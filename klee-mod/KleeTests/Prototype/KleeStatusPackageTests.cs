@@ -46,7 +46,7 @@ public class KleeStatusPackageTests
     {
         "ProtoKoForbiddenFun", "ProtoKoItWasntMe", "ProtoKoLisasTreats",
         "ProtoKoRedKnight", "ProtoKoFindersKeepers", "ProtoKoKleeCanExplain",
-        "ProtoKoDamageReport", "ProtoKoSolitaryConfinement",
+        "ProtoKoDamageReport",
         // Defence in the status pile (2026-10-01, the paper's sec.5).
         "ProtoKoUpInSmoke", "ProtoKoBehindJeansDesk", "ProtoKoKitchenAlchemy",
     };
@@ -59,14 +59,22 @@ public class KleeStatusPackageTests
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
         Assert.Equal(78, slice.Count);
-        Assert.Equal(Package, slice.Skip(67).ToArray());
+        // The Klee-only companions (2026-10-03): Solitary Confinement cut from
+        // the package, and her three companion rows LAST, after it.
+        Assert.Equal(Package, slice.Skip(65).Take(10).ToArray());
+        Assert.Equal(new[] { "ProtoMcJeanLionsFang", "ProtoMcPruneHexhunterChime",
+                             "ProtoMcAlbedoDustOfPurification" },
+                     slice.Skip(75).ToArray());
         foreach (var gone in new[] { "PocketFireworks", "RapidFire",
                                      "FlameDance", "DodocoCover", "CarefulNow",
                                      "SplitCharge", "FishFry",
                                      "FriendshipBracelet",
                                      // Defence in the status pile.
                                      "FishFlavoredBait", "BigBounce",
-                                     "SpinningSparkler" })
+                                     "SpinningSparkler",
+                                     // The Klee-only companions (2026-10-03).
+                                     "SecondSurprise", "SolitaryConfinement",
+                                     "OnceMore" })
         {
             Assert.DoesNotContain(slice, c => c == "ProtoKo" + gone);
             Assert.Null(typeof(ProtoKoPop).Assembly.GetType(
@@ -88,7 +96,6 @@ public class KleeStatusPackageTests
             (new ProtoKoFindersKeepers(), CardType.Power, 1, CardRarity.Uncommon),
             (new ProtoKoKleeCanExplain(), CardType.Skill, 1, CardRarity.Uncommon),
             (new ProtoKoDamageReport(), CardType.Power, 1, CardRarity.Rare),
-            (new ProtoKoSolitaryConfinement(), CardType.Power, 1, CardRarity.Rare),
             (new ProtoMcAlbedoDustOfPurification(), CardType.Skill, 1, CardRarity.Rare),
             (new ProtoKoUpInSmoke(), CardType.Skill, 0, CardRarity.Common),
             (new ProtoKoBehindJeansDesk(), CardType.Skill, 1, CardRarity.Uncommon),
@@ -123,10 +130,6 @@ public class KleeStatusPackageTests
                                 Upgraded<ProtoKoDamageReport>().DynamicVars["PowerAmount"].BaseValue));
         Assert.Equal((6m, 8m), (new ProtoMcAlbedoDustOfPurification().DynamicVars["Grow"].BaseValue,
                                 Upgraded<ProtoMcAlbedoDustOfPurification>().DynamicVars["Grow"].BaseValue));
-        Assert.DoesNotContain(CardKeyword.Innate,
-                              new ProtoKoSolitaryConfinement().Keywords);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKoSolitaryConfinement>().Keywords);
     }
 
     [Fact]
@@ -183,22 +186,13 @@ public class KleeStatusPackageTests
     }
 
     [Fact]
-    public void Solitary_confinement_frees_confiscated_and_nothing_else()
-    {
-        var power = new SolitaryConfinementPower();
-        Assert.False(power.TryModifyEnergyCostInCombat(
-            new ProtoKoPop(), 1m, out var other));
-        Assert.Equal(1m, other);
-    }
-
-    [Fact]
     public void Makers_of_dazed_and_confiscated_carry_their_tips()
     {
         Assert.Contains(Il.Strings(Il.Method("KleeCardTooltips", "ForCard"))
                             .Concat(Seq("KleeCardTooltips", "ForCard")),
                         c => c.Contains("Dazed"));
         Assert.Contains("Pop!", Face(new ProtoKoKleeCanExplain()));
-        Assert.Contains("[gold]Confiscated[/gold]", Face(new ProtoKoSolitaryConfinement()));
+        Assert.Contains("[gold]Confiscated[/gold]", Face(new ProtoKoBehindJeansDesk()));
     }
 
     // ---- defence in the status pile (2026-10-01, the paper's sec.5) ------

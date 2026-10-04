@@ -348,11 +348,11 @@ def test_an_all_enemies_swirl_does_not_move_a_cards_aim():
 
 #: The live rows carrying a Swirl that lands on the play's bound aim, read off
 #: the current kits' sheet (the shipped sheets left at legacy cleanup stage 6):
-#: five companions and one of Varka's Knights.
+#: five companions and one of Varka's Knights (Wind Spirit Creation swirls ALL
+#: since the Mondstadt companion review, 2026-10-03).
 SWIRL_ROWS = frozenset((
     "proto_mc_jean_gale_blade",
     "proto_mc_prune_hexhunter_chime",
-    "proto_mc_sucrose_gust",
     "proto_mc_sucrose_mollis_favonius",
     "proto_mf_lynette_astonishing_shift",
     "proto_mf_lynette_enigmatic_feint",

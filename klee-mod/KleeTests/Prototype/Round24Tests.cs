@@ -152,9 +152,10 @@ public class Round24Tests
         Assert.DoesNotContain("await sakura.FireVolley(choiceContext);", walk);
         Assert.Empty(System.Text.RegularExpressions.Regex.Matches(
             walk, @"await \w+\.(FireVolley|Tick)\(choiceContext\);"));
-        // And every one of them is wrapped: thirteen volleys plus the three
-        // ticks that take a context.
-        Assert.Equal(16, System.Text.RegularExpressions.Regex.Matches(
+        // And every one of them is wrapped: twelve volleys plus the three
+        // ticks that take a context (Yaoyao's Yuegui volley left with the
+        // Klee-only companions, 2026-10-03).
+        Assert.Equal(15, System.Text.RegularExpressions.Regex.Matches(
             walk, @"await Act\(creature, ").Count);
     }
 

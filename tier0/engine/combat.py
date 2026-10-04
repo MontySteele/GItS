@@ -14,7 +14,7 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import (companion_hexerei, companion_standins, effects,
+from tier0.engine import (companion_hexerei, effects,
                           furina_stage, klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
@@ -363,10 +363,6 @@ def card_cost(state: CombatState, card: Card) -> int:
     discount = klee_overhaul.playdate_discount(state, card)
     if discount:
         cost = max(0, cost - discount)
-    # THE KLEE STATUS PACKAGE (2026-10-01): Solitary Confinement, "Your
-    # Confiscated cost 0." `SolitaryConfinementPower` is the C# twin.
-    if klee_overhaul.solitary_confinement_frees(state, card):
-        cost = 0
     # QUARANTINED (`furina_stage.FURINA_STAGE`). POOL COMPLETION, THE LAST
     # ACT: "Costs 1 less for each empty seat." Pure, like the lines above.
     # `FurinaStageHooks.TryModifyEnergyCostInCombat` is the C# twin.
@@ -621,11 +617,6 @@ def _finish_play(state: CombatState, card: Card,
         # Attack is an Attack played again -- the same index rule Rage and
         # Juggling take three lines up.
         effects.companion_overhaul_card_played(state, card)
-        # THE STAND-IN SEAM, same broadcast and same replay rule: Diona's
-        # "If a Bomb goes off this turn" carries no ordering word, so a card
-        # played AFTER the Bomb pays at once instead of arming a watcher for a
-        # turn that has already spent its explosion.
-        companion_standins.on_played(state, card)
         # THE COMPANION READERS, same broadcast: Nicole's Ladder of Divine
         # Ascent and Klee's Coven Errand / Witches' Circle pay on every card
         # that counts as a Companion (R276; the Hexerei mark until then).
@@ -877,12 +868,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # (`KleeOverhaulLedger.For`); `roll_to` is that same stamp comparison, so a
     # skipped round still reports an honest zero.
     klee_overhaul.roll_to(state, state.turn)
-    # QUARANTINED (C.COMPANION_OVERHAUL). THE STAND-IN SEAM's turn boundary, on
-    # the line under the roll it has to agree with: Kaeya's marker becomes the
-    # flag Grounded reads (`state.mc_grounded_blind`) and both this-turn
-    # watchers close. Same span as the counters above, so "this turn" cannot
-    # mean two things one line apart.
-    companion_standins.roll_turn(state)
     # RULE 1 and RULE 3, at StS2 site A -- `ProtoBombPower.BeforeSideTurnStart`,
     # which is the hook the shipped Bomb uses to FIRE and this arm uses only to
     # GROW (rule 7). Jumps first, so a Bomb owed one grows on its new enemy

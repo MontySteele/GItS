@@ -71,36 +71,15 @@ def test_the_constant_and_the_sheet_agree(overhaul):
     assert set(C.COMPANION_STANDIN_IDS) == set(standins.standin_ids())
 
 
-def test_every_standin_is_klee_only_and_replaces_a_universal(overhaul):
-    for cid in C.COMPANION_STANDIN_IDS:
-        card = loader.peek_card(cid)
-        assert card.personal_pool == "klee", cid
-        assert card.replaces in C.MONDSTADT_OVERHAUL_POOL_IDS, cid
-        # A face swap, never a tier move: the stand-in rides the Universal's
-        # own offer, so a different rarity would move the odds it appears at.
-        assert card.rarity == loader.peek_card(card.replaces).rarity, cid
-        assert card.nation == loader.peek_card(card.replaces).nation, cid
-
-
-def test_no_standin_wears_a_neighbours_art(overhaul):
-    """`EB-778`: every stand-in owns its picture now.
-
-    Each of these rows used to carry `art_of: <the row it replaces>`, which
-    cost nothing but was INVISIBLE: a proxy asks for no art of its own, so it
-    reached no section of `art_coverage.py` and the debt could never be worked
-    off. The placement pass (2026-09-16) gave each a shortlist rank-1 row on
-    its own out-path and took the `art_of:` line off. `art_of:` is stripped
-    before `Card` (tier 0 draws nothing), so it is read off the SHEET -- which
-    is also where the codegen reads it, one line in `CustomPortrait`.
-    """
-    rows = {r["id"]: r for r in loader.yaml.safe_load(
-        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8"))}
-    plan = (REPO / "art" / "plan.tsv").read_text(encoding="utf-8")
-    for cid in C.COMPANION_STANDIN_IDS:
-        row = rows[cid]
-        assert "art_of" not in row, cid
-        # And the reason it may go: the row has a picture of its own planned.
-        assert f"{cid}	" in plan, cid
+def test_the_seam_is_empty_since_the_klee_only_companions(overhaul):
+    """The Klee-only companions (2026-10-03,
+    review/active/mondstadt-companions-2026-10-03.md sec.4): four stand-ins
+    cut, three to the shared pool, two to Klee's own pool. Nothing is handed
+    off, and every id comes back unchanged."""
+    assert C.COMPANION_STANDIN_IDS == ()
+    assert standins.standin_ids() == ()
+    for cid in C.MONDSTADT_OVERHAUL_POOL_IDS:
+        assert standins.hand_off(cid, "klee") == cid
 
 
 def test_a_shipped_row_may_not_stand_in_for_anything():
@@ -143,66 +122,7 @@ def test_no_offer_pool_holds_a_standin(overhaul):
         assert not {c.id for c in rewards.five_star_roster(nation)} & standin_ids
 
 
-# --- 3. the hand-off ---------------------------------------------------------
-
-def test_klee_is_handed_each_standin_in_place_of_its_universal(overhaul):
-    for cid in C.COMPANION_STANDIN_IDS:
-        universal = loader.peek_card(cid).replaces
-        assert standins.hand_off(universal, "klee") == cid
-
-
-def test_every_other_character_is_handed_the_universal(overhaul):
-    for cid in C.COMPANION_STANDIN_IDS:
-        universal = loader.peek_card(cid).replaces
-        for other in ("furina", "kokomi", None):
-            assert standins.hand_off(universal, other) == universal
-        # And a stand-in is never swapped for anything, by anyone.
-        assert standins.hand_off(cid, "klee") == cid
-
-
-def test_the_reward_slot_swaps_and_the_odds_do_not_move(overhaul):
-    """ONE seed, two characters. The two sequences must be the SAME offers with
-    the four Universals swapped for Klee -- which can only hold if the tiers,
-    the rarity roll and the nation-weighted draw were untouched."""
-    swap = {loader.peek_card(cid).replaces: cid
-            for cid in C.COMPANION_STANDIN_IDS}
-    klee, furina = [], []
-    for seed in range(120):
-        klee += [c.id for c in rewards.roll_rewards(
-            random.Random(seed), "klee", companion_offers=1) if c.is_companion]
-        furina += [c.id for c in rewards.roll_rewards(
-            random.Random(seed), "furina", companion_offers=1)
-            if c.is_companion]
-    # Klee saw at least one of them, or the assertion below proves nothing.
-    assert set(klee) & set(C.COMPANION_STANDIN_IDS)
-    assert not set(furina) & set(C.COMPANION_STANDIN_IDS)
-    # The comparison is per-character, because the two roll different NATION
-    # weights: what must hold is that no Klee offer is a Universal that has a
-    # stand-in, and that every stand-in she saw stands where one would be.
-    assert not set(klee) & set(swap)
-    assert all(c in swap.values() or c not in swap
-               for c in klee)
-
-
-def test_the_shop_swaps_and_keeps_one_row_per_visit(overhaul):
-    seen_standin = False
-    for seed in range(120):
-        offers = shop.companion_shop_offer(random.Random(seed), "klee")
-        ids = [c.id for c, _price in offers]
-        assert len(ids) == len(set(ids))          # no row stocked twice
-        assert not {loader.peek_card(cid).replaces
-                    for cid in ids if cid in C.COMPANION_STANDIN_IDS} & set(ids)
-        seen_standin |= bool(set(ids) & set(C.COMPANION_STANDIN_IDS))
-        for cid in ids:
-            assert loader.peek_card(cid).personal_pool in (None, "klee")
-    assert seen_standin
-    for seed in range(40):
-        ids = [c.id for c, _p in shop.companion_shop_offer(random.Random(seed),
-                                                       "furina")]
-        assert not set(ids) & set(C.COMPANION_STANDIN_IDS)
-
-
-# --- 4. the caretakers' rules -----------------------------------------------
+# --- 3. Jean's rule (Lion's Fang, in Klee's own pool since 2026-10-03) -------
 
 def _klee_state():
     state = make_state(enemies=[make_enemy(hp=200)])
@@ -217,211 +137,12 @@ def _klee_state():
     return state
 
 
-def test_diona_pays_on_the_first_bomb_of_the_turn(arms):
-    state = _klee_state()
-    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
-    klee_overhaul.place(state, state.enemies[0], 6)
-    before = state.player.block
-    klee_overhaul.set_off(state, state.enemies[0])
-    assert state.player.block == before + 5
-    assert standins.SHAKEN_NOT_PURRED not in state.player.powers   # one-shot
-
-
-def test_diona_pays_at_once_when_the_bomb_already_went_off(arms):
-    state = _klee_state()
-    klee_overhaul.place(state, state.enemies[0], 6)
-    klee_overhaul.set_off(state, state.enemies[0])
-    assert state.ko_set_off_this_turn == 1
-    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
-    before = state.player.block
-    standins.on_played(state, loader.peek_card("proto_mc_diona_icy_paws"))
-    assert state.player.block == before + 5
-
-
-def test_noelle_pays_per_mine_and_not_per_bomb(arms):
-    state = _klee_state()
-    state.player.powers[standins.I_GOT_YOUR_BACK] = 4
-    enemy = state.enemies[0]
-    klee_overhaul.place(state, enemy, 5)                    # a Bomb
-    before = state.player.block
-    klee_overhaul.set_off(state, enemy)
-    assert state.player.block == before                     # not a Mine
-    klee_overhaul.place(state, enemy, 5, is_mine=True)
-    klee_overhaul.place(state, enemy, 5, is_mine=True)
-    klee_overhaul.set_off(state, enemy)
-    assert state.player.block == before + 8                 # twice, repeating
-
-
-def test_barbara_pays_per_bomb_and_not_only_per_mine(arms):
-    """R252's fifth caretaker. Noelle's card one clause over: `Whenever` is
-    still forward-looking and still pays per explosion, but the Mines-only
-    test is gone -- a Mine is a Bomb, so Noelle's window sits inside this
-    one."""
-    state = _klee_state()
-    state.player.powers[standins.FRONT_ROW_SEAT] = 3
-    enemy = state.enemies[0]
-    klee_overhaul.place(state, enemy, 5)                    # a plain Bomb
-    before = state.player.block
-    klee_overhaul.set_off(state, enemy)
-    assert state.player.block == before + 3                 # Noelle pays none
-    klee_overhaul.place(state, enemy, 5, is_mine=True)
-    klee_overhaul.place(state, enemy, 5, is_mine=True)
-    klee_overhaul.set_off(state, enemy)
-    assert state.player.block == before + 9                 # and per Mine too
-
-
-def test_barbara_applies_hydro_twice(arms):
-    """Round 8's Diona finding read onto the other element: one application on
-    a board Klee is already cooking is eaten by her own Pyro before the
-    companion's turn comes round, so the applier row worth drafting applies
-    twice. The row's own effects are what both engines read."""
-    row = loader.peek_card("proto_mc_barbara_front_row_seat")
-    auras = [fx for fx in row.effects if fx.get("op") == "apply_aura"]
-    assert [fx["element"] for fx in auras] == ["hydro", "hydro"]
-
-
-def test_every_watcher_closes_at_the_turn_boundary(arms):
-    state = _klee_state()
-    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
-    state.player.powers[standins.I_GOT_YOUR_BACK] = 4
-    state.player.powers[standins.FRONT_ROW_SEAT] = 3
-    state.turn = 2
-    standins.roll_turn(state)
-    assert standins.SHAKEN_NOT_PURRED not in state.player.powers
-    assert standins.I_GOT_YOUR_BACK not in state.player.powers
-    assert standins.FRONT_ROW_SEAT not in state.player.powers
-
-
-def _played_a_set_off_card(state):
-    """A Set off CARD resolved this turn -- Grounded's read since `EB-749`.
-    Taken through the one write site, so this helper cannot drift from what
-    the rule counts."""
-    klee_overhaul.note_set_off_card(state, loader.get_card("proto_ko_kapow"))
-
-
-def test_kaeya_blinds_grounded_for_exactly_one_turn(arms):
-    state = _klee_state()
-    state.player.powers[klee_overhaul.GROUNDED] = 6
-    state.player.powers[standins.COLD_BLOODED] = 1
-    _played_a_set_off_card(state)                           # a noisy turn
-    # The next turn: the counter says a Set off card was played, and Grounded
-    # pays anyway.
-    state.turn = 2
-    klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
-    assert state.ko_set_off_cards_last_turn == 1
-    before = state.player.block
-    klee_overhaul.turn_start_late(state)
-    assert state.player.block == before + 6
-    # And the marker is spent: a second noisy turn is not blinded.
-    _played_a_set_off_card(state)
-    state.turn = 3
-    klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
-    before = state.player.block
-    klee_overhaul.turn_start_late(state)
-    assert state.player.block == before
-
-
-def test_kaeya_pays_grounded_on_the_turn_after_a_set_off_card(arms):
-    """`EB-576`'s acceptance, re-pointed by `EB-749` at the condition Grounded
-    HAS.
-
-    The state the cover story has to cover is whichever one Grounded refuses,
-    and R271 sec.5.1 moved that from the empty board back to the LOUD turn:
-    the card forces the payout on the turn after a Set off card was played.
-    The card's own printed clause still names the `EB-516` condition and is
-    now stale -- see `test_kaeyas_face_is_stale_and_left_standing`.
-    """
-    state = _klee_state()
-    state.player.powers[klee_overhaul.GROUNDED] = 6
-    state.player.powers[standins.COLD_BLOODED] = 1
-    _played_a_set_off_card(state)
-    state.turn = 2
-    klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
-    before = state.player.block
-    klee_overhaul.turn_start_late(state)
-    assert state.player.block == before + 6
-    # The marker is spent, so the next loud turn is refused.
-    _played_a_set_off_card(state)
-    state.turn = 3
-    klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
-    before = state.player.block
-    klee_overhaul.turn_start_late(state)
-    assert state.player.block == before
-
-
-def test_kaeyas_face_names_the_rule_grounded_has(arms):
-    """`EB-576` pinned two printed texts that had to agree, and `EB-749` keeps
-    that pin by moving BOTH: R271 sec.5.1 changed Grounded's condition and the
-    stand-in's clause was corrected with it, as TEXT and not as a rule.
-
-    THE SENTENCE AND THE FORCE-PAY ARE ASSERTED TOGETHER, which is the whole
-    point of the file the test is in: the words are only true while the buff
-    still makes Grounded pay through its refusal, so the behaviour is exercised
-    here beside the two printed texts rather than left to a source grep.
-
-    BOTH SUPERSEDED CLAUSES ARE PINNED ABSENT. Each was true of an engine this
-    one no longer is, and a face that came back would be a promise the code
-    stopped keeping.
-    """
-    from pathlib import Path
-
-    # THE BEHAVIOUR THE SENTENCE DESCRIBES: a Set off card last turn, and
-    # Grounded pays anyway because the marker is standing.
-    state = _klee_state()
-    state.player.powers[klee_overhaul.GROUNDED] = 6
-    state.player.powers[standins.COLD_BLOODED] = 1
-    _played_a_set_off_card(state)
-    state.turn = 2
-    klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
-    assert state.ko_set_off_cards_last_turn == 1
-    before = state.player.block
-    klee_overhaul.turn_start_late(state)
-    assert state.player.block == before + 6, "the force-pay still fires"
-
-    repo = Path(__file__).resolve().parents[2]
-    sheet = (repo / "docs" / "prototype-surface.yaml").read_text(
-        encoding="utf-8")
-    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
-            "[gold]Set off[/gold] card." in sheet)
-    assert "counts nothing as having gone off" not in sheet
-    assert "counts a Bomb as on the field" not in sheet
-    assert ("if you played no [gold]Set off[/gold] card last turn" in sheet)
-    assert "if you have a [gold]Bomb[/gold] on the field" not in sheet
-    card = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-            / "Generated" / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
-        encoding="utf-8")
-    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
-            "[gold]Set off[/gold] card." in card)
-
-
-def test_kaeya_does_not_pay_jean(arms):
-    """The card names Grounded. A marker that quietly paid a second power
-    would be a rule the player was never shown."""
-    state = _klee_state()
-    state.player.powers[standins.LIONS_FANG] = 8
-    state.player.powers[standins.COLD_BLOODED] = 1
-    klee_overhaul.place(state, state.enemies[0], 6)
-    klee_overhaul.set_off(state, state.enemies[0])
-    state.turn = 2
-    klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
-    before = state.player.block
-    standins.turn_start(state)
-    assert state.player.block == before
-
-
 def test_jean_pays_on_a_quiet_turn_and_draws(arms):
     state = _klee_state()
     state.player.powers[standins.LIONS_FANG] = 8
     state.player.draw_pile = [loader.peek_card("strike")] * 3
     state.turn = 2
     klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
     assert state.ko_set_off_last_turn == 0
     hand_before, block_before = len(state.player.hand), state.player.block
     standins.turn_start(state)
@@ -432,72 +153,6 @@ def test_jean_pays_on_a_quiet_turn_and_draws(arms):
 # ---------------------------------------------------------------------------
 # `EB-513` -- a companion's printed Block takes the card's Frail fold
 # ---------------------------------------------------------------------------
-
-def test_eb513_frail_bites_a_companions_printed_block(arms):
-    """`EB-513` (Klee r18 lane 2 (c) 3). "Frail applied to Defend but not to
-    Diona": Defend's face was rewritten 5 to 3 and Diona still printed and
-    delivered 4 + 5.
-
-    THE FOLD IS THE CARD'S, and the reason is what the sentence is printed on.
-    These three clauses are on the companion card's OWN face, in the same
-    breath as its primary Block, and they reach a power only because the
-    trigger is forward-looking ("goes off THIS turn"). `NC-11`'s "power-sourced
-    Block stays raw" is about Metallicize, the Ceremonial Garment rider and the
-    Kurage pulse -- passive effects a power owns, with no printed clause behind
-    them -- so it never covered these. `powers.modify_block_gained` is the same
-    funnel `_op_block` runs a kit card's Block through, which is what makes
-    Defend and Diona one rule.
-    """
-    state = _klee_state()
-    state.player.powers["frail"] = 2
-    enemy = state.enemies[0]
-
-    # DIONA, the one-shot. 5 printed, floor(5 * 0.75) = 3 delivered.
-    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
-    klee_overhaul.place(state, enemy, 6)
-    before = state.player.block
-    klee_overhaul.set_off(state, enemy)
-    assert state.player.block == before + 3
-
-    # NOELLE, per Mine.
-    state.player.powers[standins.I_GOT_YOUR_BACK] = 4
-    klee_overhaul.place(state, enemy, 5, is_mine=True)
-    before = state.player.block
-    klee_overhaul.set_off(state, enemy)
-    assert state.player.block == before + 3          # floor(4 * 0.75)
-
-    # BARBARA, per Bomb.
-    state.player.powers[standins.FRONT_ROW_SEAT] = 8
-    klee_overhaul.place(state, enemy, 5)
-    before = state.player.block
-    klee_overhaul.set_off(state, enemy)
-    assert state.player.block == before + 6          # floor(8 * 0.75)
-
-
-def test_eb513_the_ledger_reports_the_number_that_landed(arms):
-    """A ledger row carrying the PRINTED number while the board took the folded
-    one is the divergence the row is about, so both emitted rows say what the
-    player actually got."""
-    state = _klee_state()
-    state.player.powers["frail"] = 1
-    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
-    klee_overhaul.place(state, state.enemies[0], 6)
-    klee_overhaul.set_off(state, state.enemies[0])
-
-    paid = [e for e in state.log if e["event"] == "mc_shaken_not_purred"]
-    assert [e["amount"] for e in paid] == [3]
-
-
-def test_eb513_an_unfrail_board_is_untouched(arms):
-    """The acceptance condition on the change: with no Frail standing, every
-    one of the three pays exactly what it printed."""
-    state = _klee_state()
-    state.player.powers[standins.SHAKEN_NOT_PURRED] = 5
-    klee_overhaul.place(state, state.enemies[0], 6)
-    before = state.player.block
-    klee_overhaul.set_off(state, state.enemies[0])
-    assert state.player.block == before + 5
-
 
 def test_eb513_a_power_that_pays_at_turn_start_stays_raw(arms):
     """WHAT DID NOT MOVE, and it is the distinction the row turns on. Jean's
@@ -510,7 +165,6 @@ def test_eb513_a_power_that_pays_at_turn_start_stays_raw(arms):
     state.player.draw_pile = [loader.peek_card("strike")] * 3
     state.turn = 2
     klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
     before = state.player.block
     standins.turn_start(state)
     assert state.player.block == before + 8

@@ -186,7 +186,7 @@ public class Round19Tests
             .Replace("\r\n", "\n");
         body = body[body.IndexOf("public sealed class GroundedPower",
                                  StringComparison.Ordinal)..];
-        var refusal = body.IndexOf("&& !CompanionStandIns.GroundedBlind(Owner))",
+        var refusal = body.IndexOf("if (ledger.SetOffCardsLastTurn > 0)",
                                    StringComparison.Ordinal);
         var returned = body.IndexOf("return;", refusal, StringComparison.Ordinal);
         var unpaid = body.IndexOf("_paid = false;", StringComparison.Ordinal);

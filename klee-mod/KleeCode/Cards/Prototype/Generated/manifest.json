@@ -226,7 +226,6 @@
     "proto_ko_look_out",
     "proto_ko_mine_all_mine",
     "proto_ko_mine_toss",
-    "proto_ko_once_more",
     "proto_ko_one_more_charge",
     "proto_ko_party_poppers",
     "proto_ko_pass_the_match",
@@ -239,12 +238,10 @@
     "proto_ko_red_knight",
     "proto_ko_return_to_sender",
     "proto_ko_run_away",
-    "proto_ko_second_surprise",
     "proto_ko_secret_base",
     "proto_ko_shrapnel",
     "proto_ko_sit_tight",
     "proto_ko_sizzle",
-    "proto_ko_solitary_confinement",
     "proto_ko_sorry_jean",
     "proto_ko_spark_knight",
     "proto_ko_sparkling_burst",
@@ -265,7 +262,6 @@
     "proto_mc_albedo_solar_isotoma",
     "proto_mc_amber_explosive_puppet",
     "proto_mc_amber_fiery_rain",
-    "proto_mc_barbara_front_row_seat",
     "proto_mc_barbara_melody_loop",
     "proto_mc_barbara_show_begin",
     "proto_mc_bennett_fantastic_voyage",
@@ -273,7 +269,6 @@
     "proto_mc_dahlia_favonian_favor",
     "proto_mc_dahlia_sacramental_shower",
     "proto_mc_diona_icy_paws",
-    "proto_mc_diona_shaken_not_purred",
     "proto_mc_diona_signature_mix",
     "proto_mc_durin_binary_form",
     "proto_mc_durin_principle_of_purity",
@@ -284,7 +279,6 @@
     "proto_mc_jean_dandelion_breeze",
     "proto_mc_jean_gale_blade",
     "proto_mc_jean_lions_fang",
-    "proto_mc_kaeya_cold_blooded_strike",
     "proto_mc_kaeya_frostgnaw",
     "proto_mc_kaeya_glacial_waltz",
     "proto_mc_lisa_lightning_rose",
@@ -294,21 +288,18 @@
     "proto_mc_nicole_ladder_of_ascent",
     "proto_mc_nicole_revelation",
     "proto_mc_noelle_breastplate",
-    "proto_mc_noelle_i_got_your_back",
     "proto_mc_noelle_sweeping_time",
     "proto_mc_prune_hexhunter_chime",
     "proto_mc_qiqi_herald_of_frost",
     "proto_mc_razor_claw_and_thunder",
     "proto_mc_razor_lightning_fang",
     "proto_mc_rosaria_ravaging_confession",
-    "proto_mc_sayu_silencers_secret",
     "proto_mc_sucrose_astable",
     "proto_mc_sucrose_catalyst_conversion",
     "proto_mc_sucrose_gust",
     "proto_mc_sucrose_mollis_favonius",
     "proto_mc_varka_sturm_und_drang",
     "proto_mc_venti_grand_ode",
-    "proto_mc_yaoyao_yuegui_throwing_mode",
     "proto_mf_arlecchino_masque_red_death",
     "proto_mf_charlotte_enduring_frosthelm",
     "proto_mf_charlotte_freezing_point",
@@ -659,7 +650,6 @@
     "proto_ko_look_out": "klee",
     "proto_ko_mine_all_mine": "klee",
     "proto_ko_mine_toss": "klee",
-    "proto_ko_once_more": "klee",
     "proto_ko_one_more_charge": "klee",
     "proto_ko_party_poppers": "klee",
     "proto_ko_pass_the_match": "klee",
@@ -672,12 +662,10 @@
     "proto_ko_red_knight": "klee",
     "proto_ko_return_to_sender": "klee",
     "proto_ko_run_away": "klee",
-    "proto_ko_second_surprise": "klee",
     "proto_ko_secret_base": "klee",
     "proto_ko_shrapnel": "klee",
     "proto_ko_sit_tight": "klee",
     "proto_ko_sizzle": "klee",
-    "proto_ko_solitary_confinement": "klee",
     "proto_ko_sorry_jean": "klee",
     "proto_ko_spark_knight": "klee",
     "proto_ko_sparkling_burst": "klee",
@@ -698,7 +686,6 @@
     "proto_mc_albedo_solar_isotoma": "klee",
     "proto_mc_amber_explosive_puppet": "klee",
     "proto_mc_amber_fiery_rain": "klee",
-    "proto_mc_barbara_front_row_seat": "klee",
     "proto_mc_barbara_melody_loop": "klee",
     "proto_mc_barbara_show_begin": "klee",
     "proto_mc_bennett_fantastic_voyage": "klee",
@@ -706,7 +693,6 @@
     "proto_mc_dahlia_favonian_favor": "klee",
     "proto_mc_dahlia_sacramental_shower": "klee",
     "proto_mc_diona_icy_paws": "klee",
-    "proto_mc_diona_shaken_not_purred": "klee",
     "proto_mc_diona_signature_mix": "klee",
     "proto_mc_durin_binary_form": "klee",
     "proto_mc_durin_principle_of_purity": "klee",
@@ -717,7 +703,6 @@
     "proto_mc_jean_dandelion_breeze": "klee",
     "proto_mc_jean_gale_blade": "klee",
     "proto_mc_jean_lions_fang": "klee",
-    "proto_mc_kaeya_cold_blooded_strike": "klee",
     "proto_mc_kaeya_frostgnaw": "klee",
     "proto_mc_kaeya_glacial_waltz": "klee",
     "proto_mc_lisa_lightning_rose": "klee",
@@ -727,21 +712,18 @@
     "proto_mc_nicole_ladder_of_ascent": "klee",
     "proto_mc_nicole_revelation": "klee",
     "proto_mc_noelle_breastplate": "klee",
-    "proto_mc_noelle_i_got_your_back": "klee",
     "proto_mc_noelle_sweeping_time": "klee",
     "proto_mc_prune_hexhunter_chime": "klee",
     "proto_mc_qiqi_herald_of_frost": "klee",
     "proto_mc_razor_claw_and_thunder": "klee",
     "proto_mc_razor_lightning_fang": "klee",
     "proto_mc_rosaria_ravaging_confession": "klee",
-    "proto_mc_sayu_silencers_secret": "klee",
     "proto_mc_sucrose_astable": "klee",
     "proto_mc_sucrose_catalyst_conversion": "klee",
     "proto_mc_sucrose_gust": "klee",
     "proto_mc_sucrose_mollis_favonius": "klee",
     "proto_mc_varka_sturm_und_drang": "klee",
     "proto_mc_venti_grand_ode": "klee",
-    "proto_mc_yaoyao_yuegui_throwing_mode": "klee",
     "proto_mf_arlecchino_masque_red_death": "klee",
     "proto_mf_charlotte_enduring_frosthelm": "klee",
     "proto_mf_charlotte_freezing_point": "klee",
@@ -1605,9 +1587,6 @@
     "proto_ko_mine_toss": {
       "bomb_size": 3
     },
-    "proto_ko_once_more": {
-      "spark_price": -1
-    },
     "proto_ko_one_more_charge": {
       "grow": 3
     },
@@ -1645,9 +1624,6 @@
     "proto_ko_run_away": {
       "block": 3
     },
-    "proto_ko_second_surprise": {
-      "innate": true
-    },
     "proto_ko_secret_base": {
       "power_amount": 2
     },
@@ -1660,9 +1636,6 @@
     },
     "proto_ko_sizzle": {
       "damage": 3
-    },
-    "proto_ko_solitary_confinement": {
-      "innate": true
     },
     "proto_ko_sorry_jean": {
       "retain": true
@@ -1731,10 +1704,6 @@
     "proto_mc_amber_fiery_rain": {
       "damage": 1
     },
-    "proto_mc_barbara_front_row_seat": {
-      "block": 2,
-      "power_amount": 1
-    },
     "proto_mc_barbara_melody_loop": {
       "block": 3,
       "power_amount": 1
@@ -1759,10 +1728,6 @@
       }
     },
     "proto_mc_diona_icy_paws": {
-      "block": 3,
-      "power_amount": 1
-    },
-    "proto_mc_diona_shaken_not_purred": {
       "block": 3,
       "power_amount": 1
     },
@@ -1807,9 +1772,6 @@
     "proto_mc_jean_lions_fang": {
       "power_amount": 1
     },
-    "proto_mc_kaeya_cold_blooded_strike": {
-      "damage": 3
-    },
     "proto_mc_kaeya_frostgnaw": {
       "damage": 3,
       "block": 3
@@ -1827,7 +1789,7 @@
       "damage": 3
     },
     "proto_mc_mona_stellaris_phantasm": {
-      "power_amount": 1
+      "vulnerable": 1
     },
     "proto_mc_nicole_ladder_of_ascent": {
       "power_amount": 1
@@ -1837,10 +1799,6 @@
     },
     "proto_mc_noelle_breastplate": {
       "block": 3
-    },
-    "proto_mc_noelle_i_got_your_back": {
-      "block": 3,
-      "power_amount": 1
     },
     "proto_mc_noelle_sweeping_time": {
       "cost": -1
@@ -1860,9 +1818,6 @@
     "proto_mc_rosaria_ravaging_confession": {
       "damage": 3
     },
-    "proto_mc_sayu_silencers_secret": {
-      "block": 3
-    },
     "proto_mc_sucrose_astable": {
       "remove": "exhaust"
     },
@@ -1880,9 +1835,6 @@
     },
     "proto_mc_venti_grand_ode": {
       "damage": 3,
-      "power_amount": 1
-    },
-    "proto_mc_yaoyao_yuegui_throwing_mode": {
       "power_amount": 1
     },
     "proto_mf_arlecchino_masque_red_death": {

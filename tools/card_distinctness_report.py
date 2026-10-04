@@ -222,16 +222,23 @@ def surface_pools() -> list[tuple[str, list[dict]]]:
     if not os.path.exists(SURFACE):
         return []
     rows = [r for r in load_pool(SURFACE) if isinstance(r, dict)]
+    # A Companion row in a KIT's own draftable pool (Klee's three, the
+    # Klee-only companions, 2026-10-03) is measured with that kit, not with
+    # its nation's shared pool.
+    from tier0 import constants as _C
+    own = set(_C.KLEE_OWN_COMPANION_IDS)
     out = []
     for ch in SURFACE_CHARACTERS:
         out.append((ch, [r for r in rows
-                         if r.get("character") == ch and not r.get("nation")
+                         if r.get("character") == ch
+                         and (not r.get("nation") or r.get("id") in own)
                          and r.get("rarity") in OFFERABLE
                          and not r.get("multiplayer")]))
     nations = sorted({r["nation"] for r in rows if r.get("nation")})
     for nation in nations:
         out.append((f"{nation}-companions",
-                    [r for r in rows if r.get("nation") == nation]))
+                    [r for r in rows if r.get("nation") == nation
+                     and r.get("id") not in own]))
     return out
 
 

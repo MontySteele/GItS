@@ -81,8 +81,6 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         SecretBasePower =>
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
-        SecondSurprisePower =>
-            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         LookOutPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         PatienceKleePower => KleePck.Path("klee/powers/bomb_damage_up.png"),
         // Sit Tight's quiet-turn Block borrows Grounded's badge: both pay
@@ -101,8 +99,6 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         DamageReportPower =>
             KleePck.Path("klee/powers/spark_threshold_down.png"),
-        SolitaryConfinementPower =>
-            KleePck.Path("klee/powers/friendly_visit.png"),
         // R252's DEFENCE-SHELF POWER, on the block above's terms verbatim: it
         // borrows Grounded's icon, because Grounded is the power whose job it
         // takes over one trigger along -- both pay Block off the arm's own
@@ -208,7 +204,6 @@ internal static class KleePowerIcons
         // nothing and the miss is logged once by name.
         SignatureMixPower => KleePck.Path("klee/powers/celestial_gift.png"),
         RevelationPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        StellarisOmenPower => KleePck.Path("klee/powers/detonation_vuln.png"),
         GlacialWaltzPower => KleePck.Path("klee/powers/oz_summon.png"),
         MondstadtOzPower => KleePck.Path("klee/powers/oz_summon.png"),
         LightningRosePower => KleePck.Path("klee/powers/oz_summon.png"),
@@ -265,16 +260,12 @@ internal static class KleePowerIcons
         // borrow is easier to argue here than anywhere above: a stand-in wears
         // the Universal's own illustration (its row's `art_of:`), so its badge
         // borrows the icon that Universal's power already uses.
-        ShakenNotPurredPower => KleePck.Path("klee/powers/frozen.png"),
-        ColdBloodedPower => KleePck.Path("klee/powers/frozen.png"),
-        IGotYourBackPower => KleePck.Path("klee/powers/celestial_gift.png"),
         LionsFangPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         // R252's fifth caretaker. Let the Show Begin♪ prints no power, so this
         // one takes the second half of the block's rule: the icon of the power
         // whose job the stand-in takes over, which is Noelle's I Got Your Back
         // -- the same repeating this-turn Block watcher with the Mines-only
         // clause taken off.
-        FrontRowSeatPower => KleePck.Path("klee/powers/celestial_gift.png"),
         // THE SAME SLICE'S HEXEREI FAMILY (R236 sec.3), the same borrow: each
         // of the four wears its Universal's illustration, so the badge takes
         // the icon that Universal's own power already uses (Albedo's Isotoma,
@@ -290,7 +281,6 @@ internal static class KleePowerIcons
         // the four rows' own illustrations are deferred to the Balance stage.
         HexhunterChimePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         HeraldOfFrostPower => KleePck.Path("klee/powers/oz_summon.png"),
-        YueguiPower => KleePck.Path("klee/powers/oz_summon.png"),
         // THE FURINA REFRAME'S RAPTUROUS APPLAUSE COPY, on the same terms as
         // every borrow above: the arm copy is the shipped clause at a halved
         // threshold, so it wears the shipped power's own sigil rather than

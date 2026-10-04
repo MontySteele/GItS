@@ -95,11 +95,14 @@ public class PoolCountTests
         var universals = new[] { "Universals", "InazumaUniversals", "FontaineUniversals" }
             .SelectMany(m => ArmPools.Named(Powers + "CompanionOverhaulRoster", m))
             .ToList();
-        // Mondstadt 35 since the AoE trim (2026-10-03) split Durin in two.
-        Assert.Equal(35 + 24 + 16, universals.Count);
+        // Mondstadt 35 since the AoE trim (2026-10-03) split Durin in two; 39
+        // since the Klee-only companions (2026-10-03) added Sinful Hex, Mollis
+        // Favonius, Ladder of Divine Ascent and Qiqi's Herald of Frost (Liyue).
+        Assert.Equal(39 + 24 + 16, universals.Count);
         var byNation = universals.GroupBy(c => ((ICompanionCard)c).Nation)
             .ToDictionary(g => g.Key!, g => g.Count());
-        Assert.Equal(35, byNation["mondstadt"]);
+        Assert.Equal(38, byNation["mondstadt"]);
+        Assert.Equal(1, byNation["liyue"]);
         Assert.Equal(24, byNation["inazuma"]);
         Assert.Equal(16, byNation["fontaine"]);
         Assert.All(universals, c => Assert.Null(((ICompanionCard)c).PersonalPool));

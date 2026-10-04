@@ -27,6 +27,15 @@ from tier05 import draft, model, rewards, shop
 from tier05 import maps
 
 
+def _slot(card) -> bool:
+    """A companion-SLOT card. Klee's three own Companion cards (the Klee-only
+    companions, 2026-10-03, `C.KLEE_OWN_COMPANION_IDS`) are Companion cards
+    offered in her ordinary card slots, so `is_companion` alone no longer
+    tells the two slots apart."""
+    return card.is_companion and card.id not in C.KLEE_OWN_COMPANION_IDS
+
+
+
 
 @pytest.fixture(autouse=True)
 def _single_act(monkeypatch):
@@ -72,7 +81,7 @@ def test_shop_offers_only_owned_noncompanion_cards():
     for s in range(200):
         for c in shop.shop_offer(random.Random(s), "klee"):
             assert c.id in owned              # from klee's own draft pool
-            assert not c.is_companion         # never a companion
+            assert not _slot(c)         # never a companion
             assert c.character == "klee"      # never another character's card
 
 

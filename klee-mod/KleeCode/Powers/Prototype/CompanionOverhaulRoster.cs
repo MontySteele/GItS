@@ -118,6 +118,13 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMcAmberExplosivePuppet>(),
         ModelDb.Card<ProtoMcEulaGlacialIllumination>(),
         ModelDb.Card<ProtoMcMikaStarfrostSwirl>(),
+        // THE KLEE-ONLY COMPANIONS (2026-10-03, sec.4): four rows that read
+        // nothing of Klee's join the shared pool. Fischl's, Sucrose's and
+        // Nicole's were her stand-ins; Qiqi's was her coven Personal.
+        ModelDb.Card<ProtoMcFischlSinfulHex>(),
+        ModelDb.Card<ProtoMcSucroseMollisFavonius>(),
+        ModelDb.Card<ProtoMcNicoleLadderOfAscent>(),
+        ModelDb.Card<ProtoMcQiqiHeraldOfFrost>(),
     };
 
     /// <summary>

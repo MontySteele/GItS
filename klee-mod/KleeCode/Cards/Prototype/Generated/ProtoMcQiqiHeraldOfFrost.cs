@@ -40,7 +40,7 @@ public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard
 
     public Element CompanionElement => Element.Cryo;
 
-    public string? PersonalPool => "klee";
+    public string? PersonalPool => null;
 
     public string? Nation => "liyue";
 

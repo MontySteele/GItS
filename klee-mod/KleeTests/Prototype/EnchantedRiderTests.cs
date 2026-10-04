@@ -36,7 +36,7 @@ namespace KleeMod.Tests.Prototype;
 /// THE HEADLESS BOUNDARY, and what it costs this file (README). The hook half
 /// needs a live <c>CombatState</c>, so FRAIL cannot be measured here; it is
 /// pinned structurally, as the call the preview makes, beside the existing
-/// `EB-513` source pin in <see cref="CompanionBlockVarPinTests"/>. The
+/// `EB-513` source pin (its companion carriers were cut 2026-10-03). The
 /// ENCHANT half needs nothing but a card and an <c>EnchantmentModel</c>, so it
 /// is measured: <c>runGlobalHooks: false</c> is the branch where the game's
 /// own <c>BlockVar</c> folds the enchantment and nothing else, which is
@@ -95,73 +95,6 @@ public class EnchantedRiderTests
     // THE ROW'S ACCEPTANCE SENTENCE, both halves, on one enchanted card.
     // ==================================================================
 
-    [Fact]
-    public void A_nimble_barbara_prints_block_seven_and_a_rider_of_three()
-    {
-        var seat = Seat.Klee();
-        var card = Held<ProtoMcBarbaraFrontRowSeat>(seat);
-        Enchant<Nimble>(card, NimbleAmount);
-
-        // THE PRINTED BLOCK STILL MOVES. Barbara's own Block is a
-        // `CalculatedBlockVar` whose `Calculate` reaches `CombatManager`, so
-        // the number is read off the game's plain `BlockVar` under the same
-        // enchantment -- the identical `EnchantBlockAdditive` call, and the
-        // declaration every other Block card on the shelf carries.
-        var printed = new BlockVar("Block", PrintedBlock, ValueProp.Move);
-        Assert.Equal(PrintedBlock + NimbleAmount, Preview(printed, card));
-
-        // AND THE RIDER DOES NOT.
-        var rider = card.DynamicVars["PowerAmount"];
-        Assert.IsType<UnsourcedBlockVar>(rider);
-        Assert.Equal(Rider, Preview(rider, card));
-        // The highlight reads off this one, so a rider the enchantment never
-        // moved must not be coloured as though it had.
-        Assert.Equal(Rider, rider.EnchantedValue);
-        // And the number the power is actually applied is untouched either
-        // way -- it always was, which is why the defect was a face and not a
-        // rule.
-        Assert.Equal(Rider, rider.IntValue);
-    }
-
-    [Fact]
-    public void The_games_own_block_var_is_what_used_to_move_it()
-    {
-        // THE CONTROL, and the defect reproduced. Same card, same
-        // enchantment, same base value -- only the declaration differs. If
-        // this ever stops printing 5 the assertion above has stopped reading
-        // the enchantment at all and is passing for the wrong reason.
-        var seat = Seat.Klee();
-        var card = Held<ProtoMcBarbaraFrontRowSeat>(seat);
-        Enchant<Nimble>(card, NimbleAmount);
-
-        var wasDeclaredThisWay =
-            new BlockVar("PowerAmount", Rider, ValueProp.Move);
-        Assert.Equal(Rider + NimbleAmount, Preview(wasDeclaredThisWay, card));
-
-        // And with no enchantment on the card at all, the two agree -- so the
-        // subclass changes exactly one thing.
-        var plain = Held<ProtoMcBarbaraFrontRowSeat>(seat);
-        Assert.Equal(Rider, Preview(
-            new BlockVar("PowerAmount", Rider, ValueProp.Move), plain));
-        Assert.Equal(Rider, Preview(plain.DynamicVars["PowerAmount"], plain));
-    }
-
-    [Fact]
-    public void Nimble_is_still_offered_to_all_three_companions()
-    {
-        // ELIGIBILITY DID NOT MOVE, in either direction. `UnsourcedBlockVar`
-        // subclasses `BlockVar` on purpose: BaseLib's `GainsBlock`
-        // auto-detect counts one, `Nimble.CanEnchant` gates on `GainsBlock`,
-        // and each of the three prints real Block of its own besides the
-        // rider (`CompanionBlockVarPinTests`, `EB-742`). This row moved a
-        // printed number and no rule.
-        var seat = Seat.Klee();
-
-        Assert.True(Held<ProtoMcBarbaraFrontRowSeat>(seat).GainsBlock);
-        Assert.True(Held<ProtoMcDionaShakenNotPurred>(seat).GainsBlock);
-        Assert.True(Held<ProtoMcNoelleIGotYourBack>(seat).GainsBlock);
-    }
-
     // ==================================================================
     // THE FRAIL HALF, structurally: `EB-513` is not paid for by this fix.
     // ==================================================================
@@ -183,27 +116,6 @@ public class EnchantedRiderTests
         // Nor by delegating to the base class, which would fold it before
         // this method ever wrote a value.
         Assert.DoesNotContain("BlockVar.UpdateCardPreview", calls);
-    }
-
-    [Fact]
-    public void The_rider_is_still_a_powered_move_so_frail_still_bites_it()
-    {
-        // `ValueProp.Move` without `Unpowered` is the whole of
-        // `IsPoweredCardOrMonsterMoveBlock`, which is what `FrailPower` and
-        // `FastenPower` gate on -- and it is the prop the payout passes
-        // (`FrontRowSeatPower.Pay`). Face and payout share it or `EB-513`
-        // comes back.
-        var seat = Seat.Klee();
-        foreach (var rider in new[]
-                 {
-                     Held<ProtoMcBarbaraFrontRowSeat>(seat).DynamicVars["PowerAmount"],
-                     Held<ProtoMcDionaShakenNotPurred>(seat).DynamicVars["PowerAmount"],
-                     Held<ProtoMcNoelleIGotYourBack>(seat).DynamicVars["PowerAmount"],
-                 })
-        {
-            var block = Assert.IsType<UnsourcedBlockVar>(rider);
-            Assert.Equal(ValueProp.Move, block.Props);
-        }
     }
 
     // ==================================================================

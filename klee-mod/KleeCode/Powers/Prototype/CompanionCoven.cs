@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,12 +36,11 @@ namespace KleeMod.Powers;
 /// shipped Mondstadt rows the coven's own Prune row supersedes, which is a
 /// state no document describes.
 ///
-/// TWO ARMS MEET HERE, and this file is the only place in the mod where they
-/// do. Two of the four speak about BOMBS, which are the KLEE overhaul's rule --
-/// so <see cref="YueguiPower"/> and <see cref="CompanionCovenBombs"/> each test
-/// that arm as well as this one, the same pair of gates the sim's
-/// <c>companion_coven</c> takes. A Yuegui thrown by a seat that is not running
-/// the Bomb rules plants nothing and its clock still ticks.
+/// TWO ARMS MEET HERE. Prune's Chime speaks about BOMBS, which are the KLEE
+/// overhaul's rule -- so <see cref="CompanionCovenBombs"/> tests that arm as
+/// well as this one, the same pair of gates the sim's <c>companion_coven</c>
+/// takes. (Yaoyao's Yuegui, the other Bomb row, was cut with the Klee-only
+/// companions, 2026-10-03.)
 /// </summary>
 public static class CompanionCovenLaw
 {
@@ -51,10 +51,6 @@ public static class CompanionCovenLaw
     /// <summary>Qiqi, Herald of Frost: "apply Cryo twice".
     /// Mirrors <c>C.CVN_HERALD_APPLICATIONS</c>.</summary>
     public const int HeraldApplications = 2;
-
-    /// <summary>Yaoyao, Yuegui: the Bomb it throws.
-    /// Mirrors <c>C.CVN_YUEGUI_BOMB_SIZE</c>.</summary>
-    public const int YueguiBombSize = 3;
 }
 
 /// <summary>
@@ -140,10 +136,10 @@ public static class CompanionCovenBombs
 /// the sim re-rolls in the same loop for the same reason.
 ///
 /// IT KEEPS ITS OWN <c>AfterPlayerTurnStart</c> broadcast, like the arm's other
-/// three start-of-turn powers, and the sim runs it LAST of the four. The order
-/// is not ceremony here: Mona's omen applies Vulnerable to ALL enemies at the
-/// start of the turn and the Cryo below can resolve a reaction that Vulnerable
-/// amplifies. It is the only rng-drawing power on that broadcast, so no other
+/// two start-of-turn powers, and the sim runs it LAST of the three. The order
+/// was not ceremony while Mona's omen applied Vulnerable to ALL enemies at the
+/// start of the turn (until 2026-10-03), since the Cryo below can resolve a
+/// reaction that Vulnerable amplifies; it is kept. It is the only rng-drawing power on that broadcast, so no other
 /// tenant's roll can move under it, and two copies of this one are identical.
 /// </summary>
 public sealed class HeraldOfFrostPower : PowerModel, ILocalizationProvider
@@ -183,72 +179,14 @@ public sealed class HeraldOfFrostPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Yaoyao, Yuegui: Throwing Mode: "For 3 turns, at the end of your turn place
-/// a Bomb 3 on a random enemy."
-///
-/// Amount is TURNS REMAINING; FIRE, THEN TICK, the idiom the arm's other
-/// volleys use, so a stack count still means "this many more turns, including
-/// this one".
-///
-/// FIRED BY <see cref="CompanionOverhaulTurnEnd"/>, not by a broadcast of its
-/// own, and for the reason the six volleys before it are: the throw draws a
-/// target from <c>Rng.CombatTargets</c>, so its position in the sequence
-/// decides every later roll in the fight. It sits before Nicole's latch because
-/// a Bomb grants no Block and cannot change the answer that latch records.
-///
-/// THE CLOCK TICKS EVEN WHERE THE BOMB CANNOT LAND -- the Klee arm off, a seat
-/// that is not Klee, or an empty board. Three turns pass either way, which is
-/// what keeps the power from becoming permanent on a board it could not reach.
-/// </summary>
-public sealed class YueguiPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Yuegui: Throwing Mode"),
-        ("description",
-            "At the end of your turn, place a [gold]Bomb[/gold] "
-          + $"[blue]{CompanionCovenLaw.YueguiBombSize}[/blue] on a random "
-          + "enemy. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    internal async Task FireVolley(PlayerChoiceContext choiceContext)
-    {
-        if (Owner.Player == null) return;
-        // BOTH ARMS, and the second one is the KLEE overhaul's own gate --
-        // `KleeOverhaul.Enabled` plus the identity test every seam in the mod
-        // carries beside it. Sim twin: `klee_overhaul.live`.
-        if (Owner.Player.Character is IKleeCharacter)
-        {
-            await ProtoBombPower.PlaceOnRandom(
-                choiceContext, Owner, CompanionCovenLaw.YueguiBombSize,
-                isMine: false, payloadMineAll: 0, cardSource: null);
-        }
-        await PowerCmd.TickDownDuration(this);
-    }
-}
-
-/// <summary>
-/// THE COVEN'S FOUR ROWS, listed by TYPE for the reason
-/// <see cref="CompanionOverhaulRoster"/> lists its Universals that way: a
-/// deleted row takes its class with it and this file stops building, which puts
-/// the correspondence in the compiler's hands rather than in a prefix match.
-///
-/// PRUNE'S SHIPPED ROW NEEDS NO EXCLUSION. <c>prune_witch_hunt</c> is a
-/// MONDSTADT companion, and the kept half of the replacement drops every row of
-/// a replaced nation -- so the Chime supersedes it by the rule that was already
-/// there, and with the arm off the shipped row is untouched.
+/// THE COVEN'S PERSONALS, EMPTY SINCE THE KLEE-ONLY COMPANIONS (2026-10-03,
+/// <c>review/active/mondstadt-companions-2026-10-03.md</c> sec.4): Prune's
+/// Chime is in Klee's own draftable pool (<see cref="KleeOverhaulRoster"/>),
+/// Qiqi's Herald of Frost is a shared Universal
+/// (<see cref="CompanionOverhaulRoster"/>), Sayu and Yaoyao are cut. Sim twin:
+/// the empty <c>C.COVEN_PERSONAL_POOL_IDS</c>.
 /// </summary>
 internal static class CompanionCovenRoster
 {
-    internal static IEnumerable<CardModel> Personals() => new CardModel[]
-    {
-        ModelDb.Card<ProtoMcPruneHexhunterChime>(),
-        ModelDb.Card<ProtoMcSayuSilencersSecret>(),
-        ModelDb.Card<ProtoMcQiqiHeraldOfFrost>(),
-        ModelDb.Card<ProtoMcYaoyaoYueguiThrowingMode>(),
-    };
+    internal static IEnumerable<CardModel> Personals() => Array.Empty<CardModel>();
 }

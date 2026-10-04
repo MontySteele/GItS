@@ -143,33 +143,6 @@ def test_the_grounded_word_owes_its_definition_wherever_it_is_printed():
     assert gen.arm_keyword_tip_calls("This turn, Grounded counts nothing.")         == []
 
 
-def test_kaeyas_face_carries_the_grounded_tip_in_the_shipped_generation():
-    """The card the seat was actually holding, read off the emitted C# rather
-    than off the rule that emits it.
-
-    Seen to FAIL: the row's face printed the word bare, so the derived attach
-    had nothing to fire on and the card carried no definition.
-    """
-    card = (PROTOTYPE_DIR / "ProtoMcKaeyaColdBloodedStrike.cs").read_text(
-        encoding="utf-8")
-    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
-            "[gold]Set off[/gold] card.") in card
-    assert "ArmKeywordTips.ForGrounded(" in card
-
-
-def test_the_buff_kaeyas_card_leaves_behind_carries_it_too():
-    """The card is gone by the time the buff is read, and the buff is the only
-    thing on screen naming the word for the rest of that turn."""
-    power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-             / "CompanionStandIns.cs").read_text(encoding="utf-8")
-    head = power.index("class ColdBloodedPower")
-    body = power[head:power.index("class LionsFangPower")]
-    # The face's literal is split across two lines by the concatenation, so
-    # the clause is asserted the way the source spells it.
-    assert "Next turn, [gold]Grounded[/gold] triggers even if you played a "         in body
-    assert "ArmKeywordTips.ForGrounded(base.ExtraHoverTips)" in body
-
-
 def test_the_grounded_tip_states_the_condition_and_the_payout():
     """The CONDITION, and what it pays (2026-10-02): Block with no number,
     because the upgrade moves it, and the Spark off the shared constant."""
@@ -245,8 +218,18 @@ def test_every_prototype_face_printing_a_keyword_attaches_its_tip(keyword):
             missing.append(path.stem)
     assert missing == [], f"{keyword.word}: {missing}"
     # Non-vacuous: every row of the table is exercised by real faces, so a
-    # scrape that silently read nothing could not pass this file.
+    # scrape that silently read nothing could not pass this file. GROUNDED is
+    # the exception since the Klee-only companions (2026-10-03) cut Kaeya's
+    # Cold-Blooded Strike, the one card face that printed the word; the tip
+    # is still attached to `GroundedPower`'s badge.
+    if keyword.word in NO_CARD_FACE:
+        assert not printed, f"{keyword.word}: printed again -- drop it from NO_CARD_FACE"
+        return
     assert printed, f"{keyword.word}: no prototype face prints it"
+
+
+#: Table keywords no card face prints today (see the test above).
+NO_CARD_FACE = frozenset({"Grounded"})
 
 
 def test_the_two_faces_the_row_names_render_their_keyword():

@@ -57,38 +57,14 @@ public class GroundedFacesTests
     }
 
     [Fact]
-    public void Kaeyas_card_names_the_rule_the_engine_has()
+    public void Jeans_face_does_not_carry_the_grounded_definition()
     {
-        var face = Face(new ProtoMcKaeyaColdBloodedStrike());
-
-        Assert.Contains("Next turn, [gold]Grounded[/gold] triggers even if you "
-                      + "played a [gold]Set off[/gold] card.", face);
-        Assert.DoesNotContain("counts nothing as having gone off", face);
-        Assert.DoesNotContain("counts a Bomb as on the field", face);
-    }
-
-    [Fact]
-    public void Kaeyas_buff_says_the_same_sentence_the_card_did()
-    {
-        var face = Row<ColdBloodedPower>("description");
-
-        Assert.Contains("Next turn, [gold]Grounded[/gold] triggers even if you "
-                      + "played a [gold]Set off[/gold] card.", face);
-        Assert.DoesNotContain("counts nothing as having gone off", face);
-        Assert.DoesNotContain("counts a Bomb as on the field", face);
-    }
-
-    [Fact]
-    public void Only_kaeyas_face_carries_the_grounded_definition()
-    {
-        // The tip travels with the WORD, so the card that prints Grounded
-        // carries its definition and the card that does not, does not.
-        var kaeya = Source(
-            "Cards/Prototype/Generated/ProtoMcKaeyaColdBloodedStrike.cs");
+        // The tip travels with the WORD, so a card that does not print
+        // Grounded does not carry its definition. (Kaeya's Cold-Blooded
+        // Strike, the companion that did, was cut 2026-10-03.)
         var jean = Source(
             "Cards/Prototype/Generated/ProtoMcJeanLionsFang.cs");
 
-        Assert.Contains("ArmKeywordTips.ForGrounded", kaeya);
         Assert.DoesNotContain("ArmKeywordTips.ForGrounded", jean);
     }
 

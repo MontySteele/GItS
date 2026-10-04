@@ -864,8 +864,7 @@ CO_TENANCY_LEDGER = {
             "(the sim's klee_overhaul._turn_start_expansion order). What it "
             "WRITES is one Pyro hit on a Bomb's own terms. The residual is "
             "the one the companion tenants below already carry: "
-            "StellarisOmenPower's Vulnerable and HeraldOfFrostPower's Cryo "
-            "can land before or after it (the sim runs those earlier, in "
+            "HeraldOfFrostPower's Cryo can land before or after it (the sim runs those earlier, in "
             "effects.player_turn_start_triggers), and SurpriseDispatchPower "
             "draws from the same rng",
         ("Powers/Prototype/KleeExpansionPowers.cs", "AlicesDetonatorBasePower"):
@@ -898,21 +897,14 @@ CO_TENANCY_LEDGER = {
             "CompanionOverhaulTurnEnd) and never read live, so no co-tenant "
             "of this broadcast can change the answer -- which is exactly why "
             "the latch exists instead of a live Block read",
-        ("Powers/Prototype/CompanionOverhaulPowers.cs", "StellarisOmenPower"):
-            "QUARANTINED (the Mondstadt companion overhaul). Applies "
-            "Vulnerable to every enemy, then removes itself. THE ORDERING "
-            "QUESTION, answered: it writes an ENEMY debuff and reads nothing, "
-            "and no co-tenant of this broadcast deals damage -- every volley "
-            "that would care about a Vulnerable fires at turn END, a "
-            "broadcast away",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "MelodyLoopPower"):
             "QUARANTINED (the Mondstadt companion overhaul, second wave). "
             "Applies Hydro to the ENEMY it is hosted on, then ticks its own "
             "duration. THE ORDERING QUESTION, answered: it touches only its "
-            "own host and reads nothing, and the three overhaul co-tenants "
-            "one block up write the player's Block, the player's Strength and "
-            "an enemy debuff -- none of which an aura landing on one enemy "
-            "can change, and none of which changes what aura this power puts "
+            "own host and reads nothing, and the two overhaul co-tenants "
+            "one block up write the player's Block and the player's Strength "
+            "-- neither of which an aura landing on one enemy "
+            "can change, and neither of which changes what aura this power puts "
             "up. Two Melody Loops are on two different enemies by "
             "construction, because the card places the power on the body it "
             "targeted",
@@ -931,9 +923,8 @@ CO_TENANCY_LEDGER = {
             "a random enemy, pays raw Block, then ticks its own duration. THE "
             "ORDERING QUESTION, answered, and it is the reason the sim runs "
             "this LAST of the broadcast's tenants: the Cryo can resolve a "
-            "REACTION, whose damage StellarisOmenPower's Vulnerable would "
-            "amplify, so the two are not commutative and one sequence is "
-            "written down (effects.player_turn_start_triggers, coven last). "
+            "REACTION, so one sequence is written down "
+            "(effects.player_turn_start_triggers, coven last). "
             "It is also the only tenant here that draws from the rng, so no "
             "co-tenant's roll can move under it, and two copies of this one "
             "power are identical",
@@ -964,50 +955,6 @@ CO_TENANCY_LEDGER = {
             "whose Hydro lands on its own host and pays nothing that a dead "
             "host would have paid. The rng draw is the residual, and it is "
             "the same residual the shipped per-turn bomb mint already has",
-        ("Powers/Prototype/CompanionStandIns.cs", "ShakenNotPurredPower"):
-            "QUARANTINED (the companion stand-in seam, COMPANION_OVERHAUL). "
-            "Diona's one-shot watcher CLOSING, and nothing else: \"this turn\" "
-            "ends where the Klee arm's explosion counters roll, so the window "
-            "shuts at the same boundary they do and the enemy's half stays "
-            "inside it (a Mine goes off when an ENEMY attacks). THE ORDERING "
-            "QUESTION, answered: the override reads nothing and writes only "
-            "its own removal. The one reader of the power's presence is its "
-            "payer, CompanionStandIns.OnExplosion, which fires from an "
-            "explosion during card play -- strictly later than every tenant "
-            "of this broadcast. The sim closes the same window at one "
-            "sequential point (companion_standins.roll_turn, called from "
-            "combat._player_turn under klee_overhaul.roll_to), so there is no "
-            "order for it to disagree with",
-        ("Powers/Prototype/CompanionStandIns.cs", "IGotYourBackPower"):
-            "QUARANTINED (the companion stand-in seam). Noelle's repeating "
-            "watcher closing, the same removal at the same boundary and for "
-            "the same reason as ShakenNotPurredPower above -- it differs only "
-            "in what pays it (Mines, and per Mine), which happens on an "
-            "explosion and never in this broadcast",
-        ("Powers/Prototype/CompanionStandIns.cs", "FrontRowSeatPower"):
-            "QUARANTINED (the companion stand-in seam). R252's fifth "
-            "caretaker, Barbara's repeating watcher closing -- the same "
-            "removal at the same boundary and for the same reason as "
-            "IGotYourBackPower above, from which it differs in one clause "
-            "only: it pays on EVERY Bomb rather than on Mines alone. What "
-            "pays it happens on an explosion, during a card play or an enemy "
-            "attack, and never in this broadcast; the sim closes the same "
-            "window at the same sequential point "
-            "(companion_standins.roll_turn, whose _WATCHERS tuple it joined)",
-        ("Powers/Prototype/CompanionStandIns.cs", "ColdBloodedPower"):
-            "QUARANTINED (the companion stand-in seam). Kaeya's marker being "
-            "SPENT, and it is the one row of the four with a co-tenant that "
-            "shares its resource: GroundedPower, one block up, asks "
-            "CompanionStandIns.GroundedBlind, whose whole answer is \"is a "
-            "ColdBloodedPower still on this creature\". THE ORDERING QUESTION, "
-            "answered by CACHING rather than by order -- this override calls "
-            "GroundedBlind BEFORE it removes itself, which forces "
-            "StandInLedger to roll and cache the round's answer while the "
-            "marker is still there, so Grounded reads the same true whichever "
-            "of the two the listener iteration ran first. It touches nothing "
-            "else. The sim has no race to answer: it spends the marker into "
-            "state.mc_grounded_blind at the single sequential roll "
-            "(companion_standins.roll_turn)",
         ("Powers/Prototype/CompanionStandIns.cs", "LionsFangPower"):
             "QUARANTINED (the companion stand-in seam). Jean's conditional "
             "per-turn Block mint plus one draw -- GroundedPower's shape with a "
@@ -1016,8 +963,7 @@ CO_TENANCY_LEDGER = {
             "last-turn explosion count, which nothing writes outside a card "
             "play or an explosion and both are strictly later than this "
             "broadcast (the same answer GroundedPower gives above); it does "
-            "NOT read Kaeya's blind, by design, so ColdBloodedPower's removal "
-            "cannot move it either way. It writes raw Block and one drawn "
+            "read nothing else. It writes raw Block and one drawn "
             "card, and the draw is the write NaptimePower already makes here "
             "on the same terms: no co-tenant of this broadcast reads the "
             "hand's contents, and the two that touch the hand at all (the "

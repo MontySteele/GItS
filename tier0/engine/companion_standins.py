@@ -31,31 +31,13 @@ FLAG OFF EVERY FUNCTION HERE IS A NO-OP, checked at the top of each rather than
 assumed by its callers, which is what makes the byte-identity pin
 (`tier0/tests/test_companion_standins.py`) a property of this module.
 
-THE FIVE CARETAKERS' RULES also live here, for the reason the seam does: they
-are the only rules that read a stand-in, and a new file is what keeps a
-quarantined arm's whole behaviour greppable in one place.
-
-  * Shaken, Not Purred (Diona) -- ONE-SHOT. "If a Bomb goes off this turn,
-    gain 5 Block." A printed conditional with no ordering word is true whether
-    the Bomb went off before the card or after it, so the card pays at once
-    when one already has and otherwise arms a watcher for the rest of the turn.
-  * I Got Your Back (Noelle) -- REPEATING. "Whenever a Mine goes off this
-    turn, gain 4 Block." `Whenever` is forward-looking and it pays per Mine.
-  * Cold-Blooded Strike (Kaeya) -- a MARKER. "This turn, Grounded counts
-    nothing as having gone off." Grounded reads LAST turn's count at the start
-    of the next one, so the marker survives to that roll and is spent there.
-  * Lion's Fang, Fair Protector (Jean) -- a POWER, Grounded's shape with a
-    card on it: at the start of your turn, if none of your Bombs went off last
-    turn, gain its stacks in Block and draw one.
-  * Front Row Seat (Barbara, R252) -- REPEATING, and every Bomb. "Whenever a
-    Bomb goes off this turn, gain 3 Block": Noelle's card with the Mines-only
-    clause taken off, so a Mine pays both.
-
-"THIS TURN" IS THE ROUND, including the enemy's half, and that is not a
-liberty: Klee's Mines go off when an ENEMY attacks, so a window that closed at
-the end of the player's own turn would leave "whenever a Mine goes off this
-turn" unable to fire at all. Every watcher is therefore cleared where the
-explosion counters roll -- the start of the player's NEXT turn.
+THE STAND-INS ARE GONE SINCE THE KLEE-ONLY COMPANIONS (2026-10-03,
+review/active/mondstadt-companions-2026-10-03.md sec.4): four were cut, three
+joined the shared pool and two joined Klee's own draftable pool. The seam
+stays with nothing to hand off (`C.COMPANION_STANDIN_IDS` is empty), and the
+one rule left here is Jean's Lion's Fang, Fair Protector -- a POWER,
+Grounded's shape with a card on it: at the start of your turn, if none of your
+Bombs went off last turn, gain its stacks in Block and draw one.
 """
 
 from __future__ import annotations
@@ -64,28 +46,12 @@ from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from tier0 import constants as C
-from tier0.engine import powers
 
 if TYPE_CHECKING:                                   # pragma: no cover
     from tier0.engine.state import Card, CombatState
 
-#: Diona's one-shot watcher. Stacks are the BLOCK it pays, so the row's own
-#: printed number is on the row and the Prototype-stage upgrade rule moves it.
-SHAKEN_NOT_PURRED = "mc_shaken_not_purred"
-#: Noelle's repeating watcher. Stacks are the Block paid per Mine.
-I_GOT_YOUR_BACK = "mc_i_got_your_back"
-#: Kaeya's marker. Stacks are a FLAG -- the row says so and states its own
-#: upgrade rather than letting the rule move a number nothing reads.
-COLD_BLOODED = "mc_cold_blooded"
 #: Jean's power. Stacks are the Block, Grounded's own grammar.
 LIONS_FANG = "mc_lions_fang"
-#: Barbara's repeating watcher (R252). Stacks are the Block paid per BOMB --
-#: Noelle's grammar with her Mines-only clause taken off, which is the one line
-#: that separates the two.
-FRONT_ROW_SEAT = "mc_front_row_seat"
-
-#: The three watchers, cleared together at the turn roll.
-_WATCHERS = (SHAKEN_NOT_PURRED, I_GOT_YOUR_BACK, FRONT_ROW_SEAT)
 
 
 # --- the sheet contract ------------------------------------------------------
@@ -185,125 +151,18 @@ def standin_ids() -> tuple[str, ...]:
     return tuple(sorted(_replacements().values()))
 
 
-# --- the four caretakers' rules ---------------------------------------------
-
-def roll_turn(state: "CombatState") -> None:
-    """The turn boundary: spend Kaeya's marker, close both watchers.
-
-    Called from `combat._player_turn` on the line under
-    `klee_overhaul.roll_to`, which is where this arm's explosion counters roll,
-    so "this turn" means the same span to the watchers and to the counters.
-
-    THE MARKER IS SPENT HERE and not inside Grounded's own check, because
-    Grounded may not be in the deck: a marker that only a Grounded in play
-    could clear would sit on the player forever and blind a Grounded drafted
-    three fights later.
-    """
-    p = state.player
-    state.mc_grounded_blind = bool(p.powers.pop(COLD_BLOODED, 0))
-    for name in _WATCHERS:
-        p.powers.pop(name, None)
-
-
-def grounded_blind(state: "CombatState") -> bool:
-    """Does Grounded see nothing this turn? Read once, by
-    `klee_overhaul.turn_start_late`, and false on every flag-off tree."""
-    return state.mc_grounded_blind
-
-
-def _pay_block(state: "CombatState", amount: int, event: str) -> None:
-    """`EB-513`. One companion stand-in's printed Block, paid.
-
-    THROUGH `powers.modify_block_gained`, which is the SAME funnel `_op_block`
-    runs a kit card's printed Block through (`effects.py`, the `block` op), so
-    Dexterity and Frail move this number exactly as they move Defend's. The
-    amount banked on the power is the card's PRINTED number, so the fold is
-    applied once, here, at the moment the Block lands -- which is the moment
-    the mod's `Pay` folds it too.
-
-    The emitted rows are the pair every one of these sites already wrote, with
-    the LANDED number in both: a ledger that recorded the printed number while
-    the board took the folded one is the divergence this row is about.
-    """
-    landed = powers.modify_block_gained(state.player, amount)
-    if landed <= 0:
-        return
-    state.player.block += landed
-    state.emit("block", amount=landed)
-    state.emit(event, amount=landed)
-
-
-def note_explosion(state: "CombatState", is_mine: bool) -> None:
-    """One explosion landed: pay whichever watcher is armed.
-
-    Called from `klee_overhaul._explode`, beside `note_explosion`, rather than
-    through `_notify_explosion`: that bus carries no Mine flag, and widening it
-    for one card would put a stand-in's rule inside the Klee arm's own hook.
-
-    BLOCK TAKES THE CARD'S FOLD (`EB-513`), and it used to be raw. The old
-    argument was `NC-11`'s -- power-sourced Block stays out of the block funnel
-    -- and `NC-11` is about Metallicize, the Ceremonial Garment rider and the
-    Kurage pulse: passive effects a power owns, with no printed clause on any
-    card. These three are not those. The sentence is printed on the companion
-    card's OWN face, in the same breath as its primary Block, and it reaches a
-    power only because the trigger is forward-looking ("goes off THIS turn").
-    So the fold a kit card's Block takes is the fold this takes, and the r18
-    seat's screen is the reading: Frail rewrote Defend 5 to 3 and Diona printed
-    and delivered 4 + 5 in full.
-
-    ONE FOLD, NOT TWO: the card banks the PRINTED amount, `modify_block_gained`
-    runs once here, and the mod does the same thing at the same point (the C#
-    face folds in the card preview and its `Pay` passes `ValueProp.Move`).
-    `turn_start` below is untouched, and so is Grounded: a Power that pays at
-    the START of a turn is a POWER's Block and not a card's.
-    """
-    p = state.player
-    # Diona -- ONE-SHOT, popped as it pays.
-    n = p.powers.pop(SHAKEN_NOT_PURRED, 0)
-    if n:
-        _pay_block(state, n, "mc_shaken_not_purred")
-    # Noelle -- REPEATING, and MINES ONLY.
-    if is_mine:
-        n = p.powers.get(I_GOT_YOUR_BACK, 0)
-        if n:
-            _pay_block(state, n, "mc_i_got_your_back")
-    # Barbara -- REPEATING, and EVERY Bomb (R252). Noelle's shape without her
-    # Mines clause, which is the whole difference between the two cards: a
-    # Mine is a Bomb, so Noelle's window is a subset of this one.
-    n = p.powers.get(FRONT_ROW_SEAT, 0)
-    if n:
-        _pay_block(state, n, "mc_front_row_seat")
-
-
-def on_played(state: "CombatState", card: "Card") -> None:
-    """Diona's card, played on a turn a Bomb has ALREADY gone off, pays now.
-
-    "If a Bomb goes off this turn, gain 5 Block" carries no ordering word, so
-    the condition is about the TURN and not about what happens next; a watcher
-    alone would print a card that reads true and does nothing. Called from
-    `effects.resolve_card` after the body, so the watcher the body just applied
-    is the stack this spends.
-    """
-    if state.ko_set_off_this_turn <= 0:
-        return
-    p = state.player
-    n = p.powers.pop(SHAKEN_NOT_PURRED, 0)
-    if n:
-        _pay_block(state, n, "mc_shaken_not_purred")
-
+# --- Jean's rule ---------------------------------------------------------
 
 def turn_start(state: "CombatState") -> None:
     """Jean, Lion's Fang, Fair Protector -- Grounded's shape with a card on it.
 
     Called from the tail of `effects.companion_overhaul_turn_start`, which is
     where this arm's start-of-turn payouts live, and it is COMMUTATIVE with the
-    three already there: it grants the player Block and a card, and none of
+    ones already there: it grants the player Block and a card, and none of
     them reads a value it writes.
 
     IT READS `ko_set_off_last_turn` DIRECTLY, so it agrees with Grounded by
-    construction. It does NOT read Kaeya's blind: that card names Grounded, and
-    a marker that quietly paid a second power would be a rule the player was
-    never shown.
+    construction.
     """
     p = state.player
     n = p.powers.get(LIONS_FANG, 0)

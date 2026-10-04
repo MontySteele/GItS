@@ -97,8 +97,9 @@ def test_the_new_predicate_is_registered_both_ways():
 # ---------------------------------------------------------------------------
 
 def test_all_thirteen_are_in_the_replacement_pool(overhaul):
-    # 34, and Durin split in two at the AoE trim (2026-10-03).
-    assert len(C.MONDSTADT_OVERHAUL_POOL_IDS) == 35
+    # 34, and Durin split in two at the AoE trim (2026-10-03); 39 since the
+    # Klee-only companions (2026-10-03).
+    assert len(C.MONDSTADT_OVERHAUL_POOL_IDS) == 39
     roster = {c.id for c in loader.companion_roster_replacement()}
     for cid in SECOND_WAVE:
         assert cid in roster, cid

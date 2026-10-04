@@ -14,6 +14,15 @@ from tier05 import maps
 from tier05.run_metrics import summarize_runs, survival_profile
 
 
+def _slot(card) -> bool:
+    """A companion-SLOT card. Klee's three own Companion cards (the Klee-only
+    companions, 2026-10-03, `C.KLEE_OWN_COMPANION_IDS`) are Companion cards
+    offered in her ordinary card slots, so `is_companion` alone no longer
+    tells the two slots apart."""
+    return card.is_companion and card.id not in C.KLEE_OWN_COMPANION_IDS
+
+
+
 SEED = 42
 
 
@@ -135,7 +144,7 @@ def test_reward_rarity_odds_and_slot():
         offers = rewards.roll_rewards(rng, "klee")
         assert len(offers) == C.REWARD_CARD_OFFERS + 1   # + companion slot
         comp = offers[-1]
-        assert comp.is_companion
+        assert _slot(comp)
         if comp.rarity == "rare":
             assert comp.star == 5       # every Rare companion is a 5-star
         # The converse ("5-stars at rare odds ONLY") was a shipped-roster
@@ -143,7 +152,7 @@ def test_reward_rarity_odds_and_slot():
         # (Jean's Gale Blade, Kazuha, Yae...), so it left with the shipped
         # sheets at legacy cleanup stage 6.
         for c in offers[:-1]:
-            assert not c.is_companion   # card offers never companions
+            assert not _slot(c)   # card offers never companions
             counts[c.rarity] += 1
     total = sum(counts.values())
     assert counts["common"] / total == pytest.approx(0.60, abs=0.04)
@@ -187,7 +196,7 @@ def test_post_boss_companion_slot_is_rare_only():
         offers = rewards.roll_rewards(
             rng, "klee", companion_rarity="rare")
         companion = offers[-1]
-        assert companion.is_companion
+        assert _slot(companion)
         assert companion.rarity == "rare"
         assert companion.star == 5
 
@@ -333,7 +342,7 @@ def test_pity_slot_fires_after_k_companionless_screens():
     # pity(k) mechanism (pulled forward from M7 by triage ruling 4):
     # k screens without taking a companion -> next slot offers 3.
     def no_companions(rng, deck, offers, archetype):
-        picks = [c for c in offers if not c.is_companion]
+        picks = [c for c in offers if not _slot(c)]
         return picks[0] if picks else None
 
     # Pity needs THREE screens to show itself (two to build, one to fire), so
@@ -345,7 +354,7 @@ def test_pity_slot_fires_after_k_companionless_screens():
     for s in range(40):
         r = model.run_one("klee", "demolition", "demolition", no_companions,
                           SEED + s, slot_mode="pity(2)")
-        c = [sum(1 for card in d["offers"] if card.is_companion)
+        c = [sum(1 for card in d["offers"] if _slot(card))
              for d in r.decisions]
         if len(c) >= 3:
             counts = c
@@ -362,14 +371,14 @@ def test_choose3_offers_three_companions_on_every_slot():
     # anything. Same seed-scan as the pity test above, and for the same
     # reason: a fixed seed would make this a test of how long Klee lives.
     def no_companions(rng, deck, offers, archetype):
-        picks = [c for c in offers if not c.is_companion]
+        picks = [c for c in offers if not _slot(c)]
         return picks[0] if picks else None
 
     counts = None
     for s in range(40):
         r = model.run_one("klee", "demolition", "demolition", no_companions,
                           SEED + s, slot_mode="choose3")
-        c = [sum(1 for card in d["offers"] if card.is_companion)
+        c = [sum(1 for card in d["offers"] if _slot(card))
              for d in r.decisions]
         if len(c) >= 3:
             counts = c

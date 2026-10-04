@@ -141,14 +141,14 @@ public class KleeOverhaulRoundTwentyTests
                  {
                      Face(new ProtoMcRazorClawAndThunder()),
                      Face(new ProtoMcFischlSinfulHex()),
-                     Face(new ProtoMcNoelleIGotYourBack()),
                  })
         {
             Assert.DoesNotContain("Hexerei", face);
             Assert.DoesNotContain("Klee's own", face);
         }
         Assert.Null(new ProtoMcRazorClawAndThunder().PersonalPool);
-        Assert.Equal("klee", new ProtoMcFischlSinfulHex().PersonalPool);
+        // A shared Universal since the Klee-only companions (2026-10-03).
+        Assert.Null(new ProtoMcFischlSinfulHex().PersonalPool);
     }
 
     /// <summary>The card's printed description.</summary>

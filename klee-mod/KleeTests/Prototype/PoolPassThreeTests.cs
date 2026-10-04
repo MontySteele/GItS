@@ -87,14 +87,14 @@ public class PoolPassThreeTests
         // which renders `PrintedSparkPrice`. The gate reads the same property
         // back through `SparkCost.PriceOf`, so the price shown, the price
         // gated on and the price charged are one expression. It rode Fireworks
-        // Show until `EB-749` cut that row; Once More! spells the same delta.
-        // Twin: `test_once_more_upgraded_charges_one_spark_less`.
-        // Klee balance review, pick 4a, 2026-09-25. 3 Sparks -> 2.
-        var card = new ProtoKoOnceMore();
+        // Show until `EB-749` cut that row, then Once More! until the Klee-only
+        // companions (2026-10-03) cut that one; Sparkling Burst spells the
+        // same delta.
+        var card = new ProtoKoSparklingBurst();
         Assert.Equal(2, card.PrintedSparkPrice);
         Assert.Equal(2, SparkCost.PriceOf(card));
 
-        var source = Printed("Cards/Prototype/Generated/ProtoKoOnceMore.cs");
+        var source = Printed("Cards/Prototype/Generated/ProtoKoSparklingBurst.cs");
         Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 1 : 2)", source);
         Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
                         + "(IsUpgraded ? 1 : 2), this)", source);

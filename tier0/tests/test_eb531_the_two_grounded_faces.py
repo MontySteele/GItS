@@ -38,7 +38,6 @@ from tier0.tests.conftest import make_enemy, make_state
 
 REPO = Path(__file__).resolve().parents[2]
 MOD = REPO / "klee-mod" / "KleeCode"
-KAEYA = "proto_mc_kaeya_cold_blooded_strike"
 JEAN = "proto_mc_jean_lions_fang"
 
 
@@ -65,7 +64,6 @@ def _klee_state():
 def _next_turn(state):
     state.turn += 1
     klee_overhaul.roll_to(state, state.turn)
-    standins.roll_turn(state)
 
 
 def _source(relative):
@@ -110,23 +108,6 @@ def test_a_detonation_last_turn_silences_lions_fang_and_not_grounded(arms):
     assert state.player.block == before + 6
 
 
-def test_kaeyas_blind_does_not_reach_lions_fang(arms):
-    """The marker names Grounded and pays Grounded only."""
-    state = _klee_state()
-    state.player.powers[standins.LIONS_FANG] = 8
-    state.player.powers[standins.COLD_BLOODED] = 1
-    state.player.draw_pile = [loader.peek_card("strike")] * 3
-    klee_overhaul.place(state, state.enemies[0], 5)
-    klee_overhaul.set_off(state, state.enemies[0])
-    _next_turn(state)
-    assert state.mc_grounded_blind          # the blind is up for this turn
-    before = state.player.block
-
-    standins.turn_start(state)
-
-    assert state.player.block == before
-
-
 # ----------------------------------------------------------------------
 # The faces, on the sheet and in the mod.
 # ----------------------------------------------------------------------
@@ -145,14 +126,6 @@ def test_jeans_printed_condition_is_its_own(arms):
     assert "Grounded" not in face
 
 
-def test_kaeyas_printed_condition_is_the_rule_the_engine_has(arms):
-    face = _row(KAEYA)["description"]
-
-    assert ("Next turn, [gold]Grounded[/gold] triggers even if you played a "
-            "[gold]Set off[/gold] card.") in face
-    assert "counts nothing as having gone off" not in face
-
-
 def test_neither_of_jeans_faces_names_grounded():
     card = _source("Cards/Prototype/Generated/ProtoMcJeanLionsFang.cs")
     power = _source("Powers/Prototype/CompanionStandIns.cs")
@@ -166,11 +139,9 @@ def test_neither_of_jeans_faces_names_grounded():
         # note that reads as a cross-reference.
         assert "Grounded" not in source
 
-    # And the tip set attaches no Grounded definition to Jean's card, which is
-    # the attach Kaeya's face DOES carry.
+    # And the tip set attaches no Grounded definition to Jean's card (Kaeya's
+    # Cold-Blooded Strike, the face that did, was cut 2026-10-03).
     assert "ArmKeywordTips.ForGrounded" not in card
-    assert "ArmKeywordTips.ForGrounded" in _source(
-        "Cards/Prototype/Generated/ProtoMcKaeyaColdBloodedStrike.cs")
 
 
 def test_lions_fang_reads_the_ledger_and_never_the_blind():

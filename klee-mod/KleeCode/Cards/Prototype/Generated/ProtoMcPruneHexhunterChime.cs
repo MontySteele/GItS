@@ -44,7 +44,7 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
 
     public Element CompanionElement => Element.Anemo;
 
-    public string? PersonalPool => "klee";
+    public string? PersonalPool => null;
 
     public string? Nation => "mondstadt";
 

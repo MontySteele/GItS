@@ -87,6 +87,11 @@ ARMS: tuple[tuple[str, Path, str, str], ...] = (
      ARM_DIR / "KokomiOverhaulRoster.cs", "proto_kk_",
      "KOKOMI_OVERHAUL_POOL_IDS"),
 )
+# Rows an arm's Slice() may offer WITHOUT its prefix, by name in the sim
+# constant that lists them: Klee's three own Companion cards (the Klee-only
+# companions, 2026-10-03), which keep their `proto_mc_` ids -- renaming breaks
+# saves, art paths and the seat bridge (legacy cleanup pick 1).
+ARM_GUESTS: dict[str, str] = {"klee_overhaul": "KLEE_OWN_COMPANION_IDS"}
 # The co-op set's multiplayer tiers: arm label -> (roster file, method name,
 # sheet id prefix, sim mirror constant). The method is parsed with
 # `TIER_RE_FOR` below; Furina's Stage has no `Slice()`, only this tier.
@@ -233,7 +238,8 @@ def main() -> int:
                 findings.append(
                     f"{arm}: {path.name} offers {cid}, which is not on the "
                     f"prototype surface at all.")
-            elif not cid.startswith(prefix):
+            elif (not cid.startswith(prefix)
+                  and cid not in getattr(C, ARM_GUESTS.get(arm, ""), ())):
                 findings.append(
                     f"{arm}: {path.name} offers {cid}, which does not carry "
                     f"this arm's `{prefix}` prefix.")

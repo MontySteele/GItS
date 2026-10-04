@@ -17,6 +17,15 @@ from tier05 import acts, draft, model
 from tier05 import relics as relic_pool
 
 
+def _slot(card) -> bool:
+    """A companion-SLOT card. Klee's three own Companion cards (the Klee-only
+    companions, 2026-10-03, `C.KLEE_OWN_COMPANION_IDS`) are Companion cards
+    offered in her ordinary card slots, so `is_companion` alone no longer
+    tells the two slots apart."""
+    return card.is_companion and card.id not in C.KLEE_OWN_COMPANION_IDS
+
+
+
 SEED = 77
 BOUNDARY_SEED = 75   # see test_two_act_run_walks_both_acts_and_heals...
 #                      (70 until legacy cleanup stage 6 changed the starter;
@@ -96,7 +105,7 @@ def test_boundary_reward_screen_forces_rare_companion_final_boss_none(
     final = 2 * C.MAP_FLOORS - 1
     boundary = [d for d in r.decisions if d["node"] == boss1]
     assert len(boundary) == 1                       # non-final boss: a screen
-    comps = [c for c in boundary[0]["offers"] if c.is_companion]
+    comps = [c for c in boundary[0]["offers"] if _slot(c)]
     assert comps                                    # slot present for Klee
     assert all(c.rarity == "rare" and c.star == 5 for c in comps)
     assert all(d["node"] != final for d in r.decisions)   # final boss: none
@@ -112,13 +121,13 @@ def test_boundary_card_offers_are_forced_rare(monkeypatch):
                       n_acts=2)
     boss1 = C.MAP_FLOORS - 1
     screen = next(d for d in r.decisions if d["node"] == boss1)
-    cards = [c for c in screen["offers"] if not c.is_companion]
+    cards = [c for c in screen["offers"] if not _slot(c)]
     assert len(cards) == C.REWARD_CARD_OFFERS
     assert all(c.rarity == "rare" for c in cards)
     # Ordinary (non-boundary) screens keep the native rarity roll: over the
     # rest of the run SOMETHING non-rare is offered.
     ordinary = [c for d in r.decisions if d["node"] != boss1
-                for c in d["offers"] if not c.is_companion]
+                for c in d["offers"] if not _slot(c)]
     assert any(c.rarity != "rare" for c in ordinary)
 
 

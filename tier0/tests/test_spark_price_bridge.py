@@ -57,14 +57,14 @@ def test_the_observed_board_carries_each_hand_card_s_spark_price():
     id a grader's line and the falsifier both name -- and not by the wire's."""
     # Two current Klee rows that print a Spark price (Spark is a currency).
     state = board([priced("proto_ko_bang_bang", 2),
-                   priced("proto_ko_once_more", 2, affordable=False)],
+                   priced("proto_ko_sparkling_burst", 2, affordable=False)],
                   status=[SPARK_BANK])
 
     _, notes = adapter.build_combat_state(state, prototype=True)
 
     assert notes["spark_prices"] == {"proto_ko_bang_bang": 2,
-                                     "proto_ko_once_more": 2}
-    assert notes["spark_unaffordable"] == ["proto_ko_once_more"]
+                                     "proto_ko_sparkling_burst": 2}
+    assert notes["spark_unaffordable"] == ["proto_ko_sparkling_burst"]
     assert notes["spark_price_disagreements"] == []
 
 

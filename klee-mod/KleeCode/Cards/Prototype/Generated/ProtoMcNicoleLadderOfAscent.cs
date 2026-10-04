@@ -41,7 +41,7 @@ public sealed class ProtoMcNicoleLadderOfAscent : CustomCardModel, ICompanionCar
 
     public Element CompanionElement => Element.Pyro;
 
-    public string? PersonalPool => "klee";
+    public string? PersonalPool => null;
 
     public string? Nation => "mondstadt";
 

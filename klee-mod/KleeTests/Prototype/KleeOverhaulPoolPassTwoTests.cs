@@ -245,7 +245,8 @@ public class KleeOverhaulPoolPassTwoTests
         Assert.Contains("DynamicVars.Cards.UpgradeValueBy(1m);", source);
     }
 
-    // ---- Row 4, Once More!: the ledger's per-combat memory -----------------
+    // ---- Grounded's count: the Set off card note ----------------------------
+    // (Once More!, the note's first reader, was cut 2026-10-03.)
 
     [Fact]
     public void The_last_set_off_card_is_noted_at_the_three_card_facing_doors()
@@ -267,75 +268,13 @@ public class KleeOverhaulPoolPassTwoTests
 
         // A NULL CARD IS DECLINED, which is what makes a Mine no answer.
         var ledger = KleeOverhaulLedger.For(Seat.Klee().Creature);
+        var before = ledger.SetOffCardsThisTurn;
         ledger.NoteSetOffCardPlayed(null);
-        Assert.Null(ledger.LastSetOffCard);
+        Assert.Equal(before, ledger.SetOffCardsThisTurn);
 
         var detonator = new ProtoKoCountdown();
         ledger.NoteSetOffCardPlayed(detonator);
-        Assert.Same(detonator, ledger.LastSetOffCard);
-    }
-
-    [Fact]
-    public void The_last_set_off_card_survives_the_turn_roll()
-    {
-        // PER COMBAT, and deliberately not rolled: the face says "this
-        // combat". Every counter beside it is per turn and `RollTo` clears
-        // them; this one is dropped with the table when the combat changes.
-        var klee = Seat.Klee().Creature;
-        var ledger = KleeOverhaulLedger.For(klee);
-        var detonator = new ProtoKoCountdown();
-
-        ledger.NoteSetOffCardPlayed(detonator);
-        ledger.NoteExplosion(reacted: false, damageDealt: 4);
-        Assert.Equal(1, ledger.SetOffThisTurn);
-
-        ledger.RollTo(9);
-        Assert.Equal(0, ledger.SetOffThisTurn);
-        Assert.Same(detonator, ledger.LastSetOffCard);
-    }
-
-    [Fact]
-    public void Once_more_moves_a_card_only_out_of_the_discard_pile()
-    {
-        // STRUCTURAL: the move is `CardPileCmd.Add`, outside the headless
-        // boundary. What is pinned is the PILE TEST in front of it -- the
-        // command takes a card out of wherever it is, so without the test a
-        // card still in hand would be a silent no-op and an EXHAUSTED card
-        // would be a resurrection the face does not promise. Twin:
-        // `test_once_more_takes_the_last_set_off_card_out_of_the_discard`.
-        var calls = Il.Calls(
-            Il.Method("KleeOverhaulLedger", "ReturnLastSetOff"));
-
-        Assert.Contains(calls, c => c.Contains("CardPile.Get"));
-        Assert.Contains(calls, c => c.Contains("CardPileCmd.Add"));
-
-        var source = Printed("Powers/Prototype/KleeOverhaulLedger.cs");
-        Assert.Contains("CardPile.Get(PileType.Discard, player)", source);
-        Assert.Contains("if (pile == null || !pile.Cards.Contains(card)) return;",
-                        source);
-        Assert.Contains(
-            "await CardPileCmd.Add(card, PileType.Hand, CardPilePosition.Top);",
-            source);
-    }
-
-    [Fact]
-    public void Once_more_is_deterministic_and_pays_whether_or_not_it_moves()
-    {
-        // NO SELECTION SCREEN: there is one answer and the player already
-        // knows it. And the price is a COST LINE, paid before the body runs,
-        // so a card that is not in the discard pile costs the Sparks anyway --
-        // the same bargain every Spark-priced row makes.
-        var play = Il.Calls(Il.Method("ProtoKoOnceMore", "OnPlay"));
-
-        Assert.Contains(play, c => c.Contains("SparkPower.Spend"));
-        Assert.Contains(play, c => c.Contains("ReturnLastSetOff"));
-        Assert.DoesNotContain(play, c => c.Contains("CardSelectCmd"));
-
-        var source = Printed("Cards/Prototype/Generated/ProtoKoOnceMore.cs");
-        // Klee balance review, pick 4a, 2026-09-25: 3 Sparks -> 2 (1 upgraded).
-        Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 1 : 2)", source);
-        Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
-                        + "(IsUpgraded ? 1 : 2), this)", source);
+        Assert.Equal(before + 1, ledger.SetOffCardsThisTurn);
     }
 
     // ---- Row 5, Sparkling Burst: Run Away!'s predicate, paid in Energy ----
@@ -472,7 +411,7 @@ public class KleeOverhaulPoolPassTwoTests
         foreach (var row in new[]
                  {
                      "ProtoKoBlastShield", "ProtoKoReturnToSender",
-                     "ProtoKoBottomlessBag", "ProtoKoOnceMore",
+                     "ProtoKoBottomlessBag",
                      "ProtoKoSparklingBurst", "ProtoKoBlazingDelight",
                  })
         {

@@ -146,13 +146,14 @@ def test_under_the_arm_a_companion_play_is_no_gain_at_all(overhaul):
     Companion play. On 2026-09-23 [USER] turned that income off under the arm
     ("worth decreasing now to go back to the old levels and then see if play
     is Spark-constrained"), so the three cards that used to reproduce it -- a
-    Universal (Razor), the coven Personal the seat played (Diona) and a card
+    Universal (Razor), a shared row once Klee's stand-in (Mollis Favonius; Diona's
+    card the seat played was cut 2026-10-03) and a card
     outside the old family (Gorou's War Banner) -- now leave the bank and the
     ledger untouched. The ledger name below still stands for the off-arm
     world.
     """
     for cid in ("proto_mc_razor_claw_and_thunder",
-                "proto_mc_diona_shaken_not_purred",
+                "proto_mc_sucrose_mollis_favonius",
                 "proto_mi_gorou_war_banner"):
         card = loader.get_card(cid)
         assert card.is_companion, cid
