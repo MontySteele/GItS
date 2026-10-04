@@ -61,6 +61,13 @@ public static class KleeOverhaulLaw
     public const int GroundedSpark = 1;
 
     /// <summary>
+    /// Damage Report's Spark per status drawn (Klee pre-Balance sweep,
+    /// 2026-10-03). Flat at both levels: the upgrade moves the Block (4 to 6),
+    /// as Grounded's does. Mirrors <c>C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK</c>.
+    /// </summary>
+    public const int DamageReportSpark = 1;
+
+    /// <summary>
     /// THE SPARK SEED (`EB-577`): the last floor on which a card reward under
     /// this arm is guaranteed to carry a Spark-priced row. Mirrors
     /// <c>C.KLEE_OVERHAUL_SPARK_SEED_FLOORS</c>.

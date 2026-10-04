@@ -2315,6 +2315,24 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                     payloadMineAll: 0, applier, cardSource);
     }
 
+    /// <summary>
+    /// All of My Treasures! since the Klee pre-Balance sweep (2026-10-03):
+    /// "Place a Bomb the size of your largest Bomb on ALL enemies." The size is
+    /// read ONCE, before anything is placed, so a copy landing cannot raise the
+    /// size the next enemy gets. Each copy is a plain Bomb, as in
+    /// <see cref="PlaceCopyOfLargest"/>. Nothing happens with no Bomb out.
+    /// Sim twin: <c>klee_overhaul.place_copy_of_largest_on_all</c>.
+    /// </summary>
+    public static async Task PlaceCopyOfLargestOnAll(
+        PlayerChoiceContext choiceContext, Creature applier,
+        CardModel? cardSource)
+    {
+        var size = LargestCharge(applier).Size;
+        if (size <= 0) return;
+        await PlaceOnAll(choiceContext, applier, size, isMine: false,
+                         payloadMineAll: 0, cardSource);
+    }
+
     /// <summary>Big Badda Boom's second clause reads this: the damage this
     /// play's explosions have already dealt. Kept on the ledger, not here,
     /// because the card asks about the PLAY and a pile is gone by the time it

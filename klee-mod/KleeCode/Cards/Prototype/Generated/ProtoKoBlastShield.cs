@@ -73,7 +73,7 @@ public sealed class ProtoKoBlastShield : CustomCardModel, ISparkPricedCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(6m, ValueProp.Move)
+            new BlockVar(4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

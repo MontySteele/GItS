@@ -1770,42 +1770,43 @@ def companion(cid="proto_mc_friend", ctype="skill"):
 
 
 def test_coven_errand_places_one_bomb_with_no_companion_played(overhaul):
-    """"Place a Bomb 5." The else arm, and the honest read of the card
-    alone."""
+    """"Place a Bomb 8" (5 until the Klee pre-Balance sweep). The else arm,
+    and the honest read of the card alone."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
-    state.card_aim, state.card_aim_bound = a, True
-    effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [5]
-    assert sizes(b) == []
-
-
-def test_coven_errand_grows_after_a_companion(overhaul):
-    """AoE trim, 2026-10-03: "Place a Bomb 5 on an enemy, 8 if you played a
-    Companion card this turn." Still ONE Bomb on the aimed enemy."""
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
     assert sizes(a) == [8]
     assert sizes(b) == []
 
 
+def test_coven_errand_grows_after_a_companion(overhaul):
+    """AoE trim, 2026-10-03: "Place a Bomb 5 on an enemy, 8 if you played a
+    Companion card this turn"; 8 / 12 since the Klee pre-Balance sweep
+    (2026-10-03). Still ONE Bomb on the aimed enemy."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    combat._finish_play(state, companion())
+    state.card_aim, state.card_aim_bound = a, True
+    effects.resolve_card(state, load("proto_ko_coven_errand"))
+    assert sizes(a) == [12]
+    assert sizes(b) == []
+
+
 def test_coven_errands_upgrade_moves_both_numbers(overhaul):
-    """"Upgrade: Bomb 7." The rider rides the printed size: 7, or 10."""
+    """"Upgrade: Bomb 10." The rider rides the printed size: 10, or 14."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
-    assert sizes(a) == [7]
+    assert sizes(a) == [10]
 
     state = klee_state([a := make_enemy(hp=200, name="a"),
                         b := make_enemy(hp=200, name="b")])
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
-    assert sizes(a) == [10]
+    assert sizes(a) == [14]
     assert sizes(b) == []
 
 
@@ -1875,7 +1876,7 @@ def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [8] and sizes(b) == []
+    assert sizes(a) == [12] and sizes(b) == []
     assert state.player.sparks == 0
 
 
@@ -2171,19 +2172,33 @@ def aimed(state, enemy):
 
 # --- All of My Treasures!: a copy of the largest Bomb ----------------------
 
-def test_treasures_copies_the_largest_bomb_onto_the_aimed_enemy(overhaul):
-    """"Place a Bomb on the enemy equal to your largest Bomb." A board-wide
-    read and an aimed placement -- `PlaceCopyOfLargest`."""
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
+def test_treasures_copies_the_largest_bomb_onto_every_living_enemy(overhaul):
+    """Klee pre-Balance sweep (2026-10-03): "Place a Bomb the size of your
+    largest Bomb on ALL enemies." One read of the board, measured before
+    anything lands, then the same size on every LIVING enemy --
+    `PlaceCopyOfLargestOnAll`. A dead body gets nothing."""
+    a, b, c = (make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b"),
+               make_enemy(hp=200, name="c"))
+    dead = make_enemy(hp=200, name="dead")
+    state = klee_state([a, b, c, dead])
+    dead.hp = 0
     klee_overhaul.place(state, a, 5)
     klee_overhaul.place(state, b, 12)
-    aimed(state, a)
 
     effects.resolve_card(state, load("proto_ko_all_of_my_treasures"))
 
     assert sizes(a) == [5, 12]
-    assert sizes(b) == [12]              # the pile it was measured against
+    assert sizes(b) == [12, 12]          # the pile it was measured against
+    assert sizes(c) == [12]
+    assert sizes(dead) == []
+
+
+def test_treasures_is_a_two_cost_exhaust_that_retains_upgraded(overhaul):
+    """The row since the sweep: 2 Energy, Exhaust kept, Retain on upgrade."""
+    card, up = (load("proto_ko_all_of_my_treasures"),
+                load("proto_ko_all_of_my_treasures+"))
+    assert card.cost == 2 and card.exhaust and not card.retain
+    assert up.cost == 2 and up.exhaust and up.retain
 
 
 def test_treasures_copies_a_mine_as_a_plain_bomb(overhaul):
@@ -2192,7 +2207,6 @@ def test_treasures_copies_a_mine_as_a_plain_bomb(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 9, is_mine=True, payload_mine_all=3)
-    aimed(state, enemy)
 
     effects.resolve_card(state, load("proto_ko_all_of_my_treasures"))
 
@@ -2204,7 +2218,6 @@ def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
     """Nothing to copy is nothing placed -- never a Bomb 0."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
-    aimed(state, enemy)
 
     effects.resolve_card(state, load("proto_ko_all_of_my_treasures"))
 

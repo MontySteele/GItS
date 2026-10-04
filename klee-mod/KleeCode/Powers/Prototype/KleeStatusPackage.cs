@@ -158,9 +158,12 @@ public sealed class FindersKeepersPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Damage Report (AoE trim, 2026-10-03): "Whenever you draw a status, gain 4
-/// [6] Block." Per card drawn, any status (a Dazed too). Power-sourced Block,
-/// raw like the arm's other powers' (NC-11). It dealt 5 [7] to ALL enemies
-/// before the trim. Sim twin: <c>klee_overhaul.damage_report</c>, read at
+/// [6] Block and 1 Spark." Per card drawn, any status (a Dazed too).
+/// Power-sourced Block, raw like the arm's other powers' (NC-11). It dealt 5
+/// [7] to ALL enemies before the trim; the Spark is the Klee pre-Balance sweep
+/// (2026-10-03), granted through <see cref="SparkPower.Gain"/> so every Spark
+/// reader sees it, and flat at both levels
+/// (<see cref="KleeOverhaulLaw.DamageReportSpark"/>). Sim twin: <c>klee_overhaul.damage_report</c>, read at
 /// <c>refpowers.after_card_drawn</c>.
 /// </summary>
 public sealed class DamageReportPower : PowerModel, ILocalizationProvider
@@ -170,7 +173,8 @@ public sealed class DamageReportPower : PowerModel, ILocalizationProvider
         ("title", "Damage Report"),
         ("description",
             "Whenever you draw a status, gain [blue]{Amount}[/blue] "
-          + "[gold]Block[/gold]."),
+          + "[gold]Block[/gold] and [blue]" + KleeOverhaulLaw.DamageReportSpark
+          + "[/blue] [gold]Spark[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -184,6 +188,9 @@ public sealed class DamageReportPower : PowerModel, ILocalizationProvider
         if (!KleeStatusPackage.IsStatus(card)) return;
         await CreatureCmd.GainBlock(
             Owner, Amount, ValueProp.Unpowered, null, fast: true);
+        await SparkPower.Gain(
+            choiceContext, Owner, KleeOverhaulLaw.DamageReportSpark,
+            cardSource: null, source: "power:damage_report/status_drawn");
     }
 }
 

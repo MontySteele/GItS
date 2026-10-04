@@ -182,6 +182,10 @@ public class KleeStatusPackageTests
                         c => c.Contains("ProtoBombPower.PlaceOnRandom"));
         var report = Seq("DamageReportPower", "AfterCardDrawn");
         Assert.Contains(report, c => c.Contains("CreatureCmd.GainBlock"));
+        // Klee pre-Balance sweep (2026-10-03): and 1 Spark, through the one
+        // Spark door so Spark readers see it.
+        Assert.Contains(report, c => c.Contains("SparkPower.Gain"));
+        Assert.Equal(1, KleeOverhaulLaw.DamageReportSpark);
         Assert.DoesNotContain(report, c => c.Contains("ElementalHit"));
     }
 

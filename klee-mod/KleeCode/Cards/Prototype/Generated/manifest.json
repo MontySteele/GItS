@@ -1445,7 +1445,7 @@
       "cost": -1
     },
     "proto_ko_all_of_my_treasures": {
-      "remove": "exhaust"
+      "retain": true
     },
     "proto_ko_ammo_scavenging": {
       "bomb_size": 3
