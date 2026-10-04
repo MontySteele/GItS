@@ -6746,10 +6746,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # pick 2 retired with its tip.
         # Reworded 2026-10-01 (the open-Oath round).
         # Element identities (2026-10-01): the flat damage is unblockable.
-        "Swirl": [" meets a fresh aura: deal ",
-                  " unblockable damage to ALL enemies and copy it, spent, "
-                  "onto the others. ",
-                  "Enemies wearing it refresh."],
+        # 2026-10-03: spent auras removed; Swirl removes the aura.
+        "Swirl": [" meets an aura: remove it, deal ",
+                  " unblockable damage to ALL enemies, and apply that "
+                  "element to the others."],
         # `EB-372`, Klee's sixth: a Power of hers that Kaeya's Cold-Blooded
         # Strike is written against by name, met by a seat holding neither.
         # `EB-516` moved the condition to the board and `EB-749` moved it on
@@ -7640,10 +7640,11 @@ def test_an_anemo_card_over_a_standing_aura_reaches_swirl():
     # `EB-613` (R263 sec.5 item 1) turned the row round: a Geo hit is a COST
     # to a reaction deck, so the price leads and the Block follows it.
     # Text pass 2026-09-25: two short sentences, each with its verb. The
-    # element port (2026-09-28): the aura stays, spent.
-    assert (f"- **Crystallize** — Geo on a fresh aura: gain "
-            f"{blindplay.CRYSTALLIZE_BLOCK} Block. The aura stays, "
-            f"spent.") in geo
+    # element port (2026-09-28) kept the aura; 2026-10-03 removed spent
+    # auras, and Crystallize consumes again.
+    assert (f"- **Crystallize** — Geo meets an aura: gain "
+            f"{blindplay.CRYSTALLIZE_BLOCK} Block. The aura is "
+            f"removed.") in geo
 
 
 def test_a_trigger_element_with_no_aura_out_is_told_which_half_is_missing():
@@ -7746,13 +7747,14 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
                    "next Attack on it Shatters for "],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
-        # The element port (2026-09-28) moved both, in the C# and here.
-        "Swirl": [" meets a fresh aura: deal ",
-                  " damage to ALL enemies and copy it, spent, onto the "
-                  "others. Enemies wearing it refresh."],
+        # The element port (2026-09-28) moved both, in the C# and here, and
+        # so did the removal of spent auras (2026-10-03).
+        "Swirl": [" meets an aura: remove it, deal ",
+                  " unblockable damage to ALL enemies, and apply that "
+                  "element to the others."],
         # `EB-613`: the price leads. Both copies moved in one commit, which
         # is what this pin is for.
-        "Crystallize": [". The aura stays, spent."],
+        "Crystallize": [" meets an aura: gain ", ". The aura is removed."],
     }
     assert set(anchors) | {"Elemental Reaction"} \
         == set(blindplay.REACTION_KEYWORDS)

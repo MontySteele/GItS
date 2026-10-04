@@ -23,13 +23,10 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
 
-  <!-- THE ELEMENT PORT's two switches (KleeMod.Elements.TriggerRules),
+  <!-- THE ELEMENT PORT's switch (KleeMod.Elements.TriggerRules.SwirlPays),
        mirrored from KleeCode.csproj and defaulted on by Directory.Build.props. -->
   <PropertyGroup Condition="'$(SwirlPays)' == 'true'">
     <DefineConstants>$(DefineConstants);SWIRL_PAYS</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(CrystallizeKeepsAura)' == 'true'">
-    <DefineConstants>$(DefineConstants);CRYSTALLIZE_KEEPS_AURA</DefineConstants>
   </PropertyGroup>
 
   <!-- The Teyvat run frame arm, mirrored here on exactly the terms above and

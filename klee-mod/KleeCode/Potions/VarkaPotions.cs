@@ -73,7 +73,7 @@ public sealed class BottledResolve : ArmPotion
     }
 }
 
-/// <summary>Uncommon. "Swirl every fresh aura." Wall of Gales' sweep
+/// <summary>Uncommon. "Swirl every aura." Wall of Gales' sweep
 /// (<see cref="VarkaRules.SwirlFreshAuras"/>), its Swirls paying his current
 /// element and crediting no Oath.</summary>
 public sealed class BottledGale : ArmPotion
@@ -83,7 +83,7 @@ public sealed class BottledGale : ArmPotion
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bottled Gale"),
-        ("description", "[gold]Swirl[/gold] every fresh aura."),
+        ("description", "[gold]Swirl[/gold] every aura."),
     };
 
     protected override string ArtPath =>

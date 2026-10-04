@@ -134,28 +134,12 @@ public static class KleeCardTooltips
         if (trigger == Element.None || card.CombatState == null) yield break;
 
         var seen = new HashSet<Reaction>();
-        var spentShown = false;
         var printedTrigger = trigger;
         foreach (var enemy in card.CombatState.HittableEnemies)
         {
             var aura = AuraCmd.Find(enemy);
             if (aura == null) continue;
             trigger = printedTrigger;
-
-            // THE ELEMENT PORT (sec.7.1): a switched trigger over a SPENT aura
-            // pays nothing, and the preview says why rather than promising the
-            // reaction. Once per card, like every preview row.
-            if (TriggerRules.Outcome(aura.Element, aura.Spent, trigger)
-                == TriggerRules.HitOutcome.SpentNothing)
-            {
-                if (!spentShown)
-                {
-                    spentShown = true;
-                    yield return HoverTipFactory.FromKeyword(
-                        KleeKeywords.SpentPreview(trigger));
-                }
-                continue;
-            }
 
             var reaction = ReactionTable.Lookup(aura.Element, trigger);
             if (reaction == Reaction.None || !seen.Add(reaction)) continue;

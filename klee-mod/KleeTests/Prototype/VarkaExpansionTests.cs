@@ -303,13 +303,13 @@ public class VarkaExpansionTests : IDisposable
     }
 
     [Fact]
-    public void Downburst_alone_spreads_fresh()
+    public void Every_swirl_spreads_fresh_so_downburst_is_no_marker()
     {
-        Assert.True(VarkaRules.SpreadArrivesFresh(new ProtoVkDownburst()));
-        Assert.False(VarkaRules.SpreadArrivesFresh(new ProtoVkGaleSweep()));
-        Assert.False(VarkaRules.SpreadArrivesFresh(null));
-        Assert.Contains("VarkaRules.SpreadArrivesFresh",
-                        Calls("ReactionEffects", "SwirlPays"));
+        // 2026-10-03: spent auras are gone, every copy arrives fresh, and
+        // Downburst's "arrive fresh" marker went with them.
+        Assert.DoesNotContain("VarkaRules.SpreadArrivesFresh",
+                              Calls("ReactionEffects", "SwirlPays"));
+        Assert.Null(typeof(VarkaRules).GetMethod("SpreadArrivesFresh"));
     }
 
     [Fact]

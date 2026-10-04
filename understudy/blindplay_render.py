@@ -2082,9 +2082,7 @@ OATH_COUNTS_LINE = "- Oath: {counts}."
 OATH_PAYOUT_LINE = "- {payout}"
 OATH_NO_PAYOUT_LINE = ("- Your Swirls pay nothing until you apply Pyro, "
                        "Hydro, Cryo or Electro.")
-AURA_FRESH = ("{element}, fresh: an Anemo hit Swirls it.")
-AURA_SPENT = ("{element}, spent: Swirl does nothing to it until "
-              "{element} hits it again. Other elements still react with it.")
+AURA_LINE = "{element}: an Anemo hit Swirls it."
 AURA_NONE = "no aura."
 
 
@@ -2102,8 +2100,7 @@ def _render_oath(oath: dict[str, Any]) -> list[str]:
         if row["element"] is None:
             clause = AURA_NONE
         else:
-            template = AURA_SPENT if row["state"] == "spent" else AURA_FRESH
-            clause = template.format(element=row["element"])
+            clause = AURA_LINE.format(element=row["element"])
         out.append(f"- **{row['name']}**: {clause}")
     return out
 
@@ -2966,7 +2963,7 @@ def render(obs: dict[str, Any]) -> str:
                 out.append(STAGE_LOG_HEADING)
                 out += _render_stage_log(c["stage"])
         # VARKA (the Oath rework): his current element, his four Oath counts,
-        # what a Swirl pays now and every aura's fresh or spent state, above
+        # what a Swirl pays now and every enemy's aura, above
         # the hand whose Swirl choices they decide.
         if c.get("oath") is not None:
             out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])

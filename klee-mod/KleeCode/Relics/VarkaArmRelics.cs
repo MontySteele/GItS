@@ -209,7 +209,7 @@ public sealed class WindblumeGarland : VarkaArmRelic
 }
 
 /// <summary>Uncommon. "At the start of your turn, if no enemy has an aura,
-/// apply your current element to a random enemy." A spent aura is an aura.
+/// apply your current element to a random enemy."
 /// Nothing before his first element. The application gains no Oath and
 /// switches nothing (<see cref="VarkaOath.NoCredit"/>). Late in the turn
 /// start (Alice's Guidebook's hook), so it reads the board and the element

@@ -50,24 +50,20 @@ SUPERCONDUCT_VULN = 2         # Vulnerable stacks applied
 ELECTROCHARGED_DOT = 4        # DoT amount
 ELECTROCHARGED_DOT_TURNS = 2
 CRYSTALLIZE_BLOCK = 4         # player Block gained
-# THE ELEMENT PORT, PHASE ONE (`review/ruled/element-home-review-2026-09-28.md`
-# §3, §4, ruled §6: "That makes sense"). Two switches, one per change, so each
-# is tested alone (§6 pick 4.4). With either on, the trigger element it names
-# no longer consumes the aura it acts on: a hit on a FRESH aura reacts and
-# leaves the aura standing, SPENT; a hit on a spent aura does nothing extra
-# until a same-element hit refreshes it. The shared fresh/spent rule rides
-# with whichever switch is on. Off is today's consume-and-react, exactly.
-#   SWIRL_PAYS             -- §4 A: keep the aura, spread SPENT copies to every
-#                             enemy lacking it, SWIRL_DAMAGE to every enemy.
-#   CRYSTALLIZE_KEEPS_AURA -- §4 B: the 4 Block, and the aura stays (spent).
-# THE C# TWINS are `KleeMod.Elements.TriggerRules.SwirlPays` /
-# `.CrystallizeKeepsAura`, defaulted from `-p:SwirlPays` /
-# `-p:CrystallizeKeepsAura` (on in every build that names neither). The sim
-# defaults are OFF, the arm convention (`operations/prototype.md`): the
-# calibration bands are measured on the shipped world, and both sides of each
-# switch are pinned here by flipping it (`tier0/tests/test_element_port.py`).
+# THE ELEMENT PORT (`review/ruled/element-home-review-2026-09-28.md` §4 A,
+# ruled §6: "That makes sense"), as amended 2026-10-03: there is no spent
+# aura, and every reaction, Swirl and Crystallize included, consumes the aura
+# it acts on ([USER]: "Should we get rid of the concept of elements being
+# 'spent' after a swirl? It seems to generate confusion." then "agreed ...
+# please proceed"). One switch is left:
+#   SWIRL_PAYS -- §4 A: a Swirl spreads ordinary fresh copies to every OTHER
+#                 enemy and deals SWIRL_DAMAGE to every enemy. Off, a Swirl
+#                 copies the aura onto every enemy, the struck one included.
+# THE C# TWIN is `KleeMod.Elements.TriggerRules.SwirlPays`, defaulted from
+# `-p:SwirlPays` (on in every build that does not name it). The sim default
+# is OFF, the arm convention (`operations/prototype.md`), and both sides are
+# pinned here by flipping it (`tier0/tests/test_element_port.py`).
 SWIRL_PAYS = False
-CRYSTALLIZE_KEEPS_AURA = False
 SWIRL_DAMAGE = 2              # §4 A: flat, element-less, to ALL enemies
 FROZEN_BOSS_VULN = 2         # bosses consume Frozen for Vulnerable 2
                               # (round-3 ruling; STANDS through the v1.5

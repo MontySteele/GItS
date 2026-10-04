@@ -137,11 +137,11 @@ def state():
 
 @pytest.fixture
 def consume_triggers(monkeypatch):
-    """THE WORLD BEFORE THE ELEMENT PORT: Anemo and Geo CONSUME the aura they
-    act on (`C.SWIRL_PAYS` and `C.CRYSTALLIZE_KEEPS_AURA` off). A pin about
-    that rule names it with this fixture, so it keeps saying one true thing
-    whichever way the sim's defaults point
-    (`review/ruled/element-home-review-2026-09-28.md` §3/§4)."""
+    """THE WORLD BEFORE THE ELEMENT PORT: a Swirl copies the aura it consumed
+    onto every enemy, the struck one included, with no flat damage
+    (`C.SWIRL_PAYS` off). A pin about that rule names it with this fixture,
+    so it keeps saying one true thing whichever way the sim's default points
+    (`review/ruled/element-home-review-2026-09-28.md` §4 A). Anemo and Geo
+    consume either way (2026-10-03: no spent auras)."""
     from tier0 import constants as C
     monkeypatch.setattr(C, "SWIRL_PAYS", False)
-    monkeypatch.setattr(C, "CRYSTALLIZE_KEEPS_AURA", False)

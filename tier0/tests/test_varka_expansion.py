@@ -13,7 +13,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import combat
+from tier0.engine import combat, reactions
 from tier0.engine import varka_oath as V
 from tier0.engine.state import CombatState, Enemy
 
@@ -24,21 +24,21 @@ def _reset():
 
 @pytest.fixture
 def varka():
-    saved = (C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA)
-    C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = True, True
+    saved = C.SWIRL_PAYS
+    C.SWIRL_PAYS = True
     _reset()
     try:
         yield
     finally:
-        C.SWIRL_PAYS, C.CRYSTALLIZE_KEEPS_AURA = saved
+        C.SWIRL_PAYS = saved
         _reset()
 
 
-def _enemy(hp=100, name="e", aura=None, spent=False):
+def _enemy(hp=100, name="e", aura=None):
     e = Enemy(hp=hp, max_hp=hp, name=name,
               intents=[{"kind": "block", "amount": 0}])
     if aura:
-        e.aura, e.aura_turns_left, e.aura_spent = aura, 2, spent
+        e.aura, e.aura_turns_left = aura, 2
     return e
 
 
@@ -239,8 +239,8 @@ def test_pathfinders_mark(varka):
 
 
 def test_west_wind_shield_and_knightly_strike(varka):
-    st = _state(enemies=[_enemy(aura="pyro"), _enemy(aura="hydro",
-                                                     spent=True), _enemy()])
+    st = _state(enemies=[_enemy(aura="pyro"), _enemy(aura="hydro"),
+                         _enemy()])
     _play(st, _vk("west_wind_shield"))
     assert st.player.block == 5 + 2 * 2
     st = _state()
@@ -458,14 +458,17 @@ def test_tempest_four_hits_last_wins(varka):
     assert all(led.oath[el] == 1 for el in V.ELEMENTS)
 
 
-def test_downburst_spreads_fresh_copies(varka):
-    st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b")])
-    _play(st, _vk("downburst"))
-    b = st.enemies[1]
-    assert b.aura == "pyro" and not b.aura_spent
-    st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b")])
-    _play(st, _vk("favonius_cut"))
-    assert st.enemies[1].aura_spent
+def test_every_anemo_card_spreads_a_copy_that_swirls_again(varka):
+    # 2026-10-03: no spent auras. Downburst's "copies arrive fresh" is every
+    # Swirl's rule now, so Favonius Cut's copy Swirls again as Downburst's
+    # does, and the struck body's aura is consumed.
+    for card in ("downburst", "favonius_cut"):
+        st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b")])
+        _play(st, _vk(card))
+        a, b = st.enemies
+        assert a.aura is None and b.aura == "pyro", card
+        assert reactions.resolve_hit(st, b, "anemo", 0) == 0
+        assert b.aura is None and a.aura == "pyro", card
 
 
 def test_the_order_answers_adds_a_knight_at_its_cost(varka):

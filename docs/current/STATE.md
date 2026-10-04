@@ -362,11 +362,20 @@ every enemy already wearing it (amended 2026-10-01) and deals a flat 2 to
 every enemy; Crystallize gives its 4
 Block and keeps the aura. The badge and the reaction preview say when an aura
 is spent, and every reaction reports one event (reaction, target, dealer,
-source kind). Two switches, on in every build: `-p:SwirlPays=false` and
-`-p:CrystallizeKeepsAura=false` (`klee-mod/KleeCode/Elements/TriggerRules.cs`);
-the sim twins `C.SWIRL_PAYS` / `C.CRYSTALLIZE_KEEPS_AURA` stay off until each
-switch's retest. Next: agent retests with each switch alone (§6 pick 4.4), then phase
-two (Burning and Dendro, `BACKLOG.md`).
+source kind). **2026-10-03: spent removed.** [USER]: "Should we get rid of
+the concept of elements being 'spent' after a swirl? It seems to generate
+confusion." then "agreed ... please proceed". Every reaction now consumes its
+aura, Swirl and Crystallize included. A Swirl still pays what it paid (the
+flat 2 to every enemy and Varka's payout) and spreads ordinary fresh copies
+to the other enemies (one already wearing the element refreshes; another
+aura is replaced). A copy is an application with no trigger, so it never
+reacts by itself. Because copies are fresh, a Swirl that hits ALL enemies
+pays once per enemy still wearing an aura when its Anemo hit lands. The
+badge's spent face, the spent previews and `CrystallizeKeepsAura` are gone;
+one switch is left, `-p:SwirlPays=false` (`klee-mod/KleeCode/Elements/TriggerRules.cs`),
+sim twin `C.SWIRL_PAYS`, off until its retest. Downburst lost its "copies
+arrive fresh" clause and needs a new rider (main session). Next: phase two
+(Burning and Dendro, `BACKLOG.md`).
 
 All three prototypes start with no companion card. Whether each starts with
 one comes back after the kits, with the reaction display (`EB-410`) and the

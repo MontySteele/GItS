@@ -546,16 +546,16 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Gale_sweep_takes_the_fresh_auras_when_it_is_played()
+    public void Gale_sweep_takes_every_aura_when_it_is_played()
     {
-        var fresh = Seat.Klee(30).WithPower<PyroAuraPower>(2);
-        var spent = Seat.Klee(30).WithPower<HydroAuraPower>(2);
-        spent.Creature.Powers.OfType<AuraPower>().Single().Spent = true;
+        // 2026-10-03: no spent auras; every aura'd body is in the sweep.
+        var pyro = Seat.Klee(30).WithPower<PyroAuraPower>(2);
+        var hydro = Seat.Klee(30).WithPower<HydroAuraPower>(2);
         var bare = Seat.Klee(30);
-        Assert.Equal(new[] { fresh.Creature },
+        Assert.Equal(new[] { pyro.Creature, hydro.Creature },
                      VarkaRules.FreshAuraBodies(new[]
                      {
-                         fresh.Creature, spent.Creature, bare.Creature,
+                         pyro.Creature, hydro.Creature, bare.Creature,
                      }));
         Assert.Contains("VarkaRules.HitFreshAuras",
                         Il.Calls(Il.Method("ProtoVkGaleSweep", "OnPlay")));
