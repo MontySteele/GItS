@@ -43,14 +43,14 @@ public sealed class ProtoFsTheCrowdRoars : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_the_crowd_roars");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Crowd Roars"),
-        ("description", "Whenever another player loses HP, your [gold]front performer[/gold] gains {PowerAmount:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Whenever another player loses HP, gain {PowerAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

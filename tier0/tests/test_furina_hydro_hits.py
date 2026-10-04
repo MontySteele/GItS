@@ -32,7 +32,7 @@ def arm(monkeypatch):
     yield
 
 
-def _state(stage=(("usher", 5),), enemies=None, cross_examination=0):
+def _state(stage=("usher",), fanfare=5, enemies=None, cross_examination=0):
     # `element: hydro` is the character sheet's (docs' furina character
     # yaml); the loader hands it to every real Furina.
     player = Player(hp=200, max_hp=200, fanfare_cap=99,
@@ -40,7 +40,8 @@ def _state(stage=(("usher", 5),), enemies=None, cross_examination=0):
     st = CombatState(player=player, enemies=enemies or [_enemy()],
                      rng=random.Random(0))
     st.turn = 2
-    st.player.stage = [list(pair) for pair in stage]
+    st.player.stage = list(stage)
+    st.player.stage_fanfare = fanfare       # enough for any Spend mode here
     if cross_examination:
         st.player.powers["cross_examination"] = cross_examination
     return st
@@ -133,15 +134,17 @@ def test_bubble_arias_first_hit_carries_hydro_and_its_second_is_plain(arm):
     assert up.enemies[0].hp == 200 - 10
 
 
-def test_grand_deluges_hit_is_the_reaction_that_pays_the_performers(arm):
-    st = _state(stage=(("usher", 3), ("crabaletta", 1)),
+def test_grand_deluges_hit_is_the_reaction_that_gains_fanfare(arm):
+    st = _state(stage=("usher", "crabaletta"), fanfare=0,
                 enemies=[_enemy(aura="pyro"), _enemy(name="b")])
     _play(st, "proto_fs_grand_deluge")
     # 12 to ALL since the 2026-09-29 audit pass (was 10).
     assert [e.hp for e in st.enemies] == [200 - int(12 * C.VAPORIZE_MULT),
                                          200 - 12]
     assert [e.aura for e in st.enemies] == [None, "hydro"]
-    assert st.player.stage == [["usher", 5], ["crabaletta", 3]]
+    # The re-founded sheet (2026-10-04): "On an Elemental Reaction, gain 4
+    # Fanfare" -- Furina's one number.
+    assert st.player.stage_fanfare == 4
 
 
 # ---------------------------------------------------------------------------

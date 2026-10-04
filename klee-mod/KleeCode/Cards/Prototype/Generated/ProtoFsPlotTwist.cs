@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -31,17 +32,20 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsPlotTwist : CustomCardModel, ICharacterCard
+public sealed class ProtoFsPlotTwist : CustomCardModel, ICharacterCard, IStageCueCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForCue(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_plot_twist");
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Plot Twist"),
-        ("description", "Reverse the order of your performers. Deal {Damage:diff()} damage."),
+        ("title", "Encore!"),
+        ("description", "Deal {Damage:diff()} damage. [gold]Cue[/gold] a performer."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,13 +63,13 @@ public sealed class ProtoFsPlotTwist : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaStage.Reverse(Owner.Creature);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
+        await FurinaStage.Cue(choiceContext, Owner);
     }
 
     protected override void OnUpgrade()

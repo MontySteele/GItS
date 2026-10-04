@@ -32,20 +32,20 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
+public sealed class ProtoFsBis : CustomCardModel, ICharacterCard, IStageCueCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCue(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bis");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bis!"),
-        ("description", "Your [gold]front performer[/gold] acts twice."),
+        ("description", "[gold]Cue[/gold] a performer twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.PerformLead(choiceContext, Owner.Creature, 2);
+        await FurinaStage.Cue(choiceContext, Owner, 2);
     }
 
     protected override void OnUpgrade()

@@ -38,20 +38,20 @@ public sealed class ProtoFsGuestStarChevreuse : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
+        ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_chevreuse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Chevreuse"),
-        ("description", "Summon Chevreuse with {GuestFanfare:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Summon Chevreuse."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("GuestFanfare", 4m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoFsGuestStarChevreuse : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "chevreuse", DynamicVars["GuestFanfare"].IntValue);
+        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "chevreuse", 0);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["GuestFanfare"].UpgradeValueBy(2m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -37,15 +36,12 @@ public sealed class ProtoFsEndlessWaltz : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_endless_waltz");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Waltz"),
-        ("description", "Deal {Damage:diff()} damage. Each performer with 5 or more [gold]Fanfare[/gold] acts."),
+        ("description", "Deal {Damage:diff()} damage. Each guest acts."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,7 +65,7 @@ public sealed class ProtoFsEndlessWaltz : CustomCardModel, ICharacterCard
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await FurinaStage.PerformAll(choiceContext, Owner.Creature, minFanfare: 5);
+        await FurinaStage.PerformAll(choiceContext, Owner.Creature, guestsOnly: true);
     }
 
     protected override void OnUpgrade()

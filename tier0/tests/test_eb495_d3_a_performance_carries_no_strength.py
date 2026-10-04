@@ -54,8 +54,8 @@ def _state(enemy_hp=99, **powers):
                                       {"strength": 5, "weak": 2}])
 def test_crabalettas_act_deals_its_printed_number(arm, modifier):
     st = _state(**modifier)
-    st.player.stage = [["crabaletta", 4]]
-    FS.perform(st, "crabaletta")
+    st.player.stage = ["crabaletta"]
+    FS.act(st, "crabaletta")
     assert st.enemies[0].hp == 99 - FS.ACT_CRABALETTA_DAMAGE
 
 
@@ -63,20 +63,20 @@ def test_crabalettas_act_deals_its_printed_number(arm, modifier):
                                       {"strength": 5, "weak": 2}])
 def test_chevalmarins_act_deals_its_printed_number(arm, modifier):
     st = _state(**modifier)
-    st.player.stage = [["chevalmarin", 4]]
-    FS.perform(st, "chevalmarin")
+    st.player.stage = ["chevalmarin"]
+    FS.act(st, "chevalmarin")
     assert st.enemies[0].hp == 99 - FS.ACT_CHEVALMARIN_DAMAGE
 
 
 @pytest.mark.parametrize("modifier", [{}, {"strength": 5}, {"weak": 2},
                                       {"strength": 5, "weak": 2}])
 def test_crabalettas_bow_deals_its_printed_number(arm, modifier):
-    """Reached the way a player reaches it: a Spend that empties the bar
-    earns the curtain call (rule 9), which since draft 3 (2026-09-25) is the
-    act once more -- the same unpowered hit."""
+    """Reached the way a player reaches it: a performer that leaves Bows
+    (the re-founded Stage's rule 3, Final Bow here), and the Bow is the act
+    once more, free -- the same unpowered hit."""
     st = _state(**modifier)
-    st.player.stage = [["crabaletta", 1]]
-    FS.spend(st, 1)
+    st.player.stage = ["crabaletta"]
+    FS.final_bow(st, 0)
     assert st.player.stage == []
     assert st.enemies[0].hp == 99 - FS.ACT_CRABALETTA_DAMAGE
 

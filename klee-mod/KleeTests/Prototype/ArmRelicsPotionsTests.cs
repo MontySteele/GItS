@@ -495,200 +495,87 @@ public class ArmRelicsPotionsTests
         Assert.Contains("SparkPower.Gain", Il.Calls(Il.Method("BottledSparks", "OnUse")));
     }
 
-    // ==== Furina =============================================================
+    // ==== Furina (the re-founding, 2026-10-04, sec.10) =======================
 
     [Fact]
-    public void Opera_glasses_open_usher_at_five()
+    public void Opera_glasses_start_each_combat_with_three_fanfare()
     {
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        Assert.Equal(3, OperaGlasses.OpeningFor(seat.Creature));
-        Give<OperaGlasses>(seat);
-        Assert.Equal(5, OperaGlasses.OpeningFor(seat.Creature));
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Clear();
-        stage.OpenWith(StagePerformer.Usher, OperaGlasses.OpeningFor(seat.Creature));
-        Assert.Equal(5, stage.Lead!.Fanfare);
-        Assert.Contains("OperaGlasses.OpeningFor",
-                        Il.Calls(Il.Method("FurinaStage", "OpenCombat")));
+        Assert.Equal(3, OperaGlasses.Fanfare);
+        Assert.Contains("FurinaStage.Gain",
+                        Il.Calls(Il.Method("OperaGlasses", "BeforeCombatStart")));
+        Assert.Equal("Start each combat with [blue]3[/blue] [gold]Fanfare[/gold].",
+                     Face(Canon<RelicModel>(typeof(OperaGlasses))));
     }
 
     [Fact]
-    public void Stagehands_gloves_pay_three_block_a_bow_after_its_act()
+    public void Stagehands_gloves_and_the_bouquet_reach_the_bow_through_the_mods()
     {
         using var _ = new StageArm();
         var seat = Seat.Furina().WithCombatState();
-        Assert.Equal(0, StagehandsGloves.BlockFor(seat.Creature));
+        Assert.Equal(0, FurinaStage.ModsOf(seat.Creature).BowBlock);
+        Assert.Equal(1, FurinaStage.ModsOf(seat.Creature).BowActs);
         Give<StagehandsGloves>(seat);
-        Assert.Equal(3, StagehandsGloves.BlockFor(seat.Creature));
-        var bow = Il.CallSequence(Il.Method("FurinaStage", "Bow")).ToList();
-        Assert.True(bow.IndexOf("FurinaStage.Act")
-                    < bow.IndexOf("StagehandsGloves.AfterBow"));
-        Assert.Contains("CreatureCmd.GainBlock",
-                        Il.Calls(Il.Method("StagehandsGloves", "AfterBow")));
+        Give<CurtainCallBouquet>(seat);
+        var mods = FurinaStage.ModsOf(seat.Creature);
+        Assert.Equal(3, mods.BowBlock);
+        Assert.Equal(2, mods.BowActs);
+        // The Bow: its act (twice), its Fanfare, then the Gloves' Block.
+        var stage = FurinaStageLedger.For(seat.Creature);
+        stage.Seat(StagePerformer.Usher);
+        var board = new RecordingBoard();
+        StageKit.Run(new StageDirector(stage, board).FinalBow(0));
+        Assert.Equal(new[] { "block Usher 4", "block Usher 4", "gloves 3" },
+                     board.Log);
+        Assert.Equal(1, stage.Fanfare);
     }
 
     [Fact]
-    public void Guest_book_adds_three_to_the_first_guest_star_of_the_combat_only()
+    public void Guest_book_gives_three_on_the_first_guest_star_of_the_combat_only()
     {
         using var _ = new StageArm();
         var seat = Seat.Furina().WithCombatState();
-        Assert.Equal(0, GuestBook.TakeBonus(seat.Creature));
+        Assert.Equal(0, GuestBook.BonusFor(seat.Creature));
         Give<GuestBook>(seat);
-        Assert.Equal(3, GuestBook.TakeBonus(seat.Creature));
-        Assert.Equal(0, GuestBook.TakeBonus(seat.Creature));
+        Assert.Equal(3, GuestBook.BonusFor(seat.Creature));
+        var stage = FurinaStageLedger.For(seat.Creature);
+        StageKit.Run(new StageDirector(stage, new RecordingBoard())
+            .SummonGuest(StagePerformer.Charlotte, 0, GuestBook.BonusFor(seat.Creature)));
+        Assert.Equal(3, stage.Fanfare);
+        Assert.Equal(0, GuestBook.BonusFor(seat.Creature));
         FurinaStageLedger.ResetAll();                       // the next combat
-        Assert.Equal(3, GuestBook.TakeBonus(seat.Creature));
-        Assert.Contains("GuestBook.TakeBonus",
+        Assert.Equal(3, GuestBook.BonusFor(seat.Creature));
+        Assert.Contains("GuestBook.BonusFor",
                         Il.Calls(Il.Method("FurinaStage", "GuestStar")));
     }
 
     [Fact]
-    public void Grand_theater_program_turns_the_fade_off()
+    public void Grand_theater_program_gains_one_fanfare_each_turn()
     {
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var stage = Stage(seat, (StagePerformer.Usher, 9), (StagePerformer.Crabaletta, 12));
-        Assert.True(FurinaStage.Fades(seat.Creature));
-        Give<GrandTheaterProgram>(seat);
-        // The fade pass (2026-09-29): the fade-benders are gone and the
-        // relic is the one switch left.
-        Assert.False(FurinaStage.Fades(seat.Creature));
-        Assert.Empty(FurinaStage.FadeAndShow(seat.Creature));
-        Assert.Equal(new[] { 9, 12 }, stage.Seats.Select(s => s.Fanfare));
+        Assert.Equal(1, GrandTheaterProgram.Fanfare);
+        Assert.Equal("At the start of your turn, gain [blue]1[/blue] "
+                     + "[gold]Fanfare[/gold].",
+                     Face(Canon<RelicModel>(typeof(GrandTheaterProgram))));
+        var start = Il.CallSequence(Il.Method("FurinaStage", "TurnStart")).ToList();
+        Assert.Contains("FurinaStageRelics.Count<GrandTheaterProgram>", start);
+        Assert.Contains("FurinaStage.Gain", start);
     }
 
     [Fact]
-    public void The_stage_line_says_performers_do_not_fade_with_the_program()
-    {
-        // Relics smoke seat 2026-09-27: the Stage's line still said "lose
-        // half their Fanfare above 5" with Grand Theater Program owned.
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState()
-            .WithPower<StageSummaryPower>(1);
-        Stage(seat, (StagePerformer.Usher, 9));
-        var badge = seat.Creature.Powers.OfType<StageSummaryPower>().Single();
-        Assert.False(badge.ShowsNoFade);
-        Give<GrandTheaterProgram>(seat);
-        Assert.True(badge.ShowsNoFade);
-        var face = badge.Localization!
-            .First(r => r.Item1 == StageSummaryPower.NoFadeKey).Item2;
-        Assert.Contains("do not fade", face);
-        Assert.DoesNotContain("lose half", face);
-        Assert.DoesNotContain("a quarter", face);
-    }
-
-    [Fact]
-    public void The_forecast_counts_the_gloves_block_a_bow_will_give()
-    {
-        // Relics smoke seat 2026-09-27: "take 5", and she took 0. Hit one
-        // empties Crabaletta (2), whose Bow pays the Gloves' 3; hit two (5)
-        // meets that Block first.
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var foes = new[] { new StageForecastEnemy("Beetle", false) };
-        Stage(seat, (StagePerformer.Crabaletta, 2));
-        Assert.Equal(5, FurinaStage.Forecast(seat.Creature, new[] { 2, 5 }, foes)
-                            .ReachesFurina);
-        Give<StagehandsGloves>(seat);
-        Stage(seat, (StagePerformer.Crabaletta, 2));
-        Assert.Equal(2, FurinaStage.Forecast(seat.Creature, new[] { 2, 5 }, foes)
-                            .ReachesFurina);
-    }
-
-    [Fact]
-    public void The_forecast_counts_the_bouquets_second_usher_act()
-    {
-        // The sweep's act gives 3 Block. Hit one (6) spends it, empties
-        // Usher (1), and his Bow's Block catches the other 2. Under the
-        // Bouquet he acts twice: 6 Block, 2 caught, 4 left for hit two (5),
-        // so 1 reaches her. Without it: 3, 2 caught, 1 left, so 4.
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var foes = new[] { new StageForecastEnemy("Beetle", false) };
-        Stage(seat, (StagePerformer.Usher, 1));
-        var plain = FurinaStage.Forecast(seat.Creature, new[] { 6, 5 }, foes);
-        Give<CurtainCallBouquet>(seat);
-        Stage(seat, (StagePerformer.Usher, 1));
-        var twice = FurinaStage.Forecast(seat.Creature, new[] { 6, 5 }, foes);
-        Assert.Equal(4, plain.ReachesFurina);
-        Assert.Equal(1, twice.ReachesFurina);
-    }
-
-
-    [Fact]
-    public void Curtain_call_bouquet_makes_a_bow_act_twice_and_its_block_catch_both()
+    public void Palais_ledger_takes_one_off_a_spend_n()
     {
         using var _ = new StageArm();
         var seat = Seat.Furina().WithCombatState();
-        var stage = Stage(seat, (StagePerformer.Usher, 2));
-        Assert.Equal(1, stage.BowActs);
-        Assert.Equal(3, stage.BowBlock(StagePerformer.Usher));
-        Give<CurtainCallBouquet>(seat);
-        Assert.Equal(2, stage.BowActs);
-        Assert.Equal(6, stage.BowBlock(StagePerformer.Usher));
-        Assert.Equal(0, stage.BowBlock(StagePerformer.Crabaletta));
-
-        // The forecast's clone keeps it, with no Furina to ask.
-        var clone = (FurinaStageLedger)typeof(FurinaStageLedger)
-            .GetMethod("CloneForForecast", HeadlessGame.All)!.Invoke(stage, null)!;
-        Assert.Equal(2, clone.BowActs);
-
-        // An emptied Usher's Bow catches both acts' Block from the rest of
-        // the hit: 2 absorbed, 8 over, 6 caught, 2 reach her.
-        var hit = stage.Absorb(10);
-        Assert.Equal(6, hit.Caught);
-        Assert.Equal(2, hit.ReachedFurina);
-        Assert.Contains("FurinaStageLedger.get_BowActs",
-                        Il.Calls(Il.Method("FurinaStage", "Bow")));
-    }
-
-    [Fact]
-    public void Palais_ledger_takes_one_off_and_rule_8_pays_back_to_front()
-    {
-        // THE RULES PASS (2026-10-01): Palais Ledger's old text ("paid by the
-        // performers in front of it, back to front") is rule 8 itself now, so
-        // the ledger pays that way with no relic; the relic is re-aimed to
-        // "Your Spends cost 1 less Fanfare" (`FurinaStage.PriceOf`).
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var stage = Stage(seat, (StagePerformer.Usher, 3),
-                          (StagePerformer.Chevalmarin, 2),
-                          (StagePerformer.Crabaletta, 1));
-        Assert.True(stage.CanSpend(4));
-        Assert.True(stage.CanSpend(6));
-        Assert.False(stage.CanSpend(7));             // only if the total covers it
-        Assert.False(stage.Spend(7).Fired);
+        var stage = FurinaStageLedger.For(seat.Creature);
+        stage.Gain(2);
         Assert.Equal(3, FurinaStage.PriceOf(seat.Creature, 3));
-
+        Assert.False(FurinaStage.CanSpend(seat.Creature, 3));
         Give<PalaisLedger>(seat);
         Assert.Equal(2, FurinaStage.PriceOf(seat.Creature, 3));
         Assert.Equal(0, FurinaStage.PriceOf(seat.Creature, 1));
-        Assert.True(FurinaStage.CanSpend(seat.Creature, 7));
-        Assert.False(FurinaStage.CanSpend(seat.Creature, 8));
+        Assert.True(FurinaStage.CanSpend(seat.Creature, 3));
         Assert.Contains("FurinaStage.PriceOf",
                         Il.Calls(Il.Method("FurinaStage", "CanSpend")));
         Assert.Contains("FurinaStage.PriceOf",
-                        Il.Calls(Il.Method("FurinaStage", "Spend")));
-
-        var spent = stage.Spend(4);
-        Assert.True(spent.Fired);
-        Assert.Equal(4, spent.Paid);
-        Assert.Equal(new[] { StagePerformer.Crabaletta, StagePerformer.Chevalmarin },
-                     spent.Exits.Select(e => e.Who));
-        Assert.All(spent.Exits, e => Assert.True(e.Bows));
-        Assert.Equal(new[] { (StagePerformer.Usher, 2) },
-                     stage.Seats.Select(s => (s.Who, s.Fanfare)));
-        Assert.Equal(4, stage.SpentThisPlay);
-
-        // A back performer that covers it alone pays alone.
-        var alone = Stage(seat, (StagePerformer.Usher, 3), (StagePerformer.Crabaletta, 5));
-        var one = alone.Spend(2);
-        Assert.Empty(one.Exits);
-        Assert.Equal(new[] { 3, 3 }, alone.Seats.Select(s => s.Fanfare));
-
-        // Every exit Bows, through the one Spend verb.
-        Assert.Contains("StageSpend.get_Exits",
                         Il.Calls(Il.Method("FurinaStage", "Spend")));
     }
 
@@ -700,44 +587,30 @@ public class ArmRelicsPotionsTests
         Assert.True(late.IndexOf("FurinaStage.OpenCombat") >= 0);
         Assert.True(late.IndexOf("FurinaStage.OpenCombat") < late.IndexOf("FurinaStage.Summon"));
         Assert.Contains("random", Il.Strings(Il.Method("OpeningNight", "BeforeCombatStartLate")));
-        // Salon Solitaire opens in the EARLIER hook, so Usher is in front
-        // before the summon, and a summon joins at the back.
         Assert.Equal(typeof(SalonSolitaire),
             typeof(SalonSolitaire).GetMethod("BeforeCombatStart")!.DeclaringType);
 
         using var _ = new StageArm();
         var seat = Seat.Furina().WithCombatState();
         var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Clear();
-        stage.OpenWith(StagePerformer.Usher);
-        stage.Summon(StagePerformer.Crabaletta);
+        stage.Open();
+        stage.Seat(StagePerformer.Crabaletta);
         Assert.Equal(new[] { StagePerformer.Usher, StagePerformer.Crabaletta },
                      stage.Seats.Select(s => s.Who));
     }
 
     [Fact]
-    public void The_curtain_never_falls_opens_usher_at_five_and_regains_two_from_the_second_turn()
+    public void The_curtain_never_falls_opens_usher_and_gives_one_rehearsal()
     {
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var stage = Stage(seat, (StagePerformer.Usher, 3));
-        Assert.False(CurtainNeverFalls.OnStage(seat.Creature));
-        Assert.Equal(0, stage.Regen(1));                          // shipped rule 4
-        Give<CurtainNeverFalls>(seat);
-        Assert.True(CurtainNeverFalls.OnStage(seat.Creature));
-        // 2026-09-28: the face prints the 5 the first hand sees, so the
-        // relic opens at 5 and its regain starts on turn two like rule 4's.
-        Assert.Equal(5, CurtainNeverFalls.OpeningFanfare);
-        Assert.Equal(0, stage.Regen(1, CurtainNeverFalls.LeadRegen, firstTurn: 2));
-        Assert.Equal(2, stage.Regen(2, CurtainNeverFalls.LeadRegen, firstTurn: 2));
-        Assert.Equal(5, stage.Lead!.Fanfare);
-        Assert.Contains("CurtainNeverFalls.OnStage",
-                        Il.Calls(Il.Method("FurinaStage", "OpenCombat")));
-
-        var regen = Il.Calls(Il.Method("FurinaStage", "RegenLead"));
-        Assert.Contains("CurtainNeverFalls.OnStage", regen);
-        Assert.Contains("FurinaStage.OpenCombat",
-                        Il.Calls(Il.Method("CurtainNeverFalls", "BeforeCombatStart")));
+        Assert.Equal(1, CurtainNeverFalls.Rehearsal);
+        var open = Il.CallSequence(Il.Method("CurtainNeverFalls", "BeforeCombatStart")).ToList();
+        Assert.Contains("FurinaStage.OpenCombat", open);
+        Assert.Contains(open, c => c.StartsWith("PowerCmd.Apply<RehearsalPower>"));
+        Assert.Equal("Start each combat with [gold]Usher[/gold] on stage and "
+                     + "[blue]1[/blue] [gold]Rehearsal[/gold].",
+                     Face(Canon<RelicModel>(typeof(CurtainNeverFalls))));
+        Assert.Equal("Start each combat with [gold]Usher[/gold] on stage.",
+                     Face(Canon<RelicModel>(typeof(SalonSolitaire))));
         // Touch of Orobas upgrades the Stage's starter into it.
         Assert.Contains("ModelDb.Relic<CurtainNeverFalls>",
                         Il.CallSequence(Il.Method("SalonSolitaire", "GetUpgradeReplacement")));
@@ -747,9 +620,7 @@ public class ArmRelicsPotionsTests
     public void Both_stage_starters_carry_the_companion_slot()
     {
         // 2026-09-27, [USER]'s co-op run: a Stage Furina never saw the fourth
-        // reward choice. Salon Solitaire and its upgrade both roll the slot,
-        // with no Stage gate in front of the roll (structural: the roll needs
-        // a booted game).
+        // reward choice. Salon Solitaire and its upgrade both roll the slot.
         foreach (var type in new[] { "SalonSolitaire", "CurtainNeverFalls" })
         {
             var calls = Il.Calls(Il.Method(type, "TryModifyCardRewardOptions"));
@@ -758,32 +629,18 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void The_furina_potions_raise_the_back_raise_everyone_and_act_twice_now()
+    public void The_furina_potions_gain_fanfare_gain_rehearsal_and_act_twice_now()
     {
-        Assert.Contains("FurinaStage.Raise",
+        // The re-founding (sec.10): "Gain 6 Fanfare.", "Gain 1 Rehearsal.",
+        // Encore Elixir unchanged.
+        Assert.Contains("FurinaStage.Gain",
                         Il.Calls(Il.Method("BottledApplause", "OnUse")));
-        Assert.Contains("FurinaStage.RaiseAll",
-                        Il.Calls(Il.Method("CurtainWater", "OnUse")));
+        Assert.Contains(Il.CallSequence(Il.Method("CurtainWater", "OnUse")),
+                        c => c.StartsWith("PowerCmd.Apply<RehearsalPower>"));
         Assert.Contains("FurinaStage.PerformAll",
                         Il.Calls(Il.Method("EncoreElixir", "OnUse")));
-        Assert.Equal(2, EncoreElixir.Acts);
-        // PerformAll's repeat is per performer, and stops for one that left.
-        var all = Il.Calls(Il.Method("FurinaStage", "PerformAll"));
-        Assert.Contains("FurinaStage.Perform", all);
-        Assert.Contains("FurinaStageLedger.Holds", all);
-        Assert.Equal((6, 4), (BottledApplause.Fanfare, CurtainWater.Fanfare));
-    }
-
-    [Fact]
-    public void Bottled_applause_is_the_stages_raise_back_performer_or_a_summon_on_empty()
-    {
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var stage = Stage(seat, (StagePerformer.Usher, 3), (StagePerformer.Chevalmarin, 2));
-        stage.Raise(BottledApplause.Fanfare);
-        Assert.Equal(new[] { 3, 8 }, stage.Seats.Select(s => s.Fanfare));
-        stage.RaiseAll(CurtainWater.Fanfare);
-        Assert.Equal(new[] { 7, 12 }, stage.Seats.Select(s => s.Fanfare));
+        Assert.Equal((6, 1, 2), (BottledApplause.Fanfare, CurtainWater.Rehearsal,
+                                 EncoreElixir.Acts));
     }
 
     // ==== helpers ============================================================
@@ -868,19 +725,10 @@ public class ArmRelicsPotionsTests
         return body;
     }
 
-    private static FurinaStageLedger Stage(
-        Seat seat, params (StagePerformer Who, int Fanfare)[] seats)
-    {
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Clear();
-        foreach (var (who, fanfare) in seats)
-        {
-            stage.Summon(who);
-            stage.Raise(fanfare - FurinaStageLaw.SummonFanfare);
-        }
-        stage.ClearBeats();
-        return stage;
-    }
+    /// <summary>A relic's or potion's printed face.</summary>
+    private static string Face(AbstractModel model) =>
+        ((ILocalizationProvider)model).Localization!
+            .Single(r => r.Item1 == "description").Item2;
 
     private static T Owned<T>(T card, Seat owner) where T : CardModel
     {

@@ -32,39 +32,26 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IModalCard
+public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IStageCueCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCue(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_interposition");
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Interposition"),
-        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 3: gain {BranchBlock:diff()} instead."),
+        ("title", "Places, Everyone!"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Cue[/gold] a performer."),
     };
-
-    // EB-184: what each mode does about AIMING, in sheet order.
-    // The card's own TargetType is fixed before a mode is chosen (the
-    // game aims first), so it answers for the card and not for the
-    // play -- an Attack-typed modal declares AnyEnemy for the mode
-    // that aims, and the bridge then demanded a target on the mode
-    // that attacks nothing. These two rows are what it reads instead.
-    public IReadOnlyList<string> ModeLabels =>
-        new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 3: gain 13 instead" };
-
-    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
-        new[] { false, false };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
+            new SpotlightSystem.SpotlitBlockVar(5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -76,117 +63,12 @@ public sealed class ProtoFsInterposition : CustomCardModel, ICharacterCard, IMod
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var modeOptions = new List<CardModel>
-        {
-            ModalChoice.CreateMatchingOption<ProtoFsInterpositionModeA>(Owner, this),
-            ModalChoice.CreateMatchingOption<ProtoFsInterpositionModeB>(Owner, this),
-        };
-        var modeRules = new ModeRequirement?[]
-        {
-            null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 3),
-                                "needs its full price from the back performer"),
-        };
-        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 5 [gold]Block[/gold]", "[gold]Spend[/gold] 3: gain 13 instead" }[modeIndex]);
-        if (modeIndex == 0)
-        {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 8m : 5m), ValueProp.Move), cardPlay);
-        }
-        else
-        {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 3);
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 16m : 13m), ValueProp.Move), cardPlay);
-        }
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await FurinaStage.Cue(choiceContext, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_block: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["PlainBlock"].UpgradeValueBy(3m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
-    }
-}
-
-/// <summary>Mode 0 of proto_fs_interposition. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsInterpositionModeA : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_interposition");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Gain Block"),
-        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]"),
-    };
-
-    public ProtoFsInterpositionModeA()
-        : base(CardType.Skill)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainBlock"].UpgradeValueBy(3m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
-    }
-}
-
-/// <summary>Mode 1 of proto_fs_interposition. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsInterpositionModeB : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_interposition");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Spend 3"),
-        ("description", "[gold]Spend[/gold] 3: gain {BranchBlock:diff()} instead"),
-    };
-
-    public ProtoFsInterpositionModeB()
-        : base(CardType.Skill)
-    {
-    }
-
-    /// <summary>The Spend warning: the guests this Spend would leave
-    /// unable to pay for their act.</summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, 3);
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedBlockVar("PlainBlock", 5m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainBlock"].UpgradeValueBy(3m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

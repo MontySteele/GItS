@@ -94,9 +94,9 @@ public class CoopSetTests
             + "card{Cards:plural:|s}.",
             Face(new ProtoKoPassTheMatch()));
         Assert.Equal(
-            // The rules pass (2026-10-01): trimmed.
-            "Until your next turn, your [gold]front performer[/gold] takes "
-            + "hits on another player after their [gold]Block[/gold].",
+            // The re-founding (2026-10-04, sec.10).
+            "Another player gains {Block:diff()} [gold]Block[/gold]. "
+            + "[gold]Cue[/gold] a performer.",
             Face(new ProtoFsGuestOfHonor()));
         Assert.Equal(
             "Another player gains {Block:diff()} [gold]Block[/gold].\n"
@@ -317,141 +317,37 @@ public class CoopSetTests
     // ---- Furina ----------------------------------------------------------------
 
     [Fact]
-    public void Guest_of_honor_sends_what_is_left_after_their_block_to_the_lead()
+    public void Guest_of_honor_blocks_the_ally_and_cues_a_performer()
     {
-        using var _ = new StageArm();
-        var (furina, stage) = Stage((StagePerformer.Usher, 5),
-                                    (StagePerformer.Crabaletta, 3));
-        var ally = Seat.Klee();
-        var enemy = Enemy();
-        var guest = Guest(ally, furina);
-
-        // 8 past the ally's Block: the lead takes 5 and leaves WITHOUT a Bow
-        // (a hit), the back performer steps forward, and 3 reaches the ally.
-        Assert.Equal(3m, guest.ModifyHpLostBeforeOsty(
-            ally.Creature, 8m, Attack, enemy, cardSource: null));
-        Assert.Single(stage.Seats);
-        Assert.Equal(StagePerformer.Crabaletta, stage.Lead!.Who);
-        Assert.Equal(3, stage.Lead.Fanfare);
-
-        // A smaller hit stops at the lead.
-        Assert.Equal(0m, guest.ModifyHpLostBeforeOsty(
-            ally.Creature, 2m, Attack, enemy, cardSource: null));
-        Assert.Equal(1, stage.Lead!.Fanfare);
+        // THE RE-FOUNDING (sec.10): "Another player gains 7 Block. Cue a
+        // performer." No redirect any more; a Cue card, so Lyney's line reads
+        // it.
+        var play = Il.Calls(Il.Method("ProtoFsGuestOfHonor", "OnPlay"));
+        Assert.Contains("FurinaStage.Cue", play);
+        Assert.True(typeof(IStageCueCard).IsAssignableFrom(
+            typeof(ProtoFsGuestOfHonor)));
+        Assert.Null(typeof(FurinaStage).Assembly.GetType(
+            "KleeMod.Powers.GuestOfHonorPower"));
     }
 
     [Fact]
-    public void Guest_of_honor_is_attacks_on_the_guest_only()
+    public void Share_the_spotlight_spends_all_then_gives_block_per_point()
     {
-        using var _ = new StageArm();
-        var (furina, stage) = Stage((StagePerformer.Usher, 5));
-        var ally = Seat.Klee();
-        var enemy = Enemy();
-        var guest = Guest(ally, furina);
-
-        // Not the guest, not an attack, or unblockable: untouched.
-        Assert.Equal(8m, guest.ModifyHpLostBeforeOsty(
-            furina.Creature, 8m, Attack, enemy, null));
-        Assert.Equal(8m, guest.ModifyHpLostBeforeOsty(
-            ally.Creature, 8m, ValueProp.Unpowered, enemy, null));
-        Assert.Equal(8m, guest.ModifyHpLostBeforeOsty(
-            ally.Creature, 8m, Attack | ValueProp.Unblockable, enemy, null));
-        Assert.Equal(5, stage.Lead!.Fanfare);
-
-    }
-
-    [Fact]
-    public void A_lethal_mine_still_fires_first_and_the_lead_pays_nothing()
-    {
-        // The Mine answers in BeforeDamageReceived, before Block, on ANY
-        // player (PR #658); a lethal one notes the pre-empted hit, and the
-        // redirect then takes nothing off the lead for a hit that never
-        // happened. A Mine that does not kill leaves the hit to land here.
-        using var _ = new StageArm();
-        var (furina, stage) = Stage((StagePerformer.Usher, 5));
-        var ally = Seat.Klee();
-        var enemy = Enemy();
-        var guest = Guest(ally, furina);
-        var klee = Seat.Klee();
-        Assert.True(ProtoBombPower.AnswersAttack(
-            enemy, klee.Creature, ally.Creature, enemy, Attack));
-
-        ProtoBombPower.Preempted.Clear();
-        try
-        {
-            Seat.Set(enemy, "CurrentHp", 0);
-            ProtoBombPower.Preempted.Note(ally.Creature, enemy);
-            Assert.Equal(0m, guest.ModifyHpLostBeforeOsty(
-                ally.Creature, 8m, Attack, enemy, null));
-            Assert.Equal(5, stage.Lead!.Fanfare);
-        }
-        finally
-        {
-            ProtoBombPower.Preempted.Clear();
-        }
-    }
-
-    [Fact]
-    public void A_rapt_audience_fires_on_a_hit_the_guest_took()
-    {
-        using var _ = new StageArm();
-        var (furina, stage) = Stage((StagePerformer.Usher, 9),
-                                    (StagePerformer.Crabaletta, 1));
-        furina.WithPower<RaptAudiencePower>(2);
-        var ally = Seat.Klee();
-        var guest = Guest(ally, furina);
-
-        Assert.Equal(0m, guest.ModifyHpLostBeforeOsty(
-            ally.Creature, 4m, Attack, Enemy(), null));
-        Assert.Equal(5, stage.Lead!.Fanfare);
-        Assert.Equal(3, stage.Back!.Fanfare);    // 1 + a fixed 2
-    }
-
-    [Fact]
-    public void Guest_of_honor_flushes_her_stage_and_leaves_at_the_next_turn()
-    {
-        Assert.Contains("FurinaStage.Flush",
-            Il.Calls(Il.Method("GuestOfHonorPower", "AfterDamageReceived")));
-        Assert.Contains("PowerCmd.Remove",
-            Il.Calls(Il.Method("GuestOfHonorPower", "BeforeSideTurnStart")));
-        Assert.Contains("PowerCmd.Remove",
-            Il.Calls(Il.Method("GuestOfHonorPower", "AfterDeath")));
-    }
-
-    [Fact]
-    public void Share_the_spotlight_gives_the_whole_bar_as_block_then_bows()
-    {
-        // STRUCTURAL: an exact emptying of the back bar, the Block to the
-        // aimed player FIRST (the face's order), then a real Bow.
+        // The re-founding (sec.10): "Spend all your Fanfare. Another player
+        // gains 2 Block per point." The Spend first, then the ally's Block.
         var seq = Il.CallSequence(Il.Method("FurinaStage", "ShareTheSpotlight")).ToList();
-        var spend = seq.IndexOf("FurinaStageLedger.SpendAllOfBack");
+        var spend = seq.IndexOf("StageDirector.SpendAll");
         var block = seq.FindIndex(c => c.StartsWith("CreatureCmd.GainBlock"));
-        var bow = seq.IndexOf("FurinaStage.Bow");
-        Assert.True(spend >= 0 && spend < block && block < bow);
+        Assert.True(spend >= 0 && spend < block);
+        Assert.Contains("{SpotlightRate:diff()}", Face(new ProtoFsShareTheSpotlight()));
     }
 
     [Fact]
-    public void The_ledger_empties_the_back_bar_exactly_and_owes_a_bow()
-    {
-        using var _ = new StageArm();
-        var (furina, stage) = Stage((StagePerformer.Usher, 4),
-                                    (StagePerformer.Chevalmarin, 6));
-        var result = stage.SpendAllOfBack();
-        Assert.True(result.Fired);
-        Assert.Equal(6, result.Paid);
-        Assert.True(result.Exit!.Value.Bows);
-        Assert.Single(stage.Seats);
-
-        stage.Clear();
-        Assert.False(stage.SpendAllOfBack().Fired);   // empty stage: nothing
-    }
-
-    [Fact]
-    public void The_people_of_fontaine_raise_on_another_players_attack()
+    public void The_people_of_fontaine_gain_fanfare_on_another_players_attack()
     {
         var calls = Il.Calls(Il.Method("PeopleOfFontainePower", "AfterCardPlayed"));
         Assert.Contains("CoopSet.IsAnotherPlayersAttack", calls);
-        Assert.Contains("FurinaStage.Raise", calls);
+        Assert.Contains("FurinaStage.Gain", calls);
         Assert.Contains("{PowerAmount:diff()}", Face(new ProtoFsPeopleOfFontaine()));
     }
 
@@ -523,48 +419,6 @@ public class CoopSetTests
     }
 
     // ---- helpers ---------------------------------------------------------------
-
-    private sealed class StageArm : IDisposable
-    {
-
-        internal StageArm()
-        {
-            FurinaStageLedger.ResetAll();
-        }
-
-        public void Dispose()
-        {
-            FurinaStageLedger.ResetAll();
-        }
-    }
-
-    private static (Seat Seat, FurinaStageLedger Stage) Stage(
-        params (StagePerformer Who, int Fanfare)[] seats)
-    {
-        var seat = Seat.Furina().WithCombatState();
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Clear();
-        foreach (var (who, fanfare) in seats)
-        {
-            stage.Summon(who);
-            stage.Raise(fanfare - FurinaStageLaw.SummonFanfare);
-        }
-        return (seat, stage);
-    }
-
-    /// <summary>A Guest of Honor on <paramref name="ally"/>, placed by
-    /// <paramref name="furina"/>: the power's two backing fields, the way the
-    /// harness seeds every power it cannot apply.</summary>
-    private static GuestOfHonorPower Guest(Seat ally, Seat furina)
-    {
-        var power = (GuestOfHonorPower)RuntimeHelpers.GetUninitializedObject(
-            typeof(GuestOfHonorPower));
-        SetField(power, "_owner", ally.Creature);
-        SetField(power, "_applier", furina.Creature);
-        SetField(power, "_amount", 1);
-        Seat.Set(power, "IsMutable", true);
-        return power;
-    }
 
     /// <summary>A creature on the ENEMY side. The harness's seats are players,
     /// and the co-op reads ask <c>IsEnemy</c>.</summary>

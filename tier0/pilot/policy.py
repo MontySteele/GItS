@@ -161,19 +161,11 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
     "has_salon_members",
-    # `EB-724` (QUARANTINED, `furina_stage.FURINA_STAGE`). "If a performer is
-    # on stage" -- `len(player.stage) > 0`, a pure current-state read with no
-    # snapshot field, which is exactly this collection's test. It is the ONE
-    # predicate every Spend face is written against (brief sec.3 rule 8), so a
-    # pilot that could not read it would score the whole batch's attacks at
-    # their base number and never learn the rider exists.
+    # FURINA'S STAGE: "if no one is on stage" and its opposite -- a pure
+    # current-state read with no snapshot field, which is exactly this
+    # collection's test.
     "stage_occupied",
-    # R276 batch two: its opposite, the empty-stage answers' question --
-    # the same pure current-state read.
     "stage_empty",
-    # THE SUPPORTING POOL (2026-09-26), Counterclaim: a flag the enemies'
-    # hits set and her turn's end clears, read as it stands.
-    "stage_front_hit",
     "spotlight_moved_this_turn",
     # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state
@@ -766,119 +758,246 @@ def _estimated_exhausts(state: CombatState, card: Card) -> int:
     return 0
 
 
-def _stage_defence(state: CombatState, card: Card) -> float:
-    """QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-724`). What a Stage verb
-    is worth to the DEFENCE this turn, in the units `_raw_block` counts.
+# ---------------------------------------------------------------------------
+#  FURINA'S STAGE (`tier0.engine.furina_stage`, the re-founded rules): what a
+#  Stage verb is worth this turn, and the choices inside her cards. An
+#  INSTRUMENT, not a design: the simplest readings that make the pilot field
+#  a cast, Cue it and Spend.
+# ---------------------------------------------------------------------------
 
-    THE ARM'S WHOLE PROMISE IS DEFENSIVE (brief sec.2: "enemies hit her Block,
-    then the lead performer, then her"), so a pilot that read nothing here
-    would leave every summon and every Refill dead in hand and report a kit
-    that never fielded a cast. `EB-144`'s hole verbatim, one arm over: a verb
-    the pilot cannot price is a verb the measurement never sees played.
+#: A Fanfare gained, in `_tempo_value`'s units (a card drawn is 1).
+STAGE_FANFARE_TEMPO = 1.0
+#: A Fanfare a star pays, in damage points: what a Cue's payment costs.
+STAGE_FANFARE_POINTS = 1.5
 
-    THREE TERMS, each read off the rule it comes from and none invented:
 
-      * `stage_raise` is Fanfare on the BACK seat, which is not exposed to
-        this turn's attack -- so it is priced at the RESERVE's rate, half its
-        face, rather than as Block. On a stage of one the back seat IS the
-        lead and it prices in full, which the branch reads live.
-      * `stage_summon` is a body at 1 plus its ARRIVAL act (rule 3), and only
-        Usher's act is Block. The body is one point of absorption behind
-        whoever is already in front of it.
-      * `stage_perform_lead` is *Bis!*: the lead's act, now, and Block only
-        where that lead is Usher.
+def stage_act_parts(state: CombatState, member: str, *, free: bool = False,
+                    fanfare: Optional[int] = None) -> tuple[float, float]:
+    """`(damage, block)` one act of `member` would make now, off the printed
+    numbers, Rehearsal and Ousia. A star that cannot pay makes nothing (it
+    skips); Chevreuse's act and the supports' gains are not damage or Block
+    and read (0, 0)."""
+    p = state.player
+    fs = furina_stage
+    held = fs.fanfare(p) if fanfare is None else fanfare
+    if member in fs.STAR_PRICE and not free and held < fs.STAR_PRICE[member]:
+        return (0.0, 0.0)
+    r = fs.rehearsal(p)
+    mult = max(1, int(getattr(p, "stage_act_damage_mult", 1)))
+    n = max(1, len(state.living_enemies))
+    hydro = fs.NEUVILLETTE_HYDRO_BONUS if member == "neuvillette" else 0
+    if member == "usher":
+        return (0.0, float(fs.ACT_USHER_BLOCK + r))
+    if member == "sigewinne":
+        losses = max(0, int(state.player_damage_events)
+                     - int(p.stage_sigewinne_mark))
+        return (0.0, float(fs.ACT_SIGEWINNE_BLOCK
+                           + fs.SIGEWINNE_PER_HP_LOSS * losses + r))
+    if member == "lyney":
+        return (float(fs.TRICK_DAMAGE), 0.0)      # the Trick, played later
+    per = {"chevalmarin": (fs.ACT_CHEVALMARIN_DAMAGE, n),
+           "crabaletta": (fs.ACT_CRABALETTA_DAMAGE, 1),
+           "neuvillette": (fs.ACT_NEUVILLETTE_DAMAGE, n),
+           "clorinde": (fs.ACT_CLORINDE_DAMAGE, 1),
+           "lynette": (fs.ACT_LYNETTE_DAMAGE, 1),
+           "wriothesley": (fs.ACT_WRIOTHESLEY_DAMAGE
+                           + fs.WRIOTHESLEY_PER_BLOCKED
+                           * int(p.stage_wriothesley_blocked), 1)}
+    if member in per:
+        base, hits = per[member]
+        return (float(((base + r) * mult + hydro) * hits), 0.0)
+    if member == "navia":
+        spent = int(p.stage_spent_this_turn)
+        if spent <= 0:
+            return (0.0, 0.0)
+        return (float((fs.NAVIA_PER_SPENT * spent + r) * mult), 0.0)
+    if member == "escoffier":
+        dmg = blk = 0.0
+        for m in fs.stage(p):
+            if m in fs.SALON:
+                d, b = stage_act_parts(state, m)
+                dmg, blk = dmg + d, blk + b
+        return (dmg, blk)
+    return (0.0, 0.0)
 
-    NOTHING HERE PRICES A SPEND. What a Spend buys is the card's own damage
-    or Block op, which `_expected_damage` and `_raw_block` already read at
-    the branch `stage_occupied` selects; pricing the verb as well would pay
-    the card twice for one line.
+
+def _stage_act_value(state: CombatState, member: str) -> float:
+    """One act of `member` now, in damage points: its damage, its Block up to
+    this turn's need, less what a star pays. A star she cannot pay for is
+    worth -1 (it would skip)."""
+    fs = furina_stage
+    p = state.player
+    price = fs.STAR_PRICE.get(member, 0)
+    if member in fs.STAR_PRICE and fs.fanfare(p) < price:
+        return -1.0
+    dmg, blk = stage_act_parts(state, member)
+    need = max(0.0, _incoming_damage(state) - p.block)
+    val = dmg + min(blk, need) + 0.2 * max(0.0, blk - need)
+    if member == "charlotte":
+        val += STAGE_FANFARE_POINTS * fs.ACT_CHARLOTTE_GAIN
+    if member == "chevreuse" and not p.stage_chevreuse_acted:
+        if fs.fanfare(p) >= fs.ACT_CHEVREUSE_PRICE:
+            val += 1.0
+        else:
+            val -= 1.0
+    return val - STAGE_FANFARE_POINTS * price
+
+
+class FurinaStageDecider:
+    """The choices a player makes inside Furina's cards, for the sim. Simple
+    and deterministic on purpose:
+
+    * a Cue names the performer whose act is worth most now
+      (`_stage_act_value`: its damage, its Block up to this turn's need, less
+      a star's price; a star she cannot pay for is never named over one that
+      acts), ties to the front-most;
+    * Step Forward moves Charlotte to the front when she stands behind
+      someone (she funds the stars behind her the same turn), else the back
+      performer;
+    * Final Bow / Intermission sends off the front-most Salon member (a guest
+      keeps its seat), else the front performer;
+    * Arkhe Alignment and Dual Nature take Ousia when a performer on stage
+      deals damage, else Pneuma;
+    * a Spend mode is taken whenever she holds its price (the arm's "spend
+      when it can" read), except a mode whose payoff is another player's
+      (Raise a Toast's), which in a one-seat fight buys nothing.
     """
-    if not furina_stage.active(state.player):
-        return 0.0
-    total = 0.0
-    alone = furina_stage.count(state.player) <= 1
+
+    def cue_target(self, state: CombatState) -> Optional[int]:
+        seats = furina_stage.stage(state.player)
+        if not seats:
+            return None
+        vals = [(_stage_act_value(state, m), -i) for i, m in enumerate(seats)]
+        return -max(vals)[1]
+
+    def front_target(self, state: CombatState) -> Optional[int]:
+        seats = furina_stage.stage(state.player)
+        if len(seats) < 2:
+            return None
+        if "charlotte" in seats[1:]:
+            return seats.index("charlotte", 1)
+        return len(seats) - 1
+
+    def final_bow_target(self, state: CombatState) -> Optional[int]:
+        seats = furina_stage.stage(state.player)
+        if not seats:
+            return None
+        for i, m in enumerate(seats):
+            if m in furina_stage.SALON:
+                return i
+        return 0
+
+    def arkhe_choice(self, state: CombatState) -> str:
+        for m in furina_stage.stage(state.player):
+            if stage_act_parts(state, m, free=True)[0] > 0:
+                return "ousia"
+        return "pneuma"
+
+    def spend_mode(self, state: CombatState, modes: list) -> Optional[int]:
+        spends = [(i, furina_stage.spend_mode_amount(m))
+                  for i, m in enumerate(modes)]
+        spends = [(i, n) for i, n in spends if n is not None]
+        if len(spends) != 1:
+            return None
+        index, amount = spends[0]
+        keep = next((i for i in range(len(modes)) if i != index), 0)
+        body = modes[index].get("effects") or []
+        if any(fx.get("op") == "stage_toast" for fx in body):
+            return keep
+        return index if furina_stage.can_pay(state.player, amount) else keep
+
+
+FURINA_STAGE_DECIDER = FurinaStageDecider()
+
+
+def _stage_parts(state: CombatState, card: Card) -> tuple[float, float]:
+    """`(damage, block)` a Stage card's verbs put on the board this turn: a
+    summon's or a guest's first act (at the end of this turn), a Cue's act
+    now, Tutti!'s acts, the Bows' free acts. A random summon takes the mean
+    of the trio. Read off the stage as it stands at score time."""
+    fs = furina_stage
+    p = state.player
+    if not fs.active(p):
+        return (0.0, 0.0)
+    seats = fs.stage(p)
+    dmg = blk = 0.0
     for fx in card.effects:
         op = fx.get("op")
-        if op == "stage_raise":
-            amount = fx.get("amount", 0)
-            if isinstance(amount, int):
-                total += amount if alone else amount / 2
-        elif op == "stage_summon":
-            total += furina_stage.SUMMON_FANFARE
+        parts: list = []
+        if op == "stage_summon":
             member = fx.get("member", "random")
-            if member == "usher":
-                total += furina_stage.ACT_USHER_BLOCK
-            elif member == "random":
-                # The mean of the three arrivals, `_stage_offence`'s rule at
-                # the other half of the same roll.
-                total += furina_stage.ACT_USHER_BLOCK / 3
-        elif op == "stage_perform_lead":
-            lead = furina_stage.lead(state.player)
-            times = fx.get("amount", 1)
-            times = times if isinstance(times, int) else 1
-            if lead is not None and lead[0] == "usher":
-                total += furina_stage.ACT_USHER_BLOCK * times
+            if member == "random":
+                parts = [(stage_act_parts(state, m), 1.0 / len(fs.SALON))
+                         for m in fs.SALON]
+            else:
+                parts = [(stage_act_parts(state, member), 1.0)]
         elif op == "stage_guest":
-            # THE GUEST CAST (2026-09-25): a body holding its arrival
-            # Fanfare, priced as a Raise is -- in full where it will stand in
-            # front, at the reserve's half rate behind.
             amount = fx.get("amount", 0)
-            if isinstance(amount, int):
-                total += amount if furina_stage.count(state.player) == 0                     else amount / 2
-    return total
+            amount = amount if isinstance(amount, int) else 0
+            parts = [(stage_act_parts(state, fx.get("member", ""),
+                                      fanfare=fs.fanfare(p) + amount), 1.0)]
+        elif op == "stage_cue" and seats:
+            pick = FURINA_STAGE_DECIDER.cue_target(state)
+            times = fx.get("times", 1)
+            parts = [(stage_act_parts(state, seats[pick]),
+                      float(times if isinstance(times, int) else 1))]
+        elif op == "stage_perform_all":
+            parts = [(stage_act_parts(state, m), 1.0) for m in seats
+                     if not fx.get("guests") or m in fs.GUESTS]
+        elif op in ("stage_grand_finale", "stage_curtain_call"):
+            parts = [(stage_act_parts(state, m, free=True), 1.0)
+                     for m in seats]
+        elif op == "stage_final_bow" and seats:
+            pick = FURINA_STAGE_DECIDER.final_bow_target(state)
+            parts = [(stage_act_parts(state, seats[pick], free=True), 1.0)]
+        for (d, b), k in parts:
+            dmg += d * k
+            blk += b * k
+    return (dmg, blk)
+
+
+def _stage_defence(state: CombatState, card: Card) -> float:
+    """The Block half of `_stage_parts`, in `_raw_block`'s units."""
+    return _stage_parts(state, card)[1]
 
 
 def _stage_offence(state: CombatState, card: Card) -> float:
-    """The other half of `_stage_defence`: what a Stage verb is worth to the
-    DAMAGE this turn.
+    """The damage half of `_stage_parts`, in `_expected_damage`'s units."""
+    return _stage_parts(state, card)[0]
 
-    TWO OF THE THREE ACTS ARE HITS (brief sec.3 rule 10) -- Chevalmarin's 2 to
-    every enemy and Crabaletta's 5 to one -- so a summon that fields either of
-    them, and a *Bis!* that performs one, put damage on the board the turn they
-    are played. A pilot blind to that prices *Mademoiselle Crabaletta* as a
-    1-point body and never fields a cast, which is `EB-144`'s hole again.
 
-    A RANDOM SUMMON TAKES THE MEAN of the three arrivals, because that is the
-    honest estimate of a roll and not a guess about which way it lands. The
-    same call in `_stage_defence` takes the same mean for the Block half.
-    """
-    if not furina_stage.active(state.player):
+#: What a support guest's seat is worth beyond its act's damage and Block,
+#: in `_tempo_value`'s units: Charlotte's extra card a turn and her 1 Fanfare,
+#: Chevreuse's Energy next turn.
+STAGE_GUEST_SEAT_TEMPO = {"charlotte": 2.0, "chevreuse": 1.5}
+#: Casting Agent's free Guest Star card, in the same units.
+STAGE_CASTING_AGENT_TEMPO = 1.0
+
+
+def _stage_tempo(state: CombatState, card: Card) -> float:
+    """A Stage card's tempo, in `_tempo_value`'s units: the Fanfare it gains
+    ("Gain N Fanfare", a Guest Star card's N, the 1 every Bow gives), a
+    support guest's seat, and Casting Agent's free card."""
+    fs = furina_stage
+    if not fs.active(state.player):
         return 0.0
-    live = max(1, len(state.living_enemies))
-    per = {"usher": 0.0,
-           "chevalmarin": float(furina_stage.ACT_CHEVALMARIN_DAMAGE * live),
-           "crabaletta": float(furina_stage.ACT_CRABALETTA_DAMAGE)}
-    mean = sum(per.values()) / len(per)
-    total = 0.0
+    n = 0
+    extra = 0.0
     for fx in card.effects:
         op = fx.get("op")
-        if op == "stage_summon":
-            member = fx.get("member", "random")
-            total += per.get(member, mean)
-        elif op == "stage_perform_lead":
-            lead = furina_stage.lead(state.player)
-            times = fx.get("amount", 1)
-            times = times if isinstance(times, int) else 1
-            total += per.get(lead[0], 0.0) * times if lead else 0.0
-        elif op == "stage_guest":
-            # THE GUEST CAST (2026-09-25): the guest's first act, at the end
-            # of this turn, off its printed numbers. The supports' acts are
-            # not damage and price 0 here.
-            member = fx.get("member")
+        if op == "stage_guest" and fx.get("member") not in fs.stage(
+                state.player):
+            extra += STAGE_GUEST_SEAT_TEMPO.get(fx.get("member"), 0.0)
+        if op == "stage_casting_agent":
+            extra += STAGE_CASTING_AGENT_TEMPO
+        if op in ("stage_raise", "stage_guest"):
             amount = fx.get("amount", 0)
-            if member == "neuvillette":
-                total += float(furina_stage.ACT_NEUVILLETTE_DAMAGE * live)
-            elif member == "clorinde":
-                total += float(furina_stage.ACT_CLORINDE_DAMAGE)
-            elif member == "navia" and isinstance(amount, int):
-                total += float(amount)
-            # THE SUPPORTING POOL (2026-09-26): the two new guests, the same
-            # way -- Lyney's hit on one enemy, Escoffier's on ALL.
-            elif member == "lyney":
-                total += float(furina_stage.ACT_LYNEY_DAMAGE)
-            elif member == "escoffier":
-                total += float(furina_stage.ACT_ESCOFFIER_DAMAGE * live)
-    return total
+            n += amount if isinstance(amount, int) else 0
+        elif op in ("stage_grand_finale", "stage_curtain_call"):
+            n += fs.BOW_FANFARE * fs.count(state.player)
+        elif op == "stage_final_bow" and fs.count(state.player):
+            n += fs.BOW_FANFARE
+    return n * STAGE_FANFARE_TEMPO + extra
 
 
 def _raw_block(state: CombatState, card: Card) -> float:
@@ -1103,6 +1222,10 @@ def _tempo_value(state: CombatState, card: Card) -> float:
             if any(c.is_companion for c in state.player.hand):
                 val += (PILOT_COMPANION_COPY_VALUE
                         * fx.get("amount", fx.get("times", 1)))
+    # FURINA'S STAGE: the Fanfare a card gains is tempo (it buys Spends and
+    # stars' acts later), and so is a support guest's seat. 0 for anyone who
+    # is not Furina.
+    val += _stage_tempo(state, card)
     return val
 
 

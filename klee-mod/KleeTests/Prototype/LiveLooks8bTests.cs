@@ -163,41 +163,6 @@ public class LiveLooks8bTests
     }
 
     // ==================================================================
-    // Defect 4 -- `Final Bow` on an EMPTY stage
-    // ==================================================================
-
-    [Fact]
-    public void Final_bows_forecast_on_an_empty_stage_is_zero()
-    {
-        // THE FIND. "`Final Bow` printed `Gain 2 Block, its Fanfare` on an
-        // EMPTY stage, where Ousia Surge and Pneuma Refrain both correctly
-        // printed 0 on the same board."
-        //
-        // The 2 was an EARLIER card's spend. The two neighbours read a BAR
-        // (`LeadFanfare` / `BackFanfare`, 0 on an empty stage) and this one
-        // reads the per-play spend record first -- which, on the build the
-        // look read, was never closed between plays. `0d50a482` (PR #572,
-        // round three item (f)) made that record a stack; this is the empty-
-        // stage reading the look actually took, pinned on the far side of it.
-        using var _ = new StageArm();
-        var seat = Seat.Furina().WithCombatState();
-        var stage = FurinaStageLedger.For(seat.Creature);
-        stage.Clear();
-        stage.Summon(StagePerformer.Usher);
-        stage.Raise(1);                        // a bar of 2, as the look had
-
-        stage.BeginPlay();
-        stage.Spend(2);                        // ... which this play empties
-        stage.EndPlay();
-
-        // The stage is empty and no play is in flight: every reader on the
-        // board answers the same 0.
-        Assert.Equal(0, FurinaStage.LeadFanfare(seat.Creature));
-        Assert.Equal(0, FurinaStage.BackFanfare(seat.Creature));
-        Assert.Equal(0, stage.SpentThisPlay);
-    }
-
-    // ==================================================================
     // `EB-745` caveat 1 -- the GRANT site, not only the offer filter
     // ==================================================================
 

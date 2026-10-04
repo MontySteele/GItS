@@ -12,9 +12,12 @@ mod halves are pinned in `klee-mod/KleeTests` (`ModalChoicePinTests`,
      number over a body printing the board's ("Deal 7 damage" / "Deal 5
      damage" under Weak). And the page never said the open chooser refuses
      every other command, which cost the seat two refusals in a row.
-  3. The Stage badge never said how many seats there are.
-  4. The stage log filed no Raise and no hit on the lead that did not empty
-     it, so every Fanfare change was reconstructed by arithmetic.
+  3. The Stage badge never said how many seats there are. (The re-founding,
+     2026-10-04: the front performer row says who acts and when; each
+     performer's badge says its act, numbers off the law.)
+  4. The stage log filed no Raise, so every Fanfare change was reconstructed
+     by arithmetic. (The re-founding: Fanfare is one number on Furina, and
+     every gain is a log line; performers take no hits.)
   5. A lone Gas Bomb printed as "Gas Bomb (2)" (`test_understudy_blindplay`'s
      numbering pins carry that half).
 
@@ -58,8 +61,10 @@ def _fresh_fight():
 # 2. THE MODE CHOOSER.
 # ---------------------------------------------------------------------------
 
+# The re-founding (2026-10-04): Interposition is a Cue card now; Spirited
+# Aria is the fifth plain-or-Spend face.
 SPEND_CARDS = ("ProtoFsCurtainRise", "ProtoFsQuickCue", "ProtoFsTidalFlourish",
-               "ProtoFsInterposition", "ProtoFsGrandEntrance")
+               "ProtoFsSpiritedAria", "ProtoFsGrandEntrance")
 
 
 def _mode_classes(stem: str) -> dict[str, str]:
@@ -157,102 +162,47 @@ def test_the_one_press_note_says_everything_else_is_refused():
 # 3. THE SEAT COUNT.
 # ---------------------------------------------------------------------------
 
-def test_the_glossary_says_up_to_three_perform():
-    # THE SUPPORTING POOL (2026-09-26): 4 with Sold Out. The second text pass
-    # (2026-09-28) dropped the act list the page appended to both seat rows;
-    # the seat count is the Stage badge's, which says who acts and when.
-    # The rules pass (2026-10-01): rule 4 cut; the damage order lives here.
+def test_the_glossary_says_who_acts_and_when():
+    # The re-founding (2026-10-04): the front performer row says who acts and
+    # when; the back performer retired with the bars.
     assert ARM_KEYWORDS["front performer"] == (
-        "Takes hits after your Block; what its Fanfare cannot hold reaches "
-        "you.")
-    assert ARM_KEYWORDS["back performer"] == (
-        "Your last performer in line. Spend pays from it first. A lone "
-        "performer is both front and back.")
-    src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-           / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    # 2026-10-03: the fade moved to the start of her next turn.
-    assert '"Up to {Seats} performers act at the end of your turn. At the "' in src
+        "The performer in the first seat. Performers act front to back at the "
+        "end of your turn.")
+    assert "back performer" not in ARM_KEYWORDS
 
 
 def test_the_stage_badge_interpolates_the_law():
+    """Each performer's badge (and so its tip and the page's row) reads its
+    numbers off `FurinaStageLaw` (`EB-89`)."""
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    # Draft 3 (2026-09-25): the badge is the seat count and the fade, both
-    # off the law.
-    # The second text pass (2026-09-28): who acts, then the fade.
-    assert '"Up to " + FurinaStageLaw.Seats + " performers act at the end of "' in src
-    # The fade pass (2026-09-29): a quarter of every bar, in words; the C#
-    # suite pins `FurinaStageLaw.FadeDivisor` to the quarter.
-    # 2026-10-03: the fade moved to the start of her next turn.
-    assert '"your turn. At the start of your turn, each loses a quarter of "' in src
+    assert '"Act: gain " + FurinaStageLaw.ActUsherBlock' in src
+    assert "FurinaStageLaw.ActNeuvillettePrice" in src
+    assert "FadeDivisor" not in src and "quarter" not in src
 
 
 # ---------------------------------------------------------------------------
 # 4. THE STAGE LOG FILES RAISES AND HITS.
 # ---------------------------------------------------------------------------
 
-def _beat(event, member, name, bar, moved, reason="", target=""):
-    from understudy.blindplay_board import (STAGE_LEAVE_REASONS,
-                                            STAGE_LEFT_UNSAID)
+def _beat(event, member, name, fanfare, moved, source=""):
     return {"event": event, "member": member, "name": name, "seat": 0,
-            "fanfare": bar, "moved": moved,
-            "why": STAGE_LEAVE_REASONS.get(reason, STAGE_LEFT_UNSAID),
-            "target": target, "combat_id": "", "each": None}
+            "fanfare": fanfare, "moved": moved, "why": "", "target": "",
+            "combat_id": "", "source": source}
 
 
 def _log(*rows):
     return _render_stage_log({"seats": [], "log": list(rows)})
 
 
-def test_a_raise_prints_what_landed_and_the_bar_either_side():
-    lines = _log(_beat("raise", "usher", "Usher", 8, 5))
-    # The text pass: "Raise N on X: a → b" became "X gains N Fanfare".
-    assert lines == ["  - **Usher** gains 5 Fanfare: 3 → 8."]
+def test_a_gain_prints_what_landed_and_her_fanfare_either_side():
+    lines = _log(_beat("gain", "usher", "Usher", 8, 5))
+    assert lines == ["  - You gained 5 Fanfare: 3 \u2192 8."]
 
 
-def test_the_leads_regen_prints_as_a_regain():
-    lines = _log(_beat("regain", "usher", "Usher", 4, 1))
-    assert lines == ["  - **Usher** regained 1 Fanfare as the front "
-                     "performer: 3 → 4."]
-
-
-def test_an_enemy_hit_on_the_lead_prints_the_dealer_and_the_bar():
-    lines = _log(_beat("hit", "usher", "Usher", 3, 5,
-                       target="Living Fog"))
-    assert lines == ["  - **Living Fog** hit **Usher** for 5: 8 → 3."]
-
-
-def test_a_hit_that_empties_the_lead_says_it_leaves_once():
-    lines = _log(_beat("hit", "usher", "Usher", 0, 3, target="Sludge Spinner"),
-                 _beat("leave", "usher", "Usher", 0, 3, reason="hit"))
-    assert lines == [
-        "  - **Sludge Spinner** hit **Usher** for 3: 3 → 0, and it leaves "
-        "the stage: emptied by a hit, so it takes a Bow."]
-
-
-def test_a_hit_that_empties_the_lead_then_prints_its_bow():
-    """Rule 7, 2026-09-25: the Bow the mod files at the flush after the hit
-    prints on its own line, as the Spend exit's does."""
-    lines = _log(_beat("hit", "usher", "Usher", 0, 3, target="Sludge Spinner"),
-                 _beat("leave", "usher", "Usher", 0, 3, reason="hit"),
-                 _beat("bow", "usher", "Usher", 0, 4))
-    assert lines[0].endswith("emptied by a hit, so it takes a Bow.")
-    assert len(lines) == 2
-    assert lines[1].startswith("  - **Usher** took a Bow")
-
-
-def test_a_rapt_audience_refund_follows_the_hit_it_answers():
-    lines = _log(_beat("hit", "usher", "Usher", 2, 2, target="Living Fog"),
-                 _beat("raise", "chevalmarin", "Chevalmarin", 2, 1))
-    assert lines == ["  - **Living Fog** hit **Usher** for 2: 4 → 2.",
-                     "  - **Chevalmarin** gains 1 Fanfare: 1 → 2."]
-
-
-def test_a_hit_with_no_dealer_is_still_a_line():
-    lines = _log(_beat("hit", "usher", "Usher", 1, 2))
-    # 2026-09-26: and it says no enemy dealt it (a status in hand did).
-    assert lines == ["  - **Usher** took 2 damage no enemy dealt, such as a "
-                     "Burn or Wither in your hand: 3 → 1."]
+def test_a_gain_names_the_power_behind_it():
+    lines = _log(_beat("gain", "usher", "Usher", 4, 1, source="Bow"))
+    assert lines == ["  - You gained 1 Fanfare from Bow: 3 \u2192 4."]
 
 
 def test_a_raise_card_on_a_stage_board_points_at_the_log():

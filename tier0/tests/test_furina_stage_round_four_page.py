@@ -71,14 +71,14 @@ def test_a_run_without_the_relic_keeps_the_shipped_reading():
     assert FANFARE_SHIPPED_ROW in page
 
 
-def test_the_fanfare_row_carries_the_empty_stage_summon():
-    """The text pass's follow-up: on the Fanfare row, which every
-    Fanfare-giving face prints (Hold Your Places, Gala Dinner)."""
+def test_the_fanfare_row_says_whose_it_is_and_that_it_never_fades():
+    """The re-founding (2026-10-04): Fanfare is one number on Furina, with
+    no fade; the empty-stage summon retired with the bars."""
     page = blindplay.observe(_reward_state([SALON_SOLITAIRE]))
 
-    # The rules pass (2026-10-01): only what you play summons.
-    assert ("If no one is on stage, a card that gives Fanfare summons a "
-            "random performer holding it.") in page
+    assert ("Your applause. Cards and Bows give it. Spend and stars' acts use "
+            "it. It never fades.") in page
+    assert "summons a random performer holding it" not in page
     assert "**Raise**" not in page
 
 

@@ -56,10 +56,12 @@ public class StageMotionTests
                         c => c.Contains("TriggerAnim"));
         Assert.Contains(Il.Calls(Il.Method("StagePerformerBeat", "Flinch")),
                         c => c.Contains("TriggerAnim"));
-        Assert.Contains(Il.Calls(Il.Method("FurinaStage", "Act")),
+        // The re-founding (2026-10-04): the act lunges through the board;
+        // performers take no hits, so nothing on the stage flinches.
+        Assert.Contains(Il.Calls(Il.Method("GameStageBoard", "Lunge")),
                         c => c.Contains("StagePerformerBeat.Act"));
-        Assert.Contains(Il.Calls(Il.Method("FurinaStage", "AbsorbHit")),
-                        c => c.Contains("StagePerformerBeat.Flinch"));
+        Assert.Contains(Il.Calls(Il.Method("StageDirector", "Act")),
+                        c => c.Contains("IStageBoard.Lunge"));
     }
 
     [Fact]

@@ -424,29 +424,25 @@ def _runtime_count(state: CombatState, token: str,
         # nothing every time. Written by `_op_drain_fanfare`, cleared per card
         # play beside `discards_this_card` and its neighbours.
         return state.fanfare_drained_this_card
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`) -- the STAGE's three.
-    #
-    # `stage_spent` is the drain token's argument one arm over: what THIS
-    # play took off the bars, read back by the effect after it, because by the
-    # time *Final Bow*'s Block or the Rare's damage resolves the bar it is
-    # measuring is gone. Written by `_op_stage_spend`, `_op_stage_spend_all`
-    # and `_op_stage_final_bow`; cleared per card play beside
-    # `fanfare_drained_this_card`.
-    #
-    # The other two are LIVE BAR READS and not per-card memory, which is the
-    # difference between *Ousia Surge* ("damage equal to the back performer's
-    # Fanfare", R276) or *Pneuma Refrain* (the lead's) and the Rare: those two
-    # cards read a bar they do not spend. Both are 0 on an empty stage and both are 0 with the flag off,
-    # so a shipped row that ever named one would print zero rather than raise.
+    # FURINA'S STAGE. `stage_spent` is what THIS play spent ("Spend all your
+    # Fanfare"), read back by the effect after it, because by the time the
+    # damage resolves the Fanfare it measures is gone; written by
+    # `_op_stage_spend` and `_op_stage_spend_all`, cleared per card play
+    # beside `fanfare_drained_this_card`. The flow counts are her turn's
+    # (sec.8): Fanfare gained this turn, and spent this turn by a card's
+    # Spend (a star's payment is not a Spend). `stage_count` is the
+    # performers on stage, `stage_bows` every Bow this combat (Da Capo). All
+    # are 0 for anyone who is not Furina.
     if token == "stage_spent":
         return state.stage_spent_this_card
-    if token == "stage_lead_fanfare":
-        return furina_stage.lead_fanfare(p)
-    if token == "stage_back_fanfare":
-        return furina_stage.back_fanfare(p)
+    if token == "fanfare_gained":
+        return (int(p.stage_gained_this_turn)
+                if furina_stage.active(p) else 0)
+    if token == "fanfare_spent":
+        return (int(p.stage_spent_this_turn)
+                if furina_stage.active(p) else 0)
     if token == "stage_count":
         return furina_stage.count(p)
-    # THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat.
     if token == "stage_bows":
         return int(p.stage_bows) if furina_stage.active(p) else 0
     if token == "hand_size":
@@ -1786,6 +1782,11 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
             # THE KOKOMI EXPANSION's Ceremonial Garment: N more per debuff on
             # THIS body, her Attacks only. 0 without the Power or the arm.
             hit += kokomi_plan.garment_bonus(state, card, enemy)
+            # FURINA'S STAGE: Neuvillette's line, "Your Hydro damage deals 2
+            # more" -- per Hydro hit of a card, while she is on stage. 0 for
+            # anyone who is not Furina.
+            if element == "hydro":
+                hit += furina_stage.hydro_bonus(state)
             # Clorinde, Night Vigil: the same per-target aura rider, sourced
             # from a POWER instead of the card. Read before the hit resolves,
             # because resolve_hit consumes the aura it is keyed on -- the
@@ -2368,8 +2369,6 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
             state.emit("kurage_refreshed", turns=turns)
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap, never_reduces=floor)
-        # R276 batch two: an instanced Stage power's copy count.
-        furina_stage.note_power_applied(state, fx["power"])
         # `EB-415`. THE BANNER BANKS WHAT ITS CARD JUST GRANTED. `powers` is a
         # name -> int map holding TURNS REMAINING for this clock, so the
         # Dexterity it will owe back has nowhere else to live; the sidecar
@@ -3758,10 +3757,9 @@ def mode_affordable(state: CombatState, mode: dict) -> bool:
 
     Two gates, and they are two rules. EB-182's PRICE asks whether the bank can
     pay; `EB-746`'s RULE asks whether the board admits the mode at all -- the
-    Stage's Spend, where rule 8 refuses the rider on an empty stage and admits
-    it at a bar of any size, so occupancy is the question and the amount is
-    not. A mode neither reaches is offered, which keeps every unpriced fixture
-    byte-identical.
+    Stage's Spend, offered only when Furina holds its whole price in Fanfare
+    (`furina_stage.mode_offered`). A mode neither reaches is offered, which
+    keeps every unpriced fixture byte-identical.
     """
     if furina_stage.mode_offered(state.player, mode) is False:
         return False
@@ -3838,13 +3836,13 @@ def _chosen_mode(state: CombatState, modes: list[dict], card: Card) -> int:
         # nothing: the paying ops still refuse at resolution, which is the
         # loud half of the same rule.
         offered = list(range(len(modes)))
-    # `EB-746`, QUARANTINED (`furina_stage.FURINA_STAGE`) AND FIRST. The Stage's
-    # Spend is a choice on play now, and a pilot with no opinion about it takes
-    # index 0 forever -- a Furina who never spends, which is a different
-    # character from the one the seats play. The arm's own policy is written
-    # out in `furina_stage.spend_mode_index`; it answers None on every board
-    # the rule does not reach, including every board with the arm off, so
-    # nothing below it moves and `POLICY_VERSION` is untouched.
+    # `EB-746`, FURINA'S STAGE, AND FIRST. The Stage's Spend is a choice on
+    # play, and a pilot with no opinion about it takes index 0 forever -- a
+    # Furina who never spends, which is a different character from the one
+    # the seats play. `furina_stage.spend_mode_index` asks the Stage's decider
+    # (`policy.FurinaStageDecider.spend_mode`); it answers None on every board
+    # the rule does not reach, including every other character's, so nothing
+    # below it moves and `POLICY_VERSION` is untouched.
     stage_pick = furina_stage.spend_mode_index(state, modes)
     if stage_pick is not None and stage_pick in offered:
         return stage_pick
@@ -3939,20 +3937,10 @@ PREDICATE_NAMES = frozenset({
     # this turn is held, a Dusk entry is held until it resolves, and a queue
     # the morning drained is not.
     "plan_held",
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE ONE THING A
-    # SPEND RIDER ASKS. Brief sec.3 rule 8: "With no performer on stage the
-    # rider cannot fire and the card plays at its base number" -- so the
-    # question is OCCUPANCY and never size, because a bar of any size pays the
-    # whole rider (sec.4: "a small bar is the cheapest Spend"). There is
-    # deliberately no `stage_fanfare_at_least_N` beside it: a row that asked
-    # one would be printing a rule this kit does not have.
+    # FURINA'S STAGE: is anyone on stage, and its opposite (the empty-stage
+    # answers: Improvised Number, Between Acts, Solo Verse, Aria for One).
     "stage_occupied",
-    # R276 batch two: the empty-stage answers (Improvised Number, Between
-    # Acts) ask the opposite question.
     "stage_empty",
-    # THE SUPPORTING POOL (2026-09-26), Counterclaim: did an enemy's hit reach
-    # the front performer's bar since the end of her last turn?
-    "stage_front_hit",
     # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
     # first card you played this turn".
     "first_card_this_turn",
@@ -4049,17 +4037,14 @@ def is_known_predicate(name: str) -> bool:
 RUNTIME_COUNT_NAMES = frozenset({
     # QUARANTINED USE ONLY (R276) -- Fireworks Finale's "for each Spark spent".
     "sparks_spent",
-    # QUARANTINED USE ONLY (`EB-732`) -- the FURINA STAGE's three. Registered
-    # here as well as resolved in `_runtime_count` for this registry's own
-    # reason: the loader validates every count token at LOAD off this set, so a
-    # token only the resolver knows is a card that raises the first time it is
-    # played.
+    # FURINA'S STAGE. Registered here as well as resolved in `_runtime_count`
+    # for this registry's own reason: the loader validates every count token
+    # at LOAD off this set, so a token only the resolver knows is a card that
+    # raises the first time it is played.
     "stage_spent",
-    "stage_lead_fanfare",
-    "stage_back_fanfare",
-    # R276 batch two, Ensemble Piece: how many performers are on stage.
+    "fanfare_gained",
+    "fanfare_spent",
     "stage_count",
-    # THE SUPPORTING POOL (2026-09-26), Da Capo: every Bow this combat.
     "stage_bows",
     "exhaust_pile",
     "player_block",
@@ -4387,12 +4372,12 @@ def _predicate(state: CombatState, name: str) -> bool:
         want = name[len("leftmost_salon_member_"):]
         salon = state.player.salon
         return bool(salon) and salon[0] == want
-    # --- the Furina STAGE's one (QUARANTINED, `furina_stage.FURINA_STAGE`) ---
+    # --- FURINA'S STAGE ---
     if name == "stage_occupied":
-        return furina_stage.can_spend(state.player)
+        return furina_stage.count(state.player) > 0
     if name == "stage_empty":
-        return furina_stage.active(state.player) \
-            and not furina_stage.can_spend(state.player)
+        return (furina_stage.active(state.player)
+                and furina_stage.count(state.player) == 0)
     if name == "first_card_this_turn":
         # Opening Number (the Furina rules pass, 2026-10-01). This engine
         # counts a play BEFORE it resolves (`combat.play_card`, the auto-play
@@ -4400,9 +4385,6 @@ def _predicate(state: CombatState, name: str) -> bool:
         # C# twin counts AFTER (`FurinaStageLedger.CardsPlayedThisTurn`), so
         # it asks for 0; both spell "no card before this one".
         return state.cards_played_this_turn == 1
-    if name == "stage_front_hit":
-        return furina_stage.active(state.player) \
-            and bool(state.player.stage_front_hit)
     if name == "spotlight_set":
         return state.player.spotlight is not None
     if name == "spotlight_moved_this_turn":
@@ -5730,212 +5712,109 @@ def _op_remove_debuff(state: CombatState, fx: dict, card: Card) -> None:
 
 
 # ----------------------------------------------------------------------
-# THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`, `EB-732`).
-#
-# EIGHT VERBS AND NO MORE. The brief's seventeen faces (sec.12) are written in
-# these plus `damage`, `block`, `draw` and `conditional`, which is the shape
-# every arm before this one took: a kit whose rules need a new op per card is a
-# kit nobody can draft a row for. Each verb below delegates to
-# `tier0.engine.furina_stage`, which is the ONE implementation of every rule --
-# these functions unpack a row and nothing else, so a rule cannot mean one
-# thing at the end-of-turn sweep and another on a card.
-#
-# EVERY ONE OF THEM IS INERT WITH THE FLAG OFF, because every reader in that
-# module is, so a shipped run that somehow held one of these rows would play it
-# as an empty card rather than raise.
+# FURINA'S STAGE (`tier0.engine.furina_stage`, the re-founded rules). Each
+# verb unpacks its row and delegates to that module, which is the ONE
+# implementation of every rule, so a rule cannot mean one thing at the
+# end-of-turn sweep and another on a card. Every one is inert for anyone who
+# is not Furina.
 # ----------------------------------------------------------------------
 def _op_stage_summon(state: CombatState, fx: dict, card: Card) -> None:
-    """Brief sec.3 rule 3 and sec.12's four summons.
-
-    `member:` names one of the three; `member: random` (the default, and what
-    *Salon Début* and *Understudy* print) rolls uniformly from all three of
-    the trio, on stage or not (2026-09-25: the trio can be cloned; [USER]:
-    "Let's allow for copies and then check the balance."). A named summon
-    always summons, even when that performer is already on stage.
-
-    ON A FULL STAGE every summon runs `furina_stage.recast_front`
-    (2026-09-25): the lead takes a Bow and leaves, and the newcomer takes the
-    back seat holding its Fanfare, the Defect-orb rule [USER] ruled.
-    """
+    """"Summon <member>" (rule 4). `member: random` is "a random Salon
+    member", uniform over the trio."""
     p = state.player
     if not furina_stage.active(p):
         return
     named = fx.get("member", "random")
-    # THE SUPPORTING POOL's Gala Premiere (2026-09-26): a face may print the
-    # arrival ("with 3 Fanfare each"); rule 3's 1 otherwise. On a full stage
-    # it is the recast's own arrival, added to the leaver's (rule 3).
-    fanfare = int(fx.get("fanfare", furina_stage.SUMMON_FANFARE))
-    if len(furina_stage.stage(p)) >= furina_stage.capacity(p):
-        furina_stage.recast_front(state,
-                                  None if named == "random" else named,
-                                  arrival=fanfare)
-        return
     if named == "random":
-        named = state.rng.choice(furina_stage.PERFORMERS)
-    furina_stage.summon(state, named, fanfare)
+        named = state.rng.choice(furina_stage.SALON)
+    furina_stage.summon(state, named)
 
 
 def _op_stage_guest(state: CombatState, fx: dict, card: Card) -> None:
-    """THE GUEST CAST (2026-09-25): a Guest Star card, "<Name> joins the stage
-    with N Fanfare." `furina_stage.guest_star` is the whole rule."""
+    """A Guest Star card: "Summon X. Gain N Fanfare." (`amount` absent: 0)."""
     furina_stage.guest_star(state, fx["member"],
-                            _amount(state, fx.get("amount", 1)),
-                            front=fx.get("seat") == "front")
+                            _amount(state, fx.get("amount", 0)))
 
 
 def _op_stage_raise(state: CombatState, fx: dict, card: Card) -> None:
-    """Brief sec.3 rule 5: "Raise N Fanfare on the back performer", which is
-    the lead when it is alone. `seat: lead` is the other spelling, for a face
-    that names the lead instead; nothing in batch one prints it, and it is here
-    because the rule is stated per SEAT and a verb that could only reach one of
-    them would make the next such face a new op."""
-    furina_stage.raise_fanfare(state, _amount(state, fx.get("amount", 1)),
-                               fx.get("seat", furina_stage.SEAT_BACK))
-
-
-def _op_stage_scene_change(state: CombatState, fx: dict, card: Card) -> None:
-    """*Scene Change* (sec.12): "Rotate the cast: the front performer moves to
-    the back seat." No bow, no act, nothing lost (sec.5.2)."""
-    furina_stage.rotate(state)
-
-
-def _op_stage_perform_lead(state: CombatState, fx: dict, card: Card) -> None:
-    """*Bis!* (sec.12): the lead performer acts `amount` times now (the
-    same seat each time: a lead that leaves after an act takes the rest of
-    the repeats with it)."""
-    furina_stage.perform_lead(state, _amount(state, fx.get("amount", 1)))
+    """Gain N Fanfare ("Gain N Fanfare.")."""
+    furina_stage.gain(state, _amount(state, fx.get("amount", 1)))
 
 
 def _op_stage_spend(state: CombatState, fx: dict, card: Card) -> None:
-    """Brief sec.3 rule 8, the Spend mode's payment leg.
-
-    THE CHOOSER HAS ALREADY DECIDED THE MODE FIRES. Every Spend face is a
-    `choose_one` whose Spend mode opens with this op, and since the rules
-    pass (2026-10-01) that mode is offered only when the whole stage holds the
-    price, paid from the back performer first, then forward
-    (`furina_stage.mode_offered`); every performer the payment empties bows. What is recorded is what was paid, which a payoff on the same card
-    reads as `stage_spent`.
-    """
+    """A Spend mode's payment leg ("Spend 3: deal 17 instead"). The chooser
+    offered the mode only because she holds the price
+    (`furina_stage.mode_offered`)."""
     paid = furina_stage.spend(state, _amount(state, fx.get("amount", 1)))
     state.stage_spent_this_card = paid
 
 
 def _op_stage_spend_all(state: CombatState, fx: dict, card: Card) -> None:
-    """*Let the People Rejoice* (sec.5.3), first clause: "Spend all Fanfare on
-    stage."
-
-    THE BOWS ARE A SECOND OP (`stage_curtain_call`) AND THAT IS THE PRINTED
-    ORDER, not a convenience: the face reads "Spend all Fanfare on stage. Deal
-    that much damage to every enemy. Every performer takes a bow, then returns
-    at 1", so Crabaletta's bow-8 must land AFTER the card's own area damage and
-    on the board that damage left. Three sentences, three ops, in the order
-    they are printed.
-    """
-    state.stage_spent_this_card = furina_stage.collect_all(state)
+    """"Spend all your Fanfare." What was spent is this play's
+    `stage_spent` (0 held: no Spend)."""
+    state.stage_spent_this_card = furina_stage.spend_all(state)
 
 
 def _op_stage_curtain_call(state: CombatState, fx: dict, card: Card) -> None:
-    """*Let the People Rejoice*, third clause: "Every performer takes a bow,
-    then returns at 1." Pairs with `stage_spend_all` above and reads the
-    company that op recorded, so the pair cannot disagree about who was on
-    stage."""
-    furina_stage.bow_and_return(state)
+    """"Your performers Bow and return": every performer Bows and keeps its
+    seat (Let the People Rejoice)."""
+    furina_stage.curtain_call(state)
+
+
+def _op_stage_cue(state: CombatState, fx: dict, card: Card) -> None:
+    """"Cue a performer" (rule 7); `times: 2` is Bis!'s "twice"."""
+    furina_stage.cue(state, _amount(state, fx.get("times", 1)))
 
 
 def _op_stage_final_bow(state: CombatState, fx: dict, card: Card) -> None:
-    """*Final Bow* (R276): "The back performer takes a Bow and leaves." The
-    Block the card then gains is `amount_formula: {count: stage_spent}`, the
-    same token every other spend writes, so the face's second sentence is an
-    ordinary `block` op reading an ordinary count."""
-    state.stage_spent_this_card = furina_stage.final_bow(state)
+    """"A performer Bows and leaves" (Final Bow, Intermission)."""
+    furina_stage.final_bow(state)
 
 
 def _op_stage_step_forward(state: CombatState, fx: dict, card: Card) -> None:
-    """*Step Forward* (R276 batch two): the back performer takes the front
-    seat."""
+    """"Move a performer to the front" (Step Forward)."""
     furina_stage.step_forward(state)
 
 
 def _op_stage_perform_all(state: CombatState, fx: dict, card: Card) -> None:
-    """*Tutti!* (R276 batch two): every performer performs its act now.
-    `min_fanfare` is *Endless Waltz* (the Furina rules pass, 2026-10-01):
-    "Each performer with 5 or more Fanfare acts." """
-    furina_stage.perform_all(state, int(fx.get("min_fanfare", 0)))
+    """Tutti!: "All your performers act now." `guests: true` is Endless
+    Waltz's "Each guest acts." """
+    furina_stage.perform_all(state, guests_only=bool(fx.get("guests", False)))
 
 
 def _op_stage_share_spotlight(state: CombatState, fx: dict,
                               card: Card) -> None:
-    """*Share the Spotlight* (the co-op set): "Your back performer gives all
-    its Fanfare to another player as Block, then takes a Bow." ANOTHER player
-    is the target, and the base game refuses the play with nobody else alive;
-    one seat, so nothing happens -- `engine/coop.py`. The C# is
-    `FurinaStage.ShareTheSpotlight`."""
+    """Share the Spotlight (the co-op set): "Spend all your Fanfare. Another
+    player gains N Block per point." ANOTHER player is the target; one seat,
+    so nothing happens and nothing is spent -- `engine/coop.py`."""
     coop.no_other_player(state, "stage_share_spotlight", card)
 
 
 def _op_stage_toast(state: CombatState, fx: dict, card: Card) -> None:
-    """*Raise a Toast* (the co-op set, second batch,
-    review/active/coop-concepts-2026-09-27.md): "Another player gains
-    temporary Strength equal to your front performer's Fanfare, up to 6."
-    ANOTHER player is the target; one seat, so nothing happens and no bar
-    moves (the read never spends) -- `engine/coop.py`. The C# is
-    `FurinaStage.RaiseAToast`."""
+    """Raise a Toast's Spend mode (the co-op set): "another player gains N
+    temporary Strength". One seat, so nothing happens -- `engine/coop.py`."""
     coop.no_other_player(state, "stage_toast", card)
 
 
-def _op_stage_spend_back_all(state: CombatState, fx: dict,
-                             card: Card) -> None:
-    """*Bravura* (R276 batch two): spend all of the back performer's Fanfare;
-    the damage after it reads what was spent as `stage_spent`."""
-    state.stage_spent_this_card = furina_stage.spend_all_of_back(state)
-
-
-# THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
-# 2026-09-26.md). Each unpacks its row and delegates to `furina_stage`.
-def _op_stage_reverse(state: CombatState, fx: dict, card: Card) -> None:
-    """*Plot Twist*: reverse the order of the performers."""
-    furina_stage.reverse(state)
-
-
-def _op_stage_whisper(state: CombatState, fx: dict, card: Card) -> None:
-    """*Stage Whisper*: every other performer gives all but 1 of its Fanfare
-    to the front (2026-09-26 seat round, second rework)."""
-    furina_stage.whisper(state)
-
-
-def _op_stage_intermission(state: CombatState, fx: dict, card: Card) -> None:
-    """*Intermission*: the back Bows and leaves; draw 1 per `amount` of its
-    Fanfare. `amount` is the divisor the face prints ("for every 3")."""
-    furina_stage.intermission(state, _amount(state, fx.get("amount", 3)))
-
-
-def _op_stage_spend_front_all(state: CombatState, fx: dict,
-                              card: Card) -> None:
-    """*Bring the House Down*: spend all of the FRONT performer's Fanfare;
-    the damage after it reads what was spent as `stage_spent`."""
-    state.stage_spent_this_card = furina_stage.spend_all_of_front(state)
-
-
 def _op_stage_grand_finale(state: CombatState, fx: dict, card: Card) -> None:
-    """*Grand Finale*: every performer Bows without leaving."""
-    furina_stage.grand_finale(state)
+    """Grand Finale: every performer Bows without leaving."""
+    furina_stage.curtain_call(state)
 
 
 def _op_stage_verdict(state: CombatState, fx: dict, card: Card) -> None:
-    """*Oratrice's Verdict*: this turn, the acts' random hits find the card's
-    own target."""
+    """Oratrice's Verdict: this turn, the performers' random hits find the
+    card's own target."""
     furina_stage.set_verdict(state)
 
 
 def _op_stage_dual_nature(state: CombatState, fx: dict, card: Card) -> None:
-    """*Dual Nature*: Ousia or Pneuma, for this turn."""
+    """Dual Nature: Ousia or Pneuma, for this turn."""
     furina_stage.dual_nature(state)
 
 
 def _op_stage_casting_agent(state: CombatState, fx: dict, card: Card) -> None:
-    """*Casting Agent* (pool completion, 2026-10-01): one of three random Guest
-    Star cards into the hand, free this turn, upgraded when the card is
-    (`upgraded`, the `upgraded_grant` key's flag)."""
+    """Casting Agent: one of three random Guest Star cards into the hand, free
+    this turn, upgraded when the card is (`upgraded`)."""
     furina_stage.casting_agent(state, bool(fx.get("upgraded", False)))
 
 def _op_kokomi(state: CombatState, fx: dict, card: Card) -> None:
@@ -5995,32 +5874,22 @@ OPS = {
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`): the Stage's eight.
+    # FURINA'S STAGE.
     "stage_summon": _op_stage_summon,
     "stage_raise": _op_stage_raise,
-    # THE GUEST CAST (2026-09-25).
     "stage_guest": _op_stage_guest,
-    "stage_scene_change": _op_stage_scene_change,
-    "stage_perform_lead": _op_stage_perform_lead,
     "stage_spend": _op_stage_spend,
     "stage_spend_all": _op_stage_spend_all,
     "stage_curtain_call": _op_stage_curtain_call,
+    "stage_cue": _op_stage_cue,
     "stage_final_bow": _op_stage_final_bow,
     "stage_step_forward": _op_stage_step_forward,
     "stage_perform_all": _op_stage_perform_all,
-    "stage_spend_back_all": _op_stage_spend_back_all,
-    # THE SUPPORTING POOL (2026-09-26).
-    "stage_reverse": _op_stage_reverse,
-    "stage_whisper": _op_stage_whisper,
-    "stage_intermission": _op_stage_intermission,
-    "stage_spend_front_all": _op_stage_spend_front_all,
     "stage_grand_finale": _op_stage_grand_finale,
     "stage_verdict": _op_stage_verdict,
     "stage_dual_nature": _op_stage_dual_nature,
     "stage_casting_agent": _op_stage_casting_agent,
-    # THE CO-OP SET (`engine/coop.py`): Share the Spotlight's verb.
     "stage_share_spotlight": _op_stage_share_spotlight,
-    # The second batch: Raise a Toast's verb.
     "stage_toast": _op_stage_toast,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,
@@ -6234,6 +6103,10 @@ def resolve_card(state: CombatState, card: Card) -> None:
     varka = varka_oath.live(state.player)
     if varka:
         varka_oath.begin_play(state, card)
+    # FURINA'S STAGE: the Salon summon cards and Cue cards played this turn
+    # (Escoffier's and Lyney's lines), counted as the card is played. A no-op
+    # for anyone who is not Furina.
+    furina_stage.note_card_played(state, card)
     try:
         _resolve_card_bound(state, card)
         # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): a slice
@@ -6275,9 +6148,8 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # QUARANTINED (R213 B), on the same line and for the same scoping reason:
     # the card after a drain must not read the drain's number.
     state.fanfare_drained_this_card = 0
-    # QUARANTINED (`furina_stage.FURINA_STAGE`), on the same line as the drain
-    # above and for its reason: the card after a Spend must not read the
-    # Spend's number.
+    # FURINA'S STAGE, on the same line as the drain above and for its reason:
+    # the card after a Spend must not read the Spend's number.
     state.stage_spent_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0

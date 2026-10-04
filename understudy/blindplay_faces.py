@@ -235,6 +235,12 @@ def _follow_the_override(keywords: list[dict[str, str]]
 #: spells in upper snake case.
 _MODE_FACE_ID = re.compile(r"_MODE_[A-Z]$", re.I)
 
+#: THE RE-FOUNDING (2026-10-04): a face on Furina's performer picker ("Cue a
+#: performer", Step Forward, Final Bow): `UsherSeatOption` and its kin, which
+#: ModelDb spells `<NAME>_SEAT_OPTION`. Like a mode face it is never played,
+#: so it prints no cost and no type.
+SEAT_FACE_ID = re.compile(r"_SEAT_OPTION$", re.I)
+
 
 def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     """One card as the game prints it. Field by field, never spread.
@@ -324,7 +330,8 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # no type for it: the parent's cost was paid when the card was played,
         # and the wire's "0, Skill" is the option card's placeholder, not the
         # play's.
-        "mode_face": bool(_MODE_FACE_ID.search(_text(entry.get("id")))),
+        "mode_face": bool(_MODE_FACE_ID.search(_text(entry.get("id")))
+                          or SEAT_FACE_ID.search(_text(entry.get("id")))),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
         # The card's element indicator, as a word. `""` on every face that
@@ -758,9 +765,10 @@ GUEST_STAR_ELEMENTS: dict[str, str] = {
     "Navia": "Geo",
     "Wriothesley": "Cryo",
     "Lynette": "Anemo",
-    # THE SUPPORTING POOL (2026-09-26).
+    # THE SUPPORTING POOL (2026-09-26). The re-founding (2026-10-04): Lyney's
+    # act adds a Trick, a Pyro card; Escoffier's makes the Salon members act
+    # and deals no element of his own.
     "Lyney": "Pyro",
-    "Escoffier": "Cryo",
 }
 _GUEST_STAR_RE = re.compile(
     r"\bGuest Star: (" + "|".join(GUEST_STAR_ELEMENTS) + r")\b")

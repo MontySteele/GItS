@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsGuestOfHonor : CustomCardModel, ICharacterCard
+public sealed class ProtoFsGuestOfHonor : CustomCardModel, ICharacterCard, IStageCueCard
 {
     /// <summary>Multiplayer only: the base game's own constraint, so a
     /// single-player run is never offered this card.</summary>
@@ -43,20 +43,20 @@ public sealed class ProtoFsGuestOfHonor : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCue(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_of_honor");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest of Honor"),
-        ("description", "Until your next turn, your [gold]front performer[/gold] takes hits on another player after their [gold]Block[/gold]."),
+        ("description", "Another player gains {Block:diff()} [gold]Block[/gold]. [gold]Cue[/gold] a performer."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new SpotlightSystem.SpotlitBlockVar(7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,11 +69,12 @@ public sealed class ProtoFsGuestOfHonor : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<GuestOfHonorPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+        await CreatureCmd.GainBlock(cardPlay.Target, DynamicVars.Block, cardPlay);
+        await FurinaStage.Cue(choiceContext, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

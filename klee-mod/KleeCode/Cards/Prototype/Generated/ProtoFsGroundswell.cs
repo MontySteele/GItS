@@ -38,14 +38,14 @@ public sealed class ProtoFsGroundswell : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_groundswell");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Groundswell"),
-        ("description", "Deal {Damage:diff()} damage. If the enemy has an aura, your [gold]front performer[/gold] gains 3 [gold]Fanfare[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If the enemy has an aura, gain 3 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -72,7 +72,7 @@ public sealed class ProtoFsGroundswell : CustomCardModel, ICharacterCard
             .Execute(choiceContext);
         if (targetHadAura)
         {
-            await FurinaStage.RaiseLead(Owner.Creature, 3);
+            await FurinaStage.Gain(choiceContext, Owner.Creature, 3);
         }
     }
 

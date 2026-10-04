@@ -31,10 +31,10 @@ sys.path.insert(0, str(REPO / "tier0" / "tests"))
 
 from test_understudy_blindplay import combat_state  # noqa: E402
 
-# 2026-09-27: once a turn.
+# 2026-09-27: once a turn. The re-founding (2026-10-04): no bar to return
+# with.
 FIVE_CENTURY = ("The first time each turn a performer [gold]Bow[/gold]s and "
-                "leaves, it returns at the back with 1 [gold]Fanfare[/gold] "
-                "if a seat is free.")
+                "leaves, it returns at the back if a seat is free.")
 
 
 # ---- 1. A Five-Century Act's face --------------------------------------------
@@ -50,11 +50,7 @@ def test_a_five_century_act_says_it_needs_a_free_seat():
              / "FurinaStagePowers.cs").read_text(encoding="utf-8")
     assert ('"The first time each turn a performer [gold]Bow[/gold]s and "'
             in power)
-    brief = (REPO / "review" / "active"
-             / "furina-stage-brief-2026-09-08.md").read_text(encoding="utf-8")
-    assert ("The first time each turn a performer Bows and leaves, it "
-            "returns at the back with 1 Fanfare if a seat is free.") in brief
-    assert "2026-09-26 seat round" in brief
+    assert '"leaves, it returns at the back if a seat is free."' in power
 
 
 # ---- 2. BaseLib's mod-source tip ---------------------------------------------
@@ -79,29 +75,26 @@ def test_the_orobas_option_prints_no_mod_name():
     assert "KleeMod" not in str(faces)
 
 
-# ---- 4. Why an act could not pay ---------------------------------------------
+# ---- 4. Why an act was skipped ---------------------------------------------
 
-def _unpaid(member, name, reason, price):
-    return {"event": "unpaid", "member": member, "name": name, "seat": 0,
-            "fanfare": 1, "moved": price, "reason": reason, "target": "",
-            "target_id": "", "each": -1, "hp": -1, "struck": -1, "by": "",
-            "by_member": ""}
+def _skip(member, name, reason):
+    return {"event": "skip", "member": member, "name": name, "seat": 0,
+            "fanfare": 1, "moved": 0, "reason": reason, "target": "",
+            "target_id": ""}
 
 
-def test_an_unpaid_act_says_why():
+def test_a_skipped_act_says_why():
+    """The re-founding (2026-10-04): a star that cannot pay from Furina's
+    Fanfare skips its act, and Chevreuse acts once a turn."""
     stage = furina_stage({"furina_stage": {"live": True, "seats": [], "log": [
-        _unpaid("chevreuse", "Chevreuse", "back", 2),
-        _unpaid("neuvillette", "Neuvillette", "own", 3),
-        _unpaid("clorinde", "Clorinde", "alone", 0),
-        _unpaid("chevreuse", "Chevreuse", "", 0)]}})
+        _skip("neuvillette", "Neuvillette", "short"),
+        _skip("chevreuse", "Chevreuse", "once"),
+        _skip("clorinde", "Clorinde", "")]}})
     assert _render_stage_log(stage) == [
-        "  - **Chevreuse** could not pay: the back performer has less than 2 "
-        "Fanfare.",
-        "  - **Neuvillette** could not pay: he has less than 3 Fanfare.",
-        "  - **Clorinde** could not pay: no other performer is on stage to "
-        "take Fanfare from.",
-        # An older build sends no reason: the line it always printed.
-        "  - **Chevreuse** could not pay.",
+        "  - **Neuvillette** skipped its act: not enough Fanfare to pay.",
+        "  - **Chevreuse** skipped its act: it already acted this turn.",
+        # A build that sends no reason: the plain line.
+        "  - **Clorinde** skipped its act.",
     ]
     assert qa_packet.leaks(stage) == []
 
@@ -112,17 +105,14 @@ def test_an_in_combat_clause_does_not_hide_the_upgrade():
     """Bravura printed "not shown -- the face on this screen is not the
     sentence this card was written with": its template ends in an
     `{InCombat:...|}` arm with a hole of its own."""
-    # The rules pass (2026-10-01) trimmed Bravura's face.
-    face = ("Spend your back performer's Fanfare. Deal 5 damage, plus "
-            "3 per point.")
+    # The re-founding (2026-10-04): her one Fanfare number.
+    face = "Spend all your Fanfare. Deal 5 damage, plus 3 per point."
     assert qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_BRAVURA", face) == (
-        "Spend your back performer's Fanfare. Deal 5 damage, plus "
-        "4 per point.", "")
+        "Spend all your Fanfare. Deal 5 damage, plus 4 per point.", "")
     # Printed in combat, the in-combat line is struck, not copied through.
     assert qa_packet.upgrade_preview(
         "KLEEMOD-PROTO_FS_BRAVURA", face + "\n(Deals 11 damage)")[0] == (
-        "Spend your back performer's Fanfare. Deal 5 damage, plus "
-        "4 per point.")
+        "Spend all your Fanfare. Deal 5 damage, plus 4 per point.")
     assert qa_packet.upgrade_preview(
         "KLEEMOD-PROTO_FS_DA_CAPO",
         "Deal 6 damage, plus 2 for each Bow this combat.") == (
@@ -307,34 +297,28 @@ def test_a_chooser_over_a_fight_prints_the_fight():
 
 # ---- 12 and 13. Pneuma, and three log labels ---------------------------------
 
-def test_pneuma_says_it_summons_nobody():
-    # The second text pass (2026-09-28): "regains", as the front
-    # performer's row says, in place of "It summons nobody."
-    assert ARM_KEYWORDS["Pneuma"].endswith(
-        "your front performer regains 2 Fanfare.")
+def test_pneuma_says_what_it_gives():
+    # The re-founding (2026-10-04): "Gain 2 Fanfare" (sec.8).
+    assert ARM_KEYWORDS["Pneuma"] == "Gain 2 Fanfare."
     assert "It summons nobody." not in ARM_KEYWORDS["Pneuma"]
 
 
-def _row(event, member, name, bar, moved, **kw):
+def _row(event, member, name, fanfare, moved, **kw):
     row = {"event": event, "member": member, "name": name, "seat": 0,
-           "fanfare": bar, "moved": moved, "reason": "", "target": "",
-           "target_id": "", "each": -1, "hp": -1, "struck": -1, "by": "",
-           "by_member": "", "source": ""}
+           "fanfare": fanfare, "moved": moved, "reason": "", "target": "",
+           "target_id": "", "source": ""}
     row.update(kw)
     return row
 
 
-def test_the_log_names_pneuma_a_card_in_hand_and_rejoice():
+def test_the_log_names_pneuma_and_a_final_bow():
     stage = furina_stage({"furina_stage": {"live": True, "seats": [], "log": [
-        _row("regain", "usher", "Gentilhomme Usher", 5, 2, source="Pneuma"),
-        _row("regain", "usher", "Gentilhomme Usher", 6, 1),
-        _row("hit", "usher", "Gentilhomme Usher", 3, 2, source="Burn"),
-        _row("leave", "usher", "Gentilhomme Usher", 0, 3,
-             reason="rejoice")]}})
+        _row("gain", "usher", "Gentilhomme Usher", 5, 2, source="Pneuma"),
+        _row("gain", "usher", "Gentilhomme Usher", 6, 1),
+        _row("leave", "usher", "Gentilhomme Usher", 6, 0,
+             reason="final_bow")]}})
     lines = _render_stage_log(stage)
-    assert lines[0] == "  - **Usher** gains 2 Fanfare from Pneuma: 3 → 5."
-    assert lines[1] == ("  - **Usher** regained 1 Fanfare as the front "
-                        "performer: 5 → 6.")
-    assert lines[2].startswith("  - **Usher** took 2 damage from Burn: 5 → 3")
-    assert "emptied by Let the People Rejoice, so it takes a Bow" in lines[3]
-    assert "Spend" not in lines[3]
+    assert lines[0] == "  - You gained 2 Fanfare from Pneuma: 3 \u2192 5."
+    assert lines[1] == "  - You gained 1 Fanfare: 5 \u2192 6."
+    assert lines[2] == ("  - **Usher** left the stage: it took its Bow and "
+                        "left.")

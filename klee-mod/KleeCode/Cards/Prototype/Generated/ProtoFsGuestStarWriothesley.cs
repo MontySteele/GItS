@@ -38,20 +38,20 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this), this);
+        ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_wriothesley");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Wriothesley"),
-        ("description", "Summon Wriothesley with {GuestFanfare:diff()} [gold]Fanfare[/gold]. Always your [gold]front performer[/gold]."),
+        ("description", "Summon Wriothesley."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("GuestFanfare", 5m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "wriothesley", DynamicVars["GuestFanfare"].IntValue, atFront: true);
+        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "wriothesley", 0);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["GuestFanfare"].UpgradeValueBy(2m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

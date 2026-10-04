@@ -38,14 +38,14 @@ public sealed class ProtoFsOpeningNumber : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_opening_number");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Opening Number"),
-        ("description", "Deal {Damage:diff()} damage. If this is the first card you played this turn, your [gold]back performer[/gold] gains 2 [gold]Fanfare[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If this is the first card you played this turn, gain 2 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,7 +71,7 @@ public sealed class ProtoFsOpeningNumber : CustomCardModel, ICharacterCard
             .Execute(choiceContext);
         if (FurinaStage.CardsPlayedThisTurn(Owner.Creature) == 0)
         {
-            await FurinaStage.Raise(Owner.Creature, 2);
+            await FurinaStage.Gain(choiceContext, Owner.Creature, 2);
         }
     }
 

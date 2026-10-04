@@ -300,7 +300,7 @@ public class DamageCreditTelemetryTests : IDisposable
     [InlineData("BombEchoPower", "Fire", "DamageCredit.Open")]
     [InlineData("BombPower", "ResolvePayload", "DamageCredit.Open")]
     [InlineData("KokomiPlan", "Hit", "DamageCredit.Open")]
-    [InlineData("FurinaStage", "Act", "DamageCredit.Open")]
+    [InlineData("GameStageBoard", "Damage", "DamageCredit.Open")]
     public void Each_dealerless_path_opens_its_credit_scope(
         string type, string method, string call)
     {

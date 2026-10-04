@@ -364,11 +364,6 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # THE SUPPORTING POOL (2026-09-26): two more guests.
                     "KLEEMOD-ARM_STAGE_LYNEY",
                     "KLEEMOD-ARM_STAGE_ESCOFFIER",
-                    # THE FADE PASS (2026-09-29): no card face prints "fade"
-                    # since its three cards were cut, so the fade's tip left
-                    # the keyword table; the key stays as the sentence the
-                    # seat page's glossary mirrors.
-                    "KLEEMOD-ARM_STAGE_FADE",
                     # The Spend warning (Furina pool round 2026-10-01): the
                     # guests a Spend would leave unable to pay to act, on a
                     # Spend mode's face, titling no keyword.
@@ -565,30 +560,19 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # review/records/furina-text-pass-2026-09-25.md): `Raise` and
             # `Rotate` retired, the lead renamed the FRONT performer, and
             # every Stage tip reworded in [USER]'s words.
-            # THE RULES PASS (2026-10-01): back first, then forward.
-            "Pay Fanfare from your [gold]back performer[/gold] first, then ",
-            "from the next one forward. Offered only if your performers hold ",
-            "enough.\");",
-            # The rules pass (2026-10-01): only what you play summons, in the
-            # paper's line; the damage order moved to the front's tip.
-            "A performer's health. If no one is on stage, a card that gives ",
-            "Fanfare summons a random performer holding it.\");",
-            # Draft 3 (2026-09-25): the Bow is the performer's act once more;
-            # the Guest Cast: a guest's Bow does not pay; the rules pass: the
-            # Bow covers Grand Finale's stay.
-            "A performer acts one last time, without paying, as it leaves ",
-            "the stage or, if a card says so, stays.\");",
-            # The rules pass (2026-10-01): rule 4 cut, the damage order here.
-            "Takes hits after your [gold]Block[/gold]; what its ",
-            "[gold]Fanfare[/gold] cannot hold reaches you.\");",
-            # Round four's empty-stage summon is the Fanfare tip's (above).
-            # The second text pass (2026-09-28): the back performer is the
-            # last in line and pays Spends; the fade has its own tip. The
-            # fade pass (2026-09-29): a quarter of every performer's bar.
-            "Your last performer in line. [gold]Spend[/gold] pays from it ",
-            "first. A lone performer is both front and back.\");",
-            "At the start of your turn, each performer loses a quarter of its ",
-            "[gold]Fanfare[/gold], rounded down.\");",
+            # THE RE-FOUNDING (2026-10-04,
+            # review/active/furina-refounding-2026-10-03.md): Fanfare is one
+            # number on Furina, stars pay for their acts, the Bow is a free act
+            # then Fanfare, Cue and Rehearsal are new words. The back
+            # performer and the fade retired with the bars.
+            "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
+            "Your applause. Cards and Bows give it. [gold]Spend[/gold] and ",
+            "stars' acts use it. It never fades.\");",
+            "The performer acts once more without paying, then you gain ",
+            "Choose a performer. It acts now. A star pays as usual.\");",
+            "Each one makes your performers' damage and [gold]Block[/gold] ",
+            "The performer in the first seat. Performers act front to back ",
+            "at the end of your turn.\");",
     ):
         assert clause in tips, clause
 
@@ -622,7 +606,11 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     # The rules pass (2026-10-01) cut rule 4: no tip quotes a regain.
     assert "FurinaStageLaw.LeadRegen" not in tips
     assert "FurinaStageLaw.FadeThreshold" not in tips
-    assert "FadeDivisor" in tips
+    # The re-founding (2026-10-04): the fade retired; the Bow's Fanfare and
+    # Pneuma's gain are the two Stage numerals a tip carries.
+    assert "FadeDivisor" not in tips
+    assert "FurinaStageLaw.BowFanfare" in tips
+    assert "ArkheAlignmentPower.PneumaFanfare" in tips
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
     # The relic's number -- what a carried-out Plan adds to the Casket since
@@ -1163,27 +1151,29 @@ STAGE_READERS_NAMED_ON_THE_FACE = {
 
 
 
-def test_the_rare_at_twice_the_fanfare_carries_no_reader_tip():
-    """2026-09-25: its number is twice the bar, so the one-bar sentence is
-    gone from it and the face states the rule in words."""
+def test_the_rare_spend_all_carries_no_reader_tip():
+    """The re-founding (2026-10-04): Let the People Rejoice spends all of
+    Furina's one Fanfare number and states its rate per point in words, so
+    no reader tip rides it."""
     src = (PROTOTYPE_DIR / "ProtoFsLetThePeopleRejoice.cs").read_text(
         encoding="utf-8")
     assert "ForStageReader" not in src
     row = {r["id"]: r for r in proto._rows()}["proto_fs_let_the_people_rejoice"]
-    assert ("twice your performers' total [gold]Fanfare[/gold]"
+    assert ("[gold]Spend[/gold] all your [gold]Fanfare[/gold]"
             in row["description"])
+    assert "per point" in row["description"]
 
 
 @pytest.mark.parametrize("rid", sorted(STAGE_READERS_NAMED_ON_THE_FACE))
-def test_a_reader_whose_face_names_the_seat_carries_no_reader_tip(rid):
-    """The text pass: the face says "your back performer's" or "your front
-    performer's", so a tip restating which bar it is would be noise."""
+def test_a_reader_carries_no_reader_tip(rid):
+    """The re-founding (2026-10-04): no bars and no back performer, so these
+    faces read Furina's one Fanfare number (or none) and no reader tip rides
+    them."""
     cls = STAGE_READERS_NAMED_ON_THE_FACE[rid]
     src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
     assert "ForStageReader" not in src
     row = {r["id"]: r for r in proto._rows()}[rid]
-    assert ("[gold]back performer[/gold]" in row["description"]
-            or "[gold]front performer[/gold]" in row["description"])
+    assert "back performer" not in row["description"]
 
 
 def test_the_readers_tip_is_gone():
@@ -1210,7 +1200,9 @@ def test_the_readers_tip_is_gone():
 #: Every row that summons, and the performer tips it owes, in attach order.
 STAGE_SUMMONERS = {
     "proto_fs_salon_debut": ("Usher", "Chevalmarin", "Crabaletta"),
-    "proto_fs_double_casting": ("Usher", "Chevalmarin", "Crabaletta"),
+    # The re-founding (2026-10-04): Double Casting is the Rehearsal Power
+    # and summons nobody; the Leading Lady summons Usher.
+    "proto_fs_leading_lady": ("Usher",),
     # A summon inside a conditional's branch owes the same tips.
     "proto_fs_improvised_number": ("Usher", "Chevalmarin", "Crabaletta"),
     "proto_fs_surintendante_chevalmarin": ("Chevalmarin",),
@@ -1261,27 +1253,25 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
     `FurinaStageLaw` (`EB-89`)."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     for clause in (
-            '"A performer joins at the back with "',
-            "FurinaStageLaw.SummonFanfare",
-            # One sentence since the trio can be cloned (2026-09-25).
-            '" [gold]Fanfare[/gold]. On a full "',
-            # 2026-09-25 night (the granted-guest seat round): "leaves its
-            # Fanfare to the newcomer" -- lane 2 only understood "adds its
-            # Fanfare" from the log.
-            # The second text pass (2026-09-28): "first", and "gives".
-            '"stage, the front one [gold]Bow[/gold]s first and gives the "',
-            '"newcomer its Fanfare.");',
-            # Draft 3 (2026-09-25): one sentence each -- no Bow clause (a
-            # Bow is the act once more) and no Hydro (no act applies it).
-            '"End of your turn: gain " + FurinaStageLaw.ActUsherBlock',
-            '          + " [gold]Block[/gold].");',
-            '"End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage',
-            '          + " damage to ALL enemies.");',
-            '"End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage',
-            '          + " damage to a random enemy.");'):
+            # THE RE-FOUNDING (2026-10-04): no Fanfare on a performer; on a
+            # full stage the front Salon member Bows and leaves, guests stay.
+            '"A performer joins at the back. On a full stage, the front Salon "',
+            '"member [gold]Bow[/gold]s and leaves first. Guests keep their "',
+            # Each performer's tip is its badge's sentence, numerals off the
+            # law (`StagePerformerBadge.ActText`).
+            "With(inherited, UsherKey, StagePerformerBadge.ActText(StagePerformer.Usher));",
+            "StagePerformerBadge.ActText(StagePerformer.Chevalmarin));",
+            "StagePerformerBadge.ActText(StagePerformer.Crabaletta));"):
         assert clause in tips, clause
+    badges = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+              / "FurinaStageBadges.cs").read_text(encoding="utf-8")
+    for clause in ('"Act: gain " + FurinaStageLaw.ActUsherBlock',
+                   '"Act: deal " + FurinaStageLaw.ActChevalmarinDamage',
+                   '"Act: deal " + FurinaStageLaw.ActCrabalettaDamage'):
+        assert clause in badges, clause
     for gone in ("FurinaStageLaw.BowUsherFanfare",
                  "FurinaStageLaw.BowCrabalettaDamage",
+                 "FurinaStageLaw.SummonFanfare",
                  "[gold]Bow[/gold]: "):
         assert gone not in tips, gone
     mod = MOD_CS.read_text(encoding="utf-8")
@@ -1299,21 +1289,19 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     """The seat glossary is held in step from this side: the same sentences,
     the numerals written out."""
     rows = blindplay.ARM_KEYWORDS
+    # The re-founding (2026-10-04).
     assert rows["Summon"] == (
-        "A performer joins at the back with 1 Fanfare. On a full stage, the "
-        "front one Bows first and gives the newcomer its Fanfare.")
-    assert rows["Gentilhomme Usher"] == "End of your turn: gain 3 Block."
+        "A performer joins at the back. On a full stage, the front Salon "
+        "member Bows and leaves first. Guests keep their seats.")
+    assert rows["Gentilhomme Usher"] == "Act: gain 4 Block."
     assert rows["Surintendante Chevalmarin"] == (
-        "End of your turn: deal 2 damage to ALL enemies.")
+        "Act: deal 2 damage to ALL enemies.")
     assert rows["Mademoiselle Crabaletta"] == (
-        "End of your turn: deal 5 damage to a random enemy.")
+        "Act: deal 5 damage to a random enemy.")
     from understudy import blindplay_notes
-    # The second text pass (2026-09-28): the tip's words and nothing after
-    # them. The page's hit-Bow sentence left: a hit's Bow is learned in play.
-    # The rules pass (2026-10-01): the Bow tip covers Grand Finale's stay.
     assert rows["Bow"] == (
-        "A performer acts one last time, without paying, as it leaves the "
-        "stage or, if a card says so, stays.")
+        "The performer acts once more without paying, then you gain 1 "
+        "Fanfare.")
     assert not hasattr(blindplay_notes, "STAGE_BOW_ON_HIT")
 
 
@@ -1332,7 +1320,7 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
     assert gen.modal_option_faces(row, modes) == [
         "Deal {PlainDamage:diff()} damage",
         "[gold]Spend[/gold] 3: deal {BranchDamage:diff()} instead"]
-    for rid in ("proto_fs_tidal_flourish", "proto_fs_interposition",
+    for rid in ("proto_fs_tidal_flourish", "proto_fs_spirited_aria",
                 "proto_fs_grand_entrance", "proto_fs_quick_cue"):
         assert gen.modal_option_faces(
             rows[rid], gen.modal_effect(rows[rid])["modes"]) is not None, rid

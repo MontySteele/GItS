@@ -38,14 +38,14 @@ public sealed class ProtoFsHoldYourPlaces : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_hold_your_places");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hold Your Places"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your [gold]front performer[/gold] gains {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Gain {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,7 +65,7 @@ public sealed class ProtoFsHoldYourPlaces : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await FurinaStage.RaiseLead(Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
+        await FurinaStage.Gain(choiceContext, Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
     }
 
     protected override void OnUpgrade()

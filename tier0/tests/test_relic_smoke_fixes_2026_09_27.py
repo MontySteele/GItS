@@ -41,24 +41,11 @@ def test_a_relic_that_gave_block_is_named_with_what_it_gave():
         state)
 
 
-# ---- "fade" is defined wherever the page says it ---------------------------
+# ---- (the fade retired with the re-founding, 2026-10-04) -------------------
 
-def test_the_fade_is_defined_in_one_clause():
-    # The second text pass (2026-09-28): on a row of its own. The fade pass
-    # (2026-09-29): a quarter of every performer's bar, the front's too.
-    assert ARM_KEYWORDS["fade"] == (
-        "At the start of your turn, each performer loses a quarter of its "
-        "Fanfare, rounded down.")
-    assert "fade" not in ARM_KEYWORDS["back performer"]
-
-
-def test_a_face_that_says_fade_prints_the_row_that_defines_it():
-    # The second text pass (2026-09-28): the fade's own row. (Held Applause
-    # and Echoing Hall, the faces this used, left with the 2026-09-29 fade
-    # pass; the page's rule is about the word, so any face serves.)
-    assert "fade" in _names(
-        ("Grand Theater Program", "Your performers no longer fade."))
-    assert "fade" in _names(
+def test_no_row_defines_a_fade():
+    assert "fade" not in ARM_KEYWORDS
+    assert "fade" not in _names(
         ("A face", "Whenever a performer fades, draw 1 card."))
 
 
@@ -68,7 +55,7 @@ def test_the_guest_star_row_says_which_cards_and_not_the_trio():
     # The second text pass (2026-09-28): the row says one of each; the
     # Summon row beside it (a Guest Star's face says "Summon") says the rest.
     row = ARM_KEYWORDS["Guest Star"]
-    assert row.startswith("You can have one of each on stage.")
+    assert row.startswith("One of each on stage.")
 
 
 def test_naming_the_trio_does_not_print_their_rows():
@@ -84,10 +71,10 @@ def test_naming_the_trio_does_not_print_their_rows():
 
 def test_an_act_names_the_seat_it_acted_from_not_the_seat_it_holds_now():
     """Lane 2: "Chevalmarin (front seat) acted" was the middle seat when it
-    acted. The beat carries its seat and the count standing then."""
-    seats = [_seat("chevalmarin", "Chevalmarin", 0, 4, 1),
-             _seat("chevalmarin", "Chevalmarin", 1, 3, 2)]
+    acted. The beat carries the seat it acted from."""
+    seats = [_seat("chevalmarin", "Chevalmarin", 0, 1),
+             _seat("chevalmarin", "Chevalmarin", 1, 2)]
     lines = _render_stage_log({"seats": seats, "log": [
-        _beat("act", "chevalmarin", "Chevalmarin", seat=1, bar=3, moved=0,
+        _beat("act", "chevalmarin", "Chevalmarin", seat=1, moved=2,
               key=2, standing=3)]})
-    assert lines[0].startswith("  - **Chevalmarin** (middle seat) acted")
+    assert lines[0].startswith("  - **Chevalmarin** (seat 2) acted")

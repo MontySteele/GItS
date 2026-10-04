@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -37,15 +36,12 @@ public sealed class ProtoFsStepForward : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(base.ExtraHoverTips, this);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_step_forward");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Step Forward"),
-        ("description", "Move your [gold]back performer[/gold] to the front. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Move a performer to the front. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +59,7 @@ public sealed class ProtoFsStepForward : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaStage.StepForward(Owner.Creature);
+        await FurinaStage.StepForward(choiceContext, Owner);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Powers;
+using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -349,25 +350,11 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
     }
 
-    /// <summary>Under the Stage, the front performer's regain at the start of
-    /// her turn, from her SECOND turn, the same first turn as the shipped
-    /// rule. Since the rules pass (2026-10-01) rule 4 is cut and this is the
-    /// only regain ([USER]: "The Ancient relic can give it back"). The rebuild of 2026-09-27
-    /// (review/active/relics-potions-klee-furina-2026-09-27.md).
-    /// </summary>
-    public const int LeadRegen = 2;
+    /// <summary>Under the Stage (the re-founding, sec.8): the Rehearsal it
+    /// starts each combat with -- the relic source of Rehearsal.</summary>
+    public const int Rehearsal = 1;
 
-    /// <summary>Under the Stage, the Fanfare Usher opens the fight with. The
-    /// face prints what the first hand sees (2026-09-28, [USER]: "Usher starts
-    /// at 5 Fanfare ... I presume this is because it gets a tick at the start
-    /// and 2+3 = 5?"). It used to open at the starter's 3 and regain 2 on turn
-    /// one; it now opens at 5 and regains from turn two. Turn one reads 5
-    /// either way. The opening is idempotent, so with Opera Glasses (also 5)
-    /// the pair opens at 5, where it used to reach 7.</summary>
-    public const int OpeningFanfare = 5;
-
-    /// <summary>Does this Furina, on a live Stage, hold the Curtain? Read by
-    /// <c>FurinaStage.RegenLead</c>.</summary>
+    /// <summary>Does this Furina, on a live Stage, hold the Curtain?</summary>
     public static bool OnStage(Creature? furina) =>
         Powers.FurinaStage.LiveFor(furina)
         && furina!.Player is { } player
@@ -375,17 +362,19 @@ public sealed class CurtainNeverFalls : CustomRelicModel
             System.Linq.Enumerable.OfType<CurtainNeverFalls>(player.Relics));
 
     /// <summary>
-    /// REBUILT FOR THE STAGE: "Start each combat with Usher at 5 Fanfare." It
-    /// replaces Salon Solitaire (its upgrade), so it makes the starter's
-    /// sentence true itself, at the starter's own moment and through the same
-    /// idempotent opening. Arm off it does nothing here: the shipped Spotlight
-    /// kit reads it in <c>SpotlightSystem</c>.
+    /// REBUILT FOR THE RE-FOUNDING (sec.8): "Combat opens with Usher on stage.
+    /// Start each combat with 1 Rehearsal." It replaces Salon Solitaire (its
+    /// upgrade), so it makes the starter's sentence true itself, through the
+    /// same idempotent opening, and adds the Rehearsal.
     /// </summary>
     public override async Task BeforeCombatStart()
     {
         var furina = Owner?.Creature;
         if (!Powers.FurinaStage.LiveFor(furina)) return;
         await Powers.FurinaStage.OpenCombat(furina);
+        await PowerCmd.Apply<Powers.RehearsalPower>(
+            new ThrowingPlayerChoiceContext(), furina!, Rehearsal,
+            applier: furina, cardSource: null);
     }
 
     // Ancient, never Starter -- see ExplosiveFrags for why that matters.
@@ -395,17 +384,8 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     {
         ("title", "The Curtain Never Falls"),
         ("description",
-            // The Stage's face: a loc row is registered once at boot, so the
-            // switch is the compile constant the deploy line sets.
-            // The third text pass (2026-09-28): the face prints the 5 the
-            // first hand sees, and the mechanism opens at it.
-            "Start each combat with [gold]Usher[/gold] in front with [blue]"
-          + OpeningFanfare + "[/blue] [gold]Fanfare[/gold]. "
-          // THE RULES PASS (2026-10-01): rule 4 is cut, so this is the
-          // only regain and the face no longer prints "not 1".
-          + "Your [gold]front performer[/gold] regains [blue]" + LeadRegen
-          + "[/blue] [gold]Fanfare[/gold] at the start of each turn."
-            ),
+            "Start each combat with [gold]Usher[/gold] on stage and [blue]"
+          + Rehearsal + "[/blue] [gold]Rehearsal[/gold]."),
     };
 
     protected override string IconBaseName => "snake_ring";

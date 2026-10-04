@@ -4,13 +4,10 @@ This file pins the PAGE halves; the mod halves are
 `klee-mod/KleeTests/Prototype/FurinaStageDraft3SeatFixTests.cs`, and the
 sim's are in `test_furina_stage.py`.
 
-  1. A hit's Bow is paid right after the hit, on the enemy's turn too ([USER],
-     2026-09-25 evening, overruling the wait #676 built), so the hit line
-     folds the Bow in and nothing on the page says a Bow is waiting.
+  1. Nothing on the page says a Bow is waiting.
   2. A Spend is a line on the stage log.
-  3. Chevalmarin's act says what each enemy was dealt and how many it struck
-     ("2 damage to each of 4 enemies"), and by how much their HP fell where a
-     Block (a Phantasmal Gardener's Skittish) ate some.
+  3. (Chevalmarin's per-enemy sweep figures retired with the re-founding,
+     2026-10-04: an act beat carries its amount and no per-enemy count.)
   4. "What you played" names the performer a random summon rolled.
   5. "Elemental Reaction" printed on a face is defined even on a screen whose
      cards bear no element (Courtroom Drama on a reward screen).
@@ -85,29 +82,19 @@ def _state(log, resolved=None):
 # 1. A HIT'S BOW IS PAID RIGHT AFTER THE HIT.
 # ---------------------------------------------------------------------------
 
-def test_a_hits_bow_folds_into_the_hit_line():
-    stage = _stage(
-        _row("hit", fanfare=0, moved=3, target="Seapunk", target_id="1"),
-        _row("leave", seat=-1, moved=3, reason="hit"))
-    assert _render_stage_log(stage) == [
-        "  - **Seapunk** hit **Usher** for 3: 3 → 0, and it leaves the "
-        "stage: emptied by a hit, so it takes a Bow."]
-
-
 def test_nothing_on_the_stage_block_says_a_bow_waits():
     stage = _stage(seats=[{"member": "usher", "name": "Gentilhomme Usher",
-                           "seat": 0, "fanfare": 3}])
+                           "seat": 0}])
     assert "owed_bows" not in stage
     lines = _render_stage(stage, {"block": 0, "hp": 50, "max_hp": 78})
     assert not [line for line in lines if "waits" in line]
 
 
 def test_the_bow_row_is_the_plain_exit():
-    # The Guest Cast (2026-09-25): and a guest's Bow does not pay. The
-    # second text pass (2026-09-28) dropped the page's hit-Bow rider.
+    # The re-founding (2026-10-04): a free act, then 1 Fanfare.
     assert ARM_KEYWORDS["Bow"] == (
-        "A performer acts one last time, without paying, as it leaves the "
-        "stage or, if a card says so, stays.")
+        "The performer acts once more without paying, then you gain 1 "
+        "Fanfare.")
 
 
 # ---------------------------------------------------------------------------
@@ -115,46 +102,15 @@ def test_the_bow_row_is_the_plain_exit():
 # ---------------------------------------------------------------------------
 
 def test_a_spend_is_a_line_on_the_stage_log():
-    stage = _stage(_row("raise", fanfare=8, moved=5),
+    stage = _stage(_row("gain", fanfare=8, moved=5),
                    _row("spend", fanfare=5, moved=3))
     assert _render_stage_log(stage)[-1] == (
-        "  - Spent 3 of **Usher**'s Fanfare: 8 → 5.")
+        "  - You spent 3 Fanfare: 8 → 5.")
 
-
-# ---------------------------------------------------------------------------
-# 3. CHEVALMARIN'S ACT.
-# ---------------------------------------------------------------------------
 
 def _cheval(**kw):
     return _row("act", member="chevalmarin",
                 name="Surintendante Chevalmarin", **kw)
-
-
-def test_chevalmarin_says_what_each_enemy_was_dealt():
-    stage = _stage(_cheval(moved=8, each=2, struck=4))
-    assert _render_stage_log(stage) == [
-        "  - **Chevalmarin** acted: 2 damage to each of 4 enemies."]
-
-
-def test_where_a_block_ate_some_the_line_says_what_their_hp_lost():
-    """The lane-2 elite: four Phantasmal Gardeners, one of whose 2 its
-    Skittish Block ate. The act was right; the page now says so."""
-    stage = _stage(_cheval(moved=6, each=2, struck=4))
-    assert _render_stage_log(stage) == [
-        "  - **Chevalmarin** acted: 2 damage to each of 4 enemies (their HP "
-        "fell by 6 in all)."]
-
-
-def test_one_enemy_and_an_uneven_sweep_read_plainly():
-    assert _render_stage_log(_stage(_cheval(moved=2, each=2, struck=1))) == [
-        "  - **Chevalmarin** acted: 2 damage to its one enemy."]
-    assert _render_stage_log(_stage(_cheval(moved=5, struck=2))) == [
-        "  - **Chevalmarin** acted: 5 in total across 2 enemies."]
-
-
-def test_an_older_build_without_the_count_reads_as_before():
-    assert _render_stage_log(_stage(_cheval(moved=6))) == [
-        "  - **Chevalmarin** acted: 6 in total, split across the enemies."]
 
 
 # ---------------------------------------------------------------------------
@@ -190,19 +146,18 @@ def test_what_you_played_names_the_summoned_performer():
 def test_the_new_beats_cross_the_packet_and_print():
     state = _state(
         [_row("spend", fanfare=5, moved=3),
-         _row("hit", fanfare=0, moved=3, target="Seapunk", target_id="1"),
-         _row("leave", seat=-1, moved=3, reason="hit"),
-         _cheval(moved=6, each=2, struck=4)],
+         _row("leave", seat=-1, reason="evicted"),
+         _cheval(moved=2)],
         resolved=[_resolved("Understudy",
                             [{"member": "crabaletta",
                               "name": "Mademoiselle Crabaletta"}])])
     assert qa_packet.leaks(observation(state)) == []
     page = blindplay.observe(state)
     assert qa_packet.leaks(page) == []
-    assert "Spent 3 of **Usher**'s Fanfare: 8 → 5." in page
-    assert "emptied by a hit, so it takes a Bow." in page
+    assert "You spent 3 Fanfare: 8 → 5." in page
+    assert "it Bowed to make room for a summon on a full stage." in page
     assert "waits for your turn" not in page
-    assert "2 damage to each of 4 enemies (their HP fell by 6 in all)" in page
+    assert "**Chevalmarin** acted: 2 damage to ALL enemies." in page
     assert "It summoned **Crabaletta**." in page
 
 

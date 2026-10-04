@@ -821,50 +821,48 @@ class Player(Fighter):
     # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
     # every count read (has_salon_members, pilot, instruments) still works.
     salon: list[str] = field(default_factory=list)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). THE STAGE: the three
-    # seats, front first, each an `[member, fanfare]` pair. SOURCE OF TRUTH for
-    # the arm and the only state it adds -- the brief's sec.2 is explicit that
-    # "Fanfare is the performer's bar itself ... no counter beside it", so
-    # there is deliberately no meter mirroring this the way
-    # `powers["salon_member"]` mirrors `salon` above.
-    #
-    # A LIST OF LISTS AND NOT OF TUPLES, because a bar is written in place
-    # (regen, Raise, Spend, absorb) and a seat that had to be rebuilt to change
-    # its number is a seat two callers can disagree about. Empty on every
-    # shipped run, for every character, forever: `furina_stage.stage` returns
-    # `[]` with the flag off whatever is in here.
-    stage: list[list] = field(default_factory=list)
-    # R276 batch two (QUARANTINED with the stage). Performers resting after A
-    # Five-Century Act returned them (they skip this turn's acts); this turn's
-    # Arkhe Alignment multipliers on the acts; and how many copies of each
-    # instanced Stage power are in play (a copy count the `powers` map, which
-    # sums amounts, cannot carry).
-    stage_resting: list = field(default_factory=list)
-    stage_act_damage_mult: int = 1
-    stage_act_block_mult: int = 1
-    stage_power_copies: dict = field(default_factory=dict)
-    # THE GUEST CAST (2026-09-25, QUARANTINED with the stage): each guest's
-    # Fanfare lost since its last act (Wriothesley's reading), and Energy a
-    # Chevreuse act owes the next turn.
-    stage_lost: dict = field(default_factory=dict)
-    stage_energy_next: int = 0
-    # THE SUPPORTING POOL (2026-09-26, QUARANTINED with the stage): Oratrice's
-    # Verdict's enemy this turn; whether an enemy's hit reached the front
-    # performer since her last turn (Counterclaim); and every Bow this combat
-    # (Da Capo). (Held Applause's skipped fade left with the card, 2026-09-29.)
-    stage_verdict: Optional[object] = None
-    stage_front_hit: bool = False
-    stage_bows: int = 0
-    # 2026-09-27 (QUARANTINED with the stage): each guest's damage her Block
-    # stopped from enemy hits while it stood in front since its last act
-    # (Wriothesley's second reading), and A Five-Century Act's one return a
-    # turn, used.
-    stage_blocked: dict = field(default_factory=dict)
+    # FURINA'S STAGE (`furina_stage`, the re-founded rules of
+    # review/active/furina-refounding-2026-10-03.md, sec.1 as sec.8 amends
+    # it). The seats, front first, each a performer's NAME: performers have no
+    # bars any more, so a seat is who stands in it and nothing else. Empty on
+    # every other character's run: `furina_stage.stage` returns `[]` for
+    # anyone who is not Furina, whatever is in here.
+    stage: list[str] = field(default_factory=list)
+    # Fanfare, ONE number on Furina (rule 5): no cap, no fade, hits never
+    # touch it. Not the retired shipped meter (`fanfare` above), which the
+    # Stage keeps inert (`resources.stage_retires_the_shipped_meters`).
+    stage_fanfare: int = 0
+    # The flow counts (sec.8): gained this turn, spent this turn (a card's
+    # Spend only, never a payment). Reset at the START of her turn, so they
+    # hold through the whole end-of-turn sequence.
+    stage_gained_this_turn: int = 0
+    stage_spent_this_turn: int = 0
+    # The once-a-turn latches, reset with the flow counts: Salon summon cards
+    # and Cue cards played (Escoffier's and Lyney's lines), Cues made
+    # (Lynette's line), Chevreuse's one act, A Five-Century Act's one return.
+    stage_salon_cards_this_turn: int = 0
+    stage_cue_cards_this_turn: int = 0
+    stage_cues_this_turn: int = 0
+    stage_chevreuse_acted: bool = False
     stage_returned: bool = False
-    # 2026-09-29 (QUARANTINED with the stage): what enemy hits took from the
-    # FRONT performer, whoever it was, since Sigewinne's last act, counted
-    # while she is on stage (the medic's reading).
-    stage_front_lost: dict = field(default_factory=dict)
+    # Arkhe Alignment's / Dual Nature's Ousia: this turn's multiple on the
+    # performers' damage acts.
+    stage_act_damage_mult: int = 1
+    # Chevreuse's act: Energy owed at the start of the next turn.
+    stage_energy_next: int = 0
+    # Oratrice's Verdict's enemy this turn, and every Bow this combat (Da
+    # Capo).
+    stage_verdict: Optional[object] = None
+    stage_bows: int = 0
+    # Sigewinne: `CombatState.player_damage_events` at her last act (or her
+    # seating). Wriothesley: the damage her Block stopped since his last act
+    # (or his seating).
+    stage_sigewinne_mark: int = 0
+    stage_wriothesley_blocked: int = 0
+    # Who makes the player's choices inside a Stage card (which performer a
+    # Cue names, Step Forward moves, Final Bow sends off; Ousia or Pneuma).
+    # None = the pilot's (`tier0.pilot.policy.FURINA_STAGE_DECIDER`).
+    stage_decider: Optional[object] = None
     spotlight: Optional[str] = None   # THE per-player registry: one
                                   # designated character at a time; a second
                                   # designation re-aims, never stacks. The
@@ -1223,13 +1221,12 @@ class CombatState:
     # every Klee number on record. The C# side draws exactly this line for the
     # same reason -- the ledger is beside the game, not in it.
     spark_ledger: list[dict] = field(default_factory=list)
-    # QUARANTINED (`furina_stage.FURINA_STAGE`), INSTRUMENT ONLY, and the
-    # spark ledger's reason one arm over: the Stage's Fanfare economy for this
-    # fight -- what came onto the bars and by which door, what left and by
-    # which -- counted at each writer in `furina_stage` (`book_gain`,
-    # `book_loss`, `book_paid`) and read by `tools/furina_stage_report.py`.
-    # Nothing reads it back to decide anything, it is not on the event stream
-    # (no log digest moves), and it stays `{}` on every shipped run.
+    # FURINA'S STAGE, INSTRUMENT ONLY, and the spark ledger's reason one arm
+    # over: this fight's Fanfare economy (gained by door, spent, paid by
+    # payer) and the stage's counts (acts, star skips, Cues, Bows, walk-ons),
+    # booked at each writer in `furina_stage` and read by
+    # `tools/furina_stage_report.py`. Nothing reads it back to decide
+    # anything, and it stays `{}` on every other character's run.
     stage_ledger: dict = field(default_factory=dict)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy
@@ -1267,14 +1264,10 @@ class CombatState:
     # actually happened; every reader of the replacement rule asks
     # `effects.salon_numerics_replaced`, which is the OR of the two.
     salon_will_replace_this_card: bool = False
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-732`). What THIS card play
-    # took off the stage's bars, read back by the effects after it through
-    # `amount_formula: {count: stage_spent}`. Per-card and not a bar read: by
-    # the time *Final Bow*'s Block or the Rare's damage resolves, the bar it is
-    # measuring is gone. ONE counter for three writers -- `stage_spend`,
-    # `stage_spend_all` and `stage_final_bow` -- because all three answer the
-    # same question ("how much did this play take?") and a card that had to
-    # pick among three tokens is a card two rows can spell differently.
+    # FURINA'S STAGE. What THIS card play spent ("Spend all your Fanfare"),
+    # read back by the effect after it through `amount_formula: {count:
+    # stage_spent}`: by the time the damage resolves, the Fanfare it measures
+    # is gone. Written by `stage_spend` and `stage_spend_all`.
     stage_spent_this_card: int = 0
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
     # CARDS THAT REACHED THE EXHAUST PILE THIS PLAYER TURN, counted AT THE

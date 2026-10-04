@@ -45,7 +45,7 @@ public sealed class ProtoFsGuestStarEscoffier : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Escoffier"),
-        ("description", "Summon Escoffier with 6 [gold]Fanfare[/gold]."),
+        ("description", "Summon Escoffier. Gain 3 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarEscoffier : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "escoffier", 6);
+        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "escoffier", 3);
     }
 
     protected override void OnUpgrade()

@@ -104,10 +104,10 @@ def _pet_rows(row: dict[str, Any]) -> list[dict[str, Any]]:
                  "block": _int(pet.get("block")), "seat": "",
                  "stage": pet.get("stage_member") is not None}
         if pet.get("stage_member") is not None:
+            # The re-founding (2026-10-04): seats front to back, no bars.
             seat = _int(pet.get("stage_seat"))
             entry["seat"] = ("front" if seat <= 0 or len(on_stage) <= 1
-                             else "back" if seat >= len(on_stage) - 1
-                             else "middle")
+                             else f"seat {seat + 1}")
         out.append(entry)
     return out
 
@@ -374,11 +374,13 @@ def render_lines(info: dict[str, Any]) -> list[str]:
         out.append(f"- **{p['name']}**: " + ", ".join(bits))
         for pet in p["pets"]:
             where = f" ({pet['seat']})" if pet["seat"] else ""
-            # A stage performer's HP IS its Fanfare bar, and the Furina
-            # page names it that way; any other pet is HP.
-            health = (f"Fanfare {pet['hp']}" if pet["stage"]
-                      else f"HP {pet['hp']}/{pet['max_hp']}")
-            out.append(f"  - {pet['name']}{where}: {health}"
+            # A stage performer has no HP or bar to print (the re-founding,
+            # 2026-10-04): its name and seat only. Any other pet is HP.
+            if pet["stage"]:
+                out.append(f"  - {pet['name']}{where}")
+                continue
+            out.append(f"  - {pet['name']}{where}: HP {pet['hp']}/"
+                       f"{pet['max_hp']}"
                        + (f", Block {pet['block']}" if pet["block"] else ""))
     if info["votes"]:
         out += ["", "Choices so far:"]

@@ -6259,3 +6259,38 @@ Sim, `tools/varka_expansion_sim.py --seeds 2400 --seed 7 --jobs 15
 offers, played in 68.0 / 80.8% of fights held (0.83 / 1.00 plays a fight).
 Act-1 win rates moved by at most 0.1 point. The 70% take flags did not
 change.
+
+## Furina re-founding, 2026-10-04
+
+Every row of `review/active/furina-refounding-2026-10-03.md` sec.10 (and
+sec.9's slice rows), built on the old ids. The rules are sec.1 as sec.8
+amends them; the sim's reference is `tier0/engine/furina_v2.py`.
+
+- Renamed on their old ids: `proto_fs_plot_twist` (Encore!),
+  `proto_fs_interposition` (Places, Everyone!), `proto_fs_counterclaim`
+  (Dress Rehearsal, now an Uncommon Power), `proto_fs_leading_lady`
+  (Gentilhomme Usher, now a Common), `proto_fs_double_casting` (Premiere
+  Season, now a Rare Power), `proto_fs_quick_cue` (Quick Flourish, name
+  only). The two rarity moves leave the pool at 78, now 24 / 33 / 21; in the
+  sim both rows are `POOL_ADDS` and their old shipped twins `POOL_DROPS`. The
+  renamed rows keep their paintings, which still show the old cards.
+- Rewritten to the sheet: the starter's Rising Applause, Take the Stage,
+  Mademoiselle Crabaletta (its 4 damage carries Hydro under her Skill
+  cadence, so the face names it), Encore!, Stage Whisper, Places, Everyone!,
+  Step Forward, Warm Reception, Hold Your Places, Cheered On, Opening Number,
+  Ousia Surge, Pneuma Refrain, Bravura, Bis!, Final Bow, Intermission, Dress
+  Rehearsal, Revolving Stage, Thunderous Applause, Season Tickets,
+  Groundswell, Tide of Applause, the ten Guest Stars, Let the People Rejoice,
+  Bring the House Down, A Five-Century Act, Premiere Season, Gala Premiere,
+  Grand Deluge, Endless Waltz, Critics' Darling, Singer of Many Waters, and
+  the five co-op rows.
+- Exhaust stays on Final Bow, Let the People Rejoice, Singer of Many Waters
+  and Gala Premiere: sec.10 gives text and numbers, and keeps every row it
+  does not list unchanged.
+- Raise a Toast is a Spend 4 mode (the Spend is a choice on play, as on every
+  Spend card); its 4 [6] Strength is read off `IsUpgraded` inside the mode.
+- New sheet vocabulary: `stage_cue {times}`, `stage_perform_all {guests}`,
+  `stage_spend_all` (spend all of her Fanfare), counts `fanfare_gained` and
+  `fanfare_spent`, powers `fs_rehearsal` and `fs_premiere_season`. Retired:
+  the seat-moving, per-performer spend and Intermission ops, the lead and back
+  Fanfare counts, `stage_front_hit`, `fs_rapt_audience`, `fs_guest_of_honor`.

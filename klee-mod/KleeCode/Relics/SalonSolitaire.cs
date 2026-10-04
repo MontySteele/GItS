@@ -14,8 +14,8 @@ namespace KleeMod.Relics;
 /// <summary>
 /// SALON SOLITAIRE -- the stage arm's starting relic (brief sec.3 rule 2).
 ///
-/// "At the start of each combat the Gentilhomme Usher takes the front seat at
-/// 3 Fanfare."
+/// "Start each combat with Usher on stage." (The re-founding, sec.10:
+/// unchanged; performers hold no Fanfare, so the face no longer prints one.)
 ///
 /// DEFECT'S FREE LIGHTNING ORB, AS A BODY, which is the brief's own analogy
 /// and the reason the opening is a RELIC rather than an Innate card. The stage
@@ -58,17 +58,11 @@ public sealed class SalonSolitaire : CustomRelicModel
     public override RelicModel? GetUpgradeReplacement() =>
         ModelDb.Relic<CurtainNeverFalls>().ToMutable();
 
-    /// <summary>
-    /// The opening number is INTERPOLATED from the constant it quotes
-    /// (`EB-89`), so a retune of <see cref="FurinaStageLaw.OpeningFanfare"/>
-    /// cannot leave the relic telling the player a retired 3.
-    /// </summary>
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salon Solitaire"),
         ("description",
-            "Start each combat with Usher in front with [blue]"
-          + FurinaStageLaw.OpeningFanfare + "[/blue] [gold]Fanfare[/gold]."),
+            "Start each combat with [gold]Usher[/gold] on stage."),
     };
 
     /// <summary>

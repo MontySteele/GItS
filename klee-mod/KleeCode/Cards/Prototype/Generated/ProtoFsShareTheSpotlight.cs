@@ -43,20 +43,20 @@ public sealed class ProtoFsShareTheSpotlight : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_share_the_spotlight");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Share the Spotlight"),
-        ("description", "Your [gold]back performer[/gold] gives all its [gold]Fanfare[/gold] to another player as [gold]Block[/gold], then [gold]Bow[/gold]s."),
+        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Another player gains {SpotlightRate:diff()} [gold]Block[/gold] per point."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("SpotlightRate", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,11 +69,11 @@ public sealed class ProtoFsShareTheSpotlight : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await FurinaStage.ShareTheSpotlight(choiceContext, Owner.Creature, cardPlay.Target, cardPlay);
+        await FurinaStage.ShareTheSpotlight(choiceContext, Owner.Creature, cardPlay.Target, DynamicVars["SpotlightRate"].IntValue, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["SpotlightRate"].UpgradeValueBy(1m);
     }
 }

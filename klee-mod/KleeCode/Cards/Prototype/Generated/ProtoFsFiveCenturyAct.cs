@@ -38,20 +38,20 @@ public sealed class ProtoFsFiveCenturyAct : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBow(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBow(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_five_century_act");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "A Five-Century Act"),
-        ("description", "The first time each turn a performer [gold]Bow[/gold]s and leaves, it returns at the back with {PowerAmount:diff()} [gold]Fanfare[/gold] if a seat is free."),
+        ("description", "The first time each turn a performer [gold]Bow[/gold]s and leaves, it returns at the back if a seat is free."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 1m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoFsFiveCenturyAct : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<FiveCenturyActPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<FiveCenturyActPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

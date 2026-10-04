@@ -93,45 +93,26 @@ public static class ArmKeywordTips
     // current element. Four times in one round a seat lost the Oath it was
     // building to a card of another element and noticed only later.
     public const string ElementSwitchKey = "KLEEMOD-ARM_VARKA_ELEMENT_SWITCH";
-    // THE FURINA STAGE'S SEVEN (`EB-723`, R269). The brief's sec.12 names
-    // them: "Spend, Fanfare (the bar), Raise, Bow, the lead, the back
-    // performer, Rotate". `Fanfare` collides with the reframe's word by
-    // spelling and not by meaning -- there it is a meter, here it is a
-    // performer's own bar -- so it takes its own key rather than reusing one
-    // that would render the retired arm's sentence.
-    //
-    // THE TEXT PASS (2026-09-25) retired `Raise` and `Rotate` and renamed the
-    // lead to the FRONT performer (review/records/furina-text-pass-2026-09-25.md):
-    // their keys left with them, and the front seat took a key of its own so
-    // no stale loc title can survive under the old one.
+    // FURINA, THE STAGE (v2, the re-founding, 2026-10-04). The faces print
+    // `Spend`, `Fanfare`, `Bow`, `Cue`, `Rehearsal` and `front performer`;
+    // the summon, the Guest Star keyword and each performer's tip attach off
+    // the row's own ops (`gen_klee_cards.stage_summon_tip_calls`,
+    // `stage_guest_tip_calls`). The back performer and the fade retired with
+    // the bars.
     public const string SpendKey = "KLEEMOD-ARM_STAGE_SPEND";
     public const string SpendShortKey = "KLEEMOD-ARM_STAGE_SPEND_SHORT";
     public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
     public const string BowKey = "KLEEMOD-ARM_STAGE_BOW";
+    public const string CueKey = "KLEEMOD-ARM_STAGE_CUE";
+    public const string RehearsalKey = "KLEEMOD-ARM_STAGE_REHEARSAL";
     public const string FrontPerformerKey = "KLEEMOD-ARM_STAGE_FRONT";
-    public const string BackPerformerKey = "KLEEMOD-ARM_STAGE_BACK";
-    // The second text pass (2026-09-28, review/records/furina-text-pass-
-    // 2026-09-28.md): the fade, a word four faces already print, gets its
-    // own tip. The back performer's tip no longer carries it.
-    public const string FadeKey = "KLEEMOD-ARM_STAGE_FADE";
     // R276 batch two: Arkhe Alignment's two halves.
     public const string OusiaKey = "KLEEMOD-ARM_STAGE_OUSIA";
     public const string PneumaKey = "KLEEMOD-ARM_STAGE_PNEUMA";
-    // 2026-09-25: WHAT A SUMMON DOES AND WHAT EACH PERFORMER DOES. A
-    // first-time co-op player "found it very hard to understand ... what each
-    // summoned actor actually did". Not golded words: a face prints "Summon
-    // Usher", so these attach off the row's `stage_summon` op
-    // (`gen_klee_cards.stage_summon_tip_calls`), the way the readers' rider
-    // attaches off its multiplier.
     public const string SummonKey = "KLEEMOD-ARM_STAGE_SUMMON";
     public const string UsherKey = "KLEEMOD-ARM_STAGE_USHER";
     public const string ChevalmarinKey = "KLEEMOD-ARM_STAGE_CHEVALMARIN";
     public const string CrabalettaKey = "KLEEMOD-ARM_STAGE_CRABALETTA";
-    // THE GUEST CAST (2026-09-25): the Guest Star keyword and one tip per
-    // guest, attached off the row's `stage_guest` op
-    // (`gen_klee_cards.stage_guest_tip_calls`) the way the trio's are. A key
-    // of its own, not the shipped Guest Star generator's: that is another
-    // rule under the same two words.
     public const string GuestStarKey = "KLEEMOD-ARM_STAGE_GUEST_STAR";
     public const string NeuvilletteKey = "KLEEMOD-ARM_STAGE_NEUVILLETTE";
     public const string ClorindeKey = "KLEEMOD-ARM_STAGE_CLORINDE";
@@ -141,7 +122,6 @@ public static class ArmKeywordTips
     public const string SigewinneKey = "KLEEMOD-ARM_STAGE_SIGEWINNE";
     public const string CharlotteKey = "KLEEMOD-ARM_STAGE_CHARLOTTE";
     public const string LynetteKey = "KLEEMOD-ARM_STAGE_LYNETTE";
-    // THE SUPPORTING POOL (2026-09-26): two more guests.
     public const string LyneyKey = "KLEEMOD-ARM_STAGE_LYNEY";
     public const string EscoffierKey = "KLEEMOD-ARM_STAGE_ESCOFFIER";
 
@@ -824,52 +804,23 @@ public static class ArmKeywordTips
 
     // ------------------------------------------- Furina, the Stage --------
     //
-    // Her FIVE seat words since the text pass (2026-09-25; the brief's sec.12
-    // once made it seven, with `Raise` and `Rotate`): the faces print
-    // `Spend`, `Fanfare`, `Bow`, `front performer` and `back performer`, and
-    // every one of them names a rule the SHIPPED engine does not have. A shipped Fanfare is a METER on the player; here
-    // it is a performer's own bar, and the two sentences contradict each other
-    // on every face -- which is exactly why these live here, behind
-    // `PrototypeCards`, and not in <see cref="SalonMemberTips"/>.
-    //
-    // THE NUMERALS ARE INTERPOLATED FROM <see cref="FurinaStageLaw"/> (`EB-89`),
-    // so a retune cannot leave one of these sentences quoting a retired number.
+    // THE RE-FOUNDING (2026-10-04, review/active/furina-refounding-2026-10-03.md).
+    // Short and plain: one or two sentences each, the rule and nothing else.
+    // The performers' tips are their badges' sentences
+    // (<see cref="StagePerformerBadge.ActText"/>), numbers from
+    // <see cref="FurinaStageLaw"/> (`EB-89`).
 
-    /// <summary>
-    /// Brief sec.3 rule 8 as R276 ruled it: the BACK performer pays, and the
-    /// price is paid in full or the Spend mode is not offered. A performer
-    /// the Spend empties takes a bow, which the Bow tip now says for every
-    /// way of reaching 0 (rule 7, 2026-09-25).
-    /// </summary>
+    /// <summary>Rule 5: a card's Spend N takes N of her Fanfare, and is
+    /// offered only when she has it.</summary>
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SpendKey,
-            // `EB-746`: SPEND IS A CHOICE ON PLAY. Four of six round-two
-            // seats said the card spent for them -- "no verb to decline",
-            // "the card decided" -- so the wager brief sec.4 describes never
-            // happened at play time. The old last clause goes with the
-            // rider: an empty stage does not refuse a Spend now, it simply
-            // does not OFFER the mode, which the player meets on the
-            // choose-a-card screen rather than in a tip.
-            // R276 picks 1 and 2: the bank pays, and only in full.
-            // The text pass (2026-09-25): the chooser explains itself (#662),
-            // so the tip says what is paid and by whom. The bow clause left
-            // with rule 7's 2026-09-25 change: the Bow tip covers it.
-            // THE RULES PASS (2026-10-01): the back pays first, then forward,
-            // and the mode is refused only when the whole stage holds less.
-            // 2026-10-01 (a Furina seat): "then forward" read as a direction,
-            // not as the next performer paying; the clause names it.
-            "Pay Fanfare from your [gold]back performer[/gold] first, then "
-          + "from the next one forward. Offered only if your performers hold "
+            "Pay that much [gold]Fanfare[/gold]. Offered only if you have "
           + "enough.");
 
-    /// <summary>
-    /// THE SPEND WARNING (review/records/furina-pool-round-2026-10-01.md,
-    /// "What to change" 2): on a Spend mode's face in the chooser, the guests
-    /// this Spend would leave unable to pay for their act. Without it a
-    /// Neuvillette, Clorinde or Chevreuse left short simply does nothing at
-    /// the end of the turn. No tip where nobody is left short.
-    /// </summary>
+    /// <summary>THE SPEND WARNING, on a Spend mode's face in the chooser: the
+    /// stars this Spend would leave unable to pay for their act this turn.
+    /// No tip where nobody is left short.</summary>
     public static IEnumerable<IHoverTip> ForSpendShortfall(
         IEnumerable<IHoverTip> inherited, CardModel card, int amount)
     {
@@ -901,300 +852,131 @@ public static class ArmKeywordTips
         }
     }
 
-    /// <summary>
-    /// Brief sec.2: "Fanfare is the performer's bar itself ... no counter
-    /// beside it." TWO SENTENCES BECAUSE IT IS TWO FACTS, and the second is
-    /// the damage order (rule 6), which is the reason a player cares what the
-    /// bar is at all.
-    /// </summary>
+    /// <summary>Rule 5: Fanfare is one number on Furina.</summary>
     public static IEnumerable<IHoverTip> ForFanfare(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FanfareKey,
-            // The text pass's follow-up (2026-09-25): the EMPTY-STAGE
-            // summon lives here, on the word every Fanfare-giving face
-            // prints -- Hold Your Places and Gala Dinner carry no back
-            // performer tip. "At 0 it leaves" is dropped on purpose.
-            // The second text pass (2026-09-28): "your front performer's".
-            // THE RULES PASS (2026-10-01): only what you play summons, in
-            // the paper's own line. The damage order moved to the front
-            // performer's tip, which is where it happens, so this one fits
-            // the 135-character tip ceiling.
-            "A performer's health. If no one is on stage, a card that gives "
-          + "Fanfare summons a random performer holding it.");
+            "Your applause. Cards and Bows give it. [gold]Spend[/gold] and "
+          + "stars' acts use it. It never fades.");
 
-    /// <summary>
-    /// Brief sec.3 rules 7 and 9 together. Since 2026-09-25 a performer at 0
-    /// Fanfare bows whatever emptied it -- a Spend, a hit or a full-stage
-    /// summon ([USER]: "Stage members bow out when they are destroyed or
-    /// replaced, not just when you deliberately spend them down to 0").
-    /// </summary>
+    /// <summary>Rule 3: the free Bow act, then 1 Fanfare.</summary>
     public static IEnumerable<IHoverTip> ForBow(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BowKey,
-            // Draft 3 (2026-09-25, the Stage review's pick 1): the Bow is the
-            // performer's own act once more, so the tip says that and no
-            // performer's tip carries a separate Bow. Rule 7's trigger (any
-            // exit at 0 Fanfare) is unchanged. THE GUEST CAST (2026-09-25):
-            // a guest's act may pay, and its Bow does not -- stated once,
-            // here, for every performer.
-            // THE RULES PASS (2026-10-01): Grand Finale's Bow keeps the
-            // performer on stage, and the tip now says so.
-            "A performer acts one last time, without paying, as it leaves "
-          + "the stage or, if a card says so, stays.");
+            "The performer acts once more without paying, then you gain "
+          + FurinaStageLaw.BowFanfare + " [gold]Fanfare[/gold].");
 
-    /// <summary>
-    /// Brief sec.3 rule 6: the front seat is the one that is hit -- the
-    /// SHIELD, in R276's words. THE RULES PASS (2026-10-01) cut rule 4, so it
-    /// no longer regains anything (only The Curtain Never Falls gives a
-    /// regain, on the relic's own face), and the damage order the Fanfare tip
-    /// used to carry is stated here, on the seat it is about.
-    /// </summary>
+    /// <summary>Rule 7: the chosen performer acts now.</summary>
+    public static IEnumerable<IHoverTip> ForCue(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, CueKey,
+            "Choose a performer. It acts now. A star pays as usual.");
+
+    /// <summary>Rule 6: the stage's scaling.</summary>
+    public static IEnumerable<IHoverTip> ForRehearsal(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, RehearsalKey,
+            "Each one makes your performers' damage and [gold]Block[/gold] "
+          + "acts deal 1 more.");
+
+    /// <summary>The seat that acts first at the end of the turn.</summary>
     public static IEnumerable<IHoverTip> ForFrontPerformer(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FrontPerformerKey,
-            "Takes hits after your [gold]Block[/gold]; what its "
-          + "[gold]Fanfare[/gold] cannot hold reaches you.");
+            "The performer in the first seat. Performers act front to back "
+          + "at the end of your turn.");
 
-    /// <summary>
-    /// Brief sec.3 rules 5, 6 and 8, from the other end. The back seat is the
-    /// BANK (R276): a Raise fills it and a Spend draws from it. Rule 6: the
-    /// front absorbs and the rest reaches Furina, so a hit never runs on to
-    /// the middle or back seat.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForBackPerformer(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, BackPerformerKey,
-            // `EB-744`: "nothing hits it" WHERE A FLURRY DOES. Rule 6 is
-            // per ATTACK -- the lead absorbs one hit up to its bar and leaves
-            // at 0, so the next attack of the same turn meets whoever stepped
-            // forward. ROUND FOUR: "no single attack reaches it" was still
-            // read as "the back is safe", and seats lost the back performer
-            // to a second attack in one enemy turn. So the sentence says
-            // plainly where hits go, and when they reach the back.
-            // The text pass (2026-09-25): the empty-stage summon the
-            // retired Raise tip carried is the Fanfare tip's now.
-            // Draft 3 (2026-09-25): rule 12, the fade, on the seat it hits.
-            // THE GUEST ROUND (2026-09-25, 0.2.3794): "Hits reach it last"
-            // was false -- rule 6 never runs a hit on past the front -- and
-            // the Opus seat lost Wriothesley's plan to it. A lone performer
-            // is both the front and the back, so it is hit then.
-            // THE SUPPORTING-POOL SEAT ROUND (2026-09-26, the Solo seat): "a
-            // lone Usher counts as both the front and the back performer, and
-            // the fade never touched it" -- rule 12 exempts the front, and
-            // the tips gave both seats without saying which wins. One
-            // sentence says it, and says where hits go with it: a lone
-            // performer is the front, which is hit and does not fade.
-            // A LATER SEAT (2026-09-26): "the front instead" was wrong -- a
-            // seat saw Spend offered from a lone performer. It is BOTH seats
-            // (brief rule 5: with one performer, the back is the lead): it is
-            // hit, it pays Spends, and it never fades (rule 12 exempts the
-            // front). The sentence says both.
-            // Relics smoke seat 2026-09-27: "'Fade' is never defined." It
-            // was, here, in one clause -- until the second text pass
-            // (2026-09-28): the fade takes every performer behind the front,
-            // not just the back one, so it has its own tip (`ForFade`).
-            // THE RULES PASS (2026-10-01): the back pays first, then forward.
-            "Your last performer in line. [gold]Spend[/gold] pays from it "
-          + "first. A lone performer is both front and back.");
-
-    /// <summary>
-    /// The second text pass (2026-09-28). Brief sec.3 rule 12, THE FADE, on
-    /// any face that prints the word. THE FADE PASS (2026-09-29): every
-    /// performer, the front one included, loses a quarter
-    /// (<see cref="FurinaStageLaw.FadeDivisor"/>) of its Fanfare, rounded
-    /// down (<c>FurinaStageLedger.Fade</c>, the loop from seat 0).
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForFade(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, FadeKey,
-            "At the start of your turn, each performer loses a quarter of its "
-          + "[gold]Fanfare[/gold], rounded down.");
-
-    /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s damage half, the
-    /// choice a player makes at the start of each turn.</summary>
+    /// <summary>Arkhe Alignment's damage half.</summary>
     public static IEnumerable<IHoverTip> ForOusia(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, OusiaKey,
             "This turn, your performers' acts deal double damage.");
 
-    /// <summary>R276 batch two: <i>Arkhe Alignment</i>'s Block half. The
-    /// numeral is <see cref="Powers.ArkheAlignmentPower.PneumaLeadRegain"/>'s
-    /// (`EB-89`).</summary>
+    /// <summary>Arkhe Alignment's other half (sec.8: "Gain 2 Fanfare").
+    /// </summary>
     public static IEnumerable<IHoverTip> ForPneuma(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PneumaKey,
-            "This turn, your performers' acts give double [gold]Block[/gold], "
-          + "and your front performer regains "
-          + Powers.ArkheAlignmentPower.PneumaLeadRegain
-          // 2026-09-26 (wave-3 Furina lane 4): the gain is a regain, not a
-          // Raise, so on an empty stage nobody is summoned (brief rule 5).
-          // The second text pass (2026-09-28) says "regains", as the front
-          // performer's tip does, in place of "It summons nobody."
+            "Gain " + Powers.ArkheAlignmentPower.PneumaFanfare
           + " [gold]Fanfare[/gold].");
 
-    /// <summary>
-    /// 2026-09-25. WHAT A SUMMON DOES, on every card that summons. ONE
-    /// sentence since the trio can be cloned (2026-09-25; [USER]: "Let's
-    /// allow for copies and then check the balance."): a named summon always
-    /// summons, so named and random summons meet a full stage the same way --
-    /// the front performer Bows and leaves and the newcomer ADDS its own
-    /// arrival Fanfare to the leaver's (<c>FurinaStage.RecastFromFront</c>). Until then a named Common's face
-    /// said what a performer already on stage did, and this tip came in two
-    /// variants so as not to contradict it.
-    /// </summary>
+    /// <summary>Rules 2 and 4: where a summon goes, and overflow.</summary>
     public static IEnumerable<IHoverTip> ForSummon(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SummonKey,
-            // 2026-09-25 night (the granted-guest seat round): lane 2 only
-            // understood "adds its Fanfare" from the log.
-            // The second text pass (2026-09-28): the Guest Stars carry this
-            // tip too, so the ordinary full-stage rule is printed where one
-            // is played.
-            "A performer joins at the back with "
-          + FurinaStageLaw.SummonFanfare + " [gold]Fanfare[/gold]. On a full "
-          + "stage, the front one [gold]Bow[/gold]s first and gives the "
-          + "newcomer its Fanfare.");
+            "A performer joins at the back. On a full stage, the front Salon "
+          + "member [gold]Bow[/gold]s and leaves first. Guests keep their "
+          + "seats.");
 
-    /// <summary>
-    /// 2026-09-25. GENTILHOMME USHER'S ACT, on every card that names him and
-    /// on every random summon. The same sentence his body's badge carries
-    /// (<c>UsherBadgePower</c>), numbers from <see cref="FurinaStageLaw"/>
-    /// (`EB-89`). No Bow clause since draft 3 (2026-09-25): a Bow is the act
-    /// once more, which the Bow tip says once for all three.
-    /// </summary>
     public static IEnumerable<IHoverTip> ForUsher(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, UsherKey,
-            "End of your turn: gain " + FurinaStageLaw.ActUsherBlock
-          + " [gold]Block[/gold].");
+        With(inherited, UsherKey, StagePerformerBadge.ActText(StagePerformer.Usher));
 
-    /// <summary>2026-09-25. SURINTENDANTE CHEVALMARIN'S ACT, the same
-    /// sentence as <c>ChevalmarinBadgePower</c>. Plain damage since draft 3
-    /// (2026-09-25): no act applies Hydro.</summary>
     public static IEnumerable<IHoverTip> ForChevalmarin(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, ChevalmarinKey,
-            "End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage
-          + " damage to ALL enemies.");
+             StagePerformerBadge.ActText(StagePerformer.Chevalmarin));
 
-    /// <summary>2026-09-25. MADEMOISELLE CRABALETTA'S ACT, the same sentence
-    /// as <c>CrabalettaBadgePower</c>. Plain damage since draft 3.</summary>
     public static IEnumerable<IHoverTip> ForCrabaletta(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CrabalettaKey,
-            "End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage
-          + " damage to a random enemy.");
+             StagePerformerBadge.ActText(StagePerformer.Crabaletta));
 
-    // ------------------------------------------- the Guest Cast -----------
-    //
-    // 2026-09-25, review/active/furina-guest-batch-2026-09-25.md. A Guest Star
-    // card prints "<Name> joins the stage with N Fanfare." and its act lives
-    // on the performer's tip and badge, Defect-orb style, not on the face.
-    // Each tip below is word for word the build table's, numerals from
-    // `FurinaStageLaw` (`EB-89`), and the same sentence as the guest's badge.
-
-    /// <summary>The Guest Star keyword: a guest is a performer, one of each
-    /// on stage, and a second copy makes it Bow and return with the new
-    /// Fanfare added ([USER], 2026-09-25: "only one Neuvillette allowed -
-    /// repeats trigger a Bow and then resummon them, carrying over unused
-    /// Fanfare").</summary>
+    /// <summary>The Guest Star keyword: one of each; a second copy Bows it.
+    /// </summary>
     public static IEnumerable<IHoverTip> ForGuestStar(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, GuestStarKey,
-            // Relics smoke seat 2026-09-27: "I never learned what a Guest
-            // Star is", and read two Ushers standing as "one of each" broken.
-            // The row names what IS one, and what is not.
-            // The second text pass (2026-09-28): what a Guest Star is, the
-            // Summon tip beside it says.
-            "You can have one of each on stage. Summoning one already there "
-          + "makes it [gold]Bow[/gold], then return with the new "
-          + "[gold]Fanfare[/gold] added.");
+            "One of each on stage. Summoning one already there makes it "
+          + "[gold]Bow[/gold] and stay.");
 
     public static IEnumerable<IHoverTip> ForNeuvillette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, NeuvilletteKey,
-            "End of your turn: pay " + FurinaStageLaw.ActNeuvillettePrice
-          + " of his Fanfare to deal " + FurinaStageLaw.ActNeuvilletteDamage
-          + " [gold]Hydro[/gold] damage to ALL enemies.");
+             StagePerformerBadge.ActText(StagePerformer.Neuvillette));
 
     public static IEnumerable<IHoverTip> ForClorinde(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, ClorindeKey,
-            "End of your turn: take " + FurinaStageLaw.ActClorindeTax
-          + " Fanfare from each other performer to deal "
-          + FurinaStageLaw.ActClorindeDamage
-          + " [gold]Electro[/gold] damage to a random enemy.");
+             StagePerformerBadge.ActText(StagePerformer.Clorinde));
 
     public static IEnumerable<IHoverTip> ForNavia(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, NaviaKey,
-            "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy.");
+             StagePerformerBadge.ActText(StagePerformer.Navia));
 
     public static IEnumerable<IHoverTip> ForChevreuse(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, ChevreuseKey,
-            "End of your turn: [gold]Spend[/gold] "
-          + FurinaStageLaw.ActChevreusePrice + " to gain "
-          + FurinaStageLaw.ActChevreuseEnergy
-          + " [gold]Energy[/gold] next turn.");
+             StagePerformerBadge.ActText(StagePerformer.Chevreuse));
 
     public static IEnumerable<IHoverTip> ForWriothesley(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, WriothesleyKey,
-            // 2026-09-27: he always attacks, and reflects her Block too.
-            "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
-          + " [gold]Cryo[/gold] damage to a random enemy, plus "
-          + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
-          + "he lost to hits and " + FurinaStageLaw.ActWriothesleyBlockedRate
-          + " per damage [gold]Block[/gold] saved him.");
+             StagePerformerBadge.ActText(StagePerformer.Wriothesley));
 
     public static IEnumerable<IHoverTip> ForSigewinne(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SigewinneKey,
-            // 2026-09-29: the medic, free.
-            "End of your turn: your front performer regains half the "
-          + "[gold]Fanfare[/gold] hits took from it since her last act, at "
-          + "least " + FurinaStageLaw.ActSigewinneHealFloor + ".");
+             StagePerformerBadge.ActText(StagePerformer.Sigewinne));
 
     public static IEnumerable<IHoverTip> ForCharlotte(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CharlotteKey,
-            "End of your turn: each other performer gains "
-          + FurinaStageLaw.ActCharlotteGift + " [gold]Fanfare[/gold].");
+             StagePerformerBadge.ActText(StagePerformer.Charlotte));
 
     public static IEnumerable<IHoverTip> ForLynette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LynetteKey,
-            // 2026-09-25 night (the granted-guest seat round): the act always
-            // lands, and Swirls where it finds an aura.
-            "End of your turn: deal " + FurinaStageLaw.ActLynetteDamage
-          + " [gold]Anemo[/gold] damage to a random enemy, preferring one "
-          + "with an aura.");
+             StagePerformerBadge.ActText(StagePerformer.Lynette));
 
-    // THE SUPPORTING POOL (2026-09-26, review/active/furina-supporting-pool-
-    // 2026-09-26.md): two more guests, on the same terms -- the same
-    // sentence as each one's badge, numerals from `FurinaStageLaw`.
-
-    /// <summary>Lyney takes the front by himself (the 2026-09-26 seat
-    /// round's ruling: once in front he stays, and his act moves nobody).
-    /// </summary>
     public static IEnumerable<IHoverTip> ForLyney(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LyneyKey,
-            "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
-          + " of his Fanfare to deal " + FurinaStageLaw.ActLyneyDamage
-          + " [gold]Pyro[/gold] damage to a random enemy. If not in front, "
-          + "he swaps with the front.");
+             StagePerformerBadge.ActText(StagePerformer.Lyney));
 
-    /// <summary>Escoffier feeds the cast instead of hitting one enemy.
-    /// </summary>
     public static IEnumerable<IHoverTip> ForEscoffier(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, EscoffierKey,
-            "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
-          + " of her Fanfare to give each other performer "
-          + FurinaStageLaw.ActEscoffierGift + " Fanfare and deal "
-          + FurinaStageLaw.ActEscoffierDamage
-          + " [gold]Cryo[/gold] damage to ALL enemies.");
+             StagePerformerBadge.ActText(StagePerformer.Escoffier));
 }

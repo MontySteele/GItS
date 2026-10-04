@@ -371,6 +371,9 @@ public class ArmKeywordTipTests
         // face: the guests this Spend would leave unable to pay to act.
         // FORTY-FIVE: `EB-418`'s `ForCovenSpark` left with its rule (legacy
         // cleanup stage 5).
+        // STILL FORTY-FIVE with the re-founding (2026-10-04): `ForFade` and
+        // `ForBackPerformer` left with the bars, and `ForCue` and
+        // `ForRehearsal` arrived with the Cue and the stage's scaling stat.
         Assert.Equal(45, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForSpendShortfall");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
@@ -380,7 +383,9 @@ public class ArmKeywordTipTests
         Assert.DoesNotContain(attaches, m => m.Name == "ForAbsorb");
         Assert.DoesNotContain(attaches, m => m.Name == "ForWind");
         Assert.Contains(attaches, m => m.Name == "ForOpenTheCasket");
-        Assert.Contains(attaches, m => m.Name == "ForFade");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForFade");
+        Assert.Contains(attaches, m => m.Name == "ForCue");
+        Assert.Contains(attaches, m => m.Name == "ForRehearsal");
         Assert.Contains(attaches, m => m.Name == "ForLyney");
         Assert.Contains(attaches, m => m.Name == "ForEscoffier");
         Assert.Contains(attaches, m => m.Name == "ForGuestStar");
@@ -402,7 +407,7 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForBow");
         Assert.DoesNotContain(attaches, m => m.Name == "ForLeadPerformer");
         Assert.Contains(attaches, m => m.Name == "ForFrontPerformer");
-        Assert.Contains(attaches, m => m.Name == "ForBackPerformer");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForBackPerformer");
         Assert.DoesNotContain(attaches, m => m.Name == "ForRotate");
         Assert.Contains(attaches, m => m.Name == "ForDusk");
         Assert.Contains(attaches, m => m.Name == "ForCasket");

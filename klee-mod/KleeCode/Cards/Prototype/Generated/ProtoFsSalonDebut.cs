@@ -32,20 +32,20 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard
+public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard, IStageSalonSummonCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this), this);
+        ArmKeywordTips.ForCrabaletta(ArmKeywordTips.ForChevalmarin(ArmKeywordTips.ForUsher(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_salon_debut");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Take the Stage"),
-        ("description", "Summon a random performer with 3 [gold]Fanfare[/gold]. Draw 1 card."),
+        ("description", "Summon a random Salon member. Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoFsSalonDebut : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Summon(choiceContext, Owner.Creature, "random", 3);
+        await FurinaStage.Summon(choiceContext, Owner.Creature, "random");
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 

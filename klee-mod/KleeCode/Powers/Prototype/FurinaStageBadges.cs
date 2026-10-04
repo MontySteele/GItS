@@ -13,113 +13,100 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Powers;
 
 // ======================================================================
-// FURINA, THE STAGE -- THE BADGES THAT SAY WHAT THE STAGE DOES (2026-09-25).
+// FURINA, THE STAGE (v2) -- THE BADGES THAT SAY WHAT EACH PERFORMER DOES.
 //
-// THE FIND. The owner's friend played the arm in co-op on 0.2.3737+proto and
-// "found it very hard to understand what was going on from the tooltips,
-// such as what each summoned actor actually did ... the core loop was held
-// back by constant confusion as to what things did." Nothing on screen said
-// what a performer does: the bodies carried only a name, and the acts and the
-// bows lived in doc comments and in the Bow tip's list.
-//
-// SO EACH PERFORMER WEARS A BADGE, THE BASE GAME'S WAY. Hovering a creature
-// shows its powers' hover tips (`Creature.HoverTips` walks `_powers`), and
-// the base game gives Osty a visible power for exactly this -- `OstyCmd.Summon`
-// applies `DieForYouPower` to the pet, a `Single` Buff with no number and
-// `ShouldPlayVfx => false`. A performer's badge is that shape: titled with its
-// name, carrying its act and its bow, and changing no number. And Furina
-// wears one more, `The Stage`, which is the rules of the whole board in four
-// sentences.
-//
-// THEY MOVE NOTHING. No hook is overridden here; a badge is text on a body.
-// The amount is hidden (`Single`), so the wire's `DisplayAmount` is a
-// constant 1 and the seat page's status rows cannot read a number into it.
+// Hovering a creature shows its powers' tips, and the base game gives Osty a
+// quiet badge for exactly this (`DieForYouPower`). A performer's badge is
+// that shape: titled with its name, carrying its act (and a guest's "while
+// on stage" line), changing no number. The same sentence is its keyword tip
+// on every card that names it (`ArmKeywordTips`) and its face on the
+// performer picker (`StageSeatOption`), all three off <see cref="ActText"/>.
 // ======================================================================
 
-/// <summary>
-/// A PERFORMER'S BADGE: its name and what it does at the end of her turn.
-/// The same sentence <c>ArmKeywordTips.ForUsher</c> and its two siblings
-/// print on the cards that name the performer. No Bow clause since draft 3
-/// (2026-09-25): a Bow is the act once more (<c>ArmKeywordTips.ForBow</c>).
-///
-/// THE ACT'S NUMBER IS LIVE (<see cref="ActVar"/>): under Arkhe Alignment's
-/// Ousia or Pneuma the act is doubled this turn (<see cref="FurinaStage.Perform"/>
-/// multiplies by <see cref="FurinaStageLedger.ActDamageMultiplier"/> or
-/// <see cref="FurinaStageLedger.ActBlockMultiplier"/>), and the badge reads
-/// those two multipliers rather than doing its own arithmetic -- the
-/// preview-truth rule. The static <c>description</c> is the canonical face a
-/// copy with no owner shows; the in-combat hover uses <c>smartDescription</c>.
-/// </summary>
+/// <summary>A performer's badge: its name and what it does.</summary>
 public abstract class StagePerformerBadge : PowerModel
 {
-    /// <summary>Which member of the cast this badge describes.</summary>
     public abstract StagePerformer Performer { get; }
-
-    /// <summary>The act's printed number, before this turn's Arkhe multiple.
-    /// </summary>
-    protected abstract int BaseAct { get; }
 
     public override PowerType Type => PowerType.Buff;
 
-    /// <summary>No number on the badge: it is a description, not a counter,
-    /// which is <c>DieForYouPower</c>'s own choice for Osty.</summary>
+    /// <summary>No number: a description, not a counter.</summary>
     public override PowerStackType StackType => PowerStackType.Single;
 
-    /// <summary>Quiet, as Osty's is: a performer arriving is not a buff
-    /// landing.</summary>
     public override bool ShouldPlayVfx => false;
 
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new DynamicVar[] { new ActVar(BaseAct) };
-
-    /// <summary>
-    /// The act this performer will perform at the end of this turn: its
-    /// printed number times this turn's Arkhe multiple (Pneuma for Usher's
-    /// Block, Ousia for the two damage acts). The printed number wherever
-    /// there is no stage to ask -- a canonical copy, or a pet whose owner is
-    /// not a live Furina.
-    /// </summary>
-    internal int LiveAct()
+    protected List<(string, string)> Face => new()
     {
-        // A canonical copy has no owner, and `Owner` asserts mutability.
-        if (!IsMutable) return BaseAct;
-        var furina = Owner?.PetOwner?.Creature;
-        if (!FurinaStage.LiveFor(furina)) return BaseAct;
-        var ledger = FurinaStageLedger.For(furina!);
-        var multiple = Performer == StagePerformer.Usher
-            ? ledger.ActBlockMultiplier
-            : ledger.ActDamageMultiplier;
-        return BaseAct * multiple;
-    }
+        ("title", FurinaStageLedger.DisplayName(Performer)),
+        ("description", ActText(Performer)),
+    };
 
     /// <summary>
-    /// <c>{Act}</c>, READ AT FORMAT TIME -- <c>ProtoBombPower</c>'s
-    /// <c>SetOffDamageVar</c> shape: the game hands the var itself to
-    /// SmartFormat and formats it through <c>ToString()</c>, so the var asks
-    /// the ledger when the tip is drawn rather than storing a number that an
-    /// Arkhe choice later in the turn would leave stale.
+    /// What a performer does, in one or two short sentences: its act (with
+    /// its price, for a star) and, for a guest, its line. Numbers from
+    /// <see cref="FurinaStageLaw"/> (`EB-89`). Rehearsal's +N is on the
+    /// Rehearsal badge, not here.
     /// </summary>
-    private sealed class ActVar : DynamicVar
+    public static string ActText(StagePerformer who) => who switch
     {
-        public ActVar(int printed) : base("Act", printed)
-        {
-        }
+        StagePerformer.Usher =>
+            "Act: gain " + FurinaStageLaw.ActUsherBlock + " [gold]Block[/gold].",
+        StagePerformer.Chevalmarin =>
+            "Act: deal " + FurinaStageLaw.ActChevalmarinDamage
+          + " damage to ALL enemies.",
+        StagePerformer.Crabaletta =>
+            "Act: deal " + FurinaStageLaw.ActCrabalettaDamage
+          + " damage to a random enemy.",
+        StagePerformer.Neuvillette =>
+            "Your [gold]Hydro[/gold] damage deals "
+          + FurinaStageLaw.NeuvilletteHydroBonus + " more. Act: pay "
+          + FurinaStageLaw.ActNeuvillettePrice + " [gold]Fanfare[/gold] to deal "
+          + FurinaStageLaw.ActNeuvilletteDamage
+          + " [gold]Hydro[/gold] damage to ALL enemies.",
+        StagePerformer.Clorinde =>
+            "Whenever you [gold]Spend[/gold], deal "
+          + FurinaStageLaw.ClorindeSpendDamage
+          + " [gold]Electro[/gold] damage to a random enemy. Act: pay "
+          + FurinaStageLaw.ActClorindePrice + " to deal "
+          + FurinaStageLaw.ActClorindeDamage
+          + " [gold]Electro[/gold] damage to a random enemy.",
+        StagePerformer.Lyney =>
+            "The first [gold]Cue[/gold] card you play each turn costs 0. Act: "
+          + "pay " + FurinaStageLaw.ActLyneyPrice
+          + " [gold]Fanfare[/gold] to add a Trick to your hand.",
+        StagePerformer.Escoffier =>
+            "The first Salon summon card you play each turn costs 0. Act: "
+          + "pay " + FurinaStageLaw.ActEscoffierPrice
+          + " [gold]Fanfare[/gold] to make your Salon members act.",
+        StagePerformer.Navia =>
+            "Act: deal [gold]Geo[/gold] damage to a random enemy, twice the "
+          + "[gold]Fanfare[/gold] you spent this turn.",
+        StagePerformer.Charlotte =>
+            "At the start of your turn, draw " + FurinaStageLaw.CharlotteExtra
+          + " more card. Act: gain " + FurinaStageLaw.ActCharlotteGain
+          + " [gold]Fanfare[/gold].",
+        StagePerformer.Lynette =>
+            "The first performer you [gold]Cue[/gold] each turn moves to the "
+          + "front. Act: deal " + FurinaStageLaw.ActLynetteDamage
+          + " [gold]Anemo[/gold] damage to an enemy with an aura, if any.",
+        StagePerformer.Chevreuse =>
+            "Act, once a turn: pay " + FurinaStageLaw.ActChevreusePrice
+          + " [gold]Fanfare[/gold] to gain " + FurinaStageLaw.ActChevreuseEnergy
+          + " [gold]Energy[/gold] next turn.",
+        StagePerformer.Sigewinne =>
+            "Act: gain " + FurinaStageLaw.ActSigewinneBlock
+          + " [gold]Block[/gold], plus " + FurinaStageLaw.SigewinnePerHpLoss
+          + " for each time you lost HP since her last act.",
+        StagePerformer.Wriothesley =>
+            "Act: deal " + FurinaStageLaw.ActWriothesleyDamage
+          + " [gold]Cryo[/gold] damage to a random enemy, plus "
+          + FurinaStageLaw.WriothesleyPerBlocked
+          + " per damage your [gold]Block[/gold] stopped since his last act.",
+        _ => "",
+    };
 
-        private int Live =>
-            (_owner as StagePerformerBadge)?.LiveAct() ?? (int)BaseValue;
-
-        protected override decimal GetBaseValueForIConvertible() => Live;
-
-        public override string ToString() =>
-            Live.ToString(CultureInfo.InvariantCulture);
-    }
-
-    /// <summary>
-    /// Pin this performer's badge on its body. Called by
-    /// <c>FurinaStagePets.Field</c> the moment the body is fielded, so a body
-    /// never stands on the stage without saying what it does. Silent, no
-    /// applier and no card, as <c>OstyCmd.Summon</c> applies Osty's.
-    /// </summary>
+    /// <summary>Pin this performer's badge on its body, silently, the moment
+    /// it is fielded (<c>FurinaStagePets.Field</c>).</summary>
     public static async Task Pin(Creature pet, StagePerformer who)
     {
         if (pet.Powers.OfType<StagePerformerBadge>().Any()) return;
@@ -174,397 +161,80 @@ public abstract class StagePerformerBadge : PowerModel
                           silent: true);
 }
 
-/// <summary>Gentilhomme Usher's badge: Block at the end of her turn (brief
-/// sec.3 rule 10).</summary>
 public sealed class UsherBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Usher;
-
-    protected override int BaseAct => FurinaStageLaw.ActUsherBlock;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(StagePerformer.Usher)),
-        ("description",
-            "End of your turn: gain " + FurinaStageLaw.ActUsherBlock
-          + " [gold]Block[/gold]."),
-        ("smartDescription",
-            "End of your turn: gain {Act} [gold]Block[/gold]."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-/// <summary>Surintendante Chevalmarin's badge: 2 damage to every enemy at
-/// the end of her turn. No Hydro since draft 3 (2026-09-25).</summary>
-public sealed class ChevalmarinBadgePower
-    : StagePerformerBadge, ILocalizationProvider
+public sealed class ChevalmarinBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Chevalmarin;
-
-    protected override int BaseAct => FurinaStageLaw.ActChevalmarinDamage;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(StagePerformer.Chevalmarin)),
-        ("description",
-            "End of your turn: deal " + FurinaStageLaw.ActChevalmarinDamage
-          + " damage to ALL enemies."),
-        ("smartDescription",
-            "End of your turn: deal {Act} damage to ALL enemies."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-/// <summary>Mademoiselle Crabaletta's badge: damage to a random enemy at the
-/// end of her turn. No Hydro since draft 3 (2026-09-25).</summary>
-public sealed class CrabalettaBadgePower
-    : StagePerformerBadge, ILocalizationProvider
+public sealed class CrabalettaBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Crabaletta;
-
-    protected override int BaseAct => FurinaStageLaw.ActCrabalettaDamage;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(StagePerformer.Crabaletta)),
-        ("description",
-            "End of your turn: deal " + FurinaStageLaw.ActCrabalettaDamage
-          + " damage to a random enemy."),
-        ("smartDescription",
-            "End of your turn: deal {Act} damage to a random enemy."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-// ---- THE GUEST CAST (2026-09-25) -----------------------------------------
-//
-// One badge per guest, each the same sentence as that guest's tip
-// (`ArmKeywordTips.ForNeuvillette` and the seven beside it), numerals from
-// `FurinaStageLaw` (`EB-89`). A damage act's number is live under Ousia
-// (`{Act}`), as the trio's is; the others print no number that moves.
-
-public sealed class NeuvilletteBadgePower : StagePerformerBadge,
-                                            ILocalizationProvider
+public sealed class NeuvilletteBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Neuvillette;
-
-    protected override int BaseAct => FurinaStageLaw.ActNeuvilletteDamage;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: pay " + FurinaStageLaw.ActNeuvillettePrice
-          + " of his Fanfare to deal " + FurinaStageLaw.ActNeuvilletteDamage
-          + " [gold]Hydro[/gold] damage to ALL enemies."),
-        ("smartDescription",
-            "End of your turn: pay " + FurinaStageLaw.ActNeuvillettePrice
-          + " of his Fanfare to deal {Act} [gold]Hydro[/gold] damage to ALL "
-          + "enemies."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-public sealed class ClorindeBadgePower : StagePerformerBadge,
-                                         ILocalizationProvider
+public sealed class ClorindeBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Clorinde;
-
-    protected override int BaseAct => FurinaStageLaw.ActClorindeDamage;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: take " + FurinaStageLaw.ActClorindeTax
-          + " Fanfare from each other performer to deal "
-          + FurinaStageLaw.ActClorindeDamage
-          + " [gold]Electro[/gold] damage to a random enemy."),
-        ("smartDescription",
-            "End of your turn: take " + FurinaStageLaw.ActClorindeTax
-          + " Fanfare from each other performer to deal {Act} "
-          + "[gold]Electro[/gold] damage to a random enemy."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
 public sealed class NaviaBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Navia;
-
-    protected override int BaseAct => 0;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy."),
-        ("smartDescription",
-            "End of your turn: deal [gold]Geo[/gold] damage equal to her "
-          + "Fanfare to a random enemy."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-public sealed class ChevreuseBadgePower : StagePerformerBadge,
-                                          ILocalizationProvider
+public sealed class ChevreuseBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Chevreuse;
-
-    protected override int BaseAct => 0;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: [gold]Spend[/gold] "
-          + FurinaStageLaw.ActChevreusePrice + " to gain "
-          + FurinaStageLaw.ActChevreuseEnergy
-          + " [gold]Energy[/gold] next turn."),
-        ("smartDescription",
-            "End of your turn: [gold]Spend[/gold] "
-          + FurinaStageLaw.ActChevreusePrice + " to gain "
-          + FurinaStageLaw.ActChevreuseEnergy
-          + " [gold]Energy[/gold] next turn."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-public sealed class WriothesleyBadgePower : StagePerformerBadge,
-                                            ILocalizationProvider
+public sealed class WriothesleyBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Wriothesley;
-
-    protected override int BaseAct => 0;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
-          + " [gold]Cryo[/gold] damage to a random enemy, plus "
-          + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
-          + "he lost to hits and " + FurinaStageLaw.ActWriothesleyBlockedRate
-          + " per damage [gold]Block[/gold] saved him."),
-        ("smartDescription",
-            "End of your turn: deal " + FurinaStageLaw.ActWriothesleyBase
-          + " [gold]Cryo[/gold] damage to a random enemy, plus "
-          + FurinaStageLaw.ActWriothesleyRate + " per [gold]Fanfare[/gold] "
-          + "he lost to hits and " + FurinaStageLaw.ActWriothesleyBlockedRate
-          + " per damage [gold]Block[/gold] saved him."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-public sealed class SigewinneBadgePower : StagePerformerBadge,
-                                          ILocalizationProvider
+public sealed class SigewinneBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Sigewinne;
-
-    protected override int BaseAct => 0;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: your front performer regains half the "
-          + "[gold]Fanfare[/gold] hits took from it since her last act, at "
-          + "least " + FurinaStageLaw.ActSigewinneHealFloor + "."),
-        ("smartDescription",
-            "End of your turn: your front performer regains half the "
-          + "[gold]Fanfare[/gold] hits took from it since her last act, at "
-          + "least " + FurinaStageLaw.ActSigewinneHealFloor + "."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-public sealed class CharlotteBadgePower : StagePerformerBadge,
-                                          ILocalizationProvider
+public sealed class CharlotteBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Charlotte;
-
-    protected override int BaseAct => 0;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: each other performer gains "
-          + FurinaStageLaw.ActCharlotteGift + " [gold]Fanfare[/gold]."),
-        ("smartDescription",
-            "End of your turn: each other performer gains "
-          + FurinaStageLaw.ActCharlotteGift + " [gold]Fanfare[/gold]."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-public sealed class LynetteBadgePower : StagePerformerBadge,
-                                        ILocalizationProvider
+public sealed class LynetteBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Lynette;
-
-    // 2026-09-25 night (the granted-guest seat round): the act always lands.
-    // Both seats never played her: "nothing reliably leaves an aura for her
-    // Swirl". Anemo damage on an aura Swirls; on none it is plain damage.
-    protected override int BaseAct => FurinaStageLaw.ActLynetteDamage;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: deal " + FurinaStageLaw.ActLynetteDamage
-          + " [gold]Anemo[/gold] damage to a random enemy, preferring one "
-          + "with an aura."),
-        ("smartDescription",
-            "End of your turn: deal {Act} [gold]Anemo[/gold] damage to a "
-          + "random enemy, preferring one with an aura."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-// ---- THE SUPPORTING POOL (2026-09-26) ------------------------------------
-//
-// The two new guests' badges, each the same sentence as that guest's tip
-// (`ArmKeywordTips.ForLyney` / `ForEscoffier`), numerals from
-// `FurinaStageLaw`. The damage number is live under Ousia (`{Act}`).
-
-public sealed class LyneyBadgePower : StagePerformerBadge,
-                                      ILocalizationProvider
+public sealed class LyneyBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Lyney;
-
-    protected override int BaseAct => FurinaStageLaw.ActLyneyDamage;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
-          + " of his Fanfare to deal " + FurinaStageLaw.ActLyneyDamage
-          + " [gold]Pyro[/gold] damage to a random enemy. If not in front, "
-          + "he swaps with the front."),
-        ("smartDescription",
-            "End of your turn: pay " + FurinaStageLaw.ActLyneyPrice
-          + " of his Fanfare to deal {Act} [gold]Pyro[/gold] damage to a "
-          + "random enemy. If not in front, he swaps with the front."),
-    };
+    public List<(string, string)>? Localization => Face;
 }
 
-public sealed class EscoffierBadgePower : StagePerformerBadge,
-                                          ILocalizationProvider
+public sealed class EscoffierBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Escoffier;
-
-    protected override int BaseAct => FurinaStageLaw.ActEscoffierDamage;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", FurinaStageLedger.DisplayName(Performer)),
-        ("description",
-            "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
-          + " of her Fanfare to give each other performer "
-          + FurinaStageLaw.ActEscoffierGift + " Fanfare and deal "
-          + FurinaStageLaw.ActEscoffierDamage
-          + " [gold]Cryo[/gold] damage to ALL enemies."),
-        ("smartDescription",
-            "End of your turn: pay " + FurinaStageLaw.ActEscoffierPrice
-          + " of her Fanfare to give each other performer "
-          + FurinaStageLaw.ActEscoffierGift + " Fanfare and deal {Act} "
-          + "[gold]Cryo[/gold] damage to ALL enemies."),
-    };
-}
-
-/// <summary>
-/// THE STAGE, ON FURINA: when the cast acts and the damage order, on the
-/// body a player hovers first. Applied at combat open and re-asked every turn
-/// start (<see cref="FurinaStage.InstallBadge"/>), so a fight never runs
-/// without it. It moves nothing.
-///
-/// A NEW POWER AND NOT A REUSE, because the arm has no Furina-side power that
-/// is always on: Salon Solitaire is a relic, and the batch-two powers are
-/// cards' powers a run may never draft. It sits in the power row under her
-/// health bar; the damage-order strip (<c>FurinaStageStrip</c>) was a gauge on
-/// the second row ABOVE her, so the two do not meet.
-/// </summary>
-public sealed class StageSummaryPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "The Stage"),
-        // 2026-09-25 (opus-furina-l2b, (c) 3): THE SEAT COUNT. Neither this
-        // badge nor the Summon tip's full-stage clause said how many seats
-        // there are, and the seat "never dared a third summon". The number is
-        // the law's, interpolated.
-        // Draft 3 (2026-09-25): rule 12, the fade, replaces the damage-order
-        // sentence, which the Fanfare tip carries on every card that prints
-        // the word.
-        // The second text pass (2026-09-28): when the cast acts, then the
-        // fade, in the fade tip's words. The fade pass (2026-09-29): a
-        // quarter of every bar, the front's included. 2026-10-03 ([USER]:
-        // "Fanfare decay should be at the start of the next turn, not the
-        // end"): the fade moved to her next turn's start.
-        ("description",
-            "Up to " + FurinaStageLaw.Seats + " performers act at the end of "
-          + "your turn. At the start of your turn, each loses a quarter of "
-          + "its Fanfare, rounded down."),
-        // SOLD OUT (the supporting pool, 2026-09-26): in combat the count is
-        // her stage's own, so the badge says 4 once the fourth seat is open.
-        // The static line above is the canonical face a copy with no owner
-        // shows, as on the performers' badges.
-        ("smartDescription",
-            "Up to {Seats} performers act at the end of your turn. At the "
-          + "start of your turn, each loses a quarter of its Fanfare, "
-          + "rounded down."),
-        // Relics smoke seat 2026-09-27: with Grand Theater Program owned the
-        // line still said performers "lose half above 5". The face a held
-        // Program selects (`SmartDescriptionLocKey`).
-        (NoFadeKey,
-            "Up to {Seats} performers act at the end of your turn. Your "
-          + "performers do not fade."),
-    };
-
-    /// <summary>The loc suffix a held Grand Theater Program selects.</summary>
-    public const string NoFadeKey = "smartDescriptionNoFade";
-
-    /// <summary>The selector: the no-fade face while her Grand Theater
-    /// Program is held, the ruled face otherwise (and on a canonical copy,
-    /// which has no owner to ask).</summary>
-    protected override string SmartDescriptionLocKey =>
-        ShowsNoFade ? Id.Entry + "." + NoFadeKey : base.SmartDescriptionLocKey;
-
-    /// <summary>Does this badge print the no-fade face? Her Grand Theater
-    /// Program held; never on a canonical copy.</summary>
-    public bool ShowsNoFade =>
-        IsMutable && Owner is { } furina
-        && Relics.FurinaStageRelics.Holds<Relics.GrandTheaterProgram>(furina);
-
-    public override PowerType Type => PowerType.Buff;
-
-    /// <summary>No number: the badge is a rule, not a counter.</summary>
-    public override PowerStackType StackType => PowerStackType.Single;
-
-    public override bool ShouldPlayVfx => false;
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new DynamicVar[] { new SeatsVar() };
-
-    /// <summary>Her stage's seat count now: <see cref="FurinaStageLaw.Seats"/>
-    /// wherever there is no live stage to ask.</summary>
-    internal int LiveSeats()
-    {
-        // A canonical copy has no owner, and `Owner` asserts mutability.
-        if (!IsMutable) return FurinaStageLaw.Seats;
-        var furina = Owner;
-        return FurinaStage.LiveFor(furina)
-            ? FurinaStageLedger.For(furina!).Capacity
-            : FurinaStageLaw.Seats;
-    }
-
-    /// <summary><c>{Seats}</c>, read at format time -- the performers'
-    /// <c>ActVar</c> shape, so a Sold Out played mid-turn is on the badge the
-    /// next time it is drawn.</summary>
-    private sealed class SeatsVar : DynamicVar
-    {
-        public SeatsVar() : base("Seats", FurinaStageLaw.Seats)
-        {
-        }
-
-        private int Live =>
-            (_owner as StageSummaryPower)?.LiveSeats() ?? (int)BaseValue;
-
-        protected override decimal GetBaseValueForIConvertible() => Live;
-
-        public override string ToString() =>
-            Live.ToString(CultureInfo.InvariantCulture);
-    }
+    public List<(string, string)>? Localization => Face;
 }

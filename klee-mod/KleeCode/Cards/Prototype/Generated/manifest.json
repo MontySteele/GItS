@@ -862,10 +862,6 @@
       "ProtoFsGrandEntranceModeA",
       "ProtoFsGrandEntranceModeB"
     ],
-    "proto_fs_interposition": [
-      "ProtoFsInterpositionModeA",
-      "ProtoFsInterpositionModeB"
-    ],
     "proto_fs_interval_bell": [
       "ProtoFsIntervalBellModeA",
       "ProtoFsIntervalBellModeB"
@@ -873,6 +869,10 @@
     "proto_fs_quick_cue": [
       "ProtoFsQuickCueModeA",
       "ProtoFsQuickCueModeB"
+    ],
+    "proto_fs_raise_a_toast": [
+      "ProtoFsRaiseAToastModeA",
+      "ProtoFsRaiseAToastModeB"
     ],
     "proto_fs_spirited_aria": [
       "ProtoFsSpiritedAriaModeA",
@@ -923,8 +923,7 @@
       "weak": 1
     },
     "proto_fs_counterclaim": {
-      "damage": 2,
-      "conditional_then_damage": 2
+      "power_amount": 1
     },
     "proto_fs_courtroom_drama": {
       "power_amount": 1
@@ -959,10 +958,10 @@
       "formula_per": 2
     },
     "proto_fs_final_bow": {
-      "remove": "exhaust"
+      "block": 3
     },
     "proto_fs_five_century_act": {
-      "power_amount": 2
+      "cost": -1
     },
     "proto_fs_full_house": {
       "cost": -1
@@ -984,13 +983,13 @@
       "damage": 3
     },
     "proto_fs_guest_of_honor": {
-      "cost": -1
+      "block": 3
     },
     "proto_fs_guest_star_charlotte": {
-      "stage_guest": 2
+      "cost": -1
     },
     "proto_fs_guest_star_chevreuse": {
-      "stage_guest": 2
+      "cost": -1
     },
     "proto_fs_guest_star_clorinde": {
       "stage_guest": 2
@@ -999,7 +998,7 @@
       "cost": -1
     },
     "proto_fs_guest_star_lynette": {
-      "stage_guest": 2
+      "cost": -1
     },
     "proto_fs_guest_star_lyney": {
       "stage_guest": 2
@@ -1011,10 +1010,10 @@
       "cost": -1
     },
     "proto_fs_guest_star_sigewinne": {
-      "stage_guest": 2
+      "cost": -1
     },
     "proto_fs_guest_star_wriothesley": {
-      "stage_guest": 2
+      "cost": -1
     },
     "proto_fs_hold_your_places": {
       "block": 2,
@@ -1024,22 +1023,22 @@
       "damage": 3
     },
     "proto_fs_intermission": {
-      "stage_intermission": -1
+      "draw": 1
     },
     "proto_fs_interposition": {
-      "conditional_block": 3
+      "block": 3
     },
     "proto_fs_interval_bell": {
       "stage_spend": -1
     },
     "proto_fs_leading_lady": {
-      "formula_base": 3
+      "block": 2
     },
     "proto_fs_let_the_people_rejoice": {
       "cost": -1
     },
     "proto_fs_mademoiselle_crabaletta": {
-      "cost": -1
+      "damage": 2
     },
     "proto_fs_one_woman_show": {
       "cost": -1
@@ -1051,7 +1050,7 @@
       "draw": 1
     },
     "proto_fs_ousia_surge": {
-      "formula_base": 3
+      "formula_per": 1
     },
     "proto_fs_people_of_fontaine": {
       "power_amount": 1
@@ -1060,7 +1059,7 @@
       "damage": 3
     },
     "proto_fs_pneuma_refrain": {
-      "formula_base": 3
+      "formula_per": 1
     },
     "proto_fs_quick_change": {
       "power_amount": 1
@@ -1089,7 +1088,7 @@
       "power_amount": 1
     },
     "proto_fs_share_the_spotlight": {
-      "cost": -1
+      "cap": 1
     },
     "proto_fs_singer_of_many_waters": {
       "stage_raise": 3
@@ -1111,7 +1110,7 @@
       "draw": 1
     },
     "proto_fs_standing_ovation": {
-      "cost": -1
+      "stage_raise": 1
     },
     "proto_fs_star_billing": {
       "power_amount": 1
@@ -1132,7 +1131,7 @@
       "damage": 6
     },
     "proto_fs_thunderous_applause": {
-      "power_amount": 1
+      "innate": true
     },
     "proto_fs_tidal_flourish": {
       "conditional_damage": 3

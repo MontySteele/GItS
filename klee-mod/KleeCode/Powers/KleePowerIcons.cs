@@ -293,8 +293,13 @@ internal static class KleePowerIcons
         FullHousePower => KleePck.Path("furina/powers/grand_salon.png"),
         ThunderousApplausePower =>
             KleePck.Path("furina/powers/standing_ovation.png"),
-        RaptAudiencePower =>
+        // THE RE-FOUNDING (2026-10-04): Rehearsal and its Rare source
+        // borrow the gallery's sigil and Full House's neighbour, on the same
+        // terms.
+        RehearsalPower =>
             KleePck.Path("furina/powers/the_gallery_stirs.png"),
+        PremiereSeasonPower =>
+            KleePck.Path("furina/powers/grand_salon.png"),
         FiveCenturyActPower =>
             KleePck.Path("furina/powers/unheard_confession.png"),
         ArkheAlignmentPower =>
@@ -348,7 +353,8 @@ internal static class KleePowerIcons
         SoliloquyPower => KleePck.Path("furina/powers/leading_role.png"),
         OneWomanShowPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
-        StageSummaryPower => KleePck.Path("furina/powers/center_stage.png"),
+        // The re-founding: her Fanfare badge wears the board's sigil.
+        FanfarePower => KleePck.Path("furina/powers/center_stage.png"),
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md): five powers,
         // each borrowing the shipped sigil nearest its job on the terms every
         // borrow above takes -- the Bomb for the two that set Klee's Bombs
@@ -356,7 +362,6 @@ internal static class KleePowerIcons
         // ovation for the crowd, and the Casket's for the Plan payoff.
         PassTheMatchPower => KleePck.Path("klee/powers/bomb.png"),
         KnightsOfFavoniusPower => KleePck.Path("klee/powers/bomb_damage_up.png"),
-        GuestOfHonorPower => KleePck.Path("furina/powers/center_stage.png"),
         PeopleOfFontainePower =>
             KleePck.Path("furina/powers/standing_ovation.png"),
         SangonomiyasCounselPower =>

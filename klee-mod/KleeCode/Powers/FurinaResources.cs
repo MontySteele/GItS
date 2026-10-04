@@ -22,7 +22,7 @@ public interface IFurinaCharacter
 /// <summary>
 /// Furina's identity. Her shipped meters (Encore, the Fanfare meter and her
 /// Burst) went with the shipped kits (legacy cleanup stage 5); the Stage's
-/// Fanfare is each performer's bar (<see cref="FurinaStage"/>).
+/// Fanfare is one number on her (<see cref="FurinaStage"/>).
 /// </summary>
 public static class FurinaResources
 {
@@ -45,8 +45,9 @@ public static class FurinaResources
 }
 
 /// <summary>
-/// Furina's combat hooks: the Stage's damage order and its settle, and the
-/// Curtain Call windows (Quick Change's first Attack, the per-turn HP lost).
+/// Furina's combat hooks: the Curtain Call windows (Quick Change's first
+/// Attack, the per-turn HP lost). The Stage's own hooks are
+/// <c>FurinaStageHooks</c>'s; since the re-founding no hit touches the stage.
 /// </summary>
 public sealed class FurinaResourceHooks : AbstractModel
 {
@@ -80,73 +81,6 @@ public sealed class FurinaResourceHooks : AbstractModel
             {
                 CurtainCallHooks.ResetTurn(creature);
             }
-        }
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// The stage's settle, per damage instance: a lead emptied by that hit
-    /// leaves, the survivors re-flow and the strip redraws, so the board is
-    /// settled before the NEXT hit of the same flurry. A lead that hit
-    /// emptied takes its Bow here, after the hit is dealt (rule 7).
-    /// </summary>
-    public override async Task AfterDamageReceived(
-        PlayerChoiceContext choiceContext, Creature target,
-        DamageResult result, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
-    {
-        if (!FurinaResources.IsFurina(target)) return;
-        await FurinaStage.Flush(choiceContext, target);
-        FurinaStage.NoteHitOnFurina(target, result, dealer);
-        Vfx.FurinaStageCues.Refresh(target);
-    }
-
-    /// <summary>
-    /// THE STAGE'S DAMAGE ORDER, brief sec.3 rule 6: "Furina's Block, then the
-    /// lead performer's Fanfare, then Furina." The hook fires PER DAMAGE
-    /// INSTANCE with Block already spent, which is the two properties rule 6
-    /// needs. TRUNCATED, AS THE ENGINE COUNTS IT (2026-09-25):
-    /// <c>FurinaStage.HpLossThroughBlock</c> carries the finding.
-    /// </summary>
-    public override decimal ModifyHpLostBeforeOsty(
-        Creature target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
-    {
-        if (!FurinaResources.IsFurina(target)
-            || (props & ValueProp.Unblockable) != 0)
-        {
-            return amount;
-        }
-        // A HIT A LETHAL MINE ALREADY ANSWERED IS NOT ABSORBED (`EB-336`;
-        // since 2026-09-25 a Klee's Mine answers an attack on Furina too). The
-        // attacker died to the Mine before this hit, so the hit is owed
-        // nothing. 2026-09-27: what her Block stopped of this hit, noted a
-        // step earlier (`BeforeDamageReceived` below), taken here for the
-        // front performer; a pre-empted hit drops it.
-        var blocked = FurinaStage.TakeBlocked(target);
-        if (ProtoBombPower.Preempted.Covers(target, dealer)
-            && props.IsPoweredAttack())
-        {
-            return 0m;
-        }
-        var incoming = FurinaStage.HpLossThroughBlock(amount);
-        // 2026-09-26: the card behind a hit no enemy dealt (a Burn in hand),
-        // for the stage log.
-        string source;
-        try { source = cardSource?.Title ?? ""; }
-        catch (System.Exception) { source = ""; }
-        return FurinaStage.AbsorbHit(target, incoming, dealer,
-                                     source: source, blocked: blocked);
-    }
-
-    public override Task BeforeDamageReceived(
-        PlayerChoiceContext choiceContext, Creature target, decimal amount,
-        ValueProp props, Creature? dealer, CardModel? cardSource)
-    {
-        if (FurinaResources.IsFurina(target))
-        {
-            FurinaStage.NoteIncomingHit(
-                target, amount, (props & ValueProp.Unblockable) != 0);
         }
         return Task.CompletedTask;
     }

@@ -6676,8 +6676,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     interpolated constants folded out, and it is held in step FROM THIS SIDE --
     the same discipline `CHARGE_SOURCE_LINE` is under. A sentence rewritten in
     `ArmKeywordTips.cs` and not here goes red on the anchor it dropped."""
-    src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-           / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    tips_src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+                / "ArmKeywordTips.cs").read_text(encoding="utf-8")
+    # The re-founding (2026-10-04): a performer's tip IS its badge's
+    # sentence, so the badges file is the other half of the mod's text.
+    src = tips_src + (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+                      / "FurinaStageBadges.cs").read_text(encoding="utf-8")
     anchors = {
         # `EB-343` (R248) rewrote the word: it gained a fourth rule and
         # [USER] held it to the 135-character tip ceiling (PR #340), so
@@ -6768,66 +6772,30 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                "Side. ",
                "He makes an ",
                " hit at the end of your turn while he is out."],
-        # FURINA, THE STAGE (`EB-723`, R269). The reframe's four -- Deploy,
-        # Evoke, Drain and Encore -- left this table with the `proto_fr_` rows
-        # that printed them, under R213 B's deletion rule.
-        #
-        # THE SEVEN the brief's sec.12 names, and the anchors are the clauses
-        # AROUND the interpolated numerals, the same fold-out this table
-        # already makes for the Bomb's growth and the Spark's opening bank:
-        # `Bow` quotes two of `FurinaStageLaw`'s numbers and `lead performer`
-        # the regen, so what is held in step is the prose either side. The
-        # clauses that straddle a `[gold]` span are anchored by the halves
-        # that are whole.
-        # `EB-746`: the word names a MODE the player chooses, not a rider the
-        # engine fires.
-        # R276 picks 1 and 2: the back performer pays, in full.
-        # THE TEXT PASS (2026-09-25): `Raise` and `Rotate` retired, the
-        # lead renamed the FRONT performer, every row in [USER]'s words.
-        # The rules pass (2026-10-01): back first, then forward.
-        "Spend": ["Pay Fanfare from your ", " first, then ",
-                  "from the next one forward. Offered only if your performers "
-                  "hold ", "enough."],
-        # The rules pass (2026-10-01): only what you play summons.
-        "Fanfare": ["A performer's health. If no one is on stage, a card "
-                    "that gives ", "summons a random performer holding it."],
-        # Draft 3 (2026-09-25): the Bow is the performer's act once more;
-        # the rules pass (2026-10-01) covers Grand Finale's stay.
-        "Bow": ["A performer acts one last time, without paying, as it "
-                "leaves "],
-        # The rules pass (2026-10-01): rule 4 cut; the damage order here.
-        "front performer": ["Takes hits after your ", " cannot hold reaches "
-                            "you."],
-        # The second text pass (2026-09-28): the last in line, and who
-        # pays a Spend. A lone performer is both seats.
-        "back performer": ["Your last performer in line. ",
-                           " pays from it ",
-                           "first. A lone performer is both front and back."],
-        # The second text pass (2026-09-28): the fade's own tip. The fade
-        # pass (2026-09-29): a quarter, the front's bar included.
-        "fade": ["At the start of your turn, each performer loses a quarter "
-                 "of its ", ", rounded down."],
-        # R276 batch two: Arkhe Alignment's two halves. Pneuma's numeral is
-        # interpolated from `ArkheAlignmentPower.PneumaLeadRegain`, so the
-        # anchors are the prose either side of it.
+        # FURINA, THE STAGE, RE-FOUNDED (2026-10-04,
+        # review/active/furina-refounding-2026-10-03.md): one Fanfare number
+        # on Furina, no bars, stars pay for their acts, Cue and Rehearsal
+        # new. The anchors are the prose around the golded spans and the
+        # interpolated numerals; the performers' rows are their badges'
+        # sentences (`StagePerformerBadge.ActText`, in the badges file).
+        "Spend": ["Pay that much ", ". Offered only if you have "],
+        "Fanfare": ["Your applause. Cards and Bows give it. ",
+                    "stars' acts use it. It never fades."],
+        "Bow": ["The performer acts once more without paying, then you gain "],
+        "Cue": ["Choose a performer. It acts now. A star pays as usual."],
+        "Rehearsal": ["Each one makes your performers' damage and ",
+                      "acts deal 1 more."],
+        "front performer": ["The performer in the first seat. Performers act "
+                            "front to back ", "at the end of your turn."],
         "Ousia": ["This turn, your performers' acts deal double damage."],
-        "Pneuma": ["This turn, your performers' acts give double ",
-                   "and your front performer regains "],
-        # 2026-09-25: what a summon does and what each performer does. The
-        # numerals are interpolated on the mod side, so the anchors are the
-        # prose either side of them.
-        # One sentence since the trio can be cloned (2026-09-25).
-        # The second text pass (2026-09-28): "first", and "gives".
-        "Summon": ["A performer joins at the back with ",
-                   "stage, the front one ",
-                   "s first and gives the ",
-                   "newcomer its Fanfare."],
-        # Draft 3 (2026-09-25): one sentence each, no Hydro, no Bow clause.
-        "Gentilhomme Usher": ["End of your turn: gain "],
-        "Surintendante Chevalmarin": ["End of your turn: deal ",
+        "Pneuma": ["Gain "],
+        "Summon": ["A performer joins at the back. On a full stage, the front "
+                   "Salon ", "member ", "s and leaves first. Guests keep "
+                   "their ", "seats."],
+        "Gentilhomme Usher": ["Act: gain "],
+        "Surintendante Chevalmarin": ["Act: deal ",
                                       " damage to ALL enemies."],
-        "Mademoiselle Crabaletta": ["End of your turn: deal ",
-                                    " damage to a random enemy."],
+        "Mademoiselle Crabaletta": [" damage to a random enemy."],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
         # own words. The strike number is interpolated on both sides -- the
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
@@ -6854,42 +6822,27 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # it was `EB-329`'s row with no tooltip to be held in step with.
         "Companion": ["A card titled with a character's name, a dash, then "
                       "its ", "own."],
-        # THE GUEST CAST (2026-09-25): the keyword and the eight guests'
-        # tips. Numerals are interpolated on the mod side, so the anchors are
-        # the prose around them.
-        # The second text pass (2026-09-28).
-        "Guest Star": ["You can have one of each on stage. Summoning one "
-                       "already there ", "makes it ",
-                       ", then return with the new ", " added."],
-        "Neuvillette": ["End of your turn: pay ", " of his Fanfare to deal ",
+        # The Guest Star keyword and the guests' badges (the re-founding).
+        "Guest Star": ["One of each on stage. Summoning one already there "
+                       "makes it ", " and stay."],
+        "Neuvillette": [" damage deals ", " more. Act: pay ",
                         " damage to ALL enemies."],
-        "Clorinde": ["End of your turn: take ",
-                     " Fanfare from each other performer to deal ",
-                     " damage to a random enemy."],
-        "Navia": ["End of your turn: deal ", " damage equal to her ",
-                  "Fanfare to a random enemy."],
-        "Chevreuse": ["End of your turn: ", " to gain ", " next turn."],
-        # 2026-09-27: he always attacks, and reflects her Block too.
-        "Wriothesley": ["End of your turn: deal ",
-                        " damage to a random enemy, plus "],
-        # 2026-09-29: the medic.
-        "Sigewinne": ["End of your turn: your front performer regains half "
-                      "the ", " hits took from it since her last act, at ",
-                      "."],
-        "Charlotte": ["End of your turn: each other performer gains "],
-        # 2026-09-25 night (the granted-guest seat round): the act lands.
-        # The second text pass (2026-09-28): "preferring".
-        "Lynette": ["End of your turn: deal ",
-                    " damage to a random enemy, preferring one ",
-                    "with an aura."],
-        # THE SUPPORTING POOL (2026-09-26): two more guests.
-        "Lyney": ["End of your turn: pay ", " of his Fanfare to deal ",
-                  " damage to a random enemy. If not in front, ",
-                  "he swaps with the front."],
-        "Escoffier": ["End of your turn: pay ",
-                      " of her Fanfare to give each other performer ",
-                      " Fanfare and deal ",
-                      " damage to ALL enemies."],
+        "Clorinde": ["Whenever you ", " damage to a random enemy. Act: pay "],
+        "Navia": ["Act: deal ", " damage to a random enemy, twice the ",
+                  " you spent this turn."],
+        "Chevreuse": ["Act, once a turn: pay ", " next turn."],
+        "Wriothesley": [" damage to a random enemy, plus ",
+                        " per damage your "],
+        "Sigewinne": [" for each time you lost HP since her last act."],
+        "Charlotte": ["At the start of your turn, draw ", " more card. Act: "
+                      "gain "],
+        "Lynette": ["The first performer you ",
+                    " each turn moves to the ", "front. Act: deal ",
+                    " damage to an enemy with an aura, if any."],
+        "Lyney": ["The first ", " card you play each turn costs 0. Act: ",
+                  " to add a Trick to your hand."],
+        "Escoffier": ["The first Salon summon card you play each turn costs "
+                      "0. Act: ", " to make your Salon members act."],
         # VARKA (the Oath rework): the leading prose of each tip, before
         # any interpolated word (the C# side may gold the keywords).
         "Oath": ["1 Oath per element a card applies, plus 1 per element "
@@ -6916,13 +6869,16 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
             == set(blindplay.ARM_KEYWORDS))
     for key in ("BombKey", "SetOffKey", "SparkKey", "MineKey", "MendKey",
                 "PlanKey", "SpendKey", "FanfareKey", "BowKey",
-                "FrontPerformerKey", "BackPerformerKey", "FadeKey",
+                "FrontPerformerKey", "CueKey", "RehearsalKey",
                 "SwirlKey", "GroundedKey", "CompanionKey"):
-        assert f"public const string {key}" in src
-    assert "HexereiKey" not in src
+        assert f"public const string {key}" in tips_src
+    assert "HexereiKey" not in tips_src
+    # The re-founding (2026-10-04) retired these two with the bars.
+    for key in ("BackPerformerKey", "FadeKey"):
+        assert f"public const string {key}" not in tips_src
     # The text pass (2026-09-25) retired these three keys with their words.
     for key in ("RaiseKey", "RotateKey", "LeadPerformerKey"):
-        assert f"public const string {key}" not in src
+        assert f"public const string {key}" not in tips_src
     for word, phrases in anchors.items():
         for phrase in phrases:
             assert phrase in src, (word, phrase)
@@ -7085,12 +7041,10 @@ def test_the_glossary_carries_no_markup_and_no_id():
             assert not qa_packet.leaks(body), word
 
 
-def test_the_spend_row_says_the_back_performer_pays_in_full():
-    """`EB-723`, as R276 ruled it (picks 1 and 2). The Spend is paid by the
-    BACK performer -- the bank -- and only in full: a bar short of the price
-    is not offered the mode, and a performer the Spend empties exactly takes
-    its Bow. Six of nine seats had called the old over-sized Spend a
-    loophole.
+def test_the_spend_row_says_she_pays_from_her_fanfare():
+    """`EB-723`, as the re-founding (2026-10-04) rules it: Fanfare is ONE
+    number on Furina, a Spend N takes N of it, and the mode is offered only
+    when she has enough.
 
     Held in step with `ArmKeywordTips.ForSpend` from this side, the discipline
     every row in that table is under.
@@ -7098,27 +7052,15 @@ def test_the_spend_row_says_the_back_performer_pays_in_full():
     page = blindplay.observe(keyword_hand_state([
         "Deal 7 damage. Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
-    # The text pass (2026-09-25): the chooser explains itself (#662), so the
-    # row says who pays and that it is offered only in full -- the old
-    # page-only "not offered at all" sentence is the tip's own "Offered only
-    # if it can pay in full" now. The Bow clause left with rule 7's
-    # 2026-09-25 change: the Bow row covers every way of reaching 0.
-    # The rules pass (2026-10-01): back first, then forward.
-    for clause in ("Pay Fanfare from your back performer first, then from "
-                   "the next one forward",
-                   "Offered only if your performers hold enough"):
-        assert clause in page, clause
-        assert clause in blindplay.ARM_KEYWORDS["Spend"], clause
-    assert "If that empties it exactly" not in blindplay.ARM_KEYWORDS["Spend"]
+    row = blindplay.ARM_KEYWORDS["Spend"]
+    assert row == "Pay that much Fanfare. Offered only if you have enough."
+    assert row in page
+    assert "back performer" not in row
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    # The tip's own [gold] spans split the sentence across concatenated
-    # literals, so the anchors are the runs that do not straddle a `+`.
-    for phrase in ("Pay Fanfare from your ",
-                   "from the next one forward. Offered only if your performers hold "):
+    for phrase in ("Pay that much ", ". Offered only if you have "):
         assert phrase in src, phrase
-
 
 def test_ringing_is_defined_the_first_time_the_screen_names_it():
     """`EB-367`. A DEBUFF THE SEAT "never saw named or explained anywhere".
@@ -9097,15 +9039,16 @@ def test_the_one_that_cannot_be_rendered_says_which_kind_of_upgrade_it_is():
     # `EB-723`: the Stage's Début upgrades its COST, which the body prints
     # nowhere. Since 2026-09-26 a cost the upgrade moves is PRINTED (see
     # `test_the_smith_prints_an_energy_cost_the_upgrade_cuts`), so Début
-    # renders its face and the no-number reason is pinned on Final Bow
-    # (Understudy until it left the pool, 2026-09-28), whose upgrade drops a
-    # keyword the face does not print. The rule the test
+    # renders its face and the no-number reason is pinned on Tag Along (Final
+    # Bow until the re-founding, 2026-10-04, gave its upgrade a Block number;
+    # Understudy before that), whose upgrade drops a keyword the face does not
+    # print. The rule the test
     # is about is unchanged and is the LAST assertion: the reason is a fact
     # about the CARD, never a bare silence.
     built, why = qa_packet.upgrade_preview(*_R12_SMITH[1])
     assert built == _R12_SMITH[1][1] and why == ""
 
-    built, why = qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_FINAL_BOW", "")
+    built, why = qa_packet.upgrade_preview("KLEEMOD-PROTO_KO_TAG_ALONG", "")
     assert built == ""
     assert why == qa_packet.NO_PREVIEW_NO_NUMBER
     assert "changes nothing this face prints" in why
@@ -9172,15 +9115,16 @@ def test_the_other_three_reasons_are_each_a_fact_about_the_card():
 def test_the_reason_prints_on_the_smith_under_the_face_it_is_about():
     """And it prints where the missing line was, so the two rows read as two
     different facts rather than as one silence. (Understudy since
-    2026-09-26: Salon Début's cost cut now prints as a cost; Final Bow since
-    2026-09-28, when Understudy left the pool.)"""
+    2026-09-26: Salon Début's cost cut now prints as a cost; Final Bow from
+    2026-09-28, when Understudy left the pool; Tag Along since the
+    re-founding, 2026-10-04.)"""
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_FS_FINAL_BOW", "name": "Final Bow",
+        {"id": "KLEEMOD-PROTO_KO_TAG_ALONG", "name": "Tag Along",
          "cost": "1", "type": "Skill",
-         "description": "Your back performer Bows and leaves. Gain Block "
-                        "equal to its Fanfare."})
+         "description": "Add a random Companion card to your hand. It costs "
+                        "0 this turn."})
     page = blindplay.observe(smith)
 
     assert ("    Upgraded: not shown -- its upgrade changes nothing this "

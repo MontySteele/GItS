@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsRaiseAToast : CustomCardModel, ICharacterCard
+public sealed class ProtoFsRaiseAToast : CustomCardModel, ICharacterCard, IModalCard
 {
     /// <summary>Multiplayer only: the base game's own constraint, so a
     /// single-player run is never offered this card.</summary>
@@ -43,20 +43,32 @@ public sealed class ProtoFsRaiseAToast : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(ArmKeywordTips.ForFrontPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_raise_a_toast");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Raise a Toast"),
-        ("description", "Another player gains temporary [gold]Strength[/gold] equal to your [gold]front performer[/gold]'s [gold]Fanfare[/gold], up to {ToastCap:diff()}."),
+        ("description", "Draw 1 card. [gold]Spend[/gold] 4: another player gains {IfUpgraded:show:6|4} temporary [gold]Strength[/gold]."),
     };
+
+    // EB-184: what each mode does about AIMING, in sheet order.
+    // The card's own TargetType is fixed before a mode is chosen (the
+    // game aims first), so it answers for the card and not for the
+    // play -- an Attack-typed modal declares AnyEnemy for the mode
+    // that aims, and the bridge then demanded a target on the mode
+    // that attacks nothing. These two rows are what it reads instead.
+    public IReadOnlyList<string> ModeLabels =>
+        new[] { "Draw 1 card", "[gold]Spend[/gold] 4: draw 1 card and another player gains {IfUpgraded:show:6|4} temporary [gold]Strength[/gold]" };
+
+    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
+        new[] { false, false };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("ToastCap", 6m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,12 +80,91 @@ public sealed class ProtoFsRaiseAToast : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await FurinaStage.RaiseAToast(choiceContext, Owner.Creature, cardPlay.Target, DynamicVars["ToastCap"].IntValue, this);
+        var modeOptions = new List<CardModel>
+        {
+            ModalChoice.CreateMatchingOption<ProtoFsRaiseAToastModeA>(Owner, this),
+            ModalChoice.CreateMatchingOption<ProtoFsRaiseAToastModeB>(Owner, this),
+        };
+        var modeRules = new ModeRequirement?[]
+        {
+            null,
+            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 4),
+                                "needs that much Fanfare"),
+        };
+        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Draw 1 card", "[gold]Spend[/gold] 4: draw 1 card and another player gains {IfUpgraded:show:6|4} temporary [gold]Strength[/gold]" }[modeIndex]);
+        if (modeIndex == 0)
+        {
+            await CardPileCmd.Draw(choiceContext, 1m, Owner);
+        }
+        else
+        {
+            await FurinaStage.Spend(choiceContext, Owner.Creature, 4);
+            await CardPileCmd.Draw(choiceContext, 1m, Owner);
+            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+            await FurinaStage.RaiseAToast(choiceContext, Owner.Creature, cardPlay.Target, (IsUpgraded ? 6 : 4), this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["ToastCap"].UpgradeValueBy(2m);
+        // cap: the mode body reads its amount off IsUpgraded.
     }
+}
+
+/// <summary>Mode 0 of proto_fs_raise_a_toast. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsRaiseAToastModeA : ModalOptionCard
+{
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("proto_fs_raise_a_toast");
+
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Draw 1 card"),
+        ("description", "Draw 1 card"),
+    };
+
+    public ProtoFsRaiseAToastModeA()
+        : base(CardType.Skill)
+    {
+    }
+}
+
+/// <summary>Mode 1 of proto_fs_raise_a_toast. A face for the choose-a-card screen;
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
+public sealed class ProtoFsRaiseAToastModeB : ModalOptionCard
+{
+    /// <summary>The PARENT's illustration. A mode is a face of its parent,
+    /// not a card of its own, so it owes no art row -- and a null here is the
+    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
+    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
+    public override Texture2D? CustomPortrait =>
+        RosterArt.CardPortrait("proto_fs_raise_a_toast");
+
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Spend 4"),
+        ("description", "[gold]Spend[/gold] 4: another player gains {IfUpgraded:show:6|4} temporary [gold]Strength[/gold]"),
+    };
+
+    public ProtoFsRaiseAToastModeB()
+        : base(CardType.Skill)
+    {
+    }
+
+    /// <summary>The Spend warning: the guests this Spend would leave
+    /// unable to pay for their act.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForSpendShortfall(base.ExtraHoverTips, this, 4);
 }

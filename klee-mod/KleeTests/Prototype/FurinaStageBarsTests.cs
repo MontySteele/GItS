@@ -35,67 +35,22 @@ public class FurinaStageBarsTests
                                                                nonPublic: true)!;
     }
 
-    // ---- the bar: the hook that decides it ---------------------------------
+    // ---- no bar (the re-founding, 2026-10-04) ------------------------------
 
     [Fact]
-    public void Every_performer_model_asks_for_its_bar()
+    public void No_performer_model_shows_a_bar()
     {
-        // `IsHealthBarVisible` is what NCreature._Ready asks, and what Osty
-        // answers true while alive. Every member of the cast and every guest.
+        // Rule 1: "performers with no bars". Every member of the cast and
+        // every guest is a pet with its bar hidden, the Bake-Kurage's shape,
+        // and the postfix that put the bars back is gone.
         foreach (var who in Enum.GetValues<StagePerformer>())
         {
             var model = Model(who);
-            Assert.True(model.IsHealthBarVisible, $"{who} hides its bar");
+            Assert.False(model.IsHealthBarVisible, $"{who} shows a bar");
             Assert.Equal(who, model.Performer);
         }
-    }
-
-    [Fact]
-    public void No_creature_no_bar()
-    {
-        Assert.False(FurinaStagePlacement.ShowsBar(null));
-    }
-
-    [Fact]
-    public void The_engine_add_is_followed_by_the_bars_coming_back()
-    {
-        // THE PATCH IS ON THE ADD THAT HIDES THEM, and nowhere else: a
-        // postfix on NCombatRoom.AddCreature, for any pet of Furina's.
-        var patch = typeof(FurinaStagePlacement).Assembly.GetTypes()
-            .Single(t => t.Name == "NCombatRoom_AddCreature_StageBars_Patch");
-        var target = patch.GetCustomAttributes<HarmonyPatch>()
-            .Select(a => a.info)
-            .Single();
-        Assert.Equal(typeof(NCombatRoom), target.declaringType);
-        Assert.Equal(nameof(NCombatRoom.AddCreature), target.methodName);
-
-        var postfix = patch.GetMethod("Postfix", HeadlessGame.All)!;
-        Assert.NotNull(postfix.GetCustomAttribute<HarmonyPostfix>());
-        var calls = Il.Calls(postfix);
-        Assert.Contains("FurinaResources.IsFurina", calls);
-        Assert.Contains("FurinaStagePlacement.ShowBars", calls);
-    }
-
-    [Fact]
-    public void Show_bars_asks_the_model_and_writes_the_bar_visible()
-    {
-        var calls = Il.Calls(Il.Method("FurinaStagePlacement", "ShowBars"));
-        Assert.Contains("FurinaStage.LiveFor", calls);
-        Assert.Contains("FurinaStagePlacement.ShowsBar", calls);
-        Assert.Contains("CanvasItem.set_Visible", calls);
-        // The BAR only: the body's hitbox stays closed (EB-296), so nothing
-        // here reopens interaction, mouse or focus.
-        Assert.DoesNotContain("NCreature.ToggleIsInteractable", calls);
-        Assert.DoesNotContain("Control.set_MouseFilter", calls);
-        Assert.DoesNotContain("Control.set_FocusMode", calls);
-    }
-
-    [Fact]
-    public void Only_a_live_performer_wears_a_bar()
-    {
-        var calls = Il.Calls(Il.Method("FurinaStagePlacement", "ShowsBar"));
-        Assert.Contains("Creature.get_IsAlive", calls);
-        Assert.Contains("MonsterModel.get_IsHealthBarVisible", calls);
+        Assert.DoesNotContain(typeof(FurinaStagePlacement).Assembly.GetTypes(),
+            t => t.Name == "NCombatRoom_AddCreature_StageBars_Patch");
     }
 
     // ---- the line: clear of her ---------------------------------------------

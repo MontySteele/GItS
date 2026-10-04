@@ -38,20 +38,20 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_standing_ovation");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Applause"),
-        ("description", "Your [gold]back performer[/gold] gains 5 [gold]Fanfare[/gold]."),
+        ("description", "Gain {RaiseAmount:diff()} [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("RaiseAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Raise(Owner.Creature, 5);
+        await FurinaStage.Gain(choiceContext, Owner.Creature, DynamicVars["RaiseAmount"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["RaiseAmount"].UpgradeValueBy(1m);
     }
 }

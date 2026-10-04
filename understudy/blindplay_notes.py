@@ -825,6 +825,11 @@ CHOOSER_ONE_CHOICE_NOTE = (
 MODE_CHOOSER_PROMPT = ("The card you just played asks which way to resolve. "
                        "Choose one:")
 
+#: THE RE-FOUNDING (2026-10-04): the heading of Furina's performer picker,
+#: whose every row is a performer on her stage, front to back.
+STAGE_SEAT_CHOOSER_PROMPT = ("The card you just played asks you to choose a "
+                             "performer, listed front to back. Choose one:")
+
 #: The wire's `screen_type` for the one-press chooser. `BuildChooseCardState`
 #: writes it for `NChooseACardSelectionScreen` and nothing else.
 ONE_PRESS_CHOOSER_KIND = "choose"
@@ -1588,129 +1593,54 @@ ARM_KEYWORDS: dict[str, str] = {
     # that is the reason a bar matters at all. `Bow` says what triggers one:
     # since 2026-09-25 (rule 7) every performer at 0 Fanfare bows, whatever
     # emptied it.
-    # `EB-746`: the word names a MODE now, not a rider. The page adds the
-    # sentence the 135-character tip has no room for, which is what the
-    # choose-a-card screen shows a player and a blind seat has to be told: a
-    # Spend the back performer cannot pay is not offered.
-    # R276 picks 1 and 2: the BACK performer pays, in full or not at all. The
-    # "it Bows" clause left with rule 7's 2026-09-25 change: the Bow row
-    # covers every way of reaching 0.
-    # THE TEXT PASS (2026-09-25, review/records/furina-text-pass-2026-09-25.md):
-    # the glossary follows the tooltips word for word. The Spend row's old
-    # page-only sentence ("not offered at all") is the tip's own clause now.
-    # THE RULES PASS (2026-10-01): back first, then forward.
-    "Spend": ("Pay Fanfare from your back performer first, then from the "
-              "next one forward. Offered only if your performers hold "
-              "enough."),
-    # The follow-up: the empty-stage summon rides the Fanfare row, which
-    # every Fanfare-giving face prints.
-    # The second text pass (2026-09-28).
-    # THE RULES PASS (2026-10-01): only what you play summons; the damage
-    # order moved to the front performer's row.
-    "Fanfare": ("A performer's health. If no one is on stage, a card that "
-                "gives Fanfare summons a random performer holding it."),
-    # `EB-744`, and rule 7 as changed 2026-09-25: a performer at 0 Fanfare
-    # Bows whatever emptied it -- a Spend, a hit or a full-stage summon.
-    # Draft 3 (2026-09-25): the Bow is the performer's act once more.
-    # 2026-09-25 evening, [USER]: "I think it would be better to have the
-    # performer bow immediately (during the opponent's turn) instead of at
-    # the start of your turn." The waiting Bow is gone.
-    # THE GUEST CAST (2026-09-25): a guest's act may pay, and its Bow does
-    # not -- stated once, here, for every performer.
-    # THE RULES PASS (2026-10-01): Grand Finale's Bow stays.
-    "Bow": ("A performer acts one last time, without paying, as it leaves "
-            "the stage or, if a card says so, stays."),
-    # `EB-744` put the trio's acts on both seat rows; the second text pass
-    # (2026-09-28) took them off: each performer's own row carries its act.
-    # THE RULES PASS (2026-10-01): rule 4 cut; the damage order lives here.
-    "front performer": ("Takes hits after your Block; what its Fanfare cannot "
-                        "hold reaches you."),
-    # `EB-744` and round four. Draft 3 (2026-09-25): rule 12, the fade.
-    # The guest round (2026-09-25): "Hits reach it last" was false. Rule 6:
-    # the front absorbs and the rest reaches Furina, never a seat behind;
-    # a lone performer is both seats, so it is hit then.
-    # The supporting-pool seat round (2026-09-26, the Solo seat): which seat
-    # wins when one performer holds both -- the front, which is hit and does
-    # not fade (rule 12). A later seat (2026-09-26) saw Spend offered from a
-    # lone performer: it is BOTH seats (rule 5), hit, paying Spends, and never
-    # fading. `ArmKeywordTips.ForBackPerformer`'s words.
-    # Relics smoke seat 2026-09-27: "'Fade' is never defined." It is, here,
-    # in one clause, and this row prints wherever the page says the word.
-    # The second text pass (2026-09-28): the fade has its own row below.
-    "back performer": ("Your last performer in line. Spend pays from it "
-                       "first. A lone performer is both front and back."),
-    # The second text pass (2026-09-28): `ArmKeywordTips.ForFade`'s words.
-    # The fade pass (2026-09-29): a quarter of every bar, the front's too.
-    "fade": ("At the start of your turn, each performer loses a quarter of its "
-             "Fanfare, rounded down."),
-    # R276 batch two: Arkhe Alignment's two halves, in
-    # `ArmKeywordTips.ForOusia` / `ForPneuma`'s words.
+    # THE RE-FOUNDING (2026-10-04, review/active/furina-refounding-2026-10-03.md
+    # sec.1 as amended by sec.8). Performers have no bars; Fanfare is one
+    # number on Furina; a star pays for its act or skips it; a Bow is a free
+    # act, then Fanfare. Every row below is its `ArmKeywordTips` sentence
+    # word for word (a performer's row is its badge's,
+    # `StagePerformerBadge.ActText`), markup folded out and `FurinaStageLaw`'s
+    # numerals written out. The back performer and the fade retired with the
+    # bars; the history of every row is in git.
+    "Spend": "Pay that much Fanfare. Offered only if you have enough.",
+    "Fanfare": ("Your applause. Cards and Bows give it. Spend and stars' acts "
+                "use it. It never fades."),
+    "Bow": ("The performer acts once more without paying, then you gain 1 "
+            "Fanfare."),
+    "Cue": "Choose a performer. It acts now. A star pays as usual.",
+    "Rehearsal": ("Each one makes your performers' damage and Block acts "
+                  "deal 1 more."),
+    "front performer": ("The performer in the first seat. Performers act "
+                        "front to back at the end of your turn."),
+    # R276 batch two: Arkhe Alignment's two halves.
     "Ousia": "This turn, your performers' acts deal double damage.",
-    # 2026-09-26 (wave-3 Furina lane 4): "It summons nobody." The Fanfare
-    # row says Fanfare gained on an empty stage summons, and Pneuma's +2 is a
-    # regain that does not (brief rule 5); the seat read the two together.
-    # The second text pass (2026-09-28): "regains", as the front performer's
-    # row says, in place of "It summons nobody."
-    "Pneuma": ("This turn, your performers' acts give double Block, and your "
-               "front performer regains 2 Fanfare."),
-    # 2026-09-25. WHAT A SUMMON DOES, AND WHAT EACH PERFORMER DOES. A
-    # first-time co-op player "found it very hard to understand what was
-    # going on from the tooltips, such as what each summoned actor actually
-    # did". `ArmKeywordTips.ForSummon`, `ForUsher`, `ForChevalmarin` and
-    # `ForCrabaletta`'s words, with `FurinaStageLaw`'s numerals written out;
-    # the performer rows are also each body's badge in game
-    # (`StagePerformerBadge`). One Summon row since the trio can be cloned
-    # (2026-09-25): named and random summons meet a full stage the same way.
-    # 2026-09-25 night (the granted-guest seat round): lane 2 only understood
-    # "adds its Fanfare" from the log.
-    "Summon": ("A performer joins at the back with 1 Fanfare. On a full "
-               "stage, the front one Bows first and gives the newcomer its "
-               "Fanfare."),
-    # Draft 3 (2026-09-25): no Bow clause (a Bow is the act once more) and
-    # no Hydro (no act applies it).
-    "Gentilhomme Usher": "End of your turn: gain 3 Block.",
-    "Surintendante Chevalmarin": ("End of your turn: deal 2 damage to ALL "
-                                  "enemies."),
-    "Mademoiselle Crabaletta": ("End of your turn: deal 5 damage to a random "
-                                "enemy."),
-    # THE GUEST CAST (2026-09-25): `ArmKeywordTips.ForGuestStar` and the eight
-    # guests' tips, word for word with the numerals written out. Each is also
-    # the guest's badge on its body in game. The act lives here and on the
-    # badge, not on the card's face ("Summon <Name> with N Fanfare.", since
-    # the second text pass, 2026-09-28).
-    "Guest Star": ("You can have one of each on stage. Summoning one already "
-                   "there makes it Bow, then return with the new Fanfare "
-                   "added."),
-    "Neuvillette": ("End of your turn: pay 3 of his Fanfare to deal 8 Hydro "
-                    "damage to ALL enemies."),
-    "Clorinde": ("End of your turn: take 1 Fanfare from each other performer "
-                 "to deal 8 Electro damage to a random enemy."),
-    # The 2026-09-26 seat round (the designer's ruling): an emptied Navia
-    # Bows for the Fanfare she had before whatever emptied her.
-    "Navia": ("End of your turn: deal Geo damage equal to her Fanfare to a "
-              "random enemy."),
-    "Chevreuse": "End of your turn: Spend 2 to gain 1 Energy next turn.",
-    # 2026-09-27: he always attacks, and reflects her Block too.
-    "Wriothesley": ("End of your turn: deal 4 Cryo damage to a random enemy, "
-                    "plus 2 per Fanfare he lost to hits and 1 per damage "
-                    "Block saved him."),
-    # 2026-09-29: the medic, free.
-    "Sigewinne": ("End of your turn: your front performer regains half the "
-                  "Fanfare hits took from it since her last act, at least "
-                  "2."),
-    "Charlotte": "End of your turn: each other performer gains 1 Fanfare.",
-    # 2026-09-25 night (the granted-guest seat round): the act always lands.
-    "Lynette": ("End of your turn: deal 3 Anemo damage to a random enemy, "
-                "preferring one with an aura."),
-    # THE SUPPORTING POOL (2026-09-26): two more guests,
-    # `ArmKeywordTips.ForLyney` / `ForEscoffier` word for word.
-    # The seat round (2026-09-26, the designer's ruling): to the front if he
-    # is not there, and once there his act moves nobody.
-    "Lyney": ("End of your turn: pay 2 of his Fanfare to deal 6 Pyro damage "
-              "to a random enemy. If not in front, he swaps with the front."),
-    "Escoffier": ("End of your turn: pay 3 of her Fanfare to give each other "
-                  "performer 2 Fanfare and deal 3 Cryo damage to ALL "
-                  "enemies."),
+    "Pneuma": "Gain 2 Fanfare.",
+    "Summon": ("A performer joins at the back. On a full stage, the front "
+               "Salon member Bows and leaves first. Guests keep their seats."),
+    "Gentilhomme Usher": "Act: gain 4 Block.",
+    "Surintendante Chevalmarin": "Act: deal 2 damage to ALL enemies.",
+    "Mademoiselle Crabaletta": "Act: deal 5 damage to a random enemy.",
+    "Guest Star": ("One of each on stage. Summoning one already there makes "
+                   "it Bow and stay."),
+    "Neuvillette": ("Your Hydro damage deals 2 more. Act: pay 2 Fanfare to "
+                    "deal 7 Hydro damage to ALL enemies."),
+    "Clorinde": ("Whenever you Spend, deal 4 Electro damage to a random "
+                 "enemy. Act: pay 1 to deal 6 Electro damage to a random "
+                 "enemy."),
+    "Navia": ("Act: deal Geo damage to a random enemy, twice the Fanfare you "
+              "spent this turn."),
+    "Chevreuse": "Act, once a turn: pay 2 Fanfare to gain 1 Energy next turn.",
+    "Wriothesley": ("Act: deal 4 Cryo damage to a random enemy, plus 1 per "
+                    "damage your Block stopped since his last act."),
+    "Sigewinne": ("Act: gain 3 Block, plus 2 for each time you lost HP since "
+                  "her last act."),
+    "Charlotte": ("At the start of your turn, draw 1 more card. Act: gain 1 "
+                  "Fanfare."),
+    "Lynette": ("The first performer you Cue each turn moves to the front. "
+                "Act: deal 3 Anemo damage to an enemy with an aura, if any."),
+    "Lyney": ("The first Cue card you play each turn costs 0. Act: pay 1 "
+              "Fanfare to add a Trick to your hand."),
+    "Escoffier": ("The first Salon summon card you play each turn costs 0. "
+                  "Act: pay 2 Fanfare to make your Salon members act."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina
     # surfaces print it -- Shared Billing, Limelight and Stage Lights on their
     # faces, and the two Spotlight buffs on their power rows -- and every one
@@ -1829,7 +1759,7 @@ COMPANION_STAGE_CLAUSE = (
 COMPANION_STAGE_ARM_CLAUSE = (
     " It does nothing to your stage: no performer acts, moves or leaves for "
     "one. The Hydro it can react with comes from Furina's cards -- Tidal "
-    "Flourish and Quick Cue in their Spend modes, and Chevalmarin's card -- "
+    "Flourish and Quick Flourish in their Spend modes, and Chevalmarin's card -- "
     "and a guest brings its own element.")
 
 #: Whose stage it is. Matched the way `understudy/adapter.py` matches it -- on
@@ -1967,8 +1897,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     # THE CASKET PASS (2026-09-28).
     "Open the Casket": "kokomi",
     "Spend": "furina", "Fanfare": "furina", "Bow": "furina",
-    "front performer": "furina", "back performer": "furina",
-    "fade": "furina",
+    "front performer": "furina", "Cue": "furina", "Rehearsal": "furina",
     "Encore": "furina", "Spotlighted": "furina",
     "Ousia": "furina", "Pneuma": "furina",
     # VARKA (the Oath rework): his three words are his alone.
@@ -2100,20 +2029,15 @@ _ARM_KEYWORD_RE = {
     # is how the reframe's three once acquired a literal 0x08 in place of a
     # word boundary and matched nothing at all.
     # THE TEXT PASS (2026-09-25) retired `Raise` and `Rotate`, renamed the
-    # lead the FRONT performer, and prints `Bow` as a verb ("it Bows").
-    # 2026-09-26 (the supporting-pool seat round, lane 1): NOT Bring the
-    # House Down's "Spend all of your front performer's Fanfare", which names
-    # its own seat. The row says the back performer pays, and the mod no
-    # longer hangs the Spend tip on that face either.
-    "Spend": re.compile(r"\bSpends?\b(?! all of your front performer)"),
+    # lead the FRONT performer, and prints `Bow` as a verb ("it Bows"). THE
+    # RE-FOUNDING (2026-10-04) retired the back performer and the fade with
+    # the bars, and added `Cue` and `Rehearsal`.
+    "Spend": re.compile(r"\bSpends?\b"),
     "Fanfare": re.compile(r"\bFanfare\b"),
     "Bow": re.compile(r"\bBows?\b"),
     "front performer": re.compile(r"\bfront performer\b"),
-    "back performer": re.compile(r"\bback performer\b"),
-    # Relics smoke seat 2026-09-27, moved to its own row by the second text
-    # pass (2026-09-28): the fade prints wherever the page uses the word (a
-    # card, a relic, the Stage's line).
-    "fade": re.compile(r"\bfad(?:e|es|ed)\b"),
+    "Cue": re.compile(r"\bCue[sd]?\b"),
+    "Rehearsal": re.compile(r"\bRehearsal\b"),
     # R276 batch two: Arkhe Alignment's two halves.
     "Ousia": re.compile(r"\bOusia\b"),
     "Pneuma": re.compile(r"\bPneuma\b"),
@@ -2149,6 +2073,8 @@ _ARM_KEYWORD_RE = {
     "Sigewinne": re.compile(r"\bSigewinne\b(?!\s*[—–-])"),
     "Charlotte": re.compile(r"\bCharlotte\b(?!\s*[—–-])"),
     "Lynette": re.compile(r"\bLynette\b(?!\s*[—–-])"),
+    "Lyney": re.compile(r"\bLyney\b(?!\s*[—–-])"),
+    "Escoffier": re.compile(r"\bEscoffier\b(?!\s*[—–-])"),
 
     # `EB-407`, and it OUTLIVED the reframe (`EB-723`): the meter is shipped
     # machinery, the word is printed on the Neow screen and on opening-hand
@@ -3207,11 +3133,6 @@ RELIC_KEYWORD_RIDERS: dict[str, dict[str, str]] = {
     # THE RULES PASS (2026-10-01): Palais Ledger re-aimed.
     "Spend": {"Palais Ledger":
               " With Palais Ledger, each Spend costs 1 less Fanfare."},
-    "fade": {"Grand Theater Program":
-             " With Grand Theater Program, no performer fades."},
-    "front performer": {"The Curtain Never Falls":
-                        " With The Curtain Never Falls, it regains 2 at the "
-                        "start of your turn."},
     "Bow": {"Curtain Call Bouquet":
             " With Curtain Call Bouquet, it acts twice."},
 }

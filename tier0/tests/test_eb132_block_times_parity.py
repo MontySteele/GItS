@@ -166,6 +166,12 @@ ELSEWHERE = {
     # all-enemies Set off.
     "set_off": "SET_OFF_FIELDS totality + the literal-int and random-only "
                "checks in its own arm",
+    # THE RE-FOUNDING (2026-10-04): "Cue a performer", and Bis!'s `times: 2`
+    # is the one chosen performer twice. The generator emits the literal as
+    # `FurinaStage.Cue(choiceContext, Owner, 2)`; its own arm refuses
+    # anything but a positive literal int.
+    "stage_cue": "positive-literal-int check in its own arm (emitted as "
+                 "FurinaStage.Cue(choiceContext, Owner, N))",
 }
 
 
@@ -208,11 +214,16 @@ def test_the_ops_answered_elsewhere_really_do_refuse(op):
                                   "times": "exhaust_pile"},
         "set_off": {"op": "set_off", "target": "random_enemy", "damage": 4,
                     "times": "exhaust_pile"},
+        "stage_cue": {"op": "stage_cue", "times": "exhaust_pile"},
     }
     card = {
         "id": "fabricated_elsewhere", "name": "Fabricated", "cost": 1,
         "type": "skill", "rarity": "common", "effects": [bodies[op]],
     }
-    assert gen.blocked_reason(card, gen.KOKOMI_PROFILE) is not None, (
+    # The Stage's op is asked on her own profile, so the refusal is the
+    # `times` arm's and not the profile's.
+    profile = gen.FURINA_PROFILE if op.startswith("stage_") \
+        else gen.KOKOMI_PROFILE
+    assert gen.blocked_reason(card, profile) is not None, (
         f"{op} accepted a runtime `times` the emitter cannot express "
         f"({ELSEWHERE[op]} no longer covers it)")

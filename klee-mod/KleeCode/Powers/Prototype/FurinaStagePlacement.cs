@@ -43,10 +43,10 @@ namespace KleeMod.Powers;
 ///      and after one rotation the body that spawned first is no longer the
 ///      one in front. A player reading rule 6 ("the LEAD absorbs") off a line
 ///      whose order is the order the bodies happened to arrive in is reading a
-///      lie, and sec.8's last failure mode is exactly this: "the panel must
-///      show the lead's bar beside her Block, in the damage order".
+///      lie, and the acts run front to back, so the order on screen is the
+///      order they act in.
 ///   2. A DEPARTURE RE-LAYS NOTHING OUT. The engine re-flows on ADD only, so a
-///      lead emptied by a hit leaves a hole in the line until the next summon.
+///      performer that Bows and leaves leaves a hole until the next summon.
 ///   3. THE ENGINE'S LINE STARTS INSIDE THE OWNER. Slot 0 sits at
 ///      <c>owner.X - 20 + petHalfWidth</c>, which for a 121-wide Usher is
 ///      <c>owner.X + 40</c>: squarely inside Furina's 240-wide box, so a lone
@@ -62,30 +62,17 @@ namespace KleeMod.Powers;
 ///      and packs each body a <see cref="Gap"/> from the next; Furina is not
 ///      moved.
 ///
-/// AND ONE THING IT HIDES: THE BARS. <c>NCombatRoom.AddCreature</c> ends
-/// every mid-fight add by walking the owner's non-Osty pets and calling
-/// <c>ToggleIsInteractable(on: false)</c> on each (0.111.0 decompile), and
-/// that one method also writes <c>_stateDisplay.Visible = false</c> -- the
-/// HP bar. <c>NCreature._Ready</c> had just shown it off
-/// <c>IsHealthBarVisible</c> (true here: <c>CustomPetModel(visibleHp:
-/// true)</c>); the add's own loop hides it again a line later, and hides
-/// every OTHER performer's with it. Osty alone is exempt, by type. So a
-/// performer's Fanfare bar has NEVER been on screen, since `EB-721`; the
-/// 2026-09-26 smoke is the first frame anyone looked for it. The repair is
-/// <see cref="ShowBars"/>, run by a postfix on that same
-/// <c>AddCreature</c>, and it shows the BAR ONLY: the body's hitbox stays
-/// closed (mouse and focus, as `EB-296` found them), so no targeting ring and
-/// no navigation changes. The bar carries its own hover hitbox
-/// (<c>%HpBarHitbox</c>), which is what shows the nameplate and the badge tips
-/// on hover, as Osty's does.
+/// NO BARS SINCE THE RE-FOUNDING (2026-10-04): performers are
+/// <c>CustomPetModel(visibleHp: false)</c>, so the engine's add hiding every
+/// non-Osty pet's bar is now the behaviour wanted, and the postfix that put
+/// the bars back is gone.
 ///
 /// SO: A SMALL PLACEMENT PASS, AND NOT A HARMONY PATCH. This lays the line
 /// out in SEAT order after every change to the stage. It patches nothing,
 /// overrides nothing and is called only by the stage's own verbs
 /// (<c>FurinaStagePets.Sync</c> and <c>FurinaStage</c>), so with the arm off
 /// it does not run and a board with no stage is laid out by the engine exactly
-/// as it always was. (The bars below DO need a patch, because the engine hides
-/// them inside its own add; that postfix is scoped to Furina's pets.)
+/// as it always was.
 ///
 /// THE LEAD IS THE RIGHT-MOST SLOT. Allies sit at negative X and the enemies'
 /// container is to their right, so "toward the enemy" is +X: the front seat is
@@ -127,48 +114,6 @@ public static class FurinaStagePlacement
             edge += widthsBackFirst[i] + Gap;
         }
         return centres;
-    }
-
-    /// <summary>Should this body wear its bar? Every live performer, off the
-    /// model's own <c>IsHealthBarVisible</c> -- the hook the engine asks in
-    /// <c>NCreature._Ready</c> and the one Osty answers the same way.</summary>
-    public static bool ShowsBar(Creature? body) =>
-        body is { IsAlive: true, Monster: StagePerformerMonster model }
-        && model.IsHealthBarVisible;
-
-    /// <summary>
-    /// Put every live performer's Fanfare bar back on screen after the
-    /// engine's add hid it (see the header). Writes exactly what
-    /// <c>NCreature.ToggleIsInteractable</c> writes for the bar and nothing
-    /// else: <c>Visible = !IsDebugHidingHpBar</c>. A remote seat's bar keeps
-    /// the engine's transparent-until-hovered state, because only
-    /// <c>Visible</c> is touched and never <c>Modulate</c>.
-    /// </summary>
-    public static void ShowBars(Creature? furina)
-    {
-        if (!FurinaStage.LiveFor(furina)) return;
-        try
-        {
-            var room = NCombatRoom.Instance;
-            if (room == null) return;
-            foreach (var node in room.CreatureNodes)
-            {
-                if (!GodotObject.IsInstanceValid(node)) continue;
-                var body = node.Entity;
-                if (body?.PetOwner?.Creature != furina) continue;
-                if (!ShowsBar(body)) continue;
-                // `%HealthBar` on the creature is its NCreatureStateDisplay,
-                // the node `_stateDisplay` holds (NCreature._Ready's own
-                // lookup, and the cue chips' in FurinaStageCueNodes.FillOf).
-                if (node.GetNodeOrNull<Control>("%HealthBar") is not { } display)
-                    continue;
-                display.Visible = !NCombatUi.IsDebugHidingHpBar;
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Warn($"[{KleeMod.ModId}] stage: bars not shown: {e}");
-        }
     }
 
     /// <summary>
@@ -243,24 +188,5 @@ public static class FurinaStagePlacement
         {
             Log.Warn($"[{KleeMod.ModId}] stage: placement pass skipped: {e}");
         }
-    }
-}
-
-/// <summary>
-/// The bars back on after every add. <c>NCombatRoom.AddCreature</c> hides
-/// every non-Osty pet's bar of the owner it adds to (see
-/// <see cref="FurinaStagePlacement"/>'s header), so this runs on EVERY add to
-/// Furina's side, not only a performer's: any pet she gains mid-fight would
-/// otherwise take the stage's bars down with it.
-/// </summary>
-[HarmonyPatch(typeof(NCombatRoom), nameof(NCombatRoom.AddCreature))]
-internal static class NCombatRoom_AddCreature_StageBars_Patch
-{
-    [HarmonyPostfix]
-    public static void Postfix(Creature creature)
-    {
-        var owner = creature?.PetOwner?.Creature;
-        if (!FurinaResources.IsFurina(owner)) return;
-        FurinaStagePlacement.ShowBars(owner);
     }
 }

@@ -138,7 +138,7 @@ def _furina_obs(arm: bool) -> dict:
                       "text": "Gain 2 Fanfare."}]}
 
 
-def test_the_fanfare_row_is_the_bars_under_the_arm_and_the_meters_off_it():
+def test_the_fanfare_row_is_the_arms_under_the_arm_and_the_meters_off_it():
     from understudy.blindplay_notes import keyword_notes
 
     def row(obs):
@@ -150,7 +150,8 @@ def test_the_fanfare_row_is_the_bars_under_the_arm_and_the_meters_off_it():
     assert on is not None and off is not None
     assert on != off
     assert off == FANFARE_SHIPPED_ROW
-    assert "performer" in on
+    # The re-founding (2026-10-04): her applause, which stars' acts use.
+    assert "applause" in on and "stars' acts" in on
 
 
 # --- the packet's hand, numbered -------------------------------------------

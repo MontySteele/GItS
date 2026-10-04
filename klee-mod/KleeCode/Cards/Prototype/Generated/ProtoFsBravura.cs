@@ -38,22 +38,22 @@ public sealed class ProtoFsBravura : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bravura");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bravura"),
-        ("description", "[gold]Spend[/gold] your [gold]back performer[/gold]'s [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
-            new ExtraDamageVar(4m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrBackFanfare(card))
+            new CalculationBaseVar(6m),
+            new ExtraDamageVar(3m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrFanfare(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,7 +65,7 @@ public sealed class ProtoFsBravura : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendAllOfBack(choiceContext, Owner.Creature);
+        await FurinaStage.SpendAll(choiceContext, Owner.Creature);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

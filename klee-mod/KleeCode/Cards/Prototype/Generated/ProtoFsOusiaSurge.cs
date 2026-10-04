@@ -38,22 +38,22 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBackPerformer(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_ousia_surge");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ousia Surge"),
-        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Fanfare[/gold] on your [gold]back performer[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per [gold]Fanfare[/gold] you gained this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(3m),
-            new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.BackFanfare(card))
+            new CalculationBaseVar(4m),
+            new ExtraDamageVar(2m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.GainedThisTurn(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -75,6 +75,6 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }
