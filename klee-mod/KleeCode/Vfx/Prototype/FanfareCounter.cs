@@ -37,8 +37,9 @@ namespace KleeMod.Vfx;
 /// (`EB-815`), and where above the panel it lands. This file calls its
 /// <see cref="SparkCounter.SideOf"/>, <see cref="SparkCounter.Build"/> and
 /// <see cref="SparkCounter.Apply"/>, so the two resources share one placement
-/// rule and one node shape. Klee and Furina are never the same local seat, so
-/// the shared spot never holds both.
+/// rule and one node shape. A Furina holding Sparks (Klee's cards work for
+/// anyone, 2026-10-04) shows both in one row above the orb: this gauge in the
+/// first slot, the Spark counter in the next (<see cref="SparkCounter.SlotFor"/>).
 ///
 /// WHAT IT SHOWS. The face is the number alone, red at zero and cream
 /// otherwise (<c>NStarCounter.SetStarCountText</c>'s pair). Hovering it shows

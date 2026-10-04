@@ -69,6 +69,59 @@ public class SparkCounterPinTests
     }
 
     [Fact]
+    public void Anyone_with_a_spark_gets_the_counter_like_the_regents_stars()
+    {
+        // [USER], 2026-10-04: "Klee's cards need to work universally like
+        // Regent's." `NStarCounter`: shown for any character once Stars > 0,
+        // and from turn one for the Regent. Here: Klee from 0, anyone else
+        // from their first Spark.
+        Assert.True(SparkCounter.ShowsFor(Seat.Klee().Creature));
+        var ironclad = Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad());
+        Assert.False(SparkCounter.ShowsFor(ironclad.Creature));
+        Assert.False(SparkCounter.ShowsFor(Seat.Furina().Creature));
+        Assert.True(SparkCounter.ShowsFor(
+            Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad())
+                .WithPower<SparkPower>(1).Creature));
+        Assert.True(SparkCounter.ShowsFor(
+            Seat.Furina().WithPower<SparkPower>(2).Creature));
+        Assert.False(SparkCounter.ShowsFor(null));
+    }
+
+    [Fact]
+    public void A_furina_with_sparks_shows_both_counters_side_by_side()
+    {
+        // Her Fanfare gauge takes the first slot above the orb (her own
+        // resource, from turn one); the Spark counter takes the next. Klee
+        // and anyone else keep the first slot.
+        Assert.Equal(1, SparkCounter.SlotFor(Seat.Furina().Creature));
+        Assert.Equal(0, SparkCounter.SlotFor(Seat.Klee().Creature));
+        Assert.Equal(0, SparkCounter.SlotFor(
+            Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad()).Creature));
+
+        var viewports = new[]
+        {
+            Design, new Godot.Vector2(1280f, 720f), new Godot.Vector2(2560f, 1440f),
+        };
+        foreach (var viewport in viewports)
+        {
+            var panel = new Godot.Rect2(new Godot.Vector2(100f, 806f),
+                                        new Godot.Vector2(140f, 140f));
+            var fanfare = PlaceInRow(panel, Side, viewport, 0);
+            var spark = PlaceInRow(panel, Side, viewport, 1);
+
+            // Slot 0 is the placement both gauges always had.
+            Assert.Equal(Place(panel, Side, viewport), fanfare);
+            // The two never overlap each other or the orb, sit on one row,
+            // and stay on screen.
+            Assert.False(spark.Intersects(fanfare), $"{spark} on {fanfare}");
+            Assert.False(spark.Intersects(panel), $"{spark} on the orb {panel}");
+            Assert.Equal(fanfare.Position.Y, spark.Position.Y);
+            Assert.True(spark.Position.X > fanfare.End.X);
+            Assert.True(new Godot.Rect2(Godot.Vector2.Zero, viewport).Encloses(spark));
+        }
+    }
+
+    [Fact]
     public void The_scope_is_the_gauge_s_own_predicate_and_not_a_second_copy()
     {
         // `EB-281` settled who owns a Spark display and spelled the co-op
@@ -163,6 +216,12 @@ public class SparkCounterPinTests
         (Godot.Rect2)typeof(SparkCounter)
             .GetMethod(nameof(Place), All)!
             .Invoke(null, new object[] { energy, side, viewport })!;
+
+    private static Godot.Rect2 PlaceInRow(
+        Godot.Rect2 energy, float side, Godot.Vector2 viewport, int slot) =>
+        (Godot.Rect2)typeof(SparkCounter)
+            .GetMethod(nameof(PlaceInRow), All)!
+            .Invoke(null, new object[] { energy, side, viewport, slot })!;
 
     [Fact]
     public void The_badge_never_lands_on_the_energy_panel()

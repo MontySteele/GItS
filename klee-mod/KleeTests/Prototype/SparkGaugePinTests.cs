@@ -129,13 +129,24 @@ public class SparkGaugePinTests
     [Fact]
     public void A_second_seats_spark_badge_is_judged_by_its_own_owner()
     {
-        // Co-op. `HidesBadge` asks the POWER's owner, so a Spark counter on a
-        // creature that is not a Klee is not this arm's business.
+        // KLEE'S CARDS ON ANYONE (2026-10-04, [USER]: "Klee's cards need to
+        // work universally like Regent's"). A Furina who has gained Sparks
+        // gets the energy-area counter, as any character gets the Regent's
+        // Star counter once Stars pass 0, so her own screen hides the badge
+        // exactly as Klee's does. `HidesBadge` still asks the POWER's owner:
+        // her partner's screen keeps the badge on her creature.
         var furina = WithNetId(Seat.Furina(), 1UL).WithPower<SparkPower>(3);
-        var stray = furina.Creature.Powers.OfType<SparkPower>().Single();
+        var banked = furina.Creature.Powers.OfType<SparkPower>().Single();
 
-        WithArm(() => AsLocalSeat(1UL,
-            () => Assert.False(SparkGauge.HidesBadge(stray))));
+        AsLocalSeat(1UL, () => Assert.True(SparkGauge.HidesBadge(banked)));
+        AsLocalSeat(2UL, () => Assert.False(SparkGauge.HidesBadge(banked)));
+
+        // With no counter built and nothing in the bank, nothing is hidden:
+        // the badge goes only once the counter is showing.
+        var empty = WithNetId(Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad()), 1UL)
+            .WithPower<SparkPower>(0);
+        var none = empty.Creature.Powers.OfType<SparkPower>().Single();
+        AsLocalSeat(1UL, () => Assert.False(SparkGauge.HidesBadge(none)));
     }
 
     [Fact]
@@ -209,13 +220,11 @@ public class SparkGaugePinTests
     // --- the refresh funnels ----------------------------------------------
 
     [Fact]
-    public void The_refresh_declines_off_the_arm_and_for_everyone_else()
+    public void The_refresh_declines_for_a_seat_with_no_spark()
     {
         // REAL, and it is the one call into the gauge that is safe to make
-        // headlessly BECAUSE it declines: every path below returns before
-        // `SparkCounter.Refresh`, which would reach Godot nodes. That is also the
-        // acceptance condition for the release build -- a shipped Spark gain
-        // gains no gauge work.
+        // headlessly BECAUSE it declines: a seat with no Spark and no counter
+        // built returns before any node work (`SparkCounter.ShowsFor`).
         var klee = Seat.Klee();
         WithArm(() =>
         {

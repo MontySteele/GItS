@@ -12,6 +12,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 
 ## Kits and display (the mod)
 
+- Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Stage and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee done 2026-10-05.
 - Klee status package: art for Forbidden Fun, It Wasn't Me!, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report and Albedo — Dust of Purification (placeholders; Dust's plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched); the two Powers borrow Party Poppers' and Spark Knight's badges.
 - Klee defence in the status pile (2026-10-01): art for Up in Smoke!, Behind Jean's Desk and Kitchen Alchemy (placeholders).
 - Klee final pass (2026-10-02): art for Cover Your Ears! (placeholder).
