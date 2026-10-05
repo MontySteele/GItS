@@ -1093,7 +1093,7 @@
       "upgraded_grant": true
     },
     "proto_kk_shoal_of_spears": {
-      "formula_per": 1
+      "damage": 1
     },
     "proto_kk_signal_arrow": {
       "damage": 3,

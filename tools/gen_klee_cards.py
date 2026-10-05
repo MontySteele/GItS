@@ -4504,6 +4504,10 @@ RUNTIME_TIMES = {
     # R276 (Fireworks Finale): the Sparks the all-in price just spent, the
     # local `_stmt_spend_spark` declares ahead of the body.
     "sparks_spent": "sparksSpent",
+    # The Kokomi Rare pass (2026-10-04), Shoal of Spears: one hit per Plan
+    # written this turn (`effects._amount`'s token of the same name).
+    "plans_written_this_turn":
+        "KokomiOverhaulLedger.For(Owner.Creature).PlansWrittenThisTurn",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -4512,6 +4516,8 @@ RUNTIME_TIMES = {
 RUNTIME_TIMES_TEXT = {
     "salon_members": " once per [gold]Salon Member[/gold]",
     "sparks_spent": " for each [gold]Spark[/gold] spent",
+    "plans_written_this_turn":
+        " once for each [gold]Plan[/gold] you wrote this turn",
 }
 
 

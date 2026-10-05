@@ -45,7 +45,7 @@ public sealed class ProtoKkKurageSwarm : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Swarm"),
-        ("description", "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1."),
+        ("description", "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

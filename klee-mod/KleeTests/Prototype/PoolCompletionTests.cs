@@ -110,8 +110,9 @@ public class PoolCompletionTests : IDisposable
         Assert.Equal(0, UpCost<ProtoKkSpringTide>());
         Assert.Equal(0, UpCost<ProtoKkKurageSchool>());
 
-        Assert.Equal(4, new ProtoKkShoalOfSpears().DynamicVars["ExtraDamage"].IntValue);
-        Assert.Equal(5, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["ExtraDamage"].IntValue);
+        // The Rare pass (2026-10-04): 4 [5] a hit, one hit per Plan written.
+        Assert.Equal(4, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);
+        Assert.Equal(5, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
         Assert.Equal(2, new ProtoKkPatientTide().DynamicVars["PowerAmount"].IntValue);
         Assert.Equal(3, Upgraded<ProtoKkPatientTide>().DynamicVars["PowerAmount"].IntValue);
         Assert.Equal(2, new ProtoKkSeasReproach().EnergyCost.Canonical);
@@ -132,14 +133,32 @@ public class PoolCompletionTests : IDisposable
         Assert.Equal((CardRarity.Common, 1), (crash.Rarity, crash.EnergyCost.Canonical));
         Assert.Equal(0, UpCost<ProtoKkCoralCrash>());
         var rebuke = new ProtoKkTidalRebuke();
-        Assert.Equal((CardRarity.Rare, 2), (rebuke.Rarity, rebuke.EnergyCost.Canonical));
-        Assert.Equal(1, UpCost<ProtoKkTidalRebuke>());
+        // The Rare pass (2026-10-04): cost 2 -> 1 [0], and Retain.
+        Assert.Equal((CardRarity.Rare, 1), (rebuke.Rarity, rebuke.EnergyCost.Canonical));
+        Assert.Equal(0, UpCost<ProtoKkTidalRebuke>());
+        Assert.Contains(CardKeyword.Retain, rebuke.CanonicalKeywords);
         Assert.False(Exhausts(rebuke));
         Assert.Equal(TargetType.AllEnemies, rebuke.TargetType);
         Assert.Equal(1, UpCost<ProtoMcNoelleSweepingTime>());
     }
 
     // ---- Kokomi: the rules ------------------------------------------------
+
+    [Fact]
+    public void A_card_she_is_handed_exhausts()
+    {
+        // The Rare pass (2026-10-04): Shoal Call's and Watatsumi
+        // Resistance's Nips and Kurage School's copies Exhaust when played,
+        // as a Shiv does. All three go through the one helper.
+        Assert.Contains(Seq("KokomiCards", "ShoalCall"),
+                        c => c.Contains("Exhausting"));
+        Assert.Contains(Seq("KokomiCards", "KurageSchool"),
+                        c => c.Contains("Exhausting"));
+        Assert.Contains(Seq("WatatsumiResistancePower", "AfterCardPlayed"),
+                        c => c.Contains("Exhausting"));
+        Assert.Contains(Seq("KokomiCards", "Exhausting"),
+                        c => c.Contains("AddKeyword"));
+    }
 
     [Fact]
     public void Spring_tide_drains_the_whole_queue_mid_turn()

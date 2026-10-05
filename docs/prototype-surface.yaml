@@ -1271,7 +1271,9 @@
 
 - {id: proto_kk_the_moon_a_ship, name: "The Moon, A Ship O'er the Seas", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: skill, rarity: rare, exhaust: true,
+   # THE RARE PASS (2026-10-04): cost 2 -> 1. At 2 its Block half was the
+   # Regent's Uncommon Bulwark without the Forge.
+   cost: 1, type: skill, rarity: rare, exhaust: true,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
    description: "Exhaust. Gain 12 [gold]Block[/gold]. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
@@ -1778,8 +1780,12 @@
 - {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare, exhaust: true,
-   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. Double each enemy's [gold]Weak[/gold] and [gold]Vulnerable[/gold]. Exhaust.",
+   # THE RARE PASS (2026-10-04): applies 1 of each first, so it never
+   # doubles nothing (the floor is Weak 2 and Vulnerable 2 on every enemy).
+   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double its [gold]Weak[/gold] and [gold]Vulnerable[/gold]. Exhaust.",
    effects: [{op: damage, amount: 6, target: all_enemies},
+             {op: apply_power, power: weak, amount: 1, target: all_enemies},
+             {op: apply_power, power: vulnerable, amount: 1, target: all_enemies},
              {op: kokomi, kind: double_weak_vulnerable}],
    # 9 to ALL.
    upgrade: {damage: 3}}
@@ -1843,7 +1849,7 @@
 - {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Add {KkAmount:diff()} Nips to your hand.{IfUpgraded:show: They are upgraded.|}",
+   description: "Add {KkAmount:diff()} Nips to your hand.{IfUpgraded:show: They are upgraded.|} They [gold]Exhaust[/gold].",
    effects: [{op: kokomi, kind: shoal_call, amount: 2}],
    # The Nips arrive upgraded: a play-time read, the face's own swap.
    upgrade: {upgraded_grant: true}}
@@ -1851,7 +1857,7 @@
 - {id: proto_kk_kurage_swarm, name: "Kurage Swarm", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1.",
+   description: "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1 more.",
    effects: [{op: apply_power, power: kk_kurage_swarm, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1910,7 +1916,7 @@
    # "0-cost" is the card's cost as it stands in hand; the copies are exact
    # (an upgraded Nip copies upgraded). The hand is read once, before the
    # first copy is added, and a full hand stops the copying.
-   description: "Exhaust. Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand.",
+   description: "Exhaust. Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand. The copies [gold]Exhaust[/gold].",
    effects: [{op: kokomi, kind: kurage_school}],
    upgrade: {cost: -1}}
 
@@ -1919,12 +1925,12 @@
    cost: 1, type: attack, rarity: rare,
    # "Wrote" counts every Plan written onto the Bake-Kurage this turn, Moon's
    # Reflection's included; a Plan cancelled or carried out since still counts.
-   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] you wrote this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: all_enemies,
-              amount_formula: {base: 0, per: 4,
-                               count: plans_written_this_turn}}],
-   # 5 each.
-   upgrade: {formula_per: 1}}
+   # THE RARE PASS (2026-10-04): one hit per Plan written; provenance note.
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies once for each [gold]Plan[/gold] you wrote this turn.",
+   effects: [{op: damage, amount: 4, target: all_enemies,
+              times: plans_written_this_turn}],
+   # 5 a hit.
+   upgrade: {damage: 1}}
 
 - {id: proto_kk_patient_tide, name: "Patient Tide", character: kokomi,
    authored_by: [claude],
@@ -1946,8 +1952,10 @@
 
 - {id: proto_kk_tidal_rebuke, name: "Tidal Rebuke", character: kokomi,
    authored_by: [claude],
-   # Paper sec.6: no Exhaust (Body Slam to ALL, a rarity and a cost above).
-   cost: 2, type: attack, rarity: rare,
+   # Paper sec.6: no Exhaust (Body Slam to ALL, a rarity above).
+   # THE RARE PASS (2026-10-04): cost 2 -> 1 and Retain. At 2 it was her own
+   # Common, Coral Crash, at double the price in every one-enemy fight.
+   cost: 1, type: attack, rarity: rare, retain: true,
    description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies,
               amount_formula: {base: 0, per: 1, count: player_block}}],
@@ -1957,7 +1965,7 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # One Nip per Companion play; copies add.
-   description: "Whenever you play a [gold]Companion[/gold] card, add a Nip to your hand.",
+   description: "Whenever you play a [gold]Companion[/gold] card, add a Nip to your hand. It [gold]Exhausts[/gold].",
    effects: [{op: apply_power, power: kk_watatsumi_resistance, amount: 1, target: self}],
    upgrade: {cost: -1}}
 

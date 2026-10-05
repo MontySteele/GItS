@@ -82,9 +82,10 @@ def test_coral_crash_is_body_slam_and_tidal_rebuke_keeps_no_exhaust(overhaul):
     assert (crash.rarity, crash.cost, _up("proto_kk_coral_crash").cost) == (
         "common", 1, 0)
     rebuke = _row("proto_kk_tidal_rebuke")
+    # The Rare pass (2026-10-04): cost 2 -> 1 [0], and Retain.
     assert (rebuke.rarity, rebuke.cost, _up("proto_kk_tidal_rebuke").cost) == (
-        "rare", 2, 1)
-    assert not rebuke.exhaust
+        "rare", 1, 0)
+    assert not rebuke.exhaust and rebuke.retain
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
                                make_enemy(hp=300, intents=QUIET)])
     st.player.block = 13
@@ -292,3 +293,43 @@ def test_interval_bells_spend_is_three_then_two(arm):
     assert FS.spend_mode_amount(up.effects[0]["modes"][1]) == 2
     # Its Spend mode's Energy comes next turn (the 2026-10-04 loop fix):
     # `tier0/tests/test_furina_tide_arm.py` pins it on the Salon's Tab rules.
+
+
+# --- the Rare pass (2026-10-04) ------------------------------------------------
+
+def test_shoal_of_spears_is_one_hit_per_plan_written(overhaul):
+    """One hit of 4 per Plan written this turn, so her Strength counts on
+    each hit; with no Plan written it deals nothing."""
+    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
+                               make_enemy(hp=300, intents=QUIET)])
+    st.player.powers["strength"] = 2
+    _play(st, "proto_kk_shoal_of_spears")
+    assert [e.hp for e in st.enemies] == [300, 300]
+    for i in range(3):
+        kokomi_plan.schedule(st, plan_card(
+            [{"op": "energy", "amount": 1}], cid=f"proto_kk_w{i}"))
+    _play(st, "proto_kk_shoal_of_spears")
+    assert [e.hp for e in st.enemies] == [300 - 3 * 6, 300 - 3 * 6]
+
+
+def test_a_nip_she_is_handed_exhausts_and_a_drafted_one_does_not(overhaul):
+    """Shoal Call's and Watatsumi Resistance's Nips and Kurage School's
+    copies Exhaust when played, as a Shiv does; the pool row is unchanged."""
+    assert not _row(kokomi_plan.NIP_ID).exhaust
+    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
+    _play(st, "proto_kk_shoal_call")
+    st.player.powers[kokomi_plan.WATATSUMI_RESISTANCE] = 1
+    kokomi_plan.note_companion_played(st, Card(
+        id="probe_companion", name="c", cost=0, type="skill",
+        tags=["companion"]))
+    drafted = _row(kokomi_plan.NIP_ID)
+    st.player.hand.append(drafted)
+    _play(st, "proto_kk_kurage_school")
+    handed = [c for c in st.player.hand if c is not drafted]
+    assert len(handed) == 3 + 4 and all(c.exhaust for c in handed)
+    assert not drafted.exhaust
+    for c in list(st.player.hand):
+        st.player.energy = 5
+        combat.play_card(st, c)
+    assert drafted in st.player.discard_pile
+    assert all(c in st.player.exhaust_pile for c in handed)
