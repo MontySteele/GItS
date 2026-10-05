@@ -17,7 +17,10 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
 
   1. By group x act x kind (monster / elite / boss): fights, median damage a
      turn (`damage_dealt / turns`), median HP lost as % of max, median turns,
-     median Block gained a turn, losses (`outcome: died`).
+     median Block gained a turn, median peak Strength (the highest
+     end-of-turn `strength_by_turn` reading in the fight), losses
+     (`outcome: died`; written since 2026-10-05, when the mod began filing
+     the fight a seat dies in).
   2. The comparison: each group's act-by-act NORMAL-fight damage a turn and
      HP lost as a ratio to the base five's (the bar is within about 15%).
      The baseline is always the base five under the same filters, or under
@@ -32,7 +35,7 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
 OLDER RECORDS LACK KEYS. `block_gained` arrived 2026-10-02 and the wider
 damage credit the same day; a record missing a key is left out of that one
 median and counted nowhere else as zero. The Block column's `nB` says how
-many fights carried it.
+many fights carried it; `strength_by_turn` arrived 2026-10-05.
 
 Caveat carried from the paper: damage from a base character's Poison or orbs
 is credited only when the engine names the seat's creature as the dealer, so
@@ -180,6 +183,15 @@ def hp_lost_pct(row: dict) -> float | None:
     return 100.0 * lost / top
 
 
+def peak_strength(row: dict) -> float | None:
+    """The highest end-of-turn Strength in the fight; None when the record
+    has no `strength_by_turn` rows."""
+    vals = [float(e[1]) for e in row.get("strength_by_turn") or []
+            if isinstance(e, (list, tuple)) and len(e) >= 2
+            and isinstance(e[1], (int, float)) and not isinstance(e[1], bool)]
+    return max(vals) if vals else None
+
+
 def _median(values: list[float | None]) -> float | None:
     vals = [v for v in values if v is not None]
     return statistics.median(vals) if vals else None
@@ -196,6 +208,7 @@ class Cell:
     turns: float | None
     block_turn: float | None
     n_block: int
+    strength: float | None
     losses: int
 
     def as_dict(self) -> dict:
@@ -210,6 +223,7 @@ def cell(group: str, act: int, kind: str, rows: list[dict]) -> Cell:
                 _median([_num(r, "turns") for r in rows]),
                 _median(blocks),
                 sum(1 for b in blocks if b is not None),
+                _median([peak_strength(r) for r in rows]),
                 sum(1 for r in rows if r.get("outcome") == "died"))
 
 
@@ -322,12 +336,13 @@ def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
     lines.append("")
     lines.append("BY GROUP x ACT x KIND (medians across fights)")
     lines.append(f"{'group':<16}{'act':>4} {'kind':<8}{'n':>5}{'dmg/t':>8}"
-                 f"{'hp%':>7}{'turns':>7}{'blk/t':>7}{'nB':>5}{'lost':>6}")
+                 f"{'hp%':>7}{'turns':>7}{'blk/t':>7}{'nB':>5}{'str':>6}"
+                 f"{'lost':>6}")
     for c in cells:
         lines.append(f"{c.group:<16}{c.act:>4} {c.kind:<8}{c.fights:>5}"
                      f"{_f(c.dmg_turn):>8}{_f(c.hp_lost_pct):>7}"
                      f"{_f(c.turns):>7}{_f(c.block_turn):>7}{c.n_block:>5}"
-                     f"{c.losses:>6}")
+                     f"{_f(c.strength):>6}{c.losses:>6}")
     if comp:
         lines.append("")
         lines.append("COMPARISON: normal fights against the base five "

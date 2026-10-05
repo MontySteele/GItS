@@ -335,21 +335,37 @@ internal static class PlayTelemetry
         {
             var combat = CombatManager.Instance?.DebugOnlyGetState();
             if (combat == null) return;
-            var round = combat.RoundNumber;
-            foreach (var (player, record) in Open)
-            {
-                var creature = player.Creature;
-                if (creature == null) continue;
-                record.BlockAtTurnEnd.Add(new[] { round, (int)creature.Block });
-                record.HpLastSeen = (int)creature.CurrentHp;
-            }
-
+            RecordTurnEnd(combat.RoundNumber);
             SampleDetonations(combat);
             MaybeClose(combat);
         }
         catch (Exception e)
         {
             Warn("CloseTurn", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="CloseTurn"/>, and the test
+    /// seam: one turn-end row per open seat.
+    ///
+    /// 2026-10-05 — STRENGTH BY TURN. The seat's Strength standing at the end
+    /// of its turn, 0 with none, read off the base game's own
+    /// <c>StrengthPower</c> so it means the same thing for the base five and
+    /// every kit character. Negative when Strength is down. A read, never a
+    /// write (rule 1).</summary>
+    internal static void RecordTurnEnd(int round)
+    {
+        foreach (var (player, record) in Open)
+        {
+            var creature = player.Creature;
+            if (creature == null) continue;
+            record.BlockAtTurnEnd.Add(new[] { round, (int)creature.Block });
+            record.StrengthByTurn.Add(new[]
+            {
+                round,
+                creature.GetPowerAmount<MegaCrit.Sts2.Core.Models.Powers.StrengthPower>(),
+            });
+            record.HpLastSeen = (int)creature.CurrentHp;
         }
     }
 
@@ -792,7 +808,8 @@ internal static class PlayTelemetry
     /// `EndCombatInternal` at all — `CheckWinCondition` sees the pending loss,
     /// calls `ProcessPendingLoss` and returns — so there is no combat-end hook
     /// on a death. `died` was already exact from the player's own death and
-    /// stays the observation that labels it.
+    /// stays the observation that labels it; <see cref="SeatDied"/> is where
+    /// the record closes on a death.
     /// </summary>
     internal static void CombatEnded(bool victory)
     {
@@ -838,10 +855,61 @@ internal static class PlayTelemetry
     private static void MaybeClose(ICombatState combat)
     {
         if (Open.Count == 0) return;
-        var enemiesLeft = combat.Enemies.Any(e => e.IsAlive);
+        CloseIfOver(combat.Enemies.Any(e => e.IsAlive));
+    }
+
+    /// <summary>The combat-free half of <see cref="MaybeClose"/>, and the test
+    /// seam.</summary>
+    internal static void CloseIfOver(bool enemiesLeft)
+    {
+        if (Open.Count == 0) return;
         var seatsLeft = Open.Keys.Any(p => p.Creature is { IsDead: false });
         if (enemiesLeft && seatsLeft) return;
         FlushAll(enemiesLeft ? "died" : "won");
+    }
+
+    /// <summary>
+    /// 2026-10-05 — THE FATAL FIGHT. A fight the player died in wrote no line
+    /// (Klee suite 1, the two act-1 boss deaths on lanes 3 and 4), so a kit's
+    /// boss and elite rows counted only fights it won. Neither close seam
+    /// hears a death: <c>CreatureCmd.Damage</c> skips
+    /// <c>AfterDamageReceived</c> for a creature the hit killed, and the loss
+    /// path never reaches <c>EndCombatInternal</c> (see
+    /// <see cref="CombatEnded"/>). The game goes from the last seat's death
+    /// straight to <c>LoseCombat</c> and the game-over screen, so the
+    /// stale-flush in the next <see cref="OpenFight"/> never comes either.
+    ///
+    /// <c>AfterDeath</c> does fire for a player (in
+    /// <c>KillWithoutCheckingWinCondition</c>, before the player's hooks are
+    /// deactivated and before <c>Kill</c> checks for the loss), so the record
+    /// closes there: HP is the corpse's 0, and the fight is written once, as
+    /// `died`, when the last seat is down. In co-op a seat that dies while
+    /// another stands keeps its record open; it is labelled `died` at the
+    /// fight's close by <see cref="FlushAll"/>, as it always was.
+    /// </summary>
+    internal static void SeatDied(Creature creature)
+    {
+        try
+        {
+            if (Open.Count == 0 || creature?.Player == null) return;
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            CloseOnSeatDeath(creature, combat?.Enemies.Any(e => e.IsAlive) ?? true);
+        }
+        catch (Exception e)
+        {
+            Warn("SeatDied", e);
+        }
+    }
+
+    /// <summary>The combat-free half of <see cref="SeatDied"/>, and the test
+    /// seam. A seat with no open record (already flushed) writes nothing, so
+    /// the fight is filed once.</summary>
+    internal static void CloseOnSeatDeath(Creature creature, bool enemiesLeft)
+    {
+        if (creature?.Player is not { } player
+            || !Open.TryGetValue(player, out var record)) return;
+        record.HpLastSeen = Math.Max(0, (int)creature.CurrentHp);
+        CloseIfOver(enemiesLeft);
     }
 
     internal static void FlushAll(string outcome)
@@ -1142,6 +1210,7 @@ internal static class PlayTelemetry
         public readonly List<int[]> IncomingByTurn = new();
         public readonly List<int[]> EnemyPoolByTurn = new();
         public readonly List<int[]> BlockAtTurnEnd = new();
+        public readonly List<int[]> StrengthByTurn = new();
         public readonly List<int[]> ReactionsByTurn = new();
         /// <summary>-1 until the first turn sample; the counter is monotonic
         /// across combats, so a fight's own count is a difference.</summary>
@@ -1242,6 +1311,7 @@ internal static class PlayTelemetry
             Pairs(sb, "incoming_by_turn", IncomingByTurn);
             Pairs(sb, "enemy_pool_by_turn", EnemyPoolByTurn);
             Pairs(sb, "block_at_turn_end", BlockAtTurnEnd);
+            Pairs(sb, "strength_by_turn", StrengthByTurn);
             Pairs(sb, "reactions_by_turn", ReactionsByTurn);
             sb.Append(",\"cards_played\":[");
             for (var i = 0; i < CardsPlayed.Count; i++)
@@ -1735,6 +1805,13 @@ public sealed class PlayTelemetryHooks : AbstractModel
         // prevented death drops the snapshot without filing it.
         if (!wasRemovalPrevented) PlayTelemetry.RecordDeath(creature);
         else PlayTelemetry.DropPending(creature);
+        // 2026-10-05: a seat's death closes the fight when it was the last
+        // seat standing -- the only hook the loss path delivers. After
+        // RecordDeath, so the killing hit is in the record it writes.
+        if (!wasRemovalPrevented && creature is { IsPlayer: true })
+        {
+            PlayTelemetry.SeatDied(creature);
+        }
         return Task.CompletedTask;
     }
 }
