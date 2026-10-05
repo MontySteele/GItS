@@ -136,6 +136,21 @@ KNOWN_STALE = {
     "proto_vk_gust_ward": (
         "The Varka rebalance (2026-10-03, PR #863) retired this row; its replacement has no illustration yet. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_vk_gale_mantle": (
+        "The Varka combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md sec.2) cut this generic Block row from his pool. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_vk_west_wind_shield": (
+        "The Varka combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md sec.2) cut this generic Block row from his pool. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_vk_knightly_guard": (
+        "The Varka combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md sec.2) cut this generic Block row from his pool. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_vk_tailwind_guard": (
+        "The Varka combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md sec.2) cut this generic Block row from his pool. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_vk_oath_of_the_knights": (
+        "The Varka combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md sec.2) cut this generic Block row from his pool. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_vk_updraft": (
         "Legacy cleanup stage 6 (2026-10-02, #832) deleted this retired Varka row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -562,6 +577,11 @@ KNOWN_MISSING = {
     "proto_fs_salons_encore": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
     "proto_fs_salons_tab": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
     "proto_fs_surging_waters": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
+    "proto_vk_deep_freeze": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
+    "proto_vk_ember_cleave": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
+    "proto_vk_pyre_oath": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
+    "proto_vk_shatter": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
+    "proto_vk_stoke_the_flames": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
 }
 
 

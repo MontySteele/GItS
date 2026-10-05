@@ -45,7 +45,7 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 | `klee` | Klee | 70 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab built; awaiting [USER]'s play) | 24 |
-| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
+| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -348,8 +348,19 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   round's two seeds, both runs reached the final boss and died there (last
   round: act 2 and floor 42); Windbound was no seat's NEVER AGAIN, and
   holding Ascension became a named decision.
-  Cryo's payoffs (statuses with no damage payoff below Rare; Glacial Edict
-  the candidate rewrite) wait on [USER]'s next Varka playtest (2026-10-03).
+  **The combo pass is built (2026-10-04,
+  `review/active/varka-combo-pass-2026-10-04.md`, RULED, all four picks):**
+  five generic Block cards out (Gale Mantle, West Wind Shield, Knightly
+  Guard, Tailwind Guard, Oath of the Knights); Pyro's Exhaust engine in
+  (Stoke the Flames, Ember Cleave, Pyre Oath) and Cryo's status payoffs
+  (Shatter, Deep Freeze); Unwavering Banner reworded to pay 1 Oath when it
+  holds a switch; Baron Bunny's hit to a random enemy; Charge of the Knights
+  cost 1, Lion's Fang and Four Winds' Ascension upgrade to cost 1, Kaeya and
+  Razor Attacks, two faces reworded. Pool 78 (20 / 35 / 23). The sim missed
+  the paper's "Pyro and Cryo up" bar (Pyro -15, Cryo flat; the stock pilot
+  prices an Exhaust at nothing) and Deep Freeze's upgrade (cost 0) is the
+  builder's proposal: provenance note, "Varka combo pass, 2026-10-04".
+  Next: the paper's two-seat round, then [USER]'s next Varka run.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

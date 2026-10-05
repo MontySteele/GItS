@@ -1100,7 +1100,10 @@
    nation: mondstadt, star: 5, rarity: rare, role_c: buffer, element: anemo,
    cost: 2, type: power,
    description: "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card.",
-   effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}]}
+   effects: [{op: apply_power, power: mc_lions_fang, amount: 8, target: self}],
+   # Varka combo pass sec.1 (2026-10-04, the friend's note): cost 2 to 1,
+   # was 8 to 9 Block (the Prototype default).
+   upgrade: {cost: -1}}
 
 # THE KOKOMI OVERHAUL, BRIEF DRAFT 7 (the Plan). These
 # ARE her starter and her whole pool. The `plan:`
@@ -2847,12 +2850,12 @@
    authored_by: [claude],
    # Created in combat, never in the deck; played, it goes to the discard
    # pile. `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this.
-   # Starter ruling 2026-10-03: Sovereign Blade's shape (provenance note).
+   # Starter ruling 2026-10-03; upgrade cost 2 to 1 since the combo pass.
    cost: 2, type: attack, rarity: basic, retain: true, tags: [dusty_tome],
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
-   upgrade: {damage: 3, varka_per: 1}}
+   upgrade: {cost: -1}}
 
 - {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
    authored_by: [claude],
@@ -2911,18 +2914,8 @@
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    upgrade: {block: 2}}
 
-# --- Common (15; 20 since the expansion, 2026-10-01) ---
-
-# Varka defence (review/active/varka-defence-2026-10-01.md sec.3, ruled
-# 2026-10-01): Gale Mantle replaces Squall. "Half" rounds down
-# (`half_total_oath`).
-- {id: proto_vk_gale_mantle, name: "Gale Mantle", character: varka,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus half your total [gold]Oath[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 5, per: 1, count: half_total_oath}}],
-   upgrade: {formula_base: 3}}
+# --- Common (15; 20 since the expansion, 2026-10-01; the combo pass cut
+# Gale Mantle and Knightly Guard, 2026-10-04) ---
 
 # Varka element identities (review/active/varka-element-identities-2026-10-01.md
 # sec.3, ruled 2026-10-01): Charged Lunge replaces Updraft.
@@ -2962,8 +2955,10 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: pyro,
    cost: 1, type: skill, personal_pool: varka,
-   # Pick 2 (ruled): Block now, AoE Pyro next turn.
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to ALL enemies.",
+   # Pick 2 (ruled): Block now, Pyro next turn. Combo pass sec.2 (2026-10-04,
+   # [USER]: "nerf the attack from 'all enemies' to 'one enemy at random.'"):
+   # a random enemy, was ALL; the Block is unchanged.
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to a random enemy.",
    effects: [{op: block, amount: 6},
              {op: apply_power, power: vk_baron_bunny, amount: 6, target: self}],
    upgrade: {block: 2, power_amount: 2}}
@@ -2993,8 +2988,9 @@
 - {id: proto_vk_kaeya_frostgnaw, name: "Kaeya: Heart of the Abyss", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
-   cost: 1, type: skill, personal_pool: varka,
-   # The expansion's Knight pass (2026-10-01): adds 1 Vulnerable.
+   cost: 1, type: attack, personal_pool: varka,
+   # The expansion's Knight pass (2026-10-01): adds 1 Vulnerable. An Attack
+   # since the combo pass (2026-10-04): it deals damage and nothing else.
    description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Apply 1 [gold]Vulnerable[/gold].",
    effects: [{op: damage, amount: 6, target: enemy, applies_element: true},
              {op: apply_power, power: vulnerable, amount: 1, target: enemy}],
@@ -3003,10 +2999,9 @@
 - {id: proto_vk_razor_claw_and_thunder, name: "Razor: Awakening", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
-   cost: 1, type: skill, personal_pool: varka,
-   # The AoE trim (review/active/aoe-trim-2026-10-03.md sec.4): one enemy,
-   # same numbers. Was ALL enemies. 5 [7], +4 since 2026-10-03 (was
-   # 4 [6], +3): provenance, "Varka Electro Knights, 2026-10-03".
+   cost: 1, type: attack, personal_pool: varka,
+   # The AoE trim: one enemy. 5 [7], +4: provenance, "Varka Electro
+   # Knights, 2026-10-03". An Attack since the combo pass (2026-10-04).
    description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} more.",
    effects: [{op: varka, kind: awakening, target: enemy, base: 5, amount: 4}],
    upgrade: {varka_base: 2}}
@@ -3032,15 +3027,6 @@
              {op: swirl, target: enemy}],
    upgrade: {block: 3}}
 
-- {id: proto_vk_knightly_guard, name: "Knightly Guard", character: varka,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. If you played a [gold]Knight[/gold] this turn, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold].",
-   effects: [{op: block, amount: 8},
-             {op: conditional, if: knight_played_this_turn,
-              then: [{op: varka, kind: gain_current_oath}]}],
-   upgrade: {block: 3}}
-
 - {id: proto_vk_oathsworn_strike, name: "Oathsworn Strike", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common, tags: [strike],
@@ -3059,7 +3045,8 @@
               then: [{op: block, amount: 5}]}],
    upgrade: {damage: 3, conditional_block: 2}}
 
-# --- Uncommon (18; 35 since the expansion) ---
+# --- Uncommon (18; 35 since the expansion; the combo pass cut Oath of the
+# Knights and Tailwind Guard, 2026-10-04) ---
 
 - {id: proto_vk_rising_gale, name: "Rising Gale", character: varka,
    authored_by: [claude],
@@ -3123,13 +3110,6 @@
    description: "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your Anemo Attacks deal 3 additional damage.",
    effects: [{op: apply_power, power: vk_stormward_stance, amount: 3, target: self}],
    upgrade: {power_amount: +2}}
-
-- {id: proto_vk_oath_of_the_knights, name: "Oath of the Knights", character: varka,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, gain [gold]Block[/gold] equal to your [gold]current element[/gold]'s [gold]Oath[/gold].",
-   effects: [{op: apply_power, power: vk_oath_of_the_knights, amount: 1, target: self}],
-   upgrade: {innate: true}}
 
 - {id: proto_vk_rally_to_the_banner, name: "Rally to the Banner", character: varka,
    authored_by: [claude],
@@ -3196,14 +3176,6 @@
              {op: varka, kind: swirled_take_more, amount: 5}],
    upgrade: {damage: 2}}
 
-- {id: proto_vk_tailwind_guard, name: "Tailwind Guard", character: varka,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each element you have [gold]Oath[/gold] in.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 0, per: 3, count: oath_elements}}],
-   upgrade: {formula_per: 1}}
-
 # Element identities (sec.3): Chain Lightning replaces Unfurled Banner.
 - {id: proto_vk_chain_lightning, name: "Chain Lightning", character: varka,
    authored_by: [claude],
@@ -3221,7 +3193,8 @@
 - {id: proto_vk_converging_winds, name: "Converging Winds", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "Your [gold]Swirls[/gold] react where they land. An [gold]Elemental Reaction[/gold] a spread sets off hits only that enemy.",
+   # Combo pass sec.1 (2026-10-04): new words, same behaviour.
+   description: "The elements your [gold]Swirls[/gold] spread set off [gold]Elemental Reactions[/gold].",
    effects: [{op: apply_power, power: vk_converging_winds, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -3288,7 +3261,7 @@
 # ruled 2026-10-01): 37 cards, the pool to 78 (20 / 35 / 23). Readings:
 # docs/notes/prototype-surface-provenance.md, "Varka expansion, 2026-10-01".
 
-# --- Common (5) ---
+# --- Common (5; the combo pass cut West Wind Shield, 2026-10-04) ---
 
 - {id: proto_vk_pathfinders_mark, name: "Pathfinder's Mark", character: varka,
    authored_by: [claude],
@@ -3306,14 +3279,6 @@
    description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it sets off an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} more.",
    effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
    upgrade: {varka_base: 3}}
-
-- {id: proto_vk_west_wind_shield, name: "West Wind Shield", character: varka,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each enemy with an aura.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 5, per: 2, count: enemies_with_aura}}],
-   upgrade: {formula_base: 2}}
 
 - {id: proto_vk_knightly_strike, name: "Knightly Strike", character: varka,
    authored_by: [claude],
@@ -3409,7 +3374,8 @@
 - {id: proto_vk_unwavering_banner, name: "Unwavering Banner", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Only [gold]Knights[/gold] and cards that name it can change your [gold]current element[/gold].",
+   # Reworded by the combo pass (sec.4, 2026-10-04): a mono-element payoff.
+   description: "Only [gold]Knights[/gold] can change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold] instead.",
    effects: [{op: apply_power, power: vk_unwavering_banner, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3519,7 +3485,8 @@
    cost: X, type: attack, rarity: rare,
    # The element identities round (2026-10-01): the face prints the per-hit
    # total in combat (`VkHit`, codegen's VARKA_HIT_PREVIEW_KINDS).
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies X times, plus {VkPer:diff()} for each Electro [gold]Oath[/gold] each time.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}",
+   # Combo pass sec.1 (2026-10-04): the per-Oath part is damage, said first.
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage, plus {VkPer:diff()} for each Electro [gold]Oath[/gold], to ALL enemies X times.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}",
    effects: [{op: varka, kind: thundering_verdict, target: all_enemies, base: 6, per: 1}],
    upgrade: {varka_base: 2}}
 
@@ -3593,15 +3560,67 @@
 
 - {id: proto_vk_charge_of_the_knights, name: "Charge of the Knights", character: varka,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: rare,
+   # Combo pass sec.1 (2026-10-04): cost 2 to 1, 5 [6] to 5 [7].
+   cost: 1, type: attack, rarity: rare,
    description: "Deal {ExtraDamage:diff()} damage for each [gold]Knight[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy, applies_element: false,
               amount_formula: {base: 0, per: 5, count: knights_played_this_combat}}],
-   upgrade: {formula_per: 1}}
+   upgrade: {formula_per: 2}}
 
 - {id: proto_vk_the_order_answers, name: "The Order Answers", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
    description: "At the start of your turn, add a random [gold]Knight[/gold] to your hand.",
    effects: [{op: apply_power, power: vk_the_order_answers, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+# VARKA, THE COMBO PASS (review/active/varka-combo-pass-2026-10-04.md, ruled
+# 2026-10-04): five generic Block cards out, five in; the pool stays 78.
+# Readings: provenance note, "Varka combo pass, 2026-10-04".
+
+# --- Common (3) ---
+
+- {id: proto_vk_stoke_the_flames, name: "Stoke the Flames", character: varka,
+   authored_by: [claude],
+   # "Exhaust a card" is True Grit+'s: the player chooses, any card in hand.
+   cost: 1, type: skill, rarity: common,
+   description: "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro [gold]Oath[/gold].",
+   effects: [{op: exhaust_from, select: chosen, amount: 1},
+             {op: varka, kind: gain_pyro_oath, amount: 2}],
+   upgrade: {varka_amount: 1}}
+
+- {id: proto_vk_ember_cleave, name: "Ember Cleave", character: varka,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card.",
+   effects: [{op: varka, kind: pyro_strike, target: enemy, base: 9},
+             {op: exhaust_from, select: chosen, amount: 1}],
+   upgrade: {varka_base: 3}}
+
+- {id: proto_vk_shatter, name: "Shatter", character: varka,
+   authored_by: [claude],
+   # Stacks, not distinct debuffs: Weak 1 and Vulnerable 2 is 3. The face
+   # prints the total against the enemy it previews on (`VkHit`).
+   cost: 1, type: attack, rarity: common,
+   description: "Deal {VkBase:diff()} [gold]Cryo[/gold] damage, plus {VkPer:diff()} for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   effects: [{op: varka, kind: shatter, target: enemy, base: 5, per: 2}],
+   upgrade: {varka_base: 2, varka_per: 1}}
+
+# --- Uncommon (2) ---
+
+- {id: proto_vk_pyre_oath, name: "Pyre Oath", character: varka,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you [gold]Exhaust[/gold] a card, gain 1 Pyro [gold]Oath[/gold].",
+   effects: [{op: apply_power, power: vk_pyre_oath, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
+   authored_by: [claude],
+   # The upgrade (cost 1 to 0) is the builder's proposal, for the main
+   # session to confirm.
+   cost: 1, type: skill, rarity: uncommon, retain: true,
+   description: "Apply [gold]Cryo[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
+   effects: [{op: apply_aura, element: cryo, target: enemy},
+             {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}

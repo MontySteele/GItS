@@ -69,7 +69,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoVkRazorClawAndThunder()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 

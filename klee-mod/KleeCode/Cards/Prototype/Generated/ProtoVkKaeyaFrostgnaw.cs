@@ -73,7 +73,7 @@ public sealed class ProtoVkKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoVkKaeyaFrostgnaw()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 

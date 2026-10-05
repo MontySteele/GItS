@@ -203,7 +203,9 @@ public sealed class VarkaOathLedger
     /// <summary>The Elixir is drunk: this round reads all four.</summary>
     public void ReadAllFourThisTurn() => _allFourRound = _round;
 
-    /// <summary>How many elements he has any Oath in (Tailwind Guard).</summary>
+    /// <summary>How many elements he has any Oath in (the
+    /// <c>oath_elements</c> count; Tailwind Guard's, cut by the combo pass).
+    /// </summary>
     public int ElementsWithOath => Elements.Count(e => Oath(e) > 0);
 
     /// <summary>All four together.</summary>
@@ -317,8 +319,23 @@ public sealed class VarkaOathLedger
             _plays.Clear();
             _gainClauses.Clear();
             FangInThisPlay = false;
+            _bannerPaid = false;
         }
         _plays.Add((open, card));
+    }
+
+    private bool _bannerPaid;
+
+    /// <summary>Unwavering Banner (the combo pass, 2026-10-04): "Whenever
+    /// another card would [change your current element], gain 1 Oath of your
+    /// current element instead." Once per play, however many switches the
+    /// card would have made (Tempest of the Four Winds would make three).
+    /// Returns true the first time a play asks.</summary>
+    public bool TakeBannerPay()
+    {
+        if (_bannerPaid) return false;
+        _bannerPaid = true;
+        return true;
     }
 
     /// <summary>A play ends.</summary>
@@ -450,8 +467,9 @@ public static class VarkaOath
         creature != null && Live(creature)
             ? VarkaOathLedger.For(creature).ElementsWithOath : 0;
 
-    /// <summary>Gale Mantle (Varka defence, 2026-10-01): half his total
-    /// Oath, rounded down.</summary>
+    /// <summary>Half his total Oath, rounded down (the
+    /// <c>half_total_oath</c> count; Gale Mantle's, cut by the combo pass).
+    /// </summary>
     public static int HalfTotalOath(Creature? creature) =>
         creature != null && Live(creature)
             ? VarkaOathLedger.For(creature).Total / 2 : 0;
@@ -477,8 +495,9 @@ public static class VarkaOath
         creature != null && Live(creature)
         && VarkaOathLedger.For(creature).ChangedThisTurn;
 
-    /// <summary>West Wind Shield: hittable enemies wearing an aura, fresh or
-    /// spent.</summary>
+    /// <summary>Hittable enemies wearing an aura (the
+    /// <c>enemies_with_aura</c> count; West Wind Shield's, cut by the combo
+    /// pass).</summary>
     public static int EnemiesWithAura(Creature? creature) =>
         creature?.CombatState == null || !Live(creature) ? 0
             : creature.CombatState.HittableEnemies.Count(
@@ -753,12 +772,19 @@ public static class VarkaOath
         {
             foreach (var field in fields) await field.Draw(choiceContext);
         }
-        // Unwavering Banner (the expansion): only Knights and the cards that
-        // name the switch move it, so the open Oath's switch is off.
-        if (!applier.HasPower<UnwaveringBannerPower>()
-            && ledger.OpenOathSwitches(element, cardSource))
+        // Unwavering Banner (reworded by the combo pass, 2026-10-04): only
+        // Knights move it, so the open Oath's switch is off, and the card
+        // gains 1 Oath of the current element instead (once per play).
+        if (ledger.OpenOathSwitches(element, cardSource))
         {
-            await SetCurrent(choiceContext, applier, element, knight: false);
+            if (applier.HasPower<UnwaveringBannerPower>())
+            {
+                await BannerHolds(choiceContext, applier, element);
+            }
+            else
+            {
+                await SetCurrent(choiceContext, applier, element, knight: false);
+            }
         }
         if (ledger.TryCredit(swirl: false, element))
         {
@@ -785,6 +811,30 @@ public static class VarkaOath
         {
             await assembly.OnElementApplied(choiceContext);
         }
+    }
+
+    /// <summary>
+    /// UNWAVERING BANNER'S PAYOUT (the combo pass, 2026-10-04): a card of his
+    /// that is not a Knight would make <paramref name="element"/> his current
+    /// element, and the Banner holds it. When that would have been a change
+    /// (another element is current), gain 1 Oath of the current element,
+    /// once per play. With no current element there is nothing to gain.
+    /// Sim twin: <c>varka_oath.banner_holds</c>.
+    /// </summary>
+    public static async Task BannerHolds(
+        PlayerChoiceContext choiceContext, Creature varka, Element element)
+    {
+        if (!Live(varka)) return;
+        var ledger = VarkaOathLedger.For(varka);
+        var current = ledger.Current;
+        if (current == Element.None || element == current) return;
+        if (!ledger.TakeBannerPay()) return;
+        foreach (var banner in varka.Powers.OfType<UnwaveringBannerPower>().ToList())
+        {
+            banner.Pulse();
+        }
+        // "gain 1 Oath" -- the printed 1, as Vow of the Blade's.
+        await Gain(choiceContext, varka, current, 1);
     }
 
     // ---- the Swirl ------------------------------------------------------------
@@ -935,9 +985,9 @@ public static class VarkaOath
 
     /// <summary>
     /// His start-of-turn powers, in a fixed order: Baron Bunny's burst, then
-    /// Sworn Brotherhood, then Oath of the Knights (which reads the count
-    /// after Sworn Brotherhood's gain). Called from
-    /// <c>KleeElementalHooks.AfterPlayerTurnStart</c>.
+    /// Sworn Brotherhood, then The Order Answers. (Oath of the Knights, which
+    /// paid after Sworn Brotherhood, left with its card in the combo pass.)
+    /// Called from <c>KleeElementalHooks.AfterPlayerTurnStart</c>.
     /// </summary>
     public static async Task TurnStart(
         PlayerChoiceContext choiceContext, Player player)
@@ -953,9 +1003,11 @@ public static class VarkaOath
                                         fast: true);
         }
         // Weathervane (the expansion), first: Sworn Brotherhood below then
-        // gains the element it chose. It names the switch, so Unwavering
-        // Banner does not stop it.
-        if (varka.HasPower<WeathervanePower>())
+        // gains the element it chose. Since the combo pass (2026-10-04)
+        // "Only Knights can change your current element", so Unwavering
+        // Banner stops it; it is not a card, so it gains nothing instead.
+        if (varka.HasPower<WeathervanePower>()
+            && !varka.HasPower<UnwaveringBannerPower>())
         {
             await Weathervane(choiceContext, player);
         }
@@ -976,13 +1028,6 @@ public static class VarkaOath
             var element = Current(varka);
             if (element == Element.None) continue;
             await Gain(choiceContext, varka, element, sworn.Amount);
-        }
-        foreach (var oath in varka.Powers.OfType<OathOfTheKnightsPower>().ToList())
-        {
-            var block = CurrentOath(varka) * oath.Amount;
-            if (block <= 0) continue;
-            await CreatureCmd.GainBlock(varka, block, ValueProp.Unpowered, null,
-                                        fast: true);
         }
         // The Order Answers (the expansion), last: a random pool Knight at
         // its own cost, one per stack.
@@ -1043,7 +1088,7 @@ public static class VarkaCards
         await ElementalHit.ApplyOnly(choiceContext, target, element, owner);
     }
 
-    /// <summary>Knightly Guard: "gain 1 Oath of your current element".
+    /// <summary>Vow of the Blade: "Gain 1 Oath of your current element".
     /// </summary>
     public static async Task GainCurrentOath(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -1183,6 +1228,18 @@ public static class VarkaCards
         var ledger = VarkaOathLedger.For(owner);
         var held = VarkaOathLedger.Elements.Where(e => ledger.Oath(e) > 0).ToList();
         if (held.Count == 0) return;
+        // Unwavering Banner (the combo pass, 2026-10-04): only Knights change
+        // it. No grid: the Banner holds, and pays 1 Oath of the current
+        // element when another element could have been chosen.
+        if (owner.HasPower<UnwaveringBannerPower>())
+        {
+            var other = held.FirstOrDefault(e => e != ledger.Current);
+            if (other != Element.None)
+            {
+                await VarkaOath.BannerHolds(choiceContext, owner, other);
+            }
+            return;
+        }
         var element = held.Count == 1
             ? held[0]
             : await VarkaRules.ChooseElement(choiceContext, card.Owner, held);
@@ -1576,6 +1633,130 @@ public static class VarkaCards
         {
             await ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
                              Var(card, "VkBase"), element);
+        }
+    }
+
+    // ---- THE COMBO PASS (2026-10-04, review/active/varka-combo-pass-2026-10-04.md
+    // secs.3-4). Sim twins: varka_oath._combo_kind.
+
+    /// <summary>Stoke the Flames: "Gain 2 [3] Pyro Oath." One gain, after the
+    /// row's own Exhaust. Not an application, so it switches nothing.
+    /// </summary>
+    public static async Task GainPyroOath(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || !VarkaOath.Live(owner)) return;
+        await VarkaOath.Gain(choiceContext, owner, Element.Pyro,
+                             (int)Var(card, "VkAmount"));
+    }
+
+    /// <summary>Ember Cleave: "Deal 9 [12] Pyro damage." The Exhaust is the
+    /// row's own op, after this one.</summary>
+    public static Task PyroStrike(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
+        ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
+                   Var(card, "VkBase"), Element.Pyro);
+
+    /// <summary>Weak plus Vulnerable on <paramref name="enemy"/>, in stacks
+    /// (Shatter's count). 0 for none. PURE apart from the reads.</summary>
+    public static int WeakAndVulnerable(Creature? enemy) =>
+        enemy == null ? 0
+            : (int)(enemy.Powers.OfType<WeakPower>().FirstOrDefault()?.Amount ?? 0)
+              + (int)(enemy.Powers.OfType<VulnerablePower>().FirstOrDefault()?.Amount ?? 0);
+
+    /// <summary>Shatter's hit before the damage hooks: the base, plus
+    /// <paramref name="per"/> for each stack. PURE.</summary>
+    public static int ShatterDamage(decimal baseDamage, decimal per,
+                                    int stacks) =>
+        (int)(baseDamage + per * System.Math.Max(0, stacks));
+
+    /// <summary>Shatter: "Deal 5 [7] Cryo damage, plus 2 [3] for each Weak and
+    /// Vulnerable on the enemy." The stacks are read before the hit (its
+    /// Cryo may react and its hooks may move them).</summary>
+    public static async Task Shatter(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        if (cardPlay.Target is not { IsAlive: true } target) return;
+        var damage = ShatterDamage(Var(card, "VkBase"), Var(card, "VkPer"),
+                                   WeakAndVulnerable(target));
+        await ElementHit(choiceContext, card, cardPlay, target, damage,
+                         Element.Cryo);
+    }
+
+    /// <summary>Deep Freeze: "Double its Weak and Vulnerable." After the
+    /// row's own Cryo; each doubling is an application of what it holds
+    /// (Suffocating Deep's shape), so Absolute Zero sees it.</summary>
+    public static async Task DeepFreeze(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || cardPlay.Target is not { IsAlive: true } target)
+        {
+            return;
+        }
+        var weak = (int)(target.Powers.OfType<WeakPower>()
+                             .FirstOrDefault()?.Amount ?? 0);
+        if (weak > 0)
+        {
+            await PowerCmd.Apply<WeakPower>(choiceContext, target, weak,
+                                            applier: owner, cardSource: card);
+        }
+        if (!target.IsAlive) return;
+        var vulnerable = (int)(target.Powers.OfType<VulnerablePower>()
+                                   .FirstOrDefault()?.Amount ?? 0);
+        if (vulnerable > 0)
+        {
+            await PowerCmd.Apply<VulnerablePower>(
+                choiceContext, target, vulnerable, applier: owner,
+                cardSource: card);
+        }
+    }
+}
+
+/// <summary>
+/// SHATTER'S PRINTED NUMBER (the combo pass, 2026-10-04: "show the computed
+/// damage in combat the way other Varka formula cards do"). Display only:
+/// <c>VkBase</c> plus <c>VkPer</c> for each Weak and Vulnerable on the body
+/// the face previews against (the aimed enemy, else the front one, as
+/// <see cref="FrontFoldedDamageVar"/> picks), folded through the game's
+/// damage hooks with Cryo carried. The play reads the card's own vars
+/// (<see cref="VarkaCards.Shatter"/>). Emitted by codegen for the kinds in
+/// <c>VARKA_TARGET_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaShatterDamageVar : DamageVar
+{
+    /// <summary>The face's token, Thundering Verdict's.</summary>
+    public const string Token = "VkHit";
+
+    public VarkaShatterDamageVar()
+        : base(Token, 0m, ValueProp.Move)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            BaseValue = VarkaCards.ShatterDamage(
+                card.DynamicVars["VkBase"].BaseValue,
+                card.DynamicVars["VkPer"].BaseValue, 0);
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        BaseValue = VarkaCards.ShatterDamage(
+            card.DynamicVars["VkBase"].BaseValue,
+            card.DynamicVars["VkPer"].BaseValue,
+            VarkaCards.WeakAndVulnerable(body));
+        using (HitElement.Carry(card, Element.Cryo))
+        {
+            base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
         }
     }
 }

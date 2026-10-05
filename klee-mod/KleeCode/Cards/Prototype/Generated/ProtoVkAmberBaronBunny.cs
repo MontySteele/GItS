@@ -56,7 +56,7 @@ public sealed class ProtoVkAmberBaronBunny : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber: Baron Bunny"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to ALL enemies."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

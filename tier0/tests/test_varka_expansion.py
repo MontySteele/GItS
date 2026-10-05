@@ -84,7 +84,8 @@ def _rows():
 EXPANSION_IDS = (
     # The rebalance (2026-10-03): Kindled Edge took Cavalry Charge's place
     # and Storm Battery Gust Ward's.
-    "pathfinders_mark", "kindled_edge", "west_wind_shield",
+    # West Wind Shield left with the combo pass (2026-10-04).
+    "pathfinders_mark", "kindled_edge",
     "knightly_strike", "amber_sharpshooter",
     "blazing_charge", "tidal_bulwark", "glacial_edict", "static_field",
     "barbara_wellspring_hymn", "lisa_pulsating_witch",
@@ -110,7 +111,7 @@ def test_the_pool_is_78_twenty_thirty_five_twenty_three(varka):
           for r in ("common", "uncommon", "rare")}
     assert by == {"common": 20, "uncommon": 35, "rare": 23}
     ids = {c.id for c in pool}
-    assert len(EXPANSION_IDS) == 37
+    assert len(EXPANSION_IDS) == 36
     assert {_vk(x) for x in EXPANSION_IDS} <= ids
     # Thirteen pool Knights, Noelle among them; the starter four are not.
     knights = V.pool_knight_ids()
@@ -238,11 +239,9 @@ def test_pathfinders_mark(varka):
     assert all(e.aura == "hydro" for e in st.enemies)
 
 
-def test_west_wind_shield_and_knightly_strike(varka):
-    st = _state(enemies=[_enemy(aura="pyro"), _enemy(aura="hydro"),
-                         _enemy()])
-    _play(st, _vk("west_wind_shield"))
-    assert st.player.block == 5 + 2 * 2
+def test_knightly_strike(varka):
+    # West Wind Shield's half of this pin left with its card (the combo
+    # pass, 2026-10-04).
     st = _state()
     _play(st, _vk("knightly_strike"))
     assert st.enemies[0].hp == 93
