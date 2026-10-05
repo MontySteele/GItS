@@ -168,6 +168,24 @@ def test_older_records_missing_keys_are_left_out_not_zeroed(tmp_path, capsys):
     assert c["block_turn"] is None and c["n_block"] == 0
 
 
+
+def test_strength_is_the_median_of_each_fights_peak(tmp_path, capsys):
+    rows = [fight(strength_by_turn=[[1, 0], [2, 3], [3, 2]]),     # peak 3
+            fight(strength_by_turn=[[1, 0], [2, 0]]),             # peak 0
+            fight(strength_by_turn=[[1, 2], [2, 5], [3, 7]]),     # peak 7
+            fight()]                                              # older: no key
+    out = run(tmp_path, rows, "--character", "Klee", capsys=capsys)
+    assert cell(out, "Klee", 1)["strength"] == 3.0
+    d = write(tmp_path / "t", rows)
+    assert tr.main(["--dir", str(d), "--character", "Klee"]) == 0
+    text = capsys.readouterr().out
+    assert " str " in text and "3.0" in text
+
+
+def test_strength_is_none_without_the_key(tmp_path, capsys):
+    out = run(tmp_path, [fight()], "--character", "Klee", capsys=capsys)
+    assert cell(out, "Klee", 1)["strength"] is None
+
 def test_hp_lost_falls_back_to_start_minus_end(tmp_path, capsys):
     row = fight(hp_start=80, hp_end=60)
     row.pop("hp_lost")

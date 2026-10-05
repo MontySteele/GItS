@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -11,6 +12,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Models.Powers;
 using Xunit;
 
 namespace KleeMod.Tests;
@@ -337,5 +339,114 @@ public class DamageCreditTelemetryTests : IDisposable
             Il.Calls(Il.Method("PlayTelemetryHooks", "AfterDeath")));
         Assert.Contains("PlayTelemetry.BlockGained",
             Il.Calls(Il.Method("PlayTelemetryHooks", "AfterBlockGained")));
+    }
+
+    /// <summary>2026-10-05: Strength at each turn end, for a base character
+    /// and a kit character alike, 0 with none, and its own row per turn.
+    /// </summary>
+    [Fact]
+    public void Strength_is_logged_by_turn_for_base_and_kit_characters()
+    {
+        var ironclad = Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad())
+            .WithPower<StrengthPower>(2);
+        var klee = Seat.Klee();
+        Open(ironclad, 2, 0);
+        Open(klee, 2, 1);
+
+        Invoke("RecordTurnEnd", 1);
+        ironclad.SetPowerAmount<StrengthPower>(5);
+        Invoke("RecordTurnEnd", 2);
+
+        Assert.Equal("[[1,2],[2,5]]",
+            Record(ironclad).GetProperty("strength_by_turn").GetRawText());
+        Assert.Equal("[[1,0],[2,0]]",
+            Record(klee).GetProperty("strength_by_turn").GetRawText());
+        Assert.Contains("PlayTelemetry.RecordTurnEnd",
+            Il.Calls(Il.Method("PlayTelemetry", "CloseTurn")));
+    }
+
+    /// <summary>The fight's line, as written to the log, read back. The log
+    /// path is pointed at a temp file so no Godot path is resolved.</summary>
+    private static string[] WrittenLines(Action act)
+    {
+        var field = Telemetry.GetField("_path", HeadlessGame.All)!;
+        var saved = field.GetValue(null);
+        var path = Path.Combine(Path.GetTempPath(),
+            $"gits-telemetry-test-{Guid.NewGuid():N}.jsonl");
+        field.SetValue(null, path);
+        try
+        {
+            act();
+            return File.Exists(path) ? File.ReadAllLines(path) : Array.Empty<string>();
+        }
+        finally
+        {
+            field.SetValue(null, saved);
+            if (File.Exists(path)) File.Delete(path);
+        }
+    }
+
+    private static void Die(Seat seat) => Seat.Force(seat.Creature, "CurrentHp", 0);
+
+    /// <summary>2026-10-05 — THE FATAL FIGHT IS WRITTEN. A fight the player
+    /// died in wrote no line (Klee suite 1, two act-1 boss deaths). The seat's
+    /// death now closes it: once, as `died`, HP at 0, turn rows kept.</summary>
+    [Fact]
+    public void A_fight_the_player_dies_in_is_written_once_as_died()
+    {
+        var klee = Seat.Klee();
+        Open(klee, 1, 0);
+        var enemy = Enemy();
+
+        var lines = WrittenLines(() =>
+        {
+            Invoke("RecordTurnEnd", 1);
+            Hit(enemy, 6, dealer: klee.Creature);
+            Die(klee);
+            Invoke("CloseOnSeatDeath", klee.Creature, true);
+            Invoke("CloseOnSeatDeath", klee.Creature, true);   // a second call writes nothing
+        });
+
+        var row = Assert.Single(lines);
+        var r = JsonDocument.Parse(row).RootElement;
+        Assert.Equal("fight", r.GetProperty("record").GetString());
+        Assert.Equal("died", r.GetProperty("outcome").GetString());
+        Assert.Equal(0, r.GetProperty("hp_end").GetInt32());
+        Assert.Equal(6, Kind(r, DamageCredit.Direct));
+        Assert.Equal("[[1,0]]", r.GetProperty("strength_by_turn").GetRawText());
+        Assert.Null(Invoke("JsonForTest", klee.Player));
+    }
+
+    /// <summary>In co-op the fight goes on while a seat stands: the first
+    /// death writes nothing, the last writes both seats, both `died`.</summary>
+    [Fact]
+    public void In_coop_the_fight_is_written_when_the_last_seat_dies()
+    {
+        var klee = Seat.Klee();
+        var varka = Seat.Varka();
+        Open(klee, 2, 0);
+        Open(varka, 2, 1);
+
+        var lines = WrittenLines(() =>
+        {
+            Die(klee);
+            Invoke("CloseOnSeatDeath", klee.Creature, true);
+            Assert.NotNull(Invoke("JsonForTest", klee.Player));   // still open
+            Die(varka);
+            Invoke("CloseOnSeatDeath", varka.Creature, true);
+        });
+
+        Assert.Equal(2, lines.Length);
+        Assert.All(lines, l => Assert.Equal("died",
+            JsonDocument.Parse(l).RootElement.GetProperty("outcome").GetString()));
+    }
+
+    [Fact]
+    public void The_death_hook_closes_the_fatal_fight()
+    {
+        Assert.Contains("PlayTelemetry.SeatDied",
+            Il.Calls(Il.Method("PlayTelemetryHooks", "AfterDeath")));
+        Assert.Contains("PlayTelemetry.CloseOnSeatDeath",
+            Il.Calls(Il.Method("PlayTelemetry", "SeatDied")));
     }
 }
