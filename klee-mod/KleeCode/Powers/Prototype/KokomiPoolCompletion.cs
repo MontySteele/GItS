@@ -239,7 +239,8 @@ public sealed class WatatsumiResistancePower : PowerModel, ILocalizationProvider
 /// <summary>
 /// DIVINE STRATEGY, Kokomi's second Ancient (pool completion, 2026-10-01;
 /// <c>Cards/Kokomi/DivineStrategy.cs</c>): "The first time each turn you play
-/// a card on the Bake-Kurage, its now-line happens too." Bends rule 2, under
+/// a card on the Bake-Kurage, the line above its Plan happens now too."
+/// (Worded so on 2026-10-05, the Kokomi kit review.) Bends rule 2, under
 /// which a card does one half or the other.
 ///
 /// THE GENERATED PLAN BRANCH ASKS <see cref="NowLine"/> once the Plan is
@@ -266,7 +267,7 @@ public sealed class DivineStrategyPower : PowerModel, ILocalizationProvider
         ("title", "Divine Strategy"),
         ("description",
             "The first time each turn you play a card on the "
-          + "[gold]Bake-Kurage[/gold], its now-line happens too."),
+          + "[gold]Bake-Kurage[/gold], the line above its [gold]Plan[/gold] happens now too."),
     };
 
     public override PowerType Type => PowerType.Buff;

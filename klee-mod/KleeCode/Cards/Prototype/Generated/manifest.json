@@ -960,7 +960,7 @@
       "plan_block": 2
     },
     "proto_kk_deep_current": {
-      "damage": 2
+      "damage": 3
     },
     "proto_kk_depths_judgment": {
       "formula_per": 1
@@ -1074,7 +1074,7 @@
       "power_amount": 1
     },
     "proto_kk_sea_glass_harvest": {
-      "block": 1,
+      "block": 3,
       "upgraded_grant": true
     },
     "proto_kk_seas_reproach": {
@@ -1800,7 +1800,7 @@
       "conditional_block": 2
     },
     "proto_vk_cycle_of_seasons": {
-      "power_amount": 2
+      "power_amount": 3
     },
     "proto_vk_dawn_patrol": {
       "draw": 1

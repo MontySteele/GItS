@@ -214,8 +214,13 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Resistance, Kurage School's copies) Exhaust; Kurage Swarm reads "gains 1
   more". Merged 2026-10-05 (#907); a whole-kit review and a seat round follow. Provenance note, "Kokomi Rare pass,
   2026-10-04".
+  **The kit review (2026-10-05, built):** Ceremonial Garment costs 1 for 2
+  [3] per debuff, Deep Current deals 8 [11] to ALL, and Open the Casket+
+  also draws 1 card; Breakwater, Opening Gambit, Second Wave, Divine
+  Strategy, Tidecleanse and Tidal Resonance are reworded, no rule changed. Provenance note, "Kokomi kit review, 2026-10-05".
   Next: [USER] plays (a central rule changed; co-op with a friend may stand
   in); the damage gap is a paper after that run.
+  Its seat round (`review/records/kokomi-review-round-2026-10-05.md`, two baseline seeds): one run reached the final boss (Queen at 238/400 against the Silent's 38), one lost the act-2 boss; Deep Current landed; the damage gap stands. Tide Wall's Plan now says "next turn" and Sea Glass Harvest's Block is 8 [11].
 - **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; seven guests. The pool is the starter and 34 cards, not 78: the slice's 24 and the pool to 39's ten (`review/active/furina-pool-40-2026-10-05.md`, ruled and built 2026-10-05; Universal Revelry reads Drain and Repay again, not hits). Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Deployed. Two seat rounds read it: `review/records/furina-tab-round-2026-10-05.md` (one act-2 clear, every seat on Revelry plus Bravura) and, after the pool went to 34, `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one won; act-3 HP and an unread Repay plan are the open questions). Next: [USER]'s play (a rule change). Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v1 Stage and its history (first run, supporting pool, audit, fade and rules passes) are at the tag `furina-stage-frozen-2026-10-04`.
 
 - **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
@@ -308,7 +313,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   the paper's "Pyro and Cryo up" bar (Pyro -15, Cryo flat; the stock pilot
   prices an Exhaust at nothing) and Deep Freeze's upgrade (cost 0) is the
   builder's proposal: provenance note, "Varka combo pass, 2026-10-04".
-  Its seat round (`review/records/varka-combo-round-2026-10-05.md`): the Block cut landed, one run cleared act 2; Pyro Exhaust paid nothing off-element and no seat built Cryo. Fixed from it (#917): Stoke the Flames makes Pyro current, Shatter renamed Icebreaker, Tempest Charge's draw checked (it works). A second round on the same seeds, with an Ironclad control, is running. Next: [USER]'s next Varka run.
+  Its seat round (`review/records/varka-combo-round-2026-10-05.md`): the Block cut landed, one run cleared act 2; Pyro Exhaust paid nothing off-element and no seat built Cryo. Fixed from it (#917): Stoke the Flames makes Pyro current, Shatter renamed Icebreaker, Tempest Charge's draw checked (it works). The second round on the same seeds (`review/records/varka-r6-round-2026-10-05.md`, Ironclad control): one run reached the final boss (the Queen at 93/400), one lost the act-2 boss again with it at 85/379; still no seat drafted Pyro or Cryo. Cycle of Seasons is now 7 [10] (NEVER AGAIN two rounds running). Next: a round on seeds whose starter Knight is Pyro or Cryo, and [USER]'s next Varka run.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

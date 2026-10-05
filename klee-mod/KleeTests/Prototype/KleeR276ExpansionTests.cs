@@ -392,7 +392,7 @@ public class KleeR276ExpansionTests
         Assert.Contains("CardPileCmd.Add", fetch);
         Assert.Contains(Il.Calls(Il.Method("ProtoKoTreasureMap", "OnUpgrade")),
                         c => c.Contains("EnergyCost.UpgradeBy"));
-        Assert.Contains("{IfUpgraded:show:Draw 1 card.|}",
+        Assert.Contains("{IfUpgraded:show: Draw 1 card.|}",
                         Face(new ProtoKoComeBackAndPlay()));
     }
 

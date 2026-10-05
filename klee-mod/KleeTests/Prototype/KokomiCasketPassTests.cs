@@ -171,10 +171,24 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Contains(CardKeyword.Retain, card.Keywords);
         Assert.DoesNotContain(CardKeyword.Exhaust, card.Keywords);
         Assert.Equal("Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
-                   + "count, then empty it.", Face(card));
+                   + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}", Face(card));
         // In no pool: the offer is the Slice, and the token is not in it.
         Assert.DoesNotContain(Seq("KokomiOverhaulRoster", "Slice"),
                               c => c.Contains("OpenTheCasket"));
+    }
+
+    [Fact]
+    public void Open_the_casket_upgraded_also_draws_one_card_after_the_strength()
+    {
+        // The Kokomi kit review (2026-10-05): the upgrade changed nothing.
+        // Upgraded, it also draws 1 card; cost and Retain stay.
+        var card = new OpenTheCasket();
+        Assert.Equal(1m, Var(card, "Cards"));
+        var play = Seq("OpenTheCasket", "OnPlay");
+        var open = play.FindIndex(c => c.Contains("KokomiOverhaulKit.OpenCasket"));
+        var gate = play.FindIndex(c => c.Contains("get_IsUpgraded"));
+        var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
+        Assert.True(open >= 0 && gate > open && draw > gate);
     }
 
     [Fact]
@@ -252,8 +266,13 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(5m, Upgraded<ProtoKkPincer>().DynamicVars.Damage.BaseValue);
         Assert.Equal(7m, new ProtoKkOpeningGambit().DynamicVars.Damage.BaseValue);
         Assert.Equal(9m, Upgraded<ProtoKkOpeningGambit>().DynamicVars.Damage.BaseValue);
-        Assert.Equal(7m, new ProtoKkDeepCurrent().DynamicVars.Damage.BaseValue);
-        Assert.Equal(9m, Upgraded<ProtoKkDeepCurrent>().DynamicVars.Damage.BaseValue);
+        // The Kokomi kit review (2026-10-05): Deep Current 8 [11] to ALL, and
+        // Ceremonial Garment costs 1 for 2 [3] per debuff.
+        Assert.Equal(8m, new ProtoKkDeepCurrent().DynamicVars.Damage.BaseValue);
+        Assert.Equal(11m, Upgraded<ProtoKkDeepCurrent>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(1, new ProtoKkCeremonialGarment().EnergyCost.Canonical);
+        Assert.Equal(2m, Var(new ProtoKkCeremonialGarment(), "PowerAmount"));
+        Assert.Equal(3m, Var(Upgraded<ProtoKkCeremonialGarment>(), "PowerAmount"));
         var riptide = new ProtoKkRiptide();
         Assert.Equal(11m, riptide.DynamicVars.Damage.BaseValue);
         Assert.Equal(3m, riptide.DynamicVars.ExtraDamage.BaseValue);
@@ -397,7 +416,7 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(4m, card.DynamicVars.Block.BaseValue);
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
                    + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the "
-                   + "damage the enemy intends.",
+                   + "damage the enemy intends next turn.",
                      Face(card));
     }
 

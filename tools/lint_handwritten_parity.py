@@ -713,7 +713,7 @@ ANCIENT_WITNESS.update({
     "DivineStrategy": {
         "why": "Kokomi's second Ancient (pool completion, 2026-10-01): a "
                "Power, 2 Energy, 1 upgraded; the turn's first card played on "
-               "the Bake-Kurage does its now-line too.",
+               "the Bake-Kurage also does the line above its Plan now.",
         "cost": [2],
         "vars": [],
         "hits": [],

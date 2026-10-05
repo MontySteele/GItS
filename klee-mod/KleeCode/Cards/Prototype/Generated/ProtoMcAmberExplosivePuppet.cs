@@ -53,7 +53,7 @@ public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber — Explosive Puppet"),
-        ("description", "Enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

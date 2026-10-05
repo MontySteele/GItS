@@ -2217,7 +2217,9 @@ def fetch_open_casket(state: CombatState) -> None:
     p = state.player
     token, pile = None, None
     for pile in (p.draw_pile, p.discard_pile):
-        token = next((c for c in pile if c.id == OPEN_THE_CASKET), None)
+        token = next((c for c in pile
+                      if c.id in (OPEN_THE_CASKET, OPEN_THE_CASKET + "+")),
+                     None)
         if token is not None:
             break
     if token is None or pile is None:
@@ -2356,7 +2358,7 @@ def patient_tide_kept(state: CombatState) -> int:
 
 
 
-def open_the_casket_card() -> Card:
+def open_the_casket_card(upgraded: bool = False) -> Card:
     """The token, as this engine's `Card`: Skill, 1, Retain, in no pool.
     Built here rather than on a sheet for the C#'s reason (the prototype
     surface has no token rarity); `OpenTheCasket.cs` is the twin.
@@ -2365,10 +2367,19 @@ def open_the_casket_card() -> Card:
     it goes to the discard pile and comes back with the deck. [USER]: "if
     it's repeatable, it should probably cost energy, though, to make this a
     real choice and not just button mashing when it comes up?" -- so it costs
-    1 (was 0)."""
-    return Card(id=OPEN_THE_CASKET, name="Open the Casket", cost=1,
+    1 (was 0).
+
+    THE UPGRADE DRAWS 1 (the Kokomi kit review, 2026-10-05): upgraded, it
+    also draws 1 card after the Strength; cost and Retain stay. Built here
+    the way `sea_glass_card` builds its `+`, since the token has no row for
+    `upgrades.apply_upgrade` to read."""
+    effects = [{"op": "open_casket"}]
+    if upgraded:
+        effects.append({"op": "draw", "amount": 1})
+    return Card(id=OPEN_THE_CASKET + ("+" if upgraded else ""),
+                name="Open the Casket" + ("+" if upgraded else ""), cost=1,
                 type="skill", rarity="token", exhaust=False, retain=True,
-                effects=[{"op": "open_casket"}])
+                effects=effects)
 
 
 def deal_open_the_casket(state: CombatState) -> None:

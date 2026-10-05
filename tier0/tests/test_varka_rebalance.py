@@ -133,10 +133,10 @@ def test_absolute_zero_no_longer_widens_the_swirl(rebalance):
 
 def test_cycle_of_seasons_hits_one_random_enemy(rebalance):
     st = _state(n=3)
-    st.player.powers[V.CYCLE_OF_SEASONS] = 4
+    st.player.powers[V.CYCLE_OF_SEASONS] = 7
     V.set_current(st, "hydro", knight=False)
     lost = sorted(100 - e.hp for e in st.enemies)
-    assert lost == [0, 0, 4]
+    assert lost == [0, 0, 7]
 
 
 # ---------------------------------------------------------------------------

@@ -68,7 +68,7 @@ public class KokomiPoolPassFiveTests
                      card.PlanClauses[1].Kind);
         Assert.Equal(3, card.PlanClauses[1].Amount);
         // The 2026-09-25 text pass: the Bake-Kurage is not named twice.
-        Assert.EndsWith("and 3 more for each Plan waiting.", Face(card));
+        Assert.EndsWith("and 3 more for each [gold]Plan[/gold] waiting.", Face(card));
     }
 
     [Fact]

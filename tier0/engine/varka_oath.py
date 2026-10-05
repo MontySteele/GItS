@@ -538,7 +538,7 @@ def set_current(state, element: str, knight: bool) -> None:
         if n:
             p.energy += n
             state.emit("varka_unbound", energy=n)
-        # CYCLE OF SEASONS: "Whenever your current element changes, deal 4
+        # CYCLE OF SEASONS: "Whenever your current element changes, deal 7
         # damage to ALL enemies." Element-less and unpowered, a Power's.
         cycle = _power(p, CYCLE_OF_SEASONS)
         if cycle:

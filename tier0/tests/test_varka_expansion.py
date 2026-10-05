@@ -323,15 +323,17 @@ def test_shifting_gale_and_cycle_of_seasons(varka):
     st = _state(n=2)
     _play(st, _vk("shifting_gale"))
     assert st.enemies[0].hp == 94
-    st.player.powers[V.CYCLE_OF_SEASONS] = 4
+    st.player.powers[V.CYCLE_OF_SEASONS] = 7
     _play(st, _vk("mika_starfrost_swirl"))             # none -> Cryo
-    # The AoE trim (sec.4): 4 to ONE random enemy, not ALL.
-    assert sum(100 - e.hp for e in st.enemies) == 6 + 4
+    # The AoE trim (sec.4): 7 to ONE random enemy, not ALL.
+    assert sum(100 - e.hp for e in st.enemies) == 6 + 7
     st.enemies[0].aura = None                          # no Swirl, no Vulnerable
     st.enemies[0].powers.clear()
-    hp = st.enemies[0].hp
+    # The Gale hits the lowest-HP enemy, which the random Cycle hit may have
+    # made enemy 1; read the total, not enemy 0.
+    hp = sum(e.hp for e in st.enemies)
     _play(st, _vk("shifting_gale"))
-    assert st.enemies[0].hp == hp - 12
+    assert hp - sum(e.hp for e in st.enemies) == 12
 
 
 def test_charge_of_the_knights(varka):
