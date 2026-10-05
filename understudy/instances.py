@@ -698,3 +698,72 @@ def note_launch(label: str, pid: int | None, now=time.time) -> None:
             encoding="utf-8")
     except OSError:
         pass
+
+
+# ----------------------------------------- the bridge mod, enabled --------
+
+#: The mods a lane must load: the bridge (without it the lane's port never
+#: answers) and the kits.
+LANE_REQUIRED_MODS = ("STS2_MCP", "klee")
+
+
+def enable_lane_mods(inst: Instance) -> list[tuple[Path, list[str]]]:
+    """Turn the bridge and the kit mod ON in a LANE's `settings.save`.
+
+    WHY (2026-10-05, the first five-lane embark). A fresh lane's
+    `settings.save` is copied from lane 0's, and lane 0's is the owner's: on
+    that day it had `STS2_MCP` switched OFF in the mod list. Lane 5, seeded
+    that morning, booted with "Skipping loading mod STS2_MCP, it is set to
+    disabled in settings" in its `godot.log`, and its port refused every call
+    for the whole 180 s menu wait. Lanes 1-4, seeded months earlier, still
+    had it on. The lane's own copy is edited to the state a click in the
+    game's mod menu would leave; lane 0's is never written.
+
+    LANES ONLY, on the same two locks as `reveal_pending_epochs`. Idempotent;
+    a file that does not parse is left alone. Returns `(path, [mods turned
+    on])` for each file it changed.
+    """
+    if inst.appdata is None or _is_real_profile(inst.appdata):
+        return []
+    root = Path(inst.appdata).joinpath(*SETTINGS_RELATIVE)
+    if not root.is_dir():
+        return []
+    changed: list[tuple[Path, list[str]]] = []
+    for path in sorted(root.rglob(SETTINGS_NAME)):
+        if not path.is_file():
+            continue
+        try:
+            raw = path.read_bytes()
+            data = json.loads(raw.decode("utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            continue
+        mods = data.get("mod_settings") if isinstance(data, dict) else None
+        if not isinstance(mods, dict):
+            continue
+        listed = mods.get("mod_list")
+        if not isinstance(listed, list):
+            continue
+        what: list[str] = []
+        if mods.get("mods_enabled") is not True:
+            mods["mods_enabled"] = True
+            what.append("mods_enabled")
+        for name in LANE_REQUIRED_MODS:
+            row = next((m for m in listed if isinstance(m, dict)
+                        and m.get("id") == name), None)
+            if row is None:
+                listed.append({"id": name, "is_enabled": True,
+                               "source": "mods_directory"})
+                what.append(name)
+            elif row.get("is_enabled") is not True:
+                row["is_enabled"] = True
+                what.append(name)
+        if not what:
+            continue
+        text = json.dumps(data, indent=2, ensure_ascii=False)
+        if b"\r\n" in raw:
+            text = text.replace("\n", "\r\n")
+        tmp = path.with_name(path.name + ".gits-tmp")
+        tmp.write_bytes(text.encode("utf-8"))
+        os.replace(tmp, path)
+        changed.append((path, what))
+    return changed

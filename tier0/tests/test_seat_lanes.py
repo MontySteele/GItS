@@ -309,3 +309,54 @@ def test_the_cli_routes_lanes_without_coop_to_the_parallel_embark(
     assert seen["labels"] == ["lane1", "lane5"]
     assert "lane5  port 15531  UP" in capsys.readouterr().out
     assert embark.main(["--lanes", "0,1"]) == 2
+
+
+# ------------------------------------------------- the lane's mod list ----
+
+def _settings(tmp_path, mods, crlf=True):
+    path = (tmp_path / "lane" / "SlayTheSpire2" / "steam" / "123"
+            / "settings.save")
+    path.parent.mkdir(parents=True)
+    text = json.dumps({"aspect_ratio": "auto", "mod_settings": {
+        "mod_list": mods, "mods_enabled": True}}, indent=2)
+    path.write_bytes((text.replace("\n", "\r\n") if crlf else text)
+                     .encode("utf-8"))
+    return path
+
+
+def test_a_lane_seeded_with_the_bridge_switched_off_gets_it_back_on(
+        tmp_path, monkeypatch):
+    """The first five-lane embark: lane 5 was seeded from a lane 0 whose
+    mod list had STS2_MCP off, and its port never answered."""
+    monkeypatch.setenv("APPDATA", str(tmp_path / "real"))
+    path = _settings(tmp_path, [
+        {"id": "BaseLib", "is_enabled": True, "source": "steam_workshop"},
+        {"id": "klee", "is_enabled": True, "source": "mods_directory"},
+        {"id": "STS2_MCP", "is_enabled": False, "source": "mods_directory"},
+        {"id": "Downfall", "is_enabled": False, "source": "steam_workshop"}])
+    inst = instances.Instance(game_dir=None, port=15531,
+                              appdata=tmp_path / "lane", label="lane5")
+    changed = instances.enable_lane_mods(inst)
+    assert changed == [(path, ["STS2_MCP"])]
+    raw = path.read_bytes()
+    assert b"\r\n" in raw
+    mods = {m["id"]: m["is_enabled"]
+            for m in json.loads(raw)["mod_settings"]["mod_list"]}
+    assert mods == {"BaseLib": True, "klee": True, "STS2_MCP": True,
+                    "Downfall": False}
+    assert instances.enable_lane_mods(inst) == []          # idempotent
+
+
+def test_lane_zero_and_the_real_profile_are_never_written(tmp_path,
+                                                          monkeypatch):
+    path = _settings(tmp_path, [{"id": "STS2_MCP", "is_enabled": False,
+                                 "source": "mods_directory"}])
+    before = path.read_bytes()
+    lane0 = instances.Instance(game_dir=None, port=15526, appdata=None,
+                               label="lane0")
+    assert instances.enable_lane_mods(lane0) == []
+    monkeypatch.setenv("APPDATA", str(tmp_path / "lane"))
+    real = instances.Instance(game_dir=None, port=15531,
+                              appdata=tmp_path / "lane", label="lane5")
+    assert instances.enable_lane_mods(real) == []
+    assert path.read_bytes() == before

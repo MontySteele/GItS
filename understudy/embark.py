@@ -105,6 +105,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -732,11 +733,17 @@ def embark_lanes(labels: list[str], commands: list[list[str]], *,
     where = Path(log_dir) if log_dir is not None else LOG_DIR
     where.mkdir(parents=True, exist_ok=True)
     started = time.strftime("%Y%m%d-%H%M%S")
+    # UNBUFFERED, so a lane's log can be read while it boots rather than only
+    # once its embark has exited; and with no `GITS_LANE` inherited, since
+    # each lane is named by its own `--lane` and a stray export must not
+    # reach a child's wire.
+    env = {k: v for k, v in os.environ.items() if k != instances.LANE_ENV}
+    env["PYTHONUNBUFFERED"] = "1"
     procs = []
     for label, cmd in zip(labels, commands):
         log = where / f"embark-{started}-{label}.log"
         fh = log.open("w", encoding="utf-8")
-        proc = run(cmd, stdout=fh, stderr=subprocess.STDOUT,
+        proc = run(cmd, stdout=fh, stderr=subprocess.STDOUT, env=env,
                    cwd=str(Path(__file__).resolve().parent.parent))
         procs.append((label, proc, fh, log))
     rows = []

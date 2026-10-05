@@ -137,6 +137,12 @@ lanes were embarked at the same moment):
   the sidecar and the reversibility ledger; two lanes in the same second used
   to share both, and the first lane's launch row (its pid) was lost.
 
+- **A lane's mod list has the bridge on.** A fresh lane copies lane 0's
+  `settings.save`, and lane 0's had `STS2_MCP` switched off on 2026-10-05, so
+  the new lane 5 booted without the bridge ("Skipping loading mod STS2_MCP" in
+  its `godot.log`). Every lane embark now turns `STS2_MCP` and `klee` on in the
+  lane's own copy (`instances.enable_lane_mods`); lane 0's is never written.
+
 What stays shared and is not locked: `mods\klee` (one deployed build for every
 lane; deploy only with every lane down) and the bridge's FastMode capture
 file `mods\STS2_MCP\GitsSpeed.original.conf` (every lane's prefs are seeded
