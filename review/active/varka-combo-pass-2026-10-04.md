@@ -1,6 +1,6 @@
 # Varka: the combo pass (Pyro burns, Cryo shatters, less Block)
 
-Paper, 2026-10-04. Main session design, from [USER]'s Klee + Varka co-op run
+Paper, 2026-10-04. **RULED 2026-10-04, all four picks at their defaults, Baron Bunny amended** ([USER]: "Let's leave the Baron Bunny's block alone for now, but nerf the attack from \"all enemies\" to \"one enemy at random.\" ... I'm good with this proposal."). Main session design, from [USER]'s Klee + Varka co-op run
 and his friend's notes. Card rows: `docs/prototype-surface.yaml`.
 
 [USER]: "Varka still seems to have too much Block, but the basic loop is
@@ -57,13 +57,33 @@ fights, the Queen included.
 | Knightly Guard | C | leaves | a third: Block, plus Oath after a Knight |
 | Tailwind Guard | U | leaves | Block per element (your friend's note) |
 | Oath of the Knights | U | leaves | Block equal to Oath every turn |
-| Amber: Baron Bunny | C | Block 6 [8] → 3 [4] | the volume; its job is the next-turn Pyro hit |
+| Amber: Baron Bunny | C | next-turn hit: ALL enemies → a random enemy; Block unchanged | [USER]: "Currently it runs at 'a decent block + a strong AoE' and it's fairer at 'a decent block + a free strike.'" |
 
 **Jean — Wind Companion stays** as Anemo's one generic Block common ([USER]:
 "we should have one generic Anemo block card"). Eye Wall (U) and Wall of
 Gales (R) stay above it. Hydro keeps its Block (Barbara, Rippling Guard,
 Tidal Bulwark, Retaliating Tide). The pool stays 78. Lisa: Induced
 Aftershock is a starter Knight and is left alone.
+
+**The census after the cuts** ([USER]: "make sure we didn't go overboard").
+Block cards in the reward pool (Common / Uncommon / Rare), counted from the
+game's own card data (`game_ref/<class>.json`) and our sheet:
+
+| Pool | Block cards | C | U | R |
+|---|---|---|---|---|
+| Ironclad | 12 of 80 | 6 | 5 | 1 |
+| Silent | 11 of 80 | 5 | 6 | 0 |
+| Defect | 12 of 80 | 5 | 6 | 1 |
+| Necrobinder | 11 of 80 | 4 | 5 | 2 |
+| Regent | 11 of 80 | 5 | 5 | 1 |
+| Varka before | 23 of 78 | 10 | 9 | 4 |
+| **Varka after** | **17 of 78** | 7 | 7 | 3 |
+
+(Retaliating Tide names Block but gives none and is not counted.) Varka keeps
+about one and a half times a base pool's Block, which is Hydro's identity
+plus Anemo's one generic common. Not overboard. If he still walls, the next
+look is the two Rare Oath-to-Block engines, Oathbound Aegis and Dawn Wind's
+March.
 
 ## 3. Pyro burns: an Exhaust engine for the big hit
 
@@ -120,12 +140,12 @@ two-seat round, and your next Varka run.
 
 ## Picks
 
-1. **§2: five generic Block cards leave, Jean — Wind Companion stays, Baron Bunny's Block 6 [8] → 3 [4].** Default: yes.
+1. **§2: five generic Block cards leave, Jean — Wind Companion stays, Baron Bunny hits a random enemy instead of ALL.** RULED yes.
 2. **§3: Pyro's Exhaust engine (Stoke the Flames, Ember Cleave, Pyre Oath).**
-   Default: yes.
+   RULED yes.
 3. **Four Winds' Ascension's upgrade becomes cost 2 to 1** (in place of +3
-   damage and +1 per Oath). This touches his starter. Default: yes.
-4. **§4: Shatter, Deep Freeze and the reworded Unwavering Banner.** Default:
+   damage and +1 per Oath). This touches his starter. RULED yes.
+4. **§4: Shatter, Deep Freeze and the reworded Unwavering Banner.** RULED
    yes.
 
 §1's other rows are card fixes and ship with the build.
