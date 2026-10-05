@@ -6573,3 +6573,51 @@ From the combo pass's seat round (review/records/varka-combo-round-2026-10-05.md
   `swirled_by_this` re-read, so the draw fires. The seat page carries no draw
   event, only the hand after the play, which is why the seat could not see it.
   Pinned by `Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw`.
+
+## Kokomi kit review, 2026-10-05
+
+The main session's whole-kit review of Kokomi: two cards to rate, one
+upgrade that did nothing, five wording fixes, stale comments. No rule
+changed.
+
+- **`proto_kk_ceremonial_garment`**: cost 2 to 1, and 2 [3] per debuff (it
+  was 1 [2]). A 2-cost Rare giving +1 per debuff (+2 a hit on a Weak and
+  Vulnerable target) sat under an Uncommon Inflame. The face's shape is
+  unchanged: "Your Attacks deal 2 [3] additional damage for each debuff on
+  their target."
+- **`proto_kk_deep_current`**: 7 [9] to ALL becomes 8 [11] to ALL, Cleave's
+  numbers. Cleave is Slay the Spire 1's; `game_ref/ironclad.json` (Slay the
+  Spire 2) has no Cleave, and its AoE Common is Breakthrough, 9 [13] to ALL
+  for 1 HP.
+- **Open the Casket** (the relic's hand-written token, `OpenTheCasket.cs`,
+  sim `kokomi_plan.open_the_casket_card`): its upgrade changed nothing.
+  Upgraded, it also draws 1 card after the Strength. Cost 1 and Retain stay.
+  The hover tip describes the base card and is unchanged.
+- **Wording, no rule change.** Breakwater, Opening Gambit and Second Wave
+  gold the bare "Plan". Divine
+  Strategy (card and `DivineStrategyPower`) used an undefined word, "its
+  now-line happens too"; it reads "The first time each turn you play a card
+  on the Bake-Kurage, the line above its Plan happens now too." Tidecleanse
+  golds "Exhaust". Tidal Resonance's base face ended in a trailing space
+  before its upgrade-only "Draw 1 card."; the codegen now puts that
+  separator inside the upgrade clause (`_face_from_parts`), which also
+  removes the same trailing space from six other cards' faces (Come Back
+  and Play, Amber's Explosive Puppet, Dahlia's Sacramental Shower, Heizou's
+  Heartstopper, Yae's Sesshou Sakura, Crosscurrent; whitespace only).
+- **Comments.** `Kokomi.cs` no longer describes Charge and the Pearl of
+  Wisdom funnel; `KokomiCardPool.cs` no longer promises stage 5 or the
+  shipped Burst; the generated `upgraded_grant` comment says "the granted
+  card arrives upgraded" (it named Ka-pow! on Kokomi's Sea Glass Harvest and
+  Shoal Call; Alice's Detonator's copy changes with it).
+
+Not built: Tide Wall's "plus the damage the front enemy intends". Its op,
+`block_front_intent`, does read the front enemy
+(`KokomiOverhaulKit.IntendedDamage(FrontEnemy(...))`), but
+`docs/current/text-conventions.md` rules that a Plan line never names "the
+front enemy" (the Plan tip says a Plan hits the front enemy), and
+`lint_text_conventions` refuses it. The face is unchanged, pending the main
+session.
+
+Kept after a telemetry check (99 seat fights since 2026-10-01): The
+General's Banner and Watatsumi Resistance (a Companion card was played in 59
+fights), At Water's Edge (a reaction happened in 41 solo fights).

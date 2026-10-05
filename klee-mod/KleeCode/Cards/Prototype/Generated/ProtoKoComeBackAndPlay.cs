@@ -42,7 +42,7 @@ public sealed class ProtoKoComeBackAndPlay : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Come Back and Play!"),
-        ("description", "Put a [gold]Companion[/gold] card from your discard pile into your hand. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Put a [gold]Companion[/gold] card from your discard pile into your hand.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

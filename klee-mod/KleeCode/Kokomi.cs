@@ -16,15 +16,14 @@ using MegaCrit.Sts2.Core.Nodes.Vfx;
 namespace KleeMod;
 
 /// <summary>
-/// Sangonomiya Kokomi -- the card-economy Hydro strategist.
+/// Sangonomiya Kokomi -- the Hydro strategist who plans a turn ahead.
 ///
-/// She converts CARDS into damage and never HP: every card rotated off the
-/// line pays Charge through the Pearl of Wisdom funnel, and Charge is read,
-/// never spent. Her four sheet laws are enforced elsewhere and named here so
-/// the character file is not the one place they are invisible: LAW 1 no
-/// self-damage, LAW 2 no heals, LAW 3 she cannot gain Strength (converted to
-/// Charge at the apply chokepoint, see KokomiResourceHooks), LAW 4 Commons
-/// never grow the deck.
+/// Her kit is the Plan: a card played on the Bake-Kurage
+/// (Powers/Prototype/BakeKuragePet.cs) writes its Plan line, and at the
+/// start of her next turn the jellyfish carries it out
+/// (Powers/Prototype/KokomiPlan.cs). The Tamakushi Casket counts those
+/// carry-outs. Her cards are the `proto_kk_` rows of
+/// docs/prototype-surface.yaml.
 ///
 /// IKokomiCharacter is the identity gate for all of that. It is on the
 /// CHARACTER, not the cards, so a Kokomi card acquired by Klee in co-op does

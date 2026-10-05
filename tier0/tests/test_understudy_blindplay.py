@@ -8632,13 +8632,14 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KK_DEEP_CURRENT", "name": "Deep Current",
          "cost": "1", "type": "Attack",
-         "description": "Deal 7 Hydro damage to ALL enemies."})
+         "description": "Deal 8 Hydro damage to ALL enemies."})
     page = blindplay.observe(smith)
 
-    # The card the seat guessed on, both faces, one under the other (7 and 9
-    # since the Casket pass, 2026-09-28; it was 6 to 9 when the seat met it).
-    assert "    Deal 7 Hydro damage to ALL enemies." in page
-    assert "    Upgraded: Deal 9 Hydro damage to ALL enemies." in page
+    # The card the seat guessed on, both faces, one under the other (8 and 11
+    # since the Kokomi kit review, 2026-10-05; it was 6 to 9 when the seat
+    # met it).
+    assert "    Deal 8 Hydro damage to ALL enemies." in page
+    assert "    Upgraded: Deal 11 Hydro damage to ALL enemies." in page
     # And the screen's own rows, including one whose printed face carries the
     # game's appended keyword sentence -- which is why the match is a search
     # over the face rather than the whole of it.

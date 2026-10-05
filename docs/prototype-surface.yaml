@@ -1224,10 +1224,11 @@
 - {id: proto_kk_deep_current, name: "Deep Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # THE CASKET PASS (2026-09-28): 7 to ALL, 9 upgraded.
-   description: "Deal 7 [gold]Hydro[/gold] damage to ALL enemies.",
-   upgrade: {damage: 2},
-   effects: [{op: damage, amount: 7, target: all_enemies}]}
+   # THE KIT REVIEW (2026-10-05): 8 [11] (was 7 [9]), Cleave's numbers.
+   # Provenance note, "Kokomi kit review, 2026-10-05".
+   description: "Deal 8 [gold]Hydro[/gold] damage to ALL enemies.",
+   upgrade: {damage: 3},
+   effects: [{op: damage, amount: 8, target: all_enemies}]}
 
 - {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
    authored_by: [claude],
@@ -1426,7 +1427,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The Plan after this one deals double damage.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The [gold]Plan[/gold] after this one deals double damage.",
    # THE CASKET PASS (2026-09-28): 5 -> 7 now. `applies_element: true`
    # (2026-10-05): the face prints Hydro, so the row declares it -- the element
    # lives on the card, not on who plays it ([USER]'s ruling).
@@ -1444,7 +1445,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The Plan after this one is carried out twice.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] after this one is carried out twice.",
    # `applies_element: true` (2026-10-05): the face prints Hydro, so the row
    # declares it rather than leaning on Kokomi's retired every-card cadence.
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
@@ -1468,7 +1469,7 @@
    # POOL PASS FIVE (`EB-685`): THE COUNT IS THE QUEUE AT DUSK -- the Plans
    # written this turn and still waiting -- never this entry itself. Pass
    # four read the morning, which a Plan written today cannot be in.
-   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], and 3 more for each Plan waiting.",
+   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], and 3 more for each [gold]Plan[/gold] waiting.",
    effects: [],
    plan: [{op: block, amount: 5},
           {op: block_per_plan_held, amount: 3}],
@@ -1771,10 +1772,12 @@
 
 - {id: proto_kk_ceremonial_garment, name: "Ceremonial Garment", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   # THE KIT REVIEW (2026-10-05): cost 2 -> 1, 1 -> 2 per debuff (3
+   # upgraded). A 2-cost Rare at +1 per debuff sat under an Uncommon Inflame.
+   cost: 1, type: power, rarity: rare,
    description: "Your Attacks deal {PowerAmount:diff()} additional damage for each debuff on their target.",
-   effects: [{op: apply_power, power: kk_ceremonial_garment, amount: 1, target: self}],
-   # 2 per debuff.
+   effects: [{op: apply_power, power: kk_ceremonial_garment, amount: 2, target: self}],
+   # 3 per debuff.
    upgrade: {power_amount: 1}}
 
 - {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
@@ -1990,7 +1993,7 @@
    cost: 0, type: skill, rarity: common,
    # "Up to": every status and curse when she holds that many or fewer; she
    # chooses which when she holds more.
-   description: "Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Exhaust up to {PlanExhaust:diff()} statuses or curses in your hand.",
+   description: "Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand.",
    effects: [{op: apply_power, power: weak, amount: 1, target: enemy}],
    plan: [{op: exhaust_statuses_in_hand, amount: 2}],
    # Plan up to 3.

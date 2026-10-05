@@ -59,7 +59,7 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shikanoin Heizou — Heartstopper Strike"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };

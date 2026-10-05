@@ -55,9 +55,7 @@ public sealed class KokomiCardPool : CardPoolModel
     /// stage 4, 2026-10-01): every `proto_` row she owns, then her Ancients
     /// (a character whose pool holds no Ancient softlocks Darv's Dusty Tome;
     /// <c>tools/lint_ancient_coverage.py</c>), then the never-offered members
-    /// (<see cref="KokomiOffPoolCards"/>: the current kit's hand-written
-    /// tokens and the shipped Burst). The shipped rows follow as members only
-    /// until stage 5 deletes them.
+    /// (<see cref="KokomiOffPoolCards"/>: the kit's hand-written tokens).
     /// </summary>
     protected override CardModel[] GenerateAllCards() =>
         PrototypeCards.For("kokomi")
@@ -72,10 +70,8 @@ public sealed class KokomiCardPool : CardPoolModel
 ///
 /// Both halves are load-bearing. IN the pool, because CardModel.Pool falls
 /// through to MockCardPool and throws the moment a poolless card is drawn --
-/// and the kit card is drawn, into hand, every time the meter fills. OUT of
-/// rewards, because granted-not-drafted is the v1.9 kit invariant: a Burst
-/// you can take from a card reward is loot, and every number on her sheet was
-/// measured against a Burst you cannot.
+/// and her tokens (Open the Casket, Sea Glass) are dealt into hand. OUT of
+/// rewards, because a token is granted, never drafted.
 /// </summary>
 public static class KokomiOffPoolCards
 {

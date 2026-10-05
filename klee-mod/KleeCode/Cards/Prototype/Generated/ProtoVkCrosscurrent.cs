@@ -45,7 +45,7 @@ public sealed class ProtoVkCrosscurrent : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crosscurrent"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. This [gold]Swirl[/gold] pays twice. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "[gold]Swirl[/gold] an enemy's aura. This [gold]Swirl[/gold] pays twice.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -41,7 +41,9 @@ namespace KleeMod.Cards.Prototype;
 /// <c>KokomiOffPoolCards</c> so <c>CardModel.Pool</c> resolves. Sim twin:
 /// <c>kokomi_plan.open_the_casket_card</c> and <c>kokomi_plan.open_casket</c>.
 ///
-/// NO UPGRADE: the ruling gives none.
+/// THE UPGRADE DRAWS 1 (the Kokomi kit review, 2026-10-05): it changed
+/// nothing before. Upgraded it also draws 1 card, after the Strength; cost
+/// and Retain stay. Sim twin: <c>kokomi_plan.open_the_casket_card(upgraded)</c>.
 /// </summary>
 public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
 {
@@ -56,7 +58,7 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         ("title", "Open the Casket"),
         ("description",
             "Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
-          + "count, then empty it."),
+          + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
@@ -66,7 +68,7 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         ArmKeywordTips.ForCasket(base.ExtraHoverTips, this);
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
-        System.Array.Empty<DynamicVar>();
+        new List<DynamicVar> { new CardsVar(1) };
 
     public OpenTheCasket()
         : base(1, CardType.Skill, CardRarity.Token, TargetType.Self,
@@ -78,9 +80,14 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await KokomiOverhaulKit.OpenCasket(choiceContext, Owner.Creature, this);
+        if (IsUpgraded)
+        {
+            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
+        // The draw is an IsUpgraded read in OnPlay; nothing to bump here.
     }
 }

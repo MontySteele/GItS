@@ -41,7 +41,7 @@ public sealed class ProtoKkTidalResonance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Resonance"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Draw {KkAmount:diff()} card{KkAmount:plural:|s} for each enemy that already had an element. {IfUpgraded:show:Draw 1 card.|}"),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Draw {KkAmount:diff()} card{KkAmount:plural:|s} for each enemy that already had an element.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
