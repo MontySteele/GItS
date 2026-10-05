@@ -6,6 +6,7 @@ using KleeMod.Powers;
 using KleeMod.Relics;
 using KleeMod.Tests.Harness;
 using KleeMod.Vfx;
+using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -169,20 +170,161 @@ public class FurinaTideTests
         Assert.Equal(8, kit.Stage.Fanfare);
     }
 
-    // ---- Universal Revelry (sec.17) ----------------------------------------
+    // ---- Universal Revelry (the pool-40 paper, sec.2) ----------------------
 
     [Fact]
-    public void Revelry_doubles_every_gain_and_a_second_copy_triples_it()
+    public void Revelry_adds_to_drains_and_repays_never_to_hits_and_copies_add()
     {
+        // "Whenever you Drain or Repay, gain that much additional Fanfare."
         var one = StageKit.With(new StageMods { Revelry = 1 }, 0);
-        Assert.Equal(10, one.Director.OnHpLost(5));
-        Run(one.Director.Drain(3));
-        Assert.Equal(16, one.Stage.Fanfare);
+        Assert.Equal(5, one.Director.OnHpLost(5));        // a hit: no bonus
+        Run(one.Director.Drain(3));                       // 3 + 3
+        Assert.Equal(11, one.Stage.Fanfare);
+        Run(one.Director.Repay(2));                       // 2 + 2
+        Assert.Equal(15, one.Stage.Fanfare);
+        // Two copies: +2x, never multiplicative.
         var two = StageKit.With(new StageMods { Revelry = 2 }, 0);
-        Assert.Equal(15, two.Director.OnHpLost(5));
-        Assert.Equal("You gain twice as much [gold]Fanfare[/gold].",
-                     new UniversalRevelryPower().Localization!
-                         .Single(r => r.Item1 == "description").Item2);
+        Assert.Equal(5, two.Director.OnHpLost(5));
+        Run(two.Director.Drain(3));                       // 3 + 6
+        Assert.Equal(14, two.Stage.Fanfare);
+        Assert.Equal(
+            "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that "
+            + "much additional [gold]Fanfare[/gold].",
+            new UniversalRevelryPower().Localization!
+                .Single(r => r.Item1 == "description").Item2);
+    }
+
+    // ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md) ------
+
+    [Fact]
+    public void Critics_darling_hits_for_each_drain_and_repay_but_not_a_hit()
+    {
+        var kit = StageKit.With(new StageMods { CriticsDarling = 1 }, 0);
+        kit.Director.OnHpLost(6);
+        Assert.Empty(kit.Board.Hits);
+        Run(kit.Director.Drain(4));
+        Assert.Contains("power Critics' Darling Random 4", kit.Board.Log);
+        Run(kit.Director.Repay(3));
+        Assert.Contains("power Critics' Darling Random 3", kit.Board.Log);
+        var two = StageKit.With(new StageMods { CriticsDarling = 2 }, 0);
+        Run(two.Director.Drain(4));
+        Assert.Contains("power Critics' Darling Random 8", two.Board.Log);
+    }
+
+    [Fact]
+    public void Ousia_surge_draws_on_the_first_drain_each_turn_only()
+    {
+        var kit = StageKit.With(new StageMods { OusiaSurge = 1 }, 0);
+        Run(kit.Director.Drain(2));
+        Run(kit.Director.Drain(2));
+        Assert.Equal(1, kit.Board.Drawn);
+        kit.Stage.OpenTurn();
+        Run(kit.Director.Drain(2));
+        Assert.Equal(2, kit.Board.Drawn);
+    }
+
+    [Fact]
+    public void A_five_century_act_puts_the_line_at_one_hp()
+    {
+        var kit = StageKit.With(new StageMods { FiveCenturyAct = 1 }, 0);
+        Assert.Equal(1, kit.Stage.Line);
+        kit.Board.Hp = 11;
+        Assert.True(kit.Director.CanDrain(10));
+        Assert.False(kit.Director.CanDrain(11));
+        Assert.Equal(1, FurinaStageLaw.LineOf(78, lyney: true, fiveCentury: true));
+    }
+
+    [Fact]
+    public void Lyneys_line_lowers_the_line_by_ten_and_his_act_drains_two_for_eight_to_all()
+    {
+        var kit = StageKit.Of(StagePerformer.Lyney);
+        Assert.Equal(29, kit.Stage.Line);                    // 39 - 10
+        Assert.Equal(39, StageKit.Of().Stage.Line);
+        Assert.Equal(1, FurinaStageLaw.LineOf(8, lyney: true, fiveCentury: false));
+        Assert.True(StageKit.Run(kit.Director.Act(StagePerformer.Lyney,
+                                                  kit.Stage.Seats[0])));
+        Assert.Equal(76, kit.Board.Hp);
+        Assert.Equal(2, kit.Stage.Drained);
+        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        // Below the line, the act skips: no Drain and no damage.
+        var low = StageKit.At(30, 78, StagePerformer.Lyney);
+        StageKit.Run(low.Director.Act(StagePerformer.Lyney, low.Stage.Seats[0]));
+        Assert.Equal(30, low.Board.Hp);
+        Assert.Empty(low.Board.Hits);
+    }
+
+    [Fact]
+    public void Sigewinne_blocks_each_repay_and_her_act_repays_two()
+    {
+        var kit = StageKit.Of(StagePerformer.Sigewinne);
+        Run(kit.Director.Drain(6));
+        Run(kit.Director.Repay(3));
+        Assert.Contains("block 3", kit.Board.Log);
+        kit.Board.Log.Clear();
+        StageKit.Run(kit.Director.Act(StagePerformer.Sigewinne,
+                                      kit.Stage.Seats[0]));
+        Assert.Equal(new[] { "heal 2", "block 2" }, kit.Board.Log);
+    }
+
+    [Fact]
+    public void Chevreuse_applies_vulnerable_on_every_spend_and_her_act_deals_four()
+    {
+        var kit = StageKit.With(9, StagePerformer.Chevreuse);
+        Run(kit.Director.Spend(3));
+        Run(kit.Director.SpendAll());
+        Assert.Equal(2, kit.Board.Log.Count(l => l == "vulnerable Random 1"));
+        StageKit.Run(kit.Director.Act(StagePerformer.Chevreuse,
+                                      kit.Stage.Seats[0]));
+        Assert.Contains("damage Chevreuse Random 4 None", kit.Board.Log);
+    }
+
+    [Fact]
+    public void Bis_keeps_half_of_a_spend_all_rounded_down()
+    {
+        var kit = StageKit.With(new StageMods { Bis = 1 }, 9);
+        Assert.Equal(9, Run(kit.Director.SpendAll()));
+        Assert.Equal(9, kit.Stage.SpentThisPlay);
+        Assert.Equal(4, kit.Stage.Fanfare);
+        // A Spend N is not a spend-all.
+        Assert.Equal(4, Run(kit.Director.Spend(4)));
+        Assert.Equal(0, kit.Stage.Fanfare);
+        var none = StageKit.With(9);
+        Run(none.Director.SpendAll());
+        Assert.Equal(0, none.Stage.Fanfare);
+    }
+
+    [Fact]
+    public void Fountain_of_lucine_repays_at_each_of_the_next_three_turn_starts()
+    {
+        var kit = StageKit.Of();
+        Run(kit.Director.Drain(30));
+        kit.Stage.ScheduleRepay(3, FurinaStageLaw.FountainTurns);
+        kit.Stage.ScheduleRepay(4, FurinaStageLaw.FountainTurns);
+        Assert.Equal(7, kit.Stage.RepayDueNext);
+        for (var turn = 0; turn < 3; turn++)
+        {
+            Assert.Equal(7, Run(kit.Director.TurnStartRepays()));
+        }
+        Assert.False(kit.Stage.OwesRepays);
+        Assert.Equal(0, Run(kit.Director.TurnStartRepays()));
+        Assert.Equal(78 - 30 + 21, kit.Board.Hp);
+        // One Repay per play: two plays are two Repays a turn.
+        Assert.Equal(6, kit.Board.Log.Count(l => l.StartsWith("heal ")));
+        // Wired to her turn start.
+        Assert.Contains("FurinaStage.FountainRepays",
+            Il.Calls(Il.Method("FurinaStage", "TurnStart")));
+    }
+
+    [Fact]
+    public void The_seven_guests_parse_and_print_their_line_and_act()
+    {
+        foreach (var name in FurinaStage.Guests)
+        {
+            var who = FurinaStage.Parse(name);
+            Assert.Equal(name, FurinaStage.Name(who));
+            Assert.Contains("Act:", StagePerformerBadge.ActText(who));
+        }
+        Assert.Equal(7, FurinaStage.Guests.Length);
     }
 
     // ---- Spend and the three Powers ----------------------------------------
@@ -299,6 +441,49 @@ public class FurinaTideTests
                                        StagePerformer.Charlotte));
     }
 
+    [Fact]
+    public void A_spend_all_record_closes_with_its_play_and_its_turn()
+    {
+        // The Salon's Tab seat round (2026-10-05): a spend-all face read the
+        // LAST play's spend at 0 Fanfare ("Deals 113") until the next play.
+        var kit = StageKit.With(7);
+        kit.Stage.BeginPlay();
+        Assert.Equal(7, kit.Stage.SpendAll());
+        Assert.Equal(7, kit.Stage.SpentThisPlay);
+        kit.Stage.EndPlay();
+        Assert.Equal(0, kit.Stage.SpentThisPlay);
+        kit.Stage.Gain(4);
+        Assert.Equal(4, kit.Stage.SpendAll());
+        kit.Stage.OpenTurn();
+        Assert.Equal(0, kit.Stage.SpentThisPlay);
+        // And the hook that closes it at the end of every play is there.
+        Assert.Contains("FurinaStage.EndPlay",
+            Il.Calls(typeof(FurinaStageHooks).GetMethod("AfterCardPlayed")!));
+    }
+
+    [Fact]
+    public void Drain_and_repay_cards_carry_their_in_combat_lines()
+    {
+        Assert.Equal("\n(Repays 0)", FurinaStageFacePreview.Line(0));
+        foreach (var (card, token) in new (CardModel, string)[]
+                 {
+                     (new ProtoFsCurtainRise(), "StageDrainLine"),
+                     (new ProtoFsSalonsTab(), "StageDrainLine"),
+                     (new ProtoFsMademoiselleCrabaletta(), "StageDrainLine"),
+                     (new ProtoFsSurgingWaters(), "StageRepay"),
+                     (new ProtoFsSingerOfManyWaters(), "StageRepay"),
+                 })
+        {
+            var face = ((BaseLib.Abstracts.CustomCardModel)card).Localization!
+                .Single(r => r.Item1 == "description").Item2;
+            Assert.EndsWith("{InCombat:{" + token + "}|}", face);
+        }
+        // Salon's Tab's Drain option says it draws too.
+        Assert.StartsWith("[gold]Drain[/gold] 4: draw ",
+            new ProtoFsSalonsTabModeB().Localization!
+                .Single(r => r.Item1 == "description").Item2);
+    }
+
     // ---- the fixed price and the mode gate ---------------------------------
 
     [Fact]
@@ -374,12 +559,20 @@ public class FurinaTideTests
         Assert.Equal(FurinaStage.DrainedOf(seat.Creature),
                      DrainedCounter.Read(seat.Creature));
 
-        Assert.Equal("You can [gold]Drain[/gold] down to [blue]39[/blue] HP.",
-                     DrainedCounter.LineSentence(39));
+        // 2026-10-05: the line says where it comes from.
+        Assert.Equal("Drain line [blue]39[/blue] HP (half the HP you started "
+                     + "this fight with): you can [gold]Drain[/gold] down to it.",
+                     DrainedCounter.LineSentence(
+                         39, "half the HP you started this fight with"));
+        Assert.Equal("half the HP you started this fight with", stage.LineWhy);
+        Assert.Equal("A Five-Century Act",
+                     FurinaStageLaw.LineWhy(lyney: true, fiveCentury: true));
+        Assert.Contains("10 lower with Lyney",
+                        FurinaStageLaw.LineWhy(lyney: true, fiveCentury: false));
         var body = DrainedCounter.HoverBody(seat.Creature);
-        Assert.StartsWith(DrainedCounter.LineSentence(39), body);
+        Assert.StartsWith(DrainedCounter.LineSentence(39, stage.LineWhy), body);
         Assert.Contains("Drained: [blue]4[/blue] HP.", body);
-        Assert.Equal(DrainedCounter.HoverBody(0, 0),
+        Assert.Equal(DrainedCounter.HoverBody(0, 0, ""),
                      DrainedCounter.HoverBody(null));
 
         // Headless-safe, and on the funnel the Fanfare gauge rides.

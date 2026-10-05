@@ -53,8 +53,9 @@ def test_every_performer_has_its_own_literal_scene():
     cannot find)."""
     scenes = _scene_map()
     performers = _performers()
-    # The Salon's Tab (2026-10-05): the slice's four guests.
-    assert len(performers) == 4, performers
+    # The Salon's Tab (2026-10-05): the slice's four guests, and the pool to
+    # 39's three (Lyney, Sigewinne, Chevreuse).
+    assert len(performers) == 7, performers
     assert set(scenes) == set(performers), set(performers) ^ set(scenes)
     assert len(set(scenes.values())) == len(scenes), "two performers share a scene"
     for who, path in scenes.items():

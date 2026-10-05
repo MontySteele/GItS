@@ -180,6 +180,8 @@ def _drain_triggers(state, n: int) -> float:
         v += _aoe(state, T.SALON_ENCORE_DAMAGE * f.powers["salon_encore"])
     if "wriothesley" in f.stage:
         v += n * 0.9
+    if f.powers["ousia_surge"] and not f.ousia_drew:
+        v += DRAW * f.powers["ousia_surge"]
     return v
 
 
@@ -189,7 +191,8 @@ def _gain_value(state, n: float) -> float:
 
 def _loop_gain_value(state, n: float) -> float:
     """N Fanfare from a Drain or a Repay, with the readers of those two
-    (Universal Revelry, Critics' Darling)."""
+    (Universal Revelry adds N per copy, Critics' Darling deals N per
+    copy)."""
     f = _f(state)
     v = fanfare_value(state) * n * (1 + f.powers["revelry"])
     if f.powers["critics_darling"]:
@@ -254,6 +257,8 @@ def _outlet_rate(spec) -> float:
         return (n[2] - n[0] + DRAW * n[3]) / n[1]
     if k == "spend_energy":
         return 6.0 / n[1]
+    if k == "spend_block":
+        return 0.6 * (n[2] - n[0]) / n[1]
     if k in ("block_spend_all", "bravura"):
         return float(n[1])
     if k == "rejoice":
@@ -312,6 +317,10 @@ class Judged:
     def fixed_drain_value(self, state, spec) -> float | None:
         """A fixed Drain card's play value; None means never play it."""
         price, dmg = spec.n
+        if spec.kind == "drain_fixed_aoe":
+            return (_aoe(state, dmg)
+                    - drain_cost(state, price,
+                                 ends_fight(state, dmg, aoe=True)))
         return (_single(state, dmg)
                 - drain_cost(state, price, ends_fight(state, dmg)))
 
@@ -323,6 +332,9 @@ class Judged:
             gain = _aoe(state, spec.n[2]) - _aoe(state, spec.n[0])
         elif spec.kind == "spend_energy":
             gain = 6.0 if _playable_left(state) else 0.0
+        elif spec.kind == "spend_block":
+            gain = (_block_value(spec.n[2], need(state))
+                    - _block_value(spec.n[0], need(state)))
         else:
             gain = (_single(state, spec.n[2]) - _single(state, spec.n[0])
                     + DRAW * spec.n[3])
@@ -339,6 +351,8 @@ class Always(Judged):
         return True
 
     def fixed_drain_value(self, state, spec) -> float | None:
+        if spec.kind == "drain_fixed_aoe":
+            return _aoe(state, spec.n[1])
         return _single(state, spec.n[1])
 
     def spend(self, state, card, spec) -> bool:
@@ -398,6 +412,13 @@ def _guest_value(state, member: str) -> float:
         per = T.CLORINDE_ACT + 4.0
     elif member == "neuvillette":
         per = 3.0 * n + 2.0
+    elif member == "lyney":
+        # Drain 2 for 8 to ALL, when there is room (his line adds 10).
+        room = 1.0 if T.can_drain(state, T.LYNEY_ACT_DRAIN) else 0.3
+        per = room * (T.LYNEY_ACT * n - T.LYNEY_ACT_DRAIN
+                      * temp_hp_value(state)) + 1.0
+    elif member == "chevreuse":
+        per = T.CHEVREUSE_ACT + 1.5
     else:
         per = 0.0
     if member in f.stage:
@@ -414,7 +435,7 @@ def card_damage(state, card) -> float:
     k = spec.kind
     if k == "drain_hit":
         return float(n[2] if T.can_drain(state, n[1]) else n[0])
-    if k == "drain_fixed_hit":
+    if k in ("drain_fixed_hit", "drain_fixed_aoe"):
         return float(n[1] if T.can_drain(state, n[0]) else 0)
     if k == "hit_repay":
         return float(n[0])
@@ -475,6 +496,9 @@ def value(state, card, playable: list, decider) -> float:
             draws = bool(state.player.draw_pile or state.player.discard_pile)
             pv = DRAW if draws else 0.0
             bv = pv + (6.0 if _playable_left(state, card) else 0.0)
+        elif k == "spend_block":
+            pv = _block_value(n[0], need_now)
+            bv = _block_value(n[2], need_now)
         else:
             pv = _single(state, n[0])
             bv = _single(state, n[2]) + DRAW * n[3]
@@ -501,6 +525,10 @@ def value(state, card, playable: list, decider) -> float:
         return repay_value(state, n[0]) + (DRAW * n[1] if draws else 0.0)
     if k == "repay_all":
         return repay_value(state, f.drained)
+    if k == "fountain":
+        hp_per = temp_hp_value(state) if f.curtain_call else hp_value(state)
+        per_repay = hp_per + (FANFARE if f.repay_fanfare else 0.0)
+        return T.FOUNTAIN_TURNS * 0.6 * per_repay * n[0]
     if k == "bravura":
         pts = f.fanfare
         return _single(state, n[0] + n[1] * pts) - spend_cost(state, pts)
@@ -525,6 +553,12 @@ def value(state, card, playable: list, decider) -> float:
             return 0.8 * tl * 3.0
         if m == "crowd_gasps":
             return 0.8 * tl * 3.0 * FANFARE
+        if m == "ousia_surge":
+            return 0.8 * tl * DRAW * 0.8
+        if m == "five_century":
+            return 0.8 * tl * 1.5
+        if m == "bis":
+            return 0.8 * tl * 2.0
     if k == "guest":
         return _guest_value(state, spec.member)
     return 0.0

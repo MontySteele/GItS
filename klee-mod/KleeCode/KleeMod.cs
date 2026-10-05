@@ -497,6 +497,15 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.ClorindeKey + ".title"] =
                         Powers.FurinaStageLedger.DisplayName(
                             Powers.StagePerformer.Clorinde),
+                    [Cards.ArmKeywordTips.LyneyKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Lyney),
+                    [Cards.ArmKeywordTips.SigewinneKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Sigewinne),
+                    [Cards.ArmKeywordTips.ChevreuseKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Chevreuse),
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in

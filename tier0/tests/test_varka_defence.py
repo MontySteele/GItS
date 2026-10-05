@@ -68,7 +68,8 @@ def _fx(cid, op):
 # ---------------------------------------------------------------------------
 
 # Gust Ward left with the rebalance (2026-10-03): Storm Battery's place.
-NEW = {"gale_mantle": "common", "windborne_resolve": "uncommon"}
+# Gale Mantle left with the combo pass (2026-10-04).
+NEW = {"windborne_resolve": "uncommon"}
 GONE = ("squall", "four_banners", "favonian_standard")
 
 
@@ -85,34 +86,10 @@ def test_the_pool_stays_78_with_the_three_swaps(varka):
     assert not hasattr(V, "FAVONIAN_STANDARD")
 
 
-def test_tailwind_guard_is_unchanged(varka):
-    f = _fx(_vk("tailwind_guard"), "block")["amount_formula"]
-    assert (f["base"], f["per"], f["count"]) == (0, 3, "oath_elements")
-    up = _fx(_vk("tailwind_guard") + "+", "block")["amount_formula"]
-    assert up["per"] == 4
-
-
-# ---------------------------------------------------------------------------
-# 2. The three new cards.
-# ---------------------------------------------------------------------------
-
-def test_gale_mantle_gains_5_plus_half_the_total_oath(varka):
-    card = loader.get_card(_vk("gale_mantle"))
-    assert (card.cost, card.type) == (1, "skill")
-    assert _fx(_vk("gale_mantle") + "+", "block")["amount_formula"]["base"] == 8
-    st = _state()
-    _play(st, _vk("gale_mantle"))
-    assert st.player.block == 5                       # no Oath yet
-    led = V.ledger(st.player)
-    led.oath.update(pyro=3, hydro=4, cryo=0, electro=2)    # 9 -> 4
-    st.player.block = 0
-    _play(st, _vk("gale_mantle"))
-    assert st.player.block == 5 + 4                   # half rounds down
-    assert effects._runtime_count(st, "half_total_oath") == 4
-    led.oath.update(pyro=10, hydro=10, cryo=10, electro=10)
-    st.player.block = 0
-    _play(st, _vk("gale_mantle") + "+")
-    assert st.player.block == 8 + 20                  # no cap
+# Tailwind Guard and Gale Mantle left with the combo pass (2026-10-04,
+# review/active/varka-combo-pass-2026-10-04.md sec.2); their pins went with
+# them and the `half_total_oath` count stays as grammar
+# (tier0/tests/test_varka_combo.py).
 
 
 def test_half_total_oath_is_zero_for_anyone_else():

@@ -423,7 +423,6 @@ class RunDriver(Navigation):
         # that resolves off a play (salon ticks, auras, bombs); the enemy pool's
         # own drop between two turn openings cannot.
         self.fight.enemy_pool_by_turn.append([rnd, _enemy_pool(state)])
-        self.fight.meters_by_turn.append([rnd] + _meters(state))
 
     def _close_fight(self, state: dict, outcome: str) -> None:
         if self.fight is None:

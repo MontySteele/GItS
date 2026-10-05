@@ -6,9 +6,9 @@ instrument's own declarations:
   understudy/soak.py:585-601   -1 is UNSEEN, never a zero; a pre-P1.5 bridge
                                (no `resources` key) must keep saying "unseen"
   understudy/soak.py:641-643   the resource is AUTHORITATIVE over the badge
-  understudy/replay.py:301-307 `encore == -1` leaves the sim's own value alone
-                               and suppresses that turn's comparison
-  understudy/replay.py:677-686 an all-zero Encore column is reading corruption
+
+(The replay half -- `replay._apply_meters`, `_meters_at`, `_encore_unseen` --
+left with `meters_by_turn`, 2026-10-04.)
 
 The known SILENT-LIEs found in this slice (partial degradation writing a hard
 0 into the Encore column; `_encore_unseen` defeated by an intermittently
@@ -24,7 +24,7 @@ import os
 
 import pytest
 
-from understudy import replay, soak
+from understudy import soak
 
 FIX = os.path.join(os.path.dirname(__file__), "..", "..",
                    "review", "redteam", "fixtures", "track_o")
@@ -33,11 +33,6 @@ FIX = os.path.join(os.path.dirname(__file__), "..", "..",
 def _wire(case):
     with open(os.path.join(FIX, "s03-resources-wire.json"), encoding="utf-8") as fh:
         return {"player": json.load(fh)[case]["player"]}
-
-
-def _fight(name):
-    with open(os.path.join(FIX, name), encoding="utf-8") as fh:
-        return json.load(fh)
 
 
 def test_healthy_resource_map_is_read_and_beats_the_badge():
@@ -68,37 +63,3 @@ def test_reader_never_raises_on_any_wire_shape(case):
     """GitsResources.cs:104-107 -- a state read must never throw."""
     out = soak._meters(_wire(case))
     assert len(out) == 4 and all(isinstance(v, int) for v in out)
-
-
-def test_unseen_encore_leaves_the_sim_value_alone():
-    """replay.py:301-307 -- -1 must not be loaded onto the player."""
-    player = replay._fresh_player("furina", 60, 70, 0, {})
-    player.encore = 5
-    replay._apply_meters(player, {"fanfare": 7, "salon_members": 1,
-                                  "salon_cap": 3, "encore": -1})
-    assert player.encore == 5
-
-
-def test_seen_encore_is_loaded_onto_the_sim_player():
-    player = replay._fresh_player("furina", 60, 70, 0, {})
-    player.encore = 5
-    replay._apply_meters(player, {"fanfare": 7, "salon_members": 1,
-                                  "salon_cap": 3, "encore": 4})
-    assert player.encore == 4
-
-
-def test_all_zero_encore_column_is_flagged_as_corruption():
-    """replay.py:677-686 -- the sentinel wearing a zero, fight-wide."""
-    assert replay._encore_unseen(_fight("s03-allzero-fight.json")) is True
-
-
-def test_a_column_with_real_reads_is_not_flagged():
-    """Sanity companion: a column carrying non-zero reads is not corruption."""
-    fight = {"meters_by_turn": [[1, 5, 1, 3, 4], [2, 7, 1, 3, 6]]}
-    assert replay._encore_unseen(fight) is False
-
-
-def test_meters_at_defaults_encore_to_unseen_on_a_short_row():
-    """A row written by a pre-P1.5 soak has no 5th column."""
-    fight = {"meters_by_turn": [[1, 5, 1, 3]]}
-    assert replay._meters_at(fight, 1)["encore"] == -1

@@ -129,14 +129,14 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 
 from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     BlindPlayError, BOARD_SETTLE_TRIES, budget_cap, budget_path, budget_spent,
-    BUDGET_REACHED, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
+    BUDGET_REACHED, COMBAT_SCREENS,
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
     clear_refusal, mark_refusal, pending_refusal,
     MAX_ACTIONS_ENV, read_budget, set_budget,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
     AURA_DURATION_TURNS, BOMB_GROWTH, CRYSTALLIZE_BLOCK, FRAIL_BLOCK_PCT,
     VULNERABLE_TAKEN_PCT, WEAK_DEALT_PCT,
-    KURAGE_COST_PER_ENERGY, LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
+    LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
     _RATE_LIMIT_MARKERS, RECORD_ROOT, REPO, SeatBudgetExhausted,
     SELECT_SCREENS, SETTLE_DELAY_S, SETTLE_TRIES, UNDRIVEN_SCREENS)
 from understudy.blindplay_read import (   # noqa: E402,F401  (re-export)
@@ -149,6 +149,7 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _BARE_HOOK, _card_face, _card_title, _dedupe_text, _element,
     _ELEMENT_KEYWORD, EMPTY_SHELF, _enchantment, _enemy_key, _enemy_names,
     _DECK_MEMORY, _FIGHT_MEMORY, forget_deck, forget_fight, forget_run,
+    briefed_this_fight, forget_briefed, remember_briefed,
     forget_shelves, run_change, deck_elements,
     _hazard, _hook_note, _intent, _intents, _is_aura, _meter_max,
     _named_option, _number_faces, _OPTION_KIND_KEYS, _OPTION_NAME_KEYS,
@@ -157,10 +158,10 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _shop_items, _shop_options, _SPARK_POWER)
 from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
     ALREADY_UPGRADED, PHASE_FLIP_LINE, _bundle_cards, _carried_out_row, _combat, deck_titles,
-    _event_option, _event_options, kokomi_plans, kurage_memory, _map_ahead,
+    _event_option, _event_options, kokomi_plans, _map_ahead,
     _map_boss, _option_faces,
     _map_nodes, _map_options, NO_UPGRADE_DEFINED, _omitted_from_upgrade,
-    _potion_slots, _preview_cards, _proceed_option, _pulse_phrase,
+    _potion_slots, _preview_cards, _proceed_option,
     _relic_options, _rest_options, _reward_items, _screen_cards,
     _selected_bundle, UNEXPLAINED_OMISSION, map_floor, OPTION_UNNAMED_GRANT,
     upgrade_deck_floor)
@@ -190,7 +191,7 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
     observation)
 from understudy.blindplay_render import (   # noqa: E402,F401  (re-export)
-    assert_one_page, _colliding, observe, render, _render_card,
+    assert_one_page, _colliding, newest_event, observe, render, _render_card,
     _render_intent,
     _render_intents, _render_options, _render_power, sha256, still_in_fight)
 from understudy.blindplay_snapshot import (   # noqa: E402,F401  (re-export)
@@ -358,7 +359,8 @@ def cmd_observe(args) -> int:
         if word:
             print(blindplay_brief.define(observe(state), word).rstrip("\n"))
         else:
-            print(_page(observe(state), args))
+            print(_page(screen_page(state, full=not _brief_on(args)),
+                        args))
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=out)
         return 1
@@ -375,6 +377,36 @@ def cmd_observe(args) -> int:
         print(f"REFUSED: {exc}", file=out)
         return 1
     return 0
+
+
+def screen_page(state: dict[str, Any], full: bool = True) -> str:
+    """The full page as a printing door prints it: `observe`, with the
+    "Since last page" line cut to the ledger events this lane has not been
+    shown yet, and the newest one recorded (2026-10-05).
+
+    SEAT PAGE 3: and the enemy briefing ONCE PER FIGHT. It printed on round 1
+    and the brief page cut it as a word the LANE had seen, so a seat whose
+    one round-1 page went past unread (a seat's own `sed` slice, or a fresh
+    seat on the lane) never saw it again. Now the fight remembers which kinds
+    it has briefed, and the first page of the fight that a door prints carries
+    the briefing whatever the round. `full` (plain `observe`) prints it on
+    every round-1 page as before."""
+    obs = observation(state)
+    combat = obs.get("combat")
+    if combat is not None:
+        combat["events_after"] = blindplay_shape.read_events_seen()
+        combat["briefed"] = (set() if full and combat.get("round") == 1
+                             else briefed_this_fight())
+    elif obs.get("blocked") == "":
+        obs["events_after"] = blindplay_shape.read_events_seen()
+    text = render(obs)
+    if combat is not None:
+        remember_briefed({e["brief_key"] for e in combat.get("enemies") or []
+                          if e.get("briefing") and e.get("brief_key")})
+    newest = newest_event(obs)
+    if newest:
+        blindplay_shape.write_events_seen(newest)
+    return text
 
 
 def _brief_on(args) -> bool:
@@ -594,7 +626,7 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
     print(blindplay_coop.wait_line(waited, moved, latest))
     print()
     try:
-        print(_page(observe(latest), args))
+        print(_page(screen_page(latest, full=not _brief_on(args)), args))
     except (qa_packet.PacketLeak, BlindPlayError) as exc:
         print(f"REFUSED: {exc}", file=_refusal_stream(args))
         return 1
@@ -782,6 +814,8 @@ def cmd_new_seat(args) -> int:
     per LANE, so the new seat would never see a word the last one met. Forgets
     the words the lane has been shown; the action budget is left alone."""
     blindplay_shape.forget_words_seen()
+    # Seat page 3: and a fight in progress briefs its enemies again.
+    forget_briefed()
     print(f"lane {lane_tag(None)}: words forgotten; the next brief page "
           f"defines each word again (action budget unchanged).")
     return 0

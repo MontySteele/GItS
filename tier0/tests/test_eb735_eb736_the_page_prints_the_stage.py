@@ -258,8 +258,12 @@ def test_each_performers_act_says_what_it_did():
         "chevalmarin", "Surintendante Chevalmarin", 2)
     assert "acted: 5 damage to a random enemy." in line(
         "crabaletta", "Mademoiselle Crabaletta", 5)
-    assert "acted: adds a Trick to your hand." in line("lyney", "Lyney", 0)
-    assert "acted: 1 Energy next turn." in line("chevreuse", "Chevreuse", 1)
+    # Seat page 3 (2026-10-05): the Salon's Tab guests' acts, as the mod's
+    # `FurinaStage.CueOf` has them (the v2 kinds logged Chevreuse as Energy).
+    assert "acted: 8 Pyro damage to ALL enemies." in line("lyney", "Lyney", 8)
+    assert "acted: 4 damage to a random enemy." in line(
+        "chevreuse", "Chevreuse", 4)
+    assert "acted: you Repay 2." in line("sigewinne", "Sigewinne", 2)
 
 
 def test_an_act_that_dealt_nothing_prints_no_zero():

@@ -379,7 +379,11 @@ def test_the_switch_element_each_row_declares():
         "kaeya_frostgnaw": "cryo",
         "frost_ward": None, "kindled_edge": "pyro", "storm_battery": "electro",
         "pathfinders_mark": None, "noelle_steadfast_maid": None,
-        "gale_mantle": None, "northwind_avatar": None,
+        "northwind_avatar": None,
+        # The combo pass (2026-10-04): Gale Mantle left; its Pyro and Cryo
+        # cards declare their own element, and Stoke the Flames applies none.
+        "stoke_the_flames": None, "ember_cleave": "pyro",
+        "pyre_oath": None, "shatter": "cryo", "deep_freeze": "cryo",
     }
     got = {k: gen.varka_switch_element(rows[_vk(k)], profile) for k in want}
     assert got == want

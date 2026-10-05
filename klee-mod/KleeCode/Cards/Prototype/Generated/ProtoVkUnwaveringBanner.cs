@@ -38,14 +38,14 @@ public sealed class ProtoVkUnwaveringBanner : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForKnight(ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForKnight(ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_unwavering_banner");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Unwavering Banner"),
-        ("description", "Only [gold]Knights[/gold] and cards that name it can change your [gold]current element[/gold]."),
+        ("description", "Only [gold]Knights[/gold] can change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

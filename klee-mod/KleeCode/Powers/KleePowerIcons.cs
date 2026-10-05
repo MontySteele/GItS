@@ -315,6 +315,14 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/guest_charlotte.png"),
         LynetteBadgePower =>
             KleePck.Path("furina/powers/guest_lynette.png"),
+        // The pool to 39 (2026-10-05): the three new guests' faces, from the
+        // supporting pool's art pass (art/plan.tsv power_furina_guest_*).
+        LyneyBadgePower =>
+            KleePck.Path("furina/powers/guest_lyney.png"),
+        SigewinneBadgePower =>
+            KleePck.Path("furina/powers/guest_sigewinne.png"),
+        ChevreuseBadgePower =>
+            KleePck.Path("furina/powers/guest_chevreuse.png"),
         // THE SUPPORTING POOL (2026-09-26): the two new guests' faces, from
         // the same art pass, and the batch's nine powers borrowing the
         // shipped Furina sigil nearest their job, on the terms every borrow
@@ -366,8 +374,6 @@ internal static class KleePowerIcons
         ConvergingWindsPower =>
             KleePck.Path("varka/powers/converging_winds.png"),
         BoreasUnboundPower => KleePck.Path("varka/powers/boreas_unbound.png"),
-        OathOfTheKnightsPower =>
-            KleePck.Path("varka/powers/stormward_stance.png"),
         DawnWindsMarchPower => KleePck.Path("varka/powers/boreas_unbound.png"),
         SwornBrotherhoodPower =>
             KleePck.Path("varka/powers/converging_winds.png"),
@@ -391,6 +397,8 @@ internal static class KleePowerIcons
         AssemblyAtTheCathedralPower =>
             KleePck.Path("klee/powers/study_buddy.png"),
         WildfireOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
+        // The combo pass (2026-10-04): Pyro's Exhaust engine.
+        PyreOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
         RetaliatingTidePower => KleePck.Path("varka/powers/hydro_wind.png"),
         AbsoluteZeroPower => KleePck.Path("varka/powers/cryo_wind.png"),
         OathUntoDeathPower =>

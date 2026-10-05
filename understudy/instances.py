@@ -37,6 +37,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -430,4 +431,72 @@ def reveal_pending_epochs(inst: Instance) -> list[tuple[Path, list[str]]]:
         tmp.write_bytes(text.encode("utf-8"))
         os.replace(tmp, path)
         changed.append((path, revealed))
+    return changed
+
+
+#: The game's own `unlock all` (`UnlockConsoleCmd.UnlockEpochs` and
+#: `UnlockAscensions`) sets these. 10 is the game's top ascension.
+UNLOCKED_ASCENSION = 10
+
+
+def unlock_lane_progress(inst: Instance) -> list[tuple[Path, list[str]]]:
+    """Reveal every epoch and open every ascension in a LANE's saves.
+
+    WHY (2026-10-05). The modded profile the lanes seed from had 22 character
+    epochs never obtained (Ironclad 3-7, Defect 2-7, Necrobinder 3-7, Regent
+    2-7), and those epochs unlock cards and relics (`Ironclad3Epoch`: Red
+    Skull, Paper Phrog, Ruined Helmet; `Defect2Epoch`: Loop, Null, Consuming
+    Shadow). Every base-character seat played with cut-down pools, and only A0
+    could be chosen for most of them. This writes what the game's own
+    dev-console `unlock all` writes for epochs and ascensions: each epoch
+    `revealed`, each character's `max_ascension` and the multiplayer one 10.
+
+    LANES ONLY, on the same two locks as `reveal_pending_epochs`; the owner's
+    profile is never written. Idempotent. Returns `(path, [what changed])`.
+    """
+    if inst.appdata is None or _is_real_profile(inst.appdata):
+        return []
+    root = Path(inst.appdata).joinpath(*SETTINGS_RELATIVE)
+    if not root.is_dir():
+        return []
+    changed: list[tuple[Path, list[str]]] = []
+    now = int(time.time())
+    for path in sorted(root.rglob(PROGRESS_NAME)):
+        if not path.is_file():
+            continue
+        try:
+            raw = path.read_bytes()
+            data = json.loads(raw.decode("utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        what: list[str] = []
+        for epoch in data.get("epochs") or []:
+            if (isinstance(epoch, dict)
+                    and str(epoch.get("state", "")).lower()
+                    != REVEALED_EPOCH_STATE):
+                epoch["state"] = REVEALED_EPOCH_STATE
+                if not epoch.get("obtain_date"):
+                    epoch["obtain_date"] = now
+                what.append(str(epoch.get("id", "?")))
+        for stats in data.get("character_stats") or []:
+            if (isinstance(stats, dict)
+                    and int(stats.get("max_ascension") or 0)
+                    < UNLOCKED_ASCENSION):
+                stats["max_ascension"] = UNLOCKED_ASCENSION
+                what.append(f"{stats.get('id', '?')} ascension")
+        if (int(data.get("max_multiplayer_ascension") or 0)
+                < UNLOCKED_ASCENSION):
+            data["max_multiplayer_ascension"] = UNLOCKED_ASCENSION
+            what.append("multiplayer ascension")
+        if not what:
+            continue
+        text = json.dumps(data, indent=2, ensure_ascii=False)
+        if b"\r\n" in raw:
+            text = text.replace("\n", "\r\n")
+        tmp = path.with_name(path.name + ".gits-tmp")
+        tmp.write_bytes(text.encode("utf-8"))
+        os.replace(tmp, path)
+        changed.append((path, what))
     return changed

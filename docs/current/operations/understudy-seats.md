@@ -25,13 +25,19 @@ well, what did not, what to change. A display defect becomes one line in
 
 ```sh
 # an Opus subagent playing by hand: paste this brief, never rewrite it
-python tools/seat.py --opus-brief --lane 1 --character KLEEMOD-KLEE
+python tools/seat.py --opus-brief --lane 1 --character KLEEMOD-KLEE --scratch <dir>
 
 # a backend seat (codex, or the local model), embark to teardown
 python tools/seat.py --lane 1 --character KLEEMOD-KLEE --backend codex
 python tools/seat.py --lane 2 --character KLEEMOD-KOKOMI --backend local \
     --max-actions 70 --max-wall-s 5400 --dry-run      # print the 3 commands
 ```
+
+`--opus-brief` prints the embark to run first on stderr, with an explicit
+`--max-actions` (120 by default, `--max-actions N` to change it), and with
+`--scratch` names the seat's own notes file, `<scratch>/seat-lane<N>/notes.md`,
+on the brief's lane line. The map page prints the run seed (from the lane's
+embark sidecar) and the ascension (from the wire).
 
 `tools/seat.py` (the `seat` skill) runs the same three steps you can run by
 hand, and its teardown runs even when the session fails:
@@ -48,6 +54,11 @@ python -m understudy.embark --teardown --lane 1              # put it all back
 saved last-used level, so a base-game control run can match a mod run (set on
 the select screen after the pick; the sidecar records `ascension_requested`
 beside the read-back `ascension`, and a mismatch fails the embark).
+
+Every embark unlocks the lane's saves the way the game's `unlock all` does:
+every epoch revealed (the character epochs add cards and relics to the pools)
+and ascensions up to 10 (`instances.unlock_lane_progress`). Lane 0 is never
+touched.
 
 **A fresh seat on a lane that already played** (a per-act handoff: the act 1
 seat stops and a new seat takes act 2 on the same run). `observe --brief`
@@ -206,6 +217,25 @@ the game has not chosen it. The live arm keywords get one definition each per
 screen, in `ArmKeywordTips.cs`'s words (`understudy/blindplay_notes.py` must
 say the same).
 
+Three combat-page lines (2026-10-05), none of them a recommended play:
+**What these enemies do (base game)** prints one line per kind of enemy,
+from `understudy/blindplay_enemies.py` (curated from
+`docs/current/dossiers/enemies/`; a test fails on an act 1-3 elite or boss
+body with no entry), on the first page of each fight, once per fight (the
+fight's own memory, which `new-seat` also clears; `--brief` never trims it;
+plain `observe` prints it on every round-1 page; `observe --define
+"<enemy>"` prints it again); **Incoming this turn** sums the attack
+telegraphs against your Block, naming as unknown a part whose figure may not
+count Weak or Vulnerable (on Furina's stage too, where guests cannot be
+targeted; not in co-op, where a telegraph names no target); **Since last
+page** names what the mod's `ResolutionLedger` filed that the after-state
+does not show (a card drawn by an effect, a debuff Artifact negated, a
+one-off enemy trigger, a stolen card given back, an attack that Shattered
+Frozen, and on the next screen Furina's drained HP returned), only what is
+new since the lane's last page. A debuff telegraph also names what the move
+does (`understudy/blindplay_moves.py`, read off the base game by the move id
+the bridge sends).
+
 `session` drives one run: one command per screen, fight and run records at the
 ends, budgets on actions, wall time and consecutive refusals. The seat's
 record is `review/qa/blindplay/<session>/record.md` (local, gitignored) with
@@ -219,7 +249,7 @@ on.
 **Asked of `STS2_MCP`: a resolving-part marker on a multi-part intent
 (`EB-461`).** `BuildEnemyState` sends one entry per intent part (`type`,
 `label`, `title`, `description`) and nothing that says which part resolves.
-So the page prints every part neutrally ("the number on its icon is 8, one
+So the page prints every part neutrally ("icon shows 8, one
 part of this move") and makes no claim about which lands; seats were hurt by
 both guesses (r14 read a bare number as a promise, r15 read a hedge as a
 warning). One key per intent on `BuildEnemyState` would close it. `STS2_MCP`

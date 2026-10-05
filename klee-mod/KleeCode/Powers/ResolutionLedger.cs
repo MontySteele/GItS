@@ -100,9 +100,14 @@ public static class ResolutionLedger
     /// attack, say. The seat read one under Diluc's row as "Overload hit
     /// Varka"; a reaction's splash only ever reaches enemies
     /// (`CombatState.HittableEnemies`), so the page says whose HP it was.
+    /// `Source` (2026-10-04, the Klee w20 round) is who dealt a hit that
+    /// landed on a player -- the enemy whose Thorns answered the attack --
+    /// so the page names it instead of guessing; empty where the game named
+    /// no dealer.
     public readonly record struct Hit(string Target, int Amount, int Blocked,
                                       string CombatId, bool Killed = false,
-                                      bool OnPlayer = false);
+                                      bool OnPlayer = false,
+                                      string Source = "");
 
     /// <summary>A power the card put on an enemy, and by how much
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
@@ -121,6 +126,17 @@ public static class ResolutionLedger
     public sealed record Resolved(string CardId, string Card, bool AutoPlayed)
     {
         public List<Hit> Hits { get; } = new();
+
+        /// <summary>What happened inside this card that no other line of the
+        /// page shows, in order (<see cref="NoteEvent"/>). On a
+        /// <see cref="Between"/> row, what happened outside any play.</summary>
+        public List<PageEvent> Events { get; } = new();
+
+        /// <summary>A row that is not a card: it holds only the events filed
+        /// while no play was open (an enemy's turn, the start of yours). Its
+        /// card and id are empty, so a reader that predates it skips it.
+        /// </summary>
+        public bool Between { get; init; }
 
         /// <summary>The powers this card put on enemies, in order
         /// (<see cref="NotePower(string, string, int, string)"/>).</summary>
@@ -141,6 +157,39 @@ public static class ResolutionLedger
         public bool Carried { get; set; }
         public bool Overflowed { get; set; }
     }
+
+    /// <summary>
+    /// 2026-10-05, THE SEAT PAGE'S "SINCE LAST PAGE" LINE. One thing that
+    /// happened which the page's after-state does not show: a card drawn by
+    /// an effect (`drawn`), a debuff an Artifact negated (`negated`), a
+    /// base-game enemy power that fired (`triggered`), a stolen card given
+    /// back (`returned`); and (seat page 3) an attack that Shattered Frozen
+    /// (`shattered`), and the drained HP the curtain call gave back at the
+    /// combat's end (`curtain`, its figure in `Amount`). `Seq` rises across
+    /// the game process and is seeded off the clock, so a page that
+    /// remembers the last one it printed prints only what is new -- across
+    /// a restart too.
+    /// </summary>
+    public readonly record struct PageEvent(string Kind, string Card,
+                                            string Target, string Power,
+                                            string CombatId, bool OnPlayer,
+                                            long Seq, int Amount = 0);
+
+    /// <summary>The event kinds, spelled once (the page reads these words).
+    /// </summary>
+    public const string Drawn = "drawn";
+    public const string Negated = "negated";
+    public const string Triggered = "triggered";
+    public const string Returned = "returned";
+    public const string Shattered = "shattered";
+    public const string HpReturned = "curtain";
+
+    private static long _seq =
+        System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000;
+
+    /// <summary>The row out-of-play events are filed on, while it is still
+    /// the last row; null once a play has opened after it.</summary>
+    private static Resolved? _between;
 
     private static readonly List<Resolved> Rows = new();
 
@@ -180,6 +229,7 @@ public static class ResolutionLedger
         Rows.AddRange(carried);
         _playerTurnEnd = -1;
         _open = null;
+        _between = null;
     }
 
     /// <summary>Drop everything. Called when a combat opens, so one fight's
@@ -189,7 +239,58 @@ public static class ResolutionLedger
     {
         Rows.Clear();
         _open = null;
+        _between = null;
         _playerTurnEnd = -1;
+    }
+
+    /// <summary>
+    /// "This happened, and the page's after-state will not show it"
+    /// (2026-10-05). Filed on the card that is resolving, or -- outside any
+    /// play -- on a <see cref="Resolved.Between"/> row, so the turn's order
+    /// is kept. Capped per row like the hits; the cap says so.
+    /// </summary>
+    public static void NoteEvent(string kind, string card, string target,
+                                 string power, string combatId = "",
+                                 bool onPlayer = false, int amount = 0)
+    {
+        if (string.IsNullOrEmpty(kind)) return;
+        var row = _open;
+        if (row == null)
+        {
+            if (_between == null || Rows.Count == 0
+                || !ReferenceEquals(Rows[^1], _between))
+            {
+                if (Rows.Count >= MaxRows) return;
+                _between = new Resolved(string.Empty, string.Empty, false)
+                {
+                    Between = true,
+                };
+                Rows.Add(_between);
+            }
+            row = _between;
+        }
+        if (row.Events.Count >= MaxHits)
+        {
+            row.Overflowed = true;
+            return;
+        }
+        row.Events.Add(new PageEvent(kind, card ?? string.Empty,
+                                     target ?? string.Empty,
+                                     power ?? string.Empty,
+                                     combatId ?? string.Empty, onPlayer,
+                                     ++_seq, amount));
+    }
+
+    /// <summary>The same note for a body: its printed name, its combat id
+    /// and whether it is a player, read without a throw.</summary>
+    public static void NoteEvent(string kind, string card, Creature? body,
+                                 string power, int amount = 0)
+    {
+        bool onPlayer;
+        try { onPlayer = body?.IsPlayer ?? false; }
+        catch (System.Exception) { onPlayer = false; }
+        NoteEvent(kind, card, Named(body), power,
+                  Safe(() => body?.CombatId.ToString()), onPlayer, amount);
     }
 
     /// <summary>
@@ -229,6 +330,7 @@ public static class ResolutionLedger
         var row = new Resolved(cardId, card, autoPlayed);
         Rows.Add(row);
         _open = row;
+        _between = null;
     }
 
     /// <summary>
@@ -253,7 +355,8 @@ public static class ResolutionLedger
     /// hook, and none of them is a card resolving. The relic's answer has its
     /// own receipt (`RelicAnswerLog`) and the reaction has `ReactionLog`.
     /// </summary>
-    public static void NoteHit(Creature? target, int amount, int blocked)
+    public static void NoteHit(Creature? target, int amount, int blocked,
+                               Creature? dealer = null)
     {
         if (_open == null || (amount <= 0 && blocked <= 0)) return;
         if (_open.Hits.Count >= MaxHits)
@@ -266,7 +369,10 @@ public static class ResolutionLedger
         catch (System.Exception) { onPlayer = false; }
         _open.Hits.Add(new Hit(Named(target), amount, blocked,
                                Safe(() => target?.CombatId.ToString()),
-                               OnPlayer: onPlayer));
+                               OnPlayer: onPlayer,
+                               Source: onPlayer && dealer != null
+                                       && !ReferenceEquals(dealer, target)
+                                   ? Named(dealer) : string.Empty));
     }
 
     /// <summary>
@@ -360,6 +466,53 @@ public static class ResolutionLedger
         _open.Applied.Add(new PowerApplied(target, power, amount, combatId));
     }
 
+    /// <summary>Where the open row's power list stands, so a placement can
+    /// find the entry its own <c>PowerCmd.Apply</c> filed
+    /// (<see cref="SizeAppliedSince"/>).</summary>
+    public readonly record struct AppliedMark(object? Row, int Count);
+
+    public static AppliedMark MarkApplied() =>
+        new(_open, _open?.Applied.Count ?? 0);
+
+    /// <summary>
+    /// "What was placed was a Bomb 11, not one Bomb" (2026-10-04; the Opus
+    /// seat, 2026-10-02, and the co-op round, 2026-09-27: the play log read
+    /// "Put Bomb 1" / "Mine 1" where the card placed Bomb 11 / Mine 3). A Bomb
+    /// pile's power Amount is its COUNT, so the hook files a 1 for every
+    /// placement, and the charge's size is added only after the apply
+    /// returns. The placement calls this once the charge is on the pile: the
+    /// last entry filed on <paramref name="target"/> since
+    /// <paramref name="mark"/> takes the placed size and the placed kind's
+    /// name. Nothing filed since the mark, or another row open, changes
+    /// nothing.
+    /// </summary>
+    public static void SizeAppliedSince(AppliedMark mark, Creature? target,
+                                        string power, int size)
+    {
+        if (target == null) return;
+        SizeAppliedSince(mark, Safe(() => target.CombatId.ToString()),
+                         power, size);
+    }
+
+    /// <summary>The same, taking the combat id rather than the game object,
+    /// <see cref="NotePower(string, string, int, string)"/>'s bargain.</summary>
+    public static void SizeAppliedSince(AppliedMark mark, string combatId,
+                                        string power, int size)
+    {
+        if (_open == null || !ReferenceEquals(mark.Row, _open)) return;
+        for (int i = _open.Applied.Count - 1; i >= mark.Count && i >= 0; i--)
+        {
+            if (_open.Applied[i].CombatId != combatId) continue;
+            _open.Applied[i] = _open.Applied[i] with
+            {
+                Power = string.IsNullOrEmpty(power) ? _open.Applied[i].Power
+                                                    : power,
+                Amount = size,
+            };
+            return;
+        }
+    }
+
     /// <summary>
     /// "Varka gained this Oath inside the card that is resolving" (the
     /// rebalance round, 2026-10-03: two seats could not tell where Oath came
@@ -435,6 +588,7 @@ public static class ResolutionLedger
                     ["combat_id"] = hit.CombatId,
                     ["killed"] = hit.Killed,
                     ["on_player"] = hit.OnPlayer,
+                    ["source"] = hit.Source,
                 }),
             ["applied"] = row.Applied.ConvertAll(a =>
                 new Dictionary<string, object?>
@@ -458,5 +612,18 @@ public static class ResolutionLedger
                     ["source"] = o.Source,
                 }),
             ["fang_ascension"] = row.FangAscension,
+            ["between"] = row.Between,
+            ["events"] = row.Events.ConvertAll(e =>
+                new Dictionary<string, object?>
+                {
+                    ["kind"] = e.Kind,
+                    ["card"] = e.Card,
+                    ["target"] = e.Target,
+                    ["power"] = e.Power,
+                    ["combat_id"] = e.CombatId,
+                    ["on_player"] = e.OnPlayer,
+                    ["seq"] = e.Seq,
+                    ["amount"] = e.Amount,
+                }),
         });
 }

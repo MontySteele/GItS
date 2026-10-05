@@ -998,6 +998,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # also fixes a case that predates the binding: bomb 2 of a pile whose bomb
     # 1 killed used to run the reaction pipeline on the body, which could
     # consume an aura and splash off it.
+    state.last_hit_landed = 0
     if not enemy.alive:
         return 0.0
     # Solar Isotoma (Crystallize engine): attack hits vs aura'd enemies
@@ -1037,6 +1038,12 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     if slow_mult != 1.0:
         dmg *= slow_mult
     dmg = int(dmg)
+    # WHAT THE HIT LANDED FOR, before Block takes its share: the number the
+    # C#'s `ElementalHit.Deal` returns (the truncated amount it hands
+    # `CreatureCmd.Damage`). Big Badda Boom's "what your Bombs dealt" reads it,
+    # so Block a Bomb removed counts, as base-game "damage dealt" does
+    # (2026-10-04). The return value below stays the HP figure.
+    landed = state.last_hit_landed = dmg
     if base > 0 and dmg > base * C.AMP_STACK_LIMIT:
         state.emit("amp_stack_warning", base=base, final=dmg, target=enemy.name)
     block_before, hp_before = enemy.block, enemy.hp
@@ -1206,6 +1213,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # HP, not the swing") and what `hp_dmg` is not: the swing carries the
     # overkill, so a killing blow paid Block for damage no body took.
     companion_overhaul_damage_dealt(state, enemy, removed, source)
+    # Re-stated last: a reader above may have dealt a hit of its own.
+    state.last_hit_landed = landed
     return hp_dmg
 
 

@@ -52,9 +52,24 @@ public sealed record StageMods
     /// <summary>Seats: three.</summary>
     public int Capacity { get; init; } = FurinaStageLaw.Seats;
 
-    /// <summary>Universal Revelry copies: every Fanfare gain is multiplied by
-    /// one more than this (sec.17).</summary>
+    /// <summary>Universal Revelry copies: each Drain or Repay of N gains N
+    /// more Fanfare per copy (the pool-40 paper, sec.2).</summary>
     public int Revelry { get; init; }
+
+    /// <summary>Ousia Surge: cards drawn on the first Drain each turn.
+    /// </summary>
+    public int OusiaSurge { get; init; }
+
+    /// <summary>A Five-Century Act copies: any puts the line at 1 HP.
+    /// </summary>
+    public int FiveCenturyAct { get; init; }
+
+    /// <summary>Critics' Darling copies: each Drain or Repay of N deals N per
+    /// copy to a random enemy.</summary>
+    public int CriticsDarling { get; init; }
+
+    /// <summary>Bis! copies: any keeps half of a spend-all.</summary>
+    public int Bis { get; init; }
 
     /// <summary>Salon's Encore: damage to ALL enemies per Drain.</summary>
     public int SalonsEncore { get; init; }
@@ -223,8 +238,11 @@ public sealed class FurinaStageLedger
         RepaidThisTurn = 0;
         CharlotteDrewThisTurn = false;
         LynetteFiredThisTurn = false;
+        OusiaDrewThisTurn = false;
         Draining = false;
         Opened = false;
+        _fountains.Clear();
+        FountainSeen = 0;
     }
 
     /// <summary>The combat's opening has been recorded.</summary>
@@ -245,8 +263,15 @@ public sealed class FurinaStageLedger
     /// <summary>The HP she started this combat with.</summary>
     public int EntryHp { get; set; }
 
-    /// <summary>Rule 1: the lowest HP a Drain may reach.</summary>
-    public int Line => FurinaStageLaw.LineOf(EntryHp);
+    /// <summary>Rule 1: the lowest HP a Drain may reach. Lyney on stage
+    /// lowers it by 10; A Five-Century Act puts it at 1 HP.</summary>
+    public int Line => FurinaStageLaw.LineOf(
+        EntryHp, OnStage(StagePerformer.Lyney), Mods.FiveCenturyAct > 0);
+
+    /// <summary>Where <see cref="Line"/> comes from, in words (2026-10-05).
+    /// </summary>
+    public string LineWhy => FurinaStageLaw.LineWhy(
+        OnStage(StagePerformer.Lyney), Mods.FiveCenturyAct > 0);
 
     /// <summary>Can she Drain <paramref name="amount"/> at
     /// <paramref name="hp"/>? Not below the line.</summary>
@@ -315,14 +340,14 @@ public sealed class FurinaStageLedger
     /// </summary>
     public int SpentThisPlay { get; private set; }
 
-    /// <summary>Gain Fanfare: <paramref name="amount"/> times one more than
-    /// her Universal Revelry copies (sec.17: "You gain twice as much
-    /// Fanfare."; a second copy makes it three times). Returns what was
+    /// <summary>Gain Fanfare. Universal Revelry no longer multiplies a gain
+    /// (the pool-40 paper, sec.2): it adds its own gain to a Drain or a Repay
+    /// (<see cref="StageDirector"/>'s loop readers). Returns what was
     /// gained.</summary>
     public int Gain(int amount, string source = "")
     {
         if (amount <= 0) return 0;
-        var gained = amount * (1 + System.Math.Max(0, Mods.Revelry));
+        var gained = amount;
         Fanfare += gained;
         GainedThisTurn += gained;
         Note(new StageBeat(GainEvent, default, -1, Fanfare, gained, source));
@@ -343,18 +368,66 @@ public sealed class FurinaStageLedger
         return true;
     }
 
-    /// <summary>"Spend all your Fanfare." Nothing held is no Spend.</summary>
+    /// <summary>"Spend all your Fanfare." Nothing held is no Spend. Bis!
+    /// keeps half of it, rounded down: the spend and what it pays for are
+    /// the whole bank, and half the bank is back after.</summary>
     public int SpendAll()
     {
         var held = Fanfare;
         SpentThisPlay = 0;
         if (held <= 0 || !Spend(held)) return 0;
         SpentThisPlay = held;
+        var kept = Mods.Bis > 0 ? held / 2 : 0;
+        if (kept > 0)
+        {
+            Fanfare += kept;
+            Note(new StageBeat(GainEvent, default, -1, Fanfare, kept, "Bis!"));
+        }
         return held;
     }
 
+    // ---- Fountain of Lucine: Repays owed at the start of later turns -----
+
+    private readonly List<int[]> _fountains = new();
+
+    /// <summary>How much of <c>FountainOfLucinePower</c>'s applied total
+    /// the schedule has taken in (it schedules lazily at her turn start).
+    /// </summary>
+    public int FountainSeen { get; set; }
+
+    /// <summary>Owe a Repay of <paramref name="amount"/> at the start of
+    /// each of her next <paramref name="turns"/> turns.</summary>
+    public void ScheduleRepay(int amount, int turns)
+    {
+        if (amount <= 0 || turns <= 0) return;
+        _fountains.Add(new[] { amount, turns });
+    }
+
+    /// <summary>The Repays due at this turn start, one per scheduled play;
+    /// each counts down a turn and leaves when spent.</summary>
+    public List<int> TakeDueRepays()
+    {
+        var due = _fountains.Select(f => f[0]).ToList();
+        foreach (var f in _fountains) f[1]--;
+        _fountains.RemoveAll(f => f[1] <= 0);
+        return due;
+    }
+
+    /// <summary>The Repay owed at her next turn start, all plays together.
+    /// </summary>
+    public int RepayDueNext => _fountains.Sum(f => f[0]);
+
+    /// <summary>Is any Repay still owed?</summary>
+    public bool OwesRepays => _fountains.Count > 0;
+
     /// <summary>A fresh per-play spend record (every card play).</summary>
     public void BeginPlay() => SpentThisPlay = 0;
+
+    /// <summary>The play is over: the record closes with it. The Salon's Tab
+    /// seat round (2026-10-05): it used to stand until the NEXT play opened,
+    /// so a spend-all face in hand read the last play's spend at 0 Fanfare
+    /// ("Deals 113").</summary>
+    public void EndPlay() => SpentThisPlay = 0;
 
     // ---- the once-a-turn latches ---------------------------------------
 
@@ -364,6 +437,9 @@ public sealed class FurinaStageLedger
     /// <summary>Lynette's line has paid this turn.</summary>
     public bool LynetteFiredThisTurn { get; set; }
 
+    /// <summary>Ousia Surge has drawn this turn.</summary>
+    public bool OusiaDrewThisTurn { get; set; }
+
     /// <summary>The top of her turn: the flow counts and latches reset. They
     /// held through the end-of-turn sequence and the enemies' turn.</summary>
     public void OpenTurn()
@@ -372,8 +448,10 @@ public sealed class FurinaStageLedger
         SpentThisTurn = 0;
         DrainedThisTurn = 0;
         RepaidThisTurn = 0;
+        SpentThisPlay = 0;
         CharlotteDrewThisTurn = false;
         LynetteFiredThisTurn = false;
+        OusiaDrewThisTurn = false;
     }
 
     // ---- the performance log (`EB-735`) --------------------------------
@@ -456,6 +534,7 @@ public sealed class FurinaStageLedger
         snapshot["drained"] = ledger.Drained;
         snapshot["entry_hp"] = ledger.EntryHp;
         snapshot["drain_line"] = ledger.Line;
+        snapshot["drain_line_why"] = ledger.LineWhy;
         snapshot["capacity"] = ledger.Capacity;
         StageForecast? forecast;
         try

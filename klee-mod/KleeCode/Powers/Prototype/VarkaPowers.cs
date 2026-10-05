@@ -391,10 +391,11 @@ public sealed class ConvergingWindsPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Converging Winds"),
+        // The combo pass (2026-10-04), the friend's note: new words, same
+        // behaviour.
         ("description",
-            "Your [gold]Swirls[/gold] react where they land. An "
-          + "[gold]Elemental Reaction[/gold] a spread sets off hits only that "
-          + "enemy."),
+            "The elements your [gold]Swirls[/gold] spread set off "
+          + "[gold]Elemental Reactions[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -449,24 +450,6 @@ public sealed class BoreasUnboundPower : PowerModel, ILocalizationProvider
         Flash();
         await PlayerCmd.GainEnergy(Amount, Owner.Player);
     }
-}
-
-/// <summary>Oath of the Knights (sec.6): "At the start of your turn, gain
-/// Block equal to your current element's Oath." Paid by
-/// <see cref="VarkaOath.TurnStart"/>; a second copy doubles it.</summary>
-public sealed class OathOfTheKnightsPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Oath of the Knights"),
-        ("description",
-            "At the start of your turn, gain [gold]Block[/gold] equal to your "
-          + "[gold]current element[/gold]'s [gold]Oath[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>Dawn Wind's March (sec.6, pick 3): "Whenever you gain Oath of
@@ -541,27 +524,32 @@ public sealed class VarkaBaronBunnyPower : PowerModel, ILocalizationProvider
         ("title", "Baron Bunny"),
         ("description",
             "At the start of your turn, deal [blue]{Amount}[/blue] "
-          + "[gold]Pyro[/gold] damage to ALL enemies."),
+          + "[gold]Pyro[/gold] damage to a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>The combo pass (2026-10-04, [USER]: "nerf the attack from
+    /// 'all enemies' to 'one enemy at random.'"): one hit of the whole
+    /// stack at one random living enemy (<c>Rng.CombatTargets</c>), so two
+    /// Bunnies are one hit of 12, not two of 6. Sim twin:
+    /// <c>varka_oath.turn_start</c>.</summary>
     internal async Task Fire(PlayerChoiceContext choiceContext)
     {
         var amount = Amount;
-        var enemies = Owner.CombatState?.HittableEnemies.ToList();
+        var living = Owner.CombatState?.HittableEnemies
+            .Where(e => e.IsAlive).ToList();
         await PowerCmd.Remove(this);
-        if (enemies == null || amount <= 0) return;
+        if (living == null || living.Count == 0 || amount <= 0) return;
+        if (Owner.Player is not { } player) return;
+        var enemy = player.RunState.Rng.CombatTargets.NextItem(living);
+        if (enemy == null) return;
         using (VarkaOath.Scope(Owner))
         {
-            foreach (var enemy in enemies)
-            {
-                if (!enemy.IsAlive) continue;
-                await ElementalHit.DealWithoutDealerMods(
-                    choiceContext, enemy, Element.Pyro, amount, Owner);
-            }
+            await ElementalHit.DealWithoutDealerMods(
+                choiceContext, enemy, Element.Pyro, amount, Owner);
         }
     }
 }
@@ -598,23 +586,32 @@ public sealed class StaticFieldPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Unwavering Banner: "Only Knights and cards that name it can
-/// change your current element." A marker read by
-/// <see cref="VarkaOath.NoteApplication"/>: the open Oath's switch is off;
-/// Knights, Change of Guard and Weathervane still move it.</summary>
+/// <summary>Unwavering Banner (reworded by the combo pass, 2026-10-04):
+/// "Only Knights can change your current element. Whenever another card
+/// would, gain 1 Oath of your current element instead." A marker read by
+/// <see cref="VarkaOath.NoteApplication"/> (the open Oath's switch) and by
+/// Change of Guard and Weathervane, which no longer pass it: a card's blocked
+/// switch pays 1 Oath of the current element once per play
+/// (<see cref="VarkaOath.BannerHolds"/>); Weathervane is not a card and pays
+/// nothing. Sim twin: <c>varka_oath.banner_holds</c>.</summary>
 public sealed class UnwaveringBannerPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Unwavering Banner"),
         ("description",
-            "Only [gold]Knights[/gold] and cards that name it can change your "
-          + "[gold]current element[/gold]."),
+            "Only [gold]Knights[/gold] can change your [gold]current "
+          + "element[/gold]. Whenever another card would, gain 1 "
+          + "[gold]Oath[/gold] of your [gold]current "
+          + "element[/gold] instead."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Single;
+
+    /// <summary>The badge flashes when the Banner holds a switch.</summary>
+    internal void Pulse() => Flash();
 }
 
 /// <summary>Cycle of Seasons (the AoE trim, sec.4): "Whenever your current
@@ -776,6 +773,37 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
         Flash();
         await ElementalHit.DealUnelemented(choiceContext, target, damage,
                                            Owner, powered: false);
+    }
+}
+
+/// <summary>Pyre Oath (the combo pass, 2026-10-04, sec.3): "Whenever you
+/// Exhaust a card, gain 1 Pyro Oath." Feel No Pain's shape paying Oath: one
+/// gain per card exhausted, of the stack's amount, through
+/// <see cref="VarkaOath.Gain"/> (so Oath Unto Death, Dawn Wind's March and
+/// Boreas's Fang see it). Any card of his, a Status included. Sim twin:
+/// <c>varka_oath.on_card_exhausted</c>, from
+/// <c>refpowers.after_card_exhausted</c>.</summary>
+public sealed class PyreOathPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Pyre Oath"),
+        ("description",
+            "Whenever you [gold]Exhaust[/gold] a card, gain "
+          + "[blue]{Amount}[/blue] Pyro [gold]Oath[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterCardExhausted(
+        PlayerChoiceContext choiceContext, CardModel card, bool causedByEthereal)
+    {
+        if (Owner == null || Amount <= 0 || !VarkaOath.Live(Owner)) return;
+        if (card?.Owner?.Creature != Owner) return;
+        Flash();
+        await VarkaOath.Gain(choiceContext, Owner, Element.Pyro, (int)Amount);
     }
 }
 

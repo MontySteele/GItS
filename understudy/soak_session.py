@@ -333,6 +333,11 @@ class Session:
             for path, ids in instances.reveal_pending_epochs(self.instance):
                 print(f"lane {self.instance.label}: revealed pending epochs "
                       f"{', '.join(ids)} in {path}")
+            # And every epoch and ascension, so a seat plays the full pools
+            # and any ascension can be chosen (`unlock_lane_progress`).
+            for path, what in instances.unlock_lane_progress(self.instance):
+                print(f"lane {self.instance.label}: unlocked {len(what)} "
+                      f"epochs/ascensions in {path}")
         self._steam_appid()
         self._deploy_bridge()
         # EB-763. READ THE BOOT TAX BEFORE THE LAUNCH, not after: the number

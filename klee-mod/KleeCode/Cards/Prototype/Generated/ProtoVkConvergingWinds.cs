@@ -45,7 +45,7 @@ public sealed class ProtoVkConvergingWinds : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Converging Winds"),
-        ("description", "Your [gold]Swirls[/gold] react where they land. An [gold]Elemental Reaction[/gold] a spread sets off hits only that enemy."),
+        ("description", "The elements your [gold]Swirls[/gold] spread set off [gold]Elemental Reactions[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

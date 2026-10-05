@@ -628,9 +628,10 @@ INTENT_SOURCE_NOTE_BREAKDOWN = (
 #: numbers from two wire fields, and the page printed them side by side with
 #: nothing said about the pair. Where they cannot be the same number, the line
 #: says which is which instead of leaving a reader to pick one.
-INTENT_NUMBER_DISAGREES = ("the icon's figure and this sentence's number are "
-                           "two different fields of the feed and they do not "
-                           "agree here; the icon is the figure the game draws")
+#: Seat page 5 (2026-10-05): compacted; the fact kept is that the two are
+#: separate feed fields that disagree, and which one the game draws.
+INTENT_NUMBER_DISAGREES = ("icon and sentence disagree (two feed fields); the "
+                           "icon is the figure the game draws")
 
 PICKED_MARK = "PICKED"
 # `EB-393`. "(Clone)" ON A TITLE READ AS A SECOND COPY. The enchant confirm
@@ -1338,8 +1339,10 @@ MULTI_INTENT_NOTE = (
 # description at all, so the line read `Defensive (Defend)` -- a word with no
 # consequence attached, one row above the number it was about to change. A
 # reader who is shown Block only once it exists learns about it a turn late.
-DEFEND_INTENT_CLAUSE = ("this part adds Block to the Block on its line above, "
-                        "and the feed carries no number for how much")
+#
+# Seat page 5 (2026-10-05): compacted. Kept: it ADDS to the Block on the
+# body's line, and the amount is not on the feed.
+DEFEND_INTENT_CLAUSE = "adds to its Block above; amount not on the feed"
 
 #: What a number on a multi-part telegraph is called ON THE LINE ITSELF, so a
 #: reader who plans off the enemy block without reaching the note under it
@@ -1364,10 +1367,10 @@ MULTI_INTENT_LABEL = ", one part of this move"
 # the enemy's side gaining something, so it is not damage arriving at the
 # reader. The clause states that and states the gap, in `DEFEND_INTENT_CLAUSE`'s
 # shape one part-kind over -- a consequence attached to a word that had none.
-BUFF_INTENT_CLAUSE = ("this part strengthens the enemy's own side rather than "
-                      "hitting you, and the feed carries no target for an "
-                      "intent part, so this page cannot say which body it "
-                      "lands on")
+#
+# Seat page 5 (2026-10-05): compacted to the side alone. The missing-target
+# half is `INTENT_TARGET_NOTE`, once per page under the enemy list.
+BUFF_INTENT_CLAUSE = "lands on its own side, not on you"
 
 # `EB-323`, the other half. WHERE THE PAGE IS, IN THE NUMBER THE RUN COUNTS IN.
 #
@@ -1390,6 +1393,10 @@ MAP_PATHS_HEAD = ("Every room you can still reach, floor by floor. Rooms are "
 MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
                   "{next}. This is the run's own floor number -- the one the "
                   "run-over page counts in, not a grid coordinate.")
+#: 2026-10-04: the run's identity, for the seat record's first section. The
+#: ascension is the wire's `run.ascension`; the seed is the one `embark` read
+#: back and wrote into the lane's sidecar (no screen's feed carries it).
+MAP_RUN_LINE = "Run seed {seed}, ascension {ascension}."
 
 
 # `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.
@@ -1415,7 +1422,7 @@ MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
 # table answers all of those; a per-card tip answers one.
 # `test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text` reads the C# and
 # fails the moment a sentence here falls behind it -- the same way
-# `CHARGE_SOURCE_LINE` is held in step from the other side.
+# `BOMB_GROWTH` is held in step from the other side.
 #
 # THE LIVE ARMS ONLY. Klee's overhaul (Bomb, Set off, Spark, Mine) and Kokomi's
 # (Plan, Mend). `Tide`, `Surge` and `Exert` left with the rules they named when
@@ -3356,18 +3363,32 @@ def _keyword_rows(obs: dict[str, Any],
 # read off the game; the page multiplies nothing and predicts nothing, which is
 # the standing rule that keeps a printed line from disagreeing with the icon
 # four words to its left.
-INTENT_FOLD_CLAUSE = ("the game folded {modifiers} into that: it is {base} on "
-                      "the move and {folded} after")
-INTENT_FOLD_NOTHING = ("nothing on the board is folded into that number: it "
-                       "is the {base} the move itself declares")
-INTENT_TOTAL_CLAUSE = "{folded} x {repeats} is {total} if every hit lands"
+#
+# Seat page 5 (2026-10-05): compacted, every number kept. "6 base, 8 with
+# **Strength**" is the game's base and its folded figure, naming the fold;
+# "12 base, nothing folded in" is Fossil Stalker's unmoved figure.
+INTENT_FOLD_CLAUSE = "{base} base, {folded} with {modifiers}"
+INTENT_FOLD_NOTHING = "{base} base, nothing folded in"
+INTENT_TOTAL_CLAUSE = "{folded} x {repeats} = {total} if every hit lands"
 
 #: `EB-323`. The wire's own answer to whose side a part is on, read off the
 #: game's `IntentType`. Printed where the bridge sends it; the older
 #: locally-derived `BUFF_INTENT_CLAUSE` is what a feed that sends nothing gets.
-INTENT_TARGET_SIDE = ("this part lands on {side}, and the feed carries no "
-                      "target for an intent part, so this page cannot say "
-                      "which body")
+#: Seat page 5 (2026-10-05): the side alone on each line; the missing
+#: target is said once per page by `INTENT_TARGET_NOTE`.
+INTENT_TARGET_SIDE = "lands on {side}"
+
+#: `EB-323`'s gap, moved off every intent line by seat page 5 (2026-10-05):
+#: printed under the enemy list on EVERY page with two or more enemies (or
+#: in co-op), not once per lane -- seats slice pages with `sed`, and
+#: once-only text is what a slice loses.
+INTENT_TARGET_NOTE = ("*An intent part names a side, never a body: the feed "
+                      "carries no target for it, so this page cannot say "
+                      "which body a part lands on.*")
+
+#: Seat page 5 (2026-10-05): the number the game draws on an intent's icon,
+#: in a short phrase on the line.
+INTENT_ICON_NUMBER = "icon shows {label}"
 
 # ---------------------------------------------------------------------------
 # `EB-349` / `EB-611`. WHAT RESOLVED THIS TURN, AND WHAT EACH HIT DID.
@@ -3396,9 +3417,16 @@ RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
 RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
 #: 2026-10-01 (a Varka seat): a hit on YOU while the card resolved -- an
 #: enemy's Thorns answering it, say. Listed under Diluc's row it read as
-#: "Overload hit Varka"; a reaction never hits you, and the line says so.
+#: "Overload hit Varka". 2026-10-04 (Klee w20 round, lane 2): the line's
+#: "a reaction never hits you" then read as the reaction hitting you, so the
+#: line names who hit you instead: the dealer the mod filed, with its Thorns
+#: where the board shows that enemy holding Thorns.
 RESOLUTION_HIT_ON_YOU = ("  {n}. **{target}** (you) -- {amount}, taken while "
-                         "it resolved; a reaction never hits you")
+                         "it resolved{source}")
+RESOLUTION_HIT_SOURCE = ", from **{source}**"
+RESOLUTION_HIT_THORNS = ", from **{source}**'s Thorns"
+#: The power name the page names as the source of a hit on you.
+THORNS_POWER = "Thorns"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
 #: 2026-09-26 (the Silent control seat): "Poison applied is never shown in
 #: 'what it did'." A power the card put on an enemy, or took off one.

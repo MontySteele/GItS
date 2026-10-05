@@ -45,7 +45,7 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 | `klee` | Klee | 70 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab built; awaiting [USER]'s play) | 24 |
-| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (expansion built) | 78 |
+| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
 rewards and multiplayer cards; a smaller pool reads more reliable than it will
@@ -216,7 +216,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   2026-10-04".
   Next: [USER] plays (a central rule changed; co-op with a friend may stand
   in); the damage gap is a paper after that run.
-- **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; four guests. The pool is the starter and 24 cards, not 78. Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Not deployed. Next: [USER]'s play (a rule change), then a seat round. Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v2 build is in git; the v1 Stage is the tag `furina-stage-frozen-2026-10-04`.
+- **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; seven guests. The pool is the starter and 34 cards, not 78: the slice's 24 and the pool to 39's ten (`review/active/furina-pool-40-2026-10-05.md`, ruled and built 2026-10-05; Universal Revelry reads Drain and Repay again, not hits). Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Not deployed. Next: [USER]'s play (a rule change), then a seat round. Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v2 build is in git; the v1 Stage is the tag `furina-stage-frozen-2026-10-04`.
 - **Furina: frozen (2026-10-04).** [USER]: "Let's freeze Furina's current build as-is for now, with the expectation that it gets shelved once we have a better idea." No card or rule changes to the current Stage build. The re-founding (`review/active/furina-refounding-2026-10-03.md`, ruled, sec.8 and sec.9) is being built as a sim-only slice; if it finds a strong structure, it replaces this build. The history below is the frozen build's.
 - **Furina: the Stage, first run cleared.** Brief
   `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
@@ -355,8 +355,19 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   round's two seeds, both runs reached the final boss and died there (last
   round: act 2 and floor 42); Windbound was no seat's NEVER AGAIN, and
   holding Ascension became a named decision.
-  Cryo's payoffs (statuses with no damage payoff below Rare; Glacial Edict
-  the candidate rewrite) wait on [USER]'s next Varka playtest (2026-10-03).
+  **The combo pass is built (2026-10-04,
+  `review/active/varka-combo-pass-2026-10-04.md`, RULED, all four picks):**
+  five generic Block cards out (Gale Mantle, West Wind Shield, Knightly
+  Guard, Tailwind Guard, Oath of the Knights); Pyro's Exhaust engine in
+  (Stoke the Flames, Ember Cleave, Pyre Oath) and Cryo's status payoffs
+  (Icebreaker, named Shatter until 2026-10-05, Deep Freeze); Unwavering Banner reworded to pay 1 Oath when it
+  holds a switch; Baron Bunny's hit to a random enemy; Charge of the Knights
+  cost 1, Lion's Fang and Four Winds' Ascension upgrade to cost 1, Kaeya and
+  Razor Attacks, two faces reworded. Pool 78 (20 / 35 / 23). The sim missed
+  the paper's "Pyro and Cryo up" bar (Pyro -15, Cryo flat; the stock pilot
+  prices an Exhaust at nothing) and Deep Freeze's upgrade (cost 0) is the
+  builder's proposal: provenance note, "Varka combo pass, 2026-10-04".
+  Next: the paper's two-seat round, then [USER]'s next Varka run.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

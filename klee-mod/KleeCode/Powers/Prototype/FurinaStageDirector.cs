@@ -50,8 +50,14 @@ public interface IStageBoard
                 Element element);
 
     /// <summary>A Power's hit (Salon's Encore, Endless Waltz, Thunderous
-    /// Applause): unpowered, no element.</summary>
+    /// Applause, Critics' Darling): unpowered, no element.</summary>
     Task PowerHit(string source, StageTarget target, int amount);
+
+    /// <summary>Furina gains Block (Sigewinne's line): unpowered.</summary>
+    Task Block(int amount);
+
+    /// <summary>Vulnerable on an enemy (Chevreuse's line).</summary>
+    Task Vulnerable(StageTarget target, int amount);
 
     Task Draw(int amount);
 
@@ -89,6 +95,8 @@ public sealed class StageDirector
     public const string SalonsEncoreTitle = "Salon's Encore";
     public const string EndlessWaltzTitle = "Endless Waltz";
     public const string ThunderousTitle = "Thunderous Applause";
+    public const string RevelryTitle = "Universal Revelry";
+    public const string CriticsDarlingTitle = "Critics' Darling";
 
     private readonly FurinaStageLedger _stage;
     private readonly IStageBoard _board;
@@ -113,6 +121,7 @@ public sealed class StageDirector
     {
         if (!_stage.Spend(price)) return 0;
         await Thunderous();
+        await Chevreuse();
         return price;
     }
 
@@ -121,8 +130,37 @@ public sealed class StageDirector
     public async Task<int> SpendAll()
     {
         var spent = _stage.SpendAll();
-        if (spent > 0) await Thunderous();
+        if (spent > 0)
+        {
+            await Thunderous();
+            await Chevreuse();
+        }
         return spent;
+    }
+
+    /// <summary>Chevreuse's line: "Whenever you Spend, apply 1 Vulnerable to
+    /// a random enemy."</summary>
+    private async Task Chevreuse()
+    {
+        if (!_stage.OnStage(StagePerformer.Chevreuse) || _board.Over) return;
+        await _board.Vulnerable(StageTarget.Random,
+                                FurinaStageLaw.ChevreuseLineVulnerable);
+    }
+
+    /// <summary>The readers of a Drain or a Repay of
+    /// <paramref name="amount"/> (never of a hit): Universal Revelry gains
+    /// that much more Fanfare per copy, and Critics' Darling deals that much
+    /// per copy to a random enemy. Neither triggers itself.</summary>
+    private async Task LoopReaders(int amount)
+    {
+        var revelry = _stage.Mods.Revelry;
+        if (revelry > 0) _stage.Gain(amount * revelry, RevelryTitle);
+        var critics = _stage.Mods.CriticsDarling;
+        if (critics > 0 && !_board.Over)
+        {
+            await _board.PowerHit(CriticsDarlingTitle, StageTarget.Random,
+                                  amount * critics);
+        }
     }
 
     private async Task Thunderous()
@@ -182,6 +220,7 @@ public sealed class StageDirector
         _stage.Note(new StageBeat(FurinaStageLedger.DrainEvent, default, -1,
                                   _stage.Fanfare, lost, ""));
         _stage.Gain(lost, "Drain");
+        await LoopReaders(lost);
         var encore = _stage.Mods.SalonsEncore;
         if (encore > 0 && !_board.Over)
         {
@@ -191,6 +230,12 @@ public sealed class StageDirector
         {
             await _board.Damage(StagePerformer.Wriothesley, StageTarget.Random,
                                 lost, Element.Cryo);
+        }
+        var surge = _stage.Mods.OusiaSurge;
+        if (surge > 0 && !_stage.OusiaDrewThisTurn && !_board.Over)
+        {
+            _stage.OusiaDrewThisTurn = true;
+            await _board.Draw(surge);
         }
         return true;
     }
@@ -210,6 +255,7 @@ public sealed class StageDirector
         _stage.Note(new StageBeat(FurinaStageLedger.RepayEvent, default, -1,
                                   _stage.Fanfare, back, ""));
         _stage.Gain(back, "Repay");
+        await LoopReaders(back);
         for (var i = 0; i < _stage.Mods.EndlessWaltz; i++)
         {
             if (_board.Over) break;
@@ -227,7 +273,24 @@ public sealed class StageDirector
             _stage.CharlotteDrewThisTurn = true;
             await _board.Draw(FurinaStageLaw.CharlotteLineDraw);
         }
+        if (_stage.OnStage(StagePerformer.Sigewinne) && !_board.Over)
+        {
+            await _board.Block(back);
+        }
         return back;
+    }
+
+    /// <summary>Fountain of Lucine: at the start of her turn, each play still
+    /// owed Repays its amount, one Repay per play.</summary>
+    public async Task<int> TurnStartRepays()
+    {
+        var total = 0;
+        foreach (var amount in _stage.TakeDueRepays())
+        {
+            if (_board.Over) break;
+            total += await Repay(amount);
+        }
+        return total;
     }
 
     /// <summary>Singer of Many Waters: "Repay all your drained HP."</summary>
@@ -271,6 +334,26 @@ public sealed class StageDirector
                 moved = FurinaStageLaw.ClorindeActDamage;
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Electro);
+                break;
+            case StagePerformer.Lyney:
+                // "Drain 2: deal 8 Pyro damage to ALL enemies." Below the
+                // line the act skips: no Drain and no damage.
+                if (CanDrain(FurinaStageLaw.LyneyActDrain)
+                    && await Drain(FurinaStageLaw.LyneyActDrain)
+                    && !_board.Over)
+                {
+                    moved = FurinaStageLaw.LyneyActDamage;
+                    await _board.Damage(who, StageTarget.All, moved,
+                                        Element.Pyro);
+                }
+                break;
+            case StagePerformer.Sigewinne:
+                moved = await Repay(FurinaStageLaw.SigewinneActRepay);
+                break;
+            case StagePerformer.Chevreuse:
+                moved = FurinaStageLaw.ChevreuseActDamage;
+                await _board.Damage(who, StageTarget.Random, moved,
+                                    Element.None);
                 break;
         }
         _stage.Note(new StageBeat(FurinaStageLedger.ActEvent, who,

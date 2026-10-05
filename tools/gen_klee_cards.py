@@ -2460,6 +2460,12 @@ VARKA_KINDS = {
     "echo_block": "EchoBlock",
     # Downburst's rider (2026-10-04, after spent auras went, #882).
     "swirled_oath": "SwirledOath",
+    # THE COMBO PASS (2026-10-04, review/active/varka-combo-pass-2026-10-04.md
+    # secs.3-4): Pyro's Exhaust engine and Cryo's status payoffs.
+    "gain_pyro_oath": "GainPyroOath",
+    "pyro_strike": "PyroStrike",
+    "shatter": "Shatter",
+    "deep_freeze": "DeepFreeze",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2482,6 +2488,10 @@ VARKA_KIND_FIELDS = {
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),
     "swirled_oath": ("amount",),
+    # The combo pass (2026-10-04).
+    "gain_pyro_oath": ("amount",),
+    "pyro_strike": ("base",),
+    "shatter": ("base", "per"),
 }
 #: A kind that aims at the enemy the card was played on.
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
@@ -2489,7 +2499,9 @@ VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      "blazing_charge", "glacial_edict", "crosscurrent",
                      "tempest", "electro_strike",
                      # The AoE trim (sec.4): Razor: Awakening at one enemy.
-                     "awakening", "kindled_edge"}
+                     "awakening", "kindled_edge",
+                     # The combo pass (2026-10-04).
+                     "pyro_strike", "shatter", "deep_freeze"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
 VARKA_ALL_KINDS = {"thundering_verdict", "electro_all",
@@ -2517,6 +2529,10 @@ VARKA_KIND_ELEMENTS = {
     "kindled_edge": ("pyro",),
     "storm_battery": ("electro",),
     "gleeful_songs": ("hydro",),
+    # The combo pass (2026-10-04). Deep Freeze's Cryo is its row's own
+    # `apply_aura`.
+    "pyro_strike": ("pyro",),
+    "shatter": ("cryo",),
 }
 #: A kind that AIMS but whose row needs no `target:` of its own, because the
 #: card's own damage op already aims it (Ascension, Northwind Avatar).
@@ -2530,6 +2546,11 @@ VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
 #: number). The value is the element whose Oath the hit adds; the var is
 #: `VarkaHitDamageVar` (Powers/Prototype/VarkaOath.cs), display only.
 VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
+#: A kind whose face prints its total against the enemy it previews on, the
+#: same `{VkHit}` token (the combo pass, 2026-10-04: Shatter's "plus 2 for
+#: each Weak and Vulnerable on the enemy"). The value is the C# var class
+#: (Powers/Prototype/VarkaOath.cs), display only.
+VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -3080,7 +3101,21 @@ APPLY_POWERS = {
     "fs_thunderous_applause": ("ThunderousApplausePower", None,
         "Whenever you [gold]Spend[/gold], deal {X} damage to ALL enemies."),
     "fs_universal_revelry": ("UniversalRevelryPower", None,
-        "You gain twice as much [gold]Fanfare[/gold]."),
+        "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that "
+        "much additional [gold]Fanfare[/gold]."),
+    # THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+    "fs_ousia_surge": ("OusiaSurgePower", None,
+        "The first time you [gold]Drain[/gold] each turn, draw {X} card."),
+    "fs_a_five_century_act": ("FiveCenturyActPower", None,
+        "You can [gold]Drain[/gold] down to 1 HP."),
+    "fs_fountain_of_lucine": ("FountainOfLucinePower", None,
+        "At the start of your next 3 turns, [gold]Repay[/gold] {X}."),
+    "fs_critics_darling": ("CriticsDarlingPower", None,
+        "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
+        "much damage to a random enemy."),
+    "fs_bis": ("BisPower", None,
+        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep "
+        "half of it."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -3410,14 +3445,11 @@ APPLY_POWERS = {
         "While your [gold]current element[/gold] has 4 or more "
         "[gold]Oath[/gold], your Anemo Attacks deal {X} additional damage."),
     "vk_converging_winds": ("ConvergingWindsPower", None,
-        "Your [gold]Swirls[/gold] react where they land. An [gold]Elemental "
-        "Reaction[/gold] a spread sets off hits only that enemy."),
+        "The elements your [gold]Swirls[/gold] spread set off "
+        "[gold]Elemental Reactions[/gold]."),
     "vk_boreas_unbound": ("BoreasUnboundPower", None,
         "Whenever your [gold]current element[/gold] changes, gain {X} "
         "[gold]Energy[/gold]."),
-    "vk_oath_of_the_knights": ("OathOfTheKnightsPower", None,
-        "At the start of your turn, gain [gold]Block[/gold] equal to your "
-        "[gold]current element[/gold]'s [gold]Oath[/gold]."),
     "vk_dawn_winds_march": ("DawnWindsMarchPower", None,
         "Whenever you gain [gold]Oath[/gold] of your [gold]current "
         "element[/gold], gain {X} [gold]Block[/gold]."),
@@ -3429,17 +3461,20 @@ APPLY_POWERS = {
     "vk_sworn_brotherhood_current": ("SwornBrotherhoodCurrentPower", None,
         "At the start of your turn, gain {X} [gold]Oath[/gold] of your "
         "[gold]current element[/gold]."),
+    # The combo pass (2026-10-04): a random enemy, not ALL.
     "vk_baron_bunny": ("VarkaBaronBunnyPower", None,
-        "At the start of your turn, deal {X} [gold]Pyro[/gold] damage to ALL "
-        "enemies."),
+        "At the start of your turn, deal {X} [gold]Pyro[/gold] damage to a "
+        "random enemy."),
     # THE EXPANSION (2026-10-01). Classes in VarkaPowers.cs; each row carries
     # its own `description:`. Sim twins: tier0/engine/varka_oath.py.
     "vk_static_field": ("StaticFieldPower", None,
         "The first time each turn you apply [gold]Electro[/gold], draw {X} "
         "cards."),
+    # Reworded by the combo pass (2026-10-04).
     "vk_unwavering_banner": ("UnwaveringBannerPower", None,
-        "Only [gold]Knights[/gold] and cards that name it can change your "
-        "[gold]current element[/gold]."),
+        "Only [gold]Knights[/gold] can change your [gold]current "
+        "element[/gold]. Whenever another card would, gain 1 "
+        "[gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     "vk_cycle_of_seasons": ("CycleOfSeasonsPower", None,
         "Whenever your [gold]current element[/gold] changes, deal {X} damage "
         "to ALL enemies."),
@@ -3452,6 +3487,10 @@ APPLY_POWERS = {
     # Varka Wildfire Oath and Short Circuit (2026-10-03): Pyro's Absolute
     # Zero. Retaliating Tide in Unbroken Tide's place (element identities
     # sec.4).
+    # The combo pass (2026-10-04): Pyro's Exhaust engine.
+    "vk_pyre_oath": ("PyreOathPower", None,
+        "Whenever you [gold]Exhaust[/gold] a card, gain {X} Pyro "
+        "[gold]Oath[/gold]."),
     "vk_wildfire_oath": ("WildfireOathPower", None,
         "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
@@ -6144,11 +6183,13 @@ def exhausts_turn_calc_rider(card: dict,
             "KokomiResources.ExhaustsThisTurn(card.Owner)")
 
 
-#: The four guests a `stage_guest` row may name, as `FurinaStage.Guests`
+#: The seven guests a `stage_guest` row may name, as `FurinaStage.Guests`
 #: spells them (the Salon's Tab, 2026-10-05). A closed set, checked at emit
 #: rather than passed through: a typo that degraded quietly into "somebody"
 #: is the one failure a named summon could hide for a whole round.
-FURINA_STAGE_GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde")
+FURINA_STAGE_GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
+                       # The pool to 39 (2026-10-05).
+                       "lyney", "sigewinne", "chevreuse")
 
 
 #: THE STAGE's statement ops (the Salon's Tab, 2026-10-05), each a single
@@ -7232,6 +7273,9 @@ def build_vars(card: dict) -> list[str]:
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
                 out.append('new VarkaHitDamageVar(Element.'
                            f'{VARKA_HIT_PREVIEW_KINDS[eff["kind"]]})')
+            elif eff["kind"] in VARKA_TARGET_PREVIEW_KINDS:
+                out.append(
+                    f'new {VARKA_TARGET_PREVIEW_KINDS[eff["kind"]]}()')
         elif op == "crash_fanfare":
             # Always a var: the Hyperbeam's upgrade IS this number (the
             # floor_drop delta), so the upgraded face has to render it.
@@ -9890,7 +9934,8 @@ MODAL_FACE_PREFIX = "Choose one: "
 MODAL_FACE_SEPARATOR = " | "
 
 
-def modal_option_faces(card: dict, modes: list) -> list[str] | None:
+def modal_option_faces(card: dict, modes: list,
+                       built_desc: str | None = None) -> list[str] | None:
     """One face per mode, taken out of the card's OWN description.
 
     Round three's chooser defect: the option classes printed the sheet's
@@ -9906,14 +9951,49 @@ def modal_option_faces(card: dict, modes: list) -> list[str] | None:
     """
     desc = str(card.get("description") or "").strip()
     if not desc.startswith(MODAL_FACE_PREFIX):
-        return _sentence_mode_faces(card, desc, modes)
-    body = desc[len(MODAL_FACE_PREFIX):].rstrip()
-    if body.endswith("."):
-        body = body[:-1]
-    parts = [p.strip() for p in body.split(MODAL_FACE_SEPARATOR)]
-    if len(parts) != len(modes) or not all(parts):
-        return None
-    return parts
+        faces = _sentence_mode_faces(card, desc, modes)
+    else:
+        body = desc[len(MODAL_FACE_PREFIX):].rstrip()
+        if body.endswith("."):
+            body = body[:-1]
+        parts = [p.strip() for p in body.split(MODAL_FACE_SEPARATOR)]
+        faces = parts if len(parts) == len(modes) and all(parts) else None
+    if faces is None and built_desc:
+        faces = _label_mode_faces(built_desc, modes)
+    return faces
+
+
+#: Where a mode label prints a number, the built face may print that number
+#: or the token that replaced it (`{IfUpgraded:show:8|6}`, `{Damage:diff()}`).
+_FACE_NUMBER_SLOT = r"(?:\{[^{}]*\}|\d+)"
+
+
+def _label_mode_faces(built_desc: str, modes: list) -> list[str] | None:
+    """THE THIRD SHAPE: each mode's LABEL found inside the BUILT face.
+
+    `EB-805` (AoE trim, 2026-10-03): Durin's Binary Form and Principle of
+    Purity print "Choose one ... [gold]White[/gold]: Deal 6 ..." with neither
+    the prefix nor a rule gate, so neither split above reached them and the
+    option fell back to its label -- the sheet literal, so an upgraded card
+    printed 8 in the hand and 6 in the chooser. The emitter had already put
+    the upgrade swap into the parent's face (`{IfUpgraded:show:8|6}`); the
+    label is that same sentence with the bare number. So each label is
+    searched for in the built face with every number in it free to be a
+    number or a token, and the match -- the parent's own wording, tokens and
+    all -- is the face. Exactly one match per mode, or None and the labels.
+    """
+    faces: list[str] = []
+    for mode in modes:
+        label = str(mode.get("label") or "").strip()
+        if not label:
+            return None
+        pattern = _FACE_NUMBER_SLOT.join(
+            re.escape(piece) for piece in re.split(r"\d+", label))
+        found = list(re.finditer(pattern, built_desc))
+        if len(found) != 1:
+            return None
+        faces.append(found[0].group(0))
+    return faces
 
 
 #: A sentence end on a face: a full stop and the space before the next one.
@@ -9944,6 +10024,17 @@ def _sentence_mode_faces(card: dict, desc: str,
     parts = [p.strip() for p in _FACE_SENTENCE_BREAK.split(body)]
     if len(parts) != len(modes) or not all(parts):
         return None
+    # The Salon's Tab seat round (2026-10-05): a sentence that says "also"
+    # reads only beside the one before it. Alone in the chooser, Salon's
+    # Tab's "Drain 4: also gain 2 Energy next turn" stood against "Draw 2
+    # cards" and read as a Drain that does not draw. Such a mode's face is
+    # its label, which says the whole of what it does.
+    for i, part in enumerate(parts):
+        _, sep, rest = part.partition(":")
+        if sep and rest.strip().startswith("also "):
+            label = str(modes[i].get("label") or "").strip()
+            if label:
+                parts[i] = label
     return parts
 
 
@@ -9989,12 +10080,36 @@ def stage_mode_title(card: dict, index: int,
     """
     rules = mode_requirements(card)
     eff = modal_effect(card)
-    if rules is None or eff is None or index >= len(eff["modes"]):
+    if eff is None or index >= len(eff["modes"]):
         return None
     label = strip_markup(str(eff["modes"][index].get("label") or ""))
+    if rules is None:
+        return _ungated_mode_title(label, faces, index)
     if index < len(rules) and rules[index] is not None:
         label = resolve_upgrade_swap(label, upgraded)
         return label.split(":", 1)[0].strip() or label
+    source = (_FACE_VAR_TOKEN.sub("", faces[index]) if faces
+              else re.sub(r"\b\d+\b", "", label))
+    return re.sub(r"\s+", " ", strip_markup(source)).strip() or label
+
+
+def _ungated_mode_title(label: str, faces: list[str] | None,
+                        index: int) -> str | None:
+    """A mode title for a card with NO rule gate (`EB-805`, first line: "a
+    mode card's option title prints the sheet literal while the body folds
+    the board -- two numbers for one option").
+
+    A label with no number keeps itself, and so its bytes. A label with one
+    is titled by the name before its colon where there is one ("White",
+    "Dark" -- Durin's forms, the way a Spend mode is titled by its price), and
+    otherwise by its face with the var tokens taken out, the rule the gated
+    cards' plain modes already follow.
+    """
+    if not re.search(r"\d", label):
+        return None
+    head, sep, _ = label.partition(":")
+    if sep and head.strip() and not re.search(r"\d", head):
+        return head.strip()
     source = (_FACE_VAR_TOKEN.sub("", faces[index]) if faces
               else re.sub(r"\b\d+\b", "", label))
     return re.sub(r"\s+", " ", strip_markup(source)).strip() or label
@@ -11741,6 +11856,13 @@ def build_body(
             # junk says so with an explicit `filter:` (the branch below).
             n = ('DynamicVars["Exhausts"].IntValue'
                  if exhaust_upgrade(card) else str(int(eff.get("amount", 1))))
+            # THE COMBO PASS (2026-10-04): Varka's "Exhaust a card" is True
+            # Grit's, any card in hand, a Status or a Curse included. The
+            # rotation law is Kokomi's alone; the sim's `exhaust_pool` drops
+            # junk only under her relic.
+            selector = ("KokomiResources.OwnCard"
+                        if card.get("character") != "varka"
+                        else "static _ => true")
             # EB-118: the selection's identity context. Opened BEFORE the
             # screen so a cancelled or empty selector leaves an EMPTY context
             # rather than the previous effect's, recorded per victim, closed
@@ -11754,7 +11876,7 @@ def build_body(
                 "                new CardSelectorPrefs(",
                 "                    CardSelectorPrefs.ExhaustSelectionPrompt, "
                 f"{n}),",
-                "                KokomiResources.OwnCard, this)).ToList();",
+                f"                {selector}, this)).ToList();",
                 "            foreach (var victim in toExhaust)",
                 "            {",
                 "                ExhaustSelection.Record(this, victim);",
@@ -14845,6 +14967,76 @@ def stage_bow_face(desc: str) -> str:
     return desc + "{InCombat:{" + STAGE_BOW_TOKEN + "}|}"
 
 
+#: The tokens of the two other in-combat Stage lines (the Salon's Tab seat
+#: round, 2026-10-05): a Drain the line refuses, and what a Repay returns.
+STAGE_DRAIN_LINE_TOKEN = "StageDrainLine"
+STAGE_REPAY_TOKEN = "StageRepay"
+
+
+def stage_drain_line_call(card: dict) -> str | None:
+    """The C# that fills a Drain card's in-combat line, or None.
+
+    The seat round of 2026-10-05: below the line a Drain mode left the
+    chooser with no word said, and the game's chooser has no greyed option
+    (`ModalChoice.SelectAffordableMode`). So the CARD says it, in hand,
+    before the play: "(Too close to your Drain line)" while the Drain it
+    prints cannot be paid, else nothing. Read off the card's one Drain price:
+    a top-level `stage_drain` or a mode's head.
+    """
+    amounts = [int(fx["amount"]) for fx in card.get("effects") or []
+               if fx.get("op") == "stage_drain"]
+    for fx in card.get("effects") or []:
+        if fx.get("op") != "choose_one":
+            continue
+        for mode in fx.get("modes") or []:
+            body = mode.get("effects") or []
+            if body and body[0].get("op") == "stage_drain":
+                amounts.append(int(body[0]["amount"]))
+    if not amounts:
+        return None
+    if len(set(amounts)) != 1:
+        raise ValueError(f"{card['id']}: a Drain line preview reads one "
+                         "Drain price")
+    return f"FurinaStageFacePreview.DrainLine(this, {amounts[0]})"
+
+
+def stage_repay_call(card: dict) -> str | None:
+    """The C# that fills a Repay card's in-combat line, or None.
+
+    The seat round of 2026-10-05: a Repay with nothing drained did nothing
+    and said nothing. The face prints what it would Repay now, "(Repays 0)",
+    the way a spend-all prints "(Deals N damage)".
+    """
+    ops = [fx for fx in card.get("effects") or []
+           if fx.get("op") in ("stage_repay", "stage_repay_all")]
+    if not ops:
+        return None
+    if len(ops) != 1:
+        raise ValueError(f"{card['id']}: a Repay preview reads one Repay")
+    if ops[0]["op"] == "stage_repay_all":
+        return "FurinaStageFacePreview.RepayAll(this)"
+    return ('FurinaStageFacePreview.Repay(this, '
+            'DynamicVars["RepayAmount"].IntValue)')
+
+
+def stage_face_args(card: dict) -> list[tuple[str, str]]:
+    """Every in-combat Stage line a row's face carries, as (token, C#)."""
+    args = []
+    for token, call in ((STAGE_BOW_TOKEN, stage_bow_preview_call(card)),
+                        (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
+                        (STAGE_REPAY_TOKEN, stage_repay_call(card))):
+        if call:
+            args.append((token, call))
+    return args
+
+
+def stage_lines_face(desc: str, args: list[tuple[str, str]]) -> str:
+    """A face with each of its in-combat Stage lines appended."""
+    for token, _ in args:
+        desc = desc + "{InCombat:{" + token + "}|}"
+    return desc
+
+
 def emit(
     card: dict, profile: CharacterProfile = KLEE_PROFILE
 ) -> str:
@@ -15135,15 +15327,13 @@ def emit(
                 for eff in (card.get("effects") or ())))
     # A face may carry a line break (the base game's `{InCombat:<break>...|}`
     # reader line), and a raw break inside a C# literal does not compile.
-    bow_preview = stage_bow_preview_call(card)
-    if bow_preview:
-        desc = stage_bow_face(desc)
+    face_args = stage_face_args(card)
+    desc = stage_lines_face(desc, face_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
     if blanks_burst:
         arm_desc = build_description(card, include_burst_rider=False)
-        if bow_preview:
-            arm_desc = stage_bow_face(arm_desc)
+        arm_desc = stage_lines_face(arm_desc, face_args)
         arm_cs = arm_desc.replace("\n", "\\n")
         desc_expr = f'FurinaBurstRider.Face("{arm_cs}", "{desc_cs}")'
 
@@ -15394,7 +15584,7 @@ def emit(
         # the upgraded number appears only if the option is upgraded with the
         # parent -- which `ModalChoice.CreateOption(owner, parent)` does, off
         # the `DynamicVars[...]` half of the parent's own `OnUpgrade`.
-        option_faces = modal_option_faces(card, modal_eff["modes"])
+        option_faces = modal_option_faces(card, modal_eff["modes"], desc)
         option_upgrade = "\n        ".join(
             line.strip() for line in upgrade_cs.split("\n")
             if "DynamicVars[" in line)
@@ -16036,18 +16226,25 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # sim's twin is `combat.card_cost`'s `cost_reduction_per_discard_this_turn`.
     discard_discount_member = ""
     stage_bow_member = ""
-    if bow_preview:
-        # The Bow line's token (`stage_bow_preview_call`). Added as a
-        # description argument, the base game's own seam for a face word no
+    if face_args:
+        # The in-combat Stage lines' tokens (`stage_face_args`). Added as
+        # description arguments, the base game's own seam for a face word no
         # DynamicVar carries.
+        summary = (
+            "Who this card's summon will Bow, on its in-combat line\n"
+            "    /// (`FurinaStageBowPreview`)."
+            if [t for t, _ in face_args] == [STAGE_BOW_TOKEN] else
+            "This card's in-combat Stage line\n"
+            "    /// (`FurinaStageFacePreview`).")
+        adds = "".join(f'        description.Add("{token}", {call});\n'
+                       for token, call in face_args)
         stage_bow_member = (
-            "\n\n    /// <summary>Who this card's summon will Bow, on its "
-            "in-combat line\n    /// (`FurinaStageBowPreview`).</summary>\n"
+            f"\n\n    /// <summary>{summary}</summary>\n"
             "    protected override void AddExtraArgsToDescription(\n"
             "        MegaCrit.Sts2.Core.Localization.LocString description)\n"
             "    {\n"
             "        base.AddExtraArgsToDescription(description);\n"
-            f'        description.Add("{STAGE_BOW_TOKEN}", {bow_preview});\n'
+            f"{adds}"
             "    }")
     discount_rate = card.get("cost_reduction_per_discard_this_turn")
     if discount_rate:

@@ -356,6 +356,12 @@ def after_card_exhausted(state: CombatState, card: Card,
             or p.powers.get("kk_abyssal_salvage_plus")):
         from tier0.engine import kokomi_plan     # late import (cycle)
         kokomi_plan.abyssal_salvage(state, card)
+    # VARKA, THE COMBO PASS (2026-10-04), PYRE OATH: "Whenever you Exhaust a
+    # card, gain 1 Pyro Oath." At THIS funnel for the Casket accrual's
+    # reason. Dead unless the Power is up.
+    if p.powers.get("vk_pyre_oath"):
+        from tier0.engine import varka_oath      # late import (cycle)
+        varka_oath.on_card_exhausted(state, card)
     n = p.powers.get("feel_no_pain", 0)
     if n:
         gain_block(state, p, n)                  # Unpowered: no Unmovable

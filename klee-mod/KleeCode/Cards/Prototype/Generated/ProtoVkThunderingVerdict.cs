@@ -55,7 +55,7 @@ public sealed class ProtoVkThunderingVerdict : CustomCardModel, IElementalCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thundering Verdict"),
-        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies X times, plus {VkPer:diff()} for each Electro [gold]Oath[/gold] each time.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}"),
+        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage, plus {VkPer:diff()} for each Electro [gold]Oath[/gold], to ALL enemies X times.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -90,7 +90,6 @@ class Fight:
     enemies: list = field(default_factory=list)
     incoming_by_turn: list = field(default_factory=list)
     enemy_pool_by_turn: list = field(default_factory=list)
-    meters_by_turn: list = field(default_factory=list)
     block_at_turn_end: list = field(default_factory=list)
     cards_played: list = field(default_factory=list)
     damage_by_source: dict = field(default_factory=dict)
@@ -126,7 +125,6 @@ def _fight(rec: dict[str, Any]) -> Fight:
         enemies=list(rec.get("enemies") or []),
         incoming_by_turn=list(rec.get("incoming_by_turn") or []),
         enemy_pool_by_turn=list(rec.get("enemy_pool_by_turn") or []),
-        meters_by_turn=list(rec.get("meters_by_turn") or []),
         block_at_turn_end=list(rec.get("block_at_turn_end") or []),
         cards_played=list(rec.get("cards_played") or []),
         damage_by_source=dict(rec.get("damage_by_source") or {}),
@@ -403,39 +401,6 @@ def archetype_damage(fights: Sequence[Fight],
             for (feed, act, rnd, arch), v in sorted(buckets.items())]
 
 
-# ------------------------------------------------------- the salon meter ---
-
-def salon_fill(fights: Sequence[Fight]) -> dict[str, dict[str, Any]]:
-    """R91/2b's pre-registration: when does the Salon fill, and how long is it
-    full? Per feed, over fights that recorded a meter sample at all."""
-    out: dict[str, dict[str, Any]] = {}
-    for f in fights:
-        rows = [r for r in f.meters_by_turn
-                if isinstance(r, (list, tuple)) and len(r) >= 4]
-        if not rows:
-            continue
-        bucket = out.setdefault(f.feed, {"fights": 0, "first_full": [],
-                                         "never_full": 0, "turns": 0,
-                                         "turns_full": 0, "peak": []})
-        bucket["fights"] += 1
-        first = None
-        peak = 0
-        for row in rows:
-            rnd, salon, cap = int(row[0]), int(row[2]), int(row[3])
-            bucket["turns"] += 1
-            peak = max(peak, salon)
-            if cap and salon >= cap:
-                bucket["turns_full"] += 1
-                if first is None:
-                    first = rnd
-        bucket["peak"].append(peak)
-        if first is None:
-            bucket["never_full"] += 1
-        else:
-            bucket["first_full"].append(first)
-    return out
-
-
 # ---------------------------------------------------------------- render ---
 
 BANNER = (
@@ -634,30 +599,6 @@ def render(fights: Sequence[Fight], intent: str | None = None) -> str:
                 if all(c == EMPTY for c in cells):
                     continue
                 a(f"| {act} | {arch} | " + " | ".join(cells) + " |")
-        a("")
-
-    # ----------------------------------------------------------- the salon
-    a("## 3. Salon fill time (R91/2b pre-registration)")
-    a("")
-    fill = salon_fill(fights)
-    if not fill:
-        a("No fight recorded a Salon meter sample. The counter landed with "
-          "the Track B telemetry additions; soaks and sessions from before it "
-          "carry no `meters_by_turn`, and no number is inferred for them.")
-        a("")
-    else:
-        a("| feed | fights w/ meter | median turn first at cap | never filled | "
-          "fight-turns at cap | median peak members |")
-        a("|---|---|---|---|---|---|")
-        for feed, b in sorted(fill.items()):
-            frac = (100.0 * b["turns_full"] / b["turns"]) if b["turns"] else None
-            a(f"| {feed} | {b['fights']} | {fmt(med(b['first_full']), 1)} | "
-              f"{b['never_full']} | {fmt(frac, 1)}% | "
-              f"{fmt(med(b['peak']), 1)} |")
-        a("")
-        a("Reported, not acted on: R95's amendment routes this number to the "
-          "bounded-meter `scaling`-tag question, and that revisit is a design "
-          "decision this tool does not make.")
         a("")
 
     a("---")

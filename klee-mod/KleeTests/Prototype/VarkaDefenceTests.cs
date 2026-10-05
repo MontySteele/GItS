@@ -56,16 +56,11 @@ public class VarkaDefenceTests : IDisposable
 
     // ---- sec.3: the three cards ----------------------------------------------
 
+    /// <summary>Gale Mantle left with the combo pass (2026-10-04); its count,
+    /// half the total Oath, stays as grammar.</summary>
     [Fact]
-    public void Gale_mantle_is_5_plus_half_the_total_oath()
+    public void Half_the_total_oath_rounds_down()
     {
-        var mantle = new ProtoVkGaleMantle();
-        Assert.Equal(CardType.Skill, mantle.Type);
-        Assert.Equal(CardRarity.Common, mantle.Rarity);
-        Assert.Equal(1, mantle.EnergyCost.Canonical);
-        Assert.Equal(5m, Var(mantle, "CalculationBase"));
-        Assert.Equal(1m, Var(mantle, "CalculationExtra"));
-        Assert.Equal(8m, Var(Upgraded<ProtoVkGaleMantle>(), "CalculationBase"));
         // Half rounds down; no cap; nothing for anyone else.
         var varka = Seat.Varka().Creature;
         var ledger = VarkaOathLedger.For(varka);

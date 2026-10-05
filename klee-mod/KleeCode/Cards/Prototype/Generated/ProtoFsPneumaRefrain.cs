@@ -45,8 +45,17 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pneuma Refrain"),
-        ("description", "[gold]Repay[/gold] {RepayAmount:diff()}. Draw 2 cards."),
+        ("description", "[gold]Repay[/gold] {RepayAmount:diff()}. Draw 2 cards.{InCombat:{StageRepay}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

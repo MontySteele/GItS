@@ -1004,6 +1004,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         }
         if (bestPile == null || bestPile.TakeAt(bestIndex) is not { } charge)
         {
+            // Spent even when nothing goes off, as in SetOff (2026-10-04).
+            KleeOverhaulLedger.For(applier).TakeMultiplier();
             return 0;
         }
         if (bestPile._charges.Count == 0) await PowerCmd.Remove(bestPile);
@@ -1225,6 +1227,14 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
         CardModel? cardSource, int badge = 1)
     {
+        // THE MULTIPLIER IS SPENT EVEN WHEN NOTHING GOES OFF (2026-10-04).
+        // The Big One reads "Set off the enemy. Your Bombs deal quadruple
+        // damage.": the x4 belongs to that Set off, so a Set off that finds no
+        // Bomb spends it on nothing. Before this it stayed armed, and a Mine
+        // answering the enemy's attack later that round peeked it. Sim twin:
+        // the same early take in `klee_overhaul.set_off`.
+        var ledger = KleeOverhaulLedger.For(applier);
+        var multiplier = ledger.TakeMultiplier() * badge;
         if (target == null) return 0;
 
         var taken = new List<ProtoCharge>();
@@ -1242,8 +1252,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         }
         if (taken.Count == 0) return 0;
 
-        var ledger = KleeOverhaulLedger.For(applier);
-        var multiplier = ledger.TakeMultiplier() * badge;
         var pact = VermillionPactPower.Holds(applier);
         var pactAura = Element.None;
         var exploded = 0;
@@ -1767,6 +1775,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // merge and a split carry a Bomb that was already placed, so they pass
         // `relocated` and the Charm is paid once per Bomb, when it arrives.
         if (!relocated) size += Relics.DodocoCharm.BonusFor(applier);
+        var mark = ResolutionLedger.MarkApplied();
         var power = await PowerCmd.Apply<ProtoBombPower>(
             choiceContext, target, 1, applier: applier, cardSource: cardSource);
 
@@ -1774,6 +1783,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         {
             bomb.AddCharge(new ProtoCharge(size, isMine, payloadMineAll));
             Register.Note(bomb);
+            // The play log's line for this placement: the hook filed the
+            // pile's COUNT (1), and the page reads a size ("Put Bomb 11").
+            ResolutionLedger.SizeAppliedSince(mark, target,
+                                              isMine ? "Mine" : "Bomb", size);
         }
         else if (LandsOnNobody(target))
         {

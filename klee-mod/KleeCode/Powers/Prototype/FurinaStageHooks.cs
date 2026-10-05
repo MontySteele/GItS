@@ -87,6 +87,16 @@ public sealed class FurinaStageHooks : AbstractModel
         return Task.CompletedTask;
     }
 
+    /// <summary>The play is over: the per-play spend record closes, so a
+    /// spend-all face in hand previews her Fanfare and not the last play's
+    /// spend (the Salon's Tab seat round, 2026-10-05).</summary>
+    public override Task AfterCardPlayed(PlayerChoiceContext choiceContext,
+                                         CardPlay cardPlay)
+    {
+        FurinaStage.EndPlay(cardPlay.Card?.Owner?.Creature);
+        return Task.CompletedTask;
+    }
+
     /// <summary>Rule 3: every HP she loses prints 1 Fanfare -- a hit past
     /// Block, a status, a card's own HP cost. A Drain counts its own loss
     /// (the ledger's <c>Draining</c> latch).</summary>

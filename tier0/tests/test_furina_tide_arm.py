@@ -161,17 +161,61 @@ def test_run_fight_carries_the_curtain_call_into_the_run():
 
 # ---- Spend and Revelry ------------------------------------------------------
 
-def test_revelry_doubles_every_gain_and_two_copies_triple_it():
+def test_revelry_adds_to_drains_and_repays_and_copies_add():
+    """The pool-40 paper, sec.2: "Whenever you Drain or Repay, gain that
+    much additional Fanfare." A hit prints only its own; a second copy adds
+    again (+2x)."""
     st = _furina()
     effects.resolve_card(st, _row("proto_fs_universal_revelry"))
     FS.drain(st, 3)
     assert FS.fanfare(st.player) == 6
     st.player.hp -= 2
     resources.note_player_hp_loss(st, 2)
-    assert FS.fanfare(st.player) == 10
+    assert FS.fanfare(st.player) == 8
     effects.resolve_card(st, _row("proto_fs_universal_revelry"))
     FS.repay(st, 1)
-    assert FS.fanfare(st.player) == 13
+    assert FS.fanfare(st.player) == 11
+
+
+# ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3) ----
+
+def test_the_pool_is_34_rows_12_15_7():
+    rows = {c.id: c for c in loader.prototype_cards()}
+    rarities = [rows[cid].rarity for cid in FS.POOL_IDS]
+    assert len(FS.POOL_IDS) == 34 == len(set(FS.POOL_IDS))
+    assert (rarities.count("common"), rarities.count("uncommon"),
+            rarities.count("rare")) == (12, 15, 7)
+
+
+def test_the_arm_powers_move_the_line_and_read_the_loop():
+    st = _furina()
+    effects.resolve_card(st, _row("proto_fs_a_five_century_act"))
+    assert FS.can_drain(st.player, 77)
+    effects.resolve_card(st, _row("proto_fs_critics_darling"))
+    hp = st.enemies[0].hp
+    FS.drain(st, 5)
+    assert st.enemies[0].hp == hp - 5
+
+
+def test_the_arm_fountain_schedules_its_repay_at_her_turn_start():
+    from tier0.engine import furina_tide as T
+    st = _furina()
+    FS.drain(st, 10)
+    effects.resolve_card(st, _row("proto_fs_fountain_of_lucine"))
+    T.turn_start(st)
+    assert FS.drained(st.player) == 7
+    T.turn_start(st)
+    T.turn_start(st)
+    T.turn_start(st)
+    assert FS.drained(st.player) == 1
+
+
+def test_bis_on_the_arm_keeps_half_of_rising_applause():
+    st = _furina()
+    effects.resolve_card(st, _row("proto_fs_bis"))
+    FS.drain(st, 9)
+    effects.resolve_card(st, _row("proto_fs_standing_ovation"))
+    assert FS.fanfare(st.player) == 4
 
 
 def test_spend_takes_the_full_price_or_nothing():
@@ -240,6 +284,14 @@ def test_three_seats_and_the_oldest_leaves_first():
     assert FS.stage(st.player) == ["charlotte", "wriothesley", "lynette"]
     FS.guest_star(st, "clorinde")
     assert FS.stage(st.player) == ["wriothesley", "lynette", "clorinde"]
+
+
+def test_the_three_new_guests_summon():
+    st = _furina()
+    for who in ("lyney", "sigewinne", "chevreuse"):
+        FS.guest_star(st, who)
+    assert FS.stage(st.player) == ["lyney", "sigewinne", "chevreuse"]
+    assert FS.can_drain(st.player, 49)          # Lyney: line 29
 
 
 # ---- off-character -----------------------------------------------------------

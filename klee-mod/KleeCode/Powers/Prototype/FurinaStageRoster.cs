@@ -53,7 +53,7 @@ public static class FurinaStageRoster
     };
 
     /// <summary>
-    /// HER WHOLE OFFER: <see cref="Pool"/>'s 24 and her two Ancients. What
+    /// HER WHOLE OFFER: <see cref="Pool"/>'s 34 and her two Ancients. What
     /// <c>FurinaCardPool.FilterThroughEpochs</c> returns, which IS
     /// <c>GetUnlockedCards</c> -- the sole door into reward rolls, the shop
     /// and transforms. No co-op tier: the v2 Stage's five went with it.
@@ -62,9 +62,12 @@ public static class FurinaStageRoster
         Pool().Concat(RosterAncientCards.Furina).ToList();
 
     /// <summary>
-    /// THE SLICE'S 24 (proposal sec.16), every one a `proto_fs_` row: 12
-    /// Commons, 8 Uncommons and 4 Rares (pinned by `PoolCountTests`). Sim
-    /// twin: <c>furina_stage.POOL_IDS</c>, same order.
+    /// THE SLICE'S 24 (proposal sec.16) and THE POOL TO 39's ten
+    /// (<c>review/active/furina-pool-40-2026-10-05.md</c> sec.3), every one a
+    /// `proto_fs_` row: 12 Commons, 15 Uncommons and 7 Rares (pinned by
+    /// `PoolCountTests`; the paper's 39 counts the two Basics and three
+    /// guest-companion rows besides). Sim twin: <c>furina_stage.POOL_IDS</c>,
+    /// same order.
     /// </summary>
     public static CardModel[] Pool() => new CardModel[]
     {
@@ -98,5 +101,18 @@ public static class FurinaStageRoster
         // The two Rares.
         ModelDb.Card<ProtoFsUniversalRevelry>(),
         ModelDb.Card<ProtoFsLetThePeopleRejoice>(),
+        // The pool to 39 (2026-10-05). Ousia.
+        ModelDb.Card<ProtoFsGrandDeluge>(),
+        ModelDb.Card<ProtoFsOusiaSurge>(),
+        ModelDb.Card<ProtoFsGuestStarLyney>(),
+        ModelDb.Card<ProtoFsAFiveCenturyAct>(),
+        // Pneuma.
+        ModelDb.Card<ProtoFsGuestStarSigewinne>(),
+        ModelDb.Card<ProtoFsFountainOfLucine>(),
+        ModelDb.Card<ProtoFsCriticsDarling>(),
+        // The Crowd.
+        ModelDb.Card<ProtoFsHoldTheStage>(),
+        ModelDb.Card<ProtoFsGuestStarChevreuse>(),
+        ModelDb.Card<ProtoFsBis>(),
     };
 }

@@ -53,13 +53,13 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Lion's Fang, Fair Protector"),
-        ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain {PowerAmount:diff()} [gold]Block[/gold] and draw 1 card."),
+        ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 8m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,11 +71,11 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<LionsFangPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<LionsFangPower>(choiceContext, Owner.Creature, 8, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

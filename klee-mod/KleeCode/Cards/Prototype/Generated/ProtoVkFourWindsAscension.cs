@@ -81,7 +81,6 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
-        DynamicVars["VkPer"].UpgradeValueBy(1m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

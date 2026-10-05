@@ -12,8 +12,7 @@ import re
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
-                                        enchant_moves_line)
+from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
                                         BOMB_REACTION_CLAUSE,
@@ -27,7 +26,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ONE_USE_DISCOUNT_NOTE,
                                         ONE_USE_RIDER_NOTE,
                                         PER_HIT_NOTE,
-                                        MAP_FLOOR_LINE,
+                                        MAP_FLOOR_LINE, MAP_RUN_LINE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         CHOOSER_CONFIRM_NOTE,
@@ -60,6 +59,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_BLOCKED,
                                         RESOLUTION_HIT_ALL_BLOCKED,
                                         RESOLUTION_HIT_ON_YOU,
+                                        RESOLUTION_HIT_SOURCE,
+                                        RESOLUTION_HIT_THORNS, THORNS_POWER,
                                         RESOLUTION_NO_HITS,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
@@ -75,6 +76,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         INTENT_FOLD_NOTHING,
                                         INTENT_TOTAL_CLAUSE,
                                         INTENT_TARGET_SIDE,
+                                        INTENT_TARGET_NOTE,
+                                        INTENT_ICON_NUMBER,
                                         REWARD_ALTERNATIVES_HEADING,
                                         REWARD_ALTERNATIVE_ROW,
                                         REWARD_ALTERNATIVE_UNNAMED,
@@ -118,8 +121,7 @@ from understudy.blindplay_coop import banner as coop_banner
 from understudy.blindplay_coop import render_lines as coop_lines
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold, _text
-from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
-                                        FIGHT_OVERLAYS, KURAGE_COST_PER_ENERGY)
+from understudy.blindplay_shape import BlindPlayError, FIGHT_OVERLAYS
 
 
 # ----------------------------------------------------------------- render --
@@ -225,7 +227,17 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     note = qa_packet.cost_note(c)
     if note:
         out.append(f"    {note}")
+    # SEAT PAGE 3 (2026-10-05): a Guest Star's guest, under the face, as two
+    # plain lines off its own hover tip (`ArmKeywordTips.For<Guest>`, the
+    # badge's words). The face says only "Summon Lyney."; the tip was a gloss
+    # the brief page cut once the lane had seen it, and seats passed four
+    # guests they could not read.
+    guest = _guest_tip(c)
+    if guest is not None:
+        out += _guest_lines(guest["text"])
     for k in c["keywords"]:
+        if k is guest:
+            continue
         out.append(f"    *{k['name']}* — {k['text']}" if k["text"]
                    else f"    *{k['name']}*")
     if not c["playable"]:
@@ -246,6 +258,34 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
         if c.get("unplayable_note"):
             out.append(f"    {c['unplayable_note']}")
     return out
+
+
+#: A Guest Star card's title names its guest.
+_GUEST_STAR_TITLE = re.compile(r"^Guest Star: (?P<who>\w+)")
+#: The tip's two halves: the guest's standing line, then its act.
+_GUEST_ACT_SPLIT = re.compile(r"\s*\bAct: ")
+
+
+def _guest_tip(c: dict[str, Any]) -> dict[str, str] | None:
+    """The keyword row that is this Guest Star's guest, or None."""
+    hit = _GUEST_STAR_TITLE.match(str(c.get("title") or ""))
+    if not hit:
+        return None
+    for k in c.get("keywords") or []:
+        if k.get("name") == hit.group("who") and k.get("text"):
+            return k
+    return None
+
+
+def _guest_lines(text: str) -> list[str]:
+    """`Line: ...` and `Act: ...`, the tip's own two sentences."""
+    parts = _GUEST_ACT_SPLIT.split(text.strip(), maxsplit=1)
+    if len(parts) == 2 and parts[1]:
+        out = [f"    Act: {parts[1].strip()}"]
+        if parts[0].strip():
+            out.insert(0, f"    Line: {parts[0].strip()}")
+        return out
+    return [f"    Guest: {text.strip()}"]
 
 
 def _render_moved(said: dict[str, Any]) -> list[str]:
@@ -1201,6 +1241,30 @@ def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
 _NUMBER = re.compile(r"\d+")
 
 
+#: 2026-10-04 (Klee lane 2, 2026-10-02): Tuning Fork printed "(7)" and nothing
+#: said 7 of what. A relic counter that counts toward a threshold prints it.
+#: The relic's own sentence names the threshold where it can ("Every time you
+#: play 10 Skills", "Every 10th Attack", "Every 3 turns"); the table is for a
+#: relic whose sentence a feed sends without it, keyed by printed title.
+_RELIC_THRESHOLD_TEXT = re.compile(
+    r"\bevery (?:time you \w+ )?(\d+)(?:st|nd|rd|th)?\b", re.I)
+RELIC_THRESHOLDS = {"Tuning Fork": 10}
+
+
+def _relic_counter(relic: dict[str, Any]) -> str:
+    """A relic's counter as its icon's number, with "of N" where the relic
+    counts toward N and the counter is a plain count below it."""
+    counter = str(relic.get("counter") or "").strip()
+    if not counter.isdigit():
+        return counter
+    found = _RELIC_THRESHOLD_TEXT.search(str(relic.get("text") or ""))
+    threshold = (int(found.group(1)) if found
+                 else RELIC_THRESHOLDS.get(str(relic.get("name") or "")))
+    if threshold and int(counter) < threshold:
+        return f"{counter} of {threshold}"
+    return counter
+
+
 def _attack_buff_note(you: dict[str, Any],
                       hand: list[dict[str, Any]]) -> list[str]:
     """`EB-408`: a flat Attack buff beside the faces it may or may not be in.
@@ -1237,6 +1301,49 @@ def _numbers_disagree(intent: dict[str, Any]) -> bool:
     on_icon = set(_NUMBER.findall(str(intent.get("label") or "")))
     in_words = set(_NUMBER.findall(str(intent.get("text") or "")))
     return bool(on_icon and in_words and not (on_icon & in_words))
+
+
+#: Seat page 5 (2026-10-05): the game's generic hover sentences. Each says
+#: only the kind and the icon's number, which the line already carries, so
+#: one of these whose every number is on the icon is not printed. Anything
+#: else the game writes (`gain 8 Block`, `add 4 Burn to your hand`, `apply
+#: Afflictions`) is kept, and so is any sentence whose number is not the
+#: icon's (`EB-607`'s disagreement).
+_GENERIC_HOVER = re.compile(
+    r"^This enemy intends to (?:"
+    r"Attack(?: for \d+(?: damage)?)?(?: \d+ times)?"
+    r"|attack"
+    r"|use a Buff|buff itself"
+    r"|apply a Debuff(?: to you)?"
+    r"|give you \d+ Status cards?"
+    r"|Block on its turn"
+    r")\.?$")
+
+
+def _hover_adds_nothing(intent: dict[str, Any]) -> bool:
+    """Seat page 5: is the hover sentence the game's generic template with
+    no number the icon does not already show?"""
+    text = str(intent.get("text") or "").strip()
+    if not _GENERIC_HOVER.match(text):
+        return False
+    in_words = set(_NUMBER.findall(text))
+    on_icon = set(_NUMBER.findall(str(intent.get("label") or "")))
+    return in_words <= on_icon
+
+
+def _intent_target_note(enemies: list[dict[str, Any]],
+                        coop: bool = False) -> list[str]:
+    """Seat page 5 (2026-10-05): `EB-323`'s missing target, said once under
+    the enemy list on every page where more than one body could be meant --
+    two or more enemies, or co-op -- instead of on every intent line. Not a
+    once-per-lane gloss: seats cut pages with `sed`, and once-only text is
+    what a slice loses."""
+    if len(enemies) < 2 and not coop:
+        return []
+    if not any(i.get("target_side") or _fold(i.get("type")) == "buff"
+               for e in enemies for i in e.get("intents") or []):
+        return []
+    return ["", INTENT_TARGET_NOTE]
 
 
 def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
@@ -1395,8 +1502,34 @@ def _intent_fold_lines(enemy: dict[str, Any],
     return out
 
 
+def _hit_on_you_source(hit: dict[str, Any],
+                       enemies: list[dict[str, Any]]) -> str:
+    """Who dealt a hit that landed on you while a card resolved: the dealer
+    the mod filed, named with its Thorns where the board shows it holding
+    Thorns; with no dealer on the wire, the one enemy on the board holding
+    Thorns; else nothing (2026-10-04, Klee w20 round)."""
+    def thorny(enemy: dict[str, Any]) -> bool:
+        return any(_fold(str(p.get("name") or "")) == _fold(THORNS_POWER)
+                   for p in enemy.get("powers") or [])
+    source = str(hit.get("source") or "").strip()
+    if source:
+        # A board name may carry its number (`Slug (2)`); the mod's is bare.
+        named = [e for e in enemies
+                 if _fold(re.sub(r"\s*\(\d+\)$", "", str(e.get("name") or "")))
+                 == _fold(source)]
+        template = (RESOLUTION_HIT_THORNS if any(thorny(e) for e in named)
+                    else RESOLUTION_HIT_SOURCE)
+        return template.format(source=source)
+    holders = [e for e in enemies if thorny(e)]
+    if len(holders) == 1 and holders[0].get("name"):
+        return RESOLUTION_HIT_THORNS.format(source=holders[0]["name"])
+    return ""
+
+
 def _resolution_lines(rows: list[dict[str, Any]],
-                      stage: bool = False) -> list[str]:
+                      stage: bool = False,
+                      enemies: list[dict[str, Any]] | None = None
+                      ) -> list[str]:
     """`EB-349` / `EB-611`. The turn's resolutions, with their hits numbered.
 
     ONE ROW PER CARD, ONE NUMBERED LINE PER HIT. The numbering is the point:
@@ -1459,7 +1592,8 @@ def _resolution_lines(rows: list[dict[str, Any]],
                 continue
             if hit.get("on_player"):
                 line = RESOLUTION_HIT_ON_YOU.format(
-                    n=n, target=target, amount=hit["amount"])
+                    n=n, target=target, amount=hit["amount"],
+                    source=_hit_on_you_source(hit, enemies or []))
                 if hit["blocked"] > 0:
                     line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
                 out.append(line)
@@ -1539,10 +1673,14 @@ def _render_intent(intent: dict[str, Any], part: bool = False) -> str:
     kind = intent.get("type") or ""
     if head and kind and _fold(head) != _fold(kind):
         head = f"{head} ({kind})"
-    number = (f"the number on its icon is {intent['label']}"
+    # Seat page 5 (2026-10-05): "icon shows 8" for "the number on its icon
+    # is 8", and the game's generic hover sentence only where it adds
+    # something (`_hover_adds_nothing`).
+    number = (INTENT_ICON_NUMBER.format(label=intent["label"])
               + (MULTI_INTENT_LABEL if part else "")
               if intent.get("label") else "")
-    bits = [head, number, intent.get("text") or ""]
+    text = "" if _hover_adds_nothing(intent) else intent.get("text") or ""
+    bits = [head, number, text]
     # `EB-607`: the two numbers on this line are two fields of the feed --
     # `GetIntentLabel`'s icon figure and `GetHoverTip`'s sentence -- and the
     # page printed both and said nothing about the pair.
@@ -1555,6 +1693,11 @@ def _render_intent(intent: dict[str, Any], part: bool = False) -> str:
     # prints only where something WAS folded, and the total only on a
     # multi-hit, because a clause under every intent is noise.
     bits += _breakdown_clauses(intent.get("breakdown") or {})
+    # Seat page 3 (2026-10-05): what a debuff move does, read off the base
+    # game by the move's id (`blindplay_moves`). "Strategic (Debuff)" alone
+    # did not say Weak from Frail from a stolen card.
+    if intent.get("effect"):
+        bits.append(INTENT_EFFECT_CLAUSE.format(effect=intent["effect"]))
     if _fold(kind) == "defend":
         bits.append(DEFEND_INTENT_CLAUSE)
     # `EB-323`: and a part says whose side it is on. `Empower (Buff)` was a
@@ -1796,7 +1939,10 @@ STAGE_FANFARE_LINE = ("- Fanfare {fanfare} (this turn: {gained} gained, "
 #: THE SALON'S TAB (2026-10-05): the HP loan's two numbers, the "Drained N"
 #: counter's reading.
 STAGE_DRAIN_LINE = ("- Drained {drained} HP (it returns when combat ends). "
-                    "You can Drain down to {line} HP.")
+                    "Drain line {line} HP{why}: you can Drain down to it.")
+#: Seat page 3: where the line comes from ("half the HP you started this
+#: fight with"); seats connected it to their entry HP only late.
+STAGE_DRAIN_WHY = " ({why})"
 STAGE_REHEARSAL_CLAUSE = " · Rehearsal {n}"
 STAGE_EMPTY_LINE = "- The stage is empty."
 STAGE_SEATS_LINE = "- Seats, front to back ({used} of {capacity}): {seats}."
@@ -1820,6 +1966,8 @@ STAGE_KIND_WORDS = {
     "damage": "{n}{element} damage to {target}",
     "energy": "{n} Energy next turn",
     "fanfare": "{n} Fanfare",
+    # The Salon's Tab (2026-10-05): Charlotte's and Sigewinne's act.
+    "repay": "Repay {n}",
     "card": "adds a Trick to your hand",
     "ensemble": "your Salon members act",
 }
@@ -1853,14 +2001,21 @@ STAGE_LOG_EFFECTS = {
     "damage": ": {n} damage{to}",
     "energy": ": {n} Energy next turn",
     "fanfare": ": you gain {n} Fanfare",
+    "repay": ": you Repay {n}",
 }
-#: Which kind each performer's act is (`StageForecast.KindOf`).
+#: Which kind each guest's act is, where it is not damage: the mod's own
+#: table (`FurinaStage.CueOf`). SEAT PAGE 3 (2026-10-05): this still held the
+#: v2 Stage's kinds, so Chevreuse's act (4 damage to a random enemy) logged
+#: as "4 Energy next turn", Lyney's as a Trick and the two Repays as Block
+#: and Fanfare.
 STAGE_MEMBER_KINDS = {
-    "usher": "block", "sigewinne": "block", "chevreuse": "energy",
-    "charlotte": "fanfare", "lyney": "card", "escoffier": "ensemble",
+    "charlotte": "repay", "sigewinne": "repay",
+    # The v2 Stage's retired performers, for its recorded logs.
+    "usher": "block", "escoffier": "ensemble",
 }
-#: The damage acts' reach, where the act names no one body.
-STAGE_ALL_MEMBERS = frozenset({"chevalmarin", "neuvillette"})
+#: The damage acts' reach, where the act names no one body (Lyney now; the
+#: v2 Stage's two for its recorded logs).
+STAGE_ALL_MEMBERS = frozenset({"lyney", "chevalmarin", "neuvillette"})
 
 
 def _frozen_clause(row: dict[str, Any], obs: dict[str, Any],
@@ -1946,6 +2101,7 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
             line += f", Block {e['block']}"
         out.append(line)
         out += _render_intents(e["intents"])
+    out += _intent_target_note(c.get("enemies") or [])
     return out
 
 
@@ -2008,8 +2164,10 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     block.append(f"Furina {you['hp']}/{you['max_hp']}")
     out.append("- " + " · ".join(block))
     if stage.get("line") is not None:
-        out.append(STAGE_DRAIN_LINE.format(drained=stage.get("drained", 0),
-                                           line=stage["line"]))
+        why = stage.get("line_why") or ""
+        out.append(STAGE_DRAIN_LINE.format(
+            drained=stage.get("drained", 0), line=stage["line"],
+            why=STAGE_DRAIN_WHY.format(why=why) if why else ""))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
         return out
@@ -2067,7 +2225,7 @@ def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
 #: amount and not the element; `FurinaStageDirector.Act`).
 STAGE_MEMBER_ELEMENTS = {
     "neuvillette": "Hydro", "clorinde": "Electro", "navia": "Geo",
-    "lynette": "Anemo", "wriothesley": "Cryo",
+    "lynette": "Anemo", "wriothesley": "Cryo", "lyney": "Pyro",
 }
 
 
@@ -2270,6 +2428,423 @@ _RUN_RESULT = {"victory": ". You WON the run.",
                "defeat": ". You LOST the run."}
 
 
+# ------------------------------------------- 2026-10-05: the seat-page pass -
+#
+# Three additions to the combat page, each a fact a sighted player has and
+# the page did not, none of them a recommendation:
+#
+# - the ENEMY BRIEFING (`blindplay_enemies`): what each kind of enemy here
+#   does, base-game facts, on round 1. Each row is a gloss, so the brief page
+#   keeps it the first time a lane is shown it and cuts it after;
+# - the INCOMING line: the attack telegraphs summed against your Block, with
+#   the parts the page cannot count named as unknown. No lethal, no plan;
+# - the SINCE-LAST-PAGE line: what the ledger filed that no other line shows
+#   (a card drawn by an effect, a debuff Artifact negated, an enemy power that
+#   fired, a stolen card given back), only what is new since the lane's last
+#   page (`events_after`, set by the printing door), omitted when empty.
+
+#: What a debuff move does, beside its telegraph (`blindplay_moves`).
+INTENT_EFFECT_CLAUSE = "the move: {effect}"
+#: The heading over the enemy briefing.
+BRIEFING_HEADING = "## What these enemies do (base game)"
+#: The incoming-attacks line. A sum of the telegraphs, never a plan.
+INCOMING_LINE = ("- Incoming this turn: {total} (your Block {block}): you "
+                 "would take {take}.")
+#: SEAT PAGE 4 (2026-10-05): the HP that leaves, beside the take. The effort
+#: test's seats at every effort level read "you would take 12" and took it
+#: without weighing their HP (review/records/sonnet-effort-test-2026-10-05.md).
+INCOMING_LEAVES = " You would be at {after}/{max_hp} HP."
+INCOMING_UNKNOWN = ("- Incoming this turn: {total} plus an unknown amount "
+                    "from {who} (your Block {block}).")
+INCOMING_NONE = "- Incoming this turn: no attack is shown."
+#: SEAT PAGE 6: no attack, but the end of the turn hurts (Burn, Constrict).
+INCOMING_NO_ATTACK_TAKE = ("- Incoming this turn: no attack is shown "
+                           "(your Block {block}): you would take {take}.")
+#: SEAT PAGE 4: beside the rest site's HP, how much healing can land.
+REST_ROOM = " (healing stops at max HP: at most {room} more)"
+#: The since-last-page line, and how many phrases it names before it counts.
+EVENTS_HEAD = "- Since last page: "
+EVENTS_CAP = 8
+#: SEAT PAGE 3 (2026-10-05). An attack that Shattered Frozen: the after-state
+#: shows only "no Frozen", and a seat read the enemy's next full hit as
+#: Frozen's cut failing (`FrozenPower.AfterDamageReceived`).
+EVENT_SHATTERED = "{card} Shattered {target}: Frozen removed"
+#: The curtain call, on the first page after the fight (Furina's drained HP
+#: comes back when combat ends; seats could not tell it had).
+EVENT_HP_RETURNED = "Drained {n} HP returned (the fight ended)"
+#: SEAT PAGE 3: enemy powers whose firing is NOT news. Each fires on every
+#: card or hit, or every turn, and what it did is already on the page (a
+#: Strength, a Block, a damage figure): "Slippery fired x2" on a single hit
+#: confused a seat. Matched on the power's printed name. A one-off trigger
+#: (Crab Rage, Reattach, Hard To Kill's cap) is not here and still prints.
+PASSIVE_ENEMY_POWERS = frozenset({
+    "slow", "slippery", "thorns", "plating", "ritual", "territorial",
+    "enrage", "personal hive", "skittish", "paper cuts", "flutter",
+})
+
+
+def _briefing_lines(enemies: list[dict[str, Any]],
+                    shown: set[str] | frozenset[str] = frozenset()
+                    ) -> list[str]:
+    """One gloss per KIND of enemy on the board that the table knows, named
+    as the enemy list names its first body (the `(n)` off). A kind in
+    `shown` (its `brief_key`) was briefed earlier in this fight."""
+    rows: list[str] = []
+    seen: set[str] = set()
+    for e in enemies:
+        text = e.get("briefing") or ""
+        if not text or text in seen or e.get("brief_key") in shown:
+            continue
+        seen.add(text)
+        name = re.sub(r"\s*\(\d+\)$", "", str(e.get("name") or "")).strip()
+        rows.append(f"*{name or 'This enemy'}* — {text}")
+    return ["", BRIEFING_HEADING, ""] + rows if rows else []
+
+
+def _attack_part_total(intent: dict[str, Any], weak: int,
+                       vulnerable: int) -> int | None:
+    """What one attack part adds up to, or `None` where the page cannot say.
+
+    The game's own breakdown first: it folds Strength, Weak and Vulnerable.
+    Without one, the icon's `N` or `NxM` -- and `None` where Weak or
+    Vulnerable stands, because that label may or may not count them
+    (`INTENT_FOLD_NOTE`)."""
+    breakdown = intent.get("breakdown") or {}
+    if breakdown.get("repeats"):
+        total = breakdown.get("total")
+        if isinstance(total, int):
+            return total
+        return int(breakdown.get("folded") or 0) * int(breakdown["repeats"])
+    label = str(intent.get("label") or "").strip()
+    multi = _MULTI_HIT_LABEL.match(label)
+    if multi:
+        value = int(multi.group(1)) * int(multi.group(2))
+    elif label.isdigit():
+        value = int(label)
+    else:
+        return None
+    if weak or vulnerable:
+        return None
+    return value
+
+
+#: SEAT PAGE 6 (2026-10-05): what stands between the telegraphs and your HP
+#: and lands before the enemies act. Base-game Sonnet seats read "you would
+#: be at 0" and lived (Osty, Beating Remnant, Frost), or the reverse (Burn,
+#: Disintegration). The order is the game's (`CombatManager.DoTurnEnd`):
+#: end-of-turn Block first (Orichalcum, Plating, then the orbs), then the
+#: cards in hand, then the end-of-turn powers, then the enemies. Block lasts
+#: until YOUR next turn starts, so all of it meets all of the damage.
+INCOMING_FOLDS = " ({folds})"
+INCOMING_NOT_COUNTED = " Not counted: {names}."
+FOLD_BLOCK = "{who} {verb} {n} Block first"
+FOLD_SELF_HIT = "{who} {verb} you for {n} first"
+FOLD_SELF_HP = "{who} {verb} {n} HP"
+FOLD_OSTY = "{name} absorbs up to {hp}"
+FOLD_CAP = "{name} caps the turn's HP loss at {cap}"
+#: A hand card that hurts at the end of the turn, by its own sentence
+#: (Burn, Decay, Toxic, Infection, Wither: Block takes it; Bad Luck, Beckon:
+#: it is HP lost). Regret's number is the hand size, so it is named.
+_IN_HAND_EOT = re.compile(r"end of (?:your |the )?turn,? if this is in your "
+                          r"hand", re.I)
+_TAKE_DAMAGE = re.compile(r"\btake (\d+) damage", re.I)
+_LOSE_HP = re.compile(r"\blose (\d+) HP", re.I)
+#: Player debuffs that hit at the end of the turn, by printed name. Block
+#: takes the first set (`ConstrictPower`, `DisintegrationPower`,
+#: `MagicBombPower`); the second is HP lost (`DemisePower`, Unblockable).
+EOT_HIT_POWERS = ("constrict", "constricted", "disintegration", "magic bomb")
+EOT_HP_POWERS = ("demise",)
+#: Player powers that gain Block at the end of the turn, by printed name: the
+#: stack count is the Block (`PlatingPower`).
+EOT_BLOCK_POWERS = ("plating", "plated armor", "metallicize")
+#: Player powers that change what a hit costs, which this line does not
+#: model: named, never counted.
+HIT_RULE_POWERS = ("intangible", "buffer")
+#: A relic's sentence for end-of-turn Block with no Block up (Orichalcum).
+_NO_BLOCK_RELIC = re.compile(
+    r"end (?:of )?your turn without (?:any )?Block, gain (\d+) Block", re.I)
+#: And Block per card in hand (Cloak Clasp).
+_PER_CARD_RELIC = re.compile(
+    r"end of your turn, gain (\d+) Block for each card in your hand", re.I)
+#: Beating Remnant: "You cannot lose more than 20 HP in a single turn."
+_HP_LOSS_CAP = re.compile(r"lose more than (\d+) HP", re.I)
+
+
+def _plain_name(title: Any) -> str:
+    """A hand face's printed title without the page's `(n)` or the `+`."""
+    name = re.sub(r"\s*\(\d+\)$", "", str(title or "")).strip()
+    return name.rstrip("+").strip()
+
+
+def _named_sum(parts: list[tuple[str, int]]) -> tuple[str, int, bool]:
+    """`(who, n, plural)` for one clause: `Frost x2 and Plating`, 8."""
+    counts: dict[str, int] = {}
+    for name, _n in parts:
+        counts[name] = counts.get(name, 0) + 1
+    who = _and_list([f"{k} x{v}" if v > 1 else k for k, v in counts.items()])
+    return who, sum(n for _name, n in parts), len(parts) > 1
+
+
+def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
+                    pets: list[dict[str, Any]]) -> dict[str, Any]:
+    """What lands between the end of your turn and the enemies' hits, off the
+    wire's own numbers, as if the turn ended now; what the page cannot count
+    goes in `unknown`, by name."""
+    block_parts: list[tuple[str, int]] = []
+    hit_parts: list[tuple[str, int]] = []
+    hp_parts: list[tuple[str, int]] = []
+    unknown: list[str] = []
+    block_now = int(you.get("block") or 0)
+    cap = None
+    for relic in you.get("relics") or []:
+        name, text = str(relic.get("name") or ""), str(relic.get("text") or "")
+        found = _HP_LOSS_CAP.search(text)
+        if found:
+            cap = (name, int(found.group(1)))
+            continue
+        found = _NO_BLOCK_RELIC.search(text)
+        if found:
+            if block_now == 0:
+                block_parts.append((name, int(found.group(1))))
+            continue
+        found = _PER_CARD_RELIC.search(text)
+        if found:
+            if hand:
+                block_parts.append((name, int(found.group(1)) * len(hand)))
+            continue
+        # Any other relic that gives Block at the end of the turn (Ripple
+        # Basin: only if no Attack was played, which the wire does not say).
+        if _END_OF_TURN.search(text) and re.search(r"\bgain \d+ Block", text,
+                                                    re.I):
+            unknown.append(name)
+    for power in you.get("powers") or []:
+        key, stacks = _fold(power.get("name")), power.get("stacks")
+        name = str(power.get("name") or "")
+        if key in HIT_RULE_POWERS:
+            unknown.append(name)
+            continue
+        if not isinstance(stacks, int) or stacks <= 0:
+            continue
+        if key in EOT_BLOCK_POWERS:
+            block_parts.append((name, stacks))
+        elif key in EOT_HIT_POWERS:
+            hit_parts.append((name, stacks))
+        elif key in EOT_HP_POWERS:
+            hp_parts.append((name, stacks))
+    for orb in (you.get("orbs") or {}).get("list") or []:
+        if _fold(orb.get("name")) in ("frost", "frost orb") and orb.get(
+                "passive"):
+            block_parts.append(("Frost", int(orb["passive"])))
+    for card in hand:
+        name = _plain_name(card.get("title"))
+        text = str(card.get("text") or "")
+        # Regret: HP lost per card in hand at the end, whatever the hand
+        # holds then; named, never counted.
+        if _fold(name) == "regret" or (_IN_HAND_EOT.search(text)
+                                       and re.search(r"\bfor each\b", text,
+                                                     re.I)):
+            if name not in unknown:
+                unknown.append(name)
+            continue
+        if not _IN_HAND_EOT.search(text):
+            continue
+        damage, hp = _TAKE_DAMAGE.search(text), _LOSE_HP.search(text)
+        if damage:
+            hit_parts.append((name, int(damage.group(1))))
+        elif hp:
+            hp_parts.append((name, int(hp.group(1))))
+        elif name not in unknown:
+            unknown.append(name)
+    osty = next((pet for pet in pets if pet.get("absorbs")
+                 and int(pet.get("hp") or 0) > 0), None)
+    return {"block": block_parts, "hit": hit_parts, "hp": hp_parts,
+            "osty": osty, "cap": cap, "unknown": unknown}
+
+
+def _fold_clauses(facts: dict[str, Any], absorbs: bool) -> list[str]:
+    """The few words for each fact folded into the take."""
+    out = []
+    for key, template, one, many in (("block", FOLD_BLOCK, "adds", "add"),
+                                     ("hit", FOLD_SELF_HIT, "hits", "hit"),
+                                     ("hp", FOLD_SELF_HP, "costs", "cost")):
+        if facts[key]:
+            who, n, plural = _named_sum(facts[key])
+            out.append(template.format(who=who, n=n,
+                                       verb=many if plural else one))
+    if absorbs and facts["osty"]:
+        out.append(FOLD_OSTY.format(name=facts["osty"]["name"],
+                                    hp=facts["osty"]["hp"]))
+    return out
+
+
+def _with_folds(line: str, clauses: list[str]) -> str:
+    """`line` with its closing full stop moved after the folded facts."""
+    return line[:-1] + INCOMING_FOLDS.format(folds="; ".join(clauses)) + "."
+
+
+def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
+                   hand: list[dict[str, Any]] | None = None,
+                   pets: list[dict[str, Any]] | None = None) -> str:
+    """`- Incoming this turn: N (your Block B): you would take T.`
+
+    The sum of every attack part shown; a part it cannot count is named as
+    unknown. SEAT PAGE 6: and what lands before the hits or stands between
+    them and your HP, folded in where the wire gives the number and said in
+    a few words (`_turn_end_facts`); what it cannot count is named. No plan."""
+    total, unknown, any_attack = 0, [], False
+    vulnerable = _stacks_of(you, "vulnerable")
+    for e in enemies:
+        if e.get("phase_flip") or (isinstance(e.get("hp"), int)
+                                   and e["hp"] <= 0):
+            continue
+        weak = _stacks_of(e, "weak")
+        for intent in e.get("intents") or []:
+            if _fold(intent.get("type")) != "attack":
+                continue
+            any_attack = True
+            part = _attack_part_total(intent, weak, vulnerable)
+            if part is None:
+                name = str(e.get("name") or "an enemy")
+                if name not in unknown:
+                    unknown.append(name)
+            else:
+                total += part
+    facts = _turn_end_facts(you, hand or [], pets or [])
+    not_counted = (INCOMING_NOT_COUNTED.format(
+        names=_and_list(facts["unknown"])) if facts["unknown"] else "")
+    if not any_attack and not (facts["hit"] or facts["hp"]):
+        return INCOMING_NONE + not_counted
+    block = int(you.get("block") or 0)
+    if unknown:
+        clauses = _fold_clauses(facts, absorbs=True)
+        if facts["cap"]:
+            clauses.append(FOLD_CAP.format(name=facts["cap"][0],
+                                           cap=facts["cap"][1]))
+        line = INCOMING_UNKNOWN.format(total=total, who=_and_list(unknown),
+                                       block=block)
+        if clauses:
+            line = _with_folds(line, clauses)
+        return line + not_counted
+    # The game's order: end-of-turn Block, then the self-hits (Block takes
+    # them), then the HP-loss ones, then the attacks. Osty takes the
+    # unblocked attack damage up to his HP (`DieForYouPower`) and only the
+    # rest reaches you; a cap relic stops the turn's loss at its number.
+    held = block + sum(n for _name, n in facts["block"])
+    self_hit = sum(n for _name, n in facts["hit"])
+    lost = max(0, self_hit - held) + sum(n for _name, n in facts["hp"])
+    held = max(0, held - self_hit)
+    unblocked = max(0, total - held)
+    absorbs = bool(facts["osty"]) and unblocked > 0
+    if absorbs:
+        unblocked = max(0, unblocked - int(facts["osty"]["hp"]))
+    take = lost + unblocked
+    clauses = _fold_clauses(facts, absorbs)
+    if facts["cap"] and take > facts["cap"][1]:
+        take = facts["cap"][1]
+        clauses.append(FOLD_CAP.format(name=facts["cap"][0],
+                                       cap=facts["cap"][1]))
+    if any_attack:
+        line = INCOMING_LINE.format(total=total, block=block, take=take)
+    else:
+        line = INCOMING_NO_ATTACK_TAKE.format(block=block, take=take)
+    if clauses:
+        line = _with_folds(line, clauses)
+    if take and isinstance(you.get("hp"), int) and you.get("max_hp"):
+        line += INCOMING_LEAVES.format(after=max(0, you["hp"] - take),
+                                       max_hp=you["max_hp"])
+    return line + not_counted
+
+
+#: SEAT PAGE 3: the end-of-turn acts' Block, beside the incoming line on a
+#: stage board. Sigewinne's line gives Block for every Repay, and an act or
+#: the Singer may Repay at the end of the turn, before the enemies act.
+INCOMING_STAGE_BLOCK = (" Your guests' end-of-turn acts come first and may "
+                        "add Block (Sigewinne).")
+INCOMING_STAGE_BLOCK_FIXED = (" Your guests' end-of-turn acts come first and "
+                              "add {n} Block.")
+
+
+def _stage_block_clause(stage: dict[str, Any] | None) -> str:
+    """What the stage may add to her Block before the enemies act, or `""`.
+    The forecast's own figure where it sends one; else Sigewinne on stage is
+    named, because her line turns a Repay into Block and the page cannot
+    count a Repay's size before it lands."""
+    if not stage:
+        return ""
+    forecast = stage.get("forecast") or {}
+    after = forecast.get("block") or stage.get("act_block") or 0
+    if after:
+        return INCOMING_STAGE_BLOCK_FIXED.format(n=after)
+    if any(row.get("member") == "sigewinne"
+           for row in stage.get("seats") or []):
+        return INCOMING_STAGE_BLOCK
+    return ""
+
+
+def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
+    """The phrases for one kind of event, repeats counted."""
+    counted: dict[tuple, int] = {}
+    for ev in evs:
+        key = (ev["card"], ev["target"], ev["power"], ev["source"],
+               bool(ev.get("on_player")))
+        counted[key] = counted.get(key, 0) + 1
+    out: list[str] = []
+    if kind == "drawn":
+        by_source: dict[str, list[str]] = {}
+        for (card, _t, _p, source, _o), n in counted.items():
+            by_source.setdefault(source, []).append(
+                card + (f" x{n}" if n > 1 else ""))
+        for source, cards in by_source.items():
+            out.append(f"drew {_and_list(cards)}"
+                       + (f" ({source})" if source else ""))
+        return out
+    if kind == "curtain":
+        total = sum(int(ev.get("amount") or 0) for ev in evs)
+        return [EVENT_HP_RETURNED.format(n=total)] if total > 0 else []
+    for (card, target, power, _s, on_player), n in counted.items():
+        times = f" x{n}" if n > 1 else ""
+        if kind == "negated":
+            out.append((f"your Artifact negated {power}" if on_player
+                        else f"Artifact negated {power} on {target}") + times)
+        elif kind == "triggered":
+            if power.strip().casefold() in PASSIVE_ENEMY_POWERS:
+                continue
+            out.append(f"{target}'s {power} fired{times}")
+        elif kind == "returned":
+            out.append(f"{card} came back to your deck from {target}")
+        elif kind == "shattered":
+            out.append(EVENT_SHATTERED.format(card=card or "an attack",
+                                              target=target) + times)
+    return out
+
+
+def _events_lines(events: list[dict[str, Any]], after: int) -> list[str]:
+    """`- Since last page: ...`, or nothing. The events with `seq` past
+    `after`, grouped by kind in the order each kind first happened, capped."""
+    fresh = [ev for ev in events if int(ev.get("seq") or 0) > after]
+    kinds: list[str] = []
+    for ev in fresh:
+        if ev["kind"] not in kinds:
+            kinds.append(ev["kind"])
+    phrases: list[str] = []
+    for kind in kinds:
+        phrases += _event_phrases(kind, [e for e in fresh
+                                         if e["kind"] == kind])
+    if not phrases:
+        return []
+    if len(phrases) > EVENTS_CAP:
+        phrases = phrases[:EVENTS_CAP] + [
+            f"and {len(phrases) - EVENTS_CAP} more"]
+    return [EVENTS_HEAD + "; ".join(phrases) + "."]
+
+
+def newest_event(obs: dict[str, Any]) -> int:
+    """The highest event `seq` on a combat observation, else 0. The printing
+    door records it so the next page prints only what came after."""
+    combat = obs.get("combat") or {}
+    rows = combat.get("events") or obs.get("events") or []
+    return max((int(ev.get("seq") or 0) for ev in rows), default=0)
+
 def render(obs: dict[str, Any]) -> str:
     """The observation as the page the tester is handed. Same content."""
     st = obs["state_type"]
@@ -2300,6 +2875,12 @@ def render(obs: dict[str, Any]) -> str:
     # CO-OP: what the run is waiting on, first, where a reader looks first.
     # Nothing on a singleplayer page, which has no `coop` key.
     out: list[str] = coop_banner(obs.get("coop"))
+    # SEAT PAGE 3: what happened since the last page where no fight is up to
+    # print it (the curtain call, on the reward screen). Printed only through
+    # a printing door, which sets `events_after`.
+    if obs["screen"] != "combat" and "events_after" in obs:
+        said = _events_lines(obs.get("events") or [], obs["events_after"])
+        out += said + ([""] if said else [])
     if obs["screen"] == "combat":
         c = obs["combat"]
         you = c["you"]
@@ -2407,6 +2988,10 @@ def render(obs: dict[str, Any]) -> str:
                    f"{c['piles']['exhaust']} exhausted")
         out += _orb_lines(you.get("orbs"))
         out += _ally_lines(c.get("pets") or [])
+        # 2026-10-05: what happened since the last page that no other line
+        # shows. Omitted when there is nothing.
+        out += _events_lines(c.get("events") or [],
+                             int(c.get("events_after") or 0))
         # `EB-238`. IN THE HEADER, with HP and Energy, because that is where
         # the game keeps it: the relic row sits along the top of every screen
         # of a run, and a reader who is shown it only when one is OFFERED has
@@ -2414,7 +2999,7 @@ def render(obs: dict[str, Any]) -> str:
         if you["relics"]:
             out += ["", "## Your relics", ""] + [
                 f"- **{r['name']}**"
-                + (f" ({r['counter']})" if r.get("counter") else "")
+                + (f" ({_relic_counter(r)})" if r.get("counter") else "")
                 + (RELIC_USED_UP if r.get("used_up") else "")
                 + (f" — {r['text']}" if r["text"] else "")
                 for r in you["relics"]]
@@ -2629,88 +3214,8 @@ def render(obs: dict[str, Any]) -> str:
         if c.get("resolutions") is not None:
             out += ["", RESOLUTIONS_HEADING, ""]
             out += _resolution_lines(c["resolutions"],
-                                     stage=c.get("stage") is not None)
-        if c.get("memory"):
-            # `EB-181`, rewritten for the memory CARD that replaced the strip
-            # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
-            # mirrors THE ELEMENT'S facts, in the element's own order, because
-            # a blind reader must be given what a sighted player sees and
-            # nothing else:
-            #
-            #   1. the Charge count -- the big number under the card;
-            #   2. the FRONT card, its price, and whether it fires next turn --
-            #      the blue/red ring, which is one comparison and no forecast;
-            #   3. the queue, in order, as the pile view shows it on a click,
-            #      with the run-out called out.
-            #
-            # `EB-198` is why the first two are separate lines. The strip put
-            # the bank, the price and the state into one sentence with three
-            # grammars ("Charge 1 / 0"), and the tester read a free front as a
-            # fraction over zero and an empty memory as a contradiction of the
-            # Charge it had just been shown. Both frames were TRUE. One fact
-            # per line is the repair.
-            m = c["memory"]
-            out += ["", "## The Bake-Kurage's memory", ""]
-            if m["base_kit"]:
-                out.append("- The Bake-Kurage is on the field for the whole "
-                           "fight. Nothing summons it and nothing removes it.")
-            out.append(f"- Charge: {m['bank']}")
-            if m["queue"]:
-                front = m["queue"][0]
-                price = ("costs nothing" if not front["price"]
-                         else f"costs {front['price']} Charge")
-                if m["blocked"]:
-                    state = ("you cannot pay it, so NOTHING in the memory "
-                             "fires next turn")
-                else:
-                    state = "it fires at the start of your next turn"
-                out.append(f"- Next to fire: **{front['name']}** — {price} — "
-                           f"{state}.")
-                # `EB-214` item 7 (`M55`, re-scoped by R224): the pile
-                # view's own header line. The page's contract above is the
-                # element's facts in the element's order, and item 3 is "the
-                # queue, as the pile view shows it on a click" -- the header
-                # is part of that view, and a reader who cannot click gets it
-                # here or nowhere. The screen's sentence VERBATIM, with the
-                # rate off the same constant `KurageMemoryText.ChargeSource`
-                # interpolates (`lint_constant_parity` pins the pair equal),
-                # so the two surfaces cannot drift on a retune.
-                out.append(
-                    f"- Opening the memory shows “{CHARGE_SOURCE_LINE}”, "
-                    "and then the whole memory, front first:")
-                # `EB-248`: THE COST THE RULE MULTIPLIED, beside the price it
-                # produced. The price is three times the EFFECTIVE face, so a
-                # Muster recruit printing 2 enrols at 3 and the tester who read
-                # both numbers had no route from one to the other -- the defect
-                # was named unprompted, and it is legibility rather than
-                # arithmetic. This is `KurageMemory.PriceText`'s sentence,
-                # word for word, so the page and the pile view say the same
-                # thing. A free memory carries no derivation: a zero price
-                # means a zero cost, and "cost 0 x 3" would restate the answer
-                # rather than explain it.
-                for i, e in enumerate(m["queue"], 1):
-                    price = ("free" if not e["price"] else
-                             f"{e['price']} Charge, cost {e['cost']} x "
-                             f"{KURAGE_COST_PER_ENERGY}")
-                    out.append(f"  {i}. **{e['name']}** — {price} — "
-                               f"aims at {e['target']}")
-                # §14.4's running subtraction, the pile view's own colouring:
-                # blue while the bank still reaches, red from the shortfall AND
-                # every entry behind it. -1 means the bank covers the queue.
-                run_out = m.get("run_out_index", -1)
-                if run_out is None or run_out < 0:
-                    out.append("- Your Charge covers every memory queued, if "
-                               "you spend none of it elsewhere.")
-                else:
-                    out.append(f"- Charge runs out at #{run_out + 1} "
-                               f"(**{m['queue'][run_out]['name']}**): that one "
-                               f"and everything behind it are held until the "
-                               f"bank catches up.")
-            else:
-                out.append("- The memory is empty. Nothing is queued and "
-                           "nothing fires next turn.")
-            out.append(f"- At the end of this turn the jellyfish will "
-                       f"{_pulse_phrase(m)}.")
+                                     stage=c.get("stage") is not None,
+                                     enemies=c.get("enemies") or [])
         if you["potions"]:
             out += ["", "## Potions", ""]
             # `EB-341`: how many slots there are, beside how many are used.
@@ -2785,11 +3290,26 @@ def render(obs: dict[str, Any]) -> str:
                 # `EB-605`: and where a Bomb badge's headline and its list of
                 # charge sizes are two different numbers, which is which.
                 out += _bomb_forecast_note(pw, e["powers"], "    ")
+        # 2026-10-05: the attacks shown, summed against your Block. A sum of
+        # the telegraphs and nothing more; no plan is computed.
+        # SEAT PAGE 3: on Furina's stage too. Her guests are pets, and an
+        # enemy's move is handed the player creatures only, so every attack
+        # shown is at her (`FurinaStagePets`: "enemies cannot target it by
+        # construction"); what the end-of-turn acts may add is said, not
+        # counted. NOT IN CO-OP: a telegraph carries no target, and either
+        # player may take it.
+        if c["enemies"] and not obs.get("coop"):
+            out += ["", _incoming_line(c["enemies"], you, c["hand"],
+                                       c.get("pets"))
+                    + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the
         # opposite, which is what sent a seat's Melt into the wrong body.
         if c["enemies"]:
             out += ["", ENEMY_HANDLE_NOTE]
+        # Seat page 5 (2026-10-05): `EB-323`'s missing target, on every page
+        # where more than one body could be meant.
+        out += _intent_target_note(c["enemies"], bool(obs.get("coop")))
         # `EB-708`: and where one of those names carries a SIZE letter, the
         # legend for it -- beside the handle note, because both are about a
         # bracketed thing the list above just printed, and because the seat
@@ -2829,6 +3349,15 @@ def render(obs: dict[str, Any]) -> str:
                for p in you["powers"] + [x for e in c["enemies"]
                                          for x in e["powers"]]):
             out += ["", AURA_NOTE]
+        # 2026-10-05: what each kind of enemy here does. SEAT PAGE 3: once
+        # PER FIGHT, on the first page a printing door shows of it, whatever
+        # the round (`briefed`, the fight's memory of the kinds already
+        # briefed, set by `blindplay.screen_page`); with no door, on round 1.
+        # The brief page never trims it (`blindplay_brief.KEPT_SECTIONS`).
+        if c.get("briefed") is not None:
+            out += _briefing_lines(c["enemies"], c["briefed"])
+        elif c["round"] == 1:
+            out += _briefing_lines(c["enemies"])
     elif obs["screen"] == "map":
         out += ["# The map", ""]
         # `EB-323`: the floor first, because it is the frame the rest of this
@@ -2840,6 +3369,11 @@ def render(obs: dict[str, Any]) -> str:
                 here=obs["floor"],
                 act=f" of act {obs['act']}" if obs.get("act") else "",
                 next=obs["floor"] + 1), ""]
+        if obs.get("seed") or obs.get("ascension") is not None:
+            out += [MAP_RUN_LINE.format(
+                seed=obs.get("seed") or "not known to this page",
+                ascension=(obs["ascension"] if obs.get("ascension") is not None
+                           else "not known to this page")), ""]
         if obs.get("hp") is not None:
             out += [f"- HP {obs['hp']}/{obs['max_hp']}", ""]
         out += ["Where you can go next:", ""] + _render_options(obs["nodes"])
@@ -3060,8 +3594,14 @@ def render(obs: dict[str, Any]) -> str:
             # sent nothing, so it says exactly that.
             out += [EMPTY_SHELVES_NOTE]
     elif obs["screen"] == "rest_site":
+        # SEAT PAGE 4: the game's Heal figure is not capped by max HP (a seat
+        # at 62/80 read "Heal 24" and healed 18), so the room is printed.
+        room = (obs["max_hp"] - obs["hp"]
+                if isinstance(obs.get("hp"), int)
+                and isinstance(obs.get("max_hp"), int) else 0)
         out += ["# A place to rest", "",
                 f"HP {obs['hp']}/{obs['max_hp']}"
+                + (REST_ROOM.format(room=room) if room > 0 else "")
                 + (f", {obs['gold']} gold" if obs.get("gold") is not None
                    else ""), ""] \
             + (_render_options(obs["options"]) if obs["options"]
@@ -3171,7 +3711,7 @@ def render(obs: dict[str, Any]) -> str:
     if obs.get("held_relics"):
         out += ["", "## Your relics", ""] + [
             f"- **{r['name']}**"
-            + (f" ({r['counter']})" if r.get("counter") else "")
+            + (f" ({_relic_counter(r)})" if r.get("counter") else "")
             + (RELIC_USED_UP if r.get("used_up") else "")
             + (f" — {r['text']}" if r["text"] else "")
             for r in obs["held_relics"]]

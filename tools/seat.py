@@ -26,7 +26,12 @@ outlives the round and the next `deploy_proto.ps1` refuses on its pid.
     python tools/seat.py --opus-brief --lane 2 --character KLEEMOD-KLEE
 
 `--opus-brief` prints `docs/current/operations/seat-brief.md`'s brief with the
-lane filled in and runs nothing. That is for the OTHER kind of seat -- an Opus
+lane filled in and runs nothing. Before the brief, on stderr so the pasted
+stdout stays the brief alone, it prints the embark command the coordinator
+runs first, with an explicit `--max-actions` (120 for an Opus seat by default;
+`--max-actions 1500` for a Sonnet seat). `--scratch DIR` adds the seat's own
+notes path, `DIR/seat-lane<N>/notes.md`, to the line that names the lane.
+That is for the OTHER kind of seat -- an Opus
 subagent playing by hand through `blindplay observe` / `act` -- where the thing
 that must not be re-improvised is the blindness rules, not the commands.
 
@@ -120,12 +125,43 @@ def interpreter() -> str:
 #: with `--coop`, so a singleplayer seat's brief is the brief it always was.
 COOP_HEADING = "\n## CO-OP"
 
+#: The action cap an Opus seat's embark gets when the coordinator names none.
+#: `embark --max-actions` defaults to 0 (no cap), and a hand-driven seat once
+#: ran 279 actions on it. The brief's own budget paragraph says 120.
+OPUS_MAX_ACTIONS = 120
+#: What a backend seat's session is capped at when the coordinator names none.
+BACKEND_MAX_ACTIONS = 60
 
-def brief_text(lane: int, character: str, coop: bool = False) -> str:
+
+def notes_path(scratch: str, lane: int) -> str:
+    """The seat's own notes file, `<scratch>/seat-lane<N>/notes.md`. Seats
+    running at once share the coordinator's scratchpad, and a shared notes
+    file once held an earlier seat's notes; one folder per lane is the
+    brief's own rule, with the path filled in."""
+    return (PurePath(scratch) / f"seat-lane{lane}" / "notes.md").as_posix()
+
+
+def embark_line(lane: int, character: str, max_actions: int,
+                coop: bool = False) -> str:
+    """The embark the coordinator runs before handing over the brief, with
+    the cap explicit. A co-op pair is embarked once for both lanes, so its
+    line leaves the pair for the coordinator to name."""
+    py = interpreter()
+    if coop:
+        return (f"{py} -m understudy.embark --coop --lanes <HOST>,<CLIENT> "
+                f"--characters <HOST>,<CLIENT> --max-actions {max_actions}")
+    return (f"{py} -m understudy.embark --character {character} "
+            f"--lane {lane} --max-actions {max_actions}")
+
+
+def brief_text(lane: int, character: str, coop: bool = False,
+               scratch: str = "") -> str:
     """The brief, with the lane and the interpreter filled in.
 
     `coop` appends the page's co-op section (its own heading line dropped):
     a seat sharing a run with another seat is told so, and nobody else is.
+    `scratch` adds the seat's own notes path to the line that names its
+    lane; the brief's body is never reworded.
     """
     text = BRIEF.read_text(encoding="utf-8")
     _, _, body = text.partition("## THE BRIEF")
@@ -135,8 +171,12 @@ def brief_text(lane: int, character: str, coop: bool = False) -> str:
     body = body.replace("<LANE>", str(lane))
     py = interpreter()
     body = BARE_PYTHON.sub(lambda _m: py, body)
-    return (f"You are the blind seat for **{character}** on lane {lane}.\n"
-            f"{body.rstrip()}\n")
+    head = f"You are the blind seat for **{character}** on lane {lane}."
+    if scratch:
+        notes = notes_path(scratch, lane)
+        head += (f" Your scratch folder is `{PurePath(notes).parent.as_posix()}`"
+                 f" and your notes file is `{notes}`.")
+    return f"{head}\n{body.rstrip()}\n"
 
 
 def main(argv: list[str]) -> int:
@@ -148,7 +188,11 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--backend", choices=("local", "codex"), default="codex")
     ap.add_argument("--model", default="")
     ap.add_argument("--session-id", default="")
-    ap.add_argument("--max-actions", type=int, default=60)
+    ap.add_argument("--max-actions", type=int, default=None,
+                    help=f"the action cap: the session's for a backend seat "
+                         f"(default {BACKEND_MAX_ACTIONS}), the embark's for "
+                         f"--opus-brief (default {OPUS_MAX_ACTIONS}; a Sonnet "
+                         f"seat uses 1500)")
     ap.add_argument("--max-wall-s", type=float, default=3600.0)
     ap.add_argument("--local-url", default=DEFAULT_LOCAL_URL,
                     help=f"only used with --backend local, and only when "
@@ -162,14 +206,36 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--coop", action="store_true",
                     help="with --opus-brief: add the co-op paragraph (the "
                          "run is shared with another seat; `wait`)")
+    ap.add_argument("--scratch", default="",
+                    help="with --opus-brief: the coordinator's scratchpad; "
+                         "the brief names <scratch>/seat-lane<N>/notes.md as "
+                         "the seat's own notes file")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the three commands and their env, run nothing")
     ap.add_argument("--oneline", action="store_true")
     args = ap.parse_args(argv)
 
     if args.opus_brief:
-        print(brief_text(args.lane, args.character, coop=args.coop))
+        cap = (OPUS_MAX_ACTIONS if args.max_actions is None
+               else args.max_actions)
+        # THE COORDINATOR'S LINES GO TO STDERR: stdout is the brief, pasted
+        # whole, and the embark is not one of the seat's two commands.
+        print("Embark first (coordinator only; not part of the brief):",
+              file=sys.stderr)
+        print("  " + embark_line(args.lane, args.character, cap,
+                                 coop=args.coop), file=sys.stderr)
+        if args.scratch:
+            notes = Path(notes_path(args.scratch, args.lane))
+            if notes.exists():
+                print(f"  WARNING: {notes.as_posix()} already exists (an "
+                      f"earlier seat's notes?); move it before this seat "
+                      f"starts.", file=sys.stderr)
+        print(file=sys.stderr)
+        print(brief_text(args.lane, args.character, coop=args.coop,
+                         scratch=args.scratch))
         return 0
+    if args.max_actions is None:
+        args.max_actions = BACKEND_MAX_ACTIONS
 
     if args.lane == 0 and not args.allow_lane_0:
         print("REFUSED: lane 0 is the machine's own game and its profile is "

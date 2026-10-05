@@ -106,6 +106,9 @@ public static class ArmKeywordTips
     public const string WriothesleyKey = "KLEEMOD-ARM_STAGE_WRIOTHESLEY";
     public const string LynetteKey = "KLEEMOD-ARM_STAGE_LYNETTE";
     public const string ClorindeKey = "KLEEMOD-ARM_STAGE_CLORINDE";
+    public const string LyneyKey = "KLEEMOD-ARM_STAGE_LYNEY";
+    public const string SigewinneKey = "KLEEMOD-ARM_STAGE_SIGEWINNE";
+    public const string ChevreuseKey = "KLEEMOD-ARM_STAGE_CHEVREUSE";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -896,4 +899,19 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, ClorindeKey,
              StagePerformerBadge.ActText(StagePerformer.Clorinde));
+
+    public static IEnumerable<IHoverTip> ForLyney(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, LyneyKey,
+             StagePerformerBadge.ActText(StagePerformer.Lyney));
+
+    public static IEnumerable<IHoverTip> ForSigewinne(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, SigewinneKey,
+             StagePerformerBadge.ActText(StagePerformer.Sigewinne));
+
+    public static IEnumerable<IHoverTip> ForChevreuse(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, ChevreuseKey,
+             StagePerformerBadge.ActText(StagePerformer.Chevreuse));
 }

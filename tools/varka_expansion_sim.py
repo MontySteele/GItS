@@ -108,10 +108,14 @@ P = "proto_vk_"
 # the total-Oath and element-change Block (Gale Mantle, Windborne Resolve)
 # joins SWITCH, the paper's "split and switch decks". Gust Ward is in no list
 # (every deck's filler; the default scores price it).
+# The combo pass (review/active/varka-combo-pass-2026-10-04.md, 2026-10-04):
+# Oath of the Knights and Knightly Guard left FOCUS, West Wind Shield left
+# GALE, Gale Mantle and Tailwind Guard left SWITCH with their cards; Pyro's
+# Exhaust engine and Cryo's two status payoffs join their PAYOFFS.
 FOCUS = ["oathsworn_strike", "eye_of_the_storm",
-         "stormward_stance", "oath_of_the_knights",
+         "stormward_stance",
          "dawn_winds_march", "azure_devour", "sworn_brotherhood",
-         "northwind_avatar", "knightly_guard", "tailwind_stride",
+         "northwind_avatar", "tailwind_stride",
          "pathfinders_mark", "vow_of_the_blade",
          "unwavering_banner", "oath_unto_death", "grand_masters_verdict",
          "wolfpack", "oathbound_aegis"]
@@ -129,20 +133,22 @@ KNIGHTS = {
 # Electro's list gains the four discard-and-spend cards. Pressure Front left
 # GALE and Four Winds' Accord left SWITCH with their cards.
 # The rebalance (sec.4): each element's borrowing payoff joins its list.
-PAYOFFS = {"pyro": ["blazing_charge", "wildfire_oath", "kindled_edge"],
+PAYOFFS = {"pyro": ["blazing_charge", "wildfire_oath", "kindled_edge",
+                    "stoke_the_flames", "ember_cleave", "pyre_oath"],
            "hydro": ["tidal_bulwark", "retaliating_tide", "rippling_guard"],
-           "cryo": ["glacial_edict", "absolute_zero", "frost_ward"],
+           "cryo": ["glacial_edict", "absolute_zero", "frost_ward",
+                    "shatter", "deep_freeze"],
            "electro": ["static_field", "thundering_verdict", "charged_lunge",
                        "short_circuit", "chain_lightning", "violet_storm",
                        "storm_battery"]}
 GALE = ["gale_sweep", "crosswind", "rising_gale", "tempest_charge",
         "jean_dandelion_breeze", "storm_surge", "wall_of_gales",
-        "converging_winds", "west_wind_shield", "eye_wall",
+        "converging_winds", "eye_wall",
         "crosscurrent", "twin_gales", "downburst", "eye_of_stormterror"]
 SWITCH = ["shifting_gale", "cycle_of_seasons", "windborne_resolve",
-          "gale_mantle", "weathervane",
+          "weathervane",
           "tempest_of_the_four_winds", "twin_gales", "oathbound_aegis",
-          "change_of_guard", "boreas_unbound", "tailwind_guard",
+          "change_of_guard", "boreas_unbound",
           "rally_to_the_banner"]
 MUSTER = ["knights_roll_call", "grand_masters_order", "knightly_strike",
           "assembly_at_the_cathedral", "charge_of_the_knights",
@@ -395,6 +401,29 @@ def _translate(state, fx):
         if any(e.aura for e in state.living_enemies):
             yield {"op": "apply_power", "power": "vk_oath_proxy",
                    "amount": amt, "target": "self"}
+    # --- the combo pass's kinds (2026-10-04) ---
+    elif kind == "gain_pyro_oath":
+        yield {"op": "apply_power", "power": "vk_oath_proxy", "amount": amt,
+               "target": "self"}
+    elif kind == "pyro_strike":
+        yield {"op": "damage", "amount": base, "target": "enemy"}
+        yield oath_proxy
+    elif kind == "shatter":
+        # Priced against the enemy carrying the most Weak and Vulnerable.
+        stacks = max((V.weak_and_vulnerable(e)
+                      for e in state.living_enemies), default=0)
+        yield {"op": "damage", "amount": base + per * stacks,
+               "target": "enemy"}
+        yield oath_proxy
+    elif kind == "deep_freeze":
+        e = max(state.living_enemies, key=V.weak_and_vulnerable,
+                default=None)
+        if e is not None:
+            for name in ("weak", "vulnerable"):
+                n = int(e.powers.get(name, 0))
+                if n:
+                    yield {"op": "apply_power", "power": name, "amount": n,
+                           "target": "enemy"}
     elif kind in ("change_of_guard", "cleanse", "swirled_take_more"):
         return
     else:
@@ -1107,7 +1136,13 @@ def report(data, against=None, out=print):
 REBALANCE_CARDS = ("kindled_edge", "storm_battery", "frost_ward",
                    "rippling_guard", "barbara_show_begin",
                    "barbara_whisper_of_water", "razor_claw_and_thunder",
-                   "wildfire_oath", "absolute_zero", "cycle_of_seasons")
+                   "wildfire_oath", "absolute_zero", "cycle_of_seasons",
+                   # The combo pass (2026-10-04): its five new rows and the
+                   # cards it changed.
+                   "stoke_the_flames", "ember_cleave", "pyre_oath",
+                   "shatter", "deep_freeze", "unwavering_banner",
+                   "amber_baron_bunny", "charge_of_the_knights",
+                   "kaeya_frostgnaw")
 
 
 def _act1(rs):

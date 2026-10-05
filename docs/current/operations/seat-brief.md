@@ -27,6 +27,8 @@ GITS_LANE=<LANE> python -m understudy.blindplay observe
 GITS_LANE=<LANE> python -m understudy.blindplay act "<command>"
 ```
 
+Never call bare `python` or `python3` for anything: on this machine it hangs. Use the interpreter path exactly as the two commands above print it.
+
 Use `observe --brief` and `act --brief` instead of filtering output yourself;
 never filter observe or act output with grep. The brief page defines each
 word the first time your lane meets it; `observe --define "<Word>"` prints a

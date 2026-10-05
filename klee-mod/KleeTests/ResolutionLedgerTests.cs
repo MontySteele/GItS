@@ -306,12 +306,13 @@ public class ResolutionLedgerTests
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
                              "overflowed", "hits", "applied", "summoned",
-                             "oath", "fang_ascension" },
+                             "oath", "fang_ascension", "between",
+                             "events" },
                      new List<string>(row.Keys).ToArray());
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
         Assert.Equal(new[] { "target", "amount", "blocked", "combat_id",
-                             "killed", "on_player" },
+                             "killed", "on_player", "source" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
         // 2026-10-01: a hit on a player inside a play is marked as one.
@@ -378,5 +379,156 @@ public class ResolutionLedgerTests
 
         Assert.NotNull(ResolutionLedger.Snapshot());
         Assert.Empty(ResolutionLedger.Snapshot());
+    }
+
+    // ------------------------------------------- 2026-10-04, the seat page ---
+
+    /// <summary>"Put Bomb 1" where the card placed Bomb 11: the hook files the
+    /// pile's count, and the placement then sizes its own entry.</summary>
+    [Fact]
+    public void A_placement_sizes_the_entry_its_apply_filed()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("bang", "Bang Bang!", false);
+        ResolutionLedger.NotePower("Toadpole", "Weak", 1, "2");
+        var mark = ResolutionLedger.MarkApplied();
+        ResolutionLedger.NotePower("Toadpole", "Bomb", 1, "2");
+        ResolutionLedger.SizeAppliedSince(mark, "2", "Mine", 3);
+
+        var applied = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["applied"]!;
+        Assert.Equal("Weak", applied[0]["power"]);
+        Assert.Equal(1, applied[0]["amount"]);
+        Assert.Equal("Mine", applied[1]["power"]);
+        Assert.Equal(3, applied[1]["amount"]);
+    }
+
+    /// <summary>Nothing filed since the mark (the apply filed no entry)
+    /// leaves the earlier entries alone.</summary>
+    [Fact]
+    public void A_placement_with_no_entry_since_its_mark_changes_nothing()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("bang", "Bang Bang!", false);
+        ResolutionLedger.NotePower("Toadpole", "Weak", 1, "2");
+        var mark = ResolutionLedger.MarkApplied();
+        ResolutionLedger.SizeAppliedSince(mark, "2", "Bomb", 11);
+
+        var applied = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["applied"]!;
+        Assert.Single(applied);
+        Assert.Equal("Weak", applied[0]["power"]);
+        Assert.Equal(1, applied[0]["amount"]);
+    }
+
+    // ------------------------------------- 2026-10-05: the page events ---
+
+    [Fact]
+    public void An_event_inside_a_play_is_filed_on_that_card()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("acrobatics", "Acrobatics", false);
+        ResolutionLedger.NoteEvent(ResolutionLedger.Drawn, "Strike", "", "");
+
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Single(rows);
+        var events = (List<Dictionary<string, object?>>)rows[0]["events"]!;
+        Assert.Single(events);
+        Assert.Equal("drawn", events[0]["kind"]);
+        Assert.Equal("Strike", events[0]["card"]);
+        Assert.Equal(new[] { "kind", "card", "target", "power", "combat_id",
+                             "on_player", "seq", "amount" },
+                     new List<string>(events[0].Keys).ToArray());
+        Assert.Equal(0, events[0]["amount"]);
+    }
+
+    /// <summary>Seat page 3 (2026-10-05): the curtain call's figure rides
+    /// the event, and a Shatter and the curtain call reach the ledger.
+    /// </summary>
+    [Fact]
+    public void The_curtain_call_files_its_figure()
+    {
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.HpReturned, "", "Furina",
+                                   "", "", onPlayer: true, amount: 12);
+        var events = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["events"]!;
+        Assert.Equal("curtain", events[0]["kind"]);
+        Assert.Equal(12, events[0]["amount"]);
+        Assert.Equal("shattered", ResolutionLedger.Shattered);
+    }
+
+    [Fact]
+    public void A_shatter_and_the_curtain_call_reach_the_ledger()
+    {
+        Assert.Contains("ResolutionLedger.NoteEvent",
+            Il.Calls(Il.Method("FrozenPower", "AfterDamageReceived")));
+        Assert.Contains("ResolutionLedger.NoteEvent",
+            Il.Calls(Il.Method("FurinaStage", "CurtainCall")));
+    }
+
+    /// <summary>Outside any play the event goes on a row with no card,
+    /// which a page that predates it skips; the turn's order is kept by a
+    /// new such row after each play.</summary>
+    [Fact]
+    public void An_event_outside_a_play_rides_a_row_with_no_card()
+    {
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Negated, "", "Mecha Knight",
+                                   "Weak", "3");
+        ResolutionLedger.NoteEvent(ResolutionLedger.Triggered, "",
+                                   "Mecha Knight", "Artifact", "3");
+        ResolutionLedger.OpenPlay("strike", "Strike", false);
+        ResolutionLedger.ClosePlay();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Triggered, "", "Crusher",
+                                   "Crab Rage", "1");
+
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Equal(3, rows.Count);
+        Assert.Equal(true, rows[0]["between"]);
+        Assert.Equal("", rows[0]["card"]);
+        Assert.Equal(2, ((List<Dictionary<string, object?>>)
+            rows[0]["events"]!).Count);
+        Assert.Equal(false, rows[1]["between"]);
+        Assert.Equal(true, rows[2]["between"]);
+    }
+
+    [Fact]
+    public void The_event_sequence_only_rises_across_fights()
+    {
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Drawn, "Strike", "", "");
+        var first = (long)((List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["events"]!)[0]["seq"]!;
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Drawn, "Defend", "", "");
+        var second = (long)((List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["events"]!)[0]["seq"]!;
+        Assert.True(second > first);
+        Assert.True(first > 1_000_000_000_000L);
+    }
+
+    [Fact]
+    public void The_draw_hook_reaches_the_ledger()
+    {
+        var calls = Il.Calls(Il.Method("PlayTelemetryHooks", "AfterCardDrawn"));
+
+        Assert.Contains("ResolutionLedger.NoteEvent", calls);
+    }
+
+    [Fact]
+    public void The_hit_hook_hands_over_the_dealer()
+    {
+        var calls = Il.Calls(
+            Il.Method("PlayTelemetryHooks", "AfterDamageReceived"));
+
+        Assert.Contains("ResolutionLedger.NoteHit", calls);
+        Fresh();
+        ResolutionLedger.OpenPlay("strike", "Strike", false);
+        ResolutionLedger.NoteHit(null, 3, 0);
+        var row = ((List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["hits"]!)[0];
+        Assert.True(row.ContainsKey("source"));
+        Assert.Equal("", row["source"]);
     }
 }

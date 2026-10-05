@@ -257,9 +257,11 @@ def test_ascension_costs_2_retains_and_hits_10(rebalance):
     card = loader.get_card(_vk("four_winds_ascension"))
     assert (card.cost, card.retain) == (2, True)
     assert [e["amount"] for e in card.effects if e["op"] == "damage"] == [10]
+    # Combo pass pick 3 (2026-10-04): the upgrade is cost 2 to 1, in place
+    # of +3 damage and +1 per Oath.
     up = loader.get_card(_vk("four_winds_ascension") + "+")
-    assert (up.cost, up.retain) == (2, True)
-    assert [e["amount"] for e in up.effects if e["op"] == "damage"] == [13]
+    assert (up.cost, up.retain) == (1, True)
+    assert [e["amount"] for e in up.effects if e["op"] == "damage"] == [10]
     # The Fang's created copy carries the keyword the end-of-turn flush reads.
     st = _state()
     V._add_ascension(st, upgraded=False)

@@ -38,14 +38,14 @@ public sealed class ProtoFsUniversalRevelry : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRepay(ArmKeywordTips.ForDrain(ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("universal_revelry");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Universal Revelry"),
-        ("description", "You gain twice as much [gold]Fanfare[/gold]."),
+        ("description", "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that much additional [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

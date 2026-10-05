@@ -264,10 +264,16 @@ public class PoolCellCoverageTests
             // Attack (Bravura). Five cells are short again and every one is
             // seamed by the widening ladder (the matrix test above); the full
             // sheet waits on the slice's play (proposal pick 1).
+            //
+            // THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md
+            // sec.3) filled two: Rare/Power is four deep (Revelry, A
+            // Five-Century Act, Critics' Darling, Bis!), and Rare/* is seven.
+            // Rare/Attack (Let the People Rejoice), Rare/Skill (Singer,
+            // Clorinde) and Uncommon/Attack (Bravura, Grand Deluge) stay
+            // short and seamed.
             "furina-stage" => new[]
             {
-                "Rare/*", "Rare/Attack", "Rare/Power", "Rare/Skill",
-                "Uncommon/Attack",
+                "Rare/Attack", "Rare/Skill", "Uncommon/Attack",
             },
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();

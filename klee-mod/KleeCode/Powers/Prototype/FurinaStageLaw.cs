@@ -28,7 +28,7 @@ public static class FurinaStageLaw
     /// <c>furina_stage.SINGER_REPAY_UPGRADED</c>.</summary>
     public const int SingerRepayUpgraded = 3;
 
-    // ---- the four guests (sec.16) ------------------------------------------
+    // ---- the first four guests (sec.16) ------------------------------------------
 
     /// <summary>Charlotte's act: "Repay 2."</summary>
     public const int CharlotteActRepay = 2;
@@ -54,6 +54,37 @@ public static class FurinaStageLaw
     /// Electro damage to a random enemy."</summary>
     public const int ClorindePerRepay = 2;
 
+    // ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md) ------
+
+    /// <summary>Lyney's line: "Your Drain line is 10 HP lower."</summary>
+    public const int LyneyLineDrop = 10;
+
+    /// <summary>Lyney's act: "Drain 2: deal 8 Pyro damage to ALL enemies."
+    /// Below the line the act skips (no Drain, no damage).</summary>
+    public const int LyneyActDrain = 2;
+
+    /// <summary>Lyney's act's damage.</summary>
+    public const int LyneyActDamage = 8;
+
+    /// <summary>Sigewinne's act: "Repay 2." (Her line gives the Block of
+    /// every Repay.)</summary>
+    public const int SigewinneActRepay = 2;
+
+    /// <summary>Chevreuse's act: "Deal 4 damage to a random enemy."</summary>
+    public const int ChevreuseActDamage = 4;
+
+    /// <summary>Chevreuse's line: "Whenever you Spend, apply 1 Vulnerable to
+    /// a random enemy."</summary>
+    public const int ChevreuseLineVulnerable = 1;
+
+    /// <summary>A Five-Century Act: "You can Drain down to 1 HP." Also the
+    /// floor Lyney's line cannot push the line below.</summary>
+    public const int FiveCenturyLine = 1;
+
+    /// <summary>Fountain of Lucine: "At the start of your next 3 turns,
+    /// Repay 3."</summary>
+    public const int FountainTurns = 3;
+
     /// <summary>
     /// Rule 1: THE LINE. A Drain cannot take her below half the HP she
     /// started this combat with. The sim compares <c>hp - n &gt;= entry / 2</c>
@@ -61,4 +92,24 @@ public static class FurinaStageLaw
     /// rounded UP: 39 from 78, 39 from 77.
     /// </summary>
     public static int LineOf(int entryHp) => (System.Math.Max(0, entryHp) + 1) / 2;
+
+    /// <summary>The line with its two movers: A Five-Century Act puts it at
+    /// 1 HP; Lyney on stage lowers it by 10, never below 1.</summary>
+    public static int LineOf(int entryHp, bool lyney, bool fiveCentury)
+    {
+        if (fiveCentury) return FiveCenturyLine;
+        var line = LineOf(entryHp);
+        return lyney ? System.Math.Max(FiveCenturyLine, line - LyneyLineDrop)
+                     : line;
+    }
+
+    /// <summary>Where the line comes from, in words, for its hover and the
+    /// seat page (2026-10-05: seats connected the line to their entry HP
+    /// only late). The same three branches as
+    /// <see cref="LineOf(int, bool, bool)"/>.</summary>
+    public static string LineWhy(bool lyney, bool fiveCentury) =>
+        fiveCentury ? "A Five-Century Act"
+        : lyney ? "half the HP you started this fight with, "
+                  + LyneyLineDrop + " lower with Lyney on stage"
+        : "half the HP you started this fight with";
 }

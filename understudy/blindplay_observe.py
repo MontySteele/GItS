@@ -13,6 +13,7 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_coop import WAIT_COMMAND, ally_forms, coop_block
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
+                                        OUTSIDE_FIGHT_EVENTS, page_events,
                                         _event_option, _event_options,
                                         _map_ahead, _map_boss, _map_paths,
                                         _map_options, _omitted_from_upgrade,
@@ -46,7 +47,7 @@ from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SPHERE_REVEAL_HOW,
                                         UNDRIVEN_AFTER_EVENT,
                                         UNDRIVEN_EXITS, UNDRIVEN_SCREENS,
-                                        sphere_owes)
+                                        lane_run_seed, sphere_owes)
 from understudy.teyvat_ids import resolve_event_id
 
 
@@ -312,6 +313,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # 2026-09-26: and the links between them, where the feed has them.
         obs["paths"] = _map_paths(state)
         obs["boss"] = _map_boss(state)
+        # 2026-10-04: the run's seed and ascension, which no screen printed
+        # and every seat record's identity block asks for. The ascension is on
+        # the wire (`run.ascension`); the seed is not, so it is the one
+        # `embark` read back and wrote into this lane's sidecar.
+        run = _blob(state, "run")
+        if run.get("ascension") is not None:
+            obs["ascension"] = _int(run.get("ascension"))
+        obs["seed"] = lane_run_seed()
         # 2026-09-26 (control seat, Necrobinder): "The map page never shows
         # HP." A route is chosen on it.
         if _player(state).get("hp") is not None:
@@ -892,6 +901,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # screen vocabulary by the same test, and a live "Room Full of Cheese"
     # picker (2026-09-03) bricked a seat when it was not exempt: every
     # `observe` and every `act` recomputed the leak and refused.
+    # SEAT PAGE 3 (2026-10-05): the ledger's events a page OUTSIDE a fight
+    # prints -- the curtain call's drained HP given back, on the reward
+    # screen after the fight. The combat page reads its own in `_combat`.
+    if obs["screen"] != "combat" and not obs.get("blocked"):
+        events = page_events(_player(state))
+        if events:
+            obs["events"] = [ev for ev in events
+                             if ev["kind"] in OUTSIDE_FIGHT_EVENTS]
     allow = {st, obs["screen"]}
     if obs.get("select_kind"):
         allow.add(obs["select_kind"])

@@ -334,17 +334,19 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void His_turn_start_runs_bunny_then_brotherhood_then_the_knights_oath()
+    public void His_turn_start_runs_bunny_then_brotherhood()
     {
         Assert.Contains("VarkaOath.TurnStart", Il.Calls(
             Il.Method("KleeElementalHooks", "AfterPlayerTurnStart")));
         var turn = Il.CallSequence(Il.Method("VarkaOath", "TurnStart")).ToList();
         var bunny = turn.IndexOf("VarkaBaronBunnyPower.Fire");
         var sworn = turn.IndexOf("VarkaOath.Gain");
+        Assert.True(bunny >= 0 && sworn > bunny, string.Join(", ", turn));
+        // Oath of the Knights' Block left with its card (the combo pass,
+        // 2026-10-04): the only Block left is Whisper of Water's echo, first.
         var block = turn.LastIndexOf("CreatureCmd.GainBlock");
-        Assert.True(bunny >= 0 && sworn > bunny && block > sworn,
-                    string.Join(", ", turn));
-        // Bunny's burst is one Oath scope of Pyro hits on every enemy.
+        Assert.True(block < bunny, string.Join(", ", turn));
+        // Bunny's burst is one Oath scope of Pyro hits on one random enemy.
         var fire = Il.Calls(Il.Method("VarkaBaronBunnyPower", "Fire"));
         Assert.Contains("VarkaOath.Scope", fire);
         Assert.Contains("ElementalHit.DealWithoutDealerMods", fire);
@@ -391,10 +393,11 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Contains(CardKeyword.Retain, card.Keywords);
         Assert.Equal(10m, Var(card, "Damage"));
         Assert.Equal(3m, Var(card, "VkPer"));
-        // The upgraded card's numbers: 13 Anemo, 4 per Oath.
+        // Combo pass pick 3 (2026-10-04): the upgrade is cost 2 to 1, the
+        // numbers stay 10 Anemo, 3 per Oath.
         var up = Upgraded<ProtoVkFourWindsAscension>();
-        Assert.Equal(13m, Var(up, "Damage"));
-        Assert.Equal(4m, Var(up, "VkPer"));
+        Assert.Equal(10m, Var(up, "Damage"));
+        Assert.Equal(3m, Var(up, "VkPer"));
         Assert.Equal(Element.Anemo, ((IElementalCard)card).Element);
         Assert.Contains("VarkaCards.AscensionHit",
                         Il.Calls(Il.Method("ProtoVkFourWindsAscension", "OnPlay")));
@@ -486,8 +489,10 @@ public class VarkaPrototypeTests : IDisposable
                         Il.Calls(Il.Method("VarkaCards", "ApplyCurrentElement")));
         Assert.Contains("VarkaOath.Gain",
                         Il.Calls(Il.Method("VarkaCards", "GainCurrentOath")));
-        Assert.Contains("VarkaOath.KnightsPlayedThisTurn",
-                        Il.Calls(Il.Method("ProtoVkKnightlyGuard", "OnPlay")));
+        // Knightly Guard left with the combo pass (2026-10-04); Vow of the
+        // Blade carries the verb.
+        Assert.Contains("VarkaCards.GainCurrentOath",
+                        Il.Calls(Il.Method("ProtoVkVowOfTheBlade", "OnPlay")));
         Assert.Contains("ElementalHit.DealUnelemented",
                         Il.Calls(Il.Method("VarkaCards", "SwirledTakeMore")));
         Assert.Contains("VarkaRules.SwirlFreshAuras",
@@ -570,6 +575,27 @@ public class VarkaPrototypeTests : IDisposable
             var calls = Il.CallSequence(Il.Method(type, "OnPlay"));
             Assert.Equal(2, calls.Count(c => c == "VarkaOath.SwirlsMadeBy"));
         }
+    }
+
+    [Fact]
+    public void Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw()
+    {
+        // The 2026-10-05 seat round (review/records/varka-combo-round-
+        // 2026-10-05.md, screen item 2) never saw the draw. The Swirl
+        // resolves INSIDE the attack (AuraPower's AfterDamageReceived ->
+        // ReactionEffects.Resolve -> VarkaOath.OnSwirl -> NoteSwirl on the
+        // dealer, the card's own Owner.Creature), so the order that makes it
+        // fire is: snapshot, attack, re-read, draw.
+        var calls = Il.CallSequence(Il.Method("ProtoVkTempestCharge", "OnPlay")).ToList();
+        var snap = calls.IndexOf("VarkaOath.SwirlsMadeBy");
+        var hit = calls.IndexOf("AttackCommand.Execute");
+        var reread = calls.LastIndexOf("VarkaOath.SwirlsMadeBy");
+        var draw = calls.FindIndex(c => c.StartsWith("CardPileCmd.Draw"));
+        Assert.True(snap >= 0 && snap < hit, string.Join(", ", calls));
+        Assert.True(hit < reread && reread < draw, string.Join(", ", calls));
+        // And OnSwirl counts the Swirl first, on the dealer's ledger.
+        Assert.Contains("VarkaOathLedger.NoteSwirl",
+                        Il.CallSequence(Il.Method("VarkaOath", "OnSwirl")));
     }
 
     // ---- the Knights -------------------------------------------------------
