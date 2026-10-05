@@ -55,6 +55,11 @@ saved last-used level, so a base-game control run can match a mod run (set on
 the select screen after the pick; the sidecar records `ascension_requested`
 beside the read-back `ascension`, and a mismatch fails the embark).
 
+Every embark unlocks the lane's saves the way the game's `unlock all` does:
+every epoch revealed (the character epochs add cards and relics to the pools)
+and ascensions up to 10 (`instances.unlock_lane_progress`). Lane 0 is never
+touched.
+
 **A fresh seat on a lane that already played** (a per-act handoff: the act 1
 seat stops and a new seat takes act 2 on the same run). `observe --brief`
 defines each word once per LANE, so the new seat would never see the words the

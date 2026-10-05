@@ -2482,3 +2482,42 @@ def test_no_staged_record_is_not_a_mismatch(tmp_path):
     assert local_tester.live_count_preflight(
         {"turn_id": "eb208-t10", "path": str(path), "slots": ["S1", "S3"]},
         qa_dir=tmp_path / "qa") is None
+
+
+def test_a_lane_is_unlocked_like_the_games_unlock_all(tmp_path, monkeypatch):
+    """Every epoch revealed and every ascension open, on a lane only: the
+    modded profile had 22 character epochs (card and relic unlocks) never
+    obtained, so seats played cut-down pools (2026-10-05)."""
+    import json
+    monkeypatch.setenv("APPDATA", str(tmp_path / "roaming"))
+    lane1 = instances.Instance(game_dir=tmp_path / "game", port=15527,
+                               appdata=tmp_path / "lane1", label="lane1")
+    saves = (tmp_path / "lane1" / "SlayTheSpire2" / "steam" / "76561"
+             / "modded" / "profile1" / "saves")
+    saves.mkdir(parents=True)
+    data = {"character_stats": [
+                {"id": "CHARACTER.DEFECT", "max_ascension": 0},
+                {"id": "CHARACTER.SILENT", "max_ascension": 10}],
+            "epochs": [
+                {"id": "COLORLESS1_EPOCH", "obtain_date": 1, "state": "revealed"},
+                {"id": "DEFECT2_EPOCH", "obtain_date": 0, "state": "not_obtained"},
+                {"id": "REGENT3_EPOCH", "obtain_date": 3, "state": "obtained"}],
+            "max_multiplayer_ascension": 5}
+    (saves / "progress.save").write_bytes(
+        json.dumps(data, indent=2).replace("\n", "\r\n").encode("utf-8"))
+
+    changed = instances.unlock_lane_progress(lane1)
+    assert [p for p, _ in changed] == [saves / "progress.save"]
+    raw = (saves / "progress.save").read_bytes()
+    assert b"\r\n" in raw
+    after = json.loads(raw)
+    assert {e["state"] for e in after["epochs"]} == {"revealed"}
+    assert after["epochs"][1]["obtain_date"] > 0
+    assert after["epochs"][2]["obtain_date"] == 3
+    assert [c["max_ascension"] for c in after["character_stats"]] == [10, 10]
+    assert after["max_multiplayer_ascension"] == 10
+    assert instances.unlock_lane_progress(lane1) == []        # idempotent
+
+    lane0 = instances.Instance(game_dir=tmp_path / "game", port=15526,
+                               appdata=None, label="lane0")
+    assert instances.unlock_lane_progress(lane0) == []
