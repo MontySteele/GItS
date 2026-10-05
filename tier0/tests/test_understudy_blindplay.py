@@ -4615,7 +4615,9 @@ def test_observe_refuses_a_doubled_page_as_a_line_not_a_traceback(
         blindplay.assert_one_page(real(state) * 2)
         raise AssertionError("the guard did not fire")
 
-    monkeypatch.setattr(blindplay, "observe", doubled)
+    # 2026-10-05: the observe door prints `screen_page` (`observe` with the
+    # since-last-page cut), so that is the call the double rides on.
+    monkeypatch.setattr(blindplay, "screen_page", doubled)
 
     code = blindplay.cmd_observe(args)
 
@@ -8222,8 +8224,13 @@ def test_an_enemys_block_prints_beside_its_hp():
     # `EB-496` put the fight's own letter between the name and the numbers,
     # which is where the card face already carries its element.
     assert "- **Nibbit** [A] — HP 38/45, Block 5" in page
-    assert "Block" not in blindplay.observe(combat_state()).split(
+    # 2026-10-05: the incoming line under the list names YOUR Block, not a
+    # body's, so it is set aside.
+    side = blindplay.observe(combat_state()).split(
         "## The other side")[1].split("*Each enemy keeps")[0]
+    assert "Block" not in "\n".join(
+        ln for ln in side.splitlines()
+        if not ln.startswith("- Incoming this turn"))
 
 
 def test_a_defend_part_of_a_telegraph_says_it_will_add_block():

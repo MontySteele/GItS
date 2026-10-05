@@ -330,6 +330,32 @@ def forget_words_seen(lane: object = None) -> None:
         pass
 
 
+# 2026-10-05. THE NEWEST LEDGER EVENT A LANE HAS BEEN SHOWN. The combat
+# page's "Since last page" line prints only the events past it. The ledger's
+# sequence rises across a game process and starts above the last process's
+# (it is seeded off the clock), so a stale number here can only hide events
+# from a game that is gone.
+def events_seen_path(lane: object = None) -> Path:
+    return _BUDGET_STORE_DIR / f"_blindplay-events-lane{lane_tag(lane)}.json"
+
+
+def read_events_seen(lane: object = None) -> int:
+    try:
+        blob = json.loads(events_seen_path(lane).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return 0
+    return blob if isinstance(blob, int) else 0
+
+
+def write_events_seen(seq: int, lane: object = None) -> None:
+    try:
+        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        events_seen_path(lane).write_text(json.dumps(int(seq)),
+                                          encoding="utf-8")
+    except OSError:
+        pass                       # a read-only tree repeats its events
+
+
 def forget_budget(lane: object = None) -> None:
     """Drop this lane's budget. The operator's reset, and the tests'."""
     try:

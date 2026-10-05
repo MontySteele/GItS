@@ -212,6 +212,18 @@ the game has not chosen it. The live arm keywords get one definition each per
 screen, in `ArmKeywordTips.cs`'s words (`understudy/blindplay_notes.py` must
 say the same).
 
+Three combat-page lines (2026-10-05), none of them a recommended play:
+**What these enemies do (base game)** prints on round 1, one line per kind
+of enemy, from `understudy/blindplay_enemies.py` (curated from
+`docs/current/dossiers/enemies/`; a test fails on an act 1-3 elite or boss
+body with no entry; `--brief` prints each once per lane and `observe
+--define "<enemy>"` prints it again); **Incoming this turn** sums the attack
+telegraphs against your Block, naming as unknown a part whose figure may not
+count Weak or Vulnerable; **Since last page** names what the mod's
+`ResolutionLedger` filed that the after-state does not show (a card drawn by
+an effect, a debuff Artifact negated, an enemy power that fired, a stolen
+card given back), only what is new since the lane's last page.
+
 `session` drives one run: one command per screen, fight and run records at the
 ends, budgets on actions, wall time and consecutive refusals. The seat's
 record is `review/qa/blindplay/<session>/record.md` (local, gitignored) with

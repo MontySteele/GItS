@@ -25,6 +25,7 @@ from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _is_mod_source_tip,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
+from understudy.blindplay_enemies import enemy_brief
 from understudy.blindplay_shape import SELECT_SCREENS
 
 
@@ -667,6 +668,9 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      "replaced": replaced,
                      # 2026-09-26: a dead body the game brought back.
                      "revived": revived,
+                     # 2026-10-05: what this kind of enemy does, base-game
+                     # facts off `blindplay_enemies`; printed on round 1.
+                     "briefing": enemy_brief(_text(e.get("entity_id"))),
                      "powers": _powers(e)}
                     for e, name, handle, replaced, revived in zip(
                         _enemies(state),
@@ -740,6 +744,13 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         name_resolution_kills(resolved, _enemies(state),
                               combat["round"] or None)
         combat["resolutions"] = resolved
+    # 2026-10-05: what happened that no other line of the page shows -- a
+    # card drawn by an effect, a debuff Artifact negated, an enemy power that
+    # fired, a card stolen or given back. Absent on an older mod.
+    events = page_events(p)
+    if events is not None:
+        name_event_rows(events, _enemies(state), combat["enemies"])
+        combat["events"] = events
     plans = kokomi_plans(p)
     if plans is not None:
         # `EB-329`: the mod names a moved enemy by its combat id, and THE
@@ -1325,6 +1336,60 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                     "hits": hits,
                     "summoned": [name for name in summoned if name]})
     return out
+
+
+#: The ledger's event kinds the page prints (`ResolutionLedger.NoteEvent`).
+PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned")
+
+
+def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """The ledger's page events this turn, oldest first, or `None` on a mod
+    whose ledger files none (2026-10-05).
+
+    They ride the resolution rows: an event inside a card play sits on that
+    card's row (`source` is its title), and one outside any play sits on a
+    row with no card, which `resolutions` skips. `seq` rises across the whole
+    game process and is how a page prints only what is new since the last.
+    """
+    rows = player.get("resolutions")
+    if not isinstance(rows, list):
+        return None
+    if not any(isinstance(r, dict) and "events" in r for r in rows):
+        return None
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        for ev in row.get("events") or []:
+            if not isinstance(ev, dict):
+                continue
+            kind = _text(ev.get("kind"))
+            if kind not in PAGE_EVENT_KINDS:
+                continue
+            out.append({"kind": kind,
+                        "card": _text(ev.get("card")),
+                        "target": _text(ev.get("target")),
+                        "power": _text(ev.get("power")),
+                        "combat_id": _text(ev.get("combat_id")),
+                        "on_player": bool(ev.get("on_player")),
+                        "seq": _int(ev.get("seq")),
+                        "source": _text(row.get("card"))})
+    return out
+
+
+def name_event_rows(events: list[dict[str, Any]],
+                    wire: list[dict[str, Any]],
+                    printed: list[dict[str, Any]]) -> None:
+    """The page's own name for each event's body, `name_resolution_rows`'
+    rule: the enemy list's numbered name, else the name it last had."""
+    by_id = {_text(raw.get("combat_id")): face["name"]
+             for raw, face in zip(wire, printed)
+             if _text(raw.get("combat_id"))}
+    for ev in events:
+        if ev["combat_id"] and ev["target"] and not ev["on_player"]:
+            ev["target"] = (by_id.get(ev["combat_id"])
+                            or remembered_enemy_name(ev["combat_id"],
+                                                     ev["target"]))
 
 
 def name_resolution_rows(rows: list[dict[str, Any]],

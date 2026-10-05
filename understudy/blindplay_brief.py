@@ -52,6 +52,7 @@ from understudy.blindplay_notes import (AURA_NOTE, ENEMY_HANDLE_NOTE,
                                         NO_RESOLUTIONS_THIS_TURN, POWER_NOTE,
                                         _INTENT_SOURCE_HEAD,
                                         glossary_definition)
+from understudy.blindplay_enemies import brief_by_name
 from understudy.blindplay_shape import PLAY_GUARDRAIL
 
 #: The glossary section. Its rows are kept the first time each prints on a
@@ -98,13 +99,15 @@ BRIEF_NOTE = ("*Brief page: the standing notes, and any word definition "
               "\"<Word>\"` prints one again; `observe` without --brief "
               "prints them all.*")
 
+#: (2026-10-05: `error` as a word, so the Terror Eel's briefing is a gloss
+#: the trim may cut, not a line it must keep.)
 #: A removed line matching this means the trim went wrong; the full page is
 #: returned instead. Intents and what lands on you, the player's own rows,
 #: refusals and errors, banners, and the verbs.
 PROTECTED = re.compile(
-    r"lands on you|Intent:|intends to|"
+    r"lands on you|Intent:|intends to|Incoming this turn|Since last page|"
     r"^- (HP|Block|Energy) |"
-    r"REFUSED|refus|[Ee]rror|NO ANSWER|TOOL-BLOCKED|WAITING|budget|"
+    r"REFUSED|refus|\b[Ee]rror|NO ANSWER|TOOL-BLOCKED|WAITING|budget|"
     r"^- `|^# ")
 
 
@@ -257,6 +260,11 @@ def define(text: str, word: str) -> str:
     # 2026-10-02: a word this screen does not define is looked up in the
     # glossary's own tables, and marked as off-screen.
     found = glossary_definition(want)
+    if found:
+        return f"- **{found[0]}** — {found[1]}{OFF_SCREEN_MARK}\n"
+    # 2026-10-05: an enemy's base-game briefing, by its base name, after
+    # round 1 has stopped printing it.
+    found = brief_by_name(want)
     if found:
         return f"- **{found[0]}** — {found[1]}{OFF_SCREEN_MARK}\n"
     return NOT_DEFINED.format(word=word.strip(),

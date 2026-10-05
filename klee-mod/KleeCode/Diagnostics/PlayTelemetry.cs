@@ -1427,12 +1427,101 @@ public sealed class PlayTelemetryHooks : AbstractModel
         // reader over: a row from the last fight printed on this fight's first
         // page is the `EB-447` deck defect wearing a different hat.
         ResolutionLedger.ResetFight();
+        WatchedPowers.Clear();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 2026-10-05, THE SEAT PAGE'S "SINCE LAST PAGE" LINE: the enemy powers
+    /// whose firing is watched. A base-game power marks the moment it acts
+    /// with <c>Flash()</c>, which raises its <c>Flashed</c> event -- Crab Rage
+    /// when an arm dies, Hard To Kill on a capped hit -- and the page's
+    /// after-state shows the result with nothing naming the cause. Watched by
+    /// subscribing to the event rather than patching <c>Flash</c>, a one-line
+    /// method the JIT may inline past a Harmony patch.
+    ///
+    /// BASE-GAME POWERS ON ENEMIES ONLY: the mod's own badges (auras, Bombs)
+    /// have their own receipts, and the player's own powers are on the
+    /// player's block. Cleared per fight.
+    /// </summary>
+    private static readonly HashSet<PowerModel> WatchedPowers =
+        new(ReferenceEqualityComparer.Instance);
+
+    private static void Watch(PowerModel? power)
+    {
+        try
+        {
+            if (power == null || WatchedPowers.Contains(power)) return;
+            if (power.Owner is not { IsEnemy: true }) return;
+            var ns = power.GetType().Namespace ?? "";
+            if (!ns.StartsWith("MegaCrit.", StringComparison.Ordinal)) return;
+            WatchedPowers.Add(power);
+            power.Flashed += OnEnemyPowerFlashed;
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] page events watch: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
+    }
+
+    private static void WatchEnemies(ICombatState? combatState)
+    {
+        if (combatState == null) return;
+        try
+        {
+            foreach (var enemy in combatState.Enemies)
+            {
+                foreach (var power in enemy.Powers.ToList()) Watch(power);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] page events enemies: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
+    }
+
+    private static void OnEnemyPowerFlashed(PowerModel power)
+    {
+        try
+        {
+            if (power.Owner is not { IsEnemy: true }) return;
+            ResolutionLedger.NoteEvent(ResolutionLedger.Triggered,
+                                       string.Empty, power.Owner,
+                                       power.Title.GetFormattedText() ?? "");
+        }
+        catch (Exception)
+        {
+            // read-only log; nothing to undo
+        }
+    }
+
+    /// <summary>2026-10-05: a card drawn by an effect rather than the turn's
+    /// own draw, named on the page's "Since last page" line under the card
+    /// that drew it (<see cref="ResolutionLedger.NoteEvent"/>).</summary>
+    public override Task AfterCardDrawn(PlayerChoiceContext choiceContext,
+                                        CardModel card, bool fromHandDraw)
+    {
+        if (fromHandDraw || card == null) return Task.CompletedTask;
+        try
+        {
+            ResolutionLedger.NoteEvent(ResolutionLedger.Drawn,
+                                       card.Title?.ToString() ?? "",
+                                       string.Empty, string.Empty);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] page events draw: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
         return Task.CompletedTask;
     }
 
     public override Task AfterSideTurnStart(CombatSide side,
         IReadOnlyList<Creature> participants, ICombatState combatState)
     {
+        WatchEnemies(combatState);
         if (side == CombatSide.Player)
         {
             PlayTelemetry.OpenTurn();
@@ -1593,6 +1682,7 @@ public sealed class PlayTelemetryHooks : AbstractModel
             var owner = power?.Owner;
             if (owner is { IsEnemy: true })
             {
+                Watch(power);
                 ResolutionLedger.NotePower(owner,
                     power!.Title.GetFormattedText() ?? "", (int)amount);
             }

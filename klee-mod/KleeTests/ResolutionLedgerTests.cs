@@ -306,7 +306,8 @@ public class ResolutionLedgerTests
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
                              "overflowed", "hits", "applied", "summoned",
-                             "oath", "fang_ascension" },
+                             "oath", "fang_ascension", "between",
+                             "events" },
                      new List<string>(row.Keys).ToArray());
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
@@ -418,6 +419,75 @@ public class ResolutionLedgerTests
         Assert.Single(applied);
         Assert.Equal("Weak", applied[0]["power"]);
         Assert.Equal(1, applied[0]["amount"]);
+    }
+
+    // ------------------------------------- 2026-10-05: the page events ---
+
+    [Fact]
+    public void An_event_inside_a_play_is_filed_on_that_card()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("acrobatics", "Acrobatics", false);
+        ResolutionLedger.NoteEvent(ResolutionLedger.Drawn, "Strike", "", "");
+
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Single(rows);
+        var events = (List<Dictionary<string, object?>>)rows[0]["events"]!;
+        Assert.Single(events);
+        Assert.Equal("drawn", events[0]["kind"]);
+        Assert.Equal("Strike", events[0]["card"]);
+        Assert.Equal(new[] { "kind", "card", "target", "power", "combat_id",
+                             "on_player", "seq" },
+                     new List<string>(events[0].Keys).ToArray());
+    }
+
+    /// <summary>Outside any play the event goes on a row with no card,
+    /// which a page that predates it skips; the turn's order is kept by a
+    /// new such row after each play.</summary>
+    [Fact]
+    public void An_event_outside_a_play_rides_a_row_with_no_card()
+    {
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Negated, "", "Mecha Knight",
+                                   "Weak", "3");
+        ResolutionLedger.NoteEvent(ResolutionLedger.Triggered, "",
+                                   "Mecha Knight", "Artifact", "3");
+        ResolutionLedger.OpenPlay("strike", "Strike", false);
+        ResolutionLedger.ClosePlay();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Triggered, "", "Crusher",
+                                   "Crab Rage", "1");
+
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Equal(3, rows.Count);
+        Assert.Equal(true, rows[0]["between"]);
+        Assert.Equal("", rows[0]["card"]);
+        Assert.Equal(2, ((List<Dictionary<string, object?>>)
+            rows[0]["events"]!).Count);
+        Assert.Equal(false, rows[1]["between"]);
+        Assert.Equal(true, rows[2]["between"]);
+    }
+
+    [Fact]
+    public void The_event_sequence_only_rises_across_fights()
+    {
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Drawn, "Strike", "", "");
+        var first = (long)((List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["events"]!)[0]["seq"]!;
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.Drawn, "Defend", "", "");
+        var second = (long)((List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["events"]!)[0]["seq"]!;
+        Assert.True(second > first);
+        Assert.True(first > 1_000_000_000_000L);
+    }
+
+    [Fact]
+    public void The_draw_hook_reaches_the_ledger()
+    {
+        var calls = Il.Calls(Il.Method("PlayTelemetryHooks", "AfterCardDrawn"));
+
+        Assert.Contains("ResolutionLedger.NoteEvent", calls);
     }
 
     [Fact]
