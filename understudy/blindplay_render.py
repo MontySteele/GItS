@@ -2400,9 +2400,15 @@ BRIEFING_HEADING = "## What these enemies do (base game)"
 #: The incoming-attacks line. A sum of the telegraphs, never a plan.
 INCOMING_LINE = ("- Incoming this turn: {total} (your Block {block}): you "
                  "would take {take}.")
+#: SEAT PAGE 4 (2026-10-05): the HP that leaves, beside the take. The effort
+#: test's seats at every effort level read "you would take 12" and took it
+#: without weighing their HP (review/records/sonnet-effort-test-2026-10-05.md).
+INCOMING_LEAVES = " You would be at {after}/{max_hp} HP."
 INCOMING_UNKNOWN = ("- Incoming this turn: {total} plus an unknown amount "
                     "from {who} (your Block {block}).")
 INCOMING_NONE = "- Incoming this turn: no attack is shown."
+#: SEAT PAGE 4: beside the rest site's HP, how much healing can land.
+REST_ROOM = " (healing stops at max HP: at most {room} more)"
 #: The since-last-page line, and how many phrases it names before it counts.
 EVENTS_HEAD = "- Since last page: "
 EVENTS_CAP = 8
@@ -2498,8 +2504,12 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any]) -> str:
     if unknown:
         return INCOMING_UNKNOWN.format(total=total, who=_and_list(unknown),
                                        block=block)
-    return INCOMING_LINE.format(total=total, block=block,
-                                take=max(0, total - block))
+    take = max(0, total - block)
+    line = INCOMING_LINE.format(total=total, block=block, take=take)
+    if take and isinstance(you.get("hp"), int) and you.get("max_hp"):
+        line += INCOMING_LEAVES.format(after=max(0, you["hp"] - take),
+                                       max_hp=you["max_hp"])
+    return line
 
 
 #: SEAT PAGE 3: the end-of-turn acts' Block, beside the incoming line on a
@@ -3337,8 +3347,14 @@ def render(obs: dict[str, Any]) -> str:
             # sent nothing, so it says exactly that.
             out += [EMPTY_SHELVES_NOTE]
     elif obs["screen"] == "rest_site":
+        # SEAT PAGE 4: the game's Heal figure is not capped by max HP (a seat
+        # at 62/80 read "Heal 24" and healed 18), so the room is printed.
+        room = (obs["max_hp"] - obs["hp"]
+                if isinstance(obs.get("hp"), int)
+                and isinstance(obs.get("max_hp"), int) else 0)
         out += ["# A place to rest", "",
                 f"HP {obs['hp']}/{obs['max_hp']}"
+                + (REST_ROOM.format(room=room) if room > 0 else "")
                 + (f", {obs['gold']} gold" if obs.get("gold") is not None
                    else ""), ""] \
             + (_render_options(obs["options"]) if obs["options"]
