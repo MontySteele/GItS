@@ -76,6 +76,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         INTENT_FOLD_NOTHING,
                                         INTENT_TOTAL_CLAUSE,
                                         INTENT_TARGET_SIDE,
+                                        INTENT_TARGET_NOTE,
+                                        INTENT_ICON_NUMBER,
                                         REWARD_ALTERNATIVES_HEADING,
                                         REWARD_ALTERNATIVE_ROW,
                                         REWARD_ALTERNATIVE_UNNAMED,
@@ -1301,6 +1303,49 @@ def _numbers_disagree(intent: dict[str, Any]) -> bool:
     return bool(on_icon and in_words and not (on_icon & in_words))
 
 
+#: Seat page 5 (2026-10-05): the game's generic hover sentences. Each says
+#: only the kind and the icon's number, which the line already carries, so
+#: one of these whose every number is on the icon is not printed. Anything
+#: else the game writes (`gain 8 Block`, `add 4 Burn to your hand`, `apply
+#: Afflictions`) is kept, and so is any sentence whose number is not the
+#: icon's (`EB-607`'s disagreement).
+_GENERIC_HOVER = re.compile(
+    r"^This enemy intends to (?:"
+    r"Attack(?: for \d+(?: damage)?)?(?: \d+ times)?"
+    r"|attack"
+    r"|use a Buff|buff itself"
+    r"|apply a Debuff(?: to you)?"
+    r"|give you \d+ Status cards?"
+    r"|Block on its turn"
+    r")\.?$")
+
+
+def _hover_adds_nothing(intent: dict[str, Any]) -> bool:
+    """Seat page 5: is the hover sentence the game's generic template with
+    no number the icon does not already show?"""
+    text = str(intent.get("text") or "").strip()
+    if not _GENERIC_HOVER.match(text):
+        return False
+    in_words = set(_NUMBER.findall(text))
+    on_icon = set(_NUMBER.findall(str(intent.get("label") or "")))
+    return in_words <= on_icon
+
+
+def _intent_target_note(enemies: list[dict[str, Any]],
+                        coop: bool = False) -> list[str]:
+    """Seat page 5 (2026-10-05): `EB-323`'s missing target, said once under
+    the enemy list on every page where more than one body could be meant --
+    two or more enemies, or co-op -- instead of on every intent line. Not a
+    once-per-lane gloss: seats cut pages with `sed`, and once-only text is
+    what a slice loses."""
+    if len(enemies) < 2 and not coop:
+        return []
+    if not any(i.get("target_side") or _fold(i.get("type")) == "buff"
+               for e in enemies for i in e.get("intents") or []):
+        return []
+    return ["", INTENT_TARGET_NOTE]
+
+
 def _intent_source_note(enemies: list[dict[str, Any]]) -> list[str]:
     """`EB-607`: where an icon number comes from, said where Strength is up.
 
@@ -1628,10 +1673,14 @@ def _render_intent(intent: dict[str, Any], part: bool = False) -> str:
     kind = intent.get("type") or ""
     if head and kind and _fold(head) != _fold(kind):
         head = f"{head} ({kind})"
-    number = (f"the number on its icon is {intent['label']}"
+    # Seat page 5 (2026-10-05): "icon shows 8" for "the number on its icon
+    # is 8", and the game's generic hover sentence only where it adds
+    # something (`_hover_adds_nothing`).
+    number = (INTENT_ICON_NUMBER.format(label=intent["label"])
               + (MULTI_INTENT_LABEL if part else "")
               if intent.get("label") else "")
-    bits = [head, number, intent.get("text") or ""]
+    text = "" if _hover_adds_nothing(intent) else intent.get("text") or ""
+    bits = [head, number, text]
     # `EB-607`: the two numbers on this line are two fields of the feed --
     # `GetIntentLabel`'s icon figure and `GetHoverTip`'s sentence -- and the
     # page printed both and said nothing about the pair.
@@ -2052,6 +2101,7 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
             line += f", Block {e['block']}"
         out.append(line)
         out += _render_intents(e["intents"])
+    out += _intent_target_note(c.get("enemies") or [])
     return out
 
 
@@ -3063,6 +3113,9 @@ def render(obs: dict[str, Any]) -> str:
         # opposite, which is what sent a seat's Melt into the wrong body.
         if c["enemies"]:
             out += ["", ENEMY_HANDLE_NOTE]
+        # Seat page 5 (2026-10-05): `EB-323`'s missing target, on every page
+        # where more than one body could be meant.
+        out += _intent_target_note(c["enemies"], bool(obs.get("coop")))
         # `EB-708`: and where one of those names carries a SIZE letter, the
         # legend for it -- beside the handle note, because both are about a
         # bracketed thing the list above just printed, and because the seat

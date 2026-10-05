@@ -499,8 +499,9 @@ def test_the_recorded_combat_screen_prints_the_faces_and_no_ids():
     page = blindplay.observe(combat_state())
     assert "Pearl Barrage" in page and "Nibbit" in page
     # `EB-299` re-cut this line: every field on it now says what it is.
-    assert ("Intent: Aggressive (Attack) — the number on its icon is 12 — "
-            "This enemy intends to Attack for 12 damage." in page)
+    # Seat page 5: the game's generic hover sentence is not printed.
+    assert ("Intent: Aggressive (Attack) — icon shows 12"
+            in page)
     assert "Charge: 8" in page                    # a meter that holds something
     # ...and one that does not. `EB-238` NARROWED THIS ASSERTION FROM THE
     # WHOLE PAGE TO THE METER LINES, deliberately: the claim was always "a
@@ -5581,8 +5582,9 @@ def test_an_intent_number_says_what_it_is():
         {"type": "Debuff", "label": "2", "title": "Strategic",
          "description": "This enemy intends to apply a Debuff to you."}]
     page = blindplay.observe(state)
-    assert ("Intent: Strategic (Debuff) — the number on its icon is 2 — "
-            "This enemy intends to apply a Debuff to you." in page)
+    # Seat page 5: the generic hover sentence adds nothing and is dropped.
+    assert "Intent: Strategic (Debuff) — icon shows 2" in page
+    assert "This enemy intends to apply a Debuff to you." not in page
     assert "Intent: Strategic, 2," not in page
 
 
@@ -5594,9 +5596,8 @@ def test_an_intent_with_no_number_prints_no_number():
         {"type": "Buff", "title": "Strategic",
          "description": "This enemy intends to buff itself."}]
     page = blindplay.observe(state)
-    assert ("Intent: Strategic (Buff) — This enemy intends to buff itself."
-            in page)
-    assert "the number on its icon" not in page
+    assert "Intent: Strategic (Buff) — lands on its own side, not on you" in page
+    assert "icon shows" not in page
 
 
 def test_an_intent_whose_heading_is_its_type_is_not_printed_twice():
@@ -5607,7 +5608,7 @@ def test_an_intent_whose_heading_is_its_type_is_not_printed_twice():
         {"type": "Attack", "title": "Attack", "label": "8",
          "description": "Attack for 8 damage."}]
     page = blindplay.observe(state)
-    assert "Intent: Attack — the number on its icon is 8" in page
+    assert "Intent: Attack — icon shows 8 — Attack for 8 damage." in page
     assert "Attack (Attack)" not in page
 
 
@@ -8182,12 +8183,12 @@ def test_a_compound_intent_prints_every_component():
     page = blindplay.observe(compound_intent_state())
     # `EB-461` MARKED THE NUMBERS ON A MULTI-PART TELEGRAPH, and nothing else
     # about these lines moved: both parts still print, in the move's own order.
-    assert ("Intent: Aggressive (Attack) — the number on its icon is 8, one "
-            "part of this move — This enemy intends to Attack for 8 "
-            "damage.") in page
-    assert ("and also: Strategic (StatusCard) — the number on its icon "
-            "is 4, one part of this move — This enemy intends to add 4 Burn "
-            "to your hand.") in page
+    # Seat page 5: the generic Attack sentence is dropped; "add 4 Burn to
+    # your hand" is not the generic template and is kept.
+    assert ("Intent: Aggressive (Attack) — icon shows 8, one part of this "
+            "move") in page
+    assert ("and also: Strategic (StatusCard) — icon shows 4, one part of "
+            "this move — This enemy intends to add 4 Burn to your hand.") in page
 
 
 def defending_enemy_state() -> dict:
@@ -8246,12 +8247,12 @@ def test_a_defend_part_of_a_telegraph_says_it_will_add_block():
     Seen to FAIL: the part printed its title and its type and stopped.
     """
     page = blindplay.observe(defending_enemy_state())
-    assert ("and also: Defensive (Defend) — this part adds Block to the "
-            "Block on its line above, and the feed carries no number for how "
-            "much") in page
+    assert ("and also: Defensive (Defend) — adds to its Block above; amount "
+            "not on the feed") in page
     # Only a Defend part carries it -- the Attack half is untouched.
-    assert page.count("this part adds Block") == 1
-    assert "adds Block" not in blindplay.observe(compound_intent_state())
+    assert page.count("adds to its Block above") == 1
+    assert "adds to its Block" not in blindplay.observe(
+        compound_intent_state())
 
 
 def test_no_observe_prints_the_enemy_block_twice():
@@ -8295,8 +8296,8 @@ def test_a_single_component_intent_reads_exactly_as_it_always_did():
     of the move, so its number needs no part label and the note does not print.
     """
     page = blindplay.observe(combat_state())
-    assert ("Intent: Aggressive (Attack) — the number on its icon is 12 "
-            "— This enemy intends to Attack for 12 damage.") in page
+    assert ("Intent: Aggressive (Attack) — icon shows 12"
+            in page)
     assert "and also:" not in page
     assert "one part of this move" not in page
     assert blindplay.MULTI_INTENT_NOTE not in page
@@ -8326,8 +8327,8 @@ def test_a_dual_intent_number_is_labelled_one_part_of_the_move():
     Seen to FAIL: the label and the note both carried the frequency claim.
     """
     page = blindplay.observe(compound_intent_state())
-    assert "the number on its icon is 8, one part of this move" in page
-    assert "the number on its icon is 4, one part of this move" in page
+    assert "icon shows 8, one part of this move" in page
+    assert "icon shows 4, one part of this move" in page
     # ONCE, with the block's other notes, however many enemies telegraph parts.
     assert page.count(blindplay.MULTI_INTENT_NOTE) == 1
 
@@ -8347,8 +8348,8 @@ def test_a_dual_intent_number_is_labelled_one_part_of_the_move():
         {"type": "Buff", "label": "", "title": "Empower",
          "description": "This enemy intends to use a Buff."}]
     quiet_page = blindplay.observe(quiet)
-    assert "the number on its icon is 6, one part of this move" in quiet_page
-    assert quiet_page.count("the number on its icon") == 1
+    assert "icon shows 6, one part of this move" in quiet_page
+    assert quiet_page.count("icon shows") == 1
     assert blindplay.MULTI_INTENT_NOTE in quiet_page
 
 
@@ -11344,12 +11345,12 @@ def test_an_intent_number_is_the_feeds_own_figure_and_says_so():
     """
     blindplay.forget_fight()
     before = blindplay.observe(_strength_board(("12", "3x2"), 0))
-    assert "the number on its icon is 12" in before
-    assert "the number on its icon is 3x2" in before
+    assert "icon shows 12" in before
+    assert "icon shows 3x2" in before
     blindplay.forget_fight()
     after = blindplay.observe(_strength_board(("12", "7x2"), 4))
-    assert "the number on its icon is 12" in after
-    assert "the number on its icon is 7x2" in after
+    assert "icon shows 12" in after
+    assert "icon shows 7x2" in after
     assert blindplay.INTENT_SOURCE_NOTE in after
     # No Strength on the board, no provenance note.
     assert blindplay.INTENT_SOURCE_NOTE not in blindplay.observe(combat_state())
@@ -12094,7 +12095,7 @@ def test_the_red_one_a_telegraph_the_game_folded_prints_one_number():
     state = _weak_intent_state("4", weak=1)
     state["battle"]["enemies"][0]["intents"][0]["breakdown"] = _breakdown(6, 4)
     page = blindplay.observe(state)
-    assert "the game folded **Weak** into that: it is 6 on the move and 4 "            "after" in page
+    assert "6 base, 4 with **Weak**" in page
     assert "Folded through" not in page
     assert "lands as 3" not in page
     assert "on any other frame it returns the move's raw damage" not in page
@@ -12109,7 +12110,7 @@ def test_strength_and_weak_folded_together_print_one_number():
     state["battle"]["enemies"][0]["intents"][0]["breakdown"] = _breakdown(
         11, 10, modifiers=("Strength", "Weak"))
     page = blindplay.observe(state)
-    assert "the game folded **Strength** and **Weak** into that: it is 11 on "            "the move and 10 after" in page
+    assert "11 base, 10 with **Strength** and **Weak**" in page
     assert "Folded through" not in page
 
 
@@ -12120,7 +12121,7 @@ def test_a_folded_multi_hit_prints_one_total():
     state["battle"]["enemies"][0]["intents"][0]["breakdown"] = _breakdown(
         2, 1, repeats=4)
     page = blindplay.observe(state)
-    assert "1 x 4 is 4 if every hit lands" in page
+    assert "1 x 4 = 4 if every hit lands" in page
     assert "Folded through" not in page
     assert "0 in all" not in page
 

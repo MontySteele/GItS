@@ -58,8 +58,7 @@ def test_the_red_one_an_icon_that_moved_names_what_moved_it():
     page = blindplay.observe(_with_intent(
         type="Attack", label="15",
         breakdown=_breakdown(base=12, folded=15, modifiers=["Strength"])))
-    assert ("the game folded **Strength** into that: it is 12 on the move "
-            "and 15 after") in page
+    assert "12 base, 15 with **Strength**" in page
 
 
 def test_the_other_half_an_icon_that_did_not_move_says_so():
@@ -68,8 +67,7 @@ def test_the_other_half_an_icon_that_did_not_move_says_so():
     readings the r23 seat needed to tell apart."""
     page = blindplay.observe(_with_intent(
         type="Attack", label="12", breakdown=_breakdown(base=12, folded=12)))
-    assert ("nothing on the board is folded into that number: it is the 12 "
-            "the move itself declares") in page
+    assert "12 base, nothing folded in" in page
 
 
 def test_several_modifiers_are_joined_in_the_pages_own_grammar():
@@ -86,7 +84,7 @@ def test_a_multi_hit_prints_the_product_and_its_factors():
     page = blindplay.observe(_with_intent(
         type="Attack", label="6x3",
         breakdown=_breakdown(base=6, folded=6, repeats=3)))
-    assert "6 x 3 is 18 if every hit lands" in page
+    assert "6 x 3 = 18 if every hit lands" in page
 
 
 def test_a_single_hit_prints_no_product():
@@ -131,22 +129,24 @@ def test_a_buff_part_says_whose_side_it_is_on_off_the_wire():
     """Seen to FAIL: `Empower (Buff)` named nobody on a board of three."""
     page = blindplay.observe(_with_intent(
         type="Buff", label="", target_side="its own side"))
-    assert "this part lands on its own side" in page
-    assert "cannot say which body" in page
+    assert "— lands on its own side" in page
+    # Seat page 5: the missing-target caveat is a page line, printed with
+    # two or more enemies; this board has one.
+    assert "cannot say which body" not in page
 
 
 def test_a_debuff_part_says_it_is_aimed_at_you():
     page = blindplay.observe(_with_intent(
         type="Debuff", label="", target_side="you"))
-    assert "this part lands on you" in page
+    assert "— lands on you" in page
 
 
 def test_a_feed_with_no_side_keeps_the_older_buff_clause():
     """ABSENT IS ABSENT. A bridge predating the row sends no `target_side`,
     and the page's locally-derived buff clause is exactly what it was."""
     page = blindplay.observe(_with_intent(type="Buff", label=""))
-    assert "strengthens the enemy's own side rather than hitting you" in page
-    assert "this part lands on" not in page
+    assert "— lands on its own side, not on you" in page
+    assert "— lands on its own side —" not in page
 
 
 def test_the_bridge_refuses_the_three_types_that_settle_nothing():
