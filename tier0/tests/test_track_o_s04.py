@@ -42,7 +42,7 @@ def test_trace_reads_a_missing_key_as_not_recorded_and_not_as_empty():
     divergence found" cannot afford a reading that manufactures agreement.
     """
     absent = {"act": 1, "floor": 2, "kind": "monster"}
-    empty = dict(absent, cards_played=[], selectors=[], meters_by_turn=[])
+    empty = dict(absent, cards_played=[], selectors=[])
     assert tr.trace(absent) != tr.trace(empty)
     assert tr.trace(absent) == {k: tr.NOT_RECORDED for k in tr.TRACE_KEYS}
     assert tr.trace(empty) == {k: [] for k in tr.TRACE_KEYS}
@@ -67,7 +67,7 @@ def test_trace_identity_excludes_hp_and_damage():
 def test_fight_keys_are_the_identity_not_the_description():
     """`FIGHT_KEYS` are the fields that IDENTIFY a fight within a run."""
     assert tr.FIGHT_KEYS == ("act", "floor", "kind")
-    assert tr.TRACE_KEYS == ("cards_played", "selectors", "meters_by_turn")
+    assert tr.TRACE_KEYS == ("cards_played", "selectors")
 
 
 def test_selector_lines_print_the_offer_list():
@@ -81,31 +81,6 @@ def test_selector_lines_print_the_offer_list():
 
 
 # ------------------------------------------------------------ replay -----
-
-def test_meters_column_order_matches_the_soak_row_shape():
-    """`understudy/soak.py`: `meters_by_turn` is
-    `[(rnd, fanfare, salon, salon_cap, encore)]`. `replay._meters_at` is the
-    only place that names those columns, so the mapping is the schema.
-    """
-    fight = _fight_record()
-    assert fight["meters_by_turn"][1] == [2, 3, 1, 4, -1]
-    assert s7._meters_at(fight, 2) == {
-        "fanfare": 3, "salon_members": 1, "salon_cap": 4, "encore": -1}
-    assert s7._meters_at(fight, 99) == {}
-
-
-def test_encore_sentinel_is_not_loaded_onto_the_sim():
-    """`_apply_meters`: `encore == -1` means the bot feed could not see the
-    meter; it is left at the sim's own value rather than compared against a
-    sentinel.
-    """
-    player = s7._fresh_player("furina", 70, 75, 0,
-                              {"fanfare": 3, "salon_members": 0,
-                               "salon_cap": 0, "encore": -1})
-    baseline = s7.loader.build_player("furina")
-    assert player.encore == baseline.encore
-    assert player.fanfare == 3
-
 
 def test_selector_choice_needs_the_whole_offer_pair():
     """`SPOTLIGHT_OFFERS`: matching is on the OFFER LIST as well as the chosen

@@ -1419,7 +1419,7 @@ MAP_RUN_LINE = "Run seed {seed}, ascension {ascension}."
 # table answers all of those; a per-card tip answers one.
 # `test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text` reads the C# and
 # fails the moment a sentence here falls behind it -- the same way
-# `CHARGE_SOURCE_LINE` is held in step from the other side.
+# `BOMB_GROWTH` is held in step from the other side.
 #
 # THE LIVE ARMS ONLY. Klee's overhaul (Bomb, Set off, Spark, Mine) and Kokomi's
 # (Plan, Mend). `Tide`, `Surge` and `Exert` left with the rules they named when

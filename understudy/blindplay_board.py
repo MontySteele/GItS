@@ -740,9 +740,6 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         name_resolution_kills(resolved, _enemies(state),
                               combat["round"] or None)
         combat["resolutions"] = resolved
-    memory = kurage_memory(p)
-    if memory is not None:
-        combat["memory"] = memory
     plans = kokomi_plans(p)
     if plans is not None:
         # `EB-329`: the mod names a moved enemy by its combat id, and THE
@@ -1418,8 +1415,7 @@ def split_plan_lines(text: Any) -> tuple[str, str]:
 def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
     """The pending Plans as the observed board sees them (`EB-216`).
 
-    THE ABSENT / EMPTY SPLIT IS THE SAME ONE `kurage_memory` MAKES, and for the
-    same reason: an ABSENT key is "no Plan rule in this build", an EMPTY map is
+    THE ABSENT / EMPTY SPLIT: an ABSENT key is "no Plan rule in this build", an EMPTY map is
     "the rule is here and this seat is not playing it", and a POPULATED map is
     her queue. `None` here keeps the section off the page in both of the first
     two cases -- a Klee at this table must not be shown an empty jellyfish.
@@ -1779,127 +1775,6 @@ def _moved_row(row: dict[str, Any]) -> dict[str, Any]:
             "amount": _int(row.get("amount")),
             "dead": bool(row.get("dead")),
             "absorbed": None if absorbed is None else _int(absorbed)}
-
-
-def _pulse_phrase(memory: dict[str, Any]) -> str:
-    """What the jellyfish will do at the end of THIS turn, in words.
-
-    The pulse is keyed to the type of the last card she played, so it is a
-    forecast the player can still change -- which is the whole reason it has to
-    be on the page before the turn ends (D4).
-    """
-    amount, unit = memory["pulse_amount"], memory["pulse_unit"]
-    if unit == "none":
-        return "do nothing, because you have played no card this turn"
-    if unit == "damage":
-        return f"deal {amount} Hydro damage"
-    if unit == "block":
-        return f"give you {amount} Block"
-    if unit == "charge":
-        return f"give you {amount} Charge"
-    return "apply Hydro"
-
-
-def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
-    """The Kurage's memory as the observed board sees it (`EB-181`).
-
-    THE WIRE KEY IS ABSENT ON A BUILD WITHOUT THE RULE, and that absence is
-    load-bearing: the rule is quarantined behind the mod's prototype compile
-    switch, so a release build has no memory and must not be described as
-    having an empty one. `None` here keeps `memory` off the observed board
-    entirely; an empty QUEUE with a bank is a real state and IS reported.
-
-    AN EMPTY MAP IS AN ABSENT MEMORY TOO (`EB-207`), and this is the second
-    half of the same contract rather than a new rule. The bridge header spells
-    three states, not two: an ABSENT key is "no memory rule in this build", an
-    EMPTY MAP is "the rule is here and this player is not Kokomi" -- which is
-    exactly what `KurageMemory.Snapshot` returns off a seat that fails
-    `IsLive` -- and a POPULATED map is a memory. This reader only ever split
-    the first from the rest, so on a KLEE run every combat page grew a
-    "The Bake-Kurage's memory" heading built entirely out of `_int`/`_text`
-    defaults: Charge 0, an empty queue, and a pulse of `none` rendered as
-    "you have played no card this turn". The blind tester on the Klee
-    whole-fight run reported that sentence as the most confusing thing on the
-    screen, and it was describing a jellyfish Klee does not have.
-
-    A Kokomi seat's memory is never empty as a MAP -- `Snapshot` writes twelve
-    keys before it writes the queue -- so refusing `{}` cannot suppress a real
-    one. The queue being empty is a different fact and still reaches the page.
-
-    Emitted by `vendor/STS2_MCP/gits/GitsKurageMemory.cs`, which lifts it by
-    reflection from `KleeMod.Powers.KurageMemory.Snapshot`. Every field name
-    below is that method's, and the two together are the contract:
-
-      bank / front_price / blocked / fires_next / empty / summon -- the meter,
-        and the target it now has. `front_price` is null on an empty queue,
-        which is the honest reading of "no ceiling" rather than a zero.
-      base_kit -- the jellyfish was INSTALLED at fight start rather than
-        summoned by a card, so it is on the field before turn 1 and there is
-        no state in which it is absent.
-      pulse_kind / pulse_amount / pulse_unit -- what the jellyfish will do at
-        the end of THIS turn, so a seat can forecast its own turn end.
-        `pulse_unit` can read `charge`, because the Power branch pays in Charge
-        rather than in damage or Block.
-      reading -- the ONE-LINE reading, verbatim. Kept on the wire because the
-        rule still computes it, but the PAGE no longer prints it: sec.14
-        replaced the strip with an element whose facts stand one per line.
-      run_out_index -- sec.14.4's running subtraction over the queue: the index
-        of the first entry the bank cannot reach, and -1 when it covers the
-        whole queue. It is the pile view's own colouring, on the wire so the
-        page and the screen cannot drift about where the Charge stops.
-      queue -- ordered, front first: name, cost, price, target ("random" when
-        the memory stored none), blocked, affordable, ephemeral, rule.
-
-    THE WIRE'S PER-ROW `state` IS DELIBERATELY NOT CARRIED. `Snapshot` sends one
-    -- "payable" / "runs_out" / "held", the pile view's own colouring -- and it
-    is an INTERNAL SNAKE-CASE ID, which `qa_packet.assert_blind` refuses on the
-    observed board and is right to: a blind tester must never be handed a
-    developer's vocabulary. `run_out_index` says the same thing as a number,
-    and the page turns it into a sentence.
-    """
-    raw = player.get("kurage_memory")
-    if not isinstance(raw, dict) or not raw:
-        return None
-    queue = []
-    for row in (raw.get("queue") or []):
-        if not isinstance(row, dict):
-            continue
-        queue.append({
-            "name": _text(row.get("name")),
-            "cost": _int(row.get("cost")),
-            "price": _int(row.get("price")),
-            # A memory that stored no target aims randomly, and the board says
-            # so in the word the strip uses rather than leaving a null for a
-            # reader to interpret.
-            "target": _text(row.get("target")) or "random",
-            "blocked": bool(row.get("blocked")),
-            "affordable": bool(row.get("affordable")),
-            "ephemeral": bool(row.get("ephemeral")),
-            "rule": _text(row.get("rule")),
-        })
-    front_price = raw.get("front_price")
-    return {
-        "bank": _int(raw.get("bank")),
-        "front_price": None if front_price is None else _int(front_price),
-        "blocked": bool(raw.get("blocked")),
-        "fires_next": bool(raw.get("fires_next")),
-        "empty": bool(raw.get("empty")),
-        "summon": bool(raw.get("summon")),
-        # The install as a FIGHT-START FACT, so a blind run can see the
-        # jellyfish before turn 1 rather than inferring it from the first
-        # pulse. `summon` says it is on the field; this says nobody summoned
-        # it -- it is base kit, and there is no state where it is absent.
-        "base_kit": bool(raw.get("base_kit")),
-        "pulse_kind": _text(raw.get("pulse_kind")) or "none",
-        "pulse_amount": _int(raw.get("pulse_amount")),
-        "pulse_unit": _text(raw.get("pulse_unit")) or "none",
-        "reading": _text(raw.get("reading")),
-        # -1 rather than None on a wire that never sent the field: "the bank
-        # covers everything queued" is the safe reading, and an empty queue
-        # says the same thing.
-        "run_out_index": _int(raw.get("run_out_index", -1)),
-        "queue": queue,
-    }
 
 
 def _map_nodes(state: dict[str, Any]) -> list[Any]:

@@ -1441,6 +1441,10 @@ class CombatState:
     # Vulnerable -- pays it once (2026-09-26). `SetOffEchoBaseThisPlay`'s twin.
     ko_set_off_echo_base_this_play: float = 0.0
     ko_set_off_multiplier: int = 1          # The Big One arms N, a Set off spends it
+    # What the last `deal_damage_to_enemy` hit LANDED for, before Block took
+    # its share (the C#'s `ElementalHit.Deal` return). Read by
+    # `klee_overhaul._explode` right after its hit, for Big Badda Boom.
+    last_hit_landed: int = 0
     # QUARANTINED (`C.KLEE_OVERHAUL`, R244, R276). Coven Errand's read: how
     # many cards that count as Companion cards have been played this turn. A
     # COUNTER on the arm's ledger rather than a scan of the play log, for rule

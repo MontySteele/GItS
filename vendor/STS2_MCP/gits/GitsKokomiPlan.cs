@@ -1,7 +1,6 @@
 // GItS LOCAL ADDITION - not upstream STS2MCP.
 //
-// `EB-216`, the Kokomi draft-6 half, and it is `GitsKurageMemory.cs` one rule
-// over: the bridge serialises `creature.Powers`, so the arm's pending-Plans
+// `EB-216`, the Kokomi draft-6 half: the bridge serialises `creature.Powers`, so the arm's pending-Plans
 // badge reaches the wire as an ID and an AMOUNT -- a COUNT and nothing else.
 // Under draft 6 that is not enough to play her:
 //
@@ -14,8 +13,8 @@
 //     things that will happen, and The Moon Overlooks the Waters makes a Plan
 //     happen twice over two turns. Neither is visible from a badge.
 //
-// WHAT THIS READS, AND WHY IT IS REFLECTION -- the same posture and the same
-// reasons as `GitsKurageMemory.cs`: the rule is QUARANTINED inside the klee mod
+// WHAT THIS READS, AND WHY IT IS REFLECTION -- the same posture as
+// `GitsSparkPrice.cs`: the rule is QUARANTINED inside the klee mod
 // (`Powers/Prototype/KokomiPlan.cs`, compiled only under
 // `-p:PrototypeCards=true`), so a compile-time reference would make this bridge
 // refuse to load without the klee mod and would not compile at all against a

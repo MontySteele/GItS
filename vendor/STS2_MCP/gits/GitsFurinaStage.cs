@@ -1,7 +1,6 @@
 // GItS LOCAL ADDITION - not upstream STS2MCP.
 //
-// `EB-735`, and it is `GitsFurinaSalon.cs` one arm over, for the reason that
-// one exists: a fact the rule decides and the board does not keep.
+// `EB-735`: a fact the rule decides and the board does not keep.
 //
 // WHAT THE SEATS SAW (Furina, the Stage, round one, sec.2). "Nothing on the
 // blind-play page names a performer, a seat or a bar ... in some 550 actions
@@ -27,7 +26,7 @@
 // the lead -- are exactly the two the bars change most on.
 //
 // WHAT THIS READS, AND WHY IT IS REFLECTION -- the same posture and the same
-// reasons as `GitsFurinaSalon.cs`: the rule is QUARANTINED inside the klee mod
+// reasons as `GitsKokomiPlan.cs`: the rule is QUARANTINED inside the klee mod
 // (`Powers/Prototype/FurinaStageLedger.cs`, compiled only under
 // `-p:PrototypeCards=true`), so a compile-time reference would make this
 // bridge refuse to load without the klee mod and would not compile at all

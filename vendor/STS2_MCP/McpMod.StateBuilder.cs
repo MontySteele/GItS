@@ -1232,20 +1232,6 @@ public static partial class McpMod
             // Implementation and its opt-in contract: gits/GitsResources.cs.
             state["resource_info"] = GitsResourceInfo(combatState);
 
-            // GItS LOCAL EDIT (EB-181, the Kokomi half). A resource snapshot is
-            // an id and an amount, which is the whole of EB-181's second half
-            // ("a meter has no maximum"): under the Kurage's memory rule Charge
-            // HAS a target -- the front memory's own price -- and the queue
-            // behind it is a list of cards no wire key carries. A seat that
-            // cannot read the queue cannot play the character. Emitted only
-            // when this build HAS the rule, so an absent key means "no memory
-            // rule here" and an empty map means "this player is not Kokomi".
-            // Implementation and its reflection contract: gits/GitsKurageMemory.cs.
-            if (GitsKurageMemorySnapshot(player) is { } kurageMemory)
-            {
-                state["kurage_memory"] = kurageMemory;
-            }
-
             // Stars (The Regent's resource, conditionally shown)
             if (player.Character.ShouldAlwaysShowStarCounter || combatState.Stars > 0)
             {
@@ -1376,8 +1362,8 @@ public static partial class McpMod
             state[GitsResolutionsKey] = resolutions;
         }
 
-        // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). The same gap
-        // one rule over from `kurage_memory`: the arm's pending-Plans badge
+        // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). The arm's
+        // pending-Plans badge
         // reaches the wire as a COUNT, and what the next morning WILL BE is
         // the list behind it -- which Plans, in what order, and whether
         // Nereid's Ascension has made each of them happen twice. The pet's
@@ -1402,22 +1388,13 @@ public static partial class McpMod
             state["kokomi_plans"] = kokomiPlans;
         }
 
-        // GItS LOCAL EDIT (`EB-405`). The same receipt one arm over: a Salon
-        // member picks its own body and leaves an element on it, and neither
-        // fact survives the switch that decides them. Emitted beside the Plan
-        // queue and on the same absent/empty/populated contract.
-        if (GitsFurinaSalonState(player) is { } furinaSalon)
-        {
-            state["furina_salon"] = furinaSalon;
-        }
-
         // GItS LOCAL EDIT (`EB-735`). THE STAGE, and it is the block above one
         // arm over: three performers stand in three SEATS, and the seat is the
         // whole kit -- attacks reach the front one, Spend pays from the front
         // one, Raise lands on the back one. The pets already reach the wire;
         // the ORDER they stand in does not, because `Pets` is in the order the
-        // bodies were fielded and a rotation breaks it. Emitted beside the two
-        // receipts above and on the same absent/empty/populated contract, with
+        // bodies were fielded and a rotation breaks it. Emitted beside the
+        // Plan receipt above and on the same absent/empty/populated contract, with
         // one further state: a populated block with no seats is "the stage is
         // empty", which is the fact a seat about to spend a rider needs and
         // the one an absent key cannot state. Implementation and its

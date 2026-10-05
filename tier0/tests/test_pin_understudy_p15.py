@@ -36,7 +36,6 @@ def _fight(**over):
     f.cards_played = [[1, "Stage Presence"]]
     f.selectors = [[1, "choose", 0, "Center Stage",
                     ["Center Stage", "Guest Cast"]]]
-    f.meters_by_turn = [[1, 4, 1, 3, 6]]
     rec = f.as_record()
     rec.update(over)
     return rec
@@ -245,26 +244,12 @@ def test_a_truncated_row_from_an_older_log_is_read_not_crashed_on():
     'this run recorded no selector answers', not a crash". Rows written by an
     older recorder are the same case as keys written by one, and both readers
     pad rather than index blindly -- `selector_lines` over a short selector
-    row, and `describe_run` over a meter row with no Encore column.
+    row.
     """
     short_selector = _fight()
     short_selector["selectors"] = [[1, "choose"]]
     lines = replay.selector_lines(short_selector)
     assert len(lines) == 1 and "no cards on the wire" in lines[0]
-
-    short_meters = _fight()
-    short_meters["meters_by_turn"] = [[1, 4, 1, 3]]      # pre-Encore column
-    assert replay.trace(short_meters)["meters_by_turn"] == [[1, 4, 1, 3]]
-
-
-def test_describe_run_reads_a_short_meter_row_as_unseen(monkeypatch):
-    """The same row, through the reader that prints it. A meter row with no
-    Encore column is a row from a recorder that had no Encore column, which is
-    the definition of unseen."""
-    rec = _fight()
-    rec["meters_by_turn"] = [[1, 4, 1, 3]]
-    monkeypatch.setattr(replay, "read_run_log", lambda stamp, i: [SEED_A, rec])
-    assert "encore=UNSEEN" in replay.describe_run("a", 1)
 
 
 # ============================================================ soak =========

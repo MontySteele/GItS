@@ -9912,7 +9912,8 @@ MODAL_FACE_PREFIX = "Choose one: "
 MODAL_FACE_SEPARATOR = " | "
 
 
-def modal_option_faces(card: dict, modes: list) -> list[str] | None:
+def modal_option_faces(card: dict, modes: list,
+                       built_desc: str | None = None) -> list[str] | None:
     """One face per mode, taken out of the card's OWN description.
 
     Round three's chooser defect: the option classes printed the sheet's
@@ -9928,14 +9929,49 @@ def modal_option_faces(card: dict, modes: list) -> list[str] | None:
     """
     desc = str(card.get("description") or "").strip()
     if not desc.startswith(MODAL_FACE_PREFIX):
-        return _sentence_mode_faces(card, desc, modes)
-    body = desc[len(MODAL_FACE_PREFIX):].rstrip()
-    if body.endswith("."):
-        body = body[:-1]
-    parts = [p.strip() for p in body.split(MODAL_FACE_SEPARATOR)]
-    if len(parts) != len(modes) or not all(parts):
-        return None
-    return parts
+        faces = _sentence_mode_faces(card, desc, modes)
+    else:
+        body = desc[len(MODAL_FACE_PREFIX):].rstrip()
+        if body.endswith("."):
+            body = body[:-1]
+        parts = [p.strip() for p in body.split(MODAL_FACE_SEPARATOR)]
+        faces = parts if len(parts) == len(modes) and all(parts) else None
+    if faces is None and built_desc:
+        faces = _label_mode_faces(built_desc, modes)
+    return faces
+
+
+#: Where a mode label prints a number, the built face may print that number
+#: or the token that replaced it (`{IfUpgraded:show:8|6}`, `{Damage:diff()}`).
+_FACE_NUMBER_SLOT = r"(?:\{[^{}]*\}|\d+)"
+
+
+def _label_mode_faces(built_desc: str, modes: list) -> list[str] | None:
+    """THE THIRD SHAPE: each mode's LABEL found inside the BUILT face.
+
+    `EB-805` (AoE trim, 2026-10-03): Durin's Binary Form and Principle of
+    Purity print "Choose one ... [gold]White[/gold]: Deal 6 ..." with neither
+    the prefix nor a rule gate, so neither split above reached them and the
+    option fell back to its label -- the sheet literal, so an upgraded card
+    printed 8 in the hand and 6 in the chooser. The emitter had already put
+    the upgrade swap into the parent's face (`{IfUpgraded:show:8|6}`); the
+    label is that same sentence with the bare number. So each label is
+    searched for in the built face with every number in it free to be a
+    number or a token, and the match -- the parent's own wording, tokens and
+    all -- is the face. Exactly one match per mode, or None and the labels.
+    """
+    faces: list[str] = []
+    for mode in modes:
+        label = str(mode.get("label") or "").strip()
+        if not label:
+            return None
+        pattern = _FACE_NUMBER_SLOT.join(
+            re.escape(piece) for piece in re.split(r"\d+", label))
+        found = list(re.finditer(pattern, built_desc))
+        if len(found) != 1:
+            return None
+        faces.append(found[0].group(0))
+    return faces
 
 
 #: A sentence end on a face: a full stop and the space before the next one.
@@ -10011,12 +10047,36 @@ def stage_mode_title(card: dict, index: int,
     """
     rules = mode_requirements(card)
     eff = modal_effect(card)
-    if rules is None or eff is None or index >= len(eff["modes"]):
+    if eff is None or index >= len(eff["modes"]):
         return None
     label = strip_markup(str(eff["modes"][index].get("label") or ""))
+    if rules is None:
+        return _ungated_mode_title(label, faces, index)
     if index < len(rules) and rules[index] is not None:
         label = resolve_upgrade_swap(label, upgraded)
         return label.split(":", 1)[0].strip() or label
+    source = (_FACE_VAR_TOKEN.sub("", faces[index]) if faces
+              else re.sub(r"\b\d+\b", "", label))
+    return re.sub(r"\s+", " ", strip_markup(source)).strip() or label
+
+
+def _ungated_mode_title(label: str, faces: list[str] | None,
+                        index: int) -> str | None:
+    """A mode title for a card with NO rule gate (`EB-805`, first line: "a
+    mode card's option title prints the sheet literal while the body folds
+    the board -- two numbers for one option").
+
+    A label with no number keeps itself, and so its bytes. A label with one
+    is titled by the name before its colon where there is one ("White",
+    "Dark" -- Durin's forms, the way a Spend mode is titled by its price), and
+    otherwise by its face with the var tokens taken out, the rule the gated
+    cards' plain modes already follow.
+    """
+    if not re.search(r"\d", label):
+        return None
+    head, sep, _ = label.partition(":")
+    if sep and head.strip() and not re.search(r"\d", head):
+        return head.strip()
     source = (_FACE_VAR_TOKEN.sub("", faces[index]) if faces
               else re.sub(r"\b\d+\b", "", label))
     return re.sub(r"\s+", " ", strip_markup(source)).strip() or label
@@ -15423,7 +15483,7 @@ def emit(
         # the upgraded number appears only if the option is upgraded with the
         # parent -- which `ModalChoice.CreateOption(owner, parent)` does, off
         # the `DynamicVars[...]` half of the parent's own `OnUpgrade`.
-        option_faces = modal_option_faces(card, modal_eff["modes"])
+        option_faces = modal_option_faces(card, modal_eff["modes"], desc)
         option_upgrade = "\n        ".join(
             line.strip() for line in upgrade_cs.split("\n")
             if "DynamicVars[" in line)

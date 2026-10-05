@@ -12,8 +12,7 @@ import re
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_board import (PHASE_FLIP_LINE, _pulse_phrase,
-                                        enchant_moves_line)
+from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
                                         BOMB_REACTION_CLAUSE,
@@ -120,8 +119,7 @@ from understudy.blindplay_coop import banner as coop_banner
 from understudy.blindplay_coop import render_lines as coop_lines
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold, _text
-from understudy.blindplay_shape import (BlindPlayError, CHARGE_SOURCE_LINE,
-                                        FIGHT_OVERLAYS, KURAGE_COST_PER_ENERGY)
+from understudy.blindplay_shape import BlindPlayError, FIGHT_OVERLAYS
 
 
 # ----------------------------------------------------------------- render --
@@ -2684,87 +2682,6 @@ def render(obs: dict[str, Any]) -> str:
             out += _resolution_lines(c["resolutions"],
                                      stage=c.get("stage") is not None,
                                      enemies=c.get("enemies") or [])
-        if c.get("memory"):
-            # `EB-181`, rewritten for the memory CARD that replaced the strip
-            # (review/ruled/kokomi-kurage-memory-2026-08-29.md §14). The page
-            # mirrors THE ELEMENT'S facts, in the element's own order, because
-            # a blind reader must be given what a sighted player sees and
-            # nothing else:
-            #
-            #   1. the Charge count -- the big number under the card;
-            #   2. the FRONT card, its price, and whether it fires next turn --
-            #      the blue/red ring, which is one comparison and no forecast;
-            #   3. the queue, in order, as the pile view shows it on a click,
-            #      with the run-out called out.
-            #
-            # `EB-198` is why the first two are separate lines. The strip put
-            # the bank, the price and the state into one sentence with three
-            # grammars ("Charge 1 / 0"), and the tester read a free front as a
-            # fraction over zero and an empty memory as a contradiction of the
-            # Charge it had just been shown. Both frames were TRUE. One fact
-            # per line is the repair.
-            m = c["memory"]
-            out += ["", "## The Bake-Kurage's memory", ""]
-            if m["base_kit"]:
-                out.append("- The Bake-Kurage is on the field for the whole "
-                           "fight. Nothing summons it and nothing removes it.")
-            out.append(f"- Charge: {m['bank']}")
-            if m["queue"]:
-                front = m["queue"][0]
-                price = ("costs nothing" if not front["price"]
-                         else f"costs {front['price']} Charge")
-                if m["blocked"]:
-                    state = ("you cannot pay it, so NOTHING in the memory "
-                             "fires next turn")
-                else:
-                    state = "it fires at the start of your next turn"
-                out.append(f"- Next to fire: **{front['name']}** — {price} — "
-                           f"{state}.")
-                # `EB-214` item 7 (`M55`, re-scoped by R224): the pile
-                # view's own header line. The page's contract above is the
-                # element's facts in the element's order, and item 3 is "the
-                # queue, as the pile view shows it on a click" -- the header
-                # is part of that view, and a reader who cannot click gets it
-                # here or nowhere. The screen's sentence VERBATIM, with the
-                # rate off the same constant `KurageMemoryText.ChargeSource`
-                # interpolates (`lint_constant_parity` pins the pair equal),
-                # so the two surfaces cannot drift on a retune.
-                out.append(
-                    f"- Opening the memory shows “{CHARGE_SOURCE_LINE}”, "
-                    "and then the whole memory, front first:")
-                # `EB-248`: THE COST THE RULE MULTIPLIED, beside the price it
-                # produced. The price is three times the EFFECTIVE face, so a
-                # Muster recruit printing 2 enrols at 3 and the tester who read
-                # both numbers had no route from one to the other -- the defect
-                # was named unprompted, and it is legibility rather than
-                # arithmetic. This is `KurageMemory.PriceText`'s sentence,
-                # word for word, so the page and the pile view say the same
-                # thing. A free memory carries no derivation: a zero price
-                # means a zero cost, and "cost 0 x 3" would restate the answer
-                # rather than explain it.
-                for i, e in enumerate(m["queue"], 1):
-                    price = ("free" if not e["price"] else
-                             f"{e['price']} Charge, cost {e['cost']} x "
-                             f"{KURAGE_COST_PER_ENERGY}")
-                    out.append(f"  {i}. **{e['name']}** — {price} — "
-                               f"aims at {e['target']}")
-                # §14.4's running subtraction, the pile view's own colouring:
-                # blue while the bank still reaches, red from the shortfall AND
-                # every entry behind it. -1 means the bank covers the queue.
-                run_out = m.get("run_out_index", -1)
-                if run_out is None or run_out < 0:
-                    out.append("- Your Charge covers every memory queued, if "
-                               "you spend none of it elsewhere.")
-                else:
-                    out.append(f"- Charge runs out at #{run_out + 1} "
-                               f"(**{m['queue'][run_out]['name']}**): that one "
-                               f"and everything behind it are held until the "
-                               f"bank catches up.")
-            else:
-                out.append("- The memory is empty. Nothing is queued and "
-                           "nothing fires next turn.")
-            out.append(f"- At the end of this turn the jellyfish will "
-                       f"{_pulse_phrase(m)}.")
         if you["potions"]:
             out += ["", "## Potions", ""]
             # `EB-341`: how many slots there are, beside how many are used.

@@ -140,9 +140,15 @@ public sealed class ProtoMcDurinBinaryFormModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "White: Deal 6 Pyro damage to ALL enemies"),
-        ("description", "[gold]White[/gold]: Deal 6 [gold]Pyro[/gold] damage to ALL enemies"),
+        ("title", "White"),
+        ("description", "[gold]White[/gold]: Deal {IfUpgraded:show:8|6} [gold]Pyro[/gold] damage to ALL enemies"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new CardsVar(1)
+        };
 }
 
 /// <summary>Mode 1 of proto_mc_durin_binary_form. A face for the choose-a-card screen;
@@ -161,7 +167,13 @@ public sealed class ProtoMcDurinBinaryFormModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Dark: Deal 4 Pyro damage to an enemy 3 times"),
-        ("description", "[gold]Dark[/gold]: Deal 4 [gold]Pyro[/gold] damage to an enemy 3 times"),
+        ("title", "Dark"),
+        ("description", "[gold]Dark[/gold]: Deal {IfUpgraded:show:5|4} [gold]Pyro[/gold] damage to an enemy 3 times"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new CardsVar(1)
+        };
 }

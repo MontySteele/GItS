@@ -129,14 +129,14 @@ LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 
 from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     BlindPlayError, BOARD_SETTLE_TRIES, budget_cap, budget_path, budget_spent,
-    BUDGET_REACHED, CHARGE_SOURCE_LINE, COMBAT_SCREENS,
+    BUDGET_REACHED, COMBAT_SCREENS,
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
     clear_refusal, mark_refusal, pending_refusal,
     MAX_ACTIONS_ENV, read_budget, set_budget,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
     AURA_DURATION_TURNS, BOMB_GROWTH, CRYSTALLIZE_BLOCK, FRAIL_BLOCK_PCT,
     VULNERABLE_TAKEN_PCT, WEAK_DEALT_PCT,
-    KURAGE_COST_PER_ENERGY, LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
+    LOG_ROOT, PLAY_GUARDRAIL, PROMPT_PATH,
     _RATE_LIMIT_MARKERS, RECORD_ROOT, REPO, SeatBudgetExhausted,
     SELECT_SCREENS, SETTLE_DELAY_S, SETTLE_TRIES, UNDRIVEN_SCREENS)
 from understudy.blindplay_read import (   # noqa: E402,F401  (re-export)
@@ -157,10 +157,10 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _shop_items, _shop_options, _SPARK_POWER)
 from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
     ALREADY_UPGRADED, PHASE_FLIP_LINE, _bundle_cards, _carried_out_row, _combat, deck_titles,
-    _event_option, _event_options, kokomi_plans, kurage_memory, _map_ahead,
+    _event_option, _event_options, kokomi_plans, _map_ahead,
     _map_boss, _option_faces,
     _map_nodes, _map_options, NO_UPGRADE_DEFINED, _omitted_from_upgrade,
-    _potion_slots, _preview_cards, _proceed_option, _pulse_phrase,
+    _potion_slots, _preview_cards, _proceed_option,
     _relic_options, _rest_options, _reward_items, _screen_cards,
     _selected_bundle, UNEXPLAINED_OMISSION, map_floor, OPTION_UNNAMED_GRANT,
     upgrade_deck_floor)
