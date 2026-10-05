@@ -25,7 +25,8 @@ from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
                                        _is_mod_source_tip,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
-from understudy.blindplay_enemies import enemy_brief
+from understudy.blindplay_enemies import brief_key, enemy_brief
+from understudy.blindplay_moves import EFFECT_KINDS, move_effect
 from understudy.blindplay_shape import SELECT_SCREENS
 
 
@@ -671,6 +672,9 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                      # 2026-10-05: what this kind of enemy does, base-game
                      # facts off `blindplay_enemies`; printed on round 1.
                      "briefing": enemy_brief(_text(e.get("entity_id"))),
+                     # Seat page 3: which KIND it is, which is what the
+                     # once-per-fight memory of the briefing is keyed on.
+                     "brief_key": brief_key(_text(e.get("entity_id"))),
                      "powers": _powers(e)}
                     for e, name, handle, replaced, revived in zip(
                         _enemies(state),
@@ -685,6 +689,18 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # `EB-671`: and which of them is the FRONT. Read after the list is built,
     # off the rows the page is about to print.
     mark_front(combat["enemies"])
+    # Seat page 3 (2026-10-05): what a debuff move does, where the wire names
+    # the move and the base-game table knows it ("applies Frail 2", "steals a
+    # card"). On the first part whose own hover names no power.
+    for raw, face in zip(_enemies(state), combat["enemies"]):
+        effect = move_effect(_text(raw.get("entity_id")),
+                             _text(raw.get("move_id")))
+        if not effect:
+            continue
+        for intent in face["intents"]:
+            if _fold(intent.get("type")) in EFFECT_KINDS:
+                intent["effect"] = effect
+                break
     # 2026-09-26 (control seat, Silent): Surrounded's bodies behind you, by
     # the enemy list's own names. The ids stop here.
     by_id = {_text(raw.get("combat_id")): face["name"]
@@ -1004,6 +1020,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # counter's reading. `line` is None on a build that sends none.
             "drained": _int(raw.get("drained")),
             "line": None if line is None else _int(line),
+            # Seat page 3: where the line comes from, in the mod's words
+            # (`FurinaStageLaw.LineWhy`); "" on a build that sends none.
+            "line_why": _drain_line_why(raw, line),
             "gained": _int(raw.get("gained_this_turn")),
             "spent": _int(raw.get("spent_this_turn")),
             "paid": _int(raw.get("paid_this_turn")),
@@ -1012,6 +1031,23 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             "seats": seats, "log": log,
             "act_block": None if act_block is None else _int(act_block),
             "forecast": _stage_forecast(raw.get("forecast"))}
+
+
+#: The base line's source, as `FurinaStageLaw.LineWhy` words it.
+DRAIN_LINE_HALF = "half the HP you started this fight with"
+
+
+def _drain_line_why(raw: dict[str, Any], line: Any) -> str:
+    """Where the Drain line comes from: the mod's own words, or -- on a
+    build that sends none -- "half the HP you started this fight with" where
+    the line IS half the entry HP (rounded up), else nothing."""
+    why = _text(raw.get("drain_line_why"))
+    if why or line is None:
+        return why
+    entry = raw.get("entry_hp")
+    if isinstance(entry, int) and _int(line) == (max(0, entry) + 1) // 2:
+        return DRAIN_LINE_HALF
+    return ""
 
 
 def _seat_key(raw: Any) -> int | None:
@@ -1339,7 +1375,12 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
 
 
 #: The ledger's event kinds the page prints (`ResolutionLedger.NoteEvent`).
-PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned")
+PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned",
+                    # Seat page 3 (2026-10-05): a Shatter, and the curtain
+                    # call's drained HP given back.
+                    "shattered", "curtain")
+#: The event kinds a page OUTSIDE a fight prints (the reward screen after it).
+OUTSIDE_FIGHT_EVENTS = frozenset({"curtain"})
 
 
 def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:
@@ -1373,6 +1414,7 @@ def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         "combat_id": _text(ev.get("combat_id")),
                         "on_player": bool(ev.get("on_player")),
                         "seq": _int(ev.get("seq")),
+                        "amount": _int(ev.get("amount")),
                         "source": _text(row.get("card"))})
     return out
 

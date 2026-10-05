@@ -213,16 +213,23 @@ screen, in `ArmKeywordTips.cs`'s words (`understudy/blindplay_notes.py` must
 say the same).
 
 Three combat-page lines (2026-10-05), none of them a recommended play:
-**What these enemies do (base game)** prints on round 1, one line per kind
-of enemy, from `understudy/blindplay_enemies.py` (curated from
+**What these enemies do (base game)** prints one line per kind of enemy,
+from `understudy/blindplay_enemies.py` (curated from
 `docs/current/dossiers/enemies/`; a test fails on an act 1-3 elite or boss
-body with no entry; `--brief` prints each once per lane and `observe
---define "<enemy>"` prints it again); **Incoming this turn** sums the attack
+body with no entry), on the first page of each fight, once per fight (the
+fight's own memory, which `new-seat` also clears; `--brief` never trims it;
+plain `observe` prints it on every round-1 page; `observe --define
+"<enemy>"` prints it again); **Incoming this turn** sums the attack
 telegraphs against your Block, naming as unknown a part whose figure may not
-count Weak or Vulnerable; **Since last page** names what the mod's
-`ResolutionLedger` filed that the after-state does not show (a card drawn by
-an effect, a debuff Artifact negated, an enemy power that fired, a stolen
-card given back), only what is new since the lane's last page.
+count Weak or Vulnerable (on Furina's stage too, where guests cannot be
+targeted; not in co-op, where a telegraph names no target); **Since last
+page** names what the mod's `ResolutionLedger` filed that the after-state
+does not show (a card drawn by an effect, a debuff Artifact negated, a
+one-off enemy trigger, a stolen card given back, an attack that Shattered
+Frozen, and on the next screen Furina's drained HP returned), only what is
+new since the lane's last page. A debuff telegraph also names what the move
+does (`understudy/blindplay_moves.py`, read off the base game by the move id
+the bridge sends).
 
 `session` drives one run: one command per screen, fight and run records at the
 ends, budgets on actions, wall time and consecutive refusals. The seat's

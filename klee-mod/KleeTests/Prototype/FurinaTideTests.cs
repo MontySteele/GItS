@@ -559,12 +559,20 @@ public class FurinaTideTests
         Assert.Equal(FurinaStage.DrainedOf(seat.Creature),
                      DrainedCounter.Read(seat.Creature));
 
-        Assert.Equal("You can [gold]Drain[/gold] down to [blue]39[/blue] HP.",
-                     DrainedCounter.LineSentence(39));
+        // 2026-10-05: the line says where it comes from.
+        Assert.Equal("Drain line [blue]39[/blue] HP (half the HP you started "
+                     + "this fight with): you can [gold]Drain[/gold] down to it.",
+                     DrainedCounter.LineSentence(
+                         39, "half the HP you started this fight with"));
+        Assert.Equal("half the HP you started this fight with", stage.LineWhy);
+        Assert.Equal("A Five-Century Act",
+                     FurinaStageLaw.LineWhy(lyney: true, fiveCentury: true));
+        Assert.Contains("10 lower with Lyney",
+                        FurinaStageLaw.LineWhy(lyney: true, fiveCentury: false));
         var body = DrainedCounter.HoverBody(seat.Creature);
-        Assert.StartsWith(DrainedCounter.LineSentence(39), body);
+        Assert.StartsWith(DrainedCounter.LineSentence(39, stage.LineWhy), body);
         Assert.Contains("Drained: [blue]4[/blue] HP.", body);
-        Assert.Equal(DrainedCounter.HoverBody(0, 0),
+        Assert.Equal(DrainedCounter.HoverBody(0, 0, ""),
                      DrainedCounter.HoverBody(null));
 
         // Headless-safe, and on the funnel the Fanfare gauge rides.

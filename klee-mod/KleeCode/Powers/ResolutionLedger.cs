@@ -163,14 +163,17 @@ public static class ResolutionLedger
     /// happened which the page's after-state does not show: a card drawn by
     /// an effect (`drawn`), a debuff an Artifact negated (`negated`), a
     /// base-game enemy power that fired (`triggered`), a stolen card given
-    /// back (`returned`). `Seq` rises across the game process and is seeded
-    /// off the clock, so a page that remembers the last one it printed prints
-    /// only what is new -- across a restart too.
+    /// back (`returned`); and (seat page 3) an attack that Shattered Frozen
+    /// (`shattered`), and the drained HP the curtain call gave back at the
+    /// combat's end (`curtain`, its figure in `Amount`). `Seq` rises across
+    /// the game process and is seeded off the clock, so a page that
+    /// remembers the last one it printed prints only what is new -- across
+    /// a restart too.
     /// </summary>
     public readonly record struct PageEvent(string Kind, string Card,
                                             string Target, string Power,
                                             string CombatId, bool OnPlayer,
-                                            long Seq);
+                                            long Seq, int Amount = 0);
 
     /// <summary>The event kinds, spelled once (the page reads these words).
     /// </summary>
@@ -178,6 +181,8 @@ public static class ResolutionLedger
     public const string Negated = "negated";
     public const string Triggered = "triggered";
     public const string Returned = "returned";
+    public const string Shattered = "shattered";
+    public const string HpReturned = "curtain";
 
     private static long _seq =
         System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000;
@@ -246,7 +251,7 @@ public static class ResolutionLedger
     /// </summary>
     public static void NoteEvent(string kind, string card, string target,
                                  string power, string combatId = "",
-                                 bool onPlayer = false)
+                                 bool onPlayer = false, int amount = 0)
     {
         if (string.IsNullOrEmpty(kind)) return;
         var row = _open;
@@ -273,19 +278,19 @@ public static class ResolutionLedger
                                      target ?? string.Empty,
                                      power ?? string.Empty,
                                      combatId ?? string.Empty, onPlayer,
-                                     ++_seq));
+                                     ++_seq, amount));
     }
 
     /// <summary>The same note for a body: its printed name, its combat id
     /// and whether it is a player, read without a throw.</summary>
     public static void NoteEvent(string kind, string card, Creature? body,
-                                 string power)
+                                 string power, int amount = 0)
     {
         bool onPlayer;
         try { onPlayer = body?.IsPlayer ?? false; }
         catch (System.Exception) { onPlayer = false; }
         NoteEvent(kind, card, Named(body), power,
-                  Safe(() => body?.CombatId.ToString()), onPlayer);
+                  Safe(() => body?.CombatId.ToString()), onPlayer, amount);
     }
 
     /// <summary>
@@ -618,6 +623,7 @@ public static class ResolutionLedger
                     ["combat_id"] = e.CombatId,
                     ["on_player"] = e.OnPlayer,
                     ["seq"] = e.Seq,
+                    ["amount"] = e.Amount,
                 }),
         });
 }

@@ -13,6 +13,7 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_coop import WAIT_COMMAND, ally_forms, coop_block
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
+                                        OUTSIDE_FIGHT_EVENTS, page_events,
                                         _event_option, _event_options,
                                         _map_ahead, _map_boss, _map_paths,
                                         _map_options, _omitted_from_upgrade,
@@ -900,6 +901,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     # screen vocabulary by the same test, and a live "Room Full of Cheese"
     # picker (2026-09-03) bricked a seat when it was not exempt: every
     # `observe` and every `act` recomputed the leak and refused.
+    # SEAT PAGE 3 (2026-10-05): the ledger's events a page OUTSIDE a fight
+    # prints -- the curtain call's drained HP given back, on the reward
+    # screen after the fight. The combat page reads its own in `_combat`.
+    if obs["screen"] != "combat" and not obs.get("blocked"):
+        events = page_events(_player(state))
+        if events:
+            obs["events"] = [ev for ev in events
+                             if ev["kind"] in OUTSIDE_FIGHT_EVENTS]
     allow = {st, obs["screen"]}
     if obs.get("select_kind"):
         allow.add(obs["select_kind"])

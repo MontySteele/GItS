@@ -4610,7 +4610,7 @@ def test_observe_refuses_a_doubled_page_as_a_line_not_a_traceback(
 
     real = blindplay.observe
 
-    def doubled(state):
+    def doubled(state, full=True):
         # The guard itself, driven on a page that really was emitted twice.
         blindplay.assert_one_page(real(state) * 2)
         raise AssertionError("the guard did not fire")

@@ -1736,6 +1736,19 @@ public static partial class McpMod
         // Intents
         if (monster?.NextMove is MoveState moveState)
         {
+            // GItS LOCAL EDIT (seat page 3, 2026-10-05). WHICH MOVE THIS IS.
+            // A debuff telegraph reached the page as "Strategic (Debuff)" or
+            // "Malicious (CardDebuff)", and a seat could not tell Weak from
+            // Frail from a card theft. The move's own state id
+            // (`MoveState.StateId`, e.g. `FRAIL_SPORES_MOVE`) names it; the
+            // page looks the move up in a table read off the base game
+            // (`understudy/blindplay_moves.py`). An id, never a sentence.
+            try
+            {
+                state["move_id"] = moveState.Id;
+            }
+            catch { /* a read that throws is not an id */ }
+
             var intents = new List<Dictionary<string, object?>>();
             foreach (var intent in moveState.Intents)
             {
