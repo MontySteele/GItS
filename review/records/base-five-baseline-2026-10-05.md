@@ -12,7 +12,7 @@
 | Necrobinder | YEWA0B7AVE45 | 17/66, 1/66 | lost, floor 46, Mecha Knight elite | four hard fights in a row with no rest or shop, then a 40 hit at 6 HP |
 | Regent | R41TX5Q0ZQYN | 42/92, 6/102 | lost, floor 48, Aeonglass (306/512 left) | no steady Block; Wither cards clogged the deck; Conqueror+ into Artifact |
 
-Every run ended in act 3, four of them at the final boss. Every act ended with the seat low: across the ten act-1 and act-2 finishes, the median HP was about 25% of max. The Ancients' heals kept the runs alive into acts 2 and 3. **A0 is not too easy for Sonnet,** so raising ascension would add no signal yet.
+Every run ended in act 3, four of them at the final boss. Every act ended with the seat low: across the ten act-1 and act-2 finishes, the median HP was about 30% of max, and three were under 10%. The Ancients' heals kept the runs alive into acts 2 and 3. **A0 is not too easy for Sonnet,** so raising ascension would add no signal yet.
 
 The pattern repeats the effort test (`sonnet-effort-test-2026-10-05.md`): the seats race damage instead of blocking, and the bill comes at the boss. Two decision faults recur:
 - Block shortage planned at the draft. Three decks reached the act 3 boss with no reliable Block.
