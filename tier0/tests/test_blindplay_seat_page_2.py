@@ -154,7 +154,7 @@ def test_incoming_sums_single_and_multi_hits_against_block():
             {"type": "Buff", "label": "", "title": "Charge Up"}])])
     state["player"]["block"] = 5
     assert incoming(state) == ("- Incoming this turn: 18 (your Block 5): "
-                               "you would take 13.")
+                               "you would take 13. You would be at 11/70 HP.")
 
 
 def test_incoming_reads_the_games_breakdown_first():
@@ -165,7 +165,7 @@ def test_incoming_reads_the_games_breakdown_first():
                            "repeats": 3, "total_damage": 27,
                            "modifiers": ["Strength"]}}])])
     assert incoming(state) == ("- Incoming this turn: 27 (your Block 0): "
-                               "you would take 27.")
+                               "you would take 27. You would be at 0/70 HP.")
 
 
 def test_incoming_says_unknown_where_the_label_may_not_count_weak():
