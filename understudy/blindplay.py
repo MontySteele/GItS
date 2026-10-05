@@ -190,7 +190,7 @@ from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_observe import (   # noqa: E402,F401  (re-export)
     observation)
 from understudy.blindplay_render import (   # noqa: E402,F401  (re-export)
-    assert_one_page, _colliding, observe, render, _render_card,
+    assert_one_page, _colliding, newest_event, observe, render, _render_card,
     _render_intent,
     _render_intents, _render_options, _render_power, sha256, still_in_fight)
 from understudy.blindplay_snapshot import (   # noqa: E402,F401  (re-export)
@@ -358,7 +358,7 @@ def cmd_observe(args) -> int:
         if word:
             print(blindplay_brief.define(observe(state), word).rstrip("\n"))
         else:
-            print(_page(observe(state), args))
+            print(_page(screen_page(state), args))
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=out)
         return 1
@@ -375,6 +375,20 @@ def cmd_observe(args) -> int:
         print(f"REFUSED: {exc}", file=out)
         return 1
     return 0
+
+
+def screen_page(state: dict[str, Any]) -> str:
+    """The full page as a printing door prints it: `observe`, with the
+    combat page's "Since last page" line cut to the ledger events this lane
+    has not been shown yet, and the newest one recorded (2026-10-05)."""
+    obs = observation(state)
+    if obs.get("combat") is not None:
+        obs["combat"]["events_after"] = blindplay_shape.read_events_seen()
+    text = render(obs)
+    newest = newest_event(obs)
+    if newest:
+        blindplay_shape.write_events_seen(newest)
+    return text
 
 
 def _brief_on(args) -> bool:
@@ -594,7 +608,7 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
     print(blindplay_coop.wait_line(waited, moved, latest))
     print()
     try:
-        print(_page(observe(latest), args))
+        print(_page(screen_page(latest), args))
     except (qa_packet.PacketLeak, BlindPlayError) as exc:
         print(f"REFUSED: {exc}", file=_refusal_stream(args))
         return 1

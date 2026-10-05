@@ -2321,6 +2321,165 @@ _RUN_RESULT = {"victory": ". You WON the run.",
                "defeat": ". You LOST the run."}
 
 
+# ------------------------------------------- 2026-10-05: the seat-page pass -
+#
+# Three additions to the combat page, each a fact a sighted player has and
+# the page did not, none of them a recommendation:
+#
+# - the ENEMY BRIEFING (`blindplay_enemies`): what each kind of enemy here
+#   does, base-game facts, on round 1. Each row is a gloss, so the brief page
+#   keeps it the first time a lane is shown it and cuts it after;
+# - the INCOMING line: the attack telegraphs summed against your Block, with
+#   the parts the page cannot count named as unknown. No lethal, no plan;
+# - the SINCE-LAST-PAGE line: what the ledger filed that no other line shows
+#   (a card drawn by an effect, a debuff Artifact negated, an enemy power that
+#   fired, a stolen card given back), only what is new since the lane's last
+#   page (`events_after`, set by the printing door), omitted when empty.
+
+#: The heading over the enemy briefing.
+BRIEFING_HEADING = "## What these enemies do (base game)"
+#: The incoming-attacks line. A sum of the telegraphs, never a plan.
+INCOMING_LINE = ("- Incoming this turn: {total} (your Block {block}): you "
+                 "would take {take}.")
+INCOMING_UNKNOWN = ("- Incoming this turn: {total} plus an unknown amount "
+                    "from {who} (your Block {block}).")
+INCOMING_NONE = "- Incoming this turn: no attack is shown."
+#: The since-last-page line, and how many phrases it names before it counts.
+EVENTS_HEAD = "- Since last page: "
+EVENTS_CAP = 8
+
+
+def _briefing_lines(enemies: list[dict[str, Any]]) -> list[str]:
+    """One gloss per KIND of enemy on the board that the table knows, named
+    as the enemy list names its first body (the `(n)` off)."""
+    rows: list[str] = []
+    seen: set[str] = set()
+    for e in enemies:
+        text = e.get("briefing") or ""
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        name = re.sub(r"\s*\(\d+\)$", "", str(e.get("name") or "")).strip()
+        rows.append(f"*{name or 'This enemy'}* — {text}")
+    return ["", BRIEFING_HEADING, ""] + rows if rows else []
+
+
+def _attack_part_total(intent: dict[str, Any], weak: int,
+                       vulnerable: int) -> int | None:
+    """What one attack part adds up to, or `None` where the page cannot say.
+
+    The game's own breakdown first: it folds Strength, Weak and Vulnerable.
+    Without one, the icon's `N` or `NxM` -- and `None` where Weak or
+    Vulnerable stands, because that label may or may not count them
+    (`INTENT_FOLD_NOTE`)."""
+    breakdown = intent.get("breakdown") or {}
+    if breakdown.get("repeats"):
+        total = breakdown.get("total")
+        if isinstance(total, int):
+            return total
+        return int(breakdown.get("folded") or 0) * int(breakdown["repeats"])
+    label = str(intent.get("label") or "").strip()
+    multi = _MULTI_HIT_LABEL.match(label)
+    if multi:
+        value = int(multi.group(1)) * int(multi.group(2))
+    elif label.isdigit():
+        value = int(label)
+    else:
+        return None
+    if weak or vulnerable:
+        return None
+    return value
+
+
+def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any]) -> str:
+    """`- Incoming this turn: N (your Block B): you would take N-B.`
+
+    The sum of every attack part shown; a part it cannot count is named as
+    unknown. Nothing else is folded in: no end-of-turn damage, no plan."""
+    total, unknown, any_attack = 0, [], False
+    vulnerable = _stacks_of(you, "vulnerable")
+    for e in enemies:
+        if e.get("phase_flip") or (isinstance(e.get("hp"), int)
+                                   and e["hp"] <= 0):
+            continue
+        weak = _stacks_of(e, "weak")
+        for intent in e.get("intents") or []:
+            if _fold(intent.get("type")) != "attack":
+                continue
+            any_attack = True
+            part = _attack_part_total(intent, weak, vulnerable)
+            if part is None:
+                name = str(e.get("name") or "an enemy")
+                if name not in unknown:
+                    unknown.append(name)
+            else:
+                total += part
+    if not any_attack:
+        return INCOMING_NONE
+    block = int(you.get("block") or 0)
+    if unknown:
+        return INCOMING_UNKNOWN.format(total=total, who=_and_list(unknown),
+                                       block=block)
+    return INCOMING_LINE.format(total=total, block=block,
+                                take=max(0, total - block))
+
+
+def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
+    """The phrases for one kind of event, repeats counted."""
+    counted: dict[tuple, int] = {}
+    for ev in evs:
+        key = (ev["card"], ev["target"], ev["power"], ev["source"],
+               bool(ev.get("on_player")))
+        counted[key] = counted.get(key, 0) + 1
+    out: list[str] = []
+    if kind == "drawn":
+        by_source: dict[str, list[str]] = {}
+        for (card, _t, _p, source, _o), n in counted.items():
+            by_source.setdefault(source, []).append(
+                card + (f" x{n}" if n > 1 else ""))
+        for source, cards in by_source.items():
+            out.append(f"drew {_and_list(cards)}"
+                       + (f" ({source})" if source else ""))
+        return out
+    for (card, target, power, _s, on_player), n in counted.items():
+        times = f" x{n}" if n > 1 else ""
+        if kind == "negated":
+            out.append((f"your Artifact negated {power}" if on_player
+                        else f"Artifact negated {power} on {target}") + times)
+        elif kind == "triggered":
+            out.append(f"{target}'s {power} fired{times}")
+        elif kind == "returned":
+            out.append(f"{card} came back to your deck from {target}")
+    return out
+
+
+def _events_lines(events: list[dict[str, Any]], after: int) -> list[str]:
+    """`- Since last page: ...`, or nothing. The events with `seq` past
+    `after`, grouped by kind in the order each kind first happened, capped."""
+    fresh = [ev for ev in events if int(ev.get("seq") or 0) > after]
+    kinds: list[str] = []
+    for ev in fresh:
+        if ev["kind"] not in kinds:
+            kinds.append(ev["kind"])
+    phrases: list[str] = []
+    for kind in kinds:
+        phrases += _event_phrases(kind, [e for e in fresh
+                                         if e["kind"] == kind])
+    if not phrases:
+        return []
+    if len(phrases) > EVENTS_CAP:
+        phrases = phrases[:EVENTS_CAP] + [
+            f"and {len(phrases) - EVENTS_CAP} more"]
+    return [EVENTS_HEAD + "; ".join(phrases) + "."]
+
+
+def newest_event(obs: dict[str, Any]) -> int:
+    """The highest event `seq` on a combat observation, else 0. The printing
+    door records it so the next page prints only what came after."""
+    combat = obs.get("combat") or {}
+    return max((int(ev.get("seq") or 0)
+                for ev in combat.get("events") or []), default=0)
+
 def render(obs: dict[str, Any]) -> str:
     """The observation as the page the tester is handed. Same content."""
     st = obs["state_type"]
@@ -2458,6 +2617,10 @@ def render(obs: dict[str, Any]) -> str:
                    f"{c['piles']['exhaust']} exhausted")
         out += _orb_lines(you.get("orbs"))
         out += _ally_lines(c.get("pets") or [])
+        # 2026-10-05: what happened since the last page that no other line
+        # shows. Omitted when there is nothing.
+        out += _events_lines(c.get("events") or [],
+                             int(c.get("events_after") or 0))
         # `EB-238`. IN THE HEADER, with HP and Energy, because that is where
         # the game keeps it: the relic row sits along the top of every screen
         # of a run, and a reader who is shown it only when one is OFFERED has
@@ -2756,6 +2919,10 @@ def render(obs: dict[str, Any]) -> str:
                 # `EB-605`: and where a Bomb badge's headline and its list of
                 # charge sizes are two different numbers, which is which.
                 out += _bomb_forecast_note(pw, e["powers"], "    ")
+        # 2026-10-05: the attacks shown, summed against your Block. A sum of
+        # the telegraphs and nothing more; no plan is computed.
+        if c["enemies"] and not obs.get("coop") and c.get("stage") is None:
+            out += ["", _incoming_line(c["enemies"], you)]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the
         # opposite, which is what sent a seat's Melt into the wrong body.
@@ -2800,6 +2967,10 @@ def render(obs: dict[str, Any]) -> str:
                for p in you["powers"] + [x for e in c["enemies"]
                                          for x in e["powers"]]):
             out += ["", AURA_NOTE]
+        # 2026-10-05: what each kind of enemy here does, on round 1. The
+        # brief page keeps each line the first time a lane is shown it.
+        if c["round"] == 1:
+            out += _briefing_lines(c["enemies"])
     elif obs["screen"] == "map":
         out += ["# The map", ""]
         # `EB-323`: the floor first, because it is the frame the rest of this

@@ -127,6 +127,17 @@ public static class ResolutionLedger
     {
         public List<Hit> Hits { get; } = new();
 
+        /// <summary>What happened inside this card that no other line of the
+        /// page shows, in order (<see cref="NoteEvent"/>). On a
+        /// <see cref="Between"/> row, what happened outside any play.</summary>
+        public List<PageEvent> Events { get; } = new();
+
+        /// <summary>A row that is not a card: it holds only the events filed
+        /// while no play was open (an enemy's turn, the start of yours). Its
+        /// card and id are empty, so a reader that predates it skips it.
+        /// </summary>
+        public bool Between { get; init; }
+
         /// <summary>The powers this card put on enemies, in order
         /// (<see cref="NotePower(string, string, int, string)"/>).</summary>
         public List<PowerApplied> Applied { get; } = new();
@@ -146,6 +157,34 @@ public static class ResolutionLedger
         public bool Carried { get; set; }
         public bool Overflowed { get; set; }
     }
+
+    /// <summary>
+    /// 2026-10-05, THE SEAT PAGE'S "SINCE LAST PAGE" LINE. One thing that
+    /// happened which the page's after-state does not show: a card drawn by
+    /// an effect (`drawn`), a debuff an Artifact negated (`negated`), a
+    /// base-game enemy power that fired (`triggered`), a stolen card given
+    /// back (`returned`). `Seq` rises across the game process and is seeded
+    /// off the clock, so a page that remembers the last one it printed prints
+    /// only what is new -- across a restart too.
+    /// </summary>
+    public readonly record struct PageEvent(string Kind, string Card,
+                                            string Target, string Power,
+                                            string CombatId, bool OnPlayer,
+                                            long Seq);
+
+    /// <summary>The event kinds, spelled once (the page reads these words).
+    /// </summary>
+    public const string Drawn = "drawn";
+    public const string Negated = "negated";
+    public const string Triggered = "triggered";
+    public const string Returned = "returned";
+
+    private static long _seq =
+        System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000;
+
+    /// <summary>The row out-of-play events are filed on, while it is still
+    /// the last row; null once a play has opened after it.</summary>
+    private static Resolved? _between;
 
     private static readonly List<Resolved> Rows = new();
 
@@ -185,6 +224,7 @@ public static class ResolutionLedger
         Rows.AddRange(carried);
         _playerTurnEnd = -1;
         _open = null;
+        _between = null;
     }
 
     /// <summary>Drop everything. Called when a combat opens, so one fight's
@@ -194,7 +234,58 @@ public static class ResolutionLedger
     {
         Rows.Clear();
         _open = null;
+        _between = null;
         _playerTurnEnd = -1;
+    }
+
+    /// <summary>
+    /// "This happened, and the page's after-state will not show it"
+    /// (2026-10-05). Filed on the card that is resolving, or -- outside any
+    /// play -- on a <see cref="Resolved.Between"/> row, so the turn's order
+    /// is kept. Capped per row like the hits; the cap says so.
+    /// </summary>
+    public static void NoteEvent(string kind, string card, string target,
+                                 string power, string combatId = "",
+                                 bool onPlayer = false)
+    {
+        if (string.IsNullOrEmpty(kind)) return;
+        var row = _open;
+        if (row == null)
+        {
+            if (_between == null || Rows.Count == 0
+                || !ReferenceEquals(Rows[^1], _between))
+            {
+                if (Rows.Count >= MaxRows) return;
+                _between = new Resolved(string.Empty, string.Empty, false)
+                {
+                    Between = true,
+                };
+                Rows.Add(_between);
+            }
+            row = _between;
+        }
+        if (row.Events.Count >= MaxHits)
+        {
+            row.Overflowed = true;
+            return;
+        }
+        row.Events.Add(new PageEvent(kind, card ?? string.Empty,
+                                     target ?? string.Empty,
+                                     power ?? string.Empty,
+                                     combatId ?? string.Empty, onPlayer,
+                                     ++_seq));
+    }
+
+    /// <summary>The same note for a body: its printed name, its combat id
+    /// and whether it is a player, read without a throw.</summary>
+    public static void NoteEvent(string kind, string card, Creature? body,
+                                 string power)
+    {
+        bool onPlayer;
+        try { onPlayer = body?.IsPlayer ?? false; }
+        catch (System.Exception) { onPlayer = false; }
+        NoteEvent(kind, card, Named(body), power,
+                  Safe(() => body?.CombatId.ToString()), onPlayer);
     }
 
     /// <summary>
@@ -234,6 +325,7 @@ public static class ResolutionLedger
         var row = new Resolved(cardId, card, autoPlayed);
         Rows.Add(row);
         _open = row;
+        _between = null;
     }
 
     /// <summary>
@@ -515,5 +607,17 @@ public static class ResolutionLedger
                     ["source"] = o.Source,
                 }),
             ["fang_ascension"] = row.FangAscension,
+            ["between"] = row.Between,
+            ["events"] = row.Events.ConvertAll(e =>
+                new Dictionary<string, object?>
+                {
+                    ["kind"] = e.Kind,
+                    ["card"] = e.Card,
+                    ["target"] = e.Target,
+                    ["power"] = e.Power,
+                    ["combat_id"] = e.CombatId,
+                    ["on_player"] = e.OnPlayer,
+                    ["seq"] = e.Seq,
+                }),
         });
 }
