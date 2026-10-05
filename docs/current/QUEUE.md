@@ -23,7 +23,7 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
-- **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
+- **Klee at Balance: what to measure** (`review/active/klee-balance-measurement-2026-10-05.md`, five picks, all defaults): the gate becomes the base-character bar measured on the real game (seat runs on the baseline seeds, fight telemetry, [USER]'s run) instead of the sim re-baseline; one-line predictions replace slates; the sim's Balance machinery is parked; rows stay on the prototype surface.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
