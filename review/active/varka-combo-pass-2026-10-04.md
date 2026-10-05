@@ -123,10 +123,11 @@ Absolute Zero, a Rare. Two cards, and Unwavering Banner:
 
 - **Yardsticks.** Shatter with nothing on the enemy is 5 [7], under
   Strike; against 1 Weak and 2 Vulnerable it is 11 [16] for 1, and it gets
-  there only after two setup cards. Deep Freeze is Catalyst's shape (Silent
-  U, 1: double Poison [triple]) on Cryo's statuses.
-- The base-game yardsticks in §3 and §4 are quoted from memory of the
-  StS1 cards; the build checks each against the game's own code first.
+  there only after two setup cards. Deep Freeze has no base twin: StS2 has no
+  Catalyst and no card that doubles a debuff (`game_ref/silent.json`,
+  checked at the build). Its upgrade is cost 1 to 0.
+- Checked at the build against `game_ref`: True Grit is 7 [9] Block
+  (random card; chosen when upgraded), Feel No Pain 3 [4] per Exhaust.
 - **Banner** turns "don't lose your element" into a mono-element payoff:
   off-element cards still do their own job and now feed the Oath you are
   building.
