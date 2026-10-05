@@ -93,6 +93,61 @@ from the reversibility ledger on disk and walks its undo steps (newest
 embark first, or `--stamp` by name); it picks that lane's newest sidecar and
 refuses another lane's.
 
+### Five lanes, and embarking several at once
+
+There are **five seat lanes**, `lane1` to `lane5` on ports 15527 to 15531,
+each with its own disposable user tree under `%LOCALAPPDATA%\gits-lanes\laneN`.
+Lane 0 (port 15526) is the owner's own game and profile and is never embarked
+by a round. The count is one constant, `instances.SEAT_LANE_COUNT`; the
+registry, the ports and every "known lanes" message derive from it.
+
+Embark several lanes in one command, all at once:
+
+```sh
+python -m understudy.embark --lanes 1,2,3,4,5 --character klee --ascension 0 \
+    --max-actions 1500 --seeds S1,S2,S3,S4,S5      # lane N gets the Nth seed
+python -m understudy.embark --teardown --lanes 1,2,3,4,5   # or --teardown --lane N
+```
+
+Each lane runs the ordinary single-lane embark in its own process, with its
+output in `understudy/logs/embark-<time>-laneN.log`. The command waits for all
+of them and prints one row per lane: port, UP or FAILED, the character and the
+seed read back off the wire, and the log. A failed lane does not stop the
+others; tear that lane down with `--teardown --lane N` and embark it again.
+`--characters` takes one name for all lanes or one per lane; `--seeds` one
+per lane or none (the game rolls them). Each seat still sets `GITS_LANE=N`.
+
+What makes it safe (the 2026-09-25 round's second lane never came up when two
+lanes were embarked at the same moment):
+
+- **The shared install is taken one lane at a time.** `steam_appid.txt`,
+  `mods\STS2_MCP` and the launch all run inside `instances.install_lock()`, a
+  machine-wide OS file lock (`%LOCALAPPDATA%\gits-lanes\install.lock`, freed
+  by the OS if its holder dies). Unlocked, two embarks both saw no game up,
+  both ran `deploy_bridge.ps1`, and one's `Remove-Item mods\STS2_MCP` landed
+  while the other's game was booting: that game came up with no bridge and its
+  port refused every call. Inside the lock, the second lane sees the first
+  lane's game up and reuses the bridge. The menu wait is outside the lock, so
+  the boots overlap.
+- **Launches are staggered** by at least 8 s (`instances.LAUNCH_STAGGER_S`,
+  recorded in `last-launch.json` beside the lock), so Steam initialises one
+  game at a time. A lone embark never waits.
+- **Each embark claims its own stamp** (`embark.reserve_stamp`, an exclusive
+  create of its sidecar). The stamp is a clock reading to the second and names
+  the sidecar and the reversibility ledger; two lanes in the same second used
+  to share both, and the first lane's launch row (its pid) was lost.
+
+- **A lane's mod list has the bridge on.** A fresh lane copies lane 0's
+  `settings.save`, and lane 0's had `STS2_MCP` switched off on 2026-10-05, so
+  the new lane 5 booted without the bridge ("Skipping loading mod STS2_MCP" in
+  its `godot.log`). Every lane embark now turns `STS2_MCP` and `klee` on in the
+  lane's own copy (`instances.enable_lane_mods`); lane 0's is never written.
+
+What stays shared and is not locked: `mods\klee` (one deployed build for every
+lane; deploy only with every lane down) and the bridge's FastMode capture
+file `mods\STS2_MCP\GitsSpeed.original.conf` (every lane's prefs are seeded
+from lane 0's, so the captured original is the same value).
+
 ### Running a co-op round (two seats, one run)
 
 Two blind seats share ONE co-op run, each driving one player through the same
@@ -166,7 +221,8 @@ python -m understudy.embark --teardown --coop --lanes 2,3     # client first
 
 - **Lane 0 is the owner's own game** on port **15526** and the machine's own
   `APPDATA`; `tools/seat.py` refuses it without `--allow-lane-0`. Lane N gets
-  port 15526+N and `APPDATA=%LOCALAPPDATA%\gits-lanes\laneN`.
+  port 15526+N and `APPDATA=%LOCALAPPDATA%\gits-lanes\laneN`, for N = 1
+  to 5.
 - **A lane above 0 is never a run of record.** Its profile is disposable
   (seeded once from lane 0's `settings.save`, never read back); if it goes
   wrong, delete `%LOCALAPPDATA%\gits-lanes\laneN`.

@@ -257,6 +257,15 @@ def test_agent_worktree_sees_a_live_lane_only_with_both_halves(tmp_path):
     assert aw.live_lanes(tmp_path) == []
 
 
+def test_agent_worktree_reads_every_lanes_port_by_the_registrys_rule():
+    """The tool restates the port rule rather than importing the registry;
+    every lane the registry holds must get the same port from both."""
+    aw = _module("agent_worktree")
+    from understudy import instances
+    for label, (port, _) in instances.LANES.items():
+        assert aw.lane_port(label) == port == instances.port_for(label)
+
+
 # --- open_pr.py ------------------------------------------------------------
 
 def test_open_pr_appends_the_footer_once_and_only_once():

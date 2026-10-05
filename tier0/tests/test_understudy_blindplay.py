@@ -4793,9 +4793,13 @@ def test_the_lane_variable_is_spelled_the_same_on_both_sides_of_the_wall():
 
 
 def test_embark_records_the_cap_in_the_lanes_own_budget(lane_budget,
-                                                        monkeypatch):
+                                                        monkeypatch,
+                                                        tmp_path):
     """The coordinator's write, and the reset that goes with it: an embark is
     a new run, so the previous round's spent count may not survive it."""
+    # The embark claims its stamp by creating a sidecar; never in the real
+    # `understudy/logs`.
+    monkeypatch.setattr(embark, "LOG_DIR", tmp_path)
     blindplay.set_budget(120)
     for _ in range(7):
         blindplay.count_action()
