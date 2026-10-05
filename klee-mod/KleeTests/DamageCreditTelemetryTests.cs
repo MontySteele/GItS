@@ -365,6 +365,38 @@ public class DamageCreditTelemetryTests : IDisposable
             Il.Calls(Il.Method("PlayTelemetry", "CloseTurn")));
     }
 
+    /// <summary>A combat that answers only `Enemies`, enough for the two
+    /// pool readers.</summary>
+    public class CombatProxy : DispatchProxy
+    {
+        public System.Collections.Generic.IReadOnlyList<Creature> Enemies = Array.Empty<Creature>();
+
+        protected override object? Invoke(MethodInfo? m, object?[]? args)
+        {
+            if (m!.Name == "get_Enemies") return Enemies;
+            throw new NotSupportedException(m.Name);
+        }
+    }
+
+    /// <summary>2026-10-05: `enemy_hp_by_turn` is the pool without Block.</summary>
+    [Fact]
+    public void Enemy_hp_field_counts_hp_only_where_the_pool_counts_block_too()
+    {
+        var a = Enemy(30);
+        var b = Enemy(20);
+        Seat.Force(a, "Block", 8);
+        var combat = DispatchProxy.Create<MegaCrit.Sts2.Core.Combat.ICombatState, CombatProxy>();
+        ((CombatProxy)(object)combat).Enemies = new[] { a, b };
+
+        Assert.Equal(58, (int)Invoke("EnemyPool", combat)!);
+        Assert.Equal(50, (int)Invoke("EnemyHp", combat)!);
+        Assert.Contains("PlayTelemetry.EnemyHp",
+            Il.Calls(Il.Method("PlayTelemetry", "OpenTurn")));
+        var klee = Seat.Klee();
+        Open(klee, 1, 0);
+        Assert.Equal("[]", Record(klee).GetProperty("enemy_hp_by_turn").GetRawText());
+    }
+
     /// <summary>The fight's line, as written to the log, read back. The log
     /// path is pointed at a temp file so no Godot path is resolved.</summary>
     private static string[] WrittenLines(Action act)
