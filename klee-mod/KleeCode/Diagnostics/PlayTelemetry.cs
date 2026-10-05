@@ -1575,7 +1575,7 @@ public sealed class PlayTelemetryHooks : AbstractModel
         // -- so an enemy's attack, a bomb on nobody's turn and a relic's
         // answer pass straight through, each of which has its own receipt.
         ResolutionLedger.NoteHit(target, (int)result.UnblockedDamage,
-                                 (int)result.BlockedDamage);
+                                 (int)result.BlockedDamage, dealer);
         return Task.CompletedTask;
     }
 

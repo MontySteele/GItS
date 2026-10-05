@@ -1775,6 +1775,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // merge and a split carry a Bomb that was already placed, so they pass
         // `relocated` and the Charm is paid once per Bomb, when it arrives.
         if (!relocated) size += Relics.DodocoCharm.BonusFor(applier);
+        var mark = ResolutionLedger.MarkApplied();
         var power = await PowerCmd.Apply<ProtoBombPower>(
             choiceContext, target, 1, applier: applier, cardSource: cardSource);
 
@@ -1782,6 +1783,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         {
             bomb.AddCharge(new ProtoCharge(size, isMine, payloadMineAll));
             Register.Note(bomb);
+            // The play log's line for this placement: the hook filed the
+            // pile's COUNT (1), and the page reads a size ("Put Bomb 11").
+            ResolutionLedger.SizeAppliedSince(mark, target,
+                                              isMine ? "Mine" : "Bomb", size);
         }
         else if (LandsOnNobody(target))
         {

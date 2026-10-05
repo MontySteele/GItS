@@ -265,6 +265,39 @@ def pending_refusal(board: str, lane: object = None,
     return row
 
 
+# 2026-10-04. THE RUN SEED, which no screen's feed carries (`run` sends act,
+# floor and ascension only), so no page printed it and a seat could not fill
+# its record's identity block. `embark` reads the seed back off the wire once
+# and writes it into the lane's sidecar (`understudy/logs/embark-<stamp>.json`,
+# `instance` naming the lane); the newest sidecar for this lane that holds a
+# seed is the run up on it. Read as a file, by name, for the reason `LANE_ENV`
+# is spelled above: this module imports nothing that reaches a lane resolver.
+_SIDECAR_DIR = Path(__file__).resolve().parent / "logs"
+
+
+def lane_run_seed(lane: object = None) -> str:
+    """The seed `embark` read back for this lane's run, or "" when no
+    sidecar for the lane names one."""
+    label = f"lane{lane_tag(lane)}"
+    try:
+        paths = sorted(_SIDECAR_DIR.glob("embark-*.json"), reverse=True)
+    except OSError:
+        return ""
+    for path in paths:
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(blob, dict):
+            continue
+        if str(blob.get("instance") or "lane0") != label:
+            continue
+        seed = str(blob.get("run_seed") or "").strip()
+        if seed:
+            return seed
+    return ""
+
+
 # 2026-10-01. THE WORDS A LANE HAS ALREADY BEEN SHOWN. `observe --brief`
 # keeps a definition the first time it prints on a lane and cuts it after
 # (`blindplay_brief`), so the lane remembers which it has printed. Beside the

@@ -26,7 +26,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ONE_USE_DISCOUNT_NOTE,
                                         ONE_USE_RIDER_NOTE,
                                         PER_HIT_NOTE,
-                                        MAP_FLOOR_LINE,
+                                        MAP_FLOOR_LINE, MAP_RUN_LINE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         CHOOSER_CONFIRM_NOTE,
@@ -59,6 +59,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_BLOCKED,
                                         RESOLUTION_HIT_ALL_BLOCKED,
                                         RESOLUTION_HIT_ON_YOU,
+                                        RESOLUTION_HIT_SOURCE,
+                                        RESOLUTION_HIT_THORNS, THORNS_POWER,
                                         RESOLUTION_NO_HITS,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
@@ -1199,6 +1201,30 @@ def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
 _NUMBER = re.compile(r"\d+")
 
 
+#: 2026-10-04 (Klee lane 2, 2026-10-02): Tuning Fork printed "(7)" and nothing
+#: said 7 of what. A relic counter that counts toward a threshold prints it.
+#: The relic's own sentence names the threshold where it can ("Every time you
+#: play 10 Skills", "Every 10th Attack", "Every 3 turns"); the table is for a
+#: relic whose sentence a feed sends without it, keyed by printed title.
+_RELIC_THRESHOLD_TEXT = re.compile(
+    r"\bevery (?:time you \w+ )?(\d+)(?:st|nd|rd|th)?\b", re.I)
+RELIC_THRESHOLDS = {"Tuning Fork": 10}
+
+
+def _relic_counter(relic: dict[str, Any]) -> str:
+    """A relic's counter as its icon's number, with "of N" where the relic
+    counts toward N and the counter is a plain count below it."""
+    counter = str(relic.get("counter") or "").strip()
+    if not counter.isdigit():
+        return counter
+    found = _RELIC_THRESHOLD_TEXT.search(str(relic.get("text") or ""))
+    threshold = (int(found.group(1)) if found
+                 else RELIC_THRESHOLDS.get(str(relic.get("name") or "")))
+    if threshold and int(counter) < threshold:
+        return f"{counter} of {threshold}"
+    return counter
+
+
 def _attack_buff_note(you: dict[str, Any],
                       hand: list[dict[str, Any]]) -> list[str]:
     """`EB-408`: a flat Attack buff beside the faces it may or may not be in.
@@ -1393,8 +1419,34 @@ def _intent_fold_lines(enemy: dict[str, Any],
     return out
 
 
+def _hit_on_you_source(hit: dict[str, Any],
+                       enemies: list[dict[str, Any]]) -> str:
+    """Who dealt a hit that landed on you while a card resolved: the dealer
+    the mod filed, named with its Thorns where the board shows it holding
+    Thorns; with no dealer on the wire, the one enemy on the board holding
+    Thorns; else nothing (2026-10-04, Klee w20 round)."""
+    def thorny(enemy: dict[str, Any]) -> bool:
+        return any(_fold(str(p.get("name") or "")) == _fold(THORNS_POWER)
+                   for p in enemy.get("powers") or [])
+    source = str(hit.get("source") or "").strip()
+    if source:
+        # A board name may carry its number (`Slug (2)`); the mod's is bare.
+        named = [e for e in enemies
+                 if _fold(re.sub(r"\s*\(\d+\)$", "", str(e.get("name") or "")))
+                 == _fold(source)]
+        template = (RESOLUTION_HIT_THORNS if any(thorny(e) for e in named)
+                    else RESOLUTION_HIT_SOURCE)
+        return template.format(source=source)
+    holders = [e for e in enemies if thorny(e)]
+    if len(holders) == 1 and holders[0].get("name"):
+        return RESOLUTION_HIT_THORNS.format(source=holders[0]["name"])
+    return ""
+
+
 def _resolution_lines(rows: list[dict[str, Any]],
-                      stage: bool = False) -> list[str]:
+                      stage: bool = False,
+                      enemies: list[dict[str, Any]] | None = None
+                      ) -> list[str]:
     """`EB-349` / `EB-611`. The turn's resolutions, with their hits numbered.
 
     ONE ROW PER CARD, ONE NUMBERED LINE PER HIT. The numbering is the point:
@@ -1457,7 +1509,8 @@ def _resolution_lines(rows: list[dict[str, Any]],
                 continue
             if hit.get("on_player"):
                 line = RESOLUTION_HIT_ON_YOU.format(
-                    n=n, target=target, amount=hit["amount"])
+                    n=n, target=target, amount=hit["amount"],
+                    source=_hit_on_you_source(hit, enemies or []))
                 if hit["blocked"] > 0:
                     line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
                 out.append(line)
@@ -2412,7 +2465,7 @@ def render(obs: dict[str, Any]) -> str:
         if you["relics"]:
             out += ["", "## Your relics", ""] + [
                 f"- **{r['name']}**"
-                + (f" ({r['counter']})" if r.get("counter") else "")
+                + (f" ({_relic_counter(r)})" if r.get("counter") else "")
                 + (RELIC_USED_UP if r.get("used_up") else "")
                 + (f" — {r['text']}" if r["text"] else "")
                 for r in you["relics"]]
@@ -2627,7 +2680,8 @@ def render(obs: dict[str, Any]) -> str:
         if c.get("resolutions") is not None:
             out += ["", RESOLUTIONS_HEADING, ""]
             out += _resolution_lines(c["resolutions"],
-                                     stage=c.get("stage") is not None)
+                                     stage=c.get("stage") is not None,
+                                     enemies=c.get("enemies") or [])
         if you["potions"]:
             out += ["", "## Potions", ""]
             # `EB-341`: how many slots there are, beside how many are used.
@@ -2757,6 +2811,11 @@ def render(obs: dict[str, Any]) -> str:
                 here=obs["floor"],
                 act=f" of act {obs['act']}" if obs.get("act") else "",
                 next=obs["floor"] + 1), ""]
+        if obs.get("seed") or obs.get("ascension") is not None:
+            out += [MAP_RUN_LINE.format(
+                seed=obs.get("seed") or "not known to this page",
+                ascension=(obs["ascension"] if obs.get("ascension") is not None
+                           else "not known to this page")), ""]
         if obs.get("hp") is not None:
             out += [f"- HP {obs['hp']}/{obs['max_hp']}", ""]
         out += ["Where you can go next:", ""] + _render_options(obs["nodes"])
@@ -3088,7 +3147,7 @@ def render(obs: dict[str, Any]) -> str:
     if obs.get("held_relics"):
         out += ["", "## Your relics", ""] + [
             f"- **{r['name']}**"
-            + (f" ({r['counter']})" if r.get("counter") else "")
+            + (f" ({_relic_counter(r)})" if r.get("counter") else "")
             + (RELIC_USED_UP if r.get("used_up") else "")
             + (f" — {r['text']}" if r["text"] else "")
             for r in obs["held_relics"]]

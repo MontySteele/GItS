@@ -46,7 +46,7 @@ from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SPHERE_REVEAL_HOW,
                                         UNDRIVEN_AFTER_EVENT,
                                         UNDRIVEN_EXITS, UNDRIVEN_SCREENS,
-                                        sphere_owes)
+                                        lane_run_seed, sphere_owes)
 from understudy.teyvat_ids import resolve_event_id
 
 
@@ -312,6 +312,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # 2026-09-26: and the links between them, where the feed has them.
         obs["paths"] = _map_paths(state)
         obs["boss"] = _map_boss(state)
+        # 2026-10-04: the run's seed and ascension, which no screen printed
+        # and every seat record's identity block asks for. The ascension is on
+        # the wire (`run.ascension`); the seed is not, so it is the one
+        # `embark` read back and wrote into this lane's sidecar.
+        run = _blob(state, "run")
+        if run.get("ascension") is not None:
+            obs["ascension"] = _int(run.get("ascension"))
+        obs["seed"] = lane_run_seed()
         # 2026-09-26 (control seat, Necrobinder): "The map page never shows
         # HP." A route is chosen on it.
         if _player(state).get("hp") is not None:

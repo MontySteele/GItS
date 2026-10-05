@@ -25,13 +25,19 @@ well, what did not, what to change. A display defect becomes one line in
 
 ```sh
 # an Opus subagent playing by hand: paste this brief, never rewrite it
-python tools/seat.py --opus-brief --lane 1 --character KLEEMOD-KLEE
+python tools/seat.py --opus-brief --lane 1 --character KLEEMOD-KLEE --scratch <dir>
 
 # a backend seat (codex, or the local model), embark to teardown
 python tools/seat.py --lane 1 --character KLEEMOD-KLEE --backend codex
 python tools/seat.py --lane 2 --character KLEEMOD-KOKOMI --backend local \
     --max-actions 70 --max-wall-s 5400 --dry-run      # print the 3 commands
 ```
+
+`--opus-brief` prints the embark to run first on stderr, with an explicit
+`--max-actions` (120 by default, `--max-actions N` to change it), and with
+`--scratch` names the seat's own notes file, `<scratch>/seat-lane<N>/notes.md`,
+on the brief's lane line. The map page prints the run seed (from the lane's
+embark sidecar) and the ascension (from the wire).
 
 `tools/seat.py` (the `seat` skill) runs the same three steps you can run by
 hand, and its teardown runs even when the session fails:

@@ -100,9 +100,14 @@ public static class ResolutionLedger
     /// attack, say. The seat read one under Diluc's row as "Overload hit
     /// Varka"; a reaction's splash only ever reaches enemies
     /// (`CombatState.HittableEnemies`), so the page says whose HP it was.
+    /// `Source` (2026-10-04, the Klee w20 round) is who dealt a hit that
+    /// landed on a player -- the enemy whose Thorns answered the attack --
+    /// so the page names it instead of guessing; empty where the game named
+    /// no dealer.
     public readonly record struct Hit(string Target, int Amount, int Blocked,
                                       string CombatId, bool Killed = false,
-                                      bool OnPlayer = false);
+                                      bool OnPlayer = false,
+                                      string Source = "");
 
     /// <summary>A power the card put on an enemy, and by how much
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
@@ -253,7 +258,8 @@ public static class ResolutionLedger
     /// hook, and none of them is a card resolving. The relic's answer has its
     /// own receipt (`RelicAnswerLog`) and the reaction has `ReactionLog`.
     /// </summary>
-    public static void NoteHit(Creature? target, int amount, int blocked)
+    public static void NoteHit(Creature? target, int amount, int blocked,
+                               Creature? dealer = null)
     {
         if (_open == null || (amount <= 0 && blocked <= 0)) return;
         if (_open.Hits.Count >= MaxHits)
@@ -266,7 +272,10 @@ public static class ResolutionLedger
         catch (System.Exception) { onPlayer = false; }
         _open.Hits.Add(new Hit(Named(target), amount, blocked,
                                Safe(() => target?.CombatId.ToString()),
-                               OnPlayer: onPlayer));
+                               OnPlayer: onPlayer,
+                               Source: onPlayer && dealer != null
+                                       && !ReferenceEquals(dealer, target)
+                                   ? Named(dealer) : string.Empty));
     }
 
     /// <summary>
@@ -360,6 +369,53 @@ public static class ResolutionLedger
         _open.Applied.Add(new PowerApplied(target, power, amount, combatId));
     }
 
+    /// <summary>Where the open row's power list stands, so a placement can
+    /// find the entry its own <c>PowerCmd.Apply</c> filed
+    /// (<see cref="SizeAppliedSince"/>).</summary>
+    public readonly record struct AppliedMark(object? Row, int Count);
+
+    public static AppliedMark MarkApplied() =>
+        new(_open, _open?.Applied.Count ?? 0);
+
+    /// <summary>
+    /// "What was placed was a Bomb 11, not one Bomb" (2026-10-04; the Opus
+    /// seat, 2026-10-02, and the co-op round, 2026-09-27: the play log read
+    /// "Put Bomb 1" / "Mine 1" where the card placed Bomb 11 / Mine 3). A Bomb
+    /// pile's power Amount is its COUNT, so the hook files a 1 for every
+    /// placement, and the charge's size is added only after the apply
+    /// returns. The placement calls this once the charge is on the pile: the
+    /// last entry filed on <paramref name="target"/> since
+    /// <paramref name="mark"/> takes the placed size and the placed kind's
+    /// name. Nothing filed since the mark, or another row open, changes
+    /// nothing.
+    /// </summary>
+    public static void SizeAppliedSince(AppliedMark mark, Creature? target,
+                                        string power, int size)
+    {
+        if (target == null) return;
+        SizeAppliedSince(mark, Safe(() => target.CombatId.ToString()),
+                         power, size);
+    }
+
+    /// <summary>The same, taking the combat id rather than the game object,
+    /// <see cref="NotePower(string, string, int, string)"/>'s bargain.</summary>
+    public static void SizeAppliedSince(AppliedMark mark, string combatId,
+                                        string power, int size)
+    {
+        if (_open == null || !ReferenceEquals(mark.Row, _open)) return;
+        for (int i = _open.Applied.Count - 1; i >= mark.Count && i >= 0; i--)
+        {
+            if (_open.Applied[i].CombatId != combatId) continue;
+            _open.Applied[i] = _open.Applied[i] with
+            {
+                Power = string.IsNullOrEmpty(power) ? _open.Applied[i].Power
+                                                    : power,
+                Amount = size,
+            };
+            return;
+        }
+    }
+
     /// <summary>
     /// "Varka gained this Oath inside the card that is resolving" (the
     /// rebalance round, 2026-10-03: two seats could not tell where Oath came
@@ -435,6 +491,7 @@ public static class ResolutionLedger
                     ["combat_id"] = hit.CombatId,
                     ["killed"] = hit.Killed,
                     ["on_player"] = hit.OnPlayer,
+                    ["source"] = hit.Source,
                 }),
             ["applied"] = row.Applied.ConvertAll(a =>
                 new Dictionary<string, object?>
