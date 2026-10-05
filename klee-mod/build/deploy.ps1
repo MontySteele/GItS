@@ -44,7 +44,11 @@ param(
     # game's mods\ folder and additionally need BaseLib from the Workshop.
     # dist\ and *.zip are both gitignored; hand the zip off privately (it
     # carries Tier F art that must not be publicly distributed).
-    [switch]$Package
+    [switch]$Package,
+    # 2026-10-05. Stamp the package +next: a STAGING build of a `<kit>-next`
+    # branch, the release deploy otherwise unchanged. Driven by
+    # tools/deploy_round.py --staging, which checks the branch first.
+    [ValidateSet('', 'next')][string]$Stamp = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -110,11 +114,12 @@ if ($running -and -not $Package) {
 # a manifest and a commit count -- so hoisting it is free, and computing it
 # once is what makes the dll and manifest.json unable to disagree.
 $version = Get-PackageVersion `
-    -SourceManifest (Join-Path $packageDir 'manifest.json') -RepoRoot $repoRoot
-$stamp = Get-AssemblyStamp -Version $version
+    -SourceManifest (Join-Path $packageDir 'manifest.json') -RepoRoot $repoRoot `
+    -Stamp $Stamp
+$asmStamp = Get-AssemblyStamp -Version $version
 
 Write-Host "Building ($Configuration): the current kits (Klee overhaul, companion overhaul, Kokomi overhaul, Furina Stage)..." -ForegroundColor Cyan
-& dotnet build $csproj -c $Configuration -v minimal --nologo @($stamp.BuildArgs)
+& dotnet build $csproj -c $Configuration -v minimal --nologo @($asmStamp.BuildArgs)
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
 $dll = Join-Path $root "KleeCode\bin\$Configuration\klee.dll"
@@ -226,7 +231,8 @@ Write-Host "Validating package..." -ForegroundColor Cyan
     -SourceDir (Join-Path $root 'KleeCode') `
     -GameDir $gameDir `
     -AllowIncompleteGameRef:$AllowIncompleteGameRef `
-    -FullGate:$FullGate
+    -FullGate:$FullGate `
+    -Stamp $Stamp
 
 if ($Package) {
     # Read the version from the STAGED manifest so the zip name can never

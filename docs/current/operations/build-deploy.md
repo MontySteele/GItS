@@ -15,6 +15,9 @@ which `deploy_proto.ps1 -TeyvatFrame` stages as `klee.pck`.
 S2b refuses a release package that carries a frame row, and
 `tier0/tests/test_pck_frame_split.py` pins the lists.
 
+**Staging builds (2026-10-05).** A Balance kit's changes are played from its `<kit>-next` branch: check it out in the main checkout, commit, and run `tools/deploy_round.py --staging`, which refuses any other branch or a dirty tracked tree and runs `deploy.ps1 -Stamp next`, so the installed version reads `0.2.N+next`.
+`validate.ps1` S3 refuses a `+next` package on the release path and an unmarked one on the staging path; go back with plain `tools/deploy_round.py` from `main`.
+
 ### The gate's S7 arm — when the suite runs here, and when CI's run stands
 
 `validate.ps1`'s S7 is the pytest suite. Until 2026-09-02 it ran the WHOLE

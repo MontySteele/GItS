@@ -339,6 +339,28 @@ and walk to the next `?`. A dressed Teyvat event id is translated to its base
 id and the driver prints that it did. `give_relic`, `give_potion` and
 `give_gold` use the game's own commands. `CurrentActIndex` is zero-based.
 
+### Fight telemetry and the Balance report
+
+Every fight on every lane, and every fight you play, writes one JSON line
+(`PlayTelemetry.cs`; keys in `understudy/README.md`, "Telemetry schema") to
+`%APPDATA%/SlayTheSpire2/gits_telemetry/` or the lane's
+`%LOCALAPPDATA%/gits-lanes/laneN/SlayTheSpire2/gits_telemetry/`. The Balance
+gate (`stage-gate.md`) is read off them:
+
+```sh
+python tools/telemetry_report.py --character Klee --character base5
+python tools/telemetry_report.py --character Klee --since 2026-10-02 --baseline-since 2000-01-01
+python tools/telemetry_report.py --character Klee --seed <run seed> --cards-merge-upgrades --json
+```
+
+It prints medians by group x act x kind (damage a turn, HP lost % of max,
+turns, Block a turn, losses), each group's normal-fight ratio to the base five
+by act (the bar is within about 15%), and per-card plays and damage by act.
+Solo fights only unless `--no-solo`; `--feed bot|human`; `--since/--until` are
+local ISO times on `ts`; `--seed` matches the record's `run_id`. Records older
+than 2026-10-02 lack Block and the wider damage credit and are left out of
+those medians, not counted as zero, so window a kit to its current build.
+
 ### Also
 
 `KleeTests` runs the shipped `klee.dll` against the real game assemblies,
