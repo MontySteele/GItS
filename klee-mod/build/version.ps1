@@ -183,11 +183,21 @@ function Get-PackageVersion {
       RULING: R214 ruled MAJOR.AUTO with +dirty, and +proto is a second token
       on that channel serving a build shape R214 did not contemplate.
     #>
-    param([string]$SourceManifest, [string]$RepoRoot, [switch]$Prototype)
+    #
+    # -Stamp next (2026-10-05) MARKS A STAGING BUILD the same way: the
+    # release deploy, built from a `<kit>-next` branch for play and seats
+    # while a Balance kit's main is frozen until the suite reruns
+    # (stage-gate.md). `tools/deploy_round.py --staging` is the one caller.
+    #     staging         0.2.1209+next
+    #     staging dirty   0.2.1209+next.dirty
+    param([string]$SourceManifest, [string]$RepoRoot, [switch]$Prototype,
+          [ValidateSet('', 'next')][string]$Stamp = '')
     $major = Get-ManifestMajor -SourceManifest $SourceManifest
     $auto = Get-AutoVersion -RepoRoot $RepoRoot
-    if ($Prototype) {
-        $meta = @('proto')
+    if ($Prototype -or $Stamp) {
+        # @( ) around the whole if: an if-expression unrolls a one-element
+        # array to a string, and += would then concatenate ("protodirty").
+        $meta = @(if ($Prototype) { 'proto' } else { $Stamp })
         if ($auto.IsDirty) { $meta += 'dirty' }
         $autoText = "$($auto.Count)+$($meta -join '.')"
     } else {
@@ -198,6 +208,7 @@ function Get-PackageVersion {
         Major          = $major
         Auto           = $autoText
         IsPrototype    = [bool]$Prototype
+        Stamp          = $Stamp
         IsDirty        = $auto.IsDirty
         DirtyFiles     = $auto.DirtyFiles
         UntrackedFiles = $auto.UntrackedFiles
@@ -374,7 +385,8 @@ function Test-VersionPolicy {
         [Parameter(Mandatory = $true)][hashtable]$Installed,
         [AllowNull()][string]$GameVersion,
         [Parameter(Mandatory = $true)][string]$Expected,
-        [switch]$AllowPrototypeMetadata
+        [switch]$AllowPrototypeMetadata,
+        [ValidateSet('', 'next')][string]$AllowStamp = ''
     )
     $out = New-Object System.Collections.Generic.List[string]
 
@@ -436,6 +448,17 @@ function Test-VersionPolicy {
     }
     if ($AllowPrototypeMetadata -and $Manifest.version -notmatch '\+proto') {
         $out.Add("the prototype validate was asked for but the staged manifest version '$($Manifest.version)' carries no +proto mark, so nothing on the package says it is a dev build.")
+    }
+
+    # The +next token (2026-10-05) is legal ONLY from the staging deploy
+    # (`deploy.ps1 -Stamp next`, driven by `tools/deploy_round.py
+    # --staging`), on the same terms as +proto: named when it leaks into a
+    # release, and named when a staging deploy forgot it.
+    if ($AllowStamp -ne 'next' -and $Manifest.version -match '\+next') {
+        $out.Add("staged manifest version '$($Manifest.version)' carries the +next build metadata, which only a staging deploy (deploy.ps1 -Stamp next, via tools/deploy_round.py --staging) may stamp.")
+    }
+    if ($AllowStamp -eq 'next' -and $Manifest.version -notmatch '\+next') {
+        $out.Add("the staging validate was asked for but the staged manifest version '$($Manifest.version)' carries no +next mark, so nothing on the package says it is a staging build.")
     }
 
     # R70. The staged version must be the MAJOR.AUTO this checkout computes.

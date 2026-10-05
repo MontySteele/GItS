@@ -220,6 +220,7 @@ internal static class PlayTelemetry
                     HpStart = (int)creature.CurrentHp,
                     MaxHp = (int)creature.MaxHp,
                 };
+                SeedOpeningBlock(player, (int)creature.Block, combat.RoundNumber);
             }
         }
         catch (Exception e)
@@ -726,6 +727,25 @@ internal static class PlayTelemetry
         {
             given.BlockGiven += amount;
         }
+    }
+
+    /// <summary>
+    /// 2026-10-05 — BLOCK GAINED BEFORE THE RECORD OPENED. The run's own
+    /// listeners (relics) walk <c>BeforeCombatStart</c> ahead of this mod's
+    /// combat-state listeners, so Anchor's 10 Block (any character's) arrived
+    /// at <see cref="BlockGained"/> with no record open and was dropped: base
+    /// seats' fights read `block_gained: 0` under a turn-1 `hp_trajectory`
+    /// showing 10 Block standing. Block cannot carry between combats
+    /// (<c>Player.AfterCombatEnd</c> empties it, and turn 1 does not clear),
+    /// so whatever stands when the record opens was gained this fight, and is
+    /// filed to round 1. A read, never a write (rule 1).
+    /// </summary>
+    internal static void SeedOpeningBlock(Player player, int block, int round)
+    {
+        if (block <= 0 || !Open.TryGetValue(player, out var record)) return;
+        var at = Math.Max(1, round);
+        record.BlockGained.TryGetValue(at, out var running);
+        record.BlockGained[at] = running + block;
     }
 
     // ------------------------------------------------------ test seams ---

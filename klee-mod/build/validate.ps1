@@ -51,7 +51,11 @@ param(
     # deploy runs this whole gate, every S-rule, exactly as the release path
     # does -- a prototype build that skipped gates would prove nothing about
     # the cards it was built to try.
-    [switch]$PrototypeBuild
+    [switch]$PrototypeBuild,
+    # 2026-10-05. The STAGING version gate, and nothing else: set only by
+    # deploy.ps1 -Stamp next (tools/deploy_round.py --staging), so S3 expects
+    # and accepts the +next mark. Every other rule runs as on the release.
+    [ValidateSet('', 'next')][string]$Stamp = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -231,13 +235,15 @@ if (-not (Test-Path $manifestPath)) {
     $expected = Get-PackageVersion `
         -SourceManifest (Join-Path (Split-Path -Parent $PSScriptRoot) 'Klee\manifest.json') `
         -RepoRoot (Get-RepoRoot) `
-        -Prototype:$PrototypeBuild
+        -Prototype:$PrototypeBuild `
+        -Stamp $Stamp
     foreach ($finding in (Test-VersionPolicy `
                 -Manifest $m `
                 -Installed $installed `
                 -GameVersion (Get-InstalledGameVersion $GameDir) `
                 -Expected $expected.Version `
-                -AllowPrototypeMetadata:$PrototypeBuild)) {
+                -AllowPrototypeMetadata:$PrototypeBuild `
+                -AllowStamp $Stamp)) {
         if ($finding -like 'WARN:*') {
             Write-Host "  [S3] $($finding.Substring(5).Trim())" -ForegroundColor Yellow
         } else {

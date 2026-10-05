@@ -45,6 +45,16 @@ still ACCEPTED, so a packet written before the ruling still runs, and each is
 reported as the release default and dropped: asking for one adds nothing,
 because every build already carries it.
 
+STAGING (2026-10-05). A Balance kit's `main` is frozen between suite runs
+([USER]: "build is frozen until balance metrics are recaptured"); its changes
+live on a `<kit>-next` branch and are played and seated as a staging build.
+`--staging` runs the same release deploy with `deploy.ps1 -Stamp next`, so the
+installed version reads `0.2.N+next`, and it REFUSES unless the main checkout
+is on a branch named `*-next` with a clean tracked tree (an uncommitted change
+would make the commit count lie about what was built). It takes no dev arm.
+
+    python tools/deploy_round.py --staging --dry-run          # klee-next, say
+
 IT REFUSES WHILE THE GAME IS UP, by image name and for the same reason the
 script does: one install means ONE deployed build for every lane, so a second
 lane's game holds the same lock on `klee.dll` as the first. Tear the lane down
@@ -96,6 +106,55 @@ def is_main_checkout(root: Path = REPO) -> bool:
         return False
     common = Path(res.stdout.strip())
     return common.name == ".git" and common.parent.resolve() == root.resolve()
+
+
+def current_branch(root: Path = REPO) -> str:
+    """The checked-out branch name, or "" when detached or unreadable."""
+    res = _git(["rev-parse", "--abbrev-ref", "HEAD"], cwd=root)
+    name = res.stdout.strip() if not res.returncode else ""
+    return "" if name == "HEAD" else name
+
+
+def tracked_changes(root: Path = REPO) -> list[str]:
+    """`git status --porcelain` lines for TRACKED files only. Untracked files
+    are not dirt, on `version.ps1`'s own terms."""
+    res = _git(["status", "--porcelain", "--untracked-files=no"], cwd=root)
+    if res.returncode:
+        return ["(git status failed)"]
+    return [line for line in res.stdout.splitlines() if line.strip()]
+
+
+#: The staging branch suffix: `klee-next` is Klee's staging branch.
+STAGING_SUFFIX = "-next"
+
+
+def staging_refusal(branch: str, changes: list[str],
+                    dev_arms: list[str] | None = None) -> str | None:
+    """Why `--staging` must not run, or None when it may.
+
+    A staging build is a `<kit>-next` branch, committed: the `+next` stamp
+    says "this is not the release", and the commit count says which commit,
+    which an uncommitted tracked change would make false.
+    """
+    if dev_arms:
+        return (f"--staging takes no dev arm (asked for "
+                f"{', '.join(dev_arms)}); a staging build is the release "
+                f"deploy of a `<kit>-next` branch.")
+    if not branch:
+        return ("the main checkout is not on a branch (detached HEAD); "
+                "check out the kit's staging branch, e.g. `git switch "
+                "klee-next`.")
+    if not branch.endswith(STAGING_SUFFIX) or branch == STAGING_SUFFIX:
+        return (f"the main checkout is on `{branch}`, not a staging branch. "
+                f"--staging deploys only a branch named `<kit>{STAGING_SUFFIX}` "
+                f"(e.g. `klee-next`); the release build is plain "
+                f"`tools/deploy_round.py` from `main`.")
+    if changes:
+        shown = "; ".join(changes[:5]) + (" ..." if len(changes) > 5 else "")
+        return (f"`{branch}` has {len(changes)} uncommitted tracked "
+                f"change(s) ({shown}). Commit them first: the staged version "
+                f"names a commit, and a dirty tree is not that commit.")
+    return None
 
 
 def game_running() -> list[str]:
@@ -150,7 +209,7 @@ def pck_decision(root: Path = REPO, pck_rel: str = PCK) -> tuple[bool, str]:
 
 
 def verification(root: Path = REPO) -> list[str]:
-    """The three lines a deploy is read back on, off disk.
+    """The lines a deploy is read back on, off disk, and the branch built.
 
     Deliberately NOT the deploy script's own stdout: a deploy that printed
     success and staged nothing is the failure this reads past.
@@ -168,6 +227,7 @@ def verification(root: Path = REPO) -> list[str]:
             game_dir = None
     if game_dir is None:
         return ["installed version: UNKNOWN -- no readable klee-mod/local.props",
+                f"branch:            {current_branch(root) or '(detached)'}",
                 "bridge:            UNKNOWN", "staged images:     UNKNOWN"]
 
     manifest = game_dir / "mods" / "klee" / "manifest.json"
@@ -180,6 +240,7 @@ def verification(root: Path = REPO) -> list[str]:
     images = game_dir / "mods" / "klee" / "images" / "cards"
     count = len(list(images.glob("*.png"))) if images.is_dir() else 0
     return [f"installed version: {version}  ({manifest})",
+            f"branch:            {current_branch(root) or '(detached)'}",
             f"bridge:            {'present' if bridge else 'ABSENT'} "
             f"({game_dir / 'mods' / 'STS2_MCP'})",
             f"staged images:     {count} card png(s)"]
@@ -204,8 +265,10 @@ def plan(args) -> list[list[str]]:
     else:
         # THE RELEASE BUILD (2026-09-28): the current kits, no `+proto`, and
         # then the harness a seat needs, which `deploy.ps1` never installs.
+        # `--staging` (2026-10-05): the same deploy, stamped `+next`.
+        stamp = ["-Stamp", "next"] if getattr(args, "staging", False) else []
         out.append(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                    "-File", "klee-mod\\build\\deploy.ps1"])
+                    "-File", "klee-mod\\build\\deploy.ps1", *stamp])
         out.append(BRIDGE_STEP)
     return out
 
@@ -228,6 +291,10 @@ def main(argv: list[str]) -> int:
                     help="rebuild the pck whatever the mtimes say")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the decision and the commands, run nothing")
+    ap.add_argument("--staging", action="store_true",
+                    help="deploy the checked-out `<kit>-next` branch as a "
+                    "+next staging build (refuses on any other branch or a "
+                    "dirty tracked tree)")
     ap.add_argument("--oneline", action="store_true")
     args = ap.parse_args(argv)
 
@@ -255,6 +322,13 @@ def main(argv: list[str]) -> int:
               "one legal build in a worktree.")
         return 2
 
+    if args.staging:
+        refusal = staging_refusal(current_branch(), tracked_changes(),
+                                  args.arms)
+        if refusal:
+            print("REFUSED (--staging): " + refusal)
+            return 2
+
     running = game_running()
     if running and not args.dry_run:
         print(f"REFUSED: Slay the Spire 2 is running (PID "
@@ -272,12 +346,16 @@ def main(argv: list[str]) -> int:
             print(f"deploy_round: pck "
                   f"{'REBUILD' if (args.pck or rebuild) else 'skip'} ({why}); "
                   f"arms {', '.join(args.arms) or 'none'}; "
+                  f"{'staging +next; ' if args.staging else ''}"
+                  f"branch {current_branch() or '(detached)'}; "
                   f"{len(steps)} command(s); "
                   f"game {'UP -- ' + ', '.join(running) if running else 'closed'}")
             return 0
         print(f"pck:  {'REBUILD' if (args.pck or rebuild) else 'skip'} -- {why}"
               + ("  (--pck forced)" if args.pck and not rebuild else ""))
         print(f"arms: {', '.join(args.arms) or 'none (the release build: the current kits)'}")
+        print(f"branch: {current_branch() or '(detached)'}"
+              + ("  -- STAGING, stamped +next" if args.staging else ""))
         print(f"game: {'UP -- ' + ', '.join(running) if running else 'closed'}")
         print("\nwould run:")
         for cmd in steps:

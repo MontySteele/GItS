@@ -260,6 +260,27 @@ public class DamageCreditTelemetryTests : IDisposable
         Assert.Equal(0, k.GetProperty("block_given").GetInt32());
     }
 
+    /// <summary>2026-10-05: Block for EVERY character, the base game's
+    /// included, and the Block a relic gave before the record opened (Anchor
+    /// walks <c>BeforeCombatStart</c> ahead of the mod's listener).</summary>
+    [Fact]
+    public void Block_is_logged_for_a_base_character_including_block_from_before_the_record()
+    {
+        var ironclad = Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad());
+        Open(ironclad, 1, 0);
+
+        Invoke("SeedOpeningBlock", ironclad.Player, 10, 0);   // Anchor, round 0 at open
+        Invoke("RecordBlock", ironclad.Creature, 5, ironclad.Player, 1);
+        Invoke("RecordBlock", ironclad.Creature, 8, ironclad.Player, 3);
+        Invoke("SeedOpeningBlock", ironclad.Player, 0, 1);    // nothing standing: no row
+
+        var r = Record(ironclad);
+        Assert.Equal("[[1,15],[3,8]]", r.GetProperty("block_gained_by_turn").GetRawText());
+        Assert.Equal(23, r.GetProperty("block_gained").GetInt32());
+        Assert.Contains("PlayTelemetry.SeedOpeningBlock",
+            Il.Calls(Il.Method("PlayTelemetry", "OpenFight")));
+    }
+
     [Fact]
     public void The_prototype_bomb_counts_its_detonations_per_seat()
     {
