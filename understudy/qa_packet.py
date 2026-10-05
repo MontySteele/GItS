@@ -1082,7 +1082,12 @@ def _strike_in_combat(face: str, arms: list[str]) -> str:
             pattern, at = [], 0
             for m in _HOLE_RE.finditer(line):
                 pattern.append(re.escape(line[at:m.start()]))
-                pattern.append(r"-?\d+")
+                # A hole with no format is a TEXT argument the card adds
+                # itself (`{StageBow}`, `{StageDrainLine}`, `{StageRepay}`:
+                # the Furina Stage's in-combat lines), which prints a
+                # bracketed line or nothing -- never a number.
+                pattern.append(r"-?\d+" if m.group(2) is not None
+                               else r"\([^()]*\)")
                 at = m.end()
             pattern.append(re.escape(line[at:]))
             parts.append("".join(pattern))

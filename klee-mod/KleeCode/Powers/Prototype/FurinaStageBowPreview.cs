@@ -51,3 +51,64 @@ public static class FurinaStageBowPreview
         };
     }
 }
+
+/// <summary>
+/// THE OTHER TWO IN-COMBAT STAGE LINES (the Salon's Tab seat round,
+/// 2026-10-05), filled the way <see cref="FurinaStageBowPreview"/> fills a
+/// Guest Star's: the generated card ends its face in
+/// <c>{InCombat:{StageDrainLine}|}</c> or <c>{InCombat:{StageRepay}|}</c> and
+/// adds the token in <c>AddExtraArgsToDescription</c>.
+///
+/// THE DRAIN LINE. Below the line a Drain mode left the chooser with no word
+/// said, and the game's chooser has no greyed option
+/// (<see cref="ModalChoice.SelectAffordableMode"/>), so the card says it in
+/// hand, before the play. The gate is <see cref="FurinaStage.CanDrain"/>, the
+/// one the play and the chooser ask.
+///
+/// THE REPAY. A Repay with nothing drained did nothing and said nothing; the
+/// face prints what it would return now, the clamp
+/// <see cref="FurinaStageLedger.RepayRoom"/> applies, without moving it.
+/// </summary>
+public static class FurinaStageFacePreview
+{
+    /// <summary>"(Too close to your Drain line)" while a Drain of
+    /// <paramref name="amount"/> cannot be paid; empty otherwise, and off a
+    /// combat or a Furina board.</summary>
+    public static string DrainLine(CardModel card, int amount) =>
+        Owner(card) is { } owner && !FurinaStage.CanDrain(owner, amount)
+            ? "\n(Too close to your Drain line)"
+            : "";
+
+    /// <summary>"(Repays N)": what a Repay of <paramref name="amount"/>
+    /// would return now. Empty off a combat or a Furina board.</summary>
+    public static string Repay(CardModel card, int amount) =>
+        Owner(card) is { } owner ? Line(Room(owner, amount)) : "";
+
+    /// <summary>Singer of Many Waters: "Repay all your drained HP."</summary>
+    public static string RepayAll(CardModel card) =>
+        Owner(card) is { } owner
+            ? Line(Room(owner, FurinaStage.DrainedOf(owner)))
+            : "";
+
+    /// <summary>The line's words, for the pins.</summary>
+    public static string Line(int repays) => $"\n(Repays {repays})";
+
+    /// <summary>What a Repay of <paramref name="amount"/> returns at this
+    /// HP: never more than she drained, never past Max HP. A read; the
+    /// ledger is not clamped here.</summary>
+    public static int Room(MegaCrit.Sts2.Core.Entities.Creatures.Creature owner,
+                           int amount)
+    {
+        var drained = System.Math.Min(
+            FurinaStage.DrainedOf(owner),
+            System.Math.Max(0, (int)owner.MaxHp - (int)owner.CurrentHp));
+        return System.Math.Max(0, System.Math.Min(amount, drained));
+    }
+
+    private static MegaCrit.Sts2.Core.Entities.Creatures.Creature? Owner(
+        CardModel card) =>
+        TipOwner.CreatureOf(card) is { } owner
+        && owner.CombatState != null && FurinaStage.LiveFor(owner)
+            ? owner
+            : null;
+}

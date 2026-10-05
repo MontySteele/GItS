@@ -10002,6 +10002,17 @@ def _sentence_mode_faces(card: dict, desc: str,
     parts = [p.strip() for p in _FACE_SENTENCE_BREAK.split(body)]
     if len(parts) != len(modes) or not all(parts):
         return None
+    # The Salon's Tab seat round (2026-10-05): a sentence that says "also"
+    # reads only beside the one before it. Alone in the chooser, Salon's
+    # Tab's "Drain 4: also gain 2 Energy next turn" stood against "Draw 2
+    # cards" and read as a Drain that does not draw. Such a mode's face is
+    # its label, which says the whole of what it does.
+    for i, part in enumerate(parts):
+        _, sep, rest = part.partition(":")
+        if sep and rest.strip().startswith("also "):
+            label = str(modes[i].get("label") or "").strip()
+            if label:
+                parts[i] = label
     return parts
 
 
@@ -14934,6 +14945,76 @@ def stage_bow_face(desc: str) -> str:
     return desc + "{InCombat:{" + STAGE_BOW_TOKEN + "}|}"
 
 
+#: The tokens of the two other in-combat Stage lines (the Salon's Tab seat
+#: round, 2026-10-05): a Drain the line refuses, and what a Repay returns.
+STAGE_DRAIN_LINE_TOKEN = "StageDrainLine"
+STAGE_REPAY_TOKEN = "StageRepay"
+
+
+def stage_drain_line_call(card: dict) -> str | None:
+    """The C# that fills a Drain card's in-combat line, or None.
+
+    The seat round of 2026-10-05: below the line a Drain mode left the
+    chooser with no word said, and the game's chooser has no greyed option
+    (`ModalChoice.SelectAffordableMode`). So the CARD says it, in hand,
+    before the play: "(Too close to your Drain line)" while the Drain it
+    prints cannot be paid, else nothing. Read off the card's one Drain price:
+    a top-level `stage_drain` or a mode's head.
+    """
+    amounts = [int(fx["amount"]) for fx in card.get("effects") or []
+               if fx.get("op") == "stage_drain"]
+    for fx in card.get("effects") or []:
+        if fx.get("op") != "choose_one":
+            continue
+        for mode in fx.get("modes") or []:
+            body = mode.get("effects") or []
+            if body and body[0].get("op") == "stage_drain":
+                amounts.append(int(body[0]["amount"]))
+    if not amounts:
+        return None
+    if len(set(amounts)) != 1:
+        raise ValueError(f"{card['id']}: a Drain line preview reads one "
+                         "Drain price")
+    return f"FurinaStageFacePreview.DrainLine(this, {amounts[0]})"
+
+
+def stage_repay_call(card: dict) -> str | None:
+    """The C# that fills a Repay card's in-combat line, or None.
+
+    The seat round of 2026-10-05: a Repay with nothing drained did nothing
+    and said nothing. The face prints what it would Repay now, "(Repays 0)",
+    the way a spend-all prints "(Deals N damage)".
+    """
+    ops = [fx for fx in card.get("effects") or []
+           if fx.get("op") in ("stage_repay", "stage_repay_all")]
+    if not ops:
+        return None
+    if len(ops) != 1:
+        raise ValueError(f"{card['id']}: a Repay preview reads one Repay")
+    if ops[0]["op"] == "stage_repay_all":
+        return "FurinaStageFacePreview.RepayAll(this)"
+    return ('FurinaStageFacePreview.Repay(this, '
+            'DynamicVars["RepayAmount"].IntValue)')
+
+
+def stage_face_args(card: dict) -> list[tuple[str, str]]:
+    """Every in-combat Stage line a row's face carries, as (token, C#)."""
+    args = []
+    for token, call in ((STAGE_BOW_TOKEN, stage_bow_preview_call(card)),
+                        (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
+                        (STAGE_REPAY_TOKEN, stage_repay_call(card))):
+        if call:
+            args.append((token, call))
+    return args
+
+
+def stage_lines_face(desc: str, args: list[tuple[str, str]]) -> str:
+    """A face with each of its in-combat Stage lines appended."""
+    for token, _ in args:
+        desc = desc + "{InCombat:{" + token + "}|}"
+    return desc
+
+
 def emit(
     card: dict, profile: CharacterProfile = KLEE_PROFILE
 ) -> str:
@@ -15224,15 +15305,13 @@ def emit(
                 for eff in (card.get("effects") or ())))
     # A face may carry a line break (the base game's `{InCombat:<break>...|}`
     # reader line), and a raw break inside a C# literal does not compile.
-    bow_preview = stage_bow_preview_call(card)
-    if bow_preview:
-        desc = stage_bow_face(desc)
+    face_args = stage_face_args(card)
+    desc = stage_lines_face(desc, face_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
     if blanks_burst:
         arm_desc = build_description(card, include_burst_rider=False)
-        if bow_preview:
-            arm_desc = stage_bow_face(arm_desc)
+        arm_desc = stage_lines_face(arm_desc, face_args)
         arm_cs = arm_desc.replace("\n", "\\n")
         desc_expr = f'FurinaBurstRider.Face("{arm_cs}", "{desc_cs}")'
 
@@ -16125,18 +16204,25 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # sim's twin is `combat.card_cost`'s `cost_reduction_per_discard_this_turn`.
     discard_discount_member = ""
     stage_bow_member = ""
-    if bow_preview:
-        # The Bow line's token (`stage_bow_preview_call`). Added as a
-        # description argument, the base game's own seam for a face word no
+    if face_args:
+        # The in-combat Stage lines' tokens (`stage_face_args`). Added as
+        # description arguments, the base game's own seam for a face word no
         # DynamicVar carries.
+        summary = (
+            "Who this card's summon will Bow, on its in-combat line\n"
+            "    /// (`FurinaStageBowPreview`)."
+            if [t for t, _ in face_args] == [STAGE_BOW_TOKEN] else
+            "This card's in-combat Stage line\n"
+            "    /// (`FurinaStageFacePreview`).")
+        adds = "".join(f'        description.Add("{token}", {call});\n'
+                       for token, call in face_args)
         stage_bow_member = (
-            "\n\n    /// <summary>Who this card's summon will Bow, on its "
-            "in-combat line\n    /// (`FurinaStageBowPreview`).</summary>\n"
+            f"\n\n    /// <summary>{summary}</summary>\n"
             "    protected override void AddExtraArgsToDescription(\n"
             "        MegaCrit.Sts2.Core.Localization.LocString description)\n"
             "    {\n"
             "        base.AddExtraArgsToDescription(description);\n"
-            f'        description.Add("{STAGE_BOW_TOKEN}", {bow_preview});\n'
+            f"{adds}"
             "    }")
     discount_rate = card.get("cost_reduction_per_discard_this_turn")
     if discount_rate:

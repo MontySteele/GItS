@@ -45,8 +45,17 @@ public sealed class ProtoFsSoloistsSolicitation : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Soloist's Solicitation"),
-        ("description", "[gold]Drain[/gold] 2. Deal {Damage:diff()} damage."),
+        ("description", "[gold]Drain[/gold] 2. Deal {Damage:diff()} damage.{InCombat:{StageDrainLine}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageDrainLine", FurinaStageFacePreview.DrainLine(this, 2));
+    }
 
     // The Salon's Tab (2026-10-05): a fixed price is the cost line,
     // unplayable when it cannot be paid.

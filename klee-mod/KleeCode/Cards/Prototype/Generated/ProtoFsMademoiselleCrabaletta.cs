@@ -45,8 +45,17 @@ public sealed class ProtoFsMademoiselleCrabaletta : CustomCardModel, ICharacterC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mademoiselle Crabaletta"),
-        ("description", "[gold]Drain[/gold] 5. Deal {Damage:diff()} damage."),
+        ("description", "[gold]Drain[/gold] 5. Deal {Damage:diff()} damage.{InCombat:{StageDrainLine}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageDrainLine", FurinaStageFacePreview.DrainLine(this, 5));
+    }
 
     // The Salon's Tab (2026-10-05): a fixed price is the cost line,
     // unplayable when it cannot be paid.

@@ -2551,7 +2551,7 @@
    effects: [{op: choose_one, modes: [
               {label: "Draw {IfUpgraded:show:3|2} cards",
                effects: [{op: draw, amount: 2}]},
-              {label: "[gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn",
+              {label: "[gold]Drain[/gold] 4: draw {IfUpgraded:show:3|2} cards and gain 2 [gold]Energy[/gold] next turn",
                effects: [{op: stage_drain, amount: 4},
                          {op: draw, amount: 2},
                          {op: stage_energy_next, amount: 2}]}]}]}
