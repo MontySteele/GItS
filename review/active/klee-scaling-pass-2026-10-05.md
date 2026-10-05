@@ -1,7 +1,8 @@
 # Klee's scaling pass
 
-Paper, 2026-10-05, main session. Picks open. [USER]: "Yes, agreed - let's
-look at Klee's scaling."
+Paper, 2026-10-05, main session. **RULED 2026-10-05, all six picks at their
+defaults** ([USER]: "Yep, I agree across the board. Let's send this."). [USER]
+opened it: "Yes, agreed - let's look at Klee's scaling."
 
 **Draft 4,** after the second reviews by GPT and Fable. Both reviewed draft
 3. What changed:
