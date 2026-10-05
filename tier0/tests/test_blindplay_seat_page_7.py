@@ -5,10 +5,9 @@ the Bake-Kurage carries a waiting Dusk Plan out at the END of this turn,
 before the enemies act, and the line left its Block out.
 
 Seat page 6's rule: counted where the wire gives the number (the entry's
-own Plan text, `plan_line`, numbers filled), named where it does not. The
-bridge today sends no Plan text for a Dusk entry (`KokomiPlan.QueueRow`
-fills it for two-line Plans only), so on today's wire every Dusk entry is
-named.
+own Plan text, `plan_line`, numbers filled), named where it does not.
+`KokomiPlan.QueueRow` sends a Dusk entry's Plan line off the card's rendered
+face (`DuskPlanText`); an older bridge sends none, and the entry is named.
 """
 from __future__ import annotations
 
@@ -80,7 +79,7 @@ def test_double_your_block_is_named_not_counted():
 
 
 def test_a_dusk_entry_with_no_plan_text_on_the_wire_is_named():
-    """Today's bridge: the Dusk row carries its name and no Plan text."""
+    """An older bridge: the Dusk row carries its name and no Plan text."""
     plans = _plans({"name": "Dusk: Breakwater", "clauses": 2}, MORNING)
     got = line([_hit(12)], _you(), [], [], plans)
     assert "you would take 12." in got
@@ -128,3 +127,48 @@ def test_the_page_passes_the_plan_queue_to_the_line():
                   "status": []}]}}
     page = blindplay.observe(state)
     assert "Not counted: Breakwater (Dusk Plan)." in page
+
+
+def _wire_row(name: str, plan_line: str, clauses: int = 1) -> dict:
+    """One queue row exactly as `KokomiPlan.QueueRow` sends a Dusk entry."""
+    return {"name": name, "two_line": False, "now_line": "",
+            "plan_line": plan_line, "line": "plan", "clauses": clauses,
+            "damage": 0, "aim": ""}
+
+
+def _kokomi_state(*queue: dict) -> dict:
+    return {"state_type": "monster",
+            "player": {"character": "Kokomi", "hp": 60, "max_hp": 80,
+                       "block": 0, "energy": 3, "max_energy": 3, "hand": [],
+                       "potions": [], "relics": [], "status": [],
+                       "draw_pile_count": 5, "discard_pile_count": 0,
+                       "exhaust_pile_count": 0,
+                       "kokomi_plans": {
+                           "pet": True, "pet_name": "Bake-Kurage",
+                           "pet_entity_id": "KURAGE",
+                           "pending": len(queue), "twice": False,
+                           "carried_out": [], "queue": list(queue)}},
+            "battle": {"round": 2, "enemies": [
+                {"entity_id": "SEAPUNK", "combat_id": 1, "name": "Seapunk",
+                 "hp": 30, "max_hp": 44, "block": 0,
+                 "intents": [{"type": "Attack", "label": "20",
+                              "title": "Bite"}],
+                 "status": []}]}}
+
+
+def test_a_wire_breakwater_and_shell_of_sanctuary_are_counted():
+    """End to end off realistic wire rows: Breakwater+ (7, and 3 for the one
+    morning Plan left waiting) and Shell of Sanctuary (9)."""
+    from understudy import blindplay
+    morning = {"name": "Slack Water", "two_line": False, "now_line": "",
+               "plan_line": "", "line": "plan", "clauses": 1,
+               "damage": 6, "aim": "front"}
+    page = blindplay.observe(_kokomi_state(
+        _wire_row("Dusk: Breakwater+",
+                  "Gain 7 Block, and 3 more for each Plan waiting.", 2),
+        _wire_row("Dusk: Shell of Sanctuary", "Gain 9 Block."),
+        morning))
+    assert ("- Incoming this turn: 20 (your Block 0): you would take 1 "
+            "(Breakwater+ (Dusk Plan) and Shell of Sanctuary (Dusk Plan) "
+            "add 19 Block first). You would be at 59/80 HP.") in page
+    assert "Not counted" not in page

@@ -1858,6 +1858,38 @@ public static class KokomiPlan
         {
             return ("", "");
         }
+        return SplitFace(text);
+    }
+
+    /// <summary>
+    /// SEAT PAGE 7 (2026-10-05): a waiting Dusk entry's Plan line as text, off
+    /// the card's own rendered face (numbers filled, the upgrade honoured), so
+    /// the blind page's "Incoming this turn" can count its Block. A Dusk entry
+    /// is never two-line (<see cref="Entry.TwoLine"/>), so this is a separate
+    /// read: the "Or dusk plan:" split where the face has one (Shell of
+    /// Sanctuary, Evening Watch), else the text after "Dusk Plan:"
+    /// (Breakwater). Empty where the face could not be read.
+    /// </summary>
+    internal static string DuskPlanText(CardModel? card)
+    {
+        var (now, plan) = LineTexts(card);
+        return plan.Length > 0 ? plan : DuskPlanLine(now);
+    }
+
+    /// <summary>The text after a face's "Dusk Plan:", or empty. Pure, for
+    /// <see cref="DuskPlanText"/> and its headless pin.</summary>
+    internal static string DuskPlanLine(string face)
+    {
+        const string mark = "Dusk Plan:";
+        var at = (face ?? "").IndexOf(mark,
+                                      System.StringComparison.OrdinalIgnoreCase);
+        return at < 0 ? "" : face!.Substring(at + mark.Length).Trim();
+    }
+
+    /// <summary><see cref="LineTexts"/>'s split of a rendered face, its tags
+    /// stripped. Pure, so a headless test can read it.</summary>
+    internal static (string Now, string Plan) SplitFace(string? text)
+    {
         text = System.Text.RegularExpressions.Regex.Replace(
             text ?? "", @"\[[^\]]*\]", "");
         var at = text.IndexOf("Or plan:", System.StringComparison.Ordinal);
@@ -3117,7 +3149,11 @@ public static class KokomiPlan
     {
         // A PLAN STAYS OPEN (2026-10-01): a two-line Plan carries both lines
         // while it waits, so the choice is readable a turn early (sec.3).
-        var (now, plan) = entry.TwoLine ? LineTexts(entry.Source) : ("", "");
+        // SEAT PAGE 7 (2026-10-05): and a Dusk entry carries its Plan line,
+        // so the blind page can count its Block before the enemies act.
+        var (now, plan) = entry.TwoLine ? LineTexts(entry.Source)
+            : entry.Dusk ? ("", DuskPlanText(entry.Source))
+            : ("", "");
         return new Dictionary<string, object?>
             {
                 ["name"] = entry.Title,

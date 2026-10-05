@@ -187,6 +187,40 @@ public class Round24Tests
     }
 
     [Fact]
+    public void Seat_page_7_a_queued_dusk_entry_carries_its_plan_line()
+    {
+        // The blind page's "Incoming this turn" counts a waiting Dusk Plan's
+        // Block off `plan_line`. A Dusk entry is never two-line, so the row
+        // reads it through its own door, and two-line entries keep theirs.
+        var calls = Il.Calls(typeof(KokomiPlan).GetMethod("QueueRow", All)!);
+        Assert.Contains("KokomiPlan.DuskPlanText", calls);
+        Assert.Contains("KokomiPlan.LineTexts", calls);
+        Assert.Contains("KokomiPlan.LineTexts",
+            Il.Calls(typeof(KokomiPlan).GetMethod("DuskPlanText", All)!));
+    }
+
+    [Theory]
+    // Breakwater+'s face, as the hand renders it: no "Or plan:" split.
+    [InlineData("Play on the [gold]Bake-Kurage[/gold].\n[gold]Dusk[/gold] "
+                + "[gold]Plan[/gold]: Gain [green]7[/green] [gold]Block[/gold], "
+                + "and 3 more for each [gold]Plan[/gold] waiting.",
+                "Gain 7 Block, and 3 more for each Plan waiting.")]
+    // Shell of Sanctuary's: the "Or dusk plan:" split.
+    [InlineData("Draw 1 card.\nOr [gold]dusk[/gold] [gold]plan[/gold]: Gain 9 "
+                + "[gold]Block[/gold].", "Gain 9 Block.")]
+    [InlineData("Draw 1 card.", "")]
+    public void Seat_page_7_the_dusk_plan_line_is_the_faces_own_text(
+        string face, string expected)
+    {
+        var split = typeof(KokomiPlan).GetMethod("SplitFace", All)!;
+        var dusk = typeof(KokomiPlan).GetMethod("DuskPlanLine", All)!;
+        var (now, plan) = ((string, string))split.Invoke(null, new object[] { face })!;
+        var got = plan.Length > 0
+            ? plan : (string)dusk.Invoke(null, new object[] { now })!;
+        Assert.Equal(expected, got);
+    }
+
+    [Fact]
     public void Only_a_written_front_damage_clause_reaches_the_wires_number()
     {
         // THE CLAIM THE KEY MAKES is that its number is already FIXED -- the
