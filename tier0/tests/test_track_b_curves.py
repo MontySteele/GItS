@@ -28,8 +28,6 @@ def _fight(**over):
         "enemies": [{"name": "Toadpole", "max_hp": 30}],
         "incoming_by_turn": [[1, 8, 1], [2, 12, 2], [3, 0, 0]],
         "enemy_pool_by_turn": [[1, 30], [2, 18], [3, 6]],
-        "meters_by_turn": [[1, 0, 1, 3, 2], [2, 10, 3, 3, 1],
-                           [3, 12, 3, 3, 0]],
         "block_at_turn_end": [[1, 5], [2, 9], [3, 0]],
         "cards_played": [[1, "Salon Début"], [2, "An Invitation"]],
         "damage_by_source": {"Salon Début": 12.0},
@@ -153,20 +151,6 @@ def test_the_archetype_tie_break_is_declared_and_upgrades_resolve():
     assert tb.archetype_of("Strike", table) == "generic"
 
 
-def test_salon_fill_time_reports_the_turn_and_the_fraction():
-    fill = tb.salon_fill([_fight()])["bot"]
-    assert fill["first_full"] == [2]                 # cap 3 reached on turn 2
-    assert fill["turns"] == 3 and fill["turns_full"] == 2
-    assert fill["never_full"] == 0
-
-
-def test_a_fight_with_no_meter_sample_is_counted_nowhere():
-    """A pre-telemetry soak has no meters, and a missing sample is not a zero.
-    Inferring one would put "the Salon never filled" into a table describing
-    logs that could not have said so."""
-    assert tb.salon_fill([_fight(meters_by_turn=[])]) == {}
-
-
 # --------------------------------------------------- the schema contract ---
 #
 # The bot feed is written in Python and the human feed in C#. Nothing in either
@@ -178,10 +162,7 @@ CS = REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
 
 # Recorded rather than derived: each asymmetry is a decision, and a test that
 # silently tolerated a new one would be no test at all.
-BOT_ONLY = {"potions_used",         # no first-party potion hook exists yet
-            "meters_by_turn"}       # the mod's all-zero shipped-meter columns
-#                                      left at legacy cleanup stage 6; the soak's
-#                                      still read the bridge (a BACKLOG line)
+BOT_ONLY = {"potions_used"}         # no first-party potion hook exists yet
 #
 # `selectors` LEFT THIS SET on 2026-08-12 (EB-14). It was bot-only from P1.5
 # because the soak records a selector answer it POSTED itself, while the mod

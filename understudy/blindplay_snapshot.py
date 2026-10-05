@@ -42,11 +42,7 @@ from understudy.blindplay_read import (_blob, _enemies, _entity_id, _hand,
 #    `battle.round`, `player.energy`, `player.resources` (BaseLib's registered
 #    meters, which is Charge / Encore / Fanfare / Burst), `player.status` (a
 #    POWER-shaped meter, which is where Sparks ride), the hand's own `cost`
-#    and `spark_price` / `spark_affordable`, `player.kurage_memory` (the queue
-#    strip, `gits/GitsKurageMemory.cs`), and the enemies' `intents`. A build
-#    without the prototype rule serves no `kurage_memory` and the key is
-#    absent here too, which is the same three-state contract the bridge
-#    header spells and `kurage_memory()` above honours.
+#    and `spark_price` / `spark_affordable`, and the enemies' `intents`.
 #
 # ALL METERS, INCLUDING THE ZEROES, unlike the observed board -- which prints
 # only non-zero ones so a tester is not taught about a meter this screen does
@@ -143,18 +139,8 @@ def wire_snapshot(state: dict[str, Any], *, index: int, verb: str,
                         if isinstance(i, dict)],
         } for e in enemies],
     }
-    # THE QUEUE STRIP, VERBATIM AND UNSCRUBBED. `kurage_memory()` above is the
-    # PAGE's reading and deliberately drops the per-row `state` id; a grader is
-    # entitled to the developer's vocabulary the page must not print, so the
-    # raw map goes here. An absent key stays absent: no memory rule in this
-    # build (`PROTOTYPE_CARDS` undefined) is a different fact from an empty
-    # memory, and both differ from a populated one.
-    memory = p.get("kurage_memory")
-    if isinstance(memory, dict):
-        snap["kurage_memory"] = memory
-    # `EB-273`. THE KOKOMI ARM'S OWN METER, on the same terms as the strip
-    # above and for the same reason. The wire has carried `player.kokomi_plans`
-    # since the Plan build (`vendor/STS2_MCP/gits/GitsKokomiPlan.cs`) and
+    # `EB-273`. THE KOKOMI ARM'S OWN METER. The wire has carried
+    # `player.kokomi_plans` since the Plan build (`vendor/STS2_MCP/gits/GitsKokomiPlan.cs`) and
     # `kokomi_plans()` puts it on the tester's PAGE -- but the snapshot the
     # GRADER reads carried none of it, so "the queue was empty when the call
     # was made" was not a fact a seat run could be asked. The map goes in raw

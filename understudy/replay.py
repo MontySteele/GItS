@@ -15,7 +15,7 @@ What a soak log gives us, and why the replay is shaped the way it is
 A `decision` row carries `hand` (the exact hand, index-ordered), the resolved
 `names.card_name`, and — for a targeted play — `names.target_hp`, the target's
 HP **as read immediately before the action was posted**. A `fight` row carries
-the per-turn curves: `hp_trajectory`, `block_at_turn_end`, `meters_by_turn`,
+the per-turn curves: `hp_trajectory`, `block_at_turn_end`,
 `enemy_pool_by_turn`, `incoming_by_turn`, `damage_by_source`.
 
 So two independent replay levels are available, and both are run:
@@ -23,15 +23,16 @@ So two independent replay levels are available, and both are run:
 * **L1, per card.** Between two consecutive targeted plays at the same target
   in the same turn, the engine's own reading brackets exactly one card:
   `target_hp[n] - target_hp[n+1]`. The sim is asked the same question in
-  isolation — a fresh state, the player's meters set from the turn's opening
-  reading, one enemy at the bracketing HP, `effects.resolve_card`. The
+  isolation — a fresh state, the player's HP and block set from the turn's
+  opening reading, one enemy at the bracketing HP, `effects.resolve_card`. The
   divergence is per card and needs no assumption about ordering.
 
-* **L2, per turn.** The turn's opening reading (HP, block, fanfare, salon,
-  encore) is loaded into a state, the recorded hand is dealt, the recorded
+* **L2, per turn.** The turn's opening reading (HP, block) is loaded into a
+  state, the recorded hand is dealt, the recorded
   cards are played in the recorded order through `combat.play_card`, and the
-  turn's *closing* numbers are compared: block at turn end, the enemy pool
-  drop, and the next turn's opening fanfare / salon members.
+  turn's *closing* numbers are compared: block at turn end and the enemy
+  pool drop. (The meter columns, `meters_by_turn`, left with the shipped
+  kits' meters: the mod stopped writing them at legacy cleanup stage 6.)
 
 Declared confounders — read these before reading any row
 --------------------------------------------------------
@@ -74,15 +75,13 @@ Usage
 -----
 
     python -m understudy.replay --logs "<glob>" --out docs/s7-divergences.tsv
-    python -m understudy.replay --logs "<glob>" --use-selectors \
-        --ledger docs/probe-b-ledger.tsv
+    python -m understudy.replay --logs "<glob>" --use-selectors
 """
 
 from __future__ import annotations
 
 import argparse
 import collections
-import copy
 import glob as globmod
 import json
 import os
@@ -92,7 +91,7 @@ from typing import Any, Iterable
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import combat, effects, resources
+from tier0.engine import combat, effects
 from tier0.engine.state import CombatState, Enemy, Player
 
 COMBAT_SCREENS = {"monster", "elite", "boss"}
@@ -223,18 +222,6 @@ class Names:
 # --------------------------------------------------------------------------
 
 
-def _meters_at(fight: dict, rnd: Any) -> dict:
-    for row in fight.get("meters_by_turn") or []:
-        if row and row[0] == rnd:
-            return {
-                "fanfare": row[1] if len(row) > 1 else 0,
-                "salon_members": row[2] if len(row) > 2 else 0,
-                "salon_cap": row[3] if len(row) > 3 else 0,
-                "encore": row[4] if len(row) > 4 else -1,
-            }
-    return {}
-
-
 def _traj_at(fight: dict, rnd: Any) -> dict:
     for row in fight.get("hp_trajectory") or []:
         if row and row[0] == rnd:
@@ -342,34 +329,7 @@ def _spotlight_target(arm: str | None, character_id: str) -> str | None:
     return None
 
 
-def _apply_meters(player: Player, meters: dict) -> None:
-    """Load a turn-opening meter reading onto a fresh Furina player.
-
-    `salon` is the source of truth for membership and `powers["salon_member"]`
-    mirrors it, so both are set. `encore == -1` means the bot feed could not
-    see the meter (it is a CustomResource the bridge does not serialise); it
-    is left at the sim's own value and every encore comparison on that fight
-    is suppressed rather than compared against a sentinel.
-    """
-    if not meters:
-        return
-    player.fanfare = int(meters.get("fanfare") or 0)
-    cap = meters.get("salon_cap")
-    if cap:
-        extra = int(cap) - C.SALON_MEMBER_SLOTS
-        if extra > 0:
-            player.powers["salon_cap_up"] = extra
-    n = int(meters.get("salon_members") or 0)
-    if n > 0:
-        members = list(C.SALON_MEMBERS)
-        player.salon = [members[i % len(members)] for i in range(n)]
-        player.powers["salon_member"] = n
-    enc = meters.get("encore")
-    if enc is not None and enc >= 0:
-        player.encore = int(enc)
-
-
-def _fresh_player(character_id: str, hp: int, max_hp: int, block: int, meters: dict,
+def _fresh_player(character_id: str, hp: int, max_hp: int, block: int,
                   spotlight: str | None = None) -> Player:
     player = loader.build_player(character_id)
     # The designation the RECORDING carries, standing before the first card
@@ -384,7 +344,6 @@ def _fresh_player(character_id: str, hp: int, max_hp: int, block: int, meters: d
     player.discard_pile = []
     player.hand = []
     player.energy = C.ENERGY_PER_TURN if hasattr(C, "ENERGY_PER_TURN") else 3
-    _apply_meters(player, meters)
     return player
 
 
@@ -416,7 +375,6 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict,
     rows: list[dict] = []
     for turn in spec["turns"]:
         rnd = turn["round"]
-        meters = _meters_at(fight, rnd)
         traj = _traj_at(fight, rnd)
         spot = _spotlight_target(
             _selector_choice(fight, rnd) if use_selectors else None, character_id)
@@ -432,7 +390,7 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict,
                 continue
             tally["l1_compared"] += 1
             player = _fresh_player(
-                character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"), meters,
+                character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"),
                 spotlight=spot,
             )
             enemy = _enemy(cur.get("target_name") or "enemy", cur["target_hp"])
@@ -482,13 +440,12 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict,
 
 
 def l2_rows(spec: dict, names: Names, character_id: str, tally: dict,
-            use_selectors: bool = False, ledger: list[dict] | None = None) -> list[dict]:
+            use_selectors: bool = False) -> list[dict]:
     fight = spec["fight"]
     enemies_spec = fight.get("enemies") or []
     rows: list[dict] = []
     for turn in spec["turns"]:
         rnd = turn["round"]
-        meters = _meters_at(fight, rnd)
         traj = _traj_at(fight, rnd)
         if not traj:
             continue
@@ -501,7 +458,7 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict,
         pool_open = _pool_at(fight, rnd)
         pool_next = _pool_at(fight, (rnd or 0) + 1)
         player = _fresh_player(
-            character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"), meters,
+            character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"),
             spotlight=_spotlight_target(standing, character_id),
         )
         hand = []
@@ -580,163 +537,7 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict,
                         eng_drop < 0,
                     )
                 )
-        # meters at the NEXT turn opening
-        nxt = _meters_at(fight, (rnd or 0) + 1)
-        if nxt:
-            tally["l2_fanfare_compared"] += 1
-            tally["l2_salon_compared"] += 1
-            if nxt["encore"] >= 0:
-                tally["l2_encore_compared"] += 1
-            if abs(state.player.fanfare - nxt["fanfare"]) > TOLERANCE:
-                rows.append(
-                    _row(spec, rnd, "l2.fanfare_after_turn", state.player.fanfare, nxt["fanfare"], ctx, False)
-                )
-            # The engine samples `meters_by_turn` at the turn OPENING, and
-            # `combat._player_turn` decays Fanfare at the true top of the turn
-            # before any turn-start generation. Both sides of that ordering
-            # are reported: the raw end-of-turn value above, and the same
-            # value after the sim's own decay here. Which one is the fair
-            # comparison is a question for the classification pass, not for
-            # this module to decide.
-            decayed = copy.deepcopy(state)
-            try:
-                resources.decay_fanfare(decayed)
-            except Exception:
-                pass
-            tally["l2_fanfare_decayed_compared"] += 1
-            if ledger is not None:
-                ledger.append(
-                    _ledger_row(spec, rnd, arm, meters, nxt, state, decayed, ctx,
-                                traj, _traj_at(fight, (rnd or 0) + 1)))
-            if abs(decayed.player.fanfare - nxt["fanfare"]) > TOLERANCE:
-                rows.append(
-                    _row(
-                        spec,
-                        rnd,
-                        "l2.fanfare_next_open_post_decay",
-                        decayed.player.fanfare,
-                        nxt["fanfare"],
-                        ctx,
-                        False,
-                    )
-                )
-            sim_members = len(state.player.salon)
-            if sim_members != nxt["salon_members"]:
-                rows.append(
-                    _row(
-                        spec,
-                        rnd,
-                        "l2.salon_members_after_turn",
-                        sim_members,
-                        nxt["salon_members"],
-                        ctx,
-                        False,
-                    )
-                )
-            if nxt["encore"] >= 0 and abs(state.player.encore - nxt["encore"]) > TOLERANCE:
-                rows.append(
-                    _row(
-                        spec,
-                        rnd,
-                        "l2.encore_after_turn",
-                        state.player.encore,
-                        nxt["encore"],
-                        ctx,
-                        _encore_unseen(fight),
-                    )
-                )
     return rows
-
-
-LEDGER_COLUMNS = [
-    "fight_id", "turn", "selector", "eng_open", "eng_next_open", "eng_delta",
-    "sim_open", "sim_after_turn", "sim_next_open_post_decay", "sim_delta",
-    "sim_income", "sim_income_by_source", "sim_decay", "sim_floor_grant",
-    "hp_drop_to_next_open", "sim_next_open_full",
-    "residual_raw", "residual_post_decay", "residual_full", "context",
-]
-
-
-def _ledger_row(spec: dict, rnd: Any, arm: str | None, meters: dict, nxt: dict,
-                state: CombatState, decayed: CombatState, ctx: str,
-                traj: dict, traj_next: dict) -> dict:
-    """One turn of the Fanfare ledger — probe B3 (R103(b)).
-
-    The engine side is two meter readings; the sim side is the same two
-    positions plus the DECOMPOSITION tier0 can state about itself, read off
-    the events `resources.py` already emits rather than recomputed here.
-    `sim_income` is Fanfare actually applied (a gain landing entirely at the
-    cap is not income), and `sim_decay` is what `decay_fanfare` removed at
-    the seam. Nothing in this row is a conclusion.
-    """
-    income = 0
-    by_source: "collections.Counter[str]" = collections.Counter()
-    floor_grant = 0
-    for ev in state.log:
-        if ev.get("event") == "gain_fanfare":
-            amt = int(ev.get("amount") or 0)
-            income += amt
-            by_source[str(ev.get("source") or "?")] += amt
-        elif ev.get("event") == "fanfare_floor_granted":
-            floor_grant += int(ev.get("amount") or 0)
-    decay = sum(int(ev.get("amount") or 0) for ev in decayed.log
-                if ev.get("event") == "fanfare_decay") - \
-        sum(int(ev.get("amount") or 0) for ev in state.log
-            if ev.get("event") == "fanfare_decay")
-    eng_open = int(meters.get("fanfare") or 0)
-    eng_next = int(nxt.get("fanfare") or 0)
-    # THE SEAM, STATED AS THREE POSITIONS RATHER THAN ARGUED ABOUT. The
-    # engine's `meters_by_turn` sample sits at the turn OPENING, so between
-    # the sim's end-of-turn value and that reading the engine has done two
-    # things the replay's turn contains neither of: the top-of-turn decay,
-    # and the Fanfare the enemy's turn generated by taking HP off Furina
-    # (`FANFARE_PER_HP_LOST`, one per point). `hp_drop_to_next_open` is that
-    # second channel read off `hp_trajectory` -- an ATTRIBUTION, not a
-    # narration: the wire does not say which enemy landed which hit, and any
-    # self-damage inside the player's own turn is folded in with it.
-    hp_now, hp_next = traj.get("hp"), (traj_next or {}).get("hp")
-    hp_drop = (max(0, int(hp_now) - int(hp_next))
-               if hp_now is not None and hp_next is not None else 0)
-    full = decayed.player.fanfare + hp_drop * C.FANFARE_PER_HP_LOST
-    return {
-        "fight_id": spec["fight_id"],
-        "turn": "" if rnd is None else rnd,
-        "selector": arm or "",
-        "eng_open": eng_open,
-        "eng_next_open": eng_next,
-        "eng_delta": eng_next - eng_open,
-        "sim_open": eng_open,          # the sim is LOADED from the engine open
-        "sim_after_turn": state.player.fanfare,
-        "sim_next_open_post_decay": decayed.player.fanfare,
-        "sim_delta": state.player.fanfare - eng_open,
-        "sim_income": income,
-        "sim_income_by_source": ";".join(
-            "%s=%d" % (k, v) for k, v in sorted(by_source.items())) or "-",
-        "sim_decay": decay,
-        "sim_floor_grant": floor_grant,
-        "hp_drop_to_next_open": hp_drop,
-        "sim_next_open_full": full,
-        "residual_raw": state.player.fanfare - eng_next,
-        "residual_post_decay": decayed.player.fanfare - eng_next,
-        "residual_full": full - eng_next,
-        "context": ctx,
-    }
-
-
-def _encore_unseen(fight: dict) -> bool:
-    """True when this fight's Encore column is the UNSEEN sentinel, not a zero.
-
-    The bot feed cannot see Encore at all — it is a CustomResource the bridge
-    does not serialise. The current writer records `-1` for that and this
-    module skips those turns outright. Earlier soak builds wrote `0` instead,
-    which is indistinguishable from a real empty meter turn by turn but is
-    recognisable across a whole fight: a Furina fight in which Encore is 0 at
-    *every* opening, while the same fight's mod-feed row shows the meter
-    moving, is the sentinel wearing a zero. Rows from such a fight are
-    flagged as reading corruption rather than charged to the sim.
-    """
-    col = [row[4] for row in (fight.get("meters_by_turn") or []) if len(row) > 4]
-    return bool(col) and all(v == 0 for v in col)
 
 
 def _find_in_hand(state: CombatState, display: str):
@@ -783,22 +584,6 @@ def cross_feed_rows(soak_fights: list[tuple[str, dict]], mod_fights: list[dict],
                 rows.append(
                     _rowlite(fid, "", "xfeed.%s" % key, s.get(key), m.get(key), "soak vs mod feed", True)
                 )
-        smet = {r[0]: r[1:] for r in s.get("meters_by_turn") or []}
-        mmet = {r[0]: r[1:] for r in m.get("meters_by_turn") or []}
-        for rnd in sorted(set(smet) & set(mmet)):
-            for i, label in enumerate(("fanfare", "salon_members", "salon_cap", "encore")):
-                if i < len(smet[rnd]) and i < len(mmet[rnd]) and smet[rnd][i] != mmet[rnd][i]:
-                    rows.append(
-                        _rowlite(
-                            fid,
-                            rnd,
-                            "xfeed.meters.%s" % label,
-                            smet[rnd][i],
-                            mmet[rnd][i],
-                            "soak vs mod feed",
-                            True,
-                        )
-                    )
         spool = {r[0]: r[1] for r in s.get("enemy_pool_by_turn") or []}
         mpool = {r[0]: r[1] for r in m.get("enemy_pool_by_turn") or []}
         for rnd in sorted(set(spool) & set(mpool)):
@@ -909,8 +694,6 @@ def main(argv: list[str] | None = None) -> int:
              "(P1.5) instead of letting tier0's own heuristic stand in. OFF "
              "by default: a pre-P1.5 log carries no selectors and the S7 "
              "artefact must stay reproducible")
-    ap.add_argument("--ledger", default="",
-                    help="write the per-turn Fanfare ledger (probe B3) here")
     args = ap.parse_args(argv)
 
     paths: list[str] = []
@@ -926,7 +709,6 @@ def main(argv: list[str] | None = None) -> int:
     rows: list[dict] = []
     replayed = 0
     tally: "collections.Counter[str]" = collections.Counter()
-    ledger: list[dict] = []
     for spec in specs:
         if not spec["turns"]:
             continue
@@ -934,8 +716,7 @@ def main(argv: list[str] | None = None) -> int:
         tally["plays_posted"] += sum(len(t["plays"]) for t in spec["turns"])
         tally["selector_rows"] += len(spec["fight"].get("selectors") or [])
         rows.extend(l1_rows(spec, names, args.character, tally, args.use_selectors))
-        rows.extend(l2_rows(spec, names, args.character, tally, args.use_selectors,
-                            ledger if args.ledger else None))
+        rows.extend(l2_rows(spec, names, args.character, tally, args.use_selectors))
         rows.extend(cards_played_rows(spec))
 
     mod: list[dict] = []
@@ -945,13 +726,10 @@ def main(argv: list[str] | None = None) -> int:
     rows.extend(cross_feed_rows([(s["fight_id"], s["fight"]) for s in specs], mod))
 
     write_tsv(rows, args.out)
-    if args.ledger:
-        write_tsv(ledger, args.ledger, LEDGER_COLUMNS)
 
     by_field = collections.Counter(r["field"].split("[")[0] for r in rows)
     summary = {
         "use_selectors": bool(args.use_selectors),
-        "ledger_rows": len(ledger),
         "logs": len(paths),
         "fights_found": len(specs),
         "fights_replayed": replayed,

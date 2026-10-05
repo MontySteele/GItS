@@ -37,12 +37,10 @@ that computed what SHOULD have happened would be a third engine, and the repo
 already carries the two it can keep honest (tier0 and the mod).
 
 THE TRACE, AND WHY IT IS THESE FIELDS
-A fight's trace is the ordered sequence of things the game was ASKED and the
-meters it showed when asked:
+A fight's trace is the ordered sequence of things the game was ASKED:
 
     cards_played      what was played, in order, with the round
     selectors         which selector answers were given, from which offers
-    meters_by_turn    fanfare / salon / salon_cap / encore at each opening
 
 Two runs of the same seed driven by the same policy must produce identical
 traces. A divergence is a fact about the two builds, not about the bot -- and
@@ -86,7 +84,7 @@ from understudy.report import (LOG_DIR, MissingRunLog, UnreadableRunLog,
 # The fight-record keys that make up a trace. Ordered, because the report
 # prints the first disagreement and a stable order makes two reports of the
 # same divergence read the same.
-TRACE_KEYS = ("cards_played", "selectors", "meters_by_turn")
+TRACE_KEYS = ("cards_played", "selectors")
 
 # Fields that IDENTIFY a fight within a run, as opposed to describing it.
 FIGHT_KEYS = ("act", "floor", "kind")
@@ -184,16 +182,12 @@ def describe_run(stamp: str, run_index: int) -> str:
              + (f"  CHOSEN={seed['chosen']} honoured={seed['honoured']}"
                 if seed["chosen"] else "  (read-back)")]
     for i, f in enumerate(fs):
-        meters = f.get("meters_by_turn") or []
-        encore = [m[4] for m in meters if len(m) > 4]
-        unseen = all(e == -1 for e in encore) if encore else True
         lines.append(
             f"  fight {i}: act {f.get('act')} floor {f.get('floor')} "
             f"{f.get('kind')}  turns={f.get('turns')} "
             f"outcome={f.get('outcome')}  "
             f"plays={len(f.get('cards_played') or [])} "
-            f"selectors={len(f.get('selectors') or [])} "
-            f"encore={'UNSEEN' if unseen else 'read'}")
+            f"selectors={len(f.get('selectors') or [])}")
         lines += selector_lines(f)
     return "\n".join(lines)
 

@@ -23,8 +23,7 @@
 // price today), but this bridge must still load with no klee mod present at all.
 // A compile-time reference would make it refuse to load without one. Reflection
 // makes "no klee mod" mean "no Spark prices", which is the truth. Same posture
-// GitsResources.cs takes toward BaseLib and GitsKurageMemory.cs toward the
-// memory rule, and the same failure mode: probed once, cached including the
+// GitsResources.cs takes toward BaseLib, and the same failure mode: probed once, cached including the
 // null, and every failure swallowed -- a state read must never throw.
 //
 // THE CONTRACT. Two public statics on `KleeMod.Powers.SparkCost`:

@@ -61,8 +61,6 @@ class FightTelemetry:
     # TRACK B ADDITIONS (2026-08-04). Keys only ADDED -- nothing renamed, which
     # is what the shared-schema rule in understudy/README.md costs and permits.
     enemy_pool_by_turn: list = field(default_factory=list)  # [(round, pool)]
-    meters_by_turn: list = field(default_factory=list)  # [(rnd, fanfare, salon,
-    #                                                     salon_cap, encore)]
     block_at_turn_end: list = field(default_factory=list)   # [(round, block)]
     cards_played: list = field(default_factory=list)      # [(round, name)]
     # P1.5 ADDITION (2026-08-05), spec item 3. Every SELECTOR screen resolved
@@ -100,7 +98,6 @@ class FightTelemetry:
             "hp_trajectory": self.hp_trajectory,
             "incoming_by_turn": self.incoming_by_turn,
             "enemy_pool_by_turn": self.enemy_pool_by_turn,
-            "meters_by_turn": self.meters_by_turn,
             "block_at_turn_end": self.block_at_turn_end,
             "cards_played": self.cards_played,
             "n_cards_played": len(self.cards_played),

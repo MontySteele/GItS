@@ -2345,271 +2345,6 @@ def test_the_play_page_says_nothing_extra_with_no_bank():
     assert "Spark, and the costs below" not in page
 
 
-# ------------------------------------------- the Kurage's memory (EB-181) ---
-#
-# The bridge field the memory rule needs, on the observed board. The rule
-# itself is quarantined in the mod (`Powers/Prototype/KurageMemory.cs`), so
-# these fixtures are SYNTHETIC and prove the READER, never the wire -- the same
-# posture every non-combat screen above takes. What they pin is the contract in
-# `vendor/STS2_MCP/gits/GitsKurageMemory.cs`: which fields exist, that an
-# absent key is absent rather than empty, and that the block, the empty queue
-# and the pulse each reach the page a tester reads.
-
-
-def memory_combat_state(memory: dict | None) -> dict:
-    """A Kokomi combat with (or without) `player.kurage_memory` on the wire."""
-    state = combat_state()
-    player = dict(state["player"])
-    player.pop("kurage_memory", None)
-    if memory is not None:
-        player["kurage_memory"] = memory
-    state = dict(state)
-    state["player"] = player
-    return state
-
-
-BLOCKED_MEMORY = {
-    "bank": 5, "front_price": 9, "blocked": True, "fires_next": False,
-    "empty": False, "summon": True, "base_kit": True,
-    "pulse_kind": "skill", "pulse_amount": 5, "pulse_unit": "block",
-    "reading": "Charge 5 / 9 — Raiden Shogun blocked",
-    # sec.14.4's running subtraction. The bank is 5 and the front costs 9, so
-    # the queue runs out at entry 0 -- and Gorou, free though he is, is HELD
-    # behind it, because a front the bank cannot pay holds everything and pays
-    # nothing.
-    "run_out_index": 0,
-    "queue": [
-        {"name": "Raiden Shogun", "cost": 3, "price": 9, "target": "Slime",
-         "blocked": True, "affordable": False, "state": "runs_out",
-         "ephemeral": False, "rule": "exhaust"},
-        {"name": "Gorou", "cost": 0, "price": 0, "target": None,
-         "blocked": False, "affordable": True, "state": "held",
-         "ephemeral": True, "rule": "muster"},
-    ],
-}
-
-
-def test_a_board_carrying_the_memory_parses_every_field():
-    obs = blindplay.observation(memory_combat_state(BLOCKED_MEMORY))
-    memory = obs["combat"]["memory"]
-    assert memory["bank"] == 5
-    assert memory["front_price"] == 9
-    assert memory["blocked"] is True
-    assert memory["fires_next"] is False
-    assert memory["empty"] is False
-    assert memory["summon"] is True
-    assert memory["base_kit"] is True
-    assert memory["pulse_kind"] == "skill"
-    assert memory["pulse_amount"] == 5
-    assert memory["pulse_unit"] == "block"
-    assert [row["name"] for row in memory["queue"]] == ["Raiden Shogun",
-                                                        "Gorou"]
-    assert memory["queue"][0]["blocked"] is True
-    assert memory["queue"][0]["target"] == "Slime"
-    # A memory that stored NO target aims randomly, and the board says the word
-    # rather than leaving a null for a reader to interpret.
-    assert memory["queue"][1]["target"] == "random"
-    assert memory["queue"][1]["price"] == 0
-    # The affordability run rides beside the reading, so the page and the tests
-    # see the same projection the pile view paints.
-    assert memory["run_out_index"] == 0
-    # ...but the wire's per-row STATE does not reach the board: "runs_out" is an
-    # internal snake-case id and `assert_blind` refuses one. The index says the
-    # same thing as a number and the page renders it as a sentence.
-    assert "state" not in memory["queue"][0]
-
-
-def test_a_board_without_the_key_has_no_memory_at_all():
-    """A release build has no memory rule compiled in, and the observed board
-    must not describe it as an EMPTY one. Absence is the fact."""
-    obs = blindplay.observation(memory_combat_state(None))
-    assert "memory" not in obs["combat"]
-    assert "memory" not in blindplay.render(obs)
-
-
-def test_an_empty_map_is_a_seat_that_is_not_kokomi_and_gets_no_section():
-    """`EB-207`: the Klee page carried her jellyfish and told him it had
-    played no card.
-
-    THREE wire states, not two (`vendor/STS2_MCP/gits/GitsKurageMemory.cs`):
-    an ABSENT key is a build with no memory rule, an EMPTY MAP is the rule
-    present on a seat that is not hers -- exactly what
-    `KurageMemory.Snapshot` returns off a failed `IsLive` -- and a populated
-    map is a memory. Reading `{}` as a memory built the whole section out of
-    `_int`/`_text` defaults, and the `none` pulse default rendered as a
-    sentence about a card the tester HAD played.
-    """
-    obs = blindplay.observation(memory_combat_state({}))
-    assert "memory" not in obs["combat"]
-    page = blindplay.render(obs)
-    assert "Bake-Kurage" not in page
-    assert "you have played no card this turn" not in page
-    # A real memory beside it is untouched: refusing `{}` cannot suppress one,
-    # because `Snapshot` writes twelve keys before it writes the queue.
-    assert "Bake-Kurage" in blindplay.render(
-        blindplay.observation(memory_combat_state(BLOCKED_MEMORY)))
-
-
-def test_the_page_shows_the_bank_the_price_the_block_and_the_pulse():
-    """D4: everything that will fire next turn is readable this turn.
-
-    THE PAGE MIRRORS THE ELEMENT (sec.14). The strip's one running line is gone
-    and each fact stands on its own: the Charge count, then the front card with
-    its price and whether it fires, then the queue behind a heading, then the
-    run-out. `EB-198` is the reason -- the tester read "Charge 1 / 0" as a
-    fraction over a zero denominator, and both frames were true as drawn.
-    """
-    page = blindplay.render(blindplay.observation(
-        memory_combat_state(BLOCKED_MEMORY)))
-    assert "- Charge: 5" in page
-    assert ("- Next to fire: **Raiden Shogun** — costs 9 Charge — you cannot "
-            "pay it, so NOTHING in the memory fires next turn." in page)
-    assert "aims at Slime" in page
-    assert "aims at random" in page
-    # A 0-cost memory reads as free, because it is.
-    assert "**Gorou** — free" in page
-    # The run-out is CALLED OUT rather than left to be counted off the list,
-    # and it names what is held behind it.
-    assert "Charge runs out at #1 (**Raiden Shogun**)" in page
-    assert "everything behind it are held" in page
-    assert "the jellyfish will give you 5 Block" in page
-    # The strip's grammars are gone with the strip.
-    assert "Charge 5 / 9" not in page
-
-
-def test_the_pile_views_charge_source_header_reaches_the_blind_page():
-    """`EB-214` item 7 (`M55`, re-scoped by R224).
-
-    The Charge-source line is a Godot Label at the head of the pile view
-    (`KurageMemoryText.ChargeSource`), so a SIGHTED player reads it on a
-    click and a blind tester -- who has no click -- would never see it at
-    all. `P4`'s half (b) is exactly "name a play that would supply the
-    Charge", so a rerun grading that half against a line the page does not
-    carry would be grading a surface the tester was never shown.
-
-    The rate INTERPOLATES from the same constant the C# reads, which
-    `lint_constant_parity` pins equal (`KokomiConstants.ChargePerExhaust ==
-    C.CHARGE_PER_EXHAUST`), so a retune moves both sentences or neither.
-    """
-    page = blindplay.render(blindplay.observation(
-        memory_combat_state(BLOCKED_MEMORY)))
-    assert blindplay.CHARGE_SOURCE_LINE == (
-        f"Gain {C.CHARGE_PER_EXHAUST} Charge when a card of yours Exhausts")
-    assert blindplay.CHARGE_SOURCE_LINE in page
-    # It heads the QUEUE, where the pile view puts it -- not the top of the
-    # section, and never on an empty queue, which has no view to head.
-    assert "and then the whole memory, front first:" in page
-    empty = dict(BLOCKED_MEMORY, front_price=None, blocked=False,
-                 fires_next=False, empty=True, queue=[])
-    assert "when a card of yours Exhausts" not in blindplay.render(
-        blindplay.observation(memory_combat_state(empty)))
-
-
-def test_a_discounted_memory_prints_the_cost_it_was_multiplied_by():
-    """`EB-248`. The price is derivable from what the queue prints.
-
-    A Muster recruit is discounted by one, so *Thoma - Crimson Ooyoroi* prints
-    a face of 2 and enrols at `cost: 1, price: 3`: the rule reads the EFFECTIVE
-    cost, and a tester holding the card and the queue side by side has no route
-    from the 2 to the 3. `KURAGECAD-W1`'s tester named exactly that. Each queue
-    line now carries the cost the rule multiplied, in
-    `KurageMemory.PriceText`'s words, so the arithmetic is on the page.
-
-    The rate is the sim's rather than a number typed twice, and this assertion
-    is the pin: `blindplay` may not import `tier0` itself.
-    """
-    assert blindplay.KURAGE_COST_PER_ENERGY == C.KURAGE_MEMORY_COST_PER_ENERGY
-    discounted = dict(
-        BLOCKED_MEMORY, bank=3, front_price=3, blocked=False, fires_next=True,
-        run_out_index=-1,
-        reading="Charge 3 / 3 — Thoma - Crimson Ooyoroi fires next turn",
-        queue=[
-            {"name": "Thoma - Crimson Ooyoroi", "cost": 1, "price": 3,
-             "target": "Slime", "blocked": False, "affordable": True,
-             "ephemeral": False, "rule": "muster"},
-            {"name": "Gorou", "cost": 0, "price": 0, "target": None,
-             "blocked": False, "affordable": True, "ephemeral": True,
-             "rule": "muster"},
-        ])
-    page = blindplay.render(blindplay.observation(
-        memory_combat_state(discounted)))
-    assert ("1. **Thoma - Crimson Ooyoroi** — 3 Charge, cost 1 x 3 — "
-            "aims at Slime" in page)
-    assert f"cost 1 x {C.KURAGE_MEMORY_COST_PER_ENERGY}" in page
-    # A free memory reads as free and carries no derivation: a zero price is a
-    # zero cost, and "cost 0 x 3" would restate the answer rather than explain
-    # it.
-    assert "2. **Gorou** — free — aims at random" in page
-    # EVERY entry carries its own, front or not.
-    blocked = blindplay.render(blindplay.observation(
-        memory_combat_state(BLOCKED_MEMORY)))
-    assert ("1. **Raiden Shogun** — 9 Charge, cost 3 x 3 — aims at Slime"
-            in blocked)
-
-
-def test_the_page_says_a_payable_front_fires_and_names_no_run_out():
-    """The other side of the same element: a bank that covers the whole queue
-    draws blue throughout, and the page must not invent a shortfall."""
-    payable = dict(BLOCKED_MEMORY, bank=12, front_price=9, blocked=False,
-                   fires_next=True, run_out_index=-1,
-                   reading="Charge 12 / 9 — Raiden Shogun fires next turn",
-                   queue=[dict(BLOCKED_MEMORY["queue"][0], blocked=False,
-                               affordable=True, state="payable"),
-                          dict(BLOCKED_MEMORY["queue"][1], state="payable")])
-    page = blindplay.render(blindplay.observation(
-        memory_combat_state(payable)))
-    assert "- Charge: 12" in page
-    assert ("- Next to fire: **Raiden Shogun** — costs 9 Charge — it fires at "
-            "the start of your next turn." in page)
-    assert "Your Charge covers every memory queued" in page
-    assert "runs out at" not in page
-
-
-def test_an_empty_memory_says_so_and_is_not_a_block():
-    empty = dict(BLOCKED_MEMORY, front_price=None, blocked=False,
-                 fires_next=False, empty=True, queue=[],
-                 pulse_kind="none", pulse_amount=0, pulse_unit="none",
-                 reading="Charge 5 — memory empty")
-    obs = blindplay.observation(memory_combat_state(empty))
-    assert obs["combat"]["memory"]["front_price"] is None
-    page = blindplay.render(obs)
-    # The empty state is the count ALONE on the element, and the page says the
-    # same thing in words: no card, no price, no ring.
-    assert "The memory is empty. Nothing is queued and nothing fires" in page
-    assert "- Charge: 5" in page
-    assert "Next to fire" not in page
-    assert "runs out at" not in page
-    assert "you have played no card this turn" in page
-
-
-def test_the_power_pulse_reads_in_charge():
-    """The Power branch pays in Charge, so the page has to be able to say a
-    unit that is neither damage nor Block."""
-    powered = dict(BLOCKED_MEMORY, pulse_kind="power", pulse_amount=1,
-                   pulse_unit="charge")
-    page = blindplay.render(blindplay.observation(
-        memory_combat_state(powered)))
-    assert "the jellyfish will give you 1 Charge" in page
-
-
-def test_the_page_names_the_jellyfish_as_a_fight_start_fact():
-    """sec.12.6 item 12. Under the base kit the Bake-Kurage is installed at
-    combat start, so a blind run must be able to SEE it before turn 1 rather
-    than inferring it from the first pulse."""
-    page = blindplay.render(blindplay.observation(
-        memory_combat_state(BLOCKED_MEMORY)))
-    assert "on the field for the whole fight" in page
-
-
-def test_a_summoned_jellyfish_is_not_announced_as_base_kit():
-    """With the base kit off the v3 arm is still reachable, and the page must
-    not tell a tester the jellyfish is permanent when it is not."""
-    summoned = dict(BLOCKED_MEMORY, base_kit=False)
-    page = blindplay.render(blindplay.observation(
-        memory_combat_state(summoned)))
-    assert "on the field for the whole fight" not in page
-
-
 # ------------------------------------------------- EB-216: the wire snapshot -
 #
 # `M56` (R224 A). The record's OBJECTIVE side: a machine-written board per
@@ -2664,22 +2399,6 @@ def test_the_wire_snapshot_carries_every_meter_including_the_zeroes():
     assert snap["meters"]["resources"]["KLEEMOD_CHARGE"] == 8
     assert snap["meters"]["resources"]["KLEEMOD_ENCORE"] == 0
     assert snap["meters"]["powers"]["KLEEMOD-SPARK"] == 2
-
-
-def test_the_wire_snapshot_carries_the_memory_strip_only_when_the_wire_does():
-    """The bridge's three-state contract, kept: an ABSENT key is "no memory
-    rule in this build", and inventing an empty one here would make a release
-    build look like a Kokomi seat holding nothing."""
-    with_memory = blindplay.wire_snapshot(
-        memory_combat_state(BLOCKED_MEMORY), index=1, verb="end turn")
-    assert with_memory["kurage_memory"]["blocked"] is True
-    assert with_memory["kurage_memory"]["fires_next"] is False
-    # UNSCRUBBED, unlike the page: the per-row `state` id the observed board
-    # must never print is exactly what an erratum reader wants.
-    assert "queue" in with_memory["kurage_memory"]
-    without = blindplay.wire_snapshot(memory_combat_state(None), index=1,
-                                      verb="end turn")
-    assert "kurage_memory" not in without
 
 
 def test_the_wire_snapshot_omits_a_spark_price_the_wire_omits():
@@ -5064,7 +4783,7 @@ def test_two_lanes_keep_two_budgets(lane_budget):
 
 def test_the_lane_variable_is_spelled_the_same_on_both_sides_of_the_wall():
     """`blindplay_shape` may not import `instances`, so `GITS_LANE` is spelled
-    there. Held in step from this side, the way `CHARGE_SOURCE_LINE` is held
+    there. Held in step from this side, the way `BOMB_GROWTH` is held
     against `tier0.constants`."""
     from understudy import instances
     assert blindplay_shape.LANE_ENV == instances.LANE_ENV
@@ -6674,7 +6393,7 @@ def test_a_lowercase_word_in_prose_is_not_a_keyword():
 def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     """The table is the mod's OWN tooltip bodies with the markup and the
     interpolated constants folded out, and it is held in step FROM THIS SIDE --
-    the same discipline `CHARGE_SOURCE_LINE` is under. A sentence rewritten in
+    the same discipline `BOMB_GROWTH` is under. A sentence rewritten in
     `ArmKeywordTips.cs` and not here goes red on the anchor it dropped."""
     tips_src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
                 / "ArmKeywordTips.cs").read_text(encoding="utf-8")
@@ -8048,8 +7767,7 @@ def test_a_fire_potion_leaves_no_aura_in_the_sim_either():
 
 
 def test_the_bomb_growth_fallback_is_the_mods_own_constant():
-    """`BOMB_GROWTH` is held in step from THIS side, the way
-    `CHARGE_SOURCE_LINE` and `KURAGE_COST_PER_ENERGY` are: this module may not
+    """`BOMB_GROWTH` is held in step from THIS side: `understudy` may not
     import `tier0` at all, so a retune of the C# constant goes red here."""
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "KleeOverhaul.cs").read_text(encoding="utf-8")
@@ -9167,7 +8885,7 @@ def test_the_wires_own_sentence_wins_over_the_page_copy():
 def test_the_base_keyword_glossary_quotes_the_engines_own_rates():
     """`blindplay_shape`'s three percentages are held in step with
     `tier0.constants` from this side -- the module may not import `tier0` at
-    all -- the same discipline `CHARGE_SOURCE_LINE` is under."""
+    all -- the same discipline `BOMB_GROWTH` is under."""
     assert blindplay.VULNERABLE_TAKEN_PCT == round(
         (C.VULNERABLE_TAKEN_MULT - 1) * 100)
     assert blindplay.WEAK_DEALT_PCT == round((1 - C.WEAK_DEALT_MULT) * 100)

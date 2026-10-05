@@ -1658,11 +1658,6 @@ GARMENT_ATTACK_BLOCK = 2      # while the Garment holds, her attack cards
 CONSCRIPT_COST_DELTA = -1     # kickoff §2.3: a conscripted card costs 1
                               # less (floor 0) and gains Exhaust.
 
-# THE KURAGE'S MEMORY's price rate. The memory rule left the sim at legacy
-# cleanup stage 6; the seat page's memory panel still spells this rate
-# (`understudy/blindplay_shape.KURAGE_COST_PER_ENERGY`) until it goes too.
-KURAGE_MEMORY_COST_PER_ENERGY = 3
-
 # --- Reference relics ---
 BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight
                               # (ruling 1: gives A4 a nonzero anchor)
