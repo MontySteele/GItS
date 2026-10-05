@@ -277,7 +277,6 @@ def _fight_record(**over):
     f.cards_played = [[1, "Stage Presence"]]
     f.selectors = [[1, "choose", 0, "Center Stage",
                     ["Center Stage", "Guest Cast"]]]
-    f.meters_by_turn = [[1, 4, 1, 3, 6]]
     rec = f.as_record()
     rec.update(over)
     return rec
@@ -286,7 +285,6 @@ def _fight_record(**over):
 def test_replay_reads_the_new_fields_into_a_trace():
     t = replay.trace(_fight_record())
     assert t["selectors"][0][3] == "Center Stage"
-    assert t["meters_by_turn"][0][4] == 6
     assert set(t) == set(replay.TRACE_KEYS)
 
 
@@ -378,7 +376,7 @@ def test_the_new_fight_key_is_an_addition_and_not_a_rename(key):
     is still there."""
     rec = soak.FightTelemetry(act=1, floor=1, kind="monster").as_record()
     assert key in rec
-    for old in ("cards_played", "meters_by_turn", "hp_trajectory",
+    for old in ("cards_played", "hp_trajectory",
                 "enemy_pool_by_turn", "intent", "feed", "source", "schema"):
         assert old in rec
     assert rec["schema"] == "1"      # ADDITIONS do not bump the schema

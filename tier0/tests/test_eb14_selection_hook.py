@@ -312,9 +312,8 @@ def test_the_standing_designation_reads_a_mod_written_row():
 
 def test_the_divergence_reader_traces_a_mod_written_record():
     """`trace_replay` compares two recordings key by key; `selectors` is one
-    of its three trace keys. A mod-written record traces like any other."""
-    fight = {"cards_played": [[1, "Kaboom!"]], "meters_by_turn": [[1, 0, 0, 0, 0]],
-             "selectors": [_mod_row(1, 1)]}
+    of its two trace keys. A mod-written record traces like any other."""
+    fight = {"cards_played": [[1, "Kaboom!"]], "selectors": [_mod_row(1, 1)]}
     traced = trace_replay.trace(fight)
     assert traced["selectors"] == [_mod_row(1, 1)]
     assert "selectors" in trace_replay.TRACE_KEYS
@@ -347,10 +346,9 @@ def test_a_record_with_no_selectors_still_reads_as_absent_not_empty():
     """A pre-EB-14 human-feed record carries no `selectors` key at all, and
     `trace_replay` already refuses to read that as evidence of sameness. The
     new key does not change what an old record means."""
-    absent = trace_replay.trace({"cards_played": [], "meters_by_turn": []})
+    absent = trace_replay.trace({"cards_played": []})
     assert absent["selectors"] is trace_replay.NOT_RECORDED
-    empty = trace_replay.trace({"cards_played": [], "meters_by_turn": [],
-                                "selectors": []})
+    empty = trace_replay.trace({"cards_played": [], "selectors": []})
     assert empty["selectors"] == []
 
 

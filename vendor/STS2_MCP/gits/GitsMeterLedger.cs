@@ -24,8 +24,7 @@
 // the frames it snapshots and files it beside the board.
 //
 // WHY IT IS REFLECTION. Same posture as `GitsResources.cs` toward BaseLib,
-// `GitsSparkPrice.cs` toward the Spark price and `GitsKurageMemory.cs` toward
-// the memory rule, for the same reason: a compile-time reference would make
+// `GitsSparkPrice.cs` toward the Spark price, for the same reason: a compile-time reference would make
 // this bridge refuse to load with no klee mod present. Reflection makes "no
 // klee mod" mean "no ledger", which is the truth. Probed once, the null cached
 // with the hit, every failure swallowed -- a state read must never throw.

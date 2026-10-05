@@ -17,25 +17,6 @@ from typing import Any
 
 
 
-# `EB-214` item 7 (`M55`, re-scoped by R224). The pile view's own header, as
-# `KurageMemoryText.ChargeSource` renders it on screen. THE RATE IS SPELLED
-# RATHER THAN IMPORTED, deliberately: this module may not reach `tier0` at all
-# (`test_blindplay_cannot_reach_a_sheet_or_a_policy` is the structural
-# no-leak pin), so the number is held in step from the OTHER side --
-# `test_the_pile_views_charge_source_header_reaches_the_blind_page` reads
-# `C.CHARGE_PER_EXHAUST` and fails the moment this sentence falls behind a
-# retune, the same way `lint_constant_parity` holds the C# copy.
-CHARGE_SOURCE_LINE = "Gain 1 Charge when a card of yours Exhausts"
-
-# `EB-248`. What a memory's price is a multiple OF, spelled on the same terms
-# as the line above and for the same reason: this module may not import
-# `tier0`, so `test_a_discounted_memory_prints_the_cost_it_was_multiplied_by`
-# reads `C.KURAGE_MEMORY_COST_PER_ENERGY` and fails if the two fall apart.
-# The C# half interpolates it from `KurageMemoryLaw.CostPerEnergy`, which
-# `lint_constant_parity` already pins to the same sim constant, so all three
-# move on a retune or none do.
-KURAGE_COST_PER_ENERGY = 3
-
 # `EB-340`. RULE 1'S GROWTH NUMBER, and the two-line reason it is spelled here.
 #
 # THE GLOSSARY DROPPED IT. The Bomb card's own keyword tip reads "Grows by 4 at
@@ -51,7 +32,7 @@ KURAGE_COST_PER_ENERGY = 3
 # that prints the WORD with no tip on it -- an enemy's badge, a reward row -- and
 # is held in step from the other side by
 # `test_the_bomb_glossary_carries_the_growth_number`, which reads the C#
-# constant, the same discipline `CHARGE_SOURCE_LINE` is under.
+# constant.
 BOMB_GROWTH = 4
 
 #: `EB-537`. The Shatter's bonus damage, `ReactionConstants.ShatterDamage` in
@@ -97,7 +78,7 @@ SWIRL_DAMAGE = 2
 
 # `EB-377`. THE THREE BASE-GAME DURATION DEBUFFS, AS PERCENTAGES.
 #
-# Spelled here for `CHARGE_SOURCE_LINE`'s reason and held in step from the
+# Spelled here for `BOMB_GROWTH`'s reason and held in step from the
 # other side by `test_the_base_keyword_glossary_quotes_the_engines_own_rates`,
 # which reads `C.VULNERABLE_TAKEN_MULT`, `C.WEAK_DEALT_MULT` and
 # `C.FRAIL_BLOCK_MULT`. They are STRUCTURAL rates rather than balance dials --
@@ -148,7 +129,7 @@ _BUDGET_STORE_DIR = Path(__file__).resolve().parent / "logs"
 # `instances.LANE_ENV`'s value, SPELLED rather than imported: `instances`
 # reaches a game-directory resolver, and this module's whole job is to import
 # nothing from this package. The test side holds the two in step, the way
-# `CHARGE_SOURCE_LINE` is held against `tier0.constants`.
+# `BOMB_GROWTH` is held against the mod's constant.
 LANE_ENV = "GITS_LANE"
 
 

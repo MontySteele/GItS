@@ -859,7 +859,8 @@ leaving a pile, not the identity of the selection that took it, so a bot-feed
 twin is new wire surface.
 
 **And two changes of MEANING in the same pass, called out as loudly as renames
-would be.** Both live inside `meters_by_turn`; neither key was renamed and
+would be.** Both lived inside `meters_by_turn` (dropped from the schema
+2026-10-04, with the shipped meters it sampled); neither key was renamed and
 neither changed type:
 
 - the **encore** column now carries real values. It read `-1` (UNSEEN) on
@@ -954,7 +955,6 @@ Phase 0 could not do.
 | `hp_trajectory` | `[[round, hp, block], ...]`, sampled at each turn opening |
 | `incoming_by_turn` | `[[round, telegraphed_damage, n_attacking_enemies], ...]`, read before block |
 | `enemy_pool_by_turn` | `[[round, enemy hp+block total], ...]` at each turn opening. **The honest output curve**: the drop between two openings is everything that landed, whoever landed it — which `damage_by_source` cannot say |
-| `meters_by_turn` | `[[round, fanfare, salon_members, salon_cap, encore], ...]`. **P1.5 opened both blind columns.** Encore comes off `player.resources` (`KLEEMOD_ENCORE`), the reflection read of BaseLib's registry the fork added; Fanfare prefers the resource over its badge, which is only ever a synced copy. The cap is the printed base plus `SalonCapUpPower` from the status strip — which had been on the wire all along. **`-1` still means UNSEEN, not empty**, and it is what a log written against a pre-P1.5 bridge (no `resources` key) still says; a `resources` map that simply has no Encore in it reads 0, because that is a player with no Encore rather than a blind spot |
 | `reactions_by_turn` | `[[round, reactions THIS SEAT resolved since this fight opened]]` — **human feed only**; the wire does not narrate reactions. Per seat since `EB-156`: it reads `ReactionEffects.ResolvedThisCombat(combat, player)`, not the global `TotalResolved` a row used to carry (which put both seats' reactions in every seat's row, and is GLOBAL by RULING — red-pen R1 — for gameplay, not for this row). A reaction with no dealer belongs to no seat, so the seats' numbers sum to at most the team-wide count. Measurement only: no reaction constant is read or written |
 | `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
