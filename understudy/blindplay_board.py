@@ -560,10 +560,18 @@ def _allies(p: dict[str, Any], plan_pet: str | None) -> list[dict[str, Any]]:
         name = _text(row.get("name"))
         if not name:
             continue
+        powers = _powers(row)
         out.append({"name": name, "hp": _int(row.get("hp")),
                     "max_hp": _int(row.get("max_hp")),
                     "block": _int(row.get("block")),
-                    "powers": _powers(row)})
+                    "powers": powers,
+                    # Seat page 6: Osty takes the unblocked part of an enemy
+                    # attack up to his HP (`DieForYouPower`, applied on every
+                    # summon), and only the rest reaches the Necrobinder.
+                    "absorbs": row.get("alive") is not False and (
+                        _text(row.get("id")).upper() == "OSTY"
+                        or any(_fold(pw["name"]) == "die for you"
+                               for pw in powers))})
     return out
 
 

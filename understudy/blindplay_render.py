@@ -2457,6 +2457,9 @@ INCOMING_LEAVES = " You would be at {after}/{max_hp} HP."
 INCOMING_UNKNOWN = ("- Incoming this turn: {total} plus an unknown amount "
                     "from {who} (your Block {block}).")
 INCOMING_NONE = "- Incoming this turn: no attack is shown."
+#: SEAT PAGE 6: no attack, but the end of the turn hurts (Burn, Constrict).
+INCOMING_NO_ATTACK_TAKE = ("- Incoming this turn: no attack is shown "
+                           "(your Block {block}): you would take {take}.")
 #: SEAT PAGE 4: beside the rest site's HP, how much healing can land.
 REST_ROOM = " (healing stops at max HP: at most {room} more)"
 #: The since-last-page line, and how many phrases it names before it counts.
@@ -2525,11 +2528,169 @@ def _attack_part_total(intent: dict[str, Any], weak: int,
     return value
 
 
-def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any]) -> str:
-    """`- Incoming this turn: N (your Block B): you would take N-B.`
+#: SEAT PAGE 6 (2026-10-05): what stands between the telegraphs and your HP
+#: and lands before the enemies act. Base-game Sonnet seats read "you would
+#: be at 0" and lived (Osty, Beating Remnant, Frost), or the reverse (Burn,
+#: Disintegration). The order is the game's (`CombatManager.DoTurnEnd`):
+#: end-of-turn Block first (Orichalcum, Plating, then the orbs), then the
+#: cards in hand, then the end-of-turn powers, then the enemies. Block lasts
+#: until YOUR next turn starts, so all of it meets all of the damage.
+INCOMING_FOLDS = " ({folds})"
+INCOMING_NOT_COUNTED = " Not counted: {names}."
+FOLD_BLOCK = "{who} {verb} {n} Block first"
+FOLD_SELF_HIT = "{who} {verb} you for {n} first"
+FOLD_SELF_HP = "{who} {verb} {n} HP"
+FOLD_OSTY = "{name} absorbs up to {hp}"
+FOLD_CAP = "{name} caps the turn's HP loss at {cap}"
+#: A hand card that hurts at the end of the turn, by its own sentence
+#: (Burn, Decay, Toxic, Infection, Wither: Block takes it; Bad Luck, Beckon:
+#: it is HP lost). Regret's number is the hand size, so it is named.
+_IN_HAND_EOT = re.compile(r"end of (?:your |the )?turn,? if this is in your "
+                          r"hand", re.I)
+_TAKE_DAMAGE = re.compile(r"\btake (\d+) damage", re.I)
+_LOSE_HP = re.compile(r"\blose (\d+) HP", re.I)
+#: Player debuffs that hit at the end of the turn, by printed name. Block
+#: takes the first set (`ConstrictPower`, `DisintegrationPower`,
+#: `MagicBombPower`); the second is HP lost (`DemisePower`, Unblockable).
+EOT_HIT_POWERS = ("constrict", "constricted", "disintegration", "magic bomb")
+EOT_HP_POWERS = ("demise",)
+#: Player powers that gain Block at the end of the turn, by printed name: the
+#: stack count is the Block (`PlatingPower`).
+EOT_BLOCK_POWERS = ("plating", "plated armor", "metallicize")
+#: Player powers that change what a hit costs, which this line does not
+#: model: named, never counted.
+HIT_RULE_POWERS = ("intangible", "buffer")
+#: A relic's sentence for end-of-turn Block with no Block up (Orichalcum).
+_NO_BLOCK_RELIC = re.compile(
+    r"end (?:of )?your turn without (?:any )?Block, gain (\d+) Block", re.I)
+#: And Block per card in hand (Cloak Clasp).
+_PER_CARD_RELIC = re.compile(
+    r"end of your turn, gain (\d+) Block for each card in your hand", re.I)
+#: Beating Remnant: "You cannot lose more than 20 HP in a single turn."
+_HP_LOSS_CAP = re.compile(r"lose more than (\d+) HP", re.I)
+
+
+def _plain_name(title: Any) -> str:
+    """A hand face's printed title without the page's `(n)` or the `+`."""
+    name = re.sub(r"\s*\(\d+\)$", "", str(title or "")).strip()
+    return name.rstrip("+").strip()
+
+
+def _named_sum(parts: list[tuple[str, int]]) -> tuple[str, int, bool]:
+    """`(who, n, plural)` for one clause: `Frost x2 and Plating`, 8."""
+    counts: dict[str, int] = {}
+    for name, _n in parts:
+        counts[name] = counts.get(name, 0) + 1
+    who = _and_list([f"{k} x{v}" if v > 1 else k for k, v in counts.items()])
+    return who, sum(n for _name, n in parts), len(parts) > 1
+
+
+def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
+                    pets: list[dict[str, Any]]) -> dict[str, Any]:
+    """What lands between the end of your turn and the enemies' hits, off the
+    wire's own numbers, as if the turn ended now; what the page cannot count
+    goes in `unknown`, by name."""
+    block_parts: list[tuple[str, int]] = []
+    hit_parts: list[tuple[str, int]] = []
+    hp_parts: list[tuple[str, int]] = []
+    unknown: list[str] = []
+    block_now = int(you.get("block") or 0)
+    cap = None
+    for relic in you.get("relics") or []:
+        name, text = str(relic.get("name") or ""), str(relic.get("text") or "")
+        found = _HP_LOSS_CAP.search(text)
+        if found:
+            cap = (name, int(found.group(1)))
+            continue
+        found = _NO_BLOCK_RELIC.search(text)
+        if found:
+            if block_now == 0:
+                block_parts.append((name, int(found.group(1))))
+            continue
+        found = _PER_CARD_RELIC.search(text)
+        if found:
+            if hand:
+                block_parts.append((name, int(found.group(1)) * len(hand)))
+            continue
+        # Any other relic that gives Block at the end of the turn (Ripple
+        # Basin: only if no Attack was played, which the wire does not say).
+        if _END_OF_TURN.search(text) and re.search(r"\bgain \d+ Block", text,
+                                                    re.I):
+            unknown.append(name)
+    for power in you.get("powers") or []:
+        key, stacks = _fold(power.get("name")), power.get("stacks")
+        name = str(power.get("name") or "")
+        if key in HIT_RULE_POWERS:
+            unknown.append(name)
+            continue
+        if not isinstance(stacks, int) or stacks <= 0:
+            continue
+        if key in EOT_BLOCK_POWERS:
+            block_parts.append((name, stacks))
+        elif key in EOT_HIT_POWERS:
+            hit_parts.append((name, stacks))
+        elif key in EOT_HP_POWERS:
+            hp_parts.append((name, stacks))
+    for orb in (you.get("orbs") or {}).get("list") or []:
+        if _fold(orb.get("name")) in ("frost", "frost orb") and orb.get(
+                "passive"):
+            block_parts.append(("Frost", int(orb["passive"])))
+    for card in hand:
+        name = _plain_name(card.get("title"))
+        text = str(card.get("text") or "")
+        # Regret: HP lost per card in hand at the end, whatever the hand
+        # holds then; named, never counted.
+        if _fold(name) == "regret" or (_IN_HAND_EOT.search(text)
+                                       and re.search(r"\bfor each\b", text,
+                                                     re.I)):
+            if name not in unknown:
+                unknown.append(name)
+            continue
+        if not _IN_HAND_EOT.search(text):
+            continue
+        damage, hp = _TAKE_DAMAGE.search(text), _LOSE_HP.search(text)
+        if damage:
+            hit_parts.append((name, int(damage.group(1))))
+        elif hp:
+            hp_parts.append((name, int(hp.group(1))))
+        elif name not in unknown:
+            unknown.append(name)
+    osty = next((pet for pet in pets if pet.get("absorbs")
+                 and int(pet.get("hp") or 0) > 0), None)
+    return {"block": block_parts, "hit": hit_parts, "hp": hp_parts,
+            "osty": osty, "cap": cap, "unknown": unknown}
+
+
+def _fold_clauses(facts: dict[str, Any], absorbs: bool) -> list[str]:
+    """The few words for each fact folded into the take."""
+    out = []
+    for key, template, one, many in (("block", FOLD_BLOCK, "adds", "add"),
+                                     ("hit", FOLD_SELF_HIT, "hits", "hit"),
+                                     ("hp", FOLD_SELF_HP, "costs", "cost")):
+        if facts[key]:
+            who, n, plural = _named_sum(facts[key])
+            out.append(template.format(who=who, n=n,
+                                       verb=many if plural else one))
+    if absorbs and facts["osty"]:
+        out.append(FOLD_OSTY.format(name=facts["osty"]["name"],
+                                    hp=facts["osty"]["hp"]))
+    return out
+
+
+def _with_folds(line: str, clauses: list[str]) -> str:
+    """`line` with its closing full stop moved after the folded facts."""
+    return line[:-1] + INCOMING_FOLDS.format(folds="; ".join(clauses)) + "."
+
+
+def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
+                   hand: list[dict[str, Any]] | None = None,
+                   pets: list[dict[str, Any]] | None = None) -> str:
+    """`- Incoming this turn: N (your Block B): you would take T.`
 
     The sum of every attack part shown; a part it cannot count is named as
-    unknown. Nothing else is folded in: no end-of-turn damage, no plan."""
+    unknown. SEAT PAGE 6: and what lands before the hits or stands between
+    them and your HP, folded in where the wire gives the number and said in
+    a few words (`_turn_end_facts`); what it cannot count is named. No plan."""
     total, unknown, any_attack = 0, [], False
     vulnerable = _stacks_of(you, "vulnerable")
     for e in enemies:
@@ -2548,18 +2709,50 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any]) -> str:
                     unknown.append(name)
             else:
                 total += part
-    if not any_attack:
-        return INCOMING_NONE
+    facts = _turn_end_facts(you, hand or [], pets or [])
+    not_counted = (INCOMING_NOT_COUNTED.format(
+        names=_and_list(facts["unknown"])) if facts["unknown"] else "")
+    if not any_attack and not (facts["hit"] or facts["hp"]):
+        return INCOMING_NONE + not_counted
     block = int(you.get("block") or 0)
     if unknown:
-        return INCOMING_UNKNOWN.format(total=total, who=_and_list(unknown),
+        clauses = _fold_clauses(facts, absorbs=True)
+        if facts["cap"]:
+            clauses.append(FOLD_CAP.format(name=facts["cap"][0],
+                                           cap=facts["cap"][1]))
+        line = INCOMING_UNKNOWN.format(total=total, who=_and_list(unknown),
                                        block=block)
-    take = max(0, total - block)
-    line = INCOMING_LINE.format(total=total, block=block, take=take)
+        if clauses:
+            line = _with_folds(line, clauses)
+        return line + not_counted
+    # The game's order: end-of-turn Block, then the self-hits (Block takes
+    # them), then the HP-loss ones, then the attacks. Osty takes the
+    # unblocked attack damage up to his HP (`DieForYouPower`) and only the
+    # rest reaches you; a cap relic stops the turn's loss at its number.
+    held = block + sum(n for _name, n in facts["block"])
+    self_hit = sum(n for _name, n in facts["hit"])
+    lost = max(0, self_hit - held) + sum(n for _name, n in facts["hp"])
+    held = max(0, held - self_hit)
+    unblocked = max(0, total - held)
+    absorbs = bool(facts["osty"]) and unblocked > 0
+    if absorbs:
+        unblocked = max(0, unblocked - int(facts["osty"]["hp"]))
+    take = lost + unblocked
+    clauses = _fold_clauses(facts, absorbs)
+    if facts["cap"] and take > facts["cap"][1]:
+        take = facts["cap"][1]
+        clauses.append(FOLD_CAP.format(name=facts["cap"][0],
+                                       cap=facts["cap"][1]))
+    if any_attack:
+        line = INCOMING_LINE.format(total=total, block=block, take=take)
+    else:
+        line = INCOMING_NO_ATTACK_TAKE.format(block=block, take=take)
+    if clauses:
+        line = _with_folds(line, clauses)
     if take and isinstance(you.get("hp"), int) and you.get("max_hp"):
         line += INCOMING_LEAVES.format(after=max(0, you["hp"] - take),
                                        max_hp=you["max_hp"])
-    return line
+    return line + not_counted
 
 
 #: SEAT PAGE 3: the end-of-turn acts' Block, beside the incoming line on a
@@ -3106,7 +3299,8 @@ def render(obs: dict[str, Any]) -> str:
         # counted. NOT IN CO-OP: a telegraph carries no target, and either
         # player may take it.
         if c["enemies"] and not obs.get("coop"):
-            out += ["", _incoming_line(c["enemies"], you)
+            out += ["", _incoming_line(c["enemies"], you, c["hand"],
+                                       c.get("pets"))
                     + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the

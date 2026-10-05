@@ -183,7 +183,7 @@ def test_sigewinne_on_stage_says_the_acts_may_add_block():
 def test_co_op_still_prints_no_incoming_line():
     """A co-op telegraph carries no target: either player may take it."""
     src = Path(blindplay_render.__file__).read_text(encoding="utf-8")
-    guard = src.split('_incoming_line(c["enemies"], you)', 1)[0]
+    guard = src.split('_incoming_line(c["enemies"], you,', 1)[0]
     assert guard.split("\n")[-2].strip() == (
         'if c["enemies"] and not obs.get("coop"):')
 
