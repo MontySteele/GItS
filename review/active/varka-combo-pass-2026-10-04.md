@@ -23,24 +23,47 @@ supposed to have status-related payoffs, but they didn't come up this game."
 | Thundering Verdict: +1 damage or +1 hits? | Damage. **New text:** "Deal 6 [8] Electro damage, plus 1 for each Electro Oath, to ALL enemies X times." |
 | Converging Winds: legacy? | Half. Its job (spread elements react) survived the spent removal, its words did not. **New text:** "The elements your Swirls spread set off Elemental Reactions." Numbers unchanged. |
 
-## 2. Less Block: five generic Block cards leave
+## 2. Less Block: what the co-op run says
 
-The 2026-10-03 rebalance gave Block to Hydro as its identity. The generic
-Block that any deck drafts stayed, and that is the wall: Gale Mantle and
-Oath of the Knights turn whatever Oath you built into Block, every turn.
-Five cards that are Block for any element leave, and their five slots fund §3
-and §4:
+**The evidence.** The run's telemetry
+(`%APPDATA%\SlayTheSpire2\gits_telemetry\play-20261004-181026.jsonl`, Varka's
+21 fights, a win over the Queen) logs Block gained per turn and the cards
+played that turn, not Block per card. A non-negative regression of each
+turn's Block on that turn's cards (89 turns, 1,542 Block, R² 0.93) splits it
+roughly as follows. These are estimates, not counts.
 
-| Leaves | Rarity | Why |
-|---|---|---|
-| Gale Mantle | C | Block plus half your total Oath: generic Oath-to-Block |
-| West Wind Shield | C | Block per aura: a second generic Block common |
-| Jean — Wind Companion | C | Block and a Swirl; seats' weakest card on 2026-10-03 |
-| Tailwind Guard | U | Block per element (your friend's note) |
-| Oath of the Knights | U | Block equal to Oath every turn: the wall's engine |
+| Source | Plays | Block per play | Share of 1,542 |
+|---|---|---|---|
+| Amber: Baron Bunny (C Knight: 6 [8] Block, 6 [8] Pyro to ALL next turn) | 50 | about 6 | about 19% |
+| Defend | 35 | about 6 | about 13% |
+| Oath of the Knights, at the start of each turn | 22 turns | about 8 | about 11% |
+| Gale Mantle (C: 5 [8], plus half your total Oath) | 12 | about 13 | about 10% |
+| Lisa: Induced Aftershock (starter Knight) | 31 | about 5 | about 9% |
+| Jean — Wind Companion (C: 7 [10] Block, Swirl) | 8 | about 15 | about 8% |
 
-Hydro keeps its Block (Barbara, Rippling Guard, Tidal Bulwark, Retaliating
-Tide), and Anemo keeps Eye Wall and Wall of Gales. The pool stays 78.
+**Oath of the Knights is a problem child, but not the biggest.** The biggest
+is volume: Baron Bunny was played 50 times, and the Knight commons with a
+Block rider (Baron Bunny, Lisa, Gleeful Songs, Wellspring Hymn, Pulsating
+Witch) made about 40% of all his Block. Per play, the worst is Gale Mantle,
+which turns any Oath into Block. Varka took no damage in 7 of his last 10
+fights, the Queen included.
+
+**What changes:**
+
+| Card | Rarity | Change | Why |
+|---|---|---|---|
+| Gale Mantle | C | leaves | generic Oath-to-Block, the most per play |
+| West Wind Shield | C | leaves | a second generic Block common |
+| Knightly Guard | C | leaves | a third: Block, plus Oath after a Knight |
+| Tailwind Guard | U | leaves | Block per element (your friend's note) |
+| Oath of the Knights | U | leaves | Block equal to Oath every turn |
+| Amber: Baron Bunny | C | Block 6 [8] → 3 [4] | the volume; its job is the next-turn Pyro hit |
+
+**Jean — Wind Companion stays** as Anemo's one generic Block common ([USER]:
+"we should have one generic Anemo block card"). Eye Wall (U) and Wall of
+Gales (R) stay above it. Hydro keeps its Block (Barbara, Rippling Guard,
+Tidal Bulwark, Retaliating Tide). The pool stays 78. Lisa: Induced
+Aftershock is a starter Knight and is left alone.
 
 ## 3. Pyro burns: an Exhaust engine for the big hit
 
@@ -97,7 +120,7 @@ two-seat round, and your next Varka run.
 
 ## Picks
 
-1. **§2: the five generic Block cards leave.** Default: yes.
+1. **§2: five generic Block cards leave, Jean — Wind Companion stays, Baron Bunny's Block 6 [8] → 3 [4].** Default: yes.
 2. **§3: Pyro's Exhaust engine (Stoke the Flames, Ember Cleave, Pyre Oath).**
    Default: yes.
 3. **Four Winds' Ascension's upgrade becomes cost 2 to 1** (in place of +3
