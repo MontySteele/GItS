@@ -220,7 +220,10 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # 2026-10-05. The seat's Strength at each turn end, read off the
             # base game's `StrengthPower` for every character. MOD FEED ONLY,
             # added, never a rename.
-            "strength_by_turn"}
+            "strength_by_turn",
+            # 2026-10-05. Living enemies HP alone (no Block): sibling of
+            # `enemy_pool_by_turn`. MOD FEED ONLY, added.
+            "enemy_hp_by_turn"}
 
 
 def _csharp_keys() -> set[str]:
