@@ -122,10 +122,33 @@ def test_stoke_the_flames_exhausts_a_chosen_card_and_gains_2_pyro(varka):
     _play(st, _vk("stoke_the_flames"))
     assert [c.id for c in st.player.exhaust_pile] == ["defend"]
     assert _led(st).oath["pyro"] == 2
-    assert _led(st).current is None                 # a gain switches nothing
+    # The 2026-10-05 seat round: "Pyro becomes your current element."
+    assert _led(st).current == "pyro"
     st.player.hand = [loader.get_card("defend")]
     _play(st, _vk("stoke_the_flames") + "+")
     assert _led(st).oath["pyro"] == 2 + 3
+
+
+def test_stoke_the_flames_switches_after_its_gain(varka):
+    # Gain first, then the switch: the gain is not yet the current
+    # element's, so Dawn Wind's March does not pay for it.
+    st = _state(element="hydro")
+    led = _led(st)
+    led.current = "electro"
+    st.player.powers[V.DAWN_WINDS_MARCH] = 4
+    _play(st, _vk("stoke_the_flames"))
+    assert led.current == "pyro" and led.oath["pyro"] == 2
+    assert st.player.block == 0
+
+
+def test_the_banner_holds_stoke_the_flames(varka):
+    st = _state(element="hydro")
+    p, led = st.player, _led(st)
+    led.current = "electro"
+    p.powers[V.UNWAVERING_BANNER] = 1
+    _play(st, _vk("stoke_the_flames"))
+    assert led.current == "electro"
+    assert led.oath["pyro"] == 2 and led.oath["electro"] == 1
 
 
 def test_ember_cleave_hits_9_pyro_then_exhausts(varka):

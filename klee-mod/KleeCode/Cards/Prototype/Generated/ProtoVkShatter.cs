@@ -52,7 +52,7 @@ public sealed class ProtoVkShatter : CustomCardModel, IElementalCard, ICharacter
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Shatter"),
+        ("title", "Icebreaker"),
         ("description", "Deal {VkBase:diff()} [gold]Cryo[/gold] damage, plus {VkPer:diff()} for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {VkHit:diff()} damage)|}"),
     };
 

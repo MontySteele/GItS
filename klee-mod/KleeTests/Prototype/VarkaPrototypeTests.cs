@@ -577,6 +577,27 @@ public class VarkaPrototypeTests : IDisposable
         }
     }
 
+    [Fact]
+    public void Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw()
+    {
+        // The 2026-10-05 seat round (review/records/varka-combo-round-
+        // 2026-10-05.md, screen item 2) never saw the draw. The Swirl
+        // resolves INSIDE the attack (AuraPower's AfterDamageReceived ->
+        // ReactionEffects.Resolve -> VarkaOath.OnSwirl -> NoteSwirl on the
+        // dealer, the card's own Owner.Creature), so the order that makes it
+        // fire is: snapshot, attack, re-read, draw.
+        var calls = Il.CallSequence(Il.Method("ProtoVkTempestCharge", "OnPlay")).ToList();
+        var snap = calls.IndexOf("VarkaOath.SwirlsMadeBy");
+        var hit = calls.IndexOf("AttackCommand.Execute");
+        var reread = calls.LastIndexOf("VarkaOath.SwirlsMadeBy");
+        var draw = calls.FindIndex(c => c.StartsWith("CardPileCmd.Draw"));
+        Assert.True(snap >= 0 && snap < hit, string.Join(", ", calls));
+        Assert.True(hit < reread && reread < draw, string.Join(", ", calls));
+        // And OnSwirl counts the Swirl first, on the dealer's ledger.
+        Assert.Contains("VarkaOathLedger.NoteSwirl",
+                        Il.CallSequence(Il.Method("VarkaOath", "OnSwirl")));
+    }
+
     // ---- the Knights -------------------------------------------------------
 
     [Fact]

@@ -654,6 +654,25 @@ public static class VarkaOath
         await OathBadge.Sync(choiceContext, varka);
     }
 
+    /// <summary>
+    /// A card of his that is NOT a Knight says "<paramref name="element"/>
+    /// becomes your current element" (Stoke the Flames, 2026-10-05). The same
+    /// fork the open Oath's switch takes in <see cref="NoteApplication"/>:
+    /// under Unwavering Banner the Banner holds it (<see cref="BannerHolds"/>),
+    /// otherwise it is made current. Sim twin: <c>varka_oath.card_makes_current</c>.
+    /// </summary>
+    public static async Task CardMakesCurrent(
+        PlayerChoiceContext choiceContext, Creature varka, Element element)
+    {
+        if (!Live(varka) || !IsOathElement(element)) return;
+        if (varka.HasPower<UnwaveringBannerPower>())
+        {
+            await BannerHolds(choiceContext, varka, element);
+            return;
+        }
+        await SetCurrent(choiceContext, varka, element, knight: false);
+    }
+
     // ---- gains --------------------------------------------------------------
 
     /// <summary>
@@ -1639,8 +1658,11 @@ public static class VarkaCards
     // ---- THE COMBO PASS (2026-10-04, review/active/varka-combo-pass-2026-10-04.md
     // secs.3-4). Sim twins: varka_oath._combo_kind.
 
-    /// <summary>Stoke the Flames: "Gain 2 [3] Pyro Oath." One gain, after the
-    /// row's own Exhaust. Not an application, so it switches nothing.
+    /// <summary>Stoke the Flames: "Gain 2 [3] Pyro Oath. Pyro becomes your
+    /// current element." One gain, after the row's own Exhaust, then the
+    /// switch (the 2026-10-05 seat round: Pyro's on-ramp). The switch is a
+    /// non-Knight card's, so Unwavering Banner holds it
+    /// (<see cref="VarkaOath.CardMakesCurrent"/>).
     /// </summary>
     public static async Task GainPyroOath(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -1649,6 +1671,7 @@ public static class VarkaCards
         if (owner == null || !VarkaOath.Live(owner)) return;
         await VarkaOath.Gain(choiceContext, owner, Element.Pyro,
                              (int)Var(card, "VkAmount"));
+        await VarkaOath.CardMakesCurrent(choiceContext, owner, Element.Pyro);
     }
 
     /// <summary>Ember Cleave: "Deal 9 [12] Pyro damage." The Exhaust is the

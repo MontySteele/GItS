@@ -97,7 +97,7 @@ build one number. The two never share a payoff.
 
 | Card | Type, cost, rarity | Text |
 |---|---|---|
-| Stoke the Flames | Skill, 1, C | Exhaust a card. Gain 2 [3] Pyro Oath. |
+| Stoke the Flames | Skill, 1, C | Exhaust a card. Gain 2 [3] Pyro Oath. Pyro becomes your current element. |
 | Ember Cleave | Attack, 1, C | Deal 9 [12] Pyro damage. Exhaust a card. |
 | Pyre Oath | Power, 1, U | Whenever you Exhaust a card, gain 1 Pyro Oath. [Innate] |
 
@@ -106,6 +106,7 @@ build one number. The two never share a payoff.
   Cleave is 9 for 1 against Strike's 6. Stoke is Vow of the Blade (1 Oath
   and draw 1) with the draw swapped for a second Oath and a burned card.
   Pyre Oath is Feel No Pain's shape (U, 1: 3 Block per Exhaust) paying Oath.
+  2026-10-05 seat round: Stoke also makes Pyro current, so it can start a Pyro deck (review/records/varka-combo-round-2026-10-05.md).
 - **The guard.** Nothing here gains Energy or draws, so the loop is limited
   by the cards you hold. The payoff is still one hit a turn.
 
@@ -117,11 +118,11 @@ Absolute Zero, a Rare. Two cards, and Unwavering Banner:
 
 | Card | Type, cost, rarity | Text |
 |---|---|---|
-| Shatter | Attack, 1, C | Deal 5 [7] Cryo damage, plus 2 [3] for each Weak and Vulnerable on the enemy. |
+| Icebreaker (was Shatter) | Attack, 1, C | Deal 5 [7] Cryo damage, plus 2 [3] for each Weak and Vulnerable on the enemy. |
 | Deep Freeze | Skill, 1, U | Apply Cryo to an enemy. Double its Weak and Vulnerable. [Retain] |
 | Unwavering Banner (reworded) | Power, 1, U | Only Knights can change your current element. Whenever another card would, gain 1 Oath of your current element instead. [Innate] |
 
-- **Yardsticks.** Shatter with nothing on the enemy is 5 [7], under
+- **Yardsticks.** Icebreaker with nothing on the enemy is 5 [7], under
   Strike; against 1 Weak and 2 Vulnerable it is 11 [16] for 1, and it gets
   there only after two setup cards. Deep Freeze has no base twin: StS2 has no
   Catalyst and no card that doubles a debuff (`game_ref/silent.json`,
