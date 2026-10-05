@@ -312,7 +312,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   the paper's "Pyro and Cryo up" bar (Pyro -15, Cryo flat; the stock pilot
   prices an Exhaust at nothing) and Deep Freeze's upgrade (cost 0) is the
   builder's proposal: provenance note, "Varka combo pass, 2026-10-04".
-  Its seat round (`review/records/varka-combo-round-2026-10-05.md`): the Block cut landed, one run cleared act 2; Pyro Exhaust paid nothing off-element and no seat built Cryo. Fixed from it (#917): Stoke the Flames makes Pyro current, Shatter renamed Icebreaker, Tempest Charge's draw checked (it works). A second round on the same seeds, with an Ironclad control, is running. Next: [USER]'s next Varka run.
+  Its seat round (`review/records/varka-combo-round-2026-10-05.md`): the Block cut landed, one run cleared act 2; Pyro Exhaust paid nothing off-element and no seat built Cryo. Fixed from it (#917): Stoke the Flames makes Pyro current, Shatter renamed Icebreaker, Tempest Charge's draw checked (it works). The second round on the same seeds (`review/records/varka-r6-round-2026-10-05.md`, Ironclad control): one run reached the final boss (the Queen at 93/400), one lost the act-2 boss again with it at 85/379; still no seat drafted Pyro or Cryo. Cycle of Seasons is now 7 [10] (NEVER AGAIN two rounds running). Next: a round on seeds whose starter Knight is Pyro or Cryo, and [USER]'s next Varka run.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults

@@ -3494,11 +3494,12 @@
 
 - {id: proto_vk_cycle_of_seasons, name: "Cycle of Seasons", character: varka,
    authored_by: [claude],
-   # The AoE trim (sec.4): a random enemy. Was ALL enemies.
+   # The AoE trim (sec.4): a random enemy. Was ALL enemies. 4 [6] -> 7 [10]
+   # after two seat rounds called it the weakest card (r6 record, 2026-10-05).
    cost: 1, type: power, rarity: uncommon,
    description: "Whenever your [gold]current element[/gold] changes, deal {PowerAmount:diff()} damage to a random enemy.",
-   effects: [{op: apply_power, power: vk_cycle_of_seasons, amount: 4, target: self}],
-   upgrade: {power_amount: 2}}
+   effects: [{op: apply_power, power: vk_cycle_of_seasons, amount: 7, target: self}],
+   upgrade: {power_amount: 3}}
 
 # Varka defence (sec.3): Gust Ward replaces Four Banners.
 - {id: proto_vk_storm_battery, name: "Storm Battery", character: varka,

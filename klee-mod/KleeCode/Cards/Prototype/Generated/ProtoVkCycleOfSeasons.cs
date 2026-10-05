@@ -51,7 +51,7 @@ public sealed class ProtoVkCycleOfSeasons : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new DynamicVar("PowerAmount", 7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,6 +68,6 @@ public sealed class ProtoVkCycleOfSeasons : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(3m);
     }
 }

@@ -6615,9 +6615,13 @@ Not built: Tide Wall's "plus the damage the front enemy intends". Its op,
 (`KokomiOverhaulKit.IntendedDamage(FrontEnemy(...))`), but
 `docs/current/text-conventions.md` rules that a Plan line never names "the
 front enemy" (the Plan tip says a Plan hits the front enemy), and
-`lint_text_conventions` refuses it. The face is unchanged, pending the main
-session.
+`lint_text_conventions` refuses it. The face is unchanged; the main session
+dropped the item, since the convention already covers it.
 
 Kept after a telemetry check (99 seat fights since 2026-10-01): The
 General's Banner and Watatsumi Resistance (a Companion card was played in 59
 fights), At Water's Edge (a reaction happened in 41 solo fights).
+
+## Varka r6 round, 2026-10-05
+
+Cycle of Seasons 4 [6] -> 7 [10], to a random enemy. Two seat rounds named it NEVER AGAIN ("4 damage per element change was the weakest card"). 7 is a Strike per element change and stays single-target per the AoE trim. Prediction: no NEVER AGAIN next round. Record: `review/records/varka-r6-round-2026-10-05.md`.
