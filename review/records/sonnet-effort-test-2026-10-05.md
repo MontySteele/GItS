@@ -6,7 +6,7 @@
 
 | Effort | Act 1 | HP at end | Low point | Actions | Wall time |
 |---|---|---|---|---|---|
-| low | Vantom killed | 46/80 | 30s | 227 | 14.0 min |
+| low | Vantom killed | 46/80 | 34 | 227 | 14.0 min |
 | medium | Vantom killed | 53/80 | 16 | 216 | 12.8 min |
 | high | Vantom killed | 38/80 | 30 | 214 | 16.0 min |
 
