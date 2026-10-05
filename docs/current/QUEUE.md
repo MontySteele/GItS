@@ -23,11 +23,6 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
-- **Furina: archetypes and the pool to about 40** (`furina-pool-40-2026-10-05.md`,
-  three picks, from the 2026-10-05 seat round): (1) Universal Revelry reads
-  Drain and Repay, not hits; (2) ten new cards, Uncommon and Rare; (3) no
-  Drain-reflex change until [USER]'s run. All defaults.
-
 - **Klee to Balance: ruled yes** (2026-10-03, "Agreed all around!"), after the finish-line batch (`review/active/klee-brief-2026-09-01.md` §19) and its two-seat round.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
