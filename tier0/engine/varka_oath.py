@@ -124,7 +124,9 @@ THE COMBO PASS (review/active/varka-combo-pass-2026-10-04.md, ruled
     play gains 1 Oath of the current element, once per play
     (`banner_holds`), when it would have been a change. Weathervane is held
     too and, not being a card, gains nothing.
-  * KINDS `gain_pyro_oath` (Stoke the Flames), `pyro_strike` (Ember Cleave),
+  * KINDS `gain_pyro_oath` (Stoke the Flames; since the 2026-10-05 seat
+    round it also makes Pyro current, `card_makes_current`), `pyro_strike`
+    (Ember Cleave),
     `shatter` (stacks of Weak plus Vulnerable on the aim, read before the
     hit) and `deep_freeze` (double the aim's Weak and Vulnerable).
 
@@ -552,6 +554,19 @@ def set_current(state, element: str, knight: bool) -> None:
         # WINDBORNE RESOLVE (Varka defence): "Whenever your current element
         # changes, gain 5 Block." Unpowered, a Power's.
         _block(state, _power(p, WINDBORNE_RESOLVE), "windborne_resolve")
+
+
+def card_makes_current(state, element: str) -> None:
+    """A card of his that is not a Knight says "`element` becomes your
+    current element" (Stoke the Flames, 2026-10-05): the open Oath's fork in
+    `note_hit`, Unwavering Banner holding it. C# twin:
+    `VarkaOath.CardMakesCurrent`."""
+    if ledger(state.player) is None or element not in ELEMENTS:
+        return
+    if _power(state.player, UNWAVERING_BANNER):
+        banner_holds(state, element)
+    else:
+        set_current(state, element, knight=False)
 
 
 # --------------------------------------------------------------------------
@@ -1246,8 +1261,11 @@ def _combo_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     p = state.player
     aim = state.card_aim
     if kind == "gain_pyro_oath":
-        # Stoke the Flames: "Gain 2 Pyro Oath." A gain, not an application.
+        # Stoke the Flames: "Gain 2 Pyro Oath. Pyro becomes your current
+        # element." A gain, not an application; then the switch, a non-Knight
+        # card's, so Unwavering Banner holds it (2026-10-05 seat round).
         gain(state, "pyro", fx["amount"], "gain_pyro_oath")
+        card_makes_current(state, "pyro")
     elif kind == "pyro_strike":
         # Ember Cleave: "Deal 9 Pyro damage." The Exhaust is the row's op.
         _card_hit(state, card, aim, fx["base"], "pyro")

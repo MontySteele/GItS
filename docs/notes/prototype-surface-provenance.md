@@ -6510,3 +6510,28 @@ are played in about half the fights that hold them, and the default drafter
 never takes Deep Freeze (0 of 1,772 offers, as with Glacial Edict and Tidal
 Bulwark). Charge of the Knights is played in 60.7%
 of fights held (45.5% before) and taken 1.9% (0.0%).
+
+## Varka seat-round fixes, 2026-10-05
+
+From the combo pass's seat round (review/records/varka-combo-round-2026-10-05.md,
+"What to change" 1 to 3). No number moves.
+
+- **Stoke the Flames** (`proto_vk_stoke_the_flames`): "Exhaust a card. Gain 2
+  [3] Pyro Oath. Pyro becomes your current element." Played off-element, the
+  old card gave Pyro Oath nothing read; now it can start a Pyro deck. The gain
+  lands first, then the switch, so the gain is not yet the current element's
+  (Dawn Wind's March and Oath Unto Death do not see it). The switch is a
+  non-Knight card's: it goes through `VarkaOath.CardMakesCurrent` (sim:
+  `varka_oath.card_makes_current`), the open Oath's fork, so Unwavering Banner
+  holds it and pays 1 Oath of the current element instead.
+- **Icebreaker** (`proto_vk_shatter`), was "Shatter": the title was also the
+  Frozen keyword's word, and a seat called it confusing. Text and id unchanged,
+  so the art and coverage lists, keyed on the id, hold. The keyword keeps its
+  name.
+- **Tempest Charge** (`proto_vk_tempest_charge`): checked, not changed. The
+  Swirl resolves inside the card's own attack (AuraPower's
+  AfterDamageReceived, then ReactionEffects.Resolve, then VarkaOath.OnSwirl,
+  which counts it on the dealer, the card's Owner.Creature) before the
+  `swirled_by_this` re-read, so the draw fires. The seat page carries no draw
+  event, only the hand after the play, which is why the seat could not see it.
+  Pinned by `Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw`.

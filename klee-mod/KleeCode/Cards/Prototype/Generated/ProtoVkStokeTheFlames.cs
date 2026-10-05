@@ -38,14 +38,14 @@ public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_stoke_the_flames");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stoke the Flames"),
-        ("description", "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro [gold]Oath[/gold]."),
+        ("description", "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro [gold]Oath[/gold]. Pyro becomes your [gold]current element[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

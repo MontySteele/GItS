@@ -353,7 +353,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   five generic Block cards out (Gale Mantle, West Wind Shield, Knightly
   Guard, Tailwind Guard, Oath of the Knights); Pyro's Exhaust engine in
   (Stoke the Flames, Ember Cleave, Pyre Oath) and Cryo's status payoffs
-  (Shatter, Deep Freeze); Unwavering Banner reworded to pay 1 Oath when it
+  (Icebreaker, named Shatter until 2026-10-05, Deep Freeze); Unwavering Banner reworded to pay 1 Oath when it
   holds a switch; Baron Bunny's hit to a random enemy; Charge of the Knights
   cost 1, Lion's Fang and Four Winds' Ascension upgrade to cost 1, Kaeya and
   Razor Attacks, two faces reworded. Pool 78 (20 / 35 / 23). The sim missed

@@ -114,9 +114,17 @@ public class VarkaComboTests : IDisposable
         Assert.Contains("CardSelectCmd.FromHand", play);
         Assert.Contains("CardCmd.Exhaust", play);
         Assert.Contains("VarkaCards.GainPyroOath", play);
-        Assert.Contains("VarkaOath.Gain", Calls("VarkaCards", "GainPyroOath"));
+        // The 2026-10-05 seat round: gain, then "Pyro becomes your current
+        // element", through the non-Knight path Unwavering Banner holds.
+        var stoke = Calls("VarkaCards", "GainPyroOath");
+        Assert.True(stoke.IndexOf("VarkaOath.Gain")
+                    < stoke.IndexOf("VarkaOath.CardMakesCurrent"));
+        var makes = Calls("VarkaOath", "CardMakesCurrent");
+        Assert.Contains("VarkaOath.BannerHolds", makes);
+        Assert.Contains("VarkaOath.SetCurrent", makes);
         Assert.Equal("[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro "
-                     + "[gold]Oath[/gold].", Face(new ProtoVkStokeTheFlames()));
+                     + "[gold]Oath[/gold]. Pyro becomes your [gold]current "
+                     + "element[/gold].", Face(new ProtoVkStokeTheFlames()));
     }
 
     [Fact]

@@ -3583,8 +3583,9 @@
 - {id: proto_vk_stoke_the_flames, name: "Stoke the Flames", character: varka,
    authored_by: [claude],
    # "Exhaust a card" is True Grit+'s: the player chooses, any card in hand.
+   # 2026-10-05: Pyro becomes current; provenance note, "Varka seat-round fixes".
    cost: 1, type: skill, rarity: common,
-   description: "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro [gold]Oath[/gold].",
+   description: "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro [gold]Oath[/gold]. Pyro becomes your [gold]current element[/gold].",
    effects: [{op: exhaust_from, select: chosen, amount: 1},
              {op: varka, kind: gain_pyro_oath, amount: 2}],
    upgrade: {varka_amount: 1}}
@@ -3597,8 +3598,9 @@
              {op: exhaust_from, select: chosen, amount: 1}],
    upgrade: {varka_base: 3}}
 
-- {id: proto_vk_shatter, name: "Shatter", character: varka,
+- {id: proto_vk_shatter, name: "Icebreaker", character: varka,
    authored_by: [claude],
+   # Was "Shatter" until 2026-10-05; provenance note, "Varka seat-round fixes".
    # Stacks, not distinct debuffs: Weak 1 and Vulnerable 2 is 3. The face
    # prints the total against the enemy it previews on (`VkHit`).
    cost: 1, type: attack, rarity: common,
