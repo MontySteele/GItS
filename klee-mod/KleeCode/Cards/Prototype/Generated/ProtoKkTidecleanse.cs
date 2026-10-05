@@ -45,7 +45,7 @@ public sealed class ProtoKkTidecleanse : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidecleanse"),
-        ("description", "Apply 1 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Exhaust up to {PlanExhaust:diff()} statuses or curses in your hand."),
+        ("description", "Apply 1 [gold]Weak[/gold].\nOr [gold]plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

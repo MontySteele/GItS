@@ -96,6 +96,6 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(1m);
-        // upgraded_grant: the granted Ka-pow! arrives upgraded, read off IsUpgraded when the Power is installed.
+        // upgraded_grant: the granted card arrives upgraded, read off IsUpgraded when the Power is installed.
     }
 }

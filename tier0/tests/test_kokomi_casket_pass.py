@@ -154,6 +154,25 @@ def test_opening_grants_strength_equal_to_the_count_and_empties_it(overhaul):
     assert st.kk_casket == 1
 
 
+def test_the_upgraded_token_also_draws_one_card(overhaul):
+    """The Kokomi kit review (2026-10-05): the upgrade changed nothing.
+    Upgraded, it also draws 1 card, after the Strength; cost and Retain
+    stay. `OpenTheCasket.cs` is the twin."""
+    up = kokomi_plan.open_the_casket_card(upgraded=True)
+    assert (up.cost, up.retain, up.exhaust) == (1, True, False)
+    st = _casket(enemies=[make_enemy(hp=100)])
+    st.player.draw_pile = [kokomi_plan.open_the_casket_card()]
+    st.kk_casket = 2
+    effects.resolve_card(st, up)
+    assert st.player.powers.get("strength") == 2 *         C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT
+    assert len(st.player.hand) == 1
+    # The base token draws nothing.
+    st2 = _casket(enemies=[make_enemy(hp=100)])
+    st2.player.draw_pile = [kokomi_plan.open_the_casket_card()]
+    effects.resolve_card(st2, kokomi_plan.open_the_casket_card())
+    assert st2.player.hand == []
+
+
 def test_an_empty_casket_grants_nothing(overhaul):
     st = _casket(enemies=[make_enemy(hp=100)])
     effects.resolve_card(st, kokomi_plan.open_the_casket_card())
@@ -230,8 +249,13 @@ def test_the_moved_numbers(overhaul):
     assert _up("proto_kk_pincer").effects[0]["amount"] == 5
     assert _row("proto_kk_opening_gambit").effects[0]["amount"] == 7
     assert _up("proto_kk_opening_gambit").effects[0]["amount"] == 9
-    assert _row("proto_kk_deep_current").effects[0]["amount"] == 7
-    assert _up("proto_kk_deep_current").effects[0]["amount"] == 9
+    # The Kokomi kit review (2026-10-05): 8 [11], Cleave's numbers.
+    assert _row("proto_kk_deep_current").effects[0]["amount"] == 8
+    assert _up("proto_kk_deep_current").effects[0]["amount"] == 11
+    # The same review: Ceremonial Garment costs 1 for 2 [3] per debuff.
+    garment = _row("proto_kk_ceremonial_garment")
+    assert (garment.cost, garment.effects[0]["amount"]) == (1, 2)
+    assert _up("proto_kk_ceremonial_garment").effects[0]["amount"] == 3
     rip = _row("proto_kk_riptide")
     assert (rip.effects[0]["amount"], rip.effects[0]["bonus_vs_debuff"]) == \
         (11, 3)

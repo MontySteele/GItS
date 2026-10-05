@@ -14,11 +14,12 @@ namespace KleeMod.Cards.Kokomi;
 /// <summary>
 /// Kokomi's second Ancient-rarity card (pool completion, 2026-10-01;
 /// review/active/pool-completion-2026-10-01.md sec.3, ruled at the default):
-/// "The first time each turn you play a card on the Bake-Kurage, its now-line
-/// happens too." Bends the Kokomi arm's rule 2, where a card does one half or
-/// the other. Cards with no now-line (Nip) do not use up the once. The rule
-/// and its readings are <see cref="DivineStrategyPower"/>'s; the generated
-/// Plan branch asks it.
+/// "The first time each turn you play a card on the Bake-Kurage, the line
+/// above its Plan happens now too." (Worded so on 2026-10-05, the Kokomi kit
+/// review: "now-line" was an undefined word on the face.) Bends the Kokomi
+/// arm's rule 2, where a card does one half or the other. Cards with no
+/// now-line (Nip) do not use up the once. The rule and its readings are
+/// <see cref="DivineStrategyPower"/>'s; the generated Plan branch asks it.
 ///
 /// Game-side only, like every Ancient: the Dusty Tome draws one of her
 /// Ancients at random and grants it UPGRADED (read it at 1 Energy).
@@ -39,7 +40,7 @@ public sealed class DivineStrategy : CustomCardModel, ICharacterCard
         ("title", "Divine Strategy"),
         ("description",
             "The first time each turn you play a card on the "
-          + "[gold]Bake-Kurage[/gold], its now-line happens too."),
+          + "[gold]Bake-Kurage[/gold], the line above its [gold]Plan[/gold] happens now too."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

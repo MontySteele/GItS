@@ -51,7 +51,7 @@ public sealed class ProtoKkSecondWave : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Second Wave"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The Plan after this one is carried out twice."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The [gold]Plan[/gold] after this one is carried out twice."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

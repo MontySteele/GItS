@@ -126,7 +126,7 @@ public class KokomiPoolPassTwoTests
         // example) is gone; and "after this one" keeps `EB-645`'s window
         // where "your next Plan" would have read as the next one WRITTEN.
         var face = Face(new ProtoKkOpeningGambit());
-        Assert.EndsWith("The Plan after this one deals double damage.", face);
+        Assert.EndsWith("The [gold]Plan[/gold] after this one deals double damage.", face);
         Assert.DoesNotContain("next Plan", face);
         Assert.DoesNotContain("carried out with this one", face);
     }
@@ -520,9 +520,9 @@ public class KokomiPoolPassTwoTests
         // next written (`EB-687`, `EB-645`).
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The "
-          + "Plan after this one is carried out twice.",
+          + "[gold]Plan[/gold] after this one is carried out twice.",
             Face(new ProtoKkSecondWave()));
-        Assert.EndsWith("The Plan after this one deals double damage.",
+        Assert.EndsWith("The [gold]Plan[/gold] after this one deals double damage.",
                         Face(new ProtoKkOpeningGambit()));
         // Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     }

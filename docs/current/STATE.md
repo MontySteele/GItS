@@ -214,6 +214,10 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Resistance, Kurage School's copies) Exhaust; Kurage Swarm reads "gains 1
   more". No sim or seat round. Provenance note, "Kokomi Rare pass,
   2026-10-04".
+  **The kit review (2026-10-05, built):** Ceremonial Garment costs 1 for 2
+  [3] per debuff, Deep Current deals 8 [11] to ALL, and Open the Casket+
+  also draws 1 card; Breakwater, Opening Gambit, Second Wave, Divine
+  Strategy, Tidecleanse and Tidal Resonance are reworded, no rule changed. Provenance note, "Kokomi kit review, 2026-10-05".
   Next: [USER] plays (a central rule changed; co-op with a friend may stand
   in); the damage gap is a paper after that run.
 - **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; seven guests. The pool is the starter and 34 cards, not 78: the slice's 24 and the pool to 39's ten (`review/active/furina-pool-40-2026-10-05.md`, ruled and built 2026-10-05; Universal Revelry reads Drain and Repay again, not hits). Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Not deployed. Next: [USER]'s play (a rule change), then a seat round. Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v2 build is in git; the v1 Stage is the tag `furina-stage-frozen-2026-10-04`.

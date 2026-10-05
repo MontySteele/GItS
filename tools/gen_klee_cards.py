@@ -12834,9 +12834,15 @@ def _face_from_parts(parts: list[str]) -> str:
             # `EB-571`: the separator goes inside the SHOWN branch, so a base
             # card whose upgrade-only sentence renders as nothing does not
             # open with a blank. Only where the clause has a sentence AFTER
-            # it: appended, the space is `rstrip`ed off and moving it inside
-            # would put a trailing one on every `+` face that already ships.
+            # it; an appended clause takes the separator at its FRONT (below).
             out += "{IfUpgraded:show:" + upgrade_only.group("up") + " |}"
+        elif upgrade_only and len(out) > 1 and out[-1] == " " \
+                and out[-2] not in "\n}":
+            # Appended LAST after a printed sentence: the join's separator
+            # moves inside the SHOWN branch at its front, so the base card
+            # does not end in a trailing space (Kokomi kit review 2026-10-05,
+            # Tidal Resonance's face).
+            out = out[:-1] + "{IfUpgraded:show: " + upgrade_only.group("up") + "|} "
         else:
             out += part + " "
     return out.rstrip()
@@ -14567,7 +14573,7 @@ def build_upgrade(card: dict) -> list[str]:
         # R276 (Alice's Detonator). A play-time `IsUpgraded` read on the
         # install, the `generate_cost_override` shape: nothing to bump here.
         done.add("upgraded_grant")
-        lines.append("// upgraded_grant: the granted Ka-pow! arrives upgraded, "
+        lines.append("// upgraded_grant: the granted card arrives upgraded, "
                      "read off IsUpgraded when the Power is installed.")
     if "choose_knight" in deltas:
         # VARKA (Knights' Roll Call+). The same play-time read: nothing to

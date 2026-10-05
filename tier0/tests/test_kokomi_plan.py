@@ -1687,7 +1687,7 @@ def test_a_damageless_follower_is_unchanged_and_the_face_says_so(overhaul):
     assert st.player.block == 8
     # THE 2026-09-25 TEXT PASS: the clause still names what it doubles.
     assert _faces()["proto_kk_opening_gambit"].endswith(
-        "The Plan after this one deals double damage.")
+        "The [gold]Plan[/gold] after this one deals double damage.")
 
 
 def test_a_rider_with_no_follower_says_so(overhaul):
@@ -2178,10 +2178,10 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # the drain, and the entries behind this one in it -- where "your next
     # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`).
     assert faces["proto_kk_second_wave"] == (
-        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The Plan after this "
-        "one is carried out twice.")
+        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] "
+        "after this one is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
-        "The Plan after this one deals double damage.")
+        "The [gold]Plan[/gold] after this one deals double damage.")
     # Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     for face in faces.values():
         assert "carried out with this one" not in face
