@@ -338,14 +338,24 @@ class Session:
             for path, what in instances.unlock_lane_progress(self.instance):
                 print(f"lane {self.instance.label}: unlocked {len(what)} "
                       f"epochs/ascensions in {path}")
-        self._steam_appid()
-        self._deploy_bridge()
-        # EB-763. READ THE BOOT TAX BEFORE THE LAUNCH, not after: the number
-        # has to be in the operator's scrollback ahead of the wait it explains,
-        # or the only thing a failed batch leaves behind is `menu never became
-        # ready within 180s` and no reason.
-        timeout = self._menu_budget()
-        self._launch()
+        # THE SHARED INSTALL, UNDER ONE MACHINE-WIDE LOCK (2026-10-05). The
+        # appid file, the bridge and the launch are the three steps that read
+        # or write the game DIRECTORY every lane shares; run unlocked, two
+        # concurrent embarks both deployed the bridge and one's rewrite
+        # pulled `mods\STS2_MCP` out from under the other's booting game
+        # (`instances.install_lock` has the record). Held through the launch
+        # so the next lane's `_deploy_bridge` sees this game UP and reuses
+        # the bridge; released before the menu wait, so lanes boot in
+        # parallel.
+        with instances.install_lock(why=f"lane {self._quiet_label()} setup"):
+            self._steam_appid()
+            self._deploy_bridge()
+            # EB-763. READ THE BOOT TAX BEFORE THE LAUNCH, not after: the
+            # number has to be in the operator's scrollback ahead of the wait
+            # it explains, or the only thing a failed batch leaves behind is
+            # `menu never became ready within 180s` and no reason.
+            timeout = self._menu_budget()
+            self._launch()
         self.wait_for_menu(timeout)
         self._speed_on()
 
@@ -438,17 +448,41 @@ class Session:
         self.ledger.revert(entry, f"shared, left in place: {note}")
 
     def _launch(self) -> None:
+        """Launch the game, inside the shared install's lock and after the
+        machine's launch stagger. Reentrant: `setup` already holds the lock,
+        and a relaunch (`restart`, a boot stall) takes it here."""
         exe = self.dir / GAME_EXE
         if not exe.exists():
             raise SystemExit(f"game exe not found: {exe}")
+        label = self._quiet_label()
         # EB-766, AND BEFORE THE LEDGER ROW: a launch that has to wait has not
         # happened yet, and the row's timestamp is what the boot-time
         # measurement is taken from.
         slept = await_dead_gap()
         if slept:
-            print(f"lane {self.label}: waited {slept:.1f}s after the previous "
+            print(f"lane {label}: waited {slept:.1f}s after the previous "
                   f"kill before launching (EB-766: relaunching into Steam's "
                   f"teardown is what stalls the next boot)")
+        with instances.install_lock(why=f"lane {label} launch"):
+            slept = instances.await_launch_stagger()
+            if slept:
+                print(f"lane {label}: waited {slept:.1f}s after the previous "
+                      f"launch on this machine (launch stagger)")
+            self._launch_unlocked()
+            instances.note_launch(label, self.pid)
+
+    def _quiet_label(self) -> str:
+        """`label` for a log line, and `?` where a test double's wire cannot
+        name one -- a message is not worth a failed launch."""
+        try:
+            return str(self.label)
+        except Exception:                                    # noqa: BLE001
+            return "?"
+
+    def _launch_unlocked(self) -> None:
+        """The launch itself; `_launch` has checked the exe, paid the dead gap
+        and the stagger, and holds the install lock."""
+        exe = self.dir / GAME_EXE
         self._launch_entry = self.ledger.record(
             f"Launched `{GAME_EXE}` directly (Steam must be running)",
             "process terminated at teardown")

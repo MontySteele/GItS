@@ -22,6 +22,8 @@ nothing torn down. What comes next is a person running
     python -m understudy.embark --character IRONCLAD --lane 1  # base-game CONTROL
     python -m understudy.embark --teardown                     # put it all back
     python -m understudy.embark --teardown --lane 1            # lane 1's only
+    python -m understudy.embark --lanes 1,2,3 --character klee --seeds A,B,C   # PARALLEL
+    python -m understudy.embark --teardown --lanes 1,2,3
     python -m understudy.embark --coop --lanes 2,3         --characters KLEEMOD-KLEE,KLEEMOD-FURINA --ascension 0   # CO-OP
     python -m understudy.embark --teardown --coop --lanes 2,3
 
@@ -369,7 +371,7 @@ def embark(character: str, *, hold: bool = False,
     # no game rather than the last game's cursor.
     lanewatch.arm(lane)
 
-    stamp = time.strftime("%Y%m%d-%H%M%S")
+    stamp = reserve_stamp(lane)
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
     session = soak.Session(stamp, do_setup=not hold, intent="",
                            instance=instance, install_bridge=install_bridge)
@@ -466,6 +468,35 @@ def embark(character: str, *, hold: bool = False,
 
 def sidecar_path(stamp: str) -> Path:
     return LOG_DIR / f"embark-{stamp}.json"
+
+
+def reserve_stamp(lane: object = None, *, clock=time.strftime,
+                  sleep=time.sleep, attempts: int = 120) -> str:
+    """A stamp no other embark holds, CLAIMED by creating its sidecar.
+
+    THE STAMP NAMES THREE FILES -- this sidecar, the reversibility ledger
+    (`soak/reversibility-<stamp>.json`) and the run log -- and it is a clock
+    reading to the second. Two lanes embarked in the same second (the
+    parallel `--lanes` embark does exactly that) took the SAME stamp: the
+    second sidecar overwrote the first and both ledgers flushed into one
+    file, so the first lane's launch row (its pid) was lost and its teardown
+    had nothing to kill. The claim is an exclusive create, which only one
+    process can win; the loser waits for the next second and tries again.
+    """
+    label = (instances.label_for(lane) if lane is not None
+             else instances.DEFAULT_LABEL)
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    for _ in range(max(1, attempts)):
+        stamp = clock("%Y%m%d-%H%M%S")
+        try:
+            with sidecar_path(stamp).open("x", encoding="utf-8") as fh:
+                fh.write(json.dumps({"stamp": stamp, "instance": label,
+                                     "reserved": True}) + "\n")
+            return stamp
+        except FileExistsError:
+            sleep(0.25)
+    raise EmbarkError(f"could not claim an embark stamp in {LOG_DIR} after "
+                      f"{attempts} tries")
 
 
 def _write_sidecar(stamp: str, blob: dict[str, Any]) -> None:
@@ -610,6 +641,141 @@ def teardown(stamp: str = "", lane: object = None) -> str:
     return session.ledger.table()
 
 
+# ------------------------------------------------------- several lanes --
+#
+# `--lanes 1,2,3` WITHOUT `--coop`: one ordinary single-lane embark per lane,
+# all started at once, each in its OWN PROCESS -- the same command a person
+# would type per lane, with its output in its own log. A process per lane,
+# not a thread per lane, because everything an embark binds (the wire's
+# lane, the keep-awake hold, the launched game's parent) is per process, and
+# because the command a lane ran is then the command anyone can re-run for
+# that lane alone. What the lanes share -- the game directory -- is
+# serialised by `instances.install_lock` inside each one, and their stamps
+# by `reserve_stamp`; the boots overlap, which is the whole saving.
+
+def parse_seat_lanes(value: str) -> list[str]:
+    """`"1,2,3"` -> `["lane1", "lane2", "lane3"]`. Distinct, and never lane 0
+    (the owner's own game and profile)."""
+    raw = [v.strip() for v in str(value or "").split(",") if v.strip()]
+    if not raw:
+        raise EmbarkError("--lanes names no lane (`--lanes 1,2,3`)")
+    try:
+        labels = [instances.label_for(v) for v in raw]
+    except ValueError as exc:
+        raise EmbarkError(str(exc)) from None
+    if len(set(labels)) != len(labels):
+        raise EmbarkError(f"--lanes names a lane twice: {value!r}")
+    if instances.DEFAULT_LABEL in labels:
+        raise EmbarkError(
+            "lane 0 is the owner's own game and profile; a parallel embark "
+            "runs on the disposable lanes ("
+            + ", ".join(instances.seat_lane_labels()) + ")")
+    return labels
+
+
+def _per_lane(value: str, labels: list[str], what: str) -> list[str | None]:
+    """A comma list with one entry per lane, or one entry for every lane, or
+    nothing (`None` for each)."""
+    raw = [v.strip() for v in str(value or "").split(",")]
+    raw = [v for v in raw if v]
+    if not raw:
+        return [None] * len(labels)
+    if len(raw) == 1:
+        return raw * len(labels)
+    if len(raw) != len(labels):
+        raise EmbarkError(f"--{what} gives {len(raw)} values for "
+                          f"{len(labels)} lanes; give one, or one per lane in "
+                          f"the --lanes order")
+    return raw
+
+
+def lane_commands(labels: list[str], *, characters: list[str | None],
+                  seeds: list[str | None], ascension: int | None,
+                  max_actions: int, arms: list[str]) -> list[list[str]]:
+    """The single-lane embark command each lane runs."""
+    out = []
+    for label, who, seed in zip(labels, characters, seeds):
+        cmd = [sys.executable, "-m", "understudy.embark",
+               "--lane", label[len("lane"):],
+               "--character", who or "kokomi"]
+        if seed:
+            cmd += ["--seed", seed]
+        if ascension is not None:
+            cmd += ["--ascension", str(ascension)]
+        if max_actions:
+            cmd += ["--max-actions", str(max_actions)]
+        for arm in arms:
+            cmd += ["--arm", arm]
+        out.append(cmd)
+    return out
+
+
+def _sidecar_from_log(text: str) -> dict[str, Any]:
+    """The sidecar a single-lane embark's output names, read, or `{}`."""
+    for line in text.splitlines():
+        if line.startswith("sidecar:"):
+            return _sidecar(Path(line.split(":", 1)[1].strip()))
+    return {}
+
+
+def embark_lanes(labels: list[str], commands: list[list[str]], *,
+                 popen=None, log_dir: Path | None = None) -> list[dict]:
+    """Start every lane's embark at once, wait for all, report each.
+
+    Returns one row per lane: label, port, exit code, log path, and -- off
+    the lane's own sidecar -- the character, the read-back seed and the
+    ascension. A lane that fails does not stop the others; its row says so
+    and its log has the reason. Nothing is torn down here, on any branch.
+    """
+    import subprocess
+    run = popen or subprocess.Popen
+    where = Path(log_dir) if log_dir is not None else LOG_DIR
+    where.mkdir(parents=True, exist_ok=True)
+    started = time.strftime("%Y%m%d-%H%M%S")
+    procs = []
+    for label, cmd in zip(labels, commands):
+        log = where / f"embark-{started}-{label}.log"
+        fh = log.open("w", encoding="utf-8")
+        proc = run(cmd, stdout=fh, stderr=subprocess.STDOUT,
+                   cwd=str(Path(__file__).resolve().parent.parent))
+        procs.append((label, proc, fh, log))
+    rows = []
+    for label, proc, fh, log in procs:
+        code = proc.wait()
+        fh.close()
+        try:
+            text = log.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            text = ""
+        blob = _sidecar_from_log(text) if code == 0 else {}
+        rows.append({
+            "lane": label, "port": instances.port_for(label),
+            "exit": code, "log": str(log),
+            "character": blob.get("character_actual") or "",
+            "run_seed": blob.get("run_seed") or "",
+            "ascension": blob.get("ascension"),
+            "stamp": blob.get("stamp") or "",
+            "error": ("" if code == 0 else
+                      next((ln for ln in reversed(text.splitlines())
+                            if ln.strip()), "(no output)")),
+        })
+    return rows
+
+
+def render_lane_rows(rows: list[dict]) -> str:
+    out = []
+    for r in rows:
+        if r["exit"] == 0:
+            out.append(f"{r['lane']}  port {r['port']}  UP  "
+                       f"{r['character']}  seed {r['run_seed']}  "
+                       f"ascension {r['ascension']}  stamp {r['stamp']}  "
+                       f"log {r['log']}")
+        else:
+            out.append(f"{r['lane']}  port {r['port']}  FAILED (exit "
+                       f"{r['exit']}): {r['error']}  log {r['log']}")
+    return "\n".join(out)
+
+
 # -------------------------------------------------------------------- CLI --
 
 def main(argv: list[str] | None = None) -> int:
@@ -679,11 +845,21 @@ def main(argv: list[str] | None = None) -> int:
                          "(understudy/embark_coop.py). Needs --lanes and "
                          "--characters; with --teardown it tears both lanes "
                          "down, the client first")
-    ap.add_argument("--lanes", default="", metavar="HOST,CLIENT",
-                    help="with --coop: the two lanes, host first (`2,3`)")
-    ap.add_argument("--characters", default="", metavar="HOST,CLIENT",
+    ap.add_argument("--lanes", default="", metavar="N,N,...",
+                    help="with --coop: the two lanes, host first (`2,3`). "
+                         "WITHOUT --coop: embark every named lane AT ONCE, "
+                         "one ordinary single-lane embark each, and report "
+                         "each lane's port, character and read-back seed "
+                         "(`--lanes 1,2,3`); with --teardown, tear each "
+                         "named lane down")
+    ap.add_argument("--characters", default="", metavar="A,B,...",
                     help="with --coop: each lane's character, host first; "
-                         "one name is both players'")
+                         "one name is both players'. With a parallel "
+                         "--lanes: one per lane, or one for all (else "
+                         "--character)")
+    ap.add_argument("--seeds", default="", metavar="S1,S2,...",
+                    help="with a parallel --lanes: one chosen seed per lane, "
+                         "in --lanes order")
     ap.add_argument("--client-id", type=int, default=1000, metavar="N",
                     help="with --coop: the client's --clientId (default "
                          "1000; the host is always 1)")
@@ -702,6 +878,14 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         from understudy import embark_coop
         return embark_coop.run_cli(args)
+
+    if args.lanes:
+        return _lanes_cli(args)
+    if args.seeds or args.characters:
+        print("embark error: --seeds and --characters go with --lanes (or "
+              "--coop); a single lane takes --seed and --character",
+              file=sys.stderr)
+        return 2
 
     try:
         if args.teardown:
@@ -763,6 +947,53 @@ def main(argv: list[str] | None = None) -> int:
         print(f"LANE {lane_arg.rsplit(' ', 1)[-1]} IS NOT A RUN OF RECORD: "
               f"its profile is disposable and nothing in it is read back.")
     return 0
+
+
+def _lanes_cli(args: argparse.Namespace) -> int:
+    """`--lanes 1,2,3` without `--coop`: a parallel embark, or a teardown of
+    each named lane."""
+    try:
+        labels = parse_seat_lanes(args.lanes)
+        if args.teardown:
+            if args.stamp:
+                raise EmbarkError("--stamp names one embark; tear several "
+                                  "lanes down by lane alone")
+            failed = 0
+            for label in labels:
+                try:
+                    print(f"== {label}")
+                    print(teardown("", lane=label))
+                except (EmbarkError, OSError, ValueError) as exc:
+                    failed += 1
+                    print(f"embark error: {label}: {exc}", file=sys.stderr)
+            return 2 if failed else 0
+        if args.hold or args.seed:
+            raise EmbarkError("a parallel --lanes embark takes no --hold, and "
+                              "takes --seeds (one per lane) rather than --seed")
+        characters = _per_lane(args.characters or args.character, labels,
+                               "characters")
+        seeds = _per_lane(args.seeds, labels, "seeds")
+        for who in characters:
+            option_id(who or "")
+        if args.arms:
+            check_arms(args.arms)
+        commands = lane_commands(labels, characters=characters, seeds=seeds,
+                                 ascension=args.ascension,
+                                 max_actions=args.max_actions, arms=args.arms)
+    except (EmbarkError, ValueError) as exc:
+        print(f"embark error: {exc}", file=sys.stderr)
+        return 2
+    print(f"embarking {', '.join(labels)} at once (each lane's output goes to "
+          f"its own log; the shared install is taken one lane at a time)")
+    rows = embark_lanes(labels, commands)
+    print(render_lane_rows(rows))
+    up = [r for r in rows if r["exit"] == 0]
+    print()
+    print(f"{len(up)} of {len(rows)} lanes UP. Nothing has been torn down. "
+          f"Each lane's seat sets GITS_LANE=<N>; tear down with "
+          f"`python -m understudy.embark --teardown --lanes {args.lanes}` or "
+          f"one lane at a time with `--teardown --lane N`.")
+    return 0 if len(up) == len(rows) else 2
 
 
 if __name__ == "__main__":
