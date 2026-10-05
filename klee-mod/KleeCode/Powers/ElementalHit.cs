@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Commands;
@@ -125,11 +127,12 @@ internal static class ElementalHit
         // 2026-10-02 (combat visual audit, gap 3): the element's hit effect,
         // the same one an Attack card of that element draws. Visual only.
         ElementHitFx.SpawnOn(target, element);
-        await CreatureCmd.Damage(
+        var results = await CreatureCmd.Damage(
             choiceContext, target, landed,
             ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable
                         : ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        await CreditBlockBreak(choiceContext, target, applier, results);
         return landed;
     }
 
@@ -209,9 +212,10 @@ internal static class ElementalHit
         using var credit = Diagnostics.DamageCredit.OpenIfNone(
             applier, Diagnostics.DamageCredit.Element);
         ElementHitFx.SpawnOn(target, element);
-        await CreatureCmd.Damage(
+        var results = await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        await CreditBlockBreak(choiceContext, target, applier, results);
         return landed;
     }
 
@@ -225,9 +229,10 @@ internal static class ElementalHit
         var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
         using var credit = Diagnostics.DamageCredit.OpenIfNone(
             applier, Diagnostics.DamageCredit.Power);
-        await CreatureCmd.Damage(
+        var results = await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        await CreditBlockBreak(choiceContext, target, applier, results);
         return landed;
     }
 
@@ -266,6 +271,42 @@ internal static class ElementalHit
     /// element-only application set off: nothing to multiply.</summary>
     public const string NoHitToAmplify =
         "No hit came with it, so there was nothing to amplify.";
+
+    /// <summary>
+    /// After each of this funnel's <c>CreatureCmd.Damage</c> calls, whose
+    /// dealer stays null for the engine (the hit is Unpowered and already
+    /// carries the sim's modifiers, so no dealer-side hook may touch it
+    /// again): the Block break CREDITED to the applier all the same.
+    ///
+    /// HAND DRILL (Klee final-pass round, lane 2, 2026-10-02): "gave no
+    /// Vulnerable when a Bomb broke the boss's Block, only when a Pyro card's
+    /// hit did." The base relic's hook is
+    /// <c>AfterBlockBroken(target, breaker)</c> and its condition is
+    /// <c>breaker == Owner.Creature || breaker?.PetOwner == Owner</c> (0.111.0
+    /// decompile) -- not "a card attack": every base power that deals damage
+    /// (Juggernaut, Inferno, Black Hole) passes its owner as the dealer, so its
+    /// break counts. The game reports the breaker as the dealer, which here is
+    /// null, so the relic never saw a Bomb, a Burst volley or a performance
+    /// break anything.
+    ///
+    /// SO THE BREAK IS REPORTED A SECOND TIME, WITH THE BREAKER, TO THE
+    /// APPLIER'S RELICS ONLY. The null-breaker dispatch the game already made
+    /// reached every listener; the only listeners in the game are Hand Drill
+    /// (which ignores a null breaker) and the Tunneler's Burrowed (an enemy
+    /// power, not a relic, so it is not called twice). The mod declares none.
+    /// </summary>
+    private static async Task CreditBlockBreak(
+        PlayerChoiceContext choiceContext, Creature target, Creature? applier,
+        IEnumerable<DamageResult> results)
+    {
+        if (applier?.Player is not { } player || target.IsPlayer) return;
+        if (!results.Any(r => r.WasBlockBroken && r.Receiver == target)) return;
+        foreach (var relic in player.Relics.ToList())
+        {
+            await relic.AfterBlockBroken(choiceContext, target, applier);
+            relic.InvokeExecutionFinished();
+        }
+    }
 
     /// <summary>2026-10-01 (a Varka seat): Barbara's Hydro printed "Vaporize
     /// ... off Varka" and the seat saw nothing happen. Vaporize and Melt

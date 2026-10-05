@@ -120,9 +120,20 @@ public sealed class ProtoMcDurinPrincipleOfPurityModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "White: Enemies take 50% more damage from Elemental Reactions"),
-        ("description", "[gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]"),
+        ("title", "White"),
+        ("description", "[gold]White[/gold]: Enemies take {IfUpgraded:show:75|50}% more damage from [gold]Elemental Reactions[/gold]"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new DynamicVar("PowerAmount", 4m)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+    }
 }
 
 /// <summary>Mode 1 of proto_mc_durin_principle_of_purity. A face for the choose-a-card screen;
@@ -141,7 +152,18 @@ public sealed class ProtoMcDurinPrincipleOfPurityModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Dark: Your Pyro damage deals 4 more"),
-        ("description", "[gold]Dark[/gold]: Your [gold]Pyro[/gold] damage deals 4 more"),
+        ("title", "Dark"),
+        ("description", "[gold]Dark[/gold]: Your [gold]Pyro[/gold] damage deals {IfUpgraded:show:6|4} more"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new List<DynamicVar>
+        {
+            new DynamicVar("PowerAmount", 4m)
+        };
+
+    protected override void OnUpgrade()
+    {
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+    }
 }

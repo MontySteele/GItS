@@ -459,15 +459,24 @@ def set_off(state: CombatState, enemy: Optional[Enemy],
     `badge` is Boom Badge's factor (`take_boom_badge`), taken once per Set off
     clause by the caller and handed to every enemy that clause reaches. It
     MULTIPLIES The Big One's armed multiplier: x4 and x2 meet at x8.
+
+    THE MULTIPLIER IS SPENT EVEN WHEN NOTHING GOES OFF (2026-10-04). The Big
+    One reads "Set off the enemy. Your Bombs deal quadruple damage.": the x4
+    belongs to that Set off, so a Set off that finds no Bomb spends it on
+    nothing. Before this it stayed armed, and a Mine answering the enemy's
+    attack later that round peeked it. C# twin: the same early take in
+    `ProtoBombPower.SetOff`.
     """
-    if enemy is None or not live(state):
+    if not live(state):
+        return 0
+    multiplier = take_multiplier(state) * int(badge)
+    if enemy is None:
         return 0
     taken = take_all(enemy)
     if not taken:
         return 0
     state.emit("ko_set_off", target=enemy.name, charges=len(taken),
                size=sum(c.size for c in taken))
-    multiplier = take_multiplier(state) * int(badge)
     pact = bool(state.player.powers.get(VERMILLION_PACT, 0))
     pact_aura: Optional[str] = None
     exploded = 0
@@ -561,9 +570,9 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     # Explosive Frags below lays one it did not pay. C# twin: `HasVulnerable`
     # around `DealWithoutDealerMods` in `ProtoBombPower.Explode`.
     vulnerable_before = enemy.powers.get("vulnerable", 0) > 0
-    dealt = effects.deal_damage_to_enemy(state, enemy, size, element=element,
-                                         source=EXPLOSION_SOURCE,
-                                         powered=False)
+    effects.deal_damage_to_enemy(state, enemy, size, element=element,
+                                 source=EXPLOSION_SOURCE, powered=False)
+    landed = state.last_hit_landed
     vulnerable_paid = (vulnerable_before
                        or enemy.powers.get("vulnerable", 0) > 0)
     reacted = state.reactions_this_turn > before
@@ -578,10 +587,13 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     if charge.is_mine and frags and enemy.alive:
         state.emit("ko_mine_frags", target=enemy.name, amount=frags)
         powers.apply_power(state, enemy, "vulnerable", frags)
-    # `dealt` is the number the hit LANDED for, straight off the funnel that
-    # computed it (`EB-270`): Big Badda Boom's face says "the damage the Bombs
-    # dealt", and under the target's Vulnerable that is not `size`.
-    note_explosion(state, reacted, int(dealt), vulnerable_paid)
+    # The number the hit LANDED for, straight off the funnel that computed it
+    # (`EB-270`): Big Badda Boom's face says "the damage the Bombs dealt", and
+    # under the target's Vulnerable that is not `size`. BLOCK INCLUDED
+    # (2026-10-04): the funnel RETURNS the HP figure, and "damage dealt" in the
+    # base game counts what Block absorbed too, which is what the C#'s
+    # `ElementalHit.Deal` has always returned. The two engines now agree.
+    note_explosion(state, reacted, int(landed), vulnerable_paid)
 
     # THE BOMB PAYLOAD (Jumpy Dumpty). It rides the EXPLOSION rather than the
     # card, which is the whole of what makes the starter's promise legible: the
@@ -682,14 +694,17 @@ def set_off_largest(state: CombatState, enemy: Optional[Enemy],
     It spends The Big One's multiplier and Boom Badge's factor exactly as
     `set_off` does, because it IS a Set off. Returns 1 if a charge went off.
     """
-    if enemy is None or not live(state):
+    if not live(state):
+        return 0
+    # Spent even when nothing goes off, as in `set_off` (2026-10-04).
+    multiplier = take_multiplier(state) * int(badge)
+    if enemy is None:
         return 0
     index = largest_index(enemy)
     if index < 0:
         return 0
     charge = enemy.ko_charges.pop(index)
     state.emit("ko_set_off", target=enemy.name, charges=1, size=charge.size)
-    multiplier = take_multiplier(state) * int(badge)
     exploded = 0
     if not enemy.alive:
         jump_charges(state, enemy, [charge])

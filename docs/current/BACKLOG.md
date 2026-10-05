@@ -18,7 +18,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Klee final pass (2026-10-02): art for Cover Your Ears! (placeholder).
 - AoE trim (2026-10-03): Durin, Principle of Purity's turn-start Pyro hit (`PurityStrikePower`) shares `AfterPlayerTurnStart` with Melody Loop's Hydro, Herald of Frost's Cryo and Surprise Dispatch's roll, so the mod gives it no order where the sim runs it after Melody Loop (a reaction and an rng race); stage it into its own broadcast if a seat sees the two disagree.
 - AoE trim (2026-10-03): art for Durin — Principle of Purity (wears Binary Form's picture, `art_of`); the three Purity powers borrow Binary Form's badge.
-- AoE trim (2026-10-03): the mode faces of Binary Form and Principle of Purity print the base numbers when the card is upgraded (the parent's face swaps them; `EB-805`'s class).
 - Klee finish-line batch (2026-10-03): pinned headless only, so watch at the next Klee seat round and through the bridge: Dodoco Tales' opening Sparks (5 on turn one after Touch of Orobas, and the Spark row naming the relic), Finders Keepers' draw trigger (a Bomb per status drawn, Dazed and Confiscated alike), Confiscated playing as a Status (the drag-to-play, the frame, and Klee Can Explain! / Kitchen Alchemy taking it), and Mine, All Mine!'s Mine landing on the enemy its hit killed.
 - Kokomi status batch: art for Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage and the Sea Glass token (placeholders); Abyssal Salvage borrows the Princess of Watatsumi badge.
 - Kokomi status batch: the stock sim pilot cannot read the next-hand Plans (Kelp Wall's count, Tidecleanse, Sea Glass Harvest, Turning Tide) or plan for statuses it has not drawn; their census rates are unread, as Coral Tithe's were.
@@ -57,10 +56,8 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Furina Stage: a seat read the stage text as if back performers soak damage and spent Bottled Applause on the back one; only the front performer soaks (Furina seat, 2026-09-29).
 - Kokomi: Smoggy ("you can only play 1 Skill per turn") refuses writing a Plan once a Skill is played; neither Smoggy's line nor the Bake-Kurage tip says writing a Plan counts as playing the card (Kokomi seat, 2026-09-29, Living Fog).
 - `test_local_tester` is flaky: it failed once and passed on re-run with no change (2026-09-28).
-- Big Badda Boom's "what your Bombs dealt" counts Block the Bombs removed in C# (`ElementalHit.Deal` returns the pre-Block hit) but HP only in the sim (`deal_damage_to_enemy` returns `hp_dmg`); the two engines disagree whenever the target has Block (found 2026-09-26).
 - Rosaria's Melt on Klee's board printed "Deal 15" from a written 9, which no printed multiplier explains; show the reaction's factor on the face.
 - `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot is the owner's `progress.save` DiscoveredRelics list naming the retired relic (non-fatal `Progress parse` warning, godot.log 2026-10-01); no alias is left in code. Harmless; drop the id from the save or let it be.
-- `EB-805` a mode card's option title prints the sheet literal while the body folds the board (two numbers for one option); the title carries no number or folds through the same vars.
 - `EB-798` `ProtoKkBreakwater` is offered Nimble but Nimble pays it nothing (its only Block is the Plan's); planned-only Block is not `GainsBlock`, in both engines and `lint_enchant_parity`.
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
 - `EB-65` the four Furina power badges draw shrunk card portraits; they want badge-kind icons like Klee's (art bill, rank 1 applied).
@@ -70,7 +67,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
-- The Big One's x4 stays armed when its Set off finds no Bomb, so a later Mine on the enemy turn can spend it.
 - A reaction amplifier's payout is not printed: the seat log reads "Vaporize on X" with no x1.5 (Varka seat, 2026-09-29: Weak 4 -> 3 printed, 4 landed). A hit carrying an element chosen at play (Four Winds' Ascension and Northwind Avatar's current-element hit) previews no amplifier either; the multiplier is pinned by `A_current_element_hit_amplifies_like_any_hit`.
 
 ## Harness, bridge and tools
@@ -89,7 +85,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Seat page: an autoplaying relic (the Earring, Varka starter round, lane 2 act 3) plays the first turn with no line saying what it will play or played.
 - Treasure Map plays and spends its Energy with no Set off card in the discard pile, and nothing warns (Klee w20 round, lane 2, 2026-10-04).
 - Seat page: a Thorns hit taken while a card resolves prints "taken while it resolved; a reaction never hits you", which reads as the reaction hitting you; name the Thorns source instead (Klee w20 round, lane 2, 2026-10-04).
-- Hand Drill gave no Vulnerable when a Bomb broke the boss's Block, only when a Pyro card's hit did (Klee final-pass round, lane 2, 2026-10-02); check a Bomb hit reaches the base relic's break-Block hook.
 - Seat page: Tender (each card played costs 1 Strength and 1 Dexterity this turn) prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only (Klee final-pass round, 2026-10-02).
 - Big Badda Boom's "then damage equal to what your Bombs dealt" does not say whether Bombs set off earlier in the turn count (Klee final-pass round, lane 1, 2026-10-02).
 - Seat page: a Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained (smoke round, 2026-10-02); check the brief page lists the player's debuffs.
