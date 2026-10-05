@@ -356,6 +356,12 @@ public sealed class FurinaStageLedger
     /// <summary>A fresh per-play spend record (every card play).</summary>
     public void BeginPlay() => SpentThisPlay = 0;
 
+    /// <summary>The play is over: the record closes with it. The Salon's Tab
+    /// seat round (2026-10-05): it used to stand until the NEXT play opened,
+    /// so a spend-all face in hand read the last play's spend at 0 Fanfare
+    /// ("Deals 113").</summary>
+    public void EndPlay() => SpentThisPlay = 0;
+
     // ---- the once-a-turn latches ---------------------------------------
 
     /// <summary>Charlotte's line has drawn this turn.</summary>
@@ -372,6 +378,7 @@ public sealed class FurinaStageLedger
         SpentThisTurn = 0;
         DrainedThisTurn = 0;
         RepaidThisTurn = 0;
+        SpentThisPlay = 0;
         CharlotteDrewThisTurn = false;
         LynetteFiredThisTurn = false;
     }

@@ -45,8 +45,17 @@ public sealed class ProtoFsSalonsTab : CustomCardModel, ICharacterCard, IModalCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salon's Tab"),
-        ("description", "Draw {IfUpgraded:show:3|2} cards. [gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn."),
+        ("description", "Draw {IfUpgraded:show:3|2} cards. [gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn.{InCombat:{StageDrainLine}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageDrainLine", FurinaStageFacePreview.DrainLine(this, 4));
+    }
 
     // EB-184: what each mode does about AIMING, in sheet order.
     // The card's own TargetType is fixed before a mode is chosen (the
@@ -56,8 +65,8 @@ public sealed class ProtoFsSalonsTab : CustomCardModel, ICharacterCard, IModalCa
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
         IsUpgraded
-            ? new[] { "Draw 3 cards", "[gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn" }
-            : new[] { "Draw 2 cards", "[gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn" };
+            ? new[] { "Draw 3 cards", "[gold]Drain[/gold] 4: draw 3 cards and gain 2 [gold]Energy[/gold] next turn" }
+            : new[] { "Draw 2 cards", "[gold]Drain[/gold] 4: draw 2 cards and gain 2 [gold]Energy[/gold] next turn" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -89,7 +98,7 @@ public sealed class ProtoFsSalonsTab : CustomCardModel, ICharacterCard, IModalCa
                                 "would take her below the Drain line"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Draw {IfUpgraded:show:3|2} cards", "[gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Draw {IfUpgraded:show:3|2} cards", "[gold]Drain[/gold] 4: draw {IfUpgraded:show:3|2} cards and gain 2 [gold]Energy[/gold] next turn" }[modeIndex]);
         if (modeIndex == 0)
         {
             await CardPileCmd.Draw(choiceContext, (IsUpgraded ? 3m : 2m), Owner);
@@ -151,7 +160,7 @@ public sealed class ProtoFsSalonsTabModeB : ModalOptionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Drain 4"),
-        ("description", "[gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn"),
+        ("description", "[gold]Drain[/gold] 4: draw {IfUpgraded:show:3|2} cards and gain 2 [gold]Energy[/gold] next turn"),
     };
 
     public ProtoFsSalonsTabModeB()

@@ -336,6 +336,13 @@ public static class FurinaStage
         if (LiveFor(owner)) FurinaStageLedger.For(owner!).BeginPlay();
     }
 
+    /// <summary>A card play closes: its spend record closes with it, so a
+    /// spend-all face reads her Fanfare again.</summary>
+    public static void EndPlay(Creature? owner)
+    {
+        if (LiveFor(owner)) FurinaStageLedger.For(owner!).EndPlay();
+    }
+
     /// <summary>Rule 3: HP lost to anything but a Drain prints Fanfare.
     /// </summary>
     public static void NoteHpLost(Creature? owner, int amount)

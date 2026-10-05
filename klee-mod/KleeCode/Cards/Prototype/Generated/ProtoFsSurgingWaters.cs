@@ -45,8 +45,17 @@ public sealed class ProtoFsSurgingWaters : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surging Waters"),
-        ("description", "Deal {Damage:diff()} damage. [gold]Repay[/gold] {RepayAmount:diff()}."),
+        ("description", "Deal {Damage:diff()} damage. [gold]Repay[/gold] {RepayAmount:diff()}.{InCombat:{StageRepay}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

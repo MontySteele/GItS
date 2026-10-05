@@ -6,6 +6,7 @@ using KleeMod.Powers;
 using KleeMod.Relics;
 using KleeMod.Tests.Harness;
 using KleeMod.Vfx;
+using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -297,6 +298,49 @@ public class FurinaTideTests
         Assert.Equal("",
             FurinaStageBowPreview.Line(StageKit.Of().Stage,
                                        StagePerformer.Charlotte));
+    }
+
+    [Fact]
+    public void A_spend_all_record_closes_with_its_play_and_its_turn()
+    {
+        // The Salon's Tab seat round (2026-10-05): a spend-all face read the
+        // LAST play's spend at 0 Fanfare ("Deals 113") until the next play.
+        var kit = StageKit.With(7);
+        kit.Stage.BeginPlay();
+        Assert.Equal(7, kit.Stage.SpendAll());
+        Assert.Equal(7, kit.Stage.SpentThisPlay);
+        kit.Stage.EndPlay();
+        Assert.Equal(0, kit.Stage.SpentThisPlay);
+        kit.Stage.Gain(4);
+        Assert.Equal(4, kit.Stage.SpendAll());
+        kit.Stage.OpenTurn();
+        Assert.Equal(0, kit.Stage.SpentThisPlay);
+        // And the hook that closes it at the end of every play is there.
+        Assert.Contains("FurinaStage.EndPlay",
+            Il.Calls(typeof(FurinaStageHooks).GetMethod("AfterCardPlayed")!));
+    }
+
+    [Fact]
+    public void Drain_and_repay_cards_carry_their_in_combat_lines()
+    {
+        Assert.Equal("\n(Repays 0)", FurinaStageFacePreview.Line(0));
+        foreach (var (card, token) in new (CardModel, string)[]
+                 {
+                     (new ProtoFsCurtainRise(), "StageDrainLine"),
+                     (new ProtoFsSalonsTab(), "StageDrainLine"),
+                     (new ProtoFsMademoiselleCrabaletta(), "StageDrainLine"),
+                     (new ProtoFsSurgingWaters(), "StageRepay"),
+                     (new ProtoFsSingerOfManyWaters(), "StageRepay"),
+                 })
+        {
+            var face = ((BaseLib.Abstracts.CustomCardModel)card).Localization!
+                .Single(r => r.Item1 == "description").Item2;
+            Assert.EndsWith("{InCombat:{" + token + "}|}", face);
+        }
+        // Salon's Tab's Drain option says it draws too.
+        Assert.StartsWith("[gold]Drain[/gold] 4: draw ",
+            new ProtoFsSalonsTabModeB().Localization!
+                .Single(r => r.Item1 == "description").Item2);
     }
 
     // ---- the fixed price and the mode gate ---------------------------------

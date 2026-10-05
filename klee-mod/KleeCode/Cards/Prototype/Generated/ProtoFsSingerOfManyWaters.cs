@@ -48,8 +48,17 @@ public sealed class ProtoFsSingerOfManyWaters : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Singer of Many Waters"),
-        ("description", "[gold]Repay[/gold] all your drained HP."),
+        ("description", "[gold]Repay[/gold] all your drained HP.{InCombat:{StageRepay}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageRepay", FurinaStageFacePreview.RepayAll(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

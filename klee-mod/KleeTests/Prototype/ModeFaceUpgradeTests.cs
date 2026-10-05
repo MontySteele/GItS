@@ -87,7 +87,19 @@ public class ModeFaceUpgradeTests
             }
             var face = Render(option);
             Assert.DoesNotContain("{", face);
-            Assert.Contains(face, Render(parent));
+            var parentFace = Render(parent);
+            if (!parentFace.Contains(face) && parentFace.Contains(": also "))
+            {
+                // The Salon's Tab seat round (2026-10-05): an "also" mode
+                // prints its whole label, so it says it draws too. Its
+                // numbers are still the parent's.
+                foreach (Match n in Regex.Matches(face, @"\d+"))
+                {
+                    Assert.Contains(n.Value, parentFace);
+                }
+                continue;
+            }
+            Assert.Contains(face, parentFace);
         }
     }
 
