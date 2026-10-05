@@ -132,8 +132,12 @@ def test_the_refusal_lands_before_the_game_is_launched(monkeypatch):
         embark.embark("klee", arms=[ARM])
 
 
-def test_a_plain_embark_never_checks_the_build(monkeypatch):
+def test_a_plain_embark_never_checks_the_build(monkeypatch, tmp_path):
     """No `--arm`, no build question: an ordinary embark is unchanged."""
+    # The stamp is claimed by creating its sidecar before the Session exists,
+    # so the sidecar directory is a tmp one: a test may not leave a claimed
+    # lane-0 stamp in the real `understudy/logs`.
+    monkeypatch.setattr(embark, "LOG_DIR", tmp_path)
     monkeypatch.setattr(embark, "check_arms",
                         lambda *a, **k: (_ for _ in ()).throw(
                             AssertionError("checked the build with no arms")))
