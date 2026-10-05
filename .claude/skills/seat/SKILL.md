@@ -23,12 +23,12 @@ the reply truncates and the round dies with the game already up.
 ## An Opus seat (a subagent playing by hand)
 
 ```sh
-python tools/seat.py --opus-brief --lane 2 --character KLEEMOD-KLEE
+python tools/seat.py --opus-brief --lane 2 --character KLEEMOD-KLEE --scratch <dir>
 ```
 
-Prints `docs/current/operations/seat-brief.md` with the lane filled in. **Paste
-it; never rewrite it.** A rewritten brief is a different instrument, and two
-rounds graded against two briefs are not comparable.
+Prints `docs/current/operations/seat-brief.md` with the lane and notes path
+filled in; on stderr, the embark to run first, `--max-actions 120` unless named
+(Sonnet: 1500). **Paste it; never rewrite it** (a different instrument).
 
 ## Standing rules
 

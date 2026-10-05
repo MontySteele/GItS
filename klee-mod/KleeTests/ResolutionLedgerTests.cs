@@ -311,7 +311,7 @@ public class ResolutionLedgerTests
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
         Assert.Equal(new[] { "target", "amount", "blocked", "combat_id",
-                             "killed", "on_player" },
+                             "killed", "on_player", "source" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
         // 2026-10-01: a hit on a player inside a play is marked as one.
@@ -378,5 +378,61 @@ public class ResolutionLedgerTests
 
         Assert.NotNull(ResolutionLedger.Snapshot());
         Assert.Empty(ResolutionLedger.Snapshot());
+    }
+
+    // ------------------------------------------- 2026-10-04, the seat page ---
+
+    /// <summary>"Put Bomb 1" where the card placed Bomb 11: the hook files the
+    /// pile's count, and the placement then sizes its own entry.</summary>
+    [Fact]
+    public void A_placement_sizes_the_entry_its_apply_filed()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("bang", "Bang Bang!", false);
+        ResolutionLedger.NotePower("Toadpole", "Weak", 1, "2");
+        var mark = ResolutionLedger.MarkApplied();
+        ResolutionLedger.NotePower("Toadpole", "Bomb", 1, "2");
+        ResolutionLedger.SizeAppliedSince(mark, "2", "Mine", 3);
+
+        var applied = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["applied"]!;
+        Assert.Equal("Weak", applied[0]["power"]);
+        Assert.Equal(1, applied[0]["amount"]);
+        Assert.Equal("Mine", applied[1]["power"]);
+        Assert.Equal(3, applied[1]["amount"]);
+    }
+
+    /// <summary>Nothing filed since the mark (the apply filed no entry)
+    /// leaves the earlier entries alone.</summary>
+    [Fact]
+    public void A_placement_with_no_entry_since_its_mark_changes_nothing()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("bang", "Bang Bang!", false);
+        ResolutionLedger.NotePower("Toadpole", "Weak", 1, "2");
+        var mark = ResolutionLedger.MarkApplied();
+        ResolutionLedger.SizeAppliedSince(mark, "2", "Bomb", 11);
+
+        var applied = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["applied"]!;
+        Assert.Single(applied);
+        Assert.Equal("Weak", applied[0]["power"]);
+        Assert.Equal(1, applied[0]["amount"]);
+    }
+
+    [Fact]
+    public void The_hit_hook_hands_over_the_dealer()
+    {
+        var calls = Il.Calls(
+            Il.Method("PlayTelemetryHooks", "AfterDamageReceived"));
+
+        Assert.Contains("ResolutionLedger.NoteHit", calls);
+        Fresh();
+        ResolutionLedger.OpenPlay("strike", "Strike", false);
+        ResolutionLedger.NoteHit(null, 3, 0);
+        var row = ((List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["hits"]!)[0];
+        Assert.True(row.ContainsKey("source"));
+        Assert.Equal("", row["source"]);
     }
 }

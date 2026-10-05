@@ -43,7 +43,7 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - Furina Stage: the end-of-turn preview listed a trio act twice ("Crabaletta: 10 to a random enemy, twice", fight 4 turn 2 after Double Casting+ gave two Ushers under Ousia; "Chevalmarin 2 to ALL" twice, fight 5 turn 1 after Gala Premiere and a front-seat Wriothesley) while the log shows one act; both on a full stage, which is when `Forecast` and `EndOfTurnActs` add Full House's repeats. Not reproduced: `FurinaStage.Forecast` on both boards, built headless ([Crabaletta, Usher, Usher] and [Wriothesley, Usher, Chevalmarin]), lists one act each, so something live adds the repeat; it needs the `furina_stage.forecast` snapshot and her powers from such a turn (Furina seat, 2026-09-28). A third sighting 2026-09-29 (Furina run FS3EL3M3NTS4, act 1): the preview said Neuvillette "8 Hydro to ALL, twice" and the second act "could not pay" Not a skipped payment: both forecasts pay each Full House repeat on the copy before counting it (pinned 2026-09-29, board "full house, the repeat cannot pay"); the record's bars (Neuvillette 11, then 3 paid each sweep) put him at 5, where the forecast lists one act, so the doubled line came from somewhere else.
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning, where a Swirl or Crystallize on a burning enemy spends the held Pyro and Burning keeps ticking; and Dendro ported as ruled (the non-reacting pairs, the Core rules and their previews), tested on Kirara and Emilie. Neither engine has Burning or Dendro today.
 - Co-op seat page: the "What you played this turn" log lists the partner's cards as your own; players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; a contested chest pick is not announced; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted (co-op round, 2026-09-27).
-- Seat page: the play log prints "Put Bomb 1" where the badge shows the placed size, and the Weak gloss says it cuts a Bomb's damage (it does not: a Bomb carries the target's modifiers only) (co-op round, 2026-09-27).
+- Seat page: the Weak gloss says it cuts a Bomb's damage (it does not: a Bomb carries the target's modifiers only) (co-op round, 2026-09-27).
 - Kokomi text: the Neow bundle's Plan gloss omits "instead of playing it now"; the Casket tip does not say it ignores a debuff from a reaction set off by its own hit (Kokomi core seat, 2026-09-27).
 - Co-op rest site: Mend on the partner did not end the rest action, so Smith was still offered (co-op round, 2026-09-27).
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
@@ -76,26 +76,21 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 ## Harness, bridge and tools
 
 - Bridge: the enchant chooser (relic Kifuda, 'Choose 3 cards to Enchant') never closes; `confirm_selection` appends the picks again (3→6→9→12), and cancel is refused — a seat stalls in the shop (seat round 2026-09-26, wave3-furina-lane2).
-- The Opus-seat path embarks with no action cap (`embark --max-actions` defaults to 0), so a hand-driven seat ran 279 actions; make `seat.py --opus-brief` print or run the embark with `--max-actions 120`.
 - Seat page: the Tainted per-hit note still gives two readings for a multi-hit, the same double count the Weak note had before #650.
 - Seat page: Pocket Match's play log listed 3 and left out its own 5 damage.
 - Seat page: a Companion summon's ticks (Kamisato Ayaka's Soumetsu) print only inside Kokomi's Plan block (`summon_hits`); a Furina or Klee page shows them nowhere, and the stage's "acts will deal" preview leaves them out (Furina lane 2, 2026-09-26).
 - Seat page: The Trial's first page printed only "Proceed", and `proceed` was then refused against its Accept / Reject options -- the page read the event mid-transition (Furina Solo seat, 2026-09-26).
 - Furina Stage: mirror `FurinaStage.HandTurnEndHits` (the cards in her hand that hurt her as her turn ends) in the sim's `furina_stage.forecast` (tests only).
 - Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
-- Seat page: no screen prints the run seed or the ascension.
 - Shop card removal: after the first card is picked the screen refuses a re-pick and offers only confirm or skip, so a mis-pick removed a Strike instead of a Defend (Varka starter round, lane 2 act 1, floor 14); check whether the base screen allows a deselect and the bridge lacks the verb.
 - Seat page: Oathsworn Strike's line printed "Deals 29" and hit 31 on a Vulnerable target (Varka starter round, lane 1 act 3); the hand preview folds no target's Vulnerable, and the page does not say so.
 - Seat page: an autoplaying relic (the Earring, Varka starter round, lane 2 act 3) plays the first turn with no line saying what it will play or played.
 - Treasure Map plays and spends its Energy with no Set off card in the discard pile, and nothing warns (Klee w20 round, lane 2, 2026-10-04).
-- Seat page: a Thorns hit taken while a card resolves prints "taken while it resolved; a reaction never hits you", which reads as the reaction hitting you; name the Thorns source instead (Klee w20 round, lane 2, 2026-10-04).
 - Hand Drill gave no Vulnerable when a Bomb broke the boss's Block, only when a Pyro card's hit did (Klee final-pass round, lane 2, 2026-10-02); check a Bomb hit reaches the base relic's break-Block hook.
 - Seat page: Tender (each card played costs 1 Strength and 1 Dexterity this turn) prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only (Klee final-pass round, 2026-10-02).
 - Big Badda Boom's "then damage equal to what your Bombs dealt" does not say whether Bombs set off earlier in the turn count (Klee final-pass round, lane 1, 2026-10-02).
 - Seat page: a Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained (smoke round, 2026-10-02); check the brief page lists the player's debuffs.
 - Seat page: the Tamakushi Casket printed "(1)" between fights; its counter is combat-only (`TamakushiCasket.ShowCounter`), so the page reads `DisplayAmount` before combat state clears (smoke round, 2026-10-02).
-- Seat page: Tuning Fork prints "(7)" with no "of 10" (Klee lane 2, 2026-10-02).
-- Klee's played-log prints "Put Bomb 1" / "Mine 1" where the card placed Bomb 11 / Mine 3: a count printed where a size is read (Opus seat, 2026-10-02).
 - Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line (Opus seat, 2026-10-02).
 - A Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1, not +2; check the Spark accounting or the wording (Opus seat, 2026-10-02).
 - Klee reaction log: "Melt ... No hit came with it, so there was nothing to amplify" printed beside a hit multiplied by 1.75, on three fights (Opus check round, lane 2, 2026-10-02).
@@ -123,7 +118,6 @@ closed on 2026-09-08 are at tag `backlog-archive-2026-09-08`; older ones at tag
 - `EB-71` no committed sheet prints `sly_autoplay`, so the `CardKeyword.Sly` rail has never run in game; whoever prints the first one checks it live.
 - Seat page: Ka-pow!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
 - Seat glossary: the Bomb entry's "Only Vulnerable and the HP cap move it" and the Set off entry's "A random one picks a Bombed enemy first" read as unclear to a seat.
-- Seats share the coordinator's scratchpad, so a seat's notes file can hold an earlier seat's notes; give each seat its own notes path.
 - Two lanes embarked at the same moment: the second lane's game never came up (its port refused every call) until a teardown and re-embark (2026-09-25 round).
 - `scenario run` cannot start on a lane whose profile holds a saved run: the relaunched game resumed the old boss fight and the menu never became ready (lane 1, 1336 run-history files, 447 s wait).
 - Lane 1 embark `20260929-145523` was never reverted (all its ledger rows APPLIED, pid 27116 still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.

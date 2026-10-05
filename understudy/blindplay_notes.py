@@ -1390,6 +1390,10 @@ MAP_PATHS_HEAD = ("Every room you can still reach, floor by floor. Rooms are "
 MAP_FLOOR_LINE = ("You are on floor {here}{act}; the rooms above are floor "
                   "{next}. This is the run's own floor number -- the one the "
                   "run-over page counts in, not a grid coordinate.")
+#: 2026-10-04: the run's identity, for the seat record's first section. The
+#: ascension is the wire's `run.ascension`; the seed is the one `embark` read
+#: back and wrote into the lane's sidecar (no screen's feed carries it).
+MAP_RUN_LINE = "Run seed {seed}, ascension {ascension}."
 
 
 # `EB-272`. THE ARMS' OWN WORDS, DEFINED ONCE PER SCREEN.
@@ -3396,9 +3400,16 @@ RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
 RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
 #: 2026-10-01 (a Varka seat): a hit on YOU while the card resolved -- an
 #: enemy's Thorns answering it, say. Listed under Diluc's row it read as
-#: "Overload hit Varka"; a reaction never hits you, and the line says so.
+#: "Overload hit Varka". 2026-10-04 (Klee w20 round, lane 2): the line's
+#: "a reaction never hits you" then read as the reaction hitting you, so the
+#: line names who hit you instead: the dealer the mod filed, with its Thorns
+#: where the board shows that enemy holding Thorns.
 RESOLUTION_HIT_ON_YOU = ("  {n}. **{target}** (you) -- {amount}, taken while "
-                         "it resolved; a reaction never hits you")
+                         "it resolved{source}")
+RESOLUTION_HIT_SOURCE = ", from **{source}**"
+RESOLUTION_HIT_THORNS = ", from **{source}**'s Thorns"
+#: The power name the page names as the source of a hit on you.
+THORNS_POWER = "Thorns"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
 #: 2026-09-26 (the Silent control seat): "Poison applied is never shown in
 #: 'what it did'." A power the card put on an enemy, or took off one.

@@ -1286,7 +1286,10 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                  "combat_id": _text(h.get("combat_id")),
                  "killed": bool(h.get("killed")),
                  # 2026-10-01: a hit that landed on a player.
-                 "on_player": bool(h.get("on_player"))}
+                 "on_player": bool(h.get("on_player")),
+                 # 2026-10-04: and who dealt it (an enemy's Thorns), where
+                 # the mod named a dealer; "" on an older mod.
+                 "source": _text(h.get("source"))}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
         # 2026-09-25 evening: who a random summon inside the card rolled, in

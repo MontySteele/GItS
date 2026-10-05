@@ -45,8 +45,10 @@ def test_a_hit_on_you_inside_a_card_says_it_was_you_and_not_a_reaction():
              "on_player": True},
         ]}]))
     assert "1. **Nibbit** -- 8" in page
-    assert ("2. **Varka** (you) -- 3, taken while it resolved; a reaction "
-            "never hits you") in page
+    # 2026-10-04: no dealer on this wire and no Thorns on the board, so the
+    # line says whose HP it was and names nobody.
+    assert "2. **Varka** (you) -- 3, taken while it resolved" in page
+    assert "a reaction never hits you" not in page
 
 
 def test_the_ledger_marks_a_hit_on_a_player():

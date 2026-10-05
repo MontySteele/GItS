@@ -97,6 +97,21 @@ def _fresh_blindplay_deck(tmp_path_factory):
     faces._DECK_STORE_DIR = held
 
 
+# 2026-10-04. THE MAP PAGE READS THE LANE'S EMBARK SIDECAR for the run seed
+# (`blindplay_shape.lane_run_seed`), and the real ones sit under
+# `understudy/logs` on any checkout that has embarked. A test page must not
+# print whichever seed the developer's last embark read back, so every test
+# reads an empty directory unless it writes its own sidecar there.
+@pytest.fixture(autouse=True)
+def _no_embark_sidecars(tmp_path_factory):
+    from understudy import blindplay_shape as shape
+    store = tmp_path_factory.getbasetemp() / "blindplay-sidecars"
+    store.mkdir(parents=True, exist_ok=True)
+    held, shape._SIDECAR_DIR = shape._SIDECAR_DIR, store
+    yield
+    shape._SIDECAR_DIR = held
+
+
 # --- THE SEAM FAMILY, FOR THE FENCES THAT READ SOURCE ----------------------
 # `EB-180` split `understudy/soak.py`, `blindplay.py` and `staged_turn.py`
 # into one module per concern. Half a dozen fences in this suite are written
