@@ -1248,7 +1248,7 @@
    # R276 pick 1: the intent, read at carry-out. THE CLEANUP PASS
    # (2026-09-29): `amount` is a flat 6 under it, because the Plan "gave 0
    # Block twice on Empower turns" (a seat). Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the enemy intends.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the enemy intends next turn.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_front_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
@@ -2004,11 +2004,12 @@
    cost: 1, type: skill, rarity: uncommon,
    # Defect's Compact on the next hand, curses included. Sea Glass is a token
    # in no pool: 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into Sea Glass{IfUpgraded:show:+|}.",
-   effects: [{op: block, amount: 6}],
+   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into Sea Glass{IfUpgraded:show:+|}.",
+   effects: [{op: block, amount: 8}],
    plan: [{op: transform_statuses_in_hand}],
-   # 7 Block; the Sea Glass arrives upgraded.
-   upgrade: {block: 1, upgraded_grant: true}}
+   # KOKOMI REVIEW ROUND (2026-10-05): 6 [7] -> 8 [11], Coral Bulwark's Common rate.
+   # 11 Block; the Sea Glass arrives upgraded.
+   upgrade: {block: 3, upgraded_grant: true}}
 
 - {id: proto_kk_turning_tide, name: "Turning Tide", character: kokomi,
    authored_by: [claude],

@@ -60,7 +60,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(6m, ValueProp.Move)
+            new BlockVar(8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -95,7 +95,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(3m);
         // upgraded_grant: the granted card arrives upgraded, read off IsUpgraded when the Power is installed.
     }
 }
