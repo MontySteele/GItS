@@ -1449,7 +1449,7 @@ _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "handles": {}, "elements": set(),
                                  "round": None, "hp": {}, "reborn": {},
                                  "replaced": {}, "kills": {}, "shown": {},
-                                 "revived": {}}
+                                 "revived": {}, "briefed": set()}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -1495,7 +1495,7 @@ def _load_fight() -> None:
     held_round = held.get("round")
     if isinstance(held_round, int):
         _FIGHT_MEMORY["round"] = held_round
-    for key in ("numbered", "elements"):
+    for key in ("numbered", "elements", "briefed"):
         value = held.get(key)
         if isinstance(value, list):
             _FIGHT_MEMORY[key] = {str(v) for v in value}
@@ -1516,6 +1516,7 @@ def _save_fight() -> None:
            "shown": dict(_FIGHT_MEMORY["shown"]),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
            "elements": sorted(_FIGHT_MEMORY["elements"]),
+           "briefed": sorted(_FIGHT_MEMORY["briefed"]),
            "round": _FIGHT_MEMORY["round"]}
     try:
         _FIGHT_STORE_DIR.mkdir(parents=True, exist_ok=True)
@@ -1539,11 +1540,37 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["revived"] = {}
     _FIGHT_MEMORY["kills"] = {}
     _FIGHT_MEMORY["shown"] = {}
+    _FIGHT_MEMORY["briefed"] = set()
     _FIGHT_LOADED[0] = True
     try:
         _fight_store().unlink()
     except OSError:
         pass
+
+
+def briefed_this_fight() -> set[str]:
+    """The kinds of enemy whose base-game briefing a printed page has shown
+    in THIS fight (seat page 3, 2026-10-05). Read after the board's names
+    are read, which is where a new fight drops the memory."""
+    _load_fight()
+    return set(_FIGHT_MEMORY["briefed"])
+
+
+def remember_briefed(keys: set[str]) -> None:
+    """Add the kinds a page just printed a briefing for, and write it down."""
+    _load_fight()
+    if not keys or keys <= _FIGHT_MEMORY["briefed"]:
+        return
+    _FIGHT_MEMORY["briefed"] |= set(keys)
+    _save_fight()
+
+
+def forget_briefed() -> None:
+    """A fresh seat on a lane mid-fight is shown the briefing again."""
+    _load_fight()
+    if _FIGHT_MEMORY["briefed"]:
+        _FIGHT_MEMORY["briefed"] = set()
+        _save_fight()
 
 
 def remember_elements(found: set[str]) -> set[str]:

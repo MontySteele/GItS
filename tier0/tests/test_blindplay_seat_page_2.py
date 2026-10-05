@@ -117,14 +117,15 @@ def test_an_enemy_the_table_does_not_know_prints_no_section():
     assert blindplay_render.BRIEFING_HEADING not in page
 
 
-def test_the_brief_page_prints_the_briefing_once_per_lane():
+def test_the_brief_page_never_trims_the_briefing():
+    """Seat page 3: once per FIGHT, by the fight's memory
+    (`test_blindplay_seat_page_3`), and never cut as a word the lane saw."""
     seen: set[str] = set()
     first = blindplay_brief.brief(blindplay.observe(kaiser()), seen)
     second = blindplay_brief.brief(blindplay.observe(kaiser()), seen)
     assert "*Crusher* —" in first
     assert blindplay_render.BRIEFING_HEADING in first
-    assert "*Crusher* —" not in second
-    assert blindplay_render.BRIEFING_HEADING not in second
+    assert "*Crusher* —" in second
 
 
 def test_define_finds_an_enemy_after_round_one():
@@ -279,6 +280,7 @@ def test_the_printing_door_prints_only_what_is_new(tmp_path, capsys):
 
 def test_the_line_is_capped():
     many = [card_row(f"Card {n}", [ev("triggered", 200 + n, target=f"E{n}",
-                                      power="Thorns")]) for n in range(12)]
+                                      power="Hard To Kill")])
+            for n in range(12)]
     (line,) = since(with_events(many))
     assert line.endswith("and 4 more.")

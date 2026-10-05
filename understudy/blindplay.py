@@ -149,6 +149,7 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _BARE_HOOK, _card_face, _card_title, _dedupe_text, _element,
     _ELEMENT_KEYWORD, EMPTY_SHELF, _enchantment, _enemy_key, _enemy_names,
     _DECK_MEMORY, _FIGHT_MEMORY, forget_deck, forget_fight, forget_run,
+    briefed_this_fight, forget_briefed, remember_briefed,
     forget_shelves, run_change, deck_elements,
     _hazard, _hook_note, _intent, _intents, _is_aura, _meter_max,
     _named_option, _number_faces, _OPTION_KIND_KEYS, _OPTION_NAME_KEYS,
@@ -358,7 +359,8 @@ def cmd_observe(args) -> int:
         if word:
             print(blindplay_brief.define(observe(state), word).rstrip("\n"))
         else:
-            print(_page(screen_page(state), args))
+            print(_page(screen_page(state, full=not _brief_on(args)),
+                        args))
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=out)
         return 1
@@ -377,14 +379,30 @@ def cmd_observe(args) -> int:
     return 0
 
 
-def screen_page(state: dict[str, Any]) -> str:
+def screen_page(state: dict[str, Any], full: bool = True) -> str:
     """The full page as a printing door prints it: `observe`, with the
-    combat page's "Since last page" line cut to the ledger events this lane
-    has not been shown yet, and the newest one recorded (2026-10-05)."""
+    "Since last page" line cut to the ledger events this lane has not been
+    shown yet, and the newest one recorded (2026-10-05).
+
+    SEAT PAGE 3: and the enemy briefing ONCE PER FIGHT. It printed on round 1
+    and the brief page cut it as a word the LANE had seen, so a seat whose
+    one round-1 page went past unread (a seat's own `sed` slice, or a fresh
+    seat on the lane) never saw it again. Now the fight remembers which kinds
+    it has briefed, and the first page of the fight that a door prints carries
+    the briefing whatever the round. `full` (plain `observe`) prints it on
+    every round-1 page as before."""
     obs = observation(state)
-    if obs.get("combat") is not None:
-        obs["combat"]["events_after"] = blindplay_shape.read_events_seen()
+    combat = obs.get("combat")
+    if combat is not None:
+        combat["events_after"] = blindplay_shape.read_events_seen()
+        combat["briefed"] = (set() if full and combat.get("round") == 1
+                             else briefed_this_fight())
+    elif obs.get("blocked") == "":
+        obs["events_after"] = blindplay_shape.read_events_seen()
     text = render(obs)
+    if combat is not None:
+        remember_briefed({e["brief_key"] for e in combat.get("enemies") or []
+                          if e.get("briefing") and e.get("brief_key")})
     newest = newest_event(obs)
     if newest:
         blindplay_shape.write_events_seen(newest)
@@ -608,7 +626,7 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
     print(blindplay_coop.wait_line(waited, moved, latest))
     print()
     try:
-        print(_page(screen_page(latest), args))
+        print(_page(screen_page(latest, full=not _brief_on(args)), args))
     except (qa_packet.PacketLeak, BlindPlayError) as exc:
         print(f"REFUSED: {exc}", file=_refusal_stream(args))
         return 1
@@ -796,6 +814,8 @@ def cmd_new_seat(args) -> int:
     per LANE, so the new seat would never see a word the last one met. Forgets
     the words the lane has been shown; the action budget is left alone."""
     blindplay_shape.forget_words_seen()
+    # Seat page 3: and a fight in progress briefs its enemies again.
+    forget_briefed()
     print(f"lane {lane_tag(None)}: words forgotten; the next brief page "
           f"defines each word again (action budget unchanged).")
     return 0

@@ -53,6 +53,7 @@ from understudy.blindplay_notes import (AURA_NOTE, ENEMY_HANDLE_NOTE,
                                         _INTENT_SOURCE_HEAD,
                                         glossary_definition)
 from understudy.blindplay_enemies import brief_by_name
+from understudy.blindplay_render import BRIEFING_HEADING
 from understudy.blindplay_shape import PLAY_GUARDRAIL
 
 #: The glossary section. Its rows are kept the first time each prints on a
@@ -88,6 +89,12 @@ GLOSS_LINE = re.compile(r"^\s*\*[^*\s][^*]*\* — ")
 #: or a bare `- **Word**` where no rule applies) or an italic gloss.
 _WORDS_ROW = re.compile(r"^- \*\*(?P<word>[^*]+)\*\*(?: — (?P<text>.*))?$")
 _GLOSS_ROW = re.compile(r"^\s*\*(?P<word>[^*\s][^*]*)\* — (?P<text>.*)$")
+
+#: SEAT PAGE 3 (2026-10-05): sections kept WHOLE. The enemy briefing prints
+#: once per fight by the fight's own memory (`blindplay.screen_page`), so the
+#: lane's seen-words trim must not cut it as a word already defined: that
+#: trim is what left a seat with no briefing for a whole act.
+KEPT_SECTIONS = frozenset({BRIEFING_HEADING})
 
 #: Headings that are never dropped, even when their body is empty.
 KEPT_HEADINGS = frozenset({"## What you can say", "## Your hand",
@@ -174,6 +181,9 @@ def _trim(text: str, seen: set[str] | None = None
     for block in blocks:
         heading = block[0] if block and block[0].startswith("## ") else ""
         body = block[1:] if heading else block
+        if heading in KEPT_SECTIONS:
+            kept += block
+            continue
         if heading in DROPPED_SECTIONS:
             rows = [ln for ln in body
                     if ln.strip() and not PROTECTED.search(ln) and fresh(ln)]

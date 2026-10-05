@@ -367,7 +367,16 @@ public static class FurinaStage
     public static async Task CurtainCall(Creature? owner)
     {
         if (!LiveFor(owner) || owner!.IsDead) return;
-        await Director(new ThrowingPlayerChoiceContext(), owner).CurtainCall();
+        var back = await Director(new ThrowingPlayerChoiceContext(), owner)
+            .CurtainCall();
+        // 2026-10-05: the seat page says it on the next screen ("Drained N HP
+        // returned"); seats could not tell the drained HP came back.
+        if (back > 0)
+        {
+            ResolutionLedger.NoteEvent(ResolutionLedger.HpReturned,
+                                       string.Empty, owner, string.Empty,
+                                       back);
+        }
         RefreshBadges(owner);
     }
 

@@ -121,6 +121,21 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
 
         if (target.IsDead) return;
 
+        // 2026-10-05, THE SEAT PAGE'S "SINCE LAST PAGE" LINE: the attack that
+        // took Frozen off. A seat read the enemy's next hit at full strength
+        // as Frozen's cut failing, when its own Strike had Shattered it the
+        // same turn and the after-state showed only "no Frozen". Read-only.
+        try
+        {
+            ResolutionLedger.NoteEvent(ResolutionLedger.Shattered,
+                                       cardSource.Title?.ToString() ?? "",
+                                       target, Title.GetFormattedText() ?? "");
+        }
+        catch (System.Exception)
+        {
+            // a log never ends a beat
+        }
+
         // shatter_bonus (Freminet, Shattering Pressure): a flat rider the sim
         // adds inside the same raw `enemy.hp -=`, so it is unblockable and
         // unamplified exactly like the base Shatter. Read off the DEALER --

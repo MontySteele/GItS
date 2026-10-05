@@ -102,4 +102,14 @@ public static class FurinaStageLaw
         return lyney ? System.Math.Max(FiveCenturyLine, line - LyneyLineDrop)
                      : line;
     }
+
+    /// <summary>Where the line comes from, in words, for its hover and the
+    /// seat page (2026-10-05: seats connected the line to their entry HP
+    /// only late). The same three branches as
+    /// <see cref="LineOf(int, bool, bool)"/>.</summary>
+    public static string LineWhy(bool lyney, bool fiveCentury) =>
+        fiveCentury ? "A Five-Century Act"
+        : lyney ? "half the HP you started this fight with, "
+                  + LyneyLineDrop + " lower with Lyney on stage"
+        : "half the HP you started this fight with";
 }

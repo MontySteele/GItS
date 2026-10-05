@@ -437,8 +437,34 @@ public class ResolutionLedgerTests
         Assert.Equal("drawn", events[0]["kind"]);
         Assert.Equal("Strike", events[0]["card"]);
         Assert.Equal(new[] { "kind", "card", "target", "power", "combat_id",
-                             "on_player", "seq" },
+                             "on_player", "seq", "amount" },
                      new List<string>(events[0].Keys).ToArray());
+        Assert.Equal(0, events[0]["amount"]);
+    }
+
+    /// <summary>Seat page 3 (2026-10-05): the curtain call's figure rides
+    /// the event, and a Shatter and the curtain call reach the ledger.
+    /// </summary>
+    [Fact]
+    public void The_curtain_call_files_its_figure()
+    {
+        Fresh();
+        ResolutionLedger.NoteEvent(ResolutionLedger.HpReturned, "", "Furina",
+                                   "", "", onPlayer: true, amount: 12);
+        var events = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["events"]!;
+        Assert.Equal("curtain", events[0]["kind"]);
+        Assert.Equal(12, events[0]["amount"]);
+        Assert.Equal("shattered", ResolutionLedger.Shattered);
+    }
+
+    [Fact]
+    public void A_shatter_and_the_curtain_call_reach_the_ledger()
+    {
+        Assert.Contains("ResolutionLedger.NoteEvent",
+            Il.Calls(Il.Method("FrozenPower", "AfterDamageReceived")));
+        Assert.Contains("ResolutionLedger.NoteEvent",
+            Il.Calls(Il.Method("FurinaStage", "CurtainCall")));
     }
 
     /// <summary>Outside any play the event goes on a row with no card,

@@ -268,6 +268,11 @@ public sealed class FurinaStageLedger
     public int Line => FurinaStageLaw.LineOf(
         EntryHp, OnStage(StagePerformer.Lyney), Mods.FiveCenturyAct > 0);
 
+    /// <summary>Where <see cref="Line"/> comes from, in words (2026-10-05).
+    /// </summary>
+    public string LineWhy => FurinaStageLaw.LineWhy(
+        OnStage(StagePerformer.Lyney), Mods.FiveCenturyAct > 0);
+
     /// <summary>Can she Drain <paramref name="amount"/> at
     /// <paramref name="hp"/>? Not below the line.</summary>
     public bool CanDrain(int amount, int hp) =>
@@ -529,6 +534,7 @@ public sealed class FurinaStageLedger
         snapshot["drained"] = ledger.Drained;
         snapshot["entry_hp"] = ledger.EntryHp;
         snapshot["drain_line"] = ledger.Line;
+        snapshot["drain_line_why"] = ledger.LineWhy;
         snapshot["capacity"] = ledger.Capacity;
         StageForecast? forecast;
         try
