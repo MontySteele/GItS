@@ -6424,7 +6424,7 @@ card designs are the main session's; this note records the build.
   one in hand, the `FrontFoldedDamageVar` rule) with Cryo carried. Deep
   Freeze (U Skill 1, Retain: "Apply Cryo to an enemy. Double its Weak and
   Vulnerable.") doubles each by applying what the enemy holds, so Absolute
-  Zero pays on it. **Its upgrade, cost 1 to 0, is the builder's proposal**
+  Zero pays on it. **Its upgrade, cost 1 to 0, was the builder's proposal, confirmed by the main session 2026-10-04**
   and waits on the main session.
 - **Unwavering Banner reworded:** "Only Knights can change your current
   element. Whenever another card would, gain 1 Oath of your current element

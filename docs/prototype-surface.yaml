@@ -3617,8 +3617,7 @@
 
 - {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
    authored_by: [claude],
-   # The upgrade (cost 1 to 0) is the builder's proposal, for the main
-   # session to confirm.
+   # Upgrade cost 1 to 0: confirmed by the main session, 2026-10-04.
    cost: 1, type: skill, rarity: uncommon, retain: true,
    description: "Apply [gold]Cryo[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
