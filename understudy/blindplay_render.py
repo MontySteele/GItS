@@ -2568,6 +2568,19 @@ _PER_CARD_RELIC = re.compile(
     r"end of your turn, gain (\d+) Block for each card in your hand", re.I)
 #: Beating Remnant: "You cannot lose more than 20 HP in a single turn."
 _HP_LOSS_CAP = re.compile(r"lose more than (\d+) HP", re.I)
+#: SEAT PAGE 7 (2026-10-05): Kokomi's waiting Dusk Plans, which the
+#: Bake-Kurage carries out at the end of this turn, before the enemies act
+#: (`ProtoBakeKuragePower.BeforeSideTurnEnd`). Counted only off the entry's
+#: own Plan text on the wire (`plan_line`, numbers filled); an entry with no
+#: text, or whose Block the page cannot count (Double your Block), is named.
+DUSK_FOLD_NAME = "{name} (Dusk Plan)"
+_DUSK_FLAT_BLOCK = re.compile(r"^Gain (\d+) Block\.?$", re.I)
+#: Breakwater: the count is the queue left once the Dusk entries are out.
+_DUSK_PER_PLAN = re.compile(
+    r"^Gain (\d+) Block, and (\d+) more for each Plan waiting\.?$", re.I)
+#: Evening Watch: the living enemies with an attack shown.
+_DUSK_PER_ATTACKER = re.compile(
+    r"^Gain (\d+) Block for each enemy intending to attack\.?$", re.I)
 
 
 def _plain_name(title: Any) -> str:
@@ -2585,15 +2598,67 @@ def _named_sum(parts: list[tuple[str, int]]) -> tuple[str, int, bool]:
     return who, sum(n for _name, n in parts), len(parts) > 1
 
 
+def _dusk_block_number(text: str, morning: int, attackers: int) -> int | None:
+    """One Dusk entry's Block off its Plan text, 0 where it gives no Block,
+    `None` where the page cannot count it."""
+    text = re.sub(r"^.*\bplan:\s*", "", text.strip(), flags=re.I | re.S)
+    if not text:
+        return None
+    found = _DUSK_FLAT_BLOCK.match(text)
+    if found:
+        return int(found.group(1))
+    found = _DUSK_PER_PLAN.match(text)
+    if found:
+        return int(found.group(1)) + int(found.group(2)) * morning
+    found = _DUSK_PER_ATTACKER.match(text)
+    if found:
+        return int(found.group(1)) * attackers
+    return None if re.search(r"\bBlock\b", text, re.I) else 0
+
+
+def _dusk_facts(plans: dict[str, Any] | None,
+                enemies: list[dict[str, Any]]
+                ) -> tuple[list[tuple[str, int]], list[str]]:
+    """The waiting Dusk Plans' Block: `(counted, named)`. Nereid's Ascension
+    carries the first Dusk entry out twice (`KokomiPlan.Drain`)."""
+    queue = (plans or {}).get("queue") or []
+    morning = sum(1 for e in queue if not _is_dusk(e))
+    attackers = sum(1 for e in enemies
+                    if not e.get("phase_flip")
+                    and not (isinstance(e.get("hp"), int) and e["hp"] <= 0)
+                    and any(_fold(i.get("type")) == "attack"
+                            for i in e.get("intents") or []))
+    counted: list[tuple[str, int]] = []
+    named: list[str] = []
+    first = True
+    for entry in queue:
+        if not _is_dusk(entry):
+            continue
+        name = DUSK_FOLD_NAME.format(
+            name=str(entry.get("name") or "")[len(_DUSK_MARK):])
+        n = _dusk_block_number(str(entry.get("plan_line") or ""), morning,
+                               attackers)
+        times = 2 if first and (plans or {}).get("twice") else 1
+        first = False
+        if n is None:
+            if name not in named:
+                named.append(name)
+        elif n > 0:
+            counted += [(name, n)] * times
+    return counted, named
+
+
 def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
-                    pets: list[dict[str, Any]]) -> dict[str, Any]:
+                    pets: list[dict[str, Any]],
+                    dusk: tuple[list[tuple[str, int]], list[str]] = ([], [])
+                    ) -> dict[str, Any]:
     """What lands between the end of your turn and the enemies' hits, off the
     wire's own numbers, as if the turn ended now; what the page cannot count
-    goes in `unknown`, by name."""
-    block_parts: list[tuple[str, int]] = []
+    goes in `unknown`, by name. SEAT PAGE 7: `dusk` is `_dusk_facts`'s."""
+    block_parts: list[tuple[str, int]] = list(dusk[0])
     hit_parts: list[tuple[str, int]] = []
     hp_parts: list[tuple[str, int]] = []
-    unknown: list[str] = []
+    unknown: list[str] = list(dusk[1])
     block_now = int(you.get("block") or 0)
     cap = None
     for relic in you.get("relics") or []:
@@ -2604,7 +2669,11 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
             continue
         found = _NO_BLOCK_RELIC.search(text)
         if found:
-            if block_now == 0:
+            if block_now == 0 and dusk[0]:
+                # Whether the Dusk Block lands before this relic looks is
+                # not on the page: named, never counted.
+                unknown.append(name)
+            elif block_now == 0:
                 block_parts.append((name, int(found.group(1))))
             continue
         found = _PER_CARD_RELIC.search(text)
@@ -2684,7 +2753,8 @@ def _with_folds(line: str, clauses: list[str]) -> str:
 
 def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                    hand: list[dict[str, Any]] | None = None,
-                   pets: list[dict[str, Any]] | None = None) -> str:
+                   pets: list[dict[str, Any]] | None = None,
+                   plans: dict[str, Any] | None = None) -> str:
     """`- Incoming this turn: N (your Block B): you would take T.`
 
     The sum of every attack part shown; a part it cannot count is named as
@@ -2709,7 +2779,8 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                     unknown.append(name)
             else:
                 total += part
-    facts = _turn_end_facts(you, hand or [], pets or [])
+    facts = _turn_end_facts(you, hand or [], pets or [],
+                            _dusk_facts(plans, enemies))
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     if not any_attack and not (facts["hit"] or facts["hp"]):
@@ -3300,7 +3371,7 @@ def render(obs: dict[str, Any]) -> str:
         # player may take it.
         if c["enemies"] and not obs.get("coop"):
             out += ["", _incoming_line(c["enemies"], you, c["hand"],
-                                       c.get("pets"))
+                                       c.get("pets"), c.get("plans"))
                     + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the
