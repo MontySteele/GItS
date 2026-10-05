@@ -69,6 +69,18 @@ ART_PLAN = REPO / "art" / "plan.tsv"
 # TO CLOSE ONE: make the art, add the case, DELETE the row here. Leaving the
 # row behind fails this lint.
 ICON_DEBT: dict[str, str] = {
+    # Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md):
+    # five new Powers; their icons come with the art pass.
+    "OusiaSurgePower":
+        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
+    "FiveCenturyActPower":
+        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
+    "FountainOfLucinePower":
+        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
+    "CriticsDarlingPower":
+        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
+    "BisPower":
+        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
     "AncientSeaAuthorityPower":
         "Fontaine ancient payoff; no icon planned, renders the placeholder",
     "CannonFireSupportPower":

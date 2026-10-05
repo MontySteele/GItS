@@ -2721,14 +2721,15 @@
 
 # --- THE TWO RARES ---
 
-# sec.17: "You gain twice as much Fanfare." Hits count; a second copy makes
-# it three times.
+# review/active/furina-pool-40-2026-10-05.md sec.2 (pick 1): back to the
+# research paper's sec.15 text. Hits no longer count; a second copy adds
+# again (two copies give +2x, never multiplicative).
 - {id: proto_fs_universal_revelry, name: "Universal Revelry", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    art_of: universal_revelry,
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "You gain twice as much [gold]Fanfare[/gold].",
+   description: "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that much additional [gold]Fanfare[/gold].",
    effects: [{op: apply_power, power: fs_universal_revelry, amount: 1,
               target: self}]}
 
@@ -2742,6 +2743,98 @@
              {op: damage,
               amount_formula: {base: 0, per: 2, count: stage_spent},
               target: all_enemies}]}
+
+# --- THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md sec.3,
+# ruled 2026-10-05, pick 2): seven Uncommons and three Rares, one Rare per
+# archetype. ---
+
+# Ousia: Drain room is the constraint, so its cards move the line.
+- {id: proto_fs_grand_deluge, name: "Grand Deluge", character: furina,
+   upgrade: {damage: +6},
+   authored_by: [claude],
+   register: salon, cost: 2, type: attack, rarity: uncommon,
+   description: "[gold]Drain[/gold] 6. Deal 16 [gold]Hydro[/gold] damage to ALL enemies.",
+   effects: [{op: stage_drain, amount: 6},
+             {op: damage, amount: 16, target: all_enemies,
+              applies_element: true}]}
+
+- {id: proto_fs_ousia_surge, name: "Ousia Surge", character: furina,
+   upgrade: {innate: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "The first time you [gold]Drain[/gold] each turn, draw 1 card.",
+   effects: [{op: apply_power, power: fs_ousia_surge, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_guest_star_lyney, name: "Guest Star: Lyney", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Summon Lyney.",
+   effects: [{op: stage_guest, member: lyney}]}
+
+- {id: proto_fs_a_five_century_act, name: "A Five-Century Act", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "You can [gold]Drain[/gold] down to 1 HP.",
+   effects: [{op: apply_power, power: fs_a_five_century_act, amount: 1,
+              target: self}]}
+
+# Pneuma: Repay needs volume and a reason.
+- {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Summon Sigewinne.",
+   effects: [{op: stage_guest, member: sigewinne}]}
+
+# Fountain of Lucine: a Skill that leaves a Power counting the three turns
+# (`FountainOfLucinePower`; sim `furina_tide`'s schedule). Each play keeps
+# its own three turns.
+- {id: proto_fs_fountain_of_lucine, name: "Fountain of Lucine", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "At the start of your next 3 turns, [gold]Repay[/gold] {PowerAmount:diff()}.",
+   effects: [{op: apply_power, power: fs_fountain_of_lucine, amount: 3,
+              target: self}]}
+
+- {id: proto_fs_critics_darling, name: "Critics' Darling", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that much damage to a random enemy.",
+   effects: [{op: apply_power, power: fs_critics_darling, amount: 1,
+              target: self}]}
+
+# The Crowd: a second use for the bank, and a reason to spend often.
+- {id: proto_fs_hold_the_stage, name: "Hold the Stage", character: furina,
+   upgrade: {conditional_block: +2, conditional_then_block: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 6: gain {BranchBlock:diff()} instead.",
+   effects: [{op: choose_one, modes: [
+              {label: "Gain 6 Block",
+               effects: [{op: block, amount: 6}]},
+              {label: "[gold]Spend[/gold] 6: gain 16 instead",
+               effects: [{op: stage_spend, amount: 6},
+                         {op: block, amount: 16}]}]}]}
+
+- {id: proto_fs_guest_star_chevreuse, name: "Guest Star: Chevreuse", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Summon Chevreuse.",
+   effects: [{op: stage_guest, member: chevreuse}]}
+
+- {id: proto_fs_bis, name: "Bis!", character: furina,
+   upgrade: {innate: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: rare,
+   description: "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep half of it.",
+   effects: [{op: apply_power, power: fs_bis, amount: 1,
+              target: self}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

@@ -2118,7 +2118,7 @@ def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
 #: amount and not the element; `FurinaStageDirector.Act`).
 STAGE_MEMBER_ELEMENTS = {
     "neuvillette": "Hydro", "clorinde": "Electro", "navia": "Geo",
-    "lynette": "Anemo", "wriothesley": "Cryo",
+    "lynette": "Anemo", "wriothesley": "Cryo", "lyney": "Pyro",
 }
 
 

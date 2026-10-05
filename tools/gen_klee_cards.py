@@ -3101,7 +3101,21 @@ APPLY_POWERS = {
     "fs_thunderous_applause": ("ThunderousApplausePower", None,
         "Whenever you [gold]Spend[/gold], deal {X} damage to ALL enemies."),
     "fs_universal_revelry": ("UniversalRevelryPower", None,
-        "You gain twice as much [gold]Fanfare[/gold]."),
+        "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that "
+        "much additional [gold]Fanfare[/gold]."),
+    # THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+    "fs_ousia_surge": ("OusiaSurgePower", None,
+        "The first time you [gold]Drain[/gold] each turn, draw {X} card."),
+    "fs_a_five_century_act": ("FiveCenturyActPower", None,
+        "You can [gold]Drain[/gold] down to 1 HP."),
+    "fs_fountain_of_lucine": ("FountainOfLucinePower", None,
+        "At the start of your next 3 turns, [gold]Repay[/gold] {X}."),
+    "fs_critics_darling": ("CriticsDarlingPower", None,
+        "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
+        "much damage to a random enemy."),
+    "fs_bis": ("BisPower", None,
+        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep "
+        "half of it."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -6163,11 +6177,13 @@ def exhausts_turn_calc_rider(card: dict,
             "KokomiResources.ExhaustsThisTurn(card.Owner)")
 
 
-#: The four guests a `stage_guest` row may name, as `FurinaStage.Guests`
+#: The seven guests a `stage_guest` row may name, as `FurinaStage.Guests`
 #: spells them (the Salon's Tab, 2026-10-05). A closed set, checked at emit
 #: rather than passed through: a typo that degraded quietly into "somebody"
 #: is the one failure a named summon could hide for a whole round.
-FURINA_STAGE_GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde")
+FURINA_STAGE_GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
+                       # The pool to 39 (2026-10-05).
+                       "lyney", "sigewinne", "chevreuse")
 
 
 #: THE STAGE's statement ops (the Salon's Tab, 2026-10-05), each a single

@@ -6,18 +6,28 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
+    "proto_fs_a_five_century_act",
+    "proto_fs_bis",
     "proto_fs_bravura",
+    "proto_fs_critics_darling",
     "proto_fs_curtain_rise",
     "proto_fs_endless_waltz",
+    "proto_fs_fountain_of_lucine",
+    "proto_fs_grand_deluge",
     "proto_fs_guest_star_charlotte",
+    "proto_fs_guest_star_chevreuse",
     "proto_fs_guest_star_clorinde",
     "proto_fs_guest_star_lynette",
+    "proto_fs_guest_star_lyney",
+    "proto_fs_guest_star_sigewinne",
     "proto_fs_guest_star_wriothesley",
+    "proto_fs_hold_the_stage",
     "proto_fs_hymn_of_many_waters",
     "proto_fs_interval_bell",
     "proto_fs_leading_lady",
     "proto_fs_let_the_people_rejoice",
     "proto_fs_mademoiselle_crabaletta",
+    "proto_fs_ousia_surge",
     "proto_fs_pneuma_refrain",
     "proto_fs_quick_cue",
     "proto_fs_salons_encore",
@@ -371,18 +381,28 @@
     "proto_vk_wolfpack"
   ],
   "owners": {
+    "proto_fs_a_five_century_act": "furina",
+    "proto_fs_bis": "furina",
     "proto_fs_bravura": "furina",
+    "proto_fs_critics_darling": "furina",
     "proto_fs_curtain_rise": "furina",
     "proto_fs_endless_waltz": "furina",
+    "proto_fs_fountain_of_lucine": "furina",
+    "proto_fs_grand_deluge": "furina",
     "proto_fs_guest_star_charlotte": "furina",
+    "proto_fs_guest_star_chevreuse": "furina",
     "proto_fs_guest_star_clorinde": "furina",
     "proto_fs_guest_star_lynette": "furina",
+    "proto_fs_guest_star_lyney": "furina",
+    "proto_fs_guest_star_sigewinne": "furina",
     "proto_fs_guest_star_wriothesley": "furina",
+    "proto_fs_hold_the_stage": "furina",
     "proto_fs_hymn_of_many_waters": "furina",
     "proto_fs_interval_bell": "furina",
     "proto_fs_leading_lady": "furina",
     "proto_fs_let_the_people_rejoice": "furina",
     "proto_fs_mademoiselle_crabaletta": "furina",
+    "proto_fs_ousia_surge": "furina",
     "proto_fs_pneuma_refrain": "furina",
     "proto_fs_quick_cue": "furina",
     "proto_fs_salons_encore": "furina",
@@ -740,6 +760,10 @@
       "ProtoFsCurtainRiseModeA",
       "ProtoFsCurtainRiseModeB"
     ],
+    "proto_fs_hold_the_stage": [
+      "ProtoFsHoldTheStageModeA",
+      "ProtoFsHoldTheStageModeB"
+    ],
     "proto_fs_interval_bell": [
       "ProtoFsIntervalBellModeA",
       "ProtoFsIntervalBellModeB"
@@ -774,8 +798,17 @@
     ]
   },
   "upgrades": {
+    "proto_fs_a_five_century_act": {
+      "cost": -1
+    },
+    "proto_fs_bis": {
+      "innate": true
+    },
     "proto_fs_bravura": {
       "formula_per": 1
+    },
+    "proto_fs_critics_darling": {
+      "cost": -1
     },
     "proto_fs_curtain_rise": {
       "conditional_damage": 3,
@@ -784,7 +817,16 @@
     "proto_fs_endless_waltz": {
       "innate": true
     },
+    "proto_fs_fountain_of_lucine": {
+      "power_amount": 1
+    },
+    "proto_fs_grand_deluge": {
+      "damage": 6
+    },
     "proto_fs_guest_star_charlotte": {
+      "cost": -1
+    },
+    "proto_fs_guest_star_chevreuse": {
       "cost": -1
     },
     "proto_fs_guest_star_clorinde": {
@@ -793,8 +835,18 @@
     "proto_fs_guest_star_lynette": {
       "cost": -1
     },
+    "proto_fs_guest_star_lyney": {
+      "cost": -1
+    },
+    "proto_fs_guest_star_sigewinne": {
+      "cost": -1
+    },
     "proto_fs_guest_star_wriothesley": {
       "cost": -1
+    },
+    "proto_fs_hold_the_stage": {
+      "conditional_block": 2,
+      "conditional_then_block": 2
     },
     "proto_fs_hymn_of_many_waters": {
       "block": 3,
@@ -812,6 +864,9 @@
     },
     "proto_fs_mademoiselle_crabaletta": {
       "damage": 6
+    },
+    "proto_fs_ousia_surge": {
+      "innate": true
     },
     "proto_fs_pneuma_refrain": {
       "stage_repay": 2

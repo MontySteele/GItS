@@ -351,7 +351,11 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_STAGE_CHARLOTTE",
                     "KLEEMOD-ARM_STAGE_WRIOTHESLEY",
                     "KLEEMOD-ARM_STAGE_LYNETTE",
-                    "KLEEMOD-ARM_STAGE_CLORINDE"}
+                    "KLEEMOD-ARM_STAGE_CLORINDE",
+                    # The pool to 39 (2026-10-05): its three guests.
+                    "KLEEMOD-ARM_STAGE_LYNEY",
+                    "KLEEMOD-ARM_STAGE_SIGEWINNE",
+                    "KLEEMOD-ARM_STAGE_CHEVREUSE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -1176,6 +1180,10 @@ STAGE_SUMMONERS = {
     "proto_fs_guest_star_wriothesley": "Wriothesley",
     "proto_fs_guest_star_lynette": "Lynette",
     "proto_fs_guest_star_clorinde": "Clorinde",
+    # The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+    "proto_fs_guest_star_lyney": "Lyney",
+    "proto_fs_guest_star_sigewinne": "Sigewinne",
+    "proto_fs_guest_star_chevreuse": "Chevreuse",
 }
 
 
@@ -1221,7 +1229,10 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             "StagePerformerBadge.ActText(StagePerformer.Charlotte));",
             "StagePerformerBadge.ActText(StagePerformer.Wriothesley));",
             "StagePerformerBadge.ActText(StagePerformer.Lynette));",
-            "StagePerformerBadge.ActText(StagePerformer.Clorinde));"):
+            "StagePerformerBadge.ActText(StagePerformer.Clorinde));",
+            "StagePerformerBadge.ActText(StagePerformer.Lyney));",
+            "StagePerformerBadge.ActText(StagePerformer.Sigewinne));",
+            "StagePerformerBadge.ActText(StagePerformer.Chevreuse));"):
         assert clause in tips, clause
     for gone in ("StagePerformer.Usher", "StagePerformer.Chevalmarin",
                  "StagePerformer.Crabaletta", "[gold]Bow[/gold]"):
