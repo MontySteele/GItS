@@ -11,7 +11,7 @@ frozen in [`workstreams.md`](workstreams.md).
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
-**`MAJOR.AUTO`**. **Installed: `0.2.4218`** (2026-10-02, main after legacy cleanup stage 6).
+**`MAJOR.AUTO`**. **Installed: `0.2.4456`** (2026-10-05, main after #927; the `+dirty` suffix is a tracked soak log, not code).
 
 **The current kits are the release build** (2026-09-28). [USER]: "The current
 character builds are much more progressed than the old prototypes were, even
@@ -42,9 +42,9 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
-| `klee` | Klee | 70 | Mondstadt | Pyro | Prototype (at the finish line) | 78 |
+| `klee` | Klee | 70 | Mondstadt | Pyro | Balance (ruled 2026-10-03; measurement plan being drafted) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab built; awaiting [USER]'s play) | 24 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; awaiting [USER]'s play) | 34 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -55,7 +55,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
 
 ## The kits (Paper, then Prototype, then Balance; `operations/stage-gate.md`)
 
-- **Klee: at the finish line.** Brief `review/active/klee-brief-2026-09-01.md`.
+- **Klee: Balance (ruled 2026-10-03).** Brief `review/active/klee-brief-2026-09-01.md`.
   The pool is 78; two seat rounds read it; [USER]'s co-op run (A0, 2026-09-24)
   was "very fun ... the loop basically works"; the whole-pool balance review
   shipped (`review/records/klee-balance-2026-09-25.md`), and idle-vs-short Sparks
@@ -97,8 +97,8 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   their Sparks in act 2. An Opus check on the same seeds
   (`review/records/klee-opus-check-round-2026-10-02.md`): one run won,
   Klee's first seat win since the status package; the other died in act 2
-  short of Block, as the Sonnet runs did. Next, the finish line: [USER] plays one full run on
-  this build; fun through act 3 moves Klee to Balance. **The Mondstadt
+  short of Block, as the Sonnet runs did. The finish line was met without a further run on
+  this build: after the finish-line batch and its pre-Balance round (`review/records/klee-prebalance-round-2026-10-04.md`, "nothing critical"), [USER] ruled Klee to Balance on 2026-10-03 ("Agreed all around!"). Her measurement plan is being drafted. **The Mondstadt
   companion review (2026-10-03, ruled, built;
   `review/active/mondstadt-companions-2026-10-03.md`):** Stellaris Phantasm,
   Breastplate, Wind Spirit Creation and Fiery Rain retuned; Klee's 13
@@ -212,70 +212,11 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   The Moon, A Ship costs 1; Suffocating Deep applies 1 Weak and 1 Vulnerable
   before it doubles; the Nips she is handed (Shoal Call, Watatsumi
   Resistance, Kurage School's copies) Exhaust; Kurage Swarm reads "gains 1
-  more". No sim or seat round. Provenance note, "Kokomi Rare pass,
+  more". Merged 2026-10-05 (#907); a whole-kit review and a seat round follow. Provenance note, "Kokomi Rare pass,
   2026-10-04".
   Next: [USER] plays (a central rule changed; co-op with a friend may stand
   in); the damage gap is a paper after that run.
-- **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; seven guests. The pool is the starter and 34 cards, not 78: the slice's 24 and the pool to 39's ten (`review/active/furina-pool-40-2026-10-05.md`, ruled and built 2026-10-05; Universal Revelry reads Drain and Repay again, not hits). Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Not deployed. Next: [USER]'s play (a rule change), then a seat round. Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v2 build is in git; the v1 Stage is the tag `furina-stage-frozen-2026-10-04`.
-- **Furina: frozen (2026-10-04).** [USER]: "Let's freeze Furina's current build as-is for now, with the expectation that it gets shelved once we have a better idea." No card or rule changes to the current Stage build. The re-founding (`review/active/furina-refounding-2026-10-03.md`, ruled, sec.8 and sec.9) is being built as a sim-only slice; if it finds a strong structure, it replaces this build. The history below is the frozen build's.
-- **Furina: the Stage, first run cleared.** Brief
-  `review/active/furina-stage-brief-2026-09-08.md`; the Guest Cast paper
-  `review/active/furina-guest-batch-2026-09-25.md`. Draft-3 rules (Bow on any
-  exit, the fade, recasts add), eight Guest Stars with art and stage bodies.
-  [USER]'s first solo Stage run beat A2 (2026-09-26): "the core concept is
-  sound". The balance review that followed is
-  `review/records/furina-balance-2026-09-26.md` (the front stayed exempt from
-  the fade until the fade pass below; the turn predictor becomes cues on the
-  performers). The supporting
-  pool (`review/active/furina-supporting-pool-2026-09-26.md`, ruled at the
-  defaults and swept) brought the pool to 78 (#692, #693, #694). Eleven Opus
-  seats read it (2026-09-26): a Solo win from act 2, three whole runs dying at
-  the act-3 boss, fixes in #696, #698, #699, #701, #702 and #703, Lyney and Stage Whisper
-  reworked; `review/records/furina-pool-seat-round-2026-09-26.md`. **The
-  Stage starter (2026-09-28):** [USER], "Typically we'd include 4 strikes, 4
-  defends and 2 actually useful cards that teach the character's core
-  mechanics - this seems like an unnecessary power spike." It is now the base
-  Strike x4, Defend x4, Curtain Rise and Rising Applause; Take the Stage
-  ("Summon a random performer with 3 Fanfare. Draw 1 card.", tentative until
-  the balance pass's pool audit) and Regal Bearing (Block 5, Weak 1; upgraded
-  6 and 2) are Commons, so the pool was 80 (78 after balance pass one). The
-  shipped sheet and starter do not move. **The audit pass (2026-09-29)**, on
-  [USER]'s ask for "a dedupe / audit / balance pass on Furina, aimed at
-  polishing the existing core systems": Gala Dinner, A Rapt Audience and Scene
-  Change cut (pool 78 -> 75); Ensemble Piece, Improvised Number, Ousia Surge,
-  Pneuma Refrain, Final Bow, Bring the House Down and Grand Deluge raised;
-  brief §17. **The fade pass (2026-09-29)**, on [USER]'s "make Fanfare deplete
-  faster, but make that depletion more impactful. Keep her Block cards
-  generally weak but her Spend cards strong": rule 12 is now a quarter of
-  every performer's Fanfare, rounded down, the front's included ("What about
-  a percentage fade, say 25%?"); Held Applause, Echoing Hall and Eternal
-  Applause cut (pool 75 -> 72); the Spend modes of Curtain Rise, Tidal
-  Flourish, Quick Cue, Spirited Aria and Grand Entrance, and Bravura's and
-  Bring the House Down's per-point rates, raised; brief §18. After [USER]'s
-  run on the new fade ("keeping him in the front was actually hard";
-  Sigewinne "strictly fanfare-negative"), Wriothesley holds the front while
-  on stage and Sigewinne is a free medic who heals the front performer
-  (brief §18, guest paper rule 2 and table). **Pool completion (2026-10-01,
-  ruled at the defaults):** paper `review/active/pool-completion-2026-10-01.md`
-  sec.5, built in both engines: Aria for One, Interval Bell, Casting Agent
-  (Uncommon), The Last Act, Critics' Darling, Star Turn (Rare), appended; her
-  twelve old-kit cards stay (pick 3a). Her second Ancient, Center of
-  Attention, is game-side. The pool is 78 (23 / 35 / 20). Klee's second
-  Ancient, Alice's Masterpiece, landed in the same build. Provenance note,
-  "Pool completion, 2026-10-01". **The rules pass (2026-10-01, ruled):**
-  paper `review/active/furina-rules-pass-2026-10-01.md`, built in both
-  engines. A Spend pays the back performer first, then forward, refused only
-  when the whole stage holds less ([USER]: "Agreed, spending start
-  back-forwards"); only a card or potion she plays summons on an empty stage;
-  the front no longer regains 1 (The Curtain Never Falls keeps its 2);
-  Wriothesley is "Always your front performer". Palais Ledger is "Your Spends
-  cost 1 less Fanfare"; Center of Attention lost its short-bar clause. Her
-  twelve old-kit rows are prototype rows (legacy cleanup pick 3): Singer of
-  Many Waters gives the front 6 Fanfare, Opening Number, Leading Lady and
-  Endless Waltz replace the three Companion feeders, eight are ported as
-  they are. The pool stays 78 (23 / 35 / 20), every row a `proto_fs_` row.
-  Quick Cue's Spend deals 11; five faces trimmed; brief §3, §6, §12 and §19.
-  Provenance note, "Furina rules pass, 2026-10-01".
+- **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; seven guests. The pool is the starter and 34 cards, not 78: the slice's 24 and the pool to 39's ten (`review/active/furina-pool-40-2026-10-05.md`, ruled and built 2026-10-05; Universal Revelry reads Drain and Repay again, not hits). Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Deployed. Two seat rounds read it: `review/records/furina-tab-round-2026-10-05.md` (one act-2 clear, every seat on Revelry plus Bravura) and, after the pool went to 34, `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one won; act-3 HP and an unread Repay plan are the open questions). Next: [USER]'s play (a rule change). Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v1 Stage and its history (first run, supporting pool, audit, fade and rules passes) are at the tag `furina-stage-frozen-2026-10-04`.
 
 - **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
   `review/active/varka-paper-kit-2026-09-28.md`, every pick ruled ([USER]:
@@ -367,7 +308,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   the paper's "Pyro and Cryo up" bar (Pyro -15, Cryo flat; the stock pilot
   prices an Exhaust at nothing) and Deep Freeze's upgrade (cost 0) is the
   builder's proposal: provenance note, "Varka combo pass, 2026-10-04".
-  Next: the paper's two-seat round, then [USER]'s next Varka run.
+  Its seat round (`review/records/varka-combo-round-2026-10-05.md`): the Block cut landed, one run cleared act 2; Pyro Exhaust paid nothing off-element and no seat built Cryo. Fixed from it (#917): Stoke the Flames makes Pyro current, Shatter renamed Icebreaker, Tempest Charge's draw checked (it works). A second round on the same seeds, with an Ironclad control, is running. Next: [USER]'s next Varka run.
 
 **Klee's and Furina's own relics and potions** (paper
 `review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
