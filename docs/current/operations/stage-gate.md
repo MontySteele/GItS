@@ -68,11 +68,8 @@ that part is fixed.
   and about ten Stage cards, two seats, then [USER]'s first Stage run; the
   pool then grows to 78.
 
-**Balance, gated by measurement.** Accepted rows are re-authored onto the
-character's real sheet under a `CONSTANTS_VERSION` bump and deleted from the
-prototype surface in the same commit; `EXPERIMENTS.md` binds in full from here
-(pre-registration, blind grading, stamps, bands, and the twelve-arm
-re-baseline where one is owed). The landing's slate also strikes the `LAW.md`
-lines the rulings deprecation audit lists for that kit
-(`review/ruled/rulings-deprecation-audit-2026-09-04.md` §3, R256 pick 4).
-**Exit:** the re-baseline publishes.
+**Balance, measured on the real game** (`review/active/klee-balance-measurement-2026-10-05.md`, ruled 2026-10-05). The bar is a base character's level: the kit's runs on the base-five baseline seeds (`review/records/base-five-baseline-2026-10-05.md`) reach act 3 as the base five's do, its damage a turn and HP lost by act sit within about 15% of theirs in the fight telemetry, and [USER]'s run says it is fun. Rows stay on `docs/prototype-surface.yaml`; there is no re-authoring and no `CONSTANTS_VERSION` bump, and the sim re-baseline is not the gate. Each balance change states its expected effect in one line in its own paper, graded by the next suite.
+
+**The build is frozen until the metrics are recaptured** ([USER], 2026-10-05: "build is frozen until balance metrics are recaptured - aka we can make prototype changes, but not push them into the release build until the full suite is run"). A Balance kit's cards and rules on `main` (every build and release) do not change between suite runs. Changes to it are made on the staging branch `<kit>-next`, deployed for play and seats as a `+next` build (`tools/deploy_round.py --staging`), and reach `main` in one promotion PR that carries the suite record: the kit on the base-five baseline seeds through act 3 and the telemetry report, each change's one-line prediction graded.
+
+**Exit:** the bar is met on a suite run.

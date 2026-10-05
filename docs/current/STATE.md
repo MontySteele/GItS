@@ -42,7 +42,7 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
-| `klee` | Klee | 70 | Mondstadt | Pyro | Balance (ruled 2026-10-03; measurement plan being drafted) | 78 |
+| `klee` | Klee | 70 | Mondstadt | Pyro | Balance (frozen until the suite runs) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; awaiting [USER]'s play) | 34 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
@@ -98,7 +98,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   (`review/records/klee-opus-check-round-2026-10-02.md`): one run won,
   Klee's first seat win since the status package; the other died in act 2
   short of Block, as the Sonnet runs did. The finish line was met without a further run on
-  this build: after the finish-line batch and its pre-Balance round (`review/records/klee-prebalance-round-2026-10-04.md`, "nothing critical"), [USER] ruled Klee to Balance on 2026-10-03 ("Agreed all around!"). Her measurement plan is being drafted. **The Mondstadt
+  this build: after the finish-line batch and its pre-Balance round (`review/records/klee-prebalance-round-2026-10-04.md`, "nothing critical"), [USER] ruled Klee to Balance on 2026-10-03 ("Agreed all around!"). Her measurement plan is ruled (2026-10-05, `review/active/klee-balance-measurement-2026-10-05.md`): the base-character bar on the real game, and her build is frozen on `main` until each suite run; changes go to `klee-next`. **The Mondstadt
   companion review (2026-10-03, ruled, built;
   `review/active/mondstadt-companions-2026-10-03.md`):** Stellaris Phantasm,
   Breastplate, Wind Spirit Creation and Fiery Rain retuned; Klee's 13

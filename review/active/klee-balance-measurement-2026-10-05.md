@@ -1,6 +1,8 @@
 # Klee at Balance: what to measure
 
-Paper, 2026-10-05, main session. [USER] ruled Klee to Balance on 2026-10-03
+Paper, 2026-10-05, main session. **RULED 2026-10-05, all five picks at their defaults**
+([USER]: "I read through the Klee paper - looks good to me!"), with one
+addition, sec.6. [USER] ruled Klee to Balance on 2026-10-03
 (`QUEUE.md`), then: "time to properly measure Klee! This includes thinking
 through the old legacy instrumentation and figuring out what actually makes
 sense in the first place - is the old plan still too cumbersome to be worth
@@ -119,6 +121,15 @@ Block), now with a number. The other kits show the same act-2 gap (Varka
   fresh-input equivalent for five runs.
 - After that, balance passes run as they do now: a change, then two seats
   graded on telemetry.
+
+## 6. The freeze (added at the ruling)
+
+**The build is frozen until the metrics are recaptured** ([USER], 2026-10-05: "build is frozen until balance metrics are recaptured - aka we can make prototype changes, but not push them into the release build until the full suite is run"). A Balance kit's cards and rules on `main` (every build and release) do not change between suite runs. Changes to it are made on the staging branch `<kit>-next`, deployed for play and seats as a `+next` build (`tools/deploy_round.py --staging`), and reach `main` in one promotion PR that carries the suite record: the kit on the base-five baseline seeds through act 3 and the telemetry report, each change's one-line prediction graded.
+
+[USER] on the first read: "she's stronger in act 1 and weaker in later acts;
+it suggests the problem comes from scaling being low and flat numbers being
+high enough to somewhat balance it out." The first suite reads that directly:
+per-card damage by act from telemetry, scaling cards against flat ones.
 
 ## Picks
 
