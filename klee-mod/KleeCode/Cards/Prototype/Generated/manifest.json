@@ -1074,7 +1074,7 @@
       "power_amount": 1
     },
     "proto_kk_sea_glass_harvest": {
-      "block": 1,
+      "block": 3,
       "upgraded_grant": true
     },
     "proto_kk_seas_reproach": {

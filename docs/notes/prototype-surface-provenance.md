@@ -6625,3 +6625,10 @@ fights), At Water's Edge (a reaction happened in 41 solo fights).
 ## Varka r6 round, 2026-10-05
 
 Cycle of Seasons 4 [6] -> 7 [10], to a random enemy. Two seat rounds named it NEVER AGAIN ("4 damage per element change was the weakest card"). 7 is a Strike per element change and stays single-target per the AoE trim. Prediction: no NEVER AGAIN next round. Record: `review/records/varka-r6-round-2026-10-05.md`.
+
+## Kokomi review round, 2026-10-05
+
+Two changes after the seat round (`review/records/kokomi-review-round-2026-10-05.md`).
+
+- Tide Wall's Plan now says "plus the damage the enemy intends next turn." Wording only, no op change: the seat read the intent on screen and took the Plan as this turn's, but it is carried out next turn.
+- Sea Glass Harvest's now-line Block 6 [7] -> 8 [11]. Two seats named it NEVER AGAIN: 6 Block with nothing to transform. 8 [11] is Coral Bulwark's Common rate. The Plan is unchanged. Prediction: no NEVER AGAIN next round.
