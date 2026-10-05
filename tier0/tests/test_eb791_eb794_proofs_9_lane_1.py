@@ -138,7 +138,7 @@ def test_a_board_with_a_breakdown_stops_denying_it_has_one():
     page = blindplay.observe(_strength_attack(
         {"base_damage": 12, "folded_damage": 15, "repeats": 1,
          "total_damage": 15, "modifiers": ["Strength"]}))
-    assert "it is 12 on the move and 15 after" in page
+    assert "12 base, 15 with **Strength**" in page
     assert "no base, no modifier list and no breakdown" not in page
     assert blindplay.INTENT_SOURCE_NOTE_BREAKDOWN in page
 

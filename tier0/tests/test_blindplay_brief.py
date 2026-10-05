@@ -25,10 +25,7 @@ RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
                    / "observed.json")
 SEAT_BRIEF = REPO / "docs" / "current" / "operations" / "seat-brief.md"
 
-INTENT = ("    Intent: Aggressive (Attack) — the number on its icon is 12 — "
-          "This enemy intends to Attack for 12 damage. — this part lands on "
-          "you, and the feed carries no target for an intent part, so this "
-          "page cannot say which body")
+INTENT = "    Intent: Aggressive (Attack) — icon shows 12 — lands on you"
 
 #: Every line here that is not in DROPPABLE must survive the brief verbatim.
 NEVER_DROPPED = [

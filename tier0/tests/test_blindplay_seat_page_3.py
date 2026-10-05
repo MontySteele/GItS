@@ -344,8 +344,8 @@ def test_a_debuff_telegraph_names_what_the_move_does():
                        "description": "This enemy intends to do something "
                                       "to your cards."}])])
     page = blindplay.observe(state)
-    assert "Strategic (Debuff) — This enemy intends to apply a Debuff. — " \
-           "the move: applies Frail 2" in page
+    # Seat page 5: the game's generic hover sentence is not printed.
+    assert "Strategic (Debuff) — the move: applies Frail 2" in page
     assert "the move: steals a card from your draw or discard pile" in page
     assert page.count("the move:") == 2
 

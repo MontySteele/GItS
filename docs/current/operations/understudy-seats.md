@@ -249,7 +249,7 @@ on.
 **Asked of `STS2_MCP`: a resolving-part marker on a multi-part intent
 (`EB-461`).** `BuildEnemyState` sends one entry per intent part (`type`,
 `label`, `title`, `description`) and nothing that says which part resolves.
-So the page prints every part neutrally ("the number on its icon is 8, one
+So the page prints every part neutrally ("icon shows 8, one
 part of this move") and makes no claim about which lands; seats were hurt by
 both guesses (r14 read a bare number as a promise, r15 read a hedge as a
 warning). One key per intent on `BuildEnemyState` would close it. `STS2_MCP`
