@@ -105,7 +105,8 @@ def test_a_non_varka_fight_never_reaches_his_rules():
 
 def test_his_rows_always_resolve_and_his_verbs_refuse_anyone_else():
     _reset()
-    assert loader.get_card(_vk("gale_mantle")).id == _vk("gale_mantle")
+    assert (loader.get_card(_vk("stoke_the_flames")).id
+            == _vk("stoke_the_flames"))
     st = CombatState(player=Player(hp=80, max_hp=80, character_id="klee"),
                      enemies=[_enemy()], rng=random.Random(0))
     assert V.ledger(st.player) is None
@@ -146,9 +147,12 @@ def test_the_ruled_rows_and_their_upgrades(varka):
     up = loader.get_card(_vk("northwind_avatar") + "+")
     assert _fx(up.id, "damage")["amount"] == 14
     assert _fx(up.id, "varka")["base"] == 14
+    # Combo pass pick 3 (2026-10-04): the upgrade is cost 2 to 1 and
+    # nothing else.
     asc = loader.get_card(_vk("four_winds_ascension") + "+")
-    assert _fx(asc.id, "damage")["amount"] == 13
-    assert _fx(asc.id, "varka")["per"] == 4
+    assert asc.cost == 1
+    assert _fx(asc.id, "damage")["amount"] == 10
+    assert _fx(asc.id, "varka")["per"] == 3
     assert loader.get_card(_vk("grand_masters_order") + "+").retain is True
     assert _fx(_vk("knights_roll_call") + "+", "add_knight")["choose"] is True
     assert V.SWIRL_ELECTRO_DAMAGE_ALL == 3
@@ -265,9 +269,10 @@ def test_ascension_with_no_current_element_deals_its_anemo_only(varka):
 
 def _skill(*effects):
     """A non-Knight Skill of his carrying `effects` (the rebalance retired
-    the rows these pins used to borrow: Favonius Drill and Wind Wall)."""
+    the rows these pins used to borrow: Favonius Drill and Wind Wall; the
+    combo pass the template, Knightly Guard)."""
     import copy
-    card = copy.deepcopy(loader.get_card(_vk("knightly_guard")))
+    card = copy.deepcopy(loader.get_card(_vk("vow_of_the_blade")))
     card.effects = [dict(fx) for fx in effects]
     return card
 
@@ -438,21 +443,26 @@ def test_dawn_winds_march_pays_on_a_gain_of_the_current_element(varka):
     assert st.player.block == 11
 
 
-def test_the_turn_start_order_bunny_sworn_oath_of_the_knights(varka):
+def test_the_turn_start_order_bunny_then_sworn(varka):
+    """The combo pass (2026-10-04): the burst is one hit of the whole stack
+    at one random enemy, and Oath of the Knights left with its card."""
     st = _state(n=3, fang=False)
     p, led = st.player, _led(st)
     led.current = "hydro"
     p.powers[V.BARON_BUNNY] = 6 + 8                     # two Bunnies stack
     p.powers[V.SWORN_BROTHERHOOD] = 1
-    p.powers[V.OATH_OF_THE_KNIGHTS] = 1
     led.oath["hydro"] = 2
     V.turn_start(st)
-    assert all(e.hp == 100 - 14 and e.aura == "pyro" for e in st.enemies)
+    hit = [e for e in st.enemies if e.hp < 100]
+    assert len(hit) == 1
+    assert hit[0].hp == 100 - 14 and hit[0].aura == "pyro"
+    assert all(e.aura is None for e in st.enemies if e is not hit[0])
     assert V.BARON_BUNNY not in p.powers
     assert led.current == "hydro"                       # Bunny sets nothing
     # one burst, one scope: +1 Pyro; then Sworn +1 each.
     assert led.oath == {"pyro": 2, "hydro": 3, "electro": 1, "cryo": 1}
-    assert p.block == 3                                 # hydro Oath after Sworn
+    assert p.block == 0                                 # no Oath of the Knights
+    assert not hasattr(V, "OATH_OF_THE_KNIGHTS")
 
 
 def test_baron_bunny_through_the_turn(varka):
@@ -462,7 +472,8 @@ def test_baron_bunny_through_the_turn(varka):
     assert st.player.powers[V.BARON_BUNNY] == 6
     assert all(e.hp == 100 for e in st.enemies)
     V.turn_start(st)
-    assert all(e.hp == 94 for e in st.enemies)
+    # The combo pass (2026-10-04): a random enemy, not ALL.
+    assert sorted(e.hp for e in st.enemies) == [94, 100]
 
 
 def test_stormward_stance(varka):
@@ -575,12 +586,20 @@ def test_apply_current_element(varka):
     assert _led(st).oath["electro"] == 1
 
 
+def _knightly_guard():
+    """Knightly Guard's old row (cut by the combo pass, 2026-10-04): Block
+    8, and 1 Oath of the current element after a Knight this turn."""
+    return _skill({"op": "block", "amount": 8},
+                  {"op": "conditional", "if": "knight_played_this_turn",
+                   "then": [{"op": "varka", "kind": "gain_current_oath"}]})
+
+
 def test_gain_current_oath_and_knight_played_this_turn(varka):
     st = _state(fang=False)
-    _play(st, _vk("knightly_guard"))
+    _play(st, _knightly_guard())
     assert _led(st).oath == dict.fromkeys(V.ELEMENTS, 0)
     _play(st, _vk("amber_fiery_rain"))
-    _play(st, _vk("knightly_guard"))
+    _play(st, _knightly_guard())
     assert _led(st).oath["pyro"] == 2
     V.turn_start(st)
     assert V.predicate(st, "knight_played_this_turn") is False
@@ -621,12 +640,12 @@ def test_change_of_guard(varka):
     st = _state(fang=False)
     card = loader.get_card(_vk("change_of_guard"))
     assert card.cost == 0 and not card.exhaust
-    st.player.draw_pile = [loader.get_card(_vk("knightly_guard"))
+    st.player.draw_pile = [loader.get_card(_vk("favonius_cut"))
                            for _ in range(6)]
     st.player.hand = []
     _play(st, card)                                     # no Oath: draws only
     assert _led(st).current is None and st.player.block == 0
-    assert _hand_ids(st) == [_vk("knightly_guard")]
+    assert _hand_ids(st) == [_vk("favonius_cut")]
     assert card in st.player.discard_pile               # no Exhaust
     led = _led(st)
     led.oath.update(pyro=2, hydro=3, electro=3)
@@ -672,7 +691,9 @@ def test_the_counts(varka):
     led.current = "pyro"
     assert effects._runtime_count(st, "current_oath") == 2
     assert effects._runtime_count(st, "oath_elements") == 2
-    _play(st, _vk("tailwind_guard"))
+    # Tailwind Guard's old row (cut by the combo pass): the count stays.
+    _play(st, _skill({"op": "block", "amount_formula": {
+        "base": 0, "per": 3, "count": "oath_elements"}}))
     assert st.player.block == 6
     _play(st, _vk("favonius_cut"))
     _play(st, _vk("favonius_cut"))

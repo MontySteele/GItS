@@ -307,8 +307,10 @@
     "proto_vk_cycle_of_seasons",
     "proto_vk_dawn_patrol",
     "proto_vk_dawn_winds_march",
+    "proto_vk_deep_freeze",
     "proto_vk_diluc_searing_onslaught",
     "proto_vk_downburst",
+    "proto_vk_ember_cleave",
     "proto_vk_eula_icetide_vortex",
     "proto_vk_eye_of_stormterror",
     "proto_vk_eye_of_the_storm",
@@ -316,7 +318,6 @@
     "proto_vk_favonius_cut",
     "proto_vk_four_winds_ascension",
     "proto_vk_frost_ward",
-    "proto_vk_gale_mantle",
     "proto_vk_gale_sweep",
     "proto_vk_glacial_edict",
     "proto_vk_grand_masters_order",
@@ -325,7 +326,6 @@
     "proto_vk_kaeya_frostgnaw",
     "proto_vk_kaeya_glacial_waltz",
     "proto_vk_kindled_edge",
-    "proto_vk_knightly_guard",
     "proto_vk_knightly_strike",
     "proto_vk_knights_roll_call",
     "proto_vk_lisa_lightning_rose",
@@ -334,24 +334,25 @@
     "proto_vk_mika_starfrost_swirl",
     "proto_vk_noelle_steadfast_maid",
     "proto_vk_northwind_avatar",
-    "proto_vk_oath_of_the_knights",
     "proto_vk_oath_unto_death",
     "proto_vk_oathbound_aegis",
     "proto_vk_oathsworn_strike",
     "proto_vk_pathfinders_mark",
+    "proto_vk_pyre_oath",
     "proto_vk_rally_to_the_banner",
     "proto_vk_razor_claw_and_thunder",
     "proto_vk_retaliating_tide",
     "proto_vk_rippling_guard",
     "proto_vk_rising_gale",
+    "proto_vk_shatter",
     "proto_vk_shifting_gale",
     "proto_vk_short_circuit",
     "proto_vk_static_field",
+    "proto_vk_stoke_the_flames",
     "proto_vk_storm_battery",
     "proto_vk_storm_surge",
     "proto_vk_stormward_stance",
     "proto_vk_sworn_brotherhood",
-    "proto_vk_tailwind_guard",
     "proto_vk_tailwind_stride",
     "proto_vk_tempest_charge",
     "proto_vk_tempest_of_the_four_winds",
@@ -364,7 +365,6 @@
     "proto_vk_vow_of_the_blade",
     "proto_vk_wall_of_gales",
     "proto_vk_weathervane",
-    "proto_vk_west_wind_shield",
     "proto_vk_wildfire_oath",
     "proto_vk_windborne_resolve",
     "proto_vk_windbound_execution",
@@ -672,8 +672,10 @@
     "proto_vk_cycle_of_seasons": "varka",
     "proto_vk_dawn_patrol": "varka",
     "proto_vk_dawn_winds_march": "varka",
+    "proto_vk_deep_freeze": "varka",
     "proto_vk_diluc_searing_onslaught": "varka",
     "proto_vk_downburst": "varka",
+    "proto_vk_ember_cleave": "varka",
     "proto_vk_eula_icetide_vortex": "varka",
     "proto_vk_eye_of_stormterror": "varka",
     "proto_vk_eye_of_the_storm": "varka",
@@ -681,7 +683,6 @@
     "proto_vk_favonius_cut": "varka",
     "proto_vk_four_winds_ascension": "varka",
     "proto_vk_frost_ward": "varka",
-    "proto_vk_gale_mantle": "varka",
     "proto_vk_gale_sweep": "varka",
     "proto_vk_glacial_edict": "varka",
     "proto_vk_grand_masters_order": "varka",
@@ -690,7 +691,6 @@
     "proto_vk_kaeya_frostgnaw": "varka",
     "proto_vk_kaeya_glacial_waltz": "varka",
     "proto_vk_kindled_edge": "varka",
-    "proto_vk_knightly_guard": "varka",
     "proto_vk_knightly_strike": "varka",
     "proto_vk_knights_roll_call": "varka",
     "proto_vk_lisa_lightning_rose": "varka",
@@ -699,24 +699,25 @@
     "proto_vk_mika_starfrost_swirl": "varka",
     "proto_vk_noelle_steadfast_maid": "varka",
     "proto_vk_northwind_avatar": "varka",
-    "proto_vk_oath_of_the_knights": "varka",
     "proto_vk_oath_unto_death": "varka",
     "proto_vk_oathbound_aegis": "varka",
     "proto_vk_oathsworn_strike": "varka",
     "proto_vk_pathfinders_mark": "varka",
+    "proto_vk_pyre_oath": "varka",
     "proto_vk_rally_to_the_banner": "varka",
     "proto_vk_razor_claw_and_thunder": "varka",
     "proto_vk_retaliating_tide": "varka",
     "proto_vk_rippling_guard": "varka",
     "proto_vk_rising_gale": "varka",
+    "proto_vk_shatter": "varka",
     "proto_vk_shifting_gale": "varka",
     "proto_vk_short_circuit": "varka",
     "proto_vk_static_field": "varka",
+    "proto_vk_stoke_the_flames": "varka",
     "proto_vk_storm_battery": "varka",
     "proto_vk_storm_surge": "varka",
     "proto_vk_stormward_stance": "varka",
     "proto_vk_sworn_brotherhood": "varka",
-    "proto_vk_tailwind_guard": "varka",
     "proto_vk_tailwind_stride": "varka",
     "proto_vk_tempest_charge": "varka",
     "proto_vk_tempest_of_the_four_winds": "varka",
@@ -729,7 +730,6 @@
     "proto_vk_vow_of_the_blade": "varka",
     "proto_vk_wall_of_gales": "varka",
     "proto_vk_weathervane": "varka",
-    "proto_vk_west_wind_shield": "varka",
     "proto_vk_wildfire_oath": "varka",
     "proto_vk_windborne_resolve": "varka",
     "proto_vk_windbound_execution": "varka",
@@ -1477,7 +1477,7 @@
       "damage": 3
     },
     "proto_mc_jean_lions_fang": {
-      "power_amount": 1
+      "cost": -1
     },
     "proto_mc_kaeya_frostgnaw": {
       "damage": 3,
@@ -1726,7 +1726,7 @@
       "draw": 1
     },
     "proto_vk_charge_of_the_knights": {
-      "formula_per": 1
+      "formula_per": 2
     },
     "proto_vk_charged_lunge": {
       "varka_base": 3
@@ -1753,11 +1753,17 @@
     "proto_vk_dawn_winds_march": {
       "power_amount": 1
     },
+    "proto_vk_deep_freeze": {
+      "cost": -1
+    },
     "proto_vk_diluc_searing_onslaught": {
       "damage": 2
     },
     "proto_vk_downburst": {
       "damage": 4
+    },
+    "proto_vk_ember_cleave": {
+      "varka_base": 3
     },
     "proto_vk_eula_icetide_vortex": {
       "damage": 4
@@ -1775,14 +1781,10 @@
       "damage": 5
     },
     "proto_vk_four_winds_ascension": {
-      "damage": 3,
-      "varka_per": 1
+      "cost": -1
     },
     "proto_vk_frost_ward": {
       "varka_amount": 1
-    },
-    "proto_vk_gale_mantle": {
-      "formula_base": 3
     },
     "proto_vk_gale_sweep": {
       "damage": 2
@@ -1807,9 +1809,6 @@
     },
     "proto_vk_kindled_edge": {
       "varka_base": 3
-    },
-    "proto_vk_knightly_guard": {
-      "block": 3
     },
     "proto_vk_knightly_strike": {
       "damage": 3
@@ -1838,9 +1837,6 @@
       "damage": 4,
       "varka_base": 4
     },
-    "proto_vk_oath_of_the_knights": {
-      "innate": true
-    },
     "proto_vk_oath_unto_death": {
       "innate": true
     },
@@ -1852,6 +1848,9 @@
     },
     "proto_vk_pathfinders_mark": {
       "varka_upgraded": true
+    },
+    "proto_vk_pyre_oath": {
+      "innate": true
     },
     "proto_vk_rally_to_the_banner": {
       "cost": -1
@@ -1868,6 +1867,10 @@
     "proto_vk_rising_gale": {
       "damage": 2
     },
+    "proto_vk_shatter": {
+      "varka_base": 2,
+      "varka_per": 1
+    },
     "proto_vk_shifting_gale": {
       "damage": 2,
       "conditional_then_damage": 2
@@ -1877,6 +1880,9 @@
     },
     "proto_vk_static_field": {
       "power_amount": 1
+    },
+    "proto_vk_stoke_the_flames": {
+      "varka_amount": 1
     },
     "proto_vk_storm_battery": {
       "varka_per": 1
@@ -1889,9 +1895,6 @@
     },
     "proto_vk_sworn_brotherhood": {
       "upgraded_power": "vk_sworn_brotherhood"
-    },
-    "proto_vk_tailwind_guard": {
-      "formula_per": 1
     },
     "proto_vk_tailwind_stride": {
       "conditional_draw": 1
@@ -1928,9 +1931,6 @@
     },
     "proto_vk_weathervane": {
       "innate": true
-    },
-    "proto_vk_west_wind_shield": {
-      "formula_base": 2
     },
     "proto_vk_wildfire_oath": {
       "innate": true

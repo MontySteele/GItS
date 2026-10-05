@@ -57,7 +57,8 @@ internal static class VarkaRoster
     /// thirty-five Uncommons and twenty-three Rares, the thirteen pool
     /// Knights among them. It was forty-one (fifteen, eighteen and eight;
     /// the groups below keep the sheet's order, and each card's own rarity
-    /// is what the game reads).
+    /// is what the game reads). The combo pass (2026-10-04) swapped five
+    /// generic Block cards for five Pyro and Cryo cards, rarity for rarity.
     ///
     /// NO ANCIENT CARD, because the paper designs none. Darv's Dusty Tome
     /// draws an Ancient from this set and softlocks on an empty draw, so Four
@@ -66,8 +67,7 @@ internal static class VarkaRoster
     /// </summary>
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
-        // The Oath rework's forty-one.
-        ModelDb.Card<ProtoVkGaleMantle>(),        // Varka defence
+        // The Oath rework's forty-one (thirty-seven since the combo pass).
         ModelDb.Card<ProtoVkChargedLunge>(),      // element identities
         ModelDb.Card<ProtoVkGaleSweep>(),
         ModelDb.Card<ProtoVkRipplingGuard>(),     // the rebalance
@@ -79,7 +79,6 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkRazorClawAndThunder>(),
         ModelDb.Card<ProtoVkMikaStarfrostSwirl>(),
         ModelDb.Card<ProtoVkJeanDandelionBreeze>(),
-        ModelDb.Card<ProtoVkKnightlyGuard>(),
         ModelDb.Card<ProtoVkOathswornStrike>(),
         ModelDb.Card<ProtoVkCrosswind>(),
         ModelDb.Card<ProtoVkRisingGale>(),
@@ -90,7 +89,6 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkTailwindStride>(),
         ModelDb.Card<ProtoVkEyeOfTheStorm>(),
         ModelDb.Card<ProtoVkStormwardStance>(),
-        ModelDb.Card<ProtoVkOathOfTheKnights>(),
         ModelDb.Card<ProtoVkRallyToTheBanner>(),
         ModelDb.Card<ProtoVkDilucSearingOnslaught>(),
         ModelDb.Card<ProtoVkEulaIcetideVortex>(),
@@ -98,7 +96,6 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkWindborneResolve>(),  // Varka defence
         ModelDb.Card<ProtoVkChangeOfGuard>(),
         ModelDb.Card<ProtoVkStormSurge>(),
-        ModelDb.Card<ProtoVkTailwindGuard>(),
         ModelDb.Card<ProtoVkChainLightning>(),    // element identities
         ModelDb.Card<ProtoVkConvergingWinds>(),
         ModelDb.Card<ProtoVkBoreasUnbound>(),
@@ -109,10 +106,9 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkDawnWindsMarch>(),
         ModelDb.Card<ProtoVkAzureDevour>(),
         // THE EXPANSION (2026-10-01): thirty-seven, in the sheet's order.
-        // Common (5)
+        // Common (4)
         ModelDb.Card<ProtoVkPathfindersMark>(),
         ModelDb.Card<ProtoVkKindledEdge>(),       // the rebalance
-        ModelDb.Card<ProtoVkWestWindShield>(),
         ModelDb.Card<ProtoVkKnightlyStrike>(),
         ModelDb.Card<ProtoVkAmberSharpshooter>(),
         // Uncommon (17)
@@ -149,6 +145,16 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkEyeOfStormterror>(),
         ModelDb.Card<ProtoVkChargeOfTheKnights>(),
         ModelDb.Card<ProtoVkTheOrderAnswers>(),
+        // THE COMBO PASS (2026-10-04): five generic Block cards out (Gale
+        // Mantle, Knightly Guard, Oath of the Knights, Tailwind Guard, West
+        // Wind Shield), five in.
+        // Common (3)
+        ModelDb.Card<ProtoVkStokeTheFlames>(),
+        ModelDb.Card<ProtoVkEmberCleave>(),
+        ModelDb.Card<ProtoVkShatter>(),
+        // Uncommon (2)
+        ModelDb.Card<ProtoVkPyreOath>(),
+        ModelDb.Card<ProtoVkDeepFreeze>(),
     };
 
     /// <summary>

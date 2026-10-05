@@ -277,7 +277,12 @@ public class VarkaElementIdentitiesTests : IDisposable
     [InlineData("ProtoVkStormBattery", true)]
     [InlineData("ProtoVkFrostWard", false)]               // applies no element
     [InlineData("ProtoVkNoelleSteadfastMaid", false)]     // Geo
-    [InlineData("ProtoVkGaleMantle", false)]              // Anemo
+    [InlineData("ProtoVkJeanDandelionBreeze", false)]     // Anemo
+    // The combo pass (2026-10-04).
+    [InlineData("ProtoVkEmberCleave", true)]
+    [InlineData("ProtoVkShatter", true)]
+    [InlineData("ProtoVkDeepFreeze", true)]
+    [InlineData("ProtoVkStokeTheFlames", false)]          // a gain, no element
     public void A_card_that_switches_his_element_carries_the_switch_tip(
         string card, bool tipped)
     {

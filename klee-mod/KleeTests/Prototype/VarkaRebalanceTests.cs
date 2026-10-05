@@ -221,7 +221,8 @@ public class VarkaRebalanceTests : IDisposable
         Assert.Contains(CardKeyword.Retain, card.Keywords);
         Assert.Equal(TargetType.AnyEnemy, card.TargetType);
         Assert.Equal(10m, Var(card, "Damage"));
-        Assert.Equal(13m, Var(Upgraded<ProtoVkFourWindsAscension>(), "Damage"));
+        // Combo pass pick 3 (2026-10-04): the upgrade is cost 2 to 1.
+        Assert.Equal(10m, Var(Upgraded<ProtoVkFourWindsAscension>(), "Damage"));
         Assert.Contains(Calls("BoreasFang", "AddAscension"),
                         c => c.EndsWith(".CreateCard"));
     }

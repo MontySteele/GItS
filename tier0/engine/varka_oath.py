@@ -107,6 +107,27 @@ variant A's starter numbers):
     `refpowers.on_power_applied`, Sea's Reproach's seat).
   * CYCLE OF SEASONS: its damage hits one random enemy, not ALL.
 
+THE COMBO PASS (review/active/varka-combo-pass-2026-10-04.md, ruled
+2026-10-04, all four picks):
+  * FIVE GENERIC BLOCK CARDS LEFT: Oath of the Knights' turn-start Block went
+    with its card; the `half_total_oath`, `enemies_with_aura` and
+    `oath_elements` counts stay as grammar no row reads.
+  * BARON BUNNY's burst is one hit of the whole stack at ONE random living
+    enemy (was every enemy).
+  * PYRE OATH (`on_card_exhausted`, from `refpowers.after_card_exhausted`,
+    the one exhaust funnel): every card of his exhausted gains the stack's
+    Pyro Oath, one gain per card. A mid-play exhaust is swept there after
+    the play, so Stoke the Flames' own +2 lands first.
+  * UNWAVERING BANNER, reworded ("Only Knights can change your current
+    element. Whenever another card would, gain 1 Oath of your current element
+    instead."): the open Oath's switch and Change of Guard are held, and the
+    play gains 1 Oath of the current element, once per play
+    (`banner_holds`), when it would have been a change. Weathervane is held
+    too and, not being a card, gains nothing.
+  * KINDS `gain_pyro_oath` (Stoke the Flames), `pyro_strike` (Ember Cleave),
+    `shatter` (stacks of Weak plus Vulnerable on the aim, read before the
+    hit) and `deep_freeze` (double the aim's Weak and Vulnerable).
+
 VARKA WILDFIRE OATH AND SHORT CIRCUIT (2026-10-03):
   * WILDFIRE OATH is Pyro's Absolute Zero: "Whenever you apply Pyro to an
     enemy, deal damage equal to your Pyro Oath to it." Paid in `note_hit`,
@@ -145,7 +166,6 @@ PAYOUT_SOURCE = "card"
 
 # --- the powers his rows apply (`apply_power`, target self) ---
 STORMWARD = "vk_stormward_stance"
-OATH_OF_THE_KNIGHTS = "vk_oath_of_the_knights"
 SWORN_BROTHERHOOD = "vk_sworn_brotherhood"
 #: Power cost sweep, 2026-09-30: the base card's power, current element only
 #: (the upgrade installs SWORN_BROTHERHOOD, every element).
@@ -173,6 +193,10 @@ WEATHERVANE = "vk_weathervane"
 TWIN_GALES = "vk_twin_gales"
 EYE_OF_STORMTERROR = "vk_eye_of_stormterror"
 THE_ORDER_ANSWERS = "vk_the_order_answers"
+#: The combo pass (2026-10-04): Pyro's Exhaust engine.
+PYRE_OATH = "vk_pyre_oath"
+#: Unwavering Banner's "gain 1 Oath of your current element instead".
+BANNER_OATH = 1
 #: Eye of Stormterror: "The first 3 times you Swirl each turn".
 EYE_OF_STORMTERROR_SWIRLS = 3
 #: Tempest of the Four Winds' four hits, in the printed order.
@@ -215,6 +239,8 @@ KINDS = frozenset({
     "rippling_guard", "echo_block",
     # Downburst's rider (2026-10-04, after #882).
     "swirled_oath",
+    # THE COMBO PASS (2026-10-04).
+    "gain_pyro_oath", "pyro_strike", "shatter", "deep_freeze",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -236,6 +262,10 @@ KIND_FIELDS = {
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),
     "swirled_oath": ("amount",),
+    # The combo pass (2026-10-04).
+    "gain_pyro_oath": ("amount",),
+    "pyro_strike": ("base",),
+    "shatter": ("base", "per"),
 }
 #: The target each kind's row names (the codegen's `VARKA_AIMED_KINDS` less
 #: the two follow-up hits, and `VARKA_ALL_KINDS`); every other kind, none.
@@ -248,6 +278,8 @@ KIND_TARGETS = {
     "violet_storm": "random_enemy",
     "kindled_edge": "enemy", "storm_battery": "all_enemies",
     "frost_ward": "all_enemies", "gleeful_songs": "all_enemies",
+    # The combo pass (2026-10-04).
+    "pyro_strike": "enemy", "shatter": "enemy", "deep_freeze": "enemy",
 }
 #: `upgraded` is the `varka_upgraded` delta's mark (Pathfinder's Mark+).
 OP_FIELDS = frozenset({"op", "kind", "target", "per", "base", "amount",
@@ -297,6 +329,9 @@ class VarkaLedger:
     no_apply_credit: int = 0          # > 0 inside a hit that credits nothing
     landing: bool = False             # inside a Converging Winds spread
     stormward_in_bonus: int = 0       # Stormward's part of this play's bonus
+    #: Unwavering Banner (the combo pass): has the outermost open play paid
+    #: its "gain 1 Oath instead" yet.
+    banner_paid: bool = False
     # --- the rebalance paper (sim only) ---
     #: Whisper of Water: [Block, turns left] paid at each turn start.
     echo_block: list = field(default_factory=list)
@@ -428,6 +463,8 @@ def open_scope(state, open_oath: bool = False,
                target_pyro: bool = False) -> None:
     led = ledger(state.player)
     if led is not None:
+        if not led.scopes:
+            led.banner_paid = False
         led.scopes.append(set())
         led.play_swirls.append([])
         led.play_swirl_elements.append([])
@@ -459,13 +496,27 @@ def open_oath_switches(led: VarkaLedger, element: str,
                        player=None) -> bool:
     """Does this application make `element` current? Only inside an
     open-Oath play, for an Oath element, outside a no-credit hit, and never
-    under Unwavering Banner ("Only Knights and cards that name it can change
-    your current element")."""
+    under Unwavering Banner ("Only Knights can change your current element";
+    `note_hit` asks with no `player` and pays the Banner itself)."""
     if player is not None and _power(player, UNWAVERING_BANNER):
         return False
     return bool(OPEN_OATH and led.play_open and led.play_open[-1]
                 and element in ELEMENTS and not led.no_apply_credit
                 and not led.landing)
+
+
+def banner_holds(state, element: str) -> None:
+    """UNWAVERING BANNER (the combo pass, 2026-10-04): "Whenever another card
+    would [change your current element], gain 1 Oath of your current element
+    instead." Only when it would have been a change (another element is
+    current), once per play. C# twin: `VarkaOath.BannerHolds`."""
+    led = ledger(state.player)
+    if (led is None or led.current is None or element == led.current
+            or led.banner_paid):
+        return
+    led.banner_paid = True
+    state.emit("varka_banner", element=led.current, would=element)
+    gain(state, led.current, BANNER_OATH, "unwavering_banner")
 
 
 # --------------------------------------------------------------------------
@@ -559,8 +610,11 @@ def note_hit(state, enemy, element) -> None:
             state.emit("varka_static_field", draw=sf)
             state.draw(sf)
     if not led.no_apply_credit:
-        if open_oath_switches(led, element, state.player):
-            set_current(state, element, knight=False)
+        if open_oath_switches(led, element):
+            if _power(state.player, UNWAVERING_BANNER):
+                banner_holds(state, element)
+            else:
+                set_current(state, element, knight=False)
         credit(state, "apply", element)
     # WILDFIRE OATH (Varka Wildfire Oath and Short Circuit, 2026-10-03):
     # "Whenever you apply Pyro to an enemy, deal damage equal to your Pyro
@@ -756,7 +810,8 @@ def gmo_replays(state, card) -> int:
 
 def turn_start(state) -> None:
     """`combat._player_turn`, post-draw: the per-turn clears, then Baron
-    Bunny's burst, Sworn Brotherhood, Oath of the Knights, in that order."""
+    Bunny's burst, Sworn Brotherhood, The Order Answers, in that order (Oath
+    of the Knights left with its card in the combo pass)."""
     from tier0.engine import effects                # late: cycle
     led = ledger(state.player)
     if led is None:
@@ -782,20 +837,24 @@ def turn_start(state) -> None:
             state.emit("varka_fang_element", element=el)
             set_current(state, el, knight=False)
     # WEATHERVANE (the expansion), first: "you may choose an element you have
-    # Oath in; it becomes your current element." It names the switch, so the
-    # Banner does not stop it; Sworn Brotherhood below gains the new one.
-    if _power(p, WEATHERVANE):
+    # Oath in; it becomes your current element." Sworn Brotherhood below
+    # gains the new one. Since the combo pass "Only Knights can change your
+    # current element": the Banner holds it, and it is no card, so no Oath.
+    if _power(p, WEATHERVANE) and not _power(p, UNWAVERING_BANNER):
         _weathervane(state, led)
     bunny = int(p.powers.pop(BARON_BUNNY, 0))
     if bunny:
         state.emit("varka_baron_bunny", amount=bunny)
-        open_scope(state)
-        try:
-            for e in list(state.living_enemies):
+        # The combo pass (2026-10-04): one random living enemy, was ALL.
+        targets = list(state.living_enemies)
+        if targets:
+            e = state.rng.choice(targets)
+            open_scope(state)
+            try:
                 effects.deal_damage_to_enemy(state, e, bunny, element="pyro",
                                              source="card", powered=False)
-        finally:
-            close_scope(state)
+            finally:
+                close_scope(state)
     sworn = _power(p, SWORN_BROTHERHOOD)
     if sworn:
         for el in ELEMENTS:
@@ -804,9 +863,6 @@ def turn_start(state) -> None:
     led_now = ledger(p)
     if sworn_current and led_now is not None and led_now.current is not None:
         gain(state, led_now.current, sworn_current, "sworn_brotherhood")
-    okn = _power(p, OATH_OF_THE_KNIGHTS)
-    if okn:
-        _block(state, current_oath(p) * okn, "oath_of_the_knights")
     # THE ORDER ANSWERS (the expansion), last: "add a random Knight to your
     # hand" -- a pool Knight, at its own cost.
     for _ in range(_power(p, THE_ORDER_ANSWERS)):
@@ -1109,6 +1165,8 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
             _card_hit(state, card, aim, fx["base"], el)
     elif _rebalance_kind(state, fx, card, led):
         pass
+    elif _combo_kind(state, fx, card, led):
+        pass
     else:
         return False
     return True
@@ -1172,6 +1230,59 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     return True
 
 
+def weak_and_vulnerable(enemy) -> int:
+    """Shatter's count: the stacks of Weak plus Vulnerable on `enemy`."""
+    if enemy is None:
+        return 0
+    return (int(enemy.powers.get("weak", 0))
+            + int(enemy.powers.get("vulnerable", 0)))
+
+
+def _combo_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
+    """THE COMBO PASS's kinds (2026-10-04). True when `fx` was one of them.
+    C# twins: `VarkaCards.<Kind>`."""
+    from tier0.engine import powers                 # late: cycle
+    kind = fx["kind"]
+    p = state.player
+    aim = state.card_aim
+    if kind == "gain_pyro_oath":
+        # Stoke the Flames: "Gain 2 Pyro Oath." A gain, not an application.
+        gain(state, "pyro", fx["amount"], "gain_pyro_oath")
+    elif kind == "pyro_strike":
+        # Ember Cleave: "Deal 9 Pyro damage." The Exhaust is the row's op.
+        _card_hit(state, card, aim, fx["base"], "pyro")
+    elif kind == "shatter":
+        # "Deal 5 Cryo damage, plus 2 for each Weak and Vulnerable on the
+        # enemy." Stacks, read before the hit.
+        if aim is not None and aim.alive:
+            _card_hit(state, card, aim,
+                      fx["base"] + fx["per"] * weak_and_vulnerable(aim),
+                      "cryo")
+    elif kind == "deep_freeze":
+        # "Double its Weak and Vulnerable." After the row's own Cryo; each
+        # doubling is an application of what it holds.
+        if aim is not None and aim.alive:
+            for name in ("weak", "vulnerable"):
+                n = int(aim.powers.get(name, 0))
+                if n > 0 and aim.alive:
+                    powers.apply_power(state, aim, name, n, applier=p)
+    else:
+        return False
+    return True
+
+
+def on_card_exhausted(state, card) -> None:
+    """`refpowers.after_card_exhausted`: PYRE OATH (the combo pass,
+    2026-10-04), "Whenever you Exhaust a card, gain 1 Pyro Oath." One gain
+    of the stack per card, any card of his. C# twin:
+    `PyreOathPower.AfterCardExhausted`."""
+    if ledger(state.player) is None:
+        return
+    n = _power(state.player, PYRE_OATH)
+    if n:
+        gain(state, "pyro", n, "pyre_oath")
+
+
 def op_varka(state, fx: dict, card) -> None:
     """`effects.OPS['varka']`."""
     from tier0.engine import effects, reactions     # late: cycle
@@ -1232,6 +1343,14 @@ def op_varka(state, fx: dict, card) -> None:
     elif kind == "change_of_guard":
         held = [el for el in ELEMENTS if led.oath[el] > 0]
         if not held:
+            return
+        if _power(p, UNWAVERING_BANNER):
+            # The combo pass: only Knights change it. The Banner holds, and
+            # pays when another element could have been chosen.
+            other = next((el for el in held if el != led.current), None)
+            if other is not None:
+                banner_holds(state, other)
+            led.guard_choice = None
             return
         choice = led.guard_choice if led.guard_choice in held else None
         led.guard_choice = None

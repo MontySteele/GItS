@@ -6383,3 +6383,130 @@ Bottled Applause are gone. The frozen v2 build is the tag
   made every upgraded Guest Star with two Tab+ an infinite (a re-summoned
   guest acts and stays); at cost 1 each cycle is paid out of this turn's
   Energy. The loop probe now finds no productive cycle.
+
+## Varka combo pass, 2026-10-04
+
+Paper `review/active/varka-combo-pass-2026-10-04.md`, RULED 2026-10-04, all
+four picks at their defaults with Baron Bunny amended ([USER]: "Let's leave
+the Baron Bunny's block alone for now, but nerf the attack from 'all
+enemies' to 'one enemy at random.' ... I'm good with this proposal."). The
+card designs are the main session's; this note records the build.
+
+- **Five generic Block cards out (sec.2):** Gale Mantle (C), West Wind
+  Shield (C), Knightly Guard (C), Tailwind Guard (U) and Oath of the Knights
+  (U). Their rows, generated classes and pool entries are deleted, and so is
+  `OathOfTheKnightsPower` with its turn-start Block (C# `VarkaOath.TurnStart`,
+  sim `varka_oath.turn_start`). The counts they read (`half_total_oath`,
+  `enemies_with_aura`, `oath_elements`) stay as grammar no row prints. Their
+  paintings stay on disk as `KNOWN_STALE` in `tools/art_coverage.py`.
+- **Amber: Baron Bunny:** the next-turn hit is "deal 6 [8] Pyro damage to a
+  random enemy" (was ALL enemies); Block 6 [8] unchanged. Reading: two
+  Bunnies stack into one power and one hit of 12 at one random living enemy,
+  not two hits of 6 (`VarkaBaronBunnyPower.Fire`, `Rng.CombatTargets`).
+- **Pyro burns (sec.3):** Stoke the Flames (C Skill 1: "Exhaust a card. Gain
+  2 [3] Pyro Oath."), Ember Cleave (C Attack 1: "Deal 9 [12] Pyro damage.
+  Exhaust a card.") and Pyre Oath (U Power 1: "Whenever you Exhaust a card,
+  gain 1 Pyro Oath." [Innate]). "Exhaust a card" is True Grit+'s: the player
+  chooses from the hand (`exhaust_from`, `select: chosen`), and any card can
+  go, a Status or a Curse included; the chooser that excludes junk is
+  Kokomi's rotation law and stays hers (the codegen picks the selector by
+  owner). The Oath is a gain, not an application, so neither card switches
+  his element. Pyre Oath pays one gain of its stack per card exhausted, any
+  route (C# `PyreOathPower.AfterCardExhausted`; sim
+  `varka_oath.on_card_exhausted` from `refpowers.after_card_exhausted`). In
+  the sim a mid-play exhaust is swept after the play, so Stoke's own +2 lands
+  before Pyre Oath's +1; in C# the hook fires at the exhaust. The total is
+  the same.
+- **Cryo shatters (sec.4):** Shatter (C Attack 1: "Deal 5 [7] Cryo damage,
+  plus 2 [3] for each Weak and Vulnerable on the enemy.") counts stacks, read
+  before the hit, and prints its total in combat as `{VkHit}` through a new
+  display var, `VarkaShatterDamageVar`, against the aimed enemy (the front
+  one in hand, the `FrontFoldedDamageVar` rule) with Cryo carried. Deep
+  Freeze (U Skill 1, Retain: "Apply Cryo to an enemy. Double its Weak and
+  Vulnerable.") doubles each by applying what the enemy holds, so Absolute
+  Zero pays on it. **Its upgrade, cost 1 to 0, is the builder's proposal**
+  and waits on the main session.
+- **Unwavering Banner reworded:** "Only Knights can change your current
+  element. Whenever another card would, gain 1 Oath of your current element
+  instead." [Innate]. Readings: the "instead" Oath is paid once per card
+  play however many switches the card would make (Tempest of the Four Winds
+  would make three), and only when it would have been a change (another
+  element is current; with none current nothing is gained). Change of Guard
+  is a card and is held the same way: no grid, 1 Oath of the current element
+  when another element could have been chosen. Weathervane is held too (the
+  old "cards that name it" exception is gone from the text) and, being a
+  Power rather than a card, gains nothing. The Fang's combat-start element
+  is unaffected: it always lands before the Banner can be played.
+- **Sec.1 fixes:** Charge of the Knights cost 2 to 1 and 5 [7] per Knight
+  (was 5 [6]); Jean — Lion's Fang, Fair Protector (Klee's pool) upgrades
+  cost 2 to 1 (was the Prototype default, 8 to 9 Block); Kaeya: Heart of the
+  Abyss and Razor: Awakening are Attacks; Thundering Verdict reads "Deal 6
+  [8] Electro damage, plus 1 for each Electro Oath, to ALL enemies X times."
+  with its per-hit preview kept; Converging Winds reads "The elements your
+  Swirls spread set off Elemental Reactions." with the same behaviour.
+- **Four Winds' Ascension (pick 3):** the upgrade is cost 2 to 1, in place of
+  +3 damage and +1 per Oath. The Dusty Tome still hands it upgraded.
+
+The pool stays 78 (20 / 35 / 23): Commons lost Gale Mantle, West Wind
+Shield and Knightly Guard and gained Stoke the Flames, Ember Cleave and
+Shatter; Uncommons lost Tailwind Guard and Oath of the Knights and gained
+Pyre Oath and Deep Freeze.
+
+**Yardsticks, read off the game's own card data** (`game_ref/ironclad.json`,
+`game_ref/silent.json`, `game_ref/ironclad-cards.yaml`): True Grit is an
+Ironclad Common, cost 1, 7 [9] Block, exhausting a card from the hand
+(random; the upgrade lets the player choose). Feel No Pain is an Ironclad
+Uncommon Power, cost 1, 3 [4] Block whenever a card is exhausted. **Catalyst
+is not in the StS2 Silent pool** (91 cards in `silent.json`, none by that
+name and none that doubles Poison), so Deep Freeze's yardstick has no base
+twin in this game. No number moved for them.
+
+**Sim** (`tools/varka_expansion_sim.py --seeds 1500 --seed 7 --jobs 15
+--no-gauntlet`, origin/main before, this branch after, paired seeds, act-1
+win rate). The pyro and cryo `PAYOFFS` lists gained the new cards, so the
+forced Pyro and Cryo decks draft them.
+
+| deck | before | after | paired |
+|---|---|---|---|
+| default drafter, all four starts | 46.9 | 40.5 | -6.3 ±1.6 |
+| elem_pyro | 53.7 | 38.9 | -14.8 ±3.2 |
+| elem_hydro | 52.4 | 46.1 | -6.3 ±3.3 |
+| elem_electro | 52.7 | 46.7 | -6.0 ±3.3 |
+| elem_cryo | 42.8 | 42.8 | +0.0 ±3.1 |
+| mono_pyro | 43.8 | 29.1 | -14.7 ±3.1 |
+| mono_hydro | 47.5 | 41.6 | -5.9 ±3.5 |
+| mono_electro | 36.7 | 29.8 | -6.9 ±3.2 |
+| mono_cryo | 37.5 | 38.9 | +1.3 ±3.1 |
+| switch | 47.4 | 45.4 | -2.0 ±1.6 |
+
+Against the default drafter on the same start, after: elem_pyro -2.1,
+elem_hydro +5.4, elem_electro +9.7, elem_cryo -0.7, all within 10; mono_pyro
+-11.9 is outside. The starter spread widened from 3.2 to 6.5 points (P 41.0,
+H 40.7, E 36.9, C 43.5). Block a fight, default drafter: 33.7 to 29.8.
+
+**The bar "Pyro and Cryo up" is not met.** Cryo is flat; Pyro fell about 15
+points. A diagnostic run (same seeds, the new pool, the Pyro decks not
+forced to draft the three new Pyro cards) put elem_pyro at 46.5 and
+mono_pyro at 34.1: about half of Pyro's fall is the cuts and Baron Bunny's
+nerf, and half is the pilot drafting and playing the new Pyro cards badly.
+The stock pilot prices an Exhaust at nothing outside Kokomi's Casket engine
+(`policy`'s `exhaust_from` value is gated on her engine), so it plays Stoke
+the Flames in 43% of the fights that hold it (0.46 plays a fight), the
+lowest of the new cards, and its victim is the stock "lose the least" pick,
+not a plan for Pyro Oath.
+
+| card | taken (default) | played in | elite+boss won with / without |
+|---|---|---|---|
+| Stoke the Flames | 18.7% | 43.3% | 61.0 / 77.1 |
+| Ember Cleave | 16.3% | 85.2% | 74.4 / 75.9 |
+| Pyre Oath | 16.2% | 97.4% | 62.0 / 76.2 |
+| Shatter | 17.8% | 77.6% | 71.9 / 76.2 |
+| Deep Freeze | 0.0% | 52.9% | no default-drafter fights |
+| Unwavering Banner | 19.0% (18.2 before) | 98.1% | 60.5 / 76.3 |
+
+No new card is over the 70% take bar. None is dead by the sim's flag
+(played in under 5% of fights held), but Stoke the Flames and Deep Freeze
+are played in about half the fights that hold them, and the default drafter
+never takes Deep Freeze (0 of 1,772 offers, as with Glacial Edict and Tidal
+Bulwark). Charge of the Knights is played in 60.7%
+of fights held (45.5% before) and taken 1.9% (0.0%).

@@ -2460,6 +2460,12 @@ VARKA_KINDS = {
     "echo_block": "EchoBlock",
     # Downburst's rider (2026-10-04, after spent auras went, #882).
     "swirled_oath": "SwirledOath",
+    # THE COMBO PASS (2026-10-04, review/active/varka-combo-pass-2026-10-04.md
+    # secs.3-4): Pyro's Exhaust engine and Cryo's status payoffs.
+    "gain_pyro_oath": "GainPyroOath",
+    "pyro_strike": "PyroStrike",
+    "shatter": "Shatter",
+    "deep_freeze": "DeepFreeze",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2482,6 +2488,10 @@ VARKA_KIND_FIELDS = {
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),
     "swirled_oath": ("amount",),
+    # The combo pass (2026-10-04).
+    "gain_pyro_oath": ("amount",),
+    "pyro_strike": ("base",),
+    "shatter": ("base", "per"),
 }
 #: A kind that aims at the enemy the card was played on.
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
@@ -2489,7 +2499,9 @@ VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      "blazing_charge", "glacial_edict", "crosscurrent",
                      "tempest", "electro_strike",
                      # The AoE trim (sec.4): Razor: Awakening at one enemy.
-                     "awakening", "kindled_edge"}
+                     "awakening", "kindled_edge",
+                     # The combo pass (2026-10-04).
+                     "pyro_strike", "shatter", "deep_freeze"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
 VARKA_ALL_KINDS = {"thundering_verdict", "electro_all",
@@ -2517,6 +2529,10 @@ VARKA_KIND_ELEMENTS = {
     "kindled_edge": ("pyro",),
     "storm_battery": ("electro",),
     "gleeful_songs": ("hydro",),
+    # The combo pass (2026-10-04). Deep Freeze's Cryo is its row's own
+    # `apply_aura`.
+    "pyro_strike": ("pyro",),
+    "shatter": ("cryo",),
 }
 #: A kind that AIMS but whose row needs no `target:` of its own, because the
 #: card's own damage op already aims it (Ascension, Northwind Avatar).
@@ -2530,6 +2546,11 @@ VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
 #: number). The value is the element whose Oath the hit adds; the var is
 #: `VarkaHitDamageVar` (Powers/Prototype/VarkaOath.cs), display only.
 VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
+#: A kind whose face prints its total against the enemy it previews on, the
+#: same `{VkHit}` token (the combo pass, 2026-10-04: Shatter's "plus 2 for
+#: each Weak and Vulnerable on the enemy"). The value is the C# var class
+#: (Powers/Prototype/VarkaOath.cs), display only.
+VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -3410,14 +3431,11 @@ APPLY_POWERS = {
         "While your [gold]current element[/gold] has 4 or more "
         "[gold]Oath[/gold], your Anemo Attacks deal {X} additional damage."),
     "vk_converging_winds": ("ConvergingWindsPower", None,
-        "Your [gold]Swirls[/gold] react where they land. An [gold]Elemental "
-        "Reaction[/gold] a spread sets off hits only that enemy."),
+        "The elements your [gold]Swirls[/gold] spread set off "
+        "[gold]Elemental Reactions[/gold]."),
     "vk_boreas_unbound": ("BoreasUnboundPower", None,
         "Whenever your [gold]current element[/gold] changes, gain {X} "
         "[gold]Energy[/gold]."),
-    "vk_oath_of_the_knights": ("OathOfTheKnightsPower", None,
-        "At the start of your turn, gain [gold]Block[/gold] equal to your "
-        "[gold]current element[/gold]'s [gold]Oath[/gold]."),
     "vk_dawn_winds_march": ("DawnWindsMarchPower", None,
         "Whenever you gain [gold]Oath[/gold] of your [gold]current "
         "element[/gold], gain {X} [gold]Block[/gold]."),
@@ -3429,17 +3447,20 @@ APPLY_POWERS = {
     "vk_sworn_brotherhood_current": ("SwornBrotherhoodCurrentPower", None,
         "At the start of your turn, gain {X} [gold]Oath[/gold] of your "
         "[gold]current element[/gold]."),
+    # The combo pass (2026-10-04): a random enemy, not ALL.
     "vk_baron_bunny": ("VarkaBaronBunnyPower", None,
-        "At the start of your turn, deal {X} [gold]Pyro[/gold] damage to ALL "
-        "enemies."),
+        "At the start of your turn, deal {X} [gold]Pyro[/gold] damage to a "
+        "random enemy."),
     # THE EXPANSION (2026-10-01). Classes in VarkaPowers.cs; each row carries
     # its own `description:`. Sim twins: tier0/engine/varka_oath.py.
     "vk_static_field": ("StaticFieldPower", None,
         "The first time each turn you apply [gold]Electro[/gold], draw {X} "
         "cards."),
+    # Reworded by the combo pass (2026-10-04).
     "vk_unwavering_banner": ("UnwaveringBannerPower", None,
-        "Only [gold]Knights[/gold] and cards that name it can change your "
-        "[gold]current element[/gold]."),
+        "Only [gold]Knights[/gold] can change your [gold]current "
+        "element[/gold]. Whenever another card would, gain 1 "
+        "[gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     "vk_cycle_of_seasons": ("CycleOfSeasonsPower", None,
         "Whenever your [gold]current element[/gold] changes, deal {X} damage "
         "to ALL enemies."),
@@ -3452,6 +3473,10 @@ APPLY_POWERS = {
     # Varka Wildfire Oath and Short Circuit (2026-10-03): Pyro's Absolute
     # Zero. Retaliating Tide in Unbroken Tide's place (element identities
     # sec.4).
+    # The combo pass (2026-10-04): Pyro's Exhaust engine.
+    "vk_pyre_oath": ("PyreOathPower", None,
+        "Whenever you [gold]Exhaust[/gold] a card, gain {X} Pyro "
+        "[gold]Oath[/gold]."),
     "vk_wildfire_oath": ("WildfireOathPower", None,
         "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
@@ -7226,6 +7251,9 @@ def build_vars(card: dict) -> list[str]:
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
                 out.append('new VarkaHitDamageVar(Element.'
                            f'{VARKA_HIT_PREVIEW_KINDS[eff["kind"]]})')
+            elif eff["kind"] in VARKA_TARGET_PREVIEW_KINDS:
+                out.append(
+                    f'new {VARKA_TARGET_PREVIEW_KINDS[eff["kind"]]}()')
         elif op == "crash_fanfare":
             # Always a var: the Hyperbeam's upgrade IS this number (the
             # floor_drop delta), so the upgraded face has to render it.
@@ -11735,6 +11763,13 @@ def build_body(
             # junk says so with an explicit `filter:` (the branch below).
             n = ('DynamicVars["Exhausts"].IntValue'
                  if exhaust_upgrade(card) else str(int(eff.get("amount", 1))))
+            # THE COMBO PASS (2026-10-04): Varka's "Exhaust a card" is True
+            # Grit's, any card in hand, a Status or a Curse included. The
+            # rotation law is Kokomi's alone; the sim's `exhaust_pool` drops
+            # junk only under her relic.
+            selector = ("KokomiResources.OwnCard"
+                        if card.get("character") != "varka"
+                        else "static _ => true")
             # EB-118: the selection's identity context. Opened BEFORE the
             # screen so a cancelled or empty selector leaves an EMPTY context
             # rather than the previous effect's, recorded per victim, closed
@@ -11748,7 +11783,7 @@ def build_body(
                 "                new CardSelectorPrefs(",
                 "                    CardSelectorPrefs.ExhaustSelectionPrompt, "
                 f"{n}),",
-                "                KokomiResources.OwnCard, this)).ToList();",
+                f"                {selector}, this)).ToList();",
                 "            foreach (var victim in toExhaust)",
                 "            {",
                 "                ExhaustSelection.Record(this, victim);",
