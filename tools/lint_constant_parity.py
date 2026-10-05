@@ -302,6 +302,17 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.LynetteActDamage": _stage("LYNETTE_ACT_DAMAGE"),
     "FurinaStageLaw.ClorindeActDamage": _stage("CLORINDE_ACT_DAMAGE"),
     "FurinaStageLaw.ClorindePerRepay": _stage("CLORINDE_PER_REPAY"),
+    # THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md sec.3): the
+    # three new guests' lines and acts, A Five-Century Act's line and
+    # Fountain of Lucine's three turns.
+    "FurinaStageLaw.LyneyLineDrop": _stage("LYNEY_LINE_DROP"),
+    "FurinaStageLaw.LyneyActDrain": _stage("LYNEY_ACT_DRAIN"),
+    "FurinaStageLaw.LyneyActDamage": _stage("LYNEY_ACT_DAMAGE"),
+    "FurinaStageLaw.SigewinneActRepay": _stage("SIGEWINNE_ACT_REPAY"),
+    "FurinaStageLaw.ChevreuseActDamage": _stage("CHEVREUSE_ACT_DAMAGE"),
+    "FurinaStageLaw.ChevreuseLineVulnerable": _stage("CHEVREUSE_LINE_VULNERABLE"),
+    "FurinaStageLaw.FiveCenturyLine": _stage("FIVE_CENTURY_LINE"),
+    "FurinaStageLaw.FountainTurns": _stage("FOUNTAIN_TURNS"),
     # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,
     # ruled 2026-09-29): the Swirl payout of each current element, and
     # Stormward Stance's Oath bar. Sim twins in `tier0/engine/varka_oath.py`.

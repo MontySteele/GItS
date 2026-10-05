@@ -48,10 +48,12 @@ public static class FurinaStage
     public static bool LiveFor(Creature? creature) =>
         FurinaResources.IsFurina(creature);
 
-    /// <summary>The four guests' sheet names.</summary>
+    /// <summary>The seven guests' sheet names (the slice's four, and the
+    /// pool to 39's three).</summary>
     public static readonly string[] Guests =
     {
         "charlotte", "wriothesley", "lynette", "clorinde",
+        "lyney", "sigewinne", "chevreuse",
     };
 
     /// <summary>A sheet name to a guest (an unknown name reads as Charlotte:
@@ -61,6 +63,9 @@ public static class FurinaStage
         "wriothesley" => StagePerformer.Wriothesley,
         "lynette" => StagePerformer.Lynette,
         "clorinde" => StagePerformer.Clorinde,
+        "lyney" => StagePerformer.Lyney,
+        "sigewinne" => StagePerformer.Sigewinne,
+        "chevreuse" => StagePerformer.Chevreuse,
         _ => StagePerformer.Charlotte,
     };
 
@@ -115,6 +120,10 @@ public static class FurinaStage
             SalonsEncore = Sum<SalonsEncorePower>(),
             EndlessWaltz = owner.Powers.OfType<EndlessWaltzPower>().Count(),
             Thunderous = Sum<ThunderousApplausePower>(),
+            OusiaSurge = Sum<OusiaSurgePower>(),
+            FiveCenturyAct = owner.Powers.OfType<FiveCenturyActPower>().Count(),
+            CriticsDarling = Sum<CriticsDarlingPower>(),
+            Bis = owner.Powers.OfType<BisPower>().Count(),
         };
     }
 
@@ -283,7 +292,39 @@ public static class FurinaStage
                 await Gain(choiceContext, furina, program, "Grand Theater Program");
             }
         }
+        await FountainRepays(choiceContext, furina);
         RefreshBadges(furina);
+    }
+
+    /// <summary>Fountain of Lucine: what the power took in since the last
+    /// turn start is scheduled for three turns, then this turn's Repays are
+    /// made, and the badge leaves once nothing is owed.</summary>
+    private static async Task FountainRepays(PlayerChoiceContext choiceContext,
+                                             Creature furina)
+    {
+        var power = furina.Powers.OfType<FountainOfLucinePower>().FirstOrDefault();
+        if (power == null) return;
+        var ledger = FurinaStageLedger.For(furina);
+        var applied = (int)power.Amount;
+        if (applied > ledger.FountainSeen)
+        {
+            ledger.ScheduleRepay(applied - ledger.FountainSeen,
+                                 FurinaStageLaw.FountainTurns);
+            ledger.FountainSeen = applied;
+        }
+        using (ledger.CausedBy(FountainOfLucinePower.Title))
+        {
+            await Director(choiceContext, furina).TurnStartRepays();
+        }
+        if (!ledger.OwesRepays)
+        {
+            ledger.FountainSeen = 0;
+            await PowerCmd.Remove(power);
+        }
+        else
+        {
+            power.Refresh();
+        }
     }
 
     /// <summary>Rule 4: the Singer's Repay at the end of her turn -- Salon
@@ -438,6 +479,13 @@ public static class FurinaStage
             StageForecastCue.Random),
         StagePerformer.Lynette => new(seat.Who, seat.Key, StageCueKind.Damage,
             FurinaStageLaw.LynetteActDamage, "Anemo", StageForecastCue.Aura),
+        StagePerformer.Lyney => new(seat.Who, seat.Key, StageCueKind.Damage,
+            FurinaStageLaw.LyneyActDamage, "Pyro", StageForecastCue.All),
+        StagePerformer.Sigewinne => new(seat.Who, seat.Key,
+            StageCueKind.Repay, FurinaStageLaw.SigewinneActRepay, "", ""),
+        StagePerformer.Chevreuse => new(seat.Who, seat.Key,
+            StageCueKind.Damage, FurinaStageLaw.ChevreuseActDamage, "",
+            StageForecastCue.Random),
         _ => new(seat.Who, seat.Key, StageCueKind.Damage,
             FurinaStageLaw.ClorindeActDamage, "Electro",
             StageForecastCue.Random),
@@ -529,6 +577,30 @@ public sealed class GameStageBoard : IStageBoard
         await Hit(target, amount, Element.None);
     }
 
+    public async Task Block(int amount)
+    {
+        if (amount <= 0 || _owner.IsDead) return;
+        await CreatureCmd.GainBlock(_owner, amount, ValueProp.Unpowered, null,
+                                    fast: true);
+    }
+
+    public async Task Vulnerable(StageTarget target, int amount)
+    {
+        if (amount <= 0) return;
+        var enemies = FurinaStage.Enemies(_owner).ToList();
+        var targets = target == StageTarget.All
+            ? enemies
+            : FurinaStage.RandomOf(_owner, enemies) is { } one
+                ? new List<Creature> { one }
+                : new List<Creature>();
+        foreach (var enemy in targets)
+        {
+            if (Over) return;
+            await PowerCmd.Apply<VulnerablePower>(
+                _context, enemy, amount, applier: _owner, cardSource: null);
+        }
+    }
+
     private async Task Hit(StageTarget target, int amount, Element element)
     {
         var enemies = FurinaStage.Enemies(_owner).ToList();
@@ -576,12 +648,16 @@ public sealed class GameStageBoard : IStageBoard
     }
 }
 
-/// <summary>THE CAST: the four Guest Stars of the slice. A guest is a pet
-/// body with no bar; every rule about it is the ledger's.</summary>
+/// <summary>THE CAST: the slice's four Guest Stars and the pool to 39's
+/// three. A guest is a pet body with no bar; every rule about it is the
+/// ledger's.</summary>
 public enum StagePerformer
 {
     Charlotte,
     Wriothesley,
     Lynette,
     Clorinde,
+    Lyney,
+    Sigewinne,
+    Chevreuse,
 }

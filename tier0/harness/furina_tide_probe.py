@@ -6,6 +6,10 @@
 `--curtain` is sec.16's read: the curtain call (the default rule) against
 `no_curtain_call` and the `legacy` baseline, with `ref:v2` and `ref:ironclad`.
 
+`--picks` is the pool-40 paper's read (sec.5 item 3): over the same draft
+seeds, how often each card was offered and how often the draft took it when
+it was, so a dominant or a dead card shows.
+
 WHAT A RUN IS. The `furina_v2_probe` spine, unchanged: a FIXED deck (no
 draft, no relic but Salon Solitaire, no potions, no upgrades) walks act one's
 `C.RUN_NODE_TEMPLATE` against the act's own pools; HP carries; a rest heals
@@ -118,7 +122,9 @@ def _draft_ref_state(picks: list[str]):
     return st
 
 
-def draft_deck(seed: int) -> list[str]:
+def draft_deck(seed: int, log: list | None = None) -> list[str]:
+    """Ten picks from 3-card offers. `log`, when given, receives one
+    `(offer, pick)` per pick."""
     from tier0.engine.combat import card_cost
     rng = random.Random(f"furina_tide-draft-{seed}")
     rarities = [r for r, _w in RARITY_WEIGHTS]
@@ -142,7 +148,26 @@ def draft_deck(seed: int) -> list[str]:
             if best_key is None or key > best_key:
                 best, best_key = cid, key
         picks.append(best)
+        if log is not None:
+            log.append((list(offer), best))
     return STARTER + picks
+
+
+def pick_rates(runs: int, seed: int = 1) -> dict[str, dict]:
+    """Per card: offered (in how many offers), picked, and the pick rate
+    when offered, over `runs` draft seeds."""
+    offered: collections.Counter = collections.Counter()
+    picked: collections.Counter = collections.Counter()
+    for s in range(seed, seed + runs):
+        log: list = []
+        draft_deck(s, log)
+        for offer, pick in log:
+            offered.update(set(offer))
+            picked[pick] += 1
+    return {cid: {"rarity": T.CARDS[cid].rarity, "offered": offered[cid],
+                  "picked": picked[cid],
+                  "rate": picked[cid] / offered[cid] if offered[cid] else 0.0}
+            for cid in sorted(offered, key=lambda c: (T.CARDS[c].rarity, c))}
 
 
 def _plays_per_turn(state) -> list[int]:
@@ -446,8 +471,19 @@ def main(argv=None) -> int:
                     help="run K3_JOBS: the K3 switches against the baseline")
     ap.add_argument("--curtain", action="store_true",
                     help="run CURTAIN_JOBS: sec.16's curtain-call read")
+    ap.add_argument("--picks", action="store_true",
+                    help="print each card's draft pick rate when offered")
     ap.add_argument("--json")
     args = ap.parse_args(argv)
+    if args.picks:
+        rates = pick_rates(args.runs, args.seed)
+        for cid, r in rates.items():
+            print(f"{cid:24s} {r['rarity']:9s} offered {r['offered']:6d} "
+                  f"picked {r['picked']:6d} rate {r['rate']:.1%}")
+        if args.json:
+            with open(args.json, "w", encoding="utf-8") as fh:
+                json.dump(rates, fh, indent=1)
+        return 0
     if args.jobs == 0:
         import os
         args.jobs = os.cpu_count() or 1

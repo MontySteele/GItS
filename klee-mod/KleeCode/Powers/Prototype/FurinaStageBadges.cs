@@ -64,6 +64,22 @@ public abstract class StagePerformerBadge : PowerModel
           + "[gold]Electro[/gold] damage to a random enemy. Act: deal "
           + FurinaStageLaw.ClorindeActDamage
           + " [gold]Electro[/gold] damage to a random enemy.",
+        StagePerformer.Lyney =>
+            "Your [gold]Drain[/gold] line is "
+          + FurinaStageLaw.LyneyLineDrop + " HP lower. Act: [gold]Drain[/gold] "
+          + FurinaStageLaw.LyneyActDrain + ": deal "
+          + FurinaStageLaw.LyneyActDamage
+          + " [gold]Pyro[/gold] damage to ALL enemies.",
+        StagePerformer.Sigewinne =>
+            "Whenever you [gold]Repay[/gold], gain that much "
+          + "[gold]Block[/gold]. Act: [gold]Repay[/gold] "
+          + FurinaStageLaw.SigewinneActRepay + ".",
+        StagePerformer.Chevreuse =>
+            "Whenever you [gold]Spend[/gold], apply "
+          + FurinaStageLaw.ChevreuseLineVulnerable
+          + " [gold]Vulnerable[/gold] to a random enemy. Act: deal "
+          + FurinaStageLaw.ChevreuseActDamage
+          + " damage to a random enemy.",
         _ => "",
     };
 
@@ -83,6 +99,15 @@ public abstract class StagePerformerBadge : PowerModel
                 break;
             case StagePerformer.Clorinde:
                 await Apply<ClorindeBadgePower>(context, pet);
+                break;
+            case StagePerformer.Lyney:
+                await Apply<LyneyBadgePower>(context, pet);
+                break;
+            case StagePerformer.Sigewinne:
+                await Apply<SigewinneBadgePower>(context, pet);
+                break;
+            case StagePerformer.Chevreuse:
+                await Apply<ChevreuseBadgePower>(context, pet);
                 break;
             default:
                 await Apply<CharlotteBadgePower>(context, pet);
@@ -117,5 +142,23 @@ public sealed class LynetteBadgePower : StagePerformerBadge, ILocalizationProvid
 public sealed class ClorindeBadgePower : StagePerformerBadge, ILocalizationProvider
 {
     public override StagePerformer Performer => StagePerformer.Clorinde;
+    public List<(string, string)>? Localization => Face;
+}
+
+public sealed class LyneyBadgePower : StagePerformerBadge, ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Lyney;
+    public List<(string, string)>? Localization => Face;
+}
+
+public sealed class SigewinneBadgePower : StagePerformerBadge, ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Sigewinne;
+    public List<(string, string)>? Localization => Face;
+}
+
+public sealed class ChevreuseBadgePower : StagePerformerBadge, ILocalizationProvider
+{
+    public override StagePerformer Performer => StagePerformer.Chevreuse;
     public List<(string, string)>? Localization => Face;
 }

@@ -103,6 +103,9 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
         StagePerformer.Wriothesley => KleePck.Path("furina/model/guest_wriothesley.tscn"),
         StagePerformer.Lynette => KleePck.Path("furina/model/guest_lynette.tscn"),
         StagePerformer.Clorinde => KleePck.Path("furina/model/guest_clorinde.tscn"),
+        StagePerformer.Lyney => KleePck.Path("furina/model/guest_lyney.tscn"),
+        StagePerformer.Sigewinne => KleePck.Path("furina/model/guest_sigewinne.tscn"),
+        StagePerformer.Chevreuse => KleePck.Path("furina/model/guest_chevreuse.tscn"),
         _ => null,
     };
 
@@ -148,6 +151,32 @@ public sealed class LynetteMonster : StagePerformerMonster
 public sealed class ClorindeMonster : StagePerformerMonster
 {
     public override StagePerformer Performer => StagePerformer.Clorinde;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+// ---- THE POOL TO 39's three guests (2026-10-05).
+
+public sealed class LyneyMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Lyney;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class SigewinneMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Sigewinne;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class ChevreuseMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Chevreuse;
 
     public override string DisplayName =>
         FurinaStageLedger.DisplayName(Performer);
@@ -247,6 +276,12 @@ public static class FurinaStagePets
                     await PlayerCmd.AddPet<LynetteMonster>(player),
                 StagePerformer.Clorinde =>
                     await PlayerCmd.AddPet<ClorindeMonster>(player),
+                StagePerformer.Lyney =>
+                    await PlayerCmd.AddPet<LyneyMonster>(player),
+                StagePerformer.Sigewinne =>
+                    await PlayerCmd.AddPet<SigewinneMonster>(player),
+                StagePerformer.Chevreuse =>
+                    await PlayerCmd.AddPet<ChevreuseMonster>(player),
                 _ => await PlayerCmd.AddPet<CharlotteMonster>(player),
             };
             // 2026-09-25: the body SAYS WHAT IT DOES. Hovering a creature
@@ -289,6 +324,9 @@ public static class FurinaStagePets
         StagePerformer.Wriothesley => typeof(WriothesleyMonster),
         StagePerformer.Lynette => typeof(LynetteMonster),
         StagePerformer.Clorinde => typeof(ClorindeMonster),
+        StagePerformer.Lyney => typeof(LyneyMonster),
+        StagePerformer.Sigewinne => typeof(SigewinneMonster),
+        StagePerformer.Chevreuse => typeof(ChevreuseMonster),
         _ => typeof(CharlotteMonster),
     };
 

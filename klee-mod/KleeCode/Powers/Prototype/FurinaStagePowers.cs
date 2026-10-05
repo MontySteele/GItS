@@ -157,18 +157,114 @@ public sealed class ThunderousApplausePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// <i>Universal Revelry</i> (sec.17): "You gain twice as much Fanfare." Every
-/// gain counts, hits included; it does not trigger itself; a second copy
-/// makes it three times (<see cref="FurinaStageLedger.Gain"/>).
+/// <i>Universal Revelry</i> (the pool-40 paper, sec.2, back to the research
+/// paper's sec.15): "Whenever you Drain or Repay, gain that much additional
+/// Fanfare." Hits do not count; it does not trigger itself; a second copy
+/// adds again (+2x, never multiplicative; <see cref="StageDirector"/>'s
+/// loop readers).
 /// </summary>
 public sealed class UniversalRevelryPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Universal Revelry"),
-        ("description", "You gain twice as much [gold]Fanfare[/gold]."),
+        ("description",
+            "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that "
+          + "much additional [gold]Fanfare[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary><i>Ousia Surge</i>: "The first time you Drain each turn, draw 1
+/// card." [Innate] Copies add cards.</summary>
+public sealed class OusiaSurgePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Ousia Surge"),
+        ("description",
+            "The first time you [gold]Drain[/gold] each turn, draw "
+          + "[blue]{Amount}[/blue] card."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary><i>A Five-Century Act</i>: "You can Drain down to 1 HP." A second
+/// copy adds nothing.</summary>
+public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "A Five-Century Act"),
+        ("description", "You can [gold]Drain[/gold] down to 1 HP."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary><i>Critics' Darling</i>: "Whenever you Drain or Repay, deal that
+/// much damage to a random enemy." Copies add.</summary>
+public sealed class CriticsDarlingPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Critics' Darling"),
+        ("description",
+            "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
+          + "much damage to a random enemy."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary><i>Bis!</i>: "Whenever you Spend all your Fanfare, keep half of
+/// it." [Innate] Half rounds down; a second copy adds nothing
+/// (<see cref="FurinaStageLedger.SpendAll"/>).</summary>
+public sealed class BisPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Bis!"),
+        ("description",
+            "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], "
+          + "keep half of it."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>
+/// <i>Fountain of Lucine</i>: "At the start of your next 3 turns, Repay 3."
+/// [4] The card applies its Repay as this power's amount; at her turn start
+/// <see cref="FurinaStage"/> schedules what it has not yet seen for three
+/// turns (one schedule per play) and makes the Repays due. The number on the
+/// icon is the Repay owed at her next turn start; the power leaves when
+/// nothing is owed.
+/// </summary>
+public sealed class FountainOfLucinePower : PowerModel, ILocalizationProvider
+{
+    public const string Title = "Fountain of Lucine";
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", Title),
+        ("description",
+            "At the start of your turn, [gold]Repay[/gold] what this "
+          + "Fountain still owes."),
         ("smartDescription",
-            "You gain [blue]{Times}[/blue] times as much [gold]Fanfare[/gold]."),
+            "At the start of your turn, [gold]Repay[/gold] [blue]{Due}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -177,25 +273,45 @@ public sealed class UniversalRevelryPower : PowerModel, ILocalizationProvider
 
     protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
     {
-        new TimesVar(),
+        new DueVar(),
     };
 
-    /// <summary>The multiplier: one more than the copies.</summary>
-    private sealed class TimesVar : DynamicVar
+    /// <summary>The Repay owed at her next turn start.</summary>
+    public override int DisplayAmount => Due(this);
+
+    private static int Due(FountainOfLucinePower power)
     {
-        public TimesVar() : base("Times", 2m)
+        if (!power.IsMutable || power.Owner == null
+            || !FurinaStage.LiveFor(power.Owner))
+        {
+            return (int)power.Amount;
+        }
+        var ledger = FurinaStageLedger.For(power.Owner);
+        return ledger.RepayDueNext
+               + System.Math.Max(0, (int)power.Amount - ledger.FountainSeen);
+    }
+
+    /// <summary>The tip's number: the same Repay owed.</summary>
+    private sealed class DueVar : DynamicVar
+    {
+        public DueVar() : base("Due", 0m)
         {
         }
 
         private int Live =>
-            _owner is UniversalRevelryPower { IsMutable: true } power
-                ? 1 + (int)power.Amount
-                : 2;
+            _owner is FountainOfLucinePower power ? Due(power) : 0;
 
         protected override decimal GetBaseValueForIConvertible() => Live;
 
         public override string ToString() =>
             Live.ToString(CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>Redraw the icon's number.</summary>
+    internal void Refresh()
+    {
+        if (!IsMutable || Owner == null) return;
+        InvokeDisplayAmountChanged();
     }
 }
 

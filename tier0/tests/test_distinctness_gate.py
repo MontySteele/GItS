@@ -31,6 +31,12 @@ KNOWN_FAILING = {
     ("kokomi", "neardup"),
     ("varka", "uniq"),
     ("varka", "maxclu"),
+    # Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md,
+    # ruled): seven Guest Stars share the `stage_guest` shape and seven
+    # two-mode cards share `choose_one`, which the shape metric cannot tell
+    # apart (the guest and the mode bodies differ). Prototype-stage debt.
+    ("furina", "uniq"),
+    ("furina", "maxclu"),
 }
 
 

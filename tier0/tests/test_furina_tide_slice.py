@@ -135,21 +135,21 @@ def test_crabaletta_drains_five_and_deals_24():
     assert f.ledger["fixed_drains"] == 1 and f.ledger["card_drains"] == 0
 
 
-def test_revelry_multiplies_every_gain_and_critics_darling_reads_drain_and_repay():
-    # sec.17: "You gain twice as much Fanfare." Hits count; two copies make
-    # it three times. Critics' Darling (probe-only) still reads only a Drain
-    # or a Repay.
+def test_revelry_and_critics_darling_read_drain_and_repay_never_a_hit():
+    # The pool-40 paper, sec.2 (sec.15's text): "Whenever you Drain or
+    # Repay, gain that much additional Fanfare." Two copies add +2x, never
+    # multiply. Critics' Darling reads the same two verbs.
     st = _state(hp=70)
     f = st.player.ftd
-    f.powers["revelry"] = 2                     # two copies: x3
+    f.powers["revelry"] = 2                     # two copies: +2x
     f.powers["critics_darling"] = 1
     T.on_hp_loss(st, 6)
-    assert f.fanfare == 18 and st.enemies[0].hp == 200
+    assert f.fanfare == 6 and st.enemies[0].hp == 200
     T.drain(st, 3)
-    assert f.fanfare == 18 + 9
+    assert f.fanfare == 6 + 3 + 6
     assert st.enemies[0].hp == 197
     T.repay(st, 2)
-    assert f.fanfare == 27 + 6
+    assert f.fanfare == 15 + 2 + 4
     assert st.enemies[0].hp == 195
 
 
@@ -206,10 +206,118 @@ def test_singer_of_many_waters_repays_everything_and_exhausts():
     assert st.player.hp == 78 and st.player.ftd.drained == 0
 
 
-def test_the_draft_pool_is_the_slices_24():
+def test_the_draft_pool_is_the_slices_24_and_the_pool_40_ten():
     pool = [c for r in probe.DRAFT_POOL.values() for c in r]
-    assert len(pool) == 24 and len(set(pool)) == 24
-    assert "ftd_sigewinne" not in pool and "ftd_crowd_gasps" not in pool
+    assert len(pool) == 34 and len(set(pool)) == 34
+    assert "ftd_sigewinne" in pool and "ftd_critics_darling" in pool
+    assert "ftd_crowd_gasps" not in pool and "ftd_neuvillette" not in pool
+    assert {r: len(v) for r, v in probe.DRAFT_POOL.items()} == {
+        "common": 12, "uncommon": 15, "rare": 7}
+
+
+# ----------------------------------------------------------------------
+# The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+# ----------------------------------------------------------------------
+def test_grand_deluge_drains_six_for_16_hydro_to_all():
+    st = _state(enemies=2)
+    _play(st, "ftd_grand_deluge")
+    assert st.player.hp == 72 and st.player.ftd.drained == 6
+    assert all(e.hp == 200 - 16 for e in st.enemies)
+    st.player.hp = 44                            # line 39: 44 - 6 < 39
+    assert not T.playable(st, T.make_card("ftd_grand_deluge"))
+
+
+def test_ousia_surge_draws_on_the_first_drain_each_turn():
+    st = _state()
+    st.player.draw_pile = [T.make_card("ftd_hymn") for _ in range(5)]
+    st.player.ftd.powers["ousia_surge"] = 1
+    T.drain(st, 2)
+    T.drain(st, 2)
+    assert len(st.player.hand) == 1
+    T.turn_open(st)
+    T.drain(st, 2)
+    assert len(st.player.hand) == 2
+
+
+def test_lyney_lowers_the_line_and_acts_only_above_it():
+    st = _state(enemies=2)
+    f = st.player.ftd
+    assert T.half_line(st.player) == 39
+    f.stage = ["lyney"]
+    assert T.half_line(st.player) == 29
+    T.act(st, "lyney")
+    assert st.player.hp == 76 and f.drained == 2
+    assert all(e.hp == 200 - 8 for e in st.enemies)
+    st.player.hp = 30                            # 30 - 2 < 29: skipped
+    T.act(st, "lyney")
+    assert st.player.hp == 30
+    assert all(e.hp == 200 - 8 for e in st.enemies)
+
+
+def test_a_five_century_act_lets_her_drain_to_one_hp():
+    st = _state(hp=12)
+    assert not T.can_drain(st, 11)
+    st.player.ftd.powers["five_century"] = 1
+    assert T.half_line(st.player) == 1
+    assert T.can_drain(st, 11) and not T.can_drain(st, 12)
+
+
+def test_sigewinne_blocks_each_repay_and_her_act_repays_two():
+    st = _state()
+    f = st.player.ftd
+    f.stage = ["sigewinne"]
+    T.drain(st, 6)
+    T.repay(st, 3)
+    assert st.player.block == 3
+    T.act(st, "sigewinne")
+    assert st.player.block == 5 and f.drained == 1
+
+
+def test_fountain_of_lucine_repays_at_the_next_three_turn_starts():
+    st = _state()
+    f = st.player.ftd
+    T.drain(st, 20)
+    _play(st, "ftd_fountain")
+    _play(st, "ftd_fountain")
+    for _ in range(3):
+        T.turn_open(st)
+        T.turn_start(st)
+    assert f.ledger["fountain_repaid"] == 18 and f.drained == 2
+    T.turn_open(st)
+    T.turn_start(st)
+    assert f.ledger["fountain_repaid"] == 18 and not f.fountains
+
+
+def test_hold_the_stage_spends_six_for_16_block():
+    st = _state()
+    st.player.ftd.decider = _Says(True)
+    _play(st, "ftd_hold_the_stage")              # nothing banked: 6
+    assert st.player.block == 6
+    st.player.ftd.fanfare = 7
+    _play(st, "ftd_hold_the_stage")
+    assert st.player.block == 6 + 16 and st.player.ftd.fanfare == 1
+
+
+def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_four():
+    st = _state()
+    f = st.player.ftd
+    f.stage = ["chevreuse"]
+    f.fanfare = 9
+    T.spend(st, 3)
+    T.spend_all(st)
+    assert st.enemies[0].powers.get("vulnerable") == 2
+    T.act(st, "chevreuse")
+    assert st.enemies[0].hp == 200 - 6        # 4, Vulnerable: 6
+
+
+def test_bis_keeps_half_a_spend_all_rounded_down():
+    st = _state()
+    f = st.player.ftd
+    f.powers["bis"] = 1
+    f.fanfare = 9
+    _play(st, "ftd_bravura")                     # pays for all nine
+    assert st.enemies[0].hp == 200 - (6 + 2 * 9)
+    assert f.fanfare == 4 and f.ledger["bis_kept"] == 4
 
 
 # ----------------------------------------------------------------------

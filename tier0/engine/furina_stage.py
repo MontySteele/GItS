@@ -17,8 +17,9 @@ THE RULES (the slice's docstring has them whole):
    the HP she started this combat with. HP lost to a Drain is drained.
 2. REPAY N: regain up to N drained HP, never more.
 3. FANFARE: +1 per HP lost from any cause (after Block) and +1 per HP
-   repaid. Spend N and the spend-all cards pay it. Universal Revelry doubles
-   every gain (sec.17; a second copy triples it).
+   repaid. Spend N and the spend-all cards pay it. Universal Revelry adds
+   that much again to a Drain or a Repay, never a hit
+   (`review/active/furina-pool-40-2026-10-05.md` sec.2).
 4. SALON SOLITAIRE: at the end of her turn, Repay 2, after the guests act.
 5. GUEST STARS: three seats, guests only; a guest acts at the end of her
    turn; a fourth makes the oldest leave, acting once more; a second copy of
@@ -49,9 +50,20 @@ WRIOTHESLEY_ACT_DAMAGE = T.WRIOTHESLEY_ACT
 LYNETTE_ACT_DAMAGE = T.LYNETTE_ACT
 CLORINDE_ACT_DAMAGE = T.CLORINDE_ACT
 CLORINDE_PER_REPAY = T.CLORINDE_PER_REPAY
+# The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+LYNEY_LINE_DROP = T.LYNEY_LINE_DROP
+LYNEY_ACT_DRAIN = T.LYNEY_ACT_DRAIN
+LYNEY_ACT_DAMAGE = T.LYNEY_ACT
+SIGEWINNE_ACT_REPAY = T.SIGEWINNE_ACT_REPAY
+CHEVREUSE_ACT_DAMAGE = T.CHEVREUSE_ACT
+CHEVREUSE_LINE_VULNERABLE = T.CHEVREUSE_LINE_VULNERABLE
+FIVE_CENTURY_LINE = T.FIVE_CENTURY_LINE
+FOUNTAIN_TURNS = T.FOUNTAIN_TURNS
 
-#: The four guests of the slice, as the sheet's `stage_guest` names them.
-GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde")
+#: The seven guests, as the sheet's `stage_guest` names them: the slice's
+#: four and the pool to 39's three.
+GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
+          "lyney", "sigewinne", "chevreuse")
 
 #: The Powers this arm reads, by `apply_power` id. Each sheet row applies its
 #: printed number: Salon's Encore and Thunderous Applause their damage (3, 4
@@ -60,6 +72,26 @@ SALONS_ENCORE = "fs_salons_encore"
 ENDLESS_WALTZ = "fs_endless_waltz"
 THUNDEROUS_APPLAUSE = "fs_thunderous_applause"
 UNIVERSAL_REVELRY = "fs_universal_revelry"
+# The pool to 39: Ousia Surge, A Five-Century Act, Critics' Darling and Bis!
+# 1 a copy; Fountain of Lucine its Repay (3, 4 upgraded) a play, scheduled
+# for three turns at her next turn start (`furina_tide.turn_start`).
+OUSIA_SURGE = "fs_ousia_surge"
+A_FIVE_CENTURY_ACT = "fs_a_five_century_act"
+CRITICS_DARLING = "fs_critics_darling"
+BIS = "fs_bis"
+FOUNTAIN_OF_LUCINE = "fs_fountain_of_lucine"
+
+#: The slice's Power keys (`furina_tide.Ftd.powers`) to the arm's ids.
+ARM_POWER_IDS = {
+    "salon_encore": SALONS_ENCORE,
+    "endless_waltz": ENDLESS_WALTZ,
+    "thunderous": THUNDEROUS_APPLAUSE,
+    "revelry": UNIVERSAL_REVELRY,
+    "ousia_surge": OUSIA_SURGE,
+    "five_century": A_FIVE_CENTURY_ACT,
+    "critics_darling": CRITICS_DARLING,
+    "bis": BIS,
+}
 
 # ----------------------------------------------------------------------
 # THE STARTER AND THE POOL (read by `tier0/content/loader.py`).
@@ -72,8 +104,11 @@ STARTER_IDS: tuple[str, ...] = (
     "proto_fs_standing_ovation",    # Rising Applause
 )
 
-#: THE SLICE'S 24 (sec.16), in the C# roster's order
-#: (`FurinaStageRoster.Pool`): 12 Common, 8 Uncommon, 4 Rare.
+#: THE SLICE'S 24 (sec.16) and THE POOL TO 39's ten
+#: (`review/active/furina-pool-40-2026-10-05.md` sec.3), in the C# roster's
+#: order (`FurinaStageRoster.Pool`): 12 Common, 15 Uncommon, 7 Rare. (The
+#: paper's 39 counts the two Basics and the three Neuvillette companion rows
+#: besides.)
 POOL_IDS: tuple[str, ...] = (
     # Drain (five).
     "proto_fs_mademoiselle_crabaletta",
@@ -105,6 +140,19 @@ POOL_IDS: tuple[str, ...] = (
     # The two Rares.
     "proto_fs_universal_revelry",
     "proto_fs_let_the_people_rejoice",
+    # The pool to 39. Ousia.
+    "proto_fs_grand_deluge",
+    "proto_fs_ousia_surge",
+    "proto_fs_guest_star_lyney",
+    "proto_fs_a_five_century_act",
+    # Pneuma.
+    "proto_fs_guest_star_sigewinne",
+    "proto_fs_fountain_of_lucine",
+    "proto_fs_critics_darling",
+    # The Crowd.
+    "proto_fs_hold_the_stage",
+    "proto_fs_guest_star_chevreuse",
+    "proto_fs_bis",
 )
 
 #: The loader's older seams, empty since the slice: nothing is substituted
@@ -150,7 +198,8 @@ def can_pay(player, amount: int) -> bool:
 
 
 def can_drain(player, amount: int) -> bool:
-    """Rule 1: would a Drain of `amount` stay at or above the line?"""
+    """Rule 1: would a Drain of `amount` stay at or above the line (Lyney
+    and A Five-Century Act move it, `furina_tide.half_line`)?"""
     return (active(player) and int(amount) > 0
             and player.hp - int(amount) >= T.half_line(player))
 
@@ -300,11 +349,11 @@ def spend(state, amount: int) -> int:
 
 
 def spend_all(state) -> int:
-    """"Spend all your Fanfare." Nothing held is no Spend."""
+    """"Spend all your Fanfare." Nothing held is no Spend; Bis! keeps half
+    (`furina_tide.spend_all`)."""
     if not active(state.player):
         return 0
-    held = int(state.player.ftd.fanfare)
-    return held if held > 0 and T.spend(state, held) else 0
+    return T.spend_all(state)
 
 
 def gain(state, amount: int, source: str = "card") -> None:

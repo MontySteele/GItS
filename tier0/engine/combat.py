@@ -989,6 +989,15 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # on turn one, then Charlotte's extra card. A no-op for anyone else.
     furina_v2.turn_start(state)
 
+    # FURINA (the Salon's Tab; the pool to 39): Fountain of Lucine's Repays,
+    # after her draw, the C# `FurinaStage.TurnStart` site. A no-op for
+    # anyone else.
+    if furina_tide.live(state.player):
+        furina_tide.turn_start(state)
+        _settle_phases(state)
+        if not p.alive or state.over:
+            return
+
     # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
     #
