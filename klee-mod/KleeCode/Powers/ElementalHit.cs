@@ -100,6 +100,9 @@ internal static class ElementalHit
         await VarkaOath.NoteApplication(choiceContext, applier, element,
             target: target);
         var aura = AuraCmd.Find(target);
+        // TELEMETRY ONLY: the amplifier this hit carries, for `NoteAmplified`.
+        var ampReaction = Reaction.None;
+        var amp = 1m;
         if (aura == null)
         {
             await AuraCmd.Apply(choiceContext, target, element, applier, cardSource: null);
@@ -109,7 +112,9 @@ internal static class ElementalHit
             // Consume before resolving, same as AuraPower (Swirl must not
             // re-trigger off the aura it is spreading).
             var reaction = ReactionTable.Lookup(aura.Element, element);
-            dealt *= ReactionTable.AmplifierMultiplier(reaction, applier);
+            amp = ReactionTable.AmplifierMultiplier(reaction, applier);
+            ampReaction = reaction;
+            dealt *= amp;
             await ResolveOnAura(choiceContext, target, aura, element, applier);
         }
 
@@ -132,8 +137,38 @@ internal static class ElementalHit
             ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable
                         : ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        NoteAmplified(target, applier, ampReaction, amp, results);
         await CreditBlockBreak(choiceContext, target, applier, results);
         return landed;
+    }
+
+    /// <summary>
+    /// TELEMETRY ONLY (2026-10-06): file the amplifier's share of a hit that
+    /// already landed -- what reached <paramref name="target"/>'s HP plus
+    /// Block, less that over <paramref name="mult"/>. A read of the results;
+    /// <c>ReactionTally</c> swallows its own errors, and so does this.
+    /// </summary>
+    internal static void NoteAmplified(
+        Creature target, Creature? applier, Reaction reaction, decimal mult,
+        IEnumerable<DamageResult>? results)
+    {
+        try
+        {
+            if (results == null || mult <= 1m) return;
+            if (reaction is not (Reaction.Vaporize or Reaction.Melt)) return;
+            var dealt = 0;
+            foreach (var r in results)
+            {
+                if (r.Receiver != target) continue;
+                dealt += (int)r.UnblockedDamage + (int)r.BlockedDamage;
+            }
+            Diagnostics.ReactionTally.NoteAmplified(
+                target.CombatState, applier, reaction, mult, dealt);
+        }
+        catch (System.Exception)
+        {
+            // Measurement never throws into the damage path.
+        }
     }
 
     /// <summary>
@@ -204,8 +239,9 @@ internal static class ElementalHit
         }
         // Principle of Purity's Dark, as in `Deal` (a Teapot Bomb is still her
         // Pyro damage).
+        var amp = ReactionTable.AmplifierMultiplier(reaction, applier);
         var dealt = (baseDamage + PurityDarkPower.BonusFor(applier, element))
-            * ReactionTable.AmplifierMultiplier(reaction, applier);
+            * amp;
         await ReactionEffects.Resolve(
             choiceContext, reaction, target, applier, null, assumedAura);
         var landed = (int)SimDamagePipeline.TargetMods(target, dealt);
@@ -215,6 +251,7 @@ internal static class ElementalHit
         var results = await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        NoteAmplified(target, applier, reaction, amp, results);
         await CreditBlockBreak(choiceContext, target, applier, results);
         return landed;
     }
