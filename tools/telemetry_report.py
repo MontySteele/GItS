@@ -5,6 +5,8 @@
     python tools/telemetry_report.py --character Klee --since 2026-10-02
     python tools/telemetry_report.py --character Klee --cards-merge-upgrades
     python tools/telemetry_report.py --character Varka --feed bot --json
+    python tools/telemetry_report.py --reactions --character Klee
+    python tools/telemetry_report.py --coop --reactions
 
 WHAT IT READS. The real game's per-fight records (`record: "fight"`), written
 by `klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs` into the game profile's
@@ -31,6 +33,21 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      one across acts. `Strike+` is `Strike` upgraded; `--cards-merge-upgrades`
      groups by base name. Sources that are not cards (`(Bomb)`, `(Overload)`)
      are listed with no plays.
+
+  4. With `--reactions`: what reactions are worth, per group -- reactions a
+     turn by type (`reactions_by_type`), the amplifiers' bonus damage a turn
+     (`amp_bonus_damage`) and reaction debuff stacks a turn
+     (`debuffs_from_reactions`). POOLED, not medians: summed over the fights
+     that carry the keys (`nR`; written since 2026-10-06), divided by their
+     turns, because most fights hold a handful of reactions and a median of
+     small counts reads 0. Credit is the dealing seat's.
+
+CO-OP (`--coop`). Keeps only two-seat fights (`seats == 2`) instead of solo
+ones. Every co-op lane writes a row for BOTH seats of the same fight, so rows
+are de-duplicated on (run_id, act, floor, fight_index, encounter, kind,
+seat_index) before anything is counted. The reaction section then groups by
+TEAM -- the fight's characters, sorted, `Klee + Kokomi` -- with each member's
+own line beneath it; a fight's turns are counted once for the team.
 
 OLDER RECORDS LACK KEYS. `block_gained` arrived 2026-10-02 and the wider
 damage credit the same day; a record missing a key is left out of that one
@@ -126,6 +143,7 @@ class Filters:
     run_ids: tuple[str, ...] = ()
     solo: bool = True
     feed: str = "all"
+    coop: bool = False
 
     def keep(self, row: dict) -> bool:
         ts = row.get("ts")
@@ -135,7 +153,10 @@ class Filters:
             return False
         if self.run_ids and str(row.get("run_id", "")) not in self.run_ids:
             return False
-        if self.solo and row.get("seats", 1) != 1:
+        if self.coop:
+            if row.get("seats", 1) != 2:
+                return False
+        elif self.solo and row.get("seats", 1) != 1:
             return False
         if self.feed != "all" and row.get("feed", "human") != self.feed:
             return False
@@ -271,6 +292,121 @@ def comparison(grouped: dict[str, list[dict]], baseline: list[dict]
     return out
 
 
+# ------------------------------------------------------------- reactions ---
+
+REACTION_KEYS = ("reactions_by_type", "amp_bonus_damage",
+                 "debuffs_from_reactions")
+
+
+def fight_key(row: dict) -> tuple:
+    """One fight, across the seats and lanes that wrote it."""
+    return (str(row.get("run_id", "")), row.get("act"), row.get("floor"),
+            row.get("fight_index"), str(row.get("encounter", "")),
+            str(row.get("kind", "")))
+
+
+def dedupe_seats(rows: list[dict]) -> list[dict]:
+    """Co-op: each lane writes both seats' rows of one fight; keep one per
+    (fight, seat). The first row read wins."""
+    seen: set[tuple] = set()
+    out = []
+    for r in rows:
+        k = (*fight_key(r), r.get("seat_index"))
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(r)
+    return out
+
+
+def _count_map(row: dict, key: str) -> dict[str, float]:
+    v = row.get(key)
+    if not isinstance(v, dict):
+        return {}
+    return {str(k): float(n) for k, n in v.items()
+            if isinstance(n, (int, float)) and not isinstance(n, bool)}
+
+
+def reaction_summary(group: str, fights: list[list[dict]]) -> dict:
+    """Pooled per-turn reaction value over FIGHTS (each a list of the seat
+    rows counted for this group). A fight counts toward the rates only when
+    one of its rows carries `reactions_by_type`; its turns are the longest
+    seat's, counted once."""
+    totals: dict[str, dict[str, float]] = {k: {} for k in REACTION_KEYS}
+    turns = 0.0
+    carried = 0
+    for seat_rows in fights:
+        if not any(isinstance(r.get("reactions_by_type"), dict)
+                   for r in seat_rows):
+            continue
+        carried += 1
+        turns += max((_num(r, "turns") or 0.0) for r in seat_rows)
+        for r in seat_rows:
+            for key in REACTION_KEYS:
+                for name, n in _count_map(r, key).items():
+                    totals[key][name] = totals[key].get(name, 0.0) + n
+
+    def rate(m: dict[str, float]) -> dict[str, float]:
+        if turns <= 0:
+            return {}
+        return {k: m[k] / turns for k in sorted(m, key=lambda k: (-m[k], k))}
+
+    def total(m: dict[str, float]) -> float | None:
+        return sum(m.values()) / turns if turns > 0 else None
+
+    return {"group": group, "fights": len(fights),
+            "fights_with_keys": carried, "turns": turns,
+            "reactions_turn": total(totals["reactions_by_type"]),
+            "amp_bonus_turn": total(totals["amp_bonus_damage"]),
+            "debuffs_turn": total(totals["debuffs_from_reactions"]),
+            "reactions_by_type_turn": rate(totals["reactions_by_type"]),
+            "amp_bonus_by_type_turn": rate(totals["amp_bonus_damage"]),
+            "debuffs_by_type_turn": rate(totals["debuffs_from_reactions"]),
+            "totals": {k: dict(sorted(v.items())) for k, v in totals.items()}}
+
+
+def team_label(seat_rows: list[dict]) -> str:
+    return " + ".join(sorted(str(r.get("character", "unknown"))
+                             for r in seat_rows))
+
+
+def reactions(grouped: dict[str, list[dict]], kept: list[dict],
+              coop: bool, groups: list[str]) -> list[dict]:
+    """Solo: one summary per character group. Co-op: one per team (a team
+    shows when it holds any named character; none named = every team), each
+    followed by its members' own lines (`member` set)."""
+    if not coop:
+        return [reaction_summary(g, [[r] for r in rows])
+                for g, rows in grouped.items()]
+    fights: dict[tuple, list[dict]] = {}
+    for r in kept:
+        fights.setdefault(fight_key(r), []).append(r)
+    seen = sorted({str(r.get("character", "unknown")) for r in kept})
+    wanted: set[str] = set()
+    for g in groups:
+        wanted |= set(BASE5) if g.lower() == BASE5_ALIAS \
+            else {canonical(g, seen)}
+    teams: dict[str, list[list[dict]]] = {}
+    for seat_rows in fights.values():
+        if wanted and not wanted & {r.get("character") for r in seat_rows}:
+            continue
+        teams.setdefault(team_label(seat_rows), []).append(seat_rows)
+    out = []
+    for label in sorted(teams):
+        team_fights = teams[label]
+        out.append(reaction_summary(label, team_fights))
+        members = sorted({str(r.get("character", "unknown"))
+                          for f in team_fights for r in f})
+        for m in members:
+            line = reaction_summary(
+                m, [[r] for f in team_fights for r in f
+                    if r.get("character") == m])
+            line["member"] = True
+            line["team"] = label
+            out.append(line)
+    return out
+
+
 # ----------------------------------------------------------------- cards ---
 
 def split_name(name: str) -> tuple[str, bool]:
@@ -330,8 +466,33 @@ def _f(v: float | None, digits: int = 1) -> str:
     return "--" if v is None else f"{v:.{digits}f}"
 
 
+def _rates(m: dict[str, float]) -> str:
+    return "  ".join(f"{k} {v:.2f}" for k, v in m.items()) or "--"
+
+
+def render_reactions(rx: list[dict]) -> list[str]:
+    lines = ["", "REACTIONS (pooled a turn: totals over the nR fights that "
+             "carry the keys / their turns; the dealing seat's credit)",
+             f"{'group':<30}{'n':>5}{'nR':>5}{'turns':>7}{'rx/t':>7}"
+             f"{'amp+/t':>8}{'dbf/t':>7}"]
+    for s in rx:
+        member = bool(s.get("member"))
+        name = ("  | " if member else "") + s["group"]
+        lines.append(f"{name[:29]:<30}{s['fights']:>5}"
+                     f"{s['fights_with_keys']:>5}{s['turns']:>7.0f}"
+                     f"{_f(s['reactions_turn'], 2):>7}"
+                     f"{_f(s['amp_bonus_turn'], 2):>8}"
+                     f"{_f(s['debuffs_turn'], 2):>7}")
+        pad = "      " if member else "    "
+        lines.append(f"{pad}reactions/t: {_rates(s['reactions_by_type_turn'])}")
+        lines.append(f"{pad}amp bonus/t: {_rates(s['amp_bonus_by_type_turn'])}")
+        lines.append(f"{pad}debuffs/t:   {_rates(s['debuffs_by_type_turn'])}")
+    return lines
+
+
 def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
-           card_group: str | None, header: list[str], top: int) -> str:
+           card_group: str | None, header: list[str], top: int,
+           rx: list[dict] | None = None) -> str:
     lines = list(header)
     lines.append("")
     lines.append("BY GROUP x ACT x KIND (medians across fights)")
@@ -377,21 +538,28 @@ def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
             lines.append(f"{c['card'][:27]:<28}{'+' if c['upgraded'] else '':>3}"
                          f"{c['act']:>4}{c['fights']:>8}{c['plays']:>7}"
                          f"{c['damage']:>8.0f}{_f(c['dmg_per_play']):>10}")
+    if rx is not None:
+        lines.extend(render_reactions(rx))
     return "\n".join(lines)
 
 
 # ------------------------------------------------------------------ main ---
 
 def build(args: argparse.Namespace, rows: list[dict]) -> dict:
+    coop = bool(getattr(args, "coop", False))
     filt = Filters(parse_when(args.since), parse_when(args.until),
-                   tuple(args.run_id or ()), args.solo, args.feed)
+                   tuple(args.run_id or ()), args.solo, args.feed, coop)
     kept = [r for r in rows if filt.keep(r)]
+    if coop:
+        kept = dedupe_seats(kept)
     grouped = group_rows(kept, list(args.character or []))
     base_filt = Filters(parse_when(args.baseline_since or args.since),
                         parse_when(args.baseline_until or args.until),
-                        tuple(args.run_id or ()), args.solo, args.feed)
+                        tuple(args.run_id or ()), args.solo, args.feed, coop)
     baseline = [r for r in rows if base_filt.keep(r)
                 and r.get("character") in BASE5]
+    if coop:
+        baseline = dedupe_seats(baseline)
     cells = table(grouped)
     comp = comparison(grouped, baseline)
     if args.cards_for:
@@ -402,11 +570,13 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
         card_src = grouped.get(card_group, []) if card_group else []
     card_rows = cards(card_src, args.cards_merge_upgrades) \
         if card_group is not None else []
-    return {"filters": {"since": args.since, "until": args.until,
+    rx = reactions(grouped, kept, coop, list(args.character or [])) \
+        if getattr(args, "reactions", False) else None
+    out = {"filters": {"since": args.since, "until": args.until,
                         "baseline_since": args.baseline_since or args.since,
                         "baseline_until": args.baseline_until or args.until,
                         "run_id": list(args.run_id or ()), "solo": args.solo,
-                        "feed": args.feed},
+                        "coop": coop, "feed": args.feed},
             "records_read": len(rows), "records_kept": len(kept),
             "groups": {g: len(v) for g, v in grouped.items()},
             "table": [c.as_dict() for c in cells],
@@ -414,6 +584,9 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
             "cards_for": card_group,
             "cards": card_rows,
             "_cells": cells}
+    if rx is not None:
+        out["reactions"] = rx
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -434,6 +607,13 @@ def main(argv: list[str] | None = None) -> int:
                     help="keep one run seed (the record's run_id); repeatable")
     ap.add_argument("--solo", action=argparse.BooleanOptionalAction,
                     default=True, help="single-player fights only (default)")
+    ap.add_argument("--coop", action="store_true",
+                    help="two-seat fights only (overrides --solo), one row "
+                    "per seat per fight across lanes")
+    ap.add_argument("--reactions", action="store_true",
+                    help="add the reaction section: reactions, amplifier "
+                    "bonus damage and reaction debuffs a turn, by type "
+                    "(by team under --coop)")
     ap.add_argument("--feed", choices=("bot", "human", "all"), default="all")
     ap.add_argument("--cards-for", help="the group whose cards are listed "
                     "(default: the first non-base5 group)")
@@ -461,13 +641,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     header = [f"telemetry_report: {out['records_kept']} of "
               f"{out['records_read']} fight records kept from {len(dirs)} "
-              f"dir(s); solo={args.solo} feed={args.feed} "
+              f"dir(s); solo={args.solo and not args.coop} "
+              f"coop={args.coop} feed={args.feed} "
               f"since={args.since or '-'} until={args.until or '-'}"
               + (f" seeds={','.join(args.run_id)}" if args.run_id else ""),
               "groups: " + ", ".join(f"{g} {n}" for g, n in
                                      out["groups"].items())]
     print(render(cells, out["comparison"], out["cards"], out["cards_for"],
-                 header, args.top))
+                 header, args.top, out.get("reactions")))
     return 0
 
 

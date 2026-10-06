@@ -239,3 +239,88 @@ def test_text_output_carries_the_three_blocks(tmp_path, capsys):
     assert "BY GROUP x ACT x KIND" in text
     assert "COMPARISON" in text and "within" in text
     assert "PER CARD: Klee" in text and "Strike" in text
+
+
+# ------------------------------------------------------------- reactions ---
+
+def _rx_row(character, seat_index, *, turns=4, fight_index=0, run_id="CO1",
+            by_type=None, amp=None, debuffs=None, seats=2, **extra):
+    row = fight(character, turns=turns, seats=seats, run_id=run_id,
+                feed="human", fight_index=fight_index, seat_index=seat_index,
+                encounter="ENC", floor=2, **extra)
+    if by_type is not None:
+        row["reactions_by_type"] = by_type
+        row["amp_bonus_damage"] = amp or {}
+        row["debuffs_from_reactions"] = debuffs or {}
+    return row
+
+
+def _coop_fixture():
+    klee = dict(by_type={"Vaporize": 2, "Overload": 1},
+                amp={"Vaporize": 6}, debuffs={"Weak": 1})
+    koko = dict(by_type={"Vaporize": 1}, amp={"Vaporize": 3})
+    return [
+        # fight 0, written by BOTH lanes (the duplicate must not count twice)
+        _rx_row("Klee", 0, **klee), _rx_row("Kokomi", 1, **koko),
+        _rx_row("Klee", 0, **klee), _rx_row("Kokomi", 1, **koko),
+        # fight 1, an older record with no reaction keys: counted in n only
+        _rx_row("Klee", 0, fight_index=1), _rx_row("Kokomi", 1, fight_index=1),
+        # a base pair
+        _rx_row("The Ironclad", 0, run_id="CO2", by_type={}),
+        _rx_row("The Silent", 1, run_id="CO2", by_type={}),
+        # a solo fight, which --coop must leave out
+        _rx_row("Klee", 0, run_id="SOLO", seats=1,
+                by_type={"Melt": 4}, amp={"Melt": 12}),
+    ]
+
+
+def test_reactions_section_is_opt_in(tmp_path, capsys):
+    out = run(tmp_path, _coop_fixture(), capsys=capsys)
+    assert "reactions" not in out
+
+
+def test_solo_reactions_are_pooled_per_turn(tmp_path, capsys):
+    out = run(tmp_path, _coop_fixture(), "--reactions", "--character", "Klee",
+              capsys=capsys)
+    (klee,) = out["reactions"]
+    assert klee["group"] == "Klee" and klee["fights"] == 1
+    assert klee["reactions_by_type_turn"] == {"Melt": 1.0}
+    assert klee["amp_bonus_turn"] == 3.0
+    assert klee["debuffs_turn"] == 0
+
+
+def test_coop_groups_by_team_and_dedupes_lanes(tmp_path, capsys):
+    out = run(tmp_path, _coop_fixture(), "--coop", "--reactions",
+              capsys=capsys)
+    assert out["filters"]["coop"] is True
+    by = {(s["group"], s.get("team")): s for s in out["reactions"]}
+    team = by[("Klee + Kokomi", None)]
+    assert team["fights"] == 2 and team["fights_with_keys"] == 1
+    assert team["turns"] == 4            # one fight's turns, counted once
+    assert team["totals"]["reactions_by_type"] == {"Overload": 1, "Vaporize": 3}
+    assert team["reactions_turn"] == 1.0
+    assert team["amp_bonus_by_type_turn"] == {"Vaporize": 9 / 4}
+    assert team["debuffs_by_type_turn"] == {"Weak": 0.25}
+    klee = by[("Klee", "Klee + Kokomi")]
+    assert klee["member"] and klee["reactions_turn"] == 0.75
+    base = by[("The Ironclad + The Silent", None)]
+    assert base["fights_with_keys"] == 1 and base["reactions_turn"] == 0
+    assert ("Klee", None) not in by     # the solo fight stays out
+
+
+def test_coop_character_filter_keeps_teams_holding_it(tmp_path, capsys):
+    out = run(tmp_path, _coop_fixture(), "--coop", "--reactions",
+              "--character", "base5", capsys=capsys)
+    teams = {s["group"] for s in out["reactions"] if not s.get("member")}
+    assert teams == {"The Ironclad + The Silent"}
+
+
+def test_reactions_text_block(tmp_path, capsys):
+    d = write(tmp_path, _coop_fixture())
+    assert tr.main(["--dir", str(d), "--coop", "--reactions"]) == 0
+    text = capsys.readouterr().out
+    assert "REACTIONS (pooled a turn" in text
+    assert "Klee + Kokomi" in text and "  | Kokomi" in text
+    assert "reactions/t: Vaporize 0.75  Overload 0.25" in text
+    assert "amp bonus/t: Vaporize 2.25" in text
+    assert "debuffs/t:   Weak 0.25" in text
