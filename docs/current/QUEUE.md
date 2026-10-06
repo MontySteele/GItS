@@ -24,6 +24,7 @@ their defaults (R276, the last R number); nothing from them is open here.
 ## Open packets in `review/active/`
 
 - **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
+- **Klee scaling round 1** (`review/records/klee-scaling-round-1-2026-10-05.md`, three picks): the suite-2 gate (the turn-2 figure missed the relic's effect), the start-of-combat Bomb on Pounding Surprise (a starter change), and dropping Strength-on-placement.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
