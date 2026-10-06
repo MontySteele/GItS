@@ -9,6 +9,7 @@ using KleeMod.Powers;
 using KleeMod.Relics;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
@@ -20,7 +21,7 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// THE KLEE SCALING PASS (staging branch `klee-next`, 2026-10-05,
 /// `review/active/klee-scaling-pass-2026-10-05.md` sec.4): A Klee's Secret
-/// Base, B the grant-only Witch's Homework II, C Boom Badge, D the tempo
+/// Base (v3: a Bomb 4 [6] every turn), B the grant-only Witch's Homework II, C Boom Badge, D the tempo
 /// relic. Pure reads where the rule is pure; structural (IL) pins where the
 /// rule runs through <c>PowerCmd.Apply</c>, outside the headless boundary
 /// (README).
@@ -28,105 +29,126 @@ namespace KleeMod.Tests.Prototype;
 
 public sealed class KleeScalingPassTests
 {
-    // ==== A. Klee's Secret Base ==============================================
+    // ==== A. Klee's Secret Base, v3 ==========================================
 
     [Fact]
-    public void Secret_base_reads_three_four_upgraded_and_places_nothing_itself()
+    public void Secret_base_v3_places_a_bomb_four_six_upgraded_at_turn_start()
     {
         var card = new ProtoKoSecretBase();
-        Assert.Equal("Your [gold]Bombs[/gold] are placed {PowerAmount:diff()} bigger.",
-                     Face(card));
+        Assert.Equal("At the start of your turn, place a [gold]Bomb[/gold] "
+                   + "{PowerAmount:diff()} on a random enemy.", Face(card));
         Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(CardType.Power, card.Type);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Equal(3m, card.DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(4m, Upgraded<ProtoKoSecretBase>().DynamicVars["PowerAmount"].BaseValue);
-        // The old turn-start Bomb is gone: no override, no sequencer seat.
-        Assert.NotEqual(typeof(SecretBasePower),
-                        typeof(SecretBasePower).GetMethod("AfterPlayerTurnStart")!.DeclaringType);
-        Assert.DoesNotContain("SecretBasePower",
-            string.Join(" ", Il.Calls(Il.Method("KleeExpansion", "RunTurnStartPlacements"))));
+        Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(6m, Upgraded<ProtoKoSecretBase>().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal("At the start of your turn, place a [gold]Bomb[/gold] "
+                   + "[blue]{Amount}[/blue] on a random enemy.",
+                     ((ILocalizationProvider)RuntimeHelpers
+                         .GetUninitializedObject(typeof(SecretBasePower)))
+                         .Localization!.Single(r => r.Item1 == "description").Item2);
     }
 
     [Fact]
-    public void Secret_base_stacks_by_adding_and_joins_the_charm_in_the_placement_bonus()
+    public void Secret_base_copies_stack_like_noxious_fumes_into_one_bomb()
     {
+        // REAL: the size the sequencer places, read off the stack.
+        Assert.Equal(0, SecretBasePower.BombSizeFor(null));
         var klee = Seat.Klee();
-        Assert.Equal(0, SecretBasePower.BonusFor(klee.Creature));
-        Assert.Equal(0, SecretBasePower.BonusFor(null));
-        klee.WithPower<SecretBasePower>(3);
-        Assert.Equal(3, SecretBasePower.BonusFor(klee.Creature));
-        // A Counter: a second copy adds to the one instance (the game's
-        // stacking); two instances, if ever, still sum.
+        Assert.Equal(0, SecretBasePower.BombSizeFor(klee.Creature));
         klee.WithPower<SecretBasePower>(4);
-        Assert.Equal(7, SecretBasePower.BonusFor(klee.Creature));
-        Assert.Equal(7, ProtoBombPower.PlacementBonus(klee.Creature));
-        Give<DodocoCharm>(klee);
-        Assert.Equal(8, ProtoBombPower.PlacementBonus(klee.Creature));
+        Assert.Equal(4, SecretBasePower.BombSizeFor(klee.Creature));
+        // A Counter: a second copy adds (two copies, one Bomb 8).
+        klee.WithPower<SecretBasePower>(4);
+        Assert.Equal(8, SecretBasePower.BombSizeFor(klee.Creature));
+        var upgraded = Seat.Klee().WithPower<SecretBasePower>(6).WithPower<SecretBasePower>(6);
+        Assert.Equal(12, SecretBasePower.BombSizeFor(upgraded.Creature));
+        Assert.Equal(PowerStackType.Counter,
+            ((PowerModel)RuntimeHelpers.GetUninitializedObject(typeof(SecretBasePower)))
+                .StackType);
+
+        // STRUCTURAL: ONE placement of that sum, not one per copy.
+        var run = Il.CallSequence(Il.Method("KleeExpansion", "RunTurnStartPlacements"))
+            .ToList();
+        Assert.Equal(1, run.Count(c => c == "SecretBasePower.BombSizeFor"));
     }
 
     [Fact]
-    public void Place_pays_secret_base_on_every_placement_and_never_on_a_move()
+    public void Secret_base_places_after_the_growth_so_it_shows_four_when_she_acts()
     {
-        var place = Il.Calls(Il.Method("ProtoBombPower", "Place"));
-        Assert.Contains("SecretBasePower.BonusFor", place);
-        Assert.Contains("DodocoCharm.BonusFor", place);
-        // The MOVES pass `relocated: true`: a jump and a merge.
-        foreach (var move in new[] { "JumpCharges", "MergeAllTo" })
-        {
-            Assert.All(PlaceFlags("ProtoBombPower", move), f => Assert.True(f, move));
-        }
-        Assert.All(PlaceFlags("AlicesMasterpiecePower", "Remain"), f => Assert.True(f));
-        // Every PLACEMENT passes false: the card verbs, Jumpy Dumpty's payload
-        // Mines (inside Explode), All of My Treasures!'s copies, a charge
-        // landing on a dead target.
-        foreach (var placement in new[] { "PlaceOnAll", "PlaceOnRandom",
-                     "PlaceCopyOfLargest", "Explode", "PlaceOrJump" })
-        {
-            Assert.All(PlaceFlags("ProtoBombPower", placement), f => Assert.False(f, placement));
-        }
+        // STRUCTURAL. Rule 1's growth is ProtoBombPower.BeforeSideTurnStart;
+        // the Secret Base Bomb is AfterPlayerTurnStart, which the game runs
+        // after it -- so the new Bomb does not grow on the turn it arrives.
+        Assert.Contains("ProtoBombPower.GrowBy",
+                        Il.Calls(Il.Method("ProtoBombPower", "BeforeSideTurnStart")));
+        Assert.Equal(typeof(SecretBasePower),
+                     typeof(SecretBasePower).GetMethod("AfterPlayerTurnStart")!.DeclaringType);
+        Assert.NotEqual(typeof(SecretBasePower),
+                        typeof(SecretBasePower).GetMethod("BeforeSideTurnStart")!.DeclaringType);
+        Assert.Contains("KleeExpansion.RunTurnStartPlacements",
+                        Il.Calls(Il.Method("SecretBasePower", "AfterPlayerTurnStart")));
+
+        // The one sequencer: latch, echo, Secret Base's Bomb, then Dodoco's
+        // Mine. It grows nothing itself.
+        var run = Il.CallSequence(Il.Method("KleeExpansion", "RunTurnStartPlacements"))
+            .ToList();
+        Assert.DoesNotContain("ProtoBombPower.GrowBy", run);
+        Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", run);
+        var latch = run.IndexOf("KleeOverhaulLedger.TakeTurnStartPlacements");
+        var echo = run.IndexOf("BombEchoPower.Fire");
+        var size = run.IndexOf("SecretBasePower.BombSizeFor");
+        var firstPlace = run.IndexOf("ProtoBombPower.PlaceOnRandom");
+        Assert.True(latch >= 0 && latch < echo && echo < size && size < firstPlace,
+                    string.Join(" ", run));
+        Assert.True(firstPlace < run.LastIndexOf("ProtoBombPower.PlaceOnRandom"),
+                    "Dodoco's Mine is a second PlaceOnRandom, after Secret Base's");
     }
 
     [Fact]
-    public void Every_other_placer_goes_through_the_one_door()
+    public void Secret_base_uses_pops_door_and_a_random_living_enemy_or_nothing()
     {
-        // Return to Sender, Little Hexenzirkel, Aftershock, Party Poppers,
-        // Finders Keepers, Dodoco, the relics: each reaches Place (directly or
-        // through PlaceOnRandom / PlaceOnAll), which is where the bonus is paid.
-        var doors = new[] { "ProtoBombPower.Place", "ProtoBombPower.PlaceOnRandom",
-                            "ProtoBombPower.PlaceOnAll" };
-        foreach (var (type, method) in new[]
+        // STRUCTURAL: PlaceOnRandom is Place on a random living enemy, and
+        // with none it places nothing; Place is the door Pop! goes through,
+        // so merge, Sparks and the relics apply as they do to Pop!.
+        var random = Il.Calls(Il.Method("ProtoBombPower", "PlaceOnRandom"));
+        Assert.Contains("Creature.get_IsDead", random);
+        Assert.Contains("ProtoBombPower.Place", random);
+        Assert.Contains("ProtoBombPower.Place", Il.Calls(Il.Method("ProtoKoPop", "OnPlay")));
+
+        // REAL: no combat, no enemy -- the sequencer runs and places nothing.
+        KleeOverhaulLedger.ResetAll();
+        var klee = Seat.Klee().WithPower<SecretBasePower>(4);
+        KleeExpansion.RunTurnStartPlacements(null!, klee.Player)
+            .GetAwaiter().GetResult();
+        Assert.Empty(klee.Creature.Powers.OfType<ProtoBombPower>());
+        KleeOverhaulLedger.ResetAll();
+    }
+
+    [Fact]
+    public void No_placement_bonus_is_left_and_faces_print_their_own_numbers()
+    {
+        // The first draft's bonus is gone from the one door and from the faces.
+        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoBombPower", "Place")),
+                              c => c.StartsWith("SecretBasePower."));
+        Assert.Null(typeof(ProtoBombPower).GetMethod("PlacementBonus", HeadlessGame.All));
+        Assert.Null(typeof(SecretBasePower).GetMethod("BonusFor", HeadlessGame.All));
+        Assert.Null(typeof(SecretBasePower).Assembly.GetTypes()
+                        .FirstOrDefault(t => t.Name == "BombSizeVar"));
+
+        // Pop! and friends print their sheet numbers through a plain var.
+        foreach (var (card, name, size) in new (CardModel, string, decimal)[]
                  {
-                     ("AftershockPower", "AfterChargeExploded"),
-                     ("PartyPoppersPower", "AfterCardPlayed"),
-                     ("KleeExpansion", "RunTurnStartPlacements"),
-                     ("PoundingSurpriseNext", "BeforeCombatStart"),
+                     (new ProtoKoPop(), "BombSize", 5m),
+                     (new ProtoKoJumpyDumpty(), "BombSize", 8m),
+                     (new ProtoKoJumpyDumpty(), "PayloadMine", 3m),
+                     (new ProtoKoMineToss(), "BombSize", 7m),
+                     (new ProtoKoWitchsHomeworkNext(), "BombSize", 6m),
                  })
         {
-            Assert.Contains(Il.Calls(Il.Method(type, method)), c => doors.Contains(c));
+            var var = card.DynamicVars[name];
+            Assert.Equal(typeof(DynamicVar), var.GetType());
+            Assert.Equal(size, var.BaseValue);
         }
-    }
-
-    [Fact]
-    public void A_bomb_face_previews_the_placed_size_as_accuracy_does_a_shiv()
-    {
-        var klee = Seat.Klee().WithPower<SecretBasePower>(3);
-        var pop = Owned(new ProtoKoPop(), klee);
-        var size = pop.DynamicVars["BombSize"];
-        Assert.IsType<BombSizeVar>(size);
-        Assert.Equal(8m, Preview(size, pop, hooks: true));
-        // The play still hands the BASE to Place, which adds the bonus once.
-        Assert.Equal(5, size.IntValue);
-        // Off the hand (no global hooks) the face prints its own number.
-        Assert.Equal(5m, Preview(size, pop, hooks: false));
-        // A canonical copy (reward, compendium) prints its base.
-        var canonical = new ProtoKoPop();
-        Assert.Equal(5m, Preview(canonical.DynamicVars["BombSize"], canonical, hooks: true));
-
-        // Jumpy Dumpty's payload Mine is a placement too, and its face says so.
-        var jumpy = Owned(new ProtoKoJumpyDumpty(), klee);
-        Assert.Equal(11m, Preview(jumpy.DynamicVars["BombSize"], jumpy, hooks: true));
-        Assert.Equal(6m, Preview(jumpy.DynamicVars["PayloadMine"], jumpy, hooks: true));
-        Assert.Contains("ProtoBombPower.Place", Il.Calls(Il.Method("ProtoKoPop", "OnPlay")));
     }
 
     // ==== C. Boom Badge =======================================================
@@ -160,7 +182,6 @@ public sealed class KleeScalingPassTests
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
         Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
         Assert.Equal(6m, card.DynamicVars["BombSize"].BaseValue);
-        Assert.IsType<BombSizeVar>(card.DynamicVars["BombSize"]);
         Assert.Equal(2, ((IHomeworkCard)card).HomeworkStep);
         Assert.Equal(3, ((IHomeworkCard)Upgraded<ProtoKoWitchsHomeworkNext>()).HomeworkStep);
         Assert.Contains("KleeScalingPass.PlaceHomework",
@@ -275,6 +296,40 @@ public sealed class KleeScalingPassTests
         KleeOverhaulLedger.ResetAll();
     }
 
+    [Fact]
+    public void Fight_telemetry_writes_each_homeworks_run_long_bomb_size()
+    {
+        var grown = Mutable(new ProtoKoWitchsHomeworkNext());
+        ((IHomeworkCard)grown).HomeworkGrowth = 4;
+        var fresh = Mutable(Upgraded<ProtoKoWitchsHomeworkNext>());
+        Assert.Equal(10, KleeScalingPass.RunBombSize((IHomeworkCard)grown));
+        Assert.Equal(6, ((IHomeworkCard)fresh).HomeworkBaseSize);
+
+        var telemetry = typeof(global::KleeMod.Diagnostics.PlayTelemetryHooks).Assembly.GetTypes()
+            .First(t => t.Name == "PlayTelemetry");
+        var sizes = telemetry.GetMethod("HomeworkBombSizes", HeadlessGame.All)!;
+        // Deck order, one per Witch's Homework II; other cards are skipped.
+        Assert.Equal(new List<int> { 10, 6 },
+            (List<int>)sizes.Invoke(null, new object?[]
+                { new CardModel[] { grown, new ProtoKoPop(), fresh } })!);
+        Assert.Empty((List<int>)sizes.Invoke(null, new object?[] { null })!);
+        Assert.Empty((List<int>)sizes.Invoke(null, new object?[]
+            { new CardModel[] { new ProtoKoPop() } })!);
+
+        // The key is always written, `[]` with none, and the flush fills it.
+        Environment.SetEnvironmentVariable("GITS_TELEMETRY_INTENT", "");
+        telemetry.GetMethod("ResetForTest", HeadlessGame.All)!.Invoke(null, null);
+        var seat = Seat.Klee();
+        telemetry.GetMethod("OpenSeatForTest", HeadlessGame.All)!
+            .Invoke(null, new object[] { seat.Player, 1, 0 });
+        var json = (string)telemetry.GetMethod("JsonForTest", HeadlessGame.All)!
+            .Invoke(null, new object[] { seat.Player })!;
+        Assert.Contains("\"homework_bomb_size\":[]", json);
+        telemetry.GetMethod("ResetForTest", HeadlessGame.All)!.Invoke(null, null);
+        Assert.Contains("PlayTelemetry.HomeworkBombSizes",
+                        Il.Calls(Il.Method("PlayTelemetry", "FlushAll")));
+    }
+
     // ==== D. The tempo relic ==================================================
 
     [Fact]
@@ -329,13 +384,6 @@ public sealed class KleeScalingPassTests
         return card;
     }
 
-    private static T Owned<T>(T card, Seat owner) where T : CardModel
-    {
-        Seat.Set(card, "IsMutable", true);
-        Seat.Force(card, "Owner", owner.Player);
-        return card;
-    }
-
     private static T Upgraded<T>() where T : CardModel, new()
     {
         var card = new T();
@@ -345,60 +393,6 @@ public sealed class KleeScalingPassTests
         return card;
     }
 
-    private static decimal Preview(DynamicVar var, CardModel card, bool hooks)
-    {
-        var.UpdateCardPreview(card, CardPreviewMode.Normal, null, runGlobalHooks: hooks);
-        return var.PreviewValue;
-    }
-
     private static ProtoBombPower.ProtoCharge Marked(CardModel card) =>
         new(10, false, 0, new[] { card });
-
-    private static T Give<T>(Seat seat) where T : RelicModel
-    {
-        var relic = (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
-        Seat.Set(relic, "IsMutable", true);
-        Seat.Set(relic, "Owner", seat.Player);
-        ((List<RelicModel>)typeof(MegaCrit.Sts2.Core.Entities.Players.Player)
-            .GetField("_relics", HeadlessGame.All)!.GetValue(seat.Player)!).Add(relic);
-        return relic;
-    }
-
-    /// <summary>The `relocated` flag each `Place` call in a method passes,
-    /// read off the IL: the argument pushed last before the call
-    /// (`relocated` is <c>Place</c>'s final parameter).</summary>
-    private static List<bool> PlaceFlags(string type, string method)
-    {
-        var bodies = (IEnumerable<MethodBase>)typeof(Il)
-            .GetMethod("Bodies", HeadlessGame.All)!
-            .Invoke(null, new object[] { Il.Method(type, method) })!;
-        var flags = new List<bool>();
-        foreach (var body in bodies)
-        {
-            var il = body.GetMethodBody()?.GetILAsByteArray();
-            if (il == null) continue;
-            for (var i = 1; i + 5 <= il.Length; i++)
-            {
-                if (il[i] != 0x28) continue;
-                MethodBase? target;
-                try
-                {
-                    target = body.Module.ResolveMethod(BitConverter.ToInt32(il, i + 1));
-                }
-                catch
-                {
-                    continue;
-                }
-                if (target?.Name != "Place" || target.DeclaringType != typeof(ProtoBombPower))
-                {
-                    continue;
-                }
-                Assert.True(il[i - 1] == 0x16 || il[i - 1] == 0x17,
-                            $"{method}: the argument before Place is 0x{il[i - 1]:X2}");
-                flags.Add(il[i - 1] == 0x17);
-            }
-        }
-        Assert.NotEmpty(flags);
-        return flags;
-    }
 }

@@ -66,10 +66,12 @@ public sealed class ProtoKoWitchsHomeworkNext : CustomCardModel, IHomeworkCard
 
     public int HomeworkStep => IsUpgraded ? 3 : 2;
 
+    public int HomeworkBaseSize => 6;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BombSizeVar("BombSize", 6m)
+            new DynamicVar("BombSize", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

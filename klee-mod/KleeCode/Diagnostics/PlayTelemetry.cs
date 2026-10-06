@@ -973,7 +973,41 @@ internal static class PlayTelemetry
                 ? record.HpLastSeen
                 : creature != null ? (int)creature.CurrentHp : record.HpStart;
             record.Outcome = creature is { IsDead: true } ? "died" : outcome;
+            record.HomeworkBombSize = HomeworkBombSizes(DeckOf(player));
             Write(record);
+        }
+    }
+
+    /// <summary>
+    /// The Klee scaling pass (klee-next, 2026-10-05): the run-long Bomb size of
+    /// each Witch's Homework II in <paramref name="player"/>'s deck at fight
+    /// end -- base 6 plus its saved <c>HomeworkGrowth</c>, deck order. Empty
+    /// with none. Never throws: a deck that cannot be read is an empty list.
+    /// </summary>
+    internal static List<int> HomeworkBombSizes(IEnumerable<CardModel>? deck)
+    {
+        var sizes = new List<int>();
+        if (deck == null) return sizes;
+        foreach (var card in deck)
+        {
+            if (card is IHomeworkCard homework)
+                sizes.Add(KleeScalingPass.RunBombSize(homework));
+        }
+
+        return sizes;
+    }
+
+    /// <summary>The seat's deck, or null when there is none to read.</summary>
+    private static IEnumerable<CardModel>? DeckOf(Player player)
+    {
+        try
+        {
+            return player.Deck?.Cards.ToList();
+        }
+        catch (Exception e) when (e is InvalidOperationException
+                                    or NullReferenceException)
+        {
+            return null;
         }
     }
 
@@ -1277,6 +1311,10 @@ internal static class PlayTelemetry
         /// <summary>Block this seat's cards put on another seat.</summary>
         public int BlockGiven;
         public int DamageTaken;
+        /// <summary>The Klee scaling pass: each Witch's Homework II's
+        /// run-long Bomb size at fight end (<see cref="HomeworkBombSizes"/>).
+        /// </summary>
+        public List<int> HomeworkBombSize = new();
 
         /// <summary>
         /// Hand-rolled rather than serialized by reflection, deliberately: the
@@ -1438,6 +1476,12 @@ internal static class PlayTelemetry
             sb.Append(",\"detonations\":").Append(Detonations);
             sb.Append(",\"mine_detonations\":").Append(MineDetonations);
             sb.Append(",\"corpse_detonations\":").Append(CorpseDetonations);
+            // The Klee scaling pass (klee-next, 2026-10-05). Additive: one
+            // int per Witch's Homework II in the deck, `[]` with none.
+            sb.Append(",\"homework_bomb_size\":[")
+              .Append(string.Join(",", HomeworkBombSize.Select(
+                  n => n.ToString(CultureInfo.InvariantCulture))))
+              .Append(']');
             sb.Append(",\"ts\":").Append(
                 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0)
                     .ToString("F3", CultureInfo.InvariantCulture));

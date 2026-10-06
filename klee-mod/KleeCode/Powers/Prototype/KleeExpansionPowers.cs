@@ -393,22 +393,21 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Klee's Secret Base, the scaling pass (klee-next, 2026-10-05,
-/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 A): "Your Bombs are
-/// placed 3 [4] bigger." Her Accuracy. A Counter, so copies stack by adding.
+/// Klee's Secret Base, v3 of the scaling pass (klee-next, 2026-10-05,
+/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 A): "At the start of
+/// your turn, place a Bomb 4 [6] on a random enemy." A Counter, so copies stack
+/// like Noxious Fumes: two copies are one Power of 8 and place ONE Bomb 8.
 ///
-/// THE WHOLE RULE IS ONE READ AT ONE DOOR: <see cref="ProtoBombPower.Place"/>
-/// adds <see cref="BonusFor"/> to every placement, beside the Dodoco Charm,
-/// and skips it on a MOVE (a jump, a merge, a split, a remnant) exactly as the
-/// Charm does. Every Bomb or Mine Klee places goes through that door: a card's
-/// Place, Jumpy Dumpty's payload Mines, All of My Treasures!'s copies, Return
-/// to Sender, Aftershock, Party Poppers, Dodoco, Little Hexenzirkel, Finders
-/// Keepers, her relics and potions. The faces read the same number
-/// (<see cref="BombSizeVar"/>), as a Shiv reads Accuracy.
+/// <c>AfterPlayerTurnStart</c>, which runs after rule 1's growth
+/// (<c>BeforeSideTurnStart</c>), so the fresh Bomb shows its printed size when
+/// she acts. It goes through the expansion's one sequencer
+/// (<see cref="KleeExpansion.RunTurnStartPlacements"/>): after the echo, before
+/// Dodoco's Mine. The Bomb is an ordinary placement
+/// (<see cref="ProtoBombPower.PlaceOnRandom"/>, Pop!'s door): a random LIVING
+/// enemy, none means nothing, and it grows nothing itself.
 ///
-/// The old face ("At the start of your turn, if no enemy has a Bomb of yours,
-/// place a Bomb 5") left with this rewrite, and with it this Power's seat in
-/// <c>KleeExpansion.RunTurnStartPlacements</c>.
+/// v1 ("if no enemy has a Bomb of yours, place a Bomb 5") and the scaling
+/// pass's first draft ("Your Bombs are placed 3 [4] bigger") are gone.
 /// </summary>
 public sealed class SecretBasePower : PowerModel, ILocalizationProvider
 {
@@ -416,18 +415,28 @@ public sealed class SecretBasePower : PowerModel, ILocalizationProvider
     {
         ("title", "Klee's Secret Base"),
         ("description",
-            "Your [gold]Bombs[/gold] are placed [blue]{Amount}[/blue] bigger."),
+            "At the start of your turn, place a [gold]Bomb[/gold] "
+          + "[blue]{Amount}[/blue] on a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>What <paramref name="applier"/>'s placements gain: the summed
-    /// stack, 0 with none. PURE.</summary>
-    public static int BonusFor(Creature? applier) =>
-        applier == null
-            ? 0
-            : applier.Powers.OfType<SecretBasePower>().Sum(p => p.Amount);
+    /// <summary>The size of the one Bomb <paramref name="klee"/>'s Secret
+    /// Base places this turn: the summed stack (two copies, 8), 0 with none.
+    /// PURE.</summary>
+    public static int BombSizeFor(Creature? klee) =>
+        klee == null ? 0 : klee.Powers.OfType<SecretBasePower>().Sum(p => p.Amount);
+
+    /// <summary>The Bomb, in the one fixed order the expansion's
+    /// start-of-turn placements take
+    /// (<see cref="KleeExpansion.RunTurnStartPlacements"/>).</summary>
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (Owner == null || player.Creature != Owner) return;
+        await KleeExpansion.RunTurnStartPlacements(choiceContext, player);
+    }
 }
 
 /// <summary>
@@ -450,7 +459,7 @@ public sealed class DodocoPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>Through the same sequencer as Klee's Secret Base, so the
-    /// Mine lands AFTER that Power has read the board.</summary>
+    /// Mine lands AFTER that Power's Bomb.</summary>
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {

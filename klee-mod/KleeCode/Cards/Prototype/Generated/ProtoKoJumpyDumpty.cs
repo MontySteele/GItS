@@ -51,8 +51,8 @@ public sealed class ProtoKoJumpyDumpty : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BombSizeVar("BombSize", 8m),
-            new BombSizeVar("PayloadMine", 3m)
+            new DynamicVar("BombSize", 8m),
+            new DynamicVar("PayloadMine", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

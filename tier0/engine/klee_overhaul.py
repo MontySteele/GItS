@@ -297,7 +297,7 @@ def take_mines(enemy: Enemy) -> list[KleeCharge]:
 
 
 def place(state: CombatState, enemy: Enemy, size: int, is_mine: bool = False,
-          payload_mine_all: int = 0, relocated: bool = False) -> None:
+          payload_mine_all: int = 0) -> None:
     """Plant one charge. `Place`'s twin, and the SINGLE entry point for every
     source: a card's `plant_bomb`, a jump's landing and a payload's Mines all
     arrive here.
@@ -306,13 +306,7 @@ def place(state: CombatState, enemy: Enemy, size: int, is_mine: bool = False,
     (`CanReceivePowers`, which does not test `IsDead`) and this engine's own
     `CORPSE_TARGETABLE_OPS` reading for `place_bomb`. The sweep is what moves
     it off again.
-
-    KLEE'S SECRET BASE (the scaling pass, klee-next 2026-10-05): "Your Bombs
-    are placed 3 bigger." Every placement takes the stack; a MOVE (a jump, a
-    merge) passes `relocated` and does not -- `ProtoBombPower.Place`'s door.
     """
-    if not relocated and state.player is not None:
-        size = int(size) + int(state.player.powers.get(SECRET_BASE, 0))
     enemy.ko_charges.append(
         KleeCharge(size=int(size), is_mine=bool(is_mine),
                    payload_mine_all=int(payload_mine_all)))
@@ -675,7 +669,7 @@ def jump_charges(state: CombatState, from_enemy: Optional[Enemy],
                    frm=from_enemy.name if from_enemy is not None else None,
                    to=dest.name, size=charge.size, mine=charge.is_mine)
         place(state, dest, charge.size, charge.is_mine,
-              charge.payload_mine_all, relocated=True)
+              charge.payload_mine_all)
 
 
 def largest_index(enemy: Enemy) -> int:
@@ -1258,7 +1252,7 @@ def merge_all_to(state: CombatState, dest: Optional[Enemy],
         return
     state.emit("ko_bombs_merged", to=dest.name, charges=merged, size=size,
                growth=growth)
-    place(state, dest, size + growth, is_mine, payload, relocated=True)
+    place(state, dest, size + growth, is_mine, payload)
 
 
 def remove_largest_for_block(state: CombatState) -> int:
@@ -1589,7 +1583,7 @@ WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw N, +1 Energy
 PARTY_POPPERS = "ko_party_poppers"        # Spark-priced play: Bomb N
 LOOK_OUT = "ko_look_out"                  # a Mine goes off: N Block
 PATIENCE = "ko_patience"                  # quiet turn: largest grows N
-SECRET_BASE = "ko_secret_base"            # every placement is N bigger
+SECRET_BASE = "ko_secret_base"            # turn start: Bomb N
 DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
 SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N to ALL
@@ -1894,17 +1888,27 @@ def install_detonator(state: CombatState, upgraded: bool) -> None:
 
 def _turn_start_expansion(state: CombatState) -> None:
     """The expansion's start-of-turn Powers, after the draw and after rule 1's
-    growth (`AfterPlayerTurnStart`): Dodoco and Alice's Detonator."""
+    growth (`AfterPlayerTurnStart`): Klee's Secret Base, Dodoco and Alice's
+    Detonator."""
     import copy                                     # stdlib, local by habit
     from tier0.content import loader                # late import: cycle
 
     p = state.player
     # THE ORDER IS THE MOD'S ONE SEQUENCER (`KleeExpansion
     # .RunTurnStartPlacements`): Sparks 'n' Splash's echo reads the grown
-    # Bombs first (2026-09-25), then Dodoco's Mine lands.
+    # Bombs first (2026-09-25), then Klee's Secret Base's Bomb, then Dodoco's
+    # Mine.
     bomb_echo(state)
-    # Klee's Secret Base left this sequencer with the scaling pass
-    # (klee-next, 2026-10-05): it is a placement bonus now (`place`).
+    # Klee's Secret Base v3 (the scaling pass, klee-next 2026-10-05): "At the
+    # start of your turn, place a Bomb 4 [6] on a random enemy." The stack
+    # adds (two copies: one Bomb 8), placed after the growth.
+    n = p.powers.get(SECRET_BASE, 0)
+    if n:
+        living = list(state.living_enemies)
+        if living:
+            dest = state.rng.choice(living)
+            state.emit("ko_secret_base", target=dest.name, size=n)
+            place(state, dest, n)
     n = p.powers.get(DODOCO, 0)
     if n:
         living = list(state.living_enemies)

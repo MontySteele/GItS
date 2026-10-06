@@ -608,14 +608,14 @@
 # review/active/klee-status-package-2026-10-01.md sec.3). Provenance
 # note, "Klee status package, 2026-10-01".
 
-# Klee scaling pass (klee-next, 2026-10-05), sec.4 A: her Accuracy. Provenance
-# note, "Klee scaling pass, 2026-10-05".
+# Klee scaling pass (klee-next, 2026-10-05), sec.4 A, v3: a Bomb every turn,
+# copies add. Provenance note, "Klee scaling pass, 2026-10-05".
 - {id: proto_ko_secret_base, name: "Klee's Secret Base", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Your [gold]Bombs[/gold] are placed 3 bigger.",
-   upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_secret_base, amount: 3, target: self}]}
+   description: "At the start of your turn, place a [gold]Bomb[/gold] 4 on a random enemy.",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_secret_base, amount: 4, target: self}]}
 
 - {id: proto_ko_half_a_mountain, name: "Half a Mountain", character: klee,
    authored_by: [claude],

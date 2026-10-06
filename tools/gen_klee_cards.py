@@ -3071,8 +3071,8 @@ APPLY_POWERS = {
         "Whenever you draw a status, gain {X} [gold]Block[/gold] and 1 "
         "[gold]Spark[/gold]."),
     "ko_secret_base": ("SecretBasePower", None,
-        "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of "
-        "yours, place a [gold]Bomb[/gold] {X} on a random enemy."),
+        "At the start of your turn, place a [gold]Bomb[/gold] {X} on a "
+        "random enemy."),
     "ko_dodoco": ("DodocoPower", None,
         "At the start of your turn, place a [gold]Mine[/gold] {X} on a "
         "random enemy."),
@@ -7108,7 +7108,7 @@ def build_vars(card: dict) -> list[str]:
                 rider = damage_rider(card, eff)
                 if (rider == "plant_on_hit" and bomb_size_upgrade(card)
                         and eff is plant_bomb_var_effect(card)):
-                    out.append('new BombSizeVar("BombSize", '
+                    out.append('new DynamicVar("BombSize", '
                                f'{int(eff["plant_on_hit"])}m)')
                 if rider == "bonus_vs_bombed":
                     out.append(
@@ -7183,13 +7183,13 @@ def build_vars(card: dict) -> list[str]:
             if eff is plant_bomb_var_effect(card):
                 if bomb_size_upgrade(card):
                     out.append(
-                        f'new BombSizeVar("BombSize", {int(eff["size"])}m)')
+                        f'new DynamicVar("BombSize", {int(eff["size"])}m)')
                 if payload_mine_upgrade(card) and eff.get("payload_mine_all"):
-                    out.append('new BombSizeVar("PayloadMine", '
+                    out.append('new DynamicVar("PayloadMine", '
                                f'{int(eff["payload_mine_all"])}m)')
         elif op == "plant_homework_bomb":
             # The card's own size, grown for the run by `HomeworkGrowth`.
-            out.append(f'new BombSizeVar("BombSize", {int(eff["size"])}m)')
+            out.append(f'new DynamicVar("BombSize", {int(eff["size"])}m)')
         elif op in GROW_FIELD and grow_upgrade(card) \
                 and eff is grow_var_effect(card):
             out.append(f'new DynamicVar("Grow", {grow_literal(eff)}m)')
@@ -15485,6 +15485,8 @@ def emit(
             "",
             "    public int HomeworkStep => IsUpgraded ? "
             f'{int(homework["upgraded_growth"])} : {int(homework["growth"])};',
+            "",
+            f'    public int HomeworkBaseSize => {int(homework["size"])};',
         ])
 
     # PICK 8 option 2 -- THE COST BADGE'S ONE NUMBER

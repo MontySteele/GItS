@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
@@ -12,11 +11,12 @@ namespace KleeMod.Powers;
 /// <summary>
 /// THE KLEE SCALING PASS (staging branch `klee-next`, 2026-10-05,
 /// `review/active/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its
-/// defaults). Three of its four pieces meet here:
+/// defaults). Where its four pieces live:
 ///
-///   * A, Klee's Secret Base ("Your Bombs are placed 3 [4] bigger"): the
-///     placement bonus is read at <see cref="ProtoBombPower.Place"/>, and
-///     the faces read the same number through <see cref="BombSizeVar"/>.
+///   * A, Klee's Secret Base, is v3 now ("At the start of your turn, place a
+///     Bomb 4 [6] on a random enemy"): <see cref="SecretBasePower"/> and the
+///     start-of-turn sequencer, not here. The first draft's placement bonus
+///     and its card-face fold are gone.
 ///   * B, Witch's Homework (the grant-only `proto_ko_witchs_homework_next`
 ///     row): "Place a Bomb 6. When it goes off, this card's Bomb is 2 [3]
 ///     larger for the rest of the run." The charge carries a MARK
@@ -45,8 +45,8 @@ public static class KleeScalingPass
 
     /// <summary>
     /// Witch's Homework's play: one Bomb of the card's printed (grown) size on
-    /// <paramref name="target"/>, marked with the card. Secret Base and the
-    /// Dodoco Charm still apply -- it is a placement.
+    /// <paramref name="target"/>, marked with the card. The Dodoco Charm
+    /// still applies -- it is a placement.
     /// </summary>
     public static async Task PlaceHomework(
         PlayerChoiceContext choiceContext, Creature? target, Creature applier,
@@ -76,6 +76,12 @@ public static class KleeScalingPass
             Grow(card, homework.HomeworkStep);
         }
     }
+
+    /// <summary>The run-long Bomb a Witch's Homework card places now: its
+    /// base plus its saved growth. Fight telemetry's
+    /// <c>homework_bomb_size</c> reads it off each deck card.</summary>
+    public static int RunBombSize(IHomeworkCard card) =>
+        card.HomeworkBaseSize + card.HomeworkGrowth;
 
     /// <summary>The card the once-a-combat latch is keyed by: the deck card
     /// this combat copy came from, or the card itself.</summary>
@@ -110,39 +116,7 @@ public interface IHomeworkCard
 
     /// <summary>What one growth adds: 2, or 3 upgraded.</summary>
     int HomeworkStep { get; }
-}
 
-/// <summary>
-/// A BOMB SIZE ON A CARD FACE, with the placement bonus folded in, so the
-/// number the card prints is the Bomb it places -- base-game Accuracy on a
-/// Shiv. Under Klee's Secret Base 3, Pop!'s face reads Bomb 8.
-///
-/// <c>IntValue</c> STAYS THE BASE, and that is what the play hands to
-/// <see cref="ProtoBombPower.Place"/>, which adds the bonus once. Only
-/// <c>PreviewValue</c> -- what <c>{BombSize:diff()}</c> renders, green when
-/// above the base -- carries it. Outside a hand (a reward, the compendium, a
-/// canonical copy) it prints the base, as a plain var would.
-///
-/// The bonus is <see cref="ProtoBombPower.PlacementBonus"/>, the very number
-/// <c>Place</c> adds, so the face and the board cannot disagree: Secret Base
-/// and the Dodoco Charm.
-/// </summary>
-public sealed class BombSizeVar : DynamicVar
-{
-    public BombSizeVar(string name, decimal amount) : base(name, amount)
-    {
-    }
-
-    public override void UpdateCardPreview(
-        CardModel card, CardPreviewMode previewMode, Creature? target,
-        bool runGlobalHooks)
-    {
-        PreviewValue = BaseValue;
-        if (!runGlobalHooks) return;
-        // A canonical copy has no owner and its getter ASSERTS.
-        if (!card.IsMutable) return;
-        var owner = card.Owner?.Creature;
-        if (owner == null) return;
-        PreviewValue = BaseValue + ProtoBombPower.PlacementBonus(owner);
-    }
+    /// <summary>The printed Bomb before any growth: 6.</summary>
+    int HomeworkBaseSize { get; }
 }

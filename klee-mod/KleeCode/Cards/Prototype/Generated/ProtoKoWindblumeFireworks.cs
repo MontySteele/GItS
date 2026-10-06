@@ -55,7 +55,7 @@ public sealed class ProtoKoWindblumeFireworks : CustomCardModel, IElementalCard,
         new List<DynamicVar>
         {
             new DamageVar(10m, ValueProp.Move),
-            new BombSizeVar("BombSize", 6m)
+            new DynamicVar("BombSize", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

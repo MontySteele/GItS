@@ -504,32 +504,34 @@ def test_the_echo_left_the_end_of_the_turn(overhaul):
 # START OF TURN
 # ---------------------------------------------------------------------------
 
-def test_secret_base_raises_every_placement_and_places_nothing(overhaul):
-    """The Klee scaling pass (klee-next, 2026-10-05, sec.4 A): "Your Bombs
-    are placed 3 bigger." No turn-start Bomb any more; Dodoco's Mine is a
-    placement, so it is raised too."""
+def test_secret_base_places_a_bomb_every_turn_before_dodocos_mine(overhaul):
+    """Klee's Secret Base v3 (the Klee scaling pass, klee-next 2026-10-05,
+    sec.4 A): "At the start of your turn, place a Bomb 4 [6] on a random
+    enemy." Every turn, whatever is on the board, and before Dodoco's Mine."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.turn = 2
-    state.player.powers[klee_overhaul.SECRET_BASE] = 3
+    state.player.powers[klee_overhaul.SECRET_BASE] = 4
+    state.player.powers[klee_overhaul.DODOCO] = 3
     klee_overhaul.turn_start_late(state)
-    assert sizes(enemy) == []
-    state.player.powers[klee_overhaul.DODOCO] = 4
-    klee_overhaul.turn_start_late(state)
-    assert sizes(enemy) == [7]
+    assert sizes(enemy) == [4, 3]
     assert klee_overhaul.mine_count(enemy) == 1
+    klee_overhaul.turn_start_late(state)
+    # A Bomb on the board does not stop the next one.
+    assert sizes(enemy) == [4, 3, 4, 3]
+
+
+def test_secret_base_copies_add_into_one_bomb_and_raise_no_other(overhaul):
+    """Two copies stack like Noxious Fumes: one Bomb 8. A card's placement is
+    its printed size -- v3 leaves no placement bonus behind."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.turn = 2
+    state.player.powers[klee_overhaul.SECRET_BASE] = 8
+    klee_overhaul.turn_start_late(state)
+    assert sizes(enemy) == [8]
     klee_overhaul.place(state, enemy, 5)
-    assert sizes(enemy) == [7, 8]
-
-
-def test_secret_base_skips_a_move(overhaul):
-    """A merge and a jump carry a Bomb already placed: no bonus."""
-    a, b = make_enemy(hp=200), make_enemy(hp=200)
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 5)
-    state.player.powers[klee_overhaul.SECRET_BASE] = 3
-    klee_overhaul.place(state, a, 5, relocated=True)
-    assert sizes(a) == [5, 5]
+    assert sizes(enemy) == [8, 5]
 
 
 def test_alices_detonator_adds_a_kapow_and_the_plus_an_upgraded_one(

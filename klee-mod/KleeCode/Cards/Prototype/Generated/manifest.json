@@ -1389,7 +1389,7 @@
       "block": 3
     },
     "proto_ko_secret_base": {
-      "power_amount": 1
+      "power_amount": 2
     },
     "proto_ko_shrapnel": {
       "bomb_size": 3

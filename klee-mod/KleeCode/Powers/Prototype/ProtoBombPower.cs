@@ -1785,10 +1785,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // merge and a split carry a Bomb that was already placed, so they pass
         // `relocated` and the Charm is paid once per Bomb, when it arrives.
         if (!relocated) size += Relics.DodocoCharm.BonusFor(applier);
-        // KLEE'S SECRET BASE (the scaling pass, klee-next 2026-10-05): "Your
-        // Bombs are placed 3 bigger." The Charm's door and the Charm's rule: a
-        // placement takes it, a move (jump, merge, split, a remnant) does not.
-        if (!relocated) size += SecretBasePower.BonusFor(applier);
         var mark = ResolutionLedger.MarkApplied();
         var power = await PowerCmd.Apply<ProtoBombPower>(
             choiceContext, target, 1, applier: applier, cardSource: cardSource);
@@ -1823,15 +1819,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                    + "the applied power instance; the charge was not recorded.");
         }
     }
-
-    /// <summary>
-    /// What a PLACEMENT by <paramref name="applier"/> gains, right now: the
-    /// Dodoco Charm and Klee's Secret Base, the two terms <see cref="Place"/>
-    /// adds to every charge that is not a move. PURE. The card faces read it
-    /// (<see cref="BombSizeVar"/>) so the printed Bomb is the placed one.
-    /// </summary>
-    public static int PlacementBonus(Creature? applier) =>
-        Relics.DodocoCharm.BonusFor(applier) + SecretBasePower.BonusFor(applier);
 
     /// <summary>Mine Toss: one charge on EVERY enemy. A snapshot, so a payload
     /// firing mid-sweep cannot change who is swept.</summary>

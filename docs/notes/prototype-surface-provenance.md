@@ -6637,6 +6637,6 @@ Two changes after the seat round (`review/records/kokomi-review-round-2026-10-05
 
 Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-measurement-2026-10-05.md` sec.6). Paper: `review/active/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its defaults.
 
-- `proto_ko_secret_base`: "Your Bombs are placed 3 [4] bigger." (sec.4 A). Paid at `ProtoBombPower.Place` beside the Dodoco Charm, never on a move (jump, merge, split, remnant); faces fold it through `BombSizeVar`.
+- `proto_ko_secret_base`, v3 (replaces sec.4 A's "Your Bombs are placed 3 [4] bigger", whose placement bonus and card-face fold are removed, so faces print their own numbers again): "At the start of your turn, place a Bomb 4 [6] on a random enemy." 1-cost Uncommon Power; the upgrade raises 4 to 6. Copies add like Noxious Fumes (two copies place one Bomb 8, 12 upgraded). Placed after the start-of-turn growth, so it shows 4 when she acts, through the expansion's start-of-turn sequencer (after the echo, before Dodoco's Mine) and the ordinary placement path Pop! uses; a random living enemy, none means nothing.
 - `proto_ko_boom_badge`: Retain, and "Does not stack." -- x2 whatever the stack (sec.4 C).
 - `proto_ko_witchs_homework_next` (new, grant-only, `C.STAGING_GRANT_IDS`): "Place a Bomb 6. When it goes off, this card's Bomb is 2 [3] larger for the rest of the run." Exhaust (sec.4 B). Titled "Witch's Homework II" because titles are unique (`lint_prototype_titles`); the pool's Witch's Homework is unchanged.

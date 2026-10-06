@@ -531,7 +531,7 @@ public class KleeR276ExpansionTests
     // ---- start of turn -----------------------------------------------------
 
     [Fact]
-    public void Dodocos_mine_runs_through_the_one_sequencer()
+    public void Secret_base_and_dodoco_run_through_the_one_sequencer()
     {
         // REAL: the latch, once per turn per Klee.
         var klee = Seat.Klee().Creature;
@@ -543,11 +543,14 @@ public class KleeR276ExpansionTests
         Assert.True(ledger.TakeTurnStartPlacements());
         KleeOverhaulLedger.ResetAll();
 
-        // STRUCTURAL: Dodoco calls the one sequencer, which takes the latch
-        // before its Mine is placed. Klee's Secret Base left it with the
-        // scaling pass (klee-next, 2026-10-05; KleeScalingPassTests).
-        Assert.Contains("KleeExpansion.RunTurnStartPlacements",
-                        Il.Calls(Il.Method("DodocoPower", "AfterPlayerTurnStart")));
+        // STRUCTURAL: both Powers call the one sequencer, which takes the
+        // latch, places Klee's Secret Base's Bomb (v3, the scaling pass,
+        // klee-next 2026-10-05; KleeScalingPassTests) and then Dodoco's Mine.
+        foreach (var type in new[] { "SecretBasePower", "DodocoPower" })
+        {
+            Assert.Contains("KleeExpansion.RunTurnStartPlacements",
+                            Il.Calls(Il.Method(type, "AfterPlayerTurnStart")));
+        }
         var run = Il.CallSequence(Il.Method("KleeExpansion", "RunTurnStartPlacements"))
             .ToList();
         Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", run);

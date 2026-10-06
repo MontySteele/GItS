@@ -48,7 +48,7 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BombSizeVar("BombSize", 8m)
+            new DynamicVar("BombSize", 8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
