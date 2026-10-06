@@ -6632,3 +6632,11 @@ Two changes after the seat round (`review/records/kokomi-review-round-2026-10-05
 
 - Tide Wall's Plan now says "plus the damage the enemy intends next turn." Wording only, no op change: the seat read the intent on screen and took the Plan as this turn's, but it is carried out next turn.
 - Sea Glass Harvest's now-line Block 6 [7] -> 8 [11]. Two seats named it NEVER AGAIN: 6 Block with nothing to transform. 8 [11] is Coral Bulwark's Common rate. The Plan is unchanged. Prediction: no NEVER AGAIN next round.
+
+## Klee scaling pass, 2026-10-05
+
+Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-measurement-2026-10-05.md` sec.6). Paper: `review/active/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its defaults.
+
+- `proto_ko_secret_base`: "Your Bombs are placed 3 [4] bigger." (sec.4 A). Paid at `ProtoBombPower.Place` beside the Dodoco Charm, never on a move (jump, merge, split, remnant); faces fold it through `BombSizeVar`.
+- `proto_ko_boom_badge`: Retain, and "Does not stack." -- x2 whatever the stack (sec.4 C).
+- `proto_ko_witchs_homework_next` (new, grant-only, `C.STAGING_GRANT_IDS`): "Place a Bomb 6. When it goes off, this card's Bomb is 2 [3] larger for the rest of the run." Exhaust (sec.4 B). Titled "Witch's Homework II" because titles are unique (`lint_prototype_titles`); the pool's Witch's Homework is unchanged.

@@ -34,6 +34,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoKoBoomBadge : CustomCardModel, ISparkPricedCard
 {
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Retain };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this), this);
 
@@ -42,7 +45,7 @@ public sealed class ProtoKoBoomBadge : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Boom Badge"),
-        ("description", "The next time you [gold]Set off[/gold] this turn, your [gold]Bombs[/gold] deal double damage."),
+        ("description", "The next time you [gold]Set off[/gold] this turn, your [gold]Bombs[/gold] deal double damage. Does not stack."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

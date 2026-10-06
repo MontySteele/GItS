@@ -756,7 +756,10 @@ KLEE_OVERHAUL_OPS = frozenset((
     # DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy's op. Same
     # decision; `lose_strength` resolves off the arm too, but only her
     # prototype row prints it, so no drafted number moves.
-    "lose_strength"))
+    "lose_strength",
+    # THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's Homework's
+    # grant-only row. Same decision -- no pool offers it.
+    "plant_homework_bomb"))
 
 #: VARKA's two verbs (the Oath rework, review/active/varka-paper-kit-
 #: 2026-09-28.md): `varka` (one kind per Oath rule, `tier0/engine/varka_oath`)
@@ -2516,7 +2519,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "grant_kapow_each_turn",
                   "transform_statuses_into",
                   "exhaust_statuses_grow_largest",
-                  "lose_strength")},
+                  "lose_strength",
+                  "plant_homework_bomb")},
     # --- VARKA, the Oath rework (varka_oath, Varka seats only) ---
     **{op: "ZERO: VARKA's Oath verbs resolve in tier0 only for a Varka seat, "
             "and no pool offers a proto_vk_ row to this "

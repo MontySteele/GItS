@@ -98,7 +98,8 @@ internal static class ProtoBombs
         foreach (var charge in charges)
         {
             list.Add(Activator.CreateInstance(
-                ChargeType, charge.Size, charge.IsMine, charge.PayloadMineAll));
+                ChargeType, charge.Size, charge.IsMine, charge.PayloadMineAll,
+                (MegaCrit.Sts2.Core.Models.CardModel[]?)null));
         }
         return list;
     }

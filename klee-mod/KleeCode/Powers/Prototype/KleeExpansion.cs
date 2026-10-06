@@ -183,13 +183,14 @@ public static class KleeExpansion
     }
 
     /// <summary>
-    /// R276, THE START-OF-TURN PLACEMENTS IN ONE FIXED ORDER: Klee's Secret
-    /// Base asks its question ("no enemy has a Bomb of yours") of the board as
-    /// the growth left it, and only then does Dodoco's Mine land. Both Powers
-    /// call this from <c>AfterPlayerTurnStart</c> -- after the draw and after
-    /// rule 1's growth -- and the ledger's per-turn latch makes the second call
-    /// a no-op, so the order is this method's and not the broadcast's. Sim
-    /// twin: <c>klee_overhaul._turn_start_expansion</c>, same order.
+    /// R276, THE START-OF-TURN PLACEMENTS IN ONE FIXED ORDER: the echo, then
+    /// Dodoco's Mine. Each Power calls this from <c>AfterPlayerTurnStart</c>
+    /// -- after the draw and after rule 1's growth -- and the ledger's
+    /// per-turn latch makes a second call a no-op, so the order is this
+    /// method's and not the broadcast's. Klee's Secret Base left this
+    /// sequencer with the scaling pass (klee-next, 2026-10-05): it is a
+    /// placement bonus now (<see cref="SecretBasePower"/>). Sim twin:
+    /// <c>klee_overhaul._turn_start_expansion</c>, same order.
     ///
     /// SPARKS 'N' SPLASH GOES FIRST (2026-09-25): its echo reads the Bombs
     /// the growth just grew, before anything new is placed, and it is the
@@ -203,14 +204,6 @@ public static class KleeExpansion
         if (!KleeOverhaulLedger.For(klee).TakeTurnStartPlacements()) return;
         var echoes = klee.Powers.OfType<BombEchoPower>().Sum(p => p.Amount);
         if (echoes > 0) await BombEchoPower.Fire(choiceContext, klee, echoes);
-        foreach (var secretBase in klee.Powers.OfType<SecretBasePower>().ToList())
-        {
-            if (ProtoBombPower.AnyPlacedBy(klee)) break;
-            await ProtoBombPower.PlaceOnRandom(choiceContext, klee,
-                                               secretBase.Amount, isMine: false,
-                                               payloadMineAll: 0,
-                                               cardSource: null);
-        }
         foreach (var dodoco in klee.Powers.OfType<DodocoPower>().ToList())
         {
             // Motion pass (2026-10-02): Dodoco's pop over Klee as its Mine

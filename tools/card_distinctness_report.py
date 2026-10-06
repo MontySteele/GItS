@@ -233,7 +233,8 @@ def surface_pools() -> list[tuple[str, list[dict]]]:
                          if r.get("character") == ch
                          and (not r.get("nation") or r.get("id") in own)
                          and r.get("rarity") in OFFERABLE
-                         and not r.get("multiplayer")]))
+                         and not r.get("multiplayer")
+                         and r.get("id") not in _C.STAGING_GRANT_IDS]))
     nations = sorted({r["nation"] for r in rows if r.get("nation")})
     for nation in nations:
         out.append((f"{nation}-companions",

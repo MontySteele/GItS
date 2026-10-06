@@ -48,7 +48,7 @@ public sealed class ProtoKoPop : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 5m)
+            new BombSizeVar("BombSize", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

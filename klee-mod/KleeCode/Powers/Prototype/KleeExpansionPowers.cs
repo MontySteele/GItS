@@ -95,8 +95,10 @@ public sealed class PlaydatePower : PowerModel, ILocalizationProvider
 /// enemy, Rapid Fire every roll, Pocket Match its one charge. The factor
 /// MULTIPLIES the ledger's armed multiplier, so with The Big One it is x8.
 ///
-/// EVERY COPY DOUBLES THE SAME NEXT SET OFF (<see cref="FactorFor"/>),
-/// Playdate's reading: two badges are two sentences about one Set off. Spent
+/// BADGES DO NOT STACK (the scaling pass, klee-next 2026-10-05,
+/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 C): the factor is 2
+/// whatever the stack (<see cref="FactorFor"/>); two badges used to be x4.
+/// The card gained Retain in the same change. Spent
 /// whether or not the aimed enemy held a Bomb, because that card was the next
 /// Set off. A Mine answering an attack is not a Set off and never reads it.
 /// Expires at the end of the turn it was played on. Sim twin:
@@ -109,16 +111,16 @@ public sealed class BoomBadgePower : PowerModel, ILocalizationProvider
         ("title", "Boom Badge"),
         ("description",
             "The next time you [gold]Set off[/gold] this turn, your "
-          + "[gold]Bombs[/gold] deal double damage."),
+          + "[gold]Bombs[/gold] deal double damage. Does not stack."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>What <paramref name="copies"/> badges multiply the next Set
-    /// off's Bombs by: x2 per copy, 1 with none. PURE.</summary>
-    public static int FactorFor(int copies) =>
-        copies <= 0 ? 1 : 1 << System.Math.Min(copies, 20);
+    /// off's Bombs by: x2 with any, 1 with none. "Does not stack" (the
+    /// scaling pass, klee-next). PURE.</summary>
+    public static int FactorFor(int copies) => copies <= 0 ? 1 : 2;
 
     /// <summary>
     /// A Set off is happening: take every badge on <paramref name="klee"/> and
@@ -391,11 +393,22 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Klee's Secret Base: "At the start of your turn, if no enemy has a Bomb of
-/// yours, place a Bomb 5 on a random enemy." <c>AfterPlayerTurnStart</c>, which
-/// runs after the growth hook (<c>BeforeSideTurnStart</c>) -- the spec's "after
-/// Bombs grow" -- so the fresh Bomb does not grow on the turn it arrives. Two
-/// copies check in turn, so the second sees the first one's Bomb.
+/// Klee's Secret Base, the scaling pass (klee-next, 2026-10-05,
+/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 A): "Your Bombs are
+/// placed 3 [4] bigger." Her Accuracy. A Counter, so copies stack by adding.
+///
+/// THE WHOLE RULE IS ONE READ AT ONE DOOR: <see cref="ProtoBombPower.Place"/>
+/// adds <see cref="BonusFor"/> to every placement, beside the Dodoco Charm,
+/// and skips it on a MOVE (a jump, a merge, a split, a remnant) exactly as the
+/// Charm does. Every Bomb or Mine Klee places goes through that door: a card's
+/// Place, Jumpy Dumpty's payload Mines, All of My Treasures!'s copies, Return
+/// to Sender, Aftershock, Party Poppers, Dodoco, Little Hexenzirkel, Finders
+/// Keepers, her relics and potions. The faces read the same number
+/// (<see cref="BombSizeVar"/>), as a Shiv reads Accuracy.
+///
+/// The old face ("At the start of your turn, if no enemy has a Bomb of yours,
+/// place a Bomb 5") left with this rewrite, and with it this Power's seat in
+/// <c>KleeExpansion.RunTurnStartPlacements</c>.
 /// </summary>
 public sealed class SecretBasePower : PowerModel, ILocalizationProvider
 {
@@ -403,24 +416,18 @@ public sealed class SecretBasePower : PowerModel, ILocalizationProvider
     {
         ("title", "Klee's Secret Base"),
         ("description",
-            "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of "
-          + "yours, place a [gold]Bomb[/gold] [blue]{Amount}[/blue] on a "
-          + "random enemy."),
+            "Your [gold]Bombs[/gold] are placed [blue]{Amount}[/blue] bigger."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>The check and the Bomb, in the one fixed order the
-    /// expansion's start-of-turn placements take
-    /// (<see cref="KleeExpansion.RunTurnStartPlacements"/>): this Power's
-    /// question is asked before Dodoco's Mine lands.</summary>
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (Owner == null || player.Creature != Owner) return;
-        await KleeExpansion.RunTurnStartPlacements(choiceContext, player);
-    }
+    /// <summary>What <paramref name="applier"/>'s placements gain: the summed
+    /// stack, 0 with none. PURE.</summary>
+    public static int BonusFor(Creature? applier) =>
+        applier == null
+            ? 0
+            : applier.Powers.OfType<SecretBasePower>().Sum(p => p.Amount);
 }
 
 /// <summary>

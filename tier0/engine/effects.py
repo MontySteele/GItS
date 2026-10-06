@@ -504,7 +504,9 @@ AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
                         # unreachable outside the arm.
                         "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                         # R276's Hair Trigger, on the same terms.
-                        "mine_bombs"))
+                        "mine_bombs",
+                        # The Klee scaling pass's Witch's Homework (klee-next).
+                        "plant_homework_bomb"))
 
 # Ops whose aimed target may be a CORPSE. C#'s dead-target rule is op-dependent
 # and this frozenset is that asymmetry, written down once:
@@ -5516,6 +5518,20 @@ def _op_add_random_companion(state: CombatState, fx: dict,
     klee_overhaul.add_random_companions(state, int(fx["amount"]))
 
 
+def _op_plant_homework_bomb(state: CombatState, fx: dict,
+                            card: Card) -> None:
+    """THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's Homework's
+    Bomb. The sim places it at its printed size and does NOT model the
+    run-long growth: the row is grant-only (in no pool, `C.KLEE_OVERHAUL_
+    POOL_IDS`), so no sim run draws it, and the sim's Balance machinery is
+    parked (`review/active/klee-balance-measurement-2026-10-05.md` pick 3).
+    The C# is `KleeScalingPass`."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    for enemy in _pick_targets(state, "enemy", allow_dead=True):
+        klee_overhaul.place(state, enemy, int(fx["size"]))
+
+
 def _op_grant_kapow_each_turn(state: CombatState, fx: dict,
                               card: Card) -> None:
     """Alice's Detonator: install the twin the card's upgrade names
@@ -5813,6 +5829,7 @@ OPS = {
     # is not Klee -- see `_op_klee_overhaul_off`.
     "set_off": _op_set_off,
     "plant_bomb": _op_plant_bomb,
+    "plant_homework_bomb": _op_plant_homework_bomb,
     "grow_bombs": _op_grow_bombs,
     "merge_bombs": _op_merge_bombs,
     # THE POOL PASS's three (`EB-491`), on the same terms as every arm verb

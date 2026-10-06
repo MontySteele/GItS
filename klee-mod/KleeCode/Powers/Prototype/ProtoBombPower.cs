@@ -324,6 +324,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (player == null) return 0;
         var payers = player.Relics.Count(
             r => r is global::KleeMod.Relics.PoundingSurprise
+                 or global::KleeMod.Relics.PoundingSurpriseNext
                  or global::KleeMod.Relics.ExplosiveFrags);
         return _charges.Count * KleeOverhaulLaw.SparkPerExplosion * payers;
     }
@@ -353,8 +354,14 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <c>PayloadMineAll</c> is the Bomb payload the build list names: Jumpy
     /// Dumpty's charge, when it goes off, puts a Mine of this size on every
     /// enemy. 0 is "no payload", which is every other charge in the slice.
+    /// <c>Homework</c> is the Klee scaling pass's mark (klee-next, 2026-10-05,
+    /// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 B): the Witch's
+    /// Homework card(s) whose Bomb this is. It TRAVELS with a jump and a merge
+    /// and is never made by a copy, so "when it goes off" reads the charge and
+    /// not the card (<see cref="KleeScalingPass.AfterHomeworkWentOff"/>).
     /// </summary>
-    public readonly record struct ProtoCharge(int Size, bool IsMine, int PayloadMineAll);
+    public readonly record struct ProtoCharge(int Size, bool IsMine, int PayloadMineAll,
+                                              CardModel[]? Homework = null);
 
     /// <summary>Charges in placement order. MUST be deep-cloned: see
     /// <see cref="DeepCloneFields"/>.</summary>
@@ -1451,6 +1458,9 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         }
 
         await NotifyExplosionListeners(choiceContext, applier, target, size, reacted);
+        // THE SCALING PASS (klee-next): a Witch's Homework Bomb went off, so
+        // its card grows for the run (once a combat per card).
+        KleeScalingPass.AfterHomeworkWentOff(applier, charge);
         // R276, THE CHARGE-AWARE DOOR, after the bus so rule 4's Spark has
         // landed first. Look Out! and Second Surprise need to know this was a
         // MINE, Aftershock needs the charge's own size, and Wait For It...
@@ -1540,7 +1550,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             if (dest == null) return;
             await Place(choiceContext, dest, charge.Size, charge.IsMine,
                         charge.PayloadMineAll, applier, cardSource,
-                        relocated: true);
+                        homework: charge.Homework, relocated: true);
         }
     }
 
@@ -1767,7 +1777,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     public static async Task Place(
         PlayerChoiceContext choiceContext, Creature target, int size,
         bool isMine, int payloadMineAll, Creature applier, CardModel? cardSource,
-        bool relocated = false)
+        CardModel[]? homework = null, bool relocated = false)
     {
         // DODOCO CHARM (the arm's Common relic, review/active/relics-potions-
         // klee-furina-2026-09-27.md): "Whenever you place a Bomb, it is 1
@@ -1775,13 +1785,17 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // merge and a split carry a Bomb that was already placed, so they pass
         // `relocated` and the Charm is paid once per Bomb, when it arrives.
         if (!relocated) size += Relics.DodocoCharm.BonusFor(applier);
+        // KLEE'S SECRET BASE (the scaling pass, klee-next 2026-10-05): "Your
+        // Bombs are placed 3 bigger." The Charm's door and the Charm's rule: a
+        // placement takes it, a move (jump, merge, split, a remnant) does not.
+        if (!relocated) size += SecretBasePower.BonusFor(applier);
         var mark = ResolutionLedger.MarkApplied();
         var power = await PowerCmd.Apply<ProtoBombPower>(
             choiceContext, target, 1, applier: applier, cardSource: cardSource);
 
         if (power is ProtoBombPower bomb)
         {
-            bomb.AddCharge(new ProtoCharge(size, isMine, payloadMineAll));
+            bomb.AddCharge(new ProtoCharge(size, isMine, payloadMineAll, homework));
             Register.Note(bomb);
             // The play log's line for this placement: the hook filed the
             // pile's COUNT (1), and the page reads a size ("Put Bomb 11").
@@ -1800,7 +1814,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             // the sim already lands it on the corpse and sweeps it onward
             // (`klee_overhaul.place`, then `sweep_jumps`) -- so it jumps.
             await JumpCharges(choiceContext, target,
-                              new[] { new ProtoCharge(size, isMine, payloadMineAll) },
+                              new[] { new ProtoCharge(size, isMine, payloadMineAll, homework) },
                               applier, cardSource);
         }
         else
@@ -1809,6 +1823,15 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                    + "the applied power instance; the charge was not recorded.");
         }
     }
+
+    /// <summary>
+    /// What a PLACEMENT by <paramref name="applier"/> gains, right now: the
+    /// Dodoco Charm and Klee's Secret Base, the two terms <see cref="Place"/>
+    /// adds to every charge that is not a move. PURE. The card faces read it
+    /// (<see cref="BombSizeVar"/>) so the printed Bomb is the placed one.
+    /// </summary>
+    public static int PlacementBonus(Creature? applier) =>
+        Relics.DodocoCharm.BonusFor(applier) + SecretBasePower.BonusFor(applier);
 
     /// <summary>Mine Toss: one charge on EVERY enemy. A snapshot, so a payload
     /// firing mid-sweep cannot change who is swept.</summary>
@@ -2021,6 +2044,9 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         var size = 0;
         var isMine = false;
         var payload = 0;
+        // The scaling pass (klee-next): Witch's Homework's mark survives a
+        // merge -- every merged mark rides the one Bomb.
+        CardModel[]? homework = null;
         foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
         {
             foreach (var pile in enemy.Powers.OfType<ProtoBombPower>().ToList())
@@ -2032,13 +2058,14 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                     size += charge.Size;
                     isMine |= charge.IsMine;
                     payload += charge.PayloadMineAll;
+                    homework = KleeScalingPass.MergeMarks(homework, charge.Homework);
                 }
                 await PowerCmd.Remove(pile);
             }
         }
         if (size == 0) return;
         await Place(choiceContext, dest, size + growth, isMine, payload,
-                    applier, cardSource, relocated: true);
+                    applier, cardSource, homework: homework, relocated: true);
     }
 
     /// <summary>

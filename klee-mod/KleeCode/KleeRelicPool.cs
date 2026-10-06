@@ -48,7 +48,12 @@ public sealed class KleeRelicPool : RelicPoolModel
             // the mid-run Touch of Orobas grant instead of at character select.
             // Ancient rarity keeps it off reward rolls, which take
             // Common/Uncommon/Rare/Shop/Boss only (see the header above).
-            .Append(ModelDb.Relic<Relics.ExplosiveFrags>());
+            .Append(ModelDb.Relic<Relics.ExplosiveFrags>())
+            // THE TEMPO RELIC (the Klee scaling pass, klee-next 2026-10-05):
+            // a member so `RelicModel.Pool` resolves, and in no OFFER --
+            // `ArmRelicPools.KleeArmPool` does not list it. Embark's
+            // `--relic` grant is its only door.
+            .Append(ModelDb.Relic<Relics.PoundingSurpriseNext>());
         // QUARANTINED: KLEE'S OWN SEVEN (review/active/relics-potions-klee-
         // furina-2026-09-27.md, pick 1(a)). MEMBERSHIP under the compile flag,
         // for the Casket's reason (`KokomiRelicPool`): this runs once, before

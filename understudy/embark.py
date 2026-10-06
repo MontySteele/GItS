@@ -307,12 +307,39 @@ def grant_arms(arms: list[str]) -> list[dict[str, Any]]:
     return granted
 
 
+def grant_relics(relics: list[str]) -> list[dict[str, Any]]:
+    """Grant each relic into the run once it is open. One report per relic.
+
+    THE KLEE SCALING PASS (klee-next, 2026-10-05): round 1's third arm opens
+    with a staging relic (`KLEEMOD-POUNDING_SURPRISE_NEXT`, which replaces
+    Pounding Surprise when obtained). The door is the bridge's `give_relic`
+    (live look 8b), the game's own `RelicCmd.Obtain`, so the relic's
+    `AfterObtained` runs exactly as on a drop. `relic_id` is the wire id, or
+    the exact printed title; a failed grant stops the embark, as
+    `grant_arms` does.
+    """
+    granted: list[dict[str, Any]] = []
+    for relic in relics:
+        relic_id = str(relic).strip()
+        reply = bridge.give_relic(relic_id,
+                                  why="embark --relic: a staging round's "
+                                      "starting relic")
+        if str(reply.get("status") or "").lower() not in ("ok", "queued"):
+            raise EmbarkError(
+                f"granting relic {relic_id} failed: "
+                f"{reply.get('message') or reply}")
+        granted.append({"relic": relic_id,
+                        "message": reply.get("message") or ""})
+    return granted
+
+
 # ------------------------------------------------------------- the embark --
 
 def embark(character: str, *, hold: bool = False,
            chosen_seed: str | None = None,
            chosen_ascension: int | None = None,
            arms: list[str] | None = None,
+           relics: list[str] | None = None,
            instance: Any = None,
            lane: object = None,
            max_actions: int = 0,
@@ -460,6 +487,10 @@ def embark(character: str, *, hold: bool = False,
         sidecar["arms_build_version"] = build
         sidecar["arms_build_version_source"] = build_source
         sidecar["arms_guardrail"] = bridge.GRANT_GUARDRAIL
+    # The Klee scaling pass (klee-next): a starting relic, after the cards.
+    if relics:
+        sidecar["relics_granted"] = grant_relics(list(relics))
+        sidecar.setdefault("arms_guardrail", bridge.GRANT_GUARDRAIL)
 
     _write_sidecar(stamp, sidecar)
     return sidecar
@@ -692,7 +723,8 @@ def _per_lane(value: str, labels: list[str], what: str) -> list[str | None]:
 
 def lane_commands(labels: list[str], *, characters: list[str | None],
                   seeds: list[str | None], ascension: int | None,
-                  max_actions: int, arms: list[str]) -> list[list[str]]:
+                  max_actions: int, arms: list[str],
+                  relics: list[str] | None = None) -> list[list[str]]:
     """The single-lane embark command each lane runs."""
     out = []
     for label, who, seed in zip(labels, characters, seeds):
@@ -707,6 +739,8 @@ def lane_commands(labels: list[str], *, characters: list[str | None],
             cmd += ["--max-actions", str(max_actions)]
         for arm in arms:
             cmd += ["--arm", arm]
+        for relic in relics or []:
+            cmd += ["--relic", relic]
         out.append(cmd)
     return out
 
@@ -807,6 +841,13 @@ def main(argv: list[str] | None = None) -> int:
                          "is refused unless the deployed build carries the "
                          "current kits (`+proto`, or any build since the "
                          "2026-09-28 ruling)")
+    ap.add_argument("--relic", action="append", default=[], metavar="RELIC_ID",
+                    dest="relics",
+                    help="grant a relic once the run is open (after any "
+                         "--arm), through the bridge's give_relic: the wire id "
+                         "(KLEEMOD-POUNDING_SURPRISE_NEXT) or the exact title. "
+                         "Repeatable. The Klee scaling pass's staging tempo "
+                         "relic replaces Pounding Surprise when obtained")
     ap.add_argument("--seed", default=None,
                     help="embark on a CHOSEN seed instead of one the game "
                          "rolls; the read-back still decides what is recorded")
@@ -878,7 +919,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     if args.coop:
-        if args.arms or args.hold:
+        if args.arms or args.relics or args.hold:
             print("embark error: --coop takes no --arm and no --hold (a "
                   "grant refuses multiplayer, and a co-op pair is always "
                   "launched here)", file=sys.stderr)
@@ -905,7 +946,8 @@ def main(argv: list[str] | None = None) -> int:
         instance, install_bridge = soak.lane_setup(args.lane)
         blob = embark(args.character, hold=args.hold, chosen_seed=args.seed,
                       chosen_ascension=args.ascension,
-                      arms=args.arms, instance=instance, lane=args.lane,
+                      arms=args.arms, relics=args.relics,
+                      instance=instance, lane=args.lane,
                       max_actions=args.max_actions,
                       install_bridge=install_bridge)
     except (EmbarkError, ValueError) as exc:
@@ -924,6 +966,10 @@ def main(argv: list[str] | None = None) -> int:
               f"{', '.join(g['card_id'] for g in granted)}  into the deck "
               f"on {blob.get('arms_build_version')}")
         print(f"  {bridge.GRANT_GUARDRAIL}")
+    relics_granted = blob.get("relics_granted") or []
+    if relics_granted:
+        print(f"relics granted: "
+              f"{', '.join(r['relic'] for r in relics_granted)}")
     if blob.get("max_actions"):
         print(f"budget:    {blob['max_actions']} actions on this lane; "
               f"`blindplay act` refuses past it "
@@ -986,7 +1032,8 @@ def _lanes_cli(args: argparse.Namespace) -> int:
             check_arms(args.arms)
         commands = lane_commands(labels, characters=characters, seeds=seeds,
                                  ascension=args.ascension,
-                                 max_actions=args.max_actions, arms=args.arms)
+                                 max_actions=args.max_actions, arms=args.arms,
+                                 relics=args.relics)
     except (EmbarkError, ValueError) as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2

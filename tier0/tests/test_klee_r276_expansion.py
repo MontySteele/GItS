@@ -504,18 +504,32 @@ def test_the_echo_left_the_end_of_the_turn(overhaul):
 # START OF TURN
 # ---------------------------------------------------------------------------
 
-def test_secret_base_reads_the_board_before_dodocos_mine(overhaul):
+def test_secret_base_raises_every_placement_and_places_nothing(overhaul):
+    """The Klee scaling pass (klee-next, 2026-10-05, sec.4 A): "Your Bombs
+    are placed 3 bigger." No turn-start Bomb any more; Dodoco's Mine is a
+    placement, so it is raised too."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.turn = 2
-    state.player.powers[klee_overhaul.SECRET_BASE] = 5
+    state.player.powers[klee_overhaul.SECRET_BASE] = 3
+    klee_overhaul.turn_start_late(state)
+    assert sizes(enemy) == []
     state.player.powers[klee_overhaul.DODOCO] = 4
     klee_overhaul.turn_start_late(state)
-    assert sizes(enemy) == [5, 4]
+    assert sizes(enemy) == [7]
     assert klee_overhaul.mine_count(enemy) == 1
-    klee_overhaul.turn_start_late(state)
-    # A Bomb is on the board now: no second Secret Base Bomb.
-    assert sizes(enemy) == [5, 4, 4]
+    klee_overhaul.place(state, enemy, 5)
+    assert sizes(enemy) == [7, 8]
+
+
+def test_secret_base_skips_a_move(overhaul):
+    """A merge and a jump carry a Bomb already placed: no bonus."""
+    a, b = make_enemy(hp=200), make_enemy(hp=200)
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 5)
+    state.player.powers[klee_overhaul.SECRET_BASE] = 3
+    klee_overhaul.place(state, a, 5, relocated=True)
+    assert sizes(a) == [5, 5]
 
 
 def test_alices_detonator_adds_a_kapow_and_the_plus_an_upgraded_one(

@@ -53,7 +53,7 @@ public sealed class ProtoKoShrapnel : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 4m)
+            new BombSizeVar("BombSize", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

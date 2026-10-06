@@ -531,7 +531,7 @@ public class KleeR276ExpansionTests
     // ---- start of turn -----------------------------------------------------
 
     [Fact]
-    public void Secret_base_reads_the_board_before_dodocos_mine_lands()
+    public void Dodocos_mine_runs_through_the_one_sequencer()
     {
         // REAL: the latch, once per turn per Klee.
         var klee = Seat.Klee().Creature;
@@ -543,21 +543,16 @@ public class KleeR276ExpansionTests
         Assert.True(ledger.TakeTurnStartPlacements());
         KleeOverhaulLedger.ResetAll();
 
-        // STRUCTURAL: both Powers call the one sequencer, which asks Secret
-        // Base's question before Dodoco's Mine is placed.
-        foreach (var type in new[] { "SecretBasePower", "DodocoPower" })
-        {
-            Assert.Contains("KleeExpansion.RunTurnStartPlacements",
-                            Il.Calls(Il.Method(type, "AfterPlayerTurnStart")));
-        }
+        // STRUCTURAL: Dodoco calls the one sequencer, which takes the latch
+        // before its Mine is placed. Klee's Secret Base left it with the
+        // scaling pass (klee-next, 2026-10-05; KleeScalingPassTests).
+        Assert.Contains("KleeExpansion.RunTurnStartPlacements",
+                        Il.Calls(Il.Method("DodocoPower", "AfterPlayerTurnStart")));
         var run = Il.CallSequence(Il.Method("KleeExpansion", "RunTurnStartPlacements"))
             .ToList();
+        Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", run);
         Assert.True(run.IndexOf("KleeOverhaulLedger.TakeTurnStartPlacements")
-                    < run.IndexOf("ProtoBombPower.AnyPlacedBy"));
-        Assert.True(run.IndexOf("ProtoBombPower.AnyPlacedBy")
                     < run.LastIndexOf("ProtoBombPower.PlaceOnRandom"));
-        Assert.Equal(7m, Upgraded<ProtoKoSecretBase>()
-                             .DynamicVars["PowerAmount"].BaseValue);
         // Power cost sweep, 2026-09-30: Mine 3, upgraded Mine 5, cost 1.
         Assert.Equal(3m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal(5m, Upgraded<ProtoKoDodoco>()

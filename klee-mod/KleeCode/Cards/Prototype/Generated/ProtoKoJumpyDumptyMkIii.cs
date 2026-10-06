@@ -55,7 +55,7 @@ public sealed class ProtoKoJumpyDumptyMkIii : CustomCardModel, IElementalCard
         new List<DynamicVar>
         {
             new DamageVar(3m, ValueProp.Move),
-            new DynamicVar("BombSize", 2m)
+            new BombSizeVar("BombSize", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

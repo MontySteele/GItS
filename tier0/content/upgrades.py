@@ -818,7 +818,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # THE KOKOMI EXPANSION's Shoal Call rides the same key: its
             # Nips arrive upgraded.
             hit = next((fx for fx in top
-                        if fx.get("op") == "grant_kapow_each_turn"
+                        if fx.get("op") in ("grant_kapow_each_turn",
+                                            "plant_homework_bomb")
                         or (fx.get("op") == "kokomi"
                             and fx.get("kind") == "shoal_call")), None)
             # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into

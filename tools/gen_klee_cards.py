@@ -487,6 +487,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # `ProtoBombPower`, `KleeOverhaulLedger` or
                   # `CompanionHexerei`; the whitelist stays honest.
                   "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                  # THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's
+                  # Homework's marked Bomb, `KleeScalingPass.PlaceHomework`.
+                  "plant_homework_bomb",
                   "remove_bomb_for_block", "damage_set_off_total",
                   "multiply_set_off", "draw_per_set_off",
                   # R244's reader (Alice's Introduction Magic), renamed at R276
@@ -2579,6 +2582,13 @@ KOKOMI_FIELDS = {"op", "kind", "target", "amount"}
 #: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
 #: arrives upgraded is the card's own upgrade (`upgraded_grant`).
 GRANT_KAPOW_EACH_TURN_FIELDS = {"op"}
+#: THE KLEE SCALING PASS (klee-next, 2026-10-05,
+#: review/active/klee-scaling-pass-2026-10-05.md sec.4 B): Witch's Homework.
+#: "Place a Bomb SIZE. When it goes off, this card's Bomb is GROWTH
+#: [UPGRADED_GROWTH] larger for the rest of the run." The upgrade is the
+#: play-time `IsUpgraded` read (`upgraded_grant`), the face its own swap.
+PLANT_HOMEWORK_BOMB_FIELDS = {"op", "target", "size", "growth",
+                              "upgraded_growth"}
 #: Favonius Escort: `remove_bomb_for_block`'s Block is the removed size times
 #: this (Sorry, Jean... is the implicit 1).
 REMOVE_BOMB_FOR_BLOCK_FIELDS = {"op", "multiplier"}
@@ -4112,6 +4122,8 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # these would otherwise emit `TargetType.Self` and throw on
               # every play.
               "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+              # The Klee scaling pass's Witch's Homework (klee-next).
+              "plant_homework_bomb",
               # R276's Hair Trigger: "Your Bombs on this enemy".
               "mine_bombs",
               # The pool pass's one aimed verb (`EB-491`, All of My
@@ -5081,6 +5093,17 @@ def blocked_reason(
             unknown = set(eff) - GRANT_KAPOW_EACH_TURN_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "plant_homework_bomb":
+            unknown = set(eff) - PLANT_HOMEWORK_BOMB_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return f"{op} target must be 'enemy'"
+            for key in ("size", "growth", "upgraded_growth"):
+                val = eff.get(key)
+                if (not isinstance(val, int) or isinstance(val, bool)
+                        or val <= 0):
+                    return f"{op} {key} must be a positive literal int"
         if op in {"draw_per_set_off",
                   # R244's Alice's Introduction Magic: the window is a rule and
                   # the hand is whatever the hand is, so there is nothing for
@@ -7085,7 +7108,7 @@ def build_vars(card: dict) -> list[str]:
                 rider = damage_rider(card, eff)
                 if (rider == "plant_on_hit" and bomb_size_upgrade(card)
                         and eff is plant_bomb_var_effect(card)):
-                    out.append('new DynamicVar("BombSize", '
+                    out.append('new BombSizeVar("BombSize", '
                                f'{int(eff["plant_on_hit"])}m)')
                 if rider == "bonus_vs_bombed":
                     out.append(
@@ -7160,10 +7183,13 @@ def build_vars(card: dict) -> list[str]:
             if eff is plant_bomb_var_effect(card):
                 if bomb_size_upgrade(card):
                     out.append(
-                        f'new DynamicVar("BombSize", {int(eff["size"])}m)')
+                        f'new BombSizeVar("BombSize", {int(eff["size"])}m)')
                 if payload_mine_upgrade(card) and eff.get("payload_mine_all"):
-                    out.append('new DynamicVar("PayloadMine", '
+                    out.append('new BombSizeVar("PayloadMine", '
                                f'{int(eff["payload_mine_all"])}m)')
+        elif op == "plant_homework_bomb":
+            # The card's own size, grown for the run by `HomeworkGrowth`.
+            out.append(f'new BombSizeVar("BombSize", {int(eff["size"])}m)')
         elif op in GROW_FIELD and grow_upgrade(card) \
                 and eff is grow_var_effect(card):
             out.append(f'new DynamicVar("Grow", {grow_literal(eff)}m)')
@@ -7704,7 +7730,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # play-time read.
         "kokomi_amount": any(e["op"] == "kokomi" and "amount" in e
                              for e in effects),
-        "upgraded_grant": any(e["op"] == "grant_kapow_each_turn"
+        "upgraded_grant": any(e["op"] in ("grant_kapow_each_turn",
+                                          "plant_homework_bomb")
                               or (e["op"] == "kokomi"
                                   and e.get("kind") == "shoal_call")
                               for e in effects)
@@ -11308,6 +11335,15 @@ def build_body(
             lines.append(
                 "await KleeExpansion.AddRandomCompanions(choiceContext, "
                 f"Owner, {int(eff['amount'])});")
+
+        elif op == "plant_homework_bomb":
+            # THE KLEE SCALING PASS (klee-next): Witch's Homework's marked
+            # Bomb. `BombSize` is the card's grown size (`HomeworkGrowth`).
+            _target_guard(lines, ctx)
+            lines.append(
+                "await KleeScalingPass.PlaceHomework(choiceContext, "
+                "cardPlay.Target, Owner.Creature, this, "
+                'DynamicVars["BombSize"].IntValue);')
 
         elif op == "grant_kapow_each_turn":
             # Alice's Detonator. Whether the Ka-pow!s arrive upgraded is the
@@ -15418,6 +15454,39 @@ def emit(
            for eff in iter_card_effects(card)):
         interfaces += ", IExhaustRetriever"
 
+    # THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's Homework's
+    # run-long growth, the base game's Genetic Algorithm shape -- a
+    # `[SavedProperty]` on the card that writes the face's own var, so a save
+    # and load keep the grown Bomb. `KleeScalingPass.Grow` writes it on the
+    # combat copy and on its `DeckVersion`.
+    homework_member = ""
+    homework = next((e for e in card.get("effects") or []
+                     if e.get("op") == "plant_homework_bomb"), None)
+    if homework is not None:
+        interfaces += ", IHomeworkCard"
+        homework_member = chr(10) + chr(10).join([
+            "",
+            "    // THE KLEE SCALING PASS (klee-next): how much this card's Bomb",
+            "    // has grown this run. Saved, like Genetic Algorithm's block.",
+            "    private int _homeworkGrowth;",
+            "",
+            "    [MegaCrit.Sts2.Core.Saves.Runs.SavedProperty]",
+            "    public int HomeworkGrowth",
+            "    {",
+            "        get => _homeworkGrowth;",
+            "        set",
+            "        {",
+            "            AssertMutable();",
+            "            _homeworkGrowth = value;",
+            f'            DynamicVars["BombSize"].BaseValue = '
+            f'{int(homework["size"])} + value;',
+            "        }",
+            "    }",
+            "",
+            "    public int HomeworkStep => IsUpgraded ? "
+            f'{int(homework["upgraded_growth"])} : {int(homework["growth"])};',
+        ])
+
     # PICK 8 option 2 -- THE COST BADGE'S ONE NUMBER
     # (review/ruled/klee-sparks-2026-08-29.md sec.6.4). A card whose row prints
     # a TOP-LEVEL `spend_spark` declares that price on the interface, and the
@@ -16647,7 +16716,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{discard_discount_member}{stage_bow_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}
+    }};{tags_member}{wide_target_member}{discard_discount_member}{stage_bow_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

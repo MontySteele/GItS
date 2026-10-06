@@ -179,6 +179,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKoWaitForIt>(),
             ModelDb.Card<ProtoKoWindblumeFireworks>(),
             ModelDb.Card<ProtoKoWitchesCircle>(),
+            ModelDb.Card<ProtoKoWitchsHomeworkNext>(),
             ModelDb.Card<ProtoMcAlbedoDustOfPurification>(),
             ModelDb.Card<ProtoMcAlbedoSolarIsotoma>(),
             ModelDb.Card<ProtoMcAmberExplosivePuppet>(),

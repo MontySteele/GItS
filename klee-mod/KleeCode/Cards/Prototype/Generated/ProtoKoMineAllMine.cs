@@ -55,7 +55,7 @@ public sealed class ProtoKoMineAllMine : CustomCardModel, IElementalCard
         new List<DynamicVar>
         {
             new DamageVar(8m, ValueProp.Move),
-            new DynamicVar("BombSize", 4m)
+            new BombSizeVar("BombSize", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

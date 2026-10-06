@@ -824,20 +824,13 @@ CO_TENANCY_LEDGER = {
             "and being re-granted later cannot happen: nothing at this "
             "broadcast applies the mark, only a card play does, and a card "
             "play is strictly later",
-        ("Powers/Prototype/KleeExpansionPowers.cs", "SecretBasePower"):
-            "QUARANTINED (the Klee overhaul, R276). Klee's Secret Base reads "
-            "the board and places a Bomb. THE ORDERING QUESTION, answered: "
-            "its one co-tenant that writes the board is DodocoPower, so the "
-            "two do not run independently -- both call "
-            "KleeExpansion.RunTurnStartPlacements, whose per-turn ledger latch "
-            "runs Secret Base's check and then Dodoco's Mine in one fixed "
-            "order however the broadcast orders the two, the sim's "
-            "klee_overhaul._turn_start_expansion order",
         ("Powers/Prototype/KleeExpansionPowers.cs", "DodocoPower"):
             "QUARANTINED (the Klee overhaul, R276). Dodoco's Mine, placed "
-            "through the same sequencer as SecretBasePower above and AFTER "
-            "its check, so the one resource they share has one order. It "
-            "reads nothing else of this broadcast's",
+            "through KleeExpansion.RunTurnStartPlacements after the echo, so "
+            "the one resource they share has one order. Klee's Secret Base "
+            "left this broadcast with the scaling pass (klee-next, "
+            "2026-10-05): it is a placement bonus now. It reads nothing else "
+            "of this broadcast's",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
             "QUARANTINED (the Klee overhaul; moved here from "
             "BeforeSideTurnEnd on 2026-09-25). Sparks 'n' Splash: her "
@@ -845,10 +838,10 @@ CO_TENANCY_LEDGER = {
             "without going off. THE ORDERING QUESTION, answered: it READS "
             "the charge lists, which rule 1 grew at the strictly earlier "
             "BeforeSideTurnStart, and the only co-tenants that WRITE a "
-            "charge list here are SecretBasePower and DodocoPower -- so it "
-            "runs through their sequencer, "
+            "charge list here is DodocoPower -- so it "
+            "runs through its sequencer, "
             "KleeExpansion.RunTurnStartPlacements, FIRST, reading the board "
-            "as the growth left it however the broadcast orders the three "
+            "as the growth left it however the broadcast orders the two "
             "(the sim's klee_overhaul._turn_start_expansion order). What it "
             "WRITES is one Pyro hit on a Bomb's own terms. The residual is "
             "the one the companion tenants below already carry: "

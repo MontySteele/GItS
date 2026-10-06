@@ -227,10 +227,11 @@ def test_boom_badge_doubles_pocket_matchs_one_charge(overhaul):
     assert sizes(enemy) == [4]
 
 
-def test_two_badges_double_the_same_next_set_off_twice(overhaul):
+def test_two_badges_do_not_stack(overhaul):
     assert klee_overhaul.boom_badge_factor(0) == 1
     assert klee_overhaul.boom_badge_factor(1) == 2
-    assert klee_overhaul.boom_badge_factor(2) == 4
+    # The Klee scaling pass (klee-next, 2026-10-05): badges do not stack.
+    assert klee_overhaul.boom_badge_factor(2) == 2
 
 
 def test_a_mine_answering_an_attack_does_not_spend_the_badge(overhaul):

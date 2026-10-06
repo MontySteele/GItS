@@ -223,7 +223,10 @@ def main() -> int:
         sheet_ids = [row["id"] for row in rows
                      if row["id"].startswith(prefix)
                      and row.get("rarity") != "basic"
-                     and not row.get("multiplayer")]
+                     and not row.get("multiplayer")
+                     # A staging grant-only row (`C.STAGING_GRANT_IDS`) is
+                     # offered nowhere by design.
+                     and row["id"] not in C.STAGING_GRANT_IDS]
         for cid in sheet_ids:
             if cid not in roster_ids:
                 findings.append(

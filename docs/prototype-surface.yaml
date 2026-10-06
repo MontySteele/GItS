@@ -515,6 +515,17 @@
    upgrade: {grow: +3},
    effects: [{op: grow_largest, amount: 8, draw_if_at_least: 20, draw: 1}]}
 
+# Klee scaling pass (klee-next, 2026-10-05), sec.4 B: grant-only, in no pool
+# (`C.STAGING_GRANT_IDS`). Provenance note, "Klee scaling pass, 2026-10-05".
+- {id: proto_ko_witchs_homework_next, name: "Witch's Homework II", character: klee,
+   authored_by: [claude],
+   art_of: proto_ko_one_more_charge,
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Place a [gold]Bomb[/gold] {BombSize:diff()}. When it goes off, this card's [gold]Bomb[/gold] is {IfUpgraded:show:3|2} larger for the rest of the run.",
+   upgrade: {upgraded_grant: true},
+   effects: [{op: plant_homework_bomb, target: enemy, size: 6, growth: 2,
+              upgraded_growth: 3}]}
+
 - {id: proto_ko_sit_tight, name: "Sit Tight", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, retain: true,
@@ -548,10 +559,11 @@
 
 # Playtest 2026-09-24 ([USER]: "seems weak"): "played twice" replayed a Set
 # off card after its first play had emptied the Bombs. It now doubles them.
+# Klee scaling pass (klee-next, 2026-10-05), sec.4 C: Retain, no stacking.
 - {id: proto_ko_boom_badge, name: "Boom Badge", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   description: "The next time you [gold]Set off[/gold] this turn, your [gold]Bombs[/gold] deal double damage.",
+   cost: 0, type: skill, rarity: uncommon, retain: true,
+   description: "The next time you [gold]Set off[/gold] this turn, your [gold]Bombs[/gold] deal double damage. Does not stack.",
    upgrade: {spark_price: -1},
    effects: [{op: spend_spark, amount: 2},
              {op: apply_power, power: ko_boom_badge, amount: 1, target: self}]}
@@ -596,12 +608,14 @@
 # review/active/klee-status-package-2026-10-01.md sec.3). Provenance
 # note, "Klee status package, 2026-10-01".
 
+# Klee scaling pass (klee-next, 2026-10-05), sec.4 A: her Accuracy. Provenance
+# note, "Klee scaling pass, 2026-10-05".
 - {id: proto_ko_secret_base, name: "Klee's Secret Base", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of yours, place a [gold]Bomb[/gold] 5 on a random enemy.",
-   upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_secret_base, amount: 5, target: self}]}
+   description: "Your [gold]Bombs[/gold] are placed 3 bigger.",
+   upgrade: {power_amount: +1},
+   effects: [{op: apply_power, power: ko_secret_base, amount: 3, target: self}]}
 
 - {id: proto_ko_half_a_mountain, name: "Half a Mountain", character: klee,
    authored_by: [claude],

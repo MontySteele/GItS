@@ -312,6 +312,16 @@ KLEE_OWN_COMPANION_IDS: tuple[str, ...] = (
 # a Common for the same reason. Vermillion Pact was held out of slice one (it
 # touches the shared reaction funnel) and arrived with the pool pass
 # (`EB-491`), in the block below.
+#: STAGING GRANT-ONLY ROWS (the Klee scaling pass, klee-next 2026-10-05,
+#: review/active/klee-scaling-pass-2026-10-05.md sec.4 B). A row a staging
+#: round grants at embark (`understudy.embark --arm`) and NO offer surface
+#: shows: in no `Slice()`, no `*_OVERHAUL_POOL_IDS` and no draftable pool.
+#: `tools/lint_arm_pool_parity.py` and `tools/card_distinctness_report.py`
+#: skip it.
+STAGING_GRANT_IDS: tuple[str, ...] = (
+    "proto_ko_witchs_homework_next",
+)
+
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8; Fish-Flavored Bait cut by the status pile's defence,
     # 2026-10-01)
