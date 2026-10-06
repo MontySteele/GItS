@@ -244,6 +244,7 @@ internal static class PlayTelemetry
             if (combat == null || Open.Count == 0) return;
             var round = combat.RoundNumber;
             var pool = EnemyPool(combat);
+            var hp = EnemyHp(combat);
             var (telegraphed, attackers) = Telegraphed(combat);
 
             foreach (var (player, record) in Open)
@@ -256,6 +257,7 @@ internal static class PlayTelemetry
                     { round, (int)creature.CurrentHp, (int)creature.Block });
                 record.IncomingByTurn.Add(new[] { round, telegraphed, attackers });
                 record.EnemyPoolByTurn.Add(new[] { round, pool });
+                record.EnemyHpByTurn.Add(new[] { round, hp });
                 // REACTIONS RIDE ALONG, because the counter already exists and
                 // sampling it costs one read (the hand-back's "cheap now"
                 // condition). Measurement only: no reaction constant is
@@ -1060,9 +1062,13 @@ internal static class PlayTelemetry
 
     // ------------------------------------------------------------ readers --
 
-    private static int EnemyPool(ICombatState combat) =>
+    internal static int EnemyPool(ICombatState combat) =>
         combat.Enemies.Where(e => e.IsAlive)
               .Sum(e => Math.Max(0, (int)e.CurrentHp) + Math.Max(0, (int)e.Block));
+
+    /// <summary>The living enemies' HP alone (no Block): the pool's sibling.</summary>
+    internal static int EnemyHp(ICombatState combat) =>
+        combat.Enemies.Where(e => e.IsAlive).Sum(e => Math.Max(0, (int)e.CurrentHp));
 
     /// <summary>
     /// (total telegraphed attack damage, attacking bodies) for the turn about
@@ -1209,6 +1215,7 @@ internal static class PlayTelemetry
         public readonly List<int[]> HpTrajectory = new();
         public readonly List<int[]> IncomingByTurn = new();
         public readonly List<int[]> EnemyPoolByTurn = new();
+        public readonly List<int[]> EnemyHpByTurn = new();
         public readonly List<int[]> BlockAtTurnEnd = new();
         public readonly List<int[]> StrengthByTurn = new();
         public readonly List<int[]> ReactionsByTurn = new();
@@ -1310,6 +1317,7 @@ internal static class PlayTelemetry
             Pairs(sb, "hp_trajectory", HpTrajectory);
             Pairs(sb, "incoming_by_turn", IncomingByTurn);
             Pairs(sb, "enemy_pool_by_turn", EnemyPoolByTurn);
+            Pairs(sb, "enemy_hp_by_turn", EnemyHpByTurn);
             Pairs(sb, "block_at_turn_end", BlockAtTurnEnd);
             Pairs(sb, "strength_by_turn", StrengthByTurn);
             Pairs(sb, "reactions_by_turn", ReactionsByTurn);
