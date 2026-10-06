@@ -192,7 +192,7 @@ Items 1 to 6 go to `BACKLOG.md` as one line.
   - Test Subject wrote `won` after 2 turns in arm 3, though the seat died to
     its third form. Both base Ironclad baseline runs also log a won Test
     Subject.
-  - So the deaths and the later forms are missing.
+  - So the deaths and the later forms are missing. Fixed by #942.
 - **Witch's Homework II's Bomb size is not logged,** so B cannot be graded.
 
 ## Next (revised after GPT's and Fable's reviews)
