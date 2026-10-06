@@ -21,7 +21,7 @@ sec.4-5), on the `klee-next` staging build 0.2.4490+next (draft PR #940).
   baseline run on that seed.
 - **Raw records** are in the session scratchpad and are gitignored.
 
-## Result: three of five late runs reached the final boss, and one won
+## Result: four of five late runs reached the final boss, and one won
 
 | Seed | Run | End |
 |---|---|---|
@@ -37,7 +37,7 @@ sec.4-5), on the `klee-next` staging build 0.2.4490+next (draft PR #940).
 | | base Regent | floor 48, Aeonglass |
 
 - Suite 1 reached the final boss on neither seed. Round 1 reached it in
-  three of the five runs that left act 1, and arm 2 won on the Regent seed.
+  four of the five runs that left act 1, and arm 2 won on the Regent seed.
 - Arm 2 died in act 1 on the Ironclad seed, which is not graded. It reached
   a forced elite with no rest site or shop on its path. So B has no paired
   read on that seed.
@@ -89,7 +89,21 @@ Each run has 4 to 7 normal fights an act, so a single fight moves a median.
     against 17.2).
   - Its act-3 turn-3 figure (0.27 and 0.21) was at or below the base
     characters'.
-- The paper counts a clear gap between arms on both seeds; this is one.
+  - Its act-2 HP lost was slightly higher than arm 1's on both seeds (12.9
+    against 11.4, and 7.8 against 5.2) (GPT).
+- The prediction stays missed. A later gate may ask whether delayed damage
+  pays enough, but it does not turn this result into a confirmation of the
+  tempo diagnosis (GPT).
+- **What it fixed was a cold start, not tempo (Fable).**
+  - Every fight began with a Bomb already growing, so her first Set off had
+    something to pay. Her first Sparks came a turn earlier: suite 1's
+    "Spark-cost cards dead at the start of a fight".
+- **The gain is bigger than the relic's face (Fable).**
+  - A Bomb 6 that goes off at 10 or 14 adds about 14 damage a fight, but
+    arm 3 gained about 40 a fight over arm 1.
+  - The rest comes from Badge doublings landing on it, earlier Sparks, and
+    two seeds' worth of routes and seat luck.
+  - Expect the gap to shrink over more seeds.
 - **Verified in game:** the relic's Bomb shows as 10 when Klee first acts
   (lane 3, fight 1: "Relic put Bomb 10 on Toadpole 2 at start").
 
@@ -117,8 +131,9 @@ Each run has 4 to 7 normal fights an act, so a single fight moves a median.
   - Regent arm 3: 40.0 against 26.8 (only 9 turns with it).
 - Regent arm 1 never played it after act 1. Two seats called it the
   weakest card, and one had it stolen and "never missed it".
-- This split is confounded (a seat plays it in fights that last longer), but
-  it shows no steady +4.
+- This comparison cannot establish its effect (GPT): a seat chooses which
+  fights to play it in. But it shows no steady +4, and the seats do not
+  want the card.
 
 **B, Witch's Homework II: no read.**
 - Its Ironclad run died in act 1. On the Regent seed it was played in 8 of
@@ -176,31 +191,69 @@ Items 1 to 6 go to `BACKLOG.md` as one line.
   - So the deaths and the later forms are missing.
 - **Witch's Homework II's Bomb size is not logged,** so B cannot be graded.
 
-## Next
+## Next (revised after GPT's and Fable's reviews)
 
-The relic is the change that moved Klee's late damage, on both seeds. The
-turn-2 figure the paper set as the gate for suite 2 did not move, because the
-seats rightly cook the relic's Bomb. Changing that gate, and making the relic
-her starter, are [USER]'s picks.
+- **The relic stays off the starter.** [USER] ruled no: "I'm not really a
+  fan of that relic redesign."
+  - Both reviews agree. It plants for her, which hands over the first move
+    of the plan her starter teaches ("plant, wait, boom").
+  - It is also a flat gift to every deck, which this pass set out not to
+    make. And it leaves the real defect where it was: she has no Bomb
+    engine below Rare.
+  - The arm stays on record as evidence that more setup helps.
+- **The finding kept is the cold start.** The seats' failed turns show it:
+  - "a hand of Defends and an unplayable Boom Badge" (Ironclad arm 1, fight
+    1, turn 2);
+  - "Boom Badge and Blazing Delight sat dead in hand at 1 Spark on four early
+    turns" (Ironclad arm 3, act 1).
+  - Klee needs a drafted card that puts a Bomb on the table every turn.
+- **That card is Secret Base (Fable).** The pass has tried to save it twice,
+  and its first text was almost this; the condition is what killed it.
+  - **Secret Base v3:** "At the start of your turn, place a Bomb 4 [6] on a
+    random enemy." 1-cost Uncommon Power; copies stack. It replaces this
+    round's "placed 3 [4] bigger".
+  - It is her Noxious Fumes: the base-game shape the paper's census points
+    at, a 1-cost Uncommon Power that pays every turn with no card spent.
+  - **What it does:**
+    - It gives every Set off something to pay.
+    - It feeds a Spark for every Bomb that goes off.
+    - Its Bombs still grow 4 a turn, so it is both an engine and something
+      to cook.
+    - A run earns it by drafting it.
+  - **Ruling:** the Bomb is placed after her Bombs grow, so it shows 4 when
+    she acts.
+  - **Loops:** Chained Reactions grows Bombs and places none, and
+    Aftershock places at most one a turn, so neither feeds it.
+  - **Prediction:** a run holding it plays it in at least half of its act-2
+    and act-3 fights. Arm 1's Bomb+Mine damage a turn beats round 1's arm 1
+    on both seeds: 13.0 / 14.8 (Ironclad) and 16.1 / 20.6 (Regent), acts 2
+    / 3.
+- **Before round 2,** both instrument gaps get fixed:
+  - the fight line for a boss with several forms;
+  - Witch's Homework II's logged size.
 
 ## Picks
 
-1. **The gate for suite 2.** The paper said rounds repeat until the turn-2
-   figure moves. Round 1 shows that figure misses the relic's effect: seats
-   cook the Bomb, so damage lands on turn 2 and turn 3 instead.
-   - **Default:** read the gate as late damage and HP lost against the base
-     character, which arm 3 met on both seeds.
-   - Then run suite 2 on the five suite-1 seeds with A, C and the relic as
-     the starter.
-   - Alternative: keep the turn-2 gate, and try a turn-1 fix in round 2.
-2. **The relic on the starter** (the paper's pick 5). It is a starter change.
-   - **Default:** yes. Pounding Surprise on `klee-next` gains "At the start
-     of each combat, place a Bomb 6 on a random enemy". It keeps its Spark.
-   - Its text will name the Bomb's size on her first turn (screen item 1).
-3. **Strength and Bombs** (the paper's pick 4). The seats held at most 1
-   Strength, so the rule would pay little as they play.
-   - **Default:** drop it from this pass.
+The paper's pick 5 (the relic on the starter) is ruled no, above.
 
-A and C stay on `klee-next` unchanged. Secret Base's low uptake is watched in
-suite 2. B stays a staging grant until its size is logged and it has a
-paired read.
+1. **The gate for suite 2, written down now, before round 2.** The turn-2
+   figure did not move, and the missed prediction stays missed.
+   - **Default:** in act-2 and act-3 normal fights, Klee's damage a turn
+     and HP lost are within the Balance bar (15%, `telemetry_report.py`) of
+     the base character's run on the same seed, on both seeds.
+   - She must also reach the act-3 boss on both seeds, and boss fights are
+     read once their telemetry is fixed.
+   - A slow start is fine if the delayed payoff pays for it.
+2. **Secret Base v3** ("At the start of your turn, place a Bomb 4 [6] on a
+   random enemy") replaces this round's Secret Base on `klee-next`.
+   **Default:** yes.
+3. **Strength and Bombs** (the paper's pick 4). The seats held at most 1
+   Strength. **Default:** defer past this pass. Low Strength makes it a low
+   priority; it is not a rejection of the interaction (GPT).
+4. **Round 2 before suite 2.** Two seeds, cards given at embark:
+   - arm 1: Secret Base v3 and Boom Badge;
+   - arm 2: the same plus Witch's Homework II, with its size logged.
+   **Default:** yes. Suite 2 runs on whichever build meets pick 1's gate.
+
+Boom Badge (Retain, does not stack) stays on `klee-next`. B stays a staging
+grant until it has a logged size and a paired read.
