@@ -854,10 +854,34 @@ internal static class PlayTelemetry
     /// combat-end hook, so the record closes at the moment the fight did; the
     /// stale-flush in <see cref="OpenFight"/> remains the backstop for every
     /// ending neither sees (fled, abandoned, crashed).</summary>
-    private static void MaybeClose(ICombatState combat)
+    internal static void MaybeClose(ICombatState combat)
     {
         if (Open.Count == 0) return;
-        CloseIfOver(combat.Enemies.Any(e => e.IsAlive));
+        CloseIfOver(FightGoesOn(combat));
+    }
+
+    /// <summary>
+    /// 2026-10-05 — A BOSS THAT COMES BACK IN A NEW FORM. Test Subject has
+    /// three forms; when the first two drop to 0 HP every enemy is down for a
+    /// moment, and a fight line closed on "no enemy alive" was written `won`
+    /// after form 1 -- forms 2 and 3, their turns and damage, and a death in
+    /// them were never written (lane 3, 2026-10-05: won in 2 turns, the
+    /// player died to form 3).
+    ///
+    /// The game asks the same question before it ends a combat
+    /// (<c>CombatManager.IsCombatEnding</c>): its last clause is
+    /// <c>Hook.ShouldStopCombatFromEnding</c>, which Test Subject's
+    /// <c>AdaptablePower</c> answers true until its third form, and which
+    /// Phrog Parasite-style spawners use the same way. So the fight goes on
+    /// while any enemy is alive (any, not only primaries: a living summon
+    /// keeps the record open as it always did, and the combat-end hook still
+    /// closes it) OR while something in the combat holds it open.
+    /// </summary>
+    internal static bool FightGoesOn(ICombatState? combat)
+    {
+        if (combat == null) return true;
+        return combat.Enemies.Any(e => e != null && e.IsAlive)
+               || MegaCrit.Sts2.Core.Hooks.Hook.ShouldStopCombatFromEnding(combat);
     }
 
     /// <summary>The combat-free half of <see cref="MaybeClose"/>, and the test
@@ -895,7 +919,7 @@ internal static class PlayTelemetry
         {
             if (Open.Count == 0 || creature?.Player == null) return;
             var combat = CombatManager.Instance?.DebugOnlyGetState();
-            CloseOnSeatDeath(creature, combat?.Enemies.Any(e => e.IsAlive) ?? true);
+            CloseOnSeatDeath(creature, FightGoesOn(combat));
         }
         catch (Exception e)
         {
