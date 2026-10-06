@@ -365,6 +365,15 @@ internal static class ReactionEffects
     private static bool ShatteredThisHit(Creature target) =>
         ReferenceEquals(_shatteredThisHit, target);
 
+    /// <summary>TELEMETRY ONLY (2026-10-06): the stacks a reaction's own apply
+    /// added to <paramref name="target"/>, filed to the dealing seat. A read
+    /// after the apply; never throws (<c>ReactionTally</c> swallows).</summary>
+    private static void NoteDebuff<T>(Creature target, Creature? dealer,
+                                      string name, int before) where T : PowerModel =>
+        Diagnostics.ReactionTally.NoteDebuff(
+            target.CombatState, dealer, name,
+            Diagnostics.ReactionTally.Stacks<T>(target) - before);
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,
@@ -385,6 +394,9 @@ internal static class ReactionEffects
         {
             TotalResolved++;
             RecordResolved(target.CombatState, dealer);
+            // TELEMETRY ONLY (2026-10-06): the same credit, by reaction name.
+            Diagnostics.ReactionTally.NoteReaction(
+                target.CombatState, dealer, reaction);
 
             // `EB-681`. AND ON THE LOG A BLIND SEAT READS, by name. This is
             // the single site a reaction resolves in the mod -- the sentence
@@ -454,11 +466,15 @@ internal static class ReactionEffects
                 break;
 
             case Reaction.Superconduct:
+            {
+                var before = Diagnostics.ReactionTally.Stacks<VulnerablePower>(target);
                 await PowerCmd.Apply<VulnerablePower>(
                     choiceContext, target,
                     ReactionConstants.SuperconductVuln,
                     applier: dealer, cardSource: cardSource);
+                NoteDebuff<VulnerablePower>(target, dealer, "Vulnerable", before);
                 break;
+            }
 
             case Reaction.Frozen:
                 // Boss rooms consume the aura but receive Vulnerable rather
@@ -485,16 +501,20 @@ internal static class ReactionEffects
                 // that ACTS on the answer.
                 if (FrozenBossVulnWillApply(target))
                 {
+                    var before = Diagnostics.ReactionTally.Stacks<VulnerablePower>(target);
                     await PowerCmd.Apply<VulnerablePower>(
                         choiceContext, target,
                         ReactionConstants.FrozenBossVuln,
                         applier: dealer, cardSource: cardSource);
+                    NoteDebuff<VulnerablePower>(target, dealer, "Vulnerable", before);
                 }
                 else if (!ShatteredThisHit(target))
                 {
+                    var before = Diagnostics.ReactionTally.Stacks<FrozenPower>(target);
                     await PowerCmd.Apply<FrozenPower>(
                         choiceContext, target, 1,
                         applier: dealer, cardSource: cardSource);
+                    NoteDebuff<FrozenPower>(target, dealer, "Frozen", before);
                 }
                 // `EB-423`. The aura is CONSUMED either way, above, and the
                 // reaction still counted -- what the mark suppresses is only
@@ -539,9 +559,11 @@ internal static class ReactionEffects
                 // Survival sprint: the explosion staggers the reacted target.
                 // Ordinary Weak composes naturally with Bomb suppression: the
                 // Bomb hook detects a real stack and does not multiply 0.75 twice.
+                var weakBefore = Diagnostics.ReactionTally.Stacks<WeakPower>(target);
                 await PowerCmd.Apply<WeakPower>(
                     choiceContext, target, ReactionConstants.OverloadWeak,
                     applier: dealer, cardSource: cardSource);
+                NoteDebuff<WeakPower>(target, dealer, "Weak", weakBefore);
                 break;
 
             case Reaction.ElectroCharged:
@@ -549,10 +571,14 @@ internal static class ReactionEffects
                 // sim's dot IS poison (owner-turn-start tick of Amount, then
                 // decrement -- powers.py on_turn_start), so the core's own
                 // PoisonPower is the exact mirror; no custom power needed.
+            {
+                var before = Diagnostics.ReactionTally.Stacks<PoisonPower>(target);
                 await PowerCmd.Apply<PoisonPower>(
                     choiceContext, target, ReactionConstants.ElectroChargedDot,
                     applier: dealer, cardSource: cardSource);
+                NoteDebuff<PoisonPower>(target, dealer, "Poison", before);
                 break;
+            }
 
             case Reaction.Swirl when spreadReaction:
                 // "A reaction set off by a spread never Swirls again": a spread
@@ -695,15 +721,19 @@ internal static class ReactionEffects
                 if (spreadReaction != Reaction.None)
                 {
                     var consumed = existing.Element;
-                    var hit = (int)(damage * ReactionTable.AmplifierMultiplier(
-                        spreadReaction, dealer));
+                    var amp = ReactionTable.AmplifierMultiplier(
+                        spreadReaction, dealer);
+                    var hit = (int)(damage * amp);
                     await PowerCmd.Remove(existing);
                     await Resolve(choiceContext, spreadReaction, e, dealer,
                                   cardSource, consumed, spreadReaction: true);
-                    await CreatureCmd.Damage(
+                    var hitResults = await CreatureCmd.Damage(
                         choiceContext, e, hit,
                         ValueProp.Unblockable | ValueProp.Unpowered,
                         dealer: null, cardSource: null, cardPlay: null);
+                    // TELEMETRY ONLY: the amplifier's share of the spread hit.
+                    ElementalHit.NoteAmplified(e, dealer, spreadReaction, amp,
+                                               hitResults);
                     reacted.Add(e);
                     continue;
                 }

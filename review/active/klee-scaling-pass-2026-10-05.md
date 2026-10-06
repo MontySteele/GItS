@@ -248,7 +248,16 @@ deployed with the `klee-next` build.
   - Each Boom Badge play's result.
   - The turn of her first Set off.
 
-**Suite 2 waits for a round that moves turn 2** (Fable).
+**Gate changed after round 1** (ruled 2026-10-05,
+`review/records/klee-scaling-round-1-2026-10-05.md` pick 1).
+- Suite 2 now waits for a round where, in act-2 and act-3 normal fights,
+  Klee's damage a turn and HP lost are within 15% of the base character's
+  run on the same seed, on both seeds, and she reaches the act-3 boss on
+  both.
+- The turn-2 prediction below stays missed.
+- Secret Base v3 replaces change A, and the relic stays off the starter.
+
+**Suite 2 waits for a round that moves turn 2** (Fable; superseded above).
 - Draft 3's own table predicted a miss of the bar in act 3.
 - A suite cost about 12M tokens, and rounds are cheap.
 - So rounds repeat until the turn-2 figure moves, and the suite is spent on

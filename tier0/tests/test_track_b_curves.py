@@ -227,7 +227,14 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # 2026-10-05, the Klee scaling pass (klee-next): each Witch's
             # Homework II's run-long Bomb size, read off the deck card's saved
             # growth. MOD FEED ONLY, added.
-            "homework_bomb_size"}
+            "homework_bomb_size",
+            # 2026-10-06. What reactions are worth, per seat: reactions by
+            # name, the amplifiers' share of the hits they multiplied, and
+            # the debuff stacks reactions applied (`ReactionTally`). The wire
+            # does not narrate reactions, as for `reactions_by_turn`. MOD
+            # FEED ONLY, added, never a rename.
+            "reactions_by_type", "amp_bonus_damage",
+            "debuffs_from_reactions"}
 
 
 def _csharp_keys() -> set[str]:

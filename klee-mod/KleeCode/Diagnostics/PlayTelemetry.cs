@@ -324,6 +324,29 @@ internal static class PlayTelemetry
             record.CorpseDetonations = Math.Max(
                 record.CorpseDetonations,
                 BombPower.CorpseDetonationsThisCombat(combat, player));
+            // 2026-10-06. The reaction tallies, sampled on the same rule: per
+            // key, the MAX of what was held and what the counter reads, so a
+            // stale-flush that reads after the next combat reset them (they
+            // read empty then) cannot take a number back.
+            MaxInto(record.ReactionsByType,
+                    ReactionTally.TypesFor(combat, player));
+            MaxInto(record.DebuffsFromReactions,
+                    ReactionTally.DebuffsFor(combat, player));
+            foreach (var (key, value) in ReactionTally.AmpBonusFor(combat, player))
+            {
+                record.AmpBonusDamage[key] = record.AmpBonusDamage.TryGetValue(
+                    key, out var held) ? Math.Max(held, value) : value;
+            }
+        }
+    }
+
+    private static void MaxInto(Dictionary<string, int> into,
+                                IReadOnlyDictionary<string, int> from)
+    {
+        foreach (var (key, value) in from)
+        {
+            into[key] = into.TryGetValue(key, out var held)
+                ? Math.Max(held, value) : value;
         }
     }
 
@@ -1301,6 +1324,16 @@ internal static class PlayTelemetry
         /// (<see cref="DamageCredit"/>'s constants), so a reader can tell a
         /// card's hit from an element hit, a reaction, a pet or a Bomb.</summary>
         public readonly Dictionary<string, int> DamageByKind = new();
+        /// <summary>2026-10-06. Reactions this seat resolved, by name
+        /// (<see cref="ReactionTally"/>; sums to the `reactions_by_turn`
+        /// total).</summary>
+        public readonly Dictionary<string, int> ReactionsByType = new();
+        /// <summary>2026-10-06. The amplifiers' share of the hits they
+        /// multiplied, by reaction; written rounded to whole damage.</summary>
+        public readonly Dictionary<string, decimal> AmpBonusDamage = new();
+        /// <summary>2026-10-06. Debuff stacks this seat's reactions put on
+        /// enemies, by power.</summary>
+        public readonly Dictionary<string, int> DebuffsFromReactions = new();
         /// <summary>Block this seat's credited hits broke.</summary>
         public int DamageBlocked;
         /// <summary>Hits of this seat's that killed (filed through
@@ -1455,6 +1488,16 @@ internal static class PlayTelemetry
             }
 
             sb.Append('}');
+            // 2026-10-06. What reactions are worth, per seat. Additive keys,
+            // human feed only (`understudy/README.md`).
+            sb.Append(",\"reactions_by_type\":");
+            IntMap(sb, ReactionsByType);
+            sb.Append(",\"amp_bonus_damage\":");
+            IntMap(sb, AmpBonusDamage.ToDictionary(
+                p => p.Key,
+                p => (int)Math.Round(p.Value, MidpointRounding.AwayFromZero)));
+            sb.Append(",\"debuffs_from_reactions\":");
+            IntMap(sb, DebuffsFromReactions);
             sb.Append(",\"damage_blocked\":").Append(DamageBlocked);
             sb.Append(",\"killing_blows\":").Append(KillingBlows);
             sb.Append(",\"block_gained_by_turn\":[");
@@ -1487,6 +1530,21 @@ internal static class PlayTelemetry
                     .ToString("F3", CultureInfo.InvariantCulture));
             sb.Append('}');
             return sb.ToString();
+        }
+
+        private static void IntMap(StringBuilder sb, IReadOnlyDictionary<string, int> map)
+        {
+            sb.Append('{');
+            var first = true;
+            foreach (var pair in map.OrderBy(p => p.Key, StringComparer.Ordinal))
+            {
+                if (!first) sb.Append(',');
+                first = false;
+                Quote(sb, pair.Key);
+                sb.Append(':').Append(pair.Value);
+            }
+
+            sb.Append('}');
         }
 
         private static void Pairs(StringBuilder sb, string key, List<int[]> rows)
