@@ -238,6 +238,9 @@ Items 1 to 6 go to `BACKLOG.md` as one line.
 
 ## Picks
 
+**RULED 2026-10-05, all four at their defaults** ([USER]: "I agree all
+around... let's test this out.").
+
 The paper's pick 5 (the relic on the starter) is ruled no, above.
 
 1. **The gate for suite 2, written down now, before round 2.** The turn-2
