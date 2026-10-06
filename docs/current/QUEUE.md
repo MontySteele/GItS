@@ -23,6 +23,8 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
+- **Klee scaling round 2** (`review/records/klee-scaling-round-2-2026-10-06.md`, two picks): the gate was missed as written (arm 1 reached the final boss on both seeds and won one; its bar readings 0.80-1.21, mostly in her favour). (1) Run suite 2 on `klee-next` as built anyway; (2) Witch's Homework II stays a staging grant. Both defaults yes.
+
 - **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
