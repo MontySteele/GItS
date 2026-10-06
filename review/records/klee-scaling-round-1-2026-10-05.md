@@ -41,6 +41,10 @@ sec.4-5), on the `klee-next` staging build 0.2.4490+next (draft PR #940).
 - Arm 2 died in act 1 on the Ironclad seed, which is not graded. It reached
   a forced elite with no rest site or shop on its path. So B has no paired
   read on that seed.
+- **Granted cards shape the whole run (GPT).** Leaving act 1 out of the
+  grade does not remove their effect on later decks, HP, upgrades and
+  routes. These are targeted tests of the changes, not ordinary-draft
+  balance results.
 
 ## Telemetry: act-2 and act-3 normal fights
 
