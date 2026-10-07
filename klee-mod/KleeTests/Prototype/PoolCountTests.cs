@@ -58,9 +58,11 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Klee_is_78_and_24_33_21_with_two_ancients_and_five_coop()
+    // klee-common-next experiment arm, 2026-10-07: Boom Badge and Klee's Secret Base
+    // move Uncommon to Common, 24 / 33 / 21 becomes 26 / 31 / 21.
+    public void Klee_is_78_and_26_31_21_with_two_ancients_and_five_coop()
     {
-        AssertPool("KleeOverhaulRoster", "Slice", 24, 33, 21);
+        AssertPool("KleeOverhaulRoster", "Slice", 26, 31, 21);
         AssertAncients("Klee");
         AssertTier("KleeOverhaulRoster", "MultiplayerSlice");
     }

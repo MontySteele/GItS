@@ -59,7 +59,7 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
         assert cid not in ids
         assert cid not in rows
     rarity = collections.Counter(load(cid).rarity for cid in ids)
-    assert rarity == {"common": 24, "uncommon": 33, "rare": 21}
+    assert rarity == {"common": 26, "uncommon": 31, "rare": 21}
     shapes = {cid: (load(cid).type, load(cid).cost, load(cid).rarity)
               for cid in C.KLEE_STATUS_PACKAGE_IDS}
     assert shapes == {

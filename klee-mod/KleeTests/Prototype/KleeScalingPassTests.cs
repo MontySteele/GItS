@@ -39,7 +39,7 @@ public sealed class KleeScalingPassTests
                    + "{PowerAmount:diff()} on a random enemy.", Face(card));
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Power, card.Type);
-        Assert.Equal(CardRarity.Uncommon, card.Rarity);
+        Assert.Equal(CardRarity.Common, card.Rarity);
         Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal(6m, Upgraded<ProtoKoSecretBase>().DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal("At the start of your turn, place a [gold]Bomb[/gold] "

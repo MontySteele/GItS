@@ -562,7 +562,7 @@
 # Klee scaling pass (klee-next, 2026-10-05), sec.4 C: Retain, no stacking.
 - {id: proto_ko_boom_badge, name: "Boom Badge", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon, retain: true,
+   cost: 0, type: skill, rarity: common, retain: true,
    description: "The next time you [gold]Set off[/gold] this turn, your [gold]Bombs[/gold] deal double damage. Does not stack.",
    upgrade: {spark_price: -1},
    effects: [{op: spend_spark, amount: 2},
@@ -612,7 +612,7 @@
 # copies add. Provenance note, "Klee scaling pass, 2026-10-05".
 - {id: proto_ko_secret_base, name: "Klee's Secret Base", character: klee,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
+   cost: 1, type: power, rarity: common,
    description: "At the start of your turn, place a [gold]Bomb[/gold] 4 on a random enemy.",
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_secret_base, amount: 4, target: self}]}

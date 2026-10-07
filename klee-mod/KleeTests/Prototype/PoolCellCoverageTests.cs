@@ -316,8 +316,12 @@ public class PoolCellCoverageTests
     {
         foreach (var arm in new[] { "klee-overhaul", "kokomi-overhaul" })
         {
+            // klee-common-next experiment arm, 2026-10-07: Klee's Secret Base is
+            // deliberately a Common Power on klee-overhaul; nothing asks for the
+            // cell (the potion event removes Power for a Common potion).
             Assert.DoesNotContain(ArmPools.Offerable(arm),
-                c => c.Rarity == CardRarity.Common && c.Type == CardType.Power);
+                c => c.Rarity == CardRarity.Common && c.Type == CardType.Power
+                     && !(arm == "klee-overhaul" && c.GetType().Name == "ProtoKoSecretBase"));
         }
 
         Assert.DoesNotContain(Census, c => c.Name == "Common/Power");
