@@ -2784,3 +2784,12 @@ proto_vk_storm_battery	ImageGen/images/cards/varka/proto_vk_storm_battery.png	50
 proto_vk_frost_ward	ImageGen/images/cards/varka/proto_vk_frost_ward.png	500	380	cover	y0.30	shortlist	1	png	Kaeya Birthday 2024.png		splash	
 # proto_vk_rippling_guard <- Barbara (Hydro)
 proto_vk_rippling_guard	ImageGen/images/cards/varka/proto_vk_rippling_guard.png	500	380	cover	y0.30	shortlist	1	png	Barbara Birthday 2024.png		splash	
+# ---------- Art bill 2026-10-06: eight missing card keys ----------
+proto_vk_ember_cleave	ImageGen/images/cards/varka/proto_vk_ember_cleave.png	500	380	cover	y0.30	shortlist	1	png	Diluc Wish.png		splash	
+proto_vk_pyre_oath	ImageGen/images/cards/varka/proto_vk_pyre_oath.png	500	380	cover	y0.28	shortlist	1	png	Diluc Profile.png		splash	
+proto_vk_stoke_the_flames	ImageGen/images/cards/varka/proto_vk_stoke_the_flames.png	500	380	cover	y0.30	shortlist	1	png	Bennett Wish.png		splash	
+proto_vk_deep_freeze	ImageGen/images/cards/varka/proto_vk_deep_freeze.png	500	380	cover	y0.30	shortlist	1	png	Eula Wish.png		splash	
+proto_vk_shatter	ImageGen/images/cards/varka/proto_vk_shatter.png	500	380	cover	y0.30	shortlist	1	png	Rosaria Wish.png		splash	
+divine_strategy	ImageGen/images/cards/kokomi/divine_strategy.png	500	380	contain	center	shortlist	1	png	Talent Divine Maiden's Deliverance.png		item	kokomi_pool
+kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	contain	center	shortlist	1	png	Talent Tamakushi Casket.png		item	kokomi_pool
+kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool

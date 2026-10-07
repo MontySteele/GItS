@@ -304,7 +304,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature target, DamageResult result,
         ValueProp props, Creature? dealer, CardModel? cardSource)
     {
-        await ResolveLifecycle(choiceContext, target, props, dealer, cardSource);
+        await ResolveLifecycle(choiceContext, target, props, dealer, cardSource, result);
     }
 
     /// <summary>
@@ -349,13 +349,14 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         var hit = result.Receiver;
         if (hit == null) return;
         if (!result.WasTargetKilled && !hit.IsDead) return;
-        await ResolveLifecycle(choiceContext, hit, props, dealer, cardSource);
+        await ResolveLifecycle(choiceContext, hit, props, dealer, cardSource, result);
     }
 
     /// <summary>The lifecycle itself, reached from both sites above.</summary>
     private async Task ResolveLifecycle(
         PlayerChoiceContext choiceContext, Creature target,
-        ValueProp props, Creature? dealer, CardModel? cardSource)
+        ValueProp props, Creature? dealer, CardModel? cardSource,
+        DamageResult? result = null)
     {
         if (target != base.Owner) return;
         if (!props.IsPoweredAttack()) return;
@@ -382,6 +383,18 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
                 // Swirl re-applies this element to other enemies and must not
                 // immediately re-trigger here.
                 var consumedElement = Element;
+                // TELEMETRY ONLY (2026-10-06): Vaporize and Melt were folded
+                // into this hit by `ModifyDamageMultiplicative`, under the same
+                // gates this method just passed; file their share of what the
+                // hit dealt. Read before the Remove, while the dealer's terms
+                // still stand. The card's own damage credit is untouched.
+                if (result != null)
+                {
+                    ElementalHit.NoteAmplified(
+                        target, dealer, reaction,
+                        ReactionTable.AmplifierMultiplier(reaction, dealer),
+                        new[] { result });
+                }
                 await PowerCmd.Remove(this);
 
                 await ReactionEffects.Resolve(

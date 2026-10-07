@@ -560,15 +560,27 @@ def test_deploy_round_staging_stamps_the_release_deploy_next():
 
 
 def test_deploy_round_staging_refuses_on_this_branch_unless_it_is_next():
+    """Decided from the subprocess's own verdict, never from a second read of
+    the tree: a parallel test can dirty a tracked file between two reads, so
+    the dirty half is only checked for consistency. The branch half is stable
+    and is pinned: off a `<kit>-next` branch staging always refuses; on one it
+    refuses (dirty tree) or is allowed (clean), and nothing else."""
     deploy = _module("deploy_round")
     res = _run(["tools/deploy_round.py", "--staging", "--dry-run"])
     if not deploy.is_main_checkout(REPO):
         assert res.returncode == 2 and "not the main checkout" in res.stdout
-    elif deploy.staging_refusal(deploy.current_branch(),
-                                deploy.tracked_changes()):
-        assert res.returncode == 2 and "REFUSED (--staging)" in res.stdout
+        return
+    branch = deploy.current_branch()
+    on_next = (branch.endswith(deploy.STAGING_SUFFIX)
+               and branch != deploy.STAGING_SUFFIX)
+    refused = res.returncode == 2 and "REFUSED (--staging)" in res.stdout
+    allowed = res.returncode == 0 and "+next" in res.stdout
+    if not on_next:
+        assert refused, res.stdout
     else:
-        assert res.returncode == 0 and "+next" in res.stdout
+        assert refused != allowed, (res.returncode, res.stdout)
+        if refused:
+            assert "uncommitted tracked" in res.stdout, res.stdout
 
 
 def test_deploy_round_refuses_an_unknown_arm():
