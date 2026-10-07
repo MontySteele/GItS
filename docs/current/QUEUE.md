@@ -23,7 +23,7 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 ## Open packets in `review/active/`
 
-- **Klee suite 2** (`review/records/klee-suite-2-2026-10-07.md`, three picks): 0 of 5, act 2 still misses the bar (damage 0.82, HP lost 1.52); the scaling cards were in 2 of 5 decks for 7 fights, so the fix went untested. (1) Agree the read; (2) Boom Badge and Secret Base to Common; (3) suite 3 after pick 2 is built. All defaults.
+- **Klee suite 2** (`review/records/klee-suite-2-2026-10-07.md`, three picks): 0 of 5, act 2 still misses the bar (damage 0.82, HP lost 1.52); the scaling cards were in 2 of 5 decks for 7 fights, so the fix went untested. A same-night test arm with both cards Common put them in all five decks, won 2 of 5 and brought act 2 inside the bar (0.89 / 1.02); act 3 damage (0.77) is the gap left. (1) Agree the read; (2) Boom Badge and Secret Base to Common (Secret Base breaks the no-Common-Power rule); (3) the arm becomes `klee-next` and the next round aims at act-3 damage. All defaults.
 
 - **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
 
