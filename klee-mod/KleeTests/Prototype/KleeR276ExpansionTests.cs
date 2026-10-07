@@ -80,7 +80,7 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoTagAlong), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoComeBackAndPlay), CardRarity.Uncommon, CardType.Skill, 0 },
-        new object[] { typeof(ProtoKoBoomBadge), CardRarity.Uncommon, CardType.Skill, 0 },
+        new object[] { typeof(ProtoKoBoomBadge), CardRarity.Common, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoWaitForIt), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoDuckAndRun), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoPartyPoppers), CardRarity.Uncommon, CardType.Power, 1 },

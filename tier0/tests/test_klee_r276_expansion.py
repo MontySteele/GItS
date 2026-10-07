@@ -87,7 +87,7 @@ def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     by_rarity = {}
     for card in rows.values():
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + 1
-    assert by_rarity == {"common": 2, "uncommon": 15, "rare": 9}
+    assert by_rarity == {"common": 3, "uncommon": 14, "rare": 9}
     shape = {cid: (c.cost, c.type) for cid, c in rows.items()}
     assert shape["proto_ko_hiding_spot"] == (1, "skill")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")

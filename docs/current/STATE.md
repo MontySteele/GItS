@@ -104,7 +104,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Breastplate, Wind Spirit Creation and Fiery Rain retuned; Klee's 13
   Klee-only companions resolved (4 to the shared pool, 6 cut, 3 into her own
   pool for Second Surprise, Solitary Confinement and Once More!). Klee stays
-  78, 24 / 33 / 21; the shared Mondstadt roster is 39; no stand-ins remain.
+  78, now 25 / 32 / 21 (Boom Badge to Common, [USER] 2026-10-07: "Agreed on Boom Badge, but let's keep powers out of Common and leave Secret Base at Uncommon."); the shared Mondstadt roster is 39; no stand-ins remain.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start

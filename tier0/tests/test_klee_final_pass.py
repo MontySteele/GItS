@@ -42,7 +42,7 @@ def test_the_pool_stays_seventy_eight_at_24_33_21(overhaul):
     assert "proto_ko_where_did_i_put_it" not in {
         c.id for c in loader.prototype_cards()}
     rarity = collections.Counter(load(cid).rarity for cid in ids)
-    assert rarity == {"common": 24, "uncommon": 33, "rare": 21}
+    assert rarity == {"common": 25, "uncommon": 32, "rare": 21}
     assert load("proto_ko_blast_shield").rarity == "common"
 
 
