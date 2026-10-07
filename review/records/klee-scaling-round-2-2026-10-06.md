@@ -145,6 +145,10 @@ Items 1 to 7 go to `BACKLOG.md` as one line.
 
 ## Picks
 
+**Ruled 2026-10-07, both at the defaults.** [USER]: "Yep, defaults."
+Suite 2 runs on `klee-next` as built; Witch's Homework II stays a staging
+grant, out of the suite's pool.
+
 1. **Suite 2 despite the missed gate.**
    - **Default: run suite 2 on `klee-next` as built** (Secret Base v3 and
      Boom Badge in the pool), with this record saying plainly that the gate

@@ -257,6 +257,11 @@ deployed with the `klee-next` build.
 - The turn-2 prediction below stays missed.
 - Secret Base v3 replaces change A, and the relic stays off the starter.
 
+**Suite 2 runs despite round 2's missed gate** (ruled 2026-10-07,
+`review/records/klee-scaling-round-2-2026-10-06.md` pick 1: "Yep, defaults."):
+the misses mostly favoured Klee, and the five-seed suite is the instrument
+the bar was written for. Witch's Homework II stays out of its pool.
+
 **Suite 2 waits for a round that moves turn 2** (Fable; superseded above).
 - Draft 3's own table predicted a miss of the bar in act 3.
 - A suite cost about 12M tokens, and rounds are cheap.
