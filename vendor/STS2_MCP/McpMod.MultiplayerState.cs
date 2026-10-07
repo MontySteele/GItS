@@ -121,7 +121,18 @@ public static partial class McpMod
             result["state_type"] = "relic_select";
             result["relic_select"] = BuildRelicSelectState(relicSelectScreen, runState);
         }
-        else if (topOverlay is NCrystalSphereScreen crystalSphereScreen)
+        // GItS LOCAL EDIT (co-op seats, 2026-10-06). THE SPHERE UNDER THE MAP:
+        // the singleplayer builder's `!mapIsOpen` guard (upstream issue #73),
+        // carried over. The sphere overlay is never popped by its proceed
+        // button (`RunManager.ProceedFromTerminalRewardsScreen` only opens the
+        // map; `ClearScreens` on the next room pops it), and the map's
+        // `Opened` signal runs `NOverlayStack.HideOverlays`, whose
+        // `AfterOverlayHidden` DISABLES the sphere's proceed button. So once
+        // the map is up this branch printed a finished sphere with
+        // `can_proceed: false` and its stale hidden cells, and a co-op seat
+        // standing on the map was told to keep revealing (Klee + Varka,
+        // lanes 2 and 3, act 2 floor 28).
+        else if (!mapIsOpen && topOverlay is NCrystalSphereScreen crystalSphereScreen)
         {
             result["state_type"] = "crystal_sphere";
             result["crystal_sphere"] = BuildCrystalSphereState(crystalSphereScreen, runState);
@@ -154,7 +165,11 @@ public static partial class McpMod
         }
         else if (topOverlay is IOverlayScreen
                  && topOverlay is not NRewardsScreen
-                 && topOverlay is not NCardRewardSelectionScreen)
+                 && topOverlay is not NCardRewardSelectionScreen
+                 // GItS LOCAL EDIT (2026-10-06): and the sphere, as in the
+                 // singleplayer builder, so a sphere lingering under the open
+                 // map falls through to the room's `map` branch below.
+                 && topOverlay is not NCrystalSphereScreen)
         {
             result["state_type"] = "overlay";
             result["overlay"] = new Dictionary<string, object?>
