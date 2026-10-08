@@ -22,10 +22,16 @@ This page is the main session's reading of them.
    Re-graded on the counted runs, suite 4's act 1 was outside the bar too (HP lost 1.19, not 0.70).
    Suite 5 (PR #965) is the first suite graded the new way. Tonight's base control re-runs the five
    on today's page, for a second baseline.
-2. **Suite 5 split Klee's act-3 gap open.** From turn two on she deals as much as the base five. On
-   turn one she deals 22.6 against their 53.2. The design review's turn-one fix worked in acts 2 and
-   3 but not yet far enough, and not at all in act 1, where the innate Jumpy Dumpty is the turn-one
-   play. Block rose again, because the three opening Sparks went into Dig In.
+2. **Suite 5 is inside the bar on matched seeds.** The first reading put act 3 at 0.70 of base
+   damage, with the gap all on turn one. Tonight's base control and a matched-seed read
+   (PR #965) show that was seed mix: Klee died in act 2 on the two seeds whose base decks deal
+   about 60 a turn in act 3.
+   - On the seeds both sides reached, HP lost is 0.69 / 0.98 / 0.93 of the two base runs by act,
+     and damage is at or above theirs.
+   - Turn one is still about half the base characters', and her Block is above theirs in every act.
+   - Two Sonnet runs of the same base character on the same seed differed more than Klee differs
+     from either.
+
 3. **The telemetry has three readers' traps:**
    - `reactions_by_turn` is a running total, and I misread it the same way myself last night.
    - Every bot co-op row is written twice.
