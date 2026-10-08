@@ -92,7 +92,7 @@ five's range.
 | **Dodoco Tag** | Cook | Common Attack, 1 | Deal 9 [12] Pyro damage. Your largest Bomb grows by 2. |
 | **Simmer** | Cook | Uncommon Attack, 1 | Deal 5 Pyro damage, plus half your largest Bomb's size. The Bomb does not go off. |
 | **Explosive Spark** | Spray | Common Attack, 0 | Costs 1 Spark. Deal 7 [10] Pyro damage. |
-| **Kaboom!** | Spray | Uncommon Attack, 1 | Costs 2 Sparks. Deal 18 [24] Pyro damage. |
+| **Sparks Fly** | Spray | Uncommon Attack, 1 | Costs 2 Sparks. Deal 18 [24] Pyro damage. |
 
 - **Dodoco Tag** is Cook's plain Common Attack: a base-rate hit that keeps
   the Bomb growing instead of spending it. It is what a Cook deck plays on
@@ -104,13 +104,13 @@ five's range.
   name of Klee's charged attack in the source game. With Tinder Toss (1
   Spark: Set off ALL) minting Sparks from a board of Bombs, the Sparks now
   come back as damage.
-- **Kaboom!** is the Uncommon Spark payoff at 9 a Spark, between Explosive
+- **Sparks Fly** is the Uncommon Spark payoff at 9 a Spark, between Explosive
   Spark (7) and Fireworks Finale (5 to each enemy).
 - **Archetype three** loses one Dazed source (It Wasn't Me!); Forbidden Fun,
   Up in Smoke! and Fish Blasting still feed the status cards.
 - Pool stays 78, 25 / 32 / 21 (two Commons out, two in; two Uncommons out,
   two in). One Power leaves (Grounded), none comes in.
-- **Build note.** Dodoco Tag, Explosive Spark and Kaboom! use ops the build
+- **Build note.** Dodoco Tag, Explosive Spark and Sparks Fly use ops the build
   has (`damage`, `grow_largest`, `spend_spark`). Simmer needs one new op,
   damage read off the largest Bomb's size, which Sparks 'n' Splash's power
   already computes.
@@ -124,7 +124,7 @@ Turn-one and turn-two damage up in acts 2 and 3; fights at the base five's
 3 turns; Block a turn at or below theirs; HP lost a fight at or below theirs
 because the fights are shorter. Per engine: how often the four new cards are
 played, and whether Spark-heavy decks spend Sparks on Explosive Spark and
-Kaboom! rather than on Block.
+Sparks Fly rather than on Block.
 
 ## Picks
 
