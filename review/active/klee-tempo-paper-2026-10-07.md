@@ -44,68 +44,95 @@ with a Bomb.
 to 15, and gains more Block a turn than they do (act 2: 5.5 against 2.9).
 That is the slow character's trade, the reverse of the one asked for.
 
-## 2. Why: the rules and the pool both pay for waiting
+## 2. Why: each engine is missing its damage
 
-- **Rule 1** grows every Bomb by 4 at the start of her turn. A Bomb set off
-  the turn it lands is the smallest it will ever be, so every Set off card
-  says "wait".
-- **Four cards pay her for not setting off:** Grounded ("if you played no Set
-  off card last turn, gain 4 Block and 1 Spark"), Sit Tight (Block if none of
-  your Bombs went off), Experiment in Progress (Bomb grows if you played no
-  Set off card), and Jean, Lion's Fang (Block and a card if none went off).
-- **Turn one has nothing to set off.** Her damage cards are mostly Set off
-  cards, and on turn one the only Bomb is the one she just placed.
+[USER]'s frame (2026-10-07): Klee holds three archetypes in tension. **Cook**
+grows a few Bombs large and cashes them at a very big number, "but you
+probably die along the way ... The problem here is we don't have many effects
+which deal damage without setting off the bombs." **Spray** places and sets
+off many Bombs fast for the Sparks, "but then you need to solve damage
+again ... we don't have many ways to directly convert the sparks back into
+damage, as opposed to a support engine." **Companion, Reaction and Status**
+cards sit between them. "So Cook is too slow, which skews us towards
+defensive decks. And Spray doesn't have the damage to compete."
+
+The pool agrees, card for card:
+
+- **18 of her 78 cards say Set off.** Damage that leaves the Bombs cooking
+  is 8 cards, 2 of them Common: Forbidden Fun (10, a Dazed) and Fish Blasting
+  (8 to ALL, a Confiscated). The rest are Mine, All Mine! and Jumpy Dumpty
+  Mk.III (Uncommon, both also place Bombs), Prune (a companion), and three
+  Rares (Red Knight, Sparks 'n' Splash, Spark Knight). A Cook deck has no
+  Common way to deal damage while it waits, so it waits behind Block.
+- **14 cards spend Sparks; one turns them straight into damage, and it is
+  Rare** (Fireworks Finale, 5 to ALL per Spark). Of the rest, four buy Block
+  (Dig In, Blast Shield, Sit Tight, Cover Your Ears!), five are engine
+  (Bottomless Bag, Sparkling Burst, Blazing Delight, Boom Badge, Stoke the
+  Fuse), and four are more Bombs or more Set off (Booby Trap, Tinder Toss,
+  Quick Fuse, Boom-Boom Strike). Spray's Sparks loop back into Spray.
+- **Four cards pay for waiting**, which is Cook's rule turned into defence:
+  Grounded, Sit Tight, Experiment in Progress, Jean, Lion's Fang.
 - **Two Block Commons are never played:** It Wasn't Me! and Sorry, Jean...
   (0 plays in 10 runs).
 
 ## 3. The change
 
 Smallest first, per the stage gate. Starter basics and the starter relic are
-untouched; rule 1 is offered as an alternative, not the default.
+untouched. Two cards for each engine's missing damage, paid for by four
+defence cards.
 
-**Out (4 cards, all defence that pays for waiting or is never played):**
-Grounded (Uncommon Power), Sit Tight (Uncommon), It Wasn't Me! (Common),
-Sorry, Jean... (Common). Block cards go from 17 to 13, the base five's range.
+**Out (4):** Grounded (Uncommon Power), Sit Tight (Uncommon), It Wasn't Me!
+(Common), Sorry, Jean... (Common). Block cards go from 17 to 13, the base
+five's range.
 
-**In (4 cards, all damage on the turn they are played):**
+**In (4):**
 
-| Card | Rarity | Text |
-|---|---|---|
-| **Fuse's Lit!** | Common Attack, 1 | Place a Bomb 6 [9], then Set off the enemy. Deal 4 Pyro damage. |
-| **Pop-Pop-Pop!** | Common Skill, 1 | Place a Bomb 4 [6] on ALL enemies. |
-| **Dodoco Barrage** | Uncommon Attack, 2 | 3 times: place a Bomb 5 [7] on a random enemy. Then Set off ALL enemies. |
-| **Head Start** | Uncommon Skill, 0 | Innate. Exhaust. Place a Bomb 6 [9] on each enemy. Gain 1 Spark. |
+| Card | Engine | Rarity | Text |
+|---|---|---|---|
+| **Dodoco Tag** | Cook | Common Attack, 1 | Deal 9 [12] Pyro damage. Your largest Bomb grows by 2. |
+| **Simmer** | Cook | Uncommon Attack, 1 | Deal 5 Pyro damage, plus half your largest Bomb's size. The Bomb does not go off. |
+| **Explosive Spark** | Spray | Common Attack, 0 | Costs 1 Spark. Deal 7 [10] Pyro damage. |
+| **Kaboom!** | Spray | Uncommon Attack, 1 | Costs 2 Sparks. Deal 18 [24] Pyro damage. |
 
-- **Fuse's Lit!** is a full Set off turn on one card, 10 damage and a Spark
-  on turn one (Ka-pow! needs a Bomb already out). It sits beside Pocket Match
-  and Countdown, and is the Common the seats can open with.
-- **Pop-Pop-Pop!** is the hallway turn: with Tinder Toss (1 Spark: Set off
-  ALL, 3 to ALL) it clears three small enemies on turn one or two.
-- **Dodoco Barrage** is 15 damage plus every Bomb already out, and 3 Sparks,
-  in one card. Its Spark yield pays for the follow-up Attacks the Spray plan
-  needs.
-- **Head Start** puts her first explosion on turn one. It is a drafted card,
-  not the starter (the combat-start Bomb relic was vetoed 2026-10-05; a
-  drafted card earns its gain).
-- Pool stays 78; rarity 25 / 32 / 21 unchanged (two Commons out, two in; two
-  Uncommons out, two in). One Power leaves (Grounded), none comes in.
-- All four use ops the build already has (`plant_bomb`, `set_off`, `damage`,
-  `gain_spark`); Innate and Exhaust are base keywords.
+- **Dodoco Tag** is Cook's plain Common Attack: a base-rate hit that keeps
+  the Bomb growing instead of spending it. It is what a Cook deck plays on
+  the "quiet" turns instead of a Defend.
+- **Simmer** is the Uncommon payoff for having cooked: at a Bomb 20 it hits
+  for 15 and the Bomb is still there. It is the Sparks 'n' Splash idea at
+  Uncommon, on a card, once.
+- **Explosive Spark** is the Spray Common: one Spark, one hit, 0 Energy, the
+  name of Klee's charged attack in the source game. With Tinder Toss (1
+  Spark: Set off ALL) minting Sparks from a board of Bombs, the Sparks now
+  come back as damage.
+- **Kaboom!** is the Uncommon Spark payoff at 9 a Spark, between Explosive
+  Spark (7) and Fireworks Finale (5 to each enemy).
+- **Archetype three** loses one Dazed source (It Wasn't Me!); Forbidden Fun,
+  Up in Smoke! and Fish Blasting still feed the status cards.
+- Pool stays 78, 25 / 32 / 21 (two Commons out, two in; two Uncommons out,
+  two in). One Power leaves (Grounded), none comes in.
+- **Build note.** Dodoco Tag, Explosive Spark and Kaboom! use ops the build
+  has (`damage`, `grow_largest`, `spend_spark`). Simmer needs one new op,
+  damage read off the largest Bomb's size, which Sparks 'n' Splash's power
+  already computes.
 
 **Not changed this pass:** Experiment in Progress and Jean, Lion's Fang also
-pay for waiting; they are kept to see what four cards do first.
+pay for waiting; rule 1's growth of 4 a turn stays.
 
 ## 4. What a round should show
 
 Turn-one and turn-two damage up in acts 2 and 3; fights at the base five's
 3 turns; Block a turn at or below theirs; HP lost a fight at or below theirs
-because the fights are shorter.
+because the fights are shorter. Per engine: how often the four new cards are
+played, and whether Spark-heavy decks spend Sparks on Explosive Spark and
+Kaboom! rather than on Block.
 
 ## Picks
 
 1. **The read.** Klee is slow (act-3 turn-one damage 9 to the base five's
-   62) and her Block pays for it. The identity is fast and fragile, in
-   [USER]'s words above, recorded in her brief. **Default: agree.**
+   62) and her Block pays for it, because Cook has no Common damage that
+   leaves the Bombs cooking and Spray has no Spark-to-damage card below
+   Rare. The identity is fast and fragile, in [USER]'s words above, recorded
+   in her brief. **Default: agree.**
 2. **The change.**
    - **Default (a):** the four out, the four in (section 3), built on
      `klee-next`.
@@ -113,7 +140,7 @@ because the fights are shorter.
      +2, so a Bomb cashed now is worth nearly as much as one cashed later.
      This changes a core rule and every Cook card's maths; it is the bigger
      lever if (a) is not enough.
-   - (c) Cards only, but cut Experiment in Progress and Jean, Lion's Fang
-     too, with two more fast cards (a second paper for their texts).
+   - (c) (a), plus Experiment in Progress and Jean, Lion's Fang out for one
+     more card per engine (a second paper for their texts).
 3. **The round.** **Default:** suite 4 on the same five seeds, graded on the
    section 4 measures.
