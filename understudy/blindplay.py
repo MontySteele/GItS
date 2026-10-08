@@ -93,7 +93,7 @@ from typing import Any, Callable
 
 from understudy import (authorship, blindplay_brief, blindplay_coop,
                        blindplay_shape, bridge,
-                       lanewatch, qa_packet, report, seat)
+                       lanewatch, offer_log, qa_packet, report, seat)
 
 # `klee-mod/local.props` is the machine's one statement of where the game is,
 # and this is a DELIBERATE SECOND COPY of the four lines `soak.game_dir()`
@@ -677,6 +677,9 @@ def cmd_act(args) -> int:
     # `EB-341`: the row that was taken, then the game's answer -- the same two
     # lines, in the same order, the session hands its seat.
     clear_refusal()
+    # Project review 2026-10-08, pick 10: the card offer this answered, if
+    # any, and what was taken (`understudy/offer_log.py`). Never raises.
+    offer_log.record(state, res, args.command)
     said = [line for line in (taken_line(res), _result_line(result)) if line]
     for line in said or [ACT_SENT_SILENT]:
         print(line)

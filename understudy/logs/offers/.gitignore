@@ -1,0 +1,6 @@
+# Card-offer logs (`understudy/offer_log.py`): one JSONL per lane, written
+# by `blindplay act` on every answered card reward, shop, event chooser and
+# bundle. Raw instrument output, read by `tools/offer_report.py`; the
+# committed artifact is the round record that quotes it.
+*
+!.gitignore
