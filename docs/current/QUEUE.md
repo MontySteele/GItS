@@ -25,7 +25,6 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 - **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
 
-- **Klee design review** (`review/active/klee-design-review-2026-10-08.md`, five picks): (1) the starter is not the root; rules 1 and 4 and the Common layer are; (2) growth 2, 3 opening Sparks, drafted placers +2; (3) two Commons in (Fire! Fire!, Blasting Spree), Playdate and Pop! out; (4) no starter change; (5) suite 5 then [USER]'s run. Defaults.
 
 
 

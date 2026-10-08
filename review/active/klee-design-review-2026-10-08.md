@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 to 5 below; nothing built)
+Status: RULED 2026-10-08 (all five picks at the defaults; building)
 
 # Klee design review: the starter, the rules, the pool, 2026-10-08
 
@@ -590,6 +590,9 @@ built on `klee-next`, graded against the base five's runs:
 ---
 
 ## Picks
+
+**Ruled 2026-10-08.** [USER]: "Nope, this all looks good. I'm now in
+agreement with all picks." All five at the defaults.
 
 1. **The read.** The starter is not the root. Rule 1 and rule 4 make
    waiting free and the Spark cards dead; the Common layer offers placers
