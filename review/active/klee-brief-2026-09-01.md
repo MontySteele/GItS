@@ -50,6 +50,15 @@ away after the bang, and when she behaves, Jean keeps her out of trouble.
 **The obvious plan, from the starter:** plant, wait, boom. Everything else is
 a branch off that plan, taken or not depending on what act one offers.
 
+**Fast and fragile (2026-10-07).** [USER]: "Klee's supposed to read as
+fragile, which is to say I think her goal should be to kill the enemies
+faster than other characters in exchange for chip damage in long fights. ...
+I expect Klee to average less block per turn that base characters but in
+exchange end fights sooner rather than later." Her HP is fixed by ending
+fights sooner, not by more Block; Cook, Spray and the status cards between
+them each need damage of their own
+(`review/active/klee-tempo-paper-2026-10-07.md`).
+
 ## 2. The lore audit
 
 What she is, from the game and the story pages, and what each fact becomes

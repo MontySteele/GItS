@@ -95,44 +95,45 @@ stronger one paid for in statuses, which also feeds the status payoffs. The
 price follows the package's rule: a Dazed on a fair card, Confiscated on a
 strong one. Starter basics and the starter relic are untouched.
 
-**Out (7):** It Wasn't Me!, Sorry, Jean..., Blast Shield (Commons);
-Grounded, Sit Tight, Experiment in Progress, Kitchen Alchemy (Uncommons).
-Five are defence (four of them pay for waiting or are never played; Blast
-Shield spends Sparks on Block), one pays for waiting, one is the dead status
-payoff. Block cards go from 17 to 13, the base five's range.
+**Ruled 2026-10-07.** [USER]: "I personally found Blast Shield and Kitchen
+Alchemy quite useful in my runs, so I'm not sure I buy that they should go.
+Otherwise agreed." Both stay; the swap is five for five. To keep the pool at
+78 and 25 / 32 / 21, two of the seven drafted cards drop: Pop-Pop-Pop! (Spray
+already has four Bomb placers at Common) and Sparks Fly (Explosive Spark
+carries Spark-to-damage at Common; Fireworks Finale at Rare).
 
-**In (7):**
+**Out (5):** It Wasn't Me!, Sorry, Jean... (Commons); Grounded, Sit Tight,
+Experiment in Progress (Uncommons). Four are defence that pays for waiting
+or is never played; one pays for waiting. Block cards go from 17 to 14
+(Dodoco Tag adds one), inside the base five's 11 to 15.
+
+**In (5):**
 
 | Card | Line | Rarity | Text |
 |---|---|---|---|
 | **Simmer** | Cook, status | Common Attack, 1 | Deal 4 [6] Pyro damage, plus half your largest Bomb's size. The Bomb does not go off. Add a Dazed into your Discard Pile. |
 | **Taste Test** | Cook, status | Uncommon Attack, 2 | Deal damage equal to all your Bombs on the enemy. They do not go off. Add 2 Confiscated into your Discard Pile. |
-| **Pop-Pop-Pop!** | Spray, status | Common Skill, 1 | Place a Bomb 5 [7] on ALL enemies. Add a Dazed into your Discard Pile. |
 | **Tinkering** | Spray, status | Uncommon Skill, 0 | Gain 2 [3] Sparks. Add a Confiscated into your Discard Pile. |
 | **Dodoco Tag** | Spray, status | Uncommon Attack, 1 | Deal 7 [10] Pyro damage. Gain 5 [7] Block. Add a Dazed into your Discard Pile. |
 | **Explosive Spark** | Spray, Sparks | Common Attack, 0 | Costs 1 Spark. Deal 7 [10] Pyro damage. |
-| **Sparks Fly** | Spray, Sparks | Uncommon Attack, 1 | Costs 2 Sparks. Deal 18 [24] Pyro damage. |
 
 - **Cook.** Simmer is the Common that hits while the Bomb cooks (at a Bomb
   20, 14 damage, Bomb kept). Taste Test is the big read: at a Bomb 30 it is
   30 damage for 2 Energy and the Bomb is still there, paid for with two
   Confiscated. Red Knight (Rare, 2 Energy, 34, two Confiscated) is the price
   point it is set against.
-- **Spray without Sparks.** Pop-Pop-Pop! is the board of Bombs that Tinder
-  Toss cashes. Tinkering is a Spark engine that does not need an explosion
-  (Lisa's Treats, 2 Energy for two Confiscated, is its price point). Dodoco
+- **Spray without Sparks.** Tinkering is a Spark engine that does not need
+  an explosion (Lisa's Treats, 2 Energy for two Confiscated, is its price point). Dodoco
   Tag is the attack-and-Block turn that leaves the Spark bank alone.
 - **Spray with Sparks.** Explosive Spark (the name of Klee's charged attack
-  in the source game) and Sparks Fly turn Sparks straight into damage below
-  Rare, at 7 and 9 a Spark.
-- **The status line** gains five loaders (three that add a Dazed, two that
-  add Confiscated) and loses one (It Wasn't Me!), and one payoff, Kitchen Alchemy, which was never
-  played. Klee Can Explain!, Damage Report, Finders Keepers and Albedo
-  now have a pile to read.
-- Pool stays 78, 25 / 32 / 21 (three Commons out, three in; four Uncommons
-  out, four in). One Power leaves (Grounded), none comes in.
-- **Build note.** Five cards use ops the build has (`damage`, `block`,
-  `plant_bomb` on ALL enemies, `spend_spark`, `gain_spark`, `add_card`).
+  in the source game) turns a Spark straight into 7 damage at Common.
+- **The status line** gains four loaders (two that add a Dazed, two that
+  add Confiscated) and loses one (It Wasn't Me!). Kitchen Alchemy, Klee Can
+  Explain!, Damage Report, Finders Keepers and Albedo have more to read.
+- Pool stays 78, 25 / 32 / 21 (two Commons out, two in; three Uncommons
+  out, three in). One Power leaves (Grounded), none comes in.
+- **Build note.** Three cards use ops the build has (`damage`, `block`,
+  `spend_spark`, `gain_spark`, `add_card`).
   Simmer and Taste Test need one new op, damage read off Bomb sizes without
   setting them off, which Sparks 'n' Splash's power already computes.
 
@@ -149,6 +150,9 @@ whether the status payoffs start being played.
 
 ## Picks
 
+**Ruled 2026-10-07** (see section 3): pick 1 agreed; pick 2 (a) with Blast
+Shield and Kitchen Alchemy kept, five out and five in; pick 3 agreed.
+
 1. **The read.** Klee is slow (act-3 turn-one damage 9 to the base five's
    62) and her Block pays for it, because Cook has no Common damage that
    leaves the Bombs cooking, Spray has no Spark-to-damage card below Rare,
@@ -156,7 +160,7 @@ whether the status payoffs start being played.
    fast and fragile, in [USER]'s words above, recorded in her brief.
    **Default: agree.**
 2. **The change.**
-   - **Default (a):** the seven out, the seven in (section 3), built on
+   - **Default (a):** the seven out, the seven in (now five and five) (section 3), built on
      `klee-next`.
    - (b) (a), plus rule 1's growth from 4 to 2 a turn and every placing card
      +2, so a Bomb cashed now is worth nearly as much as one cashed later.
