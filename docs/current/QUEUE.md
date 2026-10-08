@@ -25,6 +25,8 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 - **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
 
+- **Klee turn-one paper** (`review/active/klee-turn-one-paper-2026-10-08.md`, two picks): (1) growth 2, 3 opening Sparks, +2 on every placer except Jumpy Dumpty; (2) suite 5 on the same seeds. Defaults.
+
 
 
 
