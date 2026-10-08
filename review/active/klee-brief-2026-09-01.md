@@ -162,7 +162,10 @@ is the Defect's hold-or-evoke question with the orb on the enemy and the
 Frost half split in two. The enemy's intent answers it, differently every
 fight.
 
-Sparks are the second contest. A Spark buys a free *Set off* Attack now
+Sparks are a bank, not a second contest (amended 2026-10-08, project review
+pick 6). She opens each fight with three, so the bank gates the turn-one Set
+off and the all-in payoffs; [USER]: they "only really matter if you're
+trying to let your bombs cook". The history below is kept. A Spark buys a free *Set off* Attack now
 (tempo, more explosions, more Sparks) or a Spark-priced Skill that plants,
 grows, or defends (setup). Generation comes from explosions, so she
 cannot bank Sparks without collecting bombs. The one deliberate exception

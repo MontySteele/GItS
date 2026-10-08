@@ -63,8 +63,10 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
     tier0/tests/test_encoding_gate.py tier0/tests/test_char_stills.py -q
 ```
 
-`tools/README.md:9-42` is the authoritative map of which tool is gated by
-`validate.ps1`, which by pytest only, and which is a manual instrument.
+Which tool is gated by `validate.ps1`, which by pytest only, and which is a
+manual instrument: `tools/run_lints.py`'s lanes and `klee-mod/build/validate.ps1`.
+`tools/README.md` is a one-line-per-script index generated from the docstrings
+(2026-10-08).
 
 ## 3. Key invariants
 
@@ -187,12 +189,12 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
   from the playtest-2 batch review, NOT `tier0/DECISIONS.md`'s R87** (which is
   the sweep backlog, `:2834`). Tool docstrings carry local label schemes.
 - **`docs/art-claimed-sources.tsv` is derived and nothing enforces its
-  freshness** — regenerate after any `plan.tsv` change (`tools/README.md:40-42`).
+  freshness** — regenerate after any `plan.tsv` change (`dump_claimed_sources.py:1-12`).
 - **`art_lint`'s L12 pixel gate reads the CANDIDATES directory**, so a stale
   leftover candidate can manufacture a finding about a card whose out-path was
-  never written (`art_lint.py:604-621`); it is dead on clean checkouts, and
-  `lint_sheet_comments.py` is gated on `furina-cards.yaml` ONLY — 35 open
-  findings elsewhere are unlinted, not absent (`tools/README.md:22-28`).
+  never written (`art_lint.py:604-621`); it is dead on clean checkouts.
+  (`lint_sheet_comments.py` left with the shipped sheets at legacy cleanup
+  stage 6a, `ad369ea1`.)
 - **Fence coordinates are pinned to one artwork revision.** If the source image
   changes, re-digitize; `--check` exists to prove the generalization never moved
   Klee's shipped bytes (`cut_combat_layers.py:11-16`, `:31-34`;
@@ -200,7 +202,7 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
 - **`gen_kokomi_stills.py` has NO byte-pin twin** the way Furina's does, and
   Kokomi's source arrives on a WHITE plate — fed to the same code it degrades
   every framing rule to frame-centring, silently reintroducing the B4 defect
-  (`tools/README.md:37`; `gen_kokomi_stills.py:16-22`).
+  (`gen_kokomi_stills.py:16-22`).
 - **`GITS_ILSPY_TREE` is opt-in** and env-only for the same class of reason: a
   persistent tree is decompiled game source outside `game_ref/`
   (`extract_base_game_pool.py:47-52`).
@@ -213,8 +215,8 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
 
 ## 6. Reading order
 
-1. `tools/README.md` — which tool is gated by what; orphan status is otherwise
-   undiscoverable.
+1. `tools/run_lints.py` (lanes) and `tools/README.md` (one line per script) —
+   which tool is gated by what, and what each one does.
 2. `.github/workflows/repo.yml:24-96` — the fresh-clone contract every session
    inherits, plus the recorded NOT-doing list.
 3. `tools/lint_text_encoding.py:1-41` — read before touching any file I/O here.

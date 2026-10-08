@@ -1,4 +1,4 @@
-"""EB-147 / R213 B: the QUARANTINED prototype surface.
+"""EB-147 / R213 B: the prototype surface.
 
 THE ACCEPTANCE SENTENCE, WHICH IS WHAT THIS FILE IS FOR:
 

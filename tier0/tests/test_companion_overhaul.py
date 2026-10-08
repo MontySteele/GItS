@@ -134,27 +134,19 @@ def test_the_pool_ids_and_the_sheet_agree(overhaul):
     THREE LISTS SINCE R236, and the split is what a `proto_mc_` row can be. The
     Mondstadt workshop's sec.3 rewrites the nation's UNIVERSALS, its sec.4 gives
     Klee four PERSONALS (`personal_pool`, filtered at every offer site), and its
-    sec.3 stand-ins are handed to Klee IN PLACE of a Universal and are a member
-    of no pool -- on the sheet and deliberately on neither pool list, subtracted
-    by `C.COMPANION_STANDIN_IDS` rather than by their `replaces:` key, so a
-    stand-in that fell off that list fails here instead of quietly joining the
-    offerable pool. A row on none of the three is still the defect this asks
-    about. A FOURTH since the Klee-only companions (2026-10-03): three
+    sec.3 stand-ins (all gone since 2026-10-03; the seam was deleted
+    2026-10-08). A row on none of the lists is the defect this asks about. A FOURTH since the Klee-only companions (2026-10-03): three
     `proto_mc_` rows are in Klee's own draftable pool
     (`C.KLEE_OWN_COMPANION_IDS`)."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mc_")}
-    assert set(C.COMPANION_STANDIN_IDS) <= on_sheet
-    assert on_sheet - set(C.COMPANION_STANDIN_IDS) == (
+    assert on_sheet == (
         set(C.MONDSTADT_OVERHAUL_POOL_IDS) | set(C.COVEN_PERSONAL_POOL_IDS)
         | set(C.KLEE_OWN_COMPANION_IDS))
     assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
                 & set(C.KLEE_OWN_COMPANION_IDS))
     assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
                 & set(C.COVEN_PERSONAL_POOL_IDS))
-    assert not (set(C.COMPANION_STANDIN_IDS)
-                & (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
-                   | set(C.COVEN_PERSONAL_POOL_IDS)))
 
 
 def test_the_banner_roster_moves_with_the_pool(overhaul):
@@ -354,13 +346,15 @@ def test_grand_ode_swirls_every_enemy_and_ticks(overhaul):
     st.enemies[1].aura = "hydro"
     st.player.powers["mc_grand_ode"] = 2
     effects.companion_overhaul_turn_end(st)
-    # This engine's Swirl SPREADS the aura it touched across the board (and
-    # Anemo itself never sticks), which is exactly what the `swirl` op does --
-    # the power calls the same `reactions.resolve_hit`, so the two cannot mean
-    # different things. Board order decides what the second enemy ends up
-    # holding, and asserting it here is what would catch the power growing a
-    # private Swirl of its own.
-    assert [e.aura for e in st.enemies] == ["pyro", "pyro"]
+    # A Swirl consumes the aura it touched, copies it fresh onto every OTHER
+    # enemy and deals SWIRL_DAMAGE to all (`C.SWIRL_PAYS`, the game's rule),
+    # which is exactly what the `swirl` op does -- the power calls the same
+    # `reactions.resolve_hit`, so the two cannot mean different things. Board
+    # order decides the end state: a's Pyro replaces b's Hydro, then b's
+    # Swirl hands it back to a. Asserting it here is what would catch the
+    # power growing a private Swirl of its own.
+    assert [e.aura for e in st.enemies] == ["pyro", None]
+    assert [e.hp for e in st.enemies] == [50 - 2 * C.SWIRL_DAMAGE] * 2
     assert st.player.powers["mc_grand_ode"] == 1
 
 
@@ -374,12 +368,12 @@ def test_dandelion_breeze_pays_its_block_even_with_no_aura_on_the_board(
 
 def test_dandelion_breeze_swirls_the_aura_bearer(overhaul):
     """It picks the aura-bearer and Swirls THERE -- the clean enemy catches
-    the spread, which is what a Swirl is in this engine."""
+    the spread and the bearer's aura is consumed, which is what a Swirl is."""
     st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
     st.enemies[1].aura = "cryo"
     st.player.powers["mc_dandelion_breeze"] = 1
     effects.companion_overhaul_turn_end(st)
-    assert [e.aura for e in st.enemies] == ["cryo", "cryo"]
+    assert [e.aura for e in st.enemies] == ["cryo", None]
     assert st.player.block == C.MC_DANDELION_BREEZE_BLOCK
 
 

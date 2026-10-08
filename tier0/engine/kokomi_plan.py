@@ -1,4 +1,4 @@
-"""THE PLAN (QUARANTINED, `C.KOKOMI_OVERHAUL`) -- the sim twin of
+"""THE PLAN (`C.KOKOMI_OVERHAUL`) -- the sim twin of
 `klee-mod/KleeCode/Powers/Prototype/KokomiPlan.cs`.
 
 DRAFT 6's ONE RULE. The Bake-Kurage is on her side of the field for the whole

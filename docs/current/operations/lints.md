@@ -23,7 +23,8 @@ Lanes (the registry in `run_lints.py` is the only list):
 - **`suite`**: already run inside pytest; `--all` includes them.
 - **`library`**: registered for the coverage check, never run bare.
 
-`tools/README.md` maps which tool is gated by what.
+`tools/run_lints.py`'s lanes map which tool is gated by what;
+`tools/README.md` is a one-line-per-script index from the docstrings.
 
 Notes on individual lints:
 

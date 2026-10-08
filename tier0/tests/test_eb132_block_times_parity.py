@@ -157,7 +157,7 @@ ELSEWHERE = {
     "apply_power": "APPLY_POWER_FIELDS totality",
     "repeat_this": "literal-int check in the conditional arm",
     "replay_next_companion": "literal-int check in its own arm",
-    # QUARANTINED (C.KLEE_OVERHAUL), `EB-312`. `set_off` began honouring
+    # (C.KLEE_OVERHAUL), `EB-312`. `set_off` began honouring
     # `times:` when the sim twin was built; its answer was already written on
     # the emitter side the day the op landed, and this is the row that says so.
     # SET_OFF_FIELDS totality, plus a positive-literal-int check on `times` and

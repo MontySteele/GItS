@@ -261,20 +261,6 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
         List<CardModel> Draw(CardRarity r, string? n)
         {
             IEnumerable<CardModel> drawn = CompanionPool.Eligible(player, r, n);
-            // THE COMPANION STAND-IN HAND-OFF (QUARANTINED, R213 B), and this
-            // is the ONE mouth where it maps the CANDIDATE LIST rather than the
-            // pick: `MerchantCardEntry` does its own draw, so there is no
-            // picked card here to swap. The map is injective and no stand-in is
-            // in `Eligible` (they are in no pool), so the list keeps its length
-            // and the slot's odds are unmoved.
-            //
-            // BEFORE THE `stocked` FILTER, not after. `stocked` holds what the
-            // OTHER slots actually put on the shelf, which for Klee is the
-            // stand-in -- so filtering the Universals against it would let slot
-            // 2 restock the row slot 1 already sold her under its other name.
-            // tier05/shop.py excludes the same row and reads it the other way
-            // round (its `taken` keeps the Universal); the two agree.
-            drawn = drawn.Select(c => Powers.CompanionStandIns.HandOff(c, player));
             return drawn.Where(c => !stocked.Contains(c)).ToList();
         }
 

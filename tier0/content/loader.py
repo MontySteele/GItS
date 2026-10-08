@@ -17,7 +17,6 @@ from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.content import yaml_memo
-from tier0.engine import companion_standins
 from tier0.engine import furina_stage
 from tier0.engine import state as state_mod
 from tier0.engine import varka_oath
@@ -363,10 +362,34 @@ def _validate_card_shape(c: Card) -> None:
     _validate_plan_dusk(c)
     _validate_basic_tag(c)
     _validate_no_upgrade_shape(c)
-    # THE STAND-IN SEAM's own two-line schema rule (`replaces:` is prototype
-    # surface only, and it needs a `personal_pool:`), stated where the arm's
-    # rules are rather than as a fourth `_validate_*` in this file.
-    companion_standins.validate_row(c)
+    _validate_replaces_shape(c)
+
+
+def _validate_replaces_shape(card: Card) -> None:
+    """`replaces:` is prototype surface only, and an arm's map must name it.
+
+    The one legal shape is a SUBSTITUTION: a row swapped in for everybody
+    playing the arm, at the offer door (`declared_pool_substitutions`) or at
+    the printed starter (`declared_starter_substitutions`). A `replaces:` row
+    that neither map names can never be dealt or offered, so it raises. (The
+    other shape, a companion stand-in handed to one character, left with the
+    empty stand-in seam on 2026-10-08.)
+    """
+    if card.replaces is None:
+        return
+    if not card.id.startswith(PROTOTYPE_ID_PREFIX):
+        raise ValueError(
+            f"card {card.id!r}: `replaces:` is prototype surface only -- a "
+            f"shipped row may not replace another card (ids on that "
+            f"surface carry {PROTOTYPE_ID_PREFIX!r})")
+    if (declared_pool_substitutions().get(card.replaces) == card.id
+            or declared_starter_substitutions().get(card.replaces)
+            == card.id):
+        return
+    raise ValueError(
+        f"card {card.id!r}: `replaces:` needs an arm's pool- or "
+        "starter-substitution map to name it -- a row that replaces another "
+        "and is in no arm's map can never be dealt or offered at all")
 
 
 def prototype_cards(sheet: Path | None = None) -> list[Card]:
@@ -467,8 +490,7 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # Only the mod loads an image (`RosterArt.CardPortrait` keys on the id
         # the emitter prints), tier0 has no art and never will, so a field on
         # `Card` would be one the engine carries and nothing reads.
-        # `replaces:` is KEPT, because the sim's stand-in hand-off is a rule
-        # and reads it (`tier0.engine.companion_standins`).
+        # `replaces:` is KEPT, because `_validate_replaces_shape` reads it.
         # THE CO-OP SET: `multiplayer:` is stripped for `description:`'s
         # reason -- it is a fact about who the GAME may offer the card to
         # (`CardMultiplayerConstraint.MultiplayerOnly`), and tier 0 seats one
@@ -505,7 +527,7 @@ def _prototype_index() -> dict[str, Card]:
 
 
 def _validate_plan_shape(card: Card) -> None:
-    """The `plan:` line's own shape, AT LOAD (QUARANTINED, draft 6).
+    """The `plan:` line's own shape, AT LOAD (draft 6).
 
     THE SAME CHECKS `tools/gen_klee_cards.plan_reason` MAKES, from the other
     side: closed clause table, closed target spellings, literal positive
@@ -739,11 +761,6 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
     whose last arm IS the count vocabulary), and by a dict `times_formula:`
     (the same `_calc_amount`), so all four are checked against the same
     registry rather than one of them.
-
-    One AMOUNT is checked here as well, for the same when-is-it-reported
-    reason: a non-positive `gain_encore` (EB-119). It is not a vocabulary
-    error, but it is a cross-engine one, and the recursion above is already
-    the only walk that reaches every nested body on every sheet.
     """
     from tier0.engine import effects as _effects        # late: cycle
 
@@ -793,27 +810,12 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
                     f"card {card_id!r}: `bonus_if:` must be {{if: <known "
                     f"predicate>, amount: <int>}}, got {rider!r}")
         _validate_count_vocabulary(card_id, fx)
-        if op == "gain_encore" and isinstance(fx.get("amount"), int) \
-                and fx["amount"] <= 0:
-            # EB-119. A negative GAIN is not a spend, and it is the exact
-            # shape a spend gets smuggled in as. It is also silently INERT in
-            # the mod -- FurinaResources.GainEncore opens `if (amount <= 0)
-            # return;` -- so a row written this way moves the sim's meter and
-            # does nothing in game. The overdraw primitive is `spend_encore`;
-            # the no-overdraw price is the `encore_cost` field. Refused here
-            # because a non-positive amount has no honest reading at all.
-            raise ValueError(
-                f"card {card_id!r}: gain_encore amount must be positive, got "
-                f"{fx['amount']} -- a negative gain is not a spend; use "
-                f"spend_encore (the overdraw primitive) or the encore_cost "
-                f"field")
         if op == _effects.BLOCK_AT_TURN_START:
             # EB-83. The DURATION is a literal positive int and the engine
             # raises on anything else; checked HERE for this function's whole
             # stated reason -- at load, once, rather than the first time a card
-            # already in front of a player resolves. Same door as the
-            # gain_encore amount above: not a vocabulary error, but a
-            # printed-text error only the resolver could otherwise see.
+            # already in front of a player resolves: not a vocabulary error,
+            # but a printed-text error only the resolver could otherwise see.
             try:
                 _effects.block_at_turn_start_turns(fx)
             except ValueError as exc:
@@ -973,30 +975,6 @@ def guest_star_generation_pool(rarity: str) -> list[Card]:
     return sorted(pool, key=lambda c: c.id)
 
 
-def companion_pool(nation: str) -> list[Card]:
-    """The conscript op's generation pool (Kokomi kickoff §2.3): every
-    ordinary shared Companion of the nation, ALL draftable rarities — the
-    5-star Rare jackpot (Itto) is deliberately in the deck of outcomes;
-    conscription pays card identity for a random recruit, and the rare
-    hit is the verb's advertised dream. Guest Stars are excluded (they are
-    a Furina personal-pool mechanism, kickoff §2.3 differentiation) and so
-    are kit cards, as everywhere.
-
-    personal_pool rows are excluded by the same explicit predicate the Guest
-    Star pool carries, for the same reason (EB-99). Unreachable today only
-    because conscript rows default to Inazuma and the personal-pool companion
-    that exists is Klee's; the filter is stated rather than inherited from
-    that accident."""
-    pool = [c for c in _card_index().values()
-            if c.is_companion and c.nation == nation
-            and not c.guest_star and not c.kit_card
-            and c.personal_pool is None
-            and c.rarity in C.RARITY_ODDS]
-    if not pool:
-        raise ValueError(f"empty companion pool for nation {nation!r}")
-    return sorted(pool, key=lambda c: c.id)
-
-
 def cards_in_pool(pool: str) -> list[Card]:
     """Named draft pools for add_card (e.g. Secret Stash's
     'demolition_commons')."""
@@ -1107,23 +1085,6 @@ def _character_index() -> dict[str, dict]:
     return index
 
 
-def _kit_cards(spec: dict) -> list[Card]:
-    """v1.9: the character's kit Bursts, attached to the Player rather than
-    shuffled into any deck. The character yaml names them (`kit:`) and the
-    card sheet marks them (`kit_card: true`); requiring both to agree is the
-    cross-check -- a card in a kit list that the sheet does not mark would
-    silently dodge the pool exclusion, so it is a loud error instead."""
-    kit = []
-    for cid in spec.get("kit", []):
-        card = get_card(cid)
-        if not card.kit_card:
-            raise ValueError(
-                f"{spec['id']}: kit lists {cid!r} but the sheet does not "
-                f"mark it kit_card")
-        kit.append(card)
-    return kit
-
-
 def _starting_relic_effects(spec: dict) -> list[dict]:
     """The character's OWN starting relic, as engine/relics.py hook dicts.
 
@@ -1196,11 +1157,8 @@ def declared_pool_substitutions() -> dict[str, str]:
 
     `_pool_substitutions` answers "what does this run swap"; this answers "what
     id is a pool substitution at all", which is a schema question and therefore
-    flag-blind. Its one caller is `companion_standins.validate_row`, which has
-    to tell the surface's TWO meanings of `replaces:` apart: a stand-in (handed
-    to one character in place of a Universal, and carrying a `personal_pool:`)
-    from a pool substitution (swapped in at the offer door for everybody
-    playing the arm, and carrying none).
+    flag-blind. Its one caller is `_validate_replaces_shape`, which accepts a
+    `replaces:` row only when an arm's map names it.
 
     Derived from the same maps the branch above reads, so an arm cannot have
     a substitution here that the run does not make, or the reverse.
@@ -1212,9 +1170,8 @@ def declared_starter_substitutions() -> dict[str, str]:
     """Every arm's `{shipped id: prototype id}` STARTER map, FLAGS IGNORED.
 
     The twin of `declared_pool_substitutions` above at the other door, and it
-    exists for the same caller and the same reason. `validate_row` has to
-    accept a `replaces:` row that carries no `personal_pool:`, and until R254
-    every such row was a POOL substitution -- so the pool map alone was the
+    exists for the same caller and the same reason. Until R254 every
+    `replaces:` row was a POOL substitution -- so the pool map alone was the
     whole answer. The Furina Stage's starter rows
     (`furina_stage.STARTER_SUBS`) are swapped in at the printed starter and
     never offered, and asking the pool map about them would be asking the
@@ -1452,10 +1409,8 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   draw_pile=[get_card(cid) for cid in card_ids],
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
-                  burst_max=spec.get("burst_max", 0),
                   relic_hooks=hooks,
                   relic_effects=_starting_relic_effects(spec),
-                  kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
                   fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))
@@ -1487,7 +1442,6 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   draw_pile=[get_card(cid) for cid in card_ids],
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
-                  burst_max=spec.get("burst_max", 0),
                   relic_hooks=(relic_hooks_replacement(character_id)
                                or list(spec.get("relic_hooks", []))),
                   # The character's own starting relic FIRST, then whatever
@@ -1500,7 +1454,6 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   potions=list(potions or []),
                   potion_slots=potion_slots,
                   node_kind=node_kind,
-                  kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
                   fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))
@@ -1617,10 +1570,6 @@ def reset_caches() -> None:
     upgrades._upgrade_index.cache_clear()
     upgrades._shipped_upgrade_index.cache_clear()
     upgrades._prototype_upgrade_index.cache_clear()
-    # The stand-in map is derived from the surface (`replaces:` +
-    # `personal_pool:`), so it is a memoized view of the content tree like the
-    # rest and belongs behind the same one door.
-    companion_standins._replacements.cache_clear()
 
 
 #: `EB-569`. THE MEMOIZED VIEWS WHOSE ANSWER MOVES WITH AN ARM FLAG.

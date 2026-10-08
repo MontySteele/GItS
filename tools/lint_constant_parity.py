@@ -37,24 +37,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-import yaml  # noqa: E402
-
 from tier0 import constants as C  # noqa: E402
 
 CS_ROOT = REPO / "klee-mod" / "KleeCode"
-
-
-def _char(name: str, key: str):
-    """A value from a tier0 character sheet (burst_max and friends live there,
-    not in constants.py, because they are per-character statline)."""
-    path = REPO / "tier0" / "content" / "characters" / f"{name}.yaml"
-    return yaml.safe_load(path.read_text(encoding="utf-8"))[key]
-
-
-def _salon(member: str, phase: str, key: str):
-    """A number out of the SALON_MEMBERS table. Furina's members are typed, so
-    their tick/bow numbers are table entries rather than named constants."""
-    return C.SALON_MEMBERS[member][phase][key]
 
 
 def _stage(name: str):
@@ -105,12 +90,6 @@ def _ancient_hook(relic_id: str, hook: str) -> int:
 
 
 MIRRORED: dict[str, object] = {
-    # Kokomi's upgraded starter (Touch of Orobas -> Pearl of Insight). Both
-    # were UNMIRRORED until 2026-08-13 because the C# side was the EXPRESSION
-    # `KokomiConstants.X * 2`, which parse_number cannot read. R190 ratified
-    # the doubling as a standing invariant, the C# side became a literal on
-    # OpeningSparks's precedent, and INVARIANTS below asserts the 2x itself --
-    # which is the half a by-value mirror cannot express.
     # Klee's upgraded starter (Touch of Orobas -> Dodoco Tales): the opening
     # bank, live again under the current kit (Klee finish-line batch,
     # 2026-10-03).
@@ -122,7 +101,6 @@ MIRRORED: dict[str, object] = {
     "ReactionConstants.OverloadWeak": C.OVERLOAD_WEAK,
     "ReactionConstants.SuperconductVuln": C.SUPERCONDUCT_VULN,
     "ReactionConstants.ElectroChargedDot": C.ELECTROCHARGED_DOT,
-    "ReactionConstants.ElectroChargedDotTurns": C.ELECTROCHARGED_DOT_TURNS,
     "ReactionConstants.CrystallizeBlock": C.CRYSTALLIZE_BLOCK,
     "ReactionConstants.SwirlDamage": C.SWIRL_DAMAGE,     # the element port, sec.4 A
     "ReactionConstants.ShatterDamage": C.SHATTER_DAMAGE,
@@ -179,13 +157,13 @@ MIRRORED: dict[str, object] = {
     # exist). FanfarePerEncoreAbsorbed is new on both sides and joins here.
 
     # Kokomi.
-    # The Kurage's memory (QUARANTINED, R213 B / EB-147 -- the C# rule lives
+    # The Kurage's memory (R213 B / EB-147 -- the C# rule lives
     # under klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of a
     # release build). Quarantined is not exempt: a prototype arm measured on a
     # number the sim never chose is exactly the failure this lint exists for,
     # and these three are the only numeric constants the rule has. Spec:
     # review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11.4.
-    # The Klee overhaul, slice one (QUARANTINED, R213 B -- the rules engine
+    # The Klee overhaul, slice one (R213 B -- the rules engine
     # lives under klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd
     # out of a release build). Quarantined is not exempt, for the same reason
     # the Kurage's three above are not: these four numbers ARE the rules
@@ -205,7 +183,7 @@ MIRRORED: dict[str, object] = {
     "KleeOverhaulLaw.SparkSeedFloors": C.KLEE_OVERHAUL_SPARK_SEED_FLOORS,
     # R276, Wait For It...'s printed payout, on the same terms.
     "WaitForItPower.ReactionEnergy": C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY,
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, `C.COMPANION_OVERHAUL`).
+    # THE MONDSTADT COMPANION OVERHAUL (`C.COMPANION_OVERHAUL`).
     # Same terms as the four above and for the same reason: quarantined is not
     # exempt. Every number here is the approved workshop's own printed text
     # (its sec.3, re-priced in its sec.8), and BOTH engines play these cards --
@@ -253,12 +231,12 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.KyoukaFinale": C.MI_KYOUKA_FINALE,
     "CompanionOverhaulLaw.SurpriseDispatchDamage": C.MI_SURPRISE_DISPATCH_DMG,
     "CompanionOverhaulLaw.TamotoDamage": C.MI_TAMOTO_DMG,
-    # KLEE'S COVEN PERSONALS (QUARANTINED, R236), same flag and same terms:
+    # KLEE'S COVEN PERSONALS (R236), same flag and same terms:
     # three numbers a POWER carries, mirrored by value because both engines
     # play these four rows.
     "CompanionCovenLaw.HeraldBlock": C.CVN_HERALD_BLOCK,
     "CompanionCovenLaw.HeraldApplications": C.CVN_HERALD_APPLICATIONS,
-    # THE KOKOMI OVERHAUL (QUARANTINED, `C.KOKOMI_OVERHAUL`). Same terms again
+    # THE KOKOMI OVERHAUL (`C.KOKOMI_OVERHAUL`). Same terms again
     # and for the same reason: quarantined is not exempt. Draft 6 left the arm
     # with exactly ONE rule number -- Tamakushi Casket's Hydro strike, printed
     # on the relic and on no card -- because its rules are structural and every
@@ -278,7 +256,7 @@ MIRRORED: dict[str, object] = {
     # POOL COMPLETION (2026-10-01): the hand limit Kurage School, Casting
     # Agent and Watatsumi Resistance stop at.
     "KokomiPoolCompletion.MaxHandSize": C.MAX_HAND_SIZE,
-    # THE FURINA STAGE (QUARANTINED, `furina_stage.FURINA_STAGE`; `EB-723` /
+    # THE FURINA STAGE (`furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the
     # brief's sec.3 rules: the seat count, the relic's opening bar, what a
@@ -848,6 +826,31 @@ def collect() -> dict[str, tuple[str, Path]]:
 
 
 # --------------------------------------------------------------------------
+# SWITCHES: build switches whose C# default is an MSBuild property in
+# `klee-mod/Directory.Build.props` and whose sim twin is a tier0 bool. A
+# `const bool` is not a number, so CONST_RE cannot see it; this table is how
+# the sim's default stays the game's. SWIRL_PAYS sat False in the sim for ten
+# days while every build Swirled for damage (fixed 2026-10-08).
+# --------------------------------------------------------------------------
+PROPS = REPO / "klee-mod" / "Directory.Build.props"
+
+SWITCHES: dict[str, str] = {
+    "SwirlPays": "SWIRL_PAYS",     # the element port, sec.4 A
+}
+
+
+def msbuild_bool_default(prop: str) -> bool:
+    """The default `Directory.Build.props` gives an MSBuild bool property."""
+    m = re.search(rf"<{prop}\s+Condition=\"[^\"]*\"\s*>\s*(true|false)\s*</{prop}>",
+                  PROPS.read_text(encoding="utf-8"), re.IGNORECASE)
+    if m is None:
+        raise SystemExit(f"FINDING: no default for <{prop}> in {PROPS}; the "
+                         "switch table names a property the props file does "
+                         "not declare.")
+    return m.group(1).lower() == "true"
+
+
+# --------------------------------------------------------------------------
 # INVARIANTS: ratified RELATIONSHIPS between two numbers.
 #
 # MIRRORED compares a C# number against a sim number BY VALUE. That cannot
@@ -859,31 +862,13 @@ def collect() -> dict[str, tuple[str, Path]]:
 # Each entry is (label, left, right, reason). The check is left == right.
 # --------------------------------------------------------------------------
 def _invariants() -> list[tuple[str, float, float, str]]:
-    return [
-        (
-            "PearlOfInsight.charge_per_exhaust == 2 x CHARGE_PER_EXHAUST",
-            _ancient_hook("touch_of_orobas_kokomi", "charge_per_exhaust"),
-            2 * C.CHARGE_PER_EXHAUST,
-            "RATIFIED INVARIANT (R190, 2026-08-13): Pearl of Insight's "
-            "upgraded rates are exactly 2x their base rates in BOTH engines, "
-            "permanently. The sim's copy is a LITERAL in "
-            "tier05/content/relics.yaml, so nothing but this check ties it to "
-            "the base constant -- bump CHARGE_PER_EXHAUST alone (EB-74's "
-            "lever-2 candidate B is the live example) and the relic keeps "
-            "granting the OLD doubled rate while the tooltip and the C# "
-            "literal say otherwise. Move all of them, or move none.",
-        ),
-        (
-            "PearlOfInsight.burst_per_exhaust == 2 x KOKOMI_BURST_PER_EXHAUST",
-            _ancient_hook("touch_of_orobas_kokomi", "burst_per_exhaust"),
-            2 * C.KOKOMI_BURST_PER_EXHAUST,
-            "Same ratified invariant, other currency. Note A9's warning "
-            "applies to the base pair independently: CHARGE_PER_EXHAUST and "
-            "KOKOMI_BURST_PER_EXHAUST are one wage in two currencies and move "
-            "together or the reason moves with them. This check is about the "
-            "UPGRADE's ratio, not about that pairing.",
-        ),
-    ]
+    # Empty since 2026-10-08. Its two entries tied Kokomi's Pearl of Insight
+    # rates (`charge_per_exhaust` / `burst_per_exhaust` on
+    # `touch_of_orobas_kokomi`) to 2 x `CHARGE_PER_EXHAUST` and
+    # `KOKOMI_BURST_PER_EXHAUST`. The Charge and Burst meters left the sim
+    # with the rest of the shipped-kit machinery, the base constants with
+    # them, and the relic's two hooks are inert (`tier0.engine.relics`).
+    return []
 
 
 def main() -> int:
@@ -939,12 +924,20 @@ def main() -> int:
                 f"UNMIRRORED lists {key}, but no such constant exists in the "
                 f"mod. Drop the entry.")
 
+    for prop, name in sorted(SWITCHES.items()):
+        cs, sim = msbuild_bool_default(prop), getattr(C, name)
+        if cs is not sim:
+            findings.append(
+                f"switch {prop}: the mod builds with {cs}, but tier0 "
+                f"C.{name} is {sim}. A plain sim run would not model the "
+                f"shipped game; make them agree.")
+
     for finding in findings:
         print(f"FINDING: {finding}")
     if findings:
         return 1
     print(f"constant parity: OK ({len(MIRRORED)} mirrored, "
-          f"{len(UNMIRRORED)} declared unmirrored, "
+          f"{len(UNMIRRORED)} declared unmirrored, {len(SWITCHES)} switch, "
           f"{len(_invariants())} ratified invariants held)")
     return 0
 

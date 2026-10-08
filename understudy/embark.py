@@ -941,6 +941,12 @@ def main(argv: list[str] | None = None) -> int:
                   "grant refuses multiplayer, and a co-op pair is always "
                   "launched here)", file=sys.stderr)
             return 2
+        if args.seeds:
+            # 2026-10-08: a co-op pair plays ONE run, so it takes `--seed`;
+            # `--seeds` was silently dropped and the pair rolled a random seed.
+            print("embark error: --coop takes one --seed (the pair shares "
+                  "one run), not --seeds", file=sys.stderr)
+            return 2
         from understudy import embark_coop
         return embark_coop.run_cli(args)
 

@@ -7,10 +7,6 @@ hp: 70                   # Klee final pass, 2026-10-02 (was 62)
 nation: mondstadt        # §4.1 reward weighting: her same-nation half
 element: pyro
 cadence: catalyst        # every attack applies pyro
-burst_max: 40
-# v1.9: the Burst is kit, not loot -- granted to hand when the meter first
-# fills. The sheet's kit_card flag and this list must agree (loader checks).
-# The shipped kit Burst left with the shipped sheets (legacy cleanup stage 6).
 relic_hooks: [spark_on_detonation]   # Pounding Surprise
 # Frontload over scaling. Ruling 3.4, restructured in round 3, and DEMOTED by
 # R204 (2026-08-24): it stays BINDING DESIGN INTENT and is no longer

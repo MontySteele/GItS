@@ -14,6 +14,12 @@ is measured on the real game (first section below, ruled 2026-10-05).
   the base-five baseline seeds and the per-fight telemetry
   (`review/active/klee-balance-measurement-2026-10-05.md`, ruled). Its numbers
   are compared with the base five's on the same seeds and acts.
+- **Rows are chosen by run instance, never by clock window, and each act is
+  compared only on the seeds where both sides have fights in that act**
+  (2026-10-08, Klee suite 5 record pick 3). The base side is every counted base
+  run on those seeds (today the 10-05 runs and the 2026-10-08 control). Pooled
+  numbers may be shown beside the matched ones, never instead: a kit that dies
+  early on a strong base seed otherwise reads as weaker in the later acts.
 - Pre-registration for kit balance is **one line in the change's own paper,
   written before the suite runs and graded by it**. Slates, countersigns and
   blind grading below do not apply to kit balance, and the twelve-arm sim

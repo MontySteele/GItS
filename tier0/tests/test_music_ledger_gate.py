@@ -60,7 +60,7 @@ SCENES = ACT_SCENES + GLOBAL_SLOTS
 
 TEYVAT_FRAME = ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatFrame.cs"
 TEYVAT_MUSIC = ROOT / "klee-mod" / "KleeCode" / "Teyvat" / "TeyvatMusic.cs"
-MEDIA_MD = ROOT / "docs" / "current" / "operations" / "media.md"
+MEDIA_MD = ROOT / "docs" / "current" / "operations" / "teyvat-frame.md"
 
 # media.md sec.3: OGG Vorbis is the default, MP3 is accepted, WAV never.
 EXTENSIONS = (".ogg", ".mp3")

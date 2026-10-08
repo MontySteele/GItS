@@ -127,6 +127,20 @@ public static partial class McpMod
 
     private static void TryApplyHarmonyPatches()
     {
+        // GItS LOCAL EDIT (parallel co-op pairs, 2026-10-08). The fastmp port
+        // patch (`gits/GitsFastMpPortPatch.cs`) is applied by hand, in its own
+        // try and BEFORE the attribute scan, so an unrelated optional patch
+        // failing in PatchAll cannot skip it. Without `--gitsFastmpPort` on the
+        // command line it changes nothing.
+        try
+        {
+            GitsFastMpPortPatch.Apply(new Harmony("com.sts2mcp"));
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr($"[STS2 MCP] fastmp port patch NOT applied: {ex.GetType().Name}: {ex.Message}");
+        }
+
         try
         {
             new Harmony("com.sts2mcp").PatchAll();

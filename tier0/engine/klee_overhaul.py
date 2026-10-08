@@ -1,4 +1,4 @@
-"""THE BOMB (QUARANTINED, `C.KLEE_OVERHAUL`) -- the sim twin of
+"""THE BOMB (`C.KLEE_OVERHAUL`) -- the sim twin of
 `klee-mod/KleeCode/Powers/Prototype/ProtoBombPower.cs` and its neighbours.
 
 THE RULED BRIEF'S SEVEN RULES (`review/active/klee-brief-2026-09-01.md` sec.3),
@@ -561,7 +561,7 @@ def _explode(state: CombatState, enemy: Enemy, charge: KleeCharge,
     before = state.reactions_this_turn
     state.emit("ko_explosion", target=enemy.name, size=size,
                mine=charge.is_mine, multiplier=multiplier)
-    # PYRO, UNLESS A COVEN PERSONAL SAYS OTHERWISE (QUARANTINED, R236). Prune's
+    # PYRO, UNLESS A COVEN PERSONAL SAYS OTHERWISE (R236). Prune's
     # Hexhunter Chime is the one thing in either engine that can move rule 5's
     # element, and it moves it for ONE explosion; `companion_coven.bomb_element`
     # answers "pyro" on every other board and with the companion arm off.
@@ -921,7 +921,7 @@ def turn_start_late(state: CombatState) -> None:
     # UNPOWERED (`ValueProp.Unpowered` in `CreatureCmd.GainBlock`), so no
     # Dexterity feeds it and no Frail bites it: it is a POWER's Block, not a
     # card's printed Block.
-    # THE ONE READER OF KAEYA'S BLIND (QUARANTINED, C.COMPANION_OVERHAUL).
+    # THE ONE READER OF KAEYA'S BLIND (C.COMPANION_OVERHAUL).
     # Cold-Blooded Strike's stand-in makes Grounded pay this turn whatever its
     # condition says, so the cover story is read HERE and not by zeroing the
     # explosion counter, which Jean's stand-in also reads. `grounded_blind` is
@@ -1853,13 +1853,11 @@ def random_companion_pool(state: CombatState) -> list[Card]:
 
 def add_random_companions(state: CombatState, amount: int) -> int:
     """Tag Along and Adventure Club: `amount` random Companion cards into the
-    hand, free this turn. `KleeExpansion.AddRandomCompanions`'s twin (the
-    stand-in hand-off included). Returns how many arrived."""
+    hand, free this turn. `KleeExpansion.AddRandomCompanions`'s twin.
+    Returns how many arrived."""
     if not live(state) or amount <= 0:
         return 0
     import copy                                     # stdlib, local by habit
-    from tier0.content import loader                # late import: cycle
-    from tier0.engine import companion_standins     # late import: cycle
 
     pool = random_companion_pool(state)
     if not pool:
@@ -1869,8 +1867,7 @@ def add_random_companions(state: CombatState, amount: int) -> int:
         if len(state.player.hand) >= C.MAX_HAND_SIZE:
             break
         pick = state.rng.choice(pool)
-        cid = companion_standins.hand_off(pick.id, state.player.character_id)
-        card = copy.deepcopy(loader.get_card(cid) if cid != pick.id else pick)
+        card = copy.deepcopy(pick)
         card.free_this_turn = True
         state.player.hand.append(card)
         state.emit("ko_random_companion", card=card.id)

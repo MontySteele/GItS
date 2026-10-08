@@ -1,10 +1,9 @@
-"""EB-144 — the pilot's conditional literacy, and the Salon verbs.
+"""EB-144 — the pilot's conditional literacy.
 
-Two blindnesses, one row. `policy._active_effects`'s predicate chain ended in
-a bare `else: continue`, which yields NEITHER branch — so a predicate nobody
-had taught it made the pilot price the whole conditional at zero, silently.
-And `salon_rotate` / `salon_perform` appeared nowhere in `tier0/pilot/`, so
-`change_the_bill` scored as its Block 3 and nothing else.
+`policy._active_effects`'s predicate chain ended in a bare `else: continue`,
+which yields NEITHER branch — so a predicate nobody had taught it made the
+pilot price the whole conditional at zero, silently. (The row's second half,
+the shipped Salon verbs, left the sim with the Salon on 2026-10-08.)
 
 The lint at the bottom is the point of the file: the failure mode here is
 SILENCE, so a future sheet row printing a predicate nobody triaged has to
@@ -41,12 +40,6 @@ def _ops(state, card):
                                                       card)]
 
 
-def _stage(state, *members):
-    p = state.player
-    p.salon.extend(members)
-    p.powers["salon_member"] = len(p.salon)
-
-
 # --- (1) the two predicates the standing read named ------------------------
 
 def test_hold_the_line_scores_the_conditional_block_against_an_attacker():
@@ -73,10 +66,7 @@ def test_the_predicate_read_is_the_engine_s_own():
     engine's `_predicate` cannot disagree, because they are one call."""
     st = make_state(enemies=[make_enemy(hp=60, intents=[
         {"kind": "attack", "amount": 5}])])
-    st.player.charge = 10
-    _stage(st, "usher")
-    for name in ("enemy_intends_attack", "has_salon_members",
-                 "spotlight_moved_this_turn", "charge_at_least_10"):
+    for name in ("enemy_intends_attack",):
         gated = [{"op": "conditional", "if": name,
                   "then": [{"op": "damage", "amount": 7}]}]
         seen = bool(list(policy._active_effects(st, gated)))

@@ -45,7 +45,7 @@ public sealed class ProtoVkPyreOath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pyre Oath"),
-        ("description", "Whenever you [gold]Exhaust[/gold] a card, gain 1 [gold]Pyro[/gold] [gold]Oath[/gold]."),
+        ("description", "[gold]Exhaust[/gold] a card. Whenever you [gold]Exhaust[/gold] a card, gain 1 [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,6 +64,21 @@ public sealed class ProtoVkPyreOath : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<PyreOathPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        {
+            ExhaustSelection.Open(this);
+            var toExhaust = (await CardSelectCmd.FromHand(
+                choiceContext, Owner,
+                new CardSelectorPrefs(
+                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
+                static _ => true, this)).ToList();
+            foreach (var victim in toExhaust)
+            {
+                ExhaustSelection.Record(this, victim);
+                await CardCmd.Exhaust(choiceContext, victim);
+            }
+
+            ExhaustSelection.Close(this);
+        }
     }
 
     protected override void OnUpgrade()

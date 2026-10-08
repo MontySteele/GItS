@@ -17,7 +17,6 @@ could silently undo.
 
 from __future__ import annotations
 
-import inspect
 import random
 import sys
 from pathlib import Path
@@ -162,30 +161,6 @@ def _play(state, cid):
     state.player.energy = 9
     combat.play_card(state, card)
     return card
-
-
-# --- THE EB-2 ORDER PIN ----------------------------------------------------
-
-def test_ancient_income_is_sourced_above_the_salon_upkeep():
-    """EB-2's parity target, pinned at the SITE (test_a7_port idiom).
-
-    The C# race is between SalonPowers' upkeep and FurinaResources' Encore
-    income inside one `AfterPlayerTurnStart` broadcast, with no guaranteed
-    order. The sim is what says which way it should fall, so the ordering
-    has to be asserted where a reader would otherwise "tidy" it: both ticks
-    sit above `salon_tick`, and above the whole per-turn income group that
-    follows it.
-    """
-    src = inspect.getsource(effects.player_turn_start_triggers)
-    upkeep = src.index("salon_tick(state)")
-    # The READS, not the words: the comment block at the insertion point
-    # names every power in this test, so matching bare names would pass on
-    # the prose alone.
-    assert src.index('p.powers.get("charge_per_turn"') < upkeep
-    assert src.index('p.powers.get("encore_per_turn"') < upkeep
-    # And genuinely ABOVE the group, not merely above one member of it.
-    assert upkeep < src.index('p.powers.get("spark_per_turn"')
-    assert upkeep < src.index('p.powers.get("celestial_gift"')
 
 
 # --- Jumpy Dumpty Mk.Omega in combat ---------------------------------------

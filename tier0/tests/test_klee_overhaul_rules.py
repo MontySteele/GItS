@@ -1,4 +1,4 @@
-"""THE BOMB, rule by rule (QUARANTINED, `C.KLEE_OVERHAUL`) -- `EB-312`.
+"""THE BOMB, rule by rule (`C.KLEE_OVERHAUL`) -- `EB-312`.
 
 `tier0/engine/klee_overhaul.py` is the sim twin of
 `klee-mod/KleeCode/Powers/Prototype/ProtoBombPower.cs` and its neighbours, and
@@ -558,18 +558,6 @@ def test_rule7_the_base_free_attack_rule_is_retired(overhaul):
     state.player.hand.append(attack)
     combat.play_card(state, attack)
     assert state.player.sparks == 9        # nothing was consumed implicitly
-
-
-def test_the_arm_neither_feeds_nor_shows_burst(overhaul):
-    """`EB-266`: under the arm Sparks are her only meter, so nothing may fill
-    Burst -- the mod's one-line guard inside `BurstResource.Find`, at this
-    engine's own funnel."""
-    from tier0.engine import resources
-
-    state = klee_state()
-    state.player.burst_max = 40
-    resources.gain_burst(state, 5, "probe")
-    assert state.player.burst_energy == 0
 
 
 # ---------------------------------------------------------------------------
@@ -2040,8 +2028,8 @@ def test_is_set_off_card_reads_the_row(overhaul):
 # (`review/ruled/klee-overhaul-round-9-2026-09-04.md`, pick 1 at its default)
 # ---------------------------------------------------------------------------
 #
-# Four rows in Klee's own pool plus one companion stand-in (Barbara's, pinned
-# with the rest of the seam in `test_companion_standins.py`). The round-9 run
+# Four rows in Klee's own pool plus one companion stand-in (Barbara's, cut
+# 2026-10-03; the seam itself was deleted 2026-10-08). The round-9 run
 # died on act-2 floor 22 with no Block in hand, and the brief's own weakness
 # stands -- so every row here is keyed to the Bomb state and none is a plain
 # Block. The C# twins are `klee-mod/KleeTests/Prototype/DefenceShelfTests.cs`,

@@ -150,7 +150,7 @@ class CharacterProfile:
     generator_script: str
     art_loader: str
     emit_character_identity: bool = False
-    # `EB-272`. Does this profile's sheet carry the QUARANTINED arms' keywords?
+    # `EB-272`. Does this profile's sheet carry the arms' keywords?
     # Only `gen_prototype_cards` sets it, and the scoping is the point: on a
     # shipped sheet `[gold]Bombs[/gold]` means the shipped Bomb, whose rules
     # are the opposite of the overhaul's, so attaching the arm's definition
@@ -409,7 +409,7 @@ PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE}
 # delta reaches it -- a card that pays less on upgrade is a repricing, and
 # repricing is [USER]'s call, not codegen's). The cost LINE is emitted
 # separately as an IsPlayable override; see `spark_gate_member` in emit().
-# spend_charge (R213 E1) is the Charge SINK and it is QUARANTINED: no
+# spend_charge (R213 E1) is the Charge SINK and it is no
 # shipped row prints it, only the prototype surface does, and R80 -- Charge is
 # read, never spent -- is the rule the slice reopened rather than repealed.
 # Built on spend_spark's rail entirely: literal price (a card that pays less
@@ -478,7 +478,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # KokomiConscript.Run. All three have verified call sites in
                   # klee-mod/KleeCode/Powers -- the whitelist stays honest.
                   "gain_charge", "summon_kurage", "conscript",
-                  # THE KLEE OVERHAUL, SLICE ONE (QUARANTINED, R213 B -- the
+                  # THE KLEE OVERHAUL, SLICE ONE (R213 B -- the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
                   # and is Compile Remove'd out of a release build, so the only
                   # rows that may print these are `proto_` rows on the
@@ -555,7 +555,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # hand (`KleeStatusPackage.ExhaustStatuses`) and grows by
                   # that many.
                   "lose_strength",
-                  # THE KOKOMI OVERHAUL, SLICE ONE (QUARANTINED, R213 B) --
+                  # THE KOKOMI OVERHAUL, SLICE ONE (R213 B) --
                   # same terms and the same quarantine as the block above: the
                   # rules engine lives in klee-mod/KleeCode/Powers/Prototype
                   # and is Compile Remove'd out of a release build, so the only
@@ -635,7 +635,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # `EB-655` (Battle Plan): the carry-out's rider, plan-only
                   # for the same reason -- a now-line spelling would be a
                   # different, unpriced card.
-                  # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B) --
+                  # THE INAZUMA COMPANION OVERHAUL (R213 B) --
                   # ONE verb, on the same terms as the two blocks above. Gorou's
                   # Inuzaka All-Round Defense prints "Gain Block equal to half
                   # the damage dealt", and the total it halves is this play's
@@ -731,7 +731,7 @@ def prints_burst_word(description: str) -> bool:
     return bool(BURST_WORD.search(description))
 
 
-# --- `EB-272`: the QUARANTINED ARMS' KEYWORDS --------------------------------
+# --- `EB-272`: the ARMS' KEYWORDS --------------------------------
 #
 # THE DEFECT. Not one word the three prototype arms invented had a definition
 # anywhere -- not in the game and not on the blind-play page -- while every
@@ -757,7 +757,7 @@ def prints_burst_word(description: str) -> bool:
 # the player reads, which is the surface the gap was reported against.
 #
 # SCOPED BY PROFILE (`CharacterProfile.arm_keyword_tips`), and only the
-# prototype surface sets it. These are QUARANTINED rules: a shipped Klee card
+# prototype surface sets it. These are arm rules: a shipped Klee card
 # printing `Bombs` means the SHIPPED Bomb, whose definition is `KLEEMOD-BOMB`
 # and whose rules are the opposite ones (it detonates by itself). Widening the
 # attach to the shipped sheets would put the arm's contradicting sentence on
@@ -918,7 +918,7 @@ ARM_KEYWORDS = (
 )
 
 
-# --- `EB-377`: the BASE GAME'S KEYWORDS A QUARANTINED FACE NAMES -------------
+# --- `EB-377`: the BASE GAME'S KEYWORDS A PROTOTYPE FACE NAMES -------------
 #
 # THE DEFECT, and it is the mirror image of the one above. `EB-272` gave every
 # word the arms INVENTED a definition; the words the arms merely USE still had
@@ -1563,7 +1563,7 @@ PREDICATES_CS = {
     # the bar is authored per card and moves at red-pen, so a literal map
     # turned every new threshold into a codegen KeyError.
     "has_salon_members": "SalonMemberPower.Count(Owner.Creature) > 0",
-    # QUARANTINED (`furina_stage.FURINA_STAGE`, `EB-723`). Is anybody on
+    # (`furina_stage.FURINA_STAGE`, `EB-723`). Is anybody on
     # stage. A Spend mode's own gate is NOT this predicate: since R276 it asks
     # whether the back performer can pay the full price, and that gate is
     # `MODE_RULE_OPS`', built off the mode's own `stage_spend` amount.
@@ -1594,7 +1594,7 @@ PREDICATES_CS = {
     # listener, and opens at the end of the player's previous turn.
     "hp_lost_since_last_turn":
         "HpLossWindow.LostSinceLastTurn(Owner.Creature)",
-    # THE KLEE OVERHAUL's two per-turn reads (QUARANTINED). Both come off
+    # THE KLEE OVERHAUL's two per-turn reads. Both come off
     # `KleeOverhaulLedger`, which is the ONE place the arm's counters are
     # written, so a card and the power that feeds it cannot disagree about
     # what an explosion was. `bomb_reacted_this_turn` is NOT a synonym for
@@ -1616,7 +1616,7 @@ PREDICATES_CS = {
     # (`SitTightPower`, 2026-09-23).
     "no_bomb_went_off_this_turn":
         "KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn == 0",
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). tier0's own
+    # THE MONDSTADT COMPANION OVERHAUL. tier0's own
     # `target_has_aura` predicate, which had no C# read until a companion row
     # printed it (Rosaria's Ravaging Confession).
     #
@@ -1629,7 +1629,7 @@ PREDICATES_CS = {
     # same `AuraCmd.Find` reader `NightVigilPower` and `FlameDance` use, so
     # there is no second definition of "holds an aura".
     "target_has_aura": "targetHadAura",
-    # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED). Undertow's "if the enemy has
+    # THE KOKOMI OVERHAUL, DRAFT 6. Undertow's "if the enemy has
     # a debuff", and the definition of "a debuff" is the ENGINE'S OWN --
     # `PowerType.Debuff` on the target -- rather than a list of names this file
     # would have to keep current as the arm, the companions and the base game
@@ -1684,7 +1684,7 @@ PREDICATE_TEXT = {
     "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
     "has_salon_members": "If you have a [gold]Salon Member[/gold]",
-    # QUARANTINED (`EB-723`). The FALLBACK wording only: every Spend row states
+    # (`EB-723`). The FALLBACK wording only: every Spend row states
     # its own face with `description:`, because rule 8's rider is printed as
     # "Spend N: <the big number> instead" and no generic clause can say that.
     "stage_occupied": "If a performer is on stage",
@@ -1734,7 +1734,7 @@ _ENCORE_BAR = re.compile(r"^encore_at_least_(\d+)$")
 # unknown name blocks the card instead of generating a branch that can never
 # fire. The display names are the faces' own: "the Usher" carries its article.
 _LEFTMOST_MEMBER = re.compile(r"^leftmost_salon_member_([a-z]+)$")
-# THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). An HP fraction, parametric
+# THE MONDSTADT COMPANION OVERHAUL. An HP fraction, parametric
 # for exactly the reason the meter bars above are: the threshold is a balance
 # number authored per card (the workshop prints "below half HP" on Noelle's
 # Breastplate and "above 70% HP" on Bennett's Fantastic Voyage), so moving one
@@ -2027,7 +2027,7 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # "if the leftmost member is X, do Y" -- see the
               # leftmost_salon_member_ predicate below.
               "salon_rotate", "salon_perform",
-              # QUARANTINED (`EB-723`). The Spend rider is a BRANCH by
+              # (`EB-723`). The Spend rider is a BRANCH by
               # construction: rule 8's two sentences are printed as
               # `conditional {if: stage_occupied, then: [stage_spend, <big>],
               # else: [<base>]}`, so this op only ever appears inside one. A
@@ -2045,7 +2045,7 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # top-level arm's own `_aura_lines`, whose one local sits inside
               # its own braces; `enemy` and `all_enemies` only.
               "apply_aura",
-              # R213 E1, QUARANTINED. A single awaited call with no locals,
+              # R213 E1. A single awaited call with no locals,
               # which is the whole branch-legality criterion -- and a mode
               # body is the one place a Charge price can go that the
               # IsPlayable cost line cannot reach, which is exactly the
@@ -2072,13 +2072,13 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # that bank. An op a price table knows and an emitter does not
               # is an unpaid payoff, not a blocked one.
               "spend_spark",
-              # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Mizuki's Anraku
+              # THE INAZUMA COMPANION OVERHAUL. Mizuki's Anraku
               # Secret Spring Therapy is "deal 18 to ALL, OTHERWISE Mend 10",
               # so the keyword lands in an ELSE branch -- and the top-level arm
               # it copies is a single awaited call with no locals, which is the
               # whole branch-legality criterion.
               "mend",
-              # THE KOKOMI OVERHAUL (QUARANTINED). Sango Isshin's redesigned
+              # THE KOKOMI OVERHAUL. Sango Isshin's redesigned
               # payoff, "...deal a quarter of your Max HP to ALL enemies
               # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
               # aimed form by name: `KokomiRules.QuarterMaxHpAll` is a single
@@ -2143,7 +2143,7 @@ BRANCH_FIELDS = {
     # natural units -- so the two validators cannot disagree.
     "salon_rotate": {"op", "amount"},
     "salon_perform": {"op", "amount"},
-    # QUARANTINED (`EB-723`). `amount` is the printed N and is REQUIRED here,
+    # (`EB-723`). `amount` is the printed N and is REQUIRED here,
     # unlike the two salon verbs above: a Spend with no number is not a rider
     # any face could print.
     "stage_spend": {"op", "amount"},
@@ -2332,7 +2332,7 @@ def _modal_reason(eff: dict) -> str | None:
 # body lands inside a for-block, so those other effects must not declare
 # method-scope locals a second time -- restrict them to declaration-free ops.
 REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy",
-                   # The Klee overhaul (QUARANTINED). Perfect Timing is
+                   # The Klee overhaul. Perfect Timing is
                    # the slice's one repeat-conditional and its body is a
                    # Set off plus damage, so `set_off` has to be legal
                    # inside the repeated block. It qualifies on the rule
@@ -2350,7 +2350,7 @@ UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
 # Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
 # field encodes a mechanic; block loudly, never approximate).
 DETONATE_FIELDS = {"op", "target", "bonus"}
-# The Klee overhaul's own, same discipline (QUARANTINED, C.KLEE_OVERHAUL).
+# The Klee overhaul's own, same discipline (C.KLEE_OVERHAUL).
 #: `wide_if` is R276's too (Team Effort), Coven Errand's field one verb
 #: over: the aimed Set off WIDENS to every enemy when the predicate holds,
 #: and the card's own hit stays on the aimed body.
@@ -2609,7 +2609,7 @@ MOVE_BOMBS_FIELDS = {"op", "target", "bonus"}
 MODIFY_BOMBS_FIELDS = {"op", "scope", "bonus"}
 CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
 
-# The Kokomi overhaul's own, same discipline (QUARANTINED, C.KOKOMI_OVERHAUL).
+# The Kokomi overhaul's own, same discipline (C.KOKOMI_OVERHAUL).
 MEND_FIELDS = {"op", "amount"}
 DAMAGE_QUARTER_MAX_HP_FIELDS = {"op", "target"}
 #: Tide Chart's two numbers (`EB-478`, R257): `per` is what one Plan carried
@@ -2998,7 +2998,7 @@ APPLY_POWERS = {
         "to that enemy."),
     "spark_threshold_down": ("SparkThresholdDownPower", None,
         "You need {X} fewer [gold]Spark[/gold] for your Attacks to cost 0."),
-    # THE KLEE OVERHAUL, SLICE ONE (QUARANTINED, R213 B). Every class below
+    # THE KLEE OVERHAUL, SLICE ONE (R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of
     # a release build, so the only rows that may name one are `proto_` rows on
     # the prototype surface -- compiled under the same switch. The {X} templates
@@ -3095,11 +3095,11 @@ APPLY_POWERS = {
         "this turn, gain {X} [gold]Block[/gold]."),
     # Jean's Lion's Fang (once a companion stand-in; in Klee's own pool since
     # the Klee-only companions, 2026-10-03). The class lives in
-    # klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs.
+    # klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs.
     "mc_lions_fang": ("LionsFangPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block and draw 1 card."),
-    # THE HEXEREI FAMILY STAND-INS' FOUR (QUARANTINED, R213 B). Every class
+    # THE HEXEREI FAMILY STAND-INS' FOUR (R213 B). Every class
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionHexerei.cs, compiled
     # only under `-p:PrototypeCards=true`, so the only rows that may name one
     # are `proto_mc_` stand-ins on the prototype surface. They are here rather
@@ -3167,7 +3167,7 @@ APPLY_POWERS = {
     "mc_ladder_of_ascent": ("LadderOfAscentPower", None,
         "Whenever you play a [gold]Companion[/gold] card, deal {X} damage of "
         "that card's element to a random enemy."),
-    # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, R213 B). Every class below
+    # THE KOKOMI OVERHAUL, DRAFT 6 (R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
     # of a release build, so the only rows that may name one are `proto_` rows
     # on the prototype surface -- compiled under the same switch. The {X}
@@ -3298,7 +3298,7 @@ APPLY_POWERS = {
     # power stack since the block funnel was written.
     "dexterity": ("DexterityPower", None,
         "Gain {X} [gold]Dexterity[/gold]."),
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, R213 B). Every class below
+    # THE MONDSTADT COMPANION OVERHAUL (R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulPowers.cs and
     # is Compile Remove'd out of a release build, so the only rows that may name
     # one are `proto_mc_` rows on the prototype surface -- compiled under the
@@ -3333,7 +3333,7 @@ APPLY_POWERS = {
         "At the end of your turn, deal 5 damage, apply [gold]Electro[/gold] "
         "and apply 1 [gold]Vulnerable[/gold] to a random enemy. Lasts {X} more "
         "turn(s)."),
-    # THE SAME ARM'S SECOND WAVE (QUARANTINED). Thirteen more rows, and these
+    # THE SAME ARM'S SECOND WAVE. Thirteen more rows, and these
     # are the powers whose HOOKS had to be built:
     # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulHooks.cs, compiled
     # under the same switch as the eleven above. Two of them land on the CHOSEN
@@ -3378,7 +3378,7 @@ APPLY_POWERS = {
         "damage plus 5 per [gold]Attack[/gold] counted. Falls in {X} turn(s)."),
     "mc_starfrost_discount": ("StarfrostDiscountPower", None,
         "Your next [gold]Attack[/gold] costs {X} less."),
-    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, R213 B), on the SAME flag
+    # THE INAZUMA COMPANION OVERHAUL (R213 B), on the SAME flag
     # pair as the Mondstadt rows above. Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulInazuma.cs and is
     # Compile Remove'd out of a release build, so the only rows that may name
@@ -3436,7 +3436,7 @@ APPLY_POWERS = {
     "mi_tamoto": ("TamotoPower", None,
         "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
         "a random enemy, ignoring [gold]Block[/gold]. Lasts {X} more turn(s)."),
-    # KLEE'S COVEN PERSONALS (QUARANTINED, R213 B / R236), on the SAME flag
+    # KLEE'S COVEN PERSONALS (R213 B / R236), on the SAME flag
     # pair as the two nation blocks above. Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/CompanionCoven.cs and is Compile
     # Remove'd out of a release build, so the only rows that may name one are
@@ -4219,7 +4219,7 @@ CARD_FIELDS = {
     "sly",
     "id", "name", "cost", "type", "rarity", "solve", "archetypes", "role",
     "effects", "tags", "exhaust", "kit_card", "requires",
-    # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED). The second HALF of a printed
+    # THE KOKOMI OVERHAUL, DRAFT 6. The second HALF of a printed
     # face: what the card does if it is played on the Bake-Kurage instead of
     # where it would normally go. A list of effects in the SAME vocabulary
     # `effects:` speaks, checked by `plan_reason` and emitted as typed
@@ -4318,12 +4318,11 @@ CARD_FIELDS = {
     # `hexerei` (the Mondstadt workshop's family mark) LEFT at R276 pick 2:
     # every reader asks "is it a Companion card" now, so a row carrying the
     # key would be declaring a mark nothing reads, and it is refused.
-    # THE COMPANION STAND-IN SEAM (QUARANTINED), and the two halves differ.
+    # `replaces` and `art_of`, and the two halves differ.
     #
-    # `replaces` is INERT here, like `register` above: which
-    # Universal a row stands in for is an OFFER rule, carried out at each
-    # engine's hand-off (`KleeMod.Powers.CompanionStandIns`,
-    # `tier0.engine.companion_standins`), and there is nothing on the card
+    # `replaces` is INERT here, like `register` above: which row a prototype
+    # row re-authors is an OFFER rule (the sim checks it in
+    # `loader._validate_replaces_shape`), and there is nothing on the card
     # itself to emit. Whitelisted rather than left unknown, because this list
     # is deliberately total and an unknown field BLOCKS the row.
     #
@@ -4386,7 +4385,7 @@ def card_level_reason(
             for e in iter_effects(card.get("effects") or [])):
         return ("a row that aims at another player AND at an enemy -- one "
                 "TargetType cannot say both")
-    # THE PLAN IS KOKOMI'S ALONE (QUARANTINED, C.KOKOMI_OVERHAUL). The clauses
+    # THE PLAN IS KOKOMI'S ALONE (C.KOKOMI_OVERHAUL). The clauses
     # emit `KokomiPlan` calls and the row declares a pet-accepting TargetType,
     # so a `plan:` on anybody else's row would be a rule that character does
     # not have, wearing a schema key.
@@ -4693,7 +4692,7 @@ def blocked_reason(
                 and kokomi_casket_calc_rider(card, effect) is None
                 and plans_held_draw_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
-                # QUARANTINED (`EB-723`): the Stage's three counts, on the
+                # (`EB-723`): the Stage's three counts, on the
                 # same rail and refused on the same terms.
                 and stage_count_calc_rider(card, effect) is None
                 and stage_count_block_rider(card, effect) is None):
@@ -4879,7 +4878,7 @@ def blocked_reason(
             amt = eff.get("amount")
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
-        # THE KLEE OVERHAUL'S EIGHT (QUARANTINED, C.KLEE_OVERHAUL). UNPARSEABLE
+        # THE KLEE OVERHAUL'S EIGHT (C.KLEE_OVERHAUL). UNPARSEABLE
         # discipline throughout: a field the emitter does not understand
         # encodes a mechanic, and every number is required to be a literal int
         # because a prototype whose printed number the emitter cannot read is a
@@ -5214,7 +5213,7 @@ def blocked_reason(
             unknown = set(eff) - RETURN_TO_HAND_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
-        # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL).
+        # THE KOKOMI OVERHAUL, DRAFT 6 (C.KOKOMI_OVERHAUL).
         # Same UNPARSEABLE discipline as the Klee arm's eight above: a field
         # the emitter does not understand encodes a mechanic, and every number
         # is required to be a literal int because a prototype whose printed
@@ -5946,7 +5945,7 @@ def companions_played_calc_rider(card: dict,
                                  eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: companions_played_this_combat}` --
     Raiden's Musou no Hitotachi, "deals 5 more for each Companion card you
-    played this combat" (QUARANTINED, the Inazuma companion overhaul).
+    played this combat" (the Inazuma companion overhaul).
 
     THE COUNT IS CARDS, NOT PLAYS, and both engines already answer it that way:
     `CompanionPlays` records `(Owner, ModelId)` once per companion and the
@@ -6153,8 +6152,7 @@ def plans_held_draw_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
 def swirls_turn_calc_rider(card: dict,
                            eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: swirls_this_turn}` -- Heizou's
-    Heartstopper Strike, "deals 4 more for each Swirl this turn" (QUARANTINED,
-    the Inazuma companion overhaul).
+    Heartstopper Strike, "deals 4 more for each Swirl this turn" (the Inazuma companion overhaul).
 
     The count comes off `CompanionOverhaulLedger`, which is where this arm
     already keeps its per-turn numbers, written at the ONE place the mod
@@ -6206,7 +6204,7 @@ def exhausts_turn_calc_rider(card: dict,
     """`amount_formula: {base, per, count: exhausts_this_turn}` -- a damage
     number priced off every card the seat has Exhausted THIS TURN.
 
-    QUARANTINED USE ONLY as this lands (R213 B): no shipped sheet row carries
+    CURRENT-KIT USE ONLY as this lands (R213 B): no shipped sheet row carries
     this count. It exists because R215 C routed [USER]'s reading of Pearl
     Barrage -- *"I thought it was tracking how many cards had been exhausted
     that whole turn"* -- to the Kokomi slice as its first prototype arm, and
@@ -6338,7 +6336,7 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
 def stage_count_calc_rider(card: dict,
                            eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: stage_*}` on a DAMAGE op --
-    QUARANTINED (`EB-723`), *Ousia Surge* and *Let the People Rejoice*.
+    (`EB-723`), *Ousia Surge* and *Let the People Rejoice*.
 
     The same CalculatedDamageVar triple as every rider on this rail. Only the
     COUNT differs, and `stage_spent` differs twice over: it is not a live board
@@ -6843,7 +6841,7 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     # so the card would have rendered and paid a flat 6 -- which is why
     # `blocked_reason` refused to emit it rather than ship a wrong number.
     charge = re.fullmatch(r"(\d+)_per_(\d+)_charge", formula)
-    # QUARANTINED (`EB-723`): the Stage's counts on the block rail -- the
+    # (`EB-723`): the Stage's counts on the block rail -- the
     # first shapes on this rail to read `amount_formula` rather than
     # `bonus_formula`, resolved here rather than in their own branch so they
     # inherit every guard below: one CalculationBase per card is the
@@ -6941,14 +6939,14 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     exhausts_turn = exhausts_turn_calc_rider(card, eff)
     if exhausts_turn is not None:
         return exhausts_turn
-    # QUARANTINED USE ONLY as this lands: no shipped row prints `player_block`.
+    # CURRENT-KIT USE ONLY as this lands: no shipped row prints `player_block`.
     # Beside the four above it because it is the same triple and the same
     # damage-only rule; see `player_block_calc_rider` for why the number cannot
     # be a literal.
     player_block = player_block_calc_rider(card, eff)
     if player_block is not None:
         return player_block
-    # QUARANTINED USE ONLY, and beside the four above for the same two reasons:
+    # CURRENT-KIT USE ONLY, and beside the four above for the same two reasons:
     # the same triple, and the same damage-only rule. Neither number can be a
     # literal -- one moves every time a Companion is played and the other every
     # time a Swirl happens.
@@ -6970,7 +6968,7 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn
-    # QUARANTINED (`EB-723`): the Stage's counts on the damage rail.
+    # (`EB-723`): the Stage's counts on the damage rail.
     staged = stage_count_calc_rider(card, eff)
     if staged is not None:
         return staged
@@ -7904,7 +7902,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or debuffs_on_target_calc_rider(card, e) is not None
             or kokomi_casket_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
-            # QUARANTINED (`EB-723`): the Stage's counts join the same two
+            # (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
             # same CalculatedDamageVar / CalculatedBlockVar triple, so a `per`
             # or `base` delta lands in the same slot whichever count the rider
@@ -7926,7 +7924,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or debuffs_on_target_calc_rider(card, e) is not None
             or kokomi_casket_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
-            # QUARANTINED (`EB-723`): the Stage's counts join the same two
+            # (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
             # same CalculatedDamageVar / CalculatedBlockVar triple, so a `per`
             # or `base` delta lands in the same slot whichever count the rider
@@ -9274,7 +9272,7 @@ def _stmt_spend_spark_guarded(card: dict, eff: dict) -> str:
 
 
 def _stmt_spend_charge(card: dict, eff: dict) -> str:
-    """R213 E1, QUARANTINED. The PAYMENT half of the Charge cost line.
+    """R213 E1. The PAYMENT half of the Charge cost line.
 
     GUARDED, which `_stmt_spend_spark` is not, and the difference is where
     the two ops are allowed to appear. A Spark price is top-level only, so
@@ -9663,7 +9661,7 @@ def _conscript_phrase(eff: dict) -> str:
         # cost_override as reaching the target ABSOLUTELY.
         phrase += f", at cost {int(eff['cost_override'])}"
     if eff.get("subsidy") == "waived":
-        # QUARANTINED (R213 E1 / EB-183). The deviation is the WAGE, and it is
+        # (R213 E1 / EB-183). The deviation is the WAGE, and it is
         # a rule the Muster keyword's own definition does not carry: the tip
         # says the recruit costs 1 less and Exhausts, and every Kokomi reader
         # has learned that an Exhaust of her own card pays Charge. A card that
@@ -9876,7 +9874,7 @@ def _emit_branch_op(
         lines.append(f"await VarkaCards.{VARKA_KINDS[eff['kind']]}("
                      "choiceContext, this, cardPlay);")
     elif op == "spend_charge":
-        # R213 E1, QUARANTINED. Byte-for-byte the call build_body's top-level
+        # R213 E1. Byte-for-byte the call build_body's top-level
         # arm makes. The GUARD is the point: a mode body has no IsPlayable to
         # gate it, the choose-a-card screen offers every mode whatever the
         # bank holds, and without the early return a short bank would collect
@@ -9894,7 +9892,7 @@ def _emit_branch_op(
         # Sim twin: `effects.spend_sparks`, which refuses the same way.
         lines.append(_stmt_spend_spark_guarded(card, eff))
     elif op == "damage_quarter_max_hp":
-        # THE KOKOMI OVERHAUL (QUARANTINED). Sango Isshin's payoff, and
+        # THE KOKOMI OVERHAUL. Sango Isshin's payoff, and
         # byte-for-byte the call `build_body`'s top-level all-enemies arm
         # makes: the quarter is computed in ONE place so the printed face and
         # the hit cannot round differently.
@@ -9905,7 +9903,7 @@ def _emit_branch_op(
             "await KokomiRules.QuarterMaxHpAll("
             "choiceContext, Owner.Creature, this, cardPlay);")
     elif op == "mend":
-        # THE INAZUMA COMPANION OVERHAUL (QUARANTINED). Byte-for-byte the call
+        # THE INAZUMA COMPANION OVERHAUL. Byte-for-byte the call
         # `build_body`'s top-level arm makes, because it IS the same rule: one
         # awaited `KokomiRules.Mend`, which is where "never above the HP you
         # entered the fight with" lives for every character that plays a card
@@ -9914,7 +9912,7 @@ def _emit_branch_op(
             "await KokomiRules.Mend(choiceContext, Owner.Creature, "
             f'{int(eff["amount"])});')
     elif op in STAGE_STMT_OPS:
-        # QUARANTINED (`EB-723` / `EB-725`, R269). The Spend rider is a BRANCH
+        # (`EB-723` / `EB-725`, R269). The Spend rider is a BRANCH
         # by construction -- rule 8's two sentences are printed as
         # `conditional {if: stage_occupied, then: [stage_spend, <big>], else:
         # [<base>]}` -- so `stage_spend` reaches emit HERE and not through
@@ -10465,7 +10463,7 @@ def build_body(
     # resolve_card START, so the C# diff bases are captured at the top of
     # OnPlay, before any effect resolves -- not at the conditional's site.
     # THE KLEE OVERHAUL's per-PLAY memory, opened at the top of the body for
-    # the same reason the snapshots below are (QUARANTINED). "The total size of
+    # the snapshots' reason above. "The total size of
     # the Bombs set off" is a question about THIS play, and the ledger's counter
     # is otherwise per turn -- so a second Big Badda Boom in one turn would read
     # the first one's explosions too. Emitted only for a card that asks.
@@ -10474,7 +10472,7 @@ def build_body(
         lines.append(
             "KleeOverhaulLedger.For(Owner.Creature).BeginPlay();")
     # THE INAZUMA ARM's per-PLAY total, opened the same way and for the same
-    # reason (QUARANTINED): Gorou asks "half the damage dealt" about THIS play,
+    # reason : Gorou asks "half the damage dealt" about THIS play,
     # so the running total has to start at zero when the play does. Emitted
     # only for a card that asks. Sim twin: `state.mi_damage_dealt_this_card`,
     # zeroed at the head of `effects.resolve_card`.
@@ -10764,7 +10762,7 @@ def build_body(
 
         elif op == "conscript":
             override = eff.get("cost_override")
-            # QUARANTINED (R213 E1 / EB-183). The argument is APPENDED ONLY
+            # (R213 E1 / EB-183). The argument is APPENDED ONLY
             # when the row asks for it, so every shipped conscript face emits
             # byte-identically to what it emitted before the key existed --
             # the parameter is optional C#-side for exactly that reason.
@@ -11058,7 +11056,7 @@ def build_body(
                 "        }"
             )
 
-        # ---- THE KLEE OVERHAUL, SLICE ONE (QUARANTINED) -------------------
+        # ---- THE KLEE OVERHAUL, SLICE ONE -------------------
         # Every arm below is ONE awaited call into `ProtoBombPower` or one
         # read off `KleeOverhaulLedger`, and that is deliberate rather than
         # tidy: the rules live in the power, so a card cannot express a
@@ -11431,7 +11429,7 @@ def build_body(
                 "await CompanionHexerei.MarkHand("
                 "choiceContext, Owner);")
 
-        # ---- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED) -------------------
+        # ---- THE KOKOMI OVERHAUL, DRAFT 6 -------------------
         # Every arm below is ONE awaited call into `KokomiRules`, `KokomiPlan`
         # or `KokomiOverhaulKit`, and that is deliberate rather than tidy: the
         # rules live in those files, so a card cannot express a variant of a
@@ -11462,7 +11460,7 @@ def build_body(
                     "choiceContext, Owner.Creature, this, cardPlay);")
 
         elif op == "block_half_damage":
-            # THE INAZUMA ARM (QUARANTINED). Gorou's second clause. No number
+            # THE INAZUMA ARM. Gorou's second clause. No number
             # here for a face to get wrong -- the amount is half of what this
             # play's damage actually landed, which the ledger opened at the top
             # of the body has been keeping.
@@ -15340,7 +15338,7 @@ def emit(
                 target_type = modal_target
                 break
 
-    # THE PLAN'S TARGET (draft 6 rule 2, QUARANTINED). "A card with a Plan:
+    # THE PLAN'S TARGET (draft 6 rule 2). "A card with a Plan:
     # line can be played on the jellyfish instead of where it would normally
     # go... A card with only a Plan line can only be planned." So the row's
     # declared TargetType has to ACCEPT THE PET, and which of the three
@@ -15487,7 +15485,7 @@ def emit(
     # same figure `WillReplace` is asked with.
     if salon_deploy_card(card):
         interfaces += ", ISalonDeployCard"
-    # QUARANTINED (R276, Where Did I Put It?). A row that prints a Set off
+    # (R276, Where Did I Put It?). A row that prints a Set off
     # declares it on the class: `ISetOffCard` is a MARKER with no members, and
     # the one question it answers is "is this a Set off card", which the look
     # at the top of the draw pile asks of every card it sees. DERIVED from the
@@ -15630,7 +15628,7 @@ def emit(
     if aims is not None:
         interfaces += ", IModalCard"
 
-    # THE PLAN LINE, AS DATA ON THE CARD (draft 6, QUARANTINED). The queue is
+    # THE PLAN LINE, AS DATA ON THE CARD (draft 6). The queue is
     # TYPED and not a closure -- `KokomiPlan`'s own header says why -- so the
     # row's `plan:` list is emitted as a list of `KokomiPlan.Planned` records
     # that the enqueue copies. `IPlannedCard` is how `KokomiPlan` reads it back
@@ -16034,11 +16032,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # to be normalised HERE too. `personal_pool:` accepts both spellings
         # and the sim normalises at load (`Card.from_dict`, pinned by
         # `test_personal_pool_normalises_a_one_member_list`); this emitter
-        # reads the RAW row, so without the same step a family stand-in wrote
-        # `PersonalPool => "['klee']"` and `CompanionStandIns.HandOff`, which
-        # compares that string to the run's character id, could never swap.
-        # Refused rather than joined for a longer list, exactly as the loader
-        # refuses one: a stand-in is handed to ONE character.
+        # reads the RAW row, so without the same step a row wrote
+        # `PersonalPool => "['klee']"`, which no reader comparing it to the
+        # run's character id could match. Refused rather than joined for a
+        # longer list, exactly as the loader refuses one: a Personal belongs
+        # to ONE character.
         if isinstance(personal, list):
             if len(personal) != 1:
                 raise SystemExit(
@@ -16299,7 +16297,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "path.\n"
     )
     # THE PORTRAIT'S ID, and it is the row's own on every row but a stand-in.
-    # `art_of:` (the companion stand-in seam, QUARANTINED) says "wear THAT
+    # `art_of:` (the companion stand-in seam) says "wear THAT
     # row's illustration": a stand-in is a Klee-only card handed out in place
     # of a named Universal, and it is meant to look like the card it replaces.
     # One line, and no other consequence -- deploy stages one flat
@@ -16570,7 +16568,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "            ? null\n"
         '            : "no Plan is written";'
         if plan_gated else "")
-    # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
+    # R213 E1: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
     # a price at the head of a `choose_one` MODE is that mode's cost line and
     # is gated per option instead (EB-182, `modal_gate_member` below).

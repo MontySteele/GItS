@@ -1,4 +1,4 @@
-"""THE COVEN ROWS' RULES (QUARANTINED, `C.COMPANION_OVERHAUL`).
+"""THE COVEN ROWS' RULES (`C.COMPANION_OVERHAUL`).
 
 The approved Mondstadt workshop's sec.4 and its sec.3 Prune entry, ruled R236.
 Since the Klee-only companions (2026-10-03,

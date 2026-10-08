@@ -33,7 +33,7 @@ namespace KleeMod.Powers;
 /// cardSource.Enchantment != null)</c>), so a sourceless gain never consults
 /// one -- the same reason the base game's <c>Prolong</c> and this repo's
 /// <c>block_next_turn</c> note give, and the reason tier0's
-/// <c>companion_standins._pay_block</c> never adds <c>card.enchant_block</c>.
+/// old stand-in seam's <c>_pay_block</c> never added <c>card.enchant_block</c>.
 /// The sim and the mod's payout have always agreed; only the mod's FACE lied.
 ///
 /// SO THE PREVIEW MAKES THE PAYOUT'S OWN CALL. Rather than subtracting the

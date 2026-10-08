@@ -53,7 +53,7 @@ class StagedTurn:
     assumptions: list[str] = field(default_factory=list)
     # MIRRORS `scenario.Scenario.prototype` (EB-147), and is the same
     # declaration for the same reason one file over: this turn names cards on
-    # the QUARANTINED prototype surface (R213 B), which is deliberately
+    # the prototype surface (R213 B), which is deliberately
     # outside `loader._card_index()`, so the tooling has to be TOLD rather
     # than have its resolvers loosened for every turn. It is an explicit
     # DEV-ROUTE DECLARATION: with it, `closeness` also resolves ids through

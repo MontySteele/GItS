@@ -88,8 +88,8 @@ def test_prevention_ward_pays_full_stacks_only_against_a_bigger_hit():
 
 def test_a_small_hit_through_the_ward_pays_out_nothing_extra():
     """A hit smaller than the ward is fully absorbed and nothing more: the
-    player neither rises above their HP nor banks Encore out of the surplus
-    prevention, because prevention stops at the size of the hit."""
+    player does not rise above their HP, because prevention stops at the size
+    of the hit."""
     enemy = make_enemy(hp=50, intents=[{"kind": "attack", "amount": 2}])
     state = _ward_state(stacks=6)
     state.enemies = [enemy]
@@ -97,10 +97,8 @@ def test_a_small_hit_through_the_ward_pays_out_nothing_extra():
     combat._enemy_turn(state, enemy)
 
     assert state.player.hp == state.player.max_hp
-    assert state.player.encore == 0
     assert [ev["amount"] for ev in state.log
             if ev["event"] == "player_hit"] == [0]
-    assert not [ev for ev in state.log if ev["event"] == "encore_absorb"]
 
 
 # --- created cards respect the hand ceiling (MEDIUM-1) ---

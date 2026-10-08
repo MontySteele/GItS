@@ -22,9 +22,6 @@ line leaves this file. Closed picks are in git
   position doing the attribution work, is the chip's prominence right. Frames
   in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the
   electro (Oz) leg, so that order falls to this look (`BACKLOG.md` `EB-53`).
-- **Furina's motion look** (`AS2-B5`): motion and facing taste on her combat
-  body. The plan is in git only:
-  `git show 762e94d9^:docs/animation-sprint-2-plan.md`.
 
 ## Open packets in `review/active/`
 

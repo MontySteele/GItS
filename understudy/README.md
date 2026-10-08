@@ -672,7 +672,6 @@ default.
 
 ```
 python -m understudy.probe_block --spotlight center --seed TRACKB2 --max-fights 1 --turns 8
-python -m tools.probe_b2_table "understudy/logs/soak/probe-b2-*.jsonl"
 python -m understudy.replay --logs "<glob>" --use-selectors --ledger <path>
 ```
 

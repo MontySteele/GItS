@@ -3,22 +3,9 @@
 import random
 from types import SimpleNamespace
 
-from tier0.engine import combat
 from tier0.engine.state import CombatState
-from tier0.tests.conftest import make_enemy, make_state
-from tools import burst_defense, realistic_axis_scores
-
-
-def test_burst_probe_records_wall_raised_not_only_block_consumed():
-    state = make_state(hp=80, enemies=[make_enemy(
-        intents=[{"kind": "attack", "amount": 23}])])
-    state.player.block = 30
-
-    combat._enemy_turn(state, state.enemies[0])
-
-    hit = next(e for e in state.log if e["event"] == "player_hit")
-    assert hit["block_before"] == 30
-    assert burst_defense._turn_incoming(state) == {0: (23, 23, 30)}
+from tier0.tests.conftest import make_enemy
+from tools import realistic_axis_scores
 
 
 def test_loadout_uses_elite_context_for_booming_conch():

@@ -339,7 +339,7 @@ def main() -> int:
     bodies_read = 0
     for path in sorted(
             (REPO / "klee-mod" / "KleeCode" / "Cards").rglob("Generated/*.cs")):
-        # THE QUARANTINED PROTOTYPE SURFACE IS OUT OF SCOPE (R213 B), and it
+        # THE PROTOTYPE SURFACE IS OUT OF SCOPE (R213 B), and it
         # is out for layer 1's reason rather than by exemption: this lint is
         # the CAMPFIRE law -- "every card a player can draft can be upgraded"
         # -- and a prototype row is never drafted. It is off-pool by

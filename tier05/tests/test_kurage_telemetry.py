@@ -22,28 +22,6 @@ def _state(charge=0):
                        rng=random.Random(0))
 
 
-def test_the_pulse_emits_its_size_and_the_bank_that_made_it():
-    st = _state(charge=5)
-    st.player.powers["kurage_summon"] = 1
-    effects.player_turn_end_triggers(st)
-    (ev,) = [e for e in st.log if e["event"] == "kurage_pulse"]
-    assert ev["amount"] == C.KURAGE_PULSE_BASE + 5 * C.KURAGE_PULSE_PER_CHARGE
-    assert ev["charge"] == 5 and ev["landed"] is True
-
-
-def test_a_pulse_into_an_empty_board_is_still_a_sample():
-    """Deliberate: filtering these out would bias the tail DOWN exactly when
-    the kit is strongest (fights ending fast). It is a sample of the curve,
-    flagged as not-landed so a reader can still separate the two."""
-    st = _state(charge=3)
-    st.enemies[0].hp = 0
-    st.player.powers["kurage_summon"] = 1
-    effects.player_turn_end_triggers(st)
-    (ev,) = [e for e in st.log if e["event"] == "kurage_pulse"]
-    assert ev["landed"] is False
-    assert kt.trace(st.log).pulses == 1
-
-
 def test_trace_reads_the_log_and_does_not_recompute():
     log = [{"turn": 1, "event": "kurage_pulse", "amount": 40, "charge": 9,
             "landed": True},

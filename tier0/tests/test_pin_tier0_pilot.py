@@ -101,45 +101,27 @@ def test_self_power_scaling_value_still_decays_with_the_setup_taper():
 # is filed in policy.py -- so that dict is still named for the version that
 # last moved it, and `test_every_pilot_weight_in_constants_is_in_the_stamped_set`
 # still compares against it.
+#
+# THE SHIPPED-KIT SWEEP (2026-10-08) took weights OUT of both halves with no
+# version bump, and that is the commit saying why the reading did not move:
+# every weight removed (the Burst, Encore, Spotlight, Charge, Garment, Muster
+# and Stoke terms, `MODE_OVERDRAW_HP_VALUE`) scored an op, a meter or a Salon
+# stage that no current card or rule reaches, so each multiplied a zero.
 PILOT_WEIGHT_SET_V2 = {
     "PILOT_REACTION_TRIGGER_VALUE": 6.0,
     "PILOT_REACTION_SEED_VALUE": 2.0,
     "PILOT_DRAW_WHILE_VALUE": 2.0,
     "PILOT_SPARK_VALUE": 0.7,
-    "PILOT_BURST_DIVISOR": 10.0,
-    "PILOT_ENCORE_VALUE": 0.8,
-    "PILOT_SPOTLIGHT_DESIGNATE_SEQUENCING": 20.0,
-    "PILOT_SPOTLIGHT_DESIGNATE_GENERATOR": 0.1,
-    "PILOT_SPOTLIGHT_DESIGNATE_OPENING": 4.0,
-    "PILOT_SPOTLIGHT_DESIGNATE_REDESIGNATE": 0.3,
-    "PILOT_SPOTLIGHT_BOOST_COMBAT": 3.0,
-    "PILOT_SPOTLIGHT_BOOST_TURN": 1.5,
-    "PILOT_SPOTLIGHT_BOOST_EARLY": 0.3,
-    "PILOT_GUEST_STAR_VALUE": 2.5,
-    "PILOT_SPOTLIGHT_COPY_VALUE": 3.5,
     "PILOT_SETUP_TAPER_TURNS": 12.0,
     "PILOT_SELF_POWER_STACK_CAP": 6,
     "PILOT_SELF_POWER_VALUE": 3,
     "PILOT_ENEMY_DEBUFF_VALUE": 2,
     "PILOT_SELF_DAMAGE_COST_WEIGHT": 0.5,
     "PILOT_FUTURE_DAMAGE_DISCOUNT": 0.8,
-    "PILOT_CHARGE_GAIN_VALUE": 0.6,
-    "PILOT_CONSCRIPT_CREATE_VALUE": 3.0,
-    "PILOT_CONSCRIPT_TRANSFORM_VALUE": 2.0,
-    "PILOT_EXHAUST_ALL_ESTIMATE": 3,
-    "PILOT_DELIBERATE_EXHAUST_VALUE": 0.8,
-    "PILOT_SELF_MILL_VALUE": 0.5,
-    "PILOT_GARMENT_CHARGE_VALUE": 1.2,
-    "PILOT_GARMENT_BASE_VALUE": 2.0,
 }
 # The half that stays in policy.py for the C# parity reason written at its
 # head. Filed elsewhere, stamped the same.
 POLICY_FILED_WEIGHT_SET_V6 = {
-    "STOKE_DEPLOY_OPEN": 6.0,
-    "STOKE_DEPLOY_FULL": 1.5,
-    "STOKE_RUNWAY_TURNS": 2.0,
-    "STOKE_FUEL_HUNGRY": 1.2,
-    "STOKE_FUEL_SATED": 0.15,
     # v2, POLICY 7 (R176): the companion-copy valuation in `_tempo_value`.
     "PILOT_COMPANION_COPY_VALUE": 1.5,
     # v3, POLICY 8 (EB-118 Phase 2A): the pair's eleven weights, read for the
@@ -158,10 +140,8 @@ POLICY_FILED_WEIGHT_SET_V6 = {
     "EXHAUST_COST_EFFICIENCY_WEIGHT": 0.5,
     "EXHAUST_JUNK_BONUS": 6.0,
     "EXHAUST_SELF_EXHAUST_DISCOUNT": 0.5,
-    # v4, POLICY 9 (EB-118 Phase 2C): the mode-valuation weight, read for the
-    # first time at the chooser flip. Its sibling epsilon rides along and is
-    # pinned rather than grounded -- see the note above the set.
-    "MODE_OVERDRAW_HP_VALUE": 1.0,
+    # v4, POLICY 9 (EB-118 Phase 2C): the mode chooser's tie epsilon (its
+    # overdraw weight left with Encore, 2026-10-08).
     "MODE_TIE_EPSILON": 1e-9,
     # v5, POLICY 10 (EB-118 Phase-3 Window 3, R211): the formula-aware exhaust
     # payout's weight. NOT the v2/v3/v4 shape -- those were weights that

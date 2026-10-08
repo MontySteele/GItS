@@ -115,7 +115,7 @@ def test_a_swirl_inside_a_conditional_arm_still_gates_the_bind():
     state = make_state([low, mid])
 
     effects.resolve_card(state, _card("hypothetical_branching_swirl", [
-        {"op": "conditional", "if": "spotlight_set",
+        {"op": "conditional", "if": "has_spark",
          "then": [{"op": "block", "amount": 3}],
          "else": [{"op": "swirl", "target": "enemy"}]},
         {"op": "damage", "amount": 4, "target": "enemy",

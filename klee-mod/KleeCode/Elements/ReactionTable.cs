@@ -42,7 +42,6 @@ public static class ReactionConstants
     public const int OverloadWeak = 1;            // OVERLOAD_WEAK
     public const int SuperconductVuln = 2;       // SUPERCONDUCT_VULN
     public const int ElectroChargedDot = 4;      // ELECTROCHARGED_DOT
-    public const int ElectroChargedDotTurns = 2; // ELECTROCHARGED_DOT_TURNS
     public const int CrystallizeBlock = 4;       // CRYSTALLIZE_BLOCK
     /// <summary>SWIRL_DAMAGE. The element port's §4 A: a Swirl
     /// deals this flat to every enemy, element-less and outside the pipeline,

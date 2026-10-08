@@ -186,10 +186,6 @@ history keeps them.
 - **The report forces stdout to UTF-8** because the death-heatmap block glyph
   killed the table mid-print on cp1252 (`runner.py:132-140`); the repo-wide
   encoding rule is structural (`tier0/tests/test_encoding_gate.py:1-22`).
-- **A failed `exp_furina_strength` arm holds its ROW** and prints `ARM FAILED`;
-  it used to vanish from `rows` and leave the comparison looking authoritative
-  (`exp_furina_strength.py:622-676`;
-  `tier0/tests/test_exp_strength_missing_arm.py`).
 - **Every published number is world-stamped and worlds are not comparable** —
   RUNTEMPLATE / DRAFTER / POLICY bumps archive their predecessors, which is why
   anchors are re-run in ONE invocation rather than quoted from older tables,

@@ -17,7 +17,7 @@ import collections
 
 from tier0 import constants as C
 from tier0.content import loader, upgrades
-from tier0.engine import combat, companion_standins, klee_overhaul, statuses
+from tier0.engine import combat, klee_overhaul, statuses
 from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy
 from tier0.tests.test_klee_r276_expansion import (  # noqa: F401
@@ -204,7 +204,6 @@ def test_dust_of_purification_exhausts_statuses_into_the_largest_bomb(
 def test_dust_of_purification_is_in_klees_own_pool(overhaul):
     """A stand-in until the Klee-only companions (2026-10-03); her own
     draftable pool since."""
-    assert ALBEDO not in C.COMPANION_STANDIN_IDS
     assert ALBEDO in C.KLEE_OVERHAUL_POOL_IDS
     row = load(ALBEDO)
     assert (row.type, row.cost, row.rarity) == ("skill", 1, "rare")
