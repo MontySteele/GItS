@@ -115,7 +115,7 @@ or is never played; one pays for waiting. Block cards go from 17 to 14
 | **Taste Test** | Cook, status | Uncommon Attack, 2 | Deal damage equal to all your Bombs on the enemy. They do not go off. Add 2 Confiscated into your Discard Pile. |
 | **Tinkering** | Spray, status | Uncommon Skill, 0 | Gain 2 [3] Sparks. Add a Confiscated into your Discard Pile. |
 | **Dodoco Tag** | Spray, status | Uncommon Attack, 1 | Deal 7 [10] Pyro damage. Gain 5 [7] Block. Add a Dazed into your Discard Pile. |
-| **Explosive Spark** | Spray, Sparks | Common Attack, 0 | Costs 1 Spark. Deal 7 [10] Pyro damage. |
+| **Explosive Spark** | Spray, Sparks | Common Attack, 0 | Costs 1 Spark. Deal 12 [16] Pyro damage. |
 
 - **Cook.** Simmer is the Common that hits while the Bomb cooks (at a Bomb
   20, 14 damage, Bomb kept). Taste Test is the big read: at a Bomb 30 it is
@@ -126,7 +126,10 @@ or is never played; one pays for waiting. Block cards go from 17 to 14
   an explosion (Lisa's Treats, 2 Energy for two Confiscated, is its price point). Dodoco
   Tag is the attack-and-Block turn that leaves the Spark bank alone.
 - **Spray with Sparks.** Explosive Spark (the name of Klee's charged attack
-  in the source game) turns a Spark straight into 7 damage at Common.
+  in the source game) turns a Spark straight into damage at Common. Raised
+  from 7 [10] to 12 [16] on [USER]'s note (2026-10-07): "Explosive Spark
+  reads to me as weak. The equivalent is 'Slice' from Silent, which is 6
+  damage at 0 energy at common." A Spark has to buy about 6 over Slice.
 - **The status line** gains four loaders (two that add a Dazed, two that
   add Confiscated) and loses one (It Wasn't Me!). Kitchen Alchemy, Klee Can
   Explain!, Damage Report, Finders Keepers and Albedo have more to read.
