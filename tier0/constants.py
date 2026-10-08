@@ -47,8 +47,7 @@ MELT_MULT = 1.75              # Pyro x Cryo, that hit only
 OVERLOAD_SPLASH = 6           # flat damage to ALL enemies
 OVERLOAD_WEAK = 1             # stagger: reacted target's next attack is Weak
 SUPERCONDUCT_VULN = 2         # Vulnerable stacks applied
-ELECTROCHARGED_DOT = 4        # DoT amount
-ELECTROCHARGED_DOT_TURNS = 2
+ELECTROCHARGED_DOT = 4        # DoT stacks applied (the `dot` power)
 CRYSTALLIZE_BLOCK = 4         # player Block gained
 # THE ELEMENT PORT (`review/ruled/element-home-review-2026-09-28.md` §4 A,
 # ruled §6: "That makes sense"), as amended 2026-10-03: there is no spent
@@ -103,7 +102,7 @@ SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
 # legacy cleanup stage 6.
 
 # =============================================================================
-# THE KLEE OVERHAUL, SLICE ONE -- R213 B PROTOTYPE ARM, QUARANTINED.
+# THE KLEE OVERHAUL, SLICE ONE -- R213 B PROTOTYPE ARM.
 #
 # The ruled brief `review/active/klee-brief-2026-09-01.md` sec.3 replaces Klee's
 # whole rule set: a Bomb is a numbered charge that GROWS and never goes off by
@@ -472,7 +471,7 @@ KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
 )
 
 # =============================================================================
-# THE MONDSTADT COMPANION OVERHAUL -- QUARANTINED (R213 B, BACKLOG EB-147).
+# THE MONDSTADT COMPANION OVERHAUL -- (R213 B, BACKLOG EB-147).
 #
 # The approved workshop `companion-workshop-mondstadt-2026-09-01.md` rewrites
 # Mondstadt's Universal companion pool: twelve Commons that beat a Strike,
@@ -635,7 +634,7 @@ COMPANION_STANDIN_IDS: tuple[str, ...] = (
 MC_LIONS_FANG_DRAW = 1
 
 # =============================================================================
-# THE INAZUMA COMPANION OVERHAUL -- SAME FLAG, SECOND NATION (QUARANTINED).
+# THE INAZUMA COMPANION OVERHAUL -- SAME FLAG, SECOND NATION.
 #
 # The approved workshop `companion-workshop-inazuma-2026-09-01.md` (approved
 # 2026-09-01 at its four default picks, its sec.9) rewrites Inazuma's Universal
@@ -771,7 +770,7 @@ COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
     FONTAINE_OVERHAUL_NATION)
 
 # =============================================================================
-# KLEE'S COVEN PERSONALS -- SAME FLAG AGAIN, THIRD LIST (QUARANTINED, R236).
+# KLEE'S COVEN PERSONALS -- SAME FLAG AGAIN, THIRD LIST (R236).
 #
 # The approved Mondstadt workshop's sec.4 (and its sec.3 Prune entry) gives
 # Klee four PERSONAL companions -- her coven. A Personal is not a Universal: it
@@ -811,7 +810,7 @@ CVN_HERALD_BLOCK = 3            # Qiqi: Block at the start of each turn
 CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 
 # =============================================================================
-# THE KOKOMI OVERHAUL, SLICE ONE -- QUARANTINED (R213 B, BACKLOG EB-147).
+# THE KOKOMI OVERHAUL, SLICE ONE -- (R213 B, BACKLOG EB-147).
 #
 # The ruled brief `review/active/kokomi-brief-2026-09-01.md` DRAFT 6 (ruled
 # direction R240, approved R241) replaces her whole rule set with ONE idea: the
@@ -1162,7 +1161,6 @@ KOKOMI_PLAN_CAP = 0
 PLAN_DELAY_DISCOUNT = 0.75
 
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
-BURST_PER_REACTION = 5        # burst energy per reaction triggered
 
 # =============================================================================
 # KLEE'S COMPANION SPARK TRIGGER -- "Little Hexenzirkul" (EB-219, retargeted
@@ -1211,7 +1209,6 @@ KLEE_COMPANION_SPARK_MAX_PER_PLAY = 3      # the bound LAW:145 requires
 SPARKS_N_SPLASH_HITS = 4          # end of turn: N hits...
 SPARKS_N_SPLASH_HIT_DMG = 5       # ...of this damage, each applies pyro
 PLAYTIME_BOMB_DAMAGE = 5          # Playtime Forever's per-turn bomb
-DETONATION_SPLASH_BURST = 3       # Blazing Delight: burst energy per detonation
 DETONATION_SPLASH_PROC_CAP = 3     # max splash procs/turn. ARMED by the
                                    # errata/M5 triage (ruling 1): sanctioned
                                    # demolition ceiling knob for band
@@ -1223,81 +1220,7 @@ WITCHS_FLAME_BURST = 3            # Durin: Burst Energy per consumed Pyro aura
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
 MASQUE_BOND_BLOCK = 5             # Arlecchino: Bond of Life, Block owed per turn
-CATALYTIC_BURST_PER_REACTION = 5  # Catalytic Converter bonus burst/reaction
 
-# --- Furina: Spotlight (kickoff §3) ---
-SPOTLIGHT_BASE_MULT = 1.5     # RATIFIED (R71, 2026-07-26). The W0
-                              # forced-arm sweep {1.25, 1.5} was the
-                              # PRE-REGISTERED decision procedure -- this
-                              # comment said "decides", and it did: pass 3
-                              # returned dose evidence favouring 1.5
-                              # (furina-pass3-rulings.md). R71 makes law of
-                              # a result already committed to; the value
-                              # does not move, so no number in the tree
-                              # changes with this line.
-                              # History, kept because it is why the
-                              # PLACEHOLDER marking existed at all:
-                              # the pass-2 "MEASURED 1.0" record is STRUCK
-                              # (R33 veto, 2026-07-20). E1's identical
-                              # cells were guaranteed by selector v2
-                              # (companion branch unreachable at ~20 self
-                              # cards vs 3-5 card kits) -- the constant was
-                              # never READ in any cell (exercise-counter
-                              # law, DECISIONS 87). E1 re-scoped to a valid
-                              # MEDIAN-DEPTH null only; never summarize it
-                              # as "the knob is dead". 1.5 restored the
-                              # pass-1 companion geometry against the
-                              # then-current self rate of 1.25. R40 later
-                              # moved self aim to 1.0 without changing this
-                              # outward-Spotlight value.
-# SPOTLIGHT_SELF_MULT: DELETED by R67 (2026-07-26). It had zero readers --
-# effects.spotlight_mult() hard-codes the 1.0 self-aim early return and never
-# consulted the constant -- so exp_furina_sheetpass block C2 swept three
-# guaranteed-identical cells. Those rows are STRUCK as instrument error, not
-# read as "the self rate doesn't matter". The rule it encoded still holds and
-# is now expressed only in code: Furina pays no hidden baseline tax, self aim
-# drives Ovation/Fanfare, and numeric empowerment is reserved for companions.
-SPOTLIGHT_GUEST_CAST = "__guest_cast__"  # all Companion cards share the light
-# Selector heuristic history. The SPOTLIGHT_SELECTOR_VERSION stamp that used
-# to sit at the end of this block was DELETED by R67 (2026-07-26): it was read
-# by nothing, so it stamped no report and could not have stopped anyone from
-# comparing selector versions unlabeled — the one job an instrument stamp has.
-# The history it guarded is real and stays here as documentation; the shipped
-# selector is v5, and "never compare selector versions unlabeled" survives as a
-# house rule rather than as a constant that pretended to enforce it.
-# v1 companions-always (sprint 1; measured harmful — 1-card guest
-#    hijack halved Ovation throughput);
-# v2 raw depth contest (passes 1-2; R33 found the companion branch
-#    UNREACHABLE at ~20 self cards vs 3-5-card kits — every pass-2
-#    number is a self-Spotlight world);
-# v3 value-aware threshold (pass 3, derived from the W0 oracle arms):
-#    designate the deepest companion iff its per-character depth
-#    reaches SPOTLIGHT_COMPANION_DEPTH_MIN (4) AND the stage holds a
-#    crowd (>= SPOTLIGHT_COMPANION_MIN_ENEMIES, 2, living enemies);
-#    otherwise self. W0 evidence: forced-companion at full-kit depth
-#    is +12.5pt on attrition and -10pt on tank_boss — outward aim is
-#    encounter-contingent, so the selector reads the fight, not just
-#    the deck.
-#    RATIFIED (R71, 2026-07-26) — and ratified as a RECORD, not as live
-#    law. v5 replaced character-depth targeting outright on 2026-07-23
-#    (commit b4b4434) and deleted both constants along with the branch
-#    that read them, three days before the ruling landed. The
-#    ratification is honoured by writing down what it ratified; it is NOT
-#    honoured by resurrecting two constants nothing reads, which is the
-#    class R67 had just deleted nine of. If v3's geometry is ever wanted
-#    back, 4 and 2 are the ratified numbers to restore it with.
-# v4 keeps v3 for drafted companions, but a card created into hand by a
-#    Guest Star generator is eligible at depth one.
-# v5 replaces character-depth targeting with the explicit two-mode design:
-#    Center Stage Spotlights Furina and generates Fanfare without a numeric
-#    multiplier; Guest Cast Spotlights every Companion card at the outward
-#    multiplier and generates no Fanfare from those plays. The selector picks
-#    Guest Cast when a Companion is ready in hand, otherwise Center Stage.
-SPOTLIGHT_CARDS_PER_TURN_CAP = None   # schematized but OFF (kickoff §3.2):
-                              # turns on only if Tier 0 shows the rate
-                              # asymmetry alone fails the §6 criterion.
-                              # When set: empowered plays per turn beyond
-                              # the cap resolve at printed numbers.
 
 # --- Furina: Encore & Fanfare (kickoff §4) ---
 # Encore is unbounded per-combat (v1.6) -- no cap constant by design.
@@ -1316,27 +1239,6 @@ FANFARE_CAP_FRACTION = 0.5    # Fanfare cap = fraction of maxHP.
                               # at 63%). Those numbers are ARCHIVE -- they
                               # were taken in the spendable-Fanfare world.
 FANFARE_PER_HP_LOST = 1       # per point of true HP lost
-FANFARE_PER_ENCORE_SPENT = 1  # per point of Encore deliberately spent
-FANFARE_PER_ENCORE_ABSORBED = 1   # per point of Encore eaten by a hit
-# FANFARE_PER_ENCORE_GAINED: DELETED by the Fanfare rework (2026-07-28, Track
-# A, RULED). Fanfare now prints when Encore goes DOWN and never when it goes
-# up. Encore used to mint on BOTH legs, so a card granting 3 Encore silently
-# printed 6 Fanfare -- measured at 47% of generation under the greedy pilot
-# and 62% under the stoker (pilot-gap P4), i.e. the better the loop was
-# played, the more of its output came from the loop taxing itself twice.
-#
-# The third reduction path, ABSORPTION, was previously worth nothing and now
-# pays: absorbed Encore is deferred Block that will never block a future hit,
-# so cashing it is a real cost (RULED). That closes an asymmetry rather than
-# opening one -- see resources.absorb_into_encore and the invariant test
-# test_every_point_past_block_prints_exactly_one_fanfare: after this change
-# EVERY point of damage that gets past Block prints exactly 1 Fanfare, via
-# absorption if the buffer eats it and via hp_lost if HP does. Those three
-# constants are therefore not independently tunable any more; the test is
-# what says so out loud.
-FANFARE_PER_SPOTLIGHT_CARD = 2    # the Ovation merge: per Spotlighted
-                              # card played. NO passive per-turn accrual
-                              # constant exists; do not add one (§4).
 
 # --- Fanfare as a read-only momentum stat ("The Tide Turns", F-A1/F-A3;
 # direction RATIFIED 2026-07-24, every NUMBER below PROPOSED pending
@@ -1410,253 +1312,8 @@ FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
 # is measured TOGETHER with Track A -- the two are never attributed
 # separately without an ablation arm.
 
-# --- Furina: Salon Members (kickoff §5; Salon v2 rework 2026-07-23,
-# docs/archive/furina-salon-rework-plan.md) ---
-# NUMBERS RATIFIED 2026-08-13 (R187, QUEUE M24). The rework plan's "every
-# NUMBER below is PROPOSED pending red-pen" banner used to sit on this line
-# and it was the last unsigned gate on the six member values; the derivation
-# it was signed against is review/ruled/eb77-salon-summon-damage-derivation.md.
-# The six values below are UNCHANGED by the countersign -- signing moved no
-# number, so this is not a CONSTANTS_VERSION event. Recorded because the
-# banner's absence is otherwise indistinguishable from nobody having written
-# it: Crabaletta 6/14, Usher 3/9 Block and Chevalmarin 2/+3 Encore are signed
-# as written, the Crabaletta/Usher gap is intended texture rather than a
-# 1:1 damage-for-Block exchange, a pure Salon deck is NOT expected to reach
-# Focus +2 on its own (cross-archetype Fanfare may earn the higher tiers),
-# the directive's upward adjustment reads as satisfied holistically, and
-# Chevalmarin's 2 -> 1 dry truncation is accepted. The paired signing surface
-# is SalonConstants in klee-mod/KleeCode/Powers/SalonPowers.cs; the mod's
-# displayed strings interpolate those constants since EB-86, so a future
-# repricing moves the constants and the tooltip follows.
-# v2 = the full Defect-orb grammar per user directive: members are TYPED
-# (unique slot passive at start of player turn + unique final bow when
-# displaced), the queue is FIFO (deploying into full slots bows the OLDEST
-# member out), and Fanfare is the Focus analogue: every member NUMERIC
-# amount gains +1 per SALON_FOCUS_PER held Fanfare at resolution (auras and
-# the Encore bow rider do not scale -- numbers-only, §2.2a discipline).
-# v1 (archive: uniform anonymous 4-damage ticks, overflow self-bows at x3)
-# is the world of sheet passes 1-3 and every pre-rework Furina number.
-SALON_MEMBERS = {
-    # member: tick (slot passive) / bow (displaced payoff). "damage" ticks
-    # are hydro to a random enemy; "block" is player Block; "aura" applies
-    # hydro (chevalmarin's tick deals its damage AND applies; her bow
-    # applies to ALL enemies and refunds Encore -- activity-gated, legal).
-    "crabaletta":  {"tick": {"damage": 6},  "bow": {"damage": 14}},
-    "usher":       {"tick": {"block": 3},   "bow": {"block": 9}},
-    "chevalmarin": {"tick": {"damage": 2, "aura": True},
-                    "bow": {"aura_all": True, "encore": 3}},
-}
-SALON_FOCUS_PER = 10          # +1 member numbers per this much held Fanfare
-                              # (cap 30 -> +3; uncapped 45 -> +4)
 SALON_MEMBER_SLOTS = 3        # Defect-orb shape: fixed active company
-SALON_REPLACE_NUMERIC_MULT = 2  # deploy card's OTHER numerics on replacement
-SALON_REPLACE_DAMAGE_MULT = 3   # deploy card's damage riders on replacement
-SALON_TICK_ENCORE_COST = 1    # Encore drained per member tick
-SALON_DRY_DAMAGE_MULT = 0.75  # no Encore: tick numerics at three-quarters;
-                              # never true-HP loss (auras still apply)
-SALON_TICK_BURST = 2          # burst energy per member tick AND bow (her
-                              # particle economy leans on Salon, §1)
-BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent
-                              # (the other half of her particle economy)
 
-# --- Kokomi: Charge & the Pearl of Wisdom relic (kickoff v1 §2; ALL numbers
-# PROPOSED — kickoff constants are [USER]-gated at battery freeze, none
-# ratified). The relic carries only the two conversion laws (R16:
-# bookkeeping in the relic, payoff magnitude in cards): exhaust→Charge and
-# Strength→Charge. Charge is uncapped, never expended, card-event-driven
-# only — no per-turn passive accrual constant exists here and none may be
-# added (the Furina Fanfare precedent).
-#
-# NAMING (v0.4 lore overlay §3, [USER]-ruled): the relic is displayed as
-# "PEARL OF WISDOM" — her signature catalyst, held-item fiction, and the
-# community's own epithet for her. It used to wear "Tamakushi Casket",
-# which is wrong: the wiki confirms Tamakushi Casket is her 1st Ascension
-# PASSIVE, and what it actually does is refresh a fielded Bake-Kurage when
-# she casts Nereid's Ascension. That name therefore moved to the mechanic
-# that does that job — the Garment↔Kurage refresh in effects.py — where
-# canon puts it. The hook IDENTIFIER stays `tamakushi_casket` on purpose:
-# ids are stable across the lore overlay (only all_streams_flow renamed
-# id-level), and the id now sits on the engine that powers the link it is
-# named for. Relic MECHANICS are unchanged by the rename. ---
-CHARGE_PER_EXHAUST = 1        # kickoff §2.1 base accrual (universal rule:
-                              # every card through the exhaust funnel)
-KOKOMI_BURST_PER_EXHAUST = 2  # her particle economy: burst energy per
-                              # exhaust event (skill_tag 5 + reactions 5
-                              # are the shared sources; this is her Salon-
-                              # tick analogue). PROPOSED.
-                              # THE DOUBLE WAGE, said out loud (addendum A9).
-                              # One exhaust event pays TWICE on this sheet:
-                              # CHARGE_PER_EXHAUST above AND this. That reads
-                              # like a duplicated payout and it is not; it is
-                              # her identity payment, and R79 is what makes it
-                              # legitimate rather than greedy. LAW 5 hands the
-                              # card/energy economy -- draw, energy, cycling,
-                              # selection -- to the Discard/Sly lane as a
-                              # MONOPOLY, so the exhaust verb has no economy
-                              # rider to be paid in. What it has instead is
-                              # these two meters. Strip either one and the
-                              # exhaust lane is a lane that spends cards and
-                              # buys nothing, because the law already gave
-                              # away the thing it would otherwise buy.
-                              # CONSEQUENCE FOR ANYONE TUNING THIS. These two
-                              # constants are one wage in two currencies, so
-                              # they move together or the reason moves with
-                              # them; halving this alone is not "a small burst
-                              # nerf", it is a partial repeal of the payment
-                              # R79 obliges. The exhaust funnel splits its
-                              # source (exhaust vs exhaust_muster) in
-                              # refpowers.py precisely so the wage can be read
-                              # per-source before anyone touches it -- see
-                              # tier05/burst_telemetry.py, which is a trace
-                              # and not an allowlist for the same reason.
-CEREMONIAL_GARMENT_TURNS = 3  # Shape B state duration (stacks = turns,
-                              # decays at player turn end). PROPOSED.
-# v0.3 charge-curve pass (user-directed 2026-07-24, PROPOSED): 4 -> 2.
-# The audit vs the Regent-common benchmark ("deal 7, Forge 7, 1 cost")
-# found her meter read ~4x under the comparison power level; at /4 a
-# node-4 bank of 8 Charge paid +2 per attack -- decoration, not a
-# scaling identity. At /2 a priest-median 24-Charge Garment window is
-# +12 per attack for 3 turns: Burst-tier, which is what a Burst is.
-GARMENT_CHARGE_DIVISOR = 2    # while the state is active, attack cards
-                              # gain +1 damage per this much Charge (the
-                              # "scaled down per hit" read, §2.2 Shape B).
-                              # KNOB_READS-instrumented. PROPOSED.
-# --- v0.4 O4 salvage (plan §1, [USER]-ratified 2026-07-26; PROPOSED
-# numbers, all five KNOB_READS-instrumented). The thesis: v0.3 bought its
-# act-1 clear by making the BURST a metronome, which the ratio instrument
-# correctly reads as frontload. O4 moves the periodic output to the summon,
-# where canon keeps it, and lets the Burst go back to being a window. ---
-KURAGE_DURATION = 1           # RETIRED UNDER THE KURAGE_MEMORY FLAG (v4 base
-                              # kit): with KURAGE_ALWAYS_ON the jellyfish is
-                              # installed at combat start and never expires,
-                              # so nothing reads this while the flag is on --
-                              # not the install, and not the Casket refresh,
-                              # which maxes a 1 against a 1. The value below
-                              # is the SHIPPED one and stays exact, because
-                              # with the flag off this constant is still the
-                              # whole of the summon.
-                              # turns the jellyfish holds the field. Stacks
-                              # = turns remaining (the oz_summon grammar);
-                              # re-summoning REFRESHES, never adds — a
-                              # second jellyfish is not a bigger jellyfish.
-                              # v0.4 STARTER REWORK ([USER], 2026-07-26):
-                              # 3 -> 1. At 3 the summon was effectively
-                              # permanent; at 1 it is a delayed strike that
-                              # must be re-bought every time. Upgrade goes
-                              # to 2 (kurage_turns +1).
-                              # KNOWN CONSEQUENCE, on the record: the
-                              # Tamakushi Casket link (Garment cast
-                              # refreshes a fielded Kurage) is near-dead at
-                              # duration 1 — it only fires if the Burst goes
-                              # off the same turn the Kurage was played. The
-                              # canon loop survives in code, not in practice.
-                              # COUPLING PIN (playtest sprint P1): this
-                              # constant is also the pulse FREQUENCY, and
-                              # Kurage's Oath pays its ward once per pulse.
-                              # The Oath's 12 was measured here at 1. Raise
-                              # the duration and you have repriced a Common
-                              # power that already carries a [USER] "maybe
-                              # too strong" flag, without editing its row.
-                              # test_oath_ward_is_pinned_to_the_pulse_
-                              # frequency_it_was_measured_at fails on that
-                              # edit by design — re-measure the Oath, then
-                              # move the pin and both notes together.
-KURAGE_PULSE_BASE = 4         # flat damage per turn-end pulse, before the
-                              # bank read (v0.4 starter rework: 2 -> 4).
-KURAGE_PULSE_PER_CHARGE = 3   # pulse gains this much damage PER POINT of
-                              # Charge. v0.4 starter rework ([USER]): the
-                              # read flips from a DIVISOR (+1 per 4 Charge)
-                              # to a MULTIPLIER (+N per Charge) — the design
-                              # intent is "every Exhaust is worth about a
-                              # Silent shiv toss", i.e. one banked point
-                              # buys roughly one shiv of damage.
-                              #
-                              # R73 (Neap Tide v2.1, 2026-07-26): x4 -> x2,
-                              # then x2 -> x3 when E1 graded P6 and the
-                              # pre-committed weak-side fallback FIRED. The
-                              # landed value is x3 — RATIFIED at the R130
-                              # sitting, 2026-08-07, so the fallback's landing
-                              # is the ruled number and not a pending read;
-                              # x2 is measured, rejected, and kept on the
-                              # record below because the rejection is the
-                              # reason x3 is here.
-                              # The x4 WATCH note this replaces was right and
-                              # is kept as the reason: Charge is uncapped and
-                              # never spent (R80), so this term only ever
-                              # grows, and at x4 a BASIC out-read both
-                              # rate-limited readers — at bank 10 the pulse
-                              # was 44 vs nereids' (Rare) 17, at bank 25 it
-                              # was 104 vs 24, inverting the §2.2 reader
-                              # hierarchy. x2 halves the slope without
-                              # touching the ACCRUAL side, which is the whole
-                              # point of the knob-order commitment: the bank
-                              # fills at the same rate, it just buys less.
-                              # E1 GRADING OF P6 (600 runs, seed 11, C4,
-                              # against same-world roster anchors). Act-1
-                              # clear across the rest of the roster spans
-                              # 57.5% (furina/fanfare) to 85.8% (klee/
-                              # reaction), with ref_ironclad at 62.2%.
-                              #   x2: her BEST plan cleared act 1 57.2% --
-                              #       below the roster floor -- and three of
-                              #       four plans sat far under it, with her
-                              #       best full-run win 5.2% vs the reference
-                              #       Ironclad's 6.3%. That is weak
-                              #       EVERYWHERE, not "mortal in acts 2-3",
-                              #       so P6's single pre-committed response
-                              #       fired.
-                              #   x3: priest 60.3 / commander 66.0 /
-                              #       generic 55.7 act-1, i.e. inside the
-                              #       band around ref_ironclad, and priest
-                              #       8.7% / commander 6.7% win.
-                              # assist stays weak at every value (2.0% win
-                              # even at x4). That is a PLAN problem and must
-                              # not be answered with this knob.
-                              # Nothing else on the accrual side moves.
-                              #
-                              # WATCH (restored by addendum A1b, and it is
-                              # MORE live at x3 than it was at x4, not less).
-                              # The x4 watch was retired in the first draft of
-                              # this comment on the reasoning that the cut had
-                              # answered it. It had not. G2 ratified STACKING
-                              # "Before Sun and Moon", which adds +1 (+2
-                              # upgraded) to THIS coefficient and does not cap,
-                              # so the cut lowered the FLOOR and left the
-                              # ceiling to the drafter: one upgraded copy is
-                              # x5, a pair is x5-x7, and 4-5 is the ordinary
-                              # in-run read for a committed priest deck. The
-                              # bank underneath is still uncapped and still
-                              # never spent (R80), so this remains the only
-                              # term in her kit that can only grow.
-                              # WORKED EXAMPLE, at the LANDED x3 (update it
-                              # when this number moves, or it becomes a lie
-                              # that reads like a check):
-                              #   bank 10, x3       pulse 4 + 30 =  34
-                              #   bank 10, x5 (BSM) pulse 4 + 50 =  54
-                              #   bank 25, x3       pulse 4 + 75 =  79
-                              #   nereids' (Rare)   17 at bank 10, 24 at 25
-                              # So the §2.2 reader hierarchy is upright at the
-                              # BASELINE and inverts behind one Uncommon draft.
-                              # That is the ratified design (sell the slope
-                              # back for a card slot), and it is exactly why
-                              # C4 reports stack counts. R14: the telemetry
-                              # carries no threshold. The thing to look at
-                              # first if the priest lane runs hot is the PAIR,
-                              # not this constant.
-KURAGE_PULSE_BLOCK = 0        # Block granted by each pulse. v0.4 starter
-                              # rework ([USER]) turned this OFF (was 2): the
-                              # pulse is damage now, not mending. NOTE this
-                              # is where R51 had put the healer fantasy that
-                              # feeds the stability band, and it is what
-                              # retired the priest Garment-uptime watchlist
-                              # in the first W2 pass — a one-constant
-                              # restore if that reads as a loss.
-GARMENT_ATTACK_BLOCK = 2      # while the Garment holds, her attack cards
-                              # ALSO grant this much Block (Charlotte
-                              # precedent). Canon: her burst's attacks
-                              # damage AND restore the party. Feeds the
-                              # stability band where R51 put the healer.
-CONSCRIPT_COST_DELTA = -1     # kickoff §2.3: a conscripted card costs 1
-                              # less (floor 0) and gains Exhaust.
 
 # --- Reference relics ---
 BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight
@@ -1815,24 +1472,6 @@ PILOT_REACTION_SEED_VALUE = 2.0      # capable card that triggers nothing yet
 # Tempo term (_tempo_value).
 PILOT_DRAW_WHILE_VALUE = 2.0         # one matching card + the stopper
 PILOT_SPARK_VALUE = 0.7              # sparks -> free attacks
-PILOT_BURST_DIVISOR = 10.0           # burst_energy is priced per burst point
-# Sustain term (_sustain_value): Encore is deferred HP economy, worth most of
-# its face because it keeps until used, discounted for not stopping THIS
-# turn's hits when drawn late.
-PILOT_ENCORE_VALUE = 0.8
-# Spotlight term (_spotlight_value). The designate ladder is a SEQUENCING
-# priority, not a value estimate -- 20.0 exists to make the selector fire
-# BEFORE the companion in hand is played, which is why it dwarfs everything
-# else in the function.
-PILOT_SPOTLIGHT_DESIGNATE_SEQUENCING = 20.0  # companion waiting: light first
-PILOT_SPOTLIGHT_DESIGNATE_GENERATOR = 0.1    # invite first, then designate
-PILOT_SPOTLIGHT_DESIGNATE_OPENING = 4.0      # no designation yet
-PILOT_SPOTLIGHT_DESIGNATE_REDESIGNATE = 0.3  # already lit; not dead, not urgent
-PILOT_SPOTLIGHT_BOOST_COMBAT = 3.0   # combat-scoped mult/ovation boosts
-PILOT_SPOTLIGHT_BOOST_TURN = 1.5     # turn-window boosts
-PILOT_SPOTLIGHT_BOOST_EARLY = 0.3    # no stage yet: not dead, just early
-PILOT_GUEST_STAR_VALUE = 2.5         # a card in hand, roughly
-PILOT_SPOTLIGHT_COPY_VALUE = 3.5     # dead without a target, and it knows it
 # Scaling term (_scaling_value): setup is worth less as the fight winds down.
 # The taper hits zero at this turn number.
 PILOT_SETUP_TAPER_TURNS = 12.0
@@ -1850,16 +1489,6 @@ PILOT_ENEMY_DEBUFF_VALUE = 2         # per stack of an ENEMY debuff
 # (the Burst payoff and the Kurage's pulses) rather than this turn.
 PILOT_SELF_DAMAGE_COST_WEIGHT = 0.5
 PILOT_FUTURE_DAMAGE_DISCOUNT = 0.8
-# Charge term (_charge_value), Kokomi's engine machinery. Values only the
-# MACHINERY; the payoff damage already flows through _expected_damage.
-PILOT_CHARGE_GAIN_VALUE = 0.6        # per point of banked Charge
-PILOT_CONSCRIPT_CREATE_VALUE = 3.0   # create mode NETS a card
-PILOT_CONSCRIPT_TRANSFORM_VALUE = 2.0    # transform mode pays one
-PILOT_EXHAUST_ALL_ESTIMATE = 3       # "all" (Stoke grammar) is worth ~3 cards
-PILOT_DELIBERATE_EXHAUST_VALUE = 0.8     # Charge + thinning, casket on
-PILOT_SELF_MILL_VALUE = 0.5          # self-mill is fuel, not just loss
-PILOT_GARMENT_CHARGE_VALUE = 1.2     # per turn per banked-Charge read
-PILOT_GARMENT_BASE_VALUE = 2.0       # the garment itself
 # PILOT_REGRET_SAMPLE_RATE: DELETED by R67 (2026-07-26). Zero readers, and
 # actively misleading while it existed -- pilot/policy._log_regret fires on
 # EVERY play, so every regret rate this repo has ever reported is a full

@@ -288,12 +288,12 @@ class Scenario:
     turns: int = 12
     notes: str = ""
     assumptions: list[str] = field(default_factory=list)
-    # EB-147 (R213 B). This file names cards on the QUARANTINED prototype
-    # surface, which is EMPTY in the committed tree by design -- accepted and
-    # rejected slices leave it, so the healthy state has no rows. The pack's
-    # card-name lint therefore cannot resolve those names against a sheet, and
-    # this flag is how it is TOLD so, rather than the lint being loosened for
-    # every file. The lint still checks what is checkable with no surface:
+    # EB-147 (R213 B). This file names cards on the prototype surface. When
+    # the flag was added that surface was EMPTY in the committed tree by
+    # design, so the pack's card-name lint could not resolve those names
+    # against a sheet, and this flag is how it is TOLD so, rather than the
+    # lint being loosened for every file. (The surface is the release pool
+    # now, 2026-10-01.) The lint still checks what is checkable with no surface:
     # every granted id on a prototype scenario carries the prototype prefix,
     # so a typo naming a shipped card is still caught.
     prototype: bool = False

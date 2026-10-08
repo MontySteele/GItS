@@ -190,37 +190,6 @@ def _pulse_block(state):
     return sum(ev["amount"] for ev in state.log if ev["event"] == "block")
 
 
-def test_kurage_pulse_block_ignores_frail():
-    """Frail is a CARD-block debuff. The jellyfish's mending is power-sourced,
-    so it pays in full. Parity pin: effects.py:2652-2655 vs
-    KuragePowers.cs:96-106 (ValueProp.Unpowered)."""
-    state = make_state()
-    p = state.player
-    p.powers["kurage_summon"] = 1
-    p.powers["kurage_ward"] = 12
-    p.powers["frail"] = 3
-
-    effects.player_turn_end_triggers(state)
-
-    expected = C.KURAGE_PULSE_BLOCK + 12
-    assert _pulse_block(state) == expected
-    assert p.block == expected
-
-
-def test_kurage_pulse_block_ignores_dexterity():
-    """The other half of the same exemption: Dexterity lives in
-    modify_block_gained (powers.py:102), which this path never enters."""
-    state = make_state()
-    p = state.player
-    p.powers["kurage_summon"] = 1
-    p.powers["kurage_ward"] = 12
-    p.powers["dexterity"] = 5
-
-    effects.player_turn_end_triggers(state)
-
-    assert _pulse_block(state) == C.KURAGE_PULSE_BLOCK + 12
-
-
 def test_the_card_block_funnel_still_bites_so_the_bypass_is_specific():
     """Control: the same Frail that the pulse ignores does reduce ordinary
     card Block. The bypass is a property of power-sourced Block, not a hole

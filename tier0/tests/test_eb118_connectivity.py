@@ -200,8 +200,21 @@ def test_target_choice_is_not_a_chosen_action():
 
 # --- 3. no silent zeroes ----------------------------------------------------
 
+#: Shipped-kit ops the sim retired on 2026-10-08 (the Burst, Encore, Salon,
+#: Spotlight, Charge, Kurage-pulse and Muster machinery). The report's
+#: vocabulary still describes them, because its fixtures and the shipped
+#: sheets it was written for do; the engine no longer registers them.
+RETIRED_OPS = frozenset({
+    "burst_energy", "gain_encore", "spend_encore", "spotlight_designate",
+    "salon_bow", "salon_rotate", "salon_perform", "generate_guest_star",
+    "copy_spotlighted_in_hand", "gain_charge", "spend_charge",
+    "summon_kurage", "conscript",
+})
+
+
 def test_op_table_covers_the_engine_exactly():
-    assert set(ccr.OP_HOOKS) == set(effects.OPS)
+    assert set(ccr.OP_HOOKS) - RETIRED_OPS == set(effects.OPS)
+    assert not RETIRED_OPS & set(effects.OPS)
 
 
 @pytest.mark.xfail(strict=True, reason=(

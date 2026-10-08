@@ -1,4 +1,4 @@
-"""THE PLAN, clause by clause (QUARANTINED, `C.KOKOMI_OVERHAUL`, draft 6).
+"""THE PLAN, clause by clause (`C.KOKOMI_OVERHAUL`, draft 6).
 
 `tier0/engine/kokomi_plan.py` is the sim twin of
 `klee-mod/KleeCode/Powers/Prototype/KokomiPlan.cs`, and this file is that twin
@@ -2631,8 +2631,9 @@ def test_a_no_element_mod_damage_card_played_by_kokomi_applies_nothing(
 
 def test_r276_princess_of_watatsumi_pays_on_every_plan_under_the_arm(overhaul):
     """Her Ancient under the arm: "Whenever the Bake-Kurage carries out a
-    Plan, gain 2 Block and draw 1 card." Every Plan, not once a turn; and the
-    shipped Charge drip is not paid, because the arm turns Charge off."""
+    Plan, gain 2 Block and draw 1 card." Every Plan, not once a turn. (The
+    shipped Charge drip its row still applies is read by nothing: Charge left
+    the sim on 2026-10-08.)"""
     st = kokomi_state()
     st.player.draw_pile = [loader.get_card("defend") for _ in range(5)]
     princess = loader.get_card("princess_of_watatsumi")
@@ -2646,10 +2647,6 @@ def test_r276_princess_of_watatsumi_pays_on_every_plan_under_the_arm(overhaul):
     kokomi_plan.resolve_all(st)
     assert st.player.block == block + 2 * (1 + 2)
     assert len(st.player.hand) == hand + 2
-
-    charge = st.player.charge
-    effects.player_turn_start_triggers(st)
-    assert st.player.charge == charge, "no Charge drip under the arm"
 
 
 def test_r276_princess_upgrades_to_three_block():

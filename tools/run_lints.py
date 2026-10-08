@@ -58,7 +58,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #              clone: no game_ref/, no art, no game, a shallow checkout.
 #   local   -- operations/lints.md "Local-only (not in CI)"; a runner has no art and
 #              no game, so these answer questions CI structurally cannot ask
-#   suite   -- already exercised by pytest (tools/README.md "Suite-gated");
+#   suite   -- already exercised by pytest (the `suite` lane in this file);
 #              excluded from the default run because `pytest` covers them, and
 #              running them twice buys nothing. `--all` includes them.
 #   library -- registered so the coverage check can see them, never RUN here:

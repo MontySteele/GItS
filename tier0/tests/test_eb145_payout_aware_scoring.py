@@ -295,8 +295,7 @@ def test_the_chooser_itself_is_unchanged_by_this_window():
     assert policy.exhaust_future_value(state, pearl) == pytest.approx(
         (base_only + policy._block_value(state, pearl)
          + policy._scaling_value(state, pearl)
-         + policy._tempo_value(state, pearl)
-         + policy._sustain_value(state, pearl)) / scale)
+         + policy._tempo_value(state, pearl)) / scale)
 
 
 def test_two_carriers_in_one_hand_terminate():

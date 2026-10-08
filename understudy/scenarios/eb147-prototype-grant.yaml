@@ -60,7 +60,7 @@ name: eb147-prototype-grant
 character: KLEEMOD-KOKOMI
 turns: 6
 
-# The cards this file names live on the QUARANTINED prototype surface, which is
+# The cards this file names live on the prototype surface, which is
 # EMPTY in the committed tree by design (R213 B's deletion rule). The pack's
 # card-name lint therefore cannot resolve them, and this flag is how it is told
 # so -- rather than the lint being loosened for every file. What the lint still

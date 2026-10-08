@@ -75,18 +75,6 @@ def test_a_card_hit_on_a_surviving_body_fires_the_when_hit_power():
     assert any(row["event"] == "skittish_block" for row in state.log)
 
 
-def test_a_performance_on_the_same_body_does_not():
-    """THE ROW'S ACCEPTANCE, half two -- `EB-548`'s rule, re-read here so the
-    pair the seat compared lives in one file."""
-    state = _board(hp=60)
-    enemy = state.enemies[0]
-
-    effects.salon_member_act(state, "crabaletta")
-
-    assert enemy.alive and enemy.hp < 60
-    assert enemy.block == 0
-
-
 def test_a_killing_card_hit_fires_nothing_and_that_is_the_seats_own_witness():
     """THE SEAT'S 12-HP BODY, played. A when-hit power grants BLOCK, and a
     corpse gains none: the latch is not even set, so the reading "the card hit

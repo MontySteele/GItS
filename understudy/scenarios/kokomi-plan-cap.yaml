@@ -34,7 +34,7 @@ name: kokomi-plan-cap
 character: KLEEMOD-KOKOMI
 turns: 6
 
-# Every card here lives on the QUARANTINED prototype surface, so the pack's
+# Every card here lives on the prototype surface, so the pack's
 # name lint checks the prefix rather than a sheet row. See eb147's header.
 prototype: true
 

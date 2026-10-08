@@ -1341,16 +1341,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "discard_for_sparks"),
                              "sparks", val)
-        elif key == "encore":
-            # ALL gain_encore ops, branches included (mirrors "draw": a
-            # conditional Encore rider is still the card's Encore story).
-            hits = [fx for fx in everywhere if fx.get("op") == "gain_encore"]
-            for fx in hits:
-                fx["amount"] += val
-            ok = bool(hits)
-        elif key == "encore_cost":
-            ok = card.encore_cost > 0
-            card.encore_cost = max(0, card.encore_cost + val)
         elif key == "fanfare_floor":
             # The "Fanfare +X" keyword's upgrade. Once retired in favour of
             # `fanfare_cap` and back again: the cap grammar died with F-A4/F-A5
@@ -1429,32 +1419,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "block_next_turn"),
                              "amount", val)
-        elif key == "kurage_turns":
-            # v0.4: Bake-Kurage+ keeps the jellyfish out longer. Duration is
-            # the ONLY thing an upgrade may move here -- the pulse numbers
-            # are constants, and the +1 Charge is untouchable under the
-            # resource-curve law (upgrades never move Charge/conscript).
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "summon_kurage"),
-                             "amount", val)
-        elif key == "generate_cost_override":
-            # Discovery-parity upgrade: the generated card costs 0 THIS TURN
-            # (R114 / FLAG-2(ii): effects.py owns the lifetime and the mod's
-            # SetThisTurn was ruled the correct leg; "this combat" here was
-            # the drifted claim).
-            hit = next((fx for fx in top
-                        if fx.get("op") == "generate_guest_star"), None)
-            ok = hit is not None
-            if hit:
-                hit["cost_override"] = val
-        elif key == "generated":
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "generate_guest_star"),
-                             "amount", val)
-        elif key == "burst_energy":
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "burst_energy"),
-                             "amount", val)
         elif key in ("weak", "vulnerable"):
             word = "vuln" if key == "vulnerable" else "weak"
             ok = _bump_first((fx for fx in top if fx.get("op") == "apply_power"
@@ -1511,8 +1475,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                              "amount", val)
         elif key == "copy_cost_override":
             hit = next((fx for fx in top
-                        if fx.get("op") in ("copy_companion_in_hand",
-                                            "copy_spotlighted_in_hand")), None)
+                        if fx.get("op") == "copy_companion_in_hand"), None)
             ok = hit is not None
             if hit:
                 hit["cost_override"] = val

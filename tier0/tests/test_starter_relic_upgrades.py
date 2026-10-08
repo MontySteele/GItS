@@ -37,12 +37,12 @@ STARTERS: dict[str, str] = {
     "PoundingSurprise": "ExplosiveFrags",          # Klee
     "PearlOfWisdomRelic": "PearlOfInsightRelic",   # Kokomi
     "EtherealSpotlightRelic": "CurtainNeverFalls", # Furina (red-pen R2)
-    # The Stage arm's starter (QUARANTINED, FURINA_STAGE). Its curated absence
+    # The Stage arm's starter (FURINA_STAGE). Its curated absence
     # closed on 2026-09-27: The Curtain Never Falls was rebuilt for the Stage
     # (review/active/relics-potions-klee-furina-2026-09-27.md, pick 4 at its
     # default) and is Salon Solitaire's upgrade as it is the Spotlight's.
     "SalonSolitaire": "CurtainNeverFalls",
-    # The prototype arms' starters (QUARANTINED, PROTOTYPE_CARDS). Built
+    # The prototype arms' starters (PROTOTYPE_CARDS). Built
     # 2026-09-30 from [USER]'s co-op playtest ("Varka and Kokomi need Ancient
     # relics for Orobas"), main-session design: each upgrade SUBCLASSES its
     # starter, so every reader that finds the starter by type finds it too.

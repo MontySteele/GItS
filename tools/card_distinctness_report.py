@@ -183,7 +183,7 @@ import yaml
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# QUARANTINED (R213 B, BACKLOG EB-147): the prototype surface is not a pool,
+# (R213 B, BACKLOG EB-147): the prototype surface is not a pool,
 # so it has no distinctness. Feeding it in would be worse than useless -- the
 # instrument's numbers are all RATIOS over a pool, and a handful of scratch
 # rows would move hapax, uniq% and neardup for a "pool" no player can draw

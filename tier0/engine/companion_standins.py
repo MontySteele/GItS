@@ -1,4 +1,4 @@
-"""THE COMPANION STAND-IN SEAM (QUARANTINED, `C.COMPANION_OVERHAUL`).
+"""THE COMPANION STAND-IN SEAM (`C.COMPANION_OVERHAUL`).
 
 A STAND-IN IS NOT A POOL MEMBER. It is a whole Klee-only card, with its own
 unique name, handed to Klee IN PLACE of one named Universal (Klee brief pick 6;

@@ -98,57 +98,6 @@ def test_the_starvation_alarm_keys_on_the_cohorts_own_archetypes():
 
 # --- audit s1.4: the Tamakushi refresh --------------------------------------
 
-def _kokomi_state() -> CombatState:
-    return CombatState(player=loader.build_player("kokomi"),
-                       enemies=[make_enemy(hp=100)], rng=random.Random(0))
-
-
-def test_the_garment_refresh_never_shortens_an_upgraded_summon():
-    """audit s1.4: the refresh hard-set KURAGE_DURATION.
-
-    Playing the Garment after an UPGRADED summon (kurage_turns +1, so 2
-    turns) took the jellyfish back to 1 and deleted the turn the upgrade had
-    paid for. R56/R57's "restoring a longer duration is safe" was true of
-    the design and false of the wiring.
-    """
-    st = _kokomi_state()
-    st.player.powers["kurage_summon"] = C.KURAGE_DURATION + 1   # upgraded
-
-    effects._op_apply_power(
-        st, {"op": "apply_power", "power": "ceremonial_garment",
-             "amount": 1, "target": "self"}, None)
-
-    assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION + 1, (
-        "the refresh must top the timer up, never cut it down")
-    refreshed = [e for e in st.log if e["event"] == "kurage_refreshed"]
-    assert refreshed and refreshed[-1]["turns"] == C.KURAGE_DURATION + 1, (
-        "the emitted turn count must agree with the power it just set")
-
-
-def test_the_garment_refresh_still_restores_a_decayed_summon():
-    """The behaviour the link exists for, unchanged: the E-into-Q loop."""
-    st = _kokomi_state()
-    st.player.powers["kurage_summon"] = 1
-
-    effects._op_apply_power(
-        st, {"op": "apply_power", "power": "ceremonial_garment",
-             "amount": 1, "target": "self"}, None)
-
-    assert st.player.powers["kurage_summon"] == C.KURAGE_DURATION
-
-
-def test_the_garment_does_not_conjure_a_kurage_from_nothing():
-    """The guard the fix must not remove: the Burst refreshes, it does not
-    summon."""
-    st = _kokomi_state()
-    st.player.powers.pop("kurage_summon", None)
-
-    effects._op_apply_power(
-        st, {"op": "apply_power", "power": "ceremonial_garment",
-             "amount": 1, "target": "self"}, None)
-
-    assert not st.player.powers.get("kurage_summon", 0)
-
 
 # --- audit s1.7: overkill in the splash paths -------------------------------
 

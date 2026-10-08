@@ -173,16 +173,17 @@ def test_phased_boss_fight_runs_through_both_bars():
 
 
 def test_turn_start_damage_that_empties_a_bar_revives_instead_of_winning():
-    """EB-29a: Salon upkeep damages enemies inside player_turn_start_triggers,
-    which sat between the last _settle_phases and the state.over early-return.
-    A phased boss killed there ended the combat as a WIN with bars still
-    queued -- 66% of Furina/test_subject wins were counterfeit."""
+    """EB-29a: turn-start triggers can damage enemies inside
+    player_turn_start_triggers, which sat between the last _settle_phases and
+    the state.over early-return. A phased boss killed there ended the combat
+    as a WIN with bars still queued -- 66% of Furina/test_subject wins were
+    counterfeit when the shipped Salon's upkeep found it. Durin's Principle
+    of Purity is today's turn-start hit."""
     e = _phased_boss()
-    e.hp = 6                                     # crabaletta's tick kills it
+    e.hp = 6                                     # the start-of-turn hit kills it
     st = make_state(enemies=[e])
     st.player.draw_pile = _clog()
-    st.player.salon = ["crabaletta"]
-    st.player.encore = 5
+    st.player.powers["mc_purity_strike"] = 6
     combat._player_turn(st, NULL_PILOT)
     assert e.alive and e.max_hp == 30            # revived into the queued bar
     assert not st.over

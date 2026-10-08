@@ -1,4 +1,4 @@
-"""THE BOMB, rule by rule (QUARANTINED, `C.KLEE_OVERHAUL`) -- `EB-312`.
+"""THE BOMB, rule by rule (`C.KLEE_OVERHAUL`) -- `EB-312`.
 
 `tier0/engine/klee_overhaul.py` is the sim twin of
 `klee-mod/KleeCode/Powers/Prototype/ProtoBombPower.cs` and its neighbours, and
@@ -551,18 +551,6 @@ def test_rule7_the_base_free_attack_rule_is_retired(overhaul):
     state.player.hand.append(attack)
     combat.play_card(state, attack)
     assert state.player.sparks == 9        # nothing was consumed implicitly
-
-
-def test_the_arm_neither_feeds_nor_shows_burst(overhaul):
-    """`EB-266`: under the arm Sparks are her only meter, so nothing may fill
-    Burst -- the mod's one-line guard inside `BurstResource.Find`, at this
-    engine's own funnel."""
-    from tier0.engine import resources
-
-    state = klee_state()
-    state.player.burst_max = 40
-    resources.gain_burst(state, 5, "probe")
-    assert state.player.burst_energy == 0
 
 
 # ---------------------------------------------------------------------------
