@@ -104,7 +104,7 @@ public sealed class BlastingPowder : ArmPotion
     {
         ("title", "Blasting Powder"),
         ("description",
-            "Every [gold]Bomb[/gold] on every enemy grows [blue]" + Growth
+            "Every [gold]Bomb[/gold] on ALL enemies grows [blue]" + Growth
           + "[/blue]."),
     };
 
@@ -140,7 +140,7 @@ public sealed class JumpyJuice : ArmPotion
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Juice"),
-        ("description", "Double every [gold]Bomb[/gold] on every enemy."),
+        ("description", "Double every [gold]Bomb[/gold] on ALL enemies."),
     };
 
     protected override string ArtPath =>

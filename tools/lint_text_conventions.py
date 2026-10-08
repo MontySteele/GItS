@@ -24,7 +24,8 @@ played or being built; the
 `proto_spark_*` rows and their power are the retired-in-place Sparks arm
 (`M48`), which carries no `description:` and prints the shipped grammar.
 
-THE SHIPPED SHEETS are `--shipped`, a REPORT rather than a gate. `R249` (`EB-345`)
+THE REPORT is `--report` (`--shipped` until the text pass of 2026-10-08).
+Its history: `R249` (`EB-345`)
 ruled the pass on them and it is applied: the Furina sheet, the companion
 rows, the shared keyword tips, the shipped powers and the shipped relics all
 read against the same rules now. The report was clean but for the exceptions
@@ -43,7 +44,7 @@ can only shrink.
 
     python tools/lint_text_conventions.py               # the gate
     python tools/lint_text_conventions.py --self-test   # seen to FAIL on a fixture
-    python tools/lint_text_conventions.py --shipped     # report the shipped sheets
+    python tools/lint_text_conventions.py --report      # the badges and relics outside the gate
     python tools/lint_text_conventions.py --census      # every string, its length
 
 Exit 1 with findings on stdout.
@@ -73,7 +74,23 @@ CEILING = {
 ADD_CLAUSE_CEILING = 20   # the longest base {IfUpgraded:show:...} clause, 18
 MAX_SENTENCES = 4         # the base's longest card is four sentences
 
-IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|fr|fs)_")
+#: Text pass 2026-10-08: Varka (`vk`) and the Fontaine companions (`mf`)
+#: joined; the retired Furina reframe (`fr`) has no rows left.
+IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|mf|fs|vk)_")
+
+#: THE DEFERRED ROWS (text pass 2026-10-08). Klee is frozen at Balance on
+#: `main` and her rows move on `klee-next`, so the spellings the pass widened
+#: are held for her rows by (row id, spelling name) until that branch lands
+#: the edits written out in `docs/notes/klee-text-pass-pending-2026-10-08.md`.
+#: ROT SEMANTICS, like `EXCEPTIONS`: an entry whose spelling no longer fires
+#: fails, so the list can only shrink.
+KLEE_PENDING = "docs/notes/klee-text-pass-pending-2026-10-08.md"
+DEFERRED: dict[tuple[str, str], str] = {
+    ("proto_ko_team_effort", "more-damage"): KLEE_PENDING,
+    ("proto_ko_sparkling_burst", "more-damage"): KLEE_PENDING,
+    ("proto_ko_treasure_map", "pile-plain"): KLEE_PENDING,
+    ("proto_ko_come_back_and_play", "pile-plain"): KLEE_PENDING,
+}
 
 # --- the exceptions: id -> reason. Rot semantics, see the module doc. ----
 EXCEPTIONS = {
@@ -152,20 +169,12 @@ SHIPPED_EXCEPTIONS = {
         "the live count meets the ceiling"),
 }
 
-#: R249 pick 2(a). The shipped Bomb and the overhaul's Bomb are two rules,
-#: and two words is honest: the shipped kit keeps "detonates" until the
-#: overhaul replaces it, so the SHIPPED read does not carry the `goes-off`
-#: spelling. The prototype gate still carries it, which is what keeps the arm
-#: on one word -- and the day the overhaul lands, this set empties.
+#: R249 pick 2(a). The old Bomb badge (`Powers/BombPower.cs`) still says
+#: "detonates". No card places that power any more and its keyword tip left
+#: with the text pass of 2026-10-08; the class stays until its tests and the
+#: telemetry that reads its counters are retired, so the report does not read
+#: the `goes-off` spelling on it. The gate carries the spelling everywhere.
 SHIPPED_SKIP_SPELLINGS = {"goes-off"}
-
-#: R249 pick 1(b). The shipped Klee and Kokomi CARD rows do not take the
-#: text pass: the overhauls being played replace them, so a rewrite of their
-#: faces is work the overhaul deletes. Read off the two sheets by id, so a
-#: row that leaves one loses the exemption with it -- and so the exemption
-#: names rows rather than a directory, which also holds the companion cards.
-EXEMPT_SHEETS = ("klee-cards.yaml", "kokomi-cards.yaml")
-SHEET_ID = re.compile(r"^\s*-\s*\{id:\s*([a-z0-9_]+)", re.M)
 
 
 def pick_branch(expr: str, branch: str) -> str:
@@ -211,8 +220,15 @@ SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
     ("dash", re.compile(r"(\s--\s|--|—|–)"), "no dashes of any kind"),
     ("draw-cards", re.compile(r"\b[Dd]raw \d+(?=[.,;]|\s+(?:and|at|if)\b)"),
      "'Draw N cards.' with the noun"),
-    ("more-damage", re.compile(r"\b\d+ more(?= damage| Block)"),
-     "'N additional damage'"),
+    # Widened by the text pass of 2026-10-08 from `N more damage|Block` to any
+    # noun-less "N more", which is what the 14 faces it found printed ("deal 6
+    # more"). The scaled hit keeps its shape (base `ASHEN_STRIKE`): "plus N
+    # for each", "N more for each". Two counters are not bonuses and are
+    # named in `MORE_COUNTERS`.
+    ("more-damage", re.compile(r"\b\d+ more\b(?! for each)"),
+     "'N additional damage' (a counter or a scaled 'N more for each' is fine)"),
+    ("pile-plain", re.compile(r"\b(draw|discard|exhaust) pile\b"),
+     "'[gold]Draw Pile[/gold]', '[gold]Discard Pile[/gold]', capitals and gold"),
     ("reaction-lowercase", re.compile(r"\breactions?\b"),
      "'[gold]Elemental Reaction[/gold]', the shipped spelling"),
     ("otherwise-comma", re.compile(r"\bOtherwise [a-z]"), "'Otherwise, ...'"),
@@ -222,8 +238,14 @@ SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
 RAW_SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
     ("gold-cardtype", re.compile(r"\[gold\]Attacks?\[/gold\]|\[gold\]Skills?\[/gold\]|\[gold\]Powers?\[/gold\]"),
      "card types are plain words: 'Attack', 'Skill', 'Power'"),
-    ("bare-keyword", re.compile(r"(?<!\[gold\])\b(Block|Weak|Vulnerable|Strength|Dexterity)\b(?![^\[]*\[/gold\])"),
-     "keywords are Capitalised and [gold]"),
+    # The text pass of 2026-10-08 added the six elements (rule 6: "Elements
+    # the mod names in text are golded like keywords") and the pile names:
+    # ten Varka faces printed "Pyro Oath" bare beside a sibling that golds it.
+    ("bare-keyword", re.compile(
+        r"(?<!\[gold\])\b(Block|Weak|Vulnerable|Strength|Dexterity"
+        r"|Pyro|Hydro|Electro|Cryo|Anemo|Geo"
+        r"|Draw Pile|Discard Pile|Exhaust Pile)\b(?![^\[]*\[/gold\])"),
+     "keywords, elements and piles are Capitalised and [gold]"),
     ("printed-exhaust", re.compile(r"(^|\.\s)Exhaust\.(\s|$)"),
      "Exhaust is the keyword rail, never a sentence"),
 ]
@@ -232,6 +254,10 @@ RAW_SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
 FRONT_ENEMY = re.compile(r"\bfront enemy\b")
 FRONT_ENEMY_ALLOWED = {"proto_kk_the_generals_banner", "GeneralsBannerPower.description",
                        "PlanKey"}
+#: `more-damage`'s two counters: "N more" there is a count growing, not a
+#: bonus on a hit, and rule 8 is about the hit.
+MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
+                 "proto_vk_oath_unto_death", "OathUntoDeathPower.description"}
 
 TAG = re.compile(r"\[/?[a-z_]+\]")
 LIT = re.compile(r'"((?:[^"\\]|\\.)*)"')
@@ -315,10 +341,70 @@ def card_rows(gen_dir: Path, scope: re.Pattern[str] | None) -> list[Row]:
     return rows
 
 
+#: `StagePerformerBadge.ActText`'s switch, one arm per guest. Text pass
+#: 2026-10-08: the seven guest tips were `ActText(StagePerformer.X)` calls,
+#: which the literal reader measured as nothing.
+_ACT_ARM = re.compile(
+    r"StagePerformer\.(\w+) =>\s*(.*?)(?=,\s*\n\s*(?:StagePerformer\.\w+ =>|_ =>))",
+    re.S)
+
+
+def _act_texts() -> dict[str, str]:
+    src = read(MOD / "Powers" / "Prototype" / "FurinaStageBadges.cs")
+    body = src[src.index("public static string ActText"):]
+    body = body[:body.index("_ =>") + 4]
+    return {who: csharp_text(expr) for who, expr in _ACT_ARM.findall(body)}
+
+
+def _tip_body(body: str, consts: dict[str, str]) -> str:
+    """A tip's body, rendered. A literal concat is read as it stands; a bare
+    `const string` name (`FanfareBody`, `KnightTipText`) is followed to its
+    declaration, and an `ActText(StagePerformer.X)` call to its switch arm.
+    Before the text pass of 2026-10-08 those eleven measured zero."""
+    name = body.strip()
+    if re.fullmatch(r"\w+", name) and name in consts:
+        return consts[name]
+    act = re.fullmatch(r"StagePerformerBadge\.ActText\(StagePerformer\.(\w+)\)", name)
+    if act:
+        return _act_texts().get(act.group(1), "")
+    return csharp_text(body)
+
+
+def base_tip_rows() -> list[Row]:
+    """`BaseKeywordTips.cs`: the mod's Weak, Vulnerable, Frail, Strength and
+    Dexterity tips (`EB-377`), read since the text pass of 2026-10-08."""
+    path = MOD / "Cards" / "Prototype" / "BaseKeywordTips.cs"
+    src = re.sub(r"^\s*//.*$", "", read(path), flags=re.M)
+    where = str(path.relative_to(REPO))
+    consts = _consts(src)
+    return [Row("tip", name, _tip_body(body, consts), where)
+            for name, body in re.findall(
+                r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S)]
+
+
+def keyword_fallback_rows() -> list[Row]:
+    """The `KLEEMOD-*` keyword rows in `KleeMod.cs` (the Applies-X tips and
+    the reaction previews): gated since the text pass of 2026-10-08, when the
+    Frozen preview was found at 211 characters with no lint reading it."""
+    # LITERAL-AWARE, for `loc_bodies`' reason (`EB-777`): the old reader ran
+    # `[^;]` to a `,\n`, so the Frozen preview -- whose prose carries a
+    # semicolon -- was never read at all, at 211 characters.
+    kleemod = re.sub(r"^\s*//.*$", "", read(MOD / "KleeMod.cs"), flags=re.M)
+    rows: list[Row] = []
+    for m in re.finditer(r'\["(KLEEMOD-[A-Z_]+)\.description"\]\s*=\s*', kleemod):
+        i, n = m.end(), len(kleemod)
+        while i < n and kleemod[i] != ",":
+            i = skip_literal(kleemod, i) if kleemod[i] == '"' else i + 1
+        rows.append(Row("tip", m.group(1), csharp_text(kleemod[m.end():i]),
+                        "klee-mod/KleeCode/KleeMod.cs"))
+    return rows
+
+
 def tip_rows() -> list[Row]:
     path = MOD / "Cards" / "Prototype" / "ArmKeywordTips.cs"
     src = re.sub(r"^\s*//.*$", "", read(path), flags=re.M)
     where = str(path.relative_to(REPO))
+    consts = _consts(src)
     rows: list[Row] = []
     # NON-GREEDY TO THE CALL'S OWN `);`, and not "any character except a
     # semicolon". The older pattern could not cross a semicolon INSIDE a
@@ -332,7 +418,7 @@ def tip_rows() -> list[Row]:
             r"With\(inherited, (\w+Key),\s*(.*?)\);", src, re.S):
         if "SparkBody(" in body:
             continue
-        rows.append(Row("tip", name, csharp_text(body), where))
+        rows.append(Row("tip", name, _tip_body(body, consts), where))
     concat = r'("[^"]*"(?:\s*\+\s*"[^"]*")*)'
     word = csharp_text(re.search(r"const string word =\s*" + concat + ";", src).group(1))
     shared = csharp_text(re.search(r"const string shared =\s*" + concat + ";", src).group(1))
@@ -519,7 +605,7 @@ def loc_bodies(src: str) -> list[LocFace]:
 #: the gate also has to answer "how many faces exist" -- `loc_audit_findings`
 #: turns an `unparsed` marker into a failure and `main` prints the arithmetic.
 #: Appended to by `loc_rows`, which is called once per surface set, so the
-#: tally is reset at the top of `prototype_rows` / `shipped_rows`.
+#: tally is reset at the top of `prototype_rows` / `report_rows`.
 LOC_TALLY: list[tuple[str, str, str]] = []
 
 
@@ -636,7 +722,7 @@ def furina_arm_rows() -> list[Row]:
     """`EB-385`. The arm's faces on SHIPPED powers, gated with the rest of the
     arm.
 
-    Those files are SHIPPED, so `--shipped` reads all of them and the arm rows
+    Those files are SHIPPED, so `--report` reads all of them and the arm rows
     would otherwise be measured only by a report. What belongs to the prototype
     gate is the rows the ARM adds, which are the rows whose KEY says so --
     filtered by key rather than by file, so a second arm face in one of these
@@ -654,40 +740,55 @@ def prompt_rows() -> list[Row]:
                 str(path.relative_to(REPO)))]
 
 
-def exempt_card_ids() -> set[str]:
-    """The rows R249 pick 1(b) leaves alone, by id, off their own sheets."""
-    out: set[str] = set()
-    for name in EXEMPT_SHEETS:
-        out |= set(SHEET_ID.findall(read(REPO / "docs" / name)))
-    return out
+#: The hand-written card faces no sheet row generates: the Ancient cards
+#: (Darv's, Pael's and the Orobas upgrades), read since the text pass of
+#: 2026-10-08.
+ANCIENT_CARD_FILES = (
+    MOD / "Cards" / "AlicesMasterpiece.cs",
+    MOD / "Cards" / "JumpyDumptyMkOmega.cs",
+    MOD / "Cards" / "Furina" / "AllTheWorldsAStage.cs",
+    MOD / "Cards" / "Furina" / "CenterOfAttention.cs",
+    MOD / "Cards" / "Kokomi" / "DivineStrategy.cs",
+    MOD / "Cards" / "Kokomi" / "PrincessOfWatatsumi.cs",
+)
+
+
+def potion_rows() -> list[Row]:
+    """The kits' potions. A potion's face is an effect line, so it is held to
+    the card ceiling and the card spellings (text pass 2026-10-08)."""
+    return loc_rows(sorted((MOD / "Potions").glob("*.cs")), "card", "proto")
 
 
 def prototype_rows() -> list[Row]:
     LOC_TALLY.clear()
     return (card_rows(MOD / "Cards" / "Prototype" / "Generated", IN_SCOPE)
             + tip_rows()
+            + base_tip_rows()
+            + keyword_fallback_rows()
             + loc_rows(sorted((MOD / "Powers" / "Prototype").glob("*.cs")), "power", "proto")
             + loc_rows([MOD / "Relics" / "PoundingSurprise.cs",
                         MOD / "Relics" / "TamakushiCasket.cs"], "relic", "proto")
             + furina_arm_rows()
-            + prompt_rows())
+            + prompt_rows()
+            + potion_rows()
+            + loc_rows(list(ANCIENT_CARD_FILES), "card", "proto"))
 
 
-def shipped_rows() -> list[Row]:
+def report_rows() -> list[Row]:
+    """`--report`: the surfaces the gate does not read yet, top-level power
+    badges and the relics. It was `--shipped` until the text pass of
+    2026-10-08: the shipped card sheets and their generated trees are gone
+    (legacy cleanup stages 5 and 6), and its exemption step read
+    `docs/klee-cards.yaml`, which no longer exists, so the mode crashed. What
+    it still reads is live (`FontainePowers.cs`, `FrozenPower.cs`, the arm
+    relics), so the rows stay and the dead step left."""
     LOC_TALLY.clear()
     rows: list[Row] = []
-    for gen in (MOD / "Cards" / "Generated", MOD / "Cards" / "Kokomi" / "Generated",
-                MOD / "Cards" / "Furina" / "Generated"):
-        rows += card_rows(gen, None)
     powers = [p for p in sorted((MOD / "Powers").glob("*.cs"))]
     rows += loc_rows(powers, "power", "shipped")
     relics = [p for p in sorted((MOD / "Relics").glob("*.cs"))
               if p.name not in ("PoundingSurprise.cs", "TamakushiCasket.cs")]
     rows += loc_rows(relics, "relic", "shipped")
-    # The keyword fallback table in KleeMod.cs: the Applies-X and reaction tips.
-    kleemod = read(MOD / "KleeMod.cs")
-    for key, expr in re.findall(r'\["(KLEEMOD-[A-Z_]+)\.description"\]\s*=\s*((?:[^;]|\n)*?),\n', kleemod):
-        rows.append(Row("tip", key, csharp_text(expr), "klee-mod/KleeCode/KleeMod.cs"))
     return rows
 
 
@@ -697,6 +798,7 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
                  skip_spellings: set[str] = frozenset()) -> list[str]:
     out: list[str] = []
     seen_over: set[str] = set()
+    deferred_seen: set[tuple[str, str]] = set()
     for row in rows:
         text = render(row.raw)
         n = len(text)
@@ -711,14 +813,23 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
         for clause in add_clauses(row.raw):
             if len(clause) > ADD_CLAUSE_CEILING:
                 out.append(f"{tag}: upgrade clause {len(clause)} > {ADD_CLAUSE_CEILING}: {clause}")
+        base = row.ident.split("#")[0]
         for name, rx, instead in SPELLINGS:
             if name in skip_spellings:
                 continue
+            if name == "more-damage" and base in MORE_COUNTERS:
+                continue
             if rx.search(text):
+                if (base, name) in DEFERRED:
+                    deferred_seen.add((base, name))
+                    continue
                 out.append(f"{tag}: {name}: {instead}: {text}")
         holes_blanked = re.sub(r"\{[^{}]*\}", "6", row.raw)
         for name, rx, instead in RAW_SPELLINGS:
             if rx.search(holes_blanked):
+                if (base, name) in DEFERRED:
+                    deferred_seen.add((base, name))
+                    continue
                 out.append(f"{tag}: {name}: {instead}: {row.raw}")
         if (row.surface in ("card", "mode") or row.surface == "tip"
                 or row.surface == "power") \
@@ -733,6 +844,11 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
             elif ident not in seen_over:
                 out.append(f"EXCEPTION ROT: {ident!r} is under its ceiling now; "
                            f"drop it from EXCEPTIONS ({reason[:40]}...)")
+        if exceptions is EXCEPTIONS:
+            for key, reason in DEFERRED.items():
+                if key not in deferred_seen:
+                    out.append(f"DEFERRED ROT: {key!r} no longer fires; drop "
+                               f"it from DEFERRED ({reason})")
     return out
 
 
@@ -836,10 +952,18 @@ def self_test() -> list[str]:
     return bad
 
 
+#: The TARGETS from text-conventions.md ("Ceilings, measured"): what a rewrite
+#: aims below. `--census` flags a string over its target so a text pass sees
+#: its list (text pass 2026-10-08).
+TARGET = {"card": 80, "mode": 80, "tip": 90, "power": 75, "relic": 85,
+          "prompt": 60}
+
+
 def census(rows: list[Row]) -> None:
     for row in sorted(rows, key=lambda r: (r.surface, -len(render(r.raw)))):
         text = render(row.raw)
-        flag = "OVER" if len(text) > CEILING[row.surface] else "    "
+        flag = ("OVER" if len(text) > CEILING[row.surface]
+                else "tgt+" if len(text) > TARGET[row.surface] else "    ")
         print(f"{flag} {row.surface:6s} {len(text):4d} {row.ident:44s} {text}")
 
 
@@ -851,24 +975,20 @@ def main(argv: list[str]) -> int:
         print("self-test: 12 bad + 4 clean case(s) + the EB-777 semicolon "
               f"face, {len(bad)} failure(s)")
         return 1 if bad else 0
-    if "--shipped" in argv:
-        rows = shipped_rows()
-        exempt = exempt_card_ids()
-        scoped = [r for r in rows if r.ident.split("#")[0] not in exempt]
+    if "--report" in argv:
+        rows = report_rows()
         found = loc_audit_findings() + findings_for(
-            scoped, SHIPPED_EXCEPTIONS, skip_spellings=SHIPPED_SKIP_SPELLINGS)
+            rows, SHIPPED_EXCEPTIONS, skip_spellings=SHIPPED_SKIP_SPELLINGS)
         for line in found:
             print(line)
-        print("text-conventions (shipped): exceptions carried "
+        print("text-conventions (report): exceptions carried "
               "(each over its ceiling for the reason given):")
         print("\n".join(f"  {k}: {v}" for k, v in SHIPPED_EXCEPTIONS.items()))
         print(f"  spellings not read here: {sorted(SHIPPED_SKIP_SPELLINGS)} "
-              "-- R249 pick 2(a), the shipped kit keeps 'detonates'")
+              "-- the old Bomb badge still says 'detonates'")
         print(loc_count_line())
-        print(f"shipped report: {len(scoped)} strings read, "
-              f"{len(rows) - len(scoped)} Klee/Kokomi card faces skipped "
-              f"(R249 pick 1(b)), {len(found)} finding(s) "
-              "-- a report, not a gate")
+        print(f"report: {len(rows)} strings read (top-level power badges and "
+              f"relics), {len(found)} finding(s) -- a report, not a gate")
         return 0
     rows = prototype_rows()
     if "--census" in argv:

@@ -823,6 +823,31 @@ def collect() -> dict[str, tuple[str, Path]]:
 
 
 # --------------------------------------------------------------------------
+# SWITCHES: build switches whose C# default is an MSBuild property in
+# `klee-mod/Directory.Build.props` and whose sim twin is a tier0 bool. A
+# `const bool` is not a number, so CONST_RE cannot see it; this table is how
+# the sim's default stays the game's. SWIRL_PAYS sat False in the sim for ten
+# days while every build Swirled for damage (fixed 2026-10-08).
+# --------------------------------------------------------------------------
+PROPS = REPO / "klee-mod" / "Directory.Build.props"
+
+SWITCHES: dict[str, str] = {
+    "SwirlPays": "SWIRL_PAYS",     # the element port, sec.4 A
+}
+
+
+def msbuild_bool_default(prop: str) -> bool:
+    """The default `Directory.Build.props` gives an MSBuild bool property."""
+    m = re.search(rf"<{prop}\s+Condition=\"[^\"]*\"\s*>\s*(true|false)\s*</{prop}>",
+                  PROPS.read_text(encoding="utf-8"), re.IGNORECASE)
+    if m is None:
+        raise SystemExit(f"FINDING: no default for <{prop}> in {PROPS}; the "
+                         "switch table names a property the props file does "
+                         "not declare.")
+    return m.group(1).lower() == "true"
+
+
+# --------------------------------------------------------------------------
 # INVARIANTS: ratified RELATIONSHIPS between two numbers.
 #
 # MIRRORED compares a C# number against a sim number BY VALUE. That cannot
@@ -896,12 +921,20 @@ def main() -> int:
                 f"UNMIRRORED lists {key}, but no such constant exists in the "
                 f"mod. Drop the entry.")
 
+    for prop, name in sorted(SWITCHES.items()):
+        cs, sim = msbuild_bool_default(prop), getattr(C, name)
+        if cs is not sim:
+            findings.append(
+                f"switch {prop}: the mod builds with {cs}, but tier0 "
+                f"C.{name} is {sim}. A plain sim run would not model the "
+                f"shipped game; make them agree.")
+
     for finding in findings:
         print(f"FINDING: {finding}")
     if findings:
         return 1
     print(f"constant parity: OK ({len(MIRRORED)} mirrored, "
-          f"{len(UNMIRRORED)} declared unmirrored, "
+          f"{len(UNMIRRORED)} declared unmirrored, {len(SWITCHES)} switch, "
           f"{len(_invariants())} ratified invariants held)")
     return 0
 

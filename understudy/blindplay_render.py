@@ -102,7 +102,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_PAST_LETHAL_BLOCK,
                                         PLAN_PAST_LETHAL_CLAUSE,
                                         POWER_NOTE, SELECTION_NOTE,
-                                        SPARK_OPENING_RULE,
+                                        SPARK_OPENING_RULE, spark_opening_rule,
                                         SPARK_SOURCES_LINE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
                                         BEHIND_CLAUSE, MAP_PATHS_HEAD,
@@ -121,7 +121,8 @@ from understudy.blindplay_coop import banner as coop_banner
 from understudy.blindplay_coop import render_lines as coop_lines
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _fold, _text
-from understudy.blindplay_shape import BlindPlayError, FIGHT_OVERLAYS
+from understudy.blindplay_shape import (BlindPlayError, FIGHT_OVERLAYS,
+                                        opening_spark)
 
 
 # ----------------------------------------------------------------- render --
@@ -3002,7 +3003,7 @@ def render(obs: dict[str, Any]) -> str:
             # block up: the meter is registered for every seat at the table.
             if (name == "Spark" and c["round"] == 1
                     and _fold(obs.get("character") or "") == "klee"):
-                rule = SPARK_OPENING_RULE
+                rule = spark_opening_rule(opening_spark(obs))
             # `EB-568`: the floor is a CLAUSE on this row, not a row. The
             # r14 lane-2 seat met `Fanfare Floor 8` and `Fanfare Cap Bonus 8`
             # as two unexplained meters beside a Fanfare that had sat at 8 for

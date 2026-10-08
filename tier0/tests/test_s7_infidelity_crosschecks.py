@@ -78,9 +78,9 @@ def test_swirl_returns_the_consumed_aura_to_the_enemy_it_was_taken_from():
 
 
 def test_swirl_spreads_the_consumed_aura_to_every_other_living_enemy():
-    """The same loop that feeds the source also seeds the rest of the board,
-    at full duration. C#: `foreach (var e in swirlTargets)` over
-    CombatState.HittableEnemies (ReactionEffects.cs:285-303)."""
+    """The source's aura is consumed and every OTHER enemy is seeded at full
+    duration (`C.SWIRL_PAYS`, the game's default). C#: `SwirlPays` in
+    ReactionEffects.cs skips the struck enemy."""
     state = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b"),
                                make_enemy(name="c")])
     source = state.enemies[0]
@@ -88,9 +88,9 @@ def test_swirl_spreads_the_consumed_aura_to_every_other_living_enemy():
     reactions.apply_aura(state, source, "cryo")
     reactions.resolve_hit(state, source, "anemo", 5)
 
-    assert [e.aura for e in state.enemies] == ["cryo", "cryo", "cryo"]
+    assert [e.aura for e in state.enemies] == [None, "cryo", "cryo"]
     assert all(e.aura_turns_left == reactions.aura_duration(state)
-               for e in state.enemies)
+               for e in state.enemies[1:])
 
 
 def test_swirl_overwrites_a_different_aura_on_a_bystander_without_reacting():

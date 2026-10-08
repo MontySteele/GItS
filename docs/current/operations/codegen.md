@@ -17,12 +17,12 @@ Partial upgrades are forbidden — a row gets its complete upgrade (`upgrade:` o
 the row, or the Prototype-stage default), or says why not with `no_upgrade:`
 (`operations/prototype.md`). Depth: `docs/current/atlas/klee-mod-cards.md`.
 
-**Two shipped leftovers stay in the generated cards**, because removing them
-changes the emitted C# of current rows: each file's header still names
-`docs/<character>-upgrades.yaml` as the source of its upgrade deltas (they
-come from the row since legacy cleanup stage 6), and companion and Furina
-damage and Block still route through `SpotlightSystem`'s print fold, the
-identity since stage 5. Both are `BACKLOG.md` lines.
+**One shipped leftover stays in the generated cards**, because removing it
+changes the emitted C# of current rows: companion and Furina damage and Block
+still route through `SpotlightSystem`'s print fold, the identity since stage
+5 (a `BACKLOG.md` line). The other, each file's header naming a deleted
+`docs/<character>-upgrades.yaml`, now names the row's `upgrade:` (text pass
+2026-10-08; a comment, no emitted behaviour).
 
 - **Cost lines are DERIVED from the printed spend, at TWO levels** (`EB-182`).
   A top-level `spend_spark` / `spend_charge` is the CARD's price and makes it

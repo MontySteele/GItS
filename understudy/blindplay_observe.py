@@ -47,7 +47,8 @@ from understudy.blindplay_shape import (COMBAT_SCREENS, PLAY_GUARDRAIL,
                                         SPHERE_REVEAL_HOW,
                                         UNDRIVEN_AFTER_EVENT,
                                         UNDRIVEN_EXITS, UNDRIVEN_SCREENS,
-                                        lane_run_seed, sphere_owes)
+                                        lane_run_seed, live_klee_law,
+                                        sphere_owes)
 from understudy.teyvat_ids import resolve_event_id
 
 
@@ -226,6 +227,9 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # NO REACTION IS REACHABLE HERE clause went back up at round one of
         # every fight. Only the element set crosses; no pile is printed.
         "deck_elements": deck_elements(state),
+        # 2026-10-08: the build's own Bomb growth and opening Spark, carried
+        # and never printed as such (`blindplay_shape.live_klee_law`).
+        "klee_law": live_klee_law(state),
     }
     hazard = _hazard(state)
 

@@ -144,7 +144,7 @@ public sealed class NightVigilPower : PowerModel, ILocalizationProvider
     {
         ("title", "Night Vigil"),
         ("description",
-            "Your Attacks against enemies holding an elemental aura deal "
+            "Your Attacks against enemies holding an aura deal "
           + "[blue]{Amount}[/blue] additional damage."),
     };
 
@@ -188,8 +188,8 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
         ("title", "Heir to the Ancient Sea's Authority"),
         ("description",
             "At the start of your turn, apply [gold]Hydro[/gold] to a random "
-          + "enemy. Elemental auras you apply last [blue]{Amount}[/blue] "
-          + "extra {Amount:plural:turn|turns}."),
+          + "enemy. Auras you apply last [blue]{Amount}[/blue] "
+          + "additional {Amount:plural:turn|turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;

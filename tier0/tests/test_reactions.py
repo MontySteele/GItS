@@ -212,7 +212,9 @@ def test_frozen_boss_becomes_vulnerable():
     assert e.aura is None
 
 
-def test_swirl_copies_aura_to_all():
+def test_swirl_copies_aura_to_all(consume_triggers):
+    # The pre-port rule (`C.SWIRL_PAYS` off); the paying rule is pinned in
+    # `test_element_port.py`.
     st = make_state(enemies=[make_enemy(hp=30, name="a"),
                              make_enemy(hp=30, name="b"),
                              make_enemy(hp=30, name="c")])

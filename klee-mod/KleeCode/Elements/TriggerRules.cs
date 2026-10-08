@@ -22,7 +22,8 @@ namespace KleeMod.Elements;
 /// On in every build that does not name it (<c>klee-mod/Directory.Build.props</c>);
 /// <c>-p:SwirlPays=false</c> turns it off, and a Swirl then copies the aura
 /// onto every enemy, the struck one included, with no flat damage. The sim
-/// twin <c>C.SWIRL_PAYS</c> ships <c>False</c>, the arm convention, and pins
+/// twin <c>C.SWIRL_PAYS</c> defaults to <c>True</c> to match
+/// (<c>tools/lint_constant_parity.py</c> compares the defaults), and pins
 /// both sides by flipping it.
 ///
 /// Compiled in every build, not under <c>PROTOTYPE_CARDS</c>: this is the

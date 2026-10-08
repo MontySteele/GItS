@@ -47,7 +47,7 @@ went one win, one loss.
 ## What to change
 
 1. The element-identities paper
-   (`review/active/varka-element-identities-2026-10-01.md`, ruled): Electro
+   (`review/ruled/varka-element-identities-2026-10-01.md`, ruled): Electro
    gets discard (Short Circuit and Violet Storm discard Wounds and Burns,
    the first answer to status clog), Unbroken Tide goes, the element-switch
    warnings land.

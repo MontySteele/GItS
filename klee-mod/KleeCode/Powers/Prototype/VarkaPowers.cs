@@ -49,8 +49,8 @@ public abstract class OathBadgePower : PowerModel, ILocalizationProvider
         ("title", Element == Element.None ? "Oath" : $"{Element} Oath"),
         ("description", Lead(smart: false)),
         ("smartDescription",
-            Lead(smart: true) + "\nOath: Pyro {PyroOath}, Hydro {HydroOath}, "
-          + "Electro {ElectroOath}, Cryo {CryoOath}."),
+            Lead(smart: true) + "\nOath: [gold]Pyro[/gold] {PyroOath}, [gold]Hydro[/gold] {HydroOath}, "
+          + "[gold]Electro[/gold] {ElectroOath}, [gold]Cryo[/gold] {CryoOath}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -353,7 +353,7 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
         ("description",
             "While your [gold]current element[/gold] has "
           + VarkaLaw.StormwardOathNeeded + " or more [gold]Oath[/gold], your "
-          + "Anemo Attacks deal [blue]{Amount}[/blue] additional damage."),
+          + "[gold]Anemo[/gold] Attacks deal [blue]{Amount}[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -790,7 +790,7 @@ public sealed class PyreOathPower : PowerModel, ILocalizationProvider
         ("title", "Pyre Oath"),
         ("description",
             "Whenever you [gold]Exhaust[/gold] a card, gain "
-          + "[blue]{Amount}[/blue] Pyro [gold]Oath[/gold]."),
+          + "[blue]{Amount}[/blue] [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -822,7 +822,7 @@ public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
         ("title", "Retaliating Tide"),
         ("description",
             "At the end of your turn, deal damage equal to your "
-          + "[gold]Block[/gold], up to your Hydro [gold]Oath[/gold], to a "
+          + "[gold]Block[/gold], up to your [gold]Hydro[/gold] [gold]Oath[/gold], to a "
           + "random enemy."),
     };
 
@@ -869,7 +869,7 @@ public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
         ("title", "Absolute Zero"),
         ("description",
             "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] "
-          + "to an enemy, deal damage equal to your Cryo [gold]Oath[/gold] "
+          + "to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold] "
           + "to it."),
     };
 
@@ -925,7 +925,7 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
         ("title", "Wolfpack"),
         ("description",
             "Whenever you play Four Winds' Ascension, add a copy of it to "
-          + "your discard pile."),
+          + "your [gold]Discard Pile[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -1000,9 +1000,8 @@ public sealed class WeathervanePower : PowerModel, ILocalizationProvider
     {
         ("title", "Weathervane"),
         ("description",
-            "At the start of your turn, you may choose an element you have "
-          + "[gold]Oath[/gold] in; it becomes your [gold]current "
-          + "element[/gold]."),
+            "At the start of your turn, you may make an element you have "
+          + "[gold]Oath[/gold] in your [gold]current element[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -1020,7 +1019,7 @@ public sealed class TwinGalesPower : PowerModel, ILocalizationProvider
         ("title", "Twin Gales"),
         ("description",
             "Your [gold]Swirls[/gold] pay both your [gold]current "
-          + "element[/gold] and the element Swirled."),
+          + "element[/gold] and the element they [gold]Swirl[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

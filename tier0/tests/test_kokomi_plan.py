@@ -2803,8 +2803,8 @@ def test_core_pass_faces(overhaul):
     assert faces["proto_kk_ambush"] == (
         "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage.")
     assert faces["proto_kk_treatise"] == (
-        "Once per turn, when you play a card with a [gold]Plan[/gold] line "
-        "normally, draw 1 card.")
+        "The first time each turn you play a card with a [gold]Plan[/gold] "
+        "line normally, draw 1 card.")
 
 
 def test_core_pass_second_waves_hit_applies_hydro(overhaul):

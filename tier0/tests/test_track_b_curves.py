@@ -230,7 +230,12 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # does not narrate reactions, as for `reactions_by_turn`. MOD
             # FEED ONLY, added, never a rename.
             "reactions_by_type", "amp_bonus_damage",
-            "debuffs_from_reactions"}
+            "debuffs_from_reactions",
+            # 2026-10-08. The Klee arm's charges that set off a reaction, and
+            # the Mines an enemy's attack set off (`ProtoBombPower`'s
+            # per-seat counters). In-engine facts the wire cannot see; MOD
+            # FEED ONLY, added, never a rename.
+            "bomb_reactions", "mine_detonations_by_attack"}
 
 
 def _csharp_keys() -> set[str]:

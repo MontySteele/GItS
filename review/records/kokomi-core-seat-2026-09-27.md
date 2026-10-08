@@ -2,7 +2,7 @@
 
 One blind Claude seat played act 1 on build 0.2.3938 (#726), as Kokomi at A0, on lane 1. It stopped at the 150-action cap. By then it had won six fights and was in round 5 of the four-Gardener elite, with one Gardener at 1 HP. Its HP went 80 → 35, back to 59 after a rest, and ended at 39. The raw record is gitignored in `review/qa/seats-2026-09-27/kokomi-core-lane1.md`.
 
-The pass (`review/active/kokomi-core-pass-2026-09-27.md`) asked one question: does a turn with no incoming attack now ask a question?
+The pass (`review/ruled/kokomi-core-pass-2026-09-27.md`) asked one question: does a turn with no incoming attack now ask a question?
 
 ## What played well
 

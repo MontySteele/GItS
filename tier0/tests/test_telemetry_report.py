@@ -324,3 +324,66 @@ def test_reactions_text_block(tmp_path, capsys):
     assert "reactions/t: Vaporize 0.75  Overload 0.25" in text
     assert "amp bonus/t: Vaporize 2.25" in text
     assert "debuffs/t:   Weak 0.25" in text
+
+
+# ------------------------------------------------- run instances, lane copies ---
+
+def test_fight_key_separates_run_instances_on_one_seed(tmp_path, capsys):
+    """An abandoned attempt and its rerun on the same seed restart
+    fight_index; run_instance keeps them two fights, two teams' worth."""
+    rows = [
+        _rx_row("Klee", 0, run_instance="20261007-010000#0", by_type={}),
+        _rx_row("Varka", 1, run_instance="20261007-010000#0", by_type={}),
+        _rx_row("Klee", 0, run_instance="20261007-020000#0", by_type={}),
+        _rx_row("Varka", 1, run_instance="20261007-020000#0", by_type={}),
+    ]
+    out = run(tmp_path, rows, "--coop", "--reactions", capsys=capsys)
+    teams = [s for s in out["reactions"] if not s.get("member")]
+    assert [(t["group"], t["fights"]) for t in teams] == [("Klee + Varka", 2)]
+    assert out["records_kept"] == 4
+
+
+def test_lane_copies_of_coop_rows_are_dropped_on_read(tmp_path):
+    """Both co-op lanes write both seats: each (fight, seat) arrives twice,
+    once per lane dir. load_fights keeps one; solo rows are never merged."""
+    inst = {"run_instance": "20260927-014342#0"}
+    coop = [_rx_row("Klee", 0, **inst), _rx_row("Furina", 1, **inst)]
+    solo = [fight("Klee", run_instance="20261003-000551#0", fight_index=0,
+                  floor=2, seat_index=0)]
+    lane_a = write(tmp_path / "lane1", coop + solo)
+    lane_b = write(tmp_path / "lane2", coop + solo)
+    rows = tr.load_fights([lane_a, lane_b])
+    assert sorted((r["character"], r["seats"]) for r in rows) == [
+        ("Furina", 2), ("Klee", 1), ("Klee", 1), ("Klee", 2)]
+    assert len(tr.load_fights([lane_a, lane_b], dedupe=False)) == 6
+
+
+def test_run_instance_filter_is_repeatable_and_prefix_matched(tmp_path,
+                                                              capsys):
+    rows = [fight("Klee", run_instance="20261007-235701#0", dealt=40),
+            fight("Klee", run_instance="20261007-235702#0", dealt=40),
+            fight("Klee", run_instance="20261007-204801#0", dealt=80),
+            fight("The Ironclad", run_instance="20261005-105504#0"),
+            fight("The Regent", run_instance="20261005-113940#0"),
+            fight("The Silent", run_instance="20261005-125503#0", dealt=999),
+            fight("Klee")]                          # no run_instance at all
+    out = run(tmp_path, rows, "--character", "Klee",
+              "--run-instance", "20261007-2357", capsys=capsys)
+    assert cell(out, "Klee", 1)["fights"] == 2
+    assert out["filters"]["run_instance"] == ["20261007-2357"]
+    out = run(tmp_path / "b", rows, "--character", "Klee",
+              "--character", "base5",
+              "--run-instance", "20261007-2357",
+              "--baseline-run-instance", "20261005-1055",
+              "--baseline-run-instance", "20261005-113940#0", capsys=capsys)
+    (act1,) = [c for c in out["comparison"] if c["act"] == 1]
+    assert act1["fights"] == 2 and act1["base_fights"] == 2
+    assert act1["base_dmg_turn"] == 10.0          # the 999 run is left out
+
+
+def test_help_prints_the_field_notes(capsys):
+    with pytest.raises(SystemExit):
+        tr.main(["--help"])
+    text = capsys.readouterr().out
+    assert "RUNNING TOTAL" in text and "never a sum" in text
+    assert "EB-156" in text and "run_instance" in text

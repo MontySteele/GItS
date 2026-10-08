@@ -180,7 +180,7 @@ Notes:
 ## 4. His relics and potions
 
 The base characters' shape (census in
-`review/active/relics-potions-klee-furina-2026-09-27.md`): Starter, Common, 2
+`review/ruled/relics-potions-klee-furina-2026-09-27.md`): Starter, Common, 2
 Uncommon, 3 Rare, Shop, plus 3 potions. The Ancient (Wolf's Gravestone) is
 built (#779).
 

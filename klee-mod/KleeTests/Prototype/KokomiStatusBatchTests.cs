@@ -231,7 +231,7 @@ public class KokomiStatusBatchTests : IDisposable
         Assert.Equal(11m, Upgraded<ProtoKkSeaGlassHarvest>().DynamicVars.Block.BaseValue);
         Assert.Equal(KokomiPlan.Kind.TransformStatusesInHand,
                      Assert.Single(card.PlanClauses).Kind);
-        Assert.Contains("Sea Glass{IfUpgraded:show:+|}", Face(card));
+        Assert.Contains("[gold]Sea Glass[/gold]{IfUpgraded:show:+|}", Face(card));
         var body = Seq("KokomiStatusBatch", "TransformStatuses");
         Assert.Contains(body, c => c.Contains("get_IsTransformable"));
         Assert.Contains(body, c => c.Contains("CreateCard"));

@@ -55,7 +55,7 @@ someone types by hand, so an unreferenced script here is not necessarily dead.
 | `gen_varka_stills.py` | Derive Varka's still surfaces from his governing render. |
 | `godot_log_sweep.py` | EB-154: sweep a headless MegaDot log for the failures its exit code hides. |
 | `kokomi_expansion_sim.py` | KOKOMI EXPANSION, BATCH ONE -- the paper's sec.5 sim (exploration, not quotable, R215 B). |
-| `land_pr.py` | Land a PLUMBING pull request: check CI, merge, purge the worktree, fast-forward. |
+| `land_pr.py` | Land a PR that asks nothing of [USER]: check CI, merge, purge the worktree, fast-forward. |
 | `lint_ancient_coverage.py` | Every visible roster character must ship >= 1 Ancient-rarity pool card. |
 | `lint_arm_pool_parity.py` | A prototype arm's OFFER roster must be the arm's sheet rows, in both engines. |
 | `lint_companion_shop_coverage.py` | The companion roster must be able to fill BOTH shop slots, always. |

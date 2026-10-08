@@ -320,7 +320,7 @@ Two faces changed after the batch landed (2026-09-23):
 
 ### 5.7 The status package (2026-10-01)
 
-Ruled 2026-10-01 (`review/active/klee-status-package-2026-10-01.md`): cards
+Ruled 2026-10-01 (`review/ruled/klee-status-package-2026-10-01.md`): cards
 with excellent cost-to-effect ratios that load her deck with statuses, priced
 by how busted they are. The fair loaders pay the light tax, the base game's
 Dazed; the "mega turn now, suffer later" cards pay the heavy one, two

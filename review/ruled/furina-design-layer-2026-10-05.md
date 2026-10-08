@@ -1,4 +1,4 @@
-Status: OPEN. A design-layer paper; it hands off to a research agent (sec.8). It asks no tuning picks.
+Status: CLOSED. It handed off to `review/active/furina-research-proposal-2026-10-05.md`, ruled 2026-10-05. History only.
 
 # Furina at the design layer: what she is for, and whether it works
 

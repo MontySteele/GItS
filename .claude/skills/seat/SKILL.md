@@ -27,7 +27,7 @@ python tools/seat.py --opus-brief --lane 2 --character KLEEMOD-KLEE --scratch <d
 ```
 
 Prints `docs/current/operations/seat-brief.md` with the lane and notes path
-filled in; on stderr, the embark to run first, `--max-actions 120` unless named
+filled in (`--scratch` adds lane scripts `o`/`a`); on stderr, the embark, `--max-actions 120` unless named
 (Sonnet: 1500). **Paste it; never rewrite it** (a different instrument).
 
 ## Standing rules

@@ -108,7 +108,8 @@ public sealed class PurityDarkPower : PowerModel, ILocalizationProvider
     {
         ("title", "Principle of Purity: Dark"),
         ("description",
-            "Your [gold]Pyro[/gold] damage deals [blue]{Amount}[/blue] more."),
+            "Your [gold]Pyro[/gold] hits deal [blue]{Amount}[/blue] additional "
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Buff;

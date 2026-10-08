@@ -354,13 +354,15 @@ def test_grand_ode_swirls_every_enemy_and_ticks(overhaul):
     st.enemies[1].aura = "hydro"
     st.player.powers["mc_grand_ode"] = 2
     effects.companion_overhaul_turn_end(st)
-    # This engine's Swirl SPREADS the aura it touched across the board (and
-    # Anemo itself never sticks), which is exactly what the `swirl` op does --
-    # the power calls the same `reactions.resolve_hit`, so the two cannot mean
-    # different things. Board order decides what the second enemy ends up
-    # holding, and asserting it here is what would catch the power growing a
-    # private Swirl of its own.
-    assert [e.aura for e in st.enemies] == ["pyro", "pyro"]
+    # A Swirl consumes the aura it touched, copies it fresh onto every OTHER
+    # enemy and deals SWIRL_DAMAGE to all (`C.SWIRL_PAYS`, the game's rule),
+    # which is exactly what the `swirl` op does -- the power calls the same
+    # `reactions.resolve_hit`, so the two cannot mean different things. Board
+    # order decides the end state: a's Pyro replaces b's Hydro, then b's
+    # Swirl hands it back to a. Asserting it here is what would catch the
+    # power growing a private Swirl of its own.
+    assert [e.aura for e in st.enemies] == ["pyro", None]
+    assert [e.hp for e in st.enemies] == [50 - 2 * C.SWIRL_DAMAGE] * 2
     assert st.player.powers["mc_grand_ode"] == 1
 
 
@@ -374,12 +376,12 @@ def test_dandelion_breeze_pays_its_block_even_with_no_aura_on_the_board(
 
 def test_dandelion_breeze_swirls_the_aura_bearer(overhaul):
     """It picks the aura-bearer and Swirls THERE -- the clean enemy catches
-    the spread, which is what a Swirl is in this engine."""
+    the spread and the bearer's aura is consumed, which is what a Swirl is."""
     st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
     st.enemies[1].aura = "cryo"
     st.player.powers["mc_dandelion_breeze"] = 1
     effects.companion_overhaul_turn_end(st)
-    assert [e.aura for e in st.enemies] == ["cryo", "cryo"]
+    assert [e.aura for e in st.enemies] == ["cryo", None]
     assert st.player.block == C.MC_DANDELION_BREEZE_BLOCK
 
 

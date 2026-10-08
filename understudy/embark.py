@@ -366,13 +366,16 @@ def embark(character: str, *, hold: bool = False,
                 f"it was never torn down, and a second game on this lane "
                 f"cannot bind its port. Tear it down first: python -m "
                 f"understudy.embark --teardown{flag} --stamp {old}")
-    budget =blindplay_shape.set_budget(max_actions, lane)
     # `EB-691`. Zeroed BEFORE the launch, beside the budget and for the same
     # reason: a launch that fails half way leaves a watch armed on a lane with
     # no game rather than the last game's cursor.
     lanewatch.arm(lane)
 
     stamp = reserve_stamp(lane)
+    # The budget is zeroed FOR THIS RUN (2026-10-08): the stamp rides in the
+    # lane's budget row, so a count carried over from an earlier run on the
+    # lane is recognised as one (`blindplay_shape.count_action`).
+    budget = blindplay_shape.set_budget(max_actions, lane, run=stamp)
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
     session = soak.Session(stamp, do_setup=not hold, intent="",
                            instance=instance, install_bridge=install_bridge)
@@ -389,6 +392,11 @@ def embark(character: str, *, hold: bool = False,
         # coordinator's shell history is a caveat the reader does not have.
         "max_actions": budget["cap"],
         "max_actions_store": str(blindplay_shape.budget_path(lane)),
+        # 2026-10-08: the install this lane launched, so the sealed record
+        # finds the deployed build from any checkout (`build_version`).
+        **({"game_dir": str(session.instance.game_dir)}
+           if session.instance is not None
+           and session.instance.game_dir is not None else {}),
         # WHICH GAME THIS RUN IS ON. A sidecar with no lane on it is a run
         # nobody can attribute once two of them can be open at once; the
         # label, the port and the user tree are all three facts a reader needs
@@ -502,8 +510,17 @@ def reserve_stamp(lane: object = None, *, clock=time.strftime,
 
 def _write_sidecar(stamp: str, blob: dict[str, Any]) -> None:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
-    sidecar_path(stamp).write_text(json.dumps(blob, indent=1) + "\n",
-                                   encoding="utf-8")
+    text = json.dumps(blob, indent=1) + "\n"
+    sidecar_path(stamp).write_text(text, encoding="utf-8")
+    # 2026-10-08: AND A COPY IN THE LANE'S STATE FOLDER, where `blindplay`
+    # reads the run's seed, stamp and install from whichever checkout the
+    # seat runs in (`blindplay_shape.lane_sidecars`). The checkout's copy
+    # stays the teardown's ledger anchor; this one is read-only to the page.
+    label = str(blob.get("instance") or "")
+    if label:
+        blindplay_shape.write_atomic(
+            blindplay_shape.lane_state_dir(label) / sidecar_path(stamp).name,
+            text)
 
 
 def _sidecar(path: Path) -> dict[str, Any]:
