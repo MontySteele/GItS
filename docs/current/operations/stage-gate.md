@@ -74,6 +74,13 @@ that part is fixed.
 
 **Exit:** the bar is met on a suite run.
 
+**Replication before reversal (2026-10-08, project review pick 1).** Each suite tests one named change
+set. A change is reverted or replaced on a suite result only if a second suite on the same build
+agrees, unless the gap is plainly outside the suite-to-suite spread seen so far (end floors moved 2
+to 6 between suites; two Sonnet runs of one base character on one seed ended 15 floors apart).
+Large structural findings, such as the design review's turn-one gap, are exempt. A replication costs
+about 12M tokens.
+
 **Solo first, co-op checked (2026-10-06).** A kit is judged on solo play
 against the base five; [USER]'s co-op runs read fun and feel, not strength
 (he wins any A0 co-op run with base characters). [USER]: "It's fine for
@@ -81,3 +88,6 @@ co-op to be easier, but the characters should not be outright weak in single
 player and dependent on reactions in a way that makes co-op exponentially
 easier." The co-op check is a paired seat round on shared seeds: a kit pair
 whose elements react against a base pair (Ironclad + Silent), on the same bar.
+It runs on three shared seeds, once at a kit's finish line and after any reaction-rule change, not
+between card batches (2026-10-08, project review pick 2). One pair runs per machine (UDP 33771), so
+the six runs go one after another.
