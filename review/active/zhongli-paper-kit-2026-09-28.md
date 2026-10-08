@@ -17,15 +17,20 @@ any turn you need; the bill arrives when the fight ends.
 
 ## 2. His element: Geo, the quiet one
 
-Geo leaves no aura. Under the element review
-(`review/ruled/element-home-review-2026-09-28.md`), a Geo hit on a fresh aura
-**crystallizes** it: Block, and the aura stays, spent for triggers.
+Geo leaves no aura. A Geo hit on an aura **crystallizes** it: 4 Block, and
+the aura is consumed, like every reaction (`LAW.md`; the spent-aura rule of
+`review/ruled/element-home-review-2026-09-28.md` was reversed 2026-10-03).
+Amended 2026-10-08 (project review, pick 4): Crystallize stays at 4 Block
+until a Geo character is picked.
 
 - **Solo:** his Geo is incidental, the way Klee's Pyro is. His kit does not
   need a reaction to work, so he needs **no starter companion** (the element
   review's pick 3 asks this per character).
-- **In co-op:** he harvests his partner's auras for Block and never takes them
-  away. That is Genshin's Zhongli: the support who fits any team.
+- **In co-op:** he can harvest his partner's auras for Block, but each one he
+  crystallizes is an aura his partner cannot react with. Whether to take it is
+  a timing question between the two players, not a free gift. (The paper
+  first said he "never takes them away"; that held only under the spent-aura
+  rule.)
 - **Element changes he needs:** only the review's shared rule and change B.
   Nothing new.
 
@@ -102,7 +107,10 @@ better than paying up front.
     wrath of the rock".
 - **Raise the Stele.** The Stone Stele is a Power: at the end of each turn it
   deals 3 Geo to every enemy. Solo, that is plain damage to all. In co-op,
-  every fresh aura on the board crystallizes into his Block.
+  under the consuming rule, it would crystallize every aura on the board each
+  turn and strip the partner's setup. **Open for his brief:** the Stele's Geo
+  either does not react, or it reacts only on enemies the partner has not
+  marked; the paper does not choose.
 
 ## 5. The three archetypes
 
@@ -116,7 +124,8 @@ better than paying up front.
    Contracts kept, because a run-long "kept" counter could be farmed on easy
    enemies (GPT's second audit).
 3. **The Rock.** Jade Shield (Block that lasts through your next turn, like
-   Blur), the Stele, and in co-op the partner's auras crystallizing every turn.
+   Blur), the Stele, and in co-op the partner's leftover auras crystallized
+   for Block.
    The finisher is **Planet Befall** (Rare): Petrify one enemy so it skips its
    next action, once per fight, Exhaust. That sits inside `LAW.md`'s "hard CC
    is payoff-tier only".
