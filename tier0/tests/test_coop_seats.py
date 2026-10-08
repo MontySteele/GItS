@@ -698,6 +698,12 @@ def test_the_embark_cli_routes_coop_and_refuses_an_arm():
                         "--arm", "x"]) == 2
 
 
+def test_the_embark_cli_refuses_seeds_with_coop(capsys):
+    assert embark.main(["--coop", "--lanes", "2,3", "--characters",
+                        "klee,varka", "--seeds", "AAA"]) == 2
+    assert "--seed" in capsys.readouterr().err
+
+
 # -------------------------------------------------------------- the brief --
 
 def test_the_coop_paragraph_is_printed_only_with_coop():
