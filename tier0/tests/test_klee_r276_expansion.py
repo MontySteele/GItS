@@ -27,7 +27,9 @@ from tier05 import rewards
 # last since the Klee-only companions (2026-10-03).
 # The Klee tempo paper (2026-10-07) cut Sit Tight and Experiment in Progress
 # from this block; the status package, the tempo five and the companions follow.
-EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-41:-17]
+# The Klee design review (2026-10-08) cut Playdate from this block and appended
+# its two after the tempo five.
+EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-42:-19]
 
 
 @pytest.fixture
@@ -85,11 +87,11 @@ def filler(n=5):
 
 def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     rows = {cid: load(cid) for cid in EXPANSION}
-    assert len(rows) == 24
+    assert len(rows) == 23
     by_rarity = {}
     for card in rows.values():
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + 1
-    assert by_rarity == {"common": 3, "uncommon": 12, "rare": 9}
+    assert by_rarity == {"common": 2, "uncommon": 12, "rare": 9}
     shape = {cid: (c.cost, c.type) for cid, c in rows.items()}
     assert shape["proto_ko_hiding_spot"] == (1, "skill")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")
@@ -186,19 +188,19 @@ def test_mk_iii_hits_three_times_and_plants_a_bomb_per_hit(overhaul):
     state = klee_state([a, b])
     play(state, load("proto_ko_jumpy_dumpty_mk_iii"))
     assert sum(len(e.ko_charges) for e in (a, b)) == 3
-    assert all(s == 2 for e in (a, b) for s in sizes(e))
+    assert all(s == 4 for e in (a, b) for s in sizes(e))
     assert (200 - a.hp) + (200 - b.hp) >= 9
 
 
-def test_mk_iii_upgraded_hits_four_and_plants_three(overhaul):
+def test_mk_iii_upgraded_hits_four_and_plants_five(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     play(state, load("proto_ko_jumpy_dumpty_mk_iii+"))
-    assert sizes(enemy) == [3, 3, 3]
+    assert sizes(enemy) == [5, 5, 5]
 
 
 def test_mine_all_mine_hits_and_places_a_mine_on_the_aimed_enemy(overhaul):
-    """Klee finish-line batch, 2026-10-03: "Deal 8 Pyro damage. Place a Mine 4
+    """Klee finish-line batch, 2026-10-03: "Deal 8 Pyro damage. Place a Mine 6 (4 until the Klee design review)
     on that enemy." Nothing goes off: the aimed body's Mine and plain Bomb
     stay, and the new Mine joins them."""
     a, b, c = (make_enemy(hp=200, name=n) for n in "abc")
@@ -207,7 +209,7 @@ def test_mine_all_mine_hits_and_places_a_mine_on_the_aimed_enemy(overhaul):
     klee_overhaul.place(state, a, 9)
     klee_overhaul.place(state, b, 4, is_mine=True)
     play(state, load("proto_ko_mine_all_mine"), aim=a)
-    assert sizes(a) == [4, 9, 4] and sizes(b) == [4]
+    assert sizes(a) == [4, 9, 6] and sizes(b) == [4]
     assert a.ko_charges[-1].is_mine
     assert a.hp < 200
     assert b.hp == 200 and c.hp == 200
@@ -241,7 +243,7 @@ def test_windblume_fireworks_sets_off_then_hits_then_plants(overhaul):
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 5)
     play(state, load("proto_ko_windblume_fireworks"))
-    assert sizes(a) == [6] and sizes(b) == [6]
+    assert sizes(a) == [8] and sizes(b) == [8]
     assert 200 - b.hp == 10
     assert 200 - a.hp == 15
 
@@ -275,23 +277,15 @@ def test_hiding_spot_blocks_and_places_a_mine(overhaul):
     state = klee_state([enemy])
     play(state, load("proto_ko_hiding_spot+"))
     assert state.player.block == 8
-    assert sizes(enemy) == [5] and klee_overhaul.mine_count(enemy) == 1
+    assert sizes(enemy) == [7] and klee_overhaul.mine_count(enemy) == 1
 
 
 # ---------------------------------------------------------------------------
 # THE COMPANION ROUTE
 # ---------------------------------------------------------------------------
 
-def test_playdate_takes_one_off_the_next_companion_card(overhaul):
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    buddy = friend(cost=2)
-    play(state, load("proto_ko_playdate"), aim=enemy)
-    assert sizes(enemy) == [3]
-    assert combat.card_cost(state, buddy) == 1
-    assert combat.card_cost(state, load("proto_ko_pop")) == 0
-    klee_overhaul.spend_playdate(state, buddy)
-    assert combat.card_cost(state, buddy) == 2
+# Playdate's card pin left with its row (Klee design review, 2026-10-08);
+# its power stays registered, pinned below.
 
 
 def test_playdate_expires_at_the_end_of_the_turn(overhaul):

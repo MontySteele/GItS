@@ -33,7 +33,7 @@ def test_five_out_five_in_and_the_split_holds(overhaul):
     rows = {c.id for c in loader.prototype_cards()}
     for cid in CUT:
         assert cid not in ids and cid not in rows, cid
-    assert ids[-8:-3] == C.KLEE_TEMPO_IDS
+    assert ids[-10:-5] == C.KLEE_TEMPO_IDS
     rarity = collections.Counter(load(cid).rarity for cid in ids)
     assert rarity == {"common": 25, "uncommon": 32, "rare": 21}
     shapes = {cid: (load(cid).type, load(cid).cost, load(cid).rarity)

@@ -9,8 +9,9 @@ namespace KleeMod.Powers;
 public static class KleeOverhaulLaw
 {
     /// <summary>Rule 1: every Bomb grows by this at the start of Klee's turn.
-    /// Mirrors <c>C.KLEE_OVERHAUL_BOMB_GROWTH</c>.</summary>
-    public const int BombGrowth = 4;
+    /// Mirrors <c>C.KLEE_OVERHAUL_BOMB_GROWTH</c>. 2 since the Klee design
+    /// review (2026-10-08, sec.4.6, ruled; it was 4).</summary>
+    public const int BombGrowth = 2;
 
     /// <summary>
     /// Alice's Recipe: growth is MULTIPLIED by this while the power is up --
@@ -41,8 +42,11 @@ public static class KleeOverhaulLaw
     /// relic into <c>ExplosiveFrags</c> -- whose own opening bank this arm
     /// deliberately gates OFF. The grant site is
     /// <c>KleeElementalHooks.AfterPlayerTurnStart</c>, turn 1.
+    ///
+    /// 3 SINCE THE KLEE DESIGN REVIEW (2026-10-08, sec.4.6, ruled; it was 1):
+    /// Regent's own 3 Stars, so a Spark card is live on turn one.
     /// </summary>
-    public const int OpeningSpark = 1;
+    public const int OpeningSpark = 3;
 
     /// <summary>
     /// GROUNDED'S SPARK (`EB-344`, ruled R248): the held turn pays this many

@@ -33,7 +33,7 @@ from typing import Any
 # is held in step from the other side by
 # `test_the_bomb_glossary_carries_the_growth_number`, which reads the C#
 # constant.
-BOMB_GROWTH = 4
+BOMB_GROWTH = 2
 
 #: `EB-537`. The Shatter's bonus damage, `ReactionConstants.ShatterDamage` in
 #: the mod and `C.SHATTER_DAMAGE` in the sim, mirrored here for `BOMB_GROWTH`'s
@@ -56,7 +56,7 @@ CASKET_PER_PLAN = 1
 #: tip is raised by a card that PRINTS the word, so a seat holding no
 #: Spark-priced card meets the meter row and nothing else: "Where Spark comes
 #: from is not on the combat screen" (Klee r20 lane 2).
-OPENING_SPARK = 1
+OPENING_SPARK = 3
 
 # `EB-340`. How long an aura clings, as `ReactionConstants.AuraDurationTurns`
 # sets it and the four `Applies <element>` tips interpolate it. Same discipline

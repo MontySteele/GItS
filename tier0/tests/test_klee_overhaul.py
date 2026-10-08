@@ -142,7 +142,10 @@ def test_the_starter_is_the_canonical_ten():
     # Draft 3's six ids: two deleted outright, two back in the offer pool.
     for gone in ("proto_ko_kaboom", "proto_ko_duck_and_cover"):
         assert gone not in {c.id for c in loader.prototype_cards()}
-    assert "proto_ko_pop" in C.KLEE_OVERHAUL_POOL_IDS
+    # Pop! left the pool at the Klee design review (2026-10-08) and is kept
+    # off-pool for Klee Can Explain!.
+    assert "proto_ko_pop" not in C.KLEE_OVERHAUL_POOL_IDS
+    assert "proto_ko_pop" in C.KLEE_OFF_POOL_ROW_IDS
     assert "proto_ko_dig_in" in C.KLEE_OVERHAUL_POOL_IDS
 
 
@@ -235,7 +238,9 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     ids = C.KLEE_OVERHAUL_POOL_IDS
     assert len(ids) == 78
     assert len(set(ids)) == 78
-    assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
+    assert "proto_ko_dig_in" in ids
+    # The Klee design review (2026-10-08): Pop! off-pool, Playdate cut.
+    assert "proto_ko_pop" not in ids and "proto_ko_playdate" not in ids
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
     # R244's three, and only three: `Hex and Wick` is the packet's sec.3
     # fourth, left out at pick 1's default until the round-8 read asks for a
@@ -294,8 +299,10 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # The Klee tempo paper (2026-10-07) cut Sit Tight and Experiment in
     # Progress here and It Wasn't Me! from the package; its five come after
     # the package and before the companions.
-    assert list(ids[-41:-17]) == [
-        "proto_ko_hiding_spot", "proto_ko_playdate",
+    # The Klee design review (2026-10-08) cut Playdate here; its two come
+    # after the tempo five.
+    assert list(ids[-42:-19]) == [
+        "proto_ko_hiding_spot",
         "proto_ko_jumpy_dumpty_mk_iii",
         "proto_ko_mine_all_mine", "proto_ko_team_effort",
         "proto_ko_one_more_charge",
@@ -328,10 +335,12 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
                 "proto_ko_grounded", "proto_ko_sit_tight",
                 "proto_ko_patience_klee"):
         assert cut not in ids, cut
-    assert ids[-17:-8] == C.KLEE_STATUS_PACKAGE_IDS
-    assert ids[-8:-3] == C.KLEE_TEMPO_IDS == (
+    assert ids[-19:-10] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-10:-5] == C.KLEE_TEMPO_IDS == (
         "proto_ko_simmer", "proto_ko_taste_test", "proto_ko_tinkering",
         "proto_ko_dodoco_tag", "proto_ko_explosive_spark")
+    assert ids[-5:-3] == C.KLEE_DESIGN_REVIEW_IDS == (
+        "proto_ko_fire_fire", "proto_ko_blasting_spree")
     assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
 
 
@@ -339,16 +348,17 @@ def test_the_numbers_are_the_briefs_placeholders():
     """Slice packet sec.1: no number in it is a claim. These four are the
     rules' own, and they are named so `lint_constant_parity` can compare the
     C# mirrors BY VALUE."""
-    # FOUR: the round-5 packet raised it from 3 to 5 and [USER] read 5 back
-    # down on the same day ("growth 5 is likely too much").
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 4
+    # TWO since the Klee design review (2026-10-08, sec.4.6, ruled): four
+    # paid every Bomb to wait. (Four from the round-5 packet to then.)
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 2
     # A MULTIPLIER since the 2026-09-02 balance pass: Alice's Recipe doubles
     # the turn's growth ("your Bombs grow twice each turn").
     assert C.KLEE_OVERHAUL_ALICE_MULTIPLIER == 2
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1
     # FIVE since R242 pick 1: rule 4's opening bank. [USER]: "Regent starts
     # with 3 stars ... so 1 is a reasonable compromise."
-    assert C.KLEE_OVERHAUL_OPENING_SPARK == 1
+    # THREE since the Klee design review (2026-10-08, sec.4.6): Regent's 3.
+    assert C.KLEE_OVERHAUL_OPENING_SPARK == 3
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------

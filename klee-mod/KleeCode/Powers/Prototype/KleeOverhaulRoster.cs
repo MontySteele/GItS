@@ -252,7 +252,9 @@ internal static class KleeOverhaulRoster
         // Spray (8 -- Pop! is the packet sec.4 table's first Spray row and it
         // OFFERS from draft 4; Fwoosh! was CUT by R271 sec.4 item 1, because
         // Pocket Match is the same card at 5 with Retain)
-        ModelDb.Card<ProtoKoPop>(),
+        // Pop! left the pool at the Klee design review (2026-10-08); its row
+        // stays in her CardPool because Klee Can Explain! creates it
+        // (`C.KLEE_OFF_POOL_ROW_IDS`).
         ModelDb.Card<ProtoKoMineToss>(),
         ModelDb.Card<ProtoKoTinderToss>(),
         ModelDb.Card<ProtoKoQuickFuse>(),
@@ -344,7 +346,7 @@ internal static class KleeOverhaulRoster
         // Cook, retrieval and mischief, more Mines and Spray, and the Rares'
         // rule-breakers. Designed by the main session; the rows are the spec's.
         ModelDb.Card<ProtoKoHidingSpot>(),
-        ModelDb.Card<ProtoKoPlaydate>(),
+        // Playdate cut by the Klee design review (2026-10-08).
         ModelDb.Card<ProtoKoJumpyDumptyMkIii>(),
         // Spinning Sparkler cut by the status pile's defence (2026-10-01).
         ModelDb.Card<ProtoKoMineAllMine>(),
@@ -401,6 +403,14 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoTinkering>(),
         ModelDb.Card<ProtoKoDodocoTag>(),
         ModelDb.Card<ProtoKoExplosiveSpark>(),
+        // THE KLEE DESIGN REVIEW (2026-10-08, ruled,
+        // review/active/klee-design-review-2026-10-08.md sec.4.4 and 4.5):
+        // two Commons in for Playdate and Pop!, in
+        // `C.KLEE_DESIGN_REVIEW_IDS`' order, which is the sheet's -- her
+        // normal attack (place and set off in one card) and Spray's fuel for
+        // a Dazed. Still 78, 25 / 32 / 21.
+        ModelDb.Card<ProtoKoFireFire>(),
+        ModelDb.Card<ProtoKoBlastingSpree>(),
         // THE KLEE-ONLY COMPANIONS (2026-10-03,
         // review/active/mondstadt-companions-2026-10-03.md sec.4): three
         // companion cards that read her rules, in her own pool now, LAST in

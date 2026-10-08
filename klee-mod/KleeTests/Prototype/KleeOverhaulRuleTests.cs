@@ -86,17 +86,17 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 9, 12 }, pile.Charges.Select(c => c.Size));
-        Assert.Equal(21, pile.TotalSize);
+        Assert.Equal(new[] { 7, 10 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(17, pile.TotalSize);
     }
 
     [Fact]
-    public void Rule1_growth_is_four_by_default()
+    public void Rule1_growth_is_two_by_default()
     {
-        // FOUR: the round-5 packet raised it from 3 to 5 and [USER] read 5
-        // back down the same day ("growth 5 is likely too much").
+        // TWO since the Klee design review (2026-10-08, sec.4.6): four
+        // paid every Bomb to wait.
         var klee = Seat.Klee();
-        Assert.Equal(4, KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(2, KleeOverhaulLaw.BombGrowth);
         Assert.Equal(KleeOverhaulLaw.BombGrowth,
                      GrowthFor(klee.Creature));
     }
@@ -315,7 +315,7 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 8, 8 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(new[] { 6, 6 }, pile.Charges.Select(c => c.Size));
         Assert.True(pile.Charges[0].IsMine);
     }
 

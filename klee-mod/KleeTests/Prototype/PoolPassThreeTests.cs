@@ -296,7 +296,7 @@ public class PoolPassThreeTests
         var card = new ProtoKoBombsAway();
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.Equal(4m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(6m, card.DynamicVars["BombSize"].BaseValue);
 
         var play = Il.CallSequence(Il.Method("ProtoKoBombsAway", "OnPlay")).ToList();
         var place = play.IndexOf("ProtoBombPower.Place");

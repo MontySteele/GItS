@@ -83,9 +83,9 @@
 
 # --- Spray, everything explodes now (packet sec.4) ---
 
-# Pop! is the packet sec.4 Spray table's first row and it OFFERS from draft 4
-# (R242): the canonical starter has no room for it, so "the cheapest plant"
-# becomes a Common anyone can draft rather than a card every Klee opens with.
+# Pop! is OFF-POOL since the Klee design review (2026-10-08, sec.4.4): the
+# row stays, unchanged, because Klee Can Explain! transforms statuses into it
+# (`C.KLEE_OFF_POOL_ROW_IDS`). Provenance note, "Klee design review".
 - {id: proto_ko_pop, name: "Pop!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
@@ -97,9 +97,9 @@
    cost: 1, type: skill, rarity: common,
    # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.2):
    # single target, was a Mine 4 on ALL enemies.
-   description: "Place a [gold]Mine[/gold] 7 on an enemy.",
+   description: "Place a [gold]Mine[/gold] 9 on an enemy.",
    upgrade: {bomb_size: +3},
-   effects: [{op: plant_bomb, target: enemy, size: 7, mine: true}]}
+   effects: [{op: plant_bomb, target: enemy, size: 9, mine: true}]}
 
 # R271 sec.4, item 1: Fwoosh! is CUT. (Pocket Match, the Retain twin it was
 # cut for, became a single-charge Set off on 2026-09-24.)
@@ -128,10 +128,10 @@
 - {id: proto_ko_bang_bang, name: "Boom-Boom Strike", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Bomb[/gold] 4.",
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Bomb[/gold] 6.",
    effects: [{op: spend_spark, amount: 2},
              {op: set_off, target: enemy, damage: 8},
-             {op: plant_bomb, target: enemy, size: 4}]}
+             {op: plant_bomb, target: enemy, size: 6}]}
 
 # RAPID FIRE IS CUT (the Klee status package, 2026-10-01,
 # review/active/klee-status-package-2026-10-01.md sec.3). Provenance
@@ -178,9 +178,9 @@
 - {id: proto_ko_ammo_scavenging, name: "Lizard-Tail Gunpowder", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 4. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
+   description: "Place a [gold]Bomb[/gold] 6. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
    upgrade: {bomb_size: +3},
-   effects: [{op: plant_bomb, target: enemy, size: 4},
+   effects: [{op: plant_bomb, target: enemy, size: 6},
              {op: draw_per_set_off}]}
 
 # R271 sec.4 item 3 and sec.7 batch one, row 1: Powder Charge's shape, a Mine
@@ -189,10 +189,10 @@
 - {id: proto_ko_booby_trap, name: "Booby Trap", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Place a [gold]Mine[/gold] 5.",
+   description: "Place a [gold]Mine[/gold] 7.",
    upgrade: {bomb_size: +3},
    effects: [{op: spend_spark, amount: 1},
-             {op: plant_bomb, target: enemy, size: 5, mine: true}]}
+             {op: plant_bomb, target: enemy, size: 7, mine: true}]}
 
 # 2026-10-03, Klee pre-Balance sweep: Block stays 8, upgrade +3 stated.
 - {id: proto_ko_dig_in, name: "Dig In", character: klee,
@@ -245,16 +245,16 @@
    upgrade: {bomb_size: +2},
    # AoE trim, 2026-10-03 (sec.2): one Bomb that grows by 3 after a
    # Companion, where it went to ALL enemies. `bonus_if:` is the rider.
-   description: "Place a [gold]Bomb[/gold] 8 on an enemy, 12 if you played a [gold]Companion[/gold] card this turn.",
-   effects: [{op: plant_bomb, target: enemy, size: 8,
+   description: "Place a [gold]Bomb[/gold] 10 on an enemy, 14 if you played a [gold]Companion[/gold] card this turn.",
+   effects: [{op: plant_bomb, target: enemy, size: 10,
               bonus_if: {if: companion_played_this_turn, amount: 4}}]}
 
 - {id: proto_ko_witches_circle, name: "Little Hexenzirkel", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    upgrade: {power_amount: +2},
-   description: "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] 3 on a random enemy.",
-   effects: [{op: apply_power, power: ko_witches_circle, amount: 3, target: self}]}
+   description: "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] 5 on a random enemy.",
+   effects: [{op: apply_power, power: ko_witches_circle, amount: 5, target: self}]}
 
 # 2026-10-03, Klee pre-Balance sweep: draws 2 after the mark.
 - {id: proto_ko_alices_introduction_magic, name: "Alice's Introduction Magic", character: klee,
@@ -323,9 +323,9 @@
    # AoE trim, 2026-10-03 (sec.2): a Skill now, Block keyed to the Bombs on
    # the board (the count is read after this Bomb lands).
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 4 on an enemy. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold].",
+   description: "Place a [gold]Bomb[/gold] 6 on an enemy. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold].",
    upgrade: {bomb_size: +2},
-   effects: [{op: plant_bomb, target: enemy, size: 4},
+   effects: [{op: plant_bomb, target: enemy, size: 6},
              {op: block, amount_formula: {base: 4, per: 2, count: enemies_with_bomb}}]}
 
 # R271 sec.4 item 2: Fireworks Show is CUT and MERGED into Tinder Toss, which
@@ -451,26 +451,22 @@
 - {id: proto_ko_hiding_spot, name: "Windtrace", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. Place a [gold]Mine[/gold] 3 on a random enemy.",
+   description: "Gain 6 [gold]Block[/gold]. Place a [gold]Mine[/gold] 5 on a random enemy.",
    upgrade: {block: +2, bomb_size: +2},
    effects: [{op: block, amount: 6},
-             {op: plant_bomb, target: random_enemy, size: 3, mine: true}]}
+             {op: plant_bomb, target: random_enemy, size: 5, mine: true}]}
 
-- {id: proto_ko_playdate, name: "Playdate", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "The next [gold]Companion[/gold] card you play this turn costs 1 less. Place a [gold]Bomb[/gold] 3.",
-   upgrade: {bomb_size: +2},
-   effects: [{op: apply_power, power: ko_playdate, amount: 1, target: self},
-             {op: plant_bomb, target: enemy, size: 3}]}
+# PLAYDATE (proto_ko_playdate) IS CUT (Klee design review, 2026-10-08,
+# review/active/klee-design-review-2026-10-08.md sec.4.4). Provenance
+# note, "Klee design review, 2026-10-08".
 
 - {id: proto_ko_jumpy_dumpty_mk_iii, name: "Jumpy Dumpty Mk.III", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 3 [gold]Pyro[/gold] damage to a random enemy 3 times. Each hit places a [gold]Bomb[/gold] 2 on that enemy.",
+   description: "Deal 3 [gold]Pyro[/gold] damage to a random enemy 3 times. Each hit places a [gold]Bomb[/gold] 4 on that enemy.",
    upgrade: {damage: +1, bomb_size: +1},
    effects: [{op: damage, amount: 3, target: random_enemy, times: 3,
-              plant_on_hit: 2}]}
+              plant_on_hit: 4}]}
 
 # SPINNING SPARKLER IS CUT (Klee defence in the status pile, 2026-10-01,
 # review/active/klee-status-package-2026-10-01.md sec.5). Provenance
@@ -482,10 +478,10 @@
    # AoE trim, 2026-10-03 (sec.2): single target. Klee finish-line batch,
    # 2026-10-03 ([USER]: "how often do you have mines you want to detonate
    # early?"): the mines-only Set off is gone; the hit places a Mine instead.
-   description: "Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Mine[/gold] 4 on that enemy.",
+   description: "Deal 8 [gold]Pyro[/gold] damage. Place a [gold]Mine[/gold] 6 on that enemy.",
    upgrade: {damage: +3, bomb_size: +2},
    effects: [{op: damage, amount: 8, target: enemy},
-             {op: plant_bomb, target: enemy, size: 4, mine: true}]}
+             {op: plant_bomb, target: enemy, size: 6, mine: true}]}
 
 - {id: proto_ko_team_effort, name: "Team Effort", character: klee,
    authored_by: [claude],
@@ -575,9 +571,9 @@
 - {id: proto_ko_party_poppers, name: "Party Poppers", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a card that costs [gold]Sparks[/gold], place a [gold]Bomb[/gold] 3 on a random enemy.",
+   description: "Whenever you play a card that costs [gold]Sparks[/gold], place a [gold]Bomb[/gold] 5 on a random enemy.",
    upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_party_poppers, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: ko_party_poppers, amount: 5, target: self}]}
 
 - {id: proto_ko_look_out, name: "Look Out!", character: klee,
    authored_by: [claude],
@@ -599,9 +595,9 @@
 - {id: proto_ko_secret_base, name: "Klee's Secret Base", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, place a [gold]Bomb[/gold] 4 on a random enemy.",
+   description: "At the start of your turn, place a [gold]Bomb[/gold] 6 on a random enemy.",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_secret_base, amount: 4, target: self}]}
+   effects: [{op: apply_power, power: ko_secret_base, amount: 6, target: self}]}
 
 - {id: proto_ko_half_a_mountain, name: "Half a Mountain", character: klee,
    authored_by: [claude],
@@ -630,11 +626,11 @@
 - {id: proto_ko_windblume_fireworks, name: "Windblume Fireworks", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] ALL enemies, deal 10 [gold]Pyro[/gold] damage to them, and place a [gold]Bomb[/gold] 6 on each.",
+   description: "[gold]Set off[/gold] ALL enemies, deal 10 [gold]Pyro[/gold] damage to them, and place a [gold]Bomb[/gold] 8 on each.",
    upgrade: {damage: +4, bomb_size: +2},
    effects: [{op: set_off, target: all_enemies},
              {op: damage, amount: 10, target: all_enemies},
-             {op: plant_bomb, target: all_enemies, size: 6}]}
+             {op: plant_bomb, target: all_enemies, size: 8}]}
 
 - {id: proto_ko_fireworks_finale, name: "Fireworks Finale", character: klee,
    authored_by: [claude],
@@ -647,9 +643,9 @@
 - {id: proto_ko_dodoco, name: "Dodoco", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, place a [gold]Mine[/gold] 3 on a random enemy.",
+   description: "At the start of your turn, place a [gold]Mine[/gold] 5 on a random enemy.",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_dodoco, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: ko_dodoco, amount: 5, target: self}]}
 
 - {id: proto_ko_aftershock, name: "Aftershock", character: klee,
    authored_by: [claude],
@@ -715,9 +711,9 @@
    # Klee finish-line batch, 2026-10-03 ([USER]: "Finders Keepers seems too
    # niche to be useful"): Damage Report's draw-a-status trigger, was "play a
    # Confiscated" for a Bomb 5 [7].
-   description: "Whenever you draw a status, place a [gold]Bomb[/gold] 4 on a random enemy.",
+   description: "Whenever you draw a status, place a [gold]Bomb[/gold] 6 on a random enemy.",
    upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_finders_keepers, amount: 4, target: self}]}
+   effects: [{op: apply_power, power: ko_finders_keepers, amount: 6, target: self}]}
 
 # Defect's Compact in her colours: every status in hand, Confiscated
 # included, becomes the pool's own Pop! (unupgraded).
@@ -816,6 +812,26 @@
    upgrade: {damage: +4},
    effects: [{op: spend_spark, amount: 1},
              {op: damage, amount: 12, target: enemy}]}
+
+# --- THE KLEE DESIGN REVIEW (2026-10-08, ruled, sec.4.5): two Commons in for
+# Playdate and Pop!; still 78, 25 / 32 / 21. Provenance note, "Klee design
+# review, 2026-10-08". ---
+
+- {id: proto_ko_fire_fire, name: "Fire! Fire!", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Place a [gold]Bomb[/gold] 7 on the enemy. [gold]Set off[/gold] the enemy.",
+   upgrade: {bomb_size: +3},
+   effects: [{op: plant_bomb, target: enemy, size: 7},
+             {op: set_off, target: enemy}]}
+
+- {id: proto_ko_blasting_spree, name: "Blasting Spree", character: klee,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Place a [gold]Bomb[/gold] 4 on ALL enemies. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   upgrade: {bomb_size: +2},
+   effects: [{op: plant_bomb, target: all_enemies, size: 4},
+             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. These ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and

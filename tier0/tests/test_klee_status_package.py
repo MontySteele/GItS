@@ -54,8 +54,9 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
     # package; her three Companion rows follow it.
     # The Klee tempo paper (2026-10-07): It Wasn't Me! cut from the package,
     # and its five rows between the package and the companions.
-    assert ids[-17:-8] == C.KLEE_STATUS_PACKAGE_IDS
-    assert ids[-8:-3] == C.KLEE_TEMPO_IDS
+    assert ids[-19:-10] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-10:-5] == C.KLEE_TEMPO_IDS
+    assert ids[-5:-3] == C.KLEE_DESIGN_REVIEW_IDS
     assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
     rows = {c.id for c in loader.prototype_cards()}
     for cid in CUT + DEFENCE_CUT:
@@ -89,8 +90,9 @@ def test_the_papers_numbers_and_upgrades(overhaul):
     assert _first(load("proto_ko_red_knight"), "damage")["amount"] == 34
     assert _first(_up("proto_ko_red_knight"), "damage")["amount"] == 40
     # Klee finish-line batch, 2026-10-03: Finders Keepers is 4 [6].
-    assert _first(load("proto_ko_finders_keepers"), "apply_power")["amount"] == 4
-    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 6
+    # 4 [6] until the Klee design review (2026-10-08): every placer +2.
+    assert _first(load("proto_ko_finders_keepers"), "apply_power")["amount"] == 6
+    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 8
     assert _first(load("proto_ko_klee_can_explain"), "block")["amount"] == 6
     assert _first(_up("proto_ko_klee_can_explain"), "block")["amount"] == 8
     assert _first(load("proto_ko_damage_report"), "apply_power")["amount"] == 4

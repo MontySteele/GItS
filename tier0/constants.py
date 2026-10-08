@@ -142,7 +142,10 @@ SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
 # claims (slice packet sec.1: "No number in it is a claim"). They are named here
 # because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
 # mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
-KLEE_OVERHAUL_BOMB_GROWTH = 4        # rule 1: every Bomb, start of her turn
+# Rule 1 at 2 since the Klee design review (2026-10-08,
+# review/active/klee-design-review-2026-10-08.md sec.4.6, ruled; it was 4):
+# a Bomb cashed now is worth what it was, a Bomb held is worth less.
+KLEE_OVERHAUL_BOMB_GROWTH = 2        # rule 1: every Bomb, start of her turn
 # Alice's Recipe MULTIPLIES the turn's growth ("your Bombs grow twice each
 # turn"), balance pass 2026-09-02.
 KLEE_OVERHAUL_ALICE_MULTIPLIER = 2
@@ -151,8 +154,10 @@ KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 # has to generate more through cards, so 1 is a reasonable compromise"). It is a
 # KIT rule and not a relic clause -- the brief's rule 4 carries the line -- so
 # the mod grants it from the arm's own turn-1 site and the relic's face is
-# unchanged. C# twin `KleeOverhaulLaw.OpeningSpark`.
-KLEE_OVERHAUL_OPENING_SPARK = 1
+# unchanged. C# twin `KleeOverhaulLaw.OpeningSpark`. 3 since the Klee design
+# review (2026-10-08, sec.4.6, ruled; it was 1): Regent's own 3 Stars, so a
+# Spark card is live on turn one.
+KLEE_OVERHAUL_OPENING_SPARK = 3
 # GROUNDED'S SPARK (`EB-344`, ruled R248). The held turn pays a Spark as well as
 # the Block: "At the start of your turn, if none of your Bombs went off last
 # turn, gain 6 Block and 1 Spark." The Block is the CARD's number and moves on
@@ -253,6 +258,16 @@ KLEE_TEMPO_IDS: tuple[str, ...] = (
     "proto_ko_explosive_spark",                 # Common
 )
 
+# THE KLEE DESIGN REVIEW (2026-10-08, ruled,
+# review/active/klee-design-review-2026-10-08.md sec.4.4 and 4.5): two Common
+# rows in for Playdate and Pop!, appended after the tempo paper's in the
+# sheet's own order. Her normal attack (place and set off in one card) and
+# Spray's fuel for a Dazed. The pool stays 78, 25 / 32 / 21.
+KLEE_DESIGN_REVIEW_IDS: tuple[str, ...] = (
+    "proto_ko_fire_fire",                       # Common
+    "proto_ko_blasting_spree",                  # Common
+)
+
 # THE KLEE-ONLY COMPANIONS (2026-10-03,
 # review/active/mondstadt-companions-2026-10-03.md sec.4, ruled): three
 # companion cards that read Klee's own rules move OUT of the companion slot
@@ -337,6 +352,16 @@ STAGING_GRANT_IDS: tuple[str, ...] = (
     "proto_ko_witchs_homework_next",
 )
 
+#: OFF-POOL ROWS (the Klee design review, 2026-10-08, sec.4.4). A row another
+#: card CREATES at play and NO offer surface shows: in no `Slice()`, no
+#: `*_OVERHAUL_POOL_IDS` and no draftable pool, but compiled and in her
+#: `CardPool` so it resolves. Pop! is the one: Klee Can Explain! transforms
+#: statuses into it. `tools/lint_arm_pool_parity.py` and
+#: `tools/card_distinctness_report.py` skip it as they skip a staging row.
+KLEE_OFF_POOL_ROW_IDS: tuple[str, ...] = (
+    "proto_ko_pop",
+)
+
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8; Fish-Flavored Bait cut by the status pile's defence,
     # 2026-10-01)
@@ -347,7 +372,8 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_alices_recipe",
     # Spray (8 -- Pop! is the packet sec.4 table's first Spray row and it
     # OFFERS from draft 4, R242; Fwoosh! was cut by R271 sec.4)
-    "proto_ko_pop",
+    # Pop! left the pool at the Klee design review (2026-10-08); its row stays
+    # for Klee Can Explain! (`KLEE_OFF_POOL_ROW_IDS`).
     "proto_ko_mine_toss",
     "proto_ko_tinder_toss",
     "proto_ko_quick_fuse",
@@ -441,7 +467,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Alice's Detonator), and more Mines and Spray (the rest). Its own block
     # at the end of the tuple, like the slices above it.
     "proto_ko_hiding_spot",
-    "proto_ko_playdate",
+    # Playdate cut by the Klee design review (2026-10-08).
     "proto_ko_jumpy_dumpty_mk_iii",
     # Spinning Sparkler cut by the status pile's defence (2026-10-01).
     "proto_ko_mine_all_mine",
@@ -475,6 +501,8 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     *KLEE_STATUS_PACKAGE_IDS,
     # THE KLEE TEMPO PAPER (2026-10-07), after it. Still 78, 25 / 32 / 21.
     *KLEE_TEMPO_IDS,
+    # THE KLEE DESIGN REVIEW (2026-10-08), after it. Still 78, 25 / 32 / 21.
+    *KLEE_DESIGN_REVIEW_IDS,
     # THE KLEE-ONLY COMPANIONS (2026-10-03), after it. Still 78, 25 / 32 / 21.
     *KLEE_OWN_COMPANION_IDS,
 )

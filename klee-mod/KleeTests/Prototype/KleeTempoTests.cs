@@ -53,7 +53,7 @@ public class KleeTempoTests
         Assert.Equal(new[] { "ProtoKoSimmer", "ProtoKoTasteTest",
                              "ProtoKoTinkering", "ProtoKoDodocoTag",
                              "ProtoKoExplosiveSpark" },
-                     slice.Skip(70).Take(5).ToArray());
+                     slice.Skip(68).Take(5).ToArray());
         foreach (var gone in new[] { "ItWasntMe", "SorryJean", "Grounded",
                                      "SitTight", "PatienceKlee" })
         {

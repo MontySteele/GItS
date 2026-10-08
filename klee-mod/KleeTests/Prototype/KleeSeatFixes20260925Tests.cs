@@ -98,12 +98,12 @@ public class KleeSeatFixes20260925Tests
     }
 
     [Fact]
-    public void A_bomb_4_placed_last_turn_is_read_as_8_and_stays()
+    public void A_bomb_4_placed_last_turn_is_read_as_6_and_stays()
     {
-        // REAL: the pick. A Bomb 4 placed last turn grows by rule 1's 4 at the
-        // start of the turn, and the echo reads the grown 8 -- reading takes
-        // nothing off the pile.
-        Assert.Equal(4, KleeOverhaulLaw.BombGrowth);
+        // REAL: the pick. A Bomb 4 placed last turn grows by rule 1's 2 at the
+        // start of the turn (4 until the Klee design review, 2026-10-08), and
+        // the echo reads the grown 6 -- reading takes nothing off the pile.
+        Assert.Equal(2, KleeOverhaulLaw.BombGrowth);
         var klee = Seat.Klee();
         var enemy = Seat.Klee(200).Creature;
         ProtoBombs.Board(klee.Creature, enemy);
@@ -113,8 +113,8 @@ public class KleeSeatFixes20260925Tests
         var (target, size) = ProtoBombPower.LargestBombFor(klee.Creature);
 
         Assert.Same(enemy, target);
-        Assert.Equal(8, size);
-        Assert.Equal(new[] { 8 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(6, size);
+        Assert.Equal(new[] { 6 }, pile.Charges.Select(c => c.Size));
     }
 
     [Fact]

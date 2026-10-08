@@ -1535,9 +1535,10 @@ def test_sparks_n_splash_fires_after_growth_and_leaves_the_bomb(overhaul):
     Klee had set her Bombs off, so it hit for nothing). "At the start of your
     turn, your largest Bomb deals its size in Pyro damage without going off."
 
-    A Bomb 4 placed last turn has grown to 8 by the time the echo reads it, so
-    it hits for 8 -- and the Bomb is still there, still 8."""
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 4, "the worked example assumes 4"
+    A Bomb 4 placed last turn has grown to 6 by the time the echo reads it, so
+    it hits for 6 -- and the Bomb is still there, still 6. (Growth 2 since the
+    Klee design review, 2026-10-08.)"""
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 2, "the worked example assumes 2"
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.turn = 2
@@ -1546,8 +1547,8 @@ def test_sparks_n_splash_fires_after_growth_and_leaves_the_bomb(overhaul):
 
     _echo_turn(state)
 
-    assert enemy.hp == 200 - 8, "the grown Bomb (4 + 4) paid"
-    assert sizes(enemy) == [8], "the Bomb stays where it is"
+    assert enemy.hp == 200 - 6, "the grown Bomb (4 + 2) paid"
+    assert sizes(enemy) == [6], "the Bomb stays where it is"
 
 
 def test_sparks_n_splash_is_not_an_explosion(overhaul):
@@ -1564,11 +1565,11 @@ def test_sparks_n_splash_is_not_an_explosion(overhaul):
 
     _echo_turn(state)
 
-    assert enemy.hp == 200 - 10
+    assert enemy.hp == 200 - 8
     assert state.player.sparks == sparks
     assert counts(state)["ko_explosion"] == 0
     assert (state.ko_set_off_this_turn, state.ko_reacted_this_turn) == (0, 0)
-    assert sizes(enemy) == [10], "no Chained Reactions Bomb: nothing went off"
+    assert sizes(enemy) == [8], "no Chained Reactions Bomb: nothing went off"
     assert klee_overhaul.mine_count(enemy) == 1
 
 
@@ -1588,7 +1589,7 @@ def test_sparks_n_splash_hits_the_largest_bomb_on_the_board(overhaul):
     _echo_turn(state)
 
     assert small.hp == 200
-    assert big.hp == 200 - 13, "the 9, grown to 13"
+    assert big.hp == 200 - 11, "the 9, grown to 11"
 
     tie_a, tie_b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([tie_a, tie_b])
@@ -1597,7 +1598,7 @@ def test_sparks_n_splash_hits_the_largest_bomb_on_the_board(overhaul):
     klee_overhaul.place(state, tie_a, 6)
     klee_overhaul.place(state, tie_b, 6)
     _echo_turn(state)
-    assert (tie_a.hp, tie_b.hp) == (190, 200)
+    assert (tie_a.hp, tie_b.hp) == (192, 200)
 
 
 def test_sparks_n_splash_with_no_bomb_does_nothing(overhaul):
@@ -1625,8 +1626,8 @@ def test_sparks_n_splash_two_copies_are_two_hits(overhaul):
     _echo_turn(state)
 
     assert counts(state)["ko_bomb_echo"] == 2
-    assert enemy.hp == 200 - 2 * 9, "two hits, each the grown 5"
-    assert sizes(enemy) == [9, 7], "still not spent, by either copy"
+    assert enemy.hp == 200 - 2 * 7, "two hits, each the grown 5"
+    assert sizes(enemy) == [7, 5], "still not spent, by either copy"
 
 
 def test_sparks_n_splash_reads_the_board_before_dodoco_places(overhaul):
@@ -1664,7 +1665,7 @@ def test_sparks_n_splash_takes_a_bombs_damage_terms(overhaul):
     assert hit["source"] == klee_overhaul.ECHO_SOURCE
     assert klee_overhaul.ECHO_SOURCE not in ("attack",
                                              klee_overhaul.EXPLOSION_SOURCE)
-    assert hit["amount"] == 12, "8 x 1.5 Vulnerable, and no Strength"
+    assert hit["amount"] == 9, "6 x 1.5 Vulnerable, and no Strength"
     assert enemy.aura == "pyro"
     assert enemy.block == 0, "Skittish is an Attack-card rule and did not fire"
 
@@ -1784,43 +1785,43 @@ def companion(cid="proto_mc_friend", ctype="skill"):
 
 
 def test_coven_errand_places_one_bomb_with_no_companion_played(overhaul):
-    """"Place a Bomb 8" (5 until the Klee pre-Balance sweep). The else arm,
+    """"Place a Bomb 10" (5 until the Klee pre-Balance sweep, 8 until the Klee design review). The else arm,
     and the honest read of the card alone."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [8]
+    assert sizes(a) == [10]
     assert sizes(b) == []
 
 
 def test_coven_errand_grows_after_a_companion(overhaul):
     """AoE trim, 2026-10-03: "Place a Bomb 5 on an enemy, 8 if you played a
     Companion card this turn"; 8 / 12 since the Klee pre-Balance sweep
-    (2026-10-03). Still ONE Bomb on the aimed enemy."""
+    (2026-10-03); 10 / 14 since the Klee design review (2026-10-08). Still ONE Bomb on the aimed enemy."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [12]
+    assert sizes(a) == [14]
     assert sizes(b) == []
 
 
 def test_coven_errands_upgrade_moves_both_numbers(overhaul):
-    """"Upgrade: Bomb 10." The rider rides the printed size: 10, or 14."""
+    """"Upgrade: Bomb 12." The rider rides the printed size: 12, or 16."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
-    assert sizes(a) == [10]
+    assert sizes(a) == [12]
 
     state = klee_state([a := make_enemy(hp=200, name="a"),
                         b := make_enemy(hp=200, name="b")])
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
-    assert sizes(a) == [14]
+    assert sizes(a) == [16]
     assert sizes(b) == []
 
 
@@ -1836,27 +1837,27 @@ def test_the_companion_count_is_per_turn(overhaul):
 
 
 def test_witches_circle_plants_per_companion_and_nothing_for_her_own(overhaul):
-    """"Whenever you play a Companion card, place a Bomb 3 on a random
+    """"Whenever you play a Companion card, place a Bomb 5 on a random
     enemy." A plain Klee card pays nothing; a Companion pays once per play."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     effects.resolve_card(state, load("proto_ko_witches_circle"))
-    assert state.player.powers[klee_overhaul.WITCHES_CIRCLE] == 3
+    assert state.player.powers[klee_overhaul.WITCHES_CIRCLE] == 5
 
     combat._finish_play(state, probe([], cid="proto_ko_plain"))
     assert sizes(enemy) == []
     combat._finish_play(state, companion())
     combat._finish_play(state, companion())
-    assert sizes(enemy) == [3, 3]
+    assert sizes(enemy) == [5, 5]
 
 
 def test_witches_circle_upgrades_the_bomb_it_plants(overhaul):
-    """"Upgrade: Bomb 5." The stack IS the size, Chained Reactions' grammar."""
+    """"Upgrade: Bomb 7." The stack IS the size, Chained Reactions' grammar."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     effects.resolve_card(state, load("proto_ko_witches_circle+"))
     combat._finish_play(state, companion())
-    assert sizes(enemy) == [5]
+    assert sizes(enemy) == [7]
 
 
 def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
@@ -1877,7 +1878,7 @@ def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
 
     combat._finish_play(state, companion())
     combat._finish_play(state, plain)
-    assert sizes(a) == [3, 3]                       # the reader fired twice
+    assert sizes(a) == [5, 5]                       # the reader fired twice
     assert klee_overhaul.played_companion_this_turn(state) is True
     assert state.player.sparks == 0
     assert "companion:personal/play" not in [
@@ -1890,7 +1891,7 @@ def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [12] and sizes(b) == []
+    assert sizes(a) == [14] and sizes(b) == []
     assert state.player.sparks == 0
 
 
@@ -1909,13 +1910,13 @@ def test_alices_introduction_magic_makes_the_hand_companions_for_one_turn(
     assert plain.is_companion is False      # the card itself never moved
     assert companion_hexerei.counts_as_companion(state, plain) is True
     combat._finish_play(state, plain)
-    assert sizes(enemy) == [3]
+    assert sizes(enemy) == [5]
 
     # ... AND NOT THE NEXT TURN. The window closes at the arm's turn end.
     klee_overhaul.turn_end(state)
     assert companion_hexerei.counts_as_companion(state, plain) is False
     combat._finish_play(state, plain)
-    assert sizes(enemy) == [3]
+    assert sizes(enemy) == [5]
 
 
 def test_alices_window_covers_the_hand_it_saw_and_not_a_later_draw(overhaul):
@@ -2324,7 +2325,7 @@ def test_fish_blasting_sets_nothing_off(overhaul):
 # --- Bombs Away!: Block keyed to the Bombs (AoE trim, 2026-10-03) ---------
 
 def test_bombs_away_places_one_bomb_and_blocks_per_bombed_enemy(overhaul):
-    """"Place a Bomb 4 on an enemy. Gain 4 Block, plus 2 for each enemy with
+    """"Place a Bomb 6 on an enemy. Gain 4 Block, plus 2 for each enemy with
     a Bomb." A Skill now; the count includes the Bomb it just placed."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
@@ -2336,7 +2337,7 @@ def test_bombs_away_places_one_bomb_and_blocks_per_bombed_enemy(overhaul):
     effects.resolve_card(state, card)
 
     assert (a.hp, b.hp) == (200, 200)
-    assert sizes(a) == [4] and sizes(b) == [3]
+    assert sizes(a) == [6] and sizes(b) == [3]
     assert state.player.block == 4 + 2 * 2
 
 

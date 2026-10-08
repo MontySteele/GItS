@@ -138,6 +138,7 @@
     "proto_ko_behind_jeans_desk",
     "proto_ko_big_badda_boom",
     "proto_ko_blast_shield",
+    "proto_ko_blasting_spree",
     "proto_ko_blazing_delight",
     "proto_ko_bombs_away",
     "proto_ko_booby_trap",
@@ -159,6 +160,7 @@
     "proto_ko_explosive_spark",
     "proto_ko_favonius_escort",
     "proto_ko_finders_keepers",
+    "proto_ko_fire_fire",
     "proto_ko_fireworks_finale",
     "proto_ko_fish_blasting",
     "proto_ko_flash_point",
@@ -181,7 +183,6 @@
     "proto_ko_party_poppers",
     "proto_ko_pass_the_match",
     "proto_ko_perfect_timing",
-    "proto_ko_playdate",
     "proto_ko_pocket_match",
     "proto_ko_pop",
     "proto_ko_quick_fuse",
@@ -514,6 +515,7 @@
     "proto_ko_behind_jeans_desk": "klee",
     "proto_ko_big_badda_boom": "klee",
     "proto_ko_blast_shield": "klee",
+    "proto_ko_blasting_spree": "klee",
     "proto_ko_blazing_delight": "klee",
     "proto_ko_bombs_away": "klee",
     "proto_ko_booby_trap": "klee",
@@ -535,6 +537,7 @@
     "proto_ko_explosive_spark": "klee",
     "proto_ko_favonius_escort": "klee",
     "proto_ko_finders_keepers": "klee",
+    "proto_ko_fire_fire": "klee",
     "proto_ko_fireworks_finale": "klee",
     "proto_ko_fish_blasting": "klee",
     "proto_ko_flash_point": "klee",
@@ -557,7 +560,6 @@
     "proto_ko_party_poppers": "klee",
     "proto_ko_pass_the_match": "klee",
     "proto_ko_perfect_timing": "klee",
-    "proto_ko_playdate": "klee",
     "proto_ko_pocket_match": "klee",
     "proto_ko_pop": "klee",
     "proto_ko_quick_fuse": "klee",
@@ -1227,6 +1229,9 @@
     "proto_ko_blast_shield": {
       "block": 2
     },
+    "proto_ko_blasting_spree": {
+      "bomb_size": 2
+    },
     "proto_ko_blazing_delight": {
       "spark_price": -1
     },
@@ -1293,6 +1298,9 @@
     },
     "proto_ko_finders_keepers": {
       "power_amount": 2
+    },
+    "proto_ko_fire_fire": {
+      "bomb_size": 3
     },
     "proto_ko_fireworks_finale": {
       "damage": 2
@@ -1363,9 +1371,6 @@
     },
     "proto_ko_perfect_timing": {
       "damage": 3
-    },
-    "proto_ko_playdate": {
-      "bomb_size": 2
     },
     "proto_ko_pocket_match": {
       "damage": 2

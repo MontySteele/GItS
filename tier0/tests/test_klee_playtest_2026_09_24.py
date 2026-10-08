@@ -345,8 +345,8 @@ def test_balance_review_numbers(overhaul):
     assert wait.cost == 0 and wait_up.cost == 0
     assert _first(wait, "apply_power")["amount"] == 2
     assert _first(wait_up, "apply_power")["amount"] == 3
-    assert _first(g("proto_ko_party_poppers"), "apply_power")["amount"] == 3
-    assert _first(g("proto_ko_party_poppers+"), "apply_power")["amount"] == 4
+    assert _first(g("proto_ko_party_poppers"), "apply_power")["amount"] == 5
+    assert _first(g("proto_ko_party_poppers+"), "apply_power")["amount"] == 6
     assert _first(g("proto_ko_look_out"), "apply_power")["amount"] == 4
     assert _first(g("proto_ko_look_out+"), "apply_power")["amount"] == 6
     assert combat.spark_cost(g("proto_ko_blast_shield")) == 1

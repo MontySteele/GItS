@@ -116,6 +116,18 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Explosive Spark (C, 0, 1 Spark: 12 [16]). Simmer and Taste Test read the
   Bombs without setting them off (new op `damage_from_bombs`, both engines).
   Still 78, 25 / 32 / 21. Untested in game until a deploy.
+  **The design review (2026-10-08, ruled, built on `klee-next`;
+  `review/active/klee-design-review-2026-10-08.md`):** [USER]: "Nope, this
+  all looks good. I'm now in agreement with all picks." No starter change.
+  Rule 1: Bombs grow 2 a turn (was 4; Alice's Recipe doubles it to 4). Rule
+  4: she starts every combat with 3 Sparks (was 1). Every drafted Bomb or
+  Mine placer prints 2 bigger, base and upgraded (Jumpy Dumpty, jumps and
+  copies unchanged). In: Fire! Fire! (C Attack, 1: Bomb 7 [10] on the enemy,
+  then Set it off) and Blasting Spree (C Skill, 1: Bomb 4 [6] on ALL
+  enemies, a Dazed). Out: Playdate and Pop! (Pop! stays in the build
+  off-pool, for Klee Can Explain!). Still 78, 25 / 32 / 21. Next: suite 5
+  on the same five seeds (the paper's sec.5), then [USER]'s run. Untested in
+  game until a deploy.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start

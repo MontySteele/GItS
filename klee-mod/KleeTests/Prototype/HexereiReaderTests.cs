@@ -133,11 +133,12 @@ public class HexereiReaderTests
         // field on the op rather than two `plant_bomb`s in a conditional: only
         // a top-level effect owns a var, so the `+` card would have printed 7
         // in one clause and placed 5 in the other (`EB-288`'s defect class).
-        // Klee pre-Balance sweep (2026-10-03): 5 / 7 -> 8 / 10.
+        // Klee pre-Balance sweep (2026-10-03): 5 / 7 -> 8 / 10; 10 / 12
+        // since the Klee design review (2026-10-08).
         Assert.Equal(
-            8m, new ProtoKoCovenErrand().DynamicVars["BombSize"].BaseValue);
+            10m, new ProtoKoCovenErrand().DynamicVars["BombSize"].BaseValue);
         Assert.Equal(
-            10m,
+            12m,
             Upgraded<ProtoKoCovenErrand>().DynamicVars["BombSize"].BaseValue);
         Assert.Contains("{BombSize:diff()}", Face(new ProtoKoCovenErrand()));
     }
@@ -154,8 +155,8 @@ public class HexereiReaderTests
         Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn", calls);
         Assert.DoesNotContain("ProtoBombPower.PlaceOnAll", calls);
         Assert.Contains("ProtoBombPower.Place", calls);
-        // 8 / 12 since the Klee pre-Balance sweep (2026-10-03).
-        Assert.Contains("{IfUpgraded:show:14|12}", Face(new ProtoKoCovenErrand()));
+        // 10 / 14 since the Klee design review (2026-10-08).
+        Assert.Contains("{IfUpgraded:show:16|14}", Face(new ProtoKoCovenErrand()));
         Assert.Contains("DynamicVarSet.get_Item", calls);
         // It PLACES; it does not detonate (rule 7).
         Assert.DoesNotContain("ProtoBombPower.SetOffAimed", calls);
@@ -170,10 +171,10 @@ public class HexereiReaderTests
         // The stack IS the Bomb size, Chained Reactions' grammar one trigger
         // over, so a second copy is a second Bomb per witch.
         Assert.Equal(
-            3m,
+            5m,
             new ProtoKoWitchesCircle().DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal(
-            5m,
+            7m,
             Upgraded<ProtoKoWitchesCircle>()
                 .DynamicVars["PowerAmount"].BaseValue);
         Assert.Contains("{PowerAmount:diff()}",

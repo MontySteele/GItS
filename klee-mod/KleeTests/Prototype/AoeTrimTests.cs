@@ -59,7 +59,8 @@ public class AoeTrimTests
     public void Mine_toss_and_red_knight_are_single_target()
     {
         Assert.Equal(TargetType.AnyEnemy, new ProtoKoMineToss().TargetType);
-        Assert.Equal(7m, new ProtoKoMineToss().DynamicVars["BombSize"].BaseValue);
+        // 9 since the Klee design review (2026-10-08): every placer +2.
+        Assert.Equal(9m, new ProtoKoMineToss().DynamicVars["BombSize"].BaseValue);
         Assert.Equal(TargetType.AnyEnemy, new ProtoKoRedKnight().TargetType);
         Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKoMineToss", "OnPlay")),
                               c => c.Contains("PlaceOnAll"));

@@ -90,7 +90,9 @@ public class KleeOverhaulRoundThreeTests
         var slice = Cards("KleeOverhaulRoster", "Slice");
         Assert.Equal(78, slice.Count);
         Assert.Contains(slice, c => c.Contains("ProtoKoDigIn"));
-        Assert.Contains(slice, c => c.Contains("ProtoKoPop"));
+        // Pop! left the offer at the Klee design review (2026-10-08); it is
+        // kept in her CardPool for Klee Can Explain!.
+        Assert.DoesNotContain(slice, c => c.Contains("ProtoKoPop"));
         // OFFERABLE means not Basic: a Basic row cannot be rolled.
         Assert.Equal(CardRarity.Common, new ProtoKoDigIn().Rarity);
         Assert.Equal(CardRarity.Common, new ProtoKoPop().Rarity);

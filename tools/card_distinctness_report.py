@@ -234,7 +234,10 @@ def surface_pools() -> list[tuple[str, list[dict]]]:
                          and (not r.get("nation") or r.get("id") in own)
                          and r.get("rarity") in OFFERABLE
                          and not r.get("multiplayer")
-                         and r.get("id") not in _C.STAGING_GRANT_IDS]))
+                         and r.get("id") not in _C.STAGING_GRANT_IDS
+                         # An off-pool row (Pop!, Klee design review
+                         # 2026-10-08) is created at play, never offered.
+                         and r.get("id") not in _C.KLEE_OFF_POOL_ROW_IDS]))
     nations = sorted({r["nation"] for r in rows if r.get("nation")})
     for nation in nations:
         out.append((f"{nation}-companions",

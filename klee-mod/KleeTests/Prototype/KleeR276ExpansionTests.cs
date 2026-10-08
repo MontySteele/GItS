@@ -71,7 +71,7 @@ public class KleeR276ExpansionTests
     {
         // class, rarity, type, energy
         new object[] { typeof(ProtoKoHidingSpot), CardRarity.Common, CardType.Skill, 1 },
-        new object[] { typeof(ProtoKoPlaydate), CardRarity.Common, CardType.Skill, 0 },
+        // Playdate cut by the Klee design review (2026-10-08).
         new object[] { typeof(ProtoKoJumpyDumptyMkIii), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoMineAllMine), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoTeamEffort), CardRarity.Uncommon, CardType.Attack, 1 },
@@ -119,10 +119,11 @@ public class KleeR276ExpansionTests
         // (2026-10-03) cut Second Surprise; 24 since the Klee tempo paper
         // (2026-10-07) cut Sit Tight and Experiment in Progress. The
         // package's nine and the tempo five follow them (the three companion
-        // rows after those are not `ProtoKo`).
-        Assert.Equal(24, names.Count);
-        Assert.Equal(24, names.Distinct().Count());
-        var tail = slice.Skip(slice.Count - 38).Take(24).ToList();
+        // rows after those are not `ProtoKo`). 23 since the Klee design
+        // review (2026-10-08) cut Playdate; its two follow the tempo five.
+        Assert.Equal(23, names.Count);
+        Assert.Equal(23, names.Distinct().Count());
+        var tail = slice.Skip(slice.Count - 39).Take(23).ToList();
         for (var i = 0; i < names.Count; i++)
         {
             Assert.Contains(names[i], tail[i]);
@@ -236,10 +237,10 @@ public class KleeR276ExpansionTests
 
         var card = new ProtoKoJumpyDumptyMkIii();
         Assert.Equal(3m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(2m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(4m, card.DynamicVars["BombSize"].BaseValue);
         var up = Upgraded<ProtoKoJumpyDumptyMkIii>();
         Assert.Equal(4m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(3m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(5m, up.DynamicVars["BombSize"].BaseValue);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
     }
 
@@ -290,7 +291,7 @@ public class KleeR276ExpansionTests
         Assert.True(setOff >= 0 && hit > setOff && place > hit);
         var up = Upgraded<ProtoKoWindblumeFireworks>();
         Assert.Equal(14m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(8m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(10m, up.DynamicVars["BombSize"].BaseValue);
     }
 
     [Fact]
@@ -322,10 +323,10 @@ public class KleeR276ExpansionTests
     {
         var card = new ProtoKoHidingSpot();
         Assert.Equal(6m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(3m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(5m, card.DynamicVars["BombSize"].BaseValue);
         var up = Upgraded<ProtoKoHidingSpot>();
         Assert.Equal(8m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(7m, up.DynamicVars["BombSize"].BaseValue);
         Assert.Contains("ProtoBombPower.PlaceOnRandom", Play("ProtoKoHidingSpot"));
         Assert.Contains("[gold]Mine[/gold]", Face(card));
     }
@@ -348,10 +349,8 @@ public class KleeR276ExpansionTests
         Assert.False(power.TryModifyEnergyCostInCombat(friend, 0m, out _));
         // Two Playdates are two sentences about the same next card.
         Assert.Equal(0m, PlaydatePower.Discounted(1m, 2));
-
-        var card = new ProtoKoPlaydate();
-        Assert.Equal(3m, card.DynamicVars["BombSize"].BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKoPlaydate>().DynamicVars["BombSize"].BaseValue);
+        // The card left with its row (Klee design review, 2026-10-08); the
+        // power stays registered.
     }
 
     [Fact]
@@ -503,7 +502,7 @@ public class KleeR276ExpansionTests
         Assert.False(KleeExpansion.CostsSparks(new ProtoKoPop()));
         Assert.Contains("KleeExpansion.CostsSparks",
                         Il.Calls(Il.Method("PartyPoppersPower", "AfterCardPlayed")));
-        Assert.Equal(4m, Upgraded<ProtoKoPartyPoppers>()
+        Assert.Equal(6m, Upgraded<ProtoKoPartyPoppers>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 
@@ -535,9 +534,10 @@ public class KleeR276ExpansionTests
         Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", run);
         Assert.True(run.IndexOf("KleeOverhaulLedger.TakeTurnStartPlacements")
                     < run.LastIndexOf("ProtoBombPower.PlaceOnRandom"));
-        // Power cost sweep, 2026-09-30: Mine 3, upgraded Mine 5, cost 1.
-        Assert.Equal(3m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKoDodoco>()
+        // Power cost sweep, 2026-09-30: cost 1. Mine 5, upgraded Mine 7
+        // since the Klee design review (2026-10-08).
+        Assert.Equal(5m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(7m, Upgraded<ProtoKoDodoco>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 

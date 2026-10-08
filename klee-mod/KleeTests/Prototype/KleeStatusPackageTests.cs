@@ -64,7 +64,9 @@ public class KleeStatusPackageTests
         // the package, and her three companion rows LAST, after it.
         // The Klee tempo paper (2026-10-07): It Wasn't Me! cut from the
         // package, and its five rows between the package and the companions.
-        Assert.Equal(Package, slice.Skip(61).Take(9).ToArray());
+        // The Klee design review (2026-10-08): Pop! and Playdate out
+        // above, its two after the tempo five.
+        Assert.Equal(Package, slice.Skip(59).Take(9).ToArray());
         Assert.Equal(new[] { "ProtoMcJeanLionsFang", "ProtoMcPruneHexhunterChime",
                              "ProtoMcAlbedoDustOfPurification" },
                      slice.Skip(75).ToArray());
@@ -121,8 +123,9 @@ public class KleeStatusPackageTests
         // AoE trim (2026-10-03): 34 to one enemy, Block on a status drawn.
         Assert.Equal((34m, 40m), (new ProtoKoRedKnight().DynamicVars.Damage.BaseValue,
                                   Upgraded<ProtoKoRedKnight>().DynamicVars.Damage.BaseValue));
-        // Klee finish-line batch (2026-10-03): Finders Keepers is 4 [6].
-        Assert.Equal((4m, 6m), (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
+        // Klee finish-line batch (2026-10-03): Finders Keepers is 4 [6];
+        // 6 [8] since the Klee design review (2026-10-08).
+        Assert.Equal((6m, 8m), (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
                                 Upgraded<ProtoKoFindersKeepers>().DynamicVars["PowerAmount"].BaseValue));
         Assert.Equal((6m, 8m), (new ProtoKoKleeCanExplain().DynamicVars.Block.BaseValue,
                                 Upgraded<ProtoKoKleeCanExplain>().DynamicVars.Block.BaseValue));

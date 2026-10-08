@@ -226,7 +226,11 @@ def main() -> int:
                      and not row.get("multiplayer")
                      # A staging grant-only row (`C.STAGING_GRANT_IDS`) is
                      # offered nowhere by design.
-                     and row["id"] not in C.STAGING_GRANT_IDS]
+                     and row["id"] not in C.STAGING_GRANT_IDS
+                     # An off-pool row (`C.KLEE_OFF_POOL_ROW_IDS`, Pop! since
+                     # the Klee design review) is created at play by another
+                     # card and offered nowhere.
+                     and row["id"] not in C.KLEE_OFF_POOL_ROW_IDS]
         for cid in sheet_ids:
             if cid not in roster_ids:
                 findings.append(

@@ -32,7 +32,7 @@ public sealed class KleeScalingPassTests
     // ==== A. Klee's Secret Base, v3 ==========================================
 
     [Fact]
-    public void Secret_base_v3_places_a_bomb_four_six_upgraded_at_turn_start()
+    public void Secret_base_v3_places_a_bomb_six_eight_upgraded_at_turn_start()
     {
         var card = new ProtoKoSecretBase();
         Assert.Equal("At the start of your turn, place a [gold]Bomb[/gold] "
@@ -40,8 +40,9 @@ public sealed class KleeScalingPassTests
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Power, card.Type);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(6m, Upgraded<ProtoKoSecretBase>().DynamicVars["PowerAmount"].BaseValue);
+        // 6 [8] since the Klee design review (2026-10-08): every placer +2.
+        Assert.Equal(6m, card.DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(8m, Upgraded<ProtoKoSecretBase>().DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal("At the start of your turn, place a [gold]Bomb[/gold] "
                    + "[blue]{Amount}[/blue] on a random enemy.",
                      ((ILocalizationProvider)RuntimeHelpers
@@ -141,7 +142,7 @@ public sealed class KleeScalingPassTests
                      (new ProtoKoPop(), "BombSize", 5m),
                      (new ProtoKoJumpyDumpty(), "BombSize", 8m),
                      (new ProtoKoJumpyDumpty(), "PayloadMine", 3m),
-                     (new ProtoKoMineToss(), "BombSize", 7m),
+                     (new ProtoKoMineToss(), "BombSize", 9m),
                      (new ProtoKoWitchsHomeworkNext(), "BombSize", 6m),
                  })
         {
@@ -352,7 +353,7 @@ public sealed class KleeScalingPassTests
                         Il.Calls(Il.Method("PoundingSurpriseNext", "BeforeCombatStart")));
         Assert.Contains("ProtoBombPower.GrowBy",
                         Il.Calls(Il.Method("ProtoBombPower", "BeforeSideTurnStart")));
-        Assert.Equal(10, PoundingSurpriseNext.OpeningBomb + KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(8, PoundingSurpriseNext.OpeningBomb + KleeOverhaulLaw.BombGrowth);
 
         // It replaces the original when granted, and Orobas upgrades it the same way.
         Assert.Contains("RelicCmd.Remove",
