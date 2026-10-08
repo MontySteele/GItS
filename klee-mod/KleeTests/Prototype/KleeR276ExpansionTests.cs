@@ -399,10 +399,8 @@ public class KleeR276ExpansionTests
     [Fact]
     public void Tag_along_and_adventure_club_add_random_companions_free_this_turn()
     {
-        // STRUCTURAL: a combat-scope copy, the stand-in hand-off, cost 0 this
-        // turn, into the hand.
+        // STRUCTURAL: a combat-scope copy, cost 0 this turn, into the hand.
         var add = Il.Calls(Il.Method("KleeExpansion", "AddRandomCompanions"));
-        Assert.Contains("CompanionStandIns.HandOff", add);
         Assert.Contains(add, c => c.Contains("SetThisTurn"));
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", add);
 

@@ -79,10 +79,6 @@ KIT_SOURCES = (
     # V14/V15, the Stage's act and Bow (`furina_stage/act`, `/bow`, `/line`),
     # left with v2 (the Salon's Tab, 2026-10-05): the arm's guests and Powers
     # hit through `furina_tide`'s one door below.
-    # The Furina re-founding sim slice (`furina_v2`, sim only): a performer's
-    # act or Bow, and Clorinde's while-on-stage line. Kit verbs, not card hits.
-    "furina_v2/act",
-    "furina_v2/clorinde_line",
     # The Furina research slice (`furina_tide`, sim only): a guest's act or
     # line, Salon's Encore, Endless Waltz and Critics' Darling. Kit verbs.
     "furina_tide/line",
@@ -292,12 +288,6 @@ SIM_CALL_SITES = {
     ('effects.py', 25): ("'companion'", None, "'pyro'"),
     # (`furina_stage.py`'s two doors left with v2, the Salon's Tab,
     # 2026-10-05: the arm runs on `furina_tide`'s rules and its one door.)
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Clorinde's
-    # line ("whenever you Spend, deal 4 Electro") and the one act door every
-    # performer's damage act and Bow uses. Unpowered, as the Stage's acts are;
-    # each carries its performer's element (None for the trio).
-    ('furina_v2.py', 1): ("'furina_v2/clorinde_line'", 'False', "'electro'"),
-    ('furina_v2.py', 2): ("'furina_v2/act'", 'False', 'element'),
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the one unpowered
     # door every guest act and line, and every HP-loop Power, uses.
     ('furina_tide.py', 1): ("'furina_tide/line'", 'False', 'element'),

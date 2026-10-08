@@ -6,11 +6,9 @@ ANY card that counts as a Companion (`counts_as_companion`), and Alice's
 Introduction Magic makes a hand count as Companion cards for a turn. The
 history below is kept where it explains a shape that survived.
 
-Four stand-ins on the seam `companion_standins` opened, and the file exists for
-that module's reason: a quarantined arm's whole behaviour should be greppable
-in one place. `companion_standins` holds the SEAM (the sheet contract, the
-hand-off, the map derived from `replaces:`) and the FOUR CARETAKERS' rules;
-this file holds the four FAMILY stand-ins' rules and the one question every
+Four former stand-ins (the stand-in seam was emptied 2026-10-03 and deleted
+2026-10-08), and the file exists so an arm's whole behaviour is greppable in
+one place: it holds the four FAMILY cards' rules and the one question every
 reader of a Companion play asks. Nothing here is reachable with both flags off
 -- every function returns at the top, checked rather than assumed by its
 callers, which is what keeps the byte-identity pin a property of the module.
@@ -251,8 +249,7 @@ def note_card_played(state: "CombatState", card: "Card") -> None:
 
     THE OWN-CARD CASE IS NOT A SPECIAL CASE, for either reader. This site runs
     after the card's effects, so a power the body just applied is standing --
-    the same contract Diona's stand-in leans on
-    (`companion_standins.on_played`) and the same one `AfterCardPlayed` gives
+    the same contract `AfterCardPlayed` gives
     the mod. Nicole's own card is a Companion and therefore pays once for
     itself, and Witches' Circle does not (it is Klee's own Power, so the play
     that sets it up plants nothing).
@@ -294,8 +291,7 @@ def roll_turn_end(state: "CombatState") -> None:
     Dahlia's Favonian Favor and Bennett's Passion Overload -- the arm's own
     reading of "this turn", and the one these two cards must share: they are
     reaction cards, not Bomb cards, so nothing they promise can be kept during
-    the enemy's half the way a Mine's can (which is why the CARETAKERS' two
-    watchers close at the turn START instead, `companion_standins.roll_turn`).
+    the enemy's half the way a Mine's can.
     """
     for name in _THIS_TURN:
         state.player.powers.pop(name, None)

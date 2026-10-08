@@ -3078,7 +3078,7 @@ APPLY_POWERS = {
         "this turn, gain {X} [gold]Block[/gold]."),
     # Jean's Lion's Fang (once a companion stand-in; in Klee's own pool since
     # the Klee-only companions, 2026-10-03). The class lives in
-    # klee-mod/KleeCode/Powers/Prototype/CompanionStandIns.cs.
+    # klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs.
     "mc_lions_fang": ("LionsFangPower", None,
         "At the start of your turn, if none of your [gold]Bombs[/gold] went "
         "off last turn, gain {X} Block and draw 1 card."),
@@ -4296,12 +4296,11 @@ CARD_FIELDS = {
     # `hexerei` (the Mondstadt workshop's family mark) LEFT at R276 pick 2:
     # every reader asks "is it a Companion card" now, so a row carrying the
     # key would be declaring a mark nothing reads, and it is refused.
-    # THE COMPANION STAND-IN SEAM , and the two halves differ.
+    # `replaces` and `art_of`, and the two halves differ.
     #
-    # `replaces` is INERT here, like `register` above: which
-    # Universal a row stands in for is an OFFER rule, carried out at each
-    # engine's hand-off (`KleeMod.Powers.CompanionStandIns`,
-    # `tier0.engine.companion_standins`), and there is nothing on the card
+    # `replaces` is INERT here, like `register` above: which row a prototype
+    # row re-authors is an OFFER rule (the sim checks it in
+    # `loader._validate_replaces_shape`), and there is nothing on the card
     # itself to emit. Whitelisted rather than left unknown, because this list
     # is deliberately total and an unknown field BLOCKS the row.
     #
@@ -15873,11 +15872,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # to be normalised HERE too. `personal_pool:` accepts both spellings
         # and the sim normalises at load (`Card.from_dict`, pinned by
         # `test_personal_pool_normalises_a_one_member_list`); this emitter
-        # reads the RAW row, so without the same step a family stand-in wrote
-        # `PersonalPool => "['klee']"` and `CompanionStandIns.HandOff`, which
-        # compares that string to the run's character id, could never swap.
-        # Refused rather than joined for a longer list, exactly as the loader
-        # refuses one: a stand-in is handed to ONE character.
+        # reads the RAW row, so without the same step a row wrote
+        # `PersonalPool => "['klee']"`, which no reader comparing it to the
+        # run's character id could match. Refused rather than joined for a
+        # longer list, exactly as the loader refuses one: a Personal belongs
+        # to ONE character.
         if isinstance(personal, list):
             if len(personal) != 1:
                 raise SystemExit(

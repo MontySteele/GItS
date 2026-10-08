@@ -14,10 +14,10 @@ from functools import lru_cache
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (companion_coven, companion_hexerei,
-                          companion_standins, coop, furina_stage,
-                          klee_overhaul, kokomi_plan, powers, reactions,
-                          resources, statuses, varka_oath)
+from tier0.engine import (companion_coven, companion_hexerei, coop,
+                          furina_stage, klee_overhaul, kokomi_plan,
+                          lions_fang, powers, reactions, resources, statuses,
+                          varka_oath)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy,
                                 grant_sly_autoplay,
@@ -685,9 +685,8 @@ def owner_identity(owner: Optional[str]) -> tuple[str, str]:
     Klee's Attack applies Pyro in Kokomi's hand, Furina's plain Attack applies
     nothing in Klee's, and a base Strike applies nothing for anybody.
 
-    Varka and the Furina re-founding slice have no character yaml (their
-    players are built by `varka_oath` and `furina_v2`), so their identities
-    are read off those modules' own constants.
+    Varka has no character yaml (his player is built by `varka_oath`), so
+    his identity is read off that module's own constants.
     """
     if not owner:
         return ("none", "")
@@ -698,9 +697,6 @@ def owner_identity(owner: Optional[str]) -> tuple[str, str]:
 def _owner_identity_cached(owner: str) -> tuple[str, str]:
     if owner == varka_oath.CHARACTER:
         return (varka_oath.ELEMENT, "catalyst")
-    from tier0.engine import furina_v2              # late import (cycle)
-    if owner == furina_v2.CHARACTER:
-        return (furina_v2.ELEMENT, furina_v2.CADENCE)
     from tier0.content import loader                # late import (cycle)
     spec = loader._character_index().get(owner)
     if not spec:
@@ -5102,12 +5098,6 @@ def resolve_card(state: CombatState, card: Card) -> None:
         varka_oath.begin_play(state, card)
     try:
         _resolve_card_bound(state, card)
-        # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): a slice
-        # row carries no `effects:`; its printed text resolves here, inside
-        # the play's bound aim. Dead for every card without the `fv2` tag.
-        if "fv2" in card.tags:
-            from tier0.engine import furina_v2      # late: avoids the cycle
-            furina_v2.resolve_card(state, card)
         # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the same door
         # for the research proposal's rows. Dead without the `ftd` tag.
         if "ftd" in card.tags:
@@ -5526,11 +5516,11 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
     # sequence (Mona's omen, which Vulnerabled the board here, left
     # 2026-10-03). `tier0.engine.companion_coven`.
     companion_coven.turn_start(state)
-    # THE STAND-IN SEAM's one start-of-turn rule after it -- Jean's Lion's
-    # Fang, Fair Protector, Grounded's shape with a card on it. LAST, and
-    # commutative with everything above: it grants Block and a draw and reads
-    # only the explosion counter, which nothing here writes.
-    companion_standins.turn_start(state)
+    # Jean's Lion's Fang, Fair Protector, after it -- Grounded's shape with a
+    # card on it. LAST, and commutative with everything above: it grants Block
+    # and a draw and reads only the explosion counter, which nothing here
+    # writes.
+    lions_fang.turn_start(state)
     _companion_overhaul_turn_start_late(state)
 
 

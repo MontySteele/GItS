@@ -1495,6 +1495,10 @@ when the arm is accepted or rejected.
 
 ## The companion stand-ins — the caretakers (2026-09-02)
 
+(The seam below was emptied 2026-10-03 and deleted 2026-10-08, project review
+2026-10-08 pick 3. Jean's rule lives on in `tier0/engine/lions_fang.py` and
+`LionsFangPower.cs`. Git keeps the rest.)
+
 ```
 THE SEAM, AND IT IS THE POINT OF THE SLICE. A stand-in is a whole Klee-only
 card, with its own unique name, handed to Klee IN PLACE of one named Universal

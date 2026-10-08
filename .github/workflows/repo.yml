@@ -182,10 +182,10 @@ jobs:
       #   test_agent_rituals            docs/current/OPERATIONS.md, operations/*.md
       #   test_arm_keyword_tips, test_inazuma_companion_overhaul
       #                                 docs/current/text-conventions.md
-      #   test_music_ledger_gate        docs/current/operations/media.md
+      #   test_music_ledger_gate        docs/current/operations/teyvat-frame.md
       #   test_teyvat_ancients_codegen, test_teyvat_events_codegen
       #                                 docs/current/operations/codegen.md
-      #   test_visual_qa_contract       docs/current/operations/act-assets.md
+      #   test_visual_qa_contract       docs/current/operations/teyvat-frame.md
       #   test_eb495_kit_verb_triggers, test_lane_d_enemy_seam
       #                                 docs/current/atlas/*.md
       # Add a module here the moment a test starts reading one of those trees.

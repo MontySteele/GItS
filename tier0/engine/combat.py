@@ -15,7 +15,7 @@ from typing import Callable
 
 from tier0 import constants as C
 from tier0.engine import (companion_hexerei, effects,
-                          furina_stage, furina_tide, furina_v2,
+                          furina_stage, furina_tide,
                           klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
@@ -308,11 +308,6 @@ def card_cost(state: CombatState, card: Card) -> int:
     discount = klee_overhaul.playdate_discount(state, card)
     if discount:
         cost = max(0, cost - discount)
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Escoffier's
-    # "The first Salon summon card you play each turn costs 0". Pure; a no-op
-    # for any player without the slice arm.
-    if furina_v2.free_salon_summon(state, card):
-        cost = 0
     # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
     # carry-out used to discount the next face-up Attack, and the mod could
     # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
@@ -690,9 +685,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # the two wear the same word in every report that conflates them.
     state.emit("turn_open", hp=max(0, state.player.hp), block=state.player.block)
     state.cards_played_this_turn = 0
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the flow counts reset
-    # at the start of her turn (paper sec.8). A no-op for anyone else.
-    furina_v2.turn_open(state)
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the flow counts
     # reset. A no-op for anyone else.
     furina_tide.turn_open(state)
@@ -822,10 +814,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         _settle_phases(state)
         if not p.alive or state.over:
             return
-
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): Salon Solitaire's Usher
-    # on turn one, then Charlotte's extra card. A no-op for anyone else.
-    furina_v2.turn_start(state)
 
     # FURINA (the Salon's Tab; the pool to 39): Fountain of Lucine's Repays,
     # after her draw, the C# `FurinaStage.TurnStart` site. A no-op for
@@ -976,9 +964,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the performers act
-    # front to back. A no-op for anyone else.
-    furina_v2.end_of_turn_acts(state)
     # THE FURINA RESEARCH SLICE (`furina_tide`): guests act, then Salon
     # Solitaire's Restore 2. A no-op for anyone else.
     furina_tide.end_of_turn(state)

@@ -943,8 +943,8 @@ CO_TENANCY_LEDGER = {
             "whose Hydro lands on its own host and pays nothing that a dead "
             "host would have paid. The rng draw is the residual, and it is "
             "the same residual the shipped per-turn bomb mint already has",
-        ("Powers/Prototype/CompanionStandIns.cs", "LionsFangPower"):
-            "(the companion stand-in seam). Jean's conditional "
+        ("Powers/Prototype/LionsFangPower.cs", "LionsFangPower"):
+            "(Jean, in Klee's own pool). Jean's conditional "
             "per-turn Block mint plus one draw -- GroundedPower's shape with a "
             "card on it, and it reads the overhaul ledger exactly as Grounded "
             "does. THE ORDERING QUESTION, answered: its input is the "

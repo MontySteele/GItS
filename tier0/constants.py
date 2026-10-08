@@ -595,38 +595,9 @@ MONDSTADT_OVERHAUL_POOL_IDS: tuple[str, ...] = (
 # at the seam, so the one line that decides which nation moves is greppable.
 COMPANION_OVERHAUL_NATION = "mondstadt"
 
-# THE STAND-INS, AND THEY ARE DELIBERATELY NOT IN THE POOL LIST ABOVE.
-#
-# A stand-in is a whole Klee-only card handed to Klee IN PLACE of one named
-# Universal (Klee brief pick 6; the Mondstadt workshop sec.1; R236 sec.3). It
-# never enters a pool on its own -- not the character-blind Universal pool, not
-# the Personal reward share, not a shop slot, not the Featured Banner, not an
-# event -- so listing one in `MONDSTADT_OVERHAUL_POOL_IDS` would be the one
-# mistake the whole seam exists to make impossible. It is reached at the
-# HAND-OFF and nowhere else: `tier0.engine.companion_standins.hand_off`, called
-# by `tier05.rewards.roll_rewards` and `tier05.shop.companion_offers` AFTER
-# their pick, so no offer's odds move.
-#
-# WHICH UNIVERSAL EACH REPLACES IS NOT HERE EITHER. The row says it, with
-# `replaces:` and `personal_pool:`, and the map is derived from the sheet --
-# a hand-copied second table would fail silently the day a row is renamed.
-# This tuple exists for the one question the sheet cannot answer cheaply from
-# inside `tier0.content.upgrades`: which staged ids a live flag makes
-# REACHABLE, and so smithable at a campfire. `companion_standins.standin_ids()`
-# is the derivation it is pinned against.
-COMPANION_STANDIN_IDS: tuple[str, ...] = (
-    # EMPTY SINCE THE KLEE-ONLY COMPANIONS (2026-10-03,
-    # review/active/mondstadt-companions-2026-10-03.md sec.4). Of the nine
-    # stand-ins, four were cut (Front Row Seat, Shaken Not Purred, I Got Your
-    # Back, Cold-Blooded Strike), three joined the shared pool (Sinful Hex,
-    # Mollis Favonius, Ladder of Divine Ascent) and two joined Klee's own
-    # draftable pool (Lion's Fang, Dust of Purification). The seam stays, with
-    # nothing to hand off.
-)
-
 # JEAN'S DRAW IS A LITERAL 1 IN BOTH ENGINES, AND DELIBERATELY NOT A CONSTANT.
-# Every other number the four stand-ins carry is a POWER'S STACK and lives on
-# the sheet row. This one would be the slice's only law constant, and naming it
+# Every other number on Jean's row is a POWER'S STACK and lives on the sheet
+# row. This one would be the slice's only law constant, and naming it
 # makes `tools/lint_prose_constants.py` read every "Draw 1 card" in the mod --
 # Elemental Ecstasy's included -- as an un-interpolated copy of it. A name that
 # turns an unrelated shipped face into a finding buys less than it costs, so
