@@ -7,6 +7,7 @@
     python tools/telemetry_report.py --character Varka --feed bot --json
     python tools/telemetry_report.py --reactions --character Klee
     python tools/telemetry_report.py --coop --reactions
+    python tools/telemetry_report.py --offers --character Varka --element pyro
     python tools/telemetry_report.py --character Klee --character base5 \\
         --run-instance 20261007-2357 --baseline-run-instance 20261005-1055 \\
         --baseline-run-instance 20261005-113940
@@ -661,6 +662,13 @@ def field_notes() -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # `--offers` is the card-offer report (`tools/offer_report.py`): the
+    # bridge's log of what seats were offered and took, not fight records.
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if "--offers" in argv:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import offer_report
+        return offer_report.main([a for a in argv if a != "--offers"])
     ap = argparse.ArgumentParser(
         description=__doc__.splitlines()[0],
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -705,6 +713,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="read this telemetry dir instead of the defaults; "
                     "repeatable")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--offers", action="store_true",
+                    help="the card-offer report instead: what seats were "
+                    "offered and took (tools/offer_report.py --help)")
     args = ap.parse_args(argv)
 
     try:  # card titles carry characters a cp1252 console cannot encode

@@ -411,6 +411,23 @@ local ISO times on `ts`; `--seed` matches the record's `run_id`. Records older
 than 2026-10-02 lack Block and the wider damage credit and are left out of
 those medians, not counted as zero, so window a kit to its current build.
 
+**Card offers.** Fight telemetry logs plays, not offers. The bridge does:
+every `blindplay act` that answers a card reward (`choose`, `skip`), a shop
+(card shelves and prices, `buy` or anything else sent there), an out-of-fight
+card chooser or a bundle appends one row to
+`understudy/logs/offers/card-offers-laneN.jsonl` (gitignored) with the lane,
+embark stamp, seed, character, act, floor, the room the reward came from, the
+cards shown (upgrade flag, rarity, wire id) and what was taken
+(`understudy/offer_log.py`). A reward screen left with its card reward never
+opened is a row with no cards. Deck screens (remove, upgrade, transform) and
+in-fight choosers are not offers and are not logged. Read it with
+`python tools/offer_report.py --character Varka --element pyro` (or
+`telemetry_report.py --offers ...`): per card, offered, taken, take rate and
+the reward / shop / event split, and with a filter (`--element`, `--rarity`,
+`--type`, `--tag`, `--card`) the character's sheet rows that match and were
+never offered. The log is the running checkout's, so a seat run from a second
+worktree writes there; pass each folder with `--dir`.
+
 ### Also
 
 `KleeTests` runs the shipped `klee.dll` against the real game assemblies,
