@@ -84,6 +84,7 @@ import hashlib
 import json
 import re
 import shutil
+import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
@@ -149,6 +150,7 @@ from understudy.blindplay_faces import (   # noqa: E402,F401  (re-export)
     _BARE_HOOK, _card_face, _card_title, _dedupe_text, _element,
     _ELEMENT_KEYWORD, EMPTY_SHELF, _enchantment, _enemy_key, _enemy_names,
     _DECK_MEMORY, _FIGHT_MEMORY, forget_deck, forget_fight, forget_run,
+    _held_run,
     briefed_this_fight, forget_briefed, remember_briefed,
     forget_shelves, run_change, deck_elements,
     _hazard, _hook_note, _intent, _intents, _is_aura, _meter_max,
@@ -213,6 +215,7 @@ from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     ScriptedThread, ScriptedWire, Session, taken_line, Transcript)
 from understudy.blindplay_record import (   # noqa: E402,F401  (re-export)
     AUDIT_EXTRA, audit_markdown, build_version, _game_dir, game_version,
+    BUILD_SKEW_KEY, build_skew,
     granted_arms, _json_field, leak_audit, meter_plays, notes_markdown,
     read_snapshots, record_markdown, seal, turn_notes)
 
@@ -352,15 +355,24 @@ def cmd_observe(args) -> int:
         print(slow)
         return 1
     out = _refusal_stream(args)
+    if not getattr(args, "raw_file", ""):
+        _warn_build_skew(state)
     try:
         # 2026-10-01: `--define "<Word>"` prints that word's definition off
         # this screen and nothing else; the brief page prints each once.
         word = getattr(args, "define", "") or ""
         if word:
-            print(blindplay_brief.define(observe(state), word).rstrip("\n"))
+            print(blindplay_brief.define(
+                observe(state), word,
+                blindplay_shape.bomb_growth(observation(state))).rstrip("\n"))
         else:
             print(_page(screen_page(state, full=not _brief_on(args)),
                         args))
+            # 2026-10-08: the lane's cap on every page, which is where the
+            # seat brief now tells the seat to read it.
+            count, cap = budget_spent()
+            if cap:
+                print(f"\nactions: {count} of {cap} on this lane")
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=out)
         return 1
@@ -379,6 +391,34 @@ def cmd_observe(args) -> int:
     return 0
 
 
+def _checkout_branch() -> str:
+    """This checkout's branch, or "" where git cannot say."""
+    try:
+        res = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                             cwd=str(REPO), capture_output=True, text=True,
+                             timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return res.stdout.strip() if res.returncode == 0 else ""
+
+
+def _warn_build_skew(state: dict[str, Any]) -> None:
+    """2026-10-08. Once per lane (the words store), where the bridge does not
+    send the build's own Klee numbers: warn on stderr when the deployed
+    build's `+next` stamp disagrees with this checkout's branch."""
+    if blindplay_shape.live_klee_law(state):
+        return
+    seen = blindplay_shape.read_words_seen()
+    if BUILD_SKEW_KEY in seen:
+        return
+    seen.add(BUILD_SKEW_KEY)
+    blindplay_shape.write_words_seen(seen)
+    version, _ = build_version()
+    line = build_skew(version, _checkout_branch())
+    if line:
+        print(line, file=sys.stderr)
+
+
 def screen_page(state: dict[str, Any], full: bool = True) -> str:
     """The full page as a printing door prints it: `observe`, with the
     "Since last page" line cut to the ledger events this lane has not been
@@ -393,6 +433,11 @@ def screen_page(state: dict[str, Any], full: bool = True) -> str:
     every round-1 page as before."""
     obs = observation(state)
     combat = obs.get("combat")
+    # 2026-10-08: whether this page opens its fight, for the brief page's
+    # relic block (`blindplay_brief.RELICS_HEADING`). Kept in the fight's own
+    # memory, which a new fight and `new-seat` both clear.
+    _FIGHT_OPENING[0] = (combat is not None
+                         and RELICS_SHOWN_KEY not in briefed_this_fight())
     if combat is not None:
         combat["events_after"] = blindplay_shape.read_events_seen()
         combat["briefed"] = (set() if full and combat.get("round") == 1
@@ -402,11 +447,18 @@ def screen_page(state: dict[str, Any], full: bool = True) -> str:
     text = render(obs)
     if combat is not None:
         remember_briefed({e["brief_key"] for e in combat.get("enemies") or []
-                          if e.get("briefing") and e.get("brief_key")})
+                          if e.get("briefing") and e.get("brief_key")}
+                         | {RELICS_SHOWN_KEY})
     newest = newest_event(obs)
     if newest:
         blindplay_shape.write_events_seen(newest)
     return text
+
+
+#: The fight-memory mark that this fight's relic sentences have printed, and
+#: whether the page `screen_page` rendered last opened its fight.
+RELICS_SHOWN_KEY = "__relics_shown__"
+_FIGHT_OPENING = [False]
 
 
 def _brief_on(args) -> bool:
@@ -426,7 +478,7 @@ def _page(text: str, args) -> str:
     if not _brief_on(args):
         return text
     seen = blindplay_shape.read_words_seen()
-    page = blindplay_brief.brief(text, seen)
+    page = blindplay_brief.brief(text, seen, relics_full=_FIGHT_OPENING[0])
     blindplay_shape.write_words_seen(seen)
     return page
 
@@ -485,6 +537,28 @@ END_TURN_AFTER_REFUSAL = (
     "has changed since, so the turn was not ended. Say `end turn` again to "
     "end it anyway")
 
+# 2026-10-08. A CHAINED COMMAND AFTER THE ROOM CLOSED. "you are not in a
+# battle" was the commonest refusal of the 10-06/07 night (30 of 146): a seat
+# chained `play` after the play that won the fight, or its co-op partner ended
+# the fight under it. The refusal was true and useless. Where the lane's last
+# page was a fight (a shop) and this command wanted one, the act says the fight
+# is over (the shop is closed) and prints the page that is up now.
+ROOM_CLOSED_REFUSALS = {
+    "you are not in a battle": (COMBAT_SCREENS, "The fight is over"),
+    "you are not in a shop": (frozenset({"shop", "fake_merchant"}),
+                              "The shop is closed"),
+}
+ROOM_CLOSED_TAIL = ": nothing was sent. This is the screen now."
+
+
+def room_closed(why: str, prev_screen: str) -> str:
+    """The sentence for a refusal whose room closed since the last page,
+    or "" where the refusal is about something else."""
+    for refusal, (screens, said) in ROOM_CLOSED_REFUSALS.items():
+        if why.startswith(refusal) and prev_screen in screens:
+            return said + ROOM_CLOSED_TAIL
+    return ""
+
 
 def cmd_act(args) -> int:
     # `EB-691` FIRST, ahead of the budget: a dead lane reported as "budget
@@ -519,6 +593,9 @@ def cmd_act(args) -> int:
     except LaneSlow as slow:
         print(slow)
         return 1
+    # The screen the lane's last page was rendered on, read BEFORE `act`
+    # (whose observation rolls the run ledger onto this screen).
+    prev_screen = _text((_held_run().get("here") or {}).get("screen"))
     try:
         res = act(state, args.command)
     except qa_packet.PacketLeak as exc:
@@ -538,6 +615,16 @@ def cmd_act(args) -> int:
     board = refusal_board(state) if live else ""
     if not res["ok"]:
         why = _text(res.get("refusal")) or ACT_UNRESOLVED
+        closed = room_closed(why, prev_screen) if live else ""
+        if closed:
+            print(closed)
+            print()
+            try:
+                print(_page(screen_page(state, full=not _brief_on(args)),
+                            args))
+            except (qa_packet.PacketLeak, BlindPlayError) as exc:
+                print(f"REFUSED: {exc}", file=out)
+            return 1
         if board:
             mark_refusal(board, args.command, why.split(". ")[0])
         print(f"REFUSED: {why}")

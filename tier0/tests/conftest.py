@@ -112,6 +112,31 @@ def _no_embark_sidecars(tmp_path_factory):
     shape._SIDECAR_DIR = held
 
 
+# 2026-10-08. THE LANE STATE LIVES UNDER `%LOCALAPPDATA%\gits-lanes` NOW
+# (`blindplay_shape.lane_state_dir`), beside the live lanes' games, and the old
+# location (`understudy/logs`) is still read once and cleared on a forget. A
+# test must touch neither: each worker gets its own root and its own "old"
+# folder.
+@pytest.fixture(autouse=True)
+def _lane_state_in_tmp(tmp_path_factory):
+    from understudy import blindplay_shape as shape
+    # Fresh per TEST, not per worker: an embark test's sidecar copy must not
+    # become the next test's run.
+    root = tmp_path_factory.mktemp("lane-state")
+    legacy = tmp_path_factory.mktemp("lane-state-legacy")
+    held = shape._LANE_STATE_ROOT, shape._LEGACY_STATE_DIR
+    held_env = os.environ.get(shape.LANE_STATE_ENV)
+    shape._LANE_STATE_ROOT, shape._LEGACY_STATE_DIR = root, legacy
+    # And for a test that runs a blind-play command in a child process.
+    os.environ[shape.LANE_STATE_ENV] = str(root)
+    yield
+    shape._LANE_STATE_ROOT, shape._LEGACY_STATE_DIR = held
+    if held_env is None:
+        os.environ.pop(shape.LANE_STATE_ENV, None)
+    else:
+        os.environ[shape.LANE_STATE_ENV] = held_env
+
+
 # 2026-10-07. THE HARNESS RUN LOG IS A TRACKED FILE. `understudy/harness.py`
 # appends to `understudy/logs/phase0-<seed>.jsonl` (committed, e.g. the
 # `unseeded` one) and writes `_harness_state.json` beside it. A test that

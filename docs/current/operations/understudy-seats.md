@@ -354,68 +354,20 @@ warning). One key per intent on `BuildEnemyState` would close it. `STS2_MCP`
 is vendored (`vendor/STS2_MCP/`, `PROVENANCE.md`): this is a request upstream,
 not a local edit.
 
-### The Codex seat
+### Dormant seats: Codex, the local model, staged turns
 
-One-time, [USER]'s to do: `npm install -g @openai/codex`, then `codex login`.
-
-```sh
-python -m understudy.seat check                          # path, version, login
-python -m understudy.seat grade <turn-id> [--model M] [--grader-id ID] [--dry-run]
-python -m understudy.seat review <prompt-file> --role doctrine [--out F]
-python -m understudy.seat review <prompt-file> --role pair     [--out F]
-python -m understudy.codex_usage                          # the five-hour and weekly windows
-```
-
-`grade` runs one fresh sandboxed Codex turn from an empty scratch directory
-outside the repo, proves blindness from the transcript, and hands the reply to
-`staged_turn grade`. Both roles refuse at 85% of the five-hour window or 50%
-of the week. GPT is the scarce budget: about three Codex calls per graded
-turn. Sessions land in `understudy/logs/seat/` (gitignored).
-
-**Doctrine seat protocol.** `review --role doctrine` reads a proposal against
-the character's brief before anything is built and answers FOLLOWS or
-REQUIRES_MODIFICATION per arm, naming the CLAUSE and the COMPARISON it rests
-on (the row or base-game card it read the arm against, both cards' numbers,
-the turn it matters on) or a counterexample board; a verdict without its
-comparison is INCOMPLETE. `--role pair` reads a round after it runs and ends
-each arm with NOT PLAYABLE / PLAYABLE / ESCALATE. In both roles a remedy the
-seat volunteers is DISCARDED. A charter prompt quotes reference rows pasted
-from the sheet, never from memory.
-
-### The local model (Qwen on `llama-server`, port 8010)
-
-```sh
-python -m understudy.local_model --probe                  # models + one prompt
-python -m understudy.local_seat grade <turn-id> [--dry-run]
-python -m understudy.local_tester read <turn-id> [--dry-run]
-python -m understudy.local_tester round <t01> <t02> ... --plan-only
-python tools/local_model_sanity.py --dry-run
-```
-
-Launch the server with `serve.ps1` (`-Parallel`, default 2); the standing
-control for runaway thinking is the server's `--reasoning-budget 4096`. One
-request per slot;
-`--read-workers N` needs a server with N slots and refuses otherwise. A local
-reading is subjective feedback: not validation, not balance evidence, and not
-the doctrine seat. Sessions land in `understudy/logs/local-seat/`
-(gitignored).
-
-### Staged turns (the single-turn funnel)
-
-```sh
-python -m understudy.staged_turn check   understudy/turns/<t>.yaml           # no game
-python -m understudy.staged_turn stage   understudy/turns/<t>.yaml --why "..."
-python -m understudy.staged_turn grade   <turn-id> <form.json>
-python -m understudy.staged_turn execute <turn-id> <form.json> --why "..."
-python -m understudy.staged_turn ledger
-```
-
-`stage` sets the board and writes a blind `packet.md`; hand it and
-`understudy/qa_grader_prompt.md` to a fresh agent that did not design the
-cards. `grade` applies the falsifiers and refuses a turn by name; `execute`
-replays a graded line live (defect diagnostics only). A preflight refuses a
-card listed in `understudy/face_defects.py` (each entry names its BACKLOG
-item; `lint_face_defects` fails an entry whose item is gone).
+No seat since 2026-09-28 has used these three, and their code stays because the
+live path still imports it (`blindplay_session` reaches `seat`, which reaches
+`staged_turn` and `codex_usage`; the `face-defects` lint reaches `scenario`).
+The Codex seat (`python -m understudy.seat check|grade|review`, one-time
+`npm install -g @openai/codex` and `codex login`) grades a staged turn or reads a
+proposal as the doctrine or pair seat, refusing at 85% of the five-hour window
+or 50% of the week. The local model (`understudy.local_model`, `local_seat`,
+`local_tester`, served by `serve.ps1` on port 8010) gives subjective readings
+only. Staged turns (`python -m understudy.staged_turn check|stage|grade|execute|ledger`)
+set one board and write a blind `packet.md` for a grader. Each module's
+docstring is the manual; the full text of this section is in git at
+`bf073df4:docs/current/operations/understudy-seats.md`, lines 315-377.
 
 ### Attended drivers (scenarios, forced events, act skips, grants)
 
