@@ -216,7 +216,21 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # the wire cannot see; MOD FEED ONLY, added, never a rename.
             "damage_by_kind", "damage_blocked", "killing_blows",
             "block_gained_by_turn", "block_gained", "block_given",
-            "mine_detonations"}
+            "mine_detonations",
+            # 2026-10-05. The seat's Strength at each turn end, read off the
+            # base game's `StrengthPower` for every character. MOD FEED ONLY,
+            # added, never a rename.
+            "strength_by_turn",
+            # 2026-10-05. Living enemies HP alone (no Block): sibling of
+            # `enemy_pool_by_turn`. MOD FEED ONLY, added.
+            "enemy_hp_by_turn",
+            # 2026-10-06. What reactions are worth, per seat: reactions by
+            # name, the amplifiers' share of the hits they multiplied, and
+            # the debuff stacks reactions applied (`ReactionTally`). The wire
+            # does not narrate reactions, as for `reactions_by_turn`. MOD
+            # FEED ONLY, added, never a rename.
+            "reactions_by_type", "amp_bonus_damage",
+            "debuffs_from_reactions"}
 
 
 def _csharp_keys() -> set[str]:

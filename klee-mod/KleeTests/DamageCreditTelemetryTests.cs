@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -11,6 +12,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Models.Powers;
 using Xunit;
 
 namespace KleeMod.Tests;
@@ -260,6 +262,27 @@ public class DamageCreditTelemetryTests : IDisposable
         Assert.Equal(0, k.GetProperty("block_given").GetInt32());
     }
 
+    /// <summary>2026-10-05: Block for EVERY character, the base game's
+    /// included, and the Block a relic gave before the record opened (Anchor
+    /// walks <c>BeforeCombatStart</c> ahead of the mod's listener).</summary>
+    [Fact]
+    public void Block_is_logged_for_a_base_character_including_block_from_before_the_record()
+    {
+        var ironclad = Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad());
+        Open(ironclad, 1, 0);
+
+        Invoke("SeedOpeningBlock", ironclad.Player, 10, 0);   // Anchor, round 0 at open
+        Invoke("RecordBlock", ironclad.Creature, 5, ironclad.Player, 1);
+        Invoke("RecordBlock", ironclad.Creature, 8, ironclad.Player, 3);
+        Invoke("SeedOpeningBlock", ironclad.Player, 0, 1);    // nothing standing: no row
+
+        var r = Record(ironclad);
+        Assert.Equal("[[1,15],[3,8]]", r.GetProperty("block_gained_by_turn").GetRawText());
+        Assert.Equal(23, r.GetProperty("block_gained").GetInt32());
+        Assert.Contains("PlayTelemetry.SeedOpeningBlock",
+            Il.Calls(Il.Method("PlayTelemetry", "OpenFight")));
+    }
+
     [Fact]
     public void The_prototype_bomb_counts_its_detonations_per_seat()
     {
@@ -316,5 +339,284 @@ public class DamageCreditTelemetryTests : IDisposable
             Il.Calls(Il.Method("PlayTelemetryHooks", "AfterDeath")));
         Assert.Contains("PlayTelemetry.BlockGained",
             Il.Calls(Il.Method("PlayTelemetryHooks", "AfterBlockGained")));
+    }
+
+    /// <summary>2026-10-05: Strength at each turn end, for a base character
+    /// and a kit character alike, 0 with none, and its own row per turn.
+    /// </summary>
+    [Fact]
+    public void Strength_is_logged_by_turn_for_base_and_kit_characters()
+    {
+        var ironclad = Seat.Of(new MegaCrit.Sts2.Core.Models.Characters.Ironclad())
+            .WithPower<StrengthPower>(2);
+        var klee = Seat.Klee();
+        Open(ironclad, 2, 0);
+        Open(klee, 2, 1);
+
+        Invoke("RecordTurnEnd", 1);
+        ironclad.SetPowerAmount<StrengthPower>(5);
+        Invoke("RecordTurnEnd", 2);
+
+        Assert.Equal("[[1,2],[2,5]]",
+            Record(ironclad).GetProperty("strength_by_turn").GetRawText());
+        Assert.Equal("[[1,0],[2,0]]",
+            Record(klee).GetProperty("strength_by_turn").GetRawText());
+        Assert.Contains("PlayTelemetry.RecordTurnEnd",
+            Il.Calls(Il.Method("PlayTelemetry", "CloseTurn")));
+    }
+
+    /// <summary>A combat that answers only `Enemies`, enough for the two
+    /// pool readers.</summary>
+    public class CombatProxy : DispatchProxy
+    {
+        public System.Collections.Generic.IReadOnlyList<Creature> Enemies = Array.Empty<Creature>();
+        public System.Collections.Generic.List<MegaCrit.Sts2.Core.Models.AbstractModel> Listeners = new();
+
+        protected override object? Invoke(MethodInfo? m, object?[]? args)
+        {
+            if (m!.Name == "get_Enemies") return Enemies;
+            if (m.Name == "IterateHookListeners") return Listeners;
+            throw new NotSupportedException(m.Name);
+        }
+    }
+
+    /// <summary>2026-10-05: `enemy_hp_by_turn` is the pool without Block.</summary>
+    [Fact]
+    public void Enemy_hp_field_counts_hp_only_where_the_pool_counts_block_too()
+    {
+        var a = Enemy(30);
+        var b = Enemy(20);
+        Seat.Force(a, "Block", 8);
+        var combat = DispatchProxy.Create<MegaCrit.Sts2.Core.Combat.ICombatState, CombatProxy>();
+        ((CombatProxy)(object)combat).Enemies = new[] { a, b };
+
+        Assert.Equal(58, (int)Invoke("EnemyPool", combat)!);
+        Assert.Equal(50, (int)Invoke("EnemyHp", combat)!);
+        Assert.Contains("PlayTelemetry.EnemyHp",
+            Il.Calls(Il.Method("PlayTelemetry", "OpenTurn")));
+        var klee = Seat.Klee();
+        Open(klee, 1, 0);
+        Assert.Equal("[]", Record(klee).GetProperty("enemy_hp_by_turn").GetRawText());
+    }
+
+    /// <summary>The fight's line, as written to the log, read back. The log
+    /// path is pointed at a temp file so no Godot path is resolved.</summary>
+    private static string[] WrittenLines(Action act)
+    {
+        var field = Telemetry.GetField("_path", HeadlessGame.All)!;
+        var saved = field.GetValue(null);
+        var path = Path.Combine(Path.GetTempPath(),
+            $"gits-telemetry-test-{Guid.NewGuid():N}.jsonl");
+        field.SetValue(null, path);
+        try
+        {
+            act();
+            return File.Exists(path) ? File.ReadAllLines(path) : Array.Empty<string>();
+        }
+        finally
+        {
+            field.SetValue(null, saved);
+            if (File.Exists(path)) File.Delete(path);
+        }
+    }
+
+    private static void Die(Seat seat) => Seat.Force(seat.Creature, "CurrentHp", 0);
+
+    /// <summary>2026-10-05 — THE FATAL FIGHT IS WRITTEN. A fight the player
+    /// died in wrote no line (Klee suite 1, two act-1 boss deaths). The seat's
+    /// death now closes it: once, as `died`, HP at 0, turn rows kept.</summary>
+    [Fact]
+    public void A_fight_the_player_dies_in_is_written_once_as_died()
+    {
+        var klee = Seat.Klee();
+        Open(klee, 1, 0);
+        var enemy = Enemy();
+
+        var lines = WrittenLines(() =>
+        {
+            Invoke("RecordTurnEnd", 1);
+            Hit(enemy, 6, dealer: klee.Creature);
+            Die(klee);
+            Invoke("CloseOnSeatDeath", klee.Creature, true);
+            Invoke("CloseOnSeatDeath", klee.Creature, true);   // a second call writes nothing
+        });
+
+        var row = Assert.Single(lines);
+        var r = JsonDocument.Parse(row).RootElement;
+        Assert.Equal("fight", r.GetProperty("record").GetString());
+        Assert.Equal("died", r.GetProperty("outcome").GetString());
+        Assert.Equal(0, r.GetProperty("hp_end").GetInt32());
+        Assert.Equal(6, Kind(r, DamageCredit.Direct));
+        Assert.Equal("[[1,0]]", r.GetProperty("strength_by_turn").GetRawText());
+        Assert.Null(Invoke("JsonForTest", klee.Player));
+    }
+
+    /// <summary>In co-op the fight goes on while a seat stands: the first
+    /// death writes nothing, the last writes both seats, both `died`.</summary>
+    [Fact]
+    public void In_coop_the_fight_is_written_when_the_last_seat_dies()
+    {
+        var klee = Seat.Klee();
+        var varka = Seat.Varka();
+        Open(klee, 2, 0);
+        Open(varka, 2, 1);
+
+        var lines = WrittenLines(() =>
+        {
+            Die(klee);
+            Invoke("CloseOnSeatDeath", klee.Creature, true);
+            Assert.NotNull(Invoke("JsonForTest", klee.Player));   // still open
+            Die(varka);
+            Invoke("CloseOnSeatDeath", varka.Creature, true);
+        });
+
+        Assert.Equal(2, lines.Length);
+        Assert.All(lines, l => Assert.Equal("died",
+            JsonDocument.Parse(l).RootElement.GetProperty("outcome").GetString()));
+    }
+
+    [Fact]
+    public void The_death_hook_closes_the_fatal_fight()
+    {
+        Assert.Contains("PlayTelemetry.SeatDied",
+            Il.Calls(Il.Method("PlayTelemetryHooks", "AfterDeath")));
+        Assert.Contains("PlayTelemetry.CloseOnSeatDeath",
+            Il.Calls(Il.Method("PlayTelemetry", "SeatDied")));
+    }
+
+    /// <summary>A combat holding <paramref name="enemies"/>; a test adds Test
+    /// Subject's own revive power to its listeners to hold it open. The power
+    /// is built without its constructor: the one member read,
+    /// <c>ShouldStopCombatFromEnding</c>, is a constant `true`.</summary>
+    private static (MegaCrit.Sts2.Core.Combat.ICombatState, CombatProxy) Combat(
+        params Creature[] enemies)
+    {
+        var combat = DispatchProxy.Create<MegaCrit.Sts2.Core.Combat.ICombatState, CombatProxy>();
+        var proxy = (CombatProxy)(object)combat;
+        proxy.Enemies = enemies;
+        return (combat, proxy);
+    }
+
+    private static AdaptablePower Adaptable() =>
+        (AdaptablePower)RuntimeHelpers.GetUninitializedObject(typeof(AdaptablePower));
+
+    private static void SetHp(Creature c, int hp) => Seat.Force(c, "CurrentHp", hp);
+
+    /// <summary>2026-10-05 — A BOSS THAT COMES BACK IN A NEW FORM. Test
+    /// Subject's forms 1 and 2 drop to 0 HP while its Adaptable power holds the
+    /// combat open; the line stays open through both knockdowns and is written
+    /// once, `won`, with every form's damage, when form 3 dies for real.</summary>
+    [Fact]
+    public void A_boss_that_revives_keeps_one_fight_open_until_its_last_form_dies()
+    {
+        var klee = Seat.Klee();
+        Open(klee, 1, 0);
+        var boss = Enemy(100);
+        var (combat, proxy) = Combat(boss);
+        proxy.Listeners.Add(Adaptable());
+
+        var lines = WrittenLines(() =>
+        {
+            // Form 1 knocked down: every enemy is at 0, the combat is held.
+            Hit(boss, 30, dealer: klee.Creature);
+            SetHp(boss, 0);
+            Assert.True((bool)Invoke("FightGoesOn", combat)!);
+            Invoke("MaybeClose", combat);
+            Assert.NotNull(Invoke("JsonForTest", klee.Player));
+            Invoke("RecordTurnEnd", 1);
+
+            // Form 2 revives, is hit, and is knocked down too.
+            SetHp(boss, 200);
+            Invoke("MaybeClose", combat);
+            Hit(boss, 40, dealer: klee.Creature);
+            SetHp(boss, 0);
+            Invoke("MaybeClose", combat);
+            Assert.NotNull(Invoke("JsonForTest", klee.Player));
+            Invoke("RecordTurnEnd", 2);
+
+            // Form 3 sheds Adaptable; its death ends the combat.
+            proxy.Listeners.Clear();
+            SetHp(boss, 300);
+            Hit(boss, 50, dealer: klee.Creature);
+            Invoke("RecordTurnEnd", 3);
+            SetHp(boss, 0);
+            Assert.False((bool)Invoke("FightGoesOn", combat)!);
+            Invoke("MaybeClose", combat);
+            Invoke("MaybeClose", combat);   // a second close writes nothing
+        });
+
+        var row = Assert.Single(lines);
+        var r = JsonDocument.Parse(row).RootElement;
+        Assert.Equal("won", r.GetProperty("outcome").GetString());
+        Assert.Equal(120, Kind(r, DamageCredit.Direct));
+        Assert.Equal(3, r.GetProperty("strength_by_turn").GetArrayLength());
+    }
+
+    /// <summary>A death in a later form is written `died`, whether it comes
+    /// while the next form fights or in the revive window itself (the boss at
+    /// 0 HP, the combat held open).</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Dying_to_a_later_form_writes_died(bool bossStanding)
+    {
+        var klee = Seat.Klee();
+        Open(klee, 1, 0);
+        var boss = Enemy(100);
+        var (combat, proxy) = Combat(boss);
+        proxy.Listeners.Add(Adaptable());
+
+        var lines = WrittenLines(() =>
+        {
+            SetHp(boss, 0);
+            Invoke("MaybeClose", combat);           // form 1 down: still open
+            if (bossStanding) SetHp(boss, 200);     // form 2 up
+            Die(klee);
+            Invoke("CloseOnSeatDeath", klee.Creature,
+                   (bool)Invoke("FightGoesOn", combat)!);
+        });
+
+        var row = Assert.Single(lines);
+        Assert.Equal("died",
+            JsonDocument.Parse(row).RootElement.GetProperty("outcome").GetString());
+    }
+
+    /// <summary>An ordinary fight is unchanged: nothing holds the combat, the
+    /// last enemy's death closes the line once as `won`, and a living summon
+    /// still keeps it open until it is down.</summary>
+    [Fact]
+    public void An_ordinary_fight_still_closes_once_when_its_enemies_are_down()
+    {
+        var klee = Seat.Klee();
+        Open(klee, 1, 0);
+        var a = Enemy(30);
+        var summon = Enemy(10);
+        var (combat, _) = Combat(a, summon);
+
+        var lines = WrittenLines(() =>
+        {
+            SetHp(a, 0);
+            Invoke("MaybeClose", combat);
+            Assert.NotNull(Invoke("JsonForTest", klee.Player));
+            SetHp(summon, 0);
+            Invoke("MaybeClose", combat);
+            Invoke("MaybeClose", combat);
+        });
+
+        var row = Assert.Single(lines);
+        Assert.Equal("won",
+            JsonDocument.Parse(row).RootElement.GetProperty("outcome").GetString());
+    }
+
+    /// <summary>Both close paths ask the one question.</summary>
+    [Fact]
+    public void Both_close_paths_ask_whether_the_combat_is_held_open()
+    {
+        Assert.Contains("PlayTelemetry.FightGoesOn",
+            Il.Calls(Il.Method("PlayTelemetry", "MaybeClose")));
+        Assert.Contains("PlayTelemetry.FightGoesOn",
+            Il.Calls(Il.Method("PlayTelemetry", "SeatDied")));
+        Assert.Contains("Hook.ShouldStopCombatFromEnding",
+            Il.Calls(Il.Method("PlayTelemetry", "FightGoesOn")));
     }
 }

@@ -13,8 +13,9 @@ PYTHONPATH=. python3 -m tier0.harness.runner --report-character --character furi
 3): the four kit arms (`C.KLEE_OVERHAUL`, `C.COMPANION_OVERHAUL`,
 `C.KOKOMI_OVERHAUL`, `furina_stage.FURINA_STAGE`) default on. The named
 shipped decks above are shipped-kit decks; set the arms `False` to read them
-in their own world. The calibration bands are retired until a kit reaches
-Balance (pick 5) and the live stamps describe the shipped world.
+in their own world. The calibration bands are retired (legacy cleanup pick 5) and
+do not return at Balance: a Balance kit is measured on the real game
+(`EXPERIMENTS.md`, ruled 2026-10-05). The live stamps describe the shipped world.
 
 Tier-0.5 run-level sim + drafter (decks emerge from drafting):
 

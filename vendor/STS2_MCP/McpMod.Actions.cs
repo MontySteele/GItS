@@ -376,12 +376,23 @@ public static partial class McpMod
             return Error($"No potion in slot {slot}");
 
         string potionName = SafeGetText(() => potion.Title) ?? "unknown";
-        _ = PotionCmd.Discard(potion);
+        // GItS LOCAL EDIT (co-op potion desync, 2026-10-06): discard through
+        // the game's synced action, exactly as the belt's own Discard button
+        // does (`NPotionPopup.OnDiscardButtonPressed`, 0.111.0 decompile).
+        // Upstream called `PotionCmd.Discard(potion)` directly, which empties
+        // the slot on THIS machine only: in co-op the peer never saw the
+        // discard, judged the next potion reward against a full belt, granted
+        // nothing, and the run was abandoned on a checksum divergence
+        // (seed 30KMHAVG9SMQ, "Exiting rest site room"). The action runs
+        // `PotionCmd.Discard` itself, on every machine, in both modes.
+        RunManager.Instance.ActionQueueSynchronizer.RequestEnqueue(
+            new DiscardPotionGameAction(player, (uint)slot,
+                CombatManager.Instance.IsInProgress));
 
         return new Dictionary<string, object?>
         {
             ["status"] = "ok",
-            ["message"] = $"Discarded potion '{potionName}' from slot {slot}"
+            ["message"] = $"Discarding potion '{potionName}' from slot {slot}"
         };
     }
 

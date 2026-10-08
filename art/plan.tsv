@@ -2544,6 +2544,25 @@ proto_ko_red_knight	ImageGen/images/cards/klee/proto_ko_red_knight.png	500	380	c
 proto_ko_solitary_confinement	ImageGen/images/cards/klee/proto_ko_solitary_confinement.png	500	380	cover	y0.52	shortlist	1	png	Happy Times Klee Preview.png		splash	
 # proto_ko_up_in_smoke <- Klee and the ghost on Halloween night, Klee framed
 proto_ko_up_in_smoke	ImageGen/images/cards/klee/proto_ko_up_in_smoke.png	500	380	cover	x0.62,y0.33@1.6	shortlist	1	png	Halloween 2022.png		splash	
+# ---------- Klee art picks 2026-10-08 ----------
+# [USER]: "Agreed on all the art picks' first options - they look really good!"
+# Candidate c1 of four per card; the 500x380 centre-cover crop is the one shown.
+# proto_ko_fire_fire <- Klee mid-throw, bombs in the air (event key art)
+proto_ko_fire_fire	ImageGen/images/cards/klee/proto_ko_fire_fire.png	500	380	cover	center	shortlist	1	png	Dodoco's Bomb-Rally Ruckus.png		splash	
+# proto_ko_blasting_spree <- Klee and Jean airborne, Dodoco bombs everywhere
+proto_ko_blasting_spree	ImageGen/images/cards/klee/proto_ko_blasting_spree.png	500	380	cover	center	shortlist	1	png	Version 1.6 Wallpaper 1.png		splash	
+# proto_ko_simmer <- Dodoco's tea party, pots and candles on a low heat
+proto_ko_simmer	ImageGen/images/cards/klee/proto_ko_simmer.png	500	380	cover	center	shortlist	1	png	Witch's Lodge Painting Tea Party Dodoco.png		splash	
+# proto_ko_taste_test <- Klee sticker, tongue out
+proto_ko_taste_test	ImageGen/images/cards/klee/proto_ko_taste_test.png	500	380	cover	center	shortlist	1	png	Icon Emoji The Land of Freedom 13.png		sticker	
+# proto_ko_tinkering <- sketch: Klee stacking a block contraption
+proto_ko_tinkering	ImageGen/images/cards/klee/proto_ko_tinkering.png	500	380	cover	center	shortlist	1	png	Mondstadt Tourism Revitalization Project Unleash Your Imagination.png		splash	
+# proto_ko_dodoco_tag <- Klee sheltering behind a big Dodoco
+proto_ko_dodoco_tag	ImageGen/images/cards/klee/proto_ko_dodoco_tag.png	500	380	cover	center	shortlist	1	png	Klee Birthday 2026.png		splash	
+# proto_ko_explosive_spark <- the Explosive Spark sigil on Klee's golden TCG talent card
+proto_ko_explosive_spark	ImageGen/images/cards/klee/proto_ko_explosive_spark.png	500	380	cover	center	shortlist	1	png	Pounding Surprise Equipment Card Golden.png		tcg	
+# alices_masterpiece <- Alice over her open spellbook, Dodocos rising from it
+alices_masterpiece	ImageGen/images/cards/klee/alices_masterpiece.png	500	380	cover	center	shortlist	1	png	Alice Song of the Welkin Moon.png		splash	
 # proto_fs_aria_for_one <- Furina alone on an empty stage, the whole stage
 proto_fs_aria_for_one	ImageGen/images/cards/furina/proto_fs_aria_for_one.png	500	380	cover	center	shortlist	1	png	Starlight Reverie Wallpaper Furina.png		splash	
 # proto_fs_casting_agent <- Furina and Navia's tea party over the cards
@@ -2784,3 +2803,12 @@ proto_vk_storm_battery	ImageGen/images/cards/varka/proto_vk_storm_battery.png	50
 proto_vk_frost_ward	ImageGen/images/cards/varka/proto_vk_frost_ward.png	500	380	cover	y0.30	shortlist	1	png	Kaeya Birthday 2024.png		splash	
 # proto_vk_rippling_guard <- Barbara (Hydro)
 proto_vk_rippling_guard	ImageGen/images/cards/varka/proto_vk_rippling_guard.png	500	380	cover	y0.30	shortlist	1	png	Barbara Birthday 2024.png		splash	
+# ---------- Art bill 2026-10-06: eight missing card keys ----------
+proto_vk_ember_cleave	ImageGen/images/cards/varka/proto_vk_ember_cleave.png	500	380	cover	y0.30	shortlist	1	png	Diluc Wish.png		splash	
+proto_vk_pyre_oath	ImageGen/images/cards/varka/proto_vk_pyre_oath.png	500	380	cover	y0.28	shortlist	1	png	Diluc Profile.png		splash	
+proto_vk_stoke_the_flames	ImageGen/images/cards/varka/proto_vk_stoke_the_flames.png	500	380	cover	y0.30	shortlist	1	png	Bennett Wish.png		splash	
+proto_vk_deep_freeze	ImageGen/images/cards/varka/proto_vk_deep_freeze.png	500	380	cover	y0.30	shortlist	1	png	Eula Wish.png		splash	
+proto_vk_shatter	ImageGen/images/cards/varka/proto_vk_shatter.png	500	380	cover	y0.30	shortlist	1	png	Rosaria Wish.png		splash	
+divine_strategy	ImageGen/images/cards/kokomi/divine_strategy.png	500	380	contain	center	shortlist	1	png	Talent Divine Maiden's Deliverance.png		item	kokomi_pool
+kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	contain	center	shortlist	1	png	Talent Tamakushi Casket.png		item	kokomi_pool
+kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool

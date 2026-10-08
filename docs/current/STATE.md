@@ -25,8 +25,8 @@ and 6, `review/active/legacy-cleanup-2026-10-01.md`): their C#, their sheets
 (`docs/*-cards.yaml`, `*-upgrades.yaml`, the companion sheets), the arm
 switches in C# and in the sim, and the engine pieces only their cards used.
 There is one C# test configuration, and the tier0 sim always runs the current
-kits; its calibration bands, measured on the shipped kits, are retired until a
-kit reaches Balance (pick 5). Every card is a `proto_` row on
+kits; its calibration bands, measured on the shipped kits, are retired, and
+the sim does not gate kit balance (the measurement ruling, 2026-10-05). Every card is a `proto_` row on
 `docs/prototype-surface.yaml` (`operations/prototype.md`). **`+proto` now
 marks only a build that differs from the release**: `deploy_proto.ps1
 -TeyvatFrame`, and the Teyvat frame is on hold (below). Each C# pool IS its
@@ -369,10 +369,10 @@ elemental shields goes to [USER] before any build.
 
 ## Live cell
 
-Measurement law binds only at Balance; nothing is there today, so
-`EXPERIMENTS.md` is dormant. The stamps below describe the shipped world and
-the calibration bands are retired until Balance (2026-10-01, legacy cleanup
-pick 5). Stamps read live via `tier05/cells.py`
+A kit at Balance is measured on the real game (`EXPERIMENTS.md`, "Kit balance
+is measured on the real game", ruled 2026-10-05); the sim stamps below do not
+gate it. They describe the shipped world, and the calibration bands are retired
+(2026-10-01, legacy cleanup pick 5). Stamps read live via `tier05/cells.py`
 (`PILOT_WEIGHTS_VERSION` 6).
 
 | stamp | value | source | what this value covers |

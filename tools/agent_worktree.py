@@ -85,11 +85,19 @@ READ_LISTS: dict[str, tuple[str, ...]] = {
     ),
 }
 
-#: Lane label -> bridge port, mirrored from `understudy/instances.py`. Read
-#: rather than imported: importing `instances` pulls `soak` in behind it and
-#: this tool must run in a checkout with no game and no local.props.
-LANE_PORTS = {"lane0": 15526, "lane1": 15527, "lane2": 15528,
-              "lane3": 15529, "lane4": 15530}
+#: Lane 0's bridge port. Lane N listens on this plus N -- the rule
+#: `understudy/instances.py`'s registry is built on (`instances.port_for`),
+#: restated rather than imported so this tool runs in a checkout with no game
+#: and no local.props; `test_agent_rituals` holds the two in step.
+DEFAULT_PORT = 15526
+
+
+def lane_port(label: str) -> int:
+    """`laneN` -> its bridge port; lane 0's for anything unreadable."""
+    try:
+        return DEFAULT_PORT + int(str(label)[len("lane"):])
+    except ValueError:
+        return DEFAULT_PORT
 
 
 def _git(args: list[str], cwd: Path = REPO) -> subprocess.CompletedProcess:
@@ -148,7 +156,7 @@ def live_lanes(root: Path = REPO) -> list[str]:
         if not any(e.get("state") == "APPLIED" for e in entries):
             continue
         label = str(blob.get("instance") or "lane0")
-        port = int(blob.get("port") or LANE_PORTS.get(label, 15526))
+        port = int(blob.get("port") or lane_port(label))
         if _port_answers(port):
             out.append(f"{label} (port {port}, sidecar {sidecar.name}, "
                        f"ledger still APPLIED)")

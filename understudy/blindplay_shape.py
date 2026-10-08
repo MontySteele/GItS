@@ -464,6 +464,17 @@ def sphere_owes(blob: dict[str, Any]) -> bool:
     no `can_proceed` (an older bridge), which keeps `leave` as it was."""
     if not isinstance(blob, dict) or "can_proceed" not in blob:
         return False
+    # 2026-10-06 (co-op, Klee + Varka, lanes 2 and 3): a FINISHED sphere owes
+    # nothing. The game hides both divination buttons when the minigame ends
+    # (`NCrystalSphereScreen.OnMinigameFinished`) but leaves the unrevealed
+    # cells visible, so the feed still lists them as clickable -- and a click
+    # there is a no-op (`OnCellClicked` returns while `DivinationCount` is 0).
+    # With the sphere stranded under the open map (`can_proceed` false) the
+    # page offered `reveal` on those cells forever. No tool offered means
+    # nothing left to spend; a feed without the tool keys reads as before.
+    if ("can_use_big_tool" in blob or "can_use_small_tool" in blob) and not (
+            blob.get("can_use_big_tool") or blob.get("can_use_small_tool")):
+        return False
     return (blob.get("can_proceed") is not True
             and bool(blob.get("clickable_cells")))
 

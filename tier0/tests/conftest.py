@@ -112,6 +112,40 @@ def _no_embark_sidecars(tmp_path_factory):
     shape._SIDECAR_DIR = held
 
 
+# 2026-10-07. THE HARNESS RUN LOG IS A TRACKED FILE. `understudy/harness.py`
+# appends to `understudy/logs/phase0-<seed>.jsonl` (committed, e.g. the
+# `unseeded` one) and writes `_harness_state.json` beside it. A test that
+# reaches a harness verb unpatched dirties the tree mid-suite, which made
+# `test_deploy_round_staging_refuses...` read a clean tree and then a dirty one.
+# Every test writes to its own worker directory instead.
+@pytest.fixture(autouse=True)
+def _harness_log_in_tmp(tmp_path_factory):
+    from understudy import harness
+    store = tmp_path_factory.getbasetemp() / "harness-logs"
+    store.mkdir(parents=True, exist_ok=True)
+    held = harness.LOG_DIR, harness.STATE_FILE
+    harness.LOG_DIR, harness.STATE_FILE = store, store / "_harness_state.json"
+    yield
+    harness.LOG_DIR, harness.STATE_FILE = held
+
+
+# 2026-10-05. THE SHARED INSTALL'S LOCK AND LAUNCH STAGGER live under
+# `%LOCALAPPDATA%\gits-lanes`, machine-wide by design. A test that launches a
+# fake game must neither write there nor queue behind a live embark's lock,
+# and two fake launches in one test must not sleep out the stagger. Each
+# worker gets its own lock directory and a zero stagger; the tests that pin
+# the stagger set their own.
+@pytest.fixture(autouse=True)
+def _lane_lock_in_tmp(tmp_path_factory):
+    from understudy import instances
+    root = tmp_path_factory.getbasetemp() / "lane-lock"
+    root.mkdir(parents=True, exist_ok=True)
+    held = instances.LOCK_ROOT, instances.LAUNCH_STAGGER_S
+    instances.LOCK_ROOT, instances.LAUNCH_STAGGER_S = root, 0.0
+    yield
+    instances.LOCK_ROOT, instances.LAUNCH_STAGGER_S = held
+
+
 # --- THE SEAM FAMILY, FOR THE FENCES THAT READ SOURCE ----------------------
 # `EB-180` split `understudy/soak.py`, `blindplay.py` and `staged_turn.py`
 # into one module per concern. Half a dozen fences in this suite are written

@@ -37,7 +37,9 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import threading
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -212,14 +214,37 @@ class Instance:
 
 # ------------------------------------------------------------- registry ----
 
-#: label -> (port, appdata or None). Lane 0 is today's defaults, exactly.
+#: How many disposable seat lanes exist above lane 0. THE ONE NUMBER: the
+#: registry below is derived from it, and so is every port, user tree and
+#: refusal message that names the lanes. Raised 4 -> 5 on 2026-10-05.
+SEAT_LANE_COUNT = 5
+
+
+def port_for(label: str) -> int:
+    """`laneN` -> `DEFAULT_PORT + N`. The rule the registry is built on, and
+    the one `tools/agent_worktree.py` reads ports by (it may not import this
+    package)."""
+    return DEFAULT_PORT + int(str(label)[len("lane"):])
+
+
+#: label -> (port, appdata or None). Lane 0 is today's defaults, exactly;
+#: lane N above it is port `DEFAULT_PORT + N` and `LANE_ROOT / laneN`.
 LANES: dict[str, tuple[int, Path | None]] = {
     "lane0": (DEFAULT_PORT, None),
-    "lane1": (DEFAULT_PORT + 1, LANE_ROOT / "lane1"),
-    "lane2": (DEFAULT_PORT + 2, LANE_ROOT / "lane2"),
-    "lane3": (DEFAULT_PORT + 3, LANE_ROOT / "lane3"),
-    "lane4": (DEFAULT_PORT + 4, LANE_ROOT / "lane4"),
+    **{f"lane{n}": (DEFAULT_PORT + n, LANE_ROOT / f"lane{n}")
+       for n in range(1, SEAT_LANE_COUNT + 1)},
 }
+
+
+def lane_labels() -> list[str]:
+    """Every lane label in NUMBER order (`lane10` after `lane9`, never after
+    `lane1`, which a plain `sorted` would do)."""
+    return sorted(LANES, key=lambda label: int(label[len("lane"):]))
+
+
+def seat_lane_labels() -> list[str]:
+    """The disposable lanes a seat may run on: every lane but lane 0."""
+    return [label for label in lane_labels() if label != DEFAULT_LABEL]
 
 
 def default_game_dir() -> Path:
@@ -236,7 +261,7 @@ def lane(label: str = "lane0", *, game_dir: Path | None = None) -> Instance:
     """The instance for a lane label. Built lazily -- see `default_game_dir`."""
     if label not in LANES:
         raise KeyError(f"unknown lane {label!r}; known lanes: "
-                       f"{', '.join(sorted(LANES))}")
+                       f"{', '.join(lane_labels())}")
     port, appdata = LANES[label]
     return Instance(game_dir=game_dir if game_dir is not None
                     else default_game_dir(),
@@ -245,7 +270,7 @@ def lane(label: str = "lane0", *, game_dir: Path | None = None) -> Instance:
 
 def lanes(count: int, *, game_dir: Path | None = None) -> list[Instance]:
     """The first `count` lanes, in registry order. `count=1` is lane 0 alone."""
-    labels = sorted(LANES)
+    labels = lane_labels()
     if count < 1 or count > len(labels):
         raise ValueError(f"lanes must be 1..{len(labels)}, not {count}")
     return [lane(labels[i], game_dir=game_dir) for i in range(count)]
@@ -267,7 +292,7 @@ def label_for(value: object) -> str:
     if label not in LANES:
         raise ValueError(
             f"{value!r} is not a lane; known lanes: "
-            f"{', '.join(sorted(LANES))} (or the bare number)")
+            f"{', '.join(lane_labels())} (or the bare number)")
     return label
 
 
@@ -294,7 +319,7 @@ def wire_lane(label: str = DEFAULT_LABEL) -> Instance:
     """
     if label not in LANES:
         raise ValueError(f"unknown lane {label!r}; known lanes: "
-                         f"{', '.join(sorted(LANES))}")
+                         f"{', '.join(lane_labels())}")
     port, appdata = LANES[label]
     return Instance(game_dir=None, port=port, appdata=appdata, label=label)
 
@@ -490,6 +515,248 @@ def unlock_lane_progress(inst: Instance) -> list[tuple[Path, list[str]]]:
                 < UNLOCKED_ASCENSION):
             data["max_multiplayer_ascension"] = UNLOCKED_ASCENSION
             what.append("multiplayer ascension")
+        if not what:
+            continue
+        text = json.dumps(data, indent=2, ensure_ascii=False)
+        if b"\r\n" in raw:
+            text = text.replace("\n", "\r\n")
+        tmp = path.with_name(path.name + ".gits-tmp")
+        tmp.write_bytes(text.encode("utf-8"))
+        os.replace(tmp, path)
+        changed.append((path, what))
+    return changed
+
+
+# ------------------------------------------ the shared install's lock -----
+#
+# CONCURRENT EMBARKS, AND WHAT THEY SHARE (2026-10-05). Each lane's user tree,
+# port, budget file and run log are its own, and so is each game's
+# `NGame.DebugSeedOverride` -- it is global to a PROCESS, and every lane is
+# its own process. What is NOT a lane's own is the game DIRECTORY: one
+# `steam_appid.txt`, one `mods\STS2_MCP` and one `mods\klee` for every lane.
+#
+# THE DEFECT (BACKLOG, the 2026-09-25 round: "two lanes embarked at the same
+# moment: the second lane's game never came up, its port refused every
+# call"). `Session._deploy_bridge` asks "is a game up?" and, with none up,
+# runs `deploy_bridge.ps1`, which builds for tens of seconds and then
+# `Remove-Item`s `mods\STS2_MCP` and copies it back. Two embarks started
+# together both see no game, both deploy, and one's `Remove-Item` lands while
+# the other's freshly launched game is booting -- before it has loaded (and
+# so locked) the dll. That game boots with no bridge mod at all, and its port
+# refuses every call until a teardown and a relaunch. The same window lets
+# two embarks both find `steam_appid.txt` absent, both record it as their
+# own creation, and the first teardown delete it from under the rest.
+#
+# THE FIX IS A SHORT CRITICAL SECTION, MACHINE-WIDE. Every write to the game
+# directory and every LAUNCH out of it runs inside `install_lock()`: an
+# OS-level lock on one file under `LOCK_ROOT`, so it spans processes,
+# checkouts and worktrees (they all share one install), and the OS drops it
+# when its holder dies -- there is no stale lock to clean up. Inside it,
+# a second lane's `_deploy_bridge` sees the first lane's game ALREADY
+# RUNNING and reuses the bridge rather than rewriting it, which is the rule
+# that was always meant to fire. The wait for the menu is OUTSIDE the lock,
+# so N lanes boot in parallel; only the seconds around each launch are
+# serialised.
+#
+# AND THE LAUNCHES ARE STAGGERED. Every launch initialises Steam and asks it
+# for the profile's remote store; `EB-766` found that a launch landing on
+# Steam while it is still busy with another session is what stalls a boot.
+# `LAUNCH_STAGGER_S` is the minimum gap between any two launches on this
+# machine, recorded in `LAST_LAUNCH_NAME` beside the lock, so a lone embark
+# never waits and the fifth of five waits four gaps.
+
+#: Where the lock and the last-launch record live. Machine-wide on purpose
+#: (beside the lanes' own trees), never in a checkout. Swappable for tests.
+LOCK_ROOT = LANE_ROOT
+INSTALL_LOCK_NAME = "install.lock"
+LAST_LAUNCH_NAME = "last-launch.json"
+
+#: How long an embark waits for another to finish with the install. A first
+#: lane's bridge deploy builds the bridge (`dotnet build`) inside it.
+INSTALL_LOCK_TIMEOUT_S = 900.0
+INSTALL_LOCK_POLL_S = 0.25
+
+#: The minimum gap between two game launches on this machine (seconds).
+LAUNCH_STAGGER_S = 8.0
+
+
+class InstallLockTimeout(RuntimeError):
+    """Another embark held the shared install for longer than the timeout."""
+
+
+_lock_guard = threading.RLock()
+_lock_depth = 0
+_lock_handle = None
+
+
+def _try_os_lock(fh) -> bool:
+    """One non-blocking attempt at an exclusive OS lock on byte 0 of `fh`."""
+    try:
+        if os.name == "nt":
+            import msvcrt
+            fh.seek(0)
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return False
+    return True
+
+
+def _os_unlock(fh) -> None:
+    try:
+        if os.name == "nt":
+            import msvcrt
+            fh.seek(0)
+            msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except OSError:
+        pass
+
+
+@contextmanager
+def install_lock(timeout_s: float | None = None, *, why: str = ""):
+    """Hold the machine-wide lock on the shared game install.
+
+    REENTRANT within a process (a `setup` that holds it calls `_launch`,
+    which takes it too) and SERIALISING across threads (a two-lane round in
+    one process takes it one lane at a time), and exclusive across processes
+    through the OS lock. Raises `InstallLockTimeout` after `timeout_s`.
+    """
+    global _lock_depth, _lock_handle
+    limit = INSTALL_LOCK_TIMEOUT_S if timeout_s is None else float(timeout_s)
+    deadline = time.monotonic() + limit
+    if not _lock_guard.acquire(timeout=max(0.0, limit)):
+        raise InstallLockTimeout(
+            f"another thread held the shared game install for {limit:.0f}s")
+    try:
+        if _lock_depth == 0:
+            root = Path(LOCK_ROOT)
+            root.mkdir(parents=True, exist_ok=True)
+            fh = os.fdopen(os.open(root / INSTALL_LOCK_NAME,
+                                   os.O_RDWR | os.O_CREAT), "r+b")
+            waited = False
+            while not _try_os_lock(fh):
+                if time.monotonic() >= deadline:
+                    fh.close()
+                    raise InstallLockTimeout(
+                        f"another embark held the shared game install "
+                        f"({root / INSTALL_LOCK_NAME}) for {limit:.0f}s"
+                        + (f" while {why}" if why else ""))
+                if not waited:
+                    waited = True
+                    print(f"waiting for the shared game install "
+                          f"(another embark holds it){': ' + why if why else ''}")
+                time.sleep(INSTALL_LOCK_POLL_S)
+            _lock_handle = fh
+        _lock_depth += 1
+        try:
+            yield
+        finally:
+            _lock_depth -= 1
+            if _lock_depth == 0 and _lock_handle is not None:
+                _os_unlock(_lock_handle)
+                _lock_handle.close()
+                _lock_handle = None
+    finally:
+        _lock_guard.release()
+
+
+def last_launch_at() -> float | None:
+    """When any lane on this machine last launched a game (epoch seconds)."""
+    try:
+        blob = json.loads((Path(LOCK_ROOT) / LAST_LAUNCH_NAME).read_text(
+            encoding="utf-8"))
+        return float(blob["at"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def await_launch_stagger(now=time.time, sleep=time.sleep) -> float:
+    """Sleep out the rest of `LAUNCH_STAGGER_S` since the last launch on this
+    machine. Returns the seconds slept. Call it holding `install_lock`."""
+    last = last_launch_at()
+    if last is None:
+        return 0.0
+    owed = LAUNCH_STAGGER_S - (now() - last)
+    if owed <= 0 or owed > LAUNCH_STAGGER_S:      # a clock that went back
+        return 0.0
+    sleep(owed)
+    return owed
+
+
+def note_launch(label: str, pid: int | None, now=time.time) -> None:
+    """Record a launch for the next one's stagger. Never raises."""
+    try:
+        root = Path(LOCK_ROOT)
+        root.mkdir(parents=True, exist_ok=True)
+        (root / LAST_LAUNCH_NAME).write_text(
+            json.dumps({"at": now(), "lane": label, "pid": pid}),
+            encoding="utf-8")
+    except OSError:
+        pass
+
+
+# ----------------------------------------- the bridge mod, enabled --------
+
+#: The mods a lane must load: the bridge (without it the lane's port never
+#: answers) and the kits.
+LANE_REQUIRED_MODS = ("STS2_MCP", "klee")
+
+
+def enable_lane_mods(inst: Instance) -> list[tuple[Path, list[str]]]:
+    """Turn the bridge and the kit mod ON in a LANE's `settings.save`.
+
+    WHY (2026-10-05, the first five-lane embark). A fresh lane's
+    `settings.save` is copied from lane 0's, and lane 0's is the owner's: on
+    that day it had `STS2_MCP` switched OFF in the mod list. Lane 5, seeded
+    that morning, booted with "Skipping loading mod STS2_MCP, it is set to
+    disabled in settings" in its `godot.log`, and its port refused every call
+    for the whole 180 s menu wait. Lanes 1-4, seeded months earlier, still
+    had it on. The lane's own copy is edited to the state a click in the
+    game's mod menu would leave; lane 0's is never written.
+
+    LANES ONLY, on the same two locks as `reveal_pending_epochs`. Idempotent;
+    a file that does not parse is left alone. Returns `(path, [mods turned
+    on])` for each file it changed.
+    """
+    if inst.appdata is None or _is_real_profile(inst.appdata):
+        return []
+    root = Path(inst.appdata).joinpath(*SETTINGS_RELATIVE)
+    if not root.is_dir():
+        return []
+    changed: list[tuple[Path, list[str]]] = []
+    for path in sorted(root.rglob(SETTINGS_NAME)):
+        if not path.is_file():
+            continue
+        try:
+            raw = path.read_bytes()
+            data = json.loads(raw.decode("utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError):
+            continue
+        mods = data.get("mod_settings") if isinstance(data, dict) else None
+        if not isinstance(mods, dict):
+            continue
+        listed = mods.get("mod_list")
+        if not isinstance(listed, list):
+            continue
+        what: list[str] = []
+        if mods.get("mods_enabled") is not True:
+            mods["mods_enabled"] = True
+            what.append("mods_enabled")
+        for name in LANE_REQUIRED_MODS:
+            row = next((m for m in listed if isinstance(m, dict)
+                        and m.get("id") == name), None)
+            if row is None:
+                listed.append({"id": name, "is_enabled": True,
+                               "source": "mods_directory"})
+                what.append(name)
+            elif row.get("is_enabled") is not True:
+                row["is_enabled"] = True
+                what.append(name)
         if not what:
             continue
         text = json.dumps(data, indent=2, ensure_ascii=False)

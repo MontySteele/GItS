@@ -220,6 +220,7 @@ internal static class PlayTelemetry
                     HpStart = (int)creature.CurrentHp,
                     MaxHp = (int)creature.MaxHp,
                 };
+                SeedOpeningBlock(player, (int)creature.Block, combat.RoundNumber);
             }
         }
         catch (Exception e)
@@ -243,6 +244,7 @@ internal static class PlayTelemetry
             if (combat == null || Open.Count == 0) return;
             var round = combat.RoundNumber;
             var pool = EnemyPool(combat);
+            var hp = EnemyHp(combat);
             var (telegraphed, attackers) = Telegraphed(combat);
 
             foreach (var (player, record) in Open)
@@ -255,6 +257,7 @@ internal static class PlayTelemetry
                     { round, (int)creature.CurrentHp, (int)creature.Block });
                 record.IncomingByTurn.Add(new[] { round, telegraphed, attackers });
                 record.EnemyPoolByTurn.Add(new[] { round, pool });
+                record.EnemyHpByTurn.Add(new[] { round, hp });
                 // REACTIONS RIDE ALONG, because the counter already exists and
                 // sampling it costs one read (the hand-back's "cheap now"
                 // condition). Measurement only: no reaction constant is
@@ -321,6 +324,29 @@ internal static class PlayTelemetry
             record.CorpseDetonations = Math.Max(
                 record.CorpseDetonations,
                 BombPower.CorpseDetonationsThisCombat(combat, player));
+            // 2026-10-06. The reaction tallies, sampled on the same rule: per
+            // key, the MAX of what was held and what the counter reads, so a
+            // stale-flush that reads after the next combat reset them (they
+            // read empty then) cannot take a number back.
+            MaxInto(record.ReactionsByType,
+                    ReactionTally.TypesFor(combat, player));
+            MaxInto(record.DebuffsFromReactions,
+                    ReactionTally.DebuffsFor(combat, player));
+            foreach (var (key, value) in ReactionTally.AmpBonusFor(combat, player))
+            {
+                record.AmpBonusDamage[key] = record.AmpBonusDamage.TryGetValue(
+                    key, out var held) ? Math.Max(held, value) : value;
+            }
+        }
+    }
+
+    private static void MaxInto(Dictionary<string, int> into,
+                                IReadOnlyDictionary<string, int> from)
+    {
+        foreach (var (key, value) in from)
+        {
+            into[key] = into.TryGetValue(key, out var held)
+                ? Math.Max(held, value) : value;
         }
     }
 
@@ -334,21 +360,37 @@ internal static class PlayTelemetry
         {
             var combat = CombatManager.Instance?.DebugOnlyGetState();
             if (combat == null) return;
-            var round = combat.RoundNumber;
-            foreach (var (player, record) in Open)
-            {
-                var creature = player.Creature;
-                if (creature == null) continue;
-                record.BlockAtTurnEnd.Add(new[] { round, (int)creature.Block });
-                record.HpLastSeen = (int)creature.CurrentHp;
-            }
-
+            RecordTurnEnd(combat.RoundNumber);
             SampleDetonations(combat);
             MaybeClose(combat);
         }
         catch (Exception e)
         {
             Warn("CloseTurn", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="CloseTurn"/>, and the test
+    /// seam: one turn-end row per open seat.
+    ///
+    /// 2026-10-05 — STRENGTH BY TURN. The seat's Strength standing at the end
+    /// of its turn, 0 with none, read off the base game's own
+    /// <c>StrengthPower</c> so it means the same thing for the base five and
+    /// every kit character. Negative when Strength is down. A read, never a
+    /// write (rule 1).</summary>
+    internal static void RecordTurnEnd(int round)
+    {
+        foreach (var (player, record) in Open)
+        {
+            var creature = player.Creature;
+            if (creature == null) continue;
+            record.BlockAtTurnEnd.Add(new[] { round, (int)creature.Block });
+            record.StrengthByTurn.Add(new[]
+            {
+                round,
+                creature.GetPowerAmount<MegaCrit.Sts2.Core.Models.Powers.StrengthPower>(),
+            });
+            record.HpLastSeen = (int)creature.CurrentHp;
         }
     }
 
@@ -728,6 +770,25 @@ internal static class PlayTelemetry
         }
     }
 
+    /// <summary>
+    /// 2026-10-05 — BLOCK GAINED BEFORE THE RECORD OPENED. The run's own
+    /// listeners (relics) walk <c>BeforeCombatStart</c> ahead of this mod's
+    /// combat-state listeners, so Anchor's 10 Block (any character's) arrived
+    /// at <see cref="BlockGained"/> with no record open and was dropped: base
+    /// seats' fights read `block_gained: 0` under a turn-1 `hp_trajectory`
+    /// showing 10 Block standing. Block cannot carry between combats
+    /// (<c>Player.AfterCombatEnd</c> empties it, and turn 1 does not clear),
+    /// so whatever stands when the record opens was gained this fight, and is
+    /// filed to round 1. A read, never a write (rule 1).
+    /// </summary>
+    internal static void SeedOpeningBlock(Player player, int block, int round)
+    {
+        if (block <= 0 || !Open.TryGetValue(player, out var record)) return;
+        var at = Math.Max(1, round);
+        record.BlockGained.TryGetValue(at, out var running);
+        record.BlockGained[at] = running + block;
+    }
+
     // ------------------------------------------------------ test seams ---
 
     /// <summary>Test seam: open a bare record for one seat, with no run and no
@@ -772,7 +833,8 @@ internal static class PlayTelemetry
     /// `EndCombatInternal` at all — `CheckWinCondition` sees the pending loss,
     /// calls `ProcessPendingLoss` and returns — so there is no combat-end hook
     /// on a death. `died` was already exact from the player's own death and
-    /// stays the observation that labels it.
+    /// stays the observation that labels it; <see cref="SeatDied"/> is where
+    /// the record closes on a death.
     /// </summary>
     internal static void CombatEnded(bool victory)
     {
@@ -815,13 +877,88 @@ internal static class PlayTelemetry
     /// combat-end hook, so the record closes at the moment the fight did; the
     /// stale-flush in <see cref="OpenFight"/> remains the backstop for every
     /// ending neither sees (fled, abandoned, crashed).</summary>
-    private static void MaybeClose(ICombatState combat)
+    internal static void MaybeClose(ICombatState combat)
     {
         if (Open.Count == 0) return;
-        var enemiesLeft = combat.Enemies.Any(e => e.IsAlive);
+        CloseIfOver(FightGoesOn(combat));
+    }
+
+    /// <summary>
+    /// 2026-10-05 — A BOSS THAT COMES BACK IN A NEW FORM. Test Subject has
+    /// three forms; when the first two drop to 0 HP every enemy is down for a
+    /// moment, and a fight line closed on "no enemy alive" was written `won`
+    /// after form 1 -- forms 2 and 3, their turns and damage, and a death in
+    /// them were never written (lane 3, 2026-10-05: won in 2 turns, the
+    /// player died to form 3).
+    ///
+    /// The game asks the same question before it ends a combat
+    /// (<c>CombatManager.IsCombatEnding</c>): its last clause is
+    /// <c>Hook.ShouldStopCombatFromEnding</c>, which Test Subject's
+    /// <c>AdaptablePower</c> answers true until its third form, and which
+    /// Phrog Parasite-style spawners use the same way. So the fight goes on
+    /// while any enemy is alive (any, not only primaries: a living summon
+    /// keeps the record open as it always did, and the combat-end hook still
+    /// closes it) OR while something in the combat holds it open.
+    /// </summary>
+    internal static bool FightGoesOn(ICombatState? combat)
+    {
+        if (combat == null) return true;
+        return combat.Enemies.Any(e => e != null && e.IsAlive)
+               || MegaCrit.Sts2.Core.Hooks.Hook.ShouldStopCombatFromEnding(combat);
+    }
+
+    /// <summary>The combat-free half of <see cref="MaybeClose"/>, and the test
+    /// seam.</summary>
+    internal static void CloseIfOver(bool enemiesLeft)
+    {
+        if (Open.Count == 0) return;
         var seatsLeft = Open.Keys.Any(p => p.Creature is { IsDead: false });
         if (enemiesLeft && seatsLeft) return;
         FlushAll(enemiesLeft ? "died" : "won");
+    }
+
+    /// <summary>
+    /// 2026-10-05 — THE FATAL FIGHT. A fight the player died in wrote no line
+    /// (Klee suite 1, the two act-1 boss deaths on lanes 3 and 4), so a kit's
+    /// boss and elite rows counted only fights it won. Neither close seam
+    /// hears a death: <c>CreatureCmd.Damage</c> skips
+    /// <c>AfterDamageReceived</c> for a creature the hit killed, and the loss
+    /// path never reaches <c>EndCombatInternal</c> (see
+    /// <see cref="CombatEnded"/>). The game goes from the last seat's death
+    /// straight to <c>LoseCombat</c> and the game-over screen, so the
+    /// stale-flush in the next <see cref="OpenFight"/> never comes either.
+    ///
+    /// <c>AfterDeath</c> does fire for a player (in
+    /// <c>KillWithoutCheckingWinCondition</c>, before the player's hooks are
+    /// deactivated and before <c>Kill</c> checks for the loss), so the record
+    /// closes there: HP is the corpse's 0, and the fight is written once, as
+    /// `died`, when the last seat is down. In co-op a seat that dies while
+    /// another stands keeps its record open; it is labelled `died` at the
+    /// fight's close by <see cref="FlushAll"/>, as it always was.
+    /// </summary>
+    internal static void SeatDied(Creature creature)
+    {
+        try
+        {
+            if (Open.Count == 0 || creature?.Player == null) return;
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            CloseOnSeatDeath(creature, FightGoesOn(combat));
+        }
+        catch (Exception e)
+        {
+            Warn("SeatDied", e);
+        }
+    }
+
+    /// <summary>The combat-free half of <see cref="SeatDied"/>, and the test
+    /// seam. A seat with no open record (already flushed) writes nothing, so
+    /// the fight is filed once.</summary>
+    internal static void CloseOnSeatDeath(Creature creature, bool enemiesLeft)
+    {
+        if (creature?.Player is not { } player
+            || !Open.TryGetValue(player, out var record)) return;
+        record.HpLastSeen = Math.Max(0, (int)creature.CurrentHp);
+        CloseIfOver(enemiesLeft);
     }
 
     internal static void FlushAll(string outcome)
@@ -972,9 +1109,13 @@ internal static class PlayTelemetry
 
     // ------------------------------------------------------------ readers --
 
-    private static int EnemyPool(ICombatState combat) =>
+    internal static int EnemyPool(ICombatState combat) =>
         combat.Enemies.Where(e => e.IsAlive)
               .Sum(e => Math.Max(0, (int)e.CurrentHp) + Math.Max(0, (int)e.Block));
+
+    /// <summary>The living enemies' HP alone (no Block): the pool's sibling.</summary>
+    internal static int EnemyHp(ICombatState combat) =>
+        combat.Enemies.Where(e => e.IsAlive).Sum(e => Math.Max(0, (int)e.CurrentHp));
 
     /// <summary>
     /// (total telegraphed attack damage, attacking bodies) for the turn about
@@ -1121,7 +1262,9 @@ internal static class PlayTelemetry
         public readonly List<int[]> HpTrajectory = new();
         public readonly List<int[]> IncomingByTurn = new();
         public readonly List<int[]> EnemyPoolByTurn = new();
+        public readonly List<int[]> EnemyHpByTurn = new();
         public readonly List<int[]> BlockAtTurnEnd = new();
+        public readonly List<int[]> StrengthByTurn = new();
         public readonly List<int[]> ReactionsByTurn = new();
         /// <summary>-1 until the first turn sample; the counter is monotonic
         /// across combats, so a fight's own count is a difference.</summary>
@@ -1147,6 +1290,16 @@ internal static class PlayTelemetry
         /// (<see cref="DamageCredit"/>'s constants), so a reader can tell a
         /// card's hit from an element hit, a reaction, a pet or a Bomb.</summary>
         public readonly Dictionary<string, int> DamageByKind = new();
+        /// <summary>2026-10-06. Reactions this seat resolved, by name
+        /// (<see cref="ReactionTally"/>; sums to the `reactions_by_turn`
+        /// total).</summary>
+        public readonly Dictionary<string, int> ReactionsByType = new();
+        /// <summary>2026-10-06. The amplifiers' share of the hits they
+        /// multiplied, by reaction; written rounded to whole damage.</summary>
+        public readonly Dictionary<string, decimal> AmpBonusDamage = new();
+        /// <summary>2026-10-06. Debuff stacks this seat's reactions put on
+        /// enemies, by power.</summary>
+        public readonly Dictionary<string, int> DebuffsFromReactions = new();
         /// <summary>Block this seat's credited hits broke.</summary>
         public int DamageBlocked;
         /// <summary>Hits of this seat's that killed (filed through
@@ -1221,7 +1374,9 @@ internal static class PlayTelemetry
             Pairs(sb, "hp_trajectory", HpTrajectory);
             Pairs(sb, "incoming_by_turn", IncomingByTurn);
             Pairs(sb, "enemy_pool_by_turn", EnemyPoolByTurn);
+            Pairs(sb, "enemy_hp_by_turn", EnemyHpByTurn);
             Pairs(sb, "block_at_turn_end", BlockAtTurnEnd);
+            Pairs(sb, "strength_by_turn", StrengthByTurn);
             Pairs(sb, "reactions_by_turn", ReactionsByTurn);
             sb.Append(",\"cards_played\":[");
             for (var i = 0; i < CardsPlayed.Count; i++)
@@ -1295,6 +1450,16 @@ internal static class PlayTelemetry
             }
 
             sb.Append('}');
+            // 2026-10-06. What reactions are worth, per seat. Additive keys,
+            // human feed only (`understudy/README.md`).
+            sb.Append(",\"reactions_by_type\":");
+            IntMap(sb, ReactionsByType);
+            sb.Append(",\"amp_bonus_damage\":");
+            IntMap(sb, AmpBonusDamage.ToDictionary(
+                p => p.Key,
+                p => (int)Math.Round(p.Value, MidpointRounding.AwayFromZero)));
+            sb.Append(",\"debuffs_from_reactions\":");
+            IntMap(sb, DebuffsFromReactions);
             sb.Append(",\"damage_blocked\":").Append(DamageBlocked);
             sb.Append(",\"killing_blows\":").Append(KillingBlows);
             sb.Append(",\"block_gained_by_turn\":[");
@@ -1321,6 +1486,21 @@ internal static class PlayTelemetry
                     .ToString("F3", CultureInfo.InvariantCulture));
             sb.Append('}');
             return sb.ToString();
+        }
+
+        private static void IntMap(StringBuilder sb, IReadOnlyDictionary<string, int> map)
+        {
+            sb.Append('{');
+            var first = true;
+            foreach (var pair in map.OrderBy(p => p.Key, StringComparer.Ordinal))
+            {
+                if (!first) sb.Append(',');
+                first = false;
+                Quote(sb, pair.Key);
+                sb.Append(':').Append(pair.Value);
+            }
+
+            sb.Append('}');
         }
 
         private static void Pairs(StringBuilder sb, string key, List<int[]> rows)
@@ -1715,6 +1895,13 @@ public sealed class PlayTelemetryHooks : AbstractModel
         // prevented death drops the snapshot without filing it.
         if (!wasRemovalPrevented) PlayTelemetry.RecordDeath(creature);
         else PlayTelemetry.DropPending(creature);
+        // 2026-10-05: a seat's death closes the fight when it was the last
+        // seat standing -- the only hook the loss path delivers. After
+        // RecordDeath, so the killing hit is in the record it writes.
+        if (!wasRemovalPrevented && creature is { IsPlayer: true })
+        {
+            PlayTelemetry.SeatDied(creature);
+        }
         return Task.CompletedTask;
     }
 }

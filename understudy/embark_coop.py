@@ -106,7 +106,8 @@ def parse_lanes(value: str) -> list[str]:
                           f"needs two games")
     if instances.DEFAULT_LABEL in labels:
         raise EmbarkError("lane 0 is the owner's own game and profile; a "
-                          "co-op pair runs on two disposable lanes (1-4)")
+                          "co-op pair runs on two disposable lanes ("
+                          + ", ".join(instances.seat_lane_labels()) + ")")
     return labels
 
 

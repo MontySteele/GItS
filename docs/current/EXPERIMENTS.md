@@ -4,6 +4,9 @@ Standing measurement law, plus pointers to the active registrations. A
 registration packet lives under `review/active/` while its picks are open and
 moves to `review/records/` once it has been run. One home at a time, not two.
 
+**The sim-law half of this file does not gate kit balance**: a kit at Balance
+is measured on the real game (first section below, ruled 2026-10-05).
+
 ## Measurement law
 
 ### Kit balance is measured on the real game (2026-10-05)

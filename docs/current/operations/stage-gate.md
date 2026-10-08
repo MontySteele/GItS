@@ -73,3 +73,11 @@ that part is fixed.
 **The build is frozen until the metrics are recaptured** ([USER], 2026-10-05: "build is frozen until balance metrics are recaptured - aka we can make prototype changes, but not push them into the release build until the full suite is run"). A Balance kit's cards and rules on `main` (every build and release) do not change between suite runs. Changes to it are made on the staging branch `<kit>-next`, deployed for play and seats as a `+next` build (`tools/deploy_round.py --staging`), and reach `main` in one promotion PR that carries the suite record: the kit on the base-five baseline seeds through act 3 and the telemetry report, each change's one-line prediction graded.
 
 **Exit:** the bar is met on a suite run.
+
+**Solo first, co-op checked (2026-10-06).** A kit is judged on solo play
+against the base five; [USER]'s co-op runs read fun and feel, not strength
+(he wins any A0 co-op run with base characters). [USER]: "It's fine for
+co-op to be easier, but the characters should not be outright weak in single
+player and dependent on reactions in a way that makes co-op exponentially
+easier." The co-op check is a paired seat round on shared seeds: a kit pair
+whose elements react against a base pair (Ironclad + Silent), on the same bar.

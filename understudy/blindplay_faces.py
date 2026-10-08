@@ -291,10 +291,11 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         # and half of that was this render. Same index and same id key the
         # staged page uses (`printed_spark`, `EB-282`), so the two pages
         # cannot say different things about one price; the WIRE's own
-        # `spark_price` is the fallback, because a hand entry carries it live
-        # (`BuildCardState`, the GItS local edit) and a reward or shop row
-        # never does. `None` where neither answers, and an absent price
-        # prints nothing.
+        # `spark_price` is the fallback: the bridge puts it on every card row
+        # (`BuildCardInfo`, 2026-10-07; a hand row since the Sparks arm), and
+        # it is what answers for a card the build in the game has and this
+        # checkout's index does not. `None` where neither answers, and an
+        # absent price prints nothing.
         # AN UPGRADED COPY CHARGES ITS UPGRADED PRICE (2026-09-26): the index
         # is keyed on the class and reads the base branch, so Sparkling
         # Burst+ in hand printed the 2 Sparks the unupgraded card charges.
@@ -491,11 +492,15 @@ def _named_option(entry: Any) -> dict[str, Any]:
     # it costs 3 energy -- a whole turn -- when I next saw it on a
     # card-selection screen".
     #
-    # The SPARK half cannot come off the shelf: `spark_price` is emitted on a
-    # HAND card only (`BuildCardState`), so a shelf is read through the same
-    # id-keyed index the hand and the reward rows use. `card_id` is the only
-    # key that names a card here, which is also what keeps this lookup off a
-    # rest option or a map node -- those carry no `card_id` and get nothing.
+    # The SPARK half: the same id-keyed index the hand and the reward rows
+    # use, and under it the shelf's own `card_spark_price` -- the game's
+    # `SparkCost.PriceOf`, which the bridge puts on every card row since
+    # 2026-10-07. THE FIND (Klee suite 4): the index is read off THIS
+    # checkout's `klee-mod`, and a card the build in the game has and this
+    # tree does not (Explosive Spark, klee-next only) printed "cost 0" on a
+    # shelf with no Spark at all. `card_id` is the only key that names a card
+    # here, which is also what keeps this lookup off a rest option or a map
+    # node -- those carry no `card_id` and get nothing.
     card_id = entry.get("card_id")
     energy = ""
     for key in ("card_cost", "energy_cost"):
@@ -505,6 +510,8 @@ def _named_option(entry: Any) -> dict[str, Any]:
     # An upgraded shelf card prints its `+`, and charges its upgraded price.
     spark = (qa_packet.spark_price_for(card_id, name.rstrip().endswith("+"))
              if card_id is not None else None)
+    if spark is None and entry.get("card_spark_price") is not None:
+        spark = _int(entry.get("card_spark_price")) or None
     cost = qa_packet.cost_label({"cost": energy, "printed_spark": spark,
                                  "spark_all": qa_packet.spends_all_sparks(card_id),
                                  # The Regent's star half (`BuildShopState`).

@@ -547,11 +547,7 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
-    "alices_masterpiece": "Klee's second Ancient card (pool completion, 2026-10-01); no painting yet.",
     "center_of_attention": "Furina's second Ancient card (pool completion, 2026-10-01); no painting yet.",
-    "divine_strategy": "Kokomi's second Ancient card (pool completion, 2026-10-01); no painting yet.",
-    "kk_open_the_casket": "The Tamakushi Casket's token (OpenTheCasket.cs, hand-written, 2026-09-28); no painting yet.",
-    "kk_sea_glass": "Sea Glass Harvest's token (SeaGlass.cs, hand-written, 2026-10-01); no painting yet.",
     "proto_fs_a_five_century_act": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
     "proto_fs_fountain_of_lucine": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
     "proto_fs_hold_the_stage": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
@@ -559,11 +555,6 @@ KNOWN_MISSING = {
     "proto_fs_salons_encore": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
     "proto_fs_salons_tab": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
     "proto_fs_surging_waters": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
-    "proto_vk_deep_freeze": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
-    "proto_vk_ember_cleave": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
-    "proto_vk_pyre_oath": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
-    "proto_vk_shatter": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
-    "proto_vk_stoke_the_flames": "Varka's combo pass (2026-10-04, review/active/varka-combo-pass-2026-10-04.md); no painting yet.",
 }
 
 

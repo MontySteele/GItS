@@ -10,6 +10,7 @@ python tools/deploy_round.py --dry-run        # decide
 python tools/deploy_round.py                  # do it
 python tools/deploy_round.py --pck            # force the pck rebuild
 python tools/deploy_round.py --arms teyvat    # a +proto dev build (frame on hold)
+python tools/deploy_round.py --staging        # a +next build of a <kit>-next branch
 ```
 
 **Always `--dry-run` first**: it prints the pck decision and its reason, the
@@ -34,3 +35,5 @@ Verify by the three printed lines, not by the script's own success message: the
 installed version from `mods\klee\manifest.json`, whether `mods\STS2_MCP` is
 there, and the staged card-image count. A `+proto` version marks a dev build
 that differs from the release; go back with `python tools/deploy_round.py`.
+
+**Staging (2026-10-05).** A Balance kit is frozen on `main` between suite runs; its changes are played from `<kit>-next`. `--staging` refuses unless the main checkout is on a `*-next` branch with a clean tracked tree, then deploys the release build stamped `+next`; the verify lines name the branch.

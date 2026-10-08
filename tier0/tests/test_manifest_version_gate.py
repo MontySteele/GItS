@@ -62,7 +62,8 @@ def _ps(script: str) -> subprocess.CompletedProcess:
 
 
 def _policy(manifest: dict, installed: dict, game_version: str | None,
-            expected: str, prototype: bool = False) -> list[str]:
+            expected: str, prototype: bool = False,
+            stamp: str = "") -> list[str]:
     """Run Test-VersionPolicy with synthetic inputs; return its findings.
 
     `prototype` is the dev-deploy switch (deploy_proto.ps1). It defaults
@@ -80,7 +81,7 @@ $installed = @{{}}
 $game = {('$null' if game_version is None else chr(39) + game_version + chr(39))}
 $out = Test-VersionPolicy -Manifest $m -Installed $installed `
     -GameVersion $game -Expected '{expected}' `
-    -AllowPrototypeMetadata:{allow}
+    -AllowPrototypeMetadata:{allow} -AllowStamp '{stamp}'
 foreach ($f in $out) {{ Write-Output "FINDING: $f" }}
 """
     res = _ps(script)
@@ -421,8 +422,10 @@ def test_the_four_shapes_compose_over_a_clean_and_a_dirty_tree(tmp_path):
 . '{VERSION_PS1}'
 $plain = Get-PackageVersion -SourceManifest '{manifest}' -RepoRoot '{root}'
 $proto = Get-PackageVersion -SourceManifest '{manifest}' -RepoRoot '{root}' -Prototype
+$next = Get-PackageVersion -SourceManifest '{manifest}' -RepoRoot '{root}' -Stamp next
 Write-Output "PLAIN: $($plain.Version)"
 Write-Output "PROTO: $($proto.Version)"
+Write-Output "NEXT: $($next.Version)"
 """
     res = _ps(script)
     assert res.returncode == 0, res.stdout + res.stderr
@@ -430,6 +433,7 @@ Write-Output "PROTO: $($proto.Version)"
                  if ": " in ln)
     assert clean["PLAIN"] == "0.2.1", clean
     assert clean["PROTO"] == "0.2.1+proto", clean
+    assert clean["NEXT"] == "0.2.1+next", clean
 
     (root / "tracked.txt").write_text("two\n", encoding="utf-8")
     res = _ps(script)
@@ -438,6 +442,7 @@ Write-Output "PROTO: $($proto.Version)"
                  if ": " in ln)
     assert dirty["PLAIN"] == "0.2.1+dirty", dirty
     assert dirty["PROTO"] == "0.2.1+proto.dirty", dirty
+    assert dirty["NEXT"] == "0.2.1+next.dirty", dirty
 
 
 def test_the_deploy_scripts_report_untracked_files_without_stamping_them():
@@ -748,3 +753,25 @@ def test_a_package_with_no_dll_is_not_a_stamp_finding():
     asked. Answering it twice would report one defect as two findings pointing
     at each other."""
     assert _assembly_findings(str(REPO / "no-such-file.dll"), "0.2.1") == []
+
+
+# --- the +next build metadata (the STAGING deploy, 2026-10-05) --------------
+
+def test_a_staging_stamp_is_refused_from_the_release_path():
+    """A `+next` package is a `<kit>-next` branch, not the release; the
+    release path names it rather than reporting a bare mismatch."""
+    findings = _policy(_manifest(version="0.2.138+next"), BASELIB_OK,
+                       "v0.111.0", "0.2.138")
+    assert any("+next" in f and "staging" in f for f in findings), findings
+
+
+def test_a_staging_stamp_is_accepted_when_the_staging_deploy_asks():
+    findings = _policy(_manifest(version="0.2.138+next"), BASELIB_OK,
+                       "v0.111.0", "0.2.138+next", stamp="next")
+    assert findings == [], findings
+
+
+def test_the_staging_path_refuses_an_unmarked_package():
+    findings = _policy(_manifest(version="0.2.138"), BASELIB_OK,
+                       "v0.111.0", "0.2.138", stamp="next")
+    assert any("no +next mark" in f for f in findings), findings

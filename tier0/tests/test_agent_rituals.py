@@ -257,6 +257,15 @@ def test_agent_worktree_sees_a_live_lane_only_with_both_halves(tmp_path):
     assert aw.live_lanes(tmp_path) == []
 
 
+def test_agent_worktree_reads_every_lanes_port_by_the_registrys_rule():
+    """The tool restates the port rule rather than importing the registry;
+    every lane the registry holds must get the same port from both."""
+    aw = _module("agent_worktree")
+    from understudy import instances
+    for label, (port, _) in instances.LANES.items():
+        assert aw.lane_port(label) == port == instances.port_for(label)
+
+
 # --- open_pr.py ------------------------------------------------------------
 
 def test_open_pr_appends_the_footer_once_and_only_once():
@@ -509,6 +518,69 @@ def test_deploy_round_with_no_dev_arm_is_the_release_build_plus_the_bridge():
     assert set(deploy.RELEASE_DEFAULT_ARMS) == {
         "klee", "companion", "kokomi", "furina-stage"}
     assert not set(deploy.RELEASE_DEFAULT_ARMS) & set(deploy.ARMS)
+
+
+def test_deploy_round_staging_refuses_anything_but_a_clean_next_branch():
+    """2026-10-05, the freeze: a Balance kit's changes are played as a
+    `+next` staging build of a `<kit>-next` branch, committed."""
+    deploy = _module("deploy_round")
+    refuse = deploy.staging_refusal
+    assert refuse("klee-next", []) is None
+    assert refuse("kokomi-next", []) is None
+    assert "not a staging branch" in refuse("main", [])
+    assert "not a staging branch" in refuse("klee-next-fix", [])
+    assert "not a staging branch" in refuse("-next", [])
+    assert "detached" in refuse("", [])
+    dirty = refuse("klee-next", [" M docs/prototype-surface.yaml"])
+    assert dirty and "uncommitted" in dirty and "prototype-surface" in dirty
+    assert "no dev arm" in refuse("klee-next", [], ["teyvat"])
+
+
+def test_deploy_round_staging_stamps_the_release_deploy_next():
+    deploy = _module("deploy_round")
+
+    class Args:
+        pck = False
+        arms: list = []
+        staging = True
+
+    steps = deploy.plan(Args())
+    release = [cmd for cmd in steps
+               if "klee-mod\\build\\deploy.ps1" in cmd]
+    assert release and release[0][-2:] == ["-Stamp", "next"], steps
+    assert steps[-1] == deploy.BRIDGE_STEP
+    Args.staging = False
+    plain = [cmd for cmd in deploy.plan(Args())
+             if "klee-mod\\build\\deploy.ps1" in cmd]
+    assert "-Stamp" not in plain[0]
+    # The switch exists on the script it is passed to.
+    script = (REPO / "klee-mod" / "build" / "deploy.ps1").read_text(
+        encoding="utf-8")
+    assert "[ValidateSet('', 'next')][string]$Stamp" in script
+
+
+def test_deploy_round_staging_refuses_on_this_branch_unless_it_is_next():
+    """Decided from the subprocess's own verdict, never from a second read of
+    the tree: a parallel test can dirty a tracked file between two reads, so
+    the dirty half is only checked for consistency. The branch half is stable
+    and is pinned: off a `<kit>-next` branch staging always refuses; on one it
+    refuses (dirty tree) or is allowed (clean), and nothing else."""
+    deploy = _module("deploy_round")
+    res = _run(["tools/deploy_round.py", "--staging", "--dry-run"])
+    if not deploy.is_main_checkout(REPO):
+        assert res.returncode == 2 and "not the main checkout" in res.stdout
+        return
+    branch = deploy.current_branch()
+    on_next = (branch.endswith(deploy.STAGING_SUFFIX)
+               and branch != deploy.STAGING_SUFFIX)
+    refused = res.returncode == 2 and "REFUSED (--staging)" in res.stdout
+    allowed = res.returncode == 0 and "+next" in res.stdout
+    if not on_next:
+        assert refused, res.stdout
+    else:
+        assert refused != allowed, (res.returncode, res.stdout)
+        if refused:
+            assert "uncommitted tracked" in res.stdout, res.stdout
 
 
 def test_deploy_round_refuses_an_unknown_arm():
