@@ -1546,6 +1546,21 @@ public static partial class McpMod
         {
             info["enchantment"] = enchantment;
         }
+
+        // GItS LOCAL EDIT (the shop Spark price, 2026-10-07). THE SPARK
+        // HALF OF A CARD'S COST, ON EVERY CARD ROW. It rode on a HAND card
+        // only (`BuildCardState`), so a shop shelf, a card reward, a chooser
+        // and a pile row printed a Spark-priced card at `cost 0` wherever the
+        // page's own source index did not know the card -- Klee suite 4 saw
+        // Explosive Spark (0 Energy + 1 Spark) on a shelf as "cost 0".
+        // `SparkCost.PriceOf` is the PRINTED price (no combat state is read),
+        // so it answers the same off a fight as in one. Emitted only when
+        // there is a price, as on the hand; `spark_affordable` stays a
+        // hand-only key, since a bank exists only in combat.
+        if (GitsSparkPrice(card) is { } sparkPrice)
+        {
+            info["spark_price"] = sparkPrice;
+        }
         return info;
     }
 
@@ -2177,6 +2192,10 @@ public static partial class McpMod
                 item["card_type"] = cardInfo["type"];
                 item["card_cost"] = cardInfo["cost"];
                 item["card_star_cost"] = cardInfo["star_cost"];
+                // GItS LOCAL EDIT (the shop Spark price, 2026-10-07): the
+                // shelf's Spark half, under the shelf's `card_` spelling.
+                if (cardInfo.TryGetValue("spark_price", out var shelfSpark))
+                    item["card_spark_price"] = shelfSpark;
                 item["card_rarity"] = cardInfo["rarity"];
                 item["card_description"] = cardInfo["description"];
                 item["keywords"] = cardInfo["keywords"];
