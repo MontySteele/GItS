@@ -3424,10 +3424,11 @@
 
 - {id: proto_vk_glacial_edict, name: "Glacial Edict", character: varka,
    authored_by: [claude],
+   # Varka payoff fix, 2026-10-08: every 3 [2] Cryo Oath, was 4 [3].
    cost: 1, type: skill, rarity: uncommon,
    description: "Apply [gold]Cryo[/gold] to an enemy, and 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold], plus 1 of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
-             {op: varka, kind: glacial_edict, target: enemy, amount: 4}],
+             {op: varka, kind: glacial_edict, target: enemy, amount: 3}],
    upgrade: {varka_amount: -1}}
 
 - {id: proto_vk_static_field, name: "Static Field", character: varka,
@@ -3562,8 +3563,8 @@
    authored_by: [claude],
    # Element identities (sec.5): re-aimed from the Swirl AoE to one big hit.
    # Since 2026-10-03 Pyro's Absolute Zero: provenance note, "Varka
-   # Wildfire Oath and Short Circuit, 2026-10-03".
-   cost: 2, type: power, rarity: rare,
+   # Wildfire Oath and Short Circuit, 2026-10-03"; costs 1 since "Varka payoff fix, 2026-10-08".
+   cost: 1, type: power, rarity: rare,
    description: "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it.",
    effects: [{op: apply_power, power: vk_wildfire_oath, amount: 1, target: self}],
    upgrade: {innate: true}}
@@ -3580,7 +3581,8 @@
    authored_by: [claude],
    # The rebalance (sec.2): Cryo's status payoff. Was a team-wide Swirl
    # debuff while Cryo was current.
-   cost: 2, type: power, rarity: rare,
+   # Varka payoff fix, 2026-10-08: costs 1, was 2.
+   cost: 1, type: power, rarity: rare,
    description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold] to it.",
    effects: [{op: apply_power, power: vk_absolute_zero, amount: 1, target: self}],
    upgrade: {innate: true}}
@@ -3690,7 +3692,8 @@
    authored_by: [claude],
    # "Exhaust a card" is True Grit+'s: the player chooses, any card in hand.
    # 2026-10-05: Pyro becomes current; provenance note, "Varka seat-round fixes".
-   cost: 1, type: skill, rarity: common,
+   # Varka payoff fix, 2026-10-08: costs 0, was 1.
+   cost: 0, type: skill, rarity: common,
    description: "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. [gold]Pyro[/gold] becomes your [gold]current element[/gold].",
    effects: [{op: exhaust_from, select: chosen, amount: 1},
              {op: varka, kind: gain_pyro_oath, amount: 2}],
@@ -3698,10 +3701,13 @@
 
 - {id: proto_vk_ember_cleave, name: "Ember Cleave", character: varka,
    authored_by: [claude],
+   # Varka payoff fix, 2026-10-08: adds "Gain 1 Pyro Oath", gained even with
+   # no card left to Exhaust. Pyro becomes current from the hit, as before.
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card.",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
    effects: [{op: varka, kind: pyro_strike, target: enemy, base: 9},
-             {op: exhaust_from, select: chosen, amount: 1}],
+             {op: exhaust_from, select: chosen, amount: 1},
+             {op: varka, kind: gain_pyro_oath, amount: 1}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_shatter, name: "Icebreaker", character: varka,
@@ -3718,16 +3724,22 @@
 
 - {id: proto_vk_pyre_oath, name: "Pyre Oath", character: varka,
    authored_by: [claude],
+   # Varka payoff fix, 2026-10-08: the paper's "Exhaust up to 2 cards" is built
+   # as exactly 1 (`exhaust_from` takes no "up to"); provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Exhaust[/gold] a card, gain 1 [gold]Pyro[/gold] [gold]Oath[/gold].",
-   effects: [{op: apply_power, power: vk_pyre_oath, amount: 1, target: self}],
+   description: "[gold]Exhaust[/gold] a card. Whenever you [gold]Exhaust[/gold] a card, gain 1 [gold]Pyro[/gold] [gold]Oath[/gold].",
+   effects: [{op: apply_power, power: vk_pyre_oath, amount: 1, target: self},
+             {op: exhaust_from, select: chosen, amount: 1}],
    upgrade: {innate: true}}
 
 - {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
    authored_by: [claude],
    # Upgrade cost 1 to 0: confirmed by the main session, 2026-10-04.
+   # Varka payoff fix, 2026-10-08: adds 1 Vulnerable, landing before the
+   # doubling, so a clean enemy ends on 2.
    cost: 1, type: skill, rarity: uncommon, retain: true,
-   description: "Apply [gold]Cryo[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
+   description: "Apply [gold]Cryo[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
+             {op: apply_power, power: vulnerable, amount: 1, target: enemy},
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}

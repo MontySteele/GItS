@@ -1115,7 +1115,7 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
         _card_hit(state, card, aim, fx["base"] + fx["per"] * led.oath["pyro"],
                   "pyro")
     elif kind == "glacial_edict":
-        # "1 Weak and 1 Vulnerable, plus 1 of each for every 4 Cryo Oath",
+        # "1 Weak and 1 Vulnerable, plus 1 of each for every 3 Cryo Oath",
         # read after the row's own Cryo landed.
         if aim is not None and aim.alive:
             n = 1 + led.oath["cryo"] // max(1, fx["amount"])

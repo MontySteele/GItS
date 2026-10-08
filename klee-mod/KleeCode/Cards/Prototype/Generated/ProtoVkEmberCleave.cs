@@ -46,20 +46,21 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro);
+        ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_ember_cleave");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ember Cleave"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card."),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 9m)
+            new DynamicVar("VkBase", 9m),
+            new DynamicVar("VkAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -87,6 +88,7 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
 
             ExhaustSelection.Close(this);
         }
+        await VarkaCards.GainPyroOath(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

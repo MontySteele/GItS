@@ -220,8 +220,9 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(1, VarkaCards.GlacialEdictStacks(3, 4));
         Assert.Equal(3, VarkaCards.GlacialEdictStacks(8, 4));
         Assert.Equal(3, VarkaCards.GlacialEdictStacks(6, 3));
-        Assert.Equal(4m, Var(new ProtoVkGlacialEdict(), "VkAmount"));
-        Assert.Equal(3m, Var(Upgraded<ProtoVkGlacialEdict>(), "VkAmount"));
+        // Varka payoff fix (2026-10-08): every 3 [2], was 4 [3].
+        Assert.Equal(3m, Var(new ProtoVkGlacialEdict(), "VkAmount"));
+        Assert.Equal(2m, Var(Upgraded<ProtoVkGlacialEdict>(), "VkAmount"));
         Assert.Equal(new[] { Element.Pyro, Element.Hydro, Element.Cryo, Element.Electro },
                      VarkaCards.TempestOrder);
     }
