@@ -547,7 +547,6 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
-    "alices_masterpiece": "Klee's second Ancient card (pool completion, 2026-10-01); no painting yet.",
     "center_of_attention": "Furina's second Ancient card (pool completion, 2026-10-01); no painting yet.",
     "proto_fs_a_five_century_act": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
     "proto_fs_fountain_of_lucine": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
