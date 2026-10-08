@@ -27,6 +27,7 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 
 
+
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
