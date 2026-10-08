@@ -502,8 +502,14 @@ class _World:
 
     BridgeError = bridge.BridgeError
 
-    def __init__(self, host="lane2", client="lane3", lobby_ascension=5):
+    def __init__(self, host="lane2", client="lane3", lobby_ascension=5,
+                 fastmp_port="pair"):
         self.host, self.client = host, client
+        # What each lobby serves as `fastmp_port`: the pair's own port by
+        # default (a bridge carrying the port patch), `None` for an older
+        # bridge that serves no key, or any other value for a wrong bind.
+        self.fastmp_port = (embark_coop.pair_port(host)
+                            if fastmp_port == "pair" else fastmp_port)
         self.lane = None
         self.up: set[str] = set()
         self.events: list[str] = []
@@ -523,9 +529,12 @@ class _World:
         players = [{"is_local": lane == self.lane,
                     "character_id": self.picked.get(lane, "")}
                    for lane in (self.host, self.client) if lane in self.up]
-        return {"type": "host" if self.lane == self.host else "client",
-                "player_count": len(players), "players": players,
-                "ascension": self.ascension}
+        lobby = {"type": "host" if self.lane == self.host else "client",
+                 "player_count": len(players), "players": players,
+                 "ascension": self.ascension}
+        if self.fastmp_port is not None:
+            lobby["fastmp_port"] = self.fastmp_port
+        return lobby
 
     def get_state(self):
         if self.lane not in self.up:
@@ -589,15 +598,15 @@ def _save(tmp_path, label, seed):
         json.dumps({"rng": {"seed": seed}}), encoding="utf-8")
 
 
-def _embark(world, tmp_path, **kw):
+def _embark(world, tmp_path, lanes=("lane2", "lane3"), **kw):
     clock = _Clock()
-    _save(tmp_path, "lane2", "P8SFJZPHDXGL")
+    _save(tmp_path, lanes[0], "P8SFJZPHDXGL")
+    kw.setdefault("port_free", lambda port: True)
     return embark_coop.embark(
-        ["lane2", "lane3"], ["KLEEMOD-KLEE", "KLEEMOD-FURINA"], wire=world,
+        list(lanes), ["KLEEMOD-KLEE", "KLEEMOD-FURINA"], wire=world,
         session_factory=lambda stamp, inst, args, ib: _Session(
             stamp, inst, args, ib, world),
-        lane_factory=_lane(tmp_path), port_free=lambda: True,
-        clock=clock, sleep=clock.sleep, **kw)
+        lane_factory=_lane(tmp_path), clock=clock, sleep=clock.sleep, **kw)
 
 
 def test_a_coop_embark_runs_host_then_client_and_writes_both_sidecars(
@@ -605,8 +614,12 @@ def test_a_coop_embark_runs_host_then_client_and_writes_both_sidecars(
     world = _World()
     blob = _embark(world, coop_dirs, ascension=0, max_actions=90)
     host, client = _Session.made
-    assert host.args == embark_coop.HOST_ARGS
-    assert client.args == ("--fastmp", "join", "--clientId", "1000")
+    # Hosted on lane 2, so the pair runs on 33772 and both games say so.
+    assert host.args == ("--fastmp", "host_standard",
+                         "--gitsFastmpPort", "33772")
+    assert client.args == ("--fastmp", "join", "--clientId", "1000",
+                           "--gitsFastmpPort", "33772")
+    assert blob["fastmp_port"] == 33772
     ev = world.events
     assert ev.index("setup:lane2") < ev.index("setup:lane3")
     # The ascension goes on the host alone, after both picks, before either
@@ -620,7 +633,7 @@ def test_a_coop_embark_runs_host_then_client_and_writes_both_sidecars(
     assert blob["run_seed"] == "P8SFJZPHDXGL"
     assert blob["ascension"] == {"lane2": 0, "lane3": 0}
     assert blob["character_actual"] == {"lane2": "Klee", "lane3": "Furina"}
-    on_disk = json.loads(embark_coop.coop_path(blob["stamp"])
+    on_disk = json.loads(embark_coop.coop_path(blob["stamp"], "lane2")
                          .read_text(encoding="utf-8"))
     assert on_disk["state"] == "open" and on_disk["host"] == "lane2"
     for label, role in (("lane2", "host"), ("lane3", "client")):
@@ -655,10 +668,13 @@ def test_a_host_that_never_reaches_its_lobby_is_refused_by_name(coop_dirs):
 
 
 def test_the_embark_refuses_before_launching_anything(coop_dirs):
-    with pytest.raises(embark_coop.EmbarkError, match="33771"):
+    asked = []
+    with pytest.raises(embark_coop.EmbarkError, match="33772"):
         embark_coop.embark(["lane2", "lane3"], ["KLEEMOD-KLEE"] * 2,
-                           wire=_World(), port_free=lambda: False,
+                           wire=_World(),
+                           port_free=lambda port: asked.append(port) or False,
                            lane_factory=_lane(coop_dirs))
+    assert asked == [33772]              # this pair's port, and only that
     for bad in ("2", "2,2", "0,3", "2,9"):
         with pytest.raises(embark_coop.EmbarkError):
             embark_coop.parse_lanes(bad)
@@ -714,3 +730,79 @@ def test_the_coop_paragraph_is_printed_only_with_coop():
     assert "co-op" not in plain.lower() and "wait" not in plain.lower()
     assert coop.startswith(plain.rstrip())
     assert 'act "wait"' in coop and "## CO-OP" not in coop
+
+
+# ------------------------------------------------- several pairs at once ---
+
+def test_each_pair_gets_its_host_lanes_port():
+    assert [embark_coop.pair_port(f"lane{n}") for n in (1, 2, 3, 5)] == [
+        33771, 33772, 33773, 33775]
+    with pytest.raises(embark_coop.EmbarkError):
+        embark_coop.pair_port("lane0")
+    with pytest.raises(embark_coop.EmbarkError):
+        embark_coop.pair_port("lane99")
+
+
+def test_a_lane_one_pair_launches_exactly_as_before_the_port_patch():
+    assert embark_coop.host_args(33771) == embark_coop.HOST_ARGS
+    assert embark_coop.client_args(1000, 33771) == (
+        "--fastmp", "join", "--clientId", "1000")
+    assert embark_coop.client_args(1000) == embark_coop.client_args(1000,
+                                                                    33771)
+
+
+def test_a_lane_one_pair_is_accepted_on_a_bridge_without_the_patch(coop_dirs):
+    world = _World(host="lane1", client="lane3", fastmp_port=None)
+    blob = _embark(world, coop_dirs, lanes=("lane1", "lane3"))
+    assert blob["fastmp_port"] == 33771
+    assert _Session.made[0].args == embark_coop.HOST_ARGS
+
+
+def test_a_moved_port_on_a_bridge_without_the_patch_is_refused(coop_dirs):
+    world = _World(fastmp_port=None)
+    with pytest.raises(embark_coop.EmbarkError) as exc:
+        _embark(world, coop_dirs)
+    assert "fastmp_port_wrong: lane2 (host)" in str(exc.value)
+    assert "33772" in str(exc.value)
+    assert len(_Session.made) == 1             # the client never launched
+
+
+def test_a_client_that_dialled_another_port_is_refused(coop_dirs):
+    world = _World()
+    real = world._lobby
+
+    def lobby():
+        got = real()
+        if world.lane == world.client:
+            got["fastmp_port"] = 33771
+        return got
+
+    world._lobby = lobby
+    with pytest.raises(embark_coop.EmbarkError,
+                       match=r"lane3 \(client\).*33771.*33772"):
+        _embark(world, coop_dirs)
+
+
+def test_two_pairs_run_on_two_ports(coop_dirs):
+    ports = []
+    first = _embark(_World(host="lane1", client="lane2"), coop_dirs,
+                    lanes=("lane1", "lane2"),
+                    port_free=lambda port: ports.append(port) or True)
+    second = _embark(_World(host="lane3", client="lane4"), coop_dirs,
+                     lanes=("lane3", "lane4"),
+                     port_free=lambda port: ports.append(port) or True)
+    assert ports == [33771, 33773]
+    assert first["fastmp_port"] == 33771 and second["fastmp_port"] == 33773
+    for blob in (first, second):
+        for label in blob["lanes"]:
+            side = json.loads(Path(blob["lane_sidecars"][label])
+                              .read_text(encoding="utf-8"))
+            assert side["coop"]["fastmp_port"] == blob["fastmp_port"]
+
+
+def test_port_mismatch_reads():
+    assert embark_coop.port_mismatch({"fastmp_port": 33772}, 33772) == ""
+    assert embark_coop.port_mismatch({}, 33771) == ""
+    assert "serves no fastmp_port" in embark_coop.port_mismatch({}, 33772)
+    assert "reads back" in embark_coop.port_mismatch(
+        {"fastmp_port": "x"}, 33772)
