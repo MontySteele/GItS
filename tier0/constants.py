@@ -61,9 +61,10 @@ CRYSTALLIZE_BLOCK = 4         # player Block gained
 #                 copies the aura onto every enemy, the struck one included.
 # THE C# TWIN is `KleeMod.Elements.TriggerRules.SwirlPays`, defaulted from
 # `-p:SwirlPays` (on in every build that does not name it). The sim default
-# is OFF, the arm convention (`operations/prototype.md`), and both sides are
-# pinned here by flipping it (`tier0/tests/test_element_port.py`).
-SWIRL_PAYS = False
+# is ON to match (2026-10-08, after the retest of the switch alone);
+# `tools/lint_constant_parity.py` compares the two defaults, and both sides
+# are pinned by flipping it (`tier0/tests/test_element_port.py`).
+SWIRL_PAYS = True
 SWIRL_DAMAGE = 2              # §4 A: flat, element-less, to ALL enemies
 FROZEN_BOSS_VULN = 2         # bosses consume Frozen for Vulnerable 2
                               # (round-3 ruling; STANDS through the v1.5

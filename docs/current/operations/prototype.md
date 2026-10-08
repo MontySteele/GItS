@@ -83,8 +83,10 @@ express STOPS the run by name.
 shared reaction layer (`review/ruled/element-home-review-2026-09-28.md` §4 A).
 `SwirlPays` is an MSBuild property defaulted on in `Directory.Build.props`,
 defining `SWIRL_PAYS`, which moves `KleeMod.Elements.TriggerRules.SwirlPays`.
-The sim twin `C.SWIRL_PAYS` ships `False` and is pinned both ways by flipping
-it (`tier0/tests/test_element_port.py`; C# `KleeTests/ElementPortTests.cs`).
+The sim twin `C.SWIRL_PAYS` defaults `True` to match (2026-10-08, after the
+retest of the switch alone); `tools/lint_constant_parity.py` compares the two
+defaults, and both sides are pinned both ways by flipping it
+(`tier0/tests/test_element_port.py`; C# `KleeTests/ElementPortTests.cs`).
 Its twin, `CrystallizeKeepsAura`, went with spent auras on 2026-10-03: every
 reaction consumes its aura.
 

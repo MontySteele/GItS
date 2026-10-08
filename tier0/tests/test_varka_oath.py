@@ -3,8 +3,8 @@
 Rules: `review/active/varka-paper-kit-2026-09-28.md` (every pick ruled
 2026-09-29); rows: the `proto_vk_` block of `docs/prototype-surface.yaml`. His
 rules have no switch (collapsed 2026-10-01: he ships nowhere else); the `varka`
-fixture turns on the element port's ruled switch (`C.SWIRL_PAYS`) and
-restores it.
+fixture resets the arm caches around each test (the element port's switch,
+`C.SWIRL_PAYS`, is on by default since 2026-10-08).
 """
 
 from __future__ import annotations
@@ -26,13 +26,10 @@ def _reset():
 
 @pytest.fixture
 def varka():
-    saved = C.SWIRL_PAYS
-    C.SWIRL_PAYS = True
     _reset()
     try:
         yield
     finally:
-        C.SWIRL_PAYS = saved
         _reset()
 
 

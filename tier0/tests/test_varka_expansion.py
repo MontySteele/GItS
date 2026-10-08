@@ -11,7 +11,6 @@ import random
 
 import pytest
 
-from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, reactions
 from tier0.engine import varka_oath as V
@@ -24,13 +23,10 @@ def _reset():
 
 @pytest.fixture
 def varka():
-    saved = C.SWIRL_PAYS
-    C.SWIRL_PAYS = True
     _reset()
     try:
         yield
     finally:
-        C.SWIRL_PAYS = saved
         _reset()
 
 
