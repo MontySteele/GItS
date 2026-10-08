@@ -196,7 +196,7 @@ def companion_shop_offer(
             continue                      # slot omitted -- see the docstring
         pick = rng.choice(cards)
         taken.append(pick)
-        # THE STAND-IN HAND-OFF (QUARANTINED, `C.COMPANION_OVERHAUL`), the same
+        # THE STAND-IN HAND-OFF (`C.COMPANION_OVERHAUL`), the same
         # one line the reward slot carries and in the same place: on the PICKED
         # id, after the eligibility list, the rarity roll and the draw. `taken`
         # keeps the UNIVERSAL, so slot 2 cannot re-offer the row slot 1 already

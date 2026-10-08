@@ -1,4 +1,4 @@
-"""THE R276 POOL EXPANSION (QUARANTINED, `C.KLEE_OVERHAUL`) -- thirty rows
+"""THE R276 POOL EXPANSION (`C.KLEE_OVERHAUL`) -- thirty rows
 toward the 78-card pool R276 ruled, designed by the main session and built as
 specified.
 

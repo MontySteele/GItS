@@ -183,7 +183,7 @@ class Card:
     star: Optional[int] = None
     role_c: Optional[str] = None          # applier | buffer | trigger
     personal_pool: Optional[str] = None
-    # QUARANTINED (`C.COMPANION_OVERHAUL`) -- THE STAND-IN SEAM'S ONE CARD
+    # (`C.COMPANION_OVERHAUL`) -- THE STAND-IN SEAM'S ONE CARD
     # FIELD. The `proto_mc_` Universal this row is handed out IN PLACE OF, for
     # a character named by `personal_pool`. Read at exactly one door,
     # `tier0.engine.companion_standins.hand_off`, which every companion offer
@@ -250,12 +250,7 @@ class Card:
     # precedent applied to naming). Purely descriptive: NOTHING in the engine
     # or the drafter may ever read it (cell-1 byte-identity is the pin).
     register: Optional[str] = None
-    # Kokomi kickoff §2.3: combat-local provenance stamped by the conscript
-    # op (the generated_by_guest_star pattern). PROPOSED reading of ruling
-    # ask §6.7: a conscripted companion is SELF-sourced for SUPPORT_CARRY /
-    # control-provenance purposes — she paid a card of her own deck for it.
-    conscripted: bool = False
-    # THE PLAN LINE (QUARANTINED, C.KOKOMI_OVERHAUL, draft 6) -- the SECOND
+    # THE PLAN LINE (C.KOKOMI_OVERHAUL, draft 6) -- the SECOND
     # HALF OF A PRINTED FACE, and the reason it is a card field rather than a
     # side table: what the card does if it is played on the Bake-Kurage
     # instead of where it would normally go is printed ON the card, in the
@@ -320,10 +315,6 @@ class Card:
     # generator, including ordinary shared companions pulled by that effect.
     # Guest Cast treats this temporary guest like every other Companion.
     generated_by_guest_star: bool = False
-    # "Spend N Encore:" cost line (kickoff §4). A playability gate, not an
-    # overdraw: cards that may legally overdraw into HP use the
-    # spend_encore op instead.
-    encore_cost: int = 0
     # NOTE: `fanfare_cost` was RETIRED by "The Tide Turns" (F-A4). Fanfare is
     # a read-only momentum stat; no card spends it. See RETIRED_CARD_FIELDS.
     # Base-game parity (Ironclad pool): CanBeGeneratedInCombat. Feed sets it
@@ -562,7 +553,7 @@ class Bomb:
 
 @dataclass
 class KleeCharge:
-    """ONE overhaul Bomb (QUARANTINED, `C.KLEE_OVERHAUL`) -- the twin of
+    """ONE overhaul Bomb (`C.KLEE_OVERHAUL`) -- the twin of
     `ProtoBombPower.ProtoCharge`.
 
     A SECOND TYPE BESIDE `Bomb`, not a mode on it, and the argument is
@@ -660,8 +651,6 @@ class Player(Fighter):
     sparks: int = 0
     element: str = "none"         # character element (catalyst cadence)
     cadence: str = "skill"        # catalyst: every attack applies element
-    burst_energy: int = 0
-    burst_max: int = 0            # 0 = character has no burst meter
     draw_pile: list[Card] = field(default_factory=list)
     hand: list[Card] = field(default_factory=list)
     discard_pile: list[Card] = field(default_factory=list)
@@ -732,7 +721,7 @@ class Player(Fighter):
     timed_power_amounts: dict[str, list[list[int]]] = field(
         default_factory=dict)
     first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # THE MONDSTADT COMPANION OVERHAUL (C.COMPANION_OVERHAUL).
     # Nicole's Revelation asks whether you "had Block left at the end of your
     # last turn", and that cannot be read at the START of this one: the turn
     # tick clears Block before any start-of-turn power runs. So the answer is
@@ -770,16 +759,8 @@ class Player(Fighter):
     potions: list[str] = field(default_factory=list)
     potion_slots: int = C.POTION_SLOTS
     node_kind: str = ""           # "", "normal", "elite", or "boss"
-    kit_cards: list[Card] = field(default_factory=list)    # v1.9: the Burst(s)
     # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
-    character_id: str = ""        # who this player IS (Center Stage owner;
-                                  # which cards read as "hers" vs Guest Cast)
-    # --- Kokomi (kickoff v1 §2.1): the Bake-Kurage meter. Uncapped, never
-    # expended, read (not consumed) by finisher effects; accrues ONLY at
-    # the exhaust funnel + explicit gain_charge lines + converted Strength.
-    # Reset per combat in run_fight. Dead field for everyone else. ---
-    charge: int = 0
-    encore: int = 0               # unbounded per-combat buffer (v1.6 style)
+    character_id: str = ""        # who this player IS
     fanfare: int = 0              # read-only momentum stat; global pool
     fanfare_cap: int = 0          # 0 = character has no Fanfare resource.
                                   # Since "The Tide Turns" this is a high
@@ -816,22 +797,12 @@ class Player(Fighter):
     # back out with activity. Readers clamp at zero via resources.readable,
     # so a negative meter turns effects off rather than inverting them.
     fanfare_floor: int = 0
-    # Salon v2 (rework 2026-07-23): the typed member queue, FIFO, max
-    # SALON_MEMBER_SLOTS, duplicates legal (Defect-orb geometry). SOURCE OF
-    # TRUTH for the Salon; powers["salon_member"] mirrors len(salon) so
-    # every count read (has_salon_members, pilot, instruments) still works.
-    salon: list[str] = field(default_factory=list)
     # FURINA (the Salon's Tab, 2026-10-05): her stage, Fanfare and drained
     # ledger live on `player.ftd` (`furina_tide.Ftd`, attached by
     # `furina_stage.reset_for_combat`). The v2 Stage's fields left with v2.
     # Who makes the player's choices inside a Stage card (whether to take a
     # Drain or Spend mode). None = `furina_stage.FURINA_TIDE_DECIDER`.
     stage_decider: Optional[object] = None
-    spotlight: Optional[str] = None   # THE per-player registry: one
-                                  # designated character at a time; a second
-                                  # designation re-aims, never stacks. The
-                                  # guest-cast sentinel means every Companion
-                                  # card rather than one named character.
 
     def __post_init__(self) -> None:
         # Seed the out-of-combat ceiling from the printed one, so EVERY
@@ -862,7 +833,7 @@ class Enemy(Fighter):
     aura: Optional[str] = None
     aura_turns_left: int = 0
     bombs: list[Bomb] = field(default_factory=list)
-    # QUARANTINED (C.KLEE_OVERHAUL): THE OVERHAUL'S PILE, in placement order.
+    # (C.KLEE_OVERHAUL): THE OVERHAUL'S PILE, in placement order.
     # `ProtoBombPower._charges`' twin, and a SEPARATE list from `bombs` above
     # for the reason `KleeCharge` gives -- no card places both, and with the
     # flag off nothing ever appends to this one.
@@ -913,7 +884,7 @@ class Enemy(Fighter):
     # lands after the enemy has already acted is spent by that same side-end.
     frozen: int = 0
     frozen_by_companion: bool = False   # control_uptime provenance (§2.2a)
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # THE MONDSTADT COMPANION OVERHAUL (C.COMPANION_OVERHAUL).
     # Eula's Lightfall Sword is PLACED ON A TARGET and "for 2 turns it counts
     # your Attacks". The turns live in the ordinary power stack
     # (`powers['mc_lightfall_sword']`, ticked like every other duration); the
@@ -1037,10 +1008,9 @@ class Enemy(Fighter):
         return times
 
 
-
 @dataclass
 class PlanEntry:
-    """ONE Plan (QUARANTINED, `C.KOKOMI_OVERHAUL`, draft 6).
+    """ONE Plan (`C.KOKOMI_OVERHAUL`, draft 6).
 
     THE TWIN OF `KokomiPlan.Entry`, and the unit everything downstream counts
     in: the pending badge, Change of Plans' "your front Plan", Nereid's
@@ -1147,7 +1117,7 @@ class CombatState:
     detonations_total: int = 0            # The Big One formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
-    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL). The
+    # THE INAZUMA COMPANION OVERHAUL (C.COMPANION_OVERHAUL). The
     # SWIRLS this player turn, which is the count Heizou's Heartstopper Strike
     # prints ("deals 4 more for each Swirl this turn"). A second counter beside
     # `reactions_this_turn` rather than a filter over it, because that one is a
@@ -1155,23 +1125,12 @@ class CombatState:
     # engine resolves a reaction, inside the arm's flag branch, and cleared
     # with the reaction window at the top of the player turn.
     mi_swirls_this_turn: int = 0
-    # KLEE'S COVEN PERSONALS (QUARANTINED, C.COMPANION_OVERHAUL). The element
+    # KLEE'S COVEN PERSONALS (C.COMPANION_OVERHAUL). The element
     # the LAST Swirl this turn consumed, which is what Prune's Chime hands to
     # the next Bomb set off. On the STATE beside the counter above, not on the
     # Player, because the two are one turn-scoped fact about one board and are
     # cleared on the same line. `tier0.engine.companion_coven`.
     cvn_swirl_element: str = ""
-    encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
-    #                                        latch (Curtain Call, R85)
-    # INSTRUMENT ONLY (EB-78 (2); resources.note_charge_read writes it and
-    # nothing reads it back). Charge-bank reads this turn, keyed by source --
-    # "garment" / "kurage_pulse" / "bonus_formula" -- so the distribution can
-    # be reported under either reading of the workshop's unsettled §6 scope
-    # boundary. Reset at the top of the player turn, emitted at turn close.
-    # It is NOT a budget: R188 ruled there is none, and no code path consults
-    # this dict to decide whether a read may happen.
-    charge_reads_this_turn: dict[str, int] = field(default_factory=dict)
-                                          # (Chevreuse; reset per turn)
     # INSTRUMENT ONLY (`EB-418`), and the sim twin of the mod's `MeterLedger`:
     # one row per Spark that lands, naming the rule that made it, for the whole
     # fight. `effects.gain_sparks` is the only writer and nothing reads it back
@@ -1209,20 +1168,12 @@ class CombatState:
     # refpowers reads the count to divide a per-gain allowance.
     block_gained_this_card: int = 0
     discards_this_card: int = 0           # CalculatedGamble's draw-back count
-    # QUARANTINED (R213 B). What `drain_fanfare` took from THIS card play,
+    # (R213 B). What `drain_fanfare` took from THIS card play,
     # read back by the effects after it through
     # `amount_formula: {count: fanfare_drained}`. Per-card and not a meter
     # read: the meter is 0 by the time they resolve.
     fanfare_drained_this_card: int = 0
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
-    salon_replacements_this_card: int = 0 # overflow count for current card
-    # `EB-412`. WILL THIS CARD BOW SOMEONE OUT? The same closed form the mod
-    # asks (`SalonMemberPower.WillReplace`), seeded at `resolve_card` start off
-    # the PRE-PLAY company, so a numeric printed BEFORE the card's own deploys
-    # still doubles. The counter above stays the honest count of bows that have
-    # actually happened; every reader of the replacement rule asks
-    # `effects.salon_numerics_replaced`, which is the OR of the two.
-    salon_will_replace_this_card: bool = False
     # FURINA'S STAGE. What THIS card play spent ("Spend all your Fanfare"),
     # read back by the effect after it through `amount_formula: {count:
     # stage_spent}`: by the time the damage resolves, the Fanfare it measures
@@ -1285,7 +1236,7 @@ class CombatState:
     card_aim: Optional[Enemy] = None
     card_aim_bound: bool = False
     current_card_cost: int = 0            # this_cost_zero
-    # THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE (QUARANTINED,
+    # THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE (
     # C.COMPANION_OVERHAUL). Which element THIS Attack applies, when a rewritten
     # companion power has changed the answer -- "" while none has, which is
     # every board in every release build. Snapshotted once per play beside
@@ -1295,7 +1246,7 @@ class CombatState:
     # Attack and nothing else. Saved and restored across a free play with the
     # rest of the per-card context (`combat._FREE_PLAY_CONTEXT`).
     mc_attack_element_override: str = ""
-    # THE INAZUMA COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL). Damage
+    # THE INAZUMA COMPANION OVERHAUL (C.COMPANION_OVERHAUL). Damage
     # this CARD PLAY has actually put on enemy HP, which is what Gorou's Inuzaka
     # All-Round Defense reads: "Gain Block equal to half the damage dealt". A
     # per-play counter beside `block_gained_this_card` above and saved with it
@@ -1303,7 +1254,7 @@ class CombatState:
     # an outer card would otherwise leave its number behind for the outer card
     # to bank. Written only inside a flag branch (`deal_damage_to_enemy`).
     mi_damage_dealt_this_card: int = 0
-    # THE MEND CEILING (QUARANTINED, C.COMPANION_OVERHAUL). The HP the player
+    # THE MEND CEILING (C.COMPANION_OVERHAUL). The HP the player
     # walked into this fight with, which is the Kokomi brief's one rule for the
     # keyword and therefore the bound on Mizuki's Universal in ANYONE's hands.
     # Per COMBAT, so it lives here and not on Player, which survives the fight.
@@ -1326,7 +1277,7 @@ class CombatState:
     # auto-play. None means "no override" -- E2 leaves it None on purpose and
     # lets the shipped forced-random roll stand.
     kurage_aim: Optional[Enemy] = None
-    # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): THE PLAN QUEUE, front first.
+    # (C.KOKOMI_OVERHAUL, draft 6): THE PLAN QUEUE, front first.
     #
     # PER FIGHT, on `CombatState`, which is this engine's whole answer to the
     # C#'s "per player" (R205): tier 0 runs ONE seat, so a per-player table
@@ -1334,7 +1285,7 @@ class CombatState:
     # seat's Plans are never another's -- holds by construction here, and the
     # per-FIGHT half is what `CombatState` being rebuilt by `run_fight` buys.
     kk_plan_queue: list[PlanEntry] = field(default_factory=list)
-    # QUARANTINED (C.KOKOMI_OVERHAUL): THE ONCE-PER-TURN LATCHES, one set for
+    # (C.KOKOMI_OVERHAUL): THE ONCE-PER-TURN LATCHES, one set for
     # every payoff of hers that has one ([USER], live 2026-09-02: Treatise,
     # Song of Pearls and The General's Banner all paid per trigger and all
     # three are now capped at one a turn). Keyed by the power's own id, and
@@ -1342,13 +1293,13 @@ class CombatState:
     # ONE turn boundary this arm has (`kokomi_plan.roll_turn`), so the three
     # cards can never come to disagree about when a turn began.
     kk_once_per_turn: set[str] = field(default_factory=set)
-    # QUARANTINED (C.KOKOMI_OVERHAUL): did the Bake-Kurage carry out a Plan
+    # (C.KOKOMI_OVERHAUL): did the Bake-Kurage carry out a Plan
     # this turn? Sango Isshin's condition, written at the ONE place a Plan is
     # carried out (`kokomi_plan._resolve_entry`) so the dawn resolution and
     # Change of Plans' early one both count -- they each carry a Plan out.
     # `KokomiOverhaulLedger`'s twin.
     kk_plan_carried_out_this_turn: bool = False
-    # QUARANTINED (C.KOKOMI_OVERHAUL): THE COMPANION CARDS SHE PLAYED THIS
+    # (C.KOKOMI_OVERHAUL): THE COMPANION CARDS SHE PLAYED THIS
     # TURN, in play order -- Crystal Collapse's "the last other Companion card
     # you played this turn". A LIST rather than a single slot, because the
     # card that reads it has already been recorded by the time it asks (see
@@ -1357,7 +1308,7 @@ class CombatState:
     # that means "this turn"; the twin of
     # `KokomiOverhaulLedger.LastCompanionPlayedThisTurn`.
     kk_companions_this_turn: list["Card"] = field(default_factory=list)
-    # QUARANTINED (C.KOKOMI_OVERHAUL, `EB-335`): HOW MANY PLANS THIS MORNING'S
+    # (C.KOKOMI_OVERHAUL, `EB-335`): HOW MANY PLANS THIS MORNING'S
     # DRAIN HELD -- Tide Wall's "for each Plan the Bake-Kurage carries out this
     # morning". THE WHOLE MORNING'S DEPTH, written once at the top of
     # `kokomi_plan.resolve_all` before the first clause runs, so a Tide Wall
@@ -1367,7 +1318,7 @@ class CombatState:
     # which runs BEFORE the drain, so a morning with no Plans reads zero.
     # `KokomiOverhaulLedger.PlansThisMorning`'s twin.
     kk_plans_this_morning: int = 0
-    # QUARANTINED (C.KOKOMI_OVERHAUL, `EB-478`): TIDE CHART'S PROMISE -- "Next
+    # (C.KOKOMI_OVERHAUL, `EB-478`): TIDE CHART'S PROMISE -- "Next
     # turn, after the Bake-Kurage carries out its Plans, draw 1 card for each."
     # TWO NUMBERS AND NOT A LIST OF CARDS, because the promise is arithmetic:
     # every copy played this turn adds its `per` to the first and its flat
@@ -1379,7 +1330,7 @@ class CombatState:
     # `KokomiPlan._tideCharts`'s twin.
     kk_tide_chart_per: int = 0
     kk_tide_chart_flat: int = 0
-    # QUARANTINED (C.KOKOMI_OVERHAUL), THE CASKET PASS (2026-09-28). How many
+    # (C.KOKOMI_OVERHAUL), THE CASKET PASS (2026-09-28). How many
     # Plans the Bake-Kurage carried out THIS TURN -- Feint's and Sango
     # Isshin's count -- written at the one place a Plan is carried out
     # (`kokomi_plan._note_plan_resolved`, once per carry-out, so a doubled one
@@ -1405,7 +1356,7 @@ class CombatState:
     # back after the refill; `PatientTidePower`'s twin).
     kk_plans_written_this_turn: int = 0
     kk_patient_tide_kept: int = 0
-    # QUARANTINED (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
+    # (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s
     # per-Creature table is a dictionary with one key here.
@@ -1419,7 +1370,7 @@ class CombatState:
     # `EB-749`: Jean's stand-in, and only that. It was Grounded's read until
     # R271 sec.5.1 moved the condition off explosions and onto CARDS.
     ko_set_off_last_turn: int = 0
-    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-749`). GROUNDED'S WHOLE READ since
+    # (`C.KLEE_OVERHAUL`, `EB-749`). GROUNDED'S WHOLE READ since
     # R271 sec.5.1: how many Set off CARDS the player played, this turn and
     # last. A count of CARDS and not of explosions, which is the whole of why
     # it is not `ko_set_off_this_turn` -- the two interactions the ruling
@@ -1445,7 +1396,7 @@ class CombatState:
     # its share (the C#'s `ElementalHit.Deal` return). Read by
     # `klee_overhaul._explode` right after its hit, for Big Badda Boom.
     last_hit_landed: int = 0
-    # QUARANTINED (`C.KLEE_OVERHAUL`, R244, R276). Coven Errand's read: how
+    # (`C.KLEE_OVERHAUL`, R244, R276). Coven Errand's read: how
     # many cards that count as Companion cards have been played this turn. A
     # COUNTER on the arm's ledger rather than a scan of the play log, for rule
     # 7's two counters' reason -- it is written at the ONE site such a play is
@@ -1453,7 +1404,7 @@ class CombatState:
     # Power beside it cannot disagree about what counts. Rolled by `roll_to`,
     # the twin of `KleeOverhaulLedger.CompanionPlayedThisTurn`.
     ko_companion_this_turn: int = 0
-    # QUARANTINED (`C.KLEE_OVERHAUL`, R244). Alice's Introduction Magic: "All
+    # (`C.KLEE_OVERHAUL`, R244). Alice's Introduction Magic: "All
     # cards in your hand count as Companion cards this turn." The window is over
     # the cards that WERE in hand when it resolved, so the mark is on the card
     # INSTANCES and not on their ids -- a second copy of the same card drawn
@@ -1464,7 +1415,7 @@ class CombatState:
     # that wrote it on a card sitting in the discard pile. Empty on every tree
     # with the arm off; the twin is `IntroductionMagicPower.Marked`.
     ko_companion_marked: list["Card"] = field(default_factory=list)
-    # QUARANTINED (`C.KLEE_OVERHAUL`, `EB-732`). Blast Shield's whole rule, as
+    # (`C.KLEE_OVERHAUL`, `EB-732`). Blast Shield's whole rule, as
     # a fact about THIS play rather than about the card: the `return_to_hand`
     # op raises it while the card resolves and `combat._finish_play` reads it
     # ONCE, at the routing line, and lowers it again. A per-play flag and not a
@@ -1472,7 +1423,7 @@ class CombatState:
     # (`GetResultLocationForCardPlay`), and the one thing both engines have to
     # agree on is where THIS play's card lands.
     ko_return_to_hand: bool = False
-    # QUARANTINED (`C.KLEE_OVERHAUL`, R276). Aftershock's once-per-turn latch,
+    # (`C.KLEE_OVERHAUL`, R276). Aftershock's once-per-turn latch,
     # rolled by `roll_to` beside the counters above; the twin of
     # `KleeOverhaulLedger.TakeAftershock`.
     ko_aftershock_spent: bool = False
@@ -1489,22 +1440,6 @@ class CombatState:
     companion_cost_delta_this_turn: int = 0   # cost_mod op
     replay_next_companion: int = 0            # Study Buddy
     current_card_companion: bool = False      # control provenance (§2.2a)
-    spotlighted_cards_this_turn: int = 0      # Ovation + the reserve cap
-    # B2 (playtest-2, 2026-07-28): Leading Role's OWN first-play window,
-    # counting only Spotlighted plays whose PRINTED cost is >= 1.
-    #
-    # Separate from the counter above on purpose. That one is the Spotlight
-    # activity count and feeds Ovation, the reserve cap, spotlight_draw and
-    # spotlight_encore_first -- all of which should keep counting every
-    # Spotlighted play, free ones included. Only the DISCOUNT has to ignore
-    # cost-0 plays, because only the discount is unable to pay them: it
-    # skips `originalCost <= 0` and then found its window already spent.
-    # Ethereal Spotlight's free token is Spotlighted under Center Stage and
-    # arrives every turn, so in practice the discount never fired at all.
-    spotlighted_paid_cards_this_turn: int = 0
-                                              # (SPOTLIGHT_CARDS_PER_TURN_CAP)
-    spotlight_moved_this_turn: bool = False   # selector-payoff predicates
-    spotlight_moves_this_combat: int = 0      # (sheet pass 1)
     # --- base-game Ironclad parity (engine/refpowers.py); inert otherwise ---
     in_player_turn: bool = False          # StS2 CombatState.CurrentSide, which
                                           # Inferno and Rupture both gate on

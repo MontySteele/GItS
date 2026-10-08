@@ -39,6 +39,7 @@ _POOL_PATH = Path(__file__).parent / "content" / "relics.yaml"
 # Combat-scoped hooks: the engine is the single source of truth for what it
 # consumes, so we import its set rather than duplicating the vocabulary.
 COMBAT_HOOKS = frozenset(engine_relics.COMBAT_HOOKS)
+INERT_HOOKS = frozenset(engine_relics.INERT_HOOKS)
 
 # Run-scoped hooks handled in this module + model.py. Engine RUN_HOOKS plus
 # pickup_upgrade (a pure deck op that never rides in relic_effects) and
@@ -303,7 +304,9 @@ def split_effects(held_ids: list[str], character: str
     for rid in held_ids:
         for fx in _relic_effects(rid, character):
             hook = fx.get("hook")
-            if hook in COMBAT_HOOKS:
+            if hook in COMBAT_HOOKS or hook in INERT_HOOKS:
+                # An inert hook (a retired shipped-kit rule) still rides in the
+                # combat list, where the engine recognises it and does nothing.
                 combat.append(fx)
             elif hook in RUN_HOOKS:
                 run.append(fx)

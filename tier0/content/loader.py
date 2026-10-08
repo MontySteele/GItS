@@ -505,7 +505,7 @@ def _prototype_index() -> dict[str, Card]:
 
 
 def _validate_plan_shape(card: Card) -> None:
-    """The `plan:` line's own shape, AT LOAD (QUARANTINED, draft 6).
+    """The `plan:` line's own shape, AT LOAD (draft 6).
 
     THE SAME CHECKS `tools/gen_klee_cards.plan_reason` MAKES, from the other
     side: closed clause table, closed target spellings, literal positive
@@ -739,11 +739,6 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
     whose last arm IS the count vocabulary), and by a dict `times_formula:`
     (the same `_calc_amount`), so all four are checked against the same
     registry rather than one of them.
-
-    One AMOUNT is checked here as well, for the same when-is-it-reported
-    reason: a non-positive `gain_encore` (EB-119). It is not a vocabulary
-    error, but it is a cross-engine one, and the recursion above is already
-    the only walk that reaches every nested body on every sheet.
     """
     from tier0.engine import effects as _effects        # late: cycle
 
@@ -793,27 +788,12 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
                     f"card {card_id!r}: `bonus_if:` must be {{if: <known "
                     f"predicate>, amount: <int>}}, got {rider!r}")
         _validate_count_vocabulary(card_id, fx)
-        if op == "gain_encore" and isinstance(fx.get("amount"), int) \
-                and fx["amount"] <= 0:
-            # EB-119. A negative GAIN is not a spend, and it is the exact
-            # shape a spend gets smuggled in as. It is also silently INERT in
-            # the mod -- FurinaResources.GainEncore opens `if (amount <= 0)
-            # return;` -- so a row written this way moves the sim's meter and
-            # does nothing in game. The overdraw primitive is `spend_encore`;
-            # the no-overdraw price is the `encore_cost` field. Refused here
-            # because a non-positive amount has no honest reading at all.
-            raise ValueError(
-                f"card {card_id!r}: gain_encore amount must be positive, got "
-                f"{fx['amount']} -- a negative gain is not a spend; use "
-                f"spend_encore (the overdraw primitive) or the encore_cost "
-                f"field")
         if op == _effects.BLOCK_AT_TURN_START:
             # EB-83. The DURATION is a literal positive int and the engine
             # raises on anything else; checked HERE for this function's whole
             # stated reason -- at load, once, rather than the first time a card
-            # already in front of a player resolves. Same door as the
-            # gain_encore amount above: not a vocabulary error, but a
-            # printed-text error only the resolver could otherwise see.
+            # already in front of a player resolves: not a vocabulary error,
+            # but a printed-text error only the resolver could otherwise see.
             try:
                 _effects.block_at_turn_start_turns(fx)
             except ValueError as exc:
@@ -973,30 +953,6 @@ def guest_star_generation_pool(rarity: str) -> list[Card]:
     return sorted(pool, key=lambda c: c.id)
 
 
-def companion_pool(nation: str) -> list[Card]:
-    """The conscript op's generation pool (Kokomi kickoff §2.3): every
-    ordinary shared Companion of the nation, ALL draftable rarities — the
-    5-star Rare jackpot (Itto) is deliberately in the deck of outcomes;
-    conscription pays card identity for a random recruit, and the rare
-    hit is the verb's advertised dream. Guest Stars are excluded (they are
-    a Furina personal-pool mechanism, kickoff §2.3 differentiation) and so
-    are kit cards, as everywhere.
-
-    personal_pool rows are excluded by the same explicit predicate the Guest
-    Star pool carries, for the same reason (EB-99). Unreachable today only
-    because conscript rows default to Inazuma and the personal-pool companion
-    that exists is Klee's; the filter is stated rather than inherited from
-    that accident."""
-    pool = [c for c in _card_index().values()
-            if c.is_companion and c.nation == nation
-            and not c.guest_star and not c.kit_card
-            and c.personal_pool is None
-            and c.rarity in C.RARITY_ODDS]
-    if not pool:
-        raise ValueError(f"empty companion pool for nation {nation!r}")
-    return sorted(pool, key=lambda c: c.id)
-
-
 def cards_in_pool(pool: str) -> list[Card]:
     """Named draft pools for add_card (e.g. Secret Stash's
     'demolition_commons')."""
@@ -1105,23 +1061,6 @@ def _character_index() -> dict[str, dict]:
         d = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
         index[d["id"]] = d
     return index
-
-
-def _kit_cards(spec: dict) -> list[Card]:
-    """v1.9: the character's kit Bursts, attached to the Player rather than
-    shuffled into any deck. The character yaml names them (`kit:`) and the
-    card sheet marks them (`kit_card: true`); requiring both to agree is the
-    cross-check -- a card in a kit list that the sheet does not mark would
-    silently dodge the pool exclusion, so it is a loud error instead."""
-    kit = []
-    for cid in spec.get("kit", []):
-        card = get_card(cid)
-        if not card.kit_card:
-            raise ValueError(
-                f"{spec['id']}: kit lists {cid!r} but the sheet does not "
-                f"mark it kit_card")
-        kit.append(card)
-    return kit
 
 
 def _starting_relic_effects(spec: dict) -> list[dict]:
@@ -1452,10 +1391,8 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   draw_pile=[get_card(cid) for cid in card_ids],
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
-                  burst_max=spec.get("burst_max", 0),
                   relic_hooks=hooks,
                   relic_effects=_starting_relic_effects(spec),
-                  kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
                   fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))
@@ -1487,7 +1424,6 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   draw_pile=[get_card(cid) for cid in card_ids],
                   element=spec.get("element", "none"),
                   cadence=spec.get("cadence", "skill"),
-                  burst_max=spec.get("burst_max", 0),
                   relic_hooks=(relic_hooks_replacement(character_id)
                                or list(spec.get("relic_hooks", []))),
                   # The character's own starting relic FIRST, then whatever
@@ -1500,7 +1436,6 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   potions=list(potions or []),
                   potion_slots=potion_slots,
                   node_kind=node_kind,
-                  kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
                   fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))

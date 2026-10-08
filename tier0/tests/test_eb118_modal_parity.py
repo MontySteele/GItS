@@ -168,13 +168,19 @@ def test_the_sim_and_the_generator_price_the_same_modes():
     """One rule, two engines: `effects.MODE_PRICE_OPS` names the ops that make
     a mode's cost line, and the generator's table is the same set. A meter
     added to one side and not the other is a mode gated in the sim and offered
-    in the mod, which is the drift EB-182 exists to close."""
-    assert set(gen.MODE_PRICE_OPS) == set(effects.MODE_PRICE_OPS)
-    for op, meter in gen.MODE_PRICE_OPS.items():
+    in the mod, which is the drift EB-182 exists to close.
+
+    The generator still prices the shipped Encore and Charge meters, which
+    left the sim on 2026-10-08 and print on no current row; those two are the
+    only names it may carry that the sim does not (they go with the codegen's
+    shipped leftovers, which ride Klee's promotion)."""
+    retired = {"spend_encore", "spend_charge"}
+    assert set(gen.MODE_PRICE_OPS) - retired == set(effects.MODE_PRICE_OPS)
+    for op in effects.MODE_PRICE_OPS:
         # EB-220: the generator's value is now the C# `Meter` member, and the
         # member NAMES are the sim's printed meter names -- the strings both
-        # engines put in a refusal line ("needs 3 Encore, bank holds 2").
-        assert effects.MODE_PRICE_OPS[op][1] == meter
+        # engines put in a refusal line ("needs 3 Sparks, bank holds 2").
+        assert effects.MODE_PRICE_OPS[op][1] == gen.MODE_PRICE_OPS[op]
 
 
 def test_the_taken_mode_is_recorded_in_the_generated_body():

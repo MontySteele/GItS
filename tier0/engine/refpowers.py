@@ -294,39 +294,6 @@ def after_card_exhausted(state: CombatState, card: Card,
     # Klee's status-exhaust route is named in the packet as a trigger.
     from tier0.engine import effects as _effects    # late import (cycle)
     _effects.note_rotation_event(state)
-    # Kokomi (kickoff v1 §2.1/§2.5): the Tamakushi Casket's universal
-    # accrual law, at the ONE exhaust funnel — played-exhausts, mid-card
-    # exhausts (swept per play), ethereal, the autoplay sweep, and the
-    # prevention ward's procs all pass through here, so "whenever one of
-    # your cards is Exhausted" is structural, not per-site discipline.
-    # "YOUR cards" is read literally since the 2026-08-23 [USER] ruling: a
-    # Status or a Curse pays NOTHING at this funnel, whichever route
-    # exhausted it (Ethereal, a Dazed, the ward's random draw-pile pick).
-    # The "statuses/curses count too, accepted quirk" line of kickoff v1
-    # §2.1 is retired with it. The exhaust event is also her burst-particle
-    # economy (KOKOMI_BURST_PER_EXHAUST) and the same reading governs both.
-    # Dead branch for every player without the relic hook.
-    if "tamakushi_casket" in p.relic_hooks and not card.is_junk:
-        from tier0.engine import resources    # late import (module graph)
-        from tier0.engine import relics       # late import (relics -> here)
-        # C5: a MUSTERED recruit's rotation is reported separately from every
-        # other exhaust. P8 is a claim specifically about conscript income
-        # ("mustered-companion exhausts, top-two in commander decks"), and a
-        # single "exhaust" bucket cannot answer it -- her whole pool exhausts,
-        # so the bucket would be top-one for every plan and confirm nothing.
-        # `Card.conscripted` is the stamp the conscript op already sets.
-        kind = "exhaust_muster" if getattr(card, "conscripted", False) \
-            else "exhaust"
-        # Touch of Orobas -> Pearl of Insight (Kokomi's upgraded starter)
-        # REPLACES both rates rather than adding to them, so the rates are
-        # asked for here instead of granted from the constants directly. The
-        # base constants stay the argument, not the answer: a run without the
-        # upgrade gets exactly the pre-Orobas numbers back.
-        charge, burst = relics.exhaust_accrual(
-            p, C.CHARGE_PER_EXHAUST, C.KOKOMI_BURST_PER_EXHAUST)
-        resources.gain_charge(state, charge, kind)
-        if p.burst_max:
-            resources.gain_burst(state, burst, kind)
     if card.on_exhaust_energy:
         # DrumOfBattle uses PlayerCmd.GainEnergy, so ExpectAFight's
         # NoEnergyGain hook must deny this payout too. Normal on-play energy

@@ -66,10 +66,10 @@ Declared confounders — read these before reading any row
    Fanfare (Center Stage). Before P1.5 the answer was not on the wire, so the
    replay fell through to tier0's OWN designation heuristic
    (`effects._op_spotlight_designate`) — a *policy* standing in for a
-   *recording*. `--use-selectors` reads `fight.selectors` instead. It is
-   RECONSTRUCTION, not rules: the recorded answer is pushed through the
-   diagnostic switch tier0 already carries for controlled Center/Guest
-   comparisons (`effects.SPOTLIGHT_FORCE`), and no rule is retyped.
+   *recording*. `--use-selectors` reads `fight.selectors` instead.
+   The Spotlight left the sim with the shipped Furina (2026-10-08), so the
+   recorded answer is now read and counted (`l2_turns_with_selector`) and no
+   longer pushed into the engine; the selector readers below still parse it.
 
 Usage
 -----
@@ -248,7 +248,7 @@ def _block_end(fight: dict, rnd: Any):
 # --------------------------------------------------------------------------
 
 # The two answers Ethereal Spotlight's selector offers, as the bridge spells
-# them, mapped onto `effects.SPOTLIGHT_FORCE`'s two arms. Matching is on the
+# them, mapped onto the two arms the retired `effects.SPOTLIGHT_FORCE` took. Matching is on the
 # OFFER LIST as well as the chosen name: "Center Stage" chosen from a list
 # that did not also contain "Guest Cast" is a different screen wearing a
 # familiar word, and this table declines to read it (P1.5 §"the selector
@@ -292,11 +292,10 @@ def _standing_choice(fight: dict, rnd: Any) -> str | None:
     fight's first Spotlight, +2 per combat in tier0's favour
     (`docs/archive/probe-b-fanfare-residual.md`).
 
-    The round's OWN answer is not discarded: it is still pushed through
-    `effects.SPOTLIGHT_FORCE`, so the designating card sets it when it
-    resolves — which is exactly when the engine sets it. This function only
-    decides what is standing BEFORE that, which is what `_fresh_player`'s
-    docstring already claimed the seed was.
+    The round's OWN answer used to be pushed through
+    `effects.SPOTLIGHT_FORCE` when the designating card resolved; the
+    Spotlight left the sim on 2026-10-08, so this reader is kept for the logs
+    it parses and nothing seeds the engine from it.
     """
     try:
         here = int(rnd)
@@ -321,22 +320,9 @@ def _standing_choice(fight: dict, rnd: Any) -> str | None:
     return best[1] if best else None
 
 
-def _spotlight_target(arm: str | None, character_id: str) -> str | None:
-    if arm == "self":
-        return character_id
-    if arm == "companion":
-        return C.SPOTLIGHT_GUEST_CAST
-    return None
-
-
-def _fresh_player(character_id: str, hp: int, max_hp: int, block: int,
-                  spotlight: str | None = None) -> Player:
+def _fresh_player(character_id: str, hp: int, max_hp: int,
+                  block: int) -> Player:
     player = loader.build_player(character_id)
-    # The designation the RECORDING carries, standing before the first card
-    # of the turn resolves. `None` leaves tier0's own default (undesignated),
-    # which is what every pre-P1.5 log can say.
-    if spotlight:
-        player.spotlight = spotlight
     player.max_hp = int(max_hp or player.max_hp)
     player.hp = int(hp if hp is not None else player.hp)
     player.block = int(block or 0)
@@ -376,8 +362,6 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict,
     for turn in spec["turns"]:
         rnd = turn["round"]
         traj = _traj_at(fight, rnd)
-        spot = _spotlight_target(
-            _selector_choice(fight, rnd) if use_selectors else None, character_id)
         targeted = [p for p in turn["plays"] if p.get("target_id") and p.get("target_hp") is not None]
         for cur, nxt in zip(targeted, targeted[1:]):
             if cur["target_id"] != nxt["target_id"]:
@@ -391,7 +375,6 @@ def l1_rows(spec: dict, names: Names, character_id: str, tally: dict,
             tally["l1_compared"] += 1
             player = _fresh_player(
                 character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"),
-                spotlight=spot,
             )
             enemy = _enemy(cur.get("target_name") or "enemy", cur["target_hp"])
             state = CombatState(player=player, enemies=[enemy], rng=random.Random(0), turn=int(rnd or 1))
@@ -450,16 +433,10 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict,
         if not traj:
             continue
         arm = _selector_choice(fight, rnd) if use_selectors else None
-        # Errata Batch 2 item 1 (R113/C-a): the SEED is the designation
-        # standing at the turn's open (an earlier round's answer); the round's
-        # OWN answer arrives through SPOTLIGHT_FORCE when the designating card
-        # resolves. Seeding the round's own answer credited the setting play.
-        standing = _standing_choice(fight, rnd) if use_selectors else None
         pool_open = _pool_at(fight, rnd)
         pool_next = _pool_at(fight, (rnd or 0) + 1)
         player = _fresh_player(
             character_id, traj.get("hp"), fight.get("max_hp"), traj.get("block"),
-            spotlight=_spotlight_target(standing, character_id),
         )
         hand = []
         skipped = 0
@@ -482,30 +459,22 @@ def l2_rows(spec: dict, names: Names, character_id: str, tally: dict,
         )
         before_pool = _pool_total(state)
         played = 0
-        # `SPOTLIGHT_FORCE` is tier0's own diagnostic switch for controlled
-        # Center/Guest comparisons. Held only across this turn's plays, and
-        # restored in `finally` so a raise inside `play_card` cannot leak a
-        # forced designation into the next turn or the next fight.
-        prev_force = effects.SPOTLIGHT_FORCE
-        if arm:
-            effects.SPOTLIGHT_FORCE = arm
-        try:
-            for play in turn["plays"]:
-                card = _find_in_hand(state, play["card"])
+        # The Spotlight left the sim with the shipped Furina (2026-10-08), so a
+        # logged selector answer is counted and no longer forced.
+        for play in turn["plays"]:
+            card = _find_in_hand(state, play["card"])
+            if card is None:
+                card = names.card(play["card"], played=True)
                 if card is None:
-                    card = names.card(play["card"], played=True)
-                    if card is None:
-                        tally["l2_skipped_unresolved"] += 1
-                        continue
-                    state.player.hand.append(card)
-                try:
-                    combat.play_card(state, card)
-                    played += 1
-                except Exception:
-                    tally["l2_play_errors"] += 1
+                    tally["l2_skipped_unresolved"] += 1
                     continue
-        finally:
-            effects.SPOTLIGHT_FORCE = prev_force
+                state.player.hand.append(card)
+            try:
+                combat.play_card(state, card)
+                played += 1
+            except Exception:
+                tally["l2_play_errors"] += 1
+                continue
         if arm:
             tally["l2_turns_with_selector"] += 1
         ctx = "cards=%d/%d hand_unresolved=%d n_enemies=%d" % (

@@ -1,7 +1,6 @@
 """EB-118: Ethereal printed on a PERSONAL card, and bought off on upgrade.
 
-The engine has modelled Ethereal since Furina's Spotlight token, but only
-through `tags: [ethereal]` -- the vocabulary the engine sheets use for
+The engine modelled Ethereal first through `tags: [ethereal]` -- the vocabulary the engine sheets use for
 Statuses, Curses and tokens. Personal sheets spell lifecycle keywords as
 fields (`exhaust:`, `innate:`, `retain:`), so a character card could not
 declare the keyword at all. This file pins the field, the shared predicate
@@ -64,7 +63,6 @@ def test_the_field_is_a_sheet_field_and_feeds_the_shared_predicate():
                                ethereal=True)).is_ethereal
     # The tag spelling still answers the same predicate: one door, two keys.
     assert loader.get_card("curse_clumsy").is_ethereal
-    assert loader.get_card("ethereal_spotlight").is_ethereal
     assert not probe().is_ethereal
 
 

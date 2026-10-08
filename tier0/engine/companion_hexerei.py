@@ -1,4 +1,4 @@
-"""THE COMPANION READERS AND THE WITCH FAMILY STAND-INS (QUARANTINED, two arms).
+"""THE COMPANION READERS AND THE WITCH FAMILY STAND-INS (two arms).
 
 R276 PICK 2 RETIRED THE HEXEREI MARK. The printed word and the `hexerei` sheet
 key are gone; every reader below that paid for a "Hexerei card" now pays for

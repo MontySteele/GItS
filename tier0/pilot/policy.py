@@ -132,8 +132,9 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 #  could notice. The `C19` audit found TEN sheet rows in that hole, not the
 #  two the standing read names: `hold_the_line` + `warmup_act`
 #  (enemy_intends_attack), `take_it_from_the_top` + `curtain_cue` +
-#  `directors_cut` (spotlight_moved_this_turn), `many_waters_melody` +
-#  `waters_embrace` + `tempo_change` (has_salon_members), `read_the_current`
+#  `directors_cut` (spotlight_moved_this_turn, retired with the Spotlight),
+#  `many_waters_melody` + `waters_embrace` + `tempo_change` (has_salon_members,
+#  retired with the Salon), `read_the_current`
 #  (charge_at_least_10) and `tail_of_flame` (this_cost_zero). Seven of the
 #  ten predate `W3` by months.
 #
@@ -160,9 +161,7 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 # the fanfare clamp below records the other half of).
 _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
-    "has_salon_members",
-    "spotlight_moved_this_turn",
-    # `EB-711` (QUARANTINED, `C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
+    # `EB-711` (`C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state
     # read with no snapshot field and no telemetry row, which is exactly this
     # collection's test. The row that printed it (her basic Defend) was
@@ -191,7 +190,7 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # `test_the_prototype_surface_prints_no_untaught_predicate` is what now
     # stops a seventh joining them.
     #
-    # `plan_carried_out_this_turn` (QUARANTINED, `C.KOKOMI_OVERHAUL`) --
+    # `plan_carried_out_this_turn` (`C.KOKOMI_OVERHAUL`) --
     # Feint's and Sango Isshin's condition, `state.kk_plan_carried_out_this_turn`.
     # A turn-level flag written at the one place a Plan is carried out
     # (`kokomi_plan._resolve_entry`), so it is a pure current-state read with no
@@ -200,7 +199,7 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # -- untaught, the pilot scored the 10 branch at nothing and read the card
     # as a 5-damage Attack it would rarely take.
     "plan_carried_out_this_turn",
-    # `EB-712`. THE KLEE OVERHAUL'S TWO PER-TURN COUNTERS (QUARANTINED,
+    # `EB-712`. THE KLEE OVERHAUL'S TWO PER-TURN COUNTERS (
     # `C.KLEE_OVERHAUL`) -- Run Away!'s `bomb_went_off_this_turn` and Sizzle's
     # and Perfect Timing's `bomb_reacted_this_turn`, read off the arm's ledger
     # (`state.ko_set_off_this_turn` / `.ko_reacted_this_turn`). Both are pure
@@ -238,7 +237,7 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     "nth_attack_this_turn_3",
     "self_has_power_mc_oz",
 })
-_ENGINE_LIVE_PREFIXES = ("charge_at_least_",)
+_ENGINE_LIVE_PREFIXES: tuple[str, ...] = ()
 
 SCORABLE_PREDICATES = frozenset({
     "has_spark",
@@ -258,7 +257,6 @@ SCORABLE_PREDICATE_PREFIXES = (
     "target_has_power_",
     "exhaust_pile_at_least_",
     "fanfare_at_least_",
-    "encore_at_least_",
 ) + _ENGINE_LIVE_PREFIXES
 
 BLIND_PREDICATES = frozenset({
@@ -378,7 +376,7 @@ def _active_effects(state: CombatState, effect_list: list[dict],
     being scored and not about the state), and a mode body probed without a
     host still scores -- it just cannot answer that one.
 
-    THE PLAN SWAP (QUARANTINED, C.KOKOMI_OVERHAUL) IS THE FIRST THING THIS
+    THE PLAN SWAP (C.KOKOMI_OVERHAUL) IS THE FIRST THING THIS
     FUNCTION DOES, and it is here rather than at the fifteen call sites for the
     reason the `choose_one` branch below is here: this is the ONE place the
     pilot turns a printed face into "what will actually happen", so it is the
@@ -449,9 +447,6 @@ def _active_effects(state: CombatState, effect_list: list[dict],
                 # branch that actually fires (Track C.2 negative floor).
                 ready = (resources.readable(state.player)
                          >= int(name.rsplit("_", 1)[1]))
-            elif name.startswith("encore_at_least_"):
-                ready = (state.player.encore
-                         >= int(name.rsplit("_", 1)[1]))
             elif name == "reaction_triggered_this_turn":
                 # EB-24p: turn-level counter, known exactly at score time
                 # (unlike reaction_triggered_by_this, which is mid-resolution
@@ -501,77 +496,8 @@ def _active_effects(state: CombatState, effect_list: list[dict],
             yield _plan_discounted(fx) if planned else fx
 
 
-def _salon_verb_yield(state: CombatState, card: Card
-                      ) -> tuple[float, float, float]:
-    """EB-144: what this card's SALON VERBS pay right now, as
-    `(damage, block, encore_spent)`.
-
-    `salon_rotate` and `salon_perform` shipped in Phase 2 and stayed unprinted
-    until `change_the_bill` (`C19`), so the pilot had never been taught either
-    and the card scored as its Block 3 and nothing else. Neither verb gets a
-    number of its own here; both are valued by DOING WHAT THE RESOLVER DOES
-    and pricing the result through the terms that already price damage, Block
-    and Encore. Change `SALON_MEMBERS` and this moves with it.
-
-      * `salon_perform` runs `salon_member_act` on the LEFTMOST member, `N`
-        times, and that function's whole payout is one `salon_tick_amount`
-        per tick -- so this asks that same function (`note=False`: a forecast
-        must not file a `fanfare_read` census row, which is the only reason
-        the kwarg exists). Damage members pay damage, the Usher pays Block,
-        and the Encore upkeep is charged per tick that can afford it, exactly
-        as `salon_member_act` charges it, with the dry three-quarters falling
-        out of `salon_tick_amount` for the ticks that cannot.
-      * `salon_rotate` is worth ZERO ON ITS OWN and that is not a placeholder
-        -- it is the drafter's ratified reading (`STATIC_SALON_ROTATE_VALUE`,
-        EB-118 §5.5): rotating delivers nothing, its whole value is WHICH
-        member the next consumer finds. What it does get here is the thing
-        the drafter cannot see, because the drafter has no stage: inside one
-        card body the rotate moves the queue BEFORE a later `salon_perform`
-        reads it, so `offset` picks the member that will actually perform.
-        `change_the_bill` prints exactly that pair, and with a Crabaletta in
-        front of an Usher the two orderings score differently -- correctly.
-
-    Conservative by construction, disclosed rather than papered over: the
-    Chevalmarin tick's hydro application and the `SALON_TICK_BURST` particle
-    are NOT priced (no term here owns either), a stage this card would DEPLOY
-    into is not counted (the queue is read as it stands at score time), and a
-    perform that would kill the last enemy mid-loop still counts its later
-    ticks. Every one of those understates the verb.
-    """
-    p = state.player
-    # `salon_member_act`'s own refusal, and `_op_salon_perform`'s whiff: an
-    # empty stage, a dead player, or nothing left to act against pays nothing
-    # and the resolver says so out loud with `salon_perform_whiffed`.
-    if not p.salon or not p.alive or not state.living_enemies:
-        return (0.0, 0.0, 0.0)
-    offset = 0
-    dmg = blk = spent = 0.0
-    encore = p.encore
-    for fx in _active_effects(state, card.effects, card):
-        op = fx["op"]
-        if op == "salon_rotate":
-            offset += _est(state, fx.get("amount", 1), 1)
-        elif op == "salon_perform":
-            member = p.salon[offset % len(p.salon)]
-            spec = C.SALON_MEMBERS[member]["tick"]
-            for _ in range(int(_est(state, fx.get("amount", 1), 1))):
-                paid = encore >= C.SALON_TICK_ENCORE_COST
-                amt = effects.salon_tick_amount(state, member, paid,
-                                                note=False)
-                if spec.get("damage", 0):
-                    # Same pipeline head the pilot's card damage uses, and
-                    # the same one `deal_damage_to_enemy` opens with.
-                    dmg += powers.modify_damage_dealt(p, amt)
-                if spec.get("block", 0):
-                    blk += amt
-                if paid:
-                    encore -= C.SALON_TICK_ENCORE_COST
-                    spent += C.SALON_TICK_ENCORE_COST
-    return (dmg, blk, spent)
-
-
 def _expected_damage(state: CombatState, card: Card) -> float:
-    total = _salon_verb_yield(state, card)[0] + _stage_offence(state, card)
+    total = _stage_offence(state, card)
     living = state.living_enemies
     # EB-145: built ONLY when a printed formula asks for it, so a card that
     # reads no selection allocates nothing and scores through the identical
@@ -620,12 +546,8 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                         state, fx["bonus_formula"], valuation=True)
                 except ValueError:
                     pass
-            # Spotlight empowerment is real damage the pilot should see --
-            # this is also what makes it PREFER Spotlighted cards.
-            per_hit *= effects.spotlight_mult(state, card)
-            # After the Spotlight multiply and before the per-hit tally, which
-            # is where the engine folds it in (_deal_damage: spotlight scales
-            # the PRINTED number, the flat bonus rides on top, per hit).
+            # The flat bonus rides on top of the printed number, per hit, which
+            # is where the engine folds it in (`_deal_damage`).
             per_hit += flat
             # EB-29t: Intangible caps every hit at INTANGIBLE_DAMAGE_CAP
             # (Nemesis alternates it turn-by-turn) -- price the capped
@@ -643,7 +565,7 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                 total += per_hit * times * n_targets
         elif fx["op"] == "place_bomb":
             total += fx["bomb_damage"] * _est(state, fx.get("amount", 1), 1)
-        # --- THE KLEE OVERHAUL'S FOUR DAMAGE VERBS (QUARANTINED,
+        # --- THE KLEE OVERHAUL'S FOUR DAMAGE VERBS (
         # C.KLEE_OVERHAUL). REACHABLE ONLY ON THE ARM BY CONSTRUCTION: no
         # shipped row prints one of these ops, and `loader._card_prototype`
         # refuses a `proto_ko_` id with the flag off, so every shipped arm's
@@ -705,20 +627,6 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             total += (fx["amount"] * C.SPARKS_N_SPLASH_HITS
                       * C.SPARKS_N_SPLASH_HIT_DMG
                       * C.PILOT_FUTURE_DAMAGE_DISCOUNT)
-        elif fx["op"] == "summon_kurage":
-            # v0.4: the jellyfish's pulses are real damage arriving over the
-            # coming turns, same futurity discount as the Burst above. Without
-            # this the pilot prices Bake-Kurage at its +1 Charge alone and
-            # never fields the summon the whole O4 arm rests on -- the
-            # DECISIONS-53 selector lesson, which this pool has already paid
-            # for once. The bank read is priced at the CURRENT bank: the
-            # pilot cannot see its own future accrual, so this understates a
-            # late-fight summon and that is the safe direction to be wrong.
-            turns = _est(state, fx.get("amount", C.KURAGE_DURATION),
-                         C.KURAGE_DURATION)
-            per_pulse = (C.KURAGE_PULSE_BASE
-                         + state.player.charge * C.KURAGE_PULSE_PER_CHARGE)
-            total += turns * per_pulse * C.PILOT_FUTURE_DAMAGE_DISCOUNT
         elif fx["op"] == "detonate":
             # Early detonation realizes bomb damage now but forfeits the
             # next-turn detonation it would get anyway — value it only
@@ -841,10 +749,7 @@ def _stage_tempo(state: CombatState, card: Card) -> float:
 
 
 def _raw_block(state: CombatState, card: Card) -> float:
-    # EB-144: the Usher's tick prints Block, so a `salon_perform` that lands
-    # on her is Block this turn and belongs in the same number the panic-block
-    # rule and _block_value read.
-    total = _salon_verb_yield(state, card)[1] + _stage_defence(state, card)
+    total = _stage_defence(state, card)
     selection: dict = {}      # EB-145, see _expected_damage
     for fx in _active_effects(state, card.effects, card):
         if fx["op"] != "block":
@@ -877,21 +782,13 @@ def _block_value(state: CombatState, card: Card,
     # the same number for every card in one decision; None recomputes it.
     val = 0.0
     raw = _raw_block(state, card)
-    # v0.4: the Kurage's pulse Block arrives at THIS turn's end, i.e. in time
-    # for the swing the pilot is currently pricing, so it counts like printed
-    # Block. Later pulses are not counted here -- their damage is already
-    # valued in _expected_damage and double-counting the defense would make
-    # the summon crowd out real blockers on a lethal turn.
-    pulse = (C.KURAGE_PULSE_BLOCK
-             if any(fx["op"] == "summon_kurage" for fx in card.effects)
-             else 0)
-    if raw or pulse:
-        # Resolved once for BOTH terms: `incoming` is the same number for
-        # every card in one decision, which is why the caller hands it down.
+    if raw:
+        # `incoming` is the same number for every card in one decision, which
+        # is why the caller hands it down.
         if incoming is None:
             incoming = _incoming_damage(state)
         prevented = max(0.0, incoming - state.player.block)
-        val += min(raw, prevented) + min(pulse, prevented)
+        val += min(raw, prevented)
     heal = sum(fx["amount"] for fx in card.effects if fx["op"] == "heal")
     if heal:
         val += min(heal, state.player.max_hp - state.player.hp)
@@ -989,7 +886,7 @@ def _reaction_value(state: CombatState, card: Card) -> float:
         reactable = [e for e in living if e.aura and e.aura != elem]
         target = fx.get("target", "enemy")
 
-        # `front_enemy` (QUARANTINED, C.KOKOMI_OVERHAUL) is a SINGLE-target
+        # `front_enemy` (C.KOKOMI_OVERHAUL) is a SINGLE-target
         # spelling and rides this branch rather than falling through to the
         # random one, which would price one planned Hydro hit as a spread. The
         # aim it estimates against is this engine's default (lowest HP) and not
@@ -1050,8 +947,6 @@ def _tempo_value(state: CombatState, card: Card) -> float:
             val += C.PILOT_DRAW_WHILE_VALUE
         elif fx["op"] == "gain_spark":
             val += fx.get("amount", 1) * C.PILOT_SPARK_VALUE
-        elif fx["op"] == "burst_energy":
-            val += fx["amount"] / C.PILOT_BURST_DIVISOR
         elif fx["op"] in ("copy_companion_in_hand", "replay_next_companion"):
             # POLICY 7 (EB-17p §13.8). Both ops turn a companion you already
             # hold into a second use of it, and both are DEAD with no companion
@@ -1071,152 +966,16 @@ def _tempo_value(state: CombatState, card: Card) -> float:
     return val
 
 
-def _sustain_value(state: CombatState, card: Card) -> float:
-    """Encore is deferred HP economy (absorbs after Block). Worth most of
-    its face -- it keeps until used, unlike Block -- but discounted for
-    not stopping THIS turn's hits when drawn late.
-
-    EB-144: a `salon_perform` BUYS its tick with the same currency, one point
-    of upkeep per tick that can pay, so the bill is charged here at the price
-    a point is credited at two lines up. Symmetric by construction rather
-    than picked -- an on-demand tick that costs a point of Encore must not be
-    free to a scorer that pays a point of Encore 0.8.
-    """
-    encore = sum(fx.get("amount", 0) for fx in card.effects
-                 if fx["op"] == "gain_encore"
-                 and isinstance(fx.get("amount"), int))
-    encore -= _salon_verb_yield(state, card)[2]
-    return encore * C.PILOT_ENCORE_VALUE
-
-
-def _spotlight_value(state: CombatState, card: Card) -> float:
-    """Selector + two-mode Spotlight machinery value. Without this
-    her pilots score the selector 0 and never designate -- the exact
-    anchor-drafted-nothing failure M5 logged (DECISIONS 53)."""
-    p = state.player
-    val = 0.0
-    # EB-31p (R124): the pilot reads the same both-modes flag the four
-    # engine readers do. Under The Curtain Never Falls a designate is
-    # functionally dead (both halves live regardless of p.spotlight, and
-    # the moved-this-turn window is always-on -- effects.py:1773), Guest
-    # Cast's half is permanently live, and is_spotlighted has targets with
-    # p.spotlight still None.
-    both_modes = effects.both_spotlight_modes(state)
-    companion_waiting = any(c.is_companion and not c.kit_card for c in p.hand)
-    generator_waiting = any(
-        any(fx.get("op") == "generate_guest_star" for fx in c.effects)
-        for c in p.hand)
-    for fx in card.effects:
-        if fx["op"] == "spotlight_designate":
-            if both_modes:
-                pass                    # dead op: nothing left to choose
-            # When a generator is waiting, invite first so this same selector
-            # can put the resulting Companion into Guest Cast.
-            elif companion_waiting:
-                # sequencing priority: light, then play
-                val += C.PILOT_SPOTLIGHT_DESIGNATE_SEQUENCING
-            elif generator_waiting:
-                val += C.PILOT_SPOTLIGHT_DESIGNATE_GENERATOR
-            else:
-                val += (C.PILOT_SPOTLIGHT_DESIGNATE_OPENING
-                        if p.spotlight is None
-                        else C.PILOT_SPOTLIGHT_DESIGNATE_REDESIGNATE)
-        elif (fx["op"] == "apply_power"
-              and fx.get("power") in ("spotlight_mult_bonus",
-                                      "spotlight_mult_bonus_turn",
-                                      "spotlight_flat_damage_turn",
-                                      "ovation_spend_boost")):
-            # R16 card-mediated boosts: worth playing when a stage exists
-            # (combat-scoped stacks compound; turn windows want same-turn
-            # Spotlighted plays). ovation_spend_boost (R32.1 flip) is a
-            # combat-scoped engine like top_billing's mult.
-            guest_mode_live = (both_modes
-                               or p.spotlight == C.SPOTLIGHT_GUEST_CAST)
-            if guest_mode_live or companion_waiting:
-                val += (C.PILOT_SPOTLIGHT_BOOST_COMBAT
-                        if fx["power"] in ("spotlight_mult_bonus",
-                                           "ovation_spend_boost")
-                        else C.PILOT_SPOTLIGHT_BOOST_TURN)
-            else:
-                # not dead, just early
-                val += C.PILOT_SPOTLIGHT_BOOST_EARLY
-        elif fx["op"] == "generate_guest_star":
-            # a card in hand, roughly
-            val += C.PILOT_GUEST_STAR_VALUE * fx.get("amount", 1)
-        elif fx["op"] == "copy_spotlighted_in_hand":
-            has_target = (p.spotlight or both_modes) and any(
-                effects.is_spotlighted(state, c) and not c.kit_card
-                for c in p.hand)
-            # dead without a target, and the pilot knows it
-            val += C.PILOT_SPOTLIGHT_COPY_VALUE if has_target else 0.0
-    return val
-
-
-def _charge_value(state: CombatState, card: Card) -> float:
-    """Kokomi's Charge-engine machinery (kickoff §2). Without this her
-    pilots would score conscription and deliberate exhausts near zero and
-    never run the engine — the DECISIONS-53 selector lesson again. Values
-    only the MACHINERY; the payoff damage (charge bonus_formula, garment
-    state) already flows through _expected_damage and _scaling_value.
-    Default weight 0.0: every non-Kokomi pilot is unchanged."""
-    p = state.player
-    engine_live = "tamakushi_casket" in p.relic_hooks
-    val = 0.0
-    for fx in _active_effects(state, card.effects, card):
-        op = fx["op"]
-        if op == "gain_charge":
-            val += (_est(state, fx.get("amount", 1), 1)
-                    * C.PILOT_CHARGE_GAIN_VALUE)
-        elif op == "conscript":
-            # A recruit in hand at a discount, plus its Exhaust feeds the
-            # meter later. Create mode nets a card; transform pays one.
-            n = _est(state, fx.get("amount", 1), 1)
-            val += n * (C.PILOT_CONSCRIPT_CREATE_VALUE
-                        if fx.get("mode") == "create"
-                        else C.PILOT_CONSCRIPT_TRANSFORM_VALUE)
-        elif op == "exhaust_from" and engine_live:
-            # Deliberate exhausts are Charge + deck-thinning when the
-            # casket is on. amount can be "all" (Stoke grammar).
-            n = fx.get("amount", 1)
-            n = (C.PILOT_EXHAUST_ALL_ESTIMATE if n == "all"
-                 else _est(state, n, 1))
-            val += n * C.PILOT_DELIBERATE_EXHAUST_VALUE
-    if engine_live and card.exhaust and not card.kit_card:
-        # self-mill is fuel, not just loss
-        val += C.PILOT_SELF_MILL_VALUE
-    # The garment state: worth its remaining-turn Charge read. Scored here
-    # (not _scaling_value) because its value RISES with banked Charge.
-    for fx in card.effects:
-        if (fx["op"] == "apply_power"
-                and fx.get("power") == "ceremonial_garment"):
-            turns = fx.get("amount", C.CEREMONIAL_GARMENT_TURNS)
-            val += (turns * (p.charge // C.GARMENT_CHARGE_DIVISOR)
-                    * C.PILOT_GARMENT_CHARGE_VALUE
-                    + C.PILOT_GARMENT_BASE_VALUE)
-    return val
-
-
-# --- Stoker tuning (pilot-gap sprint, 2026-07-28). Module-level, NOT in
-# tier0/constants.py: constants.py is the surface the C# parity gate compares
-# by value, and a pilot heuristic has no C# counterpart to compare against --
-# the mod ships no bot. These are PILOT JUDGMENT, not balance, and the sprint
-# log records that they were picked by hand and never swept.
-# Stamped by C.PILOT_WEIGHTS_VERSION all the same (EB-5): the stamp labels the
-# pilot's whole scoring weight set, and where a weight is FILED is not what
-# decides which readings are comparable.
-STOKE_DEPLOY_OPEN = 6.0     # a member entering an EMPTY slot: pure addition
-STOKE_DEPLOY_FULL = 1.5     # a member entering a FULL stage: a bow trigger,
-                            # which is a different decision (§Track 1.1)
-STOKE_RUNWAY_TURNS = 2.0    # "fuel it while the runway is under ~2 turns"
-STOKE_FUEL_HUNGRY = 1.2     # per point that CLOSES the runway gap
-STOKE_FUEL_SATED = 0.15     # per point beyond it -- not zero: surplus still
-                            # absorbs, which is the whole D8 argument
-
+# --- Pilot weights filed here, NOT in tier0/constants.py: constants.py is the
+# surface the C# parity gate compares by value, and a pilot heuristic has no C#
+# counterpart to compare against -- the mod ships no bot. Stamped by
+# C.PILOT_WEIGHTS_VERSION all the same (EB-5): the stamp labels the pilot's
+# whole scoring weight set, wherever a weight is filed.
+#
 # POLICY 7 (EB-17p §13.8, R176). A free copy of a companion ALREADY IN HAND is
 # a card you chose to draft, not the blind top of your deck: it is worth more
 # than the flat Draw 1 the tempo term prices at C.PILOT_SPARK_VALUE-scale 0.7.
-# Filed here, not in constants.py, for the C#-parity reason at the head of this
-# block -- and stamped by C.PILOT_WEIGHTS_VERSION all the same, which is why
+# Filed here, not in constants.py, for the reason at the head of this block -- and stamped by C.PILOT_WEIGHTS_VERSION all the same, which is why
 # that stamp moves to 2 in the same edit: a weight ENTERING the labeled set
 # changes the set, and two pilot readings across it are not one measurement.
 PILOT_COMPANION_COPY_VALUE = 1.5
@@ -1243,7 +1002,7 @@ PILOT_COMPANION_COPY_VALUE = 1.5
 # window (R191) and is not touched by this one.
 #
 # The constants below are filed here rather than in constants.py for the reason
-# at the head of the STOKE_* block -- constants.py is the surface the C# parity
+# at the head of the PILOT_COMPANION_COPY_VALUE block -- constants.py is the surface the C# parity
 # gate compares by value and the mod ships no bot -- and they JOIN the set
 # C.PILOT_WEIGHTS_VERSION labels. That stamp moved with the switch, in the same
 # landing edit: while the switch was off no weight below was ever read, so the
@@ -1354,14 +1113,6 @@ EXHAUST_SELF_EXHAUST_DISCOUNT = 0.5   # a card that Exhausts itself on play was
 # bending reprices every Encore generator in the pool. Any later change to one
 # of them is still its own `C.PILOT_WEIGHTS_VERSION` bump.
 MODE_CHOOSER_ENABLED = True
-MODE_OVERDRAW_HP_VALUE = 1.0   # per point of TRUE HP a `spend_encore` shortfall
-                               # drains. The chooser's scale is already "points
-                               # of damage": _block_value prices Block by the
-                               # damage it prevents and heal by the HP it
-                               # restores, both at 1. A point of HP paid and a
-                               # point of damage taken are the same point, so
-                               # this weight is 1.0 for the same reason
-                               # BOMB_SUPPRESSION_VALUE is
 MODE_TIE_EPSILON = 1e-9        # the band inside which two modes are a TIE.
                                # Float noise must not decide a mode, because the
                                # tie-break is the rule that keeps replays stable
@@ -1447,8 +1198,8 @@ ENRAGE_TAX_TURNS = 2.0      # future attack turns a +Strength grant is priced
 # the pinned set in `tier0/tests/test_pin_tier0_pilot.py`. Neither integer is
 # moved here: a window with three items in it gets one bump, not three.
 SPARK_HOLD_VALUE_WEIGHT = 1.0   # the scale is DAMAGE POINTS, the same scale
-                                # `EXHAUST_FORMULA_PAYOUT_WEIGHT` and
-                                # `MODE_OVERDRAW_HP_VALUE` already use. At 1.0
+                                # `EXHAUST_FORMULA_PAYOUT_WEIGHT` already
+                                # uses. At 1.0
                                 # a point of banked-Spark value and a point of
                                 # payoff trade one for one, which is the only
                                 # setting at which the subtraction in `_score`
@@ -1536,60 +1287,6 @@ def _spark_hold_cost(state: CombatState, card: Card) -> float:
                _spark_reader_loss(state, card, before, after))
 
 
-def _stoke_value(state: CombatState, card: Card) -> float:
-    """Furina's SALON machinery: deploy the stage, then keep it fuelled.
-
-    The sprint hypothesis (docs/archive/sprint-pilot-gap-2026-07-28.md) is that the
-    sim/table divergence is a PILOT gap, not an arithmetic one: a stage that
-    is dry half the time is a stage nobody is stoking. Two things the greedy
-    pilot cannot see:
-
-    1. A deploy is an `apply_power` on self, so its ONLY valuation is
-       `_scaling_value`'s `min(amount, 6) * 3` -- decayed by
-       `max(0, 1 - turn/12)`. That decay is right for a one-shot buff and
-       WRONG for a member: a member fielded on turn 10 ticks every remaining
-       turn of the fight, and by turn 12 the greedy pilot prices it at
-       exactly zero. This term does not decay.
-    2. Encore is valued by `_sustain_value` at a flat 0.8/point, which is a
-       statement about Encore as a damage buffer and says nothing about the
-       upkeep bill. A point of Encore that keeps a three-member stage ticking
-       is worth more than the fourth point on an idle one -- that is the
-       runway the D7 ribbon draws, and it is the quantity this term reads.
-
-    Deliberately NOT lookahead and NOT a general improvement (Track 1.4): no
-    damage or block is revalued here, so a stoker that comes back WORSE than
-    greedy is a real reading of the loop and not a broken pilot.
-
-    Default weight 0.0, the `charge`/`spotlight` precedent: every other pilot
-    is arithmetically unchanged.
-    """
-    p = state.player
-    live = len(p.salon)
-    room = max(0, effects.salon_slots(p) - live)
-    # The bill the CURRENT stage presents each upkeep. Zero with no members,
-    # which makes every Encore gain score at the sated rate -- correct: with
-    # no stage there is nothing to starve, and _sustain_value already prices
-    # the buffer. It also means the stoker deploys BEFORE it fuels, which is
-    # the ordering the brief asks for and falls out rather than being coded.
-    bill = live * C.SALON_TICK_ENCORE_COST
-    shortfall = max(0.0, STOKE_RUNWAY_TURNS * bill - p.encore)
-    val = 0.0
-    for fx in _active_effects(state, card.effects, card):
-        op = fx["op"]
-        if (op == "apply_power" and fx.get("power") == "salon_member"
-                and fx.get("target", "self") == "self"):
-            n = _est(state, fx.get("amount", 1), 1)
-            opened = min(n, room)
-            val += opened * STOKE_DEPLOY_OPEN
-            val += (n - opened) * STOKE_DEPLOY_FULL
-        elif op == "gain_encore":
-            n = _est(state, fx.get("amount", 0))
-            closes = min(n, shortfall)
-            val += closes * STOKE_FUEL_HUNGRY
-            val += (n - closes) * STOKE_FUEL_SATED
-    return val
-
-
 def _score(state: CombatState, card: Card, w: dict,
            dmg: Optional[float] = None, blk: Optional[float] = None) -> float:
     # `dmg`/`blk` are this card's already-computed _expected_damage and
@@ -1605,24 +1302,7 @@ def _score(state: CombatState, card: Card, w: dict,
              + w["scaling"] * _scaling_value(state, card)
              + w["reaction"] * _reaction_value(state, card)
              + w["tempo"] * _tempo_value(state, card)
-             + w.get("sustain", 1.0) * _sustain_value(state, card)
              - w["cost"] * cost)
-    # Character-machinery terms, skipped when their weight is zero. All three
-    # are pure readers of state, so a zeroed weight makes the whole term
-    # arithmetically dead -- and every pilot but Furina's zeroes spotlight,
-    # every pilot but Kokomi's zeroes charge, and every pilot but the stoker
-    # zeroes stoke. Scanning the hand for Companions and Guest-Star
-    # generators on each of those was the single most-called thing in a
-    # non-Furina fight.
-    sw = w.get("spotlight", 0.0)
-    if sw:
-        total += sw * _spotlight_value(state, card)
-    cw = w.get("charge", 0.0)
-    if cw:
-        total += cw * _charge_value(state, card)
-    kw = w.get("stoke", 0.0)
-    if kw:
-        total += kw * _stoke_value(state, card)
     # EB-143: the Spark ledger's other half. Subtracted here rather than folded
     # into `_tempo_value` beside the GAIN, on purpose: `_tempo_value` is also
     # read by `exhaust_future_value` and `mode_score` at weight 1, and a sink's
@@ -1789,7 +1469,7 @@ def identity_blind_payout(state: CombatState, card: Optional[Card],
 
 
 # W3 (EB-118 Phase 3, R211). The scale is DAMAGE POINTS -- the same scale
-# BOMB_LANDED_DAMAGE_VALUE and MODE_OVERDRAW_HP_VALUE already use, and the same
+# BOMB_LANDED_DAMAGE_VALUE already uses, and the same
 # scale `exhaust_future_value` is denominated in (_block_value prices Block by
 # the damage it prevents). At 1.0 a point of payout and a point of forgone
 # future value trade one for one, which is the only setting that makes the
@@ -1937,8 +1617,7 @@ def exhaust_future_value(state: CombatState, card: Card) -> float:
         val = (_expected_damage(state, card)
                + _block_value(state, card)
                + _scaling_value(state, card)
-               + _tempo_value(state, card)
-               + _sustain_value(state, card))
+               + _tempo_value(state, card))
     if card.is_junk:
         val -= EXHAUST_JUNK_BONUS
     cost = card_cost(state, card)
@@ -2146,8 +1825,8 @@ def _formula_amount(state: CombatState, fx: dict, card: Card,
 # 2026-08-23), in the order it was written:
 #
 #   1. score each mode body with the pilot's EXISTING per-op play valuations
-#      over current state, minus an overdraw penalty priced at the pilot's HP
-#      value when `spend_encore` would shortfall;
+#      over current state (the overdraw penalty for a `spend_encore`
+#      shortfall left with Encore, 2026-10-08);
 #   2. argmax, with a deterministic tie-break to the LOWEST mode index;
 #   3. weights in this file, beside the other policy weights, hand-picked;
 #   4. behind the default-off switch until 2C's own POLICY_VERSION bump;
@@ -2185,50 +1864,22 @@ def _mode_probe(mode: dict) -> Card:
                 effects=list(mode.get("effects", [])))
 
 
-def _mode_overdraw_hp(state: CombatState, mode: dict) -> float:
-    """TRUE HP this mode body's spends would drain, given the bank NOW.
-
-    `resources.spend_encore_or_hp` drains Encore first and charges any
-    shortfall to HP, so the penalty is the shortfall and not the spend: paying
-    out of a full bank costs the buffer, which `_sustain_value` already prices
-    on the other side of the ledger, while paying out of an empty one costs
-    life the pilot cannot get back.
-
-    The bank is walked in body ORDER and a gain inside the same body refills
-    it, because that is what the engine does when the two ops sit in one mode.
-    """
-    bank = float(state.player.encore)
-    short = 0.0
-    for fx in _active_effects(state, mode.get("effects", [])):
-        if fx["op"] == "gain_encore":
-            bank += _est(state, fx.get("amount", 0))
-        elif fx["op"] == "spend_encore":
-            n = _est(state, fx.get("amount", 0))
-            paid = min(bank, n)
-            bank -= paid
-            short += n - paid
-    return short
-
-
 def mode_score(state: CombatState, mode: dict) -> float:
     """What taking this mode is worth on the board as it stands.
 
-    The five terms enter at weight 1 apiece, for `exhaust_future_value`'s
+    The four terms enter at weight 1 apiece, for `exhaust_future_value`'s
     reason and with its docstring's caveat: the chooser runs at RESOLUTION
     time, where the pilot's archetype weight set is closed over by
     `make_pilot` and cannot be asked which pilot is flying. The character
-    machinery terms (`_spotlight_value`, `_charge_value`, `_stoke_value`,
-    `_reaction_value`) are left out for the same reason `_score` gates them
-    behind a per-archetype weight -- unweighted, they would let one
+    machinery term `_reaction_value` is left out for the same reason `_score`
+    gates it behind a per-archetype weight -- unweighted, they would let one
     character's machinery outvote another's on a card neither is flying.
     """
     probe = _mode_probe(mode)
     return (_expected_damage(state, probe)
             + _block_value(state, probe)
             + _scaling_value(state, probe)
-            + _tempo_value(state, probe)
-            + _sustain_value(state, probe)
-            - _mode_overdraw_hp(state, mode) * MODE_OVERDRAW_HP_VALUE)
+            + _tempo_value(state, probe))
 
 
 def choose_mode(state: CombatState, modes: list[dict],

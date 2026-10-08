@@ -20,8 +20,8 @@ a body by index and take the `fixed_index` fixture where that matters.
 The sheet syntax under test:
 
     {op: choose_one, modes: [
-        {label: "Gain 2 Encore",        effects: [{op: gain_encore, amount: 2}]},
-        {label: "Spend 2 Encore: draw", effects: [{op: spend_encore, amount: 2},
+        {label: "Gain 2 Sparks",        effects: [{op: gain_spark, amount: 2}]},
+        {label: "Spend 2 Sparks: draw", effects: [{op: spend_spark, amount: 2},
                                                   {op: draw, amount: 2}]}]}
 """
 
@@ -88,48 +88,6 @@ def test_a_mode_body_is_an_ordinary_effect_list(state, fixed_index):
         [{"op": "damage", "amount": 6, "target": "enemy"}])])
     effects.resolve_card(state, c)
     assert state.player.block == 7
-
-
-def test_a_mode_body_spends_through_the_overdraw_primitive(state, fixed_index):
-    """EB-119, the sim leg of the modal-spend repair.
-
-    The docstring above prints `spend_encore` in mode B and means it: a mode
-    body reaches the OVERDRAW primitive, the same one a printed spend rides.
-    Nothing about the op changes inside a mode -- which is exactly why the
-    generator had to learn to emit it rather than have a fixture paraphrase
-    it as a negative gain.
-    """
-    state.player.encore = 5
-    c = card(effects=[modal([{"op": "spend_encore", "amount": 2}],
-                            [{"op": "gain_encore", "amount": 2}])])
-    effects.resolve_card(state, c)
-    assert state.player.encore == 3
-    assert state.player.hp == 80
-    assert [e["amount"] for e in state.log
-            if e["event"] == "encore_spent"] == [2]
-
-
-def test_a_mode_body_spend_overdraws_into_hp(state, fixed_index):
-    """The half the substitution could never have modelled. A spend past the
-    buffer drains TRUE HP; a negative `gain_encore` would have clamped at
-    zero and charged nothing.
-
-    EB-182 MOVED THE SPEND ONE LINE DOWN and the claim is unchanged. A spend
-    at the HEAD of a mode body is that mode's PRICE, and the mode is not
-    offered below it; a spend after something else is a CONSEQUENCE of the
-    mode -- here paid partly out of what the same body just generated -- and
-    still rides the overdraw primitive exactly as EB-119 left it. Both sides
-    of that boundary are pinned in `test_eb182_mode_playability`.
-    """
-    state.player.encore = 1
-    c = card(effects=[modal([{"op": "gain_encore", "amount": 1},
-                             {"op": "spend_encore", "amount": 4}],
-                            [{"op": "gain_encore", "amount": 2}])])
-    effects.resolve_card(state, c)
-    assert state.player.encore == 0
-    assert state.player.hp == 78
-    assert [e["amount"] for e in state.log
-            if e["event"] == "encore_overdraw"] == [2]
 
 
 # --- the chooser seam ------------------------------------------------------
@@ -254,32 +212,6 @@ def test_validation_recurses_into_a_conditional_inside_a_mode():
 
 
 # --- red: a negative gain is not a spend (EB-119) --------------------------
-
-def test_a_non_positive_gain_encore_is_rejected():
-    """`gain_encore: -2` reads as a spend and is not one. It is INERT in the
-    mod (FurinaResources.GainEncore returns on `amount <= 0`) while the sim
-    would move the meter, so a row carrying it diverges between the engines
-    by construction. Refused at load, on every sheet, at every depth."""
-    with pytest.raises(ValueError, match="gain_encore amount must be"):
-        loader._validate_effect_vocabulary(
-            "probe", [{"op": "gain_encore", "amount": -2}])
-
-
-def test_a_non_positive_gain_encore_inside_a_mode_is_rejected():
-    """The depth that matters: the mode body is where the substitution was
-    reached for, because until EB-119 it was the only encore shape a mode
-    could hold."""
-    with pytest.raises(ValueError, match="gain_encore amount must be"):
-        loader._validate_effect_vocabulary(
-            "probe", [modal([{"op": "gain_encore", "amount": 0}],
-                            [{"op": "draw", "amount": 1}])])
-
-
-def test_a_positive_gain_encore_still_loads():
-    loader._validate_effect_vocabulary(
-        "probe", [modal([{"op": "gain_encore", "amount": 2}],
-                        [{"op": "spend_encore", "amount": 2},
-                         {"op": "draw", "amount": 2}])])
 
 
 # --- the connectivity walk -------------------------------------------------

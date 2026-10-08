@@ -191,20 +191,6 @@ def test_fairy_revives_lethal_card_self_damage():
     assert st.player.potions == []
 
 
-def test_fairy_revives_lethal_encore_overdraw():
-    st = make_state(hp=3)
-    st.player.max_hp = 80
-    st.player.potions = ["fairy_in_a_bottle"]
-    card = Card(id="overdraw", name="overdraw", cost=0, type="skill",
-                effects=[{"op": "spend_encore", "amount": 5}])
-    st.player.hand = [card]
-
-    combat.play_card(st, card)
-
-    assert st.player.hp == max(1, int(C.POTION_FAIRY_REVIVE_FRACTION * 80))
-    assert st.player.potions == []
-
-
 def test_fairy_revives_lethal_player_dot_at_turn_start():
     st = make_state(hp=3)
     st.player.max_hp = 80

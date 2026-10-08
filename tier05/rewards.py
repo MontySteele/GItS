@@ -99,7 +99,7 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
 @lru_cache(maxsize=1)
 def _companion_roster() -> list[Card]:
     """Every companion an offer surface may see -- the ONE reader of the
-    Mondstadt companion overhaul's seam (QUARANTINED, `C.COMPANION_OVERHAUL`).
+    Mondstadt companion overhaul's seam (`C.COMPANION_OVERHAUL`).
 
     Both companion surfaces below go through this, so a build cannot feature a
     five-star on the banner that the reward slot has no way to hand out. The
@@ -329,7 +329,7 @@ def _spark_seed(rng: random.Random, character_id: str,
     otherwise the roll it was -- so a screen that already offered a reader is
     untouched, and every screen from floor 4 on is untouched too.
 
-    QUARANTINED, like everything else in this arm: `C.KLEE_OVERHAUL` off, or
+    Like everything else in this arm (once `C.KLEE_OVERHAUL`), off it, or
     any character but Klee, and this is the identity. `floor` is None wherever
     a caller has no floor to give (the event layer's card screens), which is
     the same answer.
@@ -508,7 +508,7 @@ def roll_rewards(rng: random.Random, character_id: str,
             else:
                 while rarity not in comps:
                     rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
-            # THE STAND-IN HAND-OFF (QUARANTINED, `C.COMPANION_OVERHAUL`), on
+            # THE STAND-IN HAND-OFF (`C.COMPANION_OVERHAUL`), on
             # the PICKED id and not on `comps` above, which is the whole reason
             # the offer odds cannot move: the candidate lists, the weights and
             # both rng draws are the Universal's own, and the swap happens
