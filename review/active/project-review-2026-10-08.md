@@ -1,6 +1,6 @@
 # Project review, 2026-10-08: what the nine reviews found, and your picks
 
-Status: OPEN, picks for [USER].
+Status: RULED 2026-10-08, all ten picks at the defaults. [USER]: "Overall, agreed with all paper defaults. You're good to merge it."
 
 Overnight, nine review papers each went through four steps:
 - a Sonnet agent gathered the facts;
