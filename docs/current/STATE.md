@@ -124,7 +124,8 @@ fresh copies of the aura to the other enemies (one already wearing the element
 refreshes; another aura is replaced); a copy is an application with no
 trigger (phase one: `review/ruled/element-home-review-2026-09-28.md`). One
 switch is left, `-p:SwirlPays=false` (`Elements/TriggerRules.cs`), sim twin
-`C.SWIRL_PAYS`, off in the sim until its retest. Next: phase two (Burning and
+`C.SWIRL_PAYS`, on to match since 2026-10-08 (#967) and compared by
+`lint_constant_parity`. Next: phase two (Burning and
 Dendro, `BACKLOG.md`).
 
 ## The Teyvat run frame: on hold
