@@ -5,6 +5,10 @@ from prototype rows, so they are not quotable as sheet values. Read them
 against each other and against the reference characters, not as absolute
 win rates. Even Ironclad wins only about 7% here.
 
+**Note, after #967 (same day).** These cells ran with the sim's Swirl paying nothing, which the
+game does not do. With Swirl paid as in the game, the adaptive cell's 5.6% reads 4.2% (never 1.5%
+to 1.7%, covered 2.4% to 1.6%), and act-1 and act-2 clears rise about a point (#967's body).
+
 ## Commands (run from the worktree `GItS-furina-sweep`, branch `furina-sweep-2026-10-08`)
 
 `PY` = `.venv/Scripts/python.exe`, `PYTHONPATH=.`. All cells use the realistic loadout (relics and potions) and seed 11, and all cells share the same seeds.
