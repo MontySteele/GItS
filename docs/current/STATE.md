@@ -110,10 +110,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   read only its Oath. A Swirl he makes pays that element (Pyro 3 damage,
   Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL). Pool 78 (20 / 35 / 23),
   thirteen pool Knights; his own relics and three potions. Latest records
-  `review/records/varka-r6-round-2026-10-05.md` and
   `review/records/varka-solo-check-2026-10-07.md` (1 win of 5 on the base
-  seeds; the solo check ran three Cryo starts and one Pyro start). Next:
-  [USER]'s next Varka run; the next record lists each seat's starter Knight.
+  seeds) and `review/records/varka-offers-round-2026-10-08.md` (all five
+  reached act 3, none won; Pyro and Cryo payoffs offered and passed, Pyro
+  taken at 10%). Next: a card paper reworking the Pyro and Cryo payoffs
+  (project review pick 10), then [USER]'s next Varka run.
 
 ## Elements
 
