@@ -7,6 +7,26 @@
     python tools/telemetry_report.py --character Varka --feed bot --json
     python tools/telemetry_report.py --reactions --character Klee
     python tools/telemetry_report.py --coop --reactions
+    python tools/telemetry_report.py --character Klee --character base5 \\
+        --run-instance 20261007-2357 --baseline-run-instance 20261005-1055 \\
+        --baseline-run-instance 20261005-113940
+
+READ THIS BEFORE USING A FIELD.
+
+  * `reactions_by_turn` is a RUNNING TOTAL since combat start, sampled when
+    each turn opens (`PlayTelemetry.cs`, `OpenTurn`). Use its LAST entry (a
+    lower bound: the last turn's reactions are never sampled) or
+    `reactions_by_type`, never a sum of its entries -- a sum counts each
+    reaction once per later turn.
+  * Co-op rows before 2026-08-30 (EB-156, 3523aa2e) carry BOARD totals of
+    reactions in every seat's row, not the seat's own.
+  * A per-character window should start at a build or a `run_instance`
+    (`--run-instance`), not a date: a date window picks up stopped attempts,
+    off-seed runs and reruns on the same seed.
+  * `run_instance` is `<session stamp>#<ordinal>`, the stamp being the
+    second the game process first wrote telemetry. Two lanes started in the
+    same second share it, so a run is (`run_id`, `run_instance`), never
+    `run_instance` alone.
 
 WHAT IT READS. The real game's per-fight records (`record: "fight"`), written
 by `klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs` into the game profile's
@@ -14,6 +34,12 @@ by `klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs` into the game profile's
 play) and every seat lane's
 `%LOCALAPPDATA%/gits-lanes/laneN/SlayTheSpire2/gits_telemetry`. The schema is
 `understudy/README.md`, "Telemetry schema". `--dir` replaces both.
+
+CO-OP LANE COPIES ARE DROPPED ON READ. The mod writes a row for EVERY seat of
+a fight (`PlayTelemetry.OpenFight` loops `run.Players`), so a bot co-op run
+played on two lanes lands each (fight, seat) row once in each lane's dir.
+`load_fights` keeps the first copy of each two-seat row, keyed on
+`fight_key` plus seat and character; solo rows are never merged.
 
 WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
 
@@ -44,8 +70,9 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
 
 CO-OP (`--coop`). Keeps only two-seat fights (`seats == 2`) instead of solo
 ones. Every co-op lane writes a row for BOTH seats of the same fight, so rows
-are de-duplicated on (run_id, act, floor, fight_index, encounter, kind,
-seat_index) before anything is counted. The reaction section then groups by
+are de-duplicated on (run_id, run_instance, act, floor, fight_index,
+encounter, kind, seat_index) before anything is counted; `run_instance` keeps
+an abandoned attempt and its rerun on the same seed apart. The reaction section then groups by
 TEAM -- the fight's characters, sorted, `Klee + Kokomi` -- with each member's
 own line beneath it; a fight's turns are counted once for the team.
 
@@ -94,8 +121,10 @@ def default_dirs() -> list[Path]:
     return [d for d in out if d.is_dir()]
 
 
-def load_fights(dirs: Iterable[Path]) -> list[dict]:
-    """Every `record: "fight"` row under the dirs. A bad line is skipped."""
+def load_fights(dirs: Iterable[Path], dedupe: bool = True) -> list[dict]:
+    """Every `record: "fight"` row under the dirs. A bad line is skipped.
+    With `dedupe` (the default) a two-seat row already read from another
+    lane is dropped (`drop_lane_copies`)."""
     rows: list[dict] = []
     for d in dirs:
         for path in sorted(Path(d).glob("*.jsonl")):
@@ -113,7 +142,25 @@ def load_fights(dirs: Iterable[Path]) -> list[dict]:
                     continue
                 if isinstance(row, dict) and row.get("record") == "fight":
                     rows.append(row)
-    return rows
+    return drop_lane_copies(rows) if dedupe else rows
+
+
+def drop_lane_copies(rows: list[dict]) -> list[dict]:
+    """Co-op: both lanes of a two-seat bot run write every seat's row, so
+    each (fight, seat) arrives twice. Keep the first. Solo rows pass
+    untouched: two solo lanes started in the same second on the same seed
+    share every key here and are still two runs."""
+    seen: set[tuple] = set()
+    out = []
+    for r in rows:
+        if r.get("seats", 1) >= 2:
+            k = (*fight_key(r), r.get("seat_index"),
+                 str(r.get("character", "")))
+            if k in seen:
+                continue
+            seen.add(k)
+        out.append(r)
+    return out
 
 
 # --------------------------------------------------------------- filters ---
@@ -144,6 +191,7 @@ class Filters:
     solo: bool = True
     feed: str = "all"
     coop: bool = False
+    run_instances: tuple[str, ...] = ()
 
     def keep(self, row: dict) -> bool:
         ts = row.get("ts")
@@ -152,6 +200,9 @@ class Filters:
         if self.until is not None and (ts is None or ts >= self.until):
             return False
         if self.run_ids and str(row.get("run_id", "")) not in self.run_ids:
+            return False
+        if self.run_instances and not str(row.get("run_instance", "")
+                                          ).startswith(self.run_instances):
             return False
         if self.coop:
             if row.get("seats", 1) != 2:
@@ -299,8 +350,12 @@ REACTION_KEYS = ("reactions_by_type", "amp_bonus_damage",
 
 
 def fight_key(row: dict) -> tuple:
-    """One fight, across the seats and lanes that wrote it."""
-    return (str(row.get("run_id", "")), row.get("act"), row.get("floor"),
+    """One fight, across the seats and lanes that wrote it. `run_instance`
+    is in the key because `fight_index` restarts per instance: without it an
+    abandoned attempt and its rerun on the same seed merge into one fight
+    (the 2026-10-07 Klee + Varka and Ironclad + Silent runs did)."""
+    return (str(row.get("run_id", "")), str(row.get("run_instance", "")),
+            row.get("act"), row.get("floor"),
             row.get("fight_index"), str(row.get("encounter", "")),
             str(row.get("kind", "")))
 
@@ -547,15 +602,20 @@ def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
 
 def build(args: argparse.Namespace, rows: list[dict]) -> dict:
     coop = bool(getattr(args, "coop", False))
+    instances = tuple(getattr(args, "run_instance", None) or ())
+    base_instances = tuple(getattr(args, "baseline_run_instance", None)
+                           or ()) or instances
     filt = Filters(parse_when(args.since), parse_when(args.until),
-                   tuple(args.run_id or ()), args.solo, args.feed, coop)
+                   tuple(args.run_id or ()), args.solo, args.feed, coop,
+                   instances)
     kept = [r for r in rows if filt.keep(r)]
     if coop:
         kept = dedupe_seats(kept)
     grouped = group_rows(kept, list(args.character or []))
     base_filt = Filters(parse_when(args.baseline_since or args.since),
                         parse_when(args.baseline_until or args.until),
-                        tuple(args.run_id or ()), args.solo, args.feed, coop)
+                        tuple(args.run_id or ()), args.solo, args.feed, coop,
+                        base_instances)
     baseline = [r for r in rows if base_filt.keep(r)
                 and r.get("character") in BASE5]
     if coop:
@@ -575,7 +635,10 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
     out = {"filters": {"since": args.since, "until": args.until,
                         "baseline_since": args.baseline_since or args.since,
                         "baseline_until": args.baseline_until or args.until,
-                        "run_id": list(args.run_id or ()), "solo": args.solo,
+                        "run_id": list(args.run_id or ()),
+                        "run_instance": list(instances),
+                        "baseline_run_instance": list(base_instances),
+                        "solo": args.solo,
                         "coop": coop, "feed": args.feed},
             "records_read": len(rows), "records_kept": len(kept),
             "groups": {g: len(v) for g, v in grouped.items()},
@@ -589,10 +652,19 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
     return out
 
 
+def field_notes() -> str:
+    """The docstring's READ THIS block, which --help prints as its epilog."""
+    doc = __doc__ or ""
+    start = doc.find("READ THIS BEFORE USING A FIELD.")
+    end = doc.find("WHAT IT READS.")
+    return doc[start:end].rstrip() if 0 <= start < end else ""
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         description=__doc__.splitlines()[0],
-        formatter_class=argparse.RawDescriptionHelpFormatter, epilog=None)
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=field_notes())
     ap.add_argument("--character", action="append",
                     help="a group: a display name (Klee, The Ironclad, "
                     "ironclad) or base5 for the five pooled; repeatable; "
@@ -605,6 +677,14 @@ def main(argv: list[str] | None = None) -> int:
                     "--until")
     ap.add_argument("--run-id", "--seed", action="append", dest="run_id",
                     help="keep one run seed (the record's run_id); repeatable")
+    ap.add_argument("--run-instance", action="append",
+                    help="keep rows whose run_instance starts with this "
+                    "(a whole token like 20261005-113940#0, or a prefix like "
+                    "20261005-1055); repeatable. Grades against named runs "
+                    "instead of a clock window")
+    ap.add_argument("--baseline-run-instance", action="append",
+                    help="the base five's run instances, if not "
+                    "--run-instance; prefix match, repeatable")
     ap.add_argument("--solo", action=argparse.BooleanOptionalAction,
                     default=True, help="single-player fights only (default)")
     ap.add_argument("--coop", action="store_true",
@@ -644,7 +724,15 @@ def main(argv: list[str] | None = None) -> int:
               f"dir(s); solo={args.solo and not args.coop} "
               f"coop={args.coop} feed={args.feed} "
               f"since={args.since or '-'} until={args.until or '-'}"
-              + (f" seeds={','.join(args.run_id)}" if args.run_id else ""),
+              + (f" seeds={','.join(args.run_id)}" if args.run_id else "")
+              + (f" run_instance={','.join(args.run_instance)}"
+                 if args.run_instance else "")
+              + (f" baseline_run_instance="
+                 f"{','.join(args.baseline_run_instance)}"
+                 if args.baseline_run_instance else ""),
+              "note: reactions_by_turn is a running total (use its last "
+              "entry or reactions_by_type, never a sum); co-op rows before "
+              "2026-08-30 (EB-156) carry board totals per seat",
               "groups: " + ", ".join(f"{g} {n}" for g, n in
                                      out["groups"].items())]
     print(render(cells, out["comparison"], out["cards"], out["cards_for"],
