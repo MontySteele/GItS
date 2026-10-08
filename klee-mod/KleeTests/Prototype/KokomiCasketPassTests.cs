@@ -360,7 +360,8 @@ public class KokomiCasketPassTests : IDisposable
                         c => c.Contains("CardPileCmd.Add"));
         // 2026-10-01: Open the Casket no longer exhausts.
         Assert.Equal("Put [gold]Open the Casket[/gold] into your hand from "
-                     + "your draw pile or discard pile.", Face(returns));
+                     + "your [gold]Draw Pile[/gold] or [gold]Discard "
+                     + "Pile[/gold].", Face(returns));
     }
 
     [Fact]

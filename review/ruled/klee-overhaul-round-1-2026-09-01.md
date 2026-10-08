@@ -8,7 +8,7 @@ Written 2026-09-01, the night the prototype first ran, and extended the
 same night with round two on the fix build. This is the Prototype stage, so
 nothing here is a measurement (R217 G): the seats' words are feedback for
 iteration, the defect rows are the deliverable, and your act-one run is the
-gate (`review/active/klee-overhaul-slice-1-2026-09-01.md` §6).
+gate (`review/ruled/klee-overhaul-slice-1-2026-09-01.md` §6).
 
 ## 1. What ran
 

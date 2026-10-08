@@ -122,9 +122,11 @@ public class VarkaComboTests : IDisposable
         var makes = Calls("VarkaOath", "CardMakesCurrent");
         Assert.Contains("VarkaOath.BannerHolds", makes);
         Assert.Contains("VarkaOath.SetCurrent", makes);
-        Assert.Equal("[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro "
-                     + "[gold]Oath[/gold]. Pyro becomes your [gold]current "
-                     + "element[/gold].", Face(new ProtoVkStokeTheFlames()));
+        // The text pass of 2026-10-08: rule 6 golds the element.
+        Assert.Equal("[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} "
+                     + "[gold]Pyro[/gold] [gold]Oath[/gold]. [gold]Pyro[/gold] "
+                     + "becomes your [gold]current element[/gold].",
+                     Face(new ProtoVkStokeTheFlames()));
     }
 
     [Fact]
@@ -252,7 +254,7 @@ public class VarkaComboTests : IDisposable
     public void Thundering_verdict_and_converging_winds_say_it_plainly()
     {
         Assert.StartsWith("Deal {VkBase:diff()} [gold]Electro[/gold] damage, plus "
-                          + "{VkPer:diff()} for each Electro [gold]Oath[/gold], to "
+                          + "{VkPer:diff()} for each [gold]Electro[/gold] [gold]Oath[/gold], to "
                           + "ALL enemies X times.",
                           Face(new ProtoVkThunderingVerdict()));
         Assert.Contains("(Deals {VkHit:diff()} damage each time)",

@@ -376,7 +376,11 @@ public class ArmKeywordTipTests
         // six guests' tips left with it; `ForDrain` and `ForRepay` arrived.
         // THIRTY-FOUR with the pool to 39 (2026-10-05): `ForLyney`,
         // `ForSigewinne` and `ForChevreuse`, its three guests.
-        Assert.Equal(34, attaches.Count);
+        // THIRTY-EIGHT with the text pass of 2026-10-08: `ForElementalReaction`,
+        // `ForSakura` and `ForLightfallSword` (three golded words that
+        // hovered nothing) and `ForPlanOnly` (the Plan tip on a card with no
+        // line above its Plan).
+        Assert.Equal(38, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");

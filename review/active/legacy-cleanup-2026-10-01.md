@@ -155,11 +155,11 @@ and about 390 Python arm-flag reads.
    (`test_understudy_blindplay.py`; the folded tests had been passing
    vacuously on a deleted id). Four stay deleted: the shipped Sparks
    free-Attack rule on two pages, the Encore gloss and the Spotlight token
-   classes. **Left over (a BACKLOG line):** the seat page's Kurage memory and
+   classes. **Left over, done 2026-10-04:** the seat page's Kurage memory and
    Salon panels and the bridge files that fed them
-   (`vendor/STS2_MCP/gits/GitsKurageMemory.cs`, `GitsFurinaSalon.cs`), which
-   need a bridge deploy to retire.
+   (`vendor/STS2_MCP/gits/GitsKurageMemory.cs`, `GitsFurinaSalon.cs`) left
+   the bridge (`vendor/STS2_MCP/PROVENANCE.md`, `McpMod.StateBuilder.cs` (a2)).
 
-Out of scope: the Teyvat frame ([USER]: nothing deleted). Element switches
-`SwirlPays` and `CrystallizeKeepsAura` stay until the open retest of each
-switch alone is done.
+Out of scope: the Teyvat frame ([USER]: nothing deleted). The element switch
+`SwirlPays` stays until the open retest is done. (`CrystallizeKeepsAura` went
+on 2026-10-03 with the spent aura: every reaction consumes its aura, `LAW.md`.)

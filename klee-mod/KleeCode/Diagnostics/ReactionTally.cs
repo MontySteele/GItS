@@ -22,7 +22,8 @@ namespace KleeMod.Diagnostics;
 /// <c>dealer.Player</c>, keyed by the combat instance and cleared when it
 /// changes. A reaction with no dealer (or a pet dealer, which has no
 /// <c>Player</c>) belongs to no seat, so `reactions_by_type` sums to the
-/// seat's `reactions_by_turn` total.
+/// seat's own total. The final entry of `reactions_by_turn` (a running total
+/// sampled at turn open, so it misses the last turn) is never above it.
 ///
 /// MEASUREMENT ONLY. Nothing here is read by a card, a relic or a formula;
 /// every entry point is a read of numbers the engine already computed, and

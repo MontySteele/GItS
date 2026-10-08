@@ -146,9 +146,10 @@ public class CoopNotesRulingsTests
             .GetMethod("InjectLocStrings", HeadlessGame.All)!);
         Assert.Contains(ArmKeywordTips.KnightKey + ".title", registered);
         Assert.Contains(ArmKeywordTips.KnightKey + ".description", registered);
-        Assert.Equal("One of Varka's Companions. "
-                   + "Playing one makes its element your current element "
-                   + "(except Geo).",
+        // The text pass of 2026-10-08: rule 14, no parentheses.
+        Assert.Equal("One of Varka's Companions. Playing one makes its "
+                   + "element your current element. [gold]Geo[/gold] does "
+                   + "not.",
                      (string)typeof(ArmKeywordTips).GetField("KnightTipText",
                          HeadlessGame.All)!.GetRawConstantValue()!);
     }
@@ -206,7 +207,7 @@ public class CoopNotesRulingsTests
         Assert.Contains("ElementalHit.ApplyOnly", apply);
         var card = new ProtoMfNeuvilletteAncientSeaAuthority();
         Assert.Equal("At the start of your turn, apply [gold]Hydro[/gold] to a "
-                   + "random enemy. Elemental auras you apply last 1 extra turn.",
+                   + "random enemy. Auras you apply last 1 additional turn.",
                      Face(card));
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(MegaCrit.Sts2.Core.Entities.Cards.CardRarity.Rare, card.Rarity);

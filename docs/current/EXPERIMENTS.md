@@ -4,7 +4,22 @@ Standing measurement law, plus pointers to the active registrations. A
 registration packet lives under `review/active/` while its picks are open and
 moves to `review/records/` once it has been run. One home at a time, not two.
 
+**The sim-law half of this file does not gate kit balance**: a kit at Balance
+is measured on the real game (first section below, ruled 2026-10-05).
+
 ## Measurement law
+
+### Kit balance is measured on the real game (2026-10-05)
+- For a kit at Balance, the instrument is the real game: the kit's seat runs on
+  the base-five baseline seeds and the per-fight telemetry
+  (`review/active/klee-balance-measurement-2026-10-05.md`, ruled). Its numbers
+  are compared with the base five's on the same seeds and acts.
+- Pre-registration for kit balance is **one line in the change's own paper,
+  written before the suite runs and graded by it**. Slates, countersigns and
+  blind grading below do not apply to kit balance, and the twelve-arm sim
+  re-baseline is not its gate.
+- The sections below govern the sim whenever it is used, and the blind-QA
+  funnel.
 
 ### Stamp law
 - **Every published number is world-stamped, and worlds are not comparable.**

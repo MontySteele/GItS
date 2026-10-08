@@ -113,8 +113,10 @@ def test_nereids_face_names_the_dusk_plan_too():
     (`KokomiPlan.Drain`), the morning's and the Dusk's."""
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    assert ("carries out your first [gold]Plan[/gold] twice. Your first "
-            "[gold]Dusk[/gold] [gold]Plan[/gold] is doubled too."
+    # The text pass of 2026-10-08 (rule 15) kept both halves and cut the
+    # restated rule.
+    assert ("your first [gold]Plan[/gold] is carried out twice. So is your "
+            "first [gold]Dusk[/gold] [gold]Plan[/gold]."
             ) in sheet
 
 

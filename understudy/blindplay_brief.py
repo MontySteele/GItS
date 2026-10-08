@@ -96,6 +96,25 @@ _GLOSS_ROW = re.compile(r"^\s*\*(?P<word>[^*\s][^*]*)\* — (?P<text>.*)$")
 #: trim is what left a seat with no briefing for a whole act.
 KEPT_SECTIONS = frozenset({BRIEFING_HEADING})
 
+#: 2026-10-08. THE RELIC BLOCK AND THE SPARK-PRICE SENTENCE, the two biggest
+#: repeats the seats' own filters cut (suite 4 lane 1: the relic block was 27%
+#: of one 3,978-byte page, the price sentence 8%). A relic's sentence prints in
+#: full on a fight's first page and the first time the lane meets the relic;
+#: on every other page its row is the name and the counter. The price sentence
+#: prints once per lane. Both are keyed in the lane's words store.
+RELICS_HEADING = "## Your relics"
+_RELIC_ROW = re.compile(
+    r"^- \*\*(?P<name>[^*]+)\*\*(?P<mid>.*?)(?: — (?P<text>.*))?$")
+SPARK_PRICE_LINE = re.compile(
+    r"^\s*Its \d+ Sparks? is a price, not an Energy cost")
+SPARK_PRICE_KEY = "spark price|its # spark is a price"
+
+
+def relic_key(name: str, text: str) -> str:
+    """What "this lane has read this relic" is keyed on."""
+    return "relic|" + definition_key(name, text)
+
+
 #: Headings that are never dropped, even when their body is empty.
 KEPT_HEADINGS = frozenset({"## What you can say", "## Your hand",
                            "## The other side", "## The other player"})
@@ -149,12 +168,21 @@ def _drop_line(line: str, fresh=None) -> bool:
     return False
 
 
-def _trim(text: str, seen: set[str] | None = None
-          ) -> tuple[list[str], list[str]]:
+def _trim(text: str, seen: set[str] | None = None,
+          relics_full: bool = True) -> tuple[list[str], list[str]]:
     """(kept lines, removed lines). With `seen`, a definition whose key is
-    not in it is kept -- once per page -- and its key is added to it."""
+    not in it is kept -- once per page -- and its key is added to it.
+    `relics_full` is whether this page opens its fight: there every relic
+    prints its sentence; elsewhere only a relic new to the lane does."""
     before = frozenset(seen) if seen is not None else None
     taken: set[str] = set()
+
+    def new_key(key: str) -> bool:
+        """Whether `key` is new to the lane (and so prints), recording it."""
+        if before is not None and (key in before or key in taken):
+            return False
+        taken.add(key)
+        return True
 
     def fresh(line: str) -> bool:
         if before is None:
@@ -184,6 +212,18 @@ def _trim(text: str, seen: set[str] | None = None
         if heading in KEPT_SECTIONS:
             kept += block
             continue
+        if heading == RELICS_HEADING:
+            body = list(body)
+            for i, ln in enumerate(body):
+                row = _RELIC_ROW.match(ln)
+                if not row or not row.group("text") or PROTECTED.search(ln):
+                    continue
+                fresh_relic = new_key(relic_key(row.group("name"),
+                                                row.group("text")))
+                if relics_full or fresh_relic:
+                    continue
+                body[i] = f"- **{row.group('name')}**{row.group('mid')}"
+                removed.append(ln)
         if heading in DROPPED_SECTIONS:
             rows = [ln for ln in body
                     if ln.strip() and not PROTECTED.search(ln) and fresh(ln)]
@@ -193,7 +233,11 @@ def _trim(text: str, seen: set[str] | None = None
             else:
                 removed.append(heading)
             continue
-        verdict = [(ln, _drop_line(ln, fresh)) for ln in body]
+        verdict = [(ln, _drop_line(ln, fresh)
+                    or (bool(SPARK_PRICE_LINE.match(ln))
+                        and not PROTECTED.search(ln)
+                        and not new_key(SPARK_PRICE_KEY)))
+                   for ln in body]
         dropped = [ln for ln, gone in verdict if gone]
         rest = [ln for ln, gone in verdict if not gone]
         removed += dropped
@@ -218,7 +262,8 @@ def _collapse_blanks(lines: list[str]) -> list[str]:
     return out
 
 
-def brief(text: str, seen: set[str] | None = None) -> str:
+def brief(text: str, seen: set[str] | None = None,
+          relics_full: bool = True) -> str:
     """The brief page for a full page `observe` rendered, or the full page if
     the trim would have removed anything in `PROTECTED`.
 
@@ -226,7 +271,7 @@ def brief(text: str, seen: set[str] | None = None) -> str:
     place): those are cut, the rest are kept. `None` cuts every definition.
     A page returned whole printed every definition, so those count as seen
     too."""
-    kept, removed = _trim(text, seen)
+    kept, removed = _trim(text, seen, relics_full)
     if not removed:
         return text
     if any(PROTECTED.search(line) for line in removed):
@@ -247,7 +292,7 @@ NOT_DEFINED = ("No definition of \"{word}\" on this screen. Words defined "
                "here: {words}.")
 
 
-def define(text: str, word: str) -> str:
+def define(text: str, word: str, growth: int | None = None) -> str:
     """Every definition of `word` a full page prints -- its glossary row and
     its italic glosses, once each -- else the glossary's own row, marked as
     not on this screen, else the one line saying there is none."""
@@ -269,7 +314,7 @@ def define(text: str, word: str) -> str:
         return "\n".join(rows) + "\n"
     # 2026-10-02: a word this screen does not define is looked up in the
     # glossary's own tables, and marked as off-screen.
-    found = glossary_definition(want)
+    found = glossary_definition(want, growth)
     if found:
         return f"- **{found[0]}** — {found[1]}{OFF_SCREEN_MARK}\n"
     # 2026-10-05: an enemy's base-game briefing, by its base name, after

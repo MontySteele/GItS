@@ -86,8 +86,8 @@ public class KokomiCorePassTests
         Assert.Contains(CardKeyword.Innate,
                         Upgraded<ProtoKkTreatise>().Keywords);
         Assert.Equal(
-            "Once per turn, when you play a card with a [gold]Plan[/gold] line "
-          + "normally, draw 1 card.", Face(card));
+            "The first time each turn you play a card with a "
+          + "[gold]Plan[/gold] line normally, draw 1 card.", Face(card));
     }
 
     // ---- Chain of Command: the Plan buys a free Companion -----------------

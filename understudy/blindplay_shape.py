@@ -13,7 +13,7 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 
 
@@ -96,6 +96,45 @@ FRAIL_BLOCK_PCT = 25
 # from the other side so this page cannot be left teaching a retired number.
 SHRINK_DEALT_PCT = 30
 
+# 2026-10-08. THE GAME'S OWN NUMBERS FIRST, THESE MIRRORS SECOND. Suite 5's
+# act-1 page ran this module from `main` (growth 4, opening 1) against a game
+# built from `klee-next` (2 and 3), and where no Bomb tip was on screen the
+# page taught the stale numbers. The bridge now sends the build's
+# `KleeOverhaulLaw.BombGrowth` and `.OpeningSpark` on every screen
+# (`run.klee_law`, `vendor/STS2_MCP/gits/GitsKleeLaw.cs`); the observation
+# carries them (never printed as such) and every page sentence that quotes
+# either number reads them through these two functions.
+KLEE_LAW_KEYS = ("bomb_growth", "opening_spark")
+
+
+def live_klee_law(state: Any) -> dict[str, int]:
+    """`{"bomb_growth": n, "opening_spark": n}` off the wire's `run` block,
+    each key only where the bridge sent a number; `{}` on an older bridge
+    or a build with no Klee mod."""
+    run = state.get("run") if isinstance(state, dict) else None
+    law = run.get("klee_law") if isinstance(run, dict) else None
+    out: dict[str, int] = {}
+    if isinstance(law, dict):
+        for key in KLEE_LAW_KEYS:
+            try:
+                out[key] = int(law[key])
+            except (KeyError, TypeError, ValueError):
+                continue
+    return out
+
+
+def bomb_growth(obs: Any = None) -> int:
+    """The Bomb growth this page quotes: the live build's, else the mirror."""
+    law = obs.get("klee_law") if isinstance(obs, dict) else None
+    return int((law or {}).get("bomb_growth", BOMB_GROWTH))
+
+
+def opening_spark(obs: Any = None) -> int:
+    """The opening Spark this page quotes: the live build's, else the mirror."""
+    law = obs.get("klee_law") if isinstance(obs, dict) else None
+    return int((law or {}).get("opening_spark", OPENING_SPARK))
+
+
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"
@@ -124,7 +163,107 @@ PROMPT_PATH = Path(__file__).resolve().parent / "blindplay_prompt.md"
 # environment, and those two spellings have to meet.
 MAX_ACTIONS_ENV = "GITS_MAX_ACTIONS"
 BUDGET_REACHED = "budget reached"
-_BUDGET_STORE_DIR = Path(__file__).resolve().parent / "logs"
+
+# 2026-10-08. THE LANE'S STATE IS THE LANE'S, NOT THE CHECKOUT'S.
+#
+# THE FIND (suite 5). Every per-lane file below -- the action budget, the
+# words a lane has been shown, the refusal mark, the ledger mark, the deck,
+# arm, run and fight memories in `blindplay_faces`, and the embark sidecar's
+# copy -- lived in `understudy/logs` of WHICHEVER CHECKOUT RAN THE COMMAND. The
+# act-2 seats were moved to a second worktree to match the game's build, and
+# every lane lost its cap (no budget file reads as no cap), its words store
+# and its build identity. A control seat whose wrapper had no `cd` read one
+# checkout's counter and then the other's, and saw it jump 20 -> 127.
+#
+# SO THE STATE LIVES BESIDE THE LANE'S GAME: `%LOCALAPPDATA%\gits-lanes\
+# laneN\blindplay\`, under the folder `instances.LANE_ROOT` already gives the
+# lane's disposable profile (spelled here, not imported, for `LANE_ENV`'s
+# reason below). `GITS_LANE_STATE` names another root -- an operator's
+# override. `_BUDGET_STORE_DIR` is the tests' older seam: set, it puts every
+# lane's files in that ONE folder, as before.
+#
+# MIGRATION: a file missing in the new folder is read from the old one (this
+# checkout's `understudy/logs`) on first read, so a lane that was embarked
+# before this landed keeps its cap and its words.
+LANE_STATE_ENV = "GITS_LANE_STATE"
+_BUDGET_STORE_DIR: Path | None = None
+_LEGACY_STATE_DIR = Path(__file__).resolve().parent / "logs"
+_LANE_STATE_ROOT: Path | None = None
+
+
+def lane_state_root() -> Path:
+    """The folder that holds one sub-folder of state per lane."""
+    if _LANE_STATE_ROOT is not None:
+        return _LANE_STATE_ROOT
+    env = os.environ.get(LANE_STATE_ENV, "").strip()
+    if env:
+        return Path(env)
+    base = os.environ.get("LOCALAPPDATA") or str(
+        Path.home() / "AppData" / "Local")
+    return Path(base) / "gits-lanes"
+
+
+def lane_state_dir(lane: object = None) -> Path:
+    """Where this lane's blind-play state lives, whichever checkout runs."""
+    if _BUDGET_STORE_DIR is not None:
+        return _BUDGET_STORE_DIR
+    return lane_state_root() / f"lane{lane_tag(lane)}" / "blindplay"
+
+
+def migrated(path: Path, legacy_name: str | None = None) -> Path:
+    """`path` if it exists; else the same file in this checkout's old
+    `understudy/logs` if THAT exists (the first read after the move); else
+    `path`. Writes always go to `path`, so the old file is read until the
+    first write and never again."""
+    if path.exists():
+        return path
+    old = _LEGACY_STATE_DIR / (legacy_name or path.name)
+    return old if old != path and old.is_file() else path
+
+
+def write_atomic(path: Path, text: str) -> bool:
+    """Write `text` to `path` through a temp file and `os.replace`, so a
+    reader -- or a kill mid-write -- never sees half a file. False on
+    failure: a read-only tree simply keeps no state, as before."""
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp.write_text(text, encoding="utf-8")
+        for attempt in range(5):
+            try:
+                os.replace(tmp, path)
+                return True
+            except PermissionError:
+                # Windows refuses a replace while another process holds the
+                # target open; that window is milliseconds.
+                time.sleep(0.02 * (attempt + 1))
+        os.replace(tmp, path)
+        return True
+    except OSError:
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+        return False
+
+
+def read_state_json(path: Path, legacy_name: str | None = None) -> Any:
+    """The JSON in a lane state file (migrated), or None when unreadable."""
+    try:
+        return json.loads(migrated(path, legacy_name).read_text(
+            encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def drop_state(path: Path, legacy_name: str | None = None) -> None:
+    """Remove a lane state file, and its old-location copy, so a forget is
+    not undone by the migration read."""
+    for p in {path, _LEGACY_STATE_DIR / (legacy_name or path.name)}:
+        try:
+            p.unlink()
+        except OSError:
+            pass
 
 # `instances.LANE_ENV`'s value, SPELLED rather than imported: `instances`
 # reaches a game-directory resolver, and this module's whole job is to import
@@ -149,17 +288,17 @@ def lane_tag(lane: object = None) -> str:
 
 
 def budget_path(lane: object = None) -> Path:
-    return _BUDGET_STORE_DIR / f"_blindplay-budget-lane{lane_tag(lane)}.json"
+    return lane_state_dir(lane) / f"_blindplay-budget-lane{lane_tag(lane)}.json"
+
+
+def _budget_row(lane: object = None) -> dict[str, Any]:
+    blob = read_state_json(budget_path(lane))
+    return blob if isinstance(blob, dict) else {}
 
 
 def read_budget(lane: object = None) -> dict[str, int]:
     """`{"cap": n, "count": n}` for this lane. Zeroes where nothing is set."""
-    try:
-        blob = json.loads(budget_path(lane).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        blob = {}
-    if not isinstance(blob, dict):
-        blob = {}
+    blob = _budget_row(lane)
     def _num(key: str) -> int:
         try:
             return max(0, int(blob.get(key) or 0))
@@ -168,22 +307,24 @@ def read_budget(lane: object = None) -> dict[str, int]:
     return {"cap": _num("cap"), "count": _num("count")}
 
 
-def _write_budget(row: dict[str, int], lane: object = None) -> None:
-    try:
-        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        budget_path(lane).write_text(json.dumps(row), encoding="utf-8")
-    except OSError:
-        pass                       # a read-only tree simply keeps no count
+def _write_budget(row: dict[str, Any], lane: object = None) -> None:
+    # Atomic (2026-10-08): a kill mid-write used to leave half a file, which
+    # reads as cap 0 -- an uncapped lane.
+    write_atomic(budget_path(lane), json.dumps(row))
 
 
-def set_budget(cap: int, lane: object = None) -> dict[str, int]:
+def set_budget(cap: int, lane: object = None,
+               run: str = "") -> dict[str, int]:
     """Record this lane's cap and ZERO its count. The coordinator's write.
 
     Zeroing is the point: a cap is set at embark, and an embark is a new run.
     A cap of 0 clears the budget entirely, which is the unlimited lane every
-    round before this row ran on.
+    round before this row ran on. `run` is the embark's stamp: the count
+    belongs to that run (`count_action`).
     """
-    row = {"cap": max(0, int(cap or 0)), "count": 0}
+    row: dict[str, Any] = {"cap": max(0, int(cap or 0)), "count": 0}
+    if run:
+        row["run"] = str(run)
     _write_budget(row, lane)
     # And the words the lane has been shown: a new run's first screen
     # defines its words again (`blindplay_brief`, 2026-10-01).
@@ -208,9 +349,27 @@ def budget_spent(lane: object = None) -> tuple[int, int]:
 
 
 def count_action(lane: object = None) -> int:
-    """Charge one accepted act to this lane and return the new count."""
-    row = read_budget(lane)
-    row["count"] += 1
+    """Charge one accepted act to this lane and return the new count.
+
+    2026-10-08. THE COUNT BELONGS TO THE RUN EMBARKED LAST. When the newest
+    embark sidecar for this lane names a stamp newer than the one the budget
+    was set for, the lane was re-embarked by a door that did not reset this
+    store (an older checkout writing the old location), and the count held
+    here is the previous run's: it restarts at 0, keeping the cap."""
+    row = _budget_row(lane)
+    cap = read_budget(lane)["cap"]
+    newest = lane_embark_stamp(lane)
+    held = str(row.get("run") or "")
+    try:
+        count = max(0, int(row.get("count") or 0))
+    except (TypeError, ValueError):
+        count = 0
+    if newest and held and newest > held:
+        count = 0
+    if newest and newest > held:
+        row["run"] = newest
+    row["count"] = count + 1
+    row["cap"] = cap
     _write_budget(row, lane)
     return row["count"]
 
@@ -226,34 +385,24 @@ REFUSAL_MARK_TTL_S = 300.0
 
 
 def refusal_mark_path(lane: object = None) -> Path:
-    return _BUDGET_STORE_DIR / f"_blindplay-refused-lane{lane_tag(lane)}.json"
+    return lane_state_dir(lane) / f"_blindplay-refused-lane{lane_tag(lane)}.json"
 
 
 def mark_refusal(board: str, command: str, why: str,
                  lane: object = None, now: float | None = None) -> None:
     row = {"board": board, "command": command, "why": why,
            "at": time.time() if now is None else now}
-    try:
-        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        refusal_mark_path(lane).write_text(json.dumps(row), encoding="utf-8")
-    except OSError:
-        pass
+    write_atomic(refusal_mark_path(lane), json.dumps(row))
 
 
 def clear_refusal(lane: object = None) -> None:
-    try:
-        refusal_mark_path(lane).unlink()
-    except OSError:
-        pass
+    drop_state(refusal_mark_path(lane))
 
 
 def pending_refusal(board: str, lane: object = None,
                     now: float | None = None) -> dict | None:
     """The refusal left on THIS board, if it is fresh; else `None`."""
-    try:
-        row = json.loads(refusal_mark_path(lane).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
+    row = read_state_json(refusal_mark_path(lane))
     if not isinstance(row, dict) or row.get("board") != board:
         return None
     now = time.time() if now is None else now
@@ -272,29 +421,64 @@ def pending_refusal(board: str, lane: object = None,
 # `instance` naming the lane); the newest sidecar for this lane that holds a
 # seed is the run up on it. Read as a file, by name, for the reason `LANE_ENV`
 # is spelled above: this module imports nothing that reaches a lane resolver.
+#
+# 2026-10-08: `embark` also writes a copy of each sidecar into the LANE's
+# state folder (`lane_state_dir`), and that copy is read first, so a seat
+# running from another checkout than the embark still finds its run. The
+# checkout's own `understudy/logs` is the fallback for an older embark.
 _SIDECAR_DIR = Path(__file__).resolve().parent / "logs"
 
 
-def lane_run_seed(lane: object = None) -> str:
-    """The seed `embark` read back for this lane's run, or "" when no
-    sidecar for the lane names one."""
+def lane_sidecars(lane: object = None) -> Iterator[dict[str, Any]]:
+    """This lane's embark sidecars, newest stamp first, read lazily: the lane
+    state folder's copies, then this checkout's `understudy/logs`. A stamp
+    found in both is read once, from the lane folder. Lazy because a
+    checkout's logs hold hundreds of sidecars and a caller wants the newest."""
     label = f"lane{lane_tag(lane)}"
-    try:
-        paths = sorted(_SIDECAR_DIR.glob("embark-*.json"), reverse=True)
-    except OSError:
-        return ""
-    for path in paths:
+    named: dict[str, Path] = {}
+    for d in (lane_state_dir(lane), _SIDECAR_DIR):
         try:
-            blob = json.loads(path.read_text(encoding="utf-8"))
+            for path in d.glob("embark-*.json"):
+                named.setdefault(path.name, path)
+        except OSError:
+            continue
+    for name in sorted(named, reverse=True):
+        try:
+            blob = json.loads(named[name].read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
         if not isinstance(blob, dict):
             continue
         if str(blob.get("instance") or "lane0") != label:
             continue
+        yield blob
+
+
+def lane_embark_stamp(lane: object = None) -> str:
+    """The stamp of the newest embark on this lane, or ""."""
+    for blob in lane_sidecars(lane):
+        stamp = str(blob.get("stamp") or "").strip()
+        if stamp:
+            return stamp
+    return ""
+
+
+def lane_run_seed(lane: object = None) -> str:
+    """The seed `embark` read back for this lane's run, or "" when no
+    sidecar for the lane names one."""
+    for blob in lane_sidecars(lane):
         seed = str(blob.get("run_seed") or "").strip()
         if seed:
             return seed
+    return ""
+
+
+def lane_game_dir(lane: object = None) -> str:
+    """The game install the newest embark on this lane launched, or ""."""
+    for blob in lane_sidecars(lane):
+        game = str(blob.get("game_dir") or "").strip()
+        if game:
+            return game
     return ""
 
 
@@ -303,31 +487,21 @@ def lane_run_seed(lane: object = None) -> str:
 # (`blindplay_brief`), so the lane remembers which it has printed. Beside the
 # budget, keyed the same way, and cleared where the budget is set: at embark.
 def words_seen_path(lane: object = None) -> Path:
-    return _BUDGET_STORE_DIR / f"_blindplay-words-lane{lane_tag(lane)}.json"
+    return lane_state_dir(lane) / f"_blindplay-words-lane{lane_tag(lane)}.json"
 
 
 def read_words_seen(lane: object = None) -> set[str]:
-    try:
-        blob = json.loads(words_seen_path(lane).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return set()
+    blob = read_state_json(words_seen_path(lane))
     return {str(k) for k in blob} if isinstance(blob, list) else set()
 
 
 def write_words_seen(words: set[str], lane: object = None) -> None:
-    try:
-        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        words_seen_path(lane).write_text(json.dumps(sorted(words)),
-                                         encoding="utf-8")
-    except OSError:
-        pass                       # a read-only tree simply repeats its words
+    # A read-only tree simply repeats its words.
+    write_atomic(words_seen_path(lane), json.dumps(sorted(words)))
 
 
 def forget_words_seen(lane: object = None) -> None:
-    try:
-        words_seen_path(lane).unlink()
-    except OSError:
-        pass
+    drop_state(words_seen_path(lane))
 
 
 # 2026-10-05. THE NEWEST LEDGER EVENT A LANE HAS BEEN SHOWN. The combat
@@ -336,32 +510,22 @@ def forget_words_seen(lane: object = None) -> None:
 # (it is seeded off the clock), so a stale number here can only hide events
 # from a game that is gone.
 def events_seen_path(lane: object = None) -> Path:
-    return _BUDGET_STORE_DIR / f"_blindplay-events-lane{lane_tag(lane)}.json"
+    return lane_state_dir(lane) / f"_blindplay-events-lane{lane_tag(lane)}.json"
 
 
 def read_events_seen(lane: object = None) -> int:
-    try:
-        blob = json.loads(events_seen_path(lane).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return 0
+    blob = read_state_json(events_seen_path(lane))
     return blob if isinstance(blob, int) else 0
 
 
 def write_events_seen(seq: int, lane: object = None) -> None:
-    try:
-        _BUDGET_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        events_seen_path(lane).write_text(json.dumps(int(seq)),
-                                          encoding="utf-8")
-    except OSError:
-        pass                       # a read-only tree repeats its events
+    # A read-only tree repeats its events.
+    write_atomic(events_seen_path(lane), json.dumps(int(seq)))
 
 
 def forget_budget(lane: object = None) -> None:
     """Drop this lane's budget. The operator's reset, and the tests'."""
-    try:
-        budget_path(lane).unlink()
-    except OSError:
-        pass
+    drop_state(budget_path(lane))
 
 # The disclaimer that rides on every observation, the transcript and the sealed
 # record -- same reasoning as `qa_packet.PACKET_GUARDRAIL`: a caveat that lives

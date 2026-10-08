@@ -34,7 +34,7 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         ("title", "Treatise"),
         ("description",
-            "Once per turn, when you play a card with a [gold]Plan[/gold] "
+            "The first time each turn you play a card with a [gold]Plan[/gold] "
           + "line normally, draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
     };
 
@@ -131,7 +131,7 @@ public sealed class GeneralsBannerPower : PowerModel, ILocalizationProvider
     {
         ("title", "The General's Banner"),
         ("description",
-            "Once per turn, when you play a [gold]Companion[/gold] card, apply "
+            "The first time each turn you play a [gold]Companion[/gold] card, apply "
           + "[blue]{Amount}[/blue] [gold]Weak[/gold] to the front enemy."),
     };
 

@@ -1,4 +1,4 @@
-Status: OPEN (Prototype built and played; starter draft 4 for round five, sec.3, ruled R242)
+Status: CLOSED. Built and played (starter draft 4 ruled R242); Klee is at Balance since 2026-10-03. History only.
 
 # Klee overhaul, slice one: the rules, the starter, and 28 cards (Paper stage)
 

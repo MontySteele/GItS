@@ -1,4 +1,4 @@
-Status: OPEN (draft 6, Paper; written on the R241 brief; the Opus build follows)
+Status: CLOSED. Built; superseded by the passes in `review/active/kokomi-brief-2026-09-01.md` and `STATE.md`. History only.
 
 # Kokomi overhaul, slice one: the rules, the starter, and 26 cards (draft 6)
 
