@@ -25,7 +25,7 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 - **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
 
-- **Klee tempo paper** (`review/active/klee-tempo-paper-2026-10-07.md`, three picks): (1) she is slow because Cook has no Common damage that leaves Bombs cooking and Spray has no Spark-to-damage card below Rare; (2) Grounded, Sit Tight, It Wasn't Me!, Sorry, Jean... out; Dodoco Tag, Simmer (Cook) and Explosive Spark, Sparks Fly (Spray) in; (3) suite 4 on the same seeds. Defaults.
+- **Klee tempo paper** (`review/active/klee-tempo-paper-2026-10-07.md`, three picks): (1) she is slow: Cook lacks damage that leaves Bombs cooking, Spray lacks Spark-to-damage, the status line lacks loaders; (2) seven out (four defence that waits or is unplayed, Blast Shield, Experiment in Progress, Kitchen Alchemy), seven in (status-priced Bomb readers for Cook, Spark-free and Spark-to-damage cards for Spray); (3) suite 4 on the same seeds. Defaults.
 
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,

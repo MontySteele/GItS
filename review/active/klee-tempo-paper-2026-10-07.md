@@ -74,73 +74,95 @@ The pool agrees, card for card:
   Grounded, Sit Tight, Experiment in Progress, Jean, Lion's Fang.
 - **Two Block Commons are never played:** It Wasn't Me! and Sorry, Jean...
   (0 plays in 10 runs).
+- **The status cards are a third line nobody plays.** Payoffs that read
+  statuses were played almost never in 15 runs (suites 2 and 3 and the test
+  arm): Kitchen Alchemy, Klee Can Explain! and Damage Report 0 times, Finders
+  Keepers 3. There are too few cards that load the pile for them to read.
 
 ## 3. The change
 
-Smallest first, per the stage gate. Starter basics and the starter relic are
-untouched. Two cards for each engine's missing damage, paid for by four
-defence cards.
+[USER] (2026-10-07): "I actually think that the Status cards would also be a
+good fit here, offering a way to bridge the two modes. We can offer Cook
+decks more 'read the bombs but don't set them off' effects in exchange for
+Dazed or Confiscated stacks, priced according to power, and we can offer
+Spray decks cards that function without Sparks (whether as a spark engine
+outside of detonation, or just giving some block and attack without needing
+to spend down all your sparks, or planting lots of bombs in exchange for
+statuses)."
 
-**Out (4):** Grounded (Uncommon Power), Sit Tight (Uncommon), It Wasn't Me!
-(Common), Sorry, Jean... (Common). Block cards go from 17 to 13, the base
-five's range.
+So each engine gets its missing damage two ways: a plain card, and a
+stronger one paid for in statuses, which also feeds the status payoffs. The
+price follows the package's rule: a Dazed on a fair card, Confiscated on a
+strong one. Starter basics and the starter relic are untouched.
 
-**In (4):**
+**Out (7):** It Wasn't Me!, Sorry, Jean..., Blast Shield (Commons);
+Grounded, Sit Tight, Experiment in Progress, Kitchen Alchemy (Uncommons).
+Five are defence (four of them pay for waiting or are never played; Blast
+Shield spends Sparks on Block), one pays for waiting, one is the dead status
+payoff. Block cards go from 17 to 13, the base five's range.
 
-| Card | Engine | Rarity | Text |
+**In (7):**
+
+| Card | Line | Rarity | Text |
 |---|---|---|---|
-| **Dodoco Tag** | Cook | Common Attack, 1 | Deal 9 [12] Pyro damage. Your largest Bomb grows by 2. |
-| **Simmer** | Cook | Uncommon Attack, 1 | Deal 5 Pyro damage, plus half your largest Bomb's size. The Bomb does not go off. |
-| **Explosive Spark** | Spray | Common Attack, 0 | Costs 1 Spark. Deal 7 [10] Pyro damage. |
-| **Sparks Fly** | Spray | Uncommon Attack, 1 | Costs 2 Sparks. Deal 18 [24] Pyro damage. |
+| **Simmer** | Cook, status | Common Attack, 1 | Deal 4 [6] Pyro damage, plus half your largest Bomb's size. The Bomb does not go off. Add a Dazed into your Discard Pile. |
+| **Taste Test** | Cook, status | Uncommon Attack, 2 | Deal damage equal to all your Bombs on the enemy. They do not go off. Add 2 Confiscated into your Discard Pile. |
+| **Pop-Pop-Pop!** | Spray, status | Common Skill, 1 | Place a Bomb 5 [7] on ALL enemies. Add a Dazed into your Discard Pile. |
+| **Tinkering** | Spray, status | Uncommon Skill, 0 | Gain 2 [3] Sparks. Add a Confiscated into your Discard Pile. |
+| **Dodoco Tag** | Spray, status | Uncommon Attack, 1 | Deal 7 [10] Pyro damage. Gain 5 [7] Block. Add a Dazed into your Discard Pile. |
+| **Explosive Spark** | Spray, Sparks | Common Attack, 0 | Costs 1 Spark. Deal 7 [10] Pyro damage. |
+| **Sparks Fly** | Spray, Sparks | Uncommon Attack, 1 | Costs 2 Sparks. Deal 18 [24] Pyro damage. |
 
-- **Dodoco Tag** is Cook's plain Common Attack: a base-rate hit that keeps
-  the Bomb growing instead of spending it. It is what a Cook deck plays on
-  the "quiet" turns instead of a Defend.
-- **Simmer** is the Uncommon payoff for having cooked: at a Bomb 20 it hits
-  for 15 and the Bomb is still there. It is the Sparks 'n' Splash idea at
-  Uncommon, on a card, once.
-- **Explosive Spark** is the Spray Common: one Spark, one hit, 0 Energy, the
-  name of Klee's charged attack in the source game. With Tinder Toss (1
-  Spark: Set off ALL) minting Sparks from a board of Bombs, the Sparks now
-  come back as damage.
-- **Sparks Fly** is the Uncommon Spark payoff at 9 a Spark, between Explosive
-  Spark (7) and Fireworks Finale (5 to each enemy).
-- **Archetype three** loses one Dazed source (It Wasn't Me!); Forbidden Fun,
-  Up in Smoke! and Fish Blasting still feed the status cards.
-- Pool stays 78, 25 / 32 / 21 (two Commons out, two in; two Uncommons out,
-  two in). One Power leaves (Grounded), none comes in.
-- **Build note.** Dodoco Tag, Explosive Spark and Sparks Fly use ops the build
-  has (`damage`, `grow_largest`, `spend_spark`). Simmer needs one new op,
-  damage read off the largest Bomb's size, which Sparks 'n' Splash's power
-  already computes.
+- **Cook.** Simmer is the Common that hits while the Bomb cooks (at a Bomb
+  20, 14 damage, Bomb kept). Taste Test is the big read: at a Bomb 30 it is
+  30 damage for 2 Energy and the Bomb is still there, paid for with two
+  Confiscated. Red Knight (Rare, 2 Energy, 34, two Confiscated) is the price
+  point it is set against.
+- **Spray without Sparks.** Pop-Pop-Pop! is the board of Bombs that Tinder
+  Toss cashes. Tinkering is a Spark engine that does not need an explosion
+  (Lisa's Treats, 2 Energy for two Confiscated, is its price point). Dodoco
+  Tag is the attack-and-Block turn that leaves the Spark bank alone.
+- **Spray with Sparks.** Explosive Spark (the name of Klee's charged attack
+  in the source game) and Sparks Fly turn Sparks straight into damage below
+  Rare, at 7 and 9 a Spark.
+- **The status line** gains five loaders (three that add a Dazed, two that
+  add Confiscated) and loses one (It Wasn't Me!), and one payoff, Kitchen Alchemy, which was never
+  played. Klee Can Explain!, Damage Report, Finders Keepers and Albedo
+  now have a pile to read.
+- Pool stays 78, 25 / 32 / 21 (three Commons out, three in; four Uncommons
+  out, four in). One Power leaves (Grounded), none comes in.
+- **Build note.** Five cards use ops the build has (`damage`, `block`,
+  `plant_bomb` on ALL enemies, `spend_spark`, `gain_spark`, `add_card`).
+  Simmer and Taste Test need one new op, damage read off Bomb sizes without
+  setting them off, which Sparks 'n' Splash's power already computes.
 
-**Not changed this pass:** Experiment in Progress and Jean, Lion's Fang also
-pay for waiting; rule 1's growth of 4 a turn stays.
+**Not changed this pass:** Jean, Lion's Fang still pays for waiting; rule 1's
+growth of 4 a turn stays.
 
 ## 4. What a round should show
 
 Turn-one and turn-two damage up in acts 2 and 3; fights at the base five's
 3 turns; Block a turn at or below theirs; HP lost a fight at or below theirs
-because the fights are shorter. Per engine: how often the four new cards are
-played, and whether Spark-heavy decks spend Sparks on Explosive Spark and
-Sparks Fly rather than on Block.
+because the fights are shorter. Per line: how often each new card is played,
+whether Spark-heavy decks spend Sparks on damage rather than Block, and
+whether the status payoffs start being played.
 
 ## Picks
 
 1. **The read.** Klee is slow (act-3 turn-one damage 9 to the base five's
    62) and her Block pays for it, because Cook has no Common damage that
-   leaves the Bombs cooking and Spray has no Spark-to-damage card below
-   Rare. The identity is fast and fragile, in [USER]'s words above, recorded
-   in her brief. **Default: agree.**
+   leaves the Bombs cooking, Spray has no Spark-to-damage card below Rare,
+   and the status line has too few loaders to bridge them. The identity is
+   fast and fragile, in [USER]'s words above, recorded in her brief.
+   **Default: agree.**
 2. **The change.**
-   - **Default (a):** the four out, the four in (section 3), built on
+   - **Default (a):** the seven out, the seven in (section 3), built on
      `klee-next`.
    - (b) (a), plus rule 1's growth from 4 to 2 a turn and every placing card
      +2, so a Bomb cashed now is worth nearly as much as one cashed later.
      This changes a core rule and every Cook card's maths; it is the bigger
      lever if (a) is not enough.
-   - (c) (a), plus Experiment in Progress and Jean, Lion's Fang out for one
-     more card per engine (a second paper for their texts).
+   - (c) (a) without Dodoco Tag (keep Blast Shield instead), if a status
+     card that also gives Block reads as against the fragile identity.
 3. **The round.** **Default:** suite 4 on the same five seeds, graded on the
    section 4 measures.
