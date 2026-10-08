@@ -64,10 +64,11 @@ change costs a player who already plays fast.
 
 [USER]'s two rule changes, plus +2 on every card that places a Bomb or Mine,
 **except Jumpy Dumpty**, the starter (starter basics are never changed
-without [USER]'s pick). The sum on turn one for the starter alone: Jumpy
-Dumpty's Bomb 8 then Ka-pow! is 12 damage now, against a Bomb 12 two turns
-later; with the drafted placers at +2 and 3 Sparks in hand, turn one has
-real options.
+without [USER]'s pick). The starter's own sum: Jumpy Dumpty's Bomb 8 cashed
+by Ka-pow! on turn one is 12 damage; held to turn three it is 16 under
+growth 2, against 20 today. Waiting still pays, but a third as much as it
+does now, and the drafted placers at +2 and 3 Sparks in hand give turn one
+something to spend on.
 
 - **Rules:** rule 1 growth 4 to 2 (Alice's Recipe still doubles it, to 4);
   rule 4 opening Sparks 1 to 3. Both edited in place in the brief.
