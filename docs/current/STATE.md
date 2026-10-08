@@ -25,8 +25,8 @@ and 6, `review/active/legacy-cleanup-2026-10-01.md`): their C#, their sheets
 (`docs/*-cards.yaml`, `*-upgrades.yaml`, the companion sheets), the arm
 switches in C# and in the sim, and the engine pieces only their cards used.
 There is one C# test configuration, and the tier0 sim always runs the current
-kits; its calibration bands, measured on the shipped kits, are retired until a
-kit reaches Balance (pick 5). Every card is a `proto_` row on
+kits; its calibration bands, measured on the shipped kits, are retired, and
+the sim does not gate kit balance (the measurement ruling, 2026-10-05). Every card is a `proto_` row on
 `docs/prototype-surface.yaml` (`operations/prototype.md`). **`+proto` now
 marks only a build that differs from the release**: `deploy_proto.ps1
 -TeyvatFrame`, and the Teyvat frame is on hold (below). Each C# pool IS its
@@ -42,7 +42,7 @@ roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
 
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
-| `klee` | Klee | 70 | Mondstadt | Pyro | Balance (ruled 2026-10-03; measurement plan being drafted) | 78 |
+| `klee` | Klee | 70 | Mondstadt | Pyro | Balance (frozen until the suite runs) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; awaiting [USER]'s play) | 34 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
@@ -98,7 +98,7 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   (`review/records/klee-opus-check-round-2026-10-02.md`): one run won,
   Klee's first seat win since the status package; the other died in act 2
   short of Block, as the Sonnet runs did. The finish line was met without a further run on
-  this build: after the finish-line batch and its pre-Balance round (`review/records/klee-prebalance-round-2026-10-04.md`, "nothing critical"), [USER] ruled Klee to Balance on 2026-10-03 ("Agreed all around!"). Her measurement plan is being drafted. **The Mondstadt
+  this build: after the finish-line batch and its pre-Balance round (`review/records/klee-prebalance-round-2026-10-04.md`, "nothing critical"), [USER] ruled Klee to Balance on 2026-10-03 ("Agreed all around!"). Her measurement plan is ruled (2026-10-05, `review/active/klee-balance-measurement-2026-10-05.md`): the base-character bar on the real game, and her build is frozen on `main` until each suite run; changes go to `klee-next`. **The Mondstadt
   companion review (2026-10-03, ruled, built;
   `review/active/mondstadt-companions-2026-10-03.md`):** Stellaris Phantasm,
   Breastplate, Wind Spirit Creation and Fiery Rain retuned; Klee's 13
@@ -369,10 +369,10 @@ elemental shields goes to [USER] before any build.
 
 ## Live cell
 
-Measurement law binds only at Balance; nothing is there today, so
-`EXPERIMENTS.md` is dormant. The stamps below describe the shipped world and
-the calibration bands are retired until Balance (2026-10-01, legacy cleanup
-pick 5). Stamps read live via `tier05/cells.py`
+A kit at Balance is measured on the real game (`EXPERIMENTS.md`, "Kit balance
+is measured on the real game", ruled 2026-10-05); the sim stamps below do not
+gate it. They describe the shipped world, and the calibration bands are retired
+(2026-10-01, legacy cleanup pick 5). Stamps read live via `tier05/cells.py`
 (`PILOT_WEIGHTS_VERSION` 6).
 
 | stamp | value | source | what this value covers |
