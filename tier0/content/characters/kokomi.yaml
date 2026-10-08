@@ -32,29 +32,9 @@ element: hydro
 cadence: catalyst        # RULED R52 (N1): she is a catalyst — every
                          # attack applies hydro. Makes elite-A6
                          # application uptime structural (R51).
-burst_max: 20            # v0.4 O4 salvage (PROPOSED, plan §1.2): 10 -> 20.
-                         # The meter goes back to being a real Burst now
-                         # that the Kurage carries the periodic output.
-                         # W2 bracket (300 runs/plan, --realistic, priest /
-                         # commander act-1): meter 10 = 72/79%, 15 = 48/63%,
-                         # 20 = 34/48%, 25 = 25/39%. 20 is the arm that hits
-                         # the pre-registered acceptance band (35-50%) and
-                         # gives the healthiest median statline (A2 5.2 vs
-                         # A1 3.6 — the constraint the archetype median has
-                         # to satisfy). 15 overshoots commander past the
-                         # Furina-57 ceiling reference; 25 falls under band
-                         # on both plans.
-                         # PRIOR (v0.3, superseded): 50 -> 10 made the Burst
-                         # a FAST-CYCLING metronome, her Salon-member
-                         # analogue. It cleared the act-1 wall and the ratio
-                         # instrument correctly read it as FRONTLOAD — the
-                         # §6.4 tension. O4's thesis is that canon keeps the
-                         # metronome on the summon, not the Burst.
-                         # Klee=40, Furina=70. [USER] red-pen.
-# The shipped kit Burst left with the shipped sheets (legacy cleanup stage 6).
-# Tamakushi Casket (kickoff §2.5): the two conversion laws live on the
-# relic hook — exhaust->Charge (universal funnel) and Strength->Charge
-# (Flawless Strategy). NO payoff magnitude here (R16).
+# The shipped Tamakushi Casket hook. `loader.relic_hooks_replacement` swaps in
+# the current kit's Casket at every build, and the shipped hook's Charge rules
+# left the sim on 2026-10-08, so nothing reads this line.
 relic_hooks: [tamakushi_casket]
 # Identity constraint (kickoff §3): she is a declared scaler with a
 # load-bearing frontload weakness — the inverse of Klee's law. RULED R52

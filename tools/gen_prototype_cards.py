@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DEV-ONLY codegen for the QUARANTINED prototype surface (R213 B, EB-147).
+"""DEV-ONLY codegen for the prototype surface (R213 B, EB-147).
 
     python tools/gen_prototype_cards.py            # emit the dev-only C#
     python tools/gen_prototype_cards.py --check    # CI guard (staleness)

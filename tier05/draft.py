@@ -44,39 +44,6 @@ STATIC_DEBUFF_VALUE = 2.0
 STATIC_BOMB_DAMAGE_SHARE = 0.5
 STATIC_BOMB_GUARD_VALUE = 1.5
 STATIC_KLEE_CONDITIONAL_SHARE = 0.5
-# W3 (EB-118 Phase 3, R211) -- the Spotlight pricing rider's share.
-#
-# 0.167 IS THE MEASURED RATE, not a judgement: `spotlight_moved_this_turn`
-# reads true on 16.7% of plays in `furina/spotlight_weighted` and on 2.0% of
-# plays in the salon and fanfare arms -- an eight-fold plan lock, which is what
-# makes the branch a real bar rather than decoration.
-#
-# WHY THE MEASURED RATE RATHER THAN KLEE'S 0.5 PRECEDENT, and this is the one
-# judgement in it: R211 ratified the RIDER but not the SHARE, so the value is
-# chosen under R194's direction rule -- every one-directional error in this
-# file must make the drafter PASS ON A GOOD CARD, never pay for something it
-# cannot see. Both 0.5 (the shape-matching choice: Klee's 0.5 covers exactly
-# this class, a branch the player can arrange and the drafter cannot see) and
-# 0.167 are defensible; 0.167 is the maximally conservative of the two, and
-# anything at or above 1.0 is not defensible at all -- at share 1.0
-# `take_it_from_the_top` would price 15.00 base, one of the biggest-priced
-# Uncommon Skills on Furina's sheet, on the strength of a branch that fires on
-# a sixth of plays in its own arm. [USER] holds the value; this is the second
-# of W3's two overridable numbers (the first is STATIC_SPARK_SPEND_COST).
-#
-# ITS WHOLE REACH IS TWO ROWS, measured card by card rather than inferred:
-# `take_it_from_the_top` 5.0000/5.0000 -> 6.6700/7.3400 (the base-to-upgraded
-# gap goes from 0.00 to 0.67, which is the entire point of taking the rider),
-# and `curtain_cue` 0.0000 -> 0.4000. `directors_cut` does NOT move at any
-# share, because both its branches pay in dead dials -- energy and draw.
-#
-# RECALIBRATION IS OWED AND ITS DIRECTION IS RULED ([USER] 2026-08-25): 0.167
-# is the rate a pilot that does not PLAN Spotlight movement produces, which
-# makes it a floor on the human rate rather than an estimate of it -- the
-# player controls the re-aim, and the card creates a deliberate two-card
-# sequence. Recalibrate this share when the pilot learns to plan Spotlight
-# movement; until then it stays where the measurement put it.
-STATIC_SPOTLIGHT_MOVED_SHARE = 0.167
 STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits (v4)
 STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power (v4)
 # DRAFTER_VERSION 6: all_enemies damage counts toward the average swarm, not
@@ -91,21 +58,7 @@ STATIC_AOE_MULT = 2.0
 # Block, and Sly riders live outside card.effects entirely -- the same
 # defect class as v6's AoE blindness. Conservative structural proxies:
 STATIC_SLY_SHARE = 0.5        # a Sly rider needs a card-effect discard
-                              # outlet to fire; half its printed face
-STATIC_CONSCRIPT_VALUE = 1.5  # one playable recruit ~ one companion's
-                              # conservative static worth per transform
 STATIC_FANFARE_FLOOR_VALUE = 0.2  # per printed floor point (v9). A floor is
-                              # worth less per point than Charge: Charge is
-                              # read by a kit state the player controls,
-                              # where a floor only pays through whatever
-                              # readers the deck happens to hold. PROPOSED.
-STATIC_CHARGE_VALUE = 0.5     # per printed Charge point: the kit Garment
-                              # is a universal reader (never-expiring bank,
-                              # +1 damage per `GARMENT_CHARGE_DIVISOR` Charge
-                              # while it holds -- 2 since the v0.3 charge-curve
-                              # pass, not the 4 this comment used to say), so
-                              # banked points are never dead -- but one
-                              # Garment window is all this prices in
 
 # These predicates are readable before a card is played. Mid-resolution
 # conditions such as reaction_triggered_by_this and killed_target remain out:
@@ -143,13 +96,6 @@ STATIC_STATE_CONDITIONS = frozenset({
     "target_has_power_vulnerable",
     "card_exhausted_this_turn",
     "hp_lost_this_turn",
-    # W3 (EB-118 Phase 3, R211) -- the Spotlight pricing rider. Added WITH the
-    # first card whose whole upgrade the offer screen could not otherwise see:
-    # `take_it_from_the_top` takes `{conditional_damage: +4}` on a branch gated
-    # by this name, and while the name was unpriced the card read 5.0000 on
-    # BOTH faces. The ruling took the delta and the rider together, and the
-    # rider is what makes the delta visible.
-    "spotlight_moved_this_turn",
     # C20 (R189 C2). NOT an extension of what the drafter prices -- a
     # PRESERVATION of it. `elemental_ecstasy`'s Block branch was already
     # priced here under `target_has_nonpyro_aura`; C2 renamed the predicate
@@ -237,8 +183,6 @@ def _static_condition(name: str) -> bool:
 def _static_condition_share(name: str) -> float:
     if name in ("has_spark", "target_has_nonpyro_aura", "target_has_aura"):
         return STATIC_KLEE_CONDITIONAL_SHARE
-    if name == "spotlight_moved_this_turn":
-        return STATIC_SPOTLIGHT_MOVED_SHARE
     if name in STATIC_PROTOTYPE_CONDITIONS:
         return STATIC_PROTOTYPE_CONDITIONAL_SHARE
     return 1.0
@@ -327,47 +271,17 @@ def _is_amp_payoff(card: Card) -> bool:
     return ("reaction" in card.archetypes and card.role == "payoff")
 
 
-def _generates_guest_star(card: Card) -> bool:
-    return any(fx.get("op") == "generate_guest_star"
-               for fx in _nested_effects(card.effects))
-
-
-def _is_spotlight_access(card: Card) -> bool:
-    """A Companion itself or a card that guarantees one in combat."""
-    return card.is_companion or _generates_guest_star(card)
-
-
-def _is_spotlight_machinery(card: Card) -> bool:
-    """A real Spotlight engine piece, distinct from finding the cast."""
-    return ("spotlight" in card.archetypes
-            and card.role in ("enabler", "payoff")
-            and not _is_spotlight_access(card))
-
-
-def _spotlight_payoff_machinery(deck: list[Card]) -> int:
-    """Machinery cards whose authored role is PAYOFF.
-
-    DRAFTER_VERSION 15 (R120 / 10.3): one helper, read by both
-    `core_complete` and `_core_progress`, so the two limbs cannot drift --
-    the same single-definition rule `_generic_core_counts` follows.
-    """
-    return sum(1 for c in deck
-               if _is_spotlight_machinery(c) and c.role == "payoff")
-
-
 def _fanfare_generation(card: Card) -> float:
     """Printed Fanfare access supplied by one card.
 
-    Furina gains Fanfare when Encore moves in either direction and when she
-    loses HP.  This is an intentionally coarse draft-time estimate: it is
-    used to distinguish "the deck has a way to move the meter" from "this
-    card turns the meter into output", not to predict exact combat totals.
+    Furina's shipped meter gains Fanfare when she loses HP.  This is an
+    intentionally coarse draft-time estimate: it is used to distinguish "the
+    deck has a way to move the meter" from "this card turns the meter into
+    output", not to predict exact combat totals.
     """
-    total = max(0, card.encore_cost)
+    total = 0.0
     for fx in _nested_effects(card.effects):
-        if fx.get("op") == "gain_encore":
-            total += max(0, _neutral_amount(fx, 0))
-        elif fx.get("op") == "damage" and fx.get("target") == "self":
+        if fx.get("op") == "damage" and fx.get("target") == "self":
             total += max(0, _neutral_amount(fx, 0))
     return total
 
@@ -471,18 +385,6 @@ def core_complete(deck: list[Card], archetype: str) -> bool:
         appliers = sum(1 for c in deck if _is_applier(c))
         amps = sum(1 for c in deck if _is_amp_payoff(c))
         return appliers >= 2 and amps >= 1
-    if archetype == "spotlight":
-        # DRAFTER_VERSION 15 (R120 / 10.3, verbatim "Yes"): payoff-presence
-        # extends to the spotlight limb -- the v14 note deliberately left
-        # this branch alone because enabler-vs-payoff machinery was a
-        # definitional question, and [USER] answered it. `limelight` (the
-        # only enabler-role machinery card) alone no longer satisfies the
-        # machinery limb; the deck must also hold a machinery PAYOFF, the
-        # same one-card bar every other limb's payoff half uses.
-        access = sum(1 for c in deck if _is_spotlight_access(c))
-        machinery = sum(1 for c in deck if _is_spotlight_machinery(c))
-        payoffs = _spotlight_payoff_machinery(deck)
-        return access >= 2 and machinery >= 1 and payoffs >= 1
     if archetype == "fanfare":
         # Furina's starter already supplies the first half in practice, but
         # keep the definition honest for synthetic/modified decks.
@@ -607,17 +509,6 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
         appliers = min(2, sum(1 for c in deck if _is_applier(c)))
         amps = min(1, sum(1 for c in deck if _is_amp_payoff(c)))
         return (appliers + amps) / 3
-    if archetype == "spotlight":
-        # DRAFTER_VERSION 15: the payoff limb, weighted equally -- the same
-        # shape the v10 fanfare fix and the v14 generic fix used, and the
-        # half with teeth: progress feeds score_offer's +3.0 core-advance
-        # bonus, so a spotlight deck now reaches for a machinery payoff
-        # instead of counting `limelight` as a finished engine.
-        access = min(2, sum(1 for c in deck if _is_spotlight_access(c)))
-        machinery = min(1, sum(
-            1 for c in deck if _is_spotlight_machinery(c)))
-        payoff = min(1, _spotlight_payoff_machinery(deck))
-        return (access + machinery + payoff) / 4
     if archetype == "fanfare":
         generation = min(
             1.0,
@@ -646,7 +537,7 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
 # them rather than returning a second, quieter number for the same op.
 _PRICED_INLINE = frozenset({
     "damage", "chain_attack", "block", "place_bomb", "apply_power",
-    "conditional", "choose_one", "conscript", "gain_charge", "summon_kurage",
+    "conditional", "choose_one",
     "gain_fanfare_floor", "grow_damage", "repeat_this",
     # EB-311: the Max-HP fraction needs the CARD -- whose Max HP the fraction
     # is taken of is a fact about the character the row belongs to and is not
@@ -729,7 +620,7 @@ def _max_hp_hit(card: Card, fx: dict) -> float:
 
 #: The Klee overhaul's verbs (slice one, plus R244's `companion_mark_hand`,
 #: R252's `block_largest_bomb`, the round-11 pool pass's `grow_largest_bomb`
-#: and R276's `mine_bombs`; QUARANTINED behind `C.KLEE_OVERHAUL`).
+#: and R276's `mine_bombs`; behind `C.KLEE_OVERHAUL`).
 #: Named as a set rather than eleven `if op ==` arms because they take ONE
 #: pricing decision between them -- see `_op_price`.
 KLEE_OVERHAUL_OPS = frozenset((
@@ -770,7 +661,7 @@ KLEE_OVERHAUL_OPS = frozenset((
 #: one pricing decision: ZERO, see `_op_price`.
 VARKA_OPS = frozenset(("varka", "add_knight"))
 
-#: The Kokomi overhaul's verbs (DRAFT 6, QUARANTINED behind
+#: The Kokomi overhaul's verbs (DRAFT 6 behind
 #: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
 #: one, because the two arms are independent and a merged set would make either
 #: one's pricing decision look like the other's when the first of them is
@@ -888,34 +779,12 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         return STATIC_AURA_REFRESH_VALUE
 
     # -- Furina's meter ----------------------------------------------------
-    if op == "gain_encore":
-        return _neutral_amount(fx, 0) * STATIC_ENCORE_VALUE
-    if op == "spend_encore":
-        return -_neutral_amount(fx, 0) * STATIC_ENCORE_VALUE
-    # -- Kokomi's bank, cost side (R213 E1, QUARANTINED) -------------------
-    if op == "spend_charge":
-        # `spend_encore`'s shape and `spend_encore`'s reason, one meter over:
-        # the GAIN dial with the sign flipped, no new constant. Deliberately
-        # NOT `spend_spark`'s shape -- that op earned its own dial (R211)
-        # from three converging derivations off measured Spark waste and a
-        # measured threshold, and there is no equivalent measurement of what
-        # a Charge is worth AT THE MOMENT IT IS SPENT because until this
-        # slice no card could spend one.
-        #
-        # NO DRAFTER_VERSION BUMP, and that is a claim about output rather
-        # than an exemption: `spend_charge` lives on the quarantined
-        # prototype surface alone, which no pool, digest or drafter can see,
-        # so every drafted number in the world is byte-identical with and
-        # without this branch. If a spender is ever re-authored onto a real
-        # sheet, THAT is the change that moves the drafter and archives the
-        # numbers -- see the slice-2 packet.
-        return -_neutral_amount(fx, 0) * STATIC_CHARGE_VALUE
     if op == "raise_fanfare_cap":
         return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
     if op == "crash_fanfare":
         return -_neutral_amount(fx, 0) * STATIC_CRASH_FANFARE_VALUE
     if op == "drain_fanfare":
-        # THE FURINA REFRAME'S DRAIN (QUARANTINED, furina_reframe.FURINA_REFRAME).
+        # THE FURINA REFRAME'S DRAIN (furina_reframe.FURINA_REFRAME).
         # ZERO, and a DELIBERATE zero of a THIRD kind, different from both
         # neighbours it sits between.
         #
@@ -954,14 +823,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # DRAFTER_VERSION does not move. The same terms `drain_fanfare` and
         # `block_half_damage` took.
         return 0.0
-    if op == "salon_bow":
-        return _neutral_amount(fx) * STATIC_SALON_BOW_VALUE
-    if op == "salon_perform":
-        return _neutral_amount(fx) * STATIC_SALON_PERFORM_VALUE
-    if op == "salon_rotate":
-        return STATIC_SALON_ROTATE_VALUE
-    if op == "spotlight_designate":
-        return STATIC_SPOTLIGHT_DESIGNATE_VALUE
 
     # -- VARKA, the Oath rework (`varka_oath`, Varka seats only) -----------
     if op in VARKA_OPS:
@@ -973,7 +834,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # the Oath they earn, which the drafter models nowhere yet.
         return 0.0
 
-    # -- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) --------
+    # -- the Klee overhaul, slice one (C.KLEE_OVERHAUL) --------
     if op in KLEE_OVERHAUL_OPS:
         # ZERO, and a DELIBERATE zero. The arm is C# FIRST (the slice packet
         # sec.5) -- tier0 registers these eight verbs and REFUSES to resolve
@@ -988,7 +849,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # the old world.
         return 0.0
 
-    # -- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ------
+    # -- the Kokomi overhaul, draft 6 (C.KOKOMI_OVERHAUL) ------
     #
     # EB-311 ENDED THE BLANKET ZERO THAT USED TO SIT HERE. The note it replaces
     # said the whole set priced at zero because pricing a PLANNED clause is a
@@ -1111,7 +972,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # `autoplay_from_exhaust`'s price, one turn late, so it takes the delay
         # discount the printed `plan:` lists take.
         return STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT
-    # R276 PICK 1 (QUARANTINED). The halves rewrite's five plan clauses. The
+    # R276 PICK 1. The halves rewrite's five plan clauses. The
     # `plan:` list they live in already takes the delay discount.
     if op == "first_attack_twice":
         # Pincer: one Attack played again -- `replay_next_companion`'s rule,
@@ -1170,7 +1031,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # sits on does not change that. One, because the card removes one.
         return STATIC_DEBUFF_VALUE
 
-    # -- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
+    # -- the Inazuma companion overhaul (C.COMPANION_OVERHAUL) -
     if op == "block_half_damage":
         # ZERO, and a DELIBERATE zero, for a reason NEITHER branch above
         # gives: this op RESOLVES in tier0 -- Gorou's Inuzaka All-Round Defense
@@ -1186,13 +1047,13 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         return 0.0
 
     # -- cards from nowhere ------------------------------------------------
-    if op in ("generate_guest_star", "generate_from_pool"):
+    if op == "generate_from_pool":
         return _neutral_amount(fx) * STATIC_GENERATED_CARD_VALUE
     if op == "add_card":
         zone = fx.get("zone") or fx.get("to", "discard")
         share = 1.0 if zone == "hand" else STATIC_OFFPILE_CARD_SHARE
         return _neutral_amount(fx) * _added_card_value(fx) * share
-    if op in ("copy_companion_in_hand", "copy_spotlighted_in_hand"):
+    if op == "copy_companion_in_hand":
         per = STATIC_CARD_COPY_VALUE + (
             STATIC_FREE_COPY_BONUS if fx.get("cost_override") == 0 else 0.0)
         return _neutral_amount(fx) * per
@@ -1294,8 +1155,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # means the caller could not say, and that keeps the dearer rate.
         return -_neutral_amount(fx) * spark_spend_cost(
             prints_damage=prints_damage)
-    if op == "burst_energy":
-        return _neutral_amount(fx, 0) * STATIC_BURST_VALUE
 
     # Unreachable while lint_op_parity is green; loud rather than silent if
     # it ever is not, because a silent 0.0 here is the exact defect this
@@ -1489,28 +1348,6 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 # an entire permanent engine up front.
                 total += _neutral_amount(fx) * STATIC_PERSISTENT_PROC_SHARE
             elif (fx.get("op") == "apply_power"
-                  and fx.get("target", "self") == "self"
-                  and fx.get("power") == "salon_member"):
-                # EB-28 / v18: the salon DEPLOY. `apply_power` is priced
-                # inline and no inline branch named this power, so a printed
-                # company priced at 0.0 and the members were invisible to
-                # every plan but salon -- where the archetype term, not this
-                # function, was paying for them.
-                #
-                # MUST SIT ABOVE the generic self-power branch below: Endless
-                # Waltz is `type: power`, so that branch would otherwise
-                # swallow the whole card at STATIC_POWER_ENGINE_VALUE (0.0)
-                # and the deploy would stay invisible on the one row where
-                # the drafter most needs to see it.
-                #
-                # MEMBER-AGNOSTIC by construction. The printed `member:` key
-                # names a type (or `random`), and the three types are worth
-                # different amounts, but which one is worth MORE depends on
-                # what is already on stage -- occupancy an offer screen
-                # cannot read. One flat dial, one number, at the floor of the
-                # band; the derivation is at the constant.
-                total += _neutral_amount(fx) * STATIC_SALON_MEMBER_VALUE
-            elif (fx.get("op") == "apply_power"
                   and fx.get("target") != "self"
                   and fx.get("power") in ("weak", "vulnerable")):
                 total += _neutral_amount(fx) * STATIC_DEBUFF_VALUE
@@ -1523,18 +1360,6 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 # time, same reasoning as the Durin/Kurage single-pulse
                 # convention.
                 total += STATIC_POWER_ENGINE_VALUE
-            elif fx.get("op") == "conscript":                       # v7
-                total += _neutral_amount(fx) * STATIC_CONSCRIPT_VALUE
-            elif fx.get("op") == "gain_charge":                     # v7
-                total += _neutral_amount(fx) * STATIC_CHARGE_VALUE
-            elif fx.get("op") == "summon_kurage":                   # v8
-                # A persistent summon, priced like Durin: credit ONE pulse,
-                # not the whole duration. The bank read is invisible at
-                # offer time (the drafter cannot know her Charge curve), so
-                # only the flat pulse + its Block are counted -- deliberately
-                # conservative, same reasoning as the Durin line above.
-                total += (C.KURAGE_PULSE_BASE + C.KURAGE_PULSE_BLOCK
-                          ) * STATIC_PERSISTENT_PROC_SHARE
             elif fx.get("op") == "gain_fanfare_floor":                # v9
                 # A permanent baseline, priced like Strength: it is not
                 # output now, it is output on every later read. Conservative
@@ -1845,146 +1670,11 @@ STATIC_SWIRL_VALUE = 1.5           # swirl: spreads/consumes an aura someone
                                    # else applied, so it is worth less than
                                    # applying one and worth nothing alone.
 STATIC_AURA_REFRESH_VALUE = 1.0    # refresh_all_auras: extends what is
-                                   # already on the board; strictly weaker
-                                   # than applying, and dead on a clean one.
 # -- Furina's meter -------------------------------------------------------
-STATIC_ENCORE_VALUE = 0.3          # per printed Encore point, either sign.
-                                   # Between the Fanfare floor (0.2, pays
-                                   # only through drafted readers) and
-                                   # Charge (0.5, read by a kit state):
-                                   # Encore is a real buffer the player
-                                   # holds, but its converters are drafted.
-                                   # spend_encore pays the SAME rate with
-                                   # the sign flipped -- an overdraw is a
-                                   # printed cost and must read as one.
 STATIC_FANFARE_CAP_VALUE = 0.0     # raise_fanfare_cap. MEASURED INERT, not
                                    # unpriced: the op's docstring records
                                    # read-at-cap under 1% under every pilot.
 STATIC_CRASH_FANFARE_VALUE = 0.0   # crash_fanfare. The Final Verdict's
-                                   # crash is the PRICE of a damage line the
-                                   # static scorer still cannot see
-                                   # (`bonus_formula: 1_per_1_fanfare`).
-                                   # Pricing the cost while the benefit
-                                   # reads zero would make the sheet's only
-                                   # Hyperbeam undraftable on a bookkeeping
-                                   # asymmetry rather than on a valuation.
-                                   # Held at 0.0 until the formula reader
-                                   # lands, and this line is the reason it
-                                   # must land before this dial moves.
-STATIC_SALON_MEMBER_VALUE = 1.5    # per member DEPLOYED by a printed
-                                   # `apply_power power: salon_member`
-                                   # (EB-28, DRAFTER_VERSION 18). Until this
-                                   # dial existed a deploy priced at exactly
-                                   # ZERO: `apply_power` is priced inline and
-                                   # no inline branch named the power, so
-                                   # CROSS-PLAN -- a Furina drafting anything
-                                   # but salon -- the whole company was
-                                   # invisible. The archetype term paid for
-                                   # these rows inside the salon plan and
-                                   # nothing paid for them outside it.
-                                   #
-                                   # DERIVED, NOT PICKED. Three routes; the
-                                   # band is 1.5 to 4.0 and this is its
-                                   # CONSERVATIVE end, which for a VALUE
-                                   # (unlike D17's cost) is the BOTTOM.
-                                   #   (1) PERFORM PARITY, the in-family
-                                   #   floor. `salon_perform` prices exactly
-                                   #   one member tick, on demand, at 1.5. A
-                                   #   deploy delivers AT LEAST that -- the
-                                   #   member ticks at the start of the next
-                                   #   player turn. -> 1.5.
-                                   #   (2) TICK PLUS EVENTUAL BOW, the
-                                   #   in-family full-member read. The
-                                   #   perform dial's own note calls a tick
-                                   #   "the smaller half of a member", and
-                                   #   FIFO displacement at
-                                   #   SALON_MEMBER_SLOTS = 3 means a member
-                                   #   that stands long enough is bowed out
-                                   #   at STATIC_SALON_BOW_VALUE. 1.5 + 2.0
-                                   #   -> 3.5.
-                                   #   (3) KURAGE PARITY, the cross-family
-                                   #   ceiling. The repo's other persistent
-                                   #   per-turn engine credits ONE pulse at
-                                   #   FACE value -- (KURAGE_PULSE_BASE +
-                                   #   KURAGE_PULSE_BLOCK) *
-                                   #   STATIC_PERSISTENT_PROC_SHARE = 4.0. A
-                                   #   salon tick's face, averaged over the
-                                   #   three types a deploy can land
-                                   #   (crabaletta 6 damage, usher 3 Block,
-                                   #   chevalmarin 2 damage + one hydro aura
-                                   #   at STATIC_AURA_VALUE), is 4.33, less
-                                   #   the tick's 1-Encore upkeep at
-                                   #   STATIC_ENCORE_VALUE -> 4.03.
-                                   # (2) and (3) converge on 3.5-4.0 from
-                                   # opposite directions and (1) is the hard
-                                   # floor. THE FLOOR IS TAKEN, and the gap
-                                   # is named rather than hidden: everything
-                                   # above one tick -- the repeat ticks, the
-                                   # eventual bow, the Fanfare Focus scaling
-                                   # -- is stage occupancy and combat length,
-                                   # which is exactly what an offer screen
-                                   # cannot see. That is
-                                   # STATIC_SALON_ROTATE_VALUE's own argument
-                                   # applied to a value it CAN at least
-                                   # bound. The residual error under-credits
-                                   # the member and never over-credits it, so
-                                   # the failure it can cause is passing on a
-                                   # good card rather than paying for a bad
-                                   # one (R194's direction rule).
-                                   #
-                                   # NOT CAPPED AT SALON_MEMBER_SLOTS. A
-                                   # fourth deploy bows the oldest member out
-                                   # rather than fizzling, so it still pays;
-                                   # capping would mean reading stage
-                                   # occupancy, which is the thing this
-                                   # family of dials refuses to do.
-                                   #
-                                   # [USER]-OVERRIDABLE, and this is the one
-                                   # constant to move: 3.5 (route 2) is the
-                                   # defensible larger number in the same
-                                   # method, and the argument for it is that
-                                   # a member is strictly better than one
-                                   # on-demand perform. Moving it re-prices
-                                   # the NINE rows archived at D18 and
-                                   # nothing else.
-STATIC_SALON_BOW_VALUE = 2.0       # salon_bow: one member's bow, on demand.
-                                   # Priced at one conservative bow rather
-                                   # than at the stage it implies -- the
-                                   # drafter cannot see stage occupancy, and
-                                   # the plan bonus already pays for the
-                                   # Salon shape.
-# EB-118 §5.5 (staged 2026-08-23). BOTH VALUES BELOW ARE PROPOSED, and
-# neither moves a number today: no sheet row prints either op, so every
-# drafting arm scores exactly as it did before. DRAFTER_VERSION therefore
-# does NOT move -- an unused op cannot change an offer screen, and the pin at
-# 14 (R121's payoff-reach registration) is untouched. The first card that
-# prints one of these verbs is what makes these dials load-bearing, and the
-# bump belongs to that window, not this one.
-STATIC_SALON_PERFORM_VALUE = 1.5   # salon_perform: one extra member tick, on
-                                   # demand. Priced BELOW salon_bow because
-                                   # a tick is the smaller half of a member
-                                   # (Crabaletta 6 against 14) and because
-                                   # the tick pays its Encore upkeep, which
-                                   # the bow does not -- the drafter cannot
-                                   # see whether the meter can afford it, so
-                                   # the conservative read is the priced one.
-STATIC_SALON_ROTATE_VALUE = 0.0    # salon_rotate: ZERO, and structurally so
-                                   # rather than pending a number. Rotating
-                                   # delivers nothing by itself; its whole
-                                   # value is which member the NEXT bow,
-                                   # perform or displacement finds, and stage
-                                   # occupancy is exactly what an offer
-                                   # screen cannot see (the salon_bow note
-                                   # above says the same thing about a value
-                                   # it could at least bound). Priced at zero
-                                   # deliberately, not by omission -- the
-                                   # STATIC_STRIP_BLOCK_VALUE precedent.
-STATIC_SPOTLIGHT_DESIGNATE_VALUE = 1.5  # spotlight_designate: prints
-                                   # nothing and is what the whole
-                                   # Spotlight kit reads. Deliberately
-                                   # modest: `_is_spotlight_access` already
-                                   # pays it once through the archetype
-                                   # term, and this is the universal half.
 # -- cards from nowhere ---------------------------------------------------
 STATIC_GENERATED_CARD_VALUE = 2.0  # per token generated into hand
                                    # (generate_guest_star, generate_from_
@@ -2221,24 +1911,6 @@ STATIC_REPEAT_SHARE = 0.5          # repeat_this multiplies the card's OWN
 STATIC_DRAW_VALUE = 0.0            # draw, draw_while, draw_to_hand_size
 STATIC_ENERGY_VALUE = 0.0          # energy, and cost_mod through it
 STATIC_SPARK_VALUE = 0.0           # gain_spark, discard_for_sparks. STAYS
-                                   # DEAD, and that is a design position
-                                   # rather than an oversight: R211 kept the
-                                   # GAIN side at zero while giving the SPEND
-                                   # side a real price (STATIC_SPARK_SPEND_COST
-                                   # below). An undocumented asymmetry reads as
-                                   # a bug to the next person, so: waking this
-                                   # dial would re-price TWELVE shipped rows --
-                                   # all_my_treasures, cant_catch_me, crackle,
-                                   # da_da_da, hot_hands, skip_and_hop, snap,
-                                   # spark_collection, sparkly_treasure,
-                                   # sugar_rush, warm_glow, and prune_witch_hunt
-                                   # in docs/mondstadt-companions.yaml -- and for
-                                   # four of those (sparkly_treasure,
-                                   # spark_collection, hot_hands, sugar_rush,
-                                   # all at 0.0000 today) it would be a
-                                   # VISIBILITY FLIP rather than a re-price.
-                                   # None of that happens while this is 0.0.
-STATIC_BURST_VALUE = 0.0           # burst_energy
 # -- Klee's Spark price (W3, EB-118 Phase 3, R211) --------------------------
 # THE COST-SIDE DIAL, on STATIC_CRASH_FANFARE_VALUE's idiom: the sign lives in
 # `_op_price`'s branch, the magnitude lives here, and the reason lives beside
@@ -2488,15 +2160,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "choose_one": "MAX of the modes -- the player picks, so no share blend; "
                   "deep_breath's mode-2 under-credit ACCEPTED at the row "
                   "(R194) and its price is unmoved by the conversion",
-    "conscript": "STATIC_CONSCRIPT_VALUE per recruit (v7)",
-    "gain_charge": "STATIC_CHARGE_VALUE per printed point (v7)",
-    "spend_charge": "the same rate, NEGATIVE: a printed cost (R213 E1, "
-                    "prototype surface only -- no shipped row prints it and "
-                    "no drafted number moves)",
-    "summon_kurage": "ONE pulse, not the duration (v8)",
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
-    # --- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ------
+    # --- the Klee overhaul, slice one (C.KLEE_OVERHAUL) ------
     # One rationale, ten ops, because it is ONE decision: the arm is C#
     # first, tier0 refuses to resolve any of them off the arm, and a price is
     # an estimate of behaviour the published world does not have. See
@@ -2529,7 +2195,7 @@ STATIC_OP_PRICING: dict[str, str] = {
             "and no pool offers a proto_vk_ row to this "
             "drafter, so no drafted number moves (prototype surface only)"
        for op in ("varka", "add_knight")},
-    # --- the Kokomi overhaul, draft 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ----
+    # --- the Kokomi overhaul, draft 6 (C.KOKOMI_OVERHAUL) ----
     # EB-311: the blanket ZERO these eight rows used to share is gone. One
     # rationale apiece now, each derived from a dial already in this table, and
     # the arm is still quarantined -- no shipped row prints any of them and no
@@ -2575,21 +2241,21 @@ STATIC_OP_PRICING: dict[str, str] = {
                               "a second time here",
     "remove_debuff": "STATIC_DEBUFF_VALUE, one debuff off HER -- the mirror "
                      "of putting one onto an enemy, at the same rate",
-    # --- R276 pick 1, the Kokomi halves rewrite (QUARANTINED) ---
+    # --- R276 pick 1, the Kokomi halves rewrite ---
     "first_attack_twice": "STATIC_CARD_COPY_VALUE, one Attack played again -- "
                           "replay_next_companion's rule",
     "first_card_free": "ZERO: energy in another costume, so cost_mod's rule "
                        "and cost_mod's measured dead dial (STATIC_ENERGY_VALUE)",
     "block_front_intent": "its flat bonus only; ZERO for the intent part, a "
                           "board fact an offer screen cannot read",
-    # --- the Casket pass (2026-09-28, QUARANTINED) ---
+    # --- the Casket pass (2026-09-28) ---
     "casket_double": "ZERO, casket_gain's reason: doubling a count the offer "
                      "screen cannot see",
     "fetch_open_casket": "ZERO, casket_gain's reason: a second opening of a "
                          "count the offer screen cannot see",
     "open_casket": "ZERO: the relic's token, in no pool and never offered; "
                    "what it grants is the Casket's count at play",
-    # --- the Kokomi expansion, batch one (2026-09-29, QUARANTINED) ---
+    # --- the Kokomi expansion, batch one (2026-09-29) ---
     "energy_if_alone": "its Energy at face (STATIC_ENERGY_VALUE); whether it "
                        "lands alone is a queue fact an offer screen cannot "
                        "read",
@@ -2625,7 +2291,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                                       "and tier 0.5 seats one; a "
                                       "multiplayer-only row is never offered "
                                       "here",
-    # --- the Furina reframe (QUARANTINED, furina_reframe.FURINA_REFRAME) ---
+    # --- the Furina reframe (furina_reframe.FURINA_REFRAME) ---
     "drain_fanfare": "ZERO: it SPENDS the meter, and what the spend buys is "
                      "printed by the effect after it as an `amount_formula` "
                      "the pricer already reads at its own base. Pricing the "
@@ -2637,7 +2303,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                      "`block_half_damage` below)",
     # --- FURINA'S STAGE (`tier0.engine.furina_stage`) ---
     **{op: _STAGE_ZERO for op in FURINA_STAGE_OPS},
-    # --- the Inazuma companion overhaul (QUARANTINED, C.COMPANION_OVERHAUL) -
+    # --- the Inazuma companion overhaul (C.COMPANION_OVERHAUL) -
     "block_half_damage": "ZERO: the amount is half of what the card's own "
                          "damage line LANDED, which no static pricer can see "
                          "(prototype surface only -- no shipped row prints it "
@@ -2658,20 +2324,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "swirl": "STATIC_SWIRL_VALUE; needs an aura it did not apply",
     "refresh_all_auras": "STATIC_AURA_REFRESH_VALUE, dead on a clean board",
     # --- Furina's meter ---------------------------------------------------
-    "gain_encore": "STATIC_ENCORE_VALUE per printed point",
-    "spend_encore": "the same rate, NEGATIVE: an overdraw is a printed cost",
     "raise_fanfare_cap": "ZERO: STATIC_FANFARE_CAP_VALUE, measured inert",
     "crash_fanfare": "ZERO: STATIC_CRASH_FANFARE_VALUE until the meter-read "
                      "formula is priced; see the constant",
-    "salon_bow": "STATIC_SALON_BOW_VALUE per bow taken",
-    "salon_perform": "STATIC_SALON_PERFORM_VALUE per act performed "
-                     "(PROPOSED; no sheet row prints it, so no number moves)",
-    "salon_rotate": "ZERO: STATIC_SALON_ROTATE_VALUE, a stage-occupancy "
-                    "question an offer screen cannot see",
-    "spotlight_designate": "STATIC_SPOTLIGHT_DESIGNATE_VALUE, the universal "
-                           "half of what the archetype term already pays",
-    "generate_guest_star": "STATIC_GENERATED_CARD_VALUE per token",
-    "copy_spotlighted_in_hand": "STATIC_CARD_COPY_VALUE per copy",
     # --- cards from nowhere ----------------------------------------------
     "add_card": "STATIC_GENERATED_CARD_VALUE per token, off-pile share "
                 "applied, NEGATIVE for a `status`-rarity add",
@@ -2723,7 +2378,6 @@ STATIC_OP_PRICING: dict[str, str] = {
                    "printing an Attack body, SPARK_ALT_NONDAMAGE_SPEND_COST "
                    "for one that does not, because the 4.00 median is "
                    "denominated in damage rows only",
-    "burst_energy": "ZERO: STATIC_BURST_VALUE, the v3 flat-proxy sweep",
 }
 
 
@@ -2868,10 +2522,6 @@ def score_offer(card: Card, deck: list[Card], archetype: str) -> float:
             # Companions ARE reaction's enablers (deliberate asymmetry).
             s += (REACTION_APPLIER_WEIGHT * max(0.25, 1.0 - progress)
                   if _is_applier(card) else 1.5)
-        elif archetype == "spotlight":
-            # Guest Cast buffs every Companion, so a mixed cast is coherent:
-            # no same-character depth requirement and no selector-v3 trap.
-            s += 3.0 * max(0.25, 1.0 - progress)
         else:
             s += 0.5
     if _has_block(card) and _block_density(deck) < C.DRAFT_BLOCK_DENSITY_MIN:

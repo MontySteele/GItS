@@ -145,7 +145,8 @@ and about 390 Python arm-flag reads.
    rewritten, STATE's build paragraph, the deploy skill. **Left over (BACKLOG
    lines):** the codegen's spotlight wrap and the generated header's
    upgrades-sheet line, both of which would change the C# emitted for
-   current rows; the sim's shipped-kit machinery. **PR #833, merged.**
+   current rows; the sim's shipped-kit machinery (deleted 2026-10-08, #975,
+   except the Fanfare meter and three telemetry readers). **PR #833, merged.**
    **6c (the understudy ports), 2026-10-02:** of the thirteen understudy
    tests stage 5 deleted with the shipped faces, nine still tested something
    real and are back on current rows: the generated-text fallback, the

@@ -99,8 +99,18 @@ public class VarkaComboTests : IDisposable
         {
             Assert.Equal(type, card.Type);
             Assert.Equal(rarity, card.Rarity);
-            Assert.Equal(1, card.EnergyCost.Canonical);
+            // Varka payoff fix (2026-10-08): Stoke costs 0, was 1.
+            Assert.Equal(card is ProtoVkStokeTheFlames ? 0 : 1,
+                         card.EnergyCost.Canonical);
         }
+    }
+
+    [Fact]
+    public void The_payoff_fix_rares_cost_1()
+    {
+        // Varka payoff fix (2026-10-08): both rares cost 1, were 2.
+        Assert.Equal(1, new ProtoVkWildfireOath().EnergyCost.Canonical);
+        Assert.Equal(1, new ProtoVkAbsoluteZero().EnergyCost.Canonical);
     }
 
     // ---- sec.3: Pyro burns -------------------------------------------------------
@@ -138,6 +148,10 @@ public class VarkaComboTests : IDisposable
         Assert.True(play.IndexOf("VarkaCards.PyroStrike")
                     < play.IndexOf("CardCmd.Exhaust"));
         Assert.Contains("VarkaCards.ElementHit", Calls("VarkaCards", "PyroStrike"));
+        // Varka payoff fix (2026-10-08): "Gain 1 Pyro Oath", after the Exhaust.
+        Assert.Equal(1m, Var(new ProtoVkEmberCleave(), "VkAmount"));
+        Assert.True(play.IndexOf("CardCmd.Exhaust")
+                    < play.IndexOf("VarkaCards.GainPyroOath"));
     }
 
     [Fact]
@@ -149,6 +163,12 @@ public class VarkaComboTests : IDisposable
         Assert.DoesNotContain(CardKeyword.Innate,
                               new ProtoVkPyreOath().CanonicalKeywords);
         Assert.Contains(CardKeyword.Innate, Upgraded<ProtoVkPyreOath>().Keywords);
+        // Varka payoff fix (2026-10-08): "Exhaust a card" on play, after the
+        // Power lands, so its own Exhaust pays.
+        var play = Calls("ProtoVkPyreOath", "OnPlay");
+        Assert.True(play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal))
+                    < play.IndexOf("CardCmd.Exhaust"));
+        Assert.Contains("CardSelectCmd.FromHand", play);
     }
 
     // ---- sec.4: Cryo shatters ----------------------------------------------------
@@ -181,6 +201,11 @@ public class VarkaComboTests : IDisposable
         var play = Calls("ProtoVkDeepFreeze", "OnPlay");
         Assert.True(play.IndexOf("ElementalHit.ApplyOnly")
                     < play.IndexOf("VarkaCards.DeepFreeze"));
+        // Varka payoff fix (2026-10-08): 1 Vulnerable lands before the
+        // doubling.
+        Assert.True(play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal))
+                    < play.IndexOf("VarkaCards.DeepFreeze"));
+        Assert.True(play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal)) >= 0);
         Assert.Contains("PowerCmd.Apply", Calls("VarkaCards", "DeepFreeze"));
     }
 

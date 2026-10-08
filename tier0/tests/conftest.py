@@ -137,6 +137,22 @@ def _lane_state_in_tmp(tmp_path_factory):
         os.environ[shape.LANE_STATE_ENV] = held_env
 
 
+# 2026-10-08. THE CARD-OFFER LOG (`understudy/offer_log.py`) is appended on
+# every posted command on an offer screen, and a scripted session posts. No
+# test may write the real `understudy/logs/offers/`.
+@pytest.fixture(autouse=True)
+def _offer_log_in_tmp(tmp_path_factory):
+    from understudy import offer_log
+    held = os.environ.get(offer_log.OFFER_LOG_ENV)
+    os.environ[offer_log.OFFER_LOG_ENV] = str(
+        tmp_path_factory.mktemp("card-offers"))
+    yield
+    if held is None:
+        os.environ.pop(offer_log.OFFER_LOG_ENV, None)
+    else:
+        os.environ[offer_log.OFFER_LOG_ENV] = held
+
+
 # 2026-10-07. THE HARNESS RUN LOG IS A TRACKED FILE. `understudy/harness.py`
 # appends to `understudy/logs/phase0-<seed>.jsonl` (committed, e.g. the
 # `unseeded` one) and writes `_harness_state.json` beside it. A test that

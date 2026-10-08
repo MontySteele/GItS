@@ -14,10 +14,10 @@ from functools import lru_cache
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import (companion_coven, companion_hexerei,
-                          companion_standins, coop, furina_stage,
-                          klee_overhaul, kokomi_plan, powers, reactions,
-                          resources, statuses, varka_oath)
+from tier0.engine import (companion_coven, companion_hexerei, coop,
+                          furina_stage, klee_overhaul, kokomi_plan,
+                          lions_fang, powers, reactions, resources, statuses,
+                          varka_oath)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy,
                                 grant_sly_autoplay,
@@ -83,24 +83,15 @@ def _bonus_formula(state: CombatState, formula: str,
     Two grammars, and the difference is deliberate:
 
       N_per_<thing>      a full step per unit, for SMALL counts --
-                         'detonation_this_combat', 'salon_member'
-      N_per_M_<resource> a ratio, for LARGE pools -- 'fanfare', 'charge',
-                         'encore' -- where 1:1 would pay far too much
+                         'detonation_this_combat'
+      N_per_M_<resource> a ratio, for LARGE pools -- 'fanfare' -- where 1:1
+                         would pay far too much
     """
     n, _, rest = formula.partition("_per_")
     if not n.isdigit():
         raise ValueError(f"unknown bonus_formula {formula!r}")
     if rest == "detonation_this_combat":
         return int(n) * state.detonations_total
-    if rest == "salon_member":
-        # A13/A14 (2026-07-28): a slope on the stage itself. No _M_ divisor
-        # because the salon is a small capped count (3, or 4 with A12's
-        # cap-raise power) -- every member is a full step, unlike Fanfare
-        # where the ratio is what keeps a 40-point meter from paying 40.
-        # Reads powers['salon_member'], the same mirror has_salon_members and
-        # the `salon_members` runtime count read, so a member that left the
-        # stage stops paying immediately.
-        return int(n) * state.player.powers.get("salon_member", 0)
     if rest == "companion_played_this_turn":
         # Blocking Notes (rework Track C.3, 2026-07-28): Companion TEMPO. No
         # _M_ divisor for the same reason salon_member has none -- this is a
@@ -129,23 +120,6 @@ def _bonus_formula(state: CombatState, formula: str,
         # NEGATIVE damage -- an attack that heals the enemy. Effects shut off
         # rather than invert; see resources.drop_fanfare_to_floor.
         return int(n) * (resources.readable(state.player) // int(m))
-    if what == "charge" and m.isdigit():
-        # Kokomi finisher reads (kickoff §2.2): Charge is READ, never
-        # consumed. Rate limits (Rare / Exhaust / cost >= 2) live on the
-        # card rows, not here — this is only the arithmetic.
-        #
-        # EB-242: the tick is on the RESOLVE path only. A pilot valuation
-        # reaches the same arithmetic and must leave the instrument alone.
-        if not valuation:
-            resources.note_charge_read(state, "bonus_formula",
-                                       card=card.id if card else None)
-        return int(n) * (state.player.charge // int(m))
-    if what == "encore" and m.isdigit():
-        # Curtain Call C (R85): damage reading the held buffer -- Body
-        # Slam is the direct StS precedent for an attack priced off a
-        # defensive pool. READ only, never consumed; the private-register
-        # attack (poised_riposte) is the one card on the rate.
-        return int(n) * (state.player.encore // int(m))
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
@@ -290,7 +264,7 @@ def _runtime_count(state: CombatState, token: str,
     if token == "discards_this_turn":
         return state.discards_this_turn
     if token == "exhausts_this_turn":
-        # QUARANTINED USE ONLY (R213 B): no shipped row reads this token. It
+        # CURRENT-KIT USE ONLY (R213 B): no shipped row reads this token. It
         # is the counting basis R215 C routed to the Kokomi slice -- "how many
         # cards had been exhausted that whole turn" -- against `exhaust_pile`
         # (the whole fight) and `exhaust_selection_cost` (the one chosen card).
@@ -301,32 +275,12 @@ def _runtime_count(state: CombatState, token: str,
         return state.cards_drawn_this_combat
     if token == "enemy_poison_total":
         return sum(e.powers.get("poison", 0) for e in state.living_enemies)
-    if token == "salon_members":
-        # Curtain Call C (R85): the live cast count. A power-stack read at
-        # resolution time -- Mirage's enemy_poison_total is the in-repo
-        # precedent for a CalculatedVar over power stacks; the mirror
-        # powers['salon_member'] == len(salon) is maintained at the deploy
-        # site. Matinée Performance's per-member hits are the one user.
-        return p.powers.get("salon_member", 0)
-    if token == "leftmost_salon_act":
-        # EB-118 §5.5: what the NEXT performer's act is worth right now --
-        # the printed base plus the Focus term and Grand Salon, at the price
-        # the stage can currently pay. The reward half of the leftmost read:
-        # a card body can pay off the performer it is about to move or
-        # perform without restating the member table. 0 on an empty stage.
-        #
-        # Resolves through salon_tick_amount, the same expression
-        # salon_member_act pays out and the C# role chip renders.
-        if not p.salon:
-            return 0
-        paid = p.encore >= C.SALON_TICK_ENCORE_COST
-        return salon_tick_amount(state, p.salon[0], paid)
     if token == "X":
         # Skewer: hit count = the energy actually spent, the same number
         # `amount: X` resolves. Spelled with the same token deliberately.
         return state.current_x
     if token == "sparks_spent":
-        # QUARANTINED (R276, Fireworks Finale): one hit per Spark the all-in
+        # (R276, Fireworks Finale): one hit per Spark the all-in
         # price spent -- the bank at play, which is what such a price spends
         # (`grow_largest_bomb`'s reading). The mod's twin is the `sparksSpent`
         # local its X-price line declares.
@@ -348,7 +302,7 @@ def _runtime_count(state: CombatState, token: str,
     #                        returned -- post-Dexterity, post-Frail, not the
     #                        printed number. block_gains_this_card is a
     #                        COUNT of gains and cannot answer this.
-    # QUARANTINED USE ONLY (R213 B): no shipped row reads either token. Both
+    # CURRENT-KIT USE ONLY (R213 B): no shipped row reads either token. Both
     # belong to the INAZUMA companion overhaul and both are counts this engine
     # already keeps -- which is the whole reason the two rows that print them
     # are expressible at all.
@@ -361,7 +315,7 @@ def _runtime_count(state: CombatState, token: str,
         # deduped by `(Owner, ModelId)` for the same ruling (2026-08-06).
         return len(state.companions_played)
     if token == "companions_played_this_turn":
-        # QUARANTINED USE ONLY (R250, round-4d sec.6 pick 1): Chain of
+        # CURRENT-KIT USE ONLY (R250, round-4d sec.6 pick 1): Chain of
         # Command's now-line, "deal 3 damage for each Companion card you
         # played this turn" -- the live half beside the Plan clause's
         # `damage_per_companion_last_turn`. `state.companion_plays_this_turn`
@@ -371,36 +325,36 @@ def _runtime_count(state: CombatState, token: str,
         # rather than minting a second.
         return state.companion_plays_this_turn
     if token == "plans_carried_out_this_turn":
-        # QUARANTINED USE ONLY (the Casket pass, 2026-09-28) -- Feint and
+        # CURRENT-KIT USE ONLY (the Casket pass, 2026-09-28) -- Feint and
         # Sango Isshin, "for each Plan carried out this turn". Every
         # carry-out this turn, a doubled one twice, written at the plan bus.
         # The C# twin is `KokomiOverhaulLedger.PlansCarriedOutThisTurn`.
         return state.kk_plans_carried_out_this_turn
     if token == "plans_written_this_turn":
-        # QUARANTINED USE ONLY (pool completion, 2026-10-01) -- Shoal of
+        # CURRENT-KIT USE ONLY (pool completion, 2026-10-01) -- Shoal of
         # Spears, "for each Plan you wrote this turn". Every write onto the
         # Bake-Kurage this turn, counted at `kokomi_plan.schedule`. The C#
         # twin is `KokomiOverhaulLedger.PlansWrittenThisTurn`.
         return state.kk_plans_written_this_turn
     if token == "casket_count":
-        # QUARANTINED USE ONLY (the Casket pass) -- Driftglass and Depths'
+        # CURRENT-KIT USE ONLY (the Casket pass) -- Driftglass and Depths'
         # Judgment, the Tamakushi Casket's count. The C# twin is
         # `KokomiOverhaulLedger.CasketCount`.
         return state.kk_casket
     if token == "debuffs_on_target":
-        # QUARANTINED USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
+        # CURRENT-KIT USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
         # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
         # card's single target is the default aim when it resolves. DISTINCT
         # debuffs, not stacks -- `kokomi_plan.debuff_count`, the twin of
         # `KokomiOverhaulKit.DebuffCount`.
         return kokomi_plan.debuff_count(_default_target(state))
     if token == "plan_energy_waiting":
-        # QUARANTINED USE ONLY (the Kokomi expansion, batch one) -- Weight of
+        # CURRENT-KIT USE ONLY (the Kokomi expansion, batch one) -- Weight of
         # the Plan, "plus 3 for each Energy paid for the Plans waiting". The
         # C# twin is `KokomiPlan.EnergyWaiting`.
         return kokomi_plan.plan_energy_waiting(state)
     if token == "plans_held":
-        # QUARANTINED USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
+        # CURRENT-KIT USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
         # Tide Chart, "draw 1 card for each Plan the Bake-Kurage holds".
         #
         # THE QUEUE ITSELF, and it has to be: "holds" means WRITTEN and not yet
@@ -415,7 +369,7 @@ def _runtime_count(state: CombatState, token: str,
         # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
         return state.mi_swirls_this_turn
     if token == "fanfare_drained":
-        # QUARANTINED USE ONLY (R213 B): the FURINA REFRAME's two drain rows
+        # CURRENT-KIT USE ONLY (R213 B): the FURINA REFRAME's two drain rows
         # (packet §4.6, `F11` (1) and `F12` (1)). What `drain_fanfare` took
         # FROM THIS PLAY, read by the effects that follow it on the card.
         #
@@ -495,7 +449,7 @@ def _power_amount_formula(state: CombatState, formula: dict) -> int:
 # mod is the sheet row that binds the aim in the sim.
 AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
                         "apply_aura", "swirl", "apply_power",
-                        # QUARANTINED (C.KLEE_OVERHAUL). The arm's four aimed
+                        # (C.KLEE_OVERHAUL). The arm's four aimed
                         # verbs, restoring the "same list the emitter carries"
                         # promise above -- `gen_klee_cards.AIMING_OPS` has held
                         # them since the ops landed, on EB-142's argument (an
@@ -633,7 +587,7 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     # human at the mouse, so modelling one there would hand Havoc/Cascade a
     # judgement the mod never gives them -- the same argument that put the roll
     # here in the first place.
-    # QUARANTINED (C.KURAGE_MEMORY), and FIRST because it is an override of
+    # (C.KURAGE_MEMORY), and FIRST because it is an override of
     # the forced-random branch below rather than a competitor to it. PICK E1
     # says the jellyfish's replay "follows her lead" -- the enemy Kokomi's own
     # last attack aimed at -- which is the one auto-play in the engine that is
@@ -733,9 +687,8 @@ def owner_identity(owner: Optional[str]) -> tuple[str, str]:
     Klee's Attack applies Pyro in Kokomi's hand, Furina's plain Attack applies
     nothing in Klee's, and a base Strike applies nothing for anybody.
 
-    Varka and the Furina re-founding slice have no character yaml (their
-    players are built by `varka_oath` and `furina_v2`), so their identities
-    are read off those modules' own constants.
+    Varka has no character yaml (his player is built by `varka_oath`), so
+    his identity is read off that module's own constants.
     """
     if not owner:
         return ("none", "")
@@ -746,9 +699,6 @@ def owner_identity(owner: Optional[str]) -> tuple[str, str]:
 def _owner_identity_cached(owner: str) -> tuple[str, str]:
     if owner == varka_oath.CHARACTER:
         return (varka_oath.ELEMENT, "catalyst")
-    from tier0.engine import furina_v2              # late import (cycle)
-    if owner == furina_v2.CHARACTER:
-        return (furina_v2.ELEMENT, furina_v2.CADENCE)
     from tier0.content import loader                # late import (cycle)
     spec = loader._character_index().get(owner)
     if not spec:
@@ -804,7 +754,7 @@ def _element_for(state: CombatState, fx: dict, card: Card) -> Optional[str]:
     element, and the two Kokomi Skills that relied on the widening (Opening
     Gambit, Second Wave) declare `applies_element: true` on the sheet.
 
-    THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE (QUARANTINED) is read
+    THE MONDSTADT COMPANION OVERHAUL'S ELEMENT OVERRIDE is read
     FIRST and on damage from an Attack only. Three rewritten cards print an
     element on the ATTACK rather than on themselves -- Bennett's "your next
     Attack ... applies Pyro", Razor's "for 2 turns, your Attacks apply
@@ -839,96 +789,6 @@ def reset_knob_reads() -> None:
     KNOB_READS.clear()
 
 
-# Diagnostic switch retained for controlled Center/Guest comparisons;
-# production never sets it outside experiments and tests.
-SPOTLIGHT_FORCE: Optional[str] = None
-
-
-def both_spotlight_modes(state: CombatState) -> bool:
-    """Furina's upgraded starter (Touch of Orobas -> The Curtain Never Falls,
-    red-pen R2): both Spotlight modes permanently in force.
-
-    Thin wrapper so the four Spotlight readers below say what they mean and
-    the relic test lives in one place. Late import: `relics` imports
-    `refpowers`, so a module-level import here would close a cycle.
-    """
-    from tier0.engine import relics                  # late import (cycle)
-    return relics.spotlight_both_modes(state.player)
-
-
-def center_stage_active(state: CombatState, card: Card) -> bool:
-    """Center Stage's half for THIS card: does playing it mint Fanfare?
-
-    Her own cards only, in both worlds. Under the mode that is implied (only
-    her cards are lit at all); under R2's upgrade it has to be said, because
-    Companions are lit too and Guest Cast's "their plays generate no Fanfare"
-    clause survives the upgrade -- R2 reading 1 drops the exclusivity, not
-    the targeting. Mirrors C# `SpotlightSystem.CenterStageActive(owner) &&
-    card is ICharacterCard { CharacterId: "furina" }`.
-    """
-    p = state.player
-    if both_spotlight_modes(state):
-        return bool(p.character_id and card.character == p.character_id)
-    return p.spotlight == p.character_id
-
-
-def is_spotlighted(state: CombatState, card: Card) -> bool:
-    """Whether a card receives Spotlight play texture in the active mode."""
-    p = state.player
-    if both_spotlight_modes(state):
-        # C# SpotlightSystem.IsSpotlighted: each half keeps its own card
-        # class, and under the upgrade both halves are live at once.
-        return bool(card.is_companion
-                    or (p.character_id and card.character == p.character_id))
-    target = p.spotlight
-    if target == C.SPOTLIGHT_GUEST_CAST:
-        return card.is_companion
-    return bool(target and card.character == target)
-
-
-def is_outward_spotlighted(state: CombatState, card: Card) -> bool:
-    """Whether Spotlight may change this card's printed numbers."""
-    if both_spotlight_modes(state):
-        # Guest Cast's half ONLY. Without the card-class test the multiplier
-        # would leak onto her own cards, which Center Stage explicitly does
-        # not do (C# OutwardMultiplier keeps the same gate for the same
-        # reason). No `spotlight` read: under the upgrade the designation is
-        # irrelevant, which is the whole point of the ruling.
-        return is_spotlighted(state, card) and card.is_companion
-    return (is_spotlighted(state, card)
-            and state.player.spotlight != state.player.character_id)
-
-
-def spotlight_mult(state: CombatState, card: Card) -> float:
-    """Guest Cast numeric empowerment, including card-mediated bonuses.
-
-    Center Stage always returns 1.0, even if Spotlight bonus powers are
-    installed. Guest Cast and the legacy named-partner diagnostic path read
-    the outward base plus combat- or turn-scoped bonuses.
-
-    §2.2a extension, ENGINE-ENFORCED: this helper is plumbed into damage,
-    Block, and (when the DSL grows one) element-application counts -- and
-    nowhere else. Draw, energy, cost, and turn-economy ops have no path
-    to it, so 'numbers only' is structure, not per-card discipline."""
-    p = state.player
-    if not is_outward_spotlighted(state, card):
-        return 1.0
-    cap = C.SPOTLIGHT_CARDS_PER_TURN_CAP     # schematized, OFF by default
-    if cap is not None and state.spotlighted_cards_this_turn > cap:
-        return 1.0
-    base = C.SPOTLIGHT_BASE_MULT
-    KNOB_READS["SPOTLIGHT_BASE_MULT"] = (
-        KNOB_READS.get("SPOTLIGHT_BASE_MULT", 0) + 1)
-    bonus = (p.powers.get("spotlight_mult_bonus", 0)
-             + p.powers.get("spotlight_mult_bonus_turn", 0))
-    return base + bonus / 100.0
-
-
-def _spotlight_scale(state: CombatState, card: Card, amount: int) -> int:
-    m = spotlight_mult(state, card)
-    return int(amount * m) if m != 1.0 else amount
-
-
 #: `EB-495` D1/D2. The sim's spelling of the game's "this damage came out of
 #: a card". In C# that is `command.ModelSource is CardModel` together with
 #: `DamageProps.HasFlag(ValueProp.Move)`, and the mod's generator emits EVERY
@@ -955,15 +815,16 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     """Full damage pipeline: strength/weak -> reaction amp -> vulnerable ->
     block -> hp. Returns damage actually dealt to HP (for metrics).
 
-    `ignore_block` is QUARANTINED (C.COMPANION_OVERHAUL) and has exactly one
-    caller: Chiori's Tamoto, whose printed text is "deal 6 Geo damage to a
-    random enemy, IGNORING BLOCK". It skips the enemy's Block pool and nothing
+    `ignore_block` is the companion kit's (once `C.COMPANION_OVERHAUL`) and
+    has exactly one caller: Chiori's Tamoto, whose printed text is "deal 6 Geo
+    damage to a random enemy, IGNORING BLOCK". It skips the enemy's Block pool and nothing
     else -- the hit is still powered, still reacts, still counts as a hit and
     is still capped by Intangible, because unblockable is not uncappable
     (R128, the rule the Shatter path below already keeps). Default False, so
     every shipped caller is byte-identical.
 
-    `powered` has exactly FOUR callers -- three QUARANTINED, one not.
+    `powered=False` is passed by the current kits' verb doors (the call-site
+    census in `tier0/tests/test_eb495_kit_verb_triggers.py` lists them).
     False drops the dealer's Strength and Weak
     (`ValueProp.Unpowered` on the dealer's side) and nothing else -- the aura
     still lands, the reaction still fires, and the target's Vulnerable,
@@ -986,11 +847,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         printed size. Here the dealer IS Klee, and the flag states the RULE
         instead.
 
-    THE FOURTH IS NOT QUARANTINED: `salon_member_act`, `EB-588`. A member's
-    performance is not Furina swinging, on the arm or on the shipped kit --
-    the Salon's own paragraph says "a performance is not an Attack and not a
-    hit" -- so the dealer's terms do not enter it either way, and there is one
-    implementation of a member acting to say so in."""
+    (The shipped Salon's `salon_member_act` passed it too, until the Salon
+    left the sim on 2026-10-08.)"""
     # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
     # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
     # corpse absorbs no damage, fires no reaction and pays no on-hit rider --
@@ -1061,7 +919,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # than at the top of the function is a placement, not a reordering.
     from tier0.engine import refpowers as _rp_thorns    # late import (cycle)
     _rp_thorns.enemy_retaliates_before_the_hit(state, enemy, source, powered)
-    # QUARANTINED (C.COMPANION_OVERHAUL). `absorb` is the Block this hit may be
+    # (C.COMPANION_OVERHAUL). `absorb` is the Block this hit may be
     # eaten by, which is the whole of "ignoring Block": zero for Chiori's
     # Tamoto and the standing pool for every other hit in the engine. Named
     # rather than branched, so the amp counterfactual below reads the same
@@ -1206,7 +1064,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         enemy.block += enemy.skittish
         state.emit("skittish_block", target=enemy.name,
                    amount=enemy.skittish)
-    # QUARANTINED (C.COMPANION_OVERHAUL). The INAZUMA arm's two damage-site
+    # (C.COMPANION_OVERHAUL). The INAZUMA arm's two damage-site
     # readers, both after the whole hit has resolved. See
     # `companion_overhaul_damage_dealt` for what each one is and why it is
     # here rather than anywhere else.
@@ -1294,9 +1152,6 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
                 other.hp -= sp
                 state.emit("damage", target=other.name, amount=effective,
                            source="detonation_splash")
-            if p.burst_max:
-                resources.gain_burst(
-                    state, C.DETONATION_SPLASH_BURST, "detonation_splash")
         vuln = p.powers.get("detonation_vuln", 0)         # Explosive Frags
         if vuln and enemy.alive:
             powers.apply_power(state, enemy, "vulnerable", vuln)
@@ -1327,7 +1182,7 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
     state.spark_ledger.append({"source": source, "amount": n,
                                "before": before, "total": state.player.sparks})
     state.emit("gain_spark", amount=n, total=state.player.sparks)
-    # QUARANTINED (R276): Spark Knight rides this chokepoint, as its C# twin
+    # (R276): Spark Knight rides this chokepoint, as its C# twin
     # rides `SparkPower.Gain` -- every Spark any source grants passes here.
     klee_overhaul.spark_knight(state, state.player.sparks - before)
 
@@ -1592,7 +1447,7 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         varka_oath.fresh_aura_sweep(state, fx, card)
         return
 
-    # QUARANTINED (R276): the Klee arm's per-hit riders. Each hit comes back
+    # (R276): the Klee arm's per-hit riders. Each hit comes back
     # through this op aimed at its body, so nothing below is bypassed.
     if klee_overhaul.damage_rider(fx) and klee_overhaul.live(state):
         klee_overhaul.resolve_damage_rider(state, fx, card)
@@ -1618,18 +1473,6 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         base = _amount(state, fx["amount"])
     if "bonus_formula" in fx:
         base += _bonus_formula(state, fx["bonus_formula"], card)
-    if state.salon_replacements_this_card:
-        base *= C.SALON_REPLACE_DAMAGE_MULT
-    # Spotlight scales the card's own printed damage -- before external
-    # buffs (strength/next_attack_up are not printed numbers) and before
-    # per-target riders (v1 boring baseline; riders logged as design room).
-    base = _spotlight_scale(state, card, base)
-    # Star of the Show: flat rider on Spotlighted cards' damage. Card-level
-    # texture (kickoff §3.2 ratified design space), NOT the baseline knob.
-    # Pass 2 adds the this-turn variant (stage_lights) on the same pipe.
-    if is_outward_spotlighted(state, card):
-        base += (state.player.powers.get("spotlight_flat_damage", 0)
-                 + state.player.powers.get("spotlight_flat_damage_turn", 0))
     if card.type == "attack":
         base += state.current_attack_bonus
         # Inky enchantment (R82): the rider rides the instance, so an
@@ -1779,14 +1622,9 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
         # Personal Companion's Block is the arm's number.
         raw = fx["arm_amount"]
     # Same rider grammar damage already carries (F-B1): a defensive card may
-    # scale on the meter too. Applied BEFORE the Salon multiplier and before
-    # Spotlight, exactly where damage applies its own -- a rider that landed
-    # after those would be multiplied by them and quietly outscale its
-    # printed twin.
+    # scale on the meter too.
     if "bonus_formula" in fx:
         raw += _bonus_formula(state, fx["bonus_formula"], card)
-    if state.salon_replacements_this_card:
-        raw *= C.SALON_REPLACE_DAMAGE_MULT
     times = fx.get("times", 1)
     times = (_runtime_count(state, times, card)
              if isinstance(times, str) else times)
@@ -1803,11 +1641,10 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     # two-row Block card collects Nimble twice, and a `times` loop collects it
     # per iteration -- each of those is its own GainBlock. tier0 paid it once
     # per play off a state latch, which under-counted every multi-gain card.
-    # Not Spotlight-scaled (Spotlight scales printed numbers; an enchantment
-    # is not printed), but Frail does bite it, exactly as the hook order does:
-    # the enchant additive lands before the multiplicative listeners.
+    # Frail bites it, exactly as the hook order does: the enchant additive
+    # lands before the multiplicative listeners.
     for _ in range(times):
-        amount = _spotlight_scale(state, card, raw) + card.enchant_block
+        amount = raw + card.enchant_block
         # Frail bites each printed card-block gain before the refpower funnel.
         amount = powers.modify_block_gained(state.player, amount)
         state.player.block += amount
@@ -1817,7 +1654,7 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_block_half_damage(state: CombatState, fx: dict, card: Card) -> None:
-    """QUARANTINED (`C.COMPANION_OVERHAUL`). Gorou's Inuzaka All-Round Defense:
+    """(`C.COMPANION_OVERHAUL`). Gorou's Inuzaka All-Round Defense:
     "Gain Block equal to half the damage dealt."
 
     THE NUMBER IS THIS PLAY'S OWN, and it has to be: the printed 8 is not what
@@ -1851,10 +1688,7 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     # Charlotte, First-Person Shutter: pre-emptive block that lands at the
     # start of the player's NEXT turn (after the turn-start block reset).
     # Sustain-over-time identity without true healing (R8-shaped).
-    # Spotlight scales it at play time (printed Block is printed Block).
     amount = _amount(state, fx["amount"])
-    if state.salon_replacements_this_card:
-        amount *= C.SALON_REPLACE_DAMAGE_MULT
     # NIMBLE DOES NOT RIDE HERE (EB-85 divergence 4). This op is the sim's
     # mirror of `BlockNextTurnPower`, and that power pays out with
     #
@@ -1868,8 +1702,7 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     # later turn, not from a card play. tier0 folded the rider into the
     # power's amount, which made `tideline_watch` (inert in game) a boosted
     # card here. The eligibility half is in `enchantments._grants_block`.
-    powers.apply_power(state, state.player, "block_next_turn",
-                       _spotlight_scale(state, card, amount))
+    powers.apply_power(state, state.player, "block_next_turn", amount)
 
 
 # EB-83. The power name is the op name: one string, so `powers`, the sidecar
@@ -1913,11 +1746,9 @@ def _op_block_at_turn_start(state: CombatState, fx: dict, card: Card) -> None:
     REMAINING, the engine's own stacks-are-turns grammar, and is the LONGEST
     live instance's (see the stacking note below).
 
-    THE AMOUNT IS SNAPSHOTTED AT PLAY TIME and never re-read. Spotlight and the
-    salon replacement multiplier scale it here, exactly as they scale
-    `block_next_turn`, because printed Block is printed Block at the moment it
-    is printed; a later Frail, a later No Block or a lost Spotlight cannot
-    shrink a half that was already banked.
+    THE AMOUNT IS SNAPSHOTTED AT PLAY TIME and never re-read: printed Block is
+    printed Block at the moment it is printed, and a later Frail or a later No
+    Block cannot shrink a half that was already banked.
 
     NIMBLE DOES NOT RIDE HERE, for `block_next_turn`'s reason verbatim: the
     Block arrives from a POWER on a later turn, so there is no `cardSource`
@@ -1957,9 +1788,6 @@ def _op_block_at_turn_start(state: CombatState, fx: dict, card: Card) -> None:
     is live, and still turns rather than a count of anything else.
     """
     amount = _amount(state, fx["amount"])
-    if state.salon_replacements_this_card:
-        amount *= C.SALON_REPLACE_DAMAGE_MULT
-    amount = _spotlight_scale(state, card, amount)
     turns = block_at_turn_start_turns(fx)
     p = state.player
     # R247: APPEND, never merge. The instance list is the power, and
@@ -1990,8 +1818,6 @@ def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
         n = _calc_amount(state, fx["amount_formula"], card)
     else:
         n = _amount(state, fx.get("amount"))
-    if salon_numerics_replaced(state):
-        n *= C.SALON_REPLACE_NUMERIC_MULT
     state.draw(n)
     state.emit("extra_draw", amount=n)   # A5 velocity accounting
 
@@ -2027,187 +1853,6 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
               if "amount_formula" in fx else fx["amount"])
     state.player.energy += amount
     state.emit("energy", amount=amount)
-
-
-def _salon_amount(state: CombatState, base: int, note: bool = True) -> int:
-    """A Salon member numeric amount (Salon v2): base + the Fanfare Focus
-    term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon.
-
-    `note=False` returns the SAME number without filing the `fanfare_read`
-    census row (EB-144). It exists for the pilot, which forecasts what a
-    `salon_perform` WOULD pay at score time: a forecast is not a read, and a
-    scorer that filed one would inflate the C2-escrow census by however many
-    cards happened to be in hand. The alternative was a second copy of this
-    expression inside the pilot -- exactly the drift `salon_tick_amount`
-    below exists to make impossible.
-    """
-    p = state.player
-    if not p.fanfare_cap:
-        return base + p.powers.get("salon_damage_up", 0)
-    # The Salon-v2 Focus analogue is the read that matters most to this
-    # sprint: it is where "a constant wearing a meter" was measured.
-    if note:
-        resources.note_fanfare_read(state, "salon_focus")
-    # Clamped: a negative meter must not chip the stage. Negative member
-    # ticks are the exact reading that would look like a bug rather than a
-    # cost (Track C.2, PROPOSED semantics, flagged for review).
-    focus = resources.readable(p) // C.SALON_FOCUS_PER
-    return base + focus + p.powers.get("salon_damage_up", 0)
-
-
-def _salon_dry(amount: int, paid: bool) -> int:
-    """THE DRY CUT, in ONE place (`EB-587`). A member that cannot pay its
-    Encore acts at `SALON_DRY_DAMAGE_MULT`, and since the Evoke pays like a
-    performance that arithmetic has two callers -- `salon_tick_amount` and
-    `_salon_bow` -- which is one caller too many for a repeated expression.
-    C# twin: `SalonMemberPower.Dry`."""
-    return amount if paid else int(amount * C.SALON_DRY_DAMAGE_MULT)
-
-
-def _salon_bow(state: CombatState, member: str) -> None:
-    """The displaced member's final bow (Salon v2, rework plan §1): its
-    UNIQUE payoff. Focus/Grand-Salon scaled numerics, feeds the Burst meter
-    like a tick.
-
-    """
-    p = state.player
-    spec = C.SALON_MEMBERS[member]["bow"]
-    dmg = spec.get("damage", 0)
-    if dmg and state.living_enemies:
-        # `EB-451`: the roll's pool, not the raw board.
-        enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
-        deal_damage_to_enemy(
-            state, enemy,
-            _salon_amount(state, dmg),
-            element="hydro", source="salon_final_bow")
-    blk = spec.get("block", 0)
-    if blk:
-        amt = _salon_amount(state, blk)
-        p.block += amt
-        state.emit("block", amount=amt)
-    if spec.get("aura_all"):
-        for enemy in state.living_enemies:
-            reactions.resolve_hit(state, enemy, "hydro", 0)
-    enc = spec.get("encore", 0)
-    if enc:
-        resources.gain_encore(state, enc, "salon_final_bow")
-    if p.burst_max:
-        resources.gain_burst(state, C.SALON_TICK_BURST, "salon_final_bow")
-    # Stagehands (Curtain Call B, R85): the crew strikes the set behind
-    # every bow. Activity-gated on the bow event itself; unscaled printed
-    # numbers, same reasoning as salon_deploy_block above.
-    blk = p.powers.get("salon_bow_block", 0)
-    if blk:
-        p.block += blk
-        state.emit("block", amount=blk)
-    enc2 = p.powers.get("salon_bow_encore", 0)
-    if enc2:
-        resources.gain_encore(state, enc2, "salon_bow_encore")
-    state.emit("salon_final_bow", member=member)
-
-
-def salon_slots(player) -> int:
-    """How many members this player's stage holds.
-
-    A12 (2026-07-28) promoted the cap from a constant to a per-player stat.
-    C.SALON_MEMBER_SLOTS stays the BASE -- it is what the constant-parity gate
-    compares against SalonConstants.MemberSlots on the C# side -- and the
-    cap-raise power adds to it. Every reader goes through here so a new one
-    cannot accidentally re-hardcode 3.
-    """
-    return C.SALON_MEMBER_SLOTS + player.powers.get("salon_cap_up", 0)
-
-
-def salon_numerics_replaced(state: CombatState) -> bool:
-    """THE REPLACEMENT RULE'S QUESTION FOR THE x2 NUMERICS: does this card's
-    draw / Encore / power / aura / heal take `SALON_REPLACE_NUMERIC_MULT`
-    (`EB-412`)?
-
-    SCOPE, AND IT IS DELIBERATE. `SALON_REPLACE_DAMAGE_MULT`'s sites (damage,
-    block, the deferred block) still read the running COUNT and are unchanged,
-    so no card's damage or Block moves off this row -- Curtain Rises prints its
-    damage above its deploy and is not this row's card to reprice. What
-    `EB-412` needed is that MOVING a numeric above the deploys costs it
-    nothing, and the numeric it moved is a power.
-
-    Two terms, and the OR of them is the rule. `salon_replacements_this_card`
-    is the count of bows that have already happened, which is the whole answer
-    for every numeric printed AFTER the card's deploys.
-    `salon_will_replace_this_card` is the pre-play closed form, seeded at
-    `_resolve_card_bound`, and it is what makes a numeric printed BEFORE them
-    read the same -- Endless Waltz prints its crescendo first so the pair it
-    fields performs under the buff, and an ordering that charged a number for
-    that would be a second defect paying for the first.
-
-    The mod has only the second term: `SalonMemberPower.ReplacementDelta` asks
-    `WillReplace` off the pre-play company and the generated bodies capture the
-    scaled value at the top of `OnPlay`. So this OR is what keeps the engines
-    agreeing rather than a sim-side extra."""
-    return bool(state.salon_replacements_this_card
-                or state.salon_will_replace_this_card)
-
-
-def _card_will_replace(state: CombatState, card: Card) -> bool:
-    """`SalonMemberPower.WillReplace`'s twin: does the card's own deploy run
-    bow anybody out, asked against the PRE-PLAY company?
-
-    Iteration i of the deploy loop sees a company of `min(count + i, slots)`,
-    so the last deploy answers for all of them. The count has to be STATIC for
-    the closed form to hold -- a runtime amount falls back to the honest count
-    as it resolves, exactly as `gen_klee_cards._salon_calc_target` disqualifies
-    such a card from the C# closed form."""
-    deploys = 0
-    for fx in getattr(card, "effects", None) or []:
-        if not (fx.get("op") == "apply_power"
-                and fx.get("power") == "salon_member"
-                and fx.get("target", "self") == "self"):
-            continue
-        amount = fx.get("amount", 1)
-        if not isinstance(amount, int):
-            return False
-        deploys += amount
-    if deploys <= 0:
-        return False
-    return len(state.player.salon) + deploys - 1 >= salon_slots(state.player)
-
-
-def _deploy_salon_members(state: CombatState, amount: int,
-                          member: str = "crabaletta") -> None:
-    """Salon v2 deploy (rework plan §1): the typed FIFO queue with Defect
-    evoke geometry. Deploying into full slots bows the OLDEST member OUT
-    (its unique bow) and the new member takes the vacated slot — the v1
-    rule (the excess deploy bowed itself and never entered) is the
-    archive. powers['salon_member'] mirrors len(queue) so every count
-    read (has_salon_members, the pilot, instruments) is unchanged.
-
-"""
-    p = state.player
-    if member != "random" and member not in C.SALON_MEMBERS:
-        raise ValueError(f"unknown salon member {member!r}")
-    for _ in range(amount):
-        # A11 (2026-07-28): `member: random` de-dupes the starter from the
-        # Chevalmarin card. Rolled PER DEPLOY, not once per card, so a
-        # multi-deploy card can field a mixed stage. Sorted keys because the
-        # roll must not depend on dict insertion order.
-        entering = (state.rng.choice(sorted(C.SALON_MEMBERS))
-                    if member == "random" else member)
-        if len(p.salon) >= salon_slots(p):
-            state.salon_replacements_this_card += 1
-            _salon_bow(state, p.salon.pop(0))
-        p.salon.append(entering)
-        # `entering`, not `member`: an observer of this event wants to know
-        # WHO took the stage, and "random" is not a member.
-        state.emit("salon_deploy", member=entering, company=list(p.salon))
-        # Fortissimo Guard (Curtain Call B, R85): block per DEPLOY, per
-        # deployment event rather than per card -- Full Ensemble's three
-        # deploys are three cues. Direct add + emit, the _salon_bow block
-        # pattern; deliberately NOT Focus/Grand-Salon scaled (the power's
-        # printed number is the whole payout, matching its own note field).
-        blk = p.powers.get("salon_deploy_block", 0)
-        if blk:
-            p.block += blk
-            state.emit("block", amount=blk)
-    p.powers["salon_member"] = len(p.salon)
 
 
 #: `EB-415`. The sidecar key the banner banks its grant under -- the same name
@@ -2270,9 +1915,6 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         # Through _amount, so a power amount can be X, -X or a runtime count
         # like every other op's. Literal ints pass through untouched.
         amount = _amount(state, fx["amount"])
-    if (salon_numerics_replaced(state)
-            and fx["power"] != "salon_member"):
-        amount *= C.SALON_REPLACE_NUMERIC_MULT
     # MoltenFist reads the target's current Vulnerable and applies that many
     # MORE -- inert against a target with none, so the guard skips the apply.
     # Dominate needs no guard: it applies 1 first, so its read is always >= 1.
@@ -2286,51 +1928,14 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     # leaves the engine holding only "whatever this power was told to make".
     if "payload" in fx:
         state.player.power_payloads[fx["power"]] = fx["payload"]
-    # `EB-463`. THE SUMMON'S PRINTED DAMAGE, FOLDED AND BANKED AT PLAY.
-    #
-    # `summon_damage:` says "this power will deal a number the CARD prints".
-    # The fold is the card's own -- today `_spotlight_scale`, the same helper
-    # the `damage` and `block` ops run their printed numbers through -- and it
-    # is taken HERE, while the card is in play, because the power fires turns
-    # later when the card is gone (R72's snapshot rule; the mod's twin is
+    # `EB-463`. THE SUMMON'S PRINTED DAMAGE, BANKED AT PLAY: `summon_damage:`
+    # says "this power will deal a number the CARD prints", and it is taken
+    # HERE, while the card is in play, because the power fires turns later
+    # when the card is gone (R72's snapshot rule; the mod's twin is
     # `SummonDamage.Note`).
-    #
-    # NOT A SECOND FOLD PATH. The reason a summon needed a grammar at all is
-    # that its damage never passes through `_op_damage`, so `spotlight_mult`
-    # had nothing to reach; this is the same call at the one moment the card
-    # can still be asked.
     if "summon_damage" in fx:
-        state.player.summon_damage[fx["power"]] = _spotlight_scale(
-            state, card, int(fx["summon_damage"]))
+        state.player.summon_damage[fx["power"]] = int(fx["summon_damage"])
     if fx.get("target", "self") == "self":
-        if fx["power"] == "salon_member":
-            _deploy_salon_members(state, amount,
-                                  fx.get("member", "crabaletta"))
-            return
-        # Tamakushi Casket link (v0.4 §1.3, her canon A1 passive): casting
-        # the Garment while the Kurage is fielded refreshes the jellyfish's
-        # duration. The E-into-Q loop, verbatim. Guarded on the summon
-        # already being out -- the Burst does not conjure one from nothing.
-        #
-        # QUARANTINED CONSEQUENCE (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): a
-        # refresh of a jellyfish that never expires is a `max(1, 1)`, i.e.
-        # NOTHING. Left exactly as written -- the least-invasive default, and
-        # the guard above is still the honest one -- but the canon E-into-Q
-        # link pays nothing under the base kit. sec.12 pick 3.
-        if (fx["power"] == "ceremonial_garment"
-                and state.player.powers.get("kurage_summon", 0)):
-            # max(), not a hard set (audit 2026-07-26 s1.4; fixed in EPOCH 1).
-            # This assigned KURAGE_DURATION outright, so playing the Garment
-            # after an UPGRADED summon (kurage_turns +1, i.e. 2 turns) pulled
-            # the jellyfish back down to 1 and DELETED the turn the upgrade
-            # had paid for. R56/R57's "restoring a longer duration is safe"
-            # was true of the design and false of the wiring. Now matches
-            # _op_summon_kurage, which has always used max(): a refresh tops
-            # the timer up and never shortens it.
-            turns = max(state.player.powers["kurage_summon"],
-                        C.KURAGE_DURATION)
-            state.player.powers["kurage_summon"] = turns
-            state.emit("kurage_refreshed", turns=turns)
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap, never_reduces=floor)
         # `EB-415`. THE BANNER BANKS WHAT ITS CARD JUST GRANTED. `powers` is a
@@ -2376,26 +1981,23 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
-    times = (C.SALON_REPLACE_NUMERIC_MULT
-             if salon_numerics_replaced(state) else 1)
-    for _ in range(times):
-        # R210 Q3: `ElementalHit.ApplyOnly` reaches `AuraCmd.Apply`, which is
-        # `PowerCmd.Apply<XAuraPower>` -- the corpse-accepting door. An aura
-        # banked on a corpse is closed by `reactions.close_dead_auras` at the
-        # next settle, which is the sim's own honest bookkeeping and not a
-        # divergence: the mod's aura power sits on the dead creature too.
-        targets = _pick_targets(state, fx.get("target", "enemy"),
-                                allow_dead=True)
-        # Track H, LOG-ONLY: one row per resolution of an aura-applying VERB.
-        # Distinct from `aura_applied`, which is the verb's EFFECT and is
-        # silent when the op resolves into nothing (dead target, off-list
-        # element). "How often does the op fire" and "how often does an aura
-        # land" are two questions and the audit's claim is about the first.
-        state.emit("aura_op", op="apply_aura", card=card.id,
-                   element=fx["element"], targets=len(targets))
-        for enemy in targets:
-            reactions.resolve_hit(state, enemy, fx["element"], 0,
-                                  "apply_aura_op")
+    # R210 Q3: `ElementalHit.ApplyOnly` reaches `AuraCmd.Apply`, which is
+    # `PowerCmd.Apply<XAuraPower>` -- the corpse-accepting door. An aura
+    # banked on a corpse is closed by `reactions.close_dead_auras` at the
+    # next settle, which is the sim's own honest bookkeeping and not a
+    # divergence: the mod's aura power sits on the dead creature too.
+    targets = _pick_targets(state, fx.get("target", "enemy"),
+                            allow_dead=True)
+    # Track H, LOG-ONLY: one row per resolution of an aura-applying VERB.
+    # Distinct from `aura_applied`, which is the verb's EFFECT and is
+    # silent when the op resolves into nothing (dead target, off-list
+    # element). "How often does the op fire" and "how often does an aura
+    # land" are two questions and the audit's claim is about the first.
+    state.emit("aura_op", op="apply_aura", card=card.id,
+               element=fx["element"], targets=len(targets))
+    for enemy in targets:
+        reactions.resolve_hit(state, enemy, fx["element"], 0,
+                              "apply_aura_op")
 
 
 def _pilot_policies():
@@ -2504,17 +2106,6 @@ def _op_modify_bombs(state: CombatState, fx: dict, card: Card) -> None:
             if scope == "all" or (scope == "placed_this_turn"
                                   and bomb.turn_placed == state.turn):
                 bomb.damage += fx["bonus"]
-
-
-def _op_burst_energy(state: CombatState, fx: dict, card: Card) -> None:
-    if state.player.burst_max:
-        # The card-text source. Keeps its own `burst_energy` event as well as
-        # the shared `burst_income` one: the old event is what existing
-        # reports and tests read, and C5 is diagnostic -- it does not get to
-        # break a surface that already works.
-        resources.gain_burst(state, fx["amount"], "card")
-        state.emit("burst_energy", amount=fx["amount"],
-                   total=state.player.burst_energy)
 
 
 def _op_swirl(state: CombatState, fx: dict, card: Card) -> None:
@@ -2632,57 +2223,6 @@ def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
     spend_sparks(state, spend_spark_amount(fx))
 
 
-def _op_gain_encore(state: CombatState, fx: dict, card: Card) -> None:
-    # Her "healing" effects grant Encore (kickoff §4). Unbounded per-combat.
-    amount = _amount(state, fx["amount"])
-    if salon_numerics_replaced(state):
-        amount *= C.SALON_REPLACE_NUMERIC_MULT
-    resources.gain_encore(state, amount, "gain_encore_op", card.id)
-
-
-def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
-    """The OVERDRAW primitive (kickoff §4, Salon grammar): drains Encore
-    first; any shortfall drains TRUE HP -- greed is legal and priced.
-    Cards that must not overdraw use the encore_cost field (playability
-    gate in combat.card_playable) instead of this op."""
-    resources.spend_encore_or_hp(state, _amount(state, fx["amount"]),
-                                 "spend_encore_op", card.id)
-
-
-def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
-    """Choose between Center Stage and Guest Cast.
-
-    Center Stage designates Furina: her cards create Fanfare but receive no
-    numeric Spotlight bonus. Guest Cast designates the Companion category:
-    every Companion card is empowered, but those plays create no Fanfare.
-    A ready Companion in hand makes Guest Cast immediately useful; otherwise
-    the selector defaults to Center Stage. The diagnostic override retains
-    forced self/companion arms for experiments."""
-    p = state.player
-    companion_in_hand = any(c.is_companion and not c.kit_card for c in p.hand)
-    companion_anywhere = any(
-        c.is_companion and not c.kit_card
-        for c in (p.hand + p.draw_pile + p.discard_pile))
-    if SPOTLIGHT_FORCE == "self":
-        target = p.character_id or None
-    elif SPOTLIGHT_FORCE == "companion":
-        target = C.SPOTLIGHT_GUEST_CAST if companion_anywhere else None
-    elif companion_in_hand:
-        target = C.SPOTLIGHT_GUEST_CAST
-    else:
-        target = p.character_id or (
-            C.SPOTLIGHT_GUEST_CAST if companion_anywhere else None)
-    if target is None:
-        return                                   # nothing valid to aim at
-    if target != p.spotlight:
-        p.spotlight = target
-        state.spotlight_moved_this_turn = True      # selector-payoff window
-        state.spotlight_moves_this_combat += 1
-        mode = ("guest_cast" if target == C.SPOTLIGHT_GUEST_CAST
-                else "center_stage")
-        state.emit("spotlight_designated", character=target, mode=mode)
-
-
 def _op_gain_fanfare_floor(state: CombatState, fx: dict, card: Card) -> None:
     """The **Fanfare +X** keyword: current, floor and cap raised together.
 
@@ -2748,7 +2288,7 @@ def _op_crash_fanfare(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_drain_fanfare(state: CombatState, fx: dict, card: Card) -> None:
-    """QUARANTINED (R213 B): the FURINA REFRAME's drain, slice two.
+    """(R213 B): the FURINA REFRAME's drain, slice two.
 
     THE WHOLE OP. The held meter goes to 0 and the amount it held is recorded
     as this play's `fanfare_drained`, which the effects after it on the same
@@ -2792,166 +2332,6 @@ def _op_drain_fanfare(state: CombatState, fx: dict, card: Card) -> None:
     resources.note_fanfare_change(state, before)
     state.emit("fanfare_drained", amount=drained, source=f"card:{card.id}",
                floor=p.fanfare_floor, total=p.fanfare)
-
-
-#: The `member:` value that means "the leftmost member", spelled out. The
-#: C# side spells the same sentinel as a null aim argument.
-SALON_AIM_FRONT = "front"
-
-
-def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
-    """The on-demand bow (Track D, the D6 probe, 2026-07-28).
-
-    The LEFTMOST member takes their bow: `salon.pop(0)`, the same end of the
-    FIFO queue a deploy into a full stage displaces. That is the whole point
-    of choosing leftmost over a target -- the player already knows which
-    member is next out, because the deploy rule taught them, so the probe
-    costs no new reading.
-
-    Defect-evoke analogue, and it enters NOW because Track A changed what it
-    is worth: a bow that pays Encore is an Encore SINK's opposite, and under
-    single-leg Fanfare the Encore it grants no longer mints on arrival. It is
-    a bow trigger whose value is the bow, not the buffer -- which is exactly
-    the thing the probe wants to measure.
-
-    Inert on an empty stage, silently: "take a bow" with no company is a
-    no-op, not an error, so the card is never unplayable and never wasted in
-    a way the player cannot see coming from the stage itself.
-
-
-    `member:` AIMS THE BOW (the slot-6 ruling, 2026-08-30). The card names
-    which member it removes; unstated -- and `member: front`, the same thing
-    written out -- is the leftmost, so every row written before the ruling
-    means exactly what it always meant, explicitly rather than by accident.
-    It is an ARGUMENT on this verb and not a new op, deliberately: registering
-    a synonym would have moved the priced-op set, which is a DRAFTER_VERSION
-    bump. C# twin: `SalonMemberPower.BowLeftmost`'s optional aim.
-    """
-    p = state.player
-    named = fx.get("member")
-    if named not in (None, SALON_AIM_FRONT) and named not in C.SALON_MEMBERS:
-        # The deploy verb refuses an unknown member name and so does this one:
-        # a typo in a row must not degrade quietly into "the front member".
-        raise ValueError(f"unknown salon member {named!r}")
-    for _ in range(_amount(state, fx.get("amount", 1))):
-        if not p.salon:
-            break
-        idx = 0
-        if named not in (None, SALON_AIM_FRONT):
-            if named in p.salon:
-                idx = p.salon.index(named)
-            else:
-                # Named a member who is not on the stage. NOT silent, for the
-                # same D4 reason `salon_rotate_whiffed` exists: the aim is
-                # invisible in the state afterwards. The bow still happens, on
-                # the front -- an aimed card that cannot find its member is an
-                # unaimed bow, never a wasted one.
-                state.emit("salon_bow_target_absent", member=named,
-                           company=list(p.salon))
-        _salon_bow(state, p.salon.pop(idx))
-    p.powers["salon_member"] = len(p.salon)
-
-
-def _op_salon_rotate(state: CombatState, fx: dict, card: Card) -> None:
-    """Rotate the leftmost member to the BACK of the queue (EB-118 §5.5).
-
-    A pure reorder: the member keeps its identity, performs NO tick, drains
-    NO Encore and triggers NO bow or replacement effect. It buys exactly one
-    thing -- which performer the FIFO end offers next, to `salon_bow`, to a
-    deploy landing on a full stage, and to the `leftmost_salon_member_*`
-    reads. powers['salon_member'] is untouched by construction: the queue's
-    length cannot change here.
-
-    Inert on an empty stage, and NOT silently: unlike `salon_bow`, whose
-    no-op is legible from the empty stage itself, a rotate that found nothing
-    to rotate is invisible in the state afterwards. `conscript_whiffed` is
-    the pattern.
-    """
-    p = state.player
-    if not p.salon:
-        state.emit("salon_rotate_whiffed")
-        return
-    for _ in range(_amount(state, fx.get("amount", 1))):
-        p.salon.append(p.salon.pop(0))
-    state.emit("salon_rotate", company=list(p.salon))
-
-
-def _op_salon_perform(state: CombatState, fx: dict, card: Card) -> None:
-    """The leftmost member performs NOW (EB-118 §5.5): an extra slot passive,
-    off-turn, at the standard price.
-
-    Resolves through `salon_member_act` -- the same function the turn-start
-    upkeep calls -- so the Encore upkeep, the dry three-quarters, the
-    Focus/Grand-Salon scaling, the burst particle and the `salon_tick`
-    telemetry row are inherited rather than restated. That sharing is the
-    contract, not an implementation convenience.
-
-    The member STAYS on stage: this is a performance, not a bow, and not a
-    rotation. `amount: N` therefore performs the leftmost member N times;
-    pair it with `salon_rotate` to spread the acts across the company.
-
-    `member:` IS THE AIM (`EB-493`), AN ARGUMENT AND NOT A SECOND OP. *Second
-    Course* deploys Mademoiselle Crabaletta and then says "she performs once
-    more", which is a promise about the member the card NAMED and not about
-    whoever stands at the front of the queue -- a deploy appends, so the two
-    are only the same on an empty stage. The aim rides the shipped verb for the
-    reason `_op_salon_bow`'s own aim does and which that docstring writes out:
-    `tools/lint_op_parity.py` compares the KEY SET of `OPS` against
-    `tier05.draft.STATIC_OP_PRICING`, and `_op_price` branches on the op name
-    and reads no argument of it, so an extra field leaves the priced-op set
-    identical and this is not a `DRAFTER_VERSION` event. A `salon_perform_
-    member` synonym would have bought a stamp for a verb the engine already
-    has.
-
-    NOT FLAG-GATED, which is where it differs from the Evoke's aim. That one is
-    gated because a SHIPPED row could name a member and must not become aimable
-    in a release world; no shipped row carries `member:` on this op, and the
-    only row that does is a quarantined prototype. The gate is the field.
-
-    A NAMED MEMBER WHO IS NOT ON STAGE takes the FRONT -- the slot-6 ruling's
-    fallback for the aimed Evoke, applied to the aimed performance ("an aimed
-    card that cannot find its member is an unaimed one, never a wasted one") --
-    and it is EMITTED rather than silent, for the D4 reason
-    `salon_evoke_target_absent` exists: the aim leaves no trace in the state
-    afterwards, so a display that wants to say "she called for Crabaletta and
-    Crabaletta was not there" must be able to. Its own event name and not the
-    Evoke's, because the two verbs miss for different reasons. C# twin:
-    `SalonMemberPower.PerformLeftmost`'s `aim` parameter.
-
-    WHICH INDEX DOES NOT ARISE. `salon_member_act` takes a member NAME and
-    reads its numbers out of `C.SALON_MEMBERS`, so two Crabalettas on one stage
-    perform identically and the aim only ever has to answer "is she here at
-    all".
-    """
-    p = state.player
-    if not p.salon:
-        state.emit("salon_perform_whiffed")
-        return
-    named = fx.get("member")
-    if named is not None and named != "front":
-        if named not in C.SALON_MEMBERS:
-            raise ValueError(f"unknown salon member {named!r}")
-        if named not in p.salon:
-            state.emit("salon_perform_target_absent", member=named)
-            named = None
-    else:
-        named = None
-    for _ in range(_amount(state, fx.get("amount", 1))):
-        # `named or p.salon[0]` re-reads the front INSIDE the loop, so an
-        # unaimed call is byte-identical to what this op has always done.
-        if not salon_member_act(state, named or p.salon[0]):
-            break
-
-
-def _op_generate_guest_star(state: CombatState, fx: dict, card: Card) -> None:
-    """Guest Star generation (kickoff §9), four guardrails all structural:
-    this-combat-only (tokens live in combat piles; decks rebuild from ids
-    per fight), generators Exhaust (sheet field), equal-rarity (the pool
-    is filtered to fx['rarity'] == the generator's own printed rarity),
-    and the pool is shared companions + the Guest Star set ONLY — playable
-    characters' personal cards are structurally absent because they are
-    neither companions nor guest_star rows."""
-    _generate(state, fx, "guest_star")
 
 
 def _generation_pool(state: CombatState, fx: dict, which: str) -> list[Card]:
@@ -3045,61 +2425,9 @@ def _op_generate_from_pool(state: CombatState, fx: dict, card: Card) -> None:
     _generate(state, fx, fx.get("pool", "character"))
 
 
-    # FLAG-2(i) (R114, Errata Batch 2 item 8): THE COPY IS BUILT FROM THE
-    # PRINTED CARD, not deep-copied from the instance in hand. Verbatim:
-    # "Copy ops inherit the printed card's bounds... the printed bound
-    # travels with the copy."
-    #
-    # `loader.get_card` returns a fresh copy of the SHEET's card, and the
-    # upgraded form rides the `+` id convention, so an upgraded target still
-    # copies as upgraded. What no longer travels is whatever the instance
-    # picked up during this combat -- an Exhaust the sheet prints and some
-    # effect stripped, a cost another copy op zeroed (the `copy_dup_5`
-    # taint), a damage number that grew in play. That is exactly what the mod
-    # does: `CombatState.CreateCard(ModelDb.GetById<CardModel>(id))` copies
-    # the canonical model, and a printed keyword like Exhaust is declared per
-    # MODEL, so the C# copy has always carried it.
-    #
-    # WHAT THIS DOES NOT CLOSE: X3's loop. A copy is still an extra USE of an
-    # Exhaust card, and no bound the sheet prints on one instance can limit
-    # the number of instances. The pin reports accordingly.
-def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
-                                 card: Card) -> None:
-    """Encore Performance (kickoff §9): duplicate a Spotlighted card in
-    hand. Dead without a LIT target and a drafted one — BY DESIGN
-    (duplication deepens a committed kit; it must not conjure one).
-
-    EB-100: the question is `is_spotlighted`, never the raw `p.spotlight`
-    pointer. Under Furina's upgraded starter (R2) tier0 stops granting the
-    selector token, so `p.spotlight` stays None for the entire run while
-    every one of her cards reads as lit — and the C# card asks
-    `SpotlightSystem.IsSpotlighted`, which honours `BothModes`
-    (`EncorePerformance.cs:61-64`). On the same board the game copied and
-    the sim copied nothing. The pointer guard was pure redundancy before the
-    upgrade existed (with no designation `is_spotlighted` is False for
-    everything, so `targets` is empty and the check below returns anyway),
-    so it is deleted rather than widened: `if not targets` says the same
-    thing in both worlds and cannot go stale behind a second lighting mode.
-    """
-    from tier0.content import loader
-    p = state.player
-    targets = [c for c in p.hand if is_spotlighted(state, c)
-               and not c.kit_card]
-    if not targets:
-        return
-    for _ in range(fx.get("amount", 1)):
-        chosen = loader.get_card(state.rng.choice(targets).id)
-        if "cost_override" in fx:
-            chosen.cost_delta_this_combat = fx["cost_override"] - chosen.cost
-        _add_token(state, chosen, "hand")
-        state.emit("encore_performance_copy", card=chosen.id)
-
-
 def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
     p = state.player
     amount = fx["amount"]
-    if salon_numerics_replaced(state):
-        amount *= C.SALON_REPLACE_NUMERIC_MULT
     healed = min(amount, p.max_hp - p.hp)
     p.hp += healed
     state.emit("heal", amount=healed)
@@ -3108,7 +2436,7 @@ def _op_heal(state: CombatState, fx: dict, card: Card) -> None:
 def companion_overhaul_entry_hp(state: CombatState) -> int:
     """The HP the player walked into this fight with -- every Mend's ceiling.
 
-    QUARANTINED (`C.COMPANION_OVERHAUL`), and it is the SIM TWIN of
+    (`C.COMPANION_OVERHAUL`), and it is the SIM TWIN of
     `KokomiOverhaulLedger.EntryHp`, captured the same two ways for the same
     reason: `combat.new_combat` records it at the top of the fight, and this
     reader captures it on first ask if nothing did -- so a state built by a
@@ -3685,9 +3013,7 @@ MIN_MODES = 2
 # card, not a display fix. The Klee arm this unblocks (Bag of Tricks, a
 # Spark-priced mode) is the second consumer.
 MODE_PRICE_OPS = {
-    "spend_encore": ("encore", "Encore"),
     "spend_spark": ("sparks", "Sparks"),
-    "spend_charge": ("charge", "Charge"),
 }
 
 
@@ -3707,12 +3033,7 @@ def mode_price(state: CombatState, mode: dict):
     if op not in MODE_PRICE_OPS:
         return None
     field, meter = MODE_PRICE_OPS[op]
-    if op == "spend_spark":
-        amount = spend_spark_amount(fx)
-    elif op == "spend_charge":
-        amount = spend_charge_amount(fx)
-    else:
-        amount = _amount(state, fx["amount"])
+    amount = spend_spark_amount(fx)
     return field, meter, int(amount)
 
 
@@ -3846,7 +3167,7 @@ PREDICATE_NAMES = frozenset({
     "has_spark",
     "target_has_nonpyro_aura",
     "target_has_aura",
-    # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED). Undertow's "if the enemy has
+    # THE KOKOMI OVERHAUL, DRAFT 6. Undertow's "if the enemy has
     # a debuff". A LIVE read and not a snapshot, unlike its two aura siblings
     # above: the card that prints it applies nothing before the branch, and
     # what it is asking about is the board as the hit lands.
@@ -3862,16 +3183,11 @@ PREDICATE_NAMES = frozenset({
     # player's previous turn, the enemy turn included.
     "hp_lost_since_last_turn",
     "enemy_intends_attack",
-    "has_salon_members",
-    "spotlight_set",
-    "spotlight_moved_this_turn",
-    "spotlight_unmoved_this_combat",
-    "spotlighted_card_played_this_turn",
     # EB-118. Ownership is a yes/no on the sheet, so it is a name, not a
     # count prefix; the COUNTS are reachable as amounts.
     "exhaust_selection_has_companion",
     "exhaust_selection_has_personal",
-    # The Klee overhaul's two per-turn reads (QUARANTINED, C.KLEE_OVERHAUL).
+    # The Klee overhaul's two per-turn reads (C.KLEE_OVERHAUL).
     # Registered so the slice's rows load and validate; the chain REFUSES them
     # for the same reason the arm's ops refuse, and for the same one sentence:
     # slice one is C# first and the sim is not brought up.
@@ -3887,7 +3203,7 @@ PREDICATE_NAMES = frozenset({
     # turn" (rule 7's first counter, read the other way round). No row prints
     # it since Sit Tight moved its check to the end of the turn (2026-09-23).
     "no_bomb_went_off_this_turn",
-    # The Kokomi overhaul's own per-turn read (QUARANTINED,
+    # The Kokomi overhaul's own per-turn read (
     # C.KOKOMI_OVERHAUL): Sango Isshin's "if the Bake-Kurage carried out a
     # Plan this turn". Unlike the two above this one IS answered -- draft 6
     # runs in both engines.
@@ -3922,20 +3238,13 @@ PREDICATE_PREFIXES = frozenset({
     "target_has_power_",
     "self_has_power_",
     "exhaust_pile_at_least_",
-    "charge_at_least_",
     "fanfare_at_least_",
-    "encore_at_least_",
-    # EB-118 §5.5: WHO is next to perform. Parameterised on the member name
-    # rather than tabled per member, for the same reason the integer bars are
-    # -- but the argument is closed here, because SALON_MEMBERS is: a typo'd
-    # member is a load-time failure, not a branch that never fires.
-    "leftmost_salon_member_",
     # EB-118. `_has_type_` takes a card TYPE (a closed vocabulary, validated
     # below); the other two take an integer like their neighbours.
     "exhaust_selection_has_type_",
     "exhaust_selection_cost_at_least_",
     "exhaust_selection_size_at_least_",
-    # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED, C.COMPANION_OVERHAUL).
+    # THE MONDSTADT COMPANION OVERHAUL (C.COMPANION_OVERHAUL).
     # An HP fraction, parameterised on the percentage for the same reason the
     # meter bars are: the threshold is a printed balance number (Noelle's
     # "below half HP", Bennett's "above 70% HP"), so moving one is a card edit
@@ -3968,8 +3277,6 @@ def is_known_predicate(name: str) -> bool:
             return False
         if prefix in ("target_has_power_", "self_has_power_"):
             return True
-        if prefix == "leftmost_salon_member_":
-            return arg in C.SALON_MEMBERS
         if prefix == "exhaust_selection_has_type_":
             return arg in CARD_TYPES
         # The integer forms must actually carry an integer. A typo'd
@@ -3995,7 +3302,7 @@ def is_known_predicate(name: str) -> bool:
 # would make the validator reject valid content; a token here the chain
 # ignores documents a spelling nothing reads.
 RUNTIME_COUNT_NAMES = frozenset({
-    # QUARANTINED USE ONLY (R276) -- Fireworks Finale's "for each Spark spent".
+    # CURRENT-KIT USE ONLY (R276) -- Fireworks Finale's "for each Spark spent".
     "sparks_spent",
     # FURINA'S STAGE. Registered here as well as resolved in `_runtime_count`
     # for this registry's own reason: the loader validates every count token
@@ -4014,48 +3321,46 @@ RUNTIME_COUNT_NAMES = frozenset({
     "exhausts_this_turn",
     "cards_drawn_this_combat",
     "enemy_poison_total",
-    "salon_members",
-    "leftmost_salon_act",
     "X",
     "exhausted_this_card",
     "hand_size",
     "discards_this_card",
     "block_gained_this_card",
-    # QUARANTINED USE ONLY (R213 B) -- the INAZUMA companion overhaul's two.
+    # CURRENT-KIT USE ONLY (R213 B) -- the INAZUMA companion overhaul's two.
     # Registered here as well as resolved in `_runtime_count`, because the
     # loader validates every count token at LOAD off this set and a row whose
     # token is only in the resolver is a card that raises the first time it is
     # played (EB-135, the defect this registry exists for).
     "companions_played_this_combat",
     "swirls_this_turn",
-    # QUARANTINED USE ONLY (R250) -- the Kokomi overhaul's Chain of Command,
+    # CURRENT-KIT USE ONLY (R250) -- the Kokomi overhaul's Chain of Command,
     # the now-line twin of the Plan clause's `damage_per_companion_last_turn`.
     "companions_played_this_turn",
-    # QUARANTINED USE ONLY -- the Kokomi overhaul's tempo shelf, Tide Chart's
+    # CURRENT-KIT USE ONLY -- the Kokomi overhaul's tempo shelf, Tide Chart's
     # "for each Plan the Bake-Kurage holds". Registered here as well as
     # resolved in `_runtime_count` for this registry's own reason: the loader
     # validates every count token at LOAD off this set, so a token only the
     # resolver knows is a card that raises the first time it is played.
     "plans_held",
-    # QUARANTINED USE ONLY (`EB-492`) -- Well Laid's "for each Plan the
+    # CURRENT-KIT USE ONLY (`EB-492`) -- Well Laid's "for each Plan the
     # Bake-Kurage carried out this morning". Registered here as well as
     # resolved in `_runtime_count` for this registry's own reason: the loader
     # validates every count token at LOAD off this set.
-    # QUARANTINED USE ONLY (R276) -- Well Laid's "for each debuff on the
+    # CURRENT-KIT USE ONLY (R276) -- Well Laid's "for each debuff on the
     # enemy". Same registry reason as the two above.
     "debuffs_on_target",
-    # QUARANTINED USE ONLY (the Casket pass, 2026-09-28) -- Feint's and Sango
+    # CURRENT-KIT USE ONLY (the Casket pass, 2026-09-28) -- Feint's and Sango
     # Isshin's carry-outs this turn, and Driftglass's and Depths' Judgment's
     # Casket. Same registry reason as the rows above.
     "plans_carried_out_this_turn",
     "casket_count",
-    # QUARANTINED USE ONLY (pool completion, 2026-10-01) -- Shoal of Spears'
+    # CURRENT-KIT USE ONLY (pool completion, 2026-10-01) -- Shoal of Spears'
     # Plans written this turn. Same registry reason.
     "plans_written_this_turn",
-    # QUARANTINED USE ONLY (the Kokomi expansion, batch one) -- Weight of the
+    # CURRENT-KIT USE ONLY (the Kokomi expansion, batch one) -- Weight of the
     # Plan's "Energy paid for the Plans waiting". Same registry reason.
     "plan_energy_waiting",
-    # QUARANTINED USE ONLY (R213 B) -- the drain op's count. Same
+    # CURRENT-KIT USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
     "fanfare_drained",
@@ -4149,7 +3454,7 @@ def _predicate(state: CombatState, name: str) -> bool:
         # the aura via reaction, which is exactly what the bonus rewards.
         return state.target_had_offelement_aura
     if name == "target_has_debuff":
-        # THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED). Undertow's branch. The
+        # THE KOKOMI OVERHAUL, DRAFT 6. Undertow's branch. The
         # mod asks the game's own `PowerType.Debuff` classification
         # (`KokomiOverhaulKit.HasDebuff`); tier0's `powers` dict carries no
         # type beside the count, so `kokomi_plan.ENEMY_DEBUFFS` is that
@@ -4180,7 +3485,7 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Overload-only -- must never be a dead draw off-Pyro/Electro.
         return state.reactions_this_turn > 0
     if name == "bomb_went_off_this_turn" or name == "bomb_reacted_this_turn":
-        # THE KLEE OVERHAUL'S TWO PER-TURN READS (QUARANTINED,
+        # THE KLEE OVERHAUL'S TWO PER-TURN READS (
         # C.KLEE_OVERHAUL), and they are rule 7's two counters read off the
         # arm's ledger -- `KleeOverhaulLedger.SetOffThisTurn > 0` for Run Away!
         # and `.ReactedThisTurn > 0` for Sizzle and Perfect Timing, which is
@@ -4230,14 +3535,14 @@ def _predicate(state: CombatState, name: str) -> bool:
                 "`-p:PrototypeCards=true`.")
         return state.ko_set_off_this_turn == 0
     if name == "plan_carried_out_this_turn":
-        # SANGO ISSHIN's condition (QUARANTINED, C.KOKOMI_OVERHAUL). Written
+        # SANGO ISSHIN's condition (C.KOKOMI_OVERHAUL). Written
         # at the ONE place a Plan is carried out (`kokomi_plan._resolve_entry`)
         # so the morning queue, Change of Plans' early resolution and The Moon
         # Overlooks the Waters' play-time one all count -- they all carry a
         # Plan out, which is the phrase the card prints.
         return state.kk_plan_carried_out_this_turn
     if name == "plan_held":
-        # HER BASIC DEFEND's condition (`EB-711`, QUARANTINED). The QUEUE, and
+        # HER BASIC DEFEND's condition (`EB-711`). The QUEUE, and
         # the same one `_runtime_count`'s `plans_held` counts -- one definition
         # of "holding a Plan" per engine, so the card's rider and Breakwater's
         # per-Plan clause cannot disagree. Read LIVE, which is what makes the
@@ -4297,14 +3602,6 @@ def _predicate(state: CombatState, name: str) -> bool:
         return any(d["companion"] for d in state.exhaust_selection)
     if name == "exhaust_selection_has_personal":
         return any(not d["companion"] for d in state.exhaust_selection)
-    if name.startswith("charge_at_least_"):
-        # Kokomi threshold read (v0.5 sheet fill). A THRESHOLD is not a
-        # proportional read: it pays a flat, printed bonus once the bank
-        # clears a bar, so it cannot participate in the multiplicative-read
-        # risk that §2.2 rate-limits the per-point readers for. Charge is
-        # still never spent here -- crossing the bar changes nothing about
-        # the bank.
-        return state.player.charge >= int(name.rsplit("_", 1)[1])
     if name == "card_exhausted_this_turn":
         return state.cards_exhausted_this_turn > 0
     if name == "hp_lost_this_turn":
@@ -4317,17 +3614,6 @@ def _predicate(state: CombatState, name: str) -> bool:
                    and e.sleep_turns == 0
                    for e in state.living_enemies)
     # --- Furina sheet-pass predicates ---
-    if name == "has_salon_members":
-        return state.player.powers.get("salon_member", 0) > 0
-    if name.startswith("leftmost_salon_member_"):
-        # EB-118 §5.5: which performer is NEXT -- the head of the FIFO queue,
-        # the same end `salon_bow` pops, `salon_perform` acts on and a deploy
-        # into a full stage displaces. Reads the queue, not the mirror
-        # counter: powers['salon_member'] carries the count and cannot carry
-        # identity. False on an empty stage for every member name.
-        want = name[len("leftmost_salon_member_"):]
-        salon = state.player.salon
-        return bool(salon) and salon[0] == want
     if name == "first_card_this_turn":
         # Opening Number (the Furina rules pass, 2026-10-01). This engine
         # counts a play BEFORE it resolves (`combat.play_card`, the auto-play
@@ -4335,24 +3621,6 @@ def _predicate(state: CombatState, name: str) -> bool:
         # C# twin counts AFTER (`FurinaStageLedger.CardsPlayedThisTurn`), so
         # it asks for 0; both spell "no card before this one".
         return state.cards_played_this_turn == 1
-    if name == "spotlight_set":
-        return state.player.spotlight is not None
-    if name == "spotlight_moved_this_turn":
-        # R2 makes the upgraded starter the SELECTOR-PAYOFF ENABLER: with the
-        # selector card gone there is no designation event left to move, so
-        # without this every selector-payoff card on her sheet (curtain_cue,
-        # directors_cut) would become dead text the moment the relic was
-        # taken -- the upgrade would silently SUBTRACT from her pool while
-        # appearing to add to it. Mirrors C# SpotlightSystem.MovedThisTurn,
-        # which is `BothModes(creature) || <the resource>` for this reason.
-        return both_spotlight_modes(state) or state.spotlight_moved_this_turn
-    if name == "spotlight_unmoved_this_combat":
-        # Commitment payoff: designated once and never re-aimed. False
-        # while nothing is designated (an empty stage is not commitment).
-        return (state.player.spotlight is not None
-                and state.spotlight_moves_this_combat <= 1)
-    if name == "spotlighted_card_played_this_turn":
-        return state.spotlighted_cards_this_turn > 0
     if name.startswith("fanfare_at_least_"):
         resources.note_fanfare_read(state, "threshold")
         # Clamped for consistency with every other reader. It cannot change
@@ -4361,10 +3629,8 @@ def _predicate(state: CombatState, name: str) -> bool:
         # future `fanfare_at_least_0` reads as "she has any" rather than as
         # "always true, even mid-Hyperbeam-debt".
         return resources.readable(state.player) >= int(name.rsplit("_", 1)[1])
-    if name.startswith("encore_at_least_"):
-        return state.player.encore >= int(name.rsplit("_", 1)[1])
     if name.startswith("hp_pct_below_"):
-        # THE MONDSTADT COMPANION OVERHAUL (QUARANTINED). Noelle's
+        # THE MONDSTADT COMPANION OVERHAUL. Noelle's
         # Breastplate: "If you are below half HP, gain 4 more."
         #
         # CROSS-MULTIPLIED, never divided. `hp / max_hp` is a float here and
@@ -4831,134 +4097,6 @@ def _free_play(state: CombatState, card: Card,
         state.free_play_depth -= 1
 
 
-def _op_gain_charge(state: CombatState, fx: dict, card: Card) -> None:
-    """Kokomi: explicit bonus-Charge effect line (kickoff §2.1 — premium
-    cards may grant bonus Charge beyond the universal accrual). The base
-    per-exhaust accrual lives at the funnel (refpowers), never here."""
-    resources.gain_charge(state, _amount(state, fx.get("amount", 1)),
-                          source=card.id)
-
-
-class ChargeUnpaid(Exception):
-    """A `spend_charge` price the bank could not meet. QUARANTINED (R213 E1).
-
-    Raised so the REST OF THE CARD does not resolve, which is the only
-    reading that mirrors the mod: `_stmt_spend_charge` emits
-    `if (!await KokomiResources.SpendCharge(...)) return;`, and a C# `return`
-    out of `OnPlay` abandons the play where it stands. Caught in
-    `_resolve_card_bound` and nowhere else.
-
-    A TOP-LEVEL price never reaches this: `combat.charge_cost` derives the
-    cost line off the printed op and `combat.card_playable` refuses the card
-    below it, exactly as the Spark sink does. Since EB-182 a price at the
-    HEAD of a `choose_one` mode does not reach it either -- that mode is not
-    offered below its price. What is left is a spend deeper in a mode body,
-    which is a consequence rather than an admission fee; this exception is
-    what keeps one from paying a mode's payoff for free."""
-
-
-def spend_charge_amount(fx: dict) -> int:
-    """The literal Charge price on one `spend_charge` effect.
-
-    A LITERAL positive int, on `spend_spark_amount`'s argument verbatim:
-    `combat.charge_cost` reads the same number off the printed effect with no
-    state in hand, and a price the playability gate cannot read is a price
-    that fires without being shown."""
-    amount = fx.get("amount")
-    if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
-        raise ValueError(
-            f"spend_charge amount must be a positive literal int, got "
-            f"{amount!r}")
-    return amount
-
-
-def _op_spend_charge(state: CombatState, fx: dict, card: Card) -> None:
-    """QUARANTINED (R213 E1): the Charge SINK.
-
-    Charge is READ and never expended under R80, and this op is the reopened
-    question in code -- it exists for the prototype surface and for nothing
-    else. No shipped row prints it, and the loader is free to refuse one:
-    the lint that guards that is the grep the surface's own header describes
-    (`proto_` ids only).
-
-    THE COST LINE, not an overdraw. A card printing this at top level is
-    unplayable below its price (`combat.charge_cost` ->
-    `combat.card_playable`), so the price is visible before the energy is
-    spent; a price nested in a mode body cannot be gated that way and stops
-    the card instead (see `ChargeUnpaid`)."""
-    if not resources.spend_charge(state, spend_charge_amount(fx),
-                                  source="spend_charge_op", card=card.id):
-        raise ChargeUnpaid(card.id)
-
-
-def _op_summon_kurage(state: CombatState, fx: dict, card: Card) -> None:
-    """Bake-Kurage as a persistent summon (v0.4 plan §1).
-
-    The jellyfish holds the field for KURAGE_DURATION turns and pulses at
-    the owner's turn end (player_turn_end_triggers). Stacks ARE turns
-    remaining -- the oz_summon grammar -- so this REFRESHES to the full
-    duration rather than adding to it: a second jellyfish is not a bigger
-    jellyfish, and the Garment's Casket link refreshes through this same
-    path. Duration is the only state; the pulse reads the Charge bank live
-    at fire time, so a summon made at Charge 0 still grows all fight.
-    """
-    p = state.player
-    turns = _amount(state, fx.get("amount", C.KURAGE_DURATION))
-    p.powers["kurage_summon"] = max(p.powers.get("kurage_summon", 0), turns)
-    KNOB_READS["KURAGE_DURATION"] = KNOB_READS.get("KURAGE_DURATION", 0) + 1
-    state.emit("summon_kurage", turns=p.powers["kurage_summon"])
-
-
-def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
-    """Conscript (kickoff §2.3, the Commander verb).
-
-    transform mode (default): transform a card in hand into a random
-    same-nation Companion card; it costs CONSCRIPT_COST_DELTA less
-    (floor 0) and gains Exhaust. Pays card identity, feeds Charge when the
-    conscript is consumed (played -> exhausted -> funnel). Net deck delta
-    is ZERO, which is what makes the verb legal at Common under the
-    Kokomi deck-size law.
-
-    create mode ({mode: create}): the SAME conscription grammar but the
-    recruit is created into hand instead of replacing a card — net
-    POSITIVE delta, therefore Uncommon+ only (lint-enforced on her sheet).
-
-    The transformed pick is the _worst_card in hand (the player conscripts
-    chaff, not payoffs), excluding kit cards (v1.9 invariant) and cards
-    that are already companions (re-conscripting a recruit is rules-legal
-    but pilot-daft; excluding it here is pilot judgement, not law).
-    Replacement happens AT the original index (CardCmd.Transform parity,
-    same argument as transform_in_hand)."""
-    from tier0.content import loader                # late import (cycle)
-    pool = loader.companion_pool(fx.get("nation", "inazuma"))
-    for _ in range(_amount(state, fx.get("amount", 1))):
-        recruit = copy.deepcopy(state.rng.choice(pool))
-        if "cost_override" in fx:
-            recruit.cost = fx["cost_override"]
-        elif isinstance(recruit.cost, int):
-            recruit.cost = max(0, recruit.cost + C.CONSCRIPT_COST_DELTA)
-        recruit.exhaust = True
-        recruit.conscripted = True
-        if fx.get("mode") == "create":
-            _add_token(state, recruit, "hand")
-            continue
-        hand = state.player.hand
-        # ROTATION LAW ([USER] 2026-08-23): a Muster transforms one of HER
-        # cards. A Status or a Curse is not a recruit -- conscripting a
-        # Dazed used to be free curse removal that also paid Charge when the
-        # recruit rotated out. Unconditional here (the verb is hers alone;
-        # the shared exhaust_from keys the same law on the relic hook).
-        candidates = [c for c in hand
-                      if not c.kit_card and not c.is_companion
-                      and not c.is_junk]
-        if not candidates:
-            state.emit("conscript_whiffed")
-            return
-        victim = _worst_card(candidates)
-        hand[hand.index(victim)] = recruit
-        state.emit("conscript", was=victim.id, into=recruit.id)
-
-
 def prevent_damage_exhaust(state: CombatState, incoming: int) -> int:
     """Kokomi's prevention ward (kickoff §2.4): the first time each turn an
     attack would deal unblocked damage, prevent up to the ward's stacks and
@@ -5071,7 +4209,7 @@ def _op_remember_card(state: CombatState, fx: dict, card: Card) -> None:
 
 
 # ---------------------------------------------------------------------------
-# THE KLEE OVERHAUL'S OPS (QUARANTINED, C.KLEE_OVERHAUL).
+# THE KLEE OVERHAUL'S OPS (C.KLEE_OVERHAUL).
 #
 # THE ARM IS BUILT NOW (`EB-312`). These eight used to RAISE, on the slice
 # packet's sec.5 ("All of it goes behind the prototype switch, C# first... The
@@ -5277,8 +4415,6 @@ def _op_plant_bomb_copy_largest(state: CombatState, fx: dict,
     klee_overhaul.place_copy_of_largest(state, dest[0] if dest else None)
 
 
-
-
 def _op_merge_bombs(state: CombatState, fx: dict, card: Card) -> None:
     """Careful Arrangement. See `klee_overhaul.merge_all_to` for the two
     defaults the card text does not state."""
@@ -5451,7 +4587,7 @@ def _op_return_to_hand(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.mark_return_to_hand(state)
 
 
-# --- THE KOKOMI OVERHAUL, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---------
+# --- THE KOKOMI OVERHAUL, DRAFT 6 (C.KOKOMI_OVERHAUL) ---------
 #
 # THE ARM IS BUILT NOW. It used to refuse the way the Klee arm above still
 # does, on its slice packet's sec.5 ("the Python sim is not brought up for
@@ -5672,8 +4808,6 @@ def _op_open_casket(state: CombatState, fx: dict, card: Card) -> None:
     kokomi_plan.open_casket(state)
 
 
-
-
 def _op_cancel_all_plans_cash(state: CombatState, fx: dict,
                               card: Card) -> None:
     """Ebb Tide (`EB-643`). Per ENTRY and not per carry-out; see
@@ -5699,15 +4833,12 @@ def _op_redirect_queued_plans(state: CombatState, fx: dict,
     kokomi_plan.redirect_queued_plans(state, targets[0] if targets else None)
 
 
-
-
 def _op_remove_debuff(state: CombatState, fx: dict, card: Card) -> None:
     """Cleansing Wave's cleanse. The reading (the FIRST standing debuff, no
     choice offered) is recorded at `kokomi_plan.remove_one_debuff`."""
     if not kokomi_plan.live(state):
         _op_kokomi_overhaul_off(state, fx, card)      # always raises
     kokomi_plan.remove_one_debuff(state)
-
 
 
 # ----------------------------------------------------------------------
@@ -5786,7 +4917,7 @@ OPS = {
     "damage": _op_damage,
     "block": _op_block,
     "block_next_turn": _op_block_next_turn,
-    # QUARANTINED (C.COMPANION_OVERHAUL) -- the Inazuma arm's one new op.
+    # (C.COMPANION_OVERHAUL) -- the Inazuma arm's one new op.
     "block_half_damage": _op_block_half_damage,
     BLOCK_AT_TURN_START: _op_block_at_turn_start,
     "draw": _op_draw,
@@ -5805,16 +4936,12 @@ OPS = {
     "detonate": _op_detonate,
     "move_bombs": _op_move_bombs,
     "modify_bombs": _op_modify_bombs,
-    "burst_energy": _op_burst_energy,
     "swirl": _op_swirl,
     "refresh_all_auras": _op_refresh_all_auras,
     "buff_next_attack": _op_buff_next_attack,
     "cost_mod": _op_cost_mod,
     "gain_spark": _op_gain_spark,
     "spend_spark": _op_spend_spark,
-    "gain_encore": _op_gain_encore,
-    "spend_encore": _op_spend_encore,
-    "spotlight_designate": _op_spotlight_designate,
     # FURINA, THE SALON'S TAB.
     "stage_drain": _op_stage_drain,
     "stage_repay": _op_stage_repay,
@@ -5827,12 +4954,6 @@ OPS = {
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,
     "drain_fanfare": _op_drain_fanfare,
-    # QUARANTINED (R213 B): the Furina reframe's drain, slice two.
-    "salon_bow": _op_salon_bow,
-    "salon_rotate": _op_salon_rotate,
-    "salon_perform": _op_salon_perform,
-    "generate_guest_star": _op_generate_guest_star,
-    "copy_spotlighted_in_hand": _op_copy_spotlighted_in_hand,
     "heal": _op_heal,
     "add_card": _op_add_card,
     "discard": _op_discard,
@@ -5849,16 +4970,7 @@ OPS = {
     "copy_companion_in_hand": _op_copy_companion_in_hand,
     "replay_next_companion": _op_replay_next_companion,
     "copy_companions_played_this_combat": _op_copy_companions_played,
-    # --- Kokomi (kickoff v1 §7) ---
-    "gain_charge": _op_gain_charge,
-    # QUARANTINED (R213 E1) -- prototype surface only; see _op_spend_charge.
-    "spend_charge": _op_spend_charge,
-    "conscript": _op_conscript,
-    "summon_kurage": _op_summon_kurage,          # v0.4 O4 salvage
-    # QUARANTINED (C.KURAGE_MEMORY v3) -- prototype surface only, exactly as
-    # `spend_charge` above. No card, no sheet row, no C#; the hook the
-    # acceleration keyword ("Stir", provisional) will call if it is authored.
-    # --- Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ---
+    # --- Klee overhaul, slice one (C.KLEE_OVERHAUL) ---
     # BUILT (`EB-312`): `engine/klee_overhaul.py` is the twin, and every arm
     # here is one call into it. They refuse with the flag off or on a seat that
     # is not Klee -- see `_op_klee_overhaul_off`.
@@ -5906,7 +5018,7 @@ OPS = {
     "fetch_from_discard": _op_fetch_from_discard,
     "add_random_companion": _op_add_random_companion,
     "grant_kapow_each_turn": _op_grant_kapow_each_turn,
-    # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) -----
+    # --- Kokomi overhaul, DRAFT 6 (C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.
     #
@@ -6040,12 +5152,6 @@ def resolve_card(state: CombatState, card: Card) -> None:
         varka_oath.begin_play(state, card)
     try:
         _resolve_card_bound(state, card)
-        # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): a slice
-        # row carries no `effects:`; its printed text resolves here, inside
-        # the play's bound aim. Dead for every card without the `fv2` tag.
-        if "fv2" in card.tags:
-            from tier0.engine import furina_v2      # late: avoids the cycle
-            furina_v2.resolve_card(state, card)
         # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the same door
         # for the research proposal's rows. Dead without the `ftd` tag.
         if "ftd" in card.tags:
@@ -6059,12 +5165,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
 
 
 def _resolve_card_bound(state: CombatState, card: Card) -> None:
-    # Control provenance (§2.2a) — with the kickoff ask §6.7 attribution
-    # (PROPOSED): a CONSCRIPTED companion is self-sourced (Kokomi paid a
-    # card of her own deck for it), so its control does not count toward
-    # SUPPORT_CARRY; drafted companions count normally.
-    state.current_card_companion = (card.is_companion
-                                    and not card.conscripted)
+    # Control provenance (§2.2a): a companion's control counts toward
+    # SUPPORT_CARRY.
+    state.current_card_companion = card.is_companion
     state.reactions_this_card = 0
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
@@ -6076,24 +5179,20 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     state.exhaust_selection = []
     state.block_gains_this_card = 0
     state.block_gained_this_card = 0
-    # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's "half the damage dealt", on
+    # (C.COMPANION_OVERHAUL). Gorou's "half the damage dealt", on
     # the same line as the two Block counters and for the same scoping reason:
     # the card after an Attack must bank nothing from it.
     state.mi_damage_dealt_this_card = 0
     state.discards_this_card = 0
-    # QUARANTINED (R213 B), on the same line and for the same scoping reason:
+    # (R213 B), on the same line and for the same scoping reason:
     # the card after a drain must not read the drain's number.
     state.fanfare_drained_this_card = 0
     # FURINA'S STAGE, on the same line as the drain above and for its reason:
     # the card after a Spend must not read the Spend's number.
     state.stage_spent_this_card = 0
     state.last_drawn_type = ""
-    state.salon_replacements_this_card = 0
-    # `EB-412`: the pre-play half of the replacement rule, seeded HERE because
-    # here is the last moment the company is the one the card face read.
-    state.salon_will_replace_this_card = _card_will_replace(state, card)
     state.detonations_at_card_start = state.detonations_total
-    # QUARANTINED (C.KLEE_OVERHAUL). Big Badda Boom's play-scoped memory,
+    # (C.KLEE_OVERHAUL). Big Badda Boom's play-scoped memory,
     # opened BY THE CARD THAT READS IT and by no other row -- the emitter
     # prepends `KleeOverhaulLedger.For(...).BeginPlay()` to exactly the rows
     # carrying `damage_set_off_total`, and `klee_overhaul.begin_play` asks the
@@ -6116,38 +5215,19 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     state.target_had_aura = bool(tgt and tgt.aura)
     # Per-card flat attack bonus. Computed by the shared pure helper so the
     # pilot's estimate cannot drift from what actually resolves (v0.4 W1);
-    # the two side effects the helper must NOT have live here instead:
-    # Bennett's next_attack_up is CONSUMED by this play, and the Garment
-    # divisor's KNOB_READS tick counts real resolutions, not estimates.
+    # the side effect the helper must NOT have lives here instead: Bennett's
+    # next_attack_up is CONSUMED by this play.
     bonus = flat_attack_bonus(state, card, state.current_card_cost)
     if card.type == "attack":
         p = state.player
         p.powers.pop("next_attack_up", 0)
-        if p.powers.get("ceremonial_garment", 0) and p.charge:
-            KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
-                KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
-            # EB-78 (2): the same resolution, tallied for the reads-per-turn
-            # distribution. Sharing this site's condition is the point --
-            # KNOB_READS already established it as the place a real Garment
-            # read happens, as opposed to the pilot's estimate of one.
-            resources.note_charge_read(state, "garment", card=card.id)
-        # Garment attack rider (v0.4 §1.3): while the state holds, her
-        # attacks ALSO restore the party -- her burst's actual behaviour,
-        # translated to Block under the R52 healing law via the Charlotte
-        # precedent. Applied on the play, before the damage resolves, so
-        # it is up in time for the same turn's enemy swing.
-        if p.powers.get("ceremonial_garment", 0):
-            p.block += C.GARMENT_ATTACK_BLOCK
-            state.emit("block", amount=C.GARMENT_ATTACK_BLOCK)
-            KNOB_READS["GARMENT_ATTACK_BLOCK"] = (
-                KNOB_READS.get("GARMENT_ATTACK_BLOCK", 0) + 1)
     state.current_attack_bonus = bonus
     # VARKA: Stormward Stance's part of that bonus, which his elemental
     # follow-up hits (not Anemo) do not take. A no-op for anyone else.
     varka_oath.note_attack_bonus(state, card)
     state.mc_attack_element_override = companion_overhaul_card_start(state, card)
 
-    # THE PLAN AIM (QUARANTINED, C.KOKOMI_OVERHAUL, draft 6). "Played on the
+    # THE PLAN AIM (C.KOKOMI_OVERHAUL, draft 6). "Played on the
     # Bake-Kurage" is a property of the PLAY -- `CardPlay.Target` in the mod,
     # decided by the player before `OnPlay` is entered -- so it is asked HERE,
     # after the per-card context is open and before the first op, which is the
@@ -6162,14 +5242,7 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
         kokomi_plan.schedule(state, card)
         return
 
-    try:
-        _resolve_effects(state, card.effects, card)
-    except ChargeUnpaid:
-        # QUARANTINED (R213 E1). The card stops where the price failed, the
-        # mod's `return` out of OnPlay. Everything already paid stays paid --
-        # the energy, the card leaving hand -- because that is what the mod
-        # does too; only the effects after the unpayable price are skipped.
-        return
+    _resolve_effects(state, card.effects, card)
     if state.repeat_requested:                          # Perfect Timing
         times, state.repeat_requested = state.repeat_requested, 0
         for _ in range(times):
@@ -6200,7 +5273,7 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # would stop being twins the moment one of them is played.
     if card.enchant_first_play_damage or card.enchant_first_play_effects:
         card.enchant_played_this_combat = True
-    # QUARANTINED (C.KOKOMI_OVERHAUL). Core pass, TREATISE: a card with a Plan
+    # (C.KOKOMI_OVERHAUL). Core pass, TREATISE: a card with a Plan
     # line played NORMALLY -- a write returned above, before any of this.
     kokomi_plan.note_face_up_plan_card(state, card)
 
@@ -6240,7 +5313,7 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # double-count class the AoE-blindness finding warned about.
     bonus = (p.powers.get("next_attack_up", 0)
              + p.powers.get("attack_up_this_turn", 0))
-    # THE MONDSTADT COMPANION OVERHAUL'S THREE ATTACK RIDERS (QUARANTINED).
+    # THE MONDSTADT COMPANION OVERHAUL'S THREE ATTACK RIDERS.
     # Flat, and folded in exactly where `next_attack_up` is folded in --
     # they say the same English ("deals N more") and a second summing site
     # is how two riders come to disagree about whether Strength lands
@@ -6288,11 +5361,6 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
         if not valuation:                          # EB-253, see the docstring
             resources.note_fanfare_read(state, "attack_power")
         bonus += n5 * (resources.readable(p) // 5)
-    # Ceremonial Garment (Kokomi kit, kickoff §2.2 Shape B): while the state
-    # is active her attack cards READ Charge, scaled down by the divisor
-    # knob — repeated-but-bounded payoff, never a spend.
-    if p.powers.get("ceremonial_garment", 0) and p.charge:
-        bonus += p.charge // C.GARMENT_CHARGE_DIVISOR
     # VARKA (`varka_oath.attack_bonus`): Stormward Stance, on his Anemo
     # Attacks while his current element's Oath is at the bar. 0 for anyone
     # else.
@@ -6304,47 +5372,6 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
 
 def player_turn_start_triggers(state: CombatState) -> None:
     p = state.player
-    if ("ethereal_spotlight" in p.relic_hooks           # Furina's relic
-            and not both_spotlight_modes(state)):
-        # Selector to hand each turn (kickoff §3.1). Ethereal: unplayed
-        # copies vanish at end of turn (combat loop), so the deck never
-        # silts up with selectors. Emits its own event, NOT add_card --
-        # whether selector cadence counts toward A5 velocity is an open
-        # accounting ruling; until ruled it must not inflate the axis.
-        #
-        # THE SELECTOR STOPS ARRIVING under R2's upgrade: with both modes
-        # always on it has nothing left to choose, so C# CurtainNeverFalls
-        # deliberately does NOT override AfterPlayerTurnStart the way the
-        # base EtherealSpotlightRelic does. Funnel Contract §3 is intact --
-        # the designation funnel is not removed, moved or renamed and every
-        # existing caller (a drafted `spotlight_designate` card) still routes
-        # through it. An upgraded Furina simply never FIRES it again.
-        from tier0.content import loader                # late import (cycle)
-        if not any(c.id == "ethereal_spotlight" for c in p.hand):
-            # HAND-FULL FALLBACK (sitting 2026-08-06, family X14 leg (b)):
-            # "if the hand is full, one random card is discarded before the
-            # spotlight is added." Before this the grant was simply skipped,
-            # so the relic that exists to guarantee Furina a play was exactly
-            # what a jammed hand starved.
-            #
-            # The victim pool is _op_discard's pool rule -- kit cards are
-            # never fodder (the v1.9 invariant) -- and the draw comes from the
-            # DEDICATED selector stream, not state.rng.
-            if len(p.hand) >= C.MAX_HAND_SIZE:
-                pool = [c for c in p.hand if not c.kit_card]
-                if pool:
-                    victim = state.selector_rng.choice(pool)
-                    remove_instance(p.hand, victim)
-                    p.discard_pile.append(victim)
-                    state.discards_this_turn += 1
-                    note_rotation_event(state)   # EB-118 sec.4.4, seam 3 of 3
-                    state.emit("discard", card=victim.id)
-                    state.emit("selector_hand_full_discard", card=victim.id)
-            # A hand of nothing but kit cards has no legal victim; the grant is
-            # skipped as before rather than breaking the kit invariant.
-            if len(p.hand) < C.MAX_HAND_SIZE:
-                p.hand.append(loader.get_card("ethereal_spotlight"))
-                state.emit("selector_granted")
     n = p.powers.pop("block_next_turn", 0)              # Charlotte
     if n:
         # Deliberately raw: this payout predates both block funnels and
@@ -6396,35 +5423,6 @@ def player_turn_start_triggers(state: CombatState) -> None:
             # stale instance list waiting for the next application to append to.
             p.powers.pop(BLOCK_AT_TURN_START, None)
             p.timed_power_amounts.pop(BLOCK_AT_TURN_START, None)
-    # --- the two Ancient income powers (R127 / EB-30m) ------------------
-    # PLACED ABOVE `salon_tick` DELIBERATELY, and above the whole income
-    # group below it (celestial_gift / masque_red_death / spark_per_turn all
-    # sit AFTER the upkeep). That asymmetry is the point rather than an
-    # accident of insertion order: EB-2 was the C#-side race between
-    # SalonPowers' upkeep and FurinaResources' Encore income inside one
-    # `AfterPlayerTurnStart` broadcast, and this is the sim declaring which
-    # way that race falls -- income BEFORE upkeep, so the card's printed
-    # "at the start of your turn" funds the Salon ticks of the same turn
-    # instead of the next one. Do not tidy these down to join the other
-    # per-turn blocks; tier0/tests/test_eb30m_ancients.py pins the order
-    # against exactly that edit.
-    #
-    # THE C# NOW MATCHES BY CONSTRUCTION (2026-08-07): both income powers
-    # were staged out of `AfterPlayerTurnStart` into `BeforeSideTurnStart`,
-    # a strictly earlier broadcast, so the upkeep can no longer run first.
-    # That puts them before the C# hand draw as well, which is where this
-    # hook already sat -- and it is inert either way, because neither power
-    # reads the hand, the deck or the energy: each only moves a meter.
-    n = p.powers.get("charge_per_turn", 0)         # Princess of Watatsumi
-    # R276: under Kokomi's arm the card pays on the Plan instead
-    # (`kokomi_plan.PRINCESS_OF_WATATSUMI`); the mod applies no
-    # ChargePerTurnPower there, so this entry is never read.
-    if n and not kokomi_plan.live(state):
-        resources.gain_charge(state, n, "charge_per_turn")
-    n = p.powers.get("encore_per_turn", 0)         # All the World's a Stage
-    if n:
-        resources.gain_encore(state, n, source="encore_per_turn")
-    salon_tick(state)                                   # Furina (kickoff §5)
     # Nicole -- REDESIGNED 2026-07-26 (red-pen, item 4). Was "+N flat attack
     # damage, and 4 Block each turn"; is now "gain N Strength and 4 Block each
     # turn". The rationale on the record: a 2-cost Power must clear a high bar
@@ -6473,8 +5471,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
 
 
 def companion_overhaul_turn_start(state: CombatState) -> None:
-    """THE MONDSTADT COMPANION OVERHAUL's start-of-turn block (QUARANTINED,
-    `C.COMPANION_OVERHAUL`). Three powers, and no other engine site reads them.
+    """THE MONDSTADT COMPANION OVERHAUL's start-of-turn block (`C.COMPANION_OVERHAUL`). Three powers, and no other engine site reads them.
 
     A SEPARATE FUNCTION, called from the tail of
     `player_turn_start_triggers`, for two reasons that agree. It keeps a
@@ -6567,17 +5564,17 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         deal_damage_to_enemy(state, enemy, n, element="pyro",
                              source="companion")
     inazuma_overhaul_turn_start(state)
-    # ---- and KLEE'S COVEN PERSONALS, last (QUARANTINED, R236) --------------
+    # ---- and KLEE'S COVEN PERSONALS, last (R236) --------------
     # Qiqi's Herald applies Cryo, which can resolve a reaction, so it runs
     # after the overhaul's own start-of-turn powers in one written-down
     # sequence (Mona's omen, which Vulnerabled the board here, left
     # 2026-10-03). `tier0.engine.companion_coven`.
     companion_coven.turn_start(state)
-    # THE STAND-IN SEAM's one start-of-turn rule after it -- Jean's Lion's
-    # Fang, Fair Protector, Grounded's shape with a card on it. LAST, and
-    # commutative with everything above: it grants Block and a draw and reads
-    # only the explosion counter, which nothing here writes.
-    companion_standins.turn_start(state)
+    # Jean's Lion's Fang, Fair Protector, after it -- Grounded's shape with a
+    # card on it. LAST, and commutative with everything above: it grants Block
+    # and a draw and reads only the explosion counter, which nothing here
+    # writes.
+    lions_fang.turn_start(state)
     _companion_overhaul_turn_start_late(state)
 
 
@@ -6617,8 +5614,7 @@ def _companion_overhaul_turn_start_late(state: CombatState) -> None:
 
 
 def inazuma_overhaul_turn_start(state: CombatState) -> None:
-    """THE INAZUMA companion overhaul's start-of-turn block (QUARANTINED,
-    `C.COMPANION_OVERHAUL`). Three readers, and no other engine site reads them.
+    """THE INAZUMA companion overhaul's start-of-turn block (`C.COMPANION_OVERHAUL`). Three readers, and no other engine site reads them.
 
     AFTER the Mondstadt block and not interleaved with it, for the reason that
     block sits after the shipped income group: a second nation's rewrites are
@@ -6675,135 +5671,6 @@ def inazuma_overhaul_turn_start(state: CombatState) -> None:
         enemy = state.rng.choice(state.living_enemies)
         deal_damage_to_enemy(state, enemy, C.MI_SURPRISE_DISPATCH_DMG,
                              element=None, source="companion")
-
-
-def salon_tick_amount(state: CombatState, member: str, paid: bool,
-                      note: bool = True) -> int:
-    """What this member's tick is worth RIGHT NOW: the printed base plus the
-    Focus term and Grand Salon (_salon_amount), then the dry reduction when
-    the member cannot pay. Crabaletta and Chevalmarin print damage, the Usher
-    prints Block; each member prints exactly one numeric, so one reader
-    answers for all three.
-
-    The mirror of C# SalonMemberPower.TickValue, and the reason both exist:
-    the resolution path and every reader of "what will this member do" must
-    be the same expression, not two copies that agree until one is edited.
-    `note=False` is that same expression for a SCORE-time forecaster -- see
-    `_salon_amount`.
-    """
-    spec = C.SALON_MEMBERS[member]["tick"]
-    base = spec.get("damage", 0) or spec.get("block", 0)
-    return _salon_dry(_salon_amount(state, base, note=note), paid)
-
-
-def salon_aim_pool(living: list) -> list:
-    """The bodies a member's roll may pick (`EB-451`).
-
-    Every living enemy, SKIPPING A MINION while a non-Minion stands. Furina r7
-    fight 7 spent the run's one PAID performance -- every other member in every
-    other fight performed dry -- on the 6-HP Eye with Teeth, which revives at
-    full, while the body that mattered stood beside it.
-
-    R250'S SHAPE, ONE ROLLER OVER. It ruled that a Plan aims a non-Minion
-    unless it is aimed, over the same evidence, and `kokomi_plan.front_enemy`
-    reads `is_minion` for it. This reads the same flag, and falls back to the
-    whole list on an all-Minion board for the same reason: a performance that
-    lands on nothing is worse than one that lands on the decoy.
-
-    Twin: `SalonPowers.AimPool`, which both the tick and the bow roll over.
-    """
-    standing = [e for e in living if not e.is_minion]
-    return standing or living
-
-
-def salon_member_act(state: CombatState, member: str,
-                     free: bool = False) -> bool:
-    """ONE member's slot passive, with the full standard bill: the Encore
-    upkeep, the dry three-quarters when it goes unpaid, the Focus/Grand-Salon
-    scaling, the burst particle, and the `salon_tick` telemetry row.
-
-    THE ONLY implementation of a member acting. `salon_tick` runs it once per
-    member at the start of the player turn; the `salon_perform` op runs it on
-    demand for the leftmost member. A second copy of this body is the defect
-    this shape exists to make impossible -- a card that performs a member
-    must not be able to drift from the upkeep that performs the same member.
-
-    `free` (`EB-558`, R260's arithmetic) IS THE ONE PERFORMANCE NOBODY BUYS:
-    the relic's opening arrival. It performs PAID -- full value, not the dry
-    three-quarters -- and spends nothing, which is [USER]'s own analogy for the
-    pick ("one free Osty"): the Necrobinder's pet is summoned and out, and
-    nothing on turn one is billed for it being there. It is a PARAMETER on this
-    one function rather than a branch at the fielding site for this file's
-    standing reason -- a member performing has one implementation, and a caller
-    that wanted a free one by writing its own body would be the drift the shape
-    exists to prevent.
-
-    Returns False when the stage cannot act at all (the player is dead, or
-    there is no living enemy left to act against) -- the caller's break
-    condition, kept here so the on-demand verb inherits it rather than
-    restating it.
-    """
-    p = state.player
-    if not p.alive or not state.living_enemies:
-        return False
-    spec = C.SALON_MEMBERS[member]["tick"]
-    paid = free or p.encore >= C.SALON_TICK_ENCORE_COST
-    state.emit("salon_tick", member=member, paid=paid)
-    if paid and not free:
-        # No `card`: the upkeep bill is the STAGE's, not any one card's,
-        # and the per-member cut already exists on the `salon_tick` row
-        # that tier05.encore_telemetry reads.
-        resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
-                               "salon_upkeep")
-    if spec.get("damage", 0):
-        # `EB-451`: the roll's pool, not the raw board.
-        enemy = state.rng.choice(salon_aim_pool(state.living_enemies))
-        # `EB-588`: `powered=False` -- THE DEALER'S TERMS DO NOT ENTER A
-        # PERFORMANCE. Weak cut a member performance 6 to 4 twice (Furina r15
-        # lane 2 (c) 4) while the Salon paragraph beside it says "a performance
-        # is not an Attack and not a hit: Vulnerable moves it" and names no
-        # Weak. ONE FLAG, so it drops Strength with the Weak -- that is what
-        # `powered` means in both engines, and a parameter meaning half of it
-        # is what `deal_damage_to_enemy`'s own docstring refuses. What a
-        # member's number IS stays the member's own: the printed base, the
-        # Fanfare Focus term and Grand Salon, through `salon_tick_amount`.
-        # C# twin: `SalonMemberPower.PerformMember`'s `powered: false`.
-        deal_damage_to_enemy(state, enemy,
-                             salon_tick_amount(state, member, paid),
-                             element="hydro", source="salon", powered=False)
-    if spec.get("block", 0):
-        amt = salon_tick_amount(state, member, paid)
-        p.block += amt
-        state.emit("block", amount=amt)
-    if p.burst_max:
-        # §1 particle economy
-        resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
-    return True
-
-
-def salon_tick(state: CombatState) -> None:
-    """Salon v2 (rework plan §1): each active member performs its UNIQUE
-    slot passive at the START of the player turn, in queue order
-    (Klee-bomb timing, not Oz timing -- the sheet-pass 1 measurement
-    decision stands: end-of-turn upkeep drained the buffer BEFORE enemy
-    hits and zeroed her elite A4; start-of-turn ticks let absorption take
-    first bite and the upkeep eats what survived the night). Upkeep is
-    unchanged from v1: each member pays 1 Encore for full numerics; a dry
-    member cannot overdraw HP and resolves numerics at three-quarters
-    (hydro application on damage ticks still applies either way). Numeric
-    amounts carry the Fanfare Focus term + Grand Salon (_salon_amount)."""
-    p = state.player
-    # D8 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY: the snapshot is
-    # taken BEFORE the first member spends, because the question the D8 lever
-    # is about is whether the stage arrives at upkeep with enough fuel to run
-    # itself -- read it after the loop and a stage that drained itself to
-    # exactly zero looks identical to one that never had a member at all.
-    if p.salon:
-        state.emit("salon_upkeep", members=len(p.salon), encore=p.encore,
-                   cost=C.SALON_TICK_ENCORE_COST * len(p.salon))
-    for member in list(p.salon):
-        if not salon_member_act(state, member):
-            break
 
 
 def _exhaust_autoplay_sweep(state: CombatState) -> None:
@@ -6877,56 +5744,6 @@ def player_turn_end_triggers(state: CombatState) -> None:
             deal_damage_to_enemy(state, enemy, C.OZ_DMG,
                                  element="electro", source="companion")
         p.powers["oz_summon"] -= 1
-    if p.powers.get("kurage_summon", 0):              # Kokomi (v0.4 §1)
-        # The jellyfish's turn-end pulse: a little damage that READS the
-        # Charge bank (never spends it), hydro application, and Block for
-        # the party. This is where O4 puts the periodic output that v0.3
-        # had loaded onto the Burst -- canon keeps the metronome on the
-        # summon, so the instrument stops reading it as frontload.
-        # R73/G2: "Before Sun and Moon" adds +1 to the MULTIPLIER, and
-        # stacks -- two copies read the bank at +2. Stacking was ratified
-        # deliberately over a ban ([USER], G2): draft dilution self-corrects
-        # at full roster, and the compounding pair is a C4 telemetry watch
-        # rather than a rule. Note this multiplies an uncapped, never-spent
-        # bank (R80), so it is the steepest term the sheet can offer and the
-        # only sanctioned way back up from R73's cut.
-        amp = p.powers.get("kurage_amp", 0)
-        multiplier = C.KURAGE_PULSE_PER_CHARGE + amp
-        dmg = C.KURAGE_PULSE_BASE + p.charge * multiplier
-        KNOB_READS["KURAGE_PULSE_PER_CHARGE"] = (
-            KNOB_READS.get("KURAGE_PULSE_PER_CHARGE", 0) + 1)
-        resources.note_charge_read(state, "kurage_pulse")   # EB-78 (2)
-        # P2 runaway telemetry (playtest sprint, Track P). Report-only; no
-        # rule reads this event. The x4 bank read is the one term in the kit
-        # that only ever grows, and [USER]'s standing caveat is "watch act 3".
-        # Emitting the pulse SIZE (with the bank that produced it) means the
-        # next sheet to add a Charge source re-arms that question by itself,
-        # instead of it depending on someone remembering to ask. Emitted
-        # before the living-enemies check so a pulse into an empty board is
-        # still a sample of the CURVE -- filtering by what happened to be
-        # standing would bias the tail downward exactly when fights end fast.
-        # `amp` rides the event so C4's overlap watch can separate the two
-        # ways the tail rises -- a bigger bank, or a bought multiplier --
-        # without re-deriving either from the deck list.
-        state.emit("kurage_pulse", amount=dmg, charge=p.charge,
-                   amp=amp, landed=bool(state.living_enemies))
-        if state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
-            deal_damage_to_enemy(state, enemy, dmg, element="hydro",
-                                 source="companion")
-        # Block lands whether or not an enemy was standing: the healer's
-        # mending is Block under the R52 healing law. The BASELINE is off
-        # since the v0.4 starter rework (KURAGE_PULSE_BLOCK 0); the mending
-        # is now DRAFTED, via the kurage_ward power (Kurage's Oath). Both
-        # terms ride the same line so restoring the baseline stays a
-        # one-constant change.
-        blk = C.KURAGE_PULSE_BLOCK + p.powers.get("kurage_ward", 0)
-        if blk:
-            p.block += blk
-            state.emit("block", amount=blk)
-            KNOB_READS["KURAGE_PULSE_BLOCK"] = (
-                KNOB_READS.get("KURAGE_PULSE_BLOCK", 0) + 1)
-        p.powers["kurage_summon"] -= 1
     if p.powers.get("witchs_flame", 0):                 # Durin (permanent)
         # Turn Klee's Pyro saturation into a setup window instead of adding
         # still more Pyro. Each consumed aura pays damage + Burst Energy, then
@@ -6939,9 +5756,6 @@ def player_turn_end_triggers(state: CombatState) -> None:
             enemy.aura_turns_left = 0
             deal_damage_to_enemy(state, enemy, damage,
                                  element=None, source="companion")
-            if p.burst_max:
-                resources.gain_burst(
-                    state, C.WITCHS_FLAME_BURST, "witchs_flame")
             state.emit("witchs_flame_consumed", target=enemy.name,
                        burst_energy=C.WITCHS_FLAME_BURST)
     if p.powers.get("solar_isotoma", 0):                # Albedo, 3 turns
@@ -6951,8 +5765,7 @@ def player_turn_end_triggers(state: CombatState) -> None:
 
 
 def companion_overhaul_turn_end(state: CombatState) -> None:
-    """THE MONDSTADT COMPANION OVERHAUL's end-of-turn block (QUARANTINED,
-    `C.COMPANION_OVERHAUL`). Five powers and one latch, in this order
+    """THE MONDSTADT COMPANION OVERHAUL's end-of-turn block (`C.COMPANION_OVERHAUL`). Five powers and one latch, in this order
     (`EB-470` moved the sixth, Lisa's Lightning Rose, to the start of the
     turn -- see `companion_overhaul_turn_start`):
 
@@ -7113,8 +5926,7 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
 
 
 def inazuma_overhaul_turn_end(state: CombatState) -> None:
-    """THE INAZUMA companion overhaul's end-of-turn block (QUARANTINED,
-    `C.COMPANION_OVERHAUL`). Eight powers, in this order:
+    """THE INAZUMA companion overhaul's end-of-turn block (`C.COMPANION_OVERHAUL`). Eight powers, in this order:
 
         mi_juuga              Gorou   -- Geo volley, one target
         mi_daruma             Sayu    -- the HP-bar split: a volley or Block
@@ -7331,7 +6143,7 @@ def _mc_most_auras(state: CombatState):
 
 
 # =============================================================================
-# THE MONDSTADT COMPANION OVERHAUL, SECOND WAVE -- THE HOOKS (QUARANTINED,
+# THE MONDSTADT COMPANION OVERHAUL, SECOND WAVE -- THE HOOKS (
 # `C.COMPANION_OVERHAUL`).
 #
 # The first pass shipped twenty-one of the approved workshop's thirty-four
@@ -7404,7 +6216,7 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
     if p.powers.get("mc_lightning_fang", 0):
         override = "electro"
     # THE INAZUMA ARM'S TWO RIDERS join the same sequence, at the same two
-    # tiers, in sheet order after Mondstadt's (QUARANTINED):
+    # tiers, in sheet order after Mondstadt's :
     #   mi_kyouka      Ayato -- Hydro, every Attack, 2 turns   (blanket)
     #   mi_crowfeather Sara  -- Electro, one Attack            (one-shot)
     # Blanket first, one-shots after, LAST WINS -- the rule this function
@@ -7503,8 +6315,7 @@ def companion_overhaul_block_absorbed(state: CombatState, enemy: Enemy,
     Fires ONCE PER ABSORBING HIT while the mark stands, which is what "when
     this Block absorbs damage" says: it is a trigger on the absorption, not on
     the card and not on the turn.
-    THE KLEE ARM'S ONE READER OF THE SAME EVENT (QUARANTINED,
-    `C.KLEE_OVERHAUL`, `EB-732`) IS FIRST AND HAS ITS OWN FLAG. Return to
+    THE KLEE ARM'S ONE READER OF THE SAME EVENT (`C.KLEE_OVERHAUL`, `EB-732`) IS FIRST AND HAS ITS OWN FLAG. Return to
     Sender is the paws' construction with a Bomb on the attacker instead of an
     aura, and it rides this function rather than a fourth call site because
     `blocked` exists nowhere else in this engine -- the same argument that put
@@ -7527,7 +6338,7 @@ def companion_overhaul_block_absorbed(state: CombatState, enemy: Enemy,
             p.powers["mc_icy_paws"] = left
         else:
             p.powers.pop("mc_icy_paws", None)
-    # THE INAZUMA ARM's second reader of the same mark (QUARANTINED). Thoma's
+    # THE INAZUMA ARM's second reader of the same mark. Thoma's
     # Blazing Barrier: "Gain 6 Block. Whenever this Block absorbs damage, gain
     # 3 Block." Identical construction to the paws above -- one pool, so "this
     # Block" is a MARK on it, marked-eaten-FIRST, spent by whatever the hit
@@ -7588,14 +6399,14 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
     # stack (so two Swirls before one Attack bank twice, which is what
     # "whenever" says); the element is latched on the player, LAST WINS.
     # KLEE'S HEXEREI FAMILY, the third and fourth readers of this event
-    # (QUARANTINED, R236 sec.3): Albedo's Tectonic Tide pays on ANY reaction,
+    # (R236 sec.3): Albedo's Tectonic Tide pays on ANY reaction,
     # Fischl's Sinful Hex on an ELECTRO one -- which is derived from `name` and
     # `aura` rather than passed, so no signature here widened for the slice.
     # `tier0.engine.companion_hexerei` argues both, and why a volley that can
     # react again is safe to fire from inside this site.
     companion_hexerei.note_reaction(state, enemy, name, aura)
     if name == "swirl":
-        # THE INAZUMA ARM'S Swirl WINDOW (QUARANTINED). Heizou's Heartstopper
+        # THE INAZUMA ARM'S Swirl WINDOW. Heizou's Heartstopper
         # Strike prints "deals 4 more for each Swirl this turn", so the count
         # is taken at the one site this engine resolves a reaction -- beside
         # Varka's latch, off the same event, so "a Swirl happened" has one
@@ -7605,7 +6416,7 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
         if n:
             p.powers["mc_swirl_charge"] = p.powers.get("mc_swirl_charge", 0) + n
             p.mc_swirl_element = aura
-        # KLEE'S COVEN, third reader of the same event (QUARANTINED, R236).
+        # KLEE'S COVEN, third reader of the same event (R236).
         # Prune's Chime latches unconditionally rather than asking whether it
         # is up, because the Attack that arms it swirls BEFORE it arms --
         # `companion_coven.note_swirl` argues it.
@@ -7637,7 +6448,7 @@ def companion_overhaul_reaction_mult(state: CombatState) -> float:
 
 
 # =============================================================================
-# THE INAZUMA COMPANION OVERHAUL -- ITS OWN TWO HOOKS (QUARANTINED,
+# THE INAZUMA COMPANION OVERHAUL -- ITS OWN TWO HOOKS (
 # `C.COMPANION_OVERHAUL`).
 #
 # Everything else the Inazuma workshop's twenty-four rows want was already

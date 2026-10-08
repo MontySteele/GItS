@@ -20,7 +20,6 @@ named in the test and not about the sum.
 
 import pytest
 
-from tier0.content import loader
 from tier0.engine import effects
 from tier0.engine.state import Card
 from tier0.pilot import policy
@@ -48,8 +47,6 @@ def modal(*bodies, labels=None) -> dict:
 BLOCK_5 = [{"op": "block", "amount": 5}]
 HIT_9 = [{"op": "damage", "amount": 9, "target": "enemy"}]
 DRAW_2 = [{"op": "draw", "amount": 2}]
-SPEND_2_DRAW_2 = [{"op": "spend_encore", "amount": 2},
-                  {"op": "draw", "amount": 2}]
 
 
 # --- (1) argmax over the existing valuations -------------------------------
@@ -92,66 +89,7 @@ def test_the_pilot_forecast_agrees_with_the_mode_that_resolves(chooser_on):
     assert list(policy._active_effects(state, [fx])) == HIT_9
 
 
-# --- (2) the overdraw penalty ----------------------------------------------
-
-def test_a_spend_the_bank_covers_is_not_penalised(chooser_on):
-    """`spend_encore_or_hp` drains Encore first, so a covered spend costs the
-    buffer and no HP -- and the buffer is what `_sustain_value` prices on the
-    other side of the ledger. The mode is worth its draw."""
-    state = make_state([make_enemy(hp=60)])
-    state.player.encore = 8
-    modes = modal(SPEND_2_DRAW_2, DRAW_2)["modes"]
-    assert policy.mode_score(state, modes[0]) \
-        == pytest.approx(policy.mode_score(state, modes[1]))
-
-
-def test_an_overdrawing_spend_pays_hp_and_loses_the_comparison(chooser_on):
-    """The same pair on an EMPTY bank. Two points of TRUE HP at
-    MODE_OVERDRAW_HP_VALUE is the whole difference, and it is enough to lose
-    to the mode that draws the same two cards for nothing."""
-    state = make_state([make_enemy(hp=60)])
-    state.player.encore = 0
-    modes = modal(SPEND_2_DRAW_2, DRAW_2)["modes"]
-    assert policy.mode_score(state, modes[0]) == pytest.approx(
-        policy.mode_score(state, modes[1]) - 2 * policy.MODE_OVERDRAW_HP_VALUE)
-    assert policy.choose_mode(state, modes) == 1
-
-
-def test_the_shortfall_is_the_penalty_not_the_spend(chooser_on):
-    """A partial bank pays the difference, not the whole spend: one point of
-    Encore covered, one point of HP charged."""
-    state = make_state([make_enemy(hp=60)])
-    state.player.encore = 1
-    mode = modal(SPEND_2_DRAW_2)["modes"][0]
-    bare = modal(DRAW_2)["modes"][0]
-    assert policy.mode_score(state, mode) == pytest.approx(
-        policy.mode_score(state, bare) - policy.MODE_OVERDRAW_HP_VALUE)
-
-
-def test_a_gain_earlier_in_the_same_body_refills_the_bank(chooser_on):
-    """The bank is walked in body ORDER because that is what the engine does
-    when a gain and a spend sit in one mode -- the gain has already landed by
-    the time the spend reads the meter."""
-    state = make_state([make_enemy(hp=60)])
-    state.player.encore = 0
-    refilled = [{"op": "gain_encore", "amount": 2},
-                {"op": "spend_encore", "amount": 2}]
-    assert policy._mode_overdraw_hp(state, {"effects": refilled}) == 0.0
-    assert policy._mode_overdraw_hp(
-        state, {"effects": list(reversed(refilled))}) == 2.0
-
-
-def test_the_overdraw_penalty_survives_resolution(chooser_on):
-    """Not only a score: the mode the chooser declined is the one that would
-    have cost HP, and taking the other one costs none."""
-    state = make_state([make_enemy(hp=60)])
-    state.player.encore = 0
-    effects.resolve_card(state, card(effects=[modal(SPEND_2_DRAW_2, DRAW_2)]))
-    assert state.player.hp == 80
-    assert not [e for e in state.log if e["event"] == "encore_overdraw"]
-
-
-# --- (3) the tie-break, and the placeholder as its degenerate case ---------
+# --- (2) the tie-break, and the placeholder as its degenerate case ---------
 
 def test_ties_go_to_the_lowest_index(chooser_on):
     """Two bodies worth exactly the same. The earlier one wins, always, so a
@@ -198,7 +136,7 @@ def test_the_choice_is_deterministic_across_repeats(chooser_on):
     assert picks == {1}
 
 
-# --- (4) the frame is not scored -------------------------------------------
+# --- (3) the frame is not scored -------------------------------------------
 
 def test_the_host_card_cannot_change_the_pick(chooser_on):
     """Contract point 5, as arithmetic. The card argument is accepted and
@@ -212,19 +150,3 @@ def test_the_host_card_cannot_change_the_pick(chooser_on):
     for host in (card(cost=0, exhaust=True), card(cost=3, type="attack"),
                  None):
         assert policy.choose_mode(state, modes, host) == plain
-
-
-# --- (5) the shipped prototype ---------------------------------------------
-
-def _deep_breath_modes(face="deep_breath"):
-    return loader.get_card(face).effects[0]["modes"]
-
-
-# The crossover, as arithmetic. Mode 1 is `energy 1` + `gain_encore 2` =
-# 1.0 + 1.6 = 2.6 and carries NO state-dependent term, so it is flat at every
-# bank. Mode 2 is `draw 3` = 3.0 minus the shortfall the bank cannot cover, at
-# MODE_OVERDRAW_HP_VALUE = 1.0 a point.
-DEEP_BREATH_SCORES = {0: (2.6, 0.0), 1: (2.6, 1.0), 2: (2.6, 2.0),
-                      3: (2.6, 3.0), 4: (2.6, 3.0), 5: (2.6, 3.0),
-                      8: (2.6, 3.0), 20: (2.6, 3.0)}
-

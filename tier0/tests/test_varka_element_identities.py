@@ -16,7 +16,6 @@ from pathlib import Path
 
 import pytest
 
-from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat
 from tier0.engine import varka_oath as V
@@ -27,13 +26,10 @@ REPO = Path(__file__).resolve().parents[2]
 
 @pytest.fixture
 def varka():
-    saved = C.SWIRL_PAYS
-    C.SWIRL_PAYS = True
     loader.reset_arm_caches()
     try:
         yield
     finally:
-        C.SWIRL_PAYS = saved
         loader.reset_arm_caches()
 
 

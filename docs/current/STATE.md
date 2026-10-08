@@ -105,7 +105,8 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `tier0/engine/furina_tide.py`. Latest round
   `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one
   won; act-3 HP and an unread Repay plan are open). Next: [USER]'s play (a
-  rule change).
+  rule change). At her finish line, re-ask her motion look (`AS2-B5`, dropped
+  from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).
 - **Varka: Prototype, the combo pass built (2026-10-04).** Rules
   `review/active/varka-paper-kit-2026-09-28.md` sec.3
   (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`, sim twin
@@ -119,10 +120,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   read only its Oath. A Swirl he makes pays that element (Pyro 3 damage,
   Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL). Pool 78 (20 / 35 / 23),
   thirteen pool Knights; his own relics and three potions. Latest records
-  `review/records/varka-r6-round-2026-10-05.md` and
   `review/records/varka-solo-check-2026-10-07.md` (1 win of 5 on the base
-  seeds; the solo check ran three Cryo starts and one Pyro start). Next:
-  [USER]'s next Varka run; the next record lists each seat's starter Knight.
+  seeds) and `review/records/varka-offers-round-2026-10-08.md` (all five
+  reached act 3, none won; Pyro and Cryo payoffs offered and passed, Pyro
+  taken at 10%). Next: a card paper reworking the Pyro and Cryo payoffs
+  (project review pick 10), then [USER]'s next Varka run.
 
 ## Elements
 
@@ -134,13 +136,14 @@ fresh copies of the aura to the other enemies (one already wearing the element
 refreshes; another aura is replaced); a copy is an application with no
 trigger (phase one: `review/ruled/element-home-review-2026-09-28.md`). One
 switch is left, `-p:SwirlPays=false` (`Elements/TriggerRules.cs`), sim twin
-`C.SWIRL_PAYS`, off in the sim until its retest. Next: phase two (Burning and
+`C.SWIRL_PAYS`, on to match since 2026-10-08 (#967) and compared by
+`lint_constant_parity`. Next: phase two (Burning and
 Dendro, `BACKLOG.md`).
 
 ## The Teyvat run frame: on hold
 
 Built behind `TeyvatFrame`, off in every build; nothing deleted, no further
-work (`operations/act-assets.md`, `operations/media.md`). [USER]: the first
+work (`operations/teyvat-frame.md`). [USER]: the first
 draft "wasn't very interesting". It returns only as **elemental enemies**: a
 short brief on elemental shields goes to [USER] when the kits are done.
 

@@ -1,7 +1,7 @@
 """EB-182: per-option playability on the choose-a-card screen (sim leg).
 
 THE RULE. A `choose_one` mode whose body OPENS with a resource spend prints a
-price -- "Spend 3 Encore: draw 3" -- and that price is the mode's cost line.
+price -- "Spend 3 Sparks: draw 3" -- and that price is the mode's cost line.
 A mode the bank cannot pay is NOT OFFERED; the card stays playable while any
 mode is affordable; a card whose every mode is priced out is unplayable, and
 the refusal names the price and the bank that fell short.
@@ -109,27 +109,26 @@ def test_a_card_whose_every_mode_is_priced_out_is_unplayable(state):
     sheet could actually carry.
     """
     c = card(id="twin_price", effects=[modal(
-        [{"op": "spend_encore", "amount": 3}, {"op": "draw", "amount": 3}],
+        [{"op": "spend_spark", "amount": 3}, {"op": "draw", "amount": 3}],
         [{"op": "spend_spark", "amount": 2}, {"op": "block", "amount": 9}],
-        labels=["Spend 3 Encore: draw 3", "Spend 2 Sparks: gain 9 Block"])])
-    state.player.encore = 0
+        labels=["Spend 3 Sparks: draw 3", "Spend 2 Sparks: gain 9 Block"])])
     state.player.sparks = 1
     assert effects.offered_modes(state, c.effects[0]["modes"]) == []
     assert not combat.card_playable(state, c)
     reason = combat.modal_refusal(state, c)
     assert reason == (
         "twin_price: no mode is affordable -- "
-        "'Spend 3 Encore: draw 3' needs 3 Encore, bank holds 0; "
+        "'Spend 3 Sparks: draw 3' needs 3 Sparks, bank holds 1; "
         "'Spend 2 Sparks: gain 9 Block' needs 2 Sparks, bank holds 1")
 
 
 def test_one_affordable_mode_keeps_the_card_playable(state):
-    """The same card, one meter topped up. A card dies only when EVERY mode
-    does -- the half a card-level cost line could not express."""
+    """The same card, the bank topped up to the cheaper price. A card dies
+    only when EVERY mode does -- the half a card-level cost line could not
+    express."""
     c = card(id="twin_price", effects=[modal(
-        [{"op": "spend_encore", "amount": 3}, {"op": "draw", "amount": 3}],
+        [{"op": "spend_spark", "amount": 3}, {"op": "draw", "amount": 3}],
         [{"op": "spend_spark", "amount": 2}, {"op": "block", "amount": 9}])])
-    state.player.encore = 0
     state.player.sparks = 2
     assert effects.offered_modes(state, c.effects[0]["modes"]) == [1]
     assert combat.card_playable(state, c)
@@ -137,13 +136,11 @@ def test_one_affordable_mode_keeps_the_card_playable(state):
 
 
 @pytest.mark.parametrize("op,field,meter", [
-    ("spend_encore", "encore", "Encore"),
     ("spend_spark", "sparks", "Sparks"),
-    ("spend_charge", "charge", "Charge"),
 ])
-def test_all_three_meters_are_read_off_the_bank_they_price(op, field, meter):
-    """One rule, three meters -- Encore (shipped), Sparks (Bag of Tricks) and
-    Charge (the quarantined surface). The bank read is the meter named."""
+def test_the_meter_is_read_off_the_bank_it_prices(op, field, meter):
+    """The bank read is the meter named. Sparks are the one priced meter left:
+    Encore and Charge left the sim with the shipped kits (2026-10-08)."""
     state = make_state()
     mode = {"label": f"Spend 2 {meter}: draw 2",
             "effects": [{"op": op, "amount": 2}, {"op": "draw", "amount": 2}]}

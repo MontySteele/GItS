@@ -50,6 +50,15 @@
              Link="Vendor/GitsPort.cs" />
   </ItemGroup>
 
+  <!-- The fastmp port resolver (parallel co-op pairs, 2026-10-08), on the
+       same terms: `GitsFastMpPort.cs` holds no Godot, Harmony or game type,
+       so the rule that keeps two pairs off one UDP port is tested headlessly.
+       Its Harmony half, `GitsFastMpPortPatch.cs`, is not compiled here. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsFastMpPort.cs"
+             Link="Vendor/GitsFastMpPort.cs" />
+  </ItemGroup>
+
   <!-- EB-184's per-mode aiming reader, on the same terms and for the same
        reason. `GitsModalTargeting.cs` reads two members off a played card BY
        NAME and holds no game type of its own, so the decision that repairs the

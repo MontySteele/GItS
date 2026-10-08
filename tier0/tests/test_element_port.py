@@ -43,10 +43,13 @@ def reactions_logged(state):
 
 # --- the sim's defaults -----------------------------------------------------
 
-def test_the_sim_default_is_off_and_the_flat_two_is_two():
-    # The arm convention (`operations/prototype.md`). The mod turns it on;
-    # `lint_constant_parity` compares the 2 by value.
-    assert C.SWIRL_PAYS is False
+def test_the_sim_default_matches_the_mod_and_the_flat_two_is_two():
+    # Parity with the C# default (`klee-mod/Directory.Build.props`
+    # `SwirlPays`), which `lint_constant_parity` also compares; the 2 is
+    # compared there by value.
+    from tools import lint_constant_parity as lint
+    assert C.SWIRL_PAYS is lint.msbuild_bool_default("SwirlPays")
+    assert C.SWIRL_PAYS is True
     assert C.SWIRL_DAMAGE == 2
     assert not hasattr(C, "CRYSTALLIZE_KEEPS_AURA")
 

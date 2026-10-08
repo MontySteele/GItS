@@ -15,7 +15,7 @@ from typing import Callable
 
 from tier0 import constants as C
 from tier0.engine import (companion_hexerei, effects,
-                          furina_stage, furina_tide, furina_v2,
+                          furina_stage, furina_tide,
                           klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
@@ -61,38 +61,6 @@ def spark_price(state: CombatState, card: Card) -> int:
     `spark_cost` makes for the printed half, one layer up.
     """
     return spark_cost(card)
-
-
-def grant_charged_kit(state: CombatState) -> None:
-    """v1.9: the Burst is kit, not loot. When the meter is full, the kit
-    card is granted to hand; casting empties the meter (play_card), so a
-    refill re-grants it.
-
-    Two call sites cover every gain: all burst-energy sources (reactions,
-    detonation splash, the burst_energy op, skill tags) fire inside the
-    player-turn window, either in the turn-start trigger block or during a
-    card's resolution -- so checking at turn start and after each play is
-    exhaustive without instrumenting the five gain sites individually.
-
-    Respects MAX_HAND_SIZE: a full hand defers the grant to the next check
-    rather than dropping it -- the meter stays full, so it cannot be lost.
-
-    """
-    p = state.player
-    if not p.burst_max or p.burst_energy < p.burst_max:
-        return
-    # The Stage never grants the kit card: its Burst is retired
-    # (`resources.gain_burst`). Asked here as well, as the mod's
-    # `FurinaKitGrant.GrantIfCharged` asks it, because a grant is a rule.
-    if resources.stage_retires_the_shipped_meters(p):
-        return
-    for kit in p.kit_cards:
-        if any(c.id == kit.id for c in p.hand):
-            continue
-        if len(p.hand) >= C.MAX_HAND_SIZE:
-            return
-        p.hand.append(kit)
-        state.emit("kit_burst_granted", card=kit.id)
 
 
 def _revive_player_if_needed(state: CombatState) -> bool:
@@ -183,10 +151,7 @@ def card_playable(state: CombatState, card: Card) -> bool:
                    if c.status_play_cap), default=0)
         if cap and state.cards_played_this_turn >= cap:
             return False
-    if card.requires == "burst_energy_full":
-        if state.player.burst_energy < state.player.burst_max:
-            return False
-    elif card.requires == "draw_pile_empty":
+    if card.requires == "draw_pile_empty":
         # GrandFinale's `IsPlayable => Draw.GetPile(Owner).Cards.Count == 0`.
         # A real playability GATE, not a cost: the card sits in hand, dead,
         # until the deck runs out. pilot/policy.py already filters on this
@@ -195,9 +160,6 @@ def card_playable(state: CombatState, card: Card) -> bool:
             return False
     elif card.requires:
         raise ValueError(f"unknown requires {card.requires!r}")
-    if card.encore_cost and state.player.encore < card.encore_cost:
-        return False        # "Spend N Encore:" cost line -- a gate, never
-                            # an overdraw (that is the spend_encore op)
     # `spark_price`, not `spark_cost`: the printed price PLUS whatever the
     # strict Rare Power contributes (0 with the flag off, so this line is
     # byte-identical there). "Unplayable below 3 Sparks" is this gate.
@@ -207,18 +169,13 @@ def card_playable(state: CombatState, card: Card) -> bool:
                             # gate one line up, DERIVED from the op instead
                             # of a second sheet field, so the price shown
                             # and the price paid cannot drift apart.
-    price = charge_cost(card)
-    if price and state.player.charge < price:
-        return False        # QUARANTINED (R213 E1), the Charge sink's cost
-                            # line -- the Spark gate above, one meter over,
-                            # and DERIVED from the op for the same reason.
     # EB-182, per-option playability: a card whose top-level `choose_one`
     # prices EVERY mode above the bank has no line left to offer, so it is
     # unplayable -- the two gates above, one nesting level down.
     # `modal_refusal` is the same predicate with the reason attached.
     if modal_refusal(state, card) is not None:
         return False
-    # QUARANTINED (C.KLEE_OVERHAUL). `EB-261`, and it is the Spark gate's own
+    # (C.KLEE_OVERHAUL). `EB-261`, and it is the Spark gate's own
     # argument one resource over: a card whose whole body is a damage-less Set
     # off pays its price and resolves to NOTHING on a Bomb-less board. The mod
     # refuses it at `CardModel.IsPlayable`, the extension point the base game
@@ -227,7 +184,7 @@ def card_playable(state: CombatState, card: Card) -> bool:
     # `klee_overhaul.set_off_only` -- never a per-card flag.
     if klee_overhaul.refuses_for_no_bomb(state, card):
         return False
-    # QUARANTINED (C.KOKOMI_OVERHAUL). `EB-455`, the clause above one mechanic
+    # (C.KOKOMI_OVERHAUL). `EB-455`, the clause above one mechanic
     # over: a card whose whole body is a carry-out pays its energy, exhausts
     # itself and does NOTHING while the jellyfish holds no Plan. The r13 seat
     # met Change of Plans three times as a dead card off a face that never says
@@ -291,25 +248,6 @@ def spark_cost(card: Card) -> int:
     return total
 
 
-def charge_cost(card: Card) -> int:
-    """What this card's printed text charges in Charge, 0 for every shipped
-    card. QUARANTINED (R213 E1): `spend_charge` lives on the prototype
-    surface alone, and R80 -- Charge is read, never spent -- is what the
-    slice reopened rather than what it repealed.
-
-    TOP-LEVEL ops only, `spark_cost`'s rule verbatim. A spend inside a
-    `choose_one` mode is not part of THIS cost line: it is the MODE's cost
-    line, gated per option by `modal_refusal` since EB-182, and
-    `effects._op_spend_charge` still stops the card if one ever resolves
-    short -- the loud half of the same rule.
-    """
-    total = 0
-    for fx in card.effects:
-        if fx.get("op") == "spend_charge":
-            total += effects.spend_charge_amount(fx)
-    return total
-
-
 def card_cost(state: CombatState, card: Card) -> int:
     if card.cost == "X":
         # An X card spends the whole bank and NO cost modifier is consulted --
@@ -360,21 +298,16 @@ def card_cost(state: CombatState, card: Card) -> int:
                               * state.discards_this_turn))
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
-    # QUARANTINED (C.KOKOMI_OVERHAUL). R276, STOLEN CHAPTER's carry-out: "This
+    # (C.KOKOMI_OVERHAUL). R276, STOLEN CHAPTER's carry-out: "This
     # turn, the first card you play costs 0." PURE here; `play_card`
     # spends it. `FirstCardFreePower` is the C# twin.
     if state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0):
         cost = 0
-    # QUARANTINED (R276): Playdate's discount on the next Companion card.
+    # (R276): Playdate's discount on the next Companion card.
     # `PlaydatePower.TryModifyEnergyCostInCombat`'s twin; 0 with the arm off.
     discount = klee_overhaul.playdate_discount(state, card)
     if discount:
         cost = max(0, cost - discount)
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Escoffier's
-    # "The first Salon summon card you play each turn costs 0". Pure; a no-op
-    # for any player without the slice arm.
-    if furina_v2.free_salon_summon(state, card):
-        cost = 0
     # BATTLE PLAN HAS NO COST HOOK, and its absence is `EB-668`. The row's
     # carry-out used to discount the next face-up Attack, and the mod could
     # not mean the same thing by it: `TryModifyEnergyCostInCombat` is handed a
@@ -384,19 +317,9 @@ def card_cost(state: CombatState, card: Card) -> int:
     # resolution (`kokomi_plan.next_attack_bonus`, folded in by
     # `effects.flat_attack_bonus`), which both engines can ask at the one
     # moment the play's target is known.
-    # Leading Role (card-level texture, kickoff §3.2): the FIRST
-    # Spotlighted card each turn costs less. This is a Furina-card power
-    # granting economy, not the Spotlight baseline -- §2.2a governs the
-    # multiplier, and the multiplier has no path here.
     p = state.player
-    # B2: gated on the PAID counter, so a free Spotlighted play (Ethereal
-    # Spotlight's token, chiefly) neither takes the discount nor burns it.
-    if (effects.is_spotlighted(state, card)
-            and state.spotlighted_paid_cards_this_turn == 0):
-        cost = max(0, cost - p.powers.get("spotlight_discount", 0))
-    # QUARANTINED (C.COMPANION_OVERHAUL). Mika's Starfrost Swirl: "your next
-    # Attack costs 1 less". Beside the Leading Role discount because it is the
-    # same kind of thing and must compose with it the same way -- subtractive,
+    # (C.COMPANION_OVERHAUL). Mika's Starfrost Swirl: "your next
+    # Attack costs 1 less". Subtractive,
     # floored at zero, and read by the playability gate as well as by the
     # payment, since a discount the gate cannot see is a card the pilot will
     # not play. THIS SITE IS PURE: the stack is consumed by the next Attack
@@ -434,12 +357,6 @@ def play_card(state: CombatState, card: Card) -> None:
     p.energy -= cost
     # R276. Stolen Chapter's switch is spent by the first card paid for.
     kokomi_plan.spend_first_card_free(state, card)
-    if card.encore_cost:
-        # Gated playable -- the "Spend N Encore:" cost line, which is a
-        # different sink from the spend_encore OP and is kept apart in the
-        # census for that reason (EB-20).
-        resources.spend_encore(state, card.encore_cost, "encore_cost",
-                               card.id)
     # EB-17: read the draw context BEFORE the instance leaves hand, then
     # release it -- an instance that is no longer in hand has no draw context,
     # and holding the entry past the play is what would let a freed card's
@@ -450,81 +367,7 @@ def play_card(state: CombatState, card: Card) -> None:
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy,
                drawn_turn=drawn_turn, first_copy=first_copy)
-    # EB-101 (races-d): Supporting Cast's draw is RECORDED here and RESOLVED
-    # below `_finish_play`, which is where the mod resolves it. See the block
-    # that sets this, and the one that spends it.
-    pending_spotlight_draw = 0
-    if effects.is_spotlighted(state, card):
-        # Spotlight texture applies in both modes. Only Center Stage creates
-        # Fanfare; Guest Cast spends the light on Companion empowerment.
-        # Counted BEFORE resolution so the reserve per-turn cap (OFF by
-        # default) can compare against this play's own ordinal.
-        state.spotlighted_cards_this_turn += 1
-        # B2: the discount's own window. PRINTED cost, not the resolved one --
-        # a printed-1 card discounted to 0 must still spend the window, or the
-        # discount would re-arm behind its own effect and apply every turn.
-        # An X-cost card counts as paid (its printed cost is not a number, and
-        # X plays are never the free-token case this guard exists for).
-        if not isinstance(card.cost, int) or card.cost >= 1:
-            state.spotlighted_paid_cards_this_turn += 1
-        state.emit("spotlight_card_played", card=card.id)
-        # Center Stage's half, asked PER CARD rather than per mode: under
-        # Furina's upgraded starter (R2) both halves are live, so "is Center
-        # Stage the mode" stops being the same question as "does this card
-        # mint Fanfare". Companions are lit under the upgrade and still mint
-        # nothing -- the upgrade drops the exclusivity, not the targeting.
-        if effects.center_stage_active(state, card):
-            resources.gain_fanfare(
-                state, C.FANFARE_PER_SPOTLIGHT_CARD, "center_stage")
-        # Card-level Spotlight texture (sheet pass 1, ratified design
-        # space): Supporting Cast draws on the FIRST Spotlighted card
-        # each turn; post-flip Standing Ovation's trickle uses the same
-        # first-play window (spotlight_encore_first, pass 3 — the
-        # per-play rate was the hot-sustain driver both times it was
-        # tried). spotlight_encore (EVERY play) remains engine-supported
-        # as the archived pre-flip rate.
-        if state.spotlighted_cards_this_turn == 1:
-            # EB-101, the RECORD half. The amount is read from the powers
-            # dict HERE, on the mod's `BeforeCardPlayed` clock
-            # (`SpotlightSystem.NotePlay` stores nothing but PendingDraws),
-            # so a card that grants or strips `spotlight_draw` during its own
-            # resolution cannot change the size of its own draw. Only the
-            # DRAW moves below; the read does not.
-            pending_spotlight_draw = p.powers.get("spotlight_draw", 0)
-            n = p.powers.get("spotlight_encore_first", 0)
-            if n:
-                resources.gain_encore(state, n, "spotlight_encore_first",
-                                      card.id)
-        n = p.powers.get("spotlight_encore", 0)
-        if n:
-            resources.gain_encore(state, n, "spotlight_encore", card.id)
-    if card.requires == "burst_energy_full":
-        p.burst_energy = 0                    # playing the Burst empties it
-        state.emit("burst_cast", card=card.id)
-    if p.burst_max and "skill_tag" in card.tags:
-        resources.gain_burst(state, C.BURST_PER_SKILL_TAG, "skill_tag")
     _finish_play(state, card)
-    # EB-101 (races-d), the RESOLVE half -- the surviving member of the
-    # EB-19/NC-9 broadcast-ordering family, whose siblings closed as
-    # races-a/b/c.
-    #
-    # The mod records this draw in `BeforeCardPlayed` and resolves it in
-    # `AfterCardPlayed` (`SpotlightSystem.cs:389-403`), so the triggering
-    # card resolves against a hand WITHOUT the drawn cards. tier0 drew them
-    # above the card's own resolution, so a Spotlighted card that reads the
-    # hand while resolving -- Encore Performance -- selected from a
-    # different-sized pool in each engine, and Director's Cut and Curtain
-    # Cue flip the same way at MAX_HAND_SIZE.
-    #
-    # `BeforeCardPlayed` is not async and carries no PlayerChoiceContext, so
-    # the mod's half cannot move; the movable leg is this one.
-    #
-    # NOT A PARITY CRITERION, deliberately: neither engine's draw consumes
-    # `Rng.CombatTargets` and the two share no RNG stream, so the guarantee
-    # here is structural (a hand size), never a fixed-seed trace match.
-    if pending_spotlight_draw:
-        state.draw(pending_spotlight_draw)
-        state.emit("extra_draw", amount=pending_spotlight_draw)
 
 
 def _finish_play(state: CombatState, card: Card,
@@ -539,7 +382,7 @@ def _finish_play(state: CombatState, card: Card,
     reads energy or the hand, so both callers are correct by construction.
     """
     p = state.player
-    # QUARANTINED (C.KOKOMI_OVERHAUL). "YOU PLAYED A COMPANION CARD", at the
+    # (C.KOKOMI_OVERHAUL). "YOU PLAYED A COMPANION CARD", at the
     # same shared half of a play and for the same structural reason: a manual
     # play and an auto-play both enter here and nothing else does, so The
     # General's Banner's hook and Rally's spend have ONE definition of the
@@ -552,7 +395,7 @@ def _finish_play(state: CombatState, card: Card,
     # has to survive until `flat_attack_bonus` has read it --
     # `effects._resolve_card_bound` spends it one line after that read,
     # beside `next_attack_up`'s own consuming pop.
-    # QUARANTINED (R276): the Klee arm's Playdate is spent by the Companion
+    # (R276): the Klee arm's Playdate is spent by the Companion
     # card it discounted. A no-op with the arm off. (Boom Badge no longer
     # replays a card: since the 2026-09-24 playtest it doubles the Bombs of
     # the next Set off, spent at `effects._op_set_off`.)
@@ -615,7 +458,7 @@ def _finish_play(state: CombatState, card: Card,
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
-        # QUARANTINED (C.COMPANION_OVERHAUL). Thoma's Crimson Ooyoroi, on the
+        # (C.COMPANION_OVERHAUL). Thoma's Crimson Ooyoroi, on the
         # broadcast the mod gives it (`AfterCardPlayed`) and beside the site
         # this engine already counts an Attack at. INSIDE the replay loop and
         # NOT gated to the first pass, unlike the two companion triggers below
@@ -664,7 +507,7 @@ def _finish_play(state: CombatState, card: Card,
         # all 11 of Ironclad's Power cards (recon BUG 1).
         dest = "exhaust" if force_exhaust else refpowers.result_pile(state,
                                                                      card)
-        # QUARANTINED (C.KLEE_OVERHAUL, `EB-732`). BLAST SHIELD, and this is
+        # (C.KLEE_OVERHAUL, `EB-732`). BLAST SHIELD, and this is
         # the ONE line of it: the card the arm's `return_to_hand` op raised the
         # flag for goes back to the HAND instead of the pile the rule above
         # picked. Read and lowered here, at the routing, because that is the
@@ -684,14 +527,13 @@ def _finish_play(state: CombatState, card: Card,
             refpowers.exhaust_card(state, card)
         elif dest == "discard":
             p.discard_pile.append(card)
-    grant_charged_kit(state)
     _settle_phases(state)        # a phased boss dropped to 0 revives BEFORE
     #                              the play loop re-reads state.over
     # Self-damage and Encore overdraw resolve inside a card play rather than
     # the enemy-hit funnel. Give Fairy the same lethal checkpoint, then update
     # HP-threshold relics before the pilot chooses another card.
     _revive_player_if_needed(state)
-    # QUARANTINED (C.KLEE_OVERHAUL). RULE 3's BACKSTOP (`EB-279`), at the same
+    # (C.KLEE_OVERHAUL). RULE 3's BACKSTOP (`EB-279`), at the same
     # shared half of a play the two arms above use and for the same structural
     # reason: a manual play and an auto-play both enter here and nothing else
     # does. `KleeOverhaulSweepHooks.AfterCardPlayed` is the mod's twin, and the
@@ -709,20 +551,16 @@ def _finish_play(state: CombatState, card: Card,
 # the inner card's kills, exhausts and repeat request -- a corruption that is
 # invisible in results, which is why effects._free_play refuses to resolve
 # effects inline and routes here instead. (Its contract docstring names
-# fourteen; block_gains_this_card and salon_replacements_this_card are
-# resolve_card's too and are saved for the same reason.)
+# fourteen; block_gains_this_card is resolve_card's too and is saved for the
+# same reason.)
 _ABSENT = object()
 _FREE_PLAY_CONTEXT = (
     "current_card_companion", "reactions_this_card", "kills_this_card",
     "fatal_kills_this_card", "exhausted_this_card", "block_gains_this_card",
-    # `EB-412` put the pre-play half of the replacement rule beside the count,
-    # and it is saved for the count's reason: a free play resolved inside a
-    # deploy card must not leave its own answer behind.
-    "salon_replacements_this_card", "salon_will_replace_this_card",
     "detonations_at_card_start",
     "repeat_requested", "target_had_offelement_aura", "target_had_aura",
     "current_attack_bonus",
-    # QUARANTINED (C.COMPANION_OVERHAUL). The element override is per-CARD, set
+    # (C.COMPANION_OVERHAUL). The element override is per-CARD, set
     # in the same breath as the bonus above, so it is saved with it: a free
     # play that consumed Bennett's rider would otherwise hand the element to
     # the outer Attack as well.
@@ -732,14 +570,14 @@ _FREE_PLAY_CONTEXT = (
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
     "block_gained_this_card", "discards_this_card", "last_drawn_type",
-    # QUARANTINED (R213 B). The drain op's per-play total, saved for its
+    # (R213 B). The drain op's per-play total, saved for its
     # neighbours' reason: a free play that drained inside an outer card would
     # otherwise hand the outer card its number.
     "fanfare_drained_this_card",
     # FURINA'S STAGE. The per-play spend total, saved for its neighbour's reason exactly: a free play that spent
     # inside an outer card would otherwise hand the outer card its number.
     "stage_spent_this_card",
-    # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's per-play damage total, saved
+    # (C.COMPANION_OVERHAUL). Gorou's per-play damage total, saved
     # for the reason its three neighbours are: an auto-play that dealt damage
     # inside an outer card would otherwise hand the outer card its number.
     "mi_damage_dealt_this_card",
@@ -748,7 +586,7 @@ _FREE_PLAY_CONTEXT = (
     # exhausts mid-resolution opens its own list, and the restore below hands
     # the outer card back the one it was reading.
     "exhaust_selection",
-    # QUARANTINED (C.KLEE_OVERHAUL, `EB-732`). Blast Shield's per-play flag,
+    # (C.KLEE_OVERHAUL, `EB-732`). Blast Shield's per-play flag,
     # saved for its neighbours' reason: a free play resolved inside an outer
     # card must not hand the OUTER card its answer about where to land. The
     # inner `_finish_play` lowers the flag it raised, and this restores
@@ -847,9 +685,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # the two wear the same word in every report that conflates them.
     state.emit("turn_open", hp=max(0, state.player.hp), block=state.player.block)
     state.cards_played_this_turn = 0
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the flow counts reset
-    # at the start of her turn (paper sec.8). A no-op for anyone else.
-    furina_v2.turn_open(state)
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the flow counts
     # reset. A no-op for anyone else.
     furina_tide.turn_open(state)
@@ -873,7 +708,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # the draw. Aggression pulls Attacks out of the discard pile here; running
     # it after the draw would over-fill the hand versus the real game.
     refpowers.side_turn_start_early(state)
-    # QUARANTINED (C.KLEE_OVERHAUL). THE LEDGER'S ROLL, on the line above the
+    # (C.KLEE_OVERHAUL). THE LEDGER'S ROLL, on the line above the
     # growth that follows it and for `kokomi_plan.roll_turn`'s reason one arm
     # over: this turn's explosion count becomes last turn's at the ONE place
     # either moves, so Grounded and the counter cannot disagree about which
@@ -889,7 +724,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # (VARKA's Unbroken Tide kept his Block here; it left with element
     # identities, 2026-10-01, for Retaliating Tide.)
     if refpowers.should_clear_block(p):      # Barricade suppresses the clear
-        # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's Watatsumi's Grace:
+        # (C.KOKOMI_OVERHAUL). THE EXPANSION's Watatsumi's Grace:
         # "keep up to N of your Block" -- the clear takes what is above the
         # cap (the base game's Sturdy Clamp shape). None without the Power.
         kept = kokomi_plan.grace_keeps(state)
@@ -909,17 +744,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # discount to the current turn? Yes." One boundary idiom, used twice.
     state.splash_procs_this_turn = 0             # detonation_splash cap
     state.reactions_this_turn = 0                # Chevreuse predicate window
-    # QUARANTINED (C.COMPANION_OVERHAUL). Heizou's Swirl window, cleared on the
+    # (C.COMPANION_OVERHAUL). Heizou's Swirl window, cleared on the
     # same line as the reaction window it counts a subset of -- one turn
     # boundary for both, so the two can never disagree about which turn it is.
     state.mi_swirls_this_turn = 0
-    # Same line, same reason (QUARANTINED, R236): the element Prune's Chime
+    # Same line, same reason (R236): the element Prune's Chime
     # hands to a Bomb is "the swirled element" of THIS turn, so it is cleared
     # with the window that counts those Swirls.
     state.cvn_swirl_element = ""
-    state.spotlighted_cards_this_turn = 0        # Ovation / reserve cap
-    state.spotlighted_paid_cards_this_turn = 0   # B2: Leading Role's window
-    state.spotlight_moved_this_turn = False      # selector-payoff window
     state.prevention_used_this_turn = False      # Kokomi ward latch (§2.4)
     state.encore_spend_draws_this_turn = 0       # Gallery Stirs latch (R85)
     state.cards_created_this_turn = 0            # engine_closure window
@@ -938,11 +770,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     if not p.alive or state.over:
         return
     effects.player_turn_start_triggers(state)
-    _settle_phases(state)        # Salon upkeep damages enemies inside the
-    #                              triggers -- same hole as above (EB-29a:
-    #                              66% of Furina/test_subject wins were
-    #                              counterfeit before this settle)
-    _revive_player_if_needed(state)             # Salon upkeep can overdraw HP
+    _settle_phases(state)        # turn-start triggers can damage enemies
+    #                              -- same hole as above (EB-29a)
+    _revive_player_if_needed(state)
     if not p.alive or state.over:
         return
 
@@ -967,7 +797,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     if not p.alive or state.over:
         return
 
-    # QUARANTINED (C.KLEE_OVERHAUL). Rule 4's OPENING SPARK and Grounded's
+    # (C.KLEE_OVERHAUL). Rule 4's OPENING SPARK and Grounded's
     # Block, both at StS2 site E/F (`AfterPlayerTurnStart`) -- the site
     # `KleeOverhaulOpening` and `GroundedPower` each name for themselves, and
     # the line above is this engine's own name for it. The Spark has to land
@@ -985,10 +815,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         if not p.alive or state.over:
             return
 
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): Salon Solitaire's Usher
-    # on turn one, then Charlotte's extra card. A no-op for anyone else.
-    furina_v2.turn_start(state)
-
     # FURINA (the Salon's Tab; the pool to 39): Fountain of Lucine's Repays,
     # after her draw, the C# `FurinaStage.TurnStart` site. A no-op for
     # anyone else.
@@ -998,7 +824,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         if not p.alive or state.over:
             return
 
-    # QUARANTINED (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
+    # (C.KOKOMI_OVERHAUL, draft 6): RULE 2's RESOLUTION POINT --
     # every Plan she wrote last turn is carried out, in order, HERE.
     #
     # THIS SITE AND NOT THE PRE-DRAW ONE THE SLICE'S PROSE ASKS FOR, and that
@@ -1035,8 +861,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     _revive_player_if_needed(state)
     if not p.alive or state.over:
         return
-
-    grant_charged_kit(state)                 # turn-start gains + full-hand defer
 
     # Combat-side relics (dead branch on the battery). combat_start_* fires
     # once, HERE on turn 1 -- AFTER the block clear / energy reset / draw above,
@@ -1103,18 +927,18 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # "We do this in early so that it triggers before end-of-turn damage
     # effects" -- which is precisely what player_turn_end_triggers holds.
     refpowers.before_side_turn_end_early(state)
-    # QUARANTINED (C.KLEE_OVERHAUL). Sit Tight's end-of-turn Block, AHEAD of
+    # (C.KLEE_OVERHAUL). Sit Tight's end-of-turn Block, AHEAD of
     # the shipped triggers: the mod pays it as a power tenant of
     # `BeforeSideTurnEnd`, before the model-driven `TurnEndSequencer`, so
     # Arlecchino's Bond of Life counts it (`klee_overhaul.sit_tight_turn_end`).
     klee_overhaul.sit_tight_turn_end(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
-    # QUARANTINED (C.KLEE_OVERHAUL). The overhaul's end of turn: Alice's
+    # (C.KLEE_OVERHAUL). The overhaul's end of turn: Alice's
     # window closes, Patience, Klee! grows and the one-turn windows close.
     # Its Sparks 'n' Splash left this site on 2026-09-25 for the start of the
     # turn (`klee_overhaul.bomb_echo`, via `turn_start_late`).
     klee_overhaul.turn_end(state)
-    # QUARANTINED (C.KOKOMI_OVERHAUL). DUSK (`EB-643`, R265): "the Bake-Kurage
+    # (C.KOKOMI_OVERHAUL). DUSK (`EB-643`, R265): "the Bake-Kurage
     # carries this Plan out at the end of this turn, before enemies act."
     #
     # HERE, at this engine's `BeforeSideTurnEnd` on the player side, which is
@@ -1140,9 +964,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`): the performers act
-    # front to back. A no-op for anyone else.
-    furina_v2.end_of_turn_acts(state)
     # THE FURINA RESEARCH SLICE (`furina_tide`): guests act, then Salon
     # Solitaire's Restore 2. A no-op for anyone else.
     furina_tide.end_of_turn(state)
@@ -1161,8 +982,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         state.emit("status_eot_damage", card=c.id, amount=dmg - blocked,
                    blocked=blocked)
     _revive_player_if_needed(state)
-    grant_charged_kit(state)     # Salon-tick particles can fill the meter
-                                 # at turn end; the Burst's Retain keeps it
     # Burst cards have Retain (principles v1.4): they stay in hand.
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
@@ -1238,7 +1057,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # turn -- the same shape X11's errata hit, and the same shape the X1 pin
     # still reports. That loop is governed by the X2 rarity law (R109).
     state.companion_cost_delta_this_turn = 0
-    # QUARANTINED (C.KOKOMI_OVERHAUL). R276: Pincer's and Stolen Chapter's
+    # (C.KOKOMI_OVERHAUL). R276: Pincer's and Stolen Chapter's
     # switches say "this turn" and die with it, on the same boundary.
     state.player.powers.pop(kokomi_plan.FIRST_ATTACK_TWICE, None)
     state.player.powers.pop(kokomi_plan.FIRST_CARD_FREE, None)
@@ -1354,7 +1173,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # lands on its owner).
             dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
-            # QUARANTINED (C.COMPANION_OVERHAUL). The two TRAPS -- Dahlia's
+            # (C.COMPANION_OVERHAUL). The two TRAPS -- Dahlia's
             # Sacramental Shower and Amber's Baron Bunny -- fire HERE, after
             # the hit's number is settled and before Block is spent, which is
             # the moment the mod's `BeforeDamageReceived` gives Klee's Mine.
@@ -1362,7 +1181,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # (Baron Bunny's "take 3 less" did until 2026-10-02).
             dmg = effects.companion_overhaul_before_enemy_hit(
                 state, enemy, dmg)
-            # QUARANTINED (C.KLEE_OVERHAUL). RULE 6, at the moment the comment
+            # (C.KLEE_OVERHAUL). RULE 6, at the moment the comment
             # above already names as its own: "a Mine ALSO goes off when its
             # enemy attacks you, BEFORE the hit lands". The mod's hook is
             # `ProtoBombPower.BeforeDamageReceived`, guarded on the dealer
@@ -1396,7 +1215,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             block_before = state.player.block
             blocked = min(state.player.block, dmg)
             state.player.block -= blocked
-            # QUARANTINED (C.COMPANION_OVERHAUL). Diona's Icy Paws: the ONE
+            # (C.COMPANION_OVERHAUL). Diona's Icy Paws: the ONE
             # site in this engine that can say "this Block absorbed damage",
             # because `blocked` exists nowhere else.
             effects.companion_overhaul_block_absorbed(
@@ -1411,11 +1230,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # is a metric ruling ask (Encore precedent), not a default.
             prevented = effects.prevent_damage_exhaust(
                 state, dmg - blocked)
-            # Encore absorbs after Block, before HP (kickoff §4). Its own
-            # event stream credits A4 sustain -- NEVER folded into
-            # `blocked` (§2 harness note, Tier 0 binding).
-            hp_loss = resources.absorb_into_encore(
-                state, dmg - blocked - prevented, "enemy_hit")
+            hp_loss = dmg - blocked - prevented
             state.player.hp -= hp_loss
             resources.note_player_hp_loss(state, hp_loss)
             # Combat-side relic on_first_hp_loss_draw (dead branch on the
@@ -1448,7 +1263,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             refpowers.on_damage_received(state, state.player,
                                          unblocked=dmg - blocked, dealer=enemy,
                                          powered_attack=True)
-            # QUARANTINED (C.KOKOMI_OVERHAUL). THE EXPANSION's Tidal Riposte:
+            # (C.KOKOMI_OVERHAUL). THE EXPANSION's Tidal Riposte:
             # a hit Block absorbed whole answers back, once per hit.
             kokomi_plan.tidal_riposte(state, enemy, blocked,
                                       dmg - blocked)
@@ -1704,9 +1519,7 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
                         # hand-full selector fallback must not advance the
                         # main combat stream and renumber existing seeds.
                         selector_rng=random.Random(seed + 4 * 10 ** 9))
-    # Per-combat resources (v1.6: the reset IS the safety on unbounded
-    # Encore). Spotlight designation likewise re-aims fresh each combat.
-    player.encore = 0
+    # Per-combat resources.
     player.fanfare = 0
     # Fanfare floors and cap grants are per-COMBAT, like every other Furina
     # resource: a card is replayed each fight and re-earns what it prints.
@@ -1726,12 +1539,11 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     sync_fanfare_cap_to_max_hp(player)
     player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0
-    player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
-    # QUARANTINED (C.COMPANION_OVERHAUL). Nicole's end-of-turn Block latch is
+    # (C.COMPANION_OVERHAUL). Nicole's end-of-turn Block latch is
     # per-combat like everything else on this line: a fight opens with no
     # previous turn, so nobody has held the line yet.
     player.mc_held_block_at_turn_end = False
-    # QUARANTINED (C.COMPANION_OVERHAUL). The Mend ceiling, captured at the top
+    # (C.COMPANION_OVERHAUL). The Mend ceiling, captured at the top
     # of the fight -- "the HP you entered the fight with", which is the whole of
     # the keyword's one rule. Written unconditionally, like every other line in
     # this block: it is a new per-combat field nothing else reads, and a
@@ -1748,7 +1560,6 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # with an empty stage, no Fanfare, nothing drained, and the Drain line
     # read from the HP she enters with. A no-op for anyone else.
     furina_stage.reset_for_combat(player)
-    player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)
     # Per-combat gates that are pure functions of the built deck. Both are
@@ -1795,16 +1606,6 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
         # Burning Blood (ruling 1): post-fight, can't affect combat —
         # counts toward the A4 healing metric, not hp_left.
         state.emit("heal", amount=C.BURNING_BLOOD_HEAL, post_fight=True)
-    # D8 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY. Guarded on
-    # fanfare_cap, the same Furina marker the fanfare_turn snapshot uses --
-    # encore is hers alone in content, and a zero-valued row in every Klee log
-    # would be noise pretending to be data. Separate from fight_end rather
-    # than a key on it: fight_end is every character's event, and a
-    # character-specific field on a shared row is how a metric ends up being
-    # read for a character that never had it.
-    if state.player.fanfare_cap:
-        state.emit("encore_end", encore=state.player.encore,
-                   members=len(state.player.salon), won=won)
     # EB-256 DELIBERATELY DOES NOT ADD A KEY HERE. `fight_stall` above is the
     # stall's record and `CombatState.stalled` is the field the run layer
     # reads; a `stalled=` key on this row would have been tidier to consume

@@ -123,12 +123,6 @@ public static class CompanionSlot
 
         var pick = NationWeightedChoice(rng, pool, HomeNation(player));
         if (pick == null) return null;
-        // THE COMPANION STAND-IN HAND-OFF (QUARANTINED, R213 B). On the PICKED
-        // card and not on the tiers above, which is the whole reason the offer
-        // odds cannot move: the tiers, the rarity roll and the weighted draw
-        // are the Universal's own, and the swap happens after all three. A
-        // no-op for every character but the stand-in's, and with the arm off.
-        pick = Powers.CompanionStandIns.HandOff(pick, player);
         // Same instantiation the native reward path uses for its own rolled
         // cards (CardFactory.CreateForReward ends in exactly this call), so
         // the appended 4th option is indistinguishable from the other three.

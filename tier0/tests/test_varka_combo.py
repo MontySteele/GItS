@@ -12,7 +12,6 @@ import random
 
 import pytest
 
-from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects
 from tier0.engine import varka_oath as V
@@ -21,13 +20,10 @@ from tier0.engine.state import CombatState, Enemy
 
 @pytest.fixture
 def varka():
-    saved = C.SWIRL_PAYS
-    C.SWIRL_PAYS = True
     loader.reset_arm_caches()
     try:
         yield
     finally:
-        C.SWIRL_PAYS = saved
         loader.reset_arm_caches()
 
 
@@ -99,7 +95,8 @@ def test_the_pool_stays_78_five_out_five_in(varka):
 
 def test_the_new_rows_and_their_upgrades(varka):
     stoke = loader.get_card(_vk("stoke_the_flames"))
-    assert (stoke.cost, stoke.type) == (1, "skill")
+    # Varka payoff fix (2026-10-08): Stoke costs 0, was 1.
+    assert (stoke.cost, stoke.type) == (0, "skill")
     cleave = loader.get_card(_vk("ember_cleave"))
     assert (cleave.cost, cleave.type) == (1, "attack")
     pyre = loader.get_card(_vk("pyre_oath"))
@@ -158,10 +155,33 @@ def test_ember_cleave_hits_9_pyro_then_exhausts(varka):
     e = st.enemies[0]
     assert e.hp == 91 and e.aura == "pyro"
     assert [c.id for c in st.player.exhaust_pile] == ["defend"]
-    assert _led(st).oath["pyro"] == 1               # its own application
+    # Its own application, then the Varka payoff fix's (2026-10-08) "Gain 1
+    # Pyro Oath".
+    assert _led(st).oath["pyro"] == 1 + 1
+    assert _led(st).current == "pyro"
     st = _state()
     _play(st, _vk("ember_cleave") + "+")
     assert st.enemies[0].hp == 88
+
+
+def test_ember_cleave_gains_its_oath_with_nothing_to_exhaust(varka):
+    # The paper's reading: the Oath is gained even with no card left.
+    st = _state(element="hydro")
+    st.player.hand = []
+    _play(st, _vk("ember_cleave"))
+    assert st.player.exhaust_pile == []
+    assert _led(st).oath["pyro"] == 1 + 1
+
+
+def test_pyre_oath_lands_first_then_its_own_exhaust_pays(varka):
+    # Varka payoff fix (2026-10-08): "Exhaust a card" on play (the paper's
+    # "up to 2", read as exactly 1: `exhaust_from` takes no "up to"). The
+    # Power goes on first, so its own Exhaust pays 1 Oath.
+    st = _state(element="hydro")
+    st.player.hand = [loader.get_card("defend")]
+    _play(st, _vk("pyre_oath"))
+    assert [c.id for c in st.player.exhaust_pile] == ["defend"]
+    assert _led(st).oath["pyro"] == 1
 
 
 def test_pyre_oath_gains_1_pyro_per_exhausted_card(varka):
@@ -205,11 +225,14 @@ def test_deep_freeze_applies_cryo_and_doubles_weak_and_vulnerable(varka):
     e.powers["vulnerable"] = 1
     _play(st, _vk("deep_freeze"))
     assert e.aura == "cryo"
-    assert (e.powers["weak"], e.powers["vulnerable"]) == (4, 2)
+    # Varka payoff fix (2026-10-08): its 1 Vulnerable lands before the
+    # doubling, so 1 + 1 doubles to 4.
+    assert (e.powers["weak"], e.powers["vulnerable"]) == (4, 4)
     assert _led(st).current == "cryo"               # the open Oath
     st = _state()
-    _play(st, _vk("deep_freeze"))                   # nothing to double
+    _play(st, _vk("deep_freeze"))                   # a clean enemy ends on 2
     assert "weak" not in st.enemies[0].powers
+    assert st.enemies[0].powers["vulnerable"] == 2
 
 
 # ---------------------------------------------------------------------------
@@ -231,7 +254,9 @@ def test_the_banner_holds_and_pays_1_oath_of_the_current_element(varka):
     # An on-element card is not a change: nothing.
     before = led.oath["pyro"]
     _play(st, _vk("ember_cleave"))
-    assert led.oath["pyro"] == before + 1           # its application only
+    # Its application and its "Gain 1 Pyro Oath" (Varka payoff fix,
+    # 2026-10-08); no Banner payment.
+    assert led.oath["pyro"] == before + 2
     # A Knight still changes it.
     _play(st, _vk("kaeya_frostgnaw"))
     assert led.current == "cryo"

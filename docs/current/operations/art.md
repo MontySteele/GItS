@@ -17,9 +17,9 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 
 `cut_combat_layers.py` cuts one illustration into layers behind a hand-digitized
 fence config (`tools/combat_layer_fences/<name>.yaml`; `teyvat/<body>.yaml` are
-the six bespoke boss rigs, `operations/codegen.md` §Bespoke rigs). `--check`
-proves the shipped pixels are what the fences say; `--verify` stacks them back
-up at their manifest offsets and diffs against the source, and GATES on that
+the six bespoke boss rigs, codegen.md §Bespoke rigs at the commit
+`operations/teyvat-frame.md` names). `--check` proves the shipped pixels are
+what the fences say; `--verify` stacks them back up at their manifest offsets and diffs against the source, and GATES on that
 for a config declaring `recompose_exact: true` — which the six do and configs
 #1/#2 never claimed. `--art-root <checkout>` lets a worktree cut against the
 main tree's `ImageGen/`, which is the only supported way to reach it (never

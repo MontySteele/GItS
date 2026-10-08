@@ -1495,6 +1495,10 @@ when the arm is accepted or rejected.
 
 ## The companion stand-ins — the caretakers (2026-09-02)
 
+(The seam below was emptied 2026-10-03 and deleted 2026-10-08, project review
+2026-10-08 pick 3. Jean's rule lives on in `tier0/engine/lions_fang.py` and
+`LionsFangPower.cs`. Git keeps the rest.)
+
 ```
 THE SEAM, AND IT IS THE POINT OF THE SLICE. A stand-in is a whole Klee-only
 card, with its own unique name, handed to Klee IN PLACE of one named Universal
@@ -6673,3 +6677,24 @@ Staging branch `klee-next`. Paper `review/active/klee-design-review-2026-10-08.m
   - `proto_ko_fire_fire`, Fire! Fire! (Common Attack, 1, Pyro): "Place a Bomb 7 [10] on the enemy. Set off the enemy." Her normal attack: a Spark and Bomb-typed damage every turn without cooking.
   - `proto_ko_blasting_spree`, Blasting Spree (Common Skill, 1): "Place a Bomb 4 [6] on ALL enemies. Add a Dazed into your Discard Pile." Spray's fuel and the Spray half of the status bridge.
   - Both are existing ops (`plant_bomb`, `set_off`, `add_card`). Art `KNOWN_MISSING`. The pool stays **78 (25 / 32 / 21)**.
+
+## Varka payoff fix, 2026-10-08
+
+Paper: `review/active/varka-payoff-fix-2026-10-08.md` (project review
+2026-10-08, pick 10). Seven rows; the record is
+`review/records/varka-offers-round-2026-10-08.md`.
+
+- Ember Cleave adds "Gain 1 Pyro Oath" after its Exhaust (`gain_pyro_oath`,
+  amount 1), gained even with no card to Exhaust. Pyro becomes current from
+  the hit, as before.
+- Stoke the Flames costs 0, was 1.
+- Pyre Oath adds "Exhaust a card" on play, after the Power lands, so that
+  Exhaust pays 1 Oath. The paper prints "Exhaust up to 2 cards"; the chosen
+  `exhaust_from` selector (`CardSelectCmd.FromHand` with
+  `CardSelectorPrefs(prompt, n)`) takes an exact count and has no "up to",
+  so by the paper's own reading it is built as exactly 1.
+- Wildfire Oath and Absolute Zero cost 1, were 2.
+- Deep Freeze adds 1 Vulnerable before the doubling (`apply_power
+  vulnerable 1`), so a clean enemy ends on 2. It is an application, so
+  Absolute Zero pays on it.
+- Glacial Edict: every 3 [2] Cryo Oath, was 4 [3].

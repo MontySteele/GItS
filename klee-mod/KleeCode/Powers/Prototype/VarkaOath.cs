@@ -1353,7 +1353,7 @@ public static class VarkaCards
         1 + (per <= 0 ? 0 : cryoOath / per);
 
     /// <summary>Glacial Edict: "and 1 Weak and 1 Vulnerable, plus 1 of each
-    /// for every 4 [3] Cryo Oath", read after the row's own Cryo landed.
+    /// for every 3 [2] Cryo Oath", read after the row's own Cryo landed.
     /// </summary>
     public static async Task GlacialEdict(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)

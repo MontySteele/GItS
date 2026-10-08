@@ -285,7 +285,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # moves, not how many times it moves it, and a `turns`-scaled hook would
     # make a longer power look like a wider one.
     "block_at_turn_start": [_hook("shared", "block_held", "write")],
-    # QUARANTINED (C.COMPANION_OVERHAUL). Gorou's "Block equal to half the
+    # (C.COMPANION_OVERHAUL). Gorou's "Block equal to half the
     # damage dealt": the same `block_held` WRITE its three neighbours make,
     # and nothing else. It reads a per-play damage total, and this vocabulary
     # has no state for that -- `damage` two lines above is `[]` for the same
@@ -370,7 +370,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "move_bombs": [_hook("private", "bombs", "use")],
     "modify_bombs": [_hook("private", "bombs", "use")],
     "chance_bomb_per_detonation": [_hook("private", "bombs", "write")],
-    # --- Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ---
+    # --- Klee overhaul, slice one (C.KLEE_OVERHAUL) ---
     # The arm is C# first and tier0 refuses to resolve these eight, but the
     # connectivity vocabulary is about what state an op MOVES, which the
     # printed rule already settles (`klee-brief-2026-09-01.md` sec.3) and which
@@ -468,7 +468,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "gain_fanfare_floor": [_hook("private", "fanfare", "write")],
     "raise_fanfare_cap": [_hook("private", "fanfare", "write")],
     "crash_fanfare": [_hook("private", "fanfare", "use")],
-    # QUARANTINED (R213 B, the Furina reframe's drain slice). The same
+    # (R213 B, the Furina reframe's drain slice). The same
     # competing USE `crash_fanfare` above makes, and for the same
     # reason: the meter is spent, so a second drain in one turn finds
     # nothing. What follows it on the card reads the amount taken,
@@ -516,7 +516,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
         _hook("shared", "hand_contents", "write")],
     # --- Kokomi ---
     "gain_charge": [_hook("private", "charge", "write")],
-    # R213 E1, QUARANTINED. A competing USE of the bank, mirroring
+    # R213 E1. A competing USE of the bank, mirroring
     # spend_spark: Charge paid here is Charge her readers no longer read.
     # Nothing shipped prints it -- the op exists for the prototype surface --
     # but the table is total by construction and a missing row is a finding.
@@ -525,7 +525,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                   _hook("shared", "hand_contents", "use"),
                   _hook("shared", "card_identity", "write")],
     "summon_kurage": [_hook("private", "kurage", "write")],
-    # --- Kokomi overhaul, DRAFT 6 (QUARANTINED, C.KOKOMI_OVERHAUL) ---
+    # --- Kokomi overhaul, DRAFT 6 (C.KOKOMI_OVERHAUL) ---
     # The arm is C# first and tier0 refuses to resolve these, but the
     # connectivity vocabulary is about what state an op MOVES, which the
     # printed rule already settles (`kokomi-brief-2026-09-01.md` draft 6 sec.2)

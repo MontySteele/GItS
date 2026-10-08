@@ -32,7 +32,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import companion_standins as standins
+from tier0.engine import lions_fang
 from tier0.engine import klee_overhaul
 from tier0.tests.conftest import make_enemy, make_state
 
@@ -43,7 +43,6 @@ JEAN = "proto_mc_jean_lions_fang"
 
 def _caches_clear():
     loader.reset_arm_caches()
-    standins._replacements.cache_clear()
 
 
 @pytest.fixture
@@ -75,13 +74,13 @@ def _source(relative):
 # ----------------------------------------------------------------------
 def test_lions_fang_pays_when_nothing_went_off_last_turn(arms):
     state = _klee_state()
-    state.player.powers[standins.LIONS_FANG] = 8
+    state.player.powers[lions_fang.LIONS_FANG] = 8
     state.player.draw_pile = [loader.peek_card("strike")] * 3
     klee_overhaul.place(state, state.enemies[0], 5)
     _next_turn(state)
     before = state.player.block
 
-    standins.turn_start(state)
+    lions_fang.turn_start(state)
 
     assert state.player.block == before + 8
 
@@ -91,7 +90,7 @@ def test_a_detonation_last_turn_silences_lions_fang_and_not_grounded(arms):
     field now: Grounded's condition (`EB-516`, the board) is satisfied and
     Lion's Fang's (the ledger) is not."""
     state = _klee_state()
-    state.player.powers[standins.LIONS_FANG] = 8
+    state.player.powers[lions_fang.LIONS_FANG] = 8
     state.player.powers[klee_overhaul.GROUNDED] = 6
     state.player.draw_pile = [loader.peek_card("strike")] * 3
     klee_overhaul.place(state, state.enemies[0], 5)
@@ -100,7 +99,7 @@ def test_a_detonation_last_turn_silences_lions_fang_and_not_grounded(arms):
     _next_turn(state)
 
     before = state.player.block
-    standins.turn_start(state)
+    lions_fang.turn_start(state)
     assert state.player.block == before, "Lion's Fang paid off Grounded's rule"
 
     before = state.player.block
@@ -128,7 +127,7 @@ def test_jeans_printed_condition_is_its_own(arms):
 
 def test_neither_of_jeans_faces_names_grounded():
     card = _source("Cards/Prototype/Generated/ProtoMcJeanLionsFang.cs")
-    power = _source("Powers/Prototype/CompanionStandIns.cs")
+    power = _source("Powers/Prototype/LionsFangPower.cs")
     body = power[power.index("class LionsFangPower"):]
     body = body[:body.index("\n}")]
 
@@ -145,7 +144,7 @@ def test_neither_of_jeans_faces_names_grounded():
 
 
 def test_lions_fang_reads_the_ledger_and_never_the_blind():
-    power = _source("Powers/Prototype/CompanionStandIns.cs")
+    power = _source("Powers/Prototype/LionsFangPower.cs")
     body = power[power.index("class LionsFangPower"):]
 
     assert "SetOffLastTurn > 0" in body

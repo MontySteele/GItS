@@ -89,7 +89,7 @@ def test_the_op_extractor_still_finds_the_dispatch():
     ops = _dispatched_ops()
     assert len(ops) >= 30, sorted(ops)
     assert {"damage", "chain_attack",          # `in` against a tuple
-            "gain_encore",                     # `==` inside a generator
+            "add_card",                        # `==` inside a generator
             "upgrade_in_hand"} <= ops          # `==` inside a `next()`
 
 

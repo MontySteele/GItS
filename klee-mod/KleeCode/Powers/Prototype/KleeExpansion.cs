@@ -156,8 +156,7 @@ public static class KleeExpansion
     /// A COMBAT-SCOPE COPY (<c>CombatState.CreateCard</c>), the rule
     /// <c>KokomiConscript.RollRecruit</c> records at length: a run-scope card
     /// is refused by the pile it is added to. EACH ROLLS ITS OWN, so two can be
-    /// the same friend. THE STAND-IN HAND-OFF APPLIES, as it does to the reward
-    /// slot: Klee is dealt her caretaker where a named Universal comes up.
+    /// the same friend.
     /// "Costs 0 this turn" is the base game's own temporary cost
     /// (<c>EnergyCost.SetThisTurn</c>, the Guest Star generator's call).
     /// </summary>
@@ -173,7 +172,6 @@ public static class KleeExpansion
         {
             var canonical = owner.RunState.Rng.CombatTargets.NextItem(pool);
             if (canonical == null) break;
-            canonical = CompanionStandIns.HandOff(canonical, owner);
             var card = combat.CreateCard(canonical, owner);
             if (card == null) continue;
             card.EnergyCost.SetThisTurn(0);
@@ -236,7 +234,7 @@ public static class KleeExpansion
     /// (Wait For It...).
     ///
     /// A SECOND DOOR AND NOT A WIDER <c>IProtoExplosionListener</c>, for the
-    /// reason <c>CompanionStandIns.OnExplosion</c> gives one call up: widening
+    /// reason the stand-in seam's old <c>OnExplosion</c> gave one call up: widening
     /// the arm's own interface for these four would re-sign every existing
     /// listener. Each Power owns its rule; this only walks them.
     /// </summary>

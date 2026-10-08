@@ -128,14 +128,8 @@ def on_turn_start(state: CombatState, fighter: Fighter) -> None:
         fighter.block += fighter.powers["metallicize"]
     dot = fighter.powers.get("dot", 0)
     if dot > 0:
-        # DoT ignores block, StS-poison-like -- but the player's Encore
-        # buffer absorbs it first (kickoff §4: chip-reduction, credited
-        # A4). Enemies have no encore; the import is late to keep powers
-        # below resources in the module graph.
+        # DoT ignores block, StS-poison-like.
         hp_loss = dot
-        if getattr(fighter, "encore", 0) > 0:
-            from tier0.engine import resources
-            hp_loss = resources.absorb_into_encore(state, dot, "dot")
         # Overkill clamped OUT of the emitted accounting, per the EPOCH 1
         # reactions._splash fix: HP still takes the full hit, but a 5-tick into
         # a 2 HP add is 2 points of damage dealt, not 5. Nothing read dot_tick
@@ -186,19 +180,6 @@ def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
                 max_stacks: int | None = None,
                 applier: Fighter | None = None,
                 never_reduces: bool = False) -> None:
-    # Flawless Strategy (Kokomi kickoff §1 law 3 / §2.5): she CANNOT gain
-    # Strength — any positive Strength she would gain becomes Charge
-    # instead, at this one chokepoint (cards, companions, intents, potions
-    # all land here). Negative strength (Mangle-class) is not a gain and
-    # still applies; enemies and every other character take the normal
-    # path. The conversion is the balance guardrail on an uncapped meter:
-    # no Strength-stacking on a Charge finisher, ever.
-    if (name == "strength" and stacks > 0 and target is state.player
-            and "tamakushi_casket" in state.player.relic_hooks):
-        from tier0.engine import resources      # late import (module graph)
-        resources.gain_charge(state, stacks, "flawless_strategy")
-        state.emit("strength_converted", stacks=stacks)
-        return
     # EB-95: `SkipNextDurationTick`, set inside the authority's Apply for a
     # Debuff freshly landed on a player-side creature. Without it the enemy
     # that applies Vulnerable during its own side turn watches the tick at the

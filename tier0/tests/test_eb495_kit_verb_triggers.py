@@ -74,15 +74,11 @@ KIT_SOURCES = (
     "plan",                 # V9  Kokomi planned hit
     # V11, the Tamakushi Casket's strike (`source="casket"`), was retired by
     # the Casket pass (2026-09-28): the relic counts Plans now.
-    "salon",                # V12 Salon performance
-    "salon_final_bow",      # V13 Salon bow / Evoke
+    # V12/V13, the shipped Salon's performance and bow, left with the Salon
+    # (2026-10-08).
     # V14/V15, the Stage's act and Bow (`furina_stage/act`, `/bow`, `/line`),
     # left with v2 (the Salon's Tab, 2026-10-05): the arm's guests and Powers
     # hit through `furina_tide`'s one door below.
-    # The Furina re-founding sim slice (`furina_v2`, sim only): a performer's
-    # act or Bow, and Clorinde's while-on-stage line. Kit verbs, not card hits.
-    "furina_v2/act",
-    "furina_v2/clorinde_line",
     # The Furina research slice (`furina_tide`, sim only): a guest's act or
     # line, Salon's Encore, Endless Waltz and Critics' Darling. Kit verbs.
     "furina_tide/line",
@@ -251,10 +247,13 @@ SIM_CALL_SITES = {
     ('companion_hexerei.py', 3): ("'companion'", None, 'element'),
     ('effects.py', 1): ("'bomb'", None, 'bomb.element'),
     ('effects.py', 2): ('source', None, 'element'),
-    ('effects.py', 3): ("'salon_final_bow'", None, "'hydro'"),
+    # THE SHIPPED-KIT SWEEP (2026-10-08): the Salon's bow and performance and
+    # the Kurage's turn-end pulse (the old third, eighth and eleventh rows)
+    # left the sim with that machinery, and every row below them moved up.
+    # The ordinals in the notes below are the ones they were written with.
     # The Kurage memory's pulse (a Hydro companion hit) left with the memory
     # rule at legacy cleanup stage 6, and the rows below it moved up one.
-    ('effects.py', 4): ("'attack' if card.type == 'attack' else 'card'", None, "'hydro'"),
+    ('effects.py', 3): ("'attack' if card.type == 'attack' else 'card'", None, "'hydro'"),
     # `EB-470` MOVED ONE ROW WITHOUT CHANGING ONE. Lisa's Lightning Rose volley
     # left the end-of-turn block for the start-of-turn tail, so its Electro
     # entry -- the thirteenth here -- is now the sixth and the seven between
@@ -265,38 +264,30 @@ SIM_CALL_SITES = {
     # Pyro hit is the fifth (the Mondstadt block), so the rows below it moved
     # down one; Yoimiya's Aurous Blaze answers a Skill play now, the
     # twenty-eighth, in place of its old volley on a non-Attack hit.
-    ('effects.py', 5): ("'companion'", None, "'pyro'"),
-    ('effects.py', 6): ("'companion'", None, "'electro'"),
-    ('effects.py', 7): ("'companion'", None, 'None'),
-    ('effects.py', 8): ("'salon'", 'False', "'hydro'"),
-    ('effects.py', 9): ("'burst'", None, "'pyro'"),
-    ('effects.py', 10): ("'companion'", None, "'electro'"),
-    ('effects.py', 11): ("'companion'", None, "'hydro'"),
+    ('effects.py', 4): ("'companion'", None, "'pyro'"),
+    ('effects.py', 5): ("'companion'", None, "'electro'"),
+    ('effects.py', 6): ("'companion'", None, 'None'),
+    ('effects.py', 7): ("'burst'", None, "'pyro'"),
+    ('effects.py', 8): ("'companion'", None, "'electro'"),
+    ('effects.py', 9): ("'companion'", None, 'None'),
+    ('effects.py', 10): ("'companion'", None, "'cryo'"),
+    ('effects.py', 11): ("'companion'", None, "'electro'"),
     ('effects.py', 12): ("'companion'", None, 'None'),
-    ('effects.py', 13): ("'companion'", None, "'cryo'"),
-    ('effects.py', 14): ("'companion'", None, "'electro'"),
+    ('effects.py', 13): ("'companion'", None, 'None'),
+    ('effects.py', 14): ("'companion'", None, "'geo'"),
     ('effects.py', 15): ("'companion'", None, 'None'),
-    ('effects.py', 16): ("'companion'", None, 'None'),
-    ('effects.py', 17): ("'companion'", None, "'geo'"),
-    ('effects.py', 18): ("'companion'", None, 'None'),
-    ('effects.py', 19): ("'companion'", None, "'electro'"),
-    ('effects.py', 20): ("'companion'", None, "'electro'"),
-    ('effects.py', 21): ("'companion'", None, "'cryo'"),
-    ('effects.py', 22): ("'companion'", None, "'cryo'"),
-    ('effects.py', 23): ("'companion'", None, "'hydro'"),
-    ('effects.py', 24): ("'companion'", None, "'geo'"),
-    ('effects.py', 25): ("'companion'", None, "'hydro'"),
-    ('effects.py', 26): ("'companion'", None, "'pyro'"),
-    ('effects.py', 27): ("'companion'", None, "'pyro'"),
-    ('effects.py', 28): ("'companion'", None, "'pyro'"),
+    ('effects.py', 16): ("'companion'", None, "'electro'"),
+    ('effects.py', 17): ("'companion'", None, "'electro'"),
+    ('effects.py', 18): ("'companion'", None, "'cryo'"),
+    ('effects.py', 19): ("'companion'", None, "'cryo'"),
+    ('effects.py', 20): ("'companion'", None, "'hydro'"),
+    ('effects.py', 21): ("'companion'", None, "'geo'"),
+    ('effects.py', 22): ("'companion'", None, "'hydro'"),
+    ('effects.py', 23): ("'companion'", None, "'pyro'"),
+    ('effects.py', 24): ("'companion'", None, "'pyro'"),
+    ('effects.py', 25): ("'companion'", None, "'pyro'"),
     # (`furina_stage.py`'s two doors left with v2, the Salon's Tab,
     # 2026-10-05: the arm runs on `furina_tide`'s rules and its one door.)
-    # THE FURINA RE-FOUNDING SIM SLICE (`furina_v2`, sim only): Clorinde's
-    # line ("whenever you Spend, deal 4 Electro") and the one act door every
-    # performer's damage act and Bow uses. Unpowered, as the Stage's acts are;
-    # each carries its performer's element (None for the trio).
-    ('furina_v2.py', 1): ("'furina_v2/clorinde_line'", 'False', "'electro'"),
-    ('furina_v2.py', 2): ("'furina_v2/act'", 'False', 'element'),
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the one unpowered
     # door every guest act and line, and every HP-loop Power, uses.
     ('furina_tide.py', 1): ("'furina_tide/line'", 'False', 'element'),

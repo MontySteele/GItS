@@ -21,9 +21,6 @@ nation: fontaine         # §4.1 reward weighting: Fontaine is her half
 element: hydro
 cadence: skill           # Skill-grade (kickoff §1): only Skill/Burst-tagged
                          # cards apply hydro; engine rule in effects._element_for
-burst_max: 70            # RATIFIED (R17, 2026-07-20): particles from skill
-                         # tags (5), reactions (5), Salon ticks (2/member/
-                         # turn), Encore spend (1/point). Klee=40, nuke~90.
 fanfare: true            # Fanfare cap = FANFARE_CAP_FRACTION x maxHP
 # The shipped kit Burst left with the shipped sheets (legacy cleanup stage 6).
 # Her starting relic is Salon Solitaire, whose rule is `furina_stage.open_combat`;

@@ -199,7 +199,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
     elif pair in _AMPLIFY:
         name = _AMPLIFY[pair][0]
         out = damage * _amp_mult(state, name)
-        # QUARANTINED (C.COMPANION_OVERHAUL). Durin's White form -- "enemies
+        # (C.COMPANION_OVERHAUL). Durin's White form -- "enemies
         # take 50% more damage FROM REACTIONS" -- multiplies the REACTION'S OWN
         # contribution, `out - damage`, and leaves the hit that triggered it
         # alone. Written as an adjustment to the amplified total rather than
@@ -210,7 +210,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         out = damage + (out - damage) * _mc_reaction_mult(state)
     elif pair == frozenset(("pyro", "electro")):
         name = "overload"
-        # QUARANTINED (C.COMPANION_OVERHAUL). The other half of White: the
+        # (C.COMPANION_OVERHAUL). The other half of White: the
         # splash IS damage a reaction deals, so it is scaled by the same
         # factor, at the one site that computes it.
         splash = int(C.OVERLOAD_SPLASH * _mc_reaction_mult(state))
@@ -260,7 +260,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         state.reactions_this_card += 1
         state.reactions_this_turn += 1
         p = state.player
-        # QUARANTINED (C.COMPANION_OVERHAUL). The arm's two reaction readers --
+        # (C.COMPANION_OVERHAUL). The arm's two reaction readers --
         # Dahlia's Favonian Favor and Varka's Sturm und Drang -- ride the site
         # that already counts a reaction, so "a reaction happened" keeps one
         # definition. `aura` is the CONSUMED element and is the only surviving
@@ -282,15 +282,11 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         if n and state.reactions_this_turn == 1:
             powers.apply_power(state, enemy, "vulnerable", n)
             powers.apply_power(state, enemy, "weak", n)
-        if p.burst_max:
-            resources.gain_burst(state, C.BURST_PER_REACTION, "reaction")
         # Catalytic Converter (R120 rename; id catalytic_conversion unchanged):
-        # reactions grant bonus sparks + burst energy.
+        # reactions grant bonus sparks.
         bonus = p.powers.get("reaction_bonus_spark_energy", 0)
         if bonus:
             p.sparks += bonus
-            resources.gain_burst(
-                state, C.CATALYTIC_BURST_PER_REACTION * bonus, "catalytic")
         state.emit("reaction", reaction=name, trigger=trigger, aura=aura,
                    target=enemy.name,
                    # THE ONE REACTION EVENT (§7.3): what fired, on whom, and
@@ -326,7 +322,7 @@ def reaction_source_kind(state: CombatState) -> str:
 
 
 def _mc_reaction_mult(state: CombatState) -> float:
-    """QUARANTINED (C.COMPANION_OVERHAUL). Durin's White multiplier, behind a
+    """(C.COMPANION_OVERHAUL). Durin's White multiplier, behind a
     late import so `reactions` keeps importing nothing from `effects` at module
     level -- the same cycle `_splash` already steps around. 1.0 with the flag
     off, which is what makes this file byte-identical in a release build."""
@@ -336,7 +332,7 @@ def _mc_reaction_mult(state: CombatState) -> float:
 
 def _mc_reaction(state: CombatState, enemy: Enemy, name: str,
                  aura: str) -> None:
-    """QUARANTINED (C.COMPANION_OVERHAUL). The arm's reaction readers; see
+    """(C.COMPANION_OVERHAUL). The arm's reaction readers; see
     `effects.companion_overhaul_reaction`. Late import, same cycle."""
     from tier0.engine import effects                  # late import (cycle)
     effects.companion_overhaul_reaction(state, enemy, name, aura)

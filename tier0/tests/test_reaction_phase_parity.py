@@ -715,7 +715,7 @@ def test_no_doc_reasserts_the_refuted_pre_draw_order():
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
         ("Powers/Prototype/ProtoBombPower.cs", "ProtoBombPower"):
-            "QUARANTINED (the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
+            "(the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
             "and it GROWS rather than detonating -- rule 7 of the ruled brief "
             "is that nothing fires by itself, so this tenant deals no damage "
             "and applies no element. THE ORDERING QUESTION, answered: the "
@@ -733,7 +733,7 @@ CO_TENANCY_LEDGER = {
             "purges the Salon company map, clears Curtain Call per-turn "
             "windows; touches nothing its co-tenants read",
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
-            "QUARANTINED (the Furina stage, the re-founding 2026-10-04, sec.8). "
+            "(the Furina stage, the re-founding 2026-10-04, sec.8). "
             "The top of her turn: `FurinaStage.OpenTurn` zeroes the flow "
             "counts (Fanfare gained, spent, paid this turn) and the "
             "once-a-turn latches in `FurinaStageLedger`, then refreshes the "
@@ -755,7 +755,7 @@ CO_TENANCY_LEDGER = {
     },
     "AfterPlayerTurnStart": {
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
-            "QUARANTINED (the Furina stage; the Salon's Tab, 2026-10-05). "
+            "(the Furina stage; the Salon's Tab, 2026-10-05). "
             "After her draw: the badge and Grand Theater Program's Fanfare "
             "(`FurinaStage.TurnStart`). THE ORDERING QUESTION, answered: what "
             "it WRITES to a shared resource is Furina's one Fanfare number, "
@@ -766,7 +766,7 @@ CO_TENANCY_LEDGER = {
             "`KleeElementalHooks` or the Companion powers beside it",
         ("Powers/Prototype/StageRaisePerTurnPower.cs",
          "StageRaisePerTurnPower"):
-            "QUARANTINED (the Furina stage; R276 hygiene, re-founded "
+            "(the Furina stage; R276 hygiene, re-founded "
             "2026-10-04). Her Ancient under the arm: gain N Fanfare at the "
             "start of her turn. THE ORDERING QUESTION, answered: its "
             "co-tenants on the same resource (`FurinaStageHooks`' turn-start "
@@ -775,7 +775,7 @@ CO_TENANCY_LEDGER = {
             "damage, grants no Block and touches no element. NO SIM TWIN "
             "ORDERS IT: the sim models the shipped Ancient only",
         ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
-            "QUARANTINED (the Kokomi overhaul; pool completion, 2026-10-01). "
+            "(the Kokomi overhaul; pool completion, 2026-10-01). "
             "Patient Tide hands back the Energy it banked at her last turn's "
             "end. THE ORDERING QUESTION, answered: this broadcast fires after "
             "the energy reset, and the co-tenants that also write Energy (the "
@@ -784,7 +784,7 @@ CO_TENANCY_LEDGER = {
             "sim adds the kept Energy on the refill line (`combat._player_turn`, "
             "`kokomi_plan.patient_tide_kept`)",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
-            "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
+            "(the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
             "resolution point: the Plans she wrote last turn happen here, in "
             "the order she wrote them. THE ORDERING QUESTION, answered: the "
             "queue is per seat and this power is its only reader, so no "
@@ -804,7 +804,7 @@ CO_TENANCY_LEDGER = {
             "opens on FIVE energy, which is three plus the Plan's two. The "
             "reading is recorded in full on the method",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
-            "QUARANTINED (the Klee overhaul). Raw per-turn Block mint on a "
+            "(the Klee overhaul). Raw per-turn Block mint on a "
             "condition, the same shape as MetallicizePower below. THE "
             "ORDERING QUESTION, answered: it READS the overhaul ledger's "
             "last-turn explosion count and WRITES only Block. Nothing else "
@@ -812,7 +812,7 @@ CO_TENANCY_LEDGER = {
             "explosion, both of which are strictly later than this broadcast, "
             "so no co-tenant can move the number it reads",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "ReturnToSenderPower"):
-            "QUARANTINED (the Klee overhaul, `EB-732`). The BLOCK-MARK "
+            "(the Klee overhaul, `EB-732`). The BLOCK-MARK "
             "housekeeping half, IcyPawsPower's construction and its answer: "
             "it removes itself when no Block stands behind the mark. THE "
             "ORDERING QUESTION, answered: it reads Owner.Block and writes "
@@ -825,7 +825,7 @@ CO_TENANCY_LEDGER = {
             "broadcast applies the mark, only a card play does, and a card "
             "play is strictly later",
         ("Powers/Prototype/KleeExpansionPowers.cs", "SecretBasePower"):
-            "QUARANTINED (the Klee overhaul, R276; v3 in the scaling pass, "
+            "(the Klee overhaul, R276; v3 in the scaling pass, "
             "klee-next 2026-10-05). Klee's Secret Base places a Bomb every "
             "turn. THE ORDERING QUESTION, answered: its one co-tenant that "
             "writes the board is DodocoPower, so the two do not run "
@@ -834,12 +834,12 @@ CO_TENANCY_LEDGER = {
             "Dodoco's Mine in one fixed order however the broadcast orders "
             "the two, the sim's klee_overhaul._turn_start_expansion order",
         ("Powers/Prototype/KleeExpansionPowers.cs", "DodocoPower"):
-            "QUARANTINED (the Klee overhaul, R276). Dodoco's Mine, placed "
+            "(the Klee overhaul, R276). Dodoco's Mine, placed "
             "through the same sequencer as SecretBasePower above and AFTER "
             "its Bomb, so the one resource they share has one order. It "
             "reads nothing else of this broadcast's",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
-            "QUARANTINED (the Klee overhaul; moved here from "
+            "(the Klee overhaul; moved here from "
             "BeforeSideTurnEnd on 2026-09-25). Sparks 'n' Splash: her "
             "largest Bomb deals its size in Pyro to the enemy it is on, "
             "without going off. THE ORDERING QUESTION, answered: it READS "
@@ -856,14 +856,14 @@ CO_TENANCY_LEDGER = {
             "effects.player_turn_start_triggers), and SurpriseDispatchPower "
             "draws from the same rng",
         ("Powers/Prototype/KleeExpansionPowers.cs", "AlicesDetonatorBasePower"):
-            "QUARANTINED (the Klee overhaul, R276). Alice's Detonator adds a "
+            "(the Klee overhaul, R276). Alice's Detonator adds a "
             "Ka-pow! (upgraded on the Plus twin) to the hand per stack. THE "
             "ORDERING QUESTION, answered: it reads nothing but its own "
             "Amount, and its one write is the hand, the write NaptimePower, "
             "LionsFangPower and BlazingDelightPower already make here on the "
             "same terms -- no co-tenant reads the hand's contents",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BlazingDelightPower"):
-            "QUARANTINED (the Klee overhaul, `EB-732`). Per-turn Energy plus "
+            "(the Klee overhaul, `EB-732`). Per-turn Energy plus "
             "one draw per stack. THE ORDERING QUESTION, answered: it reads "
             "nothing but its own Amount, so no co-tenant can move an input it "
             "does not have. It WRITES energy and the hand -- the energy reset "
@@ -873,20 +873,20 @@ CO_TENANCY_LEDGER = {
             "and LionsFangPower already make here on the same terms: no "
             "co-tenant reads the hand's contents",
         ("Powers/Prototype/CompanionOverhaulPowers.cs", "SignatureMixPower"):
-            "QUARANTINED (the Mondstadt companion overhaul). Raw per-turn "
+            "(the Mondstadt companion overhaul). Raw per-turn "
             "Block mint plus its own duration tick, the same shape as "
             "MetallicizePower below. THE ORDERING QUESTION, answered: it "
             "reads nothing and writes only Block, so no co-tenant can move an "
             "input it does not have",
         ("Powers/Prototype/CompanionOverhaulPowers.cs", "RevelationPower"):
-            "QUARANTINED (the Mondstadt companion overhaul). Per-turn Block "
+            "(the Mondstadt companion overhaul). Per-turn Block "
             "plus conditional Strength. THE ORDERING QUESTION, answered: the "
             "condition is a LATCH written at the PREVIOUS turn's end (see "
             "CompanionOverhaulTurnEnd) and never read live, so no co-tenant "
             "of this broadcast can change the answer -- which is exactly why "
             "the latch exists instead of a live Block read",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "MelodyLoopPower"):
-            "QUARANTINED (the Mondstadt companion overhaul, second wave). "
+            "(the Mondstadt companion overhaul, second wave). "
             "Applies Hydro to the ENEMY it is hosted on, then ticks its own "
             "duration. THE ORDERING QUESTION, answered: it touches only its "
             "own host and reads nothing, and the two overhaul co-tenants "
@@ -897,7 +897,7 @@ CO_TENANCY_LEDGER = {
             "construction, because the card places the power on the body it "
             "targeted",
         ("Powers/Prototype/PrincipleOfPurity.cs", "PurityStrikePower"):
-            "QUARANTINED (the AoE trim, 2026-10-03: Durin, Principle of "
+            "(the AoE trim, 2026-10-03: Durin, Principle of "
             "Purity). One powered Pyro hit at a random enemy. THE ORDERING "
             "QUESTION, answered, and it is a RACE filed as a BACKLOG line: the "
             "Pyro can react with the Hydro MelodyLoopPower lays or the Cryo "
@@ -907,7 +907,7 @@ CO_TENANCY_LEDGER = {
             "(effects.companion_overhaul_turn_start); the mod gives no order "
             "among same-broadcast tenants",
         ("Powers/Prototype/CompanionCoven.cs", "HeraldOfFrostPower"):
-            "QUARANTINED (Klee's coven Personals, R236). Applies Cryo twice to "
+            "(Klee's coven Personals, R236). Applies Cryo twice to "
             "a random enemy, pays raw Block, then ticks its own duration. THE "
             "ORDERING QUESTION, answered, and it is the reason the sim runs "
             "this LAST of the broadcast's tenants: the Cryo can resolve a "
@@ -917,7 +917,7 @@ CO_TENANCY_LEDGER = {
             "co-tenant's roll can move under it, and two copies of this one "
             "power are identical",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
-            "QUARANTINED (the Inazuma companion overhaul). Draws its promised "
+            "(the Inazuma companion overhaul). Draws its promised "
             "cards and removes itself. THE ORDERING QUESTION, answered: it "
             "reads nothing this broadcast can move -- the condition it depends "
             "on (did an Attack get played last turn) was settled at the "
@@ -925,13 +925,13 @@ CO_TENANCY_LEDGER = {
             "broken -- and drawing cards changes no input any co-tenant here "
             "has",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "TenguStormcallPower"):
-            "QUARANTINED (the Inazuma companion overhaul). Pays its promise "
+            "(the Inazuma companion overhaul). Pays its promise "
             "into the shipped AttackUpThisTurnPower and removes itself. THE "
             "ORDERING QUESTION, answered: nothing in this broadcast reads an "
             "attack rider -- every volley that could is at turn END, a "
             "broadcast away -- and it reads nothing itself",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "SurpriseDispatchPower"):
-            "QUARANTINED (the Inazuma companion overhaul). One unelemented "
+            "(the Inazuma companion overhaul). One unelemented "
             "hit at a random enemy, then it removes itself. THE ORDERING "
             "QUESTION, answered, and it is the only one of the four Inazuma "
             "start-of-turn readers that needs more than a sentence: it DEALS "
@@ -943,8 +943,8 @@ CO_TENANCY_LEDGER = {
             "whose Hydro lands on its own host and pays nothing that a dead "
             "host would have paid. The rng draw is the residual, and it is "
             "the same residual the shipped per-turn bomb mint already has",
-        ("Powers/Prototype/CompanionStandIns.cs", "LionsFangPower"):
-            "QUARANTINED (the companion stand-in seam). Jean's conditional "
+        ("Powers/Prototype/LionsFangPower.cs", "LionsFangPower"):
+            "(Jean, in Klee's own pool). Jean's conditional "
             "per-turn Block mint plus one draw -- GroundedPower's shape with a "
             "card on it, and it reads the overhaul ledger exactly as Grounded "
             "does. THE ORDERING QUESTION, answered: its input is the "
@@ -974,7 +974,7 @@ CO_TENANCY_LEDGER = {
             "ChargePerTurnPower under BeforeSideTurnStart), so the grant "
             "cannot see a half-paid bank",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "BlazingBarrierPower"):
-            "QUARANTINED (the Inazuma companion overhaul). `EB-337`. Thoma's "
+            "(the Inazuma companion overhaul). `EB-337`. Thoma's "
             "Block MARK, dropping itself when the pool it marks is gone -- the "
             "twin of the sim's inazuma_overhaul_turn_start clamp. THE "
             "ORDERING QUESTION, answered, and it is the one row here whose "
@@ -990,27 +990,27 @@ CO_TENANCY_LEDGER = {
             "an ALREADY-SPENT mark leaves the strip this turn or next, and it "
             "writes only its own removal",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "IcyPawsPower"):
-            "QUARANTINED (the Mondstadt companion overhaul, second wave). "
+            "(the Mondstadt companion overhaul, second wave). "
             "`EB-337`. Diona's Block mark, and it is BlazingBarrierPower's "
             "construction to the line -- same mark, same live read, same "
             "removal, same answer to the ordering question above. The two are "
             "commutative with each other for the reason neither is ordered "
             "against a Block grant: neither reads a number it keeps",
         ("Relics/KleeArmRelics.cs", "FreshCatch"):
-            "QUARANTINED (the Klee arm's own relics, 2026-09-27). Turn-1-only: "
+            "(the Klee arm's own relics, 2026-09-27). Turn-1-only: "
             "Hydro on one random enemy. No co-tenant reads an aura at this "
             "broadcast on turn 1 -- the Klee arm's turn-start Powers are not in "
             "play before her first card -- and the sim has no counterpart until "
             "Balance",
         ("Relics/KleeArmRelics.cs", "DodocoArmy"):
-            "QUARANTINED (the Klee arm's own relics, 2026-09-27). Turn-1-only: "
+            "(the Klee arm's own relics, 2026-09-27). Turn-1-only: "
             "a Mine 2 on every enemy. Its one board-reading co-tenant, "
             "KleeExpansion.RunTurnStartPlacements (Klee's Secret Base asks "
             "'no Bomb of yours'), is carried by Powers that cannot be in play "
             "before her first card, so turn 1 has no race; the sim has no "
             "counterpart until Balance",
         ("Relics/VarkaArmRelics.cs", "KnightsCommission"):
-            "QUARANTINED (Varka's own relics, 2026-10-01). Turn-1-only: gains "
+            "(Varka's own relics, 2026-10-01). Turn-1-only: gains "
             "2 Oath in the starting Knight's element (re-aimed 2026-10-01; it "
             "sets no element, the Fang does). Its readers at this "
             "broadcast are his turn-start Powers (VarkaOath.TurnStart via "
@@ -1018,7 +1018,7 @@ CO_TENANCY_LEDGER = {
             "card; Dandelion Seeds, which reads the element, is staged into "
             "AfterPlayerTurnStartLate. No sim counterpart until Balance",
         ("Relics/BoreasFang.cs", "BoreasFang"):
-            "QUARANTINED (Varka defence sec.4, 2026-10-01). Turn-1-only: "
+            "(Varka defence sec.4, 2026-10-01). Turn-1-only: "
             "makes the starter Knight's element current, no Oath. Its one "
             "co-tenant, Knight's Commission, gains 2 Oath in that same "
             "element and sets none, so either order ends with that element "
@@ -1026,13 +1026,13 @@ CO_TENANCY_LEDGER = {
             "Commission's 2 Oath; his turn-start Powers cannot be in play before his first "
             "card. Sim twin: varka_oath.turn_start, turn 1, first",
         ("Relics/VarkaArmRelics.cs", "FavoniusDutyRoster"):
-            "QUARANTINED (Varka's own relics, 2026-10-01). Turn-1-only: adds "
+            "(Varka's own relics, 2026-10-01). Turn-1-only: adds "
             "a pool Knight to the hand. It shares only the hand with the "
             "Fang's Ascension (raised by Knight's Commission's gain); with a "
             "full hand which one overflows is unordered, and nothing reads "
             "the hand at this broadcast. No sim counterpart until Balance",
         ("Relics/VarkaArmRelics.cs", "AndriussHowl"):
-            "QUARANTINED (Varka's own relics, 2026-10-01). Moves the "
+            "(Varka's own relics, 2026-10-01). Moves the "
             "Ascensions he played last turn back to the hand. Never on turn "
             "1 (nothing played yet), so it cannot meet the two turn-1 "
             "relics; no co-tenant reads the hand or the piles here. No sim "
@@ -1049,7 +1049,7 @@ CO_TENANCY_LEDGER = {
     },
     "BeforeSideTurnEnd": {
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
-            "QUARANTINED (the Furina stage, FURINA_STAGE). RULE 10: each "
+            "(the Furina stage, FURINA_STAGE). RULE 10: each "
             "performer on the stage performs a FLAT act -- Usher 3 Block to "
             "Furina, Chevalmarin 2 to every enemy plus Hydro, Crabaletta 5 to "
             "a random enemy -- front to back. THE ORDERING QUESTION, answered "
@@ -1072,7 +1072,7 @@ CO_TENANCY_LEDGER = {
             "the shipped end-of-turn docket has already drawn. NO SIM TWIN "
             "ORDERS IT: the arm is C# FIRST and tier0 has no stage",
         ("Powers/Prototype/VarkaPowers.cs", "RetaliatingTidePower"):
-            "QUARANTINED (Varka element identities, 2026-10-01). Retaliating "
+            "(Varka element identities, 2026-10-01). Retaliating "
             "Tide: min(his Block, his Hydro Oath) to a random enemy. THE "
             "ORDERING QUESTION, answered: what it READS is his Block and the "
             "Oath ledger. The one Varka tenant that WRITES his Block at turn "
@@ -1085,7 +1085,7 @@ CO_TENANCY_LEDGER = {
             "ahead of the model-driven sequencer, whose volleys are other "
             "kits' and re-read the living enemies per hit",
         ("Powers/Prototype/KleeExpansionPowers.cs", "SitTightPower"):
-            "QUARANTINED (the Klee overhaul, R276). Sit Tight's delayed "
+            "(the Klee overhaul, R276). Sit Tight's delayed "
             "Block: 4 per copy if rule 7's first counter is still 0, then the "
             "power removes itself. THE ORDERING QUESTION, answered: what it "
             "READS is the arm's explosion ledger, and nothing in this "
@@ -1098,7 +1098,7 @@ CO_TENANCY_LEDGER = {
             "pays it at the same point, `klee_overhaul.sit_tight_turn_end` "
             "called ahead of `effects.player_turn_end_triggers`",
         ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
-            "QUARANTINED (the Kokomi overhaul; pool completion, 2026-10-01). "
+            "(the Kokomi overhaul; pool completion, 2026-10-01). "
             "Patient Tide banks up to N of her unspent Energy. THE ORDERING "
             "QUESTION, answered: it READS Energy and writes only its own "
             "field; the one co-tenant that could move her Energy here is the "
@@ -1107,7 +1107,7 @@ CO_TENANCY_LEDGER = {
             "Water's Weak). The sim banks after the Dusk drain "
             "(`kokomi_plan.patient_tide_bank` after `resolve_dusk`)",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
-            "QUARANTINED (the Kokomi overhaul, C.KOKOMI_OVERHAUL). DUSK "
+            "(the Kokomi overhaul, C.KOKOMI_OVERHAUL). DUSK "
             "(`EB-643`, R265): every dusk entry in the Plan queue is carried "
             "out here, at the end of her turn, before the enemies act -- which "
             "is the printed promise and the only clause of the face a card can "
@@ -1148,40 +1148,40 @@ CO_TENANCY_LEDGER = {
     },
     "AfterSideTurnEnd": {
         ("Powers/Prototype/VarkaPowers.cs", "OathLeftPower"):
-            "QUARANTINED (Varka element identities, 2026-10-01). The "
+            "(Varka element identities, 2026-10-01). The "
             "left-element flag beside his badge expires with his turn. "
             "Removes itself and touches nothing a co-tenant reads. No sim "
             "twin: it is a display of the ledger's `LeftElement`",
         ("Powers/Prototype/VarkaPowers.cs", "EyeWallPower"):
-            "QUARANTINED (the Varka expansion, 2026-10-01). Eye Wall's 'this "
+            "(the Varka expansion, 2026-10-01). Eye Wall's 'this "
             "turn', Grand Master's Order's boundary exactly. Removes itself "
             "and touches nothing a co-tenant reads. Sim twin: "
             "`varka_oath.turn_start` pops it",
         ("Powers/Prototype/VarkaPowers.cs", "GrandMastersOrderPower"):
-            "QUARANTINED (Varka, prototype batch one). Grand Master's Order's "
+            "(Varka, prototype batch one). Grand Master's Order's "
             "'this turn', ReplayNextCompanionPower's boundary exactly. Removes "
             "itself and touches nothing a co-tenant reads. No sim twin",
         ("Powers/Prototype/CoopSet.cs", "PassTheMatchPower"):
-            "QUARANTINED (the co-op set). Pass the Match's 'this turn' "
+            "(the co-op set). Pass the Match's 'this turn' "
             "expiring at the end of the player turn, Playdate's shape below. "
             "Removes itself and touches nothing a co-tenant reads. No sim "
             "twin: tier 0 seats one player (engine/coop.py)",
         ("Powers/Prototype/KleeExpansionPowers.cs", "PlaydatePower"):
-            "QUARANTINED (the Klee overhaul, R276). Playdate's discount "
+            "(the Klee overhaul, R276). Playdate's discount "
             "expiring at the end of the turn that wrote it, "
             "CompanionCostThisTurnPower's boundary. Removes "
             "itself and touches nothing a co-tenant reads",
         ("Powers/Prototype/KleeExpansionPowers.cs", "BoomBadgePower"):
-            "QUARANTINED (the Klee overhaul, R276). Boom Badge's replay grant "
+            "(the Klee overhaul, R276). Boom Badge's replay grant "
             "expiring at the end of its turn, ReplayNextCompanionPower's "
             "shape. Removes itself and touches nothing a co-tenant reads",
         ("Powers/Prototype/KleeExpansionPowers.cs", "WaitForItPower"):
-            "QUARANTINED (the Klee overhaul, R276). Wait For It...'s "
+            "(the Klee overhaul, R276). Wait For It...'s "
             "one-shot window closing unspent, SinfulHexPower's shape: what "
             "pays it is a reacting explosion during the turn, never this "
             "broadcast. Removes itself and touches nothing a co-tenant reads",
         ("Powers/Prototype/KleeExpansionPowers.cs", "PatienceKleePower"):
-            "QUARANTINED (the Klee overhaul, R276). Patience, Klee!'s growth "
+            "(the Klee overhaul, R276). Patience, Klee!'s growth "
             "of the largest Bomb on a turn with no Set off card. THE "
             "ORDERING QUESTION, answered: no co-tenant of this broadcast "
             "reads or writes a charge (Sparks 'n' Splash, which read the "
@@ -1190,12 +1190,12 @@ CO_TENANCY_LEDGER = {
             "klee_overhaul.turn_end",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "FirstAttackTwicePower"):
-            "QUARANTINED (the Kokomi overhaul, R276). Pincer's carry-out, "
+            "(the Kokomi overhaul, R276). Pincer's carry-out, "
             "\"this turn\", on the same-turn boundary (FLAG-1 / R114). "
             "Removes itself and touches nothing else",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "FirstCardFreePower"):
-            "QUARANTINED (the Kokomi overhaul, R276). Stolen Chapter's "
+            "(the Kokomi overhaul, R276). Stolen Chapter's "
             "carry-out, \"this turn\", on the same boundary. Removes itself "
             "and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
@@ -1219,7 +1219,7 @@ CO_TENANCY_LEDGER = {
             "their order",
         ("Powers/Prototype/CompanionOverhaulPowers.cs",
          "CompanionOverhaulTurnEnd"):
-            "QUARANTINED (the Mondstadt companion overhaul). THE ANSWER TO "
+            "(the Mondstadt companion overhaul). THE ANSWER TO "
             "THE ORDERING QUESTION RATHER THAN AN INSTANCE OF IT: six of the "
             "arm's powers fire at the end of the player's turn, four of them "
             "put an element on an enemy that may already carry one and three "
@@ -1233,19 +1233,19 @@ CO_TENANCY_LEDGER = {
             "while it is on, and the pure this-turn expiries above, which "
             "read nothing this writes",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "PassionOverloadPower"):
-            "QUARANTINED (the Mondstadt companion overhaul, second wave). A "
+            "(the Mondstadt companion overhaul, second wave). A "
             "this-turn EXPIRY and nothing else -- it removes itself, exactly "
             "as the shipped AttackUpThisTurnPower above it does. THE ORDERING "
             "QUESTION, answered: a removal reads nothing and writes only its "
             "own existence, so it has no position to defend. It is NOT in "
             "CompanionOverhaulTurnEnd's walk for that reason",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "FavonianFavorPower"):
-            "QUARANTINED (the Mondstadt companion overhaul, second wave). The "
+            "(the Mondstadt companion overhaul, second wave). The "
             "same this-turn expiry, one card over: the Block it pays is paid "
             "per REACTION during the turn (CompanionOverhaulReactions), never "
             "in this broadcast, so all that happens here is the removal",
         ("Powers/Prototype/CompanionHexerei.cs", "IntroductionMagicPower"):
-            "QUARANTINED (R244, Klee's Hexerei readers). Alice's Introduction "
+            "(R244, Klee's Hexerei readers). Alice's Introduction "
             "Magic's this-turn window CLOSING, in the shape SinfulHexPower "
             "below takes and for the same reason -- a card-play promise ends "
             "where the arm's other this-turn promises do. THE ORDERING "
@@ -1259,7 +1259,7 @@ CO_TENANCY_LEDGER = {
             "called first thing in klee_overhaul.turn_end), so there is no "
             "order for it to disagree with",
         ("Powers/Prototype/CompanionHexerei.cs", "SinfulHexPower"):
-            "QUARANTINED (the Hexerei family stand-ins, R236 sec.3). Fischl's "
+            "(the Hexerei family stand-ins, R236 sec.3). Fischl's "
             "this-turn watcher CLOSING, and Favonian Favor's expiry one row "
             "up is the shape it copies -- a reaction card's window ends where "
             "the arm's other this-turn promises do, not at the turn START the "
@@ -1273,7 +1273,7 @@ CO_TENANCY_LEDGER = {
             "effects.companion_overhaul_turn_end beside the pops for Dahlia "
             "and Bennett), so there is no order for it to disagree with",
         ("Powers/Prototype/CompanionHexerei.cs", "MollisFavoniusPower"):
-            "QUARANTINED (the Hexerei family stand-ins). Sucrose's this-turn "
+            "(the Hexerei family stand-ins). Sucrose's this-turn "
             "window closing, the same removal at the same boundary and for "
             "the same reason as SinfulHexPower above -- it differs only in "
             "what pays it, which is likewise a reaction and never this "
@@ -1281,14 +1281,14 @@ CO_TENANCY_LEDGER = {
             "inside this broadcast is not a question the two engines can "
             "answer differently",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "LightningFangPower"):
-            "QUARANTINED (the Mondstadt companion overhaul, second wave). A "
+            "(the Mondstadt companion overhaul, second wave). A "
             "duration TICK and nothing else -- what the power does happens on "
             "every Attack the player makes, in ModifyDamageAdditive and in "
             "AuraCmd.ElementOfPlay, both a broadcast away. THE ORDERING "
             "QUESTION, answered: ticking a clock reads nothing and writes "
             "only its own stack",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
-            "QUARANTINED (the Inazuma companion overhaul). A conditional "
+            "(the Inazuma companion overhaul). A conditional "
             "REMOVAL and nothing else: the promise breaks here if an Attack "
             "was played this turn. THE ORDERING QUESTION, answered: it reads "
             "the Attack counter, which is written at AfterCardPlayed and not "
@@ -1297,12 +1297,12 @@ CO_TENANCY_LEDGER = {
             "reason PassionOverloadPower is not: a removal has no position to "
             "defend",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "CrowfeatherCoverPower"):
-            "QUARANTINED (the Inazuma companion overhaul). The same this-turn "
+            "(the Inazuma companion overhaul). The same this-turn "
             "EXPIRY PassionOverloadPower above it is, one nation over -- it "
             "removes itself and does nothing else, and what it pays is paid "
             "on the Attack that spends it, a broadcast away",
         ("Powers/Prototype/CompanionCoven.cs", "HexhunterChimePower"):
-            "QUARANTINED (Klee's coven Personals, R236). The same this-turn "
+            "(Klee's coven Personals, R236). The same this-turn "
             "EXPIRY again -- it removes itself and does nothing else. THE "
             "ORDERING QUESTION, answered: what the power DOES happens at an "
             "explosion (CompanionCovenBombs.ElementFor), which is a broadcast "

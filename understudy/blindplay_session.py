@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from understudy import authorship, bridge, qa_packet, seat
+from understudy import authorship, bridge, offer_log, qa_packet, seat
 from understudy.blindplay_coop import WAIT_POLL_S, wait_for_partner, wait_line
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
@@ -730,6 +730,8 @@ class Session:
             result = post_when_the_room_is_open(
                 self.wire, action, post, tries=self.settle_tries,
                 delay=self.settle_delay_s)
+            # The card offer this answered, if any (`offer_log`).
+            offer_log.record(state, res, command)
             # `EB-216`, R225's clause. AFTER the POST, because the ledger row
             # this play minted does not exist until the play has resolved --
             # the board above is the decision, this is what the decision cost

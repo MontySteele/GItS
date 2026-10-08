@@ -3,7 +3,7 @@
 WHY: on 2026-07-22/23 a measurement world diverged between two machines whose
 world lines matched, because the provenance digest hashed only
 ``git diff --binary`` over tracked files -- gitignored game_ref/ content was
-invisible to it. Both measurement tools now print a ``game_ref=`` digest over
+invisible to it. The measurement tool now prints a ``game_ref=`` digest over
 every ``*.yaml`` in game_ref/; these tests pin that two machines with
 different game_ref content produce different digests and that absence hashes
 distinctly.
@@ -14,13 +14,12 @@ from __future__ import annotations
 import pytest
 
 from tier0.content import local_reference
-from tools import klee_survival_sprint, real_battery_calibration
+from tools import real_battery_calibration
 
 DIGESTS = pytest.mark.parametrize(
     "game_ref_digest",
-    [real_battery_calibration._game_ref_digest,
-     klee_survival_sprint._game_ref_digest],
-    ids=["real_battery_calibration", "klee_survival_sprint"],
+    [real_battery_calibration._game_ref_digest],
+    ids=["real_battery_calibration"],
 )
 
 

@@ -13,9 +13,20 @@ argument is absent). `--fastmp host_standard` opens the host's character
 select directly and binds UDP 0.0.0.0:33771; `--fastmp join --clientId N`
 connects to 127.0.0.1:33771 as player N. Two games on one Steam account work
 (`understudy/instances.py`), and ENet sidesteps the one thing that would not:
-both Steam peers would carry the same Steam id. THE PORT IS FIXED, so one
-co-op pair per machine, and the host must be listening before the client's
-join screen opens (it gives up after 10 s).
+both Steam peers would carry the same Steam id. The host must be listening
+before the client's join screen opens (it gives up after 10 s).
+
+ONE PORT PER PAIR, SO SEVERAL PAIRS PER MACHINE (2026-10-08). The game writes
+33771 as a literal at every fastmp call site; the bridge's Harmony prefixes
+(`vendor/STS2_MCP/gits/GitsFastMpPortPatch.cs`) move it per process when the
+game is launched with `--gitsFastmpPort N`. A pair's port is derived from its
+HOST lane (`pair_port`: lane 1 hosts on 33771, lane N on 33770 + N), both of
+its games are launched with it, and the port-taken refusal checks that port
+alone. A pair hosted on lane 1 passes no port argument at all, so it launches
+exactly as every pair did before. Each lobby serves the port its process
+handed ENet (`lobby.fastmp_port`), and a pair whose lobby reads back anything
+else -- or nothing, on a moved port, which is a bridge without the patch -- is
+refused: that is the check that stops a client dialling another pair's host.
 
 THE ORDER. Host launched and in its lobby; client launched and joined; both
 lobbies show two players; each side picks its character; the host alone takes
@@ -28,9 +39,10 @@ down on a failure: `--teardown --coop` puts back whatever was launched.
 WHAT IS WRITTEN. One sidecar per lane (`embark-<stamp>-laneN.json`, the shape
 every lane reader already knows: `lanewatch`, `harness frame`, the worktree
 guard, a single-lane `--teardown --lane N`), each with a `coop` block naming
-its role and its partner; and one co-op sidecar (`coop-<stamp>.json`, not
-matched by the lane readers' `embark-*.json` glob) with both lanes, both
-characters, the seed and both ascension read-backs.
+its role, its partner and the pair's port; and one co-op sidecar
+(`coop-<stamp>-<host lane>.json`, not matched by the lane readers'
+`embark-*.json` glob) with both lanes, both characters, the port, the seed
+and both ascension read-backs.
 
 THE SEED IS READ OFF THE HOST'S SAVE. A co-op run saves to
 `current_run_mp.save`, which the compendium's seed read does not open, and
@@ -54,9 +66,12 @@ from typing import Any, Callable
 
 from understudy import blindplay_shape, bridge, instances, lanewatch, soak
 
-#: The ENet port `--fastmp` hosts on (`ENetHost`, 0.111.0). Fixed in the game.
+#: The ENet port `--fastmp` hosts on (`ENetHost`, 0.111.0): a literal at
+#: every game call site, moved per process only by the bridge's port patch.
 FASTMP_PORT = 33771
 HOST_ARGS = ("--fastmp", "host_standard")
+#: The game argument the bridge's `GitsFastMpPort` reads (`--gitsFastmpPort N`).
+PORT_ARG = "--gitsFastmpPort"
 DEFAULT_CLIENT_ID = 1000
 
 #: The waits, each bounded. The lobby waits start after the lane's own
@@ -85,8 +100,55 @@ class EmbarkError(RuntimeError):
     """A co-op embark or teardown could not be done; the message says why."""
 
 
-def client_args(client_id: int = DEFAULT_CLIENT_ID) -> tuple[str, ...]:
-    return ("--fastmp", "join", "--clientId", str(int(client_id)))
+def pair_port(host_label: str) -> int:
+    """The UDP port a pair hosted on `host_label` runs on: lane 1 keeps the
+    game's own 33771, lane N gets 33770 + N. Lanes are distinct across live
+    pairs, so ports are too."""
+    try:
+        n = int(instances.label_for(host_label)[len("lane"):])
+    except ValueError as exc:
+        raise EmbarkError(str(exc)) from None
+    if n < 1:
+        raise EmbarkError("lane 0 never hosts a co-op pair")
+    return FASTMP_PORT + n - 1
+
+
+def _port_args(port: int) -> tuple[str, ...]:
+    """Nothing on the game's own port, so a lane-1 pair launches exactly as
+    before the port patch; `--gitsFastmpPort N` anywhere else."""
+    return () if int(port) == FASTMP_PORT else (PORT_ARG, str(int(port)))
+
+
+def host_args(port: int = FASTMP_PORT) -> tuple[str, ...]:
+    return HOST_ARGS + _port_args(port)
+
+
+def client_args(client_id: int = DEFAULT_CLIENT_ID,
+                port: int = FASTMP_PORT) -> tuple[str, ...]:
+    return ("--fastmp", "join", "--clientId", str(int(client_id))) \
+        + _port_args(port)
+
+
+def port_mismatch(lobby: dict[str, Any], port: int) -> str:
+    """Why a lobby's `fastmp_port` is not the pair's port, or `""`.
+
+    A lobby with no `fastmp_port` comes from a bridge without the port patch,
+    which hosts and dials 33771 whatever it was asked: acceptable only when
+    33771 is what the pair asked for."""
+    got = lobby.get("fastmp_port")
+    if got is None:
+        if int(port) == FASTMP_PORT:
+            return ""
+        return (f"its lobby serves no fastmp_port, so its bridge did not move "
+                f"the port (an installed bridge older than the port patch, or "
+                f"the patch failed: godot.log says 'fastmp port patch'); it is "
+                f"on {FASTMP_PORT}, not {port}")
+    try:
+        if int(got) == int(port):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    return f"its lobby reads back fastmp_port {got!r}, not {port}"
 
 
 # ---------------------------------------------------------------- parsing --
@@ -128,7 +190,7 @@ def parse_characters(value: str) -> list[str]:
 
 
 def fastmp_port_free(port: int = FASTMP_PORT) -> bool:
-    """Can a fastmp host bind its port? False while another pair holds it."""
+    """Can a fastmp host bind this port? False while another pair holds it."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         sock.bind(("0.0.0.0", port))
@@ -249,8 +311,10 @@ def mp_save_seed(appdata: Path | None, since: float) -> str:
 
 # -------------------------------------------------------------- sidecars --
 
-def coop_path(stamp: str) -> Path:
-    return LOG_DIR / f"coop-{stamp}.json"
+def coop_path(stamp: str, host: str) -> Path:
+    """One co-op sidecar per pair. The host lane is in the name because two
+    pairs embarked in the same second share a stamp."""
+    return LOG_DIR / f"coop-{stamp}-{host}.json"
 
 
 def _write(path: Path, blob: dict[str, Any]) -> None:
@@ -274,7 +338,7 @@ def embark(lanes: list[str], characters: list[str], *,
            wire: Any = bridge,
            session_factory: Callable[..., Any] = _default_session,
            lane_factory: Callable[[str], Any] = instances.lane,
-           port_free: Callable[[], bool] = fastmp_port_free,
+           port_free: Callable[[int], bool] = fastmp_port_free,
            clock: Callable[[], float] = time.monotonic,
            sleep: Callable[[float], None] = time.sleep) -> dict[str, Any]:
     """Launch both lanes, open one co-op run, and LEAVE IT RUNNING.
@@ -291,11 +355,12 @@ def embark(lanes: list[str], characters: list[str], *,
     from understudy import embark as single
     host_label, client_label = lanes
     host_who, client_who = characters
-    if not port_free():
+    port = pair_port(host_label)
+    if not port_free(port):
         raise EmbarkError(
-            f"UDP port {FASTMP_PORT} is taken: another --fastmp host is up on "
-            f"this machine (the port is fixed in the game, so one co-op pair "
-            f"per machine). Tear that pair down first.")
+            f"UDP port {port} is taken: a --fastmp host is already up on it "
+            f"(a pair hosted on {host_label} gets port {port}; a second pair "
+            f"must host on another lane). Tear that pair down first.")
     host = lane_factory(host_label)
     client = lane_factory(client_label)
     io = _Lanes(wire, clock, sleep)
@@ -308,9 +373,9 @@ def embark(lanes: list[str], characters: list[str], *,
                           f"port {inst.port}; tear it down first")
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    roles = ((host, host_who, "host", client_label, HOST_ARGS),
+    roles = ((host, host_who, "host", client_label, host_args(port)),
              (client, client_who, "client", host_label,
-              client_args(client_id)))
+              client_args(client_id, port)))
     blob: dict[str, Any] = {
         "stamp": stamp, "lanes": [host_label, client_label],
         "host": host_label, "client": client_label,
@@ -319,12 +384,12 @@ def embark(lanes: list[str], characters: list[str], *,
         **({"ascension_requested": ascension}
            if ascension is not None else {}),
         **({"seed_requested": seed} if seed else {}),
-        "fastmp_port": FASTMP_PORT, "client_id": int(client_id),
+        "fastmp_port": port, "client_id": int(client_id),
         "lane_sidecars": {}, "state": "launching",
         "coop_guardrail": COOP_GUARDRAIL, "run_of_record": False,
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
-    path = coop_path(stamp)
+    path = coop_path(stamp, host_label)
     _write(path, blob)
 
     sessions: dict[str, Any] = {}
@@ -351,7 +416,8 @@ def embark(lanes: list[str], characters: list[str], *,
             "lane_guardrail": instances.LANE_GUARDRAIL,
             "run_of_record": False,
             "coop": {"role": role, "partner": partner, "stamp": stamp,
-                     "sidecar": str(path), "launch_args": list(args)},
+                     "sidecar": str(path), "launch_args": list(args),
+                     "fastmp_port": port},
             "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
         lane_blobs[label] = lane_blob
@@ -370,6 +436,10 @@ def embark(lanes: list[str], characters: list[str], *,
                     HOST_LOBBY_TIMEOUT_S,
                     lambda: (_lobby(io.state(host)).get("type") == "host"
                              or _Miss(_brief(io.state(host)))))
+            wrong = port_mismatch(_lobby(io.state(host)), port)
+            if wrong:
+                raise EmbarkError(f"fastmp_port_wrong: {host_label} (host) "
+                                  f"{wrong}; the client was not launched")
 
     def both_in_lobby() -> Any:
         rows = {i.label: _lobby(io.state(i)) for i in (host, client)}
@@ -383,6 +453,10 @@ def embark(lanes: list[str], characters: list[str], *,
             f"gives up 10 s after its join screen opens; a mod-list "
             f"mismatch is named in {client_label}'s godot.log)",
             JOIN_TIMEOUT_S, both_in_lobby)
+    wrong = port_mismatch(_lobby(io.state(client)), port)
+    if wrong:
+        raise EmbarkError(f"fastmp_port_wrong: {client_label} (client) "
+                          f"{wrong}")
 
     for inst, who, _role, _p, _a in roles:
         state = io.state(inst)
@@ -549,8 +623,9 @@ def run_cli(args: Any) -> int:
     except EmbarkError as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2
-    print(f"co-op:     {coop_path(blob['stamp'])}")
+    print(f"co-op:     {coop_path(blob['stamp'], blob['host'])}")
     print(f"run seed:  {blob.get('run_seed') or '(unread)'}")
+    print(f"fastmp:    UDP {blob.get('fastmp_port')} (this pair's own port)")
     for label in blob["lanes"]:
         role = "host" if label == blob["host"] else "client"
         print(f"{label} ({role}): {blob['character_actual'].get(label)}  "
