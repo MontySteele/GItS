@@ -302,12 +302,46 @@ public class DamageCreditTelemetryTests : IDisposable
 
         var next = (ICombatState)RuntimeHelpers.GetUninitializedObject(typeof(CombatState));
         Assert.Equal(0, ProtoBombPower.ExplosionsThisCombat(next, klee.Player));
+        Assert.Equal(0, ProtoBombPower.ReactingExplosionsThisCombat(state, klee.Player));
+        Assert.Equal(0, ProtoBombPower.AttackMineExplosionsThisCombat(state, klee.Player));
 
         var sample = Il.Calls(Il.Method("PlayTelemetry", "SampleDetonations"));
         Assert.Contains("ProtoBombPower.ExplosionsThisCombat", sample);
         Assert.Contains("ProtoBombPower.MineExplosionsThisCombat", sample);
         Assert.Contains("ProtoBombPower.RecordExplosion",
                         Il.Calls(Il.Method("ProtoBombPower", "Explode")));
+    }
+
+    /// <summary>2026-10-08: a charge that reacted, and a Mine an enemy's
+    /// attack set off, are counted apart -- per seat, per combat -- and
+    /// sampled into the fight row.</summary>
+    [Fact]
+    public void Reacting_charges_and_attack_set_mines_are_counted_apart()
+    {
+        var combat = RuntimeHelpers.GetUninitializedObject(typeof(CombatState));
+        var klee = Seat.Klee();
+        ProtoBombPower.RecordExplosion(combat, klee.Player, isMine: false, reacted: true);
+        ProtoBombPower.RecordExplosion(combat, klee.Player, isMine: false);
+        ProtoBombPower.RecordExplosion(combat, klee.Player, isMine: true,
+                                       reacted: true, byAttack: true);
+        ProtoBombPower.RecordExplosion(combat, klee.Player, isMine: true);
+
+        var state = (ICombatState)combat;
+        Assert.Equal(4, ProtoBombPower.ExplosionsThisCombat(state, klee.Player));
+        Assert.Equal(2, ProtoBombPower.MineExplosionsThisCombat(state, klee.Player));
+        Assert.Equal(2, ProtoBombPower.ReactingExplosionsThisCombat(state, klee.Player));
+        Assert.Equal(1, ProtoBombPower.AttackMineExplosionsThisCombat(state, klee.Player));
+
+        var next = RuntimeHelpers.GetUninitializedObject(typeof(CombatState));
+        ProtoBombPower.RecordExplosion(next, klee.Player, isMine: true);
+        Assert.Equal(0, ProtoBombPower.ReactingExplosionsThisCombat(
+            (ICombatState)next, klee.Player));
+        Assert.Equal(0, ProtoBombPower.AttackMineExplosionsThisCombat(
+            (ICombatState)next, klee.Player));
+
+        var sample = Il.Calls(Il.Method("PlayTelemetry", "SampleDetonations"));
+        Assert.Contains("ProtoBombPower.ReactingExplosionsThisCombat", sample);
+        Assert.Contains("ProtoBombPower.AttackMineExplosionsThisCombat", sample);
     }
 
     /// <summary>STRUCTURAL: each dealer-less path opens the scope that names

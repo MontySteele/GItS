@@ -1302,7 +1302,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// </summary>
     private static async Task<Element> Explode(
         PlayerChoiceContext choiceContext, Creature target, ProtoCharge charge,
-        Creature applier, CardModel? cardSource, int multiplier)
+        Creature applier, CardModel? cardSource, int multiplier,
+        bool byAttack = false)
     {
         var ledger = KleeOverhaulLedger.For(applier);
         var size = charge.Size * multiplier;
@@ -1370,8 +1371,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             ? auraBefore
             : Element.None;
         ledger.NoteExplosion(reacted, dealt, vulnerablePaid);
-        // TELEMETRY ONLY: the per-seat count `PlayTelemetry` samples.
-        RecordExplosion(applier, charge.IsMine);
+        // TELEMETRY ONLY: the per-seat counts `PlayTelemetry` samples --
+        // whether this charge reacted, and for a Mine whether an enemy's
+        // attack set it off (`byAttack`, rule 6) rather than a Set off.
+        RecordExplosion(applier, charge.IsMine, reacted, byAttack);
         // POOL COMPLETION (2026-10-01), ALICE'S MASTERPIECE (her second
         // Ancient): "When one of your Bombs goes off, it stays on the enemy at
         // half its size, rounded down." The charge already left the pile
@@ -1654,7 +1657,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 break;
             }
             await Explode(choiceContext, enemy, mines[i], Applier,
-                          cardSource: null, multiplier);
+                          cardSource: null, multiplier, byAttack: true);
         }
         // `EB-336`. The attacker died to its own Mines, so the hit that
         // triggered them is owed nothing. NOTED HERE and not acted on here:
