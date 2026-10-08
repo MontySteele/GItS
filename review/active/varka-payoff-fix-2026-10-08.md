@@ -39,7 +39,7 @@ ladder. Both directions stay as ruled.
 |---|---|---|---|
 | Ember Cleave (C, Attack) | 1: Deal 9 [12] Pyro. Exhaust a card. | 1: Deal 9 [12] Pyro. Exhaust a card. **Gain 1 Pyro Oath.** | The burn pays on the turn. It also makes Pyro current, so the next Ascension reads the Oath it just grew. |
 | Stoke the Flames (C, Skill) | **1**: Exhaust a card. Gain 2 [3] Pyro Oath. Pyro becomes current. | **0**: the same | A free switch into Pyro that thins the deck, instead of a turn's tempo. |
-| Pyre Oath (U, Power) | 1: Whenever you Exhaust a card, gain 1 Pyro Oath. [Innate] | 1: **Exhaust up to 2 cards.** Whenever you Exhaust a card, gain 1 Pyro Oath. [Innate] | It pays 2 Oath on the turn it lands, then keeps Feel No Pain's shape. |
+| Pyre Oath (U, Power) | 1: Whenever you Exhaust a card, gain 1 Pyro Oath. [Innate] | 1: **Exhaust a card.** Whenever you Exhaust a card, gain 1 Pyro Oath. [Innate] | It pays an Oath on the turn it lands, then keeps Feel No Pain's shape. Built as exactly 1: `exhaust_from` has no "up to" (the fallback below). |
 | Wildfire Oath (R, Power) | **2**: applying Pyro deals Pyro Oath to the enemy. [Innate] | **1**: the same | The rare bends, never removed (house rule); the decision is unchanged. |
 | Deep Freeze (U, Skill) | 1 [0]: Apply Cryo. Double its Weak and Vulnerable. Retain. | 1 [0]: Apply Cryo **and 1 Vulnerable**. Double its Weak and Vulnerable. Retain. | Never dead: at worst it is 2 Vulnerable and Cryo. |
 | Glacial Edict (U, Skill) | +1 Weak and Vulnerable for every **4 [3]** Cryo Oath | every **3 [2]** | The seats' Cryo Oath sat at 7 to 12 in acts 2 and 3: 2 to 4 extra of each instead of 1 to 3. |
