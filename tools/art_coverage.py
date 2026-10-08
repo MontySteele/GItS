@@ -565,15 +565,7 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
-    "alices_masterpiece": "Klee's second Ancient card (pool completion, 2026-10-01); no painting yet.",
     "center_of_attention": "Furina's second Ancient card (pool completion, 2026-10-01); no painting yet.",
-    "proto_ko_blasting_spree": "The Klee design review (2026-10-08, review/active/klee-design-review-2026-10-08.md sec.4.5); no painting yet.",
-    "proto_ko_fire_fire": "The Klee design review (2026-10-08, review/active/klee-design-review-2026-10-08.md sec.4.5); no painting yet.",
-    "proto_ko_dodoco_tag": "The Klee tempo paper (2026-10-07, review/active/klee-tempo-paper-2026-10-07.md sec.3); no painting yet.",
-    "proto_ko_explosive_spark": "The Klee tempo paper (2026-10-07, review/active/klee-tempo-paper-2026-10-07.md sec.3); no painting yet.",
-    "proto_ko_simmer": "The Klee tempo paper (2026-10-07, review/active/klee-tempo-paper-2026-10-07.md sec.3); no painting yet.",
-    "proto_ko_taste_test": "The Klee tempo paper (2026-10-07, review/active/klee-tempo-paper-2026-10-07.md sec.3); no painting yet.",
-    "proto_ko_tinkering": "The Klee tempo paper (2026-10-07, review/active/klee-tempo-paper-2026-10-07.md sec.3); no painting yet.",
     "proto_fs_a_five_century_act": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
     "proto_fs_fountain_of_lucine": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
     "proto_fs_hold_the_stage": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
