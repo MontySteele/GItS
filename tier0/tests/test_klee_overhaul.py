@@ -250,7 +250,8 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # The round-10 pool pass's one, and only one: the Spark sink written with
     # it was withdrawn on the audit's C3 clause and is on no surface.
     assert "proto_ko_countdown" in ids
-    assert "proto_ko_explosive_spark" not in ids
+    # (Explosive Spark came back as a new row with the Klee tempo paper,
+    # 2026-10-07: 12 damage for 1 Spark, last block below.)
     # The round-11 pool pass's one: the Spark SINK, written a second time and
     # this time keyed to the Bomb rather than to the bank -- the C3 clause
     # that withdrew Explosive Spark is what the row above it is answering.
@@ -290,16 +291,19 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # The Klee-only companions (2026-10-03): Second Surprise cut here,
     # Solitary Confinement from the package, and her three Companion rows
     # last of all.
-    assert list(ids[-39:-13]) == [
+    # The Klee tempo paper (2026-10-07) cut Sit Tight and Experiment in
+    # Progress here and It Wasn't Me! from the package; its five come after
+    # the package and before the companions.
+    assert list(ids[-41:-17]) == [
         "proto_ko_hiding_spot", "proto_ko_playdate",
         "proto_ko_jumpy_dumpty_mk_iii",
         "proto_ko_mine_all_mine", "proto_ko_team_effort",
         "proto_ko_one_more_charge",
-        "proto_ko_sit_tight", "proto_ko_treasure_map",
+        "proto_ko_treasure_map",
         "proto_ko_tag_along", "proto_ko_come_back_and_play",
         "proto_ko_boom_badge", "proto_ko_wait_for_it",
         "proto_ko_duck_and_run", "proto_ko_party_poppers",
-        "proto_ko_look_out", "proto_ko_patience_klee",
+        "proto_ko_look_out",
         "proto_ko_secret_base",
         "proto_ko_half_a_mountain", "proto_ko_favonius_escort",
         "proto_ko_adventure_club", "proto_ko_windblume_fireworks",
@@ -320,7 +324,14 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     for cut in ("proto_ko_second_surprise", "proto_ko_solitary_confinement",
                 "proto_ko_once_more"):
         assert cut not in ids, cut
-    assert ids[-13:-3] == C.KLEE_STATUS_PACKAGE_IDS
+    for cut in ("proto_ko_it_wasnt_me", "proto_ko_sorry_jean",
+                "proto_ko_grounded", "proto_ko_sit_tight",
+                "proto_ko_patience_klee"):
+        assert cut not in ids, cut
+    assert ids[-17:-8] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-8:-3] == C.KLEE_TEMPO_IDS == (
+        "proto_ko_simmer", "proto_ko_taste_test", "proto_ko_tinkering",
+        "proto_ko_dodoco_tag", "proto_ko_explosive_spark")
     assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
 
 
@@ -530,7 +541,7 @@ def test_the_prototype_rule_states_the_rows_own_numbers():
     assert delta("proto_ko_jumpy_dumpty") == {"bomb_size": 2, "payload_mine": 1}
     assert delta("proto_ko_chain_fuse") == {"grow": 1}
     assert delta("proto_ko_careful_arrangement") == {"grow": 1}
-    assert delta("proto_ko_grounded") == {"power_amount": 1}
+    assert delta("proto_ko_look_out") == {"power_amount": 1}
     # Kokomi's half of the rule, on DRAFT 6's rows. `tide` left the key list
     # with the verb it read (`gain_tide`), so what is left of her side is the
     # shared Block and Mend clauses -- which is the whole point of a rule
@@ -761,7 +772,7 @@ def test_alices_marked_cards_pay_no_spark_under_the_arm(overhaul):
     from tier0.tests.conftest import make_state
 
     alices = loader.get_card("proto_ko_alices_introduction_magic")
-    marked = [loader.get_card("proto_ko_sorry_jean") for _ in range(3)]
+    marked = [loader.get_card("proto_ko_run_away") for _ in range(3)]
     assert not alices.is_companion
     assert not any(card.is_companion for card in marked)
 

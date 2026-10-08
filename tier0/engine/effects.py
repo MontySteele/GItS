@@ -5336,6 +5336,41 @@ def _op_grow_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.grow_largest_per_spark(state, int(fx["per_spark"]))
 
 
+def _op_damage_from_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """THE KLEE TEMPO PAPER (2026-10-07, Simmer and Taste Test): damage READ
+    off her Bombs that leaves them cooking. `ProtoBombPower.DealFromBombs`'s
+    twin.
+
+    `read: largest_half` is Simmer's "plus half your largest Bomb's size" --
+    the largest single charge on the living board (`largest_charge`), halved
+    and rounded down. `read: target_total` is Taste Test's "damage equal to
+    all your Bombs on the enemy" -- every charge on the aimed body, Mines
+    included (`total_size`). `amount` is the printed flat part.
+
+    IT READS THE PILE AND DOES NOT SPEND IT: nothing goes off, no Spark is
+    minted, no Mine answers. But it IS the card's own hit -- one `_op_damage`
+    Attack, so Pyro, the reaction, Strength and Vulnerable land as on any
+    other Attack of hers. A read of zero deals nothing.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    base = int(fx.get("amount", 0) or 0)
+    read = fx.get("read")
+    if read == "largest_half":
+        _enemy, _index, size = klee_overhaul.largest_charge(state)
+        bombs = size // 2
+    elif read == "target_total":
+        targets = _pick_targets(state, fx.get("target", "enemy"))
+        bombs = klee_overhaul.total_size(targets[0]) if targets else 0
+    else:
+        raise ValueError(f"damage_from_bombs read {read!r} on {card.id}")
+    total = base + bombs
+    if total <= 0:
+        return
+    _op_damage(state, {"op": "damage", "amount": total,
+                       "target": fx.get("target", "enemy")}, card)
+
+
 def _op_damage_set_off_total(state: CombatState, fx: dict,
                              card: Card) -> None:
     """Big Badda Boom's second clause: "Then deal damage equal to what the
@@ -5848,6 +5883,8 @@ OPS = {
     # see `_op_grow_largest_bomb`.
     "grow_largest_bomb": _op_grow_largest_bomb,
     "damage_set_off_total": _op_damage_set_off_total,
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test.
+    "damage_from_bombs": _op_damage_from_bombs,
     "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,
     # R244's one new verb, the readers' enabler (renamed at R276). It touches

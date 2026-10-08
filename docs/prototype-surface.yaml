@@ -211,19 +211,13 @@
              {op: conditional, if: bomb_went_off_this_turn,
               then: [{op: block, amount: 4}]}]}
 
-- {id: proto_ko_grounded, name: "Grounded", character: klee,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, if you played no [gold]Set off[/gold] card last turn, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
-   upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_grounded, amount: 4, target: self}]}
+# GROUNDED (proto_ko_grounded) IS CUT (Klee tempo paper, 2026-10-07,
+# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# note, "Klee tempo paper, 2026-10-07".
 
-- {id: proto_ko_sorry_jean, name: "Sorry, Jean...", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "Remove one of your [gold]Bombs[/gold]. Gain [gold]Block[/gold] equal to its size.",
-   upgrade: {retain: true},
-   effects: [{op: remove_bomb_for_block}]}
+# SORRY, JEAN... (proto_ko_sorry_jean) IS CUT (Klee tempo paper, 2026-10-07,
+# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# note, "Klee tempo paper, 2026-10-07".
 
 # --- the defence shelf (R252, Klee r9 pick 1): five rows, every one keyed to
 # the Bomb state, none a plain Block. Per-row reasoning:
@@ -526,14 +520,9 @@
    effects: [{op: plant_homework_bomb, target: enemy, size: 6, growth: 2,
               upgraded_growth: 3}]}
 
-- {id: proto_ko_sit_tight, name: "Sit Tight", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon, retain: true,
-   description: "Gain 5 [gold]Block[/gold]. At the end of your turn, gain 4 [gold]Block[/gold] if none of your [gold]Bombs[/gold] went off.",
-   upgrade: {block: +2, power_amount: +1},
-   effects: [{op: spend_spark, amount: 1},
-             {op: block, amount: 5},
-             {op: apply_power, power: ko_sit_tight, amount: 4, target: self}]}
+# SIT TIGHT (proto_ko_sit_tight) IS CUT (Klee tempo paper, 2026-10-07,
+# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# note, "Klee tempo paper, 2026-10-07".
 
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
    authored_by: [claude],
@@ -597,12 +586,9 @@
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_look_out, amount: 4, target: self}]}
 
-- {id: proto_ko_patience_klee, name: "Experiment in Progress", character: klee,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "At the end of your turn, if you played no [gold]Set off[/gold] card, your largest [gold]Bomb[/gold] grows by 4.",
-   upgrade: {power_amount: +2},
-   effects: [{op: apply_power, power: ko_patience, amount: 4, target: self}]}
+# EXPERIMENT IN PROGRESS (proto_ko_patience_klee) IS CUT (Klee tempo paper, 2026-10-07,
+# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# note, "Klee tempo paper, 2026-10-07".
 
 # FRIENDSHIP BRACELET IS CUT (the Klee status package, 2026-10-01,
 # review/active/klee-status-package-2026-10-01.md sec.3). Provenance
@@ -702,13 +688,9 @@
    effects: [{op: damage, amount: 10, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
-- {id: proto_ko_it_wasnt_me, name: "It Wasn't Me!", character: klee,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
-   upgrade: {block: +3},
-   effects: [{op: block, amount: 6},
-             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
+# IT WASN'T ME! (proto_ko_it_wasnt_me) IS CUT (Klee tempo paper, 2026-10-07,
+# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# note, "Klee tempo paper, 2026-10-07".
 
 - {id: proto_ko_lisas_treats, name: "Lisa's Treats", character: klee,
    authored_by: [claude],
@@ -789,6 +771,51 @@
    description: "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every status in your hand; they lose 1 more for each.",
    upgrade: {retain: true},
    effects: [{op: lose_strength, amount: 1, target: all_enemies, per_status: 1}]}
+
+# --- THE KLEE TEMPO PAPER (2026-10-07, ruled, sec.3): five in for the five
+# cut above; still 78, 25 / 32 / 21. Provenance note, "Klee tempo paper,
+# 2026-10-07". ---
+
+- {id: proto_ko_simmer, name: "Simmer", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 4 [gold]Pyro[/gold] damage, plus half your largest [gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   upgrade: {damage: +2},
+   effects: [{op: damage_from_bombs, read: largest_half, amount: 4, target: enemy},
+             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
+
+- {id: proto_ko_taste_test, name: "Taste Test", character: klee,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal [gold]Pyro[/gold] damage equal to all your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   upgrade: {cards: -1},
+   effects: [{op: damage_from_bombs, read: target_total, target: enemy},
+             {op: add_card, card: confiscated, zone: discard, amount: 2}]}
+
+- {id: proto_ko_tinkering, name: "Tinkering", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Gain 2 [gold]Sparks[/gold]. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   upgrade: {spark: +1},
+   effects: [{op: gain_spark, amount: 2},
+             {op: add_card, card: confiscated, zone: discard, amount: 1}]}
+
+- {id: proto_ko_dodoco_tag, name: "Dodoco Tag", character: klee,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 7 [gold]Pyro[/gold] damage. Gain 5 [gold]Block[/gold]. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   upgrade: {damage: +3, block: +2},
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: block, amount: 5},
+             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
+
+- {id: proto_ko_explosive_spark, name: "Explosive Spark", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common,
+   description: "Deal 12 [gold]Pyro[/gold] damage.",
+   upgrade: {damage: +4},
+   effects: [{op: spend_spark, amount: 1},
+             {op: damage, amount: 12, target: enemy}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. These ARE
 # Mondstadt's Universal companion pool. Why each row reads as it does, and

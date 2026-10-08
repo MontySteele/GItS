@@ -6640,3 +6640,23 @@ Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-m
 - `proto_ko_secret_base`, v3 (replaces sec.4 A's "Your Bombs are placed 3 [4] bigger", whose placement bonus and card-face fold are removed, so faces print their own numbers again): "At the start of your turn, place a Bomb 4 [6] on a random enemy." 1-cost Uncommon Power; the upgrade raises 4 to 6. Copies add like Noxious Fumes (two copies place one Bomb 8, 12 upgraded). Placed after the start-of-turn growth, so it shows 4 when she acts, through the expansion's start-of-turn sequencer (after the echo, before Dodoco's Mine) and the ordinary placement path Pop! uses; a random living enemy, none means nothing.
 - `proto_ko_boom_badge`: Retain, and "Does not stack." -- x2 whatever the stack (sec.4 C).
 - `proto_ko_witchs_homework_next` (new, grant-only, `C.STAGING_GRANT_IDS`): "Place a Bomb 6. When it goes off, this card's Bomb is 2 [3] larger for the rest of the run." Exhaust (sec.4 B). Titled "Witch's Homework II" because titles are unique (`lint_prototype_titles`); the pool's Witch's Homework is unchanged.
+
+## Klee tempo paper, 2026-10-07
+
+Staging branch `klee-next`. Paper `review/active/klee-tempo-paper-2026-10-07.md` sec.3, ruled 2026-10-07. [USER]: "I personally found Blast Shield and Kitchen Alchemy quite useful in my runs, so I'm not sure I buy that they should go. Otherwise agreed." Klee is slow (act-3 turn-one damage 9 to the base five's 62) and her Block pays for it; each engine gets its missing damage. Five out, five in; the pool stays **78 (25 / 32 / 21)**. Built in both engines.
+
+- **Out:** `proto_ko_it_wasnt_me` (C), `proto_ko_sorry_jean` (C), `proto_ko_grounded` (U Power), `proto_ko_sit_tight` (U), `proto_ko_patience_klee` (U, "Experiment in Progress"). Painted art `KNOWN_STALE`; card pins removed or moved onto Favonius Escort (the same `remove_bomb_for_block` verb). Their powers stay registered (BACKLOG).
+- **In, after the status package in `C.KLEE_TEMPO_IDS` and `Slice()`:**
+  - `proto_ko_simmer`, Simmer (Common Attack, 1): "Deal 4 [6] Pyro damage, plus half your largest Bomb's size. It does not go off. Add a Dazed into your Discard Pile." Cook's Common hit that leaves the Bomb cooking.
+  - `proto_ko_taste_test`, Taste Test (Uncommon Attack, 2): "Deal Pyro damage equal to all your Bombs on the enemy. They do not go off. Add 2 [1] Confiscated into your Discard Pile." Set against Red Knight (2 Energy, 34, two Confiscated).
+  - `proto_ko_tinkering`, Tinkering (Uncommon Skill, 0): "Gain 2 [3] Sparks. Add a Confiscated into your Discard Pile." The kit's second row allowed to mint Sparks without an explosion (rule-4 pins name it beside Flash Point).
+  - `proto_ko_dodoco_tag`, Dodoco Tag (Uncommon Attack, 1): "Deal 7 [10] Pyro damage. Gain 5 [7] Block. Add a Dazed into your Discard Pile."
+  - `proto_ko_explosive_spark`, Explosive Spark (Common Attack, 0, 1 Spark): "Deal 12 [16] Pyro damage." (12 [16] ruled mid-build over the paper's 7 [10].)
+
+**Readings:**
+
+1. *The read.* New op `damage_from_bombs` (`read: largest_half | target_total`, `amount` the flat part). C# `ProtoBombPower.DealFromBombs` / `BombReadDamage` (`Powers/Prototype/ProtoBombPowerTempo.cs`), sim `effects._op_damage_from_bombs`. `largest_half` is the largest single charge of hers on the living board (`LargestSizeFor`, Sparks 'n' Splash's read), halved and rounded down, the hit landing on the aimed enemy; `target_total` is every charge of hers on the aimed enemy, Mines included (`TotalPlacedBy`). Nothing goes off: no Spark, no Mine answer, no explosion counter.
+2. *The hit is the card's.* One `DamageCmd.Attack` from the card (`DealCardDamage`), so Pyro, the reaction, Strength, Weak and Vulnerable land as on any other Attack of hers; a read of zero deals nothing. Simmer's flat 4 owns the `Damage` var (`bomb_read_damage_var_effect`; sim `damage` delta bumps it third, after `damage` and a Set off's own hit).
+3. *Two upgrade keys newly printable on an authored face:* `spark` (Tinkering's "Gain {Sparks}") and `cards` on a named token (Taste Test's "Add {Stash} Confiscated"; the token loop reads the Stash var).
+4. *Taste Test's face says "Pyro".* The paper's text is "Deal damage equal to all your Bombs on the enemy."; `lint_element_text` requires a hit that applies an element to name it (the 2026-10-02 co-op ruling), so the face reads "Deal [gold]Pyro[/gold] damage equal to ...".
+

@@ -221,7 +221,7 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # 24 / 33 / 21.
 KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
     "proto_ko_forbidden_fun",
-    "proto_ko_it_wasnt_me",
+    # It Wasn't Me! cut by the Klee tempo paper (2026-10-07).
     "proto_ko_lisas_treats",
     "proto_ko_red_knight",
     "proto_ko_finders_keepers",
@@ -236,6 +236,21 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
     "proto_ko_up_in_smoke",
     "proto_ko_behind_jeans_desk",
     "proto_ko_kitchen_alchemy",
+)
+
+# THE KLEE TEMPO PAPER (2026-10-07, ruled,
+# review/active/klee-tempo-paper-2026-10-07.md sec.3): five rows in for It
+# Wasn't Me!, Sorry, Jean..., Grounded, Sit Tight and Experiment in Progress,
+# appended after the status package in the sheet's own order. Cook's damage
+# that leaves the Bombs cooking (Simmer, Taste Test), Spray's damage without
+# spending the bank (Tinkering, Dodoco Tag) and out of it (Explosive Spark).
+# The pool stays 78, 25 / 32 / 21.
+KLEE_TEMPO_IDS: tuple[str, ...] = (
+    "proto_ko_simmer",                          # Common
+    "proto_ko_taste_test",                      # Uncommon
+    "proto_ko_tinkering",                       # Uncommon
+    "proto_ko_dodoco_tag",                      # Uncommon
+    "proto_ko_explosive_spark",                 # Common
 )
 
 # THE KLEE-ONLY COMPANIONS (2026-10-03,
@@ -351,8 +366,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_booby_trap",
     "proto_ko_dig_in",
     "proto_ko_run_away",
-    "proto_ko_grounded",
-    "proto_ko_sorry_jean",
+    # Grounded and Sorry, Jean... cut by the Klee tempo paper (2026-10-07).
     # THE DEFENCE SHELF (2 -- R252, Klee round 9 pick 1 at its default). The
     # pick drafted four; the R253 charter audit withdrew two of them (Fire
     # Safety and Safety Lesson) and they are on no surface. What is left is
@@ -433,7 +447,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_mine_all_mine",
     "proto_ko_team_effort",
     "proto_ko_one_more_charge",
-    "proto_ko_sit_tight",
+    # Sit Tight cut by the Klee tempo paper (2026-10-07).
     "proto_ko_treasure_map",
     "proto_ko_tag_along",
     "proto_ko_come_back_and_play",
@@ -442,7 +456,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_duck_and_run",
     "proto_ko_party_poppers",
     "proto_ko_look_out",
-    "proto_ko_patience_klee",
+    # Experiment in Progress cut by the Klee tempo paper (2026-10-07).
     "proto_ko_secret_base",
     "proto_ko_half_a_mountain",
     "proto_ko_favonius_escort",
@@ -459,7 +473,9 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Split Charge, Fish Fry, Friendship Bracelet). The pool is 78 (24 / 33
     # / 21).
     *KLEE_STATUS_PACKAGE_IDS,
-    # THE KLEE-ONLY COMPANIONS (2026-10-03), after it. Still 78, 24 / 33 / 21.
+    # THE KLEE TEMPO PAPER (2026-10-07), after it. Still 78, 25 / 32 / 21.
+    *KLEE_TEMPO_IDS,
+    # THE KLEE-ONLY COMPANIONS (2026-10-03), after it. Still 78, 25 / 32 / 21.
     *KLEE_OWN_COMPANION_IDS,
 )
 

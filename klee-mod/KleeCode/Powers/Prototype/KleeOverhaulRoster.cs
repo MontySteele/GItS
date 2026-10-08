@@ -271,8 +271,8 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoBoobyTrap>(),
         ModelDb.Card<ProtoKoDigIn>(),
         ModelDb.Card<ProtoKoRunAway>(),
-        ModelDb.Card<ProtoKoGrounded>(),
-        ModelDb.Card<ProtoKoSorryJean>(),
+        // Grounded and Sorry, Jean... cut by the Klee tempo paper
+        // (2026-10-07).
         // THE DEFENCE SHELF (R252; both rows cut by the status package,
         // 2026-10-01).
         // The pick drafted four; the R253 charter audit withdrew Fire Safety
@@ -350,7 +350,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoMineAllMine>(),
         ModelDb.Card<ProtoKoTeamEffort>(),
         ModelDb.Card<ProtoKoOneMoreCharge>(),
-        ModelDb.Card<ProtoKoSitTight>(),
+        // Sit Tight cut by the Klee tempo paper (2026-10-07).
         ModelDb.Card<ProtoKoTreasureMap>(),
         ModelDb.Card<ProtoKoTagAlong>(),
         ModelDb.Card<ProtoKoComeBackAndPlay>(),
@@ -359,7 +359,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoDuckAndRun>(),
         ModelDb.Card<ProtoKoPartyPoppers>(),
         ModelDb.Card<ProtoKoLookOut>(),
-        ModelDb.Card<ProtoKoPatienceKlee>(),
+        // Experiment in Progress cut by the Klee tempo paper (2026-10-07).
         ModelDb.Card<ProtoKoSecretBase>(),
         ModelDb.Card<ProtoKoHalfAMountain>(),
         ModelDb.Card<ProtoKoFavoniusEscort>(),
@@ -377,7 +377,7 @@ internal static class KleeOverhaulRoster
         // Cover, Careful Now, Split Charge, Fish Fry, Friendship Bracelet);
         // the pool stays 78 and is 24 / 33 / 21.
         ModelDb.Card<ProtoKoForbiddenFun>(),
-        ModelDb.Card<ProtoKoItWasntMe>(),
+        // It Wasn't Me! cut by the Klee tempo paper (2026-10-07).
         ModelDb.Card<ProtoKoLisasTreats>(),
         ModelDb.Card<ProtoKoRedKnight>(),
         ModelDb.Card<ProtoKoFindersKeepers>(),
@@ -391,6 +391,16 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoUpInSmoke>(),
         ModelDb.Card<ProtoKoBehindJeansDesk>(),
         ModelDb.Card<ProtoKoKitchenAlchemy>(),
+        // THE KLEE TEMPO PAPER (2026-10-07, ruled,
+        // review/active/klee-tempo-paper-2026-10-07.md sec.3): five in for
+        // the five cut above, in `C.KLEE_TEMPO_IDS`' order, which is the
+        // sheet's -- Cook's damage that leaves the Bombs cooking, and Spray's
+        // damage with and without the bank. Still 78, 25 / 32 / 21.
+        ModelDb.Card<ProtoKoSimmer>(),
+        ModelDb.Card<ProtoKoTasteTest>(),
+        ModelDb.Card<ProtoKoTinkering>(),
+        ModelDb.Card<ProtoKoDodocoTag>(),
+        ModelDb.Card<ProtoKoExplosiveSpark>(),
         // THE KLEE-ONLY COMPANIONS (2026-10-03,
         // review/active/mondstadt-companions-2026-10-03.md sec.4): three
         // companion cards that read her rules, in her own pool now, LAST in

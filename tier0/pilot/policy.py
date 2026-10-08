@@ -692,6 +692,16 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             amount = int(fx.get("amount", fx.get("growth", 0)) or 0)
             if any(klee_overhaul.holds_charge(e) for e in living):
                 total += amount
+        elif fx["op"] == "damage_from_bombs":
+            # The Klee tempo paper (Simmer, Taste Test): the flat part plus
+            # the read, and the pile stays -- the hit is all it is worth now.
+            total += int(fx.get("amount", 0) or 0)
+            if fx.get("read") == "largest_half":
+                total += klee_overhaul.largest_charge(state)[2] // 2
+            else:
+                enemy = effects._default_target(state)
+                if enemy is not None:
+                    total += klee_overhaul.total_size(enemy)
         elif fx["op"] == "damage_set_off_total":
             # Big Badda Boom's second clause hits again for what the Bombs
             # dealt, so the pile counts TWICE on that row -- once for the Set

@@ -8802,17 +8802,19 @@ def test_the_smith_prints_the_keyword_an_upgrade_adds():
 
     Seen to FAIL: no surface on the page carried a keyword delta at all.
     """
-    assert qa_packet.upgrade_keywords("KLEEMOD-PROTO_KO_SORRY_JEAN") == (
+    # Sorry, Jean... left with the Klee tempo paper (2026-10-07); Favonius
+    # Escort is the same Retain-on-upgrade shape.
+    assert qa_packet.upgrade_keywords("KLEEMOD-PROTO_KO_FAVONIUS_ESCORT") == (
         "Retain",)
     assert qa_packet.upgrade_keywords("KLEEMOD-NOT_A_CARD") == ()
 
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_KO_SORRY_JEAN", "name": "Sorry, Jean...",
+        {"id": "KLEEMOD-PROTO_KO_FAVONIUS_ESCORT", "name": "Favonius Escort",
          "cost": "1", "type": "Skill",
-         "description": "Remove one of your Bombs and gain Block equal to its "
-                        "size."})
+         "description": "Remove your largest Bomb. Gain Block equal to twice "
+                        "its size."})
 
     page = blindplay.observe(smith)
 

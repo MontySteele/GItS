@@ -153,14 +153,8 @@ def test_the_grounded_tip_states_the_condition_and_the_payout():
     assert '"start of your turn, but only if you played no "' in tips
     assert '"[gold]Set off[/gold] card last turn.");' in tips
     assert "card prints what it pays." not in tips
-    sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
-        encoding="utf-8")
-    # `EB-622`: the payout moved 6 -> 4 (upgrade still `+2`, so 6 upgraded).
-    assert "gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
-    # `EB-749` (R271 sec.5.1): the sheet row's own condition, held in step
-    # with the tip.
-    assert ("if you played no [gold]Set off[/gold] card last turn, gain 4 "
-            "[gold]Block[/gold]") in sheet
+    # (The sheet half left with the Grounded row: the Klee tempo paper,
+    # 2026-10-07, cut it. The tip stays until the power's engine pieces go.)
 
 
 def test_the_attach_is_scoped_to_the_quarantined_surface():

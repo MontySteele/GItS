@@ -76,7 +76,6 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoMineAllMine), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoTeamEffort), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoOneMoreCharge), CardRarity.Uncommon, CardType.Skill, 1 },
-        new object[] { typeof(ProtoKoSitTight), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoTagAlong), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoComeBackAndPlay), CardRarity.Uncommon, CardType.Skill, 0 },
@@ -85,7 +84,6 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoDuckAndRun), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoPartyPoppers), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoLookOut), CardRarity.Uncommon, CardType.Power, 1 },
-        new object[] { typeof(ProtoKoPatienceKlee), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoSecretBase), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoHalfAMountain), CardRarity.Rare, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoFavoniusEscort), CardRarity.Rare, CardType.Skill, 1 },
@@ -118,11 +116,13 @@ public class KleeR276ExpansionTests
         // 28 since the Klee status package (2026-10-01) cut Fish Fry and
         // Friendship Bracelet, 27 since its sec.5 (defence in the status
         // pile) cut Spinning Sparkler; 26 since the Klee-only companions
-        // (2026-10-03) cut Second Surprise. The package's ten follow them (the
-        // three companion rows after it are not `ProtoKo`).
-        Assert.Equal(26, names.Count);
-        Assert.Equal(26, names.Distinct().Count());
-        var tail = slice.Skip(slice.Count - 36).Take(26).ToList();
+        // (2026-10-03) cut Second Surprise; 24 since the Klee tempo paper
+        // (2026-10-07) cut Sit Tight and Experiment in Progress. The
+        // package's nine and the tempo five follow them (the three companion
+        // rows after those are not `ProtoKo`).
+        Assert.Equal(24, names.Count);
+        Assert.Equal(24, names.Distinct().Count());
+        var tail = slice.Skip(slice.Count - 38).Take(24).ToList();
         for (var i = 0; i < names.Count; i++)
         {
             Assert.Contains(names[i], tail[i]);
@@ -427,27 +427,8 @@ public class KleeR276ExpansionTests
         Assert.Equal(1, Upgraded<ProtoKoBoomBadge>().PrintedSparkPrice);
     }
 
-    [Fact]
-    public void Sit_tight_leaves_its_bonus_to_the_end_of_the_turn()
-    {
-        var card = new ProtoKoSitTight();
-        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
-        Assert.Equal(1, card.PrintedSparkPrice);
-        Assert.Equal(5m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
-        var up = Upgraded<ProtoKoSitTight>();
-        Assert.Equal(7m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5m, up.DynamicVars["PowerAmount"].BaseValue);
-        // The play reads no ledger: it gains its 5 and installs the power.
-        var play = Play("ProtoKoSitTight");
-        Assert.DoesNotContain("KleeOverhaulLedger.get_SetOffThisTurn", play);
-        Assert.Contains("PowerCmd.Apply", play);
-        Assert.Equal(
-            "Gain {Block:diff()} [gold]Block[/gold]. At the end of your turn, "
-          + "gain {PowerAmount:diff()} [gold]Block[/gold] if none of your "
-          + "[gold]Bombs[/gold] went off.",
-            Face(card));
-    }
+    // Sit Tight's card pin left with the row (the Klee tempo paper,
+    // 2026-10-07); its power's pins below stay until the power goes.
 
     [Fact]
     public void Sit_tight_pays_only_on_a_turn_where_nothing_went_off()
@@ -510,8 +491,6 @@ public class KleeR276ExpansionTests
         // After the echo, on the strictly later broadcast.
         Assert.Contains("ProtoBombPower.GrowLargest",
                         Il.Calls(Il.Method("PatienceKleePower", "AfterSideTurnEnd")));
-        Assert.Equal(6m, Upgraded<ProtoKoPatienceKlee>()
-                             .DynamicVars["PowerAmount"].BaseValue);
         KleeOverhaulLedger.ResetAll();
     }
 

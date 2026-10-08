@@ -105,6 +105,17 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
   Klee-only companions resolved (4 to the shared pool, 6 cut, 3 into her own
   pool for Second Surprise, Solitary Confinement and Once More!). Klee stays
   78, now 25 / 32 / 21 (Boom Badge to Common, [USER] 2026-10-07: "Agreed on Boom Badge, but let's keep powers out of Common and leave Secret Base at Uncommon."); the shared Mondstadt roster is 39; no stand-ins remain.
+  **The tempo paper (2026-10-07, ruled, built on `klee-next`;
+  `review/active/klee-tempo-paper-2026-10-07.md` sec.3):** [USER]: "I
+  personally found Blast Shield and Kitchen Alchemy quite useful in my runs,
+  so I'm not sure I buy that they should go. Otherwise agreed." Out: It
+  Wasn't Me!, Sorry, Jean..., Grounded, Sit Tight, Experiment in Progress.
+  In: Simmer (C, 1: 4 [6] plus half the largest Bomb, a Dazed), Taste Test
+  (U, 2: every Bomb on the enemy, 2 [1] Confiscated), Tinkering (U, 0: 2 [3]
+  Sparks, a Confiscated), Dodoco Tag (U, 1: 7 [10] and 5 [7] Block, a Dazed),
+  Explosive Spark (C, 0, 1 Spark: 12 [16]). Simmer and Taste Test read the
+  Bombs without setting them off (new op `damage_from_bombs`, both engines).
+  Still 78, 25 / 32 / 21. Untested in game until a deploy.
 - **Kokomi: Plan stays; the cards change.** Brief
   `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
   now-line answers this turn, the Plan line buys something only a head start

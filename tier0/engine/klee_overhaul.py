@@ -87,6 +87,8 @@ OVERHAUL_OPS = frozenset((
     "plant_homework_bomb",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test's read.
+    "damage_from_bombs",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
     "plant_bomb_copy_largest",

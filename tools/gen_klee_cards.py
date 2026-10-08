@@ -506,6 +506,13 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # nothing, which is the one line separating it from
                   # `remove_bomb_for_block` above.
                   "block_largest_bomb",
+                  # THE KLEE TEMPO PAPER's verb (2026-10-07, Simmer and Taste
+                  # Test). It READS the pile the way `block_largest_bomb` does
+                  # and spends nothing, and pays the read as the CARD's own
+                  # hit -- `ProtoBombPower.DealFromBombs`, one awaited call
+                  # into `DamageCmd.Attack`, so Pyro, Strength and Vulnerable
+                  # land as on any other Attack of hers.
+                  "damage_from_bombs",
                   # The round-11 pool pass's verb (Stoke the Fuse). It writes
                   # the pile -- `ProtoBombPower.GrowLargestPerSpark`, off the
                   # same `LargestPlacedBy` read `block_largest_bomb` above
@@ -4132,6 +4139,9 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # like every verb beside it. `split_largest_bomb` aims at nobody
               # and is deliberately absent.
               "plant_bomb_copy_largest",
+              # The Klee tempo paper (Simmer, Taste Test): the hit lands on
+              # `cardPlay.Target`.
+              "damage_from_bombs",
               # The Kokomi overhaul's one aimed verb, here for the same
               # reason: it dereferences `cardPlay.Target`, so a card whose
               # ONLY aimed op is this one must declare an enemy TargetType or
@@ -5164,6 +5174,22 @@ def blocked_reason(
             if not isinstance(eff.get("multiplier"), int) \
                     or eff["multiplier"] < 2:
                 return "multiply_set_off multiplier must be a literal int >= 2"
+        if op == "damage_from_bombs":
+            # THE KLEE TEMPO PAPER (2026-10-07). `read` names which Bombs the
+            # hit is measured off -- half the largest on the board (Simmer)
+            # or the sum on the aimed enemy (Taste Test) -- and `amount` is
+            # the printed flat part, the one number a `damage` delta moves.
+            unknown = set(eff) - {"op", "read", "amount", "target"}
+            if unknown:
+                return (f"damage_from_bombs field(s) {sorted(unknown)} "
+                        "not understood")
+            if eff.get("read") not in DAMAGE_FROM_BOMBS_READS:
+                return f"damage_from_bombs read '{eff.get('read')}'"
+            if eff.get("target") != "enemy":
+                return f"damage_from_bombs target '{eff.get('target')}'"
+            base = eff.get("amount", 0)
+            if not isinstance(base, int) or isinstance(base, bool) or base < 0:
+                return "damage_from_bombs amount must be a literal int >= 0"
         if op == "damage_set_off_total":
             unknown = set(eff) - {"op", "target"}
             if unknown:
@@ -7167,6 +7193,9 @@ def build_vars(card: dict) -> list[str]:
                     f'new SpotlightSystem.SpotlitBlockVar({eff["amount"]}m)')
             else:
                 out.append(f'new BlockVar({eff["amount"]}m, ValueProp.Move)')
+        elif op == "damage_from_bombs" and eff is bomb_read_damage_var_effect(card):
+            # The Klee tempo paper (Simmer): the flat part is the card's hit.
+            out.append(f'new DamageVar({int(eff["amount"])}m, ValueProp.Move)')
         elif op == "set_off" and eff is set_off_damage_var_effect(card):
             # EB-280. A Set off Attack's own hit is card damage and takes the
             # SAME var an `op: damage` hit takes -- the face reads
@@ -7625,6 +7654,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # whose whole printed hit is a Set off's.
         "damage": any((e["op"] == "damage" and e["target"] != "self")
                       or (e["op"] == "set_off" and int(e.get("damage", 0) or 0))
+                      # The Klee tempo paper (Simmer): the flat part.
+                      or (e["op"] == "damage_from_bombs"
+                          and int(e.get("amount", 0) or 0))
                       for e in effects),
         "block": any(e["op"] == "block" for e in effects),
         "draw": any(e["op"] == "draw" for e in everywhere),
@@ -8853,6 +8885,29 @@ def damage_var_effect(card: dict) -> dict | None:
     return next((fx for fx in card.get("effects", [])
                  if fx.get("op") == "damage"
                  and fx.get("target") != "self"), None)
+
+
+#: `damage_from_bombs`'s two reads, and the C# enum member each one names
+#: (`ProtoBombPower.BombRead`). Sim twin: `effects._op_damage_from_bombs`.
+DAMAGE_FROM_BOMBS_READS = {"largest_half": "LargestHalf",
+                           "target_total": "TargetTotal"}
+
+
+def bomb_read_damage_var_effect(card: dict) -> dict | None:
+    """The ONE top-level `damage_from_bombs` whose flat part owns `Damage`.
+
+    The Klee tempo paper (2026-10-07, Simmer): "Deal 4 [6] damage, plus half
+    your largest Bomb's size." The 4 is card damage in the same slot as an
+    `op: damage` hit, so it takes the same var and the same delta, on
+    <see cref="set_off_damage_var_effect"/>'s one-owner rule: a plain
+    `damage` op or a damage-carrying `set_off` wins where a row has one.
+    """
+    if (damage_var_effect(card) is not None
+            or set_off_damage_var_effect(card) is not None):
+        return None
+    return next((fx for fx in card.get("effects", [])
+                 if fx.get("op") == "damage_from_bombs"
+                 and int(fx.get("amount", 0) or 0)), None)
 
 
 def set_off_damage_var_effect(card: dict) -> dict | None:
@@ -11173,6 +11228,20 @@ def build_body(
                     "await ProtoBombPower.BlockForLargestBomb("
                     f"choiceContext, Owner.Creature, {cap});")
 
+        elif op == "damage_from_bombs":
+            # THE KLEE TEMPO PAPER (2026-10-07). ONE call: the Bombs are read
+            # and the hit is dealt inside `ProtoBombPower`, so the number read
+            # and the number dealt cannot drift; nothing goes off.
+            _target_guard(lines, ctx)
+            base = ("DynamicVars.Damage.BaseValue"
+                    if eff is bomb_read_damage_var_effect(card)
+                    else f"{int(eff.get('amount', 0))}m")
+            read = DAMAGE_FROM_BOMBS_READS[eff["read"]]
+            lines.append(
+                "await ProtoBombPower.DealFromBombs("
+                "choiceContext, cardPlay.Target, Owner.Creature, "
+                f"{base}, ProtoBombPower.BombRead.{read}, this, cardPlay);")
+
         elif op == "damage_set_off_total":
             _target_guard(lines, ctx)
             lines.append(
@@ -12017,8 +12086,12 @@ def build_body(
                     f"            var token = CombatState!.CreateCard<{cls}>(Owner);\n"
                     f"            await CardPileCmd.AddGeneratedCardToCombat(token, {pile}, Owner{position});\n"
                 )
-                body = token_lines if n == 1 else (
-                    f"            for (var i = 0; i < {n}; i++)\n"
+                # The Klee tempo paper (Taste Test, `cards: -1`): a ruled
+                # count delta loops on the Stash var, as the pool form does.
+                count = ('DynamicVars["Stash"].IntValue'
+                         if stash_upgrade(card) else str(n))
+                body = token_lines if (n == 1 and not stash_upgrade(card)) else (
+                    f"            for (var i = 0; i < {count}; i++)\n"
                     "            {\n"
                     + token_lines.replace("            ", "                ")
                     + "            }\n"
@@ -12662,6 +12735,9 @@ def _authored_face_numbers(card: dict):
             # printed after the hit and moved by no delta.
             if eff.get("bonus_if"):
                 yield (None, None, int(eff["bonus_if"]["amount"]))
+        elif op == "damage_from_bombs" and int(eff.get("amount", 0) or 0):
+            owns = eff is bomb_read_damage_var_effect(card)
+            yield ("damage", "Damage", int(eff["amount"])) if owns                 else (None, None, int(eff["amount"]))
         elif op == "set_off" and int(eff.get("damage", 0) or 0):
             owns = eff is set_off_damage_var_effect(card)
             yield ("damage", "Damage", int(eff["damage"])) if owns \
@@ -12740,6 +12816,16 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "draw" and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
+        # The Klee tempo paper (2026-10-07): Tinkering's "Gain 2 Sparks" and
+        # Taste Test's "Add 2 Confiscated", each the number its delta moves.
+        # A count of one prints "a" and no digit, so it is not yielded.
+        elif op == "gain_spark" and isinstance(eff.get("amount"), int):
+            yield (("spark", "Sparks", eff["amount"]) if spark_upgrade(card)
+                   else (None, None, eff["amount"]))
+        elif (op == "add_card" and isinstance(eff.get("amount"), int)
+              and eff["amount"] >= 2 and "pool" not in eff):
+            yield (("cards", "Stash", eff["amount"]) if stash_upgrade(card)
+                   else (None, None, eff["amount"]))
         elif op == "choose_one" and any(
                 k in upgrade_plan(card)[0] for k in MODE_UPGRADE_KEYS):
             # AoE trim, 2026-10-03: a per-mode delta's number, swapped with
@@ -14501,6 +14587,9 @@ def build_upgrade(card: dict) -> list[str]:
             # EB-280: only the Set off that OWNS the Damage var takes the
             # delta -- the same one-owner rule the `damage` arm above obeys.
             key = "damage" if eff is set_off_damage_var_effect(card) else None
+        elif op == "damage_from_bombs":
+            key = ("damage" if eff is bomb_read_damage_var_effect(card)
+                   else None)
         elif op in GROW_FIELD:
             key = "grow" if eff is grow_var_effect(card) else None
         else:

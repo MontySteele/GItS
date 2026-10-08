@@ -25,7 +25,9 @@ from tier05 import rewards
 # the status pile) cut; its eleven rows follow them at the tuple's end.
 # Second Surprise cut, the package ten long and Klee's three Companion rows
 # last since the Klee-only companions (2026-10-03).
-EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-39:-13]
+# The Klee tempo paper (2026-10-07) cut Sit Tight and Experiment in Progress
+# from this block; the status package, the tempo five and the companions follow.
+EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-41:-17]
 
 
 @pytest.fixture
@@ -83,18 +85,17 @@ def filler(n=5):
 
 def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     rows = {cid: load(cid) for cid in EXPANSION}
-    assert len(rows) == 26
+    assert len(rows) == 24
     by_rarity = {}
     for card in rows.values():
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + 1
-    assert by_rarity == {"common": 3, "uncommon": 14, "rare": 9}
+    assert by_rarity == {"common": 3, "uncommon": 12, "rare": 9}
     shape = {cid: (c.cost, c.type) for cid, c in rows.items()}
     assert shape["proto_ko_hiding_spot"] == (1, "skill")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")
     assert shape["proto_ko_alices_detonator"] == (1, "power")
     assert shape["proto_ko_dodoco"] == (1, "power")            # power cost sweep
     assert rows["proto_ko_half_a_mountain"].exhaust            # Klee audit, 2026-10-01
-    assert rows["proto_ko_sit_tight"].retain
     assert rows["proto_ko_wait_for_it"].retain
     assert rows["proto_ko_tag_along"].exhaust
     assert rows["proto_ko_adventure_club"].exhaust
@@ -366,68 +367,9 @@ def test_boom_badge_doubles_the_bombs_of_the_next_set_off_card(overhaul):
     assert before - enemy.hp == 5 * 2 + 4
 
 
-def sit_tight_board():
-    """One enemy holding a Bomb 5, and a bank for Sit Tight's Spark."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.player.sparks = 2
-    klee_overhaul.place(state, enemy, 5)
-    return state, enemy
-
-
-def test_sit_tight_then_kapow_pays_no_bonus(overhaul):
-    state, enemy = sit_tight_board()
-    play(state, load("proto_ko_sit_tight"))
-    assert state.player.block == 5
-    play(state, load("proto_ko_kapow"), aim=enemy)
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5
-    assert klee_overhaul.SIT_TIGHT not in state.player.powers
-
-
-def test_kapow_then_sit_tight_pays_no_bonus(overhaul):
-    state, enemy = sit_tight_board()
-    play(state, load("proto_ko_kapow"), aim=enemy)
-    play(state, load("proto_ko_sit_tight"))
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5
-
-
-def test_sit_tight_with_no_detonation_pays_at_the_end_of_the_turn(overhaul):
-    state, enemy = sit_tight_board()
-    play(state, load("proto_ko_sit_tight"))
-    # The bonus is not paid at play time any more.
-    assert state.player.block == 5
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5 + 4
-    assert klee_overhaul.SIT_TIGHT not in state.player.powers
-    assert sizes(enemy) == [5]
-
-
-def test_sit_tight_is_switched_off_by_a_mine_answering_an_attack(overhaul):
-    state, enemy = sit_tight_board()
-    klee_overhaul.place(state, enemy, 3, is_mine=True)
-    play(state, load("proto_ko_sit_tight"))
-    klee_overhaul.mines_answer_attack(state, enemy)
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5
-
-
-def test_sit_tight_copies_each_pay(overhaul):
-    state, _ = sit_tight_board()
-    play(state, load("proto_ko_sit_tight"))
-    play(state, load("proto_ko_sit_tight"))
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5 + 5 + 4 + 4
-
-
-def test_sit_tight_upgraded_is_seven_and_five(overhaul):
-    state = klee_state()
-    state.player.sparks = 1
-    play(state, load("proto_ko_sit_tight+"))
-    assert state.player.block == 7
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 12
+# Sit Tight's card pins left with the row (the Klee tempo paper, 2026-10-07).
+# Its power stays registered until its engine pieces go (BACKLOG); the
+# ordering pin below reads the engine, not the card.
 
 
 def test_sit_tight_pays_before_the_shipped_turn_end_triggers():

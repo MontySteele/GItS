@@ -736,6 +736,8 @@ KLEE_OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test's read.
+    "damage_from_bombs",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
     # THE POOL PASS's two (`EB-491`): All of My Treasures! and Split Charge.
@@ -2510,6 +2512,7 @@ STATIC_OP_PRICING: dict[str, str] = {
        for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                   "remove_bomb_for_block", "block_largest_bomb",
                   "grow_largest_bomb", "damage_set_off_total",
+                  "damage_from_bombs",
                   "multiply_set_off", "draw_per_set_off",
                   "companion_mark_hand", "mine_bombs",
                   "plant_bomb_copy_largest",

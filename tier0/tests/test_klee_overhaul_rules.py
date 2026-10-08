@@ -483,15 +483,22 @@ def test_rule4_she_starts_every_combat_with_the_opening_spark(overhaul):
     assert state.log.index(opening[0]) < 40, "not on turn one"
 
 
+#: The rows ruled to mint Sparks without an explosion. The Klee tempo paper
+#: (2026-10-07, sec.3): Tinkering is "a Spark engine that does not need an
+#: explosion", paid for in a Confiscated.
+SPARK_MINTING_ROWS = {"proto_ko_tinkering"}
+
+
 def test_rule4_no_slice_row_mints_a_spark(overhaul):
     """`Rule4_no_slice_card_mints_a_spark`: "Under this flag Sparks come ONLY
     from explosions." Every slice row is swept, so a future row printing
-    `gain_spark` fails here rather than quietly opening a second income."""
+    `gain_spark` fails here rather than quietly opening a second income --
+    except the rows a ruling named (`SPARK_MINTING_ROWS`)."""
     rows = [c for c in loader.prototype_cards() if c.id.startswith("proto_ko_")]
     assert rows
-    for card in rows:
-        assert not any(fx.get("op") == "gain_spark" for fx in card.effects), \
-            card.id
+    minting = {card.id for card in rows
+               if any(fx.get("op") == "gain_spark" for fx in card.effects)}
+    assert minting == SPARK_MINTING_ROWS
 
 
 def test_rule4_the_upgraded_relics_opening_windfall_is_on(overhaul):
@@ -1374,20 +1381,23 @@ def test_one_detonation_places_one_rider_mine_per_living_enemy(overhaul):
         ("a", 3), ("b", 3)]
 
 
-def test_sorry_jean_removes_the_largest_and_blocks_for_its_size(overhaul):
+def test_remove_bomb_for_block_removes_the_largest_and_blocks_for_its_size(
+        overhaul):
     """`The_emergency_exit_removes_one_charge_and_reports_its_size`, plus the
     reported default the card text does not state: THE LARGEST, the only
-    deterministic answer a player can plan around."""
+    deterministic answer a player can plan around. (Sorry, Jean... left with
+    the Klee tempo paper, 2026-10-07; Favonius Escort prints the same verb at
+    twice the size.)"""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 3)
     klee_overhaul.place(state, b, 11)
     klee_overhaul.place(state, b, 7)
 
-    effects.resolve_card(state, load("proto_ko_sorry_jean"))
+    effects.resolve_card(state, load("proto_ko_favonius_escort"))
 
     assert sizes(a) == [3] and sizes(b) == [7]
-    assert state.player.block == 11
+    assert state.player.block == 22
 
 
 def test_bomb_sized_block_takes_dexterity_like_every_other_card_block(overhaul):
@@ -1407,16 +1417,16 @@ def test_bomb_sized_block_takes_dexterity_like_every_other_card_block(overhaul):
     state.player.powers["dexterity"] = 2
     klee_overhaul.place(state, enemy, 13)
 
-    effects.resolve_card(state, load("proto_ko_sorry_jean"))
-    assert state.player.block == 15         # 13 + 2, and the charge is spent
+    effects.resolve_card(state, load("proto_ko_favonius_escort"))
+    assert state.player.block == 28         # 2 x 13 + 2, the charge spent
     assert sizes(enemy) == []
     # (Careful Now's half left with the row: the Klee status package,
     # 2026-10-01, cut it.)
 
 
-def test_sorry_jean_on_an_empty_board_is_a_printed_no_op(overhaul):
+def test_remove_bomb_for_block_on_an_empty_board_is_a_printed_no_op(overhaul):
     state = klee_state([make_enemy()])
-    effects.resolve_card(state, load("proto_ko_sorry_jean"))
+    effects.resolve_card(state, load("proto_ko_favonius_escort"))
     assert state.player.block == 0
 
 

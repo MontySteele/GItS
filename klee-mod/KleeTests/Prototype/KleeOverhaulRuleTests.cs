@@ -236,7 +236,11 @@ public class KleeOverhaulRuleTests
     /// THE POOL PASS's one named exception (`EB-491`, Flash Point). Every
     /// other card-borne Spark grant is still a finding.
     /// </summary>
-    private static readonly string[] SparkMintersAllowed = { "ProtoKoFlashPoint" };
+    // The Klee tempo paper (2026-10-07, sec.3) names a second: Tinkering is "a
+    // Spark engine that does not need an explosion", paid for in a
+    // Confiscated.
+    private static readonly string[] SparkMintersAllowed =
+        { "ProtoKoFlashPoint", "ProtoKoTinkering" };
 
     [Fact]
     public void Rule4_no_slice_card_mints_a_spark_except_the_named_one()
@@ -262,7 +266,8 @@ public class KleeOverhaulRuleTests
             .Select(m => m.DeclaringType!.Name)
             .Distinct()
             .ToList();
-        Assert.Equal(SparkMintersAllowed, minters);
+        Assert.Equal(SparkMintersAllowed.OrderBy(n => n, System.StringComparer.Ordinal),
+                     minters.OrderBy(n => n, System.StringComparer.Ordinal));
     }
 
     [Fact]
@@ -522,13 +527,8 @@ public class KleeOverhaulRuleTests
         // it is a constant mirrored against tier0 rather than a second reading
         // of the stack.
         Assert.Equal(1, KleeOverhaulLaw.GroundedSpark);
-
-        var upgrade = typeof(ProtoBombPower).Assembly
-            .GetType("KleeMod.Cards.Prototype.Generated.ProtoKoGrounded")!
-            .GetMethod("OnUpgrade", HeadlessGame.All)!;
-        var moved = Il.Strings(upgrade);
-        Assert.Contains("PowerAmount", moved);
-        Assert.Single(moved);
+        // (The card's upgrade half left with the Grounded row: the Klee tempo
+        // paper, 2026-10-07, cut it.)
 
         // The face states both halves, and the Spark numeral comes from the
         // constant rather than a typed literal (`EB-89`).

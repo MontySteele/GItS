@@ -52,7 +52,10 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
     assert len(ids) == 78
     # The Klee-only companions (2026-10-03): Solitary Confinement cut from the
     # package; her three Companion rows follow it.
-    assert ids[-13:-3] == C.KLEE_STATUS_PACKAGE_IDS
+    # The Klee tempo paper (2026-10-07): It Wasn't Me! cut from the package,
+    # and its five rows between the package and the companions.
+    assert ids[-17:-8] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-8:-3] == C.KLEE_TEMPO_IDS
     assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
     rows = {c.id for c in loader.prototype_cards()}
     for cid in CUT + DEFENCE_CUT:
@@ -64,7 +67,6 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
               for cid in C.KLEE_STATUS_PACKAGE_IDS}
     assert shapes == {
         "proto_ko_forbidden_fun": ("attack", 0, "common"),
-        "proto_ko_it_wasnt_me": ("skill", 0, "common"),
         "proto_ko_lisas_treats": ("skill", 0, "uncommon"),
         "proto_ko_red_knight": ("attack", 2, "rare"),
         "proto_ko_finders_keepers": ("power", 1, "uncommon"),
@@ -80,8 +82,6 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
 def test_the_papers_numbers_and_upgrades(overhaul):
     assert _first(load("proto_ko_forbidden_fun"), "damage")["amount"] == 10
     assert _first(_up("proto_ko_forbidden_fun"), "damage")["amount"] == 14
-    assert _first(load("proto_ko_it_wasnt_me"), "block")["amount"] == 6
-    assert _first(_up("proto_ko_it_wasnt_me"), "block")["amount"] == 9
     assert _first(load("proto_ko_lisas_treats"), "energy")["amount"] == 2
     assert _first(_up("proto_ko_lisas_treats"), "energy")["amount"] == 3
     # AoE trim, 2026-10-03: Red Knight is 34 to one enemy, Damage Report
@@ -103,7 +103,6 @@ def test_the_papers_numbers_and_upgrades(overhaul):
 def test_the_loaders_pay_the_tier_the_paper_names(overhaul):
     """Light tax: one Dazed. Heavy tax: two Confiscated."""
     for cid, token, n in (("proto_ko_forbidden_fun", "status_dazed", 1),
-                          ("proto_ko_it_wasnt_me", "status_dazed", 1),
                           ("proto_ko_lisas_treats", "confiscated", 2),
                           ("proto_ko_red_knight", "confiscated", 2)):
         fx = _first(load(cid), "add_card")

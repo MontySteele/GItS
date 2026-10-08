@@ -437,13 +437,13 @@ public class KleeOverhaulRoundThreeTests
         // damage to be and takes a Strike's +3, where the rule's default +1
         // was an upgrade nobody could see.
         AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 9m);
-        // The same audit's third lever: Sorry, Jean...'s upgrade is a keyword,
-        // not a number. (Its other two pins rode Explosives Workshop and Sugar
-        // Rush, both cut at R276.)
-        var sorryJean = new ProtoKoSorryJean();
-        Assert.False(sorryJean.Keywords.Contains(CardKeyword.Retain));
-        Upgrade(sorryJean);
-        Assert.True(sorryJean.Keywords.Contains(CardKeyword.Retain));
+        // The same audit's third lever: an upgrade that is a keyword, not a
+        // number. (Sorry, Jean... carried it until the Klee tempo paper cut
+        // it, 2026-10-07; Favonius Escort prints the same `retain` upgrade.)
+        var escort = new ProtoKoFavoniusEscort();
+        Assert.False(escort.Keywords.Contains(CardKeyword.Retain));
+        Upgrade(escort);
+        Assert.True(escort.Keywords.Contains(CardKeyword.Retain));
         // The Mend clause, on draft 6's carrier. `Tide` left this pin with the
         // verb it read: the rule's key list is written over OPS, so retiring
         // `gain_tide` retired the delta and nothing here had to be re-decided.

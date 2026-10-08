@@ -798,6 +798,14 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                                   if fx.get("op") == "set_off"
                                   and int(fx.get("damage", 0) or 0) > 0),
                                  "damage", val)
+            if not ok:
+                # The Klee tempo paper (Simmer): the flat part of a
+                # `damage_from_bombs` hit, the codegen's third owner of the
+                # Damage var (`bomb_read_damage_var_effect`), same order.
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "damage_from_bombs"
+                                  and int(fx.get("amount", 0) or 0) > 0),
+                                 "amount", val)
         elif key == "bomb_size":
             # EB-283, the overhaul Bomb's printed size (`plant_bomb.size`).
             # Distinct from `bomb_damage`, which is the SHIPPED Bomb's
