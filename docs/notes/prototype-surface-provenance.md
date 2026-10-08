@@ -752,7 +752,7 @@ deletion.
 
 ```
 # =============================================================================
-# THE KLEE OVERHAUL, SLICE ONE (`review/active/klee-overhaul-slice-1-2026-09-01.md`,
+# THE KLEE OVERHAUL, SLICE ONE (`review/ruled/klee-overhaul-slice-1-2026-09-01.md`,
 # against the ruled brief `klee-brief-2026-09-01.md` sec.3 and sec.8).
 #
 # NO NUMBER BELOW IS A CLAIM. The slice packet says so in its sec.1: the numbers
@@ -1137,7 +1137,7 @@ prototype placeholder uses.
 
 Thirty rows: the two cards of her own that the ten-card starter carries, the
 twenty-six pool rows of
-`review/active/kokomi-overhaul-slice-1-2026-09-01.md` **draft 6**, written
+`review/ruled/kokomi-overhaul-slice-1-2026-09-01.md` **draft 6**, written
 against the ruled brief `kokomi-brief-2026-09-01.md` draft 6 (direction ruled
 R240, brief approved R241). Under `C.KOKOMI_OVERHAUL` /
 `-p:KokomiOverhaul=true` these ARE her starter and her whole reward pool; with
@@ -3121,7 +3121,7 @@ per-guest loss count Wriothesley reads, and the end-of-turn forecast.
 
 ## Furina, the Stage — Sold Out, the fourth seat (2026-09-26)
 
-`proto_fs_sold_out`, family 7 of `review/active/furina-supporting-pool-2026-09-26.md`
+`proto_fs_sold_out`, family 7 of `review/ruled/furina-supporting-pool-2026-09-26.md`
 (ruled that day, all four defaults; pick 2 (a) keeps both rule-bending Rares). A
 Rare Power, cost 2 (1 upgraded): "Your stage has a fourth seat." Built ahead of
 the other 28 because it bends rule 1, and every rule that meets a full stage had
@@ -3155,7 +3155,7 @@ Regina of All Waters) have three dropped shipped Rare Powers left to replace:
 
 ## Furina, the Stage — the supporting pool, 28 rows (2026-09-26)
 
-The other 28 cards of `review/active/furina-supporting-pool-2026-09-26.md`
+The other 28 cards of `review/ruled/furina-supporting-pool-2026-09-26.md`
 (ruled that day with all four defaults, swept before the build). The faces are
 the paper's tables as swept, with the build's own wording where a lint or a
 title forced it: **Showstopper** is *Bring the House Down* and **Undertow** is
@@ -3631,7 +3631,7 @@ shape).
 
 ### The second batch (2026-09-27)
 
-Design: `review/active/coop-concepts-2026-09-27.md`, "Proposed cards" ([USER],
+Design: `review/ruled/coop-concepts-2026-09-27.md`, "Proposed cards" ([USER],
 2026-09-27, picks 2a and 3a at their defaults). Four more `multiplayer: true`
 rows on the first set's terms, two for Klee and two for Furina; Kokomi's pair
 waits for her review (pick 4). The runtime is the same file, `CoopSet.cs`.
@@ -3679,7 +3679,7 @@ alive the latch is not spent either. The upgrade is Innate; the cost stays 2.
 
 ## Kokomi core pass: eight cards (2026-09-27)
 
-Design: `review/active/kokomi-core-pass-2026-09-27.md` (ruled at its defaults).
+Design: `review/ruled/kokomi-core-pass-2026-09-27.md` (ruled at its defaults).
 No rule changed and her starter is untouched.
 
 **Faces.** Ambush, Cleansing Wave, Ripple, Feigned Retreat and Second Wave
@@ -4292,7 +4292,7 @@ cards.
 
 ## Kokomi: expansion batch one (2026-09-29)
 
-Paper `review/active/kokomi-expansion-2026-09-29.md`, every pick ruled at
+Paper `review/ruled/kokomi-expansion-2026-09-29.md`, every pick ruled at
 the default ([USER]: "The defaults work here"). 22 rows, LAST in the sheet's
 order (`C.KOKOMI_EXPANSION_BATCH_ONE_IDS`, `KokomiOverhaulRoster.Slice()`):
 12 Uncommon and 10 Rare. The Clouds Like Waves Rippling is cut
@@ -4647,7 +4647,7 @@ inside it. The sim ticks auras before the morning and needs nothing.
 
 ## Varka relics and potions, 2026-10-01
 
-Built from `review/active/varka-expansion-2026-10-01.md` sec.4 at the
+Built from `review/ruled/varka-expansion-2026-10-01.md` sec.4 at the
 defaults of its picks, ruled 2026-10-01 ([USER]: "Agreed on all four. You're
 good to proceed."). Seven relics (`klee-mod/KleeCode/Relics/VarkaArmRelics.cs`) and
 three potions (`klee-mod/KleeCode/Potions/VarkaPotions.cs`), Klee's and
@@ -4739,7 +4739,7 @@ batch one's 22 rows were. Pins: `tier0/tests/test_kokomi_payoff_pass.py`,
 
 ## Varka expansion, 2026-10-01
 
-The paper `review/active/varka-expansion-2026-10-01.md`, all four picks at
+The paper `review/ruled/varka-expansion-2026-10-01.md`, all four picks at
 the defaults; [USER]: "Agreed on all four. You're good to proceed." This
 section is sec.3 (the cards); sec.4 (relics and potions) is "Varka relics and potions, 2026-10-01",
 #787. Built in both engines as written, with the readings below where
@@ -4864,7 +4864,7 @@ Study Buddy's).
 
 ## Pool completion, 2026-10-01
 
-The paper is `review/active/pool-completion-2026-10-01.md`, picks 1 to 5
+The paper is `review/ruled/pool-completion-2026-10-01.md`, picks 1 to 5
 ruled at the defaults ([USER]: "Overall this looks good, but one balance
 note", the Body Slam note, sec.6). Built: sec.3 (three Ancients), sec.4
 (Kokomi's one Common, seven Rares and two multiplayer cards), sec.5
@@ -4993,7 +4993,7 @@ default drafter; offer-take and play-rate bounds) were not run by this build
 
 ## Varka element identities, 2026-10-01
 
-The paper `review/active/varka-element-identities-2026-10-01.md`, picks 1 to
+The paper `review/ruled/varka-element-identities-2026-10-01.md`, picks 1 to
 5 at the defaults; [USER]: "Overall looks reasonable, though Violet Storm
 looks undertuned" (raised to 8 [11] and an Attack at the ruling). Five swaps
 in place, the pool stays 78 (20 / 35 / 23): Charged Lunge for Updraft (C),
@@ -5128,7 +5128,7 @@ Kokomi sim marked Coral Tithe.
 
 ## Varka defence, 2026-10-01
 
-The paper `review/active/varka-defence-2026-10-01.md`, both picks ruled
+The paper `review/ruled/varka-defence-2026-10-01.md`, both picks ruled
 2026-10-01 ([USER]: "Everything else looks good!"; Tailwind Guard left as it
 is). Three swaps in place, the pool stays 78 (20 / 35 / 23): Gale Mantle for
 Squall (C), Gust Ward for Four Banners (U), Windborne Resolve for Favonian
@@ -5224,7 +5224,7 @@ the sim's account.
 
 ## Furina rules pass, 2026-10-01
 
-The paper is `review/active/furina-rules-pass-2026-10-01.md`, every pick
+The paper is `review/ruled/furina-rules-pass-2026-10-01.md`, every pick
 ruled. Built: sec.2 (rules 8, 5 and 4, Wriothesley), sec.3 (the old-kit
 rows) and sec.4 (Quick Cue, the tips, the trims, the brief), in both
 engines; Palais Ledger, Center of Attention and The Curtain Never Falls are
@@ -5310,7 +5310,7 @@ All twelve are `proto_fs_` rows now and their shipped classes are named in
 
 ## Kokomi status batch, 2026-10-01
 
-Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled: [USER]
+Paper `review/ruled/kokomi-status-batch-2026-10-01.md`, ruled: [USER]
 "Agreed on the Plan text change"; "the 7 removals are good"; Kelp Wall,
 Tidecleanse and Coral Sanctuary revised on his notes. Built in both engines,
 except Coral Sanctuary: the main session withdrew it during the build and it
@@ -5432,7 +5432,7 @@ placeholder. `tools/kokomi_expansion_sim.py` no longer names the cut rows
 
 ## Klee status package, 2026-10-01
 
-Paper `review/active/klee-status-package-2026-10-01.md`, ruled: [USER] "1) I
+Paper `review/ruled/klee-status-package-2026-10-01.md`, ruled: [USER] "1) I
 think a) is fine - we can keep tho the game's conventions 2) and 3) agreed on
 your defaults". Built in both engines. The pool stays **78 (24 / 33 / 21)**,
 from 24 / 36 / 18.
@@ -5693,7 +5693,7 @@ Pins: `tier0/tests/test_klee_status_package.py`,
 
 ## Klee final pass, 2026-10-02
 
-Paper `review/active/klee-final-pass-2026-10-02.md`, "Ruled". Klee lost all
+Paper `review/ruled/klee-final-pass-2026-10-02.md`, "Ruled". Klee lost all
 nine seat runs since the status package, on Block at the act-2 boss turn,
 with Sparks piling up unspent. Built in both engines. The pool stays **78
 (24 / 33 / 21)**.
@@ -5769,7 +5769,7 @@ Untested in game until a deploy.
 
 ## The co-op notes rulings (2026-10-02)
 
-The paper `review/active/coop-notes-2026-10-02.md` (PR #843), ruled
+The paper `review/ruled/coop-notes-2026-10-02.md` (PR #843), ruled
 2026-10-02. Pick 1 (Klee to Balance) waits on a sanity playtest and builds
 nothing yet. Pick 3 (Varka's Electro discard) was reopened and folded into a
 Varka element rebalance, so Charged Lunge and Static Field do not move.
@@ -5833,7 +5833,7 @@ game until a deploy.
 
 ## AoE trim, 2026-10-03
 
-`review/active/aoe-trim-2026-10-03.md`, all picks ruled 2026-10-03. Klee,
+`review/ruled/aoe-trim-2026-10-03.md`, all picks ruled 2026-10-03. Klee,
 Furina and Varka come down to the base five's AoE range (10 AoE cards or
 fewer, 7 direct or fewer); Kokomi keeps her delayed AoE. Built in the sim
 first, then in C# once the sim read well (the same branch). Varka's two
@@ -5963,7 +5963,7 @@ Art: none (no new cards).
 
 ## Varka starter: Retain Ascension, 0-cost Windbound, 2026-10-03
 
-`review/active/varka-rebalance-2026-10-03.md`, end of sec.5. [USER]: "I do
+`review/ruled/varka-rebalance-2026-10-03.md`, end of sec.5. [USER]: "I do
 think that we should consider modifying Ascension to be 2 cost with Retain,
 similar to Regent's Sovereign Blade", and on Windbound: "What about making it
 single target but 0 energy? It nerfs his AoE output but we already found that
@@ -6046,7 +6046,7 @@ paired, muster +8.8, switch +6.8, and elem_pyro, elem_hydro and elem_cryo
 
 ## Mondstadt companions, 2026-10-03
 
-`review/active/mondstadt-companions-2026-10-03.md`, both picks ruled at their
+`review/ruled/mondstadt-companions-2026-10-03.md`, both picks ruled at their
 defaults ([USER]: "Agreed on the Mondstadt pool changes you proposed.").
 
 - `proto_mc_mona_stellaris_phantasm` (Mona — Stellaris Phantasm): cost 2 → 1,
@@ -6064,7 +6064,7 @@ defaults ([USER]: "Agreed on the Mondstadt pool changes you proposed.").
 
 ## Klee-only companions, 2026-10-03
 
-`review/active/mondstadt-companions-2026-10-03.md` sec.4 ([USER]: "Yeah,
+`review/ruled/mondstadt-companions-2026-10-03.md` sec.4 ([USER]: "Yeah,
 agreed on all of these."; Kitchen Alchemy kept, "it's quite good!", Once More!
 cut instead).
 
@@ -6262,7 +6262,7 @@ change.
 
 ## Furina re-founding, 2026-10-04
 
-Every row of `review/active/furina-refounding-2026-10-03.md` sec.10 (and
+Every row of `review/ruled/furina-refounding-2026-10-03.md` sec.10 (and
 sec.9's slice rows), built on the old ids. The rules are sec.1 as sec.8
 amends them; the sim's reference is `tier0/engine/furina_v2.py`.
 
@@ -6424,7 +6424,7 @@ Tide, Grand Design. No sim and no seat round were run.
 
 ## Varka combo pass, 2026-10-04
 
-Paper `review/active/varka-combo-pass-2026-10-04.md`, RULED 2026-10-04, all
+Paper `review/ruled/varka-combo-pass-2026-10-04.md`, RULED 2026-10-04, all
 four picks at their defaults with Baron Bunny amended ([USER]: "Let's leave
 the Baron Bunny's block alone for now, but nerf the attack from 'all
 enemies' to 'one enemy at random.' ... I'm good with this proposal."). The

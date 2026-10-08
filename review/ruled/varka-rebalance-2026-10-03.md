@@ -1,6 +1,6 @@
 # Varka: elements that borrow from each other
 
-Status: ALL FOUR PICKS RULED 2026-10-03; Storm Battery's cost is open (pick 5).
+Status: ALL FIVE PICKS SETTLED. Picks 1-4 ruled 2026-10-03; pick 5 (Storm Battery at cost 1) built at its default (`proto_vk_storm_battery`).
 2026-10-03: spent removed ([USER]: "agreed ... please proceed"). Every
 reaction consumes its aura; Swirl's copies arrive fresh, so "fresh aura"
 below now means any aura, and Downburst's clause is struck.

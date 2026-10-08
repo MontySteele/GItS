@@ -13,8 +13,9 @@
 - **The GitHub CLI IS installed** (`gh` 2.98.0, `C:\Program Files\GitHub CLI`,
   installed 2026-09-01; the older note that it was missing is retired). Auth is
   interactive and is [USER]'s one-time step: `gh auth login`. Once authed,
-  Claude merges **plumbing** PRs itself on green CI with
+  Claude merges every PR that asks nothing of [USER] itself on green CI with
   `gh pr merge <n> --merge` (merge commits, which is what this repo's history
-  carries) and says so in the turn; a plumbing PR is defined in `CLAUDE.md`
-  §Norms. Everything else is still PR = [USER]. `gh` never pushes to `main`,
+  carries) and says so in the turn; `CLAUDE.md` §Norms names the PRs that are
+  [USER]'s (an open pick, `LAW.md` or `EXPERIMENTS.md` text, a shipped-sheet
+  number or balance constant). `gh` never pushes to `main`,
   which stays rule-protected.

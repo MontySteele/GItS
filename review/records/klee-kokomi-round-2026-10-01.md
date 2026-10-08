@@ -2,7 +2,7 @@
 
 Two rounds, both run on 2026-10-01 with Sonnet seats: one act per seat, handoff notes between acts, ascension 0, seeds rolled by the game. Raw records are gitignored; they are in the session scratchpad (`w10-lane1`, `w10-lane2`, `w11-lane1`, `w11-lane2`).
 
-The save-file tables (HP after every floor, cards offered against cards taken) for both Kokomi runs went to the four-kit review as its log packet. The review read them in §2.8 (`review/active/four-kit-review-2026-10-01.md`).
+The save-file tables (HP after every floor, cards offered against cards taken) for both Kokomi runs went to the four-kit review as its log packet. The review read them in §2.8 (`review/ruled/four-kit-review-2026-10-01.md`).
 
 ## Results
 

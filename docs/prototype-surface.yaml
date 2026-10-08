@@ -1,15 +1,15 @@
-# PROTOTYPE SURFACE -- QUARANTINED. R213 B (1050f67), BACKLOG EB-147. One
-# staging surface for cards being TRIED, every character at once. A row here
-# is not a card in the game: it is a question put to the real engine. It is
-# in no reward pool, no release build, no digest and no version stamp, and
-# the only way to reach one is a grant by id on a dev build.
-#
-# THE DELETION RULE IS THE POINT OF THE FILE. Once a slice is ACCEPTED or
-# REJECTED its rows LEAVE here, re-authored onto the owning character's real
-# sheet or deleted outright, with the reasoning in the slice's packet under
-# review/ and never as a commented-out row. AN EMPTY FILE IS THE HEALTHY
-# STATE. How to write a row: docs/current/operations/prototype.md. Why each
-# row below exists: docs/notes/prototype-surface-provenance.md, by row id.
+# PROTOTYPE SURFACE -- THE RELEASE POOL SHEET. Every card of every current kit
+# and the companion roster is a `proto_` row here, and each C# pool IS its
+# roster (legacy cleanup stage 4, review/active/legacy-cleanup-2026-10-01.md):
+# the rows are the game's reward pools, in every build and release, since the
+# current kits became the release build (2026-09-28). The old quarantine (R213
+# B: rows in no pool, deleted once a slice was ruled, an empty file the healthy
+# state) ended with the shipped kits; the shipped sheets were deleted at
+# cleanup stage 6. A Balance kit's rows change on its `<kit>-next` branch, not
+# on main (operations/stage-gate.md). How to write a row:
+# docs/current/operations/prototype.md. Why each row reads as it does:
+# docs/notes/prototype-surface-provenance.md, by row id. Cut rows are deleted,
+# never left as a commented-out row.
 
 # THE KLEE OVERHAUL, SLICE ONE. Reachable rows, not staged ones: these ARE
 # Klee's starter and her whole pool. Why each row

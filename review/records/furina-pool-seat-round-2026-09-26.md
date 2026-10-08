@@ -1,6 +1,6 @@
 # Furina's supporting pool: seat round, 2026-09-26
 
-**Why this round:** a new card batch (the 29 of `review/active/furina-supporting-pool-2026-09-26.md`, built in #692 and #694, with art in #693). [USER] asked for "many Opus agents to test the deck at different points (acts 1 / 2 / 3, different deck strategies, etc)". The build was 0.2.3859+proto, at A0. Seven blind Opus seats played; their records are gitignored in `review/qa/seats-2026-09-26/furina-*.md`.
+**Why this round:** a new card batch (the 29 of `review/ruled/furina-supporting-pool-2026-09-26.md`, built in #692 and #694, with art in #693). [USER] asked for "many Opus agents to test the deck at different points (acts 1 / 2 / 3, different deck strategies, etc)". The build was 0.2.3859+proto, at A0. Seven blind Opus seats played; their records are gitignored in `review/qa/seats-2026-09-26/furina-*.md`.
 - Two seats played whole runs from Neow.
 - Five started from a deck the coordinator dressed for one plan (`skip_act` plus grants). Those runs are not comparable to anything (Guardrail-7).
 

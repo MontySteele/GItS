@@ -1,4 +1,4 @@
-Status: RULED, draft 4 amended (sec.8); sim read and full sheet for the build in sec.10 (2026-10-04)
+Status: SUPERSEDED 2026-10-05. Ruled and built, then frozen (tag `furina-stage-frozen-2026-10-04`) and replaced by the Salon's Tab (`review/active/furina-research-proposal-2026-10-05.md`). History only.
 
 # Furina: re-founding the Stage (paper, draft 4)
 

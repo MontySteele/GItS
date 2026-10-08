@@ -1,6 +1,6 @@
 ---
 name: land-pr
-description: Land a plumbing PR - check the CI runs, merge with --merge, purge the branch's worktree, fast-forward the main checkout, and handle the untracked-file trap that blocks the pull. Use only for a PR that is plumbing by CLAUDE.md's definition.
+description: Land a PR that asks nothing of [USER] - check the CI runs, merge with --merge, purge the branch's worktree, fast-forward the main checkout, and handle the untracked-file trap that blocks the pull. Use only for a PR that asks nothing of [USER] by CLAUDE.md's definition.
 ---
 
 # land-pr — check, merge, purge, fast-forward
@@ -14,17 +14,18 @@ python tools/land_pr.py <n> --no-purge    # keep the worktree
 Three lines back: what merged, what happened to the worktree, and where `main`
 now is.
 
-## Only for plumbing
+## Only for a PR that asks nothing of [USER]
 
 A PR is [USER]'s only when it carries an open pick for him, amends `LAW.md` or
 `EXPERIMENTS.md` text, or moves a shipped-sheet number or balance constant.
-Everything else is plumbing, and Claude lands it on green CI. That judgement is yours, not the
+Everything else is a PR that asks nothing of [USER], and Claude lands it on green CI. That judgement is yours, not the
 tool's; a [USER] PR is left open and said so.
 
 ## What it refuses, and why each refusal is real
 
-- **A check that is not green** (`pending` included) — named, with its
-  conclusion.
+- **A check that is not green** (`pending` included), or **no checks
+  reported at all** (an empty list is not green: #943 merged before its first
+  check began).
 - **A PR that is not `MERGEABLE`** — rebase or resolve first.
 - **An untracked file in the main checkout that DIFFERS from the incoming
   version.** This is the trap: a sitting writes a file in the main checkout, the

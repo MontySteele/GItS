@@ -8,8 +8,13 @@ commit message, the document the ruling changes is edited in place, and the
 line leaves this file. Closed picks are in git
 (`git show 2b73880a:docs/current/QUEUE.md` for the last copy in the old form).
 
-All fifteen picks of the 2026-09-23 design and process review were ruled at
-their defaults (R276, the last R number); nothing from them is open here.
+## [USER]'s merges (PRs that amend `LAW.md` or `EXPERIMENTS.md`)
+
+- **#929**, the ruled Balance measurement text (2026-10-05, "looks good to
+  me!"): `stage-gate.md`'s Balance paragraph and `EXPERIMENTS.md`'s kit-balance
+  section. Brought up to date with `main` on 2026-10-08 (conflict resolved), CI green.
+- **#966**, `LAW.md` wording: every reaction consumes its aura (the 2026-10-03
+  ruling), and reaction credit is damage only (Burst is gone).
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
@@ -22,11 +27,6 @@ their defaults (R276, the last R number); nothing from them is open here.
   `git show 762e94d9^:docs/animation-sprint-2-plan.md`.
 
 ## Open packets in `review/active/`
-
-
-
-
-
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).

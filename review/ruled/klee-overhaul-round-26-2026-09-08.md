@@ -1,4 +1,4 @@
-Status: OPEN (one A pick, §5, HELD behind the consolidated read R271 §3 orders; the defaults in §6 are applied)
+Status: CLOSED 2026-10-08. The held A pick was overtaken by the Klee passes that followed (status package, final pass, Balance on 2026-10-03); nothing waits on it. History only.
 
 # Klee round 26: the sinks work when the bank can pay, and the bank cannot pay on turn one
 
