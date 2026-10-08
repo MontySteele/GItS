@@ -213,8 +213,17 @@ python -m understudy.embark --teardown --coop --lanes 2,3     # client first
   gives up after 10 s. Both pick, the host alone takes `--ascension` (the
   lobby otherwise uses the host's saved level) and `--seed` if given, both
   confirm, and the embark waits until both bridges serve the run.
-- **One pair per machine.** The host binds UDP 33771, fixed in the game; the
-  embark refuses while the port is taken.
+- **One UDP port per pair, so several pairs per machine.** The game hosts and
+  dials a literal 33771; the bridge (`vendor/STS2_MCP/gits/GitsFastMpPort.cs`
+  and `GitsFastMpPortPatch.cs`) moves it per process when the game is launched
+  with `--gitsFastmpPort N`. The embark derives the port from the HOST lane
+  (lane 1 hosts on 33771 with no extra argument, lane N on 33770 + N), passes
+  it to both games, refuses while that port is taken, and refuses a pair whose
+  lobby does not read back that port (`lobby.fastmp_port`; an installed bridge
+  older than the patch serves none, so only a lane-1 pair runs on it). Two
+  pairs at once: `--lanes 1,2` and `--lanes 3,4`, each torn down by its own
+  `--teardown --coop --lanes`. Not yet proven live with two pairs up
+  (2026-10-08).
 - **Never resume a fastmp save.** `--fastmp load` looks the save up under the
   Steam id while the save names its players 1 and 1000; every co-op embark
   starts a fresh run.
@@ -223,8 +232,9 @@ python -m understudy.embark --teardown --coop --lanes 2,3     # client first
   held two each on 2026-09-27).
 - **What is written:** one sidecar per lane (`embark-<stamp>-laneN.json`, with
   a `coop` block; the lane readers and a single-lane `--teardown --lane N`
-  read it as usual) and `coop-<stamp>.json` with both lanes, the seed (read
-  off the host's `current_run_mp.save`) and both ascension read-backs.
+  read it as usual) and `coop-<stamp>-<host lane>.json` with both lanes, the
+  port, the seed (read off the host's `current_run_mp.save`) and both
+  ascension read-backs.
   `--keep-bridge` launches without refreshing `mods\STS2_MCP` (use it from a
   worktree carrying a bridge edit).
 - **The page.** Once the run is up, `/api/v1/singleplayer` answers 409 and

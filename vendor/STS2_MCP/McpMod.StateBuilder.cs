@@ -873,6 +873,10 @@ public static partial class McpMod
         }
         lobbyState["players"] = players;
         lobbyState["player_count"] = players.Count;
+        // GItS LOCAL EDIT (parallel co-op pairs, 2026-10-08). The UDP port this
+        // process last handed ENet (host bind or client dial), or null before
+        // any; `understudy/embark_coop.py` checks it against the pair's port.
+        lobbyState["fastmp_port"] = GitsFastMpPortPatch.BoundPort;
 
         if (!string.IsNullOrEmpty(lobby.Seed))
             lobbyState["seed"] = lobby.Seed;

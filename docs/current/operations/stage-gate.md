@@ -89,5 +89,7 @@ player and dependent on reactions in a way that makes co-op exponentially
 easier." The co-op check is a paired seat round on shared seeds: a kit pair
 whose elements react against a base pair (Ironclad + Silent), on the same bar.
 It runs on three shared seeds, once at a kit's finish line and after any reaction-rule change, not
-between card batches (2026-10-08, project review pick 2). One pair runs per machine (UDP 33771), so
-the six runs go one after another.
+between card batches (2026-10-08, project review pick 2). Each pair runs on its own UDP port
+(derived from its host lane, `understudy-seats.md`), so the kit pair and the base pair can run at
+the same time once the bridge carrying the port patch is deployed; until then the six runs go one
+after another.
