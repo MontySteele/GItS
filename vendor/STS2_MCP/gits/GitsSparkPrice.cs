@@ -37,6 +37,9 @@
 // `spark_price` and `spark_affordable`, and only when there is a price: an
 // ABSENT pair means "this card charges no Sparks", which is true of almost every
 // card in the game, and the observed board stays the size it was.
+// `spark_price` alone also rides on EVERY card row `BuildCardInfo` builds (shop
+// shelves as `card_spark_price`, rewards, choosers, piles; 2026-10-07): the
+// printed price needs no combat, and a shelf priced "cost 0" was the defect.
 //
 // READ-ONLY. Nothing here plays a card, spends a bank or mutates a model.
 
