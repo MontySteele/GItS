@@ -25,7 +25,6 @@ their defaults (R276, the last R number); nothing from them is open here.
 
 - **Klee to Balance: ruled yes** (2026-10-03); the round ran (`review/records/klee-prebalance-round-2026-10-04.md`) and she is at Balance in `STATE.md`. Her measurement plan comes to [USER] as a paper.
 
-- **Klee suite 4** (`review/records/klee-suite-4-2026-10-08.md`, three picks): (1) keep the build, act 2 now inside the bar, but turn one did not move; (2) a short turn-one paper next; (3) leftover powers stay registered. Defaults.
 
 
 
