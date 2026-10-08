@@ -66,7 +66,7 @@ change costs a player who already plays fast.
 **except Jumpy Dumpty**, the starter (starter basics are never changed
 without [USER]'s pick). The starter's own sum: Jumpy Dumpty's Bomb 8 cashed
 by Ka-pow! on turn one is 12 damage; held to turn three it is 16 under
-growth 2, against 20 today. Waiting still pays, but a third as much as it
+growth 2, against 20 today. Waiting still pays, but half as much as it
 does now, and the drafted placers at +2 and 3 Sparks in hand give turn one
 something to spend on.
 
