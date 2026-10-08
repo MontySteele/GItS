@@ -12,7 +12,6 @@ import random
 
 import pytest
 
-from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects
 from tier0.engine import varka_oath as V
@@ -21,13 +20,10 @@ from tier0.engine.state import CombatState, Enemy
 
 @pytest.fixture
 def varka():
-    saved = C.SWIRL_PAYS
-    C.SWIRL_PAYS = True
     loader.reset_arm_caches()
     try:
         yield
     finally:
-        C.SWIRL_PAYS = saved
         loader.reset_arm_caches()
 
 
