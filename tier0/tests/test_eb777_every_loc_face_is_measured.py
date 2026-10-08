@@ -97,7 +97,7 @@ def test_every_prototype_localization_row_is_measured():
 
 def test_every_shipped_localization_row_is_measured():
     """And on the report's, which is where the other eight were hiding."""
-    _counts_are_whole(lint.shipped_rows())
+    _counts_are_whole(lint.report_rows())
 
 
 def test_the_two_powers_that_were_invisible_are_counted_now():
@@ -111,6 +111,6 @@ def test_the_two_powers_that_were_invisible_are_counted_now():
     proto = {row.ident for row in lint.prototype_rows()}
     assert "PendingPlansPower.description" in proto
     assert "PendingPlansPower.descriptionCapped" in proto
-    shipped = {row.ident for row in lint.shipped_rows()}
+    shipped = {row.ident for row in lint.report_rows()}
     assert "AuraPower.description" in shipped
     assert "AuraPower.smartDescription" in shipped

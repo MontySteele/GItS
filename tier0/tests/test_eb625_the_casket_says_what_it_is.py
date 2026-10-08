@@ -148,7 +148,7 @@ def test_the_relic_and_the_tip_say_the_casket_counts():
         f"into Strength.")
     assert blindplay_notes.ARM_KEYWORDS["Open the Casket"] == (
         "1-cost, Retain. Gain Strength equal to the Casket's count, "
-        "then empty it.")
+        "then empty it. Upgraded, it also draws a card.")
     # Inside the 135-character mechanic-tip ceiling.
     assert len(page) <= 135
 

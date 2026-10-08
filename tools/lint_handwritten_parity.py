@@ -48,7 +48,6 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import gen_klee_cards as gen  # HAND_WRITTEN, pascal(), sheet paths
-from tools.effect_walk import iter_effects  # noqa: E402  (the shared walk)
 
 CARDS_DIR = gen.REPO / "klee-mod" / "KleeCode" / "Cards"
 
@@ -310,7 +309,6 @@ def extract_cs(text: str) -> dict:
         # both the visible aura badge and the board-aware preview helper.
         "pyro_aura_kw": "KleeKeywords.AppliesPyro" in text,
         "reaction_tips": "KleeCardTooltips.ForCard" in text and "Element.Pyro" in text,
-        "bomb_tips": "includesBombRules: true" in text,
         # Kit sprint: sheet `kit_card` + `requires: burst_energy_full` land as
         # the custom-resource cost, which supplies the full-meter gate (the
         # DRAIN moved onto the play hook, 2026-07-24 -- see BurstResource
@@ -898,19 +896,8 @@ def lint() -> int:
         if got["reaction_tips"] != exp_pyro_ui:
             fail(card_id, f"reaction previews: sheet catalyst Attack {exp_pyro_ui}, "
                           f"C# KleeCardTooltips/Element.Pyro {got['reaction_tips']}")
-        # L4: branch-aware, mirroring `gen_klee_cards.emit`'s
-        # `includes_bomb_rules` exactly -- both now walk the whole effect
-        # TREE. A branch-gated `place_bomb` (sparkly_explosion's kill
-        # conditional) still puts Bombs on the face, so it still owes the
-        # rules text; the two flat scans this replaced agreed with each other
-        # about the wrong answer, which is why the gate never caught it.
-        exp_bomb_tips = any(e.get("op") in {
-            "place_bomb", "detonate", "modify_bombs", "move_bombs",
-            "chance_bomb_per_detonation"
-        } for e in iter_effects(row.get("effects", [])))
-        if got["bomb_tips"] != exp_bomb_tips:
-            fail(card_id, f"Bomb tooltip: sheet Bomb mechanic {exp_bomb_tips}, "
-                          f"C# includesBombRules {got['bomb_tips']}")
+        # The Bomb tooltip check (L4, `includesBombRules`) left with the old
+        # shipped Bomb keyword in the text pass of 2026-10-08.
         exp_kit = bool(row.get("kit_card")) or bool(row.get("requires"))
         if got["kit_cost"] != exp_kit:
             fail(card_id, f"kit cost: sheet kit_card/requires {exp_kit}, "

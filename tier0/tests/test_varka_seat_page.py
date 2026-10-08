@@ -192,8 +192,8 @@ def test_the_page_glossary_defines_his_three_words():
     for word in ("Oath", "current element", "Knight"):
         assert f"- **{word}** — " in glossary, word
     assert ("- **Oath** — 1 Oath per element a card applies, plus 1 per "
-            "element it Swirls. Kept all fight. Element cards read their own; "
-            "others, the current.") in glossary
+            "element it Swirls. Kept all fight. Element cards read their own, "
+            "others the current.") in glossary
     for retired in ("Absorb", "Wind"):
         assert f"- **{retired}** — " not in glossary, retired
 

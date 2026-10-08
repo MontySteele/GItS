@@ -73,7 +73,7 @@ public class AoeTrimTests
         var face = Face(new ProtoMcDurinPrincipleOfPurity());
         Assert.Contains("{PowerAmount:diff()}", face);
         Assert.Contains("{IfUpgraded:show:75|50}%", face);
-        Assert.Contains("{IfUpgraded:show:6|4} more", face);
+        Assert.Contains("{IfUpgraded:show:6|4} additional damage", face);
         Assert.Equal(6m, Upgraded<ProtoMcDurinPrincipleOfPurity>()
             .DynamicVars["PowerAmount"].BaseValue);
         var play = Il.Calls(Il.Method("ProtoMcDurinPrincipleOfPurity", "OnPlay"));

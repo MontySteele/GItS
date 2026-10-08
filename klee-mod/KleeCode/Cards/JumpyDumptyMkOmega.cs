@@ -47,8 +47,8 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForBomb(
-            KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro,
-                                     includesBombRules: false), this);
+            KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro),
+            this);
 
     // Art: deliberate family reuse of the Mk.II portrait until the art pass
     // assigns the ancient its own crop (look-pass item, not a blocker).

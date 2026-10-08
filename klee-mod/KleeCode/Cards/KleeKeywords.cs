@@ -85,9 +85,8 @@ public static class KleeKeywords
     // Referenced-term tips. Auto=None keeps these out of rules text; cards
     // opt into them through ExtraHoverTips, including combat-aware reaction
     // previews that only appear while the matching aura is on the board.
-    [CustomEnum("bomb")]
-    [KeywordProperties(AutoKeywordPosition.None)]
-    public static CardKeyword Bomb;
+    // `Bomb`, the old shipped Bomb's keyword, left with the text pass of
+    // 2026-10-08: no card raised it.
 
     [CustomEnum("confiscated")]
     [KeywordProperties(AutoKeywordPosition.None)]

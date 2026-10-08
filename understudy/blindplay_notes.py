@@ -1516,14 +1516,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # `ForCurrentElement` and `ForKnight` word for word, markup folded out
     # and the payout numbers written out (`VarkaLaw`).
     "Oath": ("1 Oath per element a card applies, plus 1 per element it "
-             "Swirls. Kept all fight. Element cards read their own; others, "
+             "Swirls. Kept all fight. Element cards read their own, others "
              "the current."),
     "current element": ("The last Pyro, Hydro, Cryo or Electro you applied. "
                         "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
                         "Vulnerable, Electro 3 to ALL."),
-    "Knight": ("One of Varka's Companions. "
-               "Playing one makes its element your current element "
-               "(except Geo)."),
+    "Knight": ("One of Varka's Companions. Playing one makes its element "
+               "your current element. Geo does not."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -1546,7 +1545,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # `ArmKeywordTips.ForCasket` / `ForOpenTheCasket` word for word.
     "Tamakushi Casket": CASKET_ROW,
     "Open the Casket": ("1-cost, Retain. Gain Strength equal to the "
-                        "Casket's count, then empty it."),
+                        "Casket's count, then empty it. Upgraded, it also "
+                        "draws a card."),
     # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three
     # readers read any Companion play now, so the word and its row left the
@@ -1580,9 +1580,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # card the r7 run never held. The seat played Nightrider five times and
     # never learned what the word meant. Held in step with
     # `ArmKeywordTips.ForOz`.
-    "Oz": ("Fischl's raven, out while you hold the Power Oz, at Your Side. "
-           "He makes an Electro hit at the end of your turn while he is "
-           "out."),
+    "Oz": ("Fischl's raven. While you hold Oz, at Your Side, he makes an "
+           "Electro hit at the end of your turn."),
     # FURINA, THE STAGE (`EB-723`, R269). The reframe's three -- Deploy, Evoke
     # and Drain -- left this table with the eleven `proto_fr_` rows that
     # printed them: R213 B's deletion rule took the rows off the surface, and a
@@ -1612,8 +1611,9 @@ ARM_KEYWORDS: dict[str, str] = {
     "Spend": "Pay that much Fanfare. Offered only if you have enough.",
     "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It never "
                 "fades."),
-    "Drain": ("Lose that much HP. You can't go below half the HP you started "
-              "combat with. Drained HP returns when combat ends."),
+    "Drain": ("Lose N HP, never below half your HP at combat start. Lyney "
+              "and A Five-Century Act lower that line. Drained HP returns "
+              "after combat."),
     "Repay": ("Regain that much drained HP. It never returns more than you "
               "drained."),
     "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
@@ -2187,8 +2187,8 @@ BASE_KEYWORDS: dict[str, str] = {
     # page says so. Appended, so the C# twin's anchors still hold.
     "Vulnerable": (
         f"An attack or card hit on it deals {VULNERABLE_TAKEN_PCT}% more, a "
-        f"Skill's too. A potion's does not. One stack falls off at the end "
-        f"of each of its turns. Orb damage is not boosted."),
+        f"Skill's too. A potion's does not. Loses 1 stack at the end of its "
+        f"turn. Orb damage is not boosted."),
     # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
     # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
     # "the status line told me skills were safe and the card told me they were
@@ -2200,9 +2200,8 @@ BASE_KEYWORDS: dict[str, str] = {
     # says which, in the mod's own words -- this row and
     # `BaseKeywordTips.ForWeak` are one sentence, pinned to each other.
     "Weak": (
-        f"The wearer deals {WEAK_DEALT_PCT}% less damage with every hit it "
-        f"lands, a Skill's damage too. One stack falls off at the end of "
-        f"each of its turns."),
+        f"Every hit the wearer lands, a Skill's too, deals {WEAK_DEALT_PCT}% "
+        f"less. Loses 1 stack at the end of its turn."),
     "Frail": (
         f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
         f"off at the end of each of its turns."),
@@ -2423,10 +2422,10 @@ REACTION_KEYWORDS: dict[str, str] = {
     # clauses read as independent riders and are one, because the freeze ticks
     # down at the end of the turn the halved action is taken on.
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
-               "action deals 50% less damage. Until it acts, the next Attack "
-               "on it Shatters for 6 unblockable damage. In a boss fight, "
-               "only minions can be Frozen; the others become Vulnerable "
-               "instead."),
+               "action deals 50% less. Until it acts, an Attack on it "
+               "Shatters for 6 unblockable damage and ends the freeze. In a "
+               "boss fight, only minions can be Frozen; the others become "
+               "Vulnerable instead."),
     # `EB-465`'s two, and they are the mod's own preview sentences the way the
     # six above are. `Swirl` is `ARM_KEYWORDS`' row VERBATIM rather than a
     # second copy of it, because ten Universals print the word as a verb and

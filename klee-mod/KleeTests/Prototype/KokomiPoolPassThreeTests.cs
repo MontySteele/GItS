@@ -187,7 +187,8 @@ public class KokomiPoolPassThreeTests
         Assert.Contains("{Damage:diff()}", face);
         Assert.Contains("{ExtraDamage:diff()}", face);
         // [USER], 2026-09-30: the Plan draws 2, upgraded 3.
-        Assert.Contains("Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} cards.", face);
+        Assert.Contains("Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} "
+                        + "card{PlanCards:plural:|s}.", face);
         var source = Source("ProtoKkRiptide");
         Assert.Contains("new DamageVar(11m", source);
         Assert.Contains("new ExtraDamageVar(3m)", source);

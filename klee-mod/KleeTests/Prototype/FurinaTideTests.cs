@@ -600,8 +600,9 @@ public class FurinaTideTests
         string Body(string name) => (string)typeof(ArmKeywordTips)
             .GetField(name, HeadlessGame.All)!.GetRawConstantValue()!;
         Assert.Equal(
-            "Lose that much HP. You can't go below half the HP you started "
-            + "combat with. Drained HP returns when combat ends.",
+            "Lose N HP, never below half your HP at combat start. Lyney and "
+            + "A Five-Century Act lower that line. Drained HP returns after "
+            + "combat.",
             Body("DrainBody"));
         Assert.Contains("drained HP", Body("RepayBody"));
         Assert.Contains("[gold]Repay[/gold]", Body("FanfareBody"));

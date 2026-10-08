@@ -366,8 +366,9 @@ public class VarkaPrototypeTests : IDisposable
                 .Localization!.First(r => r.Item1 == key).Item2;
         Assert.Equal("Hydro Oath", Row(typeof(HydroOathPower), "title"));
         Assert.Equal("Oath", Row(typeof(UnswornOathPower), "title"));
-        Assert.EndsWith("\nOath: Pyro {PyroOath}, Hydro {HydroOath}, "
-                      + "Electro {ElectroOath}, Cryo {CryoOath}.",
+        Assert.EndsWith("\nOath: [gold]Pyro[/gold] {PyroOath}, "
+                      + "[gold]Hydro[/gold] {HydroOath}, [gold]Electro[/gold] "
+                      + "{ElectroOath}, [gold]Cryo[/gold] {CryoOath}.",
                         Row(typeof(CryoOathPower), "smartDescription"));
         Assert.StartsWith("Your [gold]current element[/gold] is Cryo. Your "
                         + "Swirls apply 1",
@@ -376,7 +377,7 @@ public class VarkaPrototypeTests : IDisposable
         // element identities round, 2026-10-01: "no current element yet"
         // read as no Oath while he held some).
         Assert.StartsWith("You have {TotalOath} [gold]Oath[/gold] but no "
-                        + "[gold]current element[/gold] yet.\nOath: Pyro",
+                        + "[gold]current element[/gold] yet.\nOath: [gold]Pyro[/gold]",
                           Row(typeof(UnswornOathPower), "smartDescription"));
     }
 

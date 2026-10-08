@@ -206,5 +206,7 @@ def test_the_face_and_the_power_tip_both_name_the_morning():
            / "gen_klee_cards.py").read_text(encoding="utf-8")
 
     assert face.startswith("At the start of your turn, ")
-    assert ('"At the start of your turn, the [gold]Bake-Kurage[/gold] "\n'
-            '        "carries out your first [gold]Plan[/gold] twice."') in gen
+    # The text pass of 2026-10-08 (rule 15): the first Plan "is carried out
+    # twice", the doer left to the Plan tip.
+    assert ('"At the start of your turn, your first [gold]Plan[/gold] is "\n'
+            '        "carried out twice.') in gen
