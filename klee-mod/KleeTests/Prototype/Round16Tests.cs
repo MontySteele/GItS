@@ -101,8 +101,7 @@ public class Round16Tests
         // not price it.
         Assert.Equal(
             "An attack or card hit on it deals 50% more, a Skill's too. A "
-          + "potion's does not. One stack falls off at the end of each of "
-          + "its turns.", body);
+          + "potion's does not. Loses 1 stack at the end of its turn.", body);
         // The tip a player hovers is inside the in-game box either way.
         //
         // NO LONGER ITS TWIN'S LENGTH, and that assertion is gone rather than

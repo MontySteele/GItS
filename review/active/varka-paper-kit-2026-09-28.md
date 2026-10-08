@@ -42,9 +42,9 @@ swears more of that element to his blade.
 
 ## 3. The rules
 
-- **Swirl** is the shared rule: an Anemo hit on a fresh aura leaves it on
-  that enemy, spent; spreads spent copies to every enemy lacking it; deals a
-  flat 2 to every enemy. A spent aura still reacts with a new element.
+- **Swirl** is the shared rule: an Anemo hit on an aura consumes it,
+  spreads fresh copies to the other enemies, and deals a flat 2 to
+  every enemy. (Amended 2026-10-03: there is no spent aura; `LAW.md`.)
 - **His current element** is the element of the last Knight he played, or
   of the last Pyro, Hydro, Cryo or Electro one of his other cards applied (or
   a card that says it changes it). The seat page and his status bar show it

@@ -1,8 +1,8 @@
-Status: BUILDING (Prototype pass; ruled 2026-09-27)
+Status: BUILT (Prototype pass; ruled 2026-09-27). History only.
 
 # Kokomi core pass, 2026-09-27
 
-This is pick 1a of `review/active/kokomi-design-review-2026-09-27.md`, which
+This is pick 1a of `review/ruled/kokomi-design-review-2026-09-27.md`, which
 was ruled at its defaults. [USER]: "Also - agreed on Kokomi's defaults." It
 changes eight cards and no rule. Her starter, Kurage's Oath included, is not
 touched.

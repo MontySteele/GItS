@@ -341,6 +341,25 @@ def test_land_pr_ignores_untracked_files_the_merge_would_not_touch(tmp_path):
     assert land.blocking_untracked("main", root) == ([], [])
 
 
+def test_land_pr_refuses_a_pr_with_no_checks_reported():
+    """#943 merged three seconds before its first check started: an empty
+    check list read as green. It refuses now, and so does a pending one."""
+    land = _module("land_pr")
+    base = {"state": "OPEN", "mergeable": "MERGEABLE",
+            "mergeStateStatus": "CLEAN"}
+    verdict, _ = land.check_verdict({**base, "checks": []})
+    assert verdict.startswith("REFUSED -- no checks reported")
+    verdict, _ = land.check_verdict({**base})
+    assert verdict.startswith("REFUSED -- no checks reported")
+    verdict, bad = land.check_verdict(
+        {**base, "checks": [("lints", "success"), ("pytest (1/4)", "")]})
+    assert verdict.startswith("REFUSED -- 1 check(s) not green")
+    assert bad == ["pytest (1/4)=pending"]
+    verdict, _ = land.check_verdict(
+        {**base, "checks": [("lints", "success"), ("sentinel", "skipped")]})
+    assert verdict == "GREEN"
+
+
 def test_land_pr_knows_the_main_checkout_from_a_worktree():
     land = _module("land_pr")
     primary = land.main_checkout()

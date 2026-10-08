@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Land a PLUMBING pull request: check CI, merge, purge the worktree, fast-forward.
+"""Land a PR that asks nothing of [USER]: check CI, merge, purge the worktree, fast-forward.
 
-THE RITUAL, AND THE TRAP IN IT. Landing a plumbing PR is five steps, four
+THE RITUAL, AND THE TRAP IN IT. Landing such a PR is five steps, four
 mechanical and one that has bitten twice in a week:
 
   1. read the merge state and every check run (a REST call, `gh api`);
@@ -27,10 +27,13 @@ with both hashes, because that is an unsaved change and no tool gets to guess.
     python tools/land_pr.py 297 --no-purge         # keep the worktree
     python tools/land_pr.py 297 --oneline
 
-REFUSES on a red or pending check, on a PR that is not mergeable, and -- always
--- if the merge would be anything but `--merge`. This lands PLUMBING only:
-CLAUDE.md's Norms define it (no card-sheet number, no balance constant, no LAW
-or EXPERIMENTS text, no design prose), and that judgement is the caller's.
+REFUSES on a red or pending check, on a PR with NO checks reported yet (#943
+merged three seconds before its first check started, and an empty list used to
+read as green), on a PR that is not mergeable, and -- always -- if the merge
+would be anything but `--merge`. This lands only a PR that asks nothing of
+[USER]: CLAUDE.md's Norms define the other kind (an open pick, LAW or
+EXPERIMENTS text, a shipped-sheet number or balance constant), and that
+judgement is the caller's.
 """
 from __future__ import annotations
 
@@ -103,6 +106,29 @@ def pr_state(gh: str, number: int) -> dict:
     return blob
 
 
+def check_verdict(pr: dict) -> tuple[str, list[str]]:
+    """`(verdict, not_green)` from a `pr_state` blob, before the untracked trap.
+
+    An EMPTY check list refuses: GitHub reports no check runs in the seconds
+    after a push or a PR opens, and "nothing reported" is not "all green".
+    """
+    bad = [f"{n}={c or 'pending'}" for n, c in pr.get("checks") or []
+           if c not in OK_CONCLUSIONS]
+    mergeable = pr.get("mergeable") == "MERGEABLE" and pr.get("state") == "OPEN"
+    if pr.get("state") != "OPEN":
+        return f"REFUSED -- PR is {pr.get('state')}", bad
+    if not pr.get("checks"):
+        return ("REFUSED -- no checks reported (CI has not started, or it is "
+                "still queued); wait and run again"), bad
+    if bad:
+        return (f"REFUSED -- {len(bad)} check(s) not green: "
+                f"{', '.join(bad)}"), bad
+    if not mergeable:
+        return (f"REFUSED -- not mergeable "
+                f"({pr.get('mergeStateStatus')}); rebase or resolve first"), bad
+    return "GREEN", bad
+
+
 def blocking_untracked(branch: str, root: Path) -> tuple[list[str], list[str]]:
     """`(identical, differing)` untracked files the incoming merge would touch.
 
@@ -150,19 +176,7 @@ def main(argv: list[str]) -> int:
     pr = pr_state(gh, args.number)
     branch = pr["headRefName"]
     root = main_checkout()
-    bad = [f"{n}={c or 'pending'}" for n, c in pr["checks"]
-           if c not in OK_CONCLUSIONS]
-    mergeable = pr.get("mergeable") == "MERGEABLE" and pr.get("state") == "OPEN"
-
-    lines: list[str] = []
-    verdict = "GREEN"
-    if pr.get("state") != "OPEN":
-        verdict = f"REFUSED -- PR is {pr.get('state')}"
-    elif bad:
-        verdict = f"REFUSED -- {len(bad)} check(s) not green: {', '.join(bad)}"
-    elif not mergeable:
-        verdict = (f"REFUSED -- not mergeable "
-                   f"({pr.get('mergeStateStatus')}); rebase or resolve first")
+    verdict, bad = check_verdict(pr)
 
     _git(["fetch", "origin", branch], cwd=root)
     same, different = blocking_untracked(branch, root)

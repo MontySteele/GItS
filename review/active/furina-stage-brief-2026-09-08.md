@@ -1,4 +1,4 @@
-Status: OPEN (picks 1-3 ruled R269; rules 5, 8 and the readers amended by R276; draft 3 rules (the Bow is the act, no Hydro acts, the fade) ruled 2026-09-25; the live Paper artefact through the Prototype build)
+Status: FROZEN 2026-10-05. The v1 Stage's brief; the build is at tag `furina-stage-frozen-2026-10-04`. Furina's current rules are the Salon's Tab, `review/active/furina-research-proposal-2026-10-05.md`. Kept in place because `tier0/tests/test_furina_seat_round_b_2026_09_25.py` reads it.
 
 # Furina — character brief, the Stage: draft 2
 
@@ -738,7 +738,7 @@ the Fanfare hits took from it since her last act, at least 2."
 
 ## 19. The rules pass (2026-10-01)
 
-Paper `review/active/furina-rules-pass-2026-10-01.md`, all picks ruled
+Paper `review/ruled/furina-rules-pass-2026-10-01.md`, all picks ruled
 ([USER], on the check-in: "she finally has a good design to stand around, but
 let's do a similar audit (rules, card pool, lore) to look for what we can
 improve upon"). Built in both engines.

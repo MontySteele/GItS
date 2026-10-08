@@ -35,8 +35,10 @@ Notes on individual lints:
 - `lint_text_conventions.py` checks every prototype-arm face, keyword tip,
   power badge, relic and prompt against the ceilings measured on the base
   game's own loc tables and the spellings `docs/current/text-conventions.md`
-  fixes, with a curated exception list. `--self-test`, `--shipped` (report the
-  shipped sheets without gating), `--census`.
+  fixes, with a curated exception list and a `DEFERRED` table for Klee rows
+  held for `klee-next`. `--self-test`, `--report` (the top-level badges and
+  relics, without gating), `--census` (lengths, with every string over its
+  target flagged).
 - `lint_recall_exhaust.py` (`EB-118`) is suite-gated through
   `tier0/tests/test_eb118_recall_exhaust.py`; its three sweeps and why leg (a)
   is vacuous are in its docstring.

@@ -1,6 +1,6 @@
 # Seat round: Varka after the rebalance (2026-10-03)
 
-The Varka rebalance (`review/active/varka-rebalance-2026-10-03.md`, #863) is
+The Varka rebalance (`review/ruled/varka-rebalance-2026-10-03.md`, #863) is
 a rule change and a new card batch: element cards read their own Oath
 whether or not it is current, four borrowing payoffs (Kindled Edge, Storm
 Battery, Frost Ward, Rippling Guard), Hydro's scaling Block, four distinct

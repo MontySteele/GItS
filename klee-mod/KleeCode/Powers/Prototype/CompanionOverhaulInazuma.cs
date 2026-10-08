@@ -201,7 +201,7 @@ public sealed class WarBannerPower : PowerModel, ILocalizationProvider
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}, then "
           + "takes it back."),
         ("smartDescription",
-            "You have [blue]{" + GrantedVar + "}[/blue] more "
+            "You have [blue]{" + GrantedVar + "}[/blue] additional "
           + "[gold]Dexterity[/gold]. "
           + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}, then "
           + "takes [blue]{" + GrantedVar + "}[/blue] back."),

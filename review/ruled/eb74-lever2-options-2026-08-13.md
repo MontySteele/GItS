@@ -1,4 +1,4 @@
-Status: OPEN (BACKLOG EB-74; merging staged/eb74-lever2-b-alone is the pull)
+Status: CLOSED 2026-10-08. `EB-74` has left BACKLOG and the sim does not gate kit balance (`EXPERIMENTS.md`, ruled 2026-10-05); nothing waits on this pick. History only.
 
 # EB-74 — Kokomi's lever 2: the candidates, side by side
 

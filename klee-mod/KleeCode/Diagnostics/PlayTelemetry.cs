@@ -280,6 +280,9 @@ internal static class PlayTelemetry
                     record.ReactionsAtStart = mine;
                 }
 
+                // A RUNNING TOTAL since combat start, not this turn's count:
+                // a reader takes the last entry (or `reactions_by_type`),
+                // never a sum of entries.
                 record.ReactionsByTurn.Add(new[]
                     { round, mine - record.ReactionsAtStart });
             }
@@ -321,6 +324,13 @@ internal static class PlayTelemetry
             record.MineDetonations = Math.Max(
                 record.MineDetonations,
                 ProtoBombPower.MineExplosionsThisCombat(combat, player));
+            // 2026-10-08. What the charges did and what set the Mines off.
+            record.BombReactions = Math.Max(
+                record.BombReactions,
+                ProtoBombPower.ReactingExplosionsThisCombat(combat, player));
+            record.MineDetonationsByAttack = Math.Max(
+                record.MineDetonationsByAttack,
+                ProtoBombPower.AttackMineExplosionsThisCombat(combat, player));
             record.CorpseDetonations = Math.Max(
                 record.CorpseDetonations,
                 BombPower.CorpseDetonationsThisCombat(combat, player));
@@ -1281,6 +1291,13 @@ internal static class PlayTelemetry
         public int Detonations;
         public int MineDetonations;
         public int CorpseDetonations;
+        /// <summary>2026-10-08. Klee-arm charges whose explosion set off an
+        /// Elemental Reaction (`bomb_reactions`); the seat's other reactions
+        /// came from its Attacks and element cards.</summary>
+        public int BombReactions;
+        /// <summary>2026-10-08. The Mines among `mine_detonations` that an
+        /// enemy's attack set off; the rest were Set off.</summary>
+        public int MineDetonationsByAttack;
         public int Act;
         public int Floor;
         public string Kind = "unknown";
@@ -1325,8 +1342,9 @@ internal static class PlayTelemetry
         /// card's hit from an element hit, a reaction, a pet or a Bomb.</summary>
         public readonly Dictionary<string, int> DamageByKind = new();
         /// <summary>2026-10-06. Reactions this seat resolved, by name
-        /// (<see cref="ReactionTally"/>; sums to the `reactions_by_turn`
-        /// total).</summary>
+        /// (<see cref="ReactionTally"/>; sums to at least the FINAL entry of
+        /// `reactions_by_turn`, which is a running total sampled at turn
+        /// open and so misses the last turn).</summary>
         public readonly Dictionary<string, int> ReactionsByType = new();
         /// <summary>2026-10-06. The amplifiers' share of the hits they
         /// multiplied, by reaction; written rounded to whole damage.</summary>
@@ -1525,6 +1543,9 @@ internal static class PlayTelemetry
               .Append(string.Join(",", HomeworkBombSize.Select(
                   n => n.ToString(CultureInfo.InvariantCulture))))
               .Append(']');
+            sb.Append(",\"bomb_reactions\":").Append(BombReactions);
+            sb.Append(",\"mine_detonations_by_attack\":")
+              .Append(MineDetonationsByAttack);
             sb.Append(",\"ts\":").Append(
                 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0)
                     .ToString("F3", CultureInfo.InvariantCulture));

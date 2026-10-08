@@ -6494,10 +6494,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # prints it carries the definition.
         # `EB-720`: the hit names its element, so the anchors are the halves
         # either side of the `[gold]Electro[/gold]` span.
-        "Oz": ["Fischl's raven, out while you hold the Power Oz, at Your "
-               "Side. ",
-               "He makes an ",
-               " hit at the end of your turn while he is out."],
+        # The text pass of 2026-10-08 trimmed it to two sentences.
+        "Oz": ["Fischl's raven. While you hold Oz, at Your Side, he makes an ",
+               " hit at the end of your turn."],
         # FURINA, THE STAGE, RE-FOUNDED (2026-10-04,
         # review/active/furina-refounding-2026-10-03.md): one Fanfare number
         # on Furina, no bars, stars pay for their acts, Cue and Rehearsal
@@ -6508,9 +6507,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
                     " uses it. It never fades."],
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
-        "Drain": ["Lose that much HP. You can't go below half the HP you "
-                  "started ", "combat with. Drained HP returns when combat "
-                  "ends."],
+        # The text pass of 2026-10-08: the clause on what moves the line.
+        "Drain": ["Lose N HP, never below half your HP at combat start. Lyney "
+                  "and ", "A Five-Century Act lower that line. Drained HP "
+                  "returns after ", "combat."],
         "Repay": ["Regain that much drained HP. It never returns more than "
                   "you ", "drained."],
         "Summon": ["A guest joins at the back. On a full stage, the oldest "
@@ -6534,7 +6534,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # And the relic's token, named by What the Tokoyo Returns.
         "Open the Casket": ["1-cost, Retain. Gain ",
                             " equal to the ",
-                            "Casket's count, then empty it."],
+                            "Casket's count, then empty it. Upgraded, it "
+                            "also draws a card."],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then
@@ -6560,11 +6561,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Oath": ["1 Oath per element a card applies, plus 1 per element "
                  "it ",
                  ". Kept all fight. Element cards read their "],
-        "current element": ["The last Pyro, Hydro, Cryo or Electro you "
-                            "applied. "],
-        "Knight": ["One of Varka's Companions. ",
-                   "Playing one makes its element your current element "
-                   "(except Geo)."],
+        # The text pass of 2026-10-08 golded the elements on the C# side, so
+        # the anchors are the prose between them.
+        "current element": [" you applied. Swirls pay it: "],
+        "Knight": ["One of Varka's Companions. Playing one makes its element "
+                   "your ", "current element. ", " does not."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces
@@ -7398,8 +7399,11 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         "Electro-Charged": ["reacted enemy gains ", "Poison"],
         # `EB-517` put the WINDOW on this row, in the C# and here in one
         # commit, so the anchor holds the clause that says when it closes.
-        "Frozen": ["ts next action deals 50% less damage. Until it acts, the "
-                   "next Attack on it Shatters for "],
+        # The text pass of 2026-10-08: a Shatter ends the freeze (BACKLOG
+        # line 51), said on both sides.
+        "Frozen": ["ts next action deals 50% less. Until it acts, an Attack "
+                   "on it Shatters for ", " unblockable damage and ends the "
+                   "freeze."],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         # The element port (2026-09-28) moved both, in the C# and here, and
@@ -7418,10 +7422,10 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
             assert phrase in src, (word, phrase)
             assert phrase in blindplay.REACTION_KEYWORDS[word], (word, phrase)
     # `EB-366`, then 2026-09-29: the boss rule is one sentence on the Frozen
-    # row, the C#'s own words (its preview says it with the keyword golded).
-    assert "bosses can't be Frozen" in src
-    assert ("In a boss fight, only minions can be Frozen; the others become "
-            in src)
+    # row. The text pass of 2026-10-08 moved it off the mod's main preview
+    # onto the boss preview, which the mod swaps in for any non-minion in a
+    # boss room; the page has no swap, so its row keeps the sentence.
+    assert "a non-minion can't be Frozen" in src
     assert (blindplay.FROZEN_BOSS_CLAUSE.strip()
             in blindplay.REACTION_KEYWORDS["Frozen"])
     # The interpolated constants, read off the table the C# interpolates from.
@@ -8874,7 +8878,7 @@ def test_a_base_keyword_a_face_names_is_defined_on_the_page():
     glossary = page.split("## Words on this screen")[1]
     assert ("- **Vulnerable** — An attack or card hit on it deals 50% more"
             in glossary)
-    assert "falls off at the end of each of its turns" in glossary
+    assert "Loses 1 stack at the end of its turn" in glossary
     # And the Plan tip is still there: two words, two definitions.
     assert "- **Plan** — " in glossary
 
@@ -8928,15 +8932,16 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-523` then put the ATTACK back in, for the side of the board
         # `EB-497` did not read: "every card hit" is complete on an enemy and
         # silent on a player, whose Vulnerable is about a monster's swing.
+        # The text pass of 2026-10-08 trimmed it, enemy hits still in scope.
         "Vulnerable": ["An attack or card hit on it deals 50% more, a Skill's "
-                       "too. A ", "potion's does not. One stack falls off at "
-                       "the end of each of ", "its turns."],
+                       "too. A ", "potion's does not. Loses 1 stack at the end "
+                       "of its turn."],
         # `EB-469` put the Skill case in this sentence, in the C# and here in
         # one commit, so the anchor holds the clause that resolves the game's
         # own "Attacks".
-        "Weak": ["The wearer deals 25% less damage with every hit it lands, a ",
-                 "Skill's damage too. One stack falls off at the end of each ",
-                 "of its turns."],
+        # The text pass of 2026-10-08 trimmed it, the Skill case kept.
+        "Weak": ["Every hit the wearer lands, a Skill's too, deals 25% less. ",
+                 "Loses ", "1 stack at the end of its turn."],
         # The two rows whose clause straddles a `[gold]` span are anchored
         # WITH the markup and folded out on the page side, the same way the
         # arm table's interpolated numerals are.
@@ -10390,7 +10395,7 @@ def test_a_klee_run_reads_the_rule_in_full():
     """The other side, and the reason the row exists at all: on the run whose
     kit the word belongs to, nothing about it has changed."""
     page = blindplay.observe(_fischl_shop_state("Klee"))
-    assert "- **Oz** — Fischl's raven, out while you hold the Power" in page
+    assert "- **Oz** — Fischl's raven. While you hold Oz" in page
 
 
 def test_a_feed_that_does_not_say_who_is_playing_keeps_the_rule():

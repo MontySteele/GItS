@@ -1,4 +1,4 @@
-Status: FOR REVIEW. [USER], Fable and GPT, before [USER]'s playtest of build 0.2.4376.
+Status: CLOSED 2026-10-05, not for review. v2 was discarded for the Salon's Tab (`review/active/furina-research-proposal-2026-10-05.md`). History only.
 
 # Furina v2, the re-founded Stage: review packet
 
@@ -8,7 +8,7 @@ passes, to a full build in the mod, to a blind two-seat round. This packet
 covers what was built, why, and what the evidence says, and ends in
 questions for the reviewers.
 - **Every claim names its source.** The ruled paper is
-  `review/active/furina-refounding-2026-10-03.md` (sec.10 is the full sheet).
+  `review/ruled/furina-refounding-2026-10-03.md` (sec.10 is the full sheet).
   The seat record is `review/records/furina-v2-round-2026-10-04.md`. The
   built rows are in `docs/prototype-surface.yaml`.
 - **The old build is kept** at git tag `furina-stage-frozen-2026-10-04`.

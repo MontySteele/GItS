@@ -26,7 +26,9 @@ from understudy.blindplay_read import (_blob, _entity_id, _fold, _int,
                                        _listing, _number_names, _relics,
                                        _screen, _text)
 from understudy.blindplay_shape import (HAZARD_EVENT_TITLES, HAZARD_EVENTS,
-                                        INSTANT_GUARDED_HAZARDS)
+                                        INSTANT_GUARDED_HAZARDS,
+                                        drop_state, lane_state_dir, lane_tag,
+                                        migrated, write_atomic)
 
 
 def relic_faces(state: dict[str, Any]) -> list[dict[str, str]]:
@@ -845,13 +847,45 @@ def deck_elements(state: dict[str, Any]) -> list[str]:
 # lane's deck answering the other's Smith screen would be worse than no answer.
 # The variable is read raw and scrubbed to a filename rather than resolved
 # through `instances`, which this module does not import.
-_DECK_STORE_DIR = Path(__file__).resolve().parent / "logs"
+#
+# 2026-10-08: the files live in the LANE's state folder
+# (`blindplay_shape.lane_state_dir`), not this checkout's `understudy/logs`,
+# so a seat that runs from another checkout keeps its lane's memory. The old
+# location is read once where the new file is missing (`migrated`).
+# `_DECK_STORE_DIR` / `_FIGHT_STORE_DIR` are the tests' seam: set, every
+# lane's files go in that one folder under the old names.
+_DECK_STORE_DIR: Path | None = None
 _DECK_MEMORY: dict[str, Any] = {}
 
 
-def _deck_store() -> Path:
+def _legacy_name(kind: str) -> str:
+    """The file name the old store used: the lane read raw, scrubbed."""
     lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
-    return _DECK_STORE_DIR / f"_blindplay-deck-lane{lane}.json"
+    return f"_blindplay-{kind}-lane{lane}.json"
+
+
+def _lane_store(kind: str, override: Path | None) -> Path:
+    if override is not None:
+        return override / _legacy_name(kind)
+    return lane_state_dir() / f"_blindplay-{kind}-lane{lane_tag()}.json"
+
+
+def _read_store(kind: str, override: Path | None) -> Any:
+    """The JSON a lane store holds (old location read once), or raise."""
+    path = migrated(_lane_store(kind, override), _legacy_name(kind))
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _write_store(kind: str, override: Path | None, row: Any) -> None:
+    write_atomic(_lane_store(kind, override), json.dumps(row))
+
+
+def _drop_store(kind: str, override: Path | None) -> None:
+    drop_state(_lane_store(kind, override), _legacy_name(kind))
+
+
+def _deck_store() -> Path:
+    return _lane_store("deck", _DECK_STORE_DIR)
 
 
 def _held_deck() -> dict[str, Any]:
@@ -861,9 +895,8 @@ def _held_deck() -> dict[str, Any]:
     session that renders every screen in one process and a seat that spawns a
     process per call have to see the same deck.
     """
-    store = _deck_store()
     try:
-        held = json.loads(store.read_text(encoding="utf-8"))
+        held = _read_store("deck", _DECK_STORE_DIR)
     except (OSError, ValueError):
         held = _DECK_MEMORY
     return held if isinstance(held, dict) and held.get("cards") else {}
@@ -872,11 +905,7 @@ def _held_deck() -> dict[str, Any]:
 def forget_deck() -> None:
     """Drop the remembered deck. The operator's reset, and the tests'."""
     _DECK_MEMORY.clear()
-    store = _deck_store()
-    try:
-        store.unlink()
-    except OSError:
-        pass
+    _drop_store("deck", _DECK_STORE_DIR)
 
 
 def remember_deck(state: dict[str, Any]) -> None:
@@ -1019,11 +1048,8 @@ def _keep_deck(state: dict[str, Any], player: dict[str, Any],
            "floor": _int(_blob(state, "run").get("floor"))}
     _DECK_MEMORY.clear()
     _DECK_MEMORY.update(row)
-    try:
-        _DECK_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        _deck_store().write_text(json.dumps(row), encoding="utf-8")
-    except OSError:
-        pass                       # a read-only tree still gets the in-process copy
+    # A read-only tree still gets the in-process copy.
+    _write_store("deck", _DECK_STORE_DIR, row)
 
 
 def remembered_deck(state: dict[str, Any]) -> dict[str, Any]:
@@ -1078,13 +1104,12 @@ _ARM_MEMORY: dict[str, Any] = {}
 
 
 def _arm_store() -> Path:
-    lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
-    return _DECK_STORE_DIR / f"_blindplay-arm-lane{lane}.json"
+    return _lane_store("arm", _DECK_STORE_DIR)
 
 
 def _held_arm() -> dict[str, Any]:
     try:
-        held = json.loads(_arm_store().read_text(encoding="utf-8"))
+        held = _read_store("arm", _DECK_STORE_DIR)
     except (OSError, ValueError):
         held = _ARM_MEMORY
     return held if isinstance(held, dict) and "live" in held else {}
@@ -1093,10 +1118,7 @@ def _held_arm() -> dict[str, Any]:
 def forget_stage_arm() -> None:
     """Drop the remembered arm. The operator's reset, and the tests'."""
     _ARM_MEMORY.clear()
-    try:
-        _arm_store().unlink()
-    except OSError:
-        pass
+    _drop_store("arm", _DECK_STORE_DIR)
 
 
 def stage_arm(state: dict[str, Any], live: bool | None) -> bool | None:
@@ -1121,11 +1143,8 @@ def stage_arm(state: dict[str, Any], live: bool | None) -> bool | None:
            "floor": floor}
     _ARM_MEMORY.clear()
     _ARM_MEMORY.update(row)
-    try:
-        _DECK_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        _arm_store().write_text(json.dumps(row), encoding="utf-8")
-    except OSError:
-        pass                       # a read-only tree still gets the in-process copy
+    # A read-only tree still gets the in-process copy.
+    _write_store("arm", _DECK_STORE_DIR, row)
     return bool(live)
 
 
@@ -1163,13 +1182,12 @@ _RUN_MEMORY: dict[str, Any] = {}
 
 
 def _run_store() -> Path:
-    lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
-    return _DECK_STORE_DIR / f"_blindplay-run-lane{lane}.json"
+    return _lane_store("run", _DECK_STORE_DIR)
 
 
 def _held_run() -> dict[str, Any]:
     try:
-        held = json.loads(_run_store().read_text(encoding="utf-8"))
+        held = _read_store("run", _DECK_STORE_DIR)
     except (OSError, ValueError):
         held = _RUN_MEMORY
     return held if isinstance(held, dict) and held.get("here") else {}
@@ -1178,10 +1196,7 @@ def _held_run() -> dict[str, Any]:
 def forget_run() -> None:
     """Drop the run ledger. The operator's reset, and the tests'."""
     _RUN_MEMORY.clear()
-    try:
-        _run_store().unlink()
-    except OSError:
-        pass
+    _drop_store("run", _DECK_STORE_DIR)
 
 
 #: `EB-676`, the bridge half. The one key that says whether the HP figure on a
@@ -1364,11 +1379,7 @@ def run_change(state: dict[str, Any]) -> dict[str, Any]:
            "character": _text(_blob(state, "player").get("character"))}
     _RUN_MEMORY.clear()
     _RUN_MEMORY.update(row)
-    try:
-        _DECK_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        _run_store().write_text(json.dumps(row), encoding="utf-8")
-    except OSError:
-        pass
+    _write_store("run", _DECK_STORE_DIR, row)
     return dict(change)
 
 
@@ -1445,7 +1456,7 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 # screen in one process and a seat that spawns a process per call have to see
 # the same numbers. Sets are stored as sorted lists because JSON has no set;
 # the in-process dict is the working copy and the file is the truth.
-_FIGHT_STORE_DIR = Path(__file__).resolve().parent / "logs"
+_FIGHT_STORE_DIR: Path | None = None
 #
 # `EB-672` ADDED THE LAST THREE KEYS: `hp` is the HP each live key was last
 # seen at, `reborn` counts how many times a combat id has been handed to a NEW
@@ -1464,8 +1475,7 @@ _FIGHT_LOADED = [False]
 
 
 def _fight_store() -> Path:
-    lane = re.sub(r"[^A-Za-z0-9]", "", os.environ.get("GITS_LANE", "")) or "0"
-    return _FIGHT_STORE_DIR / f"_blindplay-fight-lane{lane}.json"
+    return _lane_store("fight", _FIGHT_STORE_DIR)
 
 
 def _load_fight() -> None:
@@ -1474,7 +1484,7 @@ def _load_fight() -> None:
         return
     _FIGHT_LOADED[0] = True
     try:
-        held = json.loads(_fight_store().read_text(encoding="utf-8"))
+        held = _read_store("fight", _FIGHT_STORE_DIR)
     except (OSError, ValueError):
         return
     if not isinstance(held, dict):
@@ -1525,11 +1535,7 @@ def _save_fight() -> None:
            "elements": sorted(_FIGHT_MEMORY["elements"]),
            "briefed": sorted(_FIGHT_MEMORY["briefed"]),
            "round": _FIGHT_MEMORY["round"]}
-    try:
-        _FIGHT_STORE_DIR.mkdir(parents=True, exist_ok=True)
-        _fight_store().write_text(json.dumps(row), encoding="utf-8")
-    except OSError:
-        pass
+    _write_store("fight", _FIGHT_STORE_DIR, row)
 
 
 def forget_fight() -> None:
@@ -1549,10 +1555,7 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["shown"] = {}
     _FIGHT_MEMORY["briefed"] = set()
     _FIGHT_LOADED[0] = True
-    try:
-        _fight_store().unlink()
-    except OSError:
-        pass
+    _drop_store("fight", _FIGHT_STORE_DIR)
 
 
 def briefed_this_fight() -> set[str]:

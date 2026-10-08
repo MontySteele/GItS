@@ -64,6 +64,10 @@ capped by how often fresh auras arrive, and that is capped by the
 second-element source. Repeated hits (Navia acting twice, a multi-hit Varka)
 cannot loop.
 
+*Reversed 2026-10-03.* There is no spent aura: every reaction consumes its
+aura, Swirl and Crystallize included (`LAW.md`, the aura rule;
+`tier0/engine/reactions.py:6-9`).
+
 ## 4. The two changes
 
 **A. Swirl pays for itself.** An Anemo hit on a fresh aura:
@@ -99,6 +103,10 @@ and leaves the aura standing, now spent.
 Shards and constructs you spend down belong in a Geo character's kit, the way
 Bombs are Klee's and not Pyro's. The round has to test Navia with Tide of
 Applause: Block, Fanfare and a kept aura all at once.
+
+*Reversed 2026-10-03.* Crystallize consumes the aura like every reaction; the
+`CrystallizeKeepsAura` switch is gone (`LAW.md`, the aura rule;
+`klee-mod/Directory.Build.props`).
 
 ## 5. Enemies (to keep the view broad; not this phase)
 

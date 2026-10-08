@@ -1,7 +1,7 @@
 # Varka combo-pass seat round, 2026-10-05
 
 **What ran.**
-- Build 0.2.4423, the combo pass (`review/active/varka-combo-pass-2026-10-04.md`):
+- Build 0.2.4423, the combo pass (`review/ruled/varka-combo-pass-2026-10-04.md`):
   - five Block cards cut;
   - Baron Bunny hits a random enemy;
   - Pyro gets Exhaust;

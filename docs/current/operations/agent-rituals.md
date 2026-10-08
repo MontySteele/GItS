@@ -16,7 +16,7 @@ page.
 | run the gates | `tools/gates.py` | `gates` | ~400 lines of pytest / lint / dotnet output → one line per gate plus the failing test names; the rest goes to `.gates/<stamp>.log` |
 | open a worktree | `tools/agent_worktree.py` | `agent-worktree` | the fetch + add + `local.props` copy, and re-deriving CLAUDE.md's read order for the task by hand |
 | open a PR | `tools/open_pr.py` | `open-pr` | the `gh` full path, the mandatory footer, and a paragraph of output for one number |
-| land a plumbing PR | `tools/land_pr.py` | `land-pr` | the check-run read, the merge, the purge, the fast-forward, and the untracked-file trap that stopped two lands this week |
+| land a PR that asks nothing of [USER] | `tools/land_pr.py` | `land-pr` | the check-run read, the merge, the purge, the fast-forward, and the untracked-file trap that stopped two lands this week |
 | run a blind seat | `tools/seat.py` | `seat` | the three commands, `GITS_LANE`, `GITS_LOCAL_PLAY_TOKENS=12000`, and a teardown that runs even when the session fails |
 | deploy a round | `tools/deploy_round.py` | `deploy-round` | the pck-staleness decision (mtimes against two trees `git status` cannot see) and the three verification lines read off disk |
 

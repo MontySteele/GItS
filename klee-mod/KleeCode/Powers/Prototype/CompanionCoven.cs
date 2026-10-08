@@ -77,8 +77,12 @@ public sealed class HexhunterChimePower : PowerModel, ILocalizationProvider
     {
         ("title", "Hexhunter Chime"),
         ("description",
-            "The next [gold]Bomb[/gold] you set off this turn deals the "
-          + "swirled element instead of [gold]Pyro[/gold]."),
+            // The text pass of 2026-10-08: any explosion spends the rider
+            // (`CompanionCovenBombs.ElementFor`, from `ProtoBombPower.Explode`),
+            // so the face says "goes off", the event, not the Set off verb.
+            "The next [gold]Bomb[/gold] that goes off this turn deals the "
+          + "element of your last [gold]Swirl[/gold] instead of "
+          + "[gold]Pyro[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

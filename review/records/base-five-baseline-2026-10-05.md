@@ -12,6 +12,8 @@
 | Necrobinder | YEWA0B7AVE45 | 17/66, 1/66 | lost, floor 46, Mecha Knight elite | four hard fights in a row with no rest or shop, then a 40 hit at 6 HP |
 | Regent | R41TX5Q0ZQYN | 42/92, 6/102 | lost, floor 48, Aeonglass (306/512 left) | no steady Block; Wither cards clogged the deck; Conqueror+ into Artifact |
 
+**The five counted runs, by telemetry `run_instance`** (115 fight rows; grade against these with `tools/telemetry_report.py --baseline-run-instance`, not a date window): Ironclad `20261005-105504#0`, Necrobinder `20261005-105505#0`, Silent `20261005-105508#0`, Defect `20261005-105510#0`, Regent `20261005-113940#0`. Other base rows from 2026-10-05 are not this round: the stopped reduced-pool attempt (`20261005-1032xx`), earlier Ironclad runs on seed PPW4N6WX70LS (`20261005-0031xx`, `-0151xx`) and a second Ironclad run on 30KMHAVG9SMQ (`20261005-125503#0`).
+
 Every run ended in act 3, four of them at the final boss. Every act ended with the seat low: across the ten act-1 and act-2 finishes, the median HP was about 30% of max, and three were under 10%. The Ancients' heals kept the runs alive into acts 2 and 3. **A0 is not too easy for Sonnet,** so raising ascension would add no signal yet.
 
 The pattern repeats the effort test (`sonnet-effort-test-2026-10-05.md`): the seats race damage instead of blocking, and the bill comes at the boss. Two decision faults recur:
@@ -41,7 +43,7 @@ The pattern repeats the effort test (`sonnet-effort-test-2026-10-05.md`): the se
 | Regent | 323 | 610k | 33.2M | 140k / 235k / 243k | 2.42M |
 | **All five** | 1,734 | 2.89M | 175M | | **12.4M** |
 
-The fresh-input equivalent counts cache reads at 1/20 and writes at 1.25. As in the effort test, cache reads are about 95% of the cost.
+The fresh-input equivalent counts cache reads at 1/20 and writes at 1.25: reads come to 8.75M and writes to 3.61M, so reads are about 71% of the cost and writes about 29%.
 
 ## Next
 

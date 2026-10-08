@@ -30,7 +30,14 @@ lane filled in and runs nothing. Before the brief, on stderr so the pasted
 stdout stays the brief alone, it prints the embark command the coordinator
 runs first, with an explicit `--max-actions` (120 for an Opus seat by default;
 `--max-actions 1500` for a Sonnet seat). `--scratch DIR` adds the seat's own
-notes path, `DIR/seat-lane<N>/notes.md`, to the line that names the lane.
+notes path, `DIR/seat-lane<N>/notes.md`, to the line that names the lane, and
+(2026-10-08) writes two lane scripts into that folder -- `o` (observe --brief)
+and `a` (act --brief) -- with the lane, the absolute interpreter, `--brief`
+and a `cd` to this repo root baked in, and the brief itself as
+`brief-lane<N>.md`, UTF-8 with LF line ends. The brief's lane line names the
+scripts. 21 of 43 seat transcripts on 2026-10-06/07 showed a failed command
+after the seat had changed directory; 35 of 37 seats wrote such a wrapper for
+themselves, and one shared wrapper drove another seat's lane.
 That is for the OTHER kind of seat -- an Opus
 subagent playing by hand through `blindplay observe` / `act` -- where the thing
 that must not be re-improvised is the blindness rules, not the commands.
@@ -127,7 +134,8 @@ COOP_HEADING = "\n## CO-OP"
 
 #: The action cap an Opus seat's embark gets when the coordinator names none.
 #: `embark --max-actions` defaults to 0 (no cap), and a hand-driven seat once
-#: ran 279 actions on it. The brief's own budget paragraph says 120.
+#: ran 279 actions on it. The brief tells the seat its cap is the lane's own,
+#: printed on every page, so this number is set in one place.
 OPUS_MAX_ACTIONS = 120
 #: What a backend seat's session is capped at when the coordinator names none.
 BACKEND_MAX_ACTIONS = 60
@@ -139,6 +147,40 @@ def notes_path(scratch: str, lane: int) -> str:
     file once held an earlier seat's notes; one folder per lane is the
     brief's own rule, with the path filled in."""
     return (PurePath(scratch) / f"seat-lane{lane}" / "notes.md").as_posix()
+
+
+def lane_scripts(lane: int) -> dict[str, str]:
+    """The seat's two lane scripts, `o` and `a`, as bash text. Each `cd`s to
+    the repo root this tool runs from, so a seat that has changed directory
+    still runs this checkout's bridge; the lane and `--brief` are fixed, and
+    the interpreter is the absolute one the brief names (`EB-678`)."""
+    root = PurePath(REPO).as_posix()
+    py = interpreter()
+    head = ("#!/usr/bin/env bash\n"
+            f"# Lane {lane} seat script, written by tools/seat.py. "
+            "Do not edit.\n"
+            f'cd "{root}" || exit 1\n'
+            f"export GITS_LANE={lane} PYTHONIOENCODING=utf-8\n")
+    return {
+        "o": head + f'exec {py} -m understudy.blindplay observe --brief "$@"\n',
+        "a": head + f'exec {py} -m understudy.blindplay act --brief "$@"\n',
+    }
+
+
+def write_lane_scripts(scratch: str, lane: int) -> list[Path]:
+    """Write `o` and `a` into `<scratch>/seat-lane<N>/`, LF line ends."""
+    folder = Path(notes_path(scratch, lane)).parent
+    folder.mkdir(parents=True, exist_ok=True)
+    out = []
+    for name, text in lane_scripts(lane).items():
+        path = folder / name
+        path.write_bytes(text.encode("utf-8"))
+        try:
+            path.chmod(0o755)
+        except OSError:
+            pass
+        out.append(path)
+    return out
 
 
 def embark_line(lane: int, character: str, max_actions: int,
@@ -174,8 +216,14 @@ def brief_text(lane: int, character: str, coop: bool = False,
     head = f"You are the blind seat for **{character}** on lane {lane}."
     if scratch:
         notes = notes_path(scratch, lane)
-        head += (f" Your scratch folder is `{PurePath(notes).parent.as_posix()}`"
-                 f" and your notes file is `{notes}`.")
+        folder = PurePath(notes).parent.as_posix()
+        head += (f" Your scratch folder is `{folder}`"
+                 f" and your notes file is `{notes}`."
+                 f" Play through your two lane scripts, which carry your lane,"
+                 f" the interpreter, `--brief` and the repo folder:"
+                 f" `bash {folder}/o` to observe (`bash {folder}/o --define"
+                 f' "<Word>"` for a definition) and'
+                 f' `bash {folder}/a "<command>"` to act.')
     return f"{head}\n{body.rstrip()}\n"
 
 
@@ -230,9 +278,22 @@ def main(argv: list[str]) -> int:
                 print(f"  WARNING: {notes.as_posix()} already exists (an "
                       f"earlier seat's notes?); move it before this seat "
                       f"starts.", file=sys.stderr)
+        text = brief_text(args.lane, args.character, coop=args.coop,
+                          scratch=args.scratch)
+        if args.scratch:
+            for path in write_lane_scripts(args.scratch, args.lane):
+                print(f"  wrote {path.as_posix()}", file=sys.stderr)
+            brief = (Path(notes_path(args.scratch, args.lane)).parent.parent
+                     / f"brief-lane{args.lane}.md")
+            brief.write_bytes(text.encode("utf-8"))
+            print(f"  wrote {brief.as_posix()} (UTF-8, LF)", file=sys.stderr)
         print(file=sys.stderr)
-        print(brief_text(args.lane, args.character, coop=args.coop,
-                         scratch=args.scratch))
+        # UTF-8 with LF, whatever the console's code page: a coordinator who
+        # redirected this in PowerShell got cp1252 with CRLF (an em dash came
+        # out as byte 0x97).
+        sys.stdout.flush()
+        sys.stdout.buffer.write((text + "\n").encode("utf-8"))
+        sys.stdout.flush()
         return 0
     if args.max_actions is None:
         args.max_actions = BACKEND_MAX_ACTIONS

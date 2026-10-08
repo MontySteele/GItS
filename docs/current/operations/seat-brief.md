@@ -1,7 +1,7 @@
-# Seat brief — the blindness rules for an Opus tester on a lane
+# Seat brief — the blindness rules for a blind seat on a lane
 
-This page is the text a coordinator PASTES to an Opus subagent taking a blind
-seat. `python tools/seat.py --opus-brief --lane N --character X` prints it with
+This page is the text a coordinator PASTES to a subagent taking a blind seat.
+`python tools/seat.py --opus-brief --lane N --character X` prints it with
 the lane and character filled in, so the brief is never rewritten from memory —
 a rewritten brief is a different instrument, and two rounds graded against two
 briefs are not comparable.
@@ -89,11 +89,9 @@ screen. Say it again to go ahead anyway.
 
 ### Your budget
 
-- **Actions:** stop at the cap the coordinator gives you (`--max-actions`,
-  120 accepted `act` calls for an act on any of the three kits, since round
-  11: 70 reached floor 6 and 120 reached floor 10 or 11). Since `EB-456` the
-  bridge counts your accepted acts itself and refuses past the cap with
-  `budget reached`, so your own count is a courtesy and not the mechanism.
+- **Actions:** stop at the lane's cap, printed on every page. The bridge
+  counts your accepted acts itself and refuses past the cap with `budget
+  reached`, so your own count is a courtesy and not the mechanism.
 - **Wall clock:** stop at `--max-wall-s` (typically 5400 s).
 - **Refusals:** three consecutive refused commands is a stop. A refusal is a
   finding — write down what you asked for and what it said.
@@ -102,6 +100,12 @@ screen. Say it again to go ahead anyway.
 
 Stopping on a budget is a normal, complete round. Do not play past it to reach a
 tidier place, and do not start a second session.
+
+### Your notes
+
+After each fight, append one line to your notes file: the fight, the HP you
+ended on, and the one decision that mattered. If the round stops mid-act, these
+lines are the only handoff.
 
 ### The record you write
 

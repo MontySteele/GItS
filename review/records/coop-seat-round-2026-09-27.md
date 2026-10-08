@@ -28,7 +28,7 @@ No crossed lanes and no stalls that stopped the run.
   - Their hits combined on Block: Furina's Hydro sized Klee's Bomb to strip a
     Tunneler's 64 Block exactly, and the pop Stunned it.
 
-  This was read from the code in `review/active/coop-concepts-2026-09-27.md`,
+  This was read from the code in `review/ruled/coop-concepts-2026-09-27.md`,
   and it is now seen in play.
 - **Shared tools** felt like helping each other: The Ball (10 → 45, passed back
   and forth), and Rally.

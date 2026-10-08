@@ -1,15 +1,15 @@
-# PROTOTYPE SURFACE -- QUARANTINED. R213 B (1050f67), BACKLOG EB-147. One
-# staging surface for cards being TRIED, every character at once. A row here
-# is not a card in the game: it is a question put to the real engine. It is
-# in no reward pool, no release build, no digest and no version stamp, and
-# the only way to reach one is a grant by id on a dev build.
-#
-# THE DELETION RULE IS THE POINT OF THE FILE. Once a slice is ACCEPTED or
-# REJECTED its rows LEAVE here, re-authored onto the owning character's real
-# sheet or deleted outright, with the reasoning in the slice's packet under
-# review/ and never as a commented-out row. AN EMPTY FILE IS THE HEALTHY
-# STATE. How to write a row: docs/current/operations/prototype.md. Why each
-# row below exists: docs/notes/prototype-surface-provenance.md, by row id.
+# PROTOTYPE SURFACE -- THE RELEASE POOL SHEET. Every card of every current kit
+# and the companion roster is a `proto_` row here, and each C# pool IS its
+# roster (legacy cleanup stage 4, review/active/legacy-cleanup-2026-10-01.md):
+# the rows are the game's reward pools, in every build and release, since the
+# current kits became the release build (2026-09-28). The old quarantine (R213
+# B: rows in no pool, deleted once a slice was ruled, an empty file the healthy
+# state) ended with the shipped kits; the shipped sheets were deleted at
+# cleanup stage 6. A Balance kit's rows change on its `<kit>-next` branch, not
+# on main (operations/stage-gate.md). How to write a row:
+# docs/current/operations/prototype.md. Why each row reads as it does:
+# docs/notes/prototype-surface-provenance.md, by row id. Cut rows are deleted,
+# never left as a commented-out row.
 
 # THE KLEE OVERHAUL, SLICE ONE. Reachable rows, not staged ones: these ARE
 # Klee's starter and her whole pool. Why each row
@@ -1078,13 +1078,13 @@
    authored_by: [claude], art_of: proto_mc_durin_binary_form,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
-   description: "At the start of your turn, deal 4 [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] damage deals 4 more.",
+   description: "At the start of your turn, deal 4 [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 4 additional damage.",
    upgrade: {power_amount: +2, mode_power_amount: [25, 2]},
    effects: [{op: apply_power, power: mc_purity_strike, amount: 4, target: self},
              {op: choose_one, modes: [
               {label: "[gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]",
                effects: [{op: apply_power, power: mc_purity_white, amount: 50, target: self}]},
-              {label: "[gold]Dark[/gold]: Your [gold]Pyro[/gold] damage deals 4 more",
+              {label: "[gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 4 additional damage",
                effects: [{op: apply_power, power: mc_purity_dark, amount: 4, target: self}]}]}]}
 
 - {id: proto_mc_razor_claw_and_thunder, name: "Razor — Claw and Thunder", character: klee,
@@ -1234,7 +1234,7 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: skill, rarity: uncommon,
-   description: "Look at the top {Scry:diff()} cards of your draw pile. Put 1 into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   description: "Look at the top {Scry:diff()} card{Scry:plural:|s} of your [gold]Draw Pile[/gold]. Put 1 into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
    effects: [{op: scry_take, amount: 3}],
    plan: [{op: block, amount: 10}],
    # 4 seen / Plan 12: both halves move, one number each.
@@ -1248,7 +1248,7 @@
    cost: 1, type: power, rarity: uncommon,
    # Kokomi core pass: pays for playing a Plan card's now-line, not for a
    # carry-out. "Normally" = not written on the Bake-Kurage.
-   description: "Once per turn, when you play a card with a [gold]Plan[/gold] line normally, draw 1 card.",
+   description: "The first time each turn you play a card with a [gold]Plan[/gold] line normally, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1270,7 +1270,7 @@
    cost: 3, type: power, rarity: rare,
    # POOL PASS THREE (`EB-655`): THE FIRST PLAN, NOT EVERY PLAN. Doubling
    # every Plan paid for writing MORE, which is the shape the pass undoes.
-   description: "At the start of your turn, the [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] twice. Your first [gold]Dusk[/gold] [gold]Plan[/gold] is doubled too.",
+   description: "At the start of your turn, your first [gold]Plan[/gold] is carried out twice. So is your first [gold]Dusk[/gold] [gold]Plan[/gold].",
    effects: [{op: apply_power, power: kk_nereids_ascension, amount: 1, target: self}],
    # Power cost sweep, 2026-09-30: its price is three energy on a turn that
    # writes no Plan; the upgrade makes it Innate, so that turn is turn one.
@@ -1334,7 +1334,7 @@
    cost: 1, type: skill, rarity: rare, exhaust: true,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Exhaust. Gain 12 [gold]Block[/gold]. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
+   description: "Gain 12 [gold]Block[/gold]. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
    effects: [{op: block, amount: 12}],
    plan: [{op: mend, amount: 6}],
    # 16 Block; Mend 8.
@@ -1364,7 +1364,7 @@
    cost: 0, type: skill, rarity: common, exhaust: true,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Exhaust. Apply 1 [gold]Vulnerable[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold].",
+   description: "Apply 1 [gold]Vulnerable[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold].",
    effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy},
              {op: draw, amount: 1}],
    plan: [{op: energy, amount: 1}],
@@ -1374,7 +1374,7 @@
 - {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Once per turn, when you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
+   description: "The first time each turn you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
    effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {innate: true}}
@@ -1401,7 +1401,7 @@
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common, exhaust: true,
-   description: "Exhaust. The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
+   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
    effects: [{op: carry_out_front_plan}]}
 
 - {id: proto_kk_undertow, name: "Undertow", character: kokomi,
@@ -1421,7 +1421,7 @@
 - {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Exhaust. Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, carry out its [gold]Plan[/gold], or play it if it has none.",
+   description: "Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, carry out its [gold]Plan[/gold], or play it if it has none.",
    effects: [{op: plan_from_exhaust}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {cost: -1}}
@@ -1441,7 +1441,7 @@
    # THE CASKET PASS (2026-09-28): 11 to ALL, 3 more on a debuffed enemy;
    # the Plan is 2 Energy and a card.
    # 2026-09-30 [USER]: Plan draw 1 -> 2, upgraded 3 (provenance note).
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} more to debuffed ones. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} cards.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} additional damage to debuffed ones. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} card{PlanCards:plural:|s}.",
    effects: [{op: damage, amount: 11, target: all_enemies, bonus_vs_debuff: 3}],
    plan: [{op: energy, amount: 2}, {op: draw, amount: 2}],
    # 14 / 4 more, and the Plan's draw 2 -> 3 (the Energy does not move).
@@ -1612,7 +1612,7 @@
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
    # 2026-10-01 (the four-kit review, Kokomi pick 1): Open the Casket lost its
    # Exhaust, so this fetches it from the draw or discard pile instead.
-   description: "Put [gold]Open the Casket[/gold] into your hand from your draw pile or discard pile.",
+   description: "Put [gold]Open the Casket[/gold] into your hand from your [gold]Draw Pile[/gold] or [gold]Discard Pile[/gold].",
    effects: [{op: fetch_open_casket}],
    upgrade: {cost: -1}}
 
@@ -1842,7 +1842,7 @@
    cost: 2, type: attack, rarity: rare, exhaust: true,
    # THE RARE PASS (2026-10-04): applies 1 of each first, so it never
    # doubles nothing (the floor is Weak 2 and Vulnerable 2 on every enemy).
-   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double its [gold]Weak[/gold] and [gold]Vulnerable[/gold]. Exhaust.",
+   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double them.",
    effects: [{op: damage, amount: 6, target: all_enemies},
              {op: apply_power, power: weak, amount: 1, target: all_enemies},
              {op: apply_power, power: vulnerable, amount: 1, target: all_enemies},
@@ -1876,7 +1876,7 @@
 - {id: proto_kk_brace_for_the_tide, name: "Brace for the Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Exhaust. [gold]Dusk[/gold] [gold]Plan[/gold]: Double your [gold]Block[/gold].",
+   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Double your [gold]Block[/gold].",
    # No upgrade on the paper; the rule's default (Exhaust off) would undo
    # paper sec.4 guard 2, so it costs 0 instead (flagged in the build PR).
    effects: [],
@@ -1909,7 +1909,7 @@
 - {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Add {KkAmount:diff()} Nips to your hand.{IfUpgraded:show: They are upgraded.|} They [gold]Exhaust[/gold].",
+   description: "Add {KkAmount:diff()} [gold]Nips[/gold] to your hand.{IfUpgraded:show: They are upgraded.|} They [gold]Exhaust[/gold].",
    effects: [{op: kokomi, kind: shoal_call, amount: 2}],
    # The Nips arrive upgraded: a play-time read, the face's own swap.
    upgrade: {upgraded_grant: true}}
@@ -1966,7 +1966,7 @@
    # Change of Plans for the whole queue, Dusk Plans included, in order and
    # with the drain's riders; mid-turn, so Nereid's Ascension does not double
    # its first entry. The emptied queue can be written again for the morning.
-   description: "Exhaust. The [gold]Bake-Kurage[/gold] carries out all your [gold]Plans[/gold] now.",
+   description: "The [gold]Bake-Kurage[/gold] carries out all your [gold]Plans[/gold] now.",
    effects: [{op: kokomi, kind: spring_tide}],
    upgrade: {cost: -1}}
 
@@ -1976,7 +1976,7 @@
    # "0-cost" is the card's cost as it stands in hand; the copies are exact
    # (an upgraded Nip copies upgraded). The hand is read once, before the
    # first copy is added, and a full hand stops the copying.
-   description: "Exhaust. Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand. The copies [gold]Exhaust[/gold].",
+   description: "Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand. The copies [gold]Exhaust[/gold].",
    effects: [{op: kokomi, kind: kurage_school}],
    upgrade: {cost: -1}}
 
@@ -2025,7 +2025,7 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # One Nip per Companion play; copies add.
-   description: "Whenever you play a [gold]Companion[/gold] card, add a Nip to your hand. It [gold]Exhausts[/gold].",
+   description: "Whenever you play a [gold]Companion[/gold] card, add a [gold]Nip[/gold] to your hand. It [gold]Exhausts[/gold].",
    effects: [{op: apply_power, power: kk_watatsumi_resistance, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -2061,7 +2061,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Defect's Compact on the next hand, curses included. Sea Glass is a token
    # in no pool: 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into Sea Glass{IfUpgraded:show:+|}.",
+   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
    effects: [{op: block, amount: 8}],
    plan: [{op: transform_statuses_in_hand}],
    # KOKOMI REVIEW ROUND (2026-10-05): 6 [7] -> 8 [11], Coral Bulwark's Common rate.
@@ -2095,7 +2095,7 @@
    cost: 1, type: power, rarity: uncommon,
    # Any status or curse of hers, by any route: a played Slimed, a Dazed at
    # turn end, Tidecleanse. Copies add.
-   description: "Whenever a status or curse is exhausted, the [gold]Casket[/gold] gains 1{IfUpgraded:show: and you gain 2 [gold]Block[/gold]|}.",
+   description: "Whenever a status or curse is [gold]Exhausted[/gold], the [gold]Casket[/gold] gains 1{IfUpgraded:show: and you gain 2 [gold]Block[/gold]|}.",
    effects: [{op: apply_power, power: kk_abyssal_salvage, amount: 1, target: self}],
    # The upgrade swaps in the Power that also gives 2 Block per exhaust
    # (`upgraded_power`, The Long Game's shape).
@@ -2154,7 +2154,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, at the end of your turn: above 70% HP, deal 6 damage to a random enemy; otherwise, gain 6 [gold]Block[/gold].",
+   description: "For 2 turns, at the end of your turn deal 6 damage to a random enemy if you are above 70% HP; otherwise, gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
 
 - {id: proto_mi_sayu_naptime, name: "Sayu — Naptime", character: klee,
@@ -2270,14 +2270,14 @@
    # `EB-698`: which turn pays 8 and which pays 16, said the same way on both
    # surfaces. Neither number moved. Provenance:
    # docs/notes/prototype-surface-provenance.md.
-   description: "At the end of each of your next 2 turns, deal 8 [gold]Cryo[/gold] damage to ALL enemies. The last one deals 16 additional damage.",
+   description: "For 2 turns, at the end of your turn deal 8 [gold]Cryo[/gold] damage to ALL enemies. The last one deals 16 additional damage.",
    effects: [{op: apply_power, power: mi_soumetsu, amount: 2, target: self}]}
 
 - {id: proto_mi_ayato_kyouka, name: "Kamisato Ayato — Kyouka", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: buffer, element: hydro,
    cost: 1, type: skill, exhaust: true,
-   description: "Your Attacks apply [gold]Hydro[/gold] and deal 4 additional damage. After 2 turns, deal 12 [gold]Hydro[/gold] damage to a random enemy.",
+   description: "Your Attacks apply [gold]Hydro[/gold] and deal 4 additional damage. In 2 turns, deal 12 [gold]Hydro[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mi_kyouka, amount: 2, target: self}]}
 
 - {id: proto_mi_heizou_heartstopper, name: "Shikanoin Heizou — Heartstopper Strike", character: klee,
@@ -2464,7 +2464,7 @@
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack,
    upgrade: {damage: +3},
-   description: "Deal 8 [gold]Anemo[/gold] damage. [gold]Swirl[/gold]. The next [gold]Bomb[/gold] you set off this turn deals the swirled element instead of [gold]Pyro[/gold].",
+   description: "Deal 8 [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy. The next [gold]Bomb[/gold] that goes off this turn deals that element instead of [gold]Pyro[/gold].",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: swirl, target: enemy},
              {op: apply_power, power: cvn_hexhunter_chime, amount: 1, target: self}]}
@@ -2507,7 +2507,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "Exhaust every status in your hand. Your largest [gold]Bomb[/gold] grows by 6 for each.",
+   description: "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold] grows by 6 for each.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6}]}
 
@@ -2523,7 +2523,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill,
-   description: "[gold]Swirl[/gold]. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal 4 additional damage.",
+   description: "[gold]Swirl[/gold] the enemy. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal 4 additional damage.",
    effects: [{op: swirl, target: enemy},
              {op: draw, amount: 1},
              {op: apply_power, power: mc_mollis_favonius, amount: 4, target: self}]}
@@ -2764,28 +2764,28 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Summon Charlotte.",
+   description: "[gold]Summon[/gold] Charlotte.",
    effects: [{op: stage_guest, member: charlotte}]}
 
 - {id: proto_fs_guest_star_wriothesley, name: "Guest Star: Wriothesley", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon Wriothesley.",
+   description: "[gold]Summon[/gold] Wriothesley.",
    effects: [{op: stage_guest, member: wriothesley}]}
 
 - {id: proto_fs_guest_star_lynette, name: "Guest Star: Lynette", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon Lynette.",
+   description: "[gold]Summon[/gold] Lynette.",
    effects: [{op: stage_guest, member: lynette}]}
 
 - {id: proto_fs_guest_star_clorinde, name: "Guest Star: Clorinde", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare,
-   description: "Summon Clorinde.",
+   description: "[gold]Summon[/gold] Clorinde.",
    effects: [{op: stage_guest, member: clorinde}]}
 
 # --- THE TWO RARES ---
@@ -2839,7 +2839,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon Lyney.",
+   description: "[gold]Summon[/gold] Lyney.",
    effects: [{op: stage_guest, member: lyney}]}
 
 - {id: proto_fs_a_five_century_act, name: "A Five-Century Act", character: furina,
@@ -2855,7 +2855,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon Sigewinne.",
+   description: "[gold]Summon[/gold] Sigewinne.",
    effects: [{op: stage_guest, member: sigewinne}]}
 
 # Fountain of Lucine: a Skill that leaves a Power counting the three turns
@@ -2865,7 +2865,7 @@
    upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "At the start of your next 3 turns, [gold]Repay[/gold] {PowerAmount:diff()}.",
+   description: "For 3 turns, at the start of your turn [gold]Repay[/gold] {PowerAmount:diff()}.",
    effects: [{op: apply_power, power: fs_fountain_of_lucine, amount: 3,
               target: self}]}
 
@@ -2894,7 +2894,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Summon Chevreuse.",
+   description: "[gold]Summon[/gold] Chevreuse.",
    effects: [{op: stage_guest, member: chevreuse}]}
 
 - {id: proto_fs_bis, name: "Bis!", character: furina,
@@ -2997,7 +2997,7 @@
 - {id: proto_kk_kurages_mercy, name: "Kurage's Mercy", character: kokomi,
    authored_by: [claude], multiplayer: true,
    cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Exhaust. Each player [gold]Mend[/gold]s {KkAmount:diff()}.",
+   description: "Each player [gold]Mend[/gold]s {KkAmount:diff()}.",
    effects: [{op: kokomi, kind: kurages_mercy, amount: 8}],
    # Mend 12.
    upgrade: {kokomi_amount: 4}}
@@ -3047,7 +3047,7 @@
    # The rebalance (sec.5): delayed Block.
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold]. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to an enemy. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
    effects: [{op: block, amount: 6},
              {op: apply_aura, element: hydro, target: enemy},
              {op: block_next_turn, amount: 3}],
@@ -3059,7 +3059,7 @@
    # the paper's first number was 5).
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: electro,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Electro[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Electro[/gold] to an enemy. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: block, amount: 6},
              {op: apply_aura, element: electro, target: enemy},
              {op: draw, amount: 1}],
@@ -3070,7 +3070,7 @@
    # The rebalance (sec.5): statuses. No Ethereal, so the Weak stays 1.
    nation: mondstadt, star: 4, rarity: basic, role_c: applier, element: cryo,
    cost: 1, type: skill, personal_pool: varka,
-   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] and 1 [gold]Weak[/gold].",
+   description: "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] and 1 [gold]Weak[/gold] to an enemy.",
    effects: [{op: block, amount: 5},
              {op: apply_aura, element: cryo, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
@@ -3164,7 +3164,7 @@
    cost: 1, type: attack, personal_pool: varka,
    # The AoE trim: one enemy. 5 [7], +4: provenance, "Varka Electro
    # Knights, 2026-10-03". An Attack since the combo pass (2026-10-04).
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} more.",
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
    effects: [{op: varka, kind: awakening, target: enemy, base: 5, amount: 4}],
    upgrade: {varka_base: 2}}
 
@@ -3184,7 +3184,7 @@
    # round, 2026-10-01): the colon is the Knight's tell.
    # Tried at 8 Block, reverted: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] an enemy's aura.",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy.",
    effects: [{op: block, amount: 7},
              {op: swirl, target: enemy}],
    upgrade: {block: 3}}
@@ -3252,7 +3252,7 @@
 - {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Draw 2 cards. If you have a [gold]current element[/gold], draw {DrawThen:diff()} more.",
+   description: "Draw 2 cards. If you have a [gold]current element[/gold], draw {DrawThen:diff()} additional card{DrawThen:plural:|s}.",
    effects: [{op: draw, amount: 2},
              {op: conditional, if: has_current_element,
               then: [{op: draw, amount: 1}]}],
@@ -3269,7 +3269,7 @@
 - {id: proto_vk_stormward_stance, name: "Stormward Stance", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your Anemo Attacks deal 3 additional damage.",
+   description: "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your [gold]Anemo[/gold] Attacks deal 3 additional damage.",
    effects: [{op: apply_power, power: vk_stormward_stance, amount: 3, target: self}],
    upgrade: {power_amount: +2}}
 
@@ -3285,7 +3285,7 @@
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: pyro,
    cost: 2, type: attack, personal_pool: varka,
    # The expansion's Knight pass (2026-10-01): the reaction's Energy.
-   description: "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit sets off an [gold]Elemental Reaction[/gold], gain 1 [gold]Energy[/gold].",
+   description: "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit causes an [gold]Elemental Reaction[/gold], gain 1 [gold]Energy[/gold].",
    effects: [{op: damage, amount: 6, target: enemy, times: 2, applies_element: true},
              {op: conditional, if: reaction_triggered_by_this,
               then: [{op: energy, amount: 1}]}],
@@ -3295,7 +3295,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 2, type: skill, personal_pool: varka,
-   description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 Cryo [gold]Oath[/gold] for each enemy with a Cryo aura.",
+   description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura.",
    effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
              {op: varka, kind: oath_per_cryo_enemy}],
    upgrade: {damage: 4}}
@@ -3305,7 +3305,7 @@
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
    # The rebalance (sec.3): three turns of Block.
-   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold] now and {VkAmount:diff()} at the start of your next 2 turns.",
+   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. For 2 turns, at the start of your turn gain {VkAmount:diff()} [gold]Block[/gold].",
    effects: [{op: apply_aura, element: hydro, target: enemy},
              {op: block, amount: 4},
              {op: varka, kind: echo_block, amount: 4}],
@@ -3333,7 +3333,7 @@
 - {id: proto_vk_storm_surge, name: "Storm Surge", character: varka,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} more.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} additional damage.",
    effects: [{op: damage, amount: 5, target: all_enemies},
              {op: varka, kind: swirled_take_more, amount: 5}],
    upgrade: {damage: 2}}
@@ -3346,7 +3346,7 @@
    # discard_this_turn`, C# `EnergyCost.AddThisTurn`).
    cost: 2, type: attack, rarity: uncommon,
    cost_reduction_per_discard_this_turn: 1,
-   description: "Costs 1 less for each card you discarded this turn. Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies.",
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Costs 1 less for each card you discarded this turn.",
    effects: [{op: varka, kind: electro_all, target: all_enemies, base: 8}],
    upgrade: {varka_base: 3}}
 
@@ -3397,7 +3397,7 @@
    authored_by: [claude],
    # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold], as your [gold]current element[/gold].",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: avatar_hit, base: 10, per: 2}],
    upgrade: {damage: 4, varka_base: 4}}
@@ -3429,7 +3429,7 @@
    authored_by: [claude],
    # The card to watch (paper sec.3 notes): a 0-cost Oath on turn one.
    cost: 0, type: skill, rarity: common,
-   description: "Apply your [gold]current element[/gold] to {IfUpgraded:show:ALL enemies|an enemy} (a random one of the four if you have none).",
+   description: "Apply your [gold]current element[/gold] to {IfUpgraded:show:ALL enemies|an enemy}. If you have none, apply a random element.",
    effects: [{op: varka, kind: pathfinders_mark, target: enemy}],
    upgrade: {varka_upgraded: true}}
 
@@ -3438,14 +3438,14 @@
    # "more" is a second, element-less hit on the same enemy.
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it sets off an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} more.",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it causes an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.",
    effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_knightly_strike, name: "Knightly Strike", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common, tags: [strike],
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} more.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
    effects: [{op: damage, amount: 7, target: enemy},
              {op: conditional, if: knight_played_this_turn,
               then: [{op: damage, amount: 4, target: enemy}]}],
@@ -3466,14 +3466,14 @@
 - {id: proto_vk_blazing_charge, name: "Blazing Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each Pyro [gold]Oath[/gold].",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].",
    effects: [{op: varka, kind: blazing_charge, target: enemy, base: 5, per: 2}],
    upgrade: {varka_base: 2}}
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Hydro [gold]Oath[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: apply_aura, element: hydro, target: enemy},
              {op: block,
               amount_formula: {base: 4, per: 2, count: hydro_oath}}],
@@ -3482,7 +3482,7 @@
 - {id: proto_vk_glacial_edict, name: "Glacial Edict", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Apply [gold]Cryo[/gold] to an enemy, and 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold], plus 1 of each for every {VkAmount:diff()} Cryo [gold]Oath[/gold].",
+   description: "Apply [gold]Cryo[/gold] to an enemy, and 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold], plus 1 of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
              {op: varka, kind: glacial_edict, target: enemy, amount: 4}],
    upgrade: {varka_amount: -1}}
@@ -3490,7 +3490,7 @@
 - {id: proto_vk_static_field, name: "Static Field", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "The first time each turn you apply [gold]Electro[/gold], draw {PowerAmount:diff()} cards.",
+   description: "The first time each turn you apply [gold]Electro[/gold], draw {PowerAmount:diff()} card{PowerAmount:plural:|s}.",
    effects: [{op: apply_power, power: vk_static_field, amount: 2, target: self}],
    upgrade: {power_amount: 1}}
 
@@ -3537,7 +3537,7 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    # Reworded by the combo pass (sec.4, 2026-10-04): a mono-element payoff.
-   description: "Only [gold]Knights[/gold] can change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold] instead.",
+   description: "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of it instead.",
    effects: [{op: apply_power, power: vk_unwavering_banner, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3583,7 +3583,7 @@
 - {id: proto_vk_short_circuit, name: "Short Circuit", character: varka,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Discard 2 cards. Draw {Cards:diff()} cards. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.",
+   description: "Discard 2 cards. Draw {Cards:diff()} card{Cards:plural:|s}. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.",
    effects: [{op: discard, amount: 2, select: chosen},
              {op: draw, amount: 2},
              {op: energy, amount: 1},
@@ -3593,7 +3593,7 @@
 - {id: proto_vk_crosscurrent, name: "Crosscurrent", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Swirl[/gold] an enemy's aura. This [gold]Swirl[/gold] pays twice.",
+   description: "[gold]Swirl[/gold] the enemy. This [gold]Swirl[/gold] pays your [gold]current element[/gold] twice.",
    effects: [{op: varka, kind: crosscurrent, target: enemy}],
    upgrade: {add: {op: draw, amount: 1}}}
 
@@ -3629,7 +3629,7 @@
 - {id: proto_vk_retaliating_tide, name: "Retaliating Tide", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the end of your turn, deal damage equal to your [gold]Block[/gold], up to your Hydro [gold]Oath[/gold], to a random enemy.",
+   description: "At the end of your turn, deal damage equal to your [gold]Block[/gold], up to your [gold]Hydro[/gold] [gold]Oath[/gold], to a random enemy.",
    effects: [{op: apply_power, power: vk_retaliating_tide, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -3638,7 +3638,7 @@
    # The rebalance (sec.2): Cryo's status payoff. Was a team-wide Swirl
    # debuff while Cryo was current.
    cost: 2, type: power, rarity: rare,
-   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your Cryo [gold]Oath[/gold] to it.",
+   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold] to it.",
    effects: [{op: apply_power, power: vk_absolute_zero, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3649,7 +3649,7 @@
    # The element identities round (2026-10-01): the face prints the per-hit
    # total in combat (`VkHit`, codegen's VARKA_HIT_PREVIEW_KINDS).
    # Combo pass sec.1 (2026-10-04): the per-Oath part is damage, said first.
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage, plus {VkPer:diff()} for each Electro [gold]Oath[/gold], to ALL enemies X times.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}",
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage, plus {VkPer:diff()} for each [gold]Electro[/gold] [gold]Oath[/gold], to ALL enemies X times.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}",
    effects: [{op: varka, kind: thundering_verdict, target: all_enemies, base: 6, per: 1}],
    upgrade: {varka_base: 2}}
 
@@ -3663,7 +3663,7 @@
 - {id: proto_vk_grand_masters_verdict, name: "Grand Master's Verdict", character: varka,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare, exhaust: true,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Double your [gold]current element[/gold]'s [gold]Oath[/gold].",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Double your [gold]Oath[/gold] of your [gold]current element[/gold].",
    effects: [{op: damage, amount: 15, target: enemy},
              {op: varka, kind: double_current_oath}],
    upgrade: {damage: 5}}
@@ -3671,7 +3671,7 @@
 - {id: proto_vk_wolfpack, name: "Wolfpack", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever you play Four Winds' Ascension, add a copy of it to your discard pile.",
+   description: "Whenever you play Four Winds' Ascension, add a copy of it to your [gold]Discard Pile[/gold].",
    effects: [{op: apply_power, power: vk_wolfpack, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3687,7 +3687,7 @@
 - {id: proto_vk_weathervane, name: "Weathervane", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, you may choose an element you have [gold]Oath[/gold] in; it becomes your [gold]current element[/gold].",
+   description: "At the start of your turn, you may make an element you have [gold]Oath[/gold] in your [gold]current element[/gold].",
    effects: [{op: apply_power, power: vk_weathervane, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3701,7 +3701,7 @@
 - {id: proto_vk_twin_gales, name: "Twin Gales", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] and the element Swirled.",
+   description: "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] and the element they [gold]Swirl[/gold].",
    effects: [{op: apply_power, power: vk_twin_gales, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3709,7 +3709,7 @@
    authored_by: [claude],
    # 2026-10-04: new rider after spent auras were removed (#882).
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of the element Swirled.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of that element.",
    effects: [{op: damage, amount: 12, target: enemy},
              {op: varka, kind: swirled_oath, amount: 2}],
    upgrade: {damage: 4}}
@@ -3748,7 +3748,7 @@
    # "Exhaust a card" is True Grit+'s: the player chooses, any card in hand.
    # 2026-10-05: Pyro becomes current; provenance note, "Varka seat-round fixes".
    cost: 1, type: skill, rarity: common,
-   description: "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} Pyro [gold]Oath[/gold]. Pyro becomes your [gold]current element[/gold].",
+   description: "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. [gold]Pyro[/gold] becomes your [gold]current element[/gold].",
    effects: [{op: exhaust_from, select: chosen, amount: 1},
              {op: varka, kind: gain_pyro_oath, amount: 2}],
    upgrade: {varka_amount: 1}}
@@ -3776,7 +3776,7 @@
 - {id: proto_vk_pyre_oath, name: "Pyre Oath", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Exhaust[/gold] a card, gain 1 Pyro [gold]Oath[/gold].",
+   description: "Whenever you [gold]Exhaust[/gold] a card, gain 1 [gold]Pyro[/gold] [gold]Oath[/gold].",
    effects: [{op: apply_power, power: vk_pyre_oath, amount: 1, target: self}],
    upgrade: {innate: true}}
 

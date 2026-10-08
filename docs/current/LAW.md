@@ -46,10 +46,12 @@ combat grammar comes with us. (principles §1)
   balance governor. (Whether a particular card's scaling that happens to get
   duplicated is *too strong* is a balance question, not a law.) (principles §2.2)
 - **One aura per enemy (v1), 2 player-turns, refreshed by same-element hit.**
-  Anemo/Geo leave no aura — they only trigger. A trigger spends the aura
-  rather than consuming it: the aura stays, and a spent aura pays no trigger
-  until a hit of its own element refreshes it. Aura elements react with a
-  spent aura as normal. (principles §2.1; element review, 2026-09-28)
+  Anemo/Geo leave no aura — they only trigger. **Every reaction consumes its
+  aura, Swirl and Crystallize included; there is no spent aura.** (principles
+  §2.1; 2026-10-03, [USER]: "Should we get rid of the concept of elements
+  being 'spent' after a swirl? It seems to generate confusion." then "agreed
+  ... please proceed"; quoted in `tier0/engine/reactions.py:6-9`. This
+  reverses the element review's spent aura of 2026-09-28.)
 - **Canonical Frozen is a per-turn-decrementing, per-creature duration counter.**
   Non-boss Frozen = −50% next-action damage + Shatter (first Attack hit only,
   direct HP damage, cannot shatter the freeze it just applied). In boss rooms
@@ -66,8 +68,7 @@ combat grammar comes with us. (principles §1)
   above base-game stun scarcity with per-combat diminishing returns. Companions
   never source hard CC (the `control_uptime` / `SUPPORT_CARRY` detector enforces
   it). (principles §2.2a, §4.3; R45)
-- **Reaction credit — damage attribution and Burst energy — goes to the
-  triggering player;** auras live on shared enemies so cross-player reactions
+- **Reaction credit — damage attribution — goes to the triggering player;** auras live on shared enemies so cross-player reactions
   need no special-casing. (principles §2.5)
 - **Overload splash (to all enemies), Swirl's flat 2 (to all enemies) and
   Electro-Charged (stacking DoT) bypass Block and are damage-pipeline-free** (no strength/vulnerable recursion).

@@ -279,11 +279,6 @@ public static class KleeMod
                     ["KLEEMOD-APPLIES_GEO.title"] = "Applies Geo",
                     ["KLEEMOD-APPLIES_GEO.description"] =
                         "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",
-                    ["KLEEMOD-BOMB.title"] = "Bomb",
-                    // R249 pick 2(a): the SHIPPED Bomb keeps "detonates"
-                    // until the overhaul replaces this kit.
-                    ["KLEEMOD-BOMB.description"] =
-                        "Detonates at the start of your turn, or early when its enemy takes unblocked Attack damage. That enemy's first attack deals 25% less.",
                     ["KLEEMOD-CONFISCATED.title"] = "Confiscated",
                     ["KLEEMOD-CONFISCATED.description"] =
                         "A 1-cost Status card that does nothing.",
@@ -325,11 +320,18 @@ public static class KleeMod
                     ["KLEEMOD-ELECTRO_CHARGED_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Electro[/gold]: the reacted enemy gains [blue]{Elements.ReactionConstants.ElectroChargedDot}[/blue] [gold]Poison[/gold].",
                     ["KLEEMOD-FROZEN_PREVIEW.title"] = "Reaction preview: Frozen",
+                    // Text pass 2026-10-08: the boss sentence left this row,
+                    // because `KleeCardTooltips` already swaps in the boss row
+                    // below for any non-minion in a boss room
+                    // (`ReactionEffects.FrozenBossVulnWillApply`), and a
+                    // Shatter now says it ends the freeze (`FrozenPower`
+                    // removes itself when it Shatters). The comment sits
+                    // ABOVE the key, for `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Until it acts, the next Attack on it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage. In a boss fight, only minions can be Frozen; the others become [gold]Vulnerable[/gold] instead.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less. Until it acts, an Attack on it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage and ends the freeze.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: bosses can't be Frozen, so it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion can't be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
                     // THE ELEMENT PORT (sec.4 A, 2026-09-28; spent removed
                     // 2026-10-03): Swirl removes the aura, deals a flat 2 to
@@ -395,11 +397,8 @@ public static class KleeMod
                     // them interpolate an arm's law constant and one of them
                     // reads which Klee arm is live.
                     //
-                    // `ARM_BOMB` is titled "Bomb" and `KLEEMOD-BOMB` is too,
-                    // which is correct rather than a collision: they are the
-                    // same WORD under two different rules, and no single face
-                    // ever raises both (see the attach rule in
-                    // `gen_klee_cards.arm_keyword_tip_calls`).
+                    // `KLEEMOD-BOMB`, the old shipped Bomb's keyword, left
+                    // with the text pass of 2026-10-08: no card raised it.
                     [Cards.ArmKeywordTips.BombKey + ".title"] = "Bomb",
                     [Cards.ArmKeywordTips.SetOffKey + ".title"] = "Set off",
                     [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
@@ -483,6 +482,14 @@ public static class KleeMod
                     // The "Drained N" counter's hover title.
                     [Vfx.DrainedCounter.TitleKey + ".title"] = "Drained",
                     [Cards.ArmKeywordTips.SummonKey + ".title"] = "Summon",
+                    // The text pass of 2026-10-08: three golded words that
+                    // hovered nothing, and the Plan tip for a plan-only card.
+                    [Cards.ArmKeywordTips.ElementalReactionKey + ".title"] =
+                        "Elemental Reaction",
+                    [Cards.ArmKeywordTips.SakuraKey + ".title"] = "Sakura",
+                    [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
+                        "Lightfall Sword",
+                    [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",
                     [Cards.ArmKeywordTips.GuestStarKey + ".title"] =
                         "Guest Star",
                     [Cards.ArmKeywordTips.CharlotteKey + ".title"] =

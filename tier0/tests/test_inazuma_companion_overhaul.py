@@ -852,7 +852,9 @@ def test_the_two_delayed_finales_say_when_they_land(overhaul):
     """
     face = _proto_face("proto_mi_ayato_kyouka")
     assert "Then deal" not in face
-    assert "After 2 turns, deal 12" in face
+    # The text pass of 2026-10-08: the delayed one-shot's one spelling,
+    # "In 2 turns, deal ..." (Eula's Lightfall Sword reads the same way).
+    assert "In 2 turns, deal 12" in face
     # The window is stated ONCE, by the clause that says when the finale
     # lands: "For 2 turns" and "After 2 turns" together ran the face over the
     # 120-character card ceiling (`tools/lint_text_conventions.py`), and the
@@ -875,7 +877,9 @@ def test_soumetsus_face_says_which_turn_pays_which_number(overhaul):
     and no number moved.
     """
     face = _proto_face("proto_mi_ayaka_soumetsu")
-    assert "At the end of each of your next 2 turns, deal 8" in face
+    # The text pass of 2026-10-08: the repeating effect's one spelling, the
+    # ten companion rows' "For N turns, at the end of your turn".
+    assert "For 2 turns, at the end of your turn deal 8" in face
     # THE 2026-09-25 TEXT PASS: the finale in rule 8's spelling, "N
     # additional damage", on both surfaces.
     assert "The last one deals 16 additional damage." in face

@@ -13,12 +13,14 @@ ONE home and a copy bound here at import would never see the swap.
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_read import _int, _text
+from understudy import blindplay_shape
 from understudy.blindplay_shape import RECORD_ROOT
 
 
@@ -34,12 +36,34 @@ def _bp():
 
 
 def _game_dir() -> Path | None:
-    try:
-        text = _bp().LOCAL_PROPS.read_text(encoding="utf-8")
-    except OSError:
-        return None
-    m = re.search(r"<GameDir>([^<]+)</GameDir>", text)
-    return Path(m.group(1).strip()) if m and m.group(1).strip() else None
+    """The game install: the one this lane's newest embark launched (its
+    sidecar copy in the lane's state folder, readable from any checkout),
+    else `klee-mod/local.props`' `GameDir`, else the machine's
+    `%LOCALAPPDATA%\\gits\\local.props`, which every worktree's build reads
+    (`docs/current/operations/worktrees.md`). 2026-10-08: a seat moved to a
+    second worktree had no `local.props` there, and every sealed record read
+    "(not read)"."""
+    lane = blindplay_shape.lane_game_dir()
+    if lane:
+        return Path(lane)
+    props = [_bp().LOCAL_PROPS]
+    # The machine's file only where the checkout's path is the real one: a
+    # caller that swapped `LOCAL_PROPS` (the tests) asked for exactly that file.
+    if _bp().LOCAL_PROPS == _DEFAULT_PROPS and os.environ.get("LOCALAPPDATA"):
+        props.append(Path(os.environ["LOCALAPPDATA"]) / "gits"
+                     / "local.props")
+    for path in props:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        m = re.search(r"<GameDir>([^<]+)</GameDir>", text)
+        if m and m.group(1).strip():
+            return Path(m.group(1).strip())
+    return None
+
+
+_DEFAULT_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 
 
 def _json_field(path: Path, key: str) -> str:
@@ -81,6 +105,27 @@ def build_version(wire: Any = None) -> tuple[str, str]:
                 else f"no deployed package at {manifest}")
 
 
+#: The words-store key that says this lane has had its one skew check.
+BUILD_SKEW_KEY = "__build_skew_checked__"
+
+
+def build_skew(version: str, branch: str) -> str:
+    """One warning line when the deployed build's `+next` stamp and this
+    checkout's branch disagree (2026-10-08, suite 5: the page ran from `main`
+    against a `klee-next` game), else "". Only `next` is compared: `+proto`
+    and plain builds are made from `main`."""
+    if not version or not branch:
+        return ""
+    on_next = "next" in branch.lower()
+    built_next = version.partition("+")[2].strip().lower() == "next"
+    if on_next == built_next:
+        return ""
+    return (f"WARNING: the game on this lane runs build {version} and this "
+            f"page's checkout is on branch {branch}. A number the page "
+            f"quotes from its own copy (Bomb growth, opening Sparks) may not "
+            f"be the game's; the game's own text wins.")
+
+
 def granted_arms(seed: str, log_dir: Path | None = None) -> tuple[str, str]:
     """`(arms granted into this run's deck, where it was read)`. EB-188.
 
@@ -101,11 +146,18 @@ def granted_arms(seed: str, log_dir: Path | None = None) -> tuple[str, str]:
     Answers `("(none)", ...)` when nothing matches, which is a positive
     statement rather than a gap: the run met only what the pools offered.
     """
-    d = log_dir or (Path(__file__).resolve().parent / "logs")
+    # 2026-10-08: the lane's state folder first (`embark` copies each
+    # sidecar there), then this checkout's own `understudy/logs`.
+    dirs = ([log_dir] if log_dir else
+            [blindplay_shape.lane_state_dir(),
+             Path(__file__).resolve().parent / "logs"])
     none = ("(none)", "no `--arm` grant recorded against this run's seed")
-    if not seed or not d.is_dir():
+    paths = sorted((p for d in dirs if d.is_dir()
+                    for p in d.glob("embark-*.json")),
+                   key=lambda p: p.name, reverse=True)
+    if not seed or not paths:
         return none
-    for path in sorted(d.glob("embark-*.json"), reverse=True):
+    for path in paths:
         try:
             blob = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):                         # noqa: PERF203

@@ -640,6 +640,16 @@ public static partial class McpMod
             ["ascension"] = runState.AscensionLevel
         };
 
+        // GItS LOCAL EDIT (2026-10-08). The Klee kit's Bomb growth and opening
+        // Spark, read off the loaded mod, so the blind page quotes the build's
+        // numbers rather than its own mirrors. Absent where the klee mod is
+        // not loaded. Implementation: gits/GitsKleeLaw.cs.
+        if (GitsKleeLawState() is { } kleeLaw
+            && result["run"] is Dictionary<string, object?> runInfo)
+        {
+            runInfo["klee_law"] = kleeLaw;
+        }
+
         // Always include full player data (relics, potions, deck, etc.) on every screen
         var _player = LocalContext.GetMe(runState);
         if (_player != null)
