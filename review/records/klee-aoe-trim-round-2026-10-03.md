@@ -1,6 +1,6 @@
 # Seat round: Klee after the AoE trim (w19, 2026-10-03)
 
-The AoE trim (`review/active/aoe-trim-2026-10-03.md`, #862) is a new card
+The AoE trim (`review/ruled/aoe-trim-2026-10-03.md`, #862) is a new card
 batch: seven Klee cards trade AoE for Block or single-target damage, Durin
 splits in two, Yoimiya's card is reworked. [USER]: "I don't want to take
 away the central challenge of Klee ... but if she's losing aoe as a bomb

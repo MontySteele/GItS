@@ -4,7 +4,7 @@ Status: RULED 2026-10-05: the defaults (picks 1 to 6), with sec.16's two changes
 
 **Where it comes from.** [USER] played the re-founded Stage on 2026-10-05:
 "Honestly, not very engaging." The design-layer paper
-(`review/active/furina-design-layer-2026-10-05.md`) reached a verdict:
+(`review/ruled/furina-design-layer-2026-10-05.md`) reached a verdict:
 "square pegs". The Stage is three base-game engines bolted together (orbs,
 a pet and Stars), and each has lost its tension. [USER] then asked for this
 pass: "move all of these pieces around until they have a build they think is
@@ -539,8 +539,8 @@ These numbers are an instrument reading, not sheet numbers (`EXPERIMENTS.md`).
 - `review/ruled/furina-identity-concepts-2026-09-07.md`;
 - the Tide sketch at `19ace889^`;
 - `review/active/furina-stage-brief-2026-09-08.md`;
-- `review/active/furina-refounding-2026-10-03.md`;
-- `review/active/furina-v2-review-packet-2026-10-05.md`;
+- `review/ruled/furina-refounding-2026-10-03.md`;
+- `review/ruled/furina-v2-review-packet-2026-10-05.md`;
 - `review/records/furina-v2-round-2026-10-04.md`;
 - `docs/current/research/ironclad-brief-calibration-2026-09-01.md` (the
   Burning Blood lesson);

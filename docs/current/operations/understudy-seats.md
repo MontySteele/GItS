@@ -21,6 +21,48 @@ always was. The committed result is one page in `review/records/`: what played
 well, what did not, what to change. A display defect becomes one line in
 `BACKLOG.md`.
 
+### The Balance suite record (one page)
+
+A Balance suite is five base seeds x three acts, one seat per act
+(`operations/stage-gate.md`). Its record is this page and nothing more;
+analysis goes in the paper that uses it, and screen defects go to
+`BACKLOG.md` as one line each.
+
+````md
+# <Kit> Balance suite <N>, <date>
+
+Build: `<kit>-next` <sha> (<version>+next). Change set under test: <paper path>,
+its prediction line quoted: "<the one line, written before the run>".
+Seeds, seats and grading as suite <N-1>: A0, one <model> seat per act, normal
+fights against the base five's counted runs on the same seeds
+(`review/records/base-five-baseline-2026-10-05.md`).
+
+| Seed (base character) | End floor (cause) | Suite N-1 | Base | Act 1 dmg / HP | Act 2 dmg / HP | Act 3 dmg / HP |
+|---|---|---|---|---|---|---|
+| <seed> (Ironclad) | | | | | | |
+| <seed> (Silent) | | | | | | |
+| <seed> (Defect) | | | | | | |
+| <seed> (Necrobinder) | | | | | | |
+| <seed> (Regent) | | | | | | |
+| **All** (fights per act) | mean | mean | mean | ratio (n) | ratio (n) | ratio (n) |
+
+Ratios are the kit's median damage a turn and HP lost per fight over the base
+five's, normal fights, by act (`tools/telemetry_report.py`; draw windows by
+run, not clock time). The bar: runs reach act 3 as the base five's do, and each
+ratio within about 15%.
+
+## The prediction, graded
+
+"<the line>": **PREDICTED / MISS / SPLIT**, with the number that grades it.
+A SPLIT names the clause that failed.
+
+## Picks
+
+1. **<the call this suite feeds>.** (a) <default>. **Default.** (b) <other>.
+
+Raw transcripts: `review/qa/blindplay/<session>/` (local, gitignored).
+````
+
 ### Running one blind seat
 
 ```sh

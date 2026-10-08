@@ -7,7 +7,7 @@ Ruled R237 by [USER]'s own run of 2026-09-02, whose words are in that commit's m
 Written 2026-09-02, the night her prototype first ran. Prototype stage, so
 nothing here is a measurement (R217 G): the seats' words are feedback for
 iteration, the defect rows are the deliverable, and your act-one run is the
-gate (`review/active/kokomi-overhaul-slice-1-2026-09-01.md` §6).
+gate (`review/ruled/kokomi-overhaul-slice-1-2026-09-01.md` §6).
 
 ## 1. What ran
 

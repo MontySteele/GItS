@@ -182,7 +182,7 @@ stale the moment this merges.** Named:
 - **The act-1 clear rates in the richness / sitting reads** —
   `review/records/sitting-reads-2026-08-08.md` (salon 54.33%; priest 42.20%,
   commander 51.83%, assist 35.37%) and the same three Kokomi rates quoted in
-  `review/active/eb74-lever2-options-2026-08-13.md:119`. Act-1 clear is the
+  `review/ruled/eb74-lever2-options-2026-08-13.md:119`. Act-1 clear is the
   most HP-sensitive column on the board, so these move most.
 - **Furina's Fanfare-gate open rate** (the 22.4% comment in
   `docs/furina-cards.yaml`), per §6.

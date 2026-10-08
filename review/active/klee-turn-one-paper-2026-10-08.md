@@ -1,3 +1,5 @@
+Status: SUPERSEDED 2026-10-08 as a pick list by `review/active/klee-design-review-2026-10-08.md` (ruled); kept for its evidence.
+
 # Klee's turn one: a short paper, 2026-10-08
 
 **Superseded as a pick list by `review/active/klee-design-review-2026-10-08.md`**

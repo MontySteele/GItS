@@ -1,41 +1,32 @@
 # STATE
 
-What ships and what is next, rewritten 2026-09-23 after the design and
-process review (R276, the last R number; `review/ruled/*-review-2026-09-23.md`).
-Open picks for [USER] are in [`QUEUE.md`](QUEUE.md), engineering to-dos in
-[`BACKLOG.md`](BACKLOG.md), rules in [`LAW.md`](LAW.md). The older narrative is
-frozen in [`workstreams.md`](workstreams.md).
+What ships and what is next. Picks for [USER]: [`QUEUE.md`](QUEUE.md);
+to-dos: [`BACKLOG.md`](BACKLOG.md); rules: [`LAW.md`](LAW.md). Each kit keeps
+its current rules, pool and next step. Pass-by-pass history left on
+2026-10-08 and is in git (`git show bf073df4:docs/current/STATE.md`); Furina's
+v1 Stage is at tag `furina-stage-frozen-2026-10-04`; older narrative:
+[`workstreams.md`](workstreams.md).
 
 ## Mod build environment (pinned)
 
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
 `public-beta`), MegaDot v4.5.1, BaseLib **3.4.7.0**, .NET SDK 9.0.316, PCK
 contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
-**`MAJOR.AUTO`**. **Installed: `0.2.4456`** (2026-10-05, main after #927; the `+dirty` suffix is a tracked soak log, not code).
+**`MAJOR.AUTO`**. `tools/deploy_round.py` prints the installed version.
 
-**The current kits are the release build** (2026-09-28). [USER]: "The current
-character builds are much more progressed than the old prototypes were, even
-though it's still a work in progress. Let's go ahead and make all 3 current
-builds the active release builds to avoid this confusion."
-Every build carries them, unmarked: a plain `dotnet build`,
-`klee-mod\build\deploy.ps1`, and the `-Package` handoff zip. **The
-round's build is `tools/deploy_round.py`** (`deploy.ps1`, then the bridge).
-The old shipped kits are gone from both engines (legacy cleanup stages 5
-and 6, `review/active/legacy-cleanup-2026-10-01.md`): their C#, their sheets
-(`docs/*-cards.yaml`, `*-upgrades.yaml`, the companion sheets), the arm
-switches in C# and in the sim, and the engine pieces only their cards used.
-There is one C# test configuration, and the tier0 sim always runs the current
-kits; its calibration bands, measured on the shipped kits, are retired, and
-the sim does not gate kit balance (the measurement ruling, 2026-10-05). Every card is a `proto_` row on
-`docs/prototype-surface.yaml` (`operations/prototype.md`). **`+proto` now
-marks only a build that differs from the release**: `deploy_proto.ps1
--TeyvatFrame`, and the Teyvat frame is on hold (below). Each C# pool IS its
-prototype roster (legacy cleanup stage 4): the `proto_` rows are every pool's
-`GenerateAllCards`, the roster is the offer, and the 78 / Ancient / co-op
-counts are pinned (`KleeTests/Prototype/PoolCountTests.cs`); the companion
-roster is prototype rows only, Fontaine's sixteen ported as they are (pick 4,
-`proto_mf_`).
-**Last release package: `0.2.1357`**
+**The current kits are the release build** (2026-09-28; [USER]: "Let's go
+ahead and make all 3 current builds the active release builds to avoid this
+confusion."). Every build carries them, unmarked: a plain `dotnet build`,
+`klee-mod\build\deploy.ps1` and the `-Package` handoff zip. **A round's build
+is `tools/deploy_round.py`** (`deploy.ps1`, then the bridge); a Balance kit's
+staging build is `deploy_round.py --staging` (`+next`). The old shipped kits
+are gone from both engines (legacy cleanup stages 5 and 6,
+`review/active/legacy-cleanup-2026-10-01.md`). Every card is a `proto_` row on
+`docs/prototype-surface.yaml` (`operations/prototype.md`); each C# pool is its
+roster, and the 78 / Ancient / co-op counts are pinned in
+`KleeTests/Prototype/PoolCountTests.cs`. The tier0 sim always runs the current
+kits; its calibration bands are retired, and the sim does not gate kit balance
+(the measurement ruling, 2026-10-05). **Last release package: `0.2.1357`**
 (2026-08-29), which predates the ruling and carries the old kits.
 
 ## Roster
@@ -52,320 +43,96 @@ rewards and multiplayer cards; a smaller pool reads more reliable than it will
 be. Starter basics are never changed without [USER]'s pick; every kit's
 starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
 2026-09-28: "The characters' kits should all use basic Strike and Defend.").
+No kit starts with a companion card; that returns after the kits, with the
+reaction display (`EB-410`) and the companion slot as a draft choice.
 
 ## The kits (Paper, then Prototype, then Balance; `operations/stage-gate.md`)
 
-- **Klee: Balance (ruled 2026-10-03).** Brief `review/active/klee-brief-2026-09-01.md`.
-  The pool is 78; two seat rounds read it; [USER]'s co-op run (A0, 2026-09-24)
-  was "very fun ... the loop basically works"; the whole-pool balance review
-  shipped (`review/records/klee-balance-2026-09-25.md`), and idle-vs-short Sparks
-  is ruled "watch". Seat rounds in acts 2 and 3 (2026-09-26, Opus seats at
-  [USER]'s request): five whole runs, two wins, fixes in #697 and #701;
-  `review/records/klee-later-acts-2026-09-26.md`, one pick open (the React
-  loop's aura supply). [USER]'s solo verdict run (2026-10-01, died mid act 2
-  on a three-elite route, "misplays on my part"): "no bad notes here, Klee
-  seems to work basically as designed and the core gameplay loop was indeed
-  fun and interesting, with a challenge around bomb management"; Sparks
-  "only really matter if you're trying to let your bombs cook ... I never
-  really felt pressed for them." **The status package (2026-10-01, ruled,
-  built):** `review/active/klee-status-package-2026-10-01.md`. Eight cards in
-  (Dazed on the fair loaders, Confiscated on the busted ones, and the payoffs
-  that read them), eight cut, and Albedo's Klee stand-in is now Dust of
-  Purification; the pool stays 78, 24 / 33 / 21. **Its sec.5, defence in the
-  status pile (2026-10-01, ruled, built):** Up in Smoke! (Weak to ALL, a
-  Dazed), Behind Jean's Desk (14 Block, a Confiscated) and Kitchen Alchemy
-  (exhaust a status, ALL enemies lose 2 Strength) in for Fish-Flavored Bait,
-  Nova Burst and Spinning Sparkler; still 78, 24 / 33 / 21. Both engines.
-  Seat rounds on it (2026-10-02, `review/records/casket-and-klee-defence-round-2026-10-02.md`
-  and the overnight forced-deck round, `review/records/klee-forced-defence-round-2026-10-02.md`):
-  Kitchen Alchemy was unplayable as written and is now "ALL enemies lose 1
-  [2] Strength; exhaust every status in your hand, they lose 1 more for
-  each" (#830); after the forced-deck seats, Behind Jean's Desk is 11 [14],
-  Up in Smoke! costs 0 and Kitchen Alchemy's upgrade adds Retain (#831).
-  The tuned three were read on the same seeds
-  (`review/records/klee-tune-and-smoke-round-2026-10-02.md`): Behind Jean's
-  Desk settled (strong), Up in Smoke! fair, Kitchen Alchemy dead (played 2
-  times in about 26 hands). Klee has won 0 of the 9 seat runs since the
-  status package; she loses on Block at the boss turn, and Sparks pile up
-  unspent. The final pass is ruled and built in both engines
-  (`review/active/klee-final-pass-2026-10-02.md`): HP 70; Cover Your Ears!
-  in (0 Energy, 2 Sparks, Exhaust: ALL enemies lose 6 [8] Strength this
-  turn), Where Did I Put It? out; Blast Shield Common; pool 78, 24 / 33 /
-  21. Its seat round (`review/records/klee-final-pass-round-2026-10-02.md`,
-  0.2.4228, same seeds): both runs cleared act 1 for the first time, one
-  lost the act-2 boss with it at 11/321; seats now draft defence and spend
-  their Sparks in act 2. An Opus check on the same seeds
-  (`review/records/klee-opus-check-round-2026-10-02.md`): one run won,
-  Klee's first seat win since the status package; the other died in act 2
-  short of Block, as the Sonnet runs did. The finish line was met without a further run on
-  this build: after the finish-line batch and its pre-Balance round (`review/records/klee-prebalance-round-2026-10-04.md`, "nothing critical"), [USER] ruled Klee to Balance on 2026-10-03 ("Agreed all around!"). Her measurement plan is ruled (2026-10-05, `review/active/klee-balance-measurement-2026-10-05.md`): the base-character bar on the real game, and her build is frozen on `main` until each suite run; changes go to `klee-next`. **The Mondstadt
-  companion review (2026-10-03, ruled, built;
-  `review/active/mondstadt-companions-2026-10-03.md`):** Stellaris Phantasm,
-  Breastplate, Wind Spirit Creation and Fiery Rain retuned; Klee's 13
-  Klee-only companions resolved (4 to the shared pool, 6 cut, 3 into her own
-  pool for Second Surprise, Solitary Confinement and Once More!). Klee stays
-  78, 24 / 33 / 21; the shared Mondstadt roster is 39; no stand-ins remain.
-- **Kokomi: Plan stays; the cards change.** Brief
-  `review/active/kokomi-brief-2026-09-01.md`. New rule for the brief: the
-  now-line answers this turn, the Plan line buys something only a head start
-  can buy, never the same effect at two sizes. Next build: rewrite the 13
-  same-effect-bigger Plan cards (Kurage's Oath included), re-aim the five
-  per-Plan payoffs so at least half reward something other than volume, and
-  every damaging card of hers applies Hydro (Skills too; basics unchanged).
-  Pool stays 39 for this pass. Then two seats, then [USER] plays (a central
-  rule changed). **The Casket pass (2026-09-28, ruled):** the Tamakushi
-  Casket counts the Plans the Bake-Kurage carries out and deals Open the
-  Casket (1, Retain: Strength equal to the count, then empty it; it was 0
-  and Exhaust until 2026-10-01, the four-kit review's Kokomi pick 1);
-  its debuff strike is gone. Feint and Sango Isshin pay per carry-out this
-  turn, six rows cut, thirteen added: the pool is 46 (plus three co-op).
-  Shell Guard, whose strike clause the pass left dead, was re-aimed by the
-  main session to "Gain 5 Block, plus 1 for each point in the Casket".
-  Record: `docs/notes/prototype-surface-provenance.md`. **The cleanup pass
-  (2026-09-29):** both Sonnet runs died to act-2 bosses short of Block, so
-  Shell Guard is a Common and Tide Wall's Plan gains a flat 6 under the
-  intent; Scout Ahead and Song of Pearls are cut; Feint, Press the Advantage
-  and Driftglass hit harder. The pool is 44 (24 / 15 / 5). Brief §6.
-  **The feed pass (2026-09-29)**, on [USER]'s act-1 death ("her cards are
-  weirdly 'expensive'"; "some Plan cards need to go to 0 cost"): five 0-cost
-  Plan-only Commons (Bubble Ward, Nip, Jellyfish Drift, Current Read, Brine
-  Sting), eight now-and-Plan Commons moved to Uncommon, Coral Bulwark a plain
-  8 Block, Exposed Flank cut. The pool is 48 (20 / 23 / 5). Brief §6. Its
-  seat round (`review/records/kokomi-feed-round-2026-09-29.md`): energy is no
-  longer the wall, Block still is; one seat reached the act-3 boss.
-  **Expansion batch one (2026-09-29, ruled):** [USER] on the feed-pass
-  build: "I like it!"; card art redone (#770, no leg crops). Paper
-  `review/active/kokomi-expansion-2026-09-29.md`: four decks (Plan volume,
-  the Big Plan reading Energy paid, Tide Control, Dusk Guard), 22 cards (12
-  Uncommon, 10 Rare), Watatsumi's Grace replaces The Clouds Like Waves
-  Rippling; pool to 69. **Batch one is built** in both engines (the
-  22 rows, seven Powers, four Plan clauses, the `kokomi` op; readings and
-  the upgrades the paper leaves open in the provenance note, "expansion
-  batch one"); the pool is 69 (20 / 35 / 14). Its sim (paper §5,
-  `tools/kokomi_expansion_sim.py`, n = 400 paired, seed 7, stock priest
-  pilot): the stylised act 1 is lost at the first elite by every pilot
-  (0 to 0.2% act won), so the deck read is the full-deck gauntlet (every
-  act-1 elite and boss and act-2 boss at full HP). After the main
-  session's round (Undertide Lance 6 / 12, Grand Design 1 per Energy paid,
-  Brace+ cost 0 accepted): Plan volume 57.8% of fights won, Tide Control
-  51.5, the default drafter 50.1, Dusk Guard 48.4, Big Plan 47.7 (10.1
-  behind); every act-2 boss is lost. With Grand Design granted Big Plan
-  still trails volume (47.1 against 56.1). Dusk Guard with Grace and Coral
-  Crash never carries 30 Block into the enemy turn (0.1% of turns); 9.8% of
-  its gauntlet fights pass turn 15 (others about 1%), on too little damage
-  rather than a wall. All Streams Flow to the Sea is now cost 1 [0] and
-  regains the Energy paid for the Plans it cancels; still dead in the sim (7
-  plays in 252 fights, each multiplying its Plan to about 4 carry-outs --
-  the stock pilot rarely has 2 Plans waiting and a Plan card left).
-  **The payoff pass (2026-10-01, ruled):** on the co-op complaint ("no
-  payoff for playing lots of Plans", "short on block"), Second Thoughts is
-  cut ("an undo is a dead draw") and two Uncommons join: Kurage Canopy (Block
-  per carry-out) and Coral Tithe (the Casket into Energy and cards). The pool
-  is 70 (19 / 37 / 14). Brief §6; provenance note, "Kokomi payoff pass".
-  **Pool completion (2026-10-01, ruled at the defaults):** paper
-  `review/active/pool-completion-2026-10-01.md` sec.4 and sec.6, built in
-  both engines: Tidal Screen (Common), seven Rares (Spring Tide, Kurage
-  School, Shoal of Spears, Patient Tide, Sea's Reproach, Tidal Rebuke,
-  Watatsumi Resistance), two co-op cards (Tactical Relay, Kurage's Mercy),
-  Coral Crash to Common 1 [0]; her second Ancient, Divine Strategy, game-side.
-  The pool is 78 (21 / 36 / 21) plus five co-op cards and two Ancients.
-  Provenance note, "Pool completion, 2026-10-01"; sec.7's sim checks wait
-  (BACKLOG). **The status batch (2026-10-01, ruled):** paper
-  `review/active/kokomi-status-batch-2026-10-01.md`, built in both engines.
-  Six cards that answer statuses through the hand a Plan sees after the
-  draw (Kelp Wall, Tidecleanse, Sea Glass Harvest and its Sea Glass token,
-  Turning Tide, Flotsam Surge, Abyssal Salvage) and Riptide Ruin, the Rare
-  in the cut Coral Sanctuary's place, a second status source; Rally, Pearl
-  Diver, Battle Plan, Feigned Retreat, Moon Signal, Chain of Command and All
-  Streams Flow to the Sea cut. The pool is 78 (21 / 36 / 21). A Plan line
-  under a now-line prints "Or plan:" ("Or dusk plan:"), the starter's
-  included; a Plan-only card keeps "Plan:". The Plan tip opens "Instead of
-  the line above".
-  Provenance note, "Kokomi status batch, 2026-10-01". Next: [USER] plays.
-  **A Plan stays open (2026-10-01, ruled, built):** paper
-  `review/active/kokomi-delay-pays-2026-10-01.md`. When the Bake-Kurage
-  carries out a Plan from a two-line card, it is its Plan line (default)
-  or its now-line at printed size; Plan-only and Dusk Plans are unchanged; no
-  number moved. **Pick 5 (a), ruled the same day:** "Plans carry out on their
-  Plan line; click a waiting Plan to flip it." No screen: a click on a
-  waiting two-line Plan in the Plan strip flips it during her turn (a synced
-  game action), and the bridge's verb is `flip <n>`. **The Casket pays more
-  than once (four-kit review, Kokomi pick 1):** Open the Casket costs 1 and
-  has no Exhaust; What the Tokoyo Returns fetches it from the draw or discard
-  pile. [USER]: "if it's repeatable, it should probably cost energy, though,
-  to make this a real choice and not just button mashing when it comes up?"
-  Provenance notes, "A Plan stays open (Kokomi), 2026-10-01" and "Kokomi:
-  the Casket repeats, and the flip, 2026-10-01". Its seat round
-  (`review/records/casket-and-klee-defence-round-2026-10-02.md`, fixed seeds
-  with an Ironclad control): her first whole-run win, one act further on
-  both seeds, still about half the control's damage per turn on the same
-  boss; no seat flipped a Plan.
-  **The big-Plan pass (2026-10-04, built):** on a friend's solo run (every
-  Rare read as weak next to 0-cost Plans under Casket Strength), Strength
-  affects Masterstroke's Plan 3 times and Surging Shoal's Plan twice; the
-  Casket is unchanged. The expansion sim does not move (Big Plan 44.5
-  against volume 54.5; its pilot holds little Strength), so the sim's gap
-  has another cause. No seat round yet. Provenance note, "Kokomi big-Plan
-  pass, 2026-10-04".
-  **The Rare pass (2026-10-04, built):** from the same run. Shoal of Spears
-  is one hit of 4 per Plan written; Tidal Rebuke costs 1 [0] and has Retain;
-  The Moon, A Ship costs 1; Suffocating Deep applies 1 Weak and 1 Vulnerable
-  before it doubles; the Nips she is handed (Shoal Call, Watatsumi
-  Resistance, Kurage School's copies) Exhaust; Kurage Swarm reads "gains 1
-  more". Merged 2026-10-05 (#907); a whole-kit review and a seat round follow. Provenance note, "Kokomi Rare pass,
-  2026-10-04".
-  **The kit review (2026-10-05, built):** Ceremonial Garment costs 1 for 2
-  [3] per debuff, Deep Current deals 8 [11] to ALL, and Open the Casket+
-  also draws 1 card; Breakwater, Opening Gambit, Second Wave, Divine
-  Strategy, Tidecleanse and Tidal Resonance are reworded, no rule changed. Provenance note, "Kokomi kit review, 2026-10-05".
-  Next: [USER] plays (a central rule changed; co-op with a friend may stand
-  in); the damage gap is a paper after that run.
-  Its seat round (`review/records/kokomi-review-round-2026-10-05.md`, two baseline seeds): one run reached the final boss (Queen at 238/400 against the Silent's 38), one lost the act-2 boss; Deep Current landed; the damage gap stands. Tide Wall's Plan now says "next turn" and Sea Glass Harvest's Block is 8 [11].
-- **Furina: the Salon's Tab is built (2026-10-05).** The research proposal (`review/active/furina-research-proposal-2026-10-05.md`, sec.2 rules, sec.16 slice and curtain call, sec.17's two edits) replaces the re-founded Stage in place; [USER]: "the current one built overnight can be discarded". Furina pays HP for power: Drain spends HP down to a line at half the HP she entered combat with, Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every drained HP returns when combat ends. Three guest seats; seven guests. The pool is the starter and 34 cards, not 78: the slice's 24 and the pool to 39's ten (`review/active/furina-pool-40-2026-10-05.md`, ruled and built 2026-10-05; Universal Revelry reads Drain and Repay again, not hits). Relics and potions are Opera Glasses, Grand Theater Program and Bottled Applause, beside Salon Solitaire ("At the end of your turn, Repay 2."). The tier0 arm runs on `tier0/engine/furina_tide.py`. Deployed. Two seat rounds read it: `review/records/furina-tab-round-2026-10-05.md` (one act-2 clear, every seat on Revelry plus Bravura) and, after the pool went to 34, `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one won; act-3 HP and an unread Repay plan are the open questions). Next: [USER]'s play (a rule change). Provenance note, "Furina: the Salon's Tab, 2026-10-05". The v1 Stage and its history (first run, supporting pool, audit, fade and rules passes) are at the tag `furina-stage-frozen-2026-10-04`.
+Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
 
-- **Varka: the Oath rework is built (Prototype, 2026-09-29).** Paper
-  `review/active/varka-paper-kit-2026-09-28.md`, every pick ruled ([USER]:
-  "I'm good with all of these Varka defaults"). A new character with no
-  switch of his own (collapsed 2026-10-01): he compiles in every build.
-  80 HP, 99 gold;
-  starter base Strike x4, Defend x4, Windbound Execution (since 2026-10-03:
-  cost 0, 4 [6] Anemo to one enemy) and one of four starter-only Knights,
-  one per element, rolled per run; starting relic
-  Boreas's Fang. The rules (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`,
-  sim twin `tier0/engine/varka_oath.py`, live for a Varka seat): one Oath count
-  per element, counted per card; his current element is his last Knight's,
-  or since the open Oath (2026-09-30, [USER]: "Yep, let's ship it and see if
-  anything breaks") the last Pyro, Hydro, Cryo or Electro any card of his
-  applied, and his cards read only its Oath; a Swirl he makes pays that element (Pyro 3
-  damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL); the Fang adds
-  Four Winds' Ascension to his hand the first time each combat he gains Oath
-  (since 2026-10-03: cost 2 with Retain, like Regent's Sovereign Blade, 10
-  [13] Anemo then 3 [4] per Oath).
-  His status bar shows the current element's Oath; the seat page prints the
-  current element, all four counts and the Swirl payout. Pool 41 (15 / 18 /
-  8), nine Knights. Absorb, the Winds and Knights' Muster are retired. The
-  Lisa floor moved to 4 [5] after the R6 sim (#768). Per-row readings:
-  `docs/notes/prototype-surface-provenance.md`, "Varka: the Oath rework".
-  Batch one's round (`review/records/varka-round-1-2026-09-29.md`) read the
-  old design. The Oath build's seat round
-  (`review/records/varka-oath-round-2026-09-29.md`): two seats, one won the
-  run, one died in act 2. Next: [USER] plays.
-  The open-Oath round (`review/records/varka-open-oath-round-2026-10-01.md`):
-  one win, one loss to the act-2 Entomancer elite.
-  **The expansion (2026-10-01, ruled):** paper
-  `review/active/varka-expansion-2026-10-01.md`, [USER]: "Agreed on all four.
-  You're good to proceed." Each element has a job (its Swirl payout's) and
-  two payoffs that read its own Oath by name; the Knight pass gives each
-  element one defensive Knight; Muster is six cards. **Sec.3 is built** in
-  both engines: 37 cards (5 / 17 / 15), the Knight pass (Diluc, Gleeful
-  Songs, Heart of the Abyss, Suppressive Barrage, Awakening re-aimed), Noelle
-  a Geo Knight that keeps his element, Downburst's fresh spread (pick 3a).
-  The pool is 78 (20 / 35 / 23), thirteen pool Knights. Readings:
-  provenance note, "Varka expansion, 2026-10-01". His seven relics and three
-  potions (sec.4) are built too (#787). The sec.5 paired sim (#789) and two
-  Sonnet seats (`review/records/varka-expansion-round-2026-10-01.md`) ran.
-  **Element identities (2026-10-01, ruled):** paper
-  `review/active/varka-element-identities-2026-10-01.md`, [USER]: "Overall
-  looks reasonable, though Violet Storm looks undertuned" (raised to 8 [11],
-  an Attack). Built in both engines: Electro draws and hits low, discards
-  into Energy in the middle and spends at Rare (Charged Lunge, Short Circuit,
-  Chain Lightning, Thundering Verdict at X, Violet Storm, in place of
-  Updraft, Pressure Front, Unfurled Banner and Four Winds' Accord);
-  Retaliating Tide replaces Unbroken Tide; Wildfire Oath is one big hit
-  (since 2026-10-03 it deals his Pyro Oath to each enemy he applies Pyro
-  to, and Short Circuit discards 2, draws 2 [3] and gains 1 Energy:
-  provenance note, "Varka Wildfire Oath and Short Circuit, 2026-10-03"); a
-  card that would switch his element says so on hover, and the element he
-  left shows beside his badge for the turn. Pool still 78 (20 / 35 / 23).
-  The sim: Electro mono still 21.7 behind the default drafter in act 1, and
-  the stock pilot never sequences a discard into Short Circuit's Energy or
-  Chain Lightning's discount, so the sim does not read Electro's middle.
-  Readings and the tables: provenance note, "Varka element identities,
-  2026-10-01".
-  **Defence (2026-10-01, ruled):** paper
-  `review/active/varka-defence-2026-10-01.md`, [USER]: "Everything else
-  looks good!" Built in both engines: Gale Mantle (C, 5 [8] Block plus half
-  his total Oath), Gust Ward (U, 0: 4 [6] Block, draw 1) and Windborne
-  Resolve (U, Power: 5 [7] Block whenever his element changes) replace
-  Squall, Four Banners and Favonian Standard; Oathbound Aegis gives half his
-  total Oath at turn end, uncapped, upgrade cost 2 to 1; Tailwind Guard
-  unchanged. Boreas's Fang makes the starter Knight's element current on
-  his first turn, so the badge shows it from turn one. Pool still 78 (20 /
-  35 / 23). The Block probe: the default drafter's act-3 elite Block over
-  incoming 0.55 to 0.60 (the paper's bar was 0.72), the switch deck's 0.53
-  to 0.66, Hydro mono 1.49 at most; act-3 boss turn-cap stalls rose; the
-  stock drafter never takes Gust Ward. Readings and the tables: provenance
-  note, "Varka defence, 2026-10-01".
-  **The starter seat round (2026-10-03,
-  `review/records/varka-starter-round-2026-10-03.md`):** on the rebalance
-  round's two seeds, both runs reached the final boss and died there (last
-  round: act 2 and floor 42); Windbound was no seat's NEVER AGAIN, and
-  holding Ascension became a named decision.
-  **The combo pass is built (2026-10-04,
-  `review/active/varka-combo-pass-2026-10-04.md`, RULED, all four picks):**
-  five generic Block cards out (Gale Mantle, West Wind Shield, Knightly
-  Guard, Tailwind Guard, Oath of the Knights); Pyro's Exhaust engine in
-  (Stoke the Flames, Ember Cleave, Pyre Oath) and Cryo's status payoffs
-  (Icebreaker, named Shatter until 2026-10-05, Deep Freeze); Unwavering Banner reworded to pay 1 Oath when it
-  holds a switch; Baron Bunny's hit to a random enemy; Charge of the Knights
-  cost 1, Lion's Fang and Four Winds' Ascension upgrade to cost 1, Kaeya and
-  Razor Attacks, two faces reworded. Pool 78 (20 / 35 / 23). The sim missed
-  the paper's "Pyro and Cryo up" bar (Pyro -15, Cryo flat; the stock pilot
-  prices an Exhaust at nothing) and Deep Freeze's upgrade (cost 0) is the
-  builder's proposal: provenance note, "Varka combo pass, 2026-10-04".
-  Its seat round (`review/records/varka-combo-round-2026-10-05.md`): the Block cut landed, one run cleared act 2; Pyro Exhaust paid nothing off-element and no seat built Cryo. Fixed from it (#917): Stoke the Flames makes Pyro current, Shatter renamed Icebreaker, Tempest Charge's draw checked (it works). The second round on the same seeds (`review/records/varka-r6-round-2026-10-05.md`, Ironclad control): one run reached the final boss (the Queen at 93/400), one lost the act-2 boss again with it at 85/379; still no seat drafted Pyro or Cryo. Cycle of Seasons is now 7 [10] (NEVER AGAIN two rounds running). Next: a round on seeds whose starter Knight is Pyro or Cryo, and [USER]'s next Varka run.
+- **Klee: Balance (ruled 2026-10-03; [USER]: "Agreed all around!").** Brief
+  `review/active/klee-brief-2026-09-01.md` (sec.3, the rules: Bombs grow at the
+  start of her turn and go off only to a *Set off* card or a Mine answering an
+  attack; each Bomb that goes off gives a Spark, which some cards cost). Pool
+  78 (24 / 33 / 21); seven relics of her own and three potions. **She is
+  measured on the real game and frozen on `main`** between suite runs
+  (`review/active/klee-balance-measurement-2026-10-05.md`, ruled 2026-10-05):
+  changes go to `klee-next` and reach `main` in one promotion PR carrying the
+  suite record.
+  **Staging:** branch `klee-next`, build `0.2.4556+next` (the design review);
+  latest record `review/records/klee-suite-4-2026-10-08.md`, suite 5 in
+  progress; papers `review/active/klee-tempo-paper-2026-10-07.md` and
+  `review/active/klee-design-review-2026-10-08.md` (ruled; growth 4 to 2,
+  three opening Sparks). Next: suite 5; if it passes, the promotion PR and
+  [USER]'s run on that build (design review pick 5).
+- **Kokomi: Prototype.** Brief `review/active/kokomi-brief-2026-09-01.md`
+  (sec.2, the rules). A card with a Plan line can be played on the
+  Bake-Kurage instead, and it is carried out at the start of her next turn,
+  after the draw; the line prints "Or plan:" under the now-line. When it
+  carries out a two-line Plan it uses the Plan line, and a click on a waiting
+  Plan flips it to the now-line (`review/active/kokomi-delay-pays-2026-10-01.md`).
+  The Tamakushi Casket counts the Plans carried out; Open the Casket (cost 1,
+  Retain, no Exhaust) gives Strength equal to the count and empties it. Pool
+  78 (21 / 36 / 21) plus five co-op cards and two Ancients; relics are the
+  Casket and its upgrade beside the Silent's borrowed roster. Latest round
+  `review/records/kokomi-review-round-2026-10-05.md`: one run reached the
+  final boss, one lost the act-2 boss; the damage gap against
+  the control stands. Next: [USER] plays (a central rule changed; co-op with a
+  friend may stand in); the damage gap is a paper after that run.
+- **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
+  research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
+  sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
+  "the current one built overnight can be discarded". Furina pays HP for
+  power: Drain spends HP down to a line at half the HP she entered combat with,
+  Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every
+  drained HP returns when combat ends. Three guest seats; seven guests. The
+  pool is the starter and 34 cards, not 78
+  (`review/active/furina-pool-40-2026-10-05.md`, ruled and built). Relics: the
+  starter Salon Solitaire ("At the end of your turn, Repay 2."), its Orobas
+  upgrade The Curtain Never Falls (Ancient, never rolled), and two reward
+  relics, Opera Glasses and Grand Theater Program; one potion, Bottled
+  Applause (`FurinaRelicPool.cs`, `ArmPotions.cs`). Sim twin
+  `tier0/engine/furina_tide.py`. Latest round
+  `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one
+  won; act-3 HP and an unread Repay plan are open). Next: [USER]'s play (a
+  rule change).
+- **Varka: Prototype, the combo pass built (2026-10-04).** Rules
+  `review/active/varka-paper-kit-2026-09-28.md` sec.3
+  (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`, sim twin
+  `tier0/engine/varka_oath.py`). 80 HP, 99 gold; starter base Strike x4,
+  Defend x4, Windbound Execution (0: 4 [6] Anemo) and one of four
+  starter-only Knights, one per element, rolled per run; starting relic
+  Boreas's Fang, which adds Four Winds' Ascension (2, Retain: 10 [13] Anemo
+  then 3 [4] per Oath) the first time each combat he gains Oath. One Oath
+  count per element; his current element is that of his last Knight or of the
+  last Pyro, Hydro, Cryo or Electro any card of his applied, and his cards
+  read only its Oath. A Swirl he makes pays that element (Pyro 3 damage,
+  Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL). Pool 78 (20 / 35 / 23),
+  thirteen pool Knights; his own relics and three potions. Latest records
+  `review/records/varka-r6-round-2026-10-05.md` and
+  `review/records/varka-solo-check-2026-10-07.md` (1 win of 5 on the base
+  seeds; the solo check ran three Cryo starts and one Pyro start). Next:
+  [USER]'s next Varka run; the next record lists each seat's starter Knight.
 
-**Klee's and Furina's own relics and potions** (paper
-`review/active/relics-potions-klee-furina-2026-09-27.md`, ruled at the defaults
-with the two Rare potions raised) are built behind their arms, which every build
-carries since 2026-09-28: seven relics and
-three potions each, the Silent borrow gone under the arm, Dodoco Tales repaired
-and The Curtain Never Falls rebuilt for the Stage (Salon Solitaire's Orobas
-upgrade now). Arm off, both pools are as they shipped; Kokomi keeps the Silent
-borrow until her review pass. Next: a seat round with the relics given at
-embark.
+## Elements
 
-**The element port, phase one (2026-09-28)** (`review/ruled/element-home-review-2026-09-28.md`
-§3, §4, §7.1, §7.3; [USER]: "That makes sense"). Anemo and Geo no longer
-consume the aura they act on: a hit on a fresh aura reacts and leaves it
-standing, spent; a hit on a spent aura pays nothing until the aura's own
-element refreshes it. Swirl keeps the aura, spreads spent copies to every
-enemy lacking it, refreshes the aura (full duration, fresh, no reaction) on
-every enemy already wearing it (amended 2026-10-01) and deals a flat 2 to
-every enemy; Crystallize gives its 4
-Block and keeps the aura. The badge and the reaction preview say when an aura
-is spent, and every reaction reports one event (reaction, target, dealer,
-source kind). **2026-10-03: spent removed.** [USER]: "Should we get rid of
-the concept of elements being 'spent' after a swirl? It seems to generate
-confusion." then "agreed ... please proceed". Every reaction now consumes its
-aura, Swirl and Crystallize included. A Swirl still pays what it paid (the
-flat 2 to every enemy and Varka's payout) and spreads ordinary fresh copies
-to the other enemies (one already wearing the element refreshes; another
-aura is replaced). A copy is an application with no trigger, so it never
-reacts by itself. Because copies are fresh, a Swirl that hits ALL enemies
-pays once per enemy still wearing an aura when its Anemo hit lands. The
-badge's spent face, the spent previews and `CrystallizeKeepsAura` are gone;
-one switch is left, `-p:SwirlPays=false` (`klee-mod/KleeCode/Elements/TriggerRules.cs`),
-sim twin `C.SWIRL_PAYS`, off until its retest. Downburst lost its "copies
-arrive fresh" clause; its new rider (2026-10-04) is "If it Swirls, gain 2
-Oath of the element Swirled." Next: phase two
-(Burning and Dendro, `BACKLOG.md`).
-
-All three prototypes start with no companion card. Whether each starts with
-one comes back after the kits, with the reaction display (`EB-410`) and the
-companion slot as a real draft choice.
+Every reaction consumes its aura, Swirl and Crystallize included; there is no
+spent aura (2026-10-03, [USER]: "Should we get rid of the concept of elements
+being 'spent' after a swirl? It seems to generate confusion." then "agreed ...
+please proceed"). A Swirl deals a flat 2 to every enemy and spreads ordinary
+fresh copies of the aura to the other enemies (one already wearing the element
+refreshes; another aura is replaced); a copy is an application with no
+trigger (phase one: `review/ruled/element-home-review-2026-09-28.md`). One
+switch is left, `-p:SwirlPays=false` (`Elements/TriggerRules.cs`), sim twin
+`C.SWIRL_PAYS`, off in the sim until its retest. Next: phase two (Burning and
+Dendro, `BACKLOG.md`).
 
 ## The Teyvat run frame: on hold
 
-Built and behind `TeyvatFrame`, OFF in every release package; nothing
-deleted, no further work. Six dressed faces (two nations per act), 122
-dressed events, 149 dressed enemy slots, 27 music slots
-(`operations/act-assets.md`, `operations/media.md`). It is off in every
-build, dev included: [USER] dropped the whole arm because the first draft
-(image, music and enemy art replacement) "wasn't very interesting". A later
-item is to "figure out what we actually want to do with those assets". It comes back only as
-**elemental enemies**: when the three kits are done, a short brief on
-elemental shields goes to [USER] before any build.
+Built behind `TeyvatFrame`, off in every build; nothing deleted, no further
+work (`operations/act-assets.md`, `operations/media.md`). [USER]: the first
+draft "wasn't very interesting". It returns only as **elemental enemies**: a
+short brief on elemental shields goes to [USER] when the kits are done.
 
 ## Live cell
 
@@ -383,5 +150,4 @@ gate it. They describe the shipped world, and the calibration bands are retired
 | `C` `CONSTANTS_VERSION` | **22** | `tier0/constants.py` | Undercurrent costs 1 (2026-09-25). |
 
 The standing twelve-arm baseline (`review/records/sitting-reads-2026-08-26-c20-d18-p11.md`)
-is an `RT12` read and owes a re-baseline (`BACKLOG.md` `EB-195`).
-
+is an `RT12` read; its re-baseline (`EB-195`) is parked (`BACKLOG.md`).

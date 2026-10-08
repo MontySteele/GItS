@@ -299,7 +299,7 @@ The starter is unchanged. Rows, art and the sim read:
 
 ### Expansion batch one (2026-09-29)
 
-Paper `review/active/kokomi-expansion-2026-09-29.md`, every pick ruled at the
+Paper `review/ruled/kokomi-expansion-2026-09-29.md`, every pick ruled at the
 default ([USER]: "The defaults work here"): four decks (Plan volume, the Big
 Plan reading the Energy paid for the Plans waiting, Tide Control, Dusk Guard),
 22 cards, 12 Uncommon and 10 Rare, and Watatsumi's Grace replaces The Clouds
@@ -335,7 +335,7 @@ every 3 in it", every 2 upgraded; nothing without a Casket). The pool is 70:
 
 ### The status batch (2026-10-01)
 
-Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled ([USER]: "the
+Paper `review/ruled/kokomi-status-batch-2026-10-01.md`, ruled ([USER]: "the
 7 removals are good"; "Agreed on the Plan text change"). Both seats on the
 78-card build died at the act-1 boss with hands clogged by statuses. Rule 2
 resolves a Plan after the draw, so a Plan can answer the hand about to be

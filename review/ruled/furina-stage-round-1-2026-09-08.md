@@ -1,4 +1,4 @@
-Status: OPEN (no pick; one E default applied, §5; six rows, §6)
+Status: CLOSED. It read the v1 Stage, now frozen at tag `furina-stage-frozen-2026-10-04`. History only.
 
 # Furina, the Stage: round one, read
 
