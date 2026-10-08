@@ -1849,13 +1849,11 @@ def random_companion_pool(state: CombatState) -> list[Card]:
 
 def add_random_companions(state: CombatState, amount: int) -> int:
     """Tag Along and Adventure Club: `amount` random Companion cards into the
-    hand, free this turn. `KleeExpansion.AddRandomCompanions`'s twin (the
-    stand-in hand-off included). Returns how many arrived."""
+    hand, free this turn. `KleeExpansion.AddRandomCompanions`'s twin.
+    Returns how many arrived."""
     if not live(state) or amount <= 0:
         return 0
     import copy                                     # stdlib, local by habit
-    from tier0.content import loader                # late import: cycle
-    from tier0.engine import companion_standins     # late import: cycle
 
     pool = random_companion_pool(state)
     if not pool:
@@ -1865,8 +1863,7 @@ def add_random_companions(state: CombatState, amount: int) -> int:
         if len(state.player.hand) >= C.MAX_HAND_SIZE:
             break
         pick = state.rng.choice(pool)
-        cid = companion_standins.hand_off(pick.id, state.player.character_id)
-        card = copy.deepcopy(loader.get_card(cid) if cid != pick.id else pick)
+        card = copy.deepcopy(pick)
         card.free_this_turn = True
         state.player.hand.append(card)
         state.emit("ko_random_companion", card=card.id)

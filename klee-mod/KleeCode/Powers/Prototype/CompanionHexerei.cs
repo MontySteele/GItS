@@ -20,12 +20,10 @@ namespace KleeMod.Powers;
 /// <summary>
 /// THE COMPANION READERS AND THE WITCH FAMILY STAND-INS (QUARANTINED, two arms).
 ///
-/// Four stand-ins on the seam <see cref="CompanionStandIns"/> opened, and this
-/// file exists for that file's reason: a quarantined arm's whole behaviour
-/// should be greppable in one place. That one holds the SEAM (the pair table,
-/// the hand-off) and the four CARETAKERS' rules; this one holds the four FAMILY
-/// stand-ins' rules and the one question every reader of a Companion play
-/// asks.
+/// Four former stand-ins (the stand-in seam was emptied 2026-10-03 and deleted
+/// 2026-10-08), and this file exists so an arm's whole behaviour is greppable
+/// in one place: it holds the four FAMILY cards' rules and the one question
+/// every reader of a Companion play asks.
 ///
 /// WHAT A FAMILY STAND-IN IS. The caretakers read the Klee overhaul's explosion
 /// ledger, which is what a caretaker is for. These four read the REACTION,

@@ -17,7 +17,6 @@ from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.content import yaml_memo
-from tier0.engine import companion_standins
 from tier0.engine import furina_stage
 from tier0.engine import state as state_mod
 from tier0.engine import varka_oath
@@ -363,10 +362,34 @@ def _validate_card_shape(c: Card) -> None:
     _validate_plan_dusk(c)
     _validate_basic_tag(c)
     _validate_no_upgrade_shape(c)
-    # THE STAND-IN SEAM's own two-line schema rule (`replaces:` is prototype
-    # surface only, and it needs a `personal_pool:`), stated where the arm's
-    # rules are rather than as a fourth `_validate_*` in this file.
-    companion_standins.validate_row(c)
+    _validate_replaces_shape(c)
+
+
+def _validate_replaces_shape(card: Card) -> None:
+    """`replaces:` is prototype surface only, and an arm's map must name it.
+
+    The one legal shape is a SUBSTITUTION: a row swapped in for everybody
+    playing the arm, at the offer door (`declared_pool_substitutions`) or at
+    the printed starter (`declared_starter_substitutions`). A `replaces:` row
+    that neither map names can never be dealt or offered, so it raises. (The
+    other shape, a companion stand-in handed to one character, left with the
+    empty stand-in seam on 2026-10-08.)
+    """
+    if card.replaces is None:
+        return
+    if not card.id.startswith(PROTOTYPE_ID_PREFIX):
+        raise ValueError(
+            f"card {card.id!r}: `replaces:` is prototype surface only -- a "
+            f"shipped row may not replace another card (ids on that "
+            f"surface carry {PROTOTYPE_ID_PREFIX!r})")
+    if (declared_pool_substitutions().get(card.replaces) == card.id
+            or declared_starter_substitutions().get(card.replaces)
+            == card.id):
+        return
+    raise ValueError(
+        f"card {card.id!r}: `replaces:` needs an arm's pool- or "
+        "starter-substitution map to name it -- a row that replaces another "
+        "and is in no arm's map can never be dealt or offered at all")
 
 
 def prototype_cards(sheet: Path | None = None) -> list[Card]:
@@ -467,8 +490,7 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # Only the mod loads an image (`RosterArt.CardPortrait` keys on the id
         # the emitter prints), tier0 has no art and never will, so a field on
         # `Card` would be one the engine carries and nothing reads.
-        # `replaces:` is KEPT, because the sim's stand-in hand-off is a rule
-        # and reads it (`tier0.engine.companion_standins`).
+        # `replaces:` is KEPT, because `_validate_replaces_shape` reads it.
         # THE CO-OP SET: `multiplayer:` is stripped for `description:`'s
         # reason -- it is a fact about who the GAME may offer the card to
         # (`CardMultiplayerConstraint.MultiplayerOnly`), and tier 0 seats one
@@ -1135,11 +1157,8 @@ def declared_pool_substitutions() -> dict[str, str]:
 
     `_pool_substitutions` answers "what does this run swap"; this answers "what
     id is a pool substitution at all", which is a schema question and therefore
-    flag-blind. Its one caller is `companion_standins.validate_row`, which has
-    to tell the surface's TWO meanings of `replaces:` apart: a stand-in (handed
-    to one character in place of a Universal, and carrying a `personal_pool:`)
-    from a pool substitution (swapped in at the offer door for everybody
-    playing the arm, and carrying none).
+    flag-blind. Its one caller is `_validate_replaces_shape`, which accepts a
+    `replaces:` row only when an arm's map names it.
 
     Derived from the same maps the branch above reads, so an arm cannot have
     a substitution here that the run does not make, or the reverse.
@@ -1151,9 +1170,8 @@ def declared_starter_substitutions() -> dict[str, str]:
     """Every arm's `{shipped id: prototype id}` STARTER map, FLAGS IGNORED.
 
     The twin of `declared_pool_substitutions` above at the other door, and it
-    exists for the same caller and the same reason. `validate_row` has to
-    accept a `replaces:` row that carries no `personal_pool:`, and until R254
-    every such row was a POOL substitution -- so the pool map alone was the
+    exists for the same caller and the same reason. Until R254 every
+    `replaces:` row was a POOL substitution -- so the pool map alone was the
     whole answer. The Furina Stage's starter rows
     (`furina_stage.STARTER_SUBS`) are swapped in at the printed starter and
     never offered, and asking the pool map about them would be asking the
@@ -1552,10 +1570,6 @@ def reset_caches() -> None:
     upgrades._upgrade_index.cache_clear()
     upgrades._shipped_upgrade_index.cache_clear()
     upgrades._prototype_upgrade_index.cache_clear()
-    # The stand-in map is derived from the surface (`replaces:` +
-    # `personal_pool:`), so it is a memoized view of the content tree like the
-    # rest and belongs behind the same one door.
-    companion_standins._replacements.cache_clear()
 
 
 #: `EB-569`. THE MEMOIZED VIEWS WHOSE ANSWER MOVES WITH AN ARM FLAG.

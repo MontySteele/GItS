@@ -95,7 +95,8 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `tier0/engine/furina_tide.py`. Latest round
   `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one
   won; act-3 HP and an unread Repay plan are open). Next: [USER]'s play (a
-  rule change).
+  rule change). At her finish line, re-ask her motion look (`AS2-B5`, dropped
+  from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).
 - **Varka: Prototype, the combo pass built (2026-10-04).** Rules
   `review/active/varka-paper-kit-2026-09-28.md` sec.3
   (`klee-mod/KleeCode/Powers/Prototype/VarkaOath.cs`, sim twin
@@ -131,7 +132,7 @@ Dendro, `BACKLOG.md`).
 ## The Teyvat run frame: on hold
 
 Built behind `TeyvatFrame`, off in every build; nothing deleted, no further
-work (`operations/act-assets.md`, `operations/media.md`). [USER]: the first
+work (`operations/teyvat-frame.md`). [USER]: the first
 draft "wasn't very interesting". It returns only as **elemental enemies**: a
 short brief on elemental shields goes to [USER] when the kits are done.
 

@@ -1,10 +1,9 @@
 """THE HEXEREI FAMILY STAND-INS -- the four rules, the hand-off, the flag.
 
 Four Klee-only cards handed to Klee in place of four Hexerei Universals (R236
-sec.3), on the seam `test_companion_standins.py` pins. That file owns the SEAM
-(no pool holds a stand-in, the odds do not move, the hand-off is the identity
-with the flag off); this one owns what these four DO, plus the two claims the
-seam's own file makes per stand-in and this slice must make again:
+sec.3), on the stand-in seam (deleted 2026-10-08, project review pick 3; none
+of the four is a stand-in since 2026-10-03). This file owns what these four
+DO:
 
   1. EACH RULE FIRES ON ITS OWN EVENT AND ON NO OTHER. Albedo pays on any
      reaction, Sucrose only on one that deals damage, Fischl only on an Electro
@@ -23,7 +22,6 @@ import pytest
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import companion_hexerei as hexerei
-from tier0.engine import companion_standins as standins
 from tier0.engine import effects, reactions
 from tier0.tests.conftest import make_enemy, make_state
 
@@ -45,7 +43,6 @@ def _caches_clear():
     from tier05 import rewards
 
     loader.reset_arm_caches()
-    standins._replacements.cache_clear()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()
     rewards.five_star_roster.cache_clear()
@@ -97,7 +94,6 @@ def test_the_four_left_the_stand_in_seam(overhaul):
         assert card.personal_pool is None, cid
         assert card.replaces is None, cid
         assert card.is_companion, cid
-        assert cid not in C.COMPANION_STANDIN_IDS
     shared = set(FAMILY) - {"proto_mc_albedo_dust_of_purification"}
     assert shared <= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
     assert "proto_mc_albedo_dust_of_purification" in C.KLEE_OVERHAUL_POOL_IDS

@@ -18,7 +18,7 @@ from functools import lru_cache
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import combat, companion_standins
+from tier0.engine import combat
 from tier0.engine.state import Card
 
 # The calibration references draft only from their own pool. For
@@ -508,14 +508,6 @@ def roll_rewards(rng: random.Random, character_id: str,
             else:
                 while rarity not in comps:
                     rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
-            # THE STAND-IN HAND-OFF (`C.COMPANION_OVERHAUL`), on
-            # the PICKED id and not on `comps` above, which is the whole reason
-            # the offer odds cannot move: the candidate lists, the weights and
-            # both rng draws are the Universal's own, and the swap happens
-            # after all three. Klee is handed her stand-in where she would have
-            # been handed the Universal; every other character, and every
-            # flag-off tree, gets the id unchanged.
             pick = _nation_weighted_choice(rng, comps[rarity], home).id
-            offers.append(loader.get_card(
-                companion_standins.hand_off(pick, character_id)))
+            offers.append(loader.get_card(pick))
     return offers

@@ -540,10 +540,6 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     # upgrades every one.
     reachable |= set(C.INAZUMA_OVERHAUL_PERSONAL_IDS)
     reachable |= set(C.COVEN_PERSONAL_POOL_IDS)
-    # The stand-ins are in NO pool by design (see `COMPANION_STANDIN_IDS`),
-    # and they are still REACHABLE: the hand-off puts one in a deck, and a
-    # card in a deck must have a campfire answer like any other.
-    reachable |= set(C.COMPANION_STANDIN_IDS)
     # VARKA's OATH REWORK has no switch (he ships nowhere else; collapsed
     # 2026-10-01): the loader's door is always open for every `proto_vk_`
     # row -- his starter, his pool and the cards his rules create -- so each

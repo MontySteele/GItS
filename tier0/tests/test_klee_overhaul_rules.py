@@ -2017,8 +2017,8 @@ def test_is_set_off_card_reads_the_row(overhaul):
 # (`review/ruled/klee-overhaul-round-9-2026-09-04.md`, pick 1 at its default)
 # ---------------------------------------------------------------------------
 #
-# Four rows in Klee's own pool plus one companion stand-in (Barbara's, pinned
-# with the rest of the seam in `test_companion_standins.py`). The round-9 run
+# Four rows in Klee's own pool plus one companion stand-in (Barbara's, cut
+# 2026-10-03; the seam itself was deleted 2026-10-08). The round-9 run
 # died on act-2 floor 22 with no Block in hand, and the brief's own weakness
 # stands -- so every row here is keyed to the Bomb state and none is a plain
 # Block. The C# twins are `klee-mod/KleeTests/Prototype/DefenceShelfTests.cs`,

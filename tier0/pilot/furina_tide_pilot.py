@@ -1,9 +1,9 @@
 """The research slice's pilots -- INSTRUMENTS, not balance verdicts.
 
 `review/active/furina-research-proposal-2026-10-05.md` sec.10 and sec.16. One
-greedy pass per card, the shape of `furina_v2_pilot`: every playable card gets
-a value in damage-equivalent points divided by its Energy (a 0-cost card
-counts as half), and the best is played while its value is above
+greedy pass per card, the shape of the retired `furina_v2_pilot`: every
+playable card gets a value in damage-equivalent points divided by its Energy
+(a 0-cost card counts as half), and the best is played while its value is above
 `PLAY_FLOOR`. A single-card lethal is played first. The same value model
 makes the in-card choices (Drain or not, Spend or not) for the JUDGED pilot,
 and the play-or-hold choice on a fixed-price card.

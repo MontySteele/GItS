@@ -4,13 +4,13 @@
     .venv/Scripts/python.exe -m tier0.harness.furina_tide_probe --runs 1000 --jobs 0 --curtain
 
 `--curtain` is sec.16's read: the curtain call (the default rule) against
-`no_curtain_call` and the `legacy` baseline, with `ref:v2` and `ref:ironclad`.
+`no_curtain_call` and the `legacy` baseline, with `ref:ironclad`.
 
 `--picks` is the pool-40 paper's read (sec.5 item 3): over the same draft
 seeds, how often each card was offered and how often the draft took it when
 it was, so a dominant or a dead card shows.
 
-WHAT A RUN IS. The `furina_v2_probe` spine, unchanged: a FIXED deck (no
+WHAT A RUN IS. The retired `furina_v2_probe` spine: a FIXED deck (no
 draft, no relic but Salon Solitaire, no potions, no upgrades) walks act one's
 `C.RUN_NODE_TEMPLATE` against the act's own pools; HP carries; a rest heals
 30%; the run is an act-one WIN when the boss falls. The `draft` probe drafts
@@ -21,9 +21,10 @@ boss, each at full HP, from the tier05 boss pools: a read of late-game
 scaling only (the decks are hand-built, so compare probes with each other,
 never with a shipped number).
 
-A job is `probe/pilot` (pilot: judged | always | never). References run the
-same seeds: `ref:v2` is today's Furina v2 starter under its own greedy pilot
-(`furina_v2_probe`), `ref:ironclad` the reference Ironclad starter.
+A job is `probe/pilot` (pilot: judged | always | never). The reference runs
+the same seeds: `ref:ironclad` is the reference Ironclad starter. (`ref:v2`,
+the Furina v2 sim slice's starter, left with that slice on 2026-10-08; tag
+`furina-v2-sim-slice-2026-10-08` keeps it.)
 
 This is an instrument for the proposal's kill questions, not a balance
 number: no world stamp, no band, nothing here is quotable as a sheet value.
@@ -259,52 +260,47 @@ def run_gauntlet(probe: str, seed: int, pilot: str = "judged",
     return out
 
 
-def run_gauntlet_v2(probe: str, seed: int) -> dict:
-    """The same gauntlet for a furina_v2 probe deck under its own greedy
-    pilot: context for the proposal's late-game read, not a target."""
-    from tier05 import acts
-    from tier0.engine import furina_v2 as V
-    from tier0.harness import furina_v2_probe
-    from tier0.pilot import furina_v2_pilot
-    cards = furina_v2_probe.deck(probe)
-    rng = random.Random(f"gauntlet-{seed}")
-    out = {"seed": seed, "fights": []}
-    for act in (1, 2):
-        draw = acts.ActDraw(rng, act)
-        enemies = acts.spawn(draw.encounter_for("B", rng), rng)
-        player = V.build_player(cards)
-        state = run_fight(player, enemies, furina_v2_pilot.pilot,
-                          seed=rng.randrange(2 ** 31))
-        out["fights"].append({"won": state.player.alive
-                              and not state.living_enemies,
-                              "turns": state.turn,
-                              "gained": state.player.fv2.ledger["gained"]})
-    return out
-
-
 def run_reference(which: str, seed: int) -> dict:
-    if which == "v2":
-        from tier0.harness import furina_v2_probe
-        r = furina_v2_probe.run_one("base", seed)
-        return {"seed": seed, "won": r["won"],
-                "fights": [{"kind": f["kind"], "won": f["won"],
-                            "turns": f["turns"], "hp": f["hp"]}
-                           for f in r["fights"]],
-                "hp_end": r["hp_end"]}
-    from tier0.harness import furina_v2_probe
-    r = furina_v2_probe.run_reference("ref_ironclad", seed)
-    return {"seed": seed, "won": r["won"],
-            "fights": [{"kind": f["kind"], "won": f["won"],
-                        "turns": f["turns"], "hp": f["hp"]}
-                       for f in r["fights"]],
-            "hp_end": r["hp_end"]}
+    """The reference Ironclad starter over act one, on the same seeds, under
+    the generic pilot (ported from the retired `furina_v2_probe`)."""
+    if which != "ironclad":
+        raise ValueError(f"unknown reference {which!r}: only ref:ironclad")
+    from tier0.content import loader
+    from tier0.pilot.policy import make_pilot
+    from tier05 import acts
+    character = "ref_ironclad"
+    pilot = make_pilot(loader.pilot_weights("generic"))
+    rng = random.Random(seed)
+    draw = acts.ActDraw(rng, 0)
+    hp = max_hp = loader._character_index()[character]["hp"]
+    fights: list[dict] = []
+    won = False
+    for kind in C.RUN_NODE_TEMPLATE:
+        if kind == "R":
+            hp = min(max_hp, hp + int(C.REST_HEAL_FRACTION * max_hp))
+            continue
+        if kind not in FIGHT_KINDS:
+            continue
+        enemies = acts.spawn(draw.encounter_for(kind, rng), rng)
+        player = loader.build_player(character, "starter")
+        player.hp, player.max_hp = hp, max_hp
+        state = run_fight(player, enemies, pilot,
+                          seed=rng.randrange(2 ** 31))
+        rec = {"kind": kind, "won": state.player.alive
+               and not state.living_enemies,
+               "turns": state.turn, "hp": state.player.hp}
+        fights.append(rec)
+        hp = state.player.hp
+        if not rec["won"]:
+            break
+        if kind == "B":
+            won = True
+    return {"seed": seed, "won": won, "fights": fights, "hp_end": hp}
 
 
 def _one(job: str, seed: int) -> dict:
     if job.startswith("ref:"):
         return run_reference(job[4:], seed)
-    if job.startswith("v2gauntlet:"):
-        return run_gauntlet_v2(job[11:], seed)
     gaunt = job.startswith("gauntlet:")
     head, _, pilot = (job[9:] if gaunt else job).partition("/")
     probe, _, variant = head.partition("@")
@@ -423,7 +419,7 @@ def summarize_gauntlet(results: list[dict]) -> dict:
 
 
 DEFAULT_JOBS = (
-    "ref:ironclad", "ref:v2",
+    "ref:ironclad",
     "base/judged", "base/always", "base/never",
     "ousia/judged", "ousia/always", "ousia/never",
     "pneuma/judged", "pneuma/always", "pneuma/never",
@@ -444,9 +440,9 @@ K3_JOBS = tuple(
 #: The sec.16 comparison (`--curtain`): the curtain call against the old
 #: end-of-fight rule (both with the always-spend Rising Applause), and the
 #: old baseline (`legacy`: no curtain call, Rising Applause skippable), on
-#: the same seeds, with the two references for scale.
+#: the same seeds, with the Ironclad reference for scale.
 CURTAIN_VARIANTS = ("curtain_call", "no_curtain_call", "legacy")
-CURTAIN_JOBS = ("ref:ironclad", "ref:v2") + tuple(
+CURTAIN_JOBS = ("ref:ironclad",) + tuple(
     job for v in CURTAIN_VARIANTS for job in (
         f"base@{v}/judged", f"base@{v}/never",
         f"draft@{v}/judged", f"draft@{v}/always", f"draft@{v}/never",

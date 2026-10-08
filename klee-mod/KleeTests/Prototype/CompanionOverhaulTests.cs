@@ -221,13 +221,10 @@ public class CompanionOverhaulTests
             // companion the surface has grown (the four R236 caretakers, the
             // four Hexerei, and Prune, Qiqi, Sayu and Yaoyao before them).
             // `CompanionOverhaulRoster` is the OFFER list, and a card carrying
-            // a PersonalPool is deliberately not on it: a stand-in is reached
-            // at the hand-off and nowhere else (`CompanionStandIns`), and a
-            // personal companion is offered through its own character's route.
-            // So "the roster forgot a row" is a question about Universals, and
-            // this is where the two are separated. What the personal rows are
-            // swept for instead is the value of that very key:
-            // `CompanionStandInHandOffTests`.
+            // a PersonalPool is deliberately not on it: a personal companion
+            // is offered through its own character's route. So "the roster
+            // forgot a row" is a question about Universals, and this is where
+            // the two are separated.
             .Where(t => (Activator.CreateInstance(t) as ICompanionCard)
                             ?.PersonalPool == null)
             // AND THE THREE IN KLEE'S OWN DRAFTABLE POOL (the Klee-only

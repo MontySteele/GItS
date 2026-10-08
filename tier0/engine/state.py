@@ -183,14 +183,11 @@ class Card:
     star: Optional[int] = None
     role_c: Optional[str] = None          # applier | buffer | trigger
     personal_pool: Optional[str] = None
-    # (`C.COMPANION_OVERHAUL`) -- THE STAND-IN SEAM'S ONE CARD
-    # FIELD. The `proto_mc_` Universal this row is handed out IN PLACE OF, for
-    # a character named by `personal_pool`. Read at exactly one door,
-    # `tier0.engine.companion_standins.hand_off`, which every companion offer
-    # surface calls after its pick; nothing else in the engine reads it, and no
-    # shipped sheet may carry it (`companion_standins.validate_row`, run from
-    # `_validate_card_shape`). The row's `art_of:` is NOT here: tier 0 renders
-    # no card, so it is stripped at load beside `description:`.
+    # The row this prototype row re-authors for everybody playing an arm (a
+    # pool or starter substitution). Checked by
+    # `loader._validate_replaces_shape`; no shipped sheet may carry it. The
+    # row's `art_of:` is NOT here: tier 0 renders no card, so it is stripped
+    # at load beside `description:`.
     replaces: Optional[str] = None
     requires: Optional[str] = None        # e.g. burst_energy_full
     nation: Optional[str] = None          # set by the loader from the sheet name
