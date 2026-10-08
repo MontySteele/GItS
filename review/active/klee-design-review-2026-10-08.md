@@ -62,11 +62,11 @@ starts each combat with 3 Sparks, not 1 (Regent opens with 3 Stars). Every
 drafted placer prints 2 bigger, so a Bomb cashed the turn it lands is worth
 what it is worth today and a Bomb held three turns is worth less. This is
 the turn-one paper's default and [USER]'s proposal with one addition. (ii)
-Two Commons in, two out: **Kaboom!** (her normal attack: place a Bomb and
-set the enemy off in one card, so a deck that never cooks still has
+Two Commons in, two out: **Fire! Fire!** (her normal attack: place a Bomb
+and set the enemy off in one card, so a deck that never cooks still has
 Bomb-typed damage and a Spark every turn) and **Blasting Spree** (a Bomb on
 ALL enemies for a Dazed: Spray's fuel and the status bridge [USER] asked
-for); Playdate and Bombs Away! out. (iii) Cook stays in the pool as a
+for); Playdate and Pop! out. (iii) Cook stays in the pool as a
 drafted plan (Alice's Recipe, Chain Fuse, Witch's Homework, Stoke the Fuse,
 Half a Mountain, Simmer, Taste Test) and stops being the only plan the
 starter can teach. Under growth 2 the starter's lesson becomes "plant, then
@@ -168,6 +168,11 @@ and Phantom Blades scale with the deck.
 (5 Common: Tinder Toss, Quick Fuse, Sizzle, Countdown, Pocket Match; 6
 Uncommon: Big Badda Boom, Boom-Boom Strike, Perfect Timing, Flash Point,
 Team Effort, Survival Rulebook; 2 Rare: The Big One, Windblume Fireworks).
+The count is of cards whose effects perform a `set_off`. Four more rows
+print the words and do not detonate (Boom Badge, Treasure Map, Sparkborne
+Magic, Prune), so a text search reads 17 and the tempo paper's 18 counted
+the same way on the older pool. A hand holding Boom Badge and no detonator
+is the seats' "dead" hand, which is why this paper counts 13.
 Two of the Commons cost a Spark and one (Pocket Match) sets off only the
 largest Bomb. The runs in suites 2 to 4 played between 3 and 8 distinct Set
 off cards each over a whole run (the Necrobinder seed in suite 4: Ka-pow!,
@@ -377,8 +382,8 @@ Three ways to resolve it:
   It is a starter change, so it is [USER]'s, and nothing in the data asks
   for it: the starter's two cards already add up to a Strike's worth of
   damage on turn one.
-- **Keep the starter and the rule, add fast cards to the pool.** Kaboom!
-  and Blasting Spree (sec.4) alone. Act-1 turn one would still be Jumpy
+- **Keep the starter and the rule, add fast cards to the pool.** Fire!
+  Fire! and Blasting Spree (sec.4) alone. Act-1 turn one would still be Jumpy
   Dumpty and a hold, because growth 4 still pays 4 to wait. The drafted
   deck gets faster; the taught plan does not.
 - **Keep the starter, change the rule, add the fast cards.** Under growth
@@ -444,26 +449,35 @@ change for detonators and fuel.
 - **Playdate** (0, Bomb 3 and a Companion discount). "Never wanted"
   (later-acts round); not played once in suite 4's 73 normal fights. The
   companion line keeps seven cards.
-- **Bombs Away!** (1, Bomb 4 and 4 Block plus 2 per bombed enemy). Played
-  24 times in suite 4, so it is not dead: one seat drafted it on purpose
-  ("wanted block that also plants"), another wrote "NEVER AGAIN: 4 block
-  plus a 4 bomb for a card slot, and wasted on non-attack turns" (Silent
-  seed, act 1). The case for cutting it is the direction, not the uptake:
-  it is a Block card in a kit that should hold fewer, and Blasting Spree
-  takes its placing job at the same cost. The Block count goes to 13.
-  Alternatives: cut Pop! instead (19 plays in suite 4; "NEVER AGAIN" or
-  "never wanted" in six records across suites 2 to 4 and the test arm;
-  Blasting Spree replaces it as Spray's cheap fuel, but Klee Can Explain!
-  transforms statuses into Pop!, so the card would have to stay off-pool),
-  or cut Simmer (4 plays, "weakest card"; new and unread, so this paper
-  keeps it one more round).
+- **Pop!** (0, Bomb 5). Named "NEVER AGAIN" or "never wanted" in six
+  records across suites 2 to 4 and the test arm ("a 0-cost 5-size Bomb that
+  rarely got set off"); 19 plays in suite 4, mostly turn-one filler.
+  Blasting Spree takes its job (cheap Spray fuel at Common) and does it for
+  three enemies. Klee Can Explain! transforms statuses into Pop!, so the
+  card stays in the build off-pool, the way the token statuses already do
+  (`KleeOffPoolCards.cs`); only its reward-screen slot goes.
+- **Not Bombs Away!**, which a first draft of this paper cut on direction
+  (a Block card). It is the seats' most-played drafted card (24 plays in
+  suite 4, 82 across suites 2 and 3 and the test arm); one seat drafted it
+  on purpose ("wanted block that also plants"), one wrote "NEVER AGAIN";
+  and [USER] kept Blast Shield and Kitchen Alchemy over a census for the
+  same reason ("I personally found ... quite useful in my runs"). A card
+  people play is not the second cut. The Block count stays 14, inside the
+  base five's range; less Block a turn is to come from shorter fights, not
+  from this list.
+- Alternative second cut: Simmer (4 plays, one seat's "weakest card"). It
+  is new and unread, so this paper keeps it one more round.
 
 ### 4.5 New capability: two Commons
 
-**Kaboom!** (Common Attack, 1 Energy, Pyro). Her normal attack in the
-source game: she throws bombs that explode on impact. The name left the
-sheet at R242 as the renamed Strike and is free on every sheet now
-(`lint_unique_names`); it is a different card.
+**Fire! Fire!** (Common Attack, 1 Energy, Pyro). Her normal attack in the
+source game, *Kaboom!*: she throws bombs that explode on impact. The name
+"Kaboom!" is not reused: it was the renamed starter Strike until R242, it
+sits one letter from "Ka-pow!" in a hand list, and a drafted "Kaboom!" was
+renamed "Sparks Fly" two days ago for that reason. "Fire! Fire!" is her own
+line when she throws. Alternatives for the naming audit: "Dodoco Toss"
+(though Dodoco, Dodoco Tag and the Dodoco Tales relic already share the
+name) and the plain "Bomb Throw".
 
 > Place a Bomb 7 on the enemy. Set off the enemy.
 
@@ -532,7 +546,7 @@ Each is [USER]'s to pick; this paper's default is none of them.
   hand in a pool with 13; without it the Silent seed's "drew it on 2 of 8
   turns" gets worse. Growth 2 removes the reason to hold; Retain can stay.
 - **Ka-pow! gains a Spark or a Bomb.** Redundant with 3 opening Sparks and
-  with Kaboom!, and it puts a good card in the starter, which [USER]
+  with Fire! Fire!, and it puts a good card in the starter, which [USER]
   declined on 2026-09-05 ("I still would rather avoid putting too many
   actually good cards in the starting deck").
 - **Jumpy Dumpty 8 to 10** (the turn-one paper's option (c)). Harmless and
@@ -562,7 +576,7 @@ built on `klee-next`, graded against the base five's runs:
    seeds and HP lost there read against the base five's 35%; whether Cook
    decks still produce a 100-plus turn under growth 2 (any record naming
    one).
-4. **Uptake:** Kaboom! and Blasting Spree fights played and runs holding
+4. **Uptake:** Fire! Fire! and Blasting Spree fights played and runs holding
    them; Explosive Spark, Boom Badge, Boom-Boom Strike plays on turn one
    (the 3-Spark effect); Blast Shield plays a fight (the risk); Mines on
    bosses named as waste or not.
@@ -590,10 +604,13 @@ built on `klee-next`, graded against the base five's runs:
      the step, if (a) reads as too far on his own run.
 
 3. **The pool.**
-   - **Default (a):** Kaboom! and Blasting Spree in (sec.4.5); Playdate and
-     Bombs Away! out; pool 78, 25 / 32 / 21.
-   - (b) Kaboom! in, Playdate out; no Blasting Spree yet (one new card a
-     round).
+   - **Default (a):** Fire! Fire! and Blasting Spree in (sec.4.5); Playdate
+     and Pop! out (Pop! kept off-pool for Klee Can Explain!); pool 78,
+     25 / 32 / 21.
+   - (b) Fire! Fire! in, Playdate out; no Blasting Spree yet (one new card
+     a round).
+   - (d) Bombs Away! out instead of Pop!, if [USER] reads Block cards as
+     the thing to thin; the first draft's choice, withdrawn in sec.4.4.
    - (c) The rules alone this round; read the pool again after suite 5.
 
 4. **The starter.**
