@@ -21,6 +21,7 @@ from understudy.blindplay_faces import (GUEST_STAR_ELEMENTS, _GUEST_STAR_RE,
                                         remember_elements)
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
+                                        bomb_growth,
                                         CASKET_PER_PLAN,
                                         CRYSTALLIZE_BLOCK, OPENING_SPARK,
                                         SHATTER_DAMAGE,
@@ -201,8 +202,14 @@ METER_RULES: dict[str, str] = {
 # tip carries the sentence in full, so a screen that raised it has the rule and
 # a second copy on the meter row would be the two-sources defect this page has
 # closed twice.
-SPARK_OPENING_RULE = (f"you start each combat with {OPENING_SPARK}, and cards "
-                      "that print a Spark price spend it")
+def spark_opening_rule(n: int = OPENING_SPARK) -> str:
+    """The opening-bank sentence, with the live build's number
+    (`blindplay_shape.opening_spark`); the constant below is the mirror's."""
+    return (f"you start each combat with {n}, and cards that print a Spark "
+            "price spend it")
+
+
+SPARK_OPENING_RULE = spark_opening_rule()
 
 # `EB-610`. WHERE THIS FIGHT'S SPARKS CAME FROM.
 #
@@ -3026,17 +3033,20 @@ GLOSSARY_TABLES: tuple[dict[str, str], ...] = (
     BASE_KEYWORDS)
 
 
-def glossary_definition(word: str) -> tuple[str, str] | None:
+def glossary_definition(word: str, growth: int | None = None
+                        ) -> tuple[str, str] | None:
     """`(word, text)` for a word any glossary table holds, matched
-    case-insensitively, off-screen: `{growth}` takes `BOMB_GROWTH`, as the
-    page does on a screen without the Bomb's own tip. `observe --define`'s
+    case-insensitively, off-screen: `{growth}` takes the live build's growth
+    where the caller has it (2026-10-08), else `BOMB_GROWTH`, as the page
+    does on a screen without the Bomb's own tip. `observe --define`'s
     fallback (2026-10-02)."""
     want = word.strip().casefold()
     for table in GLOSSARY_TABLES:
         for name, text in table.items():
             if name.casefold() == want:
-                return name, (_arm_row_text(name) if table is ARM_KEYWORDS
-                              else text)
+                return name, (_arm_row_text(
+                    name, BOMB_GROWTH if growth is None else growth)
+                    if table is ARM_KEYWORDS else text)
     return None
 
 
@@ -3198,7 +3208,7 @@ def _keyword_rows(obs: dict[str, Any],
              "text": _OFF_ARM_KEYWORD[word]
              if (who and _ARM_KEYWORD_CHARACTER.get(word, who) != who) else
              _arm_row_text(
-                 word, int(growth.group(1)) if growth else BOMB_GROWTH)
+                 word, int(growth.group(1)) if growth else bomb_growth(obs))
              + ((COMPANION_STAGE_ARM_CLAUSE if arm
                  else COMPANION_STAGE_CLAUSE)
                 if stage and word == "Companion" else "")

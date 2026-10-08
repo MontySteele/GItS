@@ -332,9 +332,10 @@ def embark(lanes: list[str], characters: list[str], *,
     launched_at = time.time()
     for inst, who, role, partner, args in roles:
         label = inst.label
-        budget = blindplay_shape.set_budget(max_actions, label)
         lanewatch.arm(label)
         lane_stamp = f"{stamp}-{label}"
+        budget = blindplay_shape.set_budget(max_actions, label,
+                                            run=lane_stamp)
         session = session_factory(lane_stamp, inst, args, install_bridge)
         sessions[label] = session
         lane_blob = {
@@ -344,6 +345,8 @@ def embark(lanes: list[str], characters: list[str], *,
                if ascension is not None else {}),
             "max_actions": budget["cap"],
             "max_actions_store": str(blindplay_shape.budget_path(label)),
+            **({"game_dir": str(inst.game_dir)}
+               if inst.game_dir is not None else {}),
             **inst.as_row(),
             "lane_guardrail": instances.LANE_GUARDRAIL,
             "run_of_record": False,
