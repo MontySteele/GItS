@@ -61,9 +61,9 @@ public static class ArmKeywordTips
 
     // The keys. `KLEEMOD-ARM_` and not the bare word, because two of these
     // words already have a SHIPPED keyword with a DIFFERENT rule: `Bomb` is
-    // `KLEEMOD-BOMB` (the shipped Bomb detonates by itself, this one never
-    // does) and `Swirl` is `KLEEMOD-SWIRL_PREVIEW` (a board-aware preview,
-    // raised only while a matching aura is out). A shared key would have made
+    // `KLEEMOD-BOMB` (the shipped Bomb, whose keyword left with the text pass
+    // of 2026-10-08) and `Swirl` is `KLEEMOD-SWIRL_PREVIEW` (a board-aware
+    // preview, raised only while a matching aura is out). A shared key would have made
     // one arm silently overwrite the other's definition at the loc merge.
     public const string BombKey = "KLEEMOD-ARM_BOMB";
     public const string SetOffKey = "KLEEMOD-ARM_SET_OFF";
@@ -109,6 +109,20 @@ public static class ArmKeywordTips
     public const string LyneyKey = "KLEEMOD-ARM_STAGE_LYNEY";
     public const string SigewinneKey = "KLEEMOD-ARM_STAGE_SIGEWINNE";
     public const string ChevreuseKey = "KLEEMOD-ARM_STAGE_CHEVREUSE";
+    // THE TEXT PASS OF 2026-10-08: three golded words that hovered nothing.
+    // `Elemental Reaction` is printed on 13 faces across every kit; `Sakura`
+    // and `Lightfall Sword` are placed objects with badges, the shape Bomb and
+    // Mine already have.
+    public const string ElementalReactionKey = "KLEEMOD-ARM_ELEMENTAL_REACTION";
+    public const string SakuraKey = "KLEEMOD-ARM_SAKURA";
+    public const string LightfallSwordKey = "KLEEMOD-ARM_LIGHTFALL_SWORD";
+
+    // THE TEXT PASS OF 2026-10-08, and NOT A KEYWORD ROW: the Plan tip a
+    // PLAN-ONLY card carries in place of <see cref="PlanKey"/>. That tip
+    // opens "Play this line ... instead" and says "click to flip lines"; a
+    // plan-only card has no line above and nothing to flip (Kokomi review,
+    // 2026-10-08, sec.5). Same title, so the hover still reads "Plan".
+    public const string PlanOnlyKey = "KLEEMOD-ARM_PLAN_ONLY";
 
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
@@ -272,9 +286,8 @@ public static class ArmKeywordTips
             // (`docs/current/text-conventions.md`, and the lint bites), and
             // the title is quoted WITHOUT its `Fischl --` prefix because the
             // conventions ban a dash of any kind in player text.
-            "Fischl's raven, out while you hold the Power Oz, at Your Side. "
-          + "He makes an [gold]Electro[/gold]"
-          + " hit at the end of your turn while he is out.");
+            "Fischl's raven. While you hold Oz, at Your Side, he makes an "
+          + "[gold]Electro[/gold] hit at the end of your turn.");
 
     /// <summary>
     /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE
@@ -364,6 +377,16 @@ public static class ArmKeywordTips
             "Instead of the line above, play the card on the "
           + "[gold]Bake-Kurage[/gold]: it happens next turn. Click it to flip "
           + "lines. Plans go in the order made.");
+
+    /// <summary>The text pass of 2026-10-08: <see cref="ForPlan"/> for a
+    /// card with no line above its Plan. Attached by
+    /// <c>gen_klee_cards.emit</c> in ForPlan's place on a plan-only row.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForPlanOnly(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PlanOnlyKey,
+            "Play the card on the [gold]Bake-Kurage[/gold]: it happens next "
+          + "turn. Plans run in the order made.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about
@@ -492,13 +515,14 @@ public static class ArmKeywordTips
     /// THE CASKET PASS (2026-09-28). The token the Tamakushi Casket deals into
     /// her opening hand, on the face that names it (What the Tokoyo Returns).
     /// Its own card text, restated, because the card is in no pool and a
-    /// player may meet the name before the card.
+    /// player may meet the name before the card. The text pass of 2026-10-08
+    /// added the upgrade's draw (`OpenTheCasket.OnPlay`, `IsUpgraded`).
     /// </summary>
     public static IEnumerable<IHoverTip> ForOpenTheCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, OpenTheCasketKey,
             "1-cost, Retain. Gain [gold]Strength[/gold] equal to the "
-          + "Casket's count, then empty it.");
+          + "Casket's count, then empty it. Upgraded, it also draws a card.");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.
@@ -625,6 +649,35 @@ public static class ArmKeywordTips
           + " unblockable damage to ALL enemies, and apply that element to the others.");
 
     /// <summary>
+    /// The text pass of 2026-10-08. The noun is golded on 13 faces across all
+    /// four kits and hovered nothing; the board-aware previews in
+    /// <see cref="KleeCardTooltips"/> say what each pair does, and appear only
+    /// while an aura is out.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForElementalReaction(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, ElementalReactionKey,
+            "An element meets another element's aura on an enemy. The aura is "
+          + "consumed and the pair's effect happens.");
+
+    /// <summary>The text pass of 2026-10-08: Yae's placed totem, which has a
+    /// badge (<c>SesshouSakuraPower</c>) and no tip. "Up to 3" is read at
+    /// the fire, not the placing.</summary>
+    public static IEnumerable<IHoverTip> ForSakura(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, SakuraKey,
+            "A totem that stays at your side all combat. At most 3 fire "
+          + "each turn.");
+
+    /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
+    /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>
+    public static IEnumerable<IHoverTip> ForLightfallSword(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, LightfallSwordKey,
+            "A blade hung over an enemy. Its badge counts down the turns "
+          + "until it falls.");
+
+    /// <summary>
     /// 2026-09-25, the afternoon Klee seat round. The Opus seat: "Companion is
     /// never defined on screen, yet three offered cards trigger on it"
     /// (Witches' Circle, Come Back and Play!, Friendship Bracelet). The word is
@@ -651,7 +704,7 @@ public static class ArmKeywordTips
         With(inherited, OathKey,
             "1 Oath per element a card applies, plus 1 per element it "
           + "[gold]Swirls[/gold]. Kept all fight. Element cards read their "
-          + "own; others, the current.");
+          + "own, others the current.");
 
     /// <summary>
     /// THE ONE ELEMENT HIS CARDS READ (sec.3), and what his Swirls pay for
@@ -661,10 +714,11 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForCurrentElement(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, CurrentElementKey,
-            "The last Pyro, Hydro, Cryo or Electro you applied. "
-          + "Swirls pay it: Pyro " + VarkaLaw.SwirlPyroDamage + " damage, Hydro "
-          + VarkaLaw.SwirlHydroBlock + " [gold]Block[/gold], Cryo "
-          + VarkaLaw.SwirlCryoVulnerable + " [gold]Vulnerable[/gold], Electro "
+            "The last [gold]Pyro[/gold], [gold]Hydro[/gold], [gold]Cryo[/gold] or "
+          + "[gold]Electro[/gold] you applied. Swirls pay it: [gold]Pyro[/gold] "
+          + VarkaLaw.SwirlPyroDamage + " damage, [gold]Hydro[/gold] "
+          + VarkaLaw.SwirlHydroBlock + " [gold]Block[/gold], [gold]Cryo[/gold] "
+          + VarkaLaw.SwirlCryoVulnerable + " [gold]Vulnerable[/gold], [gold]Electro[/gold] "
           + VarkaLaw.SwirlElectroDamageAll + " to ALL.");
 
     /// <summary>
@@ -702,8 +756,8 @@ public static class ArmKeywordTips
     /// 2026-10-02). INTERNAL, not public: every public string constant here
     /// is a tip key (`ArmKeywordTipTests`).</summary>
     internal const string KnightTipText =
-        "One of Varka's Companions. "
-      + "Playing one makes its element your current element (except Geo).";
+        "One of Varka's Companions. Playing one makes its element your "
+      + "current element. [gold]Geo[/gold] does not.";
 
     // ---------------------------------------------------- Furina ----------
     //
@@ -847,10 +901,14 @@ public static class ArmKeywordTips
         With(inherited, FanfareKey, FanfareBody);
 
     /// <summary>Rule 1 and the curtain call, shared by the keyword tip and
-    /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>).</summary>
+    /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>). The text pass
+    /// of 2026-10-08 named what moves the line: Lyney's line
+    /// (<see cref="FurinaStageLaw.LyneyLineDrop"/>) and A Five-Century Act.
+    /// </summary>
     internal const string DrainBody =
-        "Lose that much HP. You can't go below half the HP you started "
-      + "combat with. Drained HP returns when combat ends.";
+        "Lose N HP, never below half your HP at combat start. Lyney and "
+      + "A Five-Century Act lower that line. Drained HP returns after "
+      + "combat.";
 
     /// <summary>Rule 1: Drain N.</summary>
     public static IEnumerable<IHoverTip> ForDrain(

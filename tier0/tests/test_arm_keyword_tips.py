@@ -96,23 +96,6 @@ def test_a_face_naming_several_keywords_owes_several_tips_in_table_order():
     assert calls == ["ArmKeywordTips.ForBomb", "ArmKeywordTips.ForMend"]
 
 
-def test_the_shipped_bomb_keeps_its_own_definition_and_the_arm_stands_down():
-    """THE ONE EXCLUSION, driven both ways.
-
-    A row that places a SHIPPED `BombPower` already carries `KLEEMOD-BOMB`,
-    whose rules are the opposite of the arm's. Both tips are titled "Bomb", so
-    raising both would let the game's de-duplication pick which definition of
-    one word a player reads.
-    """
-    face = "Place a [gold]Bomb[/gold] dealing 5. Gain 1 [gold]Spark[/gold]."
-    assert gen.arm_keyword_tip_calls(face, includes_bomb_rules=False) == [
-        "ArmKeywordTips.ForBomb", "ArmKeywordTips.ForSpark"]
-    # The shipped-Bomb row loses the Bomb tip and KEEPS the Spark one: Spark
-    # has no shipped card-side definition on either arm.
-    assert gen.arm_keyword_tip_calls(face, includes_bomb_rules=True) == [
-        "ArmKeywordTips.ForSpark"]
-
-
 # ------------------------------------------- EB-372: Grounded travels too --
 #
 # THE FINDING. `Grounded` is a Power card of Klee's, and Kaeya's Cold-Blooded
@@ -208,13 +191,18 @@ def test_every_prototype_face_printing_a_keyword_attaches_its_tip(keyword):
     missing: list[str] = []
     for path in _prototype_files():
         text = path.read_text(encoding="utf-8")
-        owed = any(keyword.attach in gen.arm_keyword_tip_calls(
-                       description, "includesBombRules: true" in text)
+        owed = any(keyword.attach in gen.arm_keyword_tip_calls(description)
                    for description in _descriptions(text))
         if not owed:
             continue
         printed.append(path.stem)
-        if f"{keyword.attach}(" not in text:
+        # The text pass of 2026-10-08: a plan-only row carries the Plan tip
+        # written for it (`ForPlanOnly`, no line above and no flip).
+        attach = keyword.attach
+        if attach == "ArmKeywordTips.ForPlan" and \
+                "ArmKeywordTips.ForPlanOnly(" in text:
+            attach = "ArmKeywordTips.ForPlanOnly"
+        if f"{attach}(" not in text:
             missing.append(path.stem)
     assert missing == [], f"{keyword.word}: {missing}"
     # Non-vacuous: every row of the table is exercised by real faces, so a
@@ -341,10 +329,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # (`Encore` was the sixth until R276's hygiene: no card
                     # attached its tip, so the body and its key left.)
                     # THE SALON'S TAB (2026-10-05): the Summon and Guest
-                    # Star tips and the four guests' tips. Faces print the
-                    # words UNGOLDED ("Summon Charlotte."), so they attach
-                    # off the `stage_guest` op (`gen.stage_guest_tip_calls`),
-                    # not off the table. v2's trio, its other guests and the
+                    # Star tips and the four guests' tips. They attach off
+                    # the `stage_guest` op (`gen.stage_guest_tip_calls`), not
+                    # off the table; since the text pass of 2026-10-08 the
+                    # face golds the verb ("[gold]Summon[/gold] Charlotte."). v2's trio, its other guests and the
                     # Spend warning left with v2.
                     "KLEEMOD-ARM_STAGE_SUMMON",
                     "KLEEMOD-ARM_STAGE_GUEST_STAR",
@@ -355,7 +343,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # The pool to 39 (2026-10-05): its three guests.
                     "KLEEMOD-ARM_STAGE_LYNEY",
                     "KLEEMOD-ARM_STAGE_SIGEWINNE",
-                    "KLEEMOD-ARM_STAGE_CHEVREUSE"}
+                    "KLEEMOD-ARM_STAGE_CHEVREUSE",
+                    # The text pass of 2026-10-08: the Plan tip a plan-only
+                    # card carries in ForPlan's place (no line above, no flip).
+                    "KLEEMOD-ARM_PLAN_ONLY"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -560,8 +551,9 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Cue, Rehearsal, the front seat) left with v2.
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
             "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
-            "Lose that much HP. You can't go below half the HP you started ",
-            "combat with. Drained HP returns when combat ends.",
+            # The text pass of 2026-10-08: what moves the line.
+            "Lose N HP, never below half your HP at combat start. Lyney and ",
+            "A Five-Century Act lower that line. Drained HP returns after ",
             "Regain that much drained HP. It never returns more than you ",
             "A guest joins at the back. On a full stage, the oldest guest ",
             "Acts at the end of your turn. Summoning one already on stage ",
@@ -845,6 +837,13 @@ NO_GLOSSARY_ROW_OWED = {
     "Exhaust Pile": "a zone the page prints by name, with its contents",
     # Status cards go to the discard pile, as in the base game (2026-10-03).
     "Discard Pile": "a zone the page prints by name, with its contents",
+    "Draw Pile": "a zone the page prints by name, with its count",
+    # The text pass of 2026-10-08 golded the cards a face makes, as the base
+    # golds `OVERCLOCK`'s Burn: like Dazed, the page prints each with its own
+    # face once it is added.
+    "Nip": "a token card the page prints with its own face once it is added",
+    "Nips": "a token card the page prints with its own face once it is added",
+    "Sea Glass": "a token card the page prints with its own face once added",
     # The elements. None is a glossary row and none should be: the element is
     # the card's own indicator (`blindplay_faces._element` puts it on the card
     # LINE), and every pairing it can make is a `REACTION_KEYWORDS` row on any
@@ -1283,3 +1282,78 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
                 "proto_fs_salons_tab", "proto_fs_interval_bell"):
         assert gen.modal_option_faces(
             rows[rid], gen.modal_effect(rows[rid])["modes"]) is not None, rid
+
+
+# ------------------------- the text pass of 2026-10-08: the reverse join --
+#
+# THE DEFECT. The tests above prove every word in the TABLE is printed and
+# attached. Nothing proved the reverse: that every word a face GOLDS hovers a
+# definition. `Elemental Reaction` was golded on 13 faces with no tip, and
+# `Sakura` and `Lightfall Sword` on theirs (conventions review 2026-10-08,
+# sec.3 and sec.7.4). A golded span reads as "this word has a rule", so one
+# with nothing behind it is a promise the card does not keep.
+#
+# A golded word passes if it is an arm keyword or a base keyword with a tip
+# (the two tables), a MODE LABEL (followed by a colon on the face: Durin's
+# `White` / `Dark`), or one of the classes below, each with its reason.
+
+#: The base game's own keywords and zones: the game tips the keyword, and the
+#: page prints the zone by name.
+GOLD_BASE_GAME = {"Block", "Energy", "Exhaust", "Exhausted", "Exhausts",
+                  "Discard Pile", "Draw Pile", "Exhaust Pile"}
+#: The six elements: the card wears the element's gem, whose keyword carries
+#: the Applies tip and the reaction previews (`KleeCardTooltips.ForCard`).
+GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}
+#: A card the face makes, golded as the base golds `OVERCLOCK`'s Burn.
+GOLD_CREATED_CARDS = {"Dazed", "Confiscated", "Nip", "Nips", "Sea Glass"}
+#: Words whose tip attaches off an op rather than off the table.
+GOLD_OP_TIPS = {"Summon": "the `stage_guest` op attaches ForSummon"}
+#: Names, each defined somewhere a reader meets it.
+GOLD_NAMES = {
+    "Bake-Kurage": "her pet, named on every Plan line; the Plan tip says "
+                   "what it does",
+    "Bond of Life": "Arlecchino's power, titled on its own badge and the "
+                    "end-of-turn docket",
+    "Shatters": "the Frozen reaction's preview, which the Cryo gem attaches, "
+                "defines a Shatter",
+}
+
+
+def _gold_census() -> dict[str, bool]:
+    """Every golded word on a prototype face, and whether it is ever a mode
+    label (a colon straight after the span)."""
+    out: dict[str, bool] = {}
+    for path in _prototype_files():
+        for description in _descriptions(path.read_text(encoding="utf-8")):
+            for m in _GOLD_SPAN.finditer(description):
+                word = re.sub(r"\{[^{}]*\}", "", m.group(1)).strip()
+                label = description[m.end():m.end() + 1] == ":"
+                out[word] = out.get(word, False) or label
+    return out
+
+
+def test_every_golded_word_hovers_a_definition_or_is_named_why_not():
+    census = _gold_census()
+    assert len(census) > 30
+    tipped = {t for k in gen.ARM_KEYWORDS + gen.BASE_KEYWORDS
+              for t in k.tokens}
+    excused = (GOLD_BASE_GAME | GOLD_ELEMENTS | GOLD_CREATED_CARDS
+               | set(GOLD_OP_TIPS) | set(GOLD_NAMES))
+    untipped = sorted(word for word, label in census.items()
+                      if word not in tipped and word not in excused
+                      and not label)
+    assert untipped == []
+
+
+def test_the_reverse_joins_excuses_are_all_still_printed():
+    """Rot: an excuse for a word no face golds any more is removed."""
+    census = _gold_census()
+    stale = sorted(word for word in (set(GOLD_CREATED_CARDS)
+                                     | set(GOLD_OP_TIPS) | set(GOLD_NAMES))
+                   if word not in census)
+    assert stale == []
+
+
+def test_the_three_untipped_words_have_tips_now():
+    for word in ("Elemental Reaction", "Sakura", "Lightfall Sword"):
+        assert word in {t for k in gen.ARM_KEYWORDS for t in k.tokens}, word

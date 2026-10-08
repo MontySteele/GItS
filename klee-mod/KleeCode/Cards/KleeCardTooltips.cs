@@ -87,18 +87,12 @@ public static class KleeCardTooltips
         IEnumerable<IHoverTip> inherited,
         CardModel card,
         Element trigger = Element.None,
-        bool includesBombRules = false,
         bool includesConfiscatedRules = false,
         bool appliesWithoutHit = false,
         bool includesDazedCard = false,
         bool elementOnlyOnSpend = false)
     {
         foreach (var tip in inherited) yield return tip;
-
-        if (includesBombRules)
-        {
-            yield return HoverTipFactory.FromKeyword(KleeKeywords.Bomb);
-        }
 
         if (includesConfiscatedRules)
         {

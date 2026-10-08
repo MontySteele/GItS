@@ -1119,8 +1119,9 @@ public static class VarkaCards
     }
 
     /// <summary>
-    /// Four Winds' Ascension's second hit: "Then deal 3 [4] damage for each
-    /// Oath of your current element, as that element." The Oath is read after
+    /// Four Winds' Ascension's second hit: "Then deal 3 damage for each Oath
+    /// of your current element, as that element." (The upgrade cuts the cost,
+    /// not this number.) The Oath is read after
     /// the Anemo hit, and this hit credits no Oath (sec.4).
     /// </summary>
     public static Task AscensionHit(

@@ -896,6 +896,15 @@ ARM_KEYWORDS = (
     ArmKeyword("current element", ("current element",),
                "ArmKeywordTips.ForCurrentElement"),
     ArmKeyword("Knight", ("Knight", "Knights"), "ArmKeywordTips.ForKnight"),
+    # THE TEXT PASS OF 2026-10-08: three golded words that hovered nothing.
+    # `Elemental Reaction` is the shipped noun, printed on faces in every kit;
+    # `Sakura` and `Lightfall Sword` are placed objects with badges, the
+    # shape `Bomb` and `Mine` have.
+    ArmKeyword("Elemental Reaction", ("Elemental Reaction", "Elemental Reactions"),
+               "ArmKeywordTips.ForElementalReaction"),
+    ArmKeyword("Sakura", ("Sakura",), "ArmKeywordTips.ForSakura"),
+    ArmKeyword("Lightfall Sword", ("Lightfall Sword",),
+               "ArmKeywordTips.ForLightfallSword"),
 )
 
 
@@ -1234,20 +1243,13 @@ def arm_keywords_printed(description: str) -> list[ArmKeyword]:
 
 
 def arm_keyword_tip_calls(description: str,
-                          includes_bomb_rules: bool = False,
                           spark_priced: bool = False) -> list[str]:
     """The tip calls this face owes, in table order.
 
-    `includes_bomb_rules` is the ONE exclusion, and it is a real one rather
-    than a convenience. A row that places a SHIPPED `BombPower` already carries
-    `KLEEMOD-BOMB`, whose rules are the shipped ones -- it detonates by itself
-    and suppresses the enemy's first attack -- and the overhaul's Bomb does
-    neither. Both tips are titled "Bomb", so raising both would put two
-    contradicting definitions of one word on one face and let the game's own
-    de-duplication pick which the player reads. The Sparks arm's three
-    bomb-placing rows are exactly the rows this excludes today, and the two
-    sets cannot drift together: an overhaul row places its Bomb with
-    `plant_bomb` and a shipped one with `place_bomb`.
+    The ONE EXCLUSION this used to carry, `includes_bomb_rules`, left with the
+    old shipped Bomb keyword (text pass 2026-10-08): it kept the arm's Bomb tip
+    off a row that placed the shipped `BombPower` and carried `KLEEMOD-BOMB`,
+    and no row has placed that power since the shipped sheets were deleted.
 
     `spark_priced` is the ONE ADDITION, and `EB-282` is why. The rule above is
     "the face PRINTS the word", and it was written while every Spark-priced row
@@ -1265,9 +1267,7 @@ def arm_keyword_tip_calls(description: str,
         printed = sorted(
             printed + [k for k in ARM_KEYWORDS if k.word == "Spark"],
             key=ARM_KEYWORDS.index)
-    return [keyword.attach
-            for keyword in printed
-            if not (keyword.word == "Bomb" and includes_bomb_rules)]
+    return [keyword.attach for keyword in printed]
 
 
 #: `EB-575`. The ops that resolve ONLY through a Bomb on the field. A row made
@@ -3161,19 +3161,19 @@ APPLY_POWERS = {
     # pulse (Song of Pearls and The Clouds Like Waves both rewrote it), Sango
     # Isshin's Mend overflow and Orders' Tide.
     "kk_treatise": ("TreatisePower", None,
-        "Once per turn, when the jellyfish carries out a [gold]Plan[/gold], "
-        "draw {X}."),
+        "The first time each turn you play a card with a [gold]Plan[/gold] "
+        "line normally, draw {X} card{XS}."),
     # `EB-492`. Nereid's Ascension, redesigned from a Plan clause into the
     # Power it always read as: the old row spent the morning it was meant to
     # pay for. A marker power -- the stack means nothing, `CarryOutTimes`
     # reads only whether it is worn.
     "kk_nereids_ascension": ("NereidsAscensionPower", None,
-        "At the start of your turn, the [gold]Bake-Kurage[/gold] "
-        "carries out your first [gold]Plan[/gold] twice."
-        " Your first [gold]Dusk[/gold] [gold]Plan[/gold] is doubled too."),
+        "At the start of your turn, your first [gold]Plan[/gold] is "
+        "carried out twice. So is your first [gold]Dusk[/gold] "
+        "[gold]Plan[/gold]."),
     "kk_generals_banner": ("GeneralsBannerPower", None,
-        "Once per turn, when you play a [gold]Companion[/gold] card, the front "
-        "enemy gains {X} Weak."),
+        "The first time each turn you play a [gold]Companion[/gold] card, "
+        "apply {X} [gold]Weak[/gold] to the front enemy."),
     # THE EXPANSION, BATCH ONE (2026-09-29). Every class lives in
     # Powers/Prototype/KokomiExpansion.cs; every row states its own face.
     "kk_grand_design": ("GrandDesignPower", None,
@@ -3346,7 +3346,7 @@ APPLY_POWERS = {
     "mc_purity_white": ("PurityWhitePower", None,
         "Enemies take {X}% more damage from [gold]Elemental Reactions[/gold]."),
     "mc_purity_dark": ("PurityDarkPower", None,
-        "Your [gold]Pyro[/gold] damage deals {X} more."),
+        "Your [gold]Pyro[/gold] hits deal {X} additional damage."),
     "mc_lightning_fang": ("LightningFangPower", None,
         "Your [gold]Attacks[/gold] apply [gold]Electro[/gold] and deal 3 more "
         "damage. Lasts {X} more turn(s)."),
@@ -3429,8 +3429,8 @@ APPLY_POWERS = {
     # templates are here for form; every row carries its own `description:`
     # (EB-215). Sim twin: tier0.engine.companion_coven, one function each.
     "cvn_hexhunter_chime": ("HexhunterChimePower", None,
-        "The next [gold]Bomb[/gold] you set off this turn deals the swirled "
-        "element instead of [gold]Pyro[/gold]."),
+        "The next [gold]Bomb[/gold] that goes off this turn deals the "
+        "element of your last [gold]Swirl[/gold] instead of [gold]Pyro[/gold]."),
     "cvn_herald_of_frost": ("HeraldOfFrostPower", None,
         "At the start of your turn, apply [gold]Cryo[/gold] twice to a random "
         "enemy and gain 3 [gold]Block[/gold]. Lasts {X} more turn(s)."),
@@ -3443,7 +3443,8 @@ APPLY_POWERS = {
         "The next [gold]Knight[/gold] you play this turn is played twice."),
     "vk_stormward_stance": ("StormwardStancePower", None,
         "While your [gold]current element[/gold] has 4 or more "
-        "[gold]Oath[/gold], your Anemo Attacks deal {X} additional damage."),
+        "[gold]Oath[/gold], your [gold]Anemo[/gold] Attacks deal {X} "
+        "additional damage."),
     "vk_converging_winds": ("ConvergingWindsPower", None,
         "The elements your [gold]Swirls[/gold] spread set off "
         "[gold]Elemental Reactions[/gold]."),
@@ -3469,12 +3470,12 @@ APPLY_POWERS = {
     # its own `description:`. Sim twins: tier0/engine/varka_oath.py.
     "vk_static_field": ("StaticFieldPower", None,
         "The first time each turn you apply [gold]Electro[/gold], draw {X} "
-        "cards."),
+        "card{XS}."),
     # Reworded by the combo pass (2026-10-04).
     "vk_unwavering_banner": ("UnwaveringBannerPower", None,
-        "Only [gold]Knights[/gold] can change your [gold]current "
+        "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 1 "
-        "[gold]Oath[/gold] of your [gold]current element[/gold] instead."),
+        "[gold]Oath[/gold] of it instead."),
     "vk_cycle_of_seasons": ("CycleOfSeasonsPower", None,
         "Whenever your [gold]current element[/gold] changes, deal {X} damage "
         "to ALL enemies."),
@@ -3489,17 +3490,17 @@ APPLY_POWERS = {
     # sec.4).
     # The combo pass (2026-10-04): Pyro's Exhaust engine.
     "vk_pyre_oath": ("PyreOathPower", None,
-        "Whenever you [gold]Exhaust[/gold] a card, gain {X} Pyro "
+        "Whenever you [gold]Exhaust[/gold] a card, gain {X} [gold]Pyro[/gold] "
         "[gold]Oath[/gold]."),
     "vk_wildfire_oath": ("WildfireOathPower", None,
         "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
     "vk_retaliating_tide": ("RetaliatingTidePower", None,
         "At the end of your turn, deal damage equal to your "
-        "[gold]Block[/gold], up to your Hydro [gold]Oath[/gold], to a random "
-        "enemy."),
+        "[gold]Block[/gold], up to your [gold]Hydro[/gold] [gold]Oath[/gold], "
+        "to a random enemy."),
     "vk_absolute_zero": ("AbsoluteZeroPower", None,
-        "While your [gold]current element[/gold] is Cryo, your "
+        "While your [gold]current element[/gold] is [gold]Cryo[/gold], your "
         "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
         "[gold]Weak[/gold] to ALL enemies."),
     "vk_oath_unto_death": ("OathUntoDeathPower", None,
@@ -3507,7 +3508,7 @@ APPLY_POWERS = {
         "element[/gold], gain {X} more."),
     "vk_wolfpack": ("WolfpackPower", None,
         "Whenever you play Four Winds' Ascension, add a copy of it to your "
-        "discard pile."),
+        "[gold]Discard Pile[/gold]."),
     "vk_oathbound_aegis": ("OathboundAegisPower", None,
         "At the end of your turn, gain [gold]Block[/gold] equal to half your "
         "total [gold]Oath[/gold]."),
@@ -3516,11 +3517,11 @@ APPLY_POWERS = {
         "Whenever your [gold]current element[/gold] changes, gain {X} "
         "[gold]Block[/gold]."),
     "vk_weathervane": ("WeathervanePower", None,
-        "At the start of your turn, you may choose an element you have "
-        "[gold]Oath[/gold] in; it becomes your [gold]current element[/gold]."),
+        "At the start of your turn, you may make an element you have "
+        "[gold]Oath[/gold] in your [gold]current element[/gold]."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
-        "and the element Swirled."),
+        "and the element they [gold]Swirl[/gold]."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
     "vk_the_order_answers": ("TheOrderAnswersPower", None,
@@ -3536,12 +3537,12 @@ APPLY_POWERS = {
         "Whenever you play a [gold]Companion[/gold] card, gain {X} "
         "[gold]Block[/gold]."),
     "night_vigil": ("NightVigilPower", None,
-        "Your Attacks against enemies holding an elemental aura deal {X} "
-        "additional damage."),
+        "Your Attacks against enemies holding an aura deal {X} additional "
+        "damage."),
     # Co-op notes pick 4 (2026-10-02): plus a Hydro aura each turn.
     "ancient_sea_authority": ("AncientSeaAuthorityPower", None,
         "At the start of your turn, apply [gold]Hydro[/gold] to a random "
-        "enemy. Elemental auras you apply last {X} extra turn{XS}."),
+        "enemy. Auras you apply last {X} additional turn{XS}."),
     "masque_red_death": ("MasqueRedDeathPower", None,
         "At the start of your turn, gain {X} [gold]Strength[/gold]. Your "
         "[gold]Bond of Life[/gold] eats the first 5 [gold]Block[/gold] you "
@@ -14255,6 +14256,11 @@ def _dedupe_printed_exhaust(card: dict, text: str) -> str:
     return _PRINTED_EXHAUST.sub("", text).strip()
 
 
+def is_plan_only(card: dict) -> bool:
+    """A row with a `plan:` and no now-line: the jellyfish is its only target."""
+    return bool(card.get("plan")) and not card.get("effects")
+
+
 def _plan_only_line(card: dict, text: str) -> str:
     """`EB-293`, second half: a PLAN-ONLY row says where it is played.
 
@@ -14272,7 +14278,7 @@ def _plan_only_line(card: dict, text: str) -> str:
     and it leads rather than trails: it is the instruction, and what the
     jellyfish then does is the consequence.
     """
-    if not card.get("plan") or card.get("effects"):
+    if not is_plan_only(card):
         return text
     return ("Play on the [gold]Bake-Kurage[/gold]. " + text).strip()
 
@@ -15106,15 +15112,9 @@ def emit(
                 else "Element.Anemo")
 
     aura_elements = element_tag_elements_for(card, profile, elemental)
-    # L4: the Bomb rules text is a question about the WHOLE effect tree, not
-    # about the top level. `sparkly_explosion` places its two Bombs inside the
-    # kill-conditional's `then:`, so the flat scan this replaced shipped the
-    # card with `includesBombRules: false` -- it named a mechanic and withheld
-    # the rules for it. A branch-gated Bomb is still a Bomb on the face.
-    includes_bomb_rules = any(e.get("op") in {
-        "place_bomb", "detonate", "modify_bombs", "move_bombs",
-        "chance_bomb_per_detonation"
-    } for e in _effects_everywhere(card))
+    # The old shipped Bomb's rules tip (`includesBombRules`, the L4 incident's
+    # whole-tree scan) left with that keyword in the text pass of 2026-10-08:
+    # no row places the shipped `BombPower` any more.
 
     # The card's declared TargetType follows its FIRST damaging effect; a card
     # that only blocks or draws targets Self.
@@ -15980,10 +15980,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         for eff in card.get("effects", []))
     tooltip_member = ""
     tips_expr = ""
-    if (preview_element_cs is not None or includes_bomb_rules
+    if (preview_element_cs is not None
             or includes_confiscated_rules or includes_dazed_card):
         trigger_arg = preview_element_cs or "Element.None"
-        bomb_arg = "true" if includes_bomb_rules else "false"
         confiscated_arg = (
             ", includesConfiscatedRules: true"
             if includes_confiscated_rules else "")
@@ -16000,7 +15999,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             no_hit_arg += ", elementOnlyOnSpend: true"
         tips_expr = (
             "KleeCardTooltips.ForCard(base.ExtraHoverTips, this, "
-            f"{trigger_arg}, includesBombRules: {bomb_arg}"
+            f"{trigger_arg}"
             f"{confiscated_arg}{no_hit_arg})")
     # The shipped kits' rider tips (`FurinaRiderTips`, `SalonMemberTips`,
     # `KokomiRiderTips`, `KleeCardTooltips.ForBurst`) left with the shipped
@@ -16087,9 +16086,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{ELEMENT_CS[switch_element]})")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
-        for attach in arm_keyword_tip_calls(desc,
-                                            includes_bomb_rules,
-                                            spark_priced):
+        for attach in arm_keyword_tip_calls(desc, spark_priced):
+            # The text pass of 2026-10-08: a PLAN-ONLY row has no line above
+            # its Plan and nothing to flip, so it carries the Plan tip that
+            # says so (`_plan_only_line`'s test, the one its target follows).
+            if attach == "ArmKeywordTips.ForPlan" and is_plan_only(card):
+                attach = "ArmKeywordTips.ForPlanOnly"
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above
@@ -16128,14 +16130,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             f"docs/{profile.sheet.name}.\n"
         )
     )
+    # The text pass of 2026-10-08: the header named
+    # `docs/<character>-upgrades.yaml`, a file legacy cleanup stage 6 deleted;
+    # the deltas come from the row (`upgrade:`, or the Prototype-stage default).
     upgrade_header = (
-        "//     Upgrade deltas come from docs/klee-upgrades.yaml (R24 2026-07-20: the\n"
-        "//     upgrades sheet is the single source of truth; codegen defaults abolished).\n"
-        if profile is KLEE_PROFILE
-        else (
-            f"//     Upgrade deltas come from docs/{profile.character_id}-upgrades.yaml; "
-            "unexpressible deltas block the upgrade path.\n"
-        )
+        "//     Upgrade deltas come from the row's `upgrade:` in "
+        "docs/prototype-surface.yaml; unexpressible deltas block the upgrade "
+        "path.\n"
     )
     # THE PORTRAIT'S ID, and it is the row's own on every row but a stand-in.
     # `art_of:` (the companion stand-in seam, QUARANTINED) says "wear THAT

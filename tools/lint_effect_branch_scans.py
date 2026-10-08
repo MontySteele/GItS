@@ -113,6 +113,8 @@ RULES_BEARING_OPS: dict[str, str] = {
     # only two flat readers -- `gen_klee_cards.emit`'s `includes_bomb_rules`
     # and `lint_handwritten_parity`'s `exp_bomb_tips` -- both walk the whole
     # tree now, so a branch-nested Bomb op is no longer a miss to announce.
+    # (Both reads left with the old shipped Bomb keyword, text pass
+    # 2026-10-08.)
     # (The emitter's `target_type` loop still reads `place_bomb`/`detonate`/
     # `move_bombs` positionally, but that loop asks "which effect aims this
     # card FIRST" -- an ordering question about the printed body, not a

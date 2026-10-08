@@ -133,7 +133,8 @@ public class ModeFaceUpgradeTests
     {
         Assert.Contains("75% more",
                         Render(Upgraded(new ProtoMcDurinPrincipleOfPurityModeA())));
-        Assert.Contains("deals 6 more",
+        // The text pass of 2026-10-08: rule 8's "N additional damage".
+        Assert.Contains("deal 6 additional damage",
                         Render(Upgraded(new ProtoMcDurinPrincipleOfPurityModeB())));
     }
 }
