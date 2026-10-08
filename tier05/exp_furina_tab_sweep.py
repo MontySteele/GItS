@@ -369,4 +369,6 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
+    from tier05 import expcli
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())
