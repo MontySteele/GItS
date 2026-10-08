@@ -48,7 +48,7 @@ public sealed class ProtoVkDeepFreeze : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Freeze"),
-        ("description", "Apply [gold]Cryo[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold]."),
+        ("description", "Apply [gold]Cryo[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -68,6 +68,7 @@ public sealed class ProtoVkDeepFreeze : CustomCardModel, ICharacterCard
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Cryo, Owner.Creature);
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
         await VarkaCards.DeepFreeze(choiceContext, this, cardPlay);
     }
 

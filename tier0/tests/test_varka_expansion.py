@@ -128,11 +128,16 @@ def test_the_paper_numbers_and_upgrades(varka):
     assert fx(_vk("razor_claw_and_thunder"), "varka")["amount"] == 4
     assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 7
     assert loader.get_card(_vk("lisa_pulsating_witch")).cost == 0
-    assert fx(_vk("glacial_edict") + "+", "varka")["amount"] == 3
+    # Varka payoff fix (2026-10-08): every 3 [2] Cryo Oath, was 4 [3].
+    assert fx(_vk("glacial_edict"), "varka")["amount"] == 3
+    assert fx(_vk("glacial_edict") + "+", "varka")["amount"] == 2
     assert fx(_vk("pathfinders_mark") + "+", "varka")["upgraded"] is True
     assert loader.get_card(_vk("retaliating_tide") + "+").cost == 1
     assert loader.get_card(_vk("the_order_answers") + "+").cost == 1
     assert loader.get_card(_vk("wildfire_oath") + "+").innate is True
+    # Varka payoff fix (2026-10-08): both rares cost 1, were 2.
+    assert loader.get_card(_vk("wildfire_oath")).cost == 1
+    assert loader.get_card(_vk("absolute_zero")).cost == 1
     assert loader.get_card(_vk("lisa_pulsating_witch") + "+").retain is True
     up = loader.get_card(_vk("amber_sharpshooter") + "+")
     assert fx(up.id, "damage")["amount"] == 11
@@ -266,12 +271,18 @@ def test_tidal_bulwark_reads_hydro_after_its_own(varka):
     assert st.player.block == 4 + 2 * 3
 
 
-def test_glacial_edict_stacks_every_four_cryo(varka):
+def test_glacial_edict_stacks_every_three_cryo(varka):
+    # Varka payoff fix (2026-10-08): every 3 [2], was 4 [3].
     st = _state()
-    _led(st).oath["cryo"] = 7                         # + its own = 8
+    _led(st).oath["cryo"] = 8                         # + its own = 9
     _play(st, _vk("glacial_edict"))
     e = st.enemies[0]
-    assert e.powers["weak"] == 3 and e.powers["vulnerable"] == 3
+    assert e.powers["weak"] == 4 and e.powers["vulnerable"] == 4
+    st = _state()
+    _led(st).oath["cryo"] = 7                         # + its own = 8
+    _play(st, _vk("glacial_edict") + "+")
+    e = st.enemies[0]
+    assert e.powers["weak"] == 5 and e.powers["vulnerable"] == 5
 
 
 def test_thundering_verdict_hits_all_x_times_reading_electro(varka):

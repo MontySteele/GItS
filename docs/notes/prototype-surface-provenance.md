@@ -6636,3 +6636,24 @@ Two changes after the seat round (`review/records/kokomi-review-round-2026-10-05
 
 - Tide Wall's Plan now says "plus the damage the enemy intends next turn." Wording only, no op change: the seat read the intent on screen and took the Plan as this turn's, but it is carried out next turn.
 - Sea Glass Harvest's now-line Block 6 [7] -> 8 [11]. Two seats named it NEVER AGAIN: 6 Block with nothing to transform. 8 [11] is Coral Bulwark's Common rate. The Plan is unchanged. Prediction: no NEVER AGAIN next round.
+
+## Varka payoff fix, 2026-10-08
+
+Paper: `review/active/varka-payoff-fix-2026-10-08.md` (project review
+2026-10-08, pick 10). Seven rows; the record is
+`review/records/varka-offers-round-2026-10-08.md`.
+
+- Ember Cleave adds "Gain 1 Pyro Oath" after its Exhaust (`gain_pyro_oath`,
+  amount 1), gained even with no card to Exhaust. Pyro becomes current from
+  the hit, as before.
+- Stoke the Flames costs 0, was 1.
+- Pyre Oath adds "Exhaust a card" on play, after the Power lands, so that
+  Exhaust pays 1 Oath. The paper prints "Exhaust up to 2 cards"; the chosen
+  `exhaust_from` selector (`CardSelectCmd.FromHand` with
+  `CardSelectorPrefs(prompt, n)`) takes an exact count and has no "up to",
+  so by the paper's own reading it is built as exactly 1.
+- Wildfire Oath and Absolute Zero cost 1, were 2.
+- Deep Freeze adds 1 Vulnerable before the doubling (`apply_power
+  vulnerable 1`), so a clean enemy ends on 2. It is an application, so
+  Absolute Zero pays on it.
+- Glacial Edict: every 3 [2] Cryo Oath, was 4 [3].
