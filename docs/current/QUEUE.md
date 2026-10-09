@@ -25,6 +25,12 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Furina after the human co-op run**
+  (`review/records/coop-human-playtest-2026-10-09.md`, five picks):
+  (1) Salon Solitaire Repay 2 → 1; (2) Interval Bell and Tidal Flourish to
+  Uncommon, Gentilhomme Usher 6 / 11; (3) keep the Drain line and sim the
+  friend's "Drain to 1" first; (4) Guests become an archetype in the
+  pool-growth paper; (5) max HP stays 78. All defaults.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
