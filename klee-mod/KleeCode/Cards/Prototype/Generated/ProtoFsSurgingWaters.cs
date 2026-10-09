@@ -45,7 +45,7 @@ public sealed class ProtoFsSurgingWaters : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surging Waters"),
-        ("description", "Deal {Damage:diff()} damage. [gold]Repay[/gold] {RepayAmount:diff()}.{InCombat:{StageRepay}|}"),
+        ("description", "[gold]Repay[/gold] {RepayAmount:diff()}. Deal {CalculationBase:diff()} damage, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -60,8 +60,10 @@ public sealed class ProtoFsSurgingWaters : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move),
-            new DynamicVar("RepayAmount", 3m)
+            new DynamicVar("RepayAmount", 3m),
+            new CalculationBaseVar(6m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.RepayLeftOrRoom(card, card.DynamicVars["RepayAmount"].IntValue))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -73,18 +75,18 @@ public sealed class ProtoFsSurgingWaters : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await FurinaStage.Repay(choiceContext, Owner.Creature, DynamicVars["RepayAmount"].IntValue);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await FurinaStage.Repay(choiceContext, Owner.Creature, DynamicVars["RepayAmount"].IntValue);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
         DynamicVars["RepayAmount"].UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

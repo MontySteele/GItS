@@ -35,7 +35,7 @@ kits; its calibration bands are retired, and the sim does not gate kit balance
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance (frozen until the suite runs) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool to 75 built) | 75 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool-75 rulings built) | 74 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -93,9 +93,14 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
   "the current one built overnight can be discarded". Furina pays HP for
-  power: Drain spends HP down to a line at half the HP she entered combat with,
-  Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every
-  drained HP returns when combat ends. Three guest seats (four with Ensemble
+  power: Drain spends HP, never to 0; her Drain line is 3/4 of the HP she
+  entered combat with (Lyney: 10 lower), a Drain may go past it, and when
+  combat ends only the HP drained above the line returns (A Five-Century Act
+  returns the rest too). Repay returns drained HP, the past-line part first;
+  every HP lost or repaid prints 1 Fanfare. The Repay floor: most Repay cards
+  pay Block, Vigor or damage for the HP a Repay could not return (the Drain
+  line rule and the Repay floor, ruled 2026-10-09, records pick 1 and 2).
+  Three guest seats (four with Ensemble
   Cast); eleven guests. The guest rule
   (`review/active/furina-pool-growth-2026-10-09.md` sec.3, ruled 2026-10-09):
   a Guest Star exhausts and has no effect on summon; when its guest leaves (a
@@ -103,8 +108,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   copy moves its guest to the newest seat with no act; at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
-  pool is the starter and 75 cards (20 / 35 / 20; three slots held for the
-  first seat round), built from that paper's sec.5; Overdraft and Sold Out
+  pool is the starter and 74 cards (19 / 35 / 20), built from that paper's
+  sec.5 less Endless Waltz (cut 2026-10-09) and with the round's card
+  numbers (Standing Ovation Uncommon, Bravura+ base 10, Crabaletta 20,
+  Soloist's Solicitation 6, Commanding Gaze 2 Vulnerable, Freminet's act
+  Block, Neuvillette cost 1 and act on all HP lost); Overdraft and Sold Out
   give their Energy next turn (the build's loop ruling). Relics: the
   starter Salon Solitaire ("At the end of your turn, Repay 1."; 2 before the
   2026-10-09 playtest trim), its Orobas upgrade The Curtain Never Falls
@@ -112,9 +120,12 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   relics, Opera Glasses and Grand Theater Program; one potion, Bottled
   Applause (`FurinaRelicPool.cs`, `ArmPotions.cs`). Sim twin
   `tier0/engine/furina_tide.py`. Latest round
-  `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one
-  won; act-3 HP and an unread Repay plan are open). Next: [USER]'s play (a
-  rule change). At her finish line, re-ask her motion look (`AS2-B5`, dropped
+  `review/records/furina-pool75-round-2026-10-09.md` (pool 75: 1 win in 7,
+  four deaths in act 2 with the Drain half locked; Fable review; picks
+  ruled; picks 1-3 built 2026-10-09; Soothing Waters keeps no Repay floor,
+  which closed the one loop the floor made). Next: a seat round ([USER]:
+  "Yes - let's test it with a seat"). At her
+  finish line, re-ask her motion look (`AS2-B5`, dropped
   from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).
 - **Varka: Prototype, the combo pass built (2026-10-04).** Rules
   `review/active/varka-paper-kit-2026-09-28.md` sec.3

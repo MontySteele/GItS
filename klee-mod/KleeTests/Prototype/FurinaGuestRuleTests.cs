@@ -223,7 +223,7 @@ public class FurinaGuestRuleTests
     }
 
     [Fact]
-    public void Neuvillettes_act_deals_the_hp_drained_this_turn_to_all()
+    public void Neuvillettes_act_deals_the_hp_lost_since_her_last_turn_to_all()
     {
         var kit = StageKit.Of(StagePerformer.Neuvillette);
         Run(kit.Director.Drain(3));
@@ -341,7 +341,7 @@ public class FurinaGuestRuleTests
         Assert.Equal(72, kit.Board.Hp);
         Assert.Equal(2, kit.Board.Gained);
         Assert.Equal(2, Run(kit.Director.PneumaTides(2)));
-        var low = StageKit.At(40, 78);                  // line 39: no room
+        var low = StageKit.At(3, 78);                   // 3 - 3 = 0 HP: no room
         Assert.Equal(0, Run(low.Director.Regina(1)));
         Assert.Equal(0, low.Board.Gained);
         foreach (var hook in new[] { "FurinaStage.ReginaDrains",
@@ -397,7 +397,7 @@ public class FurinaGuestRuleTests
     [Fact]
     public void Grand_entrance_repays_after_a_guest_star_and_star_turn_reads_fanfare()
     {
-        Assert.Contains("StageDirector.Repay",
+        Assert.Contains("StageDirector.RepayFloor",
             Il.Calls(Il.Method("FurinaStage", "GuestStar")));
         Assert.Contains("FurinaStage.FanfareOf",
             Il.Calls(typeof(ProtoFsStarTurn).GetMethod("TryModifyEnergyCostInCombat", All)!));

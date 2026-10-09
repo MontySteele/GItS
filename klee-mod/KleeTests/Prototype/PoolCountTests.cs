@@ -74,7 +74,7 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Furina_is_75_rows_and_20_35_20_with_two_ancients_and_no_coop()
+    public void Furina_is_74_rows_and_19_35_20_with_two_ancients_and_no_coop()
     {
         // THE SALON'S TAB (2026-10-05, proposal sec.16): the slice's 24 rows
         // (12 Common, 8 Uncommon, 4 Rare), and the pool to 39
@@ -85,8 +85,10 @@ public class PoolCountTests
         // Uncommon: 12 / 15 / 7 -> 10 / 17 / 7. THE POOL TO 75
         // (review/active/furina-pool-growth-2026-10-09.md sec.5, ruled
         // 2026-10-09): 41 rows, 10 / 18 / 13 -> 20 / 35 / 20; three slots,
-        // one per rarity, held for the first seat round.
-        AssertPool("FurinaStageRoster", "Pool", 20, 35, 20, size: 75);
+        // one per rarity, held for the first seat round. The pool-75 round's
+        // rulings (2026-10-09): Endless Waltz cut (Uncommon) and Standing
+        // Ovation Common -> Uncommon, 19 / 35 / 20.
+        AssertPool("FurinaStageRoster", "Pool", 19, 35, 20, size: 74);
         AssertAncients("Furina");
         Assert.Null(System.Type.GetType(
             "KleeMod.Powers.FurinaStageRoster, klee")?.GetMethod("MultiplayerRows"));

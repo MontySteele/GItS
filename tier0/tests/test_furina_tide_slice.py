@@ -118,7 +118,9 @@ def test_fixed_price_cards_are_unplayable_when_the_price_cannot_be_paid():
     crab = T.make_card("ftd_crabaletta")
     quick = T.make_card("ftd_quick_flourish")
     assert T.playable(st, crab) and not T.playable(st, quick)
-    st.player.hp = 42                           # line 39: 42 - 5 < 39
+    st.player.hp = 42                           # past the line of 59: fine
+    assert T.playable(st, crab)
+    st.player.hp = 5                            # 5 - 5 = 0 HP: refused
     assert not T.playable(st, crab)
     st.player.ftd.fanfare = 4
     assert T.playable(st, quick)
@@ -126,12 +128,13 @@ def test_fixed_price_cards_are_unplayable_when_the_price_cannot_be_paid():
     assert st.player.ftd.fanfare == 0 and st.enemies[0].hp == 200 - 11
 
 
-def test_crabaletta_drains_five_and_deals_24():
+def test_crabaletta_drains_five_and_deals_20():
+    # The pool-75 round's card numbers (ruled 2026-10-09): 24 -> 20.
     st = _state()
     _play(st, "ftd_crabaletta")
     f = st.player.ftd
     assert st.player.hp == 73 and f.drained == 5
-    assert st.enemies[0].hp == 200 - 24
+    assert st.enemies[0].hp == 200 - 20
     assert f.ledger["fixed_drains"] == 1 and f.ledger["card_drains"] == 0
 
 
@@ -209,14 +212,16 @@ def test_singer_of_many_waters_repays_everything_and_exhausts():
 
 def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
     # The pool to 75 (2026-10-09): its 41 join (Neuvillette among them), and
-    # the 2026-10-09 trims' rarities are mirrored: 20 / 35 / 20, the sheet's.
+    # the 2026-10-09 trims' rarities are mirrored. The pool-75 round's
+    # rulings: Endless Waltz cut, Standing Ovation Uncommon -- 19 / 35 / 20.
     pool = [c for r in probe.DRAFT_POOL.values() for c in r]
-    assert len(pool) == 75 and len(set(pool)) == 75
+    assert len(pool) == 74 and len(set(pool)) == 74
+    assert "ftd_endless_waltz" not in T.CARDS
     assert "ftd_sigewinne" in pool and "ftd_critics_darling" in pool
     assert "ftd_neuvillette" in pool and "ftd_ebb_and_flow" in pool
     assert "ftd_crowd_gasps" not in pool
     assert {r: len(v) for r, v in probe.DRAFT_POOL.items()} == {
-        "common": 20, "uncommon": 35, "rare": 20}
+        "common": 19, "uncommon": 35, "rare": 20}
 
 
 # ----------------------------------------------------------------------
@@ -227,7 +232,9 @@ def test_grand_deluge_drains_six_for_16_hydro_to_all():
     _play(st, "ftd_grand_deluge")
     assert st.player.hp == 72 and st.player.ftd.drained == 6
     assert all(e.hp == 200 - 16 for e in st.enemies)
-    st.player.hp = 44                            # line 39: 44 - 6 < 39
+    st.player.hp = 44                            # past the line: playable
+    assert T.playable(st, T.make_card("ftd_grand_deluge"))
+    st.player.hp = 6                             # 6 - 6 = 0 HP: refused
     assert not T.playable(st, T.make_card("ftd_grand_deluge"))
 
 
@@ -243,27 +250,42 @@ def test_ousia_surge_draws_on_the_first_drain_each_turn():
     assert len(st.player.hand) == 2
 
 
-def test_lyney_lowers_the_line_and_acts_only_above_it():
+def test_lyney_lowers_the_line_and_his_act_may_drain_past_it():
+    # The Drain line rule (2026-10-09): the line is 3/4 of entry, 58.5 from
+    # 78 (59 as the C# prints it); Lyney lowers it by 10. His act may Drain
+    # past it and skips only when the Drain would take her to 0 HP.
     st = _state(enemies=2)
     f = st.player.ftd
-    assert T.half_line(st.player) == 39
+    assert T.half_line(st.player) == 58.5 and T.line_hp(st.player) == 59
     f.stage = ["lyney"]
-    assert T.half_line(st.player) == 29
+    assert T.line_hp(st.player) == 49
     T.act(st, "lyney")
     assert st.player.hp == 76 and f.drained == 2
     assert all(e.hp == 200 - 8 for e in st.enemies)
-    st.player.hp = 30                            # 30 - 2 < 29: skipped
+    st.player.hp = 30                            # past his line: still acts
     T.act(st, "lyney")
-    assert st.player.hp == 30
-    assert all(e.hp == 200 - 8 for e in st.enemies)
+    assert st.player.hp == 28 and f.drained_past == 2
+    assert all(e.hp == 200 - 16 for e in st.enemies)
+    st.player.hp = 2                             # 2 - 2 = 0 HP: skipped
+    T.act(st, "lyney")
+    assert st.player.hp == 2
+    assert all(e.hp == 200 - 16 for e in st.enemies)
 
 
-def test_a_five_century_act_lets_her_drain_to_one_hp():
-    st = _state(hp=12)
-    assert not T.can_drain(st, 11)
-    st.player.ftd.powers["five_century"] = 1
-    assert T.half_line(st.player) == 1
-    assert T.can_drain(st, 11) and not T.can_drain(st, 12)
+def test_a_five_century_act_returns_the_past_line_part_at_the_curtain():
+    st = _state(hp=78)
+    f = st.player.ftd
+    f.powers["five_century"] = 1
+    assert T.line_hp(st.player) == 59            # it no longer moves the line
+    T.drain(st, 30)                              # 19 above, 11 past
+    assert (f.drained_above, f.drained_past) == (19, 11)
+    T.close_ledger(st)
+    assert st.player.hp == 78
+    plain = _state(hp=78)
+    T.drain(plain, 30)
+    T.close_ledger(plain)
+    assert plain.player.hp == 78 - 11
+    assert plain.player.ftd.ledger["lost_past_line"] == 11
 
 
 def test_sigewinne_blocks_each_repay_and_her_act_repays_two():
@@ -372,10 +394,12 @@ def test_singer1_repays_one():
 
 
 def test_the_switches_keep_the_entry_line():
+    # The default variant runs the shipped 3/4 line (2026-10-09); the other
+    # research variants keep the half line they measured.
     for v in T.VARIANT_SWITCHES:
         p = T.build_player([], hp=60, variant=v)
         assert p.ftd.line_from_entry and p.ftd.entry_hp == 60
-        assert T.half_line(p) == 30
+        assert T.half_line(p) == (45 if v == "curtain_call" else 30)
         assert p.ftd.curtain_call == (v == "curtain_call")
 
 
@@ -409,7 +433,7 @@ def test_never_pilot_never_plays_a_fixed_drain_card():
     crab = T.make_card("ftd_crabaletta")
     assert P.allowed(st, crab, P.DECIDERS["judged"])
     assert not P.allowed(st, crab, P.DECIDERS["never"])
-    st.player.hp = 42
+    st.player.hp = 5                             # 5 - 5 = 0 HP
     assert not P.allowed(st, crab, P.DECIDERS["always"])
 
 
@@ -446,3 +470,87 @@ def _twin(st, variant):
     tw = _state(variant, hp=st.player.hp, enemy_hp=st.enemies[0].hp)
     tw.player.ftd.drained = st.player.ftd.drained
     return tw
+
+
+# ---- The pool-75 fixed Drains each reach their own body -----------------
+# `resolve_card`'s plain fixed-Drain branch once caught every kind in
+# FIXED_DRAIN_KINDS, so Undercurrent and Riptide Lunge crashed on the tuple
+# unpack and the rest resolved as "Drain N, deal M". Effects:
+# `review/active/furina-pool-growth-2026-10-09.md` sec.5.
+
+def test_draft_judged_runs_past_seed_four():
+    out = probe.run_job("draft/judged", runs=40, seed=1, jobs=1)
+    assert len(out) == 40
+    drafted = {c for r in out for c in r["deck"]}
+    assert {"ftd_undercurrent", "ftd_riptide_lunge"} & drafted
+
+
+def test_undercurrent_drains_two_and_deals_five_plus_one_per_drain():
+    st = _state()
+    _play(st, "ftd_undercurrent")
+    assert st.player.hp == 76 and st.enemies[0].hp == 200 - (5 + 1)
+    _play(st, "ftd_undercurrent")
+    assert st.player.hp == 74 and st.enemies[0].hp == 194 - (5 + 2)
+    assert st.player.ftd.ledger["fixed_drains"] == 2
+
+
+def test_overdraft_drains_four_and_gives_one_energy_next_turn():
+    st = _state()
+    energy = st.player.energy
+    _play(st, "ftd_overdraft")
+    assert st.player.hp == 74 and st.player.energy == energy
+    assert st.player.ftd.energy_next == 1 and st.enemies[0].hp == 200
+
+
+def test_all_in_drains_eight_and_gives_two_energy_now():
+    st = _state()
+    energy = st.player.energy
+    _play(st, "ftd_all_in")
+    assert st.player.hp == 70 and st.player.energy == energy + 2
+    assert st.enemies[0].hp == 200
+
+
+def _with_draw_pile(st, n=5):
+    st.player.draw_pile = [T.make_card("strike") for _ in range(n)]
+    st.player.hand = []
+
+
+def test_ousia_pledge_drains_three_and_draws_two():
+    st = _state()
+    _with_draw_pile(st)
+    _play(st, "ftd_ousia_pledge")
+    assert st.player.hp == 75 and len(st.player.hand) == 2
+    assert st.enemies[0].hp == 200
+
+
+def test_pay_the_tab_drains_six_and_draws_three():
+    st = _state()
+    _with_draw_pile(st)
+    _play(st, "ftd_pay_the_tab")
+    assert st.player.hp == 72 and len(st.player.hand) == 3
+    assert st.enemies[0].hp == 200
+
+
+def test_riptide_lunge_drains_three_deals_ten_and_repays_six_on_a_kill():
+    st = _state()
+    _play(st, "ftd_riptide_lunge")
+    assert st.player.hp == 75 and st.enemies[0].hp == 190
+    assert st.player.ftd.drained == 3
+    kill = _state(enemy_hp=10)
+    _play(kill, "ftd_riptide_lunge")
+    assert not kill.enemies[0].alive
+    assert kill.player.hp == 78 and kill.player.ftd.drained == 0
+
+
+def test_the_deluge_drains_eight_and_hits_every_enemy_for_24():
+    st = _state(enemies=2)
+    _play(st, "ftd_the_deluge")
+    assert st.player.hp == 70
+    assert [e.hp for e in st.enemies] == [200 - 24, 200 - 24]
+
+
+def test_ebb_and_flow_drains_four_then_repays_two():
+    st = _state()
+    _play(st, "ftd_ebb_and_flow")
+    assert st.player.hp == 76 and st.player.ftd.drained == 2
+    assert st.enemies[0].hp == 200

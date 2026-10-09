@@ -60,7 +60,12 @@ LYNEY_ACT_DAMAGE = T.LYNEY_ACT
 SIGEWINNE_ACT_REPAY = T.SIGEWINNE_ACT_REPAY
 CHEVREUSE_ACT_DAMAGE = T.CHEVREUSE_ACT
 CHEVREUSE_LINE_VULNERABLE = T.CHEVREUSE_LINE_VULNERABLE
-FIVE_CENTURY_LINE = T.FIVE_CENTURY_LINE
+DRAIN_FLOOR = T.DRAIN_FLOOR
+LINE_SHARE = T.LINE_SHARE
+LINE_NUMERATOR = T.LINE_NUMERATOR
+LINE_DENOMINATOR = T.LINE_DENOMINATOR
+FREMINET_ACT_BLOCK = T.FREMINET_ACT_BLOCK
+FREMINET_ACT_BLOCK_UPGRADED = T.FREMINET_ACT_BLOCK_UPGRADED
 FOUNTAIN_TURNS = T.FOUNTAIN_TURNS
 # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09): the guests' upgraded lines and acts (sec.3) and the new
@@ -97,9 +102,8 @@ GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
 
 #: The Powers this arm reads, by `apply_power` id. Each sheet row applies its
 #: printed number: Salon's Encore and Thunderous Applause their damage (3, 4
-#: upgraded), Endless Waltz and Universal Revelry 1 a copy.
+#: upgraded), Universal Revelry 1 a copy.
 SALONS_ENCORE = "fs_salons_encore"
-ENDLESS_WALTZ = "fs_endless_waltz"
 THUNDEROUS_APPLAUSE = "fs_thunderous_applause"
 UNIVERSAL_REVELRY = "fs_universal_revelry"
 # The pool to 39: Ousia Surge, A Five-Century Act, Critics' Darling and Bis!
@@ -126,7 +130,6 @@ HYMN_OF_RENEWAL = "fs_hymn_of_renewal"
 #: The slice's Power keys (`furina_tide.Ftd.powers`) to the arm's ids.
 ARM_POWER_IDS = {
     "salon_encore": SALONS_ENCORE,
-    "endless_waltz": ENDLESS_WALTZ,
     "thunderous": THUNDEROUS_APPLAUSE,
     "revelry": UNIVERSAL_REVELRY,
     "ousia_surge": OUSIA_SURGE,
@@ -160,8 +163,9 @@ STARTER_IDS: tuple[str, ...] = (
 #: THE SLICE'S 24 (sec.16), THE POOL TO 39's ten
 #: (`review/active/furina-pool-40-2026-10-05.md` sec.3) and THE POOL TO 75's
 #: 41 (`review/active/furina-pool-growth-2026-10-09.md` sec.5), in the C#
-#: roster's order (`FurinaStageRoster.Pool`): 20 Common, 35 Uncommon, 20
-#: Rare, 75. Three slots, one per rarity, are held for the first seat round.
+#: roster's order (`FurinaStageRoster.Pool`), less Endless Waltz (cut
+#: 2026-10-09, with Standing Ovation moved to Uncommon): 19 Common, 35
+#: Uncommon, 20 Rare, 74.
 POOL_IDS: tuple[str, ...] = (
     # Drain (five).
     "proto_fs_mademoiselle_crabaletta",
@@ -181,9 +185,8 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_standing_ovation_all",      # Standing Ovation
     "proto_fs_interval_bell",
     "proto_fs_bravura",
-    # The three Powers.
+    # The two Powers (Endless Waltz was cut 2026-10-09).
     "proto_fs_salons_encore",
-    "proto_fs_endless_waltz",
     "proto_fs_thunderous_applause",
     # The four guests.
     "proto_fs_guest_star_charlotte",
@@ -300,10 +303,11 @@ def can_pay(player, amount: int) -> bool:
 
 
 def can_drain(player, amount: int) -> bool:
-    """Rule 1: would a Drain of `amount` stay at or above the line (Lyney
-    and A Five-Century Act move it, `furina_tide.half_line`)?"""
+    """Rule 1 (the Drain line rule, 2026-10-09): a Drain is never refused
+    for the line; only one that would take her to 0 HP or below is
+    (`furina_tide.can_drain`)."""
     return (active(player) and int(amount) > 0
-            and player.hp - int(amount) >= T.half_line(player))
+            and player.hp - int(amount) >= T.DRAIN_FLOOR)
 
 
 # ----------------------------------------------------------------------
@@ -315,7 +319,8 @@ def reset_for_combat(player) -> None:
     slice's own players (`furina_tide.build_player`) keep their record."""
     if not is_furina(player):
         return
-    player.ftd = T.Ftd(singer=SINGER_REPAY, hit_fanfare=True, line=0.5,
+    player.ftd = T.Ftd(singer=SINGER_REPAY, hit_fanfare=True,
+                       line=T.LINE_SHARE,
                        entry_hp=int(player.hp), line_from_entry=True,
                        curtain_call=True,
                        decider=getattr(player, "stage_decider", None)
@@ -364,7 +369,8 @@ def drain_mode_amount(mode: dict):
 
 def mode_offered(player, mode: dict) -> bool:
     """A Spend mode is offered only when she holds its price, a Drain mode
-    only when it would not cross the line. Off Furina neither is offered."""
+    only when it would not take her to 0 HP. Off Furina neither is
+    offered."""
     spend = spend_mode_amount(mode)
     if spend is not None:
         return can_pay(player, spend)
@@ -379,7 +385,7 @@ def mode_refusal(player, mode: dict):
         return None
     label = mode.get("label") or "(unlabelled mode)"
     if drain_mode_amount(mode) is not None:
-        return f"{label!r} would take her below the Drain line"
+        return f"{label!r} would take her to 0 HP"
     return f"{label!r} needs that much Fanfare"
 
 
@@ -414,7 +420,7 @@ def fixed_price_refusal(state, card):
         return None
     op, amount = price
     if op == DRAIN_MODE_OP and not can_drain(state.player, amount):
-        return "it would take you below your Drain line"
+        return "it would take you to 0 HP"
     if op == SPEND_MODE_OP and not can_pay(state.player, amount):
         return "you do not have that much Fanfare"
     return None
@@ -430,10 +436,13 @@ def drain(state, amount: int) -> bool:
     return T.drain(state, int(amount))
 
 
-def repay(state, amount: int) -> int:
+def repay(state, amount: int, floor: str = "none") -> int:
+    """A card's Repay N, with its Repay floor (`floor`: none, block or
+    vigor; ruled 2026-10-09). The leftover is recorded for the play
+    (`repay_left`)."""
     if not active(state.player):
         return 0
-    return T.repay(state, int(amount))
+    return T.card_repay(state, int(amount), str(floor))
 
 
 def repay_all(state) -> int:
@@ -476,7 +485,9 @@ def guest_star(state, member: str, upgraded: bool = False,
     result = T.summon(state, member, upgraded=upgraded, card=card)
     entrance = T._player_power(state.player, "grand_entrance")
     if entrance and not state.over:
-        T.repay(state, entrance)
+        # "Repay 4. Gain 1 Block for any HP it could not Repay." (The Repay
+        # floor, ruled 2026-10-09.)
+        T.repay_floor(state, entrance, "block")
     return result
 
 
@@ -548,8 +559,15 @@ def repaid_this_play(player) -> int:
     return int(player.ftd.repaid_this_play) if active(player) else 0
 
 
+def repay_left(player) -> int:
+    """The Repay floor's damage (Surging Waters, Hydro Lance, Cleansing
+    Torrent): what this play's Repay could not return."""
+    return int(player.ftd.repay_left_this_play) if active(player) else 0
+
+
 def near_line(player) -> bool:
-    """Against the Tide and High Stakes: within 5 HP of the Drain line."""
+    """Against the Tide and High Stakes: within 5 HP of the Drain line, or
+    at or below it."""
     return active(player) and T.near_line(player)
 
 
@@ -577,6 +595,7 @@ def begin_play(state) -> None:
     """A card play opens: a fresh per-play Repay record."""
     if active(state.player):
         state.player.ftd.repaid_this_play = 0
+        state.player.ftd.repay_left_this_play = 0
 
 
 def energy_next_turn(state, amount: int) -> None:
@@ -631,8 +650,10 @@ FURINA_TIDE_DECIDER = FurinaTideDecider()
 # `tier0/tests/test_furina_tide_arm.py`.
 # ----------------------------------------------------------------------
 READINGS: tuple[str, ...] = (
-    "The line is half the HP she entered the combat with, compared in "
-    "floats: from 78 or 77 a Drain may reach 39 and no lower.",
+    "The line is 3/4 of the HP she entered the combat with (ruled "
+    "2026-10-09), compared in floats: from 78 the HP above it is 59 and up. "
+    "A Drain may go past it, never to 0 HP; the part drained past it is "
+    "lost at the curtain call unless Repaid.",
     "A second copy of a guest already on stage moves it to the newest seat "
     "with no act (the pool to 75, sec.3); its card joins the seat's and "
     "returns with it, and an upgraded copy upgrades the guest.",

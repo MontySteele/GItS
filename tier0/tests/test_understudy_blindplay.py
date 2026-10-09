@@ -6505,12 +6505,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
         "Spend": ["Pay that much ", ". Offered only if you have "],
         "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
-                    " uses it. It never fades."],
+                    " uses it. It resets to 0 after each combat."],
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
-        # The text pass of 2026-10-08: the clause on what moves the line.
-        "Drain": ["Lose N HP, never below half your HP at combat start. Lyney "
-                  "and ", "A Five-Century Act lower that line. Drained HP "
-                  "returns after ", "combat."],
+        # The Drain line rule (2026-10-09): the 3/4 line, and HP drained
+        # past it is lost unless Repaid.
+        "Drain": ["Lose N HP. Drained HP returns after combat, but HP drained "
+                  "past ", "your line (3/4 of your HP at combat start) is "
+                  "lost unless you ", " it."],
         # The pool to 75 (2026-10-09): the guest rule's words.
         "Repay": ["Regain that much drained HP, never more than you ",
                   "drained. A ", " counts the HP it returns."],
@@ -8953,6 +8954,8 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
                   "off at the end of each of its turns."],
         "Strength": [" hit the wearer ", "lands. It does not decay."],
         "Dexterity": [" the wearer gains. It ", "does not decay."],
+        # The Repay floor (ruled 2026-10-09).
+        "Vigor": ["Your next Attack deals additional damage."],
     }
     page_only = {"Sharp", "Nimble", "Swift", "Bond of Life", "Exhaust"}
     # `EB-597`. A THIRD CLASS, AND SHRINK IS ITS ONLY MEMBER SO FAR: a word no

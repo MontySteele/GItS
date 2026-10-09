@@ -292,8 +292,6 @@ internal static class KleePowerIcons
         // the shipped Furina sigil nearest their job, on the same terms.
         SalonsEncorePower =>
             KleePck.Path("furina/powers/grand_salon.png"),
-        EndlessWaltzPower =>
-            KleePck.Path("furina/powers/rising_ovation.png"),
         UniversalRevelryPower =>
             KleePck.Path("furina/powers/the_gallery_stirs.png"),
         // THE RE-FOUNDING (2026-10-04): Rehearsal and its Rare source

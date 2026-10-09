@@ -45,7 +45,7 @@ public sealed class ProtoFsHymnOfManyWaters : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hymn of Many Waters"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Repay[/gold] {RepayAmount:diff()}.{InCombat:{StageRepay}|}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Repay[/gold] {RepayAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -74,7 +74,7 @@ public sealed class ProtoFsHymnOfManyWaters : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await FurinaStage.Repay(choiceContext, Owner.Creature, DynamicVars["RepayAmount"].IntValue);
+        await FurinaStage.Repay(choiceContext, Owner.Creature, DynamicVars["RepayAmount"].IntValue, StageFloor.Block);
     }
 
     protected override void OnUpgrade()

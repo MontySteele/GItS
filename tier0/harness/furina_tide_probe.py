@@ -57,11 +57,12 @@ PROBES: dict[str, tuple[str, list[str]]] = {
               ["ftd_crabaletta", "ftd_chevalmarin", "ftd_chevalmarin",
                "ftd_solicitation", "ftd_usher", "ftd_tidal_flourish",
                "ftd_bravura", "ftd_salon_encore"]),
+    # Endless Waltz left both decks below when it was cut (2026-10-09).
     "pneuma": ("Pneuma: Hymn x2, Surging Waters x2, Pneuma Refrain, "
-               "Endless Waltz, Curtain Rise, Usher",
+               "Curtain Rise, Usher",
                ["ftd_hymn", "ftd_hymn", "ftd_surging_waters",
                 "ftd_surging_waters", "ftd_pneuma_refrain",
-                "ftd_endless_waltz", "ftd_curtain_rise", "ftd_usher"]),
+                "ftd_curtain_rise", "ftd_usher"]),
     "guests": ("Guests: Charlotte, Wriothesley, Sigewinne, Clorinde, "
                "Chevalmarin, Surging Waters, Usher, Crabaletta",
                ["ftd_charlotte", "ftd_wriothesley", "ftd_sigewinne",
@@ -72,9 +73,9 @@ PROBES: dict[str, tuple[str, list[str]]] = {
                 ["ftd_crabaletta", "ftd_chevalmarin", "ftd_chevalmarin",
                  "ftd_revelry", "ftd_rejoice", "ftd_tidal_flourish",
                  "ftd_bravura", "ftd_crowd_gasps"]),
-    "loop": ("the HP loop: Revelry, Critics' Darling, Endless Waltz, Salon's "
+    "loop": ("the HP loop: Revelry, Critics' Darling, Salon's "
              "Encore, Pneuma Refrain, Hymn, Crabaletta, Chevalmarin",
-             ["ftd_revelry", "ftd_critics_darling", "ftd_endless_waltz",
+             ["ftd_revelry", "ftd_critics_darling",
               "ftd_salon_encore", "ftd_pneuma_refrain", "ftd_hymn",
               "ftd_crabaletta", "ftd_chevalmarin"]),
     "balanced": ("a balanced draft: Crabaletta, Chevalmarin, Usher, Hymn, "

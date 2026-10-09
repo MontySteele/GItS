@@ -1616,11 +1616,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
     # guests) left with it; their history is in git.
     "Spend": "Pay that much Fanfare. Offered only if you have enough.",
-    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It never "
-                "fades."),
-    "Drain": ("Lose N HP, never below half your HP at combat start. Lyney "
-              "and A Five-Century Act lower that line. Drained HP returns "
-              "after combat."),
+    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It "
+                "resets to 0 after each combat."),
+    # The Drain line rule (ruled 2026-10-09): 3/4 line, a Drain may go
+    # past it, and what it drains past it is lost unless Repaid.
+    "Drain": ("Lose N HP. Drained HP returns after combat, but HP drained "
+              "past your line (3/4 of your HP at combat start) is lost "
+              "unless you Repay it."),
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
     # Guest Star exhausts and comes back when its guest leaves.
     "Repay": ("Regain that much drained HP, never more than you drained. A "
@@ -1632,7 +1634,7 @@ ARM_KEYWORDS: dict[str, str] = {
     "oldest guest": ("The guest on stage longest: the one a fourth summon "
                      "would remove."),
     "Charlotte": ("The first time you Repay each turn, draw 1 card. Act: Repay "
-                  "2."),
+                  "2. Gain 1 Block for any HP it could not Repay."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
                     "enemy. Act: deal 4 Cryo damage to a random enemy."),
     "Lynette": ("The first time each turn an enemy makes you lose HP, gain "
@@ -2243,6 +2245,9 @@ BASE_KEYWORDS: dict[str, str] = {
                  "does not decay."),
     "Dexterity": ("Adds its amount to every Block the wearer gains. It does "
                   "not decay."),
+    # The Repay floor (ruled 2026-10-09): Soothing Waters and Pneuma Tides
+    # pay the base game's Vigor. `BaseKeywordTips.ForVigor` says the same.
+    "Vigor": ("Your next Attack deals additional damage."),
     # The three enchantments (`EB-355` is the same gap at the enchant screen).
     # A card wears one for the rest of the run and the page prints it in the
     # card's own `enchantment` field (`EB-181`), which is a badge and not a
@@ -2285,6 +2290,7 @@ _BASE_KEYWORD_RE = {
     "Shrink": re.compile(r"\bShrink\b"),
     "Strength": re.compile(r"\bStrength\b"),
     "Dexterity": re.compile(r"\bDexterity\b"),
+    "Vigor": re.compile(r"\bVigor\b"),
     "Sharp": re.compile(r"\bSharp\b"),
     "Nimble": re.compile(r"\bNimble\b"),
     "Swift": re.compile(r"\bSwift\b"),
@@ -3440,6 +3446,10 @@ RESOLUTION_HIT_ON_YOU = ("  {n}. **{target}** (you) -- {amount}, taken while "
                          "it resolved{source}")
 RESOLUTION_HIT_SOURCE = ", from **{source}**"
 RESOLUTION_HIT_THORNS = ", from **{source}**'s Thorns"
+#: The Furina pool-75 round (2026-10-09): a hit the game filed with no dealer
+#: but you is your own HP cost (a Drain). The older-mod guess named the one
+#: Thorns holder, and Ousia Pledge's Drain read as Toadpole's Thorns.
+RESOLUTION_HIT_SELF = ", your own HP cost"
 #: The power name the page names as the source of a hit on you.
 THORNS_POWER = "Thorns"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."

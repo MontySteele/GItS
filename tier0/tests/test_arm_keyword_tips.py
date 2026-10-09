@@ -550,9 +550,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Cue, Rehearsal, the front seat) left with v2.
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
             "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
-            # The text pass of 2026-10-08: what moves the line.
-            "Lose N HP, never below half your HP at combat start. Lyney and ",
-            "A Five-Century Act lower that line. Drained HP returns after ",
+            # The Drain line rule (2026-10-09): the 3/4 line, and HP drained
+            # past it is lost unless Repaid.
+            "Lose N HP. Drained HP returns after combat, but HP drained past ",
+            "your line (3/4 of your HP at combat start) is lost unless you ",
             # The pool to 75 (2026-10-09): the guest rule's words.
             "Regain that much drained HP, never more than you drained. A ",
             "A guest joins at the back. On a full stage, the oldest guest ",
@@ -746,7 +747,8 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
     """The denominator. A scrape that silently read nothing would pass the
     parametrised join above and fail here. Five since the Varka expansion
     (2026-10-01): Barbara: Wellspring Hymn prints Frail, the word the join
-    above carried for tomorrow."""
+    above carried for tomorrow. Six since the Repay floor (2026-10-09):
+    Soothing Waters and Pneuma Tides print Vigor."""
     printed = {keyword.word
                for path in _prototype_files()
                for description in _descriptions(
@@ -754,7 +756,7 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
                for keyword in gen.BASE_KEYWORDS
                if keyword.attach in gen.base_keyword_tip_calls(description)}
     assert printed == {"Vulnerable", "Weak", "Strength", "Dexterity",
-                       "Frail"}
+                       "Frail", "Vigor"}
 
 
 def test_the_row_the_defect_was_filed_against_carries_the_vulnerable_tip():
@@ -1274,7 +1276,8 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
         "Exhausts. Acts at the end of your turn. When it leaves, this card "
         "goes to your Discard Pile.")
     assert rows["Charlotte"] == (
-        "The first time you Repay each turn, draw 1 card. Act: Repay 2.")
+        "The first time you Repay each turn, draw 1 card. Act: Repay 2. "
+        "Gain 1 Block for any HP it could not Repay.")
     for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",
                  "Mademoiselle Crabaletta", "Ousia", "Pneuma"):
         assert gone not in rows, gone

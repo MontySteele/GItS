@@ -168,7 +168,7 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          "summoned", "applied", "oath", "fang_ascension"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
-         "source"])
+         "source", "self"])
 
 
 def test_the_internal_id_never_crosses_onto_the_page():

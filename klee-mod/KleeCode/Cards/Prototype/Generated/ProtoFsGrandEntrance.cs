@@ -45,8 +45,17 @@ public sealed class ProtoFsGrandEntrance : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Entrance"),
-        ("description", "Whenever you play a Guest Star, [gold]Repay[/gold] {PowerAmount:diff()}."),
+        ("description", "Whenever you play a Guest Star, [gold]Repay[/gold] {PowerAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["PowerAmount"].IntValue));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
