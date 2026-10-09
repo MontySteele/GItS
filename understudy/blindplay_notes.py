@@ -1616,8 +1616,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
     # guests) left with it; their history is in git.
     "Spend": "Pay that much Fanfare. Offered only if you have enough.",
-    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It never "
-                "fades."),
+    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It "
+                "resets to 0 after each combat."),
     "Drain": ("Lose N HP, never below half your HP at combat start. Lyney "
               "and A Five-Century Act lower that line. Drained HP returns "
               "after combat."),
@@ -3440,6 +3440,10 @@ RESOLUTION_HIT_ON_YOU = ("  {n}. **{target}** (you) -- {amount}, taken while "
                          "it resolved{source}")
 RESOLUTION_HIT_SOURCE = ", from **{source}**"
 RESOLUTION_HIT_THORNS = ", from **{source}**'s Thorns"
+#: The Furina pool-75 round (2026-10-09): a hit the game filed with no dealer
+#: but you is your own HP cost (a Drain). The older-mod guess named the one
+#: Thorns holder, and Ousia Pledge's Drain read as Toadpole's Thorns.
+RESOLUTION_HIT_SELF = ", your own HP cost"
 #: The power name the page names as the source of a hit on you.
 THORNS_POWER = "Thorns"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."

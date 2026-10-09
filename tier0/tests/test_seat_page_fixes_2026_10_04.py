@@ -207,3 +207,28 @@ def test_the_ledger_carries_the_dealer():
     hook = (CODE / "Diagnostics" / "PlayTelemetry.cs").read_text(
         encoding="utf-8")
     assert "(int)result.BlockedDamage, dealer);" in hook
+
+
+def test_your_own_hp_cost_is_never_a_thorns_guess():
+    """The Furina pool-75 round (2026-10-09): Ousia Pledge's Drain 3, a
+    Skill, read "from Toadpole(1)'s Thorns" (Thorns 2). The mod filed no
+    dealer, and the page guessed the one Thorns holder. The mod now marks a
+    hit with no dealer but you as `self`, and the page says it was your own
+    HP cost."""
+    state = copy.deepcopy(combat_state())
+    enemy = state["battle"]["enemies"][0]
+    enemy["status"] = [{"id": "THORNS_POWER", "name": "Thorns", "amount": 2,
+                        "type": "Buff",
+                        "description": "Whenever this is attacked, deal 2 "
+                                       "damage back."}]
+    hit = _on_you()
+    hit["self"] = True
+    state["player"]["resolutions"] = [_row(hits=[hit])]
+    page = blindplay.observe(state)
+    assert ("1. **Klee** (you) -- 3, taken while it resolved, your own HP "
+            "cost") in page
+    assert "'s Thorns" not in page
+
+    src = (CODE / "Powers" / "ResolutionLedger.cs").read_text(encoding="utf-8")
+    assert '["self"] = hit.Self' in src
+    assert "dealer == null || ReferenceEquals(dealer, target)" in src

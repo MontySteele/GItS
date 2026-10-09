@@ -15221,7 +15221,7 @@ def stage_repay_call(card: dict) -> str | None:
     ops = [fx for fx in card.get("effects") or []
            if fx.get("op") in ("stage_repay", "stage_repay_all")]
     if not ops:
-        return None
+        return stage_later_repay_call(card)
     if len(ops) != 1:
         raise ValueError(f"{card['id']}: a Repay preview reads one Repay")
     if ops[0]["op"] == "stage_repay_all":
@@ -15234,6 +15234,43 @@ def stage_repay_call(card: dict) -> str | None:
                 f'{int(ops[0].get("amount", 1))})')
     return ('FurinaStageFacePreview.Repay(this, '
             'DynamicVars["RepayAmount"].IntValue)')
+
+
+#: Powers whose whole job is a Repay of their amount (the pool-75 round,
+#: 2026-10-09: every Repay face prints "(Repays N)", these included).
+STAGE_REPAY_POWERS = frozenset({
+    "fs_pneuma_tides", "fs_fountain_of_lucine", "fs_grand_entrance"})
+
+
+def stage_later_repay_call(card: dict) -> str | None:
+    """The "(Repays N)" call for a Repay that is not a top-level op, or None.
+
+    The pool-75 round (2026-10-09): Gentle Current, Pneuma Tides, Fountain of
+    Lucine, Grand Entrance and Riptide Lunge print a Repay that happens later
+    or on a condition, and their faces said nothing with nothing drained. The
+    line reads what a Repay of the printed number would return now; Riptide
+    Lunge's reads the board after its own Drain.
+    """
+    top = card.get("effects") or []
+    for fx in top:
+        if fx.get("op") == "furina" and fx.get("kind") == "repay_next":
+            return ('FurinaStageFacePreview.Repay(this, '
+                    'DynamicVars["FsAmount"].IntValue)')
+        if (fx.get("op") == "apply_power"
+                and fx.get("power") in STAGE_REPAY_POWERS):
+            return ('FurinaStageFacePreview.Repay(this, '
+                    'DynamicVars["PowerAmount"].IntValue)')
+    nested = [inner for fx in top if fx.get("op") == "conditional"
+              for inner in (fx.get("then") or [])
+              if inner.get("op") == "stage_repay"]
+    if not nested:
+        return None
+    if len(nested) != 1:
+        raise ValueError(f"{card['id']}: a Repay preview reads one Repay")
+    drain = stage_fixed_price(card)
+    first = drain[1] if drain and drain[0] == "stage_drain" else 0
+    return ('FurinaStageFacePreview.RepayAfterDrain(this, '
+            f'{int(nested[0].get("amount", 1))}, {first})')
 
 
 def stage_face_args(card: dict) -> list[tuple[str, str]]:

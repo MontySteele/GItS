@@ -45,7 +45,7 @@ public sealed class ProtoFsRiptideLunge : CustomCardModel, ICharacterCard, IUnpl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide Lunge"),
-        ("description", "[gold]Drain[/gold] 3. Deal {Damage:diff()} damage. If this kills an enemy, [gold]Repay[/gold] 6.{InCombat:{StageDrainLine}|}"),
+        ("description", "[gold]Drain[/gold] 3. Deal {Damage:diff()} damage. If this kills an enemy, [gold]Repay[/gold] 6.{InCombat:{StageDrainLine}|}{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -55,6 +55,7 @@ public sealed class ProtoFsRiptideLunge : CustomCardModel, ICharacterCard, IUnpl
     {
         base.AddExtraArgsToDescription(description);
         description.Add("StageDrainLine", FurinaStageFacePreview.DrainLine(this, 3));
+        description.Add("StageRepay", FurinaStageFacePreview.RepayAfterDrain(this, 6, 3));
     }
 
     // The Salon's Tab (2026-10-05): a fixed price is the cost line,

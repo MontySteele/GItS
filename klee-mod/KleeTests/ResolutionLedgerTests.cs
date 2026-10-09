@@ -312,11 +312,13 @@ public class ResolutionLedgerTests
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
         Assert.Equal(new[] { "target", "amount", "blocked", "combat_id",
-                             "killed", "on_player", "source" },
+                             "killed", "on_player", "source", "self" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
         // 2026-10-01: a hit on a player inside a play is marked as one.
         Assert.Equal(false, hit["on_player"]);
+        // 2026-10-09: and only a hit on a player can be her own HP cost.
+        Assert.Equal(false, hit["self"]);
     }
 
     /// <summary>2026-09-25 evening: a random summon inside a card names who it
