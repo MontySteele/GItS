@@ -103,8 +103,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Applause (`FurinaRelicPool.cs`, `ArmPotions.cs`). Sim twin
   `tier0/engine/furina_tide.py`. Latest round
   `review/records/furina-pool75-round-2026-10-09.md` (pool 75: 1 win in 7,
-  four deaths in act 2 with the Drain half locked; Fable review; five picks
-  open). Next: [USER] rules those picks. At her finish line, re-ask her motion look (`AS2-B5`, dropped
+  four deaths in act 2 with the Drain half locked; Fable review; picks ruled). Next: sim the 3/4 Drain line with a real
+  cost past it, and write the card-by-card Repay list, both for [USER]
+  before the build. At her finish line, re-ask her motion look (`AS2-B5`, dropped
   from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).
 - **Varka: Prototype, the combo pass built (2026-10-04).** Rules
   `review/active/varka-paper-kit-2026-09-28.md` sec.3

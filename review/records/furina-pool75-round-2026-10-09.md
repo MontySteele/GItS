@@ -101,36 +101,33 @@ which of the two moved her. Pick 4 separates them.
 - Off-kit companion cards (Itto, Sara, Gorou and others) appeared in Furina's
   rewards in three runs. Confirm this is the intended colorless set.
 
-## Picks
+## Picks (ruled 2026-10-09)
 
-1. **Fixed-Drain cards read "Drain up to N" and never refuse.** They Drain
-   whatever room is left above the line. The line stays, and nothing locks.
-   This is the cheapest fix for the act-2 deaths, and no rule changes. The
-   line at 1 HP, or at a third of max HP, gets simmed against it later.
-   **Default: yes.**
-2. **A Repay floor.**
-   - Gentle Current, Hymn of Many Waters, Soothing Waters, Charlotte's act
-     and Sigewinne's act gain Clean Slate's clause: "If you have no drained
-     HP, draw 1 card".
-   - Endless Waltz is cut, and its slot is held.
+[USER] ruled: "Otherwise the defaults make sense to me." On pick 1: "Let's
+try it. It feels like we're making a mechanics change to accommodate the
+agents' poor play, but we can see how changing it looks in practice first."
 
-   **Default: yes.**
-3. **Card numbers.**
-   - Standing Ovation moves to Uncommon.
-   - Bravura's upgrade raises its base to 10 and keeps 2 per point.
-   - Crabaletta: 20 [26].
-   - Soloist's Solicitation: 6 [9].
-   - Commanding Gaze's plain mode applies 2 Vulnerable.
-   - Freminet's act gains 6 Block [9].
-   - Neuvillette costs 1, and his act reads all HP lost this turn.
+1. **The Drain line, revised in discussion.** [USER]'s point: "if you start
+   a fight at full health, you shouldn't lose half your health over the
+   course of a fight, so draining half of it for more damage is just free
+   power." The review's "Drain up to N" would have added free effects past
+   the line, so it is replaced. The new rule:
+   - The line moves up to **3/4 of the HP she entered the fight with**,
+     which halves the free room.
+   - **Drain can go past the line,** so no card locks.
+   - **HP drained past the line does not come back** when the fight ends.
+   - A Five-Century Act gets a new Rare text.
 
-   **Default: yes.**
-4. **Separate the trims from the growth.** Run two seeds with Salon
-   Solitaire back at Repay 2 before any more balance reading. **Default:
-   yes.**
-5. **A guest-forward seat.** Offer a guest Rare at Neow or a guest-heavy
-   shop, to get the first evidence on Encore!, Tutti!, Final Bow and
-   Showstopper. **Default: yes.**
+   **Simmed against the current rule first.** The sim result and the
+   card-by-card list come back to [USER] before anything is built.
+2. **The Repay floor, card by card.** [USER]: "I'm thinking this should be
+   card by card, and can have more than just these ideas." Each Repay card
+   gets its own no-drain effect (Vigor, Block, a guest act, or draw where it
+   fits), proposed as a list. Endless Waltz is cut.
+3. **Card numbers: default, ruled.** They are built together with picks 1
+   and 2.
+4. **Two seeds with the relic at Repay 2: default, ruled.**
+5. **A guest-forward seat: default, ruled.**
 
 **Process.** Every seat reports "Repo files read: none". Most declared a
 `grep` on their own observe output. One seat was stopped by the permission
