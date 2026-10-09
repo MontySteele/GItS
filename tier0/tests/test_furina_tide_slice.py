@@ -446,3 +446,87 @@ def _twin(st, variant):
     tw = _state(variant, hp=st.player.hp, enemy_hp=st.enemies[0].hp)
     tw.player.ftd.drained = st.player.ftd.drained
     return tw
+
+
+# ---- The pool-75 fixed Drains each reach their own body -----------------
+# `resolve_card`'s plain fixed-Drain branch once caught every kind in
+# FIXED_DRAIN_KINDS, so Undercurrent and Riptide Lunge crashed on the tuple
+# unpack and the rest resolved as "Drain N, deal M". Effects:
+# `review/active/furina-pool-growth-2026-10-09.md` sec.5.
+
+def test_draft_judged_runs_past_seed_four():
+    out = probe.run_job("draft/judged", runs=40, seed=1, jobs=1)
+    assert len(out) == 40
+    drafted = {c for r in out for c in r["deck"]}
+    assert {"ftd_undercurrent", "ftd_riptide_lunge"} & drafted
+
+
+def test_undercurrent_drains_two_and_deals_five_plus_one_per_drain():
+    st = _state()
+    _play(st, "ftd_undercurrent")
+    assert st.player.hp == 76 and st.enemies[0].hp == 200 - (5 + 1)
+    _play(st, "ftd_undercurrent")
+    assert st.player.hp == 74 and st.enemies[0].hp == 194 - (5 + 2)
+    assert st.player.ftd.ledger["fixed_drains"] == 2
+
+
+def test_overdraft_drains_four_and_gives_one_energy_next_turn():
+    st = _state()
+    energy = st.player.energy
+    _play(st, "ftd_overdraft")
+    assert st.player.hp == 74 and st.player.energy == energy
+    assert st.player.ftd.energy_next == 1 and st.enemies[0].hp == 200
+
+
+def test_all_in_drains_eight_and_gives_two_energy_now():
+    st = _state()
+    energy = st.player.energy
+    _play(st, "ftd_all_in")
+    assert st.player.hp == 70 and st.player.energy == energy + 2
+    assert st.enemies[0].hp == 200
+
+
+def _with_draw_pile(st, n=5):
+    st.player.draw_pile = [T.make_card("strike") for _ in range(n)]
+    st.player.hand = []
+
+
+def test_ousia_pledge_drains_three_and_draws_two():
+    st = _state()
+    _with_draw_pile(st)
+    _play(st, "ftd_ousia_pledge")
+    assert st.player.hp == 75 and len(st.player.hand) == 2
+    assert st.enemies[0].hp == 200
+
+
+def test_pay_the_tab_drains_six_and_draws_three():
+    st = _state()
+    _with_draw_pile(st)
+    _play(st, "ftd_pay_the_tab")
+    assert st.player.hp == 72 and len(st.player.hand) == 3
+    assert st.enemies[0].hp == 200
+
+
+def test_riptide_lunge_drains_three_deals_ten_and_repays_six_on_a_kill():
+    st = _state()
+    _play(st, "ftd_riptide_lunge")
+    assert st.player.hp == 75 and st.enemies[0].hp == 190
+    assert st.player.ftd.drained == 3
+    kill = _state(enemy_hp=10)
+    _play(kill, "ftd_riptide_lunge")
+    assert not kill.enemies[0].alive
+    assert kill.player.hp == 78 and kill.player.ftd.drained == 0
+
+
+def test_the_deluge_drains_eight_and_hits_every_enemy_for_24():
+    st = _state(enemies=2)
+    _play(st, "ftd_the_deluge")
+    assert st.player.hp == 70
+    assert [e.hp for e in st.enemies] == [200 - 24, 200 - 24]
+
+
+def test_ebb_and_flow_drains_four_then_repays_two():
+    st = _state()
+    _play(st, "ftd_ebb_and_flow")
+    assert st.player.hp == 76 and st.player.ftd.drained == 2
+    assert st.enemies[0].hp == 200
