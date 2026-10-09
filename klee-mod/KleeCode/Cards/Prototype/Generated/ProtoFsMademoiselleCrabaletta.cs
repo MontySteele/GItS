@@ -70,7 +70,7 @@ public sealed class ProtoFsMademoiselleCrabaletta : CustomCardModel, ICharacterC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(24m, ValueProp.Move)
+            new DamageVar(20m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

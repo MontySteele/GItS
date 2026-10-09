@@ -141,23 +141,6 @@ public sealed class SalonsEncorePower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Endless Waltz</i>: "Whenever you Repay, deal that much damage
-/// to a random enemy." Each copy hits once more.</summary>
-public sealed class EndlessWaltzPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Endless Waltz"),
-        ("description",
-            "Whenever you [gold]Repay[/gold], deal that much damage to a "
-          + "random enemy."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
 /// <summary><i>Thunderous Applause</i>: "Whenever you Spend, deal 3 damage to
 /// ALL enemies." [4] A spend-all is one Spend. Copies add.</summary>
 public sealed class ThunderousApplausePower : PowerModel, ILocalizationProvider
@@ -214,14 +197,18 @@ public sealed class OusiaSurgePower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>A Five-Century Act</i>: "You can Drain down to 1 HP." A second
-/// copy adds nothing.</summary>
+/// <summary><i>A Five-Century Act</i> (2026-10-09): "HP you Drain past your
+/// line also returns when combat ends." The curtain call reads it
+/// (<see cref="FurinaStageLedger.CurtainCall"/>). A second copy adds
+/// nothing.</summary>
 public sealed class FiveCenturyActPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "A Five-Century Act"),
-        ("description", "You can [gold]Drain[/gold] down to 1 HP."),
+        ("description",
+            "HP you [gold]Drain[/gold] past your line also returns when "
+          + "combat ends."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -265,8 +252,9 @@ public sealed class BisPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// <i>Fountain of Lucine</i>: "At the start of your next 3 turns, Repay 3."
-/// [4] The card applies its Repay as this power's amount; at her turn start
+/// <i>Fountain of Lucine</i>: "At the start of your next 3 turns, Repay 3.
+/// Gain 1 Block for any HP it could not Repay." [4] (The Repay floor,
+/// 2026-10-09: each turn's Repay pays its own floor.) The card applies its Repay as this power's amount; at her turn start
 /// <see cref="FurinaStage"/> schedules what it has not yet seen for three
 /// turns (one schedule per play) and makes the Repays due. The number on the
 /// icon is the Repay owed at her next turn start; the power leaves when
@@ -281,9 +269,12 @@ public sealed class FountainOfLucinePower : PowerModel, ILocalizationProvider
         ("title", Title),
         ("description",
             "At the start of your turn, [gold]Repay[/gold] what this "
-          + "Fountain still owes."),
+          + "Fountain still owes. Gain 1 [gold]Block[/gold] for any HP it "
+          + "could not [gold]Repay[/gold]."),
         ("smartDescription",
-            "At the start of your turn, [gold]Repay[/gold] [blue]{Due}[/blue]."),
+            "At the start of your turn, [gold]Repay[/gold] [blue]{Due}[/blue]. "
+          + "Gain 1 [gold]Block[/gold] for any HP it could not "
+          + "[gold]Repay[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

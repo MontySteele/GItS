@@ -60,11 +60,14 @@ public static class FurinaStageBowPreview
 /// <c>{InCombat:{StageDrainLine}|}</c> or <c>{InCombat:{StageRepay}|}</c> and
 /// adds the token in <c>AddExtraArgsToDescription</c>.
 ///
-/// THE DRAIN LINE. Below the line a Drain mode left the chooser with no word
-/// said, and the game's chooser has no greyed option
-/// (<see cref="ModalChoice.SelectAffordableMode"/>), so the card says it in
-/// hand, before the play. The gate is <see cref="FurinaStage.CanDrain"/>, the
-/// one the play and the chooser ask.
+/// THE DRAIN LINE. Since the Drain line rule (2026-10-09) a Drain may go
+/// past the line, so the card says so in hand, before the play: "(Past your
+/// Drain line of 59 HP)" while the Drain would take her past it. The one
+/// refusal left -- a Drain to 0 HP -- reads "(Not enough HP)", because the
+/// game's chooser has no greyed option
+/// (<see cref="ModalChoice.SelectAffordableMode"/>). The gate is
+/// <see cref="FurinaStage.CanDrain"/>, the one the play and the chooser
+/// ask.
 ///
 /// THE REPAY. A Repay with nothing drained did nothing and said nothing; the
 /// face prints what it would return now, the clamp
@@ -72,13 +75,43 @@ public static class FurinaStageBowPreview
 /// </summary>
 public static class FurinaStageFacePreview
 {
-    /// <summary>"(Too close to your Drain line)" while a Drain of
-    /// <paramref name="amount"/> cannot be paid; empty otherwise, and off a
-    /// combat or a Furina board.</summary>
-    public static string DrainLine(CardModel card, int amount) =>
-        Owner(card) is { } owner && !FurinaStage.CanDrain(owner, amount)
-            ? "\n(Too close to your Drain line)"
+    /// <summary>"(Not enough HP)" while a Drain of <paramref name="amount"/>
+    /// would take her to 0 HP; "(Past your Drain line of 59 HP)" while it
+    /// would take her past the line; empty otherwise, and off a combat or a
+    /// Furina board.</summary>
+    public static string DrainLine(CardModel card, int amount)
+    {
+        if (Owner(card) is not { } owner) return "";
+        if (!FurinaStage.CanDrain(owner, amount)) return NotEnoughHp;
+        return FurinaStageLedger.For(owner)
+                   .PastLine(amount, (int)owner.CurrentHp)
+            ? PastLine(FurinaStage.LineOf(owner))
             : "";
+    }
+
+    /// <summary>The refusal's words: a Drain cannot take her to 0 HP.
+    /// </summary>
+    public const string NotEnoughHp = "\n(Not enough HP)";
+
+    /// <summary>The warning's words, for the pins: the HP drained past the
+    /// line is lost unless Repaid.</summary>
+    public static string PastLine(int line) =>
+        $"\n(Past your Drain line of {line} HP)";
+
+    /// <summary>The Drain tip's in-combat sentence (the pool-75 round,
+    /// 2026-10-09: every record missed where the line sat): "Your Drain line
+    /// is 59 (3/4 of the HP you started this fight with)." Empty off a combat
+    /// or a Furina board.</summary>
+    public static string LineNow(CardModel card)
+    {
+        if (Owner(card) is not { } owner) return "";
+        var ledger = FurinaStageLedger.For(owner);
+        return LineNowWords(ledger.Line, ledger.LineWhy);
+    }
+
+    /// <summary>The sentence's words, for the pins.</summary>
+    public static string LineNowWords(int line, string why) =>
+        $"\nYour Drain line is {line} ({why}).";
 
     /// <summary>"(Repays N)": what a Repay of <paramref name="amount"/>
     /// would return now. Empty off a combat or a Furina board.</summary>
@@ -94,15 +127,24 @@ public static class FurinaStageFacePreview
     /// <summary>The line's words, for the pins.</summary>
     public static string Line(int repays) => $"\n(Repays {repays})";
 
+    /// <summary>"(Repays N)" for a card that Drains
+    /// <paramref name="drainFirst"/> before it Repays (Riptide Lunge): the
+    /// Repay reads the board after the card's own Drain.</summary>
+    public static string RepayAfterDrain(CardModel card, int amount,
+                                         int drainFirst) =>
+        Owner(card) is { } owner ? Line(Room(owner, amount, drainFirst)) : "";
+
     /// <summary>What a Repay of <paramref name="amount"/> returns at this
     /// HP: never more than she drained, never past Max HP. A read; the
-    /// ledger is not clamped here.</summary>
+    /// ledger is not clamped here. <paramref name="drainFirst"/> is a Drain
+    /// the same card pays before its Repay.</summary>
     public static int Room(MegaCrit.Sts2.Core.Entities.Creatures.Creature owner,
-                           int amount)
+                           int amount, int drainFirst = 0)
     {
         var drained = System.Math.Min(
-            FurinaStage.DrainedOf(owner),
-            System.Math.Max(0, (int)owner.MaxHp - (int)owner.CurrentHp));
+            FurinaStage.DrainedOf(owner) + drainFirst,
+            System.Math.Max(0,
+                (int)owner.MaxHp - ((int)owner.CurrentHp - drainFirst)));
         return System.Math.Max(0, System.Math.Min(amount, drained));
     }
 

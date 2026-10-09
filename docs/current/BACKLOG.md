@@ -44,7 +44,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi: the cut cards' engine clauses (Tide Chart's, Song of Pearls' power, Scout Ahead's clause) stay in both engines with nothing granting them; delete them (the brief's cleanup pass says BACKLOG lists them).
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
 - Furina: rename the four mismatched guest ids in one regen, moving their art keys and `KNOWN_MISSING` entries with them, after [USER]'s run and never mid-save.
-- Co-op rest site: Mend on the partner did not end the rest action, so Smith was still offered.
+- Co-op rest site: Mend on the partner does not use up the rest action, so Smith or Rest is still accepted after it, and the heal sometimes does not show. About 10 seats on 3 seeds reported it (`review/records/coop-paired-round-2026-10-09.md`).
 - `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot is the owner's `progress.save` DiscoveredRelics list naming the retired relic (non-fatal); no alias is left in code. Harmless; drop the id from the save or let it be.
 - `EB-798` `ProtoKkBreakwater` is offered Nimble but Nimble pays it nothing (its only Block is the Plan's); planned-only Block is not `GainsBlock`, in both engines and `lint_enchant_parity`.
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
@@ -97,7 +97,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - The Neow bundle page printed one pack's rows jumbled (a line missing, its text under another card). Not reproduced; needs the raw `bundle_select` state from such a screen.
 - The Trial's first page printed only "Proceed", and `proceed` was then refused against its Accept / Reject options (the page read the event mid-transition).
 - The first rest at a rest site printed "Took: Rest." with "error Rest site room is not open" and still counted an action (see `EB-391`).
-- Co-op: the "What you played this turn" log lists the partner's cards as your own; players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; a contested chest pick is not announced; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted.
+- Co-op: the "What you played this turn" log lists the partner's cards as your own; players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; a contested chest pick is not announced, and the page reports "Took X" for a relic the partner's pick took instead (7 seats); `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted.
 - Enemy rules not on the page: Surrounded (which arm turns you; the debuff text only says "use targeting cards to change your orientation").
 - Enemy rules not on the page: Flutter's "50% less damage from Attacks" halved Bomb damage in one run and not in two others; say whether it applies to a Bomb.
 - Enemy rules not on the page: the final boss's Enrage (Strength per Skill), which the page does not warn about.
@@ -105,7 +105,12 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Owl Magistrate's "Soar" intent has no definition on the page, so a lethal turn reads as safe.
 - Knowledge Demon's Curse of Knowledge choice shows Disintegration as "cost 0, status"; a seat took it for a card, not a permanent 6-a-turn debuff.
 - Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line.
-- A dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies); send the body and its revive countdown.
+- Co-op: a downed player is revived after the fight (at 1 or 13 HP) with no warning on the page.
+- Co-op: `proceed` answers "No proceed button" at rest sites, chests and rewards until the partner acts, then works on a retry; the page should say it is waiting on the partner.
+- Seat bridge: when a fight ends partway through a batch of commands, the refused commands after it ran past three without the stall stop firing.
+- Klee's glossary is read from the checkout, not the installed build, so a `+next` deploy shows main's numbers ("Bomb grows 4" against the build's 2).
+- Pass the Match's tip should say the partner must still be acting; once they have ended their turn it does nothing (3 seats, `review/records/coop-paired-round-2026-10-09.md`). Text only, on `klee-next`.
+- A dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies); send the body and its revive countdown. The page note also says it returns at 25 HP, while the game returns it at about 60.
 - Killing a reviving boss mid-turn (Test Subject) makes it vanish from the page with no notice; between the act-3 boss's forms the board shows no enemy and targeted cards are refused.
 - The bridge does not show the order enemies act in; print it when the game exposes it.
 

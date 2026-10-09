@@ -896,10 +896,13 @@ public static class ArmKeywordTips
           + "enough.");
 
     /// <summary>Rule 3's definition, shared by the keyword tip and the
-    /// Fanfare gauge's hover (<c>Vfx.FanfareCounter</c>).</summary>
+    /// Fanfare gauge's hover (<c>Vfx.FanfareCounter</c>). The pool-75 round
+    /// (2026-10-09): a seat banked 30 for a fight that never came. Her
+    /// ledger lives one combat (<see cref="FurinaStageLedger.For"/>), so the
+    /// tip says it resets.</summary>
     internal const string FanfareBody =
         "Gain 1 for each HP you lose or [gold]Repay[/gold]. "
-      + "[gold]Spend[/gold] uses it. It never fades.";
+      + "[gold]Spend[/gold] uses it. It resets to 0 after each combat.";
 
     /// <summary>Rule 3: Fanfare is one number on Furina.</summary>
     public static IEnumerable<IHoverTip> ForFanfare(
@@ -907,19 +910,21 @@ public static class ArmKeywordTips
         With(inherited, FanfareKey, FanfareBody);
 
     /// <summary>Rule 1 and the curtain call, shared by the keyword tip and
-    /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>). The text pass
-    /// of 2026-10-08 named what moves the line: Lyney's line
-    /// (<see cref="FurinaStageLaw.LyneyLineDrop"/>) and A Five-Century Act.
+    /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>). The Drain
+    /// line rule (ruled 2026-10-09): the line is 3/4 of her entry HP, a Drain
+    /// may go past it, and what it drains past it stays lost unless Repaid.
     /// </summary>
     internal const string DrainBody =
-        "Lose N HP, never below half your HP at combat start. Lyney and "
-      + "A Five-Century Act lower that line. Drained HP returns after "
-      + "combat.";
+        "Lose N HP. Drained HP returns after combat, but HP drained past "
+      + "your line (3/4 of your HP at combat start) is lost unless you "
+      + "[gold]Repay[/gold] it.";
 
-    /// <summary>Rule 1: Drain N.</summary>
+    /// <summary>Rule 1: Drain N. In combat the tip adds where her line is
+    /// now and why (the pool-75 round, 2026-10-09).</summary>
     public static IEnumerable<IHoverTip> ForDrain(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, DrainKey, DrainBody);
+        With(inherited, DrainKey,
+             DrainBody + FurinaStageFacePreview.LineNow(card));
 
     /// <summary>Rule 2: Repay N. The pool to 75 (Hymn of Renewal's reading,
     /// the paper's Review section): a Repay counts the HP it returns.

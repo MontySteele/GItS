@@ -65,9 +65,9 @@ public static class FurinaStageRoster
     /// THE SLICE'S 24 (proposal sec.16), THE POOL TO 39's ten
     /// (<c>review/active/furina-pool-40-2026-10-05.md</c> sec.3) and THE POOL
     /// TO 75's 41 (<c>review/active/furina-pool-growth-2026-10-09.md</c>
-    /// sec.5), every one a `proto_fs_` row: 20 Commons, 35 Uncommons and 20
-    /// Rares, 75 (pinned by `PoolCountTests`; three slots, one per rarity,
-    /// are held for the first seat round). Sim twin:
+    /// sec.5), every one a `proto_fs_` row, less Endless Waltz (cut
+    /// 2026-10-09, with Standing Ovation moved to Uncommon): 19 Commons, 35
+    /// Uncommons and 20 Rares, 74 (pinned by `PoolCountTests`). Sim twin:
     /// <c>furina_stage.POOL_IDS</c>, same order.
     /// </summary>
     public static CardModel[] Pool() => new CardModel[]
@@ -90,9 +90,8 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsStandingOvationAll>(),
         ModelDb.Card<ProtoFsIntervalBell>(),
         ModelDb.Card<ProtoFsBravura>(),
-        // The three Powers (Uncommon).
+        // The two Powers (Uncommon; Endless Waltz was cut 2026-10-09).
         ModelDb.Card<ProtoFsSalonsEncore>(),
-        ModelDb.Card<ProtoFsEndlessWaltz>(),
         ModelDb.Card<ProtoFsThunderousApplause>(),
         // The four guests.
         ModelDb.Card<ProtoFsGuestStarCharlotte>(),

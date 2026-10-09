@@ -61,6 +61,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_ON_YOU,
                                         RESOLUTION_HIT_SOURCE,
                                         RESOLUTION_HIT_THORNS, THORNS_POWER,
+                                        RESOLUTION_HIT_SELF,
                                         RESOLUTION_NO_HITS,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
@@ -1508,7 +1509,11 @@ def _hit_on_you_source(hit: dict[str, Any],
     """Who dealt a hit that landed on you while a card resolved: the dealer
     the mod filed, named with its Thorns where the board shows it holding
     Thorns; with no dealer on the wire, the one enemy on the board holding
-    Thorns; else nothing (2026-10-04, Klee w20 round)."""
+    Thorns; else nothing (2026-10-04, Klee w20 round). A hit the mod marks
+    `self` (no dealer but you: a Drain) is your own HP cost, never a Thorns
+    guess (the Furina pool-75 round, 2026-10-09)."""
+    if hit.get("self"):
+        return RESOLUTION_HIT_SELF
     def thorny(enemy: dict[str, Any]) -> bool:
         return any(_fold(str(p.get("name") or "")) == _fold(THORNS_POWER)
                    for p in enemy.get("powers") or [])
@@ -1938,10 +1943,13 @@ STAGE_LOG_HEADING = ("- Since you ended your last turn, in order (the "
 STAGE_FANFARE_LINE = ("- Fanfare {fanfare} (this turn: {gained} gained, "
                       "{spent} spent on Spend, {paid} paid by stars)")
 #: THE SALON'S TAB (2026-10-05): the HP loan's two numbers, the "Drained N"
-#: counter's reading.
-STAGE_DRAIN_LINE = ("- Drained {drained} HP (it returns when combat ends). "
-                    "Drain line {line} HP{why}: you can Drain down to it.")
-#: Seat page 3: where the line comes from ("half the HP you started this
+#: counter's reading. The Drain line rule (2026-10-09): a Drain may go past
+#: the line, and what it drains past it does not return.
+STAGE_DRAIN_LINE = ("- Drained {drained} HP (it returns when combat ends, "
+                    "except HP drained past your line). Drain line {line} "
+                    "HP{why}: HP you Drain past it is lost unless you Repay "
+                    "it.")
+#: Seat page 3: where the line comes from ("3/4 of the HP you started this
 #: fight with"); seats connected it to their entry HP only late.
 STAGE_DRAIN_WHY = " ({why})"
 STAGE_REHEARSAL_CLAUSE = " · Rehearsal {n}"

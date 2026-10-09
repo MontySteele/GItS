@@ -18,8 +18,9 @@ namespace KleeMod.Powers;
 // twin: `tier0/engine/furina_tide.py`, through `furina_stage.ARM_POWER_IDS`.
 // ======================================================================
 
-/// <summary><i>Grand Entrance</i>: "Whenever you play a Guest Star, Repay 4."
-/// [6] Copies add.</summary>
+/// <summary><i>Grand Entrance</i>: "Whenever you play a Guest Star, Repay 4.
+/// Gain 1 Block for any HP it could not Repay." [6] (The Repay floor,
+/// 2026-10-09.) Copies add.</summary>
 public sealed class GrandEntrancePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -27,7 +28,8 @@ public sealed class GrandEntrancePower : PowerModel, ILocalizationProvider
         ("title", "Grand Entrance"),
         ("description",
             "Whenever you play a Guest Star, [gold]Repay[/gold] "
-          + "[blue]{Amount}[/blue]."),
+          + "[blue]{Amount}[/blue]. Gain 1 [gold]Block[/gold] for any HP it "
+          + "could not [gold]Repay[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -189,7 +191,8 @@ public sealed class ReginaOfAllWatersPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Pneuma Tides</i>: "At the start of your turn, Repay 2." [3]
+/// <summary><i>Pneuma Tides</i>: "At the start of your turn, Repay 2. Gain 1
+/// Vigor for any HP it could not Repay." [3] (The Repay floor, 2026-10-09.)
 /// Copies add to one Repay.</summary>
 public sealed class PneumaTidesPower : PowerModel, ILocalizationProvider
 {
@@ -198,7 +201,8 @@ public sealed class PneumaTidesPower : PowerModel, ILocalizationProvider
         ("title", "Pneuma Tides"),
         ("description",
             "At the start of your turn, [gold]Repay[/gold] "
-          + "[blue]{Amount}[/blue]."),
+          + "[blue]{Amount}[/blue]. Gain 1 [gold]Vigor[/gold] for any HP it "
+          + "could not [gold]Repay[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -207,7 +211,8 @@ public sealed class PneumaTidesPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// <i>Gentle Current</i>'s "Next turn, Repay 4." [5]: the Repay owed at her
+/// <i>Gentle Current</i>'s "Next turn, Repay 4. Gain 1 Block for any HP it
+/// could not Repay." [5] (the Repay floor, 2026-10-09): the Repay owed at her
 /// next turn start, as the base game's <c>EnergyNextTurnPower</c> owes an
 /// Energy. Two plays in a turn add into one Repay. Leaves when paid
 /// (<see cref="FurinaStage.TurnStart"/>).
@@ -220,7 +225,8 @@ public sealed class RepayNextTurnPower : PowerModel, ILocalizationProvider
     {
         ("title", Title),
         ("description",
-            "Next turn, [gold]Repay[/gold] [blue]{Amount}[/blue]."),
+            "Next turn, [gold]Repay[/gold] [blue]{Amount}[/blue]. Gain 1 "
+          + "[gold]Block[/gold] for any HP it could not [gold]Repay[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

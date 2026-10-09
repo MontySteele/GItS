@@ -50,13 +50,17 @@ public interface IStageBoard
     Task Damage(StagePerformer who, StageTarget target, int amount,
                 Element element);
 
-    /// <summary>A Power's hit (Salon's Encore, Endless Waltz, Thunderous
-    /// Applause, Critics' Darling): unpowered, no element.</summary>
+    /// <summary>A Power's hit (Salon's Encore, Thunderous Applause,
+    /// Critics' Darling): unpowered, no element.</summary>
     Task PowerHit(string source, StageTarget target, int amount);
 
-    /// <summary>Furina gains Block (Sigewinne's and Freminet's lines):
-    /// unpowered.</summary>
+    /// <summary>Furina gains Block (Sigewinne's and Freminet's lines,
+    /// Freminet's act, the Repay floor): unpowered.</summary>
     Task Block(int amount);
+
+    /// <summary>Furina gains Vigor (the Repay floor of Soothing Waters and
+    /// Pneuma Tides): the base game's <c>VigorPower</c>.</summary>
+    Task Vigor(int amount);
 
     /// <summary>Vulnerable on an enemy (Chevreuse's line).</summary>
     Task Vulnerable(StageTarget target, int amount);
@@ -99,6 +103,25 @@ public enum StageSummonResult
     Evict,
 }
 
+/// <summary>
+/// THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain X for any HP it could
+/// not Repay." What a Repay pays for the part of N it could not return.
+/// The damage cards' floor (Surging Waters, Hydro Lance, Cleansing Torrent)
+/// is their own damage, read off
+/// <see cref="FurinaStageLedger.RepayLeftThisPlay"/>, so it is not here.
+/// </summary>
+public enum StageFloor
+{
+    /// <summary>No floor: a plain Repay.</summary>
+    None,
+
+    /// <summary>"Gain 1 Block for any HP it could not Repay."</summary>
+    Block,
+
+    /// <summary>"Gain 1 Vigor for any HP it could not Repay."</summary>
+    Vigor,
+}
+
 /// <summary>How a summon makes room, decided before it happens: the seat it
 /// touches (<see cref="Index"/>: the guest that leaves on an eviction, the
 /// guest that moves on a repeat; -1 otherwise).
@@ -118,7 +141,6 @@ public readonly record struct StageRoom(StageSummonResult Kind, int Index);
 public sealed class StageDirector
 {
     public const string SalonsEncoreTitle = "Salon's Encore";
-    public const string EndlessWaltzTitle = "Endless Waltz";
     public const string ThunderousTitle = "Thunderous Applause";
     public const string RevelryTitle = "Universal Revelry";
     public const string CriticsDarlingTitle = "Critics' Darling";
@@ -233,6 +255,7 @@ public sealed class StageDirector
     public int OnHpLost(int amount)
     {
         if (amount <= 0 || _stage.Draining) return 0;
+        _stage.NoteHpLost(amount);
         return _stage.Gain(amount, "HP lost");
     }
 
@@ -253,18 +276,20 @@ public sealed class StageDirector
 
     // ---- the HP loan (rules 1 and 2) ---------------------------------------
 
-    /// <summary>Rule 1: can she Drain <paramref name="amount"/> now?</summary>
+    /// <summary>Rule 1: can she Drain <paramref name="amount"/> now? Only a
+    /// Drain to 0 HP or below is refused (2026-10-09).</summary>
     public bool CanDrain(int amount) => _stage.CanDrain(amount, _board.Hp);
 
     /// <summary>
-    /// Rule 1, Drain N: lose N HP (never below the line), mark it drained,
-    /// gain that much Fanfare, then the Drain readers -- Salon's Encore,
-    /// Wriothesley's and Freminet's lines, Ousia Surge. False (nothing
-    /// happens) when it would cross the line.
+    /// Rule 1, Drain N: lose N HP, mark it drained -- above the line or past
+    /// it (2026-10-09) -- gain that much Fanfare, then the Drain readers --
+    /// Salon's Encore, Wriothesley's and Freminet's lines, Ousia Surge. False
+    /// (nothing happens) when it would take her to 0 HP or below.
     /// </summary>
     public async Task<bool> Drain(int amount)
     {
         if (!CanDrain(amount)) return false;
+        var hpBefore = _board.Hp;
         int lost;
         _stage.Draining = true;
         try
@@ -276,7 +301,7 @@ public sealed class StageDirector
             _stage.Draining = false;
         }
         if (lost <= 0) return true;
-        _stage.NoteDrain(lost);
+        _stage.NoteDrain(lost, hpBefore);
         _stage.Note(new StageBeat(FurinaStageLedger.DrainEvent, default, -1,
                                   _stage.Fanfare, lost, ""));
         _stage.Gain(lost, "Drain");
@@ -312,9 +337,10 @@ public sealed class StageDirector
 
     /// <summary>
     /// Rule 2, Repay N: regain up to N drained HP (never more than drained,
-    /// never past Max HP), gain that much Fanfare, then the Repay readers --
-    /// Endless Waltz, Clorinde's, Charlotte's and Sigewinne's lines, and Hymn
-    /// of Renewal (on 4 or more HP actually repaid). Returns HP repaid.
+    /// never past Max HP; the past-line part first), gain that much Fanfare,
+    /// then the Repay readers -- Clorinde's, Charlotte's and Sigewinne's
+    /// lines, and Hymn of Renewal (on 4 or more HP actually repaid). Returns
+    /// HP repaid.
     /// </summary>
     public async Task<int> Repay(int amount)
     {
@@ -327,11 +353,6 @@ public sealed class StageDirector
                                   _stage.Fanfare, back, ""));
         _stage.Gain(back, "Repay");
         await LoopReaders(back);
-        for (var i = 0; i < _stage.Mods.EndlessWaltz; i++)
-        {
-            if (_board.Over) break;
-            await _board.PowerHit(EndlessWaltzTitle, StageTarget.Random, back);
-        }
         if (_stage.SeatOf(StagePerformer.Clorinde) is { } clorinde
             && !_board.Over)
         {
@@ -366,16 +387,39 @@ public sealed class StageDirector
         return back;
     }
 
-    /// <summary>Fountain of Lucine and Gentle Current: at the start of her
-    /// turn, each play still owed Repays its amount, one Repay per play.
+    /// <summary>
+    /// THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain X for any HP it
+    /// could not Repay." The Repay resolves first; the leftover, N minus the
+    /// HP it returned, is paid as Block or Vigor. Returns HP repaid.
     /// </summary>
+    public async Task<int> RepayFloor(int amount, StageFloor floor)
+    {
+        if (amount <= 0) return 0;
+        var back = await Repay(amount);
+        var left = amount - back;
+        if (left <= 0 || _board.Over) return back;
+        switch (floor)
+        {
+            case StageFloor.Block:
+                await _board.Block(left);
+                break;
+            case StageFloor.Vigor:
+                await _board.Vigor(left);
+                break;
+        }
+        return back;
+    }
+
+    /// <summary>Fountain of Lucine: at the start of her turn, each play still
+    /// owed Repays its amount, one Repay per play, each with its Block floor
+    /// (2026-10-09).</summary>
     public async Task<int> TurnStartRepays()
     {
         var total = 0;
         foreach (var amount in _stage.TakeDueRepays())
         {
             if (_board.Over) break;
-            total += await Repay(amount);
+            total += await RepayFloor(amount, StageFloor.Block);
         }
         return total;
     }
@@ -383,9 +427,10 @@ public sealed class StageDirector
     /// <summary>Singer of Many Waters: "Repay all your drained HP."</summary>
     public Task<int> RepayAll() => Repay(_stage.Drained);
 
-    /// <summary>THE CURTAIN CALL (sec.16): when the combat ends, every
-    /// drained HP returns. Not a Repay: no Fanfare, no readers. Returns the
-    /// HP returned.</summary>
+    /// <summary>THE CURTAIN CALL (sec.16; the Drain line rule, 2026-10-09):
+    /// when the combat ends, the HP drained above the line returns (and the
+    /// HP drained past it, with A Five-Century Act). Not a Repay: no
+    /// Fanfare, no readers. Returns the HP returned.</summary>
     public async Task<int> CurtainCall()
     {
         var back = _stage.CurtainCall(_board.Hp, _board.MaxHp);
@@ -395,12 +440,13 @@ public sealed class StageDirector
 
     // ---- the turn-start Powers (the pool to 75) ----------------------------
 
-    /// <summary>Pneuma Tides: "At the start of your turn, Repay 2." One Repay
-    /// of the summed amount.</summary>
+    /// <summary>Pneuma Tides: "At the start of your turn, Repay 2. Gain 1
+    /// Vigor for any HP it could not Repay." One Repay of the summed amount.
+    /// </summary>
     public async Task<int> PneumaTides(int amount)
     {
         if (amount <= 0 || _board.Over) return 0;
-        return await Repay(amount);
+        return await RepayFloor(amount, StageFloor.Vigor);
     }
 
     /// <summary>Regina of All Waters: "At the start of your turn, Drain 3. If
@@ -455,6 +501,11 @@ public sealed class StageDirector
         _ => 0,
     };
 
+    /// <summary>Freminet's act's Block: 6, 9 upgraded.</summary>
+    public static int FreminetActBlock(bool upgraded) => upgraded
+        ? FurinaStageLaw.FreminetActBlockUpgraded
+        : FurinaStageLaw.FreminetActBlock;
+
     /// <summary>One guest's act, at the end of her turn or bought by a card
     /// (Encore!, Tutti!, Final Bow, Bring the House Down, Showstopper).
     /// Escoffier's line answers every act, his own included.</summary>
@@ -469,7 +520,9 @@ public sealed class StageDirector
         {
             case StagePerformer.Charlotte:
             case StagePerformer.Sigewinne:
-                moved = await Repay(number);
+                // "Repay 2. Gain 1 Block for any HP it could not Repay."
+                // (the Repay floor, 2026-10-09).
+                moved = await RepayFloor(number, StageFloor.Block);
                 break;
             case StagePerformer.Wriothesley:
                 moved = number;
@@ -487,8 +540,9 @@ public sealed class StageDirector
                                     Element.Electro);
                 break;
             case StagePerformer.Lyney:
-                // "Drain 2: deal 8 Pyro damage to ALL enemies." Below the
-                // line the act skips: no Drain and no damage.
+                // "Drain 2: deal 8 Pyro damage to ALL enemies." It may
+                // Drain past the line (2026-10-09); it skips (no Drain, no
+                // damage) only when the Drain would take her to 0 HP.
                 if (CanDrain(FurinaStageLaw.LyneyActDrain)
                     && await Drain(FurinaStageLaw.LyneyActDrain)
                     && !_board.Over)
@@ -504,9 +558,15 @@ public sealed class StageDirector
                                     Element.None);
                 break;
             case StagePerformer.Freminet:
+                // "Deal 5 Cryo damage to a random enemy. Gain 6 Block." [8,
+                // 9] (the Block, ruled 2026-10-09).
                 moved = number;
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Cryo);
+                if (!_board.Over)
+                {
+                    await _board.Block(FreminetActBlock(seat.Upgraded));
+                }
                 break;
             case StagePerformer.Navia:
                 // "Deal Geo damage to a random enemy equal to the Fanfare you
@@ -519,9 +579,9 @@ public sealed class StageDirector
                 }
                 break;
             case StagePerformer.Neuvillette:
-                // "Deal Hydro damage to ALL enemies equal to the HP you
-                // Drained this turn."
-                moved = _stage.DrainedThisTurn;
+                // "Deal Hydro damage to ALL enemies equal to the HP you lost
+                // since your last turn." (2026-10-09: Drained or taken.)
+                moved = _stage.HpLostSinceLastTurn;
                 if (moved > 0)
                 {
                     await _board.Damage(who, StageTarget.All, moved,
@@ -666,5 +726,8 @@ public sealed class StageDirector
             }
         }
         if (singer > 0 && !_board.Over) await Repay(singer);
+        // Neuvillette's window (2026-10-09): what she loses from here on --
+        // the enemies' turn first -- counts for his next act.
+        _stage.CloseTurn();
     }
 }

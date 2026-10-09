@@ -22,9 +22,13 @@ namespace KleeMod.Powers;
 ///
 ///   1. DRAIN N: lose N HP for the bigger effect -- a mode on a two-mode card
 ///      (the Spend chooser), or a fixed price on a card that cannot be played
-///      when it cannot be paid. It cannot take her below half the HP she
-///      started this combat with (the line). HP lost to a Drain is drained.
-///   2. REPAY N: regain up to N of her drained HP, never more.
+///      when it cannot be paid. The line is 3/4 of the HP she started this
+///      combat with (2026-10-09); a Drain may go past it, but never to 0 HP.
+///      HP lost to a Drain is drained, in two parts: above the line and
+///      past it.
+///   2. REPAY N: regain up to N of her drained HP, never more; the
+///      past-line part first. The Repay floor (2026-10-09): some Repays pay
+///      Block, Vigor or damage for the part of N they could not return.
 ///   3. FANFARE: one number on Furina, no cap, no fade. +1 for every HP she
 ///      loses (a Drain, a hit past Block, anything) and +1 for every HP she
 ///      Repays. Spend N and the spend-all cards pay it.
@@ -38,7 +42,9 @@ namespace KleeMod.Powers;
 ///      a guest that leaves (evicted, or sent off by Final Bow) sends its
 ///      card to the discard pile. A second copy of one on stage moves it to
 ///      the newest seat, with no act.
-///   6. THE CURTAIN CALL: when the combat ends, all drained HP returns.
+///   6. THE CURTAIN CALL: when the combat ends, the HP drained above the
+///      line returns; the HP drained past it stays lost (A Five-Century Act
+///      returns it too).
 ///
 /// THIS CLASS IS THE VERB SURFACE the generated cards, the powers, the relics
 /// and the potions call. The order of things is
@@ -101,7 +107,8 @@ public static class FurinaStage
     public static int DrainedOf(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).Drained : 0;
 
-    /// <summary>The lowest HP a Drain may take her to (rule 1).</summary>
+    /// <summary>Her Drain line (rule 1): 3/4 of her entry HP; HP drained
+    /// past it does not return at the curtain call.</summary>
     public static int LineOf(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).Line : 0;
 
@@ -135,7 +142,6 @@ public static class FurinaStage
             HymnOfRenewal = Sum<HymnOfRenewalPower>(),
             Revelry = Sum<UniversalRevelryPower>(),
             SalonsEncore = Sum<SalonsEncorePower>(),
-            EndlessWaltz = owner.Powers.OfType<EndlessWaltzPower>().Count(),
             Thunderous = Sum<ThunderousApplausePower>(),
             OusiaSurge = Sum<OusiaSurgePower>(),
             FiveCenturyAct = owner.Powers.OfType<FiveCenturyActPower>().Count(),
@@ -152,7 +158,7 @@ public static class FurinaStage
         LiveFor(owner) && FurinaStageLedger.For(owner!).CanSpend(amount);
 
     /// <summary>Rule 1: is a Drain N offered? Only when it would not take her
-    /// below the line.</summary>
+    /// to 0 HP or below (2026-10-09: never refused for the line).</summary>
     public static bool CanDrain(Creature? owner, int amount) =>
         LiveFor(owner)
         && FurinaStageLedger.For(owner!).CanDrain(amount,
@@ -214,7 +220,7 @@ public static class FurinaStage
     }
 
     /// <summary>Rule 1: Drain N. Nothing on anyone but Furina, and nothing
-    /// past the line.</summary>
+    /// that would take her to 0 HP.</summary>
     public static async Task<bool> Drain(PlayerChoiceContext choiceContext,
                                          Creature? owner, int amount)
     {
@@ -224,14 +230,39 @@ public static class FurinaStage
         return drained;
     }
 
-    /// <summary>Rule 2: Repay N. Returns HP repaid.</summary>
+    /// <summary>Rule 2: Repay N, a card's. With a
+    /// <paramref name="floor"/>, the part of N it could not return is paid
+    /// as Block or Vigor (the Repay floor, 2026-10-09); either way the
+    /// leftover is recorded for the play
+    /// (<see cref="FurinaStageLedger.RepayLeftThisPlay"/>, the damage cards'
+    /// floor). Returns HP repaid.</summary>
     public static async Task<int> Repay(PlayerChoiceContext choiceContext,
-                                        Creature? owner, int amount)
+                                        Creature? owner, int amount,
+                                        StageFloor floor = StageFloor.None)
     {
         if (!LiveFor(owner)) return 0;
-        var back = await Director(choiceContext, owner!).Repay(amount);
+        var director = Director(choiceContext, owner!);
+        var back = await director.RepayFloor(amount, floor);
+        director.Stage.NoteRepayLeft(amount, back);
         RefreshBadges(owner);
         return back;
+    }
+
+    /// <summary>The Repay floor's damage (Surging Waters, Hydro Lance,
+    /// Cleansing Torrent: "plus 1 for any HP it could not Repay"): during the
+    /// play, after its Repay, what that Repay could not return; before the
+    /// play, what a Repay of <paramref name="amount"/> would leave now. One
+    /// expression, so preview and resolution agree.</summary>
+    public static int RepayLeftOrRoom(CardModel? card, int amount)
+    {
+        if (card?.Owner?.Creature is not { } owner || !LiveFor(owner))
+        {
+            return 0;
+        }
+        var ledger = FurinaStageLedger.For(owner);
+        if (ledger.RepayedThisPlay) return ledger.RepayLeftThisPlay;
+        return System.Math.Max(0,
+            amount - FurinaStageFacePreview.Room(owner, amount));
     }
 
     /// <summary>Singer of Many Waters: "Repay all your drained HP."</summary>
@@ -275,7 +306,8 @@ public static class FurinaStage
         {
             using (director.Stage.CausedBy(StageDirector.GrandEntranceTitle))
             {
-                await director.Repay(entrance);
+                // "Repay 4. Gain 1 Block for any HP it could not Repay."
+                await director.RepayFloor(entrance, StageFloor.Block);
             }
         }
         await Done(owner);
@@ -451,8 +483,8 @@ public static class FurinaStage
         }
     }
 
-    /// <summary>Gentle Current: the Repay owed from last turn, one Repay,
-    /// and the power leaves.</summary>
+    /// <summary>Gentle Current: the Repay owed from last turn, one Repay
+    /// with its Block floor (2026-10-09), and the power leaves.</summary>
     private static async Task RepayNextTurnRepays(
         PlayerChoiceContext choiceContext, Creature furina)
     {
@@ -462,7 +494,8 @@ public static class FurinaStage
         await PowerCmd.Remove(power);
         using (FurinaStageLedger.For(furina).CausedBy(RepayNextTurnPower.Title))
         {
-            await Director(choiceContext, furina).Repay(amount);
+            await Director(choiceContext, furina)
+                .RepayFloor(amount, StageFloor.Block);
         }
     }
 
@@ -558,8 +591,10 @@ public static class FurinaStage
         await Done(owner);
     }
 
-    /// <summary>THE CURTAIN CALL (sec.16): at the combat's end every drained
-    /// HP returns, and the HP carries into the run.</summary>
+    /// <summary>THE CURTAIN CALL (sec.16; the Drain line rule, 2026-10-09):
+    /// at the combat's end the HP drained above the line returns (past it
+    /// too, with A Five-Century Act), and the HP carries into the run.
+    /// </summary>
     public static async Task CurtainCall(Creature? owner)
     {
         if (!LiveFor(owner) || owner!.IsDead) return;
@@ -589,13 +624,14 @@ public static class FurinaStage
         if (LiveFor(owner)) FurinaStageLedger.For(owner!).EndPlay();
     }
 
-    /// <summary>Rule 3: HP lost to anything but a Drain prints Fanfare.
-    /// </summary>
+    /// <summary>Rule 3: HP lost to anything but a Drain prints Fanfare (and
+    /// counts for Neuvillette's act).</summary>
     public static void NoteHpLost(Creature? owner, int amount)
     {
         if (!LiveFor(owner) || amount <= 0) return;
         var ledger = FurinaStageLedger.For(owner!);
         if (ledger.Draining) return;
+        ledger.NoteHpLost(amount);
         ledger.Gain(amount, "HP lost");
         RefreshBadges(owner);
     }
@@ -701,7 +737,7 @@ public static class FurinaStage
                 StageCueKind.Damage, ledger.SpentThisTurn, "Geo",
                 StageForecastCue.Random),
             StagePerformer.Neuvillette => new(seat.Who, seat.Key,
-                StageCueKind.Damage, ledger.DrainedThisTurn, "Hydro",
+                StageCueKind.Damage, ledger.HpLostSinceLastTurn, "Hydro",
                 StageForecastCue.All),
             StagePerformer.Escoffier => new(seat.Who, seat.Key,
                 StageCueKind.Damage, n, "Cryo", StageForecastCue.All),
@@ -801,6 +837,13 @@ public sealed class GameStageBoard : IStageBoard
         if (amount <= 0 || _owner.IsDead) return;
         await CreatureCmd.GainBlock(_owner, amount, ValueProp.Unpowered, null,
                                     fast: true);
+    }
+
+    public async Task Vigor(int amount)
+    {
+        if (amount <= 0 || _owner.IsDead) return;
+        await PowerCmd.Apply<VigorPower>(
+            _context, _owner, amount, applier: _owner, cardSource: null);
     }
 
     public Task Vulnerable(StageTarget target, int amount) =>

@@ -205,12 +205,27 @@ def _loop_gain_value(state, n: float) -> float:
     return v
 
 
+def past_line_part(state, n: int) -> int:
+    """The part of a Drain of N that would go past the line (the Drain line
+    rule, 2026-10-09): lost at the curtain call unless Repaid, or returned
+    with A Five-Century Act."""
+    p = state.player
+    if T._player_power(p, "five_century"):
+        return 0
+    return max(0, n - max(0, p.hp - T.line_hp(p)))
+
+
 def drain_cost(state, n: int, kills: bool = False) -> float:
     """What Draining N costs now, net of the Fanfare and triggers it buys.
-    `kills`: this play ends the fight."""
+    `kills`: this play ends the fight. Under the curtain call the part above
+    the line is a loan; the part past it is priced as lost HP."""
     f = _f(state)
     if f.curtain_call:
-        cost = 0.0 if kills else n * temp_hp_value(state)
+        past = past_line_part(state, n)
+        above = n - past
+        cost = (0.0 if kills else above * temp_hp_value(state))
+        cost += past * (hp_value(state)
+                        + DRAIN_RISK * (0.0 if kills else _exposed(state)))
     else:
         hpv = hp_value(state)
         cost = (n * hpv * unrepaid_share(state, n)
@@ -230,8 +245,6 @@ def repay_value(state, n: int) -> float:
         v += _loop_gain_value(state, amount)
     elif f.powers["revelry"] or f.powers["critics_darling"]:
         v += _loop_gain_value(state, amount) - _gain_value(state, amount)
-    if f.powers["endless_waltz"]:
-        v += 0.9 * amount
     if "sigewinne" in f.stage:
         v += _block_value(amount, need(state))
     if "clorinde" in f.stage:
@@ -681,8 +694,6 @@ def value(state, card, playable: list, decider) -> float:
             return 0.8 * tl * ne * 2.0
         if m == "thunderous":
             return 0.8 * tl * ne * 1.5
-        if m == "endless_waltz":
-            return 0.8 * tl * 3.0
         if m == "revelry":
             return 0.8 * tl * 3.0 * FANFARE
         if m == "critics_darling":

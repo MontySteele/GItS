@@ -71,8 +71,8 @@ public sealed record StageMods
     /// </summary>
     public int OusiaSurge { get; init; }
 
-    /// <summary>A Five-Century Act copies: any puts the line at 1 HP.
-    /// </summary>
+    /// <summary>A Five-Century Act copies: any makes the HP drained past the
+    /// line return at the curtain call too (2026-10-09).</summary>
     public int FiveCenturyAct { get; init; }
 
     /// <summary>Critics' Darling copies: each Drain or Repay of N deals N per
@@ -84,10 +84,6 @@ public sealed record StageMods
 
     /// <summary>Salon's Encore: damage to ALL enemies per Drain.</summary>
     public int SalonsEncore { get; init; }
-
-    /// <summary>Endless Waltz copies: each Repay of N deals N this many times.
-    /// </summary>
-    public int EndlessWaltz { get; init; }
 
     /// <summary>Thunderous Applause: damage to ALL enemies per Spend.</summary>
     public int Thunderous { get; init; }
@@ -278,8 +274,12 @@ public sealed class FurinaStageLedger
         GainedThisTurn = 0;
         SpentThisTurn = 0;
         SpentThisPlay = 0;
-        Drained = 0;
+        DrainedAbove = 0;
+        DrainedPast = 0;
         DrainedThisTurn = 0;
+        HpLostSinceLastTurn = 0;
+        RepayLeftThisPlay = 0;
+        RepayedThisPlay = false;
         RepaidThisTurn = 0;
         DrainsThisCombat = 0;
         RepaysThisTurn = 0;
@@ -312,27 +312,52 @@ public sealed class FurinaStageLedger
     /// <summary>The HP she started this combat with.</summary>
     public int EntryHp { get; set; }
 
-    /// <summary>Rule 1: the lowest HP a Drain may reach. Lyney on stage
-    /// lowers it by 10; A Five-Century Act puts it at 1 HP.</summary>
+    /// <summary>Rule 1: the Drain line, 3/4 of her entry HP (2026-10-09).
+    /// Lyney on stage lowers it by 10. A Drain may go past it; what it
+    /// drains past it is <see cref="DrainedPast"/>.</summary>
     public int Line => FurinaStageLaw.LineOf(
-        EntryHp, OnStage(StagePerformer.Lyney), Mods.FiveCenturyAct > 0);
+        EntryHp, OnStage(StagePerformer.Lyney));
 
     /// <summary>Where <see cref="Line"/> comes from, in words (2026-10-05).
     /// </summary>
     public string LineWhy => FurinaStageLaw.LineWhy(
-        OnStage(StagePerformer.Lyney), Mods.FiveCenturyAct > 0);
+        OnStage(StagePerformer.Lyney));
 
     /// <summary>Can she Drain <paramref name="amount"/> at
-    /// <paramref name="hp"/>? Not below the line.</summary>
+    /// <paramref name="hp"/>? Never refused for the line (2026-10-09); only
+    /// a Drain that would take her to 0 HP or below is.</summary>
     public bool CanDrain(int amount, int hp) =>
-        amount > 0 && hp - amount >= Line;
+        amount > 0 && hp - amount >= FurinaStageLaw.DrainFloor;
 
-    /// <summary>HP lost to her Drains and not yet repaid.</summary>
-    public int Drained { get; private set; }
+    /// <summary>Would a Drain of <paramref name="amount"/> at
+    /// <paramref name="hp"/> go past the line? (The face's warning.)
+    /// </summary>
+    public bool PastLine(int amount, int hp) =>
+        amount > 0 && hp - amount < Line;
+
+    /// <summary>HP lost to her Drains and not yet repaid: both parts.
+    /// </summary>
+    public int Drained => DrainedAbove + DrainedPast;
+
+    /// <summary>Drained HP taken while she stood above the line: it returns
+    /// at the curtain call.</summary>
+    public int DrainedAbove { get; private set; }
+
+    /// <summary>Drained HP taken past the line: it stays lost at the curtain
+    /// call (unless A Five-Century Act is in play). A Repay returns this
+    /// part first.</summary>
+    public int DrainedPast { get; private set; }
 
     /// <summary>HP drained this turn (the page and the pins read it).
     /// </summary>
     public int DrainedThisTurn { get; private set; }
+
+    /// <summary>Neuvillette's act (2026-10-09): every HP she lost since her
+    /// last turn ended -- to her Drains and to anything else (an enemy's
+    /// hit, a status). The window opens at the end of her turn, after the
+    /// guests act, so the enemies' turn counts; on her first turn it counts
+    /// from the combat's start.</summary>
+    public int HpLostSinceLastTurn { get; private set; }
 
     /// <summary>HP repaid this turn.</summary>
     public int RepaidThisTurn { get; private set; }
@@ -353,39 +378,91 @@ public sealed class FurinaStageLedger
     /// "that much").</summary>
     public int RepaidThisPlay { get; private set; }
 
-    public void NoteDrain(int amount)
+    /// <summary>THE REPAY FLOOR (2026-10-09): what THIS card play's Repays
+    /// could not return, N minus the HP returned (Surging Waters', Hydro
+    /// Lance's and Cleansing Torrent's damage reads it).</summary>
+    public int RepayLeftThisPlay { get; private set; }
+
+    /// <summary>A Repay has resolved in this card play (so
+    /// <see cref="RepayLeftThisPlay"/> is a fact, not a forecast).</summary>
+    public bool RepayedThisPlay { get; private set; }
+
+    /// <summary>A Drain of <paramref name="amount"/> taken from
+    /// <paramref name="hpBefore"/>: the part that stayed at or above the line
+    /// is <see cref="DrainedAbove"/>, the rest <see cref="DrainedPast"/>.
+    /// </summary>
+    public void NoteDrain(int amount, int hpBefore)
     {
         if (amount <= 0) return;
-        Drained += amount;
+        var above = System.Math.Max(0,
+            System.Math.Min(amount, hpBefore - Line));
+        DrainedAbove += above;
+        DrainedPast += amount - above;
         DrainedThisTurn += amount;
+        HpLostSinceLastTurn += amount;
         DrainsThisCombat++;
     }
 
+    /// <summary>HP lost to anything but a Drain (Neuvillette's act counts it).
+    /// </summary>
+    public void NoteHpLost(int amount)
+    {
+        if (amount <= 0) return;
+        HpLostSinceLastTurn += amount;
+    }
+
+    /// <summary>The end of her turn, after the guests act: the
+    /// since-her-last-turn window opens again.</summary>
+    public void CloseTurn() => HpLostSinceLastTurn = 0;
+
     /// <summary>Rule 2: how much a Repay of <paramref name="amount"/> returns
     /// at this HP: never more than she drained, never past Max HP. Clamps the
-    /// ledger first (HP + drained never exceeds Max HP).</summary>
+    /// ledger first (HP + drained never exceeds Max HP); the clamp takes the
+    /// past-line part first, the order a Repay returns it in.</summary>
     public int RepayRoom(int amount, int hp, int maxHp)
     {
-        Drained = System.Math.Min(Drained, System.Math.Max(0, maxHp - hp));
+        var over = Drained - System.Math.Max(0, maxHp - hp);
+        if (over > 0)
+        {
+            var past = System.Math.Min(over, DrainedPast);
+            DrainedPast -= past;
+            DrainedAbove = System.Math.Max(0, DrainedAbove - (over - past));
+        }
         return System.Math.Max(0, System.Math.Min(amount, Drained));
     }
 
+    /// <summary>A Repay returned <paramref name="amount"/>: the past-line
+    /// part first, then the above-line part (2026-10-09).</summary>
     public void NoteRepay(int amount)
     {
         if (amount <= 0) return;
-        Drained = System.Math.Max(0, Drained - amount);
+        var past = System.Math.Min(amount, DrainedPast);
+        DrainedPast -= past;
+        DrainedAbove = System.Math.Max(0, DrainedAbove - (amount - past));
         RepaidThisTurn += amount;
         RepaysThisTurn++;
         RepaidThisPlay += amount;
     }
 
-    /// <summary>THE CURTAIN CALL (sec.16): the HP that returns when the
-    /// combat ends -- every drained HP, up to Max HP. Empties the ledger.
-    /// </summary>
+    /// <summary>The Repay floor: a card play's Repay of
+    /// <paramref name="amount"/> returned <paramref name="back"/>; what it
+    /// could not return is recorded for the card's damage.</summary>
+    public void NoteRepayLeft(int amount, int back)
+    {
+        RepayedThisPlay = true;
+        RepayLeftThisPlay += System.Math.Max(0, amount - back);
+    }
+
+    /// <summary>THE CURTAIN CALL (sec.16; the Drain line rule, 2026-10-09):
+    /// the HP that returns when the combat ends -- the above-line part, up
+    /// to Max HP; the past-line part too with A Five-Century Act in play.
+    /// Empties the ledger: the past-line part is lost.</summary>
     public int CurtainCall(int hp, int maxHp)
     {
-        var back = System.Math.Max(0, System.Math.Min(Drained, maxHp - hp));
-        Drained = 0;
+        var owed = DrainedAbove + (Mods.FiveCenturyAct > 0 ? DrainedPast : 0);
+        var back = System.Math.Max(0, System.Math.Min(owed, maxHp - hp));
+        DrainedAbove = 0;
+        DrainedPast = 0;
         return back;
     }
 
@@ -540,6 +617,8 @@ public sealed class FurinaStageLedger
     {
         SpentThisPlay = 0;
         RepaidThisPlay = 0;
+        RepayLeftThisPlay = 0;
+        RepayedThisPlay = false;
     }
 
     /// <summary>The play is over: the record closes with it. The Salon's Tab
@@ -550,6 +629,8 @@ public sealed class FurinaStageLedger
     {
         SpentThisPlay = 0;
         RepaidThisPlay = 0;
+        RepayLeftThisPlay = 0;
+        RepayedThisPlay = false;
     }
 
     // ---- the once-a-turn latches ---------------------------------------
@@ -575,6 +656,8 @@ public sealed class FurinaStageLedger
         SpendsThisTurn = 0;
         SpentThisPlay = 0;
         RepaidThisPlay = 0;
+        RepayLeftThisPlay = 0;
+        RepayedThisPlay = false;
         CharlotteDrewThisTurn = false;
         LynetteFiredThisTurn = false;
         OusiaDrewThisTurn = false;
@@ -665,6 +748,7 @@ public sealed class FurinaStageLedger
         snapshot["gained_this_turn"] = ledger.GainedThisTurn;
         snapshot["spent_this_turn"] = ledger.SpentThisTurn;
         snapshot["drained"] = ledger.Drained;
+        snapshot["drained_past"] = ledger.DrainedPast;
         snapshot["entry_hp"] = ledger.EntryHp;
         snapshot["drain_line"] = ledger.Line;
         snapshot["drain_line_why"] = ledger.LineWhy;
