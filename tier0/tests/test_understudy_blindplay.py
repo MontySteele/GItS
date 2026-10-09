@@ -6505,7 +6505,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
         "Spend": ["Pay that much ", ". Offered only if you have "],
         "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
-                    " uses it. It never fades."],
+                    " uses it. It resets to 0 after each combat."],
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
         # The text pass of 2026-10-08: the clause on what moves the line.
         "Drain": ["Lose N HP, never below half your HP at combat start. Lyney "

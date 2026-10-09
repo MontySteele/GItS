@@ -614,5 +614,51 @@ public class FurinaTideTests
             Body("DrainBody"));
         Assert.Contains("drained HP", Body("RepayBody"));
         Assert.Contains("[gold]Repay[/gold]", Body("FanfareBody"));
+        // The pool-75 round (2026-10-09): Fanfare lives one combat (her
+        // ledger is per combat), and the tip says so.
+        Assert.EndsWith("It resets to 0 after each combat.",
+                        Body("FanfareBody"));
+    }
+
+    [Fact]
+    public void Drain_and_repay_faces_say_the_line_and_the_return()
+    {
+        // The pool-75 round (2026-10-09). The Drain tip names the line now,
+        // and the refusal carries its number.
+        Assert.Equal(
+            "\nYour Drain line is 39 (half the HP you started this fight "
+            + "with).",
+            FurinaStageFacePreview.LineNowWords(
+                39, "half the HP you started this fight with"));
+        Assert.Equal("\n(Too close to your Drain line of 39 HP)",
+                     FurinaStageFacePreview.TooClose(39));
+        // Off a combat the tip adds nothing.
+        Assert.Equal("", FurinaStageFacePreview.LineNow(new ProtoFsOusiaPledge()));
+
+        // Every card that Repays prints "(Repays N)", the later and the
+        // conditional Repays included.
+        foreach (var card in new CardModel[]
+                 {
+                     new ProtoFsGentleCurrent(), new ProtoFsPneumaTides(),
+                     new ProtoFsFountainOfLucine(), new ProtoFsGrandEntrance(),
+                     new ProtoFsRiptideLunge(), new ProtoFsSoothingWaters(),
+                     new ProtoFsHymnOfManyWaters(),
+                 })
+        {
+            var face = ((BaseLib.Abstracts.CustomCardModel)card).Localization!
+                .Single(r => r.Item1 == "description").Item2;
+            Assert.EndsWith("{InCombat:{StageRepay}|}", face);
+        }
+        Assert.EndsWith("Copies stack.",
+            new ProtoFsSalonsEncore().Localization!
+                .Single(r => r.Item1 == "description").Item2);
+
+        // Riptide Lunge's Repay reads the board after its own Drain 3: at
+        // full HP with nothing drained, it would return 3, not 0.
+        var seat = Seat.Furina(78).WithCombatState();
+        FurinaStageLedger.For(seat.Creature);
+        Assert.Equal(0, FurinaStageFacePreview.Room(seat.Creature, 6));
+        Assert.Equal(3, FurinaStageFacePreview.Room(seat.Creature, 6, 3));
+        FurinaStageLedger.ResetAll();
     }
 }

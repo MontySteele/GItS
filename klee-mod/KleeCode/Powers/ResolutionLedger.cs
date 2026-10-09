@@ -104,10 +104,16 @@ public static class ResolutionLedger
     /// landed on a player -- the enemy whose Thorns answered the attack --
     /// so the page names it instead of guessing; empty where the game named
     /// no dealer.
+    /// `Self` (the Furina pool-75 round, 2026-10-09) marks a hit on a player
+    /// the game filed with no dealer but the player: her own HP cost, such
+    /// as a Drain. With no dealer on the wire the page guessed the one
+    /// Thorns holder, and Ousia Pledge's Drain 3 read as "from Toadpole's
+    /// Thorns" (Thorns 2) on a Skill.
     public readonly record struct Hit(string Target, int Amount, int Blocked,
                                       string CombatId, bool Killed = false,
                                       bool OnPlayer = false,
-                                      string Source = "");
+                                      string Source = "",
+                                      bool Self = false);
 
     /// <summary>A power the card put on an enemy, and by how much
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
@@ -367,12 +373,14 @@ public static class ResolutionLedger
         bool onPlayer;
         try { onPlayer = target?.IsPlayer ?? false; }
         catch (System.Exception) { onPlayer = false; }
+        var self = onPlayer
+                   && (dealer == null || ReferenceEquals(dealer, target));
         _open.Hits.Add(new Hit(Named(target), amount, blocked,
                                Safe(() => target?.CombatId.ToString()),
                                OnPlayer: onPlayer,
-                               Source: onPlayer && dealer != null
-                                       && !ReferenceEquals(dealer, target)
-                                   ? Named(dealer) : string.Empty));
+                               Source: onPlayer && !self
+                                   ? Named(dealer) : string.Empty,
+                               Self: self));
     }
 
     /// <summary>
@@ -589,6 +597,7 @@ public static class ResolutionLedger
                     ["killed"] = hit.Killed,
                     ["on_player"] = hit.OnPlayer,
                     ["source"] = hit.Source,
+                    ["self"] = hit.Self,
                 }),
             ["applied"] = row.Applied.ConvertAll(a =>
                 new Dictionary<string, object?>

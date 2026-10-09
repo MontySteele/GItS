@@ -1346,7 +1346,10 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                  "on_player": bool(h.get("on_player")),
                  # 2026-10-04: and who dealt it (an enemy's Thorns), where
                  # the mod named a dealer; "" on an older mod.
-                 "source": _text(h.get("source"))}
+                 "source": _text(h.get("source")),
+                 # 2026-10-09: no dealer but you (a Drain); False on an
+                 # older mod, which keeps the Thorns guess.
+                 "self": bool(h.get("self"))}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
         # 2026-09-25 evening: who a random summon inside the card rolled, in

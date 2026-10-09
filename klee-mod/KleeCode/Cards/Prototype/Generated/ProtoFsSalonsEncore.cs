@@ -45,7 +45,7 @@ public sealed class ProtoFsSalonsEncore : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salon's Encore"),
-        ("description", "Whenever you [gold]Drain[/gold], deal {PowerAmount:diff()} damage to ALL enemies."),
+        ("description", "Whenever you [gold]Drain[/gold], deal {PowerAmount:diff()} damage to ALL enemies. Copies stack."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
