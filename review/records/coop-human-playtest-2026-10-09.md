@@ -52,14 +52,13 @@ lightly ordered. The checks against the sheet are Claude's. Rows are in
 | Hydro mismatch | Chevalmarin applies Hydro in both modes. Tidal Flourish applies it only when you Spend | **By design, but it reads like an error.** Spending is what makes Tidal Flourish Hydro. If the rarity moves (pick 2), the plain mode can apply Hydro too |
 | Second Energy | Interval Bell and Salon's Tab turn Fanfare or HP into next-turn Energy | **Fine for now.** Two cards out of 34 |
 
-**A caution about co-op.** The seat rounds played her solo and found the
-opposite problem: HP was the bottleneck in act 3. Both seats fell to 10–12
-HP at the Soul Nexus elite, and one died with every Drain card shut off
-(`review/records/furina-pool40-round-2026-10-05.md`). In co-op, enemy attacks
-are split between two players, so a Furina who takes less damage would never
-see her Drain line. The stage gate judges kits solo, with co-op as a check
-(`docs/current/operations/stage-gate.md`). So the trims below are small, and
-a solo seat round with an Ironclad control will read them.
+**Seats against humans.** The solo seat rounds found the opposite problem:
+HP was the bottleneck in act 3. Both seats fell to 10–12 HP at the Soul Nexus
+elite, and one died with every Drain card shut off
+(`review/records/furina-pool40-round-2026-10-05.md`). Co-op does not explain
+the gap, since every enemy hits every player. Skilled human piloting and a
+partner who shortens fights are the likelier causes. So the trims are small,
+and a solo seat round with an Ironclad control will read them.
 
 ## Klee
 
@@ -73,7 +72,8 @@ or never offered, the same question the Varka round answered.
 
 ## Picks
 
-[USER] can answer "defaults" to take all five.
+**Ruled 2026-10-09, all defaults.** [USER]: "Good on the defaults for now - we
+can start with these trims and readjust after the card pool expands."
 
 1. **Salon Solitaire: Repay 2 → Repay 1** (the Orobas upgrade 3 → 2). **Default: yes.**
 2. **Common trims:**
