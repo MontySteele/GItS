@@ -1226,7 +1226,9 @@ def resolve_card(state, card) -> None:
             state.draw(plain)
             if take:
                 f.energy_next += big
-    elif k in FIXED_DRAIN_KINDS:
+    elif k == "drain_fixed_hit":
+        # Only the plain row: the pool-75 fixed Drains (also in
+        # FIXED_DRAIN_KINDS) each resolve in their own branch below.
         price, dmg = n
         if drain(state, price):         # `playable` gated it; belt and braces
             f.ledger["fixed_drains"] += 1
