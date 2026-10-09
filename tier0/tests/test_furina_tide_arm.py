@@ -60,16 +60,17 @@ class _Priced:
 
 # ---- rule 1: the line ------------------------------------------------------
 
-def test_the_line_is_three_quarters_of_the_hp_she_entered_combat_with():
-    """The Drain line rule (ruled 2026-10-09): 3/4 of her entry HP, rounded
-    up as the half line was -- 45 from 60, 59 from 78. Read at entry, not off
-    max HP and not off her HP now."""
+def test_the_line_is_the_hp_she_entered_combat_with_minus_a_quarter_max():
+    """The Drain line rule (ruled 2026-10-09): her entry HP minus 1/4 of
+    her Max HP, rounded down -- 41 from 60 of 78, 59 from 78. Read at entry,
+    not off her HP now."""
     from tier0.engine import furina_tide as T
     st = _furina(hp=60)
-    assert T.line_hp(st.player) == 45
+    assert st.player.max_hp == 78
+    assert T.line_hp(st.player) == 41
     assert FS.drain(st, 20)
     assert st.player.hp == 40
-    assert T.line_hp(st.player) == 45
+    assert T.line_hp(st.player) == 41
     assert T.line_hp(_furina(hp=78).player) == 59
     assert T.line_hp(_furina(hp=77).player) == 58
 

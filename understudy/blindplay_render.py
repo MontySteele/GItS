@@ -1948,8 +1948,9 @@ STAGE_FANFARE_LINE = ("- Fanfare {fanfare} (this turn: {gained} gained, "
 STAGE_DRAIN_LINE = ("- Drained {drained} HP. Drained HP above your line "
                     "returns after combat. Drain line {line} HP{why}: HP you "
                     "Drain past it is lost unless you Repay it.")
-#: Seat page 3: where the line comes from ("3/4 of the HP you started this
-#: fight with"); seats connected it to their entry HP only late.
+#: Seat page 3: where the line comes from ("the HP you started this fight
+#: with, minus 1/4 of your Max HP", 2026-10-09); seats connected it to their
+#: entry HP only late.
 STAGE_DRAIN_WHY = " ({why})"
 STAGE_REHEARSAL_CLAUSE = " · Rehearsal {n}"
 STAGE_EMPTY_LINE = "- The stage is empty."

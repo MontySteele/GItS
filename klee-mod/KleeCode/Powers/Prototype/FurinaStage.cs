@@ -22,8 +22,9 @@ namespace KleeMod.Powers;
 ///
 ///   1. DRAIN N: lose N HP for the bigger effect -- a mode on a two-mode card
 ///      (the Spend chooser), or a fixed price on a card that cannot be played
-///      when it cannot be paid. The line is 3/4 of the HP she started this
-///      combat with (2026-10-09); a Drain may go past it, but never to 0 HP.
+///      when it cannot be paid. The line is the HP she started this combat
+///      with, minus 1/4 of her Max HP (2026-10-09); a Drain may go past it,
+///      but never to 0 HP.
 ///      HP lost to a Drain is drained, in two parts: above the line and
 ///      past it.
 ///   2. REPAY N: regain up to N of her drained HP, never more; the
@@ -107,8 +108,8 @@ public static class FurinaStage
     public static int DrainedOf(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).Drained : 0;
 
-    /// <summary>Her Drain line (rule 1): 3/4 of her entry HP; HP drained
-    /// past it does not return at the curtain call.</summary>
+    /// <summary>Her Drain line (rule 1): her entry HP minus 1/4 of her Max
+    /// HP; HP drained past it does not return at the curtain call.</summary>
     public static int LineOf(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).Line : 0;
 
@@ -421,12 +422,13 @@ public static class FurinaStage
 
     // ---- the clocks ---------------------------------------------------------
 
-    /// <summary>The combat opens: the entry HP the line is read from, and the
-    /// badge. Idempotent.</summary>
+    /// <summary>The combat opens: the entry HP and Max HP the line is read
+    /// from, and the badge. Idempotent.</summary>
     public static async Task OpenCombat(Creature? owner)
     {
         if (!LiveFor(owner)) return;
-        FurinaStageLedger.For(owner!).Open((int)owner!.CurrentHp);
+        FurinaStageLedger.For(owner!).Open((int)owner!.CurrentHp,
+                                           (int)owner!.MaxHp);
         await InstallBadge(owner);
         RefreshBadges(owner);
     }

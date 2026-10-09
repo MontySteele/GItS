@@ -69,8 +69,9 @@ public static class DrainedCounter
     public static int Read(Creature? creature) => FurinaStage.DrainedOf(creature);
 
     /// <summary>The hover's first sentence, the one the paper names. Pure.
-    /// 2026-10-05: and WHERE THE LINE COMES FROM ("Drain line 59 HP (3/4 of
-    /// the HP you started this fight with)"); seats connected it late. The
+    /// 2026-10-05: and WHERE THE LINE COMES FROM ("Drain line 30 HP (the HP
+    /// you started this fight with, minus 1/4 of your Max HP)"); seats
+    /// connected it late. The
     /// Drain line rule (2026-10-09): a Drain may go past it.
     /// </summary>
     public static string LineSentence(int line, string why) =>

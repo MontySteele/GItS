@@ -556,11 +556,12 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # Cue, Rehearsal, the front seat) left with v2.
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
             "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
-            # The Drain line rule (2026-10-09): the 3/4 line, and HP drained
-            # past it is lost unless Repaid.
+            # The Drain line rule (2026-10-09): the line is entry HP minus
+            # 1/4 of Max HP, and HP drained past it is lost unless Repaid.
             # The drain-line round (2026-10-09): the curtain-call sentence.
             "Lose N HP. Drained HP above your line returns after combat. HP ",
-            "drained past your line (3/4 of your HP at combat start) is lost ",
+            "drained past your line is lost unless you [gold]Repay[/gold] ",
+            "it. Your line is the HP you started this fight with, minus 1/4 ",
             # The pool to 75 (2026-10-09): the guest rule's words.
             "Regain that much drained HP, never more than you drained. A ",
             "A guest joins at the back. On a full stage, the oldest guest ",
@@ -601,7 +602,7 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     # The re-founding (2026-10-04): the fade retired.
     assert "FadeDivisor" not in tips
     # THE SALON'S TAB (2026-10-05): the Bow and Pneuma left with v2, and the
-    # Drain line is "half", which `FurinaStageLaw.LineOf` is. The guests'
+    # Drain line is `FurinaStageLaw.LineOf`'s, read from its law. The guests'
     # numerals live on their badges (`StagePerformerBadge.ActText`).
     assert "FurinaStageLaw.BowFanfare" not in tips
     assert "ArkheAlignmentPower.PneumaFanfare" not in tips

@@ -83,8 +83,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
   "the current one built overnight can be discarded". Furina pays HP for
-  power: Drain spends HP, never to 0; her Drain line is 3/4 of the HP she
-  entered combat with (Lyney: 10 lower), her own Drains may go past it (a
+  power: Drain spends HP, never to 0; her Drain line is the HP she entered
+  combat with minus 1/4 of her Max HP, rounded down (50/80 puts it at 30;
+  Lyney: 10 lower; ruled 2026-10-09: "That also rewards max HP stacking"),
+  her own Drains may go past it (a
   guest act's Drain stops at it, the drain-line round 2026-10-09), and when
   combat ends only the HP drained above the line returns (A Five-Century Act
   returns the rest too). Repay returns drained HP, the past-line part first;

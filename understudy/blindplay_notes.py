@@ -1618,13 +1618,14 @@ ARM_KEYWORDS: dict[str, str] = {
     "Spend": "Pay that much Fanfare. Offered only if you have enough.",
     "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It "
                 "resets to 0 after each combat."),
-    # The Drain line rule (ruled 2026-10-09): 3/4 line, a Drain may go
-    # past it, and what it drains past it is lost unless Repaid.
-    # The drain-line round (2026-10-09): "Drained HP above your line
-    # returns after combat."
+    # The Drain line rule (ruled 2026-10-09): the line is entry HP minus
+    # 1/4 of Max HP, a Drain may go past it, and what it drains past it is
+    # lost unless Repaid. The drain-line round (2026-10-09): "Drained HP
+    # above your line returns after combat."
     "Drain": ("Lose N HP. Drained HP above your line returns after combat. "
-              "HP drained past your line (3/4 of your HP at combat start) is "
-              "lost unless you Repay it."),
+              "HP drained past your line is lost unless you Repay it. Your "
+              "line is the HP you started this fight with, minus 1/4 of "
+              "your Max HP."),
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
     # Guest Star exhausts and comes back when its guest leaves.
     "Repay": ("Regain that much drained HP, never more than you drained. A "
