@@ -26,9 +26,8 @@ line leaves this file. Closed picks are in git
 ## Open packets in `review/active/`
 
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
-  two picks): (1) keep the ¾ line and rerun after the legibility fixes, go
-  back to ½, or return all drained HP; (2) more Block now or after a census.
-  Defaults: keep and rerun; census first.
+  pick 2): more Block now, or decide on the rerun after a Block census.
+  Default: census first.
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).

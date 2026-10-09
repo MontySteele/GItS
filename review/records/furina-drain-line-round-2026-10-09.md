@@ -63,10 +63,10 @@ What the round does show is how the rule reads to a player:
 
 ## Picks
 
-**Drain-line round, pick 1: the line.**
-- (a) **Default:** keep the ¾ line, ship changes 1–4, and rerun the same three seeds plus two fresh Furina seeds. The changes are mostly legibility, so the rule has not had a fair read yet.
-- (b) Go back to the ½ line with its lock, and keep the Repay payouts and changes 1, 2 and 4.
-- (c) Keep the ¾ line but return all drained HP after combat. This removes the permanent cost.
+**Drain-line round, pick 1: the line. Ruled 2026-10-09.**
+The line is the HP she entered the fight with, minus ¼ of her max HP (rounded down), so 50/80 gives a line of 30. This is not one of the listed options; it came from [USER]'s question about how the line works. Every fight then gives the same room to Drain safely, whatever her HP.
+In [USER]'s words: "Yeah, let's build it that way. That also rewards max HP stacking, which seems fair on a character designed for it, and punishes some event choices which cost max HP that are usually auto-picks."
+The rerun follows the build: the same three seeds plus two fresh Furina seeds.
 
 **Drain-line round, pick 2: Block.** Should Furina's pool get more Block, or is the shortfall the seats skipping it because Fanfare pays for hits?
 - (a) **Default:** no change yet. Decide on the rerun, with the base five's Block counts beside hers (a census first).
