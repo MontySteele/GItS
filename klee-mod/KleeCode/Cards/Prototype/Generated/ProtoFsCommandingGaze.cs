@@ -45,7 +45,7 @@ public sealed class ProtoFsCommandingGaze : CustomCardModel, ICharacterCard, IMo
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Commanding Gaze"),
-        ("description", "Apply 1 [gold]Vulnerable[/gold]. [gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} [gold]Vulnerable[/gold] and 2 [gold]Weak[/gold] instead."),
+        ("description", "Apply 2 [gold]Vulnerable[/gold]. [gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} [gold]Vulnerable[/gold] and 2 [gold]Weak[/gold] instead."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -56,8 +56,8 @@ public sealed class ProtoFsCommandingGaze : CustomCardModel, ICharacterCard, IMo
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
         IsUpgraded
-            ? new[] { "Apply 1 Vulnerable", "[gold]Spend[/gold] 4: apply 3 Vulnerable and 2 Weak instead" }
-            : new[] { "Apply 1 Vulnerable", "[gold]Spend[/gold] 4: apply 2 Vulnerable and 2 Weak instead" };
+            ? new[] { "Apply 2 Vulnerable", "[gold]Spend[/gold] 4: apply 3 Vulnerable and 2 Weak instead" }
+            : new[] { "Apply 2 Vulnerable", "[gold]Spend[/gold] 4: apply 2 Vulnerable and 2 Weak instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };
@@ -89,11 +89,11 @@ public sealed class ProtoFsCommandingGaze : CustomCardModel, ICharacterCard, IMo
                                 "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Apply 1 Vulnerable", "[gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} Vulnerable and 2 Weak instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Apply 2 Vulnerable", "[gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} Vulnerable and 2 Weak instead" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+            await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 2, applier: Owner.Creature, cardSource: this);
         }
         else
         {
@@ -125,8 +125,8 @@ public sealed class ProtoFsCommandingGazeModeA : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Apply 1 Vulnerable"),
-        ("description", "Apply 1 [gold]Vulnerable[/gold]"),
+        ("title", "Apply 2 Vulnerable"),
+        ("description", "Apply 2 [gold]Vulnerable[/gold]"),
     };
 
     public ProtoFsCommandingGazeModeA()

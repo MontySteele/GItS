@@ -60,23 +60,69 @@ class _Priced:
 
 # ---- rule 1: the line ------------------------------------------------------
 
-def test_the_line_is_half_the_hp_she_entered_combat_with():
+def test_the_line_is_three_quarters_of_the_hp_she_entered_combat_with():
+    """The Drain line rule (ruled 2026-10-09): 3/4 of her entry HP, rounded
+    up as the half line was -- 45 from 60, 59 from 78. Read at entry, not off
+    max HP and not off her HP now."""
+    from tier0.engine import furina_tide as T
     st = _furina(hp=60)
-    assert FS.can_drain(st.player, 30)
-    assert not FS.can_drain(st.player, 31)
-    # Read at entry, not off max HP and not off her HP now.
+    assert T.line_hp(st.player) == 45
     assert FS.drain(st, 20)
     assert st.player.hp == 40
-    assert FS.can_drain(st.player, 10)
-    assert not FS.can_drain(st.player, 11)
+    assert T.line_hp(st.player) == 45
+    assert T.line_hp(_furina(hp=78).player) == 59
+    assert T.line_hp(_furina(hp=77).player) == 58
 
 
-def test_a_drain_past_the_line_does_nothing():
+def test_a_drain_is_never_refused_for_the_line_only_at_zero_hp():
+    st = _furina(hp=60)
+    assert FS.can_drain(st.player, 59)
+    assert not FS.can_drain(st.player, 60)
     st = _furina(hp=20)
-    assert not FS.drain(st, 11)
-    assert st.player.hp == 20
+    assert FS.drain(st, 11)
+    assert st.player.hp == 9
+    assert not FS.drain(st, 9)                  # would take her to 0 HP
+    assert st.player.hp == 9
+    assert FS.drained(st.player) == 11
+
+
+def test_a_drain_splits_into_above_and_past_the_line():
+    st = _furina(hp=78)                         # line 59
+    f = st.player.ftd
+    assert FS.drain(st, 15)                     # 78 -> 63: all above
+    assert (f.drained_above, f.drained_past) == (15, 0)
+    assert FS.drain(st, 10)                     # 63 -> 53: 4 above, 6 past
+    assert (f.drained_above, f.drained_past) == (19, 6)
+    assert FS.drain(st, 3)                      # 53 -> 50: all past
+    assert (f.drained_above, f.drained_past) == (19, 9)
+    assert FS.drained(st.player) == 28
+
+
+def test_a_repay_returns_the_past_line_part_first():
+    st = _furina(hp=78)
+    f = st.player.ftd
+    FS.drain(st, 25)                            # 19 above, 6 past
+    assert FS.repay(st, 4) == 4
+    assert (f.drained_above, f.drained_past) == (19, 2)
+    assert FS.repay(st, 5) == 5
+    assert (f.drained_above, f.drained_past) == (16, 0)
+
+
+def test_the_curtain_call_returns_only_the_above_line_part():
+    st = _furina(hp=78)
+    FS.drain(st, 25)                            # 19 above, 6 past
+    assert st.player.hp == 53
+    FS.close_combat(st)
+    assert st.player.hp == 72                   # 6 HP stay lost
     assert FS.drained(st.player) == 0
-    assert FS.fanfare(st.player) == 0
+
+
+def test_a_five_century_act_returns_the_past_line_part_too():
+    st = _furina(hp=78)
+    effects.resolve_card(st, _row("proto_fs_a_five_century_act"))
+    FS.drain(st, 25)
+    FS.close_combat(st)
+    assert st.player.hp == 78
 
 
 # ---- rule 2: the ledger and Repay's cap -------------------------------------
@@ -179,22 +225,23 @@ def test_revelry_adds_to_drains_and_repays_and_copies_add():
 
 # ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3) ----
 
-def test_the_pool_is_75_rows_20_35_20():
+def test_the_pool_is_74_rows_19_35_20():
     # 10 / 17 / 7 since the 2026-10-09 playtest trim (Interval Bell and
     # Tidal Flourish to Uncommon); 12 / 15 / 7 before. THE POOL TO 75
     # (review/active/furina-pool-growth-2026-10-09.md sec.5): 41 rows more,
-    # 20 / 35 / 20, three slots held.
+    # 20 / 35 / 20. The pool-75 round's rulings (2026-10-09): Endless Waltz
+    # cut (Uncommon) and Standing Ovation Common -> Uncommon, 19 / 35 / 20.
     rows = {c.id: c for c in loader.prototype_cards()}
     rarities = [rows[cid].rarity for cid in FS.POOL_IDS]
-    assert len(FS.POOL_IDS) == 75 == len(set(FS.POOL_IDS))
+    assert len(FS.POOL_IDS) == 74 == len(set(FS.POOL_IDS))
+    assert "proto_fs_endless_waltz" not in rows
+    assert rows["proto_fs_standing_ovation_all"].rarity == "uncommon"
     assert (rarities.count("common"), rarities.count("uncommon"),
-            rarities.count("rare")) == (20, 35, 20)
+            rarities.count("rare")) == (19, 35, 20)
 
 
-def test_the_arm_powers_move_the_line_and_read_the_loop():
+def test_the_arm_powers_read_the_loop():
     st = _furina()
-    effects.resolve_card(st, _row("proto_fs_a_five_century_act"))
-    assert FS.can_drain(st.player, 77)
     effects.resolve_card(st, _row("proto_fs_critics_darling"))
     hp = st.enemies[0].hp
     FS.drain(st, 5)
@@ -233,26 +280,30 @@ def test_spend_takes_the_full_price_or_nothing():
 
 # ---- the fixed price and the Drain mode's gate ------------------------------
 
-def test_a_fixed_drain_card_is_unplayable_past_the_line():
+def test_a_fixed_drain_card_is_playable_past_the_line_not_to_zero_hp():
     crab = _row("proto_fs_mademoiselle_crabaletta")
     assert FS.fixed_price(crab) == ("stage_drain", 5)
     st = _furina(hp=78)
     crab.cost = 0
     st.player.energy = 3
     assert combat.card_playable(st, crab)
-    st.player.hp = 43          # the line is 39: 43 - 5 < 39
+    st.player.hp = 43          # the line is 59: past it, still playable
+    assert combat.card_playable(st, crab)
+    st.player.hp = 5           # 5 - 5 = 0 HP: refused
     assert not combat.card_playable(st, crab)
 
 
-def test_a_drain_mode_is_withheld_past_the_line():
+def test_a_drain_mode_is_withheld_only_at_zero_hp():
     rise = _row("proto_fs_curtain_rise")
     plain, priced = rise.effects[0]["modes"]
     st = _furina(hp=78)
     assert FS.mode_offered(st.player, priced)
-    st.player.hp = 41          # the line is 39: 41 - 3 < 39
+    st.player.hp = 41          # past the line of 59: still offered
+    assert FS.mode_offered(st.player, priced)
+    st.player.hp = 3           # 3 - 3 = 0 HP
     assert not FS.mode_offered(st.player, priced)
     assert FS.mode_offered(st.player, plain)
-    assert "below the Drain line" in FS.mode_refusal(st.player, priced)
+    assert "0 HP" in FS.mode_refusal(st.player, priced)
 
 
 def test_curtain_rise_drains_3_for_12():

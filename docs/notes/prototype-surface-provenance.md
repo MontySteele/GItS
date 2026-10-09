@@ -6753,3 +6753,71 @@ Energy next turn." [Spend 4]) give their Energy next turn, Interval Bell's
 2026-10-04 fix and its `stage_energy_next` op; the paper's rows are edited in
 place. The sweep is then clean, and none of the four named combinations is a
 productive loop.
+
+
+## Furina: the Drain line rule, the Repay floor and the round's numbers, 2026-10-09
+
+Record: `review/records/furina-pool75-round-2026-10-09.md`, "Picks (ruled
+2026-10-09)", picks 1 to 3. [USER]: "Yes - let's test it with a seat".
+
+**The Drain line rule (pick 1).** `FurinaStageLaw.LineOf` is 3/4 of her
+entry HP rounded up, as the half line was (59 from 78; `LineNumerator` /
+`LineDenominator`, sim `LINE_NUMERATOR` / `LINE_DENOMINATOR` / `LINE_SHARE`).
+A Drain is never refused for the line; the one refusal left is a Drain to 0
+HP (`DrainFloor` = 1, which replaces `FiveCenturyLine`). The ledger keeps
+drained HP in two parts (`DrainedAbove`, `DrainedPast`; sim `drained_above`,
+`drained_past`, with `drained` their sum). The curtain call returns only the
+above-line part; A Five-Century Act ("HP you Drain past your line also
+returns when combat ends.", same cost and rarity) returns both and no longer
+moves the line. A Repay returns the past-line part first. Lyney's line is 10
+lower and his act may Drain past it. "Within 5 HP of your Drain line" already
+counted HP at or below the line (HP minus the line at most 5). The Drain tip,
+the Drained counter, the card faces' in-combat line ("(Past your Drain line
+of 59 HP)", "(Not enough HP)") and the seat page say the 3/4 rule and that
+HP drained past the line is lost unless repaid.
+
+**The Repay floor (pick 2).** "Repay N. Gain X for any HP it could not
+Repay." -- `StageDirector.RepayFloor` (sim `repay_floor`): the Repay
+resolves, then N minus the HP returned is paid. Block: Hymn of Many Waters
+(`stage_repay` with `floor: block`), Gentle Current's next-turn Repay,
+Fountain of Lucine each turn, Grand Entrance, Charlotte's and Sigewinne's
+acts. Vigor (the base game's `VigorPower`; the sim's `next_attack_up`):
+Pneuma Tides (Soothing Waters keeps none: see the loop probe). Damage: Surging Waters,
+Hydro Lance and Cleansing Torrent now Repay first and deal `amount_formula
+{base, per: 1, count: stage_repay_left}` (`FurinaStage.RepayLeftOrRoom`, the
+ledger's `RepayLeftThisPlay`); their damage upgrades moved to `formula_base`.
+Endless Waltz is cut: its row, card, power and sim twin are deleted (the
+pool is 74, 19 / 35 / 20). Vigor joins the base keywords with a tip.
+
+**The card numbers (pick 3).** Standing Ovation Common -> Uncommon; Bravura's
+upgrade is `formula_base: +4` (10 plus 2 per point; was per-point +1);
+Mademoiselle Crabaletta 20 [26]; Soloist's Solicitation 6 [9]; Commanding
+Gaze's plain mode 2 Vulnerable; Freminet's act also gives 6 Block [9]
+(`FreminetActBlock`); Guest Star: Neuvillette costs 1 and his act deals the
+HP she lost since her last turn ended, Drained or taken
+(`HpLostSinceLastTurn`, closed at the end of her turn after the acts).
+
+**Readings where the ruling is silent:**
+- "Gain X" pays 1 Block or 1 Vigor per HP not returned; the damage cards
+  print "Deal 6 damage, plus 1 for any HP it could not Repay."
+- Neuvillette's "this turn" is read as since her last turn ended, so the
+  enemies' hits count ("from Drain or from enemies"), the window Grass Ring
+  of Sanctification already uses; his face says "since your last turn".
+- A Drain's split uses the line as it stands when it is paid (Lyney on stage
+  or not). A heal from elsewhere clamps the past-line part first.
+- A Five-Century Act no longer moves the line at all.
+- Pool counts: Endless Waltz leaves an Uncommon and Standing Ovation joins
+  them, so the Uncommon count is unchanged (35) and Commons drop to 19.
+
+**Loop probe.** As first built, the full sweep found one productive cycle
+the floor made: two Soothing Waters (0 cost, Repay 2, draw 1) with nothing
+drained gained 2 Vigor a play without end. The main session ruled that
+Soothing Waters keeps no leftover payout ("Repay 2. Draw 1 card." [Repay
+3]): a 0-cost draw-1 card paying out on an empty Repay looped forever, and
+the draw already carries it, as with Pneuma Refrain. The sweep then finds no
+productive cycle, and none of the four named combinations is productive in
+one turn. Over six whole turns `energy_cycle` (Overdraft, Soothing Waters,
+Sold Out, Crescendo) still reaches the 60-play cap in one turn on Soothing
+Waters' inert cycle, and Overdraft drains her from 78 to 4 HP since a Drain
+may now go past the line; it grows nothing, and it is reported here, not
+pinned.

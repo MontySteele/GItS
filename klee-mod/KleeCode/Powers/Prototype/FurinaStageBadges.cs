@@ -90,7 +90,8 @@ public abstract class StagePerformerBadge : PowerModel
             StagePerformer.Charlotte =>
                 "The first time you [gold]Repay[/gold] each turn, draw "
               + FurinaStageLaw.CharlotteLineDraw + " card. Act: "
-              + "[gold]Repay[/gold] " + act + ".",
+              + "[gold]Repay[/gold] " + act + ". Gain 1 [gold]Block[/gold] "
+              + "for any HP it could not [gold]Repay[/gold].",
             StagePerformer.Wriothesley =>
                 "Whenever you [gold]Drain[/gold], deal that much "
               + "[gold]Cryo[/gold] damage to a random enemy. Act: deal " + act
@@ -110,7 +111,9 @@ public abstract class StagePerformerBadge : PowerModel
               + ": deal " + act + " [gold]Pyro[/gold] damage to ALL enemies.",
             StagePerformer.Sigewinne =>
                 "Whenever you [gold]Repay[/gold], gain that much "
-              + "[gold]Block[/gold]. Act: [gold]Repay[/gold] " + act + ".",
+              + "[gold]Block[/gold]. Act: [gold]Repay[/gold] " + act + ". "
+              + "Gain 1 [gold]Block[/gold] for any HP it could not "
+              + "[gold]Repay[/gold].",
             StagePerformer.Chevreuse =>
                 "Whenever you [gold]Spend[/gold], apply "
               + FurinaStageLaw.ChevreuseLineVulnerable
@@ -124,7 +127,9 @@ public abstract class StagePerformerBadge : PowerModel
             StagePerformer.Freminet =>
                 "Whenever you [gold]Drain[/gold], gain that much "
               + "[gold]Block[/gold]. Act: deal " + act
-              + " [gold]Cryo[/gold] damage to a random enemy.",
+              + " [gold]Cryo[/gold] damage to a random enemy. Gain "
+              + StageDirector.FreminetActBlock(upgraded)
+              + " [gold]Block[/gold].",
             StagePerformer.Navia =>
                 "Your first [gold]Spend[/gold] each turn costs "
               + NaviaDiscount(upgraded) + " less (a spend-all keeps "
@@ -136,7 +141,7 @@ public abstract class StagePerformerBadge : PowerModel
               + (upgraded ? FurinaStageLaw.NeuvilletteHydroBonusUpgraded
                           : FurinaStageLaw.NeuvilletteHydroBonus)
               + " more. Act: deal [gold]Hydro[/gold] damage to ALL enemies "
-              + "equal to the HP you [gold]Drained[/gold] this turn.",
+              + "equal to the HP you lost since your last turn.",
             StagePerformer.Escoffier =>
                 "Whenever a guest acts, [gold]Repay[/gold] "
               + FurinaStageLaw.EscoffierLineRepay + ". Act: deal " + act

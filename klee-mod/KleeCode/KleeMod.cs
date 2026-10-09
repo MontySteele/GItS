@@ -549,6 +549,7 @@ public static class KleeMod
                         "Strength",
                     [Cards.BaseKeywordTips.DexterityKey + ".title"] =
                         "Dexterity",
+                    [Cards.BaseKeywordTips.VigorKey + ".title"] = "Vigor",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

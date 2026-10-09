@@ -2515,18 +2515,18 @@
    character: furina, authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: common,
    art_of: mademoiselle_crabaletta,
-   description: "[gold]Drain[/gold] 5. Deal 24 damage.",
+   description: "[gold]Drain[/gold] 5. Deal 20 damage.",
    effects: [{op: stage_drain, amount: 5},
-             {op: damage, amount: 24, target: enemy}]}
+             {op: damage, amount: 20, target: enemy}]}
 
 - {id: proto_fs_soloists_solicitation, name: "Soloist's Solicitation",
    upgrade: {damage: +3},
    character: furina, authored_by: [claude],
    register: salon, cost: 0, type: attack, rarity: common,
    art_of: soloists_solicitation,
-   description: "[gold]Drain[/gold] 2. Deal 8 damage.",
+   description: "[gold]Drain[/gold] 2. Deal 6 damage.",
    effects: [{op: stage_drain, amount: 2},
-             {op: damage, amount: 8, target: enemy}]}
+             {op: damage, amount: 6, target: enemy}]}
 
 - {id: proto_fs_surintendante_chevalmarin, name: "Surintendante Chevalmarin",
    upgrade: {conditional_damage: +2, conditional_then_damage: +1},
@@ -2573,20 +2573,22 @@
 # --- REPAY (four) ---
 
 - {id: proto_fs_surging_waters, name: "Surging Waters", character: furina,
-   upgrade: {damage: +3, stage_repay: +1},
+   upgrade: {formula_base: +3, stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal 6 damage. [gold]Repay[/gold] 3.",
-   effects: [{op: damage, amount: 6, target: enemy},
-             {op: stage_repay, amount: 3}]}
+   description: "[gold]Repay[/gold] 3. Deal {CalculationBase:diff()} damage, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_repay, amount: 3},
+             {op: damage,
+              amount_formula: {base: 6, per: 1, count: stage_repay_left},
+              target: enemy}]}
 
 - {id: proto_fs_hymn_of_many_waters, name: "Hymn of Many Waters", character: furina,
    upgrade: {block: +3, stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 8 [gold]Block[/gold]. [gold]Repay[/gold] 3.",
+   description: "Gain 8 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
    effects: [{op: block, amount: 8},
-             {op: stage_repay, amount: 3}]}
+             {op: stage_repay, amount: 3, floor: block}]}
 
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
    upgrade: {stage_repay: +2},
@@ -2647,7 +2649,7 @@
    upgrade: {retain: true},
    authored_by: [claude],
    art_of: standing_ovation,
-   register: salon, cost: 1, type: attack, rarity: common,
+   register: salon, cost: 1, type: attack, rarity: uncommon,
    description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage,
@@ -2671,7 +2673,7 @@
                          {op: stage_energy_next, amount: 1}]}]}]}
 
 - {id: proto_fs_bravura, name: "Bravura", character: furina,
-   upgrade: {formula_per: +1},
+   upgrade: {formula_base: +4},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
    description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
@@ -2688,14 +2690,6 @@
    register: salon, cost: 1, type: power, rarity: uncommon,
    description: "Whenever you [gold]Drain[/gold], deal 3 damage to ALL enemies. Copies stack.",
    effects: [{op: apply_power, power: fs_salons_encore, amount: 3,
-              target: self}]}
-
-- {id: proto_fs_endless_waltz, name: "Endless Waltz", character: furina,
-   upgrade: {innate: true},
-   authored_by: [claude],
-   register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Repay[/gold], deal that much damage to a random enemy.",
-   effects: [{op: apply_power, power: fs_endless_waltz, amount: 1,
               target: self}]}
 
 - {id: proto_fs_thunderous_applause, name: "Thunderous Applause", character: furina,
@@ -2796,7 +2790,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "You can [gold]Drain[/gold] down to 1 HP.",
+   description: "HP you [gold]Drain[/gold] past your line also returns when combat ends.",
    effects: [{op: apply_power, power: fs_a_five_century_act, amount: 1,
               target: self}]}
 
@@ -2815,7 +2809,7 @@
    upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "For 3 turns, at the start of your turn [gold]Repay[/gold] {PowerAmount:diff()}.",
+   description: "For 3 turns, at the start of your turn [gold]Repay[/gold] {PowerAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
    effects: [{op: apply_power, power: fs_fountain_of_lucine, amount: 3,
               target: self}]}
 
@@ -2899,7 +2893,7 @@
    upgrade: {power_amount: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a Guest Star, [gold]Repay[/gold] 4.",
+   description: "Whenever you play a Guest Star, [gold]Repay[/gold] 4. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
    effects: [{op: apply_power, power: fs_grand_entrance, amount: 4,
               target: self}]}
 
@@ -2937,7 +2931,7 @@
 - {id: proto_fs_guest_star_neuvillette, name: "Guest Star: Neuvillette", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 2, type: skill, rarity: rare, exhaust: true,
+   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: neuvillette}]}
 
@@ -2983,10 +2977,10 @@
    upgrade: {mode_power_amount: [0, 1]},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Apply 1 [gold]Vulnerable[/gold]. [gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} [gold]Vulnerable[/gold] and 2 [gold]Weak[/gold] instead.",
+   description: "Apply 2 [gold]Vulnerable[/gold]. [gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} [gold]Vulnerable[/gold] and 2 [gold]Weak[/gold] instead.",
    effects: [{op: choose_one, modes: [
-              {label: "Apply 1 Vulnerable",
-               effects: [{op: apply_power, power: vulnerable, amount: 1,
+              {label: "Apply 2 Vulnerable",
+               effects: [{op: apply_power, power: vulnerable, amount: 2,
                           target: enemy}]},
               {label: "[gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} Vulnerable and 2 Weak instead",
                effects: [{op: stage_spend, amount: 4},
@@ -3157,7 +3151,7 @@
    upgrade: {block: +2, furina_amount: 1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. Next turn, [gold]Repay[/gold] {FsAmount:diff()}.",
+   description: "Gain 5 [gold]Block[/gold]. Next turn, [gold]Repay[/gold] {FsAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
    effects: [{op: block, amount: 5},
              {op: furina, kind: repay_next, amount: 4}]}
 
@@ -3172,21 +3166,24 @@
               then: [{op: draw, amount: 1}]}]}
 
 - {id: proto_fs_hydro_lance, name: "Hydro Lance", character: furina,
-   upgrade: {damage: +4},
+   upgrade: {formula_base: +4},
    authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: common,
-   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Repay[/gold] 4.",
-   effects: [{op: damage, amount: 14, target: enemy, applies_element: true},
-             {op: stage_repay, amount: 4}]}
+   description: "[gold]Repay[/gold] 4. Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_repay, amount: 4},
+             {op: damage,
+              amount_formula: {base: 14, per: 1, count: stage_repay_left},
+              target: enemy, applies_element: true}]}
 
 - {id: proto_fs_cleansing_torrent, name: "Cleansing Torrent", character: furina,
-   upgrade: {damage: +4},
+   upgrade: {formula_base: +4},
    authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: uncommon,
-   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. [gold]Repay[/gold] 4.",
-   effects: [{op: damage, amount: 10, target: all_enemies,
-              applies_element: true},
-             {op: stage_repay, amount: 4}]}
+   description: "[gold]Repay[/gold] 4. Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_repay, amount: 4},
+              {op: damage,
+               amount_formula: {base: 10, per: 1, count: stage_repay_left},
+               target: all_enemies, applies_element: true}]}
 
 # Balance the Books: half your drained HP, rounded down (the Review section),
 # read before its own Repay.
@@ -3213,7 +3210,7 @@
    upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, [gold]Repay[/gold] 2.",
+   description: "At the start of your turn, [gold]Repay[/gold] 2. Gain 1 [gold]Vigor[/gold] for any HP it could not [gold]Repay[/gold].",
    effects: [{op: apply_power, power: fs_pneuma_tides, amount: 2,
               target: self}]}
 

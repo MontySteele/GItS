@@ -25,13 +25,20 @@ deals 12; and `review/active/furina-pool-40-2026-10-05.md` sec.2: Universal
 Revelry reads Drain and Repay again, never hits):
 
 1. DRAIN N. Lose N HP for the bigger effect (a mode on some cards, a fixed
-   price on others). It cannot be paid if it would take her below the line:
-   half the HP she started this combat with (the `entry` line; the `std`
-   family of variants measures half of Max HP, Genshin's rule). HP lost to
-   a Drain is DRAINED: the engine keeps the count. A fixed-price card whose
-   Drain cannot be paid cannot be played (`playable`), Hemokinesis's shape.
-2. REPAY N. Regain up to N of your drained HP. Repay never returns HP an
-   enemy took (the invariant: HP + drained <= Max HP, and Repay <= drained).
+   price on others). THE DRAIN LINE RULE (ruled 2026-10-09): the line is
+   3/4 of the HP she started this combat with (`LINE_SHARE`, the default
+   variant's; the `std` family of variants measures a share of Max HP), and
+   a Drain is never refused for it: it may go past it. It cannot be paid if
+   it would take her to 0 HP (`DRAIN_FLOOR`). HP lost to a Drain is DRAINED,
+   in two parts: above the line (`drained_above`) and past it
+   (`drained_past`). A fixed-price card whose Drain cannot be paid cannot be
+   played (`playable`), Hemokinesis's shape.
+2. REPAY N. Regain up to N of your drained HP, the past-line part first.
+   Repay never returns HP an enemy took (the invariant: HP + drained <= Max
+   HP, and Repay <= drained). THE REPAY FLOOR (ruled 2026-10-09): "Repay N.
+   Gain X for any HP it could not Repay." -- `repay_floor` pays Block or
+   Vigor for the leftover, N minus the HP returned; the damage cards add it
+   to their damage (`repay_left_this_play`).
 3. FANFARE. One number on Furina, no cap, no fade. She gains 1 for every HP
    she loses (to a Drain, to an enemy, to anything) and for every HP she
    Repays. Spend N on cards pays it; a spend-all is one Spend.
@@ -49,7 +56,8 @@ Revelry reads Drain and Repay again, never hits):
    on stage moves it to the newest seat, with no act. An upgraded Guest Star
    raises its guest's line or act.
 6. THE CURTAIN CALL (sec.16, the default variant `curtain_call`). When a
-   combat ends, all drained HP returns (`close_ledger`). Under
+   combat ends, the HP drained above the line returns (`close_ledger`); the
+   HP drained past it stays lost unless A Five-Century Act is in play. Under
    `no_curtain_call` unrepaid drained HP is lost when the fight ends, the
    paper's old rule. Either way `fight_record` reports the unrepaid HP at
    the curtain (under the curtain call, the HP the curtain returned).
@@ -117,7 +125,10 @@ LYNEY_ACT_DRAIN = 2          # act: "Drain 2: deal 8 Pyro damage to ALL."
 LYNEY_ACT = 8
 CHEVREUSE_ACT = 4            # act: "Deal 4 damage to a random enemy."
 CHEVREUSE_LINE_VULNERABLE = 1  # line: each Spend, 1 Vulnerable (random)
-FIVE_CENTURY_LINE = 1        # A Five-Century Act: Drain down to 1 HP
+DRAIN_FLOOR = 1              # a Drain cannot take her to 0 HP (2026-10-09)
+LINE_NUMERATOR = 3           # the Drain line: 3/4 of her entry HP (2026-10-09)
+LINE_DENOMINATOR = 4
+LINE_SHARE = LINE_NUMERATOR / LINE_DENOMINATOR
 FOUNTAIN_TURNS = 3           # Fountain of Lucine: the next 3 turns
 # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09). Sec.3: a guest's upgrade raises its line or its act.
@@ -130,6 +141,8 @@ CHEVREUSE_LINE_WEAK_UPGRADED = 1   # upgraded line: also 1 Weak
 CLORINDE_ACT_UPGRADED = 9
 FREMINET_ACT = 5                   # act: 5 Cryo to a random enemy [8]
 FREMINET_ACT_UPGRADED = 8
+FREMINET_ACT_BLOCK = 6             # act: also gain 6 Block [9] (2026-10-09)
+FREMINET_ACT_BLOCK_UPGRADED = 9
 NAVIA_LINE_DISCOUNT = 2            # line: first Spend each turn 2 less [3]
 NAVIA_LINE_DISCOUNT_UPGRADED = 3
 NEUVILLETTE_HYDRO_BONUS_UPGRADED = 3
@@ -168,11 +181,18 @@ def _new_ledger() -> dict:
 @dataclass
 class Ftd:
     fanfare: int = 0
-    drained: int = 0                 # HP lost to Drains and not yet Repaid
+    # HP lost to Drains and not yet Repaid, in two parts (the Drain line
+    # rule, 2026-10-09): taken at or above the line, and past it. `drained`
+    # is their sum.
+    drained_above: int = 0
+    drained_past: int = 0
+    # Neuvillette's act (2026-10-09): HP she lost since her last turn ended,
+    # to Drains and to anything else (the C# `HpLostSinceLastTurn`).
+    hp_lost_window: int = 0
     gained_this_turn: int = 0
     spent_this_turn: int = 0
     repaid_this_turn: int = 0
-    drained_hp_this_turn: int = 0    # Neuvillette's act reads it
+    drained_hp_this_turn: int = 0    # HP drained this turn (the page reads it)
     charlotte_drew: bool = False
     lynette_fired: bool = False
     ousia_drew: bool = False         # Ousia Surge: drawn this turn
@@ -189,6 +209,7 @@ class Ftd:
     drains_this_combat: int = 0      # Undercurrent's count
     repays_this_turn: int = 0        # Rising Tide's count
     repaid_this_play: int = 0        # Grand Absolution's "that much"
+    repay_left_this_play: int = 0    # the Repay floor's damage
     repay_next: int = 0              # Gentle Current: Repay next turn
     powers: collections.Counter = field(default_factory=collections.Counter)
     singer: int = SINGER_REPAY
@@ -203,6 +224,17 @@ class Ftd:
     drained_this_turn: bool = False
     decider: object = None
     ledger: dict = field(default_factory=_new_ledger)
+
+    @property
+    def drained(self) -> int:
+        """HP lost to Drains and not yet Repaid: both parts."""
+        return self.drained_above + self.drained_past
+
+    @drained.setter
+    def drained(self, value: int) -> None:
+        """A pin's or a probe's board: N drained HP, all above the line."""
+        self.drained_above = max(0, int(value))
+        self.drained_past = 0
 
 
 def live(player) -> bool:
@@ -256,12 +288,14 @@ CARDS: dict[str, Spec] = {
                                      "skill", "probe", "block_spend_all",
                                      (5, 2), in_slice=False),
     # --- Drain (5) ---
-    # Mademoiselle Crabaletta (2): Drain 5. Deal 24 damage.
+    # Mademoiselle Crabaletta (2): Drain 5. Deal 20 damage. (Was 24; the
+    # pool-75 round's card numbers, ruled 2026-10-09.)
     "ftd_crabaletta": Spec("Mademoiselle Crabaletta", 2, "attack", "common",
-                           "drain_fixed_hit", (5, 24)),
-    # Soloist's Solicitation (0): Drain 2. Deal 8 damage.
+                           "drain_fixed_hit", (5, 20)),
+    # Soloist's Solicitation (0): Drain 2. Deal 6 damage. (Was 8, the same
+    # ruling.)
     "ftd_solicitation": Spec("Soloist's Solicitation", 0, "attack", "common",
-                             "drain_fixed_hit", (2, 8)),
+                             "drain_fixed_hit", (2, 6)),
     # Surintendante Chevalmarin (1): Deal 4 Hydro damage to ALL enemies.
     # Drain 3: deal 8 instead.
     "ftd_chevalmarin": Spec("Surintendante Chevalmarin", 1, "attack",
@@ -277,10 +311,12 @@ CARDS: dict[str, Spec] = {
     "ftd_salons_tab": Spec("Salon's Tab", 1, "skill", "uncommon",
                            "drain_tab", (2, 4, 2)),
     # --- Repay (4) ---
-    # Surging Waters (1, Attack): Deal 6 damage. Repay 3.
+    # Surging Waters (1, Attack): Repay 3. Deal 6 damage, plus 1 for any HP
+    # it could not Repay. (The Repay floor, 2026-10-09.)
     "ftd_surging_waters": Spec("Surging Waters", 1, "attack", "common",
                                "hit_repay", (6, 3)),
-    # Hymn of Many Waters (1): Gain 8 Block. Repay 3.
+    # Hymn of Many Waters (1): Gain 8 Block. Repay 3. Gain 1 Block for any
+    # HP it could not Repay.
     "ftd_hymn": Spec("Hymn of Many Waters", 1, "skill", "common",
                      "block_repay", (8, 3)),
     # Pneuma Refrain (1): Repay 5. Draw 2 cards.
@@ -302,8 +338,8 @@ CARDS: dict[str, Spec] = {
     "ftd_quick_flourish": Spec("Quick Flourish", 0, "attack", "common",
                                "spend_fixed_hit", (4, 11)),
     # Standing Ovation (1): Spend all your Fanfare. Deal that much damage to
-    # ALL enemies.
-    "ftd_standing_ovation": Spec("Standing Ovation", 1, "attack", "common",
+    # ALL enemies. Uncommon since the pool-75 round (ruled 2026-10-09).
+    "ftd_standing_ovation": Spec("Standing Ovation", 1, "attack", "uncommon",
                                  "rejoice", (1,)),
     # Interval Bell (0): v2 text after #900: Draw 1 card. Spend 3: draw 1
     # card and gain 1 Energy instead.
@@ -313,14 +349,10 @@ CARDS: dict[str, Spec] = {
     # Bravura (1): Spend all your Fanfare. Deal 6, plus 2 per point.
     "ftd_bravura": Spec("Bravura", 1, "attack", "uncommon", "bravura",
                         (6, 2)),
-    # --- Powers (3, Uncommon) ---
+    # --- Powers (2, Uncommon; Endless Waltz was cut 2026-10-09) ---
     # Salon's Encore (1): Whenever you Drain, deal 3 damage to ALL enemies.
     "ftd_salon_encore": Spec("Salon's Encore", 1, "power", "uncommon",
                              "power", (1,), "salon_encore"),
-    # Endless Waltz (1): Whenever you Repay, deal that much damage to a
-    # random enemy.
-    "ftd_endless_waltz": Spec("Endless Waltz", 1, "power", "uncommon",
-                              "power", (1,), "endless_waltz"),
     # Thunderous Applause (1): Whenever you Spend, deal 3 damage to ALL
     # enemies.
     "ftd_thunderous": Spec("Thunderous Applause", 1, "power", "uncommon",
@@ -358,7 +390,9 @@ CARDS: dict[str, Spec] = {
     # Drain 2: deal 8 Pyro damage to ALL enemies (skipped below the line).
     "ftd_lyney": Spec("Guest Star: Lyney", 1, "skill", "uncommon", "guest",
                       (), "lyney", exhaust=True),
-    # A Five-Century Act (Power, 2): You can Drain down to 1 HP.
+    # A Five-Century Act (Power, 2): HP you Drain past your line also
+    # returns when combat ends. (2026-10-09; was "You can Drain down to 1
+    # HP".)
     "ftd_five_century": Spec("A Five-Century Act", 2, "power", "rare",
                              "power", (1,), "five_century"),
     # Fountain of Lucine (1): At the start of your next 3 turns, Repay 3.
@@ -408,8 +442,10 @@ CARDS: dict[str, Spec] = {
                                "spend_volley", (4, 2, 4, 3)),
     "ftd_bubble_aria": Spec("Bubble Aria", 1, "skill", "common",
                             "spend_block_draw", (6, 3, 2)),
+    # Commanding Gaze: the plain mode applies 2 Vulnerable (ruled
+    # 2026-10-09, was 1).
     "ftd_commanding_gaze": Spec("Commanding Gaze", 1, "skill", "common",
-                                "spend_debuff", (1, 4, 2, 2)),
+                                "spend_debuff", (2, 4, 2, 2)),
     "ftd_star_turn": Spec("Star Turn", 2, "attack", "uncommon", "star_turn",
                           (15,), exhaust=True),
     # Sold Out and Overdraft give their Energy next turn (the 2026-10-09
@@ -446,6 +482,9 @@ CARDS: dict[str, Spec] = {
     "ftd_all_in": Spec("All In", 0, "skill", "rare", "drain_energy", (8, 2),
                        exhaust=True),
     # Pneuma, Repay (10).
+    # Soothing Waters: Repay 2. Draw 1 card. No Repay floor (ruled
+    # 2026-10-09): a 0-cost draw-1 card paying out on an empty Repay looped
+    # forever, and the draw already carries it, as with Pneuma Refrain.
     "ftd_soothing_waters": Spec("Soothing Waters", 0, "skill", "uncommon",
                                 "repay_draw", (2, 1)),
     "ftd_gentle_current": Spec("Gentle Current", 1, "skill", "common",
@@ -476,8 +515,9 @@ CARDS: dict[str, Spec] = {
                             "power", (1,), "crowd_gasps", in_slice=False),
     # Neuvillette (sec.15 point 4; drafted since the pool to 75). Line:
     # Hydro damage deals 2 more. Act: deal Hydro damage to ALL enemies equal
-    # to the HP you drained this turn. He Drains nothing himself.
-    "ftd_neuvillette": Spec("Guest Star: Neuvillette", 2, "skill", "rare",
+    # to the HP you lost since your last turn, Drained or taken (2026-10-09:
+    # was the HP drained this turn; cost 1, was 2). He Drains nothing.
+    "ftd_neuvillette": Spec("Guest Star: Neuvillette", 1, "skill", "rare",
                             "guest", (), "neuvillette", exhaust=True),
 }
 
@@ -557,6 +597,10 @@ RULE_SWITCHES = {
 VARIANT_SWITCHES = {**K3_SWITCHES, **RULE_SWITCHES}
 for _name, (_singer, _sw) in VARIANT_SWITCHES.items():
     VARIANTS[_name] = (_singer, True, 0.5)
+# The default variant is the shipped rules: the Drain line rule's 3/4 line
+# (ruled 2026-10-09). The other research variants keep the half line they
+# measured.
+VARIANTS["curtain_call"] = (2, True, LINE_SHARE)
 
 DEFAULT_VARIANT = "curtain_call"   # sec.16: the entry line + curtain call
 
@@ -593,8 +637,9 @@ def _player_power(player, key: str) -> int:
 
 
 def half_line(player) -> float:
-    """The Drain line. A Five-Century Act puts it at 1 HP; Lyney on stage
-    lowers it by 10, never below 1."""
+    """The Drain line (the name is the half line's; since 2026-10-09 it is
+    3/4 of her entry HP under the default variant). Lyney on stage lowers it
+    by 10, never below 1. A Five-Century Act no longer moves it."""
     f = getattr(player, "ftd", None)
     if f is not None and f.line_from_entry:
         line = f.entry_hp * f.line
@@ -602,23 +647,36 @@ def half_line(player) -> float:
         line = player.max_hp * (f.line if f is not None else 0.5)
     if f is None:
         return line
-    if _player_power(player, "five_century"):
-        return float(FIVE_CENTURY_LINE)
     if "lyney" in f.stage:
-        return max(float(FIVE_CENTURY_LINE), line - LYNEY_LINE_DROP)
+        return max(float(DRAIN_FLOOR), line - LYNEY_LINE_DROP)
     return line
 
 
+def line_hp(player) -> int:
+    """The line as the C# prints it: the float line rounded up
+    (`FurinaStageLaw.LineOf`), the lowest HP still above it."""
+    import math
+    return math.ceil(half_line(player))
+
+
 def can_drain(state, n: int) -> bool:
+    """Rule 1 (2026-10-09): a Drain is never refused for the line, only
+    when it would take her to 0 HP or below."""
     p = state.player
-    return n > 0 and p.hp - n >= half_line(p)
+    return n > 0 and p.hp - n >= DRAIN_FLOOR
+
+
+def past_line(state, n: int) -> bool:
+    """Would a Drain of `n` go past the line?"""
+    p = state.player
+    return n > 0 and p.hp - n < half_line(p)
 
 
 def near_line(player) -> bool:
-    """Against the Tide and High Stakes: within 5 HP of the Drain line. The
-    C# line is the float line rounded up (`FurinaStageLaw.LineOf`)."""
-    import math
-    return player.hp - math.ceil(half_line(player)) <= NEAR_LINE
+    """Against the Tide and High Stakes: within 5 HP of the Drain line, or
+    at or below it (a Drain may go past it since 2026-10-09). The C# line is
+    the float line rounded up (`FurinaStageLaw.LineOf`)."""
+    return player.hp - line_hp(player) <= NEAR_LINE
 
 
 def capacity(state) -> int:
@@ -676,7 +734,7 @@ def _strength(state, n: int) -> None:
 
 
 def playable(state, card) -> bool:
-    """A fixed price must be payable: a fixed Drain above the line, a fixed
+    """A fixed price must be payable: a fixed Drain above 0 HP, a fixed
     Spend from the bank. Every other row (and any non-slice card) is True."""
     spec = spec_of(card)
     if spec is None or not live(state.player):
@@ -802,18 +860,23 @@ def spend_all(state) -> int:
 
 
 def drain(state, n: int) -> bool:
-    """Rule 1. Lose N HP (not below the line), mark it drained, gain N
+    """Rule 1. Lose N HP (never to 0 HP), mark it drained -- the part that
+    stays at or above the line, and the part past it (2026-10-09) -- gain N
     Fanfare, then the Drain readers."""
     p = state.player
     f = _f(state)
     if not can_drain(state, n):
         return False
+    above = max(0, min(n, p.hp - line_hp(p)))
     p.hp -= n
-    f.drained += n
+    f.drained_above += above
+    f.drained_past += n - above
+    f.hp_lost_window += n
     f.drained_this_turn = True
     f.drained_hp_this_turn += n
     f.drains_this_combat += 1
     f.ledger["drained"] += n
+    f.ledger["drained_past"] = f.ledger.get("drained_past", 0) + (n - above)
     f.ledger["drains"] += 1
     state.hp_lost_this_turn += n
     state.emit("ftd_drain", amount=n, hp=p.hp, drained=f.drained)
@@ -837,18 +900,31 @@ def drain(state, n: int) -> bool:
     return True
 
 
+def _clamp_drained(p, f: Ftd) -> None:
+    """HP + drained never exceeds Max HP; the clamp takes the past-line
+    part first, the order a Repay returns it in (the C# `RepayRoom`)."""
+    over = f.drained - max(0, p.max_hp - p.hp)
+    if over > 0:
+        past = min(over, f.drained_past)
+        f.drained_past -= past
+        f.drained_above = max(0, f.drained_above - (over - past))
+
+
 def repay(state, n: int) -> int:
-    """Rule 2. Regain up to N drained HP; gain that much Fanfare; then the
-    Repay readers. Returns HP repaid."""
+    """Rule 2. Regain up to N drained HP, the past-line part first
+    (2026-10-09); gain that much Fanfare; then the Repay readers. Returns HP
+    repaid."""
     p = state.player
     f = _f(state)
-    f.drained = min(f.drained, max(0, p.max_hp - p.hp))
+    _clamp_drained(p, f)
     amount = min(n, f.drained)
     f.ledger["repay_wasted"] += n - amount
     if amount <= 0:
         return 0
     p.hp += amount
-    f.drained -= amount
+    past = min(amount, f.drained_past)
+    f.drained_past -= past
+    f.drained_above = max(0, f.drained_above - (amount - past))
     f.repaid_this_turn += amount
     f.repays_this_turn += 1
     f.repaid_this_play += amount
@@ -857,11 +933,6 @@ def repay(state, n: int) -> int:
     if f.repay_fanfare:
         gain(state, amount, "repay")
     _loop_readers(state, amount)
-    for _ in range(int(f.powers["endless_waltz"])
-                   + _arm_power(state, "endless_waltz")):
-        if not state.living_enemies:
-            break
-        _hit(state, state.rng.choice(state.living_enemies), amount, None)
     if "clorinde" in f.stage and state.living_enemies:
         _line(state, "clorinde", CLORINDE_PER_REPAY * amount)
         _hit(state, state.rng.choice(state.living_enemies),
@@ -880,13 +951,49 @@ def repay(state, n: int) -> int:
     return amount
 
 
+def repay_floor(state, n: int, floor: str) -> int:
+    """THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain X for any HP it
+    could not Repay." The Repay resolves first; the leftover, N minus the HP
+    it returned, is paid as Block (`block`, unpowered, as Sigewinne's line
+    pays) or Vigor (`vigor`: the sim's `next_attack_up`, the base game's
+    "your next Attack deals N more"). The C# `StageDirector.RepayFloor`.
+    Returns HP repaid."""
+    if n <= 0:
+        return 0
+    back = repay(state, n)
+    left = n - back
+    p = state.player
+    if left <= 0 or state.over or not p.alive:
+        return back
+    if floor == "block":
+        p.block += left
+    elif floor == "vigor":
+        from tier0.engine import powers as _powers
+        _powers.apply_power(state, p, "next_attack_up", left)
+    f = _f(state)
+    f.ledger["floor_paid"] = f.ledger.get("floor_paid", 0) + left
+    return back
+
+
+def card_repay(state, n: int, floor: str = "none") -> int:
+    """A card's Repay N: with its floor, and the leftover recorded for the
+    play (`repay_left_this_play`, the damage cards' floor). Returns HP
+    repaid."""
+    back = repay_floor(state, n, floor)
+    if live(state.player):
+        _f(state).repay_left_this_play += max(0, n - back)
+    return back
+
+
 def on_hp_loss(state, n: int) -> None:
     """Hook from `resources.note_player_hp_loss`: true HP loss from any
-    source but a Drain (enemy hits, statuses) prints Fanfare 1:1. Lynette's
-    line pays it again the first time each turn."""
+    source but a Drain (enemy hits, statuses) prints Fanfare 1:1 and counts
+    for Neuvillette's act. Lynette's line pays it again the first time each
+    turn."""
     if n <= 0 or not live(state.player):
         return
     f = _f(state)
+    f.hp_lost_window += n
     if f.hit_fanfare or f.powers["crowd_gasps"]:
         gain(state, n, "hit")
     if "lynette" in f.stage and not f.lynette_fired:
@@ -963,7 +1070,9 @@ def act(state, member: str) -> None:
     living = list(state.living_enemies)
     n = act_amount(member, member in f.stage_up)
     if member in ("charlotte", "sigewinne"):
-        repay(state, n)
+        # "Repay 2. Gain 1 Block for any HP it could not Repay." (The Repay
+        # floor, 2026-10-09.)
+        repay_floor(state, n, "block")
     elif member == "wriothesley":
         if living:
             _hit(state, state.rng.choice(living), n, "cryo")
@@ -975,13 +1084,15 @@ def act(state, member: str) -> None:
         if living:
             _hit(state, state.rng.choice(living), n, "electro")
     elif member == "neuvillette":
-        dmg = f.drained_hp_this_turn
+        # The HP she lost since her last turn, Drained or taken (2026-10-09).
+        dmg = f.hp_lost_window
         if dmg > 0:
             for enemy in living:
                 _hit(state, enemy, dmg, "hydro")
     elif member == "lyney":
-        # "Drain 2: deal 8 Pyro damage to ALL enemies." Below the line the
-        # act skips: no Drain and no damage.
+        # "Drain 2: deal 8 Pyro damage to ALL enemies." It may Drain past
+        # the line (2026-10-09); it skips only when the Drain would take her
+        # to 0 HP.
         if can_drain(state, LYNEY_ACT_DRAIN) and drain(state, LYNEY_ACT_DRAIN):
             for enemy in list(state.living_enemies):
                 _hit(state, enemy, n, "pyro")
@@ -991,6 +1102,10 @@ def act(state, member: str) -> None:
     elif member == "freminet":
         if living:
             _hit(state, state.rng.choice(living), n, "cryo")
+        # "Gain 6 Block." [9] (Ruled 2026-10-09.)
+        if p.alive and not state.over:
+            p.block += (FREMINET_ACT_BLOCK_UPGRADED if member in f.stage_up
+                        else FREMINET_ACT_BLOCK)
     elif member == "navia":
         # "Deal Geo damage to a random enemy equal to the Fanfare you spent
         # this turn."
@@ -1115,6 +1230,7 @@ def turn_open(state) -> None:
     f.spends_this_turn = 0
     f.repays_this_turn = 0
     f.repaid_this_play = 0
+    f.repay_left_this_play = 0
 
 
 def turn_start(state) -> None:
@@ -1143,16 +1259,18 @@ def turn_start(state) -> None:
     for item in f.fountains:
         item[1] -= 1
     f.fountains = [item for item in f.fountains if item[1] > 0]
+    # The Repay floor (2026-10-09): Fountain of Lucine's and Gentle
+    # Current's pay Block, Pneuma Tides' Vigor.
     for amount in due:
         if state.over or not state.player.alive:
             break
-        f.ledger["fountain_repaid"] += repay(state, amount)
+        f.ledger["fountain_repaid"] += repay_floor(state, amount, "block")
     if f.repay_next and not state.over and p.alive:
         owed, f.repay_next = f.repay_next, 0
-        repay(state, owed)
+        repay_floor(state, owed, "block")
     tides = _player_power(p, "pneuma_tides")
     if tides and not state.over and p.alive:
-        repay(state, tides)
+        repay_floor(state, tides, "vigor")
     donna = _player_power(p, "prima_donna")
     if donna and f.fanfare >= PRIMA_DONNA_FANFARE and p.alive:
         p.energy += donna
@@ -1183,9 +1301,11 @@ def end_of_turn(state) -> None:
         act_all(state)
     if f.singer_rests and f.drained_this_turn:
         f.ledger["singer_skipped"] += 1
-        return
-    if not state.over and state.player.alive:
+    elif not state.over and state.player.alive:
         repay(state, f.singer)
+    # Neuvillette's window (2026-10-09): what she loses from here on -- the
+    # enemies' turn first -- counts for his next act.
+    f.hp_lost_window = 0
 
 
 def resolve_card(state, card) -> None:
@@ -1288,11 +1408,13 @@ def resolve_card(state, card) -> None:
             spend_all(state)
             _card_damage(state, card, n[1] * held)
     elif k == "hit_repay":
-        _card_damage(state, card, n[0])
-        repay(state, n[1])
+        # The Repay floor (2026-10-09): Repay first, then the damage plus
+        # what it could not return.
+        back = repay(state, n[1])
+        _card_damage(state, card, n[0] + (n[1] - back))
     elif k == "block_repay":
         _card_block(state, card, n[0])
-        repay(state, n[1])
+        repay_floor(state, n[1], "block")
     elif k == "repay_draw":
         repay(state, n[0])
         state.draw(n[1])
@@ -1313,7 +1435,7 @@ def resolve_card(state, card) -> None:
         summon(state, spec.member, card=card)
         entrance = _player_power(state.player, "grand_entrance")
         if entrance:
-            repay(state, entrance)
+            repay_floor(state, entrance, "block")
     # --- The pool to 75 ---
     elif k == "tutor_guest":
         tutor_guest(state)
@@ -1367,11 +1489,12 @@ def resolve_card(state, card) -> None:
         if f.drained <= 0:
             state.draw(n[2])
     elif k == "hydro_hit_repay":
-        _card_damage(state, card, n[0], hydro=True)
-        repay(state, n[1])
+        back = repay(state, n[1])
+        _card_damage(state, card, n[0] + (n[1] - back), hydro=True)
     elif k == "hydro_aoe_repay":
-        _card_damage(state, card, n[0], all_enemies=True, hydro=True)
-        repay(state, n[1])
+        back = repay(state, n[1])
+        _card_damage(state, card, n[0] + (n[1] - back), all_enemies=True,
+                     hydro=True)
     elif k == "balance_books":
         dmg = f.drained // 2
         if dmg > 0:
@@ -1425,7 +1548,7 @@ def default_bow(state) -> int:
         if member == "navia":
             n = f.spent_this_turn
         elif member == "neuvillette":
-            n = f.drained_hp_this_turn
+            n = f.hp_lost_window
         if n > best_n:
             best, best_n = i, n
     return best
@@ -1467,22 +1590,32 @@ def is_guest_card(card) -> bool:
 
 
 def close_ledger(state) -> None:
-    """The fight's end: record the bank and the unrepaid HP, then (under the
-    curtain call, if she lived) return every drained HP."""
-    f = _f(state)
-    f.ledger["fanfare_end"] = f.fanfare
-    f.ledger["unrepaid_end"] = f.drained
+    """The fight is over: record what the curtain found (and, under the
+    curtain call, if she lived) return the HP drained above the line -- and
+    past it too, with A Five-Century Act (the Drain line rule, 2026-10-09).
+    The past-line part is lost."""
     p = state.player
+    f = _f(state)
+    f.ledger["unrepaid_end"] = f.drained
+    f.ledger["lost_past_line"] = f.drained_past
+    f.ledger["fanfare_end"] = f.fanfare
     if f.curtain_call and p.alive and f.drained > 0:
-        back = min(f.drained, max(0, p.max_hp - p.hp))
+        owed = f.drained_above
+        if _player_power(p, "five_century"):
+            owed += f.drained_past
+            f.ledger["lost_past_line"] = 0
+        back = min(owed, max(0, p.max_hp - p.hp))
         p.hp += back
         f.ledger["curtain_repaid"] += back
-        f.drained = 0
+    f.drained_above = 0
+    f.drained_past = 0
 
 
 READINGS: tuple[str, ...] = (
-    "The line: a Drain N is legal when HP - N >= half the HP she started "
-    "the combat with (the `entry` line).",
+    "The line (2026-10-09): 3/4 of the HP she started the combat with (the "
+    "`entry` line, `LINE_SHARE`). A Drain N is legal when HP - N >= 1; the "
+    "part of it below the line (the line rounded up, as the C# prints it) "
+    "is `drained_past`.",
     "A Drain's HP loss is not routed through `note_player_hp_loss` (so no "
     "other arm's hook sees it); it prints its Fanfare directly.",
     "Enemy hits (and any other true HP loss) print Fanfare through the "
@@ -1493,17 +1626,23 @@ READINGS: tuple[str, ...] = (
     "Universal Revelry adds the Drain or Repay amount again per copy (the "
     "pool-40 paper, sec.2); hits and Lynette's line are not read. Critics' "
     "Darling's damage reads the Drain or Repay amount, unpowered, per "
-    "copy. Endless Waltz deals the HP Repaid, unpowered, once per copy.",
-    "Lyney's act skips entirely below the line (no Drain, no damage); his "
-    "line lowers the line by 10 while he is on stage, never below 1 HP. A "
-    "Five-Century Act's line is 1 HP whatever else is true.",
+    "copy.",
+    "Lyney's act may Drain past the line; it skips (no Drain, no damage) "
+    "only at 2 HP or less. His line lowers the line by 10 while he is on "
+    "stage, never below 1 HP. A Five-Century Act does not move the line: it "
+    "returns the past-line part at the curtain call.",
     "Bis! keeps half a spend-all, rounded down; a second copy adds nothing. "
     "Fountain of Lucine's Repays come after her draw, one per play.",
     "Guest acts and lines are unpowered (Strength and Weak do not touch "
     "them).",
-    "Neuvillette's act deals the HP drained this turn (gross of Repays) to "
-    "ALL as Hydro; it Drains nothing.",
-    "The curtain call returns drained HP in `close_ledger`, after the "
-    "fight's record is taken; the probe calls it on every fight.",
+    "Neuvillette's act deals the HP she lost since her last turn ended "
+    "(Drained or taken, gross of Repays) to ALL as Hydro; it Drains "
+    "nothing.",
+    "The Repay floor's Vigor is the sim's `next_attack_up` (the next Attack "
+    "card deals that much more, then it is spent); its Block is unpowered, "
+    "as Sigewinne's line pays it.",
+    "The curtain call returns the HP drained above the line in "
+    "`close_ledger`, after the fight's record is taken; the probe calls it "
+    "on every fight.",
     "Card damage aims at the engine's bound aim (the lowest-HP enemy).",
 )

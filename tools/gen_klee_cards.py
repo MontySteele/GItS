@@ -946,6 +946,9 @@ BASE_KEYWORDS = (
     ArmKeyword("Frail", ("Frail",), "BaseKeywordTips.ForFrail"),
     ArmKeyword("Strength", ("Strength",), "BaseKeywordTips.ForStrength"),
     ArmKeyword("Dexterity", ("Dexterity",), "BaseKeywordTips.ForDexterity"),
+    # The Repay floor (ruled 2026-10-09): Soothing Waters and Pneuma Tides
+    # print the base game's Vigor.
+    ArmKeyword("Vigor", ("Vigor",), "BaseKeywordTips.ForVigor"),
 )
 
 
@@ -3130,9 +3133,6 @@ APPLY_POWERS = {
     # switch on live in `FurinaStage`. Every row states its own face.
     "fs_salons_encore": ("SalonsEncorePower", None,
         "Whenever you [gold]Drain[/gold], deal {X} damage to ALL enemies."),
-    "fs_endless_waltz": ("EndlessWaltzPower", None,
-        "Whenever you [gold]Repay[/gold], deal that much damage to a random "
-        "enemy."),
     "fs_thunderous_applause": ("ThunderousApplausePower", None,
         "Whenever you [gold]Spend[/gold], deal {X} damage to ALL enemies."),
     "fs_universal_revelry": ("UniversalRevelryPower", None,
@@ -3142,7 +3142,8 @@ APPLY_POWERS = {
     "fs_ousia_surge": ("OusiaSurgePower", None,
         "The first time you [gold]Drain[/gold] each turn, draw {X} card."),
     "fs_a_five_century_act": ("FiveCenturyActPower", None,
-        "You can [gold]Drain[/gold] down to 1 HP."),
+        "HP you [gold]Drain[/gold] past your line also returns when combat "
+        "ends."),
     "fs_fountain_of_lucine": ("FountainOfLucinePower", None,
         "At the start of your next 3 turns, [gold]Repay[/gold] {X}."),
     "fs_critics_darling": ("CriticsDarlingPower", None,
@@ -6342,11 +6343,22 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
                 f"{n});")
     if op == "stage_repay":
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
+        # THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain 1 Block [Vigor]
+        # for any HP it could not Repay." The floor is the director's
+        # (`StageDirector.RepayFloor`); a row with none is a plain Repay.
+        floor = STAGE_REPAY_FLOORS[str(eff.get("floor", "none"))]
+        tail = "" if floor == "None" else f", StageFloor.{floor}"
         return ("await FurinaStage.Repay(choiceContext, Owner.Creature, "
-                f"{n});")
+                f"{n}{tail});")
     if op == "stage_repay_all":
         return "await FurinaStage.RepayAll(choiceContext, Owner.Creature);"
     raise ValueError(f"stage op {op!r} has no statement")
+
+
+#: THE REPAY FLOOR (ruled 2026-10-09): a `stage_repay`'s `floor:` -- what
+#: it pays for the part of N it could not return -- to the C# `StageFloor`.
+#: The damage cards' floor is their own damage (`stage_repay_left`).
+STAGE_REPAY_FLOORS = {"none": "None", "block": "Block", "vigor": "Vigor"}
 
 
 #: One C# expression per STAGE count token, read through a CalculatedVar so
@@ -6369,7 +6381,42 @@ STAGE_COUNT_CS = {
     "stage_repays_turn": "static (card, _) => "
                          "FurinaStage.RepaysThisTurn(card.Owner?.Creature)",
     "stage_repaid": "static (card, _) => FurinaStage.RepaidOrDrained(card)",
+    # THE REPAY FLOOR (ruled 2026-10-09): Surging Waters', Hydro Lance's and
+    # Cleansing Torrent's "plus 1 for any HP it could not Repay" -- after the
+    # card's Repay, what it could not return; before the play, what a Repay
+    # of its N would leave now. The N is filled per card
+    # (`stage_repay_left_cs`).
+    "stage_repay_left": "static (card, _) => "
+                        "FurinaStage.RepayLeftOrRoom(card, {n})",
 }
+
+
+def _stage_repay_before(card: dict, eff: dict) -> dict | None:
+    """The top-level `stage_repay` that resolves before `eff`, or None:
+    the Repay floor's damage reads what that Repay left, so it must come
+    first ("Repay resolves first, then the damage")."""
+    for other in card.get("effects") or []:
+        if other is eff:
+            return None
+        if other.get("op") == "stage_repay":
+            return other
+    return None
+
+
+def stage_repay_left_cs(card: dict, eff: dict) -> str | None:
+    """The `stage_repay_left` count's C# for `eff`, its N read the way the
+    card's Repay pays it (the `RepayAmount` var an upgrade moves, else the
+    literal), or None when no Repay comes first."""
+    repay = _stage_repay_before(card, eff)
+    if repay is None:
+        return None
+    # Read off the row's own `upgrade:` (not `upgrade_plan`, which asks
+    # this rider back): a Repay an upgrade moves pays through its var.
+    if (upgrade_deltas().get(card["id"]) or {}).get("stage_repay"):
+        n = f'card.DynamicVars["{STAGE_AMOUNT_VARS["stage_repay"]}"].IntValue'
+    else:
+        n = str(int(repay.get("amount", 1)))
+    return STAGE_COUNT_CS["stage_repay_left"].replace("{n}", n)
 
 
 def _stage_spender_before(card: dict, eff: dict) -> str | None:
@@ -6417,8 +6464,13 @@ def stage_count_calc_rider(card: dict,
         return None
     if token == "stage_spent" and not _stage_spends_before(card, eff):
         return None
-    expr = (stage_spent_cs(card, eff) if token == "stage_spent"
-            else STAGE_COUNT_CS[token])
+    if token == "stage_repay_left":
+        expr = stage_repay_left_cs(card, eff)
+        if expr is None:
+            return None
+    else:
+        expr = (stage_spent_cs(card, eff) if token == "stage_spent"
+                else STAGE_COUNT_CS[token])
     return (int(formula.get("base", 0)), int(formula.get("per", 1)), expr)
 
 

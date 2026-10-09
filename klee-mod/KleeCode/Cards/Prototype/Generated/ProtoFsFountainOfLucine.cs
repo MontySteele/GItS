@@ -45,7 +45,7 @@ public sealed class ProtoFsFountainOfLucine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fountain of Lucine"),
-        ("description", "For 3 turns, at the start of your turn [gold]Repay[/gold] {PowerAmount:diff()}.{InCombat:{StageRepay}|}"),
+        ("description", "For 3 turns, at the start of your turn [gold]Repay[/gold] {PowerAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line

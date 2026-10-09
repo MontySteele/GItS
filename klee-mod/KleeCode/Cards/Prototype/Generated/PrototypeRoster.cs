@@ -55,7 +55,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoFsCurtainRise>(),
             ModelDb.Card<ProtoFsEbbAndFlow>(),
             ModelDb.Card<ProtoFsEncore>(),
-            ModelDb.Card<ProtoFsEndlessWaltz>(),
             ModelDb.Card<ProtoFsEnsembleCast>(),
             ModelDb.Card<ProtoFsFinalBow>(),
             ModelDb.Card<ProtoFsFountainOfLucine>(),

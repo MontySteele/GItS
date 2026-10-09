@@ -76,6 +76,6 @@ public sealed class ProtoFsBravura : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(4m);
     }
 }

@@ -62,6 +62,7 @@ public static class BaseKeywordTips
     public const string FrailKey = "KLEEMOD-BASE_FRAIL";
     public const string StrengthKey = "KLEEMOD-BASE_STRENGTH";
     public const string DexterityKey = "KLEEMOD-BASE_DEXTERITY";
+    public const string VigorKey = "KLEEMOD-BASE_VIGOR";
 
     /// <summary>
     /// The word the row was filed for. Both halves matter and neither is on
@@ -184,6 +185,13 @@ public static class BaseKeywordTips
         With(inherited, DexterityKey,
             "Adds its amount to every [gold]Block[/gold] the wearer gains. It "
           + "does not decay.");
+
+    /// <summary>The base game's <c>VigorPower</c>, which the Repay floor
+    /// pays (Soothing Waters, Pneuma Tides; ruled 2026-10-09).</summary>
+    public static IEnumerable<IHoverTip> ForVigor(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, VigorKey,
+            "Your next Attack deals additional damage.");
 
     /// <summary>
     /// One tip, appended after whatever the card already carries -- the same

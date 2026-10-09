@@ -51,7 +51,7 @@ public sealed class ProtoFsCleansingTorrent : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Cleansing Torrent"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Repay[/gold] 4.{InCombat:{StageRepay}|}"),
+        ("description", "[gold]Repay[/gold] 4. Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -66,7 +66,9 @@ public sealed class ProtoFsCleansingTorrent : CustomCardModel, IElementalCard, I
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(10m, ValueProp.Move)
+            new CalculationBaseVar(10m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.RepayLeftOrRoom(card, 4))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,17 +80,17 @@ public sealed class ProtoFsCleansingTorrent : CustomCardModel, IElementalCard, I
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+        await FurinaStage.Repay(choiceContext, Owner.Creature, 4);
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await FurinaStage.Repay(choiceContext, Owner.Creature, 4);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(4m);
     }
 }

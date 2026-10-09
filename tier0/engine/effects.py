@@ -397,6 +397,10 @@ def _runtime_count(state: CombatState, token: str,
         return furina_stage.repays_this_turn(p)
     if token == "stage_repaid":
         return furina_stage.repaid_this_play(p)
+    # THE REPAY FLOOR (ruled 2026-10-09): what this play's Repay could not
+    # return (the C# `FurinaStage.RepayLeftOrRoom`).
+    if token == "stage_repay_left":
+        return furina_stage.repay_left(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -3332,6 +3336,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     # THE POOL TO 75 (2026-10-09).
     "stage_drains", "stage_half_drained", "stage_repays_turn",
     "stage_repaid",
+    # THE REPAY FLOOR (ruled 2026-10-09).
+    "stage_repay_left",
     "exhaust_pile",
     "player_block",
     "attacks_in_hand",
@@ -4833,8 +4839,11 @@ def _op_stage_drain(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_repay(state: CombatState, fx: dict, card: Card) -> None:
-    """"Repay N": regain up to N drained HP."""
-    furina_stage.repay(state, _amount(state, fx.get("amount", 1)))
+    """"Repay N": regain up to N drained HP. With a `floor:` (block or
+    vigor), "Gain 1 Block [Vigor] for any HP it could not Repay" (the Repay
+    floor, ruled 2026-10-09)."""
+    furina_stage.repay(state, _amount(state, fx.get("amount", 1)),
+                       fx.get("floor", "none"))
 
 
 def _op_stage_repay_all(state: CombatState, fx: dict, card: Card) -> None:

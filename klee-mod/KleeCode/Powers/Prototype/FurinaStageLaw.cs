@@ -61,7 +61,8 @@ public static class FurinaStageLaw
     public const int LyneyLineDrop = 10;
 
     /// <summary>Lyney's act: "Drain 2: deal 8 Pyro damage to ALL enemies."
-    /// Below the line the act skips (no Drain, no damage).</summary>
+    /// It may Drain past the line (2026-10-09); it skips only when the Drain
+    /// would take her to 0 HP.</summary>
     public const int LyneyActDrain = 2;
 
     /// <summary>Lyney's act's damage.</summary>
@@ -78,9 +79,11 @@ public static class FurinaStageLaw
     /// a random enemy."</summary>
     public const int ChevreuseLineVulnerable = 1;
 
-    /// <summary>A Five-Century Act: "You can Drain down to 1 HP." Also the
-    /// floor Lyney's line cannot push the line below.</summary>
-    public const int FiveCenturyLine = 1;
+    /// <summary>THE DRAIN FLOOR (the Drain line rule, 2026-10-09): a Drain
+    /// is never refused for the line, but it cannot take her to 0 HP -- the
+    /// lowest HP a Drain may reach is 1. Also the floor Lyney's line cannot
+    /// push the line below.</summary>
+    public const int DrainFloor = 1;
 
     /// <summary>Fountain of Lucine: "At the start of your next 3 turns,
     /// Repay 3."</summary>
@@ -117,6 +120,12 @@ public static class FurinaStageLaw
 
     public const int FreminetActDamageUpgraded = 8;
 
+    /// <summary>Freminet's act also gives Block (the pool-75 round's card
+    /// numbers, ruled 2026-10-09): "gain 6 Block." [9]</summary>
+    public const int FreminetActBlock = 6;
+
+    public const int FreminetActBlockUpgraded = 9;
+
     /// <summary>Navia's line: "Your first Spend each turn costs 2 less (a
     /// spend-all keeps 2)." [3] (Her act deals the Fanfare spent this turn
     /// as Geo.)</summary>
@@ -125,7 +134,8 @@ public static class FurinaStageLaw
     public const int NaviaLineDiscountUpgraded = 3;
 
     /// <summary>Neuvillette's line: "Your Hydro damage deals 2 more." [3]
-    /// (His act deals the HP drained this turn to ALL as Hydro.)</summary>
+    /// (His act deals the HP she lost since her last turn -- Drained or
+    /// taken -- to ALL as Hydro; 2026-10-09.)</summary>
     public const int NeuvilletteHydroBonus = 2;
 
     public const int NeuvilletteHydroBonusUpgraded = 3;
@@ -167,34 +177,45 @@ public static class FurinaStageLaw
     public const int StarTurnFanfarePer = 6;
 
     /// <summary>Is <paramref name="hp"/> within <see cref="NearLine"/> HP of
-    /// <paramref name="line"/> (at or above it, at most 5 over)?</summary>
+    /// <paramref name="line"/>: at most 5 over it, or at or below it (a Drain
+    /// may go past the line since 2026-10-09, and any HP at or below the line
+    /// counts).</summary>
     public static bool NearTheLine(int hp, int line) => hp - line <= NearLine;
 
     /// <summary>
-    /// Rule 1: THE LINE. A Drain cannot take her below half the HP she
-    /// started this combat with. The sim compares <c>hp - n &gt;= entry / 2</c>
-    /// in floats, so the lowest HP a Drain may reach is half the entry HP
-    /// rounded UP: 39 from 78, 39 from 77.
+    /// Rule 1: THE LINE (the Drain line rule, ruled 2026-10-09): 3/4 of the
+    /// HP she started this combat with, rounded UP as the half line was: 59
+    /// from 78, 58 from 77. A Drain may go past it; HP drained past it is
+    /// lost at the curtain call unless Repaid. The sim compares in floats
+    /// (<c>furina_tide.half_line</c>), so the lowest HP above the line is
+    /// the float line rounded up.
     /// </summary>
-    public static int LineOf(int entryHp) => (System.Math.Max(0, entryHp) + 1) / 2;
+    public static int LineOf(int entryHp) =>
+        (LineNumerator * System.Math.Max(0, entryHp) + LineDenominator - 1)
+        / LineDenominator;
 
-    /// <summary>The line with its two movers: A Five-Century Act puts it at
-    /// 1 HP; Lyney on stage lowers it by 10, never below 1.</summary>
-    public static int LineOf(int entryHp, bool lyney, bool fiveCentury)
+    /// <summary>The line's share of the entry HP: 3/4. Mirrors
+    /// <c>furina_tide.LINE_SHARE</c>.</summary>
+    public const int LineNumerator = 3;
+
+    public const int LineDenominator = 4;
+
+    /// <summary>The line with its one mover: Lyney on stage lowers it by 10,
+    /// never below 1. (A Five-Century Act no longer moves it: it returns the
+    /// HP drained past it instead.)</summary>
+    public static int LineOf(int entryHp, bool lyney)
     {
-        if (fiveCentury) return FiveCenturyLine;
         var line = LineOf(entryHp);
-        return lyney ? System.Math.Max(FiveCenturyLine, line - LyneyLineDrop)
+        return lyney ? System.Math.Max(DrainFloor, line - LyneyLineDrop)
                      : line;
     }
 
     /// <summary>Where the line comes from, in words, for its hover and the
     /// seat page (2026-10-05: seats connected the line to their entry HP
-    /// only late). The same three branches as
-    /// <see cref="LineOf(int, bool, bool)"/>.</summary>
-    public static string LineWhy(bool lyney, bool fiveCentury) =>
-        fiveCentury ? "A Five-Century Act"
-        : lyney ? "half the HP you started this fight with, "
-                  + LyneyLineDrop + " lower with Lyney on stage"
-        : "half the HP you started this fight with";
+    /// only late). The same two branches as
+    /// <see cref="LineOf(int, bool)"/>.</summary>
+    public static string LineWhy(bool lyney) =>
+        lyney ? "3/4 of the HP you started this fight with, "
+                + LyneyLineDrop + " lower with Lyney on stage"
+              : "3/4 of the HP you started this fight with";
 }
