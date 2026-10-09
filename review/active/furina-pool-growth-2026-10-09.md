@@ -171,7 +171,7 @@ upgrade replaces today's 0 cost.
 | High Stakes | Power 1, U | While you are within 5 HP of your Drain line, your Attacks deal 4 more damage. [6] |
 | Regina of All Waters | Power 2 [1], R | At the start of your turn, Drain 3. If you do, gain 1 Strength. |
 | The Deluge | Attack 2 [1], R | Drain 8. Deal 24 damage to ALL enemies. Exhaust. |
-| All In | Skill 1, R | Drain 8. Gain 2 Energy. Exhaust. [Drain 6] |
+| All In | Skill 0, R | Drain 8. Gain 2 Energy. Exhaust. [Drain 6] |
 
 **Pneuma, Repay (10): 3 Common, 5 Uncommon, 2 Rare**
 
@@ -185,7 +185,7 @@ upgrade replaces today's 0 cost.
 | Balance the Books | Skill 1, U | Deal damage to ALL enemies equal to half your drained HP. Repay 4. [Repay 6] |
 | Rising Tide | Attack 1, U | Deal 6 damage, plus 3 for each time you Repaid this turn. [4 per] |
 | Pneuma Tides | Power 1, U | At the start of your turn, Repay 2. [3] |
-| Hymn of Renewal | Power 2 [1], R | Whenever you Repay 4 or more at once, gain 1 Strength. |
+| Hymn of Renewal | Power 2 [1], R | Whenever you Repay 4 or more HP at once, gain 1 Strength. (It counts HP actually returned, not the number printed on the card.) |
 | Grand Absolution | Attack 2 [1], R | Repay all your drained HP. Deal that much damage to ALL enemies. Exhaust. |
 
 **Bridge (1):** Ebb and Flow (Skill 1, U): "Drain 4, then Repay 2."
@@ -205,10 +205,9 @@ shows is missing.
 - **Loops.** The build runs the loop probe on these combinations:
   - Encore! with Escoffier;
   - Tutti!, Showstopper and Bring the House Down together;
-  - Final Bow with Grand Entrance: a guest leaves, its card returns, and it is played again.
-
-  - Overdraft, Soothing Waters, Sold Out and Crescendo together. This
-    is the one cycle not bounded by HP.
+  - Final Bow with Grand Entrance: a guest leaves, its card returns, and it is played again;
+  - Overdraft, Soothing Waters, Sold Out and Crescendo together. This is
+    the one cycle not bounded by HP.
 
   Guest Stars exhaust, so a guest card cannot be replayed in a loop. It
   comes back only when its guest leaves.
