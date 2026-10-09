@@ -15,8 +15,8 @@ namespace KleeMod.Powers;
 /// </summary>
 public static class FurinaStageLaw
 {
-    /// <summary>Rule 5: three guest seats. Mirrors <c>furina_stage.SEATS</c>.
-    /// </summary>
+    /// <summary>Rule 5: three guest seats (four with Ensemble Cast). Mirrors
+    /// <c>furina_stage.SEATS</c>.</summary>
     public const int Seats = 3;
 
     /// <summary>Rule 4: Salon Solitaire, "At the end of your turn, Repay 1."
@@ -85,6 +85,90 @@ public static class FurinaStageLaw
     /// <summary>Fountain of Lucine: "At the start of your next 3 turns,
     /// Repay 3."</summary>
     public const int FountainTurns = 3;
+
+    // ---- the pool to 75 (review/active/furina-pool-growth-2026-10-09.md) --
+    // Sec.3's guest rule: a guest's upgrade raises its line or its act,
+    // never its cost (the table of seven built guests, and sec.5's four).
+
+    /// <summary>Charlotte upgraded: "Act: Repay 4."</summary>
+    public const int CharlotteActRepayUpgraded = 4;
+
+    /// <summary>Sigewinne upgraded: "Act: Repay 4."</summary>
+    public const int SigewinneActRepayUpgraded = 4;
+
+    /// <summary>Wriothesley upgraded: "Act: 7."</summary>
+    public const int WriothesleyActDamageUpgraded = 7;
+
+    /// <summary>Lyney upgraded: "Act: 11."</summary>
+    public const int LyneyActDamageUpgraded = 11;
+
+    /// <summary>Lynette upgraded: "Act: 6."</summary>
+    public const int LynetteActDamageUpgraded = 6;
+
+    /// <summary>Chevreuse upgraded: "Line: also 1 Weak."</summary>
+    public const int ChevreuseLineWeakUpgraded = 1;
+
+    /// <summary>Clorinde upgraded: "Act: 9."</summary>
+    public const int ClorindeActDamageUpgraded = 9;
+
+    /// <summary>Freminet's act: "Deal 5 Cryo damage to a random enemy."
+    /// [8] (His line gives the Block of every Drain.)</summary>
+    public const int FreminetActDamage = 5;
+
+    public const int FreminetActDamageUpgraded = 8;
+
+    /// <summary>Navia's line: "Your first Spend each turn costs 2 less (a
+    /// spend-all keeps 2)." [3] (Her act deals the Fanfare spent this turn
+    /// as Geo.)</summary>
+    public const int NaviaLineDiscount = 2;
+
+    public const int NaviaLineDiscountUpgraded = 3;
+
+    /// <summary>Neuvillette's line: "Your Hydro damage deals 2 more." [3]
+    /// (His act deals the HP drained this turn to ALL as Hydro.)</summary>
+    public const int NeuvilletteHydroBonus = 2;
+
+    public const int NeuvilletteHydroBonusUpgraded = 3;
+
+    /// <summary>Escoffier's act: "Deal 4 Cryo damage to ALL enemies." [6]
+    /// </summary>
+    public const int EscoffierActDamage = 4;
+
+    public const int EscoffierActDamageUpgraded = 6;
+
+    /// <summary>Escoffier's line: "Whenever a guest acts, Repay 1."</summary>
+    public const int EscoffierLineRepay = 1;
+
+    /// <summary>Ensemble Cast: "You have 4 guest seats."</summary>
+    public const int EnsembleSeats = 4;
+
+    /// <summary>Showstopper: "At the end of your turn, Spend 5: your guests
+    /// act again."</summary>
+    public const int ShowstopperSpend = 5;
+
+    /// <summary>Against the Tide and High Stakes: "within 5 HP of your Drain
+    /// line".</summary>
+    public const int NearLine = 5;
+
+    /// <summary>Hymn of Renewal: "Whenever you Repay 4 or more HP at once,
+    /// gain 1 Strength." (HP actually repaid.)</summary>
+    public const int HymnThreshold = 4;
+
+    /// <summary>Prima Donna: "if you have 10 or more Fanfare, gain 1
+    /// Energy."</summary>
+    public const int PrimaDonnaFanfare = 10;
+
+    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3.
+    /// If you do, gain 1 Strength."</summary>
+    public const int ReginaDrain = 3;
+
+    /// <summary>Star Turn: "Costs 1 less for every 6 Fanfare you have."
+    /// </summary>
+    public const int StarTurnFanfarePer = 6;
+
+    /// <summary>Is <paramref name="hp"/> within <see cref="NearLine"/> HP of
+    /// <paramref name="line"/> (at or above it, at most 5 over)?</summary>
+    public static bool NearTheLine(int hp, int line) => hp - line <= NearLine;
 
     /// <summary>
     /// Rule 1: THE LINE. A Drain cannot take her below half the HP she

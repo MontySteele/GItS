@@ -241,14 +241,13 @@ public class FurinaTideTests
         Assert.Equal(29, kit.Stage.Line);                    // 39 - 10
         Assert.Equal(39, StageKit.Of().Stage.Line);
         Assert.Equal(1, FurinaStageLaw.LineOf(8, lyney: true, fiveCentury: false));
-        Assert.True(StageKit.Run(kit.Director.Act(StagePerformer.Lyney,
-                                                  kit.Stage.Seats[0])));
+        Assert.True(StageKit.Run(kit.Director.Act(kit.Stage.Seats[0])));
         Assert.Equal(76, kit.Board.Hp);
         Assert.Equal(2, kit.Stage.Drained);
         Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
         // Below the line, the act skips: no Drain and no damage.
         var low = StageKit.At(30, 78, StagePerformer.Lyney);
-        StageKit.Run(low.Director.Act(StagePerformer.Lyney, low.Stage.Seats[0]));
+        StageKit.Run(low.Director.Act(low.Stage.Seats[0]));
         Assert.Equal(30, low.Board.Hp);
         Assert.Empty(low.Board.Hits);
     }
@@ -261,9 +260,10 @@ public class FurinaTideTests
         Run(kit.Director.Repay(3));
         Assert.Contains("block 3", kit.Board.Log);
         kit.Board.Log.Clear();
-        StageKit.Run(kit.Director.Act(StagePerformer.Sigewinne,
-                                      kit.Stage.Seats[0]));
-        Assert.Equal(new[] { "heal 2", "block 2" }, kit.Board.Log);
+        StageKit.Run(kit.Director.Act(kit.Stage.Seats[0]));
+        // The pool to 75: her line gets a cue of its own before its Block.
+        Assert.Equal(new[] { "heal 2", "cue Sigewinne", "block 2" },
+                     kit.Board.Log);
     }
 
     [Fact]
@@ -273,8 +273,7 @@ public class FurinaTideTests
         Run(kit.Director.Spend(3));
         Run(kit.Director.SpendAll());
         Assert.Equal(2, kit.Board.Log.Count(l => l == "vulnerable Random 1"));
-        StageKit.Run(kit.Director.Act(StagePerformer.Chevreuse,
-                                      kit.Stage.Seats[0]));
+        StageKit.Run(kit.Director.Act(kit.Stage.Seats[0]));
         Assert.Contains("damage Chevreuse Random 4 None", kit.Board.Log);
     }
 
@@ -316,7 +315,7 @@ public class FurinaTideTests
     }
 
     [Fact]
-    public void The_seven_guests_parse_and_print_their_line_and_act()
+    public void The_eleven_guests_parse_and_print_their_line_and_act()
     {
         foreach (var name in FurinaStage.Guests)
         {
@@ -324,7 +323,7 @@ public class FurinaTideTests
             Assert.Equal(name, FurinaStage.Name(who));
             Assert.Contains("Act:", StagePerformerBadge.ActText(who));
         }
-        Assert.Equal(7, FurinaStage.Guests.Length);
+        Assert.Equal(11, FurinaStage.Guests.Length);
     }
 
     // ---- Spend and the three Powers ----------------------------------------
@@ -357,25 +356,30 @@ public class FurinaTideTests
     // ---- the guests (rule 5) -------------------------------------------------
 
     [Fact]
-    public void A_fourth_guest_makes_the_oldest_leave_acting_once_more()
+    public void A_fourth_guest_makes_the_oldest_leave_with_no_act()
     {
+        // The pool to 75 (sec.3): no effect on summon, so the evicted guest
+        // leaves without acting, and its cards go back (the pins in
+        // `FurinaGuestRuleTests` hold the cards' way back).
         var kit = StageKit.Of(StagePerformer.Wriothesley,
                               StagePerformer.Lynette, StagePerformer.Clorinde);
-        StageKit.Run(kit.Director.SummonGuest(StagePerformer.Charlotte));
+        Assert.Equal(StageSummonResult.Evict,
+            StageKit.Run(kit.Director.SummonGuest(StagePerformer.Charlotte)));
         Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde,
                              StagePerformer.Charlotte }, kit.Company);
-        Assert.Equal("damage Wriothesley Random 4 Cryo", kit.Board.Hits.Single());
+        Assert.Empty(kit.Board.Hits);
+        Assert.Contains("return Wriothesley 0", kit.Board.Log);
     }
 
     [Fact]
-    public void A_second_copy_makes_the_guest_act_and_stay()
+    public void A_second_copy_moves_the_guest_to_the_newest_seat_with_no_act()
     {
-        var kit = StageKit.Of(StagePerformer.Clorinde);
+        var kit = StageKit.Of(StagePerformer.Clorinde, StagePerformer.Lynette);
         Assert.Equal(StageSummonResult.Repeat,
                      StageKit.Run(kit.Director.SummonGuest(StagePerformer.Clorinde)));
-        Assert.Equal(new[] { StagePerformer.Clorinde }, kit.Company);
-        Assert.Equal("damage Clorinde Random 6 Electro", kit.Board.Hits.Single());
-        // No Fanfare for it: the Bow's Fanfare is gone.
+        Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde },
+                     kit.Company);
+        Assert.Empty(kit.Board.Hits);
         Assert.Equal(0, kit.Stage.Fanfare);
     }
 
@@ -409,8 +413,10 @@ public class FurinaTideTests
         // Lynette finds no aura-wearer here (the board decides), then
         // Charlotte Repays 2 and draws, then the Singer Repays 1 (the
         // 2026-10-09 playtest trim; was 2).
+        // The pool to 75: Charlotte's line gets its own cue before its draw.
         Assert.Equal(new[] { "damage Lynette Aura 3 Anemo", "heal 2",
-                             "draw 1", "heal 1" }, kit.Board.Log);
+                             "cue Charlotte", "draw 1", "heal 1" },
+                     kit.Board.Log);
         Assert.Equal(3, kit.Stage.Drained);
     }
 
@@ -434,9 +440,9 @@ public class FurinaTideTests
     {
         var full = StageKit.Of(StagePerformer.Wriothesley,
                                StagePerformer.Lynette, StagePerformer.Clorinde);
-        Assert.Equal("\n(Wriothesley will act and leave)",
+        Assert.Equal("\n(Wriothesley will leave)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Charlotte));
-        Assert.Equal("\n(Lynette will act again)",
+        Assert.Equal("\n(Lynette moves to the newest seat)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Lynette));
         Assert.Equal("",
             FurinaStageBowPreview.Line(StageKit.Of().Stage,

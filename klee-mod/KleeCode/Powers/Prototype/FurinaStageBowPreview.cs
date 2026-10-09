@@ -35,18 +35,19 @@ public static class FurinaStageBowPreview
         return Line(FurinaStageLedger.For(owner), FurinaStage.Parse(member));
     }
 
-    /// <summary>The line for <paramref name="stage"/> (the pins'): "(Clorinde
-    /// will act again)" for a guest already on stage, "(Charlotte will act
-    /// and leave)" for the oldest guest on a full stage, else empty.</summary>
+    /// <summary>The line for <paramref name="stage"/> (the pins'; the pool to
+    /// 75's rule): "(Clorinde moves to the newest seat)" for a guest already
+    /// on stage, "(Charlotte will leave)" for the oldest guest on a full
+    /// stage, else empty.</summary>
     public static string Line(FurinaStageLedger stage, StagePerformer who)
     {
         var room = StageDirector.GuestRoom(stage.Company.ToList(),
                                            stage.Capacity, who);
         return room.Kind switch
         {
-            StageSummonResult.Repeat => $"\n({who} will act again)",
+            StageSummonResult.Repeat => $"\n({who} moves to the newest seat)",
             StageSummonResult.Evict =>
-                $"\n({stage.Seats[room.Index].Who} will act and leave)",
+                $"\n({stage.Seats[room.Index].Who} will leave)",
             _ => "",
         };
     }

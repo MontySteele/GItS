@@ -781,6 +781,12 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             # codegen's `KOKOMI_KINDS` check taken here too).
             from tier0.engine import kokomi_plan as _kp   # late: cycle
             _kp.validate_op(card_id, fx)
+        if op == "furina":
+            # FURINA, THE POOL TO 75's one op: a known kind with exactly the
+            # number it prints (`furina_stage.validate_op`, the codegen's
+            # `FURINA_KINDS` check taken here too).
+            from tier0.engine import furina_stage as _fs   # late: cycle
+            _fs.validate_op(card_id, fx)
         if op == "varka":
             # VARKA's one op: the kind must be one of his rules and carry
             # exactly the numeric fields that rule prints -- the codegen's

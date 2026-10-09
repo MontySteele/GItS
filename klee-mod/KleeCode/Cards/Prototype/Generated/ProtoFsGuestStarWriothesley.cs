@@ -37,6 +37,9 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
 
@@ -45,7 +48,7 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Wriothesley"),
-        ("description", "[gold]Summon[/gold] Wriothesley.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -72,11 +75,11 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "wriothesley", 0);
+        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "wriothesley", 0, this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
     }
 }

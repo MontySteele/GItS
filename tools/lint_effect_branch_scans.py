@@ -167,6 +167,13 @@ BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {
     # proto_mc_durin_binary_form left at the AoE trim (2026-10-03): its forms
     # are damage now, and Principle of Purity's form powers sit beside a
     # top-level apply_power, so no op hides in a branch.
+    # FURINA, THE POOL TO 75 (2026-10-09).
+    "proto_fs_commanding_gaze": (
+        ("apply_power",),
+        "Commanding Gaze's Vulnerable and Weak sit in its two modes; the"
+        " generated card carries `BaseKeywordTips.ForVulnerable` and"
+        " `BaseKeywordTips.ForWeak` for them (checked in"
+        " ProtoFsCommandingGaze.cs)."),
 }
 
 

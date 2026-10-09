@@ -298,5 +298,6 @@ def test_the_log_names_pneuma_and_a_final_bow():
     lines = _render_stage_log(stage)
     assert lines[0] == "  - You gained 2 Fanfare from Pneuma: 3 \u2192 5."
     assert lines[1] == "  - You gained 1 Fanfare: 5 \u2192 6."
-    assert lines[2] == ("  - **Usher** left the stage: it took its Bow and "
-                        "left.")
+    # The pool to 75 (2026-10-09): Final Bow's guest's card comes back.
+    assert lines[2] == ("  - **Usher** left the stage: it took its Final Bow; "
+                        "its card went to your discard pile.")

@@ -889,6 +889,7 @@ STAGE_SHORT_NAMES = {
     "lynette": "Lynette",
     "lyney": "Lyney",
     "escoffier": "Escoffier",
+    "freminet": "Freminet",
 }
 
 
@@ -898,8 +899,12 @@ STAGE_SHORT_NAMES = {
 #: blind packet is an ID, refused by name, so the observation carries the
 #: sentence.
 STAGE_LEAVE_REASONS = {
-    "evicted": "it Bowed to make room for a summon on a full stage",
-    "final_bow": "it took its Bow and left",
+    # THE POOL TO 75 (2026-10-09, sec.3): a leaving guest does not act, and
+    # its Guest Star card goes back to the discard pile.
+    "evicted": ("a fourth summon took its seat; its card went to your "
+                "discard pile"),
+    "final_bow": ("it took its Final Bow; its card went to your discard "
+                  "pile"),
 }
 STAGE_LEFT_UNSAID = "it left the stage"
 

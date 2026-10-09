@@ -148,7 +148,8 @@ def test_the_new_beats_cross_the_packet_and_print():
     page = blindplay.observe(state)
     assert qa_packet.leaks(page) == []
     assert "You spent 3 Fanfare: 8 → 5." in page
-    assert "it Bowed to make room for a summon on a full stage." in page
+    assert ("a fourth summon took its seat; its card went to your discard "
+            "pile." in page)
     assert "waits for your turn" not in page
     assert "**Chevalmarin** acted: 2 damage to ALL enemies." in page
     assert "It summoned **Crabaletta**." in page

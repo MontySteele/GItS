@@ -53,7 +53,7 @@ public static class FurinaStageRoster
     };
 
     /// <summary>
-    /// HER WHOLE OFFER: <see cref="Pool"/>'s 34 and her two Ancients. What
+    /// HER WHOLE OFFER: <see cref="Pool"/>'s 75 and her two Ancients. What
     /// <c>FurinaCardPool.FilterThroughEpochs</c> returns, which IS
     /// <c>GetUnlockedCards</c> -- the sole door into reward rolls, the shop
     /// and transforms. No co-op tier: the v2 Stage's five went with it.
@@ -62,12 +62,13 @@ public static class FurinaStageRoster
         Pool().Concat(RosterAncientCards.Furina).ToList();
 
     /// <summary>
-    /// THE SLICE'S 24 (proposal sec.16) and THE POOL TO 39's ten
-    /// (<c>review/active/furina-pool-40-2026-10-05.md</c> sec.3), every one a
-    /// `proto_fs_` row: 12 Commons, 15 Uncommons and 7 Rares (pinned by
-    /// `PoolCountTests`; the paper's 39 counts the two Basics and three
-    /// guest-companion rows besides). Sim twin: <c>furina_stage.POOL_IDS</c>,
-    /// same order.
+    /// THE SLICE'S 24 (proposal sec.16), THE POOL TO 39's ten
+    /// (<c>review/active/furina-pool-40-2026-10-05.md</c> sec.3) and THE POOL
+    /// TO 75's 41 (<c>review/active/furina-pool-growth-2026-10-09.md</c>
+    /// sec.5), every one a `proto_fs_` row: 20 Commons, 35 Uncommons and 20
+    /// Rares, 75 (pinned by `PoolCountTests`; three slots, one per rarity,
+    /// are held for the first seat round). Sim twin:
+    /// <c>furina_stage.POOL_IDS</c>, same order.
     /// </summary>
     public static CardModel[] Pool() => new CardModel[]
     {
@@ -114,5 +115,52 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsHoldTheStage>(),
         ModelDb.Card<ProtoFsGuestStarChevreuse>(),
         ModelDb.Card<ProtoFsBis>(),
+        // THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md
+        // sec.5, ruled 2026-10-09): 41 rows. Guests and stage (11).
+        ModelDb.Card<ProtoFsCastingCall>(),
+        ModelDb.Card<ProtoFsEncore>(),
+        ModelDb.Card<ProtoFsTutti>(),
+        ModelDb.Card<ProtoFsFinalBow>(),
+        ModelDb.Card<ProtoFsGrandEntrance>(),
+        ModelDb.Card<ProtoFsGuestStarFreminet>(),
+        ModelDb.Card<ProtoFsShowstopper>(),
+        ModelDb.Card<ProtoFsEnsembleCast>(),
+        ModelDb.Card<ProtoFsGuestStarNavia>(),
+        ModelDb.Card<ProtoFsGuestStarNeuvillette>(),
+        ModelDb.Card<ProtoFsGuestStarEscoffier>(),
+        // The Crowd (9).
+        ModelDb.Card<ProtoFsCrashingWaves>(),
+        ModelDb.Card<ProtoFsBubbleAria>(),
+        ModelDb.Card<ProtoFsCommandingGaze>(),
+        ModelDb.Card<ProtoFsStarTurn>(),
+        ModelDb.Card<ProtoFsSoldOut>(),
+        ModelDb.Card<ProtoFsCrescendo>(),
+        ModelDb.Card<ProtoFsPrimaDonna>(),
+        ModelDb.Card<ProtoFsStandingRoomOnly>(),
+        ModelDb.Card<ProtoFsBringTheHouseDown>(),
+        // Ousia, Drain (10).
+        ModelDb.Card<ProtoFsUndercurrent>(),
+        ModelDb.Card<ProtoFsOverdraft>(),
+        ModelDb.Card<ProtoFsOusiaPledge>(),
+        ModelDb.Card<ProtoFsAgainstTheTide>(),
+        ModelDb.Card<ProtoFsPayTheTab>(),
+        ModelDb.Card<ProtoFsRiptideLunge>(),
+        ModelDb.Card<ProtoFsHighStakes>(),
+        ModelDb.Card<ProtoFsReginaOfAllWaters>(),
+        ModelDb.Card<ProtoFsTheDeluge>(),
+        ModelDb.Card<ProtoFsAllIn>(),
+        // Pneuma, Repay (10).
+        ModelDb.Card<ProtoFsSoothingWaters>(),
+        ModelDb.Card<ProtoFsGentleCurrent>(),
+        ModelDb.Card<ProtoFsCleanSlate>(),
+        ModelDb.Card<ProtoFsHydroLance>(),
+        ModelDb.Card<ProtoFsCleansingTorrent>(),
+        ModelDb.Card<ProtoFsBalanceTheBooks>(),
+        ModelDb.Card<ProtoFsRisingTide>(),
+        ModelDb.Card<ProtoFsPneumaTides>(),
+        ModelDb.Card<ProtoFsHymnOfRenewal>(),
+        ModelDb.Card<ProtoFsGrandAbsolution>(),
+        // The bridge (1).
+        ModelDb.Card<ProtoFsEbbAndFlow>(),
     };
 }

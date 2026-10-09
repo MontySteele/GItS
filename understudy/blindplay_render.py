@@ -1991,6 +1991,12 @@ STAGE_LOG_WALKON = ("  - **{who}** walked on: every seat holds a Guest Star, "
                     "so it took its Bow without a seat.")
 STAGE_LOG_CUE = "  - You Cued **{who}**."
 STAGE_LOG_MOVE = "  - **{who}** moved to the front."
+#: THE POOL TO 75 (2026-10-09, sec.3): a second copy of a guest on stage moves
+#: it to the newest seat, with no act; and a guest's line has a log line of
+#: its own, so it is not read as an act.
+STAGE_LOG_REPEAT = ("  - **{who}** moved to the newest seat (a second copy; "
+                    "no act).")
+STAGE_LOG_LINE = "  - **{who}**'s line ({n})."
 STAGE_LOG_GAIN = "  - You gained {n} Fanfare{src}: {before} → {after}."
 STAGE_LOG_SPEND = "  - You spent {n} Fanfare: {before} → {after}."
 STAGE_LOG_DRAIN = "  - You drained {n} HP."
@@ -2011,12 +2017,14 @@ STAGE_LOG_EFFECTS = {
 #: and Fanfare.
 STAGE_MEMBER_KINDS = {
     "charlotte": "repay", "sigewinne": "repay",
-    # The v2 Stage's retired performers, for its recorded logs.
-    "usher": "block", "escoffier": "ensemble",
+    # The v2 Stage's retired performers, for its recorded logs. (Escoffier
+    # came back with the pool to 75 as a damage act, 4 Cryo to ALL.)
+    "usher": "block",
 }
 #: The damage acts' reach, where the act names no one body (Lyney now; the
 #: v2 Stage's two for its recorded logs).
-STAGE_ALL_MEMBERS = frozenset({"lyney", "chevalmarin", "neuvillette"})
+STAGE_ALL_MEMBERS = frozenset({"lyney", "chevalmarin", "neuvillette",
+                               "escoffier"})
 
 
 def _frozen_clause(row: dict[str, Any], obs: dict[str, Any],
@@ -2227,6 +2235,8 @@ def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
 STAGE_MEMBER_ELEMENTS = {
     "neuvillette": "Hydro", "clorinde": "Electro", "navia": "Geo",
     "lynette": "Anemo", "wriothesley": "Cryo", "lyney": "Pyro",
+    # The pool to 75 (2026-10-09).
+    "freminet": "Cryo", "escoffier": "Cryo",
 }
 
 
@@ -2303,6 +2313,10 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(STAGE_LOG_CUE.format(who=who))
         elif event == "move":
             out.append(STAGE_LOG_MOVE.format(who=who))
+        elif event == "repeat":
+            out.append(STAGE_LOG_REPEAT.format(who=who))
+        elif event == "line":
+            out.append(STAGE_LOG_LINE.format(who=who, n=row["moved"]))
         elif event == "gain":
             out.append(STAGE_LOG_GAIN.format(
                 n=row["moved"], src=src, before=row["fanfare"] - row["moved"],

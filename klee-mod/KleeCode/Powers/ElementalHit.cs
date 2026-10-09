@@ -95,6 +95,10 @@ internal static class ElementalHit
         // `powered` or not), before the amplifier -- the sim's additive phase
         // in `deal_damage_to_enemy`.
         dealt += PurityDarkPower.BonusFor(applier, element);
+        // FURINA'S NEUVILLETTE (the pool to 75): "Your Hydro damage deals 2
+        // more", on this door too (a guest's act, his own included). The
+        // sim's `furina_tide._hit` adds the same bonus.
+        dealt += FurinaStage.HydroBonus(applier, element);
 
         // VARKA (the Oath rework, sec.3): an application of his credits Oath.
         await VarkaOath.NoteApplication(choiceContext, applier, element,
@@ -240,7 +244,8 @@ internal static class ElementalHit
         // Principle of Purity's Dark, as in `Deal` (a Teapot Bomb is still her
         // Pyro damage).
         var amp = ReactionTable.AmplifierMultiplier(reaction, applier);
-        var dealt = (baseDamage + PurityDarkPower.BonusFor(applier, element))
+        var dealt = (baseDamage + PurityDarkPower.BonusFor(applier, element)
+                     + FurinaStage.HydroBonus(applier, element))
             * amp;
         await ReactionEffects.Resolve(
             choiceContext, reaction, target, applier, null, assumedAura);

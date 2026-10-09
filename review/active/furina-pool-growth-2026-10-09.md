@@ -152,7 +152,7 @@ upgrade replaces today's 0 cost.
 | Bubble Aria | Skill 1, C | Gain 6 Block. Spend 3: also draw 2 cards. [8] |
 | Commanding Gaze | Skill 1, C | Apply 1 Vulnerable. Spend 4: apply 2 Vulnerable and 2 Weak instead. [3 and 2] |
 | Star Turn | Attack 2, U | Deal 15 damage. Costs 1 less for every 6 Fanfare you have. Exhaust. [20] |
-| Sold Out | Skill 1, U | Spend 6. Gain 1 Energy. Draw 2 cards. [Spend 4] |
+| Sold Out | Skill 1, U | Spend 6. Draw 2 cards. Gain 1 Energy next turn. [Spend 4] |
 | Crescendo | Power 1, U | The first time you Spend each turn, draw 1 card. [Innate] |
 | Prima Donna | Power 2 [1], R | At the start of your turn, if you have 10 or more Fanfare, gain 1 Energy. |
 | Standing Room Only | Power 2 [1], R | Whenever you Spend all your Fanfare (at least 1), gain 1 Strength. |
@@ -163,7 +163,7 @@ upgrade replaces today's 0 cost.
 | Card | Type, cost, rarity | Text |
 |---|---|---|
 | Undercurrent | Attack 1, C | Drain 2. Deal 5 damage, plus 1 for each time you have Drained this combat. [7] |
-| Overdraft | Skill 0, C | Drain 4. Gain 1 Energy. [Drain 3] |
+| Overdraft | Skill 0, C | Drain 4. Gain 1 Energy next turn. [Drain 3] |
 | Ousia Pledge | Skill 1, C | Drain 3. Draw 2 cards. [3 cards] |
 | Against the Tide | Attack 1, U | Deal 8 damage. If you are within 5 HP of your Drain line, deal 14 instead. [11 / 18] |
 | Pay the Tab | Skill 1, U | Drain 6. Draw 3 cards. [4 cards] |
@@ -250,6 +250,7 @@ revisions before build". Every critique is now taken in the text:
 - **All In costs 0.**
 - **The loop probe gains the Energy cycle,** and the `--picks` draft read
   runs before the build.
+- 2026-10-09 build: Overdraft and Sold Out give their Energy next turn; the loop probe found 16 thin-deck cycles.
 
 ## Picks
 

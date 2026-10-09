@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using BaseLib.Abstracts;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
@@ -71,6 +73,23 @@ public sealed class FanfarePower : PowerModel, ILocalizationProvider
     {
         if (!IsMutable || Owner == null) return;
         InvokeDisplayAmountChanged();
+    }
+
+    /// <summary>
+    /// NEUVILLETTE'S LINE on her card hits (the pool to 75): "Your Hydro
+    /// damage deals 2 more." [3] This badge rides on her for the whole
+    /// combat, so it is where the card-hit half is read; the non-card half
+    /// (a guest's act, a Power's hit) is <see cref="ElementalHit.Deal"/>'s,
+    /// off the same <see cref="FurinaStage.HydroBonus"/>. PURE.
+    /// </summary>
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (cardSource == null || !props.IsPoweredAttack()) return 0m;
+        var element = CompanionOverhaulRiders.ElementFor(cardSource, dealer);
+        return FurinaStage.HydroBonus(dealer, element);
     }
 
     /// <summary>A number read off her ledger when the tip is drawn.</summary>

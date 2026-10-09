@@ -1621,12 +1621,16 @@ ARM_KEYWORDS: dict[str, str] = {
     "Drain": ("Lose N HP, never below half your HP at combat start. Lyney "
               "and A Five-Century Act lower that line. Drained HP returns "
               "after combat."),
-    "Repay": ("Regain that much drained HP. It never returns more than you "
-              "drained."),
+    # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
+    # Guest Star exhausts and comes back when its guest leaves.
+    "Repay": ("Regain that much drained HP, never more than you drained. A "
+              "Repay counts the HP it returns."),
     "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
-               "acts once more and leaves first."),
-    "Guest Star": ("Acts at the end of your turn. Summoning one already on "
-                   "stage makes it act and stay."),
+               "leaves first, and its card goes to your Discard Pile."),
+    "Guest Star": ("Exhausts. Acts at the end of your turn. When it leaves, "
+                   "this card goes to your Discard Pile."),
+    "oldest guest": ("The guest on stage longest: the one a fourth summon "
+                     "would remove."),
     "Charlotte": ("The first time you Repay each turn, draw 1 card. Act: Repay "
                   "2."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
@@ -1892,7 +1896,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     # VARKA (the Oath rework): his three words are his alone.
     "Oath": "varka", "current element": "varka", "Knight": "varka",
     # THE SALON'S TAB (2026-10-05): the summon and the four guests.
-    "Summon": "furina", "Guest Star": "furina",
+    "Summon": "furina", "Guest Star": "furina", "oldest guest": "furina",
     "Clorinde": "furina",
     "Wriothesley": "furina",
     "Charlotte": "furina",
@@ -2017,6 +2021,8 @@ _ARM_KEYWORD_RE = {
     "Drain": re.compile(r"\bDrain(?:s|ed)?\b"),
     "Repay": re.compile(r"\bRepa(?:y|ys|id)\b"),
     "Summon": re.compile(r"\b[Ss]ummon\b"),
+    # The pool to 75 (2026-10-09): Encore!'s "oldest guest".
+    "oldest guest": re.compile(r"\boldest guest\b"),
     # The keyword on a Guest Star's title or face, and each guest by its
     # name -- but never a shipped Companion's dashed title, which is that
     # Companion and not the guest.

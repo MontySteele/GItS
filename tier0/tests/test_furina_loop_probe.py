@@ -92,7 +92,19 @@ def test_the_screen_passes_every_loop_found(combo, pre_fix):
 
 
 #: Inert cycles: 0-cost card draw that refills the hand and grows nothing.
-KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",)}
+#: The pool to 75 adds Soothing Waters (0: Repay 2, draw 1) to them.
+KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
+               ("proto_fs_soothing_waters",), ("proto_fs_soothing_waters+",)}
+
+#: THE POOL TO 75 (2026-10-09). The ruled batch, built as written, gave the
+#: sweep 81 productive cycles over 16 thin-deck card sets, every set but one
+#: holding Overdraft (0: Drain 4, gain 1 Energy) or Sold Out's Energy. The
+#: main session's ruling gave both their Energy next turn (Interval Bell's
+#: fix, 2026-10-04), and the sweep is clean again.
+
+
+def _base_set(cards) -> frozenset:
+    return frozenset(c.rstrip(P.UP) for c in cards)
 
 TAB_UP = "proto_fs_salons_tab+"
 
@@ -100,5 +112,18 @@ TAB_UP = "proto_fs_salons_tab+"
 @pytest.mark.battery
 def test_the_post_fix_sweep_finds_no_productive_cycle():
     found = P.search_env(False, None)
-    assert {f.cards for f in found if f.productive} == set()
+    assert {_base_set(f.cards) for f in found if f.productive} == set()
     assert {f.cards for f in found if not f.productive} == KNOWN_INERT
+
+
+def test_overdraft_and_pneuma_refrain_no_longer_cycle():
+    """The smallest of the pool to 75's findings before the 2026-10-09
+    ruling: Overdraft (Drain 4, then +1 Energy NOW) and two Pneuma Refrains
+    (Repay 5, draw 2) looped with her HP flat. With the Energy owed next
+    turn the turn's Energy runs out."""
+    pool = P.variants(False)
+    cards = [pool["proto_fs_overdraft"], pool["proto_fs_pneuma_refrain"],
+             pool["proto_fs_pneuma_refrain"]]
+    run = P.play_out(cards, ["proto_fs_overdraft", "proto_fs_pneuma_refrain"],
+                     take=True, plays=200)
+    assert not run.productive and run.plays < 200
