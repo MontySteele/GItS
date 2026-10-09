@@ -467,10 +467,11 @@ def test_a_guest_act_carries_its_element_in_both_engines():
     clorinde = director[director.index("case StagePerformer.Clorinde:"):]
     assert "Element.Electro" in clorinde[:300]
     # The pool to 75 (2026-10-09): Charlotte's and Sigewinne's acts share
-    # one Repay of the seat's number (`ActAmount`, upgraded or not).
+    # one Repay of the seat's number (`ActAmount`, upgraded or not), with
+    # its Block floor (the Repay floor, ruled 2026-10-09).
     charlotte = director[director.index("case StagePerformer.Charlotte:"):
                          director.index("case StagePerformer.Wriothesley:")]
-    assert "Repay(number)" in charlotte
+    assert "RepayFloor(number, StageFloor.Block)" in charlotte
     assert "FurinaStageLaw.CharlotteActRepay" in director
     cs = _cs("Powers/Prototype/FurinaStage.cs")
     one = cs[cs.index("private Task<int> One("):cs.index("public async Task Draw(")]

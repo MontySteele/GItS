@@ -24,7 +24,6 @@
     "proto_fs_curtain_rise",
     "proto_fs_ebb_and_flow",
     "proto_fs_encore",
-    "proto_fs_endless_waltz",
     "proto_fs_ensemble_cast",
     "proto_fs_final_bow",
     "proto_fs_fountain_of_lucine",
@@ -440,7 +439,6 @@
     "proto_fs_curtain_rise": "furina",
     "proto_fs_ebb_and_flow": "furina",
     "proto_fs_encore": "furina",
-    "proto_fs_endless_waltz": "furina",
     "proto_fs_ensemble_cast": "furina",
     "proto_fs_final_bow": "furina",
     "proto_fs_fountain_of_lucine": "furina",
@@ -909,7 +907,7 @@
       "innate": true
     },
     "proto_fs_bravura": {
-      "formula_per": 1
+      "formula_base": 4
     },
     "proto_fs_bring_the_house_down": {
       "cost": -1
@@ -927,7 +925,7 @@
       "damage": 3
     },
     "proto_fs_cleansing_torrent": {
-      "damage": 4
+      "formula_base": 4
     },
     "proto_fs_commanding_gaze": {
       "mode_power_amount": [
@@ -954,9 +952,6 @@
     },
     "proto_fs_encore": {
       "stage_spend": -1
-    },
-    "proto_fs_endless_waltz": {
-      "innate": true
     },
     "proto_fs_ensemble_cast": {
       "cost": -1
@@ -1021,7 +1016,7 @@
       "conditional_then_block": 2
     },
     "proto_fs_hydro_lance": {
-      "damage": 4
+      "formula_base": 4
     },
     "proto_fs_hymn_of_many_waters": {
       "block": 3,
@@ -1117,7 +1112,7 @@
       "damage": 5
     },
     "proto_fs_surging_waters": {
-      "damage": 3,
+      "formula_base": 3,
       "stage_repay": 1
     },
     "proto_fs_surintendante_chevalmarin": {

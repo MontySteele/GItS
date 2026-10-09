@@ -1943,10 +1943,13 @@ STAGE_LOG_HEADING = ("- Since you ended your last turn, in order (the "
 STAGE_FANFARE_LINE = ("- Fanfare {fanfare} (this turn: {gained} gained, "
                       "{spent} spent on Spend, {paid} paid by stars)")
 #: THE SALON'S TAB (2026-10-05): the HP loan's two numbers, the "Drained N"
-#: counter's reading.
-STAGE_DRAIN_LINE = ("- Drained {drained} HP (it returns when combat ends). "
-                    "Drain line {line} HP{why}: you can Drain down to it.")
-#: Seat page 3: where the line comes from ("half the HP you started this
+#: counter's reading. The Drain line rule (2026-10-09): a Drain may go past
+#: the line, and what it drains past it does not return.
+STAGE_DRAIN_LINE = ("- Drained {drained} HP (it returns when combat ends, "
+                    "except HP drained past your line). Drain line {line} "
+                    "HP{why}: HP you Drain past it is lost unless you Repay "
+                    "it.")
+#: Seat page 3: where the line comes from ("3/4 of the HP you started this
 #: fight with"); seats connected it to their entry HP only late.
 STAGE_DRAIN_WHY = " ({why})"
 STAGE_REHEARSAL_CLAUSE = " · Rehearsal {n}"

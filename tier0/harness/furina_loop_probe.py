@@ -31,9 +31,11 @@ gained against Energy paid; every survivor is PLAYED in the real engine
 cards x "take every Drain and Spend mode offered" / "take none".
 
 THE BODY IS A REAL ONE. Furina enters at 78 of 78 HP, so the Drain line is
-39 and the HP loan is bounded exactly as in a fight (the 2026-10-04 probe ran
-on an unkillable HP pool; a Drain makes HP a resource, so it would have
-counted unbounded Drain room as a loop). She starts with 10 Fanfare.
+59 and the HP loan is bounded exactly as in a fight: since the Drain line
+rule (2026-10-09) a Drain may go past the line but never to 0 HP, so her HP
+is the bound (the 2026-10-04 probe ran on an unkillable HP pool; a Drain
+makes HP a resource, so it would have counted unbounded Drain room as a
+loop). She starts with 10 Fanfare.
 
 A RUN is one long turn against an enemy that cannot die and never attacks.
 It SUSTAINS when it reaches `PLAYS` plays and, between play `PLAYS // 2` and

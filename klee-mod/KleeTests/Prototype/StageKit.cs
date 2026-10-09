@@ -66,6 +66,12 @@ internal sealed class RecordingBoard : IStageBoard
         return Task.CompletedTask;
     }
 
+    public Task Vigor(int amount)
+    {
+        Log.Add($"vigor {amount}");
+        return Task.CompletedTask;
+    }
+
     public Task Vulnerable(StageTarget target, int amount)
     {
         Log.Add($"vulnerable {target} {amount}");

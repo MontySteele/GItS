@@ -38,14 +38,14 @@ public sealed class ProtoFsPneumaTides : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRepay(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForVigor(ArmKeywordTips.ForRepay(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_pneuma_tides");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pneuma Tides"),
-        ("description", "At the start of your turn, [gold]Repay[/gold] {PowerAmount:diff()}.{InCombat:{StageRepay}|}"),
+        ("description", "At the start of your turn, [gold]Repay[/gold] {PowerAmount:diff()}. Gain 1 [gold]Vigor[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line

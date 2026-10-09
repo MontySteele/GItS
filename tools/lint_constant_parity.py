@@ -289,7 +289,7 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.SigewinneActRepay": _stage("SIGEWINNE_ACT_REPAY"),
     "FurinaStageLaw.ChevreuseActDamage": _stage("CHEVREUSE_ACT_DAMAGE"),
     "FurinaStageLaw.ChevreuseLineVulnerable": _stage("CHEVREUSE_LINE_VULNERABLE"),
-    "FurinaStageLaw.FiveCenturyLine": _stage("FIVE_CENTURY_LINE"),
+    "FurinaStageLaw.DrainFloor": _stage("DRAIN_FLOOR"),
     "FurinaStageLaw.FountainTurns": _stage("FOUNTAIN_TURNS"),
     # THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
     # 2026-10-09): the guests' upgraded lines and acts (sec.3), the four new
@@ -303,6 +303,12 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ClorindeActDamageUpgraded": _stage("CLORINDE_ACT_DAMAGE_UPGRADED"),
     "FurinaStageLaw.FreminetActDamage": _stage("FREMINET_ACT_DAMAGE"),
     "FurinaStageLaw.FreminetActDamageUpgraded": _stage("FREMINET_ACT_DAMAGE_UPGRADED"),
+    # The pool-75 round's card numbers and the Drain line rule (ruled
+    # 2026-10-09): Freminet's act's Block and the line's 3/4.
+    "FurinaStageLaw.FreminetActBlock": _stage("FREMINET_ACT_BLOCK"),
+    "FurinaStageLaw.FreminetActBlockUpgraded": _stage("FREMINET_ACT_BLOCK_UPGRADED"),
+    "FurinaStageLaw.LineNumerator": _stage("LINE_NUMERATOR"),
+    "FurinaStageLaw.LineDenominator": _stage("LINE_DENOMINATOR"),
     "FurinaStageLaw.NaviaLineDiscount": _stage("NAVIA_LINE_DISCOUNT"),
     "FurinaStageLaw.NaviaLineDiscountUpgraded": _stage("NAVIA_LINE_DISCOUNT_UPGRADED"),
     "FurinaStageLaw.NeuvilletteHydroBonus": _stage("NEUVILLETTE_HYDRO_BONUS"),

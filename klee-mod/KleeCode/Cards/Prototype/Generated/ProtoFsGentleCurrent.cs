@@ -45,7 +45,7 @@ public sealed class ProtoFsGentleCurrent : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentle Current"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Next turn, [gold]Repay[/gold] {FsAmount:diff()}.{InCombat:{StageRepay}|}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Next turn, [gold]Repay[/gold] {FsAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line

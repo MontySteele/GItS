@@ -38,14 +38,14 @@ public sealed class ProtoFsSoothingWaters : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRepay(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForVigor(ArmKeywordTips.ForRepay(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_soothing_waters");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Soothing Waters"),
-        ("description", "[gold]Repay[/gold] {RepayAmount:diff()}. Draw 1 card.{InCombat:{StageRepay}|}"),
+        ("description", "[gold]Repay[/gold] {RepayAmount:diff()}. Gain 1 [gold]Vigor[/gold] for any HP it could not [gold]Repay[/gold]. Draw 1 card.{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -73,7 +73,7 @@ public sealed class ProtoFsSoothingWaters : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Repay(choiceContext, Owner.Creature, DynamicVars["RepayAmount"].IntValue);
+        await FurinaStage.Repay(choiceContext, Owner.Creature, DynamicVars["RepayAmount"].IntValue, StageFloor.Vigor);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 

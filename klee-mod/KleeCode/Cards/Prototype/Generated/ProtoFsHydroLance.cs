@@ -51,7 +51,7 @@ public sealed class ProtoFsHydroLance : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hydro Lance"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage. [gold]Repay[/gold] 4.{InCombat:{StageRepay}|}"),
+        ("description", "[gold]Repay[/gold] 4. Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -66,7 +66,9 @@ public sealed class ProtoFsHydroLance : CustomCardModel, IElementalCard, ICharac
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(14m, ValueProp.Move)
+            new CalculationBaseVar(14m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.RepayLeftOrRoom(card, 4))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,17 +80,17 @@ public sealed class ProtoFsHydroLance : CustomCardModel, IElementalCard, ICharac
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await FurinaStage.Repay(choiceContext, Owner.Creature, 4);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await FurinaStage.Repay(choiceContext, Owner.Creature, 4);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(4m);
     }
 }

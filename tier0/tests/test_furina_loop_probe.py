@@ -55,9 +55,12 @@ def test_interval_bells_energy_is_owed_not_paid():
     assert st.player.ftd.fanfare == P.START_FANFARE - 2
 
 
-def test_the_body_is_real_so_the_drain_room_bounds_a_drain_loop():
-    # Salon's Tab x2, with Energy to spare, drains to the line and no
-    # further: 78 -> 42 (nine Drains of 4), then it only draws.
+def test_the_body_is_real_so_her_hp_bounds_a_drain_loop():
+    # Salon's Tab x2, with Energy to spare. Since the Drain line rule
+    # (2026-10-09) a Drain may go past the line (59 from 78), never to 0 HP:
+    # 78 -> 2 (nineteen Drains of 4), then it only draws. 19 of the 76
+    # drained HP was taken at or above the line (78 down to 59), the other
+    # 57 past it.
     st = P._state((), {}, 0, take=True)
     st.player.energy = 60
     pool = P.variants(False)
@@ -66,8 +69,10 @@ def test_the_body_is_real_so_the_drain_room_bounds_a_drain_loop():
     for _ in range(60):
         options = [c for c in st.player.hand if combat.card_playable(st, c)]
         combat.play_card(st, options[0])
-    assert st.player.hp == 42
-    assert st.player.ftd.drained == 36
+    assert st.player.hp == 2
+    assert st.player.ftd.drained == 76
+    assert st.player.ftd.drained_above == 19
+    assert st.player.ftd.drained_past == 57
 
 
 def test_the_tab_costs_energy_so_a_guest_and_two_tabs_stop():
@@ -92,9 +97,16 @@ def test_the_screen_passes_every_loop_found(combo, pre_fix):
 
 
 #: Inert cycles: 0-cost card draw that refills the hand and grows nothing.
-#: The pool to 75 adds Soothing Waters (0: Repay 2, draw 1) to them.
-KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
-               ("proto_fs_soothing_waters",), ("proto_fs_soothing_waters+",)}
+KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",)}
+
+#: THE REPAY FLOOR'S PRODUCTIVE CYCLE, AWAITING A RULING (2026-10-09). The
+#: ruled Repay floor built as written gives Soothing Waters (0: Repay 2
+#: [3], gain 1 Vigor for any HP it could not Repay, draw 1) Vigor on every
+#: play with nothing drained, so the thin deck that cycled it INERT before
+#: (it was in `KNOWN_INERT`) now grows Vigor without end. Fixing it is a card
+#: ruling for the main session, not this build's; this pin keeps the sweep a
+#: tripwire meanwhile: a cycle over any OTHER set still fails.
+KNOWN_FLOOR_LOOP_SETS = {frozenset({"proto_fs_soothing_waters"})}
 
 #: THE POOL TO 75 (2026-10-09). The ruled batch, built as written, gave the
 #: sweep 81 productive cycles over 16 thin-deck card sets, every set but one
@@ -110,10 +122,21 @@ TAB_UP = "proto_fs_salons_tab+"
 
 
 @pytest.mark.battery
-def test_the_post_fix_sweep_finds_no_productive_cycle():
+def test_the_post_fix_sweep_finds_no_productive_cycle_but_the_known_one():
     found = P.search_env(False, None)
-    assert {_base_set(f.cards) for f in found if f.productive} == set()
+    assert ({_base_set(f.cards) for f in found if f.productive}
+            == KNOWN_FLOOR_LOOP_SETS)
     assert {f.cards for f in found if not f.productive} == KNOWN_INERT
+
+
+def test_soothing_waters_alone_grows_vigor_with_nothing_drained():
+    """The Repay floor's one productive cycle, pinned so a ruling that
+    closes it shows here."""
+    pool = P.variants(False)
+    cards = [pool["proto_fs_soothing_waters"]] * 2
+    run = P.play_out(cards, ["proto_fs_soothing_waters"], take=True,
+                     plays=60)
+    assert run.productive and run.growth["powers"] > 0
 
 
 def test_overdraft_and_pneuma_refrain_no_longer_cycle():

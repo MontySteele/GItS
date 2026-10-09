@@ -69,21 +69,28 @@ public static class DrainedCounter
     public static int Read(Creature? creature) => FurinaStage.DrainedOf(creature);
 
     /// <summary>The hover's first sentence, the one the paper names. Pure.
-    /// 2026-10-05: and WHERE THE LINE COMES FROM ("Drain line 39 HP (half
-    /// the HP you started this fight with)"); seats connected it late.
+    /// 2026-10-05: and WHERE THE LINE COMES FROM ("Drain line 59 HP (3/4 of
+    /// the HP you started this fight with)"); seats connected it late. The
+    /// Drain line rule (2026-10-09): a Drain may go past it.
     /// </summary>
     public static string LineSentence(int line, string why) =>
         "Drain line [blue]"
       + line.ToString(CultureInfo.InvariantCulture) + "[/blue] HP"
       + (string.IsNullOrEmpty(why) ? "" : " (" + why + ")")
-      + ": you can [gold]Drain[/gold] down to it.";
+      + ": HP you [gold]Drain[/gold] past it is lost unless you "
+      + "[gold]Repay[/gold] it.";
 
-    /// <summary>The hover's body: the line, the drained count and the rule.
-    /// Pure.</summary>
-    public static string HoverBody(int drained, int line, string why) =>
+    /// <summary>The hover's body: the line, the drained count (and how much
+    /// of it is past the line) and the rule. Pure.</summary>
+    public static string HoverBody(int drained, int line, string why,
+                                   int past = 0) =>
         LineSentence(line, why) + "\nDrained: [blue]"
-      + drained.ToString(CultureInfo.InvariantCulture) + "[/blue] HP.\n"
-      + ArmKeywordTips.DrainBody;
+      + drained.ToString(CultureInfo.InvariantCulture) + "[/blue] HP"
+      + (past > 0
+            ? ", [blue]" + past.ToString(CultureInfo.InvariantCulture)
+              + "[/blue] past your line"
+            : "")
+      + ".\n" + ArmKeywordTips.DrainBody;
 
     /// <summary>The hover's body for her, read off the ledger now.</summary>
     public static string HoverBody(Creature? creature)
@@ -93,7 +100,8 @@ public static class DrainedCounter
             return HoverBody(0, 0, "");
         }
         var ledger = FurinaStageLedger.For(creature);
-        return HoverBody(ledger.Drained, ledger.Line, ledger.LineWhy);
+        return HoverBody(ledger.Drained, ledger.Line, ledger.LineWhy,
+                         ledger.DrainedPast);
     }
 
     /// <summary>Build the counter for the LOCAL seat, from the

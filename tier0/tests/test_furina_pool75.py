@@ -343,7 +343,7 @@ def test_ebb_and_flow_nets_minus_two():
     assert st.player.hp == 76 and st.player.ftd.fanfare == 6
 
 
-@pytest.mark.parametrize("cid", [c for c in FS.POOL_IDS[34:]])
+@pytest.mark.parametrize("cid", [c for c in FS.POOL_IDS[FS.POOL_IDS.index("proto_fs_casting_call"):]])
 def test_every_new_row_loads_upgrades_and_never_throws_off_character(cid):
     assert loader.get_card(cid + "+") is not None
     st = make_state(enemies=[make_enemy(hp=300)])
