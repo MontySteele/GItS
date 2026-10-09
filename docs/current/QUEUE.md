@@ -25,6 +25,12 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Furina pool-75 round** (`review/records/furina-pool75-round-2026-10-09.md`,
+  five picks): (1) fixed-Drain cards read "Drain up to N"; (2) a Repay floor
+  ("if you have no drained HP, draw 1"), Endless Waltz cut; (3) card numbers
+  (Standing Ovation to Uncommon, Bravura+, Crabaletta, Soloist, Gaze,
+  Freminet, Neuvillette); (4) two seeds with the relic back at Repay 2;
+  (5) a guest-forward seat. All defaults.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's

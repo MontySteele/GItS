@@ -102,9 +102,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   relics, Opera Glasses and Grand Theater Program; one potion, Bottled
   Applause (`FurinaRelicPool.cs`, `ArmPotions.cs`). Sim twin
   `tier0/engine/furina_tide.py`. Latest round
-  `review/records/furina-pool40-round-2026-10-05.md` (both cleared act 2, one
-  won; act-3 HP and an unread Repay plan are open). Next: [USER]'s play (a
-  rule change). At her finish line, re-ask her motion look (`AS2-B5`, dropped
+  `review/records/furina-pool75-round-2026-10-09.md` (pool 75: 1 win in 7,
+  four deaths in act 2 with the Drain half locked; Fable review; five picks
+  open). Next: [USER] rules those picks. At her finish line, re-ask her motion look (`AS2-B5`, dropped
   from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).
 - **Varka: Prototype, the combo pass built (2026-10-04).** Rules
   `review/active/varka-paper-kit-2026-09-28.md` sec.3
