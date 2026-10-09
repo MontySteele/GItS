@@ -74,14 +74,16 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Furina_is_34_rows_and_12_15_7_with_two_ancients_and_no_coop()
+    public void Furina_is_34_rows_and_10_17_7_with_two_ancients_and_no_coop()
     {
         // THE SALON'S TAB (2026-10-05, proposal sec.16): the slice's 24 rows
         // (12 Common, 8 Uncommon, 4 Rare), and the pool to 39
         // (review/active/furina-pool-40-2026-10-05.md sec.3, ruled): seven
         // Uncommons and three Rares more. The paper's 29 -> 39 counts the
-        // two Basics and the three Neuvillette companion rows besides.
-        AssertPool("FurinaStageRoster", "Pool", 12, 15, 7, size: 34);
+        // two Basics and the three Neuvillette companion rows besides. The
+        // 2026-10-09 playtest trim moved Interval Bell and Tidal Flourish to
+        // Uncommon: 12 / 15 / 7 -> 10 / 17 / 7.
+        AssertPool("FurinaStageRoster", "Pool", 10, 17, 7, size: 34);
         AssertAncients("Furina");
         Assert.Null(System.Type.GetType(
             "KleeMod.Powers.FurinaStageRoster, klee")?.GetMethod("MultiplayerRows"));

@@ -303,7 +303,8 @@ public class PoolCompletionTests : IDisposable
         Assert.Contains(calls, c => c.Contains("FurinaStage.Spend"));
         Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
         Assert.Equal(0, new ProtoFsIntervalBell().EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, new ProtoFsIntervalBell().Rarity);
+        // Uncommon since the 2026-10-09 playtest trim.
+        Assert.Equal(CardRarity.Uncommon, new ProtoFsIntervalBell().Rarity);
     }
 
     /// <summary>The loop fix (2026-10-04): Interval Bell's Spend mode gains

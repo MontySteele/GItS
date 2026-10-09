@@ -88,8 +88,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   drained HP returns when combat ends. Three guest seats; seven guests. The
   pool is the starter and 34 cards, not 78
   (`review/active/furina-pool-40-2026-10-05.md`, ruled and built). Relics: the
-  starter Salon Solitaire ("At the end of your turn, Repay 2."), its Orobas
-  upgrade The Curtain Never Falls (Ancient, never rolled), and two reward
+  starter Salon Solitaire ("At the end of your turn, Repay 1."; 2 before the
+  2026-10-09 playtest trim), its Orobas upgrade The Curtain Never Falls
+  (Repay 2; Ancient, never rolled), and two reward
   relics, Opera Glasses and Grand Theater Program; one potion, Bottled
   Applause (`FurinaRelicPool.cs`, `ArmPotions.cs`). Sim twin
   `tier0/engine/furina_tide.py`. Latest round

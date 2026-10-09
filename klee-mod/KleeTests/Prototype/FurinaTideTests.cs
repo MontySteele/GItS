@@ -407,19 +407,21 @@ public class FurinaTideTests
         kit.Board.Log.Clear();
         StageKit.Run(kit.Director.EndOfTurn(FurinaStageLaw.SingerRepay));
         // Lynette finds no aura-wearer here (the board decides), then
-        // Charlotte Repays 2 and draws, then the Singer Repays 2.
+        // Charlotte Repays 2 and draws, then the Singer Repays 1 (the
+        // 2026-10-09 playtest trim; was 2).
         Assert.Equal(new[] { "damage Lynette Aura 3 Anemo", "heal 2",
-                             "draw 1", "heal 2" }, kit.Board.Log);
-        Assert.Equal(2, kit.Stage.Drained);
+                             "draw 1", "heal 1" }, kit.Board.Log);
+        Assert.Equal(3, kit.Stage.Drained);
     }
 
     [Fact]
-    public void Salon_solitaire_is_two_and_its_upgrade_three()
+    public void Salon_solitaire_is_one_and_its_upgrade_two()
     {
+        // The 2026-10-09 playtest trim: 1 [2], was 2 [3].
         FurinaStageLedger.ResetAll();
-        Assert.Equal(2, FurinaStage.SingerOf(
+        Assert.Equal(1, FurinaStage.SingerOf(
             Seat.Furina().WithRelic<SalonSolitaire>().Creature));
-        Assert.Equal(3, FurinaStage.SingerOf(
+        Assert.Equal(2, FurinaStage.SingerOf(
             Seat.Furina().WithRelic<CurtainNeverFalls>().Creature));
         Assert.Equal(0, FurinaStage.SingerOf(Seat.Furina().Creature));
         Assert.Equal(0, FurinaStage.SingerOf(

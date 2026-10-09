@@ -857,7 +857,7 @@
     },
     "proto_fs_leading_lady": {
       "conditional_block": 2,
-      "conditional_then_block": 2
+      "conditional_then_block": 1
     },
     "proto_fs_let_the_people_rejoice": {
       "cost": -1

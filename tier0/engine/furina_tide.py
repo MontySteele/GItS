@@ -36,6 +36,8 @@ Revelry reads Drain and Repay again, never hits):
    she loses (to a Drain, to an enemy, to anything) and for every HP she
    Repays. Spend N on cards pays it; a spend-all is one Spend.
 4. SALON SOLITAIRE (starting relic). At the end of your turn, Repay 2.
+   (Shipped Repay 1 since the 2026-10-09 playtest trim; the variants
+   below measured 2.)
 5. GUEST STARS. Three seats; a guest acts at the end of her turn; a guest
    onto a full stage makes the oldest guest leave, acting once more as it
    goes; a second copy of a guest on stage makes it act and stay.
@@ -78,7 +80,8 @@ ELEMENT = "hydro"
 CADENCE = "skill"
 
 SEATS = 3
-SINGER_REPAY = 2             # Salon Solitaire: end of turn, Repay 2
+SINGER_REPAY = 1             # Salon Solitaire: end of turn, Repay 1 (2026-10-09 playtest trim, was 2;
+                             # the research VARIANTS below keep the 2 they measured)
 
 GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
           "sigewinne", "neuvillette", "lyney", "chevreuse")

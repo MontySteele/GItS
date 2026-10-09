@@ -271,9 +271,13 @@ public class PoolCellCoverageTests
             // Rare/Attack (Let the People Rejoice), Rare/Skill (Singer,
             // Clorinde) and Uncommon/Attack (Bravura, Grand Deluge) stay
             // short and seamed.
+            //
+            // THE 2026-10-09 PLAYTEST TRIM filled Uncommon/Attack: Tidal
+            // Flourish moved to Uncommon, three deep with Bravura and Grand
+            // Deluge.
             "furina-stage" => new[]
             {
-                "Rare/Attack", "Rare/Skill", "Uncommon/Attack",
+                "Rare/Attack", "Rare/Skill",
             },
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();

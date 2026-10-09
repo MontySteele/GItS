@@ -19,14 +19,15 @@ public static class FurinaStageLaw
     /// </summary>
     public const int Seats = 3;
 
-    /// <summary>Rule 4: Salon Solitaire, "At the end of your turn, Repay 2."
+    /// <summary>Rule 4: Salon Solitaire, "At the end of your turn, Repay 1."
+    /// (2026-10-09 playtest trim, was 2.)
     /// Mirrors <c>furina_stage.SINGER_REPAY</c>.</summary>
-    public const int SingerRepay = 2;
+    public const int SingerRepay = 1;
 
-    /// <summary>Salon Solitaire upgraded ([3]): The Curtain Never Falls, its
+    /// <summary>Salon Solitaire upgraded ([2], 2026-10-09 trim, was 3): The Curtain Never Falls, its
     /// Touch of Orobas replacement. Mirrors
     /// <c>furina_stage.SINGER_REPAY_UPGRADED</c>.</summary>
-    public const int SingerRepayUpgraded = 3;
+    public const int SingerRepayUpgraded = 2;
 
     // ---- the first four guests (sec.16) ------------------------------------------
 

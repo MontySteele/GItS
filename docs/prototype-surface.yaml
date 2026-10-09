@@ -2543,17 +2543,19 @@
                          {op: damage, amount: 8, target: all_enemies,
                           applies_element: true}]}]}]}
 
+# Gentilhomme Usher: 7/13 -> 6/11, upgraded 8/14 (the 2026-10-09 playtest
+# trim, review/records/coop-human-playtest-2026-10-09.md pick 2).
 - {id: proto_fs_leading_lady, name: "Gentilhomme Usher", character: furina,
-   upgrade: {conditional_block: +2, conditional_then_block: +2},
+   upgrade: {conditional_block: +2, conditional_then_block: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
    description: "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Drain[/gold] 3: gain {BranchBlock:diff()} instead.",
    effects: [{op: choose_one, modes: [
-              {label: "Gain 7 Block",
-               effects: [{op: block, amount: 7}]},
-              {label: "[gold]Drain[/gold] 3: gain 13 instead",
+              {label: "Gain 6 Block",
+               effects: [{op: block, amount: 6}]},
+              {label: "[gold]Drain[/gold] 3: gain 11 instead",
                effects: [{op: stage_drain, amount: 3},
-                         {op: block, amount: 13}]}]}]}
+                         {op: block, amount: 11}]}]}]}
 
 - {id: proto_fs_salons_tab, name: "Salon's Tab", character: furina,
    upgrade: {mode_draw: [1, 1]},
@@ -2604,15 +2606,18 @@
 
 # --- FANFARE OUTLETS (six) ---
 
+# Tidal Flourish: uncommon, and the plain mode applies Hydro (the 2026-10-09
+# playtest trim, review/records/coop-human-playtest-2026-10-09.md pick 2).
 - {id: proto_fs_tidal_flourish, name: "Tidal Flourish", character: furina,
    upgrade: {conditional_damage: +3, conditional_then_damage: +1},
    authored_by: [claude],
-   register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage to ALL enemies. [gold]Spend[/gold] 6: deal {BranchDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies instead.",
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] 6: deal {BranchDamage:diff()} instead.",
    effects: [{op: choose_one, modes: [
-              {label: "Deal 5 damage to ALL enemies",
-               effects: [{op: damage, amount: 5, target: all_enemies}]},
-              {label: "[gold]Spend[/gold] 6: deal 12 Hydro damage to ALL enemies instead",
+              {label: "Deal 5 Hydro damage to ALL enemies",
+               effects: [{op: damage, amount: 5, target: all_enemies,
+                          applies_element: true}]},
+              {label: "[gold]Spend[/gold] 6: deal 12 instead",
                effects: [{op: stage_spend, amount: 6},
                          {op: damage, amount: 12, target: all_enemies,
                           applies_element: true}]}]}]}
@@ -2650,11 +2655,12 @@
               target: all_enemies}]}
 
 # Interval Bell: the v2 text after #900, unchanged (sec.16); its Spend mode's
-# Energy comes next turn (the loop fix, 2026-10-04).
+# Energy comes next turn (the loop fix, 2026-10-04). Uncommon since the
+# 2026-10-09 playtest trim (provenance note, that date).
 - {id: proto_fs_interval_bell, name: "Interval Bell", character: furina,
    upgrade: {stage_spend: -1},
    authored_by: [claude],
-   register: salon, cost: 0, type: skill, rarity: common,
+   register: salon, cost: 0, type: skill, rarity: uncommon,
    description: "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead.",
    effects: [{op: choose_one, modes: [
               {label: "Draw 1 card",

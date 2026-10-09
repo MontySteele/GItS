@@ -43,7 +43,7 @@ CHARACTER = "furina"
 # ----------------------------------------------------------------------
 SEATS = T.SEATS                              # rule 5
 SINGER_REPAY = T.SINGER_REPAY                # rule 4: Salon Solitaire
-SINGER_REPAY_UPGRADED = 3                    # The Curtain Never Falls
+SINGER_REPAY_UPGRADED = 2                    # The Curtain Never Falls (2026-10-09 trim, was 3)
 CHARLOTTE_ACT_REPAY = T.CHARLOTTE_ACT_REPAY
 CHARLOTTE_LINE_DRAW = 1
 WRIOTHESLEY_ACT_DAMAGE = T.WRIOTHESLEY_ACT
