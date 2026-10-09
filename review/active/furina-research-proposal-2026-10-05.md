@@ -795,6 +795,7 @@ seats, and nothing else uses the stage.
 - Rising Applause (Basic Skill, 1): "Gain 5 Block. Spend all your Fanfare
   and deal that much damage." [7 Block]
 - Salon Solitaire (relic): "At the end of your turn, Repay 2." [3]
+  2026-10-09 playtest trim: Repay 1 [2].
 
 *Drain (5):*
 - Mademoiselle Crabaletta (Attack, 2, Common): "Drain 5. Deal 24 damage."
@@ -804,6 +805,7 @@ seats, and nothing else uses the stage.
   ALL enemies. Drain 3: deal 8 instead." [6 / 11]
 - Gentilhomme Usher (Skill, 1, Common): "Gain 7 Block. Drain 3: gain 13
   instead." [9 / 17]
+  2026-10-09 playtest trim: 6 / 11 [8 / 14].
 - Salon's Tab (Skill, 0, Uncommon): "Draw 1 card. Drain 4: also gain 1
   Energy next turn." [Draw 2]
   2026-10-05: Tab cost 1, Draw 2 / Drain 4 → +2 Energy next turn [Draw 3]; the 0-cost Tab made Guest+ and Tab+ an infinite
@@ -820,12 +822,15 @@ seats, and nothing else uses the stage.
 *Fanfare outlets (6):*
 - Tidal Flourish (Attack, 1, Common): "Deal 5 damage to ALL enemies. Spend
   6: deal 12 Hydro damage to ALL enemies instead." [8 / 16]
+  2026-10-09 playtest trim: Uncommon; "Deal 5 Hydro damage to ALL enemies.
+  Spend 6: deal 12 instead."
 - Spirited Aria (Attack, 1, Common): "Deal 8 damage. Spend 5: deal 13 and
   draw 2 instead." [11 / 17]
 - Quick Flourish (Attack, 0, Common): "Spend 4. Deal 11 Hydro damage." [14]
 - Standing Ovation (Attack, 1, Common): "Spend all your Fanfare. Deal that
   much damage to ALL enemies." [Retain]
 - Interval Bell (Skill, 0, Common): v2 text after #900, unchanged.
+  2026-10-09 playtest trim: Uncommon.
 - Bravura (Attack, 1, Uncommon): "Spend all your Fanfare. Deal 6 damage,
   plus 2 per point." [3 per]
 

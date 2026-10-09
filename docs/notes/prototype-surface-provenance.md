@@ -6657,3 +6657,22 @@ Paper: `review/active/varka-payoff-fix-2026-10-08.md` (project review
   vulnerable 1`), so a clean enemy ends on 2. It is an application, so
   Absolute Zero pays on it.
 - Glacial Edict: every 3 [2] Cryo Oath, was 4 [3].
+
+## Furina playtest trim, 2026-10-09
+
+Record: `review/records/coop-human-playtest-2026-10-09.md`, picks 1 and 2.
+[USER]: "Good on the defaults for now - we can start with these trims and
+readjust after the card pool expands."
+
+- Salon Solitaire (starting relic, not a sheet row): Repay 2 -> 1; its Orobas
+  upgrade The Curtain Never Falls Repay 3 -> 2 (`FurinaStageLaw.SingerRepay`
+  / `SingerRepayUpgraded`, `tier0/engine/furina_stage.py`,
+  `tier0/engine/furina_tide.py`; the sim slice's research variants keep the
+  2 they measured).
+- Interval Bell (`proto_fs_interval_bell`): Common -> Uncommon.
+- Gentilhomme Usher (`proto_fs_leading_lady`): 7 / 13 -> 6 / 11, upgraded
+  9 / 17 -> 8 / 14 (`conditional_then_block` +2 -> +1; it adds on top of
+  `conditional_block`).
+- Tidal Flourish (`proto_fs_tidal_flourish`): Common -> Uncommon, and its
+  plain mode applies Hydro: "Deal 5 Hydro damage to ALL enemies. Spend 6:
+  deal 12 instead.", Surintendante Chevalmarin's wording.

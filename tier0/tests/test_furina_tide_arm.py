@@ -179,12 +179,14 @@ def test_revelry_adds_to_drains_and_repays_and_copies_add():
 
 # ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3) ----
 
-def test_the_pool_is_34_rows_12_15_7():
+def test_the_pool_is_34_rows_10_17_7():
+    # 10 / 17 / 7 since the 2026-10-09 playtest trim (Interval Bell and
+    # Tidal Flourish to Uncommon); 12 / 15 / 7 before.
     rows = {c.id: c for c in loader.prototype_cards()}
     rarities = [rows[cid].rarity for cid in FS.POOL_IDS]
     assert len(FS.POOL_IDS) == 34 == len(set(FS.POOL_IDS))
     assert (rarities.count("common"), rarities.count("uncommon"),
-            rarities.count("rare")) == (12, 15, 7)
+            rarities.count("rare")) == (10, 17, 7)
 
 
 def test_the_arm_powers_move_the_line_and_read_the_loop():

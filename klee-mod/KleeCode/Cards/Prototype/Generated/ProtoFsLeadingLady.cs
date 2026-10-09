@@ -64,7 +64,7 @@ public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IModal
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Gain 7 Block", "[gold]Drain[/gold] 3: gain 13 instead" };
+        new[] { "Gain 6 Block", "[gold]Drain[/gold] 3: gain 11 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -72,8 +72,8 @@ public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IModal
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedBlockVar("PlainBlock", 7m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
+            new FoldedBlockVar("PlainBlock", 6m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 11m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -97,15 +97,15 @@ public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IModal
                                 "would take her below the Drain line"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 7 Block", "[gold]Drain[/gold] 3: gain 13 instead" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 6 Block", "[gold]Drain[/gold] 3: gain 11 instead" }[modeIndex]);
         if (modeIndex == 0)
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 9m : 7m), ValueProp.Move), cardPlay);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 8m : 6m), ValueProp.Move), cardPlay);
         }
         else
         {
             await FurinaStage.Drain(choiceContext, Owner.Creature, 3);
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 17m : 13m), ValueProp.Move), cardPlay);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 14m : 11m), ValueProp.Move), cardPlay);
         }
     }
 
@@ -114,7 +114,7 @@ public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IModal
         // conditional_then_block: the then-branch Block swaps on an IsUpgraded read at play time; the face prints it live.
         // conditional_block: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
         DynamicVars["PlainBlock"].UpgradeValueBy(2m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
     }
 }
 
@@ -146,14 +146,14 @@ public sealed class ProtoFsLeadingLadyModeA : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedBlockVar("PlainBlock", 7m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
+            new FoldedBlockVar("PlainBlock", 6m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 11m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainBlock"].UpgradeValueBy(2m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
     }
 }
 
@@ -185,13 +185,13 @@ public sealed class ProtoFsLeadingLadyModeB : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedBlockVar("PlainBlock", 7m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 13m, ValueProp.Move)
+            new FoldedBlockVar("PlainBlock", 6m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 11m, ValueProp.Move)
         };
 
     protected override void OnUpgrade()
     {
         DynamicVars["PlainBlock"].UpgradeValueBy(2m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
+        DynamicVars["BranchBlock"].UpgradeValueBy(3m);
     }
 }

@@ -526,13 +526,14 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void Salon_solitaire_repays_two_and_its_upgrade_three()
+    public void Salon_solitaire_repays_one_and_its_upgrade_two()
     {
+        // The 2026-10-09 playtest trim: 1 [2], was 2 [3].
         Assert.Equal("At the end of your turn, [gold]Repay[/gold] "
-                     + "[blue]2[/blue].",
+                     + "[blue]1[/blue].",
                      Face(Canon<RelicModel>(typeof(SalonSolitaire))));
         Assert.Equal("At the end of your turn, [gold]Repay[/gold] "
-                     + "[blue]3[/blue].",
+                     + "[blue]2[/blue].",
                      Face(Canon<RelicModel>(typeof(CurtainNeverFalls))));
         // Touch of Orobas upgrades the starter into it.
         Assert.Contains("ModelDb.Relic<CurtainNeverFalls>",
