@@ -338,6 +338,11 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_STAGE_LYNEY",
                     "KLEEMOD-ARM_STAGE_SIGEWINNE",
                     "KLEEMOD-ARM_STAGE_CHEVREUSE",
+                    # The pool to 75 (2026-10-09): its four guests.
+                    "KLEEMOD-ARM_STAGE_FREMINET",
+                    "KLEEMOD-ARM_STAGE_NAVIA",
+                    "KLEEMOD-ARM_STAGE_NEUVILLETTE",
+                    "KLEEMOD-ARM_STAGE_ESCOFFIER",
                     # The text pass of 2026-10-08: the Plan tip a plan-only
                     # card carries in ForPlan's place (no line above, no flip).
                     "KLEEMOD-ARM_PLAN_ONLY"}
@@ -548,9 +553,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # The text pass of 2026-10-08: what moves the line.
             "Lose N HP, never below half your HP at combat start. Lyney and ",
             "A Five-Century Act lower that line. Drained HP returns after ",
-            "Regain that much drained HP. It never returns more than you ",
+            # The pool to 75 (2026-10-09): the guest rule's words.
+            "Regain that much drained HP, never more than you drained. A ",
             "A guest joins at the back. On a full stage, the oldest guest ",
-            "Acts at the end of your turn. Summoning one already on stage ",
+            "Exhausts. Acts at the end of your turn. When it leaves, this ",
     ):
         assert clause in tips, clause
 
@@ -594,6 +600,8 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     badges = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
               / "FurinaStageBadges.cs").read_text(encoding="utf-8")
     assert "FurinaStageLaw.CharlotteActRepay" in badges
+    # The pool to 75: and the upgraded number beside it.
+    assert "FurinaStageLaw.CharlotteActRepayUpgraded" in badges
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
     # The relic's number -- what a carried-out Plan adds to the Casket since
@@ -1177,6 +1185,11 @@ STAGE_SUMMONERS = {
     "proto_fs_guest_star_lyney": "Lyney",
     "proto_fs_guest_star_sigewinne": "Sigewinne",
     "proto_fs_guest_star_chevreuse": "Chevreuse",
+    # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md sec.5).
+    "proto_fs_guest_star_freminet": "Freminet",
+    "proto_fs_guest_star_navia": "Navia",
+    "proto_fs_guest_star_neuvillette": "Neuvillette",
+    "proto_fs_guest_star_escoffier": "Escoffier",
 }
 
 
@@ -1190,6 +1203,11 @@ def test_every_summoning_row_and_no_other_owes_the_summon_tips():
     expected = {rid: ["ArmKeywordTips.ForSummon", "ArmKeywordTips.ForGuestStar",
                       f"ArmKeywordTips.For{who}"]
                 for rid, who in STAGE_SUMMONERS.items()}
+    # The pool to 75: two rows NAME a Guest Star without summoning one
+    # (Casting Call, Grand Entrance) and owe the keyword's tip alone.
+    expected.update({rid: ["ArmKeywordTips.ForGuestStar"]
+                     for rid in ("proto_fs_casting_call",
+                                 "proto_fs_grand_entrance")})
     assert found == expected
     # v2's trio summon op is gone from the emitter's vocabulary.
     assert "stage_summon" not in gen.MECHANICAL_OPS
@@ -1215,17 +1233,23 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
     `FurinaStageLaw` (`EB-89`)."""
     tips = TIPS_CS.read_text(encoding="utf-8")
     for clause in (
+            # The pool to 75 (2026-10-09): the guest rule, and each guest's
+            # tip upgraded on an upgraded card.
             '"A guest joins at the back. On a full stage, the oldest guest "',
-            '"acts once more and leaves first."',
-            '"Acts at the end of your turn. Summoning one already on stage "',
-            '"makes it act and stay."',
-            "StagePerformerBadge.ActText(StagePerformer.Charlotte));",
-            "StagePerformerBadge.ActText(StagePerformer.Wriothesley));",
-            "StagePerformerBadge.ActText(StagePerformer.Lynette));",
-            "StagePerformerBadge.ActText(StagePerformer.Clorinde));",
-            "StagePerformerBadge.ActText(StagePerformer.Lyney));",
-            "StagePerformerBadge.ActText(StagePerformer.Sigewinne));",
-            "StagePerformerBadge.ActText(StagePerformer.Chevreuse));"):
+            '"leaves first, and its card goes to your [gold]Discard "',
+            '"Exhausts. Acts at the end of your turn. When it leaves, this "',
+            '"card goes to your [gold]Discard Pile[/gold]."',
+            "ActText(StagePerformer.Charlotte, card.IsUpgraded));",
+            "ActText(StagePerformer.Wriothesley, card.IsUpgraded));",
+            "ActText(StagePerformer.Lynette, card.IsUpgraded));",
+            "ActText(StagePerformer.Clorinde, card.IsUpgraded));",
+            "ActText(StagePerformer.Lyney, card.IsUpgraded));",
+            "ActText(StagePerformer.Sigewinne, card.IsUpgraded));",
+            "ActText(StagePerformer.Chevreuse, card.IsUpgraded));",
+            "ActText(StagePerformer.Freminet, card.IsUpgraded));",
+            "ActText(StagePerformer.Navia, card.IsUpgraded));",
+            "ActText(StagePerformer.Neuvillette, card.IsUpgraded));",
+            "ActText(StagePerformer.Escoffier, card.IsUpgraded));"):
         assert clause in tips, clause
     for gone in ("StagePerformer.Usher", "StagePerformer.Chevalmarin",
                  "StagePerformer.Crabaletta", "[gold]Bow[/gold]"):
@@ -1244,11 +1268,11 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     the numerals written out."""
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
-        "A guest joins at the back. On a full stage, the oldest guest acts "
-        "once more and leaves first.")
+        "A guest joins at the back. On a full stage, the oldest guest leaves "
+        "first, and its card goes to your Discard Pile.")
     assert rows["Guest Star"] == (
-        "Acts at the end of your turn. Summoning one already on stage makes "
-        "it act and stay.")
+        "Exhausts. Acts at the end of your turn. When it leaves, this card "
+        "goes to your Discard Pile.")
     assert rows["Charlotte"] == (
         "The first time you Repay each turn, draw 1 card. Act: Repay 2.")
     for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",

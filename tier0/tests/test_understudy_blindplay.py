@@ -6511,10 +6511,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Drain": ["Lose N HP, never below half your HP at combat start. Lyney "
                   "and ", "A Five-Century Act lower that line. Drained HP "
                   "returns after ", "combat."],
-        "Repay": ["Regain that much drained HP. It never returns more than "
-                  "you ", "drained."],
+        # The pool to 75 (2026-10-09): the guest rule's words.
+        "Repay": ["Regain that much drained HP, never more than you ",
+                  "drained. A ", " counts the HP it returns."],
         "Summon": ["A guest joins at the back. On a full stage, the oldest "
-                   "guest ", "acts once more and leaves first."],
+                   "guest ", "leaves first, and its card goes to your "],
+        "oldest guest": ["The guest on stage longest: the one a fourth summon "
+                         "would ", "remove."],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's
         # own words. The strike number is interpolated on both sides -- the
         # mod off `KokomiOverhaulLaw.CasketStrike`, the page off
@@ -6545,8 +6548,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # The Guest Star keyword and the four guests' badges (the Salon's
         # Tab, 2026-10-05): the prose either side of each golded span and
         # interpolated numeral.
-        "Guest Star": ["Acts at the end of your turn. Summoning one already "
-                       "on stage ", "makes it act and stay."],
+        "Guest Star": ["Exhausts. Acts at the end of your turn. When it "
+                       "leaves, this ", "card goes to your "],
         "Charlotte": ["The first time you ", " each turn, draw ",
                       " card. Act: "],
         "Wriothesley": ["Whenever you ", ", deal that much ",
@@ -8701,9 +8704,10 @@ _R12_SMITH = (
      "Deal 7 damage. Drain 3: deal 12 instead."),
     # The loop fix (2026-10-04) took Take the Stage's cost cut away; Guest
     # Star: Chevreuse's upgrade was the cost cut alone, and (the Salon's Tab,
-    # 2026-10-05) every Guest Star's is now; Charlotte takes the slot.
-    ("KLEEMOD-PROTO_FS_GUEST_STAR_CHARLOTTE",
-     "Summon Charlotte."),
+    # 2026-10-05) every Guest Star's was; the pool to 75 (2026-10-09) gave
+    # the guests their line or act instead, and Tutti! takes the slot.
+    ("KLEEMOD-PROTO_FS_TUTTI",
+     "Each guest acts."),
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
@@ -10669,23 +10673,24 @@ def test_the_smith_prints_a_spark_price_the_upgrade_cuts(
 
 
 def test_the_smith_prints_an_energy_cost_the_upgrade_cuts():
-    """A cost-only upgrade (Guest Star: Chevreuse, 1 to 0; Salon Debut's until
+    """A cost-only upgrade (Tutti!, 1 to 0, since the pool to 75; Guest Star:
+    Chevreuse's until then; Salon Debut's until
     the 2026-10-04 loop fix) cuts the energy cost and nothing else, and
     the Smith said "its upgrade changes nothing this face prints". It now
     prints the upgraded copy's cost slot the way it prints a Spark price cut.
     Seen to FAIL: the page printed the no-number note."""
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
-    face = "Summon Charlotte."
+    face = "Each guest acts."
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_FS_GUEST_STAR_CHARLOTTE",
-         "name": "Guest Star: Charlotte",
+        {"id": "KLEEMOD-PROTO_FS_TUTTI",
+         "name": "Tutti!",
          "cost": "1", "type": "Skill", "description": face})
     page = blindplay.observe(smith)
     assert f"    Upgraded: cost 0 — {face}" in page
     assert qa_packet.NO_PREVIEW_NO_NUMBER not in page
     assert qa_packet.upgraded_energy_delta(
-        "KLEEMOD-PROTO_FS_GUEST_STAR_CHARLOTTE") == -1
+        "KLEEMOD-PROTO_FS_TUTTI") == -1
 
 
 def test_an_upgraded_copy_in_hand_shows_its_upgraded_spark_price():

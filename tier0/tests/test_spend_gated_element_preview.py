@@ -1,8 +1,10 @@
 """Furina v2 seat round (2026-10-04): chooser titles and the Spend-gated
 element preview, as the generator decides them.
 
-Tidal Flourish and Quick Flourish apply Hydro only in their Spend mode, so
-their reaction preview is emitted with `elementOnlyOnSpend: true`. Interval
+Tidal Flourish and Quick Flourish applied Hydro only in their Spend mode, so
+their reaction preview was emitted with `elementOnlyOnSpend: true`; since the
+2026-10-09 playtest trim no Furina row is Spend-gated (Tidal Flourish's plain
+mode applies Hydro too). Interval
 Bell's Spend price moves on upgrade, so its option title is rendered per side
 rather than cut at the template's colon.
 """
@@ -29,7 +31,15 @@ def _rows() -> dict:
 
 def test_spend_only_element_is_detected_on_the_two_flourishes():
     rows = _rows()
-    assert gen.element_only_in_gated_modes(rows["proto_fs_tidal_flourish"])
+    # 2026-10-09 playtest trim (review/records/coop-human-playtest-2026-10-09.md
+    # pick 2): Tidal Flourish's plain mode applies Hydro, so it is no longer
+    # Spend-gated; the detector's positive case is its old shape, rebuilt.
+    assert not gen.element_only_in_gated_modes(rows["proto_fs_tidal_flourish"])
+    import copy
+    gated = copy.deepcopy(rows["proto_fs_tidal_flourish"])
+    plain_hit = gated["effects"][0]["modes"][0]["effects"][0]
+    plain_hit.pop("applies_element")
+    assert gen.element_only_in_gated_modes(gated)
     # The Salon's Tab (2026-10-05): Quick Flourish's Spend is a fixed price
     # now, so its Hydro rides its only (unmoded) hit; Chevalmarin's Hydro is
     # in both of its modes.

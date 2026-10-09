@@ -347,6 +347,12 @@ class Card:
     # `KokomiResources.DiscardsThisTurn`. A sheet field
     # (`gen_klee_cards.CARD_FIELDS`).
     cost_reduction_per_discard_this_turn: int = 0
+    # FURINA, THE POOL TO 75 (2026-10-09): Star Turn, "Costs 1 less for
+    # every 6 Fanfare you have". The value is the Fanfare per 1 off, read at
+    # cost time off her Fanfare (`furina_stage.fanfare`); the mod's twin is
+    # the card's own `TryModifyEnergyCostInCombat` over
+    # `FurinaStage.FanfareOf`. A sheet field (`gen_klee_cards.CARD_FIELDS`).
+    cost_reduction_per_fanfare: int = 0
     # EnergyCost.AddThisTurn / AddThisCombat / SetToFreeThisTurn -- state the
     # base game keeps on the CARD INSTANCE, not on its owner. Two copies of
     # the same card discount themselves independently, and the combat-scoped

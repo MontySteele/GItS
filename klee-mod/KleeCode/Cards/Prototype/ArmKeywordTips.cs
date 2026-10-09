@@ -109,6 +109,12 @@ public static class ArmKeywordTips
     public const string LyneyKey = "KLEEMOD-ARM_STAGE_LYNEY";
     public const string SigewinneKey = "KLEEMOD-ARM_STAGE_SIGEWINNE";
     public const string ChevreuseKey = "KLEEMOD-ARM_STAGE_CHEVREUSE";
+    // The pool to 75's four guests (2026-10-09).
+    public const string OldestGuestKey = "KLEEMOD-ARM_STAGE_OLDEST_GUEST";
+    public const string FreminetKey = "KLEEMOD-ARM_STAGE_FREMINET";
+    public const string NaviaKey = "KLEEMOD-ARM_STAGE_NAVIA";
+    public const string NeuvilletteKey = "KLEEMOD-ARM_STAGE_NEUVILLETTE";
+    public const string EscoffierKey = "KLEEMOD-ARM_STAGE_ESCOFFIER";
     // THE TEXT PASS OF 2026-10-08: three golded words that hovered nothing.
     // `Elemental Reaction` is printed on 13 faces across every kit; `Sakura`
     // and `Lightfall Sword` are placed objects with badges, the shape Bomb and
@@ -915,61 +921,95 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, DrainKey, DrainBody);
 
-    /// <summary>Rule 2: Repay N.</summary>
+    /// <summary>Rule 2: Repay N. The pool to 75 (Hymn of Renewal's reading,
+    /// the paper's Review section): a Repay counts the HP it returns.
+    /// </summary>
     internal const string RepayBody =
-        "Regain that much drained HP. It never returns more than you "
-      + "drained.";
+        "Regain that much drained HP, never more than you drained. A Repay "
+      + "counts the HP it returns.";
 
     public static IEnumerable<IHoverTip> ForRepay(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, RepayKey, RepayBody);
 
-    /// <summary>Rule 5: where a guest goes.</summary>
+    /// <summary>Rule 5 (the pool to 75, sec.3): where a guest goes.</summary>
     public static IEnumerable<IHoverTip> ForSummon(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SummonKey,
             "A guest joins at the back. On a full stage, the oldest guest "
-          + "acts once more and leaves first.");
+          + "leaves first, and its card goes to your [gold]Discard "
+          + "Pile[/gold].");
 
-    /// <summary>The Guest Star keyword: one of each.</summary>
+    /// <summary>The Guest Star keyword (the pool to 75, sec.3).</summary>
     public static IEnumerable<IHoverTip> ForGuestStar(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, GuestStarKey,
-            "Acts at the end of your turn. Summoning one already on stage "
-          + "makes it act and stay.");
+            "Exhausts. Acts at the end of your turn. When it leaves, this "
+          + "card goes to your [gold]Discard Pile[/gold].");
+
+    /// <summary>The pool to 75 (sec.5): "Oldest guest" is the one a fourth
+    /// summon would remove.</summary>
+    public static IEnumerable<IHoverTip> ForOldestGuest(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, OldestGuestKey,
+            "The guest on stage longest: the one a fourth summon would "
+          + "remove.");
+
+    // A guest's own tip: its line and act, upgraded on an upgraded card (the
+    // pool to 75: an upgrade raises the line or the act).
 
     public static IEnumerable<IHoverTip> ForCharlotte(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, CharlotteKey,
-             StagePerformerBadge.ActText(StagePerformer.Charlotte));
+             StagePerformerBadge.ActText(StagePerformer.Charlotte, card.IsUpgraded));
 
     public static IEnumerable<IHoverTip> ForWriothesley(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, WriothesleyKey,
-             StagePerformerBadge.ActText(StagePerformer.Wriothesley));
+             StagePerformerBadge.ActText(StagePerformer.Wriothesley, card.IsUpgraded));
 
     public static IEnumerable<IHoverTip> ForLynette(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LynetteKey,
-             StagePerformerBadge.ActText(StagePerformer.Lynette));
+             StagePerformerBadge.ActText(StagePerformer.Lynette, card.IsUpgraded));
 
     public static IEnumerable<IHoverTip> ForClorinde(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, ClorindeKey,
-             StagePerformerBadge.ActText(StagePerformer.Clorinde));
+             StagePerformerBadge.ActText(StagePerformer.Clorinde, card.IsUpgraded));
 
     public static IEnumerable<IHoverTip> ForLyney(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, LyneyKey,
-             StagePerformerBadge.ActText(StagePerformer.Lyney));
+             StagePerformerBadge.ActText(StagePerformer.Lyney, card.IsUpgraded));
 
     public static IEnumerable<IHoverTip> ForSigewinne(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SigewinneKey,
-             StagePerformerBadge.ActText(StagePerformer.Sigewinne));
+             StagePerformerBadge.ActText(StagePerformer.Sigewinne, card.IsUpgraded));
 
     public static IEnumerable<IHoverTip> ForChevreuse(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, ChevreuseKey,
-             StagePerformerBadge.ActText(StagePerformer.Chevreuse));
+             StagePerformerBadge.ActText(StagePerformer.Chevreuse, card.IsUpgraded));
+
+    public static IEnumerable<IHoverTip> ForFreminet(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, FreminetKey,
+             StagePerformerBadge.ActText(StagePerformer.Freminet, card.IsUpgraded));
+
+    public static IEnumerable<IHoverTip> ForNavia(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, NaviaKey,
+             StagePerformerBadge.ActText(StagePerformer.Navia, card.IsUpgraded));
+
+    public static IEnumerable<IHoverTip> ForNeuvillette(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, NeuvilletteKey,
+             StagePerformerBadge.ActText(StagePerformer.Neuvillette, card.IsUpgraded));
+
+    public static IEnumerable<IHoverTip> ForEscoffier(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, EscoffierKey,
+             StagePerformerBadge.ActText(StagePerformer.Escoffier, card.IsUpgraded));
 }

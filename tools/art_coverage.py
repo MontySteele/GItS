@@ -416,12 +416,6 @@ KNOWN_STALE = {
     "proto_fs_between_acts": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
-    "proto_fs_bring_the_house_down": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_bubble_aria": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
     "proto_fs_casting_agent": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -443,9 +437,6 @@ KNOWN_STALE = {
     "proto_fs_ensemble_piece": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
-    "proto_fs_final_bow": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
     "proto_fs_five_century_act": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -455,9 +446,6 @@ KNOWN_STALE = {
     "proto_fs_gala_premiere": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
-    "proto_fs_grand_entrance": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
     "proto_fs_grand_finale": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -465,15 +453,6 @@ KNOWN_STALE = {
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_guest_of_honor": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_guest_star_escoffier": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_guest_star_navia": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_guest_star_neuvillette": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_hold_your_places": (
@@ -506,9 +485,6 @@ KNOWN_STALE = {
     "proto_fs_raise_a_toast": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
-    "proto_fs_regina_of_all_waters": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
     "proto_fs_revolving_stage": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -519,9 +495,6 @@ KNOWN_STALE = {
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_share_the_spotlight": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_sold_out": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_soliloquy": (
@@ -536,9 +509,6 @@ KNOWN_STALE = {
     "proto_fs_star_billing": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
-    "proto_fs_star_turn": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
     "proto_fs_step_forward": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -549,9 +519,6 @@ KNOWN_STALE = {
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_tide_of_applause": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_tutti": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_warm_reception": (
@@ -567,12 +534,42 @@ KNOWN_STALE = {
 KNOWN_MISSING = {
     "center_of_attention": "Furina's second Ancient card (pool completion, 2026-10-01); no painting yet.",
     "proto_fs_a_five_century_act": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
+    "proto_fs_against_the_tide": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_all_in": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_balance_the_books": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_casting_call": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_clean_slate": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_cleansing_torrent": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_commanding_gaze": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_crashing_waves": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_crescendo": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_ebb_and_flow": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_encore": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_ensemble_cast": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_fountain_of_lucine": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
+    "proto_fs_gentle_current": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_grand_absolution": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_guest_star_freminet": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_high_stakes": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_hold_the_stage": "Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md); no painting yet.",
+    "proto_fs_hydro_lance": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_hymn_of_many_waters": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
+    "proto_fs_hymn_of_renewal": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_ousia_pledge": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_overdraft": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_pay_the_tab": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_pneuma_tides": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_prima_donna": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_riptide_lunge": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_rising_tide": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_salons_encore": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
     "proto_fs_salons_tab": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
+    "proto_fs_showstopper": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_soothing_waters": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_standing_room_only": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_surging_waters": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
+    "proto_fs_the_deluge": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_undercurrent": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
 }
 
 

@@ -44,13 +44,27 @@ public class KitVerbBaseTriggerProtoPinTests
         Assert.DoesNotContain("AttackCommand.Execute", calls);
     }
 
+    // THE POOL TO 75 (2026-10-09, sec.3): a summon has no effect, so
+    // `SummonGuest` reaches no act; every act -- the end of the turn's, the
+    // bought ones (Encore!, Tutti!, Final Bow, Showstopper) -- is the ONE
+    // `StageDirector.Act`.
     [Theory]
-    [InlineData("EndOfTurn")]
-    [InlineData("SummonGuest")]
-    public void The_stage_act_and_bow_both_reach_the_one_act(string method)
+    [InlineData("ActAll")]
+    [InlineData("ActOldest")]
+    [InlineData("FinalBow")]
+    public void Every_bought_or_scheduled_act_reaches_the_one_act(string method)
     {
         Assert.Contains("StageDirector.Act",
                         Il.Calls(Il.Method("StageDirector", method)));
+    }
+
+    [Fact]
+    public void The_end_of_turn_acts_through_act_all_and_a_summon_acts_never()
+    {
+        Assert.Contains("StageDirector.ActAll",
+                        Il.Calls(Il.Method("StageDirector", "EndOfTurn")));
+        Assert.DoesNotContain("StageDirector.Act",
+                              Il.Calls(Il.Method("StageDirector", "SummonGuest")));
     }
 
     [Fact]

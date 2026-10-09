@@ -612,6 +612,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # now-line verbs, one awaited `KokomiCards.<Kind>` call per
                   # `kind:` (`KOKOMI_KINDS`), Varka's shape.
                   "kokomi",
+                  # FURINA, THE POOL TO 75 (2026-10-09): the guest verbs the
+                  # grammar cannot spell, one awaited `FurinaCards.<Kind>`
+                  # call per `kind:` (`FURINA_KINDS`), Kokomi's shape.
+                  "furina",
                   # PLAN-ONLY verbs: legal inside a row's `plan:` list and
                   # nowhere else, which `plan_reason` and `blocked_reason`
                   # enforce by name. Each is one `KokomiPlan.Kind`.
@@ -896,6 +900,11 @@ ARM_KEYWORDS = (
     # Stage: no face prints them.
     ArmKeyword("Drain", ("Drain",), "ArmKeywordTips.ForDrain"),
     ArmKeyword("Repay", ("Repay",), "ArmKeywordTips.ForRepay"),
+    # THE POOL TO 75 (2026-10-09, sec.5: "'Oldest guest' is the one a fourth
+    # summon would remove; cards that name it carry a tip saying so"). Two
+    # words, `current element`'s shape, so the tip never fires on prose.
+    ArmKeyword("oldest guest", ("oldest guest",),
+               "ArmKeywordTips.ForOldestGuest"),
     # VARKA'S THREE (the Oath rework, review/active/varka-paper-kit-
     # 2026-09-28.md sec.3). `Oath` is what his cards charge, `current
     # element` the one element they read (two words, like `front
@@ -1571,6 +1580,10 @@ PREDICATES_CS = {
     # R276 batch two: the empty-stage answers (Improvised Number, Between
     # Acts) ask the opposite question, at play time.
     "stage_empty": "!FurinaStage.Occupied(Owner.Creature)",
+    # THE POOL TO 75 (2026-10-09): Against the Tide's "within 5 HP of your
+    # Drain line" and Clean Slate's "no drained HP left".
+    "stage_near_line": "FurinaStage.NearLine(Owner.Creature)",
+    "stage_none_drained": "FurinaStage.NoneDrained(Owner.Creature)",
     # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
     # first card you played this turn". The ledger counts a play AFTER it
     # resolves, so the card asking is the first when the count is 0 (the
@@ -1689,6 +1702,8 @@ PREDICATE_TEXT = {
     # "Spend N: <the big number> instead" and no generic clause can say that.
     "stage_occupied": "If a performer is on stage",
     "stage_empty": "If the stage is empty",
+    "stage_near_line": "If you are within 5 HP of your [gold]Drain[/gold] line",
+    "stage_none_drained": "If you have no drained HP left",
     "first_card_this_turn": "If this is the first card you played this turn",
     "spotlight_moved_this_turn":
         "If you moved the [gold]Spotlight[/gold] this turn",
@@ -2040,6 +2055,9 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # THE SALON'S TAB (2026-10-05): a Drain mode's price, "Drain 3:
               # deal 12 instead" -- one awaited call, no locals.
               "stage_drain",
+              # THE POOL TO 75 (2026-10-09): Riptide Lunge's "If this kills an
+              # enemy, Repay 6" -- one awaited call, no locals.
+              "stage_repay",
               # Furina Stage draft 3 (2026-09-25): Tidal Flourish and Quick
               # Cue's Spend modes "deal N and apply Hydro". Emitted by the
               # top-level arm's own `_aura_lines`, whose one local sits inside
@@ -2149,6 +2167,7 @@ BRANCH_FIELDS = {
     "stage_spend": {"op", "amount"},
     "stage_energy_next": {"op", "amount"},
     "stage_drain": {"op", "amount"},
+    "stage_repay": {"op", "amount"},
     "apply_aura": {"op", "element", "target"},
 }
 
@@ -2586,6 +2605,22 @@ KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "draw_if_target_weak", "resonance",
 #: The kind that aims at the enemy the card was played on.
 KOKOMI_AIMED_KINDS = {"draw_if_target_weak"}
 KOKOMI_FIELDS = {"op", "kind", "target", "amount"}
+#: `furina` (THE POOL TO 75, 2026-10-09, review/active/furina-pool-growth-
+#: 2026-10-09.md sec.5): one kind per guest verb the grammar cannot spell,
+#: each ONE awaited `FurinaCards.<method>` call
+#: (Powers/Prototype/FurinaStageCards.cs). A kind that prints a number
+#: carries it as `amount`, rendered and upgraded as the card's `FsAmount` var
+#: (upgrade key `furina_amount`). Sim twin: `furina_stage.KINDS` /
+#: `furina_stage.kind`.
+FURINA_KINDS = {
+    "act_oldest": "ActOldest",
+    "act_all": "ActAll",
+    "final_bow": "FinalBow",
+    "tutor_guest": "TutorGuest",
+    "repay_next": "RepayNextTurn",
+}
+FURINA_KIND_AMOUNT = {"final_bow", "repay_next"}
+FURINA_FIELDS = {"op", "kind", "amount"}
 #: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
 #: arrives upgraded is the card's own upgrade (`upgraded_grant`).
 GRANT_KAPOW_EACH_TURN_FIELDS = {"op"}
@@ -3133,6 +3168,35 @@ APPLY_POWERS = {
     "fs_bis": ("BisPower", None,
         "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep "
         "half of it."),
+    # THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md sec.5).
+    # Every class lives in klee-mod/KleeCode/Powers/Prototype/
+    # FurinaPool75Powers.cs.
+    "fs_grand_entrance": ("GrandEntrancePower", None,
+        "Whenever you play a Guest Star, [gold]Repay[/gold] {X}."),
+    "fs_showstopper": ("ShowstopperPower", None,
+        "At the end of your turn, [gold]Spend[/gold] 5: your guests act "
+        "again."),
+    "fs_ensemble_cast": ("EnsembleCastPower", None,
+        "You have 4 guest seats."),
+    "fs_crescendo": ("CrescendoPower", None,
+        "The first time you [gold]Spend[/gold] each turn, draw {X} card."),
+    "fs_prima_donna": ("PrimaDonnaPower", None,
+        "At the start of your turn, if you have 10 or more "
+        "[gold]Fanfare[/gold], gain 1 Energy."),
+    "fs_standing_room_only": ("StandingRoomOnlyPower", None,
+        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it "
+        "is at least 1, gain 1 [gold]Strength[/gold]."),
+    "fs_high_stakes": ("HighStakesPower", None,
+        "While you are within 5 HP of your [gold]Drain[/gold] line, your "
+        "Attacks deal {X} additional damage."),
+    "fs_regina_of_all_waters": ("ReginaOfAllWatersPower", None,
+        "At the start of your turn, [gold]Drain[/gold] 3. If you do, gain 1 "
+        "[gold]Strength[/gold]."),
+    "fs_pneuma_tides": ("PneumaTidesPower", None,
+        "At the start of your turn, [gold]Repay[/gold] {X}."),
+    "fs_hymn_of_renewal": ("HymnOfRenewalPower", None,
+        "Whenever you [gold]Repay[/gold] 4 or more HP at once, gain 1 "
+        "[gold]Strength[/gold]."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -3975,6 +4039,11 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        "varka_upgraded",
                        # THE KOKOMI EXPANSION: a `kokomi` op's own number.
                        "kokomi_amount",
+                       # FURINA, THE POOL TO 75: a `furina` op's own number
+                       # (its `FsAmount` var), a Guest Star's upgrade (the
+                       # guest's line or act, read off `IsUpgraded`), and a
+                       # fixed Drain's price.
+                       "furina_amount", "guest_upgraded", "stage_drain",
                        "bonus_per_detonation", "bonus_slope",
                        # Fanfare rework Track C.2 (2026-07-28): the
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
@@ -4349,6 +4418,11 @@ CARD_FIELDS = {
     # `KokomiResources.DiscardsThisTurn` (MementoMori's count). A positive
     # literal int on a numeric-cost row only (`card_level_reason`).
     "cost_reduction_per_discard_this_turn",
+    # FURINA, THE POOL TO 75 (2026-10-09): Star Turn's "Costs 1 less for every
+    # 6 Fanfare you have". The value is the Fanfare per 1 off; emitted as the
+    # card's own `TryModifyEnergyCostInCombat` over `FurinaStage.FanfareOf`.
+    # Sim twin: `combat.card_cost`'s `cost_reduction_per_fanfare`.
+    "cost_reduction_per_fanfare",
 }
 
 
@@ -4412,6 +4486,16 @@ def card_level_reason(
                 "basic_tag:, the starter's one answer (EB-543)")
     # Element identities (2026-10-01): a discard discount is a positive
     # literal rate on a card with a printed number to discount.
+    per_fanfare = card.get("cost_reduction_per_fanfare")
+    if per_fanfare is not None:
+        if (not isinstance(per_fanfare, int) or isinstance(per_fanfare, bool)
+                or per_fanfare <= 0):
+            return "cost_reduction_per_fanfare must be a positive literal int"
+        if card.get("character") != "furina":
+            return "cost_reduction_per_fanfare on a non-Furina row"
+        if not isinstance(card.get("cost"), int):
+            return ("cost_reduction_per_fanfare on an X or unprinted cost -- "
+                    "there is no number to discount")
     rate = card.get("cost_reduction_per_discard_this_turn")
     if rate is not None:
         if not isinstance(rate, int) or isinstance(rate, bool) or rate <= 0:
@@ -5045,6 +5129,19 @@ def blocked_reason(
                 return f"{op} field(s) {sorted(unknown)} not understood"
             if eff.get("filter") not in FETCH_FROM_DISCARD_FILTERS:
                 return f"fetch_from_discard filter '{eff.get('filter')}'"
+        if op == "furina":
+            unknown = set(eff) - FURINA_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            kind = eff.get("kind")
+            if kind not in FURINA_KINDS:
+                return f"furina kind {kind!r}"
+            if ("amount" in eff) != (kind in FURINA_KIND_AMOUNT):
+                return f"furina {kind} amount mismatch"
+            if "amount" in eff and (not isinstance(eff["amount"], int)
+                                    or isinstance(eff["amount"], bool)
+                                    or eff["amount"] <= 0):
+                return "furina amount must be a positive literal int"
         if op == "kokomi":
             unknown = set(eff) - KOKOMI_FIELDS
             if unknown:
@@ -6231,13 +6328,15 @@ def exhausts_turn_calc_rider(card: dict,
             "KokomiResources.ExhaustsThisTurn(card.Owner)")
 
 
-#: The seven guests a `stage_guest` row may name, as `FurinaStage.Guests`
+#: The eleven guests a `stage_guest` row may name, as `FurinaStage.Guests`
 #: spells them (the Salon's Tab, 2026-10-05). A closed set, checked at emit
 #: rather than passed through: a typo that degraded quietly into "somebody"
 #: is the one failure a named summon could hide for a whole round.
 FURINA_STAGE_GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
                        # The pool to 39 (2026-10-05).
-                       "lyney", "sigewinne", "chevreuse")
+                       "lyney", "sigewinne", "chevreuse",
+                       # The pool to 75 (2026-10-09).
+                       "freminet", "navia", "neuvillette", "escoffier")
 
 
 #: THE STAGE's statement ops (the Salon's Tab, 2026-10-05), each a single
@@ -6270,8 +6369,11 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
             n = amount
         else:
             n = str(int(eff.get("amount", 0)))
+        # THE POOL TO 75 (sec.3): the card hands itself over -- it exhausts,
+        # its seat holds it until the guest leaves, and its IsUpgraded raises
+        # the guest's line or act.
         return ("await FurinaStage.GuestStar(choiceContext, Owner.Creature, "
-                f'"{eff["member"]}", {n});')
+                f'"{eff["member"]}", {n}, this);')
     if op == "stage_energy_next":
         # Chevreuse's mechanism: the game's EnergyNextTurnPower.
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
@@ -6304,6 +6406,18 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
 #: `stage_bows`) left with v2 (the Salon's Tab, 2026-10-05).
 STAGE_COUNT_CS = {
     "stage_spent": "static (card, _) => FurinaStage.Spent(card)",
+    # THE POOL TO 75 (2026-10-09): Undercurrent's "for each time you have
+    # Drained this combat", Balance the Books' "half your drained HP", Rising
+    # Tide's "for each time you Repaid this turn" and Grand Absolution's
+    # "that much" (what this play's Repay returned; before the play, what a
+    # Repay of everything would return).
+    "stage_drains": "static (card, _) => "
+                    "FurinaStage.DrainsThisCombat(card.Owner?.Creature)",
+    "stage_half_drained": "static (card, _) => "
+                          "FurinaStage.HalfDrained(card.Owner?.Creature)",
+    "stage_repays_turn": "static (card, _) => "
+                         "FurinaStage.RepaysThisTurn(card.Owner?.Creature)",
+    "stage_repaid": "static (card, _) => FurinaStage.RepaidOrDrained(card)",
 }
 
 
@@ -7318,6 +7432,10 @@ def build_vars(card: dict) -> list[str]:
             # THE KOKOMI EXPANSION: the kind's printed number, read back by
             # `KokomiCards` off the card.
             out.append(f'new DynamicVar("KkAmount", {int(eff["amount"])}m)')
+        elif op == "furina" and "amount" in eff:
+            # THE POOL TO 75: the kind's printed number, read back by
+            # `FurinaCards` off the card.
+            out.append(f'new DynamicVar("FsAmount", {int(eff["amount"])}m)')
         elif op == "varka":
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
@@ -7761,6 +7879,13 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # play-time read.
         "kokomi_amount": any(e["op"] == "kokomi" and "amount" in e
                              for e in effects),
+        # FURINA, THE POOL TO 75: a `furina` op's printed number; a Guest
+        # Star's upgrade, read at play time off `IsUpgraded` (no var); a fixed
+        # Drain's price, `(IsUpgraded ? up : base)` like a fixed Spend's.
+        "furina_amount": any(e["op"] == "furina" and "amount" in e
+                             for e in effects),
+        "guest_upgraded": any(e["op"] == "stage_guest" for e in effects),
+        "stage_drain": any(e["op"] == "stage_drain" for e in effects),
         "upgraded_grant": any(e["op"] in ("grant_kapow_each_turn",
                                           "plant_homework_bomb")
                               or (e["op"] == "kokomi"
@@ -9403,7 +9528,47 @@ def stage_raise_amount(card: dict, eff: dict) -> str | None:
     if (op in STAGE_AMOUNT_VARS and stage_amount_upgrade(card, op)
             and eff is stage_amount_var_effect(card, op)):
         return f'DynamicVars["{STAGE_AMOUNT_VARS[op]}"].IntValue'
+    # THE POOL TO 75 (2026-10-09): a FIXED price an upgrade moves (Encore!
+    # "Spend 4 [3]", Sold Out, Overdraft "Drain 4 [3]", All In, Ebb and Flow)
+    # is paid at the swapped number, the one its gate reads.
+    if op == "stage_spend":
+        return stage_spend_amount_cs(card, eff)
+    if op == "stage_drain":
+        return stage_drain_amount_cs(card, eff)
     return None
+
+
+def stage_drain_amount_cs(card: dict, eff: dict) -> str | None:
+    """THE POOL TO 75 (2026-10-09): the C# price of a TOP-LEVEL `stage_drain`
+    an upgrade moves, `(IsUpgraded ? up : base)`, or None (the literal). The
+    `stage_drain` key binds the first top-level `stage_drain` -- tier0's
+    `upgrades.apply_upgrade` binds the same one -- and the fixed-price gate
+    and the payment both read it (`stage_fixed_price_cs`)."""
+    if eff.get("op") != "stage_drain":
+        return None
+    delta = int(upgrade_plan(card)[0].get("stage_drain", 0) or 0)
+    if not delta:
+        return None
+    first = next((fx for fx in card.get("effects", [])
+                  if fx.get("op") == "stage_drain"), None)
+    if first is not eff:
+        return None
+    base = int(eff.get("amount", 1))
+    return f"(IsUpgraded ? {max(0, base + delta)} : {base})"
+
+
+def stage_fixed_price_cs(card: dict) -> str | None:
+    """The C# price a fixed Drain or Spend's gate reads: the literal, or the
+    upgrade's swap (`stage_drain_amount_cs`, `stage_spend_amount_cs`), so the
+    gate and the payment read one number."""
+    price = stage_fixed_price(card)
+    if price is None:
+        return None
+    op, amount = price
+    eff = next(fx for fx in card.get("effects") or [] if fx.get("op") == op)
+    swapped = (stage_drain_amount_cs(card, eff) if op == "stage_drain"
+               else stage_spend_amount_cs(card, eff))
+    return swapped or str(amount)
 
 
 def stage_spend_amount_cs(card: dict, eff: dict) -> str | None:
@@ -11381,6 +11546,13 @@ def build_body(
             lines.append(
                 f"await KokomiCards.{method}(choiceContext, this, cardPlay);")
 
+        elif op == "furina":
+            # THE POOL TO 75: one awaited call per kind; the card and the play
+            # ride along so a kind reads its own `FsAmount`.
+            method = FURINA_KINDS[eff["kind"]]
+            lines.append(
+                f"await FurinaCards.{method}(choiceContext, this, cardPlay);")
+
         elif op == "varka":
             # VARKA (the Oath rework): one awaited call per kind. The card and
             # the play ride along so a kind can read its own `Vk*` vars, its
@@ -13090,6 +13262,12 @@ def _authored_face_with_tokens(card: dict) -> str:
         # would otherwise lose its fixed draw to the power's amount.
         if var and f"{{{var}:" in card["description"]:
             continue
+        # THE POOL TO 75 (2026-10-09, Commanding Gaze): a face that already
+        # PRINTS this whole swap (`{IfUpgraded:show:3|2}`) wrote it itself, so
+        # the next bare literal is some other number ("and 2 Weak") and is
+        # left alone.
+        if var and var.startswith("{") and var in card["description"]:
+            continue
         match = _search_outside_placeholder(re.compile(pattern), text, cursor)
         if match is None:
             continue
@@ -14726,6 +14904,24 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("kokomi_amount")
         lines.append('DynamicVars["KkAmount"].UpgradeValueBy('
                      f'{int(deltas["kokomi_amount"])}m);')
+    if "furina_amount" in deltas:
+        done.add("furina_amount")
+        lines.append('DynamicVars["FsAmount"].UpgradeValueBy('
+                     f'{int(deltas["furina_amount"])}m);')
+    if "guest_upgraded" in deltas:
+        # FURINA, THE POOL TO 75 (sec.3): "Upgrades raise the line or the act,
+        # never the cost." The Guest Star hands itself to the summon, which
+        # reads `IsUpgraded`; the guest's tip prints the upgraded line or act.
+        done.add("guest_upgraded")
+        lines.append("// guest_upgraded: the summon reads IsUpgraded off this "
+                     "card; the guest's line or act is raised.")
+    if "stage_drain" in deltas:
+        # FURINA, THE POOL TO 75: a fixed Drain's price, swapped on an
+        # IsUpgraded read where it is gated and where it is paid
+        # (`stage_drain_amount_cs`).
+        done.add("stage_drain")
+        lines.append("// stage_drain: the Drain price swaps on an IsUpgraded "
+                     "read at the gate and the payment.")
     for field, var in VARKA_VAR_FIELDS.items():
         key = f"varka_{field}"
         if key in deltas:
@@ -15132,6 +15328,11 @@ def stage_drain_line_call(card: dict) -> str | None:
     if len(set(amounts)) != 1:
         raise ValueError(f"{card['id']}: a Drain line preview reads one "
                          "Drain price")
+    # THE POOL TO 75: a fixed Drain an upgrade moves previews the number its
+    # gate reads (`stage_fixed_price_cs`).
+    fixed = stage_fixed_price(card)
+    if fixed is not None and fixed[0] == "stage_drain":
+        return f"FurinaStageFacePreview.DrainLine(this, {stage_fixed_price_cs(card)})"
     return f"FurinaStageFacePreview.DrainLine(this, {amounts[0]})"
 
 
@@ -15150,6 +15351,12 @@ def stage_repay_call(card: dict) -> str | None:
         raise ValueError(f"{card['id']}: a Repay preview reads one Repay")
     if ops[0]["op"] == "stage_repay_all":
         return "FurinaStageFacePreview.RepayAll(this)"
+    # THE POOL TO 75: a Repay no upgrade moves owns no `RepayAmount` var
+    # (Clean Slate, Hydro Lance, Cleansing Torrent), so it previews its
+    # literal.
+    if stage_raise_amount(card, ops[0]) is None:
+        return ('FurinaStageFacePreview.Repay(this, '
+                f'{int(ops[0].get("amount", 1))})')
     return ('FurinaStageFacePreview.Repay(this, '
             'DynamicVars["RepayAmount"].IntValue)')
 
@@ -16411,6 +16618,22 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "        base.AddExtraArgsToDescription(description);\n"
             f"{adds}"
             "    }")
+    per_fanfare = card.get("cost_reduction_per_fanfare")
+    if per_fanfare:
+        discard_discount_member = (
+            "\n\n    /// <summary>Sheet `cost_reduction_per_fanfare: "
+            f"{int(per_fanfare)}`: this card\n    /// costs 1 less for every "
+            f"{int(per_fanfare)} Fanfare its owner holds.</summary>\n"
+            "    public override bool TryModifyEnergyCostInCombat(\n"
+            "        CardModel card, decimal originalCost, out decimal modifiedCost)\n"
+            "    {\n"
+            "        modifiedCost = originalCost;\n"
+            "        if (!ReferenceEquals(card, this) || originalCost <= 0m) return false;\n"
+            "        modifiedCost = System.Math.Max(0m, originalCost\n"
+            "            - FurinaStage.FanfareOf(Owner?.Creature) / "
+            f"{int(per_fanfare)});\n"
+            "        return true;\n"
+            "    }")
     discount_rate = card.get("cost_reduction_per_discard_this_turn")
     if discount_rate:
         discard_discount_member = (
@@ -16546,7 +16769,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     stage_gate_member = ""
     stage_reason_member = ""
     if stage_price is not None:
-        op, amount = stage_price
+        op, _literal = stage_price
+        amount = stage_fixed_price_cs(card)
         gate = (f"FurinaStage.CanDrain(SparkCost.OwnerCreatureOf(this), {amount})"
                 if op == "stage_drain" else
                 f"FurinaStage.CanSpend(SparkCost.OwnerCreatureOf(this), {amount})")

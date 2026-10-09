@@ -627,6 +627,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "block_per_attacking_enemy": [_hook("private", "kurage", "write")],
     "double_block": [_hook("private", "kurage", "write")],
     "kokomi": [_hook("private", "kurage", "use")],
+    # FURINA, THE POOL TO 75 (2026-10-09): the `furina` op's guest verbs
+    # (Encore!, Tutti!, Final Bow, Casting Call, Gentle Current) act on, or
+    # fetch for, her guest stage, filed on the stage channel the
+    # `stage_*` ops write.
+    "furina": [_hook("private", "stage", "write")],
     "casket_double": [_hook("private", "kurage", "write")],
     "open_casket": [_hook("private", "kurage", "write")],
     "fetch_open_casket": [_hook("shared", "draw_pile", "use"),

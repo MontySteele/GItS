@@ -291,6 +291,32 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ChevreuseLineVulnerable": _stage("CHEVREUSE_LINE_VULNERABLE"),
     "FurinaStageLaw.FiveCenturyLine": _stage("FIVE_CENTURY_LINE"),
     "FurinaStageLaw.FountainTurns": _stage("FOUNTAIN_TURNS"),
+    # THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
+    # 2026-10-09): the guests' upgraded lines and acts (sec.3), the four new
+    # guests and the new Powers' numbers (sec.5).
+    "FurinaStageLaw.CharlotteActRepayUpgraded": _stage("CHARLOTTE_ACT_REPAY_UPGRADED"),
+    "FurinaStageLaw.SigewinneActRepayUpgraded": _stage("SIGEWINNE_ACT_REPAY_UPGRADED"),
+    "FurinaStageLaw.WriothesleyActDamageUpgraded": _stage("WRIOTHESLEY_ACT_DAMAGE_UPGRADED"),
+    "FurinaStageLaw.LyneyActDamageUpgraded": _stage("LYNEY_ACT_DAMAGE_UPGRADED"),
+    "FurinaStageLaw.LynetteActDamageUpgraded": _stage("LYNETTE_ACT_DAMAGE_UPGRADED"),
+    "FurinaStageLaw.ChevreuseLineWeakUpgraded": _stage("CHEVREUSE_LINE_WEAK_UPGRADED"),
+    "FurinaStageLaw.ClorindeActDamageUpgraded": _stage("CLORINDE_ACT_DAMAGE_UPGRADED"),
+    "FurinaStageLaw.FreminetActDamage": _stage("FREMINET_ACT_DAMAGE"),
+    "FurinaStageLaw.FreminetActDamageUpgraded": _stage("FREMINET_ACT_DAMAGE_UPGRADED"),
+    "FurinaStageLaw.NaviaLineDiscount": _stage("NAVIA_LINE_DISCOUNT"),
+    "FurinaStageLaw.NaviaLineDiscountUpgraded": _stage("NAVIA_LINE_DISCOUNT_UPGRADED"),
+    "FurinaStageLaw.NeuvilletteHydroBonus": _stage("NEUVILLETTE_HYDRO_BONUS"),
+    "FurinaStageLaw.NeuvilletteHydroBonusUpgraded": _stage("NEUVILLETTE_HYDRO_BONUS_UPGRADED"),
+    "FurinaStageLaw.EscoffierActDamage": _stage("ESCOFFIER_ACT_DAMAGE"),
+    "FurinaStageLaw.EscoffierActDamageUpgraded": _stage("ESCOFFIER_ACT_DAMAGE_UPGRADED"),
+    "FurinaStageLaw.EscoffierLineRepay": _stage("ESCOFFIER_LINE_REPAY"),
+    "FurinaStageLaw.EnsembleSeats": _stage("ENSEMBLE_SEATS"),
+    "FurinaStageLaw.ShowstopperSpend": _stage("SHOWSTOPPER_SPEND"),
+    "FurinaStageLaw.NearLine": _stage("NEAR_LINE"),
+    "FurinaStageLaw.HymnThreshold": _stage("HYMN_THRESHOLD"),
+    "FurinaStageLaw.PrimaDonnaFanfare": _stage("PRIMA_DONNA_FANFARE"),
+    "FurinaStageLaw.ReginaDrain": _stage("REGINA_DRAIN"),
+    "FurinaStageLaw.StarTurnFanfarePer": _stage("STAR_TURN_FANFARE_PER"),
     # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,
     # ruled 2026-09-29): the Swirl payout of each current element, and
     # Stormward Stance's Oath bar. Sim twins in `tier0/engine/varka_oath.py`.

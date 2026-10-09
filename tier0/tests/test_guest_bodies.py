@@ -41,6 +41,11 @@ def _scene_map() -> dict[str, str]:
         r'StagePerformer\.(\w+)\s*=>\s*KleePck\.Path\("([^"]+)"\)', fn))
 
 
+#: Performers fielded without a scene of their own (the Osty fallback), each
+#: art debt by name. The pool to 75's Freminet: no body cut yet.
+NO_SCENE_YET = {"Freminet"}
+
+
 def _bounds(text: str) -> dict[str, float]:
     block = text[text.index('[node name="Bounds"'):]
     return {k: float(v) for k, v in re.findall(
@@ -54,9 +59,12 @@ def test_every_performer_has_its_own_literal_scene():
     scenes = _scene_map()
     performers = _performers()
     # The Salon's Tab (2026-10-05): the slice's four guests, and the pool to
-    # 39's three (Lyney, Sigewinne, Chevreuse).
-    assert len(performers) == 7, performers
-    assert set(scenes) == set(performers), set(performers) ^ set(scenes)
+    # 39's three (Lyney, Sigewinne, Chevreuse). The pool to 75 (2026-10-09)
+    # adds four; Freminet has no scene cut yet and stands as the Osty
+    # fallback until the art pass cuts one (named here so it is not silent).
+    assert len(performers) == 11, performers
+    assert set(scenes) == set(performers) - NO_SCENE_YET, (
+        set(performers) ^ set(scenes))
     assert len(set(scenes.values())) == len(scenes), "two performers share a scene"
     for who, path in scenes.items():
         assert (ROOT / "klee-mod" / "pck-src" / path).is_file(), (who, path)

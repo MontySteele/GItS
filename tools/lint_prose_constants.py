@@ -207,6 +207,13 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # FURINA, THE POOL TO 75 (2026-10-09): Ensemble Cast's face is the sheet's
+    # `description:` ("You have 4 guest seats."), which cannot interpolate a
+    # C# constant; its power's badge interpolates `EnsembleSeats`, and
+    # `FurinaGuestRuleTests` pins the seat count.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsEnsembleCast.cs",
+     "FurinaStageLaw.EnsembleSeats", "4"):
+        "the sheet-authored face of the card the constant is the rule of",
     # DROPPED by `EB-345` (R249), and by the lint reporting it stale, which is
     # the whole point of it reporting stale entries. The entry excused True
     # Spark Knight's "for your Attacks to cost 0 (minimum 1)": the shipped

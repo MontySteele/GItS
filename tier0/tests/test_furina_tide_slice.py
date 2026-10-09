@@ -181,8 +181,9 @@ def test_neuvillette_deals_the_hp_drained_this_turn_and_drains_nothing():
     T.drain(st, 2)
     T.act(st, "neuvillette")
     assert f.ledger["drains"] == 2 and st.player.hp == 73
+    # His act deals the 5 drained, plus his own line's +2 on Hydro.
     assert all(e.hp == 200 - 5 - T.NEUVILLETTE_HYDRO_BONUS
-               for e in st.enemies)
+               for e in st.enemies), [e.hp for e in st.enemies]
     st2 = _state()
     st2.player.ftd.stage = ["neuvillette"]
     T.end_of_turn(st2)
@@ -206,13 +207,16 @@ def test_singer_of_many_waters_repays_everything_and_exhausts():
     assert st.player.hp == 78 and st.player.ftd.drained == 0
 
 
-def test_the_draft_pool_is_the_slices_24_and_the_pool_40_ten():
+def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
+    # The pool to 75 (2026-10-09): its 41 join (Neuvillette among them), and
+    # the 2026-10-09 trims' rarities are mirrored: 20 / 35 / 20, the sheet's.
     pool = [c for r in probe.DRAFT_POOL.values() for c in r]
-    assert len(pool) == 34 and len(set(pool)) == 34
+    assert len(pool) == 75 and len(set(pool)) == 75
     assert "ftd_sigewinne" in pool and "ftd_critics_darling" in pool
-    assert "ftd_crowd_gasps" not in pool and "ftd_neuvillette" not in pool
+    assert "ftd_neuvillette" in pool and "ftd_ebb_and_flow" in pool
+    assert "ftd_crowd_gasps" not in pool
     assert {r: len(v) for r, v in probe.DRAFT_POOL.items()} == {
-        "common": 12, "uncommon": 15, "rare": 7}
+        "common": 20, "uncommon": 35, "rare": 20}
 
 
 # ----------------------------------------------------------------------

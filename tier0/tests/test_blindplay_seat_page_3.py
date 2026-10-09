@@ -318,7 +318,7 @@ def test_every_guest_act_kind_matches_the_mod():
                            r"seat\.Key,\s*StageCueKind\.Repay", body))
     guests = re.search(r"Guests =\s*\{([^}]*)\}", src).group(1)
     current = re.findall(r'"(\w+)"', guests)
-    assert len(current) == 7
+    assert len(current) == 11          # the pool to 75's four join
     kinds = {m: blindplay_render.STAGE_MEMBER_KINDS.get(m, "damage")
              for m in current}
     assert {m.capitalize() for m, k in kinds.items() if k == "repay"} \

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
 
@@ -26,6 +27,16 @@ public sealed class StageSeat
     /// <c>FurinaStagePets.Sync</c> has fielded one (always null headless).
     /// </summary>
     public Creature? Pet { get; internal set; }
+
+    /// <summary>The pool to 75's guest rule (sec.3): an upgraded Guest Star
+    /// raises its guest's line or act. True when any card that brought or
+    /// moved this guest was upgraded.</summary>
+    public bool Upgraded { get; internal set; }
+
+    /// <summary>The Guest Star cards this guest holds (sec.3): each exhausted
+    /// when played, and each goes to the discard pile when the guest leaves
+    /// the stage. Empty headless unless a pin hands one in.</summary>
+    public List<CardModel> Cards { get; } = new();
 }
 
 /// <summary>
@@ -80,6 +91,26 @@ public sealed record StageMods
 
     /// <summary>Thunderous Applause: damage to ALL enemies per Spend.</summary>
     public int Thunderous { get; init; }
+
+    // ---- the pool to 75 (review/active/furina-pool-growth-2026-10-09.md) --
+
+    /// <summary>Grand Entrance: Repay per Guest Star played (copies add).
+    /// </summary>
+    public int GrandEntrance { get; init; }
+
+    /// <summary>Showstopper copies: each buys one more round of acts at the
+    /// end of her turn for Spend 5.</summary>
+    public int Showstopper { get; init; }
+
+    /// <summary>Crescendo: cards drawn on the first Spend each turn.</summary>
+    public int Crescendo { get; init; }
+
+    /// <summary>Standing Room Only: Strength per spend-all of at least 1.
+    /// </summary>
+    public int StandingRoomOnly { get; init; }
+
+    /// <summary>Hymn of Renewal: Strength per Repay of 4 or more HP.</summary>
+    public int HymnOfRenewal { get; init; }
 
     public static readonly StageMods None = new();
 }
@@ -201,10 +232,10 @@ public sealed class FurinaStageLedger
 
     /// <summary>A newcomer takes the back seat. Null on a full stage (the
     /// caller makes room first).</summary>
-    public StageSeat? Seat(StagePerformer who)
+    public StageSeat? Seat(StagePerformer who, bool upgraded = false)
     {
         if (IsFull) return null;
-        var seat = new StageSeat(who);
+        var seat = new StageSeat(who) { Upgraded = upgraded };
         _seats.Add(seat);
         Note(new StageBeat(ArriveEvent, who, _seats.Count - 1, Fanfare, 0, "",
                            SeatKey: seat.Key));
@@ -223,6 +254,20 @@ public sealed class FurinaStageLedger
         return seat;
     }
 
+    /// <summary>The pool to 75's duplicate copy (sec.3): the guest in
+    /// <paramref name="index"/> moves to the newest seat (the back), with no
+    /// act. Its seat object, key and body stay its own.</summary>
+    public StageSeat? MoveToBack(int index)
+    {
+        if (index < 0 || index >= _seats.Count) return null;
+        var seat = _seats[index];
+        _seats.RemoveAt(index);
+        _seats.Add(seat);
+        Note(new StageBeat(MoveEvent, seat.Who, _seats.Count - 1, Fanfare, 0,
+                           "moved", SeatKey: seat.Key));
+        return seat;
+    }
+
     /// <summary>Clear the stage and every count (a pin's fresh board).
     /// </summary>
     public void Clear()
@@ -236,6 +281,10 @@ public sealed class FurinaStageLedger
         Drained = 0;
         DrainedThisTurn = 0;
         RepaidThisTurn = 0;
+        DrainsThisCombat = 0;
+        RepaysThisTurn = 0;
+        RepaidThisPlay = 0;
+        SpendsThisTurn = 0;
         CharlotteDrewThisTurn = false;
         LynetteFiredThisTurn = false;
         OusiaDrewThisTurn = false;
@@ -292,11 +341,24 @@ public sealed class FurinaStageLedger
     /// count it, because the Drain counts it itself.</summary>
     public bool Draining { get; set; }
 
+    /// <summary>Drains made this combat, every one (Undercurrent's count).
+    /// </summary>
+    public int DrainsThisCombat { get; private set; }
+
+    /// <summary>Repays that returned HP this turn (Rising Tide's count).
+    /// </summary>
+    public int RepaysThisTurn { get; private set; }
+
+    /// <summary>HP THIS card play's Repays returned (Grand Absolution's
+    /// "that much").</summary>
+    public int RepaidThisPlay { get; private set; }
+
     public void NoteDrain(int amount)
     {
         if (amount <= 0) return;
         Drained += amount;
         DrainedThisTurn += amount;
+        DrainsThisCombat++;
     }
 
     /// <summary>Rule 2: how much a Repay of <paramref name="amount"/> returns
@@ -313,6 +375,8 @@ public sealed class FurinaStageLedger
         if (amount <= 0) return;
         Drained = System.Math.Max(0, Drained - amount);
         RepaidThisTurn += amount;
+        RepaysThisTurn++;
+        RepaidThisPlay += amount;
     }
 
     /// <summary>THE CURTAIN CALL (sec.16): the HP that returns when the
@@ -354,28 +418,79 @@ public sealed class FurinaStageLedger
         return gained;
     }
 
-    /// <summary>Can a Spend of <paramref name="price"/> be paid?</summary>
-    public bool CanSpend(int price) => price >= 0 && Fanfare >= price;
+    /// <summary>Spends made this turn (the "first Spend each turn" of
+    /// Navia's line and Crescendo).</summary>
+    public int SpendsThisTurn { get; private set; }
 
-    /// <summary>A Spend N, at the full price only. A Spend of 0 moves nothing
-    /// and is no Spend. True when it was paid.</summary>
+    /// <summary>Navia's line (the pool to 75): what the next Spend is
+    /// discounted by -- 2 (3 upgraded) while she is on stage and no Spend has
+    /// been made this turn, else 0.</summary>
+    public int NaviaDiscount
+    {
+        get
+        {
+            if (SpendsThisTurn > 0) return 0;
+            var seat = SeatOf(StagePerformer.Navia);
+            if (seat == null) return 0;
+            return seat.Upgraded ? FurinaStageLaw.NaviaLineDiscountUpgraded
+                                 : FurinaStageLaw.NaviaLineDiscount;
+        }
+    }
+
+    /// <summary>What a Spend of <paramref name="price"/> takes now: the
+    /// price less Navia's discount, never below 0.</summary>
+    public int PriceOf(int price) =>
+        System.Math.Max(0, price - NaviaDiscount);
+
+    /// <summary>Can a Spend of <paramref name="price"/> be paid?</summary>
+    public bool CanSpend(int price) =>
+        price >= 0 && Fanfare >= PriceOf(price);
+
+    /// <summary>A Spend N. A Spend of 0 moves nothing and is no Spend. Navia
+    /// on stage makes the first Spend each turn cost 2 less (her line; a
+    /// Spend discounted to 0 is still that Spend). True when it was paid.
+    /// </summary>
     public bool Spend(int price)
     {
-        if (price <= 0 || Fanfare < price) return false;
-        Fanfare -= price;
-        SpentThisTurn += price;
-        Note(new StageBeat(SpendEvent, default, -1, Fanfare, price, ""));
+        if (price <= 0) return false;
+        var pay = PriceOf(price);
+        if (Fanfare < pay) return false;
+        var discount = price - pay;
+        Fanfare -= pay;
+        SpentThisTurn += pay;
+        SpendsThisTurn++;
+        Note(new StageBeat(SpendEvent, default, -1, Fanfare, pay, ""));
+        if (discount > 0) NoteLine(StagePerformer.Navia, discount);
         return true;
+    }
+
+    /// <summary>A guest's LINE fired (the pool to 75, sec.3: a line gets a
+    /// log line of its own, so it is not read as a second act).</summary>
+    public void NoteLine(StagePerformer who, int moved)
+    {
+        var seat = SeatOf(who);
+        Note(new StageBeat(LineEvent, who, seat == null ? -1 : IndexOf(seat),
+                           Fanfare, moved, "line",
+                           SeatKey: seat?.Key ?? -1));
     }
 
     /// <summary>"Spend all your Fanfare." Nothing held is no Spend. Bis!
     /// keeps half of it, rounded down: the spend and what it pays for are
-    /// the whole bank, and half the bank is back after.</summary>
+    /// the whole bank, and half the bank is back after. Navia's first Spend
+    /// each turn keeps 2 (3 upgraded): the card reads the whole bank, and
+    /// that much stays.</summary>
     public int SpendAll()
     {
         var held = Fanfare;
         SpentThisPlay = 0;
-        if (held <= 0 || !Spend(held)) return 0;
+        if (held <= 0) return 0;
+        var keep = System.Math.Min(held, NaviaDiscount);
+        var pay = held - keep;
+        Fanfare -= pay;
+        SpentThisTurn += pay;
+        SpendsThisTurn++;
+        Note(new StageBeat(SpendEvent, default, -1, Fanfare, pay, ""));
+        if (keep > 0) NoteLine(StagePerformer.Navia, keep);
         SpentThisPlay = held;
         var kept = Mods.Bis > 0 ? held / 2 : 0;
         if (kept > 0)
@@ -421,13 +536,21 @@ public sealed class FurinaStageLedger
     public bool OwesRepays => _fountains.Count > 0;
 
     /// <summary>A fresh per-play spend record (every card play).</summary>
-    public void BeginPlay() => SpentThisPlay = 0;
+    public void BeginPlay()
+    {
+        SpentThisPlay = 0;
+        RepaidThisPlay = 0;
+    }
 
     /// <summary>The play is over: the record closes with it. The Salon's Tab
     /// seat round (2026-10-05): it used to stand until the NEXT play opened,
     /// so a spend-all face in hand read the last play's spend at 0 Fanfare
     /// ("Deals 113").</summary>
-    public void EndPlay() => SpentThisPlay = 0;
+    public void EndPlay()
+    {
+        SpentThisPlay = 0;
+        RepaidThisPlay = 0;
+    }
 
     // ---- the once-a-turn latches ---------------------------------------
 
@@ -448,7 +571,10 @@ public sealed class FurinaStageLedger
         SpentThisTurn = 0;
         DrainedThisTurn = 0;
         RepaidThisTurn = 0;
+        RepaysThisTurn = 0;
+        SpendsThisTurn = 0;
         SpentThisPlay = 0;
+        RepaidThisPlay = 0;
         CharlotteDrewThisTurn = false;
         LynetteFiredThisTurn = false;
         OusiaDrewThisTurn = false;
@@ -509,6 +635,13 @@ public sealed class FurinaStageLedger
     public const string DrainEvent = "drain";
     public const string RepayEvent = "repay";
 
+    /// <summary>A guest's line fired (the pool to 75, sec.3).</summary>
+    public const string LineEvent = "line";
+
+    /// <summary>A duplicate Guest Star moved its guest to the newest seat.
+    /// </summary>
+    public const string MoveEvent = "repeat";
+
     // ---- the wire ------------------------------------------------------
 
     /// <summary>
@@ -553,6 +686,7 @@ public sealed class FurinaStageLedger
                 ["seat"] = index,
                 ["seat_key"] = seat.Key,
                 ["guest"] = true,
+                ["upgraded"] = seat.Upgraded,
                 ["price"] = 0,
                 ["entity_id"] = seat.Pet?.CombatId.ToString(),
             })

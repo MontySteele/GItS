@@ -380,7 +380,10 @@ public class ArmKeywordTipTests
         // `ForSakura` and `ForLightfallSword` (three golded words that
         // hovered nothing) and `ForPlanOnly` (the Plan tip on a card with no
         // line above its Plan).
-        Assert.Equal(38, attaches.Count);
+        // FORTY-THREE with the pool to 75 (2026-10-09): `ForOldestGuest`
+        // (Encore!'s "oldest guest") and its four guests' `ForFreminet`,
+        // `ForNavia`, `ForNeuvillette` and `ForEscoffier`.
+        Assert.Equal(43, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");
