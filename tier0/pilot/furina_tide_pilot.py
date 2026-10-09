@@ -70,6 +70,11 @@ ROOM_SHARE = 0.5              # curtain call: the near-the-line premium kept
 DECK_DAMAGE_PER_TURN = 14.0   # the slice deck's rough damage rate
 SEAT_TURNS = 2.5
 EXPECTED_TURNS = 6
+# The pool to 75 (2026-10-09): the instrument's flat stand-ins for one Weak or
+# Vulnerable stack, one guest act and one Energy this turn.
+DEBUFF = 2.0
+GUEST_ACT = 5.0
+ENERGY_NOW = 6.0
 
 
 def _f(state) -> T.Ftd:
@@ -247,6 +252,19 @@ def _playable_left(state, card=None) -> bool:
 def _outlet_rate(spec) -> float:
     """Damage-equivalent points per Fanfare one outlet pays."""
     k, n = spec.kind, spec.n
+    # The pool to 75's outlets (2026-10-09).
+    if k == "spend_volley":
+        return n[0] * (n[3] - n[1]) / n[2]
+    if k == "spend_block_draw":
+        return DRAW * n[2] / n[1]
+    if k == "spend_debuff":
+        return (DEBUFF * (n[2] - n[0]) + DEBUFF * n[3]) / n[1]
+    if k == "encore":
+        return (GUEST_ACT + DRAW) / n[0]
+    if k == "sold_out":
+        return (6.0 * n[1] + DRAW * n[2]) / n[0]
+    if k == "house_down":
+        return float(n[0])
     if k == "block_spend_hit":
         return n[2] / n[1]
     if k in ("spend_aoe",):
@@ -316,16 +334,21 @@ class Judged:
 
     def fixed_drain_value(self, state, spec) -> float | None:
         """A fixed Drain card's play value; None means never play it."""
-        price, dmg = spec.n
-        if spec.kind == "drain_fixed_aoe":
-            return (_aoe(state, dmg)
-                    - drain_cost(state, price,
-                                 ends_fight(state, dmg, aoe=True)))
-        return (_single(state, dmg)
-                - drain_cost(state, price, ends_fight(state, dmg)))
+        price = spec.n[0]
+        gain, kills = fixed_drain_gain(state, spec)
+        return gain - drain_cost(state, price, kills)
 
     def spend(self, state, card, spec) -> bool:
-        price = spec.n[1]
+        price = T.spend_price(spec)
+        if spec.kind == "spend_volley":
+            gain = _single(state, spec.n[0] * (spec.n[3] - spec.n[1]))
+            return gain - spend_cost(state, price) > 0
+        if spec.kind == "spend_block_draw":
+            return DRAW * spec.n[2] - spend_cost(state, price) > 0
+        if spec.kind == "spend_debuff":
+            gain = (DEBUFF * (spec.n[2] - spec.n[0])
+                    + DEBUFF * spec.n[3])
+            return gain - spend_cost(state, price) > 0
         if spec.kind == "block_spend_hit":
             gain = _single(state, spec.n[2])
         elif spec.kind == "spend_aoe":
@@ -351,9 +374,7 @@ class Always(Judged):
         return True
 
     def fixed_drain_value(self, state, spec) -> float | None:
-        if spec.kind == "drain_fixed_aoe":
-            return _aoe(state, spec.n[1])
-        return _single(state, spec.n[1])
+        return fixed_drain_gain(state, spec)[0]
 
     def spend(self, state, card, spec) -> bool:
         return True
@@ -365,6 +386,46 @@ class Never(Judged):
 
     def fixed_drain_value(self, state, spec) -> float | None:
         return None
+
+
+def fixed_drain_gain(state, spec) -> tuple[float, bool]:
+    """What a fixed-Drain card buys, before its Drain's cost, and whether
+    the play ends the fight. The pool to 75 added six shapes."""
+    k, n = spec.kind, spec.n
+    f = _f(state)
+    if k == "drain_fixed_aoe":
+        return _aoe(state, n[1]), ends_fight(state, n[1], aoe=True)
+    if k == "drain_fixed_hit":
+        return _single(state, n[1]), ends_fight(state, n[1])
+    if k == "undercurrent":
+        dmg = n[1] + n[2] * (f.drains_this_combat + 1)
+        return _single(state, dmg), ends_fight(state, dmg)
+    if k == "drain_energy":
+        return (ENERGY_NOW * n[1] if _playable_left(state) else 1.0), False
+    if k == "drain_draw":
+        draws = bool(state.player.draw_pile or state.player.discard_pile)
+        return (DRAW * n[1] if draws else 0.0), False
+    if k == "riptide":
+        kills = ends_fight(state, n[1])
+        v = _single(state, n[1])
+        if _target_left(state) <= n[1]:
+            v += 0.6 * repay_value_after(state, n[0], n[2])
+        return v, kills
+    if k == "deluge":
+        return _aoe(state, n[1]), ends_fight(state, n[1], aoe=True)
+    if k == "ebb_flow":
+        return repay_value_after(state, n[0], n[1]), False
+    return 0.0, False
+
+
+def repay_value_after(state, drained_now: int, n: int) -> float:
+    """A Repay of `n` made after a Drain of `drained_now` this play."""
+    f = _f(state)
+    amount = min(n, f.drained + drained_now)
+    if amount <= 0:
+        return 0.0
+    per_hp = temp_hp_value(state) if f.curtain_call else hp_value(state)
+    return amount * per_hp + _loop_gain_value(state, amount)
 
 
 DECIDERS = {"judged": Judged(), "always": Always(), "never": Never()}
@@ -398,6 +459,10 @@ def _base_value(card) -> tuple[float, float]:
 def _guest_value(state, member: str) -> float:
     f = _f(state)
     n = max(1, len(state.living_enemies))
+    if member in f.stage:
+        # The pool to 75 (sec.3): a second copy only moves its guest to the
+        # newest seat, with no act.
+        return 0.2
     hp_per = temp_hp_value(state) if f.curtain_call else hp_value(state)
     per_repay = hp_per + (FANFARE if f.repay_fanfare else 0.0)
     if member == "charlotte":
@@ -419,11 +484,17 @@ def _guest_value(state, member: str) -> float:
                       * temp_hp_value(state)) + 1.0
     elif member == "chevreuse":
         per = T.CHEVREUSE_ACT + 1.5
+    elif member == "freminet":
+        per = T.FREMINET_ACT + 2.0
+    elif member == "navia":
+        per = 0.5 * 4.0 + T.NAVIA_LINE_DISCOUNT * FANFARE
+    elif member == "escoffier":
+        per = T.ESCOFFIER_ACT * n + 0.5 * per_repay * len(f.stage)
     else:
         per = 0.0
-    if member in f.stage:
-        return per                         # the repeat: one more act
-    return per * SEAT_TURNS
+    entrance = T._player_power(state.player, "grand_entrance")
+    bonus = 0.6 * per_repay * entrance if entrance else 0.0
+    return per * SEAT_TURNS + bonus
 
 
 def card_damage(state, card) -> float:
@@ -449,6 +520,24 @@ def card_damage(state, card) -> float:
         return float(n[2] if f.fanfare >= n[1] else n[0])
     if k == "spend_fixed_hit":
         return float(n[1] if f.fanfare >= n[0] else 0)
+    # The pool to 75's damage, for the single-card lethal.
+    if k == "star_turn":
+        return float(n[0])
+    if k == "undercurrent":
+        return float(n[1] + n[2] * (f.drains_this_combat + 1)
+                     if T.can_drain(state, n[0]) else 0)
+    if k == "riptide":
+        return float(n[1] if T.can_drain(state, n[0]) else 0)
+    if k == "near_line_hit":
+        return float(n[1] if T.near_line(state.player) else n[0])
+    if k == "clean_slate":
+        return float(n[0])
+    if k == "hydro_hit_repay":
+        return float(n[0])
+    if k == "rising_tide":
+        return float(n[0] + n[1] * f.repays_this_turn)
+    if k == "house_down":
+        return float(n[0] * f.fanfare)
     return 0.0
 
 
@@ -499,16 +588,35 @@ def value(state, card, playable: list, decider) -> float:
         elif k == "spend_block":
             pv = _block_value(n[0], need_now)
             bv = _block_value(n[2], need_now)
+        elif k == "spend_volley":
+            price = n[2]
+            pv = _single(state, n[0] * n[1])
+            bv = _single(state, n[0] * n[3])
+        elif k == "spend_block_draw":
+            pv = _block_value(n[0], need_now)
+            draws = bool(state.player.draw_pile or state.player.discard_pile)
+            bv = pv + (DRAW * n[2] if draws else 0.0)
+        elif k == "spend_debuff":
+            pv = DEBUFF * n[0]
+            bv = DEBUFF * (n[2] + n[3])
         else:
             pv = _single(state, n[0])
             bv = _single(state, n[2]) + DRAW * n[3]
-        if f.fanfare >= price and decider.spend(state, card, spec):
-            return bv - spend_cost(state, price)
+        if (f.fanfare >= T.price_of(f, price)
+                and decider.spend(state, card, spec)):
+            return bv - spend_cost(state, T.price_of(f, price))
         return pv
     if k in T.FIXED_SPEND_KINDS:
         if not T.playable(state, card):
             return 0.0
-        return _single(state, n[1]) - spend_cost(state, n[0])
+        price = T.price_of(f, n[0])
+        if k == "encore":
+            act = GUEST_ACT if f.stage else 0.0
+            return act + DRAW * n[1] - spend_cost(state, price)
+        if k == "sold_out":
+            energy = ENERGY_NOW * n[1] if _playable_left(state, card) else 1.0
+            return energy + DRAW * n[2] - spend_cost(state, price)
+        return _single(state, n[1]) - spend_cost(state, price)
     if k == "block_spend_all":
         v = _block_value(n[0], need_now)
         pts = f.fanfare
@@ -541,6 +649,31 @@ def value(state, card, playable: list, decider) -> float:
         tl = max(1, EXPECTED_TURNS - state.turn)
         m = spec.member
         ne = max(1, len(state.living_enemies))
+        # The pool to 75's ten Powers (2026-10-09): rough per-turn worth, on
+        # the scale of the nine above.
+        guests = len(f.stage)
+        if m == "grand_entrance":
+            return 0.8 * tl * 0.5 * n[0] * 0.6
+        if m == "showstopper":
+            return 0.8 * tl * (GUEST_ACT * guests - 5 * fanfare_value(state)
+                               if guests else 0.5)
+        if m == "ensemble_cast":
+            return 0.8 * tl * (GUEST_ACT * 0.5 if guests >= T.SEATS else 0.5)
+        if m == "crescendo":
+            return 0.8 * tl * DRAW * 0.7
+        if m == "prima_donna":
+            return 0.8 * tl * (ENERGY_NOW * 0.5)
+        if m == "standing_room_only":
+            return 0.8 * tl * 1.5
+        if m == "high_stakes":
+            return 0.8 * tl * (n[0] if T.near_line(state.player) else 0.5)
+        if m == "regina":
+            return 0.8 * tl * (2.5 if T.can_drain(state, T.REGINA_DRAIN)
+                               else 0.5)
+        if m == "pneuma_tides":
+            return 0.8 * tl * repay_value(state, n[0])
+        if m == "hymn_of_renewal":
+            return 0.8 * tl * 1.2
         if m == "salon_encore":
             return 0.8 * tl * ne * 2.0
         if m == "thunderous":
@@ -561,6 +694,44 @@ def value(state, card, playable: list, decider) -> float:
             return 0.8 * tl * 2.0
     if k == "guest":
         return _guest_value(state, spec.member)
+    # --- The pool to 75 (2026-10-09) ---
+    if k == "tutor_guest":
+        has = any(T.is_guest_card(c) for c in state.player.draw_pile)
+        return 4.0 if has else 0.0
+    if k == "tutti":
+        return GUEST_ACT * len(f.stage)
+    if k == "final_bow":
+        return GUEST_ACT * n[0] - 2.0 if f.stage else 0.0
+    if k == "star_turn":
+        return _single(state, n[0])
+    if k == "house_down":
+        pts = f.fanfare
+        return (_single(state, n[0] * pts) - spend_cost(state, pts)
+                + GUEST_ACT * len(f.stage))
+    if k in T.FIXED_DRAIN_KINDS:
+        pass                                         # handled above
+    if k == "near_line_hit":
+        return _single(state, n[1] if T.near_line(state.player) else n[0])
+    if k == "block_repay_next":
+        hp_per = temp_hp_value(state) if f.curtain_call else hp_value(state)
+        return (_block_value(n[0], need_now)
+                + 0.6 * (hp_per + FANFARE) * n[1])
+    if k == "clean_slate":
+        v = _single(state, n[0]) + repay_value(state, n[1])
+        if f.drained <= n[1]:
+            v += DRAW * n[2]
+        return v
+    if k == "hydro_hit_repay":
+        return _single(state, n[0]) + repay_value(state, n[1])
+    if k == "hydro_aoe_repay":
+        return _aoe(state, n[0]) + repay_value(state, n[1])
+    if k == "balance_books":
+        return _aoe(state, f.drained // 2) + repay_value(state, n[0])
+    if k == "rising_tide":
+        return _single(state, n[0] + n[1] * f.repays_this_turn)
+    if k == "grand_absolution":
+        back = min(f.drained, max(0, state.player.max_hp - state.player.hp))
+        return _aoe(state, back) + repay_value(state, back)
     return 0.0
 
 

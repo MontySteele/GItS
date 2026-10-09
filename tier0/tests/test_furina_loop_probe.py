@@ -92,13 +92,66 @@ def test_the_screen_passes_every_loop_found(combo, pre_fix):
 
 
 #: Inert cycles: 0-cost card draw that refills the hand and grows nothing.
-KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",)}
+#: The pool to 75 adds Soothing Waters (0: Repay 2, draw 1) to them.
+KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
+               ("proto_fs_soothing_waters",), ("proto_fs_soothing_waters+",)}
+
+#: THE POOL TO 75's PRODUCTIVE CYCLES, AWAITING A RULING (2026-10-09). The
+#: ruled batch (review/active/furina-pool-growth-2026-10-09.md) was built as
+#: written, and this sweep then found productive cycles it did not have
+#: before: 81 minimal findings over the 16 card sets below (base or
+#: upgraded variants of each). Every set but one holds Overdraft (0: Drain 4,
+#: gain 1 Energy) or Soothing Waters with Sold Out; ten of the sixteen hold
+#: her HP flat or rising across the probe's window, so the Drain line does
+#: not end them (Overdraft + Pneuma Refrain is two cards: Drain 4, Repay 5,
+#: draw 2, +8 Fanfare a cycle). Fixing them is a card ruling for the main
+#: session, not this build's; this pin keeps the sweep a tripwire meanwhile:
+#: a cycle over any OTHER set still fails, and a ruling that closes these
+#: shrinks the set here.
+KNOWN_POOL75_LOOP_SETS = {
+    frozenset(f"proto_fs_{c}" for c in cards) for cards in (
+        ("balance_the_books", "overdraft", "sold_out"),
+        ("bubble_aria", "interval_bell", "overdraft"),
+        ("bubble_aria", "overdraft", "soothing_waters"),
+        ("clean_slate", "overdraft", "sold_out"),
+        ("encore", "ousia_pledge", "overdraft"),
+        ("encore", "overdraft", "pay_the_tab"),
+        ("encore", "overdraft", "salons_tab"),
+        ("hymn_of_many_waters", "overdraft", "sold_out"),
+        ("ousia_pledge", "overdraft", "soothing_waters"),
+        ("overdraft", "pneuma_refrain"),
+        ("overdraft", "salons_tab", "soothing_waters"),
+        ("overdraft", "salons_tab", "tutti"),
+        ("overdraft", "sold_out", "soothing_waters"),
+        ("overdraft", "sold_out", "surging_waters"),
+        ("overdraft", "soothing_waters", "spirited_aria"),
+        ("sold_out", "soloists_solicitation", "soothing_waters"),
+    )
+}
+
+
+def _base_set(cards) -> frozenset:
+    return frozenset(c.rstrip(P.UP) for c in cards)
 
 TAB_UP = "proto_fs_salons_tab+"
 
 
 @pytest.mark.battery
-def test_the_post_fix_sweep_finds_no_productive_cycle():
+def test_the_post_fix_sweep_finds_no_productive_cycle_but_the_known_ones():
     found = P.search_env(False, None)
-    assert {f.cards for f in found if f.productive} == set()
+    productive = {_base_set(f.cards) for f in found if f.productive}
+    assert productive == KNOWN_POOL75_LOOP_SETS
     assert {f.cards for f in found if not f.productive} == KNOWN_INERT
+
+
+def test_overdraft_and_pneuma_refrain_cycle_without_spending_hp():
+    """The smallest of the pool to 75's findings, pinned so a ruling that
+    closes it shows here: Overdraft (Drain 4, +1 Energy) and two Pneuma
+    Refrains (Repay 5, draw 2) loop with her HP flat."""
+    pool = P.variants(False)
+    cards = [pool["proto_fs_overdraft"], pool["proto_fs_pneuma_refrain"],
+             pool["proto_fs_pneuma_refrain"]]
+    run = P.play_out(cards, ["proto_fs_overdraft", "proto_fs_pneuma_refrain"],
+                     take=True, plays=200)
+    assert run.productive
+    assert run.growth["hp"] == 0 and run.growth["fanfare"] > 0

@@ -323,6 +323,34 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/guest_sigewinne.png"),
         ChevreuseBadgePower =>
             KleePck.Path("furina/powers/guest_chevreuse.png"),
+        // The pool to 75 (2026-10-09): an upgraded guest wears its own face,
+        // and three of its four new guests have theirs from the art pass.
+        NaviaBadgePower =>
+            KleePck.Path("furina/powers/guest_navia.png"),
+        NaviaUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_navia.png"),
+        NeuvilletteBadgePower =>
+            KleePck.Path("furina/powers/guest_neuvillette.png"),
+        NeuvilletteUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_neuvillette.png"),
+        EscoffierBadgePower =>
+            KleePck.Path("furina/powers/guest_escoffier.png"),
+        EscoffierUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_escoffier.png"),
+        ClorindeUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_clorinde.png"),
+        WriothesleyUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_wriothesley.png"),
+        CharlotteUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_charlotte.png"),
+        LynetteUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_lynette.png"),
+        LyneyUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_lyney.png"),
+        SigewinneUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_sigewinne.png"),
+        ChevreuseUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_chevreuse.png"),
         // THE SUPPORTING POOL (2026-09-26): the two new guests' faces, from
         // the same art pass, and the batch's nine powers borrowing the
         // shipped Furina sigil nearest their job, on the terms every borrow

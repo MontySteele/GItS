@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -54,6 +55,23 @@ internal static class StagePerformerBeat
     {
         if (!Flinches(performer is { IsDead: false }, loss)) return;
         _ = CreatureCmd.TriggerAnim(performer!, "Hit", 0f);
+    }
+
+    /// <summary>
+    /// The pool to 75 (sec.3): a guest's LINE fired. A small cue of its own,
+    /// so a line is not read as a second act (the co-op record's first
+    /// question): the guest's badge flashes on its body, the base game's
+    /// power-flash, and the body does not lunge. Fire-and-forget; headless a
+    /// guest has no body and nothing happens.
+    /// </summary>
+    public static void Line(Creature? performer)
+    {
+        if (!Animates(performer)) return;
+        foreach (var badge in performer!.Powers
+                     .OfType<global::KleeMod.Powers.StagePerformerBadge>())
+        {
+            badge.Pulse();
+        }
     }
 
     internal static bool Animates(Creature? performer) =>

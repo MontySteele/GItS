@@ -2706,35 +2706,36 @@
    effects: [{op: apply_power, power: fs_thunderous_applause, amount: 3,
               target: self}]}
 
-# --- THE FOUR GUESTS (cost 1, upgraded 0). Each guest's line and act are its
-# tip and its badge (`StagePerformerBadge.ActText`); the face summons. ---
+# --- THE FOUR GUESTS (cost 1). Line and act are the tip and the badge. Since
+# the pool to 75 (sec.3) every Guest Star exhausts and its upgrade raises the
+# line or act (`guest_upgraded`); provenance note, 2026-10-09. ---
 
 - {id: proto_fs_guest_star_charlotte, name: "Guest Star: Charlotte", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: common,
-   description: "[gold]Summon[/gold] Charlotte.",
+   register: salon, cost: 1, type: skill, rarity: common, exhaust: true,
+   description: "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: charlotte}]}
 
 - {id: proto_fs_guest_star_wriothesley, name: "Guest Star: Wriothesley", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Summon[/gold] Wriothesley.",
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: wriothesley}]}
 
 - {id: proto_fs_guest_star_lynette, name: "Guest Star: Lynette", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Summon[/gold] Lynette.",
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: lynette}]}
 
 - {id: proto_fs_guest_star_clorinde, name: "Guest Star: Clorinde", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: rare,
-   description: "[gold]Summon[/gold] Clorinde.",
+   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "[gold]Summon[/gold] Clorinde{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: clorinde}]}
 
 # --- THE TWO RARES ---
@@ -2785,10 +2786,10 @@
               target: self}]}
 
 - {id: proto_fs_guest_star_lyney, name: "Guest Star: Lyney", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Summon[/gold] Lyney.",
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: lyney}]}
 
 - {id: proto_fs_a_five_century_act, name: "A Five-Century Act", character: furina,
@@ -2801,10 +2802,10 @@
 
 # Pneuma: Repay needs volume and a reason.
 - {id: proto_fs_guest_star_sigewinne, name: "Guest Star: Sigewinne", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Summon[/gold] Sigewinne.",
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Summon[/gold] Sigewinne{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: sigewinne}]}
 
 # Fountain of Lucine: a Skill that leaves a Power counting the three turns
@@ -2840,10 +2841,10 @@
                          {op: block, amount: 16}]}]}]}
 
 - {id: proto_fs_guest_star_chevreuse, name: "Guest Star: Chevreuse", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Summon[/gold] Chevreuse.",
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: chevreuse}]}
 
 - {id: proto_fs_bis, name: "Bis!", character: furina,
@@ -2853,6 +2854,396 @@
    description: "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep half of it.",
    effects: [{op: apply_power, power: fs_bis, amount: 1,
               target: self}]}
+
+# --- THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md sec.5,
+# ruled 2026-10-09): 41 rows, 10 / 18 / 13, three slots held. Provenance
+# note, "Furina: the pool to 75, 2026-10-09". ---
+
+# Guests and stage (11): 1 Common, 5 Uncommon, 5 Rare.
+
+# Casting Call: an Uncommon tutor, not a random guest (taken on [USER]'s read).
+# The player picks when the draw pile holds more than one Guest Star.
+- {id: proto_fs_casting_call, name: "Casting Call", character: furina,
+   upgrade: {add: {op: draw, amount: 1}},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand.",
+   effects: [{op: furina, kind: tutor_guest}]}
+
+# Encore!: one bought act. "Oldest guest" carries its tip (sec.5).
+- {id: proto_fs_encore, name: "Encore!", character: furina,
+   upgrade: {stage_spend: -1},
+   authored_by: [claude],
+   register: salon, cost: 0, type: skill, rarity: common,
+   description: "[gold]Spend[/gold] {IfUpgraded:show:3|4}. Your [gold]oldest guest[/gold] acts. Draw 1 card.",
+   effects: [{op: stage_spend, amount: 4},
+             {op: furina, kind: act_oldest},
+             {op: draw, amount: 1}]}
+
+- {id: proto_fs_tutti, name: "Tutti!", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon, retain: true,
+   description: "Each guest acts.",
+   effects: [{op: furina, kind: act_all}]}
+
+# Final Bow: the Review section's "chooses its guest". Its card returns.
+- {id: proto_fs_final_bow, name: "Final Bow", character: furina,
+   upgrade: {furina_amount: 1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Choose a guest. It acts {IfUpgraded:show:3 times|twice}, then leaves.",
+   effects: [{op: furina, kind: final_bow, amount: 2}]}
+
+- {id: proto_fs_grand_entrance, name: "Grand Entrance", character: furina,
+   upgrade: {power_amount: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you play a Guest Star, [gold]Repay[/gold] 4.",
+   effects: [{op: apply_power, power: fs_grand_entrance, amount: 4,
+              target: self}]}
+
+# The four new guests (sec.5). Line and act are the guest's tip and badge.
+- {id: proto_fs_guest_star_freminet, name: "Guest Star: Freminet", character: furina,
+   upgrade: {guest_upgraded: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Summon[/gold] Freminet{IfUpgraded:show:+|}.",
+   effects: [{op: stage_guest, member: freminet}]}
+
+- {id: proto_fs_showstopper, name: "Showstopper", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "At the end of your turn, [gold]Spend[/gold] 5: your guests act again.",
+   effects: [{op: apply_power, power: fs_showstopper, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_ensemble_cast, name: "Ensemble Cast", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "You have 4 guest seats.",
+   effects: [{op: apply_power, power: fs_ensemble_cast, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_guest_star_navia, name: "Guest Star: Navia", character: furina,
+   upgrade: {guest_upgraded: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}.",
+   effects: [{op: stage_guest, member: navia}]}
+
+- {id: proto_fs_guest_star_neuvillette, name: "Guest Star: Neuvillette", character: furina,
+   upgrade: {guest_upgraded: true},
+   authored_by: [claude],
+   register: salon, cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}.",
+   effects: [{op: stage_guest, member: neuvillette}]}
+
+- {id: proto_fs_guest_star_escoffier, name: "Guest Star: Escoffier", character: furina,
+   upgrade: {guest_upgraded: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "[gold]Summon[/gold] Escoffier{IfUpgraded:show:+|}.",
+   effects: [{op: stage_guest, member: escoffier}]}
+
+# The Crowd (9): 3 Common, 3 Uncommon, 3 Rare.
+
+- {id: proto_fs_crashing_waves, name: "Crashing Waves", character: furina,
+   upgrade: {conditional_damage: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] 4: three times instead.",
+   effects: [{op: choose_one, modes: [
+              {label: "Deal 4 Hydro damage twice",
+               effects: [{op: damage, amount: 4, times: 2, target: enemy,
+                          applies_element: true}]},
+              {label: "[gold]Spend[/gold] 4: three times instead",
+               effects: [{op: stage_spend, amount: 4},
+                         {op: damage, amount: 4, times: 3, target: enemy,
+                          applies_element: true}]}]}]}
+
+- {id: proto_fs_bubble_aria, name: "Bubble Aria", character: furina,
+   upgrade: {conditional_block: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain {IfUpgraded:show:8|6} [gold]Block[/gold]. [gold]Spend[/gold] 3: also draw 2 cards.",
+   effects: [{op: choose_one, modes: [
+              {label: "Gain 6 Block",
+               effects: [{op: block, amount: 6}]},
+              {label: "[gold]Spend[/gold] 3: also draw 2 cards",
+               effects: [{op: stage_spend, amount: 3},
+                         {op: block, amount: 6},
+                         {op: draw, amount: 2}]}]}]}
+
+# Commanding Gaze: "[3 and 2]" read as the Spend mode's numbers, 3 Vulnerable
+# and 2 Weak (the plain mode stays 1).
+- {id: proto_fs_commanding_gaze, name: "Commanding Gaze", character: furina,
+   upgrade: {mode_power_amount: [0, 1]},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Apply 1 [gold]Vulnerable[/gold]. [gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} [gold]Vulnerable[/gold] and 2 [gold]Weak[/gold] instead.",
+   effects: [{op: choose_one, modes: [
+              {label: "Apply 1 Vulnerable",
+               effects: [{op: apply_power, power: vulnerable, amount: 1,
+                          target: enemy}]},
+              {label: "[gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} Vulnerable and 2 Weak instead",
+               effects: [{op: stage_spend, amount: 4},
+                         {op: apply_power, power: vulnerable, amount: 2,
+                          target: enemy},
+                         {op: apply_power, power: weak, amount: 2,
+                          target: enemy}]}]}]}
+
+- {id: proto_fs_star_turn, name: "Star Turn", character: furina,
+   upgrade: {damage: +5},
+   authored_by: [claude],
+   register: salon, cost: 2, type: attack, rarity: uncommon, exhaust: true,
+   cost_reduction_per_fanfare: 6,
+   description: "Deal 15 damage. Costs 1 less for every 6 [gold]Fanfare[/gold] you have.",
+   effects: [{op: damage, amount: 15, target: enemy}]}
+
+- {id: proto_fs_sold_out, name: "Sold Out", character: furina,
+   upgrade: {stage_spend: -2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Spend[/gold] {IfUpgraded:show:4|6}. Gain 1 [gold]Energy[/gold]. Draw 2 cards.",
+   effects: [{op: stage_spend, amount: 6},
+             {op: energy, amount: 1},
+             {op: draw, amount: 2}]}
+
+- {id: proto_fs_crescendo, name: "Crescendo", character: furina,
+   upgrade: {innate: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "The first time you [gold]Spend[/gold] each turn, draw 1 card.",
+   effects: [{op: apply_power, power: fs_crescendo, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_prima_donna, name: "Prima Donna", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain 1 [gold]Energy[/gold].",
+   effects: [{op: apply_power, power: fs_prima_donna, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_standing_room_only, name: "Standing Room Only", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it is at least 1, gain 1 [gold]Strength[/gold].",
+   effects: [{op: apply_power, power: fs_standing_room_only, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_bring_the_house_down, name: "Bring the House Down", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: attack, rarity: rare,
+   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_all},
+             {op: damage,
+              amount_formula: {base: 0, per: 1, count: stage_spent},
+              target: enemy},
+             {op: furina, kind: act_all}]}
+
+# Ousia, Drain (10): 3 Common, 4 Uncommon, 3 Rare. The Review section caps
+# the "Drain down to your line" cards: The Deluge, All In and Pay the Tab
+# Drain fixed amounts.
+
+# Undercurrent: the count includes its own Drain (it Drains first).
+- {id: proto_fs_undercurrent, name: "Undercurrent", character: furina,
+   upgrade: {formula_base: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "[gold]Drain[/gold] 2. Deal {CalculationBase:diff()} damage, plus 1 for each time you have Drained this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_drain, amount: 2},
+             {op: damage,
+              amount_formula: {base: 5, per: 1, count: stage_drains},
+              target: enemy}]}
+
+- {id: proto_fs_overdraft, name: "Overdraft", character: furina,
+   upgrade: {stage_drain: -1},
+   authored_by: [claude],
+   register: salon, cost: 0, type: skill, rarity: common,
+   description: "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Gain 1 [gold]Energy[/gold].",
+   effects: [{op: stage_drain, amount: 4},
+             {op: energy, amount: 1}]}
+
+- {id: proto_fs_ousia_pledge, name: "Ousia Pledge", character: furina,
+   upgrade: {draw: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "[gold]Drain[/gold] 3. Draw {Cards:diff()} cards.",
+   effects: [{op: stage_drain, amount: 3},
+             {op: draw, amount: 2}]}
+
+# Against the Tide: "within 5 HP of your Drain line" (the Review section; the
+# relic Repays every turn, so she never stays exactly on the line).
+- {id: proto_fs_against_the_tide, name: "Against the Tide", character: furina,
+   upgrade: {conditional_damage: +3, conditional_then_damage: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {PlainDamage:diff()} damage. If you are within 5 HP of your [gold]Drain[/gold] line, deal {BranchDamage:diff()} instead.",
+   effects: [{op: conditional, if: stage_near_line,
+              then: [{op: damage, amount: 14, target: enemy}],
+              else: [{op: damage, amount: 8, target: enemy}]}]}
+
+- {id: proto_fs_pay_the_tab, name: "Pay the Tab", character: furina,
+   upgrade: {draw: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Drain[/gold] 6. Draw {Cards:diff()} cards.",
+   effects: [{op: stage_drain, amount: 6},
+             {op: draw, amount: 3}]}
+
+- {id: proto_fs_riptide_lunge, name: "Riptide Lunge", character: furina,
+   upgrade: {damage: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "[gold]Drain[/gold] 3. Deal 10 damage. If this kills an enemy, [gold]Repay[/gold] 6.",
+   effects: [{op: stage_drain, amount: 3},
+             {op: damage, amount: 10, target: enemy},
+             {op: conditional, if: killed_target,
+              then: [{op: stage_repay, amount: 6}]}]}
+
+- {id: proto_fs_high_stakes, name: "High Stakes", character: furina,
+   upgrade: {power_amount: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "While you are within 5 HP of your [gold]Drain[/gold] line, your Attacks deal 4 additional damage.",
+   effects: [{op: apply_power, power: fs_high_stakes, amount: 4,
+              target: self}]}
+
+- {id: proto_fs_regina_of_all_waters, name: "Regina of All Waters", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, [gold]Drain[/gold] 3. If you do, gain 1 [gold]Strength[/gold].",
+   effects: [{op: apply_power, power: fs_regina_of_all_waters, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_the_deluge, name: "The Deluge", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
+   description: "[gold]Drain[/gold] 8. Deal 24 damage to ALL enemies.",
+   effects: [{op: stage_drain, amount: 8},
+             {op: damage, amount: 24, target: all_enemies}]}
+
+# All In: costs 0 (the Review section).
+- {id: proto_fs_all_in, name: "All In", character: furina,
+   upgrade: {stage_drain: -2},
+   authored_by: [claude],
+   register: salon, cost: 0, type: skill, rarity: rare, exhaust: true,
+   description: "[gold]Drain[/gold] {IfUpgraded:show:6|8}. Gain 2 [gold]Energy[/gold].",
+   effects: [{op: stage_drain, amount: 8},
+             {op: energy, amount: 2}]}
+
+# Pneuma, Repay (10): 3 Common, 5 Uncommon, 2 Rare.
+
+# Soothing Waters: Uncommon (taken on [USER]'s read).
+- {id: proto_fs_soothing_waters, name: "Soothing Waters", character: furina,
+   upgrade: {stage_repay: +1},
+   authored_by: [claude],
+   register: salon, cost: 0, type: skill, rarity: uncommon,
+   description: "[gold]Repay[/gold] 2. Draw 1 card.",
+   effects: [{op: stage_repay, amount: 2},
+             {op: draw, amount: 1}]}
+
+- {id: proto_fs_gentle_current, name: "Gentle Current", character: furina,
+   upgrade: {block: +2, furina_amount: 1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain 5 [gold]Block[/gold]. Next turn, [gold]Repay[/gold] {FsAmount:diff()}.",
+   effects: [{op: block, amount: 5},
+             {op: furina, kind: repay_next, amount: 4}]}
+
+- {id: proto_fs_clean_slate, name: "Clean Slate", character: furina,
+   upgrade: {damage: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Deal 7 damage. [gold]Repay[/gold] 3. If you have no drained HP left, draw 1 card.",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: stage_repay, amount: 3},
+             {op: conditional, if: stage_none_drained,
+              then: [{op: draw, amount: 1}]}]}
+
+- {id: proto_fs_hydro_lance, name: "Hydro Lance", character: furina,
+   upgrade: {damage: +4},
+   authored_by: [claude],
+   register: salon, cost: 2, type: attack, rarity: common,
+   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Repay[/gold] 4.",
+   effects: [{op: damage, amount: 14, target: enemy, applies_element: true},
+             {op: stage_repay, amount: 4}]}
+
+- {id: proto_fs_cleansing_torrent, name: "Cleansing Torrent", character: furina,
+   upgrade: {damage: +4},
+   authored_by: [claude],
+   register: salon, cost: 2, type: attack, rarity: uncommon,
+   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. [gold]Repay[/gold] 4.",
+   effects: [{op: damage, amount: 10, target: all_enemies,
+              applies_element: true},
+             {op: stage_repay, amount: 4}]}
+
+# Balance the Books: half your drained HP, rounded down (the Review section),
+# read before its own Repay.
+- {id: proto_fs_balance_the_books, name: "Balance the Books", character: furina,
+   upgrade: {stage_repay: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Deal damage to ALL enemies equal to half your drained HP. [gold]Repay[/gold] 4.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage,
+              amount_formula: {base: 0, per: 1, count: stage_half_drained},
+              target: all_enemies, applies_element: false},
+             {op: stage_repay, amount: 4}]}
+
+- {id: proto_fs_rising_tide, name: "Rising Tide", character: furina,
+   upgrade: {formula_per: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage,
+              amount_formula: {base: 6, per: 3, count: stage_repays_turn},
+              target: enemy}]}
+
+- {id: proto_fs_pneuma_tides, name: "Pneuma Tides", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, [gold]Repay[/gold] 2.",
+   effects: [{op: apply_power, power: fs_pneuma_tides, amount: 2,
+              target: self}]}
+
+# Hymn of Renewal: it counts the HP a Repay actually returned, not the number
+# printed on the card (the paper's Review section). That reading is on the
+# power's hover and the Repay tip, not on this face.
+- {id: proto_fs_hymn_of_renewal, name: "Hymn of Renewal", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: power, rarity: rare,
+   description: "Whenever you [gold]Repay[/gold] 4 or more HP at once, gain 1 [gold]Strength[/gold].",
+   effects: [{op: apply_power, power: fs_hymn_of_renewal, amount: 1,
+              target: self}]}
+
+- {id: proto_fs_grand_absolution, name: "Grand Absolution", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
+   description: "[gold]Repay[/gold] all your drained HP. Deal that much damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_repay_all},
+             {op: damage,
+              amount_formula: {base: 0, per: 1, count: stage_repaid},
+              target: all_enemies}]}
+
+# The bridge (1). It costs 2 HP and makes 6 Fanfare, so the HP limits it.
+- {id: proto_fs_ebb_and_flow, name: "Ebb and Flow", character: furina,
+   upgrade: {stage_drain: +2, stage_repay: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Drain[/gold] {IfUpgraded:show:6|4}, then [gold]Repay[/gold] 2.",
+   effects: [{op: stage_drain, amount: 4},
+             {op: stage_repay, amount: 2}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

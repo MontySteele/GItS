@@ -72,6 +72,21 @@ internal sealed class RecordingBoard : IStageBoard
         return Task.CompletedTask;
     }
 
+    public Task Weak(StageTarget target, int amount)
+    {
+        Log.Add($"weak {target} {amount}");
+        return Task.CompletedTask;
+    }
+
+    internal int Gained;
+
+    public Task Strength(int amount)
+    {
+        Log.Add($"strength {amount}");
+        Gained += amount;
+        return Task.CompletedTask;
+    }
+
     public Task Draw(int amount)
     {
         Log.Add($"draw {amount}");
@@ -80,6 +95,25 @@ internal sealed class RecordingBoard : IStageBoard
     }
 
     public Task Lunge(StageSeat? seat) => Task.CompletedTask;
+
+    /// <summary>The pool to 75: a line's cue, recorded by who fired.</summary>
+    public Task LineCue(StageSeat? seat)
+    {
+        Log.Add($"cue {seat?.Who}");
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The pool to 75: the cards a leaving guest sends to the
+    /// discard pile, recorded (headless there is no pile).</summary>
+    internal readonly List<object> Returned = new();
+
+    public Task ReturnCards(StageSeat seat)
+    {
+        Log.Add($"return {seat.Who} {seat.Cards.Count}");
+        Returned.AddRange(seat.Cards);
+        seat.Cards.Clear();
+        return Task.CompletedTask;
+    }
 
     public Task Sync() => Task.CompletedTask;
 

@@ -69,6 +69,35 @@ ART_PLAN = REPO / "art" / "plan.tsv"
 # TO CLOSE ONE: make the art, add the case, DELETE the row here. Leaving the
 # row behind fails this lint.
 ICON_DEBT: dict[str, str] = {
+    # Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md):
+    # eleven new Powers and Freminet's badges; their icons wait on the art
+    # pass.
+    "CrescendoPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "EnsembleCastPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "GrandEntrancePower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "HighStakesPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "HymnOfRenewalPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "PneumaTidesPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "PrimaDonnaPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "ReginaOfAllWatersPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "RepayNextTurnPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "ShowstopperPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "StandingRoomOnlyPower":
+        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
+    "FreminetBadgePower":
+        "Furina pool-75 guest badge; the guest's face waits on the art pass",
+    "FreminetUpgradedBadgePower":
+        "Furina pool-75 guest badge; the guest's face waits on the art pass",
     # Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md):
     # five new Powers; their icons come with the art pass.
     "OusiaSurgePower":

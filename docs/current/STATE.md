@@ -35,7 +35,7 @@ kits; its calibration bands are retired, and the sim does not gate kit balance
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance (frozen until the suite runs) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; awaiting [USER]'s play) | 34 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool to 75 built, loop findings await a ruling) | 75 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -85,9 +85,19 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   "the current one built overnight can be discarded". Furina pays HP for
   power: Drain spends HP down to a line at half the HP she entered combat with,
   Repay returns drained HP, every HP lost or repaid prints 1 Fanfare, and every
-  drained HP returns when combat ends. Three guest seats; seven guests. The
-  pool is the starter and 34 cards, not 78
-  (`review/active/furina-pool-40-2026-10-05.md`, ruled and built). Relics: the
+  drained HP returns when combat ends. Three guest seats (four with Ensemble
+  Cast); eleven guests. The guest rule
+  (`review/active/furina-pool-growth-2026-10-09.md` sec.3, ruled 2026-10-09):
+  a Guest Star exhausts and has no effect on summon; when its guest leaves (a
+  fourth summon, or Final Bow) its card goes to the discard pile; a second
+  copy moves its guest to the newest seat with no act; at the end of her turn
+  the guests act oldest first, then Showstopper Spends 5 and they act again,
+  then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
+  pool is the starter and 75 cards (20 / 35 / 20; three slots held for the
+  first seat round), built from that paper's sec.5. The loop probe found
+  productive cycles in the new cards (Overdraft and Pneuma Refrain loop with
+  HP flat); they are pinned in `tier0/tests/test_furina_loop_probe.py` and
+  await a ruling before seats. Relics: the
   starter Salon Solitaire ("At the end of your turn, Repay 1."; 2 before the
   2026-10-09 playtest trim), its Orobas upgrade The Curtain Never Falls
   (Repay 2; Ancient, never rolled), and two reward

@@ -21,9 +21,12 @@ THE RULES (the slice's docstring has them whole):
    that much again to a Drain or a Repay, never a hit
    (`review/active/furina-pool-40-2026-10-05.md` sec.2).
 4. SALON SOLITAIRE: at the end of her turn, Repay 2, after the guests act.
-5. GUEST STARS: three seats, guests only; a guest acts at the end of her
-   turn; a fourth makes the oldest leave, acting once more; a second copy of
-   one on stage makes it act and stay.
+5. GUEST STARS (the pool to 75's rule, `review/active/furina-pool-growth-
+   2026-10-09.md` sec.3): three seats (four with Ensemble Cast), guests
+   only. A Guest Star exhausts and has no effect on summon; a guest acts at
+   the end of her turn, oldest first; a fourth makes the oldest leave (no
+   act) and its card goes to the discard pile, as Final Bow's guest's does;
+   a second copy of one on stage moves it to the newest seat, no act.
 6. THE CURTAIN CALL: when the combat ends, all drained HP returns
    (`close_combat`), and the HP carries into the run.
 
@@ -59,11 +62,38 @@ CHEVREUSE_ACT_DAMAGE = T.CHEVREUSE_ACT
 CHEVREUSE_LINE_VULNERABLE = T.CHEVREUSE_LINE_VULNERABLE
 FIVE_CENTURY_LINE = T.FIVE_CENTURY_LINE
 FOUNTAIN_TURNS = T.FOUNTAIN_TURNS
+# The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
+# 2026-10-09): the guests' upgraded lines and acts (sec.3) and the new
+# numbers (sec.5).
+CHARLOTTE_ACT_REPAY_UPGRADED = T.CHARLOTTE_ACT_REPAY_UPGRADED
+SIGEWINNE_ACT_REPAY_UPGRADED = T.SIGEWINNE_ACT_REPAY_UPGRADED
+WRIOTHESLEY_ACT_DAMAGE_UPGRADED = T.WRIOTHESLEY_ACT_UPGRADED
+LYNEY_ACT_DAMAGE_UPGRADED = T.LYNEY_ACT_UPGRADED
+LYNETTE_ACT_DAMAGE_UPGRADED = T.LYNETTE_ACT_UPGRADED
+CHEVREUSE_LINE_WEAK_UPGRADED = T.CHEVREUSE_LINE_WEAK_UPGRADED
+CLORINDE_ACT_DAMAGE_UPGRADED = T.CLORINDE_ACT_UPGRADED
+FREMINET_ACT_DAMAGE = T.FREMINET_ACT
+FREMINET_ACT_DAMAGE_UPGRADED = T.FREMINET_ACT_UPGRADED
+NAVIA_LINE_DISCOUNT = T.NAVIA_LINE_DISCOUNT
+NAVIA_LINE_DISCOUNT_UPGRADED = T.NAVIA_LINE_DISCOUNT_UPGRADED
+NEUVILLETTE_HYDRO_BONUS = T.NEUVILLETTE_HYDRO_BONUS
+NEUVILLETTE_HYDRO_BONUS_UPGRADED = T.NEUVILLETTE_HYDRO_BONUS_UPGRADED
+ESCOFFIER_ACT_DAMAGE = T.ESCOFFIER_ACT
+ESCOFFIER_ACT_DAMAGE_UPGRADED = T.ESCOFFIER_ACT_UPGRADED
+ESCOFFIER_LINE_REPAY = T.ESCOFFIER_LINE_REPAY
+ENSEMBLE_SEATS = T.ENSEMBLE_SEATS
+SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
+NEAR_LINE = T.NEAR_LINE
+HYMN_THRESHOLD = T.HYMN_THRESHOLD
+PRIMA_DONNA_FANFARE = T.PRIMA_DONNA_FANFARE
+REGINA_DRAIN = T.REGINA_DRAIN
+STAR_TURN_FANFARE_PER = T.STAR_TURN_FANFARE_PER
 
-#: The seven guests, as the sheet's `stage_guest` names them: the slice's
-#: four and the pool to 39's three.
+#: The eleven guests, as the sheet's `stage_guest` names them: the slice's
+#: four, the pool to 39's three and the pool to 75's four.
 GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
-          "lyney", "sigewinne", "chevreuse")
+          "lyney", "sigewinne", "chevreuse",
+          "freminet", "navia", "neuvillette", "escoffier")
 
 #: The Powers this arm reads, by `apply_power` id. Each sheet row applies its
 #: printed number: Salon's Encore and Thunderous Applause their damage (3, 4
@@ -80,6 +110,18 @@ A_FIVE_CENTURY_ACT = "fs_a_five_century_act"
 CRITICS_DARLING = "fs_critics_darling"
 BIS = "fs_bis"
 FOUNTAIN_OF_LUCINE = "fs_fountain_of_lucine"
+# The pool to 75: each applies its printed number (Grand Entrance 4 [6], High
+# Stakes 4 [6], Pneuma Tides 2 [3]) or 1 a copy.
+GRAND_ENTRANCE = "fs_grand_entrance"
+SHOWSTOPPER = "fs_showstopper"
+ENSEMBLE_CAST = "fs_ensemble_cast"
+CRESCENDO = "fs_crescendo"
+PRIMA_DONNA = "fs_prima_donna"
+STANDING_ROOM_ONLY = "fs_standing_room_only"
+HIGH_STAKES = "fs_high_stakes"
+REGINA_OF_ALL_WATERS = "fs_regina_of_all_waters"
+PNEUMA_TIDES = "fs_pneuma_tides"
+HYMN_OF_RENEWAL = "fs_hymn_of_renewal"
 
 #: The slice's Power keys (`furina_tide.Ftd.powers`) to the arm's ids.
 ARM_POWER_IDS = {
@@ -91,6 +133,17 @@ ARM_POWER_IDS = {
     "five_century": A_FIVE_CENTURY_ACT,
     "critics_darling": CRITICS_DARLING,
     "bis": BIS,
+    # The pool to 75.
+    "grand_entrance": GRAND_ENTRANCE,
+    "showstopper": SHOWSTOPPER,
+    "ensemble_cast": ENSEMBLE_CAST,
+    "crescendo": CRESCENDO,
+    "prima_donna": PRIMA_DONNA,
+    "standing_room_only": STANDING_ROOM_ONLY,
+    "high_stakes": HIGH_STAKES,
+    "regina": REGINA_OF_ALL_WATERS,
+    "pneuma_tides": PNEUMA_TIDES,
+    "hymn_of_renewal": HYMN_OF_RENEWAL,
 }
 
 # ----------------------------------------------------------------------
@@ -104,11 +157,11 @@ STARTER_IDS: tuple[str, ...] = (
     "proto_fs_standing_ovation",    # Rising Applause
 )
 
-#: THE SLICE'S 24 (sec.16) and THE POOL TO 39's ten
-#: (`review/active/furina-pool-40-2026-10-05.md` sec.3), in the C# roster's
-#: order (`FurinaStageRoster.Pool`): 12 Common, 15 Uncommon, 7 Rare. (The
-#: paper's 39 counts the two Basics and the three Neuvillette companion rows
-#: besides.)
+#: THE SLICE'S 24 (sec.16), THE POOL TO 39's ten
+#: (`review/active/furina-pool-40-2026-10-05.md` sec.3) and THE POOL TO 75's
+#: 41 (`review/active/furina-pool-growth-2026-10-09.md` sec.5), in the C#
+#: roster's order (`FurinaStageRoster.Pool`): 20 Common, 35 Uncommon, 20
+#: Rare, 75. Three slots, one per rarity, are held for the first seat round.
 POOL_IDS: tuple[str, ...] = (
     # Drain (five).
     "proto_fs_mademoiselle_crabaletta",
@@ -153,6 +206,52 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_hold_the_stage",
     "proto_fs_guest_star_chevreuse",
     "proto_fs_bis",
+    # The pool to 75 (2026-10-09). Guests and stage (11).
+    "proto_fs_casting_call",
+    "proto_fs_encore",
+    "proto_fs_tutti",
+    "proto_fs_final_bow",
+    "proto_fs_grand_entrance",
+    "proto_fs_guest_star_freminet",
+    "proto_fs_showstopper",
+    "proto_fs_ensemble_cast",
+    "proto_fs_guest_star_navia",
+    "proto_fs_guest_star_neuvillette",
+    "proto_fs_guest_star_escoffier",
+    # The Crowd (9).
+    "proto_fs_crashing_waves",
+    "proto_fs_bubble_aria",
+    "proto_fs_commanding_gaze",
+    "proto_fs_star_turn",
+    "proto_fs_sold_out",
+    "proto_fs_crescendo",
+    "proto_fs_prima_donna",
+    "proto_fs_standing_room_only",
+    "proto_fs_bring_the_house_down",
+    # Ousia, Drain (10).
+    "proto_fs_undercurrent",
+    "proto_fs_overdraft",
+    "proto_fs_ousia_pledge",
+    "proto_fs_against_the_tide",
+    "proto_fs_pay_the_tab",
+    "proto_fs_riptide_lunge",
+    "proto_fs_high_stakes",
+    "proto_fs_regina_of_all_waters",
+    "proto_fs_the_deluge",
+    "proto_fs_all_in",
+    # Pneuma, Repay (10).
+    "proto_fs_soothing_waters",
+    "proto_fs_gentle_current",
+    "proto_fs_clean_slate",
+    "proto_fs_hydro_lance",
+    "proto_fs_cleansing_torrent",
+    "proto_fs_balance_the_books",
+    "proto_fs_rising_tide",
+    "proto_fs_pneuma_tides",
+    "proto_fs_hymn_of_renewal",
+    "proto_fs_grand_absolution",
+    # The bridge (1).
+    "proto_fs_ebb_and_flow",
 )
 
 #: The loader's older seams, empty since the slice: nothing is substituted
@@ -193,8 +292,11 @@ def count(player) -> int:
 
 
 def can_pay(player, amount: int) -> bool:
-    """Does she hold `amount` Fanfare? A Spend is offered only then."""
-    return active(player) and int(player.ftd.fanfare) >= int(amount)
+    """Can she pay a Spend of `amount`? A Spend is offered only then.
+    Navia's line makes the first Spend each turn cost 2 less
+    (`furina_tide.price_of`)."""
+    return (active(player)
+            and int(player.ftd.fanfare) >= T.price_of(player.ftd, amount))
 
 
 def can_drain(player, amount: int) -> bool:
@@ -361,13 +463,120 @@ def gain(state, amount: int, source: str = "card") -> None:
         T.gain(state, int(amount), source)
 
 
-def guest_star(state, member: str) -> str:
-    """A Guest Star card: summon the guest (rule 5)."""
+def guest_star(state, member: str, upgraded: bool = False,
+               card=None) -> str:
+    """A Guest Star card (rule 5, the pool to 75's sec.3): summon the guest,
+    no effect on summon; `card` is held by its seat until the guest leaves,
+    and an upgraded one raises the guest's line or act. Grand Entrance
+    Repays after."""
     if not active(state.player):
         return "off"
     if member not in GUESTS:
         raise ValueError(f"unknown guest {member!r}")
-    return T.summon(state, member)
+    result = T.summon(state, member, upgraded=upgraded, card=card)
+    entrance = T._player_power(state.player, "grand_entrance")
+    if entrance and not state.over:
+        T.repay(state, entrance)
+    return result
+
+
+# ----------------------------------------------------------------------
+# THE POOL TO 75's card verbs (`{op: furina, kind: ...}`), the C#
+# `FurinaCards`. Each kind with a number prints it as `amount` (the card's
+# `FsAmount`, upgrade key `furina_amount`).
+# ----------------------------------------------------------------------
+KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest", "repay_next")
+KIND_AMOUNT = ("final_bow", "repay_next")
+
+
+def validate_op(card_id: str, fx: dict) -> None:
+    """The loader's check, the codegen's `FURINA_KINDS` taken here too."""
+    unknown = set(fx) - {"op", "kind", "amount"}
+    if unknown:
+        raise ValueError(f"card {card_id!r}: furina field(s) "
+                         f"{sorted(unknown)} not understood")
+    kind = fx.get("kind")
+    if kind not in KINDS:
+        raise ValueError(f"card {card_id!r}: furina kind {kind!r}")
+    if ("amount" in fx) != (kind in KIND_AMOUNT):
+        raise ValueError(f"card {card_id!r}: furina {kind} amount mismatch")
+    amount = fx.get("amount", 1)
+    if (not isinstance(amount, int) or isinstance(amount, bool)
+            or amount <= 0):
+        raise ValueError(f"card {card_id!r}: furina amount must be a "
+                         "positive literal int")
+
+
+def kind(state, fx: dict, card) -> None:
+    """One `furina` kind. Inert for anyone who is not Furina."""
+    if not active(state.player):
+        return
+    k = fx["kind"]
+    if k == "act_oldest":
+        T.act_oldest(state)
+    elif k == "act_all":
+        T.act_all(state)
+    elif k == "final_bow":
+        if state.player.ftd.stage:
+            T.final_bow(state, T._decider_bow(state), int(fx["amount"]))
+    elif k == "tutor_guest":
+        T.tutor_guest(state)
+    elif k == "repay_next":
+        state.player.ftd.repay_next += int(fx["amount"])
+    else:                                            # pragma: no cover
+        raise ValueError(f"unknown furina kind {k!r}")
+
+
+# ---- the pool to 75's reads (count tokens and predicates) -------------
+def drains_this_combat(player) -> int:
+    """Undercurrent: "for each time you have Drained this combat"."""
+    return int(player.ftd.drains_this_combat) if active(player) else 0
+
+
+def half_drained(player) -> int:
+    """Balance the Books: "half your drained HP", rounded down."""
+    return drained(player) // 2
+
+
+def repays_this_turn(player) -> int:
+    """Rising Tide: "for each time you Repaid this turn"."""
+    return int(player.ftd.repays_this_turn) if active(player) else 0
+
+
+def repaid_this_play(player) -> int:
+    """Grand Absolution's "that much": HP this play's Repays returned."""
+    return int(player.ftd.repaid_this_play) if active(player) else 0
+
+
+def near_line(player) -> bool:
+    """Against the Tide and High Stakes: within 5 HP of the Drain line."""
+    return active(player) and T.near_line(player)
+
+
+def none_drained(player) -> bool:
+    """Clean Slate: "If you have no drained HP left"."""
+    return active(player) and drained(player) <= 0
+
+
+def hydro_bonus(state) -> int:
+    """Neuvillette's line (`furina_tide.hydro_bonus`); 0 for anyone with no
+    stage record (the slice's own players have one too)."""
+    return T.hydro_bonus(state) if T.live(state.player) else 0
+
+
+def high_stakes_bonus(state) -> int:
+    """High Stakes: "While you are within 5 HP of your Drain line, your
+    Attacks deal 4 more damage." 0 off the line or off Furina."""
+    if not T.live(state.player):
+        return 0
+    n = T._player_power(state.player, "high_stakes")
+    return n if n and T.near_line(state.player) else 0
+
+
+def begin_play(state) -> None:
+    """A card play opens: a fresh per-play Repay record."""
+    if active(state.player):
+        state.player.ftd.repaid_this_play = 0
 
 
 def energy_next_turn(state, amount: int) -> None:
@@ -424,8 +633,23 @@ FURINA_TIDE_DECIDER = FurinaTideDecider()
 READINGS: tuple[str, ...] = (
     "The line is half the HP she entered the combat with, compared in "
     "floats: from 78 or 77 a Drain may reach 39 and no lower.",
-    "A guest already on stage acts and keeps its seat when summoned again "
-    "(the slice's reading; no Fanfare for it).",
+    "A second copy of a guest already on stage moves it to the newest seat "
+    "with no act (the pool to 75, sec.3); its card joins the seat's and "
+    "returns with it, and an upgraded copy upgrades the guest.",
+    "A guest evicted by a fourth summon leaves without acting (sec.3: no "
+    "effect on summon); its cards return from the exhaust pile to the "
+    "discard pile.",
+    "Final Bow's guest is the decider's pick; the sim's default is the guest "
+    "with the biggest act, the oldest on a tie.",
+    "Casting Call takes the first Guest Star in the draw pile whose guest is "
+    "not on stage, else the first (the C# asks the player).",
+    "Showstopper Spends only when a guest is on stage and the bank holds the "
+    "price; each copy is its own Spend and its own round of acts.",
+    "Navia's discount is the first Spend each turn (a Spend made before she "
+    "arrived uses it up); a Spend discounted to 0 is still a Spend.",
+    "Escoffier's line answers every act, his own included.",
+    "Regina drains first at turn start, then Fountain of Lucine, Gentle "
+    "Current and Pneuma Tides Repay, then Prima Donna reads the Fanfare.",
     "Salon Solitaire's Repay comes after the guests act, at the end of her "
     "turn.",
     "Charlotte's line counts the Singer's end-of-turn Repay: with no Repay "

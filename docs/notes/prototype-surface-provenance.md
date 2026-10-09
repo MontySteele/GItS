@@ -6676,3 +6676,78 @@ readjust after the card pool expands."
 - Tidal Flourish (`proto_fs_tidal_flourish`): Common -> Uncommon, and its
   plain mode applies Hydro: "Deal 5 Hydro damage to ALL enemies. Spend 6:
   deal 12 instead.", Surintendante Chevalmarin's wording.
+
+## Furina: the pool to 75, 2026-10-09
+
+Paper: `review/active/furina-pool-growth-2026-10-09.md` (on branch
+`furina-pool-78-paper-2026-10-09`), ruled 2026-10-09 at all defaults after a
+Fable design review ended with "no further critiques" ([USER]: "If they have
+no further critiques, then I'm good to approve it."). Built on the 2026-10-09
+playtest trims. Every row is the paper's sec.5 text as it stands after its
+Review section (All In costs 0; Hymn of Renewal counts HP actually repaid,
+which is on its power's hover and the Repay tip, not its face).
+
+**The guest rule (sec.3)** is `FurinaStage` / `StageDirector` and the sim's
+`furina_tide`: a Guest Star exhausts (`exhaust: true` on all eleven rows) and
+hands itself to the summon; the seat holds the card and sends it from the
+exhaust pile to the discard pile when its guest leaves (a fourth summon, or
+Final Bow). A summon has no effect: the old "acts at once" path is gone, and
+a duplicate copy moves its guest to the newest seat with no act. At the end of
+her turn the guests act oldest first, then each Showstopper copy Spends 5 and
+they act again, then Salon Solitaire Repays. A line that fires files a `line`
+beat on the stage log and flashes the guest's badge (`StagePerformerBeat.Line`),
+distinct from an act's lunge. A guest's upgrade (`guest_upgraded: true`) raises
+its line or act per the paper's table; its face prints "Summon Charlotte+."
+and the numbers are on its tip and badge (an upgraded guest wears its own
+badge class). Charlotte stays Common.
+
+**The 41 rows** (10 Common, 18 Uncommon, 13 Rare; the pool is 20 / 35 / 20,
+with three slots held). The guest verbs the grammar cannot spell are one op,
+`{op: furina, kind: ...}` (`act_oldest`, `act_all`, `final_bow`,
+`tutor_guest`, `repay_next`; C# `FurinaCards`, sim `furina_stage.kind`).
+Powers are `FurinaPool75Powers.cs`. New sheet machinery: `stage_drain` and
+`stage_spend` fixed prices an upgrade moves (gate and payment read one
+`IsUpgraded` swap), the count tokens `stage_drains`, `stage_half_drained`,
+`stage_repays_turn` and `stage_repaid`, the predicates `stage_near_line` and
+`stage_none_drained`, a `stage_repay` legal in a branch (Riptide Lunge), and
+Star Turn's card-level `cost_reduction_per_fanfare: 6`. Encore! prints
+"oldest guest", which has its own tip (`ArmKeywordTips.ForOldestGuest`).
+
+**Readings where the paper is silent** (each is in the PR body too):
+- An evicted guest leaves without acting ("no effect on summon"); only Final
+  Bow's guest acts as it goes.
+- A duplicate's card joins its guest's seat and returns with it; an upgraded
+  duplicate upgrades the guest.
+- Showstopper Spends only with a guest on stage and the price in the bank;
+  each copy is one Spend and one round. It is automatic.
+- Navia's discount is the first Spend of the turn (a Spend before she
+  arrived uses it up); a spend-all keeps the discount; her act reads the
+  Fanfare actually paid this turn.
+- Escoffier's line answers every act, his own included.
+- Neuvillette's bonus covers every Hydro hit she deals (cards, guests' acts,
+  his own act). It is a passive line like Lyney's, so it has no cue.
+- Casting Call and Final Bow let the player pick off a grid when there is
+  more than one choice; the sim takes the first fresh Guest Star and the
+  guest with the biggest act.
+- Commanding Gaze's "[3 and 2]" is the Spend mode: 3 Vulnerable and 2 Weak.
+- Undercurrent counts its own Drain; Balance the Books reads the drained HP
+  before its own Repay, rounded down; Grand Absolution deals what it repaid.
+- Turn start: Regina, Fountain of Lucine, Gentle Current, Pneuma Tides, then
+  Prima Donna reads the Fanfare.
+- Grand Entrance Repays after the summon, on every Guest Star played.
+- "Within 5 HP of your Drain line" is HP minus the line at most 5.
+
+**Art.** Eleven rows take paintings already on disk under the same id from
+the v2 pool (`KNOWN_STALE` entries removed); thirty are `KNOWN_MISSING`. The
+four new guests have no body scene (the Osty fallback) and no badge icon.
+
+**The sim slice** (`furina_tide.CARDS`) mirrors all 75 for the probes, and
+now carries the playtest trims (Usher 6 / 11, Tidal Flourish and Interval
+Bell Uncommon) so its draft pool matches the sheet.
+
+**Loop probe (sec.6).** The four named combinations: Encore! with Escoffier,
+Tutti! with Showstopper and Bring the House Down, and Final Bow with Grand
+Entrance do not loop. Overdraft, Soothing Waters, Sold Out and Crescendo
+does, and the full sweep finds 81 productive cycles over 16 card sets, ten
+with HP flat (the smallest: Overdraft and Pneuma Refrain). They are pinned in
+`tier0/tests/test_furina_loop_probe.py` and await a ruling.

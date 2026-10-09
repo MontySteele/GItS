@@ -74,5 +74,6 @@ def test_another_characters_run_is_not_taught_the_stages_summon():
 def test_the_full_stage_bow_says_why_the_lead_left():
     # The re-founding (2026-10-04): the front-most Salon member Bows and
     # leaves to make room; the newcomer adds nothing to anyone's bar.
+    # The pool to 75 (2026-10-09): no act on leaving; the card returns.
     assert STAGE_LEAVE_REASONS["evicted"] == (
-        "it Bowed to make room for a summon on a full stage")
+        "a fourth summon took its seat; its card went to your discard pile")

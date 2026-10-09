@@ -2130,7 +2130,10 @@ def prints_attack_body(card: Card) -> bool:
 #: ones.
 FURINA_STAGE_OPS = ("stage_drain", "stage_repay", "stage_repay_all",
                     "stage_guest", "stage_spend", "stage_spend_all",
-                    "stage_energy_next")
+                    "stage_energy_next",
+                    # THE POOL TO 75 (2026-10-09): the guest verbs' one op,
+                    # on the same terms (who is on stage is the board).
+                    "furina")
 
 #: Their shared rationale, written once. `STATIC_OP_PRICING` is prose the
 #: parity lint reads as a key set, and eight copies of one sentence would rot

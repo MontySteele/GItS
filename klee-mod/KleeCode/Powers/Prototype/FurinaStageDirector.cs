@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
+using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
 
@@ -53,16 +54,32 @@ public interface IStageBoard
     /// Applause, Critics' Darling): unpowered, no element.</summary>
     Task PowerHit(string source, StageTarget target, int amount);
 
-    /// <summary>Furina gains Block (Sigewinne's line): unpowered.</summary>
+    /// <summary>Furina gains Block (Sigewinne's and Freminet's lines):
+    /// unpowered.</summary>
     Task Block(int amount);
 
     /// <summary>Vulnerable on an enemy (Chevreuse's line).</summary>
     Task Vulnerable(StageTarget target, int amount);
 
+    /// <summary>Weak on an enemy (Chevreuse's upgraded line).</summary>
+    Task Weak(StageTarget target, int amount);
+
+    /// <summary>Furina gains Strength (Standing Room Only, Hymn of Renewal,
+    /// Regina of All Waters).</summary>
+    Task Strength(int amount);
+
     Task Draw(int amount);
 
     /// <summary>The guest's body moves (a lunge), before its act.</summary>
     Task Lunge(StageSeat? seat);
+
+    /// <summary>A guest's LINE fired: a small cue on its body, distinct from
+    /// an act's lunge (the pool to 75, sec.3).</summary>
+    Task LineCue(StageSeat? seat);
+
+    /// <summary>The guest left the stage: its Guest Star cards go from the
+    /// exhaust pile to the discard pile (the pool to 75, sec.3).</summary>
+    Task ReturnCards(StageSeat seat);
 
     /// <summary>The bodies catch up with the seats.</summary>
     Task Sync();
@@ -72,19 +89,27 @@ public interface IStageBoard
 public enum StageSummonResult
 {
     Seated,
+
+    /// <summary>A duplicate copy: the guest already on stage moves to the
+    /// newest seat, with no act (the pool to 75, sec.3).</summary>
     Repeat,
+
+    /// <summary>A full stage: the oldest guest leaves (no act) and the new
+    /// one takes the back seat.</summary>
     Evict,
 }
 
 /// <summary>How a summon makes room, decided before it happens: the seat it
-/// touches (<see cref="Index"/>: the guest that acts and leaves on an
-/// eviction, the guest that acts and stays on a repeat; -1 otherwise).
+/// touches (<see cref="Index"/>: the guest that leaves on an eviction, the
+/// guest that moves on a repeat; -1 otherwise).
 /// </summary>
 public readonly record struct StageRoom(StageSummonResult Kind, int Index);
 
 /// <summary>
-/// THE KIT'S RULES, IN ORDER (the Salon's Tab, 2026-10-05). Every method is
-/// the sim's twin of the same name in <c>tier0/engine/furina_tide.py</c>.
+/// THE KIT'S RULES, IN ORDER (the Salon's Tab, 2026-10-05; the guest rule of
+/// the pool to 75, <c>review/active/furina-pool-growth-2026-10-09.md</c>
+/// sec.3). Every method is the sim's twin of the same name in
+/// <c>tier0/engine/furina_tide.py</c>.
 ///
 /// IT OWNS NO STATE: the seats and the numbers are the ledger's, the board
 /// half is the board's. So the game and the headless pins run the very same
@@ -97,6 +122,10 @@ public sealed class StageDirector
     public const string ThunderousTitle = "Thunderous Applause";
     public const string RevelryTitle = "Universal Revelry";
     public const string CriticsDarlingTitle = "Critics' Darling";
+    public const string GrandEntranceTitle = "Grand Entrance";
+    public const string ShowstopperTitle = "Showstopper";
+    public const string PneumaTidesTitle = "Pneuma Tides";
+    public const string ReginaTitle = "Regina of All Waters";
 
     private readonly FurinaStageLedger _stage;
     private readonly IStageBoard _board;
@@ -111,40 +140,69 @@ public sealed class StageDirector
 
     // ---- Fanfare (rule 3) --------------------------------------------------
 
-    /// <summary>Gain Fanfare (Universal Revelry multiplies it).</summary>
+    /// <summary>Gain Fanfare (a relic, a potion).</summary>
     public int Gain(int amount, string source = "") =>
         _stage.Gain(amount, source);
 
-    /// <summary>A Spend N. Thunderous Applause answers a Spend that moved
-    /// Fanfare. Returns what was paid.</summary>
+    /// <summary>A Spend N. Thunderous Applause, Chevreuse's line and
+    /// Crescendo answer a Spend. Returns the price when the Spend was made
+    /// (Navia's line may take less from the bank), 0 when it was not.
+    /// </summary>
     public async Task<int> Spend(int price)
     {
+        var navia = _stage.NaviaDiscount > 0 && price > 0
+            ? _stage.SeatOf(StagePerformer.Navia) : null;
         if (!_stage.Spend(price)) return 0;
-        await Thunderous();
-        await Chevreuse();
+        if (navia != null) await _board.LineCue(navia);
+        await AfterSpend();
         return price;
     }
 
-    /// <summary>"Spend all your Fanfare": one Spend. Returns what was spent
-    /// (0 held is no Spend).</summary>
+    /// <summary>"Spend all your Fanfare": one Spend. Returns what the card
+    /// reads (the whole bank; 0 held is no Spend). Standing Room Only answers
+    /// a spend-all of at least 1.</summary>
     public async Task<int> SpendAll()
     {
+        var navia = _stage.NaviaDiscount > 0 && _stage.Fanfare > 0
+            ? _stage.SeatOf(StagePerformer.Navia) : null;
         var spent = _stage.SpendAll();
         if (spent > 0)
         {
-            await Thunderous();
-            await Chevreuse();
+            if (navia != null) await _board.LineCue(navia);
+            await AfterSpend();
+            var sro = _stage.Mods.StandingRoomOnly;
+            if (sro > 0 && !_board.Over) await _board.Strength(sro);
         }
         return spent;
     }
 
+    private async Task AfterSpend()
+    {
+        await Thunderous();
+        await Chevreuse();
+        var crescendo = _stage.Mods.Crescendo;
+        if (crescendo > 0 && _stage.SpendsThisTurn == 1 && !_board.Over)
+        {
+            await _board.Draw(crescendo);
+        }
+    }
+
     /// <summary>Chevreuse's line: "Whenever you Spend, apply 1 Vulnerable to
-    /// a random enemy."</summary>
+    /// a random enemy." Upgraded: also 1 Weak.</summary>
     private async Task Chevreuse()
     {
-        if (!_stage.OnStage(StagePerformer.Chevreuse) || _board.Over) return;
+        var seat = _stage.SeatOf(StagePerformer.Chevreuse);
+        if (seat == null || _board.Over) return;
+        _stage.NoteLine(StagePerformer.Chevreuse,
+                        FurinaStageLaw.ChevreuseLineVulnerable);
+        await _board.LineCue(seat);
         await _board.Vulnerable(StageTarget.Random,
                                 FurinaStageLaw.ChevreuseLineVulnerable);
+        if (seat.Upgraded && !_board.Over)
+        {
+            await _board.Weak(StageTarget.Random,
+                              FurinaStageLaw.ChevreuseLineWeakUpgraded);
+        }
     }
 
     /// <summary>The readers of a Drain or a Repay of
@@ -188,7 +246,9 @@ public sealed class StageDirector
             return 0;
         }
         _stage.LynetteFiredThisTurn = true;
-        return _stage.Gain(hpLost, "Lynette");
+        var gained = _stage.Gain(hpLost, "Lynette");
+        _stage.NoteLine(StagePerformer.Lynette, gained);
+        return gained;
     }
 
     // ---- the HP loan (rules 1 and 2) ---------------------------------------
@@ -199,8 +259,8 @@ public sealed class StageDirector
     /// <summary>
     /// Rule 1, Drain N: lose N HP (never below the line), mark it drained,
     /// gain that much Fanfare, then the Drain readers -- Salon's Encore,
-    /// Wriothesley's line. False (nothing happens) when it would cross the
-    /// line.
+    /// Wriothesley's and Freminet's lines, Ousia Surge. False (nothing
+    /// happens) when it would cross the line.
     /// </summary>
     public async Task<bool> Drain(int amount)
     {
@@ -226,10 +286,20 @@ public sealed class StageDirector
         {
             await _board.PowerHit(SalonsEncoreTitle, StageTarget.All, encore);
         }
-        if (_stage.OnStage(StagePerformer.Wriothesley) && !_board.Over)
+        if (_stage.SeatOf(StagePerformer.Wriothesley) is { } wrio
+            && !_board.Over)
         {
+            _stage.NoteLine(StagePerformer.Wriothesley, lost);
+            await _board.LineCue(wrio);
             await _board.Damage(StagePerformer.Wriothesley, StageTarget.Random,
                                 lost, Element.Cryo);
+        }
+        if (_stage.SeatOf(StagePerformer.Freminet) is { } freminet
+            && !_board.Over)
+        {
+            _stage.NoteLine(StagePerformer.Freminet, lost);
+            await _board.LineCue(freminet);
+            await _board.Block(lost);
         }
         var surge = _stage.Mods.OusiaSurge;
         if (surge > 0 && !_stage.OusiaDrewThisTurn && !_board.Over)
@@ -243,7 +313,8 @@ public sealed class StageDirector
     /// <summary>
     /// Rule 2, Repay N: regain up to N drained HP (never more than drained,
     /// never past Max HP), gain that much Fanfare, then the Repay readers --
-    /// Endless Waltz, Clorinde's line, Charlotte's line. Returns HP repaid.
+    /// Endless Waltz, Clorinde's, Charlotte's and Sigewinne's lines, and Hymn
+    /// of Renewal (on 4 or more HP actually repaid). Returns HP repaid.
     /// </summary>
     public async Task<int> Repay(int amount)
     {
@@ -261,27 +332,43 @@ public sealed class StageDirector
             if (_board.Over) break;
             await _board.PowerHit(EndlessWaltzTitle, StageTarget.Random, back);
         }
-        if (_stage.OnStage(StagePerformer.Clorinde) && !_board.Over)
+        if (_stage.SeatOf(StagePerformer.Clorinde) is { } clorinde
+            && !_board.Over)
         {
+            _stage.NoteLine(StagePerformer.Clorinde,
+                            FurinaStageLaw.ClorindePerRepay * back);
+            await _board.LineCue(clorinde);
             await _board.Damage(StagePerformer.Clorinde, StageTarget.Random,
                                 FurinaStageLaw.ClorindePerRepay * back,
                                 Element.Electro);
         }
-        if (_stage.OnStage(StagePerformer.Charlotte)
+        if (_stage.SeatOf(StagePerformer.Charlotte) is { } charlotte
             && !_stage.CharlotteDrewThisTurn && !_board.Over)
         {
             _stage.CharlotteDrewThisTurn = true;
+            _stage.NoteLine(StagePerformer.Charlotte,
+                            FurinaStageLaw.CharlotteLineDraw);
+            await _board.LineCue(charlotte);
             await _board.Draw(FurinaStageLaw.CharlotteLineDraw);
         }
-        if (_stage.OnStage(StagePerformer.Sigewinne) && !_board.Over)
+        if (_stage.SeatOf(StagePerformer.Sigewinne) is { } sigewinne
+            && !_board.Over)
         {
+            _stage.NoteLine(StagePerformer.Sigewinne, back);
+            await _board.LineCue(sigewinne);
             await _board.Block(back);
+        }
+        var hymn = _stage.Mods.HymnOfRenewal;
+        if (hymn > 0 && back >= FurinaStageLaw.HymnThreshold && !_board.Over)
+        {
+            await _board.Strength(hymn);
         }
         return back;
     }
 
-    /// <summary>Fountain of Lucine: at the start of her turn, each play still
-    /// owed Repays its amount, one Repay per play.</summary>
+    /// <summary>Fountain of Lucine and Gentle Current: at the start of her
+    /// turn, each play still owed Repays its amount, one Repay per play.
+    /// </summary>
     public async Task<int> TurnStartRepays()
     {
         var total = 0;
@@ -306,32 +393,96 @@ public sealed class StageDirector
         return await _board.Heal(back);
     }
 
-    // ---- the guests (rule 5) -----------------------------------------------
+    // ---- the turn-start Powers (the pool to 75) ----------------------------
 
-    /// <summary>One guest's act. <paramref name="seat"/> is null for a guest
-    /// that has already left (its once-more act as it goes).</summary>
-    public async Task<bool> Act(StagePerformer who, StageSeat? seat)
+    /// <summary>Pneuma Tides: "At the start of your turn, Repay 2." One Repay
+    /// of the summed amount.</summary>
+    public async Task<int> PneumaTides(int amount)
+    {
+        if (amount <= 0 || _board.Over) return 0;
+        return await Repay(amount);
+    }
+
+    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3. If
+    /// you do, gain 1 Strength." Each copy is its own Drain and its own
+    /// Strength. Returns the copies that drained.</summary>
+    public async Task<int> Regina(int copies)
+    {
+        var done = 0;
+        for (var i = 0; i < copies; i++)
+        {
+            if (_board.Over || !CanDrain(FurinaStageLaw.ReginaDrain)) break;
+            if (!await Drain(FurinaStageLaw.ReginaDrain)) break;
+            done++;
+            if (!_board.Over) await _board.Strength(1);
+        }
+        return done;
+    }
+
+    // ---- the guests (rule 5, the pool to 75's sec.3) -----------------------
+
+    /// <summary>A guest's act number as its seat holds it: the upgraded
+    /// number when an upgraded Guest Star brought it.</summary>
+    public static int ActAmount(StagePerformer who, bool upgraded) => who switch
+    {
+        StagePerformer.Charlotte => upgraded
+            ? FurinaStageLaw.CharlotteActRepayUpgraded
+            : FurinaStageLaw.CharlotteActRepay,
+        StagePerformer.Sigewinne => upgraded
+            ? FurinaStageLaw.SigewinneActRepayUpgraded
+            : FurinaStageLaw.SigewinneActRepay,
+        StagePerformer.Wriothesley => upgraded
+            ? FurinaStageLaw.WriothesleyActDamageUpgraded
+            : FurinaStageLaw.WriothesleyActDamage,
+        StagePerformer.Lynette => upgraded
+            ? FurinaStageLaw.LynetteActDamageUpgraded
+            : FurinaStageLaw.LynetteActDamage,
+        StagePerformer.Clorinde => upgraded
+            ? FurinaStageLaw.ClorindeActDamageUpgraded
+            : FurinaStageLaw.ClorindeActDamage,
+        StagePerformer.Lyney => upgraded
+            ? FurinaStageLaw.LyneyActDamageUpgraded
+            : FurinaStageLaw.LyneyActDamage,
+        StagePerformer.Chevreuse => FurinaStageLaw.ChevreuseActDamage,
+        StagePerformer.Freminet => upgraded
+            ? FurinaStageLaw.FreminetActDamageUpgraded
+            : FurinaStageLaw.FreminetActDamage,
+        StagePerformer.Escoffier => upgraded
+            ? FurinaStageLaw.EscoffierActDamageUpgraded
+            : FurinaStageLaw.EscoffierActDamage,
+        // Navia's and Neuvillette's acts read the turn (Fanfare spent, HP
+        // drained), not a printed number.
+        _ => 0,
+    };
+
+    /// <summary>One guest's act, at the end of her turn or bought by a card
+    /// (Encore!, Tutti!, Final Bow, Bring the House Down, Showstopper).
+    /// Escoffier's line answers every act, his own included.</summary>
+    public async Task<bool> Act(StageSeat seat)
     {
         if (_board.Over) return false;
+        var who = seat.Who;
         await _board.Lunge(seat);
         var moved = 0;
+        var number = ActAmount(who, seat.Upgraded);
         switch (who)
         {
             case StagePerformer.Charlotte:
-                moved = await Repay(FurinaStageLaw.CharlotteActRepay);
+            case StagePerformer.Sigewinne:
+                moved = await Repay(number);
                 break;
             case StagePerformer.Wriothesley:
-                moved = FurinaStageLaw.WriothesleyActDamage;
+                moved = number;
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Cryo);
                 break;
             case StagePerformer.Lynette:
-                moved = FurinaStageLaw.LynetteActDamage;
+                moved = number;
                 await _board.Damage(who, StageTarget.Aura, moved,
                                     Element.Anemo);
                 break;
             case StagePerformer.Clorinde:
-                moved = FurinaStageLaw.ClorindeActDamage;
+                moved = number;
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Electro);
                 break;
@@ -342,49 +493,100 @@ public sealed class StageDirector
                     && await Drain(FurinaStageLaw.LyneyActDrain)
                     && !_board.Over)
                 {
-                    moved = FurinaStageLaw.LyneyActDamage;
+                    moved = number;
                     await _board.Damage(who, StageTarget.All, moved,
                                         Element.Pyro);
                 }
                 break;
-            case StagePerformer.Sigewinne:
-                moved = await Repay(FurinaStageLaw.SigewinneActRepay);
-                break;
             case StagePerformer.Chevreuse:
-                moved = FurinaStageLaw.ChevreuseActDamage;
+                moved = number;
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.None);
                 break;
+            case StagePerformer.Freminet:
+                moved = number;
+                await _board.Damage(who, StageTarget.Random, moved,
+                                    Element.Cryo);
+                break;
+            case StagePerformer.Navia:
+                // "Deal Geo damage to a random enemy equal to the Fanfare you
+                // spent this turn." Nothing spent, nothing dealt.
+                moved = _stage.SpentThisTurn;
+                if (moved > 0)
+                {
+                    await _board.Damage(who, StageTarget.Random, moved,
+                                        Element.Geo);
+                }
+                break;
+            case StagePerformer.Neuvillette:
+                // "Deal Hydro damage to ALL enemies equal to the HP you
+                // Drained this turn."
+                moved = _stage.DrainedThisTurn;
+                if (moved > 0)
+                {
+                    await _board.Damage(who, StageTarget.All, moved,
+                                        Element.Hydro);
+                }
+                break;
+            case StagePerformer.Escoffier:
+                moved = number;
+                await _board.Damage(who, StageTarget.All, moved,
+                                    Element.Cryo);
+                break;
         }
         _stage.Note(new StageBeat(FurinaStageLedger.ActEvent, who,
-                                  seat == null ? -1 : _stage.IndexOf(seat),
-                                  _stage.Fanfare, moved, "",
-                                  SeatKey: seat?.Key ?? -1));
+                                  _stage.IndexOf(seat), _stage.Fanfare, moved,
+                                  "", SeatKey: seat.Key));
+        if (_stage.SeatOf(StagePerformer.Escoffier) is { } escoffier
+            && !_board.Over)
+        {
+            _stage.NoteLine(StagePerformer.Escoffier,
+                            FurinaStageLaw.EscoffierLineRepay);
+            await _board.LineCue(escoffier);
+            await Repay(FurinaStageLaw.EscoffierLineRepay);
+        }
         return true;
     }
 
     /// <summary>
-    /// A Guest Star card. A guest already on stage acts and keeps its seat.
-    /// Otherwise a free seat at the back; on a full stage the oldest guest
-    /// leaves first, acting once more as it goes.
+    /// A Guest Star card (the pool to 75, sec.3). No effect on summon. A
+    /// guest already on stage moves to the newest seat with no act; otherwise
+    /// it takes a free seat at the back, and on a full stage the oldest guest
+    /// leaves first (no act) and its cards go to the discard pile.
+    /// <paramref name="card"/> (null headless) is the Guest Star played: it
+    /// exhausts, and the seat holds it until its guest leaves.
     /// </summary>
-    public async Task<StageSummonResult> SummonGuest(StagePerformer who)
+    public async Task<StageSummonResult> SummonGuest(
+        StagePerformer who, bool upgraded = false, CardModel? card = null)
     {
         var room = GuestRoom(_stage.Company.ToList(), _stage.Capacity, who);
         if (room.Kind == StageSummonResult.Repeat)
         {
-            await Act(who, _stage.Seats[room.Index]);
+            var moved = _stage.MoveToBack(room.Index)!;
+            moved.Upgraded |= upgraded;
+            if (card != null) moved.Cards.Add(card);
+            await _board.Sync();
             return room.Kind;
         }
         if (room.Kind == StageSummonResult.Evict)
         {
-            var leaver = _stage.Unseat(room.Index, "evicted");
-            await _board.Sync();
-            if (leaver != null) await Act(leaver.Who, null);
+            await Leave(room.Index, "evicted");
         }
-        _stage.Seat(who);
+        var seat = _stage.Seat(who, upgraded);
+        if (seat != null && card != null) seat.Cards.Add(card);
         await _board.Sync();
         return room.Kind;
+    }
+
+    /// <summary>The guest in <paramref name="index"/> leaves the stage: its
+    /// Guest Star cards go to the discard pile.</summary>
+    public async Task<StageSeat?> Leave(int index, string reason)
+    {
+        var leaver = _stage.Unseat(index, reason);
+        if (leaver == null) return null;
+        await _board.ReturnCards(leaver);
+        await _board.Sync();
+        return leaver;
     }
 
     /// <summary>Rule 5 over a company, front (oldest) first. PURE: the
@@ -402,18 +604,66 @@ public sealed class StageDirector
             : new(StageSummonResult.Evict, 0);
     }
 
+    /// <summary>Every guest acts once, oldest first, over a snapshot of the
+    /// stage (end of turn, Tutti!, Bring the House Down, Showstopper).
+    /// Returns the acts made.</summary>
+    public async Task<int> ActAll()
+    {
+        var acts = 0;
+        foreach (var seat in _stage.Seats.ToList())
+        {
+            if (_board.Over) break;
+            if (!_stage.Holds(seat)) continue;
+            if (await Act(seat)) acts++;
+        }
+        return acts;
+    }
+
+    /// <summary>Encore!: "Your oldest guest acts." Nothing on an empty stage.
+    /// </summary>
+    public async Task<bool> ActOldest()
+    {
+        var lead = _stage.Lead;
+        return lead != null && await Act(lead);
+    }
+
+    /// <summary>Final Bow: "Choose a guest. It acts twice, then leaves."
+    /// [3 times]. Its cards go to the discard pile.</summary>
+    public async Task<bool> FinalBow(int index, int times)
+    {
+        if (index < 0 || index >= _stage.Seats.Count) return false;
+        var seat = _stage.Seats[index];
+        for (var i = 0; i < times; i++)
+        {
+            if (_board.Over || !_stage.Holds(seat)) break;
+            await Act(seat);
+        }
+        var at = _stage.IndexOf(seat);
+        if (at >= 0) await Leave(at, "final_bow");
+        return true;
+    }
+
     /// <summary>
-    /// The end of her turn: every guest acts, front to back, over a snapshot
-    /// of the stage; then Salon Solitaire's Singer Repays
-    /// <paramref name="singer"/> (0 without the relic).
+    /// The end of her turn (the pool to 75, sec.3): each guest acts, oldest
+    /// first; then each Showstopper copy Spends 5 and the guests act again;
+    /// then Salon Solitaire Repays <paramref name="singer"/> (0 without the
+    /// relic).
     /// </summary>
     public async Task EndOfTurn(int singer)
     {
-        foreach (var seat in _stage.Seats.ToList())
+        await ActAll();
+        for (var i = 0; i < _stage.Mods.Showstopper; i++)
         {
-            if (_board.Over) return;
-            if (!_stage.Holds(seat)) continue;
-            await Act(seat.Who, seat);
+            if (_board.Over || _stage.IsEmpty
+                || !_stage.CanSpend(FurinaStageLaw.ShowstopperSpend))
+            {
+                break;
+            }
+            using (_stage.CausedBy(ShowstopperTitle))
+            {
+                if (await Spend(FurinaStageLaw.ShowstopperSpend) <= 0) break;
+                await ActAll();
+            }
         }
         if (singer > 0 && !_board.Over) await Repay(singer);
     }

@@ -386,6 +386,17 @@ def _runtime_count(state: CombatState, token: str,
     # card play beside `fanfare_drained_this_card`. 0 for anyone else.
     if token == "stage_spent":
         return state.stage_spent_this_card
+    # THE POOL TO 75 (2026-10-09): Undercurrent's, Balance the Books',
+    # Rising Tide's and Grand Absolution's counts (`furina_stage`'s readers;
+    # the C# `FurinaStage` twins). 0 for anyone else.
+    if token == "stage_drains":
+        return furina_stage.drains_this_combat(p)
+    if token == "stage_half_drained":
+        return furina_stage.half_drained(p)
+    if token == "stage_repays_turn":
+        return furina_stage.repays_this_turn(p)
+    if token == "stage_repaid":
+        return furina_stage.repaid_this_play(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -876,6 +887,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # splash is the reaction's damage, not Pyro damage, and is left alone.
     if element == "pyro" and source not in PURITY_DARK_EXCLUDED:
         dmg += state.player.powers.get("mc_purity_dark", 0)
+    # FURINA'S NEUVILLETTE (the pool to 75): "Your Hydro damage deals 2
+    # more" [3], on the same additive phase and the same exclusions -- her
+    # cards' Hydro, a guest's, his own act's. The C# twin is
+    # `FurinaStage.HydroBonus` (`ElementalHit.Deal` and her Fanfare badge's
+    # `ModifyDamageAdditive`).
+    if element == "hydro" and source not in PURITY_DARK_EXCLUDED:
+        dmg += furina_stage.hydro_bonus(state)
     log_mark = len(state.log)
     dmg = reactions.resolve_hit(state, enemy, element, dmg)
     amped = dmg != unamped
@@ -3218,6 +3236,10 @@ PREDICATE_NAMES = frozenset({
     # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
     # first card you played this turn".
     "first_card_this_turn",
+    # THE POOL TO 75 (2026-10-09): Against the Tide's "within 5 HP of your
+    # Drain line" and Clean Slate's "no drained HP left".
+    "stage_near_line",
+    "stage_none_drained",
     # VARKA, THE OATH REWORK (`varka_oath.PREDICATES`): "if you have a
     # current element", "if you played a Knight this turn", "if it Swirls".
     # False for anyone who is not Varka and with the switch off.
@@ -3307,6 +3329,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # at LOAD off this set, so a token only the resolver knows is a card that
     # raises the first time it is played.
     "stage_spent",
+    # THE POOL TO 75 (2026-10-09).
+    "stage_drains", "stage_half_drained", "stage_repays_turn",
+    "stage_repaid",
     "exhaust_pile",
     "player_block",
     "attacks_in_hand",
@@ -3602,6 +3627,10 @@ def _predicate(state: CombatState, name: str) -> bool:
         return any(not d["companion"] for d in state.exhaust_selection)
     if name == "card_exhausted_this_turn":
         return state.cards_exhausted_this_turn > 0
+    if name == "stage_near_line":
+        return furina_stage.near_line(state.player)
+    if name == "stage_none_drained":
+        return furina_stage.none_drained(state.player)
     if name == "hp_lost_this_turn":
         return state.hp_lost_this_turn > 0
     if name == "hp_lost_since_last_turn":
@@ -4814,8 +4843,18 @@ def _op_stage_repay_all(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_guest(state: CombatState, fx: dict, card: Card) -> None:
-    """A Guest Star card: "Summon X." """
-    furina_stage.guest_star(state, fx["member"])
+    """A Guest Star card: "Summon X." The pool to 75 (sec.3): the card
+    exhausts, its guest's seat holds it until the guest leaves, and an
+    upgraded one (`upgrades`' `guest_upgraded`) raises the guest's line or
+    act."""
+    furina_stage.guest_star(state, fx["member"],
+                            upgraded=bool(fx.get("upgraded")), card=card)
+
+
+def _op_furina(state: CombatState, fx: dict, card: Card) -> None:
+    """THE POOL TO 75's guest verbs, one `kind` per card
+    (`furina_stage.kind`, the C# `FurinaCards`). Inert off Furina."""
+    furina_stage.kind(state, fx, card)
 
 
 def _op_stage_spend(state: CombatState, fx: dict, card: Card) -> None:
@@ -4880,6 +4919,9 @@ OPS = {
     # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29): the now-line verbs, one
     # op with a `kind:` (Varka's shape).
     "kokomi": _op_kokomi,
+    # FURINA, THE POOL TO 75 (2026-10-09): her guest verbs, one op with a
+    # `kind:` (Kokomi's shape).
+    "furina": _op_furina,
     "add_knight": _op_add_knight,
     "place_bomb": _op_place_bomb,
     "detonate": _op_detonate,
@@ -5136,6 +5178,8 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # FURINA'S STAGE, on the same line as the drain above and for its reason:
     # the card after a Spend must not read the Spend's number.
     state.stage_spent_this_card = 0
+    # THE POOL TO 75: and the card after a Repay must not read its HP.
+    furina_stage.begin_play(state)
     state.last_drawn_type = ""
     state.detonations_at_card_start = state.detonations_total
     # (C.KLEE_OVERHAUL). Big Badda Boom's play-scoped memory,
@@ -5290,6 +5334,11 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
         bonus += C.MI_KYOUKA_BONUS
     if cost == 0:
         bonus += p.powers.get("zero_cost_attacks_up", 0)
+    # FURINA'S HIGH STAKES (the pool to 75): "While you are within 5 HP of
+    # your Drain line, your Attacks deal 4 more damage" [6]. A pure read of
+    # her HP against the line; 0 for anyone else. The C# twin is
+    # `HighStakesPower.ModifyDamageAdditive`.
+    bonus += furina_stage.high_stakes_bonus(state)
     # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
     # power bonuses", kickoff §4). Reads the pool, spends nothing.
     n = p.powers.get("fanfare_attack_per10", 0)
