@@ -121,7 +121,8 @@ SALON_ENCORE_DAMAGE = 3      # Power: whenever you Drain, 3 to ALL
 THUNDEROUS_DAMAGE = 3        # Power: whenever you Spend, 3 to ALL
 # The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
 LYNEY_LINE_DROP = 10         # line: "Your Drain line is 10 HP lower."
-LYNEY_ACT_DRAIN = 2          # act: "Drain 2: deal 8 Pyro damage to ALL."
+LYNEY_ACT_DRAIN = 2          # act: "Drain 2, never past your line. Deal 8
+                             # Pyro damage to ALL enemies."
 LYNEY_ACT = 8
 CHEVREUSE_ACT = 4            # act: "Deal 4 damage to a random enemy."
 CHEVREUSE_LINE_VULNERABLE = 1  # line: each Spend, 1 Vulnerable (random)
@@ -387,7 +388,7 @@ CARDS: dict[str, Spec] = {
     "ftd_ousia_surge": Spec("Ousia Surge", 1, "power", "uncommon", "power",
                             (1,), "ousia_surge"),
     # Guest Star: Lyney (1). Line: your Drain line is 10 HP lower. Act:
-    # Drain 2: deal 8 Pyro damage to ALL enemies (skipped below the line).
+    # Drain 2, never past your line. Deal 8 Pyro damage to ALL enemies.
     "ftd_lyney": Spec("Guest Star: Lyney", 1, "skill", "uncommon", "guest",
                       (), "lyney", exhaust=True),
     # A Five-Century Act (Power, 2): HP you Drain past your line also
@@ -664,6 +665,14 @@ def can_drain(state, n: int) -> bool:
     when it would take her to 0 HP or below."""
     p = state.player
     return n > 0 and p.hp - n >= DRAIN_FLOOR
+
+
+def guest_drain_room(state, n: int) -> int:
+    """A guest act's Drain of `n`, stopped at the line (the drain-line round,
+    2026-10-09; the C# `FurinaStageLedger.GuestDrainRoom`): the part that
+    fits without going past the line, 0 at or below it."""
+    p = state.player
+    return max(0, min(n, p.hp - line_hp(p)))
 
 
 def past_line(state, n: int) -> bool:
@@ -1090,10 +1099,14 @@ def act(state, member: str) -> None:
             for enemy in living:
                 _hit(state, enemy, dmg, "hydro")
     elif member == "lyney":
-        # "Drain 2: deal 8 Pyro damage to ALL enemies." It may Drain past
-        # the line (2026-10-09); it skips only when the Drain would take her
-        # to 0 HP.
-        if can_drain(state, LYNEY_ACT_DRAIN) and drain(state, LYNEY_ACT_DRAIN):
+        # "Drain 2, never past your line. Deal 8 Pyro damage to ALL
+        # enemies." A guest's Drain stops at the line (the drain-line round,
+        # 2026-10-09): it drains only the room above it, 0 with none, and
+        # the damage lands either way.
+        room = guest_drain_room(state, LYNEY_ACT_DRAIN)
+        if room > 0:
+            drain(state, room)
+        if not state.over and p.alive:
             for enemy in list(state.living_enemies):
                 _hit(state, enemy, n, "pyro")
     elif member == "chevreuse":
@@ -1627,8 +1640,8 @@ READINGS: tuple[str, ...] = (
     "pool-40 paper, sec.2); hits and Lynette's line are not read. Critics' "
     "Darling's damage reads the Drain or Repay amount, unpowered, per "
     "copy.",
-    "Lyney's act may Drain past the line; it skips (no Drain, no damage) "
-    "only at 2 HP or less. His line lowers the line by 10 while he is on "
+    "Lyney's act never Drains past the line: it drains only the room "
+    "above it (0 with none) and deals its damage either way. His line lowers the line by 10 while he is on "
     "stage, never below 1 HP. A Five-Century Act does not move the line: it "
     "returns the past-line part at the curtain call.",
     "Bis! keeps half a spend-all, rounded down; a second copy adds nothing. "

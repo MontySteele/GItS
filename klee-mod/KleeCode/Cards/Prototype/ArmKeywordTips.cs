@@ -915,9 +915,9 @@ public static class ArmKeywordTips
     /// may go past it, and what it drains past it stays lost unless Repaid.
     /// </summary>
     internal const string DrainBody =
-        "Lose N HP. Drained HP returns after combat, but HP drained past "
-      + "your line (3/4 of your HP at combat start) is lost unless you "
-      + "[gold]Repay[/gold] it.";
+        "Lose N HP. Drained HP above your line returns after combat. HP "
+      + "drained past your line (3/4 of your HP at combat start) is lost "
+      + "unless you [gold]Repay[/gold] it.";
 
     /// <summary>Rule 1: Drain N. In combat the tip adds where her line is
     /// now and why (the pool-75 round, 2026-10-09).</summary>

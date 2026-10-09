@@ -1008,6 +1008,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             why = STAGE_SKIP_REASONS.get(reason, "")
         elif event == "bow":
             why = "stays" if reason == "stays" else "leaves"
+        elif event == "hit":
+            # A Power's hit (the drain-line round, 2026-10-09): its reach.
+            why = "all" if reason == "all" else "random"
         else:
             why = ""
         log.append({

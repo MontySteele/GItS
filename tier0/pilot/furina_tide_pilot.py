@@ -493,10 +493,10 @@ def _guest_value(state, member: str) -> float:
     elif member == "neuvillette":
         per = 3.0 * n + 2.0
     elif member == "lyney":
-        # Drain 2 for 8 to ALL, when there is room (his line adds 10).
-        room = 1.0 if T.can_drain(state, T.LYNEY_ACT_DRAIN) else 0.3
-        per = room * (T.LYNEY_ACT * n - T.LYNEY_ACT_DRAIN
-                      * temp_hp_value(state)) + 1.0
+        # 8 to ALL every act; it Drains only the room above the line, up to
+        # 2 (the drain-line round, 2026-10-09; his line adds 10).
+        room = T.guest_drain_room(state, T.LYNEY_ACT_DRAIN)
+        per = T.LYNEY_ACT * n - room * temp_hp_value(state) + 1.0
     elif member == "chevreuse":
         per = T.CHEVREUSE_ACT + 1.5
     elif member == "freminet":
