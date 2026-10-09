@@ -148,6 +148,7 @@ public static class FurinaStage
             FiveCenturyAct = owner.Powers.OfType<FiveCenturyActPower>().Count(),
             CriticsDarling = Sum<CriticsDarlingPower>(),
             Bis = owner.Powers.OfType<BisPower>().Count(),
+            Masquerade = Sum<TheMasqueradePower>(),
         };
     }
 

@@ -66,8 +66,9 @@ public static class FurinaStageRoster
     /// (<c>review/active/furina-pool-40-2026-10-05.md</c> sec.3) and THE POOL
     /// TO 75's 41 (<c>review/active/furina-pool-growth-2026-10-09.md</c>
     /// sec.5), every one a `proto_fs_` row, less Endless Waltz (cut
-    /// 2026-10-09, with Standing Ovation moved to Uncommon): 19 Commons, 35
-    /// Uncommons and 20 Rares, 74 (pinned by `PoolCountTests`). Sim twin:
+    /// 2026-10-09, with Standing Ovation moved to Uncommon), and THE BLOCK
+    /// GAP's four (ruled 2026-10-09): 20 Commons, 37 Uncommons and 21 Rares,
+    /// 78 (pinned by `PoolCountTests`). Sim twin:
     /// <c>furina_stage.POOL_IDS</c>, same order.
     /// </summary>
     public static CardModel[] Pool() => new CardModel[]
@@ -161,5 +162,11 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsGrandAbsolution>(),
         // The bridge (1).
         ModelDb.Card<ProtoFsEbbAndFlow>(),
+        // THE BLOCK GAP (review/records/furina-drain-line-round-2026-10-09.md
+        // pick 2, ruled 2026-10-09): 1 Common, 2 Uncommon, 1 Rare.
+        ModelDb.Card<ProtoFsVelvetCurtain>(),
+        ModelDb.Card<ProtoFsPrivateBox>(),
+        ModelDb.Card<ProtoFsTheMasquerade>(),
+        ModelDb.Card<ProtoFsTheShowMustGoOn>(),
     };
 }

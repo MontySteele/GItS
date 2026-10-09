@@ -233,3 +233,24 @@ public sealed class RepayNextTurnPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 }
+
+/// <summary><i>The Masquerade</i> (the block gap,
+/// review/records/furina-drain-line-round-2026-10-09.md pick 2, ruled
+/// 2026-10-09): "Whenever you Drain, gain that much Block." [Cost 0] "That
+/// much" is the HP actually drained, past the line included; a guest act's
+/// Drain stops at the line, so it pays less. Copies add
+/// (<see cref="StageDirector.Drain"/>).</summary>
+public sealed class TheMasqueradePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", StageDirector.MasqueradeTitle),
+        ("description",
+            "Whenever you [gold]Drain[/gold], gain that much "
+          + "[gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}

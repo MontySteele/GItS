@@ -3301,6 +3301,47 @@
    effects: [{op: stage_drain, amount: 4},
              {op: stage_repay, amount: 2}]}
 
+# --- THE BLOCK GAP (review/records/furina-drain-line-round-2026-10-09.md,
+# pick 2, ruled 2026-10-09; [USER]: "Yeah, agreed - let's plug the block gap
+# now"): four Block cards, 1 Common, 2 Uncommon, 1 Rare. Pool 78. ---
+
+# Velvet Curtain: its Fanfare is a gain (`furina` kind `gain_fanfare`, the
+# path Universal Revelry's gain takes), so it counts as gained Fanfare.
+- {id: proto_fs_velvet_curtain, name: "Velvet Curtain", character: furina,
+   upgrade: {block: +3, furina_amount: 1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain 7 [gold]Block[/gold]. Gain {FsAmount:diff()} [gold]Fanfare[/gold].",
+   effects: [{op: block, amount: 7},
+             {op: furina, kind: gain_fanfare, amount: 2}]}
+
+- {id: proto_fs_private_box, name: "Private Box", character: furina,
+   upgrade: {formula_base: +2, formula_per: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each guest on stage.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 5, per: 3, count: stage_guests}}]}
+
+# The Masquerade: "that much" is the HP actually drained, past the line
+# included; a guest act's Drain stops at the line, so it pays less.
+- {id: proto_fs_the_masquerade, name: "The Masquerade", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you [gold]Drain[/gold], gain that much [gold]Block[/gold].",
+   effects: [{op: apply_power, power: fs_the_masquerade, amount: 1,
+              target: self}]}
+
+# The Show Must Go On reads the bank and spends none of it.
+- {id: proto_fs_the_show_must_go_on, name: "The Show Must Go On", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: skill, rarity: rare,
+   description: "Gain [gold]Block[/gold] equal to your [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 0, per: 1, count: stage_fanfare}}]}
+
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:
 # docs/notes/prototype-surface-provenance.md, "The co-op set".
