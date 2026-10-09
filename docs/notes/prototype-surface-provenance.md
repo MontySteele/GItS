@@ -6851,3 +6851,36 @@ tip reads "Your Drain line is 30: the HP you started this fight with, minus
 1/4 of your Max HP."; the Drain keyword tip and the seat page's Drain row
 end "Your line is the HP you started this fight with, minus 1/4 of your Max
 HP." The fraction is written "1/4", as "3/4" was, not the glyph.
+
+## Furina: the block gap, 2026-10-09
+
+`review/records/furina-drain-line-round-2026-10-09.md`, pick 2. A census
+counted 7 Block cards in her 74 (9.5%) against 11 to 16 in 85 (13 to 19%) for
+each base character, no Rare Block card and no Power with flat repeating
+Block. [USER]: "Yeah, agreed - let's plug the block gap now." Four rows, built
+as the main session wrote them; pool 78, 20 / 37 / 21.
+
+- **Velvet Curtain** (1, Common): "Gain 7 Block. Gain 2 Fanfare." [10, 3]
+  The Fanfare is a new `furina` kind, `gain_fanfare` (`FurinaCards.GainFanfare`
+  into `FurinaStage.Gain`, the ledger's gain that Universal Revelry's gain
+  also takes), so it counts as gained Fanfare; sim `furina_tide.gain`.
+- **Private Box** (1, Uncommon): "Gain 5 Block, plus 3 for each guest on
+  stage." [7, plus 4] A `block` `amount_formula` on the new count
+  `stage_guests` (`FurinaStage.Of(...).Count`), with the live "(Gains N
+  Block)" preview of the game's `CalculatedBlockVar` (card Block, so Dexterity
+  and Frail apply).
+- **The Masquerade** (1, Uncommon, Power): "Whenever you Drain, gain that much
+  Block." [cost 0] `TheMasqueradePower`, read by `StageDirector.Drain` after
+  the loop readers: the HP actually drained, past the line included, per
+  copy, as a Power's unpowered Block (Freminet's line and Feel No Pain's
+  shape). A guest act's Drain arrives already stopped at the line, so it pays
+  less. Its icon is on `ICON_DEBT` until the art pass.
+- **The Show Must Go On** (2, Rare): "Gain Block equal to your Fanfare."
+  [cost 1] A `block` `amount_formula` on the new count `stage_fanfare`
+  (`FurinaStage.FanfareOf`); it reads the bank and spends none of it.
+
+No art: the four ids are on `tools/art_coverage.py`'s `KNOWN_MISSING`. Sim
+twins: the sheet ops through `furina_stage` (`gain_fanfare`, the two counts,
+`fs_the_masquerade` as `masquerade`), and the research slice's rows
+`ftd_velvet_curtain`, `ftd_private_box`, `ftd_masquerade` and
+`ftd_show_must_go_on`, which the tide pilot drafts and values.

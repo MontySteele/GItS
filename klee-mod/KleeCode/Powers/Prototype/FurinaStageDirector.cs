@@ -148,6 +148,7 @@ public sealed class StageDirector
     public const string ShowstopperTitle = "Showstopper";
     public const string PneumaTidesTitle = "Pneuma Tides";
     public const string ReginaTitle = "Regina of All Waters";
+    public const string MasqueradeTitle = "The Masquerade";
 
     private readonly FurinaStageLedger _stage;
     private readonly IStageBoard _board;
@@ -327,6 +328,15 @@ public sealed class StageDirector
                                   _stage.Fanfare, lost, ""));
         _stage.Gain(lost, "Drain");
         await LoopReaders(lost);
+        // The Masquerade (the block gap, 2026-10-09): "Whenever you Drain,
+        // gain that much Block." The HP actually drained, past the line
+        // included; a guest act's Drain arrives here already stopped at the
+        // line. A Power's Block: unpowered, as Feel No Pain's.
+        var masquerade = _stage.Mods.Masquerade;
+        if (masquerade > 0 && !_board.Over)
+        {
+            await _board.Block(lost * masquerade);
+        }
         var encore = _stage.Mods.SalonsEncore;
         if (encore > 0 && !_board.Over)
         {

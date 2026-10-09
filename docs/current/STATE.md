@@ -35,7 +35,7 @@ kits; its calibration bands are retired, and the sim does not gate kit balance
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance (frozen until the suite runs) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool-75 rulings built) | 74 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool-75 rulings and the block gap built) | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -101,8 +101,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   copy moves its guest to the newest seat with no act; at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
-  pool is the starter and 74 cards (19 / 35 / 20), built from that paper's
-  sec.5 less Endless Waltz (cut 2026-10-09) and with the round's card
+  pool is the starter and 78 cards (20 / 37 / 21), built from that paper's
+  sec.5 less Endless Waltz (cut 2026-10-09), plus the block gap's four
+  (Velvet Curtain, Private Box, The Masquerade, The Show Must Go On; drain-line
+  round pick 2, ruled 2026-10-09: "Yeah, agreed - let's plug the block gap
+  now"; she had 7 Block cards in 74), and with the round's card
   numbers (Standing Ovation Uncommon, Bravura+ base 10, Crabaletta 20,
   Soloist's Solicitation 6, Commanding Gaze 2 Vulnerable, Freminet's act
   Block, Neuvillette cost 1 and act on all HP lost); Overdraft and Sold Out

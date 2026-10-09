@@ -187,6 +187,8 @@ def _drain_triggers(state, n: int) -> float:
         v += n * 0.9
     if f.powers["ousia_surge"] and not f.ousia_drew:
         v += DRAW * f.powers["ousia_surge"]
+    if f.powers["masquerade"]:
+        v += _block_value(n * f.powers["masquerade"], need(state))
     return v
 
 
@@ -706,6 +708,9 @@ def value(state, card, playable: list, decider) -> float:
             return 0.8 * tl * 1.5
         if m == "bis":
             return 0.8 * tl * 2.0
+        if m == "masquerade":
+            # The block gap (2026-10-09): Block per Drain.
+            return 0.8 * tl * 2.0
     if k == "guest":
         return _guest_value(state, spec.member)
     # --- The pool to 75 (2026-10-09) ---
@@ -746,6 +751,13 @@ def value(state, card, playable: list, decider) -> float:
     if k == "grand_absolution":
         back = min(f.drained, max(0, state.player.max_hp - state.player.hp))
         return _aoe(state, back) + repay_value(state, back)
+    # --- The block gap (2026-10-09) ---
+    if k == "block_fanfare":
+        return _block_value(n[0], need_now) + _gain_value(state, n[1])
+    if k == "guest_block":
+        return _block_value(n[0] + n[1] * len(f.stage), need_now)
+    if k == "fanfare_block":
+        return _block_value(f.fanfare, need_now)
     return 0.0
 
 

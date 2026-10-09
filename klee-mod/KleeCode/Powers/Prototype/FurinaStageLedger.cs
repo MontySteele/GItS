@@ -108,6 +108,10 @@ public sealed record StageMods
     /// <summary>Hymn of Renewal: Strength per Repay of 4 or more HP.</summary>
     public int HymnOfRenewal { get; init; }
 
+    /// <summary>The Masquerade copies (the block gap, 2026-10-09): each Drain
+    /// gains the HP it actually drained as Block, per copy.</summary>
+    public int Masquerade { get; init; }
+
     public static readonly StageMods None = new();
 }
 

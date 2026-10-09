@@ -69,6 +69,18 @@ public static class FurinaCards
         FurinaStage.RepayNextTurn(choiceContext, card.Owner?.Creature,
                                   Amount(card));
 
+    /// <summary>The ledger source a card's own Fanfare gain is filed
+    /// under.</summary>
+    public const string CardGainSource = "card";
+
+    /// <summary>Velvet Curtain (the block gap, 2026-10-09): "Gain 2
+    /// Fanfare." [3] The ledger's gain, the path Universal Revelry's gain
+    /// takes, so it counts as gained Fanfare.</summary>
+    public static Task GainFanfare(PlayerChoiceContext choiceContext,
+                                   CardModel card, CardPlay cardPlay) =>
+        FurinaStage.Gain(choiceContext, card.Owner?.Creature, Amount(card),
+                         CardGainSource);
+
     /// <summary>
     /// Casting Call: "Put a Guest Star from your draw pile into your hand."
     /// A TUTOR (the paper's "an Uncommon tutor, not a random guest"): with

@@ -214,14 +214,15 @@ def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
     # The pool to 75 (2026-10-09): its 41 join (Neuvillette among them), and
     # the 2026-10-09 trims' rarities are mirrored. The pool-75 round's
     # rulings: Endless Waltz cut, Standing Ovation Uncommon -- 19 / 35 / 20.
+    # The block gap (ruled 2026-10-09): four more, 20 / 37 / 21.
     pool = [c for r in probe.DRAFT_POOL.values() for c in r]
-    assert len(pool) == 74 and len(set(pool)) == 74
+    assert len(pool) == 78 and len(set(pool)) == 78
     assert "ftd_endless_waltz" not in T.CARDS
     assert "ftd_sigewinne" in pool and "ftd_critics_darling" in pool
     assert "ftd_neuvillette" in pool and "ftd_ebb_and_flow" in pool
     assert "ftd_crowd_gasps" not in pool
     assert {r: len(v) for r, v in probe.DRAFT_POOL.items()} == {
-        "common": 19, "uncommon": 35, "rare": 20}
+        "common": 20, "uncommon": 37, "rare": 21}
 
 
 # ----------------------------------------------------------------------

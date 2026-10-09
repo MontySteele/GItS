@@ -2611,8 +2611,11 @@ FURINA_KINDS = {
     "final_bow": "FinalBow",
     "tutor_guest": "TutorGuest",
     "repay_next": "RepayNextTurn",
+    # THE BLOCK GAP (2026-10-09): Velvet Curtain's "Gain 2 Fanfare", the
+    # ledger's gain (`FurinaStage.Gain`, Universal Revelry's path).
+    "gain_fanfare": "GainFanfare",
 }
-FURINA_KIND_AMOUNT = {"final_bow", "repay_next"}
+FURINA_KIND_AMOUNT = {"final_bow", "repay_next", "gain_fanfare"}
 FURINA_FIELDS = {"op", "kind", "amount"}
 #: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
 #: arrives upgraded is the card's own upgrade (`upgraded_grant`).
@@ -3181,6 +3184,11 @@ APPLY_POWERS = {
     "fs_hymn_of_renewal": ("HymnOfRenewalPower", None,
         "Whenever you [gold]Repay[/gold] 4 or more HP at once, gain 1 "
         "[gold]Strength[/gold]."),
+    # THE BLOCK GAP (2026-10-09). The class lives in
+    # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
+    "fs_the_masquerade": ("TheMasqueradePower", None,
+        "Whenever you [gold]Drain[/gold], gain that much "
+        "[gold]Block[/gold]."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -6381,6 +6389,12 @@ STAGE_COUNT_CS = {
     "stage_repays_turn": "static (card, _) => "
                          "FurinaStage.RepaysThisTurn(card.Owner?.Creature)",
     "stage_repaid": "static (card, _) => FurinaStage.RepaidOrDrained(card)",
+    # THE BLOCK GAP (2026-10-09): Private Box's "for each guest on stage" and
+    # The Show Must Go On's "equal to your Fanfare" (read, never spent).
+    "stage_guests": "static (card, _) => "
+                    "FurinaStage.Of(card.Owner?.Creature).Count",
+    "stage_fanfare": "static (card, _) => "
+                     "FurinaStage.FanfareOf(card.Owner?.Creature)",
     # THE REPAY FLOOR (ruled 2026-10-09): Surging Waters', Hydro Lance's and
     # Cleansing Torrent's "plus 1 for any HP it could not Repay" -- after the
     # card's Repay, what it could not return; before the play, what a Repay

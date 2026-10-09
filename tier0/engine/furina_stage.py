@@ -126,6 +126,8 @@ HIGH_STAKES = "fs_high_stakes"
 REGINA_OF_ALL_WATERS = "fs_regina_of_all_waters"
 PNEUMA_TIDES = "fs_pneuma_tides"
 HYMN_OF_RENEWAL = "fs_hymn_of_renewal"
+# The block gap (2026-10-09): 1 a copy.
+THE_MASQUERADE = "fs_the_masquerade"
 
 #: The slice's Power keys (`furina_tide.Ftd.powers`) to the arm's ids.
 ARM_POWER_IDS = {
@@ -147,6 +149,8 @@ ARM_POWER_IDS = {
     "regina": REGINA_OF_ALL_WATERS,
     "pneuma_tides": PNEUMA_TIDES,
     "hymn_of_renewal": HYMN_OF_RENEWAL,
+    # The block gap.
+    "masquerade": THE_MASQUERADE,
 }
 
 # ----------------------------------------------------------------------
@@ -164,8 +168,8 @@ STARTER_IDS: tuple[str, ...] = (
 #: (`review/active/furina-pool-40-2026-10-05.md` sec.3) and THE POOL TO 75's
 #: 41 (`review/active/furina-pool-growth-2026-10-09.md` sec.5), in the C#
 #: roster's order (`FurinaStageRoster.Pool`), less Endless Waltz (cut
-#: 2026-10-09, with Standing Ovation moved to Uncommon): 19 Common, 35
-#: Uncommon, 20 Rare, 74.
+#: 2026-10-09, with Standing Ovation moved to Uncommon), and the block gap's
+#: four (ruled 2026-10-09): 20 Common, 37 Uncommon, 21 Rare, 78.
 POOL_IDS: tuple[str, ...] = (
     # Drain (five).
     "proto_fs_mademoiselle_crabaletta",
@@ -255,6 +259,12 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_grand_absolution",
     # The bridge (1).
     "proto_fs_ebb_and_flow",
+    # The block gap (review/records/furina-drain-line-round-2026-10-09.md
+    # pick 2, ruled 2026-10-09): 1 Common, 2 Uncommon, 1 Rare.
+    "proto_fs_velvet_curtain",
+    "proto_fs_private_box",
+    "proto_fs_the_masquerade",
+    "proto_fs_the_show_must_go_on",
 )
 
 #: The loader's older seams, empty since the slice: nothing is substituted
@@ -497,8 +507,10 @@ def guest_star(state, member: str, upgraded: bool = False,
 # `FurinaCards`. Each kind with a number prints it as `amount` (the card's
 # `FsAmount`, upgrade key `furina_amount`).
 # ----------------------------------------------------------------------
-KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest", "repay_next")
-KIND_AMOUNT = ("final_bow", "repay_next")
+KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest", "repay_next",
+         # The block gap (2026-10-09): Velvet Curtain's "Gain 2 Fanfare".
+         "gain_fanfare")
+KIND_AMOUNT = ("final_bow", "repay_next", "gain_fanfare")
 
 
 def validate_op(card_id: str, fx: dict) -> None:
@@ -535,6 +547,9 @@ def kind(state, fx: dict, card) -> None:
         T.tutor_guest(state)
     elif k == "repay_next":
         state.player.ftd.repay_next += int(fx["amount"])
+    elif k == "gain_fanfare":
+        # The ledger's gain, the path Universal Revelry's gain takes.
+        T.gain(state, int(fx["amount"]), "card")
     else:                                            # pragma: no cover
         raise ValueError(f"unknown furina kind {k!r}")
 

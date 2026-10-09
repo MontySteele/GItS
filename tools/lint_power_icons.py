@@ -69,6 +69,10 @@ ART_PLAN = REPO / "art" / "plan.tsv"
 # TO CLOSE ONE: make the art, add the case, DELETE the row here. Leaving the
 # row behind fails this lint.
 ICON_DEBT: dict[str, str] = {
+    # Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md
+    # pick 2, ruled 2026-10-09): one new Power; its icon waits on the art pass.
+    "TheMasqueradePower":
+        "Furina block-gap Power; icon waits on the art pass, renders the placeholder",
     # Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md):
     # eleven new Powers and Freminet's badges; their icons wait on the art
     # pass.

@@ -71,3 +71,5 @@ The rerun follows the build: the same three seeds plus two fresh Furina seeds.
 **Drain-line round, pick 2: Block.** Should Furina's pool get more Block, or is the shortfall the seats skipping it because Fanfare pays for hits?
 - (a) **Default:** no change yet. Decide on the rerun, with the base five's Block counts beside hers (a census first).
 - (b) Add Block now.
+Ruled 2026-10-09, (b). In [USER]'s words: "Yeah, agreed - let's plug the block gap now".
+Built 2026-10-09: Velvet Curtain, Private Box, The Masquerade, The Show Must Go On (PR #1005).
