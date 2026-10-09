@@ -915,6 +915,35 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "stage_spend"),
                              "amount", val)
+        elif key == "guest_upgraded":
+            # FURINA, THE POOL TO 75 (sec.3): "Upgrades raise the line or the
+            # act, never the cost." Boolean, only True is a ruling (the
+            # `innate` shape). The first top-level `stage_guest` summons an
+            # upgraded guest -- codegen hands the card to the summon, which
+            # reads its `IsUpgraded`.
+            if val is not True:
+                raise ValueError(
+                    f"guest_upgraded delta on {base_id!r} must be true")
+            hit = next((fx for fx in top if fx.get("op") == "stage_guest"),
+                       None)
+            ok = hit is not None
+            if hit is not None:
+                hit["upgraded"] = True
+        elif key == "stage_drain":
+            # FURINA, THE POOL TO 75: a fixed Drain's price ("Drain 4 [3]"),
+            # the first top-level `stage_drain` -- codegen's
+            # `stage_drain_amount_cs` binds the same one, at the gate and the
+            # payment.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "stage_drain"),
+                             "amount", val)
+        elif key == "furina_amount":
+            # FURINA, THE POOL TO 75: a `furina` op's printed number, its
+            # `FsAmount` var.
+            ok = _bump_first((fx for fx in top
+                              if fx.get("op") == "furina"
+                              and "amount" in fx),
+                             "amount", val)
         elif key == "stage_repay":
             # THE SALON'S TAB (2026-10-05): "Repay N [N']", the first
             # top-level `stage_repay` -- codegen's `STAGE_AMOUNT_VARS` binds

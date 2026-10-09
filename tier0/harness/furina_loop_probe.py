@@ -3,6 +3,15 @@
     .venv/Scripts/python.exe -m tier0.harness.furina_loop_probe
     .venv/Scripts/python.exe -m tier0.harness.furina_loop_probe --pre-fix
     .venv/Scripts/python.exe -m tier0.harness.furina_loop_probe --json out.json
+    .venv/Scripts/python.exe -m tier0.harness.furina_loop_probe --named
+
+`--named` is the pool-to-75 paper's sec.6 check
+(`review/active/furina-pool-growth-2026-10-09.md`): the four combinations it
+names, each played out in one long turn (the criterion below, with up to
+three members and the named Powers, so a four-card combination fits) and
+over several whole turns (`play_turns`: draw 5, play, the end of the turn's
+guest acts and Showstopper, discard), every variant, copy count, order and
+choice policy.
 
 THE CRITERION (the 2026-10-04 loop audit, kept for the Salon's Tab,
 2026-10-05). A combination of at most three distinct cards (any copies), on a
@@ -12,7 +21,7 @@ a Power is an ENVIRONMENT here that uses up one of the three slots.
 
 WHAT IS SEARCHED. Every row of Furina's sheet (`proto_fs_*` in
 `docs/prototype-surface.yaml`), base and upgraded -- the starter and the
-slice's 24. Exhaust cards leave the deck, so they cannot be a cycle's
+pool of 75. Exhaust cards leave the deck, so they cannot be a cycle's
 members. Each combination is tried under every environment: no Power or one
 of her Powers (base or upgraded), and two opening stages (empty; three
 guests). A static screen (`profile` / `could_cycle`) drops a combination only
@@ -501,6 +510,147 @@ def report(pre_fix: bool, jobs: int = 1) -> dict:
     return out
 
 
+# ----------------------------------------------------------------------
+# THE POOL TO 75's NAMED COMBINATIONS (sec.6).
+# ----------------------------------------------------------------------
+#: Name -> (members, Powers, opening stages). Members and Powers are base
+#: ids; every base/upgraded variant of each is tried.
+NAMED: dict[str, tuple[tuple[str, ...], tuple[str, ...],
+                       tuple[tuple[str, ...], ...]]] = {
+    # "Encore! with Escoffier": Escoffier's line Repays 1 on every act.
+    "encore_escoffier": (
+        ("proto_fs_encore",), (),
+        (("escoffier",), ("charlotte", "escoffier"),
+         ("charlotte", "sigewinne", "escoffier"))),
+    # "Tutti!, Showstopper and Bring the House Down together."
+    "tutti_showstopper_house": (
+        ("proto_fs_tutti", "proto_fs_bring_the_house_down"),
+        ("proto_fs_showstopper",),
+        (("charlotte", "wriothesley", "clorinde"),
+         ("escoffier", "charlotte", "sigewinne"))),
+    # "Final Bow with Grand Entrance: a guest leaves, its card returns, and
+    # it is played again."
+    "final_bow_grand_entrance": (
+        ("proto_fs_final_bow", "proto_fs_guest_star_charlotte"),
+        ("proto_fs_grand_entrance",),
+        ((), ("sigewinne",))),
+    # "Overdraft, Soothing Waters, Sold Out and Crescendo together. This is
+    # the one cycle not bounded by HP."
+    "energy_cycle": (
+        ("proto_fs_overdraft", "proto_fs_soothing_waters",
+         "proto_fs_sold_out"),
+        ("proto_fs_crescendo",),
+        ((),)),
+}
+
+#: Whole turns a `play_turns` run lasts, and the plays one turn may make
+#: before it counts as a runaway.
+TURNS = 6
+TURN_PLAYS = 60
+
+
+def _variants_of(pool: dict, base: str) -> list[str]:
+    return [v for v in (base, base + UP) if v in pool]
+
+
+def play_turns(cards: list, order: list[str], *, take: bool, stage=(),
+               powers: Optional[dict] = None, seed: int = 0,
+               turns: int = TURNS) -> dict:
+    """`cards` as the whole deck over `turns` turns: each turn opens (the
+    flow counts reset, Energy 3 plus what is owed), draws 5, plays by
+    `order` until nothing is playable or `TURN_PLAYS` plays (a runaway),
+    then the end of her turn runs (the guests act oldest first, Showstopper,
+    the Singer) and the hand is discarded. Returns per-turn plays and what
+    the run grew."""
+    from tier0.engine import furina_tide as T
+    st = _state(stage, dict(powers or {}), seed, take)
+    p = st.player
+    p.hand = []
+    p.draw_pile = [copy.deepcopy(c) for c in cards]
+    rank = {cid: i for i, cid in enumerate(order)}
+    start = Snapshot.of(st)
+    per_turn: list[int] = []
+    runaway = False
+    for t in range(turns):
+        st.turn = t + 1
+        T.turn_open(st)
+        p.energy = START_ENERGY + T.energy_kept(st)
+        st.draw(5)
+        T.turn_start(st)
+        n = 0
+        while n < TURN_PLAYS and not st.over:
+            options = [c for c in p.hand if combat.card_playable(st, c)]
+            if not options:
+                break
+            card = min(options, key=lambda c: rank.get(c.id, len(rank)))
+            combat.play_card(st, card)
+            n += 1
+        runaway = runaway or n >= TURN_PLAYS
+        per_turn.append(n)
+        T.end_of_turn(st)
+        keep = [c for c in p.hand if getattr(c, "retain", False)]
+        p.discard_pile.extend(c for c in p.hand if c not in keep)
+        p.hand = keep
+    end = Snapshot.of(st)
+    return {"plays_per_turn": per_turn, "runaway": runaway,
+            "growth": {k: getattr(end, k) - getattr(start, k)
+                       for k in dataclasses.asdict(end)}}
+
+
+def named_report(name: str) -> dict:
+    """One sec.6 combination, every variant: the best single-turn run (a
+    productive one if any) and the multi-turn runs' worst case."""
+    members, powers, stages = NAMED[name]
+    pool = variants(False)
+    out = {"name": name, "members": list(members), "powers": list(powers),
+           "single_turn": None, "multi_turn": None}
+    member_sets = itertools.product(*(_variants_of(pool, m)
+                                      for m in members))
+    power_sets = list(itertools.product(*(_variants_of(pool, m)
+                                          for m in powers))) or [()]
+    best = None
+    worst_turns = None
+    for combo in member_sets:
+        for pw in power_sets:
+            grants: dict = {}
+            for v in pw:
+                for pid, amount in power_grants(pool[v]):
+                    grants[pid] = grants.get(pid, 0) + amount
+            takes = (True, False) if has_choice([pool[c] for c in combo]) \
+                else (True,)
+            for copies in itertools.product(range(1, MAX_COPIES_TRIPLE + 1),
+                                            repeat=len(combo)):
+                cards = [pool[c] for c, k in zip(combo, copies)
+                         for _ in range(k)]
+                for stage in stages:
+                    for order in itertools.permutations(combo):
+                        for take in takes:
+                            run = play_out(cards, list(order), take=take,
+                                           stage=stage, powers=grants)
+                            row = {"cards": list(combo), "copies":
+                                   list(copies), "powers": list(pw),
+                                   "stage": list(stage), "take": take,
+                                   "plays": run.plays,
+                                   "sustained": run.sustained,
+                                   "productive": run.productive,
+                                   "growth": run.growth}
+                            rank_ = (run.productive, run.sustained,
+                                     run.plays)
+                            if best is None or rank_ > best[0]:
+                                best = (rank_, row)
+                            turns = play_turns(cards, list(order),
+                                               take=take, stage=stage,
+                                               powers=grants)
+                            trow = dict(row, **turns)
+                            trank = (turns["runaway"],
+                                     max(turns["plays_per_turn"]))
+                            if worst_turns is None or trank > worst_turns[0]:
+                                worst_turns = (trank, trow)
+    out["single_turn"] = best[1] if best else None
+    out["multi_turn"] = worst_turns[1] if worst_turns else None
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--pre-fix", action="store_true",
@@ -508,7 +658,31 @@ def main(argv=None) -> int:
     ap.add_argument("--json", help="write the findings here")
     ap.add_argument("--jobs", type=int, default=1,
                     help="worker processes, one environment each")
+    ap.add_argument("--named", action="store_true",
+                    help="the pool-to-75 paper's four sec.6 combinations")
     args = ap.parse_args(argv)
+    if args.named:
+        rows = [named_report(name) for name in NAMED]
+        for row in rows:
+            s, m = row["single_turn"], row["multi_turn"]
+            verdict = ("PRODUCTIVE LOOP" if s and s["productive"] else
+                       "inert loop" if s and s["sustained"] else "no loop")
+            print(f"{row['name']}: one turn -> {verdict}"
+                  + (f" ({s['plays']} plays, cards {s['cards']} x"
+                     f"{s['copies']}, powers {s['powers']}, stage "
+                     f"{s['stage']}, growth "
+                     f"{ {k: v for k, v in s['growth'].items() if v} })"
+                     if s and s["sustained"] else ""))
+            if m:
+                print(f"    {TURNS} turns, worst case: plays per turn "
+                      f"{m['plays_per_turn']}, runaway {m['runaway']}, "
+                      f"cards {m['cards']} x{m['copies']}, powers "
+                      f"{m['powers']}, stage {m['stage']}, growth "
+                      f"{ {k: v for k, v in m['growth'].items() if v} }")
+        if args.json:
+            with open(args.json, "w", encoding="utf-8") as fh:
+                json.dump(rows, fh, indent=2)
+        return 0
     out = report(args.pre_fix, args.jobs)
     for kind in ("productive", "inert"):
         print(f"{kind.upper()} ({len(out[kind])})")

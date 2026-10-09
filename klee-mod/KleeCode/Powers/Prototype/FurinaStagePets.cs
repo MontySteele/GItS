@@ -106,6 +106,12 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
         StagePerformer.Lyney => KleePck.Path("furina/model/guest_lyney.tscn"),
         StagePerformer.Sigewinne => KleePck.Path("furina/model/guest_sigewinne.tscn"),
         StagePerformer.Chevreuse => KleePck.Path("furina/model/guest_chevreuse.tscn"),
+        // The pool to 75 (2026-10-09): three of its four guests were cut by
+        // the supporting pool's art pass and stand in their own scenes;
+        // Freminet has none yet and stands as the Osty fallback.
+        StagePerformer.Navia => KleePck.Path("furina/model/guest_navia.tscn"),
+        StagePerformer.Neuvillette => KleePck.Path("furina/model/guest_neuvillette.tscn"),
+        StagePerformer.Escoffier => KleePck.Path("furina/model/guest_escoffier.tscn"),
         _ => null,
     };
 
@@ -182,6 +188,44 @@ public sealed class ChevreuseMonster : StagePerformerMonster
         FurinaStageLedger.DisplayName(Performer);
 }
 
+// ---- THE POOL TO 75's four guests (2026-10-09,
+// review/active/furina-pool-growth-2026-10-09.md sec.5). Navia, Neuvillette
+// and Escoffier wear the scenes the supporting pool's art pass cut; Freminet
+// has none yet (`ModVisualsPathFor` answers null) and stands as the Osty
+// fallback until one is cut.
+
+public sealed class FreminetMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Freminet;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class NaviaMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Navia;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class NeuvilletteMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Neuvillette;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
+public sealed class EscoffierMonster : StagePerformerMonster
+{
+    public override StagePerformer Performer => StagePerformer.Escoffier;
+
+    public override string DisplayName =>
+        FurinaStageLedger.DisplayName(Performer);
+}
+
 /// <summary>
 /// THE BODIES, RECONCILED AGAINST THE LEDGER. One entry point,
 /// <see cref="Sync"/>, called after every change to the stage.
@@ -244,7 +288,13 @@ public static class FurinaStagePets
         {
             if (seat.Pet == null || seat.Pet.IsDead)
             {
-                seat.Pet = await Field(player, seat.Who);
+                seat.Pet = await Field(player, seat.Who, seat.Upgraded);
+            }
+            else if (seat.Upgraded)
+            {
+                // The pool to 75: an upgraded duplicate moved a standing
+                // guest; its badge now says the upgraded line and act.
+                await StagePerformerBadge.Repin(seat.Pet, seat.Who, true);
             }
         }
 
@@ -261,7 +311,8 @@ public static class FurinaStagePets
     /// itself guarded by <c>Contains</c>, so calling it per summon costs one
     /// dictionary lookup and cannot double-register.
     /// </summary>
-    private static async Task<Creature?> Field(Player player, StagePerformer who)
+    private static async Task<Creature?> Field(Player player, StagePerformer who,
+                                               bool upgraded = false)
     {
         try
         {
@@ -282,13 +333,21 @@ public static class FurinaStagePets
                     await PlayerCmd.AddPet<SigewinneMonster>(player),
                 StagePerformer.Chevreuse =>
                     await PlayerCmd.AddPet<ChevreuseMonster>(player),
+                StagePerformer.Freminet =>
+                    await PlayerCmd.AddPet<FreminetMonster>(player),
+                StagePerformer.Navia =>
+                    await PlayerCmd.AddPet<NaviaMonster>(player),
+                StagePerformer.Neuvillette =>
+                    await PlayerCmd.AddPet<NeuvilletteMonster>(player),
+                StagePerformer.Escoffier =>
+                    await PlayerCmd.AddPet<EscoffierMonster>(player),
                 _ => await PlayerCmd.AddPet<CharlotteMonster>(player),
             };
             // 2026-09-25: the body SAYS WHAT IT DOES. Hovering a creature
             // shows its powers' tips, and the base game gives Osty a quiet
             // badge the same way (`OstyCmd.Summon`, `DieForYouPower`); a
             // first-time player could not tell what any performer did.
-            await StagePerformerBadge.Pin(pet, who);
+            await StagePerformerBadge.Pin(pet, who, upgraded);
             return pet;
         }
         catch (Exception e)
@@ -327,6 +386,10 @@ public static class FurinaStagePets
         StagePerformer.Lyney => typeof(LyneyMonster),
         StagePerformer.Sigewinne => typeof(SigewinneMonster),
         StagePerformer.Chevreuse => typeof(ChevreuseMonster),
+        StagePerformer.Freminet => typeof(FreminetMonster),
+        StagePerformer.Navia => typeof(NaviaMonster),
+        StagePerformer.Neuvillette => typeof(NeuvilletteMonster),
+        StagePerformer.Escoffier => typeof(EscoffierMonster),
         _ => typeof(CharlotteMonster),
     };
 

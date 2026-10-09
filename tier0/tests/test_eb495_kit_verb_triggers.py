@@ -466,9 +466,12 @@ def test_a_guest_act_carries_its_element_in_both_engines():
         assert element in arm, member
     clorinde = director[director.index("case StagePerformer.Clorinde:"):]
     assert "Element.Electro" in clorinde[:300]
+    # The pool to 75 (2026-10-09): Charlotte's and Sigewinne's acts share
+    # one Repay of the seat's number (`ActAmount`, upgraded or not).
     charlotte = director[director.index("case StagePerformer.Charlotte:"):
                          director.index("case StagePerformer.Wriothesley:")]
-    assert "Repay(FurinaStageLaw.CharlotteActRepay)" in charlotte
+    assert "Repay(number)" in charlotte
+    assert "FurinaStageLaw.CharlotteActRepay" in director
     cs = _cs("Powers/Prototype/FurinaStage.cs")
     one = cs[cs.index("private Task<int> One("):cs.index("public async Task Draw(")]
     assert "element == Element.None" in one

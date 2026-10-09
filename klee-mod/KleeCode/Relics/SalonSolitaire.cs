@@ -13,10 +13,11 @@ namespace KleeMod.Relics;
 
 /// <summary>
 /// SALON SOLITAIRE -- Furina's starting relic (the Salon's Tab, 2026-10-05,
-/// proposal sec.2 rule 4 and sec.16): "At the end of your turn, Repay 2."
-/// This is the Singer of Many Waters: she pays the Salon's loan back, two HP
+/// proposal sec.2 rule 4 and sec.16): "At the end of your turn, Repay 1."
+/// (2026-10-09 playtest trim: was Repay 2, upgraded 3.)
+/// This is the Singer of Many Waters: she pays the Salon's loan back, one HP
 /// a turn, and every HP repaid is a point of Fanfare. Upgraded (Touch of
-/// Orobas) it is The Curtain Never Falls, which Repays 3.
+/// Orobas) it is The Curtain Never Falls, which Repays 2.
 ///
 /// THE REPAY IS THE KIT'S, AT THE END OF HER TURN AFTER THE GUESTS ACT
 /// (<see cref="FurinaStage.EndOfTurnActs"/>, which reads

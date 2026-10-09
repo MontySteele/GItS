@@ -296,6 +296,9 @@ def card_cost(state: CombatState, card: Card) -> int:
     if card.cost_reduction_per_discard_this_turn:
         cost = max(0, cost - (card.cost_reduction_per_discard_this_turn
                               * state.discards_this_turn))
+    if card.cost_reduction_per_fanfare:
+        cost = max(0, cost - furina_stage.fanfare(state.player)
+                   // card.cost_reduction_per_fanfare)
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # (C.KOKOMI_OVERHAUL). R276, STOLEN CHAPTER's carry-out: "This

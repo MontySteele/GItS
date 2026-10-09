@@ -37,6 +37,9 @@ public sealed class ProtoFsGuestStarSigewinne : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSigewinne(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
 
@@ -45,7 +48,7 @@ public sealed class ProtoFsGuestStarSigewinne : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Sigewinne"),
-        ("description", "[gold]Summon[/gold] Sigewinne.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Sigewinne{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -72,11 +75,11 @@ public sealed class ProtoFsGuestStarSigewinne : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "sigewinne", 0);
+        await FurinaStage.GuestStar(choiceContext, Owner.Creature, "sigewinne", 0, this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
     }
 }

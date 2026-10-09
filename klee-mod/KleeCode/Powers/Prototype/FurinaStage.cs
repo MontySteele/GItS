@@ -30,9 +30,14 @@ namespace KleeMod.Powers;
 ///      Repays. Spend N and the spend-all cards pay it.
 ///   4. SALON SOLITAIRE, her starting relic: "At the end of your turn, Repay
 ///      2." (Upgraded: 3.)
-///   5. GUEST STARS: three seats, guests only. A guest acts at the end of her
-///      turn; a fourth makes the oldest leave, acting once more as it goes; a
-///      second copy of one on stage makes it act and stay.
+///   5. GUEST STARS (the pool to 75's rule,
+///      <c>review/active/furina-pool-growth-2026-10-09.md</c> sec.3): three
+///      seats, guests only. A Guest Star exhausts when played and has no
+///      effect on summon; a guest has a line while on stage and acts at the
+///      end of her turn, oldest first. A fourth makes the oldest leave, and
+///      a guest that leaves (evicted, or sent off by Final Bow) sends its
+///      card to the discard pile. A second copy of one on stage moves it to
+///      the newest seat, with no act.
 ///   6. THE CURTAIN CALL: when the combat ends, all drained HP returns.
 ///
 /// THIS CLASS IS THE VERB SURFACE the generated cards, the powers, the relics
@@ -48,12 +53,13 @@ public static class FurinaStage
     public static bool LiveFor(Creature? creature) =>
         FurinaResources.IsFurina(creature);
 
-    /// <summary>The seven guests' sheet names (the slice's four, and the
-    /// pool to 39's three).</summary>
+    /// <summary>The eleven guests' sheet names (the slice's four, the pool to
+    /// 39's three and the pool to 75's four).</summary>
     public static readonly string[] Guests =
     {
         "charlotte", "wriothesley", "lynette", "clorinde",
         "lyney", "sigewinne", "chevreuse",
+        "freminet", "navia", "neuvillette", "escoffier",
     };
 
     /// <summary>A sheet name to a guest (an unknown name reads as Charlotte:
@@ -66,6 +72,10 @@ public static class FurinaStage
         "lyney" => StagePerformer.Lyney,
         "sigewinne" => StagePerformer.Sigewinne,
         "chevreuse" => StagePerformer.Chevreuse,
+        "freminet" => StagePerformer.Freminet,
+        "navia" => StagePerformer.Navia,
+        "neuvillette" => StagePerformer.Neuvillette,
+        "escoffier" => StagePerformer.Escoffier,
         _ => StagePerformer.Charlotte,
     };
 
@@ -116,6 +126,13 @@ public static class FurinaStage
             (int)owner.Powers.OfType<T>().Sum(p => p.Amount);
         return new StageMods
         {
+            Capacity = owner.Powers.OfType<EnsembleCastPower>().Any()
+                ? FurinaStageLaw.EnsembleSeats : FurinaStageLaw.Seats,
+            GrandEntrance = Sum<GrandEntrancePower>(),
+            Showstopper = Sum<ShowstopperPower>(),
+            Crescendo = Sum<CrescendoPower>(),
+            StandingRoomOnly = Sum<StandingRoomOnlyPower>(),
+            HymnOfRenewal = Sum<HymnOfRenewalPower>(),
             Revelry = Sum<UniversalRevelryPower>(),
             SalonsEncore = Sum<SalonsEncorePower>(),
             EndlessWaltz = owner.Powers.OfType<EndlessWaltzPower>().Count(),
@@ -237,19 +254,138 @@ public static class FurinaStage
             choiceContext, owner!, amount, applier: owner, cardSource: null);
     }
 
-    /// <summary>A Guest Star card (`stage_guest`): summon the guest. The
-    /// trailing amount is the sheet's arrival Fanfare, 0 on every row of the
-    /// slice.</summary>
+    /// <summary>A Guest Star card (`stage_guest`, the pool to 75's sec.3):
+    /// summon the guest, with no effect on summon. The amount is the sheet's
+    /// arrival Fanfare, 0 on every row. <paramref name="card"/> is the Guest
+    /// Star played: it exhausts, its seat holds it until the guest leaves,
+    /// and an upgraded one raises the guest's line or act. Grand Entrance
+    /// Repays after.</summary>
     public static async Task GuestStar(PlayerChoiceContext choiceContext,
                                        Creature? owner, string member,
-                                       int fanfare = 0)
+                                       int fanfare = 0,
+                                       CardModel? card = null)
     {
         if (!LiveFor(owner)) return;
         var director = Director(choiceContext, owner!);
-        await director.SummonGuest(Parse(member));
+        await director.SummonGuest(Parse(member), card?.IsUpgraded ?? false,
+                                   card);
         if (fanfare > 0) director.Gain(fanfare, "Guest Star");
+        var entrance = director.Stage.Mods.GrandEntrance;
+        if (entrance > 0)
+        {
+            using (director.Stage.CausedBy(StageDirector.GrandEntranceTitle))
+            {
+                await director.Repay(entrance);
+            }
+        }
         await Done(owner);
     }
+
+    // ---- the pool to 75's guest verbs (FurinaCards' kinds call these) ------
+
+    /// <summary>Encore!: "Your oldest guest acts."</summary>
+    public static async Task ActOldest(PlayerChoiceContext choiceContext,
+                                       Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        await Director(choiceContext, owner!).ActOldest();
+        await Done(owner);
+    }
+
+    /// <summary>Tutti! and Bring the House Down: "Each guest acts."</summary>
+    public static async Task ActAll(PlayerChoiceContext choiceContext,
+                                    Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        await Director(choiceContext, owner!).ActAll();
+        await Done(owner);
+    }
+
+    /// <summary>Final Bow: "Choose a guest. It acts twice, then leaves."
+    /// [3 times]. One guest is taken without a screen; with more, the player
+    /// picks off a grid of their Guest Star cards.</summary>
+    public static async Task FinalBow(PlayerChoiceContext choiceContext,
+                                      Creature? owner, int times)
+    {
+        if (!LiveFor(owner) || owner!.Player is not { } player) return;
+        var ledger = FurinaStageLedger.For(owner);
+        if (ledger.IsEmpty) return;
+        var index = 0;
+        if (ledger.Seats.Count > 1)
+        {
+            index = await FurinaCards.ChooseSeat(choiceContext, player, ledger);
+        }
+        await Director(choiceContext, owner).FinalBow(index, times);
+        await Done(owner);
+    }
+
+    /// <summary>Gentle Current: "Next turn, Repay N." Owed on
+    /// <see cref="RepayNextTurnPower"/>, paid at her next turn start.
+    /// </summary>
+    public static async Task RepayNextTurn(PlayerChoiceContext choiceContext,
+                                           Creature? owner, int amount)
+    {
+        if (!LiveFor(owner) || amount <= 0) return;
+        await PowerCmd.Apply<RepayNextTurnPower>(
+            choiceContext, owner!, amount, applier: owner, cardSource: null);
+    }
+
+    /// <summary>Undercurrent's count: Drains made this combat.</summary>
+    public static int DrainsThisCombat(Creature? owner) =>
+        LiveFor(owner) ? FurinaStageLedger.For(owner!).DrainsThisCombat : 0;
+
+    /// <summary>Balance the Books' count: half her drained HP, rounded
+    /// down.</summary>
+    public static int HalfDrained(Creature? owner) => DrainedOf(owner) / 2;
+
+    /// <summary>Rising Tide's count: Repays that returned HP this turn.
+    /// </summary>
+    public static int RepaysThisTurn(Creature? owner) =>
+        LiveFor(owner) ? FurinaStageLedger.For(owner!).RepaysThisTurn : 0;
+
+    /// <summary>Grand Absolution's "that much": HP THIS play's Repays
+    /// returned.</summary>
+    public static int RepaidThisPlay(CardModel? card) =>
+        card?.Owner?.Creature is { } owner && LiveFor(owner)
+            ? FurinaStageLedger.For(owner).RepaidThisPlay : 0;
+
+    /// <summary>Grand Absolution's face before the play: the HP a Repay of
+    /// everything would return now; during it, what it returned.</summary>
+    public static int RepaidOrDrained(CardModel? card)
+    {
+        var repaid = RepaidThisPlay(card);
+        if (repaid > 0) return repaid;
+        return card?.Owner?.Creature is { } owner && LiveFor(owner)
+            ? FurinaStageFacePreview.Room(owner, DrainedOf(owner)) : 0;
+    }
+
+    /// <summary>Against the Tide and High Stakes: "within 5 HP of your Drain
+    /// line".</summary>
+    public static bool NearLine(Creature? owner) =>
+        LiveFor(owner)
+        && FurinaStageLaw.NearTheLine((int)owner!.CurrentHp, LineOf(owner));
+
+    /// <summary>Clean Slate: "If you have no drained HP left".</summary>
+    public static bool NoneDrained(Creature? owner) =>
+        LiveFor(owner) && DrainedOf(owner) <= 0;
+
+    /// <summary>Neuvillette's line: "Your Hydro damage deals 2 more." [3]
+    /// The bonus a hit of <paramref name="element"/> from
+    /// <paramref name="dealer"/> takes. PURE.</summary>
+    public static int HydroBonus(Creature? dealer, Element element)
+    {
+        if (element != Element.Hydro || !LiveFor(dealer)) return 0;
+        var seat = FurinaStageLedger.For(dealer!).SeatOf(
+            StagePerformer.Neuvillette);
+        if (seat == null) return 0;
+        return seat.Upgraded ? FurinaStageLaw.NeuvilletteHydroBonusUpgraded
+                             : FurinaStageLaw.NeuvilletteHydroBonus;
+    }
+
+    /// <summary>Star Turn: "Costs 1 less for every 6 Fanfare you have."
+    /// </summary>
+    public static int StarTurnDiscount(Creature? owner) =>
+        FanfareOf(owner) / FurinaStageLaw.StarTurnFanfarePer;
 
     // ---- the clocks ---------------------------------------------------------
 
@@ -292,8 +428,68 @@ public static class FurinaStage
                 await Gain(choiceContext, furina, program, "Grand Theater Program");
             }
         }
+        await ReginaDrains(choiceContext, furina);
         await FountainRepays(choiceContext, furina);
+        await RepayNextTurnRepays(choiceContext, furina);
+        await PneumaTidesRepays(choiceContext, furina);
+        await PrimaDonnaEnergy(furina);
         RefreshBadges(furina);
+    }
+
+    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3. If
+    /// you do, gain 1 Strength." First of her turn-start Powers, so the
+    /// Repays after it have room.</summary>
+    private static async Task ReginaDrains(PlayerChoiceContext choiceContext,
+                                           Creature furina)
+    {
+        var copies = (int)furina.Powers.OfType<ReginaOfAllWatersPower>()
+            .Sum(p => p.Amount);
+        if (copies <= 0) return;
+        using (FurinaStageLedger.For(furina).CausedBy(StageDirector.ReginaTitle))
+        {
+            await Director(choiceContext, furina).Regina(copies);
+        }
+    }
+
+    /// <summary>Gentle Current: the Repay owed from last turn, one Repay,
+    /// and the power leaves.</summary>
+    private static async Task RepayNextTurnRepays(
+        PlayerChoiceContext choiceContext, Creature furina)
+    {
+        var power = furina.Powers.OfType<RepayNextTurnPower>().FirstOrDefault();
+        if (power == null) return;
+        var amount = (int)power.Amount;
+        await PowerCmd.Remove(power);
+        using (FurinaStageLedger.For(furina).CausedBy(RepayNextTurnPower.Title))
+        {
+            await Director(choiceContext, furina).Repay(amount);
+        }
+    }
+
+    /// <summary>Pneuma Tides: "At the start of your turn, Repay 2." [3]
+    /// </summary>
+    private static async Task PneumaTidesRepays(
+        PlayerChoiceContext choiceContext, Creature furina)
+    {
+        var amount = (int)furina.Powers.OfType<PneumaTidesPower>()
+            .Sum(p => p.Amount);
+        if (amount <= 0) return;
+        using (FurinaStageLedger.For(furina).CausedBy(StageDirector.PneumaTidesTitle))
+        {
+            await Director(choiceContext, furina).PneumaTides(amount);
+        }
+    }
+
+    /// <summary>Prima Donna: "At the start of your turn, if you have 10 or
+    /// more Fanfare, gain 1 Energy." Last of her turn-start Powers, so it
+    /// reads the Fanfare they printed. Copies add.</summary>
+    private static async Task PrimaDonnaEnergy(Creature furina)
+    {
+        var copies = (int)furina.Powers.OfType<PrimaDonnaPower>()
+            .Sum(p => p.Amount);
+        if (copies <= 0 || furina.Player is not { } player) return;
+        if (FanfareOf(furina) < FurinaStageLaw.PrimaDonnaFanfare) return;
+        await PlayerCmd.GainEnergy(copies, player);
     }
 
     /// <summary>Fountain of Lucine: what the power took in since the last
@@ -416,7 +612,9 @@ public static class FurinaStage
             return;
         }
         ledger.LynetteFiredThisTurn = true;
-        ledger.Gain(hpLost, "Lynette");
+        var gained = ledger.Gain(hpLost, "Lynette");
+        ledger.NoteLine(StagePerformer.Lynette, gained);
+        Vfx.StagePerformerBeat.Line(ledger.SeatOf(StagePerformer.Lynette)?.Pet);
         RefreshBadges(owner);
     }
 
@@ -477,28 +675,40 @@ public static class FurinaStage
 
     /// <summary>The forecast against a given stage (the pins').</summary>
     public static StageForecast Forecast(FurinaStageLedger ledger) =>
-        new(ledger.Seats.Select(CueOf).ToList());
+        new(ledger.Seats.Select(seat => CueOf(ledger, seat)).ToList());
 
-    private static StageForecastCue CueOf(StageSeat seat) => seat.Who switch
+    private static StageForecastCue CueOf(FurinaStageLedger ledger,
+                                          StageSeat seat)
     {
-        StagePerformer.Charlotte => new(seat.Who, seat.Key, StageCueKind.Repay,
-            FurinaStageLaw.CharlotteActRepay, "", ""),
-        StagePerformer.Wriothesley => new(seat.Who, seat.Key,
-            StageCueKind.Damage, FurinaStageLaw.WriothesleyActDamage, "Cryo",
-            StageForecastCue.Random),
-        StagePerformer.Lynette => new(seat.Who, seat.Key, StageCueKind.Damage,
-            FurinaStageLaw.LynetteActDamage, "Anemo", StageForecastCue.Aura),
-        StagePerformer.Lyney => new(seat.Who, seat.Key, StageCueKind.Damage,
-            FurinaStageLaw.LyneyActDamage, "Pyro", StageForecastCue.All),
-        StagePerformer.Sigewinne => new(seat.Who, seat.Key,
-            StageCueKind.Repay, FurinaStageLaw.SigewinneActRepay, "", ""),
-        StagePerformer.Chevreuse => new(seat.Who, seat.Key,
-            StageCueKind.Damage, FurinaStageLaw.ChevreuseActDamage, "",
-            StageForecastCue.Random),
-        _ => new(seat.Who, seat.Key, StageCueKind.Damage,
-            FurinaStageLaw.ClorindeActDamage, "Electro",
-            StageForecastCue.Random),
-    };
+        var n = StageDirector.ActAmount(seat.Who, seat.Upgraded);
+        return seat.Who switch
+        {
+            StagePerformer.Charlotte => new(seat.Who, seat.Key,
+                StageCueKind.Repay, n, "", ""),
+            StagePerformer.Wriothesley => new(seat.Who, seat.Key,
+                StageCueKind.Damage, n, "Cryo", StageForecastCue.Random),
+            StagePerformer.Lynette => new(seat.Who, seat.Key,
+                StageCueKind.Damage, n, "Anemo", StageForecastCue.Aura),
+            StagePerformer.Lyney => new(seat.Who, seat.Key,
+                StageCueKind.Damage, n, "Pyro", StageForecastCue.All),
+            StagePerformer.Sigewinne => new(seat.Who, seat.Key,
+                StageCueKind.Repay, n, "", ""),
+            StagePerformer.Chevreuse => new(seat.Who, seat.Key,
+                StageCueKind.Damage, n, "", StageForecastCue.Random),
+            StagePerformer.Freminet => new(seat.Who, seat.Key,
+                StageCueKind.Damage, n, "Cryo", StageForecastCue.Random),
+            StagePerformer.Navia => new(seat.Who, seat.Key,
+                StageCueKind.Damage, ledger.SpentThisTurn, "Geo",
+                StageForecastCue.Random),
+            StagePerformer.Neuvillette => new(seat.Who, seat.Key,
+                StageCueKind.Damage, ledger.DrainedThisTurn, "Hydro",
+                StageForecastCue.All),
+            StagePerformer.Escoffier => new(seat.Who, seat.Key,
+                StageCueKind.Damage, n, "Cryo", StageForecastCue.All),
+            _ => new(seat.Who, seat.Key, StageCueKind.Damage, n, "Electro",
+                StageForecastCue.Random),
+        };
+    }
 }
 
 /// <summary>What a guest's act is, as its cue draws it.</summary>
@@ -593,7 +803,14 @@ public sealed class GameStageBoard : IStageBoard
                                     fast: true);
     }
 
-    public async Task Vulnerable(StageTarget target, int amount)
+    public Task Vulnerable(StageTarget target, int amount) =>
+        Debuff<VulnerablePower>(target, amount);
+
+    public Task Weak(StageTarget target, int amount) =>
+        Debuff<WeakPower>(target, amount);
+
+    private async Task Debuff<T>(StageTarget target, int amount)
+        where T : PowerModel
     {
         if (amount <= 0) return;
         var enemies = FurinaStage.Enemies(_owner).ToList();
@@ -605,9 +822,37 @@ public sealed class GameStageBoard : IStageBoard
         foreach (var enemy in targets)
         {
             if (Over) return;
-            await PowerCmd.Apply<VulnerablePower>(
+            await PowerCmd.Apply<T>(
                 _context, enemy, amount, applier: _owner, cardSource: null);
         }
+    }
+
+    public async Task Strength(int amount)
+    {
+        if (amount <= 0 || _owner.IsDead) return;
+        await PowerCmd.Apply<StrengthPower>(
+            _context, _owner, amount, applier: _owner, cardSource: null);
+    }
+
+    public Task LineCue(StageSeat? seat)
+    {
+        Vfx.StagePerformerBeat.Line(seat?.Pet);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The pool to 75 (sec.3): a guest that leaves sends its Guest
+    /// Star cards from the exhaust pile to the discard pile. A card no longer
+    /// exhausted (another effect moved it) is left where it is.</summary>
+    public async Task ReturnCards(StageSeat seat)
+    {
+        var exhaust = _owner.Player is { } player
+            ? CardPile.Get(PileType.Exhaust, player) : null;
+        foreach (var card in seat.Cards.ToList())
+        {
+            if (exhaust == null || !exhaust.Cards.Contains(card)) continue;
+            await CardPileCmd.Add(card, PileType.Discard);
+        }
+        seat.Cards.Clear();
     }
 
     private async Task Hit(StageTarget target, int amount, Element element)
@@ -657,9 +902,9 @@ public sealed class GameStageBoard : IStageBoard
     }
 }
 
-/// <summary>THE CAST: the slice's four Guest Stars and the pool to 39's
-/// three. A guest is a pet body with no bar; every rule about it is the
-/// ledger's.</summary>
+/// <summary>THE CAST: the slice's four Guest Stars, the pool to 39's three
+/// and the pool to 75's four. A guest is a pet body with no bar; every rule
+/// about it is the ledger's.</summary>
 public enum StagePerformer
 {
     Charlotte,
@@ -669,4 +914,8 @@ public enum StagePerformer
     Lyney,
     Sigewinne,
     Chevreuse,
+    Freminet,
+    Navia,
+    Neuvillette,
+    Escoffier,
 }

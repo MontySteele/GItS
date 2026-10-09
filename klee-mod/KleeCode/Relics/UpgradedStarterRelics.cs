@@ -352,7 +352,7 @@ public sealed class CurtainNeverFalls : CustomRelicModel
 
     /// <summary>
     /// THE SALON'S TAB (2026-10-05): Salon Solitaire upgraded, "At the end of
-    /// your turn, Repay 3." The Repay is the kit's
+    /// your turn, Repay 2." (2026-10-09 playtest trim, was 3.) The Repay is the kit's
     /// (<see cref="Powers.FurinaStage.SingerOf"/>); this relic opens the
     /// combat's ledger as the starter does.
     /// </summary>

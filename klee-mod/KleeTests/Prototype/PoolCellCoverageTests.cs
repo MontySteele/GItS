@@ -271,10 +271,16 @@ public class PoolCellCoverageTests
             // Rare/Attack (Let the People Rejoice), Rare/Skill (Singer,
             // Clorinde) and Uncommon/Attack (Bravura, Grand Deluge) stay
             // short and seamed.
-            "furina-stage" => new[]
-            {
-                "Rare/Attack", "Rare/Skill", "Uncommon/Attack",
-            },
+            //
+            // THE 2026-10-09 PLAYTEST TRIM filled Uncommon/Attack: Tidal
+            // Flourish moved to Uncommon, three deep with Bravura and Grand
+            // Deluge.
+            //
+            // THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md,
+            // ruled 2026-10-09) fills the last two: Rare/Attack (Bring the
+            // House Down, The Deluge, Grand Absolution) and Rare/Skill (All
+            // In and three guests). No cell is short.
+            "furina-stage" => System.Array.Empty<string>(),
             _ => throw new InvalidOperationException(arm),
         }).OrderBy(n => n, StringComparer.Ordinal).ToList();
 

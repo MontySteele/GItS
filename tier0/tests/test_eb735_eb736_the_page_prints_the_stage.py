@@ -235,8 +235,8 @@ def test_one_line_per_beat():
             "**Neuvillette** paid 2 Fanfare: 5 → 3.",
             "**Neuvillette** acted: 9 Hydro damage to ALL enemies.",
             "**Clorinde** skipped its act: not enough Fanfare to pay.",
-            ("**Usher** left the stage: it Bowed to make room for a summon "
-             "on a full stage."),
+            ("**Usher** left the stage: a fourth summon took its seat; its "
+             "card went to your discard pile."),
             "**Usher** took a Bow.",
             "**Usher** acted for free: Furina gains 4 Block.",
             "You gained 1 Fanfare from Bow: 3 → 4.",
@@ -274,8 +274,12 @@ def test_an_act_that_dealt_nothing_prints_no_zero():
 
 def test_a_departure_says_why():
     reasons = {
-        "evicted": "it Bowed to make room for a summon on a full stage",
-        "final_bow": "it took its Bow and left",
+        # The pool to 75 (2026-10-09, sec.3): a leaving guest does not
+        # act, and its card goes back to the discard pile.
+        "evicted": ("a fourth summon took its seat; its card went to your "
+                    "discard pile"),
+        "final_bow": ("it took its Final Bow; its card went to your discard "
+                      "pile"),
     }
     for reason, sentence in reasons.items():
         page = _page(_stage(log=[_beat("leave", "usher", "Gentilhomme Usher",

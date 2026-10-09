@@ -223,6 +223,12 @@ public static class KleeMod
                     Powers.KleeExpansion.SetOffPromptText,
                 [Powers.KleeExpansion.CompanionPromptKey] =
                     Powers.KleeExpansion.CompanionPromptText,
+                // FURINA, THE POOL TO 75 (2026-10-09): Casting Call's draw
+                // pile pick and Final Bow's guest pick, on the same terms.
+                [Powers.FurinaCards.TutorPromptKey] =
+                    Powers.FurinaCards.TutorPromptText,
+                [Powers.FurinaCards.BowPromptKey] =
+                    Powers.FurinaCards.BowPromptText,
                 // VARKA (the Oath rework): Knights' Roll Call+'s grid and
                 // Change of Guard's, on the same terms.
                 [Powers.VarkaRules.KnightPromptKey] =
@@ -513,6 +519,22 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.ChevreuseKey + ".title"] =
                         Powers.FurinaStageLedger.DisplayName(
                             Powers.StagePerformer.Chevreuse),
+                    // The pool to 75 (2026-10-09): Encore!'s "oldest
+                    // guest", and its four guests.
+                    [Cards.ArmKeywordTips.OldestGuestKey + ".title"] =
+                        "Oldest guest",
+                    [Cards.ArmKeywordTips.FreminetKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Freminet),
+                    [Cards.ArmKeywordTips.NaviaKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Navia),
+                    [Cards.ArmKeywordTips.NeuvilletteKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Neuvillette),
+                    [Cards.ArmKeywordTips.EscoffierKey + ".title"] =
+                        Powers.FurinaStageLedger.DisplayName(
+                            Powers.StagePerformer.Escoffier),
                     // `EB-377`. The BASE game's five, restated on the face
                     // that names one. Same switch and same bargain as the
                     // eleven rows above -- titles here, bodies in
