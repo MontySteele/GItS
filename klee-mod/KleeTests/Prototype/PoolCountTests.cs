@@ -87,8 +87,10 @@ public class PoolCountTests
         // 2026-10-09): 41 rows, 10 / 18 / 13 -> 20 / 35 / 20; three slots,
         // one per rarity, held for the first seat round. The pool-75 round's
         // rulings (2026-10-09): Endless Waltz cut (Uncommon) and Standing
-        // Ovation Common -> Uncommon, 19 / 35 / 20.
-        AssertPool("FurinaStageRoster", "Pool", 19, 35, 20, size: 74);
+        // Ovation Common -> Uncommon, 19 / 35 / 20. THE BLOCK GAP
+        // (review/records/furina-drain-line-round-2026-10-09.md pick 2, ruled
+        // 2026-10-09): 1 Common, 2 Uncommon, 1 Rare, 20 / 37 / 21.
+        AssertPool("FurinaStageRoster", "Pool", 20, 37, 21, size: 78);
         AssertAncients("Furina");
         Assert.Null(System.Type.GetType(
             "KleeMod.Powers.FurinaStageRoster, klee")?.GetMethod("MultiplayerRows"));
