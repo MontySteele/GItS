@@ -45,7 +45,7 @@ public sealed class ProtoFsOverdraft : CustomCardModel, ICharacterCard, IUnplaya
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Overdraft"),
-        ("description", "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Gain 1 [gold]Energy[/gold].{InCombat:{StageDrainLine}|}"),
+        ("description", "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Gain 1 [gold]Energy[/gold] next turn.{InCombat:{StageDrainLine}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -83,7 +83,7 @@ public sealed class ProtoFsOverdraft : CustomCardModel, ICharacterCard, IUnplaya
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await FurinaStage.Drain(choiceContext, Owner.Creature, (IsUpgraded ? 3 : 4));
-        await PlayerCmd.GainEnergy(1, Owner);
+        await FurinaStage.EnergyNextTurn(choiceContext, Owner.Creature, 1);
     }
 
     protected override void OnUpgrade()

@@ -35,7 +35,7 @@ kits; its calibration bands are retired, and the sim does not gate kit balance
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance (frozen until the suite runs) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool to 75 built, loop findings await a ruling) | 75 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool to 75 built) | 75 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
 
 **Every kit's pool target is 78 standard draftable cards**, plus its Ancient
@@ -94,10 +94,8 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
   pool is the starter and 75 cards (20 / 35 / 20; three slots held for the
-  first seat round), built from that paper's sec.5. The loop probe found
-  productive cycles in the new cards (Overdraft and Pneuma Refrain loop with
-  HP flat); they are pinned in `tier0/tests/test_furina_loop_probe.py` and
-  await a ruling before seats. Relics: the
+  first seat round), built from that paper's sec.5; Overdraft and Sold Out
+  give their Energy next turn (the build's loop ruling). Relics: the
   starter Salon Solitaire ("At the end of your turn, Repay 1."; 2 before the
   2026-10-09 playtest trim), its Orobas upgrade The Curtain Never Falls
   (Repay 2; Ancient, never rolled), and two reward

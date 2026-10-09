@@ -45,7 +45,7 @@ public sealed class ProtoFsSoldOut : CustomCardModel, ICharacterCard, IUnplayabl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sold Out"),
-        ("description", "[gold]Spend[/gold] {IfUpgraded:show:4|6}. Gain 1 [gold]Energy[/gold]. Draw 2 cards."),
+        ("description", "[gold]Spend[/gold] {IfUpgraded:show:4|6}. Draw 2 cards. Gain 1 [gold]Energy[/gold] next turn."),
     };
 
     // The Salon's Tab (2026-10-05): a fixed price is the cost line,
@@ -74,8 +74,8 @@ public sealed class ProtoFsSoldOut : CustomCardModel, ICharacterCard, IUnplayabl
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await FurinaStage.Spend(choiceContext, Owner.Creature, (IsUpgraded ? 4 : 6));
-        await PlayerCmd.GainEnergy(1, Owner);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        await FurinaStage.EnergyNextTurn(choiceContext, Owner.Creature, 1);
     }
 
     protected override void OnUpgrade()

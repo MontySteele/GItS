@@ -262,7 +262,7 @@ def _outlet_rate(spec) -> float:
     if k == "encore":
         return (GUEST_ACT + DRAW) / n[0]
     if k == "sold_out":
-        return (6.0 * n[1] + DRAW * n[2]) / n[0]
+        return (NEXT_ENERGY * 0.5 * n[1] + DRAW * n[2]) / n[0]
     if k == "house_down":
         return float(n[0])
     if k == "block_spend_hit":
@@ -402,6 +402,8 @@ def fixed_drain_gain(state, spec) -> tuple[float, bool]:
         return _single(state, dmg), ends_fight(state, dmg)
     if k == "drain_energy":
         return (ENERGY_NOW * n[1] if _playable_left(state) else 1.0), False
+    if k == "drain_energy_next":
+        return NEXT_ENERGY * n[1] * 0.5, False
     if k == "drain_draw":
         draws = bool(state.player.draw_pile or state.player.discard_pile)
         return (DRAW * n[1] if draws else 0.0), False
@@ -614,8 +616,9 @@ def value(state, card, playable: list, decider) -> float:
             act = GUEST_ACT if f.stage else 0.0
             return act + DRAW * n[1] - spend_cost(state, price)
         if k == "sold_out":
-            energy = ENERGY_NOW * n[1] if _playable_left(state, card) else 1.0
-            return energy + DRAW * n[2] - spend_cost(state, price)
+            # The Energy comes next turn (the 2026-10-09 loop ruling).
+            return (NEXT_ENERGY * n[1] * 0.5 + DRAW * n[2]
+                    - spend_cost(state, price))
         return _single(state, n[1]) - spend_cost(state, price)
     if k == "block_spend_all":
         v = _block_value(n[0], need_now)

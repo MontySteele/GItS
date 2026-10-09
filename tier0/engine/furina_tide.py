@@ -412,6 +412,8 @@ CARDS: dict[str, Spec] = {
                                 "spend_debuff", (1, 4, 2, 2)),
     "ftd_star_turn": Spec("Star Turn", 2, "attack", "uncommon", "star_turn",
                           (15,), exhaust=True),
+    # Sold Out and Overdraft give their Energy next turn (the 2026-10-09
+    # build's loop ruling, Interval Bell's fix).
     "ftd_sold_out": Spec("Sold Out", 1, "skill", "uncommon", "sold_out",
                          (6, 1, 2)),
     "ftd_crescendo": Spec("Crescendo", 1, "power", "uncommon", "power",
@@ -425,8 +427,8 @@ CARDS: dict[str, Spec] = {
     # Ousia, Drain (10).
     "ftd_undercurrent": Spec("Undercurrent", 1, "attack", "common",
                              "undercurrent", (2, 5, 1)),
-    "ftd_overdraft": Spec("Overdraft", 0, "skill", "common", "drain_energy",
-                          (4, 1)),
+    "ftd_overdraft": Spec("Overdraft", 0, "skill", "common",
+                          "drain_energy_next", (4, 1)),
     "ftd_ousia_pledge": Spec("Ousia Pledge", 1, "skill", "common",
                              "drain_draw", (3, 2)),
     "ftd_against_the_tide": Spec("Against the Tide", 1, "attack",
@@ -491,7 +493,8 @@ DRAIN_KINDS = ("drain_hit", "drain_aoe", "drain_block", "drain_tab")
 #: one's `n[0]` is its Drain price.
 FIXED_DRAIN_KINDS = ("drain_fixed_hit", "drain_fixed_aoe",
                      # The pool to 75.
-                     "undercurrent", "drain_energy", "drain_draw", "riptide",
+                     "undercurrent", "drain_energy", "drain_energy_next",
+                     "drain_draw", "riptide",
                      "deluge", "ebb_flow")
 SPEND_KINDS = ("block_spend_hit", "spend_aoe", "spend_draw", "spend_energy",
                "spend_block",
@@ -1273,8 +1276,8 @@ def resolve_card(state, card) -> None:
             state.draw(n[1])
     elif k == "sold_out":
         if spend(state, n[0]):
-            state.player.energy += n[1]
             state.draw(n[2])
+            f.energy_next += n[1]
     elif k == "block_spend_all":
         _card_block(state, card, n[0])
         held = f.fanfare
@@ -1331,6 +1334,10 @@ def resolve_card(state, card) -> None:
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1
             state.player.energy += n[1]
+    elif k == "drain_energy_next":
+        if drain(state, n[0]):
+            f.ledger["fixed_drains"] += 1
+            f.energy_next += n[1]
     elif k == "drain_draw":
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1

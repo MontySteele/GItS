@@ -6745,9 +6745,11 @@ four new guests have no body scene (the Osty fallback) and no badge icon.
 now carries the playtest trims (Usher 6 / 11, Tidal Flourish and Interval
 Bell Uncommon) so its draft pool matches the sheet.
 
-**Loop probe (sec.6).** The four named combinations: Encore! with Escoffier,
-Tutti! with Showstopper and Bring the House Down, and Final Bow with Grand
-Entrance do not loop. Overdraft, Soothing Waters, Sold Out and Crescendo
-does, and the full sweep finds 81 productive cycles over 16 card sets, ten
-with HP flat (the smallest: Overdraft and Pneuma Refrain). They are pinned in
-`tier0/tests/test_furina_loop_probe.py` and await a ruling.
+**Loop probe (sec.6).** As first built, the full sweep found 81 productive
+cycles over 16 thin-deck card sets, ten with HP flat (the smallest: Overdraft
+and Pneuma Refrain). The main session ruled that Overdraft ("Drain 4. Gain 1
+Energy next turn." [Drain 3]) and Sold Out ("Spend 6. Draw 2 cards. Gain 1
+Energy next turn." [Spend 4]) give their Energy next turn, Interval Bell's
+2026-10-04 fix and its `stage_energy_next` op; the paper's rows are edited in
+place. The sweep is then clean, and none of the four named combinations is a
+productive loop.

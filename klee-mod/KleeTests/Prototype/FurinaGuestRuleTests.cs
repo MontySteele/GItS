@@ -373,6 +373,20 @@ public class FurinaGuestRuleTests
     }
 
     [Fact]
+    public void Overdraft_and_sold_out_give_their_energy_next_turn()
+    {
+        // The 2026-10-09 build's loop ruling, Interval Bell's fix: the
+        // loop probe found 16 thin-deck cycles while the Energy came now.
+        foreach (var type in new[] { typeof(ProtoFsOverdraft),
+                                     typeof(ProtoFsSoldOut) })
+        {
+            var calls = Il.Calls(type.GetMethod("OnPlay", All)!);
+            Assert.Contains("FurinaStage.EnergyNextTurn", calls);
+            Assert.DoesNotContain("PlayerCmd.GainEnergy", calls);
+        }
+    }
+
+    [Fact]
     public void Within_five_hp_of_the_line_is_near_it()
     {
         Assert.True(FurinaStageLaw.NearTheLine(44, 39));

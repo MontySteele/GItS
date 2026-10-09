@@ -3003,14 +3003,16 @@
    description: "Deal 15 damage. Costs 1 less for every 6 [gold]Fanfare[/gold] you have.",
    effects: [{op: damage, amount: 15, target: enemy}]}
 
+# Sold Out and Overdraft: Energy next turn (the 2026-10-09 build's loop
+# ruling, Interval Bell's fix; the loop probe found 16 thin-deck cycles).
 - {id: proto_fs_sold_out, name: "Sold Out", character: furina,
    upgrade: {stage_spend: -2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Spend[/gold] {IfUpgraded:show:4|6}. Gain 1 [gold]Energy[/gold]. Draw 2 cards.",
+   description: "[gold]Spend[/gold] {IfUpgraded:show:4|6}. Draw 2 cards. Gain 1 [gold]Energy[/gold] next turn.",
    effects: [{op: stage_spend, amount: 6},
-             {op: energy, amount: 1},
-             {op: draw, amount: 2}]}
+             {op: draw, amount: 2},
+             {op: stage_energy_next, amount: 1}]}
 
 - {id: proto_fs_crescendo, name: "Crescendo", character: furina,
    upgrade: {innate: true},
@@ -3066,9 +3068,9 @@
    upgrade: {stage_drain: -1},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: common,
-   description: "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Gain 1 [gold]Energy[/gold].",
+   description: "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Gain 1 [gold]Energy[/gold] next turn.",
    effects: [{op: stage_drain, amount: 4},
-             {op: energy, amount: 1}]}
+             {op: stage_energy_next, amount: 1}]}
 
 - {id: proto_fs_ousia_pledge, name: "Ousia Pledge", character: furina,
    upgrade: {draw: +1},
