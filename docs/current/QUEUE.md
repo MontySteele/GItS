@@ -25,6 +25,12 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Furina pool to 75** (`furina-pool-growth-2026-10-09.md`, four picks):
+  (1) guests scale by acting more often, paid in Fanfare, never by a stat;
+  (2) Fanfare comes only from HP; (3) target 75 with 3 slots held; (4) the
+  41 cards built as one batch, then the loop probe and a solo seat round.
+  All defaults.
+
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
