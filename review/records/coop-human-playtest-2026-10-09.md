@@ -93,6 +93,22 @@ can start with these trims and readjust after the card pool expands."
    deck more power, and the solo seats were already short of HP in act 3.
    **Default: (a) on the build. Claude also sims (b) against (a) on the
    solo instrument and brings back the numbers before any build.**
+
+   **Sim result (2026-10-09).** n=2000 full runs per arm (`tier05`). The
+   pilot takes every legal Drain, so these numbers describe a greedy player.
+   - Line at 1 HP against the half line:
+     - act 2 cleared 21.4% against 17.0%;
+     - +0.7 fights won per run;
+     - 37% of its deaths came on or right after a Drain below the old line.
+   - With the trims:
+     - act 2 cleared 12.3% with the line kept, against 15.3% with the line
+       at 1;
+     - the trims cost about what the line at 1 gives back.
+   - The guest deck gains most from the line at 1: act-2 boss wins went
+     from 8% to 57% in the probe gauntlet.
+
+   So the line at 1 does make Drain dangerous, but it also buys power. The
+   line stays as ruled, and the question comes back after the pool grows.
 4. **Guests become an archetype, in the pool-growth paper.** Her pool grows
    from 34 toward 78 after her Tab play, and this was that play. The paper
    gives Guests a way to scale, such as cards that spend Fanfare to make a
