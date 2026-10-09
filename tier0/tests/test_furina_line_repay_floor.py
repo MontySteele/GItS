@@ -1,7 +1,8 @@
 """THE POOL-75 ROUND'S RULINGS, BUILT, in the sim (2026-10-09).
 
 `review/records/furina-pool75-round-2026-10-09.md`, "Picks (ruled
-2026-10-09)": the Drain line rule (3/4 line, Drain past it, the two-part
+2026-10-09)": the Drain line rule (since amended to entry HP minus 1/4 of
+Max HP, the same day; Drain past it, the two-part
 ledger, the curtain call, Repay's order, A Five-Century Act's new text,
 Lyney), the Repay floor card by card, and the ruled card numbers. The line,
 the split, the Repay order and the curtain call are also pinned rule by rule
@@ -40,11 +41,36 @@ def _play(st, card):
 
 # ---- the Drain line rule -------------------------------------------------------
 
-def test_the_arm_runs_the_three_quarter_line():
+def test_the_arm_runs_the_entry_minus_quarter_max_line():
     st = _furina()
-    assert st.player.ftd.line == T.LINE_SHARE == 0.75
-    assert (T.LINE_NUMERATOR, T.LINE_DENOMINATOR, T.DRAIN_FLOOR) == (3, 4, 1)
-    assert T.line_hp(st.player) == 59
+    assert st.player.ftd.line == T.SHIPPED_LINE
+    assert (T.LINE_MAX_HP_DIVISOR, T.DRAIN_FLOOR) == (4, 1)
+    assert st.player.ftd.entry_max_hp == 78
+    assert T.line_hp(st.player) == 59                    # 78 - 19
+
+
+def test_the_line_is_entry_hp_minus_a_quarter_of_max_hp():
+    """[USER], 2026-10-09: "Yeah, let's build it that way." The line is
+    the HP she entered with, minus 1/4 of her Max HP rounded down."""
+    assert T.line_hp(_furina(hp=50, max_hp=80).player) == 30   # 20 of room
+    assert T.line_hp(_furina(hp=80, max_hp=80).player) == 60
+    st = _furina(hp=85, max_hp=85)
+    assert st.player.hp - T.line_hp(st.player) == 21           # 21.25 down
+    assert T.shipped_line(60, 85) == 39
+    assert T.shipped_line(10, 80) == 0                         # never below 0
+    lyney = _furina(hp=50, max_hp=80)
+    lyney.player.ftd.stage = ["lyney"]
+    assert T.line_hp(lyney.player) == 20
+
+
+def test_the_line_snapshots_max_hp_at_combat_start():
+    """Max HP is read when the combat opens: a Max HP change mid-fight
+    does not move the line."""
+    st = _furina(hp=50, max_hp=80)
+    st.player.max_hp = 100
+    assert T.line_hp(st.player) == 30
+    st.player.max_hp = 60
+    assert T.line_hp(st.player) == 30
 
 
 def test_a_drain_records_its_split_on_the_ledger_and_the_past_part_is_lost():

@@ -911,13 +911,15 @@ public static class ArmKeywordTips
 
     /// <summary>Rule 1 and the curtain call, shared by the keyword tip and
     /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>). The Drain
-    /// line rule (ruled 2026-10-09): the line is 3/4 of her entry HP, a Drain
-    /// may go past it, and what it drains past it stays lost unless Repaid.
+    /// line rule (ruled 2026-10-09): the line is her entry HP minus 1/4 of
+    /// her Max HP, a Drain may go past it, and what it drains past it stays
+    /// lost unless Repaid.
     /// </summary>
     internal const string DrainBody =
         "Lose N HP. Drained HP above your line returns after combat. HP "
-      + "drained past your line (3/4 of your HP at combat start) is lost "
-      + "unless you [gold]Repay[/gold] it.";
+      + "drained past your line is lost unless you [gold]Repay[/gold] "
+      + "it. Your line is the HP you started this fight with, minus 1/4 "
+      + "of your Max HP.";
 
     /// <summary>Rule 1: Drain N. In combat the tip adds where her line is
     /// now and why (the pool-75 round, 2026-10-09).</summary>

@@ -237,11 +237,15 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void The_drain_tip_states_the_three_quarter_rule()
+    public void The_drain_tip_states_the_quarter_of_max_hp_rule()
     {
-        Assert.Contains("3/4", DrainBody);
+        Assert.Contains("minus 1/4 of your Max HP", DrainBody);
+        Assert.DoesNotContain("3/4", DrainBody);
         Assert.Contains("lost unless you", DrainBody);
-        Assert.Contains("3/4 of the HP", FurinaStageLaw.LineWhy(false));
+        Assert.Equal("the HP you started this fight with, minus 1/4 of your "
+                     + "Max HP", FurinaStageLaw.LineWhy(false));
+        Assert.EndsWith(", 10 lower with Lyney on stage",
+                        FurinaStageLaw.LineWhy(true));
     }
 
     // ---- the ruled card numbers ----------------------------------------------

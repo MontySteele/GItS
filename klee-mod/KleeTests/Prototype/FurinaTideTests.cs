@@ -30,15 +30,42 @@ public class FurinaTideTests
     // ---- rule 1: the line ---------------------------------------------------
 
     [Fact]
-    public void The_line_is_three_quarters_of_her_entry_hp_rounded_up()
+    public void The_line_is_entry_hp_minus_a_quarter_of_max_hp_rounded_down()
     {
-        // The Drain line rule (ruled 2026-10-09): 3/4, rounded the way the
-        // half line was (up).
-        Assert.Equal(59, FurinaStageLaw.LineOf(78));     // 58.5
-        Assert.Equal(58, FurinaStageLaw.LineOf(77));     // 57.75
-        Assert.Equal(30, FurinaStageLaw.LineOf(40));
-        Assert.Equal(0, FurinaStageLaw.LineOf(0));
+        // The Drain line rule (ruled 2026-10-09): the HP she entered with,
+        // minus 1/4 of her Max HP, the quarter rounded down.
+        Assert.Equal(30, FurinaStageLaw.LineOf(50, 80));   // 20 HP of room
+        Assert.Equal(60, FurinaStageLaw.LineOf(80, 80));
+        Assert.Equal(21, 85 - FurinaStageLaw.LineOf(85, 85)); // 21.25 down
+        Assert.Equal(21, 60 - FurinaStageLaw.LineOf(60, 85));
+        Assert.Equal(59, FurinaStageLaw.LineOf(78, 78));   // 19.5 down
+        Assert.Equal(0, FurinaStageLaw.LineOf(10, 80));    // never below 0
+        Assert.Equal(0, FurinaStageLaw.LineOf(0, 0));
+        Assert.Equal(4, FurinaStageLaw.LineMaxHpDivisor);
+        // Lyney lowers it by 10: 50/80 -> 20.
+        Assert.Equal(20, FurinaStageLaw.LineOf(50, 80, lyney: true));
         Assert.Equal(59, StageKit.Of().Stage.Line);
+        Assert.Equal(30, StageKit.AtMax(50, 50, 80).Stage.Line);
+        Assert.Equal(60, StageKit.AtMax(80, 80, 80).Stage.Line);
+        Assert.Equal(20,
+            StageKit.AtMax(50, 50, 80, StagePerformer.Lyney).Stage.Line);
+    }
+
+    [Fact]
+    public void The_line_snapshots_max_hp_when_the_combat_opens()
+    {
+        // Max HP is read once, beside the entry HP: a later Open (or a Max
+        // HP change mid-fight) does not move the line.
+        var stage = FurinaStageLedger.Detached();
+        Assert.True(stage.Open(50, 80));
+        Assert.Equal((50, 80), (stage.EntryHp, stage.EntryMaxHp));
+        Assert.False(stage.Open(50, 100));
+        Assert.Equal(80, stage.EntryMaxHp);
+        Assert.Equal(30, stage.Line);
+        // The game's opening hands the ledger her Max HP.
+        Assert.Contains(Il.Calls(typeof(FurinaStage)
+                            .GetMethod(nameof(FurinaStage.OpenCombat))!),
+                        c => c.EndsWith("get_MaxHp", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -63,9 +90,9 @@ public class FurinaTideTests
     public void The_line_reads_the_entry_hp_not_max_hp()
     {
         // K4: a fight started hurt still has her kit. Entered at 50 of 78:
-        // the line is 38 (37.5 up).
+        // the line is 31 (50 - 19).
         var kit = StageKit.At(30, 50);
-        Assert.Equal(38, kit.Stage.Line);
+        Assert.Equal(31, kit.Stage.Line);
         Assert.True(kit.Director.CanDrain(29));
     }
 
@@ -284,7 +311,7 @@ public class FurinaTideTests
         var kit = StageKit.Of(StagePerformer.Lyney);
         Assert.Equal(49, kit.Stage.Line);                    // 59 - 10
         Assert.Equal(59, StageKit.Of().Stage.Line);
-        Assert.Equal(1, FurinaStageLaw.LineOf(8, lyney: true));
+        Assert.Equal(1, FurinaStageLaw.LineOf(8, 78, lyney: true));
         Assert.True(StageKit.Run(kit.Director.Act(kit.Stage.Seats[0])));
         Assert.Equal(76, kit.Board.Hp);
         Assert.Equal(2, kit.Stage.Drained);
@@ -620,13 +647,17 @@ public class FurinaTideTests
                      DrainedCounter.Read(seat.Creature));
 
         // 2026-10-05: the line says where it comes from; 2026-10-09: it
-        // is 3/4, and HP drained past it is lost unless Repaid.
-        Assert.Equal("Drain line [blue]59[/blue] HP (3/4 of the HP you "
-                     + "started this fight with): HP you [gold]Drain[/gold] "
-                     + "past it is lost unless you [gold]Repay[/gold] it.",
+        // is entry HP minus 1/4 of Max HP, and HP drained past it is lost
+        // unless Repaid.
+        Assert.Equal("Drain line [blue]59[/blue] HP (the HP you started "
+                     + "this fight with, minus 1/4 of your Max HP): HP you "
+                     + "[gold]Drain[/gold] past it is lost unless you "
+                     + "[gold]Repay[/gold] it.",
                      DrainedCounter.LineSentence(
-                         59, "3/4 of the HP you started this fight with"));
-        Assert.Equal("3/4 of the HP you started this fight with",
+                         59, "the HP you started this fight with, minus 1/4 "
+                             + "of your Max HP"));
+        Assert.Equal("the HP you started this fight with, minus 1/4 of your "
+                     + "Max HP",
                      stage.LineWhy);
         Assert.Contains("10 lower with Lyney",
                         FurinaStageLaw.LineWhy(lyney: true));
@@ -665,8 +696,9 @@ public class FurinaTideTests
             .GetField(name, HeadlessGame.All)!.GetRawConstantValue()!;
         Assert.Equal(
             "Lose N HP. Drained HP above your line returns after combat. HP "
-            + "drained past your line (3/4 of your HP at combat start) is lost "
-            + "unless you [gold]Repay[/gold] it.",
+            + "drained past your line is lost unless you [gold]Repay[/gold] "
+            + "it. Your line is the HP you started this fight with, minus 1/4 "
+            + "of your Max HP.",
             Body("DrainBody"));
         Assert.Contains("drained HP", Body("RepayBody"));
         Assert.Contains("[gold]Repay[/gold]", Body("FanfareBody"));
@@ -682,10 +714,10 @@ public class FurinaTideTests
         // The pool-75 round (2026-10-09). The Drain tip names the line now,
         // and the refusal carries its number.
         Assert.Equal(
-            "\nYour Drain line is 59 (3/4 of the HP you started this fight "
-            + "with).",
+            "\nYour Drain line is 30: the HP you started this fight with, "
+            + "minus 1/4 of your Max HP.",
             FurinaStageFacePreview.LineNowWords(
-                59, "3/4 of the HP you started this fight with"));
+                30, FurinaStageLaw.LineWhy(lyney: false)));
         // The Drain line rule (2026-10-09): past the line is a warning, and
         // the one refusal left is a Drain to 0 HP.
         Assert.Equal("\n(Past your Drain line of 59 HP)",
