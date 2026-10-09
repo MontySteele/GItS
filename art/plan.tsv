@@ -1832,9 +1832,6 @@ proto_mi_gorou_crystal_collapse	ImageGen/images/cards/companions/proto_mi_gorou_
 # L1, L7 and L12 all partition on is_prototype(), and a prototype row wearing
 # a shipped picture is the pattern the partition exists for. Those six are
 # the rows worth a second look on the contact sheet.
-# proto_fs_salon_debut 'Take the Stage' <- the Opera Epiclese at the Final Feast:
-#   the house the Stage arm plays to
-proto_fs_salon_debut	ImageGen/images/cards/furina/proto_fs_salon_debut.png	500	380	cover	center	shortlist	1	png	Opera Epiclese (The Final Feast).png		splash	
 # proto_fs_curtain_rise <- Chanson of Many Waters: the aria that opens the evening
 proto_fs_curtain_rise	ImageGen/images/cards/furina/proto_fs_curtain_rise.png	500	380	cover	center	shortlist	1	png	Chanson of Many Waters.png		splash	
 # proto_fs_standing_ovation 'Rising Applause' <- the Conclusive Ovation TCG card
@@ -1928,32 +1925,20 @@ proto_ko_where_did_i_put_it	ImageGen/images/cards/klee/proto_ko_where_did_i_put_
 # proto_ko_windblume_fireworks <- study_buddy: Klee and her friends under a festival night of fireworks
 proto_ko_windblume_fireworks	ImageGen/images/cards/klee/proto_ko_windblume_fireworks.png	500	380	cover	center	shortlist	1	png	Let's Go Dodoco! Illustration 5.png		splash	
 # -- Furina: the Stage --
-# proto_fs_arkhe_alignment <- waters_embrace: the two Furinas of the 4.2 wallpaper, whole -- Ousia and Pneuma side by side
-proto_fs_arkhe_alignment	ImageGen/images/cards/furina/proto_fs_arkhe_alignment.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 2.png		splash	
 # proto_fs_between_acts <- curtain_up: the empty stage between acts, pushed in
 proto_fs_between_acts	ImageGen/images/cards/furina/proto_fs_between_acts.png	500	380	cover	center@1.25	shortlist	1	png	Opera Epiclese - After The Forgotten Thief.png		splash	
 # proto_fs_bravura <- star_of_the_show: Furina at the heart of her whirl of water, pushed in
 proto_fs_bravura	ImageGen/images/cards/furina/proto_fs_bravura.png	500	380	cover	center@1.6	shortlist	1	png	Furina Wish.png		splash	
-# proto_fs_double_casting <- rain_of_roses: Furina with two of her Salon at her side
-proto_fs_double_casting	ImageGen/images/cards/furina/proto_fs_double_casting.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2024.png		splash	
-# proto_fs_ensemble_piece <- swelling_overture: Furina and the Salon round one table
-proto_fs_ensemble_piece	ImageGen/images/cards/furina/proto_fs_ensemble_piece.png	500	380	cover	x0.62,y0.50@1.3	shortlist	1	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	
-# proto_fs_five_century_act <- usher_the_waves: Furina's back to the prophecy -- the end of a five-hundred-year role
-proto_fs_five_century_act	ImageGen/images/cards/furina/proto_fs_five_century_act.png	500	380	cover	x0.30	shortlist	1	png	Archon Quest When All Return to the Waters.png		splash	
 # proto_fs_full_house <- courtroom_drama: the Opera Epiclese gallery, row on row of seats
 proto_fs_full_house	ImageGen/images/cards/furina/proto_fs_full_house.png	500	380	cover	x0.50,y0.70@1.3	shortlist	1	png	Opera Epiclese Courtroom.png		splash	
 # proto_fs_gala_dinner <- matinee_performance: Furina at a table laden with cakes
 proto_fs_gala_dinner	ImageGen/images/cards/furina/proto_fs_gala_dinner.png	500	380	cover	y0.62	shortlist	1	png	Furina Shorts 2023-11-21.png		splash	
 # proto_fs_hold_your_places <- unused Furina sticker: her gloved hand out -- places, everyone!
 proto_fs_hold_your_places	ImageGen/images/cards/furina/proto_fs_hold_your_places.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 28 Furina 4.png		sticker	
-# proto_fs_improvised_number <- spotlight_center_stage: Furina with a lute, playing something made up on the spot
-proto_fs_improvised_number	ImageGen/images/cards/furina/proto_fs_improvised_number.png	500	380	cover	x0.50,y0.50@1.3	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	
 # proto_fs_quick_cue <- unused Furina sticker: Furina pointing, laughing -- the cue given
 proto_fs_quick_cue	ImageGen/images/cards/furina/proto_fs_quick_cue.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 28 Furina 3.png		sticker	
 # proto_fs_rapt_audience <- unused Furina sticker: chin on hand, watching intently
 proto_fs_rapt_audience	ImageGen/images/cards/furina/proto_fs_rapt_audience.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 26 Furina 1.png		sticker	
-# proto_fs_step_forward <- encore_performance: Furina striding forward, arm out
-proto_fs_step_forward	ImageGen/images/cards/furina/proto_fs_step_forward.png	500	380	cover	x0.55,y0.45@1.25	shortlist	1	png	Furina Wallpaper without Watermark.png		splash	
 # proto_fs_thunderous_applause <- rapturous_applause: the Fontainians cheering -- the card's own name
 proto_fs_thunderous_applause	ImageGen/images/cards/furina/proto_fs_thunderous_applause.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	FCFH Applause and Cheer.png		sticker	
 # proto_fs_tutti <- salon_debut: all three Salon Members in one frame -- everyone plays at once
@@ -2018,8 +2003,6 @@ power_furina_guest_lynette	ImageGen/images/furina/powers/guest_lynette.png	256	2
 proto_fs_plot_twist	ImageGen/images/cards/furina/proto_fs_plot_twist.png	500	380	cover	center	shortlist	1	png	Lies Cast Shadows Under Gathered Lights Computer Graphic.png		splash
 # proto_fs_revolving_stage <- NEW: the Opera Epiclese stage, curtain up and empty, before the next turn
 proto_fs_revolving_stage	ImageGen/images/cards/furina/proto_fs_revolving_stage.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Lies Cast Shadows Under Gathered Lights.png		splash
-# proto_fs_oratrices_verdict <- NEW: the Oratrice Mecanique d'Analyse Cardinale itself, scales lit
-proto_fs_oratrices_verdict	ImageGen/images/cards/furina/proto_fs_oratrices_verdict.png	500	380	cover	y0.42	shortlist	1	png	Oratrice Mecanique d'Analyse Cardinale.png		splash
 # proto_fs_guest_star_lyney <- NEW: Lyney's own Wish splash: the guest who joins the stage
 proto_fs_guest_star_lyney	ImageGen/images/cards/furina/proto_fs_guest_star_lyney.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Lyney Wish.png		splash
 proto_fs_guest_star_lyney	ImageGen/images/cards/furina/proto_fs_guest_star_lyney.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Lyney Full Wish.png		splash
@@ -2042,8 +2025,6 @@ proto_fs_star_billing	ImageGen/images/cards/furina/proto_fs_star_billing.png	500
 proto_fs_held_applause	ImageGen/images/cards/furina/proto_fs_held_applause.png	500	380	cover	x0.50	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 2 Lumine.png		splash
 # proto_fs_echoing_hall <- NEW: the Fontinalia hall under Furina's own portrait, stars hung from the vault
 proto_fs_echoing_hall	ImageGen/images/cards/furina/proto_fs_echoing_hall.png	500	380	cover	center	shortlist	1	png	Fontinalia Festival.png		splash
-# proto_fs_eternal_applause <- NEW: the fifth-anniversary party, Furina with an armful of flowers -- the applause that keeps coming
-proto_fs_eternal_applause	ImageGen/images/cards/furina/proto_fs_eternal_applause.png	500	380	cover	x0.33,y0.50@1.5	shortlist	1	png	Version Luna I Wallpaper 3.png		splash
 # -- 4. Cashing out --
 # proto_fs_spirited_aria <- NEW: Furina mid-song, arm flung wide (the left of her voice-cast card, its text cropped off)
 proto_fs_spirited_aria	ImageGen/images/cards/furina/proto_fs_spirited_aria.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash
@@ -2058,28 +2039,18 @@ proto_fs_bring_the_house_down	ImageGen/images/cards/furina/proto_fs_bring_the_ho
 proto_fs_da_capo	ImageGen/images/cards/furina/proto_fs_da_capo.png	500	380	cover	x0.42	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 3 Aether.png		splash
 # proto_fs_grand_finale <- NEW: the whole company on stage under the confetti, the last bow
 proto_fs_grand_finale	ImageGen/images/cards/furina/proto_fs_grand_finale.png	500	380	cover	center	shortlist	1	png	The Two Musketeers' Triumph Quest Still 1 Aether.png		splash
-# proto_fs_gala_premiere <- NEW: Furina with two of her Salon, the curtain about to rise
-proto_fs_gala_premiere	ImageGen/images/cards/furina/proto_fs_gala_premiere.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2025 - Shorts.png		splash
 # -- 6. Hydro and reactions --
 # proto_fs_bubble_aria <- NEW: Furina singing in a ring of bubbles
 proto_fs_bubble_aria	ImageGen/images/cards/furina/proto_fs_bubble_aria.png	500	380	cover	x0.36	shortlist	1	png	App Store Event Character Wallpaper Furina Version 4.2.png		splash
-# proto_fs_groundswell <- NEW: Fontaine's waves rising in a wall
-proto_fs_groundswell	ImageGen/images/cards/furina/proto_fs_groundswell.png	500	380	cover	x0.30	shortlist	1	png	Namecard Background Fontaine Judgment.png		splash
-# proto_fs_tide_of_applause <- NEW: the Primordial Sea, the tide that answers every reaction
-proto_fs_tide_of_applause	ImageGen/images/cards/furina/proto_fs_tide_of_applause.png	500	380	cover	x0.40	shortlist	1	png	Primordial Sea.png		splash
 # proto_fs_grand_deluge <- NEW: the Archon Quest's turning point, the sea torn open into a vortex
 proto_fs_grand_deluge	ImageGen/images/cards/furina/proto_fs_grand_deluge.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Turning Point.png		splash
 # proto_fs_regina_of_all_waters <- NEW: Focalors in the flooded Opera Epiclese, the Hydro Archon herself
 proto_fs_regina_of_all_waters	ImageGen/images/cards/furina/proto_fs_regina_of_all_waters.png	500	380	cover	x0.58	shortlist	1	png	Masquerade of the Guilty Travel Log Preview.png		splash
 # -- 7. Furina's side paths --
-# proto_fs_solo_verse <- NEW: Furina alone mid-performance, one arm flung out
-proto_fs_solo_verse	ImageGen/images/cards/furina/proto_fs_solo_verse.png	500	380	cover	x0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version 5.4.png		splash
 # proto_fs_soliloquy <- NEW: Furina humming to herself, eyes shut -- a song with no audience
 proto_fs_soliloquy	ImageGen/images/cards/furina/proto_fs_soliloquy.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Starlight Reverie Avatar Furina.png		sticker
 # proto_fs_one_woman_show <- NEW: Furina alone, mid-scene, a burning letter held high (the right of her Japanese voice-cast card, its text cropped off)
 proto_fs_one_woman_show	ImageGen/images/cards/furina/proto_fs_one_woman_show.png	500	380	cover	x0.645,y0.34@1.5	shortlist	1	png	Furina VA Announcement JP.png		splash
-# proto_fs_dual_nature <- NEW: Focalors, the other half of Furina, standing in the Opera Epiclese
-proto_fs_dual_nature	ImageGen/images/cards/furina/proto_fs_dual_nature.png	500	380	cover	y0.25	shortlist	1	png	NPC Focalors.png		splash
 # proto_fs_sold_out <- NEW: the whole cast crowding the stage before the curtain -- not a seat to spare
 proto_fs_sold_out	ImageGen/images/cards/furina/proto_fs_sold_out.png	500	380	cover	center	shortlist	1	png	Those We Have Kept Quest Still Lumine.png		splash
 # The two new guests' badges wear their own faces, as the eight above do.
@@ -2103,10 +2074,6 @@ proto_ko_knights_of_favonius	ImageGen/images/cards/klee/proto_ko_knights_of_favo
 # -- Furina --
 # proto_fs_guest_of_honor <- NEW: Furina in the fair's parade carriage with the Usher at her shoulder, Neuvillette leading her through the crowd
 proto_fs_guest_of_honor	ImageGen/images/cards/furina/proto_fs_guest_of_honor.png	500	380	cover	x0.40,y0.50@1.15	shortlist	1	png	Seville Fair 2024.png		splash	
-# proto_fs_share_the_spotlight <- NEW: two spotlights, one stage -- Furina below, Neuvillette above her in the 4.2 wallpaper
-proto_fs_share_the_spotlight	ImageGen/images/cards/furina/proto_fs_share_the_spotlight.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 1.jpg		splash	
-# proto_fs_people_of_fontaine <- NEW: Furina leading Fontaine's cast -- Neuvillette, Navia, Lyney and the rest behind her
-proto_fs_people_of_fontaine	ImageGen/images/cards/furina/proto_fs_people_of_fontaine.png	500	380	cover	x0.44	shortlist	1	png	Version 4.0 Wallpaper 1.png		splash	
 # -- Kokomi --
 # proto_kk_joint_orders <- NEW: Gorou and Kokomi side by side on a Watatsumi balcony at sunrise, Gorou turning to wave the others in -- two commanders, one order
 proto_kk_joint_orders	ImageGen/images/cards/kokomi/proto_kk_joint_orders.png	500	380	cover	center	shortlist	1	png	New Year 2025 JP.png		splash	kokomi_pool
@@ -2569,8 +2536,6 @@ proto_fs_aria_for_one	ImageGen/images/cards/furina/proto_fs_aria_for_one.png	500
 proto_fs_casting_agent	ImageGen/images/cards/furina/proto_fs_casting_agent.png	500	380	cover	x0.53,y0.55@1.1	shortlist	1	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	
 # proto_fs_critics_darling <- Furina posing in the clock hall, face in frame
 proto_fs_critics_darling	ImageGen/images/cards/furina/proto_fs_critics_darling.png	500	380	cover	x0.45,y0.38@1.5	shortlist	1	png	VIP Ace Detective Wallpaper.png		splash	
-# proto_fs_endless_waltz <- Furina dancing at night with the cat; the hooded watcher cropped out
-proto_fs_endless_waltz	ImageGen/images/cards/furina/proto_fs_endless_waltz.png	500	380	cover	x0.74,y0.62@2	shortlist	1	png	Fragmented Memories Archive 3.png		splash	
 # proto_fs_interval_bell <- chibi Furina in the clock shop
 proto_fs_interval_bell	ImageGen/images/cards/furina/proto_fs_interval_bell.png	500	380	cover	x0.55,y0.55@1.2	shortlist	1	png	VIP Ace Detective 1.png		splash	
 # proto_fs_leading_lady <- Furina out in front of the 4.1 cast under the flower arch, face in frame (the picked Introduction Banner is L9-banned for its wordmark)
@@ -2579,8 +2544,6 @@ proto_fs_leading_lady	ImageGen/images/cards/furina/proto_fs_leading_lady.png	500
 proto_fs_opening_number	ImageGen/images/cards/furina/proto_fs_opening_number.png	500	380	cover	x0.57,y0.33@1.6	shortlist	1	png	Version 4.2 Website Announcement.png		splash	
 # proto_fs_star_turn <- Furina at the left of the anniversary cast
 proto_fs_star_turn	ImageGen/images/cards/furina/proto_fs_star_turn.png	500	380	cover	x0.21,y0.36@1.8	shortlist	1	png	4th Anniversary Wallpaper 3.jpg		splash	
-# proto_fs_the_last_act <- Furina sitting at night with the cat, face in frame
-proto_fs_the_last_act	ImageGen/images/cards/furina/proto_fs_the_last_act.png	500	380	cover	x0.53,y0.47@1.3	shortlist	1	png	Calamitous Tread Graphic 5.png		splash	
 # ---------- Card art pass 2 (2026-10-02): Kokomi and Varka cards missing art ----------
 # [USER]: "Need another art pass for cards missing art". The main session
 # picked one picture per card; every crop frames a face or the named
@@ -2812,3 +2775,42 @@ proto_vk_shatter	ImageGen/images/cards/varka/proto_vk_shatter.png	500	380	cover	
 divine_strategy	ImageGen/images/cards/kokomi/divine_strategy.png	500	380	contain	center	shortlist	1	png	Talent Divine Maiden's Deliverance.png		item	kokomi_pool
 kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	contain	center	shortlist	1	png	Talent Tamakushi Casket.png		item	kokomi_pool
 kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool
+# Furina card-art picks, 38 rows ([USER] 2026-10-09: "all of the art picks are good enough for now")
+center_of_attention	ImageGen/images/cards/furina/center_of_attention.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 1.jpg		splash	
+proto_fs_a_five_century_act	ImageGen/images/cards/furina/proto_fs_a_five_century_act.png	500	380	cover	y0.25	shortlist	1	png	NPC Focalors.png		splash	
+proto_fs_against_the_tide	ImageGen/images/cards/furina/proto_fs_against_the_tide.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 2.png		splash	
+proto_fs_all_in	ImageGen/images/cards/furina/proto_fs_all_in.png	500	380	cover	x0.50,y0.50@1.3	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	
+proto_fs_balance_the_books	ImageGen/images/cards/furina/proto_fs_balance_the_books.png	500	380	cover	y0.42	shortlist	1	png	Oratrice Mecanique d'Analyse Cardinale.png		splash	
+proto_fs_casting_call	ImageGen/images/cards/furina/proto_fs_casting_call.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Event Invitation.png		item	
+proto_fs_clean_slate	ImageGen/images/cards/furina/proto_fs_clean_slate.png	500	380	cover	x0.74,y0.62@2	shortlist	1	png	Fragmented Memories Archive 3.png		splash	
+proto_fs_cleansing_torrent	ImageGen/images/cards/furina/proto_fs_cleansing_torrent.png	500	380	cover	center	shortlist	1	png	Namecard Background Fontaine Lucine.png		splash	
+proto_fs_commanding_gaze	ImageGen/images/cards/furina/proto_fs_commanding_gaze.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Expression 1.png		sticker	
+proto_fs_crashing_waves	ImageGen/images/cards/furina/proto_fs_crashing_waves.png	500	380	cover	x0.30	shortlist	1	png	Namecard Background Fontaine Judgment.png		splash	
+proto_fs_crescendo	ImageGen/images/cards/furina/proto_fs_crescendo.png	500	380	cover	x0.42,y0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version Luna II.png		splash	
+proto_fs_ebb_and_flow	ImageGen/images/cards/furina/proto_fs_ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 5.png		splash	
+proto_fs_encore	ImageGen/images/cards/furina/proto_fs_encore.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Wallpaper without Watermark.png		splash	
+proto_fs_ensemble_cast	ImageGen/images/cards/furina/proto_fs_ensemble_cast.png	500	380	cover	x0.44	shortlist	1	png	Version 4.0 Wallpaper 1.png		splash	
+proto_fs_fountain_of_lucine	ImageGen/images/cards/furina/proto_fs_fountain_of_lucine.png	500	380	cover	y0.50	shortlist	1	png	Fountain of Lucine.png		splash	
+proto_fs_gentle_current	ImageGen/images/cards/furina/proto_fs_gentle_current.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Tea Time Furina Preview.png		splash	
+proto_fs_grand_absolution	ImageGen/images/cards/furina/proto_fs_grand_absolution.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese (The Final Feast).png		splash	
+proto_fs_guest_star_freminet	ImageGen/images/cards/furina/proto_fs_guest_star_freminet.png	500	380	cover	center	shortlist	1	png	Freminet Birthday 2023.png		splash	
+proto_fs_high_stakes	ImageGen/images/cards/furina/proto_fs_high_stakes.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 3.png		splash	
+proto_fs_hold_the_stage	ImageGen/images/cards/furina/proto_fs_hold_the_stage.png	500	380	cover	y0.16	shortlist	1	png	Furina Profile.png		splash	
+proto_fs_hydro_lance	ImageGen/images/cards/furina/proto_fs_hydro_lance.png	500	380	cover	x0.55,y0.36@1.15	shortlist	1	png	Splendor of Tranquil Waters Equipment Card.png		tcg	
+proto_fs_hymn_of_many_waters	ImageGen/images/cards/furina/proto_fs_hymn_of_many_waters.png	500	380	cover	x0.335,y0.45@1.5	shortlist	1	png	La vaguelette.png		splash	
+proto_fs_hymn_of_renewal	ImageGen/images/cards/furina/proto_fs_hymn_of_renewal.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2024.png		splash	
+proto_fs_ousia_pledge	ImageGen/images/cards/furina/proto_fs_ousia_pledge.png	500	380	cover	y0.22	shortlist	1	png	Furina NPC Ousia.png		splash	
+proto_fs_overdraft	ImageGen/images/cards/furina/proto_fs_overdraft.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	The Opera of Noirceur and Blancheur Ticket.png		item	
+proto_fs_pay_the_tab	ImageGen/images/cards/furina/proto_fs_pay_the_tab.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Rainbow Macarons.png		item	
+proto_fs_pneuma_tides	ImageGen/images/cards/furina/proto_fs_pneuma_tides.png	500	380	cover	y0.22	shortlist	1	png	Furina NPC Pneuma.png		splash	
+proto_fs_prima_donna	ImageGen/images/cards/furina/proto_fs_prima_donna.png	500	380	cover	x0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version 5.4.png		splash	
+proto_fs_riptide_lunge	ImageGen/images/cards/furina/proto_fs_riptide_lunge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	On-Hit Effect Furina.png		vfx	
+proto_fs_rising_tide	ImageGen/images/cards/furina/proto_fs_rising_tide.png	500	380	cover	x0.40	shortlist	1	png	Primordial Sea.png		splash	
+proto_fs_salons_encore	ImageGen/images/cards/furina/proto_fs_salons_encore.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2025 - Shorts.png		splash	
+proto_fs_salons_tab	ImageGen/images/cards/furina/proto_fs_salons_tab.png	500	380	cover	x0.62,y0.50@1.3	shortlist	1	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	
+proto_fs_showstopper	ImageGen/images/cards/furina/proto_fs_showstopper.png	500	380	cover	x0.33,y0.50@1.5	shortlist	1	png	Version Luna I Wallpaper 3.png		splash	
+proto_fs_soothing_waters	ImageGen/images/cards/furina/proto_fs_soothing_waters.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Savoring the Breeze Wallpaper Furina.png		splash	
+proto_fs_standing_room_only	ImageGen/images/cards/furina/proto_fs_standing_room_only.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	4th Anniversary Wallpaper 1.png		splash	
+proto_fs_surging_waters	ImageGen/images/cards/furina/proto_fs_surging_waters.png	500	380	cover	x0.72,y0.66@1.4	shortlist	1	png	Anniversary Memories Album Wallpaper 12 - Underwater Storm in Fontaine - Aether.png		splash	
+proto_fs_the_deluge	ImageGen/images/cards/furina/proto_fs_the_deluge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Archon Quest When All Return to the Waters.png		splash	
+proto_fs_undercurrent	ImageGen/images/cards/furina/proto_fs_undercurrent.png	500	380	cover	x0.46,y0.46@1.2	shortlist	1	png	Archon Quest Proof of Guilt.png		splash	
