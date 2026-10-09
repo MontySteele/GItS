@@ -506,6 +506,9 @@ KNOWN_STALE = {
     "proto_fs_warm_reception": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_fs_endless_waltz": (
+        "Cut by the Drain line and Repay floor build (2026-10-09, #996): its damage only paid off when Repay had nothing to return. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
 }
 
 
