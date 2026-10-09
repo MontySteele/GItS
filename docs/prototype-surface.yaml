@@ -3143,8 +3143,8 @@
    upgrade: {stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: uncommon,
-   description: "[gold]Repay[/gold] 2. Gain 1 [gold]Vigor[/gold] for any HP it could not [gold]Repay[/gold]. Draw 1 card.",
-   effects: [{op: stage_repay, amount: 2, floor: vigor},
+   description: "[gold]Repay[/gold] 2. Draw 1 card.",
+   effects: [{op: stage_repay, amount: 2},
              {op: draw, amount: 1}]}
 
 - {id: proto_fs_gentle_current, name: "Gentle Current", character: furina,

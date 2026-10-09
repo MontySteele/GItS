@@ -6782,7 +6782,7 @@ resolves, then N minus the HP returned is paid. Block: Hymn of Many Waters
 (`stage_repay` with `floor: block`), Gentle Current's next-turn Repay,
 Fountain of Lucine each turn, Grand Entrance, Charlotte's and Sigewinne's
 acts. Vigor (the base game's `VigorPower`; the sim's `next_attack_up`):
-Soothing Waters (`floor: vigor`) and Pneuma Tides. Damage: Surging Waters,
+Pneuma Tides (Soothing Waters keeps none: see the loop probe). Damage: Surging Waters,
 Hydro Lance and Cleansing Torrent now Repay first and deal `amount_formula
 {base, per: 1, count: stage_repay_left}` (`FurinaStage.RepayLeftOrRoom`, the
 ledger's `RepayLeftThisPlay`); their damage upgrades moved to `formula_base`.
@@ -6809,13 +6809,15 @@ HP she lost since her last turn ended, Drained or taken
 - Pool counts: Endless Waltz leaves an Uncommon and Standing Ovation joins
   them, so the Uncommon count is unchanged (35) and Commons drop to 19.
 
-**Loop probe.** The full sweep finds one productive cycle the floor made:
-two Soothing Waters, 0 cost, Repay 2, draw 1, with nothing drained, gain 2
-Vigor a play without end (it was an inert cycle before). The named
-`energy_cycle` combination (Overdraft, Soothing Waters, Sold Out, Crescendo)
-is productive through the same card; over six whole turns it runs away (60
-plays in one turn) and Overdraft drains her from 78 to 4 HP, since a Drain
-may now go past the line. The sweep's finding is pinned in
-`tier0/tests/test_furina_loop_probe.py` as a known finding awaiting a card
-ruling; the other three named combinations are no loop (before this build
-none of the four was).
+**Loop probe.** As first built, the full sweep found one productive cycle
+the floor made: two Soothing Waters (0 cost, Repay 2, draw 1) with nothing
+drained gained 2 Vigor a play without end. The main session ruled that
+Soothing Waters keeps no leftover payout ("Repay 2. Draw 1 card." [Repay
+3]): a 0-cost draw-1 card paying out on an empty Repay looped forever, and
+the draw already carries it, as with Pneuma Refrain. The sweep then finds no
+productive cycle, and none of the four named combinations is productive in
+one turn. Over six whole turns `energy_cycle` (Overdraft, Soothing Waters,
+Sold Out, Crescendo) still reaches the 60-play cap in one turn on Soothing
+Waters' inert cycle, and Overdraft drains her from 78 to 4 HP since a Drain
+may now go past the line; it grows nothing, and it is reported here, not
+pinned.

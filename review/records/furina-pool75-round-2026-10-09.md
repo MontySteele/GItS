@@ -129,7 +129,7 @@ agents' poor play, but we can see how changing it looks in practice first."
 4. **Two seeds with the relic at Repay 2: default, ruled.**
 5. **A guest-forward seat: default, ruled.**
 
-**Built 2026-10-09:** picks 1-3 as ruled ("Yes - let's test it with a seat"); readings and the loop probe's one new cycle (Soothing Waters' Vigor) are in `docs/notes/prototype-surface-provenance.md`.
+**Built 2026-10-09:** picks 1-3 as ruled ("Yes - let's test it with a seat"); Soothing Waters keeps no leftover payout (its Vigor looped); readings and the loop probe are in `docs/notes/prototype-surface-provenance.md`.
 
 **Process.** Every seat reports "Repo files read: none". Most declared a
 `grep` on their own observe output. One seat was stopped by the permission

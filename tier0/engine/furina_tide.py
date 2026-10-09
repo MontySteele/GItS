@@ -482,10 +482,11 @@ CARDS: dict[str, Spec] = {
     "ftd_all_in": Spec("All In", 0, "skill", "rare", "drain_energy", (8, 2),
                        exhaust=True),
     # Pneuma, Repay (10).
-    # Soothing Waters: Repay 2. Gain 1 Vigor for any HP it could not
-    # Repay. Draw 1 card. (The Repay floor, 2026-10-09.)
+    # Soothing Waters: Repay 2. Draw 1 card. No Repay floor (ruled
+    # 2026-10-09): a 0-cost draw-1 card paying out on an empty Repay looped
+    # forever, and the draw already carries it, as with Pneuma Refrain.
     "ftd_soothing_waters": Spec("Soothing Waters", 0, "skill", "uncommon",
-                                "repay_vigor_draw", (2, 1)),
+                                "repay_draw", (2, 1)),
     "ftd_gentle_current": Spec("Gentle Current", 1, "skill", "common",
                                "block_repay_next", (5, 4)),
     "ftd_clean_slate": Spec("Clean Slate", 1, "attack", "common",
@@ -1416,9 +1417,6 @@ def resolve_card(state, card) -> None:
         repay_floor(state, n[1], "block")
     elif k == "repay_draw":
         repay(state, n[0])
-        state.draw(n[1])
-    elif k == "repay_vigor_draw":
-        repay_floor(state, n[0], "vigor")
         state.draw(n[1])
     elif k == "repay_all":
         repay(state, f.drained)

@@ -112,10 +112,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `tier0/engine/furina_tide.py`. Latest round
   `review/records/furina-pool75-round-2026-10-09.md` (pool 75: 1 win in 7,
   four deaths in act 2 with the Drain half locked; Fable review; picks
-  ruled; picks 1-3 built 2026-10-09). The loop probe finds one productive
-  cycle the Repay floor made: Soothing Waters alone grows Vigor with nothing
-  drained (pinned, awaiting a card ruling). Next: the ruling on that cycle,
-  then a seat round ([USER]: "Yes - let's test it with a seat"). At her
+  ruled; picks 1-3 built 2026-10-09; Soothing Waters keeps no Repay floor,
+  which closed the one loop the floor made). Next: a seat round ([USER]:
+  "Yes - let's test it with a seat"). At her
   finish line, re-ask her motion look (`AS2-B5`, dropped
   from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).
 - **Varka: Prototype, the combo pass built (2026-10-04).** Rules

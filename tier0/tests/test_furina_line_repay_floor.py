@@ -119,14 +119,15 @@ def test_hymn_pays_block_for_what_it_could_not_repay():
     assert st.player.block == 15
 
 
-def test_soothing_waters_pays_vigor():
+def test_soothing_waters_keeps_no_leftover_payout():
+    """Ruled 2026-10-09: a 0-cost draw-1 card paying out on an empty Repay
+    looped forever, so Soothing Waters is "Repay 2. Draw 1 card." [3]."""
+    assert "floor" not in _card("proto_fs_soothing_waters").effects[0]
+    assert _card("proto_fs_soothing_waters+").effects[0]["amount"] == 3
     st = _furina()
     _play(st, _card("proto_fs_soothing_waters"))
-    assert st.player.powers.get("next_attack_up") == 2
-    hp = st.enemies[0].hp
-    _play(st, _card("proto_fs_soloists_solicitation"))      # 6 + 2 Vigor
-    assert st.enemies[0].hp == hp - 8
     assert not st.player.powers.get("next_attack_up")
+    assert st.player.block == 0
 
 
 def test_gentle_current_pays_block_when_its_repay_lands_next_turn():

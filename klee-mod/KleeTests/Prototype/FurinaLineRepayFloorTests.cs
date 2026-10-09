@@ -134,7 +134,9 @@ public class FurinaLineRepayFloorTests
         {
             Assert.Contains(BlockFloor, Face(card));
         }
-        Assert.Contains(VigorFloor, Face(new ProtoFsSoothingWaters()));
+        // Soothing Waters keeps no floor (ruled 2026-10-09): a 0-cost
+        // draw-1 card paying out on an empty Repay looped forever.
+        Assert.DoesNotContain("could not", Face(new ProtoFsSoothingWaters()));
         Assert.Contains(VigorFloor, Face(new ProtoFsPneumaTides()));
         Assert.Contains("could not",
             new PneumaTidesPower().Localization!
@@ -148,13 +150,13 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void Hymn_and_soothing_waters_pass_their_floor_to_the_repay()
+    public void Hymn_passes_its_floor_to_the_repay()
     {
         Assert.Contains("DynamicVars[\"RepayAmount\"].IntValue, StageFloor.Block)",
                         Generated("ProtoFsHymnOfManyWaters"));
-        Assert.Contains("StageFloor.Vigor)", Generated("ProtoFsSoothingWaters"));
-        // The unchanged Repays pass none.
+        // The unchanged Repays pass none, Soothing Waters among them.
         foreach (var type in new[] { "ProtoFsPneumaRefrain", "ProtoFsCleanSlate",
+                                     "ProtoFsSoothingWaters",
                                      "ProtoFsBalanceTheBooks", "ProtoFsEbbAndFlow",
                                      "ProtoFsRiptideLunge" })
         {
