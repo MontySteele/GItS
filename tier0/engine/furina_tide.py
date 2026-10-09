@@ -515,6 +515,20 @@ CARDS: dict[str, Spec] = {
     # The bridge (1).
     "ftd_ebb_and_flow": Spec("Ebb and Flow", 1, "skill", "uncommon",
                              "ebb_flow", (4, 2)),
+    # --- THE BLOCK GAP (review/records/furina-drain-line-round-2026-10-09.md
+    # pick 2, ruled 2026-10-09): four Block cards, base numbers. ---
+    # Velvet Curtain (1): Gain 7 Block. Gain 2 Fanfare.
+    "ftd_velvet_curtain": Spec("Velvet Curtain", 1, "skill", "common",
+                               "block_fanfare", (7, 2)),
+    # Private Box (1): Gain 5 Block, plus 3 for each guest on stage.
+    "ftd_private_box": Spec("Private Box", 1, "skill", "uncommon",
+                            "guest_block", (5, 3)),
+    # The Masquerade (Power, 1): Whenever you Drain, gain that much Block.
+    "ftd_masquerade": Spec("The Masquerade", 1, "power", "uncommon",
+                           "power", (1,), "masquerade"),
+    # The Show Must Go On (2): Gain Block equal to your Fanfare (no Spend).
+    "ftd_show_must_go_on": Spec("The Show Must Go On", 2, "skill", "rare",
+                                "fanfare_block", ()),
     # --- Beyond the slice: rows a probe deck needs (never drafted) ---
     # The Crowd Gasps (Power, 1): Whenever an enemy makes you lose HP, gain
     # that much Fanfare (the `tragedy` deck; matters only without hits).
@@ -909,6 +923,12 @@ def drain(state, n: int) -> bool:
     state.emit("ftd_drain", amount=n, hp=p.hp, drained=f.drained)
     gain(state, n, "drain")
     _loop_readers(state, n)
+    # The Masquerade (the block gap, 2026-10-09): the HP actually drained as
+    # Block, per copy; a Power's Block, unpowered (the C# `StageDirector`).
+    # A guest act's Drain arrives here already stopped at the line.
+    masquerade = _player_power(p, "masquerade")
+    if masquerade and not state.over:
+        p.block += n * masquerade
     encore = (SALON_ENCORE_DAMAGE * f.powers["salon_encore"]
               + _arm_power(state, "salon_encore"))
     if encore:
@@ -1541,6 +1561,15 @@ def resolve_card(state, card) -> None:
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1
             repay(state, n[1])
+    # --- The block gap (2026-10-09) ---
+    elif k == "block_fanfare":
+        _card_block(state, card, n[0])
+        gain(state, n[1], "card")
+    elif k == "guest_block":
+        _card_block(state, card, n[0] + n[1] * len(f.stage))
+    elif k == "fanfare_block":
+        if f.fanfare > 0:
+            _card_block(state, card, f.fanfare)
     else:                                    # pragma: no cover
         raise ValueError(f"unknown kind {k!r}")
 

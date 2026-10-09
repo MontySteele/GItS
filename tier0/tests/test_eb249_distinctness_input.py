@@ -45,10 +45,10 @@ def test_guest_stars_are_not_in_the_universal_pool():
 
 def test_the_kit_pools_are_the_pinned_78_and_untouched_by_the_filter():
     """The control. No kit row carries either field, so the filter takes
-    nothing off -- and each pool is the size `PoolCountTests` pins (78, and
-    Furina's 74: the pool to 75 less Endless Waltz, cut 2026-10-09)."""
+    nothing off -- and each pool is the size `PoolCountTests` pins (78;
+    Furina's since the block gap's four, 2026-10-09)."""
     pools = _pools()
-    for ch, size in (("klee", 78), ("kokomi", 78), ("furina", 74)):
+    for ch, size in (("klee", 78), ("kokomi", 78), ("furina", 78)):
         assert len(pools[ch]) == size, ch
         assert len(cdr.universal_rows(pools[ch])) == size, ch
 

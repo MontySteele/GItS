@@ -545,6 +545,7 @@ KNOWN_MISSING = {
     "proto_fs_pay_the_tab": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_pneuma_tides": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_prima_donna": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_private_box": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_riptide_lunge": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_rising_tide": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_salons_encore": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
@@ -554,7 +555,10 @@ KNOWN_MISSING = {
     "proto_fs_standing_room_only": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
     "proto_fs_surging_waters": "Furina's Salon's Tab pool (#905, 2026-10-05); no painting yet.",
     "proto_fs_the_deluge": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_the_masquerade": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
+    "proto_fs_the_show_must_go_on": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_undercurrent": "Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md); no painting yet.",
+    "proto_fs_velvet_curtain": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
 }
 
 

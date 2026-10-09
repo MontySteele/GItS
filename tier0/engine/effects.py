@@ -401,6 +401,13 @@ def _runtime_count(state: CombatState, token: str,
     # return (the C# `FurinaStage.RepayLeftOrRoom`).
     if token == "stage_repay_left":
         return furina_stage.repay_left(p)
+    # THE BLOCK GAP (2026-10-09): Private Box's guests on stage and The Show
+    # Must Go On's Fanfare (read, never spent; the C# `FurinaStage.Of` and
+    # `FurinaStage.FanfareOf`).
+    if token == "stage_guests":
+        return furina_stage.count(p)
+    if token == "stage_fanfare":
+        return furina_stage.fanfare(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -3338,6 +3345,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     "stage_repaid",
     # THE REPAY FLOOR (ruled 2026-10-09).
     "stage_repay_left",
+    # THE BLOCK GAP (2026-10-09).
+    "stage_guests", "stage_fanfare",
     "exhaust_pile",
     "player_block",
     "attacks_in_hand",

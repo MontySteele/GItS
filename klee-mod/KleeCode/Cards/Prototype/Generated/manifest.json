@@ -58,6 +58,7 @@
     "proto_fs_pneuma_refrain",
     "proto_fs_pneuma_tides",
     "proto_fs_prima_donna",
+    "proto_fs_private_box",
     "proto_fs_quick_cue",
     "proto_fs_regina_of_all_waters",
     "proto_fs_riptide_lunge",
@@ -77,11 +78,14 @@
     "proto_fs_surging_waters",
     "proto_fs_surintendante_chevalmarin",
     "proto_fs_the_deluge",
+    "proto_fs_the_masquerade",
+    "proto_fs_the_show_must_go_on",
     "proto_fs_thunderous_applause",
     "proto_fs_tidal_flourish",
     "proto_fs_tutti",
     "proto_fs_undercurrent",
     "proto_fs_universal_revelry",
+    "proto_fs_velvet_curtain",
     "proto_kk_abyssal_salvage",
     "proto_kk_ambush",
     "proto_kk_at_waters_edge",
@@ -473,6 +477,7 @@
     "proto_fs_pneuma_refrain": "furina",
     "proto_fs_pneuma_tides": "furina",
     "proto_fs_prima_donna": "furina",
+    "proto_fs_private_box": "furina",
     "proto_fs_quick_cue": "furina",
     "proto_fs_regina_of_all_waters": "furina",
     "proto_fs_riptide_lunge": "furina",
@@ -492,11 +497,14 @@
     "proto_fs_surging_waters": "furina",
     "proto_fs_surintendante_chevalmarin": "furina",
     "proto_fs_the_deluge": "furina",
+    "proto_fs_the_masquerade": "furina",
+    "proto_fs_the_show_must_go_on": "furina",
     "proto_fs_thunderous_applause": "furina",
     "proto_fs_tidal_flourish": "furina",
     "proto_fs_tutti": "furina",
     "proto_fs_undercurrent": "furina",
     "proto_fs_universal_revelry": "furina",
+    "proto_fs_velvet_curtain": "furina",
     "proto_kk_abyssal_salvage": "kokomi",
     "proto_kk_ambush": "kokomi",
     "proto_kk_at_waters_edge": "kokomi",
@@ -1059,6 +1067,10 @@
     "proto_fs_prima_donna": {
       "cost": -1
     },
+    "proto_fs_private_box": {
+      "formula_base": 2,
+      "formula_per": 1
+    },
     "proto_fs_quick_cue": {
       "damage": 3
     },
@@ -1122,6 +1134,12 @@
     "proto_fs_the_deluge": {
       "cost": -1
     },
+    "proto_fs_the_masquerade": {
+      "cost": -1
+    },
+    "proto_fs_the_show_must_go_on": {
+      "cost": -1
+    },
     "proto_fs_thunderous_applause": {
       "power_amount": 1
     },
@@ -1137,6 +1155,10 @@
     },
     "proto_fs_universal_revelry": {
       "cost": -1
+    },
+    "proto_fs_velvet_curtain": {
+      "block": 3,
+      "furina_amount": 1
     },
     "proto_kk_abyssal_salvage": {
       "upgraded_power": "kk_abyssal_salvage_plus"
