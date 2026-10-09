@@ -26,8 +26,19 @@ lightly ordered. The checks against the sheet are Claude's. Rows are in
   - Gentilhomme Usher gives too much Block.
   - There are too many Common AoE cards.
   - Fanfare and Spend both work like a second Energy, which may be fine.
-- **Guests seemed to act several times in a row.** This may be a bug and is
-  being checked; see below.
+- **Guests seemed to act several times in a row.** This is not a code bug.
+  The end-of-turn hook fires once and each guest acts once
+  (`FurinaStageHooks.cs`, `StageDirector.EndOfTurn`). Two designed effects
+  read as repeats:
+  - **Lines trigger without a lunge.** With Clorinde and Sigewinne on stage,
+    Sigewinne's Repay and Salon Solitaire's Repay each fire Clorinde's line.
+    That is three Electro hits under her name from one act.
+  - **A repeat Guest Star play** makes the guest act at once, and it acts
+    again at end of turn. The friend played Lyney 31 times, Clorinde 24 and
+    Sigewinne 22.
+
+  Two questions go to the guest paper (pick 4): should a line trigger get
+  its own cue, and should Clorinde's line read the relic's Repay?
 
 ## Checking the notes against the sheet
 
@@ -61,6 +72,8 @@ The next Klee suite will show whether Spark payoffs are offered and passed,
 or never offered, the same question the Varka round answered.
 
 ## Picks
+
+[USER] can answer "defaults" to take all five.
 
 1. **Salon Solitaire: Repay 2 → Repay 1** (the Orobas upgrade 3 → 2). **Default: yes.**
 2. **Common trims:**
