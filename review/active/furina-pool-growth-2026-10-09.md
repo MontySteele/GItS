@@ -1,6 +1,6 @@
 # Furina: the pool to 75, and Guests as an archetype
 
-Paper, 2026-10-09. Main session design. It comes from the human co-op run
+Paper, 2026-10-09. **RULED 2026-10-09, all picks at their defaults,** after a Fable design review ended with "no further critiques". [USER]: "If they have no further critiques, then I'm good to approve it." Main session design. It comes from the human co-op run
 (`review/records/coop-human-playtest-2026-10-09.md`, pick 4) and [USER]'s
 ruling: "start with these trims and readjust after the card pool expands."
 The counts are from a census of `docs/prototype-surface.yaml` and
@@ -185,7 +185,7 @@ upgrade replaces today's 0 cost.
 | Balance the Books | Skill 1, U | Deal damage to ALL enemies equal to half your drained HP. Repay 4. [Repay 6] |
 | Rising Tide | Attack 1, U | Deal 6 damage, plus 3 for each time you Repaid this turn. [4 per] |
 | Pneuma Tides | Power 1, U | At the start of your turn, Repay 2. [3] |
-| Hymn of Renewal | Power 2 [1], R | Whenever you Repay 4 or more HP at once, gain 1 Strength. (It counts HP actually returned, not the number printed on the card.) |
+| Hymn of Renewal | Power 2 [1], R | Whenever you Repay 4 or more HP at once, gain 1 Strength. |
 | Grand Absolution | Attack 2 [1], R | Repay all your drained HP. Deal that much damage to ALL enemies. Exhaust. |
 
 **Bridge (1):** Ebb and Flow (Skill 1, U): "Drain 4, then Repay 2."
@@ -246,6 +246,8 @@ revisions before build". Every critique is now taken in the text:
 - **The guest rule's gaps are closed:** duplicate copies, end-of-turn
   order, line cues.
 - **Charlotte returns to Common,** as pick 2.
+- **Hymn of Renewal counts HP actually returned,** not the number printed on the card. This goes in the sheet comment and the tip, not on the card face.
+- **All In costs 0.**
 - **The loop probe gains the Energy cycle,** and the `--picks` draft read
   runs before the build.
 
