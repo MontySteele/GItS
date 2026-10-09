@@ -60,7 +60,7 @@ public sealed class ProtoFsHydroLance : CustomCardModel, IElementalCard, ICharac
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, 4));
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, 4, FurinaStageFacePreview.PayDamage));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

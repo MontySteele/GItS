@@ -54,7 +54,7 @@ public sealed class ProtoFsSurgingWaters : CustomCardModel, ICharacterCard
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue));
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue, FurinaStageFacePreview.PayDamage));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
