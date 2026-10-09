@@ -289,17 +289,18 @@ public class FurinaTideTests
         Assert.Equal(76, kit.Board.Hp);
         Assert.Equal(2, kit.Stage.Drained);
         Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
-        // Past the line (2026-10-09) the act still Drains and deals.
+        // Below the line (the drain-line round, 2026-10-09) a guest's
+        // Drain stops at the line: it drains 0 and still deals its damage.
         var low = StageKit.At(30, 78, StagePerformer.Lyney);
         StageKit.Run(low.Director.Act(low.Stage.Seats[0]));
-        Assert.Equal(28, low.Board.Hp);
-        Assert.Equal(2, low.Stage.DrainedPast);
+        Assert.Equal(30, low.Board.Hp);
+        Assert.Equal(0, low.Stage.Drained);
         Assert.Contains("damage Lyney All 8 Pyro", low.Board.Log);
-        // A Drain to 0 HP is the one it skips: no Drain and no damage.
+        // At 2 HP: no Drain, the damage unchanged.
         var last = StageKit.At(2, 78, StagePerformer.Lyney);
         StageKit.Run(last.Director.Act(last.Stage.Seats[0]));
         Assert.Equal(2, last.Board.Hp);
-        Assert.Empty(last.Board.Hits);
+        Assert.Contains("damage Lyney All 8 Pyro", last.Board.Log);
     }
 
     [Fact]
@@ -663,9 +664,9 @@ public class FurinaTideTests
         string Body(string name) => (string)typeof(ArmKeywordTips)
             .GetField(name, HeadlessGame.All)!.GetRawConstantValue()!;
         Assert.Equal(
-            "Lose N HP. Drained HP returns after combat, but HP drained past "
-            + "your line (3/4 of your HP at combat start) is lost unless you "
-            + "[gold]Repay[/gold] it.",
+            "Lose N HP. Drained HP above your line returns after combat. HP "
+            + "drained past your line (3/4 of your HP at combat start) is lost "
+            + "unless you [gold]Repay[/gold] it.",
             Body("DrainBody"));
         Assert.Contains("drained HP", Body("RepayBody"));
         Assert.Contains("[gold]Repay[/gold]", Body("FanfareBody"));

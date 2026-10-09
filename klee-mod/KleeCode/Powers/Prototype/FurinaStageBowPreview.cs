@@ -114,9 +114,26 @@ public static class FurinaStageFacePreview
         $"\nYour Drain line is {line} ({why}).";
 
     /// <summary>"(Repays N)": what a Repay of <paramref name="amount"/>
-    /// would return now. Empty off a combat or a Furina board.</summary>
-    public static string Repay(CardModel card, int amount) =>
-        Owner(card) is { } owner ? Line(Room(owner, amount)) : "";
+    /// would return now. Empty off a combat or a Furina board. A card with a
+    /// Repay floor names its <paramref name="payout"/> ("Block", "Vigor",
+    /// "damage") whenever the Repay would return less than its full amount:
+    /// "(Repays 0, +3 Block)" (the drain-line round, 2026-10-09).</summary>
+    public static string Repay(CardModel card, int amount,
+                               string payout = "") =>
+        Owner(card) is { } owner
+            ? Line(Room(owner, amount), amount, payout)
+            : "";
+
+    /// <summary>The Repay floor's payout words, as the faces print them.
+    /// </summary>
+    public const string PayBlock = "Block";
+
+    /// <summary>Pneuma Tides' payout.</summary>
+    public const string PayVigor = "Vigor";
+
+    /// <summary>Surging Waters', Hydro Lance's and Cleansing Torrent's
+    /// payout.</summary>
+    public const string PayDamage = "damage";
 
     /// <summary>Singer of Many Waters: "Repay all your drained HP."</summary>
     public static string RepayAll(CardModel card) =>
@@ -126,6 +143,15 @@ public static class FurinaStageFacePreview
 
     /// <summary>The line's words, for the pins.</summary>
     public static string Line(int repays) => $"\n(Repays {repays})";
+
+    /// <summary>The line with the Repay floor's payout: "(Repays 1, +2
+    /// Block)" when a Repay of <paramref name="amount"/> returns only
+    /// <paramref name="repays"/>; the plain line when it returns all of it
+    /// or the card has no <paramref name="payout"/>.</summary>
+    public static string Line(int repays, int amount, string payout) =>
+        string.IsNullOrEmpty(payout) || repays >= amount
+            ? Line(repays)
+            : $"\n(Repays {repays}, +{amount - repays} {payout})";
 
     /// <summary>"(Repays N)" for a card that Drains
     /// <paramref name="drainFirst"/> before it Repays (Riptide Lunge): the

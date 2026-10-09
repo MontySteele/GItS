@@ -6509,9 +6509,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
         # The Drain line rule (2026-10-09): the 3/4 line, and HP drained
         # past it is lost unless Repaid.
-        "Drain": ["Lose N HP. Drained HP returns after combat, but HP drained "
-                  "past ", "your line (3/4 of your HP at combat start) is "
-                  "lost unless you ", " it."],
+        # The drain-line round (2026-10-09): the curtain-call sentence.
+        "Drain": ["Lose N HP. Drained HP above your line returns after "
+                  "combat. HP ", "drained past your line (3/4 of your HP at "
+                  "combat start) is lost ", "unless you ", " it."],
         # The pool to 75 (2026-10-09): the guest rule's words.
         "Repay": ["Regain that much drained HP, never more than you ",
                   "drained. A ", " counts the HP it returns."],

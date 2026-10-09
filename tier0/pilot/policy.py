@@ -693,9 +693,8 @@ def stage_act_parts(state: CombatState, member: str) -> tuple[float, float]:
         aura = any(getattr(e, "aura", None) for e in state.living_enemies)
         return (float(fs.LYNETTE_ACT_DAMAGE) if aura else 0.0, 0.0)
     if member == "lyney":
-        # Drain 2: 8 to ALL, only with room above the line.
-        if not fs.can_drain(state.player, fs.LYNEY_ACT_DRAIN):
-            return (0.0, 0.0)
+        # 8 to ALL every act: his Drain stops at the line and the damage
+        # lands either way (the drain-line round, 2026-10-09).
         return (float(fs.LYNEY_ACT_DAMAGE * len(state.living_enemies)), 0.0)
     if member == "chevreuse":
         return (float(fs.CHEVREUSE_ACT_DAMAGE), 0.0)

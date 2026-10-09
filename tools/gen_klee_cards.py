@@ -15281,11 +15281,43 @@ def stage_repay_call(card: dict) -> str | None:
     # THE POOL TO 75: a Repay no upgrade moves owns no `RepayAmount` var
     # (Clean Slate, Hydro Lance, Cleansing Torrent), so it previews its
     # literal.
+    pay = stage_repay_payout_cs(card, ops[0])
     if stage_raise_amount(card, ops[0]) is None:
         return ('FurinaStageFacePreview.Repay(this, '
-                f'{int(ops[0].get("amount", 1))})')
+                f'{int(ops[0].get("amount", 1))}{pay})')
     return ('FurinaStageFacePreview.Repay(this, '
-            'DynamicVars["RepayAmount"].IntValue)')
+            f'DynamicVars["RepayAmount"].IntValue{pay})')
+
+
+#: THE REPAY FLOOR'S PAYOUT ON THE FACE (the drain-line round, 2026-10-09):
+#: "(Repays 0, +3 Block)". A `floor:` names its payout; a power whose whole
+#: job is a floored Repay names its own.
+STAGE_REPAY_PAYOUT_CS = {
+    "block": "FurinaStageFacePreview.PayBlock",
+    "vigor": "FurinaStageFacePreview.PayVigor",
+    "damage": "FurinaStageFacePreview.PayDamage",
+}
+STAGE_REPAY_POWER_PAYOUTS = {
+    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "block",
+    "fs_grand_entrance": "block"}
+
+
+def stage_repay_payout_cs(card: dict, repay: dict) -> str:
+    """The `, payout` argument of a top-level Repay's preview, or "".
+
+    A `floor:` of block or vigor pays that; a Repay whose card's damage
+    reads `stage_repay_left` (Surging Waters, Hydro Lance, Cleansing
+    Torrent) pays damage. A plain Repay (Soothing Waters, Pneuma Refrain)
+    pays nothing and keeps the plain line."""
+    floor = str(repay.get("floor", "none"))
+    if floor in STAGE_REPAY_PAYOUT_CS:
+        return ", " + STAGE_REPAY_PAYOUT_CS[floor]
+    for fx in card.get("effects") or []:
+        formula = fx.get("amount_formula") or {}
+        if (fx.get("op") == "damage"
+                and formula.get("count") == "stage_repay_left"):
+            return ", " + STAGE_REPAY_PAYOUT_CS["damage"]
+    return ""
 
 
 #: Powers whose whole job is a Repay of their amount (the pool-75 round,
@@ -15306,12 +15338,16 @@ def stage_later_repay_call(card: dict) -> str | None:
     top = card.get("effects") or []
     for fx in top:
         if fx.get("op") == "furina" and fx.get("kind") == "repay_next":
+            # Gentle Current: next turn's Repay has the Block floor.
             return ('FurinaStageFacePreview.Repay(this, '
-                    'DynamicVars["FsAmount"].IntValue)')
+                    'DynamicVars["FsAmount"].IntValue, '
+                    f'{STAGE_REPAY_PAYOUT_CS["block"]})')
         if (fx.get("op") == "apply_power"
                 and fx.get("power") in STAGE_REPAY_POWERS):
+            pay = STAGE_REPAY_PAYOUT_CS[
+                STAGE_REPAY_POWER_PAYOUTS[fx["power"]]]
             return ('FurinaStageFacePreview.Repay(this, '
-                    'DynamicVars["PowerAmount"].IntValue)')
+                    f'DynamicVars["PowerAmount"].IntValue, {pay})')
     nested = [inner for fx in top if fx.get("op") == "conditional"
               for inner in (fx.get("then") or [])
               if inner.get("op") == "stage_repay"]
