@@ -35,28 +35,55 @@ in `docs/prototype-surface.yaml` once ruled.
 - **What this means:** Common Skills, Powers and Pneuma are the holes.
   Common AoE is already full, so none is added.
 
-## 3. How Guests scale
+## 3. Guests: a cast you draft, then rotate
 
-Guests scale by **acting more often, paid for with Fanfare.** A guest's
-own numbers never grow. This keeps the line from 2026-09-07: "must not be
-a Defect with Fanfare for Focus."
+**Revised 2026-10-09 on [USER]'s read.** He said: "I don't think the deck
+should devolve into spamming random Guest Stars." His idea was a new guest
+rule, which this section proposes (pick 1).
 
-Fanfare grows across a fight. A guest act bought with Fanfare is therefore
-worth more in act 3 than in act 1, which is the fade the play reported.
+**The rule:**
+- A Guest Star card **exhausts** when played.
+- When its guest **leaves the stage**, the card goes to your discard pile.
+  This happens when a fourth summon removes the oldest guest, or when Final
+  Bow sends one off. The card can then be drawn and played again, but only
+  to bring that guest back.
+- While on stage, each guest has a **line**, a passive like a Power's, and
+  an **act** at the end of your turn. It has no effect on summon.
+- The current "play a guest who is already on stage and it acts at once"
+  path goes away. In the co-op run, that path read as guests acting twice.
 
-- **Common:**
-  - Encore!, one bought act.
-  - Casting Call, which finds a guest.
-- **Uncommon:**
-  - Tutti!, every guest acts.
-  - Final Bow, one guest acts twice and leaves.
-  - Grand Entrance, guests feed Fanfare.
-- **Rare:**
-  - Showstopper, every turn's acts are bought again.
-  - Ensemble Cast, a fourth seat. It bends the three-seat rule.
+**What this changes in play:** the first few Guest Stars you draft decide
+the cast, so you draft them for the deck you are building. Each guest plan
+is one of these:
+- **Drain support:** Wriothesley, Lyney, Neuvillette.
+- **Defence and Drain cover:** Charlotte, Sigewinne, Freminet.
+- **Fanfare payoff:** Chevreuse, Lynette, Navia.
+- **Repay damage:** Clorinde. **Guest synergy:** Escoffier.
+
+Rotation still happens, but less often.
+
+**Guest Stars are no longer Common.** Charlotte moves to Uncommon. Guests
+are stronger than a Common should be. **Upgrades raise the line or the act,
+never the cost.** The full list is in sec.5.
+
+**How Guests scale: they act more often, paid for with Fanfare.** A guest's
+own numbers never grow. That keeps the line from 2026-09-07: "must not be a
+Defect with Fanfare for Focus." Fanfare grows across a fight, so a bought act
+is worth more in act 3 than in act 1, which answers the fade the play
+reported.
+- Encore! (Common): one bought act.
+- Tutti! (Uncommon): every guest acts.
+- Final Bow (Uncommon): one guest acts twice and leaves, and its card
+  returns.
+- Showstopper (Rare): every turn's acts are bought again.
+- Ensemble Cast (Rare): a fourth seat.
+
+**Casting Call becomes an Uncommon tutor, not a random guest.** Under the
+new rule, finding the guest you drafted is worth more than finding a random
+one.
 
 **Fanfare still comes only from HP.** Every new source goes through Drain,
-Repay or HP lost. Grand Entrance Repays; it does not print Fanfare.
+Repay or HP lost.
 
 ## 4. Scaling outside the bank
 
@@ -75,21 +102,34 @@ That is the danger the play asked for, kept inside the line, which stays
 Upgrades are in brackets. "Oldest guest" is the one a fourth summon would
 remove.
 
-**Guests and stage (11): 2 Common, 4 Uncommon, 5 Rare**
+**Guests and stage (11): 1 Common, 5 Uncommon, 5 Rare**
 
 | Card | Type, cost, rarity | Text |
 |---|---|---|
-| Casting Call | Skill 1, C | Choose 1 of 3 random Guest Stars. It costs 0 this turn. Exhaust. [of 4] |
+| Casting Call | Skill 1, U | Put a Guest Star from your draw pile into your hand. [Draw 1 card] |
 | Encore! | Skill 0, C | Spend 4. Your oldest guest acts. Draw 1 card. [Spend 3] |
 | Tutti! | Skill 1, U | Each guest acts. Retain. [cost 0] |
 | Final Bow | Skill 1, U | Your oldest guest acts twice, then leaves. [3 times] |
-| Grand Entrance | Power 1, U | Whenever you play a Guest Star, Repay 2. [3] |
-| Guest Star: Freminet | Skill 1 [0], U | Line: the first time a guest leaves each turn, draw 2 cards. Act: deal 5 Cryo damage to a random enemy. |
+| Grand Entrance | Power 1, U | Whenever you play a Guest Star, Repay 4. [6] |
+| Guest Star: Freminet | Skill 1, U | Line: whenever you Drain, gain that much Block. Act: deal 5 Cryo damage to a random enemy. [Act 8] |
 | Showstopper | Power 2 [1], R | At the end of your turn, if you have 5 Fanfare, Spend 5: your guests act again. |
 | Ensemble Cast | Power 2 [1], R | You have 4 guest seats. |
-| Guest Star: Navia | Skill 1 [0], R | Line: your first Spend each turn costs 2 less. Act: deal Geo damage to a random enemy equal to the Fanfare you spent this turn. |
-| Guest Star: Neuvillette | Skill 2 [1], R | Line: your Hydro damage deals 2 more. Act: deal Hydro damage to ALL enemies equal to the HP you Drained this turn. |
-| Guest Star: Escoffier | Skill 1 [0], R | Line: whenever a guest acts, Repay 1. Act: deal 4 Cryo damage to ALL enemies. |
+| Guest Star: Navia | Skill 1, R | Line: your first Spend each turn costs 2 less. Act: deal Geo damage to a random enemy equal to the Fanfare you spent this turn. [Line: 3 less] |
+| Guest Star: Neuvillette | Skill 2, R | Line: your Hydro damage deals 2 more. Act: deal Hydro damage to ALL enemies equal to the HP you Drained this turn. [Line: 3 more] |
+| Guest Star: Escoffier | Skill 1, R | Line: whenever a guest acts, Repay 1. Act: deal 4 Cryo damage to ALL enemies. [Act 6] |
+
+**The seven built guests, under the new rule.** All cost 1 and exhaust. The
+upgrade replaces today's 0 cost.
+
+| Guest | Rarity | Line | Act | Upgrade |
+|---|---|---|---|---|
+| Charlotte | U (was C) | The first time you Repay each turn, draw 1 card | Repay 2 | Act: Repay 4 |
+| Sigewinne | U | Whenever you Repay, gain that much Block | Repay 2 | Act: Repay 4 |
+| Wriothesley | U | Whenever you Drain, deal that much Cryo damage to a random enemy | 4 Cryo to a random enemy | Act: 7 |
+| Lyney | U | Your Drain line is 10 HP lower | Drain 2: 8 Pyro to ALL enemies | Act: 11 |
+| Lynette | U | The first time each turn an enemy makes you lose HP, gain that much Fanfare again | 3 Anemo to an enemy with an aura | Act: 6 |
+| Chevreuse | U | Whenever you Spend, apply 1 Vulnerable to a random enemy | 4 to a random enemy | Line: also 1 Weak |
+| Clorinde | R | Whenever you Repay, deal twice that much Electro damage to a random enemy | 6 Electro to a random enemy | Act: 9 |
 
 **The Crowd (9): 3 Common, 3 Uncommon, 3 Rare**
 
@@ -120,11 +160,11 @@ remove.
 | The Deluge | Attack 2 [1], R | Drain down to your line. Deal that much damage to ALL enemies. Exhaust. |
 | All In | Skill 1, R | Drain down to your line. Gain 1 Energy for every 6 HP drained. Exhaust. [every 4] |
 
-**Pneuma, Repay (10): 4 Common, 4 Uncommon, 2 Rare**
+**Pneuma, Repay (10): 3 Common, 5 Uncommon, 2 Rare**
 
 | Card | Type, cost, rarity | Text |
 |---|---|---|
-| Soothing Waters | Skill 0, C | Repay 2. Draw 1 card. [Repay 3] |
+| Soothing Waters | Skill 0, U | Repay 2. Draw 1 card. [Repay 3] |
 | Gentle Current | Skill 1, C | Gain 5 Block. Next turn, Repay 4. [7 and 5] |
 | Clean Slate | Attack 1, C | Deal 7 damage. Repay 3. If you have no drained HP left, draw 1 card. [10] |
 | Hydro Lance | Attack 2, C | Deal 14 Hydro damage. Repay 4. [18] |
@@ -142,7 +182,7 @@ remove.
 
 | | Common / Uncommon / Rare | Common Skills | Uncommon / Rare Powers | Common AoE |
 |---|---|---|---|---|
-| Furina | 22 / 33 / 20 (75) | 11 | 8 / 10 | 2 |
+| Furina | 19 / 36 / 20 (75) | 8 | 8 / 10 | 2 |
 
 Three slots, one at each rarity, are held for what the first seat round
 shows is missing.
@@ -152,10 +192,10 @@ shows is missing.
 - **Loops.** The build runs the loop probe on these combinations:
   - Encore! with Escoffier;
   - Tutti!, Showstopper and Bring the House Down together;
-  - Freminet with 0-cost upgraded guests.
+  - Final Bow with Grand Entrance: a guest leaves, its card returns, and it is played again.
 
-  Freminet draws once a turn, and Casting Call exhausts, so neither can
-  chain.
+  Guest Stars exhaust, so a guest card cannot be replayed in a loop. It
+  comes back only when its guest leaves.
 - **Guests react most to the Drain line.** In the 2026-10-09 Drain-line
   sim the built guest deck won act 1 57% of the time, below the balanced
   deck's 64%. With the line at 1 HP it rose to 76%, and its act-2 boss wins
@@ -167,13 +207,19 @@ shows is missing.
 
 ## Picks
 
-1. **Guests scale by acting more often, paid in Fanfare, never by a guest
-   stat.** The other way would reopen the 2026-09-07 "not Focus" ruling.
+1. **The new guest rule** (sec.3): a Guest Star exhausts, its card returns
+   to your discard pile when the guest leaves, and it has no effect on
+   summon. Upgrades raise the line or the act, never the cost. It is a rule
+   change, so it gets a seat round and then [USER]'s play. **Default: yes.**
+2. **Guests scale by acting more often, paid in Fanfare,** never by a guest
+   stat. The other way would reopen the 2026-09-07 "not Focus" ruling.
    **Default: yes.**
-2. **Fanfare still comes only from HP.** New Fanfare sources go through
-   Drain, Repay or HP lost. **Default: yes.**
-3. **The pool targets 75, with 3 slots held** for the first seat round.
-   **Default: yes.**
-4. **The 41 cards above, built as one batch.** Then the loop probe, then a
-   solo Furina seat round with an Ironclad control, then [USER]'s play.
-   **Default: yes, as written.**
+3. **Fanfare still comes only from HP.** **Default: yes.**
+4. **The pool targets 75, with 3 slots held,** and the 41 cards above are
+   built as one batch. Then the loop probe, then a solo Furina seat round
+   with an Ironclad control. **Default: yes, as written.**
+
+Already taken on [USER]'s read (2026-10-09), not picks:
+- Casting Call becomes an Uncommon tutor.
+- Soothing Waters becomes Uncommon.
+- Guest Stars are no longer Common.
