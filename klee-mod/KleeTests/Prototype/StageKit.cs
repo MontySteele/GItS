@@ -129,7 +129,8 @@ internal sealed class RecordingBoard : IStageBoard
 }
 
 /// <summary>A free-standing ledger and the director over it, Furina at
-/// <c>hp</c> of 78 having entered the combat at <c>entry</c>.</summary>
+/// <c>hp</c> of 78 (or <c>maxHp</c>) having entered the combat at
+/// <c>entry</c>.</summary>
 internal sealed class StageKit
 {
     internal FurinaStageLedger Stage { get; }
@@ -140,11 +141,18 @@ internal sealed class StageKit
 
     internal StageKit(StageMods? mods, int fanfare, int hp, int entry,
                       params StagePerformer[] seats)
+        : this(mods, fanfare, hp, entry, 78, seats)
+    {
+    }
+
+    internal StageKit(StageMods? mods, int fanfare, int hp, int entry,
+                      int maxHp, params StagePerformer[] seats)
     {
         Stage = FurinaStageLedger.Detached();
         Stage.ModsOverride = mods ?? StageMods.None;
-        Stage.Open(entry);
+        Stage.Open(entry, maxHp);
         Board.Hp = hp;
+        Board.MaxHp = maxHp;
         foreach (var who in seats) Stage.Seat(who);
         if (fanfare > 0) Stage.Gain(fanfare);
         Stage.OpenTurn();
@@ -165,6 +173,13 @@ internal sealed class StageKit
     internal static StageKit At(int hp, int entry,
                                 params StagePerformer[] seats) =>
         new(null, 0, hp, entry, seats);
+
+    /// <summary>Furina at <paramref name="hp"/> of
+    /// <paramref name="maxHp"/>, having entered at
+    /// <paramref name="entry"/>.</summary>
+    internal static StageKit AtMax(int hp, int entry, int maxHp,
+                                   params StagePerformer[] seats) =>
+        new(null, 0, hp, entry, maxHp, seats);
 
     internal StagePerformer[] Company => Stage.Seats.Select(s => s.Who).ToArray();
 

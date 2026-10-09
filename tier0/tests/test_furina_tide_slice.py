@@ -251,13 +251,13 @@ def test_ousia_surge_draws_on_the_first_drain_each_turn():
 
 
 def test_lyney_lowers_the_line_and_his_act_stops_at_it():
-    # The Drain line rule (2026-10-09): the line is 3/4 of entry, 58.5 from
-    # 78 (59 as the C# prints it); Lyney lowers it by 10. His act never
+    # The Drain line rule (2026-10-09): the line is entry HP minus 1/4 of
+    # Max HP, 59 from 78/78; Lyney lowers it by 10. His act never
     # Drains past it (the drain-line round): it drains the room above the
     # line, 0 with none, and deals its damage either way.
     st = _state(enemies=2)
     f = st.player.ftd
-    assert T.half_line(st.player) == 58.5 and T.line_hp(st.player) == 59
+    assert T.half_line(st.player) == 59 and T.line_hp(st.player) == 59
     f.stage = ["lyney"]
     assert T.line_hp(st.player) == 49
     T.act(st, "lyney")
@@ -399,12 +399,14 @@ def test_singer1_repays_one():
 
 
 def test_the_switches_keep_the_entry_line():
-    # The default variant runs the shipped 3/4 line (2026-10-09); the other
-    # research variants keep the half line they measured.
+    # The default variant runs the shipped line, entry HP minus 1/4 of Max
+    # HP (2026-10-09): 60 - 78 // 4 = 41; the other research variants keep
+    # the half line they measured.
     for v in T.VARIANT_SWITCHES:
         p = T.build_player([], hp=60, variant=v)
         assert p.ftd.line_from_entry and p.ftd.entry_hp == 60
-        assert T.half_line(p) == (45 if v == "curtain_call" else 30)
+        assert p.ftd.entry_max_hp == p.max_hp == 78
+        assert T.half_line(p) == (41 if v == "curtain_call" else 30)
         assert p.ftd.curtain_call == (v == "curtain_call")
 
 
