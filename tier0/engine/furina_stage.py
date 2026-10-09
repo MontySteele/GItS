@@ -13,8 +13,9 @@ constants below by NAME (`tools/lint_constant_parity.py`).
 THE RULES (the slice's docstring has them whole):
 
 1. DRAIN N: lose N HP for the bigger effect -- a mode on a two-mode card, or
-   a fixed price a card cannot be played without. Never below the line, half
-   the HP she started this combat with. HP lost to a Drain is drained.
+   a fixed price a card cannot be played without. Never to 0 HP; it may go
+   past the line, the HP she started this combat with minus 1/4 of her Max
+   HP (2026-10-09). HP lost to a Drain is drained.
 2. REPAY N: regain up to N drained HP, never more.
 3. FANFARE: +1 per HP lost from any cause (after Block) and +1 per HP
    repaid. Spend N and the spend-all cards pay it. Universal Revelry adds
@@ -61,9 +62,8 @@ SIGEWINNE_ACT_REPAY = T.SIGEWINNE_ACT_REPAY
 CHEVREUSE_ACT_DAMAGE = T.CHEVREUSE_ACT
 CHEVREUSE_LINE_VULNERABLE = T.CHEVREUSE_LINE_VULNERABLE
 DRAIN_FLOOR = T.DRAIN_FLOOR
-LINE_SHARE = T.LINE_SHARE
-LINE_NUMERATOR = T.LINE_NUMERATOR
-LINE_DENOMINATOR = T.LINE_DENOMINATOR
+SHIPPED_LINE = T.SHIPPED_LINE
+LINE_MAX_HP_DIVISOR = T.LINE_MAX_HP_DIVISOR
 FREMINET_ACT_BLOCK = T.FREMINET_ACT_BLOCK
 FREMINET_ACT_BLOCK_UPGRADED = T.FREMINET_ACT_BLOCK_UPGRADED
 FOUNTAIN_TURNS = T.FOUNTAIN_TURNS
@@ -320,8 +320,9 @@ def reset_for_combat(player) -> None:
     if not is_furina(player):
         return
     player.ftd = T.Ftd(singer=SINGER_REPAY, hit_fanfare=True,
-                       line=T.LINE_SHARE,
-                       entry_hp=int(player.hp), line_from_entry=True,
+                       line=T.SHIPPED_LINE,
+                       entry_hp=int(player.hp),
+                       entry_max_hp=int(player.max_hp), line_from_entry=True,
                        curtain_call=True,
                        decider=getattr(player, "stage_decider", None)
                        or FURINA_TIDE_DECIDER)
@@ -650,8 +651,9 @@ FURINA_TIDE_DECIDER = FurinaTideDecider()
 # `tier0/tests/test_furina_tide_arm.py`.
 # ----------------------------------------------------------------------
 READINGS: tuple[str, ...] = (
-    "The line is 3/4 of the HP she entered the combat with (ruled "
-    "2026-10-09), compared in floats: from 78 the HP above it is 59 and up. "
+    "The line is the HP she entered the combat with, minus 1/4 of the Max "
+    "HP she entered it with, rounded down (ruled 2026-10-09): from 50/80 "
+    "it is 30, from 78/78 it is 59. "
     "A Drain may go past it, never to 0 HP; the part drained past it is "
     "lost at the curtain call unless Repaid.",
     "A second copy of a guest already on stage moves it to the newest seat "

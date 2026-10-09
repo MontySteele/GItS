@@ -100,8 +100,8 @@ public static class FurinaStageFacePreview
 
     /// <summary>The Drain tip's in-combat sentence (the pool-75 round,
     /// 2026-10-09: every record missed where the line sat): "Your Drain line
-    /// is 59 (3/4 of the HP you started this fight with)." Empty off a combat
-    /// or a Furina board.</summary>
+    /// is 30: the HP you started this fight with, minus 1/4 of your Max HP."
+    /// Empty off a combat or a Furina board.</summary>
     public static string LineNow(CardModel card)
     {
         if (Owner(card) is not { } owner) return "";
@@ -111,7 +111,7 @@ public static class FurinaStageFacePreview
 
     /// <summary>The sentence's words, for the pins.</summary>
     public static string LineNowWords(int line, string why) =>
-        $"\nYour Drain line is {line} ({why}).";
+        $"\nYour Drain line is {line}: {why}.";
 
     /// <summary>"(Repays N)": what a Repay of <paramref name="amount"/>
     /// would return now. Empty off a combat or a Furina board. A card with a

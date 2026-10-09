@@ -379,11 +379,16 @@ def test_the_bridge_sends_the_move_id():
 def test_the_drain_line_says_where_it_comes_from():
     state = stage_combat()
     state["player"]["furina_stage"]["drain_line_why"] = (
-        "3/4 of the HP you started this fight with")
+        "the HP you started this fight with, minus 1/4 of your Max HP")
     page = blindplay.observe(state)
-    # The Drain line rule (2026-10-09): a Drain may go past the line.
-    assert ("Drain line 39 HP (3/4 of the HP you started this fight with): "
-            "HP you Drain past it is lost unless you Repay it.") in page
+    # The Drain line rule (2026-10-09): a Drain may go past the line, and
+    # the line is entry HP minus 1/4 of Max HP.
+    assert ("Drain line 39 HP (the HP you started this fight with, minus "
+            "1/4 of your Max HP): HP you Drain past it is lost unless you "
+            "Repay it.") in page
+    # The glossary's Drain row says the rule plainly.
+    assert ("Your line is the HP you started this fight with, minus 1/4 of "
+            "your Max HP.") in blindplay.ARM_KEYWORDS["Drain"]
 
 
 def test_an_older_build_derives_the_half_line():

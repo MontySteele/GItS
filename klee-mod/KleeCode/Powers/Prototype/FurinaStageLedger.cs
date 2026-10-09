@@ -149,6 +149,7 @@ public sealed class FurinaStageLedger
             {
                 _furina = furina,
                 EntryHp = (int)furina.CurrentHp,
+                EntryMaxHp = (int)furina.MaxHp,
             };
             _byFurina[furina] = ledger;
         }
@@ -297,13 +298,15 @@ public sealed class FurinaStageLedger
     /// <summary>The combat's opening has been recorded.</summary>
     public bool Opened { get; set; }
 
-    /// <summary>Record the opening once: the entry HP the line is read from.
-    /// True the first time.</summary>
-    public bool Open(int entryHp)
+    /// <summary>Record the opening once: the entry HP and Max HP the line
+    /// is read from (both snapshotted, so the line does not move when her
+    /// Max HP changes mid-fight). True the first time.</summary>
+    public bool Open(int entryHp, int entryMaxHp)
     {
         if (Opened) return false;
         Opened = true;
         EntryHp = entryHp;
+        EntryMaxHp = entryMaxHp;
         return true;
     }
 
@@ -312,11 +315,15 @@ public sealed class FurinaStageLedger
     /// <summary>The HP she started this combat with.</summary>
     public int EntryHp { get; set; }
 
-    /// <summary>Rule 1: the Drain line, 3/4 of her entry HP (2026-10-09).
-    /// Lyney on stage lowers it by 10. A Drain may go past it; what it
-    /// drains past it is <see cref="DrainedPast"/>.</summary>
+    /// <summary>The Max HP she started this combat with (the line's
+    /// quarter, 2026-10-09).</summary>
+    public int EntryMaxHp { get; set; }
+
+    /// <summary>Rule 1: the Drain line, her entry HP minus 1/4 of her entry
+    /// Max HP (2026-10-09). Lyney on stage lowers it by 10. A Drain may go
+    /// past it; what it drains past it is <see cref="DrainedPast"/>.</summary>
     public int Line => FurinaStageLaw.LineOf(
-        EntryHp, OnStage(StagePerformer.Lyney));
+        EntryHp, EntryMaxHp, OnStage(StagePerformer.Lyney));
 
     /// <summary>Where <see cref="Line"/> comes from, in words (2026-10-05).
     /// </summary>
@@ -762,6 +769,7 @@ public sealed class FurinaStageLedger
         snapshot["drained"] = ledger.Drained;
         snapshot["drained_past"] = ledger.DrainedPast;
         snapshot["entry_hp"] = ledger.EntryHp;
+        snapshot["entry_max_hp"] = ledger.EntryMaxHp;
         snapshot["drain_line"] = ledger.Line;
         snapshot["drain_line_why"] = ledger.LineWhy;
         snapshot["capacity"] = ledger.Capacity;

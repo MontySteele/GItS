@@ -6507,12 +6507,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
                     " uses it. It resets to 0 after each combat."],
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
-        # The Drain line rule (2026-10-09): the 3/4 line, and HP drained
-        # past it is lost unless Repaid.
+        # The Drain line rule (2026-10-09): the line is entry HP minus 1/4
+        # of Max HP, and HP drained past it is lost unless Repaid.
         # The drain-line round (2026-10-09): the curtain-call sentence.
         "Drain": ["Lose N HP. Drained HP above your line returns after "
-                  "combat. HP ", "drained past your line (3/4 of your HP at "
-                  "combat start) is lost ", "unless you ", " it."],
+                  "combat. HP ", "drained past your line is lost unless "
+                  "you ", "it. Your line is the HP you started this fight "
+                  "with, minus 1/4 ", "of your Max HP."],
         # The pool to 75 (2026-10-09): the guest rule's words.
         "Repay": ["Regain that much drained HP, never more than you ",
                   "drained. A ", " counts the HP it returns."],

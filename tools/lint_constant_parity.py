@@ -304,11 +304,10 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.FreminetActDamage": _stage("FREMINET_ACT_DAMAGE"),
     "FurinaStageLaw.FreminetActDamageUpgraded": _stage("FREMINET_ACT_DAMAGE_UPGRADED"),
     # The pool-75 round's card numbers and the Drain line rule (ruled
-    # 2026-10-09): Freminet's act's Block and the line's 3/4.
+    # 2026-10-09): Freminet's act's Block and the line's quarter of Max HP.
     "FurinaStageLaw.FreminetActBlock": _stage("FREMINET_ACT_BLOCK"),
     "FurinaStageLaw.FreminetActBlockUpgraded": _stage("FREMINET_ACT_BLOCK_UPGRADED"),
-    "FurinaStageLaw.LineNumerator": _stage("LINE_NUMERATOR"),
-    "FurinaStageLaw.LineDenominator": _stage("LINE_DENOMINATOR"),
+    "FurinaStageLaw.LineMaxHpDivisor": _stage("LINE_MAX_HP_DIVISOR"),
     "FurinaStageLaw.NaviaLineDiscount": _stage("NAVIA_LINE_DISCOUNT"),
     "FurinaStageLaw.NaviaLineDiscountUpgraded": _stage("NAVIA_LINE_DISCOUNT_UPGRADED"),
     "FurinaStageLaw.NeuvilletteHydroBonus": _stage("NEUVILLETTE_HYDRO_BONUS"),

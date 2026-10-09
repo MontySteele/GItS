@@ -184,29 +184,28 @@ public static class FurinaStageLaw
     public static bool NearTheLine(int hp, int line) => hp - line <= NearLine;
 
     /// <summary>
-    /// Rule 1: THE LINE (the Drain line rule, ruled 2026-10-09): 3/4 of the
-    /// HP she started this combat with, rounded UP as the half line was: 59
-    /// from 78, 58 from 77. A Drain may go past it; HP drained past it is
-    /// lost at the curtain call unless Repaid. The sim compares in floats
-    /// (<c>furina_tide.half_line</c>), so the lowest HP above the line is
-    /// the float line rounded up.
+    /// Rule 1: THE LINE (the Drain line rule, ruled 2026-10-09, quarter of
+    /// Max HP the same day): the HP she started this combat with, minus 1/4
+    /// of the Max HP she started it with, the quarter rounded DOWN (80 Max
+    /// HP takes 20, 85 takes 21). Entering at 50/80 the line is 30: 20 HP of
+    /// room. Never below 0. A Drain may go past it; HP drained past it is
+    /// lost at the curtain call unless Repaid. Integer throughout, so the
+    /// sim (<c>furina_tide.half_line</c>) computes the same number.
     /// </summary>
-    public static int LineOf(int entryHp) =>
-        (LineNumerator * System.Math.Max(0, entryHp) + LineDenominator - 1)
-        / LineDenominator;
+    public static int LineOf(int entryHp, int maxHp) =>
+        System.Math.Max(0, System.Math.Max(0, entryHp)
+                           - System.Math.Max(0, maxHp) / LineMaxHpDivisor);
 
-    /// <summary>The line's share of the entry HP: 3/4. Mirrors
-    /// <c>furina_tide.LINE_SHARE</c>.</summary>
-    public const int LineNumerator = 3;
-
-    public const int LineDenominator = 4;
+    /// <summary>The line's room is 1/4 of her Max HP, rounded down. Mirrors
+    /// <c>furina_tide.LINE_MAX_HP_DIVISOR</c>.</summary>
+    public const int LineMaxHpDivisor = 4;
 
     /// <summary>The line with its one mover: Lyney on stage lowers it by 10,
     /// never below 1. (A Five-Century Act no longer moves it: it returns the
     /// HP drained past it instead.)</summary>
-    public static int LineOf(int entryHp, bool lyney)
+    public static int LineOf(int entryHp, int maxHp, bool lyney)
     {
-        var line = LineOf(entryHp);
+        var line = LineOf(entryHp, maxHp);
         return lyney ? System.Math.Max(DrainFloor, line - LyneyLineDrop)
                      : line;
     }
@@ -214,9 +213,13 @@ public static class FurinaStageLaw
     /// <summary>Where the line comes from, in words, for its hover and the
     /// seat page (2026-10-05: seats connected the line to their entry HP
     /// only late). The same two branches as
-    /// <see cref="LineOf(int, bool)"/>.</summary>
+    /// <see cref="LineOf(int, int, bool)"/>.</summary>
     public static string LineWhy(bool lyney) =>
-        lyney ? "3/4 of the HP you started this fight with, "
-                + LyneyLineDrop + " lower with Lyney on stage"
-              : "3/4 of the HP you started this fight with";
+        lyney ? LineWhyBase + ", " + LyneyLineDrop
+                + " lower with Lyney on stage"
+              : LineWhyBase;
+
+    /// <summary>The base line's source, in the base game's words.</summary>
+    public const string LineWhyBase =
+        "the HP you started this fight with, minus 1/4 of your Max HP";
 }

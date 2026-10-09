@@ -6862,3 +6862,33 @@ Sold Out, Crescendo) still reaches the 60-play cap in one turn on Soothing
 Waters' inert cycle, and Overdraft drains her from 78 to 4 HP since a Drain
 may now go past the line; it grows nothing, and it is reported here, not
 pinned.
+
+
+## Furina: the Drain line is entry HP minus a quarter of Max HP, 2026-10-09
+
+[USER]: "Yeah, let's build it that way. That also rewards max HP stacking,
+which seems fair on a character designed for it, and punishes some event
+choices which cost max HP that are usually auto-picks."
+
+`FurinaStageLaw.LineOf(entryHp, maxHp)` is the HP she entered the combat
+with minus her Max HP divided by `LineMaxHpDivisor` (4), rounded down, never
+below 0: 50/80 gives 30 (20 HP of room), 80/80 gives 60, 85 Max HP gives 21
+of room, 78/78 gives 59 as before. The ledger snapshots `EntryMaxHp` beside
+`EntryHp` when the combat opens (`FurinaStageLedger.Open(entryHp,
+entryMaxHp)`, and at the ledger's creation), so a Max HP change mid-fight
+does not move the line; the wire sends `entry_max_hp`. Lyney still lowers it
+by 10, never below 1. `LineNumerator` / `LineDenominator` are gone; the
+parity lint pins `LineMaxHpDivisor` to sim `LINE_MAX_HP_DIVISOR`.
+
+Sim: the default variant (`curtain_call`) and Furina's arm
+(`furina_stage.reset_for_combat`) carry the marker `SHIPPED_LINE`, and
+`furina_tide.half_line` computes `shipped_line(entry_hp, entry_max_hp)` for
+it; `Ftd.entry_max_hp` is the snapshot. The research variants keep the float
+shares they measured (`LINE_SHARE` is gone with the 3/4 line).
+
+Player text: `LineWhy` is "the HP you started this fight with, minus 1/4 of
+your Max HP" (Lyney: ", 10 lower with Lyney on stage"); the in-combat Drain
+tip reads "Your Drain line is 30: the HP you started this fight with, minus
+1/4 of your Max HP."; the Drain keyword tip and the seat page's Drain row
+end "Your line is the HP you started this fight with, minus 1/4 of your Max
+HP." The fraction is written "1/4", as "3/4" was, not the glyph.

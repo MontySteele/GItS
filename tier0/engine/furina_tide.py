@@ -26,9 +26,11 @@ Revelry reads Drain and Repay again, never hits):
 
 1. DRAIN N. Lose N HP for the bigger effect (a mode on some cards, a fixed
    price on others). THE DRAIN LINE RULE (ruled 2026-10-09): the line is
-   3/4 of the HP she started this combat with (`LINE_SHARE`, the default
-   variant's; the `std` family of variants measures a share of Max HP), and
-   a Drain is never refused for it: it may go past it. It cannot be paid if
+   the HP she started this combat with, minus 1/4 of the Max HP she started
+   it with, rounded down (`SHIPPED_LINE`, the default variant's; the `std`
+   family of variants measures a share of Max HP, the `entry` family a
+   share of entry HP), and a Drain is never refused for it: it may go past
+   it. It cannot be paid if
    it would take her to 0 HP (`DRAIN_FLOOR`). HP lost to a Drain is DRAINED,
    in two parts: above the line (`drained_above`) and past it
    (`drained_past`). A fixed-price card whose Drain cannot be paid cannot be
@@ -127,9 +129,11 @@ LYNEY_ACT = 8
 CHEVREUSE_ACT = 4            # act: "Deal 4 damage to a random enemy."
 CHEVREUSE_LINE_VULNERABLE = 1  # line: each Spend, 1 Vulnerable (random)
 DRAIN_FLOOR = 1              # a Drain cannot take her to 0 HP (2026-10-09)
-LINE_NUMERATOR = 3           # the Drain line: 3/4 of her entry HP (2026-10-09)
-LINE_DENOMINATOR = 4
-LINE_SHARE = LINE_NUMERATOR / LINE_DENOMINATOR
+LINE_MAX_HP_DIVISOR = 4      # the Drain line: entry HP minus Max HP // 4
+                             # (2026-10-09; FurinaStageLaw.LineMaxHpDivisor)
+#: The default variant's line marker: entry HP minus a quarter of entry Max
+#: HP. Every other variant's line is a float share.
+SHIPPED_LINE = "entry_minus_quarter_max"
 FOUNTAIN_TURNS = 3           # Fountain of Lucine: the next 3 turns
 # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09). Sec.3: a guest's upgrade raises its line or its act.
@@ -215,8 +219,10 @@ class Ftd:
     powers: collections.Counter = field(default_factory=collections.Counter)
     singer: int = SINGER_REPAY
     hit_fanfare: bool = True         # variant: do enemy hits print Fanfare?
-    line: float = 0.5                # variant: the Drain line, share of Max HP
+    line: float | str = 0.5          # variant: the Drain line, share of Max
+                                     # HP, or SHIPPED_LINE
     entry_hp: int = 0                # HP at the start of this combat
+    entry_max_hp: int = 0            # Max HP at the start of this combat
     line_from_entry: bool = False    # variant: the line is half of entry HP
     singer_rests: bool = False       # variant: no Singer on a turn she Drained
     repay_fanfare: bool = True       # variant: does Repay print Fanfare?
@@ -598,10 +604,10 @@ RULE_SWITCHES = {
 VARIANT_SWITCHES = {**K3_SWITCHES, **RULE_SWITCHES}
 for _name, (_singer, _sw) in VARIANT_SWITCHES.items():
     VARIANTS[_name] = (_singer, True, 0.5)
-# The default variant is the shipped rules: the Drain line rule's 3/4 line
-# (ruled 2026-10-09). The other research variants keep the half line they
-# measured.
-VARIANTS["curtain_call"] = (2, True, LINE_SHARE)
+# The default variant is the shipped rules: the Drain line rule's line,
+# entry HP minus 1/4 of Max HP (ruled 2026-10-09). The other research
+# variants keep the half line they measured.
+VARIANTS["curtain_call"] = (2, True, SHIPPED_LINE)
 
 DEFAULT_VARIANT = "curtain_call"   # sec.16: the entry line + curtain call
 
@@ -616,6 +622,7 @@ def build_player(card_ids, hp: int | None = None, max_hp: int = HP,
     singer, hit, line = VARIANTS[variant]
     switches = VARIANT_SWITCHES.get(variant, (0, {}))[1]
     p.ftd = Ftd(singer=singer, hit_fanfare=hit, line=line, entry_hp=p.hp,
+                entry_max_hp=p.max_hp,
                 line_from_entry=(variant.startswith("entry")
                                  or variant in VARIANT_SWITCHES),
                 **switches)
@@ -637,12 +644,23 @@ def _player_power(player, key: str) -> int:
     return own + (int(powers.get(arm_id, 0) or 0) if arm_id else 0)
 
 
+def shipped_line(entry_hp: int, entry_max_hp: int) -> int:
+    """The shipped Drain line (2026-10-09; `FurinaStageLaw.LineOf`): the
+    HP she started the combat with, minus 1/4 of the Max HP she started it
+    with, rounded down; never below 0. 50/80 -> 30, 80/80 -> 60."""
+    return max(0, max(0, int(entry_hp))
+               - max(0, int(entry_max_hp)) // LINE_MAX_HP_DIVISOR)
+
+
 def half_line(player) -> float:
     """The Drain line (the name is the half line's; since 2026-10-09 it is
-    3/4 of her entry HP under the default variant). Lyney on stage lowers it
-    by 10, never below 1. A Five-Century Act no longer moves it."""
+    her entry HP minus 1/4 of her entry Max HP under the default variant).
+    Lyney on stage lowers it by 10, never below 1. A Five-Century Act no
+    longer moves it."""
     f = getattr(player, "ftd", None)
-    if f is not None and f.line_from_entry:
+    if f is not None and f.line == SHIPPED_LINE:
+        line = float(shipped_line(f.entry_hp, f.entry_max_hp))
+    elif f is not None and f.line_from_entry:
         line = f.entry_hp * f.line
     else:
         line = player.max_hp * (f.line if f is not None else 0.5)
@@ -1625,8 +1643,9 @@ def close_ledger(state) -> None:
 
 
 READINGS: tuple[str, ...] = (
-    "The line (2026-10-09): 3/4 of the HP she started the combat with (the "
-    "`entry` line, `LINE_SHARE`). A Drain N is legal when HP - N >= 1; the "
+    "The line (2026-10-09): the HP she started the combat with, minus 1/4 "
+    "of the Max HP she started it with, rounded down (`SHIPPED_LINE`). A "
+    "Drain N is legal when HP - N >= 1; the "
     "part of it below the line (the line rounded up, as the C# prints it) "
     "is `drained_past`.",
     "A Drain's HP loss is not routed through `note_player_hp_loss` (so no "
