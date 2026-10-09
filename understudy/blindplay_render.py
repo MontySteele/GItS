@@ -1945,10 +1945,9 @@ STAGE_FANFARE_LINE = ("- Fanfare {fanfare} (this turn: {gained} gained, "
 #: THE SALON'S TAB (2026-10-05): the HP loan's two numbers, the "Drained N"
 #: counter's reading. The Drain line rule (2026-10-09): a Drain may go past
 #: the line, and what it drains past it does not return.
-STAGE_DRAIN_LINE = ("- Drained {drained} HP (it returns when combat ends, "
-                    "except HP drained past your line). Drain line {line} "
-                    "HP{why}: HP you Drain past it is lost unless you Repay "
-                    "it.")
+STAGE_DRAIN_LINE = ("- Drained {drained} HP. Drained HP above your line "
+                    "returns after combat. Drain line {line} HP{why}: HP you "
+                    "Drain past it is lost unless you Repay it.")
 #: Seat page 3: where the line comes from ("3/4 of the HP you started this
 #: fight with"); seats connected it to their entry HP only late.
 STAGE_DRAIN_WHY = " ({why})"
@@ -2009,6 +2008,10 @@ STAGE_LOG_GAIN = "  - You gained {n} Fanfare{src}: {before} → {after}."
 STAGE_LOG_SPEND = "  - You spent {n} Fanfare: {before} → {after}."
 STAGE_LOG_DRAIN = "  - You drained {n} HP."
 STAGE_LOG_REPAY = "  - You repaid {n} HP."
+#: The drain-line round (2026-10-09): a Power's hit (Critics' Darling, Salon's
+#: Encore, Thunderous Applause) has a log line, so a seat can see it.
+STAGE_LOG_HIT = "  - **{src}** dealt {n} damage to {to}."
+STAGE_LOG_HIT_REACH = {"all": "ALL enemies", "random": "a random enemy"}
 STAGE_SOURCE_CLAUSE = " from {src}"
 #: What an act did, by kind, with the beat's measured figure.
 STAGE_LOG_EFFECTS = {
@@ -2337,6 +2340,10 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(STAGE_LOG_DRAIN.format(n=row["moved"]))
         elif event == "repay":
             out.append(STAGE_LOG_REPAY.format(n=row["moved"]))
+        elif event == "hit" and row.get("source"):
+            out.append(STAGE_LOG_HIT.format(
+                src=row["source"], n=row["moved"],
+                to=STAGE_LOG_HIT_REACH.get(row.get("why"), "a random enemy")))
     return out
 
 

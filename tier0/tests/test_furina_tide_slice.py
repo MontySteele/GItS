@@ -250,10 +250,11 @@ def test_ousia_surge_draws_on_the_first_drain_each_turn():
     assert len(st.player.hand) == 2
 
 
-def test_lyney_lowers_the_line_and_his_act_may_drain_past_it():
+def test_lyney_lowers_the_line_and_his_act_stops_at_it():
     # The Drain line rule (2026-10-09): the line is 3/4 of entry, 58.5 from
-    # 78 (59 as the C# prints it); Lyney lowers it by 10. His act may Drain
-    # past it and skips only when the Drain would take her to 0 HP.
+    # 78 (59 as the C# prints it); Lyney lowers it by 10. His act never
+    # Drains past it (the drain-line round): it drains the room above the
+    # line, 0 with none, and deals its damage either way.
     st = _state(enemies=2)
     f = st.player.ftd
     assert T.half_line(st.player) == 58.5 and T.line_hp(st.player) == 59
@@ -262,14 +263,18 @@ def test_lyney_lowers_the_line_and_his_act_may_drain_past_it():
     T.act(st, "lyney")
     assert st.player.hp == 76 and f.drained == 2
     assert all(e.hp == 200 - 8 for e in st.enemies)
-    st.player.hp = 30                            # past his line: still acts
+    st.player.hp = 30                            # below his line: no Drain
     T.act(st, "lyney")
-    assert st.player.hp == 28 and f.drained_past == 2
+    assert st.player.hp == 30 and f.drained_past == 0
     assert all(e.hp == 200 - 16 for e in st.enemies)
-    st.player.hp = 2                             # 2 - 2 = 0 HP: skipped
+    st.player.hp = 50                            # 1 HP of room: Drain 1
+    T.act(st, "lyney")
+    assert st.player.hp == 49 and f.drained_past == 0
+    assert all(e.hp == 200 - 24 for e in st.enemies)
+    st.player.hp = 2                             # no room: damage still
     T.act(st, "lyney")
     assert st.player.hp == 2
-    assert all(e.hp == 200 - 16 for e in st.enemies)
+    assert all(e.hp == 200 - 32 for e in st.enemies)
 
 
 def test_a_five_century_act_returns_the_past_line_part_at_the_curtain():

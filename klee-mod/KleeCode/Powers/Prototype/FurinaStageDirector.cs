@@ -238,16 +238,30 @@ public sealed class StageDirector
         var critics = _stage.Mods.CriticsDarling;
         if (critics > 0 && !_board.Over)
         {
-            await _board.PowerHit(CriticsDarlingTitle, StageTarget.Random,
-                                  amount * critics);
+            await PowerHit(CriticsDarlingTitle, StageTarget.Random,
+                           amount * critics);
         }
+    }
+
+    /// <summary>A Power's hit (Critics' Darling, Salon's Encore, Thunderous
+    /// Applause), with a line in the stage log naming the Power (the
+    /// drain-line round, 2026-10-09: Critics' Darling's damage did not show
+    /// in the play log, so a seat could not see it).</summary>
+    private async Task PowerHit(string title, StageTarget target, int amount)
+    {
+        if (amount <= 0) return;
+        await _board.PowerHit(title, target, amount);
+        _stage.Note(new StageBeat(FurinaStageLedger.HitEvent, default, -1,
+                                  _stage.Fanfare, amount,
+                                  target == StageTarget.All ? "all" : "random",
+                                  Source: title));
     }
 
     private async Task Thunderous()
     {
         var damage = _stage.Mods.Thunderous;
         if (damage <= 0 || _board.Over) return;
-        await _board.PowerHit(ThunderousTitle, StageTarget.All, damage);
+        await PowerHit(ThunderousTitle, StageTarget.All, damage);
     }
 
     /// <summary>Rule 3: HP lost to anything but a Drain (a hit past Block, a
@@ -280,6 +294,13 @@ public sealed class StageDirector
     /// Drain to 0 HP or below is refused (2026-10-09).</summary>
     public bool CanDrain(int amount) => _stage.CanDrain(amount, _board.Hp);
 
+    /// <summary>A guest act's Drain of <paramref name="amount"/>, stopped
+    /// at the line (the drain-line round, 2026-10-09): the part of it that
+    /// fits above the line, 0 when there is no room. The player's own Drains
+    /// may still go past the line.</summary>
+    public int GuestDrainRoom(int amount) =>
+        _stage.GuestDrainRoom(amount, _board.Hp);
+
     /// <summary>
     /// Rule 1, Drain N: lose N HP, mark it drained -- above the line or past
     /// it (2026-10-09) -- gain that much Fanfare, then the Drain readers --
@@ -309,7 +330,7 @@ public sealed class StageDirector
         var encore = _stage.Mods.SalonsEncore;
         if (encore > 0 && !_board.Over)
         {
-            await _board.PowerHit(SalonsEncoreTitle, StageTarget.All, encore);
+            await PowerHit(SalonsEncoreTitle, StageTarget.All, encore);
         }
         if (_stage.SeatOf(StagePerformer.Wriothesley) is { } wrio
             && !_board.Over)
@@ -540,12 +561,14 @@ public sealed class StageDirector
                                     Element.Electro);
                 break;
             case StagePerformer.Lyney:
-                // "Drain 2: deal 8 Pyro damage to ALL enemies." It may
-                // Drain past the line (2026-10-09); it skips (no Drain, no
-                // damage) only when the Drain would take her to 0 HP.
-                if (CanDrain(FurinaStageLaw.LyneyActDrain)
-                    && await Drain(FurinaStageLaw.LyneyActDrain)
-                    && !_board.Over)
+                // "Drain 2, never past your line. Deal 8 Pyro damage to
+                // ALL enemies." A guest acts with no choice from the
+                // player, so its Drain stops at the line (the drain-line
+                // round, 2026-10-09): it drains only the room above the
+                // line, 0 with none, and the damage lands either way.
+                var room = GuestDrainRoom(FurinaStageLaw.LyneyActDrain);
+                if (room > 0) await Drain(room);
+                if (!_board.Over)
                 {
                     moved = number;
                     await _board.Damage(who, StageTarget.All, moved,

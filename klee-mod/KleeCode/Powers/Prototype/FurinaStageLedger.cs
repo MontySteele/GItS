@@ -329,6 +329,12 @@ public sealed class FurinaStageLedger
     public bool CanDrain(int amount, int hp) =>
         amount > 0 && hp - amount >= FurinaStageLaw.DrainFloor;
 
+    /// <summary>A guest act's Drain (the drain-line round, 2026-10-09): how
+    /// much of <paramref name="amount"/> fits at <paramref name="hp"/>
+    /// without going past the line. 0 when she is at or below it.</summary>
+    public int GuestDrainRoom(int amount, int hp) =>
+        System.Math.Max(0, System.Math.Min(amount, hp - Line));
+
     /// <summary>Would a Drain of <paramref name="amount"/> at
     /// <paramref name="hp"/> go past the line? (The face's warning.)
     /// </summary>
@@ -717,6 +723,12 @@ public sealed class FurinaStageLedger
     public const string SpendEvent = "spend";
     public const string DrainEvent = "drain";
     public const string RepayEvent = "repay";
+
+    /// <summary>A Power dealt damage (Critics' Darling, Salon's Encore,
+    /// Thunderous Applause): the Power is the beat's source, the reach
+    /// ("all" or "random") its reason (the drain-line round, 2026-10-09).
+    /// </summary>
+    public const string HitEvent = "hit";
 
     /// <summary>A guest's line fired (the pool to 75, sec.3).</summary>
     public const string LineEvent = "line";

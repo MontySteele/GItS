@@ -552,8 +552,9 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
             # The Drain line rule (2026-10-09): the 3/4 line, and HP drained
             # past it is lost unless Repaid.
-            "Lose N HP. Drained HP returns after combat, but HP drained past ",
-            "your line (3/4 of your HP at combat start) is lost unless you ",
+            # The drain-line round (2026-10-09): the curtain-call sentence.
+            "Lose N HP. Drained HP above your line returns after combat. HP ",
+            "drained past your line (3/4 of your HP at combat start) is lost ",
             # The pool to 75 (2026-10-09): the guest rule's words.
             "Regain that much drained HP, never more than you drained. A ",
             "A guest joins at the back. On a full stage, the oldest guest ",

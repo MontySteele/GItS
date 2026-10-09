@@ -60,9 +60,10 @@ public static class FurinaStageLaw
     /// <summary>Lyney's line: "Your Drain line is 10 HP lower."</summary>
     public const int LyneyLineDrop = 10;
 
-    /// <summary>Lyney's act: "Drain 2: deal 8 Pyro damage to ALL enemies."
-    /// It may Drain past the line (2026-10-09); it skips only when the Drain
-    /// would take her to 0 HP.</summary>
+    /// <summary>Lyney's act: "Drain 2, never past your line. Deal 8 Pyro
+    /// damage to ALL enemies." A guest's Drain stops at the line (the
+    /// drain-line round, 2026-10-09): it drains only the room above it, and
+    /// the damage lands either way.</summary>
     public const int LyneyActDrain = 2;
 
     /// <summary>Lyney's act's damage.</summary>
