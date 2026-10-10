@@ -439,6 +439,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # the rest) left with v2; a row that prints one fails as an
                   # unknown op rather than emitting a call to a deleted verb.
                   "stage_spend", "stage_spend_all",
+                  # The Spend paper (2026-10-10): "Spend up to X", one call
+                  # into `FurinaStage.SpendUpTo`; what it buys is the effect
+                  # after it, reading `stage_spent`.
+                  "stage_spend_up_to",
                   # A Guest Star card, one call into `FurinaStage.GuestStar`.
                   "stage_guest",
                   # Interval Bell's and Salon's Tab's "Energy next turn",
@@ -2160,6 +2164,7 @@ BRANCH_FIELDS = {
     # unlike the two salon verbs above: a Spend with no number is not a rider
     # any face could print.
     "stage_spend": {"op", "amount"},
+    "stage_spend_up_to": {"op", "amount"},
     "stage_energy_next": {"op", "amount"},
     "stage_drain": {"op", "amount"},
     "stage_repay": {"op", "amount"},
@@ -4855,8 +4860,10 @@ def blocked_reason(
                             "bonus_vs_aura", "bonus_vs_debuff",
                             "bonus_formula", "amount_formula"))):
                     return "damage bonus_if rides a plain printed hit only"
-            if eff.get("times_formula", "2_plus_sparks") != "2_plus_sparks":
-                # The sim's only times formula (effects.py raises on others).
+            if (eff.get("times_formula", "2_plus_sparks") != "2_plus_sparks"
+                    and stage_times_formula_cs(card, eff) is None):
+                # 2_plus_sparks, and the Spend paper's dict on a stage count
+                # (`stage_times_formula_cs`); nothing else emits.
                 return f"times_formula '{eff['times_formula']}'"
             bf = eff.get("bonus_formula")
             if bf is not None and not (
@@ -6174,6 +6181,29 @@ def debuffs_on_target_calc_rider(
             "static (_, target) => KokomiOverhaulKit.DebuffCount(target)")
 
 
+#: The Spend paper (2026-10-10): a stage count an effect after a "Spend up to
+#: X" reads INLINE in the `OnPlay` body (a hit count, a draw), where there is
+#: no CalculatedVar to preview it. The sim's `_runtime_count` reads the same
+#: token (`furina_stage.spent_fours`).
+STAGE_INLINE_COUNT_CS = {
+    "stage_spent_fours": "FurinaStage.SpentFours(this)",
+}
+
+
+def stage_times_formula_cs(card: dict, eff: dict) -> str | None:
+    """`times_formula: {base, per, count: stage_spent_fours}` on a damage op
+    after the card's Spend (Crashing Waves, "hit once more for every 4"), as
+    the C# hit count; else None."""
+    formula = eff.get("times_formula")
+    if eff.get("op") != "damage" or not isinstance(formula, dict):
+        return None
+    expr = STAGE_INLINE_COUNT_CS.get(str(formula.get("count")))
+    if expr is None or not _stage_spends_before(card, eff):
+        return None
+    return (f"{int(formula.get('base', 0))} + "
+            f"{int(formula.get('per', 1))} * {expr}")
+
+
 def plans_held_draw_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: plans_held}` on a DRAW -- Tide
     Chart (the tempo shelf, round 9 pick 1), "draw 1 card for each Plan the
@@ -6201,7 +6231,13 @@ def plans_held_draw_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     formula = eff.get("amount_formula")
     if not isinstance(formula, dict):
         return None
-    if formula.get("count") != "plans_held":
+    count = formula.get("count")
+    if count in STAGE_INLINE_COUNT_CS and _stage_spends_before(card, eff):
+        # The Spend paper (2026-10-10), Spirited Aria: "Draw 1 for every 4
+        # spent", inline on the same terms, after the card's Spend.
+        return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+                STAGE_INLINE_COUNT_CS[count])
+    if count != "plans_held":
         return None
     return (int(formula.get("base", 0)), int(formula.get("per", 1)),
             "KokomiPlan.PlansHeld(Owner.Creature)")
@@ -6307,6 +6343,8 @@ FURINA_STAGE_GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
 #: names: a card that looks authored and is a blank in the hand.
 STAGE_STMT_OPS = {
     "stage_spend", "stage_spend_all", "stage_guest",
+    # The Spend paper (2026-10-10): "Spend up to X".
+    "stage_spend_up_to",
     # The loop fix (2026-10-04): Interval Bell's "Energy next turn".
     "stage_energy_next",
     # THE SALON'S TAB (2026-10-05): Drain, Repay, Repay all.
@@ -6346,6 +6384,12 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
                 f"{n});")
     if op == "stage_spend_all":
         return "await FurinaStage.SpendAll(choiceContext, Owner.Creature);"
+    if op == "stage_spend_up_to":
+        # The Spend paper (2026-10-10): spends X or all she holds, never
+        # fails; the play's `stage_spent` is what it counted.
+        n = str(int(eff.get("amount", 1)))
+        return ("await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, "
+                f"{n});")
     if op == "stage_drain":
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
         return ("await FurinaStage.Drain(choiceContext, Owner.Creature, "
@@ -6441,8 +6485,20 @@ def _stage_spender_before(card: dict, eff: dict) -> str | None:
     for other in card.get("effects") or []:
         if other is eff:
             return None
-        if other.get("op") in {"stage_spend", "stage_spend_all"}:
+        if other.get("op") in {"stage_spend", "stage_spend_all",
+                               "stage_spend_up_to"}:
             return str(other["op"])
+    return None
+
+
+def _stage_up_to_before(card: dict, eff: dict) -> dict | None:
+    """The `stage_spend_up_to` that resolves before `eff`, or None (the
+    Spend paper, 2026-10-10): its cap is what the face previews."""
+    for other in card.get("effects") or []:
+        if other is eff:
+            return None
+        if other.get("op") == "stage_spend_up_to":
+            return other
     return None
 
 
@@ -6457,6 +6513,12 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
     (`FurinaStage.SpentOrFanfare`), so the face prints a number."""
     if _stage_spender_before(card, eff) == "stage_spend_all":
         return "static (card, _) => FurinaStage.SpentOrFanfare(card)"
+    up_to = _stage_up_to_before(card, eff)
+    if up_to is not None:
+        # The Spend paper (2026-10-10): before the play, what "Spend up to
+        # X" would count now; during it, what it counted.
+        return ("static (card, _) => FurinaStage.SpentOrUpTo(card, "
+                f"{int(up_to.get('amount', 1))})")
     return STAGE_COUNT_CS["stage_spent"]
 
 
@@ -9183,7 +9245,13 @@ def _emit_damage_call(card: dict, eff: dict, lines: list[str], ctx: dict,
     times_guard = ("x" if times == "X" or (isinstance(times, str)
                                            and times.startswith("X_plus_"))
                    else RUNTIME_TIMES.get(times) if x_times else None)
-    if "times_formula" in eff:
+    stage_times = stage_times_formula_cs(card, eff)
+    if stage_times is not None:
+        # The Spend paper (2026-10-10), Crashing Waves: "hit once more for
+        # every 4" -- `base + per * <stage count>` hits, read as the play
+        # resolves (the Spend comes first).
+        call.append(f".WithHitCount({stage_times})")
+    elif "times_formula" in eff:
         # 2_plus_sparks (Gleeful Barrage), the sim's only times formula.
         # SparksAtPlay: R39 (2026-07-21 ruling) -- the sim computes times from
         # state.sparks_at_play, the bank BEFORE this card's own spend, because

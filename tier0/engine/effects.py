@@ -386,6 +386,11 @@ def _runtime_count(state: CombatState, token: str,
     # card play beside `fanfare_drained_this_card`. 0 for anyone else.
     if token == "stage_spent":
         return state.stage_spent_this_card
+    # The Spend paper (2026-10-10): "Draw 1 for every 4 spent" and "hit once
+    # more for every 4" -- this play's spend in fours (the C#
+    # `FurinaStage.SpentFours`).
+    if token == "stage_spent_fours":
+        return furina_stage.spent_fours(state.stage_spent_this_card)
     # THE POOL TO 75 (2026-10-09): Undercurrent's, Balance the Books',
     # Rising Tide's and Grand Absolution's counts (`furina_stage`'s readers;
     # the C# `FurinaStage` twins). 0 for anyone else.
@@ -3343,6 +3348,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     # at LOAD off this set, so a token only the resolver knows is a card that
     # raises the first time it is played.
     "stage_spent",
+    # The Spend paper (2026-10-10).
+    "stage_spent_fours",
     # THE POOL TO 75 (2026-10-09).
     "stage_drains", "stage_half_drained", "stage_repays_turn",
     "stage_repaid",
@@ -4891,6 +4898,13 @@ def _op_stage_spend_all(state: CombatState, fx: dict, card: Card) -> None:
     state.stage_spent_this_card = furina_stage.spend_all(state)
 
 
+def _op_stage_spend_up_to(state: CombatState, fx: dict, card: Card) -> None:
+    """"Spend up to X" (the Spend paper, 2026-10-10): X or all she holds,
+    never fails. What it counted is this play's `stage_spent`."""
+    state.stage_spent_this_card = furina_stage.spend_up_to(
+        state, _amount(state, fx.get("amount", 1)))
+
+
 def _op_stage_energy_next(state: CombatState, fx: dict, card: Card) -> None:
     """"Gain N Energy next turn" (Interval Bell, Salon's Tab): owed on her
     record and paid at her next turn (`furina_tide.energy_kept`); the C#
@@ -4961,6 +4975,7 @@ OPS = {
     "stage_guest": _op_stage_guest,
     "stage_spend": _op_stage_spend,
     "stage_spend_all": _op_stage_spend_all,
+    "stage_spend_up_to": _op_stage_spend_up_to,
     "stage_energy_next": _op_stage_energy_next,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,

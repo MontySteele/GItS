@@ -637,6 +637,53 @@ public sealed class FurinaStageLedger
         return true;
     }
 
+    /// <summary>What a "Spend up to <paramref name="cap"/>" would count now:
+    /// the cap, or all she holds plus Navia's free points if that is less.
+    /// A read (the face's preview and the director's Spend agree).</summary>
+    public int UpToOf(int cap) =>
+        cap <= 0 ? 0 : System.Math.Min(cap, Fanfare + NaviaDiscount);
+
+    /// <summary>
+    /// "Spend up to X" (the Spend paper, 2026-10-10, pick 1): spends X, or
+    /// all she holds if that is less, and never fails. It is a Spend only
+    /// when at least 1 was spent; it is not a spend-all, so Bis! and Standing
+    /// Room Only ignore it. Navia's line makes the first 2 [3] points of the
+    /// first Spend each turn free: they count as spent and are not taken.
+    /// Returns what counts as spent (0: no Spend).
+    /// <paramref name="forPlay"/> records it as this card play's
+    /// `stage_spent`; a guest's act (Navia's half-Spend, Freminet's quarter)
+    /// leaves the play's record alone.
+    /// </summary>
+    public int SpendUpTo(int cap, bool forPlay = true)
+    {
+        if (forPlay) SpentThisPlay = 0;
+        var counted = UpToOf(cap);
+        if (counted <= 0) return 0;
+        var free = System.Math.Min(counted, NaviaDiscount);
+        var pay = counted - free;
+        Fanfare -= pay;
+        SpentThisTurn += pay;
+        SpendsThisTurn++;
+        // The play telemetry's Spend record carries a card's "up to X" cap
+        // (the Spend round, 2026-10-10). A guest's share-Spend has no
+        // printed cap and records -1.
+        if (forPlay) MarkUpTo(cap);
+        Note(new StageBeat(SpendEvent, default, -1, Fanfare, pay, ""));
+        if (free > 0) NoteLine(StagePerformer.Navia, free);
+        if (forPlay) SpentThisPlay = counted;
+        return counted;
+    }
+
+    /// <summary>Center of Attention's free "Spend up to X": the full X counts
+    /// for the card and nothing is taken (the Spend paper's reading of "takes
+    /// no Fanfare"). Like its free Spend N, it moves nothing, so it is no
+    /// Spend.</summary>
+    public int SpendUpToFree(int cap)
+    {
+        SpentThisPlay = System.Math.Max(0, cap);
+        return SpentThisPlay;
+    }
+
     /// <summary>A guest's LINE fired (the pool to 75, sec.3: a line gets a
     /// log line of its own, so it is not read as a second act).</summary>
     public void NoteLine(StagePerformer who, int moved)
