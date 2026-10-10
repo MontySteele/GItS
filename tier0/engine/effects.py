@@ -5220,6 +5220,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
         if "ftd" in card.tags:
             from tier0.engine import furina_tide    # late: avoids the cycle
             furina_tide.resolve_card(state, card)
+        # Varka's Sturm und Drang rider, after the Attack (C#'s
+        # `AfterCardPlayed`): a no-op unless a charge was spent on it.
+        companion_overhaul_card_end(state, card, state.card_aim)
     finally:
         if varka:
             varka_oath.end_play(state, card)
@@ -5390,13 +5393,13 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     #
     #   mc_passion_overload   Bennett -- one Attack, consumed on it
     #   mc_lightning_fang     Razor   -- every Attack, 2 turns
-    #   mc_swirl_charge       Varka   -- one Attack, banked per Swirl
     #
     # `mc_lightning_fang`'s stack is TURNS REMAINING, not damage, so its
-    # contribution is the constant rather than the stack; the other two
-    # hold their own printed number, so a second copy pays twice.
+    # contribution is the constant rather than the stack; Bennett's holds
+    # its own printed number, so a second copy pays twice. (Varka's
+    # `mc_swirl_charge` left this sum in the Varka round 3 fix, 2026-10-10:
+    # it is a separate hit after the Attack, `companion_overhaul_card_end`.)
     bonus += p.powers.get("mc_passion_overload", 0)
-    bonus += p.powers.get("mc_swirl_charge", 0)
     if p.powers.get("mc_lightning_fang", 0):
         bonus += C.MC_LIGHTNING_FANG_BONUS
     # THE INAZUMA ARM'S TWO, on the same terms and in the same sum:
@@ -6300,10 +6303,42 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
         override = "pyro"
     if p.powers.pop("mi_crowfeather", 0):
         override = "electro"
-    if p.powers.pop("mc_swirl_charge", 0):
-        override = p.mc_swirl_element or override
-        p.mc_swirl_element = ""
+    # Varka's banked Swirl (the Varka round 3 fix, 2026-10-10) no longer
+    # claims the element: the Attack keeps its own, and the bank is spent
+    # here and paid after the Attack as a separate hit of the element banked
+    # now (`companion_overhaul_card_end`). A Swirl this Attack makes re-banks
+    # for the next one.
+    n = p.powers.pop("mc_swirl_charge", 0)
+    state.mc_swirl_rider = (n, p.mc_swirl_element) if n else (0, "")
+    p.mc_swirl_element = ""
     return override
+
+
+def companion_overhaul_card_end(state: CombatState, card: Card,
+                                aim: Optional[Enemy]) -> None:
+    """Varka's Sturm und Drang rider, paid once the Attack has resolved: "your
+    next Attack deals 6 additional damage of the swirled element" as ONE
+    separate hit of the element banked when the Attack was played, through
+    the arm's companion door (as Durin's or Bennett's pulse), on the enemy the Attack aimed at if it is alive, or on
+    every living enemy for an Attack that aims at none. Its own Oath scope,
+    as Baron Bunny's burst. C# twin: `SwirlChargePower.OnSpent`."""
+    n, element = state.mc_swirl_rider
+    state.mc_swirl_rider = (0, "")
+    if not n or not element or card.type != "attack":
+        return
+    if _card_aims_at_enemy(card):
+        targets = [aim] if aim is not None and aim.alive else []
+    else:
+        targets = list(state.living_enemies)
+    if not targets:
+        return
+    varka_oath.open_scope(state)
+    try:
+        for enemy in targets:
+            deal_damage_to_enemy(state, enemy, n, element=element,
+                                 source="companion")
+    finally:
+        varka_oath.close_scope(state)
 
 
 def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,

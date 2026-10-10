@@ -219,11 +219,12 @@ public sealed class CompanionOverhaulLedger
 /// Before this arm the answer was read straight off the card at two sites --
 /// <c>AuraPower.ElementOf</c> and
 /// <c>KleeElementalHooks.BeforeDamageReceived</c> -- as
-/// <c>cardSource is IElementalCard</c>. Three rewritten companions print an
+/// <c>cardSource is IElementalCard</c>. Rewritten companions print an
 /// element on the ATTACK rather than on themselves (Bennett's "your next Attack
-/// ... applies Pyro", Razor's "for 2 turns, your Attacks apply Electro",
-/// Varka's "your next Attack deals 6 more damage of the swirled element"), so
-/// the answer now depends on the DEALER as well as the card. Both sites route
+/// ... applies Pyro", Razor's "for 2 turns, your Attacks apply Electro"), so
+/// the answer now depends on the DEALER as well as the card. (Varka's Sturm
+/// und Drang left this list in the Varka round 3 fix, 2026-10-10: its damage
+/// is a separate hit after the Attack, <see cref="SwirlChargePower"/>.) Both sites route
 /// through here so they cannot drift: an application site and a reaction site
 /// that disagreed about a card's element would apply one aura and react with
 /// another.
@@ -241,10 +242,9 @@ public static class CompanionOverhaulRiders
     /// <paramref name="dealer"/> plays it.
     ///
     /// THE ORDER IS LAW and is the sim's `companion_overhaul_card_start` order:
-    /// the blanket rider first, the two one-shots after, LAST WINS. A one-shot
+    /// the blanket riders first, the one-shots after, LAST WINS. A one-shot
     /// the player has just bought and is spending on THIS Attack is the more
-    /// specific claim than a two-turn blanket, and Varka's is last of the two
-    /// because its element is the one the board produced a moment ago.
+    /// specific claim than a two-turn blanket.
     ///
     /// AN OVERRIDE BEATS `Element.None` TOO. "Your next Attack applies Pyro" is
     /// a statement about the Attack, not a modifier to one the Attack was
@@ -265,8 +265,12 @@ public static class CompanionOverhaulRiders
             return printed;
         }
         var over = Element.None;
-        // BLANKET RIDERS FIRST, in nation order, then the ONE-SHOTS, then
-        // Varka's banked Swirl last of all. The Inazuma arm adds one of each --
+        // BLANKET RIDERS FIRST, in nation order, then the ONE-SHOTS. (Varka's
+        // banked Swirl left this sequence in the Varka round 3 fix,
+        // 2026-10-10: its damage is a separate hit of the Swirled element
+        // after the Attack, and the Attack keeps its own element, so a
+        // Crosswind after a Swirl still Swirls -- `SwirlChargePower.OnSpent`.)
+        // The Inazuma arm adds one of each --
         // Ayato's Kyouka ("for 2 turns, your Attacks apply Hydro") and Sara's
         // Crowfeather Cover ("your next Attack ... applies Electro") -- and
         // they join the sequence at their own tier rather than at the end,
@@ -277,11 +281,6 @@ public static class CompanionOverhaulRiders
         if (dealer.Powers.OfType<KyoukaPower>().Any()) over = Element.Hydro;
         if (dealer.Powers.OfType<PassionOverloadPower>().Any()) over = Element.Pyro;
         if (dealer.Powers.OfType<CrowfeatherCoverPower>().Any()) over = Element.Electro;
-        var charge = dealer.Powers.OfType<SwirlChargePower>().FirstOrDefault();
-        if (charge != null && charge.SwirledElement != Element.None)
-        {
-            over = charge.SwirledElement;
-        }
         return over == Element.None ? printed : over;
     }
 }
@@ -708,6 +707,13 @@ public abstract class NextAttackRiderPower : PowerModel
         return Task.CompletedTask;
     }
 
+    /// <summary>What a rider does once the Attack it was spent on has
+    /// resolved, before the bank drops by <paramref name="spent"/>. Nothing,
+    /// for every rider but Varka's (<see cref="SwirlChargePower"/>).</summary>
+    protected virtual Task OnSpent(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay, int spent) =>
+        Task.CompletedTask;
+
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
@@ -716,6 +722,7 @@ public abstract class NextAttackRiderPower : PowerModel
         var spent = _spending;
         _spending = 0;
         if (spent <= 0) return;
+        await OnSpent(choiceContext, cardPlay, spent);
         if (Amount <= spent)
         {
             await PowerCmd.Remove(this);
@@ -776,6 +783,18 @@ public sealed class PassionOverloadPower : NextAttackRiderPower, ILocalizationPr
 /// element." Applied by <see cref="CompanionOverhaulReactions"/> on every
 /// Swirl, never by a card.
 ///
+/// A SEPARATE HIT AFTER THE ATTACK (the Varka round 3 fix, 2026-10-10;
+/// review/records/varka-round-3-2026-10-10.md item 1). It used to add its
+/// amount to the Attack's hits and replace the Attack's element with the
+/// Swirled one, so for Varka every Swirl armed a rider that cancelled his
+/// next Swirl. Now the Attack keeps its own element and deals its own damage;
+/// once it has resolved, the bank lands as one hit of the Swirled element
+/// (<see cref="ElementalHit.Deal"/>, the arm's door, as every companion
+/// pulse's) on the enemy the Attack was played on, or on every enemy for an Attack played on
+/// none. A dead target takes nothing. The element is the one banked when the
+/// Attack was played: a Swirl the Attack makes re-banks for the next one.
+/// Sim twin: `effects.companion_overhaul_card_end`.
+///
 /// IT REMEMBERS AN ELEMENT, which no power in this mod did before. A plain enum
 /// field is safe where a <c>Creature</c> reference would not be: it is a value
 /// type, so <c>MutableClone</c>'s shallow copy carries it correctly and
@@ -796,14 +815,42 @@ public sealed class SwirlChargePower : NextAttackRiderPower, ILocalizationProvid
 
     public void Remember(Element element) => SwirledElement = element;
 
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
+    private Element _spendingElement = Element.None;
+
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
-        if (dealer != Owner || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Amount;
+        _spendingElement = SwirledElement;
+        return base.BeforeCardPlayed(cardPlay);
+    }
+
+    /// <summary>The enemies the separate hit lands on: the Attack's target
+    /// if it is a living enemy, every living enemy for an Attack played on
+    /// none. PURE.</summary>
+    public static IReadOnlyList<Creature> TargetsFor(
+        Creature? played, IEnumerable<Creature> hittable)
+    {
+        if (played != null)
+        {
+            return played.IsAlive && played.IsEnemy
+                ? new[] { played } : System.Array.Empty<Creature>();
+        }
+        return hittable.Where(e => e.IsAlive).ToList();
+    }
+
+    protected override async Task OnSpent(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay, int spent)
+    {
+        var element = _spendingElement;
+        _spendingElement = Element.None;
+        var combat = Owner.CombatState;
+        if (element == Element.None || combat == null) return;
+        // Its own Oath scope, as Baron Bunny's burst (the sim opens the same).
+        using var scope = VarkaOath.Scope(Owner);
+        foreach (var enemy in TargetsFor(cardPlay.Target, combat.HittableEnemies))
+        {
+            await ElementalHit.Deal(choiceContext, enemy, element, spent,
+                                    Owner);
+        }
     }
 }
 

@@ -190,11 +190,12 @@ def test_the_element_override_order_puts_the_blanket_first():
     body = body.split("\ndef ")[0]
     riders = [m for m in re.findall(r'"(m[ci]_[a-z_]+)"', body)
               if m in ("mc_lightning_fang", "mi_kyouka",
-                       "mc_passion_overload", "mi_crowfeather",
-                       "mc_swirl_charge")]
+                       "mc_passion_overload", "mi_crowfeather")]
+    # Varka's banked Swirl left the element sequence in the Varka round 3
+    # fix (2026-10-10): its damage is a separate hit after the Attack.
     assert list(dict.fromkeys(riders)) == [
         "mc_lightning_fang", "mi_kyouka", "mc_passion_overload",
-        "mi_crowfeather", "mc_swirl_charge"]
+        "mi_crowfeather"]
 
 
 # ---------------------------------------------------------------------------

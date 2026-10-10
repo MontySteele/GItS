@@ -216,11 +216,13 @@ public class CompanionOverhaulHookTests
     // ---- THE PURE READERS, FOR REAL -------------------------------------
 
     [Fact]
-    public void The_three_riders_all_pay_and_they_stack()
+    public void The_riders_all_pay_and_they_stack()
     {
-        // The sim's `flat_attack_bonus` sums all three; so does the engine,
-        // by folding every ModifyDamageAdditive. Same answer, and the pin is
-        // that no rider excludes another.
+        // The sim's `flat_attack_bonus` sums them; so does the engine, by
+        // folding every ModifyDamageAdditive. Same answer, and the pin is
+        // that no rider excludes another. Varka's charge adds NOTHING to the
+        // Attack's own hits since the Varka round 3 fix (2026-10-10): it is a
+        // separate hit after the Attack (`SwirlChargePower.OnSpent`).
         var seat = Seat.Klee()
             .WithPower<PassionOverloadPower>(4)
             .WithPower<LightningFangPower>(2)
@@ -230,7 +232,31 @@ public class CompanionOverhaulHookTests
         var total = seat.Creature.Powers
             .Sum(p => p.ModifyDamageAdditive(
                 target, 10m, Attack, seat.Creature, card, null));
-        Assert.Equal(4 + CompanionOverhaulLaw.LightningFangDamage + 6, total);
+        Assert.Equal(4 + CompanionOverhaulLaw.LightningFangDamage, total);
+    }
+
+    [Fact]
+    public void Sturm_und_drang_is_a_separate_hit_after_the_attack()
+    {
+        // The Varka round 3 fix (2026-10-10): the spent bank lands as one
+        // ElementalHit of the banked element, in its own Oath scope, once the
+        // Attack has resolved; ElementFor no longer reads the charge.
+        var spent = string.Join(" ",
+            Il.CallSequence(Il.Method("SwirlChargePower", "OnSpent")));
+        Assert.Contains("ElementalHit.Deal", spent);
+        Assert.Contains("VarkaOath.Scope", spent);
+        Assert.Contains("SwirlChargePower.TargetsFor", spent);
+        var after = string.Join(" ",
+            Il.CallSequence(Il.Method("NextAttackRiderPower", "AfterCardPlayed")));
+        Assert.Contains("NextAttackRiderPower.OnSpent", after);
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method("CompanionOverhaulRiders", "ElementFor")),
+            c => c.Contains("SwirlChargePower"));
+        // A target that is not an enemy, or none on an empty board: no hit.
+        Assert.Empty(SwirlChargePower.TargetsFor(
+            Seat.Klee().Creature, System.Array.Empty<MegaCrit.Sts2.Core.Entities.Creatures.Creature>()));
+        Assert.Empty(SwirlChargePower.TargetsFor(
+            null, System.Array.Empty<MegaCrit.Sts2.Core.Entities.Creatures.Creature>()));
     }
 
     [Fact]
@@ -273,8 +299,8 @@ public class CompanionOverhaulHookTests
         Assert.Equal(Element.Pyro,
             CompanionOverhaulRiders.ElementFor(card, both.Creature));
 
-        // Varka's charge is last of all, and only once it has an element --
-        // an unbanked charge names none and must not blank the card.
+        // Varka's charge claims no element (the Varka round 3 fix,
+        // 2026-10-10): banked or not, the Attack keeps what it had.
         var swirl = Seat.Klee()
             .WithPower<PassionOverloadPower>(4)
             .WithPower<SwirlChargePower>(6);
@@ -282,8 +308,13 @@ public class CompanionOverhaulHookTests
             CompanionOverhaulRiders.ElementFor(card, swirl.Creature));
         swirl.Creature.Powers.OfType<SwirlChargePower>().Single()
             .Remember(Element.Cryo);
-        Assert.Equal(Element.Cryo,
+        Assert.Equal(Element.Pyro,
             CompanionOverhaulRiders.ElementFor(card, swirl.Creature));
+        var alone = Seat.Klee().WithPower<SwirlChargePower>(6);
+        alone.Creature.Powers.OfType<SwirlChargePower>().Single()
+            .Remember(Element.Hydro);
+        Assert.Equal(Element.Electro,
+            CompanionOverhaulRiders.ElementFor(card, alone.Creature));
 
         // A SKILL is never overridden: the riders speak about Attacks, and
         // this one declares no IElementalCard at all -- so the funnel gives
