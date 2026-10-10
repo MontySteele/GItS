@@ -66,8 +66,10 @@ SHIPPED_LINE = T.SHIPPED_LINE
 LINE_MAX_HP_DIVISOR = T.LINE_MAX_HP_DIVISOR
 FREMINET_ACT_BLOCK = T.FREMINET_ACT_BLOCK
 FREMINET_ACT_BLOCK_UPGRADED = T.FREMINET_ACT_BLOCK_UPGRADED
-# The Spend paper (2026-10-10): the guests' half-Spend and "for every 4".
-GUEST_SPEND_DIVISOR = T.GUEST_SPEND_DIVISOR
+# The Spend paper (2026-10-10): Navia's half, Freminet's quarter, and "for
+# every 4".
+NAVIA_SPEND_DIVISOR = T.NAVIA_SPEND_DIVISOR
+FREMINET_SPEND_DIVISOR = T.FREMINET_SPEND_DIVISOR
 SPEND_UP_TO_EVERY = T.SPEND_UP_TO_EVERY
 FOUNTAIN_TURNS = T.FOUNTAIN_TURNS
 # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
@@ -704,10 +706,10 @@ READINGS: tuple[str, ...] = (
     "whichever is less; the free points count and are not taken, so at 0 "
     "Fanfare with Navia on stage it counts 2 [3] (the Spend paper, "
     "2026-10-10).",
-    "Navia's and Freminet's half-Spend is a Spend when at least 1 is spent, "
-    "and Navia's discount applies to it when it is the turn's first Spend; "
-    "each guest takes half of what is left, oldest first, and again after "
-    "Showstopper.",
+    "Navia's half-Spend and Freminet's quarter-Spend are each a Spend when "
+    "at least 1 is spent, and Navia's discount applies when it is the turn's "
+    "first Spend; each guest takes its share of what is left, oldest first, "
+    "and again after Showstopper.",
     "Escoffier's line answers every act, his own included.",
     "Regina drains first at turn start, then Fountain of Lucine, Gentle "
     "Current and Pneuma Tides Repay, then Prima Donna reads the Fanfare.",

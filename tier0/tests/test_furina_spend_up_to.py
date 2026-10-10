@@ -4,8 +4,9 @@
 are open on #1014). "Spend up to X" spends X, or all she holds if that is
 less, never fails, and is a Spend only when at least 1 counts; it is not a
 spend-all, so Bis! and Standing Room Only ignore it. Navia's line makes the
-first 2 [3] points of the first Spend each turn free. Navia's and Freminet's
-acts Spend half the bank, rounded down, oldest first. The C# twin is
+first 2 [3] points of the first Spend each turn free. Navia's act Spends half
+the bank and Freminet's a quarter (ruled 2026-10-10), rounded down, oldest
+first. The C# twin is
 `klee-mod/KleeTests/Prototype/FurinaSpendUpToTests.cs`.
 """
 
@@ -159,7 +160,7 @@ def test_the_four_cards_have_no_chooser():
         assert ops[0] == "stage_spend_up_to", cid
 
 
-# ---- the guests' half-Spend --------------------------------------------------------
+# ---- the guests' share-Spend (Navia half, Freminet a quarter) ----------------------
 
 def test_navias_act_spends_half_and_deals_it_as_geo():
     st = _furina(23, stage=["navia", "chevreuse"])
@@ -179,12 +180,12 @@ def test_navias_act_spends_half_and_deals_it_as_geo():
     assert poor.player.ftd.spends_this_turn == 0
 
 
-def test_freminets_act_gains_3_then_half_the_bank_as_block():
+def test_freminets_act_gains_3_then_a_quarter_of_the_bank_as_block():
     st = _furina(9, stage=["freminet"])
     hp = st.enemies[0].hp
     T.act(st, "freminet")
-    assert st.player.block == 3 + 4
-    assert st.player.ftd.fanfare == 5
+    assert st.player.block == 3 + 2                     # a quarter of 9
+    assert st.player.ftd.fanfare == 7
     assert st.enemies[0].hp == hp                       # no Cryo hit
     up = _furina(0, stage=["freminet"])
     up.player.ftd.stage_up = {"freminet"}
@@ -193,32 +194,47 @@ def test_freminets_act_gains_3_then_half_the_bank_as_block():
 
 
 def test_two_guests_split_the_bank_oldest_first():
-    # Freminet first: half of 40 is 20 (2 of it free, Navia's line on the
-    # turn's first Spend), 22 left; Navia takes half of that, 11.
+    # Freminet first: a quarter of 40 is 10 (2 of it free, Navia's line on
+    # the turn's first Spend), 32 left; Navia takes half of that, 16.
     st = _furina(40, stage=["freminet", "navia"])
     hp = st.enemies[0].hp
     T.act_all(st)
-    assert st.player.block == 3 + 20
-    assert st.enemies[0].hp == hp - 11
-    assert st.player.ftd.fanfare == 11
+    assert st.player.block == 3 + 10
+    assert st.enemies[0].hp == hp - 16
+    assert st.player.ftd.fanfare == 16
     assert st.player.ftd.spends_this_turn == 2
 
 
-def test_showstopper_makes_each_take_half_again():
+def test_freminet_then_navia_on_40_with_no_discount():
+    # A Spend first uses up Navia's discount (41, 3 spent, 2 free: 40).
+    # Freminet takes a quarter of 40, 10 (30 left); Navia half of 30, 15.
+    st = _furina(41, stage=["freminet", "navia"])
+    T.spend(st, 3)
+    assert st.player.ftd.fanfare == 40
+    hp = st.enemies[0].hp
+    T.act_all(st)
+    assert st.player.block == 3 + 10
+    assert st.enemies[0].hp == hp - 15
+    assert st.player.ftd.fanfare == 15
+
+
+def test_showstopper_makes_each_take_their_share_again():
     st = _furina(40, stage=["navia", "freminet"])
     st.player.ftd.powers["showstopper"] = 1
     st.player.ftd.singer = 0
     hp = st.enemies[0].hp
     T.end_of_turn(st)
-    # Round one: Navia 20 (2 free, 22 left), Freminet 11 (11 left).
-    # Showstopper Spends 5 (6 left). Round two: Navia 3, Freminet 1.
-    assert st.enemies[0].hp == hp - 23
-    assert st.player.block == 3 + 11 + 3 + 1
-    assert st.player.ftd.fanfare == 2
+    # Round one: Navia 20 (2 free, 22 left), Freminet 5 (17 left).
+    # Showstopper Spends 5 (12 left). Round two: Navia 6, Freminet 1.
+    assert st.enemies[0].hp == hp - 26
+    assert st.player.block == 3 + 5 + 3 + 1
+    assert st.player.ftd.fanfare == 5
 
 
 def test_the_constants_match_the_paper():
     assert (T.FREMINET_ACT_BLOCK, T.FREMINET_ACT_BLOCK_UPGRADED) == (3, 6)
-    assert T.GUEST_SPEND_DIVISOR == 2
+    assert T.NAVIA_SPEND_DIVISOR == 2
+    assert T.FREMINET_SPEND_DIVISOR == 4
+    assert not hasattr(T, "GUEST_SPEND_DIVISOR")
     assert T.SPEND_UP_TO_EVERY == 4
     assert not hasattr(T, "FREMINET_ACT")

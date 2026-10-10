@@ -195,14 +195,15 @@ public class FurinaGuestRuleTests
     [Fact]
     public void Freminet_blocks_each_drain_and_acts_for_block()
     {
-        // His act since the Spend paper (2026-10-10): "Gain 3 Block. Spend
-        // half your Fanfare (rounded down): gain that much more Block." [6]
+        // His act since the Spend paper (ruled 2026-10-10): "Gain 3 Block.
+        // Spend a quarter of your Fanfare (rounded down): gain that much more
+        // Block." [6]
         var kit = StageKit.Of(StagePerformer.Freminet);
         Run(kit.Director.Drain(4));
         Assert.Contains("block 4", kit.Board.Log);
-        Run(kit.Director.Act(kit.Stage.Seats[0]));     // 4 Fanfare: +2
+        Run(kit.Director.Act(kit.Stage.Seats[0]));     // 4 Fanfare: +1
         Assert.Contains("block 3", kit.Board.Log);
-        Assert.Contains("block 2", kit.Board.Log);
+        Assert.Contains("block 1", kit.Board.Log);
         Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("damage Freminet"));
         Assert.Equal(6, StageDirector.ActAmount(StagePerformer.Freminet, true));
     }

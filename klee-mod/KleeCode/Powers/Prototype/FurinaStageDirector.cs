@@ -215,13 +215,13 @@ public sealed class StageDirector
         return spent;
     }
 
-    /// <summary>A guest's act's half-Spend (Navia, Freminet; the Spend
-    /// paper's pick 2): "Spend half your Fanfare (rounded down)". Half of
-    /// what is left when it acts, so two such guests split the bank oldest
-    /// first. Returns what counts as spent.</summary>
-    public Task<int> SpendHalf() =>
-        SpendUpTo(_stage.Fanfare / FurinaStageLaw.GuestSpendDivisor,
-                  forPlay: false);
+    /// <summary>A guest's act's share-Spend (the Spend paper's pick 2):
+    /// Navia "Spend half your Fanfare (rounded down)" (divisor 2), Freminet
+    /// "Spend a quarter" (divisor 4). A share of what is left when it acts,
+    /// so two such guests split the bank oldest first. Returns what counts
+    /// as spent.</summary>
+    public Task<int> SpendShare(int divisor) =>
+        SpendUpTo(_stage.Fanfare / divisor, forPlay: false);
 
     private async Task AfterSpend()
     {
@@ -614,15 +614,16 @@ public sealed class StageDirector
                                     Element.None);
                 break;
             case StagePerformer.Freminet:
-                // "Gain 3 Block. Spend half your Fanfare (rounded down):
-                // gain that much more Block." [6] (the Spend paper,
-                // 2026-10-10, pick 2). The half-Spend is a Spend when at
-                // least 1 is spent.
+                // "Gain 3 Block. Spend a quarter of your Fanfare (rounded
+                // down): gain that much more Block." [6] (the Spend paper,
+                // pick 2, ruled 2026-10-10). The quarter-Spend is a Spend
+                // when at least 1 is spent.
                 await _board.Block(number);
                 moved = number;
                 if (!_board.Over)
                 {
-                    var more = await SpendHalf();
+                    var more = await SpendShare(
+                        FurinaStageLaw.FreminetSpendDivisor);
                     if (more > 0 && !_board.Over)
                     {
                         await _board.Block(more);
@@ -634,7 +635,7 @@ public sealed class StageDirector
                 // "Spend half your Fanfare (rounded down). Deal that much Geo
                 // damage to a random enemy." (the Spend paper, pick 2).
                 // Nothing spent, nothing dealt.
-                moved = await SpendHalf();
+                moved = await SpendShare(FurinaStageLaw.NaviaSpendDivisor);
                 if (moved > 0 && !_board.Over)
                 {
                     await _board.Damage(who, StageTarget.Random, moved,

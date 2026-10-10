@@ -238,8 +238,9 @@ def test_bravuras_upgrade_raises_the_base_to_ten():
 
 
 def test_freminets_act_gives_block():
-    # The Spend paper (2026-10-10): "Gain 3 Block. Spend half your Fanfare
-    # (rounded down): gain that much more Block." [6]. No hit any more.
+    # The Spend paper (ruled 2026-10-10): "Gain 3 Block. Spend a quarter of
+    # your Fanfare (rounded down): gain that much more Block." [6]. No hit any
+    # more.
     st = _furina()
     st.player.ftd.stage = ["freminet"]
     hp = [e.hp for e in st.enemies]

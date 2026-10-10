@@ -754,10 +754,10 @@ public static class FurinaStage
         return Forecast(FurinaStageLedger.For(owner!));
     }
 
-    /// <summary>The forecast against a given stage (the pins'). Navia and
-    /// Freminet each Spend half of what is left when they act, oldest first
-    /// (the Spend paper, 2026-10-10), so the bank is walked in seat order.
-    /// </summary>
+    /// <summary>The forecast against a given stage (the pins'). Navia Spends
+    /// half and Freminet a quarter of what is left when they act, oldest
+    /// first (the Spend paper, 2026-10-10), so the bank is walked in seat
+    /// order.</summary>
     public static StageForecast Forecast(FurinaStageLedger ledger)
     {
         var bank = ledger.Fanfare;
@@ -768,7 +768,9 @@ public static class FurinaStage
             var half = 0;
             if (seat.Who is StagePerformer.Navia or StagePerformer.Freminet)
             {
-                half = bank / FurinaStageLaw.GuestSpendDivisor;
+                half = bank / (seat.Who == StagePerformer.Navia
+                    ? FurinaStageLaw.NaviaSpendDivisor
+                    : FurinaStageLaw.FreminetSpendDivisor);
                 if (half > 0)
                 {
                     bank -= half - System.Math.Min(half, free);

@@ -496,7 +496,7 @@ def _guest_value(state, member: str) -> float:
     elif member == "chevreuse":
         per = T.CHEVREUSE_ACT + 1.5
     elif member == "freminet":
-        # The Spend paper (2026-10-10): 3 Block, then half the bank as
+        # The Spend paper (2026-10-10): 3 Block, then a quarter of the bank as
         # Block (a share of what she earns a turn).
         per = 0.6 * T.FREMINET_ACT_BLOCK + 3.0
     elif member == "navia":

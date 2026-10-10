@@ -117,18 +117,24 @@ public static class FurinaStageLaw
     public const int ClorindeActDamageUpgraded = 9;
 
     /// <summary>Freminet's act (the Spend paper, 2026-10-10,
-    /// <c>review/active/furina-spend-paper-2026-10-10.md</c> pick 2): "Gain 3
-    /// Block. Spend half your Fanfare (rounded down): gain that much more
-    /// Block." [6] (His line gives the Block of every Drain.) The 5 [8] Cryo
-    /// hit left with this act.</summary>
+    /// <c>review/active/furina-spend-paper-2026-10-10.md</c> pick 2, ruled
+    /// 2026-10-10): "Gain 3 Block. Spend a quarter of your Fanfare (rounded
+    /// down): gain that much more Block." [6] (His line gives the Block of
+    /// every Drain.) The 5 [8] Cryo hit left with this act.</summary>
     public const int FreminetActBlock = 3;
 
     public const int FreminetActBlockUpgraded = 6;
 
-    /// <summary>Navia's and Freminet's acts Spend half your Fanfare, rounded
-    /// down (the Spend paper, pick 2). Mirrors
-    /// <c>furina_stage.GUEST_SPEND_DIVISOR</c>.</summary>
-    public const int GuestSpendDivisor = 2;
+    /// <summary>Navia's act Spends half your Fanfare, rounded down (the
+    /// Spend paper, pick 2). Mirrors
+    /// <c>furina_stage.NAVIA_SPEND_DIVISOR</c>.</summary>
+    public const int NaviaSpendDivisor = 2;
+
+    /// <summary>Freminet's act Spends a quarter of your Fanfare, rounded down
+    /// (the Spend paper, pick 2, ruled 2026-10-10: "I don't like artificial
+    /// limits, so I'd prefer to just fiddle with the ratio"). Mirrors
+    /// <c>furina_stage.FREMINET_SPEND_DIVISOR</c>.</summary>
+    public const int FreminetSpendDivisor = 4;
 
     /// <summary>"Spend up to X" (the Spend paper, pick 1): Spirited Aria's
     /// "Draw 1 for every 4 spent" and Crashing Waves' "hit once more for
