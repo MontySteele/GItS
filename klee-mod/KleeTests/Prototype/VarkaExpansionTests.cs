@@ -289,8 +289,12 @@ public class VarkaExpansionTests : IDisposable
         // NoteApplication (CoopNotesRulingsTests).
         Assert.DoesNotContain("AssemblyAtTheCathedralPower.OnElementApplied", end);
         Assert.Contains("WolfpackPower.OnAscensionPlayed", end);
-        Assert.Contains("CardPileCmd.AddGeneratedCardToCombat",
-                        Calls("WolfpackPower", "OnAscensionPlayed"));
+        // The Varka payoff round (2026-10-10): the copy is shuffled into the
+        // draw pile, Exhausts, and the seat page hears of it.
+        var wolves = Calls("WolfpackPower", "OnAscensionPlayed");
+        Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", wolves);
+        Assert.Contains("CardModel.AddKeyword", wolves);
+        Assert.Contains("ResolutionLedger.NoteEvent", wolves);
     }
 
     [Fact]

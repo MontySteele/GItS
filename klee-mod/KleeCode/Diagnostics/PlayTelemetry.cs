@@ -406,6 +406,21 @@ internal static class PlayTelemetry
 
     // ------------------------------------------------------------ events ---
 
+    /// <summary>Varka's current element as a word for a `cards_played` row,
+    /// or null for anyone else (whose rows keep their two columns).</summary>
+    internal static string? VarkaElementWord(Creature? creature)
+    {
+        try
+        {
+            return creature != null && VarkaOath.Live(creature)
+                ? VarkaOath.Current(creature).ToString() : null;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     internal static void CardPlayed(CardPlay cardPlay)
     {
         try
@@ -414,7 +429,8 @@ internal static class PlayTelemetry
             if (owner == null || !Open.TryGetValue(owner, out var record)) return;
             if (!cardPlay!.IsFirstInSeries) return;      // one row per PLAY
             var round = CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0;
-            record.CardsPlayed.Add((round, CardName(cardPlay.Card)));
+            record.CardsPlayed.Add((round, CardName(cardPlay.Card),
+                                    VarkaElementWord(owner.Creature)));
         }
         catch (Exception e)
         {
@@ -1290,7 +1306,11 @@ internal static class PlayTelemetry
         /// the first turn sample. See the flush for why the current value will
         /// not do.</summary>
         public int HpLastSeen = -1;
-        public readonly List<(int Round, string Name)> CardsPlayed = new();
+        /// <summary>`[round, name]`, and for Varka `[round, name, element]`:
+        /// his current element once the card resolved (the Varka payoff
+        /// round, 2026-10-10: "log the current element on every
+        /// `cards_played` row"); "None" before any is set.</summary>
+        public readonly List<(int Round, string Name, string? Element)> CardsPlayed = new();
         /// <summary>EB-14. One row per card taken from a selection screen,
         /// in the bot feed's column order. `Offered` is SHARED between the
         /// rows of one screen on purpose: it is written once and never
@@ -1402,6 +1422,11 @@ internal static class PlayTelemetry
                 if (i > 0) sb.Append(',');
                 sb.Append('[').Append(CardsPlayed[i].Round).Append(',');
                 Quote(sb, CardsPlayed[i].Name);
+                if (CardsPlayed[i].Element is { } element)
+                {
+                    sb.Append(',');
+                    Quote(sb, element);
+                }
                 sb.Append(']');
             }
 

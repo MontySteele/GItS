@@ -483,7 +483,7 @@ class _SpySession:
     instances_made: list["_SpySession"] = []
 
     def __init__(self, stamp, do_setup=True, intent=None, instance=None,
-                 install_bridge=True):
+                 install_bridge=True, extra_env=None):
         self.stamp = stamp
         self.do_setup = do_setup
         self.instance = instance

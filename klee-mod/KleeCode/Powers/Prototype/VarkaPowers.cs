@@ -915,17 +915,21 @@ public sealed class OathUntoDeathPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Wolfpack: "Whenever you play Four Winds' Ascension, add a copy
-/// of it to your discard pile." Paid by <see cref="VarkaOath.EndPlay"/>, one
-/// copy per stack, upgraded when the played one was.</summary>
+/// <summary>Wolfpack (the Varka payoff round, 2026-10-10): "Whenever you
+/// play Four Winds' Ascension, shuffle a copy of it into your Draw Pile. The
+/// copy Exhausts." Paid by <see cref="VarkaOath.EndPlay"/>, one copy per
+/// stack, upgraded when the played one was, at a random depth of the draw
+/// pile. A copy played fires it again, so one real card and one copy
+/// circulate. Sim twin: <c>varka_oath.end_play</c>.</summary>
 public sealed class WolfpackPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Wolfpack"),
         ("description",
-            "Whenever you play Four Winds' Ascension, add a copy of it to "
-          + "your [gold]Discard Pile[/gold]."),
+            "Whenever you play Four Winds' Ascension, shuffle a copy of it "
+          + "into your [gold]Draw Pile[/gold]. The copy "
+          + "[gold]Exhausts[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -937,6 +941,7 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
         var combat = Owner.CombatState;
         if (combat == null || Owner.Player is not { } player) return;
         Flash();
+        var made = 0;
         for (var i = 0; i < Amount; i++)
         {
             var copy = combat.CreateCard(
@@ -946,8 +951,18 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
             {
                 copy.UpgradeInternal();
             }
-            await CardPileCmd.AddGeneratedCardToCombat(copy, PileType.Discard,
-                                                       player);
+            copy.AddKeyword(CardKeyword.Exhaust);
+            await CardPileCmd.AddGeneratedCardToCombat(
+                copy, PileType.Draw, player, CardPilePosition.Random);
+            made++;
+        }
+        // The seat page's line (the payoff round's record): what fired, and
+        // how many copies went in.
+        if (made > 0)
+        {
+            ResolutionLedger.NoteEvent(ResolutionLedger.Wolfpack,
+                                       "Four Winds' Ascension", string.Empty,
+                                       "Wolfpack", amount: made);
         }
     }
 }

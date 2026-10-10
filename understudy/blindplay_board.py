@@ -1387,6 +1387,12 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
         out.append({"card": card,
                     "oath": oath,
                     "fang_ascension": bool(row.get("fang_ascension")),
+                    # The Varka payoff round (2026-10-10): the relic that
+                    # added it ("" on an older mod), and the card's Anemo
+                    # applications that found no aura, and that found one.
+                    "fang_relic": _text(row.get("fang_relic")),
+                    "swirl_no_aura": _int(row.get("swirl_no_aura")),
+                    "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
                     "auto_played": bool(row.get("auto_played")),
                     "carried": bool(row.get("carried")),
@@ -1400,7 +1406,10 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
 PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned",
                     # Seat page 3 (2026-10-05): a Shatter, and the curtain
                     # call's drained HP given back.
-                    "shattered", "curtain")
+                    "shattered", "curtain",
+                    # The Varka payoff round (2026-10-10): Wolfpack shuffled
+                    # copies in; what a Swirl paid under Twin Gales.
+                    "wolfpack", "paid")
 #: The event kinds a page OUTSIDE a fight prints (the reward screen after it).
 OUTSIDE_FIGHT_EVENTS = frozenset({"curtain"})
 

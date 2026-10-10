@@ -66,6 +66,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
                                         RESOLUTION_OATH, RESOLUTION_FANG,
+                                        RESOLUTION_FANG_DEFAULT,
+                                        RESOLUTION_NO_AURA,
                                         RESOLUTION_HIT_KILLED,
                                         RESOLUTION_KILLED,
                                         RESOLUTION_AUTO_CLAUSE,
@@ -1575,7 +1577,8 @@ def _resolution_lines(rows: list[dict[str, Any]],
             source=f" ({gain['source']})" if gain["source"] else "")
             for gain in row.get("oath") or []]
         if oath_lines and row.get("fang_ascension"):
-            oath_lines.append(RESOLUTION_FANG)
+            oath_lines.append(RESOLUTION_FANG.format(
+                relic=row.get("fang_relic") or RESOLUTION_FANG_DEFAULT))
         killed = row.get("killed") or []
         applied = row.get("applied") or []
         if not row["hits"] and not killed and not applied and oath_lines:
@@ -1586,8 +1589,13 @@ def _resolution_lines(rows: list[dict[str, Any]],
             # that hit nothing may still have moved a bar, and the stage log
             # above now files every Raise -- so the line points there rather
             # than saying nothing countable happened.
-            out.append(RESOLUTION_NO_HITS_STAGE if stage
-                       else RESOLUTION_NO_HITS)
+            # The Varka payoff round (2026-10-10): a Swirl with no aura to
+            # Swirl says so (Sucrose on a bare board).
+            if row.get("swirl_no_aura") and not row.get("swirl_on_aura"):
+                out.append(RESOLUTION_NO_AURA)
+            else:
+                out.append(RESOLUTION_NO_HITS_STAGE if stage
+                           else RESOLUTION_NO_HITS)
             continue
         for n, hit in enumerate(row["hits"], start=1):
             target = hit["target"] or "an enemy"
@@ -2130,6 +2138,25 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
     return out
 
 
+#: The Varka payoff round (2026-10-10): Four Winds' Ascension's once-per-
+#: combat rule, under the card in the hand, in the base game's words for a
+#: relic that adds a card. Printed while Boreas's Fang (or Wolf's Gravestone)
+#: is held; Darv's Tome hands the same card with no such rule.
+ASCENSION_TITLE = "Four Winds' Ascension"
+ASCENSION_ONCE_NOTE = ("    - Added by {relic} the first time each combat you "
+                       "gain Oath.")
+ASCENSION_RELICS = ("Boreas's Fang", "Wolf's Gravestone")
+
+
+def _ascension_relic(you: dict[str, Any]) -> str:
+    """The relic that adds Four Winds' Ascension, as held, or `""`."""
+    for relic in you.get("relics") or []:
+        name = relic.get("name") if isinstance(relic, dict) else None
+        if name and _fold(name) in {_fold(r) for r in ASCENSION_RELICS}:
+            return str(name)
+    return ""
+
+
 #: VARKA (the Oath rework). The block's heading and its lines, in the words
 #: his tips use (`ArmKeywordTips.ForOath` / `ForCurrentElement`). The payout
 #: sentences are the wire badge's own (`VarkaLaw` numbers).
@@ -2509,6 +2536,13 @@ EVENT_SHATTERED = "{card} Shattered {target}: Frozen removed"
 #: The curtain call, on the first page after the fight (Furina's drained HP
 #: comes back when combat ends; seats could not tell it had).
 EVENT_HP_RETURNED = "Drained {n} HP returned (the fight ended)"
+#: The Varka payoff round (2026-10-10). Wolfpack firing: the copy goes into
+#: the draw pile, where no other line of the page shows it arrive.
+EVENT_WOLFPACK = ("Wolfpack shuffled {n} of Four Winds' Ascension into your "
+                  "draw pile (it Exhausts when played)")
+#: And under Twin Gales, what each Swirl paid ("Numbers held"; a line, not a
+#: rule): `{paid}` is the mod's own words, `VarkaOath.TwinGalesPaid`.
+EVENT_SWIRL_PAID = "Twin Gales: the Swirl of {element} on {target} paid {paid}"
 #: SEAT PAGE 3: enemy powers whose firing is NOT news. Each fires on every
 #: card or hit, or every turn, and what it did is already on the page (a
 #: Strength, a Block, a damage figure): "Slippery fired x2" on a single hit
@@ -2909,6 +2943,12 @@ def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
     if kind == "curtain":
         total = sum(int(ev.get("amount") or 0) for ev in evs)
         return [EVENT_HP_RETURNED.format(n=total)] if total > 0 else []
+    if kind == "wolfpack":
+        total = sum(int(ev.get("amount") or 0) for ev in evs)
+        if total <= 0:
+            return []
+        return [EVENT_WOLFPACK.format(
+            n="a copy" if total == 1 else f"{total} copies")]
     for (card, target, power, _s, on_player), n in counted.items():
         times = f" x{n}" if n > 1 else ""
         if kind == "negated":
@@ -2923,6 +2963,10 @@ def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
         elif kind == "shattered":
             out.append(EVENT_SHATTERED.format(card=card or "an attack",
                                               target=target) + times)
+        elif kind == "paid":
+            out.append(EVENT_SWIRL_PAID.format(
+                element=card or "an aura", target=target or "an enemy",
+                paid=power) + times)
     return out
 
 
@@ -3245,11 +3289,6 @@ def render(obs: dict[str, Any]) -> str:
             if c["stage"]["log"]:
                 out.append(STAGE_LOG_HEADING)
                 out += _render_stage_log(c["stage"])
-        # VARKA (the Oath rework): his current element, his four Oath counts,
-        # what a Swirl pays now and every enemy's aura, above
-        # the hand whose Swirl choices they decide.
-        if c.get("oath") is not None:
-            out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])
         # `EB-506`. WHO IS AT THE FRONT, printed as a LIST IN ORDER with the
         # front marked, and refreshed off the live company on every screen.
         #
@@ -3338,14 +3377,28 @@ def render(obs: dict[str, Any]) -> str:
             for n, p in enumerate(you["potions"], start=1):
                 out.append(f"- {n}. **{p['title']}** — {p['text']}"
                            if p["text"] else f"- {n}. **{p['title']}**")
+        # VARKA (the Oath rework): his current element, his four Oath counts,
+        # what a Swirl pays now and every enemy's aura, directly above the
+        # hand whose Swirl choices they decide. The Varka payoff round
+        # (2026-10-10) moved it here from under the stage, where it sat after
+        # the powers, the receipts and the potions, far from the hand.
+        if c.get("oath") is not None:
+            out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])
         out += ["", "## Your hand", ""]
         if c.get("spark_note"):
             out += [c["spark_note"], ""]
         # `EB-752`: read once for the hand and handed to each face, because it
         # is a fact about what you are HOLDING and not about any one card.
         raiser = _unblocked_raiser(you)
+        fang = _ascension_relic(you)
         for card in c["hand"]:
             out += _render_card(card, raiser=raiser)
+            # The Varka payoff round (2026-10-10): where Four Winds'
+            # Ascension came from, and that it comes once a combat (a seat
+            # tried to play a second one that never came).
+            if fang and _fold(card.get("title")).rstrip("+") == _fold(
+                    ASCENSION_TITLE):
+                out.append(ASCENSION_ONCE_NOTE.format(relic=fang))
         if not c["hand"]:
             out.append("- (your hand is empty)")
         if c.get("hand_repeats"):

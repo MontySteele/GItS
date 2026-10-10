@@ -3918,7 +3918,7 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    # Reworded by the combo pass (sec.4, 2026-10-04): a mono-element payoff.
-   description: "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of it instead.",
+   description: "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold] instead.",
    effects: [{op: apply_power, power: vk_unwavering_banner, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -4053,7 +4053,9 @@
 - {id: proto_vk_wolfpack, name: "Wolfpack", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever you play Four Winds' Ascension, add a copy of it to your [gold]Discard Pile[/gold].",
+   # Varka payoff round, 2026-10-10: shuffled in, the copy Exhausts (was: to
+   # the discard pile). Provenance note, "Varka payoff round, 2026-10-10".
+   description: "Whenever you play Four Winds' Ascension, shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].",
    effects: [{op: apply_power, power: vk_wolfpack, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -4128,18 +4130,18 @@
 - {id: proto_vk_stoke_the_flames, name: "Stoke the Flames", character: varka,
    authored_by: [claude],
    # "Exhaust a card" is True Grit+'s: the player chooses, any card in hand.
-   # 2026-10-05: Pyro becomes current; provenance note, "Varka seat-round fixes".
-   # Varka payoff fix, 2026-10-08: costs 0, was 1.
+   # 2026-10-05 Pyro becomes current; 2026-10-08 costs 0; 2026-10-10 the switch
+   # before the gain. Provenance note, "Varka payoff round, 2026-10-10".
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. [gold]Pyro[/gold] becomes your [gold]current element[/gold].",
+   description: "[gold]Exhaust[/gold] a card. [gold]Pyro[/gold] becomes your [gold]current element[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
    effects: [{op: exhaust_from, select: chosen, amount: 1},
              {op: varka, kind: gain_pyro_oath, amount: 2}],
    upgrade: {varka_amount: 1}}
 
 - {id: proto_vk_ember_cleave, name: "Ember Cleave", character: varka,
    authored_by: [claude],
-   # Varka payoff fix, 2026-10-08: adds "Gain 1 Pyro Oath", gained even with
-   # no card left to Exhaust. Pyro becomes current from the hit, as before.
+   # Varka payoff fix, 2026-10-08: adds "Gain 1 Pyro Oath", even with no card
+   # to Exhaust. 2026-10-10: that gain makes Pyro current first, as Stoke's.
    cost: 1, type: attack, rarity: common,
    description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
    effects: [{op: varka, kind: pyro_strike, target: enemy, base: 9},

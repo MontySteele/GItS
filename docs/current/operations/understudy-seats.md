@@ -159,6 +159,25 @@ others; tear that lane down with `--teardown --lane N` and embark it again.
 `--characters` takes one name for all lanes or one per lane; `--seeds` one
 per lane or none (the game rolls them). Each seat still sets `GITS_LANE=N`.
 
+**Varka's starting Knight, forced per lane** (the Varka payoff round,
+2026-10-10). Boreas's Fang rolls the starter Knight off the seed, so a seed
+set fixes the element mix. `--varka-knight` forces it, one element for all
+lanes or one per lane (`roll` keeps a lane's seed roll):
+
+```sh
+python -m understudy.embark --lanes 1,2,3,4,5 --character varka --ascension 0     --max-actions 1500 --seeds S1,S2,S3,S4,S5 --varka-knight pyro   # Amber on all five
+python -m understudy.embark --lane 2 --character varka --seed S2 --varka-knight cryo
+```
+
+`pyro` is Amber, `hydro` Barbara, `cryo` Kaeya, `electro` Lisa. The embark
+sets `GITS_VARKA_KNIGHT` on the launched game only (`soak.Session`'s
+`extra_env`; with no flag it is set empty, so a stray export in your shell
+never reaches a lane) and records `varka_knight_requested` in the sidecar.
+The mod still draws the seed's roll from `PlayerRng.Transformations` and
+discards it, so every later roll of the seed is unchanged. It acts only when
+a new run is made (`BoreasFang.AfterObtained`); co-op and `--hold` do not take
+it.
+
 What makes it safe (the 2026-09-25 round's second lane never came up when two
 lanes were embarked at the same moment):
 
@@ -417,7 +436,9 @@ It prints medians by group x act x kind (damage a turn, HP lost % of max,
 turns, Block a turn, losses), each group's normal-fight ratio to the base five
 by act (the bar is within about 15%), and per-card plays and damage by act.
 Solo fights only unless `--no-solo`; `--feed bot|human`; `--since/--until` are
-local ISO times on `ts`; `--seed` matches the record's `run_id`. Records older
+local ISO times on `ts`; `--seed` matches the record's `run_id`. A
+`cards_played` row is `[round, name]`, and for Varka `[round, name, element]`:
+his current element once the card resolved (since 2026-10-10). Records older
 than 2026-10-02 lack Block and the wider damage credit and are left out of
 those medians, not counted as zero, so window a kit to its current build.
 

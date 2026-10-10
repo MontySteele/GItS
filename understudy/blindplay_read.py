@@ -186,7 +186,8 @@ def _text(value: Any) -> str:
     `_label` off an id among them. Two doors, one rule, and neither is the
     place a reader has to remember.
     """
-    return _despritify(qa_packet._text(qa_packet.strip_markup(value)))
+    return _scrub_mod_source(
+        _despritify(qa_packet._text(qa_packet.strip_markup(value))))
 
 
 #: 2026-09-26 (wave-3 Furina lane 3; Kokomi r32 lane 2 before it). BaseLib's
@@ -197,6 +198,22 @@ def _text(value: Any) -> str:
 #: under it -- a tooling label, and it names "Klee" on a Furina or Kokomi run.
 #: No rule is in it, so no page line reads it.
 MOD_SOURCE_TIP = "WhatMod"
+
+
+#: The Varka payoff round (2026-10-10): the same label, FOLDED INTO A TEXT.
+#: The Orobas event's relic text still read "WhatMod: KleeMod", twice, with
+#: the tip filter in place: the label had reached the page inside a string,
+#: not as a tip of its own. Scrubbed at `_text`, the one door. A bare
+#: "WhatMod" (the tip's own name) is left for `_is_mod_source_tip`.
+_MOD_SOURCE_IN_TEXT = re.compile(
+    r"\s*\b" + MOD_SOURCE_TIP + r"\b(?:[ \t]*:\s*|\s+)[A-Za-z][\w.-]*")
+
+
+def _scrub_mod_source(text: str) -> str:
+    """`text` with any "WhatMod: <mod id>" label taken out."""
+    if MOD_SOURCE_TIP not in text:
+        return text
+    return _MOD_SOURCE_IN_TEXT.sub("", text).strip()
 
 
 def _is_mod_source_tip(tip: Any) -> bool:

@@ -124,18 +124,20 @@ public class VarkaComboTests : IDisposable
         Assert.Contains("CardSelectCmd.FromHand", play);
         Assert.Contains("CardCmd.Exhaust", play);
         Assert.Contains("VarkaCards.GainPyroOath", play);
-        // The 2026-10-05 seat round: gain, then "Pyro becomes your current
-        // element", through the non-Knight path Unwavering Banner holds.
+        // The Varka payoff round (2026-10-10): "Pyro becomes your current
+        // element" FIRST, through the non-Knight path Unwavering Banner
+        // holds, then the gain, so Dawn Wind's March sees a current-element
+        // gain.
         var stoke = Calls("VarkaCards", "GainPyroOath");
-        Assert.True(stoke.IndexOf("VarkaOath.Gain")
-                    < stoke.IndexOf("VarkaOath.CardMakesCurrent"));
+        Assert.True(stoke.IndexOf("VarkaOath.CardMakesCurrent")
+                    < stoke.IndexOf("VarkaOath.Gain"));
         var makes = Calls("VarkaOath", "CardMakesCurrent");
         Assert.Contains("VarkaOath.BannerHolds", makes);
         Assert.Contains("VarkaOath.SetCurrent", makes);
         // The text pass of 2026-10-08: rule 6 golds the element.
-        Assert.Equal("[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} "
-                     + "[gold]Pyro[/gold] [gold]Oath[/gold]. [gold]Pyro[/gold] "
-                     + "becomes your [gold]current element[/gold].",
+        Assert.Equal("[gold]Exhaust[/gold] a card. [gold]Pyro[/gold] becomes "
+                     + "your [gold]current element[/gold]. Gain "
+                     + "{VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
                      Face(new ProtoVkStokeTheFlames()));
     }
 
