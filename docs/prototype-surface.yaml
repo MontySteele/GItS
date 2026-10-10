@@ -3168,8 +3168,8 @@
    upgrade: {power_amount: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Your Attacks deal 1 additional damage for every 5 HP you have [gold]Drained[/gold] this combat.",
-   effects: [{op: apply_power, power: fs_high_stakes, amount: 5,
+   description: "Your Attacks deal 1 additional damage for every 4 HP you have [gold]Drained[/gold] this combat.",
+   effects: [{op: apply_power, power: fs_high_stakes, amount: 4,
               target: self}]}
 
 - {id: proto_fs_regina_of_all_waters, name: "Regina of All Waters", character: furina,

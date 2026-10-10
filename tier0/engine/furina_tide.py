@@ -159,9 +159,11 @@ SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
 NEAR_LINE = 5                      # "within 5 HP of your Drain line"
 # High Stakes (the Spend round 2, 2026-10-10): "Your Attacks deal 1
 # additional damage for every 5 HP you have Drained this combat." [every 4].
-# The card's power amount is the divisor; each copy adds its own bonus.
-HIGH_STAKES_EVERY = 5
-HIGH_STAKES_EVERY_UPGRADED = 4
+# The Spend rounds review (2026-10-10) made it every 4 [3], round 2's
+# pre-registered fallback. The card's power amount is the divisor; each copy
+# adds its own bonus.
+HIGH_STAKES_EVERY = 4
+HIGH_STAKES_EVERY_UPGRADED = 3
 HYMN_THRESHOLD = 4                 # Hymn of Renewal: a Repay of 4 or more HP
 PRIMA_DONNA_FANFARE = 10           # Prima Donna: 10 or more Fanfare
 REGINA_DRAIN = 3                   # Regina of All Waters: Drain 3

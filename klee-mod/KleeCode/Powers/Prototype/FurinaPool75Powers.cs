@@ -156,7 +156,7 @@ public sealed class HymnOfRenewalPower : PowerModel, ILocalizationProvider
 /// play the kit teaches. Round 1's "Drained and not Repaid" sat near 0,
 /// because Salon Solitaire Repays every turn: it peaked at +2 in three plays.
 ///
-/// THE AMOUNT IS THE DIVISOR (5, 4 upgraded:
+/// THE AMOUNT IS THE DIVISOR (4, 3 upgraded since the Spend rounds review:
 /// <see cref="FurinaStageLaw.HighStakesEvery"/>). It reads the ledger's gross
 /// count (<see cref="FurinaStageLedger.DrainedThisCombat"/>, every Drain's HP,
 /// which no Repay lowers), rounded down, and adds it to each powered Attack
@@ -215,12 +215,20 @@ public sealed class HighStakesPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>The bonus, read at the hit: her Attacks only (a card's
-    /// powered hit). PURE.</summary>
+    /// powered hit). PURE.
+    ///
+    /// NO TARGET IS ASKED FOR, as Strength asks for none (the Spend rounds
+    /// review, 2026-10-10, change 2). A card in her hand previews with no
+    /// body on a Stage board (<see cref="FoldedPreview.Body"/>: the game
+    /// names one only while the card is aimed), so a <c>target == null</c>
+    /// gate dropped the bonus from the face: Hydro Lance printed 15 and dealt
+    /// 18. The Attack-card and powered-hit gates stay; her own body is still
+    /// refused.</summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
     {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         if (cardSource is not { Type: CardType.Attack }) return 0m;
         return Bonus;

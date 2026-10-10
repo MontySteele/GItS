@@ -172,7 +172,7 @@ upgrade replaces today's 0 cost.
 | Against the Tide | Attack 1, U | Deal 8 damage. If you are within 5 HP of your Drain line, deal 14 instead. [11 / 18] |
 | Pay the Tab | Skill 1, U | Drain 6. Draw 3 cards. [4 cards] |
 | Riptide Lunge | Attack 1, U | Drain 3. Deal 10 damage. If this kills an enemy, Repay 6. [13] |
-| High Stakes | Power 1, U | Your Attacks deal 1 additional damage for every 5 HP you have Drained this combat. [every 4] (reworked by the Spend round and its round 2, 2026-10-10) |
+| High Stakes | Power 1, U | Your Attacks deal 1 additional damage for every 4 HP you have Drained this combat. [every 3] (reworked by the Spend round and its round 2; every 4 [3] by the Spend rounds review, 2026-10-10) |
 | Regina of All Waters | Power 2 [1], R | At the start of your turn, Drain 3. If you do, gain 1 Strength. |
 | The Deluge | Attack 2 [1], R | Drain 8. Deal 24 damage to ALL enemies. Exhaust. |
 | All In | Skill 0, R | Drain 8. Gain 2 Energy. Exhaust. [Drain 6] |

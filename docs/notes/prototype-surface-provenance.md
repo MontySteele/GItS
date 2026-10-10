@@ -7046,3 +7046,21 @@ not built here.
   Drain returns after combat.", and the seat page prints "Drain line 0 HP
   (...): all your Drain returns after combat." (`FurinaStageLaw
   .LineZeroReturns`).
+
+## Furina Spend rounds review, 2026-10-10
+
+Record: `review/records/furina-spend-rounds-review-2026-10-10.md`, "What
+changes (Claude ships)". [USER]'s picks there are not built here.
+
+- High Stakes (`proto_fs_high_stakes`): every 5 [4] becomes every 4 [3],
+  round 2's pre-registered fallback. Constants `FurinaStageLaw
+  .HighStakesEvery` / `HighStakesEveryUpgraded`, sim
+  `furina_tide.HIGH_STAKES_EVERY` / `HIGH_STAKES_EVERY_UPGRADED`.
+- High Stakes in the card preview: the hook no longer asks for a target,
+  as Strength asks for none. A card in her hand previews with no body on a
+  Stage board, so the old `target == null` gate dropped the bonus from the
+  face (Hydro Lance printed 15 and dealt 18). The Attack-card and
+  powered-hit gates stay.
+- The Drain face names who pays its Block: "(+3 Block: The Masquerade)"
+  and "(+3 Block: Freminet)", one line each, after any Drain-line warning
+  (`FurinaStageFacePreview.DrainBlock`).

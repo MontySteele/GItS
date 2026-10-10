@@ -1616,6 +1616,10 @@ public static partial class McpMod
         card.CanPlay(out var unplayableReason, out var refusedBy);
         object? gitsRefusedBy = refusedBy;
 
+        // GItS LOCAL EDIT (fresh hand previews, 2026-10-10): recompute the
+        // preview before anything reads the card; the description getter only
+        // formats the last one drawn (`gits/GitsFreshPreview.cs`).
+        GitsRefreshHandPreview(card);
         var state = BuildCardInfo(card);
         state["index"] = index;
         state["description"] = SafeGetCardDescription(card); // hand cards use default pile
@@ -2921,6 +2925,8 @@ public static partial class McpMod
             var card = holder.CardModel;
             if (card == null) continue;
 
+            // GItS LOCAL EDIT (fresh hand previews, 2026-10-10).
+            GitsRefreshHandPreview(card);
             var cardInfo = BuildCardInfo(card);
             cardInfo["index"] = index;
             cardInfo["description"] = SafeGetCardDescription(card); // hand cards use default pile
