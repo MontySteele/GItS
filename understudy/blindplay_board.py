@@ -1035,6 +1035,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # THE SALON'S TAB (2026-10-05): the HP loan, the "Drained N"
             # counter's reading. `line` is None on a build that sends none.
             "drained": _int(raw.get("drained")),
+            # The quarter-line round (2026-10-10): the part of it drained
+            # past the line, lost unless Repaid. 0 on a build that sends none.
+            "drained_past": _int(raw.get("drained_past")),
             "line": None if line is None else _int(line),
             # Seat page 3: where the line comes from, in the mod's words
             # (`FurinaStageLaw.LineWhy`); "" on a build that sends none.
