@@ -56,7 +56,7 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara: Whisper of Water"),
-        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. For 2 turns, at the start of your turn gain {VkAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Your [gold]Block[/gold] is not removed at the start of your next turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,8 +64,7 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
         {
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
-            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new DynamicVar("VkAmount", 4m)
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,12 +79,11 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
-        await VarkaCards.EchoBlock(choiceContext, this, cardPlay);
+        await PowerCmd.Apply<BlurPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(2m);
-        DynamicVars["VkAmount"].UpgradeValueBy(2m);
     }
 }

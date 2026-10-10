@@ -2496,7 +2496,6 @@ VARKA_KINDS = {
     "frost_ward": "FrostWard",
     "gleeful_songs": "GleefulSongs",
     "rippling_guard": "RipplingGuard",
-    "echo_block": "EchoBlock",
     # Downburst's rider (2026-10-04, after spent auras went, #882).
     "swirled_oath": "SwirledOath",
     # THE COMBO PASS (2026-10-04, review/active/varka-combo-pass-2026-10-04.md
@@ -2525,7 +2524,6 @@ VARKA_KIND_FIELDS = {
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
     "rippling_guard": ("base", "per"),
-    "echo_block": ("amount",),
     "swirled_oath": ("amount",),
     # The combo pass (2026-10-04).
     "gain_pyro_oath": ("amount",),
@@ -3377,6 +3375,12 @@ APPLY_POWERS = {
     # power stack since the block funnel was written.
     "dexterity": ("DexterityPower", None,
         "Gain {X} [gold]Dexterity[/gold]."),
+    # The base game's Blur (Silent), first printed by Varka's Barbara:
+    # Whisper of Water (the Hydro paper, 2026-10-10). The game's own power;
+    # tier0 reads the `blur` stack at the block clear (`refpowers`).
+    "blur": ("BlurPower", None,
+        "Your [gold]Block[/gold] is not removed at the start of your next "
+        "turn."),
     # THE MONDSTADT COMPANION OVERHAUL (R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulPowers.cs and
     # is Compile Remove'd out of a release build, so the only rows that may name
@@ -3542,8 +3546,8 @@ APPLY_POWERS = {
         "[gold]Oath[/gold], your [gold]Anemo[/gold] Attacks deal {X} "
         "additional damage."),
     "vk_converging_winds": ("ConvergingWindsPower", None,
-        "The elements your [gold]Swirls[/gold] spread set off "
-        "[gold]Elemental Reactions[/gold]."),
+        "Your [gold]Swirls[/gold] deal {X} additional damage to ALL "
+        "enemies."),
     "vk_boreas_unbound": ("BoreasUnboundPower", None,
         "Whenever your [gold]current element[/gold] changes, gain {X} "
         "[gold]Energy[/gold]."),
@@ -4789,6 +4793,7 @@ def blocked_reason(
                 and kokomi_companions_this_turn_calc_rider(card, effect) is None
                 and debuffs_on_target_calc_rider(card, effect) is None
                 and kokomi_casket_calc_rider(card, effect) is None
+                and plus_block_calc_rider(card, effect) is None
                 and plans_held_draw_rider(card, effect) is None
                 and swirls_turn_calc_rider(card, effect) is None
                 # (`EB-723`): the Stage's three counts, on the
@@ -6198,12 +6203,49 @@ def kokomi_casket_calc_rider(
     if eff.get("op") != "damage" or eff.get("target") == "self":
         return None
     formula = eff.get("amount_formula")
-    if not isinstance(formula, dict):
+    if not isinstance(formula, dict) or "plus" in formula:
         return None
     reader = RUNTIME_COUNTS.get(formula.get("count"))
     if reader is None:
         return None
     return (int(formula.get("base", 0)), int(formula.get("per", 1)), reader)
+
+
+def plus_block_calc_rider(
+        card: dict, eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: <RUNTIME_COUNTS>, plus:
+    player_block}` on a damage op -- Body Slam with a scaling rider (Varka's
+    Tidal Bulwark, the Hydro paper 2026-10-10: "Deal damage equal to your
+    Block, plus 2 [3] for each Hydro Oath").
+
+    TWO TERMS ON ONE TRIPLE. The game's `CalculatedVar.Calculate` is
+    `CalculationBase + ExtraDamage * multiplier`, one slope. So ExtraDamage is
+    1 and the multiplier carries both terms: the Block, plus the per-count
+    slope read off the card's own `CalculationExtra` (declared beside the
+    triple, the var the face prints and `formula_per` bumps). Exact decimal
+    arithmetic, no division. Sim twin: `effects._calc_amount`'s `plus`.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict) or formula.get("plus") != "player_block":
+        return None
+    reader = RUNTIME_COUNTS.get(formula.get("count"))
+    prefix = "static (card, _) => "
+    if reader is None or not reader.startswith(prefix):
+        return None
+    count = reader[len(prefix):]
+    return (int(formula.get("base", 0)), 1, (
+        f"{prefix}(int)card.Owner.Creature.Block"
+        f" + card.DynamicVars.CalculationExtra.BaseValue * {count}"))
+
+
+def plus_block_per(eff: dict) -> int | None:
+    """The slope a `plus_block_calc_rider` row declares as CalculationExtra."""
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict) or formula.get("plus") != "player_block":
+        return None
+    return int(formula.get("per", 1))
 
 
 def debuffs_on_target_calc_rider(
@@ -7208,6 +7250,10 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     casket = kokomi_casket_calc_rider(card, eff)
     if casket is not None:
         return casket
+    # The Hydro paper (2026-10-10), Tidal Bulwark: Block plus a count.
+    plus_block = plus_block_calc_rider(card, eff)
+    if plus_block is not None:
+        return plus_block
     swirls_turn = swirls_turn_calc_rider(card, eff)
     if swirls_turn is not None:
         return swirls_turn
@@ -7351,6 +7397,11 @@ def build_vars(card: dict) -> list[str]:
                 # face/preview (:diff green) and the hit resolve identically.
                 out.append(f'new CalculationBaseVar({base}m)')
                 out.append(f'new ExtraDamageVar({extra}m)')
+                # `plus_block_calc_rider`: the per-count slope the
+                # multiplier reads and the face prints.
+                if plus_block_calc_rider(card, eff) is not None:
+                    out.append(
+                        f'new CalculationExtraVar({plus_block_per(eff)}m)')
                 out.append(
                     f'new {calculated_damage_var(card)}(ValueProp.Move)'
                     f'.WithMultiplier({mult})')
@@ -8172,6 +8223,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or debuffs_on_target_calc_rider(card, e) is not None
             or kokomi_casket_calc_rider(card, e) is not None
+            or plus_block_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             # (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
@@ -8194,6 +8246,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
             or kokomi_companions_this_turn_calc_rider(card, e) is not None
             or debuffs_on_target_calc_rider(card, e) is not None
             or kokomi_casket_calc_rider(card, e) is not None
+            or plus_block_calc_rider(card, e) is not None
             or swirls_turn_calc_rider(card, e) is not None
             # (`EB-723`): the Stage's counts join the same two
             # vars on the identical argument -- the rows render through the
@@ -14978,6 +15031,7 @@ def build_upgrade(card: dict) -> list[str]:
         # face reads, and the `+` card printed its base number.
         per_var = ("CalculationExtra"
                    if any(stage_count_block_rider(card, e) is not None
+                          or plus_block_calc_rider(card, e) is not None
                           for e in card.get("effects", []))
                    else "ExtraDamage")
         lines.append(

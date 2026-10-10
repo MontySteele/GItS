@@ -450,10 +450,16 @@ def _calc_amount(state: CombatState, formula: dict,
                  current_card: Optional[Card] = None) -> int:
     """CalculatedDamageVar / CalculatedVar grammar: base + per * count, where
     count is a _runtime_count token. base defaults 0 (BodySlam), per defaults
-    1 (ExpectAFight's 1-per-Attack)."""
+    1 (ExpectAFight's 1-per-Attack). An optional `plus: <count>` adds a
+    second count at slope 1 (Tidal Bulwark, the Hydro paper 2026-10-10:
+    "damage equal to your Block, plus 2 for each Hydro Oath"; C# twin
+    `gen_klee_cards.plus_block_calc_rider`)."""
+    plus = formula.get("plus")
     return (formula.get("base", 0)
             + formula.get("per", 1)
-            * _runtime_count(state, formula["count"], current_card))
+            * _runtime_count(state, formula["count"], current_card)
+            + (_runtime_count(state, plus, current_card)
+               if plus is not None else 0))
 
 
 def _power_amount_formula(state: CombatState, formula: dict) -> int:

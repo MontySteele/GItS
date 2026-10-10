@@ -878,13 +878,16 @@ def _validate_count_vocabulary(card_id: str, fx: dict) -> None:
                     f"effects._power_amount_formula would raise the first "
                     f"time it resolved")
             continue
-        token = formula.get("count")
-        if not _effects.is_known_count(token):
-            raise ValueError(
-                f"card {card_id!r}: unknown runtime count {token!r} in "
-                f"{key} (op {op!r}) -- not resolvable by "
-                f"effects._runtime_count, so this card would raise the first "
-                f"time it resolved")
+        tokens = [formula.get("count")]
+        if "plus" in formula:                   # `_calc_amount`'s second count
+            tokens.append(formula["plus"])
+        for token in tokens:
+            if not _effects.is_known_count(token):
+                raise ValueError(
+                    f"card {card_id!r}: unknown runtime count {token!r} in "
+                    f"{key} (op {op!r}) -- not resolvable by "
+                    f"effects._runtime_count, so this card would raise the "
+                    f"first time it resolved")
     for key in ("amount", "times"):
         val = fx.get(key)
         if not isinstance(val, str):

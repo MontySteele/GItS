@@ -493,18 +493,30 @@ def test_stormward_stance(varka):
 
 
 def test_converging_winds(varka):
-    """The Swirl's spread becomes the flat 2 carrying the element, landing
-    on each other enemy; a spread reaction credits nothing."""
-    st = _state(enemies=[_enemy(name="a", aura="pyro"),
-                         _enemy(name="b", aura="hydro"),
-                         _enemy(name="c")], fang=False)
-    st.player.powers[V.CONVERGING_WINDS] = 1
+    """Varka round 3, pick 1 (2026-10-10): "Your Swirls deal 6 [8]
+    additional damage to ALL enemies." The spread is the ordinary one; the
+    bonus lands on every enemy, once per Swirl, beside the flat 2."""
+    def board():
+        return _state(enemies=[_enemy(name="a", aura="pyro"),
+                               _enemy(name="b", aura="hydro"),
+                               _enemy(name="c")], fang=False)
+    st = board()
     _play(st, _vk("jean_dandelion_breeze"))
-    a, b, c = st.enemies
-    assert a.hp == 98
-    assert b.hp < 98 and b.aura is None                 # Vaporize on b
-    assert c.hp == 98 and c.aura == "pyro"
-    assert _led(st).oath == {"pyro": 1, "hydro": 0, "electro": 0, "cryo": 0}
+    base = [e.hp for e in st.enemies]
+    st = board()
+    _play(st, _vk("converging_winds"))
+    assert st.player.powers[V.CONVERGING_WINDS] == 6
+    _play(st, _vk("jean_dandelion_breeze"))
+    assert [e.hp for e in st.enemies] == [h - 6 for h in base]
+    assert st.enemies[1].aura == "pyro"                 # the plain spread
+    st = board()
+    _play(st, _vk("converging_winds") + "+")
+    assert st.player.powers[V.CONVERGING_WINDS] == 8
+
+
+def test_converging_winds_is_cost_one_on_the_sheet(varka):
+    from tier0.content import loader
+    assert loader.get_card(_vk("converging_winds")).cost == 1
 
 
 def test_grand_masters_order_plays_the_next_knight_twice(varka):
