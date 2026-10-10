@@ -71,7 +71,7 @@ public class FurinaSpendRoundFixesTests : IDisposable
     // ---- 1. High Stakes ------------------------------------------------------
 
     [Fact]
-    public void High_stakes_prints_the_divisor_five_and_four_upgraded()
+    public void High_stakes_prints_the_divisor_from_the_constants()
     {
         var card = new ProtoFsHighStakes();
         Assert.Equal(

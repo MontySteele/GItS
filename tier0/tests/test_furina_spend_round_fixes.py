@@ -51,9 +51,9 @@ def _play(st, card):
 
 def test_high_stakes_constants_mirror_the_card():
     row = loader.get_card("proto_fs_high_stakes")
-    assert row.effects[0]["amount"] == FS.HIGH_STAKES_EVERY == 5
+    assert row.effects[0]["amount"] == FS.HIGH_STAKES_EVERY == 4
     up = loader.get_card("proto_fs_high_stakes+")
-    assert up.effects[0]["amount"] == FS.HIGH_STAKES_EVERY_UPGRADED == 4
+    assert up.effects[0]["amount"] == FS.HIGH_STAKES_EVERY_UPGRADED == 3
     assert (row.cost, row.rarity) == (1, "uncommon")
 
 
@@ -62,19 +62,19 @@ def test_high_stakes_reads_the_drained_this_combat():
     (`test_furina_spend_round_2.py`)."""
     st = _furina()
     _play(st, _card("proto_fs_high_stakes"))
-    assert st.player.ftd.high_stakes_every == [5]
+    assert st.player.ftd.high_stakes_every == [4]
     assert FS.high_stakes_bonus(st) == 0
     st.player.ftd.drained_this_combat = 14       # past the line counts too
-    assert FS.high_stakes_bonus(st) == 2         # 14 // 5
+    assert FS.high_stakes_bonus(st) == 3         # 14 // 4
 
 
 def test_high_stakes_copies_add_their_own_bonus():
     st = _furina()
     _play(st, _card("proto_fs_high_stakes"))
     _play(st, _card("proto_fs_high_stakes+"))
-    assert st.player.ftd.high_stakes_every == [5, 4]
+    assert st.player.ftd.high_stakes_every == [4, 3]
     st.player.ftd.drained_this_combat = 9
-    assert FS.high_stakes_bonus(st) == 1 + 2     # 9 // 5 + 9 // 4
+    assert FS.high_stakes_bonus(st) == 2 + 3     # 9 // 4 + 9 // 3
 
 
 def test_high_stakes_no_longer_reads_the_line():

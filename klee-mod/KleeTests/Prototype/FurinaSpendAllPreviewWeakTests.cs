@@ -76,14 +76,14 @@ public class FurinaSpendAllPreviewWeakTests
         }
     }
 
-    private sealed class Board
+    internal sealed class Board
     {
         public required Seat Furina;
         public required Creature Enemy;
         public required CardModel Card;
     }
 
-    private static Board Build(CardModel card, Action<Seat>? furinaPowers = null,
+    internal static Board Build(CardModel card, Action<Seat>? furinaPowers = null,
                                Action<Seat>? enemyPowers = null,
                                bool inHand = true)
     {
@@ -121,7 +121,7 @@ public class FurinaSpendAllPreviewWeakTests
 
     /// <summary>Run <paramref name="body"/> with the combat manager in a
     /// combat, and put it back.</summary>
-    private static void InCombat(Action body)
+    internal static void InCombat(Action body)
     {
         var field = typeof(CombatManager).GetField("_turnState", HeadlessGame.All)!;
         var saved = field.GetValue(CombatManager.Instance);
@@ -140,7 +140,7 @@ public class FurinaSpendAllPreviewWeakTests
         }
     }
 
-    private static decimal Preview(CardModel card, Creature? target, bool inHand)
+    internal static decimal Preview(CardModel card, Creature? target, bool inHand)
     {
         var var = card.DynamicVars.CalculatedDamage;
         var.UpdateCardPreview(card, CardPreviewMode.Normal, target,

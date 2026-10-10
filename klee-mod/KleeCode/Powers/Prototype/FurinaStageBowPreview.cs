@@ -77,21 +77,55 @@ public static class FurinaStageFacePreview
 {
     /// <summary>"(Not enough HP)" while a Drain of <paramref name="amount"/>
     /// would take her to 0 HP; "(Past your Drain line of 59 HP)" while it
-    /// would take her past the line; empty otherwise, and off a combat or a
-    /// Furina board.</summary>
+    /// would take her past the line; then the Block the Drain pays and who
+    /// pays it (<see cref="DrainBlock(int, int, bool)"/>). Empty otherwise,
+    /// and off a combat or a Furina board.</summary>
     public static string DrainLine(CardModel card, int amount)
     {
         if (Owner(card) is not { } owner) return "";
         if (!FurinaStage.CanDrain(owner, amount)) return NotEnoughHp;
         var ledger = FurinaStageLedger.For(owner);
-        if (!ledger.PastLine(amount, (int)owner.CurrentHp)) return "";
+        var block = DrainBlock(amount, ledger.Mods.Masquerade,
+                               ledger.OnStage(StagePerformer.Freminet));
+        if (!ledger.PastLine(amount, (int)owner.CurrentHp)) return block;
         // The Spend round (2026-10-10): with A Five-Century Act in play the
         // HP drained past the line returns at the curtain call too, so the
         // tag says that instead of naming a line that costs nothing.
-        return ledger.Mods.FiveCenturyAct > 0
-            ? PastLineReturns
-            : PastLine(FurinaStage.LineOf(owner));
+        return (ledger.Mods.FiveCenturyAct > 0
+                   ? PastLineReturns
+                   : PastLine(FurinaStage.LineOf(owner)))
+             + block;
     }
+
+    /// <summary>
+    /// THE BLOCK A DRAIN PAYS, AND WHO PAYS IT (the Spend rounds review,
+    /// 2026-10-10, change 3: a seat could not tell The Masquerade's Block from
+    /// Freminet's line and called The Masquerade "neutral"). "(+3 Block: The
+    /// Masquerade)" for <paramref name="masquerade"/> copies of the power
+    /// (each pays the HP drained), "(+3 Block: Freminet)" while Freminet is
+    /// on stage (his line pays the HP drained once), one line each, in the
+    /// order <see cref="StageDirector.Drain"/> pays them. Empty when neither
+    /// pays. The words, for the pins and the face.
+    /// </summary>
+    public static string DrainBlock(int amount, int masquerade, bool freminet)
+    {
+        if (amount <= 0) return "";
+        var words = "";
+        if (masquerade > 0)
+        {
+            words += BlockFrom(amount * masquerade,
+                               StageDirector.MasqueradeTitle);
+        }
+        if (freminet)
+        {
+            words += BlockFrom(amount, StagePerformer.Freminet.ToString());
+        }
+        return words;
+    }
+
+    /// <summary>One source's line: "(+3 Block: Freminet)".</summary>
+    public static string BlockFrom(int block, string source) =>
+        $"\n(+{block} Block: {source})";
 
     /// <summary>The tag under A Five-Century Act: the HP drained past the
     /// line returns after combat.</summary>
