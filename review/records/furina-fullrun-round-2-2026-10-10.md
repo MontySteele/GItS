@@ -63,3 +63,5 @@ This is the second round on build 0.2.4772+next. It used the same cards as round
    - (c) Quick Flourish becomes "Spend up to 8: 2 damage for each". This was declined on the Spend paper; the new fact is the two stranded deaths.
    - (d) A draw-free Uncommon sink Power, a new design.
 2. **Furina's stage.** **Default: Furina goes to your playtest now, with no third seat round on this build.** The alternative is one more round after pick 1 changes a card, graded on stranded-bank deaths: 0 of 4.
+
+**Ruled 2026-10-10, both at default.** [USER]: "Makes sense on Furina." No card change for outlets; the stranded-bank question goes into his run. Furina goes to his playtest, with no third seat round on this build.
