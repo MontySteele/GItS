@@ -338,8 +338,6 @@ MIRRORED: dict[str, object] = {
     "VarkaLaw.SwirlElectroDamageAll": _varka("SWIRL_ELECTRO_DAMAGE_ALL"),
     # THE EXPANSION (2026-10-01): Eye of Stormterror's Swirls a turn.
     "VarkaLaw.EyeOfStormterrorSwirls": _varka("EYE_OF_STORMTERROR_SWIRLS"),
-    # THE REBALANCE (2026-10-03): Whisper of Water's later turns.
-    "VarkaLaw.EchoBlockTurns": _varka("ECHO_BLOCK_TURNS"),
 }
 
 # --------------------------------------------------------------------------

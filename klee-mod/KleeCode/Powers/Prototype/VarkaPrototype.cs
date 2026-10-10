@@ -26,8 +26,9 @@ public interface IVarkaCharacter
 ///   * BOREAS'S FANG adds Four Winds' Ascension to his hand the first time
 ///     each combat he gains Oath (<c>Relics.BoreasFang</c>), and at the start
 ///     of a run rolls his starter Knight.
-///   * CONVERGING WINDS, card-scoped: his Swirls react where they land
-///     (<see cref="ConvergingWindsPower"/>, <c>ReactionEffects.SwirlPays</c>).
+///   * CONVERGING WINDS, card-scoped: his Swirls deal its amount to ALL
+///     enemies (<see cref="ConvergingWindsPower"/>, from
+///     <see cref="VarkaOath.OnSwirl"/>).
 ///
 /// NO SWITCH OF HIS OWN (collapsed 2026-10-01, legacy cleanup stage 2): he
 /// ships nowhere else, so there is no shipped kit to switch back to. He
@@ -72,8 +73,4 @@ public static class VarkaLaw
     /// <summary>Eye of Stormterror (the expansion): the Swirls each turn that
     /// draw.</summary>
     public const int EyeOfStormterrorSwirls = 3;
-
-    /// <summary>Whisper of Water (the rebalance, 2026-10-03): the turns its
-    /// later Block lasts ("at the start of your next 2 turns").</summary>
-    public const int EchoBlockTurns = 2;
 }

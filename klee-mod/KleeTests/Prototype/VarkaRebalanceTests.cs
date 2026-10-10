@@ -109,19 +109,43 @@ public class VarkaRebalanceTests : IDisposable
     }
 
     [Fact]
-    public void Whisper_of_water_echoes_for_two_turns()
+    public void Whisper_of_water_is_the_base_blur()
     {
-        Assert.Equal(2, VarkaLaw.EchoBlockTurns);
-        Assert.Equal(4m, Var(new ProtoVkBarbaraWhisperOfWater(), "VkAmount"));
-        Assert.Equal(6m, Var(Upgraded<ProtoVkBarbaraWhisperOfWater>(), "VkAmount"));
-        var ledger = VarkaOathLedger.For(Seat.Varka().Creature);
-        ledger.AddEchoBlock(4, VarkaLaw.EchoBlockTurns);
-        Assert.Equal(4, ledger.TakeEchoBlock());
-        Assert.Equal(4, ledger.TakeEchoBlock());
-        Assert.Equal(0, ledger.TakeEchoBlock());
-        Assert.Equal(0, ledger.EchoEntries);
-        Assert.Contains("VarkaOathLedger.TakeEchoBlock", Calls("VarkaOath", "TurnStart"));
-        Assert.Contains("VarkaCards.EchoBlock", Calls("ProtoVkBarbaraWhisperOfWater", "OnPlay"));
+        // The Hydro paper (2026-10-10): "Your Block is not removed at the
+        // start of your next turn" -- the game's own BlurPower, one stack.
+        var play = Calls("ProtoVkBarbaraWhisperOfWater", "OnPlay");
+        Assert.Contains(
+            Il.CallSequence(Il.Method("ProtoVkBarbaraWhisperOfWater", "OnPlay")),
+            c => c.Contains("PowerCmd.Apply<BlurPower>"));
+        Assert.Contains("CreatureCmd.GainBlock", play);
+        Assert.DoesNotContain(play, c => c.Contains("VarkaCards"));
+        Assert.False(new ProtoVkBarbaraWhisperOfWater().DynamicVars.ContainsKey("VkAmount"));
+        Assert.EndsWith("Your [gold]Block[/gold] is not removed at the start of your "
+                        + "next turn.",
+                        new ProtoVkBarbaraWhisperOfWater().Localization!
+                            .Single(p => p.Item1 == "description").Item2);
+    }
+
+    [Fact]
+    public void Tidal_bulwark_is_hydros_body_slam()
+    {
+        // The Hydro paper (2026-10-10): an Attack, 1, "Deal damage equal to
+        // your Block, plus 2 [3] for each Hydro Oath. Apply Hydro to an
+        // enemy." One CalculatedDamage folds the Block and the Oath slope.
+        var card = new ProtoVkTidalBulwark();
+        Assert.Equal(CardType.Attack, card.Type);
+        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(0m, Var(card, "CalculationBase"));
+        Assert.Equal(1m, Var(card, "ExtraDamage"));
+        Assert.Equal(2m, Var(card, "CalculationExtra"));
+        Assert.Equal(3m, Var(Upgraded<ProtoVkTidalBulwark>(), "CalculationExtra"));
+        Assert.IsType<FrontFoldedDamageVar>(card.DynamicVars["CalculatedDamage"]);
+        var play = Calls("ProtoVkTidalBulwark", "OnPlay");
+        Assert.Contains("DamageCmd.Attack", play);
+        Assert.Contains("ElementalHit.ApplyOnly", play);
+        Assert.DoesNotContain(play, c => c.Contains("GainBlock"));
+        Assert.Contains("(Deals {CalculatedDamage:diff()} damage)",
+                        card.Localization!.Single(p => p.Item1 == "description").Item2);
     }
 
     // ---- sec.4: payoffs that borrow -----------------------------------------

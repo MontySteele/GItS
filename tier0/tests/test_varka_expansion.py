@@ -264,11 +264,33 @@ def test_blazing_charge_reads_pyro_oath_by_name(varka):
     assert led.current == "pyro" and led.oath["pyro"] == 4
 
 
-def test_tidal_bulwark_reads_hydro_after_its_own(varka):
+def test_tidal_bulwark_is_hydros_body_slam(varka):
+    # The Hydro paper (2026-10-10): "Deal damage equal to your Block, plus
+    # 2 [3] for each Hydro Oath. Apply Hydro to an enemy." The hit reads the
+    # Oath before its own application credits.
+    st = _state()
+    led = _led(st)
+    led.oath["hydro"] = 2
+    st.player.block = 10
+    _play(st, _vk("tidal_bulwark"))
+    e = st.enemies[0]
+    assert e.hp == 100 - (10 + 2 * 2)
+    assert e.aura == "hydro" and led.oath["hydro"] == 3
+    assert st.player.block == 10                        # Body Slam keeps it
     st = _state()
     _led(st).oath["hydro"] = 2
-    _play(st, _vk("tidal_bulwark"))
-    assert st.player.block == 4 + 2 * 3
+    st.player.block = 10
+    _play(st, _vk("tidal_bulwark") + "+")
+    assert st.enemies[0].hp == 100 - (10 + 3 * 2)
+
+
+def test_tidal_bulwark_is_an_attack_on_the_sheet(varka):
+    from tier0.content import loader
+    c = loader.get_card(_vk("tidal_bulwark"))
+    assert c.type == "attack" and c.cost == 1
+    fx = c.effects[0]
+    assert fx["amount_formula"] == {"base": 0, "per": 2, "count": "hydro_oath",
+                                    "plus": "player_block"}
 
 
 def test_glacial_edict_stacks_every_three_cryo(varka):

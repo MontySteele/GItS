@@ -300,9 +300,12 @@ public class VarkaComboTests : IDisposable
                           Face(new ProtoVkThunderingVerdict()));
         Assert.Contains("(Deals {VkHit:diff()} damage each time)",
                         Face(new ProtoVkThunderingVerdict()));
-        const string winds = "The elements your [gold]Swirls[/gold] spread set "
-                           + "off [gold]Elemental Reactions[/gold].";
-        Assert.Equal(winds, Face(new ProtoVkConvergingWinds()));
-        Assert.Equal(winds, Face(new ConvergingWindsPower()));
+        // Varka round 3, pick 1 (2026-10-10): re-aimed at 6 [8].
+        Assert.Equal("Your [gold]Swirls[/gold] deal {PowerAmount:diff()} "
+                     + "additional damage to ALL enemies.",
+                     Face(new ProtoVkConvergingWinds()));
+        Assert.Equal("Your [gold]Swirls[/gold] deal [blue]{Amount}[/blue] "
+                     + "additional damage to ALL enemies.",
+                     Face(new ConvergingWindsPower()));
     }
 }
