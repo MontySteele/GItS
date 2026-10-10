@@ -117,21 +117,36 @@ public static class FurinaStageLaw
     /// <summary>Clorinde upgraded: "Act: 9."</summary>
     public const int ClorindeActDamageUpgraded = 9;
 
-    /// <summary>Freminet's act: "Deal 5 Cryo damage to a random enemy."
-    /// [8] (His line gives the Block of every Drain.)</summary>
-    public const int FreminetActDamage = 5;
+    /// <summary>Freminet's act (the Spend paper, 2026-10-10,
+    /// <c>review/active/furina-spend-paper-2026-10-10.md</c> pick 2, ruled
+    /// 2026-10-10): "Gain 3 Block. Spend a quarter of your Fanfare (rounded
+    /// down): gain that much more Block." [6] (His line gives the Block of
+    /// every Drain.) The 5 [8] Cryo hit left with this act.</summary>
+    public const int FreminetActBlock = 3;
 
-    public const int FreminetActDamageUpgraded = 8;
+    public const int FreminetActBlockUpgraded = 6;
 
-    /// <summary>Freminet's act also gives Block (the pool-75 round's card
-    /// numbers, ruled 2026-10-09): "gain 6 Block." [9]</summary>
-    public const int FreminetActBlock = 6;
+    /// <summary>Navia's act Spends half your Fanfare, rounded down (the
+    /// Spend paper, pick 2). Mirrors
+    /// <c>furina_stage.NAVIA_SPEND_DIVISOR</c>.</summary>
+    public const int NaviaSpendDivisor = 2;
 
-    public const int FreminetActBlockUpgraded = 9;
+    /// <summary>Freminet's act Spends a quarter of your Fanfare, rounded down
+    /// (the Spend paper, pick 2, ruled 2026-10-10: "I don't like artificial
+    /// limits, so I'd prefer to just fiddle with the ratio"). Mirrors
+    /// <c>furina_stage.FREMINET_SPEND_DIVISOR</c>.</summary>
+    public const int FreminetSpendDivisor = 4;
+
+    /// <summary>"Spend up to X" (the Spend paper, pick 1): Spirited Aria's
+    /// "Draw 1 for every 4 spent" and Crashing Waves' "hit once more for
+    /// every 4". Mirrors <c>furina_stage.SPEND_UP_TO_EVERY</c>.</summary>
+    public const int SpendUpToEvery = 4;
 
     /// <summary>Navia's line: "Your first Spend each turn costs 2 less (a
-    /// spend-all keeps 2)." [3] (Her act deals the Fanfare spent this turn
-    /// as Geo.)</summary>
+    /// spend-all keeps 2)." [3] On a "Spend up to X" the first 2 points are
+    /// free: they count as spent and are not taken. (Her act Spends half your
+    /// Fanfare and deals that much as Geo, the Spend paper 2026-10-10.)
+    /// </summary>
     public const int NaviaLineDiscount = 2;
 
     public const int NaviaLineDiscountUpgraded = 3;

@@ -154,6 +154,7 @@ public static class FurinaStageCues
     public static StageCueIcon IconOf(StageCueKind kind) => kind switch
     {
         StageCueKind.Damage => StageCueIcon.Attack,
+        StageCueKind.Block => StageCueIcon.Block,
         _ => StageCueIcon.Support,
     };
 
@@ -162,6 +163,8 @@ public static class FurinaStageCues
     public static string ForecastLine(StageForecastCue cue) =>
         cue.Kind == StageCueKind.Repay
             ? $"Repays {cue.Amount} of your drained HP."
+            : cue.Kind == StageCueKind.Block
+                ? $"Gives you {cue.Amount} Block."
             : cue.Target == StageForecastCue.Aura
                 ? "Hits an enemy with an aura, if any."
                 : "Acts at the end of your turn.";
