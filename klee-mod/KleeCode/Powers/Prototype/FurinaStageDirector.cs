@@ -199,6 +199,30 @@ public sealed class StageDirector
         return spent;
     }
 
+    /// <summary>"Spend up to X" (the Spend paper, 2026-10-10): one Spend when
+    /// at least 1 counts, answered like any Spend (Thunderous Applause,
+    /// Chevreuse, Crescendo) but not like a spend-all (no Bis!, no Standing
+    /// Room Only). Returns what counts as spent.
+    /// <paramref name="forPlay"/> is false for a guest's act.</summary>
+    public async Task<int> SpendUpTo(int cap, bool forPlay = true)
+    {
+        var navia = _stage.NaviaDiscount > 0 && cap > 0
+            ? _stage.SeatOf(StagePerformer.Navia) : null;
+        var spent = _stage.SpendUpTo(cap, forPlay);
+        if (spent <= 0) return 0;
+        if (navia != null) await _board.LineCue(navia);
+        await AfterSpend();
+        return spent;
+    }
+
+    /// <summary>A guest's act's share-Spend (the Spend paper's pick 2):
+    /// Navia "Spend half your Fanfare (rounded down)" (divisor 2), Freminet
+    /// "Spend a quarter" (divisor 4). A share of what is left when it acts,
+    /// so two such guests split the bank oldest first. Returns what counts
+    /// as spent.</summary>
+    public Task<int> SpendShare(int divisor) =>
+        SpendUpTo(_stage.Fanfare / divisor, forPlay: false);
+
     private async Task AfterSpend()
     {
         await Thunderous();
@@ -521,18 +545,17 @@ public sealed class StageDirector
             ? FurinaStageLaw.LyneyActDamageUpgraded
             : FurinaStageLaw.LyneyActDamage,
         StagePerformer.Chevreuse => FurinaStageLaw.ChevreuseActDamage,
-        StagePerformer.Freminet => upgraded
-            ? FurinaStageLaw.FreminetActDamageUpgraded
-            : FurinaStageLaw.FreminetActDamage,
+        StagePerformer.Freminet => FreminetActBlock(upgraded),
         StagePerformer.Escoffier => upgraded
             ? FurinaStageLaw.EscoffierActDamageUpgraded
             : FurinaStageLaw.EscoffierActDamage,
-        // Navia's and Neuvillette's acts read the turn (Fanfare spent, HP
-        // drained), not a printed number.
+        // Navia's act Spends half the bank and Neuvillette's reads the HP
+        // lost: neither is a printed number.
         _ => 0,
     };
 
-    /// <summary>Freminet's act's Block: 6, 9 upgraded.</summary>
+    /// <summary>Freminet's act's printed Block: 3, 6 upgraded (the Spend
+    /// paper, 2026-10-10).</summary>
     public static int FreminetActBlock(bool upgraded) => upgraded
         ? FurinaStageLaw.FreminetActBlockUpgraded
         : FurinaStageLaw.FreminetActBlock;
@@ -591,21 +614,29 @@ public sealed class StageDirector
                                     Element.None);
                 break;
             case StagePerformer.Freminet:
-                // "Deal 5 Cryo damage to a random enemy. Gain 6 Block." [8,
-                // 9] (the Block, ruled 2026-10-09).
+                // "Gain 3 Block. Spend a quarter of your Fanfare (rounded
+                // down): gain that much more Block." [6] (the Spend paper,
+                // pick 2, ruled 2026-10-10). The quarter-Spend is a Spend
+                // when at least 1 is spent.
+                await _board.Block(number);
                 moved = number;
-                await _board.Damage(who, StageTarget.Random, moved,
-                                    Element.Cryo);
                 if (!_board.Over)
                 {
-                    await _board.Block(FreminetActBlock(seat.Upgraded));
+                    var more = await SpendShare(
+                        FurinaStageLaw.FreminetSpendDivisor);
+                    if (more > 0 && !_board.Over)
+                    {
+                        await _board.Block(more);
+                        moved += more;
+                    }
                 }
                 break;
             case StagePerformer.Navia:
-                // "Deal Geo damage to a random enemy equal to the Fanfare you
-                // spent this turn." Nothing spent, nothing dealt.
-                moved = _stage.SpentThisTurn;
-                if (moved > 0)
+                // "Spend half your Fanfare (rounded down). Deal that much Geo
+                // damage to a random enemy." (the Spend paper, pick 2).
+                // Nothing spent, nothing dealt.
+                moved = await SpendShare(FurinaStageLaw.NaviaSpendDivisor);
+                if (moved > 0 && !_board.Over)
                 {
                     await _board.Damage(who, StageTarget.Random, moved,
                                         Element.Geo);

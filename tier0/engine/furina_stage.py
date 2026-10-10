@@ -66,6 +66,11 @@ SHIPPED_LINE = T.SHIPPED_LINE
 LINE_MAX_HP_DIVISOR = T.LINE_MAX_HP_DIVISOR
 FREMINET_ACT_BLOCK = T.FREMINET_ACT_BLOCK
 FREMINET_ACT_BLOCK_UPGRADED = T.FREMINET_ACT_BLOCK_UPGRADED
+# The Spend paper (2026-10-10): Navia's half, Freminet's quarter, and "for
+# every 4".
+NAVIA_SPEND_DIVISOR = T.NAVIA_SPEND_DIVISOR
+FREMINET_SPEND_DIVISOR = T.FREMINET_SPEND_DIVISOR
+SPEND_UP_TO_EVERY = T.SPEND_UP_TO_EVERY
 FOUNTAIN_TURNS = T.FOUNTAIN_TURNS
 # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09): the guests' upgraded lines and acts (sec.3) and the new
@@ -77,8 +82,6 @@ LYNEY_ACT_DAMAGE_UPGRADED = T.LYNEY_ACT_UPGRADED
 LYNETTE_ACT_DAMAGE_UPGRADED = T.LYNETTE_ACT_UPGRADED
 CHEVREUSE_LINE_WEAK_UPGRADED = T.CHEVREUSE_LINE_WEAK_UPGRADED
 CLORINDE_ACT_DAMAGE_UPGRADED = T.CLORINDE_ACT_UPGRADED
-FREMINET_ACT_DAMAGE = T.FREMINET_ACT
-FREMINET_ACT_DAMAGE_UPGRADED = T.FREMINET_ACT_UPGRADED
 NAVIA_LINE_DISCOUNT = T.NAVIA_LINE_DISCOUNT
 NAVIA_LINE_DISCOUNT_UPGRADED = T.NAVIA_LINE_DISCOUNT_UPGRADED
 NEUVILLETTE_HYDRO_BONUS = T.NEUVILLETTE_HYDRO_BONUS
@@ -478,6 +481,20 @@ def spend_all(state) -> int:
     return T.spend_all(state)
 
 
+def spend_up_to(state, cap: int) -> int:
+    """"Spend up to X" (the Spend paper, 2026-10-10): X or all she holds,
+    never fails (`furina_tide.spend_up_to`). Returns what counts as spent."""
+    if not active(state.player):
+        return 0
+    return T.spend_up_to(state, int(cap))
+
+
+def spent_fours(spent: int) -> int:
+    """`stage_spent_fours`: a play's spend in fours, rounded down ("Draw 1
+    for every 4 spent"; the C# `FurinaStage.SpentFours`)."""
+    return max(0, int(spent)) // SPEND_UP_TO_EVERY
+
+
 def gain(state, amount: int, source: str = "card") -> None:
     if active(state.player):
         T.gain(state, int(amount), source)
@@ -685,6 +702,14 @@ READINGS: tuple[str, ...] = (
     "price; each copy is its own Spend and its own round of acts.",
     "Navia's discount is the first Spend each turn (a Spend made before she "
     "arrived uses it up); a Spend discounted to 0 is still a Spend.",
+    "Spend up to X counts X or her Fanfare plus Navia's free points, "
+    "whichever is less; the free points count and are not taken, so at 0 "
+    "Fanfare with Navia on stage it counts 2 [3] (the Spend paper, "
+    "2026-10-10).",
+    "Navia's half-Spend and Freminet's quarter-Spend are each a Spend when "
+    "at least 1 is spent, and Navia's discount applies when it is the turn's "
+    "first Spend; each guest takes its share of what is left, oldest first, "
+    "and again after Showstopper.",
     "Escoffier's line answers every act, his own included.",
     "Regina drains first at turn start, then Fountain of Lucine, Gentle "
     "Current and Pneuma Tides Repay, then Prima Donna reads the Fanfare.",

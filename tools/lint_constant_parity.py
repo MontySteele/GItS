@@ -301,12 +301,15 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.LynetteActDamageUpgraded": _stage("LYNETTE_ACT_DAMAGE_UPGRADED"),
     "FurinaStageLaw.ChevreuseLineWeakUpgraded": _stage("CHEVREUSE_LINE_WEAK_UPGRADED"),
     "FurinaStageLaw.ClorindeActDamageUpgraded": _stage("CLORINDE_ACT_DAMAGE_UPGRADED"),
-    "FurinaStageLaw.FreminetActDamage": _stage("FREMINET_ACT_DAMAGE"),
-    "FurinaStageLaw.FreminetActDamageUpgraded": _stage("FREMINET_ACT_DAMAGE_UPGRADED"),
     # The pool-75 round's card numbers and the Drain line rule (ruled
     # 2026-10-09): Freminet's act's Block and the line's quarter of Max HP.
     "FurinaStageLaw.FreminetActBlock": _stage("FREMINET_ACT_BLOCK"),
     "FurinaStageLaw.FreminetActBlockUpgraded": _stage("FREMINET_ACT_BLOCK_UPGRADED"),
+    # The Spend paper (2026-10-10): Navia's half, Freminet's quarter, and
+    # "for every 4".
+    "FurinaStageLaw.NaviaSpendDivisor": _stage("NAVIA_SPEND_DIVISOR"),
+    "FurinaStageLaw.FreminetSpendDivisor": _stage("FREMINET_SPEND_DIVISOR"),
+    "FurinaStageLaw.SpendUpToEvery": _stage("SPEND_UP_TO_EVERY"),
     "FurinaStageLaw.LineMaxHpDivisor": _stage("LINE_MAX_HP_DIVISOR"),
     "FurinaStageLaw.NaviaLineDiscount": _stage("NAVIA_LINE_DISCOUNT"),
     "FurinaStageLaw.NaviaLineDiscountUpgraded": _stage("NAVIA_LINE_DISCOUNT_UPGRADED"),

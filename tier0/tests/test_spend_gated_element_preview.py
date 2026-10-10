@@ -32,13 +32,19 @@ def _rows() -> dict:
 def test_spend_only_element_is_detected_on_the_two_flourishes():
     rows = _rows()
     # 2026-10-09 playtest trim (review/records/coop-human-playtest-2026-10-09.md
-    # pick 2): Tidal Flourish's plain mode applies Hydro, so it is no longer
-    # Spend-gated; the detector's positive case is its old shape, rebuilt.
+    # pick 2): Tidal Flourish's plain mode applied Hydro, so it was no longer
+    # Spend-gated; the Spend paper (2026-10-10) then took its chooser away
+    # ("Spend up to 10"). The detector's positive case is its old modal
+    # shape, rebuilt here.
     assert not gen.element_only_in_gated_modes(rows["proto_fs_tidal_flourish"])
-    import copy
-    gated = copy.deepcopy(rows["proto_fs_tidal_flourish"])
-    plain_hit = gated["effects"][0]["modes"][0]["effects"][0]
-    plain_hit.pop("applies_element")
+    gated = {"id": "probe_gated", "effects": [{"op": "choose_one", "modes": [
+        {"label": "Deal 5 Hydro damage to ALL enemies",
+         "effects": [{"op": "damage", "amount": 5,
+                      "target": "all_enemies"}]},
+        {"label": "Spend 6: deal 12 instead",
+         "effects": [{"op": "stage_spend", "amount": 6},
+                     {"op": "damage", "amount": 12, "target": "all_enemies",
+                      "applies_element": True}]}]}]}
     assert gen.element_only_in_gated_modes(gated)
     # The Salon's Tab (2026-10-05): Quick Flourish's Spend is a fixed price
     # now, so its Hydro rides its only (unmoded) hit; Chevalmarin's Hydro is

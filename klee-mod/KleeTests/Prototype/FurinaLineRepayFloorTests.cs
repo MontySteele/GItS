@@ -287,20 +287,21 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void Freminets_act_also_gives_six_block_nine_upgraded()
+    public void Freminets_act_gives_three_block_six_upgraded()
     {
+        // The Spend paper (2026-10-10) took the 5 [8] Cryo hit and set the
+        // Block to 3 [6], plus a quarter of the bank (none held here).
         var kit = StageKit.Of(StagePerformer.Freminet);
         Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Contains("damage Freminet Random 5 Cryo", kit.Board.Log);
-        Assert.Contains("block 6", kit.Board.Log);
+        Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("damage Freminet"));
+        Assert.Contains("block 3", kit.Board.Log);
         var up = StageKit.Of();
         Run(up.Director.SummonGuest(StagePerformer.Freminet, true));
         Run(up.Director.Act(up.Stage.Seats[0]));
-        Assert.Contains("damage Freminet Random 8 Cryo", up.Board.Log);
-        Assert.Contains("block 9", up.Board.Log);
-        Assert.Contains("Gain 6 [gold]Block[/gold]",
+        Assert.Contains("block 6", up.Board.Log);
+        Assert.Contains("gain 3 [gold]Block[/gold]",
             StagePerformerBadge.ActText(StagePerformer.Freminet));
-        Assert.Contains("Gain 9 [gold]Block[/gold]",
+        Assert.Contains("gain 6 [gold]Block[/gold]",
             StagePerformerBadge.ActText(StagePerformer.Freminet, true));
     }
 
