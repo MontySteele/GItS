@@ -82,12 +82,17 @@ public sealed class FanfarePower : PowerModel, ILocalizationProvider
     /// combat, so it is where the card-hit half is read; the non-card half
     /// (a guest's act, a Power's hit) is <see cref="ElementalHit.Deal"/>'s,
     /// off the same <see cref="FurinaStage.HydroBonus"/>. PURE.
+    ///
+    /// NO TARGET IS ASKED FOR (2026-10-10): the bonus is hers, not the
+    /// enemy's, and a card in her hand previews with a null target, so a
+    /// <c>target == null</c> gate dropped it from the face as it did High
+    /// Stakes'. Her own body is still refused.
     /// </summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
     {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (dealer != Owner || target == Owner) return 0m;
         if (cardSource == null || !props.IsPoweredAttack()) return 0m;
         var element = CompanionOverhaulRiders.ElementFor(cardSource, dealer);
         return FurinaStage.HydroBonus(dealer, element);

@@ -85,10 +85,13 @@ public class FurinaSpendAllPreviewWeakTests
 
     internal static Board Build(CardModel card, Action<Seat>? furinaPowers = null,
                                Action<Seat>? enemyPowers = null,
-                               bool inHand = true)
+                               bool inHand = true,
+                               Func<Seat>? owner = null)
     {
         FurinaStageLedger.ResetAll();
-        var furina = Seat.Furina(66).WithCombatState();
+        // `owner` seats another character with the card in hand (the
+        // null-target preview pins); the board's field keeps its name.
+        var furina = (owner?.Invoke() ?? Seat.Furina(66)).WithCombatState();
         furinaPowers?.Invoke(furina);
         var enemySeat = Seat.Klee(234);
         enemyPowers?.Invoke(enemySeat);
