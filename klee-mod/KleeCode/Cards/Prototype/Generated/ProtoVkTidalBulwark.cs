@@ -32,8 +32,14 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkTidalBulwark : CustomCardModel, ICharacterCard
+public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, ICharacterCard
 {
+    /// <summary>Sheet `applies_element: false` on this row's own
+    /// damage: this hit applies NOTHING, whatever the cadence says.
+    /// Declared so the card states its own element
+    /// (<see cref="CatalystCadence.PrintedElement"/>).</summary>
+    public Element Element => Element.None;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
@@ -48,33 +54,38 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Bulwark"),
-        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
+            new CalculationBaseVar(0m),
+            new ExtraDamageVar(1m),
             new CalculationExtraVar(2m),
-            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaOath.Count(card.Owner.Creature, Element.Hydro))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => (int)card.Owner.Creature.Block + card.DynamicVars.CalculationExtra.BaseValue * VarkaOath.Count(card.Owner.Creature, Element.Hydro))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoVkTidalBulwark()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars.CalculationExtra.UpgradeValueBy(1m);
     }
 }

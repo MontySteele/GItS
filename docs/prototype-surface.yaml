@@ -3738,12 +3738,14 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   # The rebalance (sec.3): three turns of Block.
-   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. For 2 turns, at the start of your turn gain {VkAmount:diff()} [gold]Block[/gold].",
+   # The Hydro paper (2026-10-10, review/active/varka-hydro-payoffs-2026-10-10.md):
+   # the base game's Blur, so it pays off the turn's other Block cards. Was
+   # "For 2 turns, at the start of your turn gain 4 [6] Block".
+   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Your [gold]Block[/gold] is not removed at the start of your next turn.",
    effects: [{op: apply_aura, element: hydro, target: enemy},
              {op: block, amount: 4},
-             {op: varka, kind: echo_block, amount: 4}],
-   upgrade: {block: 2, varka_amount: 2}}
+             {op: apply_power, power: blur, amount: 1, target: self}],
+   upgrade: {block: 2}}
 
 # Varka defence (sec.3): Windborne Resolve replaces Favonian Standard, the
 # Block twin of Cycle of Seasons.
@@ -3788,11 +3790,13 @@
 
 - {id: proto_vk_converging_winds, name: "Converging Winds", character: varka,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   # Combo pass sec.1 (2026-10-04): new words, same behaviour.
-   description: "The elements your [gold]Swirls[/gold] spread set off [gold]Elemental Reactions[/gold].",
-   effects: [{op: apply_power, power: vk_converging_winds, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   # Varka round 3, pick 1 (2026-10-10, review/records/varka-round-3-2026-10-10.md):
+   # re-aimed, (a) at 6 [8] after the tier-0 read (#1042). Was cost 2 [1],
+   # "The elements your Swirls spread set off Elemental Reactions".
+   cost: 1, type: power, rarity: rare,
+   description: "Your [gold]Swirls[/gold] deal {PowerAmount:diff()} additional damage to ALL enemies.",
+   effects: [{op: apply_power, power: vk_converging_winds, amount: 6, target: self}],
+   upgrade: {power_amount: 2}}
 
 - {id: proto_vk_boreas_unbound, name: "Boreas Unbound", character: varka,
    authored_by: [claude],
@@ -3906,12 +3910,16 @@
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: apply_aura, element: hydro, target: enemy},
-             {op: block,
-              amount_formula: {base: 4, per: 2, count: hydro_oath}}],
-   upgrade: {formula_base: 2}}
+   # The Hydro paper (2026-10-10, review/active/varka-hydro-payoffs-2026-10-10.md):
+   # Hydro's Body Slam. Was a Skill, "Gain 4 [6] Block, plus 2 for each
+   # Hydro Oath".
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy, applies_element: false,
+              amount_formula: {base: 0, per: 2, count: hydro_oath,
+                               plus: player_block}},
+             {op: apply_aura, element: hydro, target: enemy}],
+   upgrade: {formula_per: 1}}
 
 - {id: proto_vk_glacial_edict, name: "Glacial Edict", character: varka,
    authored_by: [claude],

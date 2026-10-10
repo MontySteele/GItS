@@ -143,33 +143,6 @@ public sealed class VarkaOathLedger
     /// </summary>
     public void NotePlay() => PlaysThisTurn++;
 
-    private readonly List<int[]> _echoBlock = new();
-
-    /// <summary>Whisper of Water (the rebalance, sec.3): <paramref
-    /// name="block"/> at the start of each of his next
-    /// <paramref name="turns"/> turns.</summary>
-    public void AddEchoBlock(int block, int turns)
-    {
-        if (block > 0 && turns > 0) _echoBlock.Add(new[] { block, turns });
-    }
-
-    /// <summary>The echo Block due this turn start, each entry spending a
-    /// turn. Returns the total.</summary>
-    public int TakeEchoBlock()
-    {
-        var total = 0;
-        foreach (var echo in _echoBlock)
-        {
-            total += echo[0];
-            echo[1]--;
-        }
-        _echoBlock.RemoveAll(e => e[1] <= 0);
-        return total;
-    }
-
-    /// <summary>The echo Block still owed, for a test.</summary>
-    public int EchoEntries => _echoBlock.Count;
-
     /// <summary>A new round clears the turn's Knight, Swirl and play counts.
     /// </summary>
     public void RollTo(int round)
@@ -872,6 +845,8 @@ public static class VarkaOath
         Element swirled)
     {
         if (dealer == null || !Live(dealer)) return;
+        // Converging Winds (round 3, pick 1): first, as the sim pays it.
+        await ConvergingWindsPower.OnSwirl(choiceContext, target, dealer);
         var ledger = VarkaOathLedger.For(dealer);
         ledger.NoteSwirl(target, swirled);
         if (ledger.TryCredit(swirl: true, swirled))
@@ -1061,14 +1036,6 @@ public static class VarkaOath
     {
         var varka = player.Creature;
         if (!Live(varka)) return;
-        // Whisper of Water (the rebalance, sec.3): "and at the start of your
-        // next 2 turns". Unpowered, as BlockNextTurnPower's payout is.
-        var echo = VarkaOathLedger.For(varka).TakeEchoBlock();
-        if (echo > 0)
-        {
-            await CreatureCmd.GainBlock(varka, echo, ValueProp.Unpowered, null,
-                                        fast: true);
-        }
         // Weathervane (the expansion), first: Sworn Brotherhood below then
         // gains the element it chose. Since the combo pass (2026-10-04)
         // "Only Knights can change your current element", so Unwavering
@@ -1609,20 +1576,6 @@ public static class VarkaCards
             0, VarkaOathLedger.For(owner).PlaysThisTurn - 1);
         await GainCardBlock(owner,
             Var(card, "VkBase") + Var(card, "VkPer") * others, cardPlay);
-    }
-
-    /// <summary>Whisper of Water's "and at the start of your next 2 turns":
-    /// the ledger pays it at <see cref="VarkaOath.TurnStart"/>.</summary>
-    public static Task EchoBlock(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        var owner = card.Owner?.Creature;
-        if (owner != null && VarkaOath.Live(owner))
-        {
-            VarkaOathLedger.For(owner).AddEchoBlock(
-                (int)Var(card, "VkAmount"), VarkaLaw.EchoBlockTurns);
-        }
-        return Task.CompletedTask;
     }
 
     /// <summary>A card's printed Block, powered (Dexterity, Frail).</summary>

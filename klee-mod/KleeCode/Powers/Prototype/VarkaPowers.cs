@@ -381,48 +381,51 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Converging Winds (sec.6, the Gale Rare): "Your Swirls react where they
-/// land" -- the spread hit is the flat 2 carrying the swirled element; a
-/// reaction it sets off lands on that enemy only; a reaction from a spread
-/// never Swirls again. A marker read inside the Swirl itself
-/// (<c>ReactionEffects.SwirlPays</c>).
+/// Converging Winds (Varka round 3, pick 1, 2026-10-10,
+/// <c>review/records/varka-round-3-2026-10-10.md</c>): "Your Swirls deal 6
+/// [8] additional damage to ALL enemies." Paid once per Swirl he makes, from
+/// <see cref="VarkaOath.OnSwirl"/>: every hittable enemy takes
+/// <see cref="PowerModel.Amount"/> through the Swirl's own flat-damage door
+/// (element-less, Unblockable | Unpowered, no dealer; Durin's White not
+/// applied). Was "the elements your Swirls spread set off Elemental
+/// Reactions", blank against one enemy. Sim twin:
+/// <c>varka_oath.converging_bonus</c>.
 /// </summary>
 public sealed class ConvergingWindsPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Converging Winds"),
-        // The combo pass (2026-10-04), the friend's note: new words, same
-        // behaviour.
         ("description",
-            "The elements your [gold]Swirls[/gold] spread set off "
-          + "[gold]Elemental Reactions[/gold]."),
+            "Your [gold]Swirls[/gold] deal [blue]{Amount}[/blue] additional "
+          + "damage to ALL enemies."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
-    public override PowerStackType StackType => PowerStackType.Single;
+    public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>Do this dealer's Swirls react where they land? PURE.</summary>
-    public static bool Converges(Creature? dealer) =>
-        dealer != null
-        && dealer.HasPower<ConvergingWindsPower>();
+    /// <summary>The bonus one Swirl by <paramref name="dealer"/> deals each
+    /// enemy: his stack, or 0. PURE.</summary>
+    public static int Bonus(Creature? dealer) =>
+        dealer == null ? 0 : dealer.GetPowerAmount<ConvergingWindsPower>();
 
-    /// <summary>
-    /// THE SPREAD'S ONE DECISION, on primitives: a copy of
-    /// <paramref name="spread"/> arriving on an enemy wearing
-    /// <paramref name="existing"/> reacts there, instead of replacing it,
-    /// only under this power and only where the two elements react. PURE.
-    /// </summary>
-    public static Reaction SpreadReaction(bool converges, Element spread,
-                                          Element existing)
+    /// <summary>One Swirl's bonus, to every hittable enemy.</summary>
+    internal static async Task OnSwirl(
+        PlayerChoiceContext choiceContext, Creature target, Creature dealer)
     {
-        if (!converges || existing == Element.None || existing == spread)
+        var bonus = Bonus(dealer);
+        if (bonus <= 0) return;
+        var bodies = target.CombatState?.HittableEnemies.ToList();
+        if (bodies == null) return;
+        dealer.Powers.OfType<ConvergingWindsPower>().FirstOrDefault()?.Flash();
+        foreach (var e in bodies)
         {
-            return Reaction.None;
+            await CreatureCmd.Damage(
+                choiceContext, e, bonus,
+                ValueProp.Unblockable | ValueProp.Unpowered,
+                dealer: null, cardSource: null, cardPlay: null);
         }
-        var reaction = ReactionTable.Lookup(existing, spread);
-        return reaction == Reaction.Swirl ? Reaction.None : reaction;
     }
 }
 

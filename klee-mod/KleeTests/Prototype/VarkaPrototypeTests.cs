@@ -545,17 +545,22 @@ public class VarkaPrototypeTests : IDisposable
                      + "additional damage.", text);
     }
 
-    [Theory]
-    [InlineData(false, Element.Pyro, Element.Hydro, Reaction.None)]
-    [InlineData(true, Element.Pyro, Element.Hydro, Reaction.Vaporize)]
-    [InlineData(true, Element.Electro, Element.Pyro, Reaction.Overload)]
-    [InlineData(true, Element.Pyro, Element.None, Reaction.None)]
-    [InlineData(true, Element.Pyro, Element.Pyro, Reaction.None)]
-    public void Converging_winds_reacts_where_a_spread_lands(
-        bool converges, Element spread, Element existing, Reaction expected)
+    [Fact]
+    public void Converging_winds_adds_its_amount_to_every_swirl()
     {
-        Assert.Equal(expected,
-            ConvergingWindsPower.SpreadReaction(converges, spread, existing));
+        // Varka round 3, pick 1 (2026-10-10): cost 1, 6 [8] to ALL enemies,
+        // once per Swirl, paid from VarkaOath.OnSwirl.
+        var card = new ProtoVkConvergingWinds();
+        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(6m, card.DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(0, ConvergingWindsPower.Bonus(null));
+        Assert.Equal(0, ConvergingWindsPower.Bonus(Seat.Varka().Creature));
+        Assert.Equal(6, ConvergingWindsPower.Bonus(
+            Seat.Varka().WithPower<ConvergingWindsPower>(6).Creature));
+        Assert.Contains("ConvergingWindsPower.OnSwirl",
+                        Il.Calls(Il.Method("VarkaOath", "OnSwirl")));
+        Assert.Contains("CreatureCmd.Damage",
+                        Il.Calls(Il.Method("ConvergingWindsPower", "OnSwirl")));
     }
 
     [Fact]

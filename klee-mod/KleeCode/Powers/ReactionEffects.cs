@@ -380,8 +380,7 @@ internal static class ReactionEffects
         Creature target,
         Creature? dealer,
         CardModel? cardSource,
-        Element consumedAura,
-        bool spreadReaction = false)
+        Element consumedAura)
     {
         // TELEMETRY ONLY. Every reaction's own damage (Overload's splash,
         // Swirl's flat hit) goes out with `dealer: null`; this scope names the
@@ -535,10 +534,6 @@ internal static class ReactionEffects
                 // Unblockable | Unpowered with no dealer -- which also keeps
                 // splash from early-detonating bombs or counting as an attack.
                 var splashTargets = target.CombatState?.HittableEnemies.ToList();
-                // VARKA's Converging Winds (sec.5): "a reaction it sets off
-                // lands on that enemy only, so Overload does not splash".
-                // False on every other caller.
-                if (spreadReaction) splashTargets = new List<Creature> { target };
                 var splash = ReactionConstants.OverloadSplash;
                 // QUARANTINED. The other half of Durin's White form: the splash
                 // IS damage a reaction deals, so it takes the same factor the
@@ -579,11 +574,6 @@ internal static class ReactionEffects
                 NoteDebuff<PoisonPower>(target, dealer, "Poison", before);
                 break;
             }
-
-            case Reaction.Swirl when spreadReaction:
-                // "A reaction set off by a spread never Swirls again": a spread
-                // carries an aura element, so this is unreachable -- stated.
-                break;
 
             case Reaction.Swirl when TriggerRules.SwirlPays:
                 await SwirlPays(choiceContext, target, dealer, cardSource, consumedAura);
@@ -650,7 +640,7 @@ internal static class ReactionEffects
         // Swirled element once per card, then pays his current element's one
         // effect. After the Swirl's own spread and flat 2. Every Swirl in the
         // mod passes this line once; anyone but a live Varka pays nothing.
-        if (reaction == Reaction.Swirl && !spreadReaction)
+        if (reaction == Reaction.Swirl)
         {
             await VarkaOath.OnSwirl(choiceContext, target, dealer, consumedAura);
         }
@@ -681,11 +671,6 @@ internal static class ReactionEffects
         // Durin's White scales it for the reason it scales Overload's splash:
         // it is damage a reaction deals. Truncated like the sim's int(...).
         damage = (int)(damage * CompanionOverhaulReactions.DamageMultiplier(dealer));
-        // VARKA's Converging Winds: the spread reacts where it lands.
-        var converges = ConvergingWindsPower.Converges(dealer);
-        // The bodies whose flat 2 was the spread's own elemental hit.
-        var reacted = new HashSet<Creature>();
-
         foreach (var e in bodies)
         {
             if (ReferenceEquals(e, target)) continue;
@@ -700,9 +685,6 @@ internal static class ReactionEffects
                 && TriggerRules.SpreadOn(spread, existing.Element)
                     == TriggerRules.SpreadOutcome.Refresh)
             {
-                // Converging Winds is unchanged: there the same element only
-                // takes the 2 (`varka_oath.converging_spread`).
-                if (converges) continue;
                 await existing.RefreshFromSpread(choiceContext, dealer, cardSource);
                 continue;
             }
@@ -711,32 +693,6 @@ internal static class ReactionEffects
             if (VarkaRules.SpreadShielded(e)) continue;
             if (existing != null)
             {
-                // VARKA's Converging Winds (sec.5): "the spread hit is the
-                // flat 2 carrying the swirled element", and a reaction it
-                // sets off "lands on that enemy only". The aura is consumed,
-                // the reaction resolves on this body alone, and an amplifier
-                // multiplies the 2. No copy arrives.
-                var spreadReaction = ConvergingWindsPower.SpreadReaction(
-                    converges, spread, existing.Element);
-                if (spreadReaction != Reaction.None)
-                {
-                    var consumed = existing.Element;
-                    var amp = ReactionTable.AmplifierMultiplier(
-                        spreadReaction, dealer);
-                    var hit = (int)(damage * amp);
-                    await PowerCmd.Remove(existing);
-                    await Resolve(choiceContext, spreadReaction, e, dealer,
-                                  cardSource, consumed, spreadReaction: true);
-                    var hitResults = await CreatureCmd.Damage(
-                        choiceContext, e, hit,
-                        ValueProp.Unblockable | ValueProp.Unpowered,
-                        dealer: null, cardSource: null, cardPlay: null);
-                    // TELEMETRY ONLY: the amplifier's share of the spread hit.
-                    ElementalHit.NoteAmplified(e, dealer, spreadReaction, amp,
-                                               hitResults);
-                    reacted.Add(e);
-                    continue;
-                }
                 await PowerCmd.Remove(existing);
             }
             // A plain application: no trigger, so it reacts with nothing.
@@ -745,7 +701,6 @@ internal static class ReactionEffects
 
         foreach (var e in bodies)
         {
-            if (reacted.Contains(e)) continue;
             await CreatureCmd.Damage(
                 choiceContext, e, damage,
                 ValueProp.Unblockable | ValueProp.Unpowered,
