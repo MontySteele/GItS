@@ -1339,6 +1339,15 @@ GOLD_NAMES = {
                     "end-of-turn docket",
     "Shatters": "the Frozen reaction's preview, which the Cryo gem attaches, "
                 "defines a Shatter",
+    # Sucrose -- Mollis Favonius (the Varka payoff round, 2026-10-10) names
+    # the three reactions its 4 reaches, which the old "Elemental Reactions"
+    # overstated.
+    "Melt": "a reaction, defined by the reaction preview the Pyro and Cryo "
+            "gems attach and named on the reaction log",
+    "Vaporize": "a reaction, defined by the reaction preview the Pyro and "
+                "Hydro gems attach and named on the reaction log",
+    "Overloaded": "a reaction, defined by the reaction preview the Pyro and "
+                  "Electro gems attach and named on the reaction log",
 }
 
 
