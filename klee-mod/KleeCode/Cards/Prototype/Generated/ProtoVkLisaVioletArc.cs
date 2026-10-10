@@ -64,7 +64,7 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(6m),
             new CalculationExtraVar(3m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).AttacksPlayedThisTurn)
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).AttacksPlayedThisTurn)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

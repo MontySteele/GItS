@@ -1960,6 +1960,13 @@ STAGE_DRAIN_LINE = ("- Drained {drained} HP{past}. Drained HP above your "
 #: change" 1): the part drained past the line, after the drained count, only
 #: when there is any. Seats learned that cost only by losing the HP.
 STAGE_DRAIN_PAST = " ({past} past your line: lost unless you Repay)"
+#: THE SPEND ROUND (2026-10-10, "A Five-Century Act becomes visible"): with
+#: the power up the past-line part returns after combat, so the counter drops
+#: "lost unless you Repay" and the line says the return covers it.
+STAGE_DRAIN_LINE_RETURNS = ("- Drained {drained} HP{past}. Drained HP "
+                            "returns after combat, past your line too. "
+                            "Drain line {line} HP{why}.")
+STAGE_DRAIN_PAST_RETURNS = " ({past} past your line)"
 #: Seat page 3: where the line comes from ("the HP you started this fight
 #: with, minus 1/4 of your Max HP", 2026-10-09); seats connected it to their
 #: entry HP only late.
@@ -2218,9 +2225,12 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     if stage.get("line") is not None:
         why = stage.get("line_why") or ""
         past = stage.get("drained_past") or 0
-        out.append(STAGE_DRAIN_LINE.format(
+        returns = bool(stage.get("past_returns"))
+        line_words = STAGE_DRAIN_LINE_RETURNS if returns else STAGE_DRAIN_LINE
+        past_words = STAGE_DRAIN_PAST_RETURNS if returns else STAGE_DRAIN_PAST
+        out.append(line_words.format(
             drained=stage.get("drained", 0), line=stage["line"],
-            past=STAGE_DRAIN_PAST.format(past=past) if past > 0 else "",
+            past=past_words.format(past=past) if past > 0 else "",
             why=STAGE_DRAIN_WHY.format(why=why) if why else ""))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
@@ -2536,6 +2546,12 @@ EVENT_SHATTERED = "{card} Shattered {target}: Frozen removed"
 #: The curtain call, on the first page after the fight (Furina's drained HP
 #: comes back when combat ends; seats could not tell it had).
 EVENT_HP_RETURNED = "Drained {n} HP returned (the fight ended)"
+#: THE SPEND ROUND (2026-10-10): the curtain call also names what did NOT
+#: come back, the HP drained past the line and not Repaid; and under A
+#: Five-Century Act, how much of the return was past the line.
+EVENT_HP_RETURNED_LOST = ("Drained {n} HP returned; {lost} past your line "
+                          "lost (the fight ended)")
+EVENT_HP_RETURNED_PAST = "Drained {n} HP returned, {past} of it past your line"
 #: The Varka payoff round (2026-10-10). Wolfpack firing: the copy goes into
 #: the draw pile, where no other line of the page shows it arrive.
 EVENT_WOLFPACK = ("Wolfpack shuffled {n} of Four Winds' Ascension into your "
@@ -2942,7 +2958,15 @@ def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
         return out
     if kind == "curtain":
         total = sum(int(ev.get("amount") or 0) for ev in evs)
-        return [EVENT_HP_RETURNED.format(n=total)] if total > 0 else []
+        lost = sum(int(ev.get("lost") or 0) for ev in evs)
+        past = sum(int(ev.get("past") or 0) for ev in evs)
+        if lost > 0:
+            return [EVENT_HP_RETURNED_LOST.format(n=total, lost=lost)]
+        if total <= 0:
+            return []
+        if past > 0:
+            return [EVENT_HP_RETURNED_PAST.format(n=total, past=past)]
+        return [EVENT_HP_RETURNED.format(n=total)]
     if kind == "wolfpack":
         total = sum(int(ev.get("amount") or 0) for ev in evs)
         if total <= 0:

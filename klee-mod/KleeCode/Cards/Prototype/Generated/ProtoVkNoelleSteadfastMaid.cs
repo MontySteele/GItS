@@ -60,7 +60,7 @@ public sealed class ProtoVkNoelleSteadfastMaid : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(9m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new CardsVar(1)
         };
 

@@ -83,11 +83,20 @@ public static class FurinaStageFacePreview
     {
         if (Owner(card) is not { } owner) return "";
         if (!FurinaStage.CanDrain(owner, amount)) return NotEnoughHp;
-        return FurinaStageLedger.For(owner)
-                   .PastLine(amount, (int)owner.CurrentHp)
-            ? PastLine(FurinaStage.LineOf(owner))
-            : "";
+        var ledger = FurinaStageLedger.For(owner);
+        if (!ledger.PastLine(amount, (int)owner.CurrentHp)) return "";
+        // The Spend round (2026-10-10): with A Five-Century Act in play the
+        // HP drained past the line returns at the curtain call too, so the
+        // tag says that instead of naming a line that costs nothing.
+        return ledger.Mods.FiveCenturyAct > 0
+            ? PastLineReturns
+            : PastLine(FurinaStage.LineOf(owner));
     }
+
+    /// <summary>The tag under A Five-Century Act: the HP drained past the
+    /// line returns after combat.</summary>
+    public const string PastLineReturns =
+        "\n(Past your Drain line: returns after combat)";
 
     /// <summary>The refusal's words: a Drain cannot take her to 0 HP.
     /// </summary>

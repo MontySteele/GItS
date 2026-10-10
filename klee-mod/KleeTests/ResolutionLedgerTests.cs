@@ -440,7 +440,7 @@ public class ResolutionLedgerTests
         Assert.Equal("drawn", events[0]["kind"]);
         Assert.Equal("Strike", events[0]["card"]);
         Assert.Equal(new[] { "kind", "card", "target", "power", "combat_id",
-                             "on_player", "seq", "amount" },
+                             "on_player", "seq", "amount", "lost", "past" },
                      new List<string>(events[0].Keys).ToArray());
         Assert.Equal(0, events[0]["amount"]);
     }

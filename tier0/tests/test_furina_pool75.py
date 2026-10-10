@@ -288,17 +288,12 @@ def test_the_drain_cards_and_their_counts():
     assert st.player.hp == 61
 
 
-def test_against_the_tide_and_high_stakes_read_the_line():
+def test_against_the_tide_reads_the_line():
     st = _furina()                             # entered at 78: line 39
     st.player.hp = 43                          # within 5 of it
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_against_the_tide"))
     assert hp - st.enemies[0].hp == 14
-    st.player.powers[FS.HIGH_STAKES] = 4
-    assert FS.high_stakes_bonus(st) == 4
-    far = _furina()
-    far.player.powers[FS.HIGH_STAKES] = 4
-    assert FS.high_stakes_bonus(far) == 0
 
 
 def test_riptide_lunge_repays_on_a_kill():

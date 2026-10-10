@@ -53,7 +53,7 @@ public sealed class ProtoKkShellGuard : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(5m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CasketCount)
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).CasketCount)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

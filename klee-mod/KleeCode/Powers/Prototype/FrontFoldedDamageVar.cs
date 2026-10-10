@@ -397,3 +397,109 @@ public sealed class FoldedBlockVar : BlockVar
         PreviewValue = folded.PreviewValue;
     }
 }
+
+/// <summary>
+/// THE SPEND ROUND (2026-10-10, <c>review/records/furina-spend-round-2026-10-10.md</c>,
+/// "Defects to fix"): "Hold the Stage and The Show Must Go On preview Block
+/// without Frail (18 shown, 13 given). They need a folding wrapper like
+/// <c>FrontFoldedDamageVar</c>."
+///
+/// The game's own <c>CalculatedBlockVar</c> under its own token, so a face
+/// still prints <c>{CalculatedBlock:diff()}</c> and a body still reads
+/// <c>DynamicVars.CalculatedBlock</c> (it subclasses, and
+/// <c>DynamicVarSet</c> casts). Its preview makes the PAYOUT'S OWN CALL: the
+/// generated play is
+/// <c>CreatureCmd.GainBlock(Owner.Creature, CalculatedBlock.Calculate(target), Props, cardPlay)</c>,
+/// which hands <c>Hook.ModifyBlock</c> her creature, the computed number,
+/// <c>ValueProp.Move</c> and the card as its source -- so the preview folds
+/// the same four through the same listeners, and Frail (x0.75 on a powered
+/// card's Block)
+/// and Dexterity (+N on her own card's Block) fold into "(Gains N Block)"
+/// exactly as they fold into the Block gained. The combat it reads is the
+/// card's, else her creature's (<c>CalculatedDamageVar</c>'s own fallback,
+/// which the base block var does not take), and its listeners are walked
+/// directly (<see cref="Fold"/> says why).
+///
+/// WHERE THE GAME RUNS NO HOOKS NEITHER DOES THIS: off the Hand and Play
+/// piles (<c>runGlobalHooks</c> false) a calculated face prints its formula,
+/// the convention every calculated attack keeps
+/// (<c>FurinaSpendAllPreviewWeakTests</c>).
+///
+/// QUARANTINED: this directory, and <c>gen_klee_cards.calculated_block_var_type</c>
+/// emits it for `proto_` rows only.
+/// </summary>
+public sealed class FoldedCalculatedBlockVar : CalculatedBlockVar
+{
+    /// <summary>The token this var declares: the game's own
+    /// (`lint_generated_structure.var_token_aliases` reads it).</summary>
+    public const string Token = "CalculatedBlock";
+
+    public FoldedCalculatedBlockVar(ValueProp props) : base(props)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        var owner = card.IsMutable ? card.Owner?.Creature : null;
+        var combat = owner == null ? null : card.CombatState ?? owner.CombatState;
+        if (!runGlobalHooks || owner == null || combat == null)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        // The base's enchantment bookkeeping, unchanged: the enchanted base
+        // number is what `diff()` colours the preview against.
+        var enchantment = card.Enchantment;
+        if (enchantment != null)
+        {
+            var baseValue = GetBaseVar().BaseValue;
+            baseValue += enchantment.EnchantBlockAdditive(baseValue);
+            baseValue *= enchantment.EnchantBlockMultiplicative(baseValue);
+            if (card.IsEnchantmentPreview) PreviewValue = baseValue;
+            else EnchantedValue = baseValue;
+        }
+        PreviewValue = Fold(combat, owner, Calculate(target), Props, card);
+    }
+
+    /// <summary>
+    /// <c>Hook.ModifyBlock</c>'s fold, in its order: the card's enchantment,
+    /// then every listener's additive term (Dexterity), then every
+    /// listener's multiplier (Frail), floored at 0 -- with the card as the
+    /// source and no play, the payout's arguments.
+    ///
+    /// WHY IT IS WRITTEN OUT rather than calling the hook: the hook walks
+    /// <c>Hook.IterateCombatHookListeners</c>, which yields NOTHING whenever
+    /// <c>CombatManager.IsOverOrEnding</c> holds at the moment the walk
+    /// begins, and the preview is not a dispatch -- a face read in that
+    /// window printed its bare formula. This walks the combat's listeners
+    /// directly (<c>ICombatState.IterateHookListeners</c>, the walk
+    /// <c>Hook.ModifyDamage</c>'s preview takes), which is also what lets a
+    /// headless pin put Frail and Dexterity in her hand and read the number
+    /// (<c>FurinaSpendRoundFixesTests</c>). PURE.
+    /// </summary>
+    internal static decimal Fold(
+        MegaCrit.Sts2.Core.Combat.ICombatState combat, Creature owner,
+        decimal block, ValueProp props, CardModel card)
+    {
+        var num = block;
+        if (card.Enchantment is { } enchantment)
+        {
+            num += enchantment.EnchantBlockAdditive(num);
+            num *= enchantment.EnchantBlockMultiplicative(num);
+        }
+        var listeners = System.Linq.Enumerable.ToList(
+            combat.IterateHookListeners());
+        foreach (var model in listeners)
+        {
+            num += model.ModifyBlockAdditive(owner, num, props, card, null);
+        }
+        foreach (var model in listeners)
+        {
+            num *= model.ModifyBlockMultiplicative(owner, num, props, card,
+                                                   null);
+        }
+        return System.Math.Max(0m, num);
+    }
+}

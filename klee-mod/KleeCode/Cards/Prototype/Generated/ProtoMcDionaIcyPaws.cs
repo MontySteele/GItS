@@ -57,7 +57,7 @@ public sealed class ProtoMcDionaIcyPaws : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new DynamicVar("PowerAmount", 6m)
         };
 
