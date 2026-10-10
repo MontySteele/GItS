@@ -616,7 +616,7 @@ public sealed class FurinaStageLedger
     /// first Spend each turn free: they count as spent and are not taken.
     /// Returns what counts as spent (0: no Spend).
     /// <paramref name="forPlay"/> records it as this card play's
-    /// `stage_spent`; a guest's act (Navia's and Freminet's half-Spend)
+    /// `stage_spent`; a guest's act (Navia's half-Spend, Freminet's quarter)
     /// leaves the play's record alone.
     /// </summary>
     public int SpendUpTo(int cap, bool forPlay = true)
