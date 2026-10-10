@@ -45,13 +45,13 @@ public sealed class ProtoVkSwornBrotherhood : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sworn Brotherhood"),
-        ("description", "At the start of your turn, gain 1 [gold]Oath[/gold] of {IfUpgraded:show:every element|your [gold]current element[/gold]}."),
+        ("description", "At the start of your turn, gain {PowerAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,18 +63,11 @@ public sealed class ProtoVkSwornBrotherhood : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<SwornBrotherhoodPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<SwornBrotherhoodCurrentPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await PowerCmd.Apply<SwornBrotherhoodCurrentPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs SwornBrotherhoodPower, read off IsUpgraded when the card is played.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

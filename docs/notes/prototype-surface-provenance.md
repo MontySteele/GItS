@@ -4120,8 +4120,9 @@ Per row, where the face or the build differs from sec.10.3's words:
   Grand Master's Order can find them. Faces print `{CalculatedDamage}` /
   `{CalculatedBlock}`, the companion rail's var. Barbara keeps "Let the Show
   Begin" without the shipped row's note sign.
-- `proto_vk_stormward_stance`, `proto_vk_boreas_unbound`: the face prints the
-  literal 3 and 1; the upgrade is a cost cut, so no var moves.
+- `proto_vk_boreas_unbound`: the face prints the literal 1; the upgrade is a
+  cost cut, so no var moves. (Stormward Stance prints its own number since
+  Varka round 3, 2026-10-10.)
 - `proto_vk_converging_winds`: face "Your Swirls react where they land. An
   Elemental Reaction a spread sets off hits only that enemy." (the text lint
   spells the reaction that way).
@@ -6940,6 +6941,40 @@ Record: `review/records/varka-amber-round-2026-10-10.md`, "What changes
   it does not fire on a Swirl's spread.
 - Knight cards: the seat page already prints the keyword's "Knight." line at
   the head of the face (the wire's sentence); pinned, nothing added.
+
+## Varka round 3, 2026-10-10
+
+Record: `review/records/varka-round-3-2026-10-10.md`, "What changes (Claude
+ships)". Converging Winds is held for [USER]'s pick and is untouched.
+
+- Stormward Stance (`proto_vk_stormward_stance`): "Your Anemo Attacks deal 3
+  [5] additional damage." The 4-Oath gate is gone ("Every holder called it
+  dead because of the gate"): `StormwardStancePower.Applies` and the sim's
+  `varka_oath.attack_bonus` drop the Oath test, and `VarkaLaw
+  .StormwardOathNeeded` / `STORMWARD_OATH_NEEDED` leave with their parity
+  pair. The face prints `{PowerAmount}`, so the upgrade's +2 shows.
+- Sworn Brotherhood (`proto_vk_sworn_brotherhood`): "At the start of your
+  turn, gain 2 [3] Oath of your current element." The record says "Upgrade:
+  3"; read as 3 of the current element, so the every-element upgrade
+  (`upgraded_power: vk_sworn_brotherhood`) is replaced by `power_amount: +1`
+  on `vk_sworn_brotherhood_current`. `SwornBrotherhoodPower` (every element)
+  stays defined but no card installs it.
+- Frost Ward (`proto_vk_frost_ward`): "Gain 5 [6] Block. For each enemy with
+  an aura, apply 1 Weak and gain 3 [4] additional Block." ("more" in the
+  record; the text lint spells it "additional".) The floor and the per-aura
+  step are now two variables (`VkBase` 5 +1, `VkPer` 3 +1); one Block gain of
+  VkBase + VkPer x enemies with an aura after the Weak (C#
+  `VarkaCards.FrostWardBlock(floor, per, marked)`, sim `varka_oath` kind
+  `frost_ward` with `base`/`per`), so Dexterity counts once.
+- Seat page: a Knight's "Knight." head reads "Knight, <its printed
+  element>."; the Oath note adds "A Swirl gives 1 Oath of the element it
+  Swirls, not of your current element."; the would-take line folds a power's
+  plain "gain N Block" at the end of the turn off its hover text and names a
+  conditional one under "Not counted"; a face printing "Draw N" gets "(no
+  draw: Fiddle)" while a relic says "You may not draw cards during your
+  turn"; Surrounded's behind clause adds "Playing a card on an enemy turns
+  you to face it." (`SurroundedPower.BeforeCardPlayed` turns you toward any
+  enemy a card of yours targets; a targeted potion too, 0.111.0 decompile).
 
 ## Furina Spend round 2, 2026-10-10
 

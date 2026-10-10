@@ -477,12 +477,13 @@ def test_stormward_stance(varka):
     st = _state(fang=False)
     st.player.powers[V.STORMWARD] = 3
     led = _led(st)
-    led.current, led.oath["pyro"] = "pyro", 3
+    # Varka round 3 (2026-10-10): no Oath gate; 0 Oath still pays.
+    led.current, led.oath["pyro"] = "pyro", 0
     _play(st, _vk("favonius_cut"))
-    assert st.enemies[0].hp == 100 - 14                 # 3 Oath: below bar
+    assert st.enemies[0].hp == 100 - 17
     led.oath["pyro"] = 4
     _play(st, _vk("favonius_cut"))
-    assert st.enemies[0].hp == 100 - 14 - 17
+    assert st.enemies[0].hp == 100 - 17 - 17
     hp = st.enemies[0].hp
     _play(st, _vk("oathsworn_strike"))                  # element-less
     assert st.enemies[0].hp == hp - (6 + 4)

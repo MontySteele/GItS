@@ -341,9 +341,9 @@ public sealed class GrandMastersOrderPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Stormward Stance (sec.6): "While your current element has 4 or more Oath,
-/// your Anemo Attacks deal 3 more." An additive term on his own powered
-/// Attacks whose hit is Anemo, read live.
+/// Stormward Stance (sec.6; Varka round 3, 2026-10-10, the 4-Oath gate
+/// dropped): "Your Anemo Attacks deal 3 [5] additional damage." An additive
+/// term on his own powered Attacks whose hit is Anemo.
 /// </summary>
 public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
 {
@@ -351,9 +351,8 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
     {
         ("title", "Stormward Stance"),
         ("description",
-            "While your [gold]current element[/gold] has "
-          + VarkaLaw.StormwardOathNeeded + " or more [gold]Oath[/gold], your "
-          + "[gold]Anemo[/gold] Attacks deal [blue]{Amount}[/blue] additional damage."),
+            "Your [gold]Anemo[/gold] Attacks deal [blue]{Amount}[/blue] "
+          + "additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -362,9 +361,8 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
 
     /// <summary>The Stance's condition on primitives. PURE.</summary>
     public static bool Applies(bool poweredAttack, bool isAttackCard,
-                               Element hit, int currentOath) =>
-        poweredAttack && isAttackCard && hit == Element.Anemo
-        && currentOath >= VarkaLaw.StormwardOathNeeded;
+                               Element hit) =>
+        poweredAttack && isAttackCard && hit == Element.Anemo;
 
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
@@ -373,8 +371,7 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
         if (dealer != Owner || target == null || target == Owner) return 0m;
         return Applies(props.IsPoweredAttack(),
                        cardSource is { Type: CardType.Attack },
-                       AuraCmd.ElementOfPlay(cardSource, dealer),
-                       VarkaOath.CurrentOath(Owner))
+                       AuraCmd.ElementOfPlay(cardSource, dealer))
             ? Amount : 0m;
     }
 }

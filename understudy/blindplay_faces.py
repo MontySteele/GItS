@@ -260,9 +260,14 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
                         "text": _text(k.get("description"))})
     # `EB-389`: and where an override row names the aura that will LAND, the
     # printed `Applies X` row follows it instead of arguing with it.
+    # Varka round 3 (2026-10-10): the PRINTED element, before an override
+    # renames its row: a Knight's tag names it ("Knight, Electro").
+    printed = next((m.group(1) for m in (_ELEMENT_KEYWORD.match(k["name"])
+                                         for k in kws) if m), "")
     kws = _follow_the_override(kws)
     return {
         "title": _text(entry.get("name")),
+        "printed_element": printed,
         "text": _text(entry.get("description")),
         "cost": _text(entry.get("cost")),
         # `EB-186`, and the same number for the same reason as on the staged

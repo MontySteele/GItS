@@ -159,8 +159,6 @@ SWIRL_PYRO_DAMAGE = 3             # to the enemy Swirled, element-less
 SWIRL_HYDRO_BLOCK = 3             # Block, unpowered
 SWIRL_CRYO_VULNERABLE = 1         # on the enemy Swirled
 SWIRL_ELECTRO_DAMAGE_ALL = 3      # to ALL living enemies, element-less
-# Stormward Stance: the current element's Oath it asks for.
-STORMWARD_OATH_NEEDED = 4
 
 #: The damage source a payout and Baron Bunny's burst carry: his card's, on
 #: the unpowered door (`ElementalHit.DealUnelemented(powered: false)`).
@@ -259,7 +257,7 @@ KIND_FIELDS = {
     "violet_storm": ("base",),
     "kindled_edge": ("base",),
     "storm_battery": ("per",),
-    "frost_ward": ("amount",),
+    "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),
@@ -799,11 +797,10 @@ def card_hits_anemo(state, card) -> bool:
 
 def attack_bonus(state, card) -> int:
     """`effects.flat_attack_bonus`: Stormward Stance, on a powered Attack
-    whose hit is Anemo while his current element's Oath is at the bar."""
+    whose hit is Anemo (Varka round 3, 2026-10-10: no Oath gate)."""
     p = state.player
     if (ledger(p) is None or card.type != "attack"
             or not _power(p, STORMWARD)
-            or current_oath(p) < STORMWARD_OATH_NEEDED
             or not card_hits_anemo(state, card)):
         return 0
     return _power(p, STORMWARD)
@@ -1223,13 +1220,13 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
         for e in list(state.living_enemies):
             _card_hit(state, card, e, fx["per"] * n, "electro")
     elif kind == "frost_ward":
-        # "Gain 3 Block. For each enemy with an aura, apply 1 Weak and gain
-        # 3 additional Block." (the forced-Amber round, 2026-10-10). One Block
-        # gain of 3 x (1 + those enemies), as C#'s `VarkaCards.FrostWardBlock`.
+        # "Gain 5 Block. For each enemy with an aura, apply 1 Weak and gain
+        # 3 additional Block." (Varka round 3, 2026-10-10). One Block gain of
+        # base + per x those enemies, as C#'s `VarkaCards.FrostWardBlock`.
         hit = [e for e in state.living_enemies if e.aura]
         for e in hit:
             powers.apply_power(state, e, "weak", 1, applier=p)
-        _powered_block(state, card, fx["amount"] * (1 + len(hit)))
+        _powered_block(state, card, fx["base"] + fx["per"] * len(hit))
     elif kind == "gleeful_songs":
         # "Apply Hydro to ALL enemies. Gain 4 Block, plus 3 for each enemy it
         # reacts on."
