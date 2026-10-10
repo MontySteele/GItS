@@ -23,7 +23,7 @@ well, what did not, what to change. A display defect becomes one line in
 
 ### The Balance suite record (one page)
 
-A Balance suite is five base seeds x three acts, one seat per act
+A Balance suite is five base seeds, one seat per lane for the whole run
 (`operations/stage-gate.md`). Its record is this page and nothing more;
 analysis goes in the paper that uses it, and screen defects go to
 `BACKLOG.md` as one line each.
@@ -33,7 +33,7 @@ analysis goes in the paper that uses it, and screen defects go to
 
 Build: `<kit>-next` <sha> (<version>+next). Change set under test: <paper path>,
 its prediction line quoted: "<the one line, written before the run>".
-Seeds, seats and grading as suite <N-1>: A0, one <model> seat per act, normal
+Seeds, seats and grading as suite <N-1>: A0, one <model> seat per lane for the whole run, normal
 fights against the base five's counted runs on the same seeds
 (`review/records/base-five-baseline-2026-10-05.md`).
 
@@ -102,7 +102,7 @@ every epoch revealed (the character epochs add cards and relics to the pools)
 and ascensions up to 10 (`instances.unlock_lane_progress`). Lane 0 is never
 touched.
 
-**A fresh seat on a lane that already played** (a per-act handoff: the act 1
+**A fresh seat on a lane that already played** (rare since 2026-10-10, when seats became whole-run: "agreed on both picks", `review/records/furina-fullrun-round-2026-10-10.md`; a per-act handoff: the act 1
 seat stops and a new seat takes act 2 on the same run). `observe --brief`
 defines each word once per LANE, so the new seat would never see the words the
 last one met. Before starting each seat after the first on a lane, the

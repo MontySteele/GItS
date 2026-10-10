@@ -462,6 +462,37 @@ public class FurinaSpendRoundFixesTests : IDisposable
     }
 
     [Fact]
+    public void A_furina_fight_writes_her_fanfare_at_each_turn_start()
+    {
+        // The Furina full-run round (2026-10-10): banking claims (Prima
+        // Donna, saving for a Spend) need the bank as each turn opens.
+        var furina = Seat.Furina(80).WithCombatState();
+        var combat = DispatchProxy.Create<ICombatState,
+            FurinaSpendAllPreviewWeakTests.ListenerProxy>();
+        furina.Creature.CombatState = combat;
+        Invoke("OpenSeatForTest", furina.Player, 1, 0);
+        var ledger = FurinaStageLedger.For(furina.Creature);
+        Invoke("RecordTurnStartForTest", 1);
+        ledger.Gain(9);
+        Invoke("RecordTurnStartForTest", 2);
+
+        var r = JsonDocument.Parse((string)Invoke("JsonForTest", furina.Player)!)
+            .RootElement;
+        var rows = r.GetProperty("fanfare_turn_start").EnumerateArray()
+            .Select(row => row.EnumerateArray().Select(v => v.GetInt32()).ToArray())
+            .ToArray();
+        Assert.Equal(new[] { new[] { 1, 0 }, new[] { 2, 9 } }, rows);
+
+        // Anyone else writes no row and no key.
+        var klee = Seat.Klee();
+        Invoke("OpenSeatForTest", klee.Player, 1, 0);
+        Invoke("RecordTurnStartForTest", 1);
+        var kr = JsonDocument.Parse((string)Invoke("JsonForTest", klee.Player)!)
+            .RootElement;
+        Assert.False(kr.TryGetProperty("fanfare_turn_start", out _));
+    }
+
+    [Fact]
     public void A_won_fight_waits_for_the_end_of_combat_effects_and_writes_the_hp_after()
     {
         var klee = Seat.Klee(80);

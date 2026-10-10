@@ -2258,8 +2258,9 @@ BASE_KEYWORDS: dict[str, str] = {
     # The two undecaying stat powers. Named on four prototype faces and on the
     # Plan's own tip, which says Strength does NOT reach a Plan -- a sentence
     # that cannot be read by somebody who does not know what Strength is.
+    # The Furina full-run round (2026-10-10): and how long it lasts.
     "Strength": ("Adds its amount to every Attack hit the wearer lands. It "
-                 "does not decay."),
+                 "does not decay; it lasts for the rest of this fight."),
     "Dexterity": ("Adds its amount to every Block the wearer gains. It does "
                   "not decay."),
     # The Repay floor (ruled 2026-10-09): Soothing Waters and Pneuma Tides
