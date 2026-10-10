@@ -95,6 +95,14 @@ He wins by not dying, not by killing faster.
 
 **Default:** keep it, and re-read after the replication.
 
+**Ruled 2026-10-10: Hydro keeps the Block job.** [USER]: "Block is fine if boring. I do wonder if we
+have a conflict between making Hydro Varka desirable but also printing enough Anemo Block that he's
+functional without it. So the Hydro Varka style might need fewer 'generate block' effects and more
+'Block Payoff' effects - details depending on how many actual block cards he has in total compared
+to other characters."
+- Next: a Block census (Varka's Block cards by element, against the base five and the other kits).
+- Then a design pass that moves Hydro from making Block toward Block payoffs, sized by the census.
+
 ## Next round
 
 - Log the current element on every `cards_played` row.
