@@ -182,6 +182,26 @@ def _offer_words(state: dict[str, Any], st: str) -> list[dict[str, str]]:
     return out
 
 
+def confirm_takes_nothing(state: dict[str, Any], st: str) -> bool:
+    """Does a bare `confirm` close this chooser with nothing taken?
+
+    The Furina whole-run round 2 (2026-10-10): Neow's Fury allows 0 picks,
+    and nothing on the page said a `confirm` with no `choose` was a way out.
+    The wire's own answer: the confirm button is live and nothing is picked
+    -- on a grid only where the bridge could read the selection
+    (`selection_known`), and never over an open preview.
+    """
+    blob = _blob(state, st)
+    if not blob.get("can_confirm") or blob.get("preview_showing"):
+        return False
+    if st == "hand_select":
+        return not blob.get("selected_cards")
+    if not blob.get("selection_known"):
+        return False
+    return not any(isinstance(c, dict) and c.get("selected")
+                   for c in (blob.get("cards") or []))
+
+
 def observation(state: dict[str, Any]) -> dict[str, Any]:
     """One screen, design-blind, field by field. Raises `PacketLeak` on a leak.
 
@@ -540,6 +560,9 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             obs["selected"] = [c for c in obs["offers"] if c.get("selected")]
         obs["can_confirm"] = bool(blob.get("can_confirm"))
         obs["can_skip"] = bool(blob.get("can_skip") or blob.get("can_cancel"))
+        # The Furina whole-run round 2 (2026-10-10): a chooser that allows 0
+        # picks says a bare `confirm` closes it.
+        obs["confirm_takes_nothing"] = confirm_takes_nothing(state, st)
         # `EB-259`. THE PAGE MAY NOT OFFER WHAT THE STATE WILL REFUSE. This
         # screen said *Confirm is not available* in its body and listed
         # `confirm` under "What you can say" three lines later; the tester

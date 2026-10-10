@@ -802,6 +802,19 @@ public static class FurinaStage
     }
 }
 
+/// <summary>
+/// A SPEND CARD, AS A TYPE (the Furina whole-run round 2, 2026-10-10). The
+/// codegen puts this on every row whose own play pays Fanfare -- a
+/// <c>stage_spend</c>, <c>stage_spend_all</c> or <c>stage_spend_up_to</c>
+/// anywhere in its body, modes included -- and nothing else implements it.
+/// A Power that Spends later (Showstopper) or reacts to a Spend is not one.
+/// A marker with no members, like <c>ISetOffCard</c>: telemetry counts the
+/// Spend cards in her hand as each turn opens.
+/// </summary>
+public interface IStageSpendCard
+{
+}
+
 /// <summary>What a guest's act is, as its cue draws it.</summary>
 public enum StageCueKind
 {

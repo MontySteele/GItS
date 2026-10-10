@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, ICharacterCard, IStageSpendCard
 {
     /// <summary>Sheet cadence: damaging Skills, Burst-tagged cards, and skill-tagged cards apply Hydro.</summary>
     public Element Element => Element.Hydro;

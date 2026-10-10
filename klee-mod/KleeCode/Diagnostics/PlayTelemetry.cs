@@ -275,6 +275,47 @@ internal static class PlayTelemetry
         record.BlockCardRounds.Add(round);
     }
 
+    /// <summary>
+    /// The Furina whole-run round 2 (2026-10-10): how many Spend cards
+    /// (<see cref="IStageSpendCard"/>) were in her hand as each of her turns
+    /// opened, after the draw, so a stranded bank (20+ Fanfare, no Spend
+    /// played) can be told apart from a hand with nothing to spend it on.
+    /// Furina only, like <c>fanfare_turn_start</c>: a seat with no stage
+    /// ledger writes no row. A read (rule 1).
+    /// </summary>
+    internal static void SpendCardsTurnStart(Player player)
+    {
+        try
+        {
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            if (combat == null || !Open.ContainsKey(player)) return;
+            var hand = CardPile.Get(PileType.Hand, player)?.Cards;
+            RecordSpendCardsTurnStart(player, combat.RoundNumber,
+                                      CountSpendCards(hand));
+        }
+        catch (Exception e)
+        {
+            Warn("SpendCardsTurnStart", e);
+        }
+    }
+
+    /// <summary>The Spend cards among <paramref name="cards"/>.</summary>
+    internal static int CountSpendCards(IEnumerable<CardModel>? cards) =>
+        cards?.Count(c => c is IStageSpendCard) ?? 0;
+
+    /// <summary>The hook-free half of <see cref="SpendCardsTurnStart"/>, and
+    /// the test seam.</summary>
+    internal static void RecordSpendCardsTurnStart(Player player, int round,
+                                                   int spendCards)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        if (player.Creature is not { } creature) return;
+        var ledger = FurinaStageLedger.Peek(creature);
+        if (ledger == null) return;
+        record.Stage = ledger;
+        record.SpendCardsTurnStart.Add(new[] { round, spendCards });
+    }
+
     /// <summary>The turn-opening sample: HP, block, the telegraph BEFORE
     /// block and the enemy HP pool. The pool is what makes an
     /// output curve possible without trusting attribution — per-turn damage is
@@ -1499,6 +1540,10 @@ internal static class PlayTelemetry
         /// <summary>2026-10-10 (the full-run round). [round, Fanfare] as each
         /// of her turns opens (<see cref="NoteFanfareTurnStart"/>).</summary>
         public readonly List<int[]> FanfareTurnStart = new();
+        /// <summary>2026-10-10 (the whole-run round 2). [round, Spend cards
+        /// in hand] as each of her turns opens, after the draw
+        /// (<see cref="SpendCardsTurnStart"/>).</summary>
+        public readonly List<int[]> SpendCardsTurnStart = new();
         /// <summary>2026-10-10 (round 2). The rounds that opened with a
         /// Block-gaining card in hand and attack damage telegraphed
         /// (<see cref="BlockCardTurn"/>).</summary>
@@ -1652,6 +1697,10 @@ internal static class PlayTelemetry
                 // 2026-10-10, the full-run round: her Fanfare as each turn
                 // opened, [round, fanfare].
                 Pairs(sb, "fanfare_turn_start", FanfareTurnStart);
+                // 2026-10-10, the whole-run round 2: the Spend cards in her
+                // hand as each turn opened, [round, n].
+                Pairs(sb, "spend_cards_in_hand_turn_start",
+                      SpendCardsTurnStart);
             }
             sb.Append(",\"turns\":").Append(Turns);
             sb.Append(',');
@@ -2002,6 +2051,7 @@ public sealed class PlayTelemetryHooks : AbstractModel
         PlayerChoiceContext choiceContext, Player player)
     {
         PlayTelemetry.BlockCardTurn(player);
+        PlayTelemetry.SpendCardsTurnStart(player);
         return Task.CompletedTask;
     }
 
