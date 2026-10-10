@@ -98,6 +98,11 @@ Two steps, each read on its own, like the line and the Block cards were:
    - Alternative (a): Navia only.
    - Alternative (b): a quarter, not half. This keeps more bank for spend-all cards but drains the
      81-type pile more slowly.
+   - **Ruled 2026-10-10: Freminet a quarter, Navia half.** [USER]: "I don't like artificial
+     limits, so I'd prefer to just fiddle with the ratio (make him only spend a quarter or a fifth
+     or something like that...)". Freminet's act: "Gain 3 [6] Block. Spend a quarter of your
+     Fanfare (rounded down): gain that much more Block." Navia's act still Spends half. Built on
+     #1016.
 3. **Overshoot response.** **Default:** if the round reads clearly stronger than the Block round,
    lower the four caps by a third before touching the guests.
 4. **Overnight.** **Default:** build picks 1 to 3 at their defaults tonight. Run the Furina round
