@@ -209,8 +209,9 @@ public static class FurinaStageLaw
     /// Energy."</summary>
     public const int PrimaDonnaFanfare = 10;
 
-    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3.
-    /// If you do, gain 1 Strength."</summary>
+    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
+    /// never past your line. If you do, gain 1 Strength." (2026-10-10)
+    /// </summary>
     public const int ReginaDrain = 3;
 
     /// <summary>Star Turn: "Costs 1 less for every 6 Fanfare you have."

@@ -3183,8 +3183,8 @@ APPLY_POWERS = {
         "Your Attacks deal 1 additional damage for every {X} HP you have "
         "[gold]Drained[/gold] and not [gold]Repaid[/gold]."),
     "fs_regina_of_all_waters": ("ReginaOfAllWatersPower", None,
-        "At the start of your turn, [gold]Drain[/gold] 3. If you do, gain 1 "
-        "[gold]Strength[/gold]."),
+        "At the start of your turn, [gold]Drain[/gold] 3, never past your "
+        "line. If you do, gain 1 [gold]Strength[/gold]."),
     "fs_pneuma_tides": ("PneumaTidesPower", None,
         "At the start of your turn, [gold]Repay[/gold] {X}."),
     "fs_hymn_of_renewal": ("HymnOfRenewalPower", None,

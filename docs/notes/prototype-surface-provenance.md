@@ -7080,3 +7080,18 @@ changes (Claude ships)". [USER]'s picks there are not built here.
 - The Drain face names who pays its Block: "(+3 Block: The Masquerade)"
   and "(+3 Block: Freminet)", one line each, after any Drain-line warning
   (`FurinaStageFacePreview.DrainBlock`).
+
+## Furina: Regina stops at the line, Navia to Uncommon, 2026-10-10
+
+Two rulings by [USER], built as written.
+
+- **Regina of All Waters** (`proto_fs_regina_of_all_waters`): "At the start
+  of your turn, Drain 3, never past your line. If you do, gain 1 Strength."
+  [USER]: "I'm good with stopping Regina's Drain at the line." It reuses the
+  guest act's stop (`StageDirector.GuestDrainRoom`, sim
+  `furina_tide.guest_drain_room`, Lyney's act): each copy drains only the
+  room above the line, none at or below it, and gains its Strength when it
+  drained at all. The upgrade is still cost 2 -> 1.
+- **Guest Star: Navia** (`proto_fs_guest_star_navia`): Rare -> Uncommon.
+  [USER]: "I lean more towards putting Navia to Uncommon first." Pool 78,
+  20 / 38 / 20 (was 20 / 37 / 21); sim `furina_tide.CARDS["ftd_navia"]`.

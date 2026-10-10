@@ -101,7 +101,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   copy moves its guest to the newest seat with no act; at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
-  pool is the starter and 78 cards (20 / 37 / 21), built from that paper's
+  pool is the starter and 78 cards (20 / 38 / 20; Guest Star: Navia moved
+  Rare to Uncommon 2026-10-10, "I lean more towards putting Navia to
+  Uncommon first"), built from that paper's
   sec.5 less Endless Waltz (cut 2026-10-09), plus the block gap's four
   (Velvet Curtain, Private Box, The Masquerade, The Show Must Go On; drain-line
   round pick 2, ruled 2026-10-09: "Yeah, agreed - let's plug the block gap

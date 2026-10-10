@@ -2916,7 +2916,7 @@
 - {id: proto_fs_guest_star_navia, name: "Guest Star: Navia", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
    description: "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}.",
    effects: [{op: stage_guest, member: navia}]}
 
@@ -3104,7 +3104,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, [gold]Drain[/gold] 3. If you do, gain 1 [gold]Strength[/gold].",
+   description: "At the start of your turn, [gold]Drain[/gold] 3, never past your line. If you do, gain 1 [gold]Strength[/gold].",
    effects: [{op: apply_power, power: fs_regina_of_all_waters, amount: 1,
               target: self}]}
 
