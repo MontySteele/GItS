@@ -227,10 +227,11 @@ def test_boom_badge_doubles_pocket_matchs_one_charge(overhaul):
     assert sizes(enemy) == [4]
 
 
-def test_two_badges_double_the_same_next_set_off_twice(overhaul):
+def test_two_badges_do_not_stack(overhaul):
     assert klee_overhaul.boom_badge_factor(0) == 1
     assert klee_overhaul.boom_badge_factor(1) == 2
-    assert klee_overhaul.boom_badge_factor(2) == 4
+    # The Klee scaling pass (klee-next, 2026-10-05): badges do not stack.
+    assert klee_overhaul.boom_badge_factor(2) == 2
 
 
 def test_a_mine_answering_an_attack_does_not_spend_the_badge(overhaul):
@@ -344,8 +345,8 @@ def test_balance_review_numbers(overhaul):
     assert wait.cost == 0 and wait_up.cost == 0
     assert _first(wait, "apply_power")["amount"] == 2
     assert _first(wait_up, "apply_power")["amount"] == 3
-    assert _first(g("proto_ko_party_poppers"), "apply_power")["amount"] == 3
-    assert _first(g("proto_ko_party_poppers+"), "apply_power")["amount"] == 4
+    assert _first(g("proto_ko_party_poppers"), "apply_power")["amount"] == 5
+    assert _first(g("proto_ko_party_poppers+"), "apply_power")["amount"] == 6
     assert _first(g("proto_ko_look_out"), "apply_power")["amount"] == 4
     assert _first(g("proto_ko_look_out+"), "apply_power")["amount"] == 6
     assert combat.spark_cost(g("proto_ko_blast_shield")) == 1

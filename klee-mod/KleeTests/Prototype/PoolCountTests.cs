@@ -58,9 +58,9 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Klee_is_78_and_24_33_21_with_two_ancients_and_five_coop()
+    public void Klee_is_78_and_25_32_21_with_two_ancients_and_five_coop()
     {
-        AssertPool("KleeOverhaulRoster", "Slice", 24, 33, 21);
+        AssertPool("KleeOverhaulRoster", "Slice", 25, 32, 21);
         AssertAncients("Klee");
         AssertTier("KleeOverhaulRoster", "MultiplayerSlice");
     }

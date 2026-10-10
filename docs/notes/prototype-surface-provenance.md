@@ -6638,6 +6638,47 @@ Two changes after the seat round (`review/records/kokomi-review-round-2026-10-05
 - Tide Wall's Plan now says "plus the damage the enemy intends next turn." Wording only, no op change: the seat read the intent on screen and took the Plan as this turn's, but it is carried out next turn.
 - Sea Glass Harvest's now-line Block 6 [7] -> 8 [11]. Two seats named it NEVER AGAIN: 6 Block with nothing to transform. 8 [11] is Coral Bulwark's Common rate. The Plan is unchanged. Prediction: no NEVER AGAIN next round.
 
+## Klee scaling pass, 2026-10-05
+
+Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-measurement-2026-10-05.md` sec.6). Paper: `review/active/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its defaults.
+
+- `proto_ko_secret_base`, v3 (replaces sec.4 A's "Your Bombs are placed 3 [4] bigger", whose placement bonus and card-face fold are removed, so faces print their own numbers again): "At the start of your turn, place a Bomb 4 [6] on a random enemy." 1-cost Uncommon Power; the upgrade raises 4 to 6. Copies add like Noxious Fumes (two copies place one Bomb 8, 12 upgraded). Placed after the start-of-turn growth, so it shows 4 when she acts, through the expansion's start-of-turn sequencer (after the echo, before Dodoco's Mine) and the ordinary placement path Pop! uses; a random living enemy, none means nothing.
+- `proto_ko_boom_badge`: Retain, and "Does not stack." -- x2 whatever the stack (sec.4 C).
+- `proto_ko_witchs_homework_next` (new, grant-only, `C.STAGING_GRANT_IDS`): "Place a Bomb 6. When it goes off, this card's Bomb is 2 [3] larger for the rest of the run." Exhaust (sec.4 B). Titled "Witch's Homework II" because titles are unique (`lint_prototype_titles`); the pool's Witch's Homework is unchanged.
+
+## Klee tempo paper, 2026-10-07
+
+Staging branch `klee-next`. Paper `review/active/klee-tempo-paper-2026-10-07.md` sec.3, ruled 2026-10-07. [USER]: "I personally found Blast Shield and Kitchen Alchemy quite useful in my runs, so I'm not sure I buy that they should go. Otherwise agreed." Klee is slow (act-3 turn-one damage 9 to the base five's 62) and her Block pays for it; each engine gets its missing damage. Five out, five in; the pool stays **78 (25 / 32 / 21)**. Built in both engines.
+
+- **Out:** `proto_ko_it_wasnt_me` (C), `proto_ko_sorry_jean` (C), `proto_ko_grounded` (U Power), `proto_ko_sit_tight` (U), `proto_ko_patience_klee` (U, "Experiment in Progress"). Painted art `KNOWN_STALE`; card pins removed or moved onto Favonius Escort (the same `remove_bomb_for_block` verb). Their powers stay registered (BACKLOG).
+- **In, after the status package in `C.KLEE_TEMPO_IDS` and `Slice()`:**
+  - `proto_ko_simmer`, Simmer (Common Attack, 1): "Deal 4 [6] Pyro damage, plus half your largest Bomb's size. It does not go off. Add a Dazed into your Discard Pile." Cook's Common hit that leaves the Bomb cooking.
+  - `proto_ko_taste_test`, Taste Test (Uncommon Attack, 2): "Deal Pyro damage equal to all your Bombs on the enemy. They do not go off. Add 2 [1] Confiscated into your Discard Pile." Set against Red Knight (2 Energy, 34, two Confiscated).
+  - `proto_ko_tinkering`, Tinkering (Uncommon Skill, 0): "Gain 2 [3] Sparks. Add a Confiscated into your Discard Pile." The kit's second row allowed to mint Sparks without an explosion (rule-4 pins name it beside Flash Point).
+  - `proto_ko_dodoco_tag`, Dodoco Tag (Uncommon Attack, 1): "Deal 7 [10] Pyro damage. Gain 5 [7] Block. Add a Dazed into your Discard Pile."
+  - `proto_ko_explosive_spark`, Explosive Spark (Common Attack, 0, 1 Spark): "Deal 12 [16] Pyro damage." (12 [16] ruled mid-build over the paper's 7 [10].)
+
+**Readings:**
+
+1. *The read.* New op `damage_from_bombs` (`read: largest_half | target_total`, `amount` the flat part). C# `ProtoBombPower.DealFromBombs` / `BombReadDamage` (`Powers/Prototype/ProtoBombPowerTempo.cs`), sim `effects._op_damage_from_bombs`. `largest_half` is the largest single charge of hers on the living board (`LargestSizeFor`, Sparks 'n' Splash's read), halved and rounded down, the hit landing on the aimed enemy; `target_total` is every charge of hers on the aimed enemy, Mines included (`TotalPlacedBy`). Nothing goes off: no Spark, no Mine answer, no explosion counter.
+2. *The hit is the card's.* One `DamageCmd.Attack` from the card (`DealCardDamage`), so Pyro, the reaction, Strength, Weak and Vulnerable land as on any other Attack of hers; a read of zero deals nothing. Simmer's flat 4 owns the `Damage` var (`bomb_read_damage_var_effect`; sim `damage` delta bumps it third, after `damage` and a Set off's own hit).
+3. *Two upgrade keys newly printable on an authored face:* `spark` (Tinkering's "Gain {Sparks}") and `cards` on a named token (Taste Test's "Add {Stash} Confiscated"; the token loop reads the Stash var).
+4. *Taste Test's face says "Pyro".* The paper's text is "Deal damage equal to all your Bombs on the enemy."; `lint_element_text` requires a hit that applies an element to name it (the 2026-10-02 co-op ruling), so the face reads "Deal [gold]Pyro[/gold] damage equal to ...".
+
+
+## Klee design review, 2026-10-08
+
+Staging branch `klee-next`. Paper `review/active/klee-design-review-2026-10-08.md`, ruled 2026-10-08, all five picks at the defaults. [USER]: "Nope, this all looks good. I'm now in agreement with all picks." The starter is not the root; rule 1 made waiting free and rule 4 left the Spark cards dead on turn one. No starter change. Built in both engines.
+
+- **Rule 1 (sec.4.6):** Bomb growth 4 to **2** a turn. `C.KLEE_OVERHAUL_BOMB_GROWTH`, `KleeOverhaulLaw.BombGrowth`, `understudy/blindplay_shape.BOMB_GROWTH`; the Bomb tip interpolates the constant. Alice's Recipe still doubles it (4).
+- **Rule 4 (sec.4.6):** opening Sparks 1 to **3**. `C.KLEE_OVERHAUL_OPENING_SPARK`, `KleeOverhaulLaw.OpeningSpark`, `blindplay_shape.OPENING_SPARK`; the Spark tip interpolates it. Pounding Surprise's text does not move; Explosive Frags' own 4 stacks on top (7).
+- **Every drafted placer +2, base and upgraded (sec.4.2):** the upgrade deltas are unchanged, so the upgraded face moves by 2 as well. Mine Toss 7 to 9; Boom-Boom Strike's Bomb 4 to 6; Lizard-Tail Gunpowder 4 to 6; Booby Trap 5 to 7; Coven Errand 8 / 12 to 10 / 14; Little Hexenzirkel 3 to 5; Bombs Away! 4 to 6; Windtrace's Mine 3 to 5; Jumpy Dumpty Mk.III's per-hit Bomb 2 to 4; Mine, All Mine!'s Mine 4 to 6; Party Poppers 3 to 5; Klee's Secret Base 4 to 6; Windblume Fireworks' Bomb 6 to 8; Dodoco 3 to 5; Finders Keepers 4 to 6. Not moved: Jumpy Dumpty (starter, pick 4 (a)); the jumps and copies (Aftershock, All of My Treasures!); Return to Sender (its Bomb is the Block absorbed, no printed size); Pop! (off-pool) and the two new rows (their numbers are final); the co-op tier's Shrapnel and the staging-only Witch's Homework II, outside the 78.
+- **Out (sec.4.4):** `proto_ko_playdate` (C), row deleted with a CUT note, art `KNOWN_STALE`, `PlaydatePower` stays registered. `proto_ko_pop` (C) leaves `Slice()` and `C.KLEE_OVERHAUL_POOL_IDS` but keeps its row and class: Klee Can Explain! transforms statuses into it. New register `C.KLEE_OFF_POOL_ROW_IDS` (a row created at play and offered nowhere), skipped by `lint_arm_pool_parity` and `card_distinctness_report` as a staging row is.
+- **In (sec.4.5), after the tempo paper's in `C.KLEE_DESIGN_REVIEW_IDS` and `Slice()`:**
+  - `proto_ko_fire_fire`, Fire! Fire! (Common Attack, 1, Pyro): "Place a Bomb 7 [10] on the enemy. Set off the enemy." Her normal attack: a Spark and Bomb-typed damage every turn without cooking.
+  - `proto_ko_blasting_spree`, Blasting Spree (Common Skill, 1): "Place a Bomb 4 [6] on ALL enemies. Add a Dazed into your Discard Pile." Spray's fuel and the Spray half of the status bridge.
+  - Both are existing ops (`plant_bomb`, `set_off`, `add_card`). Art `KNOWN_MISSING`. The pool stays **78 (25 / 32 / 21)**.
+
 ## Varka payoff fix, 2026-10-08
 
 Paper: `review/active/varka-payoff-fix-2026-10-08.md` (project review

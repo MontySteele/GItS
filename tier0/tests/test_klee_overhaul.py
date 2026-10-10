@@ -142,7 +142,10 @@ def test_the_starter_is_the_canonical_ten():
     # Draft 3's six ids: two deleted outright, two back in the offer pool.
     for gone in ("proto_ko_kaboom", "proto_ko_duck_and_cover"):
         assert gone not in {c.id for c in loader.prototype_cards()}
-    assert "proto_ko_pop" in C.KLEE_OVERHAUL_POOL_IDS
+    # Pop! left the pool at the Klee design review (2026-10-08) and is kept
+    # off-pool for Klee Can Explain!.
+    assert "proto_ko_pop" not in C.KLEE_OVERHAUL_POOL_IDS
+    assert "proto_ko_pop" in C.KLEE_OFF_POOL_ROW_IDS
     assert "proto_ko_dig_in" in C.KLEE_OVERHAUL_POOL_IDS
 
 
@@ -235,7 +238,9 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     ids = C.KLEE_OVERHAUL_POOL_IDS
     assert len(ids) == 78
     assert len(set(ids)) == 78
-    assert {"proto_ko_dig_in", "proto_ko_pop"} <= set(ids)
+    assert "proto_ko_dig_in" in ids
+    # The Klee design review (2026-10-08): Pop! off-pool, Playdate cut.
+    assert "proto_ko_pop" not in ids and "proto_ko_playdate" not in ids
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
     # R244's three, and only three: `Hex and Wick` is the packet's sec.3
     # fourth, left out at pick 1's default until the round-8 read asks for a
@@ -250,7 +255,8 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # The round-10 pool pass's one, and only one: the Spark sink written with
     # it was withdrawn on the audit's C3 clause and is on no surface.
     assert "proto_ko_countdown" in ids
-    assert "proto_ko_explosive_spark" not in ids
+    # (Explosive Spark came back as a new row with the Klee tempo paper,
+    # 2026-10-07: 12 damage for 1 Spark, last block below.)
     # The round-11 pool pass's one: the Spark SINK, written a second time and
     # this time keyed to the Bomb rather than to the bank -- the C3 clause
     # that withdrew Explosive Spark is what the row above it is answering.
@@ -290,16 +296,21 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     # The Klee-only companions (2026-10-03): Second Surprise cut here,
     # Solitary Confinement from the package, and her three Companion rows
     # last of all.
-    assert list(ids[-39:-13]) == [
-        "proto_ko_hiding_spot", "proto_ko_playdate",
+    # The Klee tempo paper (2026-10-07) cut Sit Tight and Experiment in
+    # Progress here and It Wasn't Me! from the package; its five come after
+    # the package and before the companions.
+    # The Klee design review (2026-10-08) cut Playdate here; its two come
+    # after the tempo five.
+    assert list(ids[-42:-19]) == [
+        "proto_ko_hiding_spot",
         "proto_ko_jumpy_dumpty_mk_iii",
         "proto_ko_mine_all_mine", "proto_ko_team_effort",
         "proto_ko_one_more_charge",
-        "proto_ko_sit_tight", "proto_ko_treasure_map",
+        "proto_ko_treasure_map",
         "proto_ko_tag_along", "proto_ko_come_back_and_play",
         "proto_ko_boom_badge", "proto_ko_wait_for_it",
         "proto_ko_duck_and_run", "proto_ko_party_poppers",
-        "proto_ko_look_out", "proto_ko_patience_klee",
+        "proto_ko_look_out",
         "proto_ko_secret_base",
         "proto_ko_half_a_mountain", "proto_ko_favonius_escort",
         "proto_ko_adventure_club", "proto_ko_windblume_fireworks",
@@ -320,7 +331,16 @@ def test_the_pool_is_the_slices_rows_and_the_passes_that_followed():
     for cut in ("proto_ko_second_surprise", "proto_ko_solitary_confinement",
                 "proto_ko_once_more"):
         assert cut not in ids, cut
-    assert ids[-13:-3] == C.KLEE_STATUS_PACKAGE_IDS
+    for cut in ("proto_ko_it_wasnt_me", "proto_ko_sorry_jean",
+                "proto_ko_grounded", "proto_ko_sit_tight",
+                "proto_ko_patience_klee"):
+        assert cut not in ids, cut
+    assert ids[-19:-10] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-10:-5] == C.KLEE_TEMPO_IDS == (
+        "proto_ko_simmer", "proto_ko_taste_test", "proto_ko_tinkering",
+        "proto_ko_dodoco_tag", "proto_ko_explosive_spark")
+    assert ids[-5:-3] == C.KLEE_DESIGN_REVIEW_IDS == (
+        "proto_ko_fire_fire", "proto_ko_blasting_spree")
     assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
 
 
@@ -328,16 +348,17 @@ def test_the_numbers_are_the_briefs_placeholders():
     """Slice packet sec.1: no number in it is a claim. These four are the
     rules' own, and they are named so `lint_constant_parity` can compare the
     C# mirrors BY VALUE."""
-    # FOUR: the round-5 packet raised it from 3 to 5 and [USER] read 5 back
-    # down on the same day ("growth 5 is likely too much").
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 4
+    # TWO since the Klee design review (2026-10-08, sec.4.6, ruled): four
+    # paid every Bomb to wait. (Four from the round-5 packet to then.)
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 2
     # A MULTIPLIER since the 2026-09-02 balance pass: Alice's Recipe doubles
     # the turn's growth ("your Bombs grow twice each turn").
     assert C.KLEE_OVERHAUL_ALICE_MULTIPLIER == 2
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1
     # FIVE since R242 pick 1: rule 4's opening bank. [USER]: "Regent starts
     # with 3 stars ... so 1 is a reasonable compromise."
-    assert C.KLEE_OVERHAUL_OPENING_SPARK == 1
+    # THREE since the Klee design review (2026-10-08, sec.4.6): Regent's 3.
+    assert C.KLEE_OVERHAUL_OPENING_SPARK == 3
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------
@@ -464,7 +485,7 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     the base game's thicker Rares (the paper's sec.3)."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 24, "uncommon": 33, "rare": 21}
+        "common": 25, "uncommon": 32, "rare": 21}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):
@@ -530,7 +551,7 @@ def test_the_prototype_rule_states_the_rows_own_numbers():
     assert delta("proto_ko_jumpy_dumpty") == {"bomb_size": 2, "payload_mine": 1}
     assert delta("proto_ko_chain_fuse") == {"grow": 1}
     assert delta("proto_ko_careful_arrangement") == {"grow": 1}
-    assert delta("proto_ko_grounded") == {"power_amount": 1}
+    assert delta("proto_ko_look_out") == {"power_amount": 1}
     # Kokomi's half of the rule, on DRAFT 6's rows. `tide` left the key list
     # with the verb it read (`gain_tide`), so what is left of her side is the
     # shared Block and Mend clauses -- which is the whole point of a rule
@@ -761,7 +782,7 @@ def test_alices_marked_cards_pay_no_spark_under_the_arm(overhaul):
     from tier0.tests.conftest import make_state
 
     alices = loader.get_card("proto_ko_alices_introduction_magic")
-    marked = [loader.get_card("proto_ko_sorry_jean") for _ in range(3)]
+    marked = [loader.get_card("proto_ko_run_away") for _ in range(3)]
     assert not alices.is_companion
     assert not any(card.is_companion for card in marked)
 

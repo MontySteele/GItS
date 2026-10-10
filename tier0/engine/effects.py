@@ -491,7 +491,9 @@ AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
                         # unreachable outside the arm.
                         "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
                         # R276's Hair Trigger, on the same terms.
-                        "mine_bombs"))
+                        "mine_bombs",
+                        # The Klee scaling pass's Witch's Homework (klee-next).
+                        "plant_homework_bomb"))
 
 # Ops whose aimed target may be a CORPSE. C#'s dead-target rule is op-dependent
 # and this frozenset is that asymmetry, written down once:
@@ -4530,6 +4532,41 @@ def _op_grow_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.grow_largest_per_spark(state, int(fx["per_spark"]))
 
 
+def _op_damage_from_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """THE KLEE TEMPO PAPER (2026-10-07, Simmer and Taste Test): damage READ
+    off her Bombs that leaves them cooking. `ProtoBombPower.DealFromBombs`'s
+    twin.
+
+    `read: largest_half` is Simmer's "plus half your largest Bomb's size" --
+    the largest single charge on the living board (`largest_charge`), halved
+    and rounded down. `read: target_total` is Taste Test's "damage equal to
+    all your Bombs on the enemy" -- every charge on the aimed body, Mines
+    included (`total_size`). `amount` is the printed flat part.
+
+    IT READS THE PILE AND DOES NOT SPEND IT: nothing goes off, no Spark is
+    minted, no Mine answers. But it IS the card's own hit -- one `_op_damage`
+    Attack, so Pyro, the reaction, Strength and Vulnerable land as on any
+    other Attack of hers. A read of zero deals nothing.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    base = int(fx.get("amount", 0) or 0)
+    read = fx.get("read")
+    if read == "largest_half":
+        _enemy, _index, size = klee_overhaul.largest_charge(state)
+        bombs = size // 2
+    elif read == "target_total":
+        targets = _pick_targets(state, fx.get("target", "enemy"))
+        bombs = klee_overhaul.total_size(targets[0]) if targets else 0
+    else:
+        raise ValueError(f"damage_from_bombs read {read!r} on {card.id}")
+    total = base + bombs
+    if total <= 0:
+        return
+    _op_damage(state, {"op": "damage", "amount": total,
+                       "target": fx.get("target", "enemy")}, card)
+
+
 def _op_damage_set_off_total(state: CombatState, fx: dict,
                              card: Card) -> None:
     """Big Badda Boom's second clause: "Then deal damage equal to what the
@@ -4710,6 +4747,20 @@ def _op_add_random_companion(state: CombatState, fx: dict,
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
     klee_overhaul.add_random_companions(state, int(fx["amount"]))
+
+
+def _op_plant_homework_bomb(state: CombatState, fx: dict,
+                            card: Card) -> None:
+    """THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's Homework's
+    Bomb. The sim places it at its printed size and does NOT model the
+    run-long growth: the row is grant-only (in no pool, `C.KLEE_OVERHAUL_
+    POOL_IDS`), so no sim run draws it, and the sim's Balance machinery is
+    parked (`review/active/klee-balance-measurement-2026-10-05.md` pick 3).
+    The C# is `KleeScalingPass`."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    for enemy in _pick_targets(state, "enemy", allow_dead=True):
+        klee_overhaul.place(state, enemy, int(fx["size"]))
 
 
 def _op_grant_kapow_each_turn(state: CombatState, fx: dict,
@@ -5009,6 +5060,7 @@ OPS = {
     # is not Klee -- see `_op_klee_overhaul_off`.
     "set_off": _op_set_off,
     "plant_bomb": _op_plant_bomb,
+    "plant_homework_bomb": _op_plant_homework_bomb,
     "grow_bombs": _op_grow_bombs,
     "merge_bombs": _op_merge_bombs,
     # THE POOL PASS's three (`EB-491`), on the same terms as every arm verb
@@ -5027,6 +5079,8 @@ OPS = {
     # see `_op_grow_largest_bomb`.
     "grow_largest_bomb": _op_grow_largest_bomb,
     "damage_set_off_total": _op_damage_set_off_total,
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test.
+    "damage_from_bombs": _op_damage_from_bombs,
     "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,
     # R244's one new verb, the readers' enabler (renamed at R276). It touches
@@ -5187,6 +5241,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
         if "ftd" in card.tags:
             from tier0.engine import furina_tide    # late: avoids the cycle
             furina_tide.resolve_card(state, card)
+        # Varka's Sturm und Drang rider, after the Attack (C#'s
+        # `AfterCardPlayed`): a no-op unless a charge was spent on it.
+        companion_overhaul_card_end(state, card, state.card_aim)
     finally:
         if varka:
             varka_oath.end_play(state, card)
@@ -5357,13 +5414,13 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     #
     #   mc_passion_overload   Bennett -- one Attack, consumed on it
     #   mc_lightning_fang     Razor   -- every Attack, 2 turns
-    #   mc_swirl_charge       Varka   -- one Attack, banked per Swirl
     #
     # `mc_lightning_fang`'s stack is TURNS REMAINING, not damage, so its
-    # contribution is the constant rather than the stack; the other two
-    # hold their own printed number, so a second copy pays twice.
+    # contribution is the constant rather than the stack; Bennett's holds
+    # its own printed number, so a second copy pays twice. (Varka's
+    # `mc_swirl_charge` left this sum in the Varka round 3 fix, 2026-10-10:
+    # it is a separate hit after the Attack, `companion_overhaul_card_end`.)
     bonus += p.powers.get("mc_passion_overload", 0)
-    bonus += p.powers.get("mc_swirl_charge", 0)
     if p.powers.get("mc_lightning_fang", 0):
         bonus += C.MC_LIGHTNING_FANG_BONUS
     # THE INAZUMA ARM'S TWO, on the same terms and in the same sum:
@@ -6267,10 +6324,42 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
         override = "pyro"
     if p.powers.pop("mi_crowfeather", 0):
         override = "electro"
-    if p.powers.pop("mc_swirl_charge", 0):
-        override = p.mc_swirl_element or override
-        p.mc_swirl_element = ""
+    # Varka's banked Swirl (the Varka round 3 fix, 2026-10-10) no longer
+    # claims the element: the Attack keeps its own, and the bank is spent
+    # here and paid after the Attack as a separate hit of the element banked
+    # now (`companion_overhaul_card_end`). A Swirl this Attack makes re-banks
+    # for the next one.
+    n = p.powers.pop("mc_swirl_charge", 0)
+    state.mc_swirl_rider = (n, p.mc_swirl_element) if n else (0, "")
+    p.mc_swirl_element = ""
     return override
+
+
+def companion_overhaul_card_end(state: CombatState, card: Card,
+                                aim: Optional[Enemy]) -> None:
+    """Varka's Sturm und Drang rider, paid once the Attack has resolved: "your
+    next Attack deals 6 additional damage of the swirled element" as ONE
+    separate hit of the element banked when the Attack was played, through
+    the arm's companion door (as Durin's or Bennett's pulse), on the enemy the Attack aimed at if it is alive, or on
+    every living enemy for an Attack that aims at none. Its own Oath scope,
+    as Baron Bunny's burst. C# twin: `SwirlChargePower.OnSpent`."""
+    n, element = state.mc_swirl_rider
+    state.mc_swirl_rider = (0, "")
+    if not n or not element or card.type != "attack":
+        return
+    if _card_aims_at_enemy(card):
+        targets = [aim] if aim is not None and aim.alive else []
+    else:
+        targets = list(state.living_enemies)
+    if not targets:
+        return
+    varka_oath.open_scope(state)
+    try:
+        for enemy in targets:
+            deal_damage_to_enemy(state, enemy, n, element=element,
+                                 source="companion")
+    finally:
+        varka_oath.close_scope(state)
 
 
 def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,

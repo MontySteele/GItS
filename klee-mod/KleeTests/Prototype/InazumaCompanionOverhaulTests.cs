@@ -524,14 +524,15 @@ public class InazumaCompanionOverhaulTests
         Assert.Equal(Element.Electro,
             CompanionOverhaulRiders.ElementFor(card, both.Creature));
 
-        // And Varka's banked Swirl is still last of all five.
+        // And Varka's banked Swirl claims no element (the Varka round 3
+        // fix, 2026-10-10): Sara's one-shot still answers.
         var swirl = Seat.Klee()
             .WithPower<KyoukaPower>(2)
             .WithPower<CrowfeatherCoverPower>(4)
             .WithPower<SwirlChargePower>(6);
         swirl.Creature.Powers.OfType<SwirlChargePower>().Single()
             .Remember(Element.Cryo);
-        Assert.Equal(Element.Cryo,
+        Assert.Equal(Element.Electro,
             CompanionOverhaulRiders.ElementFor(card, swirl.Creature));
     }
 

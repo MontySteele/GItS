@@ -48,7 +48,7 @@ public sealed class ProtoKoMineToss : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 7m)
+            new DynamicVar("BombSize", 9m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

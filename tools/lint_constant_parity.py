@@ -378,6 +378,9 @@ UNMIRRORED: dict[str, str] = {
     "CloverCharm.Block": _ARM_ITEMS_REASON,
     "DodocoArmy.MineSize": _ARM_ITEMS_REASON,
     "DodocoCharm.Bonus": _ARM_ITEMS_REASON,
+    # THE KLEE SCALING PASS (klee-next, 2026-10-05, sec.4 D): the tempo
+    # relic's start-of-combat Bomb, a staging-only test relic.
+    "PoundingSurpriseNext.OpeningBomb": _ARM_ITEMS_REASON,
     "ExplosiveFrags.FirstExplosionSparks": _ARM_ITEMS_REASON,
     "FireworksStand.Energy": _ARM_ITEMS_REASON,
     "FireworksStand.Threshold": _ARM_ITEMS_REASON,

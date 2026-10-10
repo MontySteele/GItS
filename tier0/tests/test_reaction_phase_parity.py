@@ -832,18 +832,18 @@ CO_TENANCY_LEDGER = {
             "broadcast applies the mark, only a card play does, and a card "
             "play is strictly later",
         ("Powers/Prototype/KleeExpansionPowers.cs", "SecretBasePower"):
-            "(the Klee overhaul, R276). Klee's Secret Base reads "
-            "the board and places a Bomb. THE ORDERING QUESTION, answered: "
-            "its one co-tenant that writes the board is DodocoPower, so the "
-            "two do not run independently -- both call "
-            "KleeExpansion.RunTurnStartPlacements, whose per-turn ledger latch "
-            "runs Secret Base's check and then Dodoco's Mine in one fixed "
-            "order however the broadcast orders the two, the sim's "
-            "klee_overhaul._turn_start_expansion order",
+            "(the Klee overhaul, R276; v3 in the scaling pass, "
+            "klee-next 2026-10-05). Klee's Secret Base places a Bomb every "
+            "turn. THE ORDERING QUESTION, answered: its one co-tenant that "
+            "writes the board is DodocoPower, so the two do not run "
+            "independently -- both call KleeExpansion.RunTurnStartPlacements, "
+            "whose per-turn ledger latch places Secret Base's Bomb and then "
+            "Dodoco's Mine in one fixed order however the broadcast orders "
+            "the two, the sim's klee_overhaul._turn_start_expansion order",
         ("Powers/Prototype/KleeExpansionPowers.cs", "DodocoPower"):
             "(the Klee overhaul, R276). Dodoco's Mine, placed "
             "through the same sequencer as SecretBasePower above and AFTER "
-            "its check, so the one resource they share has one order. It "
+            "its Bomb, so the one resource they share has one order. It "
             "reads nothing else of this broadcast's",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
             "(the Klee overhaul; moved here from "

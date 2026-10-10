@@ -49,7 +49,7 @@ public sealed class ProtoKoHidingSpot : CustomCardModel
         new List<DynamicVar>
         {
             new BlockVar(6m, ValueProp.Move),
-            new DynamicVar("BombSize", 3m)
+            new DynamicVar("BombSize", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

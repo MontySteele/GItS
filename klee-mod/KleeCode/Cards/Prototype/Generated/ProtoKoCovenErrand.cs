@@ -42,13 +42,13 @@ public sealed class ProtoKoCovenErrand : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coven Errand"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy, {IfUpgraded:show:14|12} if you played a [gold]Companion[/gold] card this turn."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()} on an enemy, {IfUpgraded:show:16|14} if you played a [gold]Companion[/gold] card this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 8m)
+            new DynamicVar("BombSize", 10m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

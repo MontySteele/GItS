@@ -54,7 +54,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `review/active/klee-brief-2026-09-01.md` (sec.3, the rules: Bombs grow at the
   start of her turn and go off only to a *Set off* card or a Mine answering an
   attack; each Bomb that goes off gives a Spark, which some cards cost). Pool
-  78 (24 / 33 / 21); seven relics of her own and three potions. **She is
+  78 (25 / 32 / 21; Boom Badge to Common, [USER] 2026-10-07:
+  "Agreed on Boom Badge, but let's keep powers out of Common and leave Secret
+  Base at Uncommon."); seven relics of her own and three potions. **She is
   measured on the real game and frozen on `main`** between suite runs
   (`review/active/klee-balance-measurement-2026-10-05.md`, ruled 2026-10-05):
   changes go to `klee-next` and reach `main` in one promotion PR carrying the
@@ -63,7 +65,15 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   latest record `review/records/klee-suite-4-2026-10-08.md`, suite 5 in
   progress; papers `review/active/klee-tempo-paper-2026-10-07.md` and
   `review/active/klee-design-review-2026-10-08.md` (ruled; growth 4 to 2,
-  three opening Sparks). Next: suite 5; if it passes, the promotion PR and
+  three opening Sparks). The tempo paper ([USER]: "I personally found Blast
+  Shield and Kitchen Alchemy quite useful in my runs, so I'm not sure I buy
+  that they should go. Otherwise agreed."): out It Wasn't Me!, Sorry,
+  Jean..., Grounded, Sit Tight, Experiment in Progress; in Simmer, Taste
+  Test, Tinkering, Dodoco Tag, Explosive Spark. The design review ([USER]:
+  "Nope, this all looks good. I'm now in agreement with all picks."): Bombs
+  grow 2 a turn, 3 opening Sparks, every drafted Bomb or Mine placer prints 2
+  bigger; in Fire! Fire! and Blasting Spree; out Playdate and Pop! (Pop!
+  stays off-pool for Klee Can Explain!). Next: suite 5; if it passes, the promotion PR and
   [USER]'s run on that build (design review pick 5).
 - **Kokomi: Prototype.** Brief `review/active/kokomi-brief-2026-09-01.md`
   (sec.2, the rules). A card with a Plan line can be played on the

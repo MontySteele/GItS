@@ -22,7 +22,10 @@ public class StatusToDiscardTests
     {
         { "ProtoKoFishBlasting", "Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKoForbiddenFun", "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
-        { "ProtoKoItWasntMe", "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
+        // It Wasn't Me! cut by the Klee tempo paper (2026-10-07).
+        { "ProtoKoSimmer", "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
+        { "ProtoKoTinkering", "Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]." },
+        { "ProtoKoDodocoTag", "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKoLisasTreats", "Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKoRedKnight", "Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKoUpInSmoke", "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },

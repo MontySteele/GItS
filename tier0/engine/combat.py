@@ -568,6 +568,9 @@ _FREE_PLAY_CONTEXT = (
     # play that consumed Bennett's rider would otherwise hand the element to
     # the outer Attack as well.
     "mc_attack_element_override",
+    # And Varka's Sturm und Drang rider, spent at card start and paid at its
+    # end (the Varka round 3 fix, 2026-10-10).
+    "mc_swirl_rider",
     "sparks_at_play", "current_x", "current_card_cost",
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card

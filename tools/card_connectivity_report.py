@@ -380,6 +380,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "set_off": [_hook("private", "bombs", "use"),
                 _hook("private", "sparks", "write")],
     "plant_bomb": [_hook("private", "bombs", "write")],
+    # The Klee scaling pass (klee-next, 2026-10-05): Witch's Homework II.
+    "plant_homework_bomb": [_hook("private", "bombs", "write")],
     "grow_bombs": [_hook("private", "bombs", "use")],
     "merge_bombs": [_hook("private", "bombs", "use")],
     "remove_bomb_for_block": [_hook("private", "bombs", "use"),
@@ -401,6 +403,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "plant_bomb_copy_largest": [_hook("private", "bombs", "read"),
                                 _hook("private", "bombs", "write")],
     "damage_set_off_total": [_hook("private", "bombs", "read")],
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test READ the pile
+    # and leave it cooking.
+    "damage_from_bombs": [_hook("private", "bombs", "read")],
     "multiply_set_off": [_hook("private", "bombs", "read")],
     "draw_per_set_off": [_hook("private", "bombs", "read"),
                          _hook("shared", "draw_pile", "use"),

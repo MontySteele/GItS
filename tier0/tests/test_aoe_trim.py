@@ -92,7 +92,7 @@ def test_bombs_away_is_a_skill_whose_block_counts_bombed_enemies():
     assert card.type == "skill" and card.cost == 1
     play(st, card, aim=a)
     # Its own Bomb counts: 4 + 2 x 1.
-    assert sizes(a) == [4] and sizes(b) == [] and sizes(c) == []
+    assert sizes(a) == [6] and sizes(b) == [] and sizes(c) == []
     assert st.player.block == 6
     klee_overhaul.place(st, b, 3, is_mine=True)       # a Mine is a Bomb
     st.player.block = 0
@@ -104,17 +104,17 @@ def test_bombs_away_upgrade_moves_the_bomb():
     a = make_enemy(hp=200)
     st = klee_state([a])
     play(st, load("proto_ko_bombs_away+"), aim=a)
-    assert sizes(a) == [6] and st.player.block == 6
+    assert sizes(a) == [8] and st.player.block == 6
 
 
-def test_mine_toss_places_one_mine_seven_on_one_enemy():
+def test_mine_toss_places_one_mine_nine_on_one_enemy():
     a, b, c = three()
     st = klee_state([a, b, c])
     play(st, load("proto_ko_mine_toss"), aim=b)
     assert sizes(a) == [] and sizes(c) == []
-    assert [(ch.size, ch.is_mine) for ch in b.ko_charges] == [(7, True)]
+    assert [(ch.size, ch.is_mine) for ch in b.ko_charges] == [(9, True)]
     play(st, load("proto_ko_mine_toss+"), aim=a)
-    assert sizes(a) == [10]
+    assert sizes(a) == [12]
 
 
 # Mine, All Mine!'s mines-only Set off left in the Klee finish-line batch
@@ -141,17 +141,17 @@ def test_team_effort_sets_off_the_target_only_and_pays_six_more():
     assert (200 - a2.hp) - plain == 6
 
 
-def test_coven_errand_places_eight_or_twelve_on_one_enemy():
-    # Klee pre-Balance sweep (2026-10-03): 5 / 8 -> 8 / 12, upgrade +2 both.
+def test_coven_errand_places_ten_or_fourteen_on_one_enemy():
+    # Klee pre-Balance sweep (2026-10-03): 5 / 8 -> 8 / 12, upgrade +2 both; 10 / 14 since the Klee design review (2026-10-08).
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     st = klee_state([a, b])
     play(st, load("proto_ko_coven_errand"), aim=a)
-    assert sizes(a) == [8] and sizes(b) == []
+    assert sizes(a) == [10] and sizes(b) == []
     st.ko_companion_this_turn = 1
     play(st, load("proto_ko_coven_errand"), aim=b)
-    assert sizes(b) == [12] and sizes(a) == [8]
+    assert sizes(b) == [14] and sizes(a) == [10]
     play(st, load("proto_ko_coven_errand+"), aim=b)
-    assert sizes(b) == [12, 14]
+    assert sizes(b) == [14, 16]
 
 
 def test_red_knight_is_34_to_one_enemy_and_two_confiscated():

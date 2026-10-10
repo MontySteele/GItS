@@ -282,10 +282,13 @@ SIM_CALL_SITES = {
     ('effects.py', 19): ("'companion'", None, "'cryo'"),
     ('effects.py', 20): ("'companion'", None, "'hydro'"),
     ('effects.py', 21): ("'companion'", None, "'geo'"),
-    ('effects.py', 22): ("'companion'", None, "'hydro'"),
-    ('effects.py', 23): ("'companion'", None, "'pyro'"),
+    # Varka's Sturm und Drang rider, a separate hit of the Swirled element
+    # after the Attack (the Varka round 3 fix, 2026-10-10).
+    ('effects.py', 22): ("'companion'", None, 'element'),
+    ('effects.py', 23): ("'companion'", None, "'hydro'"),
     ('effects.py', 24): ("'companion'", None, "'pyro'"),
     ('effects.py', 25): ("'companion'", None, "'pyro'"),
+    ('effects.py', 26): ("'companion'", None, "'pyro'"),
     # (`furina_stage.py`'s two doors left with v2, the Salon's Tab,
     # 2026-10-05: the arm runs on `furina_tide`'s rules and its one door.)
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the one unpowered

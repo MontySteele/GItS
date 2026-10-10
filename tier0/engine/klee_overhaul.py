@@ -83,8 +83,12 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 #: this tuple, so the parity test that walks it never asked about it.
 OVERHAUL_OPS = frozenset((
     "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+    # The Klee scaling pass's Witch's Homework (klee-next, 2026-10-05).
+    "plant_homework_bomb",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test's read.
+    "damage_from_bombs",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
     "plant_bomb_copy_largest",
@@ -1581,7 +1585,7 @@ WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw N, +1 Energy
 PARTY_POPPERS = "ko_party_poppers"        # Spark-priced play: Bomb N
 LOOK_OUT = "ko_look_out"                  # a Mine goes off: N Block
 PATIENCE = "ko_patience"                  # quiet turn: largest grows N
-SECRET_BASE = "ko_secret_base"            # empty board at turn start: Bomb N
+SECRET_BASE = "ko_secret_base"            # turn start: Bomb N
 DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
 SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N to ALL
@@ -1661,13 +1665,13 @@ def spend_playdate(state: CombatState, card: Card) -> None:
 
 
 def boom_badge_factor(copies: int) -> int:
-    """What `copies` Boom Badges multiply the next Set off's Bombs by: x2 per
-    copy, 1 with none. `BoomBadgePower.FactorFor`'s twin.
+    """What `copies` Boom Badges multiply the next Set off's Bombs by: x2 with
+    any, 1 with none. `BoomBadgePower.FactorFor`'s twin.
 
-    EVERY COPY DOUBLES THE SAME NEXT SET OFF, Playdate's reading: two badges
-    are two sentences about one Set off, so they stack to x4 there rather than
-    queueing onto the Set off after it."""
-    return 2 ** int(copies) if copies > 0 else 1
+    BADGES DO NOT STACK (the Klee scaling pass, klee-next 2026-10-05,
+    `review/active/klee-scaling-pass-2026-10-05.md` sec.4 C): two badges on
+    one Set off are x2, not x4."""
+    return 2 if copies > 0 else 1
 
 
 def take_boom_badge(state: CombatState, card: Optional[Card] = None) -> int:
@@ -1882,20 +1886,23 @@ def install_detonator(state: CombatState, upgraded: bool) -> None:
 
 
 def _turn_start_expansion(state: CombatState) -> None:
-    """The expansion's three start-of-turn Powers, after the draw and after
-    rule 1's growth (`AfterPlayerTurnStart`): Klee's Secret Base, Dodoco and
-    Alice's Detonator."""
+    """The expansion's start-of-turn Powers, after the draw and after rule 1's
+    growth (`AfterPlayerTurnStart`): Klee's Secret Base, Dodoco and Alice's
+    Detonator."""
     import copy                                     # stdlib, local by habit
     from tier0.content import loader                # late import: cycle
 
     p = state.player
     # THE ORDER IS THE MOD'S ONE SEQUENCER (`KleeExpansion
     # .RunTurnStartPlacements`): Sparks 'n' Splash's echo reads the grown
-    # Bombs first (2026-09-25), then Secret Base reads the board BEFORE
-    # Dodoco's Mine lands, so none of the three can race.
+    # Bombs first (2026-09-25), then Klee's Secret Base's Bomb, then Dodoco's
+    # Mine.
     bomb_echo(state)
+    # Klee's Secret Base v3 (the scaling pass, klee-next 2026-10-05): "At the
+    # start of your turn, place a Bomb 4 [6] on a random enemy." The stack
+    # adds (two copies: one Bomb 8), placed after the growth.
     n = p.powers.get(SECRET_BASE, 0)
-    if n and not any_bomb_placed(state):
+    if n:
         living = list(state.living_enemies)
         if living:
             dest = state.rng.choice(living)

@@ -44,7 +44,8 @@ public class KleeStatusPackageTests
 
     private static readonly string[] Package =
     {
-        "ProtoKoForbiddenFun", "ProtoKoItWasntMe", "ProtoKoLisasTreats",
+        // It Wasn't Me! cut by the Klee tempo paper (2026-10-07).
+        "ProtoKoForbiddenFun", "ProtoKoLisasTreats",
         "ProtoKoRedKnight", "ProtoKoFindersKeepers", "ProtoKoKleeCanExplain",
         "ProtoKoDamageReport",
         // Defence in the status pile (2026-10-01, the paper's sec.5).
@@ -61,7 +62,11 @@ public class KleeStatusPackageTests
         Assert.Equal(78, slice.Count);
         // The Klee-only companions (2026-10-03): Solitary Confinement cut from
         // the package, and her three companion rows LAST, after it.
-        Assert.Equal(Package, slice.Skip(65).Take(10).ToArray());
+        // The Klee tempo paper (2026-10-07): It Wasn't Me! cut from the
+        // package, and its five rows between the package and the companions.
+        // The Klee design review (2026-10-08): Pop! and Playdate out
+        // above, its two after the tempo five.
+        Assert.Equal(Package, slice.Skip(59).Take(9).ToArray());
         Assert.Equal(new[] { "ProtoMcJeanLionsFang", "ProtoMcPruneHexhunterChime",
                              "ProtoMcAlbedoDustOfPurification" },
                      slice.Skip(75).ToArray());
@@ -90,7 +95,6 @@ public class KleeStatusPackageTests
         var shapes = new (CardModel Card, CardType Type, int Cost, CardRarity Rarity)[]
         {
             (new ProtoKoForbiddenFun(), CardType.Attack, 0, CardRarity.Common),
-            (new ProtoKoItWasntMe(), CardType.Skill, 0, CardRarity.Common),
             (new ProtoKoLisasTreats(), CardType.Skill, 0, CardRarity.Uncommon),
             (new ProtoKoRedKnight(), CardType.Attack, 2, CardRarity.Rare),
             (new ProtoKoFindersKeepers(), CardType.Power, 1, CardRarity.Uncommon),
@@ -114,15 +118,14 @@ public class KleeStatusPackageTests
     {
         Assert.Equal((10m, 14m), (new ProtoKoForbiddenFun().DynamicVars.Damage.BaseValue,
                                   Upgraded<ProtoKoForbiddenFun>().DynamicVars.Damage.BaseValue));
-        Assert.Equal((6m, 9m), (new ProtoKoItWasntMe().DynamicVars.Block.BaseValue,
-                                Upgraded<ProtoKoItWasntMe>().DynamicVars.Block.BaseValue));
         Assert.Equal((2m, 3m), (new ProtoKoLisasTreats().DynamicVars["Energy"].BaseValue,
                                 Upgraded<ProtoKoLisasTreats>().DynamicVars["Energy"].BaseValue));
         // AoE trim (2026-10-03): 34 to one enemy, Block on a status drawn.
         Assert.Equal((34m, 40m), (new ProtoKoRedKnight().DynamicVars.Damage.BaseValue,
                                   Upgraded<ProtoKoRedKnight>().DynamicVars.Damage.BaseValue));
-        // Klee finish-line batch (2026-10-03): Finders Keepers is 4 [6].
-        Assert.Equal((4m, 6m), (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
+        // Klee finish-line batch (2026-10-03): Finders Keepers is 4 [6];
+        // 6 [8] since the Klee design review (2026-10-08).
+        Assert.Equal((6m, 8m), (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
                                 Upgraded<ProtoKoFindersKeepers>().DynamicVars["PowerAmount"].BaseValue));
         Assert.Equal((6m, 8m), (new ProtoKoKleeCanExplain().DynamicVars.Block.BaseValue,
                                 Upgraded<ProtoKoKleeCanExplain>().DynamicVars.Block.BaseValue));
@@ -135,7 +138,8 @@ public class KleeStatusPackageTests
     [Fact]
     public void The_loaders_add_dazed_or_confiscated_into_the_discard_pile()
     {
-        foreach (var dazed in new[] { "ProtoKoForbiddenFun", "ProtoKoItWasntMe" })
+        // It Wasn't Me! cut by the Klee tempo paper (2026-10-07).
+        foreach (var dazed in new[] { "ProtoKoForbiddenFun" })
         {
             Assert.Contains(Seq(dazed, "OnPlay"), c => c.Contains("Dazed"));
             Assert.Contains("Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",

@@ -71,21 +71,19 @@ public class KleeR276ExpansionTests
     {
         // class, rarity, type, energy
         new object[] { typeof(ProtoKoHidingSpot), CardRarity.Common, CardType.Skill, 1 },
-        new object[] { typeof(ProtoKoPlaydate), CardRarity.Common, CardType.Skill, 0 },
+        // Playdate cut by the Klee design review (2026-10-08).
         new object[] { typeof(ProtoKoJumpyDumptyMkIii), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoMineAllMine), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoTeamEffort), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoOneMoreCharge), CardRarity.Uncommon, CardType.Skill, 1 },
-        new object[] { typeof(ProtoKoSitTight), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoTagAlong), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoComeBackAndPlay), CardRarity.Uncommon, CardType.Skill, 0 },
-        new object[] { typeof(ProtoKoBoomBadge), CardRarity.Uncommon, CardType.Skill, 0 },
+        new object[] { typeof(ProtoKoBoomBadge), CardRarity.Common, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoWaitForIt), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoDuckAndRun), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoPartyPoppers), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoLookOut), CardRarity.Uncommon, CardType.Power, 1 },
-        new object[] { typeof(ProtoKoPatienceKlee), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoSecretBase), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoHalfAMountain), CardRarity.Rare, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoFavoniusEscort), CardRarity.Rare, CardType.Skill, 1 },
@@ -118,11 +116,14 @@ public class KleeR276ExpansionTests
         // 28 since the Klee status package (2026-10-01) cut Fish Fry and
         // Friendship Bracelet, 27 since its sec.5 (defence in the status
         // pile) cut Spinning Sparkler; 26 since the Klee-only companions
-        // (2026-10-03) cut Second Surprise. The package's ten follow them (the
-        // three companion rows after it are not `ProtoKo`).
-        Assert.Equal(26, names.Count);
-        Assert.Equal(26, names.Distinct().Count());
-        var tail = slice.Skip(slice.Count - 36).Take(26).ToList();
+        // (2026-10-03) cut Second Surprise; 24 since the Klee tempo paper
+        // (2026-10-07) cut Sit Tight and Experiment in Progress. The
+        // package's nine and the tempo five follow them (the three companion
+        // rows after those are not `ProtoKo`). 23 since the Klee design
+        // review (2026-10-08) cut Playdate; its two follow the tempo five.
+        Assert.Equal(23, names.Count);
+        Assert.Equal(23, names.Distinct().Count());
+        var tail = slice.Skip(slice.Count - 39).Take(23).ToList();
         for (var i = 0; i < names.Count; i++)
         {
             Assert.Contains(names[i], tail[i]);
@@ -236,10 +237,10 @@ public class KleeR276ExpansionTests
 
         var card = new ProtoKoJumpyDumptyMkIii();
         Assert.Equal(3m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(2m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(4m, card.DynamicVars["BombSize"].BaseValue);
         var up = Upgraded<ProtoKoJumpyDumptyMkIii>();
         Assert.Equal(4m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(3m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(5m, up.DynamicVars["BombSize"].BaseValue);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
     }
 
@@ -290,7 +291,7 @@ public class KleeR276ExpansionTests
         Assert.True(setOff >= 0 && hit > setOff && place > hit);
         var up = Upgraded<ProtoKoWindblumeFireworks>();
         Assert.Equal(14m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(8m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(10m, up.DynamicVars["BombSize"].BaseValue);
     }
 
     [Fact]
@@ -322,10 +323,10 @@ public class KleeR276ExpansionTests
     {
         var card = new ProtoKoHidingSpot();
         Assert.Equal(6m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(3m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(5m, card.DynamicVars["BombSize"].BaseValue);
         var up = Upgraded<ProtoKoHidingSpot>();
         Assert.Equal(8m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(7m, up.DynamicVars["BombSize"].BaseValue);
         Assert.Contains("ProtoBombPower.PlaceOnRandom", Play("ProtoKoHidingSpot"));
         Assert.Contains("[gold]Mine[/gold]", Face(card));
     }
@@ -348,10 +349,8 @@ public class KleeR276ExpansionTests
         Assert.False(power.TryModifyEnergyCostInCombat(friend, 0m, out _));
         // Two Playdates are two sentences about the same next card.
         Assert.Equal(0m, PlaydatePower.Discounted(1m, 2));
-
-        var card = new ProtoKoPlaydate();
-        Assert.Equal(3m, card.DynamicVars["BombSize"].BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKoPlaydate>().DynamicVars["BombSize"].BaseValue);
+        // The card left with its row (Klee design review, 2026-10-08); the
+        // power stays registered.
     }
 
     [Fact]
@@ -425,27 +424,8 @@ public class KleeR276ExpansionTests
         Assert.Equal(1, Upgraded<ProtoKoBoomBadge>().PrintedSparkPrice);
     }
 
-    [Fact]
-    public void Sit_tight_leaves_its_bonus_to_the_end_of_the_turn()
-    {
-        var card = new ProtoKoSitTight();
-        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
-        Assert.Equal(1, card.PrintedSparkPrice);
-        Assert.Equal(5m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
-        var up = Upgraded<ProtoKoSitTight>();
-        Assert.Equal(7m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5m, up.DynamicVars["PowerAmount"].BaseValue);
-        // The play reads no ledger: it gains its 5 and installs the power.
-        var play = Play("ProtoKoSitTight");
-        Assert.DoesNotContain("KleeOverhaulLedger.get_SetOffThisTurn", play);
-        Assert.Contains("PowerCmd.Apply", play);
-        Assert.Equal(
-            "Gain {Block:diff()} [gold]Block[/gold]. At the end of your turn, "
-          + "gain {PowerAmount:diff()} [gold]Block[/gold] if none of your "
-          + "[gold]Bombs[/gold] went off.",
-            Face(card));
-    }
+    // Sit Tight's card pin left with the row (the Klee tempo paper,
+    // 2026-10-07); its power's pins below stay until the power goes.
 
     [Fact]
     public void Sit_tight_pays_only_on_a_turn_where_nothing_went_off()
@@ -508,8 +488,6 @@ public class KleeR276ExpansionTests
         // After the echo, on the strictly later broadcast.
         Assert.Contains("ProtoBombPower.GrowLargest",
                         Il.Calls(Il.Method("PatienceKleePower", "AfterSideTurnEnd")));
-        Assert.Equal(6m, Upgraded<ProtoKoPatienceKlee>()
-                             .DynamicVars["PowerAmount"].BaseValue);
         KleeOverhaulLedger.ResetAll();
     }
 
@@ -522,14 +500,14 @@ public class KleeR276ExpansionTests
         Assert.False(KleeExpansion.CostsSparks(new ProtoKoPop()));
         Assert.Contains("KleeExpansion.CostsSparks",
                         Il.Calls(Il.Method("PartyPoppersPower", "AfterCardPlayed")));
-        Assert.Equal(4m, Upgraded<ProtoKoPartyPoppers>()
+        Assert.Equal(6m, Upgraded<ProtoKoPartyPoppers>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 
     // ---- start of turn -----------------------------------------------------
 
     [Fact]
-    public void Secret_base_reads_the_board_before_dodocos_mine_lands()
+    public void Secret_base_and_dodoco_run_through_the_one_sequencer()
     {
         // REAL: the latch, once per turn per Klee.
         var klee = Seat.Klee().Creature;
@@ -541,8 +519,9 @@ public class KleeR276ExpansionTests
         Assert.True(ledger.TakeTurnStartPlacements());
         KleeOverhaulLedger.ResetAll();
 
-        // STRUCTURAL: both Powers call the one sequencer, which asks Secret
-        // Base's question before Dodoco's Mine is placed.
+        // STRUCTURAL: both Powers call the one sequencer, which takes the
+        // latch, places Klee's Secret Base's Bomb (v3, the scaling pass,
+        // klee-next 2026-10-05; KleeScalingPassTests) and then Dodoco's Mine.
         foreach (var type in new[] { "SecretBasePower", "DodocoPower" })
         {
             Assert.Contains("KleeExpansion.RunTurnStartPlacements",
@@ -550,15 +529,13 @@ public class KleeR276ExpansionTests
         }
         var run = Il.CallSequence(Il.Method("KleeExpansion", "RunTurnStartPlacements"))
             .ToList();
+        Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", run);
         Assert.True(run.IndexOf("KleeOverhaulLedger.TakeTurnStartPlacements")
-                    < run.IndexOf("ProtoBombPower.AnyPlacedBy"));
-        Assert.True(run.IndexOf("ProtoBombPower.AnyPlacedBy")
                     < run.LastIndexOf("ProtoBombPower.PlaceOnRandom"));
-        Assert.Equal(7m, Upgraded<ProtoKoSecretBase>()
-                             .DynamicVars["PowerAmount"].BaseValue);
-        // Power cost sweep, 2026-09-30: Mine 3, upgraded Mine 5, cost 1.
-        Assert.Equal(3m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKoDodoco>()
+        // Power cost sweep, 2026-09-30: cost 1. Mine 5, upgraded Mine 7
+        // since the Klee design review (2026-10-08).
+        Assert.Equal(5m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(7m, Upgraded<ProtoKoDodoco>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 

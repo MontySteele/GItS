@@ -107,7 +107,9 @@ the cook-or-cash decision, and none of them is "the bomb is a shield."
 Seven sentences. If a rule is not here, it is a card.
 
 1. **Bomb.** A numbered charge on an enemy. At the start of Klee's turn every
-   Bomb grows by **4** (placeholder). A Bomb never goes off on its own.
+   Bomb grows by **2**. A Bomb never goes off on its own.
+   (2026-10-08, design review: growth 4 to 2; Alice's Recipe still doubles
+   it, to 4.)
 2. **Set off.** Only a card that says *Set off* makes Bombs go off. It sets
    off every Bomb on the target, **one at a time, before the rest of the card
    resolves**, each dealing its number as Pyro damage. Plain Attacks, a co-op
@@ -118,8 +120,9 @@ Seven sentences. If a rule is not here, it is a card.
    enemy: the third jumps. A partner or a poison killed the enemy: all of them
    jump.)
 4. **Spark.** Each Bomb that goes off gives Klee 1 Spark, and she starts
-   every combat with 1 (R242). Some cards cost Sparks instead of energy,
+   every combat with 3. Some cards cost Sparks instead of energy,
    printed as a badge. No cap. Lost at the end of combat.
+   (2026-10-08, design review: opening Sparks 1 to 3, Regent's 3 Stars.)
 5. **Pyro.** Every Klee Attack applies Pyro, except the base game's Strike,
    which applies nothing ([USER], 2026-09-02: the basic cards are supposed
    to be bad), and so does every explosion. An

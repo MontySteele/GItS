@@ -224,6 +224,21 @@ public sealed class KleeOverhaulLedger
     /// The ONE write site, for <see cref="NoteExplosion"/>'s reason.</summary>
     public void NoteCompanionPlayed() => CompanionPlayedThisTurn++;
 
+    /// <summary>
+    /// THE SCALING PASS (klee-next, 2026-10-05), Witch's Homework's ruling:
+    /// "It grows at most once a combat, whatever replays it." Keyed by the
+    /// DECK card the play came from (<c>DeckVersion</c>, or the card itself
+    /// when it has none), so a replay of the same card, a second Bomb from it
+    /// and a merged mark all find the latch spent. Per combat, because the
+    /// ledger is (<see cref="For"/>).
+    /// </summary>
+    private readonly HashSet<CardModel> _homeworkGrown =
+        new(ReferenceEqualityComparer.Instance);
+
+    /// <summary>True the FIRST time <paramref name="deckCard"/> is asked in
+    /// this combat, false after.</summary>
+    public bool TakeHomework(CardModel deckCard) => _homeworkGrown.Add(deckCard);
+
     private bool _aftershockSpent;
 
     /// <summary>

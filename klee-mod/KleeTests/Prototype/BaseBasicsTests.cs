@@ -301,12 +301,13 @@ public class BaseBasicsTests
     // ---- rule 4's opening Spark (R242 pick 1) -----------------------------
 
     [Fact]
-    public void The_opening_spark_is_one_and_is_granted_on_turn_one()
+    public void The_opening_spark_is_three_and_is_granted_on_turn_one()
     {
         // [USER]: "Regent starts with 3 stars and has to generate more through
         // cards, so 1 is a reasonable compromise." The VALUE is mirrored by
         // `tools/lint_constant_parity.py`; what is pinned here is the wiring.
-        Assert.Equal(1, KleeOverhaulLaw.OpeningSpark);
+        // THREE since the Klee design review (2026-10-08, sec.4.6): Regent's 3.
+        Assert.Equal(3, KleeOverhaulLaw.OpeningSpark);
 
         var grant = Il.Calls(Il.Method("KleeOverhaulOpening", "GrantSpark"));
         Assert.Contains(grant, c => c.Contains("SparkPower.Gain"));

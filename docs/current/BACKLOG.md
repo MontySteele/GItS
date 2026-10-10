@@ -16,7 +16,8 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Kits and display (the mod)
 
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
-- Art owed, Klee: Forbidden Fun, It Wasn't Me!, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Albedo — Dust of Purification (its plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched), Up in Smoke!, Behind Jean's Desk, Kitchen Alchemy, Cover Your Ears!; the two status-package Powers borrow Party Poppers' and Spark Knight's badges.
+- Art owed, Klee: Forbidden Fun, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Albedo — Dust of Purification (its plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched), Up in Smoke!, Behind Jean's Desk, Kitchen Alchemy, Cover Your Ears!; the two status-package Powers borrow Party Poppers' and Spark Knight's badges.
+- Klee tempo paper (2026-10-07, `klee-next`): delete the engine pieces only its five cuts used, in both engines -- `GroundedPower` (and its `Grounded` keyword tip and `KleeOverhaulLaw.GroundedSpark`), `SitTightPower`, `PatienceKleePower` and their sim twins (`ko_grounded`, `ko_sit_tight`, `ko_patience`), with their pins. Left registered so the cut could land without an engine sweep.
 - Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage and the Sea Glass token; Abyssal Salvage borrows the Princess of Watatsumi badge.
 - Art owed, pool completion: the 14 new rows and the three new Ancients (Alice's Masterpiece, Divine Strategy, Center of Attention).
 - Art owed: Durin — Principle of Purity wears Binary Form's picture (`art_of`); the three Purity powers borrow Binary Form's badge.
@@ -67,7 +68,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Jean+ is switched off when Dodoco+'s Mine goes off on the enemy's turn ("a Bomb went off last turn"); the face does not say so.
 - Perfect Timing's replay did not visibly fire when its first Set off killed the target.
 - Return to Sender turns only its own Block into a Bomb; check the face says so.
-- "Sorry, Jean..." removes the oldest Bomb without saying so.
 - Boom Badge's Retain reads as if the doubling carries over; "Witch's Homework" and "Witch's Homework II" read alike in hand lists.
 - Chained Reactions' +3 missed a two-Bomb Ka-pow! set-off (trace); Durin's start-of-turn tick skipped one fight (Fogmog, trace).
 - The Spark line vanishes at 0, and Snecko Oil's added Spark costs are unexplained; a Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1.

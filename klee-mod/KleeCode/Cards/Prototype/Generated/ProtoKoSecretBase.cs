@@ -42,13 +42,13 @@ public sealed class ProtoKoSecretBase : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Klee's Secret Base"),
-        ("description", "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of yours, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
+        ("description", "At the start of your turn, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

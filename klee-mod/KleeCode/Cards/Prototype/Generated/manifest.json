@@ -182,6 +182,7 @@
     "proto_ko_behind_jeans_desk",
     "proto_ko_big_badda_boom",
     "proto_ko_blast_shield",
+    "proto_ko_blasting_spree",
     "proto_ko_blazing_delight",
     "proto_ko_bombs_away",
     "proto_ko_booby_trap",
@@ -197,20 +198,21 @@
     "proto_ko_damage_report",
     "proto_ko_dig_in",
     "proto_ko_dodoco",
+    "proto_ko_dodoco_tag",
     "proto_ko_duck_and_run",
     "proto_ko_explosive_frags",
+    "proto_ko_explosive_spark",
     "proto_ko_favonius_escort",
     "proto_ko_finders_keepers",
+    "proto_ko_fire_fire",
     "proto_ko_fireworks_finale",
     "proto_ko_fish_blasting",
     "proto_ko_flash_point",
     "proto_ko_forbidden_fun",
-    "proto_ko_grounded",
     "proto_ko_hair_trigger",
     "proto_ko_half_a_mountain",
     "proto_ko_hide_here",
     "proto_ko_hiding_spot",
-    "proto_ko_it_wasnt_me",
     "proto_ko_jumpy_dumpty",
     "proto_ko_jumpy_dumpty_mk_iii",
     "proto_ko_kapow",
@@ -224,9 +226,7 @@
     "proto_ko_one_more_charge",
     "proto_ko_party_poppers",
     "proto_ko_pass_the_match",
-    "proto_ko_patience_klee",
     "proto_ko_perfect_timing",
-    "proto_ko_playdate",
     "proto_ko_pocket_match",
     "proto_ko_pop",
     "proto_ko_quick_fuse",
@@ -235,24 +235,26 @@
     "proto_ko_run_away",
     "proto_ko_secret_base",
     "proto_ko_shrapnel",
-    "proto_ko_sit_tight",
+    "proto_ko_simmer",
     "proto_ko_sizzle",
-    "proto_ko_sorry_jean",
     "proto_ko_spark_knight",
     "proto_ko_sparkling_burst",
     "proto_ko_sparks_for_everyone",
     "proto_ko_sparks_n_splash",
     "proto_ko_stoke_the_fuse",
     "proto_ko_tag_along",
+    "proto_ko_taste_test",
     "proto_ko_team_effort",
     "proto_ko_the_big_one",
     "proto_ko_tinder_toss",
+    "proto_ko_tinkering",
     "proto_ko_treasure_map",
     "proto_ko_up_in_smoke",
     "proto_ko_vermillion_pact",
     "proto_ko_wait_for_it",
     "proto_ko_windblume_fireworks",
     "proto_ko_witches_circle",
+    "proto_ko_witchs_homework_next",
     "proto_mc_albedo_dust_of_purification",
     "proto_mc_albedo_solar_isotoma",
     "proto_mc_amber_explosive_puppet",
@@ -601,6 +603,7 @@
     "proto_ko_behind_jeans_desk": "klee",
     "proto_ko_big_badda_boom": "klee",
     "proto_ko_blast_shield": "klee",
+    "proto_ko_blasting_spree": "klee",
     "proto_ko_blazing_delight": "klee",
     "proto_ko_bombs_away": "klee",
     "proto_ko_booby_trap": "klee",
@@ -616,20 +619,21 @@
     "proto_ko_damage_report": "klee",
     "proto_ko_dig_in": "klee",
     "proto_ko_dodoco": "klee",
+    "proto_ko_dodoco_tag": "klee",
     "proto_ko_duck_and_run": "klee",
     "proto_ko_explosive_frags": "klee",
+    "proto_ko_explosive_spark": "klee",
     "proto_ko_favonius_escort": "klee",
     "proto_ko_finders_keepers": "klee",
+    "proto_ko_fire_fire": "klee",
     "proto_ko_fireworks_finale": "klee",
     "proto_ko_fish_blasting": "klee",
     "proto_ko_flash_point": "klee",
     "proto_ko_forbidden_fun": "klee",
-    "proto_ko_grounded": "klee",
     "proto_ko_hair_trigger": "klee",
     "proto_ko_half_a_mountain": "klee",
     "proto_ko_hide_here": "klee",
     "proto_ko_hiding_spot": "klee",
-    "proto_ko_it_wasnt_me": "klee",
     "proto_ko_jumpy_dumpty": "klee",
     "proto_ko_jumpy_dumpty_mk_iii": "klee",
     "proto_ko_kapow": "klee",
@@ -643,9 +647,7 @@
     "proto_ko_one_more_charge": "klee",
     "proto_ko_party_poppers": "klee",
     "proto_ko_pass_the_match": "klee",
-    "proto_ko_patience_klee": "klee",
     "proto_ko_perfect_timing": "klee",
-    "proto_ko_playdate": "klee",
     "proto_ko_pocket_match": "klee",
     "proto_ko_pop": "klee",
     "proto_ko_quick_fuse": "klee",
@@ -654,24 +656,26 @@
     "proto_ko_run_away": "klee",
     "proto_ko_secret_base": "klee",
     "proto_ko_shrapnel": "klee",
-    "proto_ko_sit_tight": "klee",
+    "proto_ko_simmer": "klee",
     "proto_ko_sizzle": "klee",
-    "proto_ko_sorry_jean": "klee",
     "proto_ko_spark_knight": "klee",
     "proto_ko_sparkling_burst": "klee",
     "proto_ko_sparks_for_everyone": "klee",
     "proto_ko_sparks_n_splash": "klee",
     "proto_ko_stoke_the_fuse": "klee",
     "proto_ko_tag_along": "klee",
+    "proto_ko_taste_test": "klee",
     "proto_ko_team_effort": "klee",
     "proto_ko_the_big_one": "klee",
     "proto_ko_tinder_toss": "klee",
+    "proto_ko_tinkering": "klee",
     "proto_ko_treasure_map": "klee",
     "proto_ko_up_in_smoke": "klee",
     "proto_ko_vermillion_pact": "klee",
     "proto_ko_wait_for_it": "klee",
     "proto_ko_windblume_fireworks": "klee",
     "proto_ko_witches_circle": "klee",
+    "proto_ko_witchs_homework_next": "klee",
     "proto_mc_albedo_dust_of_purification": "klee",
     "proto_mc_albedo_solar_isotoma": "klee",
     "proto_mc_amber_explosive_puppet": "klee",
@@ -1449,6 +1453,9 @@
     "proto_ko_blast_shield": {
       "block": 2
     },
+    "proto_ko_blasting_spree": {
+      "bomb_size": 2
+    },
     "proto_ko_blazing_delight": {
       "spark_price": -1
     },
@@ -1497,17 +1504,27 @@
     "proto_ko_dodoco": {
       "power_amount": 2
     },
+    "proto_ko_dodoco_tag": {
+      "damage": 3,
+      "block": 2
+    },
     "proto_ko_duck_and_run": {
       "block": 3
     },
     "proto_ko_explosive_frags": {
       "power_amount": 1
     },
+    "proto_ko_explosive_spark": {
+      "damage": 4
+    },
     "proto_ko_favonius_escort": {
       "retain": true
     },
     "proto_ko_finders_keepers": {
       "power_amount": 2
+    },
+    "proto_ko_fire_fire": {
+      "bomb_size": 3
     },
     "proto_ko_fireworks_finale": {
       "damage": 2
@@ -1521,9 +1538,6 @@
     "proto_ko_forbidden_fun": {
       "damage": 4
     },
-    "proto_ko_grounded": {
-      "power_amount": 2
-    },
     "proto_ko_hair_trigger": {
       "draw": 1
     },
@@ -1536,9 +1550,6 @@
     "proto_ko_hiding_spot": {
       "block": 2,
       "bomb_size": 2
-    },
-    "proto_ko_it_wasnt_me": {
-      "block": 3
     },
     "proto_ko_jumpy_dumpty": {
       "bomb_size": 3,
@@ -1582,14 +1593,8 @@
     "proto_ko_pass_the_match": {
       "draw": 1
     },
-    "proto_ko_patience_klee": {
-      "power_amount": 2
-    },
     "proto_ko_perfect_timing": {
       "damage": 3
-    },
-    "proto_ko_playdate": {
-      "bomb_size": 2
     },
     "proto_ko_pocket_match": {
       "damage": 2
@@ -1616,15 +1621,11 @@
     "proto_ko_shrapnel": {
       "bomb_size": 3
     },
-    "proto_ko_sit_tight": {
-      "block": 2,
-      "power_amount": 1
+    "proto_ko_simmer": {
+      "damage": 2
     },
     "proto_ko_sizzle": {
       "damage": 3
-    },
-    "proto_ko_sorry_jean": {
-      "retain": true
     },
     "proto_ko_spark_knight": {
       "power_amount": 1
@@ -1644,6 +1645,9 @@
     "proto_ko_tag_along": {
       "remove": "exhaust"
     },
+    "proto_ko_taste_test": {
+      "cards": -1
+    },
     "proto_ko_team_effort": {
       "damage": 3
     },
@@ -1652,6 +1656,9 @@
     },
     "proto_ko_tinder_toss": {
       "damage": 2
+    },
+    "proto_ko_tinkering": {
+      "spark": 1
     },
     "proto_ko_treasure_map": {
       "cost": -1
@@ -1671,6 +1678,9 @@
     },
     "proto_ko_witches_circle": {
       "power_amount": 2
+    },
+    "proto_ko_witchs_homework_next": {
+      "upgraded_grant": true
     },
     "proto_mc_albedo_dust_of_purification": {
       "grow": 2

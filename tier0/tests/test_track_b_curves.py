@@ -241,6 +241,10 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # 2026-10-05. Living enemies HP alone (no Block): sibling of
             # `enemy_pool_by_turn`. MOD FEED ONLY, added.
             "enemy_hp_by_turn",
+            # 2026-10-05, the Klee scaling pass (klee-next): each Witch's
+            # Homework II's run-long Bomb size, read off the deck card's saved
+            # growth. MOD FEED ONLY, added.
+            "homework_bomb_size",
             # 2026-10-06. What reactions are worth, per seat: reactions by
             # name, the amplifiers' share of the hits they multiplied, and
             # the debuff stacks reactions applied (`ReactionTally`). The wire

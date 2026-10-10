@@ -142,7 +142,7 @@ public class KleePlaytest20260924Tests
         var card = new ProtoKoBoomBadge();
         Assert.Equal(
             "The next time you [gold]Set off[/gold] this turn, your "
-          + "[gold]Bombs[/gold] deal double damage.",
+          + "[gold]Bombs[/gold] deal double damage. Does not stack.",
             Face(card));
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Equal(2, card.PrintedSparkPrice);
@@ -150,13 +150,14 @@ public class KleePlaytest20260924Tests
     }
 
     [Fact]
-    public void Boom_badge_doubles_per_copy_and_with_the_big_one_makes_eight()
+    public void Boom_badge_doubles_once_and_with_the_big_one_makes_eight()
     {
-        // REAL: the factor. None up is 1; one badge is x2; two badges are two
-        // sentences about the same next Set off, x4.
+        // REAL: the factor. None up is 1; one badge is x2; and since the Klee
+        // scaling pass (klee-next, 2026-10-05) badges do not stack: two are x2.
         Assert.Equal(1, BoomBadgePower.FactorFor(0));
         Assert.Equal(2, BoomBadgePower.FactorFor(1));
-        Assert.Equal(4, BoomBadgePower.FactorFor(2));
+        Assert.Equal(2, BoomBadgePower.FactorFor(2));
+        Assert.Equal(2, BoomBadgePower.FactorFor(5));
 
         // With no badge on her, Spend is a 1 and moves nothing.
         var klee = Seat.Klee();

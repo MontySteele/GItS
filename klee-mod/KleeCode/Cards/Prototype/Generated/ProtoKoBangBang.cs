@@ -69,7 +69,7 @@ public sealed class ProtoKoBangBang : CustomCardModel, IElementalCard, ISetOffCa
         new List<DynamicVar>
         {
             new DamageVar(8m, ValueProp.Move),
-            new DynamicVar("BombSize", 4m)
+            new DynamicVar("BombSize", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

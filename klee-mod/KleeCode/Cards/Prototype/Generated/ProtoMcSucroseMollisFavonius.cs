@@ -49,14 +49,14 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this);
+        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_mollis_favonius");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Mollis Favonius"),
-        ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal {PowerAmount:diff()} additional damage."),
+        ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card. This turn, [gold]Melt[/gold], [gold]Vaporize[/gold] and [gold]Overloaded[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

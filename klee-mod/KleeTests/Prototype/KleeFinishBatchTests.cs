@@ -60,7 +60,7 @@ public class KleeFinishBatchTests
             "Whenever you draw a status, place a [gold]Bomb[/gold] "
           + "{PowerAmount:diff()} on a random enemy.",
             Face(new ProtoKoFindersKeepers()));
-        Assert.Equal((4m, 6m),
+        Assert.Equal((6m, 8m),
             (new ProtoKoFindersKeepers().DynamicVars["PowerAmount"].BaseValue,
              Upgraded<ProtoKoFindersKeepers>().DynamicVars["PowerAmount"].BaseValue));
         var drawn = Seq("FindersKeepersPower", "AfterCardDrawn");
@@ -76,7 +76,7 @@ public class KleeFinishBatchTests
     public void Dodoco_tales_opens_with_four_more_sparks()
     {
         Assert.Equal(4, ExplosiveFrags.OpeningSparks);
-        Assert.Equal(5, KleeOverhaulLaw.OpeningSpark + ExplosiveFrags.OpeningSparks);
+        Assert.Equal(7, KleeOverhaulLaw.OpeningSpark + ExplosiveFrags.OpeningSparks);
         var face = new ExplosiveFrags().Localization!
             .First(r => r.Item1 == "description").Item2;
         Assert.EndsWith(
@@ -99,7 +99,7 @@ public class KleeFinishBatchTests
           + "[gold]Mine[/gold] {BombSize:diff()} on that enemy.", Face(card));
         Assert.Equal((8m, 11m), (card.DynamicVars.Damage.BaseValue,
             Upgraded<ProtoKoMineAllMine>().DynamicVars.Damage.BaseValue));
-        Assert.Equal((4m, 6m), (card.DynamicVars["BombSize"].BaseValue,
+        Assert.Equal((6m, 8m), (card.DynamicVars["BombSize"].BaseValue,
             Upgraded<ProtoKoMineAllMine>().DynamicVars["BombSize"].BaseValue));
         Assert.False(card is ISetOffCard);
         var play = Seq("ProtoKoMineAllMine", "OnPlay");

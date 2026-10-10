@@ -124,11 +124,15 @@ public sealed class PurityDarkPower : PowerModel, ILocalizationProvider
         return dealer.Powers.OfType<PurityDarkPower>().Sum(p => (int)p.Amount);
     }
 
+    /// <summary>NO TARGET IS ASKED FOR (2026-10-10): the bonus is the
+    /// owner's, and a card in the hand previews with a null target, so a
+    /// <c>target == null</c> gate dropped it from the face. The owner's own
+    /// body is still refused.</summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
     {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (dealer != Owner || target == Owner) return 0m;
         if (cardSource == null || !props.IsPoweredAttack()) return 0m;
         return CompanionOverhaulRiders.ElementFor(cardSource, dealer) == Element.Pyro
             ? Amount : 0m;
