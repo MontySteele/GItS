@@ -94,6 +94,8 @@ Two steps, each read on its own, like the line and the Block cards were:
 1. **The rule: "Spend up to X" at 1 per point, on the four cards above.** Fixed Spends stay
    elsewhere. **Default: yes.**
    - Alternative: also convert Quick Flourish (Spend up to 8: 2 damage for each, max 16).
+   - **Ruled 2026-10-10: yes, the default.** [USER]: "Spend up to X - I'm fine with trying this."
+     The four cards take "Spend up to X"; Quick Flourish keeps its fixed Spend. Built on #1016.
 2. **The guests: Navia and Freminet Spend half the bank when they act.** **Default: yes, both.**
    - Alternative (a): Navia only.
    - Alternative (b): a quarter, not half. This keeps more bank for spend-all cards but drains the
@@ -105,6 +107,8 @@ Two steps, each read on its own, like the line and the Block cards were:
      #1016.
 3. **Overshoot response.** **Default:** if the round reads clearly stronger than the Block round,
    lower the four caps by a third before touching the guests.
+   - **Ruled 2026-10-10 at the default.**
 4. **Overnight.** **Default:** build picks 1 to 3 at their defaults tonight. Run the Furina round
    (four seeds plus the control), then the Varka payoff round (`varka-payoff-fix-2026-10-08.md`, the
    offers round's five seeds with offers logged). Both records ready in the morning.
+   - **Ruled 2026-10-10 at the default.** The build is #1016.
