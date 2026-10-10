@@ -7054,7 +7054,7 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # the preamble -- "damage to ALL enemies" is what splash meant -- and the
     # numbers it exists for are both still here.
     assert "6 damage to ALL enemies and applies 1 Weak" in page
-    assert "Shatters for 6 unblockable damage" in page
+    assert "ends the freeze and deals 6 unblockable damage" in page
     # `EB-366`: no unqualified "Bosses can't be Frozen" here. Since
     # 2026-09-29 the row carries the boss rule in one sentence that names the
     # room, which is true on a `monster` page too -- see the test below.
@@ -7091,7 +7091,8 @@ def test_the_boss_substitution_prints_in_a_boss_room():
     boss["state_type"] = "boss"
 
     assert "Bosses can't be Frozen" not in blindplay.observe(elite)
-    assert "Shatters for 6 unblockable damage" in blindplay.observe(elite)
+    assert ("ends the freeze and deals 6 unblockable damage"
+            in blindplay.observe(elite))
 
     # 2026-09-29 (a Furina seat met "Frozen" on Vantom and was hit for 26):
     # the rule is one sentence on the Frozen row, qualified by the room, so
@@ -7407,9 +7408,9 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # commit, so the anchor holds the clause that says when it closes.
         # The text pass of 2026-10-08: a Shatter ends the freeze (BACKLOG
         # line 51), said on both sides.
-        "Frozen": ["ts next action deals 50% less. Until it acts, an Attack "
-                   "on it Shatters for ", " unblockable damage and ends the "
-                   "freeze."],
+        # The Varka forced-Amber round (2026-10-10): the badge's words.
+        "Frozen": ["ts next action deals 50% less damage. Attacking it ends "
+                   "the freeze and deals ", " unblockable damage."],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         # The element port (2026-09-28) moved both, in the C# and here, and
@@ -7715,8 +7716,9 @@ def test_a_keyword_on_an_offered_face_is_defined_even_when_unreachable():
     """
     page = blindplay.observe(_shattering_pressure_reward_state())
 
-    assert "- **Shatter** — The first Attack to hit a Frozen enemy" in page
-    assert "ends the freeze" in page
+    # The Varka forced-Amber round (2026-10-10): the Frozen badge's words.
+    assert "- **Shatter** — Attacking a Frozen enemy ends the freeze" in page
+    assert "Only a Frozen enemy can be Shattered." in page
 
 
 def test_the_shatter_row_is_the_mods_own_number():
@@ -7725,8 +7727,12 @@ def test_the_shatter_row_is_the_mods_own_number():
     src = (REPO / "tier0" / "constants.py").read_text(encoding="utf-8")
     assert re.search(
         rf"SHATTER_DAMAGE\s*=\s*{blindplay_notes.SHATTER_DAMAGE}\b", src)
-    assert (f"deals {blindplay_notes.SHATTER_DAMAGE} additional damage"
-            in blindplay_notes.GAME_KEYWORDS["Shatter"])
+    # The Varka forced-Amber round (2026-10-10): unblockable damage, never
+    # "additional" (a seat read it as a bonus on the Attack).
+    row = blindplay_notes.GAME_KEYWORDS["Shatter"]
+    assert (f"deals {blindplay_notes.SHATTER_DAMAGE} unblockable damage"
+            in row)
+    assert "additional" not in row
 
 
 def test_a_reaction_the_screen_names_is_defined_though_it_is_unreachable():
