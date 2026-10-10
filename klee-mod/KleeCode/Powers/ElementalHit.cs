@@ -293,6 +293,13 @@ internal static class ElementalHit
         await VarkaOath.NoteApplication(choiceContext, applier, element,
             target: target);
         var aura = AuraCmd.Find(target);
+        // The Varka payoff round (2026-10-10): an Anemo application is a
+        // Swirl attempt; the seat page says "no aura to Swirl" for a card
+        // whose every one found none (Sucrose on a bare board).
+        if (element == Element.Anemo)
+        {
+            ResolutionLedger.NoteAnemoApplication(onAura: aura != null);
+        }
         if (aura == null)
         {
             await AuraCmd.Apply(choiceContext, target, element, applier, cardSource: null);

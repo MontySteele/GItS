@@ -600,12 +600,18 @@ def end_play(state, card=None) -> None:
     p = state.player
     wolves = _power(p, WOLFPACK)
     if wolves and card.id.rstrip("+") == ASCENSION_ID:
+        # WOLFPACK (the Varka payoff round, 2026-10-10): "shuffle a copy of
+        # it into your Draw Pile. The copy Exhausts." A random depth, top and
+        # bottom alike (`draw` pops index 0); a copy played fires it again.
+        # C# twin: `WolfpackPower.OnAscensionPlayed`.
         from tier0.content import loader            # late: cycle
         for _ in range(wolves):
             copy = loader.get_card(card.id)
-            p.discard_pile.append(copy)
+            copy.exhaust = True
+            p.draw_pile.insert(state.rng.randrange(len(p.draw_pile) + 1),
+                               copy)
             state.cards_created_this_turn += 1
-            state.emit("add_card", card=copy.id, to="discard")
+            state.emit("add_card", card=copy.id, to="draw")
 
 
 def note_hit(state, enemy, element) -> None:
@@ -1261,11 +1267,13 @@ def _combo_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     p = state.player
     aim = state.card_aim
     if kind == "gain_pyro_oath":
-        # Stoke the Flames: "Gain 2 Pyro Oath. Pyro becomes your current
-        # element." A gain, not an application; then the switch, a non-Knight
-        # card's, so Unwavering Banner holds it (2026-10-05 seat round).
-        gain(state, "pyro", fx["amount"], "gain_pyro_oath")
+        # Stoke the Flames: "Pyro becomes your current element. Gain 2 Pyro
+        # Oath." The switch first, a non-Knight card's, so Unwavering Banner
+        # holds it (2026-10-05 seat round); then the gain, a gain and not an
+        # application, which sees Pyro current (Varka payoff round,
+        # 2026-10-10). Ember Cleave's gain is this kind too.
         card_makes_current(state, "pyro")
+        gain(state, "pyro", fx["amount"], "gain_pyro_oath")
     elif kind == "pyro_strike":
         # Ember Cleave: "Deal 9 Pyro damage." The Exhaust is the row's op.
         _card_hit(state, card, aim, fx["base"], "pyro")

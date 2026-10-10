@@ -580,7 +580,9 @@ def cards_played_rows(spec: dict) -> list[dict]:
     not a statement about the sim.
     """
     fight = spec["fight"]
-    recorded = collections.Counter(c for _, c in fight.get("cards_played") or [])
+    # A row is `[round, name]`, or `[round, name, element]` for Varka since
+    # the payoff round (2026-10-10): the name is column 1 either way.
+    recorded = collections.Counter(row[1] for row in fight.get("cards_played") or [])
     posted = collections.Counter(
         p["card"] for turn in spec["turns"] for p in turn["plays"] if p.get("status") == "ok"
     )

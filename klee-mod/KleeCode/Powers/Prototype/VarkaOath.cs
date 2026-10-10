@@ -318,7 +318,7 @@ public sealed class VarkaOathLedger
             _swirledElementsThisPlay.Clear();
             _plays.Clear();
             _gainClauses.Clear();
-            FangInThisPlay = false;
+            FangInThisPlay = null;
             _bannerPaid = false;
         }
         _plays.Add((open, card));
@@ -393,23 +393,25 @@ public sealed class VarkaOathLedger
     private readonly List<string> _gainClauses = new();
 
     /// <summary>The open play's gains, in order, as
-    /// <see cref="VarkaOath.GainClause"/> prints them, and whether one of
-    /// them made Boreas's Fang add Four Winds' Ascension.</summary>
+    /// <see cref="VarkaOath.GainClause"/> prints them, and the name of the
+    /// relic one of them made add Four Winds' Ascension (Boreas's Fang, or
+    /// Wolf's Gravestone after Orobas), or null.</summary>
     public IReadOnlyList<string> GainClauses => _gainClauses;
-    public bool FangInThisPlay { get; private set; }
+    public string? FangInThisPlay { get; private set; }
 
     /// <summary>File one gain's clause against the open play.</summary>
     public void NoteGainClause(string clause) => _gainClauses.Add(clause);
 
-    /// <summary>The Fang fired inside the open play.</summary>
-    public void NoteFangInPlay() => FangInThisPlay = true;
+    /// <summary>The Fang (by its printed name) fired inside the open play.
+    /// </summary>
+    public void NoteFangInPlay(string relic) => FangInThisPlay = relic;
 
     /// <summary>Hand back and forget the outermost play's gains.</summary>
-    public (List<string> Clauses, bool Fang) TakeGainClauses()
+    public (List<string> Clauses, string? Fang) TakeGainClauses()
     {
         var taken = (new List<string>(_gainClauses), FangInThisPlay);
         _gainClauses.Clear();
-        FangInThisPlay = false;
+        FangInThisPlay = null;
         return taken;
     }
 }
@@ -718,8 +720,8 @@ public static class VarkaOath
             && Relics.BoreasFang.HeldBy(player) is { } fang)
         {
             ledger.FangFired = true;
-            ResolutionLedger.NoteFangAscension();
-            if (ledger.Scoped) ledger.NoteFangInPlay();
+            ResolutionLedger.NoteFangAscension(fang.RelicName);
+            if (ledger.Scoped) ledger.NoteFangInPlay(fang.RelicName);
             await fang.AddAscension(player);
         }
     }
@@ -742,15 +744,16 @@ public static class VarkaOath
     }
 
     /// <summary>A play's gains in one line: "Amber: Precise Shot — +1 Pyro
-    /// Oath (applied)", and the Fang's card when one of them added it. Empty
-    /// when the play gained nothing. PURE.</summary>
+    /// Oath (applied)", and the card <paramref name="fang"/> (the relic held:
+    /// Boreas's Fang, or Wolf's Gravestone after Orobas) added when one of
+    /// them made it. Empty when the play gained nothing. PURE.</summary>
     public static string GainLine(string? card, IReadOnlyList<string> clauses,
-                                  bool fang)
+                                  string? fang)
     {
         if (clauses.Count == 0) return string.Empty;
         var line = string.Join(", ", clauses);
         if (!string.IsNullOrEmpty(card)) line = $"{card} — {line}";
-        if (fang) line += ". Boreas's Fang: Four Winds' Ascension";
+        if (!string.IsNullOrEmpty(fang)) line += $". {fang}: Four Winds' Ascension";
         return line;
     }
 
@@ -891,6 +894,17 @@ public static class VarkaOath
                 await Pay(choiceContext, target, dealer, swirled);
             }
         }
+        // Twin Gales (the Varka payoff round, 2026-10-10): the seat page says
+        // what each Swirl paid. Numbers held; this is a line, not a rule.
+        if (twin)
+        {
+            var paid = TwinGalesPaid(current, swirled, times);
+            if (paid.Length > 0)
+            {
+                ResolutionLedger.NoteEvent(ResolutionLedger.SwirlPaid,
+                    swirled.ToString(), target, paid);
+            }
+        }
         // Eye Wall: Block per Swirl this turn. Eye of Stormterror: the first
         // three Swirls each turn draw.
         foreach (var wall in dealer.Powers.OfType<EyeWallPower>().ToList())
@@ -910,6 +924,40 @@ public static class VarkaOath
             Log.Info($"[{KleeMod.ModId}] VARKA Swirl on {target.Name}: "
                    + $"{swirled} Oath, paid {current}.");
         }
+    }
+
+    /// <summary>One element's Swirl payout in words, with
+    /// <see cref="VarkaLaw"/>'s numbers: "Pyro (3 damage)". Empty for an
+    /// element that pays nothing. PURE.</summary>
+    public static string PayoutWords(Element element) => element switch
+    {
+        Element.Pyro => $"Pyro ({VarkaLaw.SwirlPyroDamage} damage)",
+        Element.Hydro => $"Hydro ({VarkaLaw.SwirlHydroBlock} Block)",
+        Element.Cryo => $"Cryo ({VarkaLaw.SwirlCryoVulnerable} Vulnerable)",
+        Element.Electro =>
+            $"Electro ({VarkaLaw.SwirlElectroDamageAll} damage to ALL)",
+        _ => string.Empty,
+    };
+
+    /// <summary>What one Swirl paid under Twin Gales, as the seat page prints
+    /// it: the current element's payout, and the Swirled element's when it is
+    /// another Oath element, joined by "and", with " x2" when the Swirl paid
+    /// <paramref name="times"/> over (Stormterror's Scale, Crosscurrent).
+    /// Empty when nothing paid. PURE.</summary>
+    public static string TwinGalesPaid(Element current, Element swirled,
+                                       int times)
+    {
+        if (times <= 0) return string.Empty;
+        var parts = new List<string>();
+        var first = PayoutWords(current);
+        if (first.Length > 0) parts.Add(first);
+        if (IsOathElement(swirled) && swirled != current)
+        {
+            parts.Add(PayoutWords(swirled));
+        }
+        if (parts.Count == 0) return string.Empty;
+        var line = string.Join(" and ", parts);
+        return times > 1 ? $"{line}, x{times}" : line;
     }
 
     /// <summary>
@@ -1659,20 +1707,22 @@ public static class VarkaCards
     // ---- THE COMBO PASS (2026-10-04, review/active/varka-combo-pass-2026-10-04.md
     // secs.3-4). Sim twins: varka_oath._combo_kind.
 
-    /// <summary>Stoke the Flames: "Gain 2 [3] Pyro Oath. Pyro becomes your
-    /// current element." One gain, after the row's own Exhaust, then the
-    /// switch (the 2026-10-05 seat round: Pyro's on-ramp). The switch is a
-    /// non-Knight card's, so Unwavering Banner holds it
-    /// (<see cref="VarkaOath.CardMakesCurrent"/>).
+    /// <summary>Stoke the Flames: "Pyro becomes your current element. Gain
+    /// 2 [3] Pyro Oath." After the row's own Exhaust, the switch, then one
+    /// gain (the Varka payoff round, 2026-10-10: switch first, so Dawn Wind's
+    /// March, Oath Unto Death and every current-element gain listener see the
+    /// gain as the current element's). The switch is a non-Knight card's, so
+    /// Unwavering Banner holds it (<see cref="VarkaOath.CardMakesCurrent"/>).
+    /// Ember Cleave's gain is this kind too, so it switches first as well.
     /// </summary>
     public static async Task GainPyroOath(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
         var owner = card.Owner?.Creature;
         if (owner == null || !VarkaOath.Live(owner)) return;
+        await VarkaOath.CardMakesCurrent(choiceContext, owner, Element.Pyro);
         await VarkaOath.Gain(choiceContext, owner, Element.Pyro,
                              (int)Var(card, "VkAmount"));
-        await VarkaOath.CardMakesCurrent(choiceContext, owner, Element.Pyro);
     }
 
     /// <summary>Ember Cleave: "Deal 9 [12] Pyro damage." The Exhaust is the

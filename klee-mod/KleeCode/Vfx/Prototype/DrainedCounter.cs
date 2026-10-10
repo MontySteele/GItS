@@ -81,16 +81,24 @@ public static class DrainedCounter
       + ": HP you [gold]Drain[/gold] past it is lost unless you "
       + "[gold]Repay[/gold] it.";
 
+    /// <summary>THE "LOST FOR GOOD" COUNTER (the quarter-line round,
+    /// 2026-10-10, "What to change" 1): the drained count and, when any of
+    /// it is past the line, that part in one phrase: "Drained 12 HP (4 past
+    /// your line: lost unless you Repay)". Seats learned the cost of
+    /// draining past the line only by losing the HP. Pure.</summary>
+    public static string DrainedPhrase(int drained, int past) =>
+        "Drained [blue]" + drained.ToString(CultureInfo.InvariantCulture)
+      + "[/blue] HP"
+      + (past > 0
+            ? " ([blue]" + past.ToString(CultureInfo.InvariantCulture)
+              + "[/blue] past your line: lost unless you [gold]Repay[/gold])"
+            : "");
+
     /// <summary>The hover's body: the line, the drained count (and how much
     /// of it is past the line) and the rule. Pure.</summary>
     public static string HoverBody(int drained, int line, string why,
                                    int past = 0) =>
-        LineSentence(line, why) + "\nDrained: [blue]"
-      + drained.ToString(CultureInfo.InvariantCulture) + "[/blue] HP"
-      + (past > 0
-            ? ", [blue]" + past.ToString(CultureInfo.InvariantCulture)
-              + "[/blue] past your line"
-            : "")
+        LineSentence(line, why) + "\n" + DrainedPhrase(drained, past)
       + ".\n" + ArmKeywordTips.DrainBody;
 
     /// <summary>The hover's body for her, read off the ledger now.</summary>

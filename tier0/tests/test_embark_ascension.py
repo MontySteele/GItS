@@ -136,7 +136,7 @@ def test_ascension_not_honoured_is_a_harness_side_defect():
 
 class _Session:
     def __init__(self, stamp, do_setup=True, intent=None, instance=None,
-                 install_bridge=True):
+                 install_bridge=True, extra_env=None):
         self.instance = instance
         self.ledger = soak.Reversibility(Path("rev.json"))
 

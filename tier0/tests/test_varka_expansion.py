@@ -419,12 +419,16 @@ def test_oath_unto_death_and_grand_masters_verdict(varka):
     assert led.oath["cryo"] == 1                      # not the current one
 
 
-def test_wolfpack_copies_ascension_into_discard(varka):
+def test_wolfpack_shuffles_an_exhausting_copy_into_the_draw_pile(varka):
+    # The Varka payoff round (2026-10-10): was "into your Discard Pile".
     st = _state()
     st.player.powers[V.WOLFPACK] = 1
     _play(st, _vk("four_winds_ascension") + "+")
     ids = [c.id for c in st.player.discard_pile]
-    assert ids.count(V.ASCENSION_ID + "+") == 2       # itself and the copy
+    assert ids.count(V.ASCENSION_ID + "+") == 1       # itself only
+    copies = [c for c in st.player.draw_pile
+              if c.id == V.ASCENSION_ID + "+"]
+    assert len(copies) == 1 and copies[0].exhaust
 
 
 def test_oathbound_aegis_pays_half_the_total_uncapped(varka):
