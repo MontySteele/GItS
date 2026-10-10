@@ -418,10 +418,57 @@ def test_sturm_und_drang_banks_the_swirled_element(overhaul):
     reactions.resolve_hit(st, st.enemies[0], "anemo", 0, "swirl_op")
     assert st.player.powers["mc_swirl_charge"] == 6
     assert st.player.mc_swirl_element == "cryo"
-    # The next Attack takes the damage AND the element, and spends the charge.
+    # The next Attack spends the charge (the Varka round 3 fix, 2026-10-10:
+    # its 6 lands as a separate Cryo hit after the Attack).
     effects.resolve_card(st, _attack(element="none", applies=False, amount=6))
     assert "mc_swirl_charge" not in st.player.powers
     assert st.player.mc_swirl_element == ""
+
+
+def test_sturm_und_drang_is_a_separate_hit_and_the_attack_keeps_its_element(
+        overhaul):
+    """The Varka round 3 fix (2026-10-10): the Attack applies its OWN element
+    and deals its own damage; the bank then lands as one hit of the Swirled
+    element on the enemy the Attack aimed at."""
+    st = make_state(enemies=[make_enemy(hp=60, name="a")])
+    st.player.powers["mc_swirl_charge"] = 6
+    st.player.mc_swirl_element = "cryo"
+    effects.resolve_card(st, _attack(element="none", applies=False,
+                                     amount=5))
+    e = st.enemies[0]
+    assert e.hp == 60 - 5 - 6            # the Attack's 5, then the rider's 6
+    assert e.aura == "cryo"              # the rider's hit carried the element
+    assert st.mc_swirl_rider == (0, "")
+    assert "mc_swirl_charge" not in st.player.powers
+
+
+def test_sturm_und_drang_adds_nothing_to_the_attacks_own_hits(overhaul):
+    st = make_state()
+    st.player.powers["mc_swirl_charge"] = 6
+    assert effects.flat_attack_bonus(st, _attack(), 1) == 0
+
+
+def test_sturm_und_drang_no_longer_overrides_the_attacks_element(overhaul):
+    st = make_state()
+    st.player.powers["mc_swirl_charge"] = 6
+    st.player.mc_swirl_element = "hydro"
+    assert effects.companion_overhaul_card_start(st, _attack()) == ""
+    assert st.mc_swirl_rider == (6, "hydro")
+
+
+def test_sturm_und_drang_hits_every_enemy_under_an_attack_that_aims_at_none(
+        overhaul):
+    st = make_state(enemies=[make_enemy(hp=60, name="a"),
+                             make_enemy(hp=60, name="b")])
+    st.player.powers["mc_swirl_charge"] = 6
+    st.player.mc_swirl_element = "electro"
+    sweep = Card(id="sweep", name="Sweep", cost=1, type="attack",
+                 element="none",
+                 effects=[{"op": "damage", "amount": 3,
+                           "target": "all_enemies", "applies_element": False}])
+    effects.resolve_card(st, sweep)
+    assert [e.hp for e in st.enemies] == [60 - 3 - 6, 60 - 3 - 6]
+    assert [e.aura for e in st.enemies] == ["electro", "electro"]
 
 
 def test_two_swirls_bank_twice_and_the_last_element_wins(overhaul):
@@ -632,10 +679,11 @@ def test_the_element_override_order_is_the_one_the_mod_walks():
     body = src.split("def companion_overhaul_card_start(")[1]
     body = body.split("\ndef ")[0]
     riders = [m for m in re.findall(r'"(mc_[a-z_]+)"', body)
-              if m in ("mc_lightning_fang", "mc_passion_overload",
-                       "mc_swirl_charge")]
+              if m in ("mc_lightning_fang", "mc_passion_overload")]
     assert list(dict.fromkeys(riders)) == [
-        "mc_lightning_fang", "mc_passion_overload", "mc_swirl_charge"]
+        "mc_lightning_fang", "mc_passion_overload"]
+    # The Varka round 3 fix (2026-10-10): Varka's charge claims no element.
+    assert "override = p.mc_swirl_element" not in body
 
     cs = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
           / "CompanionOverhaulHooks.cs").read_text(encoding="utf-8")
@@ -644,8 +692,7 @@ def test_the_element_override_order_is_the_one_the_mod_walks():
     cs_order = re.findall(
         r"OfType<(LightningFangPower|PassionOverloadPower|SwirlChargePower)>",
         body)
-    assert cs_order == ["LightningFangPower", "PassionOverloadPower",
-                        "SwirlChargePower"], cs_order
+    assert cs_order == ["LightningFangPower", "PassionOverloadPower"], cs_order
 
 
 def test_every_new_power_has_a_c_sharp_class_the_generator_knows():
