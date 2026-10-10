@@ -112,4 +112,5 @@ def test_a_knight_row_prints_knight():
                    "Knight. Deal 6 Pyro damage.", "Pyro")
     _hand(state, knight)
     rows = _rows_after(blindplay.observe(state), "Amber: Precise Shot")
-    assert rows[1].strip().startswith("Knight.")
+    # Varka round 3 (2026-10-10): the tag carries the Knight's element.
+    assert rows[1].strip().startswith("Knight, Pyro.")

@@ -2517,7 +2517,7 @@ VARKA_KIND_FIELDS = {
     "violet_storm": ("base",),
     "kindled_edge": ("base",),
     "storm_battery": ("per",),
-    "frost_ward": ("amount",),
+    "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
     "rippling_guard": ("base", "per"),
     "echo_block": ("amount",),

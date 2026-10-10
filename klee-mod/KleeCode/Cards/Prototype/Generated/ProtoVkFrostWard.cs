@@ -45,13 +45,14 @@ public sealed class ProtoVkFrostWard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Frost Ward"),
-        ("description", "Gain {VkAmount:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkAmount:diff()} additional [gold]Block[/gold]."),
+        ("description", "Gain {VkBase:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkPer:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkAmount", 3m)
+            new DynamicVar("VkBase", 5m),
+            new DynamicVar("VkPer", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,6 +69,7 @@ public sealed class ProtoVkFrostWard : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["VkAmount"].UpgradeValueBy(1m);
+        DynamicVars["VkPer"].UpgradeValueBy(1m);
+        DynamicVars["VkBase"].UpgradeValueBy(1m);
     }
 }
