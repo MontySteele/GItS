@@ -283,8 +283,9 @@ public sealed class MollisFavoniusPower : PowerModel, ILocalizationProvider
     {
         ("title", "Mollis Favonius"),
         ("description",
-            "This turn, [gold]Elemental Reactions[/gold] deal "
-          + "[blue]{Amount}[/blue] additional damage."),
+            "This turn, [gold]Melt[/gold], [gold]Vaporize[/gold] and "
+          + "[gold]Overloaded[/gold] deal [blue]{Amount}[/blue] additional "
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Buff;

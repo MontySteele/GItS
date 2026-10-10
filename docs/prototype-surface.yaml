@@ -2523,7 +2523,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill,
-   description: "[gold]Swirl[/gold] the enemy. Draw 1 card. This turn, [gold]Elemental Reactions[/gold] deal 4 additional damage.",
+   # Varka payoff round (2026-10-10): the face names the three reactions the
+   # code pays (`CompanionHexerei.DamagingReactions`), not every reaction.
+   description: "[gold]Swirl[/gold] the enemy. Draw 1 card. This turn, [gold]Melt[/gold], [gold]Vaporize[/gold] and [gold]Overloaded[/gold] deal 4 additional damage.",
    effects: [{op: swirl, target: enemy},
              {op: draw, amount: 1},
              {op: apply_power, power: mc_mollis_favonius, amount: 4, target: self}]}
