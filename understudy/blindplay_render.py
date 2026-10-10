@@ -142,6 +142,35 @@ KNIGHT_TAG = "Knight, {element}."
 _NO_DRAW_RELIC = re.compile(r"\bmay not draw cards during your turn\b", re.I)
 _DRAW_N = re.compile(r"\bdraw \d+\b", re.I)
 NO_DRAW_CLAUSE = " (no draw: {relic})"
+#: The Varka Hydro round (2026-10-10): where two hand copies print one name
+#: and only some of them Exhaust (Wolfpack's copy of Four Winds' Ascension),
+#: the exhausting copy says so beside its number.
+EXHAUST_COPY_TAG = " (exhausts)"
+_COPY_NUMBER = re.compile(r" \(\d+\)$")
+_EXHAUST_LINE = re.compile(r"\bExhaust\.?\s*$")
+
+
+def _exhausts(c: dict[str, Any]) -> bool:
+    """Does this face carry Exhaust (its keyword row or its last line)?"""
+    if any(_fold(k.get("name")) == "exhaust"
+           for k in c.get("keywords") or []):
+        return True
+    return bool(_EXHAUST_LINE.search(str(c.get("text") or "")))
+
+
+def _exhausting_copies(hand: list[dict[str, Any]]) -> set[int]:
+    """Places in the hand of copies that Exhaust beside a same-name copy that
+    does not. Empty where every copy of a name agrees."""
+    by_name: dict[str, list[int]] = {}
+    for i, c in enumerate(hand):
+        base = _COPY_NUMBER.sub("", str(c.get("title") or ""))
+        by_name.setdefault(_fold(base), []).append(i)
+    out: set[int] = set()
+    for places in by_name.values():
+        ex = [i for i in places if _exhausts(hand[i])]
+        if ex and len(ex) < len(places):
+            out.update(ex)
+    return out
 
 
 def _knight_tagged(c: dict[str, Any]) -> str:
@@ -170,7 +199,7 @@ def _no_draw_clause(c: dict[str, Any], relic: str) -> str:
 
 def _render_card(c: dict[str, Any], bullet: str = "-",
                  mark: str = "", raiser: dict[str, Any] | None = None,
-                 no_draw: str = "") -> list[str]:
+                 no_draw: str = "", copy_tag: str = "") -> list[str]:
     """One card face. `mark` is a state the SCREEN is in about this row and
     not a fact about the card, so it goes at the END of the head, after the
     cost and the type -- the shape `EB-294` gave a picked bundle.
@@ -181,6 +210,7 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
+    head += copy_tag
     # The element INDICATOR's twin on this page: the card now carries a gem
     # rather than a sentence, and a gem does not cross a text wire. Beside the
     # title, in brackets, because that is where the card carries it -- next to
@@ -2224,7 +2254,7 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
 #: is held; Darv's Tome hands the same card with no such rule.
 ASCENSION_TITLE = "Four Winds' Ascension"
 ASCENSION_ONCE_NOTE = ("    - Added by {relic} the first time each combat you "
-                       "gain Oath.")
+                       "gain Oath. It is not in your deck.")
 ASCENSION_RELICS = ("Boreas's Fang", "Wolf's Gravestone")
 
 
@@ -3570,8 +3600,11 @@ def render(obs: dict[str, Any]) -> str:
         no_draw = _no_draw_relic(you)
         fang = _ascension_relic(you)
         wildfire = _wildfire_hit(you, c.get("oath"))
-        for card in c["hand"]:
-            out += _render_card(card, raiser=raiser, no_draw=no_draw)
+        exhausting = _exhausting_copies(c["hand"])
+        for i, card in enumerate(c["hand"]):
+            out += _render_card(card, raiser=raiser, no_draw=no_draw,
+                                copy_tag=EXHAUST_COPY_TAG
+                                if i in exhausting else "")
             if wildfire is not None and _applies_pyro(card):
                 out.append(WILDFIRE_NOTE.format(n=wildfire))
             # The Varka payoff round (2026-10-10): where Four Winds'
