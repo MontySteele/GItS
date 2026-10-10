@@ -193,14 +193,18 @@ public class FurinaGuestRuleTests
     // ---- the four new guests --------------------------------------------------
 
     [Fact]
-    public void Freminet_blocks_each_drain_and_acts_for_five_cryo()
+    public void Freminet_blocks_each_drain_and_acts_for_block()
     {
+        // His act since the Spend paper (2026-10-10): "Gain 3 Block. Spend
+        // half your Fanfare (rounded down): gain that much more Block." [6]
         var kit = StageKit.Of(StagePerformer.Freminet);
         Run(kit.Director.Drain(4));
         Assert.Contains("block 4", kit.Board.Log);
-        Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Contains("damage Freminet Random 5 Cryo", kit.Board.Log);
-        Assert.Equal(8, StageDirector.ActAmount(StagePerformer.Freminet, true));
+        Run(kit.Director.Act(kit.Stage.Seats[0]));     // 4 Fanfare: +2
+        Assert.Contains("block 3", kit.Board.Log);
+        Assert.Contains("block 2", kit.Board.Log);
+        Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("damage Freminet"));
+        Assert.Equal(6, StageDirector.ActAmount(StagePerformer.Freminet, true));
     }
 
     [Fact]
@@ -217,9 +221,11 @@ public class FurinaGuestRuleTests
         var all = StageKit.With(9, StagePerformer.Navia);
         Assert.Equal(9, Run(all.Director.SpendAll()));
         Assert.Equal(2, all.Stage.Fanfare);
-        // Her act deals the Fanfare spent this turn, as Geo.
+        // Her act Spends half the bank and deals that much as Geo (the Spend
+        // paper, 2026-10-10): half of the 2 kept is 1.
         Run(all.Director.Act(all.Stage.Seats[0]));
-        Assert.Contains("damage Navia Random 7 Geo", all.Board.Log);
+        Assert.Contains("damage Navia Random 1 Geo", all.Board.Log);
+        Assert.Equal(1, all.Stage.Fanfare);
     }
 
     [Fact]

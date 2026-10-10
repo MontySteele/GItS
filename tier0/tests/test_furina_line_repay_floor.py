@@ -237,15 +237,19 @@ def test_bravuras_upgrade_raises_the_base_to_ten():
     assert st.enemies[0].hp == hp - (10 + 2 * 5)
 
 
-def test_freminets_act_also_gives_block():
+def test_freminets_act_gives_block():
+    # The Spend paper (2026-10-10): "Gain 3 Block. Spend half your Fanfare
+    # (rounded down): gain that much more Block." [6]. No hit any more.
     st = _furina()
     st.player.ftd.stage = ["freminet"]
+    hp = [e.hp for e in st.enemies]
     T.act(st, "freminet")
-    assert st.player.block == 6
+    assert st.player.block == 3
+    assert [e.hp for e in st.enemies] == hp
     st.player.ftd.stage_up = {"freminet"}
     st.player.block = 0
     T.act(st, "freminet")
-    assert st.player.block == 9
+    assert st.player.block == 6
 
 
 def test_neuvillette_acts_for_all_hp_lost_since_her_last_turn():

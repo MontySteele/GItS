@@ -79,8 +79,8 @@ public abstract class StagePerformerBadge : PowerModel
             StagePerformer.Lyney => Pick(FurinaStageLaw.LyneyActDamage,
                 FurinaStageLaw.LyneyActDamageUpgraded),
             StagePerformer.Chevreuse => FurinaStageLaw.ChevreuseActDamage,
-            StagePerformer.Freminet => Pick(FurinaStageLaw.FreminetActDamage,
-                FurinaStageLaw.FreminetActDamageUpgraded),
+            StagePerformer.Freminet => Pick(FurinaStageLaw.FreminetActBlock,
+                FurinaStageLaw.FreminetActBlockUpgraded),
             StagePerformer.Escoffier => Pick(FurinaStageLaw.EscoffierActDamage,
                 FurinaStageLaw.EscoffierActDamageUpgraded),
             _ => 0,
@@ -127,16 +127,16 @@ public abstract class StagePerformerBadge : PowerModel
               + " damage to a random enemy.",
             StagePerformer.Freminet =>
                 "Whenever you [gold]Drain[/gold], gain that much "
-              + "[gold]Block[/gold]. Act: deal " + act
-              + " [gold]Cryo[/gold] damage to a random enemy. Gain "
-              + StageDirector.FreminetActBlock(upgraded)
-              + " [gold]Block[/gold].",
+              + "[gold]Block[/gold]. Act: gain " + act
+              + " [gold]Block[/gold]. [gold]Spend[/gold] half your "
+              + "[gold]Fanfare[/gold] (rounded down): gain that much more "
+              + "[gold]Block[/gold].",
             StagePerformer.Navia =>
                 "Your first [gold]Spend[/gold] each turn costs "
               + NaviaDiscount(upgraded) + " less (a spend-all keeps "
-              + NaviaDiscount(upgraded) + "). Act: deal [gold]Geo[/gold] "
-              + "damage to a random enemy equal to the "
-              + "[gold]Fanfare[/gold] you spent this turn.",
+              + NaviaDiscount(upgraded) + "). Act: [gold]Spend[/gold] half "
+              + "your [gold]Fanfare[/gold] (rounded down). Deal that much "
+              + "[gold]Geo[/gold] damage to a random enemy.",
             StagePerformer.Neuvillette =>
                 "Your [gold]Hydro[/gold] damage deals "
               + (upgraded ? FurinaStageLaw.NeuvilletteHydroBonusUpgraded

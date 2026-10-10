@@ -77,8 +77,10 @@ def test_an_amplifier_off_an_application_says_there_was_no_hit():
 
 def test_the_spend_tip_says_whose_fanfare_pays():
     # The re-founding (2026-10-04): her one Fanfare number pays a Spend.
+    # The Spend paper (2026-10-10): the second sentence names Spend up to X.
     assert ARM_KEYWORDS["Spend"] == (
-        "Pay that much Fanfare. Offered only if you have enough.")
+        "Pay that much Fanfare. Offered only if you have enough. "
+        "Spend up to X pays X, or all you have if that is less.")
 
 
 # ---- 4. Arkhe Alignment -----------------------------------------------------

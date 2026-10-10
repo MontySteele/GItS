@@ -888,12 +888,18 @@ public static class ArmKeywordTips
     // (<see cref="StagePerformerBadge.ActText"/>).
 
     /// <summary>Rule 3's price: a Spend N takes N of her Fanfare, and is
-    /// offered only when she has it.</summary>
+    /// offered only when she has it. "Spend up to X" (the Spend paper,
+    /// 2026-10-10) takes X or all she has, and never fails.</summary>
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SpendKey,
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have "
-          + "enough.");
+          + "enough. " + SpendUpToSentence);
+
+    /// <summary>The Spend tip's second sentence (the Spend paper,
+    /// 2026-10-10), shared with the seat glossary.</summary>
+    internal const string SpendUpToSentence =
+        "Spend up to X pays X, or all you have if that is less.";
 
     /// <summary>Rule 3's definition, shared by the keyword tip and the
     /// Fanfare gauge's hover (<c>Vfx.FanfareCounter</c>). The pool-75 round

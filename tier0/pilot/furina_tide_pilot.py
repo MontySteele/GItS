@@ -267,9 +267,17 @@ def _playable_left(state, card=None) -> bool:
 def _outlet_rate(spec) -> float:
     """Damage-equivalent points per Fanfare one outlet pays."""
     k, n = spec.kind, spec.n
+    # The Spend paper's up-to cards (2026-10-10): 1 per point (Block at the
+    # pilot's 0.6), the volley a hit per 4, Spirited Aria's draw per 4.
+    if k == "upto_aoe":
+        return 1.0
+    if k == "upto_hit_draw":
+        return 1.0 + DRAW / T.SPEND_UP_TO_EVERY
+    if k == "upto_block":
+        return 0.6
+    if k == "upto_volley":
+        return n[0] / T.SPEND_UP_TO_EVERY
     # The pool to 75's outlets (2026-10-09).
-    if k == "spend_volley":
-        return n[0] * (n[3] - n[1]) / n[2]
     if k == "spend_block_draw":
         return DRAW * n[2] / n[1]
     if k == "spend_debuff":
@@ -282,16 +290,10 @@ def _outlet_rate(spec) -> float:
         return float(n[0])
     if k == "block_spend_hit":
         return n[2] / n[1]
-    if k in ("spend_aoe",):
-        return (n[2] - n[0]) / n[1]
     if k == "spend_fixed_hit":
         return n[1] / n[0]
-    if k == "spend_draw":
-        return (n[2] - n[0] + DRAW * n[3]) / n[1]
     if k == "spend_energy":
         return 6.0 / n[1]
-    if k == "spend_block":
-        return 0.6 * (n[2] - n[0]) / n[1]
     if k in ("block_spend_all", "bravura"):
         return float(n[1])
     if k == "rejoice":
@@ -355,9 +357,6 @@ class Judged:
 
     def spend(self, state, card, spec) -> bool:
         price = T.spend_price(spec)
-        if spec.kind == "spend_volley":
-            gain = _single(state, spec.n[0] * (spec.n[3] - spec.n[1]))
-            return gain - spend_cost(state, price) > 0
         if spec.kind == "spend_block_draw":
             return DRAW * spec.n[2] - spend_cost(state, price) > 0
         if spec.kind == "spend_debuff":
@@ -366,13 +365,8 @@ class Judged:
             return gain - spend_cost(state, price) > 0
         if spec.kind == "block_spend_hit":
             gain = _single(state, spec.n[2])
-        elif spec.kind == "spend_aoe":
-            gain = _aoe(state, spec.n[2]) - _aoe(state, spec.n[0])
         elif spec.kind == "spend_energy":
             gain = 6.0 if _playable_left(state) else 0.0
-        elif spec.kind == "spend_block":
-            gain = (_block_value(spec.n[2], need(state))
-                    - _block_value(spec.n[0], need(state)))
         else:
             gain = (_single(state, spec.n[2]) - _single(state, spec.n[0])
                     + DRAW * spec.n[3])
@@ -502,7 +496,9 @@ def _guest_value(state, member: str) -> float:
     elif member == "chevreuse":
         per = T.CHEVREUSE_ACT + 1.5
     elif member == "freminet":
-        per = T.FREMINET_ACT + 2.0
+        # The Spend paper (2026-10-10): 3 Block, then half the bank as
+        # Block (a share of what she earns a turn).
+        per = 0.6 * T.FREMINET_ACT_BLOCK + 3.0
     elif member == "navia":
         per = 0.5 * 4.0 + T.NAVIA_LINE_DISCOUNT * FANFARE
     elif member == "escoffier":
@@ -533,8 +529,8 @@ def card_damage(state, card) -> float:
         return float(n[2] if f.fanfare >= n[1] else 0)
     if k == "block_spend_all":
         return float(n[1] * f.fanfare)
-    if k == "spend_draw":
-        return float(n[2] if f.fanfare >= n[1] else n[0])
+    if k == "upto_hit_draw":
+        return float(n[0] + T.up_to_of(f, n[1]))
     if k == "spend_fixed_hit":
         return float(n[1] if f.fanfare >= n[0] else 0)
     # The pool to 75's damage, for the single-card lethal.
@@ -596,19 +592,10 @@ def value(state, card, playable: list, decider) -> float:
         if k == "block_spend_hit":
             pv = _block_value(n[0], need_now)
             bv = pv + _single(state, n[2])
-        elif k == "spend_aoe":
-            pv, bv = _aoe(state, n[0]), _aoe(state, n[2])
         elif k == "spend_energy":
             draws = bool(state.player.draw_pile or state.player.discard_pile)
             pv = DRAW if draws else 0.0
             bv = pv + (6.0 if _playable_left(state, card) else 0.0)
-        elif k == "spend_block":
-            pv = _block_value(n[0], need_now)
-            bv = _block_value(n[2], need_now)
-        elif k == "spend_volley":
-            price = n[2]
-            pv = _single(state, n[0] * n[1])
-            bv = _single(state, n[0] * n[3])
         elif k == "spend_block_draw":
             pv = _block_value(n[0], need_now)
             draws = bool(state.player.draw_pile or state.player.discard_pile)
@@ -623,6 +610,26 @@ def value(state, card, playable: list, decider) -> float:
                 and decider.spend(state, card, spec)):
             return bv - spend_cost(state, T.price_of(f, price))
         return pv
+    if k in T.UPTO_KINDS:
+        # "Spend up to X" (the Spend paper, 2026-10-10): no choice, so the
+        # play's value is what the counted points buy, less what the bank
+        # gives up (Navia's free points cost nothing).
+        cap = T.upto_cap(spec)
+        spent = T.up_to_of(f, cap)
+        paid = spent - min(spent, T.navia_discount(f))
+        if k == "upto_aoe":
+            gain = _aoe(state, n[0] + spent)
+        elif k == "upto_hit_draw":
+            draws = bool(state.player.draw_pile or state.player.discard_pile)
+            gain = (_single(state, n[0] + spent)
+                    + (DRAW * (spent // T.SPEND_UP_TO_EVERY) if draws
+                       else 0.0))
+        elif k == "upto_block":
+            gain = _block_value(n[0] + spent, need_now)
+        else:
+            gain = _single(state, n[0] * (n[1]
+                                          + spent // T.SPEND_UP_TO_EVERY))
+        return gain - (spend_cost(state, paid) if paid else 0.0)
     if k in T.FIXED_SPEND_KINDS:
         if not T.playable(state, card):
             return 0.0
