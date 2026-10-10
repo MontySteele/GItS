@@ -32,8 +32,7 @@ runs first, with an explicit `--max-actions` (120 for an Opus seat by default;
 `--max-actions 1500` for a Sonnet seat). `--scratch DIR` adds the seat's own
 notes path, `DIR/seat-lane<N>/notes.md`, to the line that names the lane, and
 (2026-10-08) writes two lane scripts into that folder -- `o` (observe --brief)
-and `a` (act --brief --observe, which acts and then prints the new page)
--- with the lane, the absolute interpreter, `--brief`
+and `a` (act --brief) -- with the lane, the absolute interpreter, `--brief`
 and a `cd` to this repo root baked in, and the brief itself as
 `brief-lane<N>.md`, UTF-8 with LF line ends. The brief's lane line names the
 scripts. 21 of 43 seat transcripts on 2026-10-06/07 showed a failed command
@@ -164,10 +163,7 @@ def lane_scripts(lane: int) -> dict[str, str]:
             f"export GITS_LANE={lane} PYTHONIOENCODING=utf-8\n")
     return {
         "o": head + f'exec {py} -m understudy.blindplay observe --brief "$@"\n',
-        # 2026-10-09: `--observe` prints the new page after the act, so a
-        # move is one call (subagents may not chain `a ... && o`).
-        "a": head + (f"exec {py} -m understudy.blindplay act --brief "
-                     '--observe "$@"\n'),
+        "a": head + f'exec {py} -m understudy.blindplay act --brief "$@"\n',
     }
 
 
@@ -227,8 +223,7 @@ def brief_text(lane: int, character: str, coop: bool = False,
                  f" the interpreter, `--brief` and the repo folder:"
                  f" `bash {folder}/o` to observe (`bash {folder}/o --define"
                  f' "<Word>"` for a definition) and'
-                 f' `bash {folder}/a "<command>"` to act, which also prints'
-                 f' the new page.')
+                 f' `bash {folder}/a "<command>"` to act.')
     return f"{head}\n{body.rstrip()}\n"
 
 
