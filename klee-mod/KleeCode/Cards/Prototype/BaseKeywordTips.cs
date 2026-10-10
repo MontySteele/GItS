@@ -177,7 +177,7 @@ public static class BaseKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, StrengthKey,
             "Adds its amount to every Attack hit the wearer "
-          + "lands. It does not decay.");
+          + "lands. It does not decay; it lasts for the rest of this fight.");
 
     /// <summary>Strength's Block twin.</summary>
     public static IEnumerable<IHoverTip> ForDexterity(

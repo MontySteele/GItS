@@ -8954,7 +8954,10 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # arm table's interpolated numerals are.
         "Frail": [" less [gold]Block[/gold]. One stack falls ",
                   "off at the end of each of its turns."],
-        "Strength": [" hit the wearer ", "lands. It does not decay."],
+        # The Furina full-run round (2026-10-10): and how long it lasts.
+        "Strength": [" hit the wearer ",
+                     "lands. It does not decay; it lasts for the rest of "
+                     "this fight."],
         "Dexterity": [" the wearer gains. It ", "does not decay."],
         # The Repay floor (ruled 2026-10-09).
         "Vigor": ["Your next Attack deals additional damage."],
