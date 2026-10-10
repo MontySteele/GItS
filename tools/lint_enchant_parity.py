@@ -228,9 +228,10 @@ _CANONICAL_VARS = re.compile(
 # arrives next turn does not gain Block on the play, which is what
 # `Nimble.CanEnchant` is asking about.
 # FoldedBlockVar and UnsourcedBlockVar (Powers/Prototype) subclass BlockVar,
-# which is what BaseLib's GainsBlock detection reads.
+# which is what BaseLib's GainsBlock detection reads; FoldedCalculatedBlockVar
+# (2026-10-10) subclasses CalculatedBlockVar.
 _BLOCK_VAR = re.compile(
-    r"\bnew (?:Calculated|Folded|Unsourced)?BlockVar\(|\bnew SpotlightSystem\.SpotlitBlockVar\(")
+    r"\bnew (?:Calculated|Folded|FoldedCalculated|Unsourced)?BlockVar\(|\bnew SpotlightSystem\.SpotlitBlockVar\(")
 _CTOR_TYPE = re.compile(r":\s*base\([^)]*?CardType\.(\w+)")
 _COST_X = re.compile(r"protected override bool HasEnergyCostX\s*=>\s*true")
 

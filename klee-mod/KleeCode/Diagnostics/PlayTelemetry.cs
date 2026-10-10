@@ -174,6 +174,11 @@ internal static class PlayTelemetry
     {
         try
         {
+            // A won fight still waiting for its HP after the end-of-combat
+            // effects is written now, unread: the combat-won signal never
+            // came (`FinishReturns`).
+            FinishReturns(read: false);
+            EnsureReturnWatch();
             FlushAll("interrupted");
             Pending.Clear();
             var run = RunManager.Instance?.DebugOnlyGetState();
@@ -401,6 +406,31 @@ internal static class PlayTelemetry
                 creature.GetPowerAmount<MegaCrit.Sts2.Core.Models.Powers.StrengthPower>(),
             });
             record.HpLastSeen = (int)creature.CurrentHp;
+            NoteStage(record, creature);
+        }
+    }
+
+    /// <summary>
+    /// THE SPEND ROUND (2026-10-10, "Next round: telemetry first"): Furina's
+    /// Fanfare record for this fight, read off her stage ledger -- the peak,
+    /// the bank at the close (the fight's end, or her death), and every Spend
+    /// with the bank before it (<see cref="FurinaStageLedger.Spends"/>). The
+    /// ledger is held from the first reading on, so a fight closed after its
+    /// combat is gone (the stale-flush) still writes it. A read; `Peek`
+    /// creates no ledger (rule 1).
+    /// </summary>
+    private static void NoteStage(FightRecord record, Creature? creature)
+    {
+        try
+        {
+            if (creature == null) return;
+            var ledger = FurinaStageLedger.Peek(creature);
+            if (ledger != null) record.Stage = ledger;
+            if (record.Stage != null) record.FanfareEnd = record.Stage.Fanfare;
+        }
+        catch (Exception e)
+        {
+            Warn("NoteStage", e);
         }
     }
 
@@ -833,6 +863,88 @@ internal static class PlayTelemetry
     {
         Open.Clear();
         Pending.Clear();
+        AwaitingReturn.Clear();
+        _returnWatch = false;
+    }
+
+    /// <summary>Test seam: hold won fights for the combat-won signal, as the
+    /// game does once <see cref="EnsureReturnWatch"/> has subscribed.
+    /// </summary>
+    internal static void ArmReturnWatchForTest(bool armed) =>
+        _returnWatch = armed;
+
+    /// <summary>Test seam: the won fights waiting for their HP.</summary>
+    internal static int AwaitingReturnForTest() => AwaitingReturn.Count;
+
+    // ------------------------------------------------- after the return ---
+
+    /// <summary>
+    /// THE SPEND ROUND (2026-10-10): "Telemetry stamps HP before the curtain
+    /// call returns drained HP (`PlayTelemetry.cs:1005`). Lane 4's act-1
+    /// normals: telemetry 23 lost, records 4." `hp_end` is the last in-fight
+    /// reading, and stays so (comparability, and the campfire reason in
+    /// <see cref="FlushAll"/>). `hp_after_return` is the HP once every
+    /// end-of-combat effect has run -- Furina's curtain call
+    /// (<c>AfterCombatEnd</c>), Burning Blood and its kin
+    /// (<c>AfterCombatVictory</c>) -- for every character.
+    ///
+    /// WHERE IT IS READ. Those effects run inside
+    /// <c>CombatManager.EndCombatInternal</c>, in hook order this listener does
+    /// not control, and the game raises <c>CombatManager.CombatWon</c> after
+    /// all of them. So a won fight is HELD here when it closes and written
+    /// when that event comes, with the HP then. A held fight that never
+    /// hears it (the next fight opened first) is written with
+    /// `hp_after_return` -1: not read. A death, an interrupted fight and a
+    /// fight closed before the watch is armed are written at once, the
+    /// field equal to `hp_end` (no end-of-combat effect ran).
+    /// </summary>
+    private static readonly List<(Player Player, FightRecord Record)>
+        AwaitingReturn = new();
+
+    private static bool _returnWatch;
+
+    private static CombatManager? _watched;
+
+    /// <summary>Subscribe once to the combat-won signal (again if the
+    /// manager is ever replaced). An event handler cannot throw into the
+    /// game: <see cref="OnCombatWon"/> catches everything (rule 2).</summary>
+    private static void EnsureReturnWatch()
+    {
+        var manager = CombatManager.Instance;
+        if (manager == null || ReferenceEquals(_watched, manager)) return;
+        if (_watched != null) _watched.CombatWon -= OnCombatWon;
+        manager.CombatWon += OnCombatWon;
+        _watched = manager;
+        _returnWatch = true;
+    }
+
+    private static void OnCombatWon(CombatRoom room)
+    {
+        try
+        {
+            FinishReturns(read: true);
+        }
+        catch (Exception e)
+        {
+            Warn("CombatWon", e);
+        }
+    }
+
+    /// <summary>Write every held fight: with the seat's HP now when
+    /// <paramref name="read"/>, else -1. The test seam too.</summary>
+    internal static void FinishReturns(bool read)
+    {
+        if (AwaitingReturn.Count == 0) return;
+        var waiting = AwaitingReturn.ToList();
+        AwaitingReturn.Clear();
+        foreach (var (player, record) in waiting)
+        {
+            var creature = player.Creature;
+            record.HpAfterReturn = read && creature != null
+                ? Math.Max(0, (int)creature.CurrentHp)
+                : -1;
+            Write(record);
+        }
     }
 
     // ------------------------------------------------------------- close ---
@@ -1022,6 +1134,13 @@ internal static class PlayTelemetry
                 ? record.HpLastSeen
                 : creature != null ? (int)creature.CurrentHp : record.HpStart;
             record.Outcome = creature is { IsDead: true } ? "died" : outcome;
+            NoteStage(record, creature);
+            record.HpAfterReturn = record.HpEnd;
+            if (_returnWatch && record.Outcome is "won" or "ended")
+            {
+                AwaitingReturn.Add((player, record));
+                continue;
+            }
             Write(record);
         }
     }
@@ -1233,6 +1352,11 @@ internal static class PlayTelemetry
         }
     }
 
+    /// <summary>A card's name as the records write it ("Strike+"); "" for
+    /// none. The Furina ledger files her Spends under it.</summary>
+    internal static string CardNameOf(CardModel? card) =>
+        card == null ? "" : CardName(card);
+
     private static string CardName(CardModel card)
     {
         try
@@ -1289,6 +1413,14 @@ internal static class PlayTelemetry
         public List<(string Name, int MaxHp)> Enemies = new();
         public int HpStart;
         public int HpEnd;
+        /// <summary>2026-10-10. The HP after the end-of-combat effects (see
+        /// <see cref="FinishReturns"/>); -1 when it could not be read.</summary>
+        public int HpAfterReturn = -1;
+        /// <summary>2026-10-10. Furina's stage ledger for this fight, null
+        /// for anyone else (<see cref="NoteStage"/>).</summary>
+        public FurinaStageLedger? Stage;
+        /// <summary>2026-10-10. Her Fanfare at the close.</summary>
+        public int FanfareEnd = -1;
         public int MaxHp;
         public int Turns;
         public string Outcome = "unknown";
@@ -1406,6 +1538,29 @@ internal static class PlayTelemetry
             sb.Append(",\"hp_end\":").Append(HpEnd);
             sb.Append(",\"max_hp\":").Append(MaxHp);
             sb.Append(",\"hp_lost\":").Append(HpStart - HpEnd);
+            // 2026-10-10. Additive: the HP once the end-of-combat effects
+            // ran (Furina's curtain call, Burning Blood); -1 not read.
+            sb.Append(",\"hp_after_return\":").Append(HpAfterReturn);
+            if (Stage != null)
+            {
+                // 2026-10-10, the Spend round. Furina only: her peak Fanfare,
+                // her Fanfare at the close, and every Spend.
+                sb.Append(",\"fanfare_peak\":").Append(Stage.PeakFanfare);
+                sb.Append(",\"fanfare_end\":").Append(FanfareEnd);
+                sb.Append(",\"fanfare_spends\":[");
+                var spends = Stage.Spends;
+                for (var i = 0; i < spends.Count; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append('{');
+                    Str(sb, "card", spends[i].Source);
+                    sb.Append(",\"spent\":").Append(spends[i].Spent);
+                    sb.Append(",\"before\":").Append(spends[i].Before);
+                    sb.Append(",\"cap\":").Append(spends[i].Cap);
+                    sb.Append('}');
+                }
+                sb.Append(']');
+            }
             sb.Append(",\"turns\":").Append(Turns);
             sb.Append(',');
             Str(sb, "outcome", Outcome);

@@ -64,7 +64,7 @@ public sealed class ProtoVkBarbaraMelodyLoop : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new SpotlightSystem.DeferredBlockVar(3m)
         };
 

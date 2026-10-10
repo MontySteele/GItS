@@ -3,6 +3,7 @@ using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -143,25 +144,74 @@ public sealed class HymnOfRenewalPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>High Stakes</i>: "While you are within 5 HP of your Drain
-/// line, your Attacks deal 4 more damage." [6] Copies add.</summary>
+/// <summary>
+/// <i>High Stakes</i> (reworked by the Spend round,
+/// <c>review/records/furina-spend-round-2026-10-10.md</c>, "What changes" 3):
+/// "Your Attacks deal 1 additional damage for every 5 HP you have Drained and
+/// not Repaid." [every 4]. The old card ("within 5 HP of your Drain line")
+/// was NEVER AGAIN three times over two rounds: the line band punished the
+/// play the kit teaches.
+///
+/// THE AMOUNT IS THE DIVISOR (5, 4 upgraded:
+/// <see cref="FurinaStageLaw.HighStakesEvery"/>). It reads the ledger's net
+/// Drained (<see cref="FurinaStageLedger.Drained"/>, above and past the line,
+/// which Repay lowers), rounded down, and adds it to each powered Attack hit,
+/// as Strength does.
+///
+/// COPIES ADD, AS SEPARATE INSTANCES. A divisor cannot stack by summing (two
+/// copies at 5 would read "every 10"), so each play is its own instance
+/// (<see cref="PowerInstanceType.Instanced"/>, the base game's
+/// <c>AutomationPower</c> shape) and each adds its own bonus.
+///
+/// THE BADGE SHOWS THE BONUS NOW (<see cref="DisplayAmount"/>, refreshed by
+/// <see cref="FurinaStage.RefreshBadges"/> on every Drain and Repay), and the
+/// hover says it in words.
+/// </summary>
 public sealed class HighStakesPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "High Stakes"),
         ("description",
-            "While you are within 5 HP of your [gold]Drain[/gold] line, your "
-          + "Attacks deal [blue]{Amount}[/blue] additional damage."),
+            "Your Attacks deal 1 additional damage for every "
+          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] and not "
+          + "[gold]Repaid[/gold]."),
+        ("smartDescription",
+            "Your Attacks deal 1 additional damage for every "
+          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] and not "
+          + "[gold]Repaid[/gold]. Now: [blue]{Bonus}[/blue] additional "
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    public override PowerInstanceType InstanceType =>
+        PowerInstanceType.Instanced;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new BonusVar() };
+
+    /// <summary>This copy's bonus a hit now. PURE.</summary>
+    public int Bonus =>
+        IsMutable && Owner != null
+            ? FurinaStageLaw.HighStakesBonus(FurinaStage.DrainedOf(Owner),
+                                             Amount)
+            : 0;
+
+    /// <summary>The badge: the bonus now, not the divisor.</summary>
+    public override int DisplayAmount => Bonus;
+
+    /// <summary>Redraw the badge's number.</summary>
+    internal void Refresh()
+    {
+        if (!IsMutable || Owner == null) return;
+        InvokeDisplayAmountChanged();
+    }
+
     /// <summary>The bonus, read at the hit: her Attacks only (a card's
-    /// powered hit), while she stands within 5 HP of the line. PURE.
-    /// </summary>
+    /// powered hit). PURE.</summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
@@ -169,7 +219,22 @@ public sealed class HighStakesPower : PowerModel, ILocalizationProvider
         if (dealer != Owner || target == null || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return FurinaStage.NearLine(Owner) ? Amount : 0m;
+        return Bonus;
+    }
+
+    /// <summary>`{Bonus}` in the hover, read live.</summary>
+    private sealed class BonusVar : DynamicVar
+    {
+        public BonusVar() : base("Bonus", 0m)
+        {
+        }
+
+        private int Live => _owner is HighStakesPower power ? power.Bonus : 0;
+
+        protected override decimal GetBaseValueForIConvertible() => Live;
+
+        public override string ToString() =>
+            Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
     }
 }
 

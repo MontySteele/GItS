@@ -56,7 +56,7 @@ public sealed class ProtoVkEyeOfTheStorm : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new CalculationExtraVar(2m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaOath.CurrentOath(card.Owner.Creature))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaOath.CurrentOath(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

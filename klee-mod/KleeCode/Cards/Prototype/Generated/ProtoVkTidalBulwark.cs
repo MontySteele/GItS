@@ -56,7 +56,7 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(4m),
             new CalculationExtraVar(2m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaOath.Count(card.Owner.Creature, Element.Hydro))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaOath.Count(card.Owner.Creature, Element.Hydro))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

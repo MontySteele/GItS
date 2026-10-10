@@ -144,10 +144,10 @@ public class FurinaBlockGapTests
         var up = Owned(Upgraded(new ProtoFsPrivateBox()), seat);
         Assert.Equal(19m, Formula(up));
         // The live preview, "(Gains N Block)", and card Block (Dexterity
-        // and Frail apply): the game's CalculatedBlockVar on ValueProp.Move.
+        // and Frail apply): the game's CalculatedBlockVar (folded) on ValueProp.Move.
         Assert.Contains("(Gains {CalculatedBlock:diff()} [gold]Block[/gold])",
                         Face(card));
-        Assert.Contains("new CalculatedBlockVar(ValueProp.Move)",
+        Assert.Contains("new FoldedCalculatedBlockVar(ValueProp.Move)",
                         Generated("ProtoFsPrivateBox"));
         FurinaStageLedger.ResetAll();
     }
@@ -212,7 +212,7 @@ public class FurinaBlockGapTests
         Assert.DoesNotContain("FurinaStage.Spend", src);
         Assert.Contains("(Gains {CalculatedBlock:diff()} [gold]Block[/gold])",
                         Face(card));
-        Assert.Contains("new CalculatedBlockVar(ValueProp.Move)", src);
+        Assert.Contains("new FoldedCalculatedBlockVar(ValueProp.Move)", src);
         FurinaStageLedger.ResetAll();
     }
 }

@@ -1965,6 +1965,9 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     if fx.get("target", "self") == "self":
         powers.apply_power(state, state.player, fx["power"], amount,
                            max_stacks=cap, never_reduces=floor)
+        # High Stakes (the Spend round, 2026-10-10): its amount is a divisor,
+        # so each copy is recorded on its own (`furina_stage`).
+        furina_stage.note_power_applied(state, fx["power"], amount)
         # `EB-415`. THE BANNER BANKS WHAT ITS CARD JUST GRANTED. `powers` is a
         # name -> int map holding TURNS REMAINING for this clock, so the
         # Dexterity it will owe back has nowhere else to live; the sidecar
@@ -5352,10 +5355,10 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
         bonus += C.MI_KYOUKA_BONUS
     if cost == 0:
         bonus += p.powers.get("zero_cost_attacks_up", 0)
-    # FURINA'S HIGH STAKES (the pool to 75): "While you are within 5 HP of
-    # your Drain line, your Attacks deal 4 more damage" [6]. A pure read of
-    # her HP against the line; 0 for anyone else. The C# twin is
-    # `HighStakesPower.ModifyDamageAdditive`.
+    # FURINA'S HIGH STAKES (the Spend round, 2026-10-10): "Your Attacks deal
+    # 1 additional damage for every 5 HP you have Drained and not Repaid"
+    # [every 4]. A pure read of her net drained HP; 0 for anyone else. The
+    # C# twin is `HighStakesPower.ModifyDamageAdditive`.
     bonus += furina_stage.high_stakes_bonus(state)
     # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
     # power bonuses", kickoff §4). Reads the pool, spends nothing.

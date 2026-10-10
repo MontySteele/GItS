@@ -59,7 +59,9 @@ public sealed class ProtoFsBubbleAria : CustomCardModel, ICharacterCard, IModalC
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Gain 6 Block", "[gold]Spend[/gold] 3: also draw 2 cards" };
+        IsUpgraded
+            ? new[] { "Gain 6 Block", "Gain 8 [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards." }
+            : new[] { "Gain 6 Block", "Gain 6 [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards." };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -91,7 +93,7 @@ public sealed class ProtoFsBubbleAria : CustomCardModel, ICharacterCard, IModalC
                                 "needs that much Fanfare"),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 6 Block", "[gold]Spend[/gold] 3: also draw 2 cards" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 6 Block", "Gain {IfUpgraded:show:8|6} [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards." }[modeIndex]);
         if (modeIndex == 0)
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 8m : 6m), ValueProp.Move), cardPlay);
@@ -152,9 +154,13 @@ public sealed class ProtoFsBubbleAriaModeB : ModalOptionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3"),
-        ("description", "[gold]Spend[/gold] 3: also draw 2 cards"),
+        ("title", "Gain 6 Block. Spend 3"),
+        ("description", "Gain {IfUpgraded:show:8|6} [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards."),
     };
+
+    /// <summary>The upgraded side of a price the upgrade moves.</summary>
+    public override string Title =>
+        IsUpgraded ? "Gain 8 Block. Spend 3+" : base.Title;
 
     public ProtoFsBubbleAriaModeB()
         : base(CardType.Skill)
