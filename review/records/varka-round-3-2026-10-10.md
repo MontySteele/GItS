@@ -86,7 +86,12 @@ Take-rate grading lines now measure that taste, not the cards, so they stop here
    - (b) "Whenever you Swirl, gain 1 more Oath of the element Swirled."
    - (c) Keep it as a multi-enemy Rare.
    - **Default: (c) until your run.**
+   - **Ruled 2026-10-10: (a) or (b), not (c).** [USER]: "agreed on a or b; we can sim a and see if
+     it's good enough for Rare." (a) is simmed in tier-0 first. If (a) does not read as Rare-worthy,
+     Converging Winds becomes (b).
 2. **Hydro's job** is already queued (#1017). Read it together with the Windborne Resolve finding above.
+   - **Ruled 2026-10-10 on #1017:** Hydro keeps the Block job; a Block census comes first, then a
+     pass moving Hydro toward Block payoffs.
 
 ## Next
 
