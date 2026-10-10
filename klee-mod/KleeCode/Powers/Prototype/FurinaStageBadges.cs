@@ -108,7 +108,7 @@ public abstract class StagePerformerBadge : PowerModel
                 "Your [gold]Drain[/gold] line is "
               + FurinaStageLaw.LyneyLineDrop + " HP lower. Act: "
               + "[gold]Drain[/gold] " + FurinaStageLaw.LyneyActDrain
-              + ", never past your line. Deal " + act
+              + ", never past your line (none at or below it). Deal " + act
               + " [gold]Pyro[/gold] damage to ALL enemies.",
             StagePerformer.Sigewinne =>
                 "Whenever you [gold]Repay[/gold], gain that much "

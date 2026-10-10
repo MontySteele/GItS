@@ -594,8 +594,8 @@ public sealed class StageDirector
                                     Element.Electro);
                 break;
             case StagePerformer.Lyney:
-                // "Drain 2, never past your line. Deal 8 Pyro damage to
-                // ALL enemies." A guest acts with no choice from the
+                // "Drain 2, never past your line (none at or below it). Deal 8
+                // Pyro damage to ALL enemies." A guest acts with no choice from the
                 // player, so its Drain stops at the line (the drain-line
                 // round, 2026-10-09): it drains only the room above the
                 // line, 0 with none, and the damage lands either way.
