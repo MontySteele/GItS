@@ -338,7 +338,9 @@ def _live_load(args, *, sleep=None) -> dict[str, Any]:
         return state
 
 
-def cmd_observe(args) -> int:
+def cmd_observe(args, *, budget: bool = True) -> int:
+    """Print the current screen. `budget=False` leaves out the lane's
+    `actions:` line, for `act --observe`, which has just printed it."""
     # `EB-691`, BEFORE THE WIRE CALL. A lane in the EB-1 storm answers its
     # health endpoint and nothing else, so a command that starts by talking to
     # the bridge learns nothing for twenty seconds and then retries.
@@ -371,7 +373,7 @@ def cmd_observe(args) -> int:
             # 2026-10-08: the lane's cap on every page, which is where the
             # seat brief now tells the seat to read it.
             count, cap = budget_spent()
-            if cap:
+            if cap and budget:
                 print(f"\nactions: {count} of {cap} on this lane")
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=out)
@@ -628,6 +630,7 @@ def cmd_act(args) -> int:
         if board:
             mark_refusal(board, args.command, why.split(". ")[0])
         print(f"REFUSED: {why}")
+        _refused_page(state, live, args)
         return 1
     left = (unclaimed_rewards(state)
             if live and (res.get("post") or {}).get("action") == "proceed"
@@ -640,6 +643,7 @@ def cmd_act(args) -> int:
             mark_refusal(key, args.command, "rewards left")
             print("REFUSED: " + PROCEED_PAST_REWARDS.format(
                 left=", ".join(left)))
+            _refused_page(state, live, args)
             return 1
     if board and res["verb"] == "end turn":
         held = pending_refusal(board)
@@ -648,6 +652,7 @@ def cmd_act(args) -> int:
             print("REFUSED: " + END_TURN_AFTER_REFUSAL.format(
                 command=held.get("command") or "a command",
                 why=held.get("why") or ACT_UNRESOLVED))
+            _refused_page(state, live, args)
             return 1
     if res["verb"] == "wait":
         return _cmd_wait(state, int(res["printed"]["seconds"]), live, args)
@@ -688,7 +693,34 @@ def cmd_act(args) -> int:
     # round run without one reads exactly as it always did.
     if cap:
         print(f"actions: {count_action()} of {cap}")
+    if _observe_after(args):
+        # 2026-10-09. `act --observe`: the page `observe --brief` would print
+        # next, from this process, on the same settled read (`_live_load`).
+        # A seat used to chain `a ... && o`; a permission classifier refuses
+        # compound commands for subagents, so each move became two calls,
+        # each a Python start and a bridge round trip (10-20 s a move, up
+        # from 3.5-5). The act stands whatever the read does: its own
+        # refusal line says why a page is missing, and the exit stays 0.
+        print()
+        cmd_observe(args, budget=False)
     return 0
+
+
+def _observe_after(args) -> bool:
+    return bool(getattr(args, "observe", False))
+
+
+def _refused_page(state: dict[str, Any], live: bool, args) -> None:
+    """`act --observe` on a live refusal: nothing was posted, so the screen
+    is the one this act already read and settled. Print it from that read,
+    with no second wire call."""
+    if not (live and _observe_after(args)):
+        return
+    print()
+    try:
+        print(_page(screen_page(state, full=not _brief_on(args)), args))
+    except (qa_packet.PacketLeak, BlindPlayError) as exc:
+        print(f"REFUSED: {exc}", file=_refusal_stream(args))
 
 
 def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
@@ -940,6 +972,10 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--dry-run", action="store_true",
                    help="resolve against the live state and post nothing")
     a.add_argument("--brief", action="store_true", help=BRIEF_HELP)
+    a.add_argument("--observe", action="store_true",
+                   help="after an act that was sent, print the new page as "
+                        "`observe` would (and, on a refusal, the unchanged "
+                        "page); never on --dry-run or --raw-file")
     a.set_defaults(func=cmd_act)
 
     s = sub.add_parser("session", help="one blind thread plays the run")
