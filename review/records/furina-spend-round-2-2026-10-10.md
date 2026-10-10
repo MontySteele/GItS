@@ -84,8 +84,14 @@ This is the second round on the Spend paper (PR #1014, build #1016). It adds the
    - Regina is her own card, so by the ruling ("her own Drains may go past it, a guest act's stops at it") it goes past the line today. But it fires every turn with no choice, like an act, and it carried the round's two biggest past-line losses.
    - Proposed text: "At the start of your turn, Drain 3, never past your line. If you do, gain 1 Strength."
    - **Default: yes.**
+   - **Ruled 2026-10-10: yes.** [USER]: "I'm good with stopping Regina's Drain at the line." The
+     proposed text above ships.
 2. **Navia to Uncommon,** so the draw-independent Fanfare sink shows up. Neither round recorded her offered. This moves the ruled 20 / 37 / 21 rarity split.
    - **Default: no. Read the offer logs first.**
+   - **Ruled 2026-10-10: yes, against the default.** Navia moves to Uncommon first, before any
+     change to Repay or Wriothesley. [USER], on the rounds review (#1036, pick 1): "I don't want
+     Repay to give fanfare without a spend right now, so I lean more towards putting Navia to
+     Uncommon first."
 
 ## Next round
 
