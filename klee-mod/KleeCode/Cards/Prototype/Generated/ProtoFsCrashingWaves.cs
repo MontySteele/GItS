@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICharacterCard, IModalCard
+public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICharacterCard
 {
     /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
     public Element Element => Element.Hydro;
@@ -51,26 +51,13 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crashing Waves"),
-        ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] 4: three times instead."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 12: hit once more for every 4."),
     };
-
-    // EB-184: what each mode does about AIMING, in sheet order.
-    // The card's own TargetType is fixed before a mode is chosen (the
-    // game aims first), so it answers for the card and not for the
-    // play -- an Attack-typed modal declares AnyEnemy for the mode
-    // that aims, and the bridge then demanded a target on the mode
-    // that attacks nothing. These two rows are what it reads instead.
-    public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 4 Hydro damage twice", "[gold]Spend[/gold] 4: three times instead" };
-
-    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
-        new[] { true, true };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 4m, ValueProp.Move, carries: Element.Hydro),
-            new FoldedDamageVar("BranchDamage", 4m, ValueProp.Move, carries: Element.Hydro)
+            new DamageVar(4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -82,123 +69,18 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var modeOptions = new List<CardModel>
-        {
-            ModalChoice.CreateMatchingOption<ProtoFsCrashingWavesModeA>(Owner, this),
-            ModalChoice.CreateMatchingOption<ProtoFsCrashingWavesModeB>(Owner, this),
-        };
-        var modeRules = new ModeRequirement?[]
-        {
-            null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 4),
-                                "needs that much Fanfare"),
-        };
-        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 4 Hydro damage twice", "[gold]Spend[/gold] 4: three times instead" }[modeIndex]);
-        if (modeIndex == 0)
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 5m : 4m))
-                .WithHitCount(2)
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithElementHitFx(this)
-                .Execute(choiceContext);
-        }
-        else
-        {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 4);
-            await DamageCmd.Attack((IsUpgraded ? 5m : 4m))
-                .WithHitCount(3)
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithElementHitFx(this)
-                .Execute(choiceContext);
-        }
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 12);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .WithHitCount(2 + 1 * FurinaStage.SpentFours(this))
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["PlainDamage"].UpgradeValueBy(1m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(1m);
-    }
-}
-
-/// <summary>Mode 0 of proto_fs_crashing_waves. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsCrashingWavesModeA : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_crashing_waves");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Deal Hydro damage twice"),
-        ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage twice"),
-    };
-
-    public ProtoFsCrashingWavesModeA()
-        : base(CardType.Attack)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedDamageVar("PlainDamage", 4m, ValueProp.Move, carries: Element.Hydro),
-            new FoldedDamageVar("BranchDamage", 4m, ValueProp.Move, carries: Element.Hydro)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(1m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(1m);
-    }
-}
-
-/// <summary>Mode 1 of proto_fs_crashing_waves. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsCrashingWavesModeB : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_crashing_waves");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Spend 4"),
-        ("description", "[gold]Spend[/gold] 4: three times instead"),
-    };
-
-    public ProtoFsCrashingWavesModeB()
-        : base(CardType.Attack)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedDamageVar("PlainDamage", 4m, ValueProp.Move, carries: Element.Hydro),
-            new FoldedDamageVar("BranchDamage", 4m, ValueProp.Move, carries: Element.Hydro)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(1m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(1m);
+        DynamicVars.Damage.UpgradeValueBy(1m);
     }
 }
