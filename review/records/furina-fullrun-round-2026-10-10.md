@@ -74,3 +74,5 @@ This is the round [USER] ruled on #1036 (pick 2): "Definitely agree with testing
 2. **Next Furina round.** **Default:** the same five seeds, whole-run seats, this build unchanged, after your run, to take n to 8 before any number moves.
    - Pass: 4 of 8 pooled; act-2 bosses won with 55% or less of max HP lost after the return; the control at floor 48.
    - Fail: 0 or 1 of 4, with act-2 boss deaths entered at 80% HP or more. Then Standing Room Only to Uncommon and Wriothesley 5 [8] come back as picks.
+
+**Ruled 2026-10-10, both at default.** [USER]: "Ok, yep, agreed on both picks." Seat rounds use whole-run seats from now on, for every kit (`docs/current/operations/understudy-seats.md` follows). The next Furina round runs after his own run.
