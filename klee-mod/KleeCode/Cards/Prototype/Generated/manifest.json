@@ -1989,8 +1989,7 @@
       "block": 3
     },
     "proto_vk_barbara_whisper_of_water": {
-      "block": 2,
-      "varka_amount": 2
+      "block": 2
     },
     "proto_vk_blazing_charge": {
       "varka_base": 2
@@ -2011,7 +2010,7 @@
       "varka_base": 3
     },
     "proto_vk_converging_winds": {
-      "cost": -1
+      "power_amount": 2
     },
     "proto_vk_crosscurrent": {
       "add": {
@@ -2192,7 +2191,7 @@
       "varka_base": 2
     },
     "proto_vk_tidal_bulwark": {
-      "formula_base": 2
+      "formula_per": 1
     },
     "proto_vk_twin_gales": {
       "innate": true

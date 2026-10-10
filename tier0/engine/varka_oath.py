@@ -25,14 +25,13 @@ THE RULES AS MODELLED:
     that is NOT a Knight, an application of an Oath element makes it his
     current element before it credits (so Dawn Wind's March pays on it); the
     last one applied wins. A Knight keeps its play-time switch; Baron Bunny's
-    burst, a relic, a potion, a power outside a play, a Swirl's spread and a
-    Converging Winds landing switch nothing. Knight-named payoffs (Grand
+    burst, a relic, a potion, a power outside a play and a Swirl's spread
+    switch nothing. Knight-named payoffs (Grand
     Master's Order, Knightly Guard, Knights' Roll Call) stay Knight-only.
   * CREDIT, PER CARD PLAY: within one play, the first application of E to a
     live enemy is +1 Oath of E, and the first Swirl of an E aura is +1 Oath of
-    E -- two keys, at most once each per play. A Swirl's spread copies, a
-    Converging Winds landing and Four Winds' Ascension's elemental hit credit
-    nothing. Outside a card play a scope is opened around the event (Baron
+    E -- two keys, at most once each per play. A Swirl's spread copies and
+    Four Winds' Ascension's elemental hit credit nothing. Outside a card play a scope is opened around the event (Baron
     Bunny's burst); an event with no scope open is its own scope.
   * GAIN EVENTS (any +n): Dawn Wind's March pays Block on a gain of the
     current element; the first gain of the combat has Boreas's Fang add Four
@@ -139,7 +138,8 @@ VARKA WILDFIRE OATH AND SHORT CIRCUIT (2026-10-03):
     C# twin: `VarkaOath.NoteApplication` -> `WildfireOathPower.OnPyroApplied`.
   * RAZOR: AWAKENING (`awakening`) hits the one enemy it is played on.
   * KINDS `kindled_edge`, `storm_battery`, `frost_ward`, `gleeful_songs`,
-    `rippling_guard` and `echo_block` (Whisper of Water's next two turns).
+    and `rippling_guard`. (`echo_block`, Whisper of Water's next two turns,
+    left with the Hydro paper, 2026-10-10: Whisper applies the base Blur.)
 """
 
 from __future__ import annotations
@@ -236,7 +236,7 @@ KINDS = frozenset({
     "electro_strike", "electro_all", "violet_storm",
     # THE REBALANCE (2026-10-03).
     "kindled_edge", "storm_battery", "frost_ward", "gleeful_songs",
-    "rippling_guard", "echo_block",
+    "rippling_guard",
     # Downburst's rider (2026-10-04, after #882).
     "swirled_oath",
     # THE COMBO PASS (2026-10-04).
@@ -260,7 +260,6 @@ KIND_FIELDS = {
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
     "rippling_guard": ("base", "per"),
-    "echo_block": ("amount",),
     "swirled_oath": ("amount",),
     # The combo pass (2026-10-04).
     "gain_pyro_oath": ("amount",),
@@ -327,14 +326,10 @@ class VarkaLedger:
     #: top of the play (Amber: Sharpshooter's "already has Pyro").
     play_target_pyro: list = field(default_factory=list)
     no_apply_credit: int = 0          # > 0 inside a hit that credits nothing
-    landing: bool = False             # inside a Converging Winds spread
     stormward_in_bonus: int = 0       # Stormward's part of this play's bonus
     #: Unwavering Banner (the combo pass): has the outermost open play paid
     #: its "gain 1 Oath instead" yet.
     banner_paid: bool = False
-    # --- the rebalance paper (sim only) ---
-    #: Whisper of Water: [Block, turns left] paid at each turn start.
-    echo_block: list = field(default_factory=list)
     # --- the pilot's choices (None: the default reading) ---
     guard_choice: Optional[str] = None
     knight_choice: Optional[str] = None
@@ -488,9 +483,6 @@ def close_scope(state) -> None:
 #: The open Oath's switch (module, so a paired sim can run the old rule).
 OPEN_OATH = True
 
-#: Whisper of Water (rebalance sec.3): "at the start of your next 2 turns".
-ECHO_BLOCK_TURNS = 2
-
 
 def open_oath_switches(led: VarkaLedger, element: str,
                        player=None) -> bool:
@@ -501,8 +493,7 @@ def open_oath_switches(led: VarkaLedger, element: str,
     if player is not None and _power(player, UNWAVERING_BANNER):
         return False
     return bool(OPEN_OATH and led.play_open and led.play_open[-1]
-                and element in ELEMENTS and not led.no_apply_credit
-                and not led.landing)
+                and element in ELEMENTS and not led.no_apply_credit)
 
 
 def banner_holds(state, element: str) -> None:
@@ -617,8 +608,7 @@ def note_hit(state, enemy, element) -> None:
     a live enemy credits apply-Oath (whether it sticks, refreshes or reacts).
     """
     led = ledger(state.player)
-    if (led is None or element not in ELEMENTS or not enemy.alive
-            or led.landing):
+    if led is None or element not in ELEMENTS or not enemy.alive:
         return
     # STATIC FIELD: "The first time each turn you apply Electro, draw 2."
     # Any application of his, a no-credit hit's too.
@@ -670,40 +660,22 @@ def _wildfire(state, enemy) -> None:
                                  source="card", powered=False)
 
 
-def converging(state) -> bool:
-    led = ledger(state.player)
-    return bool(led is not None and _power(state.player, CONVERGING_WINDS))
-
-
-def landing_only(state) -> bool:
-    """`reactions._react`'s Overload branch: inside a Converging spread the
-    splash lands on the struck enemy only."""
-    led = ledger(state.player)
-    return bool(led is not None and led.landing)
-
-
-def converging_spread(state, struck, aura: str, flat: int) -> None:
-    """CONVERGING WINDS: replaces the Swirl's spread and flat 2. The struck
-    enemy takes the flat 2 element-less; every other enemy takes it CARRYING
-    the swirled element: a bare one gets a copy, one already wearing it
-    only the 2, and one wearing another aura reacts with it, on that enemy
-    alone, and never Swirls. Nothing here credits Oath."""
+def converging_bonus(state) -> None:
+    """CONVERGING WINDS (Varka round 3, pick 1, 2026-10-10): "Your Swirls
+    deal 6 [8] additional damage to ALL enemies." After the shared Swirl
+    (spread and flat 2), every living enemy takes the power's amount through
+    `reactions._splash`, the door the flat 2 uses: element-less, ignores
+    Block, Durin's White not applied. Once per Swirl. The semantics
+    `tools/varka_rare_marginal_sim.py` measured as (a) (#1042). C# twin:
+    `ConvergingWindsPower.OnSwirl`."""
     from tier0.engine import reactions              # late: cycle
-    led = ledger(state.player)
-    reactions._splash(state, struck, flat)
-    for other in list(state.living_enemies):
-        if other is struck:
-            continue
-        if other.aura == aura:
-            reactions._splash(state, other, flat)
-            continue
-        led.landing = True
-        try:
-            dmg = reactions.resolve_hit(state, other, aura, flat,
-                                        "converging_spread")
-        finally:
-            led.landing = False
-        reactions._splash(state, other, int(dmg))
+    bonus = _power(state.player, CONVERGING_WINDS)
+    if bonus <= 0:
+        return
+    hit = list(state.living_enemies)
+    for other in hit:
+        reactions._splash(state, other, bonus)
+    state.emit("varka_converging_winds", amount=bonus, enemies=len(hit))
 
 
 def on_swirl(state, enemy, aura: str) -> None:
@@ -713,6 +685,7 @@ def on_swirl(state, enemy, aura: str) -> None:
     led = ledger(state.player)
     if led is None:
         return
+    converging_bonus(state)
     led.swirls_made += 1
     led.swirls_this_turn += 1
     if led.play_swirls:
@@ -839,13 +812,6 @@ def turn_start(state) -> None:
     led.swirls_this_turn = 0
     p.powers.pop(GRAND_MASTERS_ORDER, None)         # "this turn" ran out
     p.powers.pop(EYE_WALL, None)                    # Eye Wall's too
-    # WHISPER OF WATER (rebalance sec.3): "Gain 4 Block ... at the start of
-    # your next 2 turns." Raw, as `block_next_turn`'s payout is.
-    if led.echo_block:
-        for echo in led.echo_block:
-            _block(state, echo[0], "echo_block")
-            echo[1] -= 1
-        led.echo_block = [e for e in led.echo_block if e[1] > 0]
     # BOREAS'S FANG (Varka defence sec.4): "At the start of each combat, your
     # starting Knight's element becomes your current element."
     if state.turn == 1 and (FANG in p.relic_hooks
@@ -1242,9 +1208,6 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
         # `cards_played_this_turn` already counts this play.
         others = max(0, state.cards_played_this_turn - 1)
         _powered_block(state, card, fx["base"] + fx["per"] * others)
-    elif kind == "echo_block":
-        # Whisper of Water's "and at the start of your next 2 turns".
-        led.echo_block.append([fx["amount"], ECHO_BLOCK_TURNS])
     else:
         return False
     return True

@@ -157,15 +157,19 @@ def test_rippling_guard_counts_the_other_cards_played(rebalance):
     assert st.enemies[0].aura == "hydro"
 
 
-def test_whisper_of_water_lasts_two_more_turns(rebalance):
+def test_whisper_of_water_is_blur(rebalance):
+    # The Hydro paper (2026-10-10): "Your Block is not removed at the start
+    # of your next turn" -- the base game's Blur, one stack.
+    from tier0.engine import refpowers
     st = _state()
     _play(st, _vk("barbara_whisper_of_water"))
     assert st.player.block == 4
-    for turn in (2, 3, 4):
-        st.player.block = 0
-        st.turn = turn
-        V.turn_start(st)
-        assert st.player.block == (4 if turn < 4 else 0), turn
+    assert st.player.powers.get("blur") == 1
+    assert st.enemies[0].aura == "hydro"
+    assert not refpowers.should_clear_block(st.player)
+    st = _state()
+    _play(st, _vk("barbara_whisper_of_water") + "+")
+    assert st.player.block == 6
 
 
 # ---------------------------------------------------------------------------

@@ -157,13 +157,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
 
     if trigger == "anemo":
         name = "swirl"
-        if C.SWIRL_PAYS and varka_oath.converging(state):
-            # VARKA's Converging Winds replaces the spread and the flat 2
-            # (`varka_oath.converging_spread`). Dead for anyone else.
-            varka_oath.converging_spread(
-                state, enemy, aura,
-                int(C.SWIRL_DAMAGE * _mc_reaction_mult(state)))
-        elif C.SWIRL_PAYS:
+        if C.SWIRL_PAYS:
             # §4 A. The struck enemy's aura was consumed by `resolve_hit`
             # (2026-10-03: every reaction consumes). The spread reaches every
             # OTHER living enemy. One already wearing this element goes back
@@ -214,11 +208,7 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # splash IS damage a reaction deals, so it is scaled by the same
         # factor, at the one site that computes it.
         splash = int(C.OVERLOAD_SPLASH * _mc_reaction_mult(state))
-        # VARKA: an Overload a Converging Winds landing sets off splashes
-        # that enemy only. Dead for anyone else.
-        splashed = ([enemy] if varka_oath.landing_only(state)
-                    else state.living_enemies)
-        for other in splashed:
+        for other in state.living_enemies:
             _splash(state, other, splash)
         # The explosion staggers the reacted target. This is ordinary Weak,
         # so it uses the shared debuff rules and never multiplies with Klee's
