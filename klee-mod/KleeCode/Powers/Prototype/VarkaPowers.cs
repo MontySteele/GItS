@@ -776,8 +776,10 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Pyre Oath (the combo pass, 2026-10-04, sec.3): "Whenever you
-/// Exhaust a card, gain 1 Pyro Oath." Feel No Pain's shape paying Oath: one
+/// <summary>Ashen Oath, was Pyre Oath (the combo pass, 2026-10-04, sec.3;
+/// renamed and paying 2 a card since the forced-Amber round, 2026-10-10;
+/// the class keeps its old name with the card id): "Whenever you
+/// Exhaust a card, gain 2 Pyro Oath." Feel No Pain's shape paying Oath: one
 /// gain per card exhausted, of the stack's amount, through
 /// <see cref="VarkaOath.Gain"/> (so Oath Unto Death, Dawn Wind's March and
 /// Boreas's Fang see it). Any card of his, a Status included. Sim twin:
@@ -787,7 +789,7 @@ public sealed class PyreOathPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Pyre Oath"),
+        ("title", "Ashen Oath"),
         ("description",
             "Whenever you [gold]Exhaust[/gold] a card, gain "
           + "[blue]{Amount}[/blue] [gold]Pyro[/gold] [gold]Oath[/gold]."),

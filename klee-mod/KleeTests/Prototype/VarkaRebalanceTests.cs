@@ -162,6 +162,12 @@ public class VarkaRebalanceTests : IDisposable
         Assert.Contains("AuraCmd.Find", body);
         Assert.Contains("PowerCmd.Apply", body);
         Assert.Contains("VarkaCards.GainCardBlock", body);
+        // The forced-Amber round (2026-10-10): "Gain 3 [4] Block. For each
+        // enemy with an aura, apply 1 Weak and gain 3 [4] additional Block."
+        Assert.Contains("VarkaCards.FrostWardBlock", body);
+        Assert.Equal(3, VarkaCards.FrostWardBlock(3, 0));
+        Assert.Equal(9, VarkaCards.FrostWardBlock(3, 2));
+        Assert.Equal(8, VarkaCards.FrostWardBlock(4, 1));
     }
 
     [Fact]

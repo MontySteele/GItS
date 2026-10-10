@@ -201,7 +201,19 @@ def test_frost_ward_weakens_each_aura_and_blocks_for_each(rebalance):
                               _enemy(name="c")])
     _play(st, _vk("frost_ward"))
     assert [e.powers.get("weak", 0) for e in st.enemies] == [1, 1, 0]
-    assert st.player.block == 6
+    # The forced-Amber round (2026-10-10): 3 Block, plus 3 for each.
+    assert st.player.block == 3 + 3 * 2
+
+
+def test_frost_ward_blocks_on_a_bare_board(rebalance):
+    # The forced-Amber round (2026-10-10): the floor, 3 [4] with no aura up.
+    st = _state(n=2, enemies=[_enemy(name="a"), _enemy(name="b")])
+    _play(st, _vk("frost_ward"))
+    assert [e.powers.get("weak", 0) for e in st.enemies] == [0, 0]
+    assert st.player.block == 3
+    st = _state(n=1, enemies=[_enemy(name="a", aura="cryo")])
+    _play(st, _vk("frost_ward") + "+")
+    assert st.player.block == 4 + 4
 
 
 def test_awakening_hits_one_enemy_more_if_electro(rebalance):

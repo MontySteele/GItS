@@ -173,6 +173,20 @@ public class VarkaComboTests : IDisposable
         Assert.Contains("CardSelectCmd.FromHand", play);
     }
 
+    [Fact]
+    public void Pyre_oath_is_ashen_oath_and_pays_2()
+    {
+        // The forced-Amber round (2026-10-10): renamed (the id and the class
+        // are kept) and pays 2 a card; the power's status-list name too.
+        string Title(BaseLib.Abstracts.ILocalizationProvider m) =>
+            m.Localization!.Single(r => r.Item1 == "title").Item2;
+        Assert.Equal("Ashen Oath", Title(new ProtoVkPyreOath()));
+        Assert.Equal("Ashen Oath", Title(new PyreOathPower()));
+        var card = new ProtoVkPyreOath().Localization!
+            .Single(r => r.Item1 == "description").Item2;
+        Assert.Contains("gain 2 [gold]Pyro[/gold] [gold]Oath[/gold]", card);
+    }
+
     // ---- sec.4: Cryo shatters ----------------------------------------------------
 
     [Fact]
