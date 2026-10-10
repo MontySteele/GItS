@@ -463,7 +463,7 @@ CARDS: dict[str, Spec] = {
                             (1,), "showstopper"),
     "ftd_ensemble_cast": Spec("Ensemble Cast", 2, "power", "rare", "power",
                               (1,), "ensemble_cast"),
-    "ftd_navia": Spec("Guest Star: Navia", 1, "skill", "rare", "guest", (),
+    "ftd_navia": Spec("Guest Star: Navia", 1, "skill", "uncommon", "guest", (),
                       "navia", exhaust=True),
     "ftd_escoffier": Spec("Guest Star: Escoffier", 1, "skill", "rare",
                           "guest", (), "escoffier", exhaust=True),
@@ -1434,11 +1434,16 @@ def turn_start(state) -> None:
     # order: Regina of All Waters first (so the Repays after it have room),
     # then Fountain of Lucine, Pneuma Tides, and Prima Donna
     # last (so it reads the Fanfare they printed).
+    # Regina's Drain stops at the line, like a guest's act (2026-10-10, "I'm
+    # good with stopping Regina's Drain at the line"): "Drain 3, never past
+    # your line. If you do, gain 1 Strength."
     for _ in range(_player_power(p, "regina")):
-        if state.over or not p.alive or not can_drain(state, REGINA_DRAIN):
+        if state.over or not p.alive:
             break
-        if drain(state, REGINA_DRAIN):
-            _strength(state, 1)
+        room = guest_drain_room(state, REGINA_DRAIN)
+        if room <= 0 or not drain(state, room):
+            break
+        _strength(state, 1)
     applied = _arm_fountain(state)
     if applied > f.fountain_seen:
         f.fountains.append([applied - f.fountain_seen, FOUNTAIN_TURNS])

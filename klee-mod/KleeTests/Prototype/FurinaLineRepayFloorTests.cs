@@ -325,10 +325,11 @@ public class FurinaLineRepayFloorTests
     [Fact]
     public void The_pool_is_78()
     {
-        // The block gap (ruled 2026-10-09): four more, 20 / 37 / 21.
+        // The block gap (ruled 2026-10-09): four more, 20 / 37 / 21. Navia
+        // to Uncommon (2026-10-10): 20 / 38 / 20.
         var pool = ArmPools.Named("KleeMod.Powers.FurinaStageRoster", "Pool");
         Assert.Equal(78, pool.Count);
-        Assert.Equal((20, 37, 21),
+        Assert.Equal((20, 38, 20),
             (pool.Count(c => c.Rarity == CardRarity.Common),
              pool.Count(c => c.Rarity == CardRarity.Uncommon),
              pool.Count(c => c.Rarity == CardRarity.Rare)));

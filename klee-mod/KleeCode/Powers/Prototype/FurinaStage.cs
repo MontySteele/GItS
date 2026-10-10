@@ -506,9 +506,9 @@ public static class FurinaStage
         RefreshBadges(furina);
     }
 
-    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3. If
-    /// you do, gain 1 Strength." First of her turn-start Powers, so the
-    /// Repays after it have room.</summary>
+    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
+    /// never past your line. If you do, gain 1 Strength." First of her
+    /// turn-start Powers, so the Repays after it have room.</summary>
     private static async Task ReginaDrains(PlayerChoiceContext choiceContext,
                                            Creature furina)
     {

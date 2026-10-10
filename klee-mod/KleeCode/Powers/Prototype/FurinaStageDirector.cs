@@ -534,16 +534,21 @@ public sealed class StageDirector
         return await RepayFloor(amount, StageFloor.Vigor);
     }
 
-    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3. If
-    /// you do, gain 1 Strength." Each copy is its own Drain and its own
-    /// Strength. Returns the copies that drained.</summary>
+    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
+    /// never past your line. If you do, gain 1 Strength." Each copy is its
+    /// own Drain and its own Strength. Like a guest's act it runs with no
+    /// choice from the player, so it stops at the line (2026-10-10, "I'm
+    /// good with stopping Regina's Drain at the line"): it drains only the
+    /// room above the line, none at or below it. Returns the copies that
+    /// drained.</summary>
     public async Task<int> Regina(int copies)
     {
         var done = 0;
         for (var i = 0; i < copies; i++)
         {
-            if (_board.Over || !CanDrain(FurinaStageLaw.ReginaDrain)) break;
-            if (!await Drain(FurinaStageLaw.ReginaDrain)) break;
+            if (_board.Over) break;
+            var room = GuestDrainRoom(FurinaStageLaw.ReginaDrain);
+            if (room <= 0 || !await Drain(room)) break;
             done++;
             if (!_board.Over) await _board.Strength(1);
         }

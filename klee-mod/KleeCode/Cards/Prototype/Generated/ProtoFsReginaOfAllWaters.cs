@@ -45,7 +45,7 @@ public sealed class ProtoFsReginaOfAllWaters : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Regina of All Waters"),
-        ("description", "At the start of your turn, [gold]Drain[/gold] 3. If you do, gain 1 [gold]Strength[/gold]."),
+        ("description", "At the start of your turn, [gold]Drain[/gold] 3, never past your line. If you do, gain 1 [gold]Strength[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
