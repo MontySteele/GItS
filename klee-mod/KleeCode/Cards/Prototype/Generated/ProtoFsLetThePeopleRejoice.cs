@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard
+public sealed class ProtoFsLetThePeopleRejoice : CustomCardModel, ICharacterCard, IStageSpendCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";

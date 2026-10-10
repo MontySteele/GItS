@@ -21,7 +21,8 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         remember_deck, remember_kills,
                                         remembered_deck,
                                         remembered_enemy_name)
-from understudy.blindplay_read import (_blob, _enemies, _fold, _hand, _int,
+from understudy.blindplay_read import (_aims_at_an_enemy, _blob, _enemies,
+                                       _fold, _hand, _int,
                                        _is_mod_source_tip,
                                        _label, _listing, _player, _potions,
                                        _screen, _text)
@@ -718,6 +719,13 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         ids = power.pop("behind_ids", None)
         if ids is not None:
             power["behind"] = [by_id[i] for i in ids if i in by_id]
+    # The Furina whole-run round 2 (2026-10-10): while Surrounded, which hand
+    # cards take `on` -- the ones that turn you to face their target
+    # (`BEHIND_CLAUSE` states the rule; this marks the cards it is about).
+    if any("behind" in power for power in combat["you"]["powers"]):
+        for raw, face in zip(_hand(state), combat["hand"]):
+            if _aims_at_an_enemy(raw):
+                face["turns_you"] = True
     # `EB-271`: the refusal that named nothing, given the board it is about.
     for face in combat["hand"]:
         face["unplayable_note"] = _hook_note(face, combat["you"]["powers"])

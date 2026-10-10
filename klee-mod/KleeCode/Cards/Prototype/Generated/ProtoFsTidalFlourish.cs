@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsTidalFlourish : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoFsTidalFlourish : CustomCardModel, IElementalCard, ICharacterCard, IStageSpendCard
 {
     /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
     public Element Element => Element.Hydro;

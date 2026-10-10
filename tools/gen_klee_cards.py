@@ -6442,6 +6442,18 @@ STAGE_STMT_OPS = {
     "stage_drain", "stage_repay", "stage_repay_all",
 }
 
+#: The ops that pay Fanfare when the card itself is played (the Furina
+#: whole-run round 2, 2026-10-10). A row printing one anywhere in its body
+#: carries `IStageSpendCard`.
+STAGE_SPEND_OPS = frozenset({"stage_spend", "stage_spend_all",
+                             "stage_spend_up_to"})
+
+
+def stage_spend_card(card: dict) -> bool:
+    """True when the row's own play pays Fanfare (a Spend card)."""
+    return any(fx.get("op") in STAGE_SPEND_OPS
+               for fx in iter_card_effects(card))
+
 #: The stage op whose `amount` an upgrade moves through a var named for what
 #: the face prints, the one place such a var is declared.
 STAGE_AMOUNT_VARS: dict[str, str] = {
@@ -15976,6 +15988,13 @@ def emit(
     if any(fx.get("op") == "set_off"
            for fx in iter_effects(card.get("effects") or [])):
         interfaces += ", ISetOffCard"
+    # The Furina whole-run round 2 (2026-10-10): a row whose own play pays
+    # Fanfare declares it, so telemetry can count the Spend cards in hand.
+    # DERIVED from the row's `stage_spend*` ops, modes included; a Power
+    # that Spends later carries none. `IStageSpendCard` is in
+    # Powers/Prototype beside `FurinaStage`.
+    if stage_spend_card(card):
+        interfaces += ", IStageSpendCard"
     # Sheet `skill_tag` -> ISkillTagCard: worth BURST_PER_SKILL_TAG burst
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):

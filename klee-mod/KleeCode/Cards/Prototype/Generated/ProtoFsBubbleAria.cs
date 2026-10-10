@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsBubbleAria : CustomCardModel, ICharacterCard, IModalCard
+public sealed class ProtoFsBubbleAria : CustomCardModel, ICharacterCard, IStageSpendCard, IModalCard
 {
     /// <summary>Block arrives from a conditional row, so this card declares no
     /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
