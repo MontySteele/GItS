@@ -145,12 +145,13 @@ LYNETTE_ACT_UPGRADED = 6
 CHEVREUSE_LINE_WEAK_UPGRADED = 1   # upgraded line: also 1 Weak
 CLORINDE_ACT_UPGRADED = 9
 # The Spend paper (review/active/furina-spend-paper-2026-10-10.md pick 2,
-# built at its default 2026-10-10): Freminet's act is "Gain 3 Block. Spend
-# half your Fanfare (rounded down): gain that much more Block." [6]; his 5 [8]
-# Cryo hit left with it. Navia's act Spends half and deals that much as Geo.
-FREMINET_ACT_BLOCK = 3             # act: gain 3 Block [6], then the half
+# ruled 2026-10-10): Freminet's act is "Gain 3 Block. Spend a quarter of your
+# Fanfare (rounded down): gain that much more Block." [6]; his 5 [8] Cryo hit
+# left with it. Navia's act Spends half and deals that much as Geo.
+FREMINET_ACT_BLOCK = 3             # act: gain 3 Block [6], then the quarter
 FREMINET_ACT_BLOCK_UPGRADED = 6
-GUEST_SPEND_DIVISOR = 2            # Navia's and Freminet's acts: half the bank
+NAVIA_SPEND_DIVISOR = 2            # Navia's act: half the bank
+FREMINET_SPEND_DIVISOR = 4         # Freminet's act: a quarter of the bank
 SPEND_UP_TO_EVERY = 4              # "Draw 1 / hit once more for every 4"
 NAVIA_LINE_DISCOUNT = 2            # line: first Spend each turn 2 less [3]
 NAVIA_LINE_DISCOUNT_UPGRADED = 3
@@ -917,11 +918,12 @@ def spend_up_to(state, cap: int) -> int:
     return counted
 
 
-def spend_half(state) -> int:
-    """A guest's act's half-Spend (Navia, Freminet; the Spend paper's pick
-    2): "Spend half your Fanfare (rounded down)", of what is left when it
-    acts. Returns what counts as spent."""
-    return spend_up_to(state, _f(state).fanfare // GUEST_SPEND_DIVISOR)
+def spend_share(state, divisor: int) -> int:
+    """A guest's act's share-Spend (the Spend paper's pick 2): Navia "Spend
+    half your Fanfare (rounded down)" (divisor 2), Freminet "a quarter"
+    (divisor 4), of what is left when it acts. Returns what counts as
+    spent."""
+    return spend_up_to(state, _f(state).fanfare // divisor)
 
 
 def spend_all(state) -> int:
@@ -1203,18 +1205,19 @@ def act(state, member: str) -> None:
         if living:
             _hit(state, state.rng.choice(living), n, None)
     elif member == "freminet":
-        # "Gain 3 Block. Spend half your Fanfare (rounded down): gain that
-        # much more Block." [6] (the Spend paper, 2026-10-10, pick 2).
+        # "Gain 3 Block. Spend a quarter of your Fanfare (rounded down): gain
+        # that much more Block." [6] (the Spend paper, pick 2, ruled
+        # 2026-10-10).
         p.block += n
         if p.alive and not state.over:
-            more = spend_half(state)
+            more = spend_share(state, FREMINET_SPEND_DIVISOR)
             if more > 0 and p.alive and not state.over:
                 p.block += more
     elif member == "navia":
         # "Spend half your Fanfare (rounded down). Deal that much Geo damage
         # to a random enemy." (the Spend paper, pick 2). Nothing spent,
         # nothing dealt.
-        dmg = spend_half(state)
+        dmg = spend_share(state, NAVIA_SPEND_DIVISOR)
         living = state.living_enemies
         if dmg > 0 and living and not state.over:
             _hit(state, state.rng.choice(living), dmg, "geo")
@@ -1665,9 +1668,9 @@ def default_bow(state) -> int:
     for i, member in enumerate(f.stage):
         n = act_amount(member, member in f.stage_up)
         if member == "navia":
-            n = f.fanfare // GUEST_SPEND_DIVISOR
+            n = f.fanfare // NAVIA_SPEND_DIVISOR
         elif member == "freminet":
-            n += f.fanfare // GUEST_SPEND_DIVISOR
+            n += f.fanfare // FREMINET_SPEND_DIVISOR
         elif member == "neuvillette":
             n = f.hp_lost_window
         if n > best_n:

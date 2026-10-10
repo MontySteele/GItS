@@ -128,7 +128,7 @@ public abstract class StagePerformerBadge : PowerModel
             StagePerformer.Freminet =>
                 "Whenever you [gold]Drain[/gold], gain that much "
               + "[gold]Block[/gold]. Act: gain " + act
-              + " [gold]Block[/gold]. [gold]Spend[/gold] half your "
+              + " [gold]Block[/gold]. [gold]Spend[/gold] a quarter of your "
               + "[gold]Fanfare[/gold] (rounded down): gain that much more "
               + "[gold]Block[/gold].",
             StagePerformer.Navia =>

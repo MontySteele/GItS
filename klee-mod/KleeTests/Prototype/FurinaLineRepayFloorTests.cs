@@ -290,7 +290,7 @@ public class FurinaLineRepayFloorTests
     public void Freminets_act_gives_three_block_six_upgraded()
     {
         // The Spend paper (2026-10-10) took the 5 [8] Cryo hit and set the
-        // Block to 3 [6], plus half the bank (none held here).
+        // Block to 3 [6], plus a quarter of the bank (none held here).
         var kit = StageKit.Of(StagePerformer.Freminet);
         Run(kit.Director.Act(kit.Stage.Seats[0]));
         Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("damage Freminet"));

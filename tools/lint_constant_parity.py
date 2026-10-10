@@ -305,8 +305,10 @@ MIRRORED: dict[str, object] = {
     # 2026-10-09): Freminet's act's Block and the line's quarter of Max HP.
     "FurinaStageLaw.FreminetActBlock": _stage("FREMINET_ACT_BLOCK"),
     "FurinaStageLaw.FreminetActBlockUpgraded": _stage("FREMINET_ACT_BLOCK_UPGRADED"),
-    # The Spend paper (2026-10-10): the guests' half-Spend and "for every 4".
-    "FurinaStageLaw.GuestSpendDivisor": _stage("GUEST_SPEND_DIVISOR"),
+    # The Spend paper (2026-10-10): Navia's half, Freminet's quarter, and
+    # "for every 4".
+    "FurinaStageLaw.NaviaSpendDivisor": _stage("NAVIA_SPEND_DIVISOR"),
+    "FurinaStageLaw.FreminetSpendDivisor": _stage("FREMINET_SPEND_DIVISOR"),
     "FurinaStageLaw.SpendUpToEvery": _stage("SPEND_UP_TO_EVERY"),
     "FurinaStageLaw.LineMaxHpDivisor": _stage("LINE_MAX_HP_DIVISOR"),
     "FurinaStageLaw.NaviaLineDiscount": _stage("NAVIA_LINE_DISCOUNT"),

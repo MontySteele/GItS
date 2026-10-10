@@ -6931,3 +6931,13 @@ gone; `FreminetActBlock` is 3 [6]; `GuestSpendDivisor` (2) and
 forecast cue is Block now (`StageCueKind.Block`), and the forecast walks the
 bank in seat order. The research slice's four rows became the `upto_*`
 kinds, valued by the tide pilot.
+
+Pick 2 ruled 2026-10-10 ([USER]: "I don't like artificial limits, so I'd
+prefer to just fiddle with the ratio (make him only spend a quarter or a
+fifth or something like that...)"): Freminet's act Spends a quarter, not
+half: "Gain 3 [6] Block. Spend a quarter of your Fanfare (rounded down): gain
+that much more Block." Navia stays at half. `GuestSpendDivisor` split into
+`NaviaSpendDivisor` (2) and `FreminetSpendDivisor` (4), each pinned by the
+parity lint (sim `NAVIA_SPEND_DIVISOR`, `FREMINET_SPEND_DIVISOR`);
+`StageDirector.SpendHalf` became `SpendShare(divisor)` (sim `spend_share`),
+and the forecast divides by the acting guest's own divisor.
