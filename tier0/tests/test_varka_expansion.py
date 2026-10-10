@@ -408,6 +408,14 @@ def test_twin_gales_pays_the_swirled_element_too(varka):
     assert st.enemies[0].hp == 100 - 2 - 3           # and Pyro paid
 
 
+def test_oath_unto_death_costs_2_and_keeps_its_innate_upgrade(varka):
+    # The forced-Amber round (2026-10-10): cost 3 to 2.
+    oud = loader.get_card(_vk("oath_unto_death"))
+    assert (oud.cost, oud.innate) == (2, False)
+    up = loader.get_card(_vk("oath_unto_death") + "+")
+    assert (up.cost, up.innate) == (2, True)
+
+
 def test_oath_unto_death_and_grand_masters_verdict(varka):
     st = _state()
     led = _led(st)
