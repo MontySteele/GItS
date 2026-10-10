@@ -516,8 +516,9 @@ def guest_star(state, member: str, upgraded: bool = False,
     entrance = T._player_power(state.player, "grand_entrance")
     if entrance and not state.over:
         # "Repay 4. Gain 1 Block for any HP it could not Repay." (The Repay
-        # floor, ruled 2026-10-09.)
-        T.repay_floor(state, entrance, "block")
+        # floor, ruled 2026-10-09.) A Power's Repay, not the card's.
+        with T.caused_by(state):
+            T.repay_floor(state, entrance, "block")
     return result
 
 
@@ -526,10 +527,10 @@ def guest_star(state, member: str, upgraded: bool = False,
 # `FurinaCards`. Each kind with a number prints it as `amount` (the card's
 # `FsAmount`, upgrade key `furina_amount`).
 # ----------------------------------------------------------------------
-KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest", "repay_next",
+KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest",
          # The block gap (2026-10-09): Velvet Curtain's "Gain 2 Fanfare".
          "gain_fanfare")
-KIND_AMOUNT = ("final_bow", "repay_next", "gain_fanfare")
+KIND_AMOUNT = ("final_bow", "gain_fanfare")
 
 
 def validate_op(card_id: str, fx: dict) -> None:
@@ -564,8 +565,6 @@ def kind(state, fx: dict, card) -> None:
             T.final_bow(state, T._decider_bow(state), int(fx["amount"]))
     elif k == "tutor_guest":
         T.tutor_guest(state)
-    elif k == "repay_next":
-        state.player.ftd.repay_next += int(fx["amount"])
     elif k == "gain_fanfare":
         # The ledger's gain, the path Universal Revelry's gain takes.
         T.gain(state, int(fx["amount"]), "card")
@@ -618,8 +617,8 @@ def hydro_bonus(state) -> int:
 
 
 def high_stakes_bonus(state) -> int:
-    """High Stakes (the Spend round, 2026-10-10): "Your Attacks deal 1
-    additional damage for every 5 HP you have Drained and not Repaid."
+    """High Stakes (the Spend round 2, 2026-10-10): "Your Attacks deal 1
+    additional damage for every 5 HP you have Drained this combat."
     [every 4]. 0 off Furina."""
     return T.high_stakes_bonus(state.player)
 
@@ -632,10 +631,18 @@ def note_power_applied(state, power: str, amount: int) -> None:
 
 
 def begin_play(state) -> None:
-    """A card play opens: a fresh per-play Repay record."""
+    """A card play opens: a fresh per-play Repay record, and Charlotte's
+    line counts its Repays (`furina_tide.card_repaying`)."""
     if active(state.player):
         state.player.ftd.repaid_this_play = 0
         state.player.ftd.repay_left_this_play = 0
+        state.player.ftd.in_card = True
+
+
+def end_play(state) -> None:
+    """A card play closes (the C# `FurinaStageLedger.EndPlay`)."""
+    if active(state.player):
+        state.player.ftd.in_card = False
 
 
 def energy_next_turn(state, amount: int) -> None:

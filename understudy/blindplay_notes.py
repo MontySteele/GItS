@@ -105,7 +105,11 @@ TURN_ORDER_ORB = "an orb's passive"
 STOLEN_CARD_CLAUSE = " It holds your **{card}**."
 #: 2026-09-26 (control seat, Silent, Kaiser Crab): "The page never says which
 #: way I face." On Surrounded, the bodies whose attacks now land from behind.
-BEHIND_CLAUSE = " Behind you now: {names}."
+#: Varka round 3 (2026-10-10): and what turns you. `SurroundedPower.
+#: BeforeCardPlayed` (0.111.0 decompile) turns you to face any enemy a card
+#: of yours targets (a targeted potion too).
+BEHIND_CLAUSE = (" Behind you now: {names}. Playing a card on an enemy turns "
+                 "you to face it.")
 NOTHING_BEHIND_CLAUSE = " No enemy is behind you now."
 
 #: 2026-09-26 (control seat, Ironclad): "Sozu: the tool said 'Took: Power
@@ -1522,9 +1526,13 @@ ARM_KEYWORDS: dict[str, str] = {
     # VARKA (the Oath rework), in step with `ArmKeywordTips.ForOath`,
     # `ForCurrentElement` and `ForKnight` word for word, markup folded out
     # and the payout numbers written out (`VarkaLaw`).
+    # Varka round 3 (2026-10-10): a seat read Windbound's Swirl Oath as a
+    # fault; the page adds whose Oath a Swirl gives (`VarkaOath`: the
+    # element Swirled, not the current one).
     "Oath": ("1 Oath per element a card applies, plus 1 per element it "
              "Swirls. Kept all fight. Element cards read their own, others "
-             "the current."),
+             "the current. A Swirl gives 1 Oath of the element it Swirls, "
+             "not of your current element."),
     "current element": ("The last Pyro, Hydro, Cryo or Electro you applied. "
                         "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
                         "Vulnerable, Electro 3 to ALL."),
@@ -1638,8 +1646,9 @@ ARM_KEYWORDS: dict[str, str] = {
                    "this card goes to your Discard Pile."),
     "oldest guest": ("The guest on stage longest: the one a fourth summon "
                      "would remove."),
-    "Charlotte": ("The first time you Repay each turn, draw 1 card. Act: Repay "
-                  "2. Gain 1 Block for any HP it could not Repay."),
+    "Charlotte": ("The first time one of your cards Repays each turn, draw 1 "
+                  "card. Act: Repay 2. Gain 1 Block for any HP it could not "
+                  "Repay."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
                     "enemy. Act: deal 4 Cryo damage to a random enemy."),
     "Lynette": ("The first time each turn an enemy makes you lose HP, gain "

@@ -312,6 +312,7 @@ public sealed class FurinaStageLedger
         RepayedThisPlay = false;
         RepaidThisTurn = 0;
         DrainsThisCombat = 0;
+        DrainedThisCombat = 0;
         RepaysThisTurn = 0;
         RepaidThisPlay = 0;
         SpendsThisTurn = 0;
@@ -325,7 +326,11 @@ public sealed class FurinaStageLedger
         _spends.Clear();
         PeakFanfare = 0;
         PlayingCard = "";
+        CardPlaying = false;
+        Acting = 0;
         _upToCap = -1;
+        PastLost = 0;
+        HighStakesDealt = 0;
     }
 
     /// <summary>The combat's opening has been recorded.</summary>
@@ -416,6 +421,12 @@ public sealed class FurinaStageLedger
     /// </summary>
     public int DrainsThisCombat { get; private set; }
 
+    /// <summary>HP drained this combat, GROSS: every Drain's HP, above and
+    /// past the line, and no Repay lowers it (High Stakes' count, the Spend
+    /// round 2, 2026-10-10: the net count sat near 0 because Salon Solitaire
+    /// Repays every turn). Mirrors <c>Ftd.drained_this_combat</c>.</summary>
+    public int DrainedThisCombat { get; private set; }
+
     /// <summary>Repays that returned HP this turn (Rising Tide's count).
     /// </summary>
     public int RepaysThisTurn { get; private set; }
@@ -445,6 +456,7 @@ public sealed class FurinaStageLedger
         DrainedAbove += above;
         DrainedPast += amount - above;
         DrainedThisTurn += amount;
+        DrainedThisCombat += amount;
         HpLostSinceLastTurn += amount;
         DrainsThisCombat++;
     }
@@ -522,9 +534,32 @@ public sealed class FurinaStageLedger
                        System.Math.Min(DrainedPast, back - DrainedAbove))
                  : 0,
             five ? 0 : DrainedPast);
+        PastLost += parts.Lost;
         DrainedAbove = 0;
         DrainedPast = 0;
         return parts;
+    }
+
+    /// <summary>The play telemetry's <c>past_lost</c> (the Spend round 2,
+    /// 2026-10-10): HP drained past the line that the curtain call did not
+    /// return. Before the curtain call (a death) it is the past-line HP
+    /// still owed, which nothing will return.</summary>
+    public int PastLostAtClose => PastLost + DrainedPast;
+
+    /// <summary>What the curtain call left lost (its <c>Lost</c> part).
+    /// </summary>
+    public int PastLost { get; private set; }
+
+    /// <summary>The play telemetry's <c>high_stakes_bonus</c> (the Spend
+    /// round 2, 2026-10-10): the damage High Stakes added to her Attack hits
+    /// this combat, each hit's bonus capped at what the hit dealt.</summary>
+    public int HighStakesDealt { get; private set; }
+
+    /// <summary>A High Stakes bonus of <paramref name="amount"/> landed.
+    /// </summary>
+    public void NoteHighStakes(int amount)
+    {
+        if (amount > 0) HighStakesDealt += amount;
     }
 
     // ---- Fanfare: one number on Furina (rule 3) ------------------------
@@ -726,6 +761,7 @@ public sealed class FurinaStageLedger
     public void BeginPlay(string card = "")
     {
         PlayingCard = card ?? "";
+        CardPlaying = true;
         SpentThisPlay = 0;
         RepaidThisPlay = 0;
         RepayLeftThisPlay = 0;
@@ -739,11 +775,30 @@ public sealed class FurinaStageLedger
     public void EndPlay()
     {
         PlayingCard = "";
+        CardPlaying = false;
         SpentThisPlay = 0;
         RepaidThisPlay = 0;
         RepayLeftThisPlay = 0;
         RepayedThisPlay = false;
     }
+
+    /// <summary>A card of hers is resolving (<see cref="BeginPlay"/> to
+    /// <see cref="EndPlay"/>).</summary>
+    public bool CardPlaying { get; private set; }
+
+    /// <summary>Guest acts resolving now (an act can run inside a card play:
+    /// Encore!, Final Bow).</summary>
+    public int Acting { get; set; }
+
+    /// <summary>
+    /// CHARLOTTE'S LINE (the Spend round 2, 2026-10-10): "The first time one
+    /// of your cards Repays each turn, draw 1 card." Is the Repay resolving
+    /// now one of her cards'? A card play is open, and no Power, relic
+    /// (<see cref="Cause"/>) or guest act (<see cref="Acting"/>) is the one
+    /// Repaying inside it. Her own act and Salon Solitaire, at the end of
+    /// her turn, drew a card she then discarded.
+    /// </summary>
+    public bool CardRepaying => CardPlaying && Cause.Length == 0 && Acting == 0;
 
     // ---- the once-a-turn latches ---------------------------------------
 

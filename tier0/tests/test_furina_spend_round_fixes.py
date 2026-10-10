@@ -51,31 +51,30 @@ def _play(st, card):
 
 def test_high_stakes_constants_mirror_the_card():
     row = loader.get_card("proto_fs_high_stakes")
-    assert row.effects[0]["amount"] == FS.HIGH_STAKES_EVERY == 5
+    assert row.effects[0]["amount"] == FS.HIGH_STAKES_EVERY == 4
     up = loader.get_card("proto_fs_high_stakes+")
-    assert up.effects[0]["amount"] == FS.HIGH_STAKES_EVERY_UPGRADED == 4
+    assert up.effects[0]["amount"] == FS.HIGH_STAKES_EVERY_UPGRADED == 3
     assert (row.cost, row.rarity) == (1, "uncommon")
 
 
-def test_high_stakes_reads_the_net_drained_and_repay_lowers_it():
+def test_high_stakes_reads_the_drained_this_combat():
+    """Round 2 (2026-10-10) made the count gross: Repay no longer lowers it
+    (`test_furina_spend_round_2.py`)."""
     st = _furina()
     _play(st, _card("proto_fs_high_stakes"))
-    assert st.player.ftd.high_stakes_every == [5]
+    assert st.player.ftd.high_stakes_every == [4]
     assert FS.high_stakes_bonus(st) == 0
-    st.player.ftd.drained_above = 8
-    st.player.ftd.drained_past = 6               # past the line counts too
-    assert FS.high_stakes_bonus(st) == 2         # 14 // 5
-    st.player.ftd.drained_past = 1               # a Repay of 5
-    assert FS.high_stakes_bonus(st) == 1         # 9 // 5
+    st.player.ftd.drained_this_combat = 14       # past the line counts too
+    assert FS.high_stakes_bonus(st) == 3         # 14 // 4
 
 
 def test_high_stakes_copies_add_their_own_bonus():
     st = _furina()
     _play(st, _card("proto_fs_high_stakes"))
     _play(st, _card("proto_fs_high_stakes+"))
-    assert st.player.ftd.high_stakes_every == [5, 4]
-    st.player.ftd.drained_above = 9
-    assert FS.high_stakes_bonus(st) == 1 + 2     # 9 // 5 + 9 // 4
+    assert st.player.ftd.high_stakes_every == [4, 3]
+    st.player.ftd.drained_this_combat = 9
+    assert FS.high_stakes_bonus(st) == 2 + 3     # 9 // 4 + 9 // 3
 
 
 def test_high_stakes_no_longer_reads_the_line():
@@ -87,7 +86,7 @@ def test_high_stakes_no_longer_reads_the_line():
 def test_high_stakes_adds_to_every_attack_hit():
     st = _furina()
     _play(st, _card("proto_fs_high_stakes"))
-    st.player.ftd.drained_above = 10
+    st.player.ftd.drained_this_combat = 10
     strike = _card("strike")
     assert effects.flat_attack_bonus(st, strike, 1) >= 2
 
@@ -95,7 +94,7 @@ def test_high_stakes_adds_to_every_attack_hit():
 def test_a_pin_that_sets_the_power_directly_reads_one_copy():
     st = _furina()
     st.player.powers[FS.HIGH_STAKES] = 4
-    st.player.ftd.drained_above = 8
+    st.player.ftd.drained_this_combat = 8
     assert FS.high_stakes_bonus(st) == 2
 
 

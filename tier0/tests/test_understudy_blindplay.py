@@ -6553,7 +6553,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # interpolated numeral.
         "Guest Star": ["Exhausts. Acts at the end of your turn. When it "
                        "leaves, this ", "card goes to your "],
-        "Charlotte": ["The first time you ", " each turn, draw ",
+        "Charlotte": ["The first time one of your cards ", " each turn, draw ",
                       " card. Act: "],
         "Wriothesley": ["Whenever you ", ", deal that much ",
                         "damage to a random enemy. Act: deal "],

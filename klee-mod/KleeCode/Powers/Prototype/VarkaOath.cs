@@ -1551,9 +1551,17 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Frost Ward: "Apply 1 Weak to each enemy with an aura. Gain
-    /// 3 [4] Block for each." The enemies wearing an aura when it is
-    /// played.</summary>
+    /// <summary>Frost Ward's Block (Varka round 3, 2026-10-10): the floor
+    /// plus the per-aura step for each enemy with an aura. PURE.</summary>
+    public static int FrostWardBlock(int floor, int per, int marked) =>
+        floor + per * System.Math.Max(0, marked);
+
+    /// <summary>Frost Ward (Varka round 3, 2026-10-10): "Gain 5 [6] Block.
+    /// For each enemy with an aura, apply 1 Weak and gain 3 [4] additional
+    /// Block." The enemies wearing an aura when it is played; one Block gain
+    /// of VkBase + VkPer x those enemies, so Dexterity counts once.
+    /// Sim twin: <c>varka_oath</c>'s <c>frost_ward</c> kind.</summary>
+
     public static async Task FrostWard(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1566,8 +1574,9 @@ public static class VarkaCards
             await PowerCmd.Apply<WeakPower>(choiceContext, enemy, 1,
                                             applier: owner, cardSource: card);
         }
-        await GainCardBlock(owner, Var(card, "VkAmount") * marked.Count,
-                            cardPlay);
+        await GainCardBlock(owner, FrostWardBlock((int)Var(card, "VkBase"),
+                                                  (int)Var(card, "VkPer"),
+                                                  marked.Count), cardPlay);
     }
 
     /// <summary>Barbara: Gleeful Songs: "Apply Hydro to ALL enemies. Gain

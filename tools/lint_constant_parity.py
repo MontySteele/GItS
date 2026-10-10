@@ -329,13 +329,13 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ReginaDrain": _stage("REGINA_DRAIN"),
     "FurinaStageLaw.StarTurnFanfarePer": _stage("STAR_TURN_FANFARE_PER"),
     # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,
-    # ruled 2026-09-29): the Swirl payout of each current element, and
-    # Stormward Stance's Oath bar. Sim twins in `tier0/engine/varka_oath.py`.
+    # ruled 2026-09-29): the Swirl payout of each current element. (Stormward
+    # Stance's Oath bar left in Varka round 3, 2026-10-10.) Sim twins in
+    # `tier0/engine/varka_oath.py`.
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),
     "VarkaLaw.SwirlElectroDamageAll": _varka("SWIRL_ELECTRO_DAMAGE_ALL"),
-    "VarkaLaw.StormwardOathNeeded": _varka("STORMWARD_OATH_NEEDED"),
     # THE EXPANSION (2026-10-01): Eye of Stormterror's Swirls a turn.
     "VarkaLaw.EyeOfStormterrorSwirls": _varka("EYE_OF_STORMTERROR_SWIRLS"),
     # THE REBALANCE (2026-10-03): Whisper of Water's later turns.

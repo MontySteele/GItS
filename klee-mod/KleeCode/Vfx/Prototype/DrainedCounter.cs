@@ -79,7 +79,12 @@ public static class DrainedCounter
         "Drain line [blue]"
       + line.ToString(CultureInfo.InvariantCulture) + "[/blue] HP"
       + (string.IsNullOrEmpty(why) ? "" : " (" + why + ")")
-      + (pastReturns
+      // The Spend round 2 (2026-10-10): a line of 0 says that all her Drain
+      // returns (nothing can go past it).
+      + (line <= 0
+            ? ": " + FurinaStageLaw.LineZeroReturns.Replace(
+                  "Drain", "[gold]Drain[/gold]") + "."
+         : pastReturns
             // The Spend round (2026-10-10): A Five-Century Act returns the
             // HP drained past the line too, so nothing past it is lost.
             ? "."

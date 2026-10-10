@@ -956,7 +956,7 @@
     },
     "proto_fs_gentle_current": {
       "block": 2,
-      "furina_amount": 1
+      "stage_repay": 1
     },
     "proto_fs_grand_absolution": {
       "cost": -1
@@ -2063,7 +2063,8 @@
       "cost": -1
     },
     "proto_vk_frost_ward": {
-      "varka_amount": 1
+      "varka_base": 1,
+      "varka_per": 1
     },
     "proto_vk_gale_sweep": {
       "damage": 2
@@ -2173,7 +2174,7 @@
       "power_amount": 2
     },
     "proto_vk_sworn_brotherhood": {
-      "upgraded_power": "vk_sworn_brotherhood"
+      "power_amount": 1
     },
     "proto_vk_tailwind_stride": {
       "conditional_draw": 1

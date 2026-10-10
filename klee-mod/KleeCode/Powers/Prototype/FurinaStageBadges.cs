@@ -88,7 +88,8 @@ public abstract class StagePerformerBadge : PowerModel
         return who switch
         {
             StagePerformer.Charlotte =>
-                "The first time you [gold]Repay[/gold] each turn, draw "
+                "The first time one of your cards [gold]Repays[/gold]"
+              + " each turn, draw "
               + FurinaStageLaw.CharlotteLineDraw + " card. Act: "
               + "[gold]Repay[/gold] " + act + ". Gain 1 [gold]Block[/gold] "
               + "for any HP it could not [gold]Repay[/gold].",

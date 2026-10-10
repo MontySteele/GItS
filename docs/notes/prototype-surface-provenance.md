@@ -4120,8 +4120,9 @@ Per row, where the face or the build differs from sec.10.3's words:
   Grand Master's Order can find them. Faces print `{CalculatedDamage}` /
   `{CalculatedBlock}`, the companion rail's var. Barbara keeps "Let the Show
   Begin" without the shipped row's note sign.
-- `proto_vk_stormward_stance`, `proto_vk_boreas_unbound`: the face prints the
-  literal 3 and 1; the upgrade is a cost cut, so no var moves.
+- `proto_vk_boreas_unbound`: the face prints the literal 1; the upgrade is a
+  cost cut, so no var moves. (Stormward Stance prints its own number since
+  Varka round 3, 2026-10-10.)
 - `proto_vk_converging_winds`: face "Your Swirls react where they land. An
   Elemental Reaction a spread sets off hits only that enemy." (the text lint
   spells the reaction that way).
@@ -6732,8 +6733,9 @@ Star Turn's card-level `cost_reduction_per_fanfare: 6`. Encore! prints
 - Commanding Gaze's "[3 and 2]" is the Spend mode: 3 Vulnerable and 2 Weak.
 - Undercurrent counts its own Drain; Balance the Books reads the drained HP
   before its own Repay, rounded down; Grand Absolution deals what it repaid.
-- Turn start: Regina, Fountain of Lucine, Gentle Current, Pneuma Tides, then
-  Prima Donna reads the Fanfare.
+- Turn start: Regina, Fountain of Lucine, Pneuma Tides, then Prima Donna
+  reads the Fanfare. (Gentle Current Repaid here until the Spend round 2,
+  2026-10-10; it Repays on play now.)
 - Grand Entrance Repays after the summon, on every Guest Star played.
 - "Within 5 HP of your Drain line" is HP minus the line at most 5.
 
@@ -6779,7 +6781,8 @@ HP drained past the line is lost unless repaid.
 **The Repay floor (pick 2).** "Repay N. Gain X for any HP it could not
 Repay." -- `StageDirector.RepayFloor` (sim `repay_floor`): the Repay
 resolves, then N minus the HP returned is paid. Block: Hymn of Many Waters
-(`stage_repay` with `floor: block`), Gentle Current's next-turn Repay,
+(`stage_repay` with `floor: block`), Gentle Current (on play since the
+Spend round 2),
 Fountain of Lucine each turn, Grand Entrance, Charlotte's and Sigewinne's
 acts. Vigor (the base game's `VigorPower`; the sim's `next_attack_up`):
 Pneuma Tides (Soothing Waters keeps none: see the loop probe). Damage: Surging Waters,
@@ -6966,3 +6969,114 @@ Record: `review/records/varka-payoff-round-2026-10-10.md`, "What changes
   the would-be element; the code pays the current element
   (`VarkaOath.BannerHolds`), as the Power's own face already said. The card
   now says "of your current element".
+
+## Varka forced-Amber round, 2026-10-10
+
+Record: `review/records/varka-amber-round-2026-10-10.md`, "What changes
+(Claude ships)".
+
+- Ashen Oath (`proto_vk_pyre_oath`), was Pyre Oath: "Exhaust a card.
+  Whenever you Exhaust a card, gain 2 Pyro Oath." [Innate]. The fallback the
+  payoff record promised; 1 to 2 a card (the Power applies 2). Renamed
+  because "Pyre Oath 1" sat beside "Pyro Oath 12" on the status list. Title
+  only, card and power: the id and the C# classes (`ProtoVkPyreOath`,
+  `PyreOathPower`) are kept, as Shatter -> Icebreaker kept its id, so art,
+  coverage and offer logs hold.
+- Frost Ward (`proto_vk_frost_ward`): "Gain 3 [4] Block. For each enemy with
+  an aura, apply 1 Weak and gain 3 [4] additional Block." The record's words
+  say "more Block"; rule 8 of `docs/current/text-conventions.md` (and the
+  `more-damage` lint) spell a bonus of Block "additional", so the face does.
+  One variable used twice (`VkAmount`, upgrade +1), and one Block gain of
+  VkAmount x (1 + enemies with an aura) after the Weak (C#
+  `VarkaCards.FrostWardBlock`, sim `varka_oath` kind `frost_ward`), so
+  Dexterity counts once.
+- Oath Unto Death (`proto_vk_oath_unto_death`): costs 2, was 3. Innate
+  upgrade kept.
+- Wildfire Oath: numbers held. The seat page prints "Wildfire: +N a hit."
+  under each card in the hand that applies Pyro while the power is up, N the
+  Pyro Oath per stack (`blindplay_render._wildfire_hit`). Not on Anemo cards:
+  it does not fire on a Swirl's spread.
+- Knight cards: the seat page already prints the keyword's "Knight." line at
+  the head of the face (the wire's sentence); pinned, nothing added.
+
+## Varka round 3, 2026-10-10
+
+Record: `review/records/varka-round-3-2026-10-10.md`, "What changes (Claude
+ships)". Converging Winds is held for [USER]'s pick and is untouched.
+
+- Stormward Stance (`proto_vk_stormward_stance`): "Your Anemo Attacks deal 3
+  [5] additional damage." The 4-Oath gate is gone ("Every holder called it
+  dead because of the gate"): `StormwardStancePower.Applies` and the sim's
+  `varka_oath.attack_bonus` drop the Oath test, and `VarkaLaw
+  .StormwardOathNeeded` / `STORMWARD_OATH_NEEDED` leave with their parity
+  pair. The face prints `{PowerAmount}`, so the upgrade's +2 shows.
+- Sworn Brotherhood (`proto_vk_sworn_brotherhood`): "At the start of your
+  turn, gain 2 [3] Oath of your current element." The record says "Upgrade:
+  3"; read as 3 of the current element, so the every-element upgrade
+  (`upgraded_power: vk_sworn_brotherhood`) is replaced by `power_amount: +1`
+  on `vk_sworn_brotherhood_current`. `SwornBrotherhoodPower` (every element)
+  stays defined but no card installs it.
+- Frost Ward (`proto_vk_frost_ward`): "Gain 5 [6] Block. For each enemy with
+  an aura, apply 1 Weak and gain 3 [4] additional Block." ("more" in the
+  record; the text lint spells it "additional".) The floor and the per-aura
+  step are now two variables (`VkBase` 5 +1, `VkPer` 3 +1); one Block gain of
+  VkBase + VkPer x enemies with an aura after the Weak (C#
+  `VarkaCards.FrostWardBlock(floor, per, marked)`, sim `varka_oath` kind
+  `frost_ward` with `base`/`per`), so Dexterity counts once.
+- Seat page: a Knight's "Knight." head reads "Knight, <its printed
+  element>."; the Oath note adds "A Swirl gives 1 Oath of the element it
+  Swirls, not of your current element."; the would-take line folds a power's
+  plain "gain N Block" at the end of the turn off its hover text and names a
+  conditional one under "Not counted"; a face printing "Draw N" gets "(no
+  draw: Fiddle)" while a relic says "You may not draw cards during your
+  turn"; Surrounded's behind clause adds "Playing a card on an enemy turns
+  you to face it." (`SurroundedPower.BeforeCardPlayed` turns you toward any
+  enemy a card of yours targets; a targeted potion too, 0.111.0 decompile).
+
+## Furina Spend round 2, 2026-10-10
+
+Record: `review/records/furina-spend-round-2-2026-10-10.md`, "What changes
+(Claude ships)". Regina's line and Navia's rarity are [USER]'s picks and are
+not built here.
+
+- High Stakes (`proto_fs_high_stakes`): "Your Attacks deal 1 additional
+  damage for every 5 [4] HP you have Drained this combat." It reads the
+  ledger's gross count (`FurinaStageLedger.DrainedThisCombat`, sim
+  `Ftd.drained_this_combat`): every Drain's HP, which no Repay lowers. The
+  hover keeps "Now: N additional damage."
+- Gentle Current (`proto_fs_gentle_current`): "Gain 5 [7] Block. Repay 3 [4].
+  Gain 1 Block for any HP it could not Repay." Hymn of Many Waters' row
+  shape (`stage_repay` with `floor: block`, upgrade `stage_repay: +1`), so
+  the face prints "(Repays N, +M Block)". The `furina` kind `repay_next`,
+  `RepayNextTurnPower` and the turn-start Repay are gone: nothing else used
+  them.
+- Charlotte's line: "The first time one of your cards Repays each turn,
+  draw 1 card." A card Repays when a card play is open and no Power, relic
+  (the ledger's `Cause`) or guest act (`Acting`) is the one Repaying inside
+  it (`FurinaStageLedger.CardRepaying`, sim `furina_tide.card_repaying`).
+  Her own act, Escoffier's line, Grand Entrance, the turn-start Powers and
+  Salon Solitaire do not count. The record keeps "draw 1" short; the face
+  keeps the badge's "draw 1 card".
+- A Drain line of 0: the Drained counter's hover reads "Drain line 0 HP
+  (...): all your Drain returns after combat.", the Drain tip adds "All your
+  Drain returns after combat.", and the seat page prints "Drain line 0 HP
+  (...): all your Drain returns after combat." (`FurinaStageLaw
+  .LineZeroReturns`).
+
+## Furina Spend rounds review, 2026-10-10
+
+Record: `review/records/furina-spend-rounds-review-2026-10-10.md`, "What
+changes (Claude ships)". [USER]'s picks there are not built here.
+
+- High Stakes (`proto_fs_high_stakes`): every 5 [4] becomes every 4 [3],
+  round 2's pre-registered fallback. Constants `FurinaStageLaw
+  .HighStakesEvery` / `HighStakesEveryUpgraded`, sim
+  `furina_tide.HIGH_STAKES_EVERY` / `HIGH_STAKES_EVERY_UPGRADED`.
+- High Stakes in the card preview: the hook no longer asks for a target,
+  as Strength asks for none. A card in her hand previews with no body on a
+  Stage board, so the old `target == null` gate dropped the bonus from the
+  face (Hydro Lance printed 15 and dealt 18). The Attack-card and
+  powered-hit gates stay.
+- The Drain face names who pays its Block: "(+3 Block: The Masquerade)"
+  and "(+3 Block: Freminet)", one line each, after any Drain-line warning
+  (`FurinaStageFacePreview.DrainBlock`).

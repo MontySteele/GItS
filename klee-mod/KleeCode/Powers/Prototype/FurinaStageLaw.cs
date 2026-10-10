@@ -34,8 +34,9 @@ public static class FurinaStageLaw
     /// <summary>Charlotte's act: "Repay 2."</summary>
     public const int CharlotteActRepay = 2;
 
-    /// <summary>Charlotte's line: "The first time you Repay each turn, draw 1
-    /// card."</summary>
+    /// <summary>Charlotte's line: "The first time one of your cards Repays
+    /// each turn, draw 1 card." (The Spend round 2, 2026-10-10: her own act
+    /// and Salon Solitaire no longer count.)</summary>
     public const int CharlotteLineDraw = 1;
 
     /// <summary>Wriothesley's act: "Deal 4 Cryo damage to a random enemy."
@@ -176,21 +177,29 @@ public static class FurinaStageLaw
     /// <summary>Against the Tide: "within 5 HP of your Drain line".</summary>
     public const int NearLine = 5;
 
-    /// <summary>High Stakes (the Spend round, 2026-10-10,
-    /// <c>review/records/furina-spend-round-2026-10-10.md</c>): "Your Attacks
-    /// deal 1 additional damage for every 5 HP you have Drained and not
-    /// Repaid." The card's power amount is this divisor. Mirrors
+    /// <summary>High Stakes (the Spend round 2, 2026-10-10,
+    /// <c>review/records/furina-spend-round-2-2026-10-10.md</c>): "Your
+    /// Attacks deal 1 additional damage for every 5 HP you have Drained this
+    /// combat." The Spend rounds review (2026-10-10,
+    /// <c>review/records/furina-spend-rounds-review-2026-10-10.md</c>, change 1)
+    /// made it every 4 [3], round 2's pre-registered fallback. The card's power
+    /// amount is this divisor. Mirrors
     /// <c>furina_stage.HIGH_STAKES_EVERY</c>.</summary>
-    public const int HighStakesEvery = 5;
+    public const int HighStakesEvery = 4;
 
-    /// <summary>High Stakes upgraded: "for every 4".</summary>
-    public const int HighStakesEveryUpgraded = 4;
+    /// <summary>High Stakes upgraded: "for every 3".</summary>
+    public const int HighStakesEveryUpgraded = 3;
 
-    /// <summary>High Stakes' bonus a hit: the net Drained (what Repay has
-    /// not given back, past the line included) over <paramref name="every"/>,
-    /// rounded down. 0 for a divisor below 1.</summary>
+    /// <summary>High Stakes' bonus a hit: the HP drained this combat, gross
+    /// (no Repay lowers it), over <paramref name="every"/>, rounded down. 0
+    /// for a divisor below 1.</summary>
     public static int HighStakesBonus(int drained, int every) =>
         every > 0 && drained > 0 ? drained / every : 0;
+
+    /// <summary>What a hit's High Stakes bonus counts for the telemetry: the
+    /// bonus, never more than the hit dealt (HP and Block).</summary>
+    public static int HighStakesCredit(int bonus, int dealt) =>
+        System.Math.Max(0, System.Math.Min(bonus, dealt));
 
     /// <summary>Hymn of Renewal: "Whenever you Repay 4 or more HP at once,
     /// gain 1 Strength." (HP actually repaid.)</summary>
@@ -253,4 +262,11 @@ public static class FurinaStageLaw
     /// <summary>The base line's source, in the base game's words.</summary>
     public const string LineWhyBase =
         "the HP you started this fight with, minus 1/4 of your Max HP";
+
+    /// <summary>A line of 0 explains itself (the Spend round 2, 2026-10-10:
+    /// a seat read a line of 0 as "every Drain is permanent", which is
+    /// backwards). At 0 every Drain stays above the line, so all of it
+    /// returns. Plain words; the counter's hover golds the verb.</summary>
+    public const string LineZeroReturns =
+        "all your Drain returns after combat";
 }

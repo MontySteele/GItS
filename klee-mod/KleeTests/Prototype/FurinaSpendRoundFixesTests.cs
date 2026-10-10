@@ -71,13 +71,13 @@ public class FurinaSpendRoundFixesTests : IDisposable
     // ---- 1. High Stakes ------------------------------------------------------
 
     [Fact]
-    public void High_stakes_prints_the_divisor_five_and_four_upgraded()
+    public void High_stakes_prints_the_divisor_from_the_constants()
     {
         var card = new ProtoFsHighStakes();
         Assert.Equal(
             "Your Attacks deal 1 additional damage for every "
-            + "{PowerAmount:diff()} HP you have [gold]Drained[/gold] and not "
-            + "[gold]Repaid[/gold].",
+            + "{PowerAmount:diff()} HP you have [gold]Drained[/gold] this "
+            + "combat.",
             Face(card));
         Assert.Equal(FurinaStageLaw.HighStakesEvery,
                      card.DynamicVars["PowerAmount"].IntValue);
@@ -96,14 +96,14 @@ public class FurinaSpendRoundFixesTests : IDisposable
     [InlineData(14, 5, 2)]
     [InlineData(14, 4, 3)]
     [InlineData(30, 5, 6)]
-    public void High_stakes_bonus_is_the_net_drained_over_the_divisor_rounded_down(
+    public void High_stakes_bonus_is_the_drained_over_the_divisor_rounded_down(
         int drained, int every, int bonus)
     {
         Assert.Equal(bonus, FurinaStageLaw.HighStakesBonus(drained, every));
     }
 
     [Fact]
-    public void High_stakes_adds_per_attack_hit_off_the_net_drained_and_copies_add()
+    public void High_stakes_adds_per_attack_hit_off_the_gross_drained_and_copies_add()
     {
         var furina = Seat.Furina(80).WithPower<HighStakesPower>(5);
         var enemy = Seat.Klee().Creature;
@@ -123,9 +123,12 @@ public class FurinaSpendRoundFixesTests : IDisposable
         Assert.Equal(2m, Hit(stakes, attack));        // 14 / 5
         Assert.Equal(2, stakes.Bonus);
         Assert.Equal(2, stakes.DisplayAmount);        // the badge: the bonus
-        // Repay lowers it.
+        // The Spend round 2 (2026-10-10): Repay no longer lowers it.
         ledger.NoteRepay(5);
-        Assert.Equal(1m, Hit(stakes, attack));        // 9 / 5
+        Assert.Equal(9, ledger.Drained);
+        Assert.Equal(2m, Hit(stakes, attack));        // still 14 / 5
+        ledger.NoteDrain(1, 80);
+        Assert.Equal(3m, Hit(stakes, attack));        // 15 / 5
         // Not a Skill's hit, not an unpowered hit, not someone else's.
         Assert.Equal(0m, Hit(stakes, new ProtoFsOverdraft()));
         Assert.Equal(0m, Hit(stakes, attack, ValueProp.Unpowered));
@@ -135,7 +138,7 @@ public class FurinaSpendRoundFixesTests : IDisposable
         furina.WithPower<HighStakesPower>(4);
         var both = furina.Creature.Powers.OfType<HighStakesPower>().ToList();
         Assert.Equal(2, both.Count);
-        Assert.Equal(1m + 2m, both.Sum(p => Hit(p, attack)));   // 9/5 + 9/4
+        Assert.Equal(3m + 3m, both.Sum(p => Hit(p, attack)));   // 15/5 + 15/4
     }
 
     [Fact]

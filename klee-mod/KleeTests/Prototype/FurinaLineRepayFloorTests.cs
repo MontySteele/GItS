@@ -120,10 +120,8 @@ public class FurinaLineRepayFloorTests
         kit.Board.Log.Clear();
         Run(kit.Director.PneumaTides(2));
         Assert.Equal(new[] { "vigor 2" }, kit.Board.Log.ToArray());
-        // Gentle Current's next-turn Repay and Grand Entrance: the Block
-        // floor, wired where each Repay is made.
-        Assert.Contains("StageDirector.RepayFloor",
-            Il.Calls(Il.Method("FurinaStage", "RepayNextTurnRepays")));
+        // Grand Entrance: the Block floor, wired where its Repay is made.
+        // (Gentle Current Repays on play since the Spend round 2.)
         Assert.Contains("StageDirector.RepayFloor",
             Il.Calls(Il.Method("FurinaStage", "GuestStar")));
         foreach (var card in new CardModel[]
@@ -143,9 +141,6 @@ public class FurinaLineRepayFloorTests
                 .Single(r => r.Item1 == "description").Item2);
         Assert.Contains("could not",
             new GrandEntrancePower().Localization!
-                .Single(r => r.Item1 == "description").Item2);
-        Assert.Contains("could not",
-            new RepayNextTurnPower().Localization!
                 .Single(r => r.Item1 == "description").Item2);
     }
 

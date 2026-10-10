@@ -162,11 +162,13 @@ ESCOFFIER_LINE_REPAY = 1           # line: whenever a guest acts, Repay 1
 ENSEMBLE_SEATS = 4                 # Ensemble Cast: 4 guest seats
 SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
 NEAR_LINE = 5                      # "within 5 HP of your Drain line"
-# High Stakes (the Spend round, 2026-10-10): "Your Attacks deal 1 additional
-# damage for every 5 HP you have Drained and not Repaid." [every 4]. The
-# card's power amount is the divisor; each copy adds its own bonus.
-HIGH_STAKES_EVERY = 5
-HIGH_STAKES_EVERY_UPGRADED = 4
+# High Stakes (the Spend round 2, 2026-10-10): "Your Attacks deal 1
+# additional damage for every 5 HP you have Drained this combat." [every 4].
+# The Spend rounds review (2026-10-10) made it every 4 [3], round 2's
+# pre-registered fallback. The card's power amount is the divisor; each copy
+# adds its own bonus.
+HIGH_STAKES_EVERY = 4
+HIGH_STAKES_EVERY_UPGRADED = 3
 HYMN_THRESHOLD = 4                 # Hymn of Renewal: a Repay of 4 or more HP
 PRIMA_DONNA_FANFARE = 10           # Prima Donna: 10 or more Fanfare
 REGINA_DRAIN = 3                   # Regina of All Waters: Drain 3
@@ -222,10 +224,17 @@ class Ftd:
     stage_cards: dict = field(default_factory=dict)
     spends_this_turn: int = 0        # Navia's line and Crescendo
     drains_this_combat: int = 0      # Undercurrent's count
+    # High Stakes' count (the Spend round 2, 2026-10-10): HP drained this
+    # combat, gross; no Repay lowers it (the C# `DrainedThisCombat`).
+    drained_this_combat: int = 0
+    # Charlotte's line (the Spend round 2): a card of hers is resolving
+    # (`furina_stage.begin_play` to `end_play`), and guest acts or Powers
+    # resolving inside it (`caused`); the C# `FurinaStageLedger.CardRepaying`.
+    in_card: bool = False
+    caused: int = 0
     repays_this_turn: int = 0        # Rising Tide's count
     repaid_this_play: int = 0        # Grand Absolution's "that much"
     repay_left_this_play: int = 0    # the Repay floor's damage
-    repay_next: int = 0              # Gentle Current: Repay next turn
     powers: collections.Counter = field(default_factory=collections.Counter)
     # High Stakes: each copy's divisor (the Spend round, 2026-10-10).
     high_stakes_every: list = field(default_factory=list)
@@ -510,8 +519,10 @@ CARDS: dict[str, Spec] = {
     # forever, and the draw already carries it, as with Pneuma Refrain.
     "ftd_soothing_waters": Spec("Soothing Waters", 0, "skill", "uncommon",
                                 "repay_draw", (2, 1)),
+    # Gentle Current (the Spend round 2, 2026-10-10): Gain 5 Block. Repay 3.
+    # Gain 1 Block for any HP it could not Repay. Hymn of Many Waters' kind.
     "ftd_gentle_current": Spec("Gentle Current", 1, "skill", "common",
-                               "block_repay_next", (5, 4)),
+                               "block_repay", (5, 3)),
     "ftd_clean_slate": Spec("Clean Slate", 1, "attack", "common",
                             "clean_slate", (7, 3, 1)),
     "ftd_hydro_lance": Spec("Hydro Lance", 2, "attack", "common",
@@ -743,14 +754,14 @@ def note_high_stakes(player, every: int) -> None:
 
 
 def high_stakes_bonus(player) -> int:
-    """High Stakes, every copy: net drained HP (above and past the line,
-    which Repay lowers) over each copy's divisor, rounded down, summed. A
+    """High Stakes, every copy: HP drained this combat, gross (no Repay
+    lowers it), over each copy's divisor, rounded down, summed. A
     board that set the power's amount directly (a pin) and noted no copy
     reads that amount as one copy's divisor. The C# twin is
     `FurinaStageLaw.HighStakesBonus`."""
     if not live(player):
         return 0
-    drained = int(player.ftd.drained)
+    drained = int(player.ftd.drained_this_combat)
     if drained <= 0:
         return 0
     everies = list(player.ftd.high_stakes_every)
@@ -1003,6 +1014,7 @@ def drain(state, n: int) -> bool:
     f.drained_this_turn = True
     f.drained_hp_this_turn += n
     f.drains_this_combat += 1
+    f.drained_this_combat += n
     f.ledger["drained"] += n
     f.ledger["drained_past"] = f.ledger.get("drained_past", 0) + (n - above)
     f.ledger["drains"] += 1
@@ -1071,7 +1083,10 @@ def repay(state, n: int) -> int:
         _line(state, "clorinde", CLORINDE_PER_REPAY * amount)
         _hit(state, state.rng.choice(state.living_enemies),
              CLORINDE_PER_REPAY * amount, "electro")
-    if "charlotte" in f.stage and not f.charlotte_drew and not state.over:
+    # Charlotte's line counts a Repay from one of her cards only (the Spend
+    # round 2, 2026-10-10): not a guest's act, a Power or Salon Solitaire.
+    if ("charlotte" in f.stage and card_repaying(f) and not f.charlotte_drew
+            and not state.over):
         f.charlotte_drew = True
         _line(state, "charlotte", 1)
         state.draw(1)
@@ -1083,6 +1098,31 @@ def repay(state, n: int) -> int:
         # Hymn of Renewal counts the HP this Repay actually returned.
         _strength(state, hymn)
     return amount
+
+
+def card_repaying(f: Ftd) -> bool:
+    """Is the Repay resolving now one of her cards'? A card play is open
+    and no guest act or Power is Repaying inside it (the C#
+    `FurinaStageLedger.CardRepaying`)."""
+    return bool(f.in_card) and f.caused == 0
+
+
+class caused_by:
+    """A guest act or a Power resolving: a Repay inside it is not a card's
+    (the C# `CausedBy` and `Acting`)."""
+
+    def __init__(self, state):
+        self.f = _f(state) if live(state.player) else None
+
+    def __enter__(self):
+        if self.f is not None:
+            self.f.caused += 1
+        return self
+
+    def __exit__(self, *exc):
+        if self.f is not None:
+            self.f.caused -= 1
+        return False
 
 
 def repay_floor(state, n: int, floor: str) -> int:
@@ -1195,7 +1235,13 @@ def _card_block(state, card, amount: int) -> None:
 def act(state, member: str) -> None:
     """One guest's act (the C# `StageDirector.Act`): at the end of her turn
     or bought by a card. Escoffier's line answers every act, his own
-    included."""
+    included. A Repay inside it is the act's, not a card's (Charlotte's
+    line)."""
+    with caused_by(state):
+        _act(state, member)
+
+
+def _act(state, member: str) -> None:
     p = state.player
     f = _f(state)
     if state.over or not p.alive:
@@ -1386,7 +1432,7 @@ def turn_start(state) -> None:
     p = state.player
     # The pool to 75's turn-start Powers, in the C# `FurinaStage.TurnStart`
     # order: Regina of All Waters first (so the Repays after it have room),
-    # then Fountain of Lucine, Gentle Current, Pneuma Tides, and Prima Donna
+    # then Fountain of Lucine, Pneuma Tides, and Prima Donna
     # last (so it reads the Fanfare they printed).
     for _ in range(_player_power(p, "regina")):
         if state.over or not p.alive or not can_drain(state, REGINA_DRAIN):
@@ -1401,15 +1447,12 @@ def turn_start(state) -> None:
     for item in f.fountains:
         item[1] -= 1
     f.fountains = [item for item in f.fountains if item[1] > 0]
-    # The Repay floor (2026-10-09): Fountain of Lucine's and Gentle
-    # Current's pay Block, Pneuma Tides' Vigor.
+    # The Repay floor (2026-10-09): Fountain of Lucine's pays Block, Pneuma
+    # Tides' Vigor.
     for amount in due:
         if state.over or not state.player.alive:
             break
         f.ledger["fountain_repaid"] += repay_floor(state, amount, "block")
-    if f.repay_next and not state.over and p.alive:
-        owed, f.repay_next = f.repay_next, 0
-        repay_floor(state, owed, "block")
     tides = _player_power(p, "pneuma_tides")
     if tides and not state.over and p.alive:
         repay_floor(state, tides, "vigor")
@@ -1628,9 +1671,6 @@ def resolve_card(state, card) -> None:
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1
             _card_damage(state, card, n[1], all_enemies=True)
-    elif k == "block_repay_next":
-        _card_block(state, card, n[0])
-        f.repay_next += n[1]
     elif k == "clean_slate":
         _card_damage(state, card, n[0])
         repay(state, n[1])

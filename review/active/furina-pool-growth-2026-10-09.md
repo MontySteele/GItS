@@ -111,7 +111,8 @@ That is the danger the play asked for, kept inside the line, which stays
 (ruled pick 3). (The Spend round, 2026-10-10,
 `review/records/furina-spend-round-2026-10-10.md`, reworked High Stakes: it
 reads the Drained counter instead of the line band. Against the Tide is now
-the only card that reads the band.)
+the only card that reads the band. Round 2, `furina-spend-round-2-2026-10-10.md`,
+made the count the HP drained this combat: Repay no longer lowers it.)
 
 ## 5. The 41 new cards
 
@@ -139,7 +140,7 @@ upgrade replaces today's 0 cost.
 
 | Guest | Rarity | Line | Act | Upgrade |
 |---|---|---|---|---|
-| Charlotte | C (pick 2) | The first time you Repay each turn, draw 1 card | Repay 2 | Act: Repay 4 |
+| Charlotte | C (pick 2) | The first time one of your cards Repays each turn, draw 1 card (the Spend round 2, 2026-10-10) | Repay 2 | Act: Repay 4 |
 | Sigewinne | U | Whenever you Repay, gain that much Block | Repay 2 | Act: Repay 4 |
 | Wriothesley | U | Whenever you Drain, deal that much Cryo damage to a random enemy | 4 Cryo to a random enemy | Act: 7 |
 | Lyney | U | Your Drain line is 10 HP lower | Drain 2: 8 Pyro to ALL enemies | Act: 11 |
@@ -171,7 +172,7 @@ upgrade replaces today's 0 cost.
 | Against the Tide | Attack 1, U | Deal 8 damage. If you are within 5 HP of your Drain line, deal 14 instead. [11 / 18] |
 | Pay the Tab | Skill 1, U | Drain 6. Draw 3 cards. [4 cards] |
 | Riptide Lunge | Attack 1, U | Drain 3. Deal 10 damage. If this kills an enemy, Repay 6. [13] |
-| High Stakes | Power 1, U | Your Attacks deal 1 additional damage for every 5 HP you have Drained and not Repaid. [every 4] (reworked by the Spend round, 2026-10-10) |
+| High Stakes | Power 1, U | Your Attacks deal 1 additional damage for every 4 HP you have Drained this combat. [every 3] (reworked by the Spend round and its round 2; every 4 [3] by the Spend rounds review, 2026-10-10) |
 | Regina of All Waters | Power 2 [1], R | At the start of your turn, Drain 3. If you do, gain 1 Strength. |
 | The Deluge | Attack 2 [1], R | Drain 8. Deal 24 damage to ALL enemies. Exhaust. |
 | All In | Skill 0, R | Drain 8. Gain 2 Energy. Exhaust. [Drain 6] |
@@ -181,7 +182,7 @@ upgrade replaces today's 0 cost.
 | Card | Type, cost, rarity | Text |
 |---|---|---|
 | Soothing Waters | Skill 0, U | Repay 2. Draw 1 card. [Repay 3] |
-| Gentle Current | Skill 1, C | Gain 5 Block. Next turn, Repay 4. [7 and 5] |
+| Gentle Current | Skill 1, C | Gain 5 Block. Repay 3. Gain 1 Block for any HP it could not Repay. [7 and 4] (the Spend round 2, 2026-10-10: was "Next turn, Repay 4") |
 | Clean Slate | Attack 1, C | Deal 7 damage. Repay 3. If you have no drained HP left, draw 1 card. [10] |
 | Hydro Lance | Attack 2, C | Deal 14 Hydro damage. Repay 4. [18] |
 | Cleansing Torrent | Attack 2, U | Deal 10 Hydro damage to ALL enemies. Repay 4. [14] |

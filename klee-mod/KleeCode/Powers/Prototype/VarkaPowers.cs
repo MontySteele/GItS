@@ -341,9 +341,9 @@ public sealed class GrandMastersOrderPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Stormward Stance (sec.6): "While your current element has 4 or more Oath,
-/// your Anemo Attacks deal 3 more." An additive term on his own powered
-/// Attacks whose hit is Anemo, read live.
+/// Stormward Stance (sec.6; Varka round 3, 2026-10-10, the 4-Oath gate
+/// dropped): "Your Anemo Attacks deal 3 [5] additional damage." An additive
+/// term on his own powered Attacks whose hit is Anemo.
 /// </summary>
 public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
 {
@@ -351,9 +351,8 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
     {
         ("title", "Stormward Stance"),
         ("description",
-            "While your [gold]current element[/gold] has "
-          + VarkaLaw.StormwardOathNeeded + " or more [gold]Oath[/gold], your "
-          + "[gold]Anemo[/gold] Attacks deal [blue]{Amount}[/blue] additional damage."),
+            "Your [gold]Anemo[/gold] Attacks deal [blue]{Amount}[/blue] "
+          + "additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -362,19 +361,21 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
 
     /// <summary>The Stance's condition on primitives. PURE.</summary>
     public static bool Applies(bool poweredAttack, bool isAttackCard,
-                               Element hit, int currentOath) =>
-        poweredAttack && isAttackCard && hit == Element.Anemo
-        && currentOath >= VarkaLaw.StormwardOathNeeded;
+                               Element hit) =>
+        poweredAttack && isAttackCard && hit == Element.Anemo;
 
+    /// <summary>NO TARGET IS ASKED FOR (2026-10-10): the bonus is his, and a
+    /// card in his hand previews with a null target, so a
+    /// <c>target == null</c> gate dropped it from the face. His own body is
+    /// still refused.</summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
     {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (dealer != Owner || target == Owner) return 0m;
         return Applies(props.IsPoweredAttack(),
                        cardSource is { Type: CardType.Attack },
-                       AuraCmd.ElementOfPlay(cardSource, dealer),
-                       VarkaOath.CurrentOath(Owner))
+                       AuraCmd.ElementOfPlay(cardSource, dealer))
             ? Amount : 0m;
     }
 }
@@ -776,8 +777,10 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Pyre Oath (the combo pass, 2026-10-04, sec.3): "Whenever you
-/// Exhaust a card, gain 1 Pyro Oath." Feel No Pain's shape paying Oath: one
+/// <summary>Ashen Oath, was Pyre Oath (the combo pass, 2026-10-04, sec.3;
+/// renamed and paying 2 a card since the forced-Amber round, 2026-10-10;
+/// the class keeps its old name with the card id): "Whenever you
+/// Exhaust a card, gain 2 Pyro Oath." Feel No Pain's shape paying Oath: one
 /// gain per card exhausted, of the stack's amount, through
 /// <see cref="VarkaOath.Gain"/> (so Oath Unto Death, Dawn Wind's March and
 /// Boreas's Fang see it). Any card of his, a Status included. Sim twin:
@@ -787,7 +790,7 @@ public sealed class PyreOathPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Pyre Oath"),
+        ("title", "Ashen Oath"),
         ("description",
             "Whenever you [gold]Exhaust[/gold] a card, gain "
           + "[blue]{Amount}[/blue] [gold]Pyro[/gold] [gold]Oath[/gold]."),

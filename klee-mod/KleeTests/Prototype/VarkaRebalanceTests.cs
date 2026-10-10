@@ -156,12 +156,32 @@ public class VarkaRebalanceTests : IDisposable
     {
         var ward = new ProtoVkFrostWard();
         Assert.Equal(CardRarity.Common, ward.Rarity);
-        Assert.Equal(3m, Var(ward, "VkAmount"));
-        Assert.Equal(4m, Var(Upgraded<ProtoVkFrostWard>(), "VkAmount"));
+        // Varka round 3 (2026-10-10): the floor 5 [6], each aura 3 [4].
+        Assert.Equal(5m, Var(ward, "VkBase"));
+        Assert.Equal(3m, Var(ward, "VkPer"));
+        Assert.Equal(6m, Var(Upgraded<ProtoVkFrostWard>(), "VkBase"));
+        Assert.Equal(4m, Var(Upgraded<ProtoVkFrostWard>(), "VkPer"));
         var body = Calls("VarkaCards", "FrostWard");
         Assert.Contains("AuraCmd.Find", body);
         Assert.Contains("PowerCmd.Apply", body);
         Assert.Contains("VarkaCards.GainCardBlock", body);
+        // Varka round 3 (2026-10-10): "Gain 5 [6] Block. For each enemy
+        // with an aura, apply 1 Weak and gain 3 [4] additional Block."
+        Assert.Contains("VarkaCards.FrostWardBlock", body);
+        Assert.Equal(5, VarkaCards.FrostWardBlock(5, 3, 0));
+        Assert.Equal(11, VarkaCards.FrostWardBlock(5, 3, 2));
+        Assert.Equal(10, VarkaCards.FrostWardBlock(6, 4, 1));
+    }
+
+    [Fact]
+    public void Sworn_brotherhood_and_stormward_carry_round_3_numbers()
+    {
+        // Varka round 3 (2026-10-10): Sworn Brotherhood 2 [3] Oath of the
+        // current element; Stormward Stance 3 [5], no Oath gate.
+        Assert.Equal(2m, Var(new ProtoVkSwornBrotherhood(), "PowerAmount"));
+        Assert.Equal(3m, Var(Upgraded<ProtoVkSwornBrotherhood>(), "PowerAmount"));
+        Assert.Equal(3m, Var(new ProtoVkStormwardStance(), "PowerAmount"));
+        Assert.Equal(5m, Var(Upgraded<ProtoVkStormwardStance>(), "PowerAmount"));
     }
 
     [Fact]

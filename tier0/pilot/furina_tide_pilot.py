@@ -691,8 +691,9 @@ def value(state, card, playable: list, decider) -> float:
         if m == "standing_room_only":
             return 0.8 * tl * 1.5
         if m == "high_stakes":
-            # The Spend round's sizing: about +2 a hit in a normal fight.
-            drained = int(state.player.ftd.drained)
+            # The Spend round 2's sizing: about +2 a hit in a normal fight,
+            # off the HP drained this combat (gross).
+            drained = int(state.player.ftd.drained_this_combat)
             return 0.8 * tl * max(1.0, drained / max(1, n[0]) + 1.0)
         if m == "regina":
             return 0.8 * tl * (2.5 if T.can_drain(state, T.REGINA_DRAIN)
@@ -740,10 +741,6 @@ def value(state, card, playable: list, decider) -> float:
         pass                                         # handled above
     if k == "near_line_hit":
         return _single(state, n[1] if T.near_line(state.player) else n[0])
-    if k == "block_repay_next":
-        hp_per = temp_hp_value(state) if f.curtain_call else hp_value(state)
-        return (_block_value(n[0], need_now)
-                + 0.6 * (hp_per + FANFARE) * n[1])
     if k == "clean_slate":
         v = _single(state, n[0]) + repay_value(state, n[1])
         if f.drained <= n[1]:

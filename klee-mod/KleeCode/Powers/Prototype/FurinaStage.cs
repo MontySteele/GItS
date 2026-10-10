@@ -34,7 +34,7 @@ namespace KleeMod.Powers;
 ///      loses (a Drain, a hit past Block, anything) and +1 for every HP she
 ///      Repays. Spend N and the spend-all cards pay it.
 ///   4. SALON SOLITAIRE, her starting relic: "At the end of your turn, Repay
-///      2." (Upgraded: 3.)
+///      1." (Upgraded: 2. <see cref="FurinaStageLaw.SingerRepay"/>.)
 ///   5. GUEST STARS (the pool to 75's rule,
 ///      <c>review/active/furina-pool-growth-2026-10-09.md</c> sec.3): three
 ///      seats, guests only. A Guest Star exhausts when played and has no
@@ -107,6 +107,11 @@ public static class FurinaStage
     /// <summary>Her drained HP, not yet repaid.</summary>
     public static int DrainedOf(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).Drained : 0;
+
+    /// <summary>High Stakes' count: HP she has drained this combat, gross
+    /// (no Repay lowers it; the Spend round 2, 2026-10-10).</summary>
+    public static int DrainedThisCombatOf(Creature? owner) =>
+        LiveFor(owner) ? FurinaStageLedger.For(owner!).DrainedThisCombat : 0;
 
     /// <summary>Her Drain line (rule 1): her entry HP minus 1/4 of her Max
     /// HP; HP drained past it does not return at the curtain call.</summary>
@@ -395,17 +400,6 @@ public static class FurinaStage
         await Done(owner);
     }
 
-    /// <summary>Gentle Current: "Next turn, Repay N." Owed on
-    /// <see cref="RepayNextTurnPower"/>, paid at her next turn start.
-    /// </summary>
-    public static async Task RepayNextTurn(PlayerChoiceContext choiceContext,
-                                           Creature? owner, int amount)
-    {
-        if (!LiveFor(owner) || amount <= 0) return;
-        await PowerCmd.Apply<RepayNextTurnPower>(
-            choiceContext, owner!, amount, applier: owner, cardSource: null);
-    }
-
     /// <summary>Undercurrent's count: Drains made this combat.</summary>
     public static int DrainsThisCombat(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).DrainsThisCombat : 0;
@@ -507,7 +501,6 @@ public static class FurinaStage
         }
         await ReginaDrains(choiceContext, furina);
         await FountainRepays(choiceContext, furina);
-        await RepayNextTurnRepays(choiceContext, furina);
         await PneumaTidesRepays(choiceContext, furina);
         await PrimaDonnaEnergy(furina);
         RefreshBadges(furina);
@@ -525,22 +518,6 @@ public static class FurinaStage
         using (FurinaStageLedger.For(furina).CausedBy(StageDirector.ReginaTitle))
         {
             await Director(choiceContext, furina).Regina(copies);
-        }
-    }
-
-    /// <summary>Gentle Current: the Repay owed from last turn, one Repay
-    /// with its Block floor (2026-10-09), and the power leaves.</summary>
-    private static async Task RepayNextTurnRepays(
-        PlayerChoiceContext choiceContext, Creature furina)
-    {
-        var power = furina.Powers.OfType<RepayNextTurnPower>().FirstOrDefault();
-        if (power == null) return;
-        var amount = (int)power.Amount;
-        await PowerCmd.Remove(power);
-        using (FurinaStageLedger.For(furina).CausedBy(RepayNextTurnPower.Title))
-        {
-            await Director(choiceContext, furina)
-                .RepayFloor(amount, StageFloor.Block);
         }
     }
 
@@ -910,6 +887,12 @@ public sealed class GameStageBoard : IStageBoard
     public async Task PowerHit(string source, StageTarget target, int amount)
     {
         if (amount <= 0) return;
+        // The play telemetry credits the Power by name ("(Thunderous
+        // Applause)", the Spend round 2, 2026-10-10), not the shared
+        // "(power)" bucket; it replaces a card's or an act's scope, since the
+        // Power is what deals it.
+        using var credit = Diagnostics.DamageCredit.Open(
+            _owner, Diagnostics.DamageCredit.Power, source);
         await Hit(target, amount, Element.None);
     }
 

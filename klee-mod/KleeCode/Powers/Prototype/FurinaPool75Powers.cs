@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -146,17 +148,20 @@ public sealed class HymnOfRenewalPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// <i>High Stakes</i> (reworked by the Spend round,
-/// <c>review/records/furina-spend-round-2026-10-10.md</c>, "What changes" 3):
-/// "Your Attacks deal 1 additional damage for every 5 HP you have Drained and
-/// not Repaid." [every 4]. The old card ("within 5 HP of your Drain line")
+/// <c>review/records/furina-spend-round-2026-10-10.md</c>, "What changes" 3,
+/// and again by round 2, <c>furina-spend-round-2-2026-10-10.md</c> change 1):
+/// "Your Attacks deal 1 additional damage for every 5 HP you have Drained
+/// this combat." [every 4]. The old card ("within 5 HP of your Drain line")
 /// was NEVER AGAIN three times over two rounds: the line band punished the
-/// play the kit teaches.
+/// play the kit teaches. Round 1's "Drained and not Repaid" sat near 0,
+/// because Salon Solitaire Repays every turn: it peaked at +2 in three plays.
 ///
-/// THE AMOUNT IS THE DIVISOR (5, 4 upgraded:
-/// <see cref="FurinaStageLaw.HighStakesEvery"/>). It reads the ledger's net
-/// Drained (<see cref="FurinaStageLedger.Drained"/>, above and past the line,
-/// which Repay lowers), rounded down, and adds it to each powered Attack hit,
-/// as Strength does.
+/// THE AMOUNT IS THE DIVISOR (4, 3 upgraded since the Spend rounds review:
+/// <see cref="FurinaStageLaw.HighStakesEvery"/>). It reads the ledger's gross
+/// count (<see cref="FurinaStageLedger.DrainedThisCombat"/>, every Drain's HP,
+/// which no Repay lowers), rounded down, and adds it to each powered Attack
+/// hit, as Strength does. What it added is filed for the play telemetry
+/// (<see cref="AfterDamageGiven"/>).
 ///
 /// COPIES ADD, AS SEPARATE INSTANCES. A divisor cannot stack by summing (two
 /// copies at 5 would read "every 10"), so each play is its own instance
@@ -174,13 +179,12 @@ public sealed class HighStakesPower : PowerModel, ILocalizationProvider
         ("title", "High Stakes"),
         ("description",
             "Your Attacks deal 1 additional damage for every "
-          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] and not "
-          + "[gold]Repaid[/gold]."),
+          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] this "
+          + "combat."),
         ("smartDescription",
             "Your Attacks deal 1 additional damage for every "
-          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] and not "
-          + "[gold]Repaid[/gold]. Now: [blue]{Bonus}[/blue] additional "
-          + "damage."),
+          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] this "
+          + "combat. Now: [blue]{Bonus}[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -196,8 +200,8 @@ public sealed class HighStakesPower : PowerModel, ILocalizationProvider
     /// <summary>This copy's bonus a hit now. PURE.</summary>
     public int Bonus =>
         IsMutable && Owner != null
-            ? FurinaStageLaw.HighStakesBonus(FurinaStage.DrainedOf(Owner),
-                                             Amount)
+            ? FurinaStageLaw.HighStakesBonus(
+                FurinaStage.DrainedThisCombatOf(Owner), Amount)
             : 0;
 
     /// <summary>The badge: the bonus now, not the divisor.</summary>
@@ -211,15 +215,40 @@ public sealed class HighStakesPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>The bonus, read at the hit: her Attacks only (a card's
-    /// powered hit). PURE.</summary>
+    /// powered hit). PURE.
+    ///
+    /// NO TARGET IS ASKED FOR, as Strength asks for none (the Spend rounds
+    /// review, 2026-10-10, change 2). A card in her hand previews with no
+    /// body on a Stage board (<see cref="FoldedPreview.Body"/>: the game
+    /// names one only while the card is aimed), so a <c>target == null</c>
+    /// gate dropped the bonus from the face: Hydro Lance printed 15 and dealt
+    /// 18. The Attack-card and powered-hit gates stay; her own body is still
+    /// refused.</summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
     {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         if (cardSource is not { Type: CardType.Attack }) return 0m;
         return Bonus;
+    }
+
+    /// <summary>The play telemetry's <c>high_stakes_bonus</c> (the Spend
+    /// round 2, 2026-10-10): the bonus this copy added to a hit that landed,
+    /// capped at what the hit dealt (HP and Block). A read for the record;
+    /// nothing the rules ask.</summary>
+    public override Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext, Creature dealer, DamageResult result,
+        ValueProp props, Creature target, CardModel? cardSource)
+    {
+        if (dealer != Owner || !props.IsPoweredAttack()) return Task.CompletedTask;
+        if (cardSource is not { Type: CardType.Attack }) return Task.CompletedTask;
+        if (!FurinaStage.LiveFor(Owner)) return Task.CompletedTask;
+        FurinaStageLedger.For(Owner!).NoteHighStakes(
+            FurinaStageLaw.HighStakesCredit(
+                Bonus, (int)(result.UnblockedDamage + result.BlockedDamage)));
+        return Task.CompletedTask;
     }
 
     /// <summary>`{Bonus}` in the hover, read live.</summary>
@@ -268,30 +297,6 @@ public sealed class PneumaTidesPower : PowerModel, ILocalizationProvider
             "At the start of your turn, [gold]Repay[/gold] "
           + "[blue]{Amount}[/blue]. Gain 1 [gold]Vigor[/gold] for any HP it "
           + "could not [gold]Repay[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
-/// <i>Gentle Current</i>'s "Next turn, Repay 4. Gain 1 Block for any HP it
-/// could not Repay." [5] (the Repay floor, 2026-10-09): the Repay owed at her
-/// next turn start, as the base game's <c>EnergyNextTurnPower</c> owes an
-/// Energy. Two plays in a turn add into one Repay. Leaves when paid
-/// (<see cref="FurinaStage.TurnStart"/>).
-/// </summary>
-public sealed class RepayNextTurnPower : PowerModel, ILocalizationProvider
-{
-    public new const string Title = "Gentle Current";
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", Title),
-        ("description",
-            "Next turn, [gold]Repay[/gold] [blue]{Amount}[/blue]. Gain 1 "
-          + "[gold]Block[/gold] for any HP it could not [gold]Repay[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
