@@ -38,8 +38,9 @@ public sealed class FanfarePower : PowerModel, ILocalizationProvider
             "Gain 1 [gold]Fanfare[/gold] for each HP you lose or "
           + "[gold]Repay[/gold]. [gold]Spend[/gold] pays it."),
         ("smartDescription",
-            "You have {Fanfare} [gold]Fanfare[/gold]. This turn: gained "
-          + "{Gained}, spent {Spent}."),
+            "You have {Fanfare} [gold]Fanfare[/gold]. Gain 1 "
+          + "[gold]Fanfare[/gold] for each HP you lose or [gold]Repay[/gold]. "
+          + "This turn: gained {Gained}, spent {Spent}."),
     };
 
     public override PowerType Type => PowerType.Buff;

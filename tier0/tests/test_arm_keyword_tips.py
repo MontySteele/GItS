@@ -555,7 +555,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # guests are the only performers. The v2 Stage's clauses (Bow,
             # Cue, Rehearsal, the front seat) left with v2.
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
-            "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
+            "Gain 1 [gold]Fanfare[/gold] for each HP you lose or [gold]Repay[/gold]. ",
             # The Drain line rule (2026-10-09): the line is entry HP minus
             # 1/4 of Max HP, and HP drained past it is lost unless Repaid.
             # The drain-line round (2026-10-09): the curtain-call sentence.
