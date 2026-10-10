@@ -130,9 +130,45 @@ from understudy.blindplay_shape import (BlindPlayError, FIGHT_OVERLAYS,
 
 # ----------------------------------------------------------------- render --
 
+#: Varka round 3 (2026-10-10): a Knight's hand row names its element. The
+#: game prints the keyword "Knight." at the head of the rules box
+#: (`KleeKeywords.Knight`, `AutoKeywordPosition.Before`).
+_KNIGHT_HEAD = re.compile(r"^Knight\.")
+KNIGHT_TAG = "Knight, {element}."
+#: And while a relic forbids drawing on your turn (Fiddle: "You may not draw
+#: cards during your turn"), a face that prints "Draw N" says so.
+_NO_DRAW_RELIC = re.compile(r"\bmay not draw cards during your turn\b", re.I)
+_DRAW_N = re.compile(r"\bdraw \d+\b", re.I)
+NO_DRAW_CLAUSE = " (no draw: {relic})"
+
+
+def _knight_tagged(c: dict[str, Any]) -> str:
+    """The face's text, its leading "Knight." carrying the printed element."""
+    text = str(c.get("text") or "")
+    element = c.get("printed_element") or c.get("element")
+    if element and _KNIGHT_HEAD.match(text):
+        return KNIGHT_TAG.format(element=element) + text[len("Knight."):]
+    return text
+
+
+def _no_draw_relic(you: dict[str, Any]) -> str:
+    """The held relic that forbids drawing on your turn, by name, or ""."""
+    for relic in you.get("relics") or []:
+        if _NO_DRAW_RELIC.search(str(relic.get("text") or "")):
+            return str(relic.get("name") or "")
+    return ""
+
+
+def _no_draw_clause(c: dict[str, Any], relic: str) -> str:
+    """`(no draw: Fiddle)` on a face that prints "Draw N"."""
+    if relic and _DRAW_N.search(str(c.get("text") or "")):
+        return NO_DRAW_CLAUSE.format(relic=relic)
+    return ""
+
+
 def _render_card(c: dict[str, Any], bullet: str = "-",
-                 mark: str = "", raiser: dict[str, Any] | None = None) -> \
-        list[str]:
+                 mark: str = "", raiser: dict[str, Any] | None = None,
+                 no_draw: str = "") -> list[str]:
     """One card face. `mark` is a state the SCREEN is in about this row and
     not a fact about the card, so it goes at the END of the head, after the
     cost and the type -- the shape `EB-294` gave a picked bundle.
@@ -180,8 +216,9 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # face's sentence is the game's and is printed unchanged; the clause is
     # this page's and is appended after it, the way `_rider_clause` puts a
     # named source beside a carry-out's figure.
-    out = [head, f"    {c['text'] or '(no printed text)'}"
-                 + _unblocked_raise_clause(c, raiser)]
+    out = [head, f"    {_knight_tagged(c) or '(no printed text)'}"
+                 + _unblocked_raise_clause(c, raiser)
+                 + _no_draw_clause(c, no_draw)]
     # 2026-09-28 (the Spend pass): a Spend mode the board cannot pay, under
     # the face that prints it. The game plays such a card's plain mode without
     # asking, so this line is the only place the refused mode shows.
@@ -2686,6 +2723,33 @@ EOT_HP_POWERS = ("demise",)
 #: Player powers that gain Block at the end of the turn, by printed name: the
 #: stack count is the Block (`PlatingPower`).
 EOT_BLOCK_POWERS = ("plating", "plated armor", "metallicize")
+#: Varka round 3 (2026-10-10): any other power of yours whose hover text
+#: gains Block at the end of your turn. A plain "gain N Block" in that
+#: sentence is folded; a conditional or computed one ("if", "equal to") is
+#: named under "Not counted", the way relics are.
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
+_PLAIN_GAIN_BLOCK = re.compile(r"\bgain (\d+) Block\b", re.I)
+_ANY_GAIN_BLOCK = re.compile(r"\bgain\b[^.]*\bBlock\b", re.I)
+_CONDITIONAL_BLOCK = re.compile(
+    r"\b(?:if|unless|otherwise|equal to|for each|per|up to|instead)\b", re.I)
+
+
+def _power_eot_block(text: str) -> int | None:
+    """The plain Block a power's text gains at the end of your turn: N, or
+    0 where it gains none then, or None where it gains some the page cannot
+    count."""
+    found = 0
+    for sentence in _SENTENCE_SPLIT.split(text):
+        if not _END_OF_TURN.search(sentence) \
+                or not _ANY_GAIN_BLOCK.search(sentence):
+            continue
+        plain = _PLAIN_GAIN_BLOCK.search(sentence)
+        if plain is None or _CONDITIONAL_BLOCK.search(sentence):
+            return None
+        found += int(plain.group(1))
+    return found
+
+
 #: Player powers that change what a hit costs, which this line does not
 #: model: named, never counted.
 HIT_RULE_POWERS = ("intangible", "buffer")
@@ -2820,6 +2884,14 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
         name = str(power.get("name") or "")
         if key in HIT_RULE_POWERS:
             unknown.append(name)
+            continue
+        if key not in EOT_BLOCK_POWERS + EOT_HIT_POWERS + EOT_HP_POWERS:
+            # Its hover text says the number it gains, the stacks in it.
+            gained = _power_eot_block(str(power.get("text") or ""))
+            if gained is None:
+                unknown.append(name)
+            elif gained:
+                block_parts.append((name, gained))
             continue
         if not isinstance(stacks, int) or stacks <= 0:
             continue
@@ -3456,10 +3528,11 @@ def render(obs: dict[str, Any]) -> str:
         # `EB-752`: read once for the hand and handed to each face, because it
         # is a fact about what you are HOLDING and not about any one card.
         raiser = _unblocked_raiser(you)
+        no_draw = _no_draw_relic(you)
         fang = _ascension_relic(you)
         wildfire = _wildfire_hit(you, c.get("oath"))
         for card in c["hand"]:
-            out += _render_card(card, raiser=raiser)
+            out += _render_card(card, raiser=raiser, no_draw=no_draw)
             if wildfire is not None and _applies_pyro(card):
                 out.append(WILDFIRE_NOTE.format(n=wildfire))
             # The Varka payoff round (2026-10-10): where Four Winds'

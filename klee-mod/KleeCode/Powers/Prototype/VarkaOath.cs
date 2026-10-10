@@ -1551,15 +1551,16 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Frost Ward (the forced-Amber round, 2026-10-10): "Gain 3 [4]
-    /// Block. For each enemy with an aura, apply 1 Weak and gain 3 [4] additional
+    /// <summary>Frost Ward's Block (Varka round 3, 2026-10-10): the floor
+    /// plus the per-aura step for each enemy with an aura. PURE.</summary>
+    public static int FrostWardBlock(int floor, int per, int marked) =>
+        floor + per * System.Math.Max(0, marked);
+
+    /// <summary>Frost Ward (Varka round 3, 2026-10-10): "Gain 5 [6] Block.
+    /// For each enemy with an aura, apply 1 Weak and gain 3 [4] additional
     /// Block." The enemies wearing an aura when it is played; one Block gain
-    /// of VkAmount x (1 + those enemies), so Dexterity counts once.
+    /// of VkBase + VkPer x those enemies, so Dexterity counts once.
     /// Sim twin: <c>varka_oath</c>'s <c>frost_ward</c> kind.</summary>
-    /// <summary>Frost Ward's Block: the floor plus as much again per enemy
-    /// with an aura. PURE.</summary>
-    public static int FrostWardBlock(int amount, int marked) =>
-        amount * (1 + System.Math.Max(0, marked));
 
     public static async Task FrostWard(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -1573,7 +1574,8 @@ public static class VarkaCards
             await PowerCmd.Apply<WeakPower>(choiceContext, enemy, 1,
                                             applier: owner, cardSource: card);
         }
-        await GainCardBlock(owner, FrostWardBlock((int)Var(card, "VkAmount"),
+        await GainCardBlock(owner, FrostWardBlock((int)Var(card, "VkBase"),
+                                                  (int)Var(card, "VkPer"),
                                                   marked.Count), cardPlay);
     }
 

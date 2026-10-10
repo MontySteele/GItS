@@ -69,10 +69,6 @@ public static class VarkaLaw
     /// </summary>
     public const int SwirlElectroDamageAll = 3;
 
-    /// <summary>Stormward Stance: the current element's Oath it needs.
-    /// </summary>
-    public const int StormwardOathNeeded = 4;
-
     /// <summary>Eye of Stormterror (the expansion): the Swirls each turn that
     /// draw.</summary>
     public const int EyeOfStormterrorSwirls = 3;

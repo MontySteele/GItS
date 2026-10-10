@@ -33,12 +33,14 @@ public class PowerCostSweep20260930Tests
     }
 
     [Fact]
-    public void Sworn_brotherhood_base_is_the_current_element_and_the_upgrade_every_element()
+    public void Sworn_brotherhood_gains_the_current_element_both_faces()
     {
+        // Varka round 3 (2026-10-10): 2 [3] Oath of the current element;
+        // the every-element upgrade is gone.
         var play = string.Join(" ",
             Il.CallSequence(Il.Method("ProtoVkSwornBrotherhood", "OnPlay")));
         Assert.Contains("PowerCmd.Apply<SwornBrotherhoodCurrentPower>", play);
-        Assert.Contains("PowerCmd.Apply<SwornBrotherhoodPower>", play);
+        Assert.DoesNotContain("PowerCmd.Apply<SwornBrotherhoodPower>", play);
         Assert.Equal(1, new ProtoVkSwornBrotherhood().EnergyCost.Canonical);
         var start = string.Join(" ",
             Il.CallSequence(Il.Method("VarkaOath", "TurnStart")));

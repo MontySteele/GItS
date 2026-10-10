@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -37,15 +36,12 @@ public sealed class ProtoVkStormwardStance : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_stormward_stance");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stormward Stance"),
-        ("description", "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your [gold]Anemo[/gold] Attacks deal {PowerAmount:diff()} additional damage."),
+        ("description", "Your [gold]Anemo[/gold] Attacks deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

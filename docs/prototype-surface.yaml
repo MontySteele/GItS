@@ -3550,13 +3550,13 @@
 
 - {id: proto_vk_frost_ward, name: "Frost Ward", character: varka,
    # The rebalance (sec.4): Cryo's payoff; replaces Favonius Drill.
-   # Varka forced-Amber round (2026-10-10): a floor, the same 3 [4] once
-   # before the per-aura part; one Block gain of 3 x (1 + enemies with an aura).
+   # Varka round 3 (2026-10-10): "The floor is now a Defend." 5 [6], each
+   # aura 3 [4] more; one Block gain (provenance note).
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {VkAmount:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkAmount:diff()} additional [gold]Block[/gold].",
-   effects: [{op: varka, kind: frost_ward, target: all_enemies, amount: 3}],
-   upgrade: {varka_amount: 1}}
+   description: "Gain {VkBase:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkPer:diff()} additional [gold]Block[/gold].",
+   effects: [{op: varka, kind: frost_ward, target: all_enemies, base: 5, per: 3}],
+   upgrade: {varka_base: 1, varka_per: 1}}
 
 - {id: proto_vk_amber_baron_bunny, name: "Amber: Baron Bunny", character: varka,
    authored_by: [claude],
@@ -3714,7 +3714,9 @@
 - {id: proto_vk_stormward_stance, name: "Stormward Stance", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "While your [gold]current element[/gold] has 4 or more [gold]Oath[/gold], your [gold]Anemo[/gold] Attacks deal 3 additional damage.",
+   # Varka round 3 (2026-10-10): the 4-Oath gate dropped; "Every holder
+   # called it dead because of the gate."
+   description: "Your [gold]Anemo[/gold] Attacks deal {PowerAmount:diff()} additional damage.",
    effects: [{op: apply_power, power: vk_stormward_stance, amount: 3, target: self}],
    upgrade: {power_amount: +2}}
 
@@ -3832,11 +3834,11 @@
 - {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, gain 1 [gold]Oath[/gold] of {IfUpgraded:show:every element|your [gold]current element[/gold]}.",
-   effects: [{op: apply_power, power: vk_sworn_brotherhood_current, amount: 1, target: self}],
-   # Power cost sweep, 2026-09-30: upgraded, the card installs the
-   # every-element power (`upgraded_power`).
-   upgrade: {upgraded_power: vk_sworn_brotherhood}}
+   # Varka round 3 (2026-10-10): 2 [3] of the current element; one Oath a
+   # turn "never paid for the slot". The every-element upgrade is gone.
+   description: "At the start of your turn, gain {PowerAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold].",
+   effects: [{op: apply_power, power: vk_sworn_brotherhood_current, amount: 2, target: self}],
+   upgrade: {power_amount: 1}}
 
 - {id: proto_vk_northwind_avatar, name: "Northwind Avatar", character: varka,
    authored_by: [claude],
