@@ -331,10 +331,13 @@ public static class KleeMod
                     // below for any non-minion in a boss room
                     // (`ReactionEffects.FrozenBossVulnWillApply`), and a
                     // Shatter now says it ends the freeze (`FrozenPower`
-                    // removes itself when it Shatters). The comment sits
-                    // ABOVE the key, for `gen_keyword_loc.py`'s reader.
+                    // removes itself when it Shatters). The Varka forced-Amber
+                    // round (2026-10-10): the badge's words, which say what
+                    // attacking it does (a seat read the Shatter as a bonus).
+                    // The comment sits ABOVE the key, for
+                    // `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
-                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less. Until it acts, an Attack on it Shatters for [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage and ends the freeze.",
+                        $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Attacking it ends the freeze and deals [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage.",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion can't be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
