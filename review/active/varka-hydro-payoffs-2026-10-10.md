@@ -46,3 +46,5 @@ Overall, Varka's Block cards go from 14 to 13, still above the base five, and hi
 
 1. **Is "Hydro = Block payoffs" the direction you meant?** Default: yes, as above.
 2. **Should Wellspring Hymn also become a payoff?** For example: "Whenever you gain Block, gain 1 Hydro Oath" as a Power, which would feed Tidal Bulwark and Retaliating Tide. Default: no. Its cleanse is the only one in the pool.
+
+**Ruled 2026-10-10, both at default.** [USER]: "I like the Hydro paper - I agree with all proposed changes! Good to merge as is." Tidal Bulwark becomes Hydro's Body Slam, Whisper of Water keeps its Block, and Wellspring Hymn is unchanged. Converging Winds at 6 [8] builds in the same batch.
