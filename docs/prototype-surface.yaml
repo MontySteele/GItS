@@ -2665,34 +2665,29 @@
 
 # --- FANFARE OUTLETS (six) ---
 
-# Tidal Flourish: uncommon, and the plain mode applies Hydro (the 2026-10-09
-# playtest trim, review/records/coop-human-playtest-2026-10-09.md pick 2).
+# Tidal Flourish, Spirited Aria, Crashing Waves, Hold the Stage: "Spend up
+# to X", no chooser (the Spend paper, 2026-10-10; provenance note).
 - {id: proto_fs_tidal_flourish, name: "Tidal Flourish", character: furina,
-   upgrade: {conditional_damage: +3, conditional_then_damage: +1},
+   upgrade: {formula_base: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] 6: deal {BranchDamage:diff()} instead.",
-   effects: [{op: choose_one, modes: [
-              {label: "Deal 5 Hydro damage to ALL enemies",
-               effects: [{op: damage, amount: 5, target: all_enemies,
-                          applies_element: true}]},
-              {label: "[gold]Spend[/gold] 6: deal 12 instead",
-               effects: [{op: stage_spend, amount: 6},
-                         {op: damage, amount: 12, target: all_enemies,
-                          applies_element: true}]}]}]}
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] up to 10: deal 1 more for each.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_up_to, amount: 10},
+             {op: damage,
+              amount_formula: {base: 5, per: 1, count: stage_spent},
+              target: all_enemies, applies_element: true}]}
 
 - {id: proto_fs_spirited_aria, name: "Spirited Aria", character: furina,
-   upgrade: {conditional_damage: +3, conditional_then_damage: +1},
+   upgrade: {formula_base: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} and draw 2 cards instead.",
-   effects: [{op: choose_one, modes: [
-              {label: "Deal 8 damage",
-               effects: [{op: damage, amount: 8, target: enemy}]},
-              {label: "[gold]Spend[/gold] 5: deal 13 and draw 2 cards instead",
-               effects: [{op: stage_spend, amount: 5},
-                         {op: damage, amount: 13, target: enemy},
-                         {op: draw, amount: 2}]}]}]}
+   description: "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 8: deal 1 more for each. Draw 1 for every 4 spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_up_to, amount: 8},
+             {op: damage,
+              amount_formula: {base: 8, per: 1, count: stage_spent},
+              target: enemy},
+             {op: draw,
+              amount_formula: {base: 0, per: 1, count: stage_spent_fours}}]}
 
 - {id: proto_fs_quick_cue, name: "Quick Flourish", character: furina,
    upgrade: {damage: +3},
@@ -2880,16 +2875,13 @@
 
 # The Crowd: a second use for the bank, and a reason to spend often.
 - {id: proto_fs_hold_the_stage, name: "Hold the Stage", character: furina,
-   upgrade: {conditional_block: +2, conditional_then_block: +2},
+   upgrade: {formula_base: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 6: gain {BranchBlock:diff()} instead.",
-   effects: [{op: choose_one, modes: [
-              {label: "Gain 6 Block",
-               effects: [{op: block, amount: 6}]},
-              {label: "[gold]Spend[/gold] 6: gain 16 instead",
-               effects: [{op: stage_spend, amount: 6},
-                         {op: block, amount: 16}]}]}]}
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 12: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: stage_spend_up_to, amount: 12},
+             {op: block,
+              amount_formula: {base: 6, per: 1, count: stage_spent}}]}
 
 - {id: proto_fs_guest_star_chevreuse, name: "Guest Star: Chevreuse", character: furina,
    upgrade: {guest_upgraded: true},
@@ -3002,18 +2994,13 @@
 # The Crowd (9): 3 Common, 3 Uncommon, 3 Rare.
 
 - {id: proto_fs_crashing_waves, name: "Crashing Waves", character: furina,
-   upgrade: {conditional_damage: +1},
+   upgrade: {damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] 4: three times instead.",
-   effects: [{op: choose_one, modes: [
-              {label: "Deal 4 Hydro damage twice",
-               effects: [{op: damage, amount: 4, times: 2, target: enemy,
-                          applies_element: true}]},
-              {label: "[gold]Spend[/gold] 4: three times instead",
-               effects: [{op: stage_spend, amount: 4},
-                         {op: damage, amount: 4, times: 3, target: enemy,
-                          applies_element: true}]}]}]}
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 12: hit once more for every 4.",
+   effects: [{op: stage_spend_up_to, amount: 12},
+             {op: damage, amount: 4, target: enemy, applies_element: true,
+              times_formula: {base: 2, per: 1, count: stage_spent_fours}}]}
 
 - {id: proto_fs_bubble_aria, name: "Bubble Aria", character: furina,
    upgrade: {conditional_block: +2},

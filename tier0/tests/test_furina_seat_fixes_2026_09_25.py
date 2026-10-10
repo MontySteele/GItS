@@ -63,9 +63,10 @@ def _fresh_fight():
 
 # The Salon's Tab (2026-10-05): the plain-or-priced faces whose numbers fold
 # (Quick Flourish's Spend is a fixed price now; Interval Bell's and Salon's
-# Tab's plain modes draw a card, a number no board moves).
-SPEND_CARDS = ("ProtoFsTidalFlourish", "ProtoFsSpiritedAria",
-               "ProtoFsCurtainRise", "ProtoFsSurintendanteChevalmarin",
+# Tab's plain modes draw a card, a number no board moves). Tidal Flourish and
+# Spirited Aria left the chooser for "Spend up to X" (the Spend paper,
+# 2026-10-10).
+SPEND_CARDS = ("ProtoFsCurtainRise", "ProtoFsSurintendanteChevalmarin",
                "ProtoFsLeadingLady")
 
 
