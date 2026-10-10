@@ -493,6 +493,47 @@ public class FurinaSpendRoundFixesTests : IDisposable
     }
 
     [Fact]
+    public void A_furina_fight_writes_her_spend_cards_in_hand_at_each_turn_start()
+    {
+        // The Furina whole-run round 2 (2026-10-10): a stranded bank needs
+        // the hand it was stranded with. A Spend card is a row whose own
+        // play pays Fanfare; a Power that Spends later or reacts to a Spend
+        // is not one, and neither is a Drain chooser.
+        Assert.Equal(3, (int)Invoke("CountSpendCards", new List<CardModel>
+        {
+            new ProtoFsQuickCue(), new ProtoFsBravura(),
+            new ProtoFsSpiritedAria(), new ProtoFsThunderousApplause(),
+            new ProtoFsShowstopper(), new ProtoFsCurtainRise(),
+        })!);
+        Assert.Equal(0, (int)Invoke("CountSpendCards", new object?[] { null })!);
+
+        var furina = Seat.Furina(80).WithCombatState();
+        var combat = DispatchProxy.Create<ICombatState,
+            FurinaSpendAllPreviewWeakTests.ListenerProxy>();
+        furina.Creature.CombatState = combat;
+        Invoke("OpenSeatForTest", furina.Player, 1, 0);
+        FurinaStageLedger.For(furina.Creature);
+        Invoke("RecordSpendCardsTurnStart", furina.Player, 1, 0);
+        Invoke("RecordSpendCardsTurnStart", furina.Player, 2, 3);
+
+        var r = JsonDocument.Parse((string)Invoke("JsonForTest", furina.Player)!)
+            .RootElement;
+        var rows = r.GetProperty("spend_cards_in_hand_turn_start")
+            .EnumerateArray()
+            .Select(row => row.EnumerateArray().Select(v => v.GetInt32()).ToArray())
+            .ToArray();
+        Assert.Equal(new[] { new[] { 1, 0 }, new[] { 2, 3 } }, rows);
+
+        // Anyone else writes no row and no key.
+        var klee = Seat.Klee();
+        Invoke("OpenSeatForTest", klee.Player, 1, 0);
+        Invoke("RecordSpendCardsTurnStart", klee.Player, 1, 2);
+        var kr = JsonDocument.Parse((string)Invoke("JsonForTest", klee.Player)!)
+            .RootElement;
+        Assert.False(kr.TryGetProperty("spend_cards_in_hand_turn_start", out _));
+    }
+
+    [Fact]
     public void A_won_fight_waits_for_the_end_of_combat_effects_and_writes_the_hp_after()
     {
         var klee = Seat.Klee(80);

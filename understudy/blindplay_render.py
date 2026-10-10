@@ -110,6 +110,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         TRANSFORM_NOTE, TRANSFORM_UNREADABLE,
                                         BEHIND_CLAUSE, MAP_PATHS_HEAD,
                                         NOTHING_BEHIND_CLAUSE, ORB_ORDER_NOTE,
+                                        TURNS_YOU_TAG,
+                                        CONFIRM_TAKES_NOTHING_NOTE,
                                         POTION_BARRED_NOTE,
                                         RESOLUTION_APPLIED,
                                         RESOLUTION_REMOVED,
@@ -187,6 +189,10 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # line is the glance, not the explanation.
     if c.get("element"):
         head += f" [{c['element']}]"
+    # The Furina whole-run round 2 (2026-10-10): while Surrounded, a card
+    # that takes `on` turns you to face its target (the board sets it).
+    if c.get("turns_you"):
+        head += TURNS_YOU_TAG
     # `EB-181`: the enchantment beside the title, where the game paints it and
     # where `(upgraded)` already sits -- the two facts a copy of a card can
     # differ by, on one line, so two copies of one title are told apart at a
@@ -3844,6 +3850,8 @@ def render(obs: dict[str, Any]) -> str:
                     and not (note.startswith(CLOSES_NOTE_HEAD)
                              and not obs["can_confirm"]):
                 out += ["", f"Confirm is {'available' if obs['can_confirm'] else 'not available'}."]
+            if obs.get("confirm_takes_nothing"):
+                out += ["", CONFIRM_TAKES_NOTHING_NOTE]
             # 2026-09-26 (wave-3 Furina lane 4): the fight behind a chooser
             # that opened mid-fight, where the bridge sends it.
             if obs.get("board"):

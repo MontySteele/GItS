@@ -111,6 +111,10 @@ STOLEN_CARD_CLAUSE = " It holds your **{card}**."
 BEHIND_CLAUSE = (" Behind you now: {names}. Playing a card on an enemy turns "
                  "you to face it.")
 NOTHING_BEHIND_CLAUSE = " No enemy is behind you now."
+#: The Furina whole-run round 2 (2026-10-10): "While Surrounded, the hand
+#: does not mark which cards turn her to face their target." Beside each
+#: hand card that takes `on`, only while you are Surrounded.
+TURNS_YOU_TAG = " (turns you)"
 
 #: 2026-09-26 (control seat, Ironclad): "Sozu: the tool said 'Took: Power
 #: Potion' and nothing arrived." Said beside the offer, before the claim.
@@ -872,6 +876,12 @@ CHOOSER_MAYBE_CLOSES_NOTE = (
     "*Each `choose` picks one card. On this chooser the pick that completes "
     "the count may close it at once; if it is still open after that, say "
     "`confirm`.*")
+
+
+#: The Furina whole-run round 2 (2026-10-10): Neow's Fury allows 0 picks.
+#: Printed where the confirm is live and nothing is picked.
+CONFIRM_TAKES_NOTHING_NOTE = ("*You may pick none: a bare `confirm` closes "
+                              "this chooser with nothing taken.*")
 
 
 def _closes_note(picks: int | None) -> str:
