@@ -240,14 +240,25 @@ class Session:
     # and `--fastmp join --clientId N` are the only callers
     # (`understudy/embark_coop.py`), and nothing single-player passes any.
     extra_args: tuple[str, ...] = ()
+    # The Varka payoff round (2026-10-10): extra launch variables, EMPTY BY
+    # DEFAULT for the same reason (`GITS_VARKA_KNIGHT`, from the embark).
+    extra_env: dict[str, str] = {}
 
     def __init__(self, stamp: str, do_setup: bool = True,
                  intent: str | None = None,
                  instance: "instances.Instance | None" = None,
                  install_bridge: bool = True,
-                 extra_args: tuple[str, ...] | list[str] = ()):
+                 extra_args: tuple[str, ...] | list[str] = (),
+                 extra_env: dict[str, str] | None = None):
         self.stamp = stamp
         self.extra_args = tuple(str(a) for a in extra_args)
+        # The Varka payoff round (2026-10-10): variables the launched game
+        # gets on top of the lane's own (`GITS_VARKA_KNIGHT`), assigned on
+        # every launch and relaunch of this session. An empty value is
+        # assigned, not dropped, so an operator's stray export cannot reach
+        # the game (`GITS_TELEMETRY_INTENT`'s rule below).
+        self.extra_env = {str(k): str(v)
+                          for k, v in (extra_env or {}).items()}
         self.do_setup = do_setup
         # Passed to the launched game so the mod's own hook labels its
         # records with the same declaration the bot feed is stamping.
@@ -517,6 +528,7 @@ class Session:
         # whatever archetype a person last declared for their own session.
         # Do not "simplify" this to a conditional set.
         env["GITS_TELEMETRY_INTENT"] = self.intent or ""
+        env.update(dict(self.extra_env))
         self.proc = subprocess.Popen([str(exe), *self.extra_args],
                                      cwd=str(self.dir),
                                      env=env,

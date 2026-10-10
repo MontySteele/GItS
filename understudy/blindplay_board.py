@@ -1038,6 +1038,10 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # The quarter-line round (2026-10-10): the part of it drained
             # past the line, lost unless Repaid. 0 on a build that sends none.
             "drained_past": _int(raw.get("drained_past")),
+            # The Spend round (2026-10-10): A Five-Century Act is in play, so
+            # the past-line part returns after combat. False on a build that
+            # sends none.
+            "past_returns": bool(raw.get("past_returns")),
             "line": None if line is None else _int(line),
             # Seat page 3: where the line comes from, in the mod's words
             # (`FurinaStageLaw.LineWhy`); "" on a build that sends none.
@@ -1387,6 +1391,12 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
         out.append({"card": card,
                     "oath": oath,
                     "fang_ascension": bool(row.get("fang_ascension")),
+                    # The Varka payoff round (2026-10-10): the relic that
+                    # added it ("" on an older mod), and the card's Anemo
+                    # applications that found no aura, and that found one.
+                    "fang_relic": _text(row.get("fang_relic")),
+                    "swirl_no_aura": _int(row.get("swirl_no_aura")),
+                    "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
                     "auto_played": bool(row.get("auto_played")),
                     "carried": bool(row.get("carried")),
@@ -1400,7 +1410,10 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
 PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned",
                     # Seat page 3 (2026-10-05): a Shatter, and the curtain
                     # call's drained HP given back.
-                    "shattered", "curtain")
+                    "shattered", "curtain",
+                    # The Varka payoff round (2026-10-10): Wolfpack shuffled
+                    # copies in; what a Swirl paid under Twin Gales.
+                    "wolfpack", "paid")
 #: The event kinds a page OUTSIDE a fight prints (the reward screen after it).
 OUTSIDE_FIGHT_EVENTS = frozenset({"curtain"})
 
@@ -1437,6 +1450,12 @@ def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         "on_player": bool(ev.get("on_player")),
                         "seq": _int(ev.get("seq")),
                         "amount": _int(ev.get("amount")),
+                        # The Spend round (2026-10-10): the curtain call's
+                        # past-line HP lost, and (A Five-Century Act) the
+                        # part of the return that was past the line. 0 on a
+                        # build that sends neither.
+                        "lost": _int(ev.get("lost")),
+                        "past": _int(ev.get("past")),
                         "source": _text(row.get("card"))})
     return out
 

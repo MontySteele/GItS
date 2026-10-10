@@ -1001,7 +1001,7 @@
       "guest_upgraded": true
     },
     "proto_fs_high_stakes": {
-      "power_amount": 2
+      "power_amount": -1
     },
     "proto_fs_hold_the_stage": {
       "formula_base": 2

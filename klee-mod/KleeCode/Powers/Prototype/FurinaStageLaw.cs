@@ -173,9 +173,24 @@ public static class FurinaStageLaw
     /// act again."</summary>
     public const int ShowstopperSpend = 5;
 
-    /// <summary>Against the Tide and High Stakes: "within 5 HP of your Drain
-    /// line".</summary>
+    /// <summary>Against the Tide: "within 5 HP of your Drain line".</summary>
     public const int NearLine = 5;
+
+    /// <summary>High Stakes (the Spend round, 2026-10-10,
+    /// <c>review/records/furina-spend-round-2026-10-10.md</c>): "Your Attacks
+    /// deal 1 additional damage for every 5 HP you have Drained and not
+    /// Repaid." The card's power amount is this divisor. Mirrors
+    /// <c>furina_stage.HIGH_STAKES_EVERY</c>.</summary>
+    public const int HighStakesEvery = 5;
+
+    /// <summary>High Stakes upgraded: "for every 4".</summary>
+    public const int HighStakesEveryUpgraded = 4;
+
+    /// <summary>High Stakes' bonus a hit: the net Drained (what Repay has
+    /// not given back, past the line included) over <paramref name="every"/>,
+    /// rounded down. 0 for a divisor below 1.</summary>
+    public static int HighStakesBonus(int drained, int every) =>
+        every > 0 && drained > 0 ? drained / every : 0;
 
     /// <summary>Hymn of Renewal: "Whenever you Repay 4 or more HP at once,
     /// gain 1 Strength." (HP actually repaid.)</summary>

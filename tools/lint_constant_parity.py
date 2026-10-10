@@ -321,6 +321,9 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.EnsembleSeats": _stage("ENSEMBLE_SEATS"),
     "FurinaStageLaw.ShowstopperSpend": _stage("SHOWSTOPPER_SPEND"),
     "FurinaStageLaw.NearLine": _stage("NEAR_LINE"),
+    # High Stakes' divisor (the Spend round, 2026-10-10).
+    "FurinaStageLaw.HighStakesEvery": _stage("HIGH_STAKES_EVERY"),
+    "FurinaStageLaw.HighStakesEveryUpgraded": _stage("HIGH_STAKES_EVERY_UPGRADED"),
     "FurinaStageLaw.HymnThreshold": _stage("HYMN_THRESHOLD"),
     "FurinaStageLaw.PrimaDonnaFanfare": _stage("PRIMA_DONNA_FANFARE"),
     "FurinaStageLaw.ReginaDrain": _stage("REGINA_DRAIN"),

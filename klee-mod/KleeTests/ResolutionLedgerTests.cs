@@ -306,7 +306,8 @@ public class ResolutionLedgerTests
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
                              "overflowed", "hits", "applied", "summoned",
-                             "oath", "fang_ascension", "between",
+                             "oath", "fang_ascension", "fang_relic",
+                             "swirl_no_aura", "swirl_on_aura", "between",
                              "events" },
                      new List<string>(row.Keys).ToArray());
 
@@ -439,7 +440,7 @@ public class ResolutionLedgerTests
         Assert.Equal("drawn", events[0]["kind"]);
         Assert.Equal("Strike", events[0]["card"]);
         Assert.Equal(new[] { "kind", "card", "target", "power", "combat_id",
-                             "on_player", "seq", "amount" },
+                             "on_player", "seq", "amount", "lost", "past" },
                      new List<string>(events[0].Keys).ToArray());
         Assert.Equal(0, events[0]["amount"]);
     }

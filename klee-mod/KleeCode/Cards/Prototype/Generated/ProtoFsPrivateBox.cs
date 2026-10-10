@@ -49,7 +49,7 @@ public sealed class ProtoFsPrivateBox : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(5m),
             new CalculationExtraVar(3m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.Of(card.Owner?.Creature).Count)
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.Of(card.Owner?.Creature).Count)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

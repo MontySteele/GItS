@@ -53,6 +53,20 @@ public readonly record struct StageBeat(
     int Dealt = -1, int TargetHp = -1, int Blocked = -1, int Caught = 0,
     int Standing = -1, string Source = "");
 
+/// <summary>ONE SPEND, for the play telemetry (the Spend round,
+/// 2026-10-10): what it was for (the card, or the Power or relic resolving;
+/// "" for a guest's act), what left the bank, the bank before it, and for a
+/// "Spend up to X" its cap (-1 otherwise; <see
+/// cref="FurinaStageLedger.MarkUpTo"/>).</summary>
+public readonly record struct StageSpendRecord(string Source, int Spent,
+                                               int Before, int Cap);
+
+/// <summary>The curtain call's parts
+/// (<see cref="FurinaStageLedger.CurtainCallOf"/>): the HP returned, the part
+/// of it drained past the line, and the past-line HP lost.</summary>
+public readonly record struct CurtainCallParts(int Back, int PastBack,
+                                               int Lost);
+
 /// <summary>
 /// What the kit reads off Furina's powers, in one record, so a headless pin
 /// can set them (<see cref="FurinaStageLedger.ModsOverride"/>) and the game
@@ -158,6 +172,17 @@ public sealed class FurinaStageLedger
             _byFurina[furina] = ledger;
         }
         return ledger;
+    }
+
+    /// <summary>This Furina's ledger for her current combat if one exists,
+    /// else null. Creates nothing and captures nothing, so a READER (the play
+    /// telemetry) can ask without moving the entry HP the line is read from.
+    /// </summary>
+    public static FurinaStageLedger? Peek(Creature furina)
+    {
+        var combat = (object?)furina.CombatState;
+        if (combat == null || !ReferenceEquals(_combat, combat)) return null;
+        return _byFurina.TryGetValue(furina, out var ledger) ? ledger : null;
     }
 
     /// <summary>Every Furina with a ledger in the current combat (the curtain
@@ -297,6 +322,10 @@ public sealed class FurinaStageLedger
         Opened = false;
         _fountains.Clear();
         FountainSeen = 0;
+        _spends.Clear();
+        PeakFanfare = 0;
+        PlayingCard = "";
+        _upToCap = -1;
     }
 
     /// <summary>The combat's opening has been recorded.</summary>
@@ -474,13 +503,28 @@ public sealed class FurinaStageLedger
     /// the HP that returns when the combat ends -- the above-line part, up
     /// to Max HP; the past-line part too with A Five-Century Act in play.
     /// Empties the ledger: the past-line part is lost.</summary>
-    public int CurtainCall(int hp, int maxHp)
+    public int CurtainCall(int hp, int maxHp) => CurtainCallOf(hp, maxHp).Back;
+
+    /// <summary>The curtain call in its three parts (the Spend round,
+    /// 2026-10-10: the page said only what returned). <c>Back</c> is the HP
+    /// returned; <c>PastBack</c> the part of it drained past the line (A
+    /// Five-Century Act; the above-line part returns first); <c>Lost</c> the
+    /// past-line HP not Repaid that does not return (none with A Five-Century
+    /// Act). Empties the ledger.</summary>
+    public CurtainCallParts CurtainCallOf(int hp, int maxHp)
     {
-        var owed = DrainedAbove + (Mods.FiveCenturyAct > 0 ? DrainedPast : 0);
+        var five = Mods.FiveCenturyAct > 0;
+        var owed = DrainedAbove + (five ? DrainedPast : 0);
         var back = System.Math.Max(0, System.Math.Min(owed, maxHp - hp));
+        var parts = new CurtainCallParts(
+            back,
+            five ? System.Math.Max(0,
+                       System.Math.Min(DrainedPast, back - DrainedAbove))
+                 : 0,
+            five ? 0 : DrainedPast);
         DrainedAbove = 0;
         DrainedPast = 0;
-        return back;
+        return parts;
     }
 
     // ---- Fanfare: one number on Furina (rule 3) ------------------------
@@ -585,6 +629,10 @@ public sealed class FurinaStageLedger
         Fanfare -= pay;
         SpentThisTurn += pay;
         SpendsThisTurn++;
+        // The play telemetry's Spend record carries a card's "up to X" cap
+        // (the Spend round, 2026-10-10). A guest's share-Spend has no
+        // printed cap and records -1.
+        if (forPlay) MarkUpTo(cap);
         Note(new StageBeat(SpendEvent, default, -1, Fanfare, pay, ""));
         if (free > 0) NoteLine(StagePerformer.Navia, free);
         if (forPlay) SpentThisPlay = counted;
@@ -672,9 +720,12 @@ public sealed class FurinaStageLedger
     /// <summary>Is any Repay still owed?</summary>
     public bool OwesRepays => _fountains.Count > 0;
 
-    /// <summary>A fresh per-play spend record (every card play).</summary>
-    public void BeginPlay()
+    /// <summary>A fresh per-play spend record (every card play).
+    /// <paramref name="card"/> is the card's name as the play telemetry
+    /// writes it, so a Spend during the play is filed under it.</summary>
+    public void BeginPlay(string card = "")
     {
+        PlayingCard = card ?? "";
         SpentThisPlay = 0;
         RepaidThisPlay = 0;
         RepayLeftThisPlay = 0;
@@ -687,6 +738,7 @@ public sealed class FurinaStageLedger
     /// ("Deals 113").</summary>
     public void EndPlay()
     {
+        PlayingCard = "";
         SpentThisPlay = 0;
         RepaidThisPlay = 0;
         RepayLeftThisPlay = 0;
@@ -733,6 +785,7 @@ public sealed class FurinaStageLedger
 
     public void Note(StageBeat beat)
     {
+        Observe(beat);
         if (beat.SeatKey < 0 && beat.Seat >= 0 && beat.Seat < _seats.Count
             && _seats[beat.Seat].Who == beat.Who)
         {
@@ -769,6 +822,51 @@ public sealed class FurinaStageLedger
     }
 
     public void ClearBeats() => _beats.Clear();
+
+    // ---- the fight's Fanfare record (the play telemetry) ----------------
+    //
+    // THE SPEND ROUND (2026-10-10, "Next round: telemetry first"): per fight,
+    // her peak Fanfare and every Spend with the bank before it. Read off the
+    // beats every Fanfare move already files (a gain, Bis!'s return and each
+    // Spend all go through `Note`), so no Spend path needs a second call and
+    // a new one is counted the day it files its beat. The ledger lives one
+    // combat, so these are per fight. A read for `PlayTelemetry`; nothing
+    // the kit's rules ask.
+
+    private readonly List<StageSpendRecord> _spends = new();
+
+    private int _upToCap = -1;
+
+    /// <summary>The most Fanfare she held at once this combat.</summary>
+    public int PeakFanfare { get; private set; }
+
+    /// <summary>Every Spend this combat, in order.</summary>
+    public IReadOnlyList<StageSpendRecord> Spends => _spends;
+
+    /// <summary>The card being played, as the telemetry names it; "" between
+    /// plays (<see cref="BeginPlay"/>).</summary>
+    public string PlayingCard { get; private set; } = "";
+
+    /// <summary>
+    /// THE HOOK FOR "SPEND UP TO X" (the Spend paper's build, #1016): call
+    /// it just before the up-to Spend files its beat, and the next Spend
+    /// recorded carries <paramref name="cap"/> as its cap (-1, the default,
+    /// for every other Spend).
+    /// </summary>
+    public void MarkUpTo(int cap) => _upToCap = cap;
+
+    private void Observe(StageBeat beat)
+    {
+        if (beat.Fanfare > PeakFanfare) PeakFanfare = beat.Fanfare;
+        if (beat.Event != SpendEvent) return;
+        var source = beat.Source.Length > 0 ? beat.Source
+                   : Cause.Length > 0 ? Cause
+                   : PlayingCard;
+        _spends.Add(new StageSpendRecord(source, beat.Moved,
+                                         beat.Fanfare + beat.Moved,
+                                         _upToCap));
+        _upToCap = -1;
+    }
 
     public const string ArriveEvent = "arrive";
     public const string ActEvent = "act";
@@ -815,6 +913,9 @@ public sealed class FurinaStageLedger
         snapshot["spent_this_turn"] = ledger.SpentThisTurn;
         snapshot["drained"] = ledger.Drained;
         snapshot["drained_past"] = ledger.DrainedPast;
+        // The Spend round (2026-10-10): A Five-Century Act is in play, so the
+        // past-line part returns after combat and the page says so.
+        snapshot["past_returns"] = ledger.Mods.FiveCenturyAct > 0;
         snapshot["entry_hp"] = ledger.EntryHp;
         snapshot["entry_max_hp"] = ledger.EntryMaxHp;
         snapshot["drain_line"] = ledger.Line;

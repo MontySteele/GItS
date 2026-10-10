@@ -6,6 +6,7 @@
     python tools/telemetry_report.py --character Klee --cards-merge-upgrades
     python tools/telemetry_report.py --character Varka --feed bot --json
     python tools/telemetry_report.py --reactions --character Klee
+    python tools/telemetry_report.py --fanfare --character Furina
     python tools/telemetry_report.py --coop --reactions
     python tools/telemetry_report.py --offers --character Varka --element pyro
     python tools/telemetry_report.py --character Klee --character base5 \\
@@ -24,6 +25,11 @@ READ THIS BEFORE USING A FIELD.
   * A per-character window should start at a build or a `run_instance`
     (`--run-instance`), not a date: a date window picks up stopped attempts,
     off-seed runs and reruns on the same seed.
+  * `hp_lost` is the HP the fight cost BEFORE the end-of-combat effects:
+    Furina's curtain call returns drained HP after it. `hp_after_return`
+    (every character, since 2026-10-10) is the HP once they ran; the `net%`
+    column is `hp_start - hp_after_return` over max HP, and is blank on a
+    record without the key (or with -1, not read).
   * `run_instance` is `<session stamp>#<ordinal>`, the stamp being the
     second the game process first wrote telemetry. Two lanes started in the
     same second share it, so a run is (`run_id`, `run_instance`), never
@@ -68,6 +74,13 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      that carry the keys (`nR`; written since 2026-10-06), divided by their
      turns, because most fights hold a handful of reactions and a median of
      small counts reads 0. Credit is the dealing seat's.
+
+  5. With `--fanfare`: Furina's Fanfare per fight, per group (the keys
+     `fanfare_peak`, `fanfare_end`, `fanfare_spends`, since 2026-10-10):
+     medians of the peak, of the bank at the close (the fight's end or her
+     death), of Spends a fight, of what one Spend took and of the bank
+     before it; and the share of Spends that were "Spend up to X" (`cap`
+     not -1). Fights without the keys are left out (`nF`).
 
 CO-OP (`--coop`). Keeps only two-seat fights (`seats == 2`) instead of solo
 ones. Every co-op lane writes a row for BOTH seats of the same fight, so rows
@@ -256,6 +269,17 @@ def hp_lost_pct(row: dict) -> float | None:
     return 100.0 * lost / top
 
 
+def hp_net_pct(row: dict) -> float | None:
+    """HP lost after the end-of-combat effects, as % of max: `hp_start -
+    hp_after_return` (2026-10-10). None on a record without the key, or with
+    -1 (not read)."""
+    start, after = _num(row, "hp_start"), _num(row, "hp_after_return")
+    top = _num(row, "max_hp")
+    if start is None or after is None or after < 0 or not top or top <= 0:
+        return None
+    return 100.0 * (start - after) / top
+
+
 def peak_strength(row: dict) -> float | None:
     """The highest end-of-turn Strength in the fight; None when the record
     has no `strength_by_turn` rows."""
@@ -283,6 +307,7 @@ class Cell:
     n_block: int
     strength: float | None
     losses: int
+    hp_net_pct: float | None = None
 
     def as_dict(self) -> dict:
         return dict(self.__dict__)
@@ -297,7 +322,8 @@ def cell(group: str, act: int, kind: str, rows: list[dict]) -> Cell:
                 _median(blocks),
                 sum(1 for b in blocks if b is not None),
                 _median([peak_strength(r) for r in rows]),
-                sum(1 for r in rows if r.get("outcome") == "died"))
+                sum(1 for r in rows if r.get("outcome") == "died"),
+                _median([hp_net_pct(r) for r in rows]))
 
 
 def table(grouped: dict[str, list[dict]]) -> list[Cell]:
@@ -333,15 +359,74 @@ def comparison(grouped: dict[str, list[dict]], baseline: list[dict]
             bh = _median([hp_lost_pct(r) for r in base])
             dr = md / bd if md is not None and bd else None
             hr = mh / bh if mh is not None and bh else None
+            mn = _median([hp_net_pct(r) for r in mine])
+            bn = _median([hp_net_pct(r) for r in base])
             out.append({
                 "group": g, "act": act, "fights": len(mine),
                 "base_fights": len(base),
                 "dmg_turn": md, "base_dmg_turn": bd, "dmg_ratio": dr,
                 "hp_lost_pct": mh, "base_hp_lost_pct": bh, "hp_ratio": hr,
+                # 2026-10-10: after the end-of-combat effects. Informative;
+                # the bar still reads `hp_lost` (comparability).
+                "hp_net_pct": mn, "base_hp_net_pct": bn,
+                "hp_net_ratio": mn / bn if mn is not None and bn else None,
                 "within_bar": (dr is not None and hr is not None
                                and abs(dr - 1) <= BAR and abs(hr - 1) <= BAR),
             })
     return out
+
+
+# --------------------------------------------------------------- fanfare ---
+
+FANFARE_KEYS = ("fanfare_peak", "fanfare_end", "fanfare_spends")
+
+
+def fanfare_summary(group: str, rows: list[dict]) -> dict:
+    """Furina's Fanfare per fight for one group (2026-10-10): medians over
+    the fights that carry the keys."""
+    keyed = [r for r in rows
+             if all(k in r for k in FANFARE_KEYS)
+             and isinstance(r.get("fanfare_spends"), list)]
+    spends = [s for r in keyed for s in r["fanfare_spends"]
+              if isinstance(s, dict)]
+    up_to = sum(1 for s in spends
+                if isinstance(s.get("cap"), int) and s["cap"] >= 0)
+    return {
+        "group": group, "fights": len(rows), "fights_with_keys": len(keyed),
+        "peak": _median([_num(r, "fanfare_peak") for r in keyed]),
+        "end": _median([_num(r, "fanfare_end") for r in keyed]),
+        "end_on_death": _median([_num(r, "fanfare_end") for r in keyed
+                                 if r.get("outcome") == "died"]),
+        "spends_per_fight": _median([float(len(r["fanfare_spends"]))
+                                     for r in keyed]),
+        "spent_per_spend": _median([_num(s, "spent") for s in spends]),
+        "before_per_spend": _median([_num(s, "before") for s in spends]),
+        "spends": len(spends),
+        "up_to_share": (up_to / len(spends)) if spends else None,
+    }
+
+
+def fanfare(grouped: dict[str, list[dict]]) -> list[dict]:
+    return [fanfare_summary(g, rows) for g, rows in grouped.items()]
+
+
+def render_fanfare(fx: list[dict]) -> list[str]:
+    lines = ["", "FANFARE (Furina, medians over the nF fights that carry the "
+             "keys; spent/before per Spend)",
+             f"{'group':<16}{'n':>5}{'nF':>5}{'peak':>7}{'end':>7}"
+             f"{'death':>7}{'sp/f':>6}{'spent':>7}{'before':>8}"
+             f"{'n sp':>6}{'upto':>6}"]
+    for s in fx:
+        share = ("--" if s["up_to_share"] is None
+                 else f"{100 * s['up_to_share']:.0f}%")
+        lines.append(f"{s['group'][:15]:<16}{s['fights']:>5}"
+                     f"{s['fights_with_keys']:>5}{_f(s['peak']):>7}"
+                     f"{_f(s['end']):>7}{_f(s['end_on_death']):>7}"
+                     f"{_f(s['spends_per_fight']):>6}"
+                     f"{_f(s['spent_per_spend']):>7}"
+                     f"{_f(s['before_per_spend']):>8}{s['spends']:>6}"
+                     f"{share:>6}")
+    return lines
 
 
 # ------------------------------------------------------------- reactions ---
@@ -548,16 +633,18 @@ def render_reactions(rx: list[dict]) -> list[str]:
 
 def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
            card_group: str | None, header: list[str], top: int,
-           rx: list[dict] | None = None) -> str:
+           rx: list[dict] | None = None,
+           fx: list[dict] | None = None) -> str:
     lines = list(header)
     lines.append("")
     lines.append("BY GROUP x ACT x KIND (medians across fights)")
     lines.append(f"{'group':<16}{'act':>4} {'kind':<8}{'n':>5}{'dmg/t':>8}"
-                 f"{'hp%':>7}{'turns':>7}{'blk/t':>7}{'nB':>5}{'str':>6}"
-                 f"{'lost':>6}")
+                 f"{'hp%':>7}{'net%':>7}{'turns':>7}{'blk/t':>7}{'nB':>5}"
+                 f"{'str':>6}{'lost':>6}")
     for c in cells:
         lines.append(f"{c.group:<16}{c.act:>4} {c.kind:<8}{c.fights:>5}"
                      f"{_f(c.dmg_turn):>8}{_f(c.hp_lost_pct):>7}"
+                     f"{_f(c.hp_net_pct):>7}"
                      f"{_f(c.turns):>7}{_f(c.block_turn):>7}{c.n_block:>5}"
                      f"{_f(c.strength):>6}{c.losses:>6}")
     if comp:
@@ -596,6 +683,8 @@ def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
                          f"{c['damage']:>8.0f}{_f(c['dmg_per_play']):>10}")
     if rx is not None:
         lines.extend(render_reactions(rx))
+    if fx is not None:
+        lines.extend(render_fanfare(fx))
     return "\n".join(lines)
 
 
@@ -633,6 +722,7 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
         if card_group is not None else []
     rx = reactions(grouped, kept, coop, list(args.character or [])) \
         if getattr(args, "reactions", False) else None
+    fx = fanfare(grouped) if getattr(args, "fanfare", False) else None
     out = {"filters": {"since": args.since, "until": args.until,
                         "baseline_since": args.baseline_since or args.since,
                         "baseline_until": args.baseline_until or args.until,
@@ -650,6 +740,8 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
             "_cells": cells}
     if rx is not None:
         out["reactions"] = rx
+    if fx is not None:
+        out["fanfare"] = fx
     return out
 
 
@@ -702,6 +794,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="add the reaction section: reactions, amplifier "
                     "bonus damage and reaction debuffs a turn, by type "
                     "(by team under --coop)")
+    ap.add_argument("--fanfare", action="store_true",
+                    help="add the Fanfare section: Furina's peak, Fanfare at "
+                    "the close, Spends a fight and the bank before each, by "
+                    "group (keys since 2026-10-10)")
     ap.add_argument("--feed", choices=("bot", "human", "all"), default="all")
     ap.add_argument("--cards-for", help="the group whose cards are listed "
                     "(default: the first non-base5 group)")
@@ -747,7 +843,7 @@ def main(argv: list[str] | None = None) -> int:
               "groups: " + ", ".join(f"{g} {n}" for g, n in
                                      out["groups"].items())]
     print(render(cells, out["comparison"], out["cards"], out["cards_for"],
-                 header, args.top, out.get("reactions")))
+                 header, args.top, out.get("reactions"), out.get("fanfare")))
     return 0
 
 

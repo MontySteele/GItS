@@ -74,31 +74,44 @@ public static class DrainedCounter
     /// connected it late. The
     /// Drain line rule (2026-10-09): a Drain may go past it.
     /// </summary>
-    public static string LineSentence(int line, string why) =>
+    public static string LineSentence(int line, string why,
+                                      bool pastReturns = false) =>
         "Drain line [blue]"
       + line.ToString(CultureInfo.InvariantCulture) + "[/blue] HP"
       + (string.IsNullOrEmpty(why) ? "" : " (" + why + ")")
-      + ": HP you [gold]Drain[/gold] past it is lost unless you "
-      + "[gold]Repay[/gold] it.";
+      + (pastReturns
+            // The Spend round (2026-10-10): A Five-Century Act returns the
+            // HP drained past the line too, so nothing past it is lost.
+            ? "."
+            : ": HP you [gold]Drain[/gold] past it is lost unless you "
+              + "[gold]Repay[/gold] it.");
 
     /// <summary>THE "LOST FOR GOOD" COUNTER (the quarter-line round,
     /// 2026-10-10, "What to change" 1): the drained count and, when any of
     /// it is past the line, that part in one phrase: "Drained 12 HP (4 past
     /// your line: lost unless you Repay)". Seats learned the cost of
     /// draining past the line only by losing the HP. Pure.</summary>
-    public static string DrainedPhrase(int drained, int past) =>
+    public static string DrainedPhrase(int drained, int past,
+                                       bool pastReturns = false) =>
         "Drained [blue]" + drained.ToString(CultureInfo.InvariantCulture)
       + "[/blue] HP"
       + (past > 0
             ? " ([blue]" + past.ToString(CultureInfo.InvariantCulture)
-              + "[/blue] past your line: lost unless you [gold]Repay[/gold])"
+              + "[/blue] past your line"
+              // The Spend round (2026-10-10): under A Five-Century Act the
+              // past-line part returns at the curtain call, so it is not
+              // "lost unless you Repay".
+              + (pastReturns
+                    ? ")"
+                    : ": lost unless you [gold]Repay[/gold])")
             : "");
 
     /// <summary>The hover's body: the line, the drained count (and how much
     /// of it is past the line) and the rule. Pure.</summary>
     public static string HoverBody(int drained, int line, string why,
-                                   int past = 0) =>
-        LineSentence(line, why) + "\n" + DrainedPhrase(drained, past)
+                                   int past = 0, bool pastReturns = false) =>
+        LineSentence(line, why, pastReturns) + "\n"
+      + DrainedPhrase(drained, past, pastReturns)
       + ".\n" + ArmKeywordTips.DrainBody;
 
     /// <summary>The hover's body for her, read off the ledger now.</summary>
@@ -110,7 +123,8 @@ public static class DrainedCounter
         }
         var ledger = FurinaStageLedger.For(creature);
         return HoverBody(ledger.Drained, ledger.Line, ledger.LineWhy,
-                         ledger.DrainedPast);
+                         ledger.DrainedPast,
+                         ledger.Mods.FiveCenturyAct > 0);
     }
 
     /// <summary>Build the counter for the LOCAL seat, from the

@@ -322,4 +322,37 @@ public class FurinaSpendUpToTests
         Assert.Equal(2, FurinaStageLaw.NaviaSpendDivisor);
         Assert.Equal(4, FurinaStageLaw.FreminetSpendDivisor);
     }
+
+    // ---- the telemetry's Spend record (the Spend round, 2026-10-10) ----------
+
+    /// <summary>An up-to Spend in a card play is recorded under the card
+    /// with its cap; a guest's share-Spend under the guest, cap -1
+    /// (<see cref="FurinaStageLedger.Spends"/>, read by `PlayTelemetry`).
+    /// </summary>
+    [Fact]
+    public void The_telemetry_records_an_up_to_cap_and_a_guests_source()
+    {
+        var kit = StageKit.With(20, StagePerformer.Freminet,
+                                StagePerformer.Navia);
+        kit.Stage.BeginPlay("Tidal Flourish+");
+        Assert.Equal(10, Run(kit.Director.SpendUpTo(10)));
+        kit.Stage.EndPlay();
+        Run(kit.Director.Act(kit.Stage.Seats[0]));   // Freminet: a quarter
+        Run(kit.Director.Act(kit.Stage.Seats[1]));   // Navia: half the rest
+        Assert.Equal(new[]
+            {
+                // Navia's line makes the turn's first 2 free: 10 counted, 8
+                // taken.
+                new StageSpendRecord("Tidal Flourish+", 8, 20, 10),
+                new StageSpendRecord(StageDirector.FreminetSpendSource, 3, 12,
+                                     -1),
+                new StageSpendRecord(StageDirector.NaviaSpendSource, 4, 9,
+                                     -1),
+            },
+            kit.Stage.Spends.ToArray());
+        Assert.Equal("Freminet", StageDirector.FreminetSpendSource);
+        Assert.Equal("Navia", StageDirector.NaviaSpendSource);
+        // The scope covers only the Spend: the play's source is back after.
+        Assert.Equal("", kit.Stage.Cause);
+    }
 }

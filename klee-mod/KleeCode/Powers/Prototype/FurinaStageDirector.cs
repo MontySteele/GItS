@@ -204,11 +204,20 @@ public sealed class StageDirector
     /// Chevreuse, Crescendo) but not like a spend-all (no Bis!, no Standing
     /// Room Only). Returns what counts as spent.
     /// <paramref name="forPlay"/> is false for a guest's act.</summary>
-    public async Task<int> SpendUpTo(int cap, bool forPlay = true)
+    public async Task<int> SpendUpTo(int cap, bool forPlay = true,
+                                      string source = "")
     {
         var navia = _stage.NaviaDiscount > 0 && cap > 0
             ? _stage.SeatOf(StagePerformer.Navia) : null;
-        var spent = _stage.SpendUpTo(cap, forPlay);
+        int spent;
+        // A guest's act names itself on the Spend it files, so the play
+        // telemetry's record says whose it was (the Spend round,
+        // 2026-10-10). Only the ledger's Spend is in the scope: what answers
+        // it (Thunderous Applause, Chevreuse) keeps its own source.
+        using (source.Length > 0 ? _stage.CausedBy(source) : null)
+        {
+            spent = _stage.SpendUpTo(cap, forPlay);
+        }
         if (spent <= 0) return 0;
         if (navia != null) await _board.LineCue(navia);
         await AfterSpend();
@@ -220,8 +229,14 @@ public sealed class StageDirector
     /// "Spend a quarter" (divisor 4). A share of what is left when it acts,
     /// so two such guests split the bank oldest first. Returns what counts
     /// as spent.</summary>
-    public Task<int> SpendShare(int divisor) =>
-        SpendUpTo(_stage.Fanfare / divisor, forPlay: false);
+    public Task<int> SpendShare(int divisor, string source = "") =>
+        SpendUpTo(_stage.Fanfare / divisor, forPlay: false, source: source);
+
+    /// <summary>The source Navia's act files its Spend under.</summary>
+    public const string NaviaSpendSource = "Navia";
+
+    /// <summary>The source Freminet's act files its Spend under.</summary>
+    public const string FreminetSpendSource = "Freminet";
 
     private async Task AfterSpend()
     {
@@ -486,11 +501,22 @@ public sealed class StageDirector
     /// when the combat ends, the HP drained above the line returns (and the
     /// HP drained past it, with A Five-Century Act). Not a Repay: no
     /// Fanfare, no readers. Returns the HP returned.</summary>
-    public async Task<int> CurtainCall()
+    public async Task<int> CurtainCall() => (await CurtainCallParts()).Back;
+
+    /// <summary>The curtain call with its parts (the Spend round,
+    /// 2026-10-10): what returned, the part of it past the line, and the
+    /// past-line HP lost. <c>Back</c> is what the heal actually gave.
+    /// </summary>
+    public async Task<CurtainCallParts> CurtainCallParts()
     {
-        var back = _stage.CurtainCall(_board.Hp, _board.MaxHp);
-        if (back <= 0) return 0;
-        return await _board.Heal(back);
+        var parts = _stage.CurtainCallOf(_board.Hp, _board.MaxHp);
+        if (parts.Back <= 0) return parts with { Back = 0, PastBack = 0 };
+        var healed = await _board.Heal(parts.Back);
+        return parts with
+        {
+            Back = healed,
+            PastBack = System.Math.Min(parts.PastBack, healed),
+        };
     }
 
     // ---- the turn-start Powers (the pool to 75) ----------------------------
@@ -623,7 +649,8 @@ public sealed class StageDirector
                 if (!_board.Over)
                 {
                     var more = await SpendShare(
-                        FurinaStageLaw.FreminetSpendDivisor);
+                        FurinaStageLaw.FreminetSpendDivisor,
+                        FreminetSpendSource);
                     if (more > 0 && !_board.Over)
                     {
                         await _board.Block(more);
@@ -635,7 +662,8 @@ public sealed class StageDirector
                 // "Spend half your Fanfare (rounded down). Deal that much Geo
                 // damage to a random enemy." (the Spend paper, pick 2).
                 // Nothing spent, nothing dealt.
-                moved = await SpendShare(FurinaStageLaw.NaviaSpendDivisor);
+                moved = await SpendShare(FurinaStageLaw.NaviaSpendDivisor,
+                                         NaviaSpendSource);
                 if (moved > 0 && !_board.Over)
                 {
                     await _board.Damage(who, StageTarget.Random, moved,

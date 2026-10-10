@@ -435,8 +435,8 @@ public static class FurinaStage
             ? FurinaStageFacePreview.Room(owner, DrainedOf(owner)) : 0;
     }
 
-    /// <summary>Against the Tide and High Stakes: "within 5 HP of your Drain
-    /// line".</summary>
+    /// <summary>Against the Tide: "within 5 HP of your Drain line".
+    /// </summary>
     public static bool NearLine(Creature? owner) =>
         LiveFor(owner)
         && FurinaStageLaw.NearTheLine((int)owner!.CurrentHp, LineOf(owner));
@@ -643,23 +643,27 @@ public static class FurinaStage
     public static async Task CurtainCall(Creature? owner)
     {
         if (!LiveFor(owner) || owner!.IsDead) return;
-        var back = await Director(new ThrowingPlayerChoiceContext(), owner)
-            .CurtainCall();
+        var parts = await Director(new ThrowingPlayerChoiceContext(), owner)
+            .CurtainCallParts();
         // 2026-10-05: the seat page says it on the next screen ("Drained N HP
-        // returned"); seats could not tell the drained HP came back.
-        if (back > 0)
+        // returned"); seats could not tell the drained HP came back. The
+        // Spend round (2026-10-10): and what did NOT come back, the HP
+        // drained past the line ("6 past your line lost"), or under A
+        // Five-Century Act how much of the return was past it.
+        if (parts.Back > 0 || parts.Lost > 0)
         {
             ResolutionLedger.NoteEvent(ResolutionLedger.HpReturned,
                                        string.Empty, owner, string.Empty,
-                                       back);
+                                       parts.Back, lost: parts.Lost,
+                                       past: parts.PastBack);
         }
         RefreshBadges(owner);
     }
 
     /// <summary>A card play opens: a fresh per-play spend record.</summary>
-    public static void BeginPlay(Creature? owner)
+    public static void BeginPlay(Creature? owner, string card = "")
     {
-        if (LiveFor(owner)) FurinaStageLedger.For(owner!).BeginPlay();
+        if (LiveFor(owner)) FurinaStageLedger.For(owner!).BeginPlay(card);
     }
 
     /// <summary>A card play closes: its spend record closes with it, so a
@@ -720,6 +724,12 @@ public static class FurinaStage
         foreach (var badge in owner!.Powers.OfType<FanfarePower>().ToList())
         {
             badge.Refresh();
+        }
+        // High Stakes' badge is its bonus now, which every Drain and Repay
+        // moves (the Spend round, 2026-10-10).
+        foreach (var stakes in owner.Powers.OfType<HighStakesPower>().ToList())
+        {
+            stakes.Refresh();
         }
         Vfx.FanfareCounter.Refresh(owner);
         Vfx.DrainedCounter.Refresh(owner);

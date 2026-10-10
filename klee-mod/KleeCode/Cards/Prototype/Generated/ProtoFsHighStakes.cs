@@ -38,20 +38,20 @@ public sealed class ProtoFsHighStakes : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForDrain(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRepay(ArmKeywordTips.ForDrain(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_high_stakes");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "High Stakes"),
-        ("description", "While you are within 5 HP of your [gold]Drain[/gold] line, your Attacks deal {PowerAmount:diff()} additional damage."),
+        ("description", "Your Attacks deal 1 additional damage for every {PowerAmount:diff()} HP you have [gold]Drained[/gold] and not [gold]Repaid[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new DynamicVar("PowerAmount", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,6 +68,6 @@ public sealed class ProtoFsHighStakes : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(-1m);
     }
 }

@@ -156,9 +156,20 @@ public static class ResolutionLedger
         /// <summary>Varka's Oath gains inside this card, in order: the
         /// element, the amount, and "applied", "Swirl" or "" for its source
         /// (<see cref="NoteOath"/>). `FangAscension` marks the card whose
-        /// gain made Boreas's Fang add Four Winds' Ascension.</summary>
+        /// gain made Boreas's Fang add Four Winds' Ascension, and `FangRelic`
+        /// names the relic that did (Wolf's Gravestone after Orobas; the
+        /// Varka payoff round, 2026-10-10).</summary>
         public List<(string Element, int Amount, string Source)> Oath { get; } = new();
         public bool FangAscension { get; set; }
+        public string FangRelic { get; set; } = string.Empty;
+
+        /// <summary>The Varka payoff round (2026-10-10): Anemo applications
+        /// inside this card that found NO aura to Swirl, and ones that found
+        /// one (<see cref="NoteAnemoApplication"/>). A Sucrose played on a
+        /// board with no aura reads "no aura to Swirl" rather than "nothing
+        /// countable".</summary>
+        public int SwirlNoAura { get; set; }
+        public int SwirlOnAura { get; set; }
 
         public bool Carried { get; set; }
         public bool Overflowed { get; set; }
@@ -176,10 +187,16 @@ public static class ResolutionLedger
     /// remembers the last one it printed prints only what is new -- across
     /// a restart too.
     /// </summary>
+    /// <remarks>The Spend round (2026-10-10): the curtain call carries the
+    /// HP drained past the line that did NOT come back (`Lost`, the fight
+    /// ended before it was Repaid) and, under A Five-Century Act, the part of
+    /// `Amount` that was past the line (`Past`). 0 on every other kind.
+    /// </remarks>
     public readonly record struct PageEvent(string Kind, string Card,
                                             string Target, string Power,
                                             string CombatId, bool OnPlayer,
-                                            long Seq, int Amount = 0);
+                                            long Seq, int Amount = 0,
+                                            int Lost = 0, int Past = 0);
 
     /// <summary>The event kinds, spelled once (the page reads these words).
     /// </summary>
@@ -189,6 +206,12 @@ public static class ResolutionLedger
     public const string Returned = "returned";
     public const string Shattered = "shattered";
     public const string HpReturned = "curtain";
+    /// <summary>The Varka payoff round (2026-10-10): Wolfpack shuffled
+    /// `Amount` copies of Four Winds' Ascension into the draw pile; and what
+    /// one Swirl paid under Twin Gales (`Power` the payouts, `Target` the
+    /// body Swirled).</summary>
+    public const string Wolfpack = "wolfpack";
+    public const string SwirlPaid = "paid";
 
     private static long _seq =
         System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000;
@@ -257,7 +280,8 @@ public static class ResolutionLedger
     /// </summary>
     public static void NoteEvent(string kind, string card, string target,
                                  string power, string combatId = "",
-                                 bool onPlayer = false, int amount = 0)
+                                 bool onPlayer = false, int amount = 0,
+                                 int lost = 0, int past = 0)
     {
         if (string.IsNullOrEmpty(kind)) return;
         var row = _open;
@@ -284,19 +308,21 @@ public static class ResolutionLedger
                                      target ?? string.Empty,
                                      power ?? string.Empty,
                                      combatId ?? string.Empty, onPlayer,
-                                     ++_seq, amount));
+                                     ++_seq, amount, lost, past));
     }
 
     /// <summary>The same note for a body: its printed name, its combat id
     /// and whether it is a player, read without a throw.</summary>
     public static void NoteEvent(string kind, string card, Creature? body,
-                                 string power, int amount = 0)
+                                 string power, int amount = 0, int lost = 0,
+                                 int past = 0)
     {
         bool onPlayer;
         try { onPlayer = body?.IsPlayer ?? false; }
         catch (System.Exception) { onPlayer = false; }
         NoteEvent(kind, card, Named(body), power,
-                  Safe(() => body?.CombatId.ToString()), onPlayer, amount);
+                  Safe(() => body?.CombatId.ToString()), onPlayer, amount,
+                  lost, past);
     }
 
     /// <summary>
@@ -538,11 +564,24 @@ public static class ResolutionLedger
         _open.Oath.Add((element, amount, source ?? string.Empty));
     }
 
-    /// <summary>"This card's Oath gain made Boreas's Fang add Four Winds'
-    /// Ascension." Dropped where no play is open.</summary>
-    public static void NoteFangAscension()
+    /// <summary>"This card's Oath gain made <paramref name="relic"/> (Boreas's
+    /// Fang, or Wolf's Gravestone) add Four Winds' Ascension." Dropped where
+    /// no play is open.</summary>
+    public static void NoteFangAscension(string relic = "")
     {
-        if (_open != null) _open.FangAscension = true;
+        if (_open == null) return;
+        _open.FangAscension = true;
+        _open.FangRelic = relic ?? string.Empty;
+    }
+
+    /// <summary>An element-only Anemo application inside the open card
+    /// (a Swirl attempt): <paramref name="onAura"/> when the body had an
+    /// aura to Swirl. Dropped where no play is open.</summary>
+    public static void NoteAnemoApplication(bool onAura)
+    {
+        if (_open == null) return;
+        if (onAura) _open.SwirlOnAura++;
+        else _open.SwirlNoAura++;
     }
 
     /// <summary>"That card has finished." Closes the row.</summary>
@@ -621,6 +660,9 @@ public static class ResolutionLedger
                     ["source"] = o.Source,
                 }),
             ["fang_ascension"] = row.FangAscension,
+            ["fang_relic"] = row.FangRelic,
+            ["swirl_no_aura"] = row.SwirlNoAura,
+            ["swirl_on_aura"] = row.SwirlOnAura,
             ["between"] = row.Between,
             ["events"] = row.Events.ConvertAll(e =>
                 new Dictionary<string, object?>
@@ -633,6 +675,8 @@ public static class ResolutionLedger
                     ["on_player"] = e.OnPlayer,
                     ["seq"] = e.Seq,
                     ["amount"] = e.Amount,
+                    ["lost"] = e.Lost,
+                    ["past"] = e.Past,
                 }),
         });
 }

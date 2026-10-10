@@ -60,7 +60,7 @@ public sealed class ProtoMcBarbaraMelodyLoop : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new DynamicVar("PowerAmount", 3m)
         };
 

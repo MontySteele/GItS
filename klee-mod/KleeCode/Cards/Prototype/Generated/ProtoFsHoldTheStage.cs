@@ -53,7 +53,7 @@ public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 12))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 12))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -912,7 +912,10 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 "Casket": "Tamakushi Casket",
                 # The status batch (2026-10-01): "Or plan:" and "Or dusk
                 # plan:" print the two words in lower case.
-                "plan": "Plan", "dusk": "Dusk"}
+                "plan": "Plan", "dusk": "Dusk",
+                # High Stakes (the Spend round, 2026-10-10): "HP you have
+                # Drained and not Repaid" (the page's Repay row matches it).
+                "Repaid": "Repay"}
 
 
 def _word_owner(word: str) -> str:

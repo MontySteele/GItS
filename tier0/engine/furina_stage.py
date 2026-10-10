@@ -92,6 +92,8 @@ ESCOFFIER_LINE_REPAY = T.ESCOFFIER_LINE_REPAY
 ENSEMBLE_SEATS = T.ENSEMBLE_SEATS
 SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
 NEAR_LINE = T.NEAR_LINE
+HIGH_STAKES_EVERY = T.HIGH_STAKES_EVERY
+HIGH_STAKES_EVERY_UPGRADED = T.HIGH_STAKES_EVERY_UPGRADED
 HYMN_THRESHOLD = T.HYMN_THRESHOLD
 PRIMA_DONNA_FANFARE = T.PRIMA_DONNA_FANFARE
 REGINA_DRAIN = T.REGINA_DRAIN
@@ -599,7 +601,7 @@ def repay_left(player) -> int:
 
 
 def near_line(player) -> bool:
-    """Against the Tide and High Stakes: within 5 HP of the Drain line, or
+    """Against the Tide: within 5 HP of the Drain line, or
     at or below it."""
     return active(player) and T.near_line(player)
 
@@ -616,12 +618,17 @@ def hydro_bonus(state) -> int:
 
 
 def high_stakes_bonus(state) -> int:
-    """High Stakes: "While you are within 5 HP of your Drain line, your
-    Attacks deal 4 more damage." 0 off the line or off Furina."""
-    if not T.live(state.player):
-        return 0
-    n = T._player_power(state.player, "high_stakes")
-    return n if n and T.near_line(state.player) else 0
+    """High Stakes (the Spend round, 2026-10-10): "Your Attacks deal 1
+    additional damage for every 5 HP you have Drained and not Repaid."
+    [every 4]. 0 off Furina."""
+    return T.high_stakes_bonus(state.player)
+
+
+def note_power_applied(state, power: str, amount: int) -> None:
+    """An arm Power was applied to her (`effects._op_apply_power`): a High
+    Stakes copy records its divisor."""
+    if power == HIGH_STAKES and active(state.player):
+        T.note_high_stakes(state.player, amount)
 
 
 def begin_play(state) -> None:

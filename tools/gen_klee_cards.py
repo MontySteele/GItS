@@ -892,8 +892,10 @@ ARM_KEYWORDS = (
     # THE SALON'S TAB (2026-10-05): the HP loan's two verbs. `Bow`, `front
     # performer`, `Cue`, `Rehearsal`, `Ousia` and `Pneuma` left with the v2
     # Stage: no face prints them.
-    ArmKeyword("Drain", ("Drain",), "ArmKeywordTips.ForDrain"),
-    ArmKeyword("Repay", ("Repay",), "ArmKeywordTips.ForRepay"),
+    # High Stakes (the Spend round, 2026-10-10) prints both verbs in the
+    # past tense: "every 5 HP you have Drained and not Repaid".
+    ArmKeyword("Drain", ("Drain", "Drained"), "ArmKeywordTips.ForDrain"),
+    ArmKeyword("Repay", ("Repay", "Repaid"), "ArmKeywordTips.ForRepay"),
     # THE POOL TO 75 (2026-10-09, sec.5: "'Oldest guest' is the one a fourth
     # summon would remove; cards that name it carry a tip saying so"). Two
     # words, `current element`'s shape, so the tip never fires on prose.
@@ -3179,8 +3181,8 @@ APPLY_POWERS = {
         "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it "
         "is at least 1, gain 1 [gold]Strength[/gold]."),
     "fs_high_stakes": ("HighStakesPower", None,
-        "While you are within 5 HP of your [gold]Drain[/gold] line, your "
-        "Attacks deal {X} additional damage."),
+        "Your Attacks deal 1 additional damage for every {X} HP you have "
+        "[gold]Drained[/gold] and not [gold]Repaid[/gold]."),
     "fs_regina_of_all_waters": ("ReginaOfAllWatersPower", None,
         "At the start of your turn, [gold]Drain[/gold] 3. If you do, gain 1 "
         "[gold]Strength[/gold]."),
@@ -7262,6 +7264,22 @@ def calculated_damage_var(card: dict) -> str:
             else "CalculatedDamageVar")
 
 
+def calculated_block_var_type(card: dict) -> str:
+    """The type a calculated Block face is declared as (the Spend round,
+    2026-10-10: "Hold the Stage and The Show Must Go On preview Block without
+    Frail (18 shown, 13 given)"). `FoldedCalculatedBlockVar` is the game's own
+    `CalculatedBlockVar` whose preview makes the payout's own
+    `Hook.ModifyBlock` call over the computed number, so Frail and Dexterity
+    fold into "(Gains N Block)" as they fold into the Block gained.
+
+    `proto_` ROWS ONLY, `calculated_damage_var`'s quarantine: the var
+    lives under `Powers/Prototype/`, which a release build Compile-Removes.
+    """
+    return ("FoldedCalculatedBlockVar"
+            if str(card.get("id") or "").startswith("proto_")
+            else "CalculatedBlockVar")
+
+
 def build_vars(card: dict) -> list[str]:
     """DynamicVar declarations, in the order the effects use them."""
     out = []
@@ -7344,7 +7362,7 @@ def build_vars(card: dict) -> list[str]:
                 out.append(f'new CalculationBaseVar({base}m)')
                 out.append(f'new CalculationExtraVar({extra}m)')
                 out.append(
-                    'new CalculatedBlockVar(ValueProp.Move)'
+                    f'new {calculated_block_var_type(card)}(ValueProp.Move)'
                     f'.WithMultiplier({mult})')
             elif block_base is not None:
                 # Mirage idiom: base + 1 * (PrintedBlock(base) - base), which
@@ -7353,7 +7371,8 @@ def build_vars(card: dict) -> list[str]:
                 out.append(f'new CalculationBaseVar({block_base}m)')
                 out.append('new CalculationExtraVar(1m)')
                 out.append(
-                    'new CalculatedBlockVar(ValueProp.Move).WithMultiplier('
+                    f'new {calculated_block_var_type(card)}(ValueProp.Move)'
+                    '.WithMultiplier('
                     'static (card, _) => '
                     'SpotlightSystem.PrintedBlockDelta(card))')
             elif spotlight_folds(card):
@@ -16821,7 +16840,10 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         gate = (f"FurinaStage.CanDrain(SparkCost.OwnerCreatureOf(this), {amount})"
                 if op == "stage_drain" else
                 f"FurinaStage.CanSpend(SparkCost.OwnerCreatureOf(this), {amount})")
-        why = ("it would take you below your Drain line"
+        # The Spend round (2026-10-10): a Drain may go past the line since
+        # 2026-10-09, so the only refusal left is a Drain to 0 HP, and the
+        # reason says so (`FurinaStage.CanDrain`).
+        why = ("it would take you to 0 HP"
                if op == "stage_drain" else "you do not have that much Fanfare")
         stage_gate_member = (
             "\n\n    // The Salon's Tab (2026-10-05): a fixed price is the cost"

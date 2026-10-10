@@ -162,6 +162,11 @@ ESCOFFIER_LINE_REPAY = 1           # line: whenever a guest acts, Repay 1
 ENSEMBLE_SEATS = 4                 # Ensemble Cast: 4 guest seats
 SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
 NEAR_LINE = 5                      # "within 5 HP of your Drain line"
+# High Stakes (the Spend round, 2026-10-10): "Your Attacks deal 1 additional
+# damage for every 5 HP you have Drained and not Repaid." [every 4]. The
+# card's power amount is the divisor; each copy adds its own bonus.
+HIGH_STAKES_EVERY = 5
+HIGH_STAKES_EVERY_UPGRADED = 4
 HYMN_THRESHOLD = 4                 # Hymn of Renewal: a Repay of 4 or more HP
 PRIMA_DONNA_FANFARE = 10           # Prima Donna: 10 or more Fanfare
 REGINA_DRAIN = 3                   # Regina of All Waters: Drain 3
@@ -222,6 +227,8 @@ class Ftd:
     repay_left_this_play: int = 0    # the Repay floor's damage
     repay_next: int = 0              # Gentle Current: Repay next turn
     powers: collections.Counter = field(default_factory=collections.Counter)
+    # High Stakes: each copy's divisor (the Spend round, 2026-10-10).
+    high_stakes_every: list = field(default_factory=list)
     singer: int = SINGER_REPAY
     hit_fanfare: bool = True         # variant: do enemy hits print Fanfare?
     line: float | str = 0.5          # variant: the Drain line, share of Max
@@ -490,7 +497,7 @@ CARDS: dict[str, Spec] = {
     "ftd_riptide_lunge": Spec("Riptide Lunge", 1, "attack", "uncommon",
                               "riptide", (3, 10, 6)),
     "ftd_high_stakes": Spec("High Stakes", 1, "power", "uncommon", "power",
-                            (4,), "high_stakes"),
+                            (HIGH_STAKES_EVERY,), "high_stakes"),
     "ftd_regina": Spec("Regina of All Waters", 2, "power", "rare", "power",
                        (1,), "regina"),
     "ftd_the_deluge": Spec("The Deluge", 2, "attack", "rare", "deluge",
@@ -727,8 +734,34 @@ def past_line(state, n: int) -> bool:
     return n > 0 and p.hp - n < half_line(p)
 
 
+def note_high_stakes(player, every: int) -> None:
+    """A High Stakes copy came into play: its divisor joins the list (the
+    C# `HighStakesPower` is one instance a copy, so copies add bonuses and
+    never sum divisors)."""
+    if live(player) and int(every) > 0:
+        player.ftd.high_stakes_every.append(int(every))
+
+
+def high_stakes_bonus(player) -> int:
+    """High Stakes, every copy: net drained HP (above and past the line,
+    which Repay lowers) over each copy's divisor, rounded down, summed. A
+    board that set the power's amount directly (a pin) and noted no copy
+    reads that amount as one copy's divisor. The C# twin is
+    `FurinaStageLaw.HighStakesBonus`."""
+    if not live(player):
+        return 0
+    drained = int(player.ftd.drained)
+    if drained <= 0:
+        return 0
+    everies = list(player.ftd.high_stakes_every)
+    if not everies:
+        n = _player_power(player, "high_stakes")
+        everies = [n] if n > 0 else []
+    return sum(drained // e for e in everies if e > 0)
+
+
 def near_line(player) -> bool:
-    """Against the Tide and High Stakes: within 5 HP of the Drain line, or
+    """Against the Tide: within 5 HP of the Drain line, or
     at or below it (a Drain may go past it since 2026-10-09). The C# line is
     the float line rounded up (`FurinaStageLaw.LineOf`)."""
     return player.hp - line_hp(player) <= NEAR_LINE
@@ -1544,6 +1577,8 @@ def resolve_card(state, card) -> None:
         f.fountains.append([n[0], FOUNTAIN_TURNS])
     elif k == "power":
         f.powers[spec.member] += n[0]
+        if spec.member == "high_stakes":
+            note_high_stakes(state.player, n[0])
     elif k == "guest":
         summon(state, spec.member, card=card)
         entrance = _player_power(state.player, "grand_entrance")

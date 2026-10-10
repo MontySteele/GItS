@@ -6941,3 +6941,28 @@ that much more Block." Navia stays at half. `GuestSpendDivisor` split into
 parity lint (sim `NAVIA_SPEND_DIVISOR`, `FREMINET_SPEND_DIVISOR`);
 `StageDirector.SpendHalf` became `SpendShare(divisor)` (sim `spend_share`),
 and the forecast divides by the acting guest's own divisor.
+
+## Varka payoff round, 2026-10-10
+
+Record: `review/records/varka-payoff-round-2026-10-10.md`, "What changes
+(Claude ships)". Four rows' text; no number moved.
+
+- Stoke the Flames (`proto_vk_stoke_the_flames`): "Exhaust a card. Pyro
+  becomes your current element. Gain 2 [3] Pyro Oath." The code switched
+  after the gain, so Dawn Wind's March and Oath Unto Death never saw it as
+  the current element's; `gain_pyro_oath` now switches first (C#
+  `VarkaCards.GainPyroOath`, sim `varka_oath._combo_kind`). Under Unwavering
+  Banner the Banner's 1 Oath now lands before the 2 Pyro.
+- Ember Cleave (`proto_vk_ember_cleave`): the same op order, through the same
+  kind. Its hit already makes Pyro current (the open Oath), so the change
+  shows only where the hit did not switch. Numbers held.
+- Wolfpack (`proto_vk_wolfpack`): "Whenever you play Four Winds' Ascension,
+  shuffle a copy of it into your Draw Pile. The copy Exhausts." The copy
+  goes to a random depth of the draw pile (`CardPilePosition.Random`; sim: a
+  random index) and carries Exhaust (`AddKeyword`, the Kokomi Nips' shape).
+  A copy played fires Wolfpack again, so one real card and one copy
+  circulate. Upgrade stays Innate.
+- Unwavering Banner (`proto_vk_unwavering_banner`): "gain 1 Oath of it" said
+  the would-be element; the code pays the current element
+  (`VarkaOath.BannerHolds`), as the Power's own face already said. The card
+  now says "of your current element".

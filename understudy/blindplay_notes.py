@@ -3475,9 +3475,18 @@ RESOLUTION_SUMMONED = "  It summoned {names}."
 #: its source, so a seat can tell where Oath came from. `{source}` is
 #: " (applied)", " (Swirl)" or "" (the card's own text).
 RESOLUTION_OATH = "  +{n} {element} Oath{source}"
-#: And the gain that made Boreas's Fang add Four Winds' Ascension.
-RESOLUTION_FANG = ("  That gain made **Boreas's Fang** add **Four Winds' "
+#: And the gain that made Boreas's Fang add Four Winds' Ascension. `{relic}`
+#: is the relic actually held (the Varka payoff round, 2026-10-10: the line
+#: said Boreas's Fang after Orobas swapped it for Wolf's Gravestone); an older
+#: mod that sends no name reads as the Fang.
+RESOLUTION_FANG = ("  That gain made **{relic}** add **Four Winds' "
                    "Ascension** to your hand.")
+RESOLUTION_FANG_DEFAULT = "Boreas's Fang"
+#: The Varka payoff round (2026-10-10): a card whose every Anemo application
+#: found no aura (Sucrose on a bare board) said "Nothing this page can count
+#: landed off it", and the seat could not tell it had needed an aura.
+RESOLUTION_NO_AURA = ("  No aura to Swirl: no enemy had an element on it, so "
+                      "the Swirl did nothing.")
 #: A body that DIED inside the play. The game never hands a killing hit to the
 #: damage hook the ledger reads, so a kill arrives with no number, and the
 #: first wording printed it as "Nothing this page can count landed off it"
