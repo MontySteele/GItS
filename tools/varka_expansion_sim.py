@@ -359,7 +359,7 @@ def _translate(state, fx):
         if n:
             yield {"op": "apply_power", "power": "weak", "amount": 1,
                    "target": "enemy"}
-            yield {"op": "block", "amount": amt * n}
+        yield {"op": "block", "amount": base + per * n}
     elif kind == "gleeful_songs":
         n = sum(1 for e in state.living_enemies
                 if e.aura in ("pyro", "cryo", "electro"))
@@ -658,7 +658,7 @@ def _draft_ops(fx):
         return [{"op": "block_next_turn", "amount": 2 * amt}]
     if kind == "frost_ward":
         return [{"op": "apply_power", "power": "weak", "amount": 1,
-                 "target": "enemy"}, {"op": "block", "amount": 2 * amt}]
+                 "target": "enemy"}, {"op": "block", "amount": base + per}]
     if kind == "kindled_edge":
         return [{"op": "damage", "amount": base + base // 2,
                  "target": "enemy"}]

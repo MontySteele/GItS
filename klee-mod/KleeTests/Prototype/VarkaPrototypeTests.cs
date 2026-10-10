@@ -253,7 +253,6 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Equal(3, VarkaLaw.SwirlHydroBlock);
         Assert.Equal(1, VarkaLaw.SwirlCryoVulnerable);
         Assert.Equal(3, VarkaLaw.SwirlElectroDamageAll);
-        Assert.Equal(4, VarkaLaw.StormwardOathNeeded);
         Assert.Equal("Your Swirls deal 3 damage to that enemy.",
                      VarkaOath.PayoutSentence(Element.Pyro));
         Assert.Equal("Your Swirls deal 3 damage to ALL enemies.",
@@ -525,17 +524,25 @@ public class VarkaPrototypeTests : IDisposable
     // ---- the other powers ----------------------------------------------------
 
     [Theory]
-    [InlineData(true, true, Element.Anemo, 4, true)]
-    [InlineData(true, true, Element.Anemo, 7, true)]
-    [InlineData(true, true, Element.Anemo, 3, false)]
-    [InlineData(true, true, Element.Pyro, 5, false)]
-    [InlineData(true, false, Element.Anemo, 5, false)]
-    [InlineData(false, true, Element.Anemo, 5, false)]
-    public void Stormward_stance_needs_four_oath_and_an_anemo_attack(
-        bool powered, bool attack, Element hit, int oath, bool expected)
+    [InlineData(true, true, Element.Anemo, true)]
+    [InlineData(true, true, Element.Pyro, false)]
+    [InlineData(true, false, Element.Anemo, false)]
+    [InlineData(false, true, Element.Anemo, false)]
+    public void Stormward_stance_needs_only_an_anemo_attack(
+        bool powered, bool attack, Element hit, bool expected)
     {
+        // Varka round 3 (2026-10-10): the 4-Oath gate dropped.
         Assert.Equal(expected,
-            StormwardStancePower.Applies(powered, attack, hit, oath));
+            StormwardStancePower.Applies(powered, attack, hit));
+    }
+
+    [Fact]
+    public void Stormward_stance_reads_without_a_gate()
+    {
+        var text = new StormwardStancePower().Localization!
+            .Single(p => p.Item1 == "description").Item2;
+        Assert.Equal("Your [gold]Anemo[/gold] Attacks deal [blue]{Amount}[/blue] "
+                     + "additional damage.", text);
     }
 
     [Theory]

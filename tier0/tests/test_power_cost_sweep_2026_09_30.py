@@ -60,19 +60,22 @@ def test_the_long_game_upgrade_installs_the_drawing_twin(overhaul):
     assert (st.player.energy, len(st.player.hand)) == (4, 1)
 
 
-def test_sworn_brotherhood_base_gains_the_current_element_only(varka):
+def test_sworn_brotherhood_gains_the_current_element_only(varka):
+    # Varka round 3 (2026-10-10): 2 [3] Oath of the current element; the
+    # every-element upgrade is gone.
     row = _row("proto_vk_sworn_brotherhood")
     assert row.cost == 1
     assert _power_of(row)["power"] == V.SWORN_BROTHERHOOD_CURRENT
-    assert _power_of(_up("proto_vk_sworn_brotherhood"))["power"] == \
-        V.SWORN_BROTHERHOOD
+    assert _power_of(row)["amount"] == 2
+    up = _power_of(_up("proto_vk_sworn_brotherhood"))
+    assert (up["power"], up["amount"]) == (V.SWORN_BROTHERHOOD_CURRENT, 3)
     st = _varka_state(n=1, fang=False)
     led = _led(st)
     before = dict(led.oath)
     led.current = None
-    st.player.powers[V.SWORN_BROTHERHOOD_CURRENT] = 1
+    st.player.powers[V.SWORN_BROTHERHOOD_CURRENT] = 2
     V.turn_start(st)
     assert led.oath == before                       # no current: nothing
     led.current = "hydro"
     V.turn_start(st)
-    assert led.oath == {**before, "hydro": before["hydro"] + 1}
+    assert led.oath == {**before, "hydro": before["hydro"] + 2}
