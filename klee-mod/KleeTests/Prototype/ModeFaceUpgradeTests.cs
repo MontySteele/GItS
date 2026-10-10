@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Enchantments;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -113,6 +116,72 @@ public class ModeFaceUpgradeTests
                      Render(new ProtoFsCurtainRiseModeB()));
         Assert.Equal("[gold]Drain[/gold] 3: deal 16 instead",
                      Render(Upgraded(new ProtoFsCurtainRiseModeB())));
+    }
+
+    /// <summary>Hang a real enchantment on a card, uninitialised, the way
+    /// <c>EnchantedRiderTests.Enchant</c> does (its constructor registers with
+    /// the game's model tables), and mutable, as one on a deck card is.</summary>
+    private static T Enchant<T>(CardModel card, int amount)
+        where T : EnchantmentModel
+    {
+        var enchantment = (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
+        typeof(EnchantmentModel)
+            .GetField("_amount", HeadlessGame.All)!
+            .SetValue(enchantment, amount);
+        Seat.Set(enchantment, "IsMutable", true);
+        Seat.Set(enchantment, "Card", card);
+        Seat.Set(card, "Enchantment", enchantment);
+        return enchantment;
+    }
+
+    private static decimal Face(CardModel card, string var)
+    {
+        var v = card.DynamicVars[var];
+        v.UpdateCardPreview(card, CardPreviewMode.Normal, null,
+                            runGlobalHooks: false);
+        return v.PreviewValue;
+    }
+
+    [Fact]
+    public void A_mode_face_carries_the_parents_enchantment()
+    {
+        // The Furina full-run seat round (2026-10-10): a Sharp Curtain Rise
+        // read 16 in the chooser and hit for 18; an Instinct one read 11 and
+        // hit for 22. The face now folds what the hit folds.
+        var parent = new ProtoFsCurtainRise();
+        Seat.Set(parent, "IsMutable", true);
+        var sharp = Enchant<Sharp>(parent, 2);
+        var option = new ProtoFsCurtainRiseModeB();
+        Seat.Set(option, "IsMutable", true);
+
+        ModalChoice.CarryEnchantment(option, parent);
+
+        Assert.IsType<Sharp>(option.Enchantment);
+        // A copy, not the parent's own: the parent's stays on the parent.
+        Assert.NotSame(sharp, option.Enchantment);
+        Assert.Same(parent, sharp.Card);
+        Assert.Same(option, option.Enchantment!.Card);
+        Assert.Equal(2, option.Enchantment.Amount);
+        Assert.Equal(14m, Face(option, "BranchDamage"));
+
+        var instinctParent = new ProtoFsCurtainRise();
+        Seat.Set(instinctParent, "IsMutable", true);
+        Enchant<Instinct>(instinctParent, 1);
+        var instinctOption = new ProtoFsCurtainRiseModeA();
+        Seat.Set(instinctOption, "IsMutable", true);
+        ModalChoice.CarryEnchantment(instinctOption, instinctParent);
+        Assert.Equal(14m, Face(instinctOption, "PlainDamage"));
+    }
+
+    [Fact]
+    public void An_unenchanted_parent_leaves_the_face_bare()
+    {
+        var parent = new ProtoFsCurtainRise();
+        var option = new ProtoFsCurtainRiseModeB();
+        Seat.Set(option, "IsMutable", true);
+        ModalChoice.CarryEnchantment(option, parent);
+        ModalChoice.CarryEnchantment(option, null);
+        Assert.Null(option.Enchantment);
     }
 
     [Fact]

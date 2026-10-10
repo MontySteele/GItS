@@ -302,6 +302,7 @@ internal static class PlayTelemetry
                 record.IncomingByTurn.Add(new[] { round, telegraphed, attackers });
                 record.EnemyPoolByTurn.Add(new[] { round, pool });
                 record.EnemyHpByTurn.Add(new[] { round, hp });
+                NoteFanfareTurnStart(record, creature, round);
                 // REACTIONS RIDE ALONG, because the counter already exists and
                 // sampling it costs one read (the hand-back's "cheap now"
                 // condition). Measurement only: no reaction constant is
@@ -446,6 +447,28 @@ internal static class PlayTelemetry
             });
             record.HpLastSeen = (int)creature.CurrentHp;
             NoteStage(record, creature);
+        }
+    }
+
+    /// <summary>
+    /// The Furina full-run round (2026-10-10): her Fanfare as each of her
+    /// turns opens, so a banking claim (Prima Donna, saving for a Spend) can
+    /// be checked turn by turn. Furina only: a seat with no stage ledger
+    /// writes no row. A read; <c>Peek</c> creates no ledger (rule 1).
+    /// </summary>
+    private static void NoteFanfareTurnStart(FightRecord record,
+                                             Creature creature, int round)
+    {
+        try
+        {
+            var ledger = FurinaStageLedger.Peek(creature);
+            if (ledger == null) return;
+            record.Stage = ledger;
+            record.FanfareTurnStart.Add(new[] { round, ledger.Fanfare });
+        }
+        catch (Exception e)
+        {
+            Warn("NoteFanfareTurnStart", e);
         }
     }
 
@@ -891,6 +914,19 @@ internal static class PlayTelemetry
     internal static void OpenSeatForTest(Player player, int seats, int seatIndex)
     {
         Open[player] = new FightRecord { Seats = seats, SeatIndex = seatIndex };
+    }
+
+    /// <summary>Test seam: the turn-opening Fanfare row for every open seat,
+    /// with no combat. The mod never calls it.</summary>
+    internal static void RecordTurnStartForTest(int round)
+    {
+        foreach (var (player, record) in Open)
+        {
+            if (player.Creature is { } creature)
+            {
+                NoteFanfareTurnStart(record, creature, round);
+            }
+        }
     }
 
     /// <summary>Test seam: the JSON a seat's open record would write.</summary>
@@ -1494,6 +1530,9 @@ internal static class PlayTelemetry
         public FurinaStageLedger? Stage;
         /// <summary>2026-10-10. Her Fanfare at the close.</summary>
         public int FanfareEnd = -1;
+        /// <summary>2026-10-10 (the full-run round). [round, Fanfare] as each
+        /// of her turns opens (<see cref="NoteFanfareTurnStart"/>).</summary>
+        public readonly List<int[]> FanfareTurnStart = new();
         /// <summary>2026-10-10 (round 2). The rounds that opened with a
         /// Block-gaining card in hand and attack damage telegraphed
         /// (<see cref="BlockCardTurn"/>).</summary>
@@ -1648,6 +1687,9 @@ internal static class PlayTelemetry
                 sb.Append(",\"past_lost\":").Append(Stage.PastLostAtClose);
                 sb.Append(",\"high_stakes_bonus\":")
                   .Append(Stage.HighStakesDealt);
+                // 2026-10-10, the full-run round: her Fanfare as each turn
+                // opened, [round, fanfare].
+                Pairs(sb, "fanfare_turn_start", FanfareTurnStart);
             }
             sb.Append(",\"turns\":").Append(Turns);
             sb.Append(',');

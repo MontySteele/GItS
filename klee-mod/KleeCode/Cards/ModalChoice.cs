@@ -136,6 +136,7 @@ public static class ModalChoice
         {
             option.UpgradeInternal();
         }
+        CarryEnchantment(option, parent);
         // `EB-780`, THE FOLD, FOUND FAILING BY THE LIVE LOOK OF 2026-09-16
         // (proofs-9 lane 0, B3): under Weak 3 an upgraded Curtain Rise read
         // 7 / 12 in the hand and 10 / 16 in the chooser. The upgrade carried;
@@ -189,6 +190,36 @@ public static class ModalChoice
         // both calls on the shapes their own code was written for.
         option.UpgradePreviewType = CardUpgradePreviewType.Combat;
         return option;
+    }
+
+    /// <summary>
+    /// The Furina full-run seat round (2026-10-10): A FACE CARRIES THE
+    /// PARENT'S ENCHANTMENT. A Sharp Curtain Rise and an Instinct one read
+    /// 16 and 11 in the chooser and hit for 18 and 22: the option was built
+    /// from a canonical template, so <c>card.Enchantment</c> was null on the
+    /// face, and <c>DamageVar.UpdateCardPreview</c> and
+    /// <c>Hook.ModifyDamage</c> both read the enchantment off the card they
+    /// are handed (0.111.0 decompile).
+    ///
+    /// THE GAME'S OWN COPY: <c>CardModel.DeepCloneFields</c> carries an
+    /// enchantment onto a cloned card as
+    /// <c>ClonePreservingMutability</c> then <c>EnchantInternal</c>, and
+    /// nothing more -- no <c>ModifyCard</c>, so no <c>OnEnchant</c> keyword
+    /// (Goopy's Exhaust, Steady's Retain) is stamped onto the face.
+    ///
+    /// NO DOUBLE HIT: the hit is the PARENT's (<c>FromCard(this, ...)</c> in
+    /// the emitted play), and an option is never played and in no pile, so
+    /// the copy is read by the face and by nothing else.
+    /// </summary>
+    public static void CarryEnchantment(CardModel option, CardModel? parent)
+    {
+        if (parent?.Enchantment is not { } enchantment
+            || option.Enchantment != null)
+        {
+            return;
+        }
+        var copy = (EnchantmentModel)enchantment.ClonePreservingMutability();
+        option.EnchantInternal(copy, copy.Amount);
     }
 
     /// <summary>

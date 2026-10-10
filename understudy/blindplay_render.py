@@ -873,6 +873,28 @@ def _preview_leaves_out(power: dict[str, Any],
 RELIC_USED_UP = " (used up: it has done its job and does nothing more)"
 
 
+#: The Furina full-run round (2026-10-10): the game sometimes lists one
+#: power twice on a creature ("Weak 1" twice, "Crab Rage" twice). The page
+#: prints it once and says so.
+POWER_LISTED_TWICE_CLAUSE = " (the game lists this twice)"
+
+
+def _once(powers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The powers with a second row of the same name and amount folded
+    into the first, which carries `listed_twice`."""
+    out: list[dict[str, Any]] = []
+    seen: dict[tuple[Any, Any], dict[str, Any]] = {}
+    for pw in powers:
+        key = (pw.get("name"), pw.get("stacks"))
+        if key in seen:
+            seen[key]["listed_twice"] = True
+            continue
+        row = dict(pw)
+        seen[key] = row
+        out.append(row)
+    return out
+
+
 def _render_power(power: dict[str, Any], indent: str) -> str:
     """One power: printed name, the amount, buff or debuff, the printed text.
 
@@ -922,6 +944,8 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
         line += (BEHIND_CLAUSE.format(names=_and_list(
                      [f"**{n}**" for n in power["behind"]]))
                  if power["behind"] else NOTHING_BEHIND_CLAUSE)
+    if power.get("listed_twice"):
+        line += POWER_LISTED_TWICE_CLAUSE
     return line
 
 
@@ -1862,7 +1886,7 @@ def _ally_lines(pets: list[dict[str, Any]]) -> list[str]:
         out.append(f"- Your ally **{pet['name']}**: HP {pet['hp']}/"
                    f"{pet['max_hp']}"
                    + (f", Block {pet['block']}" if pet["block"] else ""))
-        out += [_render_power(pw, "    - ") for pw in pet["powers"]]
+        out += [_render_power(pw, "    - ") for pw in _once(pet["powers"])]
     return out
 
 
@@ -2364,6 +2388,12 @@ def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
     return out
 
 
+#: The damage acts whose number is the HP she lost since her last turn
+#: (`FurinaStageDirector.ActBody`, Neuvillette).
+STAGE_HP_LOST_MEMBERS = frozenset({"neuvillette"})
+STAGE_NO_DAMAGE_HP_LOST = ": no damage (you lost no HP since your last turn)"
+
+
 #: The element a guest's act deals, for the log (the act beat carries the
 #: amount and not the element; `FurinaStageDirector.Act`).
 STAGE_MEMBER_ELEMENTS = {
@@ -2385,7 +2415,10 @@ def _stage_act_effect(row: dict[str, Any]) -> str:
         return ": your Salon members act"
     if kind == "damage":
         if n <= 0:
-            return ": no damage"
+            # The Furina full-run round (2026-10-10): his act reads the HP
+            # she lost since her last turn, so a 0 says why.
+            return (STAGE_NO_DAMAGE_HP_LOST if member in STAGE_HP_LOST_MEMBERS
+                    else ": no damage")
         element = STAGE_MEMBER_ELEMENTS.get(member, "")
         to = (" to ALL enemies" if member in STAGE_ALL_MEMBERS
               else f" to {row['target']}" if row.get("target")
@@ -3256,7 +3289,7 @@ def render(obs: dict[str, Any]) -> str:
             if name == "Spark" and c.get("spark_sources"):
                 out.append("    - " + _spark_sources_line(c))
                 spark_named = True
-        for pw in you["powers"]:
+        for pw in _once(you["powers"]):
             out.append(_render_power(pw, "- "))
             # `EB-610`, THE OTHER SHAPE SPARK ARRIVES IN. The clause above is
             # emitted inside the METERS loop, and the live look of 2026-09-16
@@ -3587,7 +3620,7 @@ def render(obs: dict[str, Any]) -> str:
             # telegraph they are about, because a seat plans Block against THIS
             # body's figure.
             out += _intent_fold_lines(e, you)
-            for pw in e["powers"]:
+            for pw in _once(e["powers"]):
                 out.append(_render_power(pw, "    ")
                            + _preview_leaves_out(pw, c["hand"]))
                 # `EB-605`: and where a Bomb badge's headline and its list of

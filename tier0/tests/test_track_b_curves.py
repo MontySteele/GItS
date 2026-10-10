@@ -210,6 +210,9 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # ledger and hand reads with no wire route.
             "past_lost", "high_stakes_bonus", "block_card_turns",
             "block_card_turns_no_block",
+            # 2026-10-10 (the full-run round): Furina's Fanfare as each turn
+            # opens. A mod-side ledger read with no wire route.
+            "fanfare_turn_start",
             "run_id", "run_instance", "fight_index", "encounter",
             "detonations", "corpse_detonations",
             # EB-118. One row per resolved Exhaust selection, in the SIM's
