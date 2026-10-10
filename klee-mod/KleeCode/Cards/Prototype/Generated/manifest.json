@@ -856,17 +856,9 @@
       "ProtoFsCommandingGazeModeA",
       "ProtoFsCommandingGazeModeB"
     ],
-    "proto_fs_crashing_waves": [
-      "ProtoFsCrashingWavesModeA",
-      "ProtoFsCrashingWavesModeB"
-    ],
     "proto_fs_curtain_rise": [
       "ProtoFsCurtainRiseModeA",
       "ProtoFsCurtainRiseModeB"
-    ],
-    "proto_fs_hold_the_stage": [
-      "ProtoFsHoldTheStageModeA",
-      "ProtoFsHoldTheStageModeB"
     ],
     "proto_fs_interval_bell": [
       "ProtoFsIntervalBellModeA",
@@ -880,17 +872,9 @@
       "ProtoFsSalonsTabModeA",
       "ProtoFsSalonsTabModeB"
     ],
-    "proto_fs_spirited_aria": [
-      "ProtoFsSpiritedAriaModeA",
-      "ProtoFsSpiritedAriaModeB"
-    ],
     "proto_fs_surintendante_chevalmarin": [
       "ProtoFsSurintendanteChevalmarinModeA",
       "ProtoFsSurintendanteChevalmarinModeB"
-    ],
-    "proto_fs_tidal_flourish": [
-      "ProtoFsTidalFlourishModeA",
-      "ProtoFsTidalFlourishModeB"
     ],
     "proto_mc_durin_binary_form": [
       "ProtoMcDurinBinaryFormModeA",
@@ -946,7 +930,7 @@
       ]
     },
     "proto_fs_crashing_waves": {
-      "conditional_damage": 1
+      "damage": 1
     },
     "proto_fs_crescendo": {
       "innate": true
@@ -1024,8 +1008,7 @@
       "power_amount": -1
     },
     "proto_fs_hold_the_stage": {
-      "conditional_block": 2,
-      "conditional_then_block": 2
+      "formula_base": 2
     },
     "proto_fs_hydro_lance": {
       "formula_base": 4
@@ -1112,8 +1095,7 @@
       "stage_repay": 1
     },
     "proto_fs_spirited_aria": {
-      "conditional_damage": 3,
-      "conditional_then_damage": 1
+      "formula_base": 3
     },
     "proto_fs_standing_ovation": {
       "block": 2
@@ -1148,8 +1130,7 @@
       "power_amount": 1
     },
     "proto_fs_tidal_flourish": {
-      "conditional_damage": 3,
-      "conditional_then_damage": 1
+      "formula_base": 3
     },
     "proto_fs_tutti": {
       "cost": -1

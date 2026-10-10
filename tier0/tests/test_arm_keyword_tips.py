@@ -1303,8 +1303,9 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
     assert gen.modal_option_faces(row, modes) == [
         "Deal {PlainDamage:diff()} damage",
         "[gold]Drain[/gold] 3: deal {BranchDamage:diff()} instead"]
-    for rid in ("proto_fs_tidal_flourish", "proto_fs_spirited_aria",
-                "proto_fs_surintendante_chevalmarin", "proto_fs_leading_lady",
+    # Tidal Flourish and Spirited Aria left the chooser for "Spend up to X"
+    # (the Spend paper, 2026-10-10).
+    for rid in ("proto_fs_surintendante_chevalmarin", "proto_fs_leading_lady",
                 "proto_fs_salons_tab", "proto_fs_interval_bell"):
         assert gen.modal_option_faces(
             rows[rid], gen.modal_effect(rows[rid])["modes"]) is not None, rid
