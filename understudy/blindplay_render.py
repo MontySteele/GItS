@@ -2155,6 +2155,40 @@ ASCENSION_ONCE_NOTE = ("    - Added by {relic} the first time each combat you "
 ASCENSION_RELICS = ("Boreas's Fang", "Wolf's Gravestone")
 
 
+#: The Varka forced-Amber round (2026-10-10): Wildfire Oath's payout, under
+#: each card in the hand that applies Pyro, while the power is up. Its per-
+#: application damage is the Pyro Oath per stack (`WildfireOathPower.
+#: DamageFor`); it fires on every Pyro application of his, never on a Swirl's
+#: spread, so an Anemo card does not get the line.
+WILDFIRE_TITLE = "Wildfire Oath"
+WILDFIRE_NOTE = "    - Wildfire: +{n} a hit."
+
+
+def _wildfire_hit(you: dict[str, Any], oath: dict[str, Any] | None)         -> int | None:
+    """Wildfire Oath's damage per Pyro application now, or None with the
+    power down (or no Oath block to read his Pyro Oath off)."""
+    if not oath:
+        return None
+    for power in you.get("powers") or []:
+        if _fold(power.get("name")) == _fold(WILDFIRE_TITLE):
+            stacks = power.get("stacks")
+            stacks = stacks if isinstance(stacks, int) and stacks > 0 else 1
+            return max(0, stacks * int(oath["counts"].get("Pyro") or 0))
+    return None
+
+
+def _applies_pyro(card: dict[str, Any]) -> bool:
+    """Does this face apply Pyro: its element indicator (which follows an
+    override row) or any of its `Applies Pyro` rows."""
+    if card.get("element") == "Pyro":
+        return True
+    if any(k.get("name") == "Element overridden"
+           for k in card.get("keywords") or []):
+        return False
+    return any(k.get("name") == "Applies Pyro"
+               for k in card.get("keywords") or [])
+
+
 def _ascension_relic(you: dict[str, Any]) -> str:
     """The relic that adds Four Winds' Ascension, as held, or `""`."""
     for relic in you.get("relics") or []:
@@ -3415,8 +3449,11 @@ def render(obs: dict[str, Any]) -> str:
         # is a fact about what you are HOLDING and not about any one card.
         raiser = _unblocked_raiser(you)
         fang = _ascension_relic(you)
+        wildfire = _wildfire_hit(you, c.get("oath"))
         for card in c["hand"]:
             out += _render_card(card, raiser=raiser)
+            if wildfire is not None and _applies_pyro(card):
+                out.append(WILDFIRE_NOTE.format(n=wildfire))
             # The Varka payoff round (2026-10-10): where Four Winds'
             # Ascension came from, and that it comes once a combat (a seat
             # tried to play a second one that never came).

@@ -176,24 +176,28 @@ def test_ember_cleave_gains_its_oath_with_nothing_to_exhaust(varka):
 def test_pyre_oath_lands_first_then_its_own_exhaust_pays(varka):
     # Varka payoff fix (2026-10-08): "Exhaust a card" on play (the paper's
     # "up to 2", read as exactly 1: `exhaust_from` takes no "up to"). The
-    # Power goes on first, so its own Exhaust pays 1 Oath.
+    # Power goes on first, so its own Exhaust pays (2 Oath since Ashen Oath,
+    # the forced-Amber round, 2026-10-10).
     st = _state(element="hydro")
     st.player.hand = [loader.get_card("defend")]
     _play(st, _vk("pyre_oath"))
     assert [c.id for c in st.player.exhaust_pile] == ["defend"]
-    assert _led(st).oath["pyro"] == 1
+    assert _led(st).oath["pyro"] == 2
 
 
-def test_pyre_oath_gains_1_pyro_per_exhausted_card(varka):
+def test_ashen_oath_gains_2_pyro_per_exhausted_card(varka):
+    # The forced-Amber round (2026-10-10): Pyre Oath is Ashen Oath and pays 2
+    # a card. The id is kept.
+    assert loader.get_card(_vk("pyre_oath")).name == "Ashen Oath"
     st = _state(element="hydro")
     _play(st, _vk("pyre_oath"))
-    assert st.player.powers[V.PYRE_OATH] == 1
+    assert st.player.powers[V.PYRE_OATH] == 2
     st.player.hand = [loader.get_card("defend")]
     _play(st, _vk("stoke_the_flames"))
-    assert _led(st).oath["pyro"] == 2 + 1
+    assert _led(st).oath["pyro"] == 2 + 2
     # A card that exhausts itself is an Exhaust too.
     _play(st, _vk("dawn_patrol"))
-    assert _led(st).oath["pyro"] == 4
+    assert _led(st).oath["pyro"] == 6
 
 
 # ---------------------------------------------------------------------------

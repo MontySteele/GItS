@@ -6909,3 +6909,32 @@ Record: `review/records/varka-payoff-round-2026-10-10.md`, "What changes
   the would-be element; the code pays the current element
   (`VarkaOath.BannerHolds`), as the Power's own face already said. The card
   now says "of your current element".
+
+## Varka forced-Amber round, 2026-10-10
+
+Record: `review/records/varka-amber-round-2026-10-10.md`, "What changes
+(Claude ships)".
+
+- Ashen Oath (`proto_vk_pyre_oath`), was Pyre Oath: "Exhaust a card.
+  Whenever you Exhaust a card, gain 2 Pyro Oath." [Innate]. The fallback the
+  payoff record promised; 1 to 2 a card (the Power applies 2). Renamed
+  because "Pyre Oath 1" sat beside "Pyro Oath 12" on the status list. Title
+  only, card and power: the id and the C# classes (`ProtoVkPyreOath`,
+  `PyreOathPower`) are kept, as Shatter -> Icebreaker kept its id, so art,
+  coverage and offer logs hold.
+- Frost Ward (`proto_vk_frost_ward`): "Gain 3 [4] Block. For each enemy with
+  an aura, apply 1 Weak and gain 3 [4] additional Block." The record's words
+  say "more Block"; rule 8 of `docs/current/text-conventions.md` (and the
+  `more-damage` lint) spell a bonus of Block "additional", so the face does.
+  One variable used twice (`VkAmount`, upgrade +1), and one Block gain of
+  VkAmount x (1 + enemies with an aura) after the Weak (C#
+  `VarkaCards.FrostWardBlock`, sim `varka_oath` kind `frost_ward`), so
+  Dexterity counts once.
+- Oath Unto Death (`proto_vk_oath_unto_death`): costs 2, was 3. Innate
+  upgrade kept.
+- Wildfire Oath: numbers held. The seat page prints "Wildfire: +N a hit."
+  under each card in the hand that applies Pyro while the power is up, N the
+  Pyro Oath per stack (`blindplay_render._wildfire_hit`). Not on Anemo cards:
+  it does not fire on a Swirl's spread.
+- Knight cards: the seat page already prints the keyword's "Knight." line at
+  the head of the face (the wire's sentence); pinned, nothing added.

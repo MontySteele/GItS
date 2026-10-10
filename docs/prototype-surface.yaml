@@ -3487,9 +3487,11 @@
 
 - {id: proto_vk_frost_ward, name: "Frost Ward", character: varka,
    # The rebalance (sec.4): Cryo's payoff; replaces Favonius Drill.
+   # Varka forced-Amber round (2026-10-10): a floor, the same 3 [4] once
+   # before the per-aura part; one Block gain of 3 x (1 + enemies with an aura).
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Apply 1 [gold]Weak[/gold] to each enemy with an aura. Gain {VkAmount:diff()} [gold]Block[/gold] for each.",
+   description: "Gain {VkAmount:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkAmount:diff()} additional [gold]Block[/gold].",
    effects: [{op: varka, kind: frost_ward, target: all_enemies, amount: 3}],
    upgrade: {varka_amount: 1}}
 
@@ -4037,7 +4039,8 @@
 
 - {id: proto_vk_oath_unto_death, name: "Oath Unto Death", character: varka,
    authored_by: [claude],
-   cost: 3, type: power, rarity: rare,
+   # Varka forced-Amber round (2026-10-10): costs 2, was 3.
+   cost: 2, type: power, rarity: rare,
    description: "Whenever you gain [gold]Oath[/gold] of your [gold]current element[/gold], gain 1 more.",
    effects: [{op: apply_power, power: vk_oath_unto_death, amount: 1, target: self}],
    upgrade: {innate: true}}
@@ -4161,13 +4164,14 @@
 
 # --- Uncommon (2) ---
 
-- {id: proto_vk_pyre_oath, name: "Pyre Oath", character: varka,
+- {id: proto_vk_pyre_oath, name: "Ashen Oath", character: varka,
    authored_by: [claude],
    # Varka payoff fix, 2026-10-08: the paper's "Exhaust up to 2 cards" is built
    # as exactly 1 (`exhaust_from` takes no "up to"); provenance note.
+   # Forced-Amber round (2026-10-10): was Pyre Oath, paid 1; provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "[gold]Exhaust[/gold] a card. Whenever you [gold]Exhaust[/gold] a card, gain 1 [gold]Pyro[/gold] [gold]Oath[/gold].",
-   effects: [{op: apply_power, power: vk_pyre_oath, amount: 1, target: self},
+   description: "[gold]Exhaust[/gold] a card. Whenever you [gold]Exhaust[/gold] a card, gain 2 [gold]Pyro[/gold] [gold]Oath[/gold].",
+   effects: [{op: apply_power, power: vk_pyre_oath, amount: 2, target: self},
              {op: exhaust_from, select: chosen, amount: 1}],
    upgrade: {innate: true}}
 
