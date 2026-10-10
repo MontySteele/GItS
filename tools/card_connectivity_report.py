@@ -490,6 +490,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "stage_guest": [_hook("private", "stage", "write")],
     "stage_spend": [_hook("private", "stage", "use")],
     "stage_spend_all": [_hook("private", "stage", "use")],
+    "stage_spend_up_to": [_hook("private", "stage", "use")],
     # Salon's Tab's Drain mode: Energy next turn, `energy`'s empty row.
     "stage_energy_next": [],
     "salon_bow": [_hook("private", "salon", "use")],

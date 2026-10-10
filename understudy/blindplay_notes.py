@@ -1623,7 +1623,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # `FurinaStageLaw`'s numerals written out. The v2 Stage's rows (the
     # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
     # guests) left with it; their history is in git.
-    "Spend": "Pay that much Fanfare. Offered only if you have enough.",
+    # The Spend paper (2026-10-10): "Spend up to X" pays X or all she has.
+    "Spend": ("Pay that much Fanfare. Offered only if you have enough. "
+              "Spend up to X pays X, or all you have if that is less."),
     "Fanfare": ("Gain 1 Fanfare for each HP you lose or Repay. Spend uses "
                 "it. It resets to 0 after each combat."),
     # The Drain line rule (ruled 2026-10-09): the line is entry HP minus

@@ -144,10 +144,15 @@ LYNEY_ACT_UPGRADED = 11
 LYNETTE_ACT_UPGRADED = 6
 CHEVREUSE_LINE_WEAK_UPGRADED = 1   # upgraded line: also 1 Weak
 CLORINDE_ACT_UPGRADED = 9
-FREMINET_ACT = 5                   # act: 5 Cryo to a random enemy [8]
-FREMINET_ACT_UPGRADED = 8
-FREMINET_ACT_BLOCK = 6             # act: also gain 6 Block [9] (2026-10-09)
-FREMINET_ACT_BLOCK_UPGRADED = 9
+# The Spend paper (review/active/furina-spend-paper-2026-10-10.md pick 2,
+# ruled 2026-10-10): Freminet's act is "Gain 3 Block. Spend a quarter of your
+# Fanfare (rounded down): gain that much more Block." [6]; his 5 [8] Cryo hit
+# left with it. Navia's act Spends half and deals that much as Geo.
+FREMINET_ACT_BLOCK = 3             # act: gain 3 Block [6], then the quarter
+FREMINET_ACT_BLOCK_UPGRADED = 6
+NAVIA_SPEND_DIVISOR = 2            # Navia's act: half the bank
+FREMINET_SPEND_DIVISOR = 4         # Freminet's act: a quarter of the bank
+SPEND_UP_TO_EVERY = 4              # "Draw 1 / hit once more for every 4"
 NAVIA_LINE_DISCOUNT = 2            # line: first Spend each turn 2 less [3]
 NAVIA_LINE_DISCOUNT_UPGRADED = 3
 NEUVILLETTE_HYDRO_BONUS_UPGRADED = 3
@@ -347,14 +352,15 @@ CARDS: dict[str, Spec] = {
     "ftd_singer": Spec("Singer of Many Waters", 1, "skill", "rare",
                        "repay_all", (), exhaust=True),
     # --- Fanfare outlets (6) ---
-    # Tidal Flourish (1): Deal 5 to ALL. Spend 6: deal 12 Hydro to ALL
-    # instead.
-    # Uncommon, and its plain mode applies Hydro too (the 2026-10-09 trim).
+    # Tidal Flourish (1): Deal 5 Hydro damage to ALL enemies. Spend up to
+    # 10: deal 1 more for each. (The Spend paper, 2026-10-10; Uncommon since
+    # the 2026-10-09 trim.)
     "ftd_tidal_flourish": Spec("Tidal Flourish", 1, "attack", "uncommon",
-                               "spend_aoe", (5, 6, 12)),
-    # Spirited Aria (1): Deal 8. Spend 5: deal 13 and draw 2 instead.
+                               "upto_aoe", (5, 10)),
+    # Spirited Aria (1): Deal 8 damage. Spend up to 8: deal 1 more for each.
+    # Draw 1 for every 4 spent. (The Spend paper.)
     "ftd_spirited_aria": Spec("Spirited Aria", 1, "attack", "common",
-                              "spend_draw", (8, 5, 13, 2)),
+                              "upto_hit_draw", (8, 8)),
     # Quick Flourish (0): Spend 4. Deal 11 Hydro damage.
     "ftd_quick_flourish": Spec("Quick Flourish", 0, "attack", "common",
                                "spend_fixed_hit", (4, 11)),
@@ -419,9 +425,10 @@ CARDS: dict[str, Spec] = {
     # Fountain of Lucine (1): At the start of your next 3 turns, Repay 3.
     "ftd_fountain": Spec("Fountain of Lucine", 1, "skill", "uncommon",
                          "fountain", (3,)),
-    # Hold the Stage (1): Gain 6 Block. Spend 6: gain 16 instead.
+    # Hold the Stage (1): Gain 6 Block. Spend up to 12: gain 1 more for
+    # each. (The Spend paper.)
     "ftd_hold_the_stage": Spec("Hold the Stage", 1, "skill", "uncommon",
-                               "spend_block", (6, 6, 16)),
+                               "upto_block", (6, 12)),
     # Guest Star: Chevreuse (1). Line: whenever you Spend, apply 1
     # Vulnerable to a random enemy. Act: deal 4 damage to a random enemy.
     "ftd_chevreuse": Spec("Guest Star: Chevreuse", 1, "skill", "uncommon",
@@ -459,8 +466,10 @@ CARDS: dict[str, Spec] = {
     "ftd_escoffier": Spec("Guest Star: Escoffier", 1, "skill", "rare",
                           "guest", (), "escoffier", exhaust=True),
     # The Crowd (9).
+    # Crashing Waves (1): Deal 4 Hydro damage twice. Spend up to 12: hit
+    # once more for every 4. (The Spend paper.)
     "ftd_crashing_waves": Spec("Crashing Waves", 1, "attack", "common",
-                               "spend_volley", (4, 2, 4, 3)),
+                               "upto_volley", (4, 2, 12)),
     "ftd_bubble_aria": Spec("Bubble Aria", 1, "skill", "common",
                             "spend_block_draw", (6, 3, 2)),
     # Commanding Gaze: the plain mode applies 2 Vulnerable (ruled
@@ -573,19 +582,24 @@ FIXED_DRAIN_KINDS = ("drain_fixed_hit", "drain_fixed_aoe",
                      "undercurrent", "drain_energy", "drain_energy_next",
                      "drain_draw", "riptide",
                      "deluge", "ebb_flow")
-SPEND_KINDS = ("block_spend_hit", "spend_aoe", "spend_draw", "spend_energy",
-               "spend_block",
+SPEND_KINDS = ("block_spend_hit", "spend_energy",
                # The pool to 75: each one's `n` prints its price at `[1]`
                # except the volley's and the debuff's (`spend_price`).
-               "spend_volley", "spend_block_draw", "spend_debuff")
+               "spend_block_draw", "spend_debuff")
+#: "Spend up to X" cards (the Spend paper, 2026-10-10): no choice, the Spend
+#: is made on play. Each one's cap is `upto_cap`.
+UPTO_KINDS = ("upto_aoe", "upto_hit_draw", "upto_block", "upto_volley")
+
+
+def upto_cap(spec) -> int:
+    """An up-to card's X (the volley prints it at `[2]`, the rest at `[1]`)."""
+    return int(spec.n[2] if spec.kind == "upto_volley" else spec.n[1])
 #: Fixed-price Spend cards; every one's `n[0]` is its Spend price.
 FIXED_SPEND_KINDS = ("spend_fixed_hit", "encore", "sold_out")
 
 
 def spend_price(spec) -> int:
     """A Spend-mode card's price (most print it at `n[1]`)."""
-    if spec.kind == "spend_volley":
-        return int(spec.n[2])
     return int(spec.n[1])
 
 
@@ -779,7 +793,7 @@ def act_amount(member: str, upgraded: bool = False) -> int:
         "clorinde": (CLORINDE_ACT, CLORINDE_ACT_UPGRADED),
         "lyney": (LYNEY_ACT, LYNEY_ACT_UPGRADED),
         "chevreuse": (CHEVREUSE_ACT, CHEVREUSE_ACT),
-        "freminet": (FREMINET_ACT, FREMINET_ACT_UPGRADED),
+        "freminet": (FREMINET_ACT_BLOCK, FREMINET_ACT_BLOCK_UPGRADED),
         "escoffier": (ESCOFFIER_ACT, ESCOFFIER_ACT_UPGRADED),
     }
     pair = table.get(member)
@@ -912,6 +926,46 @@ def _after_spend(state) -> None:
     crescendo = _player_power(state.player, "crescendo")
     if crescendo and f.spends_this_turn == 1 and not state.over:
         state.draw(crescendo)
+
+
+def up_to_of(f: Ftd, cap: int) -> int:
+    """What a "Spend up to `cap`" counts now: the cap, or all she holds plus
+    Navia's free points if that is less (the C# `UpToOf`)."""
+    cap = int(cap)
+    return 0 if cap <= 0 else min(cap, f.fanfare + navia_discount(f))
+
+
+def spend_up_to(state, cap: int) -> int:
+    """"Spend up to X" (the Spend paper, 2026-10-10, pick 1): spends X, or all
+    she holds if that is less, and never fails. A Spend only when at least 1
+    counts (Thunderous Applause, Chevreuse, Crescendo); not a spend-all, so
+    Bis! and Standing Room Only ignore it. Navia's line makes the first 2 [3]
+    points of the first Spend each turn free: they count, and are not taken.
+    Returns what counts as spent."""
+    f = _f(state)
+    counted = up_to_of(f, cap)
+    if counted <= 0:
+        return 0
+    free = min(counted, navia_discount(f))
+    pay = counted - free
+    f.fanfare -= pay
+    f.spent_this_turn += pay
+    f.spends_this_turn += 1
+    f.ledger["spent"] += pay
+    f.ledger["spends"] += 1
+    state.emit("ftd_spend", amount=pay, fanfare=f.fanfare)
+    if free:
+        _line(state, "navia", free)
+    _after_spend(state)
+    return counted
+
+
+def spend_share(state, divisor: int) -> int:
+    """A guest's act's share-Spend (the Spend paper's pick 2): Navia "Spend
+    half your Fanfare (rounded down)" (divisor 2), Freminet "a quarter"
+    (divisor 4), of what is left when it acts. Returns what counts as
+    spent."""
+    return spend_up_to(state, _f(state).fanfare // divisor)
 
 
 def spend_all(state) -> int:
@@ -1228,17 +1282,21 @@ def _act(state, member: str) -> None:
         if living:
             _hit(state, state.rng.choice(living), n, None)
     elif member == "freminet":
-        if living:
-            _hit(state, state.rng.choice(living), n, "cryo")
-        # "Gain 6 Block." [9] (Ruled 2026-10-09.)
+        # "Gain 3 Block. Spend a quarter of your Fanfare (rounded down): gain
+        # that much more Block." [6] (the Spend paper, pick 2, ruled
+        # 2026-10-10).
+        p.block += n
         if p.alive and not state.over:
-            p.block += (FREMINET_ACT_BLOCK_UPGRADED if member in f.stage_up
-                        else FREMINET_ACT_BLOCK)
+            more = spend_share(state, FREMINET_SPEND_DIVISOR)
+            if more > 0 and p.alive and not state.over:
+                p.block += more
     elif member == "navia":
-        # "Deal Geo damage to a random enemy equal to the Fanfare you spent
-        # this turn."
-        dmg = f.spent_this_turn
-        if dmg > 0 and living:
+        # "Spend half your Fanfare (rounded down). Deal that much Geo damage
+        # to a random enemy." (the Spend paper, pick 2). Nothing spent,
+        # nothing dealt.
+        dmg = spend_share(state, NAVIA_SPEND_DIVISOR)
+        living = state.living_enemies
+        if dmg > 0 and living and not state.over:
             _hit(state, state.rng.choice(living), dmg, "geo")
     elif member == "escoffier":
         for enemy in living:
@@ -1489,22 +1547,10 @@ def resolve_card(state, card) -> None:
             _card_block(state, card, n[0])
             if take:
                 _card_damage(state, card, n[2])
-        elif k == "spend_aoe":
-            _card_damage(state, card, n[2] if take else n[0],
-                         all_enemies=True, hydro=True)
-        elif k == "spend_draw":
-            _card_damage(state, card, n[2] if take else n[0])
-            if take:
-                state.draw(n[3])
         elif k == "spend_energy":
             state.draw(n[0])
             if take:
                 state.player.energy += n[2]
-        elif k == "spend_block":
-            _card_block(state, card, n[2] if take else n[0])
-        elif k == "spend_volley":
-            for _ in range(n[3] if take else n[1]):
-                _card_damage(state, card, n[0], hydro=True)
         elif k == "spend_block_draw":
             _card_block(state, card, n[0])
             if take:
@@ -1513,6 +1559,22 @@ def resolve_card(state, card) -> None:
             _debuff_target(state, "vulnerable", n[2] if take else n[0])
             if take:
                 _debuff_target(state, "weak", n[3])
+    elif k in UPTO_KINDS:
+        # "Spend up to X" (the Spend paper, 2026-10-10): no choice; 1 more
+        # per point spent, and "for every 4" in fours.
+        spent = spend_up_to(state, upto_cap(spec))
+        if k == "upto_aoe":
+            _card_damage(state, card, n[0] + spent, all_enemies=True,
+                         hydro=True)
+        elif k == "upto_hit_draw":
+            _card_damage(state, card, n[0] + spent)
+            if spent // SPEND_UP_TO_EVERY:
+                state.draw(spent // SPEND_UP_TO_EVERY)
+        elif k == "upto_block":
+            _card_block(state, card, n[0] + spent)
+        else:                                       # upto_volley
+            for _ in range(n[1] + spent // SPEND_UP_TO_EVERY):
+                _card_damage(state, card, n[0], hydro=True)
     elif k == "spend_fixed_hit":
         price, dmg = n
         if spend(state, price):
@@ -1679,7 +1741,9 @@ def default_bow(state) -> int:
     for i, member in enumerate(f.stage):
         n = act_amount(member, member in f.stage_up)
         if member == "navia":
-            n = f.spent_this_turn
+            n = f.fanfare // NAVIA_SPEND_DIVISOR
+        elif member == "freminet":
+            n += f.fanfare // FREMINET_SPEND_DIVISOR
         elif member == "neuvillette":
             n = f.hp_lost_window
         if n > best_n:
