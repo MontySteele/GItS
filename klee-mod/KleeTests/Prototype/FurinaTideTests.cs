@@ -469,11 +469,14 @@ public class FurinaTideTests
                               StagePerformer.Clorinde, StagePerformer.Charlotte);
         Run(kit.Director.Drain(5));
         Assert.Contains("damage Wriothesley Random 5 Cryo", kit.Board.Log);
+        // Charlotte's line reads a card's Repay (the Spend round 2).
+        kit.Stage.BeginPlay("Soothing Waters");
         Run(kit.Director.Repay(2));
         Assert.Contains("damage Clorinde Random 4 Electro", kit.Board.Log);
         Assert.Equal(1, kit.Board.Drawn);
         Run(kit.Director.Repay(2));                 // Charlotte: once a turn
         Assert.Equal(1, kit.Board.Drawn);
+        kit.Stage.EndPlay();
 
         var lynette = StageKit.Of(StagePerformer.Lynette);
         Assert.Equal(6, lynette.Director.OnEnemyHit(6));
@@ -490,11 +493,11 @@ public class FurinaTideTests
         kit.Board.Log.Clear();
         StageKit.Run(kit.Director.EndOfTurn(FurinaStageLaw.SingerRepay));
         // Lynette finds no aura-wearer here (the board decides), then
-        // Charlotte Repays 2 and draws, then the Singer Repays 1 (the
-        // 2026-10-09 playtest trim; was 2).
-        // The pool to 75: Charlotte's line gets its own cue before its draw.
+        // Charlotte Repays 2, then the Singer Repays 1 (the 2026-10-09
+        // playtest trim; was 2). The Spend round 2 (2026-10-10): neither is
+        // a card's Repay, so Charlotte's line draws nothing.
         Assert.Equal(new[] { "damage Lynette Aura 3 Anemo", "heal 2",
-                             "cue Charlotte", "draw 1", "heal 1" },
+                             "heal 1" },
                      kit.Board.Log);
         Assert.Equal(3, kit.Stage.Drained);
     }

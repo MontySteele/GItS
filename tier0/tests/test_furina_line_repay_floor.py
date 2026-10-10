@@ -156,13 +156,12 @@ def test_soothing_waters_keeps_no_leftover_payout():
     assert st.player.block == 0
 
 
-def test_gentle_current_pays_block_when_its_repay_lands_next_turn():
+def test_gentle_current_pays_its_floor_now():
+    """The Spend round 2 (2026-10-10): "Gain 5 Block. Repay 3. Gain 1 Block
+    for any HP it could not Repay." Nothing drained: 5 + 3."""
     st = _furina()
     _play(st, _card("proto_fs_gentle_current"))
-    assert st.player.block == 5
-    st.player.block = 0
-    T.turn_start(st)
-    assert st.player.block == 4
+    assert st.player.block == 5 + 3
 
 
 def test_fountain_pays_block_each_turn_and_pneuma_tides_vigor():
