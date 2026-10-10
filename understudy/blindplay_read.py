@@ -635,6 +635,75 @@ def _entity_id(e: dict[str, Any]) -> str:
     return str(e.get("entity_id") or e.get("id") or "")
 
 
+# Moved here from `blindplay_grammar` (the Furina whole-run round 2,
+# 2026-10-10) so the board can mark the hand cards Surrounded turns you
+# for; the grammar imports them back under the same names.
+# The wire's `target_type` spellings, split by what the BRIDGE does with each.
+#
+# `EB-269`. `ExecuteUsePotion` (`vendor/STS2_MCP/McpMod.Actions.cs:287-306`) is
+# the authority and it is a `switch` on `potion.TargetType`: `AnyEnemy` REFUSES
+# a post with no `target`, while `Self` / `AnyAlly` / `AnyPlayer` resolve the
+# target to the player's own creature and anything else resolves it to nothing.
+# So an aimed potion has to be aimed before it is posted and a self-aimed one
+# must not carry a target at all -- and a card follows the same table, which is
+# why `_play` reads the aimed set from here rather than spelling its own copy.
+AIMED_TARGETS = frozenset({"anyenemy", "enemy", "singleenemy", "targetenemy"})
+SELF_TARGETS = frozenset({"self", "anyally", "anyplayer"})
+
+# `EB-319`. The spellings that take NO enemy of the tester's choosing: the
+# game aims these itself, or aims them at nobody. `Rapid Fire` -- "Deal 3
+# damage to a random enemy 4 times" -- is `AllEnemies` here, which is why
+# `play "Rapid Fire" on "Fossil Stalker"` used to be POSTED and then refused
+# by the bridge's own `IsValidTarget` (`McpMod.Actions.cs:205-210`), a round
+# trip whose answer named the card, named the enemy and named no way to play
+# it. The set is CLOSED and holds the game's own enum names only: a custom
+# single-target type renders as a bare number on the wire (`EB-216`), matches
+# nothing here, and keeps the fall-through that lets a Plan card be aimed.
+#: 2026-09-26: the one target that is not a creature. `TargetType.cs` says it
+#: is "currently only used by FoulPotion to target the merchant"; the game
+#: aims it, so nothing is sent.
+MERCHANT_TARGETS = frozenset({"targetednocreature"})
+UNAIMED_TARGETS = (frozenset({"none", "allenemies"}) | SELF_TARGETS
+                   | MERCHANT_TARGETS)
+
+
+def _aims_at_an_enemy(entry: dict[str, Any]) -> bool:
+    """Does this hand card need an enemy of the tester's choosing? `EB-402`.
+
+    THE DEFECT, in one line: `play "Slack Water"` with no `on` clause was
+    answered `ok` and did nothing -- no damage, no Weak -- on the Kokomi
+    round-10 seat, while an `AllEnemies` card played bare resolved.
+
+    WHY. Six of the arm's cards are `KokomiTargets.PetOrEnemy`, a CUSTOM target
+    type minted at `ModelDb.Init`, so `card.TargetType.ToString()` renders a
+    bare NUMBER on the wire (`EB-216`) and matches nothing in `AIMED_TARGETS`.
+    The bridge's `ExecutePlayCard` only demands a target for
+    `TargetType.AnyEnemy` (`McpMod.Actions.cs:152`), so the play was posted
+    with a NULL target, reached `PlayCardAction(card, null)`, and the card's
+    own `ArgumentNullException.ThrowIfNull(cardPlay.Target)` ended it inside
+    the action queue -- after the wire had already answered `ok`.
+
+    AND WHY THE NUMBER ALONE IS NOT ENOUGH. The other two custom spellings
+    render as bare numbers too, and for BOTH of them a bare play is correct:
+    `PetOrSelf` (ten cards, e.g. Tide Wall) falls through to its now-line on
+    the player, and `PetOnly` (two) schedules its Plan with no target read. So
+    the question is asked of the CARD rather than of the spelling, through the
+    bridge's `can_target_enemy` (`EB-402`, the twin of `EB-216`'s
+    `can_target_pet`): both are `CardModel.IsValidTarget`, which is the game's
+    own gate and is prefixed by BaseLib for every custom type.
+
+    An ABSENT `can_target_enemy` is a build that predates the field, and it
+    reads as the behaviour that build has: the named spellings decide and a
+    custom one falls through, exactly as before.
+    """
+    aim = str(entry.get("target_type") or "").lower()
+    if aim in AIMED_TARGETS:
+        return True
+    if not aim or aim in UNAIMED_TARGETS:
+        return False
+    return entry.get("can_target_enemy") is True
+
+
 def _hand(state: dict[str, Any]) -> list[dict[str, Any]]:
     return [c for c in (_player(state).get("hand") or []) if isinstance(c, dict)]
 
