@@ -684,7 +684,9 @@ def value(state, card, playable: list, decider) -> float:
         if m == "standing_room_only":
             return 0.8 * tl * 1.5
         if m == "high_stakes":
-            return 0.8 * tl * (n[0] if T.near_line(state.player) else 0.5)
+            # The Spend round's sizing: about +2 a hit in a normal fight.
+            drained = int(state.player.ftd.drained)
+            return 0.8 * tl * max(1.0, drained / max(1, n[0]) + 1.0)
         if m == "regina":
             return 0.8 * tl * (2.5 if T.can_drain(state, T.REGINA_DRAIN)
                                else 0.5)

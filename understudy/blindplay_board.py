@@ -1038,6 +1038,10 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # The quarter-line round (2026-10-10): the part of it drained
             # past the line, lost unless Repaid. 0 on a build that sends none.
             "drained_past": _int(raw.get("drained_past")),
+            # The Spend round (2026-10-10): A Five-Century Act is in play, so
+            # the past-line part returns after combat. False on a build that
+            # sends none.
+            "past_returns": bool(raw.get("past_returns")),
             "line": None if line is None else _int(line),
             # Seat page 3: where the line comes from, in the mod's words
             # (`FurinaStageLaw.LineWhy`); "" on a build that sends none.
@@ -1446,6 +1450,12 @@ def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         "on_player": bool(ev.get("on_player")),
                         "seq": _int(ev.get("seq")),
                         "amount": _int(ev.get("amount")),
+                        # The Spend round (2026-10-10): the curtain call's
+                        # past-line HP lost, and (A Five-Century Act) the
+                        # part of the return that was past the line. 0 on a
+                        # build that sends neither.
+                        "lost": _int(ev.get("lost")),
+                        "past": _int(ev.get("past")),
                         "source": _text(row.get("card"))})
     return out
 

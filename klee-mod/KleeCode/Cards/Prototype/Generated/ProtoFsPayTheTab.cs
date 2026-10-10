@@ -65,7 +65,7 @@ public sealed class ProtoFsPayTheTab : CustomCardModel, ICharacterCard, IUnplaya
     public string? UnplayableReason =>
         FurinaStage.CanDrain(SparkCost.OwnerCreatureOf(this), 6)
             ? null
-            : "it would take you below your Drain line";
+            : "it would take you to 0 HP";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

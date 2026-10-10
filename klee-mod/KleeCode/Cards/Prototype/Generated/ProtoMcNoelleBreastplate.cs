@@ -57,7 +57,7 @@ public sealed class ProtoMcNoelleBreastplate : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(8m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new FoldedBlockVar("BranchBlock", 4m, ValueProp.Move)
         };
 

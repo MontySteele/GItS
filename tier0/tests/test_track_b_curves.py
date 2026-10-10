@@ -199,6 +199,12 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             #
             # SURFACED, not smuggled: any Track B cut on these is a HUMAN-FEED
             # cut until a wire route for them lands.
+            # 2026-10-10 (the Spend round): HP after the end-of-combat
+            # effects, read on the game's combat-won signal, and Furina's
+            # Fanfare record (the last with its row keys card, spent, before
+            # and cap). Mod-side ledger reads with no wire route.
+            "hp_after_return", "fanfare_peak", "fanfare_end",
+            "fanfare_spends", "card", "spent", "before", "cap",
             "run_id", "run_instance", "fight_index", "encounter",
             "detonations", "corpse_detonations",
             # EB-118. One row per resolved Exhaust selection, in the SIM's

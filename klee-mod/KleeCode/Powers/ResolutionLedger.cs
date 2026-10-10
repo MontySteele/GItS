@@ -187,10 +187,16 @@ public static class ResolutionLedger
     /// remembers the last one it printed prints only what is new -- across
     /// a restart too.
     /// </summary>
+    /// <remarks>The Spend round (2026-10-10): the curtain call carries the
+    /// HP drained past the line that did NOT come back (`Lost`, the fight
+    /// ended before it was Repaid) and, under A Five-Century Act, the part of
+    /// `Amount` that was past the line (`Past`). 0 on every other kind.
+    /// </remarks>
     public readonly record struct PageEvent(string Kind, string Card,
                                             string Target, string Power,
                                             string CombatId, bool OnPlayer,
-                                            long Seq, int Amount = 0);
+                                            long Seq, int Amount = 0,
+                                            int Lost = 0, int Past = 0);
 
     /// <summary>The event kinds, spelled once (the page reads these words).
     /// </summary>
@@ -274,7 +280,8 @@ public static class ResolutionLedger
     /// </summary>
     public static void NoteEvent(string kind, string card, string target,
                                  string power, string combatId = "",
-                                 bool onPlayer = false, int amount = 0)
+                                 bool onPlayer = false, int amount = 0,
+                                 int lost = 0, int past = 0)
     {
         if (string.IsNullOrEmpty(kind)) return;
         var row = _open;
@@ -301,19 +308,21 @@ public static class ResolutionLedger
                                      target ?? string.Empty,
                                      power ?? string.Empty,
                                      combatId ?? string.Empty, onPlayer,
-                                     ++_seq, amount));
+                                     ++_seq, amount, lost, past));
     }
 
     /// <summary>The same note for a body: its printed name, its combat id
     /// and whether it is a player, read without a throw.</summary>
     public static void NoteEvent(string kind, string card, Creature? body,
-                                 string power, int amount = 0)
+                                 string power, int amount = 0, int lost = 0,
+                                 int past = 0)
     {
         bool onPlayer;
         try { onPlayer = body?.IsPlayer ?? false; }
         catch (System.Exception) { onPlayer = false; }
         NoteEvent(kind, card, Named(body), power,
-                  Safe(() => body?.CombatId.ToString()), onPlayer, amount);
+                  Safe(() => body?.CombatId.ToString()), onPlayer, amount,
+                  lost, past);
     }
 
     /// <summary>
@@ -666,6 +675,8 @@ public static class ResolutionLedger
                     ["on_player"] = e.OnPlayer,
                     ["seq"] = e.Seq,
                     ["amount"] = e.Amount,
+                    ["lost"] = e.Lost,
+                    ["past"] = e.Past,
                 }),
         });
 }

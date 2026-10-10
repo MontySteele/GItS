@@ -3025,7 +3025,7 @@
    effects: [{op: choose_one, modes: [
               {label: "Gain 6 Block",
                effects: [{op: block, amount: 6}]},
-              {label: "[gold]Spend[/gold] 3: also draw 2 cards",
+              {label: "Gain {IfUpgraded:show:8|6} [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards.",
                effects: [{op: stage_spend, amount: 3},
                          {op: block, amount: 6},
                          {op: draw, amount: 2}]}]}]}
@@ -3163,11 +3163,11 @@
               then: [{op: stage_repay, amount: 6}]}]}
 
 - {id: proto_fs_high_stakes, name: "High Stakes", character: furina,
-   upgrade: {power_amount: +2},
+   upgrade: {power_amount: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "While you are within 5 HP of your [gold]Drain[/gold] line, your Attacks deal 4 additional damage.",
-   effects: [{op: apply_power, power: fs_high_stakes, amount: 4,
+   description: "Your Attacks deal 1 additional damage for every 5 HP you have [gold]Drained[/gold] and not [gold]Repaid[/gold].",
+   effects: [{op: apply_power, power: fs_high_stakes, amount: 5,
               target: self}]}
 
 - {id: proto_fs_regina_of_all_waters, name: "Regina of All Waters", character: furina,

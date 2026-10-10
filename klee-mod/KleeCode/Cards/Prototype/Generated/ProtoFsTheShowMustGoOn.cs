@@ -53,7 +53,7 @@ public sealed class ProtoFsTheShowMustGoOn : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(0m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.FanfareOf(card.Owner?.Creature))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.FanfareOf(card.Owner?.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
