@@ -92,8 +92,6 @@ ICON_DEBT: dict[str, str] = {
         "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
     "ReginaOfAllWatersPower":
         "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "RepayNextTurnPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
     "ShowstopperPower":
         "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
     "StandingRoomOnlyPower":

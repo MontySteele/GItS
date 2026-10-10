@@ -6732,8 +6732,9 @@ Star Turn's card-level `cost_reduction_per_fanfare: 6`. Encore! prints
 - Commanding Gaze's "[3 and 2]" is the Spend mode: 3 Vulnerable and 2 Weak.
 - Undercurrent counts its own Drain; Balance the Books reads the drained HP
   before its own Repay, rounded down; Grand Absolution deals what it repaid.
-- Turn start: Regina, Fountain of Lucine, Gentle Current, Pneuma Tides, then
-  Prima Donna reads the Fanfare.
+- Turn start: Regina, Fountain of Lucine, Pneuma Tides, then Prima Donna
+  reads the Fanfare. (Gentle Current Repaid here until the Spend round 2,
+  2026-10-10; it Repays on play now.)
 - Grand Entrance Repays after the summon, on every Guest Star played.
 - "Within 5 HP of your Drain line" is HP minus the line at most 5.
 
@@ -6779,7 +6780,8 @@ HP drained past the line is lost unless repaid.
 **The Repay floor (pick 2).** "Repay N. Gain X for any HP it could not
 Repay." -- `StageDirector.RepayFloor` (sim `repay_floor`): the Repay
 resolves, then N minus the HP returned is paid. Block: Hymn of Many Waters
-(`stage_repay` with `floor: block`), Gentle Current's next-turn Repay,
+(`stage_repay` with `floor: block`), Gentle Current (on play since the
+Spend round 2),
 Fountain of Lucine each turn, Grand Entrance, Charlotte's and Sigewinne's
 acts. Vigor (the base game's `VigorPower`; the sim's `next_attack_up`):
 Pneuma Tides (Soothing Waters keeps none: see the loop probe). Damage: Surging Waters,
@@ -6938,3 +6940,33 @@ Record: `review/records/varka-amber-round-2026-10-10.md`, "What changes
   it does not fire on a Swirl's spread.
 - Knight cards: the seat page already prints the keyword's "Knight." line at
   the head of the face (the wire's sentence); pinned, nothing added.
+
+## Furina Spend round 2, 2026-10-10
+
+Record: `review/records/furina-spend-round-2-2026-10-10.md`, "What changes
+(Claude ships)". Regina's line and Navia's rarity are [USER]'s picks and are
+not built here.
+
+- High Stakes (`proto_fs_high_stakes`): "Your Attacks deal 1 additional
+  damage for every 5 [4] HP you have Drained this combat." It reads the
+  ledger's gross count (`FurinaStageLedger.DrainedThisCombat`, sim
+  `Ftd.drained_this_combat`): every Drain's HP, which no Repay lowers. The
+  hover keeps "Now: N additional damage."
+- Gentle Current (`proto_fs_gentle_current`): "Gain 5 [7] Block. Repay 3 [4].
+  Gain 1 Block for any HP it could not Repay." Hymn of Many Waters' row
+  shape (`stage_repay` with `floor: block`, upgrade `stage_repay: +1`), so
+  the face prints "(Repays N, +M Block)". The `furina` kind `repay_next`,
+  `RepayNextTurnPower` and the turn-start Repay are gone: nothing else used
+  them.
+- Charlotte's line: "The first time one of your cards Repays each turn,
+  draw 1 card." A card Repays when a card play is open and no Power, relic
+  (the ledger's `Cause`) or guest act (`Acting`) is the one Repaying inside
+  it (`FurinaStageLedger.CardRepaying`, sim `furina_tide.card_repaying`).
+  Her own act, Escoffier's line, Grand Entrance, the turn-start Powers and
+  Salon Solitaire do not count. The record keeps "draw 1" short; the face
+  keeps the badge's "draw 1 card".
+- A Drain line of 0: the Drained counter's hover reads "Drain line 0 HP
+  (...): all your Drain returns after combat.", the Drain tip adds "All your
+  Drain returns after combat.", and the seat page prints "Drain line 0 HP
+  (...): all your Drain returns after combat." (`FurinaStageLaw
+  .LineZeroReturns`).

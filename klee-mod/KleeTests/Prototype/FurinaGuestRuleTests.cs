@@ -296,7 +296,8 @@ public class FurinaGuestRuleTests
             Il.Calls(typeof(ProtoFsFinalBow).GetMethod("OnPlay", All)!));
         Assert.Contains("FurinaCards.TutorGuest",
             Il.Calls(typeof(ProtoFsCastingCall).GetMethod("OnPlay", All)!));
-        Assert.Contains("FurinaCards.RepayNextTurn",
+        // Gentle Current Repays now (the Spend round 2, 2026-10-10).
+        Assert.Contains("FurinaStage.Repay",
             Il.Calls(typeof(ProtoFsGentleCurrent).GetMethod("OnPlay", All)!));
     }
 
@@ -346,7 +347,6 @@ public class FurinaGuestRuleTests
         Assert.Equal(0, low.Board.Gained);
         foreach (var hook in new[] { "FurinaStage.ReginaDrains",
                                      "FurinaStage.PneumaTidesRepays",
-                                     "FurinaStage.RepayNextTurnRepays",
                                      "FurinaStage.PrimaDonnaEnergy" })
         {
             Assert.Contains(hook, Il.Calls(Il.Method("FurinaStage", "TurnStart")));

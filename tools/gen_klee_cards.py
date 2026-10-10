@@ -2612,12 +2612,11 @@ FURINA_KINDS = {
     "act_all": "ActAll",
     "final_bow": "FinalBow",
     "tutor_guest": "TutorGuest",
-    "repay_next": "RepayNextTurn",
     # THE BLOCK GAP (2026-10-09): Velvet Curtain's "Gain 2 Fanfare", the
     # ledger's gain (`FurinaStage.Gain`, Universal Revelry's path).
     "gain_fanfare": "GainFanfare",
 }
-FURINA_KIND_AMOUNT = {"final_bow", "repay_next", "gain_fanfare"}
+FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare"}
 FURINA_FIELDS = {"op", "kind", "amount"}
 #: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
 #: arrives upgraded is the card's own upgrade (`upgraded_grant`).
@@ -15362,19 +15361,14 @@ STAGE_REPAY_POWERS = frozenset({
 def stage_later_repay_call(card: dict) -> str | None:
     """The "(Repays N)" call for a Repay that is not a top-level op, or None.
 
-    The pool-75 round (2026-10-09): Gentle Current, Pneuma Tides, Fountain of
-    Lucine, Grand Entrance and Riptide Lunge print a Repay that happens later
+    The pool-75 round (2026-10-09): Pneuma Tides, Fountain of Lucine, Grand
+    Entrance and Riptide Lunge print a Repay that happens later
     or on a condition, and their faces said nothing with nothing drained. The
     line reads what a Repay of the printed number would return now; Riptide
     Lunge's reads the board after its own Drain.
     """
     top = card.get("effects") or []
     for fx in top:
-        if fx.get("op") == "furina" and fx.get("kind") == "repay_next":
-            # Gentle Current: next turn's Repay has the Block floor.
-            return ('FurinaStageFacePreview.Repay(this, '
-                    'DynamicVars["FsAmount"].IntValue, '
-                    f'{STAGE_REPAY_PAYOUT_CS["block"]})')
         if (fx.get("op") == "apply_power"
                 and fx.get("power") in STAGE_REPAY_POWERS):
             pay = STAGE_REPAY_PAYOUT_CS[

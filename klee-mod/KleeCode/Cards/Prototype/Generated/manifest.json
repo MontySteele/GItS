@@ -972,7 +972,7 @@
     },
     "proto_fs_gentle_current": {
       "block": 2,
-      "furina_amount": 1
+      "stage_repay": 1
     },
     "proto_fs_grand_absolution": {
       "cost": -1

@@ -38,14 +38,14 @@ public sealed class ProtoFsHighStakes : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRepay(ArmKeywordTips.ForDrain(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForDrain(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_high_stakes");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "High Stakes"),
-        ("description", "Your Attacks deal 1 additional damage for every {PowerAmount:diff()} HP you have [gold]Drained[/gold] and not [gold]Repaid[/gold]."),
+        ("description", "Your Attacks deal 1 additional damage for every {PowerAmount:diff()} HP you have [gold]Drained[/gold] this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
