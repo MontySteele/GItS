@@ -1945,9 +1945,13 @@ STAGE_FANFARE_LINE = ("- Fanfare {fanfare} (this turn: {gained} gained, "
 #: THE SALON'S TAB (2026-10-05): the HP loan's two numbers, the "Drained N"
 #: counter's reading. The Drain line rule (2026-10-09): a Drain may go past
 #: the line, and what it drains past it does not return.
-STAGE_DRAIN_LINE = ("- Drained {drained} HP. Drained HP above your line "
-                    "returns after combat. Drain line {line} HP{why}: HP you "
-                    "Drain past it is lost unless you Repay it.")
+STAGE_DRAIN_LINE = ("- Drained {drained} HP{past}. Drained HP above your "
+                    "line returns after combat. Drain line {line} HP{why}: "
+                    "HP you Drain past it is lost unless you Repay it.")
+#: THE "LOST FOR GOOD" COUNTER (the quarter-line round, 2026-10-10, "What to
+#: change" 1): the part drained past the line, after the drained count, only
+#: when there is any. Seats learned that cost only by losing the HP.
+STAGE_DRAIN_PAST = " ({past} past your line: lost unless you Repay)"
 #: Seat page 3: where the line comes from ("the HP you started this fight
 #: with, minus 1/4 of your Max HP", 2026-10-09); seats connected it to their
 #: entry HP only late.
@@ -2186,8 +2190,10 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     out.append("- " + " · ".join(block))
     if stage.get("line") is not None:
         why = stage.get("line_why") or ""
+        past = stage.get("drained_past") or 0
         out.append(STAGE_DRAIN_LINE.format(
             drained=stage.get("drained", 0), line=stage["line"],
+            past=STAGE_DRAIN_PAST.format(past=past) if past > 0 else "",
             why=STAGE_DRAIN_WHY.format(why=why) if why else ""))
     if not seats:
         out.append(STAGE_EMPTY_LINE)

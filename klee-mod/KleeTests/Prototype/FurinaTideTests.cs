@@ -663,9 +663,9 @@ public class FurinaTideTests
                         FurinaStageLaw.LineWhy(lyney: true));
         var body = DrainedCounter.HoverBody(seat.Creature);
         Assert.StartsWith(DrainedCounter.LineSentence(59, stage.LineWhy), body);
-        Assert.Contains("Drained: [blue]4[/blue] HP.", body);
-        Assert.Contains("Drained: [blue]9[/blue] HP, [blue]3[/blue] past "
-                        + "your line.",
+        Assert.Contains("\nDrained [blue]4[/blue] HP.\n", body);
+        Assert.Contains("Drained [blue]9[/blue] HP ([blue]3[/blue] past "
+                        + "your line: lost unless you [gold]Repay[/gold]).",
                         DrainedCounter.HoverBody(9, 59, "", past: 3));
         Assert.Equal(DrainedCounter.HoverBody(0, 0, ""),
                      DrainedCounter.HoverBody(null));
