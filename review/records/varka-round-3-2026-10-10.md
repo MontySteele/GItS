@@ -89,6 +89,13 @@ Take-rate grading lines now measure that taste, not the cards, so they stop here
    - **Ruled 2026-10-10: (a) or (b), not (c).** [USER]: "agreed on a or b; we can sim a and see if
      it's good enough for Rare." (a) is simmed in tier-0 first. If (a) does not read as Rare-worthy,
      Converging Winds becomes (b).
+   - **Sim read (#1042, `tools/varka_rare_marginal_sim.py`).** The test compared each deck plus the card against the same deck plus a Strike, with 500 drafted decks and 5,000 or more fights per arm.
+     - (a) at 4 sits about 13th of Varka's 23 Rares, about the same as adding no card.
+     - (a) at 6 sits about 10th against one enemy and 6th–7th against groups.
+     - (b) is below (a) in every cohort. The current card is the worst measured.
+     - All of them are well below a Demon Form reference.
+     - About 3 Swirls a fight come after the Power is played.
+   - **Claude's call:** (a) at **6 [8]**, cost 1: "Your Swirls deal 6 [8] additional damage to ALL enemies." At 4 it is only an empty slot. At 6 it is above Varka's median Rare and below Demon Form. It builds with the Hydro batch after [USER]'s Varka run, so his run grades the build the seats graded.
 2. **Hydro's job** is already queued (#1017). Read it together with the Windborne Resolve finding above.
    - **Ruled 2026-10-10 on #1017:** Hydro keeps the Block job; a Block census comes first, then a
      pass moving Hydro toward Block payoffs.
