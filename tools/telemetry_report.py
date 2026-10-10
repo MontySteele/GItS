@@ -7,6 +7,8 @@
     python tools/telemetry_report.py --character Varka --feed bot --json
     python tools/telemetry_report.py --reactions --character Klee
     python tools/telemetry_report.py --fanfare --character Furina
+    python tools/telemetry_report.py --block-gap --character Furina \
+        --character base5
     python tools/telemetry_report.py --coop --reactions
     python tools/telemetry_report.py --offers --character Varka --element pyro
     python tools/telemetry_report.py --character Klee --character base5 \\
@@ -80,7 +82,17 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      medians of the peak, of the bank at the close (the fight's end or her
      death), of Spends a fight, of what one Spend took and of the bank
      before it; and the share of Spends that were "Spend up to X" (`cap`
-     not -1). Fights without the keys are left out (`nF`).
+     not -1). Fights without the keys are left out (`nF`). Since the
+     Spend round 2 (2026-10-10), per group too: the HP drained past the line
+     and not returned (`past_lost`: median a fight and total) and the damage
+     High Stakes added (`high_stakes_bonus`: total, and the fights it added
+     any), over the fights that carry each key.
+
+  6. With `--block-gap` (the Spend round 2, 2026-10-10; every character):
+     turns that opened with a Block-gaining card in hand while the enemies
+     telegraphed attack damage (`block_card_turns`), and how many of those
+     gained no Block (`block_card_turns_no_block`), POOLED over the fights
+     that carry the keys (`nK`), with the no-Block share.
 
 CO-OP (`--coop`). Keeps only two-seat fights (`seats == 2`) instead of solo
 ones. Every co-op lane writes a row for BOTH seats of the same fight, so rows
@@ -403,6 +415,25 @@ def fanfare_summary(group: str, rows: list[dict]) -> dict:
         "before_per_spend": _median([_num(s, "before") for s in spends]),
         "spends": len(spends),
         "up_to_share": (up_to / len(spends)) if spends else None,
+        # The Spend round 2 (2026-10-10).
+        **_stage_extras(rows),
+    }
+
+
+def _stage_extras(rows: list[dict]) -> dict:
+    """`past_lost` and `high_stakes_bonus` (the Spend round 2, 2026-10-10),
+    over the fights that carry each key."""
+    lost = [_num(r, "past_lost") for r in rows if "past_lost" in r]
+    lost = [v for v in lost if v is not None]
+    stakes = [_num(r, "high_stakes_bonus") for r in rows
+              if "high_stakes_bonus" in r]
+    stakes = [v for v in stakes if v is not None]
+    return {
+        "fights_with_past_lost": len(lost),
+        "past_lost": _median(lost),
+        "past_lost_total": sum(lost) if lost else None,
+        "high_stakes_total": sum(stakes) if stakes else None,
+        "high_stakes_fights": sum(1 for v in stakes if v > 0),
     }
 
 
@@ -415,7 +446,8 @@ def render_fanfare(fx: list[dict]) -> list[str]:
              "keys; spent/before per Spend)",
              f"{'group':<16}{'n':>5}{'nF':>5}{'peak':>7}{'end':>7}"
              f"{'death':>7}{'sp/f':>6}{'spent':>7}{'before':>8}"
-             f"{'n sp':>6}{'upto':>6}"]
+             f"{'n sp':>6}{'upto':>6}{'pastL':>7}{'pL tot':>7}"
+             f"{'HS tot':>7}{'HS f':>5}"]
     for s in fx:
         share = ("--" if s["up_to_share"] is None
                  else f"{100 * s['up_to_share']:.0f}%")
@@ -425,7 +457,51 @@ def render_fanfare(fx: list[dict]) -> list[str]:
                      f"{_f(s['spends_per_fight']):>6}"
                      f"{_f(s['spent_per_spend']):>7}"
                      f"{_f(s['before_per_spend']):>8}{s['spends']:>6}"
-                     f"{share:>6}")
+                     f"{share:>6}{_f(s['past_lost']):>7}"
+                     f"{_f(s['past_lost_total']):>7}"
+                     f"{_f(s['high_stakes_total']):>7}"
+                     f"{s['high_stakes_fights']:>5}")
+    return lines
+
+
+# ------------------------------------------------------------- block gap ---
+
+BLOCK_GAP_KEYS = ("block_card_turns", "block_card_turns_no_block")
+
+
+def block_gap_summary(group: str, rows: list[dict]) -> dict:
+    """Turns opened with a Block card in hand and damage incoming, and those
+    that gained no Block (the Spend round 2, 2026-10-10), pooled over the
+    fights that carry both keys."""
+    keyed = [r for r in rows if all(k in r for k in BLOCK_GAP_KEYS)]
+    turns = sum(_num(r, "block_card_turns") or 0 for r in keyed)
+    bare = sum(_num(r, "block_card_turns_no_block") or 0 for r in keyed)
+    return {"group": group, "fights": len(rows),
+            "fights_with_keys": len(keyed),
+            "block_card_turns": turns, "no_block": bare,
+            "no_block_share": (bare / turns) if turns else None,
+            "fights_with_a_bare_turn": sum(
+                1 for r in keyed
+                if (_num(r, "block_card_turns_no_block") or 0) > 0)}
+
+
+def block_gap(grouped: dict[str, list[dict]]) -> list[dict]:
+    return [block_gap_summary(g, rows) for g, rows in grouped.items()]
+
+
+def render_block_gap(bx: list[dict]) -> list[str]:
+    lines = ["", "BLOCK GAP (turns opened with a Block card in hand and "
+             "attack damage telegraphed; pooled over the nK fights with the "
+             "keys)",
+             f"{'group':<16}{'n':>5}{'nK':>5}{'turns':>7}{'no blk':>8}"
+             f"{'share':>7}{'fights':>8}"]
+    for s in bx:
+        share = ("--" if s["no_block_share"] is None
+                 else f"{100 * s['no_block_share']:.0f}%")
+        lines.append(f"{s['group'][:15]:<16}{s['fights']:>5}"
+                     f"{s['fights_with_keys']:>5}"
+                     f"{s['block_card_turns']:>7.0f}{s['no_block']:>8.0f}"
+                     f"{share:>7}{s['fights_with_a_bare_turn']:>8}")
     return lines
 
 
@@ -634,7 +710,8 @@ def render_reactions(rx: list[dict]) -> list[str]:
 def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
            card_group: str | None, header: list[str], top: int,
            rx: list[dict] | None = None,
-           fx: list[dict] | None = None) -> str:
+           fx: list[dict] | None = None,
+           bx: list[dict] | None = None) -> str:
     lines = list(header)
     lines.append("")
     lines.append("BY GROUP x ACT x KIND (medians across fights)")
@@ -685,6 +762,8 @@ def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
         lines.extend(render_reactions(rx))
     if fx is not None:
         lines.extend(render_fanfare(fx))
+    if bx is not None:
+        lines.extend(render_block_gap(bx))
     return "\n".join(lines)
 
 
@@ -723,6 +802,7 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
     rx = reactions(grouped, kept, coop, list(args.character or [])) \
         if getattr(args, "reactions", False) else None
     fx = fanfare(grouped) if getattr(args, "fanfare", False) else None
+    bx = block_gap(grouped) if getattr(args, "block_gap", False) else None
     out = {"filters": {"since": args.since, "until": args.until,
                         "baseline_since": args.baseline_since or args.since,
                         "baseline_until": args.baseline_until or args.until,
@@ -742,6 +822,8 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
         out["reactions"] = rx
     if fx is not None:
         out["fanfare"] = fx
+    if bx is not None:
+        out["block_gap"] = bx
     return out
 
 
@@ -797,7 +879,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--fanfare", action="store_true",
                     help="add the Fanfare section: Furina's peak, Fanfare at "
                     "the close, Spends a fight and the bank before each, by "
-                    "group (keys since 2026-10-10)")
+                    "group (keys since 2026-10-10), with the HP lost past "
+                    "the line and High Stakes' damage")
+    ap.add_argument("--block-gap", action="store_true",
+                    help="add the block-gap section: turns opened with a "
+                    "Block card in hand and damage incoming, and those that "
+                    "gained no Block, by group (keys since 2026-10-10)")
     ap.add_argument("--feed", choices=("bot", "human", "all"), default="all")
     ap.add_argument("--cards-for", help="the group whose cards are listed "
                     "(default: the first non-base5 group)")
@@ -843,7 +930,8 @@ def main(argv: list[str] | None = None) -> int:
               "groups: " + ", ".join(f"{g} {n}" for g, n in
                                      out["groups"].items())]
     print(render(cells, out["comparison"], out["cards"], out["cards_for"],
-                 header, args.top, out.get("reactions"), out.get("fanfare")))
+                 header, args.top, out.get("reactions"), out.get("fanfare"),
+                 out.get("block_gap")))
     return 0
 
 

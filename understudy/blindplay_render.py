@@ -1967,6 +1967,12 @@ STAGE_DRAIN_LINE_RETURNS = ("- Drained {drained} HP{past}. Drained HP "
                             "returns after combat, past your line too. "
                             "Drain line {line} HP{why}.")
 STAGE_DRAIN_PAST_RETURNS = " ({past} past your line)"
+#: THE SPEND ROUND 2 (2026-10-10, change 4): a line of 0 explains itself. A
+#: seat read "Drain line 0" as "every Drain is permanent", which is
+#: backwards: at 0 every Drain stays above the line and returns. The words
+#: are `FurinaStageLaw.LineZeroReturns`.
+STAGE_DRAIN_LINE_ZERO = ("- Drained {drained} HP. Drain line 0 HP{why}: all "
+                         "your Drain returns after combat.")
 #: Seat page 3: where the line comes from ("the HP you started this fight
 #: with, minus 1/4 of your Max HP", 2026-10-09); seats connected it to their
 #: entry HP only late.
@@ -2261,6 +2267,8 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         past = stage.get("drained_past") or 0
         returns = bool(stage.get("past_returns"))
         line_words = STAGE_DRAIN_LINE_RETURNS if returns else STAGE_DRAIN_LINE
+        if stage["line"] <= 0:
+            line_words = STAGE_DRAIN_LINE_ZERO
         past_words = STAGE_DRAIN_PAST_RETURNS if returns else STAGE_DRAIN_PAST
         out.append(line_words.format(
             drained=stage.get("drained", 0), line=stage["line"],

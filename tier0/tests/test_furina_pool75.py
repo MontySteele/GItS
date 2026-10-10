@@ -257,19 +257,18 @@ def test_hymn_of_renewal_counts_hp_actually_repaid():
     assert st.player.powers.get("strength", 0) == 1
 
 
-def test_turn_start_regina_gentle_current_pneuma_tides_and_prima_donna():
+def test_turn_start_regina_pneuma_tides_and_prima_donna():
     st = _furina()
     p = st.player
     p.powers[FS.REGINA_OF_ALL_WATERS] = 1
     p.powers[FS.PNEUMA_TIDES] = 2
     p.powers[FS.PRIMA_DONNA] = 1
-    p.ftd.repay_next = 4
     p.ftd.fanfare = 10
     p.energy = 3
     FS.drain(st, 6)
     T.turn_start(st)
     assert p.powers.get("strength", 0) == 1          # Regina drained 3
-    assert p.ftd.drained == 6 + 3 - 4 - 2
+    assert p.ftd.drained == 6 + 3 - 2
     assert p.energy == 4
 
 
@@ -312,8 +311,9 @@ def test_the_repay_cards_and_their_counts():
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_rising_tide"))
     assert hp - st.enemies[0].hp == 6 + 3 * 2
+    before = st.player.ftd.drained
     _play(st, _card("proto_fs_gentle_current"))
-    assert st.player.ftd.repay_next == 4
+    assert st.player.ftd.drained == before - 3       # Repays now (round 2)
     left = st.player.ftd.drained
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_grand_absolution"))

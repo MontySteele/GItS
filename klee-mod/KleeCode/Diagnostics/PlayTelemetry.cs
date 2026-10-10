@@ -236,6 +236,45 @@ internal static class PlayTelemetry
 
     // -------------------------------------------------------------- turn ---
 
+    /// <summary>
+    /// THE BLOCK GAP (the Furina Spend round 2, 2026-10-10: "In 16 of 67
+    /// fights her first turn faced incoming damage and she gained no Block.
+    /// The control: 2 of 22."). After her draw, for every seat: did a turn
+    /// open with a Block-gaining card in hand (<c>CardModel.GainsBlock</c>)
+    /// while the enemies telegraphed attack damage? The round is kept; the
+    /// writer counts those turns (`block_card_turns`) and the ones that
+    /// gained no Block (`block_card_turns_no_block`). Every character, so
+    /// the control reads the same number. A read (rule 1).
+    /// </summary>
+    internal static void BlockCardTurn(Player player)
+    {
+        try
+        {
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            if (combat == null || !Open.ContainsKey(player)) return;
+            var hand = CardPile.Get(PileType.Hand, player)?.Cards;
+            var blockCard = hand != null && hand.Any(c => c.GainsBlock);
+            var (telegraphed, _) = Telegraphed(combat);
+            RecordBlockCardTurn(player, combat.RoundNumber, blockCard,
+                                telegraphed);
+        }
+        catch (Exception e)
+        {
+            Warn("BlockCardTurn", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="BlockCardTurn"/>, and the
+    /// test seam.</summary>
+    internal static void RecordBlockCardTurn(Player player, int round,
+                                             bool blockCardInHand,
+                                             int incoming)
+    {
+        if (!blockCardInHand || incoming <= 0) return;
+        if (!Open.TryGetValue(player, out var record)) return;
+        record.BlockCardRounds.Add(round);
+    }
+
     /// <summary>The turn-opening sample: HP, block, the telegraph BEFORE
     /// block and the enemy HP pool. The pool is what makes an
     /// output curve possible without trusting attribution — per-turn damage is
@@ -1455,6 +1494,10 @@ internal static class PlayTelemetry
         public FurinaStageLedger? Stage;
         /// <summary>2026-10-10. Her Fanfare at the close.</summary>
         public int FanfareEnd = -1;
+        /// <summary>2026-10-10 (round 2). The rounds that opened with a
+        /// Block-gaining card in hand and attack damage telegraphed
+        /// (<see cref="BlockCardTurn"/>).</summary>
+        public readonly SortedSet<int> BlockCardRounds = new();
         public int MaxHp;
         public int Turns;
         public string Outcome = "unknown";
@@ -1598,6 +1641,13 @@ internal static class PlayTelemetry
                     sb.Append('}');
                 }
                 sb.Append(']');
+                // 2026-10-10, the Spend round 2. HP drained past the line
+                // and not returned (the curtain call's lost part; at a
+                // death, the past-line HP still owed), and the damage High
+                // Stakes added to her Attack hits.
+                sb.Append(",\"past_lost\":").Append(Stage.PastLostAtClose);
+                sb.Append(",\"high_stakes_bonus\":")
+                  .Append(Stage.HighStakesDealt);
             }
             sb.Append(",\"turns\":").Append(Turns);
             sb.Append(',');
@@ -1710,6 +1760,11 @@ internal static class PlayTelemetry
             sb.Append(']');
             sb.Append(",\"block_gained\":").Append(BlockGained.Values.Sum());
             sb.Append(",\"block_given\":").Append(BlockGiven);
+            // 2026-10-10 (the Furina Spend round 2). Every character.
+            sb.Append(",\"block_card_turns\":").Append(BlockCardRounds.Count);
+            sb.Append(",\"block_card_turns_no_block\":")
+              .Append(BlockCardRounds.Count(r =>
+                  !BlockGained.TryGetValue(r, out var b) || b <= 0));
             sb.Append(",\"damage_taken\":").Append(DamageTaken);
             // EB-18. This seat's bombs, and how many of them went off on a
             // body that was already dead (probe (e) / Q11's question, asked of
@@ -1940,6 +1995,15 @@ public sealed class PlayTelemetryHooks : AbstractModel
             Log.Warn($"[{KleeMod.ModId}] page events draw: "
                    + $"{e.GetType().Name}: {e.Message}");
         }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The block-card sample (2026-10-10), after the draw: the
+    /// hand is the one the turn opens with.</summary>
+    public override Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        PlayTelemetry.BlockCardTurn(player);
         return Task.CompletedTask;
     }
 

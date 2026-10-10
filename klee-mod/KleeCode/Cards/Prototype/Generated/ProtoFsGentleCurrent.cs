@@ -45,7 +45,7 @@ public sealed class ProtoFsGentleCurrent : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentle Current"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Next turn, [gold]Repay[/gold] {FsAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Repay[/gold] {RepayAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -54,14 +54,14 @@ public sealed class ProtoFsGentleCurrent : CustomCardModel, ICharacterCard
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["FsAmount"].IntValue, FurinaStageFacePreview.PayBlock));
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue, FurinaStageFacePreview.PayBlock));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new SpotlightSystem.SpotlitBlockVar(5m),
-            new DynamicVar("FsAmount", 4m)
+            new DynamicVar("RepayAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -74,12 +74,12 @@ public sealed class ProtoFsGentleCurrent : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await FurinaCards.RepayNextTurn(choiceContext, this, cardPlay);
+        await FurinaStage.Repay(choiceContext, Owner.Creature, DynamicVars["RepayAmount"].IntValue, StageFloor.Block);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(2m);
-        DynamicVars["FsAmount"].UpgradeValueBy(1m);
+        DynamicVars["RepayAmount"].UpgradeValueBy(1m);
     }
 }

@@ -1281,8 +1281,8 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
         "Exhausts. Acts at the end of your turn. When it leaves, this card "
         "goes to your Discard Pile.")
     assert rows["Charlotte"] == (
-        "The first time you Repay each turn, draw 1 card. Act: Repay 2. "
-        "Gain 1 Block for any HP it could not Repay.")
+        "The first time one of your cards Repays each turn, draw 1 card. "
+        "Act: Repay 2. Gain 1 Block for any HP it could not Repay.")
     for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",
                  "Mademoiselle Crabaletta", "Ousia", "Pneuma"):
         assert gone not in rows, gone

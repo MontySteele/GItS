@@ -754,6 +754,13 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
+        ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
+            "diagnostics observer; reads, never writes board state (the "
+            "block-card turn sample, the Furina Spend round 2, 2026-10-10). "
+            "THE ORDERING QUESTION, answered: no sim twin -- it reads the "
+            "hand after the draw and the telegraph; a co-tenant that draws "
+            "first (Ousia Surge off Regina) can only add a card to what it "
+            "sees, and Block from either side is counted per round",
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
             "(the Furina stage; the Salon's Tab, 2026-10-05). "
             "After her draw: the badge and Grand Theater Program's Fanfare "

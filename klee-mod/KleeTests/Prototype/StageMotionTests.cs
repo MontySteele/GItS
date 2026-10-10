@@ -60,7 +60,11 @@ public class StageMotionTests
         // performers take no hits, so nothing on the stage flinches.
         Assert.Contains(Il.Calls(Il.Method("GameStageBoard", "Lunge")),
                         c => c.Contains("StagePerformerBeat.Act"));
+        // The Spend round 2 (2026-10-10): `Act` holds the guest-act count
+        // around `ActBody`, which lunges.
         Assert.Contains(Il.Calls(Il.Method("StageDirector", "Act")),
+                        c => c.Contains("StageDirector.ActBody"));
+        Assert.Contains(Il.Calls(Il.Method("StageDirector", "ActBody")),
                         c => c.Contains("IStageBoard.Lunge"));
     }
 

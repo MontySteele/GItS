@@ -63,12 +63,6 @@ public static class FurinaCards
         FurinaStage.FinalBow(choiceContext, card.Owner?.Creature,
                              Amount(card));
 
-    /// <summary>Gentle Current: "Next turn, Repay 4." [5]</summary>
-    public static Task RepayNextTurn(PlayerChoiceContext choiceContext,
-                                     CardModel card, CardPlay cardPlay) =>
-        FurinaStage.RepayNextTurn(choiceContext, card.Owner?.Creature,
-                                  Amount(card));
-
     /// <summary>The ledger source a card's own Fanfare gain is filed
     /// under.</summary>
     public const string CardGainSource = "card";

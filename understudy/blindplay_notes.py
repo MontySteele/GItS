@@ -1636,8 +1636,9 @@ ARM_KEYWORDS: dict[str, str] = {
                    "this card goes to your Discard Pile."),
     "oldest guest": ("The guest on stage longest: the one a fourth summon "
                      "would remove."),
-    "Charlotte": ("The first time you Repay each turn, draw 1 card. Act: Repay "
-                  "2. Gain 1 Block for any HP it could not Repay."),
+    "Charlotte": ("The first time one of your cards Repays each turn, draw 1 "
+                  "card. Act: Repay 2. Gain 1 Block for any HP it could not "
+                  "Repay."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
                     "enemy. Act: deal 4 Cryo damage to a random enemy."),
     "Lynette": ("The first time each turn an enemy makes you lose HP, gain "

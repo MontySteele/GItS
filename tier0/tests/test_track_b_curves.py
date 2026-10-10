@@ -205,6 +205,11 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # and cap). Mod-side ledger reads with no wire route.
             "hp_after_return", "fanfare_peak", "fanfare_end",
             "fanfare_spends", "card", "spent", "before", "cap",
+            # 2026-10-10 (the Spend round 2): Furina's past-line HP lost and
+            # High Stakes' damage, and every seat's block-card turns. Mod-side
+            # ledger and hand reads with no wire route.
+            "past_lost", "high_stakes_bonus", "block_card_turns",
+            "block_card_turns_no_block",
             "run_id", "run_instance", "fight_index", "encounter",
             "detonations", "corpse_detonations",
             # EB-118. One row per resolved Exhaust selection, in the SIM's
