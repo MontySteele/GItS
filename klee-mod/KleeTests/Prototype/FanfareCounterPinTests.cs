@@ -101,6 +101,23 @@ public class FanfareCounterPinTests
         FurinaStageLedger.ResetAll();
     }
 
+    /// <summary>The Block-card round (2026-10-10): "The fight 1 screen said
+    /// 'Fanfare 19' with no hint that being hit was the source." The gauge's
+    /// hover and the badge's in-combat line (the seat page's Fanfare row)
+    /// both say where it comes from, in one sentence.</summary>
+    [Fact]
+    public void The_hover_and_the_badge_row_say_where_fanfare_comes_from()
+    {
+        const string Source =
+            "Gain 1 [gold]Fanfare[/gold] for each HP you lose or "
+          + "[gold]Repay[/gold].";
+        Assert.Contains(Source, FanfareCounter.HoverBody(3, 1));
+        var smart = new FanfarePower().Localization!
+            .Single(r => r.Item1 == "smartDescription").Item2;
+        Assert.Contains(Source, smart);
+        Assert.StartsWith("You have {Fanfare} [gold]Fanfare[/gold]. ", smart);
+    }
+
     [Fact]
     public void The_old_badge_hides_on_her_screen_and_shows_to_a_partner()
     {

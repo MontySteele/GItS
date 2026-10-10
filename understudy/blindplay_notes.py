@@ -1616,8 +1616,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
     # guests) left with it; their history is in git.
     "Spend": "Pay that much Fanfare. Offered only if you have enough.",
-    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. It "
-                "resets to 0 after each combat."),
+    "Fanfare": ("Gain 1 Fanfare for each HP you lose or Repay. Spend uses "
+                "it. It resets to 0 after each combat."),
     # The Drain line rule (ruled 2026-10-09): the line is entry HP minus
     # 1/4 of Max HP, a Drain may go past it, and what it drains past it is
     # lost unless Repaid. The drain-line round (2026-10-09): "Drained HP
