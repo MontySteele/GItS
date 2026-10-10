@@ -3103,11 +3103,13 @@
              {op: conditional, if: killed_target,
               then: [{op: stage_repay, amount: 6}]}]}
 
+# High Stakes reads the HP drained this combat, gross (the Spend round 2,
+# 2026-10-10: the net count sat near 0 under Salon Solitaire's Repay).
 - {id: proto_fs_high_stakes, name: "High Stakes", character: furina,
    upgrade: {power_amount: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Your Attacks deal 1 additional damage for every 5 HP you have [gold]Drained[/gold] and not [gold]Repaid[/gold].",
+   description: "Your Attacks deal 1 additional damage for every 5 HP you have [gold]Drained[/gold] this combat.",
    effects: [{op: apply_power, power: fs_high_stakes, amount: 5,
               target: self}]}
 
@@ -3147,13 +3149,15 @@
    effects: [{op: stage_repay, amount: 2},
              {op: draw, amount: 1}]}
 
+# Gentle Current Repays now (the Spend round 2, 2026-10-10: seats never paid
+# for "next turn"); Hymn of Many Waters' shape, smaller.
 - {id: proto_fs_gentle_current, name: "Gentle Current", character: furina,
-   upgrade: {block: +2, furina_amount: 1},
+   upgrade: {block: +2, stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. Next turn, [gold]Repay[/gold] {FsAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
+   description: "Gain 5 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
    effects: [{op: block, amount: 5},
-             {op: furina, kind: repay_next, amount: 4}]}
+             {op: stage_repay, amount: 3, floor: block}]}
 
 - {id: proto_fs_clean_slate, name: "Clean Slate", character: furina,
    upgrade: {damage: +3},

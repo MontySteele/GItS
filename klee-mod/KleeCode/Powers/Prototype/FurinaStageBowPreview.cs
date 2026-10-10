@@ -120,7 +120,14 @@ public static class FurinaStageFacePreview
 
     /// <summary>The sentence's words, for the pins.</summary>
     public static string LineNowWords(int line, string why) =>
-        $"\nYour Drain line is {line}: {why}.";
+        $"\nYour Drain line is {line}: {why}."
+        // The Spend round 2 (2026-10-10): a line of 0 explains itself.
+      + (line <= 0 ? " " + Capitalised(FurinaStageLaw.LineZeroReturns) + "."
+                   : "");
+
+    private static string Capitalised(string words) =>
+        words.Length == 0 ? words
+                          : char.ToUpperInvariant(words[0]) + words.Substring(1);
 
     /// <summary>"(Repays N)": what a Repay of <paramref name="amount"/>
     /// would return now. Empty off a combat or a Furina board. A card with a

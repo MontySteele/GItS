@@ -394,7 +394,11 @@ public sealed class StageDirector
                                 FurinaStageLaw.ClorindePerRepay * back,
                                 Element.Electro);
         }
+        // Charlotte's line counts a Repay from one of her cards only (the
+        // Spend round 2, 2026-10-10): not her own act, a Power or Salon
+        // Solitaire (`FurinaStageLedger.CardRepaying`).
         if (_stage.SeatOf(StagePerformer.Charlotte) is { } charlotte
+            && _stage.CardRepaying
             && !_stage.CharlotteDrewThisTurn && !_board.Over)
         {
             _stage.CharlotteDrewThisTurn = true;
@@ -550,8 +554,25 @@ public sealed class StageDirector
 
     /// <summary>One guest's act, at the end of her turn or bought by a card
     /// (Encore!, Tutti!, Final Bow, Bring the House Down, Showstopper).
-    /// Escoffier's line answers every act, his own included.</summary>
+    /// Escoffier's line answers every act, his own included. A Repay inside
+    /// it is the act's, not a card's (<see cref="FurinaStageLedger.Acting"/>,
+    /// Charlotte's line).</summary>
     public async Task<bool> Act(StageSeat seat)
+    {
+        _stage.Acting++;
+        try
+        {
+            return await ActBody(seat);
+        }
+        finally
+        {
+            _stage.Acting--;
+        }
+    }
+
+    // The act itself; `Act` holds the Acting count around it. The lunge is
+    // here, so the structural pins read both (`StageMotionTests`).
+    private async Task<bool> ActBody(StageSeat seat)
     {
         if (_board.Over) return false;
         var who = seat.Who;

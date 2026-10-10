@@ -5169,6 +5169,8 @@ def resolve_card(state: CombatState, card: Card) -> None:
     finally:
         if varka:
             varka_oath.end_play(state, card)
+        # Charlotte's line (the Spend round 2): the play is over.
+        furina_stage.end_play(state)
         state.card_aim = None
         state.card_aim_bound = False
 
