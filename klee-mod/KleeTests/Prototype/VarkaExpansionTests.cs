@@ -384,6 +384,13 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(1, Upgraded<ProtoVkTheOrderAnswers>().EnergyCost
             .GetWithModifiers(CostModifiers.None));
         Assert.Contains(CardKeyword.Innate, Upgraded<ProtoVkWildfireOath>().Keywords);
+        // The forced-Amber round (2026-10-10): Oath Unto Death costs 2, was 3;
+        // its upgrade stays Innate.
+        Assert.Equal(2, new ProtoVkOathUntoDeath().EnergyCost.Canonical);
+        Assert.Equal(2, Upgraded<ProtoVkOathUntoDeath>().EnergyCost
+            .GetWithModifiers(CostModifiers.None));
+        Assert.Contains(CardKeyword.Innate, Upgraded<ProtoVkOathUntoDeath>().Keywords);
+        Assert.DoesNotContain(CardKeyword.Innate, new ProtoVkOathUntoDeath().Keywords);
         Assert.DoesNotContain(CardKeyword.Innate, new ProtoVkWildfireOath().Keywords);
         Assert.Contains(CardKeyword.Exhaust, new ProtoVkGrandMastersVerdict().Keywords);
         Assert.Contains(CardKeyword.Exhaust, new ProtoVkDawnPatrol().Keywords);

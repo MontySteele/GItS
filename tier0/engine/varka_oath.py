@@ -1223,11 +1223,13 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
         for e in list(state.living_enemies):
             _card_hit(state, card, e, fx["per"] * n, "electro")
     elif kind == "frost_ward":
-        # "Apply 1 Weak to each enemy with an aura. Gain 3 Block for each."
+        # "Gain 3 Block. For each enemy with an aura, apply 1 Weak and gain
+        # 3 additional Block." (the forced-Amber round, 2026-10-10). One Block
+        # gain of 3 x (1 + those enemies), as C#'s `VarkaCards.FrostWardBlock`.
         hit = [e for e in state.living_enemies if e.aura]
         for e in hit:
             powers.apply_power(state, e, "weak", 1, applier=p)
-        _powered_block(state, card, fx["amount"] * len(hit))
+        _powered_block(state, card, fx["amount"] * (1 + len(hit)))
     elif kind == "gleeful_songs":
         # "Apply Hydro to ALL enemies. Gain 4 Block, plus 3 for each enemy it
         # reacts on."
@@ -1299,7 +1301,8 @@ def _combo_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
 
 def on_card_exhausted(state, card) -> None:
     """`refpowers.after_card_exhausted`: PYRE OATH (the combo pass,
-    2026-10-04), "Whenever you Exhaust a card, gain 1 Pyro Oath." One gain
+    2026-10-04; ASHEN OATH since 2026-10-10, 2 a card), "Whenever you
+    Exhaust a card, gain 2 Pyro Oath." One gain
     of the stack per card, any card of his. C# twin:
     `PyreOathPower.AfterCardExhausted`."""
     if ledger(state.player) is None:
