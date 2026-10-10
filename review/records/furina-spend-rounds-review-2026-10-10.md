@@ -63,12 +63,20 @@ Furina's drop has the same shape. Varka's round 1 (full-run seats) won 3 of 5; h
    - (b) Standing Room Only, a Strength Power, moves to Uncommon. This moves the ruled 20 / 37 / 21 split.
    - (c) Leave the rules and make the guests the engine: Navia to Uncommon, and Wriothesley's act from 4 [7] to 5 [8].
    - Whichever is chosen, a rule-3 edit is a keyword rule, so it ships after your run.
+   - **Ruled 2026-10-10: Navia to Uncommon first; (a) is rejected.** [USER]: "I don't want Repay to
+     give fanfare without a spend right now, so I lean more towards putting Navia to Uncommon
+     first." (b) and (c)'s Wriothesley change are not taken now.
 2. **Seat format.** The control's results suggest per-act seats play worse than full-run seats. Per-act seats are the ruled cost and context-rot fix.
    - **Default:** after your run, one round on the same five seeds with full-run seats on the Spend build, to separate format from change.
    - The alternative is to keep per-act seats and treat the confound as fixed noise.
+   - **Ruled 2026-10-10: yes.** [USER]: "Definitely agree with testing whole-seat runs since we seem
+     to have gotten token counts under control." One full-run-seat round on the Spend build. Per-act
+     seats stay the default until that round is read. Timing is not yet set.
 3. **#1028's picks stand.**
    - Regina stops at the line. Default yes.
    - Navia to Uncommon. Default no. New fact: she has not been seen offered in seven rounds. Offer rows still need locating (`Diagnostics/RewardRowProbe.cs`).
+   - **Ruled 2026-10-10 on #1028:** Regina stops at the line ("I'm good with stopping Regina's Drain
+     at the line."); Navia moves to Uncommon (pick 1 above).
 
 ## Next
 
