@@ -214,7 +214,8 @@ def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
     # The pool to 75 (2026-10-09): its 41 join (Neuvillette among them), and
     # the 2026-10-09 trims' rarities are mirrored. The pool-75 round's
     # rulings: Endless Waltz cut, Standing Ovation Uncommon -- 19 / 35 / 20.
-    # The block gap (ruled 2026-10-09): four more, 20 / 37 / 21.
+    # The block gap (ruled 2026-10-09): four more, 20 / 37 / 21. Navia to
+    # Uncommon (2026-10-10): 20 / 38 / 20.
     pool = [c for r in probe.DRAFT_POOL.values() for c in r]
     assert len(pool) == 78 and len(set(pool)) == 78
     assert "ftd_endless_waltz" not in T.CARDS
@@ -222,7 +223,7 @@ def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
     assert "ftd_neuvillette" in pool and "ftd_ebb_and_flow" in pool
     assert "ftd_crowd_gasps" not in pool
     assert {r: len(v) for r, v in probe.DRAFT_POOL.items()} == {
-        "common": 20, "uncommon": 37, "rare": 21}
+        "common": 20, "uncommon": 38, "rare": 20}
 
 
 # ----------------------------------------------------------------------
@@ -320,14 +321,19 @@ def test_fountain_of_lucine_repays_at_the_next_three_turn_starts():
     assert f.ledger["fountain_repaid"] == 18 and not f.fountains
 
 
-def test_hold_the_stage_spends_six_for_16_block():
+def test_hold_the_stage_spends_up_to_12_for_1_block_each():
+    # The Spend paper (2026-10-10): "Gain 6 Block. Spend up to 12: gain 1
+    # more for each." No chooser: the decider is not asked.
     st = _state()
-    st.player.ftd.decider = _Says(True)
+    st.player.ftd.decider = _Says(False)
     _play(st, "ftd_hold_the_stage")              # nothing banked: 6
     assert st.player.block == 6
     st.player.ftd.fanfare = 7
-    _play(st, "ftd_hold_the_stage")
-    assert st.player.block == 6 + 16 and st.player.ftd.fanfare == 1
+    _play(st, "ftd_hold_the_stage")              # all 7
+    assert st.player.block == 6 + 13 and st.player.ftd.fanfare == 0
+    st.player.ftd.fanfare = 20
+    _play(st, "ftd_hold_the_stage")              # the cap, 12
+    assert st.player.block == 6 + 13 + 18 and st.player.ftd.fanfare == 8
 
 
 def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_four():

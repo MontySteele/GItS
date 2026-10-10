@@ -6929,6 +6929,63 @@ twins: the sheet ops through `furina_stage` (`gain_fanfare`, the two counts,
 `ftd_velvet_curtain`, `ftd_private_box`, `ftd_masquerade` and
 `ftd_show_must_go_on`, which the tide pilot drafts and values.
 
+## Furina: Spend up to X, and two guests Spend half the bank, 2026-10-10
+
+`review/active/furina-spend-paper-2026-10-10.md`, picks 1 and 2, built at the
+paper's defaults; [USER]'s ruling is pending (picks open on #1014). His
+direction, quoted in the paper: "we could have Spend act as 'spend up to X'
+with partial effects, and then make the X larger".
+
+The rule (`FurinaStageLedger.SpendUpTo`, `StageDirector.SpendUpTo`,
+`FurinaStage.SpendUpTo`; sim `furina_tide.spend_up_to`): it counts X, or all
+she holds if that is less, and never fails. It is a Spend only when at least
+1 counts (Thunderous Applause, Chevreuse, Crescendo answer it); it is not a
+spend-all, so Bis! and Standing Room Only ignore it. Navia's line makes the
+first 2 [3] points of the turn's first Spend free: they count and are not
+taken, so with Navia on stage and 0 Fanfare an up-to Spend counts 2.
+Center of Attention's free Spend counts the full X and takes nothing, and,
+like its free Spend N, is no Spend. The new op is `stage_spend_up_to`; the
+card reads what it counted as `stage_spent`, and "for every 4" as the count
+`stage_spent_fours` (`FurinaStage.SpentFours`, sim
+`furina_stage.spent_fours`), a Crashing Waves hit count (`times_formula`) and
+a Spirited Aria draw.
+
+The four cards lose their chooser (the Spend is made on play):
+
+- Tidal Flourish: "Deal 5 [8] Hydro damage to ALL enemies. Spend up to 10:
+  deal 1 more for each."
+- Spirited Aria: "Deal 8 [11] damage. Spend up to 8: deal 1 more for each.
+  Draw 1 for every 4 spent."
+- Crashing Waves: "Deal 4 [5] Hydro damage twice. Spend up to 12: hit once
+  more for every 4."
+- Hold the Stage: "Gain 6 [8] Block. Spend up to 12: gain 1 more for each."
+
+The three formula faces keep the house "(Deals N damage)" / "(Gains N Block)"
+preview line, which previews what the Spend would count now.
+
+The guests (lines unchanged): Navia's act is "Spend half your Fanfare
+(rounded down). Deal that much Geo damage to a random enemy."; Freminet's is
+"Gain 3 [6] Block. Spend half your Fanfare (rounded down): gain that much
+more Block.", replacing 5 [8] Cryo and 6 [9] Block. Each takes half of what
+is left when it acts, oldest first, and again after Showstopper; the
+half-Spend is a Spend when at least 1 is spent, and takes Navia's discount
+when it is the turn's first Spend. `FreminetActDamage` and its upgrade are
+gone; `FreminetActBlock` is 3 [6]; `GuestSpendDivisor` (2) and
+`SpendUpToEvery` (4) are new, each pinned by the parity lint. Freminet's
+forecast cue is Block now (`StageCueKind.Block`), and the forecast walks the
+bank in seat order. The research slice's four rows became the `upto_*`
+kinds, valued by the tide pilot.
+
+Pick 2 ruled 2026-10-10 ([USER]: "I don't like artificial limits, so I'd
+prefer to just fiddle with the ratio (make him only spend a quarter or a
+fifth or something like that...)"): Freminet's act Spends a quarter, not
+half: "Gain 3 [6] Block. Spend a quarter of your Fanfare (rounded down): gain
+that much more Block." Navia stays at half. `GuestSpendDivisor` split into
+`NaviaSpendDivisor` (2) and `FreminetSpendDivisor` (4), each pinned by the
+parity lint (sim `NAVIA_SPEND_DIVISOR`, `FREMINET_SPEND_DIVISOR`);
+`StageDirector.SpendHalf` became `SpendShare(divisor)` (sim `spend_share`),
+and the forecast divides by the acting guest's own divisor.
+
 ## Varka payoff round, 2026-10-10
 
 Record: `review/records/varka-payoff-round-2026-10-10.md`, "What changes
@@ -7064,3 +7121,18 @@ changes (Claude ships)". [USER]'s picks there are not built here.
 - The Drain face names who pays its Block: "(+3 Block: The Masquerade)"
   and "(+3 Block: Freminet)", one line each, after any Drain-line warning
   (`FurinaStageFacePreview.DrainBlock`).
+
+## Furina: Regina stops at the line, Navia to Uncommon, 2026-10-10
+
+Two rulings by [USER], built as written.
+
+- **Regina of All Waters** (`proto_fs_regina_of_all_waters`): "At the start
+  of your turn, Drain 3, never past your line. If you do, gain 1 Strength."
+  [USER]: "I'm good with stopping Regina's Drain at the line." It reuses the
+  guest act's stop (`StageDirector.GuestDrainRoom`, sim
+  `furina_tide.guest_drain_room`, Lyney's act): each copy drains only the
+  room above the line, none at or below it, and gains its Strength when it
+  drained at all. The upgrade is still cost 2 -> 1.
+- **Guest Star: Navia** (`proto_fs_guest_star_navia`): Rare -> Uncommon.
+  [USER]: "I lean more towards putting Navia to Uncommon first." Pool 78,
+  20 / 38 / 20 (was 20 / 37 / 21); sim `furina_tide.CARDS["ftd_navia"]`.

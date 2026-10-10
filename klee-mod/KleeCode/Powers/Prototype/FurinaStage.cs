@@ -123,6 +123,28 @@ public static class FurinaStage
         card?.Owner?.Creature is { } owner && LiveFor(owner)
             ? FurinaStageLedger.For(owner).SpentThisPlay : 0;
 
+    /// <summary>`stage_spent` for a "Spend up to <paramref name="cap"/>" as
+    /// a face prints it: during the play, what it counted; before it, what
+    /// it would count now (the cap under Center of Attention's free Spend,
+    /// else the cap or all she holds plus Navia's free points). One
+    /// expression, so preview and resolution agree.</summary>
+    public static int SpentOrUpTo(CardModel? card, int cap)
+    {
+        var spent = Spent(card);
+        if (spent > 0) return spent;
+        var owner = card?.Owner?.Creature;
+        if (!LiveFor(owner)) return 0;
+        return CenterOfAttentionPower.Covers(owner)
+            ? cap
+            : FurinaStageLedger.For(owner!).UpToOf(cap);
+    }
+
+    /// <summary>`stage_spent_fours`: this play's "Spend up to X" in fours,
+    /// rounded down ("Draw 1 for every 4 spent", "hit once more for every
+    /// 4").</summary>
+    public static int SpentFours(CardModel? card) =>
+        Spent(card) / FurinaStageLaw.SpendUpToEvery;
+
     /// <summary>`stage_spent` as a face prints it: before the play, the
     /// Fanfare a spend-all is about to take; during it, what it took. One
     /// expression, so preview and resolution agree.</summary>
@@ -214,6 +236,26 @@ public static class FurinaStage
         var paid = await Director(choiceContext, owner!).Spend(amount);
         RefreshBadges(owner);
         return paid;
+    }
+
+    /// <summary>"Spend up to X" (the Spend paper, 2026-10-10): spends X or
+    /// all she holds, never fails, and is a Spend when at least 1 counts.
+    /// Center of Attention's free Spend counts the full X and takes nothing
+    /// (and, like its free Spend N, is no Spend). Returns what counts as
+    /// spent, which the card's payoff reads as `stage_spent`.</summary>
+    public static async Task<int> SpendUpTo(PlayerChoiceContext choiceContext,
+                                            Creature? owner, int cap)
+    {
+        if (!LiveFor(owner)) return 0;
+        if (cap > 0 && CenterOfAttentionPower.TryClaim(owner!))
+        {
+            var free = FurinaStageLedger.For(owner!).SpendUpToFree(cap);
+            RefreshBadges(owner);
+            return free;
+        }
+        var spent = await Director(choiceContext, owner!).SpendUpTo(cap);
+        RefreshBadges(owner);
+        return spent;
     }
 
     /// <summary>"Spend all your Fanfare." Returns what was spent.</summary>
@@ -464,9 +506,9 @@ public static class FurinaStage
         RefreshBadges(furina);
     }
 
-    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3. If
-    /// you do, gain 1 Strength." First of her turn-start Powers, so the
-    /// Repays after it have room.</summary>
+    /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
+    /// never past your line. If you do, gain 1 Strength." First of her
+    /// turn-start Powers, so the Repays after it have room.</summary>
     private static async Task ReginaDrains(PlayerChoiceContext choiceContext,
                                            Creature furina)
     {
@@ -699,12 +741,36 @@ public static class FurinaStage
         return Forecast(FurinaStageLedger.For(owner!));
     }
 
-    /// <summary>The forecast against a given stage (the pins').</summary>
-    public static StageForecast Forecast(FurinaStageLedger ledger) =>
-        new(ledger.Seats.Select(seat => CueOf(ledger, seat)).ToList());
+    /// <summary>The forecast against a given stage (the pins'). Navia Spends
+    /// half and Freminet a quarter of what is left when they act, oldest
+    /// first (the Spend paper, 2026-10-10), so the bank is walked in seat
+    /// order.</summary>
+    public static StageForecast Forecast(FurinaStageLedger ledger)
+    {
+        var bank = ledger.Fanfare;
+        var free = ledger.NaviaDiscount;      // the turn's first Spend only
+        var cues = new List<StageForecastCue>(ledger.Seats.Count);
+        foreach (var seat in ledger.Seats)
+        {
+            var half = 0;
+            if (seat.Who is StagePerformer.Navia or StagePerformer.Freminet)
+            {
+                half = bank / (seat.Who == StagePerformer.Navia
+                    ? FurinaStageLaw.NaviaSpendDivisor
+                    : FurinaStageLaw.FreminetSpendDivisor);
+                if (half > 0)
+                {
+                    bank -= half - System.Math.Min(half, free);
+                    free = 0;
+                }
+            }
+            cues.Add(CueOf(ledger, seat, half));
+        }
+        return new(cues);
+    }
 
     private static StageForecastCue CueOf(FurinaStageLedger ledger,
-                                          StageSeat seat)
+                                          StageSeat seat, int half)
     {
         var n = StageDirector.ActAmount(seat.Who, seat.Upgraded);
         return seat.Who switch
@@ -722,10 +788,9 @@ public static class FurinaStage
             StagePerformer.Chevreuse => new(seat.Who, seat.Key,
                 StageCueKind.Damage, n, "", StageForecastCue.Random),
             StagePerformer.Freminet => new(seat.Who, seat.Key,
-                StageCueKind.Damage, n, "Cryo", StageForecastCue.Random),
+                StageCueKind.Block, n + half, "", ""),
             StagePerformer.Navia => new(seat.Who, seat.Key,
-                StageCueKind.Damage, ledger.SpentThisTurn, "Geo",
-                StageForecastCue.Random),
+                StageCueKind.Damage, half, "Geo", StageForecastCue.Random),
             StagePerformer.Neuvillette => new(seat.Who, seat.Key,
                 StageCueKind.Damage, ledger.HpLostSinceLastTurn, "Hydro",
                 StageForecastCue.All),
@@ -745,6 +810,9 @@ public enum StageCueKind
 
     /// <summary>Charlotte: Repay.</summary>
     Repay,
+
+    /// <summary>Freminet: Block (the Spend paper, 2026-10-10).</summary>
+    Block,
 }
 
 /// <summary>ONE GUEST'S CUE: what it will do at the end of this turn.

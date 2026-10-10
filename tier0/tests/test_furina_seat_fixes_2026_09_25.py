@@ -63,9 +63,10 @@ def _fresh_fight():
 
 # The Salon's Tab (2026-10-05): the plain-or-priced faces whose numbers fold
 # (Quick Flourish's Spend is a fixed price now; Interval Bell's and Salon's
-# Tab's plain modes draw a card, a number no board moves).
-SPEND_CARDS = ("ProtoFsTidalFlourish", "ProtoFsSpiritedAria",
-               "ProtoFsCurtainRise", "ProtoFsSurintendanteChevalmarin",
+# Tab's plain modes draw a card, a number no board moves). Tidal Flourish and
+# Spirited Aria left the chooser for "Spend up to X" (the Spend paper,
+# 2026-10-10).
+SPEND_CARDS = ("ProtoFsCurtainRise", "ProtoFsSurintendanteChevalmarin",
                "ProtoFsLeadingLady")
 
 
@@ -172,6 +173,9 @@ def test_the_stage_badge_interpolates_the_law():
            / "FurinaStageBadges.cs").read_text(encoding="utf-8")
     assert "FurinaStageLaw.ClorindeActDamage" in src
     assert "FurinaStageLaw.CharlotteActRepay" in src
+    # Freminet's act Spends "a quarter of your Fanfare" (the Spend paper,
+    # pick 2, ruled 2026-10-10); no other quarter (the old fade) may print.
+    src = src.replace("[gold]Spend[/gold] a quarter of your ", "")
     assert "FadeDivisor" not in src and "quarter" not in src
 
 

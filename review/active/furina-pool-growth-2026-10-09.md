@@ -131,7 +131,7 @@ remove; cards that name it carry a tip saying so.
 | Guest Star: Freminet | Skill 1, U | Line: whenever you Drain, gain that much Block. Act: deal 5 Cryo damage to a random enemy. [Act 8] |
 | Showstopper | Power 2 [1], R | At the end of your turn, Spend 5: your guests act again. |
 | Ensemble Cast | Power 2 [1], R | You have 4 guest seats. |
-| Guest Star: Navia | Skill 1, R | Line: your first Spend each turn costs 2 less (a spend-all keeps 2). Act: deal Geo damage to a random enemy equal to the Fanfare you spent this turn. [Line: 3 less] |
+| Guest Star: Navia | Skill 1, U (R until 2026-10-10) | Line: your first Spend each turn costs 2 less (a spend-all keeps 2). Act: deal Geo damage to a random enemy equal to the Fanfare you spent this turn. [Line: 3 less] |
 | Guest Star: Neuvillette | Skill 2, R | Line: your Hydro damage deals 2 more. Act: deal Hydro damage to ALL enemies equal to the HP you Drained this turn. [Line: 3 more] |
 | Guest Star: Escoffier | Skill 1, R | Line: whenever a guest acts, Repay 1. Act: deal 4 Cryo damage to ALL enemies. [Act 6] |
 
@@ -173,7 +173,7 @@ upgrade replaces today's 0 cost.
 | Pay the Tab | Skill 1, U | Drain 6. Draw 3 cards. [4 cards] |
 | Riptide Lunge | Attack 1, U | Drain 3. Deal 10 damage. If this kills an enemy, Repay 6. [13] |
 | High Stakes | Power 1, U | Your Attacks deal 1 additional damage for every 4 HP you have Drained this combat. [every 3] (reworked by the Spend round and its round 2; every 4 [3] by the Spend rounds review, 2026-10-10) |
-| Regina of All Waters | Power 2 [1], R | At the start of your turn, Drain 3. If you do, gain 1 Strength. |
+| Regina of All Waters | Power 2 [1], R | At the start of your turn, Drain 3, never past your line. If you do, gain 1 Strength. (", never past your line" added 2026-10-10) |
 | The Deluge | Attack 2 [1], R | Drain 8. Deal 24 damage to ALL enemies. Exhaust. |
 | All In | Skill 0, R | Drain 8. Gain 2 Energy. Exhaust. [Drain 6] |
 

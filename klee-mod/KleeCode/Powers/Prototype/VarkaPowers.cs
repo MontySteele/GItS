@@ -364,11 +364,15 @@ public sealed class StormwardStancePower : PowerModel, ILocalizationProvider
                                Element hit) =>
         poweredAttack && isAttackCard && hit == Element.Anemo;
 
+    /// <summary>NO TARGET IS ASKED FOR (2026-10-10): the bonus is his, and a
+    /// card in his hand previews with a null target, so a
+    /// <c>target == null</c> gate dropped it from the face. His own body is
+    /// still refused.</summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
     {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
+        if (dealer != Owner || target == Owner) return 0m;
         return Applies(props.IsPoweredAttack(),
                        cardSource is { Type: CardType.Attack },
                        AuraCmd.ElementOfPlay(cardSource, dealer))
