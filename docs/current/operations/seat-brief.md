@@ -33,7 +33,6 @@ Use `observe --brief` and `act --brief` instead of filtering output yourself;
 never filter observe or act output with grep. The brief page defines each
 word the first time your lane meets it; `observe --define "<Word>"` prints a
 word's definition from the current screen again.
-`act --observe` (your lane's act script passes it) also prints the new page after the move, so you do not need to `observe` after every act.
 
 `observe` prints whichever screen is up — combat, map, rewards, shop, rest,
 event, a selection overlay — as printed faces and nothing else. `act` resolves

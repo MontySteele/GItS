@@ -78,9 +78,7 @@ python tools/seat.py --lane 2 --character KLEEMOD-KOKOMI --backend local \
 `--opus-brief` prints the embark to run first on stderr, with an explicit
 `--max-actions` (120 by default, `--max-actions N` to change it), and with
 `--scratch` names the seat's own notes file, `<scratch>/seat-lane<N>/notes.md`,
-on the brief's lane line, and writes the lane scripts there: `o` (observe
---brief) and `a` (act --brief --observe, which acts and then prints the new
-page, so a seat needs no `o` after every move). The map page prints the run seed (from the lane's
+on the brief's lane line. The map page prints the run seed (from the lane's
 embark sidecar) and the ascension (from the wire).
 
 `tools/seat.py` (the `seat` skill) runs the same three steps you can run by
@@ -311,7 +309,7 @@ python -m understudy.embark --teardown --coop --lanes 2,3     # client first
 
 ```sh
 python -m understudy.blindplay observe [--raw-file <state.json>]
-python -m understudy.blindplay act "<command>" [--raw-file <f>] [--dry-run] [--observe]
+python -m understudy.blindplay act "<command>" [--raw-file <f>] [--dry-run]
 python -m understudy.blindplay session [--backend codex|local] [--max-actions N] [--max-wall-s S]
 ```
 
@@ -325,9 +323,7 @@ printing one name are numbered (`Slug (1)`, `Slug (2)`); `(upgraded)` /
 pick is taken (`skip` cancels it); a transform's result is not printed because
 the game has not chosen it. The live arm keywords get one definition each per
 screen, in `ArmKeywordTips.cs`'s words (`understudy/blindplay_notes.py` must
-say the same). `act --observe` prints the new page after a sent act (and
-the unchanged page after a refusal), from the same process, so a move is one
-call; never on `--dry-run` or `--raw-file`.
+say the same).
 
 Three combat-page lines (2026-10-05), none of them a recommended play:
 **What these enemies do (base game)** prints one line per kind of enemy,
