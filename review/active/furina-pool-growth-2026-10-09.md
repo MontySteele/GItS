@@ -108,7 +108,10 @@ Each archetype gets one permanent scaler at Rare and one Uncommon Power:
 
 Two cards reward being within 5 HP of the Drain line: Against the Tide and High Stakes.
 That is the danger the play asked for, kept inside the line, which stays
-(ruled pick 3).
+(ruled pick 3). (The Spend round, 2026-10-10,
+`review/records/furina-spend-round-2026-10-10.md`, reworked High Stakes: it
+reads the Drained counter instead of the line band. Against the Tide is now
+the only card that reads the band.)
 
 ## 5. The 41 new cards
 
@@ -168,7 +171,7 @@ upgrade replaces today's 0 cost.
 | Against the Tide | Attack 1, U | Deal 8 damage. If you are within 5 HP of your Drain line, deal 14 instead. [11 / 18] |
 | Pay the Tab | Skill 1, U | Drain 6. Draw 3 cards. [4 cards] |
 | Riptide Lunge | Attack 1, U | Drain 3. Deal 10 damage. If this kills an enemy, Repay 6. [13] |
-| High Stakes | Power 1, U | While you are within 5 HP of your Drain line, your Attacks deal 4 more damage. [6] |
+| High Stakes | Power 1, U | Your Attacks deal 1 additional damage for every 5 HP you have Drained and not Repaid. [every 4] (reworked by the Spend round, 2026-10-10) |
 | Regina of All Waters | Power 2 [1], R | At the start of your turn, Drain 3. If you do, gain 1 Strength. |
 | The Deluge | Attack 2 [1], R | Drain 8. Deal 24 damage to ALL enemies. Exhaust. |
 | All In | Skill 0, R | Drain 8. Gain 2 Energy. Exhaust. [Drain 6] |

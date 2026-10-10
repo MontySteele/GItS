@@ -51,7 +51,7 @@ public sealed class ProtoKoBombsAway : CustomCardModel
             new DynamicVar("BombSize", 4m),
             new CalculationBaseVar(4m),
             new CalculationExtraVar(2m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => ProtoBombPower.EnemiesHoldingChargeFrom(card.Owner.Creature))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => ProtoBombPower.EnemiesHoldingChargeFrom(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

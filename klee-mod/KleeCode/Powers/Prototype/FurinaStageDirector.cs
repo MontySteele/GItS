@@ -462,11 +462,22 @@ public sealed class StageDirector
     /// when the combat ends, the HP drained above the line returns (and the
     /// HP drained past it, with A Five-Century Act). Not a Repay: no
     /// Fanfare, no readers. Returns the HP returned.</summary>
-    public async Task<int> CurtainCall()
+    public async Task<int> CurtainCall() => (await CurtainCallParts()).Back;
+
+    /// <summary>The curtain call with its parts (the Spend round,
+    /// 2026-10-10): what returned, the part of it past the line, and the
+    /// past-line HP lost. <c>Back</c> is what the heal actually gave.
+    /// </summary>
+    public async Task<CurtainCallParts> CurtainCallParts()
     {
-        var back = _stage.CurtainCall(_board.Hp, _board.MaxHp);
-        if (back <= 0) return 0;
-        return await _board.Heal(back);
+        var parts = _stage.CurtainCallOf(_board.Hp, _board.MaxHp);
+        if (parts.Back <= 0) return parts with { Back = 0, PastBack = 0 };
+        var healed = await _board.Heal(parts.Back);
+        return parts with
+        {
+            Back = healed,
+            PastBack = System.Math.Min(parts.PastBack, healed),
+        };
     }
 
     // ---- the turn-start Powers (the pool to 75) ----------------------------

@@ -57,7 +57,7 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
         {
             new CalculationBaseVar(4m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new SpotlightSystem.DeferredBlockVar(4m)
         };
 

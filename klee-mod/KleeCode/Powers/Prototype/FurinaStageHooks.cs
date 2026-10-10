@@ -83,7 +83,11 @@ public sealed class FurinaStageHooks : AbstractModel
     /// <summary>A fresh per-play spend record (`stage_spent`).</summary>
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
-        FurinaStage.BeginPlay(cardPlay.Card?.Owner?.Creature);
+        // The card's name rides the play so a Spend in it is filed under it
+        // (the play telemetry's Fanfare record, 2026-10-10).
+        FurinaStage.BeginPlay(cardPlay.Card?.Owner?.Creature,
+                              global::KleeMod.Diagnostics.PlayTelemetry
+                                  .CardNameOf(cardPlay.Card));
         return Task.CompletedTask;
     }
 

@@ -186,7 +186,7 @@ def test_shell_guard_is_the_caskets_defensive_reader(overhaul):
     assert "{CalculatedBlock:diff()}" in face
 
     card = SHELL_GUARD_CS.read_text(encoding="utf-8")
-    assert "new CalculatedBlockVar(ValueProp.Move)" in card
+    assert "new FoldedCalculatedBlockVar(ValueProp.Move)" in card
     assert "get_CasketCount" in card or "CasketCount" in card
     assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in card
 

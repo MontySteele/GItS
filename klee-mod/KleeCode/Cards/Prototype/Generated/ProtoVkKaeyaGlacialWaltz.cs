@@ -64,7 +64,7 @@ public sealed class ProtoVkKaeyaGlacialWaltz : CustomCardModel, ICompanionCard
         {
             new CalculationBaseVar(5m),
             new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
