@@ -45,7 +45,7 @@ public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stoke the Flames"),
-        ("description", "[gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. [gold]Pyro[/gold] becomes your [gold]current element[/gold]."),
+        ("description", "[gold]Exhaust[/gold] a card. [gold]Pyro[/gold] becomes your [gold]current element[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

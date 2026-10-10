@@ -76,6 +76,11 @@ public class BoreasFang : CustomRelicModel
         return upgrade;
     }
 
+    /// <summary>The relic's printed name, for the lines that say which relic
+    /// added Four Winds' Ascension (the Varka payoff round, 2026-10-10: the
+    /// line said "Boreas's Fang" after Orobas swapped it). PURE.</summary>
+    public virtual string RelicName => "Boreas's Fang";
+
     /// <summary>Does this relic hand Ascension over upgraded and free this
     /// turn? The Fang no; <see cref="WolfsGravestone"/> yes.</summary>
     public virtual bool AscensionUpgraded => false;
@@ -161,8 +166,13 @@ public class BoreasFang : CustomRelicModel
         var listed = player.Deck.Cards.FirstOrDefault(
             c => c is ProtoVkAmberFieryRain && c.FloorAddedToDeck <= 1);
         if (listed == null) return;
-        var pick = player.PlayerRng.Transformations.NextItem(
-            VarkaRules.StarterKnights().ToList());
+        var knights = VarkaRules.StarterKnights().ToList();
+        var pick = player.PlayerRng.Transformations.NextItem(knights);
+        // The lane override (the Varka payoff round, 2026-10-10): a seat lane
+        // may force the Knight's element. The roll above is still drawn and
+        // discarded, so the seed's later Transformations rolls are unchanged.
+        pick = VarkaStarterKnight.Choose(pick, VarkaStarterKnight.Override(),
+                                         knights, VarkaOath.KnightElement);
         // Recorded for the run (Knight's Commission reads it after the card
         // is gone): the rolled Knight's element, or the listed one's.
         VarkaStarterKnight.Record(this, VarkaOath.KnightElement(pick ?? listed));
@@ -241,6 +251,8 @@ public sealed class WolfsGravestone : BoreasFang
     };
 
     public override bool AscensionUpgraded => true;
+
+    public override string RelicName => "Wolf's Gravestone";
 
     /// <summary>Already the upgrade: nothing further for Orobas.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;

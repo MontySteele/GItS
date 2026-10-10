@@ -45,7 +45,7 @@ public sealed class ProtoVkUnwaveringBanner : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Unwavering Banner"),
-        ("description", "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of it instead."),
+        ("description", "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
