@@ -111,7 +111,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   copy moves its guest to the newest seat with no act; at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
-  pool is the starter and 78 cards (20 / 37 / 21), built from that paper's
+  pool is the starter and 78 cards (20 / 38 / 20; Guest Star: Navia moved
+  Rare to Uncommon 2026-10-10, "I lean more towards putting Navia to
+  Uncommon first"), built from that paper's
   sec.5 less Endless Waltz (cut 2026-10-09), plus the block gap's four
   (Velvet Curtain, Private Box, The Masquerade, The Show Must Go On; drain-line
   round pick 2, ruled 2026-10-09: "Yeah, agreed - let's plug the block gap
@@ -129,7 +131,12 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `review/records/furina-pool75-round-2026-10-09.md` (pool 75: 1 win in 7,
   four deaths in act 2 with the Drain half locked; Fable review; picks
   ruled; picks 1-3 built 2026-10-09; Soothing Waters keeps no Repay floor,
-  which closed the one loop the floor made). Next: a seat round ([USER]:
+  which closed the one loop the floor made). The Spend paper
+  (`review/active/furina-spend-paper-2026-10-10.md`): "Spend up to X" on
+  Tidal Flourish, Spirited Aria, Crashing Waves and Hold the Stage, and
+  Navia's act Spends half the bank and Freminet's a quarter (pick 2,
+  ruled 2026-10-10); the rest built at the paper's defaults, picks open on
+  #1014. Next: a seat round ([USER]:
   "Yes - let's test it with a seat"). At her
   finish line, re-ask her motion look (`AS2-B5`, dropped
   from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).

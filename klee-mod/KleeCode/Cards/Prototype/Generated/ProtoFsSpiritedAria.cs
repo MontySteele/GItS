@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModalCard
+public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
@@ -45,26 +45,15 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spirited Aria"),
-        ("description", "Deal {PlainDamage:diff()} damage. [gold]Spend[/gold] 5: deal {BranchDamage:diff()} and draw 2 cards instead."),
+        ("description", "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 8: deal 1 more for each. Draw 1 for every 4 spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
-
-    // EB-184: what each mode does about AIMING, in sheet order.
-    // The card's own TargetType is fixed before a mode is chosen (the
-    // game aims first), so it answers for the card and not for the
-    // play -- an Attack-typed modal declares AnyEnemy for the mode
-    // that aims, and the bridge then demanded a target on the mode
-    // that attacks nothing. These two rows are what it reads instead.
-    public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 8 damage", "[gold]Spend[/gold] 5: deal 13 and draw 2 cards instead" };
-
-    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
-        new[] { true, true };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
+            new CalculationBaseVar(8m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 8))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -76,125 +65,18 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IModa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var modeOptions = new List<CardModel>
-        {
-            ModalChoice.CreateMatchingOption<ProtoFsSpiritedAriaModeA>(Owner, this),
-            ModalChoice.CreateMatchingOption<ProtoFsSpiritedAriaModeB>(Owner, this),
-        };
-        var modeRules = new ModeRequirement?[]
-        {
-            null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 5),
-                                "needs that much Fanfare"),
-        };
-        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage", "[gold]Spend[/gold] 5: deal 13 and draw 2 cards instead" }[modeIndex]);
-        if (modeIndex == 0)
-        {
-            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 11m : 8m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithElementHitFx(this)
-                .Execute(choiceContext);
-        }
-        else
-        {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 5);
-            await DamageCmd.Attack((IsUpgraded ? 17m : 13m))
-                .FromCard(this, cardPlay)
-                .Targeting(cardPlay.Target)
-                .WithElementHitFx(this)
-                .Execute(choiceContext);
-            await CardPileCmd.Draw(choiceContext, 2m, Owner);
-        }
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 8);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
+        await CardPileCmd.Draw(choiceContext, 0 + 1 * FurinaStage.SpentFours(this), Owner);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
-        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
-        // and swaps via {IfUpgraded:show:...|...} where it does not.
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
-    }
-}
-
-/// <summary>Mode 0 of proto_fs_spirited_aria. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsSpiritedAriaModeA : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_spirited_aria");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Deal damage"),
-        ("description", "Deal {PlainDamage:diff()} damage"),
-    };
-
-    public ProtoFsSpiritedAriaModeA()
-        : base(CardType.Attack)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
-    }
-}
-
-/// <summary>Mode 1 of proto_fs_spirited_aria. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsSpiritedAriaModeB : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_spirited_aria");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Spend 5"),
-        ("description", "[gold]Spend[/gold] 5: deal {BranchDamage:diff()} and draw 2 cards instead"),
-    };
-
-    public ProtoFsSpiritedAriaModeB()
-        : base(CardType.Attack)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move),
-            new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

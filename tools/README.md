@@ -111,6 +111,7 @@ someone types by hand, so an unreferenced script here is not necessarily dead.
 | `telemetry_report.py` | The Balance telemetry report: per-fight medians by character, act and kind. |
 | `track_b_curves.py` | Track B's demand (B1) and output (B2) curves, from both feeds. |
 | `varka_expansion_sim.py` | VARKA EXPANSION -- the paper's sec.5 sim (Prototype stage, exploration, not a Balance measurement). |
+| `varka_rare_marginal_sim.py` | VARKA RARE MARGINAL VALUE -- one card added to a drafted Varka deck, paired against a filler (Prototype-stage exploration, not a Balance measurement). |
 | `build_pck.ps1` | Build klee.pck from ImageGen art with the MegaDot editor. |
 
 ## Directories

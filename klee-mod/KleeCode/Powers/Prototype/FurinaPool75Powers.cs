@@ -267,8 +267,9 @@ public sealed class HighStakesPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary><i>Regina of All Waters</i>: "At the start of your turn, Drain 3.
-/// If you do, gain 1 Strength." Each copy Drains and gains on its own.
+/// <summary><i>Regina of All Waters</i>: "At the start of your turn, Drain 3,
+/// never past your line. If you do, gain 1 Strength." Each copy Drains and
+/// gains on its own; the Drain stops at the line (2026-10-10).
 /// </summary>
 public sealed class ReginaOfAllWatersPower : PowerModel, ILocalizationProvider
 {
@@ -276,8 +277,8 @@ public sealed class ReginaOfAllWatersPower : PowerModel, ILocalizationProvider
     {
         ("title", "Regina of All Waters"),
         ("description",
-            "At the start of your turn, [gold]Drain[/gold] 3. If you do, gain "
-          + "1 [gold]Strength[/gold]."),
+            "At the start of your turn, [gold]Drain[/gold] 3, never past "
+          + "your line. If you do, gain 1 [gold]Strength[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

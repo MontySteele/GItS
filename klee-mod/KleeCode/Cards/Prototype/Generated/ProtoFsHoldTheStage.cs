@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard, IModalCard
+public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
@@ -45,26 +45,15 @@ public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard, IModa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hold the Stage"),
-        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]. [gold]Spend[/gold] 6: gain {BranchBlock:diff()} instead."),
+        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 12: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
-
-    // EB-184: what each mode does about AIMING, in sheet order.
-    // The card's own TargetType is fixed before a mode is chosen (the
-    // game aims first), so it answers for the card and not for the
-    // play -- an Attack-typed modal declares AnyEnemy for the mode
-    // that aims, and the bridge then demanded a target on the mode
-    // that attacks nothing. These two rows are what it reads instead.
-    public IReadOnlyList<string> ModeLabels =>
-        new[] { "Gain 6 Block", "[gold]Spend[/gold] 6: gain 16 instead" };
-
-    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
-        new[] { false, false };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedBlockVar("PlainBlock", 6m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 16m, ValueProp.Move)
+            new CalculationBaseVar(6m),
+            new CalculationExtraVar(1m),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 12))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -76,113 +65,12 @@ public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard, IModa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var modeOptions = new List<CardModel>
-        {
-            ModalChoice.CreateMatchingOption<ProtoFsHoldTheStageModeA>(Owner, this),
-            ModalChoice.CreateMatchingOption<ProtoFsHoldTheStageModeB>(Owner, this),
-        };
-        var modeRules = new ModeRequirement?[]
-        {
-            null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 6),
-                                "needs that much Fanfare"),
-        };
-        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 6 Block", "[gold]Spend[/gold] 6: gain 16 instead" }[modeIndex]);
-        if (modeIndex == 0)
-        {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 8m : 6m), ValueProp.Move), cardPlay);
-        }
-        else
-        {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 6);
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 20m : 16m), ValueProp.Move), cardPlay);
-        }
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 12);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_then_block: the then-branch Block swaps on an IsUpgraded read at play time; the face prints it live.
-        // conditional_block: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["PlainBlock"].UpgradeValueBy(2m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
-    }
-}
-
-/// <summary>Mode 0 of proto_fs_hold_the_stage. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsHoldTheStageModeA : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_hold_the_stage");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Gain Block"),
-        ("description", "Gain {PlainBlock:diff()} [gold]Block[/gold]"),
-    };
-
-    public ProtoFsHoldTheStageModeA()
-        : base(CardType.Skill)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedBlockVar("PlainBlock", 6m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 16m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainBlock"].UpgradeValueBy(2m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
-    }
-}
-
-/// <summary>Mode 1 of proto_fs_hold_the_stage. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsHoldTheStageModeB : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_hold_the_stage");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Spend 6"),
-        ("description", "[gold]Spend[/gold] 6: gain {BranchBlock:diff()} instead"),
-    };
-
-    public ProtoFsHoldTheStageModeB()
-        : base(CardType.Skill)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new FoldedBlockVar("PlainBlock", 6m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 16m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainBlock"].UpgradeValueBy(2m);
-        DynamicVars["BranchBlock"].UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }
