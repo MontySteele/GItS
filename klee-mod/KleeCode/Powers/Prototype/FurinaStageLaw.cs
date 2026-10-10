@@ -165,12 +165,15 @@ public static class FurinaStageLaw
     /// <summary>High Stakes (the Spend round 2, 2026-10-10,
     /// <c>review/records/furina-spend-round-2-2026-10-10.md</c>): "Your
     /// Attacks deal 1 additional damage for every 5 HP you have Drained this
-    /// combat." The card's power amount is this divisor. Mirrors
+    /// combat." The Spend rounds review (2026-10-10,
+    /// <c>review/records/furina-spend-rounds-review-2026-10-10.md</c>, change 1)
+    /// made it every 4 [3], round 2's pre-registered fallback. The card's power
+    /// amount is this divisor. Mirrors
     /// <c>furina_stage.HIGH_STAKES_EVERY</c>.</summary>
-    public const int HighStakesEvery = 5;
+    public const int HighStakesEvery = 4;
 
-    /// <summary>High Stakes upgraded: "for every 4".</summary>
-    public const int HighStakesEveryUpgraded = 4;
+    /// <summary>High Stakes upgraded: "for every 3".</summary>
+    public const int HighStakesEveryUpgraded = 3;
 
     /// <summary>High Stakes' bonus a hit: the HP drained this combat, gross
     /// (no Repay lowers it), over <paramref name="every"/>, rounded down. 0
