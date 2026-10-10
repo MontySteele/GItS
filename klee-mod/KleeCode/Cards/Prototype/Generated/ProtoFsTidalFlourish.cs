@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsTidalFlourish : CustomCardModel, IElementalCard, ICharacterCard, IModalCard
+public sealed class ProtoFsTidalFlourish : CustomCardModel, IElementalCard, ICharacterCard
 {
     /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
     public Element Element => Element.Hydro;
@@ -51,26 +51,15 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Flourish"),
-        ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] 6: deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] up to 10: deal 1 more for each.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
-
-    // EB-184: what each mode does about AIMING, in sheet order.
-    // The card's own TargetType is fixed before a mode is chosen (the
-    // game aims first), so it answers for the card and not for the
-    // play -- an Attack-typed modal declares AnyEnemy for the mode
-    // that aims, and the bridge then demanded a target on the mode
-    // that attacks nothing. These two rows are what it reads instead.
-    public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 5 Hydro damage to ALL enemies", "[gold]Spend[/gold] 6: deal 12 instead" };
-
-    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
-        new[] { false, false };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 12m, ValueProp.Move)
+            new CalculationBaseVar(5m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 10))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -82,125 +71,17 @@ public sealed class ProtoFsTidalFlourish : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var modeOptions = new List<CardModel>
-        {
-            ModalChoice.CreateMatchingOption<ProtoFsTidalFlourishModeA>(Owner, this),
-            ModalChoice.CreateMatchingOption<ProtoFsTidalFlourishModeB>(Owner, this),
-        };
-        var modeRules = new ModeRequirement?[]
-        {
-            null,
-            new ModeRequirement(FurinaStage.CanSpend(Owner.Creature, 6),
-                                "needs that much Fanfare"),
-        };
-        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, System.Array.Empty<ModePrice?>(), modeRules);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 5 Hydro damage to ALL enemies", "[gold]Spend[/gold] 6: deal 12 instead" }[modeIndex]);
-        if (modeIndex == 0)
-        {
-            await DamageCmd.Attack((IsUpgraded ? 8m : 5m))
-                .FromCard(this, cardPlay)
-                .TargetingAllOpponents(CombatState!)
-                .WithElementHitFx(this)
-                .SpawningHitVfxOnEachCreature()
-                .Execute(choiceContext);
-        }
-        else
-        {
-            await FurinaStage.Spend(choiceContext, Owner.Creature, 6);
-            await DamageCmd.Attack((IsUpgraded ? 16m : 12m))
-                .FromCard(this, cardPlay)
-                .TargetingAllOpponents(CombatState!)
-                .WithElementHitFx(this)
-                .SpawningHitVfxOnEachCreature()
-                .Execute(choiceContext);
-        }
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 10);
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .TargetingAllOpponents(CombatState!)
+            .WithElementHitFx(this)
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        // conditional_then_damage: the then-branch amount swaps on an IsUpgraded read at play time;
-        // the FACE prints it live (`EB-657`, the folded pair below) where the row has one,
-        // and swaps via {IfUpgraded:show:...|...} where it does not.
-        // conditional_damage: all 2 branch amounts swap on an IsUpgraded read at play time; the face prints them live (`EB-657`).
-        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
-    }
-}
-
-/// <summary>Mode 0 of proto_fs_tidal_flourish. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsTidalFlourishModeA : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_tidal_flourish");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Deal Hydro damage to ALL enemies"),
-        ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies"),
-    };
-
-    public ProtoFsTidalFlourishModeA()
-        : base(CardType.Attack)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 12m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
-    }
-}
-
-/// <summary>Mode 1 of proto_fs_tidal_flourish. A face for the choose-a-card screen;
-/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
-/// the generated ModalOptions roster the character's off-pool list carries.
-/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
-/// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoFsTidalFlourishModeB : ModalOptionCard
-{
-    /// <summary>The PARENT's illustration. A mode is a face of its parent,
-    /// not a card of its own, so it owes no art row -- and a null here is the
-    /// pre-EB-275 answer that sends the game to its own card_atlas for an id
-    /// only this mod knows (proofs-8a, 2026-09-16).</summary>
-    public override Texture2D? CustomPortrait =>
-        RosterArt.CardPortrait("proto_fs_tidal_flourish");
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Spend 6"),
-        ("description", "[gold]Spend[/gold] 6: deal {BranchDamage:diff()} instead"),
-    };
-
-    public ProtoFsTidalFlourishModeB()
-        : base(CardType.Attack)
-    {
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar>
-        {
-            new DamageVar("PlainDamage", 5m, ValueProp.Move),
-            new DamageVar("BranchDamage", 12m, ValueProp.Move)
-        };
-
-    protected override void OnUpgrade()
-    {
-        DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["BranchDamage"].UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

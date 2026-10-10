@@ -6773,13 +6773,15 @@ def test_the_spend_row_says_she_pays_from_her_fanfare():
         "Deal 7 damage. Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
     row = blindplay.ARM_KEYWORDS["Spend"]
-    assert row == "Pay that much Fanfare. Offered only if you have enough."
+    assert row == ("Pay that much Fanfare. Offered only if you have enough. "
+                   "Spend up to X pays X, or all you have if that is less.")
     assert row in page
     assert "back performer" not in row
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    for phrase in ("Pay that much ", ". Offered only if you have "):
+    for phrase in ("Pay that much ", ". Offered only if you have ",
+                   "Spend up to X pays X, or all you have if that is less."):
         assert phrase in src, phrase
 
 def test_ringing_is_defined_the_first_time_the_screen_names_it():

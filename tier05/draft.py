@@ -2135,6 +2135,7 @@ def prints_attack_body(card: Card) -> bool:
 #: ones.
 FURINA_STAGE_OPS = ("stage_drain", "stage_repay", "stage_repay_all",
                     "stage_guest", "stage_spend", "stage_spend_all",
+                    "stage_spend_up_to",
                     "stage_energy_next",
                     # THE POOL TO 75 (2026-10-09): the guest verbs' one op,
                     # on the same terms (who is on stage is the board).
