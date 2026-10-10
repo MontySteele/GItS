@@ -47,14 +47,37 @@ public class VarkaOathSourceTests : IDisposable
     {
         Assert.Equal("Amber: Precise Shot — +1 Pyro Oath (applied)",
                      VarkaOath.GainLine("Amber: Precise Shot",
-                         new[] { "+1 Pyro Oath (applied)" }, fang: false));
+                         new[] { "+1 Pyro Oath (applied)" }, fang: null));
         Assert.Equal(
             "Windbound Execution — +1 Pyro Oath (Swirl), +1 Pyro Oath. "
             + "Boreas's Fang: Four Winds' Ascension",
             VarkaOath.GainLine("Windbound Execution",
-                new[] { "+1 Pyro Oath (Swirl)", "+1 Pyro Oath" }, fang: true));
+                new[] { "+1 Pyro Oath (Swirl)", "+1 Pyro Oath" },
+                fang: "Boreas's Fang"));
         Assert.Equal(string.Empty,
-                     VarkaOath.GainLine("Strike", Array.Empty<string>(), true));
+                     VarkaOath.GainLine("Strike", Array.Empty<string>(),
+                                        "Boreas's Fang"));
+    }
+
+    [Fact]
+    public void The_play_line_names_the_relic_actually_held()
+    {
+        // The Varka payoff round (2026-10-10): after Orobas the line said
+        // "Boreas's Fang" over Wolf's Gravestone's card.
+        Assert.Equal("Boreas's Fang",
+            ((global::KleeMod.Relics.BoreasFang)System.Runtime.CompilerServices
+                .RuntimeHelpers.GetUninitializedObject(
+                    typeof(global::KleeMod.Relics.BoreasFang))).RelicName);
+        Assert.Equal("Wolf's Gravestone",
+            ((global::KleeMod.Relics.BoreasFang)System.Runtime.CompilerServices
+                .RuntimeHelpers.GetUninitializedObject(
+                    typeof(global::KleeMod.Relics.WolfsGravestone))).RelicName);
+        Assert.Equal(
+            "Lunge — +1 Pyro Oath. Wolf's Gravestone: Four Winds' Ascension",
+            VarkaOath.GainLine("Lunge", new[] { "+1 Pyro Oath" },
+                               "Wolf's Gravestone"));
+        var gain = Il.Calls(Il.Method("VarkaOath", "Gain"));
+        Assert.Contains("BoreasFang.get_RelicName", gain);
     }
 
     [Fact]
@@ -63,13 +86,13 @@ public class VarkaOathSourceTests : IDisposable
         var ledger = new VarkaOathLedger();
         ledger.OpenScope(open: true);
         ledger.NoteGainClause("+1 Pyro Oath (applied)");
-        ledger.NoteFangInPlay();
+        ledger.NoteFangInPlay("Wolf's Gravestone");
         ledger.CloseScope();
         var (clauses, fang) = ledger.TakeGainClauses();
         Assert.Equal(new[] { "+1 Pyro Oath (applied)" }, clauses);
-        Assert.True(fang);
+        Assert.Equal("Wolf's Gravestone", fang);
         Assert.Empty(ledger.GainClauses);
-        Assert.False(ledger.FangInThisPlay);
+        Assert.Null(ledger.FangInThisPlay);
 
         // A stale clause never leaks into the next play.
         ledger.NoteGainClause("+1 Cryo Oath");
@@ -82,7 +105,7 @@ public class VarkaOathSourceTests : IDisposable
     {
         ResolutionLedger.OpenPlay("precise_shot", "Amber: Precise Shot", false);
         ResolutionLedger.NoteOath("Pyro", 1, "applied");
-        ResolutionLedger.NoteFangAscension();
+        ResolutionLedger.NoteFangAscension("Wolf's Gravestone");
         ResolutionLedger.ClosePlay();
         ResolutionLedger.OpenPlay("windbound", "Windbound Execution", false);
         ResolutionLedger.NoteOath("Pyro", 1, "Swirl");
@@ -94,6 +117,7 @@ public class VarkaOathSourceTests : IDisposable
         Assert.Equal(1, first[0]["amount"]);
         Assert.Equal("applied", first[0]["source"]);
         Assert.Equal(true, rows[0]["fang_ascension"]);
+        Assert.Equal("Wolf's Gravestone", rows[0]["fang_relic"]);
         var second = (List<Dictionary<string, object?>>)rows[1]["oath"]!;
         Assert.Equal("Swirl", second[0]["source"]);
         Assert.Equal(false, rows[1]["fang_ascension"]);

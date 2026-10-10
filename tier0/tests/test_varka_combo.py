@@ -126,16 +126,16 @@ def test_stoke_the_flames_exhausts_a_chosen_card_and_gains_2_pyro(varka):
     assert _led(st).oath["pyro"] == 2 + 3
 
 
-def test_stoke_the_flames_switches_after_its_gain(varka):
-    # Gain first, then the switch: the gain is not yet the current
-    # element's, so Dawn Wind's March does not pay for it.
+def test_stoke_the_flames_switches_before_its_gain(varka):
+    # The Varka payoff round (2026-10-10): the switch first, then the gain,
+    # so the gain is the current element's and Dawn Wind's March pays.
     st = _state(element="hydro")
     led = _led(st)
     led.current = "electro"
     st.player.powers[V.DAWN_WINDS_MARCH] = 4
     _play(st, _vk("stoke_the_flames"))
     assert led.current == "pyro" and led.oath["pyro"] == 2
-    assert st.player.block == 0
+    assert st.player.block == 4
 
 
 def test_the_banner_holds_stoke_the_flames(varka):

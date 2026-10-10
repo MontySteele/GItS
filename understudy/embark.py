@@ -343,7 +343,8 @@ def embark(character: str, *, hold: bool = False,
            instance: Any = None,
            lane: object = None,
            max_actions: int = 0,
-           install_bridge: bool = True) -> dict[str, Any]:
+           install_bridge: bool = True,
+           knight: str | None = None) -> dict[str, Any]:
     """Launch (or attach), embark, read the seed back, and LEAVE IT RUNNING.
 
     Returns the sidecar dict. Raises rather than tearing down on failure: a
@@ -373,6 +374,9 @@ def embark(character: str, *, hold: bool = False,
     """
     who = option_id(character)
     wanted = list(arms or [])
+    # The Varka payoff round (2026-10-10): the starting Knight's element, or
+    # "" for the seed's roll. Refused before the launch, like an arm.
+    forced = varka_knight(knight)
     # BEFORE the launch. An unknown row id or a release build is a fact about
     # the machine and the request, not about the run, and finding it out after
     # the game is up costs a launch and a teardown for nothing.
@@ -405,7 +409,8 @@ def embark(character: str, *, hold: bool = False,
     budget = blindplay_shape.set_budget(max_actions, lane, run=stamp)
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
     session = soak.Session(stamp, do_setup=not hold, intent="",
-                           instance=instance, install_bridge=install_bridge)
+                           instance=instance, install_bridge=install_bridge,
+                           extra_env={VARKA_KNIGHT_ENV: forced})
     sidecar = {
         "stamp": stamp,
         "ledger": str(session.ledger.path),
@@ -418,6 +423,9 @@ def embark(character: str, *, hold: bool = False,
         # comparable to another inside it, and a caveat that lives in the
         # coordinator's shell history is a caveat the reader does not have.
         "max_actions": budget["cap"],
+        # The Varka payoff round (2026-10-10): a forced starting Knight is a
+        # fact about the run, in its manifest; "" is the seed's own roll.
+        "varka_knight_requested": forced,
         "max_actions_store": str(blindplay_shape.budget_path(lane)),
         # 2026-10-08: the install this lane launched, so the sealed record
         # finds the deployed build from any checkout (`build_version`).
@@ -738,13 +746,40 @@ def _per_lane(value: str, labels: list[str], what: str) -> list[str | None]:
     return raw
 
 
+#: The Varka payoff round (2026-10-10): the environment variable the mod's
+#: Boreas's Fang reads to force the starting Knight's element
+#: (`VarkaStarterKnight.OverrideEnvVar`), and the words it takes. The seed's
+#: own roll is still drawn and discarded, so its later rolls do not move.
+VARKA_KNIGHT_ENV = "GITS_VARKA_KNIGHT"
+VARKA_KNIGHTS = {"pyro": "Amber", "hydro": "Barbara", "cryo": "Kaeya",
+                 "electro": "Lisa"}
+#: A lane in a `--varka-knight` list that keeps the seed's own roll.
+VARKA_KNIGHT_ROLL = ("roll", "-", "none")
+
+
+def varka_knight(value: str | None) -> str:
+    """`value` as the element the override takes, or `""` for the seed's own
+    roll. Refuses anything else, before any game is launched."""
+    word = str(value or "").strip().lower()
+    if not word or word in VARKA_KNIGHT_ROLL:
+        return ""
+    if word not in VARKA_KNIGHTS:
+        raise EmbarkError(
+            f"--varka-knight {value!r}: give pyro, hydro, cryo or electro "
+            f"(or {'/'.join(VARKA_KNIGHT_ROLL)} for the seed's own roll)")
+    return word
+
+
 def lane_commands(labels: list[str], *, characters: list[str | None],
                   seeds: list[str | None], ascension: int | None,
                   max_actions: int, arms: list[str],
-                  relics: list[str] | None = None) -> list[list[str]]:
+                  relics: list[str] | None = None,
+                  knights: list[str | None] | None = None
+                  ) -> list[list[str]]:
     """The single-lane embark command each lane runs."""
     out = []
-    for label, who, seed in zip(labels, characters, seeds):
+    knights = knights or [None] * len(labels)
+    for label, who, seed, knight in zip(labels, characters, seeds, knights):
         cmd = [sys.executable, "-m", "understudy.embark",
                "--lane", label[len("lane"):],
                "--character", who or "kokomi"]
@@ -758,6 +793,8 @@ def lane_commands(labels: list[str], *, characters: list[str | None],
             cmd += ["--arm", arm]
         for relic in relics or []:
             cmd += ["--relic", relic]
+        if varka_knight(knight):
+            cmd += ["--varka-knight", varka_knight(knight)]
         out.append(cmd)
     return out
 
@@ -922,6 +959,15 @@ def main(argv: list[str] | None = None) -> int:
                          "one name is both players'. With a parallel "
                          "--lanes: one per lane, or one for all (else "
                          "--character)")
+    ap.add_argument("--varka-knight", default="", metavar="ELEMENT[,...]",
+                    help="VARKA: force the starting Knight's element "
+                         "(pyro=Amber, hydro=Barbara, cryo=Kaeya, "
+                         "electro=Lisa) through GITS_VARKA_KNIGHT on the "
+                         "launched game. The seed's own roll is still drawn "
+                         "and discarded, so its later rolls do not move. "
+                         "With a parallel --lanes: one per lane, or one for "
+                         "all; `roll` keeps a lane's seed roll. Ignored by a "
+                         "--hold embark, which launches nothing")
     ap.add_argument("--seeds", default="", metavar="S1,S2,...",
                     help="with a parallel --lanes: one chosen seed per lane, "
                          "in --lanes order")
@@ -940,6 +986,10 @@ def main(argv: list[str] | None = None) -> int:
             print("embark error: --coop takes no --arm and no --hold (a "
                   "grant refuses multiplayer, and a co-op pair is always "
                   "launched here)", file=sys.stderr)
+            return 2
+        if args.varka_knight:
+            print("embark error: --varka-knight is for solo lanes; a co-op "
+                  "pair's launch does not take it", file=sys.stderr)
             return 2
         if args.seeds:
             # 2026-10-08: a co-op pair plays ONE run, so it takes `--seed`;
@@ -972,7 +1022,8 @@ def main(argv: list[str] | None = None) -> int:
                       arms=args.arms, relics=args.relics,
                       instance=instance, lane=args.lane,
                       max_actions=args.max_actions,
-                      install_bridge=install_bridge)
+                      install_bridge=install_bridge,
+                      knight=args.varka_knight)
     except (EmbarkError, ValueError) as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2
@@ -997,6 +1048,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"budget:    {blob['max_actions']} actions on this lane; "
               f"`blindplay act` refuses past it "
               f"({blindplay_shape.BUDGET_REACHED})")
+    if blob.get("varka_knight_requested"):
+        element = blob["varka_knight_requested"]
+        print(f"knight:    {VARKA_KNIGHTS[element]} ({element}), forced by "
+              f"{VARKA_KNIGHT_ENV}; the seed's own roll was drawn and "
+              f"discarded")
     print(f"sidecar:   {sidecar_path(blob['stamp'])}")
     label = sidecar_lane(blob)
     lane_arg = ""
@@ -1049,6 +1105,9 @@ def _lanes_cli(args: argparse.Namespace) -> int:
         characters = _per_lane(args.characters or args.character, labels,
                                "characters")
         seeds = _per_lane(args.seeds, labels, "seeds")
+        knights = _per_lane(args.varka_knight, labels, "varka-knight")
+        for knight in knights:
+            varka_knight(knight)
         for who in characters:
             option_id(who or "")
         if args.arms:
@@ -1056,7 +1115,8 @@ def _lanes_cli(args: argparse.Namespace) -> int:
         commands = lane_commands(labels, characters=characters, seeds=seeds,
                                  ascension=args.ascension,
                                  max_actions=args.max_actions, arms=args.arms,
-                                 relics=args.relics)
+                                 relics=args.relics,
+                                 knights=knights)
     except (EmbarkError, ValueError) as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2

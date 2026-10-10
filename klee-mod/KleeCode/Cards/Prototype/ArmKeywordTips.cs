@@ -901,7 +901,7 @@ public static class ArmKeywordTips
     /// ledger lives one combat (<see cref="FurinaStageLedger.For"/>), so the
     /// tip says it resets.</summary>
     internal const string FanfareBody =
-        "Gain 1 for each HP you lose or [gold]Repay[/gold]. "
+        "Gain 1 [gold]Fanfare[/gold] for each HP you lose or [gold]Repay[/gold]. "
       + "[gold]Spend[/gold] uses it. It resets to 0 after each combat.";
 
     /// <summary>Rule 3: Fanfare is one number on Furina.</summary>
