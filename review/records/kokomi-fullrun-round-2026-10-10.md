@@ -109,3 +109,9 @@ These three card changes are worth a few points a turn in act 1. They do nothing
 4. **Rarity of the damage Plans.** Ambush is taken 75% of the time and Surging Shoal 2 of 2.
    - **(a) Default:** leave rarities. The take rates are a symptom of pick 1.
    - (b) Ambush to Common, and Coral Crash to Uncommon.
+
+**Ruled 2026-10-10, all four at default.** [USER]: "I'm good with the defaults on those picks."
+1. The Casket gives 2 per Plan carried out; this is read on the next whole-run round.
+2. The act-1 boss: tempo fixes only.
+3. Abyssal Salvage and Tidecleanse are swapped for two "plan the reaction" cards after his run.
+4. Rarities are unchanged.
