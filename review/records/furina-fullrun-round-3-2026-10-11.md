@@ -173,3 +173,9 @@ Furina won 1 of 4, with a mean floor of 40.5, the same as round 4. Pooled over r
 1. **Standing Ovation's Spend.**
    - **(a) Default:** keep "Spend half" through your own run. You asked to "see how that goes", and seats undervalue a bank they keep.
    - (b) Common at "Spend all", which was this record's round-3 default.
+
+## Ruled, round 5 (2026-10-11)
+
+[USER]: "On Furina - let's go with a) and leave it alone for now"
+
+Pick 1 (a): Standing Ovation stays at Common with "Spend half your Fanfare." Furina is left alone until your own run.
