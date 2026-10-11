@@ -131,3 +131,68 @@ These are decided after your run, not before.
 3. **The debuff and reaction cards** (seven cards, 0 of 25 offers). Blind seats draft printed numbers, so this needs your eyes.
    - **(a) Default:** keep them and watch in your run.
    - (b) A pass on them next.
+
+## Round 5, after the card pass (2026-10-11, 14:13)
+
+Five whole-run Sonnet seats at A0 on build 0.2.4914+next, the same seeds as before, testing the card pass (#1102). The packet (`kokomi-r5-packet.md`) and the Fable review (`kokomi-r5-review-fable.md`) are in the session scratchpad.
+
+**Result: 1 win in 5.** Round 4 was 0 in 5. One win is not evidence by itself. The seed-by-seed comparison against the base Sonnet seat is:
+
+| Lane | Seed | Kokomi round 5 | Base seat |
+|---|---|---|---|
+| 1 | CYHZM9S0VPW6 | floor 48, the Queen | floor 33 |
+| 2 | DJCAV76ZKAUN | floor 23, Bowlbugs (entered at 11 HP) | floor 24 |
+| 3 | 30KMHAVG9SMQ | floor 48, the Queen (2 HP short) | floor 33 |
+| 4 | YEWA0B7AVE45 | **won** | floor 33 |
+| 5 | R41TX5Q0ZQYN | floor 33, Kaiser Crab | floor 33, Kaiser Crab |
+
+**The three lines:**
+- Act-1 normal HP is 7.3, which passes the line of 9 or less. Round 4 was 9.2.
+- Act-2 boss damage a turn is 36.9 this round, which misses 40. Lane 5's Crab fight was 15.1. Pooled over rounds 3 to 5 the median is 40.1 (n = 12), which passes.
+- Act-1 turns run 5% longer than base, which passes.
+
+**The card pass moved the draft.** Pass cards were taken 11 times in 70 reward offers; in round 4 it was 0 in 71.
+- **Taken and played:** Sea Glass Harvest, Kelp Wall, Massed Volley, Tideturn, Pincer, Weight of the Plan, Coral Crash, Change of Plans and Treatise.
+  - Massed Volley averaged 21 damage a play. That comes from the Casket's Strength, not from the card's own number.
+- **Still passed:**
+  - Tidecleanse (1 take in 37 offers, all rounds).
+  - Turning Tide (0 in 26).
+  - Abyssal Salvage (0 in 19).
+  - Salt in the Wound (0 in 16).
+- **Never offered:** At Water's Edge, Suffocating Deep, Undercurrent Snare and Undertide Lance. So the debuff group cannot be judged yet.
+- **Too strong:** nothing. Coral Tithe and Abyssal Salvage never entered a deck, so the watch list has nothing to watch yet.
+- Per-card counts this small mostly measure how blind seats draft printed numbers. No card number changes this round.
+
+**The deaths:**
+- **Lanes 2 and 5** died on the same seed walls where the base seat dies, at the same floors.
+- **Lanes 1 and 3** both died to the Queen: her Chains of Binding let a seat play only one Bound card a turn, and her Frail cut Plan Block. Both seats were within 9 HP of winning.
+  - That is structural, because Kokomi's deck is many cheap cards.
+  - But it is n = 2, and the base seats have no Queen fight to compare against, so nothing is tuned for one boss.
+- **The one kit-level number to watch is act-3 damage.** Normal fights:
+
+| | Damage a turn | Block a turn |
+|---|---|---|
+| Round 5 | 37 | 14 |
+| Round 4 | 30 | not given |
+| Base | 48 | 8.5 |
+
+  The base act-3 rows come from per-act seats, so the comparison is soft.
+
+**Fixed with no pick needed:**
+- Open the Casket's text no longer says "then empty it" under Grand Design. Two seats were misled by it.
+- The seat page no longer reports a Plan aimed at an already-dead enemy as a Plan that failed.
+- Treatise's word "normally" is replaced with plain words.
+- Two telemetry gaps are on BACKLOG: `damage_blocked`, and Plan damage being credited to the Bake-Kurage.
+
+**Left alone:**
+- Open the Casket at an empty Casket still raises its cost (one seat fell into it). That is your ramp rule of 2026-10-10.
+- Depths' Judgment and Tidecleanse buffs were proposed by the review, but they are held until your run.
+
+## For [USER], round 5
+
+1. **What Treatise is for.** It draws a card only when you play a Plan card's first line, not when you write it as a Plan (`KokomiOverhaulPowers.cs`, `TreatisePower`). The card-pass paper's row ("First Plan card each turn: draw 1") read as if writing a Plan drew. That was my error in the paper. Two seats called it "filler" or "did nothing visible".
+   - **(a) Default:** keep it as the reward for playing the first line, with the new plain wording. It keeps the choice between playing a card now and writing it paid on both sides.
+   - (b) "The first time each turn you write a Plan, draw 1 card." A straight engine that a Plan deck feels every turn.
+2. **Is this the finish line?** Five rounds of seats are in, and she is at or above the base seats on the same seeds.
+   - **(a) Default:** your own full run next, on the build with the fixes above. Watch act 3's damage and the Queen's Bound turns.
+   - (b) One more Sonnet round first, so the debuff engine (At Water's Edge) is offered at least once.

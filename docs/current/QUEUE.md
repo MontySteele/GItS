@@ -25,6 +25,10 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi round 5** (`review/records/kokomi-fullrun-round-3-2026-10-11.md`, round 5
+  picks 1-2): Treatise draws on the first line (default) or on writing a Plan; your
+  full run next (default) or one more seat round.
+
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.
