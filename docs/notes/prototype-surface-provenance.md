@@ -7101,13 +7101,15 @@ Two rulings by [USER], built as written.
 Brief `review/active/kokomi-growth-powers-2026-10-10.md`. [USER]: "Agreed on
 both." Sim read: `tools/kokomi_growth_power_sim.py` (#1059).
 
-- **Rising Tide** (`proto_kk_rising_tide`, new, Uncommon Power, cost 1):
+- **Flood Tide** (`proto_kk_flood_tide`, new, Uncommon Power, cost 1):
   "At the start of your turn, the Casket gains 1." Upgrade: Innate. Paid
   after the hand draw and before the morning's Plans, at The Long Game's
-  site (`kokomi_plan.rising_tide`, `RisingTidePower.Signal`). Copies add. No
+  site (`kokomi_plan.rising_tide`, `FloodTidePower.Signal`). Copies add. No
   relic is asked, as for every "the Casket gains". Pool LAST; pool stays 78
   (21 / 36 / 21). No painting yet (`art_coverage.KNOWN_MISSING`); the power
   borrows the Princess of Watatsumi badge.
+  The paper called it Rising Tide; Furina already has one
+  (`proto_fs_rising_tide`), so it ships as Flood Tide.
 - **The General's Banner** (`proto_kk_the_generals_banner`) is cut: offered
   3 times in the round, never taken. Its power (`kk_generals_banner`,
   `GeneralsBannerPower`) stays in both engines with nothing granting it

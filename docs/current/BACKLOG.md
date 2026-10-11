@@ -17,7 +17,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
 - Art owed, Klee: Forbidden Fun, It Wasn't Me!, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Albedo — Dust of Purification (its plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched), Up in Smoke!, Behind Jean's Desk, Kitchen Alchemy, Cover Your Ears!; the two status-package Powers borrow Party Poppers' and Spark Knight's badges.
-- Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage, Rising Tide and the Sea Glass token; Abyssal Salvage and Rising Tide borrow the Princess of Watatsumi badge.
+- Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage, Flood Tide and the Sea Glass token; Abyssal Salvage and Flood Tide borrow the Princess of Watatsumi badge.
 - Art owed, pool completion: the 14 new rows and the three new Ancients (Alice's Masterpiece, Divine Strategy, Center of Attention).
 - Art owed: Durin — Principle of Purity wears Binary Form's picture (`art_of`); the three Purity powers borrow Binary Form's badge.
 - Durin, Principle of Purity's turn-start Pyro hit (`PurityStrikePower`) shares `AfterPlayerTurnStart` with Melody Loop's Hydro, Herald of Frost's Cryo and Surprise Dispatch's roll, so the mod gives it no order where the sim runs it after Melody Loop; stage it into its own broadcast if a seat sees the two disagree.

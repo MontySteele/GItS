@@ -213,7 +213,7 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
            "proto_kk_chain_of_command",
            "proto_kk_all_streams_flow_to_the_sea"}
     assert not cut & set(ids)
-    # The growth Powers (2026-10-10): Rising Tide LAST, The General's
+    # The growth Powers (2026-10-10): Flood Tide LAST, The General's
     # Banner gone.
     assert "proto_kk_the_generals_banner" not in ids
     assert ids[-1:] == C.KOKOMI_GROWTH_POWERS_IDS

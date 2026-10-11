@@ -354,9 +354,9 @@ PRINCESS_OF_WATATSUMI_DRAW = 1
 #: longer empties the Casket." A marker: `open_casket` reads only whether
 #: it is worn. `GrandDesignPower` is the twin.
 GRAND_DESIGN = "kk_grand_design"
-#: THE GROWTH POWERS (2026-10-10): Rising Tide, "At the start of your turn,
-#: the Casket gains 1." Copies add. `RisingTidePower` is the twin.
-RISING_TIDE = "kk_rising_tide"
+#: THE GROWTH POWERS (2026-10-10): Flood Tide, "At the start of your turn,
+#: the Casket gains 1." Copies add. `FloodTidePower` is the twin.
+FLOOD_TIDE = "kk_flood_tide"
 LONG_GAME = "kk_the_long_game"            # +N Energy when exactly 1 Plan waits
 #: Power cost sweep, 2026-09-30: The Long Game+ installs this twin instead
 #: (+N Energy and draw N). C# twin: `TheLongGamePlusPower`.
@@ -2603,18 +2603,18 @@ def plan_energy_waiting(state: CombatState) -> int:
     return sum(max(0, int(e.paid)) for e in state.kk_plan_queue)
 
 
-def rising_tide(state: CombatState) -> None:
+def flood_tide(state: CombatState) -> None:
     """RISING TIDE (the growth Powers, 2026-10-10): "At the start of your
     turn, the Casket gains 1." After the hand draw, before the morning's
     Plans, The Long Game's site. Copies add. Like every "the Casket gains",
-    no relic is asked. `RisingTidePower.Signal` is the twin."""
+    no relic is asked. `FloodTidePower.Signal` is the twin."""
     if not live(state):
         return
-    n = int(state.player.powers.get(RISING_TIDE, 0))
+    n = int(state.player.powers.get(FLOOD_TIDE, 0))
     if n <= 0:
         return
     gain_casket(state, n)
-    state.emit("plan_rising_tide", amount=n)
+    state.emit("plan_flood_tide", amount=n)
 
 
 def long_game(state: CombatState, waiting: int) -> None:

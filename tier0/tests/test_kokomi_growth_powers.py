@@ -1,4 +1,4 @@
-"""KOKOMI GROWTH POWERS (2026-10-10): Rising Tide in, The General's Banner
+"""KOKOMI GROWTH POWERS (2026-10-10): Flood Tide in, The General's Banner
 out, Grand Design bent, Brine Sting deals damage.
 
 Brief `review/active/kokomi-growth-powers-2026-10-10.md`, ruled ("Agreed on
@@ -36,10 +36,10 @@ def _casket(**kw):
 
 # --- the pool -----------------------------------------------------------------
 
-def test_rising_tide_replaces_the_generals_banner(overhaul):
+def test_flood_tide_replaces_the_generals_banner(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == len(set(ids)) == 78
-    assert ids[-1:] == C.KOKOMI_GROWTH_POWERS_IDS == ("proto_kk_rising_tide",)
+    assert ids[-1:] == C.KOKOMI_GROWTH_POWERS_IDS == ("proto_kk_flood_tide",)
     assert "proto_kk_the_generals_banner" not in ids
     assert "proto_kk_the_generals_banner" not in {
         c.id for c in loader.prototype_cards()}
@@ -47,38 +47,38 @@ def test_rising_tide_replaces_the_generals_banner(overhaul):
     assert rarity == {"common": 21, "uncommon": 36, "rare": 21}
 
 
-# --- Rising Tide ---------------------------------------------------------------
+# --- Flood Tide ---------------------------------------------------------------
 
-def test_rising_tide_row(overhaul):
-    row = _row("proto_kk_rising_tide")
+def test_flood_tide_row(overhaul):
+    row = _row("proto_kk_flood_tide")
     assert (row.cost, row.type, row.rarity) == (1, "power", "uncommon")
     assert _faces()[row.id] == (
         "At the start of your turn, the [gold]Casket[/gold] gains 1.")
     assert row.effects == [{"op": "apply_power",
-                            "power": kokomi_plan.RISING_TIDE, "amount": 1,
+                            "power": kokomi_plan.FLOOD_TIDE, "amount": 1,
                             "target": "self"}]
     assert not row.innate
-    up = _up("proto_kk_rising_tide")
+    up = _up("proto_kk_flood_tide")
     assert up.cost == 1 and up.innate
 
 
-def test_rising_tide_adds_one_per_copy_each_turn(overhaul):
+def test_flood_tide_adds_one_per_copy_each_turn(overhaul):
     st = kokomi_state()
-    kokomi_plan.rising_tide(st)
+    kokomi_plan.flood_tide(st)
     assert st.kk_casket == 0                     # not worn: nothing
-    st.player.powers[kokomi_plan.RISING_TIDE] = 1
-    kokomi_plan.rising_tide(st)
+    st.player.powers[kokomi_plan.FLOOD_TIDE] = 1
+    kokomi_plan.flood_tide(st)
     assert st.kk_casket == 1                     # no relic asked
-    st.player.powers[kokomi_plan.RISING_TIDE] = 2    # two copies
-    kokomi_plan.rising_tide(st)
+    st.player.powers[kokomi_plan.FLOOD_TIDE] = 2    # two copies
+    kokomi_plan.flood_tide(st)
     assert st.kk_casket == 3
 
 
-def test_rising_tide_is_paid_at_the_long_game_site(overhaul):
+def test_flood_tide_is_paid_at_the_long_game_site(overhaul):
     src = inspect.getsource(combat._player_turn)
     draw = src.index("refpowers.player_turn_start_late(state)")
     long_game = src.index("kokomi_plan.long_game(")
-    rising = src.index("kokomi_plan.rising_tide(state)")
+    rising = src.index("kokomi_plan.flood_tide(state)")
     morning = src.index("kokomi_plan.resolve_all(state)")
     assert draw < long_game < rising < morning
 

@@ -107,6 +107,7 @@
     "proto_kk_evening_watch",
     "proto_kk_feint",
     "proto_kk_flank",
+    "proto_kk_flood_tide",
     "proto_kk_flotsam_surge",
     "proto_kk_grand_design",
     "proto_kk_jellyfish_drift",
@@ -132,7 +133,6 @@
     "proto_kk_read_the_field",
     "proto_kk_riptide",
     "proto_kk_riptide_ruin",
-    "proto_kk_rising_tide",
     "proto_kk_salt_in_the_wound",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
@@ -526,6 +526,7 @@
     "proto_kk_evening_watch": "kokomi",
     "proto_kk_feint": "kokomi",
     "proto_kk_flank": "kokomi",
+    "proto_kk_flood_tide": "kokomi",
     "proto_kk_flotsam_surge": "kokomi",
     "proto_kk_grand_design": "kokomi",
     "proto_kk_jellyfish_drift": "kokomi",
@@ -551,7 +552,6 @@
     "proto_kk_read_the_field": "kokomi",
     "proto_kk_riptide": "kokomi",
     "proto_kk_riptide_ruin": "kokomi",
-    "proto_kk_rising_tide": "kokomi",
     "proto_kk_salt_in_the_wound": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
@@ -1206,6 +1206,9 @@
       "damage": 3,
       "plan_damage": 3
     },
+    "proto_kk_flood_tide": {
+      "innate": true
+    },
     "proto_kk_flotsam_surge": {
       "damage": 4
     },
@@ -1286,9 +1289,6 @@
     },
     "proto_kk_riptide_ruin": {
       "damage": 3
-    },
-    "proto_kk_rising_tide": {
-      "innate": true
     },
     "proto_kk_salt_in_the_wound": {
       "kokomi_amount": 1

@@ -25,7 +25,7 @@ My working is in the session scratchpad (`kokomi-power-census.md`). Base-five te
 
 ## The two cards
 
-**1. Rising Tide (new Uncommon; replaces The General's Banner).**
+**1. Flood Tide (new Uncommon; replaces The General's Banner).**
 - Cost 1, Power: "At the start of your turn, the Casket gains 1." Upgrade: Innate.
 - It adds 3 points in a 3-turn hallway and 9 in a 9-turn boss. It grows with fight length, and it feeds the Casket she already has, so Open the Casket, Driftglass, Shell Guard and Depths' Judgment all read it.
 - The General's Banner ("first Companion card each turn applies 1 Weak to the front enemy") was offered 3 times and never taken. Its Weak job is covered by Ambush, Feint and Slack Water.
@@ -52,7 +52,7 @@ My working is in the session scratchpad (`kokomi-power-census.md`). Base-five te
 3. The next whole-run Kokomi round runs on the five seeds, graded on four lines:
    - act-2 boss damage a turn is above 40 (today 26.9; base 58.4);
    - act-1 normal fights do not speed up by more than 10%, which tests [USER]'s "trivialise act 1" concern;
-   - Rising Tide is taken when offered and played when held;
+   - Flood Tide is taken when offered and played when held;
    - when Grand Design is drafted and played, its fight's top Strength stays under 30.
 
 ## For [USER]
@@ -60,13 +60,15 @@ My working is in the session scratchpad (`kokomi-power-census.md`). Base-five te
 1. **These two Powers.**
    - **Default:** yes, sim-gated as above. Grand Design's ratio is set by the sim, and the cards are built after the sim.
    - Alternative: a different growth Power at Uncommon, such as "Your Plans deal 1 more damage each turn" (Rupture-like, no Casket).
-2. **Rising Tide replaces The General's Banner.** **Default:** yes. Alternative: it replaces Kurage Canopy instead (also 0 of 3 offers taken, a 1-Block-per-Plan Power).
+2. **Flood Tide replaces The General's Banner.** **Default:** yes. Alternative: it replaces Kurage Canopy instead (also 0 of 3 offers taken, a 1-Block-per-Plan Power).
 
-**Ruled 2026-10-10, both at default.** [USER]: "Agreed on both." Rising Tide replaces The General's Banner; Grand Design becomes "the Casket keeps its count", with its ratio set by the sim before it is built.
+**Ruled 2026-10-10, both at default.** [USER]: "Agreed on both." Flood Tide replaces The General's Banner; Grand Design becomes "the Casket keeps its count", with its ratio set by the sim before it is built.
+
+The new card was called "Rising Tide" in this paper. Furina already has a Rising Tide, so it ships as **Flood Tide** (`proto_kk_flood_tide`).
 
 ## Sim read (#1059)
 
-- Rising Tide: +11.5 pp boss wins over a Strike (+13.5 upgraded). The Demon Form stand-in reads +14.9.
+- Flood Tide: +11.5 pp boss wins over a Strike (+13.5 upgraded). The Demon Form stand-in reads +14.9.
 - The Grand Design keep variants read below a Strike. But the sim carries out about 0.39 Plans a turn against the seats' ~1.4, and its pilot never opens the Casket without a scripted rule, so the sim cannot grade Grand Design.
 - The Claude call is ratio 1/1 (Strength equal to the full count), graded on the next whole-run round's line: top Strength under 30 when played.
-- Claude ships, weaker than the base equivalents (Neutralize, Footwork, Inflame): Brine Sting's Plan deals 3 damage before its Weak (built). Kurage Canopy (2 Block per Plan carried out, 3 upgraded) and Ceremonial Garment (+2 damage per debuff, 3 upgraded) already printed those numbers on the sheet, so they did not move.
+- Claude ships one raise, weaker than its base equivalent (Neutralize): Brine Sting's Plan deals 3 damage before its Weak (built). It is the only raise. The census misread the other two: Kurage Canopy already gives 2 Block per Plan carried out (3 upgraded), not 1, and Ceremonial Garment already gives +2 damage per debuff (3 upgraded). Both were already under Footwork and Inflame, and neither moved.

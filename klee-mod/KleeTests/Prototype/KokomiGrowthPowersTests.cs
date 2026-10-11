@@ -14,7 +14,7 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// KOKOMI GROWTH POWERS (2026-10-10). Brief
 /// <c>review/active/kokomi-growth-powers-2026-10-10.md</c>, ruled ("Agreed on
-/// both"): Rising Tide replaces The General's Banner, Grand Design keeps the
+/// both"): Flood Tide replaces The General's Banner, Grand Design keeps the
 /// Casket's count, and Brine Sting's Plan deals 3 before its Weak. Readers
 /// that run synchronously run for real on a headless seat; anything that
 /// awaits a command is pinned off the compiled methods. Sim twin:
@@ -46,18 +46,18 @@ public class KokomiGrowthPowersTests
             .ToList();
 
     [Fact]
-    public void Rising_tide_replaces_the_generals_banner_last_in_the_pool()
+    public void Flood_tide_replaces_the_generals_banner_last_in_the_pool()
     {
         var slice = Slice();
         Assert.Equal(78, slice.Count);
-        Assert.Equal("ProtoKkRisingTide", slice.Last());
+        Assert.Equal("ProtoKkFloodTide", slice.Last());
         Assert.DoesNotContain("ProtoKkTheGeneralsBanner", slice);
     }
 
     [Fact]
-    public void Rising_tide_is_a_one_cost_uncommon_power_innate_upgraded()
+    public void Flood_tide_is_a_one_cost_uncommon_power_innate_upgraded()
     {
-        var card = new ProtoKkRisingTide();
+        var card = new ProtoKkFloodTide();
         Assert.Equal((CardType.Power, CardRarity.Uncommon, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal(
@@ -65,30 +65,30 @@ public class KokomiGrowthPowersTests
             Face(card));
         Assert.DoesNotContain(CardKeyword.Innate, card.CanonicalKeywords);
         Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkRisingTide>().Keywords);
-        Assert.Contains(Seq("ProtoKkRisingTide", "OnPlay"),
-                        c => c.Contains("RisingTidePower"));
+                        Upgraded<ProtoKkFloodTide>().Keywords);
+        Assert.Contains(Seq("ProtoKkFloodTide", "OnPlay"),
+                        c => c.Contains("FloodTidePower"));
     }
 
     [Fact]
-    public void Rising_tide_adds_one_per_copy_at_the_long_game_site()
+    public void Flood_tide_adds_one_per_copy_at_the_long_game_site()
     {
         var morning = Seq("ProtoBakeKuragePower", "AfterPlayerTurnStart");
         var longGame = morning.FindIndex(c => c.Contains("TheLongGamePower.Signal"));
-        var rising = morning.FindIndex(c => c.Contains("RisingTidePower.Signal"));
+        var rising = morning.FindIndex(c => c.Contains("FloodTidePower.Signal"));
         var drain = morning.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));
         Assert.True(longGame >= 0 && longGame < rising && rising < drain);
 
         KokomiOverhaulLedger.ResetAll();
         var bare = Seat.Kokomi();
-        RisingTidePower.Signal(bare.Creature);
+        FloodTidePower.Signal(bare.Creature);
         Assert.Equal(0, KokomiOverhaulLedger.For(bare.Creature).CasketCount);
 
         KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi().WithPower<RisingTidePower>(2);
-        RisingTidePower.Signal(seat.Creature);
+        var seat = Seat.Kokomi().WithPower<FloodTidePower>(2);
+        FloodTidePower.Signal(seat.Creature);
         Assert.Equal(2, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-        RisingTidePower.Signal(seat.Creature);
+        FloodTidePower.Signal(seat.Creature);
         Assert.Equal(4, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
     }
 

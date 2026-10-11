@@ -947,7 +947,7 @@ KOKOMI_STATUS_BATCH_IDS: tuple[str, ...] = (
 # Casket every turn, appended LAST to `KOKOMI_OVERHAUL_POOL_IDS`. The General's
 # Banner left the pool for it; the pool stays 78 (21 / 36 / 21).
 KOKOMI_GROWTH_POWERS_IDS: tuple[str, ...] = (
-    "proto_kk_rising_tide",
+    "proto_kk_flood_tide",
 )
 
 # THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-EIGHT rows since the
@@ -1079,7 +1079,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # THE STATUS BATCH (2026-10-01): seven rows, LAST. The pool is 78 (21 /
     # 36 / 21); Riptide Ruin is the Rare, in Coral Sanctuary's place.
     *KOKOMI_STATUS_BATCH_IDS,
-    # THE GROWTH POWERS (2026-10-10): Rising Tide, LAST, in The General's
+    # THE GROWTH POWERS (2026-10-10): Flood Tide, LAST, in The General's
     # Banner's Uncommon slot. Still 78 (21 / 36 / 21).
     *KOKOMI_GROWTH_POWERS_IDS,
 )

@@ -3258,7 +3258,7 @@ APPLY_POWERS = {
         "[gold]Open the Casket[/gold] no longer empties the "
         "[gold]Casket[/gold]."),
     # THE GROWTH POWERS (2026-10-10). Class in KokomiExpansion.cs.
-    "kk_rising_tide": ("RisingTidePower", None,
+    "kk_flood_tide": ("FloodTidePower", None,
         "At the start of your turn, the [gold]Casket[/gold] gains {X}."),
     "kk_the_long_game": ("TheLongGamePower", None,
         "At the start of your turn, if exactly one [gold]Plan[/gold] is "

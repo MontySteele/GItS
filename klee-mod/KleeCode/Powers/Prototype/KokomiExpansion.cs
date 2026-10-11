@@ -222,16 +222,16 @@ public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
         && kokomi.Powers.OfType<GrandDesignPower>().Any(p => p.Amount > 0);
 }
 
-/// <summary>Rising Tide (the growth Powers, 2026-10-10, ruled): "At the start
+/// <summary>Flood Tide (the growth Powers, 2026-10-10, ruled): "At the start
 /// of your turn, the Casket gains 1." Copies add. Paid from
 /// <see cref="ProtoBakeKuragePower"/>'s morning, after the hand draw and
 /// before the Plans, The Long Game's site. Sim twin:
 /// <c>kokomi_plan.rising_tide</c>.</summary>
-public sealed class RisingTidePower : PowerModel, ILocalizationProvider
+public sealed class FloodTidePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Rising Tide"),
+        ("title", "Flood Tide"),
         ("description",
             "At the start of your turn, the [gold]Casket[/gold] gains "
           + "[blue]{Amount}[/blue]."),
@@ -244,7 +244,7 @@ public sealed class RisingTidePower : PowerModel, ILocalizationProvider
     public static void Signal(Creature? kokomi)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var n = (int)kokomi!.Powers.OfType<RisingTidePower>()
+        var n = (int)kokomi!.Powers.OfType<FloodTidePower>()
             .Sum(p => p.Amount);
         if (n <= 0) return;
         KokomiOverhaulKit.GainCasket(kokomi, n);

@@ -116,9 +116,9 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // empty still counts.
         var waiting = KokomiPlan.PlansHeld(Owner);
         await TheLongGamePower.Signal(Owner, waiting, choiceContext);
-        // THE GROWTH POWERS (2026-10-10): Rising Tide, at the same site.
+        // THE GROWTH POWERS (2026-10-10): Flood Tide, at the same site.
         // Sim twin: `kokomi_plan.rising_tide`, beside `long_game`.
-        RisingTidePower.Signal(Owner);
+        FloodTidePower.Signal(Owner);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:
         // its face is "Next turn, after the Bake-Kurage carries out its Plans,

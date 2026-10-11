@@ -114,7 +114,7 @@ def test_the_offer_holds_the_feed_after_the_casket_rows(overhaul):
     # payoff pass (2026-10-01) appended two more and cut Second Thoughts;
     # pool completion (2026-10-01) appended eight; the status batch
     # (2026-10-01) cut seven (All Streams after the feed) and appended seven;
-    # the growth Powers (2026-10-10) appended Rising Tide.
+    # the growth Powers (2026-10-10) appended Flood Tide.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == 78
     assert ids[-44:-39] == FEED

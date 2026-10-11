@@ -171,7 +171,7 @@ internal static class KokomiOverhaulRoster
     /// and Coral Tithe; SEVENTY-EIGHT since pool completion (2026-10-01)
     /// added eight; still SEVENTY-EIGHT since the status batch (2026-10-01)
     /// cut seven and added seven; still SEVENTY-EIGHT since the growth
-    /// Powers (2026-10-10) swapped The General's Banner for Rising Tide. The
+    /// Powers (2026-10-10) swapped The General's Banner for Flood Tide. The
     /// Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
@@ -309,9 +309,9 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkFlotsamSurge>(),
         ModelDb.Card<ProtoKkAbyssalSalvage>(),
         ModelDb.Card<ProtoKkRiptideRuin>(),
-        // THE GROWTH POWERS (2026-10-10, ruled): Rising Tide, in The General's
+        // THE GROWTH POWERS (2026-10-10, ruled): Flood Tide, in The General's
         // Banner's Uncommon slot, LAST. Still 78 (21 / 36 / 21).
-        ModelDb.Card<ProtoKkRisingTide>(),
+        ModelDb.Card<ProtoKkFloodTide>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the
