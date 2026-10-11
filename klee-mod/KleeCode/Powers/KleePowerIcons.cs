@@ -152,8 +152,6 @@ internal static class KleePowerIcons
         // it wears Kurage Swarm's Casket-feeding badge until it has its own.
         AbyssalSalvagePower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
-        AbyssalSalvagePlusPower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
         // POOL COMPLETION (2026-10-01): the six new Powers and three Ancient
         // Powers borrow the nearest shipped shape, the block above's rule.
         PatientTidePower => KleePck.Path("klee/powers/spark_per_turn.png"),

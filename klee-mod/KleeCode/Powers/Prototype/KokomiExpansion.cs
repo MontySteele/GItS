@@ -167,32 +167,39 @@ public static partial class KokomiCards
 }
 
 /// <summary>
-/// The expansion's reaction reader: At Water's Edge, "Whenever a reaction
-/// happens on an enemy, apply 1 Weak and 1 Vulnerable to it." ANY reaction,
-/// whoever caused it -- every seat wearing the Power pays, off the one site
-/// the mod resolves a reaction (<c>ReactionEffects</c>). Sim twin:
-/// <c>kokomi_plan.note_reaction</c>.
+/// At Water's Edge (the Kokomi card pass, 2026-10-11): "The first time each
+/// turn you deal Hydro damage to an enemy, apply 1 Weak and 1 Vulnerable to
+/// it." HER Hydro damage only (the wearer's), once a turn on the ledger's
+/// shared latch (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed
+/// by the first Hydro hit that lands on an enemy (fully blocked included) and
+/// leaves it alive: a killing hit neither pays nor spends the turn's trigger.
+/// Fed from two doors: a powered hit
+/// whose element is Hydro (<see cref="AtWatersEdgePower.AfterDamageGiven"/>)
+/// and an element-tagged hit she is the applier of
+/// (<see cref="ElementalHit.Deal"/>: Plans, the Casket, Sea's Reproach). It
+/// read "Whenever an Elemental Reaction happens on an enemy" before the pass.
+/// Copies stack the amount, still once a turn. Sim twin:
+/// <c>kokomi_plan.note_hydro_damage</c>.
 /// </summary>
 public static class KokomiExpansion
 {
-    internal static async Task OnReaction(
-        PlayerChoiceContext choiceContext, Creature target)
+    internal static async Task OnHydroDamage(
+        PlayerChoiceContext choiceContext, Creature? kokomi, Creature? target)
     {
-        if (target == null || target.IsDead || !target.IsEnemy) return;
-        var players = target.CombatState?.PlayerCreatures;
-        if (players == null) return;
-        foreach (var kokomi in players.ToList())
+        if (kokomi == null || target == null || !target.IsEnemy) return;
+        if (target.IsDead || !KokomiOverhaul.LiveFor(kokomi)) return;
+        var n = (int)kokomi.Powers.OfType<AtWatersEdgePower>()
+                           .Sum(p => p.Amount);
+        if (n <= 0) return;
+        if (!KokomiOverhaulLedger.ClaimOncePerTurn(
+                kokomi, nameof(AtWatersEdgePower)))
         {
-            if (kokomi == null || !KokomiOverhaul.LiveFor(kokomi)) continue;
-            var edge = kokomi.Powers.OfType<AtWatersEdgePower>()
-                             .FirstOrDefault();
-            if (edge == null || edge.Amount <= 0 || target.IsDead) continue;
-            var n = (int)edge.Amount;
-            await PowerCmd.Apply<WeakPower>(
-                choiceContext, target, n, applier: kokomi, cardSource: null);
-            await PowerCmd.Apply<VulnerablePower>(
-                choiceContext, target, n, applier: kokomi, cardSource: null);
+            return;
         }
+        await PowerCmd.Apply<WeakPower>(
+            choiceContext, target, n, applier: kokomi, cardSource: null);
+        await PowerCmd.Apply<VulnerablePower>(
+            choiceContext, target, n, applier: kokomi, cardSource: null);
     }
 }
 
@@ -372,16 +379,21 @@ public sealed class TheLongGamePlusPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>At Water's Edge (her C1). The Power hooks nothing; the reaction
-/// site reads it (<see cref="KokomiExpansion.OnReaction"/>).</summary>
+/// <summary>At Water's Edge (her C1; the Kokomi card pass, 2026-10-11). The
+/// powered door: a hit she deals whose element is Hydro, read through the one
+/// funnel (<see cref="AuraCmd.ElementOfPlay"/>), per body hit. An
+/// element-tagged hit has no dealer and reaches
+/// <see cref="KokomiExpansion.OnHydroDamage"/> from
+/// <see cref="ElementalHit.Deal"/> instead, so no hit is counted twice.
+/// </summary>
 public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "At Water's Edge"),
         ("description",
-            "Whenever an [gold]Elemental Reaction[/gold] happens on an "
-          + "enemy, apply "
+            "The first time each turn you deal [gold]Hydro[/gold] damage to "
+          + "an enemy, apply "
           + "[blue]{Amount}[/blue] [gold]Weak[/gold] and [blue]{Amount}[/blue] "
           + "[gold]Vulnerable[/gold] to it."),
     };
@@ -389,13 +401,24 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext, Creature dealer, DamageResult result,
+        ValueProp props, Creature target, CardModel? cardSource)
+    {
+        if (Owner == null || dealer != Owner) return;
+        var hit = result.Receiver;
+        if (hit == null || !hit.IsEnemy) return;
+        if (AuraCmd.ElementOfPlay(cardSource, dealer) != Element.Hydro) return;
+        await KokomiExpansion.OnHydroDamage(choiceContext, Owner, hit);
+    }
 }
 
 /// <summary>Ceremonial Garment: "Your Attacks deal 1 more damage for each
-/// debuff on their target." Per hit of an Attack card she plays face-up, off
-/// the body it lands on; a debuff is a <see cref="PowerType.Debuff"/> power
-/// (an aura is a Buff and does not count). Sim twin:
-/// <c>kokomi_plan.garment_bonus</c>.</summary>
+/// Weak and Vulnerable on their target." Per hit of an Attack card she plays
+/// face-up, off the body it lands on; STACKS of Weak plus stacks of
+/// Vulnerable (the Kokomi card pass, 2026-10-11; it counted distinct debuffs
+/// before). Sim twin: <c>kokomi_plan.garment_bonus</c>.</summary>
 public sealed class ProtoCeremonialGarmentPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -403,8 +426,8 @@ public sealed class ProtoCeremonialGarmentPower : PowerModel, ILocalizationProvi
         ("title", "Ceremonial Garment"),
         ("description",
             "Your Attacks deal [blue]{Amount}[/blue] additional damage for "
-          + "each "
-          + "debuff on their target."),
+          + "each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on their "
+          + "target."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -418,7 +441,7 @@ public sealed class ProtoCeremonialGarmentPower : PowerModel, ILocalizationProvi
         if (dealer != Owner || target == null || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Amount * KokomiOverhaulKit.DebuffCount(target);
+        return Amount * KokomiOverhaulKit.WeakVulnStacks(target);
     }
 }
 

@@ -58,7 +58,7 @@ public sealed class ProtoKkTideturn : CustomCardModel, IElementalCard, ICharacte
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(4m),
+            new ExtraDamageVar(6m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.PlansHeld(card.Owner.Creature))
         };
 
@@ -81,6 +81,6 @@ public sealed class ProtoKkTideturn : CustomCardModel, IElementalCard, ICharacte
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
     }
 }

@@ -107,8 +107,10 @@ def test_kurage_canopy_upgrades_to_three(overhaul):
 
 # --- Coral Tithe ----------------------------------------------------------------
 
-@pytest.mark.parametrize("casket,paid", [(0, 0), (3, 1), (7, 2)])
-def test_coral_tithe_pays_one_per_three(overhaul, casket, paid):
+# The Kokomi card pass (2026-10-11): every 2 at both levels; the upgrade
+# adds Retain (on watch: the first number back down if too strong).
+@pytest.mark.parametrize("casket,paid", [(0, 0), (3, 1), (7, 3)])
+def test_coral_tithe_pays_one_per_two(overhaul, casket, paid):
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
     st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
     _library(st)
@@ -120,7 +122,10 @@ def test_coral_tithe_pays_one_per_three(overhaul, casket, paid):
 
 
 @pytest.mark.parametrize("casket,paid", [(0, 0), (3, 1), (7, 3)])
-def test_coral_tithe_upgraded_pays_one_per_two(overhaul, casket, paid):
+def test_coral_tithe_upgraded_pays_one_per_two_and_retains(overhaul, casket,
+                                                          paid):
+    assert _up("proto_kk_coral_tithe").retain
+    assert not _row("proto_kk_coral_tithe").retain
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
     st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
     _library(st)

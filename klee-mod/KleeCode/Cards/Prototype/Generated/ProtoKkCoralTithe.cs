@@ -51,7 +51,7 @@ public sealed class ProtoKkCoralTithe : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("KkAmount", 3m)
+            new DynamicVar("KkAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,6 +68,6 @@ public sealed class ProtoKkCoralTithe : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["KkAmount"].UpgradeValueBy(-1m);
+        AddKeyword(CardKeyword.Retain);
     }
 }

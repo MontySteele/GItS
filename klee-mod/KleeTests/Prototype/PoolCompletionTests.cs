@@ -98,9 +98,11 @@ public class PoolCompletionTests : IDisposable
                       screen.DynamicVars.Block.IntValue));
         Assert.Equal(10, Upgraded<ProtoKkTidalScreen>().DynamicVars.Block.IntValue);
 
+        // The Kokomi card pass (2026-10-11): Kurage School costs 0 and its
+        // upgrade adds Retain.
         foreach (var (card, cost) in new (CardModel, int)[]
                  {
-                     (new ProtoKkSpringTide(), 1), (new ProtoKkKurageSchool(), 1),
+                     (new ProtoKkSpringTide(), 1), (new ProtoKkKurageSchool(), 0),
                  })
         {
             Assert.Equal(CardRarity.Rare, card.Rarity);
@@ -109,14 +111,17 @@ public class PoolCompletionTests : IDisposable
         }
         Assert.Equal(0, UpCost<ProtoKkSpringTide>());
         Assert.Equal(0, UpCost<ProtoKkKurageSchool>());
+        Assert.Contains(CardKeyword.Retain,
+                        Upgraded<ProtoKkKurageSchool>().Keywords);
 
         // The Rare pass (2026-10-04): 4 [5] a hit, one hit per Plan written.
         Assert.Equal(4, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);
         Assert.Equal(5, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
         Assert.Equal(2, new ProtoKkPatientTide().DynamicVars["PowerAmount"].IntValue);
         Assert.Equal(3, Upgraded<ProtoKkPatientTide>().DynamicVars["PowerAmount"].IntValue);
-        Assert.Equal(2, new ProtoKkSeasReproach().EnergyCost.Canonical);
-        Assert.Equal(1, UpCost<ProtoKkSeasReproach>());
+        // The Kokomi card pass (2026-10-11): Sea's Reproach 1 [0].
+        Assert.Equal(1, new ProtoKkSeasReproach().EnergyCost.Canonical);
+        Assert.Equal(0, UpCost<ProtoKkSeasReproach>());
         Assert.Equal(0, UpCost<ProtoKkWatatsumiResistance>());
         Assert.Equal(8, new ProtoKkKuragesMercy().DynamicVars["KkAmount"].IntValue);
         Assert.Equal(12, Upgraded<ProtoKkKuragesMercy>().DynamicVars["KkAmount"].IntValue);
@@ -127,11 +132,15 @@ public class PoolCompletionTests : IDisposable
     [Fact]
     public void Body_slam_is_priced_once()
     {
-        // Paper sec.6: Coral Crash is Body Slam exactly, Tidal Rebuke keeps
-        // no Exhaust, Noelle's Sweeping Time upgrades to cost 1.
+        // Paper sec.6: Tidal Rebuke keeps no Exhaust, Noelle's Sweeping Time
+        // upgrades to cost 1. The Kokomi card pass (2026-10-11): Coral Crash
+        // costs 0 and its upgrade adds 4 damage.
         var crash = new ProtoKkCoralCrash();
-        Assert.Equal((CardRarity.Common, 1), (crash.Rarity, crash.EnergyCost.Canonical));
+        Assert.Equal((CardRarity.Common, 0), (crash.Rarity, crash.EnergyCost.Canonical));
         Assert.Equal(0, UpCost<ProtoKkCoralCrash>());
+        Assert.Equal(0m, crash.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(4m, Upgraded<ProtoKkCoralCrash>()
+                             .DynamicVars.CalculationBase.BaseValue);
         var rebuke = new ProtoKkTidalRebuke();
         // The Rare pass (2026-10-04): cost 2 -> 1 [0], and Retain.
         Assert.Equal((CardRarity.Rare, 1), (rebuke.Rarity, rebuke.EnergyCost.Canonical));

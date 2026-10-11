@@ -5375,7 +5375,9 @@ the start of your next turn. Plans go in the order made." (133 of 135).
    stack is 1 Casket and 2 Block per exhausted status or curse
    (`KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK`, mirrored). "A status or curse" is one
    of hers, by any route (played Slimed, a Dazed's Ethereal exhaust at turn
-   end, Tidecleanse); Block is powered.
+   end, Tidecleanse); Block is powered. Superseded by the Kokomi card pass
+   (2026-10-11, below): the Power reads the draw, and the Plus Power and its
+   constant are gone.
 7. *Sea Glass Harvest.* Upgraded, the Plan transforms into Sea Glass+, read
    off the writing card's `IsUpgraded` at carry-out (sim: the
    `upgraded_grant` flag on the clause). A curse the game will not transform
@@ -7223,3 +7225,42 @@ your Fanfare and see how that goes." (Furina round 3 record, pick 1.)
   0 or 1 held spends nothing. It is not a spend-all, so Bis! and Standing
   Room Only ignore it. Pool 78, 21 / 37 / 20 (was 20 / 38 / 20); sim
   `furina_tide.CARDS["ftd_standing_ovation"]`.
+
+## Kokomi card pass, 2026-10-11
+
+[USER]: "On Kokomi - Abyssal Salvage sounds possibly too good. The rest look
+good to me ... Coral Tithe might be too strong now, but since it was never
+played before, maybe we buff it and put it on watch." Paper
+`review/active/kokomi-card-pass-2026-10-11.md`, picks 1 (a), 2 (the middle
+option) and 3 (a).
+
+- **Debuff stacks.** The new count token `weak_vuln_stacks_on_target` is
+  stacks of Weak plus stacks of Vulnerable on the aimed enemy (C#
+  `KokomiOverhaulKit.WeakVulnStacks`, sim `kokomi_plan.weak_vuln_stacks`).
+  Drowning Pressure 3 [4] per stack; Ceremonial Garment 1 [2] per stack
+  (`garment_bonus` reads the same count). `debuffs_on_target` stays.
+- **At Water's Edge** reads her first Hydro damage to an enemy each turn, on
+  the shared once-per-turn latch, claimed only by a hit the enemy survives
+  (fully blocked counts). C#: `AtWatersEdgePower.AfterDamageGiven` for a
+  powered hit whose element is Hydro, and `ElementalHit.Deal` / `DealAsIfAura`
+  for element-tagged hits (Plans, the Casket, Sea's Reproach); both call
+  `KokomiExpansion.OnHydroDamage`. Sim: `deal_damage_to_enemy` at the
+  AfterDamageGiven seat calls `kokomi_plan.note_hydro_damage`. The reaction
+  site no longer reads it.
+- **Abyssal Salvage**: "The first time each turn you draw a status, Exhaust
+  it. The Casket gains 1." Upgrade Innate. A status is Damage Report's test
+  (`KleeStatusPackage.IsStatus`, sim `klee_overhaul.is_status`); curses are
+  not included. The latch is claimed by the first status drawn, then the card
+  is Exhausted from hand, then the Casket gains the Power's amount.
+- **Salt in the Wound** is a draw 1 plus a `conditional` on the new codegen
+  predicate `target_has_power_weak` (the sim's existing `target_has_power_`
+  prefix; C# a live read of `cardPlay.Target`).
+- **Numbers and costs**, rest of each card unchanged: Tidecleanse adds Draw
+  1; Kelp Wall Plan 9 [12]; Sea Glass Harvest 10 [13]; Massed Volley 4 [5]
+  x3; Coral Crash cost 0, upgrade +4 damage; Change of Plans draws 2 and
+  still Exhausts; Pincer 5 [6] twice; Tideturn 6 [8] per Plan; Weight of the
+  Plan 8 [10] plus 4 per Energy; Undercurrent Snare and Tidal Resonance cost
+  0; Turning Tide draws 2 [3]; Coral Tithe every 2, upgrade Retain (on
+  watch); Undertide Lance now-line 9 [12] to ALL; Watatsumi's Grace cost 1;
+  Kurage School cost 0, upgrade Retain; Treatise cost 0 [Innate]; Suffocating
+  Deep 10 [13] to ALL; Sea's Reproach 1 [0].

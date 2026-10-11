@@ -1450,15 +1450,15 @@ def test_change_of_plans_is_unplayable_while_no_plan_is_written(overhaul):
 
 def test_change_of_plans_draws_after_the_carry_out(overhaul):
     """Kokomi whole-run round 2 (2026-10-10): "The Bake-Kurage carries out
-    your first Plan now. Draw 1 card." Cost 0, Exhaust; the upgrade removes
-    the Exhaust. Playable on an empty jellyfish, since the draw still does
-    something."""
+    your first Plan now. Draw 1 card." The Kokomi card pass (2026-10-11):
+    draws 2, Exhaust stays. Playable on an empty jellyfish, since the draw
+    still does something."""
     from tier0.engine import combat
 
     card = loader.get_card("proto_kk_change_of_plans")
     assert card.cost == 0 and card.exhaust
     assert card.effects == [{"op": "carry_out_front_plan"},
-                            {"op": "draw", "amount": 1}]
+                            {"op": "draw", "amount": 2}]
     assert kokomi_plan.carry_out_only(card) is False
     st = kokomi_state(enemies=[make_enemy(hp=40)])
     st.player.energy = 3
