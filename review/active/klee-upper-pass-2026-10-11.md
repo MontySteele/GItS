@@ -97,3 +97,14 @@ Klee is at Balance, so these are your picks.
 4. **Companions.**
    - **(a) Default:** a Companion pass is the next paper, held to your Common / Colorless-tier bar. The seven Companion and reaction payoffs wait for it.
    - (b) Change the seven payoffs by number now, and run the Companion pass after.
+
+## Ruled 2026-10-11
+
+[USER]: "Agreed on all defaults - looks good!"
+
+- Pick 1 (a): all ten number changes.
+- Pick 2 (a): Exquisite Compound drops the merge; each Bomb grows 4 [6].
+- Pick 3 (a): Tag Along chooses 1 of 3, and Adventure Club 2 of 4, at today's costs.
+- Pick 4 (a): the Companion pass is the next paper.
+
+Built into `klee-next`.
