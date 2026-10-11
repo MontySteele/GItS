@@ -5947,16 +5947,20 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
         if p.powers["mc_grand_ode"] <= 0:
             del p.powers["mc_grand_ode"]
 
-    # Jean, Dandelion Breeze -- PERMANENT, stacks are COPIES. The Block is
-    # paid whether or not a Swirl landed: the sentence is two clauses joined
-    # by a bare "and", not a consequence, and that is also the reading that
-    # keeps a Rare Power from being dead against an aura-less board.
-    for _ in range(p.powers.get("mc_dandelion_breeze", 0)):
+    # Jean, Dandelion Breeze -- PERMANENT, and since the 2026-10-11 Companion
+    # pass the stack IS the Block (6 [9]; copies add into one payment, Durin's
+    # Principle of Purity shape), so the upgrade reaches it. One Swirl a turn.
+    # The Block is paid whether or not a Swirl landed: the sentence is two
+    # clauses joined by a bare "and", not a consequence, and that is also the
+    # reading that keeps a Rare Power from being dead against an aura-less
+    # board.
+    n = p.powers.get("mc_dandelion_breeze", 0)
+    if n:
         target = _mc_most_auras(state)
         if target is not None:
             reactions.resolve_hit(state, target, "anemo", 0, "swirl_op")
-        p.block += C.MC_DANDELION_BREEZE_BLOCK
-        state.emit("block", amount=C.MC_DANDELION_BREEZE_BLOCK)
+        p.block += n
+        state.emit("block", amount=n)
 
     # Albedo, Solar Isotoma -- PERMANENT, stacks are COPIES. BOTH halves are
     # inside the condition ("if any enemy has an aura, deal 8 damage to that

@@ -28,10 +28,6 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MC_ISOTOMA_BLOCK</c>.</summary>
     public const int IsotomaBlock = 4;
 
-    /// <summary>Jean, Dandelion Breeze: Block per end of turn.
-    /// Mirrors <c>C.MC_DANDELION_BREEZE_BLOCK</c>.</summary>
-    public const int DandelionBreezeBlock = 6;
-
     /// <summary>Fischl, Oz at Your Side: the Electro volley, no turn limit.
     /// Mirrors <c>C.MC_OZ_DMG</c>.</summary>
     public const int OzDamage = 5;

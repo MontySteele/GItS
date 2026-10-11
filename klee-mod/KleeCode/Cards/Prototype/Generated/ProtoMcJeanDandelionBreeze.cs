@@ -53,13 +53,13 @@ public sealed class ProtoMcJeanDandelionBreeze : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Dandelion Breeze"),
-        ("description", "{IfUpgraded:show:Draw 1 card. |}At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain 6 [gold]Block[/gold]."),
+        ("description", "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new DynamicVar("PowerAmount", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,15 +71,11 @@ public sealed class ProtoMcJeanDandelionBreeze : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<DandelionBreezePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
+        await PowerCmd.Apply<DandelionBreezePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        DynamicVars["PowerAmount"].UpgradeValueBy(3m);
     }
 }

@@ -83,6 +83,22 @@ public class AoeTrimTests
     }
 
     [Fact]
+    public void Dandelion_breeze_is_cost_1_both_states_and_upgrades_its_block()
+    {
+        // The 2026-10-11 Companion pass, as amended: cost 1 [1], "gain 6 [9]
+        // Block". The power's Amount IS the Block, so the upgrade reaches it.
+        var face = Face(new ProtoMcJeanDandelionBreeze());
+        Assert.Contains("gain {PowerAmount:diff()} [gold]Block[/gold]", face);
+        Assert.Equal(1, new ProtoMcJeanDandelionBreeze().EnergyCost.Canonical);
+        var up = Upgraded<ProtoMcJeanDandelionBreeze>();
+        Assert.Equal(1, up.EnergyCost.Canonical);
+        Assert.Equal(9m, up.DynamicVars["PowerAmount"].BaseValue);
+        var fire = Il.Calls(Il.Method("DandelionBreezePower", "FireVolley"));
+        Assert.Contains(fire, c => c.Contains("CreatureCmd.GainBlock"));
+        Assert.Contains(fire, c => c.Contains("get_Amount"));
+    }
+
+    [Fact]
     public void Binary_form_swaps_each_modes_number_on_the_face()
     {
         var face = Face(new ProtoMcDurinBinaryForm());

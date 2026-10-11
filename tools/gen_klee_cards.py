@@ -3401,7 +3401,7 @@ APPLY_POWERS = {
         "that enemy and gain 4 [gold]Block[/gold]."),
     "mc_dandelion_breeze": ("DandelionBreezePower", None,
         "At the end of your turn, [gold]Swirl[/gold] the enemy with the most "
-        "auras and gain 6 [gold]Block[/gold]."),
+        "auras and gain {X} [gold]Block[/gold]."),
     "mc_oz": ("MondstadtOzPower", None,
         "At the end of your turn, Oz deals 5 damage and applies "
         "[gold]Electro[/gold] to a random enemy."),

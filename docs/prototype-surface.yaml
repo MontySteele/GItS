@@ -921,8 +921,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 1, type: power,
+   upgrade: {power_amount: +3},
    description: "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain 6 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 1, target: self}]}
+   effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 6, target: self}]}
 
 - {id: proto_mc_fischl_nightrider, name: "Fischl — Nightrider", character: klee,
    authored_by: [claude],
