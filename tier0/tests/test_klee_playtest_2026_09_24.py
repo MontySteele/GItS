@@ -334,8 +334,8 @@ def test_balance_review_numbers(overhaul):
     g = load
     assert _first(g("proto_ko_countdown"), "draw")["amount"] == 2
     assert _first(g("proto_ko_countdown+"), "draw")["amount"] == 3
-    assert _first(g("proto_ko_fish_blasting"), "damage")["amount"] == 8
-    assert _first(g("proto_ko_fish_blasting+"), "damage")["amount"] == 11
+    assert _first(g("proto_ko_fish_blasting"), "damage")["amount"] == 9
+    assert _first(g("proto_ko_fish_blasting+"), "damage")["amount"] == 12
     assert _first(g("proto_ko_stoke_the_fuse"), "grow_largest_bomb")["per_spark"] == 5
     assert _first(g("proto_ko_stoke_the_fuse+"), "grow_largest_bomb")["per_spark"] == 7
     one_more = _first(g("proto_ko_one_more_charge"), "grow_largest")

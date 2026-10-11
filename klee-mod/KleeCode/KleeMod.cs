@@ -287,7 +287,7 @@ public static class KleeMod
                         "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",
                     ["KLEEMOD-CONFISCATED.title"] = "Confiscated",
                     ["KLEEMOD-CONFISCATED.description"] =
-                        "A 1-cost Status card that does nothing.",
+                        "A 1-cost Status card that does nothing. [gold]Exhaust[/gold].",
                     ["KLEEMOD-VAPORIZE_PREVIEW.title"] = "Reaction preview: Vaporize",
                     ["KLEEMOD-VAPORIZE_PREVIEW.description"] =
                         "[gold]Pyro[/gold] meets [gold]Hydro[/gold]: this hit deals 1.5x damage and consumes the aura.",

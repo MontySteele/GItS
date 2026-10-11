@@ -7242,3 +7242,11 @@ trim. Agree on the rest."
   (`upgrade: {block: +2, stage_repay: +1}`); the "Gain 1 Block for any HP it
   could not Repay" floor stays. Most Block: 9, upgraded 12 (was 11, 15).
 - Sim twins in `tier0/engine/furina_tide.py` moved with the sheet.
+
+## Klee: Fish Blasting, Lisa's Treats, Confiscated Exhausts, 2026-10-11
+
+[USER]'s rulings: "I think that Fish Blasting needs to give Dazed rather than Confiscated - Confiscated is too punishing - and I'm not sure if 8 aoe for 1 energy is actually worth punishing with Dazed"; "Lisa's Treats also underwhelmed; I rarely needed the energy."; "Actually, should we tag Confiscated with Exhaust? Currently we're using it as a drawback mechanism to load the deck but it builds over time."; "And agreed with a) on both." Landed on `klee-next` (Klee is frozen on `main`).
+
+- `proto_ko_fish_blasting` (C Attack, 1): "Deal 9 [12] Pyro damage to ALL enemies. Add a Dazed into your Discard Pile." Was 8 [11] and a Confiscated. The token is the base game's Dazed (`status_dazed`), as Forbidden Fun adds it. Base shape: Ironclad's Breakthrough (9 to ALL for 1, lose 1 HP).
+- `proto_ko_lisas_treats` (U Skill, 0): "Gain 2 [3] Energy. Add a Confiscated into your Discard Pile." Was two Confiscated. Base twin: Defect's Turbo (one Void).
+- `confiscated` (token, `tokens.yaml` `exhaust: true`; C# `Cards/Confiscated.cs` `CanonicalKeywords` Exhaust): the keyword the base game's Slimed carries (decompiled `MegaCrit.Sts2.Core.Models.Cards.Slimed`: cost 1, Status, `CardKeyword.Exhaust`). The face still reads "Does nothing."; the game appends "Exhaust." from the keyword. The Confiscated hover tip now ends "Exhaust.".

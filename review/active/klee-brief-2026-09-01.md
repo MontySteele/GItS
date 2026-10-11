@@ -88,7 +88,7 @@ here. "Shipped" means it exists on the current sheet in some form.
 | The Little Hexenzirkel (Luna VII) | Klee founded her own coven in Chinju Forest after Alice's challenge: Qiqi, Yaoyao, Sayu, then Prune; "little" because they all still have growing to do; each brings an imaginary friend | Prune's card only | Her second companion path: **her own coven**, off-region on purpose (§7) |
 | Prune (Luna VII) | Self-styled witch hunter from Nod-Krai chasing Alice, who "kidnapped" her imaginary friend Descartes so that Klee would make a friend; Anemo; her hammer **absorbs the element she Swirls** | Prune — Witch Hunt (Swirl, Klee-personal) | The canonical way to give Klee an off-element bomb: Prune's Swirl converts the next explosion (§7) |
 | The Red Knight of Stormbearer Mountains | Too many charges, half a mountain gone | no | The Big One's flavour; the Cook loop's signature moment |
-| Fish blasting | Her hobby; gets her confiscated | Fish Blasting, adds Confiscated | Kept as is: AoE with a cost card |
+| Fish blasting | Her hobby; gets her confiscated | Fish Blasting, adds Confiscated | AoE with a cost card; since 2026-10-11 the cost card is a Dazed (9 to ALL) |
 
 Nothing on the current sheet is contradicted by her story. What the current
 sheet **misses** is the half of her story that is about other people
@@ -333,9 +333,20 @@ Dazed; the "mega turn now, suffer later" cards pay the heavy one, two
 Confiscated that stay all combat. A status is a card of Status type or Status
 rarity (Confiscated counts; curses do not).
 
+**2026-10-11 ([USER], after his runs):** "I think that Fish Blasting needs to
+give Dazed rather than Confiscated - Confiscated is too punishing - and I'm
+not sure if 8 aoe for 1 energy is actually worth punishing with Dazed";
+"Lisa's Treats also underwhelmed; I rarely needed the energy."; "Actually,
+should we tag Confiscated with Exhaust? Currently we're using it as a
+drawback mechanism to load the deck but it builds over time."; "And agreed
+with a) on both." So: Fish Blasting (Attack 1, Common) deals 9 [12] to ALL
+and adds a Dazed (Ironclad's Breakthrough); Lisa's Treats adds one
+Confiscated, not two (Defect's Turbo); Confiscated Exhausts when played, as
+the base game's Slimed does, so it no longer stays all combat once paid for.
+
 - **Loaders:** Forbidden Fun (Attack 0, Common, 10 [14], a Dazed), It Wasn't
   Me! (Skill 0, Common, 6 [9] Block, a Dazed), Lisa's Treats (Skill 0,
-  Uncommon, 2 [3] Energy, 2 Confiscated), Red Knight (Attack 2, Rare, 22 [28]
+  Uncommon, 2 [3] Energy, a Confiscated since 2026-10-11), Red Knight (Attack 2, Rare, 22 [28]
   to ALL, 2 Confiscated).
 - **Payoffs and answers:** Finders Keepers (Power 1, Uncommon: a Confiscated
   played places a Bomb 5 [7]), Klee Can Explain! (Skill 1, Uncommon: 6 [8]

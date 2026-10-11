@@ -275,7 +275,8 @@ public class PoolPassThreeTests
         // A status goes to the discard pile, as the base game adds every one
         // ([USER], 2026-10-03: "I agree that we should adopt the same
         // convention"). Twin:
-        // `test_fish_blasting_adds_a_confiscated_into_the_discard_pile`.
+        // `test_fish_blasting_adds_a_dazed_into_the_discard_pile` (a Dazed since
+        // 2026-10-11).
         var source = Printed("Cards/Prototype/Generated/ProtoKoFishBlasting.cs");
         Assert.Contains("PileType.Discard, Owner);", source);
         Assert.DoesNotContain("PileType.Draw", source);

@@ -42,7 +42,7 @@ public sealed class ProtoKoLisasTreats : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lisa's Treats"),
-        ("description", "Gain {Energy:diff()} [gold]Energy[/gold]. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Gain {Energy:diff()} [gold]Energy[/gold]. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -62,11 +62,8 @@ public sealed class ProtoKoLisasTreats : CustomCardModel
     {
         await PlayerCmd.GainEnergy(DynamicVars["Energy"].IntValue, Owner);
         {
-            for (var i = 0; i < 2; i++)
-            {
-                var token = CombatState!.CreateCard<Confiscated>(Owner);
-                await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
-            }
+            var token = CombatState!.CreateCard<Confiscated>(Owner);
+            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
         }
     }
 

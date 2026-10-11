@@ -73,7 +73,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   "Nope, this all looks good. I'm now in agreement with all picks."): Bombs
   grow 2 a turn, 3 opening Sparks, every drafted Bomb or Mine placer prints 2
   bigger; in Fire! Fire! and Blasting Spree; out Playdate and Pop! (Pop!
-  stays off-pool for Klee Can Explain!). Next: suite 5; if it passes, the promotion PR and
+  stays off-pool for Klee Can Explain!). 2026-10-11 ([USER]: "Confiscated
+  is too punishing"; "Lisa's Treats also underwhelmed"; "should we tag
+  Confiscated with Exhaust?"): Fish Blasting 9 [12] to ALL and a Dazed,
+  Lisa's Treats one Confiscated, Confiscated Exhausts. Next: suite 5; if it passes, the promotion PR and
   [USER]'s run on that build (design review pick 5).
 - **Kokomi: Prototype.** Brief `review/active/kokomi-brief-2026-09-01.md`
   (sec.2, the rules). A card with a Plan line can be played on the

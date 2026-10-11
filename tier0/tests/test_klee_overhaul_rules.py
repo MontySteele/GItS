@@ -2281,10 +2281,12 @@ def test_tinder_toss_is_playable_on_a_bomb_less_board(overhaul):
 
 # --- Fish Blasting: the status goes to the discard pile ---------------------
 
-def test_fish_blasting_adds_a_confiscated_into_the_discard_pile(overhaul):
+def test_fish_blasting_adds_a_dazed_into_the_discard_pile(overhaul):
     """Every status our cards make goes to the DISCARD pile, as the base game's
     do (Turbo, Overclock, Gunk Up, Boost Away, Fight Through). [USER],
-    2026-10-03: "I agree that we should adopt the same convention"."""
+    2026-10-03: "I agree that we should adopt the same convention". The
+    token is a Dazed and the hit 9 since 2026-10-11 ([USER]: "Confiscated is
+    too punishing")."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.player.draw_pile = [probe([], cid="f%d" % i, ctype="skill")
@@ -2292,9 +2294,10 @@ def test_fish_blasting_adds_a_confiscated_into_the_discard_pile(overhaul):
 
     effects.resolve_card(state, load("proto_ko_fish_blasting"))
 
-    assert (a.hp, b.hp) == (192, 192)      # 8 to ALL since the balance review
-    assert [c.id for c in state.player.discard_pile].count("confiscated") == 1
-    assert not any(c.id == "confiscated" for c in state.player.draw_pile)
+    assert (a.hp, b.hp) == (191, 191)      # 9 to ALL since 2026-10-11
+    assert [c.id for c in state.player.discard_pile].count("status_dazed") == 1
+    assert not any(c.id == "confiscated" for c in state.player.discard_pile)
+    assert not any(c.id == "status_dazed" for c in state.player.draw_pile)
 
 
 def test_fish_blasting_sets_nothing_off(overhaul):
