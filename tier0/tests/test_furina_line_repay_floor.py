@@ -147,11 +147,11 @@ def test_the_damage_cards_repay_first_then_add_the_leftover():
 def test_hymn_pays_block_for_what_it_could_not_repay():
     st = _furina()
     FS.drain(st, 1)
-    _play(st, _card("proto_fs_hymn_of_many_waters"))        # 8 + (3 - 1)
-    assert st.player.block == 10
+    _play(st, _card("proto_fs_hymn_of_many_waters"))        # 6 + (3 - 1)
+    assert st.player.block == 8
     st = _furina()
-    _play(st, _card("proto_fs_hymn_of_many_waters+"))       # 11 + 4
-    assert st.player.block == 15
+    _play(st, _card("proto_fs_hymn_of_many_waters+"))       # 8 + 4
+    assert st.player.block == 12      # the 2026-10-11 trim (was 15)
 
 
 def test_soothing_waters_keeps_no_leftover_payout():

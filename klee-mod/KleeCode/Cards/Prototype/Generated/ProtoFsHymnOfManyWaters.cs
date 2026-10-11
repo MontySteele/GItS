@@ -60,7 +60,7 @@ public sealed class ProtoFsHymnOfManyWaters : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new SpotlightSystem.SpotlitBlockVar(8m),
+            new SpotlightSystem.SpotlitBlockVar(6m),
             new DynamicVar("RepayAmount", 3m)
         };
 
@@ -79,7 +79,7 @@ public sealed class ProtoFsHymnOfManyWaters : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(2m);
         DynamicVars["RepayAmount"].UpgradeValueBy(1m);
     }
 }

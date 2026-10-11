@@ -306,6 +306,7 @@ class Spec:
     member: str = ""
     in_slice: bool = True      # False: a probe deck's row, never drafted
     exhaust: bool = False
+    retain: bool = False
 
 
 CARDS: dict[str, Spec] = {
@@ -353,16 +354,17 @@ CARDS: dict[str, Spec] = {
     # it could not Repay. (The Repay floor, 2026-10-09.)
     "ftd_surging_waters": Spec("Surging Waters", 1, "attack", "common",
                                "hit_repay", (6, 3)),
-    # Hymn of Many Waters (1): Gain 8 Block. Repay 3. Gain 1 Block for any
-    # HP it could not Repay.
+    # Hymn of Many Waters (1): Gain 6 Block. Repay 3. Gain 1 Block for any
+    # HP it could not Repay. (The 2026-10-11 playtest trim, was 8.)
     "ftd_hymn": Spec("Hymn of Many Waters", 1, "skill", "common",
-                     "block_repay", (8, 3)),
+                     "block_repay", (6, 3)),
     # Pneuma Refrain (1): Repay 5. Draw 2 cards.
     "ftd_pneuma_refrain": Spec("Pneuma Refrain", 1, "skill", "uncommon",
                                "repay_draw", (5, 2)),
-    # Singer of Many Waters (1): Repay all your drained HP. Exhaust.
+    # Singer of Many Waters (1): Retain. Repay all your drained HP. Exhaust.
+    # (Retain since the 2026-10-11 playtest.)
     "ftd_singer": Spec("Singer of Many Waters", 1, "skill", "rare",
-                       "repay_all", (), exhaust=True),
+                       "repay_all", (), exhaust=True, retain=True),
     # --- Fanfare outlets (6) ---
     # Tidal Flourish (1): Deal 5 Hydro damage to ALL enemies. Spend up to
     # 10: deal 1 more for each. (The Spend paper, 2026-10-10; Uncommon since
@@ -630,7 +632,7 @@ def make_card(card_id: str):
     card = Card(id=card_id, name=spec.name, cost=spec.cost, type=spec.type,
                 rarity=spec.rarity, effects=[], tags=[TAG],
                 character=CHARACTER, exhaust=spec.exhaust,
-                retain=spec.kind == "tutti")
+                retain=spec.retain or spec.kind == "tutti")
     if spec.kind == "star_turn":
         card.cost_reduction_per_fanfare = STAR_TURN_FANFARE_PER
     return card
@@ -1721,7 +1723,7 @@ def resolve_card(state, card) -> None:
         _card_damage(state, card, n[0] + (n[1] - back), all_enemies=True,
                      hydro=True)
     elif k == "balance_books":
-        dmg = f.drained // 2
+        dmg = f.drained                  # all of it (2026-10-11; was half)
         if dmg > 0:
             _card_damage(state, card, dmg, all_enemies=True)
         repay(state, n[0])

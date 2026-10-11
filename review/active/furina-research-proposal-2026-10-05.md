@@ -828,9 +828,15 @@ seats, and nothing else uses the stage.
   4]
 - Hymn of Many Waters (Skill, 1, Common): "Gain 8 Block. Repay 3." [11,
   Repay 4]
+  2026-10-11 playtest trim: "Gain 6 Block. Repay 3. Gain 1 Block for any HP
+  it could not Repay." [8, Repay 4]. [USER]: "Hymn of Many Waters is usually
+  just 15 block as a 1 energy upgraded common and is extremely good." /
+  "Yeah, I think Hymn needs a trim."
 - Pneuma Refrain (Skill, 1, Uncommon): "Repay 5. Draw 2 cards." [Repay 7]
 - Singer of Many Waters (Skill, 1, Rare): "Repay all your drained HP.
   Exhaust." [cost 0]
+  2026-10-11: gains Retain. [USER]: "Singer of Many Waters felt hit or miss.
+  Usually returned 0, sometimes returned 10."
 
 *Fanfare outlets (6):*
 - Tidal Flourish (Attack, 1, Common): "Deal 5 damage to ALL enemies. Spend
