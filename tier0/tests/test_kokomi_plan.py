@@ -2146,15 +2146,16 @@ def test_breakwaters_count_is_not_the_mornings_depth(overhaul):
 
 
 def test_slack_waters_plan_half_is_a_morning_line(overhaul):
-    """R267 PICK 1. The starter is back to exactly its pre-pass-five form: 4
-    damage and a single Weak now, the multi-body Weak next morning. The Plan
+    """R267 PICK 1. The starter is back to its pre-pass-five form: damage
+    (6 since the Plan pricing, 2026-10-11) and a single Weak now, the
+    multi-body Weak next morning. The Plan
     half is what makes turn one a choice -- one Weak on the front enemy today
     or one on every body tomorrow -- which is the brief's turn-one decision,
     and `ProtoKkSlackWater.OnPlay` schedules with no `dusk:` argument."""
     row = _row("proto_kk_slack_water")
     assert row.plan_dusk is False
     assert row.effects == [
-        {"op": "damage", "amount": 4, "target": "enemy"},
+        {"op": "damage", "amount": 6, "target": "enemy"},
         {"op": "apply_power", "power": "weak", "amount": 1,
          "target": "enemy"},
     ]

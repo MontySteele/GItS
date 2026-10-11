@@ -1216,7 +1216,7 @@
       "cost": -1
     },
     "proto_kk_jellyfish_drift": {
-      "plan_damage": 1
+      "plan_damage": 2
     },
     "proto_kk_joint_orders": {
       "block": 3

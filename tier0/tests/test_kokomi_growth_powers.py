@@ -178,25 +178,25 @@ def test_grand_design_fetch_is_paid_at_flood_tides_site(overhaul):
 
 # --- Brine Sting ---------------------------------------------------------------
 
-def test_brine_sting_plans_3_damage_then_weak(overhaul):
+def test_brine_sting_plans_4_damage_then_weak(overhaul):
     row = _row("proto_kk_brine_sting")
     assert (row.cost, row.type, row.rarity) == (0, "skill", "common")
     assert _faces()[row.id] == (
-        "[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage. Apply 1 "
+        "[gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage. Apply 1 "
         "[gold]Weak[/gold].")
     assert row.plan == [
-        {"op": "damage", "amount": 3, "target": "front_enemy"},
+        {"op": "damage", "amount": 4, "target": "front_enemy"},
         {"op": "apply_power", "power": "weak", "amount": 1,
          "target": "front_enemy"}]
     assert _up("proto_kk_brine_sting").plan[1]["amount"] == 2
-    assert _up("proto_kk_brine_sting").plan[0]["amount"] == 3
+    assert _up("proto_kk_brine_sting").plan[0]["amount"] == 4
 
 
 def test_brine_sting_carried_out_hits_and_weakens(overhaul):
     enemy = make_enemy(hp=50)
     st = kokomi_state(enemies=[enemy])
     carry_out(st, _row("proto_kk_brine_sting").plan)
-    assert enemy.hp == 50 - 3
+    assert enemy.hp == 50 - 4
     assert enemy.powers.get("weak") == 1
 
 

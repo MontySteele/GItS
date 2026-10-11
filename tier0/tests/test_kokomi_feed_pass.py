@@ -48,23 +48,26 @@ def test_each_feed_row_is_a_zero_cost_plan_only_common(overhaul, cid):
 
 @pytest.mark.parametrize("cid,base,upgraded", [
     ("proto_kk_bubble_ward",
-     [{"op": "block", "amount": 4}], [{"op": "block", "amount": 6}]),
+     [{"op": "block", "amount": 5}], [{"op": "block", "amount": 7}]),
+    # Plan pricing (2026-10-11), ratio 1.3: Nip 5 [7] -> 7 [9].
     ("proto_kk_nip",
-     [{"op": "damage", "amount": 5, "target": "front_enemy"}],
-     [{"op": "damage", "amount": 7, "target": "front_enemy"}]),
-    # Kokomi whole-run round 2026-10-10: Plan 2 [3] -> 3 [4].
+     [{"op": "damage", "amount": 7, "target": "front_enemy"}],
+     [{"op": "damage", "amount": 9, "target": "front_enemy"}]),
+    # Kokomi whole-run round 2026-10-10: Plan 2 [3] -> 3 [4]; Plan pricing
+    # (2026-10-11): 3 [4] -> 6 [8].
     ("proto_kk_jellyfish_drift",
-     [{"op": "damage", "amount": 3, "target": "all_enemies"}],
-     [{"op": "damage", "amount": 4, "target": "all_enemies"}]),
+     [{"op": "damage", "amount": 6, "target": "all_enemies"}],
+     [{"op": "damage", "amount": 8, "target": "all_enemies"}]),
     ("proto_kk_current_read",
      [{"op": "draw", "amount": 1}, {"op": "block", "amount": 0}],
      [{"op": "draw", "amount": 1}, {"op": "block", "amount": 2}]),
-    # The growth Powers (2026-10-10): Brine Sting deals 3 before the Weak.
+    # The growth Powers (2026-10-10): Brine Sting deals 3 before the Weak;
+    # Plan pricing (2026-10-11): 4.
     ("proto_kk_brine_sting",
-     [{"op": "damage", "amount": 3, "target": "front_enemy"},
+     [{"op": "damage", "amount": 4, "target": "front_enemy"},
       {"op": "apply_power", "power": "weak", "amount": 1,
        "target": "front_enemy"}],
-     [{"op": "damage", "amount": 3, "target": "front_enemy"},
+     [{"op": "damage", "amount": 4, "target": "front_enemy"},
       {"op": "apply_power", "power": "weak", "amount": 2,
        "target": "front_enemy"}]),
 ])
@@ -91,7 +94,7 @@ def test_nip_and_drift_land_on_the_morning(overhaul):
     kokomi_plan.schedule(st, _row("proto_kk_nip"))
     kokomi_plan.schedule(st, _row("proto_kk_jellyfish_drift"))
     kokomi_plan.resolve_all(st)
-    assert [e.hp for e in st.enemies] == [40 - 5 - 3, 40 - 3]
+    assert [e.hp for e in st.enemies] == [40 - 7 - 6, 40 - 6]
 
 
 def test_coral_bulwark_blocks_eight_and_writes_no_plan(overhaul):

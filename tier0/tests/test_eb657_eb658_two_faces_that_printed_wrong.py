@@ -120,7 +120,7 @@ def test_the_pair_is_a_shape_and_not_a_card_special_case():
 def test_flanks_face_names_the_moment_the_intents_are_read():
     row = _sheet_row("proto_kk_flank")
     assert row["description"] == (
-        "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 "
+        "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 9 "
         "[gold]Hydro[/gold] damage to each enemy that "
         "intended to attack when you wrote this.")
     src = (GENERATED / "ProtoKkFlank.cs").read_text(encoding="utf-8")
@@ -132,7 +132,7 @@ def test_flanks_rule_did_not_move():
     """A FACE PASS AND NOTHING ELSE: the aim is the same aim, and both engines
     still resolve it where they resolved it before."""
     row = _sheet_row("proto_kk_flank")
-    assert row["plan"] == [{"op": "damage", "amount": 8,
+    assert row["plan"] == [{"op": "damage", "amount": 9,
                             "target": "enemies_intending_attack"}]
 
     sim = (REPO / "tier0" / "engine" / "kokomi_plan.py").read_text(

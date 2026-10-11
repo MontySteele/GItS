@@ -7162,3 +7162,19 @@ obvious use in a short hallway fight".
   Grand Design move the played copy, so a fetched Open keeps its price.
   Tip and page row: "0-cost, Retain. ... then empty it, and increase its
   cost by 1. ..."
+
+## Kokomi Plan pricing, 2026-10-11
+
+Paper `review/active/kokomi-plan-pricing-2026-10-11.md`. [USER]: "Let's go
+with a ratio of 1.3 and I agree on the other defaults." and "I'm also fine
+with modifying the starters if the rates are low." A Plan that lands next
+turn prints 1.3 times the base on-turn median for its cost and target.
+Base [upgraded]:
+
+- Signal Arrow Plan 3 -> 4 [5] to ALL twice; Pearl Current 2 -> 3 [4] to ALL
+  3 times; Flank 8 -> 9 [12] to each attacker; Undertide Lance 12 -> 14 [18],
+  doubled if alone; Masterstroke 30 -> 35 [45], Strength 3 times; Nip 5 -> 7
+  [9]; Jellyfish Drift 3 [4] -> 6 [8] to ALL (`plan_damage` 1 -> 2); Brine
+  Sting 3 -> 4 damage, 1 [2] Weak; Bubble Ward 4 -> 5 [7] Block.
+- Starter: Kurage's Oath's Plan 7 -> 9 [12] to ALL (6 [8] Block unchanged);
+  Slack Water's on-turn damage 4 -> 6 [9] (Weak and Plan line unchanged).
