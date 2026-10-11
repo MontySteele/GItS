@@ -66,7 +66,7 @@ public sealed class ProtoKkSlackWater : CustomCardModel, IElementalCard, ICharac
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move),
+            new DamageVar(6m, ValueProp.Move),
             new DynamicVar("PlanPowerAmount", 1m)
         };
 

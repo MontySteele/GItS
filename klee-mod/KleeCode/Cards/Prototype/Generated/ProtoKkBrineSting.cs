@@ -45,7 +45,7 @@ public sealed class ProtoKkBrineSting : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Brine Sting"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage. Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage. Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,7 +54,7 @@ public sealed class ProtoKkBrineSting : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 3, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 4, KokomiPlan.Aim.FrontEnemy),
             new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 

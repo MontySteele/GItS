@@ -61,7 +61,7 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
         new List<DynamicVar>
         {
             new BlockVar(6m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(7m)
+            new KokomiPlan.PlanDamageVar(9m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

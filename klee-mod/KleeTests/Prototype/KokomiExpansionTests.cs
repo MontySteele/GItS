@@ -140,9 +140,9 @@ public class KokomiExpansionTests : IDisposable
         var lull = Assert.Single(new ProtoKkLull().PlanClauses);
         Assert.Equal((KokomiPlan.Kind.EnergyIfAlone, 2), (lull.Kind, lull.Amount));
         var lance = Assert.Single(new ProtoKkUndertideLance().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.DamageIfAlone, 12, KokomiPlan.Aim.FrontEnemy),
+        Assert.Equal((KokomiPlan.Kind.DamageIfAlone, 14, KokomiPlan.Aim.FrontEnemy),
                      (lance.Kind, lance.Amount, lance.Aim));
-        Assert.Equal(16, Assert.Single(
+        Assert.Equal(18, Assert.Single(
             Upgraded<ProtoKkUndertideLance>().PlanClauses).Amount);
         // The drain hands its entry count to every carry-out.
         Assert.Contains(Seq("KokomiPlan", "Drain"),
@@ -158,8 +158,8 @@ public class KokomiExpansionTests : IDisposable
         Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
         Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].", Face(card));
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Damage, 30), (clause.Kind, clause.Amount));
-        Assert.Equal(40, Upgraded<ProtoKkMasterstroke>().PlanClauses.Single().Amount);
+        Assert.Equal((KokomiPlan.Kind.Damage, 35), (clause.Kind, clause.Amount));
+        Assert.Equal(45, Upgraded<ProtoKkMasterstroke>().PlanClauses.Single().Amount);
     }
 
     [Fact]
