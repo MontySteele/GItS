@@ -202,12 +202,12 @@ public class KokomiGrowthPowersTests
     }
 
     [Fact]
-    public void Brine_sting_deals_three_before_its_weak()
+    public void Brine_sting_deals_four_before_its_weak()
     {
         var card = new ProtoKkBrineSting();
-        Assert.Contains("[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage. Apply ",
+        Assert.Contains("[gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage. Apply ",
                         Face(card));
-        Assert.Equal((KokomiPlan.Kind.Damage, 3, KokomiPlan.Aim.FrontEnemy),
+        Assert.Equal((KokomiPlan.Kind.Damage, 4, KokomiPlan.Aim.FrontEnemy),
                      (card.PlanClauses[0].Kind, card.PlanClauses[0].Amount,
                       card.PlanClauses[0].Aim));
     }

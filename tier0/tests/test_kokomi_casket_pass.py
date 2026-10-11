@@ -324,11 +324,11 @@ def test_the_commons(overhaul):
 
     arrow = _row("proto_kk_signal_arrow")
     assert arrow.effects[0]["amount"] == 7
-    assert arrow.plan == [{"op": "damage", "amount": 3,
+    assert arrow.plan == [{"op": "damage", "amount": 4,
                            "target": "all_enemies", "times": 2}]
     arrow_up = _up("proto_kk_signal_arrow")
     assert arrow_up.effects[0]["amount"] == 10
-    assert arrow_up.plan[0]["amount"] == 4
+    assert arrow_up.plan[0]["amount"] == 5
 
     shoal = _row("proto_kk_surging_shoal")
     assert (shoal.cost, shoal.effects[0]["amount"], shoal.plan[0]["amount"]) \
@@ -411,14 +411,15 @@ def test_the_uncommons_and_the_rare(overhaul):
     # Moon Signal left the pool in the status batch (2026-10-01); its
     # power stays registered (`test_moon_signal_reads_the_queue_...`).
 
-    # Pearl Current: 2 x4 / Plan 2 to ALL x3 (3s upgraded).
+    # Pearl Current: 2 x4 / Plan 3 to ALL x3 (3 x4 / Plan 4s upgraded; Plan
+    # pricing 2026-10-11).
     current = _row("proto_kk_pearl_current")
     assert (current.effects[0]["amount"], current.effects[0]["times"]) == (2, 4)
-    assert current.plan == [{"op": "damage", "amount": 2,
+    assert current.plan == [{"op": "damage", "amount": 3,
                              "target": "all_enemies", "times": 3}]
     current_up = _up("proto_kk_pearl_current")
     assert current_up.effects[0]["amount"] == 3
-    assert current_up.plan[0]["amount"] == 3
+    assert current_up.plan[0]["amount"] == 4
 
     # What the Tokoyo Took: double the count. Rare, 2, Exhaust (1 upgraded).
     took = _row("proto_kk_what_the_tokoyo_took")

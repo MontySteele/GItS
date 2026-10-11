@@ -67,7 +67,7 @@ public sealed class ProtoKkSignalArrow : CustomCardModel, IElementalCard, IChara
         new List<DynamicVar>
         {
             new DamageVar(7m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(3m)
+            new KokomiPlan.PlanDamageVar(4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

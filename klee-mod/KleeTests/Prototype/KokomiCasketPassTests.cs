@@ -351,11 +351,11 @@ public class KokomiCasketPassTests : IDisposable
         var arrow = new ProtoKkSignalArrow();
         Assert.Equal(7m, arrow.DynamicVars.Damage.BaseValue);
         var arrowPlan = arrow.PlanClauses.Single();
-        Assert.Equal((KokomiPlan.Kind.Damage, 3, 2, KokomiPlan.Aim.AllEnemies),
+        Assert.Equal((KokomiPlan.Kind.Damage, 4, 2, KokomiPlan.Aim.AllEnemies),
                      (arrowPlan.Kind, arrowPlan.Amount, arrowPlan.Times, arrowPlan.Aim));
         var arrowUp = Upgraded<ProtoKkSignalArrow>();
         Assert.Equal(10m, arrowUp.DynamicVars.Damage.BaseValue);
-        Assert.Equal(4, arrowUp.PlanClauses.Single().Amount);
+        Assert.Equal(5, arrowUp.PlanClauses.Single().Amount);
 
         var shoal = new ProtoKkSurgingShoal();
         Assert.Equal(2, shoal.EnergyCost.Canonical);
