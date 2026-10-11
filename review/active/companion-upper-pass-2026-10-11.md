@@ -11,7 +11,7 @@ The packet is `companion-ur-packet.md` in the session scratchpad, which is gitig
 | | Companion | The kit's own card |
 |---|---|---|
 | Uncommon, taken (non-boss screens) | 9 of 152, 5.9% | 124 of 541, 22.9% |
-| Rare, taken on boss screens | 4 of 51, 7.8% | 33 of 121, 27.3% |
+| Rare, taken on boss screens | 4 of 44, 9% (see below) | 33 of 121, 27.3% |
 
 - **On boss screens the gap is the same in every kit.** Klee took 1 of 23 Rare Companions, Kokomi 2 of 17 and Furina 1 of 11.
 - **Every one of the 44 boss screens showed at least one Rare Companion.** So a dead Rare Companion costs the player a quarter of the most important card reward in the act.
@@ -20,14 +20,12 @@ The packet is `companion-ur-packet.md` in the session scratchpad, which is gitig
 
 Single cards have small samples, 3 to 11 offers each. What the paper leans on is the shape: whole groups of cards share one reason to lose.
 
-## Fixed now, with no approval needed: Klee-only text in the shared pool
+## Three of these are Klee's own cards
 
-Three Companions are worded for Klee's Bombs, but any kit can be offered them:
-- Prune's Ring-A-Ding-Ding! Hexhunter Chime ("the next Bomb that goes off");
-- Albedo's Dust of Purification ("your largest Bomb");
-- Jean's Lion's Fang ("if none of your Bombs went off").
-
-Kokomi was offered Dust of Purification once tonight. For anyone but Klee these are dead cards. Each gets `personal_pool: klee`, the switch Gorou's Crystal Collapse already uses for Kokomi (`CompanionSlot.cs:98`). Klee's offers don't change.
+Since 2026-10-03, Prune's Hexhunter Chime, Albedo's Dust of Purification and Jean's Lion's Fang have been in Klee's own card pool, not the Companion slot (`KleeOverhaulRoster.cs`, `KLEE_OWN_COMPANION_IDS`).
+- Kokomi met Dust of Purification once, through a reward that draws from other characters' pools. That is working as intended.
+- The packet counted their offers as Companion offers. Without them, Rare Companions were taken 4 of 44 times on boss screens, not 4 of 51. Every boss screen still showed at least one Rare Companion.
+- They are priced below anyway, as Klee cards.
 
 ## Shape 1: "For 3 turns" cards pay too slowly
 
