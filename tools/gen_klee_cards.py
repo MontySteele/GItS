@@ -9228,7 +9228,7 @@ def damage_var_effect(card: dict) -> dict | None:
 
 #: `damage_from_bombs`'s two reads, and the C# enum member each one names
 #: (`ProtoBombPower.BombRead`). Sim twin: `effects._op_damage_from_bombs`.
-DAMAGE_FROM_BOMBS_READS = {"largest_half": "LargestHalf",
+DAMAGE_FROM_BOMBS_READS = {"largest": "Largest",
                            "target_total": "TargetTotal",
                            # Klee upper pass, 2026-10-11 (Taste Test).
                            "target_total_double": "TargetTotalDouble"}

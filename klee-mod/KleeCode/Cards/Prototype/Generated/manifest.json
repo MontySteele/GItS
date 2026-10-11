@@ -1602,7 +1602,7 @@
       "damage": 3
     },
     "proto_ko_pocket_match": {
-      "damage": 2
+      "damage": 3
     },
     "proto_ko_pop": {
       "bomb_size": 2
@@ -1627,7 +1627,7 @@
       "bomb_size": 3
     },
     "proto_ko_simmer": {
-      "damage": 2
+      "damage": 3
     },
     "proto_ko_sizzle": {
       "damage": 3

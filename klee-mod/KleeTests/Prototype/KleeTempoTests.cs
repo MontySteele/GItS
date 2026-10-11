@@ -88,7 +88,7 @@ public class KleeTempoTests
     [Fact]
     public void The_papers_numbers_and_their_upgrades()
     {
-        Assert.Equal((4m, 6m), (new ProtoKoSimmer().DynamicVars.Damage.BaseValue,
+        Assert.Equal((6m, 9m), (new ProtoKoSimmer().DynamicVars.Damage.BaseValue,
                                 Upgraded<ProtoKoSimmer>().DynamicVars.Damage.BaseValue));
         Assert.Equal((2m, 1m), (new ProtoKoTasteTest().DynamicVars["Stash"].BaseValue,
                                 Upgraded<ProtoKoTasteTest>().DynamicVars["Stash"].BaseValue));
@@ -106,7 +106,7 @@ public class KleeTempoTests
     public void The_faces_print_the_rows()
     {
         Assert.Equal(
-            "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus half your largest "
+            "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus your largest "
           + "[gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] "
           + "into your [gold]Discard Pile[/gold].",
             Face(new ProtoKoSimmer()));
@@ -124,10 +124,11 @@ public class KleeTempoTests
     }
 
     [Fact]
-    public void Simmer_reads_half_the_largest_bomb_and_sets_nothing_off()
+    public void Simmer_reads_the_largest_bomb_and_sets_nothing_off()
     {
-        // REAL. The read is the board's largest charge of HERS, halved and
-        // rounded down; another Klee's pile is not read.
+        // REAL. The read is the board's largest charge of HERS, in full (the
+        // Klee Commons pass, 2026-10-11: it was half); another Klee's pile is
+        // not read.
         var klee = Seat.Klee();
         var a = Seat.Klee(200).Creature;
         var b = Seat.Klee(200).Creature;
@@ -136,10 +137,10 @@ public class KleeTempoTests
         ProtoBombs.Place(a, klee.Creature, new ProtoBombs.Charge(6));
         ProtoBombs.Place(b, klee.Creature, new ProtoBombs.Charge(21));
         ProtoBombs.Place(b, other, new ProtoBombs.Charge(40));
-        Assert.Equal(14m, ProtoBombPower.BombReadDamage(
-            a, klee.Creature, 4m, ProtoBombPower.BombRead.LargestHalf));
-        Assert.Equal(4m, ProtoBombPower.BombReadDamage(
-            a, Seat.Klee().Creature, 4m, ProtoBombPower.BombRead.LargestHalf));
+        Assert.Equal(27m, ProtoBombPower.BombReadDamage(
+            a, klee.Creature, 6m, ProtoBombPower.BombRead.Largest));
+        Assert.Equal(6m, ProtoBombPower.BombReadDamage(
+            a, Seat.Klee().Creature, 6m, ProtoBombPower.BombRead.Largest));
 
         var play = Play("ProtoKoSimmer");
         Assert.Contains("ProtoBombPower.DealFromBombs", play);

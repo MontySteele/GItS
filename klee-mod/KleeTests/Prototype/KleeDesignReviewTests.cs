@@ -88,7 +88,7 @@ public class KleeDesignReviewTests
         var spree = new ProtoKoBlastingSpree();
         Assert.Equal((CardType.Skill, 1, CardRarity.Common),
                      (spree.Type, spree.EnergyCost.Canonical, spree.Rarity));
-        Assert.Equal((4m, 6m), (spree.DynamicVars["BombSize"].BaseValue,
+        Assert.Equal((6m, 8m), (spree.DynamicVars["BombSize"].BaseValue,
             Upgraded<ProtoKoBlastingSpree>().DynamicVars["BombSize"].BaseValue));
         Assert.Equal("Place a [gold]Bomb[/gold] {BombSize:diff()} on ALL enemies. "
                    + "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
@@ -103,9 +103,9 @@ public class KleeDesignReviewTests
     {
         var rows = new (CardModel Card, CardModel Up, string Var, decimal Base, decimal Plus)[]
         {
-            (new ProtoKoMineToss(), Upgraded<ProtoKoMineToss>(), "BombSize", 9m, 12m),
+            (new ProtoKoMineToss(), Upgraded<ProtoKoMineToss>(), "BombSize", 11m, 14m),
             (new ProtoKoBangBang(), Upgraded<ProtoKoBangBang>(), "BombSize", 6m, 8m),
-            (new ProtoKoAmmoScavenging(), Upgraded<ProtoKoAmmoScavenging>(), "BombSize", 6m, 9m),
+            (new ProtoKoAmmoScavenging(), Upgraded<ProtoKoAmmoScavenging>(), "BombSize", 8m, 11m),
             (new ProtoKoBoobyTrap(), Upgraded<ProtoKoBoobyTrap>(), "BombSize", 7m, 10m),
             (new ProtoKoCovenErrand(), Upgraded<ProtoKoCovenErrand>(), "BombSize", 10m, 12m),
             (new ProtoKoWitchesCircle(), Upgraded<ProtoKoWitchesCircle>(), "PowerAmount", 5m, 7m),

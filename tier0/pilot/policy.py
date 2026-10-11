@@ -631,8 +631,8 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             # The Klee tempo paper (Simmer, Taste Test): the flat part plus
             # the read, and the pile stays -- the hit is all it is worth now.
             total += int(fx.get("amount", 0) or 0)
-            if fx.get("read") == "largest_half":
-                total += klee_overhaul.largest_charge(state)[2] // 2
+            if fx.get("read") == "largest":
+                total += klee_overhaul.largest_charge(state)[2]
             else:
                 enemy = effects._default_target(state)
                 if enemy is not None:

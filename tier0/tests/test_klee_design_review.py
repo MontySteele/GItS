@@ -71,9 +71,9 @@ def test_two_out_two_in_and_the_split_holds(overhaul):
 
 #: Sec.4.2: every drafted placer in the 78, (base, upgraded), after the +2.
 PLACERS = {
-    "proto_ko_mine_toss": ("plant_bomb", "size", 9, 12),
+    "proto_ko_mine_toss": ("plant_bomb", "size", 11, 14),
     "proto_ko_bang_bang": ("plant_bomb", "size", 6, 8),
-    "proto_ko_ammo_scavenging": ("plant_bomb", "size", 6, 9),
+    "proto_ko_ammo_scavenging": ("plant_bomb", "size", 8, 11),
     "proto_ko_booby_trap": ("plant_bomb", "size", 7, 10),
     "proto_ko_coven_errand": ("plant_bomb", "size", 10, 12),
     "proto_ko_witches_circle": ("apply_power", "amount", 5, 7),
@@ -130,17 +130,17 @@ def test_fire_fire_cashes_what_is_already_cooking(overhaul):
 
 # --- Blasting Spree -----------------------------------------------------------
 
-def test_blasting_spree_places_four_on_all_and_adds_a_dazed(overhaul):
+def test_blasting_spree_places_six_on_all_and_adds_a_dazed(overhaul):
     a, b, c = (make_enemy(hp=200, name=n) for n in "abc")
     state = klee_state([a, b, c])
     play(state, load("proto_ko_blasting_spree"))
-    assert sizes(a) == sizes(b) == sizes(c) == [4]
+    assert sizes(a) == sizes(b) == sizes(c) == [6]
     assert (a.hp, b.hp, c.hp) == (200, 200, 200)
     assert [x.id for x in state.player.discard_pile] == ["status_dazed"]
 
 
-def test_blasting_spree_upgraded_places_six(overhaul):
+def test_blasting_spree_upgraded_places_eight(overhaul):
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     play(state, load("proto_ko_blasting_spree+"))
-    assert sizes(a) == sizes(b) == [6]
+    assert sizes(a) == sizes(b) == [8]

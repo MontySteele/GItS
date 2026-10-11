@@ -56,8 +56,8 @@ public class KleePlaytest20260924Tests
             "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the "
           + "enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage.",
             Face(card));
-        Assert.Equal(3m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKoPocketMatch>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(6m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(9m, Upgraded<ProtoKoPocketMatch>().DynamicVars.Damage.BaseValue);
     }
 
     [Fact]

@@ -4537,11 +4537,13 @@ def _op_damage_from_bombs(state: CombatState, fx: dict, card: Card) -> None:
     off her Bombs that leaves them cooking. `ProtoBombPower.DealFromBombs`'s
     twin.
 
-    `read: largest_half` is Simmer's "plus half your largest Bomb's size" --
-    the largest single charge on the living board (`largest_charge`), halved
-    and rounded down. `read: target_total` is Taste Test's "damage equal to
+    `read: largest` is Simmer's "plus your largest Bomb's size" -- the
+    largest single charge on the living board (`largest_charge`), in full
+    (the Klee Commons pass, 2026-10-11: it was half). `read: target_total` is "damage equal to
     all your Bombs on the enemy" -- every charge on the aimed body, Mines
-    included (`total_size`). `amount` is the printed flat part.
+    included (`total_size`); `target_total_double` is Taste Test's since the
+    Klee upper pass (2026-10-11), twice that. `amount` is the printed flat
+    part.
 
     IT READS THE PILE AND DOES NOT SPEND IT: nothing goes off, no Spark is
     minted, no Mine answers. But it IS the card's own hit -- one `_op_damage`
@@ -4552,9 +4554,9 @@ def _op_damage_from_bombs(state: CombatState, fx: dict, card: Card) -> None:
         _op_klee_overhaul_off(state, fx, card)        # always raises
     base = int(fx.get("amount", 0) or 0)
     read = fx.get("read")
-    if read == "largest_half":
+    if read == "largest":
         _enemy, _index, size = klee_overhaul.largest_charge(state)
-        bombs = size // 2
+        bombs = size
     elif read in ("target_total", "target_total_double"):
         # `target_total_double`: Taste Test since the Klee upper pass
         # (2026-10-11), "twice the sum of your Bombs on the enemy".

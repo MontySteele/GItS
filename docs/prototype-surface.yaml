@@ -48,9 +48,9 @@
 - {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] on the enemy grows by 6.",
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 9.",
    upgrade: {grow: +3},
-   effects: [{op: grow_bombs, target: enemy, amount: 6}]}
+   effects: [{op: grow_bombs, target: enemy, amount: 9}]}
 
 - {id: proto_ko_careful_arrangement, name: "Exquisite Compound", character: klee,
    authored_by: [claude],
@@ -97,9 +97,9 @@
    cost: 1, type: skill, rarity: common,
    # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.2):
    # single target, was a Mine 4 on ALL enemies.
-   description: "Place a [gold]Mine[/gold] 9 on an enemy.",
+   description: "Place a [gold]Mine[/gold] 11 on an enemy.",
    upgrade: {bomb_size: +3},
-   effects: [{op: plant_bomb, target: enemy, size: 9, mine: true}]}
+   effects: [{op: plant_bomb, target: enemy, size: 11, mine: true}]}
 
 # R271 sec.4, item 1: Fwoosh! is CUT. (Pocket Match, the Retain twin it was
 # cut for, became a single-charge Set off on 2026-09-24.)
@@ -156,8 +156,9 @@
 - {id: proto_ko_sizzle, name: "Sizzle", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
-   effects: [{op: set_off, target: enemy, damage: 6},
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
+   upgrade: {damage: +3},
+   effects: [{op: set_off, target: enemy, damage: 8},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: damage, amount: 6, target: enemy}]}]}
 
@@ -178,9 +179,9 @@
 - {id: proto_ko_ammo_scavenging, name: "Lizard-Tail Gunpowder", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 6. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
+   description: "Place a [gold]Bomb[/gold] 8. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
    upgrade: {bomb_size: +3},
-   effects: [{op: plant_bomb, target: enemy, size: 6},
+   effects: [{op: plant_bomb, target: enemy, size: 8},
              {op: draw_per_set_off}]}
 
 # R271 sec.4 item 3 and sec.7 batch one, row 1: Powder Charge's shape, a Mine
@@ -317,9 +318,9 @@
 - {id: proto_ko_pocket_match, name: "Pocket Match", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common, retain: true,
-   description: "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal 3 [gold]Pyro[/gold] damage.",
-   upgrade: {damage: +2},
-   effects: [{op: set_off, target: enemy, damage: 3, charge: largest}]}
+   description: "[gold]Set off[/gold] only your largest [gold]Bomb[/gold] on the enemy. Deal 6 [gold]Pyro[/gold] damage.",
+   upgrade: {damage: +3},
+   effects: [{op: set_off, target: enemy, damage: 6, charge: largest}]}
 
 - {id: proto_ko_bombs_away, name: "Bombs Away!", character: klee,
    authored_by: [claude],
@@ -793,9 +794,9 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 [gold]Pyro[/gold] damage, plus half your largest [gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
-   upgrade: {damage: +2},
-   effects: [{op: damage_from_bombs, read: largest_half, amount: 4, target: enemy},
+   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   upgrade: {damage: +3},
+   effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
@@ -846,9 +847,9 @@
 - {id: proto_ko_blasting_spree, name: "Blasting Spree", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 4 on ALL enemies. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Place a [gold]Bomb[/gold] 6 on ALL enemies. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {bomb_size: +2},
-   effects: [{op: plant_bomb, target: all_enemies, size: 4},
+   effects: [{op: plant_bomb, target: all_enemies, size: 6},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 # THE MONDSTADT COMPANION OVERHAUL. These ARE
