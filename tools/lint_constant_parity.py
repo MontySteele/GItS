@@ -661,11 +661,21 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the counter's place in the column above the energy "
         "orb (above the Fanfare gauge). The number it draws is the ledger's "
         "drained HP, which the sim keeps as `Ftd.drained`.",
-    # The Fanfare gauge's face at 0 (the 2026-10-11 playtest): the gold,
-    # dimmed.
-    "FanfareCounter.EmptyAlpha":
-        "presentation: the alpha of the Fanfare gauge's gold face when it "
-        "reads 0. The sim draws no gauge.",
+    # Furina's two counters' numbers (the 2026-10-11 playtest, ruled "Yep,
+    # sounds good!"): the base power icon's amount label (power.tscn
+    # %AmountLabel), scaled from its 40-px icon to the counter's square.
+    "FurinaCounterFace.PowerIconSide":
+        "presentation: the base power icon's side in pixels, the unit the "
+        "amount label's numbers scale from. The sim draws no counter.",
+    "FurinaCounterFace.AmountFontSize":
+        "presentation: the base power amount label's font size. The sim "
+        "draws no counter.",
+    "FurinaCounterFace.AmountOutlineSize":
+        "presentation: the base power amount label's outline size. The sim "
+        "draws no counter.",
+    "FurinaCounterFace.AmountShadowOffset":
+        "presentation: the base power amount label's shadow offset. The sim "
+        "draws no counter.",
     "SparkCounter.PanelMargin":
         "presentation: the gap the badge keeps from the energy panel, in the "
         "panel's own units. It is a MARGIN rather than a position -- it is "
