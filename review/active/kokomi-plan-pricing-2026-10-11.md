@@ -76,10 +76,7 @@ A Plan that lands next turn prints **1.3 times** the base on-turn median for its
   - the act-2 boss damage median is at 40 a turn or more.
 - If act 1 overshoots, the lever is the ratio, not a cap.
 
-## For [USER]
+## Ruled by [USER], 2026-10-11
 
-1. **The Plan ratio.**
-   - **(a) Default:** 1.3 times the base on-turn median, on the nine cards above.
-   - (b) 1.25 times, which is exactly break-even.
-   - (c) 1.5 times, as Surging Shoal already is. This is a bigger swing, so the round would check act 1 harder.
+1. **The Plan ratio (ruled: "Let's go with a ratio of 1.3 and I agree on the other defaults").** 1.3 times the base on-turn median, on the nine cards above.
 2. **The starter (ruled: "I'm also fine with modifying the starters if the rates are low").** Kurage's Oath's Plan goes to 9 [12] to ALL, and Slack Water to 6 [9] damage, as above. No pick.
