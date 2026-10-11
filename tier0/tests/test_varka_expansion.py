@@ -513,20 +513,40 @@ def test_every_anemo_card_spreads_a_copy_that_swirls_again(varka):
         assert b.aura is None and a.aura == "pyro", card
 
 
-def test_the_order_answers_adds_a_knight_at_its_cost(varka):
+def test_the_order_answers_adds_a_chosen_upgraded_knight(varka):
+    # Varka co-op fixes (2026-10-11): "choose 1 of 3 random Knights. Add it
+    # to your hand, upgraded." The sim's pick is `order_answers_pick`.
     st = _state()
     st.player.powers[V.THE_ORDER_ANSWERS] = 1
     V.turn_start(st)
     assert len(st.player.hand) == 1
     knight = st.player.hand[0]
-    assert knight.id in V.pool_knight_ids() and not knight.free_this_turn
+    assert knight.id.endswith("+") and not knight.free_this_turn
+    assert knight.id[:-1] in V.pool_knight_ids()
+    offered = [e for e in st.log if e["event"] == "varka_order_answers"][-1][
+        "offered"]
+    assert len(offered) == len(set(offered)) == V.ORDER_ANSWERS_OPTIONS
+    assert knight.id[:-1] in offered
+    # Two stacks, two choices.
+    st = _state()
+    st.player.powers[V.THE_ORDER_ANSWERS] = 2
+    V.turn_start(st)
+    assert len(st.player.hand) == 2
+
+
+def test_the_order_answers_stand_in_prefers_the_current_element(varka):
+    offered = [_vk("amber_baron_bunny"), _vk("kaeya_frostgnaw"),
+               _vk("barbara_show_begin")]
+    assert V.order_answers_pick(offered, "cryo") == _vk("kaeya_frostgnaw")
+    assert V.order_answers_pick(offered, None) == _vk("amber_baron_bunny")
 
 
 def test_vow_dawn_patrol(varka):
     st = _state()
     _led(st).current = "hydro"
     _play(st, _vk("vow_of_the_blade"))
-    assert _led(st).oath["hydro"] == 1 and len(st.player.hand) == 1
+    # Varka co-op fixes (2026-10-11): 2 Oath, was 1.
+    assert _led(st).oath["hydro"] == 2 and len(st.player.hand) == 1
     _play(st, _vk("dawn_patrol"))
     assert st.player.energy == 10 + 1                  # 0 cost, +1
     assert st.player.exhaust_pile[-1].id == _vk("dawn_patrol")
