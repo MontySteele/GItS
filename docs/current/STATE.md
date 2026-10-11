@@ -83,7 +83,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   friend may stand in); the damage gap is a paper after that run. Growth
   Powers built 2026-10-10 (`review/active/kokomi-growth-powers-2026-10-10.md`):
   Flood Tide replaces The General's Banner, Grand Design keeps the Casket's
-  count.
+  count. Plan pricing built 2026-10-11
+  (`review/active/kokomi-plan-pricing-2026-10-11.md`, ratio 1.3): nine
+  next-turn Plans pay 1.3 times the base on-turn rate, Kurage's Oath's Plan
+  is 9 [12] to ALL and Slack Water deals 6 [9]; checked by the next
+  whole-run seat round.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:

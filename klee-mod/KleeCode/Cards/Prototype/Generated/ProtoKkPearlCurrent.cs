@@ -67,7 +67,7 @@ public sealed class ProtoKkPearlCurrent : CustomCardModel, IElementalCard, IChar
         new List<DynamicVar>
         {
             new DamageVar(2m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(2m)
+            new KokomiPlan.PlanDamageVar(3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

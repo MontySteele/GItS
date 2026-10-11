@@ -66,7 +66,7 @@ public sealed class ProtoKkMasterstroke : CustomCardModel, IElementalCard, IChar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new KokomiPlan.PlanDamageVar(30m, 3)
+            new KokomiPlan.PlanDamageVar(35m, 3)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

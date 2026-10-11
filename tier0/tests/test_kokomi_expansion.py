@@ -92,9 +92,9 @@ def test_masterstroke_is_a_retained_plan_only_attack(overhaul):
     card = _row("proto_kk_masterstroke")
     assert card.type == "attack" and card.cost == 3 and card.retain
     assert card.effects == []
-    assert card.plan == [{"op": "damage", "amount": 30,
+    assert card.plan == [{"op": "damage", "amount": 35,
                           "target": "front_enemy", "strength_times": 3}]
-    assert _up("proto_kk_masterstroke").plan[0]["amount"] == 40
+    assert _up("proto_kk_masterstroke").plan[0]["amount"] == 45
 
 
 def test_strength_affects_the_big_plans_more_than_once(overhaul):
@@ -107,7 +107,7 @@ def test_strength_affects_the_big_plans_more_than_once(overhaul):
     _write(st, "proto_kk_surging_shoal")
     _write(st, "proto_kk_nip")
     assert [e.clauses[0]["amount"] for e in st.kk_plan_queue] == [
-        30 + 6 * 3, 22 + 6 * 2, 5 + 6]
+        35 + 6 * 3, 22 + 6 * 2, 7 + 6]
     assert _up("proto_kk_masterstroke").plan[0]["strength_times"] == 3
     assert _up("proto_kk_surging_shoal").plan[0]["strength_times"] == 2
 
@@ -182,14 +182,14 @@ def test_undertide_lance_doubles_alone(overhaul):
     st = kokomi_state(enemies=[enemy])
     kokomi_plan.schedule(st, _row("proto_kk_undertide_lance"))
     kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 24
+    assert enemy.hp == 200 - 28
 
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
     kokomi_plan.schedule(st, _row("proto_kk_undertide_lance"))
     kokomi_plan.schedule(st, plan_card([{"op": "block", "amount": 1}]))
     kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 12
+    assert enemy.hp == 200 - 14
 
 
 def test_measured_breath_draws_only_on_an_empty_queue(overhaul):
