@@ -17,7 +17,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; telemetry has no draw field, so add one or check the relic in game.
-- `KokomiExpansion.DrawIfTargetWeak` is dead after the Kokomi card pass (Salt in the Wound now uses the `target_has_power_weak` predicate); delete the `draw_if_target_weak` Plan kind with it: the helper, `gen_klee_cards.py`'s kind map and `KOKOMI_AIMED_KINDS` check, `kokomi_plan.py`'s `KINDS`/`AIMED_KINDS` branch and `kokomi_expansion_sim.py`'s twin.
 - Dahlia — Sacramental Shower and Raiden — Musou no Hitotachi print their damage as fixed text, so the face ignores Strength and Weak; move them to the computed damage token like the other Companions.
 - `build_pck` skips three copy blocks whose sources are missing locally: `klee\mod_image.png`, `kokomi\potions`, `varka\potions` (deploy 2026-10-11, 0.2.4849+next).
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.

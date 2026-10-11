@@ -41,19 +41,6 @@ public static partial class KokomiCards
         await CardPileCmd.Draw(choiceContext, Amount(card), owner);
     }
 
-    /// <summary>Salt in the Wound: "If the enemy has Weak, draw 1 card."
-    /// </summary>
-    public static async Task DrawIfTargetWeak(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        var owner = card.Owner;
-        if (owner?.Creature == null) return;
-        if (!KokomiOverhaul.LiveFor(owner.Creature)) return;
-        var target = cardPlay.Target;
-        if (target == null || !target.Powers.OfType<WeakPower>().Any()) return;
-        await CardPileCmd.Draw(choiceContext, Amount(card), owner);
-    }
-
     /// <summary>Tidal Resonance: "Apply Hydro to ALL enemies. Draw 1 card for
     /// each enemy that already had an element." Counted before the Hydro
     /// lands; "an element" is a standing aura.</summary>

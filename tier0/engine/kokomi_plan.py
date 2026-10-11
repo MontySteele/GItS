@@ -2755,10 +2755,6 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
         # MEASURED BREATH: "If no Plan is waiting, draw 2."
         if not state.kk_plan_queue:
             state.draw(amount)
-    elif k == "draw_if_target_weak":
-        # SALT IN THE WOUND: "If the enemy has Weak, draw 1."
-        if target is not None and target.powers.get("weak", 0) > 0:
-            state.draw(amount)
     elif k == "resonance":
         # TIDAL RESONANCE: "Apply Hydro to ALL enemies. Draw 1 for each enemy
         # that already had an element." Counted before the Hydro lands.
@@ -2818,26 +2814,21 @@ def _exhausting(card: Card) -> Card:
 #: The `kokomi` op's kinds and the numeric field each prints. The codegen's
 #: `KOKOMI_KINDS` / `KOKOMI_KIND_FIELDS` are the twin; `validate_op` is the
 #: loader's check.
-KINDS = {"draw_if_no_plan": ("amount",), "draw_if_target_weak": ("amount",),
-         "resonance": ("amount",), "double_weak_vulnerable": (),
+KINDS = {"draw_if_no_plan": ("amount",), "resonance": ("amount",), "double_weak_vulnerable": (),
          "shoal_call": ("amount",),
          "coral_tithe": ("amount",),
          # POOL COMPLETION (2026-10-01).
          "spring_tide": (), "kurage_school": (),
          "kurages_mercy": ("amount",)}
-#: The one kind that aims at the enemy the card was played on.
-AIMED_KINDS = frozenset(("draw_if_target_weak",))
 
 
 def validate_op(card_id: str, fx: dict) -> None:
     """The loader's check of a `kokomi` op: a known kind, exactly its numeric
-    fields, and a target only where the kind aims."""
+    fields, and no target (no kind aims)."""
     k = fx.get("kind")
     if k not in KINDS:
         raise ValueError(f"card {card_id!r}: unknown kokomi kind {k!r}")
     allowed = {"op", "kind", *KINDS[k]}
-    if k in AIMED_KINDS:
-        allowed.add("target")
     if k == "shoal_call":
         allowed.add("upgraded")      # the `upgraded_grant` key's flag
     unknown = set(fx) - allowed
@@ -2849,5 +2840,3 @@ def validate_op(card_id: str, fx: dict) -> None:
         if not isinstance(v, int) or isinstance(v, bool) or v <= 0:
             raise ValueError(f"card {card_id!r}: kokomi {k} {field} must be "
                              "a positive literal int")
-    if k in AIMED_KINDS and fx.get("target") != "enemy":
-        raise ValueError(f"card {card_id!r}: kokomi {k} aims (target enemy)")

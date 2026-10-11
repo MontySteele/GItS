@@ -2614,7 +2614,6 @@ VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: key `kokomi_amount`). Sim twin: `kokomi_plan.KINDS` / `kokomi_plan.kind`.
 KOKOMI_KINDS = {
     "draw_if_no_plan": "DrawIfNoPlan",
-    "draw_if_target_weak": "DrawIfTargetWeak",
     "resonance": "Resonance",
     "double_weak_vulnerable": "DoubleWeakVulnerable",
     "shoal_call": "ShoalCall",
@@ -2626,11 +2625,10 @@ KOKOMI_KINDS = {
     "kurage_school": "KurageSchool",
     "kurages_mercy": "KuragesMercy",
 }
-KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "draw_if_target_weak", "resonance",
-                      "shoal_call", "coral_tithe", "kurages_mercy"}
-#: The kind that aims at the enemy the card was played on.
-KOKOMI_AIMED_KINDS = {"draw_if_target_weak"}
-KOKOMI_FIELDS = {"op", "kind", "target", "amount"}
+KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "resonance", "shoal_call",
+                      "coral_tithe", "kurages_mercy"}
+#: No kind aims: none takes a `target`.
+KOKOMI_FIELDS = {"op", "kind", "amount"}
 #: `furina` (THE POOL TO 75, 2026-10-09, review/active/furina-pool-growth-
 #: 2026-10-09.md sec.5): one kind per guest verb the grammar cannot spell,
 #: each ONE awaited `FurinaCards.<method>` call
@@ -5178,8 +5176,6 @@ def blocked_reason(
             kind = eff.get("kind")
             if kind not in KOKOMI_KINDS:
                 return f"kokomi kind {kind!r}"
-            if (eff.get("target") == "enemy") != (kind in KOKOMI_AIMED_KINDS):
-                return "kokomi: only draw_if_target_weak aims (target 'enemy')"
             if ("amount" in eff) != (kind in KOKOMI_KIND_AMOUNT):
                 return f"kokomi {kind} amount mismatch"
             if "amount" in eff and (not isinstance(eff["amount"], int)
