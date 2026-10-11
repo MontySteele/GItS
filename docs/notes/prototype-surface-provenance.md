@@ -7265,3 +7265,20 @@ Fish Blasting, Lisa's Treats, Confiscated, Tinder Toss, Alice's Detonator. [USER
 - `proto_ko_ammo_scavenging` (Lizard-Tail Gunpowder, C Skill, 1): Bomb 8 [11]. Was 6 [9].
 - `proto_ko_mine_toss` (C Skill, 1): Mine 11 [14]. Was 9 [12].
 - `proto_ko_blasting_spree` (C Skill, 1): Bomb 6 [8] on ALL, Dazed kept. Was 4 [6].
+
+## Klee Uncommons and Rares pass, 2026-10-11
+
+`review/active/klee-upper-pass-2026-10-11.md` (PR #1081). [USER]: "Agreed on all defaults - looks good!" Landed on `klee-next`.
+
+- `proto_ko_cover_your_ears` (U Skill, 0, Exhaust): 1 Spark, was 2. ALL enemies lose 6 [8] Strength this turn, unchanged.
+- `proto_ko_sparkling_burst` (U Skill, 0): 1 Spark. "Gain 1 [2] Energy. If a Bomb went off this turn, gain 1 more." Was 2 [1] Sparks for a flat 1. The `energy` delta bumps the first `energy` op only (tier0 `_bump_first`), so the generator's branch emitter now reads the `Energy` var only when no top-level gain owns it: the bonus stays 1.
+- `proto_ko_blazing_delight` (R Power, 2): 1 [0] Spark, was 3 [2]. A Spark price an upgrade cuts to 0 is free: `SparkPower.CanSpend` refuses 0 ("paid 0" is not a payment, `EB-512`), so the generated gate reads `SparkCost.PriceOf(this) <= 0` as playable and the badge prints no price (`MeterCost.Priced`); tier0's `spark_price` delta drops a `spend_spark` it cuts to 0.
+- `proto_ko_one_more_charge` (Witch's Homework, U Skill, 1): largest Bomb grows 12 [15], was 8 [11]; the draw at 20 stays.
+- `proto_ko_treasure_map` (U Skill): costs 0, was 1 [0]; the upgrade grows the largest Bomb 6 instead of 3.
+- `proto_ko_taste_test` (U Attack, 2): "Deal Pyro damage equal to twice your Bombs on the enemy. They do not go off." Confiscated 2 [1] unchanged. New read `target_total_double` (C# `BombRead.TargetTotalDouble`); `target_total` is kept and now unused.
+- `proto_ko_flash_point` (U Attack, 1): 9 [12], was 7 [10].
+- `proto_ko_party_poppers` (U Power, 1): Bomb 7 [9], was 5 [6].
+- `proto_ko_sparks_n_splash` (R Power): 2 Energy, was 3; the upgrade stays Innate.
+- `proto_ko_all_of_my_treasures` (R Skill, Exhaust): 2 [1] Energy; the upgrade cuts the cost instead of adding Retain.
+- `proto_ko_careful_arrangement` (Exquisite Compound, U Skill, 1): "Move all your Bombs onto the enemy. Each grows by 4 [6]." Was one merged Bomb grown 5 [8], a Mine if any part was. Pick 2 (a): no merge, so each Bomb that goes off still pays its Spark. Op `gather_bombs` (was `merge_bombs`); C# `ProtoBombPower.GatherAllTo`, sim `klee_overhaul.gather_all_to`: every charge of hers on the living board is taken off first, then lands on the aimed enemy as itself (size plus growth, its Mine flag, payload and Witch's Homework mark), the ones already there included; `relocated: true`, so the Dodoco Charm is not paid again. `EB-573`'s merge-riders hover tip (`ForMergeRiders`) and `KleeScalingPass.MergeMarks` left with the merge; the pile badge's rider count stays.
+- `proto_ko_tag_along` (U Skill, 1, Exhaust; upgrade removes Exhaust): "Choose 1 of 3 Companion cards to add to your hand. It costs 0 this turn." `proto_ko_adventure_club` (R Skill, 1 [0], Exhaust): "Choose 2 of 4 Companion cards to add to your hand. They cost 0 this turn." Pick 3 (a); [USER]: "it would be much better if it let you pick what it generated." Op `choose_companion` (`amount`, `options`; was `add_random_companion`). C# `KleeExpansion.ChooseCompanions` follows the decompiled `Discovery`: distinct options off `RandomCompanionPool` (the pool the random add drew from) with `TakeRandom(n, Rng.CombatCardGeneration)` as `CardFactory.GetDistinctForCombat` does, made as combat copies; one of three on `CardSelectCmd.FromChooseACardScreen` (`canSkip: true`, Discovery's call); then `SetThisTurn(0)` and `AddGeneratedCardToCombat` to the hand. The choose screen throws on more than three cards and returns one, so two of four is `CardSelectCmd.FromSimpleGrid` selecting two (Knights' Roll Call+'s screen), prompt "Choose 2 Companion cards to add to your hand." Sim `klee_overhaul.choose_companions`: `rng.sample` for the offer, and the pilot keeps the rarest offered (ties in offer order).
