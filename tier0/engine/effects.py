@@ -4911,6 +4911,13 @@ def _op_stage_spend_up_to(state: CombatState, fx: dict, card: Card) -> None:
         state, _amount(state, fx.get("amount", 1)))
 
 
+def _op_stage_spend_half(state: CombatState, fx: dict, card: Card) -> None:
+    """"Spend half your Fanfare" (Standing Ovation, 2026-10-11): half the
+    bank, rounded down; not a spend-all. What it counted is this play's
+    `stage_spent`."""
+    state.stage_spent_this_card = furina_stage.spend_half(state)
+
+
 def _op_stage_energy_next(state: CombatState, fx: dict, card: Card) -> None:
     """"Gain N Energy next turn" (Interval Bell, Salon's Tab): owed on her
     record and paid at her next turn (`furina_tide.energy_kept`); the C#
@@ -4982,6 +4989,7 @@ OPS = {
     "stage_spend": _op_stage_spend,
     "stage_spend_all": _op_stage_spend_all,
     "stage_spend_up_to": _op_stage_spend_up_to,
+    "stage_spend_half": _op_stage_spend_half,
     "stage_energy_next": _op_stage_energy_next,
     "gain_fanfare_floor": _op_gain_fanfare_floor,
     "raise_fanfare_cap": _op_raise_fanfare_cap,

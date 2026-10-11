@@ -492,6 +492,15 @@ def spend_up_to(state, cap: int) -> int:
     return T.spend_up_to(state, int(cap))
 
 
+def spend_half(state) -> int:
+    """"Spend half your Fanfare" (Standing Ovation, 2026-10-11): half the
+    bank, rounded down (`furina_tide.spend_half`); not a spend-all, so no
+    Bis!. Returns what counts as spent."""
+    if not active(state.player):
+        return 0
+    return T.spend_half(state)
+
+
 def spent_fours(spent: int) -> int:
     """`stage_spent_fours`: a play's spend in fours, rounded down ("Draw 1
     for every 4 spent"; the C# `FurinaStage.SpentFours`)."""
