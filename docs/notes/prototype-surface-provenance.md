@@ -7136,3 +7136,34 @@ Two rulings by [USER], built as written.
 - **Guest Star: Navia** (`proto_fs_guest_star_navia`): Rare -> Uncommon.
   [USER]: "I lean more towards putting Navia to Uncommon first." Pool 78,
   20 / 38 / 20 (was 20 / 37 / 21); sim `furina_tide.CARDS["ftd_navia"]`.
+
+## Kokomi growth Powers, 2026-10-10
+
+Brief `review/active/kokomi-growth-powers-2026-10-10.md`. [USER]: "Agreed on
+both." Sim read: `tools/kokomi_growth_power_sim.py` (#1059).
+
+- **Flood Tide** (`proto_kk_flood_tide`, new, Uncommon Power, cost 1):
+  "At the start of your turn, the Casket gains 1." Upgrade: Innate. Paid
+  after the hand draw and before the morning's Plans, at The Long Game's
+  site (`kokomi_plan.rising_tide`, `FloodTidePower.Signal`). Copies add. No
+  relic is asked, as for every "the Casket gains". Pool LAST; pool stays 78
+  (21 / 36 / 21). No painting yet (`art_coverage.KNOWN_MISSING`); the power
+  borrows the Princess of Watatsumi badge.
+  The paper called it Rising Tide; Furina already has one
+  (`proto_fs_rising_tide`), so it ships as Flood Tide.
+- **The General's Banner** (`proto_kk_the_generals_banner`) is cut: offered
+  3 times in the round, never taken. Its power (`kk_generals_banner`,
+  `GeneralsBannerPower`) stays in both engines with nothing granting it
+  (BACKLOG's cut-clauses line); its painting is `KNOWN_STALE`.
+- **Grand Design** (`proto_kk_grand_design`, Rare Power) bent: cost 1 -> 2,
+  upgrade Innate -> cost 1. "Open the Casket no longer empties the Casket."
+  Strength per Open stays the whole count (ratio 1/1, the main session's
+  call; graded on the next whole-run round: top Strength under 30 when
+  played). The old per-Energy carry-out gain left both engines
+  (`GrandDesignPower.Note` and its sim branch). Coral Tithe still empties.
+- **Brine Sting** (`proto_kk_brine_sting`): "Plan: Deal 3 Hydro damage.
+  Apply 1 Weak." [2 Weak]. Claude ships: under the base game's Neutralize
+  (0 cost, 3 damage, 1 Weak, now).
+- Kurage Canopy and Ceremonial Garment already printed 2 [3] (the payoff
+  pass and the kit review, 2026-10-05), so the raises the build was asked
+  for were already in place; no number moved.

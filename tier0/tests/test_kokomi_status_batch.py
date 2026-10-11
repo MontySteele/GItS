@@ -58,7 +58,8 @@ def _carry_out(st, card):
 def test_the_batch_cuts_seven_and_adds_seven(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == 78
-    assert ids[-7:] == C.KOKOMI_STATUS_BATCH_IDS
+    # The growth Powers (2026-10-10) appended Flood Tide after the seven.
+    assert ids[-8:-1] == C.KOKOMI_STATUS_BATCH_IDS
     rows = {c.id: c for c in loader.prototype_cards()}
     for cid in CUT:
         assert cid not in ids

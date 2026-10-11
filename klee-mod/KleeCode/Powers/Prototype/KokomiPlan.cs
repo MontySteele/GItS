@@ -2136,9 +2136,6 @@ public static class KokomiPlan
         // its reason: this is the one place a Plan is carried out, once per
         // carry-out, so a doubled carry-out adds twice.
         Relics.TamakushiCasket.NoteCarriedOut(kokomi);
-        // THE EXPANSION, GRAND DESIGN: "Whenever the Bake-Kurage carries out a
-        // Plan that cost 2 or more, the Casket gains 2 more." Per carry-out.
-        GrandDesignPower.Note(kokomi, entry);
 
         foreach (var power in kokomi.Powers.ToList())
         {

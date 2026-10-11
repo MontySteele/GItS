@@ -66,7 +66,7 @@ public class KokomiStatusBatchTests : IDisposable
             .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
             .ToList();
         Assert.Equal(78, slice.Count);
-        Assert.Equal(Batch, slice.Skip(71).ToArray());
+        Assert.Equal(Batch, slice.Skip(70).Take(7).ToArray());
         foreach (var gone in new[] { "Rally", "PearlDiver", "BattlePlan",
                                      "FeignedRetreat", "MoonSignal",
                                      "ChainOfCommand",

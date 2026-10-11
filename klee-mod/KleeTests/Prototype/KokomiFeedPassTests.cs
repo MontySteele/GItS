@@ -100,14 +100,20 @@ public class KokomiFeedPassTests : IDisposable
     }
 
     [Fact]
-    public void Brine_sting_plans_one_weak_on_the_front_enemy_two_upgraded()
+    public void Brine_sting_plans_three_damage_then_one_weak_two_upgraded()
     {
+        // The growth Powers (2026-10-10): 3 damage before the Weak.
         var card = new ProtoKkBrineSting();
         AssertFeedShape(card);
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.FrontEnemy),
-                     (clause.Kind, clause.Amount, clause.Aim));
-        Assert.Equal(2, Upgraded<ProtoKkBrineSting>().PlanClauses.Single().Amount);
+        Assert.Equal(new[]
+            {
+                (KokomiPlan.Kind.Damage, 3, KokomiPlan.Aim.FrontEnemy),
+                (KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.FrontEnemy),
+            },
+            card.PlanClauses.Select(c => (c.Kind, c.Amount, c.Aim)).ToArray());
+        Assert.Equal(new[] { 3, 2 },
+                     Upgraded<ProtoKkBrineSting>().PlanClauses
+                         .Select(c => c.Amount).ToArray());
     }
 
     [Fact]
@@ -145,11 +151,12 @@ public class KokomiFeedPassTests : IDisposable
         // SIXTY-NINE since expansion batch one (2026-09-29), whose 22 rows
         // follow the five; SEVENTY since the payoff pass (2026-10-01);
         // SEVENTY-EIGHT since pool completion and since the status batch
-        // (2026-10-01), which cut six rows ahead of the five.
+        // (2026-10-01), which cut six rows ahead of the five; the growth
+        // Powers (2026-10-10) cut The General's Banner ahead of them too.
         Assert.Equal(78, slice.Count);
         Assert.Equal(new[] { "ProtoKkBubbleWard", "ProtoKkNip", "ProtoKkJellyfishDrift",
                              "ProtoKkCurrentRead", "ProtoKkBrineSting" },
-                     slice.Skip(35).Take(5).Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
+                     slice.Skip(34).Take(5).Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
                           .ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("ProtoKkExposedFlank"));
     }
