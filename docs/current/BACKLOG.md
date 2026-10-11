@@ -115,6 +115,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Killing a reviving boss mid-turn (Test Subject) makes it vanish from the page with no notice; between the act-3 boss's forms the board shows no enemy and targeted cards are refused.
 - The bridge does not show the order enemies act in; print it when the game exposes it.
 - Live repro, no change before it: Wax Lizard Tail did not fire after Toy Box (base relics; `review/records/furina-fullrun-round-2-2026-10-10.md`). Check whether a melted relic stays in `player.Relics` unflagged, so the page still lists it (bridge `McpMod.StateBuilder.cs:1471-1488`).
+- Live repro, no change before it: Fairy in a Bottle may not have saved the Ironclad control at death (base potion; `review/records/kokomi-fullrun-round-2026-10-10.md`). No klee-mod hook touches death or HP loss, so check the base game's own path in a live run.
 
 ## Harness, bridge and tools
 

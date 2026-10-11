@@ -94,6 +94,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RELIC_ANSWER_ROW_NO_TARGET,
                                         RELIC_ANSWER_GAIN_ROW,
                                         RELIC_ANSWERS_HEADING,
+                                        PLAN_STRENGTH_NOTE,
                                         CARD_OFFER_AFTER_SKIP_NOTE,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
@@ -1278,7 +1279,12 @@ def _casket_aura_clause(you: dict[str, Any]) -> str:
 
 #: The Tamakushi Casket's own clause, "... adds 1 to the Casket." Matched on
 #: the relic's words, `_casket_aura_clause`'s discipline, not on its name.
-_CASKET_COUNT_TEXT = re.compile(r"\bto the Casket\b", re.IGNORECASE)
+#: Kokomi whole-run round 2026-10-10: the Watatsumi Casket (Touch of Orobas's
+#: upgrade) ends "Each Plan it carries out adds 1." with no "to the Casket",
+#: and the line vanished. The board row carries no relic id (`relic_faces`
+#: prints only what the game prints), so the clause both texts share matches.
+_CASKET_COUNT_TEXT = re.compile(
+    r"\bto the Casket\b|\bit carries out adds\b", re.IGNORECASE)
 
 
 def _casket_count_line(you: dict[str, Any]) -> list[str]:
@@ -3410,6 +3416,9 @@ def render(obs: dict[str, Any]) -> str:
                 # written with her terms folded in, and untouched by anything
                 # that lands on her afterwards.
                 out.append(PLAN_WRITTEN_NUMBER_NOTE)
+                # Kokomi whole-run round 2026-10-10: a seat gained Strength
+                # with Plans waiting and expected them to grow.
+                out.append(PLAN_STRENGTH_NOTE)
                 # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
                 # The form under *What you can say* is gone on such a turn
                 # (`blindplay_observe`), and a form that disappears with no

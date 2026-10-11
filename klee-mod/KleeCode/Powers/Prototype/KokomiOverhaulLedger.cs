@@ -83,6 +83,15 @@ public sealed class KokomiOverhaulLedger
         return ledger;
     }
 
+    /// <summary>This Kokomi's ledger for her CURRENT combat, or null when
+    /// none exists yet. A read for telemetry: it creates nothing and rolls
+    /// nothing (rule 1).</summary>
+    public static KokomiOverhaulLedger? Peek(Creature kokomi)
+    {
+        if (!ReferenceEquals(_combat, (object?)kokomi.CombatState)) return null;
+        return _byKokomi.TryGetValue(kokomi, out var ledger) ? ledger : null;
+    }
+
     /// <summary>Test seam: forget everything. The mod never calls it.</summary>
     public static void ResetAll()
     {
@@ -159,8 +168,21 @@ public sealed class KokomiOverhaulLedger
     /// </summary>
     public int PlansWrittenThisTurn { get; private set; }
 
+    /// <summary>The Kokomi whole-run round (2026-10-10): Plans written and
+    /// carried out THIS COMBAT, for telemetry only. Never rolled; a new combat
+    /// is a new ledger. Carry-outs count as <see cref="PlansCarriedOutThisTurn"/>
+    /// does (a Plan carried out twice counts twice).</summary>
+    public int PlansWrittenThisCombat { get; private set; }
+
+    /// <inheritdoc cref="PlansWrittenThisCombat"/>
+    public int PlansCarriedOutThisCombat { get; private set; }
+
     /// <summary>One Plan written onto the Bake-Kurage.</summary>
-    public void NotePlanWritten() => PlansWrittenThisTurn++;
+    public void NotePlanWritten()
+    {
+        PlansWrittenThisTurn++;
+        PlansWrittenThisCombat++;
+    }
 
     /// <summary>
     /// THE TAMAKUSHI CASKET'S COUNT (the Casket pass, 2026-09-28). Per combat:
@@ -261,6 +283,7 @@ public sealed class KokomiOverhaulLedger
         PlanCarriedOutThisTurn = true;
         // THE CASKET PASS (2026-09-28): the count as well as the fact.
         PlansCarriedOutThisTurn++;
+        PlansCarriedOutThisCombat++;
     }
 
     /// <summary>The morning opens with <paramref name="plans"/> Plans due.

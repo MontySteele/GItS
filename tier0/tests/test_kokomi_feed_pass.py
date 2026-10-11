@@ -52,9 +52,10 @@ def test_each_feed_row_is_a_zero_cost_plan_only_common(overhaul, cid):
     ("proto_kk_nip",
      [{"op": "damage", "amount": 5, "target": "front_enemy"}],
      [{"op": "damage", "amount": 7, "target": "front_enemy"}]),
+    # Kokomi whole-run round 2026-10-10: Plan 2 [3] -> 3 [4].
     ("proto_kk_jellyfish_drift",
-     [{"op": "damage", "amount": 2, "target": "all_enemies"}],
-     [{"op": "damage", "amount": 3, "target": "all_enemies"}]),
+     [{"op": "damage", "amount": 3, "target": "all_enemies"}],
+     [{"op": "damage", "amount": 4, "target": "all_enemies"}]),
     ("proto_kk_current_read",
      [{"op": "draw", "amount": 1}, {"op": "block", "amount": 0}],
      [{"op": "draw", "amount": 1}, {"op": "block", "amount": 2}]),
@@ -87,7 +88,7 @@ def test_nip_and_drift_land_on_the_morning(overhaul):
     kokomi_plan.schedule(st, _row("proto_kk_nip"))
     kokomi_plan.schedule(st, _row("proto_kk_jellyfish_drift"))
     kokomi_plan.resolve_all(st)
-    assert [e.hp for e in st.enemies] == [40 - 5 - 2, 40 - 2]
+    assert [e.hp for e in st.enemies] == [40 - 5 - 3, 40 - 3]
 
 
 def test_coral_bulwark_blocks_eight_and_writes_no_plan(overhaul):
