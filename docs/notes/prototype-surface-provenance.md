@@ -7201,3 +7201,11 @@ trim. Agree on the rest."
   (`upgrade: {block: +2, stage_repay: +1}`); the "Gain 1 Block for any HP it
   could not Repay" floor stays. Most Block: 9, upgraded 12 (was 11, 15).
 - Sim twins in `tier0/engine/furina_tide.py` moved with the sheet.
+
+## Tide Wall names the front enemy, 2026-10-11
+
+- Tide Wall's Plan now says "plus the damage the front enemy intends next
+  turn." Wording only, no op change: the code reads
+  `IntendedDamage(FrontEnemy)`, which counts the front enemy alone and skips
+  Minions, and a seat expected it to count every attacker. The row joins
+  `FRONT_ENEMY_ALLOWED` in `tools/lint_text_conventions.py`.
