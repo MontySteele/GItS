@@ -89,7 +89,11 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      any), over the fights that carry each key. Since Furina round 3
      (2026-10-11): the Drain buffer left at the close (`drain_buffer_left`:
      median, and the fights that ended with none left, i.e. the buffer
-     bound), and the Guest Star evictions and repeat acts (totals).
+     bound), and the Guest Star evictions and repeat acts (totals). Since
+     Furina round 5 (2026-10-11): the Spend card plays (`spend_card_plays`:
+     `scP`, and the median enemies alive as one was played) and the Spend
+     cards in hand at each turn start by name (`spend_card_names_turn_start`,
+     tallied per card under the table).
 
   6. With `--block-gap` (the Spend round 2, 2026-10-10; every character):
      turns that opened with a Block-gaining card in hand while the enemies
@@ -442,6 +446,20 @@ def _stage_extras(rows: list[dict]) -> dict:
              if "guest_evictions" in r]
     repeat = [_num(r, "guest_repeat_acts") for r in rows
               if "guest_repeat_acts" in r]
+    # Furina round 5 (2026-10-11): each Spend card play with the enemies
+    # alive as it was played, and the Spend cards in hand by name at each
+    # turn start.
+    plays = [row for r in rows
+             for row in (r.get("spend_card_plays") or [])
+             if isinstance(row, list) and len(row) > 2]
+    alive = [row[2] for row in plays if isinstance(row[2], (int, float))]
+    held: dict[str, int] = {}
+    for r in rows:
+        for row in r.get("spend_card_names_turn_start") or []:
+            if not isinstance(row, list) or len(row) < 2                     or not isinstance(row[1], list):
+                continue
+            for name in row[1]:
+                held[str(name)] = held.get(str(name), 0) + 1
     return {
         "fights_with_past_lost": len(lost),
         "past_lost": _median(lost),
@@ -454,6 +472,10 @@ def _stage_extras(rows: list[dict]) -> dict:
         "guest_evictions": (sum(v or 0 for v in evict) if evict else None),
         "guest_repeat_acts": (sum(v or 0 for v in repeat) if repeat
                               else None),
+        "spend_card_plays": (len(plays) if any("spend_card_plays" in r
+                                               for r in rows) else None),
+        "alive_per_spend_play": _median(alive),
+        "spend_cards_held": held,
     }
 
 
@@ -468,7 +490,7 @@ def render_fanfare(fx: list[dict]) -> list[str]:
              f"{'death':>7}{'sp/f':>6}{'spent':>7}{'before':>8}"
              f"{'n sp':>6}{'upto':>6}{'pastL':>7}{'pL tot':>7}"
              f"{'HS tot':>7}{'HS f':>5}{'bufL':>6}{'bnd':>5}{'evict':>6}"
-             f"{'rpt':>5}"]
+             f"{'rpt':>5}{'scP':>5}{'alive':>6}"]
     for s in fx:
         share = ("--" if s["up_to_share"] is None
                  else f"{100 * s['up_to_share']:.0f}%")
@@ -484,7 +506,18 @@ def render_fanfare(fx: list[dict]) -> list[str]:
                      f"{s['high_stakes_fights']:>5}"
                      f"{_f(s['buffer_left']):>6}{s['buffer_bound']:>5}"
                      f"{_f(s['guest_evictions']):>6}"
-                     f"{_f(s['guest_repeat_acts']):>5}")
+                     f"{_f(s['guest_repeat_acts']):>5}"
+                     f"{_f(s['spend_card_plays'], 0):>5}"
+                     f"{_f(s['alive_per_spend_play']):>6}")
+    for s in fx:
+        held = sorted(s["spend_cards_held"].items(),
+                      key=lambda kv: (-kv[1], kv[0]))
+        if not held:
+            continue
+        lines.append(f"  {s['group'][:15]}: Spend cards in hand at turn "
+                     "start, by name (turn starts)")
+        for name, n in held[:12]:
+            lines.append(f"    {name[:28]:<29}{n:>5}")
     return lines
 
 

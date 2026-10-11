@@ -222,6 +222,10 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # and hook reads with no wire route.
             "drain_buffer", "drain_buffer_left", "guest_evictions",
             "guest_repeat_acts", "card_play_block",
+            # 2026-10-11 (Furina round 5): the Spend cards in hand by name
+            # at each turn start, and each Spend card play with the enemies
+            # alive. Mod-side hand and hook reads with no wire route.
+            "spend_card_names_turn_start", "spend_card_plays",
             # 2026-10-10 (the Kokomi whole-run round): the Casket's count as
             # each turn opens, and the Plans written and carried out per
             # fight. Mod-side ledger reads with no wire route.

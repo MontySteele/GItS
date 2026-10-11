@@ -2177,6 +2177,15 @@ STAGE_DRAIN_BUFFER_LINE_RETURNS = ("- Drained {drained} HP{past}. Drain "
                                    "buffer {left} of {buffer} left: all your "
                                    "Drain returns after combat, past it too. "
                                    "Drain line {line} HP.")
+#: FURINA ROUND 5 (2026-10-11, review change 2): a line of 0 on a buffer
+#: build, in the buffer's words. The zero test used to run first, so a
+#: buffer build printed the old "Drain line 0 HP (your HP minus your Drain
+#: buffer...)" (`lane1:71`, `lane3:52`). At 0 her HP is inside what is left
+#: of the buffer, and a Drain never takes her to 0, so all of it returns.
+STAGE_DRAIN_BUFFER_LINE_ZERO = ("- Drained {drained} HP. Drain buffer {left} "
+                                "of {buffer} left: your HP is inside it, so "
+                                "all your Drain returns after combat. Drain "
+                                "line 0 HP.")
 #: Seat page 3: where the line comes from (2026-10-09; since the Drain buffer,
 #: 2026-10-11, "your HP minus your Drain buffer: 1/4 of your Max HP, less
 #: what you have drained"); seats connected it to its source only late.
@@ -2267,6 +2276,11 @@ STAGE_LOG_EFFECTS = {
 #: and Fanfare.
 STAGE_MEMBER_KINDS = {
     "charlotte": "repay", "sigewinne": "repay",
+    # FURINA ROUND 5 (2026-10-11, review change 1): Freminet's act is Block
+    # (`CueOf`: `StageCueKind.Block`), its 3 [6] plus the quarter-Spend's
+    # Block, and the beat carries the total. It fell to "damage" and logged
+    # as "N Cryo damage to a random enemy" (`lane4:72`).
+    "freminet": "block",
     # The v2 Stage's retired performers, for its recorded logs. (Escoffier
     # came back with the pool to 75 as a damage act, 4 Cryo to ALL.)
     "usher": "block",
@@ -2480,12 +2494,14 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         past = stage.get("drained_past") or 0
         returns = bool(stage.get("past_returns"))
         line_words = STAGE_DRAIN_LINE_RETURNS if returns else STAGE_DRAIN_LINE
-        if stage["line"] <= 0:
-            line_words = STAGE_DRAIN_LINE_ZERO
-        elif stage.get("buffer") is not None:
-            # Furina round 3: the buffer first, the line derived.
-            line_words = (STAGE_DRAIN_BUFFER_LINE_RETURNS if returns
+        if stage.get("buffer") is not None:
+            # Furina round 3: the buffer first, the line derived. Round 5:
+            # the buffer's words win at a line of 0 too.
+            line_words = (STAGE_DRAIN_BUFFER_LINE_ZERO if stage["line"] <= 0
+                          else STAGE_DRAIN_BUFFER_LINE_RETURNS if returns
                           else STAGE_DRAIN_BUFFER_LINE)
+        elif stage["line"] <= 0:
+            line_words = STAGE_DRAIN_LINE_ZERO
         past_words = STAGE_DRAIN_PAST_RETURNS if returns else STAGE_DRAIN_PAST
         out.append(line_words.format(
             drained=stage.get("drained", 0), line=stage["line"],
@@ -2577,8 +2593,9 @@ STAGE_NO_DAMAGE_HP_LOST = ": no damage (you lost no HP since your last turn)"
 STAGE_MEMBER_ELEMENTS = {
     "neuvillette": "Hydro", "clorinde": "Electro", "navia": "Geo",
     "lynette": "Anemo", "wriothesley": "Cryo", "lyney": "Pyro",
-    # The pool to 75 (2026-10-09).
-    "freminet": "Cryo", "escoffier": "Cryo",
+    # The pool to 75 (2026-10-09). Freminet's act is Block, not damage
+    # (Furina round 5), so he has no element here.
+    "escoffier": "Cryo",
 }
 
 
