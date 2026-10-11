@@ -171,7 +171,8 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Contains(CardKeyword.Retain, card.Keywords);
         Assert.DoesNotContain(CardKeyword.Exhaust, card.Keywords);
         Assert.Equal("Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
-                   + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}", Face(card));
+                   + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}"
+                   + "{InCombat:{CasketStrength}|}", Face(card));
         // In no pool: the offer is the Slice, and the token is not in it.
         Assert.DoesNotContain(Seq("KokomiOverhaulRoster", "Slice"),
                               c => c.Contains("OpenTheCasket"));

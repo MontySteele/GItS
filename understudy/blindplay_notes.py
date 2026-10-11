@@ -819,6 +819,11 @@ TWO_LINE_WAITING_ROW = (
     TWO_LINE_WAITING_NOTE + " **{line}**: {this} · {other_name}: {other} · "
     "`flip {n}` switches it.")
 
+#: Kokomi whole-run round 2 (2026-10-10): after a waiting Plan line whose
+#: number the front enemy's Vulnerable raised. The printed number folds it
+#: (`PlanDamageVar`), and a seat read the rise as the Plan changing.
+AFTER_VULNERABLE = " (after Vulnerable)"
+
 #: The mode chooser (`screen_type: "choose"`), where one `choose` resolves.
 #: It never says `confirm`, because there is no confirm button on this screen
 #: and saying the word costs a refusal (`EB-779`).

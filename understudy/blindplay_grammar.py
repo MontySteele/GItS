@@ -14,10 +14,11 @@ from typing import Any, Callable
 from understudy import qa_packet
 from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
                                         _event_options, _map_nodes,
-                                        _map_options, _proceed_option,
+                                        _map_options, _preview_cards,
+                                        _proceed_option,
                                         _potion_slots, _relic_options,
                                         _rest_options, _reward_items,
-                                        _screen_cards,
+                                        _screen_cards, _selected_bundle,
                                         map_floor, reward_alternatives)
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
@@ -1006,7 +1007,7 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
             return _refuse(why)
         return Resolution(True, "choose",
                           {"action": "select_bundle", "index": idx},
-                          {"bundle": _named_option(entries[idx])["name"]})
+                          {"bundle": _bundle_titles(entries[idx])})
     if st == "event":
         # `EB-448`: the page's own namer, so the line after the command names
         # the card or relic the option hands over rather than only the
@@ -1448,7 +1449,25 @@ def _confirm(state: dict[str, Any]) -> Resolution:
              "bundle_select": "confirm_bundle_selection"}
     if st not in verbs:
         return _refuse("there is nothing waiting to be confirmed")
-    return Resolution(True, "confirm", {"action": verbs[st]}, {})
+    printed: dict[str, Any] = {}
+    if st == "bundle_select":
+        # Kokomi whole-run round 2 (2026-10-10): the confirm line names every
+        # card in the bundle taken, so the seat need not open its deck to
+        # learn what a Neow bundle added. The armed bundle is the one the
+        # preview shows (`EB-294`'s match); none found prints nothing extra.
+        entries = _screen_cards(state)
+        armed = _selected_bundle(entries, _preview_cards(state, st))
+        if 0 <= armed < len(entries):
+            printed = {"bundle": _bundle_titles(entries[armed])}
+    return Resolution(True, "confirm", {"action": verbs[st]}, printed)
+
+
+def _bundle_titles(bundle: Any) -> str:
+    """Every printed card title in one bundle, in wire order: the only name
+    a bundle has (`EB-173`). Falls back to the option namer for a bundle
+    whose cards carry no titles."""
+    titles = [t for t in (_card_title(c) for c in _bundle_cards(bundle)) if t]
+    return ", ".join(titles) or _named_option(bundle)["name"]
 
 
 def _sacrifice(state: dict[str, Any]) -> Resolution:

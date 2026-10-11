@@ -7126,3 +7126,22 @@ both." Sim read: `tools/kokomi_growth_power_sim.py` (#1059).
 - Kurage Canopy and Ceremonial Garment already printed 2 [3] (the payoff
   pass and the kit review, 2026-10-05), so the raises the build was asked
   for were already in place; no number moved.
+
+## Kokomi whole-run round 2, 2026-10-10
+
+Record `review/records/kokomi-fullrun-round-2-2026-10-10.md`, "What changes
+(Claude ships)".
+
+- **Change of Plans** (`proto_kk_change_of_plans`): "The Bake-Kurage carries
+  out your first Plan now. Draw 1 card." Cost 0, Exhaust; the upgrade still
+  removes the Exhaust. 0 of 8 taken in the round. With the draw it is no
+  longer carry-out-only, so the `EB-455` no-Plan gate no longer applies to it
+  (played on an empty jellyfish it draws 1).
+- **Grand Design** (`proto_kk_grand_design`): "Open the Casket no longer
+  empties the Casket. At the start of your turn, put it into your hand."
+  Paid at Flood Tide's site (`kokomi_plan.grand_design_fetch`,
+  `GrandDesignPower.Signal`): nothing moves if an Open is already in hand;
+  otherwise the first one in the draw pile, then the discard pile, comes to
+  hand (`FetchOpenCasket`); an exhausted Open stays gone. Cost 2 [1].
+- **Open the Casket** (the token) prints "(Gains N Strength)" in combat, the
+  way Driftglass prints its damage.

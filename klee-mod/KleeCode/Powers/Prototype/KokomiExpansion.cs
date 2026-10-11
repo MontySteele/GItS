@@ -197,10 +197,13 @@ public static class KokomiExpansion
 }
 
 /// <summary>Grand Design, bent (the growth Powers, 2026-10-10, ruled):
-/// "Open the Casket no longer empties the Casket." A marker: the stack means
-/// nothing, <see cref="KokomiOverhaulKit.OpenCasket"/> reads only whether it
-/// is worn, and the Strength stays the whole count. Sim twin:
-/// <c>kokomi_plan.open_casket</c>.
+/// "Open the Casket no longer empties the Casket. At the start of your turn,
+/// put it into your hand." The stack means nothing:
+/// <see cref="KokomiOverhaulKit.OpenCasket"/> reads only whether it is worn,
+/// and the Strength stays the whole count. The second sentence (Kokomi
+/// whole-run round 2, 2026-10-10) is <see cref="Signal"/>, paid from
+/// <see cref="ProtoBakeKuragePower"/>'s morning beside Flood Tide. Sim twins:
+/// <c>kokomi_plan.open_casket</c>, <c>kokomi_plan.grand_design_fetch</c>.
 /// </summary>
 public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
 {
@@ -209,7 +212,8 @@ public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
         ("title", "Grand Design"),
         ("description",
             "[gold]Open the Casket[/gold] no longer empties the "
-          + "[gold]Casket[/gold]."),
+          + "[gold]Casket[/gold]. At the start of your turn, put it into "
+          + "your hand."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -220,6 +224,26 @@ public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
     public static bool Keeps(Creature? kokomi) =>
         kokomi != null
         && kokomi.Powers.OfType<GrandDesignPower>().Any(p => p.Amount > 0);
+
+    /// <summary>"At the start of your turn, put it into your hand." One Open
+    /// in hand is enough: if one is already there nothing moves (no second
+    /// copy is made, and copies of the Power do not fetch twice). Otherwise
+    /// <see cref="KokomiOverhaulKit.FetchOpenCasket"/> moves the first one
+    /// from the draw pile, then the discard pile; an exhausted Open stays
+    /// gone.</summary>
+    public static async Task Signal(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi) || !Keeps(kokomi)) return;
+        var player = kokomi!.Player;
+        if (player == null) return;
+        if (HoldsOpen(CardPile.Get(PileType.Hand, player)?.Cards)) return;
+        await KokomiOverhaulKit.FetchOpenCasket(choiceContext, kokomi);
+    }
+
+    /// <summary>Is an Open the Casket already in this pile (the hand)?</summary>
+    public static bool HoldsOpen(IEnumerable<CardModel>? hand) =>
+        KokomiOverhaulKit.FindOpenCasket(hand) != null;
 }
 
 /// <summary>Flood Tide (the growth Powers, 2026-10-10, ruled): "At the start
