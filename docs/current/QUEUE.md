@@ -29,15 +29,6 @@ line leaves this file. Closed picks are in git
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.
 
-- **Kokomi whole-run round 2, pick 1** (act 1, the starter; the record is
-  PR #1063): after his run [USER] ruled a Casket change instead, built
-  2026-10-10: Open the Casket starts at 0 and costs 1 more each play. "I
-  think that the casket should start at 0 and then have a ramping cost
-  (goes up by 1 each time) That means the casket is free the first play,
-  costs 1 the second, and then at 2+ becomes difficult. That way it has
-  obvious use in a short hallway fight".
-  Pick 2 stays open.
-
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's

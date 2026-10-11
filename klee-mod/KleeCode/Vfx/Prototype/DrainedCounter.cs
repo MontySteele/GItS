@@ -5,7 +5,6 @@ using Godot;
 using HarmonyLib;
 using KleeMod.Cards;
 using KleeMod.Powers;
-using MegaCrit.Sts2.addons.mega_text;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -35,8 +34,10 @@ namespace KleeMod.Vfx;
 /// moves one slot further for a Furina holding Sparks). It sat one slot to
 /// the RIGHT until the 2026-10-11 playtest ("The Drain gauge also overlaps
 /// with the Block indicator; we need to move it."): see
-/// <see cref="SparkCounter.PlaceInColumn"/>. The face is the drained HP, red (<see cref="FaceColor"/>);
-/// the hover is the line
+/// <see cref="SparkCounter.PlaceInColumn"/>. The face is the drained HP in
+/// the base game's style for a number over art, cream with a dark outline in
+/// the glyph's bottom-right corner (<see cref="FurinaCounterFace"/>), inside
+/// a thin red ring (<see cref="RingColour"/>); the hover is the line
 /// and the Drain rule. No HP-bar tick: the counter is the reading.
 ///
 /// THE FEED is <see cref="FurinaStage.RefreshBadges"/>, the funnel every
@@ -152,6 +153,7 @@ public static class DrainedCounter
         var side = SparkCounter.SideOf(star);
         var root = SparkCounter.Build(side);
         root.Name = RootName;
+        FurinaCounterFace.Dress(root, side, RingColour);
         // The one difference from the Spark badge: this face has a hover.
         root.MouseFilter = Control.MouseFilterEnum.Stop;
         var creature = me.Creature;
@@ -204,11 +206,17 @@ public static class DrainedCounter
         }
     }
 
-    /// <summary>THE FACE'S COLOUR (the 2026-10-11 playtest: "the white one
-    /// of Drain is hard to make out"): always the base game's red,
-    /// <c>StsColors.red</c> (#FF5555), the HP-loss colour, at every count.
-    /// </summary>
-    public static Color FaceColor => StsColors.red;
+    /// <summary>THE RING'S COLOUR: the base game's red,
+    /// <c>StsColors.red</c> (#FF5555), the HP-loss colour. The 2026-10-11
+    /// playtest found the white number "hard to make out" and the red one
+    /// on the busy glyph "not really legible, either"; the ruled fix ("Yep,
+    /// sounds good!") put the number in the base style and the red on a
+    /// ring.</summary>
+    public static Color RingColour => StsColors.red;
+
+    /// <summary>The number's fill: the base game's cream at every count
+    /// (<see cref="FurinaCounterFace.Fill"/>).</summary>
+    public static Color FaceColor => FurinaCounterFace.Fill;
 
     private static void Paint(Control root, Creature? creature)
     {
@@ -218,9 +226,8 @@ public static class DrainedCounter
         if (root.GetNodeOrNull<Label>("Count") is { } count)
         {
             count.Text = drained.ToString(CultureInfo.InvariantCulture);
-            count.AddThemeColorOverride(
-                ThemeConstants.Label.FontColor, FaceColor);
         }
+        FurinaCounterFace.SetFill(root, FaceColor);
 
         if (root.GetNodeOrNull<TextureRect>("Icon") is { } icon)
         {

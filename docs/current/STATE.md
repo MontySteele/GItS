@@ -93,7 +93,13 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   friend may stand in); the damage gap is a paper after that run. Growth
   Powers built 2026-10-10 (`review/active/kokomi-growth-powers-2026-10-10.md`):
   Flood Tide replaces The General's Banner, Grand Design keeps the Casket's
-  count. Plan pricing built 2026-10-11
+  count. Whole-run round 2
+  (`review/records/kokomi-fullrun-round-2-2026-10-10.md`): 0 of 5, level with
+  the same-night base; Flood Tide works and Plan damage no longer collapses
+  late (act 3 53.3 a fight, was 5.7); act 1 still bleeds. Round-2 fixes:
+  Grand Design puts Open the Casket into her hand each turn, Change of Plans
+  draws 1, Open the Casket shows its count. Its two picks were settled by
+  [USER]'s run and rulings after it. Plan pricing built 2026-10-11
   (`review/active/kokomi-plan-pricing-2026-10-11.md`, ratio 1.3): nine
   next-turn Plans pay 1.3 times the base on-turn rate, Kurage's Oath's Plan
   is 9 [12] to ALL and Slack Water deals 6 [9]; checked by the next
