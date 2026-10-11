@@ -97,16 +97,15 @@ The Companion rows sit on Klee's shipped sheet, so these are your picks.
    - **(a) Default:** wait for the round.
    - (b) Rework them now.
 
-## Ruled 2026-10-11 (picks 2 and 3; pick 1 stays open)
+## Ruled 2026-10-11 (all three picks)
 
 [USER]: "Agreed on 2 and 3 on the Companion picks; I think that 1) needs more consideration, since I do actually think Klee should be able to draft Nicole and Durin cards; Furina should get Neuvillette cards, etc."
 
 - **Pick 2 (a):** all six numbers. Built into `klee-next` with the 19 Fontaine descriptions.
 - **Pick 3 (a):** the Companion-count payoffs and the reaction Rares wait for the round.
-- **Pick 1 is open.**
-  - Under (a), Nicole (Rares), Durin (an Uncommon and a Rare) and Neuvillette's reward-pool Rare all stay offerable, since the rule touched only Commons.
-  - [USER]'s point stands on its own, though: a character's own element can be the right draft, so the rule needs a second look.
-  - It goes into the next paper together with the nation question below.
+- **Pick 1 (c), ruled the same evening:** no change. [USER]: "Honestly, at that pool size, my inclination is to just leave them alone so we don't have a bunch of bespoke rules. It's fine if Commons of the same element can just be bad drafts; the 4th slot for Companion cards is basically a bonus reward and it's ok if it spits out garbage sometimes."
+  - The census before the ruling found three same-element Commons that only carry their element: Chevreuse, Interdiction Fire (Pyro), and Neuvillette, O Tears and Sourcewater Droplets (Hydro). They stay offerable.
+  - [USER]: "Separately we can look and see if some companion cards are just bad and need buffs to be brought up to par for their rarity." That audit goes in the nations paper below.
 
 **Next paper: the nations.**
 
