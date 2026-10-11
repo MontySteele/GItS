@@ -954,12 +954,14 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, RepayKey, RepayBody);
 
-    /// <summary>Rule 5 (the pool to 75, sec.3): where a guest goes.</summary>
+    /// <summary>Rule 5 (the pool to 75, sec.3): where a guest goes. Since
+    /// 2026-10-11 the guest a full stage pushes out acts once as it leaves
+    /// ("(b) a guest who's pushed out takes a bow").</summary>
     public static IEnumerable<IHoverTip> ForSummon(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SummonKey,
             "A guest joins at the back. On a full stage, the oldest guest "
-          + "leaves first, and its card goes to your [gold]Discard "
+          + "acts once and leaves; its card goes to your [gold]Discard "
           + "Pile[/gold].");
 
     /// <summary>The Guest Star keyword (the pool to 75, sec.3).</summary>

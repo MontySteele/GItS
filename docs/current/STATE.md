@@ -114,7 +114,9 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   (`review/active/furina-pool-growth-2026-10-09.md` sec.3, ruled 2026-10-09):
   a Guest Star exhausts and has no effect on summon; when its guest leaves (a
   fourth summon, or Final Bow) its card goes to the discard pile; a second
-  copy moves its guest to the newest seat and it acts once (2026-10-11); at the end of her turn
+  copy moves its guest to the newest seat and it acts once (2026-10-11); a
+  guest a fourth summon pushes off a full stage acts once, then leaves
+  (2026-10-11: "(b) a guest who's pushed out takes a bow"); at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
   pool is the starter and 78 cards (20 / 38 / 20; Guest Star: Navia moved

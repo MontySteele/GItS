@@ -101,7 +101,79 @@ public class FurinaGuestRuleTests
         Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde,
                              StagePerformer.Charlotte }, kit.Company);
         Assert.Same(first, kit.Board.Returned.Single());
-        Assert.Empty(kit.Board.Hits);
+        // ...after it acts once on the way out (2026-10-11).
+        Assert.Equal(new[] { "damage Wriothesley Random 4 Cryo" },
+                     kit.Board.Hits.ToArray());
+    }
+
+    // ---- a guest pushed off a full stage acts once as it leaves ---------------
+    //
+    // Ruled 2026-10-11: "I lean towards b) as well. That way there's some
+    // reward for taking multiples, but if you want consistency in the end of
+    // turn act, there's also a deck issue with spamming them out, which seems
+    // fine." The option: "(b) a guest who's pushed out takes a bow: they act
+    // once as they leave."
+
+    [Fact]
+    public void A_fourth_guest_makes_the_oldest_act_once_then_leave_then_sits()
+    {
+        var kit = StageKit.Of(StagePerformer.Clorinde, StagePerformer.Lynette,
+                              StagePerformer.Charlotte);
+        var oldest = kit.Stage.Seats[0];
+        oldest.Cards.Add(new ProtoFsGuestStarClorinde());
+        Assert.Equal(StageSummonResult.Evict,
+            Run(kit.Director.SummonGuest(StagePerformer.Wriothesley)));
+        Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Charlotte,
+                             StagePerformer.Wriothesley }, kit.Company);
+        Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Clorinde));
+        Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent));
+        // It acts, then leaves (its card back), then the new guest is seated.
+        var acted = kit.Board.Log.IndexOf("damage Clorinde Random 6 Electro");
+        var left = kit.Board.Log.IndexOf("return Clorinde 1");
+        Assert.True(acted >= 0 && left > acted);
+        var beats = kit.Stage.Beats.ToList();
+        var actBeat = beats.FindIndex(b => b.Event == FurinaStageLedger.ActEvent);
+        var leaveBeat = beats.FindIndex(b => b.Event == FurinaStageLedger.LeaveEvent);
+        Assert.True(actBeat >= 0 && leaveBeat > actBeat);
+        Assert.Equal("evicted", beats[leaveBeat].Reason);
+    }
+
+    [Fact]
+    public void An_evicted_lyney_pays_his_drain()
+    {
+        var kit = StageKit.Of(StagePerformer.Lyney, StagePerformer.Lynette,
+                              StagePerformer.Charlotte);
+        var before = kit.Stage.Drained;
+        Run(kit.Director.SummonGuest(StagePerformer.Clorinde));
+        Assert.Equal(before + FurinaStageLaw.LyneyActDrain, kit.Stage.Drained);
+        Assert.Equal(76, kit.Board.Hp);
+        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Lyney));
+        Assert.DoesNotContain(StagePerformer.Lyney, kit.Company);
+    }
+
+    [Fact]
+    public void An_evicted_neuvillette_reads_the_window_as_usual()
+    {
+        var kit = StageKit.Of(StagePerformer.Neuvillette, StagePerformer.Lynette,
+                              StagePerformer.Charlotte);
+        Run(kit.Director.Drain(4));
+        Run(kit.Director.SummonGuest(StagePerformer.Clorinde));
+        Assert.Contains("damage Neuvillette All 4 Hydro", kit.Board.Log);
+        Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Neuvillette));
+        Assert.DoesNotContain(StagePerformer.Neuvillette, kit.Company);
+    }
+
+    [Fact]
+    public void Final_bows_leave_adds_no_extra_act()
+    {
+        var kit = StageKit.Of(StagePerformer.Clorinde, StagePerformer.Lynette,
+                              StagePerformer.Charlotte);
+        Assert.True(Run(kit.Director.FinalBow(0, 2)));
+        Assert.Equal(2, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Clorinde));
+        Assert.Equal(2, kit.Board.Hits.Count());
+        Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Charlotte },
+                     kit.Company);
     }
 
     [Fact]
