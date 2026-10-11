@@ -26,8 +26,8 @@ line leaves this file. Closed picks are in git
 ## Open packets in `review/active/`
 
 - **Furina diversity pass** (`review/active/furina-diversity-pass-2026-10-11.md`,
-  picks 1-4): three playstyles (Spend, guests that grow with Fanfare, hoard),
-  Bravura as Hydro multi-hit, two dead Repay cards out. Defaults: all (a).
+  picks 1-5): two guest styles (stars support her; stars hit, fed by Full House
+  spending Fanfare), hoard and line as small parts, four redundant cuts. Defaults: all (a).
 
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
