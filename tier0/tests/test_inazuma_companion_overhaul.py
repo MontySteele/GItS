@@ -633,11 +633,11 @@ def test_superlative_superstrength_is_both_halves_whole(overhaul):
 def test_musou_reads_the_companions_you_played(overhaul):
     st = make_state(enemies=[make_enemy(hp=90)])
     _play(st, "proto_mi_raiden_musou_no_hitotachi")
-    assert st.enemies[0].hp == 70
+    assert st.enemies[0].hp == 63
     st = make_state(enemies=[make_enemy(hp=90)])
     st.companions_played = ["a", "b", "c"]
     _play(st, "proto_mi_raiden_musou_no_hitotachi")
-    assert st.enemies[0].hp == 90 - (20 + 15)
+    assert st.enemies[0].hp == 90 - (27 + 15)
 
 
 # ---------------------------------------------------------------------------

@@ -997,7 +997,7 @@ public sealed class FavonianFavorPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Dahlia, Sacramental Shower: "Place a Shower: the next time an enemy attacks
-/// you, deal 9 Hydro damage to it first."
+/// you, deal 12 Hydro damage to it first."
 ///
 /// Amount is the number of SHOWERS placed, and one hit spends one -- "the next
 /// time an enemy attacks you" is one attack, so two copies answer two attacks
@@ -1257,7 +1257,7 @@ public sealed class LightfallSwordPower : PowerModel, ILocalizationProvider
 /// would have had its reactions decided by listener iteration order. ONE tenant
 /// drives all three, in the sim's sequence:
 ///
-///     SacramentalShowerPower   (9 Hydro at the attacker, before its hit)
+///     SacramentalShowerPower   (12 Hydro at the attacker, before its hit)
 ///     BaronBunnyPower          (the volley)
 ///     IcyPawsPower             (Cryo at the attacker, off the Block absorbed)
 ///

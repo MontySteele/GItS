@@ -6394,7 +6394,7 @@ def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,
     card's this-turn Strength loss does that job, before the attack.
     """
     p = state.player
-    # Dahlia, Sacramental Shower: "the next time an enemy attacks you, deal 9
+    # Dahlia, Sacramental Shower: "the next time an enemy attacks you, deal 12
     # Hydro damage to it FIRST" -- to IT, the attacker, and before its hit.
     if p.powers.get("mc_sacramental_shower", 0):
         _mc_spend_one(p, "mc_sacramental_shower")
