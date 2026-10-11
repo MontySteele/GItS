@@ -90,7 +90,22 @@ public class KokomiCorePassTests
                         Upgraded<ProtoKkTreatise>().Keywords);
         Assert.Equal(
             "The first time each turn you play a card with a "
-          + "[gold]Plan[/gold] line normally, draw 1 card.", Face(card));
+          + "[gold]Plan[/gold] line without writing it as a Plan, draw 1 "
+          + "card.", Face(card));
+    }
+
+    [Fact]
+    public void Treatise_power_says_without_writing_it_as_a_plan()
+    {
+        // Kokomi round 5 (2026-10-11): two seats read "normally" as jargon.
+        // The power's words follow the card's; the behaviour is unchanged.
+        var text = new TreatisePower().Localization!
+            .Single(row => row.Item1 == "description").Item2;
+        Assert.Equal(
+            "The first time each turn you play a card with a "
+          + "[gold]Plan[/gold] line without writing it as a Plan, draw "
+          + "[blue]{Amount}[/blue] card{Amount:plural:|s}.", text);
+        Assert.DoesNotContain("normally", text);
     }
 
     // ---- Chain of Command: the Plan buys a free Companion -----------------
