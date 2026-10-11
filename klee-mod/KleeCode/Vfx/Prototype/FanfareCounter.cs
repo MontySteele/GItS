@@ -5,7 +5,6 @@ using Godot;
 using HarmonyLib;
 using KleeMod.Cards;
 using KleeMod.Powers;
-using MegaCrit.Sts2.addons.mega_text;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -42,11 +41,15 @@ namespace KleeMod.Vfx;
 /// the first slot, the Drained counter above it and the Spark counter above
 /// that (<see cref="SparkCounter.SlotFor"/>).
 ///
-/// WHAT IT SHOWS. The face is the number alone, in the game's gold
-/// (<see cref="FaceColor"/>). It began as <c>NStarCounter.SetStarCountText</c>'s
-/// pair, red at zero and cream otherwise; the 2026-10-11 playtest: "the red
-/// one on Fanfare is workable at a glance" but "I see the fnafare turned to
-/// white when it's non-zero... that doesn't work either." Hovering it shows
+/// WHAT IT SHOWS. The face is the number alone, in the base game's style
+/// for a number over art: cream with a dark outline in the glyph's
+/// bottom-right corner, the power icon's amount (<see cref="FurinaCounterFace"/>),
+/// grey at 0 (<see cref="FaceColor"/>). A thin gold ring round the glyph
+/// (<see cref="RingColour"/>) tells it from the red-ringed Drained counter.
+/// History: it began as <c>NStarCounter.SetStarCountText</c>'s pair, red at
+/// zero and cream otherwise; the 2026-10-11 playtest made it gold, then
+/// found the gold-on-art number "not really legible, either", and the ruled
+/// fix ("Yep, sounds good!") moved the colour to the ring. Hovering it shows
 /// this turn's gained and spent counts, the ones Ousia Surge, Pneuma Refrain,
 /// Bring the House Down and Navia read, under the Fanfare keyword's own title
 /// and definition (<see cref="ArmKeywordTips.FanfareBody"/>).
@@ -141,6 +144,7 @@ public static class FanfareCounter
         var side = SparkCounter.SideOf(star);
         var root = SparkCounter.Build(side);
         root.Name = RootName;
+        FurinaCounterFace.Dress(root, side, RingColour);
         // The one difference from the Spark badge: this face has a hover.
         root.MouseFilter = Control.MouseFilterEnum.Stop;
         var creature = me.Creature;
@@ -192,22 +196,17 @@ public static class FanfareCounter
         }
     }
 
-    /// <summary>The alpha of an empty gauge's face: the same gold, dimmed.
-    /// </summary>
-    public const float EmptyAlpha = 0.45f;
+    /// <summary>THE RING'S COLOUR: the base game's gold,
+    /// <c>StsColors.gold</c> (#EFC851, the colour the <c>[gold]</c> tag
+    /// paints), the word every card golds.</summary>
+    public static Color RingColour => StsColors.gold;
 
-    /// <summary>THE FACE'S COLOUR (the 2026-10-11 playtest): always the
-    /// base game's gold, <c>StsColors.gold</c> (#EFC851, the colour the
-    /// <c>[gold]</c> tag paints, <c>RichTextGold</c>), so the number reads
-    /// as Fanfare, the word every card golds. At 0 it is that gold at
-    /// <see cref="EmptyAlpha"/>, dimmed rather than red. Pure.</summary>
-    public static Color FaceColor(int fanfare)
-    {
-        var gold = StsColors.gold;
-        return fanfare == 0
-            ? new Color(gold.R, gold.G, gold.B, EmptyAlpha)
-            : gold;
-    }
+    /// <summary>THE NUMBER'S FILL: the base game's cream
+    /// (<see cref="FurinaCounterFace.Fill"/>), and at 0 the same style with
+    /// a grey fill (<see cref="FurinaCounterFace.EmptyFill"/>), not a faded
+    /// colour. Pure.</summary>
+    public static Color FaceColor(int fanfare) =>
+        fanfare == 0 ? FurinaCounterFace.EmptyFill : FurinaCounterFace.Fill;
 
     private static void Paint(Control root, Creature? creature)
     {
@@ -217,10 +216,8 @@ public static class FanfareCounter
         if (root.GetNodeOrNull<Label>("Count") is { } count)
         {
             count.Text = fanfare.ToString(CultureInfo.InvariantCulture);
-            count.AddThemeColorOverride(
-                ThemeConstants.Label.FontColor,
-                FaceColor(fanfare));
         }
+        FurinaCounterFace.SetFill(root, FaceColor(fanfare));
 
         if (root.GetNodeOrNull<TextureRect>("Icon") is { } icon)
         {
