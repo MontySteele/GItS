@@ -25,6 +25,10 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Varka Pyro pass** (`review/active/varka-pyro-pass-2026-10-11.md`, pick 1):
+  Pyro powers up his Attacks (Strength, next-Attack damage); the Exhaust lane
+  retires. Default: (a).
+
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
