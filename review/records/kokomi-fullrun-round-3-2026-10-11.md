@@ -80,6 +80,36 @@ What remains is [USER]'s full run, after the text fixes deploy. Things to watch 
 - the free first Casket against the hold;
 - whether Change of Plans or Tidecleanse ever looks worth a pick.
 
+## Round 4, pooled (2026-10-11, 05:57)
+
+The review asked for one more round before any lever on the act-2 boss line. Five seats played the same seeds on build 0.2.4870+next, with the text fixes above in. The packet is `kokomi-r4-packet.md` in the scratchpad.
+
+| Seed | Round 4 |
+|---|---|
+| CYHZM9S0VPW6 | floor 48, the Queen |
+| DJCAV76ZKAUN | floor 22, Louse Progenitor (entered at 6 HP) |
+| 30KMHAVG9SMQ | floor 39, Slimed Berserker (at 2 HP, after a Regret curse) |
+| YEWA0B7AVE45 | floor 43, Soul Nexus elite |
+| R41TX5Q0ZQYN | floor 33, Kaiser Crab |
+
+The three lines, rounds 3 and 4 pooled:
+
+| Line | Pooled | Result |
+|---|---|---|
+| Act-1 normal fights, 9.0 HP lost or less | 8.8 (n=69; round 4 alone 9.2) | Pass |
+| Act-2 boss, median damage a turn, 40 or more | 40.5 (n=8; base 39.4) | Pass |
+| Act-1 normal fights not more than 10% shorter than base | 3.25 turns against 3.06 | Pass |
+
+Other findings:
+- **Act-2 normal fights** cost 11.6 HP in round 4, against base's 10.9 to 12.1. In round 3 they cost 15.6. Block a turn rose from 5.9 to 8.0. One lane (24 HP over 3 fights) carries most of the pooled 13.9.
+- **The debuff and reaction cards** have now had 39 reward offers and 0 takes over two rounds.
+- **Flagged items:**
+  - A Plan "hitting a Minion" was an ALL Plan, which is correct.
+  - Tide Wall+ reads only the front enemy's intent. Its text now says "front enemy".
+  - The rest are consistent with the rules, or the data can't tell.
+
+What this changes for the picks below: pick 1's case (Block Plans at 1.5) is weaker, because act 2 came back to base without it. The default stays hold.
+
 ## For [USER]
 
 These are decided after your run, not before.
