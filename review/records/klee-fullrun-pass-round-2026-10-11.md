@@ -70,6 +70,41 @@ These are display and text fixes:
 - Vulnerable does scale Bomb damage.
 - Weak alone prints Ka-pow! at 3. The 2 a seat saw came from Shrink.
 
+## Round 2, pooled (2026-10-11, 07:53)
+
+Round 2 used the same seeds on build 0.2.4878+next, with the display fixes in and no Klee number changed. The packet is `klee-pass2-packet.md` in the scratchpad.
+
+**Floors.** Round 2 reached 48, 48, 48, 48 and 33. Four seats died to the act-3 boss and one to the act-2 boss. The mean floor was 45.0, against 40.2 in round 1, with 0 wins in 10.
+
+**The lines, pooled over both rounds:**
+
+| Line | Pooled | Result |
+|---|---|---|
+| Changed cards taken in at least 20% of offers | 35 of 184 = 19.0% (95% interval 14% to 25%); Commons 23.7%, Uncommons and Rares 14.3% | Miss |
+| No act-1 boss deaths | 0 of 10 | Pass |
+| Act-1 normal fights no more than 10% shorter than base | 0.9% shorter | Pass |
+| Companions taken in at least 15% of offers | 11 of 229 = 4.8%; 0.9 per deck at the act-1 boss | Fail |
+
+**Against base:**
+- Act-2 elites cost 14.4 HP against base's 30.9.
+- At the act-2 boss she deals 52.0 damage a turn against 38.6.
+- Act-1 elites cost a little more than base, 21.1 HP against 16.4.
+
+**The Big One.** It was taken 4 of the 6 times offered. Played 14 times, it ended the fight on that turn 8 times, against enemies of 145 to 379 HP. Two seats called it a one-shot. It is a Rare doing a Rare's job, so there is no pick here; watch it in your sweep.
+
+**Rare Companions.** One of the 23 Rare Companion slots on boss screens was taken (Mona). This confirms pick 1.
+
+**Never taken, now past noise:**
+- Exquisite Compound, 0 of 15;
+- Taste Test, 0 of 13;
+- Lizard-Tail Gunpowder, 0 of 10.
+
+**Never-again picks, two seats each:** Mine Toss, Lisa's Treats and Sparkling Burst. You also found Lisa's Treats underwhelming.
+
+What this changes for the picks below:
+- Pick 4 adds Lizard-Tail Gunpowder.
+- Exquisite Compound and Taste Test are no longer just thin samples, so pick 4's (b) is the stronger case. The default stays hold for your sweep.
+
 ## For [USER]
 
 Klee is ready for your playtest sweep. Things to watch:
@@ -88,6 +123,6 @@ The picks below are all decided after the sweep, except the Companion one.
 3. **Stoke the Fuse targets an enemy.** It would grow the largest Bomb on the chosen enemy.
    - **(a) Default:** the text fix only for now.
    - (b) Targeted.
-4. **Exquisite Compound and Taste Test.**
+4. **Exquisite Compound, Taste Test and Lizard-Tail Gunpowder** (0 of 15, 0 of 13 and 0 of 10 offers, pooled).
    - **(a) Default:** hold for the sweep.
    - (b) Taste Test drops its 2 Confiscated, and "they don't go off" becomes its one drawback. Exquisite Compound goes to a design question: does an Uncommon "gather" card have a job that Chain Fuse doesn't already do?
