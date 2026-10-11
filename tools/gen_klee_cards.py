@@ -2436,7 +2436,8 @@ MULTIPLY_LARGEST_BOMB_FIELDS = {"op", "factor"}
 # knows; the exhaust-and-grow prints one number, the growth per status.
 TRANSFORM_STATUSES_INTO_FIELDS = {"op", "card"}
 TRANSFORM_INTO_CLASSES = {"proto_ko_pop": "ProtoKoPop"}
-EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount"}
+# `draw_each` (2026-10-11 Companion pass): cards drawn per status exhausted.
+EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount", "draw_each"}
 # DEFENCE IN THE STATUS PILE (2026-10-01, reworked 2026-10-02). The Strength
 # loss prints one number and reaches ALL enemies, or the chosen enemy
 # (Amber, Explosive Puppet, 2026-10-02: `lose_strength` is in AIMING_OPS, so
@@ -3408,7 +3409,7 @@ APPLY_POWERS = {
         "that enemy and gain 4 [gold]Block[/gold]."),
     "mc_dandelion_breeze": ("DandelionBreezePower", None,
         "At the end of your turn, [gold]Swirl[/gold] the enemy with the most "
-        "auras and gain 6 [gold]Block[/gold]."),
+        "auras and gain {X} [gold]Block[/gold]."),
     "mc_oz": ("MondstadtOzPower", None,
         "At the end of your turn, Oz deals 5 damage and applies "
         "[gold]Electro[/gold] to a random enemy."),
@@ -5139,6 +5140,10 @@ def blocked_reason(
             if not isinstance(value, int) or isinstance(value, bool) \
                     or value <= 0:
                 return f"{op} amount must be a positive literal int"
+            draw_each = eff.get("draw_each", 0)
+            if not isinstance(draw_each, int) or isinstance(draw_each, bool) \
+                    or draw_each < 0:
+                return f"{op} draw_each must be a non-negative literal int"
         if op == "lose_strength":
             unknown = set(eff) - LOSE_STRENGTH_FIELDS
             if unknown:
@@ -11797,9 +11802,11 @@ def build_body(
 
         elif op == "exhaust_statuses_grow_largest":
             # THE KLEE STATUS PACKAGE: Albedo -- Dust of Purification.
+            draw_each = int(eff.get("draw_each", 0))
+            draw_arg = f", {draw_each}" if draw_each else ""
             lines.append(
                 "await KleeStatusPackage.ExhaustStatusesGrowLargest("
-                f"choiceContext, Owner, {grow_expr(card, eff)});")
+                f"choiceContext, Owner, {grow_expr(card, eff)}{draw_arg});")
 
         elif op == "lose_strength":
             # DEFENCE IN THE STATUS PILE: a PERMANENT Strength loss, the base

@@ -276,7 +276,6 @@ public class CompanionOverhaulTests
     [InlineData(typeof(GlacialWaltzPower), CompanionOverhaulLaw.GlacialWaltzDamage)]
     [InlineData(typeof(MondstadtOzPower), CompanionOverhaulLaw.OzDamage)]
     [InlineData(typeof(LightningRosePower), CompanionOverhaulLaw.LightningRoseDamage)]
-    [InlineData(typeof(DandelionBreezePower), CompanionOverhaulLaw.DandelionBreezeBlock)]
     [InlineData(typeof(SolarIsotomaBloomPower), CompanionOverhaulLaw.IsotomaDamage)]
     [InlineData(typeof(RevelationPower), CompanionOverhaulLaw.RevelationBlock)]
     public void Every_power_face_prints_the_number_it_pays(Type type, int number)

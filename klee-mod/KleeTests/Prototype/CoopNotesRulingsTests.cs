@@ -197,19 +197,46 @@ public class CoopNotesRulingsTests
     // ---- pick 4: Neuvillette's Rare ----------------------------------------
 
     [Fact]
-    public void Neuvillette_applies_hydro_at_the_start_of_the_turn()
+    public void Neuvillette_deals_hydro_damage_at_the_start_of_the_turn()
     {
+        // The 2026-10-11 Companion pass: "deal 5 Hydro damage to a random
+        // enemy" in place of "apply Hydro"; the damage lays the Hydro.
         var hook = typeof(AncientSeaAuthorityPower).GetMethod("AfterPlayerTurnStart",
                                                               HeadlessGame.All)!;
         Assert.Equal(typeof(AncientSeaAuthorityPower), hook.DeclaringType);
-        Assert.Contains("AncientSeaAuthorityPower.ApplyHydro", Il.Calls(hook));
-        var apply = Il.Calls(Il.Method("AncientSeaAuthorityPower", "ApplyHydro"));
-        Assert.Contains("ElementalHit.ApplyOnly", apply);
+        Assert.Contains("AncientSeaAuthorityPower.HitHydro", Il.Calls(hook));
+        var hit = Il.Calls(Il.Method("AncientSeaAuthorityPower", "HitHydro"));
+        Assert.Contains("ElementalHit.Deal", hit);
+        Assert.DoesNotContain("ElementalHit.ApplyOnly", hit);
+        Assert.Equal(5, CompanionConstants.AncientSeaDamage);
         var card = new ProtoMfNeuvilletteAncientSeaAuthority();
-        Assert.Equal("At the start of your turn, apply [gold]Hydro[/gold] to a "
-                   + "random enemy. Auras you apply last 1 additional turn.",
+        Assert.Equal("At the start of your turn, deal 5 [gold]Hydro[/gold] damage "
+                   + "to a random enemy. Auras you apply last 1 additional turn.",
                      Face(card));
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(MegaCrit.Sts2.Core.Entities.Cards.CardRarity.Rare, card.Rarity);
+    }
+
+    // ---- the 2026-10-11 Companion pass: Arlecchino ---------------------------
+
+    [Fact]
+    public void Arlecchino_loses_1_hp_then_gains_strength_and_has_no_bond()
+    {
+        var hook = typeof(MasqueRedDeathPower).GetMethod("AfterPlayerTurnStart",
+                                                         HeadlessGame.All)!;
+        Assert.Equal(typeof(MasqueRedDeathPower), hook.DeclaringType);
+        // Structural pin (Il.Calls is a set; the order is the source's).
+        var calls = Il.Calls(hook);
+        Assert.Contains(calls, c => c.Contains("CreatureCmd.Damage"));
+        Assert.Contains(calls, c => c.Contains("PowerCmd.Apply"));
+        Assert.Equal(1, CompanionConstants.MasqueHpLoss);
+        // The Bond of Life left: no payment method, no docket entry.
+        Assert.Null(typeof(MasqueRedDeathPower).GetMethod("PayBondOfLife",
+                                                          HeadlessGame.All));
+        Assert.Empty(TurnEndAttribution.Order);
+        var card = new ProtoMfArlecchinoMasqueRedDeath();
+        Assert.Equal("At the start of your turn, lose 1 HP and gain "
+                   + "{PowerAmount:diff()} [gold]Strength[/gold].", Face(card));
+        Assert.Equal(1, card.EnergyCost.Canonical);
     }
 }

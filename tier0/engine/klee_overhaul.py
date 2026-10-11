@@ -2147,12 +2147,19 @@ def exhaust_statuses(state: CombatState) -> int:
     return len(victims)
 
 
-def exhaust_statuses_grow_largest(state: CombatState, per: int) -> int:
+def exhaust_statuses_grow_largest(state: CombatState, per: int,
+                                  draw_each: int = 0) -> int:
     """Albedo -- Dust of Purification: "Exhaust every status in your hand.
-    Your largest Bomb grows by 6 [8] for each." One growth of `per` times the
-    count, after the exhausts; no Bomb and the exhausts still happen."""
+    Your largest Bomb grows by 6 [8] for each. Draw 1 card for each." One
+    growth of `per` times the count, after the exhausts; no Bomb and the
+    exhausts still happen. Then the draw, `draw_each` per status exhausted
+    (the 2026-10-11 Companion pass), after the growth as printed."""
     n = exhaust_statuses(state)
     if n and per > 0:
         grow_largest(state, int(per) * n)
     state.emit("ko_dust_of_purification", exhausted=n, per=int(per))
+    cards = int(draw_each) * n
+    if cards > 0:
+        state.draw(cards)
+        state.emit("extra_draw", amount=cards)   # A5 velocity accounting
     return n

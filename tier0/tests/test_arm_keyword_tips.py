@@ -1335,8 +1335,6 @@ GOLD_OP_TIPS = {"Summon": "the `stage_guest` op attaches ForSummon"}
 GOLD_NAMES = {
     "Bake-Kurage": "her pet, named on every Plan line; the Plan tip says "
                    "what it does",
-    "Bond of Life": "Arlecchino's power, titled on its own badge and the "
-                    "end-of-turn docket",
     "Shatters": "the Frozen reaction's preview, which the Cryo gem attaches, "
                 "defines a Shatter",
     # Sucrose -- Mollis Favonius (the Varka payoff round, 2026-10-10) names

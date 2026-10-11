@@ -53,7 +53,7 @@ public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanio
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Dust of Purification"),
-        ("description", "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by {Grow:diff()} for each."),
+        ("description", "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by {Grow:diff()} for each. Draw 1 card for each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,7 +71,7 @@ public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanio
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KleeStatusPackage.ExhaustStatusesGrowLargest(choiceContext, Owner, DynamicVars["Grow"].IntValue);
+        await KleeStatusPackage.ExhaustStatusesGrowLargest(choiceContext, Owner, DynamicVars["Grow"].IntValue, 1);
     }
 
     protected override void OnUpgrade()

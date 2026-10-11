@@ -53,7 +53,7 @@ public sealed class ProtoMfArlecchinoMasqueRedDeath : CustomCardModel, ICompanio
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Arlecchino — Masque of the Red Death"),
-        ("description", "At the start of your turn, gain {PowerAmount:diff()} [gold]Strength[/gold]. Your [gold]Bond of Life[/gold] eats the first 5 [gold]Block[/gold] you gain each turn."),
+        ("description", "At the start of your turn, lose 1 HP and gain {PowerAmount:diff()} [gold]Strength[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

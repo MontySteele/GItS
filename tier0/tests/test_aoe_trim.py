@@ -238,9 +238,10 @@ def test_principle_of_purity_hits_a_random_enemy_each_turn_start(monkeypatch):
     _force_mode(monkeypatch, 0)
     st = make_state(enemies=[make_enemy(hp=50)])
     play(st, load("proto_mc_durin_principle_of_purity"))
-    assert st.player.powers["mc_purity_strike"] == 4
+    # 7 since the 2026-10-11 Companion pass (was 4).
+    assert st.player.powers["mc_purity_strike"] == 7
     effects.companion_overhaul_turn_start(st)
-    assert st.enemies[0].hp == 46
+    assert st.enemies[0].hp == 43
     assert st.enemies[0].aura == "pyro"
 
 
@@ -259,7 +260,7 @@ def test_principle_of_purity_white_is_the_team_reaction_multiplier(
 
 def test_principle_of_purity_upgrade_moves_all_three_numbers():
     fx = load("proto_mc_durin_principle_of_purity+").effects
-    assert fx[0]["amount"] == 6
+    assert fx[0]["amount"] == 9          # 7 [9], the 2026-10-11 pass
     assert fx[1]["modes"][0]["effects"][0]["amount"] == 75
     assert fx[1]["modes"][1]["effects"][0]["amount"] == 6
 

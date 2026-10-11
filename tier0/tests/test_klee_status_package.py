@@ -201,6 +201,33 @@ def test_dust_of_purification_exhausts_statuses_into_the_largest_bomb(
     assert sizes(enemy) == [17]
 
 
+def test_dust_of_purification_draws_one_card_per_status(overhaul):
+    """2026-10-11 Companion pass: "... grows by 6 for each. Draw 1 card for
+    each." Two statuses exhausted: the Bomb grows 12 and two cards come in;
+    none exhausted, none drawn."""
+    assert _first(load(ALBEDO), "exhaust_statuses_grow_largest")[
+        "draw_each"] == 1
+    enemy = make_enemy(hp=200)
+    st = klee_state([enemy])
+    klee_overhaul.place(st, enemy, 5)
+    st.player.draw_pile = filler(4)
+    st.player.hand = [statuses.make_status("dazed"), _confiscated(),
+                      load("proto_ko_chain_fuse")]
+    play(st, load(ALBEDO))
+    assert sizes(enemy) == [17]
+    assert len(st.player.exhaust_pile) == 2
+    assert len(st.player.hand) == 3                 # Chain Fuse + 2 drawn
+    assert sum(c.id.startswith("filler") for c in st.player.hand) == 2
+    assert len(st.player.draw_pile) == 2
+
+    st = klee_state([make_enemy(hp=200)])
+    st.player.draw_pile = filler(4)
+    st.player.hand = [load("proto_ko_chain_fuse")]
+    play(st, load(ALBEDO))
+    assert [c.id for c in st.player.hand] == ["proto_ko_chain_fuse"]
+    assert len(st.player.draw_pile) == 4
+
+
 def test_dust_of_purification_is_in_klees_own_pool(overhaul):
     """A stand-in until the Klee-only companions (2026-10-03); her own
     draftable pool since."""

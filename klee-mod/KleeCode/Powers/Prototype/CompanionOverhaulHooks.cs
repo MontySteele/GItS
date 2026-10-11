@@ -945,9 +945,16 @@ public sealed class LightningFangPower : PowerModel, ILocalizationProvider
 /// more damage of the swirled element." PERMANENT; Amount is the damage each
 /// copy banks, so two copies bank twice per Swirl.
 ///
-/// The power itself does nothing on a hook: it is read by
-/// <see cref="CompanionOverhaulReactions"/>, which is the one place the mod
-/// knows a Swirl happened AND what it swirled.
+/// The rider is read by <see cref="CompanionOverhaulReactions"/>, which is
+/// the one place the mod knows a Swirl happened AND what it swirled.
+///
+/// 2026-10-11 COMPANION PASS: "At the start of your turn, Swirl a random
+/// enemy." first, a Swirl source of its own for decks that rarely Swirl. Once
+/// per turn whatever the Amount (copies bank more per Swirl instead), through
+/// <see cref="ElementalHit.ApplyOnly"/> with Anemo, the door the `swirl` op
+/// takes, so it reacts and banks the rider exactly as a card's Swirl does.
+/// Sim twin: the `mc_sturm_und_drang` read after Durin's hit in
+/// `effects.companion_overhaul_turn_start`.
 /// </summary>
 public sealed class SturmUndDrangPower : PowerModel, ILocalizationProvider
 {
@@ -955,13 +962,27 @@ public sealed class SturmUndDrangPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sturm und Drang"),
         ("description",
-            "Whenever a [gold]Swirl[/gold] happens, your next Attack deals "
-          + "[blue]{Amount}[/blue] additional damage of the swirled element."),
+            "At the start of your turn, [gold]Swirl[/gold] a random enemy. "
+          + "Each [gold]Swirl[/gold] gives your next Attack "
+          + "[blue]{Amount}[/blue] additional damage of that element."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (player.Creature != Owner || Amount <= 0) return;
+        var combat = CombatState;
+        if (combat == null) return;
+        var target = CompanionOverhaulTargeting.RandomEnemy(combat);
+        if (target == null) return;
+        Flash();
+        await ElementalHit.ApplyOnly(
+            choiceContext, target, Element.Anemo, Owner);
+    }
 }
 
 /// <summary>

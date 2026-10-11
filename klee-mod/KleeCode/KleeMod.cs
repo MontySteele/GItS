@@ -386,13 +386,9 @@ public static class KleeMod
                     // node's text only where the row resolves to something.
                     ["KLEEMOD-TURN_END_DOCKET.header"] = "END OF TURN",
 
-                    // EB-53/N1: the end-of-turn docket's per-slot hovers.
-                    // TITLES only --
-                    // every body is built live in TurnEndAttribution from the
-                    // constants the resolution reads, so a repricing cannot
-                    // leave a row quoting a retired number.
-                    [Powers.TurnEndAttribution.MasqueKey + ".title"] =
-                        "Bond of Life",
+                    // EB-53/N1: the end-of-turn docket's per-slot hover titles
+                    // go here. None stands since Arlecchino's Bond of Life
+                    // left (the 2026-10-11 Companion pass).
 
                     // `EB-272`. QUARANTINED, and inside the switch for the
                     // reason Rally's prompt is: `Cards/Prototype/**` is

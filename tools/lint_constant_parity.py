@@ -145,7 +145,8 @@ MIRRORED: dict[str, object] = {
     # it visible here.
 
     # Klee.
-    "CompanionConstants.MasqueBondBlock": C.MASQUE_BOND_BLOCK,
+    "CompanionConstants.MasqueHpLoss": C.MASQUE_HP_LOSS,
+    "CompanionConstants.AncientSeaDamage": C.ANCIENT_SEA_DMG,
     "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
 
     # Furina.
@@ -193,7 +194,6 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.GlacialWaltzDamage": C.MC_GLACIAL_WALTZ_DMG,
     "CompanionOverhaulLaw.IsotomaDamage": C.MC_ISOTOMA_DMG,
     "CompanionOverhaulLaw.IsotomaBlock": C.MC_ISOTOMA_BLOCK,
-    "CompanionOverhaulLaw.DandelionBreezeBlock": C.MC_DANDELION_BREEZE_BLOCK,
     "CompanionOverhaulLaw.OzDamage": C.MC_OZ_DMG,
     "CompanionOverhaulLaw.RevelationBlock": C.MC_REVELATION_BLOCK,
     "CompanionOverhaulLaw.RevelationStrength": C.MC_REVELATION_STRENGTH,
