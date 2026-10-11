@@ -25,6 +25,10 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Furina round 3** (`review/records/furina-fullrun-round-3-2026-10-11.md`,
+  pick 1): the stranded bank. (a) Standing Ovation back to Common, default;
+  (b) Spirited Aria and Crashing Waves "Spend half"; (c) no change.
+
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.
