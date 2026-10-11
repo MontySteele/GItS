@@ -1396,11 +1396,11 @@
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
-   # Kokomi whole-run round 2026-10-10: cost 1 -> 0 (played in 1 of 14
-   # fights where it was held). The default upgrade still removes Exhaust.
+   # Whole-run round 1 (2026-10-10): cost 1 -> 0; round 2: draws 1 (0 of 8
+   # taken). The default upgrade still removes Exhaust. Provenance note.
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
-   effects: [{op: carry_out_front_plan}]}
+   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 1 card.",
+   effects: [{op: carry_out_front_plan}, {op: draw, amount: 1}]}
 
 - {id: proto_kk_undertow, name: "Undertow", character: kokomi,
    authored_by: [claude],
@@ -1755,10 +1755,10 @@
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   # The growth Powers (2026-10-10, pick 1, ruled): the Casket keeps its
-   # count. Open still gives Strength equal to the whole count (ratio 1/1,
-   # the main session's call; graded on the next whole-run round).
-   description: "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold].",
+   # The growth Powers (2026-10-10, ruled): the Casket keeps its count,
+   # ratio 1/1. Round 2 (2026-10-10): Open also comes to hand each turn.
+   # Provenance note, "Kokomi whole-run round 2".
+   description: "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold]. At the start of your turn, put it into your hand.",
    effects: [{op: apply_power, power: kk_grand_design, amount: 1, target: self}],
    # Cost 1.
    upgrade: {cost: -1}}

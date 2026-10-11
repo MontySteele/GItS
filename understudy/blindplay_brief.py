@@ -52,7 +52,7 @@ from understudy.blindplay_notes import (AURA_NOTE, ENEMY_HANDLE_NOTE,
                                         NO_RESOLUTIONS_THIS_TURN, POWER_NOTE,
                                         _INTENT_SOURCE_HEAD,
                                         glossary_definition)
-from understudy.blindplay_enemies import brief_by_name
+from understudy.blindplay_enemies import brief_by_name, briefs_mentioning
 from understudy.blindplay_render import BRIEFING_HEADING
 from understudy.blindplay_shape import PLAY_GUARDRAIL
 
@@ -322,5 +322,12 @@ def define(text: str, word: str, growth: int | None = None) -> str:
     found = brief_by_name(want)
     if found:
         return f"- **{found[0]}** — {found[1]}{OFF_SCREEN_MARK}\n"
+    # Kokomi whole-run round 2 (2026-10-10): a word no glossary defines but
+    # an enemy's briefing explains ("Sandpit", "Frantic Escape") prints that
+    # briefing, under the enemy's name.
+    mentions = briefs_mentioning(word)
+    if mentions:
+        return "".join(f"- **{base}** — {text}{OFF_SCREEN_MARK}\n"
+                       for base, text in mentions)
     return NOT_DEFINED.format(word=word.strip(),
                               words=", ".join(words) or "none") + "\n"

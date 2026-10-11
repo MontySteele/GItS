@@ -58,8 +58,34 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         ("title", "Open the Casket"),
         ("description",
             "Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
-          + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}"),
+          + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}"
+          + "{InCombat:{CasketStrength}|}"),
     };
+
+    /// <summary>
+    /// THE COUNT ON THE FACE (Kokomi whole-run round 2, 2026-10-10): in
+    /// combat the card prints the Strength it would grant, the way Driftglass
+    /// prints its damage -- "(Gains N Strength)". Under Grand Design the
+    /// number is still the whole count (<see cref="KokomiOverhaulKit.OpenCasket"/>).
+    /// </summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("CasketStrength", StrengthLine(this));
+    }
+
+    /// <summary>The in-combat line, or empty out of combat.</summary>
+    public static string StrengthLine(CardModel card) =>
+        TipOwner.CreatureOf(card) is { } owner
+        && owner.CombatState != null && KokomiOverhaul.LiveFor(owner)
+            ? Line(KokomiOverhaulLedger.For(owner).CasketCount
+                   * KokomiOverhaulLaw.CasketStrengthPerPoint)
+            : "";
+
+    /// <summary>The line's words, for the pins.</summary>
+    public static string Line(int strength) =>
+        $"\n(Gains {strength} [gold]Strength[/gold])";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Retain };

@@ -30,7 +30,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         CHOOSER_CONFIRM_NOTE,
-                                        TWO_LINE_WAITING_ROW,
+                                        TWO_LINE_WAITING_ROW, AFTER_VULNERABLE,
                                         CHOOSER_ONE_CHOICE_NOTE,
                                         CHOOSER_MAYBE_CLOSES_NOTE,
                                         CLOSES_NOTE_HEAD,
@@ -3473,11 +3473,17 @@ def render(obs: dict[str, Any]) -> str:
                     if e.get("two_line") and (e.get("now_line")
                                               or e.get("plan_line")):
                         now = e.get("line") == "now"
+                        # Kokomi whole-run round 2 (2026-10-10): a Plan
+                        # line whose number the target's Vulnerable raised
+                        # says so.
+                        plan_text = e["plan_line"] + (
+                            AFTER_VULNERABLE if e.get("after_vulnerable")
+                            and e["plan_line"] else "")
                         out.append("     - " + TWO_LINE_WAITING_ROW.format(
                             line="now-line" if now else "Plan line",
-                            this=e["now_line"] if now else e["plan_line"],
+                            this=e["now_line"] if now else plan_text,
                             other_name="Plan line" if now else "Now-line",
-                            other=e["plan_line"] if now else e["now_line"],
+                            other=plan_text if now else e["now_line"],
                             n=i))
                 if pl["twice"]:
                     # 2026-09-28 (Kokomi seat): with a Dusk Plan in the
