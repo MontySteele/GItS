@@ -41,14 +41,14 @@ public sealed class ProtoFsGuestStarLyney : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLyney(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForDrain(ArmKeywordTips.ForLyney(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_lyney");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Lyney"),
-        ("description", "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: [gold]Drain[/gold] 2, deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line

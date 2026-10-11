@@ -309,13 +309,18 @@ def test_chevreuse_acts_for_damage_not_energy():
 
 def test_every_guest_act_kind_matches_the_mod():
     """The page's table against `FurinaStage.CueOf`: a Repay guest logs a
-    Repay, every other guest logs damage."""
+    Repay, a Block guest logs Block (Freminet, Furina round 5: he logged as
+    "Cryo damage"), every other guest logs damage."""
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "FurinaStage.cs").read_text(encoding="utf-8")
     body = src.split("private static StageForecastCue CueOf", 1)[1]
     body = body.split("};", 1)[0]
-    repay = set(re.findall(r"StagePerformer\.(\w+) => new\(seat\.Who, "
-                           r"seat\.Key,\s*StageCueKind\.Repay", body))
+
+    def cued(kind: str) -> set[str]:
+        return set(re.findall(r"StagePerformer\.(\w+) => new\(seat\.Who, "
+                              r"seat\.Key,\s*StageCueKind\." + kind, body))
+
+    repay = cued("Repay")
     guests = re.search(r"Guests =\s*\{([^}]*)\}", src).group(1)
     current = re.findall(r'"(\w+)"', guests)
     assert len(current) == 11          # the pool to 75's four join
@@ -323,7 +328,9 @@ def test_every_guest_act_kind_matches_the_mod():
              for m in current}
     assert {m.capitalize() for m, k in kinds.items() if k == "repay"} \
         == repay
-    assert set(kinds.values()) == {"repay", "damage"}
+    assert {m.capitalize() for m, k in kinds.items() if k == "block"} \
+        == cued("Block") == {"Freminet"}
+    assert set(kinds.values()) == {"repay", "block", "damage"}
 
 
 # --------------------------------------------- 6. what a debuff move does --

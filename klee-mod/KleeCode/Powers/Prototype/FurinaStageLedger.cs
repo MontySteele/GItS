@@ -974,6 +974,9 @@ public sealed class FurinaStageLedger
     {
         if (beat.Fanfare > PeakFanfare) PeakFanfare = beat.Fanfare;
         if (beat.Event != SpendEvent) return;
+        // A card play that spends nothing (Standing Ovation at 0 or 1
+        // Fanfare) files no beat and so no row here; `spend_card_plays`
+        // carries every Spend card play (Furina round 5, 2026-10-11).
         var source = beat.Source.Length > 0 ? beat.Source
                    : Cause.Length > 0 ? Cause
                    : PlayingCard;

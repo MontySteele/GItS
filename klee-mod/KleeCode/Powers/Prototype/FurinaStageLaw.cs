@@ -58,9 +58,10 @@ public static class FurinaStageLaw
 
     // ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md) ------
 
-    /// <summary>Lyney's line: "Your Drain line is 10 HP lower." Since the
-    /// Drain buffer (2026-10-11) he adds 10 to her buffer, which puts the
-    /// line 10 HP lower.</summary>
+    /// <summary>Lyney's line: "Your Drain buffer is 10 HP larger." (Furina
+    /// round 5, 2026-10-11; it read "Your Drain line is 10 HP lower" before
+    /// the Drain buffer.) He adds 10 to her buffer, which puts the line 10
+    /// HP lower.</summary>
     public const int LyneyLineDrop = 10;
 
     /// <summary>Lyney's act: "Drain 2, never past your line (none at or below
