@@ -25,11 +25,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Uncommon and Rare Companions** (`review/active/companion-upper-pass-2026-10-11.md`,
-  three picks): (1) "For 3 turns" cards pay over 2 turns at about 10% more, default yes;
-  (2) Companion-count Rares, default hold and re-measure; (3) nine Rares and four
-  Uncommons repriced, default yes.
-
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.

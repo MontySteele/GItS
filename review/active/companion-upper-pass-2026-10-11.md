@@ -91,6 +91,21 @@ Mondstadt holds 18 of the 34 Uncommons, so its overlaps are the sweep's question
 - They are dead because Companions are rarely taken, not because their numbers are low.
 - This pass is aimed at that take rate, so re-measure after it lands. That is pick 2.
 
+## Ruled (2026-10-11)
+
+[USER]: "On Companions - \"Jean — Lion's Fang\" was pretty good in my co op runs, so I'm not sure I buy it's fair at 1 energy. Charlotte — Snappy Silhouette as a 0 cost becomes a cycling card, so it should only do 1 vulnerable. I think the '3 turns' cards should stay at 3 turns and get a slight power lift. Agreed on the rest."
+
+- **Pick 1, (b):** the "For 3 turns" cards stay at 3 turns, and each per-turn number rises by 1:
+  - Glacial Waltz, Juuga and Hasode: 7 a turn;
+  - Lightning Rose: 6 damage and 1 Vulnerable a turn;
+  - Sanctifying Ring: 6 to ALL and 6 Block a turn;
+  - Herald of Frost: 4 Block a turn;
+  - Melody Loop: 5 Block up front.
+- **Pick 2, (a):** hold the Companion-count Rares.
+- **Pick 3, (a), with two changes:**
+  - Jean's Lion's Fang is unchanged at 2 [1].
+  - Charlotte's Snappy Silhouette costs 0 and applies 1 [2] Vulnerable.
+
 ## For [USER]
 
 1. **Shape 1, the "For 3 turns" rule.** Seven Uncommons pay over 2 turns at about 10% more in total.
