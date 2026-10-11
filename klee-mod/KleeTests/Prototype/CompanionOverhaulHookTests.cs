@@ -567,6 +567,24 @@ public class CompanionOverhaulHookTests
     }
 
     [Fact]
+    public void Sturm_und_drang_swirls_a_random_enemy_at_the_start_of_the_turn()
+    {
+        // The 2026-10-11 Companion pass: "At the start of your turn, Swirl a
+        // random enemy." A damage-less Anemo through the swirl op's door.
+        var hook = typeof(SturmUndDrangPower).GetMethod("AfterPlayerTurnStart",
+                                                        All)!;
+        Assert.Equal(typeof(SturmUndDrangPower), hook.DeclaringType);
+        var calls = Il.Calls(hook);
+        Assert.Contains(calls, c => c.Contains("CompanionOverhaulTargeting.RandomEnemy"));
+        Assert.Contains(calls, c => c.Contains("ElementalHit.ApplyOnly"));
+        Assert.DoesNotContain(calls, c => c.Contains("ElementalHit.Deal"));
+        var face = ((ILocalizationProvider)new ProtoMcVarkaSturmUndDrang())
+            .Localization!.Single(r => r.Item1 == "description").Item2;
+        Assert.StartsWith(
+            "At the start of your turn, [gold]Swirl[/gold] a random enemy.", face);
+    }
+
+    [Fact]
     public void The_permanent_power_never_ticks_down()
     {
         // The workshop's sec.1 rule: "A Power has no turn limit." Varka's

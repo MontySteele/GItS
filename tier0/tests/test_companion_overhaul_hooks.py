@@ -200,7 +200,7 @@ def test_melody_loop_lands_on_the_chosen_enemy(overhaul):
     st = make_state(enemies=[make_enemy(hp=10, name="a"),
                              make_enemy(hp=50, name="b")])
     _play(st, "proto_mc_barbara_melody_loop")
-    assert st.player.block == 4
+    assert st.player.block == 5               # 2026-10-11 Companion pass
     aimed = [e for e in st.enemies if e.powers.get("mc_melody_loop")]
     assert len(aimed) == 1
     assert aimed[0].powers["mc_melody_loop"] == 3
@@ -500,7 +500,7 @@ def test_principle_of_purity_offers_two_forms_for_the_fight(overhaul):
     chosen = ("mc_purity_white" in st.player.powers,
               "mc_purity_dark" in st.player.powers)
     assert chosen.count(True) == 1, "exactly one form, for the fight"
-    assert st.player.powers["mc_purity_strike"] == 4
+    assert st.player.powers["mc_purity_strike"] == 7   # 2026-10-11 pass
 
 
 def test_white_scales_the_reaction_and_not_the_hit(overhaul):

@@ -885,11 +885,12 @@
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: block, amount: 3}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_kaeya_glacial_waltz, name: "Kaeya — Glacial Waltz", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the end of your turn deal 6 [gold]Cryo[/gold] damage to a random enemy.",
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Cryo[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mc_glacial_waltz, amount: 3, target: self}]}
 
 - {id: proto_mc_barbara_show_begin, name: "Barbara — Let the Show Begin♪", character: klee,
@@ -915,10 +916,11 @@
    effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
              {op: swirl, target: enemy}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_jean_dandelion_breeze, name: "Jean — Dandelion Breeze", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
-   cost: 2, type: power,
+   cost: 1, type: power,
    description: "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 1, target: self}]}
 
@@ -986,12 +988,13 @@
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
              {op: apply_power, power: vulnerable, amount: 3, target: all_enemies}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: skill, exhaust: true,
-   description: "Deal 8 [gold]Anemo[/gold] damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] ALL enemies.",
-   effects: [{op: damage, amount: 8, target: all_enemies, applies_element: true},
+   description: "Deal 14 [gold]Anemo[/gold] damage to ALL enemies. For 2 turns, at the end of your turn [gold]Swirl[/gold] ALL enemies.",
+   effects: [{op: damage, amount: 14, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_grand_ode, amount: 2, target: self}]}
 
 - {id: proto_mc_amber_fiery_rain, name: "Amber — Fiery Rain", character: klee,
@@ -1011,11 +1014,12 @@
    effects: [{op: apply_aura, element: electro, target: all_enemies},
              {op: draw, amount: 1}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_lisa_lightning_rose, name: "Lisa — Lightning Rose", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the start of your turn deal 5 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold].",
+   description: "For 3 turns, at the start of your turn deal 6 [gold]Electro[/gold] damage to a random enemy and apply 1 [gold]Vulnerable[/gold].",
    effects: [{op: apply_power, power: mc_lightning_rose, amount: 3, target: self}]}
 
 - {id: proto_mc_rosaria_ravaging_confession, name: "Rosaria — Ravaging Confession", character: klee,
@@ -1049,12 +1053,13 @@
    # POOL COMPLETION (2026-10-01, paper sec.6, the Body Slam note): cost 2 [1].
    upgrade: {cost: -1}}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_barbara_melody_loop, name: "Barbara — Melody Loop", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
    cost: 1, type: skill, exhaust: true,
-   description: "Gain 4 [gold]Block[/gold]. For 3 turns, at the start of your turn apply [gold]Hydro[/gold] to the enemy.",
-   effects: [{op: block, amount: 4},
+   description: "Gain 5 [gold]Block[/gold]. For 3 turns, at the start of your turn apply [gold]Hydro[/gold] to the enemy.",
+   effects: [{op: block, amount: 5},
              {op: apply_power, power: mc_melody_loop, amount: 3, target: enemy}]}
 
 - {id: proto_mc_bennett_passion_overload, name: "Bennett — Passion Overload", character: klee,
@@ -1096,13 +1101,14 @@
 
 # White is the team form (every player's reactions); Dark is all the
 # holder's Pyro damage, Bombs and Mines included.
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_durin_principle_of_purity, name: "Durin — Principle of Purity", character: klee,
    authored_by: [claude], art_of: proto_mc_durin_binary_form,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
-   description: "At the start of your turn, deal 4 [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 4 additional damage.",
+   description: "At the start of your turn, deal 7 [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 4 additional damage.",
    upgrade: {power_amount: +2, mode_power_amount: [25, 2]},
-   effects: [{op: apply_power, power: mc_purity_strike, amount: 4, target: self},
+   effects: [{op: apply_power, power: mc_purity_strike, amount: 7, target: self},
              {op: choose_one, modes: [
               {label: "[gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]",
                effects: [{op: apply_power, power: mc_purity_white, amount: 50, target: self}]},
@@ -1125,11 +1131,12 @@
    description: "For 2 turns, your Attacks apply [gold]Electro[/gold] and deal 3 additional damage.",
    effects: [{op: apply_power, power: mc_lightning_fang, amount: 2, target: self}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_varka_sturm_und_drang, name: "Varka — Sturm und Drang", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: power,
-   description: "Whenever a [gold]Swirl[/gold] happens, your next Attack deals 6 additional damage of the swirled element.",
+   description: "At the start of your turn, [gold]Swirl[/gold] a random enemy. Each [gold]Swirl[/gold] gives your next Attack 6 additional damage of that element.",
    effects: [{op: apply_power, power: mc_sturm_und_drang, amount: 6, target: self}]}
 
 # Klee finish-line batch, 2026-10-03: Common -> Uncommon ([USER]: "probably
@@ -2180,11 +2187,12 @@
    effects: [{op: apply_power, power: dexterity, amount: 2, target: self},
              {op: apply_power, power: mi_war_banner, amount: 2, target: self}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy.",
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}]}
 
 - {id: proto_mi_sayu_fuuin_dash, name: "Sayu — Yoohoo Art: Fuuin Dash", character: klee,
@@ -2194,11 +2202,12 @@
    description: "Deal 8 [gold]Anemo[/gold] damage to a random enemy and [gold]Swirl[/gold] it.",
    effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, at the end of your turn deal 6 damage to a random enemy if you are above 70% HP; otherwise, gain 6 [gold]Block[/gold].",
+   description: "For 2 turns, at the end of your turn deal 9 damage to a random enemy if you are above 70% HP; otherwise, gain 9 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
 
 - {id: proto_mi_sayu_naptime, name: "Sayu — Naptime", character: klee,
@@ -2209,11 +2218,12 @@
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
    cost: 1, type: skill, exhaust: true,
-   description: "Lose 3 HP. For 3 turns, at the end of your turn deal 5 [gold]Electro[/gold] damage to ALL enemies and gain 5 [gold]Block[/gold].",
+   description: "Lose 3 HP. For 3 turns, at the end of your turn deal 6 [gold]Electro[/gold] damage to ALL enemies and gain 6 [gold]Block[/gold].",
    effects: [{op: damage, amount: 3, target: self},
              {op: apply_power, power: mi_sanctifying_ring, amount: 3, target: self}]}
 
@@ -2342,23 +2352,25 @@
    effects: [{op: block, amount: 8},
              {op: apply_power, power: mi_surprise_dispatch, amount: 1, target: self}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_mizuki_anraku, name: "Yumemizuki Mizuki — Anraku Secret Spring Therapy", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: skill, exhaust: true,
-   description: "[gold]Swirl[/gold] ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10.",
+   upgrade: {cost: -1},
+   description: "[gold]Swirl[/gold] ALL enemies. Deal 14 damage to ALL enemies and [gold]Mend[/gold] 6.",
    effects: [{op: swirl, target: all_enemies},
-             {op: conditional, if: hp_pct_above_70,
-              then: [{op: damage, amount: 18, target: all_enemies, applies_element: true}],
-              else: [{op: mend, amount: 10}]}]}
+             {op: damage, amount: 14, target: all_enemies, applies_element: false},
+             {op: mend, amount: 6}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_chiori_hasode, name: "Chiori — Fluttering Hasode", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self,
-              summon_damage: 6}]}
+              summon_damage: 7}]}
 
 # --- FONTAINE (legacy cleanup pick 4): the shipped rows ported as they are,
 # bodies, upgrades and art; the three guest stars are Furina's. Provenance
@@ -2404,13 +2416,14 @@
    description: "Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: draw, amount: 2}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: lynette_astonishing_shift,
    nation: fontaine, star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill,
-   description: "[gold]Swirl[/gold] the enemy. Deal 6 damage to ALL enemies.",
-   effects: [{op: swirl, target: enemy}, {op: damage, amount: 6, target: all_enemies, applies_element: false}]}
+   description: "[gold]Swirl[/gold] the enemy. Deal 8 damage to ALL enemies.",
+   effects: [{op: swirl, target: enemy}, {op: damage, amount: 8, target: all_enemies, applies_element: false}]}
 
 - {id: proto_mf_charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition", character: klee,
    upgrade: {damage: 2},
@@ -2428,13 +2441,14 @@
    description: "Gain 4 [gold]Block[/gold]. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
    effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", character: klee,
    upgrade: {vulnerable: 1},
    authored_by: [claude],
    art_of: charlotte_snappy_silhouette,
-   nation: fontaine, star: 4, rarity: uncommon, role_c: buffer, element: cryo, cost: 1, type: skill,
-   description: "Apply 2 [gold]Vulnerable[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}, {op: draw, amount: 1}]}
+   nation: fontaine, star: 4, rarity: uncommon, role_c: buffer, element: cryo, cost: 0, type: skill,
+   description: "Apply 1 [gold]Vulnerable[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}, {op: draw, amount: 1}]}
 
 - {id: proto_mf_freminet_pers_deploy, name: "Freminet — Pers, Deploy!", character: klee,
    upgrade: {damage: 2},
@@ -2481,18 +2495,20 @@
    authored_by: [claude],
    # Co-op notes pick 4 (ruled 2026-10-02): plus a Hydro aura each turn, a
    # free reaction partner. The face is the power's (`ancient_sea_authority`).
+   # 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
    art_of: neuvillette_ancient_sea_authority,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: hydro, cost: 1, type: power,
-   description: "At the start of your turn, apply [gold]Hydro[/gold] to a random enemy. Auras you apply last 1 additional turn.",
-   effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "at the start of your turn apply Hydro to a random enemy; auras you apply last 1 extra turn"}]}
+   description: "At the start of your turn, deal 5 [gold]Hydro[/gold] damage to a random enemy. Auras you apply last 1 additional turn.",
+   effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "at the start of your turn deal 5 Hydro damage to a random enemy; auras you apply last 1 extra turn"}]}
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", character: klee,
    upgrade: {power_amount: 1},
    authored_by: [claude],
    art_of: arlecchino_masque_red_death,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power,
-   description: "At the start of your turn, gain 1 [gold]Strength[/gold]. Your [gold]Bond of Life[/gold] eats the first 5 [gold]Block[/gold] you gain each turn.",
-   effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn gain 1 Strength; your Bond of Life eats the first 5 Block you gain each turn"}]}
+   description: "At the start of your turn, lose 1 HP and gain {PowerAmount:diff()} [gold]Strength[/gold].",
+   effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn lose 1 HP and gain 1 Strength"}]}
 
 - {id: proto_mf_guest_neuvillette_tears, name: "Neuvillette — O Tears, I Shall Repay", character: furina,
    no_upgrade: "A Guest Star is made for one fight and never upgraded, as the shipped row.",
@@ -2522,13 +2538,14 @@
 # shared, Sayu and Yaoyao cut by the Klee-only companions (2026-10-03).
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_prune_hexhunter_chime, name: "Prune — Ring-A-Ding-Ding! Hexhunter Chime", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
    cost: 1, type: attack,
    upgrade: {damage: +3},
-   description: "Deal 8 [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy. The next [gold]Bomb[/gold] that goes off this turn deals that element instead of [gold]Pyro[/gold].",
-   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
+   description: "Deal 10 [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy. The next [gold]Bomb[/gold] that goes off this turn deals that element instead of [gold]Pyro[/gold].",
+   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
              {op: swirl, target: enemy},
              {op: apply_power, power: cvn_hexhunter_chime, amount: 1, target: self}]}
 
@@ -2536,11 +2553,12 @@
 # review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
 # note, "Klee-only companions, 2026-10-03".
 
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_qiqi_herald_of_frost, name: "Qiqi — Herald of Frost", character: klee,
    authored_by: [claude],
    nation: liyue, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold].",
+   description: "For 3 turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 4 [gold]Block[/gold].",
    effects: [{op: apply_power, power: cvn_herald_of_frost, amount: 3, target: self}]}
 
 # YAOYAO — YUEGUI: THROWING MODE IS CUT (the Klee-only companions, 2026-10-03,
@@ -2566,13 +2584,14 @@
 
 # Klee status package (2026-10-01, ruled; lore pass pick 3): his sixth
 # constellation, in Tectonic Tide's place.
+# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_albedo_dust_of_purification, name: "Albedo — Dust of Purification", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by 6 for each.",
+   description: "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by 6 for each. Draw 1 card for each.",
    upgrade: {grow: +2},
-   effects: [{op: exhaust_statuses_grow_largest, amount: 6}]}
+   effects: [{op: exhaust_statuses_grow_largest, amount: 6, draw_each: 1}]}
 
 - {id: proto_mc_fischl_sinful_hex, name: "Fischl — Undone Be Thy Sinful Hex", character: klee,
    authored_by: [claude],

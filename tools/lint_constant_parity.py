@@ -145,7 +145,8 @@ MIRRORED: dict[str, object] = {
     # it visible here.
 
     # Klee.
-    "CompanionConstants.MasqueBondBlock": C.MASQUE_BOND_BLOCK,
+    "CompanionConstants.MasqueHpLoss": C.MASQUE_HP_LOSS,
+    "CompanionConstants.AncientSeaDamage": C.ANCIENT_SEA_DMG,
     "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
 
     # Furina.

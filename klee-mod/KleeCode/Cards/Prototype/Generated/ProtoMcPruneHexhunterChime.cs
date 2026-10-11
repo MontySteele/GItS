@@ -65,7 +65,7 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(8m),
+            new CalculationBaseVar(10m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };

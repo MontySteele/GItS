@@ -264,31 +264,35 @@ SIM_CALL_SITES = {
     # Pyro hit is the fifth (the Mondstadt block), so the rows below it moved
     # down one; Yoimiya's Aurous Blaze answers a Skill play now, the
     # twenty-eighth, in place of its old volley on a non-Attack hit.
-    ('effects.py', 4): ("'companion'", None, "'pyro'"),
-    ('effects.py', 5): ("'companion'", None, "'electro'"),
-    ('effects.py', 6): ("'companion'", None, 'None'),
-    ('effects.py', 7): ("'burst'", None, "'pyro'"),
-    ('effects.py', 8): ("'companion'", None, "'electro'"),
-    ('effects.py', 9): ("'companion'", None, 'None'),
-    ('effects.py', 10): ("'companion'", None, "'cryo'"),
-    ('effects.py', 11): ("'companion'", None, "'electro'"),
-    ('effects.py', 12): ("'companion'", None, 'None'),
+    # THE 2026-10-11 COMPANION PASS: Neuvillette's start-of-turn Hydro is a
+    # hit now (it applied Hydro only), the fourth, so every row below it
+    # moved down one.
+    ('effects.py', 4): ("'companion'", None, "'hydro'"),
+    ('effects.py', 5): ("'companion'", None, "'pyro'"),
+    ('effects.py', 6): ("'companion'", None, "'electro'"),
+    ('effects.py', 7): ("'companion'", None, 'None'),
+    ('effects.py', 8): ("'burst'", None, "'pyro'"),
+    ('effects.py', 9): ("'companion'", None, "'electro'"),
+    ('effects.py', 10): ("'companion'", None, 'None'),
+    ('effects.py', 11): ("'companion'", None, "'cryo'"),
+    ('effects.py', 12): ("'companion'", None, "'electro'"),
     ('effects.py', 13): ("'companion'", None, 'None'),
-    ('effects.py', 14): ("'companion'", None, "'geo'"),
-    ('effects.py', 15): ("'companion'", None, 'None'),
-    ('effects.py', 16): ("'companion'", None, "'electro'"),
+    ('effects.py', 14): ("'companion'", None, 'None'),
+    ('effects.py', 15): ("'companion'", None, "'geo'"),
+    ('effects.py', 16): ("'companion'", None, 'None'),
     ('effects.py', 17): ("'companion'", None, "'electro'"),
-    ('effects.py', 18): ("'companion'", None, "'cryo'"),
+    ('effects.py', 18): ("'companion'", None, "'electro'"),
     ('effects.py', 19): ("'companion'", None, "'cryo'"),
-    ('effects.py', 20): ("'companion'", None, "'hydro'"),
-    ('effects.py', 21): ("'companion'", None, "'geo'"),
+    ('effects.py', 20): ("'companion'", None, "'cryo'"),
+    ('effects.py', 21): ("'companion'", None, "'hydro'"),
+    ('effects.py', 22): ("'companion'", None, "'geo'"),
     # Varka's Sturm und Drang rider, a separate hit of the Swirled element
     # after the Attack (the Varka round 3 fix, 2026-10-10).
-    ('effects.py', 22): ("'companion'", None, 'element'),
-    ('effects.py', 23): ("'companion'", None, "'hydro'"),
-    ('effects.py', 24): ("'companion'", None, "'pyro'"),
+    ('effects.py', 23): ("'companion'", None, 'element'),
+    ('effects.py', 24): ("'companion'", None, "'hydro'"),
     ('effects.py', 25): ("'companion'", None, "'pyro'"),
     ('effects.py', 26): ("'companion'", None, "'pyro'"),
+    ('effects.py', 27): ("'companion'", None, "'pyro'"),
     # (`furina_stage.py`'s two doors left with v2, the Salon's Tab,
     # 2026-10-05: the arm runs on `furina_tide`'s rules and its one door.)
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the one unpowered

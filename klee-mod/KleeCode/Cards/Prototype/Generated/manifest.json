@@ -1765,7 +1765,10 @@
       "power_amount": 1
     },
     "proto_mc_jean_dandelion_breeze": {
-      "cost": -1
+      "add": {
+        "op": "draw",
+        "amount": 1
+      }
     },
     "proto_mc_jean_gale_blade": {
       "damage": 3

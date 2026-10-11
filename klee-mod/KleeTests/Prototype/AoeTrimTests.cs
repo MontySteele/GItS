@@ -75,7 +75,8 @@ public class AoeTrimTests
         Assert.Contains("{PowerAmount:diff()}", face);
         Assert.Contains("{IfUpgraded:show:75|50}%", face);
         Assert.Contains("{IfUpgraded:show:6|4} additional damage", face);
-        Assert.Equal(6m, Upgraded<ProtoMcDurinPrincipleOfPurity>()
+        // 7 [9] since the 2026-10-11 Companion pass (was 4 [6]).
+        Assert.Equal(9m, Upgraded<ProtoMcDurinPrincipleOfPurity>()
             .DynamicVars["PowerAmount"].BaseValue);
         var play = Il.Calls(Il.Method("ProtoMcDurinPrincipleOfPurity", "OnPlay"));
         Assert.Contains(play, c => c.Contains("get_IsUpgraded"));

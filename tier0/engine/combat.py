@@ -942,7 +942,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # (C.KLEE_OVERHAUL). Sit Tight's end-of-turn Block, AHEAD of
     # the shipped triggers: the mod pays it as a power tenant of
     # `BeforeSideTurnEnd`, before the model-driven `TurnEndSequencer`, so
-    # Arlecchino's Bond of Life counts it (`klee_overhaul.sit_tight_turn_end`).
+    # Arlecchino's Bond of Life counted it (gone 2026-10-11; `sit_tight_turn_end`).
     klee_overhaul.sit_tight_turn_end(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     # (C.KLEE_OVERHAUL). The overhaul's end of turn: Alice's

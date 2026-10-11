@@ -562,14 +562,14 @@ KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
 # (`tools/lint_constant_parity.py`); the numbers a CARD prints stay on the card
 # row, and only a number a POWER carries lands here.
 MC_SIGNATURE_MIX_BLOCK = 4      # Diona: Block per turn, 2 turns
-MC_GLACIAL_WALTZ_DMG = 6        # Kaeya: Cryo damage per turn, 3 turns
+MC_GLACIAL_WALTZ_DMG = 7        # Kaeya: Cryo damage per turn, 3 turns
 MC_ISOTOMA_DMG = 8              # Albedo: end-of-turn damage on an aura'd enemy
 MC_ISOTOMA_BLOCK = 4            # Albedo: the Crystallize half
 MC_DANDELION_BREEZE_BLOCK = 6   # Jean: Block per end of turn
 MC_OZ_DMG = 5                   # Fischl: Oz's Electro volley, no turn limit
 MC_REVELATION_BLOCK = 5         # Nicole: Block at the start of your turn
 MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line
-MC_LIGHTNING_ROSE_DMG = 5       # Lisa: Electro damage per turn, 3 turns
+MC_LIGHTNING_ROSE_DMG = 6       # Lisa: Electro damage per turn, 3 turns
 MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
 # THE SECOND WAVE -- the thirteen rows the first pass left out. Same rule as
 # the eleven above: a number the CARD prints stays on the card row (Diona's 6
@@ -690,11 +690,11 @@ MC_LIONS_FANG_DRAW = 1
 # (`tools/lint_constant_parity.py`). Every one is the workshop's sec.3 printed
 # text, re-priced in its sec.8 -- nothing is derived and nothing is picked.
 MI_WAR_BANNER_DEXTERITY = 2     # Gorou: Dexterity while the banner stands
-MI_JUUGA_DMG = 6                # Gorou: Geo damage per turn, 3 turns
-MI_DARUMA_DMG = 6               # Sayu: the Daruma's hit above 70% HP
-MI_DARUMA_BLOCK = 6             # Sayu: and the Block below it
-MI_SANCTIFYING_RING_DMG = 5     # Shinobu: Electro to ALL, per turn, 3 turns
-MI_SANCTIFYING_RING_BLOCK = 5   # Shinobu: and the Block that rides it
+MI_JUUGA_DMG = 7                # Gorou: Geo damage per turn, 3 turns
+MI_DARUMA_DMG = 9               # Sayu: the Daruma's hit above 70% HP
+MI_DARUMA_BLOCK = 9             # Sayu: and the Block below it
+MI_SANCTIFYING_RING_DMG = 6     # Shinobu: Electro to ALL, per turn, 3 turns
+MI_SANCTIFYING_RING_BLOCK = 6   # Shinobu: and the Block that rides it
 MI_BLAZING_BARRIER_BLOCK = 3    # Thoma: Block per absorbing hit
 MI_OOYOROI_DMG = 5              # Thoma: Pyro per Attack you play, 2 turns
 MI_OOYOROI_BLOCK = 3            # Thoma: and the Block per Attack
@@ -708,7 +708,7 @@ MI_SOUMETSU_FINALE = 16         # Ayaka: and the hit it ends on
 MI_KYOUKA_BONUS = 4             # Ayato: damage your Attacks gain, 2 turns
 MI_KYOUKA_FINALE = 12           # Ayato: the illusion that pops when it ends
 MI_SURPRISE_DISPATCH_DMG = 10   # Kirara: the parcel, next turn
-MI_TAMOTO_DMG = 6               # Chiori: Geo per turn, ignoring Block
+MI_TAMOTO_DMG = 7               # Chiori: Geo per turn, ignoring Block
 
 # THE INAZUMA UNIVERSALS, WHOLE -- the workshop's sec.3 in its own character
 # order. TWENTY-FOUR, and the number is worth writing down: its sec.4 counts
@@ -834,7 +834,7 @@ COVEN_PERSONAL_POOL_IDS: tuple[str, ...] = (
 # above: a number the CARD prints stays on the card row, and only a number a
 # POWER carries lands here, because the C# mirrors are compared BY VALUE
 # (`tools/lint_constant_parity.py`). Every one is R236's printed text.
-CVN_HERALD_BLOCK = 3            # Qiqi: Block at the start of each turn
+CVN_HERALD_BLOCK = 4            # Qiqi: Block at the start of each turn
 CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 
 # =============================================================================
@@ -1259,7 +1259,8 @@ OZ_DMG = 3                        # Oz end-of-turn hit (applies electro)
 WITCHS_FLAME_BURST = 3            # Durin: Burst Energy per consumed Pyro aura
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
-MASQUE_BOND_BLOCK = 5             # Arlecchino: Bond of Life, Block owed per turn
+MASQUE_HP_LOSS = 1                # Arlecchino: HP lost at the start of each turn
+ANCIENT_SEA_DMG = 5               # Neuvillette: Hydro damage at the start of each turn
 
 
 # --- Furina: Encore & Fanfare (kickoff §4) ---

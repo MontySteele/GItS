@@ -56,13 +56,15 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yumemizuki Mizuki — Anraku Secret Spring Therapy"),
-        ("description", "[gold]Swirl[/gold] ALL enemies. If you are above 70% HP, deal 18 damage to ALL enemies. Otherwise, [gold]Mend[/gold] 10."),
+        ("description", "[gold]Swirl[/gold] ALL enemies. Deal {CalculatedDamage:diff()} damage to ALL enemies and [gold]Mend[/gold] 6."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CalculationBaseVar(14m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,19 +80,13 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard
         {
             await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Anemo, Owner.Creature);
         }
-        if (Owner.Creature.CurrentHp * 100m > Owner.Creature.MaxHp * 70m)
-        {
-            await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 18m))
-                .FromCard(this, cardPlay)
-                .TargetingAllOpponents(CombatState!)
-                .WithElementHitFx(this)
-                .SpawningHitVfxOnEachCreature()
-                .Execute(choiceContext);
-        }
-        else
-        {
-            await KokomiRules.Mend(choiceContext, Owner.Creature, 10);
-        }
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .TargetingAllOpponents(CombatState!)
+            .WithElementHitFx(this)
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
+        await KokomiRules.Mend(choiceContext, Owner.Creature, 6);
     }
 
     protected override void OnUpgrade()

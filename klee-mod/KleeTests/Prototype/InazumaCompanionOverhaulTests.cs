@@ -302,6 +302,24 @@ public class InazumaCompanionOverhaulTests
     }
 
     [Fact]
+    public void Mizukis_snack_hits_and_mends_whatever_the_hp()
+    {
+        // The 2026-10-11 Companion pass: "Swirl ALL enemies. Deal 14 damage
+        // to ALL enemies and Mend 6." Both halves, no 70% branch.
+        var calls = Il.Calls(typeof(ProtoMiMizukiAnraku).GetMethod("OnPlay", All)!);
+        Assert.Contains(calls, c => c.Contains("DamageCmd.Attack"));
+        Assert.Contains(calls, c => c.Contains("KokomiRules.Mend"));
+        Assert.DoesNotContain(calls, c => c.Contains("get_CurrentHp"));
+        var card = new ProtoMiMizukiAnraku();
+        var face = ((BaseLib.Abstracts.ILocalizationProvider)card).Localization!
+            .Single(r => r.Item1 == "description").Item2;
+        Assert.Equal("[gold]Swirl[/gold] ALL enemies. Deal "
+                   + "{CalculatedDamage:diff()} damage to ALL enemies and "
+                   + "[gold]Mend[/gold] 6.", face);
+        Assert.Equal(2, card.EnergyCost.Canonical);
+    }
+
+    [Fact]
     public void Mizukis_snack_is_the_one_row_that_mends()
     {
         // And it goes through KokomiRules.Mend -- the ONE place "never above

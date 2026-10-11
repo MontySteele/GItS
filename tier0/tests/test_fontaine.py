@@ -322,16 +322,19 @@ def test_ancient_sea_authority_extends_applied_and_refreshed_auras():
     assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
 
 
-def test_ancient_sea_authority_applies_hydro_each_turn_start():
-    """Co-op notes pick 4 (2026-10-02, "Agreed on Neuvillette's a)"): "At
-    the start of your turn, apply Hydro to a random enemy." Nothing on play;
-    the Hydro lands at the turn start and lasts the extra turn."""
+def test_ancient_sea_authority_hits_for_hydro_each_turn_start():
+    """2026-10-11 Companion pass: "At the start of your turn, deal 5 Hydro
+    damage to a random enemy." (it applied Hydro only before). Nothing on
+    play; the hit lands at the turn start, lays the Hydro, and the Hydro
+    lasts the extra turn."""
     st = make_state(enemies=[make_enemy(hp=200)])
     effects.resolve_card(
         st, loader.get_card("proto_mf_neuvillette_ancient_sea_authority"))
     assert all(e.aura is None for e in st.enemies)
+    assert st.enemies[0].hp == 200
     effects.player_turn_start_triggers(st)
     e = st.enemies[0]
+    assert e.hp == 200 - C.ANCIENT_SEA_DMG == 195
     assert e.aura == "hydro"
     assert e.aura_turns_left == C.AURA_DURATION_TURNS + 1
 
@@ -346,44 +349,38 @@ def test_masque_ratchets_strength_every_turn():
     assert st.player.powers["strength"] == 2           # a ratchet, not a flat
 
 
-def test_masque_bond_of_life_eats_block_every_turn():
+def test_masque_loses_1_hp_every_turn_start_before_the_strength():
+    """2026-10-11 Companion pass: "At the start of your turn, lose 1 HP and
+    gain 1 Strength." Unblockable, flat per turn, and not scaled by the
+    stack (the upgrade's 2 Strength still costs 1 HP)."""
+    st = make_state(hp=50, enemies=[make_enemy(hp=300)])
+    effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
+    assert st.player.hp == 50                          # nothing on play
+    st.player.block = 10
+    effects.player_turn_start_triggers(st)
+    assert st.player.hp == 50 - C.MASQUE_HP_LOSS == 49
+    assert st.player.block == 10                       # Block does not pay it
+    assert st.player.powers["strength"] == 1
+    effects.player_turn_start_triggers(st)
+    assert st.player.hp == 48
+
+    st = make_state(hp=50, enemies=[make_enemy(hp=300)])
+    st.player.powers["masque_red_death"] = 2           # the upgraded stack
+    effects.player_turn_start_triggers(st)
+    assert st.player.hp == 49
+    assert st.player.powers["strength"] == 2
+
+
+def test_masque_bond_of_life_is_gone():
+    """The Bond of Life Block clause left in the 2026-10-11 pass: Block
+    standing at the end of the turn is no longer eaten."""
     st = make_state(enemies=[make_enemy(hp=300)])
     effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
-
     st.player.block = 12
     effects.player_turn_end_triggers(st)
-    assert st.player.block == 12 - C.MASQUE_BOND_BLOCK
-    bond = [ev for ev in st.log if ev["event"] == "bond_of_life"]
-    assert bond and bond[-1]["amount"] == C.MASQUE_BOND_BLOCK
-
-    # Every turn, not once: a second turn pays again.
-    st.player.block = 8
-    effects.player_turn_end_triggers(st)
-    assert st.player.block == 8 - C.MASQUE_BOND_BLOCK
-
-
-def test_masque_bond_clamps_at_zero_and_never_goes_negative():
-    """The debt is paid out of Block, not out of HP -- a turn with less Block
-    than the Bond loses what there is and no more."""
-    st = make_state(enemies=[make_enemy(hp=300)])
-    effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
-    st.player.block = 2
-    effects.player_turn_end_triggers(st)
-    assert st.player.block == 0
-    bond = [ev for ev in st.log if ev["event"] == "bond_of_life"]
-    assert bond[-1]["amount"] == 2      # paid what existed, owed 5
-
-
-def test_masque_bond_is_universal_and_navia_block_cannot_dodge_it():
-    """The reason the Bond is paid at turn end rather than at a card-block
-    funnel: power-sourced Block would otherwise slip past it."""
-    st = make_state(enemies=[make_enemy(hp=300)])
-    effects.resolve_card(st, loader.get_card("proto_mf_arlecchino_masque_red_death"))
-    st.player.powers["cannon_fire_support"] = 3
-    _play(st, "proto_mf_lynette_box_trick")        # Navia pays 3 Block, not card block
-    assert st.player.block == 3
-    effects.player_turn_end_triggers(st)
-    assert st.player.block == 0
+    assert st.player.block == 12
+    assert not [ev for ev in st.log if ev["event"] == "bond_of_life"]
+    assert not hasattr(C, "MASQUE_BOND_BLOCK")
 
 
 @pytest.mark.parametrize("stacks", (0, 1, 2))

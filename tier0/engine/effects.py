@@ -1539,7 +1539,7 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         # same reason celestial_gift left flat_attack_bonus at the 2026-07-26
         # red pen (the note there states the rule). It used to be a flat "+N
         # damage on your Attacks"; it is now a per-turn STRENGTH ratchet plus
-        # a Bond of Life that eats the first block, and the Strength half is
+        # a Bond of Life (gone since 2026-10-11), and the Strength half is
         # applied as a real power in player_turn_start_triggers
         # (powers.deal_damage folds it in after this read). Leaving the rider
         # here as well paid the companion twice -- once as flat damage, once
@@ -4709,7 +4709,8 @@ def _op_exhaust_statuses_grow_largest(state: CombatState, fx: dict,
     """THE KLEE STATUS PACKAGE: Albedo -- Dust of Purification."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.exhaust_statuses_grow_largest(state, int(fx["amount"]))
+    klee_overhaul.exhaust_statuses_grow_largest(
+        state, int(fx["amount"]), int(fx.get("draw_each", 0)))
 
 
 def _op_lose_strength(state: CombatState, fx: dict, card: Card) -> None:
@@ -5559,24 +5560,30 @@ def player_turn_start_triggers(state: CombatState) -> None:
     if n:
         powers.apply_power(state, p, "strength", n, applier=p)
         p.block += C.CELESTIAL_GIFT_BLOCK
-    # Arlecchino -- Strength half. Routed through powers.apply_power, NOT
-    # written into p.powers directly, so Kokomi's LAW 3 chokepoint sees it and
-    # converts it to Charge. That interaction is meant to fall out of the
-    # standard path rather than be special-cased anywhere.
+    # Arlecchino -- 2026-10-11 Companion pass: "At the start of your turn,
+    # lose 1 HP and gain 1 Strength." The HP first, as printed: an unblockable,
+    # unpowered loss (`refpowers.damage_player_unblockable`, the C#
+    # `CreatureCmd.Damage(Unblockable | Unpowered)`), flat per turn and not
+    # scaled by the stack. The Bond of Life Block clause left in the same pass.
+    # Strength routed through powers.apply_power, NOT written into p.powers
+    # directly, so Kokomi's LAW 3 chokepoint sees it and converts it to Charge.
     n = p.powers.get("masque_red_death", 0)
     if n:
+        from tier0.engine import refpowers as _rp_masque   # late import (cycle)
+        _rp_masque.damage_player_unblockable(state, C.MASQUE_HP_LOSS,
+                                             reason="masque_red_death")
         powers.apply_power(state, p, "strength", n, applier=p)
-    # Neuvillette -- co-op notes pick 4 (2026-10-02): "At the start of your
-    # turn, apply Hydro to a random enemy." One per copy (the amount counts
-    # copies; the upgrade is a cost cut), through `resolve_hit` like the
-    # apply_aura op, so it reacts and credits. C# twin:
-    # `AncientSeaAuthorityPower.AfterPlayerTurnStart`.
+    # Neuvillette -- 2026-10-11 Companion pass: "At the start of your turn,
+    # deal 5 Hydro damage to a random enemy." (was: apply Hydro). One hit per
+    # copy (the amount counts copies; the upgrade is a cost cut); the damage
+    # applies the Hydro, so it reacts and credits as any companion hit does.
+    # C# twin: `AncientSeaAuthorityPower.AfterPlayerTurnStart`.
     for _ in range(p.powers.get("ancient_sea_authority", 0)):
         if not state.living_enemies:
             break
         enemy = state.rng.choice(list(state.living_enemies))
-        reactions.resolve_hit(state, enemy, "hydro", 0,
-                              "ancient_sea_authority")
+        deal_damage_to_enemy(state, enemy, C.ANCIENT_SEA_DMG,
+                             element="hydro", source="companion")
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
         gain_sparks(state, n, source="power:endless_fireworks/turn_start")
@@ -5685,6 +5692,16 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         enemy = state.rng.choice(state.living_enemies)
         deal_damage_to_enemy(state, enemy, n, element="pyro",
                              source="companion")
+    # Varka, Sturm und Drang (2026-10-11 Companion pass): "At the start of your
+    # turn, Swirl a random enemy." Once per turn whatever the stack (the stack
+    # is the rider's damage, so copies already bank more per Swirl). The same
+    # damage-less Anemo the `swirl` op lays, so it banks the rider through
+    # `companion_overhaul_reaction` when the body held an aura. After Durin's
+    # Pyro, so a Pyro that hit laid can be the aura swirled. C# twin:
+    # `SturmUndDrangPower.AfterPlayerTurnStart`.
+    if p.powers.get("mc_sturm_und_drang", 0) and state.living_enemies:
+        enemy = state.rng.choice(state.living_enemies)
+        reactions.resolve_hit(state, enemy, "anemo", 0, "swirl_op")
     inazuma_overhaul_turn_start(state)
     # ---- and KLEE'S COVEN PERSONALS, last (R236) --------------
     # Qiqi's Herald applies Cryo, which can resolve a reaction, so it runs
@@ -5824,30 +5841,6 @@ def _exhaust_autoplay_sweep(state: CombatState) -> None:
 
 def player_turn_end_triggers(state: CombatState) -> None:
     p = state.player
-    # Arlecchino -- Bond of Life half, once per turn, clamped at zero.
-    #
-    # WHY END-OF-TURN AND NOT AT THE MOMENT BLOCK IS GAINED. The card reads
-    # "the first 5 Block you gain each turn does not count", and eating it at
-    # the gain site would need a funnel that does not exist: Block is added at
-    # ~15 places, and modify_block_gained deliberately covers CARD block only
-    # (its docstring: passive/power Block from Metallicize, Crystallize and
-    # Solar Isotoma is intentionally exempt from Frail). Deducting once at turn
-    # end is ARITHMETICALLY IDENTICAL -- eating the first 5 leaves
-    # max(0, gained - 5), and so does subtracting 5 at the end and clamping --
-    # and it is universal, so Navia's or Crystallize's Block cannot dodge the
-    # Bond the way a card-only funnel would let it.
-    #
-    # The one case where the two differ is a card that READS current Block
-    # mid-turn: the `player_block` formula token (Body Slam). That card is
-    # reference-pool only and the refs take no companions
-    # (rewards.NO_COMPANION_CHARACTERS), so the divergence is unreachable
-    # today. Recorded rather than assumed away -- if a roster character ever
-    # gets a Block-reading card, this is the note that says to move the
-    # deduction to a real gain funnel.
-    if p.powers.get("masque_red_death", 0):
-        paid = min(p.block, C.MASQUE_BOND_BLOCK)
-        p.block -= paid
-        state.emit("bond_of_life", amount=paid, owed=C.MASQUE_BOND_BLOCK)
     # Runs FIRST: the game's AutoPostPlay phase lands after the player's
     # plays and before turn end, so the free play resolves ahead of the
     # other end-of-turn triggers and well ahead of the enemy turn.

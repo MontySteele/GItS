@@ -71,7 +71,7 @@ public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new DynamicVar("PowerAmount", 7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -131,7 +131,7 @@ public sealed class ProtoMcDurinPrincipleOfPurityModeA : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new DynamicVar("PowerAmount", 7m)
         };
 
     protected override void OnUpgrade()
@@ -163,7 +163,7 @@ public sealed class ProtoMcDurinPrincipleOfPurityModeB : ModalOptionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new DynamicVar("PowerAmount", 7m)
         };
 
     protected override void OnUpgrade()

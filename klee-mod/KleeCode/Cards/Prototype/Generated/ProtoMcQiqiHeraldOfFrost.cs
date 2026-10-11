@@ -52,7 +52,7 @@ public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Qiqi — Herald of Frost"),
-        ("description", "For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 3 [gold]Block[/gold]."),
+        ("description", "For {PowerAmount:diff()} turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -180,6 +180,8 @@ public class KleeStatusPackageTests
         Assert.Contains(Seq("KleeStatusPackage", "ExhaustStatuses"),
                         c => c.Contains("CardCmd.Exhaust"));
         Assert.Contains(dust, c => c.Contains("ProtoBombPower.GrowLargest"));
+        // The 2026-10-11 Companion pass: "Draw 1 card for each."
+        Assert.Contains(dust, c => c.Contains("CardPileCmd.Draw"));
         // Klee finish-line batch (2026-10-03): Finders Keepers pays on a
         // status DRAWN, Damage Report's hook.
         Assert.Contains(Seq("FindersKeepersPower", "AfterCardDrawn"),

@@ -97,17 +97,23 @@ public static class KleeStatusPackage
     }
 
     /// <summary>Albedo -- Dust of Purification: "Exhaust every status in your
-    /// hand. Your largest Bomb grows by 6 [8] for each." The exhausts first,
-    /// then ONE growth of <paramref name="per"/> times the count; with no
-    /// Bomb out the exhausts still happen.</summary>
+    /// hand. Your largest Bomb grows by 6 [8] for each. Draw 1 card for
+    /// each." The exhausts first, then ONE growth of <paramref name="per"/>
+    /// times the count; with no Bomb out the exhausts still happen. Then the
+    /// draw, <paramref name="drawEach"/> per status exhausted (the 2026-10-11
+    /// Companion pass). Sim twin:
+    /// <c>klee_overhaul.exhaust_statuses_grow_largest</c>.</summary>
     public static async Task<int> ExhaustStatusesGrowLargest(
-        PlayerChoiceContext choiceContext, Player player, int per)
+        PlayerChoiceContext choiceContext, Player player, int per,
+        int drawEach = 0)
     {
         var n = await ExhaustStatuses(choiceContext, player);
         if (n > 0 && per > 0 && player.Creature != null)
         {
             ProtoBombPower.GrowLargest(player.Creature, per * n);
         }
+        var cards = drawEach * n;
+        if (cards > 0) await CardPileCmd.Draw(choiceContext, cards, player);
         return n;
     }
 
