@@ -45,7 +45,7 @@ public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Design"),
-        ("description", "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold]."),
+        ("description", "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold]. At the start of your turn, put it into your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard, IUnplayableReasonCard
+public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -48,25 +48,13 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard, IUnp
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Change of Plans"),
-        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now."),
+        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 1 card."),
     };
-
-    // `EB-455`, the carry-out gate: a card whose whole body is
-    // a carry-out is unplayable while the Bake-Kurage holds no
-    // Plan, rather than paying its energy and exhausting itself
-    // for nothing.
-    protected override bool IsPlayable =>
-        KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0;
-
-    public string? UnplayableReason =>
-        KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0
-            ? null
-            : "no Plan is written";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -79,6 +67,7 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard, IUnp
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await KokomiPlan.ResolveFront(choiceContext, Owner.Creature);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

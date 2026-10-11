@@ -2236,6 +2236,21 @@ def fetch_open_casket(state: CombatState) -> None:
     state.emit("casket_fetch", found=True)
 
 
+def grand_design_fetch(state: CombatState) -> None:
+    """GRAND DESIGN's second sentence (Kokomi whole-run round 2, 2026-10-10):
+    "At the start of your turn, put it into your hand." Paid at Flood Tide's
+    site. One Open in hand is enough: if one is there nothing moves, and
+    copies of the Power do not fetch twice. Otherwise `fetch_open_casket`
+    moves the first one from the draw pile, then the discard pile.
+    `GrandDesignPower.Signal` is the twin."""
+    if not live(state) or not state.player.powers.get(GRAND_DESIGN, 0):
+        return
+    if any(c.id in (OPEN_THE_CASKET, OPEN_THE_CASKET + "+")
+           for c in state.player.hand):
+        return
+    fetch_open_casket(state)
+
+
 def coral_tithe(state: CombatState, per: int) -> None:
     """CORAL TITHE (the payoff pass, 2026-10-01): "Empty the Casket. Gain 1
     Energy and draw 1 card for every 3 in it." Only while she holds a Casket
