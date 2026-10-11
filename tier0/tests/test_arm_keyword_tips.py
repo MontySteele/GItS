@@ -435,8 +435,9 @@ def test_the_klee_tips_and_the_page_say_the_same_three_rules():
                                  "first. A random Set off picks an enemy "
                                  "with Bombs.")
     assert page["Set off"] == tips["SetOffKey"]
-    assert tips["MineKey"] == ("A Bomb that also goes off just before its "
-                               "enemy attacks. Any Set off spends it too.")
+    assert tips["MineKey"] == ("A Bomb that also goes off when its enemy "
+                               "attacks you. If it does not attack, the "
+                               "Mine waits. Any Set off spends it too.")
     assert page["Mine"] == tips["MineKey"]
     for gone in ("stacks beside the first", "Block stops it",
                  "the HP cap move it", "unless the Mine kills",
@@ -489,8 +490,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             "Gone after combat.",
-            "A [gold]Bomb[/gold] that also goes off just before its enemy ",
-            "attacks. Any ",
+            "A [gold]Bomb[/gold] that also goes off when its enemy attacks ",
+            "you. If it does not attack, the Mine waits. Any ",
             " spends it too.",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the

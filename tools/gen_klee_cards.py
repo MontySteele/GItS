@@ -3044,8 +3044,8 @@ APPLY_POWERS = {
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     "ko_bomb_echo": ("BombEchoPower", None,
-        "At the start of your turn, your largest [gold]Bomb[/gold] deals its "
-        "size in [gold]Pyro[/gold] damage without going off."),
+        "At the start of your turn, your largest [gold]Bomb[/gold], on any "
+        "enemy, deals its size in [gold]Pyro[/gold] damage without going off."),
     "ko_grounded": ("GroundedPower", None,
         "At the start of your turn, if you have a [gold]Bomb[/gold] on the "
         "field, gain {X} Block."),

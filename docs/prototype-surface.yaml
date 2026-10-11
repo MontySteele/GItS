@@ -147,7 +147,7 @@
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, your largest [gold]Bomb[/gold] deals its size in [gold]Pyro[/gold] damage without going off.",
+   description: "At the start of your turn, your largest [gold]Bomb[/gold], on any enemy, deals its size in [gold]Pyro[/gold] damage without going off.",
    upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_bomb_echo, amount: 1, target: self}]}
 
@@ -285,7 +285,7 @@
 - {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by 5 per [gold]Spark[/gold] spent.",
+   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 5 per [gold]Spark[/gold] spent.",
    upgrade: {grow: +2},
    effects: [{op: spend_spark, amount: all},
              {op: grow_largest_bomb, per_spark: 5}]}
@@ -505,7 +505,7 @@
 - {id: proto_ko_one_more_charge, name: "Witch's Homework", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Your largest [gold]Bomb[/gold] grows by 12. If it is now 20 or more, draw 1 card.",
+   description: "Your largest [gold]Bomb[/gold], on any enemy, grows by 12. If it is now 20 or more, draw 1 card.",
    upgrade: {grow: +3},
    effects: [{op: grow_largest, amount: 12, draw_if_at_least: 20, draw: 1}]}
 
@@ -527,7 +527,7 @@
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Put a [gold]Set off[/gold] card from your discard pile into your hand. Your largest [gold]Bomb[/gold] grows by 3.",
+   description: "Put a [gold]Set off[/gold] card from your discard pile into your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by 3.",
    upgrade: {grow: +3},
    effects: [{op: fetch_from_discard, filter: set_off},
              {op: grow_largest, amount: 3}]}
@@ -609,14 +609,14 @@
    # doubled again, and with The Big One and Boom Badge a Bomb 30 went off for
    # 480. One doubling per copy per combat.
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Your largest [gold]Bomb[/gold] doubles in size.",
+   description: "Your largest [gold]Bomb[/gold], on any enemy, doubles in size.",
    upgrade: {retain: true},
    effects: [{op: multiply_largest_bomb, factor: 2}]}
 
 - {id: proto_ko_favonius_escort, name: "Favonius Escort", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
-   description: "Remove your largest [gold]Bomb[/gold]. Gain [gold]Block[/gold] equal to twice its size.",
+   description: "Remove your largest [gold]Bomb[/gold], on any enemy. Gain [gold]Block[/gold] equal to twice its size.",
    upgrade: {retain: true},
    effects: [{op: remove_bomb_for_block, multiplier: 2}]}
 
@@ -2567,7 +2567,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold] grows by 6 for each.",
+   description: "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by 6 for each.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6}]}
 
@@ -3418,7 +3418,7 @@
 - {id: proto_ko_hide_here, name: "Hide Here!", character: klee,
    authored_by: [claude], multiplayer: true,
    cost: 1, type: skill, rarity: uncommon,
-   description: "Another player gains [gold]Block[/gold] equal to your largest [gold]Bomb[/gold], up to 12.",
+   description: "Another player gains [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] on any enemy, up to 12.",
    upgrade: {cap: 4},
    effects: [{op: block_largest_bomb, cap: 12, target: ally}]}
 

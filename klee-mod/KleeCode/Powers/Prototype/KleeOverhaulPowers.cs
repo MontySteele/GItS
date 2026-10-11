@@ -228,8 +228,8 @@ public sealed class BombEchoPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sparks 'n' Splash"),
         ("description",
-            "At the start of your turn, your largest [gold]Bomb[/gold] deals "
-          + "its size in [gold]Pyro[/gold] damage without going off."),
+            "At the start of your turn, your largest [gold]Bomb[/gold], on any "
+          + "enemy, deals its size in [gold]Pyro[/gold] damage without going off."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -262,6 +262,23 @@ FRONT_ENEMY_ALLOWED = {"proto_kk_the_generals_banner", "GeneralsBannerPower.desc
 MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  "proto_vk_oath_unto_death", "OathUntoDeathPower.description"}
 
+#: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
+#: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat
+#: meant the boss's). Every reading but Pocket Match's is board-wide, so a
+#: face says "on any enemy" or "on the enemy", or is listed here with why.
+LARGEST_BOMB = re.compile(r"\blargest Bomb")
+LARGEST_BOMB_SAYS_WHERE = re.compile(r"\bon (?:the|any) enemy\b")
+LARGEST_BOMB_ALLOWED = {
+    "proto_ko_all_of_my_treasures": (
+        "it has no target and places on ALL enemies, so no enemy is "
+        "singled out to misread; a second 'enemy' clause in one sentence "
+        "reads worse than the gap it closes"),
+    "proto_ko_simmer": (
+        "'plus the size of your largest Bomb on any enemy' takes the face to "
+        "124 of 120 with its Dazed sentence; held for a text pick (the Klee "
+        "round fixes, 2026-10-11) rather than a length exception"),
+}
+
 TAG = re.compile(r"\[/?[a-z_]+\]")
 LIT = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
@@ -839,6 +856,11 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
                 and FRONT_ENEMY.search(text) and row.ident not in FRONT_ENEMY_ALLOWED:
             out.append(f"{tag}: front-enemy: a Plan line names no target; "
                        f"the tip carries the rule: {text}")
+        if (row.surface in ("card", "mode") and LARGEST_BOMB.search(text)
+                and not LARGEST_BOMB_SAYS_WHERE.search(text)
+                and base not in LARGEST_BOMB_ALLOWED):
+            out.append(f"{tag}: largest-bomb-where: say 'on any enemy' or "
+                       f"'on the enemy': {text}")
     if gate:
         known = {r.ident for r in rows}
         for ident, reason in exceptions.items():
@@ -926,6 +948,7 @@ def self_test() -> list[str]:
         Row("power", "fx_dash", "Draw {Amount} cards -- unless you play an Attack.", "fixture"),
         Row("card", "fx_upgrade", "Deal 6 damage.{IfUpgraded:show: Then draw 2 cards and gain 3 Block.|}", "fixture"),
         Row("tip", "fx_tip", "A " + "very " * 30 + "long tip.", "fixture"),
+        Row("card", "fx_largest", "Your largest [gold]Bomb[/gold] grows by 3.", "fixture"),
     ]
     expected = {"fx_long": ("> 120", "sentences", "reaction-lowercase", "more-damage"),
                 "fx_target": ("target-word",), "fx_every": ("every-enemy",),
@@ -933,7 +956,7 @@ def self_test() -> list[str]:
                 "fx_bare": ("bare-keyword",), "fx_gold_type": ("gold-cardtype",),
                 "fx_plan_front": ("front-enemy",), "fx_lasts": ("lasts-more",),
                 "fx_dash": ("dash",), "fx_upgrade": ("upgrade clause",),
-                "fx_tip": ("> 135",)}
+                "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-where",)}
     found = findings_for(fixture, {}, gate=False)
     for ident, needles in expected.items():
         mine = [f for f in found if f"[{ident}]" in f]
@@ -945,6 +968,7 @@ def self_test() -> list[str]:
         Row("card", "ok_b", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 5 damage to ALL enemies.", "fixture"),
         Row("power", "ok_c", "At the end of your turn, deal [blue]6[/blue] [gold]Cryo[/gold] damage to a random enemy. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}.", "fixture"),
         Row("card", "ok_d", "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.", "fixture"),
+        Row("card", "ok_e", "Your largest [gold]Bomb[/gold], on any enemy, grows by 3.", "fixture"),
     ]
     for f in findings_for(clean, {}, gate=False):
         bad.append(f"self-test: clean fixture raised {f}")
@@ -975,7 +999,7 @@ def main(argv: list[str]) -> int:
         bad = self_test()
         for line in bad:
             print(line)
-        print("self-test: 12 bad + 4 clean case(s) + the EB-777 semicolon "
+        print("self-test: 13 bad + 5 clean case(s) + the EB-777 semicolon "
               f"face, {len(bad)} failure(s)")
         return 1 if bad else 0
     if "--report" in argv:

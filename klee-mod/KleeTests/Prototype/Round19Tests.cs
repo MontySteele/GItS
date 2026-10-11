@@ -329,7 +329,7 @@ public class Round19Tests
         // the Mine tip's "also" is not a correction to it (text pass
         // 2026-09-25).
         Assert.DoesNotContain("only", bomb);
-        Assert.Contains("also goes off just before its enemy attacks", mine);
+        Assert.Contains("also goes off when its enemy attacks", mine);
     }
 
 

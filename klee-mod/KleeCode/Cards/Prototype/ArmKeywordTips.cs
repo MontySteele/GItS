@@ -247,8 +247,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
-            "A [gold]Bomb[/gold] that also goes off just before its enemy "
-          + "attacks. Any [gold]Set off[/gold] spends it too.");
+            "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
+          + "you. If it does not attack, the Mine waits. Any "
+          + "[gold]Set off[/gold] spends it too.");
 
     /// <summary>
     /// `EB-446`. A NAME ON ONE FACE THAT BELONGS TO ANOTHER CARD.
