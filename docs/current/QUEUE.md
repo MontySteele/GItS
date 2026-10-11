@@ -25,6 +25,12 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Klee pass round** (`review/records/klee-fullrun-pass-round-2026-10-11.md`,
+  four picks): (1) the next Companion paper leads with Uncommon/Rare Companions,
+  default yes; (2) Bomb growth 3 a turn, default hold; (3) a targeted Stoke the
+  Fuse, default text fix only; (4) Exquisite Compound and Taste Test, default hold.
+  Klee is ready for [USER]'s playtest sweep.
+
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.
