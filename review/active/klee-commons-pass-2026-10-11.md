@@ -81,3 +81,12 @@ Klee is at Balance, so these are your picks.
 2. **Simmer's Dazed.**
    - **(a) Default:** remove it.
    - (b) Keep it and deal the full largest Bomb instead of half, the Wild Strike shape: a drawback that buys a bigger number.
+
+## Ruled 2026-10-11
+
+[USER]: "Agreed on 6 of the commons - I like leaving the Dazed on Simmer, so let's try b)".
+
+- **Pick 1:** the six other Commons as listed.
+- **Pick 2 (b):** Simmer keeps its Dazed and deals 6 [9] plus your full largest Bomb, which doesn't go off.
+
+Built into `klee-next`; the Klee seat round above checks it.
