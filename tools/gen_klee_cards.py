@@ -3427,7 +3427,7 @@ APPLY_POWERS = {
         "Your next [gold]Attack[/gold] this turn deals {X} more damage and "
         "applies [gold]Pyro[/gold]."),
     "mc_sacramental_shower": ("SacramentalShowerPower", None,
-        "The next time an enemy attacks you, deal 9 damage and apply "
+        "The next time an enemy attacks you, deal 12 damage and apply "
         "[gold]Hydro[/gold] to it first."),
     "mc_favonian_favor": ("FavonianFavorPower", None,
         "Whenever a reaction happens this turn, gain {X} [gold]Block[/gold]."),
