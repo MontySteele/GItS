@@ -180,9 +180,12 @@ Five whole-run Sonnet seats at A0 on build 0.2.4914+next, the same seeds as befo
 
 **Fixed with no pick needed:**
 - Open the Casket's text no longer says "then empty it" under Grand Design. Two seats were misled by it.
-- The seat page no longer reports a Plan aimed at an already-dead enemy as a Plan that failed.
+- Open the Casket's tip lost "Upgraded, it also draws a card" to fit. The card face still says it.
 - Treatise's word "normally" is replaced with plain words.
-- Two telemetry gaps are on BACKLOG: `damage_blocked`, and Plan damage being credited to the Bake-Kurage.
+- **On BACKLOG, not fixed:**
+  - The seat page reports a Plan with no living enemy left to hit as one that moved nothing; the game sends no field that tells the two apart.
+  - Plan damage is credited to the Bake-Kurage.
+  - Telemetry has no field for Block that absorbed hits on her; `damage_blocked` is enemy Block her hits broke.
 
 **Left alone:**
 - Open the Casket at an empty Casket still raises its cost (one seat fell into it). That is your ramp rule of 2026-10-10.
