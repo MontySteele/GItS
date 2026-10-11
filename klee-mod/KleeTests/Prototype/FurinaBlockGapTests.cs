@@ -157,8 +157,11 @@ public class FurinaBlockGapTests
     [Fact]
     public void The_masquerade_pays_the_hp_drained_past_the_line_too()
     {
-        // Entered at 78: the line is 59. At 60 HP a Drain 4 goes 3 past it.
-        var kit = new StageKit(new StageMods { Masquerade = 1 }, 0, 60, 78);
+        // A buffer of 19 from 78 (the Drain buffer, 2026-10-11), 18 of it
+        // drained: a Drain 4 goes 3 past the line.
+        var kit = new StageKit(new StageMods { Masquerade = 1 }, 0, 78, 78);
+        Assert.True(StageKit.Run(kit.Director.Drain(18)));
+        kit.Board.Log.Clear();
         Assert.True(StageKit.Run(kit.Director.Drain(4)));
         Assert.Equal(3, kit.Stage.DrainedPast);
         Assert.Contains("block 4", kit.Board.Log);
@@ -167,11 +170,14 @@ public class FurinaBlockGapTests
     [Fact]
     public void The_masquerade_pays_a_guest_acts_drain_stopped_at_the_line()
     {
-        // Line 49 with Lyney on stage; at 50 HP his Drain 2 has room for 1.
-        var kit = new StageKit(new StageMods { Masquerade = 1 }, 0, 50, 78,
+        // A buffer of 29 with Lyney on stage, 28 of it drained: his Drain 2
+        // has room for 1.
+        var kit = new StageKit(new StageMods { Masquerade = 1 }, 0, 78, 78,
                                StagePerformer.Lyney);
+        Run(kit.Director.Drain(28));
+        kit.Board.Log.Clear();
         Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Equal(1, kit.Stage.Drained);
+        Assert.Equal(29, kit.Stage.Drained);
         Assert.Contains("block 1", kit.Board.Log);
         Assert.DoesNotContain("block 2", kit.Board.Log);
         // At the line: no Drain, so no Block.

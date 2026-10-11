@@ -63,7 +63,9 @@ def test_an_evicted_guests_card_returns_to_the_discard_pile():
     assert st.player.ftd.ledger["guest_acts"]["wriothesley"] == 0
 
 
-def test_a_duplicate_moves_its_guest_to_the_newest_seat_with_no_act():
+def test_a_duplicate_moves_its_guest_to_the_newest_seat_and_it_acts():
+    """The 2026-10-11 playtest: "I'm thinking to let the guest star Act when
+    replayed to make getting a second copy do something at all." """
     st = _furina()
     _play(st, _card("proto_fs_guest_star_lynette"))
     _play(st, _card("proto_fs_guest_star_chevreuse"))
@@ -73,7 +75,29 @@ def test_a_duplicate_moves_its_guest_to_the_newest_seat_with_no_act():
     assert FS.stage(st.player) == ["chevreuse", "lynette"]
     assert "lynette" in f.stage_up
     assert len(f.stage_cards["lynette"]) == 2
+    assert dict(f.ledger["guest_acts"]) == {"lynette": 1}
+
+
+def test_played_twice_the_first_seats_the_guest_and_the_second_acts():
+    st = _furina()
+    hp = st.enemies[0].hp
+    _play(st, _card("proto_fs_guest_star_clorinde"))
+    f = st.player.ftd
     assert sum(f.ledger["guest_acts"].values()) == 0
+    assert st.enemies[0].hp == hp
+    _play(st, _card("proto_fs_guest_star_clorinde"))
+    assert dict(f.ledger["guest_acts"]) == {"clorinde": 1}
+    assert hp - st.enemies[0].hp == T.CLORINDE_ACT
+    assert FS.stage(st.player) == ["clorinde"]
+
+
+def test_a_repeat_act_pays_the_drain_its_act_costs():
+    st = _furina()
+    _play(st, _card("proto_fs_guest_star_lyney"))
+    hp = st.player.hp
+    _play(st, _card("proto_fs_guest_star_lyney"))
+    assert st.player.hp == hp - T.LYNEY_ACT_DRAIN
+    assert st.player.ftd.ledger["guest_acts"]["lyney"] == 1
 
 
 def test_final_bow_acts_twice_then_its_guest_leaves_and_its_card_returns():
@@ -288,8 +312,8 @@ def test_the_drain_cards_and_their_counts():
 
 
 def test_against_the_tide_reads_the_line():
-    st = _furina()                             # entered at 78: line 39
-    st.player.hp = 43                          # within 5 of it
+    st = _furina()                             # a buffer of 19
+    st.player.ftd.drained_above = 15           # 4 left: within 5 of the line
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_against_the_tide"))
     assert hp - st.enemies[0].hp == 14

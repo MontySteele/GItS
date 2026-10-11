@@ -41,6 +41,19 @@ weight, because a hit eats the HP she would otherwise lend.
    bigger effect ("Deal 7. Drain 3: deal 14 instead."). It cannot take her
    below half the HP she started this combat with. HP lost to a Drain is
    *drained*.
+   **Amended 2026-10-11 (the Drain buffer).** [USER]: "There should be a
+   buffer for drain equal to 1/4 my max HP which should be restore-able,
+   but getting hurt should not disqualify it. Say my max HP is 80 and my
+   current HP is 50. Then the drain line is 20 below, aka 30. If I take 15
+   normal damage and Drain 15, I expect to be at 20 hp with my Drain line
+   at 15 and be able to Repay to 35." So: each combat her buffer is 1/4 of
+   her Max HP, rounded down (Lyney adds 10). It is counted in HP drained: a
+   Drain fills it first, what goes beyond it is drained past the line, and
+   enemy damage never touches it. The line as shown is her HP less the
+   buffer left. Drained HP within the buffer returns after the fight; HP
+   drained past it returns only through Repay. (This replaces the
+   2026-10-09 line, entry HP minus 1/4 of Max HP, under which a hit used up
+   the room.)
 2. **Restore N.** She gets back up to N of her drained HP. It never returns
    more than she drained, and never HP an enemy took. Drained HP still
    missing when the fight ends is gone.

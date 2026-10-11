@@ -58,7 +58,9 @@ public static class FurinaStageLaw
 
     // ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md) ------
 
-    /// <summary>Lyney's line: "Your Drain line is 10 HP lower."</summary>
+    /// <summary>Lyney's line: "Your Drain line is 10 HP lower." Since the
+    /// Drain buffer (2026-10-11) he adds 10 to her buffer, which puts the
+    /// line 10 HP lower.</summary>
     public const int LyneyLineDrop = 10;
 
     /// <summary>Lyney's act: "Drain 2, never past your line (none at or below
@@ -225,44 +227,52 @@ public static class FurinaStageLaw
     public static bool NearTheLine(int hp, int line) => hp - line <= NearLine;
 
     /// <summary>
-    /// Rule 1: THE LINE (the Drain line rule, ruled 2026-10-09, quarter of
-    /// Max HP the same day): the HP she started this combat with, minus 1/4
-    /// of the Max HP she started it with, the quarter rounded DOWN (80 Max
-    /// HP takes 20, 85 takes 21). Entering at 50/80 the line is 30: 20 HP of
-    /// room. Never below 0. A Drain may go past it; HP drained past it is
-    /// lost at the curtain call unless Repaid. Integer throughout, so the
-    /// sim (<c>furina_tide.half_line</c>) computes the same number.
+    /// Rule 1: THE DRAIN BUFFER (2026-10-11; [USER]: "There should be a
+    /// buffer for drain equal to 1/4 my max HP which should be restore-able,
+    /// but getting hurt should not disqualify it. Say my max HP is 80 and my
+    /// current HP is 50. Then the drain line is 20 below, aka 30. If I take
+    /// 15 normal damage and Drain 15, I expect to be at 20 hp with my Drain
+    /// line at 15 and be able to Repay to 35."). Each combat her buffer is
+    /// 1/4 of the Max HP she entered it with, rounded DOWN (80 takes 20, 85
+    /// takes 21); Lyney on stage adds <see cref="LyneyLineDrop"/>. It is
+    /// counted in HP DRAINED, never in HP position: a Drain fills it first,
+    /// what it drains beyond it is drained past the line, and an enemy's hit
+    /// never touches it. A Repay of drained HP within it refills it. (Until
+    /// 2026-10-11 the line was fixed at her entry HP minus the quarter, so a
+    /// hit used up the room.) Integer throughout, so the sim
+    /// (<c>furina_tide.shipped_buffer</c>) computes the same number.
     /// </summary>
-    public static int LineOf(int entryHp, int maxHp) =>
-        System.Math.Max(0, System.Math.Max(0, entryHp)
-                           - System.Math.Max(0, maxHp) / LineMaxHpDivisor);
+    public static int BufferOf(int maxHp, bool lyney = false) =>
+        System.Math.Max(0, maxHp) / LineMaxHpDivisor
+      + (lyney ? LyneyLineDrop : 0);
 
-    /// <summary>The line's room is 1/4 of her Max HP, rounded down. Mirrors
+    /// <summary>The buffer is 1/4 of her Max HP, rounded down. Mirrors
     /// <c>furina_tide.LINE_MAX_HP_DIVISOR</c>.</summary>
     public const int LineMaxHpDivisor = 4;
 
-    /// <summary>The line with its one mover: Lyney on stage lowers it by 10,
-    /// never below 1. (A Five-Century Act no longer moves it: it returns the
-    /// HP drained past it instead.)</summary>
-    public static int LineOf(int entryHp, int maxHp, bool lyney)
-    {
-        var line = LineOf(entryHp, maxHp);
-        return lyney ? System.Math.Max(DrainFloor, line - LyneyLineDrop)
-                     : line;
-    }
+    /// <summary>THE LINE AS SHOWN (2026-10-11): her HP now minus the buffer
+    /// she has left, never below 0. At 20 HP with 5 of buffer left it is 15.
+    /// It moves with her HP; a Drain within the buffer leaves it where it
+    /// was, and so does a Repay of that Drain.</summary>
+    public static int LineAt(int hp, int bufferLeft) =>
+        System.Math.Max(0, System.Math.Max(0, hp) - System.Math.Max(0, bufferLeft));
 
     /// <summary>Where the line comes from, in words, for its hover and the
     /// seat page (2026-10-05: seats connected the line to their entry HP
-    /// only late). The same two branches as
-    /// <see cref="LineOf(int, int, bool)"/>.</summary>
+    /// only late; the buffer's words since 2026-10-11).</summary>
     public static string LineWhy(bool lyney) =>
-        lyney ? LineWhyBase + ", " + LyneyLineDrop
-                + " lower with Lyney on stage"
-              : LineWhyBase;
+        LineWhyBase + (lyney ? ", plus " + LyneyLineDrop
+                               + " with Lyney on stage" : "")
+      + LineWhyTail;
 
-    /// <summary>The base line's source, in the base game's words.</summary>
+    /// <summary>The line's source, in the base game's words (2026-10-11).
+    /// </summary>
     public const string LineWhyBase =
-        "the HP you started this fight with, minus 1/4 of your Max HP";
+        "your HP minus your Drain buffer: 1/4 of your Max HP";
+
+    /// <summary>The buffer's last clause: what she has drained into it.
+    /// </summary>
+    public const string LineWhyTail = ", less what you have drained";
 
     /// <summary>A line of 0 explains itself (the Spend round 2, 2026-10-10:
     /// a seat read a line of 0 as "every Drain is permanent", which is

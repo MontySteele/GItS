@@ -48,7 +48,7 @@ public sealed class ProtoFsGuestStarLynette : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Lynette"),
-        ("description", "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Anemo[/gold] damage to an enemy with an aura.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarLynette : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("GuestAct", FurinaStageLaw.LynetteActDamage)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,5 +81,6 @@ public sealed class ProtoFsGuestStarLynette : CustomCardModel, ICharacterCard
     protected override void OnUpgrade()
     {
         // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
+        DynamicVars["GuestAct"].UpgradeValueBy(FurinaStageLaw.LynetteActDamageUpgraded - FurinaStageLaw.LynetteActDamage);
     }
 }

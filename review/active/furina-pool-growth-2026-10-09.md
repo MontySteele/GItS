@@ -52,7 +52,11 @@ rule, which this section proposes (pick 1).
 - The current "play a guest who is already on stage and it acts at once"
   path goes away. In the co-op run, that path read as guests acting twice.
   A second copy played while its guest is on stage moves that guest to the
-  newest seat, with no act.
+  newest seat, and it then **acts once**, exactly as on its turn (a Drain
+  its act costs included). Amended 2026-10-11 after [USER]'s Furina
+  playtest: "I'm thinking to let the guest star Act when replayed to make
+  getting a second copy do something at all." (Until then it moved with no
+  act.)
 - **End-of-turn order:** each guest acts, oldest first. Then Showstopper
   Spends and the guests act again. Then Salon Solitaire Repays.
 - In shape a guest is now a Power with a seat cap and an end-of-turn act.

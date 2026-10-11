@@ -36,8 +36,8 @@ public static class FurinaStageBowPreview
     }
 
     /// <summary>The line for <paramref name="stage"/> (the pins'; the pool to
-    /// 75's rule): "(Clorinde moves to the newest seat)" for a guest already
-    /// on stage, "(Charlotte will leave)" for the oldest guest on a full
+    /// 75's rule): "(Clorinde moves to the newest seat and acts)" for a
+    /// guest already on stage (it acts since the 2026-10-11 playtest), "(Charlotte will leave)" for the oldest guest on a full
     /// stage, else empty.</summary>
     public static string Line(FurinaStageLedger stage, StagePerformer who)
     {
@@ -45,7 +45,7 @@ public static class FurinaStageBowPreview
                                            stage.Capacity, who);
         return room.Kind switch
         {
-            StageSummonResult.Repeat => $"\n({who} moves to the newest seat)",
+            StageSummonResult.Repeat => $"\n({who} moves to the newest seat and acts)",
             StageSummonResult.Evict =>
                 $"\n({stage.Seats[room.Index].Who} will leave)",
             _ => "",
@@ -143,7 +143,8 @@ public static class FurinaStageFacePreview
 
     /// <summary>The Drain tip's in-combat sentence (the pool-75 round,
     /// 2026-10-09: every record missed where the line sat): "Your Drain line
-    /// is 30: the HP you started this fight with, minus 1/4 of your Max HP."
+    /// is 30: your HP minus your Drain buffer: ..." (the buffer's words since
+    /// 2026-10-11). Off the Drain tip since 2026-10-11.
     /// Empty off a combat or a Furina board.</summary>
     public static string LineNow(CardModel card)
     {

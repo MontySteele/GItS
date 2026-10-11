@@ -182,14 +182,16 @@ public class FurinaSpendRoundFixesTests : IDisposable
         {
             var b = Build(new ProtoFsOverdraft());            // Drain 4
             var ledger = FurinaStageLedger.For(b.Furina.Creature);
-            Seat.Force(b.Furina.Creature, "CurrentHp", ledger.Line + 2);
+            // 2 HP of Drain buffer left (the Drain buffer, 2026-10-11).
+            ledger.NoteDrain(ledger.BufferLeft - 2,
+                             (int)b.Furina.Creature.CurrentHp);
             Assert.Equal(FurinaStageFacePreview.PastLine(ledger.Line),
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
             ledger.ModsOverride = new StageMods { FiveCenturyAct = 1 };
             Assert.Equal("\n(Past your Drain line: returns after combat)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
-            // Above the line nothing is printed either way.
-            Seat.Force(b.Furina.Creature, "CurrentHp", ledger.Line + 10);
+            // Within the buffer nothing is printed either way.
+            ledger.NoteRepay(ledger.Drained);
             Assert.Equal("", FurinaStageFacePreview.DrainLine(b.Card, 4));
         });
     }
@@ -199,27 +201,29 @@ public class FurinaSpendRoundFixesTests : IDisposable
     [Fact]
     public void The_curtain_call_carries_the_lost_past_line_hp()
     {
-        // Entered at 60 of 80: the line is 40. At 42, Drain 8: 2 above, 6
-        // past.
-        var kit = StageKit.AtMax(42, 60, 80);
+        // A buffer of 20 from 80 (the Drain buffer, 2026-10-11), 18 of it
+        // drained: at 42, Drain 8 takes 2 within it and 6 past.
+        var kit = StageKit.AtMax(60, 60, 80);
+        Assert.True(StageKit.Run(kit.Director.Drain(18)));
         Assert.True(StageKit.Run(kit.Director.Drain(8)));
-        Assert.Equal(2, kit.Stage.DrainedAbove);
+        Assert.Equal(20, kit.Stage.DrainedAbove);
         Assert.Equal(6, kit.Stage.DrainedPast);
         var parts = StageKit.Run(kit.Director.CurtainCallParts());
-        Assert.Equal(new CurtainCallParts(2, 0, 6), parts);
-        Assert.Equal(36, kit.Board.Hp);
+        Assert.Equal(new CurtainCallParts(20, 0, 6), parts);
+        Assert.Equal(54, kit.Board.Hp);
         Assert.Equal(0, kit.Stage.Drained);
     }
 
     [Fact]
     public void Under_a_five_century_act_the_curtain_call_names_the_past_part_returned()
     {
-        var kit = new StageKit(new StageMods { FiveCenturyAct = 1 }, 0, 42, 60,
+        var kit = new StageKit(new StageMods { FiveCenturyAct = 1 }, 0, 60, 60,
                                80);
+        StageKit.Run(kit.Director.Drain(18));
         StageKit.Run(kit.Director.Drain(8));
         var parts = StageKit.Run(kit.Director.CurtainCallParts());
-        Assert.Equal(new CurtainCallParts(8, 6, 0), parts);
-        Assert.Equal(42, kit.Board.Hp);
+        Assert.Equal(new CurtainCallParts(26, 6, 0), parts);
+        Assert.Equal(60, kit.Board.Hp);
     }
 
     [Fact]

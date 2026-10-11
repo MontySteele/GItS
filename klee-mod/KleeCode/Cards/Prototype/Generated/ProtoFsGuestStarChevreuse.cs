@@ -41,14 +41,14 @@ public sealed class ProtoFsGuestStarChevreuse : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_chevreuse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Chevreuse"),
-        ("description", "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.{IfUpgraded:show: Also applies [gold]Weak[/gold].|}{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line

@@ -41,14 +41,14 @@ public sealed class ProtoFsGuestStarCharlotte : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCharlotte(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForRepay(ArmKeywordTips.ForCharlotte(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_charlotte");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Charlotte"),
-        ("description", "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}. Act: [gold]Repay[/gold] {GuestAct:diff()}.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarCharlotte : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("GuestAct", FurinaStageLaw.CharlotteActRepay)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,5 +81,6 @@ public sealed class ProtoFsGuestStarCharlotte : CustomCardModel, ICharacterCard
     protected override void OnUpgrade()
     {
         // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
+        DynamicVars["GuestAct"].UpgradeValueBy(FurinaStageLaw.CharlotteActRepayUpgraded - FurinaStageLaw.CharlotteActRepay);
     }
 }

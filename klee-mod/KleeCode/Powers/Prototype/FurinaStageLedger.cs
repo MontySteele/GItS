@@ -281,8 +281,9 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>The pool to 75's duplicate copy (sec.3): the guest in
-    /// <paramref name="index"/> moves to the newest seat (the back), with no
-    /// act. Its seat object, key and body stay its own.</summary>
+    /// <paramref name="index"/> moves to the newest seat (the back); the
+    /// director then has it act (2026-10-11). Its seat object, key and body
+    /// stay its own.</summary>
     public StageSeat? MoveToBack(int index)
     {
         if (index < 0 || index >= _seats.Count) return null;
@@ -357,11 +358,32 @@ public sealed class FurinaStageLedger
     /// quarter, 2026-10-09).</summary>
     public int EntryMaxHp { get; set; }
 
-    /// <summary>Rule 1: the Drain line, her entry HP minus 1/4 of her entry
-    /// Max HP (2026-10-09). Lyney on stage lowers it by 10. A Drain may go
-    /// past it; what it drains past it is <see cref="DrainedPast"/>.</summary>
-    public int Line => FurinaStageLaw.LineOf(
-        EntryHp, EntryMaxHp, OnStage(StagePerformer.Lyney));
+    /// <summary>Rule 1: the Drain buffer (2026-10-11), 1/4 of her entry Max
+    /// HP, plus 10 with Lyney on stage (<see cref="FurinaStageLaw.BufferOf"/>).
+    /// </summary>
+    public int Buffer => FurinaStageLaw.BufferOf(
+        EntryMaxHp, OnStage(StagePerformer.Lyney));
+
+    /// <summary>The buffer she has left: the buffer less the drained HP
+    /// within it (<see cref="DrainedAbove"/>). A hit never lowers it; a Repay
+    /// of drained HP within it raises it again.</summary>
+    public int BufferLeft => System.Math.Max(0, Buffer - DrainedAbove);
+
+    /// <summary>The Drain line at <paramref name="hp"/>: that HP less the
+    /// buffer left (<see cref="FurinaStageLaw.LineAt"/>). A Drain may go past
+    /// it; what it drains past it is <see cref="DrainedPast"/>.</summary>
+    public int LineAt(int hp) => FurinaStageLaw.LineAt(hp, BufferLeft);
+
+    /// <summary>Test seam: a detached ledger's HP (the headless board's).
+    /// </summary>
+    public System.Func<int>? HpSource { get; set; }
+
+    /// <summary>Rule 1: the Drain line now, at her current HP
+    /// (<see cref="LineAt"/>). It moves with her HP since 2026-10-11.
+    /// </summary>
+    public int Line => LineAt(
+        _furina != null ? (int)_furina.CurrentHp
+                        : HpSource?.Invoke() ?? EntryHp);
 
     /// <summary>Where <see cref="Line"/> comes from, in words (2026-10-05).
     /// </summary>
@@ -376,25 +398,26 @@ public sealed class FurinaStageLedger
 
     /// <summary>A guest act's Drain (the drain-line round, 2026-10-09): how
     /// much of <paramref name="amount"/> fits at <paramref name="hp"/>
-    /// without going past the line. 0 when she is at or below it.</summary>
+    /// without going past the line: the buffer left (2026-10-11). 0 when
+    /// none is left.</summary>
     public int GuestDrainRoom(int amount, int hp) =>
-        System.Math.Max(0, System.Math.Min(amount, hp - Line));
+        System.Math.Max(0, System.Math.Min(amount, hp - LineAt(hp)));
 
     /// <summary>Would a Drain of <paramref name="amount"/> at
     /// <paramref name="hp"/> go past the line? (The face's warning.)
     /// </summary>
     public bool PastLine(int amount, int hp) =>
-        amount > 0 && hp - amount < Line;
+        amount > 0 && hp - amount < LineAt(hp);
 
     /// <summary>HP lost to her Drains and not yet repaid: both parts.
     /// </summary>
     public int Drained => DrainedAbove + DrainedPast;
 
-    /// <summary>Drained HP taken while she stood above the line: it returns
-    /// at the curtain call.</summary>
+    /// <summary>Drained HP within her buffer (2026-10-11; before, taken while
+    /// she stood above the line): it returns at the curtain call.</summary>
     public int DrainedAbove { get; private set; }
 
-    /// <summary>Drained HP taken past the line: it stays lost at the curtain
+    /// <summary>Drained HP beyond her buffer, "past the line": it stays lost at the curtain
     /// call (unless A Five-Century Act is in play). A Repay returns this
     /// part first.</summary>
     public int DrainedPast { get; private set; }
@@ -445,14 +468,15 @@ public sealed class FurinaStageLedger
     public bool RepayedThisPlay { get; private set; }
 
     /// <summary>A Drain of <paramref name="amount"/> taken from
-    /// <paramref name="hpBefore"/>: the part that stayed at or above the line
-    /// is <see cref="DrainedAbove"/>, the rest <see cref="DrainedPast"/>.
+    /// <paramref name="hpBefore"/>: the part that fits in the buffer left is
+    /// <see cref="DrainedAbove"/>, the rest <see cref="DrainedPast"/>
+    /// (2026-10-11: counted by HP drained, not by HP position).
     /// </summary>
     public void NoteDrain(int amount, int hpBefore)
     {
         if (amount <= 0) return;
         var above = System.Math.Max(0,
-            System.Math.Min(amount, hpBefore - Line));
+            System.Math.Min(amount, hpBefore - LineAt(hpBefore)));
         DrainedAbove += above;
         DrainedPast += amount - above;
         DrainedThisTurn += amount;

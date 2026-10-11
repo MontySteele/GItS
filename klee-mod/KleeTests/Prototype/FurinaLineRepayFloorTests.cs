@@ -234,13 +234,17 @@ public class FurinaLineRepayFloorTests
     [Fact]
     public void The_drain_tip_states_the_quarter_of_max_hp_rule()
     {
-        Assert.Contains("minus 1/4 of your Max HP", DrainBody);
+        // The Drain buffer (2026-10-11): the tip states the quarter, and
+        // the line's hover states where the line comes from.
+        Assert.Contains("the first 1/4 of your Max HP drained returns", DrainBody);
         Assert.DoesNotContain("3/4", DrainBody);
-        Assert.Contains("lost unless you", DrainBody);
-        Assert.Equal("the HP you started this fight with, minus 1/4 of your "
-                     + "Max HP", FurinaStageLaw.LineWhy(false));
-        Assert.EndsWith(", 10 lower with Lyney on stage",
-                        FurinaStageLaw.LineWhy(true));
+        Assert.Contains("only [gold]Repay[/gold] returns", DrainBody);
+        Assert.Equal("your HP minus your Drain buffer: 1/4 of your Max HP, "
+                     + "less what you have drained",
+                     FurinaStageLaw.LineWhy(false));
+        Assert.Equal("your HP minus your Drain buffer: 1/4 of your Max HP, "
+                     + "plus 10 with Lyney on stage, less what you have "
+                     + "drained", FurinaStageLaw.LineWhy(true));
     }
 
     // ---- the ruled card numbers ----------------------------------------------

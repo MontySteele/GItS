@@ -908,10 +908,12 @@ public static class ArmKeywordTips
     /// Fanfare gauge's hover (<c>Vfx.FanfareCounter</c>). The pool-75 round
     /// (2026-10-09): a seat banked 30 for a fight that never came. Her
     /// ledger lives one combat (<see cref="FurinaStageLedger.For"/>), so the
-    /// tip says it resets.</summary>
+    /// tip says it resets.
+    /// The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
+    /// rather verbose (Drain moreso)".</summary>
     internal const string FanfareBody =
-        "Gain 1 [gold]Fanfare[/gold] for each HP you lose or [gold]Repay[/gold]. "
-      + "[gold]Spend[/gold] uses it. It resets to 0 after each combat.";
+        "Gain 1 for each HP you lose or [gold]Repay[/gold]. "
+      + "[gold]Spend[/gold] uses it. Resets after each combat.";
 
     /// <summary>Rule 3: Fanfare is one number on Furina.</summary>
     public static IEnumerable<IHoverTip> ForFanfare(
@@ -920,22 +922,26 @@ public static class ArmKeywordTips
 
     /// <summary>Rule 1 and the curtain call, shared by the keyword tip and
     /// the Drained counter's hover (<c>Vfx.DrainedCounter</c>). The Drain
-    /// line rule (ruled 2026-10-09): the line is her entry HP minus 1/4 of
-    /// her Max HP, a Drain may go past it, and what it drains past it stays
-    /// lost unless Repaid.
-    /// </summary>
+    /// line rule (ruled 2026-10-09): a Drain may go past the line, and what
+    /// it drains past it stays lost unless Repaid. The Drain buffer
+    /// (2026-10-11): the line is the first 1/4 of her Max HP she drains each
+    /// combat, counted in HP drained, so a hit never uses it up.
+    /// The 2026-10-11 playtest ("the tooltips for Fanfare and Drain are
+    /// rather verbose (Drain moreso)"): one sentence. The line's number and
+    /// its definition live on the Drained counter's hover
+    /// (<c>Vfx.DrainedCounter.LineSentence</c>).</summary>
     internal const string DrainBody =
-        "Lose N HP. Drained HP above your line returns after combat. HP "
-      + "drained past your line is lost unless you [gold]Repay[/gold] "
-      + "it. Your line is the HP you started this fight with, minus 1/4 "
-      + "of your Max HP.";
+        "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns "
+      + "after combat; more than that only [gold]Repay[/gold] returns.";
 
-    /// <summary>Rule 1: Drain N. In combat the tip adds where her line is
-    /// now and why (the pool-75 round, 2026-10-09).</summary>
+    /// <summary>Rule 1: Drain N. The in-combat "Your Drain line is N" suffix
+    /// (the pool-75 round, 2026-10-09) is off the tip since the 2026-10-11
+    /// playtest: with it the tip ran past the 135-character ceiling, and the
+    /// Drained counter's hover already names the line and where it comes
+    /// from.</summary>
     public static IEnumerable<IHoverTip> ForDrain(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, DrainKey,
-             DrainBody + FurinaStageFacePreview.LineNow(card));
+        With(inherited, DrainKey, DrainBody);
 
     /// <summary>Rule 2: Repay N. The pool to 75 (Hymn of Renewal's reading,
     /// the paper's Review section): a Repay counts the HP it returns.
