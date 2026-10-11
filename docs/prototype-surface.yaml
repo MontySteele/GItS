@@ -1250,7 +1250,7 @@
    # R276 pick 1: the intent, read at carry-out. THE CLEANUP PASS
    # (2026-09-29): `amount` is a flat 6 under it, because the Plan "gave 0
    # Block twice on Empower turns" (a seat). Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the enemy intends next turn.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the front enemy intends next turn.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_front_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
