@@ -405,10 +405,6 @@ public static class FurinaStage
     public static int DrainsThisCombat(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).DrainsThisCombat : 0;
 
-    /// <summary>Balance the Books' count: half her drained HP, rounded
-    /// down.</summary>
-    public static int HalfDrained(Creature? owner) => DrainedOf(owner) / 2;
-
     /// <summary>Rising Tide's count: Repays that returned HP this turn.
     /// </summary>
     public static int RepaysThisTurn(Creature? owner) =>

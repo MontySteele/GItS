@@ -190,7 +190,7 @@ upgrade replaces today's 0 cost.
 | Clean Slate | Attack 1, C | Deal 7 damage. Repay 3. If you have no drained HP left, draw 1 card. [10] |
 | Hydro Lance | Attack 2, C | Deal 14 Hydro damage. Repay 4. [18] |
 | Cleansing Torrent | Attack 2, U | Deal 10 Hydro damage to ALL enemies. Repay 4. [14] |
-| Balance the Books | Skill 1, U | Deal damage to ALL enemies equal to half your drained HP. Repay 4. [Repay 6] |
+| Balance the Books | Skill 1, U | Deal damage to ALL enemies equal to your drained HP. Repay 4. [Repay 6] (2026-10-11: was half; [USER]: "Balance the Books is mostly a brick.") |
 | Rising Tide | Attack 1, U | Deal 6 damage, plus 3 for each time you Repaid this turn. [4 per] |
 | Pneuma Tides | Power 1, U | At the start of your turn, Repay 2. [3] |
 | Hymn of Renewal | Power 2 [1], R | Whenever you Repay 4 or more HP at once, gain 1 Strength. |

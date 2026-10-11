@@ -7178,3 +7178,25 @@ Base [upgraded]:
   Sting 3 -> 4 damage, 1 [2] Weak; Bubble Ward 4 -> 5 [7] Block.
 - Starter: Kurage's Oath's Plan 7 -> 9 [12] to ALL (6 [8] Block unchanged);
   Slack Water's on-turn damage 4 -> 6 [9] (Weak and Plan line unchanged).
+
+## Furina: Singer Retains, Balance the Books, Hymn trimmed, 2026-10-11
+
+After [USER]'s winning Furina run: "Singer of Many Waters felt hit or miss.
+Usually returned 0, sometimes returned 10." / "Balance the Books is mostly a
+brick." / "Hymn of Many Waters is usually just 15 block as a 1 energy
+upgraded common and is extremely good." Then: "Yeah, I think Hymn needs a
+trim. Agree on the rest."
+
+- **Singer of Many Waters** gains Retain (the card-level `retain: true`, a
+  keyword as on base cards). Cost 1 [0], Exhaust, "Repay all your drained
+  HP." unchanged.
+- **Balance the Books**: "Deal damage to ALL enemies equal to your drained
+  HP. Repay 4." [Repay 6] (was half, rounded down). The count token
+  `stage_half_drained` becomes `stage_drained` (C# `FurinaStage.DrainedOf`,
+  sim `furina_stage.drained`); the damage still reads the drained HP before
+  the card's own Repay, and the in-combat "(Deals N damage)" line reads the
+  same number.
+- **Hymn of Many Waters**: Block 8 [11] -> 6 [8], Repay 3 [4] unchanged
+  (`upgrade: {block: +2, stage_repay: +1}`); the "Gain 1 Block for any HP it
+  could not Repay" floor stays. Most Block: 9, upgraded 12 (was 11, 15).
+- Sim twins in `tier0/engine/furina_tide.py` moved with the sheet.
