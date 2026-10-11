@@ -1633,7 +1633,11 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # PICK 5 (a) (2026-10-01): the line it will be carried out
               # as, "now" once flipped. An absent key is a bridge older
               # than the flip, and reads as the Plan line.
-              "line": "now" if row.get("line") == "now" else "plan"}
+              "line": "now" if row.get("line") == "now" else "plan",
+              # Kokomi whole-run round 2 (2026-10-10): the printed Plan
+              # line's number includes the front body's Vulnerable. Absent
+              # on an older bridge, and then nothing is said.
+              "after_vulnerable": row.get("after_vulnerable") is True}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

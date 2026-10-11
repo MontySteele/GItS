@@ -253,3 +253,20 @@ def brief_by_name(name: str) -> tuple[str, str] | None:
         if base.casefold() == want:
             return base, text
     return None
+
+
+def briefs_mentioning(word: str) -> list[tuple[str, str]]:
+    """Every `(base name, briefing)` whose briefing names `word` as a whole
+    word or phrase, for `--define` (Kokomi whole-run round 2, 2026-10-10: a
+    seat asked for "Sandpit" and "Frantic Escape", which only an enemy's
+    briefing explains). Table order, each enemy once."""
+    want = str(word or "").strip().strip('"*').strip()
+    if not want:
+        return []
+    pattern = re.compile(r"(?<!\w)" + re.escape(want) + r"(?!\w)",
+                         re.IGNORECASE)
+    found: list[tuple[str, str]] = []
+    for base, text in ENEMY_BRIEFS.values():
+        if pattern.search(text) and (base, text) not in found:
+            found.append((base, text))
+    return found

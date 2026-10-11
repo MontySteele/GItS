@@ -3112,7 +3112,7 @@ public static class KokomiPlan
         snapshot["twice"] =
             creature!.Powers.OfType<NereidsAscensionPower>().Any();
         snapshot["queue"] = pending
-            .Select(entry => (object?)QueueRow(entry))
+            .Select(entry => (object?)QueueRow(entry, creature))
             .ToList();
         // `EB-317`. WHAT THE JELLYFISH HAS ALREADY DONE THIS TURN, in the
         // order it did it, and in the WORDS IT SAID: `line` is the very string
@@ -3142,7 +3142,8 @@ public static class KokomiPlan
     /// <summary>One waiting Plan on the wire. A named method for
     /// <see cref="CarriedOutRow"/>'s reason: the key names are the contract
     /// with `understudy/blindplay_board.kokomi_plans`.</summary>
-    private static Dictionary<string, object?> QueueRow(Entry entry)
+    private static Dictionary<string, object?> QueueRow(
+        Entry entry, Creature? kokomi)
     {
         // A PLAN STAYS OPEN (2026-10-01): a two-line Plan carries both lines
         // while it waits, so the choice is readable a turn early (sec.3).
@@ -3179,7 +3180,27 @@ public static class KokomiPlan
                 ["damage"] = entry.Now && entry.TwoLine
                     ? 0 : WrittenFrontDamage(entry),
                 ["aim"] = entry.Now && entry.TwoLine ? "" : WrittenAim(entry),
+                // Kokomi whole-run round 2 (2026-10-10): the printed Plan
+                // line folds the front body's Vulnerable (`PlanDamageVar`),
+                // and a seat read the number rising as the Plan changing.
+                // The page says "(after Vulnerable)" where it did.
+                ["after_vulnerable"] = RaisedByVulnerable(entry, kokomi),
             };
+    }
+
+    /// <summary>Does the front body's Vulnerable raise the damage this entry
+    /// has written at it? False with no front damage, no front body or no
+    /// Vulnerable on it. The same fold the face prints
+    /// (<see cref="PlannedDamage"/>).</summary>
+    public static bool RaisedByVulnerable(Entry entry, Creature? kokomi)
+    {
+        var written = WrittenFrontDamage(entry);
+        if (written <= 0) return false;
+        var front = FrontEnemy(kokomi);
+        if (front == null
+            || !front.Powers.OfType<VulnerablePower>().Any(p => p.Amount > 0))
+            return false;
+        return PlannedDamage(front, written) > written;
     }
 
     /// <summary>

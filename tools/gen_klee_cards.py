@@ -3256,7 +3256,8 @@ APPLY_POWERS = {
     # Bent 2026-10-10 (the growth Powers): a marker the Open reads.
     "kk_grand_design": ("GrandDesignPower", None,
         "[gold]Open the Casket[/gold] no longer empties the "
-        "[gold]Casket[/gold]."),
+        "[gold]Casket[/gold]. At the start of your turn, put it into your "
+        "hand."),
     # THE GROWTH POWERS (2026-10-10). Class in KokomiExpansion.cs.
     "kk_flood_tide": ("FloodTidePower", None,
         "At the start of your turn, the [gold]Casket[/gold] gains {X}."),

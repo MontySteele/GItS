@@ -119,6 +119,9 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // THE GROWTH POWERS (2026-10-10): Flood Tide, at the same site.
         // Sim twin: `kokomi_plan.rising_tide`, beside `long_game`.
         FloodTidePower.Signal(Owner);
+        // Kokomi whole-run round 2 (2026-10-10): Grand Design puts Open the
+        // Casket into her hand. Sim twin: `kokomi_plan.grand_design_fetch`.
+        await GrandDesignPower.Signal(choiceContext, Owner);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
         // `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning:
         // its face is "Next turn, after the Bake-Kurage carries out its Plans,

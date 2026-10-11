@@ -847,11 +847,9 @@ public class KokomiOverhaulRuleTests
         // AND NO ROW SPENDS IT SINCE R257 (`EB-478`): Tide Chart used to read
         // this count at PLAY time and drew zero on three plays out of four,
         // because a seat plays its cheap cards before it writes its Plans.
-        // What still reads it is Change of Plans' unplayable reason, which
-        // asks the right question of it -- is there a Plan to hurry.
+        // Change of Plans' unplayable reason read it too until it gained a
+        // draw (Kokomi whole-run round 2, 2026-10-10) and lost the gate.
         // (Tide Chart itself was cut by the Casket pass, 2026-09-28.)
-        Assert.Contains("KokomiPlan.PlansHeld", Il.Calls(
-            Il.Method("ProtoKkChangeOfPlans", "get_UnplayableReason")));
     }
 
     [Fact]
