@@ -348,6 +348,12 @@ def _runtime_count(state: CombatState, token: str,
         # debuffs, not stacks -- `kokomi_plan.debuff_count`, the twin of
         # `KokomiOverhaulKit.DebuffCount`.
         return kokomi_plan.debuff_count(_default_target(state))
+    if token == "weak_vuln_stacks_on_target":
+        # CURRENT-KIT USE ONLY (the Kokomi card pass, 2026-10-11) -- Drowning
+        # Pressure, "for each Weak and Vulnerable on the enemy": STACKS of
+        # Weak plus stacks of Vulnerable on the aimed enemy. The C# twin is
+        # `KokomiOverhaulKit.WeakVulnStacks`.
+        return kokomi_plan.weak_vuln_stacks(_default_target(state))
     if token == "plan_energy_waiting":
         # CURRENT-KIT USE ONLY (the Kokomi expansion, batch one) -- Weight of
         # the Plan, "plus 3 for each Energy paid for the Plans waiting". The
@@ -1058,6 +1064,14 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # predicate is that flag rather than the card's type.
     from tier0.engine import refpowers as _refpowers
     _refpowers.envenom_on_hit(state, enemy, hp_dmg, source, powered)
+    # THE KOKOMI CARD PASS (2026-10-11), AT WATER'S EDGE: her first Hydro
+    # damage each turn applies Weak and Vulnerable. Every Hydro hit passes
+    # this funnel, at the AfterDamageGiven seat; the C# twin is fed from
+    # `AtWatersEdgePower.AfterDamageGiven` (powered hits) and
+    # `ElementalHit.Deal` (element-tagged hits).
+    if element == "hydro" and state.player.powers.get("kk_at_waters_edge"):
+        from tier0.engine import kokomi_plan             # late: cycle
+        kokomi_plan.note_hydro_damage(state, enemy)
     # Hook.AfterDamageReceived on the ENEMY -- `EB-495` D5 and D6, the funnel
     # tier0 did not have. BELOW Envenom for the reason the game orders them
     # that way: `AfterDamageGiven` is broadcast first (`CreatureCmd.cs:406`)
@@ -3403,6 +3417,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # CURRENT-KIT USE ONLY (R276) -- Well Laid's "for each debuff on the
     # enemy". Same registry reason as the two above.
     "debuffs_on_target",
+    # CURRENT-KIT USE ONLY (the Kokomi card pass, 2026-10-11) -- Drowning
+    # Pressure's Weak and Vulnerable stacks. Same registry reason.
+    "weak_vuln_stacks_on_target",
     # CURRENT-KIT USE ONLY (the Casket pass, 2026-09-28) -- Feint's and Sango
     # Isshin's carry-outs this turn, and Driftglass's and Depths' Judgment's
     # Casket. Same registry reason as the rows above.

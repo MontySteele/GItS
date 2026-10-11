@@ -451,10 +451,9 @@ internal static class ReactionEffects
             // `reactions._react` at the site that already counts.
             await CompanionOverhaulReactions.Note(
                 choiceContext, reaction, target, dealer, consumedAura);
-            // QUARANTINED (the Kokomi arm). THE EXPANSION's At Water's Edge
-            // (2026-09-29): "Whenever a reaction happens on an enemy, apply 1
-            // Weak and 1 Vulnerable to it" -- any reaction, whoever caused it.
-            await KokomiExpansion.OnReaction(choiceContext, target);
+            // At Water's Edge left this site in the Kokomi card pass
+            // (2026-10-11): it now reads her first Hydro damage each turn
+            // (`KokomiExpansion.OnHydroDamage`), not a reaction.
         }
 
         switch (reaction)
