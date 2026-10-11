@@ -73,6 +73,43 @@ These are seat-page lines (the seats' text view of the game), plus telemetry:
 
 The buffer came into play in 2 of 65 fights, so seats almost never meet the Drain line's penalty. If you want players to feel the line, the lever is the buffer's size, which is your ruled number. This is a fact for your run, not a pick.
 
+## Round 4, pooled (2026-10-11, 06:51)
+
+Round 4 used the same seeds on build 0.2.4872+next. No card changed. The round added the seat-page fixes and the new telemetry fields: buffer left, Block per card, and guest repeats and evictions. The packet is `furina-r4-packet.md` in the scratchpad.
+
+| Seed | Round 4 |
+|---|---|
+| JF391WG2NN0X | floor 33, Kaiser Crab |
+| WDETA8RRGH98 | **won** |
+| 0J427L1YQV15 | floor 48, Aeonglass |
+| TYXJLVY31QN7 | floor 33, Knowledge Demon |
+| Ironclad control | floor 33, Knowledge Demon |
+
+**Pooled results.** Rounds 3 and 4 won 1 of 8; rounds 1 to 4 won 4 of 16. The control has won 0 of 4.
+
+**Act-2 boss damage a turn** was 49.9 in round 4 and 45.8 pooled with round 3 (n=7), against 40.8 in round 3 alone. Round 3's drop was mostly variance.
+
+**What the new telemetry shows:**
+- **The buffer** emptied in 6 of 77 fights, and HP was lost past the line in 4 fights (12 HP in all). Players will rarely meet the line's penalty.
+- **Block per play:**
+
+  | Card | Block per play | Plays |
+  |---|---|---|
+  | Hymn of Many Waters | 6.0 | 2 |
+  | Hymn of Many Waters, upgraded | 9.3 | 3 |
+  | Usher | 10.8 | 25 |
+  | Defend | 5.0 | 41 |
+
+  Hymn is where the trim aimed.
+- **Guest repeats and evictions:** 0 in 77 fights. The two guest rules are still untested by seats.
+
+**The stranded bank.**
+- Thirty-nine turns started with 20 or more Fanfare and played no Spend card. On 31 of them, no Spend card was in hand.
+- When a capped Spend card was played with a bank of twice its cap or more, it spent exactly the cap every time.
+- So both causes are real, but the larger one in this round is that the Spend-all cards are too rare to be drawn. Pick 1 (a) addresses exactly that, and stays the default.
+
+**Flutter.** Thieving Hopper's Flutter halves any hit the game treats as an attack. Mod card damage, Skills included, is dealt as an attack. So Rising Applause and Kokomi's Opening Gambit, both Skills, are halved by it. This is on BACKLOG; it applies to every mod Skill that deals damage.
+
 ## For [USER]
 
 1. **The stranded bank.** This is reopened by one new fact: the bank strands with Spend cards in hand, because the Common Spend cards stop at 8 or 12.
