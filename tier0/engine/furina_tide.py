@@ -378,10 +378,11 @@ CARDS: dict[str, Spec] = {
     # Quick Flourish (0): Spend 4. Deal 11 Hydro damage.
     "ftd_quick_flourish": Spec("Quick Flourish", 0, "attack", "common",
                                "spend_fixed_hit", (4, 11)),
-    # Standing Ovation (1): Spend all your Fanfare. Deal that much damage to
-    # ALL enemies. Uncommon since the pool-75 round (ruled 2026-10-09).
-    "ftd_standing_ovation": Spec("Standing Ovation", 1, "attack", "uncommon",
-                                 "rejoice", (1,)),
+    # Standing Ovation (1): Spend half your Fanfare. Deal that much damage
+    # to ALL enemies. Common again, Spend half (2026-10-11, Furina round 3
+    # record, pick 1); Uncommon and a spend-all since the pool-75 round.
+    "ftd_standing_ovation": Spec("Standing Ovation", 1, "attack", "common",
+                                 "half_aoe", (1,)),
     # Interval Bell (0): v2 text after #900: Draw 1 card. Spend 3: draw 1
     # card and gain 1 Energy instead.
     # Uncommon since the 2026-10-09 trim.
@@ -998,6 +999,14 @@ def spend_share(state, divisor: int) -> int:
     (divisor 4), of what is left when it acts. Returns what counts as
     spent."""
     return spend_up_to(state, _f(state).fanfare // divisor)
+
+
+def spend_half(state) -> int:
+    """"Spend half your Fanfare" (Standing Ovation, 2026-10-11): a "Spend up
+    to" of half the bank, rounded down, so 0 or 1 held spends nothing. Not a
+    spend-all: Bis! and Standing Room Only ignore it. Returns what counts as
+    spent."""
+    return spend_up_to(state, _f(state).fanfare // 2)
 
 
 def spend_all(state) -> int:
@@ -1658,6 +1667,10 @@ def resolve_card(state, card) -> None:
     elif k == "bravura":
         held = spend_all(state)
         _card_damage(state, card, n[0] + n[1] * held)
+    elif k == "half_aoe":
+        spent = spend_half(state)
+        if spent > 0:
+            _card_damage(state, card, n[0] * spent, all_enemies=True)
     elif k == "rejoice":
         held = spend_all(state)
         if held > 0:
