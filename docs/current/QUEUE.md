@@ -25,6 +25,10 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi card pass** (`review/active/kokomi-card-pass-2026-10-11.md`, three picks):
+  (1) debuff payoffs count stacks of Weak and Vulnerable, default yes; (2) Abyssal
+  Salvage exhausts statuses as drawn, default yes; (3) 18 cards repriced, default yes.
+
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.
