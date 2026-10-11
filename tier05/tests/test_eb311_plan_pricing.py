@@ -270,9 +270,12 @@ def test_the_queue_verbs_price_off_dials_this_table_already_holds():
     the op. `test_the_rare_power_takes_the_engine_credit` below is the pin.
     """
     # Change of Plans: one resolution moved a turn earlier, not created.
+    # Cost 0 since the Kokomi whole-run round (2026-10-10); `_static_power`
+    # divides by max(1, cost).
     card = _proto("proto_kk_change_of_plans")
+    assert card.cost == 0
     assert draft._static_power(card) == (
-        draft.STATIC_AUTOPLAY_VALUE * (1 - C.PLAN_DELAY_DISCOUNT) / card.cost)
+        draft.STATIC_AUTOPLAY_VALUE * (1 - C.PLAN_DELAY_DISCOUNT) / max(1, card.cost))
     # Moon's Reflection: one card out of the exhaust pile, a turn late.
     card = _proto("proto_kk_moons_reflection")
     assert draft._static_power(card) == (

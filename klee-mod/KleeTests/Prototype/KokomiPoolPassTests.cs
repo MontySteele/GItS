@@ -262,7 +262,7 @@ public class KokomiPoolPassTests
         var card = new ProtoKkNereidsAscension();
         Assert.Equal(CardType.Power, card.Type);
         Assert.Equal(CardRarity.Rare, card.Rarity);
-        Assert.Equal(3, card.EnergyCost.Canonical);   // power cost sweep
+        Assert.Equal(2, card.EnergyCost.Canonical);   // Kokomi whole-run round 2026-10-10: 3 -> 2
         Assert.False(typeof(IPlannedCard)
                          .IsAssignableFrom(typeof(ProtoKkNereidsAscension)));
         Assert.DoesNotContain(CardKeyword.Exhaust, card.CanonicalKeywords);

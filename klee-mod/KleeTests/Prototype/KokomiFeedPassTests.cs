@@ -72,14 +72,15 @@ public class KokomiFeedPassTests : IDisposable
     }
 
     [Fact]
-    public void Jellyfish_drift_plans_two_to_all_three_upgraded()
+    public void Jellyfish_drift_plans_three_to_all_four_upgraded()
     {
+        // Kokomi whole-run round 2026-10-10: Plan 2 [3] -> 3 [4].
         var card = new ProtoKkJellyfishDrift();
         AssertFeedShape(card);
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Damage, 2, KokomiPlan.Aim.AllEnemies),
+        Assert.Equal((KokomiPlan.Kind.Damage, 3, KokomiPlan.Aim.AllEnemies),
                      (clause.Kind, clause.Amount, clause.Aim));
-        Assert.Equal(3, Upgraded<ProtoKkJellyfishDrift>().PlanClauses.Single().Amount);
+        Assert.Equal(4, Upgraded<ProtoKkJellyfishDrift>().PlanClauses.Single().Amount);
     }
 
     [Fact]
