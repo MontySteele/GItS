@@ -62,8 +62,8 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
         new List<DynamicVar>
         {
             new CardsVar(1),
-            new UnsourcedBlockVar("PlanBlock", 7m, ValueProp.Move),
-            new PlanStatusBlockVar(7m, 3)
+            new UnsourcedBlockVar("PlanBlock", 9m, ValueProp.Move),
+            new PlanStatusBlockVar(9m, 3)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

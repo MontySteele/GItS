@@ -144,6 +144,13 @@ internal static class ElementalHit
             dealer: null, cardSource: null, cardPlay: null);
         NoteAmplified(target, applier, ampReaction, amp, results);
         await CreditBlockBreak(choiceContext, target, applier, results);
+        // KOKOMI'S AT WATER'S EDGE (the card pass, 2026-10-11): her first
+        // Hydro damage each turn, on this door as on a powered hit. The
+        // sim's `deal_damage_to_enemy` makes the same call.
+        if (element == Element.Hydro)
+        {
+            await KokomiExpansion.OnHydroDamage(choiceContext, applier, target);
+        }
         return landed;
     }
 
@@ -259,6 +266,13 @@ internal static class ElementalHit
             dealer: null, cardSource: null, cardPlay: null);
         NoteAmplified(target, applier, reaction, amp, results);
         await CreditBlockBreak(choiceContext, target, applier, results);
+        // KOKOMI'S AT WATER'S EDGE (the card pass, 2026-10-11): her first
+        // Hydro damage each turn, on this door as on a powered hit. The
+        // sim's `deal_damage_to_enemy` makes the same call.
+        if (element == Element.Hydro)
+        {
+            await KokomiExpansion.OnHydroDamage(choiceContext, applier, target);
+        }
         return landed;
     }
 

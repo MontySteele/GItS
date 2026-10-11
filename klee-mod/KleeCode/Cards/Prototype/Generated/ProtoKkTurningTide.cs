@@ -60,7 +60,7 @@ public sealed class ProtoKkTurningTide : CustomCardModel, ICharacterCard, IPlann
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new CardsVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

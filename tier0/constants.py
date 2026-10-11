@@ -900,10 +900,6 @@ KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT = 1  # Open the Casket's rate
 # prints, "if exactly one Plan is waiting". Mirrored BY VALUE against
 # `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
 KOKOMI_EXPANSION_LONG_GAME_WAITING = 1
-# THE STATUS BATCH (2026-10-01): Abyssal Salvage+'s "and you gain 2 Block" per
-# stack per exhausted status or curse. Mirrored BY VALUE against
-# `AbyssalSalvagePlusPower.BlockPerStack` by `tools/lint_constant_parity.py`.
-KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK = 2
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one

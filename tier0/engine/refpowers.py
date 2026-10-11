@@ -315,14 +315,8 @@ def after_card_exhausted(state: CombatState, card: Card,
     if p.relic_effects:
         from tier0.engine import relics           # late import (relics -> here)
         relics.on_card_exhausted(state)
-    # THE STATUS BATCH (2026-10-01), ABYSSAL SALVAGE: "Whenever a status or
-    # curse is exhausted, the Casket gains 1 [and you gain 2 Block]." At
-    # THIS funnel for the Casket accrual's reason: every exhaust route
-    # passes through it. Dead unless the Power is up.
-    if (p.powers.get("kk_abyssal_salvage")
-            or p.powers.get("kk_abyssal_salvage_plus")):
-        from tier0.engine import kokomi_plan     # late import (cycle)
-        kokomi_plan.abyssal_salvage(state, card)
+    # Abyssal Salvage left this funnel in the Kokomi card pass (2026-10-11):
+    # it reads the draw now (`after_card_drawn`).
     # VARKA, THE COMBO PASS (2026-10-04), PYRE OATH: "Whenever you Exhaust a
     # card, gain 1 Pyro Oath." At THIS funnel for the Casket accrual's
     # reason. Dead unless the Power is up.
@@ -1164,6 +1158,12 @@ def after_card_drawn(state: CombatState, card: Card,
     if p.powers.get("ko_finders_keepers"):
         from tier0.engine import klee_overhaul     # late import (cycle)
         klee_overhaul.finders_keepers(state, card)
+    # The Kokomi card pass (2026-10-11), ABYSSAL SALVAGE: the first status
+    # drawn each turn is Exhausted and the Casket gains 1. Dead unless the
+    # Power is up. `AbyssalSalvagePower.AfterCardDrawn`.
+    if p.powers.get("kk_abyssal_salvage"):
+        from tier0.engine import kokomi_plan     # late import (cycle)
+        kokomi_plan.abyssal_salvage(state, card)
     randomise_cost_on_draw(state, card)
 
 
