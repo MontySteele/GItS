@@ -51,7 +51,7 @@ public readonly record struct StageBeat(
     string Reason, string Target = "", string TargetId = "", int Each = -1,
     int Hp = -1, int Struck = -1, string By = "", int SeatKey = -1,
     int Dealt = -1, int TargetHp = -1, int Blocked = -1, int Caught = 0,
-    int Standing = -1, string Source = "");
+    int Standing = -1, string Source = "", int Floor = 0);
 
 /// <summary>ONE SPEND, for the play telemetry (the Spend round,
 /// 2026-10-10): what it was for (the card, or the Power or relic resolving;
@@ -332,6 +332,10 @@ public sealed class FurinaStageLedger
         _upToCap = -1;
         PastLost = 0;
         HighStakesDealt = 0;
+        BufferAtCall = -1;
+        BufferLeftAtCall = -1;
+        GuestEvictions = 0;
+        GuestRepeatActs = 0;
     }
 
     /// <summary>The combat's opening has been recorded.</summary>
@@ -549,6 +553,11 @@ public sealed class FurinaStageLedger
     /// Act). Empties the ledger.</summary>
     public CurtainCallParts CurtainCallOf(int hp, int maxHp)
     {
+        // Furina round 3 (2026-10-11): the buffer as the fight closed, read
+        // before the curtain call empties it (the telemetry's
+        // `drain_buffer_left`).
+        BufferAtCall = Buffer;
+        BufferLeftAtCall = BufferLeft;
         var five = Mods.FiveCenturyAct > 0;
         var owed = DrainedAbove + (five ? DrainedPast : 0);
         var back = System.Math.Max(0, System.Math.Min(owed, maxHp - hp));
@@ -578,6 +587,33 @@ public sealed class FurinaStageLedger
     /// round 2, 2026-10-10): the damage High Stakes added to her Attack hits
     /// this combat, each hit's bonus capped at what the hit dealt.</summary>
     public int HighStakesDealt { get; private set; }
+
+    /// <summary>Furina round 3 (2026-10-11): the buffer and the buffer left
+    /// when the curtain call ran; -1 before it.</summary>
+    public int BufferAtCall { get; private set; } = -1;
+
+    /// <summary>See <see cref="BufferAtCall"/>.</summary>
+    public int BufferLeftAtCall { get; private set; } = -1;
+
+    /// <summary>The play telemetry's <c>drain_buffer</c> (Furina round 3,
+    /// 2026-10-11): her Drain buffer at the fight's close -- at the curtain
+    /// call, or now on a death (no curtain call).</summary>
+    public int BufferAtClose => BufferAtCall >= 0 ? BufferAtCall : Buffer;
+
+    /// <summary>The play telemetry's <c>drain_buffer_left</c>: the buffer
+    /// she had left at the fight's close (see <see cref="BufferAtClose"/>).
+    /// </summary>
+    public int BufferLeftAtClose =>
+        BufferLeftAtCall >= 0 ? BufferLeftAtCall : BufferLeft;
+
+    /// <summary>The play telemetry's <c>guest_evictions</c> (Furina round
+    /// 3, 2026-10-11): Guest Star plays on a full stage that pushed the
+    /// oldest guest out (it acts once as it leaves).</summary>
+    public int GuestEvictions { get; set; }
+
+    /// <summary>The play telemetry's <c>guest_repeat_acts</c>: the acts a
+    /// second copy of a guest already on stage made (2026-10-11).</summary>
+    public int GuestRepeatActs { get; set; }
 
     /// <summary>A High Stakes bonus of <paramref name="amount"/> landed.
     /// </summary>
@@ -999,6 +1035,9 @@ public sealed class FurinaStageLedger
         snapshot["entry_max_hp"] = ledger.EntryMaxHp;
         snapshot["drain_line"] = ledger.Line;
         snapshot["drain_line_why"] = ledger.LineWhy;
+        // Furina round 3 (2026-10-11): the page leads with the buffer.
+        snapshot["drain_buffer"] = ledger.Buffer;
+        snapshot["drain_buffer_left"] = ledger.BufferLeft;
         snapshot["capacity"] = ledger.Capacity;
         StageForecast? forecast;
         try
@@ -1044,6 +1083,7 @@ public sealed class FurinaStageLedger
                 ["blocked"] = beat.Blocked,
                 ["standing"] = beat.Standing,
                 ["source"] = beat.Source,
+                ["floor"] = beat.Floor,
             })
             .ToList();
         snapshot["forecast"] = ForecastSnapshot(forecast, ledger.Fanfare);

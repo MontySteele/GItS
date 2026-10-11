@@ -628,6 +628,7 @@ public sealed class StageDirector
         var who = seat.Who;
         await _board.Lunge(seat);
         var moved = 0;
+        var floor = 0;
         var number = ActAmount(who, seat.Upgraded);
         switch (who)
         {
@@ -636,6 +637,9 @@ public sealed class StageDirector
                 // "Repay 2. Gain 1 Block for any HP it could not Repay."
                 // (the Repay floor, 2026-10-09).
                 moved = await RepayFloor(number, StageFloor.Block);
+                // Furina round 3 (2026-10-11): the log names the floor's
+                // Block, as the face does ("you Repay 0, +2 Block").
+                if (!_board.Over) floor = System.Math.Max(0, number - moved);
                 break;
             case StagePerformer.Wriothesley:
                 moved = number;
@@ -721,7 +725,7 @@ public sealed class StageDirector
         }
         _stage.Note(new StageBeat(FurinaStageLedger.ActEvent, who,
                                   _stage.IndexOf(seat), _stage.Fanfare, moved,
-                                  "", SeatKey: seat.Key));
+                                  "", SeatKey: seat.Key, Floor: floor));
         if (_stage.SeatOf(StagePerformer.Escoffier) is { } escoffier
             && !_board.Over)
         {
@@ -760,7 +764,10 @@ public sealed class StageDirector
             if (card != null) moved.Cards.Add(card);
             await _board.Sync();
             // The repeat acts (2026-10-11), from its new seat.
-            if (!_board.Over && _stage.Holds(moved)) await Act(moved);
+            if (!_board.Over && _stage.Holds(moved) && await Act(moved))
+            {
+                _stage.GuestRepeatActs++;
+            }
             return room.Kind;
         }
         if (room.Kind == StageSummonResult.Evict)
@@ -768,6 +775,7 @@ public sealed class StageDirector
             // The evicted guest acts once (2026-10-11), then leaves, then the
             // new guest takes the back seat.
             var oldest = _stage.Seats[room.Index];
+            _stage.GuestEvictions++;
             if (!_board.Over && _stage.Holds(oldest)) await Act(oldest);
             var at = _stage.IndexOf(oldest);
             if (at >= 0) await Leave(at, "evicted");
