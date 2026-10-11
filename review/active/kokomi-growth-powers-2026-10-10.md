@@ -61,3 +61,5 @@ My working is in the session scratchpad (`kokomi-power-census.md`). Base-five te
    - **Default:** yes, sim-gated as above. Grand Design's ratio is set by the sim, and the cards are built after the sim.
    - Alternative: a different growth Power at Uncommon, such as "Your Plans deal 1 more damage each turn" (Rupture-like, no Casket).
 2. **Rising Tide replaces The General's Banner.** **Default:** yes. Alternative: it replaces Kurage Canopy instead (also 0 of 3 offers taken, a 1-Block-per-Plan Power).
+
+**Ruled 2026-10-10, both at default.** [USER]: "Agreed on both." Rising Tide replaces The General's Banner; Grand Design becomes "the Casket keeps its count", with its ratio set by the sim before it is built.
