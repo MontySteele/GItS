@@ -1038,6 +1038,10 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # The power or card title behind a beat (a gain's source: "Bow",
             # "Guest Star", a relic). Empty elsewhere.
             "source": _text(row.get("source")),
+            # Furina round 3 (2026-10-11): a Repay act's floor, the Block it
+            # gave for the HP it could not Repay. 0 elsewhere, and on a
+            # build that sends none.
+            "floor": _int(row.get("floor")),
         })
     act_block = raw.get("act_block")
     line = raw.get("drain_line")
@@ -1056,6 +1060,13 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             # Seat page 3: where the line comes from, in the mod's words
             # (`FurinaStageLaw.LineWhy`); "" on a build that sends none.
             "line_why": _drain_line_why(raw, line),
+            # Furina round 3 (2026-10-11): the Drain buffer and what is left
+            # of it (`FurinaStageLedger.Buffer`, `BufferLeft`); None on a
+            # build that sends none, which keeps the older line.
+            "buffer": (None if raw.get("drain_buffer") is None
+                       else _int(raw.get("drain_buffer"))),
+            "buffer_left": (None if raw.get("drain_buffer_left") is None
+                            else _int(raw.get("drain_buffer_left"))),
             "gained": _int(raw.get("gained_this_turn")),
             "spent": _int(raw.get("spent_this_turn")),
             "paid": _int(raw.get("paid_this_turn")),
