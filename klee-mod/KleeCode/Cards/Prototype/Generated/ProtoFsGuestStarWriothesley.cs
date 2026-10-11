@@ -48,7 +48,7 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Wriothesley"),
-        ("description", "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Cryo[/gold] damage to a random enemy.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("GuestAct", FurinaStageLaw.WriothesleyActDamage)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,5 +81,6 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
     protected override void OnUpgrade()
     {
         // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
+        DynamicVars["GuestAct"].UpgradeValueBy(FurinaStageLaw.WriothesleyActDamageUpgraded - FurinaStageLaw.WriothesleyActDamage);
     }
 }

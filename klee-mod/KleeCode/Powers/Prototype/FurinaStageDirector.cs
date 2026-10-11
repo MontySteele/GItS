@@ -95,7 +95,10 @@ public enum StageSummonResult
     Seated,
 
     /// <summary>A duplicate copy: the guest already on stage moves to the
-    /// newest seat, with no act (the pool to 75, sec.3).</summary>
+    /// newest seat and acts once (the 2026-10-11 playtest: "let the guest
+    /// star Act when replayed to make getting a second copy do something at
+    /// all"; until then it moved with no act, the pool to 75, sec.3).
+    /// </summary>
     Repeat,
 
     /// <summary>A full stage: the oldest guest leaves (no act) and the new
@@ -728,7 +731,11 @@ public sealed class StageDirector
 
     /// <summary>
     /// A Guest Star card (the pool to 75, sec.3). No effect on summon. A
-    /// guest already on stage moves to the newest seat with no act; otherwise
+    /// guest already on stage moves to the newest seat, keeps the upgrade
+    /// merge, and then ACTS ONCE, exactly as on her turn, a Drain its act
+    /// costs included (the 2026-10-11 playtest: "I'm thinking to let the
+    /// guest star Act when replayed to make getting a second copy do
+    /// something at all"); otherwise
     /// it takes a free seat at the back, and on a full stage the oldest guest
     /// leaves first (no act) and its cards go to the discard pile.
     /// <paramref name="card"/> (null headless) is the Guest Star played: it
@@ -744,6 +751,8 @@ public sealed class StageDirector
             moved.Upgraded |= upgraded;
             if (card != null) moved.Cards.Add(card);
             await _board.Sync();
+            // The repeat acts (2026-10-11), from its new seat.
+            if (!_board.Over && _stage.Holds(moved)) await Act(moved);
             return room.Kind;
         }
         if (room.Kind == StageSummonResult.Evict)

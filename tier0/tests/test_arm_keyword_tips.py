@@ -549,13 +549,14 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # guests are the only performers. The v2 Stage's clauses (Bow,
             # Cue, Rehearsal, the front seat) left with v2.
             "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
-            "Gain 1 [gold]Fanfare[/gold] for each HP you lose or [gold]Repay[/gold]. ",
-            # The Drain line rule (2026-10-09): the line is entry HP minus
-            # 1/4 of Max HP, and HP drained past it is lost unless Repaid.
-            # The drain-line round (2026-10-09): the curtain-call sentence.
-            "Lose N HP. Drained HP above your line returns after combat. HP ",
-            "drained past your line is lost unless you [gold]Repay[/gold] ",
-            "it. Your line is the HP you started this fight with, minus 1/4 ",
+            # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain
+            # are rather verbose (Drain moreso)".
+            "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
+            "[gold]Spend[/gold] uses it. Resets after each combat.",
+            # The Drain buffer (2026-10-11): HP drained past it is lost
+            # unless Repaid. One sentence since the 2026-10-11 playtest.
+            "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns ",
+            "after combat; more than that only [gold]Repay[/gold] returns.",
             # The pool to 75 (2026-10-09): the guest rule's words.
             "Regain that much drained HP, never more than you drained. A ",
             "A guest joins at the back. On a full stage, the oldest guest ",
@@ -1223,14 +1224,16 @@ def test_every_summoning_row_and_no_other_owes_the_summon_tips():
 @pytest.mark.parametrize("rid", sorted(STAGE_SUMMONERS))
 def test_every_summoning_row_carries_the_summon_and_performer_tips(rid):
     """The attach is committed: the generated card wraps its tips in the
-    Summon tip, then Guest Star, then its guest's own."""
+    Summon tip, then Guest Star, then its guest's own. (Since the 2026-10-11
+    Guest Star faces a keyword the face golds -- Repay, Weak, Fanfare,
+    Spend -- may wrap the chain once more.)"""
     cls = "ProtoFs" + "".join(
         part.capitalize() for part in rid.removeprefix("proto_fs_").split("_"))
     src = (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8")
     who = STAGE_SUMMONERS[rid]
     assert (f"ArmKeywordTips.For{who}(ArmKeywordTips.ForGuestStar("
             f"ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), "
-            f"this);") in src
+            f"this)") in src
     for other in set(STAGE_SUMMONERS.values()) - {who}:
         assert f"ArmKeywordTips.For{other}(" not in src
 

@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
+using System.Globalization;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using BaseLib.Abstracts;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
@@ -18,7 +21,8 @@ namespace KleeMod.Tests.Prototype;
 ///
 /// THE RULE: a Guest Star exhausts when played and has no effect on summon;
 /// when its guest leaves (a fourth summon, or Final Bow) its card goes to the
-/// discard pile; a duplicate moves its guest to the newest seat with no act;
+/// discard pile; a duplicate moves its guest to the newest seat and acts once
+/// (2026-10-11; it moved with no act before);
 /// at the end of her turn the guests act oldest first, then Showstopper
 /// Spends 5 and they act again, then Salon Solitaire Repays; a guest's line
 /// gets a cue and a log line of its own.
@@ -117,7 +121,10 @@ public class FurinaGuestRuleTests
         Assert.Empty(up.Company);
     }
 
-    // ---- a duplicate moves its guest, with no act ----------------------------
+    // ---- a duplicate moves its guest, and it acts -----------------------------
+    //
+    // The 2026-10-11 playtest: "I'm thinking to let the guest star Act when
+    // replayed to make getting a second copy do something at all."
 
     [Fact]
     public void A_duplicate_moves_its_guest_to_the_newest_seat_and_keeps_both_cards()
@@ -135,9 +142,100 @@ public class FurinaGuestRuleTests
         Assert.Same(seat, kit.Stage.Seats[1]);
         Assert.True(seat.Upgraded);
         Assert.Equal(new CardModel[] { a, b }, seat.Cards);
-        Assert.Empty(kit.Board.Hits);
+        // ...and then it acts once, from its new seat, upgraded by the merge.
+        Assert.Single(kit.Board.Hits);
+        Assert.StartsWith("damage Lynette Aura ", kit.Board.Hits.Single());
         Assert.Equal(1, kit.Beats(FurinaStageLedger.MoveEvent, StagePerformer.Lynette));
+        Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent));
+    }
+
+    [Fact]
+    public void Played_twice_the_first_copy_seats_the_guest_and_the_second_acts()
+    {
+        var kit = StageKit.Of();
+        Assert.Equal(StageSummonResult.Seated,
+            Run(kit.Director.SummonGuest(StagePerformer.Clorinde, false,
+                                         new ProtoFsGuestStarClorinde())));
+        Assert.Empty(kit.Board.Hits);
         Assert.Equal(0, kit.Beats(FurinaStageLedger.ActEvent));
+        Assert.Equal(StageSummonResult.Repeat,
+            Run(kit.Director.SummonGuest(StagePerformer.Clorinde, false,
+                                         new ProtoFsGuestStarClorinde())));
+        Assert.Equal(new[] { "damage Clorinde Random 6 Electro" },
+                     kit.Board.Hits.ToArray());
+        Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Clorinde));
+        Assert.Equal(new[] { StagePerformer.Clorinde }, kit.Company);
+    }
+
+    [Fact]
+    public void A_repeat_act_pays_the_drain_its_act_costs()
+    {
+        // Lyney's act Drains 2 (never past the line) before his hit; a
+        // repeat's act is the same act.
+        var kit = StageKit.Of(StagePerformer.Lyney);
+        var before = kit.Stage.Drained;
+        Run(kit.Director.SummonGuest(StagePerformer.Lyney));
+        Assert.Equal(before + FurinaStageLaw.LyneyActDrain, kit.Stage.Drained);
+        Assert.Equal(76, kit.Board.Hp);
+        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Single(kit.Board.Hits);
+        Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Lyney));
+    }
+
+    // ---- the upgrade shows on the face ----------------------------------------
+    //
+    // The 2026-10-11 playtest: "Guest star upgrades don't show what the +
+    // version will do." Each face prints the number its upgrade raises as a
+    // var (or, for Chevreuse, a clause behind IfUpgraded), so the upgrade
+    // preview shows the + version.
+
+    private static readonly Regex UpgradeSwap =
+        new(@"\{IfUpgraded:show:([^{}|]*)\|([^{}|]*)\}");
+
+    private static readonly Regex VarToken = new(@"\{(\w+)(?::diff\(\))?\}");
+
+    private static string Render(CardModel card)
+    {
+        var raw = ((CustomCardModel)card).Localization!
+            .First(r => r.Item1 == "description").Item2;
+        var text = UpgradeSwap.Replace(raw,
+            m => card.IsUpgraded ? m.Groups[1].Value : m.Groups[2].Value);
+        return VarToken.Replace(text, m =>
+            card.DynamicVars.TryGetValue(m.Groups[1].Value, out var v)
+                ? ((int)v.BaseValue).ToString(CultureInfo.InvariantCulture)
+                : m.Value);
+    }
+
+    [Fact]
+    public void Every_guest_stars_upgraded_face_differs_from_its_base_face()
+    {
+        foreach (var type in GuestCards)
+        {
+            var card = (CardModel)Activator.CreateInstance(type)!;
+            var plain = Render(card);
+            Seat.Set(card, "IsMutable", true);
+            typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+                .Invoke(card, Array.Empty<object>());
+            var upgraded = Render(card);
+            Assert.NotEqual(plain, upgraded);
+            // Past the name's "+": the face itself says what changed.
+            Assert.NotEqual(plain.Replace("+", ""), upgraded.Replace("+", ""));
+        }
+    }
+
+    [Fact]
+    public void A_guest_stars_face_number_is_the_number_the_guest_uses()
+    {
+        var lynette = new ProtoFsGuestStarLynette();
+        Assert.Equal(FurinaStageLaw.LynetteActDamage,
+                     (int)lynette.DynamicVars["GuestAct"].BaseValue);
+        Seat.Set(lynette, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(lynette, Array.Empty<object>());
+        Assert.Equal(FurinaStageLaw.LynetteActDamageUpgraded,
+                     (int)lynette.DynamicVars["GuestAct"].BaseValue);
+        Assert.Equal(StageDirector.ActAmount(StagePerformer.Lynette, true),
+                     (int)lynette.DynamicVars["GuestAct"].BaseValue);
     }
 
     // ---- the end of her turn --------------------------------------------------

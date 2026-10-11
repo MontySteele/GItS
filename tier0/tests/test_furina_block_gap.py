@@ -122,7 +122,7 @@ def test_the_masquerade_pays_the_hp_drained_past_the_line_too():
     _play(st, _card("proto_fs_the_masquerade"))
     assert st.player.powers[FS.THE_MASQUERADE] == 1
     assert st.player.block == 0
-    st.player.hp = T.line_hp(st.player) + 1     # 1 HP of room above the line
+    f.drained_above = 18                        # 1 HP of buffer left (19)
     _play(st, _card("proto_fs_overdraft"))      # Drain 4: 3 of it past the line
     assert f.drained_past == 3
     assert st.player.block == 4
@@ -133,10 +133,10 @@ def test_the_masquerade_pays_a_guest_acts_drain_stopped_at_the_line():
     f = st.player.ftd
     st.player.powers[FS.THE_MASQUERADE] = 1
     f.stage = ["lyney"]
-    st.player.hp = T.line_hp(st.player) + 1     # Lyney's Drain 2 has room 1
+    f.drained_above = 28                        # buffer 19 + 10: room 1
     assert T.guest_drain_room(st, T.LYNEY_ACT_DRAIN) == 1
     T.act(st, "lyney")
-    assert f.drained == 1
+    assert f.drained == 29
     assert st.player.block == 1
     # At the line, no Drain and no Block.
     T.act(st, "lyney")

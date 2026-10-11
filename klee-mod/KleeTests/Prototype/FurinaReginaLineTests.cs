@@ -20,9 +20,12 @@ public class FurinaReginaLineTests
     [Fact]
     public void Regina_drains_only_the_room_above_the_line()
     {
-        // Entered at 78: line 59. At 61 there are 2 HP of room: the first
-        // copy drains 2 and gains its Strength, the second finds no room.
-        var kit = StageKit.At(61, 78);
+        // A buffer of 19 from 78 (the Drain buffer, 2026-10-11), 17 of it
+        // drained: 2 HP of room. The first copy drains 2 and gains its
+        // Strength, the second finds no room.
+        var kit = StageKit.At(78, 78);
+        Run(kit.Director.Drain(17));
+        kit.Board.Gained = 0;
         Assert.Equal(1, Run(kit.Director.Regina(2)));
         Assert.Equal(59, kit.Board.Hp);
         Assert.Equal(1, kit.Board.Gained);
@@ -31,7 +34,9 @@ public class FurinaReginaLineTests
     [Fact]
     public void Regina_at_or_below_the_line_drains_nothing()
     {
-        var kit = StageKit.At(59, 78);
+        var kit = StageKit.At(78, 78);
+        Run(kit.Director.Drain(19));                   // the buffer is used up
+        kit.Board.Gained = 0;
         Assert.Equal(0, Run(kit.Director.Regina(1)));
         Assert.Equal(59, kit.Board.Hp);
         Assert.Equal(0, kit.Board.Gained);
