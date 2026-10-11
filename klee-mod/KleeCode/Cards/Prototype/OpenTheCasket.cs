@@ -44,6 +44,21 @@ namespace KleeMod.Cards.Prototype;
 /// THE UPGRADE DRAWS 1 (the Kokomi kit review, 2026-10-05): it changed
 /// nothing before. Upgraded it also draws 1 card, after the Strength; cost
 /// and Retain stay. Sim twin: <c>kokomi_plan.open_the_casket_card(upgraded)</c>.
+///
+/// IT STARTS AT 0 AND RAMPS (2026-10-10, after [USER]'s Kokomi playtest).
+/// [USER]: "I think that the casket should start at 0 and then have a ramping
+/// cost (goes up by 1 each time) That means the casket is free the first
+/// play, costs 1 the second, and then at 2+ becomes difficult. That way it
+/// has obvious use in a short hallway fight". Printed cost 0; every play ends
+/// with <c>EnergyCost.AddThisCombat(1)</c>, the base game's Modded (a 0-cost
+/// Rare whose face ends "Increase this card's cost by 1."), whose words the
+/// face borrows. The ramp lives on the CARD INSTANCE, as Modded's does: the
+/// relic deals a fresh copy each combat (so it resets), and What the Tokoyo
+/// Returns and Grand Design MOVE that copy to the hand, so a fetched Open
+/// keeps its ramped cost. The face's cost is the engine's own resolved cost,
+/// so it is always the true price. Sim twin: the
+/// <c>cost_mod self_this_combat</c> op on
+/// <c>kokomi_plan.open_the_casket_card</c>.
 /// </summary>
 public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
 {
@@ -58,7 +73,8 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         ("title", "Open the Casket"),
         ("description",
             "Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
-          + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}"
+          + "count, then empty it.{IfUpgraded:show: Draw 1 card.|} "
+          + "Increase this card's cost by 1."
           + "{InCombat:{CasketStrength}|}"),
     };
 
@@ -97,7 +113,7 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         new List<DynamicVar> { new CardsVar(1) };
 
     public OpenTheCasket()
-        : base(1, CardType.Skill, CardRarity.Token, TargetType.Self,
+        : base(0, CardType.Skill, CardRarity.Token, TargetType.Self,
                autoAdd: false)
     {
     }
@@ -110,6 +126,8 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         {
             await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
         }
+        // "Increase this card's cost by 1." Modded's line, last, as Modded's.
+        EnergyCost.AddThisCombat(1);
     }
 
     protected override void OnUpgrade()

@@ -158,20 +158,21 @@ public class KokomiCasketPassTests : IDisposable
     // ---- B. Open the Casket -----------------------------------------------
 
     [Fact]
-    public void Open_the_casket_is_a_one_cost_retain_token_that_does_not_exhaust()
+    public void Open_the_casket_is_a_zero_cost_retain_token_that_does_not_exhaust()
     {
-        // 2026-10-01, the four-kit review, Kokomi pick 1. [USER]: "On your
-        // new picks agree all around - I think that if it's repeatable, it
-        // should probably cost energy, though, to make this a real choice and
-        // not just button mashing when it comes up?"
+        // 2026-10-01, the four-kit review, Kokomi pick 1: no Exhaust, so it
+        // repeats. 2026-10-10, after [USER]'s Kokomi playtest: "I think that
+        // the casket should start at 0 and then have a ramping cost (goes up
+        // by 1 each time)". Printed 0; each play raises it (below).
         var card = new OpenTheCasket();
-        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(CardRarity.Token, card.Rarity);
         Assert.Contains(CardKeyword.Retain, card.Keywords);
         Assert.DoesNotContain(CardKeyword.Exhaust, card.Keywords);
         Assert.Equal("Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
-                   + "count, then empty it.{IfUpgraded:show: Draw 1 card.|}"
+                   + "count, then empty it.{IfUpgraded:show: Draw 1 card.|} "
+                   + "Increase this card's cost by 1."
                    + "{InCombat:{CasketStrength}|}", Face(card));
         // In no pool: the offer is the Slice, and the token is not in it.
         Assert.DoesNotContain(Seq("KokomiOverhaulRoster", "Slice"),
@@ -190,6 +191,62 @@ public class KokomiCasketPassTests : IDisposable
         var gate = play.FindIndex(c => c.Contains("get_IsUpgraded"));
         var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
         Assert.True(open >= 0 && gate > open && draw > gate);
+    }
+
+    [Fact]
+    public void Each_play_raises_its_cost_by_one_for_the_combat()
+    {
+        // 2026-10-10, after [USER]'s Kokomi playtest: "That means the casket
+        // is free the first play, costs 1 the second, and then at 2+ becomes
+        // difficult." The base game's Modded: "Increase this card's cost by
+        // 1." -- EnergyCost.AddThisCombat(1), the last thing OnPlay does,
+        // after the Strength and the upgrade's draw.
+        var play = Seq("OpenTheCasket", "OnPlay");
+        var open = play.FindIndex(c => c.Contains("KokomiOverhaulKit.OpenCasket"));
+        var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
+        var ramp = play.FindIndex(c => c.Contains("AddThisCombat"));
+        Assert.True(open >= 0 && draw > open && ramp > draw);
+        Assert.Equal(1, play.Count(c => c.Contains("AddThisCombat")));
+        Assert.DoesNotContain(play, c => c.Contains("AddThisTurn")
+                                       || c.Contains("UntilPlayed"));
+    }
+
+    [Fact]
+    public void The_ramp_lives_on_the_copy_so_the_shown_cost_is_the_true_cost()
+    {
+        // Per CARD INSTANCE, as Modded's: a combat-scoped local modifier the
+        // engine itself prices with, so the face, the bridge and the Energy
+        // spent all read one number. 0, 1, 2, 3 across four plays.
+        var card = new OpenTheCasket();
+        Seat.Set(card, "IsMutable", true);
+        var seen = new List<int>();
+        for (var i = 0; i < 4; i++)
+        {
+            seen.Add(card.EnergyCost.GetWithModifiers(CostModifiers.Local));
+            card.EnergyCost.AddThisCombat(1);   // what OnPlay ends with
+        }
+        Assert.Equal(new[] { 0, 1, 2, 3 }, seen);
+        // A fresh copy -- the one the relic deals each combat -- starts at 0.
+        var fresh = new OpenTheCasket();
+        Seat.Set(fresh, "IsMutable", true);
+        Assert.Equal(0, fresh.EnergyCost.GetWithModifiers(CostModifiers.Local));
+    }
+
+    [Fact]
+    public void A_fetched_open_is_moved_not_remade_so_it_keeps_its_ramp()
+    {
+        // What the Tokoyo Returns and Grand Design's morning fetch MOVE the
+        // copy already in the draw or discard pile (CardPileCmd.Add); neither
+        // makes a new one, which would start back at 0.
+        var fetch = Seq("KokomiOverhaulKit", "FetchOpenCasket");
+        Assert.Contains(fetch, c => c.Contains("CardPileCmd.Add"));
+        Assert.DoesNotContain(fetch, c => c.Contains("CreateCard")
+                                        || c.Contains("CloneCard")
+                                        || c.Contains("AddGeneratedCardToCombat"));
+        var signal = Seq("GrandDesignPower", "Signal");
+        Assert.Contains(signal, c => c.Contains("FetchOpenCasket"));
+        Assert.DoesNotContain(signal, c => c.Contains("CreateCard")
+                                         || c.Contains("AddGeneratedCardToCombat"));
     }
 
     [Fact]

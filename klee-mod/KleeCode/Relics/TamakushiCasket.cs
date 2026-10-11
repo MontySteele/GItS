@@ -39,7 +39,9 @@ namespace KleeMod.Relics;
 /// deck. [USER]: "if it's repeatable, it should probably cost energy, though,
 /// to make this a real choice and not just button mashing when it comes up?"
 /// This relic still deals ONE copy, on turn one; nothing here assumed the
-/// Exhaust.
+/// Exhaust. Since 2026-10-10 ([USER], after his Kokomi playtest) it starts at
+/// 0 and each play raises that copy's cost by 1 for the combat; the fresh
+/// copy this relic deals each combat is the reset.
 ///
 /// THE COUNT LIVES ON THE ARM'S LEDGER, NOT ON THIS INSTANCE
 /// (<see cref="KokomiOverhaulLedger.CasketCount"/>): per combat by

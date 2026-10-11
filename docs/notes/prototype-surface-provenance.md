@@ -7145,3 +7145,20 @@ Record `review/records/kokomi-fullrun-round-2-2026-10-10.md`, "What changes
   hand (`FetchOpenCasket`); an exhausted Open stays gone. Cost 2 [1].
 - **Open the Casket** (the token) prints "(Gains N Strength)" in combat, the
   way Driftglass prints its damage.
+
+## Open the Casket ramps, 2026-10-10 ([USER]'s ruling after his Kokomi run)
+
+[USER]: "I think that the casket should start at 0 and then have a ramping
+cost (goes up by 1 each time) That means the casket is free the first play,
+costs 1 the second, and then at 2+ becomes difficult. That way it has
+obvious use in a short hallway fight".
+
+- **Open the Casket** (`OpenTheCasket.cs`, sim
+  `kokomi_plan.open_the_casket_card`): cost 1 -> 0, and "Increase this
+  card's cost by 1." ends the face, the base game's Modded line and
+  mechanism (`EnergyCost.AddThisCombat(1)` last in `OnPlay`; sim
+  `cost_mod self_this_combat +1`, Up My Sleeve's op). Per copy: the relic
+  deals a fresh one each combat (the reset), and What the Tokoyo Returns and
+  Grand Design move the played copy, so a fetched Open keeps its price.
+  Tip and page row: "0-cost, Retain. ... then empty it, and increase its
+  cost by 1. ..."
