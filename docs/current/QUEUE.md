@@ -25,6 +25,12 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi whole-run round 2** (`review/records/kokomi-fullrun-round-2-2026-10-10.md`,
+  picks 1 and 2): (1) act 1: leave the starter and judge by feel, or Slack
+  Water deals 6, or Open the Casket draws 1 unupgraded. Default: leave it.
+  (2) play her on the next +next build before any seat round, or run one
+  Sonnet round first. Default: play first.
+
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.

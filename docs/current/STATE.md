@@ -81,7 +81,13 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   friend may stand in); the damage gap is a paper after that run. Growth
   Powers built 2026-10-10 (`review/active/kokomi-growth-powers-2026-10-10.md`):
   Flood Tide replaces The General's Banner, Grand Design keeps the Casket's
-  count.
+  count. Whole-run round 2
+  (`review/records/kokomi-fullrun-round-2-2026-10-10.md`): 0 of 5, level with
+  the same-night base; Flood Tide works and Plan damage no longer collapses
+  late (act 3 53.3 a fight, was 5.7); act 1 still bleeds. Round-2 fixes:
+  Grand Design puts Open the Casket into her hand each turn, Change of Plans
+  draws 1, Open the Casket shows its count. Next: [USER]'s run; round 2
+  picks 1 and 2 open.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
