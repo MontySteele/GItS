@@ -6757,7 +6757,8 @@ Star Turn's card-level `cost_reduction_per_fanfare: 6`. Encore! prints
 
 **Readings where the paper is silent** (each is in the PR body too):
 - An evicted guest leaves without acting ("no effect on summon"); only Final
-  Bow's guest acts as it goes.
+  Bow's guest acts as it goes. (Superseded 2026-10-11: an evicted guest acts
+  once, then leaves; "(b) a guest who's pushed out takes a bow".)
 - A duplicate's card joins its guest's seat and returns with it; an upgraded
   duplicate upgrades the guest.
 - Showstopper Spends only with a guest on stage and the price in the bank;

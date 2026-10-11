@@ -37,8 +37,9 @@ public static class FurinaStageBowPreview
 
     /// <summary>The line for <paramref name="stage"/> (the pins'; the pool to
     /// 75's rule): "(Clorinde moves to the newest seat and acts)" for a
-    /// guest already on stage (it acts since the 2026-10-11 playtest), "(Charlotte will leave)" for the oldest guest on a full
-    /// stage, else empty.</summary>
+    /// guest already on stage (it acts since the 2026-10-11 playtest),
+    /// "(Charlotte acts, then leaves)" for the oldest guest on a full stage
+    /// (it acts on the way out since 2026-10-11), else empty.</summary>
     public static string Line(FurinaStageLedger stage, StagePerformer who)
     {
         var room = StageDirector.GuestRoom(stage.Company.ToList(),
@@ -47,7 +48,7 @@ public static class FurinaStageBowPreview
         {
             StageSummonResult.Repeat => $"\n({who} moves to the newest seat and acts)",
             StageSummonResult.Evict =>
-                $"\n({stage.Seats[room.Index].Who} will leave)",
+                $"\n({stage.Seats[room.Index].Who} acts, then leaves)",
             _ => "",
         };
     }

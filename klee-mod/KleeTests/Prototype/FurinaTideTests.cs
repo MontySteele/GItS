@@ -497,18 +497,20 @@ public class FurinaTideTests
     // ---- the guests (rule 5) -------------------------------------------------
 
     [Fact]
-    public void A_fourth_guest_makes_the_oldest_leave_with_no_act()
+    public void A_fourth_guest_makes_the_oldest_act_once_then_leave()
     {
-        // The pool to 75 (sec.3): no effect on summon, so the evicted guest
-        // leaves without acting, and its cards go back (the pins in
-        // `FurinaGuestRuleTests` hold the cards' way back).
+        // Ruled 2026-10-11 ("(b) a guest who's pushed out takes a bow: they
+        // act once as they leave"; it left with no act before), and its
+        // cards go back (the pins in `FurinaGuestRuleTests` hold the cards'
+        // way back).
         var kit = StageKit.Of(StagePerformer.Wriothesley,
                               StagePerformer.Lynette, StagePerformer.Clorinde);
         Assert.Equal(StageSummonResult.Evict,
             StageKit.Run(kit.Director.SummonGuest(StagePerformer.Charlotte)));
         Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde,
                              StagePerformer.Charlotte }, kit.Company);
-        Assert.Empty(kit.Board.Hits);
+        Assert.Equal(new[] { "damage Wriothesley Random 4 Cryo" },
+                     kit.Board.Hits.ToArray());
         Assert.Contains("return Wriothesley 0", kit.Board.Log);
     }
 
@@ -587,7 +589,7 @@ public class FurinaTideTests
     {
         var full = StageKit.Of(StagePerformer.Wriothesley,
                                StagePerformer.Lynette, StagePerformer.Clorinde);
-        Assert.Equal("\n(Wriothesley will leave)",
+        Assert.Equal("\n(Wriothesley acts, then leaves)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Charlotte));
         Assert.Equal("\n(Lynette moves to the newest seat and acts)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Lynette));
