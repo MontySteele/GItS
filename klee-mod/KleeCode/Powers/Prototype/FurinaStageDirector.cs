@@ -101,8 +101,12 @@ public enum StageSummonResult
     /// </summary>
     Repeat,
 
-    /// <summary>A full stage: the oldest guest leaves (no act) and the new
-    /// one takes the back seat.</summary>
+    /// <summary>A full stage: the oldest guest takes a bow -- it acts once,
+    /// exactly as on her turn, then leaves -- and the new one takes the back
+    /// seat (ruled 2026-10-11: "That way there's some reward for taking
+    /// multiples, but if you want consistency in the end of turn act,
+    /// there's also a deck issue with spamming them out, which seems fine.";
+    /// it left with no act before).</summary>
     Evict,
 }
 
@@ -737,7 +741,11 @@ public sealed class StageDirector
     /// guest star Act when replayed to make getting a second copy do
     /// something at all"); otherwise
     /// it takes a free seat at the back, and on a full stage the oldest guest
-    /// leaves first (no act) and its cards go to the discard pile.
+    /// ACTS ONCE, as on her turn (a Drain its act costs included), then
+    /// leaves and its cards go to the discard pile (ruled 2026-10-11: "(b) a
+    /// guest who's pushed out takes a bow: they act once as they leave"; it
+    /// left with no act before). Only an eviction acts on the way out:
+    /// Final Bow's leave and the end-of-combat clear are unchanged.
     /// <paramref name="card"/> (null headless) is the Guest Star played: it
     /// exhausts, and the seat holds it until its guest leaves.
     /// </summary>
@@ -757,7 +765,12 @@ public sealed class StageDirector
         }
         if (room.Kind == StageSummonResult.Evict)
         {
-            await Leave(room.Index, "evicted");
+            // The evicted guest acts once (2026-10-11), then leaves, then the
+            // new guest takes the back seat.
+            var oldest = _stage.Seats[room.Index];
+            if (!_board.Over && _stage.Holds(oldest)) await Act(oldest);
+            var at = _stage.IndexOf(oldest);
+            if (at >= 0) await Leave(at, "evicted");
         }
         var seat = _stage.Seat(who, upgraded);
         if (seat != null && card != null) seat.Cards.Add(card);

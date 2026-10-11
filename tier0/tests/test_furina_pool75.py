@@ -60,7 +60,65 @@ def test_an_evicted_guests_card_returns_to_the_discard_pile():
     assert FS.stage(st.player) == ["lynette", "clorinde", "charlotte"]
     assert any(c is first for c in st.player.discard_pile)
     assert not any(c is first for c in st.player.exhaust_pile)
-    assert st.player.ftd.ledger["guest_acts"]["wriothesley"] == 0
+    # Ruled 2026-10-11: "(b) a guest who's pushed out takes a bow: they act
+    # once as they leave."
+    assert st.player.ftd.ledger["guest_acts"]["wriothesley"] == 1
+
+
+# ---- a guest pushed off a full stage acts once as it leaves (2026-10-11) ----
+#
+# "I lean towards b) as well. That way there's some reward for taking
+# multiples, but if you want consistency in the end of turn act, there's also
+# a deck issue with spamming them out, which seems fine."
+
+def test_a_fourth_guest_makes_the_oldest_act_once_then_leave():
+    st = _furina()
+    for who in ("clorinde", "lynette", "charlotte"):
+        FS.guest_star(st, who)
+    hp = st.enemies[0].hp
+    events = []
+    st.emit = lambda kind, **kw: events.append((kind, kw.get("member")))
+    assert FS.guest_star(st, "wriothesley") == "evict"
+    f = st.player.ftd
+    assert FS.stage(st.player) == ["lynette", "charlotte", "wriothesley"]
+    assert dict(f.ledger["guest_acts"]) == {"clorinde": 1}
+    assert hp - st.enemies[0].hp == T.CLORINDE_ACT
+    # It acts, then leaves, then the new guest is seated.
+    assert events.index(("ftd_act", "clorinde")) < events.index(
+        ("ftd_leave", "clorinde"))
+
+
+def test_an_evicted_lyney_pays_his_drain():
+    st = _furina()
+    for who in ("lyney", "lynette", "charlotte"):
+        FS.guest_star(st, who)
+    hp = st.player.hp
+    assert FS.guest_star(st, "clorinde") == "evict"
+    assert st.player.hp == hp - T.LYNEY_ACT_DRAIN
+    assert FS.drained(st.player) == T.LYNEY_ACT_DRAIN
+    assert st.player.ftd.ledger["guest_acts"]["lyney"] == 1
+    assert "lyney" not in FS.stage(st.player)
+
+
+def test_an_evicted_neuvillette_reads_the_window_as_usual():
+    st = _furina()
+    for who in ("neuvillette", "lynette", "charlotte"):
+        FS.guest_star(st, who)
+    FS.drain(st, 4)
+    hp = st.enemies[0].hp
+    assert FS.guest_star(st, "clorinde") == "evict"
+    # 4 lost this window, plus his own Hydro bonus while he is still on stage.
+    assert hp - st.enemies[0].hp == 4 + 2
+    assert st.player.ftd.ledger["guest_acts"]["neuvillette"] == 1
+
+
+def test_final_bows_leave_adds_no_extra_act():
+    st = _furina()
+    for who in ("clorinde", "lynette", "charlotte"):
+        FS.guest_star(st, who)
+    T.final_bow(st, 0, 2)
+    assert st.player.ftd.ledger["guest_acts"]["clorinde"] == 2
+    assert "clorinde" not in FS.stage(st.player)
 
 
 def test_a_duplicate_moves_its_guest_to_the_newest_seat_and_it_acts():

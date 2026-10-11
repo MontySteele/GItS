@@ -47,6 +47,18 @@ rule, which this section proposes (pick 1).
   This happens when a fourth summon removes the oldest guest, or when Final
   Bow sends one off. The card can then be drawn and played again, but only
   to bring that guest back.
+- **A guest pushed off a full stage acts once as it leaves.** When a fourth
+  summon removes the oldest guest, that guest first **acts once**, exactly as
+  on its turn (a Drain its act costs included), then leaves and its card goes
+  to your discard pile, then the new guest takes the back seat. Only an
+  eviction gets this act; Final Bow's leave and the end-of-combat clear are
+  unchanged. Amended 2026-10-11. [USER]'s reasoning: "Because Guest Stars
+  don't act when played / replayed, I didn't particularly want to draft more
+  than 3." The option was "(b) a guest who's pushed out takes a bow: they act
+  once as they leave", and he ruled: "I lean towards b) as well. That way
+  there's some reward for taking multiples, but if you want consistency in
+  the end of turn act, there's also a deck issue with spamming them out,
+  which seems fine." (Until then it left with no act.)
 - While on stage, each guest has a **line**, a passive like a Power's, and
   an **act** at the end of your turn. It has no effect on summon.
 - The current "play a guest who is already on stage and it acts at once"

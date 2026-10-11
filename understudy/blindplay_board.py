@@ -907,10 +907,12 @@ STAGE_SHORT_NAMES = {
 #: blind packet is an ID, refused by name, so the observation carries the
 #: sentence.
 STAGE_LEAVE_REASONS = {
-    # THE POOL TO 75 (2026-10-09, sec.3): a leaving guest does not act, and
-    # its Guest Star card goes back to the discard pile.
-    "evicted": ("a fourth summon took its seat; its card went to your "
-                "discard pile"),
+    # THE POOL TO 75 (2026-10-09, sec.3): its Guest Star card goes back to
+    # the discard pile. Since 2026-10-11 an evicted guest acts once on the
+    # way out ("(b) a guest who's pushed out takes a bow"); Final Bow's leave
+    # is unchanged.
+    "evicted": ("a fourth summon took its seat; it acted once on the way "
+                "out, and its card went to your discard pile"),
     "final_bow": ("it took its Final Bow; its card went to your discard "
                   "pile"),
 }

@@ -1252,7 +1252,8 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             # The pool to 75 (2026-10-09): the guest rule, and each guest's
             # tip upgraded on an upgraded card.
             '"A guest joins at the back. On a full stage, the oldest guest "',
-            '"leaves first, and its card goes to your [gold]Discard "',
+            # 2026-10-11: the guest pushed out acts once as it leaves.
+            '"acts once and leaves; its card goes to your [gold]Discard "',
             '"Exhausts. Acts at the end of your turn. When it leaves, this "',
             '"card goes to your [gold]Discard Pile[/gold]."',
             "ActText(StagePerformer.Charlotte, card.IsUpgraded));",
@@ -1284,8 +1285,8 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
     the numerals written out."""
     rows = blindplay.ARM_KEYWORDS
     assert rows["Summon"] == (
-        "A guest joins at the back. On a full stage, the oldest guest leaves "
-        "first, and its card goes to your Discard Pile.")
+        "A guest joins at the back. On a full stage, the oldest guest acts "
+        "once and leaves; its card goes to your Discard Pile.")
     assert rows["Guest Star"] == (
         "Exhausts. Acts at the end of your turn. When it leaves, this card "
         "goes to your Discard Pile.")

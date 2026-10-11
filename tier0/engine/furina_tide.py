@@ -1340,8 +1340,9 @@ def _act(state, member: str) -> None:
 def summon(state, member: str, upgraded: bool = False, card=None) -> str:
     """A Guest Star (sec.3): no effect on summon. A guest already on stage
     moves to the newest seat and acts once (2026-10-11); otherwise it takes the back seat,
-    and on a full stage the oldest guest leaves first (no act) and its cards
-    go to the discard pile. `card` is the Guest Star played: its seat holds
+    and on a full stage the oldest guest acts once, as on her turn, then
+    leaves and its cards go to the discard pile (2026-10-11: "(b) a guest
+    who's pushed out takes a bow"; it left with no act before). `card` is the Guest Star played: its seat holds
     it until the guest leaves."""
     f = _f(state)
     if member in f.stage:
@@ -1360,7 +1361,13 @@ def summon(state, member: str, upgraded: bool = False, card=None) -> str:
         return "repeat"
     result = "seated"
     if len(f.stage) >= capacity(state):
-        leave(state, 0, "evicted")
+        # The evicted guest acts once, then leaves, then the new guest takes
+        # the back seat (the C# `SummonGuest`, 2026-10-11).
+        oldest = f.stage[0]
+        if not state.over and state.player.alive:
+            act(state, oldest)
+        if oldest in f.stage:
+            leave(state, f.stage.index(oldest), "evicted")
         result = "evict"
     f.stage.append(member)
     if upgraded:
