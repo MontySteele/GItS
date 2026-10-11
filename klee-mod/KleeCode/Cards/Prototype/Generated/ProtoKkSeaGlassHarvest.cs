@@ -60,7 +60,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(8m, ValueProp.Move)
+            new BlockVar(10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

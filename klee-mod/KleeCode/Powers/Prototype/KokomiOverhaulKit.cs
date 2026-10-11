@@ -214,6 +214,20 @@ public static class KokomiOverhaulKit
             ? 0
             : creature.Powers.Count(p => p.Type == PowerType.Debuff);
 
+    /// <summary>
+    /// The Kokomi card pass (2026-10-11, pick 1): "for each Weak and
+    /// Vulnerable on the enemy" -- STACKS of Weak plus stacks of Vulnerable,
+    /// so Weak 2 and Vulnerable 2 read 4. Drowning Pressure and Ceremonial
+    /// Garment. Null-safe for <see cref="DebuffCount"/>'s preview reason. Sim
+    /// twin: <c>kokomi_plan.weak_vuln_stacks</c>.
+    /// </summary>
+    public static int WeakVulnStacks(Creature? creature) =>
+        creature == null
+            ? 0
+            : (int)(creature.Powers.OfType<WeakPower>().Sum(p => p.Amount)
+                    + creature.Powers.OfType<VulnerablePower>()
+                        .Sum(p => p.Amount));
+
     // The re-entrancy latch the Casket's debuff strike needed (a Hydro
     // strike into a Cryo aura Freezes, and Frozen is a debuff she applied)
     // left with the strike in the Casket pass (2026-09-28).

@@ -224,12 +224,10 @@ BLOCK_PER_STATUS_IN_HAND = "block_per_status_in_hand"
 EXHAUST_STATUSES_IN_HAND = "exhaust_statuses_in_hand"
 TRANSFORM_STATUSES_IN_HAND = "transform_statuses_in_hand"
 DISCARD_AND_DRAW = "discard_and_draw"
-#: Abyssal Salvage: "Whenever a status or curse is exhausted, the Casket gains
-#: 1 [and you gain 2 Block]." The upgraded card installs `_PLUS` instead
-#: (`upgraded_power`). Read at `refpowers.after_card_exhausted`.
+#: Abyssal Salvage (the Kokomi card pass, 2026-10-11): "The first time each
+#: turn you draw a status, Exhaust it. The Casket gains 1." Read at
+#: `refpowers.after_card_drawn`.
 ABYSSAL_SALVAGE = "kk_abyssal_salvage"
-ABYSSAL_SALVAGE_PLUS = "kk_abyssal_salvage_plus"
-ABYSSAL_SALVAGE_PLUS_BLOCK = C.KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK
 #: Sea Glass Harvest's token, in no pool. `SeaGlass.cs` is the twin.
 SEA_GLASS = "kk_sea_glass"
 
@@ -361,8 +359,8 @@ LONG_GAME = "kk_the_long_game"            # +N Energy when exactly 1 Plan waits
 #: Power cost sweep, 2026-09-30: The Long Game+ installs this twin instead
 #: (+N Energy and draw N). C# twin: `TheLongGamePlusPower`.
 LONG_GAME_PLUS = "kk_the_long_game_plus"
-AT_WATERS_EDGE = "kk_at_waters_edge"      # Weak N + Vulnerable N per reaction
-CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per debuff, her Attacks
+AT_WATERS_EDGE = "kk_at_waters_edge"      # first Hydro hit a turn: Weak N + Vuln N
+CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per Weak/Vuln stack, Attacks
 WATATSUMIS_GRACE = "kk_watatsumis_grace"  # keep up to N Block at turn end
 TIDAL_RIPOSTE = "kk_tidal_riposte"        # N to an attacker fully Blocked
 KURAGE_SWARM = "kk_kurage_swarm"          # Casket +N per 0-cost Plan written
@@ -1877,24 +1875,24 @@ def discard_and_draw(state: CombatState) -> int:
 
 
 def abyssal_salvage(state: CombatState, card: Card) -> None:
-    """ABYSSAL SALVAGE at the one exhaust funnel: a status or curse of hers
-    exhausted gives the Casket 1 per stack, and the upgraded Power 2 Block
-    per stack as well. `AbyssalSalvagePower` / `AbyssalSalvagePlusPower`."""
-    if not live(state) or not is_status_or_curse(card):
+    """ABYSSAL SALVAGE (the Kokomi card pass, 2026-10-11): "The first time each
+    turn you draw a status, Exhaust it. The Casket gains 1." Per card drawn,
+    a status by `klee_overhaul.is_status` (Damage Report's test; curses are
+    not statuses), once a turn on the shared latch, claimed by the first
+    status drawn. The card leaves her hand through the one exhaust funnel,
+    then the Casket gains the Power's amount (copies add, still once a turn).
+    `AbyssalSalvagePower.AfterCardDrawn` is the twin."""
+    from tier0.engine import effects, klee_overhaul, refpowers  # late: cycle
+    if not live(state) or not klee_overhaul.is_status(card):
         return
     p = state.player
-    base = int(p.powers.get(ABYSSAL_SALVAGE, 0))
-    plus = int(p.powers.get(ABYSSAL_SALVAGE_PLUS, 0))
-    if base + plus <= 0:
+    n = int(p.powers.get(ABYSSAL_SALVAGE, 0))
+    if n <= 0 or not claim_once_per_turn(state, ABYSSAL_SALVAGE):
         return
-    gain_casket(state, base + plus)
-    if plus:
-        gained = powers.modify_block_gained(
-            p, ABYSSAL_SALVAGE_PLUS_BLOCK * plus)
-        if gained:
-            p.block += gained
-            state.emit("block", amount=gained)
-    state.emit("plan_abyssal_salvage", card=card.id)
+    if effects.remove_instance(p.hand, card):
+        refpowers.exhaust_card(state, card)
+    gain_casket(state, n)
+    state.emit("plan_abyssal_salvage", card=card.id, amount=n)
 
 
 def quarter_of_max_hp(state: CombatState) -> int:
@@ -2455,6 +2453,17 @@ def debuff_count(enemy: Optional[Enemy]) -> int:
     return count + (1 if enemy.frozen > 0 else 0)
 
 
+def weak_vuln_stacks(enemy: Optional[Enemy]) -> int:
+    """The Kokomi card pass (2026-10-11, pick 1): "for each Weak and
+    Vulnerable on the enemy" -- STACKS of Weak plus stacks of Vulnerable, so
+    Weak 2 and Vulnerable 2 read 4. Drowning Pressure and Ceremonial Garment.
+    `KokomiOverhaulKit.WeakVulnStacks` is the twin."""
+    if enemy is None:
+        return 0
+    return (max(0, int(enemy.powers.get("weak", 0)))
+            + max(0, int(enemy.powers.get("vulnerable", 0))))
+
+
 def cancel_all_plans_cash(state: CombatState) -> None:
     """EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy
     and draw 1 card for each."
@@ -2664,15 +2673,19 @@ def long_game(state: CombatState, waiting: int) -> None:
         state.draw(plus)
 
 
-def note_reaction(state: CombatState, enemy: Enemy) -> None:
-    """AT WATER'S EDGE: "Whenever a reaction happens on an enemy, apply 1 Weak
-    and 1 Vulnerable to it." Any reaction, whoever caused it; called from
-    `reactions._react` at the one site a reaction is counted.
-    `KokomiExpansion.OnReaction` is the twin."""
+def note_hydro_damage(state: CombatState, enemy: Enemy) -> None:
+    """AT WATER'S EDGE (the Kokomi card pass, 2026-10-11): "The first time
+    each turn you deal Hydro damage to an enemy, apply 1 Weak and 1
+    Vulnerable to it." Called from `effects.deal_damage_to_enemy` for every
+    hit whose element is Hydro, once the hit has landed (fully blocked
+    included). Once a turn on the shared latch, claimed by the first such
+    hit on an enemy that survives it: a killing hit neither pays nor spends
+    the turn's trigger. Copies stack the amount.
+    `KokomiExpansion.OnHydroDamage` is the twin."""
     if not live(state) or enemy is None or not enemy.alive:
         return
     n = int(state.player.powers.get(AT_WATERS_EDGE, 0))
-    if n <= 0:
+    if n <= 0 or not claim_once_per_turn(state, AT_WATERS_EDGE):
         return
     powers.apply_power(state, enemy, "weak", n, applier=state.player)
     powers.apply_power(state, enemy, "vulnerable", n, applier=state.player)
@@ -2680,17 +2693,18 @@ def note_reaction(state: CombatState, enemy: Enemy) -> None:
 
 
 def garment_bonus(state: CombatState, card: Card, enemy: Enemy) -> int:
-    """CEREMONIAL GARMENT: "Your Attacks deal N more damage for each debuff on
-    their target." Per hit, read off the body the hit lands on, for an Attack
-    card played face-up. The debuff count is `debuff_count`'s: distinct
-    debuffs, auras not among them (an aura is a Buff in the mod).
-    `ProtoCeremonialGarmentPower.ModifyDamageAdditive` is the twin."""
+    """CEREMONIAL GARMENT: "Your Attacks deal N more damage for each Weak and
+    Vulnerable on their target." Per hit, read off the body the hit lands on,
+    for an Attack card played face-up. The count is `weak_vuln_stacks`'s:
+    stacks of Weak plus stacks of Vulnerable (the Kokomi card pass,
+    2026-10-11). `ProtoCeremonialGarmentPower.ModifyDamageAdditive` is the
+    twin."""
     if card is None or card.type != "attack" or not live(state):
         return 0
     n = int(state.player.powers.get(CEREMONIAL_GARMENT, 0))
     if n <= 0:
         return 0
-    return n * debuff_count(enemy)
+    return n * weak_vuln_stacks(enemy)
 
 
 def grace_keeps(state: CombatState) -> Optional[int]:

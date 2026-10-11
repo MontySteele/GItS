@@ -160,13 +160,15 @@ public class KokomiGrowthPowersTests
     }
 
     [Fact]
-    public void Change_of_plans_draws_one_after_the_carry_out()
+    public void Change_of_plans_draws_two_after_the_carry_out()
     {
+        // The Kokomi card pass (2026-10-11): draws 2; Exhaust stays.
         var card = new ProtoKkChangeOfPlans();
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
+        Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
         Assert.Equal("The [gold]Bake-Kurage[/gold] carries out your first "
-                   + "[gold]Plan[/gold] now. Draw 1 card.", Face(card));
+                   + "[gold]Plan[/gold] now. Draw 2 cards.", Face(card));
         var play = Seq("ProtoKkChangeOfPlans", "OnPlay");
         var carry = play.FindIndex(c => c.Contains("KokomiPlan.ResolveFront"));
         var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));

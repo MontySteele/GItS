@@ -1768,6 +1768,10 @@ _NTH_ATTACK = re.compile(r"^nth_attack_this_turn_(\d+)$")
 # emitter uses, so a predicate cannot invent a second spelling of a power; an
 # id nothing in that registry names returns None and BLOCKS the card.
 _SELF_HAS_POWER = re.compile(r"^self_has_power_(.+)$")
+#: The sim's `target_has_power_<name>` (`effects._predicate`), a LIVE read off
+#: the aimed enemy. Its first C# row is Salt in the Wound's "or 2 if the enemy
+#: has Weak" (the Kokomi card pass, 2026-10-11).
+_TARGET_HAS_POWER = re.compile(r"^target_has_power_(.+)$")
 
 
 def _bonus_if_reason(eff: dict) -> str | None:
@@ -1839,6 +1843,13 @@ def predicate_cs(name: str) -> str | None:
         entry = APPLY_POWERS.get(hit.group(1))
         if entry:
             return f"Owner.Creature.Powers.OfType<{entry[0]}>().Any()"
+        return None
+    hit = _TARGET_HAS_POWER.match(name)
+    if hit:
+        entry = APPLY_POWERS.get(hit.group(1))
+        if entry:
+            return (f"cardPlay.Target != null && "
+                    f"cardPlay.Target.Powers.OfType<{entry[0]}>().Any()")
         return None
     hit = _LEFTMOST_MEMBER.match(name)
     # SALON_MEMBER_CS is the one member->enum map, shared with `member:` on
@@ -3281,11 +3292,11 @@ APPLY_POWERS = {
         "At the start of your turn, if exactly one [gold]Plan[/gold] is "
         "waiting, gain {X} [gold]Energy[/gold] and draw {X} card."),
     "kk_at_waters_edge": ("AtWatersEdgePower", None,
-        "Whenever an [gold]Elemental Reaction[/gold] happens on an enemy, "
-        "apply {X} Weak and {X} Vulnerable to it."),
+        "The first time each turn you deal [gold]Hydro[/gold] damage to an "
+        "enemy, apply {X} Weak and {X} Vulnerable to it."),
     "kk_ceremonial_garment": ("ProtoCeremonialGarmentPower", None,
-        "Your Attacks deal {X} additional damage for each debuff on their "
-        "target."),
+        "Your Attacks deal {X} additional damage for each Weak and "
+        "Vulnerable on their target."),
     "kk_watatsumis_grace": ("WatatsumisGracePower", None,
         "At the end of your turn, keep up to {X} of your Block."),
     "kk_tidal_riposte": ("TidalRipostePower", None,
@@ -3298,14 +3309,11 @@ APPLY_POWERS = {
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], gain {X} Block."),
-    # THE STATUS BATCH (2026-10-01). Abyssal Salvage and the Block its
-    # upgrade adds; classes in KokomiStatusBatch.cs.
+    # THE STATUS BATCH (2026-10-01); the Kokomi card pass (2026-10-11) moved
+    # it to the draw. Class in KokomiStatusBatch.cs.
     "kk_abyssal_salvage": ("AbyssalSalvagePower", None,
-        "Whenever a status or curse is exhausted, the "
+        "The first time each turn you draw a status, Exhaust it. The "
         "[gold]Casket[/gold] gains {X}."),
-    "kk_abyssal_salvage_plus": ("AbyssalSalvagePlusPower", None,
-        "Whenever a status or curse is exhausted, the "
-        "[gold]Casket[/gold] gains {X} and you gain 2 Block."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
     "kk_patient_tide": ("PatientTidePower", None,
         "At the end of your turn, keep up to {X} unspent "
@@ -6277,10 +6285,17 @@ def debuffs_on_target_calc_rider(
     formula = eff.get("amount_formula")
     if not isinstance(formula, dict):
         return None
-    if formula.get("count") != "debuffs_on_target":
+    count = formula.get("count")
+    if count == "debuffs_on_target":
+        read = "static (_, target) => KokomiOverhaulKit.DebuffCount(target)"
+    elif count == "weak_vuln_stacks_on_target":
+        # The Kokomi card pass (2026-10-11): Drowning Pressure counts STACKS
+        # of Weak plus stacks of Vulnerable, on the same aimed rail.
+        read = ("static (_, target) => "
+                "KokomiOverhaulKit.WeakVulnStacks(target)")
+    else:
         return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            "static (_, target) => KokomiOverhaulKit.DebuffCount(target)")
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)), read)
 
 
 #: The Spend paper (2026-10-10): a stage count an effect after a "Spend up to

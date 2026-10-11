@@ -15,6 +15,7 @@ sec.2 rule 2), so "in your hand" on a Plan is the hand just drawn.
 from __future__ import annotations
 
 import collections
+import dataclasses
 
 import pytest
 
@@ -93,21 +94,22 @@ def test_a_plan_reads_the_hand_drawn_that_morning(overhaul):
     combat._player_turn(st, lambda s: None)
     kelp = [e for e in st.log if e["event"] == "plan_kelp_wall"]
     assert kelp and kelp[0]["statuses"] == 2
-    assert st.player.block == 7 + 3 * 2
+    # The Kokomi card pass (2026-10-11): Plan 9 [12] (was 7 [10]).
+    assert st.player.block == 9 + 3 * 2
 
 
 def test_kelp_wall_pays_the_flat_block_on_a_clean_hand(overhaul):
     st = _quiet_state()
     st.player.hand = _filler(3)
     _carry_out(st, _row("proto_kk_kelp_wall"))
-    assert st.player.block == 7
+    assert st.player.block == 9
 
 
 def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
     st = _quiet_state()
     st.player.hand = [statuses.make_status("wound")]
     _carry_out(st, _up("proto_kk_kelp_wall"))
-    assert st.player.block == 10 + 3
+    assert st.player.block == 12 + 3
 
 
 # --- Tidecleanse -------------------------------------------------------------------
@@ -214,48 +216,69 @@ def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
 
 # --- Abyssal Salvage -----------------------------------------------------------------------
 
-def test_abyssal_salvage_feeds_the_casket_per_status_exhausted(overhaul):
-    st = _quiet_state()
-    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
-    st.player.hand = [statuses.make_status("dazed"),
-                      statuses.make_status("wound")]
-    _carry_out(st, _row("proto_kk_tidecleanse"))
-    # Two exhausted, plus the Plan's own carry-out (no Casket relic here,
-    # so the relic's count does not move; the Power's does).
-    assert st.kk_casket == 2
-    assert st.player.block == 0
-
-
-def test_abyssal_salvage_ignores_her_own_cards(overhaul):
-    from tier0.engine import refpowers
-    st = _quiet_state()
-    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
-    refpowers.exhaust_card(st, _filler(1)[0])
-    assert st.kk_casket == 0
-
-
-def test_abyssal_salvage_upgraded_also_blocks(overhaul):
-    up = _up("proto_kk_abyssal_salvage")
-    assert up.effects[0]["power"] == kokomi_plan.ABYSSAL_SALVAGE_PLUS
-    st = _quiet_state()
-    st.player.energy = 3
-    st.player.hand.append(up)
-    combat.play_card(st, up)
-    assert st.player.powers[kokomi_plan.ABYSSAL_SALVAGE_PLUS] == 1
-    from tier0.engine import refpowers
-    refpowers.exhaust_card(st, statuses.make_status("dazed"),
-                           caused_by_ethereal=True)
-    assert st.kk_casket == 1
-    assert st.player.block == 2
-
-
-def test_an_ethereal_dazed_at_turn_end_counts(overhaul):
-    """Flotsam's Dazed exhausts itself from hand at turn end: that pays."""
+def test_abyssal_salvage_exhausts_only_the_first_status_drawn_each_turn(overhaul):
+    """The Kokomi card pass (2026-10-11, pick 2): "The first time each turn
+    you draw a status, Exhaust it. The Casket gains 1." The first status
+    drawn leaves her hand for the exhaust pile and the Casket gains 1; the
+    second status that turn stays in hand; the next turn pays again."""
     st = _quiet_state()
     st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
     st.player.hand = []
-    st.player.draw_pile = [statuses.make_status("dazed")] + _filler(8)
+    first, second = statuses.make_status("dazed"), statuses.make_status("wound")
+    st.player.draw_pile = [first, second] + _filler(3)
+    st.draw(3)
+    assert first in st.player.exhaust_pile and first not in st.player.hand
+    assert second in st.player.hand
+    assert st.kk_casket == 1
+    assert len(st.player.hand) == 2
+    kokomi_plan.roll_turn(st)
+    third = statuses.make_status("dazed")
+    st.player.draw_pile = [third] + _filler(1)
+    st.draw(1)
+    assert third in st.player.exhaust_pile and st.kk_casket == 2
+
+
+def test_abyssal_salvage_ignores_curses_and_her_own_cards(overhaul):
+    """Statuses only: a curse or a card of hers drawn first neither pays nor
+    spends the turn's trigger."""
+    st = _quiet_state()
+    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
+    st.player.hand = []
+    curse = dataclasses.replace(_filler(1)[0], id="probe_curse", type="curse",
+                                rarity="curse")
+    dazed = statuses.make_status("dazed")
+    st.player.draw_pile = _filler(1) + [curse, dazed]
+    st.draw(3)
+    assert curse in st.player.hand
+    assert dazed in st.player.exhaust_pile and st.kk_casket == 1
+
+
+def test_abyssal_salvage_upgrade_is_innate(overhaul):
+    row, up = _row("proto_kk_abyssal_salvage"), _up("proto_kk_abyssal_salvage")
+    assert not row.innate and up.innate
+    assert up.effects == row.effects == [
+        {"op": "apply_power", "power": kokomi_plan.ABYSSAL_SALVAGE,
+         "amount": 1, "target": "self"}]
+    assert not hasattr(kokomi_plan, "ABYSSAL_SALVAGE_PLUS")
+
+
+def test_abyssal_salvage_no_longer_reads_the_exhaust(overhaul):
+    from tier0.engine import refpowers
+    st = _quiet_state()
+    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
+    refpowers.exhaust_card(st, statuses.make_status("dazed"))
+    assert st.kk_casket == 0
+
+
+def test_a_dazed_in_the_opening_hand_pays(overhaul):
+    """The turn-start hand draw is a draw: a Dazed in it is Exhausted."""
+    st = _quiet_state()
+    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
+    st.player.hand = []
+    dazed = statuses.make_status("dazed")
+    st.player.draw_pile = [dazed] + _filler(8)
     combat._player_turn(st, lambda s: None)
+    assert dazed in st.player.exhaust_pile
     assert st.kk_casket >= 1
 
 

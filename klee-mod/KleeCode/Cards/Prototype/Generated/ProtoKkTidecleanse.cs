@@ -45,7 +45,7 @@ public sealed class ProtoKkTidecleanse : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidecleanse"),
-        ("description", "Apply 1 [gold]Weak[/gold].\nOr [gold]plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand."),
+        ("description", "Apply 1 [gold]Weak[/gold]. Draw 1 card.\nOr [gold]plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,6 +60,7 @@ public sealed class ProtoKkTidecleanse : CustomCardModel, ICharacterCard, IPlann
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new CardsVar(1),
             new DynamicVar("PlanExhaust", 2m)
         };
 
@@ -92,6 +93,7 @@ public sealed class ProtoKkTidecleanse : CustomCardModel, ICharacterCard, IPlann
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

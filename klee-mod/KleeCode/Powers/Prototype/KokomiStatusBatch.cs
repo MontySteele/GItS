@@ -151,11 +151,17 @@ public static class KokomiStatusBatch
 }
 
 /// <summary>
-/// Abyssal Salvage (the status batch, 2026-10-01): "Whenever a status or
-/// curse is exhausted, the Casket gains 1." Any of HER statuses and curses,
-/// by any route (a played Slimed, a Dazed at turn end, Tidecleanse). The
-/// count is the ledger's, as every Casket card's. Sim twin:
-/// <c>refpowers.after_card_exhausted</c>'s <c>kk_abyssal_salvage</c> read.
+/// Abyssal Salvage (the Kokomi card pass, 2026-10-11, pick 2): "The first time
+/// each turn you draw a status, Exhaust it. The Casket gains 1." Damage
+/// Report's trigger (<see cref="DamageReportPower.AfterCardDrawn"/>: per card
+/// drawn, a status by <see cref="KleeStatusPackage.IsStatus"/>, curses not
+/// included), once a turn on the ledger's shared latch
+/// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed by the first
+/// status she draws. The status is Exhausted from her hand, then the Casket
+/// gains the Power's amount: copies add Casket, still once a turn. It read
+/// "Whenever a status or curse is Exhausted, the Casket gains 1" before the
+/// pass. Sim twin: <c>kokomi_plan.abyssal_salvage</c>, read at
+/// <c>refpowers.after_card_drawn</c>.
 /// </summary>
 public sealed class AbyssalSalvagePower : PowerModel, ILocalizationProvider
 {
@@ -163,60 +169,33 @@ public sealed class AbyssalSalvagePower : PowerModel, ILocalizationProvider
     {
         ("title", "Abyssal Salvage"),
         ("description",
-            "Whenever a status or curse is exhausted, the "
-          + "[gold]Casket[/gold] gains [blue]{Amount}[/blue]."),
+            "The first time each turn you draw a status, "
+          + "[gold]Exhaust[/gold] it. The [gold]Casket[/gold] gains "
+          + "[blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override Task AfterCardExhausted(
-        PlayerChoiceContext choiceContext, CardModel card, bool causedByEthereal)
-    {
-        if (Owner == null || Amount <= 0) return Task.CompletedTask;
-        if (card?.Owner?.Creature != Owner) return Task.CompletedTask;
-        if (!KokomiStatusBatch.IsStatusOrCurse(card)) return Task.CompletedTask;
-        if (!KokomiOverhaul.LiveFor(Owner)) return Task.CompletedTask;
-        KokomiOverhaulKit.GainCasket(Owner, Amount);
-        return Task.CompletedTask;
-    }
-}
-
-/// <summary>
-/// Abyssal Salvage upgraded: "the Casket gains 1 and you gain 2 Block". The
-/// upgraded card installs this Power in place of
-/// <see cref="AbyssalSalvagePower"/> (`upgraded_power`, The Long Game's
-/// shape). Each stack is 1 Casket and 2 Block per exhaust. Powered Block,
-/// the planned Block's reading. Sim twin: <c>kk_abyssal_salvage_plus</c>.
-/// </summary>
-public sealed class AbyssalSalvagePlusPower : PowerModel, ILocalizationProvider
-{
-    /// <summary>The Block per stack per exhausted status or curse.</summary>
-    public const int BlockPerStack = 2;
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Abyssal Salvage+"),
-        ("description",
-            "Whenever a status or curse is exhausted, the "
-          + "[gold]Casket[/gold] gains [blue]{Amount}[/blue] and you gain "
-          + "2 [gold]Block[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterCardExhausted(
-        PlayerChoiceContext choiceContext, CardModel card, bool causedByEthereal)
+    public override async Task AfterCardDrawn(
+        PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
     {
         if (Owner == null || Amount <= 0) return;
         if (card?.Owner?.Creature != Owner) return;
-        if (!KokomiStatusBatch.IsStatusOrCurse(card)) return;
+        if (!KleeStatusPackage.IsStatus(card)) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
+        var player = Owner.Player;
+        if (player == null) return;
+        if (!KokomiOverhaulLedger.ClaimOncePerTurn(
+                Owner, nameof(AbyssalSalvagePower)))
+        {
+            return;
+        }
+        if (PileType.Hand.GetPile(player).Cards.Contains(card))
+        {
+            await CardCmd.Exhaust(choiceContext, card);
+        }
         KokomiOverhaulKit.GainCasket(Owner, Amount);
-        await CreatureCmd.GainBlock(Owner, BlockPerStack * Amount,
-                                    ValueProp.Move, null);
     }
 }
