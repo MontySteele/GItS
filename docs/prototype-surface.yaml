@@ -2538,7 +2538,7 @@
    upgrade: {block: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: basic,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Gain 5 [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much [gold]Hydro[/gold] damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: block, amount: 5},
              {op: stage_spend_all},
              {op: damage,
