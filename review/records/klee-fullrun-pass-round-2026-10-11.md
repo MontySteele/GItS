@@ -105,6 +105,15 @@ What this changes for the picks below:
 - Pick 4 adds Lizard-Tail Gunpowder.
 - Exquisite Compound and Taste Test are no longer just thin samples, so pick 4's (b) is the stronger case. The default stays hold for your sweep.
 
+## Ruled (2026-10-11)
+
+[USER]: "On Klee - I think we should do the targeting fix for Stoke the Fuse, but otherwise agreed on defaults."
+
+- Pick 1: (a), the next Companion paper leads with the Uncommon and Rare Companions.
+- Pick 2: (a), hold Bomb growth at 2; watch act 3 in the sweep.
+- Pick 3: (b), Stoke the Fuse targets an enemy and grows the largest Bomb on it.
+- Pick 4: (a), hold the three untaken cards for the sweep.
+
 ## For [USER]
 
 Klee is ready for your playtest sweep. Things to watch:
