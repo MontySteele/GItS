@@ -1578,9 +1578,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # `Open the Casket` is the relic's token. Both follow
     # `ArmKeywordTips.ForCasket` / `ForOpenTheCasket` word for word.
     "Tamakushi Casket": CASKET_ROW,
-    "Open the Casket": ("1-cost, Retain. Gain Strength equal to the "
-                        "Casket's count, then empty it. Upgraded, it also "
-                        "draws a card."),
+    # 2026-10-10 ([USER], after his Kokomi playtest): it starts at 0 and
+    # each play raises its cost by 1.
+    "Open the Casket": ("0-cost, Retain. Gain Strength equal to the "
+                        "Casket's count, then empty it, and increase its "
+                        "cost by 1. Upgraded, it also draws a card."),
     # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three
     # readers read any Companion play now, so the word and its row left the
