@@ -81,8 +81,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   after the draw; the line prints "Or plan:" under the now-line. When it
   carries out a two-line Plan it uses the Plan line, and a click on a waiting
   Plan flips it to the now-line (`review/active/kokomi-delay-pays-2026-10-01.md`).
-  The Tamakushi Casket counts the Plans carried out; Open the Casket (cost 1,
-  Retain, no Exhaust) gives Strength equal to the count and empties it. Pool
+  The Tamakushi Casket counts the Plans carried out; Open the Casket (cost 0,
+  then 1 more each play this combat, ruled by [USER] after his run
+  2026-10-10; Retain, no Exhaust) gives Strength equal to the count and
+  empties it. Pool
   78 (21 / 36 / 21) plus five co-op cards and two Ancients; relics are the
   Casket and its upgrade beside the Silent's borrowed roster. Latest round
   `review/records/kokomi-review-round-2026-10-05.md`: one run reached the

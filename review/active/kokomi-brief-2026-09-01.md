@@ -80,14 +80,23 @@ the Bake-Kurage carries it out at the start of her next turn.
 7. **The Casket counts (2026-09-28).** Her relic, the Tamakushi Casket,
    gains 1 each time the Bake-Kurage carries out a Plan -- in the morning,
    at Dusk or hurried by Change of Plans, and a Plan carried out twice adds
-   twice. The count is per combat and starts at 0. Open the Casket (a 1-cost
-   Retain token the relic puts in her opening hand) turns the count into
+   twice. The count is per combat and starts at 0. Open the Casket (a Retain
+   token the relic puts in her opening hand; it costs 0, and each play
+   raises its cost by 1 for the combat) turns the count into
    Strength, 1 per point, and empties it; the Casket keeps counting. Since
    2026-10-01 it has no Exhaust and cycles with the deck, so it pays more
    than once (the four-kit review, Kokomi pick 1). [USER]:
    "On your new picks agree all around - I think that if it's repeatable,
    it should probably cost energy, though, to make this a real choice and
-   not just button mashing when it comes up?"
+   not just button mashing when it comes up?" It cost 1 from then until
+   2026-10-10, when, after his Kokomi run, [USER] ruled: "I think that the
+   casket should start at 0 and then have a ramping cost (goes up by 1 each
+   time) That means the casket is free the first play, costs 1 the second,
+   and then at 2+ becomes difficult. That way it has obvious use in a short
+   hallway fight".
+   The face takes the base game's Modded line, "Increase this card's cost
+   by 1."; the ramp is on the copy, so a fetched Open keeps it, and the
+   relic's fresh copy each combat is the reset.
    Cards may read or add to the count; none spends it. [USER]: "We don't
    need this to be the equivalent to Regent's stars or Klee's sparks. This
    should feel like a distinct effect."
@@ -151,8 +160,9 @@ to ALL written; upgrade 7 damage and 2 Weak written).
 Relic, **Tamakushi Casket** (the Casket pass, 2026-09-28): "Start each
 combat with the Bake-Kurage and Open the Casket in hand. Each Plan it
 carries out adds 1 to the Casket." Open the Casket: "Gain Strength equal to
-the Casket's count, then empty it." (1, Retain; it was 0, Retain, Exhaust
-until 2026-10-01, when it became repeatable at a cost: rule 7.) [USER], choosing
+the Casket's count, then empty it. Increase this card's cost by 1." (0,
+Retain; it was 0, Retain, Exhaust until 2026-10-01, then 1, Retain until
+2026-10-10, when it became free first and dearer each play: rule 7.) [USER], choosing
 this Forge-style relic over a Vigor-style one, because Vigor "devolves into
 'solve for lethal, press the I Win button'": "an artifact that grants /
 tracks an alternative energy that builds by 1 for every Plan played, and
