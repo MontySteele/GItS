@@ -6540,11 +6540,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
             "Your relic. Each ", "carries out adds ",
             " turns the count into "],
         # And the relic's token, named by What the Tokoyo Returns.
-        "Open the Casket": ["0-cost, Retain. Gain ",
+        "Open the Casket": ["Retain. Costs 0, rising by 1 each play. Gain ",
                             " equal to the ",
-                            "Casket's count, then empty it, and increase "
-                            "its cost by 1. ",
-                            "Upgraded, it also draws a card."],
+                            "Casket's count, then empty it. Under ",
+                            "it is not emptied."],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then

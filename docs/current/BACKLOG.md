@@ -17,6 +17,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; telemetry has no draw field, so add one or check the relic in game.
+- `KokomiExpansion.DrawIfTargetWeak` is dead after the Kokomi card pass (Salt in the Wound now uses the `target_has_power_weak` predicate); delete the `draw_if_target_weak` Plan kind with it: the helper, `gen_klee_cards.py`'s kind map and `KOKOMI_AIMED_KINDS` check, `kokomi_plan.py`'s `KINDS`/`AIMED_KINDS` branch and `kokomi_expansion_sim.py`'s twin.
 - Dahlia — Sacramental Shower and Raiden — Musou no Hitotachi print their damage as fixed text, so the face ignores Strength and Weak; move them to the computed damage token like the other Companions.
 - `build_pck` skips three copy blocks whose sources are missing locally: `klee\mod_image.png`, `kokomi\potions`, `varka\potions` (deploy 2026-10-11, 0.2.4849+next).
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
@@ -121,6 +122,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - The bridge does not show the order enemies act in; print it when the game exposes it.
 - Live repro, no change before it: Wax Lizard Tail did not fire after Toy Box (base relics; `review/records/furina-fullrun-round-2-2026-10-10.md`). Check whether a melted relic stays in `player.Relics` unflagged, so the page still lists it (bridge `McpMod.StateBuilder.cs:1471-1488`).
 - Live repro, no change before it: Fairy in a Bottle may not have saved the Ironclad control at death (base potion; `review/records/kokomi-fullrun-round-2026-10-10.md`). No klee-mod hook touches death or HP loss, so check the base game's own path in a live run.
+- A Plan carried out with no living enemy to aim at (an earlier Plan that morning killed it) prints "no enemy lost HP", like a Plan that missed (Kokomi round 5, lane 3). The wire cannot tell the two apart: `KokomiPlan.Hit` returns null when `Aimed` finds no living body, so the row is `number` null, `moved` []; add a field to `CarriedOutRow` (e.g. `no_target`) and print "its target was already dead" in `blindplay_render._render_moved`.
 
 ## Harness, bridge and tools
 
@@ -132,9 +134,12 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
 - Fight telemetry: log Witch's Homework II's run-long Bomb size (`HomeworkGrowth`) per fight, so its prediction can be graded.
+- Fight telemetry has no field for Block that absorbed hits on the player: `damage_blocked` is enemy Block her own hits broke (`PlayTelemetry.FileHit`), so it does not track `block_gained` (Kokomi round 5, lane 5 Kaiser Crab: 192 gained, 11 broken). Add a `damage_absorbed` beside it if a review needs it.
+- Fight telemetry credits a Plan carry-out's damage to "(Bake-Kurage)" in `damage_by_source` (`KokomiPlan.Hit`'s `DamageCredit` scope), not to the card that wrote the Plan, so a Plan card's damage cannot be read per card.
 - `scenario run` cannot start on a lane whose profile holds a saved run: the relaunched game resumed the old boss fight and the menu never became ready.
 - An embark was never reverted (all its ledger rows APPLIED, the game still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
 - `test_local_tester` is flaky: it failed once and passed on re-run with no change.
+- The seat harness sometimes sends end-turn twice in a row (seat rounds); find which path repeats it.
 - `EB-802` `understudy/twolane_frames.py` may carry the PrintWindow clip `frames.py` fixed; route it through the same capture, and make a frame-reading row refuse `complete: false`.
 - `EB-799` `vendor/STS2_MCP/STS2_MCP.csproj` ignores `klee-mod/local.props`, so a bare `dotnet build` of the bridge fails in a worktree; read `local.props` (until then pass `-p:STS2GameDir=...`).
 - `EB-489` bound the bridge's main-thread hop so one stalled frame cannot hang `/api/v1/singleplayer` for the life of the process.

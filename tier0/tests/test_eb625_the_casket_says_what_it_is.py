@@ -147,9 +147,9 @@ def test_the_relic_and_the_tip_say_the_casket_counts():
         f"{C.KOKOMI_OVERHAUL_CASKET_PER_PLAN}. Open the Casket turns the count "
         f"into Strength.")
     assert blindplay_notes.ARM_KEYWORDS["Open the Casket"] == (
-        "0-cost, Retain. Gain Strength equal to the Casket's count, "
-        "then empty it, and increase its cost by 1. Upgraded, it also "
-        "draws a card.")
+        "Retain. Costs 0, rising by 1 each play. Gain Strength equal to "
+        "the Casket's count, then empty it. Under Grand Design it is not "
+        "emptied.")
     # Inside the 135-character mechanic-tip ceiling.
     assert len(page) <= 135
 

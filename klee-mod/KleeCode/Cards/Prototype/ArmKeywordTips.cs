@@ -516,13 +516,18 @@ public static class ArmKeywordTips
     /// added the upgrade's draw (`OpenTheCasket.OnPlay`, `IsUpgraded`).
     /// 2026-10-10 ([USER], after his Kokomi playtest): it starts at 0 and
     /// each play raises its cost by 1 (`EnergyCost.AddThisCombat(1)`).
+    /// Kokomi round 5 (2026-10-11): Grand Design carries this tip and keeps
+    /// the Casket (`GrandDesignPower.Keeps`), so the tip says so. The upgrade's
+    /// draw left the tip to make room under the 135 ceiling; the card's own
+    /// face still prints it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForOpenTheCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, OpenTheCasketKey,
-            "0-cost, Retain. Gain [gold]Strength[/gold] equal to the "
-          + "Casket's count, then empty it, and increase its cost by 1. "
-          + "Upgraded, it also draws a card.");
+            "Retain. Costs 0, rising by 1 each play. Gain "
+          + "[gold]Strength[/gold] equal to the "
+          + "Casket's count, then empty it. Under [gold]Grand Design[/gold] "
+          + "it is not emptied.");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.

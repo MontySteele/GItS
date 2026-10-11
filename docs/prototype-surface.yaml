@@ -1278,10 +1278,10 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    # Kokomi core pass: pays for playing a Plan card's now-line, not for a
-   # carry-out. "Normally" = not written on the Bake-Kurage.
+   # carry-out. "Without writing it as a Plan" = not on the Bake-Kurage.
    # 2026-10-11 Kokomi card pass: cost 1 -> 0.
    cost: 0, type: power, rarity: uncommon,
-   description: "The first time each turn you play a card with a [gold]Plan[/gold] line normally, draw 1 card.",
+   description: "The first time each turn you play a card with a [gold]Plan[/gold] line without writing it as a Plan, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 

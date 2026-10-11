@@ -91,17 +91,24 @@ public sealed class OpenTheCasket : CustomCardModel, ICharacterCard
         description.Add("CasketStrength", StrengthLine(this));
     }
 
-    /// <summary>The in-combat line, or empty out of combat.</summary>
+    /// <summary>The in-combat line, or empty out of combat. Under Grand
+    /// Design the Casket is not emptied (<see cref="GrandDesignPower.Keeps"/>),
+    /// so the line says it stays (Kokomi round 5, 2026-10-11: the face said
+    /// "then empty it" and the seats believed it).</summary>
     public static string StrengthLine(CardModel card) =>
         TipOwner.CreatureOf(card) is { } owner
         && owner.CombatState != null && KokomiOverhaul.LiveFor(owner)
             ? Line(KokomiOverhaulLedger.For(owner).CasketCount
-                   * KokomiOverhaulLaw.CasketStrengthPerPoint)
+                   * KokomiOverhaulLaw.CasketStrengthPerPoint,
+                   GrandDesignPower.Keeps(owner))
             : "";
 
     /// <summary>The line's words, for the pins.</summary>
-    public static string Line(int strength) =>
-        $"\n(Gains {strength} [gold]Strength[/gold])";
+    public static string Line(int strength, bool keeps = false) =>
+        keeps
+            ? $"\n(Gains {strength} [gold]Strength[/gold]; the "
+              + "[gold]Casket[/gold] stays)"
+            : $"\n(Gains {strength} [gold]Strength[/gold])";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Retain };
