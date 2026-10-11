@@ -138,9 +138,30 @@ public class VarkaExpansionTests : IDisposable
         {
             Assert.Contains($"ModelDb.Card<{name}>", pool);
         }
-        var order = Calls("VarkaRules", "AddRandomKnight");
+        // Varka co-op fixes (2026-10-11): The Order Answers offers 3 of
+        // them on the choose-a-card screen, upgraded.
+        var order = Calls("VarkaRules", "ChooseUpgradedKnight");
         Assert.Contains("VarkaRules.PoolKnights", order);
+        Assert.Contains("CardModel.UpgradeInternal", order);
+        Assert.Contains("CardSelectCmd.FromChooseACardScreen", order);
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", order);
+        Assert.DoesNotContain("SetThisTurn", string.Join(",", order));
+        Assert.Equal(3, VarkaRules.OrderAnswersOptions);
+    }
+
+    [Fact]
+    public void The_order_answers_offers_three_distinct_knights()
+    {
+        var pool = new[] { "a", "b", "c", "d", "e" };
+        // Always the first left: a, b, c, never a repeat.
+        Assert.Equal(new[] { "a", "b", "c" },
+                     VarkaRules.DrawDistinct(pool, 3, left => left[0]));
+        // Always the last left: e, d, c.
+        Assert.Equal(new[] { "e", "d", "c" },
+                     VarkaRules.DrawDistinct(pool, 3, left => left[^1]));
+        // A pool smaller than the offer gives what it has.
+        Assert.Equal(new[] { "a", "b" },
+                     VarkaRules.DrawDistinct(new[] { "a", "b" }, 3, left => left[0]));
     }
 
     // ---- the Knight pass ---------------------------------------------------
@@ -280,7 +301,7 @@ public class VarkaExpansionTests : IDisposable
         var start = Il.CallSequence(Il.Method("VarkaOath", "TurnStart")).ToList();
         var vane = start.IndexOf("VarkaOath.Weathervane");
         var bunny = start.IndexOf("VarkaBaronBunnyPower.Fire");
-        var order = start.IndexOf("VarkaRules.AddRandomKnight");
+        var order = start.IndexOf("VarkaRules.ChooseUpgradedKnight");
         Assert.True(vane >= 0 && bunny > vane && order > bunny,
                     string.Join(", ", start));
         Assert.Contains("VarkaRules.ChooseElement", Calls("VarkaOath", "Weathervane"));

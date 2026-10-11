@@ -45,7 +45,7 @@ public sealed class ProtoVkTheOrderAnswers : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Order Answers"),
-        ("description", "At the start of your turn, add a random [gold]Knight[/gold] to your hand."),
+        ("description", "At the start of your turn, choose 1 of 3 random [gold]Knights[/gold]. Add it to your hand, upgraded."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

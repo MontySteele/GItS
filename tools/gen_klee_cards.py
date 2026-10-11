@@ -2534,6 +2534,20 @@ VARKA_KIND_FIELDS = {
     "pyro_strike": ("base",),
     "shatter": ("base", "per"),
 }
+#: A field a kind MAY print; absent, the rule's own default holds (Vow of the
+#: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).
+VARKA_OPTIONAL_FIELDS = {
+    "gain_current_oath": ("amount",),
+}
+
+
+def varka_fields(eff: dict) -> tuple:
+    """The numeric fields one `varka` op prints, in call order."""
+    kind = eff["kind"]
+    return VARKA_KIND_FIELDS.get(kind, ()) + tuple(
+        f for f in VARKA_OPTIONAL_FIELDS.get(kind, ()) if f in eff)
+
+
 #: A kind that aims at the enemy the card was played on.
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      "pathfinders_mark", "current_element_strike",
@@ -5190,7 +5204,7 @@ def blocked_reason(
             if eff.get("target") != want_target:
                 return (f"varka {kind} takes target {want_target!r}, "
                         f"row gives {eff.get('target')!r}")
-            wanted = set(VARKA_KIND_FIELDS.get(kind, ()))
+            wanted = set(varka_fields(eff))
             given = set(eff) & set(VARKA_VAR_FIELDS)
             if given != wanted:
                 return (f"varka {kind} prints {sorted(wanted)}, "
@@ -7630,7 +7644,7 @@ def build_vars(card: dict) -> list[str]:
         elif op == "varka":
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
-            for field in VARKA_KIND_FIELDS.get(eff["kind"], ()):
+            for field in varka_fields(eff):
                 out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
                            f'{int(eff[field])}m)')
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
