@@ -130,8 +130,9 @@ NEUVILLETTE_HYDRO_BONUS = 2  # line: "Your Hydro damage deals 2 more." [3]
 SALON_ENCORE_DAMAGE = 3      # Power: whenever you Drain, 3 to ALL
 THUNDEROUS_DAMAGE = 3        # Power: whenever you Spend, 3 to ALL
 # The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
-LYNEY_LINE_DROP = 10         # line: "Your Drain line is 10 HP lower."
-                             # (2026-10-11: +10 to her Drain buffer)
+LYNEY_LINE_DROP = 10         # line: "Your Drain buffer is 10 HP larger."
+                             # (2026-10-11: +10 to her Drain buffer; the line
+                             # sits 10 HP lower)
 LYNEY_ACT_DRAIN = 2          # act: "Drain 2, never past your line. Deal 8
                              # Pyro damage to ALL enemies."
 LYNEY_ACT = 8
@@ -428,7 +429,7 @@ CARDS: dict[str, Spec] = {
     # Ousia Surge (Power, 1): The first time you Drain each turn, draw 1.
     "ftd_ousia_surge": Spec("Ousia Surge", 1, "power", "uncommon", "power",
                             (1,), "ousia_surge"),
-    # Guest Star: Lyney (1). Line: your Drain line is 10 HP lower. Act:
+    # Guest Star: Lyney (1). Line: your Drain buffer is 10 HP larger. Act:
     # Drain 2, never past your line. Deal 8 Pyro damage to ALL enemies.
     "ftd_lyney": Spec("Guest Star: Lyney", 1, "skill", "uncommon", "guest",
                       (), "lyney", exhaust=True),

@@ -122,3 +122,60 @@ Pick 1 is a new option, a mix of (a) and (b): Standing Ovation goes back to Comm
    - **(a) Default:** Standing Ovation ("Spend all your Fanfare. Deal that much damage to ALL enemies.") goes back to Common. This undoes the 2026-10-09 move to Uncommon.
    - (b) Spirited Aria and Crashing Waves become "Spend half your Fanfare" instead of "up to 8" and "up to 12". This reopens the 2026-10-10 "Spend up to X" ruling, a ratio in place of a cap.
    - (c) No change. Watch for it in your next run.
+
+## Round 5: Standing Ovation spends half (2026-10-11, 13:10)
+
+The round tests the pick 1 ruling: Standing Ovation at Common, "Spend half your Fanfare." It ran on the same seeds as rounds 1 to 4, on build 0.2.4897+next. The packet (`furina-r5-packet.md`) and the Fable review (`furina-r5-review-fable.md`) are in the session scratchpad.
+
+| Seed | Round 5 | Round 4 |
+|---|---|---|
+| JF391WG2NN0X | floor 33, Kaiser Crab | floor 33, Kaiser Crab |
+| WDETA8RRGH98 | floor 48, Aeonglass | won |
+| 0J427L1YQV15 | floor 33, Kaiser Crab | floor 48 |
+| TYXJLVY31QN7 | **won** | floor 33 |
+| Ironclad control | floor 48, the Queen | floor 33 |
+
+Furina won 1 of 4, with a mean floor of 40.5, the same as round 4. Pooled over rounds 1 to 5 she has won 6 of 20; the control has won 0 of 5.
+
+**Standing Ovation, as drafted and played:**
+- Offered 9 times and taken 4 times. All four Furina decks ended with it, against 1 of 4 in round 4.
+- It was played in only 10 of the 64 fights held after the take (16%). At "Spend all" in round 4 that was 36%.
+- A play spent 13.5 Fanfare on average, from a bank of 27.5.
+
+**The stranded bank:**
+
+| | Round 3 | Round 4 | Round 5 |
+|---|---|---|---|
+| Turns starting at 20+ Fanfare with no Spend played | 30% | 48% | 34% |
+| Of those, turns with no Spend card in hand | — | 31 | 13 |
+
+- Making the card easier to find worked: far fewer turns had no Spend card in hand.
+- How often the bank strands is back to round 3's level, not below it.
+- Seats price the card per point of bank ("always worse than Bravura"). It keeps half the bank, and a seat planning a one-turn lethal values that at nothing.
+
+**Other findings:**
+- **The act-2 boss is the wall.** In rounds 3 to 5 it cost 51.6 HP a fight, with 6 deaths in 11 fights. Kaiser Crab killed both of this round's dead seats, on the same two seeds. No number moves for it on seat evidence alone.
+- **Not a Block call.** Block a turn in normal fights fell from 8.9 to 5.0, but HP lost after the Drain return held at 7.4 (round 4: 6.8). The seats raced, and the one that raced hardest won.
+- **The guest rules** (repeats and evictions, #1072 and #1076) are still untested after 231 fights.
+
+**Being built, with no approval needed:**
+- The seat page now logs Freminet's act as the Block it gives, not as Cryo damage.
+- The Drain counter at zero uses the buffer wording.
+- Lyney's badge and face describe the buffer, and the face shows his act's Drain 2.
+- Telemetry records the Spend cards in hand at each turn start and the enemies alive when a Spend card is played.
+
+**Not defects:**
+- "Not enough HP" at 2 HP: Drain never takes her to 0.
+- Surrounded, Hard To Kill and the other enemy rules: these are base-game rules.
+
+## For [USER], round 5
+
+1. **Standing Ovation's Spend.**
+   - **(a) Default:** keep "Spend half" through your own run. You asked to "see how that goes", and seats undervalue a bank they keep.
+   - (b) Common at "Spend all", which was this record's round-3 default.
+
+## Ruled, round 5 (2026-10-11)
+
+[USER]: "On Furina - let's go with a) and leave it alone for now"
+
+Pick 1 (a): Standing Ovation stays at Common with "Spend half your Fanfare." Furina is left alone until your own run.
