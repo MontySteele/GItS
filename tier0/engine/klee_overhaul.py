@@ -1337,10 +1337,15 @@ def block_for_largest_bomb(state: CombatState, cap: int) -> int:
     return gained
 
 
-def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
+def grow_largest_per_spark(state: CombatState, per_spark: int,
+                           only_on: Optional[Enemy] = None) -> int:
     """Stoke the Fuse (the round-11 pool pass): the SINGLE largest Bomb on the
     board grows by `per_spark` for every Spark the card spent. Returns the
     growth applied, 0 if nothing grew. `GrowLargestPerSpark`'s twin.
+
+    `only_on` restricts the walk to one enemy (the card aims since the Klee
+    pass round, pick 3 (b): "your largest Bomb on the enemy"); None keeps the
+    board-wide walk. A target holding no Bomb grows nothing.
 
     WHAT "PER SPARK SPENT" READS. The row's price is `spend_spark: all`, so
     the Sparks spent are exactly the bank as it stood when the card was played
@@ -1376,6 +1381,8 @@ def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
     best_index = -1
     best_size = 0
     for enemy in list(state.living_enemies):
+        if only_on is not None and enemy is not only_on:
+            continue
         for index, charge in enumerate(enemy.ko_charges):
             if charge.size > best_size:
                 best_enemy, best_index, best_size = enemy, index, charge.size

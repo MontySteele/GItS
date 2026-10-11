@@ -493,7 +493,9 @@ AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
                         # R276's Hair Trigger, on the same terms.
                         "mine_bombs",
                         # The Klee scaling pass's Witch's Homework (klee-next).
-                        "plant_homework_bomb"))
+                        "plant_homework_bomb",
+                        # Stoke the Fuse, aimed (Klee pass round, pick 3 (b)).
+                        "grow_largest_bomb"))
 
 # Ops whose aimed target may be a CORPSE. C#'s dead-target rule is op-dependent
 # and this frozenset is that asymmetry, written down once:
@@ -4529,6 +4531,16 @@ def _op_grow_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
+    if fx.get("target") == "enemy":
+        # Klee pass round, pick 3 (b): the largest Bomb ON THE AIMED ENEMY.
+        # `GrowLargestPerSpark(..., onlyOn: cardPlay.Target)`'s twin; a dead
+        # aim fizzles (the C# walk skips the dead).
+        aimed = _pick_targets(state, "enemy")
+        if not aimed:
+            return
+        klee_overhaul.grow_largest_per_spark(state, int(fx["per_spark"]),
+                                             only_on=aimed[0])
+        return
     klee_overhaul.grow_largest_per_spark(state, int(fx["per_spark"]))
 
 
