@@ -90,6 +90,16 @@ In rounds 3 and 4, act-2 Toxic and Dazed hurt her (round 3 record), yet her stat
 - **Gorou's Crystal Collapse** waits with the Companion-count cards (Companion paper, pick 2).
 - **Co-op-only cards** are judged by a paired round: Joint Orders, Coordinated Strike, Tactical Relay, Sangonomiya's Counsel and Kurage's Mercy.
 
+## Ruled (2026-10-11)
+
+[USER]: "On Kokomi - Abyssal Salvage sounds possibly too good. The rest look good to me - we might be duplicating Varka's Cryo payoffs here, but I'm not sure what other shape we could naturally use here. Coral Tithe might be too strong now, but since it was never played before, maybe we buff it and put it on watch."
+
+- **Pick 1, (a):** debuff payoffs count stacks of Weak and Vulnerable. The overlap with Varka's Cryo payoffs is noted. No other shape fits Kokomi as naturally, so it stays.
+- **Pick 2, a middle option:** "The first time each turn you draw a status, Exhaust it. The Casket gains 1."
+  - Once a turn, it still clears the act-2 clog. It no longer swallows a whole Dazed pile for free.
+  - Upgrade: Innate.
+- **Pick 3, (a):** the 18 cards as listed. Coral Tithe goes on the watch list: "every 2" is built, and it is the first number to come back down if it proves too strong.
+
 ## For [USER]
 
 1. **Debuff payoffs count stacks of Weak and Vulnerable, not kinds.** At Water's Edge becomes the engine and Suffocating Deep the burst, with the five rows above.
