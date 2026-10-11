@@ -4,6 +4,7 @@
 - "I constantly felt energy-starved for everything; I think the idea of the tension around Planning works, but the one turn penalty is currently too punishing - I couldn't afford to put plans into motion, and I couldn't afford to use the casket when I had charge."
 - "None of the cards that I saw when drafting felt obviously amazing, because even though I saw synergies, the numbers didn't balance to something effective under the pressure."
 - "I also agree that we should check that the Plan payoff is higher than the base rates."
+- On the starter: "I'm also fine with modifying the starters if the rates are low."
 
 The Casket half is already ruled and built separately: Open the Casket costs 0, then 1 more each time it is played that fight.
 
@@ -59,9 +60,12 @@ A Plan that lands next turn prints **1.3 times** the base on-turn median for its
 | Jellyfish Drift | 3 [4] to ALL | 6 to ALL | 8 |
 | Brine Sting | 3 and 1 [2] Weak | 4 and 1 [2] Weak | unchanged Weak |
 | Bubble Ward | 4 Block | 5 Block | 7 |
+| Kurage's Oath (starter) | 7 to ALL | 9 to ALL | 12 |
 
 - **Not changed:** Surging Shoal and Ambush, which already pay a premium, and every on-turn number.
-- **Kurage's Oath, the starter, is not changed** unless you rule it. At this ratio it would be 9 to ALL.
+- **The starter is in, on [USER]'s word.**
+  - **Kurage's Oath:** its Plan takes the same ratio, 9 to ALL [12]. Its 6 [8] Block now is unchanged, because it is already above a Defend.
+  - **Slack Water:** its on-turn rate is low, too. It deals 4 [7] damage and applies 1 Weak for 1 Energy. The Silent pays 8 damage and 1 Weak for 1 Energy with Sucker Punch, a Common, or 3 damage and 1 Weak for 0 Energy with Neutralize, her starter (`game_ref/silent.json`). The new Slack Water deals 6 [9], with its Weak and its Plan line unchanged.
 
 ## How it is checked
 
@@ -78,6 +82,4 @@ A Plan that lands next turn prints **1.3 times** the base on-turn median for its
    - **(a) Default:** 1.3 times the base on-turn median, on the nine cards above.
    - (b) 1.25 times, which is exactly break-even.
    - (c) 1.5 times, as Surging Shoal already is. This is a bigger swing, so the round would check act 1 harder.
-2. **Kurage's Oath (starter).**
-   - **(a) Default:** leave it at 7 to ALL. The Casket at 0 is the starter change you ruled.
-   - (b) 9 to ALL, the same ratio.
+2. **The starter (ruled: "I'm also fine with modifying the starters if the rates are low").** Kurage's Oath's Plan goes to 9 [12] to ALL, and Slack Water to 6 [9] damage, as above. No pick.
