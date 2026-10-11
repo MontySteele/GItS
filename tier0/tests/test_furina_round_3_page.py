@@ -85,7 +85,12 @@ def test_a_five_century_act_returns_the_past_part_too():
 
 
 def test_the_zero_line_sentence_stays():
-    line = _drain_line(_wire(drain_line=0))
+    # On a build that sends no buffer. Furina round 5 (2026-10-11): a buffer
+    # build at a line of 0 reads in the buffer's words
+    # (`test_furina_round_5_fixes.py`).
+    old = _wire(drain_line=0)
+    del old["drain_buffer"], old["drain_buffer_left"]
+    line = _drain_line(old)
     assert line.startswith("- Drained 6 HP. Drain line 0 HP")
     assert line.endswith(": all your Drain returns after combat.")
 

@@ -106,8 +106,10 @@ public abstract class StagePerformerBadge : PowerModel
               + "[gold]Electro[/gold] damage to a random enemy. Act: deal "
               + act + " [gold]Electro[/gold] damage to a random enemy.",
             StagePerformer.Lyney =>
-                "Your [gold]Drain[/gold] line is "
-              + FurinaStageLaw.LyneyLineDrop + " HP lower. Act: "
+                // Furina round 5 (2026-10-11): in buffer words, the model
+                // since 2026-10-11 (`FurinaStageLaw.BufferOf` adds 10).
+                "Your [gold]Drain[/gold] buffer is "
+              + FurinaStageLaw.LyneyLineDrop + " HP larger. Act: "
               + "[gold]Drain[/gold] " + FurinaStageLaw.LyneyActDrain
               + ", never past your line (none at or below it). Deal " + act
               + " [gold]Pyro[/gold] damage to ALL enemies.",
