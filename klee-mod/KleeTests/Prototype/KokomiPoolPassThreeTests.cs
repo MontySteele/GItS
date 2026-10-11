@@ -241,17 +241,6 @@ public class KokomiPoolPassThreeTests
                         Source("KokomiPlan", power: true));
     }
 
-    [Fact]
-    public void Scout_aheads_count_is_the_drains_and_not_the_entrys()
-    {
-        // `EB-655` narrowed the count to entries; `EB-679` then made it the
-        // WHOLE DRAIN, itself included, read once before the loop. What both
-        // passes share is that the number comes off the drain and not off the
-        // board, which is what this pins.
-        Assert.Contains("var drainPlans = due.Count",
-                        Source("KokomiPlan", power: true));
-    }
-
     // ======================================================================
     // 6. THE DUSK ROWS -- written-only
     // ======================================================================

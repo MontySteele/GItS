@@ -46,7 +46,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi text: the Neow bundle's Plan gloss omits "instead of playing it now"; the Casket tip does not say it ignores a debuff from a reaction set off by its own hit.
 - Kokomi's Plan list prints a waiting Plan's damage without the target's Vulnerable: a queued card is in no pile, so its numbers never refresh; `KokomiPlan.QueueRow` could send the front-target-folded number (`PlannedDamage(FrontEnemy, ...)`) for front-aimed Plans; `WrittenFrontDamage` has the same gap.
 - Kokomi: Smoggy ("you can only play 1 Skill per turn") refuses writing a Plan once a Skill is played; neither Smoggy's line nor the Bake-Kurage tip says writing a Plan counts as playing the card.
-- Kokomi: the cut cards' engine clauses (Tide Chart's, Song of Pearls' power, Scout Ahead's clause, The General's Banner's power) stay in both engines with nothing granting them; delete them (the brief's cleanup pass says BACKLOG lists them).
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
 - Furina: rename the four mismatched guest ids in one regen, moving their art keys and `KNOWN_MISSING` entries with them, after [USER]'s run and never mid-save.
 - `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot is the owner's `progress.save` DiscoveredRelics list naming the retired relic (non-fatal); no alias is left in code. Harmless; drop the id from the save or let it be.

@@ -54,7 +54,8 @@ public class KokomiPoolPassTwoTests
         // these members BY NAME, so a rename here is a codegen break rather
         // than a silent approximation -- the contract every Kind is under.
         var names = System.Enum.GetNames(typeof(KokomiPlan.Kind));
-        Assert.Contains("DrawPerPlanThisTurn", names);
+        // `DrawPerPlanThisTurn` left with the cut Scout Ahead (2026-10-11).
+        Assert.DoesNotContain("DrawPerPlanThisTurn", names);
         Assert.Contains("NextPlanDoubleDamage", names);
         Assert.Contains("NextPlanExtraCarryOut", names);
     }
@@ -204,8 +205,8 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     // The two row pins that stood here left with the card: the cleanup pass
-    // (2026-09-29) cut Scout Ahead. `DrawPerPlanAfter` stays with nothing
-    // spelling it, and the structural pin below still holds the drain.
+    // (2026-09-29) cut Scout Ahead, and its clauses left in the hygiene pass
+    // (2026-10-11). The structural pin below still holds the drain.
 
     [Fact]
     public void The_count_is_the_drains_and_is_paid_per_later_carry_out()
@@ -215,12 +216,10 @@ public class KokomiPoolPassTwoTests
         // drain -- which is what makes the count CARRY-OUTS rather than the
         // entries still queued, and what keeps a Scout Ahead written first and
         // one written last answering differently. `EB-679`'s whole-drain term
-        // is still computed once above the loop for the kind no row spells.
-        // Twins: `test_scout_ahead_counts_the_plans_that_follow_it`,
-        // `test_scout_ahead_pays_second_waves_doubled_carry_out_twice`.
+        // left with its kind in the hygiene pass (2026-10-11).
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
         Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "after");
-        Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
+        Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "drainPlans");
         var drain = typeof(KokomiPlan).GetMethod("Drain", All)!;
         Assert.Contains("KokomiPlan.CarryOutTimes", Il.Calls(drain));
         var source = Source("KokomiPlan", power: true);

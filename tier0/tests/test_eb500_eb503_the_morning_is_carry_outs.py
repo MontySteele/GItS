@@ -17,12 +17,8 @@ now-copy -- the Plan resolved the moment it is written -- is single, as is
 Change of Plans' front-copy. The rule stands (D default) and the face and the
 tip now name the morning.
 
-`EB-503`. Tide Chart's draw happened inside the morning with no line anywhere:
-"the one Plan card the Bake-Kurage block never reports on". The C# pays it
-through `Announce`, the block's own door, so it is a beat over the pet and a
-row in the same list every carry-out lands in. The sim's twin row is
-`tide_chart_paid`, and both now count carry-outs, so a doubled morning draws
-twice.
+`EB-503` was Tide Chart's unreported draw. Its pins left with Tide Chart's
+promise in the hygiene pass (2026-10-11).
 """
 
 from __future__ import annotations
@@ -129,48 +125,6 @@ def test_the_depth_is_read_once_at_the_drain():
 
 
 # Well Laid's four pins left with the row (the Casket pass, 2026-09-28).
-
-
-# ---- EB-503: Tide Chart --------------------------------------------------
-# The card was cut by the Casket pass (2026-09-28); its promise-and-payment
-# machinery stays registered, and these pins drive it directly.
-
-def _tide_chart_paid(state):
-    return [row for row in state.log if row["event"] == "tide_chart_paid"]
-
-
-def test_tide_chart_draws_one_per_carry_out():
-    state = _state()
-    kokomi_plan.promise_tide_chart(state, per=1, flat=0)
-    _write(state, [{"op": "draw", "amount": 1}, {"op": "draw", "amount": 1}])
-    kokomi_plan.resolve_all(state)
-    kokomi_plan.pay_tide_charts(state)
-
-    assert _tide_chart_paid(state)[0]["cards"] == 2
-
-
-def test_a_doubled_morning_draws_twice():
-    """The row's acceptance: one written Plan, two carry-outs, two cards."""
-    state = _state(ascension=True)
-    kokomi_plan.promise_tide_chart(state, per=1, flat=0)
-    _write(state, [{"op": "draw", "amount": 1}])
-    kokomi_plan.resolve_all(state)
-    kokomi_plan.pay_tide_charts(state)
-
-    assert _tide_chart_paid(state)[0]["cards"] == 2
-
-
-def test_the_payment_still_says_what_it_paid():
-    """The sim's twin of the C# line: the row that names the draw exists and
-    carries the number, which is what the page prints from."""
-    state = _state()
-    kokomi_plan.promise_tide_chart(state, per=1, flat=1)
-    _write(state, [{"op": "draw", "amount": 1}])
-    kokomi_plan.resolve_all(state)
-    kokomi_plan.pay_tide_charts(state)
-
-    row = _tide_chart_paid(state)[0]
-    assert row["cards"] == 2 and row["plans"] == 1
 
 
 # ---- EB-500: the morning is what doubles ---------------------------------

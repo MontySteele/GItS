@@ -4359,11 +4359,9 @@ def test_the_number_kind_words_are_the_mods_own():
     assert "KokomiRules.QuarterOfMaxHp(kokomi)" in asked
     # Read before the clause resolves, which is the whole reason it is a
     # separate call rather than a read inside `Announce`.
-    # `EB-643` ADDED A FOURTH SCALED KIND, and it is the one that reads the
-    # DRAIN rather than a ledger: nothing on the board says how deep the drain
-    # around this entry is, so the count is a parameter and the asked-for
-    # figure is the rate times it.
-    assert "Kind.DrawPerPlanThisTurn => plan.Amount * drainPlans" in asked
+    # `EB-643`'s drain-scaled kind left with the cut Scout Ahead (the hygiene
+    # pass, 2026-10-11), and its drain count with it.
+    assert "drainPlans" not in asked
     # `EB-718` TOOK SCOUT AHEAD OFF THIS SWITCH, and the pin is the ABSENCE.
     # It is paid per later CARRY-OUT as those carry-outs happen, so there is no
     # figure to ask for at its own clause and NO ENTRIES-BASED ESTIMATE IS
@@ -4371,7 +4369,7 @@ def test_the_number_kind_words_are_the_mods_own():
     # (`KokomiPlan.NoteRider`), which `_rider_clause` already prints.
     assert "Kind.DrawPerPlanAfter" not in asked
     entry = plan[plan.index(
-        "var wanted = AskedFor(kokomi, clause, drainPlans);"):]
+        "var wanted = AskedFor(kokomi, clause);"):]
     assert entry.index("await ResolveOne(") < entry.index("kind = NumberKind(")
 
 

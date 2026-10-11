@@ -113,63 +113,6 @@ public sealed class PrincessOfWatatsumiPlanPower
 }
 
 /// <summary>
-/// The General's Banner: "Once per turn, when you play a Companion card, apply
-/// 1 Weak to the front enemy."
-///
-/// ONCE PER TURN SINCE 2026-09-02 ([USER], live: "The General's Banner applies
-/// a LOT of Weak. Probably too strong."). It used to pay per PLAY, which a
-/// Commander hand full of Companions turned into a stack of Weak nothing else
-/// in the arm can match, and a replayed Companion paid twice on top.
-///
-/// THE COMPANION COUNTER MOVED OFF THIS HOOK (`EB-362`). It used to be
-/// written here and ONLY here, which meant Chain of Command's "for each
-/// Companion card you played last/this turn" read a permanent zero on any
-/// board without The General's Banner in play -- the seat that found it had
-/// declined the card outright (round-5 run 3, act 3, finding 7). The counter
-/// is now <see cref="ProtoBakeKuragePower.AfterCardPlayed"/>'s, beside
-/// <see cref="KokomiOverhaulLedger.NoteCompanionCard"/>, because rule 1
-/// guarantees that marker is on her every turn of every combat and this Power
-/// is a card she may never draw.
-///
-/// THE FRONT ENEMY IS <see cref="KokomiPlan.FrontEnemy"/>'s, which is the same
-/// reader a planned hit uses -- so "the front enemy" means one thing in this
-/// arm and is defined once.
-/// </summary>
-public sealed class GeneralsBannerPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "The General's Banner"),
-        ("description",
-            "The first time each turn you play a [gold]Companion[/gold] card, apply "
-          + "[blue]{Amount}[/blue] [gold]Weak[/gold] to the front enemy."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        if (cardPlay.Card is not ICompanionCard) return;
-        if (cardPlay.Card.Owner?.Creature != Owner) return;
-        if (Owner == null || Amount <= 0) return;
-        var front = KokomiPlan.FrontEnemy(Owner);
-        // The claim is taken AFTER the board question, so a Companion played
-        // on an empty board does not spend the turn's Weak on nothing.
-        if (front == null) return;
-        if (!KokomiOverhaulLedger.ClaimOncePerTurn(
-                Owner, nameof(GeneralsBannerPower)))
-        {
-            return;
-        }
-        await PowerCmd.Apply<WeakPower>(
-            choiceContext, front, Amount, applier: Owner, cardSource: null);
-    }
-}
-
-/// <summary>
 /// PINCER's carry-out (R276 pick 1): "This turn, your first Attack is played
 /// twice." The base game's replay surface (<c>ModifyCardPlayCount</c>), the
 /// shape <see cref="ReplayNextCompanionPower"/> takes one card type over.

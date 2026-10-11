@@ -577,22 +577,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # pays Block, so it declares the line above's one hook for the line
     # above's reason.
     "block_per_plan_held": [_hook("private", "kurage", "read")],
-    # Tide Chart (`EB-478`, R257) reads the same morning's depth Tide Wall
-    # reads, one turn after the card that promised the draw was played, and
-    # pays CARDS rather than Block -- the draw pile is the player's own and no
-    # other draw op declares a hook for it, exactly as the line above says of
-    # Block.
-    "draw_after_plans": [_hook("private", "kurage", "read")],
     # POOL PASS TWO (`EB-643`, R265). SIX OPS, ONE CHANNEL: every one of them
     # is about the jellyfish's own queue, which this vocabulary already carries
     # as the private `kurage` channel -- so the hooks below say READ where the
     # op only counts the queue and WRITE where it changes what is in it or what
     # it will do.
-    #
-    # Scout Ahead READS the drain it sits in (how many carry-outs follow) and
-    # pays CARDS, which is the player's own draw pile and which no draw op
-    # declares a hook for -- `draw_after_plans` one line up states that limit.
-    "draw_per_plan_this_turn": [_hook("private", "kurage", "read")],
     # The two riders WRITE what the entry that follows them will do. Nothing is
     # added to or removed from the queue, so a read would be the wrong word:
     # the next entry behaves differently because this one happened.
