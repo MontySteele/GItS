@@ -239,10 +239,11 @@ def test_drowning_pressure_counts_distinct_debuffs_not_auras(overhaul):
     st.player.energy = 1
     before = enemy.hp
     _write(st, "proto_kk_drowning_pressure", energy=1)
-    # 4 per debuff, two debuffs; Vulnerable multiplies (x1.5) and the Hydro
-    # on Pyro vaporizes -- read against the plain 8 by ratio, not by value.
+    # 5 per debuff (Kokomi round 3 review, 2026-10-11: 4 -> 5), two debuffs;
+    # Vulnerable multiplies (x1.5) and the Hydro on Pyro vaporizes -- read
+    # against the plain 10 by ratio, not by value.
     assert kokomi_plan.debuff_count(enemy) == 2
-    assert before - enemy.hp > 8
+    assert before - enemy.hp > 10
 
 
 def test_salt_in_the_wound_draws_only_off_weak(overhaul):

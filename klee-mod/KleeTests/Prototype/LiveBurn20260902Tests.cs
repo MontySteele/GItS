@@ -166,7 +166,7 @@ public class LiveBurn20260902Tests
         Assert.StartsWith("Instead of the line above, ",
                           body.Substring(body.IndexOf("Instead",
                               System.StringComparison.Ordinal)));
-        Assert.Contains("play the card on the [gold]Bake-Kurage[/gold]", body);
+        Assert.Contains("play it on the [gold]Bake-Kurage[/gold]", body);
     }
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------

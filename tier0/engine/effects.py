@@ -1693,7 +1693,7 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_block_half_damage(state: CombatState, fx: dict, card: Card) -> None:
     """(`C.COMPANION_OVERHAUL`). Gorou's Inuzaka All-Round Defense:
-    "Gain Block equal to half the damage dealt."
+    "Gain Block equal to half the unblocked damage."
 
     THE NUMBER IS THIS PLAY'S OWN, and it has to be: the printed 8 is not what
     landed once Strength, Weak, an amplifier and the target's Block have had
