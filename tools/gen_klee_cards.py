@@ -7853,6 +7853,19 @@ def build_vars(card: dict) -> list[str]:
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
+    # Kokomi round 3 review, change 4: Kelp Wall's `{InCombat:...}` line
+    # prints the live total of its two Block clauses (the flat Block plus the
+    # per-status rate against the hand as it stands), the way Driftglass
+    # prints its Casket total. Emitted only where the face prints the token.
+    status_rate = next((int(fx["amount"]) for fx in plan_line
+                        if fx.get("op") == "block_per_status_in_hand"
+                        and isinstance(fx.get("amount"), int)), None)
+    if status_rate is not None and "{PlanStatusBlock" in str(
+            card.get("description") or ""):
+        flat = next((int(fx["amount"]) for fx in plan_line
+                     if fx.get("op") == "block"
+                     and isinstance(fx.get("amount"), int)), 0)
+        out.append(f'new PlanStatusBlockVar({flat}m, {status_rate})')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore

@@ -1759,7 +1759,7 @@
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
    # Main session, 2026-09-29: 8/16 -> 6/12 (the sim read it dominant).
-   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 14 [gold]Hydro[/gold] damage, doubled if no other [gold]Plan[/gold] is carried out with it.",
+   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 14 [gold]Hydro[/gold] damage to the front enemy, doubled if carried out alone.",
    effects: [{op: damage, amount: 6, target: all_enemies}],
    plan: [{op: damage_if_alone, amount: 14, target: front_enemy}],
    # 9 to ALL / Plan 18 (Plan pricing 2026-10-11: Plan 12 -> 14).
@@ -1818,8 +1818,8 @@
    # a Buff in both engines and does not count.
    description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 4, count: debuffs_on_target}}],
-   # 6 each.
+              amount_formula: {base: 0, per: 5, count: debuffs_on_target}}],
+   # 7 each. Kokomi round 3 review (2026-10-11): 4 [6] -> 5 [7].
    upgrade: {formula_per: 2}}
 
 - {id: proto_kk_salt_in_the_wound, name: "Salt in the Wound", character: kokomi,
@@ -2066,7 +2066,7 @@
    cost: 1, type: skill, rarity: common,
    # The count is read when the clause runs; a card an earlier Plan of the
    # same morning drew is counted.
-   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.",
+   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: draw, amount: 1}],
    plan: [{op: block, amount: 7},
           {op: block_per_status_in_hand, amount: 3}],
@@ -2162,7 +2162,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: geo,
    cost: 1, type: attack,
-   description: "Deal 8 [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the damage dealt.",
+   description: "Deal 8 [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the unblocked damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: block_half_damage}]}
 

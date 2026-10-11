@@ -45,7 +45,7 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kelp Wall"),
-        ("description", "Draw 1 card.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand."),
+        ("description", "Draw 1 card.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -62,7 +62,8 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
         new List<DynamicVar>
         {
             new CardsVar(1),
-            new UnsourcedBlockVar("PlanBlock", 7m, ValueProp.Move)
+            new UnsourcedBlockVar("PlanBlock", 7m, ValueProp.Move),
+            new PlanStatusBlockVar(7m, 3)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

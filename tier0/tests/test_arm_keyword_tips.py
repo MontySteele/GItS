@@ -503,9 +503,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # review/records/text-pass-2026-09-25/.
             # THE STATUS BATCH (2026-10-01, sec.3 pick 2): the face says
             # "Or plan:" and the tip opens "Instead of the line above".
-            "Instead of the line above, play the card on the ",
-            "[gold]Bake-Kurage[/gold]: it happens next turn. Click it to flip ",
-            "lines. Plans go in the order made.\");",
+            # Kokomi round 3 review (2026-10-11), change 3: the tip says
+            # when Plan Block lands, in two sentences.
+            "Instead of the line above, play it on the ",
+            "[gold]Bake-Kurage[/gold]; click to flip. Plans happen next turn ",
+            "in order, and their [gold]Block[/gold] lasts that turn.\");",
             "heal N HP, but never above the HP you had ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
@@ -1036,9 +1038,11 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
 # THE STATUS BATCH (2026-10-01, sec.3 pick 2, [USER]: "Agreed on the Plan
 # text change"): the face prints "Or plan:" and the tip opens "Instead of the
 # line above"; the second sentence was shortened to stay under the ceiling.
-PLAN_TIP = ("Instead of the line above, play the card on the Bake-Kurage: "
-            "it happens next turn. Click it to flip lines. Plans go in the "
-            "order made.")
+# Kokomi round 3 review (2026-10-11), change 3: one clause on when Plan
+# Block lands, merged so the tip stays two sentences.
+PLAN_TIP = ("Instead of the line above, play it on the Bake-Kurage; "
+            "click to flip. Plans happen next turn in order, and their "
+            "Block lasts that turn.")
 
 
 def test_the_plan_tip_is_the_rewrite_on_the_page():

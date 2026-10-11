@@ -1530,9 +1530,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # THE STATUS BATCH (2026-10-01, sec.3 pick 2): the face prints "Or plan:"
     # and the tip opens "Instead of the line above". A PLAN STAYS OPEN
     # (2026-10-01), pick 5 (a): "click a waiting Plan to flip it".
-    "Plan": ("Instead of the line above, play the card on the Bake-Kurage: "
-             "it happens next turn. Click it to flip lines. Plans go in the "
-             "order made."),
+    # Kokomi round 3 review (2026-10-11), change 3: when Plan Block lands.
+    "Plan": ("Instead of the line above, play it on the Bake-Kurage; "
+             "click to flip. Plans happen next turn in order, and their "
+             "Block lasts that turn."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
     # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and
     # the row above says all of it. What a reader cannot get from anywhere else
