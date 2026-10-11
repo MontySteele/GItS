@@ -50,7 +50,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi: the cut cards' engine clauses (Tide Chart's, Song of Pearls' power, Scout Ahead's clause, The General's Banner's power) stay in both engines with nothing granting them; delete them (the brief's cleanup pass says BACKLOG lists them).
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
 - Furina: rename the four mismatched guest ids in one regen, moving their art keys and `KNOWN_MISSING` entries with them, after [USER]'s run and never mid-save.
-- Co-op rest site: Mend on the partner does not use up the rest action, so Smith or Rest is still accepted after it, and the heal sometimes does not show. About 10 seats on 3 seeds reported it (`review/records/coop-paired-round-2026-10-09.md`).
 - `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot is the owner's `progress.save` DiscoveredRelics list naming the retired relic (non-fatal); no alias is left in code. Harmless; drop the id from the save or let it be.
 - `EB-798` `ProtoKkBreakwater` is offered Nimble but Nimble pays it nothing (its only Block is the Plan's); planned-only Block is not `GainsBlock`, in both engines and `lint_enchant_parity`.
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
