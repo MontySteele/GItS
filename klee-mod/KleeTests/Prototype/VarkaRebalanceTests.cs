@@ -81,10 +81,11 @@ public class VarkaRebalanceTests : IDisposable
     {
         var songs = new ProtoVkBarbaraShowBegin();
         Assert.Equal(TargetType.AllEnemies, songs.TargetType);
-        Assert.Equal(4m, Var(songs, "VkBase"));
-        Assert.Equal(3m, Var(songs, "VkPer"));
-        Assert.Equal(6m, Var(Upgraded<ProtoVkBarbaraShowBegin>(), "VkBase"));
-        Assert.Equal(4m, Var(Upgraded<ProtoVkBarbaraShowBegin>(), "VkPer"));
+        // Varka co-op fixes (2026-10-11): 6 [8] + 2 [3], was 4 [6] + 3 [4].
+        Assert.Equal(6m, Var(songs, "VkBase"));
+        Assert.Equal(2m, Var(songs, "VkPer"));
+        Assert.Equal(8m, Var(Upgraded<ProtoVkBarbaraShowBegin>(), "VkBase"));
+        Assert.Equal(3m, Var(Upgraded<ProtoVkBarbaraShowBegin>(), "VkPer"));
         var body = Calls("VarkaCards", "GleefulSongs");
         Assert.Contains("ElementalHit.ApplyOnly", body);
         Assert.Contains("ReactionEffects.get_TotalResolved", body);
@@ -96,9 +97,11 @@ public class VarkaRebalanceTests : IDisposable
     {
         var guard = new ProtoVkRipplingGuard();
         Assert.Equal(CardRarity.Common, guard.Rarity);
-        Assert.Equal(3m, Var(guard, "VkBase"));
-        Assert.Equal(2m, Var(guard, "VkPer"));
-        Assert.Equal(3m, Var(Upgraded<ProtoVkRipplingGuard>(), "VkPer"));
+        // Varka co-op fixes (2026-10-11): 6 + 1 [2], was 3 + 2 [3].
+        Assert.Equal(6m, Var(guard, "VkBase"));
+        Assert.Equal(1m, Var(guard, "VkPer"));
+        Assert.Equal(6m, Var(Upgraded<ProtoVkRipplingGuard>(), "VkBase"));
+        Assert.Equal(2m, Var(Upgraded<ProtoVkRipplingGuard>(), "VkPer"));
         Assert.Contains("VarkaOathLedger.get_PlaysThisTurn",
                         Calls("VarkaCards", "RipplingGuard"));
         Assert.Contains("VarkaOathLedger.NotePlay", Calls("VarkaOath", "BeginPlay"));

@@ -493,6 +493,10 @@ public class VarkaPrototypeTests : IDisposable
         // Blade carries the verb.
         Assert.Contains("VarkaCards.GainCurrentOath",
                         Il.Calls(Il.Method("ProtoVkVowOfTheBlade", "OnPlay")));
+        // Varka co-op fixes (2026-10-11): Vow prints 2; a row with no
+        // VkAmount (Rippling Guard prints none) gains 1.
+        Assert.Equal(2, VarkaCards.CurrentOathAmount(new ProtoVkVowOfTheBlade()));
+        Assert.Equal(1, VarkaCards.CurrentOathAmount(new ProtoVkRipplingGuard()));
         Assert.Contains("ElementalHit.DealUnelemented",
                         Il.Calls(Il.Method("VarkaCards", "SwirledTakeMore")));
         Assert.Contains("VarkaRules.SwirlFreshAuras",

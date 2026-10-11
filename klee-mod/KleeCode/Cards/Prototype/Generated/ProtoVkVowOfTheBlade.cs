@@ -45,12 +45,13 @@ public sealed class ProtoVkVowOfTheBlade : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Vow of the Blade"),
-        ("description", "Gain 1 [gold]Oath[/gold] of your [gold]current element[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {VkAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DynamicVar("VkAmount", 2m),
             new CardsVar(1)
         };
 
