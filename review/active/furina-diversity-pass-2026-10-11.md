@@ -137,3 +137,14 @@ Against the Tide, High Stakes, Regina, A Five-Century Act and Lyney's bigger buf
 5. **The three Rares that repeat a lower card:** The Deluge, All In, and Singer of Many Waters.
    - **(a) Default:** a follow-up paper giving each a rule-bend in its slot.
    - (b) Leave them.
+
+## Ruled 2026-10-11: all defaults
+
+Claude raised three watch items before the ruling: Bravura's multi-hit with no cap stacks Strength and Leading Lady on every hit, so a bank of 144 (the act-3 boss fight in the co-op run) would be 48 hits; Full House fires Chevreuse, Thunderous Applause and Crescendo on every guest Spend; the cuts take out two draw and Energy cards after the run said she was slow. [USER]:
+
+> 1) I think that we can leave it as double-scaling for now and see if it goes overboard
+> 2) Seems fine as guest start are currently not dominating, but worth watching for sure
+> 3) Yeah, let's keep an eye on this
+
+- **Picks 1-5 (a).** Section 2 and section 3 build as written.
+- **Watch in the next round:** Bravura's damage against the bank it spent; Spend triggers per turn under Full House; Furina's draws and Energy per turn after the two cuts.

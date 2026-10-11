@@ -25,14 +25,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Furina diversity pass** (`review/active/furina-diversity-pass-2026-10-11.md`,
-  picks 1-5): two guest styles (stars support her; stars hit, fed by Full House
-  spending Fanfare), hoard and line as small parts, four redundant cuts. Defaults: all (a).
-
-- **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
-  pick 2): more Block now, or decide on the rerun after a Block census.
-  Default: census first.
-
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
