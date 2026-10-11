@@ -78,7 +78,7 @@ public class PoolCompletionTests : IDisposable
                 "ProtoKkSeasReproach", "ProtoKkTidalRebuke",
                 "ProtoKkWatatsumiResistance",
             },
-            slice.Skip(63).Take(8).ToArray());
+            slice.Skip(62).Take(8).ToArray());
         var multiplayer = Cards("KokomiOverhaulRoster", "MultiplayerSlice");
         Assert.Equal(5, multiplayer.Count);
         Assert.Equal(new[] { "ProtoKkTacticalRelay", "ProtoKkKuragesMercy" },

@@ -170,7 +170,9 @@ internal static class KokomiOverhaulRoster
     /// payoff pass (2026-10-01) cut Second Thoughts and added Kurage Canopy
     /// and Coral Tithe; SEVENTY-EIGHT since pool completion (2026-10-01)
     /// added eight; still SEVENTY-EIGHT since the status batch (2026-10-01)
-    /// cut seven and added seven. The Open the Casket token is in
+    /// cut seven and added seven; still SEVENTY-EIGHT since the growth
+    /// Powers (2026-10-10) swapped The General's Banner for Flood Tide. The
+    /// Open the Casket token is in
     /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -191,7 +193,8 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkSangoIsshin>(),
         // The Commander -- Gorou, go (4)
         ModelDb.Card<ProtoKkVanguard>(),
-        ModelDb.Card<ProtoKkTheGeneralsBanner>(),
+        // The General's Banner left on 2026-10-10 (the growth Powers); Rising
+        // Tide takes its slot, LAST.
         // Currencies, tempo, and the one replay (5)
         ModelDb.Card<ProtoKkStolenChapter>(),
         ModelDb.Card<ProtoKkChangeOfPlans>(),
@@ -306,6 +309,9 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkFlotsamSurge>(),
         ModelDb.Card<ProtoKkAbyssalSalvage>(),
         ModelDb.Card<ProtoKkRiptideRuin>(),
+        // THE GROWTH POWERS (2026-10-10, ruled): Flood Tide, in The General's
+        // Banner's Uncommon slot, LAST. Still 78 (21 / 36 / 21).
+        ModelDb.Card<ProtoKkFloodTide>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

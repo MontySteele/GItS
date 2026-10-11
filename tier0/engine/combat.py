@@ -855,6 +855,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     kokomi_plan.deal_open_the_casket(state)
     # THE EXPANSION's The Long Game, off the same pre-drain queue.
     kokomi_plan.long_game(state, len(state.kk_plan_queue))
+    # THE GROWTH POWERS (2026-10-10): Flood Tide, at the same site.
+    kokomi_plan.flood_tide(state)
     kokomi_plan.resolve_all(state)
     # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
     # and before anything else reads the hand: the face says "after the

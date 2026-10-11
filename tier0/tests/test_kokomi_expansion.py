@@ -73,7 +73,8 @@ def test_the_batch_is_twelve_uncommon_and_ten_rare_last_in_the_pool(overhaul):
     assert "proto_kk_all_streams_flow_to_the_sea" not in NEW
     # The payoff pass (2026-10-01) appended two rows after the batch, pool
     # completion eight more and the status batch seven.
-    assert C.KOKOMI_OVERHAUL_POOL_IDS[-38:-17] == NEW
+    # The growth Powers (2026-10-10) appended one more.
+    assert C.KOKOMI_OVERHAUL_POOL_IDS[-39:-18] == NEW
     assert "proto_kk_the_clouds_like_waves" not in C.KOKOMI_OVERHAUL_POOL_IDS
     assert "proto_kk_the_clouds_like_waves" not in {
         c.id for c in loader.prototype_cards()}
@@ -204,18 +205,15 @@ def test_measured_breath_draws_only_on_an_empty_queue(overhaul):
     assert st.player.block == 6 and len(st.player.hand) == 0
 
 
-def test_grand_design_adds_one_per_energy_paid(overhaul):
-    """Main session, 2026-09-29: "the Casket gains 1 more for each Energy
-    paid for it"."""
+def test_grand_design_no_longer_adds_per_energy_paid(overhaul):
+    """Bent 2026-10-10 (the growth Powers): the per-Energy gain is gone; a
+    carry-out adds only the relic's 1."""
     st = _casket(enemies=[make_enemy(hp=300, intents=QUIET)])
     st.player.powers[kokomi_plan.GRAND_DESIGN] = 1
     _write(st, "proto_kk_surging_shoal")           # 2 paid
     _write(st, "proto_kk_nip")                     # 0 paid
     kokomi_plan.resolve_all(st)
-    assert st.kk_casket == (1 + 2) + 1
-    # Power cost sweep, 2026-09-30: cost stays 1, the upgrade is Innate.
-    assert _up("proto_kk_grand_design").cost == 1
-    assert _up("proto_kk_grand_design").innate
+    assert st.kk_casket == 1 + 1
 
 
 def test_the_long_game_pays_on_exactly_one_waiting(overhaul):

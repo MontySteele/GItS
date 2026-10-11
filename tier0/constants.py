@@ -996,6 +996,14 @@ KOKOMI_STATUS_BATCH_IDS: tuple[str, ...] = (
     "proto_kk_riptide_ruin",
 )
 
+# THE GROWTH POWERS (2026-10-10, review/active/kokomi-growth-powers-
+# 2026-10-10.md, ruled "Agreed on both"): one Uncommon Power that grows the
+# Casket every turn, appended LAST to `KOKOMI_OVERHAUL_POOL_IDS`. The General's
+# Banner left the pool for it; the pool stays 78 (21 / 36 / 21).
+KOKOMI_GROWTH_POWERS_IDS: tuple[str, ...] = (
+    "proto_kk_flood_tide",
+)
+
 # THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-EIGHT rows since the
 # status batch (2026-10-01: seven cut, seven added, Riptide Ruin the Rare);
 # SEVENTY-EIGHT rows since
@@ -1045,7 +1053,8 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_sango_isshin",
     # The Commander -- Gorou, go (4)
     "proto_kk_vanguard",
-    "proto_kk_the_generals_banner",
+    # The General's Banner left on 2026-10-10 (the growth Powers); Rising
+    # Tide takes its slot, LAST.
     # Currencies, tempo, and the one replay (5)
     "proto_kk_stolen_chapter",
     "proto_kk_change_of_plans",
@@ -1124,6 +1133,9 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # THE STATUS BATCH (2026-10-01): seven rows, LAST. The pool is 78 (21 /
     # 36 / 21); Riptide Ruin is the Rare, in Coral Sanctuary's place.
     *KOKOMI_STATUS_BATCH_IDS,
+    # THE GROWTH POWERS (2026-10-10): Flood Tide, LAST, in The General's
+    # Banner's Uncommon slot. Still 78 (21 / 36 / 21).
+    *KOKOMI_GROWTH_POWERS_IDS,
 )
 
 # THE CO-OP SET's Kokomi tier, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s

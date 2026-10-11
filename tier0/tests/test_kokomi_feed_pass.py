@@ -59,10 +59,13 @@ def test_each_feed_row_is_a_zero_cost_plan_only_common(overhaul, cid):
     ("proto_kk_current_read",
      [{"op": "draw", "amount": 1}, {"op": "block", "amount": 0}],
      [{"op": "draw", "amount": 1}, {"op": "block", "amount": 2}]),
+    # The growth Powers (2026-10-10): Brine Sting deals 3 before the Weak.
     ("proto_kk_brine_sting",
-     [{"op": "apply_power", "power": "weak", "amount": 1,
+     [{"op": "damage", "amount": 3, "target": "front_enemy"},
+      {"op": "apply_power", "power": "weak", "amount": 1,
        "target": "front_enemy"}],
-     [{"op": "apply_power", "power": "weak", "amount": 2,
+     [{"op": "damage", "amount": 3, "target": "front_enemy"},
+      {"op": "apply_power", "power": "weak", "amount": 2,
        "target": "front_enemy"}]),
 ])
 def test_the_feed_rows_print_the_ruled_numbers(overhaul, cid, base, upgraded):
@@ -110,10 +113,11 @@ def test_the_offer_holds_the_feed_after_the_casket_rows(overhaul):
     # 22 rows after the feed and cut The Clouds Like Waves Rippling; the
     # payoff pass (2026-10-01) appended two more and cut Second Thoughts;
     # pool completion (2026-10-01) appended eight; the status batch
-    # (2026-10-01) cut seven (All Streams after the feed) and appended seven.
+    # (2026-10-01) cut seven (All Streams after the feed) and appended seven;
+    # the growth Powers (2026-10-10) appended Flood Tide.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == 78
-    assert ids[-43:-38] == FEED
+    assert ids[-44:-39] == FEED
     assert "proto_kk_exposed_flank" not in ids
     assert "proto_kk_exposed_flank" not in {
         c.id for c in loader.prototype_cards()}
