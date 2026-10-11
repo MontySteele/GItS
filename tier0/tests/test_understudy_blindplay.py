@@ -6442,7 +6442,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-436`: the hit is in the sentence now. Trimmed 2026-09-08 with
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
-        "Mine": [" that also goes off just before its enemy ", "attacks."],
+        "Mine": [" that also goes off when its enemy attacks ",
+                 "you. If it does not attack, the Mine waits. Any "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a

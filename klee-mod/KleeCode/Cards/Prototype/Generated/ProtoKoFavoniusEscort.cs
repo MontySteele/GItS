@@ -42,7 +42,7 @@ public sealed class ProtoKoFavoniusEscort : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Favonius Escort"),
-        ("description", "Remove your largest [gold]Bomb[/gold]. Gain [gold]Block[/gold] equal to twice its size."),
+        ("description", "Remove your largest [gold]Bomb[/gold], on any enemy. Gain [gold]Block[/gold] equal to twice its size."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

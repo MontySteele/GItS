@@ -109,18 +109,26 @@ public static class ResolutionLedger
     /// as a Drain. With no dealer on the wire the page guessed the one
     /// Thorns holder, and Ousia Pledge's Drain 3 read as "from Toadpole's
     /// Thorns" (Thorns 2) on a Skill.
+    /// `Seq` (the Klee round, 2026-10-11) is the same process-wide counter
+    /// <see cref="PageEvent"/> carries, stamped when the hit is filed, so the
+    /// page can merge hits and <see cref="PowerApplied"/> entries in play
+    /// order: Fire! Fire! placed its Bomb 7 and then set it off, and the page
+    /// printed the hit above the "Put". 0 where nothing stamped it.
     public readonly record struct Hit(string Target, int Amount, int Blocked,
                                       string CombatId, bool Killed = false,
                                       bool OnPlayer = false,
                                       string Source = "",
-                                      bool Self = false);
+                                      bool Self = false,
+                                      long Seq = 0);
 
     /// <summary>A power the card put on an enemy, and by how much
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
     /// in 'what it did'"). `Amount` is the change the game reports to
-    /// `AfterPowerAmountChanged`, signed, so a strip reads as one.</summary>
+    /// `AfterPowerAmountChanged`, signed, so a strip reads as one. `Seq` is
+    /// <see cref="Hit"/>'s, for the same merge (2026-10-11).</summary>
     public readonly record struct PowerApplied(string Target, string Power,
-                                               int Amount, string CombatId);
+                                               int Amount, string CombatId,
+                                               long Seq = 0);
 
     /// <summary>One resolved card.
     ///
@@ -406,7 +414,7 @@ public static class ResolutionLedger
                                OnPlayer: onPlayer,
                                Source: onPlayer && !self
                                    ? Named(dealer) : string.Empty,
-                               Self: self));
+                               Self: self, Seq: ++_seq));
     }
 
     /// <summary>
@@ -447,7 +455,8 @@ public static class ResolutionLedger
             _open.Overflowed = true;
             return;
         }
-        _open.Hits.Add(new Hit(target, 0, 0, combatId, Killed: true));
+        _open.Hits.Add(new Hit(target, 0, 0, combatId, Killed: true,
+                               Seq: ++_seq));
     }
 
     /// <summary>
@@ -497,7 +506,8 @@ public static class ResolutionLedger
             _open.Overflowed = true;
             return;
         }
-        _open.Applied.Add(new PowerApplied(target, power, amount, combatId));
+        _open.Applied.Add(new PowerApplied(target, power, amount, combatId,
+                                           ++_seq));
     }
 
     /// <summary>Where the open row's power list stands, so a placement can
@@ -637,6 +647,7 @@ public static class ResolutionLedger
                     ["on_player"] = hit.OnPlayer,
                     ["source"] = hit.Source,
                     ["self"] = hit.Self,
+                    ["seq"] = hit.Seq,
                 }),
             ["applied"] = row.Applied.ConvertAll(a =>
                 new Dictionary<string, object?>
@@ -645,6 +656,7 @@ public static class ResolutionLedger
                     ["power"] = a.Power,
                     ["amount"] = a.Amount,
                     ["combat_id"] = a.CombatId,
+                    ["seq"] = a.Seq,
                 }),
             ["summoned"] = row.Summoned.ConvertAll(s =>
                 new Dictionary<string, object?>

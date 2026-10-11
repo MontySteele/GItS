@@ -53,7 +53,7 @@ public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanio
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Dust of Purification"),
-        ("description", "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold] grows by {Grow:diff()} for each."),
+        ("description", "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by {Grow:diff()} for each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

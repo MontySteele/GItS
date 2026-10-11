@@ -47,8 +47,8 @@ public class KleeSeatFixes20260925Tests
     public void Sparks_n_splash_prints_the_start_of_turn_rule_and_costs_one_upgraded()
     {
         const string rule =
-            "At the start of your turn, your largest [gold]Bomb[/gold] deals "
-          + "its size in [gold]Pyro[/gold] damage without going off.";
+            "At the start of your turn, your largest [gold]Bomb[/gold], on any "
+          + "enemy, deals its size in [gold]Pyro[/gold] damage without going off.";
         var card = new ProtoKoSparksNSplash();
         Assert.Equal(CardRarity.Rare, card.Rarity);
         Assert.Equal(CardType.Power, card.Type);

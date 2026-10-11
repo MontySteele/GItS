@@ -73,6 +73,21 @@ def test_an_amplifier_off_an_application_says_there_was_no_hit():
     assert "nothing to amplify" in src
 
 
+def test_a_damaging_melt_or_vaporize_gets_no_amplify_note():
+    """Klee round 2026-10-11, lane 2: a Bomb's Melt printed "nothing to
+    amplify" beside a correct 17. The note is for element-only applications:
+    Deal passes hadHit true, ApplyOnly false, and only false notes it."""
+    src = _read("klee-mod", "KleeCode", "Powers", "ElementalHit.cs")
+    deal = src[src.index("public static async Task<int> Deal("):
+               src.index("public static Task<int> DealWithoutDealerMods(")]
+    apply_only = src[src.index("public static async Task ApplyOnly("):
+                     src.index("public const string NoHitToAmplify")]
+    assert "hadHit: true" in deal and "hadHit: false" not in deal
+    assert "hadHit: false" in apply_only and "hadHit: true" not in apply_only
+    resolve = src[src.index("private static async Task ResolveOnAura("):]
+    assert "if (!hadHit) NoteNoHit(consumed, element);" in resolve
+
+
 # ---- 3. Spend ---------------------------------------------------------------
 
 def test_the_spend_tip_says_whose_fanfare_pays():
