@@ -111,7 +111,7 @@ These three card changes are worth a few points a turn in act 1. They do nothing
    - (b) Ambush to Common, and Coral Crash to Uncommon.
 
 **Ruled 2026-10-10, all four at default.** [USER]: "I'm good with the defaults on those picks."
-1. The Casket gives 2 per Plan carried out; this is read on the next whole-run round.
+1. **Reopened the same evening and replaced.** [USER]: "My intuition: doubling the casket scaling trivialize act 1 but won't solve the later game issues" and "This all feels like a problem to be solved through the power pool." The Casket stays at 1 per Plan; see `review/active/kokomi-growth-powers-2026-10-10.md`.
 2. The act-1 boss: tempo fixes only.
 3. Abyssal Salvage and Tidecleanse are swapped for two "plan the reaction" cards after his run.
 4. Rarities are unchanged.
