@@ -142,7 +142,7 @@ public sealed class KleeScalingPassTests
                      (new ProtoKoPop(), "BombSize", 5m),
                      (new ProtoKoJumpyDumpty(), "BombSize", 8m),
                      (new ProtoKoJumpyDumpty(), "PayloadMine", 3m),
-                     (new ProtoKoMineToss(), "BombSize", 9m),
+                     (new ProtoKoMineToss(), "BombSize", 11m),
                      (new ProtoKoWitchsHomeworkNext(), "BombSize", 6m),
                  })
         {

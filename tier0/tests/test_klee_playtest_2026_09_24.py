@@ -89,8 +89,8 @@ def test_pocket_match_is_free_retained_and_prices_no_spark(overhaul):
     assert combat.spark_cost(card) == 0
     assert klee_overhaul.is_set_off_card(card)
     up = load("proto_ko_pocket_match+")
-    assert [fx.get("damage") for fx in card.effects] == [3]
-    assert [fx.get("damage") for fx in up.effects] == [5]
+    assert [fx.get("damage") for fx in card.effects] == [6]
+    assert [fx.get("damage") for fx in up.effects] == [9]
 
 
 def test_pocket_match_fires_only_the_largest_charge_and_the_rest_stay(overhaul):
@@ -103,7 +103,7 @@ def test_pocket_match_fires_only_the_largest_charge_and_the_rest_stay(overhaul):
     play(state, load("proto_ko_pocket_match"), aim=enemy)
 
     assert sizes(enemy) == [4, 6], "only the 9 went off"
-    assert 200 - enemy.hp == 9 + 3, "the charge, then the card's own 3"
+    assert 200 - enemy.hp == 9 + 6, "the charge, then the card's own 6"
     assert state.player.sparks == sparks + 1, "a normal explosion pays 1 Spark"
     assert state.ko_set_off_this_turn == 1
     # The two left behind keep growing like any other charge.
@@ -162,7 +162,7 @@ def test_pocket_match_on_an_empty_enemy_is_just_its_hit(overhaul):
     state = klee_state([a, b])
     klee_overhaul.place(state, b, 9)
     play(state, load("proto_ko_pocket_match"), aim=a)
-    assert 200 - a.hp == 3
+    assert 200 - a.hp == 6
     assert sizes(b) == [9], "another enemy's pile is not this card's"
 
 
@@ -223,7 +223,7 @@ def test_boom_badge_doubles_pocket_matchs_one_charge(overhaul):
     klee_overhaul.place(state, enemy, 4)
     klee_overhaul.place(state, enemy, 9)
     play(state, load("proto_ko_pocket_match"), aim=enemy)
-    assert 200 - enemy.hp == 9 * 2 + 3
+    assert 200 - enemy.hp == 9 * 2 + 6
     assert sizes(enemy) == [4]
 
 

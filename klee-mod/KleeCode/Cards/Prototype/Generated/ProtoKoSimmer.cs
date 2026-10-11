@@ -48,13 +48,13 @@ public sealed class ProtoKoSimmer : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Simmer"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus half your largest [gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,7 +67,7 @@ public sealed class ProtoKoSimmer : CustomCardModel, IElementalCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.DealFromBombs(choiceContext, cardPlay.Target, Owner.Creature, DynamicVars.Damage.BaseValue, ProtoBombPower.BombRead.LargestHalf, this, cardPlay);
+        await ProtoBombPower.DealFromBombs(choiceContext, cardPlay.Target, Owner.Creature, DynamicVars.Damage.BaseValue, ProtoBombPower.BombRead.Largest, this, cardPlay);
         {
             var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
             await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
@@ -76,6 +76,6 @@ public sealed class ProtoKoSimmer : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

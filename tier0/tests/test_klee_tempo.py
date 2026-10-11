@@ -49,15 +49,15 @@ def test_five_out_five_in_and_the_split_holds(overhaul):
 
 # --- Simmer -------------------------------------------------------------------
 
-def test_simmer_with_no_bomb_deals_its_flat_four(overhaul):
+def test_simmer_with_no_bomb_deals_its_flat_six(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     play(state, load("proto_ko_simmer"), aim=enemy)
-    assert enemy.hp == 196
+    assert enemy.hp == 194
     assert len(_statuses(state, "status_dazed")) == 1
 
 
-def test_simmer_adds_half_the_largest_bomb_rounded_down_and_keeps_it(overhaul):
+def test_simmer_adds_the_full_largest_bomb_and_keeps_it(overhaul):
     """The largest Bomb is read off the whole board; the hit lands on the aimed
     enemy. Nothing goes off: the charges stay, no Spark is minted."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
@@ -65,17 +65,17 @@ def test_simmer_adds_half_the_largest_bomb_rounded_down_and_keeps_it(overhaul):
     klee_overhaul.place(state, a, 6)
     klee_overhaul.place(state, b, 21)
     play(state, load("proto_ko_simmer"), aim=a)
-    assert a.hp == 200 - (4 + 10)
+    assert a.hp == 200 - (6 + 21)
     assert sizes(a) == [6] and sizes(b) == [21]
     assert state.player.sparks == 0
 
 
-def test_simmer_upgraded_is_six_flat(overhaul):
+def test_simmer_upgraded_is_nine_flat(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 20)
     play(state, load("proto_ko_simmer+"), aim=enemy)
-    assert enemy.hp == 200 - (6 + 10)
+    assert enemy.hp == 200 - (9 + 20)
 
 
 def test_simmer_is_card_damage_and_takes_strength(overhaul):
@@ -84,7 +84,7 @@ def test_simmer_is_card_damage_and_takes_strength(overhaul):
     state.player.powers["strength"] = 3
     klee_overhaul.place(state, enemy, 8)
     play(state, load("proto_ko_simmer"), aim=enemy)
-    assert enemy.hp == 200 - (4 + 4 + 3)
+    assert enemy.hp == 200 - (6 + 8 + 3)
 
 
 # --- Taste Test ---------------------------------------------------------------

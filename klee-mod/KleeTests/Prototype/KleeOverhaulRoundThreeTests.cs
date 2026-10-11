@@ -429,16 +429,16 @@ public class KleeOverhaulRoundThreeTests
         // default rule. Fwoosh! prints the same clause beside it: aimed and
         // 6 since R243's card-audit ruling ("default looks good").
         AssertUpgradeMoves<ProtoKoKapow>("Damage", 4m, 7m);
-        // `EB-749` cut Fwoosh!; Pocket Match is the same shape and its
-        // delta is the one the Prototype-stage rule gives a `damage` row.
-        AssertUpgradeMoves<ProtoKoPocketMatch>("Damage", 3m, 5m);
+        // `EB-749` cut Fwoosh!; Pocket Match is the same shape. 6 [9] since
+        // the Klee Commons pass (2026-10-11).
+        AssertUpgradeMoves<ProtoKoPocketMatch>("Damage", 6m, 9m);
         AssertUpgradeMoves<ProtoKoPop>("BombSize", 5m, 7m);
-        // Chain Fuse grows by 6 since the 2026-09-02 balance pass. Its
+        // Chain Fuse grows by 9 since the Klee Commons pass (2026-10-11). Its
         // upgrade is the row's OWN `grow: +3` (the Klee card audit of the
         // same day, `review/active/klee-card-audit-2026-09-02.md`): a grow is
         // damage to be and takes a Strike's +3, where the rule's default +1
         // was an upgrade nobody could see.
-        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 6m, 9m);
+        AssertUpgradeMoves<ProtoKoChainFuse>("Grow", 9m, 12m);
         // The same audit's third lever: an upgrade that is a keyword, not a
         // number. (Sorry, Jean... carried it until the Klee tempo paper cut
         // it, 2026-10-07; Favonius Escort prints the same `retain` upgrade.)
