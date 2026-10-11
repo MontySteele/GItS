@@ -110,6 +110,14 @@ Other findings:
 
 What this changes for the picks below: pick 1's case (Block Plans at 1.5) is weaker, because act 2 came back to base without it. The default stays hold.
 
+## Ruled (2026-10-11)
+
+[USER]: "On Kokomi - it sounds like we have a lot of dead card picks. Let's do what we did for Klee and survey for weak or unpicked cards to buff. Otherwise good to take the defaults and hold for now."
+
+- Pick 1: (a), hold Block Plans at 1.3.
+- Pick 2: (a), leave Kurage's Oath.
+- Pick 3: in place of "keep and watch", a Klee-style card audit of Kokomi's weak and unpicked cards, all rarities, to buff. The debuff and reaction cards are part of it.
+
 ## For [USER]
 
 These are decided after your run, not before.
