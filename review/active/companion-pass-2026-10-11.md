@@ -122,4 +122,4 @@ Offerable Companions by nation (Common / Uncommon / Rare):
 
 The Liyue row (Qiqi, one Uncommon) and the Guest Star and personal-pool rows are excluded.
 
-With half of each tier's weight on the home nation, a Furina Fontaine Uncommon is offered about four times as often as a Klee Mondstadt Uncommon.
+With half of each tier's weight on the home nation, a Furina Fontaine Uncommon is offered about three times as often as a Klee Mondstadt Uncommon (0.14 against 0.04 of the Uncommon draws, by `CompanionSlot.cs:153-198`).
