@@ -128,20 +128,65 @@ public static class VarkaRules
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, owner);
     }
 
+    /// <summary>How many Knights The Order Answers offers at once.</summary>
+    public const int OrderAnswersOptions = 3;
+
     /// <summary>
-    /// The Order Answers: "add a random Knight to your hand", a pool Knight
-    /// at its own cost (<paramref name="free"/> false), off the same roll
-    /// Knights' Roll Call takes.
+    /// The Order Answers' offer: <paramref name="count"/> DISTINCT pool
+    /// Knights, drawn without replacement off <paramref name="pick"/> (one
+    /// item of what is left), in draw order. PURE apart from the roll; fewer
+    /// when the pool is smaller.
     /// </summary>
-    public static async Task AddRandomKnight(Player? owner, bool free)
+    public static List<T> DrawDistinct<T>(
+        IReadOnlyList<T> pool, int count, System.Func<List<T>, T?> pick)
+        where T : class
+    {
+        var left = pool.ToList();
+        var drawn = new List<T>();
+        while (drawn.Count < count && left.Count > 0)
+        {
+            var item = pick(left);
+            if (item == null || !left.Remove(item)) break;
+            drawn.Add(item);
+        }
+        return drawn;
+    }
+
+    /// <summary>
+    /// The Order Answers (Varka co-op fixes, 2026-10-11): "choose 1 of 3
+    /// random Knights. Add it to your hand, upgraded." Three distinct pool
+    /// Knights, each an upgraded combat copy, on the base game's
+    /// choose-a-card screen (<c>CardSelectCmd.FromChooseACardScreen</c>, the
+    /// Discovery screen; three is its ceiling). The pick goes to the hand at
+    /// its own (upgraded) cost. Co-op: the screen is the owner's and is
+    /// synced through <paramref name="choiceContext"/>, as Weathervane's
+    /// turn-start grid is.
+    /// </summary>
+    public static async Task ChooseUpgradedKnight(
+        PlayerChoiceContext choiceContext, Player? owner)
     {
         var combat = owner?.Creature?.CombatState;
         if (owner == null || combat == null) return;
-        var canonical = owner.RunState.Rng.CombatTargets.NextItem(
-            PoolKnights().ToList());
-        var card = canonical == null ? null : combat.CreateCard(canonical, owner);
+        var rng = owner.RunState.Rng.CombatTargets;
+        var options = DrawDistinct(PoolKnights(), OrderAnswersOptions,
+                                   left => rng.NextItem(left))
+            .Select(c => combat.CreateCard(c, owner))
+            .Where(c => c != null)
+            .Cast<CardModel>()
+            .ToList();
+        foreach (var option in options)
+        {
+            if (option.IsUpgradable && !option.IsUpgraded)
+            {
+                option.UpgradeInternal();
+            }
+        }
+        if (options.Count == 0) return;
+        var card = options.Count == 1
+            ? options[0]
+            : await CardSelectCmd.FromChooseACardScreen(
+                choiceContext, options, owner, canSkip: false);
         if (card == null) return;
-        if (free) card.EnergyCost.SetThisTurn(0);
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, owner);
     }
 

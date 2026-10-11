@@ -62,8 +62,8 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 4m),
-            new DynamicVar("VkPer", 3m)
+            new DynamicVar("VkBase", 6m),
+            new DynamicVar("VkPer", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -144,7 +144,7 @@ def test_gleeful_songs_pays_per_reacting_enemy(rebalance):
                               _enemy(name="b", aura="cryo"),
                               _enemy(name="c")])
     _play(st, _vk("barbara_show_begin"))
-    assert st.player.block == 4 + 3 * 2
+    assert st.player.block == 6 + 2 * 2         # co-op fixes, 2026-10-11
     assert st.enemies[2].aura == "hydro"
 
 
@@ -153,7 +153,7 @@ def test_rippling_guard_counts_the_other_cards_played(rebalance):
     _play(st, _attack(1))
     _play(st, _attack(1))
     _play(st, _vk("rippling_guard"))
-    assert st.player.block == 3 + 2 * 2
+    assert st.player.block == 6 + 1 * 2         # co-op fixes, 2026-10-11
     assert st.enemies[0].aura == "hydro"
 
 
