@@ -96,3 +96,30 @@ The Companion rows sit on Klee's shipped sheet, so these are your picks.
 3. **The Companion-count payoffs and the reaction Rares.**
    - **(a) Default:** wait for the round.
    - (b) Rework them now.
+
+## Ruled 2026-10-11 (picks 2 and 3; pick 1 stays open)
+
+[USER]: "Agreed on 2 and 3 on the Companion picks; I think that 1) needs more consideration, since I do actually think Klee should be able to draft Nicole and Durin cards; Furina should get Neuvillette cards, etc."
+
+- **Pick 2 (a):** all six numbers. Built into `klee-next` with the 19 Fontaine descriptions.
+- **Pick 3 (a):** the Companion-count payoffs and the reaction Rares wait for the round.
+- **Pick 1 is open.**
+  - Under (a), Nicole (Rares), Durin (an Uncommon and a Rare) and Neuvillette's reward-pool Rare all stay offerable, since the rule touched only Commons.
+  - [USER]'s point stands on its own, though: a character's own element can be the right draft, so the rule needs a second look.
+  - It goes into the next paper together with the nation question below.
+
+**Next paper: the nations.**
+
+[USER]: "The card rewards are skewed such that 50% of rewards come from Companions of a character's home region (or are supposed to be at least) - I did not notice how many more Mondstadt has compared to other regions, so we might need to do a sweep to remove dead cards or expand the smaller pools soon."
+
+Offerable Companions by nation (Common / Uncommon / Rare):
+
+| Nation | Common | Uncommon | Rare | Total | Home of |
+|---|---|---|---|---|---|
+| Mondstadt | 12 | 18 | 11 | 41 | Klee, Varka |
+| Inazuma | 9 | 11 | 4 | 24 | Kokomi |
+| Fontaine | 8 | 4 | 4 | 16 | Furina |
+
+The Liyue row (Qiqi, one Uncommon) and the Guest Star and personal-pool rows are excluded.
+
+With half of each tier's weight on the home nation, a Furina Fontaine Uncommon is offered about four times as often as a Klee Mondstadt Uncommon.
