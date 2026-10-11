@@ -31,10 +31,10 @@ public sealed partial class ProtoBombPower
     /// </summary>
     public enum BombRead
     {
-        /// <summary>Simmer: "plus half your largest Bomb's size" -- the
-        /// largest single charge on the living board
-        /// (<see cref="LargestSizeFor"/>), halved, rounded down.</summary>
-        LargestHalf,
+        /// <summary>Simmer: "plus your largest Bomb's size" -- the largest
+        /// single charge on the living board (<see cref="LargestSizeFor"/>),
+        /// in full (the Klee Commons pass, 2026-10-11: it was half).</summary>
+        Largest,
 
         /// <summary>Taste Test: "damage equal to all your Bombs on the
         /// enemy" -- every one of her charges on the aimed body, Mines
@@ -49,7 +49,7 @@ public sealed partial class ProtoBombPower
     {
         var bombs = read switch
         {
-            BombRead.LargestHalf => LargestSizeFor(applier) / 2,
+            BombRead.Largest => LargestSizeFor(applier),
             BombRead.TargetTotal => TotalPlacedBy(target, applier),
             _ => 0,
         };

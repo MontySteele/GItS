@@ -107,14 +107,14 @@ def test_bombs_away_upgrade_moves_the_bomb():
     assert sizes(a) == [8] and st.player.block == 6
 
 
-def test_mine_toss_places_one_mine_nine_on_one_enemy():
+def test_mine_toss_places_one_mine_eleven_on_one_enemy():
     a, b, c = three()
     st = klee_state([a, b, c])
     play(st, load("proto_ko_mine_toss"), aim=b)
     assert sizes(a) == [] and sizes(c) == []
-    assert [(ch.size, ch.is_mine) for ch in b.ko_charges] == [(9, True)]
+    assert [(ch.size, ch.is_mine) for ch in b.ko_charges] == [(11, True)]
     play(st, load("proto_ko_mine_toss+"), aim=a)
-    assert sizes(a) == [12]
+    assert sizes(a) == [14]
 
 
 # Mine, All Mine!'s mines-only Set off left in the Klee finish-line batch
