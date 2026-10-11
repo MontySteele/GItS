@@ -523,12 +523,15 @@ public static class ArmKeywordTips
     /// Its own card text, restated, because the card is in no pool and a
     /// player may meet the name before the card. The text pass of 2026-10-08
     /// added the upgrade's draw (`OpenTheCasket.OnPlay`, `IsUpgraded`).
+    /// 2026-10-10 ([USER], after his Kokomi playtest): it starts at 0 and
+    /// each play raises its cost by 1 (`EnergyCost.AddThisCombat(1)`).
     /// </summary>
     public static IEnumerable<IHoverTip> ForOpenTheCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, OpenTheCasketKey,
-            "1-cost, Retain. Gain [gold]Strength[/gold] equal to the "
-          + "Casket's count, then empty it. Upgraded, it also draws a card.");
+            "0-cost, Retain. Gain [gold]Strength[/gold] equal to the "
+          + "Casket's count, then empty it, and increase its cost by 1. "
+          + "Upgraded, it also draws a card.");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.

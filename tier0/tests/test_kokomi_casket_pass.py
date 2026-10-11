@@ -102,13 +102,12 @@ def test_the_count_is_per_fight_and_never_rolled_by_the_turn(overhaul):
 
 # --- B. Open the Casket ------------------------------------------------------
 
-def test_the_token_is_a_one_cost_retain_skill_in_no_pool(overhaul):
-    """2026-10-01, the four-kit review, Kokomi pick 1. [USER]: "On your new
-    picks agree all around - I think that if it's repeatable, it should
-    probably cost energy, though, to make this a real choice and not just
-    button mashing when it comes up?" Cost 1 (was 0), no Exhaust."""
+def test_the_token_is_a_zero_cost_retain_skill_in_no_pool(overhaul):
+    """2026-10-01, the four-kit review, Kokomi pick 1: no Exhaust. 2026-10-10,
+    after [USER]'s Kokomi playtest: "I think that the casket should start at
+    0 and then have a ramping cost (goes up by 1 each time)". Printed 0."""
     card = kokomi_plan.open_the_casket_card()
-    assert (card.cost, card.type, card.rarity) == (1, "skill", "token")
+    assert (card.cost, card.type, card.rarity) == (0, "skill", "token")
     assert card.retain and not card.exhaust
     assert card.id not in C.KOKOMI_OVERHAUL_POOL_IDS
 
@@ -124,7 +123,7 @@ def test_the_token_is_reshuffled_and_opens_again_from_zero(overhaul):
     st.player.energy = 3
     st.kk_casket = 3
     combat.play_card(st, token)
-    assert st.player.energy == 2                     # it cost 1
+    assert st.player.energy == 3                     # the first play is free
     assert st.player.powers.get("strength") == 3
     assert st.kk_casket == 0
     assert token in st.player.discard_pile           # not exhausted
@@ -138,8 +137,53 @@ def test_the_token_is_reshuffled_and_opens_again_from_zero(overhaul):
     assert token in st.player.hand
     st.player.energy = 3
     combat.play_card(st, token)
+    assert st.player.energy == 2                     # the second costs 1
     assert st.player.powers.get("strength") == 5     # 3 + 2
     assert st.kk_casket == 0
+
+
+def test_each_play_raises_its_cost_by_one_for_the_combat(overhaul):
+    """2026-10-10, after [USER]'s Kokomi playtest: "That means the casket is
+    free the first play, costs 1 the second, and then at 2+ becomes
+    difficult. That way it has obvious use in a short hallway fight". The
+    base game's Modded: "Increase this card's cost by 1." 0, 1, 2, 3 -- per
+    copy, upgraded or not, and the price `card_cost` reports is the price
+    `play_card` takes. `OpenTheCasket.OnPlay`'s `AddThisCombat(1)` is the
+    twin."""
+    from tier0.engine import combat
+    for upgraded in (False, True):
+        st = _casket(enemies=[make_enemy(hp=500)])
+        token = kokomi_plan.open_the_casket_card(upgraded=upgraded)
+        seen = []
+        for _ in range(4):
+            st.player.hand.append(token)
+            st.player.energy = 5
+            seen.append(combat.card_cost(st, token))
+            combat.play_card(st, token)
+            assert st.player.energy == 5 - seen[-1]
+            for pile in (st.player.discard_pile, st.player.hand,
+                         st.player.draw_pile):
+                if token in pile:
+                    pile.remove(token)
+        assert seen == [0, 1, 2, 3]
+    # A fresh copy -- the one the relic deals each combat -- starts at 0.
+    assert combat.card_cost(_casket(), kokomi_plan.open_the_casket_card()) == 0
+
+
+def test_a_fetched_open_keeps_its_ramped_cost(overhaul):
+    """What the Tokoyo Returns (and Grand Design's morning fetch, which calls
+    it) MOVES the played copy back to hand; it makes no new one, so the ramp
+    comes with it."""
+    from tier0.engine import combat
+    st = _casket(enemies=[make_enemy(hp=100)])
+    token = kokomi_plan.open_the_casket_card()
+    st.player.hand.append(token)
+    st.player.energy = 3
+    combat.play_card(st, token)
+    assert token in st.player.discard_pile
+    kokomi_plan.fetch_open_casket(st)
+    assert token in st.player.hand
+    assert combat.card_cost(st, token) == 1
 
 
 def test_opening_grants_strength_equal_to_the_count_and_empties_it(overhaul):
@@ -159,7 +203,7 @@ def test_the_upgraded_token_also_draws_one_card(overhaul):
     Upgraded, it also draws 1 card, after the Strength; cost and Retain
     stay. `OpenTheCasket.cs` is the twin."""
     up = kokomi_plan.open_the_casket_card(upgraded=True)
-    assert (up.cost, up.retain, up.exhaust) == (1, True, False)
+    assert (up.cost, up.retain, up.exhaust) == (0, True, False)
     st = _casket(enemies=[make_enemy(hp=100)])
     st.player.draw_pile = [kokomi_plan.open_the_casket_card()]
     st.kk_casket = 2
