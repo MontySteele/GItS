@@ -89,14 +89,15 @@ def test_simmer_is_card_damage_and_takes_strength(overhaul):
 
 # --- Taste Test ---------------------------------------------------------------
 
-def test_taste_test_deals_every_bomb_on_the_enemy_and_keeps_them(overhaul):
+def test_taste_test_deals_twice_every_bomb_on_the_enemy_and_keeps_them(overhaul):
+    # The Klee upper pass (2026-10-11): twice the sum, was the sum.
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 12)
     klee_overhaul.place(state, a, 5, is_mine=True)
     klee_overhaul.place(state, b, 30)
     play(state, load("proto_ko_taste_test"), aim=a)
-    assert a.hp == 200 - 17                 # 12 + the Mine 5; b's not read
+    assert a.hp == 200 - 2 * 17             # 12 + the Mine 5; b's not read
     assert sizes(a) == [12, 5] and sizes(b) == [30]
     assert state.player.sparks == 0
     assert len(_statuses(state, klee_overhaul.CONFISCATED_ID)) == 2
@@ -115,7 +116,7 @@ def test_taste_test_upgraded_adds_one_confiscated(overhaul):
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 9)
     play(state, load("proto_ko_taste_test+"), aim=enemy)
-    assert enemy.hp == 191
+    assert enemy.hp == 200 - 2 * 9
     assert len(_statuses(state, klee_overhaul.CONFISCATED_ID)) == 1
 
 

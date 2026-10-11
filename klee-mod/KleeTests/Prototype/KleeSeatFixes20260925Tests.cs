@@ -52,7 +52,7 @@ public class KleeSeatFixes20260925Tests
         var card = new ProtoKoSparksNSplash();
         Assert.Equal(CardRarity.Rare, card.Rarity);
         Assert.Equal(CardType.Power, card.Type);
-        Assert.Equal(3, card.EnergyCost.Canonical);   // power cost sweep
+        Assert.Equal(2, card.EnergyCost.Canonical);   // the Klee upper pass, 2026-10-11
         Assert.Equal(rule, Face(card));
         // The badge says the same thing in the same words.
         Assert.Equal(rule, new BombEchoPower().Localization!
@@ -60,7 +60,7 @@ public class KleeSeatFixes20260925Tests
         // Upgrade (power cost sweep, 2026-09-30): Innate, cost unmoved.
         var up = Upgraded<ProtoKoSparksNSplash>();
         Assert.Contains(CardKeyword.Innate, up.Keywords);
-        Assert.Equal(3, up.EnergyCost.GetWithModifiers(CostModifiers.None));
+        Assert.Equal(2, up.EnergyCost.GetWithModifiers(CostModifiers.None));
     }
 
     [Fact]

@@ -257,7 +257,7 @@ public sealed class KleeScalingPassTests
     }
 
     [Fact]
-    public void The_mark_survives_a_jump_and_a_merge_and_a_copy_never_has_it()
+    public void The_mark_survives_a_jump_and_a_gather_and_a_copy_never_has_it()
     {
         // Explode is where it is read.
         Assert.Contains("KleeScalingPass.AfterHomeworkWentOff",
@@ -265,22 +265,16 @@ public sealed class KleeScalingPassTests
         // A jump hands the charge's mark to its landing.
         Assert.Contains("ProtoCharge.get_Homework",
                         Il.Calls(Il.Method("ProtoBombPower", "JumpCharges")));
-        // A merge carries every mark it swallowed.
-        Assert.Contains("KleeScalingPass.MergeMarks",
-                        Il.Calls(Il.Method("ProtoBombPower", "MergeAllTo")));
+        // A gather (Exquisite Compound, the Klee upper pass 2026-10-11) moves
+        // each charge as itself, its mark with it.
+        Assert.Contains("ProtoCharge.get_Homework",
+                        Il.Calls(Il.Method("ProtoBombPower", "GatherAllTo")));
         // A copy reads the size and nothing else.
         foreach (var copy in new[] { "PlaceCopyOfLargest", "PlaceCopyOfLargestOnAll" })
         {
             Assert.DoesNotContain("ProtoCharge.get_Homework",
                                   Il.Calls(Il.Method("ProtoBombPower", copy)));
         }
-
-        var a = Mutable(new ProtoKoWitchsHomeworkNext());
-        var b = Mutable(new ProtoKoWitchsHomeworkNext());
-        Assert.Null(KleeScalingPass.MergeMarks(null, null));
-        Assert.Equal(new CardModel[] { a }, KleeScalingPass.MergeMarks(null, new CardModel[] { a }));
-        Assert.Equal(new CardModel[] { a, b },
-                     KleeScalingPass.MergeMarks(new CardModel[] { a }, new CardModel[] { b, a }));
     }
 
     [Fact]

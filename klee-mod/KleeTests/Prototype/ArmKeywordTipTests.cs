@@ -383,7 +383,9 @@ public class ArmKeywordTipTests
         // FORTY-THREE with the pool to 75 (2026-10-09): `ForOldestGuest`
         // (Encore!'s "oldest guest") and its four guests' `ForFreminet`,
         // `ForNavia`, `ForNeuvillette` and `ForEscoffier`.
-        Assert.Equal(43, attaches.Count);
+        // FORTY-TWO with the Klee upper pass (2026-10-11): `EB-573`'s
+        // `ForMergeRiders` left with the merge it explained.
+        Assert.Equal(42, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");
@@ -419,25 +421,17 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.DoesNotContain(attaches, m => m.Name == "ForCovenSpark");
         Assert.Contains(attaches, m => m.Name == "ForEmptyField");
-        Assert.Contains(attaches, m => m.Name == "ForMergeRiders");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForMergeRiders");
         Assert.All(attaches, m => Assert.Contains(
             Il.Calls(m), c => c.EndsWith("ArmKeywordTips.With",
                                          System.StringComparison.Ordinal)));
     }
 
-    // --- `EB-573`: WHAT THE MERGE KEEPS BESIDES THE MINE --------------------
-
-    [Fact]
-    public void EB573_the_merge_row_says_riders_survive_it()
-    {
-        Assert.Contains(
-            Il.Calls(Il.Method("ProtoKoCarefulArrangement",
-                               "get_ExtraHoverTips")),
-            c => c.Contains("ForMergeRiders"));
-        var body = Printed("ForMergeRiders");
-        Assert.Contains("The merged [gold]Bomb[/gold] keeps every rider its "
-                      + "charges carried, and their riders add up.", body);
-    }
+    // --- `EB-573`: THE RIDER A PILE CARRIES -----------------------------
+    //
+    // The card-side sentence ("Riders survive the merge") left with the merge
+    // (the Klee upper pass, 2026-10-11): Exquisite Compound moves each Bomb
+    // as itself, so a rider travels on its own charge. The badge half stays.
 
     [Fact]
     public void EB573_the_badge_counts_the_rider_it_is_carrying()
@@ -458,7 +452,7 @@ public class ArmKeywordTipTests
         var rider = ProtoBombs.Place(enemy, klee.Creature,
                                      new ProtoBombs.Charge(8, PayloadMineAll: 3),
                                      new ProtoBombs.Charge(5, PayloadMineAll: 2));
-        // THE SUM, which is what `MergeAllTo` builds and `Explode` pays out.
+        // THE SUM over the pile's charges, which is what `Explode` pays out.
         Assert.Equal(5, rider.PayloadTotal);
         Assert.Contains("Rider", LocKeyOf(rider));
         ProtoBombPower.Register.Rebase(null);

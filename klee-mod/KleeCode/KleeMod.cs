@@ -223,6 +223,9 @@ public static class KleeMod
                     Powers.KleeExpansion.SetOffPromptText,
                 [Powers.KleeExpansion.CompanionPromptKey] =
                     Powers.KleeExpansion.CompanionPromptText,
+                // The Klee upper pass (2026-10-11): Adventure Club's grid.
+                [Powers.KleeExpansion.ChooseCompanionsPromptKey] =
+                    Powers.KleeExpansion.ChooseCompanionsPromptText,
                 // FURINA, THE POOL TO 75 (2026-10-09): Casting Call's draw
                 // pile pick and Final Bow's guest pick, on the same terms.
                 [Powers.FurinaCards.TutorPromptKey] =
@@ -426,11 +429,6 @@ public static class KleeMod
                     // field is accepted, charged for, and silent.
                     [Cards.ArmKeywordTips.EmptyFieldKey + ".title"] =
                         "No Bomb on the field",
-                    // `EB-573`. The fifth rider here that titles no keyword:
-                    // what a merge keeps besides the Mine, on the card that
-                    // does the merging.
-                    [Cards.ArmKeywordTips.MergeRidersKey + ".title"] =
-                        "Riders survive the merge",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
                     // `EB-643` (R265): the pool pass's one new word, and it is

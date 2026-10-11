@@ -82,7 +82,7 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 #: not: it went live in both engines with the round-11 pass and never reached
 #: this tuple, so the parity test that walks it never asked about it.
 OVERHAUL_OPS = frozenset((
-    "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+    "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
     # The Klee scaling pass's Witch's Homework (klee-next, 2026-10-05).
     "plant_homework_bomb",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
@@ -103,7 +103,7 @@ OVERHAUL_OPS = frozenset((
     #: Play!), random Companion cards made free this turn (Tag Along,
     #: Adventure Club) and Alice's Detonator's install.
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
-    "add_random_companion", "grant_alices_mine_each_turn",
+    "choose_companion", "grant_alices_mine_each_turn",
     #: THE STATUS PACKAGE's two (2026-10-01): every status in hand becomes a
     #: Pop! (Klee Can Explain!), and every status in hand is exhausted to grow
     #: the largest Bomb (Albedo -- Dust of Purification).
@@ -1224,37 +1224,32 @@ def block_absorbed(state: CombatState, enemy: Enemy, blocked: int,
 # THE CARD VERBS THAT ARE NOT A SET OFF
 # ---------------------------------------------------------------------------
 
-def merge_all_to(state: CombatState, dest: Optional[Enemy],
-                 growth: int) -> None:
-    """Careful Arrangement: move ALL your Bombs onto one enemy AS ONE Bomb,
-    which then grows by `growth`. `MergeAllTo`'s twin.
+def gather_all_to(state: CombatState, dest: Optional[Enemy],
+                  growth: int) -> None:
+    """Exquisite Compound: "Move all your Bombs onto the enemy. Each grows by
+    4 [6]." `GatherAllTo`'s twin.
 
-    TWO THINGS THE CARD TEXT DOES NOT SAY, and both are the mod's reported
-    defaults taken unchanged: the merged Bomb is a MINE if any merged charge
-    was one (merging must not silently delete the defence the player set up),
-    and it carries the payloads of every merged charge, summed. A merge is a
-    move, and a move loses nothing.
+    THE KLEE UPPER PASS (2026-10-11, `review/active/klee-upper-pass-2026-10-11.md`
+    pick 2 (a)) dropped the old merge: every Bomb that goes off pays a Spark,
+    so folding three into one threw two away. Each charge now lands on `dest`
+    as ITSELF -- a Mine stays a Mine, its payload rides with it -- and grows by
+    `growth`. The ones already on `dest` are hers too, so they grow as well.
 
     THE SOURCES ARE THE LIVING BOARD (`HittableEnemies`), so a corpse's pile is
     not gathered -- the sweep is what moves that one, and it moves it whole.
     """
     if dest is None or not live(state):
         return
-    size = 0
-    is_mine = False
-    payload = 0
-    merged = 0
+    moved: list[KleeCharge] = []
     for enemy in list(state.living_enemies):
-        for charge in take_all(enemy):
-            size += charge.size
-            is_mine |= charge.is_mine
-            payload += charge.payload_mine_all
-            merged += 1
-    if size == 0:
+        moved.extend(take_all(enemy))
+    if not moved:
         return
-    state.emit("ko_bombs_merged", to=dest.name, charges=merged, size=size,
+    state.emit("ko_bombs_gathered", to=dest.name, charges=len(moved),
                growth=growth)
-    place(state, dest, size + growth, is_mine, payload)
+    for charge in moved:
+        place(state, dest, charge.size + growth, charge.is_mine,
+              charge.payload_mine_all)
 
 
 def remove_largest_for_block(state: CombatState) -> int:
@@ -1852,10 +1847,19 @@ def random_companion_pool(state: CombatState) -> list[Card]:
                   key=lambda c: c.id)
 
 
-def add_random_companions(state: CombatState, amount: int) -> int:
-    """Tag Along and Adventure Club: `amount` random Companion cards into the
-    hand, free this turn. `KleeExpansion.AddRandomCompanions`'s twin.
-    Returns how many arrived."""
+#: The sim pilot's keep order for `choose_companions`: the rarest first.
+_COMPANION_KEEP_RANK = {"rare": 0, "uncommon": 1, "common": 2}
+
+
+def choose_companions(state: CombatState, amount: int, options: int) -> int:
+    """Tag Along (choose 1 of 3) and Adventure Club (choose 2 of 4): `options`
+    DISTINCT Companion cards off `random_companion_pool`, keep `amount`, each
+    free this turn. `KleeExpansion.ChooseCompanions`'s twin (the Klee upper
+    pass, 2026-10-11; they were random adds).
+
+    THE PICK IS THE PILOT'S, and this engine has no screen: it keeps the
+    rarest offered first, ties in offer order -- a fixed rule, so a replay
+    keeps what it kept. Returns how many arrived."""
     if not live(state) or amount <= 0:
         return 0
     import copy                                     # stdlib, local by habit
@@ -1863,15 +1867,18 @@ def add_random_companions(state: CombatState, amount: int) -> int:
     pool = random_companion_pool(state)
     if not pool:
         return 0
+    offered = state.rng.sample(pool, min(int(options), len(pool)))
+    state.emit("ko_companions_offered", cards=[c.id for c in offered])
+    ranked = sorted(offered,
+                    key=lambda c: _COMPANION_KEEP_RANK.get(c.rarity, 3))
     arrived = 0
-    for _ in range(int(amount)):
+    for pick in ranked[:int(amount)]:
         if len(state.player.hand) >= C.MAX_HAND_SIZE:
             break
-        pick = state.rng.choice(pool)
         card = copy.deepcopy(pick)
         card.free_this_turn = True
         state.player.hand.append(card)
-        state.emit("ko_random_companion", card=card.id)
+        state.emit("ko_companion_chosen", card=card.id)
         arrived += 1
     return arrived
 

@@ -860,13 +860,12 @@ def test_the_payload_pays_from_inside_a_stacked_pile(overhaul):
     assert klee_overhaul.mine_count(b) == 1
 
 
-def test_a_merge_carries_every_payload_it_moved(overhaul):
-    """`A_merge_carries_every_payload_it_moved`, `EB-395`'s other suspect.
+def test_a_gather_carries_every_payload_it_moved(overhaul):
+    """`EB-395`'s other suspect, since the Klee upper pass (2026-10-11).
 
-    Careful Arrangement moves every Bomb onto one enemy AS ONE Bomb, and a
-    merge is a MOVE: the merged charge is a Mine if any part of it was and it
-    carries the summed payload, so a card whose face only says it moves Bombs
-    cannot delete a rider. Read here as the rider PAYING after the merge,
+    Exquisite Compound moves every Bomb onto one enemy, each AS ITSELF: a
+    charge's payload rides with it, so a card whose face only says it moves
+    Bombs cannot delete a rider. Read here as the rider PAYING after the move,
     rather than as the field surviving it.
     """
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
@@ -874,10 +873,10 @@ def test_a_merge_carries_every_payload_it_moved(overhaul):
     klee_overhaul.place(state, a, 8, payload_mine_all=3)   # Jumpy Dumpty
     klee_overhaul.place(state, b, 5)                       # Pop!, elsewhere
 
-    klee_overhaul.merge_all_to(state, b, growth=5)
+    klee_overhaul.gather_all_to(state, b, growth=4)
 
-    assert sizes(a) == [] and sizes(b) == [8 + 5 + 5]
-    assert b.ko_charges[0].payload_mine_all == 3
+    assert sizes(a) == [] and sorted(sizes(b)) == [5 + 4, 8 + 4]
+    assert sorted(c.payload_mine_all for c in b.ko_charges) == [0, 3]
 
     klee_overhaul.set_off(state, b)
 
@@ -1251,72 +1250,50 @@ def test_a_mine_peeks_the_multiplier_without_spending_it(overhaul):
 # THE CARD VERBS THAT ARE NOT A SET OFF
 # ---------------------------------------------------------------------------
 
-def test_careful_arrangement_merges_the_board_into_one_bomb(overhaul):
-    """`MergeAllTo`, and its TWO REPORTED DEFAULTS the card text does not
-    state: the merged Bomb is a MINE if any merged charge was one, and it
-    carries the payloads of every merged charge, summed. A merge is a move, and
-    a move loses nothing."""
+def test_exquisite_compound_gathers_the_board_and_grows_each_bomb(overhaul):
+    """`GatherAllTo` (the Klee upper pass, 2026-10-11, pick 2 (a)): "Move all
+    your Bombs onto the enemy. Each grows by 4 [6]." No merge: every charge
+    lands as itself, so three Bombs are still three Sparks when they go off.
+    The ones already on the aimed enemy grow too; a Mine stays a Mine and a
+    plain Bomb stays plain; a payload rides with its own charge."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 5, is_mine=True)
     klee_overhaul.place(state, a, 6)
     klee_overhaul.place(state, b, 7, payload_mine_all=3)
 
-    klee_overhaul.merge_all_to(state, b, growth=2)
+    klee_overhaul.gather_all_to(state, b, growth=4)
 
     assert a.ko_charges == []
-    assert sizes(b) == [5 + 6 + 7 + 2]
-    assert b.ko_charges[0].is_mine is True
-    assert b.ko_charges[0].payload_mine_all == 3
+    got = sorted((c.size, c.is_mine, c.payload_mine_all) for c in b.ko_charges)
+    assert got == [(5 + 4, True, 0), (6 + 4, False, 0), (7 + 4, False, 3)]
 
 
-def test_eb534_the_face_says_the_merged_pile_is_still_a_mine(overhaul):
-    """`EB-534`. TWO SEATS, OPPOSITE READS, AND THE FACE SAID NEITHER.
+def test_exquisite_compound_row_plays_four_and_six_upgraded(overhaul):
+    """The sheet row through the card path: 4, and 6 upgraded, per Bomb."""
+    for cid, growth in (("proto_ko_careful_arrangement", 4),
+                        ("proto_ko_careful_arrangement+", 6)):
+        # The play binds its aim to the lowest-HP enemy: b.
+        a, b = make_enemy(hp=200, name="a"), make_enemy(hp=100, name="b")
+        state = klee_state([a, b])
+        klee_overhaul.place(state, a, 5)
+        klee_overhaul.place(state, a, 3, is_mine=True)
 
-    Klee r18 lane 1 read Careful Arrangement as PRESERVING Mine status ("the
-    body line said so"); r19 lane 1 read it as converting Mines to plain Bombs
-    and never played the card, "worse than a blank card". The face said only
-    "as one Bomb".
+        effects.resolve_card(state, load(cid))
 
-    BOTH ENGINES PRESERVE IT and always did, for the reason above this test: a
-    merge is a MOVE and a move must not silently delete the defence the player
-    set up. So r18 was right and the fix is one clause on the card. This pin is
-    the SHEET against the ENGINE, in one place, so the clause cannot outlive the
-    behaviour or the other way round.
-    """
-    from pathlib import Path
-
-    import yaml
-
-    repo = Path(__file__).resolve().parents[2]
-    sheet = yaml.safe_load((repo / "docs" / "prototype-surface.yaml")
-                           .read_text(encoding="utf-8"))
-    row = next(r for r in sheet if r["id"] == "proto_ko_careful_arrangement")
-    assert "is a [gold]Mine[/gold] if any of them were" in row["description"]
-
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 4, is_mine=True)
-    klee_overhaul.place(state, b, 6)
-
-    klee_overhaul.merge_all_to(state, b, growth=5)
-
-    assert sizes(b) == [4 + 6 + 5]
-    assert b.ko_charges[0].is_mine is True, "the face's clause, played"
+        assert a.ko_charges == []
+        assert sorted((c.size, c.is_mine) for c in b.ko_charges) == [
+            (3 + growth, True), (5 + growth, False)]
 
 
-def test_eb534_a_merge_of_plain_bombs_stays_plain(overhaul):
-    """The other half of the clause, and the reason it reads "if any of them
-    was" rather than "a Mine": a board with no Mine on it merges into a plain
-    Bomb, so the card does not hand out a defence the player never placed."""
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 4)
-    klee_overhaul.place(state, b, 6)
+def test_exquisite_compound_on_a_bare_board_places_nothing(overhaul):
+    """Nothing to move is nothing placed -- never a Bomb 4."""
+    a = make_enemy(hp=200, name="a")
+    state = klee_state([a])
 
-    klee_overhaul.merge_all_to(state, b, growth=5)
+    klee_overhaul.gather_all_to(state, a, growth=4)
 
-    assert b.ko_charges[0].is_mine is False
+    assert a.ko_charges == []
 
 
 def test_chain_fuse_grows_one_enemys_pile_only(overhaul):
@@ -2196,12 +2173,13 @@ def test_treasures_copies_the_largest_bomb_onto_every_living_enemy(overhaul):
     assert sizes(dead) == []
 
 
-def test_treasures_is_a_two_cost_exhaust_that_retains_upgraded(overhaul):
-    """The row since the sweep: 2 Energy, Exhaust kept, Retain on upgrade."""
+def test_treasures_is_a_two_cost_exhaust_that_costs_one_upgraded(overhaul):
+    """The row since the Klee upper pass (2026-10-11): 2 [1] Energy, Exhaust
+    kept; the upgrade lowers the cost instead of adding Retain."""
     card, up = (load("proto_ko_all_of_my_treasures"),
                 load("proto_ko_all_of_my_treasures+"))
     assert card.cost == 2 and card.exhaust and not card.retain
-    assert up.cost == 2 and up.exhaust and up.retain
+    assert up.cost == 1 and up.exhaust and not up.retain
 
 
 def test_treasures_copies_a_mine_as_a_plain_bomb(overhaul):

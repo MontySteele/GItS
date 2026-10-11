@@ -159,7 +159,7 @@ def _proto_grow(effects: list[dict]) -> dict | None:
     return next((fx for fx in effects
                  if (fx.get("op") == "grow_bombs"
                      and isinstance(fx.get("amount"), int))
-                 or (fx.get("op") == "merge_bombs"
+                 or (fx.get("op") == "gather_bombs"
                      and isinstance(fx.get("growth"), int))
                  or (fx.get("op") == "grow_largest_bomb"
                      and isinstance(fx.get("per_spark"), int))), None)
@@ -855,7 +855,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                  if fx.get("op") == "block_largest_bomb"),
                 "cap", val)
         elif key == "grow":
-            # One key, three ops: `grow_bombs.amount`, `merge_bombs.growth`
+            # One key, three ops: `grow_bombs.amount`, `gather_bombs.growth`
             # and `grow_largest_bomb.per_spark` are all "how much the Bombs
             # grow", and a row carries at most one of them. The third is a
             # RATE rather than a flat amount and still takes this key, for
@@ -865,7 +865,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if fx.get("op") == "grow_bombs"), "amount", val)
             if not ok:
                 ok = _bump_first((fx for fx in top
-                                  if fx.get("op") == "merge_bombs"),
+                                  if fx.get("op") == "gather_bombs"),
                                  "growth", val)
             if not ok:
                 ok = _bump_first((fx for fx in top
@@ -898,6 +898,15 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if fx.get("op") == "spend_spark"
                               and isinstance(fx.get("amount"), int)),
                              "amount", val)
+            # A PRICE CUT TO NOTHING IS NO PRICE (Blazing Delight, the Klee
+            # upper pass 2026-10-11: 1 [0] Spark). `spend_spark` refuses an
+            # amount of 0, and the mod's gate reads 0 as free
+            # (`gen_klee_cards`, `spark_can_be_free`), so the op leaves.
+            if ok:
+                top[:] = [fx for fx in top
+                          if not (fx.get("op") == "spend_spark"
+                                  and isinstance(fx.get("amount"), int)
+                                  and fx["amount"] <= 0)]
         elif key == "mend":
             ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
                              "amount", val)

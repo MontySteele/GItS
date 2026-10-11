@@ -78,7 +78,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Confiscated with Exhaust?"): Fish Blasting 9 [12] to ALL and a Dazed,
   Lisa's Treats one Confiscated, Confiscated Exhausts; Tinder Toss 5 [8] to
   ALL; Alice's Detonator adds Alice's Mine (0, Ethereal, Exhaust, a Mine
-  10 [15]) each turn, Sentry Mode's shape. Next: suite 5; if it passes, the promotion PR and
+  10 [15]) each turn, Sentry Mode's shape. The Uncommons and Rares pass
+  (`review/active/klee-upper-pass-2026-10-11.md`, all defaults): ten
+  numbers, Exquisite Compound moves each Bomb (no merge), Tag Along and
+  Adventure Club choose 1 of 3 and 2 of 4. Next: suite 5; if it passes, the promotion PR and
   [USER]'s run on that build (design review pick 5).
 - **Kokomi: Prototype.** Brief `review/active/kokomi-brief-2026-09-01.md`
   (sec.2, the rules). A card with a Plan line can be played on the

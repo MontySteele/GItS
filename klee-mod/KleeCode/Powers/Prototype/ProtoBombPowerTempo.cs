@@ -36,10 +36,16 @@ public sealed partial class ProtoBombPower
         /// in full (the Klee Commons pass, 2026-10-11: it was half).</summary>
         Largest,
 
-        /// <summary>Taste Test: "damage equal to all your Bombs on the
-        /// enemy" -- every one of her charges on the aimed body, Mines
-        /// included (<see cref="TotalPlacedBy"/>).</summary>
+        /// <summary>"Damage equal to all your Bombs on the enemy" -- every
+        /// one of her charges on the aimed body, Mines included
+        /// (<see cref="TotalPlacedBy"/>). Taste Test's read until the Klee
+        /// upper pass (2026-10-11) doubled it.</summary>
         TargetTotal,
+
+        /// <summary>Taste Test since the Klee upper pass (2026-10-11):
+        /// "twice the sum of your Bombs on the enemy" --
+        /// <see cref="TargetTotal"/>'s read, doubled.</summary>
+        TargetTotalDouble,
     }
 
     /// <summary>The number the hit is dealt for, before the Attack's own
@@ -51,6 +57,7 @@ public sealed partial class ProtoBombPower
         {
             BombRead.Largest => LargestSizeFor(applier),
             BombRead.TargetTotal => TotalPlacedBy(target, applier),
+            BombRead.TargetTotalDouble => 2 * TotalPlacedBy(target, applier),
             _ => 0,
         };
         return baseDamage + bombs;

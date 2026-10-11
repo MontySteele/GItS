@@ -31,19 +31,6 @@ namespace KleeMod.Powers;
 public static class KleeScalingPass
 {
     /// <summary>
-    /// Every Witch's Homework card these two marks name, once each. A merge
-    /// (Exquisite Compound) carries ALL the marks it swallowed, so two
-    /// Homework Bombs merged into one still grow both cards.
-    /// </summary>
-    public static CardModel[]? MergeMarks(CardModel[]? into, CardModel[]? more)
-    {
-        if (more == null || more.Length == 0) return into;
-        if (into == null || into.Length == 0) return more;
-        return into.Concat(more).Distinct(ReferenceEqualityComparer.Instance)
-                   .Cast<CardModel>().ToArray();
-    }
-
-    /// <summary>
     /// Witch's Homework's play: one Bomb of the card's printed (grown) size on
     /// <paramref name="target"/>, marked with the card. The Dodoco Charm
     /// still applies -- it is a placement.

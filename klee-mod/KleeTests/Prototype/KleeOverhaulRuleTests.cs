@@ -414,23 +414,24 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void A_merge_carries_every_payload_it_moved()
+    public void A_gather_carries_every_payload_it_moved()
     {
-        // `EB-395`'s other named suspect: Careful Arrangement moves every Bomb
-        // onto one enemy AS ONE Bomb, and a merge is a MOVE, so it loses
-        // nothing -- the merged charge is a Mine if any part of it was, and it
-        // carries the summed payload. Read off `MergeAllTo`'s own loop, which
-        // is the only place in the arm that folds charges together.
-        var il = Il.Calls(Method("MergeAllTo"));
+        // `EB-395`'s other named suspect: Exquisite Compound moves every Bomb
+        // onto one enemy, and since the Klee upper pass (2026-10-11) each one
+        // AS ITSELF -- a move loses nothing, so each charge keeps its Mine
+        // flag, its payload and its Homework mark, and grows by the card's
+        // number. Read off `GatherAllTo`'s own loop.
+        var il = Il.Calls(Method("GatherAllTo"));
 
         Assert.Contains("ProtoBombPower.Place", il);
         Assert.Contains("ProtoBombPower.TakeAll", il);
-        // The three fields the fold must READ, off the compiled method that
-        // folds them. A getter missing here is a rider deleted by a card whose
-        // face says it only moves Bombs.
+        // The fields each landing must READ, off the compiled method. A getter
+        // missing here is a rider deleted by a card whose face says it only
+        // moves Bombs.
         Assert.Contains(il, c => c.Contains("get_PayloadMineAll"));
         Assert.Contains(il, c => c.Contains("get_IsMine"));
         Assert.Contains(il, c => c.Contains("get_Size"));
+        Assert.Contains(il, c => c.Contains("get_Homework"));
     }
 
     // ---- RULE 7: the two per-turn counters -------------------------------

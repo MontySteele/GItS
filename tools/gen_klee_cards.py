@@ -490,7 +490,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # verbs, every one with a verified call site on
                   # `ProtoBombPower`, `KleeOverhaulLedger` or
                   # `CompanionHexerei`; the whitelist stays honest.
-                  "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                  "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
                   # THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's
                   # Homework's marked Bomb, `KleeScalingPass.PlaceHomework`.
                   "plant_homework_bomb",
@@ -544,7 +544,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # random Companion card made free this turn (Tag Along,
                   # Adventure Club), and Alice's Detonator's install.
                   "grow_largest", "multiply_largest_bomb",
-                  "fetch_from_discard", "add_random_companion",
+                  "fetch_from_discard", "choose_companion",
                   "grant_alices_mine_each_turn",
                   # THE KLEE STATUS PACKAGE (2026-10-01): two single calls
                   # into `KleeStatusPackage` -- every status in hand becomes
@@ -1301,7 +1301,7 @@ def arm_keyword_tip_calls(description: str,
 #: `EB-575`. The ops that resolve ONLY through a Bomb on the field. A row made
 #: of nothing but these (plus its own price) does nothing whatever on a bare
 #: board; a row with anything else still does that other thing.
-BOMB_ONLY_OPS = frozenset({"set_off", "merge_bombs", "grow_bombs",
+BOMB_ONLY_OPS = frozenset({"set_off", "gather_bombs", "grow_bombs",
                            "multiply_set_off", "mine_bombs"})
 #: A PRICE IS NOT A LINE. `spend_spark` is what the card costs, not what it
 #: does, so a Spark-priced Set off with nothing else is still a blank -- and
@@ -1310,23 +1310,12 @@ BOMB_PRICE_OPS = frozenset({"spend_spark", "spend_charge"})
 
 
 def reads_the_field(card: dict) -> bool:
-    """Does this row set off or merge Bombs? (`EB-575`.)
+    """Does this row set off or gather Bombs? (`EB-575`.)
 
     Through `iter_effects`, the repo's one walk, so a `set_off` inside a
     conditional or a mode body counts exactly as a top-level one does.
     """
-    return any(fx.get("op") in ("set_off", "merge_bombs", "mine_bombs")
-               for fx in iter_effects(card.get("effects") or []))
-
-
-def merges_bombs(card: dict) -> bool:
-    """Does this row merge Bombs into one? (`EB-573`.)
-
-    `reads_the_field`'s narrower sibling, and derived for its reason: the merge
-    is what keeps the riders, so a second merge row carries the sentence the
-    day its row exists rather than the day somebody remembers it.
-    """
-    return any(fx.get("op") == "merge_bombs"
+    return any(fx.get("op") in ("set_off", "gather_bombs", "mine_bombs")
                for fx in iter_effects(card.get("effects") or []))
 
 
@@ -2405,7 +2394,7 @@ GROW_BOMBS_FIELDS = {"op", "target", "amount"}
 #: Stoke the Fuse. NO `target`: "your largest Bomb" is board-wide, the same
 #: scope `block_largest_bomb` reads, so the row aims at nobody.
 GROW_LARGEST_BOMB_FIELDS = {"op", "per_spark"}
-MERGE_BOMBS_FIELDS = {"op", "target", "growth"}
+GATHER_BOMBS_FIELDS = {"op", "target", "growth"}
 #: THE POOL PASS's two (`EB-491`), same discipline.
 #: All of My Treasures! aims (the copy lands where the player says) and carries
 #: no number: the size is the board's own largest charge, which is what "equal
@@ -2448,7 +2437,7 @@ LOSE_STRENGTH_TARGETS = ("all_enemies", "enemy")
 FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
 FETCH_FROM_DISCARD_FILTERS = {"set_off", "companion"}
 #: Tag Along and Adventure Club: `amount` random Companion cards, free this turn.
-ADD_RANDOM_COMPANION_FIELDS = {"op", "amount"}
+CHOOSE_COMPANION_FIELDS = {"op", "amount", "options"}
 #: VARKA's two verbs (the Oath rework). `add_knight` aims at nobody, and
 #: whether the player CHOOSES the Knight is the card's upgrade
 #: (`choose_knight`), read at play time off `IsUpgraded` the way Alice's
@@ -4224,7 +4213,7 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # wherever it sits, so a card whose ONLY aimed op is one of
               # these would otherwise emit `TargetType.Self` and throw on
               # every play.
-              "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+              "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
               # The Klee scaling pass's Witch's Homework (klee-next).
               "plant_homework_bomb",
               # R276's Hair Trigger: "Your Bombs on this enemy".
@@ -5071,15 +5060,15 @@ def blocked_reason(
                 return f"grow_bombs target '{eff.get('target')}'"
             if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
                 return "grow_bombs amount must be a positive literal int"
-        if op == "merge_bombs":
-            unknown = set(eff) - MERGE_BOMBS_FIELDS
+        if op == "gather_bombs":
+            unknown = set(eff) - GATHER_BOMBS_FIELDS
             if unknown:
-                return f"merge_bombs field(s) {sorted(unknown)} not understood"
+                return f"gather_bombs field(s) {sorted(unknown)} not understood"
             if eff.get("target") != "enemy":
-                return f"merge_bombs target '{eff.get('target')}'"
+                return f"gather_bombs target '{eff.get('target')}'"
             growth = eff.get("growth", 0)
             if not isinstance(growth, int) or growth < 0:
-                return "merge_bombs growth must be a literal int >= 0"
+                return "gather_bombs growth must be a literal int >= 0"
         if op == "mine_bombs":
             # R276's Hair Trigger: every Bomb on the aimed enemy becomes a
             # Mine at its own size. The aimed spelling is the only one.
@@ -5218,13 +5207,16 @@ def blocked_reason(
             unknown = set(eff) - ADD_KNIGHT_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
-        if op == "add_random_companion":
-            unknown = set(eff) - ADD_RANDOM_COMPANION_FIELDS
+        if op == "choose_companion":
+            unknown = set(eff) - CHOOSE_COMPANION_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
-            amount = eff.get("amount")
-            if not isinstance(amount, int) or isinstance(amount, bool)                     or amount <= 0:
-                return "add_random_companion amount must be a positive literal int"
+            for key in ("amount", "options"):
+                n = eff.get(key)
+                if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
+                    return f"choose_companion {key} must be a positive literal int"
+            if eff["amount"] > eff["options"]:
+                return "choose_companion keeps more than it offers"
         if op == "grant_alices_mine_each_turn":
             unknown = set(eff) - GRANT_ALICES_MINE_EACH_TURN_FIELDS
             if unknown:
@@ -9237,7 +9229,9 @@ def damage_var_effect(card: dict) -> dict | None:
 #: `damage_from_bombs`'s two reads, and the C# enum member each one names
 #: (`ProtoBombPower.BombRead`). Sim twin: `effects._op_damage_from_bombs`.
 DAMAGE_FROM_BOMBS_READS = {"largest": "Largest",
-                           "target_total": "TargetTotal"}
+                           "target_total": "TargetTotal",
+                           # Klee upper pass, 2026-10-11 (Taste Test).
+                           "target_total_double": "TargetTotalDouble"}
 
 
 def bomb_read_damage_var_effect(card: dict) -> dict | None:
@@ -9736,7 +9730,7 @@ def payload_mine_upgrade(card: dict) -> int:
 
 
 def grow_upgrade(card: dict) -> int:
-    """`grow: +N` -- a printed grow amount (`grow_bombs`, `merge_bombs`)."""
+    """`grow: +N` -- a printed grow amount (`grow_bombs`, `gather_bombs`)."""
     return int(upgrade_plan(card)[0].get("grow", 0))
 
 
@@ -10004,7 +9998,7 @@ def grow_var_effect(card: dict) -> dict | None:
     ops."""
     return next((fx for fx in card.get("effects", [])
                  if (fx.get("op") == "grow_bombs" and "amount" in fx)
-                 or (fx.get("op") == "merge_bombs" and "growth" in fx)
+                 or (fx.get("op") == "gather_bombs" and "growth" in fx)
                  or (fx.get("op") == "grow_largest_bomb"
                      and "per_spark" in fx)
                  # R276: One More Charge's flat growth.
@@ -10017,7 +10011,7 @@ def grow_var_effect(card: dict) -> dict | None:
 
 
 #: Which field each of the four grow ops prints its number in.
-GROW_FIELD = {"grow_bombs": "amount", "merge_bombs": "growth",
+GROW_FIELD = {"grow_bombs": "amount", "gather_bombs": "growth",
               "grow_largest_bomb": "per_spark",
               # R276 (One More Charge, Treasure Map): a FLAT growth of the
               # largest Bomb.
@@ -10362,7 +10356,14 @@ def _emit_branch_op(
         # mod while the sim gave 3, and the card face printed 2 either way.
         # It shipped that way. Reading the var is what makes the declared
         # upgrade real; the description half is fixed alongside it.
-        amount = ('DynamicVars["Energy"].IntValue' if energy_upgrade(card)
+        # The delta bumps the FIRST `energy` op only (tier0 `apply_upgrade`
+        # key 'energy', `_bump_first`), so a branch gain reads the var only
+        # when no top-level gain owns it. Sparkling Burst (2026-10-11): "Gain
+        # 1 [2] Energy. If a Bomb went off this turn, gain 1 more" -- the
+        # branch's 1 stays 1.
+        owns_var = energy_upgrade(card) and not any(
+            fx.get("op") == "energy" for fx in card.get("effects", []))
+        amount = ('DynamicVars["Energy"].IntValue' if owns_var
                   else int(eff["amount"]))
         lines.append(f"await PlayerCmd.GainEnergy({amount}, Owner);")
     elif op == "place_bomb":
@@ -11614,10 +11615,10 @@ def build_body(
             lines.append(
                 "ProtoBombPower.MineAllOn(cardPlay.Target, Owner.Creature);")
 
-        elif op == "merge_bombs":
+        elif op == "gather_bombs":
             _target_guard(lines, ctx)
             lines.append(
-                "await ProtoBombPower.MergeAllTo(choiceContext, "
+                "await ProtoBombPower.GatherAllTo(choiceContext, "
                 f'cardPlay.Target, Owner.Creature, {grow_expr(card, eff)}, '
                 "this);")
 
@@ -11830,12 +11831,12 @@ def build_body(
                 "await VarkaRules.AddKnight(choiceContext, Owner, "
                 "IsUpgraded);")
 
-        elif op == "add_random_companion":
-            # Tag Along and Adventure Club: random Companion cards, free this
-            # turn.
+        elif op == "choose_companion":
+            # Tag Along and Adventure Club (the Klee upper pass, 2026-10-11):
+            # choose `amount` of `options` Companion cards, free this turn.
             lines.append(
-                "await KleeExpansion.AddRandomCompanions(choiceContext, "
-                f"Owner, {int(eff['amount'])});")
+                "await KleeExpansion.ChooseCompanions(choiceContext, "
+                f"Owner, {int(eff['amount'])}, {int(eff['options'])});")
 
         elif op == "plant_homework_bomb":
             # THE KLEE SCALING PASS (klee-next): Witch's Homework's marked
@@ -14941,7 +14942,7 @@ def build_upgrade(card: dict) -> list[str]:
                # unambiguous per card and the two grammars read alike.
                "discard": "discard",
                # EB-283, the prototype arms' own printed numbers.
-               "grow_bombs": "grow", "merge_bombs": "grow",
+               "grow_bombs": "grow", "gather_bombs": "grow",
                # The round-11 pool pass. A RATE, on the one key that names a
                # printed grow number -- see `grow_var_effect`.
                "grow_largest_bomb": "grow",
@@ -14961,7 +14962,7 @@ def build_upgrade(card: dict) -> list[str]:
                "lose_strength": "strength_loss"}
     var_for = {"block": "DynamicVars.Block", "draw": "DynamicVars.Cards", "gain_spark": 'DynamicVars["Sparks"]',
                "grow_bombs": 'DynamicVars["Grow"]',
-               "merge_bombs": 'DynamicVars["Grow"]',
+               "gather_bombs": 'DynamicVars["Grow"]',
                "grow_largest_bomb": 'DynamicVars["Grow"]',
                "grow_largest": 'DynamicVars["Grow"]',
                "exhaust_statuses_grow_largest": 'DynamicVars["Grow"]',
@@ -16759,17 +16760,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForEmptyField("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this, {own_line})")
-        # `EB-573`. WHAT THE MERGE KEEPS BESIDES THE MINE. Careful
-        # Arrangement's face promises "a Mine if any of them was" and says
-        # nothing about riders, while `ProtoBombPower.MergeAllTo` sums
-        # `PayloadMineAll` across every charge it takes -- so Jumpy Dumpty's
-        # Mine-on-ALL survives the merge and grows in bulk. The r21 lane-1 seat
-        # called it a large part of the kit's ceiling and "completely
-        # undiscoverable except by accident".
-        if merges_bombs(card):
-            tips_expr = (
-                "ArmKeywordTips.ForMergeRiders("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # (`EB-573`'s merge-riders rider left with the merge, the Klee
+        # upper pass 2026-10-11: Exquisite Compound moves each Bomb as
+        # itself, so every rider travels the way a jump carries it.)
         # (The Stage readers' "What this number is" rider left on
         # 2026-09-25: Let the People Rejoice, its last row, deals twice its
         # Fanfare and says so on its face.)
@@ -17047,6 +17040,22 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             and price_effs[0].get("amount") != SPEND_ALL
             and upgrade_plan(card)[0].get("spark_price")):
         spark_price_cs = spark_price_expr(card, price_effs[0])
+    # A PRICE AN UPGRADE CUTS TO NOTHING (Blazing Delight, the Klee upper pass
+    # 2026-10-11: 1 [0] Spark). `SparkPower.CanSpend` refuses a spend of 0 --
+    # "paid 0" is not a payment (`EB-512`) -- so the gate reads 0 as free,
+    # `SparkCost.Affordable`'s own rule, and the badge draws no price
+    # (`MeterCost.Priced`). tier0 twin: `upgrades.apply_upgrade` key
+    # 'spark_price' drops a `spend_spark` it cuts to 0.
+    spark_can_be_free = (
+        len(price_effs) == 1
+        and price_effs[0].get("amount") != SPEND_ALL
+        and int(price_effs[0].get("amount", 0))
+        + int(upgrade_plan(card)[0].get("spark_price", 0)) <= 0)
+    spark_gate_expr = (
+        "(SparkCost.PriceOf(this) <= 0\n"
+        "         || SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this)))"
+        if spark_can_be_free else
+        "SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this))")
     # EB-261, THE OTHER HALF OF THE SAME GATE. A card whose whole body is a
     # damage-less `set_off` does NOTHING on a board with no Bomb on it -- it
     # pays its price and resolves to nothing, which is the play the cost line
@@ -17071,7 +17080,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "    // here (tier0 twin: combat.spark_price, sub-pick (a)).\n"
         f"    public int PrintedSparkPrice => {spark_price_cs};\n\n"
         "    protected override bool IsPlayable =>\n"
-        "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this))"
+        f"        {spark_gate_expr}"
         f"{bomb_clause};"
         if spark_price else "")
     # The same gate on a card that prints no price at all: its own IsPlayable.

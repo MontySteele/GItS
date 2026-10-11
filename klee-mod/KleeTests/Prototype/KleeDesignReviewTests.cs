@@ -113,7 +113,7 @@ public class KleeDesignReviewTests
             (new ProtoKoHidingSpot(), Upgraded<ProtoKoHidingSpot>(), "BombSize", 5m, 7m),
             (new ProtoKoJumpyDumptyMkIii(), Upgraded<ProtoKoJumpyDumptyMkIii>(), "BombSize", 4m, 5m),
             (new ProtoKoMineAllMine(), Upgraded<ProtoKoMineAllMine>(), "BombSize", 6m, 8m),
-            (new ProtoKoPartyPoppers(), Upgraded<ProtoKoPartyPoppers>(), "PowerAmount", 5m, 6m),
+            (new ProtoKoPartyPoppers(), Upgraded<ProtoKoPartyPoppers>(), "PowerAmount", 7m, 9m),
             (new ProtoKoSecretBase(), Upgraded<ProtoKoSecretBase>(), "PowerAmount", 6m, 8m),
             (new ProtoKoWindblumeFireworks(), Upgraded<ProtoKoWindblumeFireworks>(), "BombSize", 8m, 10m),
             (new ProtoKoDodoco(), Upgraded<ProtoKoDodoco>(), "PowerAmount", 5m, 7m),

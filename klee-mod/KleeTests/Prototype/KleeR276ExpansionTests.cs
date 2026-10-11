@@ -98,7 +98,7 @@ public class KleeR276ExpansionTests
         new object[] { typeof(ProtoKoMineAllMine), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoTeamEffort), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoOneMoreCharge), CardRarity.Uncommon, CardType.Skill, 1 },
-        new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 1 },
+        new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoTagAlong), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoComeBackAndPlay), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoBoomBadge), CardRarity.Common, CardType.Skill, 0 },
@@ -200,9 +200,10 @@ public class KleeR276ExpansionTests
         Assert.Contains("CardPileCmd.Draw", grow);
 
         var card = new ProtoKoOneMoreCharge();
-        // Klee balance review, pick 4a, 2026-09-25. 5 -> 8, upgrade still +3.
-        Assert.Equal(8m, card.DynamicVars["Grow"].BaseValue);
-        Assert.Equal(11m, Upgraded<ProtoKoOneMoreCharge>().DynamicVars["Grow"].BaseValue);
+        // Klee balance review, pick 4a, 2026-09-25. 5 -> 8, upgrade still +3;
+        // the Klee upper pass, 2026-10-11: 12 [15].
+        Assert.Equal(12m, card.DynamicVars["Grow"].BaseValue);
+        Assert.Equal(15m, Upgraded<ProtoKoOneMoreCharge>().DynamicVars["Grow"].BaseValue);
         Assert.Contains("If it is now 20 or more, draw 1 card.", Face(card));
     }
 
@@ -411,19 +412,48 @@ public class KleeR276ExpansionTests
         var fetch = Il.Calls(Il.Method("KleeExpansion", "FetchFromDiscard"));
         Assert.Contains("CardSelectCmd.FromSimpleGrid", fetch);
         Assert.Contains("CardPileCmd.Add", fetch);
-        Assert.Contains(Il.Calls(Il.Method("ProtoKoTreasureMap", "OnUpgrade")),
-                        c => c.Contains("EnergyCost.UpgradeBy"));
+        // The Klee upper pass (2026-10-11): costs 0; the upgrade grows the
+        // largest Bomb 6 instead of 3, in place of its old cost cut.
+        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKoTreasureMap", "OnUpgrade")),
+                              c => c.Contains("EnergyCost.UpgradeBy"));
+        Assert.Equal((3m, 6m),
+            (new ProtoKoTreasureMap().DynamicVars["Grow"].BaseValue,
+             Upgraded<ProtoKoTreasureMap>().DynamicVars["Grow"].BaseValue));
         Assert.Contains("{IfUpgraded:show: Draw 1 card.|}",
                         Face(new ProtoKoComeBackAndPlay()));
     }
 
     [Fact]
-    public void Tag_along_and_adventure_club_add_random_companions_free_this_turn()
+    public void Tag_along_and_adventure_club_choose_companions_free_this_turn()
     {
-        // STRUCTURAL: a combat-scope copy, cost 0 this turn, into the hand.
-        var add = Il.Calls(Il.Method("KleeExpansion", "AddRandomCompanions"));
-        Assert.Contains(add, c => c.Contains("SetThisTurn"));
-        Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", add);
+        // The Klee upper pass (2026-10-11, pick 3 (a)): a choice, the base
+        // game's Discovery shape. STRUCTURAL, because the screens need a
+        // running game: distinct options off the companion pool on the
+        // card-generation stream, a choose-a-card screen for one of three
+        // and a grid for two of four (the screen throws on more than three),
+        // then a combat-scope copy, cost 0 this turn, into the hand.
+        var choose = Il.Calls(Il.Method("KleeExpansion", "ChooseCompanions"));
+        Assert.Contains("KleeExpansion.RandomCompanionPool", choose);
+        Assert.Contains(choose, c => c.Contains("TakeRandom"));
+        Assert.Contains(choose, c => c.Contains("CombatCardGeneration"));
+        Assert.Contains("CardSelectCmd.FromChooseACardScreen", choose);
+        Assert.Contains("CardSelectCmd.FromSimpleGrid", choose);
+        Assert.Contains(choose, c => c.Contains("SetThisTurn"));
+        Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", choose);
+        Assert.DoesNotContain(choose, c => c.Contains("CombatTargets"));
+
+        // Each row asks for its own keep and offer: 1 of 3, 2 of 4.
+        Assert.Contains("await KleeExpansion.ChooseCompanions(choiceContext, Owner, 1, 3);",
+                        Printed("Cards/Prototype/Generated/ProtoKoTagAlong.cs"));
+        Assert.Contains("await KleeExpansion.ChooseCompanions(choiceContext, Owner, 2, 4);",
+                        Printed("Cards/Prototype/Generated/ProtoKoAdventureClub.cs"));
+        Assert.Equal("Choose 1 of 3 [gold]Companion[/gold] cards to add to your hand. "
+                     + "It costs 0 this turn.", Face(new ProtoKoTagAlong()));
+        Assert.Equal("Choose 2 of 4 [gold]Companion[/gold] cards to add to your hand. "
+                     + "They cost 0 this turn.", Face(new ProtoKoAdventureClub()));
+        // The grid's prompt is injected with the other selection prompts.
+        Assert.Equal("Choose 2 Companion cards to add to your hand.",
+                     KleeExpansion.ChooseCompanionsPromptText);
 
         Assert.Contains(CardKeyword.Exhaust, new ProtoKoTagAlong().CanonicalKeywords);
         Assert.Contains(Il.Calls(Il.Method("ProtoKoTagAlong", "OnUpgrade")),
@@ -522,7 +552,10 @@ public class KleeR276ExpansionTests
         Assert.False(KleeExpansion.CostsSparks(new ProtoKoPop()));
         Assert.Contains("KleeExpansion.CostsSparks",
                         Il.Calls(Il.Method("PartyPoppersPower", "AfterCardPlayed")));
-        Assert.Equal(6m, Upgraded<ProtoKoPartyPoppers>()
+        // The Klee upper pass (2026-10-11): 7 [9].
+        Assert.Equal(7m, new ProtoKoPartyPoppers()
+                             .DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(9m, Upgraded<ProtoKoPartyPoppers>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 

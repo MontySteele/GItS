@@ -186,10 +186,10 @@ public class ArmRelicsPotionsTests
     {
         // STRUCTURAL (a placement is a `PowerCmd.Apply`): `Place` reads the
         // bonus, and every caller passes `relocated` -- true for the two
-        // moves (a jump, a merge), false for every placement.
+        // moves (a jump, a gather), false for every placement.
         Assert.Contains("DodocoCharm.BonusFor",
                         Il.Calls(Il.Method("ProtoBombPower", "Place")));
-        foreach (var move in new[] { "JumpCharges", "MergeAllTo" })
+        foreach (var move in new[] { "JumpCharges", "GatherAllTo" })
         {
             Assert.All(PlaceFlags(move), f => Assert.True(f, move));
         }

@@ -192,8 +192,9 @@ the plan the starter teaches.
   turn.
 - **You draft:** Fish-Flavored Bait and Forbidden Fun (plain Attacks that
   keep pressure without cashing), Chain Fuse and Explosives Workshop (grow
-  faster), Exquisite Compound (pile every Bomb onto one enemy, which also
-  makes one big reacting number), Grounded and Sorry, Jean... (defence), Big
+  faster), Exquisite Compound (move every Bomb onto one enemy, each
+  growing 4 [6]; no merge since the upper pass of 2026-10-11, so each still
+  pays its Spark), Grounded and Sorry, Jean... (defence), Big
   Badda Boom and The Big One (*Set off* with a multiplier), Quick Fuse and
   Countdown (*Set off* on a Skill).
 - **The payoff moment:** the Red Knight of Stormbearer Mountains. A single
@@ -232,7 +233,8 @@ mint the Sparks for the next one. The hallway plan and the Shiv analogue.
 Explosions are Pyro, so a Bomb set off on an enemy carrying a foreign aura
 reacts: Vaporize on Hydro, Melt on Cryo, Overload splash on Electro. The
 multiplier lands on the cooked number, and since bombs go off one at a time,
-on the *first* one, which is why Exquisite Compound is a React card.
+on the *first* one, which is why Exquisite Compound (every Bomb on one
+enemy) is a React card.
 
 - **A turn looks like:** a companion applies Hydro this turn, and next turn
   she sets off the bomb for one and a half times its size. Sequencing is the
@@ -274,8 +276,8 @@ on the *first* one, which is why Exquisite Compound is a React card.
 - **Sparks → Attacks** (Tinder Toss, Common; Boom-Boom Strike, Uncommon), **→ setup and defence**
   (Dig In, Powder Charge; Blast Shield and Return to Sender, pass two),
   **→ cards** (Bottomless Bag; Once More!, a Set off card back), **→ energy**
-  (Sparkling Burst, Uncommon, 3 Sparks; Sugar Rush, Rare; Blazing Delight,
-  Rare Power, 5 Sparks). R270 lifted draft 4's "energy only at Rare" line:
+  (Sparkling Burst, Uncommon, 1 Spark; Sugar Rush, Rare; Blazing Delight,
+  Rare Power, 1 [0] Spark, the upper pass of 2026-10-11). R270 lifted draft 4's "energy only at Rare" line:
   Regent sells Energy for Stars at Uncommon, and what keeps Sparks from
   being a second energy pool is the price, three explosions per Energy.
 - **Reactions → Sparks:** Flash Point. React feeds Spray.

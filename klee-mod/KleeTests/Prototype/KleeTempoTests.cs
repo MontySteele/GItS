@@ -111,7 +111,7 @@ public class KleeTempoTests
           + "into your [gold]Discard Pile[/gold].",
             Face(new ProtoKoSimmer()));
         Assert.Equal(
-            "Deal [gold]Pyro[/gold] damage equal to all your [gold]Bombs[/gold] on "
+            "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on "
           + "the enemy. They do not go off. Add {Stash:diff()} "
           + "[gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
             Face(new ProtoKoTasteTest()));

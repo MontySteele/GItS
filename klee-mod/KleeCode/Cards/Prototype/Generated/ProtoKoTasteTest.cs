@@ -48,7 +48,7 @@ public sealed class ProtoKoTasteTest : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Taste Test"),
-        ("description", "Deal [gold]Pyro[/gold] damage equal to all your [gold]Bombs[/gold] on the enemy. They do not go off. Add {Stash:diff()} [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add {Stash:diff()} [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -67,7 +67,7 @@ public sealed class ProtoKoTasteTest : CustomCardModel, IElementalCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.DealFromBombs(choiceContext, cardPlay.Target, Owner.Creature, 0m, ProtoBombPower.BombRead.TargetTotal, this, cardPlay);
+        await ProtoBombPower.DealFromBombs(choiceContext, cardPlay.Target, Owner.Creature, 0m, ProtoBombPower.BombRead.TargetTotalDouble, this, cardPlay);
         {
             for (var i = 0; i < DynamicVars["Stash"].IntValue; i++)
             {

@@ -388,7 +388,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     public int MineCount => _charges.Count(c => c.IsMine);
 
     /// <summary>`EB-573`. The riders this pile is carrying, summed -- the same
-    /// sum <see cref="MergeAllTo"/> builds and <see cref="Explode"/> pays out,
+    /// sum <see cref="Explode"/> pays out,
     /// so the badge's number and the board's are one read.</summary>
     public int PayloadTotal => _charges.Sum(c => c.PayloadMineAll);
 
@@ -2000,17 +2000,6 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Careful Arrangement: move ALL of this placer's Bombs onto one enemy AS
-    /// ONE Bomb, which then grows by <paramref name="growth"/>.
-    ///
-    /// TWO THINGS THE CARD TEXT DOES NOT SAY, chosen as the simplest reading
-    /// that loses nothing (and reported as defaults):
-    ///   * the merged Bomb is a MINE if any merged charge was one -- merging
-    ///     must not silently delete the defence the player set up;
-    ///   * it carries the payloads of every merged charge, summed, for the same
-    ///     reason: a merge is a move, and a move loses nothing.
-    /// </summary>
-    /// <summary>
     /// R276, HAIR TRIGGER: every charge of <paramref name="applier"/>'s on
     /// <paramref name="target"/> becomes a Mine at its own size. Pure, like
     /// <see cref="GrowOn"/>: no charge moves, merges or goes off, so the pile
@@ -2025,37 +2014,44 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         }
     }
 
-    public static async Task MergeAllTo(
+    /// <summary>
+    /// Exquisite Compound (<c>proto_ko_careful_arrangement</c>): "Move all
+    /// your Bombs onto the enemy. Each grows by 4 [6]." Every one of this
+    /// placer's charges on the living board lands on <paramref name="dest"/>
+    /// AS ITSELF and grows by <paramref name="growth"/>: a Mine stays a Mine,
+    /// its payload and its Witch's Homework mark ride with it, the way a jump
+    /// carries them. The ones already on <paramref name="dest"/> grow too.
+    ///
+    /// THE KLEE UPPER PASS (2026-10-11,
+    /// <c>review/active/klee-upper-pass-2026-10-11.md</c> pick 2 (a)) dropped
+    /// the merge: every Bomb that goes off pays a Spark, so folding three into
+    /// one threw two away. Sim twin: <c>klee_overhaul.gather_all_to</c>.
+    /// </summary>
+    public static async Task GatherAllTo(
         PlayerChoiceContext choiceContext, Creature? dest, Creature applier,
         int growth, CardModel? cardSource)
     {
         if (dest == null || applier.CombatState == null) return;
 
-        var size = 0;
-        var isMine = false;
-        var payload = 0;
-        // The scaling pass (klee-next): Witch's Homework's mark survives a
-        // merge -- every merged mark rides the one Bomb.
-        CardModel[]? homework = null;
+        // Every charge is OFF its pile before any lands, so a landing can
+        // never re-gather a charge it already moved.
+        var moved = new List<ProtoCharge>();
         foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
         {
             foreach (var pile in enemy.Powers.OfType<ProtoBombPower>().ToList())
             {
                 if (pile.Applier != applier) continue;
                 if (pile.TakeAll() is not { } charges) continue;
-                foreach (var charge in charges)
-                {
-                    size += charge.Size;
-                    isMine |= charge.IsMine;
-                    payload += charge.PayloadMineAll;
-                    homework = KleeScalingPass.MergeMarks(homework, charge.Homework);
-                }
+                moved.AddRange(charges);
                 await PowerCmd.Remove(pile);
             }
         }
-        if (size == 0) return;
-        await Place(choiceContext, dest, size + growth, isMine, payload,
-                    applier, cardSource, homework: homework, relocated: true);
+        foreach (var charge in moved)
+        {
+            await Place(choiceContext, dest, charge.Size + growth, charge.IsMine,
+                        charge.PayloadMineAll, applier, cardSource,
+                        homework: charge.Homework, relocated: true);
+        }
     }
 
     /// <summary>

@@ -136,19 +136,20 @@ def test_the_largest_bomb_is_the_largest_charge_and_the_older_on_a_tie(
     assert sizes(a) == [12, 7] and sizes(b) == [5]
 
 
-def test_one_more_charge_grows_eight_and_draws_at_twenty(overhaul):
-    # Klee balance review, pick 4a, 2026-09-25: 5 -> 8 (11 upgraded).
+def test_one_more_charge_grows_twelve_and_draws_at_twenty(overhaul):
+    # Klee balance review, pick 4a, 2026-09-25: 5 -> 8 (11 upgraded); the
+    # Klee upper pass, 2026-10-11: 12 (15 upgraded). The draw at 20 stays.
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.draw_pile = filler()
-    klee_overhaul.place(state, enemy, 10)
+    klee_overhaul.place(state, enemy, 5)
     play(state, load("proto_ko_one_more_charge"))
-    assert sizes(enemy) == [18] and len(state.player.hand) == 0
+    assert sizes(enemy) == [17] and len(state.player.hand) == 0
     play(state, load("proto_ko_one_more_charge"))
-    assert sizes(enemy) == [26] and len(state.player.hand) == 1
-    # Upgraded: grows 11.
+    assert sizes(enemy) == [29] and len(state.player.hand) == 1
+    # Upgraded: grows 15.
     play(state, load("proto_ko_one_more_charge+"))
-    assert sizes(enemy) == [37]
+    assert sizes(enemy) == [44]
 
 
 def test_one_more_charge_with_no_bomb_grows_nothing_and_draws_nothing(
@@ -335,6 +336,58 @@ def test_tag_along_and_adventure_club_add_free_companions(overhaul):
     play(state, load("proto_ko_adventure_club"))
     assert len(state.player.hand) == 3
     assert all(c.free_this_turn for c in state.player.hand)
+
+
+def _offers(state):
+    return [e["cards"] for e in state.log
+            if e.get("event") == "ko_companions_offered"]
+
+
+def test_tag_along_offers_three_distinct_companions_and_keeps_one(overhaul):
+    """The Klee upper pass (2026-10-11, pick 3 (a)): "Choose 1 of 3 Companion
+    cards to add to your hand. It costs 0 this turn." Three DISTINCT offers
+    off the same pool the random add drew from; one kept, and it is one of
+    the three."""
+    pool_ids = {c.id for c in klee_overhaul.random_companion_pool(klee_state())}
+    for seed in range(8):
+        state = klee_state()
+        state.rng.seed(seed)
+        play(state, load("proto_ko_tag_along"))
+        (offered,) = _offers(state)
+        assert len(offered) == 3 and len(set(offered)) == 3
+        assert set(offered) <= pool_ids
+        assert len(state.player.hand) == 1
+        kept = state.player.hand[0]
+        assert kept.id in offered and kept.free_this_turn
+
+
+def test_adventure_club_offers_four_distinct_companions_and_keeps_two(overhaul):
+    """"Choose 2 of 4 Companion cards ... They cost 0 this turn." Two
+    different cards, both from the four offered."""
+    for seed in range(8):
+        state = klee_state()
+        state.rng.seed(seed)
+        play(state, load("proto_ko_adventure_club"))
+        (offered,) = _offers(state)
+        assert len(offered) == 4 and len(set(offered)) == 4
+        kept = [c.id for c in state.player.hand]
+        assert len(kept) == 2 and len(set(kept)) == 2
+        assert set(kept) <= set(offered)
+        assert all(c.free_this_turn for c in state.player.hand)
+
+
+def test_the_companion_choice_keeps_the_rarest_offered(overhaul):
+    """The sim has no screen, so the pilot's keep is a fixed rule: the rarest
+    offered first, ties in offer order."""
+    rank = {"rare": 0, "uncommon": 1, "common": 2}
+    for seed in range(8):
+        state = klee_state()
+        state.rng.seed(seed)
+        play(state, load("proto_ko_adventure_club"))
+        (offered,) = _offers(state)
+        best = sorted(offered,
+                      key=lambda cid: rank[loader.peek_card(cid).rarity])[:2]
+        assert [c.id for c in state.player.hand] == best
 
 
 # ---------------------------------------------------------------------------
