@@ -186,7 +186,8 @@ def test_burns_in_hand_and_disintegration_eat_block_then_hp():
     you = _you(block=5, powers=[_power("Disintegration", 3)])
     assert line(_hit(6), you, hand, []) == (
         "- Incoming this turn: 6 (your Block 5): you would take 8 "
-        "(Disintegration and Burn x2 hit you for 7 first). "
+        "(Disintegration and Burn x2 hit you for 7 before the enemies act, and your "
+            "Block takes it). "
         "You would be at 52/80 HP.")
 
 
@@ -198,7 +199,8 @@ def test_hp_loss_cards_skip_block():
 def test_burn_with_no_attack_still_prints_the_take():
     assert line([], _you(), [BURN], []) == (
         "- Incoming this turn: no attack is shown (your Block 0): you would "
-        "take 2 (Burn hits you for 2 first). You would be at 58/80 HP.")
+        "take 2 (Burn hits you for 2 before the enemies act, and your Block "
+        "takes it). You would be at 58/80 HP.")
 
 
 def test_regret_and_intangible_are_named_not_counted():
