@@ -252,8 +252,11 @@ RAW_SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
 #: Card faces only: a Plan line never names the front enemy (the rule is the
 #: word's), and the one row allowed to is the power whose trigger is not a Plan.
 FRONT_ENEMY = re.compile(r"\bfront enemy\b")
+#: Undertide Lance: the Kokomi round 3 review (2026-10-11, change 2) names
+#: the target on its Plan line, because the line is a single big hit whose
+#: aim decides the card.
 FRONT_ENEMY_ALLOWED = {"proto_kk_the_generals_banner", "GeneralsBannerPower.description",
-                       "PlanKey"}
+                       "PlanKey", "proto_kk_undertide_lance"}
 #: `more-damage`'s two counters: "N more" there is a count growing, not a
 #: bonus on a hit, and rule 8 is about the hit.
 MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",

@@ -370,9 +370,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Instead of the line above, play the card on the "
-          + "[gold]Bake-Kurage[/gold]: it happens next turn. Click it to flip "
-          + "lines. Plans go in the order made.");
+            "Instead of the line above, play it on the "
+          + "[gold]Bake-Kurage[/gold]; click to flip. Plans happen next turn "
+          + "in order, and their [gold]Block[/gold] lasts that turn.");
 
     /// <summary>The text pass of 2026-10-08: <see cref="ForPlan"/> for a
     /// card with no line above its Plan. Attached by
@@ -381,8 +381,8 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForPlanOnly(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanOnlyKey,
-            "Play the card on the [gold]Bake-Kurage[/gold]: it happens next "
-          + "turn. Plans run in the order made.");
+            "Play the card on the [gold]Bake-Kurage[/gold]. Plans happen next "
+          + "turn in order, and their [gold]Block[/gold] lasts that turn.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about

@@ -58,7 +58,7 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(4m),
+            new ExtraDamageVar(5m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => KokomiOverhaulKit.DebuffCount(target))
         };
 
