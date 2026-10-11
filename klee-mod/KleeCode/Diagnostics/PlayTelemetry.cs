@@ -344,6 +344,7 @@ internal static class PlayTelemetry
                 record.EnemyPoolByTurn.Add(new[] { round, pool });
                 record.EnemyHpByTurn.Add(new[] { round, hp });
                 NoteFanfareTurnStart(record, creature, round);
+                NoteKokomiTurnStart(record, creature, round);
                 // REACTIONS RIDE ALONG, because the counter already exists and
                 // sampling it costs one read (the hand-back's "cheap now"
                 // condition). Measurement only: no reaction constant is
@@ -510,6 +511,30 @@ internal static class PlayTelemetry
         catch (Exception e)
         {
             Warn("NoteFanfareTurnStart", e);
+        }
+    }
+
+    /// <summary>
+    /// The Kokomi whole-run round (2026-10-10): the Casket's count as each of
+    /// her turns opens, and her overhaul ledger held for the fight's Plan
+    /// counts (<see cref="FightRecord.KokomiLedger"/>). Kokomi only: anyone
+    /// else writes no row and no key. A read; <c>Peek</c> creates no ledger
+    /// (rule 1), and a turn with none yet reads a count of 0.
+    /// </summary>
+    private static void NoteKokomiTurnStart(FightRecord record,
+                                            Creature creature, int round)
+    {
+        try
+        {
+            if (!KokomiOverhaul.LiveFor(creature)) return;
+            record.IsKokomi = true;
+            var ledger = KokomiOverhaulLedger.Peek(creature);
+            if (ledger != null) record.KokomiLedger = ledger;
+            record.CasketTurnStart.Add(new[] { round, ledger?.CasketCount ?? 0 });
+        }
+        catch (Exception e)
+        {
+            Warn("NoteKokomiTurnStart", e);
         }
     }
 
@@ -966,6 +991,7 @@ internal static class PlayTelemetry
             if (player.Creature is { } creature)
             {
                 NoteFanfareTurnStart(record, creature, round);
+                NoteKokomiTurnStart(record, creature, round);
             }
         }
     }
@@ -1540,6 +1566,14 @@ internal static class PlayTelemetry
         /// <summary>2026-10-10 (the full-run round). [round, Fanfare] as each
         /// of her turns opens (<see cref="NoteFanfareTurnStart"/>).</summary>
         public readonly List<int[]> FanfareTurnStart = new();
+        /// <summary>2026-10-10 (the Kokomi whole-run round). True for a
+        /// Kokomi seat (<see cref="NoteKokomiTurnStart"/>).</summary>
+        public bool IsKokomi;
+        /// <summary>Her overhaul ledger for this fight, held from the first
+        /// turn-start read on, so a stale-flush still reads it.</summary>
+        public KokomiOverhaulLedger? KokomiLedger;
+        /// <summary>[round, Casket count] as each of her turns opens.</summary>
+        public readonly List<int[]> CasketTurnStart = new();
         /// <summary>2026-10-10 (the whole-run round 2). [round, Spend cards
         /// in hand] as each of her turns opens, after the draw
         /// (<see cref="SpendCardsTurnStart"/>).</summary>
@@ -1701,6 +1735,17 @@ internal static class PlayTelemetry
                 // hand as each turn opened, [round, n].
                 Pairs(sb, "spend_cards_in_hand_turn_start",
                       SpendCardsTurnStart);
+            }
+            if (IsKokomi)
+            {
+                // 2026-10-10, the Kokomi whole-run round: the Casket's count
+                // as each turn opened, [round, count], and the Plans written
+                // and carried out this fight (0 when no ledger was read).
+                Pairs(sb, "casket_turn_start", CasketTurnStart);
+                sb.Append(",\"plans_written\":")
+                  .Append(KokomiLedger?.PlansWrittenThisCombat ?? 0);
+                sb.Append(",\"plans_carried_out\":")
+                  .Append(KokomiLedger?.PlansCarriedOutThisCombat ?? 0);
             }
             sb.Append(",\"turns\":").Append(Turns);
             sb.Append(',');

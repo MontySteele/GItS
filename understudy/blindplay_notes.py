@@ -989,7 +989,9 @@ REACTION_FROZEN_THAWED_CLAUSE = (" Frozen ends when the enemies' turn ends, "
 # lane 1), and no such question exists here -- a relic that answered nothing
 # answered nothing, and a page saying so on every screen of every run that
 # holds no such relic is noise.
-RELIC_ANSWERS_HEADING = "## What your relics answered with"
+#: Kokomi whole-run round 2026-10-10: "and powers", because Treatise's draw
+#: is a row here now (`TreatisePower` files it through `NoteGain`).
+RELIC_ANSWERS_HEADING = "## What your relics and powers answered with"
 RELIC_ANSWER_ROW = "- **{source}** {amount} on **{target}**."
 RELIC_ANSWER_ROW_NO_TARGET = "- **{source}** {amount}."
 #: Relics smoke seat 2026-09-27: a relic that GAVE you something (Stagehand's
@@ -1232,6 +1234,8 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
                             "on you never cuts it, before or after you write "
                             "it; a planned BLOCK is yours, so Frail does cut "
                             "it.")
+#: Kokomi whole-run round 2026-10-10. The same fact, said for Strength alone.
+PLAN_STRENGTH_NOTE = "- Strength is read when the Plan is written."
 
 # `EB-752`. THE RELIC TERM NO DAMAGE FACE CAN FOLD.
 #

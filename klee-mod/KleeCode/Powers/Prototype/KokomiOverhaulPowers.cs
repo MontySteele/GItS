@@ -55,7 +55,14 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
         {
             return;
         }
+        // Kokomi whole-run round 2026-10-10: the draw had no receipt, so a
+        // turn on which it did not fire looked the same as one on which it
+        // did. The row counts the cards that reached the hand (a full hand or
+        // empty piles draw none, and a zero files nothing).
+        var before = PileType.Hand.GetPile(player).Cards.Count;
         await CardPileCmd.Draw(choiceContext, Amount, player);
+        var drawn = PileType.Hand.GetPile(player).Cards.Count - before;
+        RelicAnswerLog.NoteGain("Treatise", drawn, drawn == 1 ? "card" : "cards");
     }
 }
 
