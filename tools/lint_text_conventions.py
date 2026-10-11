@@ -273,10 +273,6 @@ LARGEST_BOMB_ALLOWED = {
         "it has no target and places on ALL enemies, so no enemy is "
         "singled out to misread; a second 'enemy' clause in one sentence "
         "reads worse than the gap it closes"),
-    "proto_ko_simmer": (
-        "'plus the size of your largest Bomb on any enemy' takes the face to "
-        "124 of 120 with its Dazed sentence; held for a text pick (the Klee "
-        "round fixes, 2026-10-11) rather than a length exception"),
 }
 
 TAG = re.compile(r"\[/?[a-z_]+\]")
