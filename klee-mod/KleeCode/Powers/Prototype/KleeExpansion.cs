@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Extensions;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
@@ -56,6 +57,14 @@ public static class KleeExpansion
 
     public const string CompanionPromptText =
         "Choose a Companion card to put into your hand.";
+
+    /// <summary>Adventure Club's grid prompt (<see cref="ChooseCompanions"/>),
+    /// on the same terms.</summary>
+    public const string ChooseCompanionsPromptKey =
+        "KLEEMOD-CHOOSE_COMPANIONS.selectionScreenPrompt";
+
+    public const string ChooseCompanionsPromptText =
+        "Choose 2 Companion cards to add to your hand.";
 
     /// <summary>Is <paramref name="card"/> a Companion card?
     /// <c>CompanionHexerei.CountsAsCompanion</c>, the one reader. PURE.
@@ -151,30 +160,58 @@ public static class KleeExpansion
             .ToList();
 
     /// <summary>
-    /// Tag Along and Adventure Club: <paramref name="amount"/> random Companion
-    /// cards into the hand, each costing 0 this turn.
+    /// Tag Along ("Choose 1 of 3 Companion cards to add to your hand. It costs
+    /// 0 this turn.") and Adventure Club ("Choose 2 of 4 ... They cost 0 this
+    /// turn."): <paramref name="options"/> DISTINCT Companion cards off
+    /// <see cref="RandomCompanionPool"/>, the player keeps
+    /// <paramref name="amount"/> of them. The Klee upper pass (2026-10-11,
+    /// <c>review/active/klee-upper-pass-2026-10-11.md</c> pick 3 (a)); they
+    /// were random adds.
     ///
-    /// A COMBAT-SCOPE COPY (<c>CombatState.CreateCard</c>), the rule
-    /// <c>KokomiConscript.RollRecruit</c> records at length: a run-scope card
-    /// is refused by the pile it is added to. EACH ROLLS ITS OWN, so two can be
-    /// the same friend.
-    /// "Costs 0 this turn" is the base game's own temporary cost
-    /// (<c>EnergyCost.SetThisTurn</c>, the Guest Star generator's call).
+    /// THE BASE GAME'S DISCOVERY, line for line where it can be: the options
+    /// are <c>TakeRandom(count, Rng.CombatCardGeneration)</c> made as
+    /// combat-scope copies (<c>CardFactory.GetDistinctForCombat</c>'s body),
+    /// one is picked on <c>CardSelectCmd.FromChooseACardScreen</c> with
+    /// <c>canSkip: true</c>, and the pick costs 0 this turn and goes to the
+    /// hand through <c>AddGeneratedCardToCombat</c>.
+    ///
+    /// A CHOICE OF TWO FROM FOUR IS A GRID. The choose-a-card screen throws on
+    /// more than three cards and returns one (0.111.0 decompile), so more than
+    /// three options or more than one keep is <c>CardSelectCmd.FromSimpleGrid</c>
+    /// with that many to select -- <see cref="VarkaRules.AddKnight"/>'s screen.
+    /// Sim twin: <c>klee_overhaul.choose_companions</c>.
     /// </summary>
-    public static async Task AddRandomCompanions(
-        PlayerChoiceContext choiceContext, Player? owner, int amount)
+    public static async Task ChooseCompanions(
+        PlayerChoiceContext choiceContext, Player? owner, int amount,
+        int options)
     {
         var combat = owner?.Creature?.CombatState;
         if (owner == null || combat == null || amount <= 0) return;
-        var pool = RandomCompanionPool(owner);
-        if (pool.Count == 0) return;
+        var offered = RandomCompanionPool(owner)
+            .TakeRandom(options, owner.RunState.Rng.CombatCardGeneration)
+            .Select(c => combat.CreateCard(c, owner))
+            .Where(c => c != null)
+            .Cast<CardModel>()
+            .ToList();
+        if (offered.Count == 0) return;
 
-        for (var i = 0; i < amount; i++)
+        IEnumerable<CardModel> kept;
+        if (offered.Count <= 3 && amount == 1)
         {
-            var canonical = owner.RunState.Rng.CombatTargets.NextItem(pool);
-            if (canonical == null) break;
-            var card = combat.CreateCard(canonical, owner);
-            if (card == null) continue;
+            var pick = await CardSelectCmd.FromChooseACardScreen(
+                choiceContext, offered, owner, canSkip: true);
+            kept = pick == null ? Enumerable.Empty<CardModel>() : new[] { pick };
+        }
+        else
+        {
+            var keep = System.Math.Min(amount, offered.Count);
+            kept = await CardSelectCmd.FromSimpleGrid(
+                choiceContext, offered, owner,
+                new CardSelectorPrefs(
+                    new LocString(Table, ChooseCompanionsPromptKey), keep));
+        }
+        foreach (var card in kept.ToList())
+        {
             card.EnergyCost.SetThisTurn(0);
             await CardPileCmd.AddGeneratedCardToCombat(
                 card, PileType.Hand, owner);

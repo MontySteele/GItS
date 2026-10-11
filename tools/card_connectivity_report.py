@@ -383,7 +383,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # The Klee scaling pass (klee-next, 2026-10-05): Witch's Homework II.
     "plant_homework_bomb": [_hook("private", "bombs", "write")],
     "grow_bombs": [_hook("private", "bombs", "use")],
-    "merge_bombs": [_hook("private", "bombs", "use")],
+    "gather_bombs": [_hook("private", "bombs", "use")],
     "remove_bomb_for_block": [_hook("private", "bombs", "use"),
                               _hook("shared", "block_held", "write")],
     # R252 (Careful Now). A READ of the pile and not a use: the charge stays
@@ -439,7 +439,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                               _hook("private", "bombs", "write")],
     "fetch_from_discard": [_hook("shared", "discard_pile", "use"),
                            _hook("shared", "hand_contents", "write")],
-    "add_random_companion": [_hook("shared", "hand_contents", "write")],
+    "choose_companion": [_hook("shared", "hand_contents", "write")],
     # THE KLEE STATUS PACKAGE (2026-10-01): Klee Can Explain! turns the
     # statuses in hand into Pop!s (Sea Glass Harvest's vocabulary), and
     # Albedo's Dust of Purification exhausts them into the largest Bomb.
@@ -454,7 +454,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # VARKA, the Oath rework. His one op paints and Swirls enemies through
     # the shared reaction layer (`apply_current_element`, the follow-up hits,
     # `swirl_fresh_auras`), which is `apply_aura`'s channel; Knights' Roll
-    # Call writes the hand, `add_random_companion`'s.
+    # Call writes the hand, `choose_companion`'s.
     "varka": [_hook("shared", "aura_reaction", "write")],
     "add_knight": [_hook("shared", "hand_contents", "write")],
     "grant_alices_mine_each_turn": [_hook("shared", "hand_contents", "write")],

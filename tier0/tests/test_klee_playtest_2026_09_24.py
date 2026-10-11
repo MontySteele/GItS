@@ -293,8 +293,9 @@ def test_the_two_companion_rows_upgrade_to_draw_two(companions, cid):
 # ---------------------------------------------------------------------------
 
 def test_hair_trigger_then_the_enemy_attacks_klee_and_every_mine_fires(overhaul):
-    """The owner's board, end to end: charges placed at different times, one
-    of them the product of a merge (Careful Arrangement) and one carrying
+    """The owner's board, end to end: charges placed at different times, two
+    of them gathered by Exquisite Compound (each moved and grown as itself
+    since the Klee upper pass, 2026-10-11) and one carrying
     Jumpy Dumpty's rider, all converted by Hair Trigger. The enemy's attack
     lands on Klee and every converted Mine goes off before it."""
     enemy = make_enemy(hp=300, name="attacker", intents=ATTACKER)
@@ -305,11 +306,11 @@ def test_hair_trigger_then_the_enemy_attacks_klee_and_every_mine_fires(overhaul)
     klee_overhaul.place(state, enemy, 4)
     play(state, load("proto_ko_careful_arrangement"), aim=enemy)
     merged = sizes(enemy)
-    assert len(merged) == 1
+    assert sorted(merged) == [4 + 4, 6 + 4] and sizes(other) == []
     klee_overhaul.place(state, enemy, 3)
     klee_overhaul.place(state, enemy, 8, payload_mine_all=2)
     play(state, load("proto_ko_hair_trigger"), aim=enemy)
-    assert klee_overhaul.mine_count(enemy) == 3
+    assert klee_overhaul.mine_count(enemy) == 4
 
     fired = sum(merged) + 3 + 8
     before = enemy.hp
@@ -339,22 +340,26 @@ def test_balance_review_numbers(overhaul):
     assert _first(g("proto_ko_stoke_the_fuse"), "grow_largest_bomb")["per_spark"] == 5
     assert _first(g("proto_ko_stoke_the_fuse+"), "grow_largest_bomb")["per_spark"] == 7
     one_more = _first(g("proto_ko_one_more_charge"), "grow_largest")
-    assert one_more["amount"] == 8 and one_more["draw_if_at_least"] == 20
-    assert _first(g("proto_ko_one_more_charge+"), "grow_largest")["amount"] == 11
+    # The Klee upper pass (2026-10-11): 12 [15], was 8 [11].
+    assert one_more["amount"] == 12 and one_more["draw_if_at_least"] == 20
+    assert _first(g("proto_ko_one_more_charge+"), "grow_largest")["amount"] == 15
     wait, wait_up = g("proto_ko_wait_for_it"), g("proto_ko_wait_for_it+")
     assert wait.cost == 0 and wait_up.cost == 0
     assert _first(wait, "apply_power")["amount"] == 2
     assert _first(wait_up, "apply_power")["amount"] == 3
-    assert _first(g("proto_ko_party_poppers"), "apply_power")["amount"] == 5
-    assert _first(g("proto_ko_party_poppers+"), "apply_power")["amount"] == 6
+    # The Klee upper pass (2026-10-11): 7 [9], was 5 [6].
+    assert _first(g("proto_ko_party_poppers"), "apply_power")["amount"] == 7
+    assert _first(g("proto_ko_party_poppers+"), "apply_power")["amount"] == 9
     assert _first(g("proto_ko_look_out"), "apply_power")["amount"] == 4
     assert _first(g("proto_ko_look_out+"), "apply_power")["amount"] == 6
     assert combat.spark_cost(g("proto_ko_blast_shield")) == 1
     assert combat.spark_cost(g("proto_ko_return_to_sender")) == 0
-    for cid, base in (("proto_ko_sparkling_burst", 2),
-                      ("proto_ko_blazing_delight", 3)):
-        assert combat.spark_cost(g(cid)) == base
-        assert combat.spark_cost(g(cid + "+")) == base - 1
+    # The Klee upper pass (2026-10-11): Sparkling Burst 1 Spark, its upgrade
+    # an Energy; Blazing Delight 1 [0].
+    assert combat.spark_cost(g("proto_ko_sparkling_burst")) == 1
+    assert combat.spark_cost(g("proto_ko_sparkling_burst+")) == 1
+    assert combat.spark_cost(g("proto_ko_blazing_delight")) == 1
+    assert combat.spark_cost(g("proto_ko_blazing_delight+")) == 0
 
 
 def test_wait_for_it_draws_its_stack_and_one_energy(overhaul):

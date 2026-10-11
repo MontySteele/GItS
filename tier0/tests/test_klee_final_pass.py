@@ -50,17 +50,18 @@ def test_cover_your_ears_shape_and_numbers(overhaul):
     card = load(CYE)
     assert (card.type, card.cost, card.rarity) == ("skill", 0, "uncommon")
     assert card.exhaust
-    assert combat.spark_cost(card) == 2
+    # 1 Spark since the Klee upper pass (2026-10-11), was 2.
+    assert combat.spark_cost(card) == 1
     assert _loss(card)["amount"] == 6 and _loss(card)["this_turn"] is True
     assert _loss(_up(CYE))["amount"] == 8
-    assert combat.spark_cost(_up(CYE)) == 2
+    assert combat.spark_cost(_up(CYE)) == 1
 
 
-def test_cover_your_ears_needs_two_sparks(overhaul):
+def test_cover_your_ears_needs_one_spark(overhaul):
     st = klee_state([make_enemy(hp=200)])
-    st.player.sparks = 1
+    st.player.sparks = 0
     assert not combat.card_playable(st, load(CYE))
-    st.player.sparks = 2
+    st.player.sparks = 1
     assert combat.card_playable(st, load(CYE))
 
 
@@ -70,7 +71,7 @@ def test_cover_your_ears_takes_six_from_all_for_the_enemy_turn_only(overhaul):
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     b.powers["strength"] = 3
     st = klee_state([a, b])
-    st.player.sparks = 2
+    st.player.sparks = 1
     play(st, load(CYE))
     assert st.player.sparks == 0
     assert (a.powers.get("strength"), b.powers.get("strength")) == (-6, -3)

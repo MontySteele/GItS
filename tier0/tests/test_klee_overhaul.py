@@ -45,7 +45,7 @@ SEED = 7
 #: vocabulary check accepts a row, priced in `draft.STATIC_OP_PRICING` so
 #: `lint_op_parity` stays green, and resolved only with the flag on and Klee in
 #: the seat.
-OVERHAUL_OPS = ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+OVERHAUL_OPS = ("set_off", "plant_bomb", "grow_bombs", "gather_bombs",
                 "remove_bomb_for_block", "block_largest_bomb",
                 "grow_largest_bomb", "damage_set_off_total",
                 "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
@@ -1067,16 +1067,30 @@ def test_sparkling_burst_pays_one_energy_or_two_by_the_predicate(overhaul):
     play_card(state2, card2)
     assert state2.player.energy == 2
 
-    # THE UPGRADE MOVES THE SPARK PRICE and nothing on the face.
-    # (2 Sparks, 1 upgraded, since the Klee balance review, pick 4a.)
+    # THE UPGRADE ADDS AN ENERGY on the flat line and not on the bonus; the
+    # price is 1 Spark either way (the Klee upper pass, 2026-10-11: was 2
+    # Sparks, 1 upgraded).
+    assert [fx for fx in card.effects
+            if fx["op"] == "spend_spark"][0]["amount"] == 1
     state3 = _pass_two_state()
     up = loader.get_card("proto_ko_sparkling_burst+")
     state3.player.sparks = 1
     state3.player.energy = 0
     state3.player.hand = [up]
     play_card(state3, up)
-    assert state3.player.energy == 1
+    assert state3.player.energy == 2
     assert state3.player.sparks == 0
+
+    state4 = _pass_two_state()
+    enemy4 = state4.enemies[0]
+    klee_overhaul.place(state4, enemy4, 4)
+    klee_overhaul.set_off(state4, enemy4)
+    up4 = loader.get_card("proto_ko_sparkling_burst+")
+    state4.player.sparks = 1
+    state4.player.energy = 0
+    state4.player.hand = [up4]
+    play_card(state4, up4)
+    assert state4.player.energy == 3, "2 upgraded, and the bonus stays 1"
 
 
 def test_blazing_delight_pays_energy_and_a_card_at_turn_start(overhaul):
@@ -1122,20 +1136,22 @@ def test_blazing_delight_pays_energy_and_a_card_at_turn_start(overhaul):
 
     # THE UPGRADE CUTS THE SPARK PRICE, Once More!'s and Sparkling Burst's
     # rail: the `+` card is the SAME body for 2 Sparks and the same 2 Energy
-    # (3 and 2 since the Klee balance review, pick 4a, 2026-09-25).
+    # (3 and 2 since the Klee balance review, pick 4a, 2026-09-25; 1 and 0
+    # since the Klee upper pass, 2026-10-11).
     # Authored on the row rather than left to the Prototype rule, which would
     # have fallen through to its cost clause and sold a 1-energy Rare instead
     # (`amount: 1` on a Power reads as "this row prints no power number").
     up = loader.get_card("proto_ko_blazing_delight+")
     assert up.cost == 2
-    assert [fx for fx in up.effects
-            if fx["op"] == "spend_spark"][0]["amount"] == 2
+    assert [fx for fx in card.effects
+            if fx["op"] == "spend_spark"][0]["amount"] == 1
+    assert not [fx for fx in up.effects if fx["op"] == "spend_spark"],         "a price cut to 0 is no price"
     state4 = _pass_two_state()
     state4.player.sparks = 2
     state4.player.draw_pile = fodder(3)
     state4.player.hand = [up]
     play_card(state4, up)
-    assert state4.player.sparks == 0
+    assert state4.player.sparks == 2
     assert state4.player.powers[klee_overhaul.BLAZING_DELIGHT] == 1
 
     # AND A SEAT WITHOUT THE POWER PAYS NOTHING.

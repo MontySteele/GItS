@@ -40,6 +40,11 @@ public sealed partial class ProtoBombPower
         /// enemy" -- every one of her charges on the aimed body, Mines
         /// included (<see cref="TotalPlacedBy"/>).</summary>
         TargetTotal,
+
+        /// <summary>Taste Test since the Klee upper pass (2026-10-11):
+        /// "twice the sum of your Bombs on the enemy" --
+        /// <see cref="TargetTotal"/>'s read, doubled.</summary>
+        TargetTotalDouble,
     }
 
     /// <summary>The number the hit is dealt for, before the Attack's own
@@ -51,6 +56,7 @@ public sealed partial class ProtoBombPower
         {
             BombRead.LargestHalf => LargestSizeFor(applier) / 2,
             BombRead.TargetTotal => TotalPlacedBy(target, applier),
+            BombRead.TargetTotalDouble => 2 * TotalPlacedBy(target, applier),
             _ => 0,
         };
         return baseDamage + bombs;

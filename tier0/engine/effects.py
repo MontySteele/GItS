@@ -489,7 +489,7 @@ AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
                         # aiming op dereferences `cardPlay.Target` wherever it
                         # sits). No shipped row prints one, so this widening is
                         # unreachable outside the arm.
-                        "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                        "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
                         # R276's Hair Trigger, on the same terms.
                         "mine_bombs",
                         # The Klee scaling pass's Witch's Homework (klee-next).
@@ -4475,14 +4475,14 @@ def _op_plant_bomb_copy_largest(state: CombatState, fx: dict,
     klee_overhaul.place_copy_of_largest(state, dest[0] if dest else None)
 
 
-def _op_merge_bombs(state: CombatState, fx: dict, card: Card) -> None:
-    """Careful Arrangement. See `klee_overhaul.merge_all_to` for the two
-    defaults the card text does not state."""
+def _op_gather_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """Exquisite Compound (`proto_ko_careful_arrangement`). See
+    `klee_overhaul.gather_all_to`."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
     dest = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
-    klee_overhaul.merge_all_to(state, dest[0] if dest else None,
-                               int(fx.get("growth", 0)))
+    klee_overhaul.gather_all_to(state, dest[0] if dest else None,
+                                int(fx.get("growth", 0)))
 
 
 def _op_remove_bomb_for_block(state: CombatState, fx: dict,
@@ -4555,9 +4555,13 @@ def _op_damage_from_bombs(state: CombatState, fx: dict, card: Card) -> None:
     if read == "largest_half":
         _enemy, _index, size = klee_overhaul.largest_charge(state)
         bombs = size // 2
-    elif read == "target_total":
+    elif read in ("target_total", "target_total_double"):
+        # `target_total_double`: Taste Test since the Klee upper pass
+        # (2026-10-11), "twice the sum of your Bombs on the enemy".
         targets = _pick_targets(state, fx.get("target", "enemy"))
         bombs = klee_overhaul.total_size(targets[0]) if targets else 0
+        if read == "target_total_double":
+            bombs *= 2
     else:
         raise ValueError(f"damage_from_bombs read {read!r} on {card.id}")
     total = base + bombs
@@ -4740,13 +4744,13 @@ def _op_fetch_from_discard(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.fetch_from_discard(state, fx["filter"])
 
 
-def _op_add_random_companion(state: CombatState, fx: dict,
-                             card: Card) -> None:
-    """Tag Along and Adventure Club: random Companion cards, free this
-    turn."""
+def _op_choose_companion(state: CombatState, fx: dict, card: Card) -> None:
+    """Tag Along and Adventure Club: choose `amount` of `options` Companion
+    cards, free this turn (`klee_overhaul.choose_companions`)."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.add_random_companions(state, int(fx["amount"]))
+    klee_overhaul.choose_companions(state, int(fx["amount"]),
+                                    int(fx["options"]))
 
 
 def _op_plant_homework_bomb(state: CombatState, fx: dict,
@@ -5062,7 +5066,7 @@ OPS = {
     "plant_bomb": _op_plant_bomb,
     "plant_homework_bomb": _op_plant_homework_bomb,
     "grow_bombs": _op_grow_bombs,
-    "merge_bombs": _op_merge_bombs,
+    "gather_bombs": _op_gather_bombs,
     # THE POOL PASS's three (`EB-491`), on the same terms as every arm verb
     # above: one call each into `klee_overhaul`, and a raise with the flag off
     # or on a seat that is not Klee.
@@ -5100,7 +5104,7 @@ OPS = {
     "exhaust_statuses_grow_largest": _op_exhaust_statuses_grow_largest,
     "lose_strength": _op_lose_strength,
     "fetch_from_discard": _op_fetch_from_discard,
-    "add_random_companion": _op_add_random_companion,
+    "choose_companion": _op_choose_companion,
     "grant_alices_mine_each_turn": _op_grant_alices_mine_each_turn,
     # --- Kokomi overhaul, DRAFT 6 (C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by

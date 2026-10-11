@@ -10655,17 +10655,17 @@ def test_a_smith_row_prints_one_upgrade_line_and_not_two():
 
 
 #: The rows whose upgrade cuts the Spark price and nothing else (Once More!
-#: left with the Klee-only companions, 2026-10-03):
+#: left with the Klee-only companions, 2026-10-03; Sparkling Burst's upgrade
+#: is an Energy since the Klee upper pass, 2026-10-11, and Blazing Delight's
+#: cuts its 1 Spark to none):
 #: (wire id, title, energy cost on the wire, face, the upgraded cost slot).
 _SPARK_PRICE_UPGRADES = [
-    ("KLEEMOD-PROTO_KO_SPARKLING_BURST", "Sparkling Burst", "0",
-     "Gain 1 Energy. If a Bomb went off this turn, gain 1 more.", "1 Spark"),
     ("KLEEMOD-PROTO_KO_BOOM_BADGE", "Boom Badge", "0",
      "The next time you Set off this turn, your Bombs deal double damage.",
      "1 Spark"),
     ("KLEEMOD-PROTO_KO_BLAZING_DELIGHT", "Blazing Delight", "2",
      "At the start of your turn, gain 1 Energy and draw 1 card.",
-     "2 and 2 Sparks"),
+     "2"),
 ]
 
 
@@ -10714,23 +10714,25 @@ def test_an_upgraded_copy_in_hand_shows_its_upgraded_spark_price():
     """The seat page read a card's Spark price off the CLASS, whose index
     holds the unupgraded price, so Sparkling Burst+ in hand printed "cost 2
     Sparks" while the card charges 1. The copy's own `is_upgraded` flag now
-    picks the upgraded price. Seen to FAIL: the head read "cost 2 Sparks"."""
+    picks the upgraded price. Seen to FAIL: the head read "cost 2 Sparks".
+    (Boom Badge since the Klee upper pass, 2026-10-11, which moved Sparkling
+    Burst's upgrade off its price.)"""
     fight, _smith = upgrade_run_states()
     fight = json.loads(json.dumps(fight))
-    card = {"id": "KLEEMOD-PROTO_KO_SPARKLING_BURST", "type": "Skill",
+    card = {"id": "KLEEMOD-PROTO_KO_BOOM_BADGE", "type": "Skill",
             "cost": "0", "can_play": True, "index": 99,
-            "description": "Gain 1 Energy. If a Bomb went off this turn, "
-                           "gain 1 more."}
+            "description": "The next time you Set off this turn, your Bombs "
+                           "deal double damage."}
     fight["player"]["hand"] = [
-        {**card, "name": "Sparkling Burst+", "is_upgraded": True},
-        {**card, "name": "Sparkling Burst", "index": 98}]
+        {**card, "name": "Boom Badge+", "is_upgraded": True},
+        {**card, "name": "Boom Badge", "index": 98}]
     page = blindplay.observe(fight)
-    assert "**Sparkling Burst+** (upgraded) — cost 1 Spark, skill" in page
-    assert "**Sparkling Burst** — cost 2 Sparks, skill" in page
+    assert "**Boom Badge+** (upgraded) — cost 1 Spark, skill" in page
+    assert "**Boom Badge** — cost 2 Sparks, skill" in page
     assert qa_packet.spark_price_for(
-        "KLEEMOD-PROTO_KO_SPARKLING_BURST", True) == 1
+        "KLEEMOD-PROTO_KO_BOOM_BADGE", True) == 1
     assert qa_packet.spark_price_for(
-        "KLEEMOD-PROTO_KO_SPARKLING_BURST", False) == 2
+        "KLEEMOD-PROTO_KO_BOOM_BADGE", False) == 2
 
 
 # --- The offline sitting's page rows -----------------------------------------

@@ -152,16 +152,6 @@ public static class ArmKeywordTips
     // (<see cref="KleeMod.Cards.FurinaRiderTips.ForCompanionPerform"/>).
     public const string EmptyFieldKey = "KLEEMOD-ARM_EMPTY_FIELD";
 
-    // `EB-573`. THE FIFTH KEY HERE THAT TITLES NO KEYWORD. Careful
-    // Arrangement's face promises the merged charge is "a Mine if any of them
-    // was" and says nothing about RIDERS -- and `ProtoBombPower.MergeAllTo`
-    // sums `PayloadMineAll` across every charge it takes, so Jumpy Dumpty's
-    // Mine-on-ALL survives the merge and grows in bulk. The r21 lane-1 seat
-    // met a Bomb 21 that was Jumpy's Bomb 8 two merges ago still dropping Mine
-    // 3 on ALL, called it a large part of the kit's ceiling, and said it was
-    // "completely undiscoverable except by accident".
-    public const string MergeRidersKey = "KLEEMOD-ARM_MERGE_RIDERS";
-
     // ----------------------------------------------------------- Klee ------
     //
     // The four sentences are the ruled brief's sec.3 rules 1, 2, 4 and 6, as
@@ -576,35 +566,6 @@ public static class ArmKeywordTips
             : With(inherited, EmptyFieldKey,
                 "No [gold]Bomb[/gold] on the field: this card does nothing.");
     }
-
-    /// <summary>
-    /// `EB-573`. WHAT THE MERGE KEEPS BESIDES THE MINE.
-    ///
-    /// THE FIND (Klee r21 lane 1, (c) 4). "A Bomb 21 that was Jumpy's Bomb 8
-    /// two merges and two turns ago still dropped Mine 3 on ALL when it went
-    /// off. This is a GOOD interaction and a large part of the kit's ceiling,
-    /// and it is completely undiscoverable except by accident. Careful
-    /// Arrangement's face says the merged charge is 'a Mine if any of them
-    /// was'; it says nothing about riders."
-    ///
-    /// THE CARD SAYS IT AND THE BADGE COUNTS IT. This sentence is the RULE, on
-    /// the card that does the merging, where a player decides whether to
-    /// merge; <c>ProtoBombPower.RiderSentence</c> is the live number, on the pile
-    /// the rule produced. Neither is enough alone -- the rule is unreadable off
-    /// a number and the number is unreachable before the play.
-    ///
-    /// STATIC, unlike <see cref="ForEmptyField"/>: it is a fact about the CARD
-    /// and true in a reward screen and a shop as well as in a fight.
-    ///
-    /// ATTACHED BY THE MERGE OP, not by name
-    /// (`gen_klee_cards.reads_the_field`'s sibling), so a second merge row
-    /// carries the sentence the day its row exists.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForMergeRiders(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, MergeRidersKey,
-            "The merged [gold]Bomb[/gold] keeps every rider its charges "
-          + "carried, and their riders add up.");
 
     /// <summary>
     /// `EB-575`'s question, on its own so a pin can ask it. Is there a board

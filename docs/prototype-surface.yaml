@@ -55,9 +55,9 @@
 - {id: proto_ko_careful_arrangement, name: "Exquisite Compound", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by 5, and is a [gold]Mine[/gold] if any of them were.",
-   upgrade: {grow: +3},
-   effects: [{op: merge_bombs, target: enemy, growth: 5}]}
+   description: "Move all your [gold]Bombs[/gold] onto the enemy. Each grows by 4.",
+   upgrade: {grow: +2},
+   effects: [{op: gather_bombs, target: enemy, growth: 4}]}
 
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
@@ -146,7 +146,7 @@
 
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash", character: klee,
    authored_by: [claude],
-   cost: 3, type: power, rarity: rare,
+   cost: 2, type: power, rarity: rare,
    description: "At the start of your turn, your largest [gold]Bomb[/gold] deals its size in [gold]Pyro[/gold] damage without going off.",
    upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_bomb_echo, amount: 1, target: self}]}
@@ -298,7 +298,7 @@
    authored_by: [claude],
    cost: 2, type: skill, rarity: rare, exhaust: true,
    description: "Place a [gold]Bomb[/gold] the size of your largest [gold]Bomb[/gold] on ALL enemies.",
-   upgrade: {retain: true},
+   upgrade: {cost: -1},
    effects: [{op: plant_bomb_copy_largest, target: all_enemies}]}
 
 # 2026-10-11 ([USER]: "Fish Blasting needs to give Dazed rather than
@@ -337,9 +337,9 @@
 - {id: proto_ko_flash_point, name: "Flash Point", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 7 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold], draw 1 card.",
+   description: "[gold]Set off[/gold] the enemy. Deal 9 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold], draw 1 card.",
    upgrade: {damage: +3},
-   effects: [{op: set_off, target: enemy, damage: 7},
+   effects: [{op: set_off, target: enemy, damage: 9},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: gain_spark, amount: 1},
                      {op: draw, amount: 1}]}]}
@@ -394,9 +394,9 @@
 - {id: proto_ko_sparkling_burst, name: "Sparkling Burst", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Gain 1 [gold]Energy[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 1 more.",
-   upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 2},
+   description: "Gain {Energy:diff()} [gold]Energy[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 1 more.",
+   upgrade: {energy: +1},
+   effects: [{op: spend_spark, amount: 1},
              {op: energy, amount: 1},
              {op: conditional, if: bomb_went_off_this_turn,
               then: [{op: energy, amount: 1}]}]}
@@ -406,7 +406,7 @@
    cost: 2, type: power, rarity: rare,
    description: "At the start of your turn, gain 1 [gold]Energy[/gold] and draw 1 card.",
    upgrade: {spark_price: -1},
-   effects: [{op: spend_spark, amount: 3},
+   effects: [{op: spend_spark, amount: 1},
              {op: apply_power, power: ko_blazing_delight, amount: 1,
               target: self}]}
 
@@ -436,7 +436,7 @@
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
    description: "ALL enemies lose 6 [gold]Strength[/gold] this turn.",
    upgrade: {strength_loss: +2},
-   effects: [{op: spend_spark, amount: 2},
+   effects: [{op: spend_spark, amount: 1},
              {op: lose_strength, amount: 6, target: all_enemies,
               this_turn: true}]}
 
@@ -504,9 +504,9 @@
 - {id: proto_ko_one_more_charge, name: "Witch's Homework", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Your largest [gold]Bomb[/gold] grows by 8. If it is now 20 or more, draw 1 card.",
+   description: "Your largest [gold]Bomb[/gold] grows by 12. If it is now 20 or more, draw 1 card.",
    upgrade: {grow: +3},
-   effects: [{op: grow_largest, amount: 8, draw_if_at_least: 20, draw: 1}]}
+   effects: [{op: grow_largest, amount: 12, draw_if_at_least: 20, draw: 1}]}
 
 # Klee scaling pass (klee-next, 2026-10-05), sec.4 B: grant-only, in no pool
 # (`C.STAGING_GRANT_IDS`). Provenance note, "Klee scaling pass, 2026-10-05".
@@ -525,18 +525,18 @@
 
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
+   cost: 0, type: skill, rarity: uncommon,
    description: "Put a [gold]Set off[/gold] card from your discard pile into your hand. Your largest [gold]Bomb[/gold] grows by 3.",
-   upgrade: {cost: -1},
+   upgrade: {grow: +3},
    effects: [{op: fetch_from_discard, filter: set_off},
              {op: grow_largest, amount: 3}]}
 
 - {id: proto_ko_tag_along, name: "Tag Along", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Add a random [gold]Companion[/gold] card to your hand. It costs 0 this turn.",
+   description: "Choose 1 of 3 [gold]Companion[/gold] cards to add to your hand. It costs 0 this turn.",
    upgrade: {remove: exhaust},
-   effects: [{op: add_random_companion, amount: 1}]}
+   effects: [{op: choose_companion, amount: 1, options: 3}]}
 
 - {id: proto_ko_come_back_and_play, name: "Come Back and Play!", character: klee,
    authored_by: [claude],
@@ -574,9 +574,9 @@
 - {id: proto_ko_party_poppers, name: "Party Poppers", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a card that costs [gold]Sparks[/gold], place a [gold]Bomb[/gold] 5 on a random enemy.",
-   upgrade: {power_amount: +1},
-   effects: [{op: apply_power, power: ko_party_poppers, amount: 5, target: self}]}
+   description: "Whenever you play a card that costs [gold]Sparks[/gold], place a [gold]Bomb[/gold] 7 on a random enemy.",
+   upgrade: {power_amount: +2},
+   effects: [{op: apply_power, power: ko_party_poppers, amount: 7, target: self}]}
 
 - {id: proto_ko_look_out, name: "Look Out!", character: klee,
    authored_by: [claude],
@@ -622,9 +622,9 @@
 - {id: proto_ko_adventure_club, name: "Adventure Club", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Add 2 random [gold]Companion[/gold] cards to your hand. They cost 0 this turn.",
+   description: "Choose 2 of 4 [gold]Companion[/gold] cards to add to your hand. They cost 0 this turn.",
    upgrade: {cost: -1},
-   effects: [{op: add_random_companion, amount: 2}]}
+   effects: [{op: choose_companion, amount: 2, options: 4}]}
 
 - {id: proto_ko_windblume_fireworks, name: "Windblume Fireworks", character: klee,
    authored_by: [claude],
@@ -801,9 +801,9 @@
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal [gold]Pyro[/gold] damage equal to all your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {cards: -1},
-   effects: [{op: damage_from_bombs, read: target_total, target: enemy},
+   effects: [{op: damage_from_bombs, read: target_total_double, target: enemy},
              {op: add_card, card: confiscated, zone: discard, amount: 2}]}
 
 - {id: proto_ko_tinkering, name: "Tinkering", character: klee,

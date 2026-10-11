@@ -81,7 +81,8 @@ PLACERS = {
     "proto_ko_hiding_spot": ("plant_bomb", "size", 5, 7),
     "proto_ko_jumpy_dumpty_mk_iii": ("damage", "plant_on_hit", 4, 5),
     "proto_ko_mine_all_mine": ("plant_bomb", "size", 6, 8),
-    "proto_ko_party_poppers": ("apply_power", "amount", 5, 6),
+    # The Klee upper pass (2026-10-11): 7 [9].
+    "proto_ko_party_poppers": ("apply_power", "amount", 7, 9),
     "proto_ko_secret_base": ("apply_power", "amount", 6, 8),
     "proto_ko_windblume_fireworks": ("plant_bomb", "size", 8, 10),
     "proto_ko_dodoco": ("apply_power", "amount", 5, 7),

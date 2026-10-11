@@ -47,13 +47,14 @@ public class KleeFinalPassTests
     }
 
     [Fact]
-    public void Cover_your_ears_is_an_uncommon_free_skill_priced_two_sparks()
+    public void Cover_your_ears_is_an_uncommon_free_skill_priced_one_spark()
     {
         var card = new ProtoKoCoverYourEars();
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
         Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(2, card.PrintedSparkPrice);
+        // The Klee upper pass (2026-10-11): 1 Spark, was 2.
+        Assert.Equal(1, card.PrintedSparkPrice);
         Assert.Contains(CardKeyword.Exhaust, card.Keywords);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
         Assert.Equal((6m, 8m),

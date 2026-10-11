@@ -1440,7 +1440,7 @@
       "cost": -1
     },
     "proto_ko_all_of_my_treasures": {
-      "retain": true
+      "cost": -1
     },
     "proto_ko_ammo_scavenging": {
       "bomb_size": 3
@@ -1477,7 +1477,7 @@
       "draw": 1
     },
     "proto_ko_careful_arrangement": {
-      "grow": 3
+      "grow": 2
     },
     "proto_ko_chain_fuse": {
       "grow": 3
@@ -1593,7 +1593,7 @@
       "grow": 3
     },
     "proto_ko_party_poppers": {
-      "power_amount": 1
+      "power_amount": 2
     },
     "proto_ko_pass_the_match": {
       "draw": 1
@@ -1636,7 +1636,7 @@
       "power_amount": 1
     },
     "proto_ko_sparkling_burst": {
-      "spark_price": -1
+      "energy": 1
     },
     "proto_ko_sparks_for_everyone": {
       "innate": true
@@ -1666,7 +1666,7 @@
       "spark": 1
     },
     "proto_ko_treasure_map": {
-      "cost": -1
+      "grow": 3
     },
     "proto_ko_up_in_smoke": {
       "weak": 1

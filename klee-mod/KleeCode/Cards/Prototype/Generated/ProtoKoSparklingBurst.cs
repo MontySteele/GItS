@@ -42,7 +42,7 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparkling Burst"),
-        ("description", "Gain 1 [gold]Energy[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 1 more."),
+        ("description", "Gain {Energy:diff()} [gold]Energy[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 1 more."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -54,7 +54,7 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
     // that already prints a price is unaffected by the strict Rare
     // Power, which is why PriceOf returns this number unchanged
     // here (tier0 twin: combat.spark_price, sub-pick (a)).
-    public int PrintedSparkPrice => (IsUpgraded ? 1 : 2);
+    public int PrintedSparkPrice => 1;
 
     protected override bool IsPlayable =>
         SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
@@ -62,7 +62,7 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("Energy", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -74,8 +74,8 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await SparkPower.Spend(choiceContext, Owner.Creature, (IsUpgraded ? 1 : 2), this);
-        await PlayerCmd.GainEnergy(1, Owner);
+        await SparkPower.Spend(choiceContext, Owner.Creature, 1, this);
+        await PlayerCmd.GainEnergy(DynamicVars["Energy"].IntValue, Owner);
         if (KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn > 0)
         {
             await PlayerCmd.GainEnergy(1, Owner);
@@ -84,7 +84,6 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
 
     protected override void OnUpgrade()
     {
-        // spark_price: read at play time off IsUpgraded, at
-        // PrintedSparkPrice and the SparkPower.Spend beside it; tier0 twin: upgrades.apply key 'spark_price', which bumps the `spend_spark` amount both engines gate on.
+        DynamicVars["Energy"].UpgradeValueBy(1m);
     }
 }

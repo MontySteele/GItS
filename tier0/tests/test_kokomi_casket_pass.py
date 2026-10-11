@@ -367,7 +367,7 @@ def test_the_commons(overhaul):
 def test_no_common_increases_deck_size(overhaul):
     """LAW: a Kokomi Common never adds a card. Open the Casket is the relic's
     token, not a Common's."""
-    creating = {"add_card", "generate_from_pool", "add_random_companion"}
+    creating = {"add_card", "generate_from_pool", "choose_companion"}
     for cid in C.KOKOMI_OVERHAUL_POOL_IDS:
         card = _row(cid)
         if card.rarity != "common":

@@ -615,7 +615,12 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             # pilot got wrong, not a number this function should hedge.
             n = len(living) if fx.get("target") == "all_enemies" else 1
             total += int(fx.get("size", 0)) * n
-        elif fx["op"] in ("grow_bombs", "merge_bombs"):
+        elif fx["op"] == "gather_bombs":
+            # Exquisite Compound (2026-10-11): EVERY charge she holds moves
+            # and grows, so the growth is paid once per charge.
+            charges = sum(len(e.ko_charges) for e in living)
+            total += int(fx.get("growth", 0) or 0) * charges
+        elif fx["op"] == "grow_bombs":
             # Growth is damage the pile will deal when it is finally cashed,
             # and it is worth nothing at all on a board with no pile -- which
             # is the same sentence `EB-261` gates Quick Fuse's playability on.

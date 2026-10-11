@@ -309,8 +309,6 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # and the first whose sentence comes and goes with the
                     # board.
                     "KLEEMOD-ARM_EMPTY_FIELD",
-                    # `EB-573`: what a merge keeps besides the Mine.
-                    "KLEEMOD-ARM_MERGE_RIDERS",
                     # `EB-709`: how many Plans a doubled carry-out is, on the
                     # one card that doubles one. A per-Plan reader's own face
                     # states its rate truthfully; what no face said is that a
@@ -360,28 +358,17 @@ def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
     assert "KLEEMOD-SWIRL_PREVIEW" not in keys
 
 
-def test_the_merge_row_says_riders_survive_it():
-    """`EB-573`. The rider the merge keeps, on the card that does the merging.
-
-    THE FIND (Klee r21 lane 1, (c) 4). "A Bomb 21 that was Jumpy's Bomb 8 two
-    merges and two turns ago still dropped Mine 3 on ALL when it went off. This
-    is a GOOD interaction and a large part of the kit's ceiling, and it is
-    completely undiscoverable except by accident."
-
-    Seen to FAIL: Careful Arrangement's face promises "a Mine if any of them
-    was" and says nothing about riders, and no badge counted one.
-    """
-    rows = {row["id"]: row for row in proto._rows()}
-    mergers = {rid for rid, row in rows.items() if gen.merges_bombs(row)}
-    assert mergers == {"proto_ko_careful_arrangement"}
+def test_no_row_merges_bombs_and_the_merge_rider_is_gone():
+    """`EB-573`'s merge-riders rider left with the merge (the Klee upper pass,
+    2026-10-11, pick 2 (a)). Exquisite Compound moves each Bomb AS ITSELF, so
+    a rider travels on its own charge the way a jump carries it, and there is
+    no sum left for a sentence to explain."""
     merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
         encoding="utf-8")
-    assert "ArmKeywordTips.ForMergeRiders(" in merge
-    # AND THE RIDER EXISTS TO SURVIVE: the one row that plants one.
-    riders = {rid for rid, row in rows.items()
-              if any(fx.get("payload_mine_all")
-                     for fx in gen.iter_effects(row.get("effects") or []))}
-    assert "proto_ko_jumpy_dumpty" in riders
+    assert "ForMergeRiders" not in merge
+    assert "GatherAllTo" in merge
+    assert "ForMergeRiders" not in TIPS_CS.read_text(encoding="utf-8")
+    assert not hasattr(gen, "merges_bombs")
 
 
 def test_a_set_off_row_on_a_bare_board_says_so():
