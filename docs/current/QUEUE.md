@@ -25,6 +25,11 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi round 3** (`review/records/kokomi-fullrun-round-3-2026-10-11.md`,
+  three picks, decided after your run): (1) a 1.5 rate on Block Plans, default hold;
+  (2) Kurage's Oath at 9, default leave; (3) a pass on the debuff and reaction
+  cards, default keep and watch.
+
 - **Furina Drain-line round** (`review/records/furina-drain-line-round-2026-10-09.md`,
   pick 2): more Block now, or decide on the rerun after a Block census.
   Default: census first.
