@@ -250,9 +250,11 @@ public class FurinaLineRepayFloorTests
     // ---- the ruled card numbers ----------------------------------------------
 
     [Fact]
-    public void Standing_ovation_is_uncommon()
+    public void Standing_ovation_is_common()
     {
-        Assert.Equal(CardRarity.Uncommon, new ProtoFsStandingOvationAll().Rarity);
+        // Common again, Spend half (2026-10-11, Furina round 3 record,
+        // pick 1).
+        Assert.Equal(CardRarity.Common, new ProtoFsStandingOvationAll().Rarity);
     }
 
     [Fact]
@@ -330,10 +332,11 @@ public class FurinaLineRepayFloorTests
     public void The_pool_is_78()
     {
         // The block gap (ruled 2026-10-09): four more, 20 / 37 / 21. Navia
-        // to Uncommon (2026-10-10): 20 / 38 / 20.
+        // to Uncommon (2026-10-10): 20 / 38 / 20. Standing Ovation Common
+        // again (2026-10-11): 21 / 37 / 20.
         var pool = ArmPools.Named("KleeMod.Powers.FurinaStageRoster", "Pool");
         Assert.Equal(78, pool.Count);
-        Assert.Equal((20, 38, 20),
+        Assert.Equal((21, 37, 20),
             (pool.Count(c => c.Rarity == CardRarity.Common),
              pool.Count(c => c.Rarity == CardRarity.Uncommon),
              pool.Count(c => c.Rarity == CardRarity.Rare)));

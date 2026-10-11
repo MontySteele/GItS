@@ -349,7 +349,7 @@ def has_choice(cards) -> bool:
     """Does any card print a Drain or Spend (a mode, a fixed price, or a
     spend-all)? Only then is "take none" a different run."""
     return any(fx.get("op") in ("stage_spend", "stage_spend_all",
-                                "stage_drain")
+                                "stage_spend_half", "stage_drain")
                for c in cards for fx in _walk(c.effects))
 
 

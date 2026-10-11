@@ -90,8 +90,9 @@ public class PoolCountTests
         // Ovation Common -> Uncommon, 19 / 35 / 20. THE BLOCK GAP
         // (review/records/furina-drain-line-round-2026-10-09.md pick 2, ruled
         // 2026-10-09): 1 Common, 2 Uncommon, 1 Rare, 20 / 37 / 21. Guest
-        // Star: Navia Rare -> Uncommon (2026-10-10): 20 / 38 / 20.
-        AssertPool("FurinaStageRoster", "Pool", 20, 38, 20, size: 78);
+        // Star: Navia Rare -> Uncommon (2026-10-10): 20 / 38 / 20. Standing
+        // Ovation Common again (2026-10-11): 21 / 37 / 20.
+        AssertPool("FurinaStageRoster", "Pool", 21, 37, 20, size: 78);
         AssertAncients("Furina");
         Assert.Null(System.Type.GetType(
             "KleeMod.Powers.FurinaStageRoster, klee")?.GetMethod("MultiplayerRows"));

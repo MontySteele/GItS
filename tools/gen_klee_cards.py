@@ -443,6 +443,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # into `FurinaStage.SpendUpTo`; what it buys is the effect
                   # after it, reading `stage_spent`.
                   "stage_spend_up_to",
+                  # Standing Ovation (2026-10-11): "Spend half your
+                  # Fanfare", one call into `FurinaStage.SpendHalf`.
+                  "stage_spend_half",
                   # A Guest Star card, one call into `FurinaStage.GuestStar`.
                   "stage_guest",
                   # Interval Bell's and Salon's Tab's "Energy next turn",
@@ -6391,6 +6394,8 @@ STAGE_STMT_OPS = {
     "stage_spend", "stage_spend_all", "stage_guest",
     # The Spend paper (2026-10-10): "Spend up to X".
     "stage_spend_up_to",
+    # Standing Ovation (2026-10-11): "Spend half your Fanfare".
+    "stage_spend_half",
     # The loop fix (2026-10-04): Interval Bell's "Energy next turn".
     "stage_energy_next",
     # THE SALON'S TAB (2026-10-05): Drain, Repay, Repay all.
@@ -6401,7 +6406,7 @@ STAGE_STMT_OPS = {
 #: whole-run round 2, 2026-10-10). A row printing one anywhere in its body
 #: carries `IStageSpendCard`.
 STAGE_SPEND_OPS = frozenset({"stage_spend", "stage_spend_all",
-                             "stage_spend_up_to"})
+                             "stage_spend_up_to", "stage_spend_half"})
 
 
 def stage_spend_card(card: dict) -> bool:
@@ -6448,6 +6453,11 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         n = str(int(eff.get("amount", 1)))
         return ("await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, "
                 f"{n});")
+    if op == "stage_spend_half":
+        # Standing Ovation (2026-10-11): a "Spend up to" half the bank,
+        # rounded down; not a spend-all, so no Bis!.
+        return ("await FurinaStage.SpendHalf(choiceContext, "
+                "Owner.Creature);")
     if op == "stage_drain":
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
         return ("await FurinaStage.Drain(choiceContext, Owner.Creature, "
@@ -6543,8 +6553,7 @@ def _stage_spender_before(card: dict, eff: dict) -> str | None:
     for other in card.get("effects") or []:
         if other is eff:
             return None
-        if other.get("op") in {"stage_spend", "stage_spend_all",
-                               "stage_spend_up_to"}:
+        if other.get("op") in STAGE_SPEND_OPS:
             return str(other["op"])
     return None
 
@@ -6571,6 +6580,10 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
     (`FurinaStage.SpentOrFanfare`), so the face prints a number."""
     if _stage_spender_before(card, eff) == "stage_spend_all":
         return "static (card, _) => FurinaStage.SpentOrFanfare(card)"
+    if _stage_spender_before(card, eff) == "stage_spend_half":
+        # Standing Ovation (2026-10-11): before the play, half the bank;
+        # during it, what it counted.
+        return "static (card, _) => FurinaStage.SpentOrHalf(card)"
     up_to = _stage_up_to_before(card, eff)
     if up_to is not None:
         # The Spend paper (2026-10-10): before the play, what "Spend up to
