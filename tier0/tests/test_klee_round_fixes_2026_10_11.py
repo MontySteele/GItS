@@ -82,7 +82,7 @@ def test_the_mine_tip_says_it_waits_without_an_attack():
 # ---- 4. "your largest Bomb" ------------------------------------------------
 
 @pytest.mark.parametrize("cls", [
-    "ProtoKoStokeTheFuse", "ProtoKoSparksNSplash", "ProtoKoOneMoreCharge",
+    "ProtoKoSparksNSplash", "ProtoKoOneMoreCharge",
     "ProtoKoTreasureMap", "ProtoKoHalfAMountain", "ProtoKoFavoniusEscort",
     "ProtoKoHideHere", "ProtoMcAlbedoDustOfPurification"])
 def test_a_board_wide_largest_bomb_says_on_any_enemy(cls):
@@ -94,9 +94,11 @@ def test_a_board_wide_largest_bomb_says_on_any_enemy(cls):
 def test_stoke_the_fuse_keeps_its_number_and_its_spend():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "Generated" / "ProtoKoStokeTheFuse.cs").read_text(encoding="utf-8")
+    # Klee pass round, pick 3 (b): it aims now, so "on the enemy".
     assert ('"Spend all your remaining [gold]Sparks[/gold]. Your largest '
-            '[gold]Bomb[/gold], on any enemy, grows by {Grow:diff()} per '
+            '[gold]Bomb[/gold] on the enemy grows by {Grow:diff()} per '
             '[gold]Spark[/gold] spent."') in src
+    assert "TargetType.AnyEnemy" in src
 
 
 def test_the_largest_bomb_lint_fires_on_a_face_that_does_not_say_where():

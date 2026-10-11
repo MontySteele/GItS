@@ -2086,9 +2086,9 @@ def test_stoke_the_fuse_upgraded_pays_seven_per_spark(overhaul):
 
 
 def test_stoke_the_fuse_grows_the_largest_of_two_bombs(overhaul):
-    """"Your largest Bomb", board-wide and ONE charge -- `block_largest_bomb`'s
-    scope with `grow_bombs`'s effect, and neither one's spread: the other
-    charges are exactly where they were."""
+    """"Your largest Bomb on the enemy", ONE charge -- `grow_bombs`'s effect
+    without its spread: the other charges are exactly where they were. The
+    aim binds to `a` (lowest-HP tie, first in order)."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 4)
@@ -2099,6 +2099,39 @@ def test_stoke_the_fuse_grows_the_largest_of_two_bombs(overhaul):
 
     assert sizes(a) == [4, 9 + 10]         # the 9 took all of it
     assert sizes(b) == [7]
+
+
+def test_stoke_the_fuse_grows_the_largest_bomb_on_the_aimed_enemy(overhaul):
+    """The Klee pass round, pick 3 (b) (2026-10-11): the card aims. The bigger
+    Bomb is on `a`; aimed at `b` (lower HP, so the sim binds to it), `b`'s
+    largest grows and `a`'s is untouched. A seat grew a minion's Bomb when it
+    meant the boss's -- this is that fix. Twin:
+    `Stoke_the_fuse_grows_the_largest_bomb_on_the_aimed_enemy_only`."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=150, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 12)
+    klee_overhaul.place(state, b, 3)
+    klee_overhaul.place(state, b, 7)
+
+    stoke(state, [a, b], 2)
+
+    assert sizes(a) == [12]
+    assert sizes(b) == [3, 7 + 10]
+    assert state.player.sparks == 0
+
+
+def test_stoke_the_fuse_aimed_at_a_bomb_less_enemy_grows_nothing(overhaul):
+    """The target holds no Bomb: nothing grows, the Bomb on the other enemy
+    included, and the Sparks are still spent."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=150, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 12)
+
+    stoke(state, [a, b], 2)
+
+    assert sizes(a) == [12]
+    assert sizes(b) == []
+    assert state.player.sparks == 0
 
 
 def test_stoke_the_fuse_sets_nothing_off(overhaul):

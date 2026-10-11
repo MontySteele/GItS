@@ -2229,6 +2229,11 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// board grows by <paramref name="perSpark"/> for every Spark this card
     /// spent. Returns the growth applied, 0 if nothing grew.
     ///
+    /// <paramref name="onlyOn"/> restricts the walk to one enemy (the card
+    /// aims since the Klee pass round, pick 3 (b): "your largest Bomb on the
+    /// enemy"). Null keeps the board-wide walk. A target holding none of
+    /// this Klee's Bombs grows nothing.
+    ///
     /// <paramref name="sparksSpent"/> IS HANDED IN, not read here, and that is
     /// the whole ordering rule. <c>SparkPower.Spend</c> debits the bank where
     /// it is called, so the generated body captures
@@ -2248,7 +2253,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <c>klee_overhaul.grow_largest_per_spark</c>.
     /// </summary>
     public static int GrowLargestPerSpark(
-        Creature applier, int perSpark, int sparksSpent)
+        Creature applier, int perSpark, int sparksSpent,
+        Creature? onlyOn = null)
     {
         if (applier.CombatState == null) return 0;
         if (perSpark <= 0 || sparksSpent <= 0) return 0;
@@ -2258,6 +2264,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         foreach (var enemy in applier.CombatState.HittableEnemies.ToList())
         {
             if (enemy.IsDead) continue;
+            if (onlyOn != null && enemy != onlyOn) continue;
             foreach (var pile in enemy.Powers.OfType<ProtoBombPower>())
             {
                 if (pile.Applier != applier) continue;

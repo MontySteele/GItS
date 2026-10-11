@@ -282,13 +282,16 @@
 # X price on any sheet -- `spend_spark: all`, gated at one Spark. Why it
 # exists: docs/notes/prototype-surface-provenance.md.
 
+# 2026-10-11 ([USER]: "do the targeting fix for Stoke the Fuse"; Klee pass
+# round, pick 3 (b)): grows your largest Bomb on the aimed enemy, was the
+# largest board-wide (a seat grew a minion's Bomb when it meant the boss's).
 - {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 5 per [gold]Spark[/gold] spent.",
+   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] on the enemy grows by 5 per [gold]Spark[/gold] spent.",
    upgrade: {grow: +2},
    effects: [{op: spend_spark, amount: all},
-             {op: grow_largest_bomb, per_spark: 5}]}
+             {op: grow_largest_bomb, per_spark: 5, target: enemy}]}
 
 # THE POOL PASS, rounds 13 to 16 (2026-09-05, `EB-491`): ten rows, three
 # shelves and a bridge. Why each exists and what the rounds said:

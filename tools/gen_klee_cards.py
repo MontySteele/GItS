@@ -2391,9 +2391,12 @@ PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all",
                      # predicate holds. Sim twin: `effects.bonus_if_amount`.
                      "bonus_if"}
 GROW_BOMBS_FIELDS = {"op", "target", "amount"}
-#: Stoke the Fuse. NO `target`: "your largest Bomb" is board-wide, the same
-#: scope `block_largest_bomb` reads, so the row aims at nobody.
-GROW_LARGEST_BOMB_FIELDS = {"op", "per_spark"}
+#: Stoke the Fuse. Without `target`, "your largest Bomb" is board-wide, the
+#: same scope `block_largest_bomb` reads, and the row aims at nobody. With
+#: `target: enemy` (Klee pass round, pick 3 (b), 2026-10-11: a seat grew a
+#: minion's Bomb when it meant the boss's) the walk is restricted to the
+#: enemy the player picks: "your largest Bomb on the enemy".
+GROW_LARGEST_BOMB_FIELDS = {"op", "per_spark", "target"}
 GATHER_BOMBS_FIELDS = {"op", "target", "growth"}
 #: THE POOL PASS's two (`EB-491`), same discipline.
 #: All of My Treasures! aims (the copy lands where the player says) and carries
@@ -4246,7 +4249,10 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               "kokomi",
               # Amber, Explosive Puppet (2026-10-02): "Enemy loses 3
               # Strength this turn" lands on `cardPlay.Target`.
-              "lose_strength")
+              "lose_strength",
+              # Stoke the Fuse (Klee pass round, pick 3 (b)): with `target:
+              # enemy` the growth walk reads `cardPlay.Target`.
+              "grow_largest_bomb")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -5267,6 +5273,9 @@ def blocked_reason(
             if not isinstance(rate, int) or isinstance(rate, bool) or rate <= 0:
                 return ("grow_largest_bomb per_spark must be a positive "
                         "literal int")
+            if eff.get("target", None) not in (None, "enemy"):
+                return (f"grow_largest_bomb target '{eff.get('target')}' -- "
+                        "only `enemy` (or no target, board-wide)")
             # THE ORDERING RULE, AND IT IS LOAD-BEARING IN BOTH ENGINES. The
             # Sparks this op multiplies by are the ones the card SPENT, read
             # as the bank at play (`SparkPower.SparksAtPlay`,
@@ -11617,9 +11626,18 @@ def build_body(
             # read and the growth applied are one arithmetic; `sparksSpent` is
             # the local `_stmt_spend_spark` declares for the X price ahead of
             # it, which `blocked_reason` requires this row to carry.
-            lines.append(
-                "ProtoBombPower.GrowLargestPerSpark(Owner.Creature, "
-                f"{grow_expr(card, eff)}, sparksSpent);")
+            # `target: enemy` (Klee pass round, pick 3 (b)): the walk is
+            # restricted to the enemy the player picked.
+            if eff.get("target") == "enemy":
+                _target_guard(lines, ctx)
+                lines.append(
+                    "ProtoBombPower.GrowLargestPerSpark(Owner.Creature, "
+                    f"{grow_expr(card, eff)}, sparksSpent, "
+                    "onlyOn: cardPlay.Target);")
+            else:
+                lines.append(
+                    "ProtoBombPower.GrowLargestPerSpark(Owner.Creature, "
+                    f"{grow_expr(card, eff)}, sparksSpent);")
 
         elif op == "mine_bombs":
             # R276 (Hair Trigger). Pure and synchronous, `GrowOn`'s shape: the
