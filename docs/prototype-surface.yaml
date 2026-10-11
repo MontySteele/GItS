@@ -2663,12 +2663,14 @@
               amount_formula: {base: 6, per: 1, count: stage_repay_left},
               target: enemy}]}
 
+# Hymn of Many Waters: Block 8 [11] -> 6 [8], Repay 3 [4] kept ([USER],
+# 2026-10-11: "Yeah, I think Hymn needs a trim."; provenance note).
 - {id: proto_fs_hymn_of_many_waters, name: "Hymn of Many Waters", character: furina,
-   upgrade: {block: +3, stage_repay: +1},
+   upgrade: {block: +2, stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 8 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
-   effects: [{op: block, amount: 8},
+   description: "Gain 6 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
+   effects: [{op: block, amount: 6},
              {op: stage_repay, amount: 3, floor: block}]}
 
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
@@ -2679,11 +2681,14 @@
    effects: [{op: stage_repay, amount: 5},
              {op: draw, amount: 2}]}
 
+# Singer of Many Waters: Retain added ([USER], 2026-10-11: "Singer of Many
+# Waters felt hit or miss."; provenance note).
 - {id: proto_fs_singer_of_many_waters, name: "Singer of Many Waters", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    art_of: singer_of_many_waters,
    register: archon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   retain: true,
    description: "[gold]Repay[/gold] all your drained HP.",
    effects: [{op: stage_repay_all}]}
 
@@ -3257,15 +3262,16 @@
                amount_formula: {base: 10, per: 1, count: stage_repay_left},
                target: all_enemies, applies_element: true}]}
 
-# Balance the Books: half your drained HP, rounded down (the Review section),
-# read before its own Repay.
+# Balance the Books: all your drained HP, read before its own Repay. (Was
+# half, rounded down; the playtest of 2026-10-11, [USER]: "Balance the Books
+# is mostly a brick.")
 - {id: proto_fs_balance_the_books, name: "Balance the Books", character: furina,
    upgrade: {stage_repay: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Deal damage to ALL enemies equal to half your drained HP. [gold]Repay[/gold] 4.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal damage to ALL enemies equal to your drained HP. [gold]Repay[/gold] 4.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_half_drained},
+              amount_formula: {base: 0, per: 1, count: stage_drained},
               target: all_enemies, applies_element: false},
              {op: stage_repay, amount: 4}]}
 

@@ -51,7 +51,7 @@ public sealed class ProtoFsBalanceTheBooks : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Balance the Books"),
-        ("description", "Deal damage to ALL enemies equal to half your drained HP. [gold]Repay[/gold] {RepayAmount:diff()}.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{StageRepay}|}"),
+        ("description", "Deal damage to ALL enemies equal to your drained HP. [gold]Repay[/gold] {RepayAmount:diff()}.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -68,7 +68,7 @@ public sealed class ProtoFsBalanceTheBooks : CustomCardModel, IElementalCard, IC
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.HalfDrained(card.Owner?.Creature)),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.DrainedOf(card.Owner?.Creature)),
             new DynamicVar("RepayAmount", 4m)
         };
 

@@ -396,8 +396,8 @@ def _runtime_count(state: CombatState, token: str,
     # the C# `FurinaStage` twins). 0 for anyone else.
     if token == "stage_drains":
         return furina_stage.drains_this_combat(p)
-    if token == "stage_half_drained":
-        return furina_stage.half_drained(p)
+    if token == "stage_drained":
+        return furina_stage.drained(p)
     if token == "stage_repays_turn":
         return furina_stage.repays_this_turn(p)
     if token == "stage_repaid":
@@ -3359,7 +3359,7 @@ RUNTIME_COUNT_NAMES = frozenset({
     # The Spend paper (2026-10-10).
     "stage_spent_fours",
     # THE POOL TO 75 (2026-10-09).
-    "stage_drains", "stage_half_drained", "stage_repays_turn",
+    "stage_drains", "stage_drained", "stage_repays_turn",
     "stage_repaid",
     # THE REPAY FLOOR (ruled 2026-10-09).
     "stage_repay_left",

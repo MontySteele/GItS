@@ -6530,14 +6530,14 @@ STAGE_REPAY_FLOORS = {"none": "None", "block": "Block", "vigor": "Vigor"}
 STAGE_COUNT_CS = {
     "stage_spent": "static (card, _) => FurinaStage.Spent(card)",
     # THE POOL TO 75 (2026-10-09): Undercurrent's "for each time you have
-    # Drained this combat", Balance the Books' "half your drained HP", Rising
+    # Drained this combat", Balance the Books' "your drained HP", Rising
     # Tide's "for each time you Repaid this turn" and Grand Absolution's
     # "that much" (what this play's Repay returned; before the play, what a
     # Repay of everything would return).
     "stage_drains": "static (card, _) => "
                     "FurinaStage.DrainsThisCombat(card.Owner?.Creature)",
-    "stage_half_drained": "static (card, _) => "
-                          "FurinaStage.HalfDrained(card.Owner?.Creature)",
+    "stage_drained": "static (card, _) => "
+                     "FurinaStage.DrainedOf(card.Owner?.Creature)",
     "stage_repays_turn": "static (card, _) => "
                          "FurinaStage.RepaysThisTurn(card.Owner?.Creature)",
     "stage_repaid": "static (card, _) => FurinaStage.RepaidOrDrained(card)",

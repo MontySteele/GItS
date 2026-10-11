@@ -330,7 +330,7 @@ def test_the_repay_cards_and_their_counts():
     FS.drain(st, 20)
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_balance_the_books"))
-    assert hp - st.enemies[0].hp >= 10         # half of 20
+    assert hp - st.enemies[0].hp >= 20         # all 20 (2026-10-11; was half)
     _play(st, _card("proto_fs_soothing_waters"))
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_rising_tide"))
