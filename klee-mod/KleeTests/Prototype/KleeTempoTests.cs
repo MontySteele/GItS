@@ -107,7 +107,7 @@ public class KleeTempoTests
     {
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus your largest "
-          + "[gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] "
+          + "[gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] "
           + "into your [gold]Discard Pile[/gold].",
             Face(new ProtoKoSimmer()));
         Assert.Equal(

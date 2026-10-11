@@ -794,7 +794,7 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {damage: +3},
    effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
