@@ -60,7 +60,7 @@ public sealed class ProtoKkJellyfishDrift : CustomCardModel, ICharacterCard, IPl
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new KokomiPlan.PlanDamageVar(2m)
+            new KokomiPlan.PlanDamageVar(3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

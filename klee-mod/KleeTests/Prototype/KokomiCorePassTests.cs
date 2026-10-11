@@ -73,6 +73,9 @@ public class KokomiCorePassTests
             c => c.Contains("KokomiOverhaulLedger.ClaimOncePerTurn"));
         var draw = calls.FindIndex(c => c.Contains("CardPileCmd.Draw"));
         Assert.True(pet >= 0 && claim > pet && draw > claim);
+        // Kokomi whole-run round 2026-10-10: the draw files its receipt.
+        var receipt = calls.FindIndex(c => c.Contains("RelicAnswerLog.NoteGain"));
+        Assert.True(receipt > draw);
         Assert.False(typeof(IKokomiPlanListener)
             .IsAssignableFrom(typeof(TreatisePower)));
         Assert.Equal(PowerStackType.Counter, new TreatisePower().StackType);

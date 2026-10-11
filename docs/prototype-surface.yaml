@@ -1267,13 +1267,13 @@
 # spent the morning it was meant to pay for. Now a Power, for the fight.
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension", character: kokomi,
    authored_by: [claude],
-   cost: 3, type: power, rarity: rare,
+   cost: 2, type: power, rarity: rare,
    # POOL PASS THREE (`EB-655`): THE FIRST PLAN, NOT EVERY PLAN. Doubling
    # every Plan paid for writing MORE, which is the shape the pass undoes.
    description: "At the start of your turn, your first [gold]Plan[/gold] is carried out twice. So is your first [gold]Dusk[/gold] [gold]Plan[/gold].",
    effects: [{op: apply_power, power: kk_nereids_ascension, amount: 1, target: self}],
-   # Power cost sweep, 2026-09-30: its price is three energy on a turn that
-   # writes no Plan; the upgrade makes it Innate, so that turn is turn one.
+   # Cost 3 -> 2 (Kokomi whole-run round 2026-10-10; brief sec.5 says 2).
+   # The upgrade makes it Innate, so its no-Plan turn is turn one.
    upgrade: {innate: true}}
 
 # --- the Priestess: Block through the jellyfish, Mend at Rare (packet sec.4) ---
@@ -1400,7 +1400,9 @@
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common, exhaust: true,
+   # Kokomi whole-run round 2026-10-10: cost 1 -> 0 (played in 1 of 14
+   # fights where it was held). The default upgrade still removes Exhaust.
+   cost: 0, type: skill, rarity: common, exhaust: true,
    description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
    effects: [{op: carry_out_front_plan}]}
 
@@ -1679,10 +1681,12 @@
 - {id: proto_kk_jellyfish_drift, name: "Jellyfish Drift", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 2 [gold]Hydro[/gold] damage to ALL enemies.",
+   description: "[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage to ALL enemies.",
    effects: [],
-   plan: [{op: damage, amount: 2, target: all_enemies}],
-   # Plan 3 to ALL.
+   # Kokomi whole-run round 2026-10-10: Plan 2 -> 3 (at 2 it was a third of
+   # Astral Pulse).
+   plan: [{op: damage, amount: 3, target: all_enemies}],
+   # Plan 4 to ALL.
    upgrade: {plan_damage: 1}}
 
 - {id: proto_kk_current_read, name: "Current Read", character: kokomi,
