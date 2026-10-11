@@ -7359,3 +7359,23 @@ option) and 3 (a).
 - **Open the Casket** prints "(Gains N Strength; the Casket stays)" in combat
   under Grand Design (`GrandDesignPower.Keeps`), and its tip adds "Under
   Grand Design it is not emptied." Text only.
+
+## Varka co-op fixes, 2026-10-11
+
+The human co-op playtest (`review/records/coop-human-playtest-2026-10-11.md`)
+said of Varka: "Solid! But reliant on powers for Block.", "The Order Answers -
+random Knights are often commons, right? This seems bad." and "Vow of the
+Blade is weak."
+
+- **Rippling Guard** 6 + 1 [2] per other card played, was 3 + 2 [3]: a higher
+  floor, a lower ratio.
+- **Barbara: Gleeful Songs** 6 [8] + 2 [3] per enemy it reacts on, was
+  4 [6] + 3 [4].
+- **Vow of the Blade** gains 2 Oath, was 1; draw stays 1 [2].
+  `gain_current_oath` takes an optional `amount` (absent means 1).
+- **The Order Answers** "At the start of your turn, choose 1 of 3 random
+  Knights. Add it to your hand, upgraded." One choice per stack, three
+  distinct pool Knights on the choose-a-card screen, the pick at its own
+  upgraded cost (C# `VarkaRules.ChooseUpgradedKnight`). The sim picks the
+  first offered Knight of the current element, else the first offered
+  (`varka_oath.order_answers_pick`).

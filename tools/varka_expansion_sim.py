@@ -395,7 +395,7 @@ def _translate(state, fx):
         if cur or kind == "rally":
             yield {"op": "apply_power", "power": "vk_oath_proxy",
                    "amount": max(1, cur_oath if kind == "double_current_oath"
-                                 else 1), "target": "self"}
+                                 else fx.get("amount", 1)), "target": "self"}
     elif kind == "swirled_oath":
         # Downburst: its Oath when the hit can Swirl (any enemy wears an aura).
         if any(e.aura for e in state.living_enemies):
