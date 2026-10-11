@@ -177,9 +177,9 @@ public class ArmKeywordTipTests
         // THE STATUS BATCH (2026-10-01, sec.3 pick 2): "Instead of the line
         // above"; the second sentence shortened to stay under the ceiling.
         Assert.Equal(
-            "Instead of the line above, play the card on the Bake-Kurage: "
-          + "it happens next turn. Click it to flip lines. Plans go in the "
-          + "order made.",
+            "Instead of the line above, play it on the Bake-Kurage; "
+          + "click to flip. Plans happen next turn in order, and their "
+          + "Block lasts that turn.",
             rendered);
         // The base game's own longest mechanic tip is CHANNELING, 134.
         Assert.True(rendered.Length <= 135, rendered.Length.ToString());

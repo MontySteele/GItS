@@ -14,6 +14,7 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
+                                        ENEMY_FOLD_NOTE,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
                                         BOMB_REACTION_CLAUSE,
                                         REACTION_ELEMENTS,
@@ -1396,6 +1397,28 @@ def _attack_buff_note(you: dict[str, Any],
                                         n=buff["stacks"])]
 
 
+#: The enemy powers a hand face leaves out until a card is aimed.
+ENEMY_FOLD_POWERS = ("vulnerable", "slow")
+
+
+def _enemy_fold_note(enemies: list[dict[str, Any]],
+                     hand: list[dict[str, Any]]) -> list[str]:
+    """Furina round 3 (2026-10-11): one line under the hand where a living
+    enemy wears Vulnerable or Slow and an Attack in hand prints a number,
+    `_attack_buff_note`'s rule: one rule about the hand, not a line per
+    card."""
+    if not any(_stacks_of(e, word) > 0 for e in enemies
+               if not e.get("phase_flip")
+               and not (isinstance(e.get("hp"), int) and e["hp"] <= 0)
+               for word in ENEMY_FOLD_POWERS):
+        return []
+    if not any(str(card.get("kind") or "").strip().casefold() == "attack"
+               and _NUMBER.search(str(card.get("text") or ""))
+               for card in hand):
+        return []
+    return ["", ENEMY_FOLD_NOTE]
+
+
 def _numbers_disagree(intent: dict[str, Any]) -> bool:
     """`EB-607`: does the hover sentence's number contradict the icon's?
 
@@ -2076,6 +2099,20 @@ STAGE_DRAIN_PAST_RETURNS = " ({past} past your line)"
 #: are `FurinaStageLaw.LineZeroReturns`.
 STAGE_DRAIN_LINE_ZERO = ("- Drained {drained} HP. Drain line 0 HP{why}: all "
                          "your Drain returns after combat.")
+#: FURINA ROUND 3 (2026-10-11, review change 1): the counter leads with the
+#: buffer, the model [USER] ruled in, and prints the line as a derived number.
+#: Three seats called the line-first sentence dense, and two read the rule
+#: right off the Drain keyword tip, which already says it in buffer words.
+#: The rule is unchanged. Used where the build sends the buffer.
+STAGE_DRAIN_BUFFER_LINE = ("- Drained {drained} HP{past}. Drain buffer "
+                           "{left} of {buffer} left: Drain inside it returns "
+                           "after combat; past it, only Repay returns. Drain "
+                           "line {line} HP.")
+#: The same, with A Five-Century Act in play: the past part returns too.
+STAGE_DRAIN_BUFFER_LINE_RETURNS = ("- Drained {drained} HP{past}. Drain "
+                                   "buffer {left} of {buffer} left: all your "
+                                   "Drain returns after combat, past it too. "
+                                   "Drain line {line} HP.")
 #: Seat page 3: where the line comes from (2026-10-09; since the Drain buffer,
 #: 2026-10-11, "your HP minus your Drain buffer: 1/4 of your Max HP, less
 #: what you have drained"); seats connected it to its source only late.
@@ -2097,6 +2134,14 @@ STAGE_FORECAST_PRICE = ", pays {price} Fanfare"
 STAGE_FORECAST_TWICE = ", twice"
 STAGE_FORECAST_TIMES = ", {n} times"
 STAGE_FORECAST_AFTER = "- After the acts: Fanfare {fanfare}."
+#: FURINA ROUND 3 (2026-10-11, review change 2): a Repay act names its floor
+#: as the card face does ("(Repays 0, +2 Block)",
+#: `FurinaStageBowPreview.Line`). A seat read Charlotte's act that gave 2
+#: Block as "Repay 0". Printed only when the Repay returns less than its
+#: number; what it returns is read the face's way (`Room`): never more than
+#: she has drained, never past her Max HP, walked front to back.
+STAGE_FORECAST_REPAY_FLOOR = " (repays {back}, +{floor} Block)"
+STAGE_LOG_REPAY_FLOOR = ", +{floor} Block"
 #: What one act of each kind does, as the forecast names it.
 STAGE_KIND_WORDS = {
     "block": "{n} Block",
@@ -2373,11 +2418,17 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         line_words = STAGE_DRAIN_LINE_RETURNS if returns else STAGE_DRAIN_LINE
         if stage["line"] <= 0:
             line_words = STAGE_DRAIN_LINE_ZERO
+        elif stage.get("buffer") is not None:
+            # Furina round 3: the buffer first, the line derived.
+            line_words = (STAGE_DRAIN_BUFFER_LINE_RETURNS if returns
+                          else STAGE_DRAIN_BUFFER_LINE)
         past_words = STAGE_DRAIN_PAST_RETURNS if returns else STAGE_DRAIN_PAST
         out.append(line_words.format(
             drained=stage.get("drained", 0), line=stage["line"],
             past=past_words.format(past=past) if past > 0 else "",
-            why=STAGE_DRAIN_WHY.format(why=why) if why else ""))
+            why=STAGE_DRAIN_WHY.format(why=why) if why else "",
+            buffer=stage.get("buffer"),
+            left=stage.get("buffer_left") or 0))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
         return out
@@ -2398,15 +2449,28 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         if row.get("act") and row["name"] not in said:
             said.add(row["name"])
             out.append(STAGE_ACT_LINE.format(who=row["name"], act=row["act"]))
-    out += _render_stage_forecast(forecast)
+    out += _render_stage_forecast(forecast, _repay_room(stage, you))
     return out
 
 
-def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
+def _repay_room(stage: dict[str, Any], you: dict[str, Any]) -> int | None:
+    """What Repay could return now, the face's way
+    (`FurinaStageBowPreview.Room`): her drained HP, never past her Max HP.
+    None where the board does not say."""
+    hp, max_hp = you.get("hp"), you.get("max_hp")
+    if not isinstance(hp, int) or not isinstance(max_hp, int):
+        return None
+    return max(0, min(int(stage.get("drained") or 0), max_hp - hp))
+
+
+def _render_stage_forecast(forecast: dict[str, Any] | None,
+                           room: int | None = None) -> list[str]:
     """The mod's forecast of the end of this turn, one line per seat front to
     back: what the act does, a star's price, how many times it lands, or that
     it skips for want of Fanfare; then her Fanfare and the Block after the
-    acts. Nothing on a build that sends none, or on an empty stage."""
+    acts. A Repay act names its floor where it returns less than its number
+    (`room`, what Repay could return, walked front to back). Nothing on a
+    build that sends none, or on an empty stage."""
     if not forecast or not forecast.get("acts"):
         return []
     out = [STAGE_FORECAST_HEADING]
@@ -2421,6 +2485,13 @@ def _render_stage_forecast(forecast: dict[str, Any] | None) -> list[str]:
             element=f" {act['element']}" if act["element"] else "",
             target=act["target"] or "a random enemy")
         times = act.get("times") or 1
+        if act["kind"] == "repay" and room is not None and act["amount"] > 0:
+            back = min(act["amount"], room)
+            room -= back * times
+            room = max(0, room)
+            if back < act["amount"]:
+                what += STAGE_FORECAST_REPAY_FLOOR.format(
+                    back=back, floor=act["amount"] - back)
         out.append(STAGE_FORECAST_ROW.format(
             who=act["name"], what=what,
             price=(STAGE_FORECAST_PRICE.format(price=act["price"])
@@ -2452,6 +2523,9 @@ def _stage_act_effect(row: dict[str, Any]) -> str:
     member = row["member"]
     kind = STAGE_MEMBER_KINDS.get(member, "damage")
     n = row["moved"]
+    if kind == "repay" and row.get("floor"):
+        return (STAGE_LOG_EFFECTS[kind].format(n=n)
+                + STAGE_LOG_REPAY_FLOOR.format(floor=row["floor"]))
     if kind == "card":
         return ": adds a Trick to your hand"
     if kind == "ensemble":
@@ -2780,7 +2854,11 @@ def _attack_part_total(intent: dict[str, Any], weak: int,
 INCOMING_FOLDS = " ({folds})"
 INCOMING_NOT_COUNTED = " Not counted: {names}."
 FOLD_BLOCK = "{who} {verb} {n} Block first"
-FOLD_SELF_HIT = "{who} {verb} you for {n} first"
+#: FURINA ROUND 3 (2026-10-11, review change 3): "first" meant "before the
+#: enemies act", and a seat read it as "before Block" and called Wither
+#: unblockable. The words say which; the arithmetic is unchanged.
+FOLD_SELF_HIT = ("{who} {verb} you for {n} before the enemies act, and your "
+                 "Block takes it")
 FOLD_SELF_HP = "{who} {verb} {n} HP"
 FOLD_OSTY = "{name} absorbs up to {hp}"
 FOLD_CAP = "{name} caps the turn's HP loss at {cap}"
@@ -3640,6 +3718,8 @@ def render(obs: dict[str, Any]) -> str:
         # figure on each of those faces came from -- one field of the feed,
         # printed unchanged, which may or may not already count the buff.
         out += _attack_buff_note(you, c["hand"])
+        # Furina round 3: the enemy's Vulnerable and Slow are not on a face.
+        out += _enemy_fold_note(c["enemies"], c["hand"])
         out += ["", _OTHER_SIDE, ""]
         for e in c["enemies"]:
             # `EB-496`: the letter in brackets after the name, where the card

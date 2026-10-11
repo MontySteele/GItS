@@ -133,7 +133,7 @@ public class KokomiStatusBatchTests : IDisposable
     {
         var tip = string.Join("", Il.Strings(Il.Method("ArmKeywordTips",
                                                        "ForPlan")));
-        Assert.StartsWith("Instead of the line above, play the card on the ",
+        Assert.StartsWith("Instead of the line above, play it on the ",
                           tip.Substring(tip.IndexOf("Instead", StringComparison.Ordinal)));
     }
 

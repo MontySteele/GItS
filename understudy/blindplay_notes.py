@@ -507,6 +507,16 @@ ATTACK_BUFF_NOTE = (
     "for it, and does no arithmetic on it. So a row may already count your "
     "{n} or may not, and this page cannot say which -- both have been seen "
     "under one live buff.*")
+# FURINA ROUND 3 (2026-10-11, review change 4). A face in hand previews
+# against no body, so the dealer's side folds (Weak, Strength, Shrink) and the
+# enemy's Vulnerable and Slow do not; the number with the enemy folded shows
+# only when a card is aimed (`FrontFoldedDamageVar`, the base game's
+# convention, ruled 2026-09-25). A seat cannot drag a card, so it never sees
+# that number: a seat read Rising Applause landing 92 off 64 Fanfare spent as
+# a preview bug. Said once under the hand, only where an enemy wears either.
+ENEMY_FOLD_NOTE = (
+    "*Face numbers leave out the enemy's Vulnerable and Slow until a card is "
+    "aimed; the hit lands higher.*")
 # `EB-605`. TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE.
 #
 # THE FIND (Klee r22 lane 1 re-run (c) 2, fight 6 turn 4). "`Bomb 6 ... Bomb
@@ -1530,9 +1540,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # THE STATUS BATCH (2026-10-01, sec.3 pick 2): the face prints "Or plan:"
     # and the tip opens "Instead of the line above". A PLAN STAYS OPEN
     # (2026-10-01), pick 5 (a): "click a waiting Plan to flip it".
-    "Plan": ("Instead of the line above, play the card on the Bake-Kurage: "
-             "it happens next turn. Click it to flip lines. Plans go in the "
-             "order made."),
+    # Kokomi round 3 review (2026-10-11), change 3: when Plan Block lands.
+    "Plan": ("Instead of the line above, play it on the Bake-Kurage; "
+             "click to flip. Plans happen next turn in order, and their "
+             "Block lasts that turn."),
     # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
     # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and
     # the row above says all of it. What a reader cannot get from anywhere else
