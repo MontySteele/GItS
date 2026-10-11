@@ -80,14 +80,23 @@ the Bake-Kurage carries it out at the start of her next turn.
 7. **The Casket counts (2026-09-28).** Her relic, the Tamakushi Casket,
    gains 1 each time the Bake-Kurage carries out a Plan -- in the morning,
    at Dusk or hurried by Change of Plans, and a Plan carried out twice adds
-   twice. The count is per combat and starts at 0. Open the Casket (a 1-cost
-   Retain token the relic puts in her opening hand) turns the count into
+   twice. The count is per combat and starts at 0. Open the Casket (a Retain
+   token the relic puts in her opening hand; it costs 0, and each play
+   raises its cost by 1 for the combat) turns the count into
    Strength, 1 per point, and empties it; the Casket keeps counting. Since
    2026-10-01 it has no Exhaust and cycles with the deck, so it pays more
    than once (the four-kit review, Kokomi pick 1). [USER]:
    "On your new picks agree all around - I think that if it's repeatable,
    it should probably cost energy, though, to make this a real choice and
-   not just button mashing when it comes up?"
+   not just button mashing when it comes up?" It cost 1 from then until
+   2026-10-10, when, after his Kokomi run, [USER] ruled: "I think that the
+   casket should start at 0 and then have a ramping cost (goes up by 1 each
+   time) That means the casket is free the first play, costs 1 the second,
+   and then at 2+ becomes difficult. That way it has obvious use in a short
+   hallway fight".
+   The face takes the base game's Modded line, "Increase this card's cost
+   by 1."; the ramp is on the copy, so a fetched Open keeps it, and the
+   relic's fresh copy each combat is the reset.
    Cards may read or add to the count; none spends it. [USER]: "We don't
    need this to be the equivalent to Regent's stars or Klee's sparks. This
    should feel like a distinct effect."
@@ -131,8 +140,8 @@ touching the basics.
 |---|---|---|---|---|
 | Strike | 1 | Attack | Deal 6. | 4 |
 | Defend | 1 | Skill | Gain 5 Block. | 4 |
-| Kurage's Oath | 1 | Skill | Gain 6 Block. Plan: Deal 7 damage to ALL enemies. | 1 |
-| Slack Water | 1 | Attack | Deal 4 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies. | 1 |
+| Kurage's Oath | 1 | Skill | Gain 6 Block. Plan: Deal 9 damage to ALL enemies. | 1 |
+| Slack Water | 1 | Attack | Deal 6 damage. Apply 1 Weak. Plan: Apply 1 Weak to ALL enemies. | 1 |
 
 The basics are the base game's Strike and Defend (R242) and apply no
 element ([USER], 2026-09-02); every damaging card of her own applies Hydro,
@@ -140,19 +149,26 @@ Skills included (R276 pick 2), which is what a companion's Pyro, Electro or
 Cryo card reacts with. Kurage's Oath gained a now-line under R250 pick 1
 (round 4d), so writing it is a trade rather than the only play; R276 pick 1
 made that line 4 Block, a different job from the Plan's 7 to ALL (the
-halves rule, §3). 2026-09-28, [USER]: "The non-plan effect is quite bad
+halves rule, §3; the Plan is 9 since the Plan pricing, below). 2026-09-28, [USER]: "The non-plan effect is quite bad
 (worse than a basic defend)" ... "Option 1 is fine for now." The now-line
-is 6 Block, and the upgrade moves both halves: 8 Block, Plan 10 to ALL.
+is 6 Block, and the upgrade moves both halves: 8 Block, Plan 12 to ALL.
 Slack Water's Plan is a **morning** Plan: the Weak lands the
 next turn, after the swing it was written against, and that delay is the
-point (R267 pick 1). Its numbers are the R243 audit's (Weak 1 now, Weak 1
-to ALL written; upgrade 7 damage and 2 Weak written).
+point (R267 pick 1). Its Weak numbers are the R243 audit's (Weak 1 now, Weak 1
+to ALL written; upgrade 2 Weak written); its damage is 6 [9].
+
+**Plan pricing (2026-10-11,
+`review/active/kokomi-plan-pricing-2026-10-11.md`).** [USER]: "Let's go
+with a ratio of 1.3 and I agree on the other defaults." and "I'm also fine
+with modifying the starters if the rates are low." Kurage's Oath's Plan
+7 to ALL became 9 [12]; Slack Water's damage 4 [7] became 6 [9].
 
 Relic, **Tamakushi Casket** (the Casket pass, 2026-09-28): "Start each
 combat with the Bake-Kurage and Open the Casket in hand. Each Plan it
 carries out adds 1 to the Casket." Open the Casket: "Gain Strength equal to
-the Casket's count, then empty it." (1, Retain; it was 0, Retain, Exhaust
-until 2026-10-01, when it became repeatable at a cost: rule 7.) [USER], choosing
+the Casket's count, then empty it. Increase this card's cost by 1." (0,
+Retain; it was 0, Retain, Exhaust until 2026-10-01, then 1, Retain until
+2026-10-10, when it became free first and dearer each play: rule 7.) [USER], choosing
 this Forge-style relic over a Vigor-style one, because Vigor "devolves into
 'solve for lethal, press the I Win button'": "an artifact that grants /
 tracks an alternative energy that builds by 1 for every Plan played, and
@@ -165,11 +181,11 @@ is gone. It keeps the companion reward slot.
 
 Fight one, turn one: three energy, Strike twice, Defend, Kurage's Oath,
 Slack Water, and Open the Casket held for later; the enemy intends 8.
-Slack Water on the enemy: 4 and Weak. Defend, 5 Block against a Weakened
+Slack Water on the enemy: 6 and Weak. Defend, 5 Block against a Weakened
 6. Kurage's Oath on the jellyfish, or 6 more Block now. Turn two opens
-with the jellyfish hitting every enemy for 7 once you have drawn. Slack
+with the jellyfish hitting every enemy for 9 once you have drawn. Slack
 Water and the Oath were the decisions: blunt this turn's hit now, or Weak
-on everyone and 7 to everyone at dawn. That is the whole kit, on turn one.
+on everyone and 9 to everyone at dawn. That is the whole kit, on turn one.
 
 ## 5. The payoff moment
 
@@ -348,6 +364,30 @@ Sanctuary feels messy"); Riptide Ruin took the slot, a second status source.
 The pool is 78 (21 / 36 / 21). A Plan line under a now-line prints "Or
 plan:" (rule 2). Readings: provenance note, "Kokomi status batch,
 2026-10-01".
+
+### Plan pricing (2026-10-11)
+
+A Plan that lands next turn prints 1.3 times the base game's on-turn median
+for its cost and target (`review/active/kokomi-plan-pricing-2026-10-11.md`,
+ruled: "Let's go with a ratio of 1.3 and I agree on the other defaults").
+Base [upgraded]:
+
+| Card | Plan before | Plan now |
+|---|---|---|
+| Signal Arrow | 3 to ALL twice | 4 [5] to ALL twice |
+| Pearl Current | 2 to ALL 3 times | 3 [4] to ALL 3 times |
+| Flank | 8 to each attacker | 9 [12] to each attacker |
+| Undertide Lance | 12, doubled if alone | 14 [18], doubled if alone |
+| Masterstroke | 30, Strength 3 times | 35 [45], Strength 3 times |
+| Nip | 5 | 7 [9] |
+| Jellyfish Drift | 3 [4] to ALL | 6 [8] to ALL |
+| Brine Sting | 3 and 1 [2] Weak | 4 and 1 [2] Weak |
+| Bubble Ward | 4 Block | 5 [7] Block |
+| Kurage's Oath (starter) | 7 to ALL | 9 [12] to ALL |
+| Slack Water (starter, on-turn damage) | 4 [7] | 6 [9] |
+
+Surging Shoal, Ambush, the Dusk Plans and every other on-turn number are
+unchanged.
 
 ## 7. What the engine does
 

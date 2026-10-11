@@ -6504,16 +6504,16 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # interpolated numerals; the performers' rows are their badges'
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
         "Spend": ["Pay that much ", ". Offered only if you have "],
-        "Fanfare": ["Gain 1 ", " for each HP you lose or ", ". ",
-                    " uses it. It resets to 0 after each combat."],
+        "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
+                    " uses it. Resets after each combat."],
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
         # The Drain line rule (2026-10-09): the line is entry HP minus 1/4
         # of Max HP, and HP drained past it is lost unless Repaid.
         # The drain-line round (2026-10-09): the curtain-call sentence.
-        "Drain": ["Lose N HP. Drained HP above your line returns after "
-                  "combat. HP ", "drained past your line is lost unless "
-                  "you ", "it. Your line is the HP you started this fight "
-                  "with, minus 1/4 ", "of your Max HP."],
+        # The 2026-10-11 playtest: one sentence.
+        "Drain": ["Lose N HP. Each combat, the first 1/4 of your Max HP "
+                  "drained returns ", "after combat; more than that only ",
+                  " returns."],
         # The pool to 75 (2026-10-09): the guest rule's words.
         "Repay": ["Regain that much drained HP, never more than you ",
                   "drained. A ", " counts the HP it returns."],
@@ -6538,10 +6538,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
             "Your relic. Each ", "carries out adds ",
             " turns the count into "],
         # And the relic's token, named by What the Tokoyo Returns.
-        "Open the Casket": ["1-cost, Retain. Gain ",
+        "Open the Casket": ["0-cost, Retain. Gain ",
                             " equal to the ",
-                            "Casket's count, then empty it. Upgraded, it "
-                            "also draws a card."],
+                            "Casket's count, then empty it, and increase "
+                            "its cost by 1. ",
+                            "Upgraded, it also draws a card."],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then

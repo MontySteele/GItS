@@ -71,8 +71,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   after the draw; the line prints "Or plan:" under the now-line. When it
   carries out a two-line Plan it uses the Plan line, and a click on a waiting
   Plan flips it to the now-line (`review/active/kokomi-delay-pays-2026-10-01.md`).
-  The Tamakushi Casket counts the Plans carried out; Open the Casket (cost 1,
-  Retain, no Exhaust) gives Strength equal to the count and empties it. Pool
+  The Tamakushi Casket counts the Plans carried out; Open the Casket (cost 0,
+  then 1 more each play this combat, ruled by [USER] after his run
+  2026-10-10; Retain, no Exhaust) gives Strength equal to the count and
+  empties it. Pool
   78 (21 / 36 / 21) plus five co-op cards and two Ancients; relics are the
   Casket and its upgrade beside the Silent's borrowed roster. Latest round
   `review/records/kokomi-review-round-2026-10-05.md`: one run reached the
@@ -86,18 +88,23 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   the same-night base; Flood Tide works and Plan damage no longer collapses
   late (act 3 53.3 a fight, was 5.7); act 1 still bleeds. Round-2 fixes:
   Grand Design puts Open the Casket into her hand each turn, Change of Plans
-  draws 1, Open the Casket shows its count. Next: [USER]'s run; round 2
-  picks 1 and 2 open.
+  draws 1, Open the Casket shows its count. Its two picks were settled by
+  [USER]'s run and rulings after it. Plan pricing built 2026-10-11
+  (`review/active/kokomi-plan-pricing-2026-10-11.md`, ratio 1.3): nine
+  next-turn Plans pay 1.3 times the base on-turn rate, Kurage's Oath's Plan
+  is 9 [12] to ALL and Slack Water deals 6 [9]; checked by the next
+  whole-run seat round.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
   "the current one built overnight can be discarded". Furina pays HP for
-  power: Drain spends HP, never to 0; her Drain line is the HP she entered
-  combat with minus 1/4 of her Max HP, rounded down (50/80 puts it at 30;
-  Lyney: 10 lower; ruled 2026-10-09: "That also rewards max HP stacking"),
+  power: Drain spends HP, never to 0; each combat she has a Drain buffer of
+  1/4 of her Max HP, rounded down, counted in HP drained, so a hit never
+  uses it up, and her Drain line is her HP less the buffer left (2026-10-11,
+  replacing the entry-HP line of 2026-10-09; Lyney adds 10 to the buffer),
   her own Drains may go past it (a
   guest act's Drain stops at it, the drain-line round 2026-10-09), and when
-  combat ends only the HP drained above the line returns (A Five-Century Act
+  combat ends only the HP drained within the buffer returns (A Five-Century Act
   returns the rest too). Repay returns drained HP, the past-line part first;
   every HP lost or repaid prints 1 Fanfare. The Repay floor: most Repay cards
   pay Block, Vigor or damage for the HP a Repay could not return (the Drain
@@ -107,7 +114,7 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   (`review/active/furina-pool-growth-2026-10-09.md` sec.3, ruled 2026-10-09):
   a Guest Star exhausts and has no effect on summon; when its guest leaves (a
   fourth summon, or Final Bow) its card goes to the discard pile; a second
-  copy moves its guest to the newest seat with no act; at the end of her turn
+  copy moves its guest to the newest seat and it acts once (2026-10-11); at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
   pool is the starter and 78 cards (20 / 38 / 20; Guest Star: Navia moved

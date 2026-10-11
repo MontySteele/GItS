@@ -819,6 +819,11 @@ TWO_LINE_WAITING_ROW = (
     TWO_LINE_WAITING_NOTE + " **{line}**: {this} · {other_name}: {other} · "
     "`flip {n}` switches it.")
 
+#: Kokomi whole-run round 2 (2026-10-10): after a waiting Plan line whose
+#: number the front enemy's Vulnerable raised. The printed number folds it
+#: (`PlanDamageVar`), and a seat read the rise as the Plan changing.
+AFTER_VULNERABLE = " (after Vulnerable)"
+
 #: The mode chooser (`screen_type: "choose"`), where one `choose` resolves.
 #: It never says `confirm`, because there is no confirm button on this screen
 #: and saying the word costs a refusal (`EB-779`).
@@ -1573,9 +1578,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # `Open the Casket` is the relic's token. Both follow
     # `ArmKeywordTips.ForCasket` / `ForOpenTheCasket` word for word.
     "Tamakushi Casket": CASKET_ROW,
-    "Open the Casket": ("1-cost, Retain. Gain Strength equal to the "
-                        "Casket's count, then empty it. Upgraded, it also "
-                        "draws a card."),
+    # 2026-10-10 ([USER], after his Kokomi playtest): it starts at 0 and
+    # each play raises its cost by 1.
+    "Open the Casket": ("0-cost, Retain. Gain Strength equal to the "
+                        "Casket's count, then empty it, and increase its "
+                        "cost by 1. Upgraded, it also draws a card."),
     # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three
     # readers read any Companion play now, so the word and its row left the
@@ -1640,16 +1647,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # The Spend paper (2026-10-10): "Spend up to X" pays X or all she has.
     "Spend": ("Pay that much Fanfare. Offered only if you have enough. "
               "Spend up to X pays X, or all you have if that is less."),
-    "Fanfare": ("Gain 1 Fanfare for each HP you lose or Repay. Spend uses "
-                "it. It resets to 0 after each combat."),
-    # The Drain line rule (ruled 2026-10-09): the line is entry HP minus
-    # 1/4 of Max HP, a Drain may go past it, and what it drains past it is
-    # lost unless Repaid. The drain-line round (2026-10-09): "Drained HP
+    # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
+    # rather verbose (Drain moreso)".
+    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. "
+                "Resets after each combat."),
+    # The Drain buffer (2026-10-11): the first 1/4 of her Max HP drained
+    # each combat returns after it; what she drains past it is lost unless
+    # Repaid. The drain-line round (2026-10-09): "Drained HP
     # above your line returns after combat."
-    "Drain": ("Lose N HP. Drained HP above your line returns after combat. "
-              "HP drained past your line is lost unless you Repay it. Your "
-              "line is the HP you started this fight with, minus 1/4 of "
-              "your Max HP."),
+    "Drain": ("Lose N HP. Each combat, the first 1/4 of your Max HP "
+              "drained returns after combat; more than that only Repay "
+              "returns."),
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
     # Guest Star exhausts and comes back when its guest leaves.
     "Repay": ("Regain that much drained HP, never more than you drained. A "

@@ -30,7 +30,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
                                         CARRY_OUT_BOARD_NOTE,
                                         CHOOSER_CONFIRM_NOTE,
-                                        TWO_LINE_WAITING_ROW,
+                                        TWO_LINE_WAITING_ROW, AFTER_VULNERABLE,
                                         CHOOSER_ONE_CHOICE_NOTE,
                                         CHOOSER_MAYBE_CLOSES_NOTE,
                                         CLOSES_NOTE_HEAD,
@@ -2076,9 +2076,9 @@ STAGE_DRAIN_PAST_RETURNS = " ({past} past your line)"
 #: are `FurinaStageLaw.LineZeroReturns`.
 STAGE_DRAIN_LINE_ZERO = ("- Drained {drained} HP. Drain line 0 HP{why}: all "
                          "your Drain returns after combat.")
-#: Seat page 3: where the line comes from ("the HP you started this fight
-#: with, minus 1/4 of your Max HP", 2026-10-09); seats connected it to their
-#: entry HP only late.
+#: Seat page 3: where the line comes from (2026-10-09; since the Drain buffer,
+#: 2026-10-11, "your HP minus your Drain buffer: 1/4 of your Max HP, less
+#: what you have drained"); seats connected it to its source only late.
 STAGE_DRAIN_WHY = " ({why})"
 STAGE_REHEARSAL_CLAUSE = " · Rehearsal {n}"
 STAGE_EMPTY_LINE = "- The stage is empty."
@@ -2128,10 +2128,11 @@ STAGE_LOG_WALKON = ("  - **{who}** walked on: every seat holds a Guest Star, "
 STAGE_LOG_CUE = "  - You Cued **{who}**."
 STAGE_LOG_MOVE = "  - **{who}** moved to the front."
 #: THE POOL TO 75 (2026-10-09, sec.3): a second copy of a guest on stage moves
-#: it to the newest seat, with no act; and a guest's line has a log line of
-#: its own, so it is not read as an act.
+#: it to the newest seat; and a guest's line has a log line of its own, so it
+#: is not read as an act. Since 2026-10-11 the repeat then acts, and the act
+#: is logged as its own line after this one.
 STAGE_LOG_REPEAT = ("  - **{who}** moved to the newest seat (a second copy; "
-                    "no act).")
+                    "it acts).")
 STAGE_LOG_LINE = "  - **{who}**'s line ({n})."
 STAGE_LOG_GAIN = "  - You gained {n} Fanfare{src}: {before} → {after}."
 STAGE_LOG_SPEND = "  - You spent {n} Fanfare: {before} → {after}."
@@ -3473,11 +3474,17 @@ def render(obs: dict[str, Any]) -> str:
                     if e.get("two_line") and (e.get("now_line")
                                               or e.get("plan_line")):
                         now = e.get("line") == "now"
+                        # Kokomi whole-run round 2 (2026-10-10): a Plan
+                        # line whose number the target's Vulnerable raised
+                        # says so.
+                        plan_text = e["plan_line"] + (
+                            AFTER_VULNERABLE if e.get("after_vulnerable")
+                            and e["plan_line"] else "")
                         out.append("     - " + TWO_LINE_WAITING_ROW.format(
                             line="now-line" if now else "Plan line",
-                            this=e["now_line"] if now else e["plan_line"],
+                            this=e["now_line"] if now else plan_text,
                             other_name="Plan line" if now else "Now-line",
-                            other=e["plan_line"] if now else e["now_line"],
+                            other=plan_text if now else e["now_line"],
                             n=i))
                 if pl["twice"]:
                     # 2026-09-28 (Kokomi seat): with a Dusk Plan in the

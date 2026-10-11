@@ -7126,3 +7126,77 @@ both." Sim read: `tools/kokomi_growth_power_sim.py` (#1059).
 - Kurage Canopy and Ceremonial Garment already printed 2 [3] (the payoff
   pass and the kit review, 2026-10-05), so the raises the build was asked
   for were already in place; no number moved.
+
+## Kokomi whole-run round 2, 2026-10-10
+
+Record `review/records/kokomi-fullrun-round-2-2026-10-10.md`, "What changes
+(Claude ships)".
+
+- **Change of Plans** (`proto_kk_change_of_plans`): "The Bake-Kurage carries
+  out your first Plan now. Draw 1 card." Cost 0, Exhaust; the upgrade still
+  removes the Exhaust. 0 of 8 taken in the round. With the draw it is no
+  longer carry-out-only, so the `EB-455` no-Plan gate no longer applies to it
+  (played on an empty jellyfish it draws 1).
+- **Grand Design** (`proto_kk_grand_design`): "Open the Casket no longer
+  empties the Casket. At the start of your turn, put it into your hand."
+  Paid at Flood Tide's site (`kokomi_plan.grand_design_fetch`,
+  `GrandDesignPower.Signal`): nothing moves if an Open is already in hand;
+  otherwise the first one in the draw pile, then the discard pile, comes to
+  hand (`FetchOpenCasket`); an exhausted Open stays gone. Cost 2 [1].
+- **Open the Casket** (the token) prints "(Gains N Strength)" in combat, the
+  way Driftglass prints its damage.
+
+## Open the Casket ramps, 2026-10-10 ([USER]'s ruling after his Kokomi run)
+
+[USER]: "I think that the casket should start at 0 and then have a ramping
+cost (goes up by 1 each time) That means the casket is free the first play,
+costs 1 the second, and then at 2+ becomes difficult. That way it has
+obvious use in a short hallway fight".
+
+- **Open the Casket** (`OpenTheCasket.cs`, sim
+  `kokomi_plan.open_the_casket_card`): cost 1 -> 0, and "Increase this
+  card's cost by 1." ends the face, the base game's Modded line and
+  mechanism (`EnergyCost.AddThisCombat(1)` last in `OnPlay`; sim
+  `cost_mod self_this_combat +1`, Up My Sleeve's op). Per copy: the relic
+  deals a fresh one each combat (the reset), and What the Tokoyo Returns and
+  Grand Design move the played copy, so a fetched Open keeps its price.
+  Tip and page row: "0-cost, Retain. ... then empty it, and increase its
+  cost by 1. ..."
+
+## Kokomi Plan pricing, 2026-10-11
+
+Paper `review/active/kokomi-plan-pricing-2026-10-11.md`. [USER]: "Let's go
+with a ratio of 1.3 and I agree on the other defaults." and "I'm also fine
+with modifying the starters if the rates are low." A Plan that lands next
+turn prints 1.3 times the base on-turn median for its cost and target.
+Base [upgraded]:
+
+- Signal Arrow Plan 3 -> 4 [5] to ALL twice; Pearl Current 2 -> 3 [4] to ALL
+  3 times; Flank 8 -> 9 [12] to each attacker; Undertide Lance 12 -> 14 [18],
+  doubled if alone; Masterstroke 30 -> 35 [45], Strength 3 times; Nip 5 -> 7
+  [9]; Jellyfish Drift 3 [4] -> 6 [8] to ALL (`plan_damage` 1 -> 2); Brine
+  Sting 3 -> 4 damage, 1 [2] Weak; Bubble Ward 4 -> 5 [7] Block.
+- Starter: Kurage's Oath's Plan 7 -> 9 [12] to ALL (6 [8] Block unchanged);
+  Slack Water's on-turn damage 4 -> 6 [9] (Weak and Plan line unchanged).
+
+## Furina: Singer Retains, Balance the Books, Hymn trimmed, 2026-10-11
+
+After [USER]'s winning Furina run: "Singer of Many Waters felt hit or miss.
+Usually returned 0, sometimes returned 10." / "Balance the Books is mostly a
+brick." / "Hymn of Many Waters is usually just 15 block as a 1 energy
+upgraded common and is extremely good." Then: "Yeah, I think Hymn needs a
+trim. Agree on the rest."
+
+- **Singer of Many Waters** gains Retain (the card-level `retain: true`, a
+  keyword as on base cards). Cost 1 [0], Exhaust, "Repay all your drained
+  HP." unchanged.
+- **Balance the Books**: "Deal damage to ALL enemies equal to your drained
+  HP. Repay 4." [Repay 6] (was half, rounded down). The count token
+  `stage_half_drained` becomes `stage_drained` (C# `FurinaStage.DrainedOf`,
+  sim `furina_stage.drained`); the damage still reads the drained HP before
+  the card's own Repay, and the in-combat "(Deals N damage)" line reads the
+  same number.
+- **Hymn of Many Waters**: Block 8 [11] -> 6 [8], Repay 3 [4] unchanged
+  (`upgrade: {block: +2, stage_repay: +1}`); the "Gain 1 Block for any HP it
+  could not Repay" floor stays. Most Block: 9, upgraded 12 (was 11, 15).
+- Sim twins in `tier0/engine/furina_tide.py` moved with the sheet.

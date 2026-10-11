@@ -304,7 +304,8 @@ public class FurinaSpendRound2Tests : IDisposable
             FurinaSpendAllPreviewWeakTests.ListenerProxy>();
         furina.Creature.CombatState = combat;
         Invoke("OpenSeatForTest", furina.Player, 1, 0);
-        var ledger = FurinaStageLedger.For(furina.Creature);  // line 60
+        var ledger = FurinaStageLedger.For(furina.Creature);  // buffer 20
+        ledger.NoteDrain(18, 80);                              // 2 left
         ledger.NoteDrain(8, 62);                               // 2 above, 6 past
         ledger.NoteHighStakes(5);
         Assert.Equal(6, ledger.PastLostAtClose);               // owed: a death
@@ -322,6 +323,7 @@ public class FurinaSpendRound2Tests : IDisposable
         var five = FurinaStageLedger.Detached();
         five.ModsOverride = new StageMods { FiveCenturyAct = 1 };
         five.Open(80, 80);
+        five.NoteDrain(18, 80);
         five.NoteDrain(8, 62);
         five.CurtainCallOf(54, 80);
         Assert.Equal(0, five.PastLostAtClose);

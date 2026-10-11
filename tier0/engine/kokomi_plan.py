@@ -2236,6 +2236,21 @@ def fetch_open_casket(state: CombatState) -> None:
     state.emit("casket_fetch", found=True)
 
 
+def grand_design_fetch(state: CombatState) -> None:
+    """GRAND DESIGN's second sentence (Kokomi whole-run round 2, 2026-10-10):
+    "At the start of your turn, put it into your hand." Paid at Flood Tide's
+    site. One Open in hand is enough: if one is there nothing moves, and
+    copies of the Power do not fetch twice. Otherwise `fetch_open_casket`
+    moves the first one from the draw pile, then the discard pile.
+    `GrandDesignPower.Signal` is the twin."""
+    if not live(state) or not state.player.powers.get(GRAND_DESIGN, 0):
+        return
+    if any(c.id in (OPEN_THE_CASKET, OPEN_THE_CASKET + "+")
+           for c in state.player.hand):
+        return
+    fetch_open_casket(state)
+
+
 def coral_tithe(state: CombatState, per: int) -> None:
     """CORAL TITHE (the payoff pass, 2026-10-01): "Empty the Casket. Gain 1
     Energy and draw 1 card for every 3 in it." Only while she holds a Casket
@@ -2362,7 +2377,7 @@ def patient_tide_kept(state: CombatState) -> int:
 
 
 def open_the_casket_card(upgraded: bool = False) -> Card:
-    """The token, as this engine's `Card`: Skill, 1, Retain, in no pool.
+    """The token, as this engine's `Card`: Skill, 0, Retain, in no pool.
     Built here rather than on a sheet for the C#'s reason (the prototype
     surface has no token rarity); `OpenTheCasket.cs` is the twin.
 
@@ -2375,12 +2390,25 @@ def open_the_casket_card(upgraded: bool = False) -> Card:
     THE UPGRADE DRAWS 1 (the Kokomi kit review, 2026-10-05): upgraded, it
     also draws 1 card after the Strength; cost and Retain stay. Built here
     the way `sea_glass_card` builds its `+`, since the token has no row for
-    `upgrades.apply_upgrade` to read."""
+    `upgrades.apply_upgrade` to read.
+
+    IT STARTS AT 0 AND RAMPS (2026-10-10, after [USER]'s Kokomi playtest).
+    [USER]: "I think that the casket should start at 0 and then have a
+    ramping cost (goes up by 1 each time) That means the casket is free the
+    first play, costs 1 the second, and then at 2+ becomes difficult. That
+    way it has obvious use in a short hallway fight". Printed 0; each play
+    ends "Increase this card's cost by 1." (the base game's Modded), Up My
+    Sleeve's `cost_mod self_this_combat` op with +1: per INSTANCE, so a
+    fetched copy keeps its price, and the relic deals a fresh copy each
+    combat. `OpenTheCasket.OnPlay`'s `EnergyCost.AddThisCombat(1)` is the
+    twin."""
     effects = [{"op": "open_casket"}]
     if upgraded:
         effects.append({"op": "draw", "amount": 1})
+    effects.append({"op": "cost_mod", "scope": "self_this_combat",
+                    "delta": 1})
     return Card(id=OPEN_THE_CASKET + ("+" if upgraded else ""),
-                name="Open the Casket" + ("+" if upgraded else ""), cost=1,
+                name="Open the Casket" + ("+" if upgraded else ""), cost=0,
                 type="skill", rarity="token", exhaust=False, retain=True,
                 effects=effects)
 

@@ -88,7 +88,13 @@ The two act-2 bosses above 40 had an engine: lane 1 the Casket with Grand Design
 
 The review proposed a Sonnet round on the fixed build "in parallel" with [USER]'s run. Seats never run while [USER] plays, so the round can only come before or after his run. That is pick 2.
 
-## For [USER]
+## For [USER] (settled 2026-10-11)
+
+Both picks were settled by [USER]'s Kokomi run and his rulings after it ("you're good to proceed", 2026-10-11):
+- **Pick 1 (act 1):** neither option was taken as written. [USER] ruled a Casket change instead: "I think that the casket should start at 0 and then have a ramping cost (goes up by 1 each time)" (#1067). He also allowed starter changes: "I'm also fine with modifying the starters if the rates are low". Kurage's Oath's Plan and Slack Water rose with the Plan pricing (#1066, #1069).
+- **Pick 2 (his run):** (a). He played her before any further seat round.
+
+The picks as offered:
 
 1. **Act 1.** The round-1 pool tempo fixes moved act-1 HP loss only from 11.9 to 11.0 a fight, against base's 5.9. The rest comes from the Plan's one-turn delay and the starter, which only you can change.
    - **(a) Default:** leave the starter. Play the build and judge act 1 by feel. Only the Change of Plans retune ships.

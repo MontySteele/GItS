@@ -60,7 +60,7 @@ public sealed class ProtoKkNip : CustomCardModel, ICharacterCard, IPlannedCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new KokomiPlan.PlanDamageVar(5m)
+            new KokomiPlan.PlanDamageVar(7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

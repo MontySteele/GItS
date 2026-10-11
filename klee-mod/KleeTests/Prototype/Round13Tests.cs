@@ -320,73 +320,12 @@ public class Round13Tests
     // `CardModel.CanPlay` collapses every mod-side refusal into
     // `BlockedByCardLogic` and has no slot for what the reason was.
 
-    [Fact]
-    public void Change_of_plans_says_why_it_is_refusing()
-    {
-        var card = new ProtoKkChangeOfPlans();
-
-        // No owner, so no queue: the empty-memory board, and the answer a
-        // compendium copy gives too.
-        Assert.Equal("no Plan is written",
-                     ((IUnplayableReasonCard)card).UnplayableReason);
-    }
-
-    [Fact]
-    public void A_written_plan_clears_the_refusal()
-    {
-        // THE QUEUE IS SEEDED DIRECTLY, and that is the headless boundary
-        // rather than a shortcut: `KokomiPlan.Schedule` is the writer and it
-        // syncs the pending badge through a command, which needs a live
-        // combat. What is under test is the READ -- `PlansHeld` over this
-        // seat's queue -- and the read is the same one either writer feeds.
-        var seat = Seat.Kokomi().WithCombatState();
-        var card = new ProtoKkChangeOfPlans();
-        Seat.Set(card, "IsMutable", true);
-        card.Owner = seat.Player;
-
-        Assert.Equal("no Plan is written",
-                     ((IUnplayableReasonCard)card).UnplayableReason);
-        Assert.Equal(0, KokomiPlan.PlansHeld(seat.Creature));
-
-        try
-        {
-            Queue(seat).Add(new KokomiPlan.Entry(
-                null, System.Array.Empty<KokomiPlan.Planned>()));
-
-            Assert.Equal(1, KokomiPlan.PlansHeld(seat.Creature));
-            Assert.Null(((IUnplayableReasonCard)card).UnplayableReason);
-        }
-        finally
-        {
-            KokomiPlan.ResetAll();
-        }
-    }
-
-    /// <summary>This seat's pending queue, created if it has none. `_queues`
-    /// is private static and keyed by `Player`, which is what `Pending` reads
-    /// back.</summary>
-    private static List<KokomiPlan.Entry> Queue(Seat seat)
-    {
-        var queues = (System.Collections.IDictionary)typeof(KokomiPlan)
-            .GetField("_queues", HeadlessGame.All)!.GetValue(null)!;
-        var list = new List<KokomiPlan.Entry>();
-        queues[seat.Player] = list;
-        return list;
-    }
-
-    [Fact]
-    public void The_gate_and_the_sentence_read_the_same_queue()
-    {
-        // One question, one answer. A gate reading one thing and a sentence
-        // reading another is how a card comes to refuse for a reason it does
-        // not print.
-        var playable = Il.Method("ProtoKkChangeOfPlans", "get_IsPlayable");
-        var reason = Il.Method("ProtoKkChangeOfPlans",
-                               "get_UnplayableReason");
-
-        Assert.Contains("KokomiPlan.PlansHeld", Il.Calls(playable));
-        Assert.Contains("KokomiPlan.PlansHeld", Il.Calls(reason));
-    }
+    // KOKOMI WHOLE-RUN ROUND 2 (2026-10-10): Change of Plans now also draws
+    // 1, so it is no longer carry-out-only and the generator no longer emits
+    // the gate on it (a card that does something on an empty jellyfish is
+    // never refused). No row carries the gate today; the rule is pinned in
+    // the sim (`test_kokomi_plan`'s probe row) and the card's new shape in
+    // `KokomiGrowthPowersTests.Change_of_plans_draws_one_after_the_carry_out`.
 
     [Fact]
     public void The_tip_names_the_power_that_puts_him_out()

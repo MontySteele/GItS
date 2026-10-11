@@ -1118,10 +1118,11 @@
    cost: 1, type: skill, rarity: basic,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage to ALL enemies.",
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage to ALL enemies.",
    effects: [{op: block, amount: 6}],
-   plan: [{op: damage, amount: 7, target: all_enemies}],
-   # 8 Block / Plan 10 to ALL (2026-09-28: the now-line upgrades too).
+   plan: [{op: damage, amount: 9, target: all_enemies}],
+   # 8 Block / Plan 12 to ALL (2026-09-28: the now-line upgrades too;
+   # Plan pricing 2026-10-11: Plan 7 -> 9, the 1.3 ratio).
    upgrade: {block: 2, plan_damage: 3}}
 
 - {id: proto_kk_slack_water, name: "Slack Water", character: kokomi,
@@ -1130,11 +1131,12 @@
    # R267 PICK 1: THE PLAN HALF IS BACK IN THE MORNING. Pass five moved it to
    # Dusk; the brief names the next-morning Weak as the kit's turn-one
    # decision, and a starter card is [USER]'s.
-   description: "Deal 4 [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
-   effects: [{op: damage, amount: 4, target: enemy},
+   description: "Deal 6 [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: damage, amount: 6, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
-   # R243 card audit pick 2: 4 and Weak 1 / Plan Weak 1 to ALL; upgrade 7 / Plan Weak 2.
+   # R243 card audit pick 2: 4 and Weak 1 / Plan Weak 1 to ALL. Plan pricing
+   # 2026-10-11: damage 4 -> 6 (Sucker Punch rate); upgrade 9 / Plan Weak 2.
    upgrade: {damage: 3, plan_power_amount: 1}}
 
 # --- the Tactician: Plans, and the cards that pay per Plan (packet sec.4) ---
@@ -1339,11 +1341,11 @@
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
-   # Kokomi whole-run round 2026-10-10: cost 1 -> 0 (played in 1 of 14
-   # fights where it was held). The default upgrade still removes Exhaust.
+   # Whole-run round 1 (2026-10-10): cost 1 -> 0; round 2: draws 1 (0 of 8
+   # taken). The default upgrade still removes Exhaust. Provenance note.
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now.",
-   effects: [{op: carry_out_front_plan}]}
+   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 1 card.",
+   effects: [{op: carry_out_front_plan}, {op: draw, amount: 1}]}
 
 - {id: proto_kk_undertow, name: "Undertow", character: kokomi,
    authored_by: [claude],
@@ -1405,11 +1407,11 @@
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 [gold]Hydro[/gold] damage to each enemy that intended to attack when you wrote this.",
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage to each enemy that intended to attack when you wrote this.",
    effects: [{op: damage, amount: 8, target: enemy}],
    # `EB-492`, the intent-keyed aim. THE SET IS FIXED WHEN THE PLAN IS
    # WRITTEN -- R250's rule for an aimed Plan, applied to a set.
-   plan: [{op: damage, amount: 8, target: enemies_intending_attack}],
+   plan: [{op: damage, amount: 9, target: enemies_intending_attack}],
    upgrade: {damage: 3, plan_damage: 3}}
 
 # FEIGNED RETREAT IS CUT (the status batch, 2026-10-01,
@@ -1494,10 +1496,10 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage to ALL enemies twice.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage to ALL enemies twice.",
    effects: [{op: damage, amount: 7, target: enemy}],
-   plan: [{op: damage, amount: 3, target: all_enemies, times: 2}],
-   # 10 / Plan 4 twice.
+   plan: [{op: damage, amount: 4, target: all_enemies, times: 2}],
+   # 10 / Plan 5 twice (Plan pricing 2026-10-11: Plan 3 -> 4).
    upgrade: {damage: 3, plan_damage: 1}}
 
 - {id: proto_kk_surging_shoal, name: "Surging Shoal", character: kokomi,
@@ -1582,10 +1584,10 @@
 - {id: proto_kk_pearl_current, name: "Pearl Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 2 [gold]Hydro[/gold] damage 4 times. [gold]Plan[/gold]: Deal 2 [gold]Hydro[/gold] damage to ALL enemies 3 times.",
+   description: "Deal 2 [gold]Hydro[/gold] damage 4 times. [gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage to ALL enemies 3 times.",
    effects: [{op: damage, amount: 2, target: enemy, times: 4}],
-   plan: [{op: damage, amount: 2, target: all_enemies, times: 3}],
-   # 3 x4 / Plan 3 x3.
+   plan: [{op: damage, amount: 3, target: all_enemies, times: 3}],
+   # 3 x4 / Plan 4 x3 (Plan pricing 2026-10-11: Plan 2 -> 3).
    upgrade: {damage: 1, plan_damage: 1}}
 
 - {id: proto_kk_what_the_tokoyo_took, name: "What the Tokoyo Took", character: kokomi,
@@ -1604,29 +1606,29 @@
    cost: 0, type: skill, rarity: common,
    description: "[gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
    effects: [],
-   plan: [{op: block, amount: 4}],
-   # Plan 6.
+   plan: [{op: block, amount: 5}],
+   # Plan 7 (Plan pricing 2026-10-11: Plan 4 -> 5).
    upgrade: {plan_block: 2}}
 
 - {id: proto_kk_nip, name: "Nip", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage.",
+   description: "[gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage.",
    effects: [],
-   plan: [{op: damage, amount: 5, target: front_enemy}],
-   # Plan 7.
+   plan: [{op: damage, amount: 7, target: front_enemy}],
+   # Plan 9 (Plan pricing 2026-10-11: Plan 5 -> 7).
    upgrade: {plan_damage: 2}}
 
 - {id: proto_kk_jellyfish_drift, name: "Jellyfish Drift", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage to ALL enemies.",
+   description: "[gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage to ALL enemies.",
    effects: [],
    # Kokomi whole-run round 2026-10-10: Plan 2 -> 3 (at 2 it was a third of
-   # Astral Pulse).
-   plan: [{op: damage, amount: 3, target: all_enemies}],
-   # Plan 4 to ALL.
-   upgrade: {plan_damage: 1}}
+   # Astral Pulse). Plan pricing 2026-10-11: 3 -> 6, the 1.3 ratio.
+   plan: [{op: damage, amount: 6, target: all_enemies}],
+   # Plan 8 to ALL.
+   upgrade: {plan_damage: 2}}
 
 - {id: proto_kk_current_read, name: "Current Read", character: kokomi,
    authored_by: [claude],
@@ -1643,12 +1645,13 @@
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
    # The growth Powers (2026-10-10), Claude ships: a 3 damage hit added
-   # under Neutralize's 3 damage and 1 Weak, a turn late.
-   description: "[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold].",
+   # under Neutralize's 3 damage and 1 Weak, a turn late. Plan pricing
+   # 2026-10-11: damage 3 -> 4.
+   description: "[gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold].",
    effects: [],
-   plan: [{op: damage, amount: 3, target: front_enemy},
+   plan: [{op: damage, amount: 4, target: front_enemy},
           {op: apply_power, power: weak, amount: 1, target: front_enemy}],
-   # Plan 3 damage, 2 Weak.
+   # Plan 4 damage, 2 Weak.
    upgrade: {plan_power_amount: 1}}
 
 # --- THE EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
@@ -1680,10 +1683,10 @@
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
    # Main session, 2026-09-29: 8/16 -> 6/12 (the sim read it dominant).
-   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage, doubled if no other [gold]Plan[/gold] is carried out with it.",
+   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 14 [gold]Hydro[/gold] damage, doubled if no other [gold]Plan[/gold] is carried out with it.",
    effects: [{op: damage, amount: 6, target: all_enemies}],
-   plan: [{op: damage_if_alone, amount: 12, target: front_enemy}],
-   # 9 to ALL / Plan 16.
+   plan: [{op: damage_if_alone, amount: 14, target: front_enemy}],
+   # 9 to ALL / Plan 18 (Plan pricing 2026-10-11: Plan 12 -> 14).
    upgrade: {damage: 3, plan_damage: 4}}
 
 - {id: proto_kk_measured_breath, name: "Measured Breath", character: kokomi,
@@ -1698,10 +1701,10 @@
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   # The growth Powers (2026-10-10, pick 1, ruled): the Casket keeps its
-   # count. Open still gives Strength equal to the whole count (ratio 1/1,
-   # the main session's call; graded on the next whole-run round).
-   description: "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold].",
+   # The growth Powers (2026-10-10, ruled): the Casket keeps its count,
+   # ratio 1/1. Round 2 (2026-10-10): Open also comes to hand each turn.
+   # Provenance note, "Kokomi whole-run round 2".
+   description: "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold]. At the start of your turn, put it into your hand.",
    effects: [{op: apply_power, power: kk_grand_design, amount: 1, target: self}],
    # Cost 1.
    upgrade: {cost: -1}}
@@ -1720,10 +1723,10 @@
    cost: 3, type: attack, rarity: rare, retain: true,
    # THE BIG-PLAN PASS (2026-10-04): Strength counts 3 times. Flat Strength
    # per hit paid a 0-cost Nip as much as this; provenance note.
-   description: "[gold]Plan[/gold]: Deal 30 [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] 3 times.",
+   description: "[gold]Plan[/gold]: Deal 35 [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] 3 times.",
    effects: [],
-   plan: [{op: damage, amount: 30, target: front_enemy, strength_times: 3}],
-   # Plan 40.
+   plan: [{op: damage, amount: 35, target: front_enemy, strength_times: 3}],
+   # Plan 45 (Plan pricing 2026-10-11: Plan 30 -> 35).
    upgrade: {plan_damage: 10}}
 
 # ALL STREAMS FLOW TO THE SEA IS CUT (the status batch, 2026-10-01,
@@ -2601,12 +2604,14 @@
               amount_formula: {base: 6, per: 1, count: stage_repay_left},
               target: enemy}]}
 
+# Hymn of Many Waters: Block 8 [11] -> 6 [8], Repay 3 [4] kept ([USER],
+# 2026-10-11: "Yeah, I think Hymn needs a trim."; provenance note).
 - {id: proto_fs_hymn_of_many_waters, name: "Hymn of Many Waters", character: furina,
-   upgrade: {block: +3, stage_repay: +1},
+   upgrade: {block: +2, stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 8 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
-   effects: [{op: block, amount: 8},
+   description: "Gain 6 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
+   effects: [{op: block, amount: 6},
              {op: stage_repay, amount: 3, floor: block}]}
 
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
@@ -2617,11 +2622,14 @@
    effects: [{op: stage_repay, amount: 5},
              {op: draw, amount: 2}]}
 
+# Singer of Many Waters: Retain added ([USER], 2026-10-11: "Singer of Many
+# Waters felt hit or miss."; provenance note).
 - {id: proto_fs_singer_of_many_waters, name: "Singer of Many Waters", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    art_of: singer_of_many_waters,
    register: archon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   retain: true,
    description: "[gold]Repay[/gold] all your drained HP.",
    effects: [{op: stage_repay_all}]}
 
@@ -2702,7 +2710,7 @@
    upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Drain[/gold], deal 3 damage to ALL enemies. Copies stack.",
+   description: "Whenever you [gold]Drain[/gold], deal 3 damage to ALL enemies.",
    effects: [{op: apply_power, power: fs_salons_encore, amount: 3,
               target: self}]}
 
@@ -2722,28 +2730,28 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common, exhaust: true,
-   description: "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}. Act: [gold]Repay[/gold] {GuestAct:diff()}.",
    effects: [{op: stage_guest, member: charlotte}]}
 
 - {id: proto_fs_guest_star_wriothesley, name: "Guest Star: Wriothesley", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Cryo[/gold] damage to a random enemy.",
    effects: [{op: stage_guest, member: wriothesley}]}
 
 - {id: proto_fs_guest_star_lynette, name: "Guest Star: Lynette", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Anemo[/gold] damage to an enemy with an aura.",
    effects: [{op: stage_guest, member: lynette}]}
 
 - {id: proto_fs_guest_star_clorinde, name: "Guest Star: Clorinde", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Summon[/gold] Clorinde{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Clorinde{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: stage_guest, member: clorinde}]}
 
 # --- THE TWO RARES ---
@@ -2797,7 +2805,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: stage_guest, member: lyney}]}
 
 - {id: proto_fs_a_five_century_act, name: "A Five-Century Act", character: furina,
@@ -2813,7 +2821,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Sigewinne{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Sigewinne{IfUpgraded:show:+|}. Act: [gold]Repay[/gold] {GuestAct:diff()}.",
    effects: [{op: stage_guest, member: sigewinne}]}
 
 # Fountain of Lucine: a Skill that leaves a Power counting the three turns
@@ -2849,7 +2857,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.{IfUpgraded:show: Also applies [gold]Weak[/gold].|}",
    effects: [{op: stage_guest, member: chevreuse}]}
 
 - {id: proto_fs_bis, name: "Bis!", character: furina,
@@ -2913,7 +2921,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Freminet{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Freminet{IfUpgraded:show:+|}. Act: gain {GuestAct:diff()} [gold]Block[/gold], and more for [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: freminet}]}
 
 - {id: proto_fs_showstopper, name: "Showstopper", character: furina,
@@ -2936,21 +2944,21 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}. Your first [gold]Spend[/gold] each turn costs {GuestLine:diff()} less.",
    effects: [{op: stage_guest, member: navia}]}
 
 - {id: proto_fs_guest_star_neuvillette, name: "Guest Star: Neuvillette", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}. Your [gold]Hydro[/gold] damage deals {GuestLine:diff()} additional damage.",
    effects: [{op: stage_guest, member: neuvillette}]}
 
 - {id: proto_fs_guest_star_escoffier, name: "Guest Star: Escoffier", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Summon[/gold] Escoffier{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Escoffier{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Cryo[/gold] damage to ALL enemies.",
    effects: [{op: stage_guest, member: escoffier}]}
 
 # The Crowd (9): 3 Common, 3 Uncommon, 3 Rare.
@@ -3195,15 +3203,16 @@
                amount_formula: {base: 10, per: 1, count: stage_repay_left},
                target: all_enemies, applies_element: true}]}
 
-# Balance the Books: half your drained HP, rounded down (the Review section),
-# read before its own Repay.
+# Balance the Books: all your drained HP, read before its own Repay. (Was
+# half, rounded down; the playtest of 2026-10-11, [USER]: "Balance the Books
+# is mostly a brick.")
 - {id: proto_fs_balance_the_books, name: "Balance the Books", character: furina,
    upgrade: {stage_repay: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Deal damage to ALL enemies equal to half your drained HP. [gold]Repay[/gold] 4.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal damage to ALL enemies equal to your drained HP. [gold]Repay[/gold] 4.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_half_drained},
+              amount_formula: {base: 0, per: 1, count: stage_drained},
               target: all_enemies, applies_element: false},
              {op: stage_repay, amount: 4}]}
 

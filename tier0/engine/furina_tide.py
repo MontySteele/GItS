@@ -25,12 +25,18 @@ deals 12; and `review/active/furina-pool-40-2026-10-05.md` sec.2: Universal
 Revelry reads Drain and Repay again, never hits):
 
 1. DRAIN N. Lose N HP for the bigger effect (a mode on some cards, a fixed
-   price on others). THE DRAIN LINE RULE (ruled 2026-10-09): the line is
-   the HP she started this combat with, minus 1/4 of the Max HP she started
-   it with, rounded down (`SHIPPED_LINE`, the default variant's; the `std`
-   family of variants measures a share of Max HP, the `entry` family a
-   share of entry HP), and a Drain is never refused for it: it may go past
-   it. It cannot be paid if
+   price on others). THE DRAIN BUFFER (2026-10-11, replacing the entry-HP
+   line of 2026-10-09; [USER]: "There should be a buffer for drain equal to
+   1/4 my max HP which should be restore-able, but getting hurt should not
+   disqualify it."): each combat her buffer is 1/4 of the Max HP she
+   entered it with, rounded down, plus 10 with Lyney on stage
+   (`shipped_buffer`, the default variant's `SHIPPED_LINE`). It is counted
+   in HP drained: a Drain fills it first, the rest is drained past the
+   line, and a hit never touches it. The line as shown is her HP less the
+   buffer left (`half_line`). The `std` family of variants measures a share
+   of Max HP, the `entry` family a share of entry HP, both by HP position.
+   A Drain is never refused for the line: it may go past it. It cannot be
+   paid if
    it would take her to 0 HP (`DRAIN_FLOOR`). HP lost to a Drain is DRAINED,
    in two parts: above the line (`drained_above`) and past it
    (`drained_past`). A fixed-price card whose Drain cannot be paid cannot be
@@ -55,7 +61,9 @@ Revelry reads Drain and Repay again, never hits):
    Solitaire Repays. A guest onto a full stage makes the oldest leave (no
    act); a guest that leaves (evicted, or sent off by Final Bow) sends its
    card from the exhaust pile to the discard pile. A second copy of a guest
-   on stage moves it to the newest seat, with no act. An upgraded Guest Star
+   on stage moves it to the newest seat and acts once, as on her turn (the
+   2026-10-11 playtest: "let the guest star Act when replayed to make getting
+   a second copy do something at all"). An upgraded Guest Star
    raises its guest's line or act.
 6. THE CURTAIN CALL (sec.16, the default variant `curtain_call`). When a
    combat ends, the HP drained above the line returns (`close_ledger`); the
@@ -123,16 +131,18 @@ SALON_ENCORE_DAMAGE = 3      # Power: whenever you Drain, 3 to ALL
 THUNDEROUS_DAMAGE = 3        # Power: whenever you Spend, 3 to ALL
 # The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
 LYNEY_LINE_DROP = 10         # line: "Your Drain line is 10 HP lower."
+                             # (2026-10-11: +10 to her Drain buffer)
 LYNEY_ACT_DRAIN = 2          # act: "Drain 2, never past your line. Deal 8
                              # Pyro damage to ALL enemies."
 LYNEY_ACT = 8
 CHEVREUSE_ACT = 4            # act: "Deal 4 damage to a random enemy."
 CHEVREUSE_LINE_VULNERABLE = 1  # line: each Spend, 1 Vulnerable (random)
 DRAIN_FLOOR = 1              # a Drain cannot take her to 0 HP (2026-10-09)
-LINE_MAX_HP_DIVISOR = 4      # the Drain line: entry HP minus Max HP // 4
-                             # (2026-10-09; FurinaStageLaw.LineMaxHpDivisor)
-#: The default variant's line marker: entry HP minus a quarter of entry Max
-#: HP. Every other variant's line is a float share.
+LINE_MAX_HP_DIVISOR = 4      # the Drain buffer: entry Max HP // 4
+                             # (2026-10-11; FurinaStageLaw.LineMaxHpDivisor)
+#: The default variant's line marker: the Drain buffer, a quarter of entry
+#: Max HP counted in HP drained (2026-10-11). Every other variant's line is a
+#: float share, by HP position.
 SHIPPED_LINE = "entry_minus_quarter_max"
 FOUNTAIN_TURNS = 3           # Fountain of Lucine: the next 3 turns
 # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
@@ -296,6 +306,7 @@ class Spec:
     member: str = ""
     in_slice: bool = True      # False: a probe deck's row, never drafted
     exhaust: bool = False
+    retain: bool = False
 
 
 CARDS: dict[str, Spec] = {
@@ -343,16 +354,17 @@ CARDS: dict[str, Spec] = {
     # it could not Repay. (The Repay floor, 2026-10-09.)
     "ftd_surging_waters": Spec("Surging Waters", 1, "attack", "common",
                                "hit_repay", (6, 3)),
-    # Hymn of Many Waters (1): Gain 8 Block. Repay 3. Gain 1 Block for any
-    # HP it could not Repay.
+    # Hymn of Many Waters (1): Gain 6 Block. Repay 3. Gain 1 Block for any
+    # HP it could not Repay. (The 2026-10-11 playtest trim, was 8.)
     "ftd_hymn": Spec("Hymn of Many Waters", 1, "skill", "common",
-                     "block_repay", (8, 3)),
+                     "block_repay", (6, 3)),
     # Pneuma Refrain (1): Repay 5. Draw 2 cards.
     "ftd_pneuma_refrain": Spec("Pneuma Refrain", 1, "skill", "uncommon",
                                "repay_draw", (5, 2)),
-    # Singer of Many Waters (1): Repay all your drained HP. Exhaust.
+    # Singer of Many Waters (1): Retain. Repay all your drained HP. Exhaust.
+    # (Retain since the 2026-10-11 playtest.)
     "ftd_singer": Spec("Singer of Many Waters", 1, "skill", "rare",
-                       "repay_all", (), exhaust=True),
+                       "repay_all", (), exhaust=True, retain=True),
     # --- Fanfare outlets (6) ---
     # Tidal Flourish (1): Deal 5 Hydro damage to ALL enemies. Spend up to
     # 10: deal 1 more for each. (The Spend paper, 2026-10-10; Uncommon since
@@ -620,7 +632,7 @@ def make_card(card_id: str):
     card = Card(id=card_id, name=spec.name, cost=spec.cost, type=spec.type,
                 rarity=spec.rarity, effects=[], tags=[TAG],
                 character=CHARACTER, exhaust=spec.exhaust,
-                retain=spec.kind == "tutti")
+                retain=spec.retain or spec.kind == "tutti")
     if spec.kind == "star_turn":
         card.cost_reduction_per_fanfare = STAR_TURN_FANFARE_PER
     return card
@@ -690,23 +702,40 @@ def _player_power(player, key: str) -> int:
     return own + (int(powers.get(arm_id, 0) or 0) if arm_id else 0)
 
 
-def shipped_line(entry_hp: int, entry_max_hp: int) -> int:
-    """The shipped Drain line (2026-10-09; `FurinaStageLaw.LineOf`): the
-    HP she started the combat with, minus 1/4 of the Max HP she started it
-    with, rounded down; never below 0. 50/80 -> 30, 80/80 -> 60."""
-    return max(0, max(0, int(entry_hp))
-               - max(0, int(entry_max_hp)) // LINE_MAX_HP_DIVISOR)
+def shipped_buffer(entry_max_hp: int, lyney: bool = False) -> int:
+    """The Drain buffer (2026-10-11; `FurinaStageLaw.BufferOf`): 1/4 of the
+    Max HP she entered the combat with, rounded down, plus 10 with Lyney on
+    stage. 80 -> 20, 85 -> 21."""
+    return (max(0, int(entry_max_hp)) // LINE_MAX_HP_DIVISOR
+            + (LYNEY_LINE_DROP if lyney else 0))
+
+
+def buffer_left(player) -> int:
+    """The buffer she has left (`FurinaStageLedger.BufferLeft`): the buffer
+    less the drained HP within it. A hit never lowers it; a Repay of that
+    drained HP raises it again."""
+    f = player.ftd
+    return max(0, shipped_buffer(f.entry_max_hp, "lyney" in f.stage)
+               - f.drained_above)
+
+
+def shipped_line(hp: int, left: int) -> int:
+    """The line as shown (2026-10-11; `FurinaStageLaw.LineAt`): her HP less
+    the buffer left, never below 0. 20 HP with 5 left -> 15."""
+    return max(0, max(0, int(hp)) - max(0, int(left)))
 
 
 def half_line(player) -> float:
-    """The Drain line (the name is the half line's; since 2026-10-09 it is
-    her entry HP minus 1/4 of her entry Max HP under the default variant).
-    Lyney on stage lowers it by 10, never below 1. A Five-Century Act no
-    longer moves it."""
+    """The Drain line (the name is the half line's). Under the default
+    variant (2026-10-11) it is her HP now less the Drain buffer she has left
+    (`shipped_line`); Lyney adds 10 to the buffer, so the line sits 10
+    lower. Under the measured variants it is a share of Max or entry HP,
+    and Lyney lowers it by 10, never below 1. A Five-Century Act does not
+    move it."""
     f = getattr(player, "ftd", None)
     if f is not None and f.line == SHIPPED_LINE:
-        line = float(shipped_line(f.entry_hp, f.entry_max_hp))
-    elif f is not None and f.line_from_entry:
+        return float(shipped_line(player.hp, buffer_left(player)))
+    if f is not None and f.line_from_entry:
         line = f.entry_hp * f.line
     else:
         line = player.max_hp * (f.line if f is not None else 0.5)
@@ -734,7 +763,8 @@ def can_drain(state, n: int) -> bool:
 def guest_drain_room(state, n: int) -> int:
     """A guest act's Drain of `n`, stopped at the line (the drain-line round,
     2026-10-09; the C# `FurinaStageLedger.GuestDrainRoom`): the part that
-    fits without going past the line, 0 at or below it."""
+    fits without going past the line -- the buffer left, under the default
+    variant (2026-10-11) -- 0 with none."""
     p = state.player
     return max(0, min(n, p.hp - line_hp(p)))
 
@@ -1000,8 +1030,8 @@ def spend_all(state) -> int:
 
 def drain(state, n: int) -> bool:
     """Rule 1. Lose N HP (never to 0 HP), mark it drained -- the part that
-    stays at or above the line, and the part past it (2026-10-09) -- gain N
-    Fanfare, then the Drain readers."""
+    fits in the buffer left, and the part past the line (2026-10-11) --
+    gain N Fanfare, then the Drain readers."""
     p = state.player
     f = _f(state)
     if not can_drain(state, n):
@@ -1311,7 +1341,7 @@ def _act(state, member: str) -> None:
 
 def summon(state, member: str, upgraded: bool = False, card=None) -> str:
     """A Guest Star (sec.3): no effect on summon. A guest already on stage
-    moves to the newest seat, with no act; otherwise it takes the back seat,
+    moves to the newest seat and acts once (2026-10-11); otherwise it takes the back seat,
     and on a full stage the oldest guest leaves first (no act) and its cards
     go to the discard pile. `card` is the Guest Star played: its seat holds
     it until the guest leaves."""
@@ -1325,6 +1355,10 @@ def summon(state, member: str, upgraded: bool = False, card=None) -> str:
             f.stage_cards.setdefault(member, []).append(card)
         f.ledger["moves"] += 1
         state.emit("ftd_move", member=member)
+        # The repeat acts, exactly as on her turn (the C# `SummonGuest`,
+        # 2026-10-11).
+        if not state.over and state.player.alive:
+            act(state, member)
         return "repeat"
     result = "seated"
     if len(f.stage) >= capacity(state):
@@ -1689,7 +1723,7 @@ def resolve_card(state, card) -> None:
         _card_damage(state, card, n[0] + (n[1] - back), all_enemies=True,
                      hydro=True)
     elif k == "balance_books":
-        dmg = f.drained // 2
+        dmg = f.drained                  # all of it (2026-10-11; was half)
         if dmg > 0:
             _card_damage(state, card, dmg, all_enemies=True)
         repay(state, n[0])

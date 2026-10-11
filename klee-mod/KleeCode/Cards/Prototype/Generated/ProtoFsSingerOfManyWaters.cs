@@ -38,7 +38,7 @@ public sealed class ProtoFsSingerOfManyWaters : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust };
+        new[] { CardKeyword.Exhaust, CardKeyword.Retain };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForRepay(base.ExtraHoverTips, this);

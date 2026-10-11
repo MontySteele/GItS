@@ -29,7 +29,7 @@ _CLAUSE = re.compile(
 def test_kurages_oath_now_line_is_six_and_upgrades_both_halves():
     row = next(c for c in proto._rows() if c["id"] == "proto_kk_kurages_oath")
     assert row["effects"] == [{"op": "block", "amount": 6}]
-    assert row["plan"] == [{"op": "damage", "amount": 7,
+    assert row["plan"] == [{"op": "damage", "amount": 9,
                             "target": "all_enemies"}]
     assert row["upgrade"] == {"block": 2, "plan_damage": 3}
     text = (proto.OUT_DIR / "ProtoKkKuragesOath.cs").read_text(

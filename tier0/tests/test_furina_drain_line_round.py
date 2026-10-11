@@ -87,23 +87,26 @@ def test_the_preview_words_are_one_short_line():
 # ---- 2. a guest act's Drain stops at the line --------------------------------
 
 def test_lyneys_act_drains_only_the_room_above_the_line():
+    # The Drain buffer (2026-10-11): 19 + 10 with Lyney, 28 used, 1 left.
     st = _state(hp=50)
     f = st.player.ftd
     f.stage = ["lyney"]
+    f.drained_above = 28
     assert T.line_hp(st.player) == 49
     assert T.guest_drain_room(st, T.LYNEY_ACT_DRAIN) == 1
     T.act(st, "lyney")
-    assert st.player.hp == 49 and f.drained == 1 and f.drained_past == 0
+    assert st.player.hp == 49 and f.drained == 29 and f.drained_past == 0
     assert all(e.hp == 200 - 8 for e in st.enemies)
     # At the line: no Drain, the damage unchanged.
     assert T.guest_drain_room(st, T.LYNEY_ACT_DRAIN) == 0
     T.act(st, "lyney")
-    assert st.player.hp == 49 and f.drained == 1
+    assert st.player.hp == 49 and f.drained == 29
     assert all(e.hp == 200 - 16 for e in st.enemies)
 
 
 def test_the_players_own_drain_still_goes_past_the_line():
     st = _state(hp=50)
+    st.player.ftd.drained_above = 19             # the buffer is used up
     assert T.drain(st, 5)
     assert st.player.hp == 45 and st.player.ftd.drained_past == 5
 
@@ -119,7 +122,9 @@ def test_lyneys_badge_says_his_drain_stops_at_the_line():
 # ---- 3. the curtain-call sentence --------------------------------------------
 
 def test_the_page_says_drained_hp_above_the_line_returns():
-    assert "Drained HP above your line returns after combat." in (
+    # The 2026-10-11 playtest shortened the tip to one sentence, and the
+    # Drain buffer (2026-10-11) reworded it; the return still leads it.
+    assert "the first 1/4 of your Max HP drained returns after combat" in (
         blindplay_notes.ARM_KEYWORDS["Drain"])
     assert "Drained HP above your line returns after combat." in (
         blindplay_render.STAGE_DRAIN_LINE)

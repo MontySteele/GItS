@@ -74,13 +74,16 @@ public class FurinaDrainLineRoundTests
     [Fact]
     public void Lyneys_act_drains_only_the_room_above_the_line()
     {
-        // Line 59 from 78, 49 with Lyney on stage. At 50 HP there is 1 HP
-        // of room: it drains 1, nothing past the line, and deals its 8.
-        var kit = StageKit.At(50, 78, StagePerformer.Lyney);
+        // A buffer of 19 from 78, 29 with Lyney on stage (the Drain buffer,
+        // 2026-10-11). With 28 of it drained there is 1 HP of room: it
+        // drains 1, nothing past the line, and deals its 8.
+        var kit = StageKit.At(78, 78, StagePerformer.Lyney);
+        Run(kit.Director.Drain(28));
         Assert.Equal(1, kit.Director.GuestDrainRoom(2));
+        kit.Board.Log.Clear();
         Run(kit.Director.Act(kit.Stage.Seats[0]));
         Assert.Equal(49, kit.Board.Hp);
-        Assert.Equal(1, kit.Stage.Drained);
+        Assert.Equal(29, kit.Stage.Drained);
         Assert.Equal(0, kit.Stage.DrainedPast);
         Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
         // At the line: 0 drained, the damage unchanged.
@@ -95,9 +98,10 @@ public class FurinaDrainLineRoundTests
     [Fact]
     public void The_players_own_drain_still_goes_past_the_line()
     {
-        var kit = StageKit.At(50, 78);
+        var kit = StageKit.At(70, 78);
+        Assert.True(StageKit.Run(kit.Director.Drain(19)));   // the buffer
         Assert.True(StageKit.Run(kit.Director.Drain(5)));
-        Assert.Equal(45, kit.Board.Hp);
+        Assert.Equal(46, kit.Board.Hp);
         Assert.Equal(5, kit.Stage.DrainedPast);
     }
 
@@ -117,8 +121,9 @@ public class FurinaDrainLineRoundTests
     {
         var body = (string)typeof(ArmKeywordTips)
             .GetField("DrainBody", HeadlessGame.All)!.GetRawConstantValue()!;
-        Assert.Contains("Drained HP above your line returns after combat.",
-                        body);
+        // The 2026-10-11 playtest shortened it to one sentence.
+        Assert.Contains("the first 1/4 of your Max HP drained returns after "
+                        + "combat", body);
         Assert.DoesNotContain("Drained HP returns after combat", body);
     }
 

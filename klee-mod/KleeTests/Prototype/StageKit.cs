@@ -151,6 +151,7 @@ internal sealed class StageKit
         Stage = FurinaStageLedger.Detached();
         Stage.ModsOverride = mods ?? StageMods.None;
         Stage.Open(entry, maxHp);
+        Stage.HpSource = () => Board.Hp;
         Board.Hp = hp;
         Board.MaxHp = maxHp;
         foreach (var who in seats) Stage.Seat(who);

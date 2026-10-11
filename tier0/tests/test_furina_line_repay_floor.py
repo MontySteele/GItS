@@ -49,15 +49,18 @@ def test_the_arm_runs_the_entry_minus_quarter_max_line():
     assert T.line_hp(st.player) == 59                    # 78 - 19
 
 
-def test_the_line_is_entry_hp_minus_a_quarter_of_max_hp():
-    """[USER], 2026-10-09: "Yeah, let's build it that way." The line is
-    the HP she entered with, minus 1/4 of her Max HP rounded down."""
+def test_the_line_is_hp_less_the_drain_buffer_left():
+    """The Drain buffer (2026-10-11; it replaced 2026-10-09's entry-HP
+    line): 1/4 of her Max HP rounded down, counted in HP drained. The line
+    as shown is her HP less the buffer left."""
     assert T.line_hp(_furina(hp=50, max_hp=80).player) == 30   # 20 of room
     assert T.line_hp(_furina(hp=80, max_hp=80).player) == 60
     st = _furina(hp=85, max_hp=85)
     assert st.player.hp - T.line_hp(st.player) == 21           # 21.25 down
-    assert T.shipped_line(60, 85) == 39
-    assert T.shipped_line(10, 80) == 0                         # never below 0
+    assert T.shipped_buffer(85) == 21
+    assert T.shipped_buffer(80, lyney=True) == 30
+    assert T.shipped_line(60, 21) == 39
+    assert T.shipped_line(10, 20) == 0                         # never below 0
     lyney = _furina(hp=50, max_hp=80)
     lyney.player.ftd.stage = ["lyney"]
     assert T.line_hp(lyney.player) == 20
@@ -85,15 +88,21 @@ def test_a_drain_records_its_split_on_the_ledger_and_the_past_part_is_lost():
     assert st.player.hp == 77
 
 
-def test_near_the_line_counts_any_hp_at_or_below_it():
-    st = _furina()                                          # line 59
-    st.player.hp = 64
-    assert FS.near_line(st.player)                          # 5 over it
-    st.player.hp = 65
-    assert not FS.near_line(st.player)
+def test_near_the_line_is_five_or_less_of_buffer_left():
+    """Since the Drain buffer (2026-10-11) the line moves with her HP, so
+    "within 5 HP of your Drain line" reads the buffer she has left: a hit
+    never brings her near it, her Drains do."""
+    st = _furina()                                          # buffer 19
     st.player.hp = 40
-    assert FS.near_line(st.player)                          # below it
-    st.player.hp = 59
+    assert not FS.near_line(st.player)                      # a hit: 19 left
+    st.player.ftd.drained_above = 14                        # 5 left
+    assert FS.near_line(st.player)
+    st.player.ftd.drained_above = 13                        # 6 left
+    assert not FS.near_line(st.player)
+    st.player.ftd.drained_above = 19                        # none left
+    assert FS.near_line(st.player)
+    st.player.ftd.drained_above = 0
+    st.player.hp = 4                                        # line 0
     assert FS.near_line(st.player)
 
 
@@ -138,11 +147,11 @@ def test_the_damage_cards_repay_first_then_add_the_leftover():
 def test_hymn_pays_block_for_what_it_could_not_repay():
     st = _furina()
     FS.drain(st, 1)
-    _play(st, _card("proto_fs_hymn_of_many_waters"))        # 8 + (3 - 1)
-    assert st.player.block == 10
+    _play(st, _card("proto_fs_hymn_of_many_waters"))        # 6 + (3 - 1)
+    assert st.player.block == 8
     st = _furina()
-    _play(st, _card("proto_fs_hymn_of_many_waters+"))       # 11 + 4
-    assert st.player.block == 15
+    _play(st, _card("proto_fs_hymn_of_many_waters+"))       # 8 + 4
+    assert st.player.block == 12      # the 2026-10-11 trim (was 15)
 
 
 def test_soothing_waters_keeps_no_leftover_payout():
@@ -263,3 +272,49 @@ def test_neuvillette_acts_for_all_hp_lost_since_her_last_turn():
     # 12, plus his own line's Hydro bonus of 2.
     assert [e.hp for e in st.enemies] == [h - 14 for h in hp]
     assert st.player.ftd.hp_lost_window == 0
+
+
+# ---- the Drain buffer (2026-10-11) ---------------------------------------------
+
+def test_the_users_worked_example_a_hit_never_uses_the_buffer():
+    """[USER], 2026-10-11: "There should be a buffer for drain equal to 1/4
+    my max HP which should be restore-able, but getting hurt should not
+    disqualify it. Say my max HP is 80 and my current HP is 50. Then the
+    drain line is 20 below, aka 30. If I take 15 normal damage and Drain 15,
+    I expect to be at 20 hp with my Drain line at 15 and be able to Repay to
+    35." """
+    st = _furina(hp=50, max_hp=80)
+    p, f = st.player, st.player.ftd
+    assert T.line_hp(p) == 30
+    p.hp -= 15                                  # 15 normal damage
+    assert T.line_hp(p) == 15                   # the line moves with her HP
+    assert T.drain(st, 15)
+    assert p.hp == 20
+    assert T.line_hp(p) == 15
+    assert (f.drained_above, f.drained_past) == (15, 0)
+    assert T.repay(st, 15) == 15
+    assert p.hp == 35 and f.drained == 0
+    assert T.buffer_left(p) == 20               # restore-able
+
+
+def test_a_drain_past_the_buffer_is_past_the_line():
+    st = _furina(hp=50, max_hp=80)              # a buffer of 20
+    p, f = st.player, st.player.ftd
+    p.hp -= 15
+    assert T.drain(st, 25)
+    assert p.hp == 10
+    assert (f.drained_above, f.drained_past) == (20, 5)
+    assert T.line_hp(p) == 10                   # no buffer left
+    T.close_ledger(st)
+    assert p.hp == 30                           # the 5 past it stay lost
+    assert f.ledger["lost_past_line"] == 5
+
+
+def test_lyney_adds_ten_to_the_buffer():
+    st = _furina(hp=50, max_hp=80)
+    p, f = st.player, st.player.ftd
+    f.stage = ["lyney"]
+    assert T.buffer_left(p) == 30 and T.line_hp(p) == 20
+    assert T.drain(st, 30)
+    assert (f.drained_above, f.drained_past) == (30, 0)
+    assert T.guest_drain_room(st, T.LYNEY_ACT_DRAIN) == 0

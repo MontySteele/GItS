@@ -1430,16 +1430,38 @@ def test_change_of_plans_is_unplayable_while_no_plan_is_written(overhaul):
     first reader plays it into an empty jellyfish". It is `EB-261`'s Set-off
     gate one mechanic over: the card pays its energy, exhausts itself and
     resolves to nothing.
+
+    Kokomi whole-run round 2 (2026-10-10): Change of Plans now also draws 1,
+    so it is no longer carry-out-only and the gate no longer applies to it
+    (the next test's rule). The gate itself is pinned on a probe row.
     """
     from tier0.engine import combat
 
     st = kokomi_state(enemies=[make_enemy(hp=40)])
     st.player.energy = 3
-    card = loader.get_card("proto_kk_change_of_plans")
+    card = Card(id="proto_kk_probe", name="probe", cost=0, type="skill",
+                effects=[{"op": "carry_out_front_plan"}])
     assert kokomi_plan.carry_out_only(card) is True
 
     assert combat.card_playable(st, card) is False
     kokomi_plan.schedule(st, plan_card(ATTACKER))
+    assert combat.card_playable(st, card) is True
+
+
+def test_change_of_plans_draws_after_the_carry_out(overhaul):
+    """Kokomi whole-run round 2 (2026-10-10): "The Bake-Kurage carries out
+    your first Plan now. Draw 1 card." Cost 0, Exhaust; the upgrade removes
+    the Exhaust. Playable on an empty jellyfish, since the draw still does
+    something."""
+    from tier0.engine import combat
+
+    card = loader.get_card("proto_kk_change_of_plans")
+    assert card.cost == 0 and card.exhaust
+    assert card.effects == [{"op": "carry_out_front_plan"},
+                            {"op": "draw", "amount": 1}]
+    assert kokomi_plan.carry_out_only(card) is False
+    st = kokomi_state(enemies=[make_enemy(hp=40)])
+    st.player.energy = 3
     assert combat.card_playable(st, card) is True
 
 
@@ -2124,15 +2146,16 @@ def test_breakwaters_count_is_not_the_mornings_depth(overhaul):
 
 
 def test_slack_waters_plan_half_is_a_morning_line(overhaul):
-    """R267 PICK 1. The starter is back to exactly its pre-pass-five form: 4
-    damage and a single Weak now, the multi-body Weak next morning. The Plan
+    """R267 PICK 1. The starter is back to its pre-pass-five form: damage
+    (6 since the Plan pricing, 2026-10-11) and a single Weak now, the
+    multi-body Weak next morning. The Plan
     half is what makes turn one a choice -- one Weak on the front enemy today
     or one on every body tomorrow -- which is the brief's turn-one decision,
     and `ProtoKkSlackWater.OnPlay` schedules with no `dusk:` argument."""
     row = _row("proto_kk_slack_water")
     assert row.plan_dusk is False
     assert row.effects == [
-        {"op": "damage", "amount": 4, "target": "enemy"},
+        {"op": "damage", "amount": 6, "target": "enemy"},
         {"op": "apply_power", "power": "weak", "amount": 1,
          "target": "enemy"},
     ]

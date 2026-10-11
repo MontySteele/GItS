@@ -37,17 +37,19 @@ public class FurinaDrainLostCounterTests
     [Fact]
     public void The_hover_reads_both_parts_off_the_ledger()
     {
-        // Line 59 from 78 of 78. At 62 HP a Drain of 7 takes 3 above the
-        // line and 4 past it.
-        var kit = StageKit.At(62, 78);
+        // A buffer of 19 from 78 of 78 (the Drain buffer, 2026-10-11), 16
+        // of it drained: a Drain of 7 takes 3 within it and 4 past it.
+        var kit = StageKit.At(78, 78);
+        Assert.True(StageKit.Run(kit.Director.Drain(16)));
+        Assert.Equal(3, kit.Stage.BufferLeft);
         Assert.Equal(59, kit.Stage.Line);
         Assert.True(StageKit.Run(kit.Director.Drain(7)));
-        Assert.Equal((3, 4), (kit.Stage.DrainedAbove, kit.Stage.DrainedPast));
+        Assert.Equal((19, 4), (kit.Stage.DrainedAbove, kit.Stage.DrainedPast));
 
         var body = DrainedCounter.HoverBody(kit.Stage.Drained, kit.Stage.Line,
                                             kit.Stage.LineWhy,
                                             kit.Stage.DrainedPast);
-        Assert.Contains("\n" + DrainedCounter.DrainedPhrase(7, 4) + ".\n",
+        Assert.Contains("\n" + DrainedCounter.DrainedPhrase(23, 4) + ".\n",
                         body);
 
         // A Repay returns the past-line part first: once it is back, the
@@ -57,7 +59,7 @@ public class FurinaDrainLostCounterTests
         var after = DrainedCounter.HoverBody(kit.Stage.Drained,
                                              kit.Stage.Line, kit.Stage.LineWhy,
                                              kit.Stage.DrainedPast);
-        Assert.Contains("\nDrained [blue]3[/blue] HP.\n", after);
+        Assert.Contains("\nDrained [blue]19[/blue] HP.\n", after);
         Assert.DoesNotContain("past your line:", after);
     }
 }
