@@ -194,7 +194,7 @@ public class KokomiExpansionTests : IDisposable
     // ---- Tide Control ---------------------------------------------------------
 
     [Fact]
-    public void Ceremonial_garment_pays_per_debuff_on_an_attack_only()
+    public void Ceremonial_garment_pays_per_weak_and_vulnerable_stack()
     {
         var seat = Seat.Kokomi().WithPower<ProtoCeremonialGarmentPower>(1);
         var power = seat.Creature.Powers.OfType<ProtoCeremonialGarmentPower>()
@@ -202,7 +202,9 @@ public class KokomiExpansionTests : IDisposable
         var target = Seat.Kokomi()
             .WithPower<WeakPower>(2).WithPower<VulnerablePower>(1).Creature;
         var attack = new ProtoKkMassedVolley();
-        Assert.Equal(2m, power.ModifyDamageAdditive(
+        // The Kokomi card pass (2026-10-11): stacks, so Weak 2 + Vulnerable 1
+        // is 3 (it counted 2 distinct debuffs before).
+        Assert.Equal(3m, power.ModifyDamageAdditive(
             target, 10m, ValueProp.Move, seat.Creature, attack, null));
         Assert.Equal(0m, power.ModifyDamageAdditive(
             target, 10m, ValueProp.Move, seat.Creature,
@@ -211,13 +213,55 @@ public class KokomiExpansionTests : IDisposable
             target, 10m, ValueProp.Unpowered, seat.Creature, attack, null));
     }
 
+    /// <summary>The Kokomi card pass (2026-10-11): "The first time each
+    /// turn you deal Hydro damage to an enemy, apply 1 Weak and 1 Vulnerable
+    /// to it." Fed from both Hydro doors (a powered hit's
+    /// <c>AfterDamageGiven</c> and <c>ElementalHit.Deal</c>), no longer from
+    /// the reaction site; the latch is claimed before the two applications,
+    /// so it fires once per turn.</summary>
     [Fact]
-    public void At_waters_edge_rides_the_one_reaction_site()
+    public void At_waters_edge_fires_once_per_turn_on_hydro_damage()
     {
-        Assert.Contains(Seq("ReactionEffects", "Resolve"),
-                        c => c.Contains("KokomiExpansion.OnReaction"));
-        Assert.Equal(2, Seq("KokomiExpansion", "OnReaction")
-            .Count(c => c.Contains("PowerCmd.Apply")));
+        Assert.DoesNotContain(Seq("ReactionEffects", "Resolve"),
+                              c => c.Contains("KokomiExpansion"));
+        Assert.Null(typeof(KokomiExpansion).GetMethod(
+            "OnReaction", HeadlessGame.All));
+        var given = Seq("AtWatersEdgePower", "AfterDamageGiven");
+        Assert.Contains(given, c => c.Contains("AuraCmd.ElementOfPlay"));
+        Assert.Contains(given, c => c.Contains("KokomiExpansion.OnHydroDamage"));
+        Assert.Contains(Seq("ElementalHit", "Deal"),
+                        c => c.Contains("KokomiExpansion.OnHydroDamage"));
+        var hydro = Seq("KokomiExpansion", "OnHydroDamage");
+        var claim = hydro.FindIndex(c => c.Contains("ClaimOncePerTurn"));
+        var first = hydro.FindIndex(c => c.Contains("PowerCmd.Apply"));
+        Assert.True(claim >= 0 && first > claim);
+        Assert.Equal(2, hydro.Count(c => c.Contains("PowerCmd.Apply")));
+
+        var ledger = new KokomiOverhaulLedger();
+        ledger.RollTo(1);
+        Assert.True(ledger.Claim(nameof(AtWatersEdgePower)));
+        Assert.False(ledger.Claim(nameof(AtWatersEdgePower)));
+        ledger.RollTo(2);
+        Assert.True(ledger.Claim(nameof(AtWatersEdgePower)));
+        Assert.StartsWith("The first time each turn you deal [gold]Hydro[/gold]",
+                          Face(new ProtoKkAtWatersEdge()));
+    }
+
+    /// <summary>The Kokomi card pass (2026-10-11, pick 1): Drowning
+    /// Pressure counts STACKS of Weak plus stacks of Vulnerable. 2 Weak and 2
+    /// Vulnerable read 4, so 3 each deals 12 (before the Vulnerable).</summary>
+    [Fact]
+    public void Drowning_pressure_counts_weak_and_vulnerable_stacks()
+    {
+        var target = Seat.Kokomi()
+            .WithPower<WeakPower>(2).WithPower<VulnerablePower>(2).Creature;
+        Assert.Equal(4, KokomiOverhaulKit.WeakVulnStacks(target));
+        Assert.Equal(0, KokomiOverhaulKit.WeakVulnStacks(null));
+        var card = new ProtoKkDrowningPressure();
+        Assert.Equal(12m, card.DynamicVars["ExtraDamage"].BaseValue
+                          * KokomiOverhaulKit.WeakVulnStacks(target));
+        Assert.Equal(4m, Upgraded<ProtoKkDrowningPressure>()
+                             .DynamicVars["ExtraDamage"].BaseValue);
     }
 
     [Fact]
@@ -228,9 +272,13 @@ public class KokomiExpansionTests : IDisposable
                      (snare.Kind, snare.Amount, snare.Aim));
         Assert.Equal(2, Upgraded<ProtoKkUndercurrentSnare>().PlanClauses
                             .Single().Amount);
-        Assert.Equal(1m, new ProtoKkSaltInTheWound().DynamicVars["KkAmount"].BaseValue);
+        // The Kokomi card pass (2026-10-11): draw 1, or 2 on Weak; the
+        // upgrade is 2 Vulnerable.
+        Assert.Equal(1m, new ProtoKkSaltInTheWound().DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal(2m, Upgraded<ProtoKkSaltInTheWound>()
-                             .DynamicVars["KkAmount"].BaseValue);
+                             .DynamicVars["PowerAmount"].BaseValue);
+        Assert.Contains(Il.Calls(Il.Method("ProtoKkSaltInTheWound", "OnPlay")),
+                        c => c.Contains("CardPileCmd.Draw"));
         Assert.Contains(Il.Calls(Il.Method("ProtoKkSuffocatingDeep", "OnPlay")),
                         c => c.Contains("KokomiCards.DoubleWeakVulnerable"));
         Assert.Contains(Il.Calls(Il.Method("ProtoKkTidalResonance", "OnPlay")),

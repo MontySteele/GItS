@@ -257,12 +257,9 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # handle on it (`enemy.aura` was cleared before this call), which is
         # exactly what Varka's "of the swirled element" needs.
         _mc_reaction(state, enemy, name, aura)
-        # THE EXPANSION's At Water's Edge
-        # (2026-09-29): "Whenever a reaction happens on an enemy, apply 1 Weak
-        # and 1 Vulnerable to it" -- any reaction, whoever caused it, read at
-        # the site that counts one. `KokomiExpansion.OnReaction` is the twin.
-        from tier0.engine import kokomi_plan             # late: cycle
-        kokomi_plan.note_reaction(state, enemy)
+        # At Water's Edge left this site in the Kokomi card pass (2026-10-11):
+        # it reads her first Hydro damage each turn
+        # (`kokomi_plan.note_hydro_damage`, from `deal_damage_to_enemy`).
         # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
         # turn puts its target on the stand -- Vulnerable + Weak per stack.
         # Gated on the existing reactions_this_turn counter (== 1 is the

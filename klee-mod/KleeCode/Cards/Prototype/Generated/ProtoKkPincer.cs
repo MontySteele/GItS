@@ -66,7 +66,7 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new DamageVar(5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

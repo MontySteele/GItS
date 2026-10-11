@@ -45,13 +45,14 @@ public sealed class ProtoKkSaltInTheWound : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salt in the Wound"),
-        ("description", "Apply 1 [gold]Vulnerable[/gold]. If the enemy has [gold]Weak[/gold], draw {KkAmount:diff()} card{KkAmount:plural:|s}."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Draw 1 card, or 2 if the enemy has [gold]Weak[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("KkAmount", 1m)
+            new DynamicVar("PowerAmount", 1m),
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,12 +65,16 @@ public sealed class ProtoKkSaltInTheWound : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
-        await KokomiCards.DrawIfTargetWeak(choiceContext, this, cardPlay);
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        if (cardPlay.Target != null && cardPlay.Target.Powers.OfType<WeakPower>().Any())
+        {
+            await CardPileCmd.Draw(choiceContext, 1m, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["KkAmount"].UpgradeValueBy(1m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

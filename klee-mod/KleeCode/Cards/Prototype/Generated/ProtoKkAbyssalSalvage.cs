@@ -45,7 +45,7 @@ public sealed class ProtoKkAbyssalSalvage : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Abyssal Salvage"),
-        ("description", "Whenever a status or curse is [gold]Exhausted[/gold], the [gold]Casket[/gold] gains 1{IfUpgraded:show: and you gain 2 [gold]Block[/gold]|}."),
+        ("description", "The first time each turn you draw a status, [gold]Exhaust[/gold] it. The [gold]Casket[/gold] gains 1."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,18 +63,11 @@ public sealed class ProtoKkAbyssalSalvage : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<AbyssalSalvagePlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<AbyssalSalvagePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await PowerCmd.Apply<AbyssalSalvagePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs AbyssalSalvagePlusPower, read off IsUpgraded when the card is played.
+        AddKeyword(CardKeyword.Innate);
     }
 }

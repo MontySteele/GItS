@@ -174,17 +174,18 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Kelp Wall ---------------------------------------------------------------------
 
     [Fact]
-    public void Kelp_wall_plans_seven_plus_three_per_status_ten_upgraded()
+    public void Kelp_wall_plans_nine_plus_three_per_status_twelve_upgraded()
     {
         var card = new ProtoKkKelpWall();
         Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
         var clauses = card.PlanClauses;
         Assert.Equal(2, clauses.Count);
-        Assert.Equal((KokomiPlan.Kind.Block, 7), (clauses[0].Kind, clauses[0].Amount));
+        // The Kokomi card pass (2026-10-11): Plan 9 [12].
+        Assert.Equal((KokomiPlan.Kind.Block, 9), (clauses[0].Kind, clauses[0].Amount));
         Assert.Equal((KokomiPlan.Kind.BlockPerStatusInHand, 3),
                      (clauses[1].Kind, clauses[1].Amount));
         var up = Upgraded<ProtoKkKelpWall>().PlanClauses;
-        Assert.Equal((10, 3), (up[0].Amount, up[1].Amount));
+        Assert.Equal((12, 3), (up[0].Amount, up[1].Amount));
         Assert.Contains("plus 3 for each status or curse in your hand",
                         Face(card));
         Assert.Contains(Seq("KokomiStatusBatch", "BlockPerStatus"),
@@ -227,8 +228,9 @@ public class KokomiStatusBatchTests : IDisposable
     public void Sea_glass_harvest_is_compact_on_the_next_hand_curses_included()
     {
         var card = new ProtoKkSeaGlassHarvest();
-        Assert.Equal(8m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(11m, Upgraded<ProtoKkSeaGlassHarvest>().DynamicVars.Block.BaseValue);
+        // The Kokomi card pass (2026-10-11): 10 [13] Block.
+        Assert.Equal(10m, card.DynamicVars.Block.BaseValue);
+        Assert.Equal(13m, Upgraded<ProtoKkSeaGlassHarvest>().DynamicVars.Block.BaseValue);
         Assert.Equal(KokomiPlan.Kind.TransformStatusesInHand,
                      Assert.Single(card.PlanClauses).Kind);
         Assert.Contains("[gold]Sea Glass[/gold]{IfUpgraded:show:+|}", Face(card));
@@ -265,7 +267,9 @@ public class KokomiStatusBatchTests : IDisposable
         var card = new ProtoKkTurningTide();
         Assert.Equal(KokomiPlan.Kind.DiscardAndDraw,
                      Assert.Single(card.PlanClauses).Kind);
-        Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
+        // The Kokomi card pass (2026-10-11): draw 2 [3].
+        Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
+        Assert.Equal(3m, Upgraded<ProtoKkTurningTide>().DynamicVars.Cards.BaseValue);
         var body = Seq("KokomiStatusBatch", "DiscardAndDraw");
         var pick = body.FindIndex(c => c.Contains("CardSelectCmd.FromHandForDiscard"));
         var swap = body.FindIndex(c => c.Contains("CardCmd.DiscardAndDraw"));
@@ -309,21 +313,48 @@ public class KokomiStatusBatchTests : IDisposable
 
     // ---- Abyssal Salvage ------------------------------------------------------------------------------
 
+    /// <summary>The Kokomi card pass (2026-10-11, pick 2): "The first time
+    /// each turn you draw a status, Exhaust it. The Casket gains 1." Upgrade:
+    /// Innate. The draw hook asks the status test, then claims the turn's
+    /// latch, THEN Exhausts and feeds the Casket, so only the first status
+    /// drawn each turn is taken. It no longer reads the exhaust.</summary>
     [Fact]
-    public void Abyssal_salvage_feeds_the_casket_and_its_upgrade_also_blocks()
+    public void Abyssal_salvage_exhausts_the_first_status_drawn_each_turn()
     {
-        var feed = Seq("AbyssalSalvagePower", "AfterCardExhausted");
-        Assert.Contains(feed, c => c.Contains("KokomiStatusBatch.IsStatusOrCurse"));
-        Assert.Contains(feed, c => c.Contains("KokomiOverhaulKit.GainCasket"));
-        Assert.DoesNotContain(feed, c => c.Contains("GainBlock"));
-        var plus = Seq("AbyssalSalvagePlusPower", "AfterCardExhausted");
-        Assert.Contains(plus, c => c.Contains("KokomiOverhaulKit.GainCasket"));
-        Assert.Contains(plus, c => c.Contains("CreatureCmd.GainBlock"));
-        Assert.Equal(2, AbyssalSalvagePlusPower.BlockPerStack);
+        var drawn = Seq("AbyssalSalvagePower", "AfterCardDrawn");
+        var status = drawn.FindIndex(c => c.Contains("KleeStatusPackage.IsStatus"));
+        var claim = drawn.FindIndex(c => c.Contains("KokomiOverhaulLedger.ClaimOncePerTurn"));
+        var exhaust = drawn.FindIndex(c => c.Contains("CardCmd.Exhaust"));
+        var casket = drawn.FindIndex(c => c.Contains("KokomiOverhaulKit.GainCasket"));
+        Assert.True(status >= 0 && claim > status && exhaust > claim
+                    && casket > exhaust);
+        Assert.DoesNotContain(drawn, c => c.Contains("IsStatusOrCurse"));
+        Assert.Null(typeof(AbyssalSalvagePower).GetMethod(
+            "AfterCardExhausted",
+            System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.DeclaredOnly));
+        Assert.Null(typeof(AbyssalSalvagePower).Assembly.GetType(
+            "KleeMod.Powers.AbyssalSalvagePlusPower"));
+
+        // Once a turn, on the ledger's latch: the second claim in a turn is
+        // refused, the next turn's is granted.
+        var ledger = new KokomiOverhaulLedger();
+        ledger.RollTo(1);
+        Assert.True(ledger.Claim(nameof(AbyssalSalvagePower)));
+        Assert.False(ledger.Claim(nameof(AbyssalSalvagePower)));
+        ledger.RollTo(2);
+        Assert.True(ledger.Claim(nameof(AbyssalSalvagePower)));
+
         var play = Seq("ProtoKkAbyssalSalvage", "OnPlay");
-        Assert.Contains(play, c => c.Contains("AbyssalSalvagePlusPower"));
         Assert.Contains(play, c => c.Contains("AbyssalSalvagePower"));
-        Assert.Contains(" and you gain 2 [gold]Block[/gold]",
-                        Face(new ProtoKkAbyssalSalvage()));
+        var card = new ProtoKkAbyssalSalvage();
+        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.DoesNotContain(CardKeyword.Innate, card.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Innate,
+                        Upgraded<ProtoKkAbyssalSalvage>().Keywords);
+        Assert.Equal("The first time each turn you draw a status, "
+                     + "[gold]Exhaust[/gold] it. The [gold]Casket[/gold] "
+                     + "gains 1.", Face(card));
     }
 }

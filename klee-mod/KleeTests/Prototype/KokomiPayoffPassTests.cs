@@ -107,14 +107,19 @@ public class KokomiPayoffPassTests : IDisposable
     // ---- Coral Tithe ---------------------------------------------------------
 
     [Fact]
-    public void Coral_tithe_is_a_zero_cost_uncommon_skill_every_three_then_two()
+    public void Coral_tithe_is_a_zero_cost_uncommon_skill_every_two_retain_upgraded()
     {
+        // The Kokomi card pass (2026-10-11): every 2 at both levels; the
+        // upgrade adds Retain. On watch.
         var card = new ProtoKkCoralTithe();
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Equal(3, card.DynamicVars["KkAmount"].IntValue);
-        Assert.Equal(2, Upgraded<ProtoKkCoralTithe>().DynamicVars["KkAmount"].IntValue);
+        Assert.Equal(2, card.DynamicVars["KkAmount"].IntValue);
+        var up = Upgraded<ProtoKkCoralTithe>();
+        Assert.Equal(2, up.DynamicVars["KkAmount"].IntValue);
+        Assert.DoesNotContain(CardKeyword.Retain, card.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Retain, up.Keywords);
         Assert.Contains(Seq("ProtoKkCoralTithe", "OnPlay"),
                         c => c.Contains("KokomiCards.CoralTithe"));
     }

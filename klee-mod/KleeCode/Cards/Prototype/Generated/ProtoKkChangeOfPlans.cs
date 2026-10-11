@@ -48,13 +48,13 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Change of Plans"),
-        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 1 card."),
+        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 2 cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new CardsVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

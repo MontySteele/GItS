@@ -202,7 +202,8 @@ def test_brine_sting_carried_out_hits_and_weakens(overhaul):
 
 # --- the two raises that were already in place ----------------------------------
 
-def test_kurage_canopy_and_ceremonial_garment_print_2_and_3(overhaul):
-    for cid in ("proto_kk_kurage_canopy", "proto_kk_ceremonial_garment"):
-        assert _row(cid).effects[0]["amount"] == 2
-        assert _up(cid).effects[0]["amount"] == 3
+def test_kurage_canopy_prints_2_and_3(overhaul):
+    # Ceremonial Garment left this pin in the Kokomi card pass (2026-10-11):
+    # 1 [2] per stack (`test_kokomi_casket_pass.test_the_moved_numbers`).
+    assert _row("proto_kk_kurage_canopy").effects[0]["amount"] == 2
+    assert _up("proto_kk_kurage_canopy").effects[0]["amount"] == 3

@@ -289,17 +289,19 @@ def test_the_moved_numbers(overhaul):
     assert wave.effects[0]["amount"] == 7
     assert _up("proto_kk_second_wave").effects[0]["amount"] == 9
     pincer = _row("proto_kk_pincer")
-    assert (pincer.effects[0]["amount"], pincer.effects[0]["times"]) == (4, 2)
-    assert _up("proto_kk_pincer").effects[0]["amount"] == 5
+    # The Kokomi card pass (2026-10-11): 5 [6] twice.
+    assert (pincer.effects[0]["amount"], pincer.effects[0]["times"]) == (5, 2)
+    assert _up("proto_kk_pincer").effects[0]["amount"] == 6
     assert _row("proto_kk_opening_gambit").effects[0]["amount"] == 7
     assert _up("proto_kk_opening_gambit").effects[0]["amount"] == 9
     # The Kokomi kit review (2026-10-05): 8 [11], Cleave's numbers.
     assert _row("proto_kk_deep_current").effects[0]["amount"] == 8
     assert _up("proto_kk_deep_current").effects[0]["amount"] == 11
-    # The same review: Ceremonial Garment costs 1 for 2 [3] per debuff.
+    # Ceremonial Garment costs 1; the Kokomi card pass (2026-10-11): 1 [2]
+    # per stack of Weak and Vulnerable (was 2 [3] per debuff).
     garment = _row("proto_kk_ceremonial_garment")
-    assert (garment.cost, garment.effects[0]["amount"]) == (1, 2)
-    assert _up("proto_kk_ceremonial_garment").effects[0]["amount"] == 3
+    assert (garment.cost, garment.effects[0]["amount"]) == (1, 1)
+    assert _up("proto_kk_ceremonial_garment").effects[0]["amount"] == 2
     rip = _row("proto_kk_riptide")
     assert (rip.effects[0]["amount"], rip.effects[0]["bonus_vs_debuff"]) == \
         (11, 3)
@@ -318,9 +320,10 @@ def test_the_moved_numbers(overhaul):
 
 def test_the_commons(overhaul):
     volley = _row("proto_kk_massed_volley")
+    # The Kokomi card pass (2026-10-11): 4 [5] x3.
     assert (volley.cost, volley.effects[0]["amount"],
-            volley.effects[0]["times"]) == (1, 3, 3)
-    assert _up("proto_kk_massed_volley").effects[0]["amount"] == 4
+            volley.effects[0]["times"]) == (1, 4, 3)
+    assert _up("proto_kk_massed_volley").effects[0]["amount"] == 5
 
     arrow = _row("proto_kk_signal_arrow")
     assert arrow.effects[0]["amount"] == 7
@@ -401,12 +404,13 @@ def test_the_uncommons_and_the_rare(overhaul):
     assert _up("proto_kk_depths_judgment").effects[0]["amount_formula"][
         "per"] == 4
 
-    # Tideturn: 4 per Plan waiting (5 upgraded).
+    # Tideturn: 6 per Plan waiting (8 upgraded; the Kokomi card pass,
+    # 2026-10-11).
     st = kokomi_state(enemies=[make_enemy(hp=100)])
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    assert _hit(st, _row("proto_kk_tideturn")) == 8
-    assert _up("proto_kk_tideturn").effects[0]["amount_formula"]["per"] == 5
+    assert _hit(st, _row("proto_kk_tideturn")) == 12
+    assert _up("proto_kk_tideturn").effects[0]["amount_formula"]["per"] == 8
 
     # Moon Signal left the pool in the status batch (2026-10-01); its
     # power stays registered (`test_moon_signal_reads_the_queue_...`).

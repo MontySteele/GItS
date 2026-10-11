@@ -1148,7 +1148,7 @@
       "furina_amount": 1
     },
     "proto_kk_abyssal_salvage": {
-      "upgraded_power": "kk_abyssal_salvage_plus"
+      "innate": true
     },
     "proto_kk_ambush": {
       "plan_damage": 3
@@ -1181,10 +1181,10 @@
       "block": 3
     },
     "proto_kk_coral_crash": {
-      "cost": -1
+      "formula_base": 4
     },
     "proto_kk_coral_tithe": {
-      "kokomi_amount": -1
+      "retain": true
     },
     "proto_kk_current_read": {
       "plan_block": 2
@@ -1199,7 +1199,7 @@
       "formula_base": 2
     },
     "proto_kk_drowning_pressure": {
-      "formula_per": 2
+      "formula_per": 1
     },
     "proto_kk_evening_watch": {
       "plan_block": 2
@@ -1234,7 +1234,7 @@
       "power_amount": 1
     },
     "proto_kk_kurage_school": {
-      "cost": -1
+      "retain": true
     },
     "proto_kk_kurage_swarm": {
       "innate": true
@@ -1297,7 +1297,7 @@
       "damage": 3
     },
     "proto_kk_salt_in_the_wound": {
-      "kokomi_amount": 1
+      "power_amount": 1
     },
     "proto_kk_sango_isshin": {
       "formula_base": 2,
@@ -1382,7 +1382,7 @@
       "plan_exhaust": 1
     },
     "proto_kk_tideturn": {
-      "formula_per": 1
+      "formula_per": 2
     },
     "proto_kk_treatise": {
       "innate": true

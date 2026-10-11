@@ -80,8 +80,12 @@ def test_her_pool_is_seventy_eight_with_the_eight_last(overhaul):
 
 def test_coral_crash_is_body_slam_and_tidal_rebuke_keeps_no_exhaust(overhaul):
     crash = _row("proto_kk_coral_crash")
+    # The Kokomi card pass (2026-10-11): costs 0; the upgrade adds 4 damage.
     assert (crash.rarity, crash.cost, _up("proto_kk_coral_crash").cost) == (
-        "common", 1, 0)
+        "common", 0, 0)
+    assert crash.effects[0]["amount_formula"]["base"] == 0
+    assert _up("proto_kk_coral_crash").effects[0]["amount_formula"] == {
+        "base": 4, "per": 1, "count": "player_block"}
     rebuke = _row("proto_kk_tidal_rebuke")
     # The Rare pass (2026-10-04): cost 2 -> 1 [0], and Retain.
     assert (rebuke.rarity, rebuke.cost, _up("proto_kk_tidal_rebuke").cost) == (
@@ -221,7 +225,9 @@ def test_seas_reproach_answers_her_weak_and_vulnerable(overhaul):
     powers.apply_power(st, st.player, "weak", 1, applier=st.player)
     powers.apply_power(st, enemy, "poison", 1, applier=st.player)
     assert enemy.hp == hp
-    assert _up("proto_kk_seas_reproach").cost == 1
+    # The Kokomi card pass (2026-10-11): 1 [0] (was 2 [1]).
+    assert (_row("proto_kk_seas_reproach").cost,
+            _up("proto_kk_seas_reproach").cost) == (1, 0)
 
 
 def test_watatsumi_resistance_adds_a_nip_per_companion_play(overhaul):
