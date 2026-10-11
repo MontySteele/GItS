@@ -67,14 +67,15 @@ public static class KleeExpansion
     /// R276 (Alice's Detonator): the card it adds, previewed as a hover tip,
     /// the base game's shape for a card that makes another (Blade Dance and
     /// Infinite Blades show a Shiv through <c>HoverTipFactory.FromCard</c>).
-    /// The upgraded Detonator previews the upgraded Ka-pow!, which is the one
-    /// its Power adds. Appended after <paramref name="tips"/>.
+    /// The upgraded Detonator previews the upgraded Alice's Mine (Ka-pow!
+    /// until 2026-10-11), which is the one its Power adds. Appended after
+    /// <paramref name="tips"/>.
     /// </summary>
-    public static IEnumerable<IHoverTip> WithKapowPreview(
+    public static IEnumerable<IHoverTip> WithAlicesMinePreview(
         IEnumerable<IHoverTip> tips, CardModel card)
     {
         foreach (var tip in tips) yield return tip;
-        yield return HoverTipFactory.FromCard<ProtoKoKapow>(card.IsUpgraded);
+        yield return HoverTipFactory.FromCard<ProtoKoAlicesMine>(card.IsUpgraded);
     }
 
     /// <summary>Does this card say Set off? The stamp, read. PURE.</summary>

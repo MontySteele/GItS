@@ -793,6 +793,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
     refpowers.before_hand_draw(state)                # Hook.BeforeHandDraw
+    klee_overhaul.before_hand_draw(state)            # Alice's Detonator
     state.draw(C.CARDS_DRAWN_PER_TURN + refpowers.hand_draw_bonus(p),
                from_hand_draw=True)
     # StS2 sites E/F (AfterPlayerTurnStart, AfterSideTurnStart) -- AFTER the

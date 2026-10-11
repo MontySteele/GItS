@@ -862,13 +862,6 @@ CO_TENANCY_LEDGER = {
             "HeraldOfFrostPower's Cryo can land before or after it (the sim runs those earlier, in "
             "effects.player_turn_start_triggers), and SurpriseDispatchPower "
             "draws from the same rng",
-        ("Powers/Prototype/KleeExpansionPowers.cs", "AlicesDetonatorBasePower"):
-            "(the Klee overhaul, R276). Alice's Detonator adds a "
-            "Ka-pow! (upgraded on the Plus twin) to the hand per stack. THE "
-            "ORDERING QUESTION, answered: it reads nothing but its own "
-            "Amount, and its one write is the hand, the write NaptimePower, "
-            "LionsFangPower and BlazingDelightPower already make here on the "
-            "same terms -- no co-tenant reads the hand's contents",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BlazingDelightPower"):
             "(the Klee overhaul, `EB-732`). Per-turn Energy plus "
             "one draw per stack. THE ORDERING QUESTION, answered: it reads "

@@ -569,11 +569,14 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Alice's Detonator: "At the start of your turn, add a Ka-pow! to your hand."
-/// The starter's own card (<see cref="ProtoKoKapow"/>: 0, Retain, Set off,
-/// Deal 4), one per copy, added AFTER the turn's draw
-/// (<c>AfterPlayerTurnStart</c>, Blazing Delight's site and reason). No prompt
-/// of any kind.
+/// Alice's Detonator: "At the start of your turn, add Alice's Mine to your
+/// hand." Since 2026-10-11 ([USER]: "What about instead treating this like
+/// Necrobinder's Sentry Gaze and having it add a 0 cost card with Ethereal and
+/// Exhaust that adds a Mine for 10 (15 on upgrade)?") the card is
+/// <see cref="ProtoKoAlicesMine"/> (0, Ethereal, Exhaust, a Mine 10 [15]); it
+/// was the starter's Ka-pow!. One per copy, added BEFORE the turn's draw
+/// (<c>BeforeHandDraw</c>), the base game's <c>SentryModePower</c> (Sweeping
+/// Gaze) site and command. No prompt of any kind.
 ///
 /// TWO POWERS AND ONE RULE: the upgraded card's copies arrive upgraded, and a
 /// Power has no upgrade of its own and a copy count cannot also carry a flag,
@@ -583,13 +586,13 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
 /// </summary>
 public abstract class AlicesDetonatorBasePower : PowerModel, ILocalizationProvider
 {
-    /// <summary>Do this Power's Ka-pow!s arrive upgraded?</summary>
+    /// <summary>Do this Power's Alice's Mines arrive upgraded?</summary>
     public abstract bool Upgraded { get; }
 
-    /// <summary>The badge previews the Ka-pow! it adds, as the card does
-    /// (Infinite Blades' Shiv), upgraded on the Plus twin.</summary>
+    /// <summary>The badge previews the Alice's Mine it adds, as the card does
+    /// (Sentry Mode's Sweeping Gaze), upgraded on the Plus twin.</summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        new[] { HoverTipFactory.FromCard<ProtoKoKapow>(Upgraded) };
+        new[] { HoverTipFactory.FromCard<ProtoKoAlicesMine>(Upgraded) };
 
     public abstract List<(string, string)>? Localization { get; }
 
@@ -614,15 +617,16 @@ public abstract class AlicesDetonatorBasePower : PowerModel, ILocalizationProvid
         }
     }
 
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    public override async Task BeforeHandDraw(
+        Player player, PlayerChoiceContext choiceContext,
+        ICombatState combatState)
     {
         if (Owner == null || player.Creature != Owner) return;
         var combat = Owner.CombatState;
         if (combat == null) return;
         for (var copy = 0; copy < Amount; copy++)
         {
-            var card = combat.CreateCard(ModelDb.Card<ProtoKoKapow>(), player);
+            var card = combat.CreateCard(ModelDb.Card<ProtoKoAlicesMine>(), player);
             if (card == null) continue;
             if (Upgraded && card.IsUpgradable && !card.IsUpgraded)
             {
@@ -644,11 +648,11 @@ public sealed class AlicesDetonatorPower : AlicesDetonatorBasePower
         ("title", "Alice's Detonator"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] "
-          + "[gold]Ka-pow![/gold] to your hand."),
+          + "[gold]Alice's Mine[/gold] to your hand."),
     };
 }
 
-/// <summary>The upgraded Alice's Detonator: the same rule, and each Ka-pow! it
+/// <summary>The upgraded Alice's Detonator: the same rule, and each Alice's Mine it
 /// adds arrives upgraded.</summary>
 public sealed class AlicesDetonatorPlusPower : AlicesDetonatorBasePower
 {
@@ -659,6 +663,6 @@ public sealed class AlicesDetonatorPlusPower : AlicesDetonatorBasePower
         ("title", "Alice's Detonator+"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] upgraded "
-          + "[gold]Ka-pow![/gold] to your hand."),
+          + "[gold]Alice's Mine[/gold] to your hand."),
     };
 }

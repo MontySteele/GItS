@@ -8723,7 +8723,7 @@ _R12_SMITH = (
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
-     "At the start of your turn, add a Ka-pow! to your hand."),
+     "At the start of your turn, add Alice's Mine to your hand."),
     ("KLEEMOD-PROTO_MC_FISCHL_OZ",
      "At the end of your turn, Oz deals 5 Electro damage to a random "
      "enemy."),
@@ -8752,7 +8752,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
         "Deal 10 damage. Drain 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
-        "At the start of your turn, add an upgraded Ka-pow! to your hand.")
+        "At the start of your turn, add an upgraded Alice's Mine to your hand.")
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
         "Draw 1 card. At the end of your turn, Oz deals 5 Electro damage to "
         "a random enemy.")

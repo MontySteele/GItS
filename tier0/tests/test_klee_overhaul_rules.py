@@ -2238,7 +2238,7 @@ def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
 def test_tinder_toss_sets_off_every_enemy_then_hits_every_enemy(overhaul):
     """`set_off` with `target: all_enemies` and NO aura filter, then a plain
     `damage` to all. THE ORDER IS THE RULE: Set off resolves on every enemy
-    FIRST, and only then does the 3 land."""
+    FIRST, and only then does the 5 land (3 until 2026-10-11)."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.player.sparks = 1
@@ -2247,13 +2247,13 @@ def test_tinder_toss_sets_off_every_enemy_then_hits_every_enemy(overhaul):
 
     effects.resolve_card(state, load("proto_ko_tinder_toss"))
 
-    # 7 + 3 and 5 + 3: the charge, then the card's own line.
-    assert (a.hp, b.hp) == (190, 192)
+    # 7 + 5 and 5 + 5: the charge, then the card's own line.
+    assert (a.hp, b.hp) == (188, 190)
     assert sizes(a) == [] and sizes(b) == []
 
 
-def test_tinder_toss_upgraded_hits_for_two_more(overhaul):
-    """`upgrade: {damage: +2}` moves the card's own line and NOT the charges,
+def test_tinder_toss_upgraded_hits_for_three_more(overhaul):
+    """`upgrade: {damage: +3}` (2026-10-11) moves the card's own line and NOT the charges,
     which carry their own sizes."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
@@ -2262,7 +2262,7 @@ def test_tinder_toss_upgraded_hits_for_two_more(overhaul):
 
     effects.resolve_card(state, load("proto_ko_tinder_toss+"))
 
-    assert (a.hp, b.hp) == (188, 195)
+    assert (a.hp, b.hp) == (185, 192)
 
 
 def test_tinder_toss_is_playable_on_a_bomb_less_board(overhaul):

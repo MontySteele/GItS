@@ -4763,7 +4763,7 @@ def _op_plant_homework_bomb(state: CombatState, fx: dict,
         klee_overhaul.place(state, enemy, int(fx["size"]))
 
 
-def _op_grant_kapow_each_turn(state: CombatState, fx: dict,
+def _op_grant_alices_mine_each_turn(state: CombatState, fx: dict,
                               card: Card) -> None:
     """Alice's Detonator: install the twin the card's upgrade names
     (`upgraded_grant`, written onto the effect by the upgrade applier)."""
@@ -5101,7 +5101,7 @@ OPS = {
     "lose_strength": _op_lose_strength,
     "fetch_from_discard": _op_fetch_from_discard,
     "add_random_companion": _op_add_random_companion,
-    "grant_kapow_each_turn": _op_grant_kapow_each_turn,
+    "grant_alices_mine_each_turn": _op_grant_alices_mine_each_turn,
     # --- Kokomi overhaul, DRAFT 6 (C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.

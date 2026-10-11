@@ -545,7 +545,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # Adventure Club), and Alice's Detonator's install.
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",
-                  "grant_kapow_each_turn",
+                  "grant_alices_mine_each_turn",
                   # THE KLEE STATUS PACKAGE (2026-10-01): two single calls
                   # into `KleeStatusPackage` -- every status in hand becomes
                   # a named card (Klee Can Explain!), and every status in hand
@@ -2631,9 +2631,9 @@ FURINA_KINDS = {
 }
 FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare"}
 FURINA_FIELDS = {"op", "kind", "amount"}
-#: Alice's Detonator: no field -- the Ka-pow! is the starter's, and whether it
-#: arrives upgraded is the card's own upgrade (`upgraded_grant`).
-GRANT_KAPOW_EACH_TURN_FIELDS = {"op"}
+#: Alice's Detonator: no field -- the card is Alice's Mine (its own row), and
+#: whether it arrives upgraded is the card's own upgrade (`upgraded_grant`).
+GRANT_ALICES_MINE_EACH_TURN_FIELDS = {"op"}
 #: THE KLEE SCALING PASS (klee-next, 2026-10-05,
 #: review/active/klee-scaling-pass-2026-10-05.md sec.4 B): Witch's Homework.
 #: "Place a Bomb SIZE. When it goes off, this card's Bomb is GROWTH
@@ -4172,6 +4172,9 @@ RARITY_CS = {
     "common": "CardRarity.Common",
     "uncommon": "CardRarity.Uncommon",
     "rare": "CardRarity.Rare",
+    # Alice's Mine (2026-10-11): a card another card makes, the base game's
+    # Token rarity (Sweeping Gaze, Shiv). Off-pool by C.KLEE_OFF_POOL_ROW_IDS.
+    "token": "CardRarity.Token",
 }
 
 TYPE_CS = {"attack": "CardType.Attack", "skill": "CardType.Skill", "power": "CardType.Power"}
@@ -5222,8 +5225,8 @@ def blocked_reason(
             amount = eff.get("amount")
             if not isinstance(amount, int) or isinstance(amount, bool)                     or amount <= 0:
                 return "add_random_companion amount must be a positive literal int"
-        if op == "grant_kapow_each_turn":
-            unknown = set(eff) - GRANT_KAPOW_EACH_TURN_FIELDS
+        if op == "grant_alices_mine_each_turn":
+            unknown = set(eff) - GRANT_ALICES_MINE_EACH_TURN_FIELDS
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
         if op == "plant_homework_bomb":
@@ -8104,7 +8107,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                              for e in effects),
         "guest_upgraded": any(e["op"] == "stage_guest" for e in effects),
         "stage_drain": any(e["op"] == "stage_drain" for e in effects),
-        "upgraded_grant": any(e["op"] in ("grant_kapow_each_turn",
+        "upgraded_grant": any(e["op"] in ("grant_alices_mine_each_turn",
                                           "plant_homework_bomb")
                               or (e["op"] == "kokomi"
                                   and e.get("kind") == "shoal_call")
@@ -11843,7 +11846,7 @@ def build_body(
                 "cardPlay.Target, Owner.Creature, this, "
                 'DynamicVars["BombSize"].IntValue);')
 
-        elif op == "grant_kapow_each_turn":
+        elif op == "grant_alices_mine_each_turn":
             # Alice's Detonator. Whether the Ka-pow!s arrive upgraded is the
             # CARD's upgrade, read here at install time (`upgraded_grant`).
             lines.append(
@@ -16809,9 +16812,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # R276 (Alice's Detonator). A card that ADDS a card previews it, the base
     # game's Blade Dance / Infinite Blades shape (`HoverTipFactory.FromCard`)
     # -- and the upgraded card previews the upgraded Ka-pow!, off IsUpgraded.
-    if any(eff.get("op") == "grant_kapow_each_turn"
+    if any(eff.get("op") == "grant_alices_mine_each_turn"
            for eff in card.get("effects", [])):
-        tips_expr = ("KleeExpansion.WithKapowPreview("
+        tips_expr = ("KleeExpansion.WithAlicesMinePreview("
                      f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # THE KLEE STATUS PACKAGE: Klee Can Explain! previews the card it makes,
     # Compact's Fuel tip.

@@ -54,7 +54,8 @@ def test_two_out_two_in_and_the_split_holds(overhaul):
     assert "proto_ko_playdate" not in ids
     assert "proto_ko_playdate" not in {c.id for c in loader.prototype_cards()}
     assert "proto_ko_pop" not in ids
-    assert C.KLEE_OFF_POOL_ROW_IDS == ("proto_ko_pop",)
+    # Alice's Mine joined it on 2026-10-11 (Alice's Detonator's token).
+    assert C.KLEE_OFF_POOL_ROW_IDS == ("proto_ko_pop", "proto_ko_alices_mine")
     assert load("proto_ko_pop").rarity == "common"     # the row stays
     assert ids[-5:-3] == C.KLEE_DESIGN_REVIEW_IDS == (
         "proto_ko_fire_fire", "proto_ko_blasting_spree")

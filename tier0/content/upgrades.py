@@ -527,6 +527,9 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     # sets contributes and the index is byte-identical to what it was.
     reachable |= set(C.KLEE_OVERHAUL_STARTER_IDS)
     reachable |= set(C.KLEE_OVERHAUL_POOL_IDS)
+    # Rows her cards create at play (Pop!, Alice's Mine): the upgraded
+    # Alice's Detonator hands over Alice's Mine+, so it must resolve.
+    reachable |= set(C.KLEE_OFF_POOL_ROW_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_POOL_IDS)
     reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
@@ -822,7 +825,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # THE KOKOMI EXPANSION's Shoal Call rides the same key: its
             # Nips arrive upgraded.
             hit = next((fx for fx in top
-                        if fx.get("op") in ("grant_kapow_each_turn",
+                        if fx.get("op") in ("grant_alices_mine_each_turn",
                                             "plant_homework_bomb")
                         or (fx.get("op") == "kokomi"
                             and fx.get("kind") == "shoal_call")), None)

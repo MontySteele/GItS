@@ -642,7 +642,7 @@ KLEE_OVERHAUL_OPS = frozenset((
     # above -- the arm's verbs, quarantined, and no published world drafts
     # them.
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
-    "add_random_companion", "grant_kapow_each_turn",
+    "add_random_companion", "grant_alices_mine_each_turn",
     # THE STATUS PACKAGE's two (2026-10-01): Klee Can Explain!'s transform and
     # Albedo -- Dust of Purification's exhaust-and-grow. Same decision.
     "transform_statuses_into", "exhaust_statuses_grow_largest",
@@ -2189,7 +2189,7 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "return_to_hand",
                   "grow_largest", "multiply_largest_bomb",
                   "fetch_from_discard", "add_random_companion",
-                  "grant_kapow_each_turn",
+                  "grant_alices_mine_each_turn",
                   "transform_statuses_into",
                   "exhaust_statuses_grow_largest",
                   "lose_strength",

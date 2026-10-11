@@ -304,7 +304,8 @@ Set off, Spark, Companion, Retain and Exhaust. Numbers are starting values.
 - **The Companion route (6):** Playdate, Team Effort, Tag Along, Come Back
   and Play!, Friendship Bracelet (cut by the status package, §5.7),
   Adventure Club.
-- **Retrieval (2):** Treasure Map, Alice's Detonator.
+- **Retrieval (2):** Treasure Map, Alice's Detonator. (Since 2026-10-11
+  Alice's Detonator adds Alice's Mine, not a Ka-pow!: see §5.7's note.)
 
 Two names moved on a clash with shipped cards: Hide and Seek became Hiding
 Spot (now **Windtrace**, the lore pass of 2026-10-01), and Jumpy Dumpty Mk.II is **Jumpy Dumpty Mk.III**.
@@ -343,6 +344,21 @@ with a) on both." So: Fish Blasting (Attack 1, Common) deals 9 [12] to ALL
 and adds a Dazed (Ironclad's Breakthrough); Lisa's Treats adds one
 Confiscated, not two (Defect's Turbo); Confiscated Exhausts when played, as
 the base game's Slimed does, so it no longer stays all combat once paid for.
+
+The same day: "Tinder Box also looks weak? ... having this deal 3 and AoE set
+off feels a little underwhelming for a draw." On 5 [8] to ALL: "I'm good with
+a)". So Tinder Toss (Attack 0 plus 1 Spark, Common) sets off ALL enemies and
+deals 5 [8] to ALL, was 3 [5] (Thunderclap: 4 to ALL and Vulnerable for 1).
+And: "I also wonder if Alice's Detonator is actually any good. In decks that
+want to cook, you can just keep your starting Ka-Pow! handy. In decks
+prioritizing rapid detonation, this still feels underwhelming, plus your
+discard pile fills up with Ka-Pow!'s. What about instead treating this like
+Necrobinder's Sentry Gaze and having it add a 0 cost card with Ethereal and
+Exhaust that adds a Mine for 10 (15 on upgrade)? Same damage rate at 1 energy
+lower, but the damage is delayed a turn." So Alice's Detonator (Power 1, Rare)
+adds Alice's Mine to her hand at the start of each turn, before the draw
+(Sentry Mode's Sweeping Gaze); Alice's Mine is a 0-cost Token Skill, Ethereal
+and Exhaust: "Place a Mine 10 [15] on an enemy." Mine Toss's own Mine.
 
 - **Loaders:** Forbidden Fun (Attack 0, Common, 10 [14], a Dazed), It Wasn't
   Me! (Skill 0, Common, 6 [9] Block, a Dazed), Lisa's Treats (Skill 0,

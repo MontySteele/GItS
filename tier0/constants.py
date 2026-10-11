@@ -360,6 +360,8 @@ STAGING_GRANT_IDS: tuple[str, ...] = (
 #: `tools/card_distinctness_report.py` skip it as they skip a staging row.
 KLEE_OFF_POOL_ROW_IDS: tuple[str, ...] = (
     "proto_ko_pop",
+    # Alice's Detonator's token (2026-10-11), made at turn start.
+    "proto_ko_alices_mine",
 )
 
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
