@@ -30,20 +30,20 @@ public class FurinaTideTests
     // ---- rule 1: the line ---------------------------------------------------
 
     [Fact]
-    public void The_line_is_entry_hp_minus_a_quarter_of_max_hp_rounded_down()
+    public void The_line_is_hp_less_the_drain_buffer_left()
     {
-        // The Drain line rule (ruled 2026-10-09): the HP she entered with,
-        // minus 1/4 of her Max HP, the quarter rounded down.
-        Assert.Equal(30, FurinaStageLaw.LineOf(50, 80));   // 20 HP of room
-        Assert.Equal(60, FurinaStageLaw.LineOf(80, 80));
-        Assert.Equal(21, 85 - FurinaStageLaw.LineOf(85, 85)); // 21.25 down
-        Assert.Equal(21, 60 - FurinaStageLaw.LineOf(60, 85));
-        Assert.Equal(59, FurinaStageLaw.LineOf(78, 78));   // 19.5 down
-        Assert.Equal(0, FurinaStageLaw.LineOf(10, 80));    // never below 0
-        Assert.Equal(0, FurinaStageLaw.LineOf(0, 0));
+        // The Drain buffer (2026-10-11, replacing 2026-10-09's entry-HP
+        // line): 1/4 of her Max HP, rounded down, counted in HP drained; the
+        // line is her HP less the buffer left.
+        Assert.Equal(20, FurinaStageLaw.BufferOf(80));      // 20 HP of room
+        Assert.Equal(21, FurinaStageLaw.BufferOf(85));      // 21.25 down
+        Assert.Equal(19, FurinaStageLaw.BufferOf(78));      // 19.5 down
+        Assert.Equal(0, FurinaStageLaw.BufferOf(0));
+        Assert.Equal(30, FurinaStageLaw.LineAt(50, 20));
+        Assert.Equal(0, FurinaStageLaw.LineAt(10, 20));     // never below 0
         Assert.Equal(4, FurinaStageLaw.LineMaxHpDivisor);
-        // Lyney lowers it by 10: 50/80 -> 20.
-        Assert.Equal(20, FurinaStageLaw.LineOf(50, 80, lyney: true));
+        // Lyney adds 10 to the buffer: 50/80 -> a line of 20.
+        Assert.Equal(30, FurinaStageLaw.BufferOf(80, lyney: true));
         Assert.Equal(59, StageKit.Of().Stage.Line);
         Assert.Equal(30, StageKit.AtMax(50, 50, 80).Stage.Line);
         Assert.Equal(60, StageKit.AtMax(80, 80, 80).Stage.Line);
@@ -71,8 +71,9 @@ public class FurinaTideTests
     [Fact]
     public void A_drain_is_never_refused_for_the_line_only_at_zero_hp()
     {
-        // Entered at 78, now at 42 (past the line of 59): every Drain short
-        // of 0 HP goes ahead; Drain 42 would take her to 0 and does nothing.
+        // Entered at 78, now at 42 after hits: every Drain short of 0 HP
+        // goes ahead; Drain 42 would take her to 0 and does nothing. (The
+        // Drain buffer, 2026-10-11: the hits left all 19 of it.)
         var kit = StageKit.At(42, 78);
         Assert.True(kit.Director.CanDrain(41));
         Assert.False(kit.Director.CanDrain(42));
@@ -82,18 +83,68 @@ public class FurinaTideTests
         Assert.Equal(0, kit.Stage.Fanfare);
         Assert.True(Run(kit.Director.Drain(4)));
         Assert.Equal(38, kit.Board.Hp);
-        Assert.Equal(4, kit.Stage.DrainedPast);
+        Assert.Equal(0, kit.Stage.DrainedPast);
+        Assert.Equal(4, kit.Stage.DrainedAbove);
+        Assert.True(Run(kit.Director.Drain(20)));       // 15 left, 5 past
+        Assert.Equal(5, kit.Stage.DrainedPast);
         Assert.Equal(1, FurinaStageLaw.DrainFloor);
     }
 
     [Fact]
-    public void The_line_reads_the_entry_hp_not_max_hp()
+    public void A_hit_never_uses_the_buffer()
     {
-        // K4: a fight started hurt still has her kit. Entered at 50 of 78:
-        // the line is 31 (50 - 19).
+        // K4: a fight started hurt still has her kit. The Drain buffer
+        // (2026-10-11): entered at 50 of 78 and hit to 30, she still has all
+        // 19 of it; the line is 11.
         var kit = StageKit.At(30, 50);
-        Assert.Equal(31, kit.Stage.Line);
+        Assert.Equal(19, kit.Stage.BufferLeft);
+        Assert.Equal(11, kit.Stage.Line);
         Assert.True(kit.Director.CanDrain(29));
+    }
+
+    [Fact]
+    public void The_users_worked_example_reads_line_15_and_repays_to_35()
+    {
+        // [USER], 2026-10-11: "There should be a buffer for drain equal to
+        // 1/4 my max HP which should be restore-able, but getting hurt should
+        // not disqualify it. Say my max HP is 80 and my current HP is 50.
+        // Then the drain line is 20 below, aka 30. If I take 15 normal damage
+        // and Drain 15, I expect to be at 20 hp with my Drain line at 15 and
+        // be able to Repay to 35."
+        var kit = StageKit.AtMax(50, 50, 80);
+        Assert.Equal(30, kit.Stage.Line);
+        kit.Board.Hp -= 15;                               // 15 normal damage
+        Assert.True(Run(kit.Director.Drain(15)));
+        Assert.Equal(20, kit.Board.Hp);
+        Assert.Equal(15, kit.Stage.Line);
+        Assert.Equal(0, kit.Stage.DrainedPast);
+        Assert.Equal(15, Run(kit.Director.Repay(15)));
+        Assert.Equal(35, kit.Board.Hp);
+        Assert.Equal(20, kit.Stage.BufferLeft);           // restore-able
+    }
+
+    [Fact]
+    public void A_drain_past_the_buffer_is_past_the_line_and_stays_lost()
+    {
+        var kit = StageKit.AtMax(50, 50, 80);             // a buffer of 20
+        kit.Board.Hp -= 15;
+        Assert.True(Run(kit.Director.Drain(25)));
+        Assert.Equal(10, kit.Board.Hp);
+        Assert.Equal((20, 5), (kit.Stage.DrainedAbove, kit.Stage.DrainedPast));
+        Assert.Equal(10, kit.Stage.Line);
+        Assert.Equal(20, Run(kit.Director.CurtainCall()));
+        Assert.Equal(30, kit.Board.Hp);
+    }
+
+    [Fact]
+    public void Lyney_adds_ten_to_the_buffer()
+    {
+        var kit = StageKit.AtMax(50, 50, 80, StagePerformer.Lyney);
+        Assert.Equal(30, kit.Stage.BufferLeft);
+        Assert.Equal(20, kit.Stage.Line);
+        Assert.True(Run(kit.Director.Drain(30)));
+        Assert.Equal((30, 0), (kit.Stage.DrainedAbove, kit.Stage.DrainedPast));
+        Assert.Equal(0, kit.Director.GuestDrainRoom(FurinaStageLaw.LyneyActDrain));
     }
 
     [Fact]
@@ -107,8 +158,10 @@ public class FurinaTideTests
         Run(kit.Director.Drain(3));                    // all past
         Assert.Equal((19, 9), (kit.Stage.DrainedAbove, kit.Stage.DrainedPast));
         Assert.Equal(28, kit.Stage.Drained);
-        Assert.True(kit.Stage.PastLine(1, 59 + 0));
-        Assert.False(kit.Stage.PastLine(1, 60));
+        // No buffer left: any Drain goes past the line (2026-10-11).
+        Assert.True(kit.Stage.PastLine(1, 50));
+        Assert.False(StageKit.Of().Stage.PastLine(19, 78));
+        Assert.True(StageKit.Of().Stage.PastLine(20, 78));
     }
 
     [Fact]
@@ -311,18 +364,27 @@ public class FurinaTideTests
         var kit = StageKit.Of(StagePerformer.Lyney);
         Assert.Equal(49, kit.Stage.Line);                    // 59 - 10
         Assert.Equal(59, StageKit.Of().Stage.Line);
-        Assert.Equal(1, FurinaStageLaw.LineOf(8, 78, lyney: true));
+        Assert.Equal(29, kit.Stage.BufferLeft);              // 19 + 10
         Assert.True(StageKit.Run(kit.Director.Act(kit.Stage.Seats[0])));
         Assert.Equal(76, kit.Board.Hp);
         Assert.Equal(2, kit.Stage.Drained);
         Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
-        // Below the line (the drain-line round, 2026-10-09) a guest's
-        // Drain stops at the line: it drains 0 and still deals its damage.
+        // Hit to 30 (the Drain buffer, 2026-10-11): the buffer is whole, so
+        // his Drain 2 goes ahead.
         var low = StageKit.At(30, 78, StagePerformer.Lyney);
         StageKit.Run(low.Director.Act(low.Stage.Seats[0]));
-        Assert.Equal(30, low.Board.Hp);
-        Assert.Equal(0, low.Stage.Drained);
+        Assert.Equal(28, low.Board.Hp);
+        Assert.Equal(2, low.Stage.Drained);
         Assert.Contains("damage Lyney All 8 Pyro", low.Board.Log);
+        // With the buffer used up (the drain-line round, 2026-10-09) a
+        // guest's Drain stops at the line: it drains 0 and still deals its
+        // damage.
+        var spent = StageKit.At(60, 78, StagePerformer.Lyney);
+        StageKit.Run(spent.Director.Drain(29));
+        StageKit.Run(spent.Director.Act(spent.Stage.Seats[0]));
+        Assert.Equal(31, spent.Board.Hp);
+        Assert.Equal(29, spent.Stage.Drained);
+        Assert.Contains("damage Lyney All 8 Pyro", spent.Board.Log);
         // At 2 HP: no Drain, the damage unchanged.
         var last = StageKit.At(2, 78, StagePerformer.Lyney);
         StageKit.Run(last.Director.Act(last.Stage.Seats[0]));
@@ -451,14 +513,17 @@ public class FurinaTideTests
     }
 
     [Fact]
-    public void A_second_copy_moves_the_guest_to_the_newest_seat_with_no_act()
+    public void A_second_copy_moves_the_guest_to_the_newest_seat_and_it_acts()
     {
+        // The 2026-10-11 playtest: "I'm thinking to let the guest star Act
+        // when replayed to make getting a second copy do something at all."
         var kit = StageKit.Of(StagePerformer.Clorinde, StagePerformer.Lynette);
         Assert.Equal(StageSummonResult.Repeat,
                      StageKit.Run(kit.Director.SummonGuest(StagePerformer.Clorinde)));
         Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde },
                      kit.Company);
-        Assert.Empty(kit.Board.Hits);
+        Assert.Equal(new[] { "damage Clorinde Random 6 Electro" },
+                     kit.Board.Hits.ToArray());
         Assert.Equal(0, kit.Stage.Fanfare);
     }
 
@@ -524,7 +589,7 @@ public class FurinaTideTests
                                StagePerformer.Lynette, StagePerformer.Clorinde);
         Assert.Equal("\n(Wriothesley will leave)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Charlotte));
-        Assert.Equal("\n(Lynette moves to the newest seat)",
+        Assert.Equal("\n(Lynette moves to the newest seat and acts)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Lynette));
         Assert.Equal("",
             FurinaStageBowPreview.Line(StageKit.Of().Stage,
@@ -649,23 +714,22 @@ public class FurinaTideTests
         Assert.Equal(FurinaStage.DrainedOf(seat.Creature),
                      DrainedCounter.Read(seat.Creature));
 
-        // 2026-10-05: the line says where it comes from; 2026-10-09: it
-        // is entry HP minus 1/4 of Max HP, and HP drained past it is lost
-        // unless Repaid.
-        Assert.Equal("Drain line [blue]59[/blue] HP (the HP you started "
-                     + "this fight with, minus 1/4 of your Max HP): HP you "
+        // 2026-10-05: the line says where it comes from; 2026-10-11 (the
+        // Drain buffer): it is her HP less the buffer left, and HP drained
+        // past it is lost unless Repaid.
+        const string Why = "your HP minus your Drain buffer: 1/4 of your Max "
+                         + "HP, less what you have drained";
+        Assert.Equal("Drain line [blue]59[/blue] HP (" + Why + "): HP you "
                      + "[gold]Drain[/gold] past it is lost unless you "
                      + "[gold]Repay[/gold] it.",
-                     DrainedCounter.LineSentence(
-                         59, "the HP you started this fight with, minus 1/4 "
-                             + "of your Max HP"));
-        Assert.Equal("the HP you started this fight with, minus 1/4 of your "
-                     + "Max HP",
-                     stage.LineWhy);
-        Assert.Contains("10 lower with Lyney",
+                     DrainedCounter.LineSentence(59, Why));
+        Assert.Equal(Why, stage.LineWhy);
+        Assert.Contains("plus 10 with Lyney on stage",
                         FurinaStageLaw.LineWhy(lyney: true));
         var body = DrainedCounter.HoverBody(seat.Creature);
-        Assert.StartsWith(DrainedCounter.LineSentence(59, stage.LineWhy), body);
+        // At 78 HP with 4 of the 19 buffer drained, the line is 63.
+        Assert.Equal(63, stage.Line);
+        Assert.StartsWith(DrainedCounter.LineSentence(63, stage.LineWhy), body);
         Assert.Contains("\nDrained [blue]4[/blue] HP.\n", body);
         Assert.Contains("Drained [blue]9[/blue] HP ([blue]3[/blue] past "
                         + "your line: lost unless you [gold]Repay[/gold]).",
@@ -686,10 +750,26 @@ public class FurinaTideTests
             .GetMethod("Postfix", HeadlessGame.All)!);
         Assert.Contains(activate,
             c => c.EndsWith("DrainedCounter.Setup", StringComparison.Ordinal));
-        // One slot along from the Fanfare gauge; the Spark counter after it.
+        // One slot up from the Fanfare gauge; the Spark counter above it.
         Assert.Equal(1, DrainedCounter.Slot);
         Assert.Equal(2, SparkCounter.SlotFor(Seat.Furina().Creature));
         FurinaStageLedger.ResetAll();
+    }
+
+    [Fact]
+    public void The_counters_faces_are_gold_and_red()
+    {
+        // The 2026-10-11 playtest: "the white one of Drain is hard to make
+        // out" and "I see the fnafare turned to white when it's non-zero...
+        // that doesn't work either." Fanfare is the [gold] tag's gold, dimmed
+        // at 0; Drained is the game's red at every count.
+        var gold = new Godot.Color("EFC851");
+        Assert.Equal(gold, FanfareCounter.FaceColor(3));
+        Assert.Equal(gold, FanfareCounter.FaceColor(40));
+        var empty = FanfareCounter.FaceColor(0);
+        Assert.Equal((gold.R, gold.G, gold.B), (empty.R, empty.G, empty.B));
+        Assert.Equal(0.45f, empty.A, 3);
+        Assert.Equal(new Godot.Color("FF5555"), DrainedCounter.FaceColor);
     }
 
     [Fact]
@@ -698,16 +778,15 @@ public class FurinaTideTests
         string Body(string name) => (string)typeof(ArmKeywordTips)
             .GetField(name, HeadlessGame.All)!.GetRawConstantValue()!;
         Assert.Equal(
-            "Lose N HP. Drained HP above your line returns after combat. HP "
-            + "drained past your line is lost unless you [gold]Repay[/gold] "
-            + "it. Your line is the HP you started this fight with, minus 1/4 "
-            + "of your Max HP.",
+            "Lose N HP. Each combat, the first 1/4 of your Max HP drained "
+            + "returns after combat; more than that only [gold]Repay[/gold] "
+            + "returns.",
             Body("DrainBody"));
         Assert.Contains("drained HP", Body("RepayBody"));
         Assert.Contains("[gold]Repay[/gold]", Body("FanfareBody"));
         // The pool-75 round (2026-10-09): Fanfare lives one combat (her
         // ledger is per combat), and the tip says so.
-        Assert.EndsWith("It resets to 0 after each combat.",
+        Assert.EndsWith("Resets after each combat.",
                         Body("FanfareBody"));
     }
 
@@ -717,8 +796,8 @@ public class FurinaTideTests
         // The pool-75 round (2026-10-09). The Drain tip names the line now,
         // and the refusal carries its number.
         Assert.Equal(
-            "\nYour Drain line is 30: the HP you started this fight with, "
-            + "minus 1/4 of your Max HP.",
+            "\nYour Drain line is 30: your HP minus your Drain buffer: 1/4 "
+            + "of your Max HP, less what you have drained.",
             FurinaStageFacePreview.LineNowWords(
                 30, FurinaStageLaw.LineWhy(lyney: false)));
         // The Drain line rule (2026-10-09): past the line is a warning, and
@@ -743,7 +822,8 @@ public class FurinaTideTests
                 .Single(r => r.Item1 == "description").Item2;
             Assert.EndsWith("{InCombat:{StageRepay}|}", face);
         }
-        Assert.EndsWith("Copies stack.",
+        // "I don't think 'Salon's Encore' needs to say 'Copies stack'." ([USER], 2026-10-11)
+        Assert.EndsWith("damage to ALL enemies.",
             new ProtoFsSalonsEncore().Localization!
                 .Single(r => r.Item1 == "description").Item2);
 

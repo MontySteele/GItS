@@ -33,8 +33,10 @@ def _furina(hp: int) -> object:
 
 
 def test_regina_drains_only_the_room_above_the_line():
+    # The Drain buffer (2026-10-11): 19 of buffer, 17 drained, 2 left.
     st = _furina(61)
     p = st.player
+    p.ftd.drained_above = 17
     assert T.line_hp(p) == 59
     p.powers[FS.REGINA_OF_ALL_WATERS] = 2
     T.turn_start(st)
@@ -45,6 +47,7 @@ def test_regina_drains_only_the_room_above_the_line():
 def test_regina_at_the_line_drains_nothing():
     st = _furina(59)
     p = st.player
+    p.ftd.drained_above = 19                    # the buffer is used up
     p.powers[FS.REGINA_OF_ALL_WATERS] = 1
     T.turn_start(st)
     assert p.hp == 59

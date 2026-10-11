@@ -2705,7 +2705,7 @@
    upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Drain[/gold], deal 3 damage to ALL enemies. Copies stack.",
+   description: "Whenever you [gold]Drain[/gold], deal 3 damage to ALL enemies.",
    effects: [{op: apply_power, power: fs_salons_encore, amount: 3,
               target: self}]}
 
@@ -2725,28 +2725,28 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common, exhaust: true,
-   description: "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}. Act: [gold]Repay[/gold] {GuestAct:diff()}.",
    effects: [{op: stage_guest, member: charlotte}]}
 
 - {id: proto_fs_guest_star_wriothesley, name: "Guest Star: Wriothesley", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Cryo[/gold] damage to a random enemy.",
    effects: [{op: stage_guest, member: wriothesley}]}
 
 - {id: proto_fs_guest_star_lynette, name: "Guest Star: Lynette", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Anemo[/gold] damage to an enemy with an aura.",
    effects: [{op: stage_guest, member: lynette}]}
 
 - {id: proto_fs_guest_star_clorinde, name: "Guest Star: Clorinde", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Summon[/gold] Clorinde{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Clorinde{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Electro[/gold] damage to a random enemy.",
    effects: [{op: stage_guest, member: clorinde}]}
 
 # --- THE TWO RARES ---
@@ -2800,7 +2800,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: stage_guest, member: lyney}]}
 
 - {id: proto_fs_a_five_century_act, name: "A Five-Century Act", character: furina,
@@ -2816,7 +2816,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Sigewinne{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Sigewinne{IfUpgraded:show:+|}. Act: [gold]Repay[/gold] {GuestAct:diff()}.",
    effects: [{op: stage_guest, member: sigewinne}]}
 
 # Fountain of Lucine: a Skill that leaves a Power counting the three turns
@@ -2852,7 +2852,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.{IfUpgraded:show: Also applies [gold]Weak[/gold].|}",
    effects: [{op: stage_guest, member: chevreuse}]}
 
 - {id: proto_fs_bis, name: "Bis!", character: furina,
@@ -2916,7 +2916,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Freminet{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Freminet{IfUpgraded:show:+|}. Act: gain {GuestAct:diff()} [gold]Block[/gold], and more for [gold]Fanfare[/gold].",
    effects: [{op: stage_guest, member: freminet}]}
 
 - {id: proto_fs_showstopper, name: "Showstopper", character: furina,
@@ -2939,21 +2939,21 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}. Your first [gold]Spend[/gold] each turn costs {GuestLine:diff()} less.",
    effects: [{op: stage_guest, member: navia}]}
 
 - {id: proto_fs_guest_star_neuvillette, name: "Guest Star: Neuvillette", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}. Your [gold]Hydro[/gold] damage deals {GuestLine:diff()} additional damage.",
    effects: [{op: stage_guest, member: neuvillette}]}
 
 - {id: proto_fs_guest_star_escoffier, name: "Guest Star: Escoffier", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Summon[/gold] Escoffier{IfUpgraded:show:+|}.",
+   description: "[gold]Summon[/gold] Escoffier{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Cryo[/gold] damage to ALL enemies.",
    effects: [{op: stage_guest, member: escoffier}]}
 
 # The Crowd (9): 3 Common, 3 Uncommon, 3 Rare.

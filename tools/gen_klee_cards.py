@@ -7508,6 +7508,11 @@ def build_vars(card: dict) -> list[str]:
             # Raise idiom -- a var only when the upgrade has to render.
             out.append(
                 f'new DynamicVar("GuestFanfare", {int(eff["amount"])}m)')
+        elif (op == "stage_guest" and eff is stage_guest_var_effect(card)
+              and guest_face_var(card) is not None):
+            # GUEST STAR FACES (2026-10-11): the number the upgrade raises.
+            var, base, _ = guest_face_var(card)
+            out.append(f'new DynamicVar("{var}", FurinaStageLaw.{base})')
         elif (op in STAGE_AMOUNT_VARS and stage_amount_upgrade(card, op)
               and eff is stage_amount_var_effect(card, op)):
             # THE SUPPORTING POOL (2026-09-26): the Raise idiom again.
@@ -9739,6 +9744,38 @@ def stage_amount_var_effect(card: dict, op: str) -> dict | None:
     """The ONE top-level `op` its delta binds to, tier0's `_bump_first`."""
     return next((fx for fx in card.get("effects", [])
                  if fx.get("op") == op), None)
+
+
+#: GUEST STAR FACES (the 2026-10-11 playtest: "Guest star upgrades don't
+#: show what the + version will do."). The number a Guest Star's upgrade
+#: raises, printed on its face as a var so the game's upgrade preview greens
+#: it: the act's number, or the line's where the upgrade raises the line.
+#: (var, `FurinaStageLaw` base constant, upgraded constant). Chevreuse's
+#: upgrade adds a clause, not a number: her face says it behind IfUpgraded.
+GUEST_FACE_VARS: dict[str, tuple[str, str, str]] = {
+    "charlotte": ("GuestAct", "CharlotteActRepay", "CharlotteActRepayUpgraded"),
+    "sigewinne": ("GuestAct", "SigewinneActRepay", "SigewinneActRepayUpgraded"),
+    "wriothesley": ("GuestAct", "WriothesleyActDamage",
+                    "WriothesleyActDamageUpgraded"),
+    "lynette": ("GuestAct", "LynetteActDamage", "LynetteActDamageUpgraded"),
+    "clorinde": ("GuestAct", "ClorindeActDamage", "ClorindeActDamageUpgraded"),
+    "lyney": ("GuestAct", "LyneyActDamage", "LyneyActDamageUpgraded"),
+    "freminet": ("GuestAct", "FreminetActBlock", "FreminetActBlockUpgraded"),
+    "escoffier": ("GuestAct", "EscoffierActDamage",
+                  "EscoffierActDamageUpgraded"),
+    "navia": ("GuestLine", "NaviaLineDiscount", "NaviaLineDiscountUpgraded"),
+    "neuvillette": ("GuestLine", "NeuvilletteHydroBonus",
+                    "NeuvilletteHydroBonusUpgraded"),
+}
+
+
+def guest_face_var(card: dict) -> tuple[str, str, str] | None:
+    """The face var a Guest Star row with a `guest_upgraded` delta prints,
+    off its first `stage_guest` (GUEST_FACE_VARS), else None."""
+    if not upgrade_plan(card)[0].get("guest_upgraded"):
+        return None
+    eff = stage_guest_var_effect(card)
+    return GUEST_FACE_VARS.get(str(eff.get("member"))) if eff else None
 
 
 def stage_guest_upgrade(card: dict) -> int:
@@ -15012,6 +15049,13 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("guest_upgraded")
         lines.append("// guest_upgraded: the summon reads IsUpgraded off this "
                      "card; the guest's line or act is raised.")
+        face = guest_face_var(card)
+        if face is not None:
+            # GUEST STAR FACES (2026-10-11): the face's number follows, so
+            # the upgrade preview greens it.
+            var, base, up = face
+            lines.append(f'DynamicVars["{var}"].UpgradeValueBy('
+                         f'FurinaStageLaw.{up} - FurinaStageLaw.{base});')
     if "stage_drain" in deltas:
         # FURINA, THE POOL TO 75: a fixed Drain's price, swapped on an
         # IsUpgraded read where it is gated and where it is paid

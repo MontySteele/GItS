@@ -652,11 +652,17 @@ UNMIRRORED: dict[str, str] = {
     "SparkCounter.CountFontSize":
         "presentation: the Spark count's font size.",
     # Furina's "Drained N" counter (the Salon's Tab, 2026-10-05): its slot in
-    # the row above the energy orb, after the Fanfare gauge.
+    # the column above the energy orb, above the Fanfare gauge (a column
+    # since the 2026-10-11 playtest moved it off her Block badge).
     "DrainedCounter.Slot":
-        "presentation: the counter's place in the row above the energy orb "
-        "(after the Fanfare gauge). The number it draws is the ledger's "
+        "presentation: the counter's place in the column above the energy "
+        "orb (above the Fanfare gauge). The number it draws is the ledger's "
         "drained HP, which the sim keeps as `Ftd.drained`.",
+    # The Fanfare gauge's face at 0 (the 2026-10-11 playtest): the gold,
+    # dimmed.
+    "FanfareCounter.EmptyAlpha":
+        "presentation: the alpha of the Fanfare gauge's gold face when it "
+        "reads 0. The sim draws no gauge.",
     "SparkCounter.PanelMargin":
         "presentation: the gap the badge keeps from the energy panel, in the "
         "panel's own units. It is a MARGIN rather than a position -- it is "

@@ -92,12 +92,13 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
   "the current one built overnight can be discarded". Furina pays HP for
-  power: Drain spends HP, never to 0; her Drain line is the HP she entered
-  combat with minus 1/4 of her Max HP, rounded down (50/80 puts it at 30;
-  Lyney: 10 lower; ruled 2026-10-09: "That also rewards max HP stacking"),
+  power: Drain spends HP, never to 0; each combat she has a Drain buffer of
+  1/4 of her Max HP, rounded down, counted in HP drained, so a hit never
+  uses it up, and her Drain line is her HP less the buffer left (2026-10-11,
+  replacing the entry-HP line of 2026-10-09; Lyney adds 10 to the buffer),
   her own Drains may go past it (a
   guest act's Drain stops at it, the drain-line round 2026-10-09), and when
-  combat ends only the HP drained above the line returns (A Five-Century Act
+  combat ends only the HP drained within the buffer returns (A Five-Century Act
   returns the rest too). Repay returns drained HP, the past-line part first;
   every HP lost or repaid prints 1 Fanfare. The Repay floor: most Repay cards
   pay Block, Vigor or damage for the HP a Repay could not return (the Drain
@@ -107,7 +108,7 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   (`review/active/furina-pool-growth-2026-10-09.md` sec.3, ruled 2026-10-09):
   a Guest Star exhausts and has no effect on summon; when its guest leaves (a
   fourth summon, or Final Bow) its card goes to the discard pile; a second
-  copy moves its guest to the newest seat with no act; at the end of her turn
+  copy moves its guest to the newest seat and it acts once (2026-10-11); at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
   pool is the starter and 78 cards (20 / 38 / 20; Guest Star: Navia moved

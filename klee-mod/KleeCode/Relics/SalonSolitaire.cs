@@ -51,7 +51,8 @@ public sealed class SalonSolitaire : CustomRelicModel
           + FurinaStageLaw.SingerRepay + "[/blue]."),
     };
 
-    /// <summary>The combat opens: the entry HP the Drain line is read from.
+    /// <summary>The combat opens: the entry Max HP the Drain buffer is read
+    /// from (2026-10-11; the entry HP is still recorded for the page).
     /// Idempotent.</summary>
     public override async Task BeforeCombatStart()
     {

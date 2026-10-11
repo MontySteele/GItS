@@ -44,14 +44,15 @@ public class KitVerbBaseTriggerProtoPinTests
         Assert.DoesNotContain("AttackCommand.Execute", calls);
     }
 
-    // THE POOL TO 75 (2026-10-09, sec.3): a summon has no effect, so
-    // `SummonGuest` reaches no act; every act -- the end of the turn's, the
-    // bought ones (Encore!, Tutti!, Final Bow, Showstopper) -- is the ONE
+    // THE POOL TO 75 (2026-10-09, sec.3): a summon has no effect; every act
+    // -- the end of the turn's, the bought ones (Encore!, Tutti!, Final Bow,
+    // Showstopper) and a repeat Guest Star's (2026-10-11) -- is the ONE
     // `StageDirector.Act`.
     [Theory]
     [InlineData("ActAll")]
     [InlineData("ActOldest")]
     [InlineData("FinalBow")]
+    [InlineData("SummonGuest")]
     public void Every_bought_or_scheduled_act_reaches_the_one_act(string method)
     {
         Assert.Contains("StageDirector.Act",
@@ -59,11 +60,13 @@ public class KitVerbBaseTriggerProtoPinTests
     }
 
     [Fact]
-    public void The_end_of_turn_acts_through_act_all_and_a_summon_acts_never()
+    public void The_end_of_turn_acts_through_act_all()
     {
+        // A summon's only act is a repeat's (2026-10-11), through `Act`
+        // above; it never reaches `ActAll`.
         Assert.Contains("StageDirector.ActAll",
                         Il.Calls(Il.Method("StageDirector", "EndOfTurn")));
-        Assert.DoesNotContain("StageDirector.Act",
+        Assert.DoesNotContain("StageDirector.ActAll",
                               Il.Calls(Il.Method("StageDirector", "SummonGuest")));
     }
 

@@ -41,14 +41,14 @@ public sealed class ProtoFsGuestStarNavia : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForNavia(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        ArmKeywordTips.ForSpend(ArmKeywordTips.ForNavia(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_navia");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Navia"),
-        ("description", "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Navia{IfUpgraded:show:+|}. Your first [gold]Spend[/gold] each turn costs {GuestLine:diff()} less.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarNavia : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("GuestLine", FurinaStageLaw.NaviaLineDiscount)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,5 +81,6 @@ public sealed class ProtoFsGuestStarNavia : CustomCardModel, ICharacterCard
     protected override void OnUpgrade()
     {
         // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
+        DynamicVars["GuestLine"].UpgradeValueBy(FurinaStageLaw.NaviaLineDiscountUpgraded - FurinaStageLaw.NaviaLineDiscount);
     }
 }

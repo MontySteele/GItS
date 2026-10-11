@@ -127,9 +127,11 @@ namespace KleeMod.Vfx;
 /// is their own energy area.
 ///
 /// BESIDE FURINA'S FANFARE. <see cref="FanfareCounter"/> uses this file's
-/// placement. A Furina holding Sparks shows both, in one row above the energy
-/// orb: Fanfare in the first slot (her own resource, from turn one) and Sparks
-/// in the next (<see cref="SlotFor"/>, <see cref="PlaceInRow"/>).
+/// placement. Furina's counters stack in one column above the energy orb:
+/// Fanfare in the first slot (her own resource, from turn one), Drained above
+/// it, and a Furina holding Sparks shows them above that
+/// (<see cref="SlotFor"/>, <see cref="PlaceInColumn"/>; a column since the
+/// 2026-10-11 playtest, when slot 1 of the old row sat on her Block badge).
 ///
 /// WHAT NOTHING HEADLESS CAN ANSWER. Whether the badge lands where the star
 /// counter lands, and whether the displaced energy orb reads well beside it.
@@ -361,16 +363,38 @@ public static class SparkCounter
     /// beats a readable one painted over the energy cost.
     /// </summary>
     /// <summary>
-    /// <see cref="Place"/>, then <paramref name="slot"/> badges further along
-    /// the row (one side and one <see cref="PanelMargin"/> each), held inside
+    /// <see cref="Place"/>, then <paramref name="slot"/> badges further UP a
+    /// column (one side and one <see cref="PanelMargin"/> each), held inside
     /// the viewport. Slot 0 is <see cref="Place"/> itself. Pure, like it.
+    ///
+    /// A COLUMN, NOT A ROW (the 2026-10-11 playtest: "The Drain gauge also
+    /// overlaps with the Block indicator; we need to move it."). Slot 1 used
+    /// to sit one badge to the RIGHT of slot 0, and right of the orb's top is
+    /// where the player's health bar begins: the base game centres the Block
+    /// badge on the LEFT EDGE of the creature's bounds
+    /// (<c>NHealthBar.UpdateLayoutForCreatureBounds</c>:
+    /// <c>_blockContainer.GlobalPosition.X = bounds.X - _blockContainer.Size.X
+    /// * 0.5</c>), so it is the left-most thing the creature draws and it
+    /// reached back over slot 1. Slot 0 never touched it, which puts the
+    /// badge's left edge right of slot 0's right edge; every slot of a column
+    /// shares slot 0's X span, so no slot can reach the badge, at any height
+    /// and at any Block digit count (the label grows inside the badge, which
+    /// is re-centred on the same edge). The creature's body is right of its
+    /// bounds' left edge, further away still.
+    ///
+    /// When <see cref="Place"/> fell back to the RIGHT of the panel (no room
+    /// above), the column has no room either, and the badges run on to the
+    /// right as they did before.
     /// </summary>
-    internal static Rect2 PlaceInRow(
+    internal static Rect2 PlaceInColumn(
         Rect2 energy, float side, Vector2 viewport, int slot)
     {
         var first = Place(energy, side, viewport);
         if (slot <= 0) return first;
-        var at = first.Position + new Vector2(slot * (side + PanelMargin), 0f);
+        var step = slot * (side + PanelMargin);
+        var at = first.Position.Y < energy.Position.Y
+            ? first.Position - new Vector2(0f, step)
+            : first.Position + new Vector2(step, 0f);
         return new Rect2(Hold(at, side, viewport), first.Size);
     }
 
@@ -396,7 +420,7 @@ public static class SparkCounter
     {
         if (panel == null)
         {
-            var guess = PlaceInRow(
+            var guess = PlaceInColumn(
                 new Rect2(EnergyCounterOffset, new Vector2(side, side)),
                 side, viewport, slot);
             root.AnchorLeft = 0f;
@@ -411,7 +435,7 @@ public static class SparkCounter
         }
 
         var rect = new Rect2(panel.Position, panel.Size);
-        var delta = PlaceInRow(rect, side, viewport, slot).Position
+        var delta = PlaceInColumn(rect, side, viewport, slot).Position
                   - rect.Position;
 
         root.AnchorLeft = panel.AnchorLeft;
