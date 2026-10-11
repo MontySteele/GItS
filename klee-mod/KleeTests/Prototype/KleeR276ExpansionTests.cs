@@ -56,6 +56,28 @@ public class KleeR276ExpansionTests
     private static IReadOnlyCollection<string> Play(string type) =>
         Il.Calls(Il.Method(type, "OnPlay"));
 
+    /// <summary>A source file under klee-mod/KleeCode, line comments
+    /// stripped (`PoolPassThreeTests.Printed`'s idiom).</summary>
+    private static string Printed(string relativePath)
+    {
+        var relative = System.IO.Path.Combine("klee-mod", "KleeCode",
+            relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
+        var dir = new System.IO.DirectoryInfo(System.AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = System.IO.Path.Combine(dir.FullName, relative);
+            if (System.IO.File.Exists(candidate))
+            {
+                return System.Text.RegularExpressions.Regex.Replace(
+                    System.IO.File.ReadAllText(candidate),
+                    @"^\s*//.*$", string.Empty,
+                    System.Text.RegularExpressions.RegexOptions.Multiline);
+            }
+            dir = dir.Parent;
+        }
+        throw new System.IO.FileNotFoundException(relative);
+    }
+
     private static (Seat Klee, Creature A, Creature B) Board()
     {
         var klee = Seat.Klee();
@@ -540,25 +562,34 @@ public class KleeR276ExpansionTests
     }
 
     [Fact]
-    public void Alices_detonator_adds_a_kapow_after_the_draw_upgraded_on_the_plus_card()
+    public void Alices_detonator_adds_alices_mine_before_the_draw_upgraded_on_the_plus_card()
     {
+        // 2026-10-11 ([USER]: "What about instead treating this like
+        // Necrobinder's Sentry Gaze ..."): Alice's Mine, not Ka-pow!, at
+        // Sentry Mode's site (BeforeHandDraw). Sim twin:
+        // `test_alices_detonator_adds_an_alices_mine_and_the_plus_an_upgraded_one`.
         Assert.False(((AlicesDetonatorBasePower)RuntimeHelpers
             .GetUninitializedObject(typeof(AlicesDetonatorPower))).Upgraded);
         Assert.True(((AlicesDetonatorBasePower)RuntimeHelpers
             .GetUninitializedObject(typeof(AlicesDetonatorPlusPower))).Upgraded);
         Assert.Contains("AlicesDetonatorBasePower.Install", Play("ProtoKoAlicesDetonator"));
-        var turn = Il.Calls(Il.Method("AlicesDetonatorBasePower", "AfterPlayerTurnStart"));
+        var turn = Il.Calls(Il.Method("AlicesDetonatorBasePower", "BeforeHandDraw"));
         Assert.Contains("CardModel.UpgradeInternal", turn);
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", turn);
         Assert.Contains(turn, c => c.Contains("CreateCard"));
-        Assert.Contains("{IfUpgraded:show:an upgraded|a} Ka-pow!",
+        // Which card: the IL call list drops ModelDb.Card's generic argument,
+        // so the class is pinned off the source instead.
+        var source = Printed("Powers/Prototype/KleeExpansionPowers.cs");
+        Assert.Contains("ModelDb.Card<ProtoKoAlicesMine>()", source);
+        Assert.DoesNotContain("ModelDb.Card<ProtoKoKapow>()", source);
+        Assert.Contains("{IfUpgraded:show:an upgraded |}Alice's Mine",
                         Face(new ProtoKoAlicesDetonator()));
         // No prompt of any kind.
         Assert.DoesNotContain(turn, c => c.StartsWith("CardSelectCmd"));
     }
 
     [Fact]
-    public void Alices_detonator_previews_the_kapow_it_adds_upgraded_on_the_plus()
+    public void Alices_detonator_previews_the_mine_it_adds_upgraded_on_the_plus()
     {
         // STRUCTURAL: `HoverTipFactory.FromCard` resolves through `ModelDb`,
         // which is outside the headless boundary. The card's tips end in the
@@ -566,8 +597,8 @@ public class KleeR276ExpansionTests
         // when the card is (Blade Dance's Shiv, the base game's shape).
         var tips = typeof(ProtoKoAlicesDetonator)
             .GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
-        Assert.Contains("KleeExpansion.WithKapowPreview", Il.Calls(tips));
-        var preview = Il.Calls(Il.Method("KleeExpansion", "WithKapowPreview"));
+        Assert.Contains("KleeExpansion.WithAlicesMinePreview", Il.Calls(tips));
+        var preview = Il.Calls(Il.Method("KleeExpansion", "WithAlicesMinePreview"));
         Assert.Contains("HoverTipFactory.FromCard", preview);
         Assert.Contains("CardModel.get_IsUpgraded", preview);
 
@@ -580,7 +611,28 @@ public class KleeR276ExpansionTests
         Assert.Contains("AlicesDetonatorBasePower.get_Upgraded", calls);
 
         // The face stays plain: the preview carries the card, not a gold word.
-        Assert.DoesNotContain("[gold]Ka-pow![/gold]", Face(new ProtoKoAlicesDetonator()));
+        Assert.DoesNotContain("[gold]Alice's Mine[/gold]", Face(new ProtoKoAlicesDetonator()));
+    }
+
+    [Fact]
+    public void Alices_mine_is_sweeping_gazes_shape_a_mine_10_or_15()
+    {
+        // 0, Token, Ethereal and Exhaust (the base game's Sweeping Gaze), and
+        // Mine Toss's own Mine call.
+        var card = new ProtoKoAlicesMine();
+        Assert.Equal(0, card.EnergyCost.Canonical);
+        Assert.Equal(CardType.Skill, card.Type);
+        Assert.Equal(CardRarity.Token, card.Rarity);
+        Assert.Contains(CardKeyword.Ethereal, card.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
+        Assert.Equal(10m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(15m, Upgraded<ProtoKoAlicesMine>().DynamicVars["BombSize"].BaseValue);
+        var play = Play("ProtoKoAlicesMine");
+        Assert.Contains("ProtoBombPower.Place", play);
+        Assert.Equal(
+            Play("ProtoKoMineToss").Where(c => c.Contains("ProtoBombPower")),
+            play.Where(c => c.Contains("ProtoBombPower")));
+        Assert.Equal("Place a [gold]Mine[/gold] {BombSize:diff()} on an enemy.", Face(card));
     }
 
     // ---- the explosion's charge-aware door ----------------------------------

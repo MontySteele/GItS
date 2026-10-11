@@ -470,15 +470,62 @@ def test_secret_base_copies_add_into_one_bomb_and_raise_no_other(overhaul):
     assert sizes(enemy) == [8, 5]
 
 
-def test_alices_detonator_adds_a_kapow_and_the_plus_an_upgraded_one(
+def test_alices_detonator_adds_an_alices_mine_and_the_plus_an_upgraded_one(
         overhaul):
+    """2026-10-11 ([USER]: "What about instead treating this like
+    Necrobinder's Sentry Gaze and having it add a 0 cost card with Ethereal
+    and Exhaust that adds a Mine for 10 (15 on upgrade)?"): one Alice's Mine
+    per copy BEFORE the draw (Sentry Mode's `BeforeHandDraw`), upgraded on
+    the Plus twin, and no Ka-pow! any more."""
     state = klee_state()
     state.turn = 2
     play(state, load("proto_ko_alices_detonator"))
     play(state, load("proto_ko_alices_detonator+"))
-    klee_overhaul.turn_start_late(state)
+    klee_overhaul.turn_start_late(state)        # the old site adds nothing
+    assert state.player.hand == []
+    klee_overhaul.before_hand_draw(state)
     ids = sorted(c.id for c in state.player.hand)
-    assert ids == ["proto_ko_kapow", "proto_ko_kapow+"]
+    assert ids == ["proto_ko_alices_mine", "proto_ko_alices_mine+"]
+    assert not any(c.id.startswith("proto_ko_kapow")
+                   for c in state.player.hand)
+
+
+def test_one_detonator_adds_exactly_one_card_a_turn(overhaul):
+    state = klee_state()
+    play(state, load("proto_ko_alices_detonator"))
+    klee_overhaul.before_hand_draw(state)
+    assert [c.id for c in state.player.hand] == ["proto_ko_alices_mine"]
+
+
+def test_alices_mine_is_sweeping_gazes_shape_and_places_a_mine_10_or_15(
+        overhaul):
+    card = load("proto_ko_alices_mine")
+    assert (card.cost, card.type, card.rarity) == (0, "skill", "token")
+    assert card.is_ethereal and card.exhaust
+    assert "proto_ko_alices_mine" in C.KLEE_OFF_POOL_ROW_IDS
+    assert "proto_ko_alices_mine" not in C.KLEE_OVERHAUL_POOL_IDS
+    for cid, size in (("proto_ko_alices_mine", 10),
+                      ("proto_ko_alices_mine+", 15)):
+        enemy = make_enemy(hp=200)
+        state = klee_state([enemy])
+        play(state, load(cid), aim=enemy)
+        assert sizes(enemy) == [size]
+        assert enemy.ko_charges[-1].is_mine
+
+
+def test_an_unplayed_alices_mine_exhausts_at_end_of_turn(overhaul):
+    """Ethereal, through the real turn loop: one fight, no plays, nothing to
+    draw (`test_ethereal_base_field.hand_survives`'s idiom)."""
+    from tier0.content import loader as _loader
+    p = _loader.build_player("klee")
+    p.draw_pile, p.discard_pile = [], []
+    p.hand = [load("proto_ko_alices_mine")]
+    st = combat.run_fight(
+        p, [make_enemy(hp=1, intents=[{"kind": "block", "amount": 0}])],
+        lambda s: None, seed=0)
+    assert any(c.id == "proto_ko_alices_mine" for c in st.player.exhaust_pile)
+    assert not any(c.id == "proto_ko_alices_mine"
+                   for c in st.player.discard_pile)
 
 
 # ---------------------------------------------------------------------------

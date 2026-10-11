@@ -143,6 +143,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKoAftershock>(),
             ModelDb.Card<ProtoKoAlicesDetonator>(),
             ModelDb.Card<ProtoKoAlicesIntroductionMagic>(),
+            ModelDb.Card<ProtoKoAlicesMine>(),
             ModelDb.Card<ProtoKoAlicesRecipe>(),
             ModelDb.Card<ProtoKoAllOfMyTreasures>(),
             ModelDb.Card<ProtoKoAmmoScavenging>(),

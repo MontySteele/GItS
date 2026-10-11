@@ -104,17 +104,17 @@
 # R271 sec.4, item 1: Fwoosh! is CUT. (Pocket Match, the Retain twin it was
 # cut for, became a single-charge Set off on 2026-09-24.)
 
-# R271 sec.5.3: Tinder Toss takes the brief's shape and Fireworks Show's slot.
-# Set off resolves on EVERY enemy first, then the 3 lands on all of them, which
-# is the order the two ops are written in.
+# Set off resolves on EVERY enemy first, then the hit. 2026-10-11 ([USER]:
+# "I'm good with a)"): 5 [8] to ALL, was 3 [5]. Base shape: Thunderclap (4 to
+# ALL and Vulnerable for 1). Provenance note, "Klee rulings, 2026-10-11".
 - {id: proto_ko_tinder_toss, name: "Tinder Toss", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] ALL enemies. Deal 3 [gold]Pyro[/gold] damage to ALL enemies.",
-   upgrade: {damage: +2},
+   description: "[gold]Set off[/gold] ALL enemies. Deal 5 [gold]Pyro[/gold] damage to ALL enemies.",
+   upgrade: {damage: +3},
    effects: [{op: spend_spark, amount: 1},
              {op: set_off, target: all_enemies},
-             {op: damage, amount: 3, target: all_enemies}]}
+             {op: damage, amount: 5, target: all_enemies}]}
 
 - {id: proto_ko_quick_fuse, name: "Quick Fuse", character: klee,
    authored_by: [claude],
@@ -301,13 +301,16 @@
    upgrade: {retain: true},
    effects: [{op: plant_bomb_copy_largest, target: all_enemies}]}
 
+# 2026-10-11 ([USER]: "Fish Blasting needs to give Dazed rather than
+# Confiscated - Confiscated is too punishing"): 9 to ALL and a Dazed, was 8
+# and a Confiscated. Provenance note, "Klee rulings, 2026-10-11".
 - {id: proto_ko_fish_blasting, name: "Fish Blasting", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 8 [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Deal 9 [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {damage: +3},
-   effects: [{op: damage, amount: 8, target: all_enemies},
-             {op: add_card, card: confiscated, zone: discard, amount: 1}]}
+   effects: [{op: damage, amount: 9, target: all_enemies},
+             {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 # Playtest 2026-09-24 ([USER]: "Pocket Match is redundant with Ka-pow!"): a
 # new design. Only the single largest charge goes off; the rest stay and grow.
@@ -662,12 +665,24 @@
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_spark_knight, amount: 3, target: self}]}
 
+# 2026-10-11: Necrobinder's Sentry Mode, which adds a Sweeping Gaze each
+# turn; was a Ka-pow!. [USER]'s words: provenance note, "Klee rulings,
+# 2026-10-11".
 - {id: proto_ko_alices_detonator, name: "Alice's Detonator", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, add {IfUpgraded:show:an upgraded|a} Ka-pow! to your hand.",
+   description: "At the start of your turn, add {IfUpgraded:show:an upgraded |}Alice's Mine to your hand.",
    upgrade: {upgraded_grant: true},
-   effects: [{op: grant_kapow_each_turn}]}
+   effects: [{op: grant_alices_mine_each_turn}]}
+
+# Alice's Detonator's token (Sweeping Gaze's shape: 0, Ethereal, Exhaust),
+# off-pool (`C.KLEE_OFF_POOL_ROW_IDS`). Mine Toss's own Mine op.
+- {id: proto_ko_alices_mine, name: "Alice's Mine", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: token, ethereal: true, exhaust: true,
+   description: "Place a [gold]Mine[/gold] 10 on an enemy.",
+   upgrade: {bomb_size: +5},
+   effects: [{op: plant_bomb, target: enemy, size: 10, mine: true}]}
 
 # SECOND SURPRISE IS CUT (the Klee-only companions, 2026-10-03,
 # review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
@@ -688,13 +703,16 @@
 # review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
 # note, "Klee tempo paper, 2026-10-07".
 
+# 2026-10-11 ([USER]: "Lisa's Treats also underwhelmed; I rarely needed the
+# energy."; "And agreed with a) on both."): one Confiscated, was 2 (Defect's
+# Turbo adds one Void).
 - {id: proto_ko_lisas_treats, name: "Lisa's Treats", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Gain 2 [gold]Energy[/gold]. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Gain 2 [gold]Energy[/gold]. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {energy: +1},
    effects: [{op: energy, amount: 2},
-             {op: add_card, card: confiscated, zone: discard, amount: 2}]}
+             {op: add_card, card: confiscated, zone: discard, amount: 1}]}
 
 - {id: proto_ko_red_knight, name: "Red Knight", character: klee,
    authored_by: [claude],

@@ -175,6 +175,7 @@
     "proto_ko_aftershock",
     "proto_ko_alices_detonator",
     "proto_ko_alices_introduction_magic",
+    "proto_ko_alices_mine",
     "proto_ko_alices_recipe",
     "proto_ko_all_of_my_treasures",
     "proto_ko_ammo_scavenging",
@@ -596,6 +597,7 @@
     "proto_ko_aftershock": "klee",
     "proto_ko_alices_detonator": "klee",
     "proto_ko_alices_introduction_magic": "klee",
+    "proto_ko_alices_mine": "klee",
     "proto_ko_alices_recipe": "klee",
     "proto_ko_all_of_my_treasures": "klee",
     "proto_ko_ammo_scavenging": "klee",
@@ -1431,6 +1433,9 @@
     "proto_ko_alices_introduction_magic": {
       "retain": true
     },
+    "proto_ko_alices_mine": {
+      "bomb_size": 5
+    },
     "proto_ko_alices_recipe": {
       "cost": -1
     },
@@ -1655,7 +1660,7 @@
       "cost": -1
     },
     "proto_ko_tinder_toss": {
-      "damage": 2
+      "damage": 3
     },
     "proto_ko_tinkering": {
       "spark": 1

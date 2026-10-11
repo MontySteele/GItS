@@ -105,7 +105,7 @@ def test_the_papers_numbers_and_upgrades(overhaul):
 def test_the_loaders_pay_the_tier_the_paper_names(overhaul):
     """Light tax: one Dazed. Heavy tax: two Confiscated."""
     for cid, token, n in (("proto_ko_forbidden_fun", "status_dazed", 1),
-                          ("proto_ko_lisas_treats", "confiscated", 2),
+                          ("proto_ko_lisas_treats", "confiscated", 1),   # 2026-10-11
                           ("proto_ko_red_knight", "confiscated", 2)):
         fx = _first(load(cid), "add_card")
         assert (fx["card"], fx["zone"], fx["amount"]) == (token, "discard", n)
@@ -324,3 +324,19 @@ def test_kitchen_alchemy_leaves_a_curse_in_hand(overhaul):
     assert st.player.hand == [curse]
     assert curse not in st.player.exhaust_pile
     assert enemy.powers.get("strength") == -2
+
+
+def test_confiscated_exhausts_when_played(overhaul):
+    """2026-10-11 ([USER]: "Actually, should we tag Confiscated with Exhaust?
+    Currently we're using it as a drawback mechanism to load the deck but it
+    builds over time."): Exhaust, the keyword the base game's Slimed carries.
+    Still playable for 1, still does nothing."""
+    st = klee_state()
+    card = _confiscated()
+    assert card.exhaust
+    st.player.hand = [card]
+    assert combat.card_playable(st, card)
+    combat.play_card(st, card)
+    assert [c.id for c in st.player.exhaust_pile] == ["confiscated"]
+    assert not any(c.id == "confiscated" for c in st.player.discard_pile)
+    assert st.player.energy == 4

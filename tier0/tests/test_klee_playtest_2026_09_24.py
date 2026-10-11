@@ -212,8 +212,8 @@ def test_boom_badge_doubles_every_enemy_one_set_off_card_reaches(overhaul):
     klee_overhaul.place(state, a, 5)
     klee_overhaul.place(state, b, 6)
     play(state, load("proto_ko_tinder_toss"))
-    assert 200 - a.hp == 5 * 2 + 3
-    assert 200 - b.hp == 6 * 2 + 3
+    assert 200 - a.hp == 5 * 2 + 5
+    assert 200 - b.hp == 6 * 2 + 5
 
 
 def test_boom_badge_doubles_pocket_matchs_one_charge(overhaul):
@@ -334,8 +334,8 @@ def test_balance_review_numbers(overhaul):
     g = load
     assert _first(g("proto_ko_countdown"), "draw")["amount"] == 2
     assert _first(g("proto_ko_countdown+"), "draw")["amount"] == 3
-    assert _first(g("proto_ko_fish_blasting"), "damage")["amount"] == 8
-    assert _first(g("proto_ko_fish_blasting+"), "damage")["amount"] == 11
+    assert _first(g("proto_ko_fish_blasting"), "damage")["amount"] == 9
+    assert _first(g("proto_ko_fish_blasting+"), "damage")["amount"] == 12
     assert _first(g("proto_ko_stoke_the_fuse"), "grow_largest_bomb")["per_spark"] == 5
     assert _first(g("proto_ko_stoke_the_fuse+"), "grow_largest_bomb")["per_spark"] == 7
     one_more = _first(g("proto_ko_one_more_charge"), "grow_largest")

@@ -41,20 +41,20 @@ public sealed class ProtoKoFishBlasting : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesConfiscatedRules: true);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesDazedCard: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_fish_blasting");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fish Blasting"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move)
+            new DamageVar(9m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -73,7 +73,7 @@ public sealed class ProtoKoFishBlasting : CustomCardModel, IElementalCard
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         {
-            var token = CombatState!.CreateCard<Confiscated>(Owner);
+            var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
             await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
         }
     }

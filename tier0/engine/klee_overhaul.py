@@ -103,7 +103,7 @@ OVERHAUL_OPS = frozenset((
     #: Play!), random Companion cards made free this turn (Tag Along,
     #: Adventure Club) and Alice's Detonator's install.
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
-    "add_random_companion", "grant_kapow_each_turn",
+    "add_random_companion", "grant_alices_mine_each_turn",
     #: THE STATUS PACKAGE's two (2026-10-01): every status in hand becomes a
     #: Pop! (Klee Can Explain!), and every status in hand is exhausted to grow
     #: the largest Bomb (Albedo -- Dust of Purification).
@@ -1590,14 +1590,15 @@ DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
 SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N to ALL
 SIT_TIGHT = "ko_sit_tight"                # held turn: N Block at turn end
-ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Ka-pow!
+ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Alice's Mine
 ALICES_DETONATOR_PLUS = "ko_alices_detonator_plus"  # ... an upgraded one
 
 #: Wait For It...'s printed payout, per copy. `WaitForItPower.Cards/Energy`.
 WAIT_FOR_IT_ENERGY = int(C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY)
 
-#: The one Ka-pow! Alice's Detonator hands over -- the starter's own row.
-KAPOW_ID = "proto_ko_kapow"
+#: The card Alice's Detonator hands over (2026-10-11; was the starter's
+#: Ka-pow!): Alice's Mine, an off-pool row, 0, Ethereal, Exhaust, a Mine 10.
+ALICES_MINE_ID = "proto_ko_alices_mine"
 
 
 def is_companion_card(state: CombatState, card: Optional[Card]) -> bool:
@@ -1887,11 +1888,8 @@ def install_detonator(state: CombatState, upgraded: bool) -> None:
 
 def _turn_start_expansion(state: CombatState) -> None:
     """The expansion's start-of-turn Powers, after the draw and after rule 1's
-    growth (`AfterPlayerTurnStart`): Klee's Secret Base, Dodoco and Alice's
-    Detonator."""
-    import copy                                     # stdlib, local by habit
-    from tier0.content import loader                # late import: cycle
-
+    growth (`AfterPlayerTurnStart`): Klee's Secret Base and Dodoco. (Alice's
+    Detonator moved to `before_hand_draw` on 2026-10-11.)"""
     p = state.player
     # THE ORDER IS THE MOD'S ONE SEQUENCER (`KleeExpansion
     # .RunTurnStartPlacements`): Sparks 'n' Splash's echo reads the grown
@@ -1915,13 +1913,25 @@ def _turn_start_expansion(state: CombatState) -> None:
             dest = state.rng.choice(living)
             state.emit("ko_dodoco", target=dest.name, size=n)
             place(state, dest, n, is_mine=True)
-    for key, cid in ((ALICES_DETONATOR, KAPOW_ID),
-                     (ALICES_DETONATOR_PLUS, KAPOW_ID + "+")):
+
+
+def before_hand_draw(state: CombatState) -> None:
+    """Alice's Detonator (2026-10-11): one Alice's Mine per copy (upgraded on
+    the Plus twin) BEFORE the turn's draw -- `AlicesDetonatorBasePower
+    .BeforeHandDraw`, the base game's Sentry Mode site."""
+    import copy                                     # stdlib, local by habit
+    from tier0.content import loader                # late import: cycle
+
+    if not live(state):
+        return
+    p = state.player
+    for key, cid in ((ALICES_DETONATOR, ALICES_MINE_ID),
+                     (ALICES_DETONATOR_PLUS, ALICES_MINE_ID + "+")):
         for _ in range(p.powers.get(key, 0)):
             if len(p.hand) >= C.MAX_HAND_SIZE:
                 break
             p.hand.append(copy.deepcopy(loader.get_card(cid)))
-            state.emit("ko_kapow_added", card=cid)
+            state.emit("ko_alices_mine_added", card=cid)
 
 
 def _turn_end_expansion(state: CombatState) -> None:
