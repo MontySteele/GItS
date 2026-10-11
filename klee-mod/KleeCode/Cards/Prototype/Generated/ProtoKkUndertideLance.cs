@@ -51,7 +51,7 @@ public sealed class ProtoKkUndertideLance : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertide Lance"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage, doubled if no other [gold]Plan[/gold] is carried out with it."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to the front enemy, doubled if carried out alone."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -66,7 +66,7 @@ public sealed class ProtoKkUndertideLance : CustomCardModel, IElementalCard, ICh
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move),
+            new DamageVar(9m, ValueProp.Move),
             new KokomiPlan.PlanDamageVar(14m)
         };
 

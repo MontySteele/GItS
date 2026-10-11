@@ -443,6 +443,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # into `FurinaStage.SpendUpTo`; what it buys is the effect
                   # after it, reading `stage_spent`.
                   "stage_spend_up_to",
+                  # Standing Ovation (2026-10-11): "Spend half your
+                  # Fanfare", one call into `FurinaStage.SpendHalf`.
+                  "stage_spend_half",
                   # A Guest Star card, one call into `FurinaStage.GuestStar`.
                   "stage_guest",
                   # Interval Bell's and Salon's Tab's "Energy next turn",
@@ -1766,6 +1769,10 @@ _NTH_ATTACK = re.compile(r"^nth_attack_this_turn_(\d+)$")
 # emitter uses, so a predicate cannot invent a second spelling of a power; an
 # id nothing in that registry names returns None and BLOCKS the card.
 _SELF_HAS_POWER = re.compile(r"^self_has_power_(.+)$")
+#: The sim's `target_has_power_<name>` (`effects._predicate`), a LIVE read off
+#: the aimed enemy. Its first C# row is Salt in the Wound's "or 2 if the enemy
+#: has Weak" (the Kokomi card pass, 2026-10-11).
+_TARGET_HAS_POWER = re.compile(r"^target_has_power_(.+)$")
 
 
 def _bonus_if_reason(eff: dict) -> str | None:
@@ -1837,6 +1844,13 @@ def predicate_cs(name: str) -> str | None:
         entry = APPLY_POWERS.get(hit.group(1))
         if entry:
             return f"Owner.Creature.Powers.OfType<{entry[0]}>().Any()"
+        return None
+    hit = _TARGET_HAS_POWER.match(name)
+    if hit:
+        entry = APPLY_POWERS.get(hit.group(1))
+        if entry:
+            return (f"cardPlay.Target != null && "
+                    f"cardPlay.Target.Powers.OfType<{entry[0]}>().Any()")
         return None
     hit = _LEFTMOST_MEMBER.match(name)
     # SALON_MEMBER_CS is the one member->enum map, shared with `member:` on
@@ -2520,6 +2534,20 @@ VARKA_KIND_FIELDS = {
     "pyro_strike": ("base",),
     "shatter": ("base", "per"),
 }
+#: A field a kind MAY print; absent, the rule's own default holds (Vow of the
+#: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).
+VARKA_OPTIONAL_FIELDS = {
+    "gain_current_oath": ("amount",),
+}
+
+
+def varka_fields(eff: dict) -> tuple:
+    """The numeric fields one `varka` op prints, in call order."""
+    kind = eff["kind"]
+    return VARKA_KIND_FIELDS.get(kind, ()) + tuple(
+        f for f in VARKA_OPTIONAL_FIELDS.get(kind, ()) if f in eff)
+
+
 #: A kind that aims at the enemy the card was played on.
 VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      "pathfinders_mark", "current_element_strike",
@@ -3269,11 +3297,11 @@ APPLY_POWERS = {
         "At the start of your turn, if exactly one [gold]Plan[/gold] is "
         "waiting, gain {X} [gold]Energy[/gold] and draw {X} card."),
     "kk_at_waters_edge": ("AtWatersEdgePower", None,
-        "Whenever an [gold]Elemental Reaction[/gold] happens on an enemy, "
-        "apply {X} Weak and {X} Vulnerable to it."),
+        "The first time each turn you deal [gold]Hydro[/gold] damage to an "
+        "enemy, apply {X} Weak and {X} Vulnerable to it."),
     "kk_ceremonial_garment": ("ProtoCeremonialGarmentPower", None,
-        "Your Attacks deal {X} additional damage for each debuff on their "
-        "target."),
+        "Your Attacks deal {X} additional damage for each Weak and "
+        "Vulnerable on their target."),
     "kk_watatsumis_grace": ("WatatsumisGracePower", None,
         "At the end of your turn, keep up to {X} of your Block."),
     "kk_tidal_riposte": ("TidalRipostePower", None,
@@ -3286,14 +3314,11 @@ APPLY_POWERS = {
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], gain {X} Block."),
-    # THE STATUS BATCH (2026-10-01). Abyssal Salvage and the Block its
-    # upgrade adds; classes in KokomiStatusBatch.cs.
+    # THE STATUS BATCH (2026-10-01); the Kokomi card pass (2026-10-11) moved
+    # it to the draw. Class in KokomiStatusBatch.cs.
     "kk_abyssal_salvage": ("AbyssalSalvagePower", None,
-        "Whenever a status or curse is exhausted, the "
+        "The first time each turn you draw a status, Exhaust it. The "
         "[gold]Casket[/gold] gains {X}."),
-    "kk_abyssal_salvage_plus": ("AbyssalSalvagePlusPower", None,
-        "Whenever a status or curse is exhausted, the "
-        "[gold]Casket[/gold] gains {X} and you gain 2 Block."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
     "kk_patient_tide": ("PatientTidePower", None,
         "At the end of your turn, keep up to {X} unspent "
@@ -5179,7 +5204,7 @@ def blocked_reason(
             if eff.get("target") != want_target:
                 return (f"varka {kind} takes target {want_target!r}, "
                         f"row gives {eff.get('target')!r}")
-            wanted = set(VARKA_KIND_FIELDS.get(kind, ()))
+            wanted = set(varka_fields(eff))
             given = set(eff) & set(VARKA_VAR_FIELDS)
             if given != wanted:
                 return (f"varka {kind} prints {sorted(wanted)}, "
@@ -6221,10 +6246,17 @@ def debuffs_on_target_calc_rider(
     formula = eff.get("amount_formula")
     if not isinstance(formula, dict):
         return None
-    if formula.get("count") != "debuffs_on_target":
+    count = formula.get("count")
+    if count == "debuffs_on_target":
+        read = "static (_, target) => KokomiOverhaulKit.DebuffCount(target)"
+    elif count == "weak_vuln_stacks_on_target":
+        # The Kokomi card pass (2026-10-11): Drowning Pressure counts STACKS
+        # of Weak plus stacks of Vulnerable, on the same aimed rail.
+        read = ("static (_, target) => "
+                "KokomiOverhaulKit.WeakVulnStacks(target)")
+    else:
         return None
-    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
-            "static (_, target) => KokomiOverhaulKit.DebuffCount(target)")
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)), read)
 
 
 #: The Spend paper (2026-10-10): a stage count an effect after a "Spend up to
@@ -6391,6 +6423,8 @@ STAGE_STMT_OPS = {
     "stage_spend", "stage_spend_all", "stage_guest",
     # The Spend paper (2026-10-10): "Spend up to X".
     "stage_spend_up_to",
+    # Standing Ovation (2026-10-11): "Spend half your Fanfare".
+    "stage_spend_half",
     # The loop fix (2026-10-04): Interval Bell's "Energy next turn".
     "stage_energy_next",
     # THE SALON'S TAB (2026-10-05): Drain, Repay, Repay all.
@@ -6401,7 +6435,7 @@ STAGE_STMT_OPS = {
 #: whole-run round 2, 2026-10-10). A row printing one anywhere in its body
 #: carries `IStageSpendCard`.
 STAGE_SPEND_OPS = frozenset({"stage_spend", "stage_spend_all",
-                             "stage_spend_up_to"})
+                             "stage_spend_up_to", "stage_spend_half"})
 
 
 def stage_spend_card(card: dict) -> bool:
@@ -6448,6 +6482,11 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
         n = str(int(eff.get("amount", 1)))
         return ("await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, "
                 f"{n});")
+    if op == "stage_spend_half":
+        # Standing Ovation (2026-10-11): a "Spend up to" half the bank,
+        # rounded down; not a spend-all, so no Bis!.
+        return ("await FurinaStage.SpendHalf(choiceContext, "
+                "Owner.Creature);")
     if op == "stage_drain":
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
         return ("await FurinaStage.Drain(choiceContext, Owner.Creature, "
@@ -6543,8 +6582,7 @@ def _stage_spender_before(card: dict, eff: dict) -> str | None:
     for other in card.get("effects") or []:
         if other is eff:
             return None
-        if other.get("op") in {"stage_spend", "stage_spend_all",
-                               "stage_spend_up_to"}:
+        if other.get("op") in STAGE_SPEND_OPS:
             return str(other["op"])
     return None
 
@@ -6571,6 +6609,10 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
     (`FurinaStage.SpentOrFanfare`), so the face prints a number."""
     if _stage_spender_before(card, eff) == "stage_spend_all":
         return "static (card, _) => FurinaStage.SpentOrFanfare(card)"
+    if _stage_spender_before(card, eff) == "stage_spend_half":
+        # Standing Ovation (2026-10-11): before the play, half the bank;
+        # during it, what it counted.
+        return "static (card, _) => FurinaStage.SpentOrHalf(card)"
     up_to = _stage_up_to_before(card, eff)
     if up_to is not None:
         # The Spend paper (2026-10-10): before the play, what "Spend up to
@@ -7602,7 +7644,7 @@ def build_vars(card: dict) -> list[str]:
         elif op == "varka":
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
-            for field in VARKA_KIND_FIELDS.get(eff["kind"], ()):
+            for field in varka_fields(eff):
                 out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
                            f'{int(eff[field])}m)')
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
@@ -7803,6 +7845,19 @@ def build_vars(card: dict) -> list[str]:
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
+    # Kokomi round 3 review, change 4: Kelp Wall's `{InCombat:...}` line
+    # prints the live total of its two Block clauses (the flat Block plus the
+    # per-status rate against the hand as it stands), the way Driftglass
+    # prints its Casket total. Emitted only where the face prints the token.
+    status_rate = next((int(fx["amount"]) for fx in plan_line
+                        if fx.get("op") == "block_per_status_in_hand"
+                        and isinstance(fx.get("amount"), int)), None)
+    if status_rate is not None and "{PlanStatusBlock" in str(
+            card.get("description") or ""):
+        flat = next((int(fx["amount"]) for fx in plan_line
+                     if fx.get("op") == "block"
+                     and isinstance(fx.get("amount"), int)), 0)
+        out.append(f'new PlanStatusBlockVar({flat}m, {status_rate})')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore

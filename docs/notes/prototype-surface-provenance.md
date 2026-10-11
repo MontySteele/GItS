@@ -5375,7 +5375,9 @@ the start of your next turn. Plans go in the order made." (133 of 135).
    stack is 1 Casket and 2 Block per exhausted status or curse
    (`KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK`, mirrored). "A status or curse" is one
    of hers, by any route (played Slimed, a Dazed's Ethereal exhaust at turn
-   end, Tidecleanse); Block is powered.
+   end, Tidecleanse); Block is powered. Superseded by the Kokomi card pass
+   (2026-10-11, below): the Power reads the draw, and the Plus Power and its
+   constant are gone.
 7. *Sea Glass Harvest.* Upgraded, the Plan transforms into Sea Glass+, read
    off the writing card's `IsUpgraded` at carry-out (sim: the
    `upgraded_grant` flag on the clause). A curse the game will not transform
@@ -7163,6 +7165,11 @@ obvious use in a short hallway fight".
   Grand Design move the played copy, so a fetched Open keeps its price.
   Tip and page row: "0-cost, Retain. ... then empty it, and increase its
   cost by 1. ..."
+  Kokomi round 5 (2026-10-11): the tip and page row now read "Retain.
+  Costs 0, rising by 1 each play. ... then empty it. Under Grand Design it
+  is not emptied."
+  (Grand Design carries the tip and keeps the Casket); the upgrade's draw
+  left the tip for the 135 ceiling and stays on the card face.
 
 ## Kokomi Plan pricing, 2026-10-11
 
@@ -7201,3 +7208,93 @@ trim. Agree on the rest."
   (`upgrade: {block: +2, stage_repay: +1}`); the "Gain 1 Block for any HP it
   could not Repay" floor stays. Most Block: 9, upgraded 12 (was 11, 15).
 - Sim twins in `tier0/engine/furina_tide.py` moved with the sheet.
+
+## Tide Wall names the front enemy, 2026-10-11
+
+- Tide Wall's Plan now says "plus the damage the front enemy intends next
+  turn." Wording only, no op change: the code reads
+  `IntendedDamage(FrontEnemy)`, which counts the front enemy alone and skips
+  Minions, and a seat expected it to count every attacker. The row joins
+  `FRONT_ENEMY_ALLOWED` in `tools/lint_text_conventions.py`.
+
+## Standing Ovation: Common again, Spend half, 2026-10-11
+
+[USER]: "On Furina - let's try standing ovation at Common but only for half
+your Fanfare and see how that goes." (Furina round 3 record, pick 1.)
+
+- **Standing Ovation** (`proto_fs_standing_ovation_all`): Uncommon -> Common.
+  "[gold]Spend[/gold] half your [gold]Fanfare[/gold]. Deal that much damage
+  to ALL enemies." (was "all"). Cost 1, upgrade Retain, unchanged. The new op
+  `stage_spend_half` is a "Spend up to" half the bank, rounded down (C#
+  `FurinaStage.SpendHalf` / `SpentOrHalf`, sim `furina_stage.spend_half`);
+  0 or 1 held spends nothing. It is not a spend-all, so Bis! and Standing
+  Room Only ignore it. Pool 78, 21 / 37 / 20 (was 20 / 38 / 20); sim
+  `furina_tide.CARDS["ftd_standing_ovation"]`.
+
+## Kokomi card pass, 2026-10-11
+
+[USER]: "On Kokomi - Abyssal Salvage sounds possibly too good. The rest look
+good to me ... Coral Tithe might be too strong now, but since it was never
+played before, maybe we buff it and put it on watch." Paper
+`review/active/kokomi-card-pass-2026-10-11.md`, picks 1 (a), 2 (the middle
+option) and 3 (a).
+
+- **Debuff stacks.** The new count token `weak_vuln_stacks_on_target` is
+  stacks of Weak plus stacks of Vulnerable on the aimed enemy (C#
+  `KokomiOverhaulKit.WeakVulnStacks`, sim `kokomi_plan.weak_vuln_stacks`).
+  Drowning Pressure 3 [4] per stack; Ceremonial Garment 1 [2] per stack
+  (`garment_bonus` reads the same count). `debuffs_on_target` stays.
+- **At Water's Edge** reads her first Hydro damage to an enemy each turn, on
+  the shared once-per-turn latch, claimed only by a hit the enemy survives
+  (fully blocked counts). C#: `AtWatersEdgePower.AfterDamageGiven` for a
+  powered hit whose element is Hydro, and `ElementalHit.Deal` / `DealAsIfAura`
+  for element-tagged hits (Plans, the Casket, Sea's Reproach); both call
+  `KokomiExpansion.OnHydroDamage`. Sim: `deal_damage_to_enemy` at the
+  AfterDamageGiven seat calls `kokomi_plan.note_hydro_damage`. The reaction
+  site no longer reads it.
+- **Abyssal Salvage**: "The first time each turn you draw a status, Exhaust
+  it. The Casket gains 1." Upgrade Innate. A status is Damage Report's test
+  (`KleeStatusPackage.IsStatus`, sim `klee_overhaul.is_status`); curses are
+  not included. The latch is claimed by the first status drawn, then the card
+  is Exhausted from hand, then the Casket gains the Power's amount.
+- **Salt in the Wound** is a draw 1 plus a `conditional` on the new codegen
+  predicate `target_has_power_weak` (the sim's existing `target_has_power_`
+  prefix; C# a live read of `cardPlay.Target`).
+- **Numbers and costs**, rest of each card unchanged: Tidecleanse adds Draw
+  1; Kelp Wall Plan 9 [12]; Sea Glass Harvest 10 [13]; Massed Volley 4 [5]
+  x3; Coral Crash cost 0, upgrade +4 damage; Change of Plans draws 2 and
+  still Exhausts; Pincer 5 [6] twice; Tideturn 6 [8] per Plan; Weight of the
+  Plan 8 [10] plus 4 per Energy; Undercurrent Snare and Tidal Resonance cost
+  0; Turning Tide draws 2 [3]; Coral Tithe every 2, upgrade Retain (on
+  watch); Undertide Lance now-line 9 [12] to ALL; Watatsumi's Grace cost 1;
+  Kurage School cost 0, upgrade Retain; Treatise cost 0 [Innate]; Suffocating
+  Deep 10 [13] to ALL; Sea's Reproach 1 [0].
+
+## Kokomi round 5 text fixes, 2026-10-11
+
+- **Treatise** reads "The first time each turn you play a card with a Plan
+  line without writing it as a Plan, draw 1 card." Two seats read "normally"
+  as jargon. Text only; `TreatisePower` says the same with `{Amount}`.
+- **Open the Casket** prints "(Gains N Strength; the Casket stays)" in combat
+  under Grand Design (`GrandDesignPower.Keeps`), and its tip adds "Under
+  Grand Design it is not emptied." Text only.
+
+## Varka co-op fixes, 2026-10-11
+
+The human co-op playtest (`review/records/coop-human-playtest-2026-10-11.md`)
+said of Varka: "Solid! But reliant on powers for Block.", "The Order Answers -
+random Knights are often commons, right? This seems bad." and "Vow of the
+Blade is weak."
+
+- **Rippling Guard** 6 + 1 [2] per other card played, was 3 + 2 [3]: a higher
+  floor, a lower ratio.
+- **Barbara: Gleeful Songs** 6 [8] + 2 [3] per enemy it reacts on, was
+  4 [6] + 3 [4].
+- **Vow of the Blade** gains 2 Oath, was 1; draw stays 1 [2].
+  `gain_current_oath` takes an optional `amount` (absent means 1).
+- **The Order Answers** "At the start of your turn, choose 1 of 3 random
+  Knights. Add it to your hand, upgraded." One choice per stack, three
+  distinct pool Knights on the choose-a-card screen, the pick at its own
+  upgraded cost (C# `VarkaRules.ChooseUpgradedKnight`). The sim picks the
+  first offered Knight of the current element, else the first offered
+  (`varka_oath.order_answers_pick`).

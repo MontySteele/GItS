@@ -6461,9 +6461,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # THE 2026-09-25 TEXT PASS: two short sentences, the word's whole
         # text now; the long forms are the panel's own notes.
         # THE STATUS BATCH (2026-10-01): "Instead of the line above".
-        "Plan": ["Instead of the line above, play the card on the ",
-                 ": it happens next turn. Click it to flip ",
-                 "lines. Plans go in the order made."],
+        # Kokomi round 3 review (2026-10-11): when Plan Block lands.
+        "Plan": ["Instead of the line above, play it on the ",
+                 "; click to flip. Plans happen next turn ",
+                 "in order, and their ", " lasts that turn."],
         # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
         # alone: everything else about a Dusk Plan is a Plan and the row above
         # says all of it. The sentence straddles two `[gold]` spans on the mod
@@ -6538,11 +6539,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
             "Your relic. Each ", "carries out adds ",
             " turns the count into "],
         # And the relic's token, named by What the Tokoyo Returns.
-        "Open the Casket": ["0-cost, Retain. Gain ",
+        "Open the Casket": ["Retain. Costs 0, rising by 1 each play. Gain ",
                             " equal to the ",
-                            "Casket's count, then empty it, and increase "
-                            "its cost by 1. ",
-                            "Upgraded, it also draws a card."],
+                            "Casket's count, then empty it. Under ",
+                            "it is not emptied."],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then

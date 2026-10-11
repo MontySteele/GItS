@@ -250,9 +250,6 @@ MIRRORED: dict[str, object] = {
     # THE EXPANSION, BATCH ONE (2026-09-29): The Long Game's threshold.
     "KokomiOverhaulLaw.LongGameWaiting":
         C.KOKOMI_EXPANSION_LONG_GAME_WAITING,
-    # THE STATUS BATCH (2026-10-01): Abyssal Salvage+'s Block per stack.
-    "AbyssalSalvagePlusPower.BlockPerStack":
-        C.KOKOMI_ABYSSAL_SALVAGE_PLUS_BLOCK,
     # POOL COMPLETION (2026-10-01): the hand limit Kurage School, Casting
     # Agent and Watatsumi Resistance stop at.
     "KokomiPoolCompletion.MaxHandSize": C.MAX_HAND_SIZE,
@@ -338,6 +335,8 @@ MIRRORED: dict[str, object] = {
     "VarkaLaw.SwirlElectroDamageAll": _varka("SWIRL_ELECTRO_DAMAGE_ALL"),
     # THE EXPANSION (2026-10-01): Eye of Stormterror's Swirls a turn.
     "VarkaLaw.EyeOfStormterrorSwirls": _varka("EYE_OF_STORMTERROR_SWIRLS"),
+    # Varka co-op fixes (2026-10-11): The Order Answers offers 3 Knights.
+    "VarkaRules.OrderAnswersOptions": _varka("ORDER_ANSWERS_OPTIONS"),
 }
 
 # --------------------------------------------------------------------------

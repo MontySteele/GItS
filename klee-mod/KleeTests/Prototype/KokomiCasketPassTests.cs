@@ -320,17 +320,19 @@ public class KokomiCasketPassTests : IDisposable
     {
         Assert.Equal(CardRarity.Uncommon, new ProtoKkSecondWave().Rarity);
         Assert.Equal(7m, new ProtoKkSecondWave().DynamicVars.Damage.BaseValue);
-        Assert.Equal(4m, new ProtoKkPincer().DynamicVars.Damage.BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKkPincer>().DynamicVars.Damage.BaseValue);
+        // The Kokomi card pass (2026-10-11): Pincer 5 [6] twice.
+        Assert.Equal(5m, new ProtoKkPincer().DynamicVars.Damage.BaseValue);
+        Assert.Equal(6m, Upgraded<ProtoKkPincer>().DynamicVars.Damage.BaseValue);
         Assert.Equal(7m, new ProtoKkOpeningGambit().DynamicVars.Damage.BaseValue);
         Assert.Equal(9m, Upgraded<ProtoKkOpeningGambit>().DynamicVars.Damage.BaseValue);
         // The Kokomi kit review (2026-10-05): Deep Current 8 [11] to ALL, and
-        // Ceremonial Garment costs 1 for 2 [3] per debuff.
+        // Ceremonial Garment costs 1; the Kokomi card pass (2026-10-11): 1 [2]
+        // per stack of Weak and Vulnerable.
         Assert.Equal(8m, new ProtoKkDeepCurrent().DynamicVars.Damage.BaseValue);
         Assert.Equal(11m, Upgraded<ProtoKkDeepCurrent>().DynamicVars.Damage.BaseValue);
         Assert.Equal(1, new ProtoKkCeremonialGarment().EnergyCost.Canonical);
-        Assert.Equal(2m, Var(new ProtoKkCeremonialGarment(), "PowerAmount"));
-        Assert.Equal(3m, Var(Upgraded<ProtoKkCeremonialGarment>(), "PowerAmount"));
+        Assert.Equal(1m, Var(new ProtoKkCeremonialGarment(), "PowerAmount"));
+        Assert.Equal(2m, Var(Upgraded<ProtoKkCeremonialGarment>(), "PowerAmount"));
         var riptide = new ProtoKkRiptide();
         Assert.Equal(11m, riptide.DynamicVars.Damage.BaseValue);
         Assert.Equal(3m, riptide.DynamicVars.ExtraDamage.BaseValue);
@@ -343,9 +345,10 @@ public class KokomiCasketPassTests : IDisposable
     [Fact]
     public void The_commons()
     {
+        // The Kokomi card pass (2026-10-11): 4 [5], 3 times.
         var volley = new ProtoKkMassedVolley();
-        Assert.Equal(3m, volley.DynamicVars.Damage.BaseValue);
-        Assert.Equal(4m, Upgraded<ProtoKkMassedVolley>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(4m, volley.DynamicVars.Damage.BaseValue);
+        Assert.Equal(5m, Upgraded<ProtoKkMassedVolley>().DynamicVars.Damage.BaseValue);
         Assert.Equal("Deal {Damage:diff()} [gold]Hydro[/gold] damage 3 times.", Face(volley));
 
         var arrow = new ProtoKkSignalArrow();
@@ -475,7 +478,7 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(4m, card.DynamicVars.Block.BaseValue);
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
                    + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the "
-                   + "damage the enemy intends next turn.",
+                   + "damage the front enemy intends next turn.",
                      Face(card));
     }
 

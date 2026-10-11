@@ -292,6 +292,10 @@ internal static class PlayTelemetry
             var hand = CardPile.Get(PileType.Hand, player)?.Cards;
             RecordSpendCardsTurnStart(player, combat.RoundNumber,
                                       CountSpendCards(hand));
+            // Furina round 5 (2026-10-11): which ones, by name. A count
+            // cannot tell a Standing Ovation held from a Spirited Aria held.
+            RecordSpendCardNamesTurnStart(player, combat.RoundNumber,
+                                          SpendCardNames(hand));
         }
         catch (Exception e)
         {
@@ -302,6 +306,66 @@ internal static class PlayTelemetry
     /// <summary>The Spend cards among <paramref name="cards"/>.</summary>
     internal static int CountSpendCards(IEnumerable<CardModel>? cards) =>
         cards?.Count(c => c is IStageSpendCard) ?? 0;
+
+    /// <summary>The Spend cards among <paramref name="cards"/>, by the name
+    /// `cards_played` writes ("Standing Ovation+"), in hand order.</summary>
+    internal static string[] SpendCardNames(IEnumerable<CardModel>? cards) =>
+        cards?.Where(c => c is IStageSpendCard).Select(CardName).ToArray()
+        ?? Array.Empty<string>();
+
+    /// <summary>The hook-free half of the names read (Furina round 5,
+    /// 2026-10-11), and the test seam: [round, [names]] as each of her turns
+    /// opens, after the draw. Furina only, like the count.</summary>
+    internal static void RecordSpendCardNamesTurnStart(Player player, int round,
+                                                       string[] names)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        if (player.Creature is not { } creature) return;
+        var ledger = FurinaStageLedger.Peek(creature);
+        if (ledger == null) return;
+        record.Stage = ledger;
+        record.SpendCardNamesTurnStart.Add((round, names ?? Array.Empty<string>()));
+    }
+
+    /// <summary>
+    /// FURINA ROUND 5 (2026-10-11): how many enemies were alive as each
+    /// Spend card (<see cref="IStageSpendCard"/>) was played, read before it
+    /// resolves, so a Standing Ovation's ALL-enemies damage can be read
+    /// against the bodies it had to hit. One row per play (the first of a
+    /// series), whether or not it spent anything: a play at 0 Fanfare files
+    /// no `fanfare_spends` row and still files this one. Furina only. A read
+    /// (rule 1).
+    /// </summary>
+    internal static void SpendCardPlayed(CardModel? card)
+    {
+        try
+        {
+            if (card is not IStageSpendCard) return;
+            var owner = card.Owner;
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            if (owner == null || combat == null) return;
+            var alive = combat.Enemies.Count(e => e != null && e.IsAlive);
+            RecordSpendCardPlay(owner, combat.RoundNumber, CardName(card),
+                                alive);
+        }
+        catch (Exception e)
+        {
+            Warn("SpendCardPlayed", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="SpendCardPlayed"/>, and the
+    /// test seam.</summary>
+    internal static void RecordSpendCardPlay(Player player, int round,
+                                             string name, int enemiesAlive)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        if (player.Creature is not { } creature) return;
+        var ledger = FurinaStageLedger.Peek(creature);
+        if (ledger == null) return;
+        record.Stage = ledger;
+        record.SpendCardPlays.Add((round, name ?? "", Math.Max(0, enemiesAlive)));
+    }
 
     /// <summary>The hook-free half of <see cref="SpendCardsTurnStart"/>, and
     /// the test seam.</summary>
@@ -585,15 +649,101 @@ internal static class PlayTelemetry
         {
             var owner = cardPlay?.Card?.Owner;
             if (owner == null || !Open.TryGetValue(owner, out var record)) return;
-            if (!cardPlay!.IsFirstInSeries) return;      // one row per PLAY
-            var round = CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0;
-            record.CardsPlayed.Add((round, CardName(cardPlay.Card),
-                                    VarkaElementWord(owner.Creature)));
+            if (cardPlay!.IsFirstInSeries)                // one row per PLAY
+            {
+                var round = CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0;
+                record.CardsPlayed.Add((round, CardName(cardPlay.Card),
+                                        VarkaElementWord(owner.Creature)));
+            }
+            ClosePlayBlock(record, cardPlay.Card, cardPlay.IsFirstInSeries,
+                           cardPlay.IsLastInSeries);
         }
         catch (Exception e)
         {
             Warn("CardPlayed", e);
         }
+    }
+
+    /// <summary>
+    /// BLOCK GAINED PER CARD PLAY (Furina round 3, 2026-10-11: telemetry for
+    /// "Block gained per card play", so the next round can read Hymn of Many
+    /// Waters instead of inferring it). A play's window opens before it
+    /// resolves (the first of its series) and closes after its last replay;
+    /// the Block the seat's own creature gains inside it, from any source,
+    /// is the play's, written as `card_play_block`, one entry per
+    /// `cards_played` row. A play inside a play (an autoplay) keeps its own
+    /// Block, and the outer play's entry leaves it out, so the column never
+    /// counts a point twice. Every character. A read (rule 1).
+    /// </summary>
+    internal static void OpenPlayBlock(CardModel? card)
+    {
+        try
+        {
+            var owner = card?.Owner;
+            if (owner == null || !Open.TryGetValue(owner, out var record)) return;
+            OpenPlayBlock(record, card!);
+        }
+        catch (Exception e)
+        {
+            Warn("OpenPlayBlock", e);
+        }
+    }
+
+    /// <summary>The hook-free half of the open, and the test seam.</summary>
+    private static void OpenPlayBlock(FightRecord record, object key)
+    {
+        // A window that never closed (a play the game abandoned) is dropped
+        // rather than left open for the rest of the fight: nested plays 16
+        // deep are a leak, not a game.
+        if (record.PlayBlockStack.Count >= 16)
+        {
+            record.PlayBlockStack.Clear();
+        }
+        record.PlayBlockStack.Add(new PlayBlockWindow
+        {
+            Key = key, Start = record.BlockSeen,
+        });
+    }
+
+    /// <summary>One open play's Block window.</summary>
+    internal sealed class PlayBlockWindow
+    {
+        public object Key = null!;
+        public int Start;
+        public int Excluded;
+        public int Row = -1;
+    }
+
+    /// <summary>The hook-free half of the close, and the test seam: after a
+    /// play of <paramref name="card"/> resolves. The first of a series
+    /// claims the row <see cref="CardPlayed"/> just wrote; every play of the
+    /// series refreshes it; the last closes the window.</summary>
+    private static void ClosePlayBlock(FightRecord record, object? key,
+                                        bool first, bool last)
+    {
+        var at = record.PlayBlockStack.FindLastIndex(
+            w => ReferenceEquals(w.Key, key));
+        if (at < 0)
+        {
+            // No window (the play opened before the record did): the row
+            // still gets its entry, so the two columns stay aligned.
+            if (first) record.CardPlayBlock.Add(0);
+            return;
+        }
+        var window = record.PlayBlockStack[at];
+        if (first && window.Row < 0)
+        {
+            record.CardPlayBlock.Add(0);
+            window.Row = record.CardPlayBlock.Count - 1;
+        }
+        var raw = record.BlockSeen - window.Start;
+        if (window.Row >= 0)
+        {
+            record.CardPlayBlock[window.Row] = Math.Max(0, raw - window.Excluded);
+        }
+        if (!last) return;
+        record.PlayBlockStack.RemoveAt(at);
+        if (at > 0) record.PlayBlockStack[at - 1].Excluded += raw;
     }
 
     /// <summary>
@@ -945,6 +1095,7 @@ internal static class PlayTelemetry
         {
             record.BlockGained.TryGetValue(round, out var running);
             record.BlockGained[round] = running + amount;
+            record.BlockSeen += amount;
         }
 
         if (giver != null && !ReferenceEquals(giver, receiver)
@@ -994,6 +1145,24 @@ internal static class PlayTelemetry
                 NoteKokomiTurnStart(record, creature, round);
             }
         }
+    }
+
+    /// <summary>Test seam: open a play's Block window for a seat, keyed by
+    /// any object standing for the card. The mod never calls it.</summary>
+    internal static void OpenPlayBlockForTest(Player player, object key)
+    {
+        if (Open.TryGetValue(player, out var record)) OpenPlayBlock(record, key);
+    }
+
+    /// <summary>Test seam: a play of <paramref name="key"/> resolved, as
+    /// <see cref="CardPlayed"/> files it. The mod never calls it.</summary>
+    internal static void ClosePlayBlockForTest(Player player, object key,
+                                               string name, int round,
+                                               bool first, bool last)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        if (first) record.CardsPlayed.Add((round, name, null));
+        ClosePlayBlock(record, key, first, last);
     }
 
     /// <summary>Test seam: the JSON a seat's open record would write.</summary>
@@ -1578,6 +1747,14 @@ internal static class PlayTelemetry
         /// in hand] as each of her turns opens, after the draw
         /// (<see cref="SpendCardsTurnStart"/>).</summary>
         public readonly List<int[]> SpendCardsTurnStart = new();
+        /// <summary>Furina round 5 (2026-10-11). [round, [names]] as each of
+        /// her turns opens (<see cref="RecordSpendCardNamesTurnStart"/>).
+        /// </summary>
+        public readonly List<(int Round, string[] Names)> SpendCardNamesTurnStart = new();
+        /// <summary>Furina round 5 (2026-10-11). [round, name, enemies
+        /// alive] per Spend card play (<see cref="SpendCardPlayed"/>).
+        /// </summary>
+        public readonly List<(int Round, string Name, int Alive)> SpendCardPlays = new();
         /// <summary>2026-10-10 (round 2). The rounds that opened with a
         /// Block-gaining card in hand and attack damage telegraphed
         /// (<see cref="BlockCardTurn"/>).</summary>
@@ -1615,6 +1792,25 @@ internal static class PlayTelemetry
         /// Exhaust selection, in the sim's column order. Rendered by
         /// `Powers.ExhaustSelection.ParityRow`, which owns the names.</summary>
         public readonly List<string> ExhaustSelections = new();
+        /// <summary>
+        /// `damage_by_source` (its meaning written down in Furina round 5,
+        /// 2026-10-11, after a reader failed to reconcile it with "spent x
+        /// enemies"): for each source, the sum over every hit credited to it
+        /// (<see cref="Credit"/>) of the HP that hit took off an enemy. Per
+        /// hit, per body: an ALL-enemies card files one hit per body it
+        /// struck. A hit on a body that survives counts the game's
+        /// <c>DamageResult.UnblockedDamage</c>; a killing hit counts the HP
+        /// the body had just before it (<see cref="RecordDeath"/>), so
+        /// OVERKILL IS NOT COUNTED. The Block a hit broke is never in
+        /// it (that is `damage_blocked`). The number is the hit as dealt, so
+        /// Strength, Vigor (Akabeko), Vulnerable and the like are inside the
+        /// card's figure: a Standing Ovation at 0 Fanfare under Akabeko's 8
+        /// Vigor logs 8 per body with no `fanfare_spends` row. The key is the
+        /// card's name as `cards_played` writes it when the game hands over the
+        /// card, else the credit scope's label in parentheses ("(Critics'
+        /// Darling)"), else "(uncredited)"; a guest's act has no card. The
+        /// values sum to `damage_dealt`.
+        /// </summary>
         public readonly Dictionary<string, int> DamageBySource = new();
         /// <summary>2026-10-02. The same damage split by kind
         /// (<see cref="DamageCredit"/>'s constants), so a reader can tell a
@@ -1638,6 +1834,15 @@ internal static class PlayTelemetry
         public int KillingBlows;
         /// <summary>Block gained by this seat's creature, by round.</summary>
         public readonly SortedDictionary<int, int> BlockGained = new();
+        /// <summary>Furina round 3 (2026-10-11). Every point of Block this
+        /// seat's creature gained this fight, as a running count the play
+        /// windows read (<see cref="OpenPlayBlock(CardModel?)"/>).</summary>
+        public int BlockSeen;
+        /// <summary>The open play windows, innermost last.</summary>
+        public readonly List<PlayBlockWindow> PlayBlockStack = new();
+        /// <summary>`card_play_block`: the Block each play gained, aligned
+        /// with <see cref="CardsPlayed"/>.</summary>
+        public readonly List<int> CardPlayBlock = new();
         /// <summary>Block this seat's cards put on another seat.</summary>
         public int BlockGiven;
         public int DamageTaken;
@@ -1735,6 +1940,42 @@ internal static class PlayTelemetry
                 // hand as each turn opened, [round, n].
                 Pairs(sb, "spend_cards_in_hand_turn_start",
                       SpendCardsTurnStart);
+                // Furina round 5 (2026-10-11): the same hand by name,
+                // [round, [names]], and each Spend card play with the
+                // enemies alive as it was played, [round, name, alive].
+                sb.Append(",\"spend_card_names_turn_start\":[");
+                for (var i = 0; i < SpendCardNamesTurnStart.Count; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append('[').Append(SpendCardNamesTurnStart[i].Round)
+                      .Append(",[");
+                    var names = SpendCardNamesTurnStart[i].Names;
+                    for (var j = 0; j < names.Length; j++)
+                    {
+                        if (j > 0) sb.Append(',');
+                        Quote(sb, names[j]);
+                    }
+                    sb.Append("]]");
+                }
+                sb.Append(']');
+                sb.Append(",\"spend_card_plays\":[");
+                for (var i = 0; i < SpendCardPlays.Count; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append('[').Append(SpendCardPlays[i].Round).Append(',');
+                    Quote(sb, SpendCardPlays[i].Name);
+                    sb.Append(',').Append(SpendCardPlays[i].Alive).Append(']');
+                }
+                sb.Append(']');
+                // Furina round 3 (2026-10-11): her Drain buffer and what
+                // was left of it at the close, and the Guest Star rules
+                // (an eviction acts as it leaves; a second copy acts).
+                sb.Append(",\"drain_buffer\":").Append(Stage.BufferAtClose);
+                sb.Append(",\"drain_buffer_left\":")
+                  .Append(Stage.BufferLeftAtClose);
+                sb.Append(",\"guest_evictions\":").Append(Stage.GuestEvictions);
+                sb.Append(",\"guest_repeat_acts\":")
+                  .Append(Stage.GuestRepeatActs);
             }
             if (IsKokomi)
             {
@@ -1773,6 +2014,16 @@ internal static class PlayTelemetry
 
             sb.Append(']');
             sb.Append(",\"n_cards_played\":").Append(CardsPlayed.Count);
+            // Furina round 3 (2026-10-11). Every character: the Block each
+            // play gained, one entry per `cards_played` row.
+            sb.Append(",\"card_play_block\":[");
+            for (var i = 0; i < CardsPlayed.Count; i++)
+            {
+                if (i > 0) sb.Append(',');
+                sb.Append(i < CardPlayBlock.Count ? CardPlayBlock[i] : 0);
+            }
+
+            sb.Append(']');
             // EB-14. `[round, screen, index, chosen, [offered…]]`, the bot
             // feed's row shape column for column -- the whole point of the
             // channel is that the two feeds can be read by one reader, and
@@ -2152,6 +2403,10 @@ public sealed class PlayTelemetryHooks : AbstractModel
             // not anybody has a bank. `ResolutionLedger.OpenPlay` applies the
             // gate itself so the two cannot drift apart.
             ResolutionLedger.OpenPlay(cardPlay);
+            // Furina round 3 (2026-10-11): the play's Block window.
+            PlayTelemetry.OpenPlayBlock(cardPlay.Card);
+            // Furina round 5 (2026-10-11): a Spend card's enemies alive.
+            PlayTelemetry.SpendCardPlayed(cardPlay.Card);
 
             var creature = cardPlay.Card.Owner?.Creature;
             if (creature == null) return Task.CompletedTask;

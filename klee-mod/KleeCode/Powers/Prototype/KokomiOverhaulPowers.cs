@@ -21,7 +21,9 @@ namespace KleeMod.Powers;
 /// card with a Plan line normally, draw 1 card." It pays for the other side of
 /// the Plan choice -- playing the now-line -- where it used to pay for a
 /// carry-out. "Normally" is <see cref="KokomiPlan.PlayedOnPet"/> answering no:
-/// a card written on the Bake-Kurage draws nothing.
+/// a card written on the Bake-Kurage draws nothing. Kokomi round 5
+/// (2026-10-11): the face says "without writing it as a Plan" instead, because
+/// seats read "normally" as jargon.
 ///
 /// ONCE PER TURN on the ledger's shared latch
 /// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed before the
@@ -35,7 +37,8 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
         ("title", "Treatise"),
         ("description",
             "The first time each turn you play a card with a [gold]Plan[/gold] "
-          + "line normally, draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
+          + "line without writing it as a Plan, draw [blue]{Amount}[/blue] "
+          + "card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -51,7 +51,7 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Applause"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much [gold]Hydro[/gold] damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

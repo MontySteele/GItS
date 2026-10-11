@@ -237,13 +237,14 @@ def test_the_pool_is_78_rows_20_38_20():
     # The block gap (ruled 2026-10-09): 1 Common, 2 Uncommon, 1 Rare more,
     # 20 / 37 / 21. Guest Star: Navia Rare -> Uncommon (2026-10-10, "I lean
     # more towards putting Navia to Uncommon first"): 20 / 38 / 20.
+    # Standing Ovation Common again, Spend half (2026-10-11): 21 / 37 / 20.
     rows = {c.id: c for c in loader.prototype_cards()}
     rarities = [rows[cid].rarity for cid in FS.POOL_IDS]
     assert len(FS.POOL_IDS) == 78 == len(set(FS.POOL_IDS))
     assert "proto_fs_endless_waltz" not in rows
-    assert rows["proto_fs_standing_ovation_all"].rarity == "uncommon"
+    assert rows["proto_fs_standing_ovation_all"].rarity == "common"
     assert (rarities.count("common"), rarities.count("uncommon"),
-            rarities.count("rare")) == (20, 38, 20)
+            rarities.count("rare")) == (21, 37, 20)
     assert rows["proto_fs_guest_star_navia"].rarity == "uncommon"
 
 

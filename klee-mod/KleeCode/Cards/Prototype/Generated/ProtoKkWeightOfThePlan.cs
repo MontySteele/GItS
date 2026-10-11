@@ -57,8 +57,8 @@ public sealed class ProtoKkWeightOfThePlan : CustomCardModel, IElementalCard, IC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
-            new ExtraDamageVar(3m),
+            new CalculationBaseVar(8m),
+            new ExtraDamageVar(4m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.EnergyWaiting(card.Owner.Creature))
         };
 

@@ -86,13 +86,23 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      Spend round 2 (2026-10-10), per group too: the HP drained past the line
      and not returned (`past_lost`: median a fight and total) and the damage
      High Stakes added (`high_stakes_bonus`: total, and the fights it added
-     any), over the fights that carry each key.
+     any), over the fights that carry each key. Since Furina round 3
+     (2026-10-11): the Drain buffer left at the close (`drain_buffer_left`:
+     median, and the fights that ended with none left, i.e. the buffer
+     bound), and the Guest Star evictions and repeat acts (totals). Since
+     Furina round 5 (2026-10-11): the Spend card plays (`spend_card_plays`:
+     `scP`, and the median enemies alive as one was played) and the Spend
+     cards in hand at each turn start by name (`spend_card_names_turn_start`,
+     tallied per card under the table).
 
   6. With `--block-gap` (the Spend round 2, 2026-10-10; every character):
      turns that opened with a Block-gaining card in hand while the enemies
      telegraphed attack damage (`block_card_turns`), and how many of those
      gained no Block (`block_card_turns_no_block`), POOLED over the fights
-     that carry the keys (`nK`), with the no-Block share.
+     that carry the keys (`nK`), with the no-Block share. Since Furina round
+     3 (2026-10-11): Block gained per card play (`card_play_block`, one
+     entry per `cards_played` row), pooled, and per card for the cards that
+     gained any.
 
 CO-OP (`--coop`). Keeps only two-seat fights (`seats == 2`) instead of solo
 ones. Every co-op lane writes a row for BOTH seats of the same fight, so rows
@@ -428,12 +438,44 @@ def _stage_extras(rows: list[dict]) -> dict:
     stakes = [_num(r, "high_stakes_bonus") for r in rows
               if "high_stakes_bonus" in r]
     stakes = [v for v in stakes if v is not None]
+    # Furina round 3 (2026-10-11).
+    left = [_num(r, "drain_buffer_left") for r in rows
+            if "drain_buffer_left" in r]
+    left = [v for v in left if v is not None]
+    evict = [_num(r, "guest_evictions") for r in rows
+             if "guest_evictions" in r]
+    repeat = [_num(r, "guest_repeat_acts") for r in rows
+              if "guest_repeat_acts" in r]
+    # Furina round 5 (2026-10-11): each Spend card play with the enemies
+    # alive as it was played, and the Spend cards in hand by name at each
+    # turn start.
+    plays = [row for r in rows
+             for row in (r.get("spend_card_plays") or [])
+             if isinstance(row, list) and len(row) > 2]
+    alive = [row[2] for row in plays if isinstance(row[2], (int, float))]
+    held: dict[str, int] = {}
+    for r in rows:
+        for row in r.get("spend_card_names_turn_start") or []:
+            if not isinstance(row, list) or len(row) < 2                     or not isinstance(row[1], list):
+                continue
+            for name in row[1]:
+                held[str(name)] = held.get(str(name), 0) + 1
     return {
         "fights_with_past_lost": len(lost),
         "past_lost": _median(lost),
         "past_lost_total": sum(lost) if lost else None,
         "high_stakes_total": sum(stakes) if stakes else None,
         "high_stakes_fights": sum(1 for v in stakes if v > 0),
+        "fights_with_buffer": len(left),
+        "buffer_left": _median(left),
+        "buffer_bound": sum(1 for v in left if v <= 0),
+        "guest_evictions": (sum(v or 0 for v in evict) if evict else None),
+        "guest_repeat_acts": (sum(v or 0 for v in repeat) if repeat
+                              else None),
+        "spend_card_plays": (len(plays) if any("spend_card_plays" in r
+                                               for r in rows) else None),
+        "alive_per_spend_play": _median(alive),
+        "spend_cards_held": held,
     }
 
 
@@ -447,7 +489,8 @@ def render_fanfare(fx: list[dict]) -> list[str]:
              f"{'group':<16}{'n':>5}{'nF':>5}{'peak':>7}{'end':>7}"
              f"{'death':>7}{'sp/f':>6}{'spent':>7}{'before':>8}"
              f"{'n sp':>6}{'upto':>6}{'pastL':>7}{'pL tot':>7}"
-             f"{'HS tot':>7}{'HS f':>5}"]
+             f"{'HS tot':>7}{'HS f':>5}{'bufL':>6}{'bnd':>5}{'evict':>6}"
+             f"{'rpt':>5}{'scP':>5}{'alive':>6}"]
     for s in fx:
         share = ("--" if s["up_to_share"] is None
                  else f"{100 * s['up_to_share']:.0f}%")
@@ -460,7 +503,21 @@ def render_fanfare(fx: list[dict]) -> list[str]:
                      f"{share:>6}{_f(s['past_lost']):>7}"
                      f"{_f(s['past_lost_total']):>7}"
                      f"{_f(s['high_stakes_total']):>7}"
-                     f"{s['high_stakes_fights']:>5}")
+                     f"{s['high_stakes_fights']:>5}"
+                     f"{_f(s['buffer_left']):>6}{s['buffer_bound']:>5}"
+                     f"{_f(s['guest_evictions']):>6}"
+                     f"{_f(s['guest_repeat_acts']):>5}"
+                     f"{_f(s['spend_card_plays'], 0):>5}"
+                     f"{_f(s['alive_per_spend_play']):>6}")
+    for s in fx:
+        held = sorted(s["spend_cards_held"].items(),
+                      key=lambda kv: (-kv[1], kv[0]))
+        if not held:
+            continue
+        lines.append(f"  {s['group'][:15]}: Spend cards in hand at turn "
+                     "start, by name (turn starts)")
+        for name, n in held[:12]:
+            lines.append(f"    {name[:28]:<29}{n:>5}")
     return lines
 
 
@@ -482,7 +539,38 @@ def block_gap_summary(group: str, rows: list[dict]) -> dict:
             "no_block_share": (bare / turns) if turns else None,
             "fights_with_a_bare_turn": sum(
                 1 for r in keyed
-                if (_num(r, "block_card_turns_no_block") or 0) > 0)}
+                if (_num(r, "block_card_turns_no_block") or 0) > 0),
+            **card_play_block(rows)}
+
+
+def card_play_block(rows: list[dict]) -> dict:
+    """Block gained per card play (Furina round 3, 2026-10-11): pooled over
+    the plays of the fights that carry `card_play_block`, and per card (its
+    plays and the Block they gained) for the cards that gained any. A row
+    whose list does not line up with its `cards_played` is left out."""
+    plays = 0
+    block = 0
+    by_card: dict[str, list[int]] = {}
+    for r in rows:
+        gains = r.get("card_play_block")
+        played = r.get("cards_played")
+        if not isinstance(gains, list) or not isinstance(played, list) \
+                or len(gains) != len(played):
+            continue
+        for row, gained in zip(played, gains):
+            if not isinstance(gained, (int, float)):
+                continue
+            name = (str(row[1]) if isinstance(row, list) and len(row) > 1
+                    else "?")
+            plays += 1
+            block += gained
+            tally = by_card.setdefault(name, [0, 0])
+            tally[0] += 1
+            tally[1] += int(gained)
+    return {"plays_with_block_key": plays,
+            "block_per_play": (block / plays) if plays else None,
+            "block_by_card": {name: tuple(t) for name, t in by_card.items()
+                              if t[1] > 0}}
 
 
 def block_gap(grouped: dict[str, list[dict]]) -> list[dict]:
@@ -494,14 +582,26 @@ def render_block_gap(bx: list[dict]) -> list[str]:
              "attack damage telegraphed; pooled over the nK fights with the "
              "keys)",
              f"{'group':<16}{'n':>5}{'nK':>5}{'turns':>7}{'no blk':>8}"
-             f"{'share':>7}{'fights':>8}"]
+             f"{'share':>7}{'fights':>8}{'plays':>7}{'blk/pl':>8}"]
     for s in bx:
         share = ("--" if s["no_block_share"] is None
                  else f"{100 * s['no_block_share']:.0f}%")
         lines.append(f"{s['group'][:15]:<16}{s['fights']:>5}"
                      f"{s['fights_with_keys']:>5}"
                      f"{s['block_card_turns']:>7.0f}{s['no_block']:>8.0f}"
-                     f"{share:>7}{s['fights_with_a_bare_turn']:>8}")
+                     f"{share:>7}{s['fights_with_a_bare_turn']:>8}"
+                     f"{s['plays_with_block_key']:>7}"
+                     f"{_f(s['block_per_play']):>8}")
+    for s in bx:
+        cards = sorted(s["block_by_card"].items(),
+                       key=lambda kv: (-kv[1][1], kv[0]))
+        if not cards:
+            continue
+        lines.append(f"  {s['group'][:15]}: Block per play, by card "
+                     "(plays, Block, a play)")
+        for name, (n, total) in cards[:12]:
+            lines.append(f"    {name[:28]:<29}{n:>5}{total:>7}"
+                         f"{total / n:>7.1f}")
     return lines
 
 

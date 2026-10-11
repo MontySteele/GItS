@@ -225,7 +225,8 @@ def test_endless_waltz_is_cut():
 # ---- the ruled card numbers ----------------------------------------------------------
 
 def test_the_ruled_card_numbers():
-    assert _card("proto_fs_standing_ovation_all").rarity == "uncommon"
+    # Common again, Spend half (2026-10-11, Furina round 3 record, pick 1).
+    assert _card("proto_fs_standing_ovation_all").rarity == "common"
     crab = _card("proto_fs_mademoiselle_crabaletta")
     assert crab.effects[1]["amount"] == 20
     solo = _card("proto_fs_soloists_solicitation")

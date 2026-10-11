@@ -54,8 +54,8 @@ public sealed class ProtoVkRipplingGuard : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 3m),
-            new DynamicVar("VkPer", 2m)
+            new DynamicVar("VkBase", 6m),
+            new DynamicVar("VkPer", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

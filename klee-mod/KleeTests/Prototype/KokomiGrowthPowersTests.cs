@@ -160,13 +160,33 @@ public class KokomiGrowthPowersTests
     }
 
     [Fact]
-    public void Change_of_plans_draws_one_after_the_carry_out()
+    public void Open_the_casket_says_the_casket_stays_under_grand_design()
     {
+        // Kokomi round 5 (2026-10-11): the face said "then empty it" while
+        // Grand Design kept the Casket. The in-combat line now says so.
+        Assert.Equal(
+            "\n(Gains 7 [gold]Strength[/gold]; the [gold]Casket[/gold] stays)",
+            OpenTheCasket.Line(7, keeps: true));
+        Assert.Equal("\n(Gains 7 [gold]Strength[/gold])",
+                     OpenTheCasket.Line(7, keeps: false));
+        var line = Seq("OpenTheCasket", "StrengthLine");
+        var keeps = line.FindIndex(c => c.Contains("GrandDesignPower.Keeps"));
+        var words = line.FindIndex(c => c.Contains("OpenTheCasket.Line"));
+        Assert.True(keeps >= 0 && words > keeps);
+        // The tip Grand Design carries is pinned word for word on the tier0
+        // side (test_eb625_the_casket_says_what_it_is, the page-row anchors).
+    }
+
+    [Fact]
+    public void Change_of_plans_draws_two_after_the_carry_out()
+    {
+        // The Kokomi card pass (2026-10-11): draws 2; Exhaust stays.
         var card = new ProtoKkChangeOfPlans();
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
+        Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
         Assert.Equal("The [gold]Bake-Kurage[/gold] carries out your first "
-                   + "[gold]Plan[/gold] now. Draw 1 card.", Face(card));
+                   + "[gold]Plan[/gold] now. Draw 2 cards.", Face(card));
         var play = Seq("ProtoKkChangeOfPlans", "OnPlay");
         var carry = play.FindIndex(c => c.Contains("KokomiPlan.ResolveFront"));
         var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));

@@ -10,8 +10,9 @@ The readings the build took where the paper is loose, pinned below:
     paid (after reductions) for each Plan in the queue;
   * "the only Plan carried out" is no OTHER entry in the same drain (Dusk is
     its own drain; the same entry carried out twice is one Plan);
-  * a "debuff" is a distinct debuff power; an aura is a Buff and not one;
-  * At Water's Edge answers any reaction, whoever caused it;
+  * Drowning Pressure and Ceremonial Garment count STACKS of Weak plus
+    stacks of Vulnerable (the Kokomi card pass, 2026-10-11);
+  * At Water's Edge answers her first Hydro damage each turn (the same pass);
   * "fully Blocked" is a hit Block absorbed whole, once per hit;
   * Watatsumi's Grace is the base game's Sturdy Clamp shape;
   * All Streams refunds nothing, and its gift is taken by the next card
@@ -129,11 +130,12 @@ def test_weight_of_the_plan_reads_the_energy_paid_not_the_count(overhaul):
         _write(st, "proto_kk_nip")                 # three feeders, 0 each
     before = enemy.hp
     _write(st, "proto_kk_weight_of_the_plan")
-    assert before - enemy.hp == 5                  # feeders never scale it
+    # The Kokomi card pass (2026-10-11): 8, plus 4 each (was 5, plus 3).
+    assert before - enemy.hp == 8                  # feeders never scale it
     _write(st, "proto_kk_surging_shoal")           # 2 paid
     before = enemy.hp
     _write(st, "proto_kk_weight_of_the_plan")
-    assert before - enemy.hp == 5 + 3 * 2
+    assert before - enemy.hp == 8 + 4 * 2
 
 
 def test_a_reduced_cost_is_what_was_paid(overhaul):
@@ -229,31 +231,40 @@ def test_the_long_game_pays_on_exactly_one_waiting(overhaul):
 
 # --- Tide Control ---------------------------------------------------------------
 
-def test_drowning_pressure_counts_distinct_debuffs_not_auras(overhaul):
+def test_drowning_pressure_counts_weak_and_vulnerable_stacks(overhaul):
+    """The Kokomi card pass (2026-10-11, pick 1): "Deal 3 [4] Hydro damage for
+    each Weak and Vulnerable on the enemy" -- STACKS. 2 Weak + 2 Vulnerable
+    is 4, so 12; the Vulnerable then multiplies the hit (x1.5) to 18. Poison
+    is a debuff and not counted; an aura is not counted."""
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
-    powers.apply_power(st, enemy, "weak", 3, applier=st.player)
-    powers.apply_power(st, enemy, "vulnerable", 1, applier=st.player)
-    enemy.aura = "pyro"
-    enemy.aura_turns_left = 2
-    st.player.energy = 1
+    powers.apply_power(st, enemy, "weak", 2, applier=st.player)
+    powers.apply_power(st, enemy, "vulnerable", 2, applier=st.player)
+    powers.apply_power(st, enemy, "poison", 3, applier=st.player)
+    assert kokomi_plan.weak_vuln_stacks(enemy) == 4
+    card = _row("proto_kk_drowning_pressure")
+    assert card.effects[0]["amount_formula"] == {
+        "base": 0, "per": 3, "count": "weak_vuln_stacks_on_target"}
+    assert effects._runtime_count(st, "weak_vuln_stacks_on_target") == 4
     before = enemy.hp
-    _write(st, "proto_kk_drowning_pressure", energy=1)
-    # 4 per debuff, two debuffs; Vulnerable multiplies (x1.5) and the Hydro
-    # on Pyro vaporizes -- read against the plain 8 by ratio, not by value.
-    assert kokomi_plan.debuff_count(enemy) == 2
-    assert before - enemy.hp > 8
+    _write(st, card, energy=1)
+    assert before - enemy.hp == 18                 # 12, x1.5 Vulnerable
+    assert _up("proto_kk_drowning_pressure").effects[0][
+        "amount_formula"]["per"] == 4
 
 
-def test_salt_in_the_wound_draws_only_off_weak(overhaul):
+def test_salt_in_the_wound_draws_one_or_two_off_weak(overhaul):
+    """The Kokomi card pass (2026-10-11): "Apply 1 [2] Vulnerable. Draw 1
+    card, or 2 if the enemy has Weak." """
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
     _library(st)
     _write(st, "proto_kk_salt_in_the_wound")
-    assert enemy.powers.get("vulnerable") == 1 and len(st.player.hand) == 0
+    assert enemy.powers.get("vulnerable") == 1 and len(st.player.hand) == 1
+    st.player.hand.clear()
     powers.apply_power(st, enemy, "weak", 1, applier=st.player)
     _write(st, _up("proto_kk_salt_in_the_wound"))
-    assert len(st.player.hand) == 2
+    assert enemy.powers.get("vulnerable") == 3 and len(st.player.hand) == 2
 
 
 def test_undercurrent_snare_plans_vulnerable_on_all(overhaul):
@@ -275,25 +286,45 @@ def test_tidal_resonance_draws_per_enemy_already_elemented(overhaul):
     assert c.aura == "hydro"
 
 
-def test_at_waters_edge_answers_any_reaction(overhaul):
-    enemy = make_enemy(hp=200)
-    st = kokomi_state(enemies=[enemy])
+def test_at_waters_edge_fires_once_per_turn_on_hydro_damage(overhaul):
+    """The Kokomi card pass (2026-10-11): "The first time each turn you deal
+    Hydro damage to an enemy, apply 1 Weak and 1 Vulnerable to it." Once a
+    turn: the second Hydro hit pays nothing; a non-Hydro hit never claims it;
+    the next turn pays again. A reaction no longer triggers it."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    st = kokomi_state(enemies=[a, b])
     st.player.powers[kokomi_plan.AT_WATERS_EDGE] = 1
-    enemy.aura, enemy.aura_turns_left = "pyro", 2
-    reactions.resolve_hit(st, enemy, "hydro", 0, "probe")
-    assert enemy.powers.get("weak") == 1
-    assert enemy.powers.get("vulnerable") == 1
+    effects.deal_damage_to_enemy(st, a, 3, element=None)
+    assert a.powers.get("weak") is None
+    effects.deal_damage_to_enemy(st, a, 3, element="hydro")
+    assert a.powers.get("weak") == 1 and a.powers.get("vulnerable") == 1
+    effects.deal_damage_to_enemy(st, a, 3, element="hydro")
+    effects.deal_damage_to_enemy(st, b, 3, element="hydro")
+    assert a.powers.get("weak") == 1 and a.powers.get("vulnerable") == 1
+    assert b.powers.get("weak") is None
+    kokomi_plan.roll_turn(st)
+    effects.deal_damage_to_enemy(st, b, 3, element="hydro")
+    assert b.powers.get("weak") == 1 and b.powers.get("vulnerable") == 1
+    # A reaction alone pays nothing now.
+    kokomi_plan.roll_turn(st)
+    c = make_enemy(hp=200, name="c")
+    c.aura, c.aura_turns_left = "pyro", 2
+    reactions.resolve_hit(st, c, "hydro", 0, "probe")
+    assert c.powers.get("weak") is None
 
 
-def test_ceremonial_garment_adds_per_debuff_on_an_attack_only(overhaul):
+def test_ceremonial_garment_adds_per_weak_and_vulnerable_stack(overhaul):
+    """The Kokomi card pass (2026-10-11): stacks of Weak plus stacks of
+    Vulnerable, on an Attack only; Poison is not counted."""
     enemy = make_enemy(hp=300)
     st = kokomi_state(enemies=[enemy])
-    card = _row("proto_kk_massed_volley")         # 3 x3, an Attack
+    card = _row("proto_kk_massed_volley")         # 4 x3, an Attack
     assert kokomi_plan.garment_bonus(st, card, enemy) == 0
     st.player.powers[kokomi_plan.CEREMONIAL_GARMENT] = 1
-    powers.apply_power(st, enemy, "weak", 1, applier=st.player)
+    powers.apply_power(st, enemy, "weak", 2, applier=st.player)
+    powers.apply_power(st, enemy, "vulnerable", 1, applier=st.player)
     powers.apply_power(st, enemy, "poison", 2, applier=st.player)
-    assert kokomi_plan.garment_bonus(st, card, enemy) == 2
+    assert kokomi_plan.garment_bonus(st, card, enemy) == 3
     assert kokomi_plan.garment_bonus(
         st, _row("proto_kk_coral_bulwark"), enemy) == 0
 

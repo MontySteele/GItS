@@ -44,22 +44,22 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro);
+        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_drowning_pressure");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Drowning Pressure"),
-        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(4m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => KokomiOverhaulKit.DebuffCount(target))
+            new ExtraDamageVar(3m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => KokomiOverhaulKit.WeakVulnStacks(target))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,6 +81,6 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
     }
 }

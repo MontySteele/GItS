@@ -380,9 +380,9 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Instead of the line above, play the card on the "
-          + "[gold]Bake-Kurage[/gold]: it happens next turn. Click it to flip "
-          + "lines. Plans go in the order made.");
+            "Instead of the line above, play it on the "
+          + "[gold]Bake-Kurage[/gold]; click to flip. Plans happen next turn "
+          + "in order, and their [gold]Block[/gold] lasts that turn.");
 
     /// <summary>The text pass of 2026-10-08: <see cref="ForPlan"/> for a
     /// card with no line above its Plan. Attached by
@@ -391,8 +391,8 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForPlanOnly(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanOnlyKey,
-            "Play the card on the [gold]Bake-Kurage[/gold]: it happens next "
-          + "turn. Plans run in the order made.");
+            "Play the card on the [gold]Bake-Kurage[/gold]. Plans happen next "
+          + "turn in order, and their [gold]Block[/gold] lasts that turn.");
 
     /// <summary>
     /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about
@@ -525,13 +525,18 @@ public static class ArmKeywordTips
     /// added the upgrade's draw (`OpenTheCasket.OnPlay`, `IsUpgraded`).
     /// 2026-10-10 ([USER], after his Kokomi playtest): it starts at 0 and
     /// each play raises its cost by 1 (`EnergyCost.AddThisCombat(1)`).
+    /// Kokomi round 5 (2026-10-11): Grand Design carries this tip and keeps
+    /// the Casket (`GrandDesignPower.Keeps`), so the tip says so. The upgrade's
+    /// draw left the tip to make room under the 135 ceiling; the card's own
+    /// face still prints it.
     /// </summary>
     public static IEnumerable<IHoverTip> ForOpenTheCasket(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, OpenTheCasketKey,
-            "0-cost, Retain. Gain [gold]Strength[/gold] equal to the "
-          + "Casket's count, then empty it, and increase its cost by 1. "
-          + "Upgraded, it also draws a card.");
+            "Retain. Costs 0, rising by 1 each play. Gain "
+          + "[gold]Strength[/gold] equal to the "
+          + "Casket's count, then empty it. Under [gold]Grand Design[/gold] "
+          + "it is not emptied.");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.

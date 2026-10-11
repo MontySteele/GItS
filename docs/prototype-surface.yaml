@@ -1190,10 +1190,11 @@
 
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
    # Kokomi core pass: pays for playing a Plan card's now-line, not for a
-   # carry-out. "Normally" = not written on the Bake-Kurage.
-   description: "The first time each turn you play a card with a [gold]Plan[/gold] line normally, draw 1 card.",
+   # carry-out. "Without writing it as a Plan" = not on the Bake-Kurage.
+   # 2026-10-11 Kokomi card pass: cost 1 -> 0.
+   cost: 0, type: power, rarity: uncommon,
+   description: "The first time each turn you play a card with a [gold]Plan[/gold] line without writing it as a Plan, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1250,7 +1251,7 @@
    # R276 pick 1: the intent, read at carry-out. THE CLEANUP PASS
    # (2026-09-29): `amount` is a flat 6 under it, because the Plan "gave 0
    # Block twice on Empower turns" (a seat). Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the enemy intends next turn.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the front enemy intends next turn.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_front_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
@@ -1342,10 +1343,10 @@
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
    # Whole-run round 1 (2026-10-10): cost 1 -> 0; round 2: draws 1 (0 of 8
-   # taken). The default upgrade still removes Exhaust. Provenance note.
+   # taken). 2026-10-11 Kokomi card pass: draws 2; Exhaust stays.
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 1 card.",
-   effects: [{op: carry_out_front_plan}, {op: draw, amount: 1}]}
+   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 2 cards.",
+   effects: [{op: carry_out_front_plan}, {op: draw, amount: 2}]}
 
 - {id: proto_kk_undertow, name: "Undertow", character: kokomi,
    authored_by: [claude],
@@ -1397,11 +1398,11 @@
    cost: 1, type: attack, rarity: uncommon,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
-   effects: [{op: damage, amount: 4, target: enemy, times: 2}],
+   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
+   effects: [{op: damage, amount: 5, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}],
-   # THE CASKET PASS (2026-09-28): 4 twice; upgraded 5 twice. The Plan line
-   # does not upgrade.
+   # 2026-10-11 Kokomi card pass (review/active/kokomi-card-pass-2026-10-11.md):
+   # 5 twice; upgraded 6 twice. The Plan line does not upgrade.
    upgrade: {damage: 1}}
 
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
@@ -1487,8 +1488,9 @@
 - {id: proto_kk_massed_volley, name: "Massed Volley", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 3 [gold]Hydro[/gold] damage 3 times.",
-   effects: [{op: damage, amount: 3, target: enemy, times: 3}],
+   description: "Deal 4 [gold]Hydro[/gold] damage 3 times.",
+   effects: [{op: damage, amount: 4, target: enemy, times: 3}],
+   # 2026-10-11 Kokomi card pass: 3 [4] -> 4 [5], 3 times.
    upgrade: {damage: 1}}
 
 - {id: proto_kk_signal_arrow, name: "Signal Arrow", character: kokomi,
@@ -1573,9 +1575,9 @@
    cost: 1, type: attack, rarity: uncommon,
    description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 4, count: plans_held}}],
-   # 5 each.
-   upgrade: {formula_per: 1}}
+              amount_formula: {base: 0, per: 6, count: plans_held}}],
+   # 8 each. 2026-10-11 Kokomi card pass: 4 [5] -> 6 [8].
+   upgrade: {formula_per: 2}}
 
 # MOON SIGNAL IS CUT (the status batch, 2026-10-01,
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
@@ -1666,8 +1668,8 @@
    cost: 1, type: attack, rarity: uncommon,
    description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Energy[/gold] paid for the [gold]Plans[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 5, per: 3, count: plan_energy_waiting}}],
-   # 7, plus 3 each.
+              amount_formula: {base: 8, per: 4, count: plan_energy_waiting}}],
+   # 10, plus 4 each. 2026-10-11 Kokomi card pass: was 5 [7], plus 3.
    upgrade: {formula_base: 2}}
 
 - {id: proto_kk_lull, name: "Lull", character: kokomi,
@@ -1683,10 +1685,11 @@
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
    # Main session, 2026-09-29: 8/16 -> 6/12 (the sim read it dominant).
-   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 14 [gold]Hydro[/gold] damage, doubled if no other [gold]Plan[/gold] is carried out with it.",
-   effects: [{op: damage, amount: 6, target: all_enemies}],
+   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 14 [gold]Hydro[/gold] damage to the front enemy, doubled if carried out alone.",
+   effects: [{op: damage, amount: 9, target: all_enemies}],
    plan: [{op: damage_if_alone, amount: 14, target: front_enemy}],
-   # 9 to ALL / Plan 18 (Plan pricing 2026-10-11: Plan 12 -> 14).
+   # 12 to ALL / Plan 18 (Plan pricing 2026-10-11: Plan 12 -> 14).
+   # 2026-10-11 Kokomi card pass: the now-line 6 [9] -> 9 [12].
    upgrade: {damage: 3, plan_damage: 4}}
 
 - {id: proto_kk_measured_breath, name: "Measured Breath", character: kokomi,
@@ -1738,26 +1741,31 @@
 - {id: proto_kk_drowning_pressure, name: "Drowning Pressure", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # "Each debuff" is each DISTINCT debuff on the enemy; an elemental aura is
-   # a Buff in both engines and does not count.
-   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each debuff on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # 2026-10-11 Kokomi card pass (review/active/kokomi-card-pass-2026-10-11.md):
+   # STACKS of Weak plus stacks of Vulnerable on the enemy, 5 [7] -> 3 [4].
+   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 4, count: debuffs_on_target}}],
-   # 6 each.
-   upgrade: {formula_per: 2}}
+              amount_formula: {base: 0, per: 3, count: weak_vuln_stacks_on_target}}],
+   # 4 each.
+   upgrade: {formula_per: 1}}
 
 - {id: proto_kk_salt_in_the_wound, name: "Salt in the Wound", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Apply 1 [gold]Vulnerable[/gold]. If the enemy has [gold]Weak[/gold], draw {KkAmount:diff()} card{KkAmount:plural:|s}.",
+   # 2026-10-11 Kokomi card pass: always draws 1, and 1 more if the enemy
+   # has Weak; the upgrade is 2 Vulnerable (was draw 2 on Weak).
+   description: "Apply 1 [gold]Vulnerable[/gold]. Draw 1 card, or 2 if the enemy has [gold]Weak[/gold].",
    effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy},
-             {op: kokomi, kind: draw_if_target_weak, amount: 1, target: enemy}],
-   # draw 2.
-   upgrade: {kokomi_amount: 1}}
+             {op: draw, amount: 1},
+             {op: conditional, if: target_has_power_weak,
+              then: [{op: draw, amount: 1}]}],
+   # 2 Vulnerable.
+   upgrade: {power_amount: 1}}
 
 - {id: proto_kk_undercurrent_snare, name: "Undercurrent Snare", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
+   # 2026-10-11 Kokomi card pass: cost 1 -> 0.
+   cost: 0, type: skill, rarity: uncommon,
    description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: apply_power, power: weak, amount: 2, target: enemy}],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies}],
@@ -1766,7 +1774,8 @@
 
 - {id: proto_kk_tidal_resonance, name: "Tidal Resonance", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
+   # 2026-10-11 Kokomi card pass: cost 1 -> 0.
+   cost: 0, type: skill, rarity: uncommon,
    description: "Apply [gold]Hydro[/gold] to ALL enemies. Draw {KkAmount:diff()} card{KkAmount:plural:|s} for each enemy that already had an element.",
    # No upgrade on the paper: the Prototype-stage rule's default stands.
    effects: [{op: kokomi, kind: resonance, amount: 1}]}
@@ -1774,8 +1783,9 @@
 - {id: proto_kk_at_waters_edge, name: "At Water's Edge", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   # Her C1. Any reaction on an enemy, whoever caused it.
-   description: "Whenever an [gold]Elemental Reaction[/gold] happens on an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it.",
+   # 2026-10-11 Kokomi card pass: once per turn, off her first Hydro damage
+   # to an enemy (was any Elemental Reaction, which solo never fires).
+   description: "The first time each turn you deal [gold]Hydro[/gold] damage to an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it.",
    effects: [{op: apply_power, power: kk_at_waters_edge, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -1784,9 +1794,10 @@
    # THE KIT REVIEW (2026-10-05): cost 2 -> 1, 1 -> 2 per debuff (3
    # upgraded). A 2-cost Rare at +1 per debuff sat under an Uncommon Inflame.
    cost: 1, type: power, rarity: rare,
-   description: "Your Attacks deal {PowerAmount:diff()} additional damage for each debuff on their target.",
-   effects: [{op: apply_power, power: kk_ceremonial_garment, amount: 2, target: self}],
-   # 3 per debuff.
+   description: "Your Attacks deal {PowerAmount:diff()} additional damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on their target.",
+   effects: [{op: apply_power, power: kk_ceremonial_garment, amount: 1, target: self}],
+   # 2 per stack. 2026-10-11 Kokomi card pass: stacks of Weak and
+   # Vulnerable, 2 [3] per debuff -> 1 [2] per stack.
    upgrade: {power_amount: 1}}
 
 - {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
@@ -1794,26 +1805,25 @@
    cost: 2, type: attack, rarity: rare, exhaust: true,
    # THE RARE PASS (2026-10-04): applies 1 of each first, so it never
    # doubles nothing (the floor is Weak 2 and Vulnerable 2 on every enemy).
-   description: "Deal 6 [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double them.",
-   effects: [{op: damage, amount: 6, target: all_enemies},
+   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double them.",
+   effects: [{op: damage, amount: 10, target: all_enemies},
              {op: apply_power, power: weak, amount: 1, target: all_enemies},
              {op: apply_power, power: vulnerable, amount: 1, target: all_enemies},
              {op: kokomi, kind: double_weak_vulnerable}],
-   # 9 to ALL.
+   # 13 to ALL. 2026-10-11 Kokomi card pass: 6 [9] -> 10 [13].
    upgrade: {damage: 3}}
 
 # Dusk Guard: Block that is paid off, and guarded (paper sec.4).
 
 - {id: proto_kk_coral_crash, name: "Coral Crash", character: kokomi,
    authored_by: [claude],
-   # POOL COMPLETION (2026-10-01, paper sec.6, [USER]: "we're probably
-   # systemically over-pricing this effect"): Uncommon -> Common, and the
-   # upgrade is cost 0 -- Body Slam exactly.
-   cost: 1, type: attack, rarity: common,
-   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # POOL COMPLETION (2026-10-01, paper sec.6): Uncommon -> Common. 2026-10-11
+   # Kokomi card pass: costs 0; the upgrade adds 4 damage (was cost 0).
+   cost: 0, type: attack, rarity: common,
+   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 1, count: player_block}}],
-   upgrade: {cost: -1}}
+   upgrade: {formula_base: 4}}
 
 - {id: proto_kk_evening_watch, name: "Evening Watch", character: kokomi,
    authored_by: [claude],
@@ -1838,7 +1848,8 @@
 
 - {id: proto_kk_watatsumis_grace, name: "Watatsumi's Grace", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   # 2026-10-11 Kokomi card pass: cost 2 -> 1.
+   cost: 1, type: power, rarity: rare,
    # Replaces The Clouds Like Waves Rippling (paper pick 3). The base game's
    # Sturdy Clamp shape: Block above the cap is lost, up to the cap is kept.
    description: "At the end of your turn, keep up to {PowerAmount:diff()} of your [gold]Block[/gold].",
@@ -1893,11 +1904,12 @@
    cost: 0, type: skill, rarity: uncommon,
    # The count is read and emptied only while she holds a Casket (the
    # Tamakushi Casket or its Orobas upgrade, the Watatsumi Casket); without
-   # one the card does nothing. Rounds down: 7 at every 3 pays 2.
+   # one the card does nothing. Rounds down: 7 at every 2 pays 3.
    description: "Empty the [gold]Casket[/gold]. Gain 1 [gold]Energy[/gold] and draw 1 card for every {KkAmount:diff()} in it.",
-   effects: [{op: kokomi, kind: coral_tithe, amount: 3}],
-   # For every 2.
-   upgrade: {kokomi_amount: -1}}
+   effects: [{op: kokomi, kind: coral_tithe, amount: 2}],
+   # 2026-10-11 Kokomi card pass: every 3 [2] -> every 2, and the upgrade
+   # adds Retain. On watch: the first number back down if too strong.
+   upgrade: {retain: true}}
 
 # --- POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
 # sec.4): one Common and seven Rares, LAST in the sheet's order; the pool is 78
@@ -1924,13 +1936,14 @@
 
 - {id: proto_kk_kurage_school, name: "Kurage School", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
+   # 2026-10-11 Kokomi card pass: costs 0; the upgrade adds Retain.
+   cost: 0, type: skill, rarity: rare, exhaust: true,
    # "0-cost" is the card's cost as it stands in hand; the copies are exact
    # (an upgraded Nip copies upgraded). The hand is read once, before the
    # first copy is added, and a full hand stops the copying.
    description: "Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand. The copies [gold]Exhaust[/gold].",
    effects: [{op: kokomi, kind: kurage_school}],
-   upgrade: {cost: -1}}
+   upgrade: {retain: true}}
 
 - {id: proto_kk_shoal_of_spears, name: "Shoal of Spears", character: kokomi,
    authored_by: [claude],
@@ -1955,7 +1968,8 @@
 
 - {id: proto_kk_seas_reproach, name: "Sea's Reproach", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   # 2026-10-11 Kokomi card pass: cost 2 [1] -> 1 [0].
+   cost: 1, type: power, rarity: rare,
    # Per application of Weak or Vulnerable that she makes, once per enemy it
    # lands on; Hydro and unpowered, as Tidal Riposte's.
    description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal 3 damage to it.",
@@ -1990,11 +2004,12 @@
    cost: 1, type: skill, rarity: common,
    # The count is read when the clause runs; a card an earlier Plan of the
    # same morning drew is counted.
-   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.",
+   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: draw, amount: 1}],
-   plan: [{op: block, amount: 7},
+   plan: [{op: block, amount: 9},
           {op: block_per_status_in_hand, amount: 3}],
-   # Plan 10; the rate does not upgrade.
+   # Plan 12; the rate does not upgrade. 2026-10-11 Kokomi card pass: 7 [10]
+   # -> 9 [12].
    upgrade: {plan_block: 3}}
 
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
@@ -2002,8 +2017,10 @@
    cost: 0, type: skill, rarity: common,
    # "Up to": every status and curse when she holds that many or fewer; she
    # chooses which when she holds more.
-   description: "Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand.",
-   effects: [{op: apply_power, power: weak, amount: 1, target: enemy}],
+   # 2026-10-11 Kokomi card pass: adds "Draw 1 card."
+   description: "Apply 1 [gold]Weak[/gold]. Draw 1 card. [gold]Plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
+             {op: draw, amount: 1}],
    plan: [{op: exhaust_statuses_in_hand, amount: 2}],
    # Plan up to 3.
    upgrade: {plan_exhaust: 1}}
@@ -2013,11 +2030,11 @@
    cost: 1, type: skill, rarity: uncommon,
    # Defect's Compact on the next hand, curses included. Sea Glass is a token
    # in no pool: 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
-   effects: [{op: block, amount: 8}],
+   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   effects: [{op: block, amount: 10}],
    plan: [{op: transform_statuses_in_hand}],
-   # KOKOMI REVIEW ROUND (2026-10-05): 6 [7] -> 8 [11], Coral Bulwark's Common rate.
-   # 11 Block; the Sea Glass arrives upgraded.
+   # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13].
+   # 13 Block; the Sea Glass arrives upgraded.
    upgrade: {block: 3, upgraded_grant: true}}
 
 - {id: proto_kk_turning_tide, name: "Turning Tide", character: kokomi,
@@ -2025,9 +2042,9 @@
    cost: 0, type: skill, rarity: uncommon,
    # Gambler's Brew on the next hand: any number, none included.
    description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Discard any number of cards, then draw that many.",
-   effects: [{op: draw, amount: 1}],
+   effects: [{op: draw, amount: 2}],
    plan: [{op: discard_and_draw}],
-   # The paper prints no upgrade: draw 2 now, the Prototype-stage default.
+   # 2026-10-11 Kokomi card pass: draw 2 [3] (was 1 [2]).
    upgrade: {draw: 1}}
 
 - {id: proto_kk_flotsam_surge, name: "Flotsam Surge", character: kokomi,
@@ -2045,13 +2062,11 @@
 - {id: proto_kk_abyssal_salvage, name: "Abyssal Salvage", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Any status or curse of hers, by any route: a played Slimed, a Dazed at
-   # turn end, Tidecleanse. Copies add.
-   description: "Whenever a status or curse is [gold]Exhausted[/gold], the [gold]Casket[/gold] gains 1{IfUpgraded:show: and you gain 2 [gold]Block[/gold]|}.",
+   # 2026-10-11 Kokomi card pass (review/active/kokomi-card-pass-2026-10-11.md):
+   # once a turn, off the draw. Statuses only, not curses. Copies add Casket.
+   description: "The first time each turn you draw a status, [gold]Exhaust[/gold] it. The [gold]Casket[/gold] gains 1.",
    effects: [{op: apply_power, power: kk_abyssal_salvage, amount: 1, target: self}],
-   # The upgrade swaps in the Power that also gives 2 Block per exhaust
-   # (`upgraded_power`, The Long Game's shape).
-   upgrade: {upgraded_power: kk_abyssal_salvage_plus}}
+   upgrade: {innate: true}}
 
 - {id: proto_kk_riptide_ruin, name: "Riptide Ruin", character: kokomi,
    authored_by: [claude],
@@ -2086,7 +2101,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: geo,
    cost: 1, type: attack,
-   description: "Deal 8 [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the damage dealt.",
+   description: "Deal 8 [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the unblocked damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: block_half_damage}]}
 
@@ -2523,7 +2538,7 @@
    upgrade: {block: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: basic,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Gain 5 [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much [gold]Hydro[/gold] damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: block, amount: 5},
              {op: stage_spend_all},
              {op: damage,
@@ -2667,13 +2682,14 @@
    effects: [{op: stage_spend, amount: 4},
              {op: damage, amount: 11, target: enemy, applies_element: true}]}
 
+# 2026-10-11 Common again, Spend half (Furina round 3 record, pick 1).
 - {id: proto_fs_standing_ovation_all, name: "Standing Ovation", character: furina,
    upgrade: {retain: true},
    authored_by: [claude],
    art_of: standing_ovation,
-   register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_all},
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "[gold]Spend[/gold] half your [gold]Fanfare[/gold]. Deal that much damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_half},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},
               target: all_enemies}]}
@@ -2805,7 +2821,7 @@
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.",
+   description: "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: [gold]Drain[/gold] 2, deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: stage_guest, member: lyney}]}
 
 - {id: proto_fs_a_five_century_act, name: "A Five-Century Act", character: furina,
@@ -3497,11 +3513,12 @@
 
 - {id: proto_vk_rippling_guard, name: "Rippling Guard", character: varka,
    # The rebalance (sec.3): replaces Wind Wall. No illustration yet.
+   # Varka co-op fixes (2026-10-11): 6 + 1 [2], was 3 + 2 [3] (provenance).
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Apply [gold]Hydro[/gold] to an enemy. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each other card you played this turn.",
    effects: [{op: apply_aura, element: hydro, target: enemy},
-             {op: varka, kind: rippling_guard, base: 3, per: 2}],
+             {op: varka, kind: rippling_guard, base: 6, per: 1}],
    upgrade: {varka_per: 1}}
 
 - {id: proto_vk_frost_ward, name: "Frost Ward", character: varka,
@@ -3530,9 +3547,10 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   # The rebalance (sec.3): Block that scales with reactions.
+   # The rebalance (sec.3): Block that scales with reactions. Varka co-op
+   # fixes (2026-10-11): 6 [8] + 2 [3], was 4 [6] + 3 [4] (provenance).
    description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on.",
-   effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 4, per: 3}],
+   effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 6, per: 2}],
    upgrade: {varka_base: 2, varka_per: 1}}
 
 - {id: proto_vk_lisa_violet_arc, name: "Lisa: Infinite Circuit", character: varka,
@@ -3940,8 +3958,9 @@
 - {id: proto_vk_vow_of_the_blade, name: "Vow of the Blade", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 1 [gold]Oath[/gold] of your [gold]current element[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: varka, kind: gain_current_oath},
+   # Varka co-op fixes (2026-10-11): 2 Oath, was 1 (provenance).
+   description: "Gain {VkAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: varka, kind: gain_current_oath, amount: 2},
              {op: draw, amount: 1}],
    upgrade: {draw: 1}}
 
@@ -4149,7 +4168,8 @@
 - {id: proto_vk_the_order_answers, name: "The Order Answers", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, add a random [gold]Knight[/gold] to your hand.",
+   # Varka co-op fixes (2026-10-11): choose 1 of 3, upgraded (provenance).
+   description: "At the start of your turn, choose 1 of 3 random [gold]Knights[/gold]. Add it to your hand, upgraded.",
    effects: [{op: apply_power, power: vk_the_order_answers, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
