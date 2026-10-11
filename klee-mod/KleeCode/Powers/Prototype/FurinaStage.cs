@@ -140,6 +140,13 @@ public static class FurinaStage
             : FurinaStageLedger.For(owner!).UpToOf(cap);
     }
 
+    /// <summary>`stage_spent` for "Spend half your Fanfare" (Standing
+    /// Ovation, 2026-10-11) as a face prints it: during the play, what it
+    /// counted; before it, what a "Spend up to" half the bank (rounded down)
+    /// would count now.</summary>
+    public static int SpentOrHalf(CardModel? card) =>
+        SpentOrUpTo(card, FanfareOf(card?.Owner?.Creature) / 2);
+
     /// <summary>`stage_spent_fours`: this play's "Spend up to X" in fours,
     /// rounded down ("Draw 1 for every 4 spent", "hit once more for every
     /// 4").</summary>
@@ -258,6 +265,14 @@ public static class FurinaStage
         RefreshBadges(owner);
         return spent;
     }
+
+    /// <summary>"Spend half your Fanfare" (Standing Ovation, 2026-10-11): a
+    /// "Spend up to" half the bank, rounded down, so 0 or 1 held spends
+    /// nothing. Not a spend-all: Bis! and Standing Room Only ignore it.
+    /// Returns what counts as spent.</summary>
+    public static Task<int> SpendHalf(PlayerChoiceContext choiceContext,
+                                      Creature? owner) =>
+        SpendUpTo(choiceContext, owner, FanfareOf(owner) / 2);
 
     /// <summary>"Spend all your Fanfare." Returns what was spent.</summary>
     public static async Task<int> SpendAll(PlayerChoiceContext choiceContext,
@@ -802,8 +817,8 @@ public static class FurinaStage
 /// <summary>
 /// A SPEND CARD, AS A TYPE (the Furina whole-run round 2, 2026-10-10). The
 /// codegen puts this on every row whose own play pays Fanfare -- a
-/// <c>stage_spend</c>, <c>stage_spend_all</c> or <c>stage_spend_up_to</c>
-/// anywhere in its body, modes included -- and nothing else implements it.
+/// <c>stage_spend</c>, <c>stage_spend_all</c>, <c>stage_spend_up_to</c> or
+/// <c>stage_spend_half</c> anywhere in its body, modes included -- and nothing else implements it.
 /// A Power that Spends later (Showstopper) or reacts to a Spend is not one.
 /// A marker with no members, like <c>ISetOffCard</c>: telemetry counts the
 /// Spend cards in her hand as each turn opens.
