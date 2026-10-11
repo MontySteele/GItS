@@ -7165,6 +7165,11 @@ obvious use in a short hallway fight".
   Grand Design move the played copy, so a fetched Open keeps its price.
   Tip and page row: "0-cost, Retain. ... then empty it, and increase its
   cost by 1. ..."
+  Kokomi round 5 (2026-10-11): the tip and page row now read "Retain.
+  Costs 0, rising by 1 each play. ... then empty it. Under Grand Design it
+  is not emptied."
+  (Grand Design carries the tip and keeps the Casket); the upgrade's draw
+  left the tip for the 135 ceiling and stays on the card face.
 
 ## Kokomi Plan pricing, 2026-10-11
 
@@ -7264,3 +7269,32 @@ option) and 3 (a).
   watch); Undertide Lance now-line 9 [12] to ALL; Watatsumi's Grace cost 1;
   Kurage School cost 0, upgrade Retain; Treatise cost 0 [Innate]; Suffocating
   Deep 10 [13] to ALL; Sea's Reproach 1 [0].
+
+## Kokomi round 5 text fixes, 2026-10-11
+
+- **Treatise** reads "The first time each turn you play a card with a Plan
+  line without writing it as a Plan, draw 1 card." Two seats read "normally"
+  as jargon. Text only; `TreatisePower` says the same with `{Amount}`.
+- **Open the Casket** prints "(Gains N Strength; the Casket stays)" in combat
+  under Grand Design (`GrandDesignPower.Keeps`), and its tip adds "Under
+  Grand Design it is not emptied." Text only.
+
+## Varka co-op fixes, 2026-10-11
+
+The human co-op playtest (`review/records/coop-human-playtest-2026-10-11.md`)
+said of Varka: "Solid! But reliant on powers for Block.", "The Order Answers -
+random Knights are often commons, right? This seems bad." and "Vow of the
+Blade is weak."
+
+- **Rippling Guard** 6 + 1 [2] per other card played, was 3 + 2 [3]: a higher
+  floor, a lower ratio.
+- **Barbara: Gleeful Songs** 6 [8] + 2 [3] per enemy it reacts on, was
+  4 [6] + 3 [4].
+- **Vow of the Blade** gains 2 Oath, was 1; draw stays 1 [2].
+  `gain_current_oath` takes an optional `amount` (absent means 1).
+- **The Order Answers** "At the start of your turn, choose 1 of 3 random
+  Knights. Add it to your hand, upgraded." One choice per stack, three
+  distinct pool Knights on the choose-a-card screen, the pick at its own
+  upgraded cost (C# `VarkaRules.ChooseUpgradedKnight`). The sim picks the
+  first offered Knight of the current element, else the first offered
+  (`varka_oath.order_answers_pick`).

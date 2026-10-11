@@ -1063,13 +1063,14 @@ public static class VarkaOath
             if (element == Element.None) continue;
             await Gain(choiceContext, varka, element, sworn.Amount);
         }
-        // The Order Answers (the expansion), last: a random pool Knight at
-        // its own cost, one per stack.
+        // The Order Answers (the expansion), last: one choice of 3 random
+        // pool Knights per stack, the pick added upgraded at its own cost
+        // (Varka co-op fixes, 2026-10-11).
         foreach (var order in varka.Powers.OfType<TheOrderAnswersPower>().ToList())
         {
             for (var i = 0; i < order.Amount; i++)
             {
-                await VarkaRules.AddRandomKnight(player, free: false);
+                await VarkaRules.ChooseUpgradedKnight(choiceContext, player);
             }
         }
     }
@@ -1122,16 +1123,24 @@ public static class VarkaCards
         await ElementalHit.ApplyOnly(choiceContext, target, element, owner);
     }
 
-    /// <summary>Vow of the Blade: "Gain 1 Oath of your current element".
-    /// </summary>
+    /// <summary>Vow of the Blade: "Gain 2 Oath of your current element"
+    /// (Varka co-op fixes, 2026-10-11). The number is the card's optional
+    /// <c>VkAmount</c>; a row that prints none gains 1.</summary>
     public static async Task GainCurrentOath(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
         var owner = card.Owner?.Creature;
         var element = VarkaOath.Current(owner);
         if (owner == null || element == Element.None) return;
-        await VarkaOath.Gain(choiceContext, owner, element, 1);
+        await VarkaOath.Gain(choiceContext, owner, element,
+                             CurrentOathAmount(card));
     }
+
+    /// <summary>How much Oath <see cref="GainCurrentOath"/> pays: the card's
+    /// <c>VkAmount</c>, or 1 when it prints none. PURE.</summary>
+    public static int CurrentOathAmount(CardModel card) =>
+        card.DynamicVars.TryGetValue("VkAmount", out var amount)
+            ? (int)amount.BaseValue : 1;
 
     /// <summary>
     /// Four Winds' Ascension's second hit: "Then deal 3 damage for each Oath

@@ -266,6 +266,11 @@ KIND_FIELDS = {
     "pyro_strike": ("base",),
     "shatter": ("base", "per"),
 }
+#: A field a kind MAY print (codegen's `VARKA_OPTIONAL_FIELDS`): Vow of the
+#: Blade's `amount: 2` (Varka co-op fixes, 2026-10-11); absent means 1.
+OPTIONAL_FIELDS = {
+    "gain_current_oath": ("amount",),
+}
 #: The target each kind's row names (the codegen's `VARKA_AIMED_KINDS` less
 #: the two follow-up hits, and `VARKA_ALL_KINDS`); every other kind, none.
 KIND_TARGETS = {
@@ -847,10 +852,10 @@ def turn_start(state) -> None:
     led_now = ledger(p)
     if sworn_current and led_now is not None and led_now.current is not None:
         gain(state, led_now.current, sworn_current, "sworn_brotherhood")
-    # THE ORDER ANSWERS (the expansion), last: "add a random Knight to your
-    # hand" -- a pool Knight, at its own cost.
+    # THE ORDER ANSWERS, last: "choose 1 of 3 random Knights. Add it to
+    # your hand, upgraded" (Varka co-op fixes, 2026-10-11), once per stack.
     for _ in range(_power(p, THE_ORDER_ANSWERS)):
-        _add_random_knight(state, free=False)
+        _choose_upgraded_knight(state)
 
 
 def _weathervane(state, led: VarkaLedger) -> None:
@@ -985,8 +990,9 @@ def validate_op(card_id: str, fx: dict) -> None:
         raise ValueError(
             f"card {card_id!r}: varka {kind!r} has unknown fields "
             f"{sorted(unknown)}")
-    want = set(KIND_FIELDS.get(kind, ()))
     have = set(fx) & {"per", "base", "amount"}
+    want = set(KIND_FIELDS.get(kind, ())) | (
+        have & set(OPTIONAL_FIELDS.get(kind, ())))
     if want != have:
         raise ValueError(
             f"card {card_id!r}: varka {kind!r} takes the fields "
@@ -1048,16 +1054,34 @@ def _card_hit(state, card, target, amount: int, element: str,
             led.no_apply_credit -= 1
 
 
-def _add_random_knight(state, free: bool) -> None:
-    """The Order Answers: a random pool Knight into the hand."""
+#: How many Knights The Order Answers offers (C# `OrderAnswersOptions`).
+ORDER_ANSWERS_OPTIONS = 3
+
+
+def order_answers_pick(offered: list[str], current: Optional[str]) -> str:
+    """THE SIM'S STAND-IN for the player's pick on The Order Answers' screen:
+    the first offered Knight of the current element, else the first offered
+    (Knights' Roll Call+'s fallback rule). Deterministic, and documented
+    here because C# asks the player instead."""
+    from tier0.content import loader                # late: cycle
+    return next((cid for cid in offered
+                 if loader.peek_card(cid).element == current), offered[0])
+
+
+def _choose_upgraded_knight(state) -> None:
+    """The Order Answers: 3 distinct random pool Knights offered, the pick
+    (`order_answers_pick`) into the hand upgraded, at its own cost."""
     from tier0.content import loader                # late: cycle
     from tier0.engine import effects                # late: cycle
     pool = pool_knight_ids()
     if not pool:
         return
-    knight = loader.get_card(state.rng.choice(pool))
-    knight.free_this_turn = free
-    state.emit("varka_order_answers", card=knight.id)
+    offered = state.rng.sample(pool, min(ORDER_ANSWERS_OPTIONS, len(pool)))
+    led = ledger(state.player)
+    pick = order_answers_pick(offered, led.current if led else None)
+    knight = loader.get_card(pick + "+")
+    knight.free_this_turn = False
+    state.emit("varka_order_answers", card=knight.id, offered=offered)
     effects._add_token(state, knight, "hand")
 
 
@@ -1194,8 +1218,8 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
             powers.apply_power(state, e, "weak", 1, applier=p)
         _powered_block(state, card, fx["base"] + fx["per"] * len(hit))
     elif kind == "gleeful_songs":
-        # "Apply Hydro to ALL enemies. Gain 4 Block, plus 3 for each enemy it
-        # reacts on."
+        # "Apply Hydro to ALL enemies. Gain 6 Block, plus 2 for each enemy it
+        # reacts on." (Numbers off the row.)
         reacted = 0
         for e in effects._pick_targets(state, "all_enemies",
                                        allow_dead=True):
@@ -1204,7 +1228,7 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
             reacted += state.reactions_this_card > before
         _powered_block(state, card, fx["base"] + fx["per"] * reacted)
     elif kind == "rippling_guard":
-        # "Gain 3 Block, plus 2 for each other card you played this turn."
+        # "Gain 6 Block, plus 1 for each other card you played this turn."
         # `cards_played_this_turn` already counts this play.
         others = max(0, state.cards_played_this_turn - 1)
         _powered_block(state, card, fx["base"] + fx["per"] * others)
@@ -1290,7 +1314,7 @@ def op_varka(state, fx: dict, card) -> None:
             reactions.resolve_hit(state, e, led.current, 0, "apply_aura_op")
     elif kind == "gain_current_oath":
         if led.current is not None:
-            gain(state, led.current, 1, "gain_current_oath")
+            gain(state, led.current, fx.get("amount", 1), "gain_current_oath")
     elif kind == "ascension_hit":
         if led.current is not None:
             _elemental_follow_up(state, card,

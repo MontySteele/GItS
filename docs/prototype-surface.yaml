@@ -1191,10 +1191,10 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    # Kokomi core pass: pays for playing a Plan card's now-line, not for a
-   # carry-out. "Normally" = not written on the Bake-Kurage.
+   # carry-out. "Without writing it as a Plan" = not on the Bake-Kurage.
    # 2026-10-11 Kokomi card pass: cost 1 -> 0.
    cost: 0, type: power, rarity: uncommon,
-   description: "The first time each turn you play a card with a [gold]Plan[/gold] line normally, draw 1 card.",
+   description: "The first time each turn you play a card with a [gold]Plan[/gold] line without writing it as a Plan, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -2538,7 +2538,7 @@
    upgrade: {block: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: basic,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Gain 5 [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much [gold]Hydro[/gold] damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: block, amount: 5},
              {op: stage_spend_all},
              {op: damage,
@@ -3513,11 +3513,12 @@
 
 - {id: proto_vk_rippling_guard, name: "Rippling Guard", character: varka,
    # The rebalance (sec.3): replaces Wind Wall. No illustration yet.
+   # Varka co-op fixes (2026-10-11): 6 + 1 [2], was 3 + 2 [3] (provenance).
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    description: "Apply [gold]Hydro[/gold] to an enemy. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each other card you played this turn.",
    effects: [{op: apply_aura, element: hydro, target: enemy},
-             {op: varka, kind: rippling_guard, base: 3, per: 2}],
+             {op: varka, kind: rippling_guard, base: 6, per: 1}],
    upgrade: {varka_per: 1}}
 
 - {id: proto_vk_frost_ward, name: "Frost Ward", character: varka,
@@ -3546,9 +3547,10 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   # The rebalance (sec.3): Block that scales with reactions.
+   # The rebalance (sec.3): Block that scales with reactions. Varka co-op
+   # fixes (2026-10-11): 6 [8] + 2 [3], was 4 [6] + 3 [4] (provenance).
    description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on.",
-   effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 4, per: 3}],
+   effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 6, per: 2}],
    upgrade: {varka_base: 2, varka_per: 1}}
 
 - {id: proto_vk_lisa_violet_arc, name: "Lisa: Infinite Circuit", character: varka,
@@ -3956,8 +3958,9 @@
 - {id: proto_vk_vow_of_the_blade, name: "Vow of the Blade", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 1 [gold]Oath[/gold] of your [gold]current element[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: varka, kind: gain_current_oath},
+   # Varka co-op fixes (2026-10-11): 2 Oath, was 1 (provenance).
+   description: "Gain {VkAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: varka, kind: gain_current_oath, amount: 2},
              {op: draw, amount: 1}],
    upgrade: {draw: 1}}
 
@@ -4165,7 +4168,8 @@
 - {id: proto_vk_the_order_answers, name: "The Order Answers", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, add a random [gold]Knight[/gold] to your hand.",
+   # Varka co-op fixes (2026-10-11): choose 1 of 3, upgraded (provenance).
+   description: "At the start of your turn, choose 1 of 3 random [gold]Knights[/gold]. Add it to your hand, upgraded.",
    effects: [{op: apply_power, power: vk_the_order_answers, amount: 1, target: self}],
    upgrade: {cost: -1}}
 

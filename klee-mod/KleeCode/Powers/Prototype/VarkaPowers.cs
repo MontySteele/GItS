@@ -1073,9 +1073,10 @@ public sealed class EyeOfStormterrorPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>The Order Answers: "At the start of your turn, add a random
-/// Knight to your hand." Paid last in <see cref="VarkaOath.TurnStart"/>, a
-/// pool Knight at its own cost (<see cref="VarkaRules.AddRandomKnight"/>).
+/// <summary>The Order Answers: "At the start of your turn, choose 1 of 3
+/// random Knights. Add it to your hand, upgraded." Paid last in
+/// <see cref="VarkaOath.TurnStart"/>, one choice per stack
+/// (<see cref="VarkaRules.ChooseUpgradedKnight"/>).
 /// </summary>
 public sealed class TheOrderAnswersPower : PowerModel, ILocalizationProvider
 {
@@ -1083,9 +1084,9 @@ public sealed class TheOrderAnswersPower : PowerModel, ILocalizationProvider
     {
         ("title", "The Order Answers"),
         ("description",
-            "At the start of your turn, add [blue]{Amount}[/blue] random "
-          + "{Amount:plural:[gold]Knight[/gold]|[gold]Knights[/gold]} to your "
-          + "hand."),
+            $"At the start of your turn, choose 1 of {VarkaRules.OrderAnswersOptions} random "
+          + "[gold]Knights[/gold] [blue]{Amount}[/blue] "
+          + "{Amount:plural:time|times}. Add each to your hand, upgraded."),
     };
 
     public override PowerType Type => PowerType.Buff;
