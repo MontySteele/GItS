@@ -199,3 +199,10 @@ Five whole-run Sonnet seats at A0 on build 0.2.4914+next, the same seeds as befo
 2. **Is this the finish line?** Five rounds of seats are in, and she is at or above the base seats on the same seeds.
    - **(a) Default:** your own full run next, on the build with the fixes above. Watch act 3's damage and the Queen's Bound turns.
    - (b) One more Sonnet round first, so the debuff engine (At Water's Edge) is offered at least once.
+
+## Ruled, round 5 (2026-10-11)
+
+[USER]: "Kokomi and Companions - I think defaults here are fine".
+
+- Pick 1: (a). Treatise draws when you play a Plan card's first line, not when you write it as a Plan. The plain wording ("The first time each turn you play a card with a Plan line without writing it as a Plan, draw 1 card.") is already on main from the round-5 fixes (e283f91b), on the card and the power; the sim twin (`kokomi_plan.note_face_up_plan_card`) already draws on that play.
+- Pick 2: (a). [USER]'s own full run is next, on the build with the round-5 fixes. Watch act 3's damage and the Queen's Bound turns.

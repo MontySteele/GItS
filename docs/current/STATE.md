@@ -92,8 +92,13 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   [USER]'s run and rulings after it. Plan pricing built 2026-10-11
   (`review/active/kokomi-plan-pricing-2026-10-11.md`, ratio 1.3): nine
   next-turn Plans pay 1.3 times the base on-turn rate, Kurage's Oath's Plan
-  is 9 [12] to ALL and Slack Water deals 6 [9]; checked by the next
-  whole-run seat round.
+  is 9 [12] to ALL and Slack Water deals 6 [9]. Rounds 3 to 5 and a card
+  pass followed (`review/records/kokomi-fullrun-round-3-2026-10-11.md`):
+  round 5 won 1 of 5 and reached the base seats' floors or deeper on every
+  seed. Ruled 2026-10-11 ("I think defaults here are fine"): Treatise draws
+  when you play a Plan card's first line, not when you write it. Next:
+  [USER]'s full run on the build with the round-5 fixes, watching act 3's
+  damage and the Queen's Bound turns.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
