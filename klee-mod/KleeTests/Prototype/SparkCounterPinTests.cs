@@ -88,7 +88,7 @@ public class SparkCounterPinTests
     }
 
     [Fact]
-    public void A_furina_with_sparks_shows_both_counters_side_by_side()
+    public void A_furina_with_sparks_stacks_her_counters_in_one_column()
     {
         // Her Fanfare gauge takes the first slot above the orb (her own
         // resource, from turn one); the Spark counter takes the next. Klee
@@ -107,18 +107,25 @@ public class SparkCounterPinTests
         {
             var panel = new Godot.Rect2(new Godot.Vector2(100f, 806f),
                                         new Godot.Vector2(140f, 140f));
-            var fanfare = PlaceInRow(panel, Side, viewport, 0);
-            var spark = PlaceInRow(panel, Side, viewport, 1);
+            var fanfare = PlaceInColumn(panel, Side, viewport, 0);
+            var drained = PlaceInColumn(panel, Side, viewport, 1);
+            var spark = PlaceInColumn(panel, Side, viewport, 2);
 
             // Slot 0 is the placement both gauges always had.
             Assert.Equal(Place(panel, Side, viewport), fanfare);
-            // The two never overlap each other or the orb, sit on one row,
-            // and stay on screen.
-            Assert.False(spark.Intersects(fanfare), $"{spark} on {fanfare}");
-            Assert.False(spark.Intersects(panel), $"{spark} on the orb {panel}");
-            Assert.Equal(fanfare.Position.Y, spark.Position.Y);
-            Assert.True(spark.Position.X > fanfare.End.X);
-            Assert.True(new Godot.Rect2(Godot.Vector2.Zero, viewport).Encloses(spark));
+            // The 2026-10-11 playtest ("The Drain gauge also overlaps with
+            // the Block indicator"): the slots stack UP one column, sharing
+            // slot 0's X span, so none reaches right of the Fanfare gauge
+            // toward her health bar's Block badge. None overlaps another or
+            // the orb, and all stay on screen.
+            foreach (var (above, below) in new[] { (drained, fanfare), (spark, drained) })
+            {
+                Assert.False(above.Intersects(below), $"{above} on {below}");
+                Assert.False(above.Intersects(panel), $"{above} on the orb {panel}");
+                Assert.Equal(below.Position.X, above.Position.X);
+                Assert.True(above.End.Y < below.Position.Y);
+                Assert.True(new Godot.Rect2(Godot.Vector2.Zero, viewport).Encloses(above));
+            }
         }
     }
 
@@ -218,10 +225,10 @@ public class SparkCounterPinTests
             .GetMethod(nameof(Place), All)!
             .Invoke(null, new object[] { energy, side, viewport })!;
 
-    private static Godot.Rect2 PlaceInRow(
+    private static Godot.Rect2 PlaceInColumn(
         Godot.Rect2 energy, float side, Godot.Vector2 viewport, int slot) =>
         (Godot.Rect2)typeof(SparkCounter)
-            .GetMethod(nameof(PlaceInRow), All)!
+            .GetMethod(nameof(PlaceInColumn), All)!
             .Invoke(null, new object[] { energy, side, viewport, slot })!;
 
     [Fact]

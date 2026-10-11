@@ -1645,16 +1645,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # The Spend paper (2026-10-10): "Spend up to X" pays X or all she has.
     "Spend": ("Pay that much Fanfare. Offered only if you have enough. "
               "Spend up to X pays X, or all you have if that is less."),
-    "Fanfare": ("Gain 1 Fanfare for each HP you lose or Repay. Spend uses "
-                "it. It resets to 0 after each combat."),
-    # The Drain line rule (ruled 2026-10-09): the line is entry HP minus
-    # 1/4 of Max HP, a Drain may go past it, and what it drains past it is
-    # lost unless Repaid. The drain-line round (2026-10-09): "Drained HP
+    # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
+    # rather verbose (Drain moreso)".
+    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. "
+                "Resets after each combat."),
+    # The Drain buffer (2026-10-11): the first 1/4 of her Max HP drained
+    # each combat returns after it; what she drains past it is lost unless
+    # Repaid. The drain-line round (2026-10-09): "Drained HP
     # above your line returns after combat."
-    "Drain": ("Lose N HP. Drained HP above your line returns after combat. "
-              "HP drained past your line is lost unless you Repay it. Your "
-              "line is the HP you started this fight with, minus 1/4 of "
-              "your Max HP."),
+    "Drain": ("Lose N HP. Each combat, the first 1/4 of your Max HP "
+              "drained returns after combat; more than that only Repay "
+              "returns."),
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
     # Guest Star exhausts and comes back when its guest leaves.
     "Repay": ("Regain that much drained HP, never more than you drained. A "

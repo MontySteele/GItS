@@ -42,7 +42,7 @@ namespace KleeMod.Powers;
 ///      end of her turn, oldest first. A fourth makes the oldest leave, and
 ///      a guest that leaves (evicted, or sent off by Final Bow) sends its
 ///      card to the discard pile. A second copy of one on stage moves it to
-///      the newest seat, with no act.
+///      the newest seat and acts once (2026-10-11).
 ///   6. THE CURTAIN CALL: when the combat ends, the HP drained above the
 ///      line returns; the HP drained past it stays lost (A Five-Century Act
 ///      returns it too).
@@ -113,8 +113,9 @@ public static class FurinaStage
     public static int DrainedThisCombatOf(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).DrainedThisCombat : 0;
 
-    /// <summary>Her Drain line (rule 1): her entry HP minus 1/4 of her Max
-    /// HP; HP drained past it does not return at the curtain call.</summary>
+    /// <summary>Her Drain line (rule 1): her HP now minus the Drain buffer
+    /// she has left (2026-10-11); HP drained past it does not return at the
+    /// curtain call.</summary>
     public static int LineOf(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).Line : 0;
 

@@ -27,7 +27,8 @@ THE RULES (the slice's docstring has them whole):
    only. A Guest Star exhausts and has no effect on summon; a guest acts at
    the end of her turn, oldest first; a fourth makes the oldest leave (no
    act) and its card goes to the discard pile, as Final Bow's guest's does;
-   a second copy of one on stage moves it to the newest seat, no act.
+   a second copy of one on stage moves it to the newest seat and acts once
+   (2026-10-11).
 6. THE CURTAIN CALL: when the combat ends, all drained HP returns
    (`close_combat`), and the HP carries into the run.
 
@@ -703,7 +704,8 @@ READINGS: tuple[str, ...] = (
     "A Drain may go past it, never to 0 HP; the part drained past it is "
     "lost at the curtain call unless Repaid.",
     "A second copy of a guest already on stage moves it to the newest seat "
-    "with no act (the pool to 75, sec.3); its card joins the seat's and "
+    "and acts once, as on her turn (2026-10-11; it moved with no act before, "
+    "the pool to 75, sec.3); its card joins the seat's and "
     "returns with it, and an upgraded copy upgrades the guest.",
     "A guest evicted by a fourth summon leaves without acting (sec.3: no "
     "effect on summon); its cards return from the exhaust pile to the "

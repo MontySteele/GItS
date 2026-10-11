@@ -2076,9 +2076,9 @@ STAGE_DRAIN_PAST_RETURNS = " ({past} past your line)"
 #: are `FurinaStageLaw.LineZeroReturns`.
 STAGE_DRAIN_LINE_ZERO = ("- Drained {drained} HP. Drain line 0 HP{why}: all "
                          "your Drain returns after combat.")
-#: Seat page 3: where the line comes from ("the HP you started this fight
-#: with, minus 1/4 of your Max HP", 2026-10-09); seats connected it to their
-#: entry HP only late.
+#: Seat page 3: where the line comes from (2026-10-09; since the Drain buffer,
+#: 2026-10-11, "your HP minus your Drain buffer: 1/4 of your Max HP, less
+#: what you have drained"); seats connected it to its source only late.
 STAGE_DRAIN_WHY = " ({why})"
 STAGE_REHEARSAL_CLAUSE = " · Rehearsal {n}"
 STAGE_EMPTY_LINE = "- The stage is empty."
@@ -2128,10 +2128,11 @@ STAGE_LOG_WALKON = ("  - **{who}** walked on: every seat holds a Guest Star, "
 STAGE_LOG_CUE = "  - You Cued **{who}**."
 STAGE_LOG_MOVE = "  - **{who}** moved to the front."
 #: THE POOL TO 75 (2026-10-09, sec.3): a second copy of a guest on stage moves
-#: it to the newest seat, with no act; and a guest's line has a log line of
-#: its own, so it is not read as an act.
+#: it to the newest seat; and a guest's line has a log line of its own, so it
+#: is not read as an act. Since 2026-10-11 the repeat then acts, and the act
+#: is logged as its own line after this one.
 STAGE_LOG_REPEAT = ("  - **{who}** moved to the newest seat (a second copy; "
-                    "no act).")
+                    "it acts).")
 STAGE_LOG_LINE = "  - **{who}**'s line ({n})."
 STAGE_LOG_GAIN = "  - You gained {n} Fanfare{src}: {before} → {after}."
 STAGE_LOG_SPEND = "  - You spent {n} Fanfare: {before} → {after}."

@@ -30,9 +30,13 @@ namespace KleeMod.Vfx;
 ///
 /// BUILT THE WAY <see cref="FanfareCounter"/> IS, which is built the way
 /// Klee's Spark counter is (<see cref="SparkCounter"/>): the same node shape,
-/// the same placement rule, one slot along the row above the energy orb
-/// (<see cref="Slot"/>; the Spark counter moves one slot further for a Furina
-/// holding Sparks). The face is the drained HP, cream; the hover is the line
+/// the same placement rule, one slot up the column above the energy orb
+/// (<see cref="Slot"/>: directly above the Fanfare gauge; the Spark counter
+/// moves one slot further for a Furina holding Sparks). It sat one slot to
+/// the RIGHT until the 2026-10-11 playtest ("The Drain gauge also overlaps
+/// with the Block indicator; we need to move it."): see
+/// <see cref="SparkCounter.PlaceInColumn"/>. The face is the drained HP, red (<see cref="FaceColor"/>);
+/// the hover is the line
 /// and the Drain rule. No HP-bar tick: the counter is the reading.
 ///
 /// THE FEED is <see cref="FurinaStage.RefreshBadges"/>, the funnel every
@@ -47,7 +51,7 @@ public static class DrainedCounter
     /// HP). There is no dedicated Drained icon.</summary>
     public const string GlyphPath = "furina/powers/salon_member.png";
 
-    /// <summary>Its place in the row: after the Fanfare gauge.</summary>
+    /// <summary>Its place in the column: above the Fanfare gauge.</summary>
     public const int Slot = 1;
 
     /// <summary>The hover's title key (registered in
@@ -200,6 +204,12 @@ public static class DrainedCounter
         }
     }
 
+    /// <summary>THE FACE'S COLOUR (the 2026-10-11 playtest: "the white one
+    /// of Drain is hard to make out"): always the base game's red,
+    /// <c>StsColors.red</c> (#FF5555), the HP-loss colour, at every count.
+    /// </summary>
+    public static Color FaceColor => StsColors.red;
+
     private static void Paint(Control root, Creature? creature)
     {
         if (creature == null || !GodotObject.IsInstanceValid(root)) return;
@@ -209,7 +219,7 @@ public static class DrainedCounter
         {
             count.Text = drained.ToString(CultureInfo.InvariantCulture);
             count.AddThemeColorOverride(
-                ThemeConstants.Label.FontColor, StsColors.cream);
+                ThemeConstants.Label.FontColor, FaceColor);
         }
 
         if (root.GetNodeOrNull<TextureRect>("Icon") is { } icon)

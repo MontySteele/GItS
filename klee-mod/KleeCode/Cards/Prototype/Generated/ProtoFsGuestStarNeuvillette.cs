@@ -48,7 +48,7 @@ public sealed class ProtoFsGuestStarNeuvillette : CustomCardModel, ICharacterCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Neuvillette"),
-        ("description", "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Neuvillette{IfUpgraded:show:+|}. Your [gold]Hydro[/gold] damage deals {GuestLine:diff()} additional damage.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarNeuvillette : CustomCardModel, ICharacterCar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("GuestLine", FurinaStageLaw.NeuvilletteHydroBonus)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,5 +81,6 @@ public sealed class ProtoFsGuestStarNeuvillette : CustomCardModel, ICharacterCar
     protected override void OnUpgrade()
     {
         // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
+        DynamicVars["GuestLine"].UpgradeValueBy(FurinaStageLaw.NeuvilletteHydroBonusUpgraded - FurinaStageLaw.NeuvilletteHydroBonus);
     }
 }

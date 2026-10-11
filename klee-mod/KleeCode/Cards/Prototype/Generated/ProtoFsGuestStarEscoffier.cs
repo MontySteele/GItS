@@ -48,7 +48,7 @@ public sealed class ProtoFsGuestStarEscoffier : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Escoffier"),
-        ("description", "[gold]Summon[/gold] Escoffier{IfUpgraded:show:+|}.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Escoffier{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Cryo[/gold] damage to ALL enemies.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line
@@ -63,7 +63,7 @@ public sealed class ProtoFsGuestStarEscoffier : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("GuestAct", FurinaStageLaw.EscoffierActDamage)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,5 +81,6 @@ public sealed class ProtoFsGuestStarEscoffier : CustomCardModel, ICharacterCard
     protected override void OnUpgrade()
     {
         // guest_upgraded: the summon reads IsUpgraded off this card; the guest's line or act is raised.
+        DynamicVars["GuestAct"].UpgradeValueBy(FurinaStageLaw.EscoffierActDamageUpgraded - FurinaStageLaw.EscoffierActDamage);
     }
 }

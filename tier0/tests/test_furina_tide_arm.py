@@ -60,17 +60,19 @@ class _Priced:
 
 # ---- rule 1: the line ------------------------------------------------------
 
-def test_the_line_is_the_hp_she_entered_combat_with_minus_a_quarter_max():
-    """The Drain line rule (ruled 2026-10-09): her entry HP minus 1/4 of
-    her Max HP, rounded down -- 41 from 60 of 78, 59 from 78. Read at entry,
-    not off her HP now."""
+def test_the_line_is_her_hp_less_the_drain_buffer_left():
+    """The Drain buffer (2026-10-11): 1/4 of her Max HP, rounded down (19
+    of 78), counted in HP drained. The line is her HP less the buffer left
+    -- 41 at 60 of 78 -- and a Drain within the buffer does not move it; a
+    Drain past it does, and a hit moves it with her HP."""
     from tier0.engine import furina_tide as T
     st = _furina(hp=60)
     assert st.player.max_hp == 78
     assert T.line_hp(st.player) == 41
     assert FS.drain(st, 20)
     assert st.player.hp == 40
-    assert T.line_hp(st.player) == 41
+    assert (st.player.ftd.drained_above, st.player.ftd.drained_past) == (19, 1)
+    assert T.line_hp(st.player) == 40                    # no buffer left
     assert T.line_hp(_furina(hp=78).player) == 59
     assert T.line_hp(_furina(hp=77).player) == 58
 
