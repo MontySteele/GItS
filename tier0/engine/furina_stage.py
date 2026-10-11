@@ -579,11 +579,6 @@ def drains_this_combat(player) -> int:
     return int(player.ftd.drains_this_combat) if active(player) else 0
 
 
-def half_drained(player) -> int:
-    """Balance the Books: "half your drained HP", rounded down."""
-    return drained(player) // 2
-
-
 def repays_this_turn(player) -> int:
     """Rising Tide: "for each time you Repaid this turn"."""
     return int(player.ftd.repays_this_turn) if active(player) else 0

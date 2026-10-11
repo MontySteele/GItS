@@ -206,6 +206,7 @@ def test_singer_of_many_waters_repays_everything_and_exhausts():
     st = _state(hp=70)
     st.player.ftd.drained = 8
     assert T.make_card("ftd_singer").exhaust
+    assert T.make_card("ftd_singer").retain        # 2026-10-11
     _play(st, "ftd_singer")
     assert st.player.hp == 78 and st.player.ftd.drained == 0
 
