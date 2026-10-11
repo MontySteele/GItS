@@ -576,7 +576,7 @@ MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
 # Block, Bennett's 4, Favonian Favor's 3, Sturm und Drang's 6, Mika's 1) and
 # only a number a POWER carries is named here, because these are the ones no
 # row can render.
-MC_SHOWER_DMG = 9               # Dahlia: the Shower's answer to one attack
+MC_SHOWER_DMG = 12              # Dahlia: the Shower's answer to one attack
 MC_LIGHTNING_FANG_BONUS = 3     # Razor: damage his Attacks gain, 2 turns
 MC_BARON_BUNNY_DMG = 8          # Amber: the Pyro the decoy answers with
 MC_LIGHTFALL_BASE = 8           # Eula: the blade's own damage

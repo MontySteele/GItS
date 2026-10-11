@@ -59,7 +59,7 @@ public static class CompanionOverhaulLaw
 
     /// <summary>Dahlia, Sacramental Shower: what the trap answers with.
     /// Mirrors <c>C.MC_SHOWER_DMG</c>.</summary>
-    public const int ShowerDamage = 9;
+    public const int ShowerDamage = 12;
 
     /// <summary>Razor, Lightning Fang: damage his Attacks gain, 2 turns.
     /// Mirrors <c>C.MC_LIGHTNING_FANG_BONUS</c>.</summary>
