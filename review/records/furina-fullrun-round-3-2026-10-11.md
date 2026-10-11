@@ -110,6 +110,12 @@ Round 4 used the same seeds on build 0.2.4872+next. No card changed. The round a
 
 **Flutter.** Thieving Hopper's Flutter halves any hit the game treats as an attack. Mod card damage, Skills included, is dealt as an attack. So Rising Applause and Kokomi's Opening Gambit, both Skills, are halved by it. This is on BACKLOG; it applies to every mod Skill that deals damage.
 
+## Ruled (2026-10-11)
+
+[USER]: "On Furina - let's try standing ovation at Common but only for half your Fanfare and see how that goes."
+
+Pick 1 is a new option, a mix of (a) and (b): Standing Ovation goes back to Common and reads "Spend half your Fanfare. Deal that much damage to ALL enemies." Half rounds down. It no longer Spends all, so it no longer triggers Bis!.
+
 ## For [USER]
 
 1. **The stranded bank.** This is reopened by one new fact: the bank strands with Spend cards in hand, because the Common Spend cards stop at 8 or 12.
