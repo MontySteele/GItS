@@ -2767,13 +2767,14 @@
    effects: [{op: stage_spend, amount: 4},
              {op: damage, amount: 11, target: enemy, applies_element: true}]}
 
+# 2026-10-11 Common again, Spend half (Furina round 3 record, pick 1).
 - {id: proto_fs_standing_ovation_all, name: "Standing Ovation", character: furina,
    upgrade: {retain: true},
    authored_by: [claude],
    art_of: standing_ovation,
-   register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_all},
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "[gold]Spend[/gold] half your [gold]Fanfare[/gold]. Deal that much damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_half},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},
               target: all_enemies}]}

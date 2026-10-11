@@ -216,7 +216,8 @@ def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
     # the 2026-10-09 trims' rarities are mirrored. The pool-75 round's
     # rulings: Endless Waltz cut, Standing Ovation Uncommon -- 19 / 35 / 20.
     # The block gap (ruled 2026-10-09): four more, 20 / 37 / 21. Navia to
-    # Uncommon (2026-10-10): 20 / 38 / 20.
+    # Uncommon (2026-10-10): 20 / 38 / 20. Standing Ovation Common again
+    # (2026-10-11): 21 / 37 / 20.
     pool = [c for r in probe.DRAFT_POOL.values() for c in r]
     assert len(pool) == 78 and len(set(pool)) == 78
     assert "ftd_endless_waltz" not in T.CARDS
@@ -224,7 +225,7 @@ def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
     assert "ftd_neuvillette" in pool and "ftd_ebb_and_flow" in pool
     assert "ftd_crowd_gasps" not in pool
     assert {r: len(v) for r, v in probe.DRAFT_POOL.items()} == {
-        "common": 20, "uncommon": 38, "rare": 20}
+        "common": 21, "uncommon": 37, "rare": 20}
 
 
 # ----------------------------------------------------------------------

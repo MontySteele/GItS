@@ -7290,3 +7290,17 @@ Fish Blasting, Lisa's Treats, Confiscated, Tinder Toss, Alice's Detonator. [USER
   `IntendedDamage(FrontEnemy)`, which counts the front enemy alone and skips
   Minions, and a seat expected it to count every attacker. The row joins
   `FRONT_ENEMY_ALLOWED` in `tools/lint_text_conventions.py`.
+
+## Standing Ovation: Common again, Spend half, 2026-10-11
+
+[USER]: "On Furina - let's try standing ovation at Common but only for half
+your Fanfare and see how that goes." (Furina round 3 record, pick 1.)
+
+- **Standing Ovation** (`proto_fs_standing_ovation_all`): Uncommon -> Common.
+  "[gold]Spend[/gold] half your [gold]Fanfare[/gold]. Deal that much damage
+  to ALL enemies." (was "all"). Cost 1, upgrade Retain, unchanged. The new op
+  `stage_spend_half` is a "Spend up to" half the bank, rounded down (C#
+  `FurinaStage.SpendHalf` / `SpentOrHalf`, sim `furina_stage.spend_half`);
+  0 or 1 held spends nothing. It is not a spend-all, so Bis! and Standing
+  Room Only ignore it. Pool 78, 21 / 37 / 20 (was 20 / 38 / 20); sim
+  `furina_tide.CARDS["ftd_standing_ovation"]`.
