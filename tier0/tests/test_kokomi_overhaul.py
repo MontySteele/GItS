@@ -213,7 +213,12 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
            "proto_kk_chain_of_command",
            "proto_kk_all_streams_flow_to_the_sea"}
     assert not cut & set(ids)
-    # The status batch (2026-10-01): seven rows LAST.
+    # The growth Powers (2026-10-10): Rising Tide LAST, The General's
+    # Banner gone.
+    assert "proto_kk_the_generals_banner" not in ids
+    assert ids[-1:] == C.KOKOMI_GROWTH_POWERS_IDS
+    ids = ids[:-1]
+    # The status batch (2026-10-01): seven rows LAST before it.
     assert ids[-7:] == C.KOKOMI_STATUS_BATCH_IDS
     ids = ids[:-7]
     # Pool completion (2026-10-01): eight rows LAST before them.

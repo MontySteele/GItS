@@ -132,6 +132,7 @@
     "proto_kk_read_the_field",
     "proto_kk_riptide",
     "proto_kk_riptide_ruin",
+    "proto_kk_rising_tide",
     "proto_kk_salt_in_the_wound",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
@@ -149,7 +150,6 @@
     "proto_kk_suffocating_deep",
     "proto_kk_surging_shoal",
     "proto_kk_tactical_relay",
-    "proto_kk_the_generals_banner",
     "proto_kk_the_long_game",
     "proto_kk_the_moon_a_ship",
     "proto_kk_tidal_rebuke",
@@ -551,6 +551,7 @@
     "proto_kk_read_the_field": "kokomi",
     "proto_kk_riptide": "kokomi",
     "proto_kk_riptide_ruin": "kokomi",
+    "proto_kk_rising_tide": "kokomi",
     "proto_kk_salt_in_the_wound": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
@@ -568,7 +569,6 @@
     "proto_kk_suffocating_deep": "kokomi",
     "proto_kk_surging_shoal": "kokomi",
     "proto_kk_tactical_relay": "kokomi",
-    "proto_kk_the_generals_banner": "kokomi",
     "proto_kk_the_long_game": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
     "proto_kk_tidal_rebuke": "kokomi",
@@ -1210,7 +1210,7 @@
       "damage": 4
     },
     "proto_kk_grand_design": {
-      "innate": true
+      "cost": -1
     },
     "proto_kk_jellyfish_drift": {
       "plan_damage": 1
@@ -1287,6 +1287,9 @@
     "proto_kk_riptide_ruin": {
       "damage": 3
     },
+    "proto_kk_rising_tide": {
+      "innate": true
+    },
     "proto_kk_salt_in_the_wound": {
       "kokomi_amount": 1
     },
@@ -1342,9 +1345,6 @@
     },
     "proto_kk_tactical_relay": {
       "plan_draw": 1
-    },
-    "proto_kk_the_generals_banner": {
-      "innate": true
     },
     "proto_kk_the_long_game": {
       "upgraded_power": "kk_the_long_game_plus"

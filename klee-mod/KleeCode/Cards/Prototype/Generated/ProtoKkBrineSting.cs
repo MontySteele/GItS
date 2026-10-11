@@ -38,14 +38,14 @@ public sealed class ProtoKkBrineSting : CustomCardModel, ICharacterCard, IPlanne
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlanOnly(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlanOnly(ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_brine_sting");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Brine Sting"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage. Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,6 +54,7 @@ public sealed class ProtoKkBrineSting : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, 3, KokomiPlan.Aim.FrontEnemy),
             new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 

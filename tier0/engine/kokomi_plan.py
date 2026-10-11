@@ -350,7 +350,13 @@ PRINCESS_OF_WATATSUMI_DRAW = 1
 #: THE EXPANSION, BATCH ONE (2026-09-29): seven Powers. Twins in
 #: `KokomiExpansion.cs`. The Clouds Like Waves Rippling left the pool (paper
 #: pick 3) and its power left both engines with it.
-GRAND_DESIGN = "kk_grand_design"          # Casket +N per Energy paid, per carry-out
+#: Grand Design, bent (the growth Powers, 2026-10-10): "Open the Casket no
+#: longer empties the Casket." A marker: `open_casket` reads only whether
+#: it is worn. `GrandDesignPower` is the twin.
+GRAND_DESIGN = "kk_grand_design"
+#: THE GROWTH POWERS (2026-10-10): Rising Tide, "At the start of your turn,
+#: the Casket gains 1." Copies add. `RisingTidePower` is the twin.
+RISING_TIDE = "kk_rising_tide"
 LONG_GAME = "kk_the_long_game"            # +N Energy when exactly 1 Plan waits
 #: Power cost sweep, 2026-09-30: The Long Game+ installs this twin instead
 #: (+N Energy and draw N). C# twin: `TheLongGamePlusPower`.
@@ -1588,13 +1594,6 @@ def _note_plan_resolved(state: CombatState,
     # and the relic's +1 -- once per CARRY-OUT, so a doubled one counts twice.
     state.kk_plans_carried_out_this_turn += 1
     note_casket_carry_out(state)
-    # THE EXPANSION, GRAND DESIGN: "Whenever the Bake-Kurage carries out a
-    # Plan, the Casket gains 1 more for each Energy paid for it." The Energy
-    # paid for the card that wrote it; per carry-out, so a doubled one pays
-    # twice. `GrandDesignPower.Note` is the twin.
-    design = int(p.powers.get(GRAND_DESIGN, 0))
-    if design and entry is not None and entry.paid > 0:
-        gain_casket(state, design * int(entry.paid))
     # THE PAYOFF PASS, KURAGE CANOPY: "Whenever the Bake-Kurage carries out
     # a Plan, gain 2 Block." Per carry-out, so a doubled one pays twice.
     # POWERED, as her Ancient's Block below. `KurageCanopyPower` is the twin.
@@ -2194,11 +2193,15 @@ def open_casket(state: CombatState) -> None:
     """Open the Casket: "Gain Strength equal to the Casket's count, then empty
     it." At `C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT` per point; an empty
     Casket grants nothing. The relic keeps counting from 0.
+
+    GRAND DESIGN (bent 2026-10-10): "Open the Casket no longer empties the
+    Casket." Worn, the count stays and the Strength is still the whole count.
     `KokomiOverhaulKit.OpenCasket` is the twin."""
     if not live(state):
         return
     points = state.kk_casket
-    state.kk_casket = 0
+    if not state.player.powers.get(GRAND_DESIGN, 0):
+        state.kk_casket = 0
     state.emit("casket_opened", points=points)
     strength = points * C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT
     if strength > 0:
@@ -2598,6 +2601,20 @@ def plan_energy_waiting(state: CombatState) -> int:
     if not live(state):
         return 0
     return sum(max(0, int(e.paid)) for e in state.kk_plan_queue)
+
+
+def rising_tide(state: CombatState) -> None:
+    """RISING TIDE (the growth Powers, 2026-10-10): "At the start of your
+    turn, the Casket gains 1." After the hand draw, before the morning's
+    Plans, The Long Game's site. Copies add. Like every "the Casket gains",
+    no relic is asked. `RisingTidePower.Signal` is the twin."""
+    if not live(state):
+        return
+    n = int(state.player.powers.get(RISING_TIDE, 0))
+    if n <= 0:
+        return
+    gain_casket(state, n)
+    state.emit("plan_rising_tide", amount=n)
 
 
 def long_game(state: CombatState, waiting: int) -> None:

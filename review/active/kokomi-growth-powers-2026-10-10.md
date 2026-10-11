@@ -63,3 +63,10 @@ My working is in the session scratchpad (`kokomi-power-census.md`). Base-five te
 2. **Rising Tide replaces The General's Banner.** **Default:** yes. Alternative: it replaces Kurage Canopy instead (also 0 of 3 offers taken, a 1-Block-per-Plan Power).
 
 **Ruled 2026-10-10, both at default.** [USER]: "Agreed on both." Rising Tide replaces The General's Banner; Grand Design becomes "the Casket keeps its count", with its ratio set by the sim before it is built.
+
+## Sim read (#1059)
+
+- Rising Tide: +11.5 pp boss wins over a Strike (+13.5 upgraded). The Demon Form stand-in reads +14.9.
+- The Grand Design keep variants read below a Strike. But the sim carries out about 0.39 Plans a turn against the seats' ~1.4, and its pilot never opens the Casket without a scripted rule, so the sim cannot grade Grand Design.
+- The Claude call is ratio 1/1 (Strength equal to the full count), graded on the next whole-run round's line: top Strength under 30 when played.
+- Claude ships, weaker than the base equivalents (Neutralize, Footwork, Inflame): Brine Sting's Plan deals 3 damage before its Weak (built). Kurage Canopy (2 Block per Plan carried out, 3 upgraded) and Ceremonial Garment (+2 damage per debuff, 3 upgraded) already printed those numbers on the sheet, so they did not move.

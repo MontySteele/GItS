@@ -290,6 +290,9 @@ KNOWN_STALE = {
     "proto_mc_albedo_tectonic_tide": (
         "The Klee status package (2026-10-01) replaced this Klee stand-in with Albedo — Dust of Purification (review/active/klee-status-package-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a companions/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_kk_the_generals_banner": (
+        "The Kokomi growth Powers (2026-10-10) CUT this row from her pool: Rising Tide replaces it (review/active/kokomi-growth-powers-2026-10-10.md, pick 2). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_rally": (
         "The Kokomi status batch (2026-10-01, #801) CUT this row from her pool (seven rows cut, six added; review/active/kokomi-status-batch-2026-10-01.md). Kept rather than deleted, as the entries below are: a painted asset on a kokomi/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -463,6 +466,7 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
+    "proto_kk_rising_tide": "Kokomi's growth Powers (review/active/kokomi-growth-powers-2026-10-10.md, ruled 2026-10-10); no painting yet.",
     "proto_fs_private_box": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_the_masquerade": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_the_show_must_go_on": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
