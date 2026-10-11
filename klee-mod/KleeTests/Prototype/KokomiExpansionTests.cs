@@ -74,7 +74,7 @@ public class KokomiExpansionTests : IDisposable
         // eight more; the status batch (2026-10-01) cut All Streams Flow to
         // the Sea and five rows ahead of the batch, and appended seven.
         Assert.Equal(78, slice.Count);
-        Assert.Equal(Batch, slice.Skip(40).Take(21).ToArray());
+        Assert.Equal(Batch, slice.Skip(39).Take(21).ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("AllStreams"));
         Assert.DoesNotContain(slice, c => c.Contains("CloudsLikeWaves"));
         Assert.Null(typeof(KokomiOverhaulKit).Assembly
@@ -163,27 +163,14 @@ public class KokomiExpansionTests : IDisposable
     }
 
     [Fact]
-    public void Grand_design_and_kurage_swarm_feed_the_casket()
+    public void Kurage_swarm_feeds_the_casket()
     {
-        Assert.Contains(Seq("KokomiPlan", "ResolveEntry"),
-                        c => c.Contains("GrandDesignPower.Note"));
+        // Grand Design left the plan bus when it was bent (2026-10-10);
+        // `KokomiGrowthPowersTests` pins its new reading.
+        Assert.DoesNotContain(Seq("KokomiPlan", "ResolveEntry"),
+                              c => c.Contains("GrandDesignPower"));
         Assert.Contains(Seq("KokomiPlan", "Schedule"),
                         c => c.Contains("KurageSwarmPower.Note"));
-        // 1 more per Energy paid (main session, 2026-09-29).
-        KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi().WithPower<GrandDesignPower>(1);
-        var free = new KokomiPlan.Entry(null,
-            Array.Empty<KokomiPlan.Planned>(), Paid: 0);
-        var three = new KokomiPlan.Entry(null,
-            Array.Empty<KokomiPlan.Planned>(), Paid: 3);
-        GrandDesignPower.Note(seat.Creature, free);
-        Assert.Equal(0, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-        GrandDesignPower.Note(seat.Creature, three);
-        Assert.Equal(3, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-        // Power cost sweep, 2026-09-30: cost stays 1, the upgrade is Innate.
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkGrandDesign>().Keywords);
-        Assert.Equal(1, new ProtoKkGrandDesign().EnergyCost.Canonical);
         Assert.Equal(1, new ProtoKkKurageSwarm().EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Innate,
                         Upgraded<ProtoKkKurageSwarm>().Keywords);

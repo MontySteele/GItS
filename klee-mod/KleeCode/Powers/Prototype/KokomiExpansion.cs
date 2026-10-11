@@ -196,11 +196,11 @@ public static class KokomiExpansion
     }
 }
 
-/// <summary>Grand Design: "Whenever the Bake-Kurage carries out a Plan, the
-/// Casket gains 1 more for each Energy paid for it" (main session,
-/// 2026-09-29). The Energy paid for the writing card
-/// (<see cref="KokomiPlan.Entry.Paid"/>); per carry-out, so a doubled one
-/// pays twice. Sim twin: <c>kokomi_plan._note_plan_resolved</c>.
+/// <summary>Grand Design, bent (the growth Powers, 2026-10-10, ruled):
+/// "Open the Casket no longer empties the Casket." A marker: the stack means
+/// nothing, <see cref="KokomiOverhaulKit.OpenCasket"/> reads only whether it
+/// is worn, and the Strength stays the whole count. Sim twin:
+/// <c>kokomi_plan.open_casket</c>.
 /// </summary>
 public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
 {
@@ -208,23 +208,46 @@ public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
     {
         ("title", "Grand Design"),
         ("description",
-            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold], the [gold]Casket[/gold] gains "
-          + "[blue]{Amount}[/blue] more for each [gold]Energy[/gold] paid "
-          + "for it."),
+            "[gold]Open the Casket[/gold] no longer empties the "
+          + "[gold]Casket[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public static void Note(Creature? kokomi, KokomiPlan.Entry entry)
+    /// <summary>Is Grand Design worn? The one read the Open makes.</summary>
+    public static bool Keeps(Creature? kokomi) =>
+        kokomi != null
+        && kokomi.Powers.OfType<GrandDesignPower>().Any(p => p.Amount > 0);
+}
+
+/// <summary>Flood Tide (the growth Powers, 2026-10-10, ruled): "At the start
+/// of your turn, the Casket gains 1." Copies add. Paid from
+/// <see cref="ProtoBakeKuragePower"/>'s morning, after the hand draw and
+/// before the Plans, The Long Game's site. Sim twin:
+/// <c>kokomi_plan.rising_tide</c>.</summary>
+public sealed class FloodTidePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Flood Tide"),
+        ("description",
+            "At the start of your turn, the [gold]Casket[/gold] gains "
+          + "[blue]{Amount}[/blue]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public static void Signal(Creature? kokomi)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (entry.Paid <= 0) return;
-        var design = kokomi!.Powers.OfType<GrandDesignPower>().FirstOrDefault();
-        if (design == null || design.Amount <= 0) return;
-        KokomiOverhaulKit.GainCasket(kokomi, (int)design.Amount * entry.Paid);
+        var n = (int)kokomi!.Powers.OfType<FloodTidePower>()
+            .Sum(p => p.Amount);
+        if (n <= 0) return;
+        KokomiOverhaulKit.GainCasket(kokomi, n);
     }
 }
 

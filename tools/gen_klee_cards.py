@@ -3253,10 +3253,13 @@ APPLY_POWERS = {
         "apply {X} [gold]Weak[/gold] to the front enemy."),
     # THE EXPANSION, BATCH ONE (2026-09-29). Every class lives in
     # Powers/Prototype/KokomiExpansion.cs; every row states its own face.
+    # Bent 2026-10-10 (the growth Powers): a marker the Open reads.
     "kk_grand_design": ("GrandDesignPower", None,
-        "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], "
-        "the [gold]Casket[/gold] gains {X} more for each [gold]Energy[/gold] "
-        "paid for it."),
+        "[gold]Open the Casket[/gold] no longer empties the "
+        "[gold]Casket[/gold]."),
+    # THE GROWTH POWERS (2026-10-10). Class in KokomiExpansion.cs.
+    "kk_flood_tide": ("FloodTidePower", None,
+        "At the start of your turn, the [gold]Casket[/gold] gains {X}."),
     "kk_the_long_game": ("TheLongGamePower", None,
         "At the start of your turn, if exactly one [gold]Plan[/gold] is "
         "waiting, gain {X} [gold]Energy[/gold]."),

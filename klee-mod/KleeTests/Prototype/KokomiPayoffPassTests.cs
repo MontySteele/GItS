@@ -58,7 +58,7 @@ public class KokomiPayoffPassTests : IDisposable
         // status batch (2026-10-01) cut seven ahead and appended seven.
         Assert.Equal(78, slice.Count);
         Assert.Equal(new[] { "ProtoKkKurageCanopy", "ProtoKkCoralTithe" },
-                     slice.Skip(61).Take(2).ToArray());
+                     slice.Skip(60).Take(2).ToArray());
         Assert.DoesNotContain(slice, c => c.Contains("SecondThoughts"));
         Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoKkSecondThoughts"));

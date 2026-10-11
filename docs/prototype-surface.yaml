@@ -1314,13 +1314,9 @@
    # now 2 Vulnerable; the Plan line does not upgrade.
    upgrade: {power_amount: 1}}
 
-- {id: proto_kk_the_generals_banner, name: "The General's Banner", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "The first time each turn you play a [gold]Companion[/gold] card, apply 1 [gold]Weak[/gold] to the front enemy.",
-   effects: [{op: apply_power, power: kk_generals_banner, amount: 1, target: self}],
-   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
-   upgrade: {innate: true}}
+# THE GENERAL'S BANNER IS CUT (the growth Powers, 2026-10-10,
+# review/active/kokomi-growth-powers-2026-10-10.md, pick 2). Provenance
+# note, "Kokomi growth Powers, 2026-10-10".
 
 # CHAIN OF COMMAND IS CUT (the status batch, 2026-10-01,
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
@@ -1646,10 +1642,13 @@
 - {id: proto_kk_brine_sting, name: "Brine Sting", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Apply 1 [gold]Weak[/gold].",
+   # The growth Powers (2026-10-10), Claude ships: a 3 damage hit added
+   # under Neutralize's 3 damage and 1 Weak, a turn late.
+   description: "[gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold].",
    effects: [],
-   plan: [{op: apply_power, power: weak, amount: 1, target: front_enemy}],
-   # Plan 2 Weak.
+   plan: [{op: damage, amount: 3, target: front_enemy},
+          {op: apply_power, power: weak, amount: 1, target: front_enemy}],
+   # Plan 3 damage, 2 Weak.
    upgrade: {plan_power_amount: 1}}
 
 # --- THE EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
@@ -1698,11 +1697,14 @@
 
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   # Main session, 2026-09-29: per Energy paid (the sim failed paper check 2).
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], the [gold]Casket[/gold] gains 1 more for each [gold]Energy[/gold] paid for it.",
+   cost: 2, type: power, rarity: rare,
+   # The growth Powers (2026-10-10, pick 1, ruled): the Casket keeps its
+   # count. Open still gives Strength equal to the whole count (ratio 1/1,
+   # the main session's call; graded on the next whole-run round).
+   description: "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold].",
    effects: [{op: apply_power, power: kk_grand_design, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Cost 1.
+   upgrade: {cost: -1}}
 
 - {id: proto_kk_the_long_game, name: "The Long Game", character: kokomi,
    authored_by: [claude],
@@ -2059,6 +2061,19 @@
              {op: add_card, card: status_dazed, zone: discard, amount: 3}],
    # 12 to ALL, twice.
    upgrade: {damage: 3}}
+
+# --- THE GROWTH POWERS (2026-10-10, ruled): Flood Tide, in The General's
+# Banner's Uncommon slot, LAST. Provenance note, "Kokomi growth Powers,
+# 2026-10-10". ---
+
+- {id: proto_kk_flood_tide, name: "Flood Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Copies add. After her hand draw, before the Bake-Kurage carries out
+   # last turn's Plans (The Long Game's site).
+   description: "At the start of your turn, the [gold]Casket[/gold] gains 1.",
+   effects: [{op: apply_power, power: kk_flood_tide, amount: 1, target: self}],
+   upgrade: {innate: true}}
 
 # THE INAZUMA COMPANION OVERHAUL, beside the Mondstadt block:
 # these ARE Inazuma's Universal companion pool.

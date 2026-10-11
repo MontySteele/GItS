@@ -138,6 +138,10 @@ internal static class KleePowerIcons
         AtWatersEdgePower => KleePck.Path("klee/powers/solar_isotoma.png"),
         GrandDesignPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
+        // THE GROWTH POWERS (2026-10-10): Flood Tide feeds the Casket, so it
+        // wears the Casket-feeding badge until it has its own.
+        FloodTidePower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
         KurageSwarmPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
         // THE PAYOFF PASS (2026-10-01): Kurage Canopy is her Ancient's Block

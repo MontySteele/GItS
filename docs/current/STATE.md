@@ -78,7 +78,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `review/records/kokomi-review-round-2026-10-05.md`: one run reached the
   final boss, one lost the act-2 boss; the damage gap against
   the control stands. Next: [USER] plays (a central rule changed; co-op with a
-  friend may stand in); the damage gap is a paper after that run.
+  friend may stand in); the damage gap is a paper after that run. Growth
+  Powers built 2026-10-10 (`review/active/kokomi-growth-powers-2026-10-10.md`):
+  Flood Tide replaces The General's Banner, Grand Design keeps the Casket's
+  count.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:

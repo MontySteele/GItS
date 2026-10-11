@@ -135,13 +135,20 @@ public static class KokomiOverhaulKit
     /// it." At <see cref="KokomiOverhaulLaw.CasketStrengthPerPoint"/> per
     /// point. An empty Casket grants nothing (and applies no zero-stack
     /// power). The relic keeps counting from 0.
+    ///
+    /// GRAND DESIGN (bent 2026-10-10): "Open the Casket no longer empties the
+    /// Casket." Worn, the count stays and the Strength is still the whole
+    /// count. Sim twin: <c>kokomi_plan.open_casket</c>.
     /// </summary>
     public static async Task OpenCasket(
         PlayerChoiceContext choiceContext, Creature? kokomi,
         CardModel? cardSource)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var points = KokomiOverhaulLedger.For(kokomi!).EmptyCasket();
+        var ledger = KokomiOverhaulLedger.For(kokomi!);
+        var points = GrandDesignPower.Keeps(kokomi)
+            ? ledger.CasketCount
+            : ledger.EmptyCasket();
         Relics.TamakushiCasket.Refresh(kokomi);
         var strength = points * KokomiOverhaulLaw.CasketStrengthPerPoint;
         if (strength <= 0) return;
