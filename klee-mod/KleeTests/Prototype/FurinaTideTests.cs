@@ -497,18 +497,20 @@ public class FurinaTideTests
     // ---- the guests (rule 5) -------------------------------------------------
 
     [Fact]
-    public void A_fourth_guest_makes_the_oldest_leave_with_no_act()
+    public void A_fourth_guest_makes_the_oldest_act_once_then_leave()
     {
-        // The pool to 75 (sec.3): no effect on summon, so the evicted guest
-        // leaves without acting, and its cards go back (the pins in
-        // `FurinaGuestRuleTests` hold the cards' way back).
+        // Ruled 2026-10-11 ("(b) a guest who's pushed out takes a bow: they
+        // act once as they leave"; it left with no act before), and its
+        // cards go back (the pins in `FurinaGuestRuleTests` hold the cards'
+        // way back).
         var kit = StageKit.Of(StagePerformer.Wriothesley,
                               StagePerformer.Lynette, StagePerformer.Clorinde);
         Assert.Equal(StageSummonResult.Evict,
             StageKit.Run(kit.Director.SummonGuest(StagePerformer.Charlotte)));
         Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde,
                              StagePerformer.Charlotte }, kit.Company);
-        Assert.Empty(kit.Board.Hits);
+        Assert.Equal(new[] { "damage Wriothesley Random 4 Cryo" },
+                     kit.Board.Hits.ToArray());
         Assert.Contains("return Wriothesley 0", kit.Board.Log);
     }
 
@@ -587,7 +589,7 @@ public class FurinaTideTests
     {
         var full = StageKit.Of(StagePerformer.Wriothesley,
                                StagePerformer.Lynette, StagePerformer.Clorinde);
-        Assert.Equal("\n(Wriothesley will leave)",
+        Assert.Equal("\n(Wriothesley acts, then leaves)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Charlotte));
         Assert.Equal("\n(Lynette moves to the newest seat and acts)",
             FurinaStageBowPreview.Line(full.Stage, StagePerformer.Lynette));
@@ -757,19 +759,41 @@ public class FurinaTideTests
     }
 
     [Fact]
-    public void The_counters_faces_are_gold_and_red()
+    public void The_counters_numbers_are_the_base_style_and_rings_tell_them_apart()
     {
-        // The 2026-10-11 playtest: "the white one of Drain is hard to make
-        // out" and "I see the fnafare turned to white when it's non-zero...
-        // that doesn't work either." Fanfare is the [gold] tag's gold, dimmed
-        // at 0; Drained is the game's red at every count.
-        var gold = new Godot.Color("EFC851");
-        Assert.Equal(gold, FanfareCounter.FaceColor(3));
-        Assert.Equal(gold, FanfareCounter.FaceColor(40));
+        // The 2026-10-11 playtest on the gold and red numbers: "that's not
+        // really legible, either." Ruled ("Yep, sounds good!"): the number
+        // is the base game's cream with a dark outline, the colour moves to
+        // a ring (gold Fanfare, red Drain), and Fanfare at 0 is grey.
+        var cream = new Godot.Color("FFF6E2");
+        Assert.Equal(cream, FanfareCounter.FaceColor(3));
+        Assert.Equal(cream, FanfareCounter.FaceColor(40));
         var empty = FanfareCounter.FaceColor(0);
-        Assert.Equal((gold.R, gold.G, gold.B), (empty.R, empty.G, empty.B));
-        Assert.Equal(0.45f, empty.A, 3);
-        Assert.Equal(new Godot.Color("FF5555"), DrainedCounter.FaceColor);
+        Assert.Equal(new Godot.Color(0.75f, 0.75f, 0.75f), empty);
+        Assert.Equal(1f, empty.A, 3);                    // no alpha dimming
+        Assert.Equal(cream, DrainedCounter.FaceColor);
+        Assert.Equal(new Godot.Color("EFC851"), FanfareCounter.RingColour);
+        Assert.Equal(new Godot.Color("FF5555"), DrainedCounter.RingColour);
+        // The outline stays the power amount label's dark brown.
+        Assert.Equal(new Godot.Color(0.12f, 0.10208f, 0.0816f, 1f),
+                     FurinaCounterFace.OutlineColour);
+    }
+
+    [Fact]
+    public void The_counters_numbers_scale_the_power_amount_label()
+    {
+        // power.tscn %AmountLabel on a 40-px icon: size 18, outline 10,
+        // shadow (3, 3), rect (-56, 21)-(44, 44), right-aligned. On the
+        // 128-px star-counter square every number scales by 3.2.
+        Assert.Equal(58, FurinaCounterFace.FontSize(128f));
+        Assert.Equal(32, FurinaCounterFace.OutlineSize(128f));
+        Assert.Equal(10, FurinaCounterFace.ShadowOffset(128f));
+        Assert.Equal(4, FurinaCounterFace.RingWidth(128f));
+        var rect = FurinaCounterFace.AmountRect(128f);
+        Assert.Equal(128f * 44f / 40f, rect.End.X, 3);   // bottom-right corner
+        Assert.Equal(128f * 44f / 40f, rect.End.Y, 3);
+        Assert.Equal(18, FurinaCounterFace.FontSize(40f));
+        Assert.True(FurinaCounterFace.FontSize(128f) > 40); // larger than before
     }
 
     [Fact]

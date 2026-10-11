@@ -1663,7 +1663,8 @@ ARM_KEYWORDS: dict[str, str] = {
     "Repay": ("Regain that much drained HP, never more than you drained. A "
               "Repay counts the HP it returns."),
     "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
-               "leaves first, and its card goes to your Discard Pile."),
+               "acts once and leaves; its card goes to your Discard "
+               "Pile."),
     "Guest Star": ("Exhausts. Acts at the end of your turn. When it leaves, "
                    "this card goes to your Discard Pile."),
     "oldest guest": ("The guest on stage longest: the one a fourth summon "

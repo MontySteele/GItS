@@ -6518,7 +6518,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Repay": ["Regain that much drained HP, never more than you ",
                   "drained. A ", " counts the HP it returns."],
         "Summon": ["A guest joins at the back. On a full stage, the oldest "
-                   "guest ", "leaves first, and its card goes to your "],
+                   "guest ", "acts once and leaves; its card goes to your "],
         "oldest guest": ["The guest on stage longest: the one a fourth summon "
                          "would ", "remove."],
         # `EB-625`. The relic Shell Guard's payout hangs off, in the relic's

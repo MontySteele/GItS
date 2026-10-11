@@ -702,9 +702,9 @@ READINGS: tuple[str, ...] = (
     "and acts once, as on her turn (2026-10-11; it moved with no act before, "
     "the pool to 75, sec.3); its card joins the seat's and "
     "returns with it, and an upgraded copy upgrades the guest.",
-    "A guest evicted by a fourth summon leaves without acting (sec.3: no "
-    "effect on summon); its cards return from the exhaust pile to the "
-    "discard pile.",
+    "A guest evicted by a fourth summon acts once, as on her turn, then "
+    "leaves (2026-10-11; it left without acting before, sec.3); its cards "
+    "return from the exhaust pile to the discard pile.",
     "Final Bow's guest is the decider's pick; the sim's default is the guest "
     "with the biggest act, the oldest on a tie.",
     "Casting Call takes the first Guest Star in the draw pile whose guest is "
