@@ -245,7 +245,7 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     # offer screen cannot see.
     "plan_block": ("block",
                    # R276, Tide Wall: the flat bonus on top of the intent.
-                   "block_front_intent"),
+                   "block_max_intent"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
     "plan_draw": ("draw",

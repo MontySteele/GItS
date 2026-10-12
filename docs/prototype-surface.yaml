@@ -1280,10 +1280,10 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    # Pays for a play not written on the Bake-Kurage, never a carry-out.
-   # 2026-10-11: cost 1 -> 0. Kokomi round 2 (2026-10-12): any card that can
-   # be written counts (Companions too).
+   # Cost 0 (2026-10-11); Companions count (round 2); face reworded in the
+   # Kokomi round-3 changes (2026-10-12). Provenance note.
    cost: 0, type: power, rarity: uncommon,
-   description: "The first time each turn you play a card you could have written as a [gold]Plan[/gold], draw 1 card.",
+   description: "Once a turn, when you play a card you could write as a [gold]Plan[/gold] instead of writing it, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1328,12 +1328,12 @@
 - {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1: the intent, read at carry-out; a flat 6 under it (the
-   # cleanup pass, 2026-09-29). Face reworded in the Kokomi round-1 fixes
-   # (2026-10-12). Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the front enemy's intended damage.",
+   # R276 pick 1: the intent, read at carry-out, a flat 6 under it. Kokomi
+   # round-3 changes (2026-10-12): the LARGEST intent on the board, not the
+   # front enemy's. Provenance note.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the most damage an enemy intends.",
    effects: [{op: block, amount: 4}],
-   plan: [{op: block_front_intent, amount: 6}],
+   plan: [{op: block_max_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
    upgrade: {block: 2, plan_block: 3}}
 
@@ -1874,16 +1874,16 @@
 - {id: proto_kk_kelp_wall, name: "Kelp Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Kokomi round-1 fixes (2026-10-12): the count is the hand WHEN THE PLAN
-   # IS WRITTEN (the number the preview shows), not the carry-out hand,
-   # which seats found empty. Provenance note.
-   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand when written.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: draw, amount: 1}],
+   # The count is the hand WHEN THE PLAN IS WRITTEN (round-1 fixes); the
+   # now-line gains 5 [7] Block before its draw (Kokomi round-3 changes,
+   # 2026-10-12). Provenance note.
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand when written.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block, amount: 5}, {op: draw, amount: 1}],
    plan: [{op: block, amount: 9},
           {op: block_per_status_in_hand, amount: 3}],
-   # Plan 12; the rate does not upgrade. 2026-10-11 Kokomi card pass: 7 [10]
-   # -> 9 [12].
-   upgrade: {plan_block: 3}}
+   # now 7 Block; Plan 12; the rate does not upgrade. 2026-10-11 Kokomi card
+   # pass: 7 [10] -> 9 [12].
+   upgrade: {block: 2, plan_block: 3}}
 
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
@@ -2027,10 +2027,13 @@
 
 - {id: proto_kk_watchful_shoal, name: "Watchful Shoal", character: kokomi,
    authored_by: [claude],
+   # Kokomi round-3 changes (2026-10-12): the jellyfish line's Accuracy.
+   # Same id, name and art; both lines of a Sting, a Ward's now-line.
+   # Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you write an [gold]Ethereal[/gold] card as a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
-   effects: [{op: apply_power, power: kk_watchful_shoal, amount: 5, target: self}],
-   # 7 Block. Kokomi round 2 (2026-10-12): 3 [4] -> 5 [7].
+   description: "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} additional [gold]Block[/gold].",
+   effects: [{op: apply_power, power: kk_watchful_shoal, amount: 3, target: self}],
+   # 5 and 5.
    upgrade: {power_amount: 2}}
 
 - {id: proto_kk_coordinated_tide, name: "Coordinated Tide", character: kokomi,

@@ -184,17 +184,17 @@ public class KokomiCasketPassTests : IDisposable
         // The cleanup pass (2026-09-29): the Plan read 0 on buff turns ("it
         // gave 0 Block twice on Empower turns"), so it gains a flat 6 (9
         // upgraded) on top of the intent, still read at carry-out. Sim twin:
-        // `test_r276_tide_wall_blocks_the_front_enemys_intent`.
+        // `test_r276_tide_wall_blocks_the_largest_intent`.
         var card = new ProtoKkTideWall();
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.BlockFrontIntent, 6),
+        Assert.Equal((KokomiPlan.Kind.BlockMaxIntent, 6),
                      (clause.Kind, clause.Amount));
         Assert.Equal(9, Upgraded<ProtoKkTideWall>().PlanClauses.Single().Amount);
         Assert.Equal(4m, card.DynamicVars.Block.BaseValue);
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
                    + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the "
-                   + "front enemy's intended damage.",
+                   + "most damage an enemy intends.",
                      Face(card));
     }
 

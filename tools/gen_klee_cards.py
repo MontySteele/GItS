@@ -2742,7 +2742,7 @@ PLAN_CLAUSE_KINDS = {
     "first_attack_twice": "FirstAttackTwice",
     # Kokomi core pass, CHAIN OF COMMAND: "Next turn, the first Companion card
     # you play costs 0." Stolen Chapter's switch, narrowed to Companions.
-    "block_front_intent": "BlockFrontIntent",
+    "block_max_intent": "BlockMaxIntent",
     # THE CO-OP SET. Joint Orders' "They draw 2 cards" (the player captured
     # when the Plan is written) and Coordinated Strike's "each other player's
     # Attacks deal 3 additional damage" (Battle Plan's clause, mirrored).
@@ -2823,7 +2823,7 @@ PLAN_ONLY_OPS = {
                  # R276. Each names the carry-out turn or the writing, so a
                  # now-line spelling would be a different, unpriced card.
                  "first_attack_twice",
-                 "block_front_intent",
+                 "block_max_intent",
                  # Kokomi core pass, Chain of Command: "next turn".
                  # THE CO-OP SET: both name the carry-out turn, and the first
                  # a player captured at writing.
@@ -2845,7 +2845,7 @@ PLAN_ONLY_OPS = {
 #: adds a Block clause the base face does not print, so it is written at 0 and
 #: `KokomiPlan` carries a 0 flat Block out as nothing. The sim's twin is
 #: `kokomi_plan.PLAN_ZERO_AMOUNT_OPS`.
-PLAN_ZERO_AMOUNT_OPS = {"block_front_intent", "block",
+PLAN_ZERO_AMOUNT_OPS = {"block_max_intent", "block",
                         # POOL COMPLETION: Tactical Relay's draw, added by
                         # the upgrade.
                         "each_player_draw"}
@@ -3317,8 +3317,8 @@ APPLY_POWERS = {
     "kk_kurage_bloom": ("KurageBloomPower", None,
         "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
     "kk_watchful_shoal": ("WatchfulShoalPower", None,
-        "Whenever you write an [gold]Ethereal[/gold] card as a "
-        "[gold]Plan[/gold], gain {X} [gold]Block[/gold]."),
+        "Your [gold]Stings[/gold] deal {X} additional damage. Your "
+        "[gold]Wards[/gold] gain {X} additional [gold]Block[/gold]."),
     "kk_coordinated_tide": ("CoordinatedTidePower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out an "
         "[gold]Ethereal[/gold] card, deal {X} [gold]Hydro[/gold] damage to "

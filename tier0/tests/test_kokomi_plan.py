@@ -504,7 +504,7 @@ def test_tide_wall_loads_and_smiths(overhaul):
     wall = loader.get_card("proto_kk_tide_wall")
     assert wall.rarity == "uncommon" and wall.cost == 1
     assert wall.effects == [{"op": "block", "amount": 4}]
-    assert wall.plan == [{"op": "block_front_intent", "amount": 6}]
+    assert wall.plan == [{"op": "block_max_intent", "amount": 6}]
     up = upgrades.apply_upgrade(wall)
     assert up.effects[0]["amount"] == 6
     assert up.plan[0]["amount"] == 9
@@ -2430,19 +2430,21 @@ def test_r276_pincer_plays_the_first_face_up_attack_twice(overhaul):
     assert enemy.hp == 200 - 3 * 5, "only the FIRST Attack is doubled"
 
 
-def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
-    """Tide Wall's Plan: 6 Block (9 upgraded) plus the damage the front enemy
-    intends to deal -- every hit of a multi-hit intent. A non-attack intent
-    adds 0, so an Empower turn still pays the flat 6 (the cleanup pass,
-    2026-09-29)."""
+def test_r276_tide_wall_blocks_the_largest_intent(overhaul):
+    """Tide Wall's Plan: 6 Block (9 upgraded) plus the most damage any one
+    enemy intends to deal -- every hit of a multi-hit intent (Kokomi round-3
+    changes, 2026-10-12: the largest, no longer the front enemy's). A
+    non-attack intent adds 0, so an Empower turn still pays the flat 6 (the
+    cleanup pass, 2026-09-29)."""
     front = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 6,
                                         "times": 2}])
     behind = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 20}])
     st = kokomi_state(enemies=[front, behind])
     st.player.block = 0
-    assert kokomi_plan.front_intent_damage(st) == 12
+    assert kokomi_plan.intent_damage(st, front) == 12
+    assert kokomi_plan.max_intent_damage(st) == 20
     carry_out(st, _arm_card("proto_kk_tide_wall").plan)
-    assert st.player.block == 6 + 12
+    assert st.player.block == 6 + 20
 
     st = kokomi_state(enemies=[make_enemy(hp=40, intents=BLOCKER)])
     st.player.block = 0
@@ -2458,8 +2460,8 @@ def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
 
 
 def test_tide_wall_reads_the_intent_shown_at_carry_out(overhaul):
-    """Kokomi round-1 fixes (2026-10-12): the face says "the front enemy's
-    intended damage", and it is the intent ON SCREEN WHEN THE PLAN IS
+    """Kokomi round-1 fixes (2026-10-12): the intent Tide Wall reads is the
+    one ON SCREEN WHEN THE PLAN IS
     CARRIED OUT -- the attack that enemy makes that turn -- not the one shown
     when it was written. Written over a 5; the intent moves on to a 14; the
     Plan pays 6 + 14."""
@@ -2467,7 +2469,7 @@ def test_tide_wall_reads_the_intent_shown_at_carry_out(overhaul):
                                        {"kind": "attack", "amount": 14}])
     st = kokomi_state(enemies=[front])
     st.player.block = 0
-    assert kokomi_plan.front_intent_damage(st) == 5
+    assert kokomi_plan.max_intent_damage(st) == 5
     kokomi_plan.schedule(st, _arm_card("proto_kk_tide_wall"))
     front.intent_index += 1
     kokomi_plan.resolve_all(st)
@@ -2534,10 +2536,11 @@ def test_core_pass_faces(overhaul):
     faces = _faces()
     assert faces["proto_kk_ambush"] == (
         "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage.")
-    # Kokomi round 2 (2026-10-12): any card that can be written counts.
+    # Kokomi round 2 (2026-10-12): any card that can be written counts;
+    # round 3 reworded the face so writing plainly does not.
     assert faces["proto_kk_treatise"] == (
-        "The first time each turn you play a card you could have written as "
-        "a [gold]Plan[/gold], draw 1 card.")
+        "Once a turn, when you play a card you could write as a "
+        "[gold]Plan[/gold] instead of writing it, draw 1 card.")
 
 
 def test_core_pass_second_waves_hit_applies_hydro(overhaul):

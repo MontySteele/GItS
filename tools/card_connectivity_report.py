@@ -622,7 +622,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # front enemy's intent, which this vocabulary has no state for -- EMPTY
     # and disclosed, `remove_debuff`'s argument.
     "first_attack_twice": [_hook("shared", "card_identity", "write")],
-    "block_front_intent": [],
+    "block_max_intent": [],
     # THE CO-OP SET: both land on ANOTHER player, whom this vocabulary has no
     # state for -- EMPTY and disclosed, `remove_debuff`'s argument.
     "ally_draw": [],

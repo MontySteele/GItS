@@ -70,16 +70,17 @@ public class KokomiRound1FixesTests
     // ---- Tide Wall --------------------------------------------------------------
 
     [Fact]
-    public void Tide_wall_reads_the_front_intent_at_carry_out()
+    public void Tide_wall_reads_the_intent_at_carry_out()
     {
         // Read in ResolveOne (the morning the Plan is carried out, after the
         // enemies' intents for that turn are up), never stamped at writing.
+        // The largest intent since the Kokomi round-3 changes (2026-10-12).
         Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "ResolveOne")),
-                        c => c.Contains("KokomiOverhaulKit.IntendedDamage"));
+                        c => c.Contains("KokomiOverhaulKit.MostIntendedDamage"));
         Assert.DoesNotContain(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
                               c => c.Contains("IntendedDamage"));
         var face = Face(new ProtoKkTideWall());
-        Assert.Contains("plus the front enemy's intended damage.", face);
+        Assert.Contains("plus the most damage an enemy intends.", face);
         Assert.DoesNotContain("next turn", face);
     }
 

@@ -686,7 +686,7 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # R276 PICK 1, the halves rewrite: five plan clauses, each with its own
     # branch in `_op_price` on the same terms.
     "first_attack_twice",
-    "block_front_intent",
+    "block_max_intent",
     # THE CO-OP SET: two plan clauses about ANOTHER player, priced ZERO in
     # `_op_price` -- the one-seat drafter has nobody for them to pay.
     "ally_draw", "others_attack_damage_this_turn",
@@ -965,7 +965,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
         # multiplayer-only row is never offered to this drafter anyway.
         return 0.0
-    if op == "block_front_intent":
+    if op == "block_max_intent":
         # Tide Wall: the flat bonus only. The intent is a board fact an offer
         # screen cannot read, so that part is a deliberate ZERO.
         return _neutral_amount(fx, 0)
@@ -2196,7 +2196,7 @@ STATIC_OP_PRICING: dict[str, str] = {
     # --- R276 pick 1, the Kokomi halves rewrite ---
     "first_attack_twice": "STATIC_CARD_COPY_VALUE, one Attack played again -- "
                           "replay_next_companion's rule",
-    "block_front_intent": "its flat bonus only; ZERO for the intent part, a "
+    "block_max_intent": "its flat bonus only; ZERO for the intent part, a "
                           "board fact an offer screen cannot read",
     # --- the Kokomi expansion, batch one (2026-09-29) ---
     "kokomi": "ZERO: each kind pays off a board, queue or hand fact (Plans "

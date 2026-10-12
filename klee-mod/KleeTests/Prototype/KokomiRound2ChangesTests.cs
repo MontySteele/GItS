@@ -53,8 +53,8 @@ public class KokomiRound2ChangesTests
     [Fact]
     public void The_engine_powers_pay_more()
     {
-        Assert.Equal((5, 7), (Var<ProtoKkWatchfulShoal>("PowerAmount"),
-                              Var<ProtoKkWatchfulShoal>("PowerAmount", true)));
+        // Watchful Shoal was rewritten in the Kokomi round-3 changes
+        // (`KokomiRound3ChangesTests`).
         Assert.Equal((6, 9), (Var<ProtoKkCoordinatedTide>("PowerAmount"),
                               Var<ProtoKkCoordinatedTide>("PowerAmount", true)));
         Assert.Equal((3, 4), (Var<ProtoKkKurageCanopy>("PowerAmount"),

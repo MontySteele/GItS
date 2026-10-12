@@ -858,6 +858,8 @@ NO_GLOSSARY_ROW_OWED = {
     "Sting": "a token card the page prints with its own face once it is added",
     "Stings": "a token card the page prints with its own face once it is added",
     "Ward": "a token card the page prints with its own face once it is added",
+    # Watchful Shoal (Kokomi round-3 changes, 2026-10-12).
+    "Wards": "a token card the page prints with its own face once it is added",
     "Sea Glass": "a token card the page prints with its own face once added",
     # The elements. None is a glossary row and none should be: the element is
     # the card's own indicator (`blindplay_faces._element` puts it on the card
@@ -1344,9 +1346,10 @@ GOLD_BASE_GAME = {"Block", "Energy", "Exhaust", "Exhausted", "Exhausts",
 GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}
 #: A card the face makes, golded as the base golds `OVERCLOCK`'s Burn.
 #: Sting, Stings and Ward since the Kokomi re-founding (2026-10-12), which
-#: also preview the card they name (`KokomiCards.WithStingPreview`).
+#: also preview the card they name (`KokomiCards.WithStingPreview`); Wards
+#: since Watchful Shoal's rewrite (Kokomi round-3 changes, 2026-10-12).
 GOLD_CREATED_CARDS = {"Dazed", "Confiscated", "Sting", "Stings", "Ward",
-                      "Sea Glass"}
+                      "Wards", "Sea Glass"}
 #: Words whose tip attaches off an op rather than off the table.
 GOLD_OP_TIPS = {"Summon": "the `stage_guest` op attaches ForSummon"}
 #: Names, each defined somewhere a reader meets it.
