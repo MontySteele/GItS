@@ -77,6 +77,9 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - The Spark line vanishes at 0, and Snecko Oil's added Spark costs are unexplained; a Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1.
 - Wait For It... printed "Nothing ... landed" on paying turns; Weak shows different Pyro numbers on card and board; the Melt preview reads as if the whole Bomb pile multiplies.
 
+- Fight telemetry has no draws or Energy per turn and no Full House trigger count, so [USER]'s Furina watch items are unreadable from a round (`review/records/furina-varka-round-2026-10-12.md`); add both.
+- Fight telemetry credits Swirl damage to "(Swirl)", not to the card behind it, so Converging Winds' multi-enemy bonus cannot be read; credit it to the card (round 2026-10-12).
+
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 
 - No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
@@ -121,6 +124,8 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Live repro, no change before it: Wax Lizard Tail did not fire after Toy Box (base relics; `review/records/furina-fullrun-round-2-2026-10-10.md`). Check whether a melted relic stays in `player.Relics` unflagged, so the page still lists it (bridge `McpMod.StateBuilder.cs:1471-1488`).
 - Live repro, no change before it: Fairy in a Bottle may not have saved the Ironclad control at death (base potion; `review/records/kokomi-fullrun-round-2026-10-10.md`). No klee-mod hook touches death or HP loss, so check the base game's own path in a live run.
 - A Plan carried out with no living enemy to aim at (an earlier Plan that morning killed it) prints "no enemy lost HP", like a Plan that missed (Kokomi round 5, lane 3). The wire cannot tell the two apart: `KokomiPlan.Hit` returns null when `Aimed` finds no living body, so the row is `number` null, `moved` []; add a field to `CarriedOutRow` (e.g. `no_target`) and print "its target was already dead" in `blindplay_render._render_moved`.
+
+- Furina's Incoming forecast leaves out the guests' end-of-turn Block (Freminet), so it reads too pessimistic; and Frozen on a boss, and whether a guest's act ends a freeze, are not printed (round 2026-10-12, lane 2).
 
 ## Harness, bridge and tools
 
