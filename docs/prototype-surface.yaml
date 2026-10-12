@@ -3222,14 +3222,14 @@
    effects: [{op: stage_drain, amount: 3},
              {op: draw, amount: 2}]}
 
-# Against the Tide: "within 5 HP of your Drain line" (the Review section; the
-# relic Repays every turn, so she never stays exactly on the line).
+# Against the Tide: "If you Drained this turn", any Drain of 1+ HP (2026-10-12;
+# was "within 5 HP of your Drain line"; see the provenance notes).
 - {id: proto_fs_against_the_tide, name: "Against the Tide", character: furina,
    upgrade: {conditional_damage: +3, conditional_then_damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {PlainDamage:diff()} damage. If you are within 5 HP of your [gold]Drain[/gold] line, deal {BranchDamage:diff()} instead.",
-   effects: [{op: conditional, if: stage_near_line,
+   description: "Deal {PlainDamage:diff()} damage. If you [gold]Drained[/gold] this turn, deal {BranchDamage:diff()} instead.",
+   effects: [{op: conditional, if: stage_drained_this_turn,
               then: [{op: damage, amount: 14, target: enemy}],
               else: [{op: damage, amount: 8, target: enemy}]}]}
 

@@ -369,12 +369,22 @@ def test_the_drain_cards_and_their_counts():
     assert st.player.hp == 61
 
 
-def test_against_the_tide_reads_the_line():
-    st = _furina()                             # a buffer of 19
-    st.player.ftd.drained_above = 15           # 4 left: within 5 of the line
+def test_against_the_tide_reads_a_drain_this_turn():
+    """2026-10-12 (review/records/furina-varka-round-2026-10-12.md): "If you
+    Drained this turn", any Drain of 1+ HP; was "within 5 HP of your Drain
+    line", which a seat almost never reached."""
+    st = _furina()
+    hp = st.enemies[0].hp
+    _play(st, _card("proto_fs_against_the_tide"))
+    assert hp - st.enemies[0].hp == 8          # no Drain yet
+    assert FS.drain(st, 1)
+    assert FS.drained_this_turn(st.player)
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_against_the_tide"))
     assert hp - st.enemies[0].hp == 14
+    hp = st.enemies[0].hp
+    _play(st, _card("proto_fs_against_the_tide+"))
+    assert hp - st.enemies[0].hp == 14 + 3 + 1   # both upgrade keys
 
 
 def test_riptide_lunge_repays_on_a_kill():

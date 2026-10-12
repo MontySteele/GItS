@@ -7510,3 +7510,21 @@ Paper `review/active/varka-block-paper-2026-10-12.md`, both picks ruled (a)
 - **Stormward Stance** (`proto_vk_stormward_stance`, the paper's sec.3,
   Claude's call): "Your Anemo Attacks deal 4 [6] additional damage", was
   3 [5]. Accuracy's number.
+
+## Against the Tide reads a Drain this turn, 2026-10-12
+
+Lane 1's NEVER AGAIN in `review/records/furina-varka-round-2026-10-12.md`
+(what to change, 2): "within 5 HP of your Drain line" was almost never
+reachable, because the line moves each time she drains. Claude's call;
+Furina is at Prototype.
+
+- **Against the Tide** (`proto_fs_against_the_tide`): "Deal 8 [11] damage.
+  If you [gold]Drained[/gold] this turn, deal 14 [18] instead." (was "If you
+  are within 5 HP of your Drain line"). Cost, rarity and upgrade unchanged.
+  The predicate `stage_drained_this_turn` is true when she has drained 1 or
+  more HP this turn by any Drain, her cards' or a guest's act: C#
+  `FurinaStage.DrainedThisTurn` (off `FurinaStageLedger.DrainedThisTurn`,
+  reset at `OpenTurn`), sim `furina_stage.drained_this_turn` /
+  `furina_tide.drained_this_turn` (off `drained_hp_this_turn`). Nothing
+  else read `stage_near_line`, so it is removed with `NearLine`,
+  `NearTheLine` and `NEAR_LINE`.

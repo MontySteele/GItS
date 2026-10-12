@@ -45,7 +45,7 @@ public sealed class ProtoFsAgainstTheTide : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Against the Tide"),
-        ("description", "Deal {PlainDamage:diff()} damage. If you are within 5 HP of your [gold]Drain[/gold] line, deal {BranchDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} damage. If you [gold]Drained[/gold] this turn, deal {BranchDamage:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,7 +64,7 @@ public sealed class ProtoFsAgainstTheTide : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (FurinaStage.NearLine(Owner.Creature))
+        if (FurinaStage.DrainedThisTurn(Owner.Creature))
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
             await DamageCmd.Attack((IsUpgraded ? 18m : 14m))
