@@ -94,3 +94,15 @@ Fable's review (scratchpad, `kokomi-design-review-fable.md`) checked the claims 
 5. **Dusk.**
    - **(a) Default:** retired; its cards become now-line cards or go.
    - (b) Kept.
+
+## Ruled 2026-10-12: all five picks (a)
+
+[USER]: "I think this makes sense. Her Companion Plans can react, but should normally only ever react with Hydro and not each other, which means she's mainly getting Poison from Electro, Vape from Pyro, Crystallize from Geo, and maybe Freeze but I think the only Cryo Inazuma character is Ayaka, so Freeze shouldn't trivialize every fight."
+
+"Agreed all around. For Companions, I like a) - I'm thinking that to keep things simple, her Personal Companions can be given specific Plan lines with the permitted better effect rates, with the flexibility to play normal Companions the next turn at the regular rate if you want to."
+
+- **Picks 1, 2, 3 and 5 (a)** as written.
+- **Pick 4 (a), with two tiers:**
+  - Any Companion card can be written as a Plan. It is carried out next turn at its printed rate, and the Bake-Kurage applies Hydro to its target first, so each written Companion reacts with that Hydro and never with the Companion before it.
+  - Her Personal Companions (Gorou's four cards are the starting set; the card paper names them) print their own Plan lines at the ruled Plan rate (1.3 times, `kokomi-plan-pricing-2026-10-11.md`), each a different job from the now-line (the halves rule).
+- **Next:** the card paper.
