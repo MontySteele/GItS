@@ -23,3 +23,5 @@
 2. **The generators** (Orders from the Shrine, Watatsumi Muster, Sangonomiya's Orders). They roll only Inazuma Common Companions; General's War Banner was taken 0 of 44 times.
    - **(a) Default:** keep it to Inazuma Commons.
    - (b) Widen it to any Common Companion.
+
+**Ruled 2026-10-12** ([USER]: "Good with all defaults."): late growth is answered by `kokomi-jellyfish-growth-2026-10-12.md`, ruled at its defaults; the generators keep rolling Inazuma Commons (pick 2 (a)).

@@ -25,12 +25,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Kokomi jellyfish growth paper** (`kokomi-jellyfish-growth-2026-10-12.md`,
-  three picks, defaults (a)): Stings and Wards become 0-cost Shivs with no Plan
-  line and the generators move to the Silent's rates; Endless Shoal (a Sting per
-  Plan carried out), All Streams Flow to the Sea and The Shape of Water; built
-  and seat-tested before [USER]'s run. Read with the growth-test record's two
-  picks (`kokomi-growth-test-2026-10-12.md`).
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's

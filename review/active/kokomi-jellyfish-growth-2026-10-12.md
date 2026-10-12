@@ -48,12 +48,12 @@ So a lean into the Shiv shape starts with the token's cost, because that is what
 
 ## 3. The proposal: Stings become her Shivs
 
-**The token.** It drops its Plan line, which lets it cost 0 without breaking the rule that no card with a Plan line costs 0 (card paper, rule 2; you called the 0-cost Dusk Plans "kinda silly").
+**The token.** It costs 0 and keeps a Plan line. (This draft first dropped the Plan line, reading the card paper's rule 2 as "no 0-cost Plans". [USER]: "I'm actually totally fine with 0-cost plans; it's Dusk Plans that were 'kinda silly' since they take place within your turn (at the end) like a normal card with extra steps".)
 
 | Card | Today | Proposed |
 |---|---|---|
-| **Sting** (token) | 1: "Deal 7 [10] Hydro damage. Plan: Deal 5 [7] Hydro damage to ALL enemies." Ethereal | **0:** "Deal 4 [6] Hydro damage." Ethereal, Exhausts (the Shiv) |
-| **Ward** (token) | 1: "Gain 7 [10] Block. Plan: Apply 1 [2] Weak to ALL enemies." Ethereal | **0:** "Gain 4 [6] Block." Ethereal, Exhausts |
+| **Sting** (token) | 1: "Deal 7 [10] Hydro damage. Plan: Deal 5 [7] Hydro damage to ALL enemies." Ethereal | **0:** "Deal 4 [6] Hydro damage. Plan: Deal 3 [4] Hydro damage to ALL enemies." Ethereal, Exhausts (the Shiv, with a Plan) |
+| **Ward** (token) | 1: "Gain 7 [10] Block. Plan: Apply 1 [2] Weak to ALL enemies." Ethereal | **0:** "Gain 4 [6] Block. Plan: Apply 1 [2] Weak to ALL enemies." Ethereal, Exhausts |
 
 - Watchful Shoal (+3 [5] to each Sting and Ward) becomes the Accuracy it was modelled on. It is a point lower than Accuracy because it buffs two tokens.
 - Kurage Bloom (a Sting each turn) becomes Infinite Blades.
@@ -71,7 +71,7 @@ So a lean into the Shiv shape starts with the token's cost, because that is what
 
 > **Endless Shoal** (Uncommon Power, 1): Whenever the Bake-Kurage carries out a Plan, add a Sting to your hand.
 
-- **Today** it is a Rare, 2 [1]: "Whenever the Bake-Kurage carries out a Sting or Ward, add a copy of it to your hand." Stings are no longer written, so its text has to change anyway.
+- **Today** it is a Rare, 2 [1]: "Whenever the Bake-Kurage carries out a Sting or Ward, add a copy of it to your hand." Free Stings that can be written would make that copy loop for nothing, so its text changes.
 - **Lore:** the Tamakushi Casket, where carrying out a Plan refreshes the jellyfish.
 - **Rate:** Infinite Blades' rate, tied to her spine, so any Plan deck can dip into Stings.
 - **Doubled carry-outs:** a carry-out done twice (Nereid's Ascension, Second Wave) gives two Stings.
@@ -94,12 +94,11 @@ So a lean into the Shiv shape starts with the token's cost, because that is what
 
 ## 4. What it costs and what to check
 
-- **Stings leave the Plan queue.**
-  - A Sting no longer counts for "Plans waiting" (Feint, Breakwater, Tideturn, Shoal of Spears).
-  - Round 3's best jellyfish turn, a Sting written as a Plan plus Coordinated Tide, goes away.
-  - Coordinated Tide becomes a Commander-half card: it fires on written Companions and her own Ethereal cards.
-  - The halves now meet through Kurage's Wake, Endless Shoal and Watatsumi Resistance. The queue decisions (order, Opening Gambit, Second Wave) are untouched.
-- **Treatise** draws off cards you could write as Plans, so Stings stop feeding it.
+- **Stings stay in the Plan queue, and now cost nothing to write.** The choice each turn is 4 to one enemy now, or 3 to ALL next turn.
+  - A written Sting counts for "Plans waiting" (Feint, Breakwater, Tideturn, Shoal of Spears) and fires Coordinated Tide, so round 3's best jellyfish turn stays.
+  - The risk is free Plans inflating those counters. Tideturn (8 per Plan waiting) with four written Stings is 32 more for 1 Energy. The round watches the biggest Tideturn and Shoal of Spears hits.
+  - Endless Shoal plus a written Sting makes one Sting a turn that keeps itself going, and Nereid's Ascension grows it by one a turn. That goes in the probe's known set.
+- **Treatise** draws once a turn when you play a card you could have written, so a Sting played now can feed it.
 - **The ceiling.**
   - Kurage Bloom, Endless Shoal, Shoal Call, Watchful Shoal and The Shape of Water together make a turn of 50 to 70. The Silent's assembled Shiv deck makes about 70.
   - Nereid's Ascension plus Kurage's Wake plus Endless Shoal gives 6 Stings a turn on a Rare, an Uncommon and a Common.
@@ -119,7 +118,7 @@ So a lean into the Shiv shape starts with the token's cost, because that is what
 ## For [USER]
 
 1. **The jellyfish token.**
-   - **(a) Default:** Stings and Wards become 0-cost Shivs with no Plan line, with the generators at the Silent's rates (section 3).
+   - **(a) Default:** Stings and Wards become 0-cost Shivs that keep a Plan line, with the generators at the Silent's rates (section 3).
    - (b) Keep Stings at 1 Energy with their Plan line, and add a Rare Power, "Everlasting Moonglow: Your Stings cost 0." The risk is that free Stings make free Plans, which feed the Plans-waiting counters: the Dusk problem again.
    - (c) No change before your run.
 2. **Growth cards** (with 1 (a) or (b)).
@@ -132,3 +131,18 @@ So a lean into the Shiv shape starts with the token's cost, because that is what
 3. **When to play it.**
    - **(a) Default:** I build your picks, run a Kokomi seat round on them, and you play that build, rather than today's 0.2.5020.
    - (b) You play 0.2.5020 as it is first, and the jellyfish change waits for your verdict.
+
+## Ruled (2026-10-12)
+
+[USER]: "On Kokomi - I'm actually totally fine with 0-cost plans; it's Dusk Plans that were 'kinda silly' since they take place within your turn (at the end) like a normal card with extra steps. So we can allow for Stings to Plan if there is an actual reason to do it. Likewise for other 0-cost cards. At a glance - Kokomi looks good otherwise! Good with all defaults."
+
+All three picks at (a), with the token keeping its Plan line:
+- Sting "0: Deal 4 [6] Hydro damage. Plan: Deal 3 [4] Hydro damage to ALL enemies."
+- Ward "0: Gain 4 [6] Block. Plan: Apply 1 [2] Weak to ALL enemies."
+- The generators at the Silent's rates. Shoal Call becomes Blade Dance.
+- Endless Shoal becomes the Uncommon "a Sting per Plan carried out". All Streams Flow to the Sea is the Rare, and The Shape of Water the Uncommon.
+- I build it and run a Kokomi seat round, and [USER] plays that build.
+
+The card paper's rule 2 ("No card with a Plan line costs 0") is lifted. The rule that stands is that no Plan happens within your own turn (Dusk).
+
+The growth-test record's picks go with this: late growth is answered here, and the generators keep rolling Inazuma Commons (pick 2 (a)).
