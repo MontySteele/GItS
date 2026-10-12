@@ -63,6 +63,12 @@ public static class FurinaCards
         FurinaStage.FinalBow(choiceContext, card.Owner?.Creature,
                              Amount(card));
 
+    /// <summary>Ensemble Cast (the diversity pass, 2026-10-11): "Summon a
+    /// random guest."</summary>
+    public static Task SummonRandom(PlayerChoiceContext choiceContext,
+                                    CardModel card, CardPlay cardPlay) =>
+        FurinaStage.SummonRandom(choiceContext, card.Owner?.Creature);
+
     /// <summary>The ledger source a card's own Fanfare gain is filed
     /// under.</summary>
     public const string CardGainSource = "card";
@@ -76,11 +82,13 @@ public static class FurinaCards
                          CardGainSource);
 
     /// <summary>
-    /// Casting Call: "Put a Guest Star from your draw pile into your hand."
-    /// A TUTOR (the paper's "an Uncommon tutor, not a random guest"): with
-    /// more than one in the pile the player picks off a grid, one is taken
-    /// without a screen (<c>KleeExpansion.FetchFromDiscard</c>'s rule), none
-    /// and the card plays on. TOP of the hand.
+    /// Casting Call: "Put a Guest Star from your draw pile into your hand. If
+    /// you can't, draw 2 cards." A TUTOR (the paper's "an Uncommon tutor, not
+    /// a random guest"): with more than one in the pile the player picks off
+    /// a grid, one is taken without a screen
+    /// (<c>KleeExpansion.FetchFromDiscard</c>'s rule). TOP of the hand. With
+    /// none in the pile it draws its <c>FsAmount</c> instead (the diversity
+    /// pass, 2026-10-11: the floor).
     /// </summary>
     public static async Task TutorGuest(PlayerChoiceContext choiceContext,
                                         CardModel card, CardPlay cardPlay)
@@ -88,9 +96,13 @@ public static class FurinaCards
         if (card.Owner is not { } owner) return;
         if (!FurinaStage.LiveFor(owner.Creature)) return;
         var pile = CardPile.Get(PileType.Draw, owner);
-        if (pile == null) return;
-        var eligible = pile.Cards.Where(IsGuestStar).ToList();
-        if (eligible.Count == 0) return;
+        var eligible = pile?.Cards.Where(IsGuestStar).ToList()
+                       ?? new List<CardModel>();
+        if (eligible.Count == 0)
+        {
+            await CardPileCmd.Draw(choiceContext, Amount(card), owner);
+            return;
+        }
         CardModel? pick;
         if (eligible.Count == 1)
         {

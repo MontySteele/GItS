@@ -67,8 +67,10 @@ public static class FurinaStageRoster
     /// TO 75's 41 (<c>review/active/furina-pool-growth-2026-10-09.md</c>
     /// sec.5), every one a `proto_fs_` row, less Endless Waltz (cut
     /// 2026-10-09, with Standing Ovation moved to Uncommon), and THE BLOCK
-    /// GAP's four (ruled 2026-10-09): 20 Commons, 37 Uncommons and 21 Rares,
-    /// 78 (pinned by `PoolCountTests`). Sim twin:
+    /// GAP's four (ruled 2026-10-09), and THE DIVERSITY PASS (ruled
+    /// 2026-10-11: Headliner, Leading Lady, Full House and Packed House in;
+    /// Gentle Current, Surging Waters, Pay the Tab and Sold Out out): 23
+    /// Commons, 35 Uncommons and 20 Rares, 78 (pinned by `PoolCountTests`). Sim twin:
     /// <c>furina_stage.POOL_IDS</c>, same order.
     /// </summary>
     public static CardModel[] Pool() => new CardModel[]
@@ -80,7 +82,6 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsLeadingLady>(),
         ModelDb.Card<ProtoFsSalonsTab>(),
         // Repay (four).
-        ModelDb.Card<ProtoFsSurgingWaters>(),
         ModelDb.Card<ProtoFsHymnOfManyWaters>(),
         ModelDb.Card<ProtoFsPneumaRefrain>(),
         ModelDb.Card<ProtoFsSingerOfManyWaters>(),
@@ -133,7 +134,6 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsBubbleAria>(),
         ModelDb.Card<ProtoFsCommandingGaze>(),
         ModelDb.Card<ProtoFsStarTurn>(),
-        ModelDb.Card<ProtoFsSoldOut>(),
         ModelDb.Card<ProtoFsCrescendo>(),
         ModelDb.Card<ProtoFsPrimaDonna>(),
         ModelDb.Card<ProtoFsStandingRoomOnly>(),
@@ -143,7 +143,6 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsOverdraft>(),
         ModelDb.Card<ProtoFsOusiaPledge>(),
         ModelDb.Card<ProtoFsAgainstTheTide>(),
-        ModelDb.Card<ProtoFsPayTheTab>(),
         ModelDb.Card<ProtoFsRiptideLunge>(),
         ModelDb.Card<ProtoFsHighStakes>(),
         ModelDb.Card<ProtoFsReginaOfAllWaters>(),
@@ -151,7 +150,6 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsAllIn>(),
         // Pneuma, Repay (10).
         ModelDb.Card<ProtoFsSoothingWaters>(),
-        ModelDb.Card<ProtoFsGentleCurrent>(),
         ModelDb.Card<ProtoFsCleanSlate>(),
         ModelDb.Card<ProtoFsHydroLance>(),
         ModelDb.Card<ProtoFsCleansingTorrent>(),
@@ -168,5 +166,11 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsPrivateBox>(),
         ModelDb.Card<ProtoFsTheMasquerade>(),
         ModelDb.Card<ProtoFsTheShowMustGoOn>(),
+        // THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md,
+        // ruled 2026-10-11): 2 Common, 2 Uncommon.
+        ModelDb.Card<ProtoFsHeadliner>(),
+        ModelDb.Card<ProtoFsTheLeadingLady>(),
+        ModelDb.Card<ProtoFsTheFullHouse>(),
+        ModelDb.Card<ProtoFsPackedHouse>(),
     };
 }

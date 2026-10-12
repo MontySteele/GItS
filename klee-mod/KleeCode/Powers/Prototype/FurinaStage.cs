@@ -153,6 +153,18 @@ public static class FurinaStage
     public static int SpentFours(CardModel? card) =>
         Spent(card) / FurinaStageLaw.SpendUpToEvery;
 
+    /// <summary>`stage_spent_threes` (the diversity pass, 2026-10-11): this
+    /// play's spend-all in threes, rounded down -- Bravura's hits ("Deal 7
+    /// Hydro damage for every 3 spent").</summary>
+    public static int SpentThrees(CardModel? card) =>
+        Spent(card) / FurinaStageLaw.BravuraSpentPer;
+
+    /// <summary>`stage_fanfare_fives` (the diversity pass, 2026-10-11): her
+    /// Fanfare in fives, rounded down -- Packed House's "plus 1 for every 5
+    /// Fanfare you have" (read, never spent).</summary>
+    public static int FanfareFives(Creature? owner) =>
+        FanfareOf(owner) / FurinaStageLaw.PackedHouseFanfarePer;
+
     /// <summary>`stage_spent` as a face prints it: before the play, the
     /// Fanfare a spend-all is about to take; during it, what it took. One
     /// expression, so preview and resolution agree.</summary>
@@ -184,6 +196,7 @@ public static class FurinaStage
             CriticsDarling = Sum<CriticsDarlingPower>(),
             Bis = owner.Powers.OfType<BisPower>().Count(),
             Masquerade = Sum<TheMasqueradePower>(),
+            FullHouse = Sum<FullHousePower>(),
         };
     }
 
@@ -413,6 +426,26 @@ public static class FurinaStage
             index = await FurinaCards.ChooseSeat(choiceContext, player, ledger);
         }
         await Director(choiceContext, owner).FinalBow(index, times);
+        await Done(owner);
+    }
+
+    /// <summary>Ensemble Cast (the diversity pass, 2026-10-11): "Summon a
+    /// random guest." One of the eleven not on stage, off the combat's
+    /// target stream, unupgraded and holding no card (none comes back when
+    /// it leaves). Not a Guest Star played, so Grand Entrance stays quiet.
+    /// With all eleven on stage, nothing. Sim twin:
+    /// <c>furina_tide.summon_random</c>.</summary>
+    public static async Task SummonRandom(PlayerChoiceContext choiceContext,
+                                          Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        var ledger = FurinaStageLedger.For(owner!);
+        var absent = System.Enum.GetValues<StagePerformer>()
+            .Where(who => ledger.SeatOf(who) == null).ToList();
+        if (absent.Count == 0) return;
+        var rng = owner!.Player?.RunState?.Rng?.CombatTargets;
+        var pick = rng == null ? absent[0] : rng.NextItem(absent);
+        await Director(choiceContext, owner).SummonGuest(pick);
         await Done(owner);
     }
 
@@ -1003,7 +1036,10 @@ public sealed class GameStageBoard : IStageBoard
         var pool = enemies;
         if (target == StageTarget.Aura)
         {
-            pool = enemies.Where(e => AuraCmd.Find(e) != null).ToList();
+            // "an enemy, one with an aura if able" (the diversity pass,
+            // 2026-10-11): with no aura on any enemy, any enemy.
+            var aura = enemies.Where(e => AuraCmd.Find(e) != null).ToList();
+            if (aura.Count > 0) pool = aura;
         }
         if (FurinaStage.RandomOf(_owner, pool) is { } body)
         {

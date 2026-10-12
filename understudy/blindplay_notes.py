@@ -1686,8 +1686,8 @@ ARM_KEYWORDS: dict[str, str] = {
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
                     "enemy. Act: deal 4 Cryo damage to a random enemy."),
     "Lynette": ("The first time each turn an enemy makes you lose HP, gain "
-                "that much Fanfare again. Act: deal 3 Anemo damage to an enemy "
-                "with an aura."),
+                "that much Fanfare again. Act: deal 3 Anemo damage to an enemy, "
+                "one with an aura if able."),
     "Clorinde": ("Whenever you Repay, deal twice that much Electro damage to a "
                  "random enemy. Act: deal 6 Electro damage to a random enemy."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina

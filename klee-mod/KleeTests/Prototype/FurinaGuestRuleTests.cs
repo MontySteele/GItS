@@ -473,9 +473,6 @@ public class FurinaGuestRuleTests
             Il.Calls(typeof(ProtoFsFinalBow).GetMethod("OnPlay", All)!));
         Assert.Contains("FurinaCards.TutorGuest",
             Il.Calls(typeof(ProtoFsCastingCall).GetMethod("OnPlay", All)!));
-        // Gentle Current Repays now (the Spend round 2, 2026-10-10).
-        Assert.Contains("FurinaStage.Repay",
-            Il.Calls(typeof(ProtoFsGentleCurrent).GetMethod("OnPlay", All)!));
     }
 
     [Fact]
@@ -550,12 +547,12 @@ public class FurinaGuestRuleTests
     }
 
     [Fact]
-    public void Overdraft_and_sold_out_give_their_energy_next_turn()
+    public void Overdraft_gives_its_energy_next_turn()
     {
         // The 2026-10-09 build's loop ruling, Interval Bell's fix: the
         // loop probe found 16 thin-deck cycles while the Energy came now.
-        foreach (var type in new[] { typeof(ProtoFsOverdraft),
-                                     typeof(ProtoFsSoldOut) })
+        // (Sold Out, its partner, was cut in the diversity pass, 2026-10-11.)
+        foreach (var type in new[] { typeof(ProtoFsOverdraft) })
         {
             var calls = Il.Calls(type.GetMethod("OnPlay", All)!);
             Assert.Contains("FurinaStage.EnergyNextTurn", calls);

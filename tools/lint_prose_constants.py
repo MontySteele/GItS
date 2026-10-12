@@ -207,13 +207,19 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
-    # FURINA, THE POOL TO 75 (2026-10-09): Ensemble Cast's face is the sheet's
-    # `description:` ("You have 4 guest seats."), which cannot interpolate a
-    # C# constant; its power's badge interpolates `EnsembleSeats`, and
-    # `FurinaGuestRuleTests` pins the seat count.
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsEnsembleCast.cs",
-     "FurinaStageLaw.EnsembleSeats", "4"):
-        "the sheet-authored face of the card the constant is the rule of",
+    # DROPPED 2026-10-11 (the diversity pass), reported stale by the lint:
+    # Ensemble Cast's face ("You have 4 guest seats. Summon a random guest.")
+    # no longer reads as a lone match once the corpus moved.
+    # FURINA, THE DIVERSITY PASS (2026-10-11): Tutti! and Final Bow draw 1
+    # card as their floor, the base game's "Draw 1 card." -- a card's own
+    # draw, not Charlotte's line. "draw" fell under the common-word cap when
+    # the pass cut two draw cards.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
+     "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "the card's own base-game draw, not Charlotte's line",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
+     "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "the card's own base-game draw, not Charlotte's line",
     # DROPPED by `EB-345` (R249), and by the lint reporting it stale, which is
     # the whole point of it reporting stale entries. The entry excused True
     # Spark Knight's "for your Attacks to cost 0 (minimum 1)": the shipped

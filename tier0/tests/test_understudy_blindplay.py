@@ -6560,7 +6560,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                         "damage to a random enemy. Act: deal "],
         "Lynette": ["The first time each turn an enemy makes you lose HP, "
                     "gain that ", " again. Act: deal ",
-                    " damage to an enemy with an aura."],
+                    " damage to an enemy, one with an aura if "],
         "Clorinde": ["Whenever you ", ", deal twice that much ",
                      " damage to a random enemy."],
         # VARKA (the Oath rework): the leading prose of each tip, before

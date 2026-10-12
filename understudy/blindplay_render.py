@@ -2556,7 +2556,8 @@ def _stage_act_effect(row: dict[str, Any]) -> str:
         element = STAGE_MEMBER_ELEMENTS.get(member, "")
         to = (" to ALL enemies" if member in STAGE_ALL_MEMBERS
               else f" to {row['target']}" if row.get("target")
-              else " to an enemy with an aura" if member == "lynette"
+              else " to an enemy, one with an aura if able"
+              if member == "lynette"
               else " to a random enemy")
         return f": {n}{' ' + element if element else ''} damage{to}"
     return STAGE_LOG_EFFECTS[kind].format(n=n)

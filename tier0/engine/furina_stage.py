@@ -99,6 +99,8 @@ HYMN_THRESHOLD = T.HYMN_THRESHOLD
 PRIMA_DONNA_FANFARE = T.PRIMA_DONNA_FANFARE
 REGINA_DRAIN = T.REGINA_DRAIN
 STAR_TURN_FANFARE_PER = T.STAR_TURN_FANFARE_PER
+BRAVURA_SPENT_PER = T.BRAVURA_SPENT_PER
+PACKED_HOUSE_FANFARE_PER = T.PACKED_HOUSE_FANFARE_PER
 
 #: The eleven guests, as the sheet's `stage_guest` names them: the slice's
 #: four, the pool to 39's three and the pool to 75's four.
@@ -134,6 +136,10 @@ PNEUMA_TIDES = "fs_pneuma_tides"
 HYMN_OF_RENEWAL = "fs_hymn_of_renewal"
 # The block gap (2026-10-09): 1 a copy.
 THE_MASQUERADE = "fs_the_masquerade"
+# The diversity pass (2026-10-11): Leading Lady 1 a copy (its Strength is the
+# base game's), Full House its "Spend up to" cap (4, 6 upgraded).
+LEADING_LADY = "fs_leading_lady"
+FULL_HOUSE = "fs_full_house"
 
 #: The slice's Power keys (`furina_tide.Ftd.powers`) to the arm's ids.
 ARM_POWER_IDS = {
@@ -157,6 +163,9 @@ ARM_POWER_IDS = {
     "hymn_of_renewal": HYMN_OF_RENEWAL,
     # The block gap.
     "masquerade": THE_MASQUERADE,
+    # The diversity pass.
+    "leading_lady": LEADING_LADY,
+    "full_house": FULL_HOUSE,
 }
 
 # ----------------------------------------------------------------------
@@ -175,7 +184,10 @@ STARTER_IDS: tuple[str, ...] = (
 #: 41 (`review/active/furina-pool-growth-2026-10-09.md` sec.5), in the C#
 #: roster's order (`FurinaStageRoster.Pool`), less Endless Waltz (cut
 #: 2026-10-09, with Standing Ovation moved to Uncommon), and the block gap's
-#: four (ruled 2026-10-09): 20 Common, 37 Uncommon, 21 Rare, 78.
+#: four (ruled 2026-10-09), and the diversity pass (ruled 2026-10-11:
+#: Headliner, Leading Lady, Full House and Packed House in; Gentle Current,
+#: Surging Waters, Pay the Tab and Sold Out out): 23 Common, 35 Uncommon,
+#: 20 Rare, 78.
 POOL_IDS: tuple[str, ...] = (
     # Drain (five).
     "proto_fs_mademoiselle_crabaletta",
@@ -184,7 +196,6 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_leading_lady",              # Gentilhomme Usher
     "proto_fs_salons_tab",
     # Repay (four).
-    "proto_fs_surging_waters",
     "proto_fs_hymn_of_many_waters",
     "proto_fs_pneuma_refrain",
     "proto_fs_singer_of_many_waters",
@@ -236,7 +247,6 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_bubble_aria",
     "proto_fs_commanding_gaze",
     "proto_fs_star_turn",
-    "proto_fs_sold_out",
     "proto_fs_crescendo",
     "proto_fs_prima_donna",
     "proto_fs_standing_room_only",
@@ -246,7 +256,6 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_overdraft",
     "proto_fs_ousia_pledge",
     "proto_fs_against_the_tide",
-    "proto_fs_pay_the_tab",
     "proto_fs_riptide_lunge",
     "proto_fs_high_stakes",
     "proto_fs_regina_of_all_waters",
@@ -254,7 +263,6 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_all_in",
     # Pneuma, Repay (10).
     "proto_fs_soothing_waters",
-    "proto_fs_gentle_current",
     "proto_fs_clean_slate",
     "proto_fs_hydro_lance",
     "proto_fs_cleansing_torrent",
@@ -271,6 +279,12 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_private_box",
     "proto_fs_the_masquerade",
     "proto_fs_the_show_must_go_on",
+    # The diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
+    # ruled 2026-10-11): 2 Common, 2 Uncommon.
+    "proto_fs_headliner",
+    "proto_fs_the_leading_lady",          # Leading Lady
+    "proto_fs_the_full_house",            # Full House
+    "proto_fs_packed_house",
 )
 
 #: The loader's older seams, empty since the slice: nothing is substituted
@@ -507,6 +521,28 @@ def spent_fours(spent: int) -> int:
     return max(0, int(spent)) // SPEND_UP_TO_EVERY
 
 
+def spent_threes(spent: int) -> int:
+    """`stage_spent_threes`: a play's spend in threes, rounded down
+    (Bravura's "for every 3 spent"; the C# `FurinaStage.SpentThrees`)."""
+    return max(0, int(spent)) // BRAVURA_SPENT_PER
+
+
+def fanfare_fives(player) -> int:
+    """`stage_fanfare_fives`: her Fanfare in fives, rounded down (Packed
+    House's "plus 1 for every 5 Fanfare you have"; the C#
+    `FurinaStage.FanfareFives`)."""
+    return fanfare(player) // PACKED_HOUSE_FANFARE_PER
+
+
+def leading_lady_bonus(state) -> int:
+    """Leading Lady (the diversity pass, 2026-10-11): "Your Attacks deal 1
+    more damage for each guest on stage." Copies add. 0 off Furina. The C#
+    twin is `LeadingLadyPower.ModifyDamageAdditive`."""
+    if not active(state.player):
+        return 0
+    return T._player_power(state.player, "leading_lady") * count(state.player)
+
+
 def gain(state, amount: int, source: str = "card") -> None:
     if active(state.player):
         T.gain(state, int(amount), source)
@@ -539,8 +575,13 @@ def guest_star(state, member: str, upgraded: bool = False,
 # ----------------------------------------------------------------------
 KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest",
          # The block gap (2026-10-09): Velvet Curtain's "Gain 2 Fanfare".
-         "gain_fanfare")
-KIND_AMOUNT = ("final_bow", "gain_fanfare")
+         "gain_fanfare",
+         # The diversity pass (2026-10-11): Ensemble Cast's "Summon a random
+         # guest".
+         "summon_random")
+#: Casting Call's `tutor_guest` carries its floor's draw ("If you can't,
+#: draw 2 cards"; the diversity pass, 2026-10-11).
+KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest")
 
 
 def validate_op(card_id: str, fx: dict) -> None:
@@ -574,7 +615,11 @@ def kind(state, fx: dict, card) -> None:
         if state.player.ftd.stage:
             T.final_bow(state, T._decider_bow(state), int(fx["amount"]))
     elif k == "tutor_guest":
-        T.tutor_guest(state)
+        # "If you can't, draw 2 cards." (the diversity pass, 2026-10-11)
+        if not T.tutor_guest(state) and not state.over:
+            state.draw(int(fx["amount"]))
+    elif k == "summon_random":
+        T.summon_random(state)
     elif k == "gain_fanfare":
         # The ledger's gain, the path Universal Revelry's gain takes.
         T.gain(state, int(fx["amount"]), "card")
@@ -717,7 +762,14 @@ READINGS: tuple[str, ...] = (
     "Final Bow's guest is the decider's pick; the sim's default is the guest "
     "with the biggest act, the oldest on a tie.",
     "Casting Call takes the first Guest Star in the draw pile whose guest is "
-    "not on stage, else the first (the C# asks the player).",
+    "not on stage, else the first (the C# asks the player); with none it "
+    "draws 2 (2026-10-11).",
+    "Ensemble Cast's random guest is one not already on stage, unupgraded, "
+    "with no card held; with all eleven on stage it summons nothing "
+    "(2026-10-11).",
+    "Full House Spends once per act that deals damage, before the hit, and "
+    "adds what it spent to each hit of that act (an act to ALL adds it to "
+    "every enemy); copies add their caps into one Spend (2026-10-11).",
     "Showstopper Spends only when a guest is on stage and the bank holds the "
     "price; each copy is its own Spend and its own round of acts.",
     "Navia's discount is the first Spend each turn (a Spend made before she "
@@ -731,12 +783,13 @@ READINGS: tuple[str, ...] = (
     "first Spend; each guest takes its share of what is left, oldest first, "
     "and again after Showstopper.",
     "Escoffier's line answers every act, his own included.",
-    "Regina drains first at turn start, then Fountain of Lucine, Gentle "
-    "Current and Pneuma Tides Repay, then Prima Donna reads the Fanfare.",
+    "Regina drains first at turn start, then Fountain of Lucine and Pneuma "
+    "Tides Repay, then Prima Donna reads the Fanfare.",
     "Salon Solitaire's Repay comes after the guests act, at the end of her "
     "turn.",
     "Charlotte's line counts the Singer's end-of-turn Repay: with no Repay "
     "earlier in the turn, it draws then.",
-    "Lynette's act hits nothing when no enemy wears an aura.",
+    "Lynette's act hits a random enemy with an aura, or a random enemy when "
+    "none wears one (2026-10-11; it hit nothing before).",
     "The curtain call is not a Repay: no Fanfare and no Repay reader.",
 )

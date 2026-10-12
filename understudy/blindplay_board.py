@@ -1149,7 +1149,7 @@ def spend_unavailable(text: str, stage: dict[str, Any] | None,
 #: when the observation is built: a raw kind such as `random_aura` is a
 #: snake_case token the blindness check refuses (2026-09-26).
 STAGE_TARGET_WORDS = {"all": "ALL enemies", "random": "a random enemy",
-                      "random_aura": "an enemy with an aura"}
+                      "random_aura": "an enemy, one with an aura if able"}
 
 
 def _stage_target(value: Any) -> str:

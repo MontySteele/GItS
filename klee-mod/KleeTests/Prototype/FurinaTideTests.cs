@@ -627,7 +627,7 @@ public class FurinaTideTests
                      (new ProtoFsCurtainRise(), "StageDrainLine"),
                      (new ProtoFsSalonsTab(), "StageDrainLine"),
                      (new ProtoFsMademoiselleCrabaletta(), "StageDrainLine"),
-                     (new ProtoFsSurgingWaters(), "StageRepay"),
+                     (new ProtoFsHymnOfManyWaters(), "StageRepay"),
                      (new ProtoFsSingerOfManyWaters(), "StageRepay"),
                  })
         {
@@ -836,7 +836,7 @@ public class FurinaTideTests
         // conditional Repays included.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoFsGentleCurrent(), new ProtoFsPneumaTides(),
+                     new ProtoFsPneumaTides(),
                      new ProtoFsFountainOfLucine(), new ProtoFsGrandEntrance(),
                      new ProtoFsRiptideLunge(), new ProtoFsSoothingWaters(),
                      new ProtoFsHymnOfManyWaters(),

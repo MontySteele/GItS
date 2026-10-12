@@ -151,46 +151,49 @@ public class FurinaSpendAllPreviewWeakTests
         return var.PreviewValue;
     }
 
-    /// <summary>Bravura's formula at the seat's Fanfare: 6 + 2 x 38.</summary>
-    private const decimal BravuraFormula = 6m + 2m * SeatFanfare;
+    /// <summary>Bring the House Down's formula at the seat's Fanfare: 0 + 1
+    /// x 38. (Bravura carried these pins until the diversity pass,
+    /// 2026-10-11, made it one hit of 7 for every 3 spent, which has no
+    /// calculated var.)</summary>
+    private const decimal HouseFormula = 0m + 1m * SeatFanfare;
 
     [Fact]
-    public void Bravura_in_hand_under_weak_2_previews_the_weakened_hit()
+    public void Bring_the_house_down_in_hand_under_weak_2_previews_the_weakened_hit()
     {
         InCombat(() =>
         {
-            var b = Build(new ProtoFsBravura(),
+            var b = Build(new ProtoFsBringTheHouseDown(),
                           f => f.WithPower<WeakPower>(2));
-            Assert.Equal(BravuraFormula,
+            Assert.Equal(HouseFormula,
                          b.Card.DynamicVars.CalculatedDamage.Calculate(null));
 
             var preview = Preview(b.Card, null, inHand: true);
 
-            // 82 x 0.75 = 61.5, printed 61: Weak folded, once.
-            Assert.Equal(61.5m, preview);
+            // 38 x 0.75 = 28.5, printed 28: Weak folded, once.
+            Assert.Equal(28.5m, preview);
             Assert.Equal(HitOrder.Compose(b.Furina.Creature, null,
-                                          BravuraFormula, ValueProp.Move,
+                                          HouseFormula, ValueProp.Move,
                                           b.Card),
                          preview);
-            Assert.NotEqual(BravuraFormula, preview);
+            Assert.NotEqual(HouseFormula, preview);
         });
     }
 
     [Fact]
-    public void Bravura_aimed_folds_strength_weak_and_the_targets_vulnerable()
+    public void Bring_the_house_down_aimed_folds_strength_weak_and_the_targets_vulnerable()
     {
         InCombat(() =>
         {
-            var b = Build(new ProtoFsBravura(),
+            var b = Build(new ProtoFsBringTheHouseDown(),
                           f => f.WithPower<WeakPower>(2).WithPower<StrengthPower>(3),
                           e => e.WithPower<VulnerablePower>(2));
 
             var preview = Preview(b.Card, b.Enemy, inHand: true);
 
-            // (82 + 3) x 0.75 x 1.5 = 95.625: the engine's order, one product.
-            Assert.Equal(95.625m, preview);
+            // (38 + 3) x 0.75 x 1.5 = 46.125: the engine's order, one product.
+            Assert.Equal(46.125m, preview);
             Assert.Equal(HitOrder.Compose(b.Furina.Creature, b.Enemy,
-                                          BravuraFormula, ValueProp.Move,
+                                          HouseFormula, ValueProp.Move,
                                           b.Card),
                          preview);
         });
@@ -222,11 +225,11 @@ public class FurinaSpendAllPreviewWeakTests
         // CalculatedDamageVar, unchanged by this mod.
         InCombat(() =>
         {
-            var b = Build(new ProtoFsBravura(),
+            var b = Build(new ProtoFsBringTheHouseDown(),
                           f => f.WithPower<WeakPower>(2), inHand: false);
             Assert.Equal(PileType.Draw, b.Card.Pile!.Type);
 
-            Assert.Equal(BravuraFormula, Preview(b.Card, null, inHand: false));
+            Assert.Equal(HouseFormula, Preview(b.Card, null, inHand: false));
         });
     }
 }

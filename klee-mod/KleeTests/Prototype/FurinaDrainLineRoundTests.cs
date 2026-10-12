@@ -48,10 +48,8 @@ public class FurinaDrainLineRoundTests
                  {
                      ("ProtoFsFountainOfLucine", "PayBlock"),
                      ("ProtoFsHymnOfManyWaters", "PayBlock"),
-                     ("ProtoFsGentleCurrent", "PayBlock"),
                      ("ProtoFsGrandEntrance", "PayBlock"),
                      ("ProtoFsPneumaTides", "PayVigor"),
-                     ("ProtoFsSurgingWaters", "PayDamage"),
                      ("ProtoFsHydroLance", "PayDamage"),
                      ("ProtoFsCleansingTorrent", "PayDamage"),
                  })

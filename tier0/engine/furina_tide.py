@@ -184,6 +184,10 @@ HYMN_THRESHOLD = 4                 # Hymn of Renewal: a Repay of 4 or more HP
 PRIMA_DONNA_FANFARE = 10           # Prima Donna: 10 or more Fanfare
 REGINA_DRAIN = 3                   # Regina of All Waters: Drain 3
 STAR_TURN_FANFARE_PER = 6          # Star Turn: 1 less per 6 Fanfare
+# The diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
+# ruled 2026-10-11).
+BRAVURA_SPENT_PER = 3              # Bravura: a hit for every 3 spent
+PACKED_HOUSE_FANFARE_PER = 5       # Packed House: +1 for every 5 Fanfare
 
 
 def _new_ledger() -> dict:
@@ -1295,18 +1299,25 @@ def _act(state, member: str) -> None:
         repay_floor(state, n, "block")
     elif member == "wriothesley":
         if living:
+            n += full_house(state)
             _hit(state, state.rng.choice(living), n, "cryo")
     elif member == "lynette":
+        # "Deal 3 Anemo damage to an enemy, one with an aura if able." (the
+        # diversity pass, 2026-10-11: with no aura it hit nothing before).
         aura = [e for e in living if getattr(e, "aura", None)]
-        if aura:
-            _hit(state, state.rng.choice(aura), n, "anemo")
+        pool = aura or living
+        if pool:
+            n += full_house(state)
+            _hit(state, state.rng.choice(pool), n, "anemo")
     elif member == "clorinde":
         if living:
+            n += full_house(state)
             _hit(state, state.rng.choice(living), n, "electro")
     elif member == "neuvillette":
         # The HP she lost since her last turn, Drained or taken (2026-10-09).
         dmg = f.hp_lost_window
-        if dmg > 0:
+        if dmg > 0 and living:
+            dmg += full_house(state)
             for enemy in living:
                 _hit(state, enemy, dmg, "hydro")
     elif member == "lyney":
@@ -1317,11 +1328,13 @@ def _act(state, member: str) -> None:
         room = guest_drain_room(state, LYNEY_ACT_DRAIN)
         if room > 0:
             drain(state, room)
-        if not state.over and p.alive:
+        if not state.over and p.alive and state.living_enemies:
+            n += full_house(state)
             for enemy in list(state.living_enemies):
                 _hit(state, enemy, n, "pyro")
     elif member == "chevreuse":
         if living:
+            n += full_house(state)
             _hit(state, state.rng.choice(living), n, None)
     elif member == "freminet":
         # "Gain 3 Block. Spend a quarter of your Fanfare (rounded down): gain
@@ -1339,14 +1352,46 @@ def _act(state, member: str) -> None:
         dmg = spend_share(state, NAVIA_SPEND_DIVISOR)
         living = state.living_enemies
         if dmg > 0 and living and not state.over:
+            dmg += full_house(state)
             _hit(state, state.rng.choice(living), dmg, "geo")
     elif member == "escoffier":
+        if living:
+            n += full_house(state)
         for enemy in living:
             _hit(state, enemy, n, "cryo")
     state.emit("ftd_act", member=member)
     if "escoffier" in f.stage and not state.over and p.alive:
         _line(state, "escoffier", ESCOFFIER_LINE_REPAY)
         repay(state, ESCOFFIER_LINE_REPAY)
+
+
+def full_house(state) -> int:
+    """Full House (the diversity pass, 2026-10-11): "Whenever a guest's act
+    deals damage, Spend up to 4: it deals that much more." [6] Called once
+    by an act about to deal damage; copies add their caps into one Spend (a
+    Spend like any, so Thunderous Applause, Chevreuse and Crescendo answer
+    it). Returns what it spent, the act's extra damage a hit. The C# twin is
+    `StageDirector.FullHouse`."""
+    cap = _player_power(state.player, "full_house")
+    if cap <= 0 or state.over or not state.player.alive:
+        return 0
+    return spend_up_to(state, cap)
+
+
+def summon_random(state) -> str | None:
+    """Ensemble Cast (the diversity pass, 2026-10-11): "Summon a random
+    guest." One of the eleven not on stage, unupgraded, with no card held;
+    none left, nothing. Returns who came. The C# twin is
+    `FurinaStage.SummonRandom`."""
+    f = _f(state)
+    if state.over or not state.player.alive:
+        return None
+    absent = [m for m in GUESTS if m not in f.stage]
+    if not absent:
+        return None
+    member = state.rng.choice(absent)
+    summon(state, member)
+    return member
 
 
 def summon(state, member: str, upgraded: bool = False, card=None) -> str:

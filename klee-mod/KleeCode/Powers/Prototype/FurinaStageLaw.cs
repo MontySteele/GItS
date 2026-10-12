@@ -227,6 +227,17 @@ public static class FurinaStageLaw
     /// counts).</summary>
     public static bool NearTheLine(int hp, int line) => hp - line <= NearLine;
 
+    // ---- the diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
+    // ruled 2026-10-11) -----------------------------------------------------
+
+    /// <summary>Bravura: "Deal 7 Hydro damage for every 3 spent." Mirrors
+    /// <c>furina_stage.BRAVURA_SPENT_PER</c>.</summary>
+    public const int BravuraSpentPer = 3;
+
+    /// <summary>Packed House: "plus 1 for every 5 Fanfare you have."
+    /// Mirrors <c>furina_stage.PACKED_HOUSE_FANFARE_PER</c>.</summary>
+    public const int PackedHouseFanfarePer = 5;
+
     /// <summary>
     /// Rule 1: THE DRAIN BUFFER (2026-10-11; [USER]: "There should be a
     /// buffer for drain equal to 1/4 my max HP which should be restore-able,

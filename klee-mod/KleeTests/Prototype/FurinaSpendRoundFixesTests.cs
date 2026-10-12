@@ -255,7 +255,8 @@ public class FurinaSpendRoundFixesTests : IDisposable
             .Contains("below your Drain line"));
         var refusing = files.Count(f => File.ReadAllText(f)
             .Contains(": \"it would take you to 0 HP\";"));
-        Assert.True(refusing >= 11, $"{refusing} fixed-Drain refusals");
+        // 10 since the diversity pass (2026-10-11) cut Pay the Tab.
+        Assert.True(refusing >= 10, $"{refusing} fixed-Drain refusals");
         Assert.Contains(": \"it would take you to 0 HP\";",
                         Generated("ProtoFsOverdraft"));
     }

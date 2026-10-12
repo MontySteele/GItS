@@ -397,6 +397,10 @@ def _runtime_count(state: CombatState, token: str,
     # `FurinaStage.SpentFours`).
     if token == "stage_spent_fours":
         return furina_stage.spent_fours(state.stage_spent_this_card)
+    # The diversity pass (2026-10-11): Bravura's "for every 3 spent" (the C#
+    # `FurinaStage.SpentThrees`).
+    if token == "stage_spent_threes":
+        return furina_stage.spent_threes(state.stage_spent_this_card)
     # THE POOL TO 75 (2026-10-09): Undercurrent's, Balance the Books',
     # Rising Tide's and Grand Absolution's counts (`furina_stage`'s readers;
     # the C# `FurinaStage` twins). 0 for anyone else.
@@ -419,6 +423,10 @@ def _runtime_count(state: CombatState, token: str,
         return furina_stage.count(p)
     if token == "stage_fanfare":
         return furina_stage.fanfare(p)
+    # The diversity pass (2026-10-11): Packed House's "for every 5 Fanfare"
+    # (the C# `FurinaStage.FanfareFives`).
+    if token == "stage_fanfare_fives":
+        return furina_stage.fanfare_fives(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -3370,6 +3378,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     "stage_spent",
     # The Spend paper (2026-10-10).
     "stage_spent_fours",
+    # The diversity pass (2026-10-11).
+    "stage_spent_threes", "stage_fanfare_fives",
     # THE POOL TO 75 (2026-10-09).
     "stage_drains", "stage_drained", "stage_repays_turn",
     "stage_repaid",
@@ -5408,6 +5418,10 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # [every 4]. A pure read of her net drained HP; 0 for anyone else. The
     # C# twin is `HighStakesPower.ModifyDamageAdditive`.
     bonus += furina_stage.high_stakes_bonus(state)
+    # FURINA'S LEADING LADY (the diversity pass, 2026-10-11): "Your Attacks
+    # deal 1 more damage for each guest on stage." The C# twin is
+    # `LeadingLadyPower.ModifyDamageAdditive`.
+    bonus += furina_stage.leading_lady_bonus(state)
     # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
     # power bonuses", kickoff §4). Reads the pool, spends nothing.
     n = p.powers.get("fanfare_attack_per10", 0)
