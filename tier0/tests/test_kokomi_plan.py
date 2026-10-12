@@ -972,35 +972,6 @@ def companion_card(cid="proto_kk_ally"):
     return Card(id=cid, name="ally", cost=1, type="skill", role_c="applier")
 
 
-def test_the_generals_banner_weaks_the_front_enemy_once_a_turn(overhaul):
-    """[USER], live 2026-09-02: "The General's Banner applies a LOT of Weak.
-    Probably too strong." TWO Companion plays in one turn apply ONE Weak, and
-    the next turn applies one more -- a cap, not a one-shot.
-
-    The front enemy is `front_enemy`'s, the same reader a planned hit uses, so
-    "the front enemy" means one thing in this arm and is defined once."""
-    front, back = make_enemy(name="front"), make_enemy(name="back")
-    st = kokomi_state(enemies=[front, back])
-    st.player.powers[kokomi_plan.GENERALS_BANNER] = 1
-    card = companion_card()
-    kokomi_plan.note_companion_played(st, card)
-    kokomi_plan.note_companion_played(st, card)
-    assert front.powers["weak"] == 1
-    assert "weak" not in back.powers
-
-    kokomi_plan.roll_turn(st)
-    kokomi_plan.note_companion_played(st, card)
-    assert front.powers["weak"] == 2
-
-
-def test_the_banner_ignores_a_card_that_is_not_a_companion(overhaul):
-    enemy = make_enemy()
-    st = kokomi_state(enemies=[enemy])
-    st.player.powers[kokomi_plan.GENERALS_BANNER] = 1
-    kokomi_plan.note_companion_played(st, plan_card([]))
-    assert "weak" not in enemy.powers
-
-
 # --- 10. RALLY AND CLEANSING WAVE ------------------------------------------
 
 def test_cleansing_wave_removes_the_first_standing_debuff(overhaul):
@@ -1840,37 +1811,6 @@ def test_change_of_plans_neither_sets_nor_consumes_a_rider(overhaul):
     assert enemy.hp == 200 - 13
 
 
-# --- Scout Ahead ----------------------------------------------------------
-
-def scout_cards(state):
-    """`EB-718`. WHAT SCOUT AHEAD ACTUALLY DREW in a drain: the card is paid at
-    every later CARRY-OUT rather than once off a count, so the pin is the sum
-    and not one event's figure."""
-    return sum(e["cards"] for e in state.log
-               if e["event"] == "plan_scout_ahead")
-
-
-def test_the_whole_drain_count_is_kept_resolved_on_no_row(overhaul):
-    """R267 pick 3. `draw_per_plan_this_turn` is `EB-679`'s spelling and no
-    row spells it now. It stays REGISTERED and RESOLVED the way `scry_bottom`
-    and `redirect_queued_plans` are, so a sheet can reach for it without a
-    build: three entries, itself included, is 3."""
-    assert kokomi_plan.DRAW_PER_PLAN_THIS_TURN in kokomi_plan.PLAN_KINDS
-    assert not [c for c in loader.prototype_cards()
-                if any(cl.get("op") == kokomi_plan.DRAW_PER_PLAN_THIS_TURN
-                       for cl in (c.plan or []))]
-    st = kokomi_state()
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": kokomi_plan.DRAW_PER_PLAN_THIS_TURN, "amount": 1}],
-        cid="proto_kk_scout"))
-    for i in range(2):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_p{i}"))
-    kokomi_plan.resolve_all(st)
-    drew = [e for e in st.log if e["event"] == "plan_scout_ahead"]
-    assert [e["cards"] for e in drew] == [3]
-
-
 # --- Second Thoughts ------------------------------------------------------
 
 # --- Ebb Tide -------------------------------------------------------------
@@ -2293,8 +2233,7 @@ def test_the_cap_defaults_to_unlimited(overhaul):
 
 def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
     """A now-line spelling would name a drain that is not running."""
-    for op in (kokomi_plan.DRAW_PER_PLAN_THIS_TURN,
-               kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE,
+    for op in (kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE,
                kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT):
         assert op in kokomi_plan.PLAN_ONLY_OPS
         with pytest.raises(NotImplementedError, match="PLAN-ONLY"):

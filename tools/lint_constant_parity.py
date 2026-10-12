@@ -145,7 +145,8 @@ MIRRORED: dict[str, object] = {
     # it visible here.
 
     # Klee.
-    "CompanionConstants.MasqueBondBlock": C.MASQUE_BOND_BLOCK,
+    "CompanionConstants.MasqueHpLoss": C.MASQUE_HP_LOSS,
+    "CompanionConstants.AncientSeaDamage": C.ANCIENT_SEA_DMG,
     "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
 
     # Furina.
@@ -193,7 +194,6 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.GlacialWaltzDamage": C.MC_GLACIAL_WALTZ_DMG,
     "CompanionOverhaulLaw.IsotomaDamage": C.MC_ISOTOMA_DMG,
     "CompanionOverhaulLaw.IsotomaBlock": C.MC_ISOTOMA_BLOCK,
-    "CompanionOverhaulLaw.DandelionBreezeBlock": C.MC_DANDELION_BREEZE_BLOCK,
     "CompanionOverhaulLaw.OzDamage": C.MC_OZ_DMG,
     "CompanionOverhaulLaw.RevelationBlock": C.MC_REVELATION_BLOCK,
     "CompanionOverhaulLaw.RevelationStrength": C.MC_REVELATION_STRENGTH,
@@ -381,6 +381,9 @@ UNMIRRORED: dict[str, str] = {
     "CloverCharm.Block": _ARM_ITEMS_REASON,
     "DodocoArmy.MineSize": _ARM_ITEMS_REASON,
     "DodocoCharm.Bonus": _ARM_ITEMS_REASON,
+    # THE KLEE SCALING PASS (klee-next, 2026-10-05, sec.4 D): the tempo
+    # relic's start-of-combat Bomb, a staging-only test relic.
+    "PoundingSurpriseNext.OpeningBomb": _ARM_ITEMS_REASON,
     "ExplosiveFrags.FirstExplosionSparks": _ARM_ITEMS_REASON,
     "FireworksStand.Energy": _ARM_ITEMS_REASON,
     "FireworksStand.Threshold": _ARM_ITEMS_REASON,

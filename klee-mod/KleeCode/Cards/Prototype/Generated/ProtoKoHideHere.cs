@@ -47,7 +47,7 @@ public sealed class ProtoKoHideHere : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hide Here!"),
-        ("description", "Another player gains [gold]Block[/gold] equal to your largest [gold]Bomb[/gold], up to {BombCap:diff()}."),
+        ("description", "Another player gains [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] on any enemy, up to {BombCap:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

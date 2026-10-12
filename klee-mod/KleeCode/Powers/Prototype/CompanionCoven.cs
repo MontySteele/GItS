@@ -46,7 +46,7 @@ public static class CompanionCovenLaw
 {
     /// <summary>Qiqi, Herald of Frost: Block at the start of each turn.
     /// Mirrors <c>C.CVN_HERALD_BLOCK</c>.</summary>
-    public const int HeraldBlock = 3;
+    public const int HeraldBlock = 4;
 
     /// <summary>Qiqi, Herald of Frost: "apply Cryo twice".
     /// Mirrors <c>C.CVN_HERALD_APPLICATIONS</c>.</summary>

@@ -6640,6 +6640,47 @@ Two changes after the seat round (`review/records/kokomi-review-round-2026-10-05
 - Tide Wall's Plan now says "plus the damage the enemy intends next turn." Wording only, no op change: the seat read the intent on screen and took the Plan as this turn's, but it is carried out next turn.
 - Sea Glass Harvest's now-line Block 6 [7] -> 8 [11]. Two seats named it NEVER AGAIN: 6 Block with nothing to transform. 8 [11] is Coral Bulwark's Common rate. The Plan is unchanged. Prediction: no NEVER AGAIN next round.
 
+## Klee scaling pass, 2026-10-05
+
+Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-measurement-2026-10-05.md` sec.6). Paper: `review/active/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its defaults.
+
+- `proto_ko_secret_base`, v3 (replaces sec.4 A's "Your Bombs are placed 3 [4] bigger", whose placement bonus and card-face fold are removed, so faces print their own numbers again): "At the start of your turn, place a Bomb 4 [6] on a random enemy." 1-cost Uncommon Power; the upgrade raises 4 to 6. Copies add like Noxious Fumes (two copies place one Bomb 8, 12 upgraded). Placed after the start-of-turn growth, so it shows 4 when she acts, through the expansion's start-of-turn sequencer (after the echo, before Dodoco's Mine) and the ordinary placement path Pop! uses; a random living enemy, none means nothing.
+- `proto_ko_boom_badge`: Retain, and "Does not stack." -- x2 whatever the stack (sec.4 C).
+- `proto_ko_witchs_homework_next` (new, grant-only, `C.STAGING_GRANT_IDS`): "Place a Bomb 6. When it goes off, this card's Bomb is 2 [3] larger for the rest of the run." Exhaust (sec.4 B). Titled "Witch's Homework II" because titles are unique (`lint_prototype_titles`); the pool's Witch's Homework is unchanged.
+
+## Klee tempo paper, 2026-10-07
+
+Staging branch `klee-next`. Paper `review/active/klee-tempo-paper-2026-10-07.md` sec.3, ruled 2026-10-07. [USER]: "I personally found Blast Shield and Kitchen Alchemy quite useful in my runs, so I'm not sure I buy that they should go. Otherwise agreed." Klee is slow (act-3 turn-one damage 9 to the base five's 62) and her Block pays for it; each engine gets its missing damage. Five out, five in; the pool stays **78 (25 / 32 / 21)**. Built in both engines.
+
+- **Out:** `proto_ko_it_wasnt_me` (C), `proto_ko_sorry_jean` (C), `proto_ko_grounded` (U Power), `proto_ko_sit_tight` (U), `proto_ko_patience_klee` (U, "Experiment in Progress"). Painted art `KNOWN_STALE`; card pins removed or moved onto Favonius Escort (the same `remove_bomb_for_block` verb). Their powers stay registered (BACKLOG).
+- **In, after the status package in `C.KLEE_TEMPO_IDS` and `Slice()`:**
+  - `proto_ko_simmer`, Simmer (Common Attack, 1): "Deal 4 [6] Pyro damage, plus half your largest Bomb's size. It does not go off. Add a Dazed into your Discard Pile." Cook's Common hit that leaves the Bomb cooking.
+  - `proto_ko_taste_test`, Taste Test (Uncommon Attack, 2): "Deal Pyro damage equal to all your Bombs on the enemy. They do not go off. Add 2 [1] Confiscated into your Discard Pile." Set against Red Knight (2 Energy, 34, two Confiscated).
+  - `proto_ko_tinkering`, Tinkering (Uncommon Skill, 0): "Gain 2 [3] Sparks. Add a Confiscated into your Discard Pile." The kit's second row allowed to mint Sparks without an explosion (rule-4 pins name it beside Flash Point).
+  - `proto_ko_dodoco_tag`, Dodoco Tag (Uncommon Attack, 1): "Deal 7 [10] Pyro damage. Gain 5 [7] Block. Add a Dazed into your Discard Pile."
+  - `proto_ko_explosive_spark`, Explosive Spark (Common Attack, 0, 1 Spark): "Deal 12 [16] Pyro damage." (12 [16] ruled mid-build over the paper's 7 [10].)
+
+**Readings:**
+
+1. *The read.* New op `damage_from_bombs` (`read: largest | target_total`; `largest_half` until the Klee Commons pass, 2026-10-11, `amount` the flat part). C# `ProtoBombPower.DealFromBombs` / `BombReadDamage` (`Powers/Prototype/ProtoBombPowerTempo.cs`), sim `effects._op_damage_from_bombs`. `largest_half` is the largest single charge of hers on the living board (`LargestSizeFor`, Sparks 'n' Splash's read), halved and rounded down, the hit landing on the aimed enemy; `target_total` is every charge of hers on the aimed enemy, Mines included (`TotalPlacedBy`). Nothing goes off: no Spark, no Mine answer, no explosion counter.
+2. *The hit is the card's.* One `DamageCmd.Attack` from the card (`DealCardDamage`), so Pyro, the reaction, Strength, Weak and Vulnerable land as on any other Attack of hers; a read of zero deals nothing. Simmer's flat 4 owns the `Damage` var (`bomb_read_damage_var_effect`; sim `damage` delta bumps it third, after `damage` and a Set off's own hit).
+3. *Two upgrade keys newly printable on an authored face:* `spark` (Tinkering's "Gain {Sparks}") and `cards` on a named token (Taste Test's "Add {Stash} Confiscated"; the token loop reads the Stash var).
+4. *Taste Test's face says "Pyro".* The paper's text is "Deal damage equal to all your Bombs on the enemy."; `lint_element_text` requires a hit that applies an element to name it (the 2026-10-02 co-op ruling), so the face reads "Deal [gold]Pyro[/gold] damage equal to ...".
+
+
+## Klee design review, 2026-10-08
+
+Staging branch `klee-next`. Paper `review/active/klee-design-review-2026-10-08.md`, ruled 2026-10-08, all five picks at the defaults. [USER]: "Nope, this all looks good. I'm now in agreement with all picks." The starter is not the root; rule 1 made waiting free and rule 4 left the Spark cards dead on turn one. No starter change. Built in both engines.
+
+- **Rule 1 (sec.4.6):** Bomb growth 4 to **2** a turn. `C.KLEE_OVERHAUL_BOMB_GROWTH`, `KleeOverhaulLaw.BombGrowth`, `understudy/blindplay_shape.BOMB_GROWTH`; the Bomb tip interpolates the constant. Alice's Recipe still doubles it (4).
+- **Rule 4 (sec.4.6):** opening Sparks 1 to **3**. `C.KLEE_OVERHAUL_OPENING_SPARK`, `KleeOverhaulLaw.OpeningSpark`, `blindplay_shape.OPENING_SPARK`; the Spark tip interpolates it. Pounding Surprise's text does not move; Explosive Frags' own 4 stacks on top (7).
+- **Every drafted placer +2, base and upgraded (sec.4.2):** the upgrade deltas are unchanged, so the upgraded face moves by 2 as well. Mine Toss 7 to 9; Boom-Boom Strike's Bomb 4 to 6; Lizard-Tail Gunpowder 4 to 6; Booby Trap 5 to 7; Coven Errand 8 / 12 to 10 / 14; Little Hexenzirkel 3 to 5; Bombs Away! 4 to 6; Windtrace's Mine 3 to 5; Jumpy Dumpty Mk.III's per-hit Bomb 2 to 4; Mine, All Mine!'s Mine 4 to 6; Party Poppers 3 to 5; Klee's Secret Base 4 to 6; Windblume Fireworks' Bomb 6 to 8; Dodoco 3 to 5; Finders Keepers 4 to 6. Not moved: Jumpy Dumpty (starter, pick 4 (a)); the jumps and copies (Aftershock, All of My Treasures!); Return to Sender (its Bomb is the Block absorbed, no printed size); Pop! (off-pool) and the two new rows (their numbers are final); the co-op tier's Shrapnel and the staging-only Witch's Homework II, outside the 78.
+- **Out (sec.4.4):** `proto_ko_playdate` (C), row deleted with a CUT note, art `KNOWN_STALE`, `PlaydatePower` stays registered. `proto_ko_pop` (C) leaves `Slice()` and `C.KLEE_OVERHAUL_POOL_IDS` but keeps its row and class: Klee Can Explain! transforms statuses into it. New register `C.KLEE_OFF_POOL_ROW_IDS` (a row created at play and offered nowhere), skipped by `lint_arm_pool_parity` and `card_distinctness_report` as a staging row is.
+- **In (sec.4.5), after the tempo paper's in `C.KLEE_DESIGN_REVIEW_IDS` and `Slice()`:**
+  - `proto_ko_fire_fire`, Fire! Fire! (Common Attack, 1, Pyro): "Place a Bomb 7 [10] on the enemy. Set off the enemy." Her normal attack: a Spark and Bomb-typed damage every turn without cooking.
+  - `proto_ko_blasting_spree`, Blasting Spree (Common Skill, 1): "Place a Bomb 4 [6] on ALL enemies. Add a Dazed into your Discard Pile." Spray's fuel and the Spray half of the status bridge.
+  - Both are existing ops (`plant_bomb`, `set_off`, `add_card`). Art `KNOWN_MISSING`. The pool stays **78 (25 / 32 / 21)**.
+
 ## Varka payoff fix, 2026-10-08
 
 Paper: `review/active/varka-payoff-fix-2026-10-08.md` (project review
@@ -7208,6 +7249,46 @@ trim. Agree on the rest."
   (`upgrade: {block: +2, stage_repay: +1}`); the "Gain 1 Block for any HP it
   could not Repay" floor stays. Most Block: 9, upgraded 12 (was 11, 15).
 - Sim twins in `tier0/engine/furina_tide.py` moved with the sheet.
+
+## Klee rulings, 2026-10-11
+
+Fish Blasting, Lisa's Treats, Confiscated, Tinder Toss, Alice's Detonator. [USER]'s rulings: "I think that Fish Blasting needs to give Dazed rather than Confiscated - Confiscated is too punishing - and I'm not sure if 8 aoe for 1 energy is actually worth punishing with Dazed"; "Lisa's Treats also underwhelmed; I rarely needed the energy."; "Actually, should we tag Confiscated with Exhaust? Currently we're using it as a drawback mechanism to load the deck but it builds over time."; "And agreed with a) on both." Landed on `klee-next` (Klee is frozen on `main`).
+
+- `proto_ko_fish_blasting` (C Attack, 1): "Deal 9 [12] Pyro damage to ALL enemies. Add a Dazed into your Discard Pile." Was 8 [11] and a Confiscated. The token is the base game's Dazed (`status_dazed`), as Forbidden Fun adds it. Base shape: Ironclad's Breakthrough (9 to ALL for 1, lose 1 HP).
+- `proto_ko_lisas_treats` (U Skill, 0): "Gain 2 [3] Energy. Add a Confiscated into your Discard Pile." Was two Confiscated. Base twin: Defect's Turbo (one Void).
+- `confiscated` (token, `tokens.yaml` `exhaust: true`; C# `Cards/Confiscated.cs` `CanonicalKeywords` Exhaust): the keyword the base game's Slimed carries (decompiled `MegaCrit.Sts2.Core.Models.Cards.Slimed`: cost 1, Status, `CardKeyword.Exhaust`). The face still reads "Does nothing."; the game appends "Exhaust." from the keyword. The Confiscated hover tip now ends "Exhaust.".
+- `proto_ko_tinder_toss` (C Attack, 0 plus 1 Spark): "Set off ALL enemies. Deal 5 [8] Pyro damage to ALL enemies." Was 3 [5]. [USER]: "Tinder Box also looks weak? ... having this deal 3 and AoE set off feels a little underwhelming for a draw."; on 5 [8]: "I'm good with a)". Base shape: Thunderclap (4 to ALL and Vulnerable to ALL for 1).
+- `proto_ko_alices_detonator` (R Power, 1): "At the start of your turn, add {IfUpgraded:show:an upgraded |}Alice's Mine to your hand." Was a Ka-pow!. [USER]: "I also wonder if Alice's Detonator is actually any good. In decks that want to cook, you can just keep your starting Ka-Pow! handy. In decks prioritizing rapid detonation, this still feels underwhelming, plus your discard pile fills up with Ka-Pow!'s. What about instead treating this like Necrobinder's Sentry Gaze and having it add a 0 cost card with Ethereal and Exhaust that adds a Mine for 10 (15 on upgrade)? Same damage rate at 1 energy lower, but the damage is delayed a turn." Copied from the decompiled `SentryModePower`: one card per stack at `BeforeHandDraw` (was `AfterPlayerTurnStart`), `CreateCard` then `AddGeneratedCardToCombat` to hand; sim `klee_overhaul.before_hand_draw`, called beside `refpowers.before_hand_draw`. The op is renamed `grant_alices_mine_each_turn` (was `grant_kapow_each_turn`), the preview `KleeExpansion.WithAlicesMinePreview`.
+- `proto_ko_alices_mine` (new, Token Skill, 0, Ethereal, Exhaust): "Place a Mine 10 [15] on an enemy." Sweeping Gaze's shape (`SweepingGaze`: 0, Token, Ethereal, Exhaust). Mine Toss's own op (`plant_bomb`, `mine: true`), so it merges and cooks as a Mine Toss Mine does. An off-pool row (`C.KLEE_OFF_POOL_ROW_IDS`, beside Pop!); the generator gained `rarity: token` (`CardRarity.Token`). The sim's upgrade index now reaches off-pool rows so Alice's Mine+ resolves (Pop! became smithable in the sim as it already was in C#). Art: Mine Toss's illustration (Krash-Kaboom Mine), its own `art/plan.tsv` row; the PNG is cut by the next art pass on the main checkout.
+
+## Klee Commons pass, 2026-10-11
+
+`review/active/klee-commons-pass-2026-10-11.md` (PR #1080). [USER]: "Agreed on 6 of the commons - I like leaving the Dazed on Simmer, so let's try b)". Landed on `klee-next`.
+
+- `proto_ko_pocket_match` (C Attack, 0, Retain): Deal 6 [9]. Was 3 [5].
+- `proto_ko_simmer` (C Attack, 1): "Deal 6 [9] Pyro damage, plus your largest Bomb's size. It does not go off. Add a Dazed." Was 4 [6] plus half. Pick 2 (b), the Wild Strike shape: the Dazed stays and buys the full read. The read is renamed `largest` (was `largest_half`; C# `BombRead.Largest`, sim `effects._op_damage_from_bombs`, pilot `policy` estimate).
+- `proto_ko_sizzle` (C Attack, 1): Set off, Deal 8 [11]; the +6 on a reaction stays. Was 6, with the Prototype-stage default +3 as its upgrade; the row now carries `upgrade: {damage: +3}`.
+- `proto_ko_chain_fuse` (C Skill, 1): each Bomb grows by 9 [12]. Was 6 [9].
+- `proto_ko_ammo_scavenging` (Lizard-Tail Gunpowder, C Skill, 1): Bomb 8 [11]. Was 6 [9].
+- `proto_ko_mine_toss` (C Skill, 1): Mine 11 [14]. Was 9 [12].
+- `proto_ko_blasting_spree` (C Skill, 1): Bomb 6 [8] on ALL, Dazed kept. Was 4 [6].
+
+## Klee Uncommons and Rares pass, 2026-10-11
+
+`review/active/klee-upper-pass-2026-10-11.md` (PR #1081). [USER]: "Agreed on all defaults - looks good!" Landed on `klee-next`.
+
+- `proto_ko_cover_your_ears` (U Skill, 0, Exhaust): 1 Spark, was 2. ALL enemies lose 6 [8] Strength this turn, unchanged.
+- `proto_ko_sparkling_burst` (U Skill, 0): 1 Spark. "Gain 1 [2] Energy. If a Bomb went off this turn, gain 1 more." Was 2 [1] Sparks for a flat 1. The `energy` delta bumps the first `energy` op only (tier0 `_bump_first`), so the generator's branch emitter now reads the `Energy` var only when no top-level gain owns it: the bonus stays 1.
+- `proto_ko_blazing_delight` (R Power, 2): 1 [0] Spark, was 3 [2]. A Spark price an upgrade cuts to 0 is free: `SparkPower.CanSpend` refuses 0 ("paid 0" is not a payment, `EB-512`), so the generated gate reads `SparkCost.PriceOf(this) <= 0` as playable and the badge prints no price (`MeterCost.Priced`); tier0's `spark_price` delta drops a `spend_spark` it cuts to 0.
+- `proto_ko_one_more_charge` (Witch's Homework, U Skill, 1): largest Bomb grows 12 [15], was 8 [11]; the draw at 20 stays.
+- `proto_ko_treasure_map` (U Skill): costs 0, was 1 [0]; the upgrade grows the largest Bomb 6 instead of 3.
+- `proto_ko_taste_test` (U Attack, 2): "Deal Pyro damage equal to twice your Bombs on the enemy. They do not go off." Confiscated 2 [1] unchanged. New read `target_total_double` (C# `BombRead.TargetTotalDouble`); `target_total` is kept and now unused.
+- `proto_ko_flash_point` (U Attack, 1): 9 [12], was 7 [10].
+- `proto_ko_party_poppers` (U Power, 1): Bomb 7 [9], was 5 [6].
+- `proto_ko_sparks_n_splash` (R Power): 2 Energy, was 3; the upgrade stays Innate.
+- `proto_ko_all_of_my_treasures` (R Skill, Exhaust): 2 [1] Energy; the upgrade cuts the cost instead of adding Retain.
+- `proto_ko_careful_arrangement` (Exquisite Compound, U Skill, 1): "Move all your Bombs onto the enemy. Each grows by 4 [6]." Was one merged Bomb grown 5 [8], a Mine if any part was. Pick 2 (a): no merge, so each Bomb that goes off still pays its Spark. Op `gather_bombs` (was `merge_bombs`); C# `ProtoBombPower.GatherAllTo`, sim `klee_overhaul.gather_all_to`: every charge of hers on the living board is taken off first, then lands on the aimed enemy as itself (size plus growth, its Mine flag, payload and Witch's Homework mark), the ones already there included; `relocated: true`, so the Dodoco Charm is not paid again. `EB-573`'s merge-riders hover tip (`ForMergeRiders`) and `KleeScalingPass.MergeMarks` left with the merge; the pile badge's rider count stays.
+- `proto_ko_tag_along` (U Skill, 1, Exhaust; upgrade removes Exhaust): "Choose 1 of 3 Companion cards to add to your hand. It costs 0 this turn." `proto_ko_adventure_club` (R Skill, 1 [0], Exhaust): "Choose 2 of 4 Companion cards to add to your hand. They cost 0 this turn." Pick 3 (a); [USER]: "it would be much better if it let you pick what it generated." Op `choose_companion` (`amount`, `options`; was `add_random_companion`). C# `KleeExpansion.ChooseCompanions` follows the decompiled `Discovery`: distinct options off `RandomCompanionPool` (the pool the random add drew from) with `TakeRandom(n, Rng.CombatCardGeneration)` as `CardFactory.GetDistinctForCombat` does, made as combat copies; one of three on `CardSelectCmd.FromChooseACardScreen` (`canSkip: true`, Discovery's call); then `SetThisTurn(0)` and `AddGeneratedCardToCombat` to the hand. The choose screen throws on more than three cards and returns one, so two of four is `CardSelectCmd.FromSimpleGrid` selecting two (Knights' Roll Call+'s screen), prompt "Choose 2 Companion cards to add to your hand." Sim `klee_overhaul.choose_companions`: `rng.sample` for the offer, and the pilot keeps the rarest offered (ties in offer order).
 
 ## Tide Wall names the front enemy, 2026-10-11
 

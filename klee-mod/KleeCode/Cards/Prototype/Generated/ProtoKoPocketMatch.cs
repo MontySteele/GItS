@@ -54,7 +54,7 @@ public sealed class ProtoKoPocketMatch : CustomCardModel, IElementalCard, ISetOf
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(3m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,6 +72,6 @@ public sealed class ProtoKoPocketMatch : CustomCardModel, IElementalCard, ISetOf
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

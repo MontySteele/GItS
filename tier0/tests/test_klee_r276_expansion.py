@@ -25,7 +25,11 @@ from tier05 import rewards
 # the status pile) cut; its eleven rows follow them at the tuple's end.
 # Second Surprise cut, the package ten long and Klee's three Companion rows
 # last since the Klee-only companions (2026-10-03).
-EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-39:-13]
+# The Klee tempo paper (2026-10-07) cut Sit Tight and Experiment in Progress
+# from this block; the status package, the tempo five and the companions follow.
+# The Klee design review (2026-10-08) cut Playdate from this block and appended
+# its two after the tempo five.
+EXPANSION = C.KLEE_OVERHAUL_POOL_IDS[-42:-19]
 
 
 @pytest.fixture
@@ -83,18 +87,17 @@ def filler(n=5):
 
 def test_the_thirty_are_the_specs_rows_at_the_specs_shape(overhaul):
     rows = {cid: load(cid) for cid in EXPANSION}
-    assert len(rows) == 26
+    assert len(rows) == 23
     by_rarity = {}
     for card in rows.values():
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + 1
-    assert by_rarity == {"common": 2, "uncommon": 15, "rare": 9}
+    assert by_rarity == {"common": 2, "uncommon": 12, "rare": 9}
     shape = {cid: (c.cost, c.type) for cid, c in rows.items()}
     assert shape["proto_ko_hiding_spot"] == (1, "skill")
     assert shape["proto_ko_half_a_mountain"] == (1, "skill")
     assert shape["proto_ko_alices_detonator"] == (1, "power")
     assert shape["proto_ko_dodoco"] == (1, "power")            # power cost sweep
     assert rows["proto_ko_half_a_mountain"].exhaust            # Klee audit, 2026-10-01
-    assert rows["proto_ko_sit_tight"].retain
     assert rows["proto_ko_wait_for_it"].retain
     assert rows["proto_ko_tag_along"].exhaust
     assert rows["proto_ko_adventure_club"].exhaust
@@ -133,19 +136,20 @@ def test_the_largest_bomb_is_the_largest_charge_and_the_older_on_a_tie(
     assert sizes(a) == [12, 7] and sizes(b) == [5]
 
 
-def test_one_more_charge_grows_eight_and_draws_at_twenty(overhaul):
-    # Klee balance review, pick 4a, 2026-09-25: 5 -> 8 (11 upgraded).
+def test_one_more_charge_grows_twelve_and_draws_at_twenty(overhaul):
+    # Klee balance review, pick 4a, 2026-09-25: 5 -> 8 (11 upgraded); the
+    # Klee upper pass, 2026-10-11: 12 (15 upgraded). The draw at 20 stays.
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.player.draw_pile = filler()
-    klee_overhaul.place(state, enemy, 10)
+    klee_overhaul.place(state, enemy, 5)
     play(state, load("proto_ko_one_more_charge"))
-    assert sizes(enemy) == [18] and len(state.player.hand) == 0
+    assert sizes(enemy) == [17] and len(state.player.hand) == 0
     play(state, load("proto_ko_one_more_charge"))
-    assert sizes(enemy) == [26] and len(state.player.hand) == 1
-    # Upgraded: grows 11.
+    assert sizes(enemy) == [29] and len(state.player.hand) == 1
+    # Upgraded: grows 15.
     play(state, load("proto_ko_one_more_charge+"))
-    assert sizes(enemy) == [37]
+    assert sizes(enemy) == [44]
 
 
 def test_one_more_charge_with_no_bomb_grows_nothing_and_draws_nothing(
@@ -185,19 +189,19 @@ def test_mk_iii_hits_three_times_and_plants_a_bomb_per_hit(overhaul):
     state = klee_state([a, b])
     play(state, load("proto_ko_jumpy_dumpty_mk_iii"))
     assert sum(len(e.ko_charges) for e in (a, b)) == 3
-    assert all(s == 2 for e in (a, b) for s in sizes(e))
+    assert all(s == 4 for e in (a, b) for s in sizes(e))
     assert (200 - a.hp) + (200 - b.hp) >= 9
 
 
-def test_mk_iii_upgraded_hits_four_and_plants_three(overhaul):
+def test_mk_iii_upgraded_hits_four_and_plants_five(overhaul):
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     play(state, load("proto_ko_jumpy_dumpty_mk_iii+"))
-    assert sizes(enemy) == [3, 3, 3]
+    assert sizes(enemy) == [5, 5, 5]
 
 
 def test_mine_all_mine_hits_and_places_a_mine_on_the_aimed_enemy(overhaul):
-    """Klee finish-line batch, 2026-10-03: "Deal 8 Pyro damage. Place a Mine 4
+    """Klee finish-line batch, 2026-10-03: "Deal 8 Pyro damage. Place a Mine 6 (4 until the Klee design review)
     on that enemy." Nothing goes off: the aimed body's Mine and plain Bomb
     stay, and the new Mine joins them."""
     a, b, c = (make_enemy(hp=200, name=n) for n in "abc")
@@ -206,7 +210,7 @@ def test_mine_all_mine_hits_and_places_a_mine_on_the_aimed_enemy(overhaul):
     klee_overhaul.place(state, a, 9)
     klee_overhaul.place(state, b, 4, is_mine=True)
     play(state, load("proto_ko_mine_all_mine"), aim=a)
-    assert sizes(a) == [4, 9, 4] and sizes(b) == [4]
+    assert sizes(a) == [4, 9, 6] and sizes(b) == [4]
     assert a.ko_charges[-1].is_mine
     assert a.hp < 200
     assert b.hp == 200 and c.hp == 200
@@ -240,7 +244,7 @@ def test_windblume_fireworks_sets_off_then_hits_then_plants(overhaul):
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 5)
     play(state, load("proto_ko_windblume_fireworks"))
-    assert sizes(a) == [6] and sizes(b) == [6]
+    assert sizes(a) == [8] and sizes(b) == [8]
     assert 200 - b.hp == 10
     assert 200 - a.hp == 15
 
@@ -274,23 +278,15 @@ def test_hiding_spot_blocks_and_places_a_mine(overhaul):
     state = klee_state([enemy])
     play(state, load("proto_ko_hiding_spot+"))
     assert state.player.block == 8
-    assert sizes(enemy) == [5] and klee_overhaul.mine_count(enemy) == 1
+    assert sizes(enemy) == [7] and klee_overhaul.mine_count(enemy) == 1
 
 
 # ---------------------------------------------------------------------------
 # THE COMPANION ROUTE
 # ---------------------------------------------------------------------------
 
-def test_playdate_takes_one_off_the_next_companion_card(overhaul):
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    buddy = friend(cost=2)
-    play(state, load("proto_ko_playdate"), aim=enemy)
-    assert sizes(enemy) == [3]
-    assert combat.card_cost(state, buddy) == 1
-    assert combat.card_cost(state, load("proto_ko_pop")) == 0
-    klee_overhaul.spend_playdate(state, buddy)
-    assert combat.card_cost(state, buddy) == 2
+# Playdate's card pin left with its row (Klee design review, 2026-10-08);
+# its power stays registered, pinned below.
 
 
 def test_playdate_expires_at_the_end_of_the_turn(overhaul):
@@ -342,6 +338,58 @@ def test_tag_along_and_adventure_club_add_free_companions(overhaul):
     assert all(c.free_this_turn for c in state.player.hand)
 
 
+def _offers(state):
+    return [e["cards"] for e in state.log
+            if e.get("event") == "ko_companions_offered"]
+
+
+def test_tag_along_offers_three_distinct_companions_and_keeps_one(overhaul):
+    """The Klee upper pass (2026-10-11, pick 3 (a)): "Choose 1 of 3 Companion
+    cards to add to your hand. It costs 0 this turn." Three DISTINCT offers
+    off the same pool the random add drew from; one kept, and it is one of
+    the three."""
+    pool_ids = {c.id for c in klee_overhaul.random_companion_pool(klee_state())}
+    for seed in range(8):
+        state = klee_state()
+        state.rng.seed(seed)
+        play(state, load("proto_ko_tag_along"))
+        (offered,) = _offers(state)
+        assert len(offered) == 3 and len(set(offered)) == 3
+        assert set(offered) <= pool_ids
+        assert len(state.player.hand) == 1
+        kept = state.player.hand[0]
+        assert kept.id in offered and kept.free_this_turn
+
+
+def test_adventure_club_offers_four_distinct_companions_and_keeps_two(overhaul):
+    """"Choose 2 of 4 Companion cards ... They cost 0 this turn." Two
+    different cards, both from the four offered."""
+    for seed in range(8):
+        state = klee_state()
+        state.rng.seed(seed)
+        play(state, load("proto_ko_adventure_club"))
+        (offered,) = _offers(state)
+        assert len(offered) == 4 and len(set(offered)) == 4
+        kept = [c.id for c in state.player.hand]
+        assert len(kept) == 2 and len(set(kept)) == 2
+        assert set(kept) <= set(offered)
+        assert all(c.free_this_turn for c in state.player.hand)
+
+
+def test_the_companion_choice_keeps_the_rarest_offered(overhaul):
+    """The sim has no screen, so the pilot's keep is a fixed rule: the rarest
+    offered first, ties in offer order."""
+    rank = {"rare": 0, "uncommon": 1, "common": 2}
+    for seed in range(8):
+        state = klee_state()
+        state.rng.seed(seed)
+        play(state, load("proto_ko_adventure_club"))
+        (offered,) = _offers(state)
+        best = sorted(offered,
+                      key=lambda cid: rank[loader.peek_card(cid).rarity])[:2]
+        assert [c.id for c in state.player.hand] == best
+
+
 # ---------------------------------------------------------------------------
 # THE SPARK-SUPPORTED COOK
 # ---------------------------------------------------------------------------
@@ -366,68 +414,9 @@ def test_boom_badge_doubles_the_bombs_of_the_next_set_off_card(overhaul):
     assert before - enemy.hp == 5 * 2 + 4
 
 
-def sit_tight_board():
-    """One enemy holding a Bomb 5, and a bank for Sit Tight's Spark."""
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.player.sparks = 2
-    klee_overhaul.place(state, enemy, 5)
-    return state, enemy
-
-
-def test_sit_tight_then_kapow_pays_no_bonus(overhaul):
-    state, enemy = sit_tight_board()
-    play(state, load("proto_ko_sit_tight"))
-    assert state.player.block == 5
-    play(state, load("proto_ko_kapow"), aim=enemy)
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5
-    assert klee_overhaul.SIT_TIGHT not in state.player.powers
-
-
-def test_kapow_then_sit_tight_pays_no_bonus(overhaul):
-    state, enemy = sit_tight_board()
-    play(state, load("proto_ko_kapow"), aim=enemy)
-    play(state, load("proto_ko_sit_tight"))
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5
-
-
-def test_sit_tight_with_no_detonation_pays_at_the_end_of_the_turn(overhaul):
-    state, enemy = sit_tight_board()
-    play(state, load("proto_ko_sit_tight"))
-    # The bonus is not paid at play time any more.
-    assert state.player.block == 5
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5 + 4
-    assert klee_overhaul.SIT_TIGHT not in state.player.powers
-    assert sizes(enemy) == [5]
-
-
-def test_sit_tight_is_switched_off_by_a_mine_answering_an_attack(overhaul):
-    state, enemy = sit_tight_board()
-    klee_overhaul.place(state, enemy, 3, is_mine=True)
-    play(state, load("proto_ko_sit_tight"))
-    klee_overhaul.mines_answer_attack(state, enemy)
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5
-
-
-def test_sit_tight_copies_each_pay(overhaul):
-    state, _ = sit_tight_board()
-    play(state, load("proto_ko_sit_tight"))
-    play(state, load("proto_ko_sit_tight"))
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 5 + 5 + 4 + 4
-
-
-def test_sit_tight_upgraded_is_seven_and_five(overhaul):
-    state = klee_state()
-    state.player.sparks = 1
-    play(state, load("proto_ko_sit_tight+"))
-    assert state.player.block == 7
-    klee_overhaul.sit_tight_turn_end(state)
-    assert state.player.block == 12
+# Sit Tight's card pins left with the row (the Klee tempo paper, 2026-10-07).
+# Its power stays registered until its engine pieces go (BACKLOG); the
+# ordering pin below reads the engine, not the card.
 
 
 def test_sit_tight_pays_before_the_shipped_turn_end_triggers():
@@ -504,29 +493,92 @@ def test_the_echo_left_the_end_of_the_turn(overhaul):
 # START OF TURN
 # ---------------------------------------------------------------------------
 
-def test_secret_base_reads_the_board_before_dodocos_mine(overhaul):
+def test_secret_base_places_a_bomb_every_turn_before_dodocos_mine(overhaul):
+    """Klee's Secret Base v3 (the Klee scaling pass, klee-next 2026-10-05,
+    sec.4 A): "At the start of your turn, place a Bomb 4 [6] on a random
+    enemy." Every turn, whatever is on the board, and before Dodoco's Mine."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.turn = 2
-    state.player.powers[klee_overhaul.SECRET_BASE] = 5
-    state.player.powers[klee_overhaul.DODOCO] = 4
+    state.player.powers[klee_overhaul.SECRET_BASE] = 4
+    state.player.powers[klee_overhaul.DODOCO] = 3
     klee_overhaul.turn_start_late(state)
-    assert sizes(enemy) == [5, 4]
+    assert sizes(enemy) == [4, 3]
     assert klee_overhaul.mine_count(enemy) == 1
     klee_overhaul.turn_start_late(state)
-    # A Bomb is on the board now: no second Secret Base Bomb.
-    assert sizes(enemy) == [5, 4, 4]
+    # A Bomb on the board does not stop the next one.
+    assert sizes(enemy) == [4, 3, 4, 3]
 
 
-def test_alices_detonator_adds_a_kapow_and_the_plus_an_upgraded_one(
+def test_secret_base_copies_add_into_one_bomb_and_raise_no_other(overhaul):
+    """Two copies stack like Noxious Fumes: one Bomb 8. A card's placement is
+    its printed size -- v3 leaves no placement bonus behind."""
+    enemy = make_enemy(hp=200)
+    state = klee_state([enemy])
+    state.turn = 2
+    state.player.powers[klee_overhaul.SECRET_BASE] = 8
+    klee_overhaul.turn_start_late(state)
+    assert sizes(enemy) == [8]
+    klee_overhaul.place(state, enemy, 5)
+    assert sizes(enemy) == [8, 5]
+
+
+def test_alices_detonator_adds_an_alices_mine_and_the_plus_an_upgraded_one(
         overhaul):
+    """2026-10-11 ([USER]: "What about instead treating this like
+    Necrobinder's Sentry Gaze and having it add a 0 cost card with Ethereal
+    and Exhaust that adds a Mine for 10 (15 on upgrade)?"): one Alice's Mine
+    per copy BEFORE the draw (Sentry Mode's `BeforeHandDraw`), upgraded on
+    the Plus twin, and no Ka-pow! any more."""
     state = klee_state()
     state.turn = 2
     play(state, load("proto_ko_alices_detonator"))
     play(state, load("proto_ko_alices_detonator+"))
-    klee_overhaul.turn_start_late(state)
+    klee_overhaul.turn_start_late(state)        # the old site adds nothing
+    assert state.player.hand == []
+    klee_overhaul.before_hand_draw(state)
     ids = sorted(c.id for c in state.player.hand)
-    assert ids == ["proto_ko_kapow", "proto_ko_kapow+"]
+    assert ids == ["proto_ko_alices_mine", "proto_ko_alices_mine+"]
+    assert not any(c.id.startswith("proto_ko_kapow")
+                   for c in state.player.hand)
+
+
+def test_one_detonator_adds_exactly_one_card_a_turn(overhaul):
+    state = klee_state()
+    play(state, load("proto_ko_alices_detonator"))
+    klee_overhaul.before_hand_draw(state)
+    assert [c.id for c in state.player.hand] == ["proto_ko_alices_mine"]
+
+
+def test_alices_mine_is_sweeping_gazes_shape_and_places_a_mine_10_or_15(
+        overhaul):
+    card = load("proto_ko_alices_mine")
+    assert (card.cost, card.type, card.rarity) == (0, "skill", "token")
+    assert card.is_ethereal and card.exhaust
+    assert "proto_ko_alices_mine" in C.KLEE_OFF_POOL_ROW_IDS
+    assert "proto_ko_alices_mine" not in C.KLEE_OVERHAUL_POOL_IDS
+    for cid, size in (("proto_ko_alices_mine", 10),
+                      ("proto_ko_alices_mine+", 15)):
+        enemy = make_enemy(hp=200)
+        state = klee_state([enemy])
+        play(state, load(cid), aim=enemy)
+        assert sizes(enemy) == [size]
+        assert enemy.ko_charges[-1].is_mine
+
+
+def test_an_unplayed_alices_mine_exhausts_at_end_of_turn(overhaul):
+    """Ethereal, through the real turn loop: one fight, no plays, nothing to
+    draw (`test_ethereal_base_field.hand_survives`'s idiom)."""
+    from tier0.content import loader as _loader
+    p = _loader.build_player("klee")
+    p.draw_pile, p.discard_pile = [], []
+    p.hand = [load("proto_ko_alices_mine")]
+    st = combat.run_fight(
+        p, [make_enemy(hp=1, intents=[{"kind": "block", "amount": 0}])],
+        lambda s: None, seed=0)
+    assert any(c.id == "proto_ko_alices_mine" for c in st.player.exhaust_pile)
+    assert not any(c.id == "proto_ko_alices_mine"
+                   for c in st.player.discard_pile)
 
 
 # ---------------------------------------------------------------------------

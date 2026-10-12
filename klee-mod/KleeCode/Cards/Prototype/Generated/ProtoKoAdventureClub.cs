@@ -45,7 +45,7 @@ public sealed class ProtoKoAdventureClub : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Adventure Club"),
-        ("description", "Add 2 random [gold]Companion[/gold] cards to your hand. They cost 0 this turn."),
+        ("description", "Choose 2 of 4 [gold]Companion[/gold] cards to add to your hand. They cost 0 this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoKoAdventureClub : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KleeExpansion.AddRandomCompanions(choiceContext, Owner, 2);
+        await KleeExpansion.ChooseCompanions(choiceContext, Owner, 2, 4);
     }
 
     protected override void OnUpgrade()

@@ -83,7 +83,8 @@ public class PoolPassThreeTests
         // The row's shape, off the shipped class: a 2-cost Rare that fires
         // ONCE (it Exhausts), on ALL enemies since the Klee pre-Balance sweep
         // (2026-10-03), and printing no number of its own -- "your largest
-        // Bomb" is a read. The upgrade adds Retain and keeps Exhaust.
+        // Bomb" is a read. The upgrade cuts the cost to 1 and keeps Exhaust
+        // (the Klee upper pass, 2026-10-11; it added Retain).
         var card = new ProtoKoAllOfMyTreasures();
 
         Assert.Equal(CardRarity.Rare, card.Rarity);
@@ -93,7 +94,8 @@ public class PoolPassThreeTests
         Assert.Contains(card.CanonicalKeywords, k => k == CardKeyword.Exhaust);
         Assert.Empty(Vars(card));
         var upgrade = Il.Calls(Il.Method("ProtoKoAllOfMyTreasures", "OnUpgrade"));
-        Assert.Contains(upgrade, c => c.Contains("AddKeyword"));
+        Assert.Contains(upgrade, c => c.Contains("EnergyCost.UpgradeBy"));
+        Assert.DoesNotContain(upgrade, c => c.Contains("AddKeyword"));
         Assert.DoesNotContain(upgrade, c => c.Contains("RemoveKeyword"));
     }
 
@@ -109,13 +111,14 @@ public class PoolPassThreeTests
         // back through `SparkCost.PriceOf`, so the price shown, the price
         // gated on and the price charged are one expression. It rode Fireworks
         // Show until `EB-749` cut that row, then Once More! until the Klee-only
-        // companions (2026-10-03) cut that one; Sparkling Burst spells the
-        // same delta.
-        var card = new ProtoKoSparklingBurst();
+        // companions (2026-10-03) cut that one, then Sparkling Burst until the
+        // Klee upper pass (2026-10-11) gave it an Energy instead; Boom Badge
+        // spells the same delta.
+        var card = new ProtoKoBoomBadge();
         Assert.Equal(2, card.PrintedSparkPrice);
         Assert.Equal(2, SparkCost.PriceOf(card));
 
-        var source = Printed("Cards/Prototype/Generated/ProtoKoSparklingBurst.cs");
+        var source = Printed("Cards/Prototype/Generated/ProtoKoBoomBadge.cs");
         Assert.Contains("PrintedSparkPrice => (IsUpgraded ? 1 : 2)", source);
         Assert.Contains("SparkPower.Spend(choiceContext, Owner.Creature, "
                         + "(IsUpgraded ? 1 : 2), this)", source);
@@ -275,7 +278,8 @@ public class PoolPassThreeTests
         // A status goes to the discard pile, as the base game adds every one
         // ([USER], 2026-10-03: "I agree that we should adopt the same
         // convention"). Twin:
-        // `test_fish_blasting_adds_a_confiscated_into_the_discard_pile`.
+        // `test_fish_blasting_adds_a_dazed_into_the_discard_pile` (a Dazed since
+        // 2026-10-11).
         var source = Printed("Cards/Prototype/Generated/ProtoKoFishBlasting.cs");
         Assert.Contains("PileType.Discard, Owner);", source);
         Assert.DoesNotContain("PileType.Draw", source);
@@ -296,7 +300,7 @@ public class PoolPassThreeTests
         var card = new ProtoKoBombsAway();
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.Equal(4m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(6m, card.DynamicVars["BombSize"].BaseValue);
 
         var play = Il.CallSequence(Il.Method("ProtoKoBombsAway", "OnPlay")).ToList();
         var place = play.IndexOf("ProtoBombPower.Place");

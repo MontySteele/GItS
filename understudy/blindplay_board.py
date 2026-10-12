@@ -1319,6 +1319,15 @@ def reward_alternatives(blob: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
+def _seq(entry: dict[str, Any]) -> int | None:
+    """A hit's or applied power's play-order stamp (the Klee round,
+    2026-10-11: Fire! Fire! printed its hit above the "Put" that came first),
+    or None where the mod sent none -- an older mod, or an entry nothing
+    stamped (0) -- and the page then keeps hits-then-Puts."""
+    seq = _int(entry.get("seq"))
+    return seq if seq > 0 else None
+
+
 def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
     """What resolved this turn, in order, with its hits under it
     (`EB-349` / `EB-611`).
@@ -1380,7 +1389,10 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                  "source": _text(h.get("source")),
                  # 2026-10-09: no dealer but you (a Drain); False on an
                  # older mod, which keeps the Thorns guess.
-                 "self": bool(h.get("self"))}
+                 "self": bool(h.get("self")),
+                 # 2026-10-11: the ledger's play-order stamp, shared with
+                 # `applied`; None on an older mod (`_seq` below).
+                 "seq": _seq(h)}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
         # 2026-09-25 evening: who a random summon inside the card rolled, in
@@ -1395,7 +1407,8 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
         applied = [{"target": _text(a.get("target")),
                     "power": _text(a.get("power")),
                     "amount": _int(a.get("amount")),
-                    "combat_id": _text(a.get("combat_id"))}
+                    "combat_id": _text(a.get("combat_id")),
+                    "seq": _seq(a)}
                    for a in (row.get("applied") or [])
                    if isinstance(a, dict) and _text(a.get("power"))
                    and _int(a.get("amount"))]

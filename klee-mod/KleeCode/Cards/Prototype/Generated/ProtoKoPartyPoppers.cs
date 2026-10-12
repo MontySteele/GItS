@@ -48,7 +48,7 @@ public sealed class ProtoKoPartyPoppers : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("PowerAmount", 7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,6 +65,6 @@ public sealed class ProtoKoPartyPoppers : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

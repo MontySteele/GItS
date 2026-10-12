@@ -18,7 +18,7 @@ public static class CompanionOverhaulLaw
 
     /// <summary>Kaeya, Glacial Waltz: Cryo damage per end of turn, 3 turns.
     /// Mirrors <c>C.MC_GLACIAL_WALTZ_DMG</c>.</summary>
-    public const int GlacialWaltzDamage = 6;
+    public const int GlacialWaltzDamage = 7;
 
     /// <summary>Albedo, Solar Isotoma: the platform's own damage.
     /// Mirrors <c>C.MC_ISOTOMA_DMG</c>.</summary>
@@ -27,10 +27,6 @@ public static class CompanionOverhaulLaw
     /// <summary>Albedo, Solar Isotoma: the Crystallize half.
     /// Mirrors <c>C.MC_ISOTOMA_BLOCK</c>.</summary>
     public const int IsotomaBlock = 4;
-
-    /// <summary>Jean, Dandelion Breeze: Block per end of turn.
-    /// Mirrors <c>C.MC_DANDELION_BREEZE_BLOCK</c>.</summary>
-    public const int DandelionBreezeBlock = 6;
 
     /// <summary>Fischl, Oz at Your Side: the Electro volley, no turn limit.
     /// Mirrors <c>C.MC_OZ_DMG</c>.</summary>
@@ -46,7 +42,7 @@ public static class CompanionOverhaulLaw
 
     /// <summary>Lisa, Lightning Rose: Electro damage per end of turn.
     /// Mirrors <c>C.MC_LIGHTNING_ROSE_DMG</c>.</summary>
-    public const int LightningRoseDamage = 5;
+    public const int LightningRoseDamage = 6;
 
     /// <summary>Lisa, Lightning Rose: the Vulnerable that rides it.
     /// Mirrors <c>C.MC_LIGHTNING_ROSE_VULN</c>.</summary>
@@ -59,7 +55,7 @@ public static class CompanionOverhaulLaw
 
     /// <summary>Dahlia, Sacramental Shower: what the trap answers with.
     /// Mirrors <c>C.MC_SHOWER_DMG</c>.</summary>
-    public const int ShowerDamage = 9;
+    public const int ShowerDamage = 12;
 
     /// <summary>Razor, Lightning Fang: damage his Attacks gain, 2 turns.
     /// Mirrors <c>C.MC_LIGHTNING_FANG_BONUS</c>.</summary>
@@ -89,23 +85,23 @@ public static class CompanionOverhaulLaw
 
     /// <summary>Gorou, Juuga: Geo damage per end of turn, 3 turns.
     /// Mirrors <c>C.MI_JUUGA_DMG</c>.</summary>
-    public const int JuugaDamage = 6;
+    public const int JuugaDamage = 7;
 
     /// <summary>Sayu, Muji-Muji Daruma: the hit above 70% HP.
     /// Mirrors <c>C.MI_DARUMA_DMG</c>.</summary>
-    public const int DarumaDamage = 6;
+    public const int DarumaDamage = 9;
 
     /// <summary>Sayu, Muji-Muji Daruma: and the Block below it.
     /// Mirrors <c>C.MI_DARUMA_BLOCK</c>.</summary>
-    public const int DarumaBlock = 6;
+    public const int DarumaBlock = 9;
 
     /// <summary>Kuki Shinobu, Sanctifying Ring: Electro to ALL, per turn.
     /// Mirrors <c>C.MI_SANCTIFYING_RING_DMG</c>.</summary>
-    public const int SanctifyingRingDamage = 5;
+    public const int SanctifyingRingDamage = 6;
 
     /// <summary>Kuki Shinobu, Sanctifying Ring: the Block that rides it.
     /// Mirrors <c>C.MI_SANCTIFYING_RING_BLOCK</c>.</summary>
-    public const int SanctifyingRingBlock = 5;
+    public const int SanctifyingRingBlock = 6;
 
     /// <summary>Thoma, Blazing Barrier: Block per absorbing hit.
     /// Mirrors <c>C.MI_BLAZING_BARRIER_BLOCK</c>.</summary>
@@ -161,5 +157,5 @@ public static class CompanionOverhaulLaw
 
     /// <summary>Chiori, Tamoto: Geo per turn, ignoring Block.
     /// Mirrors <c>C.MI_TAMOTO_DMG</c>.</summary>
-    public const int TamotoDamage = 6;
+    public const int TamotoDamage = 7;
 }

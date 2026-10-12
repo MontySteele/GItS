@@ -260,6 +260,24 @@ KNOWN_STALE = {
     "proto_ko_spinning_sparkler": (
         "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_ko_playdate": (
+        "The Klee design review (2026-10-08) CUT this row from her pool (two rows cut, two added; review/active/klee-design-review-2026-10-08.md sec.4.4). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_it_wasnt_me": (
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_sorry_jean": (
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_grounded": (
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_sit_tight": (
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ko_patience_klee": (
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_ko_where_did_i_put_it": (
         "The Klee final pass (2026-10-02) CUT this row from her pool (Cover Your Ears! took its slot; review/active/klee-final-pass-2026-10-02.md, \"Ruled\"). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),

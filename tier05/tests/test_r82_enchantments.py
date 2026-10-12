@@ -159,7 +159,8 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
     from tier0 import roster
     live = {c.id for c in loader.prototype_cards()
             if c.type == "attack" and enchantments.eligible(c, "nimble")}
-    assert live == {"proto_mc_kaeya_frostgnaw",
+    assert live == {"proto_ko_dodoco_tag",       # Klee tempo paper
+                    "proto_mc_kaeya_frostgnaw",
                     "proto_mf_freminet_pressurized_floe",
                     "proto_mi_itto_superlative_superstrength",
                     "proto_vk_crosswind"}

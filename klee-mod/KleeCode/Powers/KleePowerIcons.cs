@@ -185,7 +185,6 @@ internal static class KleePowerIcons
         FirstAttackTwicePower => KleePck.Path("klee/powers/study_buddy.png"),
         FirstCardFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
         TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
-        GeneralsBannerPower => KleePck.Path("klee/powers/study_buddy.png"),
         // `EB-668`. Battle Plan's rider borrows the icon of the shipped power
         // that already means "your next Attack hits harder" -- the same
         // standing rule the discount took from Rally, applied to what the

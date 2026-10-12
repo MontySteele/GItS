@@ -503,9 +503,13 @@ AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
                         # aiming op dereferences `cardPlay.Target` wherever it
                         # sits). No shipped row prints one, so this widening is
                         # unreachable outside the arm.
-                        "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                        "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
                         # R276's Hair Trigger, on the same terms.
-                        "mine_bombs"))
+                        "mine_bombs",
+                        # The Klee scaling pass's Witch's Homework (klee-next).
+                        "plant_homework_bomb",
+                        # Stoke the Fuse, aimed (Klee pass round, pick 3 (b)).
+                        "grow_largest_bomb"))
 
 # Ops whose aimed target may be a CORPSE. C#'s dead-target rule is op-dependent
 # and this frozenset is that asymmetry, written down once:
@@ -1557,7 +1561,7 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         # same reason celestial_gift left flat_attack_bonus at the 2026-07-26
         # red pen (the note there states the rule). It used to be a flat "+N
         # damage on your Attacks"; it is now a per-turn STRENGTH ratchet plus
-        # a Bond of Life that eats the first block, and the Strength half is
+        # a Bond of Life (gone since 2026-10-11), and the Strength half is
         # applied as a real power in player_turn_start_triggers
         # (powers.deal_damage folds it in after this read). Leaving the rider
         # here as well paid the companion twice -- once as flat damage, once
@@ -4500,14 +4504,14 @@ def _op_plant_bomb_copy_largest(state: CombatState, fx: dict,
     klee_overhaul.place_copy_of_largest(state, dest[0] if dest else None)
 
 
-def _op_merge_bombs(state: CombatState, fx: dict, card: Card) -> None:
-    """Careful Arrangement. See `klee_overhaul.merge_all_to` for the two
-    defaults the card text does not state."""
+def _op_gather_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """Exquisite Compound (`proto_ko_careful_arrangement`). See
+    `klee_overhaul.gather_all_to`."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
     dest = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
-    klee_overhaul.merge_all_to(state, dest[0] if dest else None,
-                               int(fx.get("growth", 0)))
+    klee_overhaul.gather_all_to(state, dest[0] if dest else None,
+                                int(fx.get("growth", 0)))
 
 
 def _op_remove_bomb_for_block(state: CombatState, fx: dict,
@@ -4554,7 +4558,58 @@ def _op_grow_largest_bomb(state: CombatState, fx: dict, card: Card) -> None:
     """
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
+    if fx.get("target") == "enemy":
+        # Klee pass round, pick 3 (b): the largest Bomb ON THE AIMED ENEMY.
+        # `GrowLargestPerSpark(..., onlyOn: cardPlay.Target)`'s twin; a dead
+        # aim fizzles (the C# walk skips the dead).
+        aimed = _pick_targets(state, "enemy")
+        if not aimed:
+            return
+        klee_overhaul.grow_largest_per_spark(state, int(fx["per_spark"]),
+                                             only_on=aimed[0])
+        return
     klee_overhaul.grow_largest_per_spark(state, int(fx["per_spark"]))
+
+
+def _op_damage_from_bombs(state: CombatState, fx: dict, card: Card) -> None:
+    """THE KLEE TEMPO PAPER (2026-10-07, Simmer and Taste Test): damage READ
+    off her Bombs that leaves them cooking. `ProtoBombPower.DealFromBombs`'s
+    twin.
+
+    `read: largest` is Simmer's "plus your largest Bomb's size" -- the
+    largest single charge on the living board (`largest_charge`), in full
+    (the Klee Commons pass, 2026-10-11: it was half). `read: target_total` is "damage equal to
+    all your Bombs on the enemy" -- every charge on the aimed body, Mines
+    included (`total_size`); `target_total_double` is Taste Test's since the
+    Klee upper pass (2026-10-11), twice that. `amount` is the printed flat
+    part.
+
+    IT READS THE PILE AND DOES NOT SPEND IT: nothing goes off, no Spark is
+    minted, no Mine answers. But it IS the card's own hit -- one `_op_damage`
+    Attack, so Pyro, the reaction, Strength and Vulnerable land as on any
+    other Attack of hers. A read of zero deals nothing.
+    """
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    base = int(fx.get("amount", 0) or 0)
+    read = fx.get("read")
+    if read == "largest":
+        _enemy, _index, size = klee_overhaul.largest_charge(state)
+        bombs = size
+    elif read in ("target_total", "target_total_double"):
+        # `target_total_double`: Taste Test since the Klee upper pass
+        # (2026-10-11), "twice the sum of your Bombs on the enemy".
+        targets = _pick_targets(state, fx.get("target", "enemy"))
+        bombs = klee_overhaul.total_size(targets[0]) if targets else 0
+        if read == "target_total_double":
+            bombs *= 2
+    else:
+        raise ValueError(f"damage_from_bombs read {read!r} on {card.id}")
+    total = base + bombs
+    if total <= 0:
+        return
+    _op_damage(state, {"op": "damage", "amount": total,
+                       "target": fx.get("target", "enemy")}, card)
 
 
 def _op_damage_set_off_total(state: CombatState, fx: dict,
@@ -4681,7 +4736,8 @@ def _op_exhaust_statuses_grow_largest(state: CombatState, fx: dict,
     """THE KLEE STATUS PACKAGE: Albedo -- Dust of Purification."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.exhaust_statuses_grow_largest(state, int(fx["amount"]))
+    klee_overhaul.exhaust_statuses_grow_largest(
+        state, int(fx["amount"]), int(fx.get("draw_each", 0)))
 
 
 def _op_lose_strength(state: CombatState, fx: dict, card: Card) -> None:
@@ -4730,16 +4786,30 @@ def _op_fetch_from_discard(state: CombatState, fx: dict, card: Card) -> None:
     klee_overhaul.fetch_from_discard(state, fx["filter"])
 
 
-def _op_add_random_companion(state: CombatState, fx: dict,
-                             card: Card) -> None:
-    """Tag Along and Adventure Club: random Companion cards, free this
-    turn."""
+def _op_choose_companion(state: CombatState, fx: dict, card: Card) -> None:
+    """Tag Along and Adventure Club: choose `amount` of `options` Companion
+    cards, free this turn (`klee_overhaul.choose_companions`)."""
     if not klee_overhaul.live(state):
         _op_klee_overhaul_off(state, fx, card)        # always raises
-    klee_overhaul.add_random_companions(state, int(fx["amount"]))
+    klee_overhaul.choose_companions(state, int(fx["amount"]),
+                                    int(fx["options"]))
 
 
-def _op_grant_kapow_each_turn(state: CombatState, fx: dict,
+def _op_plant_homework_bomb(state: CombatState, fx: dict,
+                            card: Card) -> None:
+    """THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's Homework's
+    Bomb. The sim places it at its printed size and does NOT model the
+    run-long growth: the row is grant-only (in no pool, `C.KLEE_OVERHAUL_
+    POOL_IDS`), so no sim run draws it, and the sim's Balance machinery is
+    parked (`review/active/klee-balance-measurement-2026-10-05.md` pick 3).
+    The C# is `KleeScalingPass`."""
+    if not klee_overhaul.live(state):
+        _op_klee_overhaul_off(state, fx, card)        # always raises
+    for enemy in _pick_targets(state, "enemy", allow_dead=True):
+        klee_overhaul.place(state, enemy, int(fx["size"]))
+
+
+def _op_grant_alices_mine_each_turn(state: CombatState, fx: dict,
                               card: Card) -> None:
     """Alice's Detonator: install the twin the card's upgrade names
     (`upgraded_grant`, written onto the effect by the upgrade applier)."""
@@ -4773,21 +4843,6 @@ def _op_carry_out_front_plan(state: CombatState, fx: dict,
     if not kokomi_plan.live(state):
         _op_kokomi_overhaul_off(state, fx, card)      # always raises
     kokomi_plan.resolve_front(state)
-
-
-def _op_draw_after_plans(state: CombatState, fx: dict, card: Card) -> None:
-    """Tide Chart (`EB-478`, R257): "Next turn, after the Bake-Kurage carries
-    out its Plans, draw 1 card for each."
-
-    THE PLAY WRITES A PROMISE AND DRAWS NOTHING. The count this row multiplies
-    does not exist yet on the turn the card is played -- that is the defect the
-    redesign answers -- so the whole op is one call into `kokomi_plan`, which
-    owns the promise and the payment alike.
-    """
-    if not kokomi_plan.live(state):
-        _op_kokomi_overhaul_off(state, fx, card)      # always raises
-    kokomi_plan.promise_tide_chart(state, int(fx.get("per", 1)),
-                                   int(fx.get("amount", 0)))
 
 
 def _op_plan_from_exhaust(state: CombatState, fx: dict, card: Card) -> None:
@@ -5044,8 +5099,9 @@ OPS = {
     # is not Klee -- see `_op_klee_overhaul_off`.
     "set_off": _op_set_off,
     "plant_bomb": _op_plant_bomb,
+    "plant_homework_bomb": _op_plant_homework_bomb,
     "grow_bombs": _op_grow_bombs,
-    "merge_bombs": _op_merge_bombs,
+    "gather_bombs": _op_gather_bombs,
     # THE POOL PASS's three (`EB-491`), on the same terms as every arm verb
     # above: one call each into `klee_overhaul`, and a raise with the flag off
     # or on a seat that is not Klee.
@@ -5062,6 +5118,8 @@ OPS = {
     # see `_op_grow_largest_bomb`.
     "grow_largest_bomb": _op_grow_largest_bomb,
     "damage_set_off_total": _op_damage_set_off_total,
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test.
+    "damage_from_bombs": _op_damage_from_bombs,
     "multiply_set_off": _op_multiply_set_off,
     "draw_per_set_off": _op_draw_per_set_off,
     # R244's one new verb, the readers' enabler (renamed at R276). It touches
@@ -5081,8 +5139,8 @@ OPS = {
     "exhaust_statuses_grow_largest": _op_exhaust_statuses_grow_largest,
     "lose_strength": _op_lose_strength,
     "fetch_from_discard": _op_fetch_from_discard,
-    "add_random_companion": _op_add_random_companion,
-    "grant_kapow_each_turn": _op_grant_kapow_each_turn,
+    "choose_companion": _op_choose_companion,
+    "grant_alices_mine_each_turn": _op_grant_alices_mine_each_turn,
     # --- Kokomi overhaul, DRAFT 6 (C.KOKOMI_OVERHAUL) -----
     # Registered so the rows load, priced so the drafter is honest, resolved by
     # nothing -- see `_op_kokomi_overhaul_unbuilt` for why raising is the shape.
@@ -5100,8 +5158,6 @@ OPS = {
     "remove_debuff": _op_remove_debuff,
     "carry_out_front_plan": _op_carry_out_front_plan,
     "plan_from_exhaust": _op_plan_from_exhaust,
-    # `EB-478`, R257. Tide Chart's promise: a now-line that draws NOTHING now.
-    "draw_after_plans": _op_draw_after_plans,
     "damage_quarter_max_hp": _op_damage_quarter_max_hp,
     # The two PLAN-ONLY clauses. They never appear in an `effects:` list -- the
     # codegen refuses one there by name -- but they are registered here anyway,
@@ -5126,14 +5182,10 @@ OPS = {
     # spelling would read the queue before the turn's Plans were written and
     # pay for a queue the player has not built yet.
     "block_per_plan_held": _op_kokomi_plan_only,
-    # NINE, and four of them are `EB-643`'s (R265). Same terms as the four
-    # above, and plan-only for one reason they share: each names a POSITION in
-    # a running drain -- "the next Plan", "each Plan carried out after this
-    # one" -- so a now-line spelling would ask about a drain that is not
-    # running and answer nothing every time it was played.
-    # R267 pick 3: Scout Ahead is back on the positional count. Both spellings
-    # stay registered; only `draw_per_plan_after` is on a row today.
-    "draw_per_plan_this_turn": _op_kokomi_plan_only,
+    # `EB-643`'s (R265) riders. Same terms as the four above, and plan-only
+    # for one reason they share: each names a POSITION in a running drain --
+    # "the next Plan" -- so a now-line spelling would ask about a drain that
+    # is not running and answer nothing every time it was played.
     "next_plan_double_damage": _op_kokomi_plan_only,
     "next_plan_extra_carry_out": _op_kokomi_plan_only,
     # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
@@ -5222,6 +5274,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
         if "ftd" in card.tags:
             from tier0.engine import furina_tide    # late: avoids the cycle
             furina_tide.resolve_card(state, card)
+        # Varka's Sturm und Drang rider, after the Attack (C#'s
+        # `AfterCardPlayed`): a no-op unless a charge was spent on it.
+        companion_overhaul_card_end(state, card, state.card_aim)
     finally:
         if varka:
             varka_oath.end_play(state, card)
@@ -5392,13 +5447,13 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     #
     #   mc_passion_overload   Bennett -- one Attack, consumed on it
     #   mc_lightning_fang     Razor   -- every Attack, 2 turns
-    #   mc_swirl_charge       Varka   -- one Attack, banked per Swirl
     #
     # `mc_lightning_fang`'s stack is TURNS REMAINING, not damage, so its
-    # contribution is the constant rather than the stack; the other two
-    # hold their own printed number, so a second copy pays twice.
+    # contribution is the constant rather than the stack; Bennett's holds
+    # its own printed number, so a second copy pays twice. (Varka's
+    # `mc_swirl_charge` left this sum in the Varka round 3 fix, 2026-10-10:
+    # it is a separate hit after the Attack, `companion_overhaul_card_end`.)
     bonus += p.powers.get("mc_passion_overload", 0)
-    bonus += p.powers.get("mc_swirl_charge", 0)
     if p.powers.get("mc_lightning_fang", 0):
         bonus += C.MC_LIGHTNING_FANG_BONUS
     # THE INAZUMA ARM'S TWO, on the same terms and in the same sum:
@@ -5515,24 +5570,30 @@ def player_turn_start_triggers(state: CombatState) -> None:
     if n:
         powers.apply_power(state, p, "strength", n, applier=p)
         p.block += C.CELESTIAL_GIFT_BLOCK
-    # Arlecchino -- Strength half. Routed through powers.apply_power, NOT
-    # written into p.powers directly, so Kokomi's LAW 3 chokepoint sees it and
-    # converts it to Charge. That interaction is meant to fall out of the
-    # standard path rather than be special-cased anywhere.
+    # Arlecchino -- 2026-10-11 Companion pass: "At the start of your turn,
+    # lose 1 HP and gain 1 Strength." The HP first, as printed: an unblockable,
+    # unpowered loss (`refpowers.damage_player_unblockable`, the C#
+    # `CreatureCmd.Damage(Unblockable | Unpowered)`), flat per turn and not
+    # scaled by the stack. The Bond of Life Block clause left in the same pass.
+    # Strength routed through powers.apply_power, NOT written into p.powers
+    # directly, so Kokomi's LAW 3 chokepoint sees it and converts it to Charge.
     n = p.powers.get("masque_red_death", 0)
     if n:
+        from tier0.engine import refpowers as _rp_masque   # late import (cycle)
+        _rp_masque.damage_player_unblockable(state, C.MASQUE_HP_LOSS,
+                                             reason="masque_red_death")
         powers.apply_power(state, p, "strength", n, applier=p)
-    # Neuvillette -- co-op notes pick 4 (2026-10-02): "At the start of your
-    # turn, apply Hydro to a random enemy." One per copy (the amount counts
-    # copies; the upgrade is a cost cut), through `resolve_hit` like the
-    # apply_aura op, so it reacts and credits. C# twin:
-    # `AncientSeaAuthorityPower.AfterPlayerTurnStart`.
+    # Neuvillette -- 2026-10-11 Companion pass: "At the start of your turn,
+    # deal 5 Hydro damage to a random enemy." (was: apply Hydro). One hit per
+    # copy (the amount counts copies; the upgrade is a cost cut); the damage
+    # applies the Hydro, so it reacts and credits as any companion hit does.
+    # C# twin: `AncientSeaAuthorityPower.AfterPlayerTurnStart`.
     for _ in range(p.powers.get("ancient_sea_authority", 0)):
         if not state.living_enemies:
             break
         enemy = state.rng.choice(list(state.living_enemies))
-        reactions.resolve_hit(state, enemy, "hydro", 0,
-                              "ancient_sea_authority")
+        deal_damage_to_enemy(state, enemy, C.ANCIENT_SEA_DMG,
+                             element="hydro", source="companion")
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
         gain_sparks(state, n, source="power:endless_fireworks/turn_start")
@@ -5641,6 +5702,16 @@ def companion_overhaul_turn_start(state: CombatState) -> None:
         enemy = state.rng.choice(state.living_enemies)
         deal_damage_to_enemy(state, enemy, n, element="pyro",
                              source="companion")
+    # Varka, Sturm und Drang (2026-10-11 Companion pass): "At the start of your
+    # turn, Swirl a random enemy." Once per turn whatever the stack (the stack
+    # is the rider's damage, so copies already bank more per Swirl). The same
+    # damage-less Anemo the `swirl` op lays, so it banks the rider through
+    # `companion_overhaul_reaction` when the body held an aura. After Durin's
+    # Pyro, so a Pyro that hit laid can be the aura swirled. C# twin:
+    # `SturmUndDrangPower.AfterPlayerTurnStart`.
+    if p.powers.get("mc_sturm_und_drang", 0) and state.living_enemies:
+        enemy = state.rng.choice(state.living_enemies)
+        reactions.resolve_hit(state, enemy, "anemo", 0, "swirl_op")
     inazuma_overhaul_turn_start(state)
     # ---- and KLEE'S COVEN PERSONALS, last (R236) --------------
     # Qiqi's Herald applies Cryo, which can resolve a reaction, so it runs
@@ -5780,30 +5851,6 @@ def _exhaust_autoplay_sweep(state: CombatState) -> None:
 
 def player_turn_end_triggers(state: CombatState) -> None:
     p = state.player
-    # Arlecchino -- Bond of Life half, once per turn, clamped at zero.
-    #
-    # WHY END-OF-TURN AND NOT AT THE MOMENT BLOCK IS GAINED. The card reads
-    # "the first 5 Block you gain each turn does not count", and eating it at
-    # the gain site would need a funnel that does not exist: Block is added at
-    # ~15 places, and modify_block_gained deliberately covers CARD block only
-    # (its docstring: passive/power Block from Metallicize, Crystallize and
-    # Solar Isotoma is intentionally exempt from Frail). Deducting once at turn
-    # end is ARITHMETICALLY IDENTICAL -- eating the first 5 leaves
-    # max(0, gained - 5), and so does subtracting 5 at the end and clamping --
-    # and it is universal, so Navia's or Crystallize's Block cannot dodge the
-    # Bond the way a card-only funnel would let it.
-    #
-    # The one case where the two differ is a card that READS current Block
-    # mid-turn: the `player_block` formula token (Body Slam). That card is
-    # reference-pool only and the refs take no companions
-    # (rewards.NO_COMPANION_CHARACTERS), so the divergence is unreachable
-    # today. Recorded rather than assumed away -- if a roster character ever
-    # gets a Block-reading card, this is the note that says to move the
-    # deduction to a real gain funnel.
-    if p.powers.get("masque_red_death", 0):
-        paid = min(p.block, C.MASQUE_BOND_BLOCK)
-        p.block -= paid
-        state.emit("bond_of_life", amount=paid, owed=C.MASQUE_BOND_BLOCK)
     # Runs FIRST: the game's AutoPostPlay phase lands after the player's
     # plays and before turn end, so the free play resolves ahead of the
     # other end-of-turn triggers and well ahead of the enemy turn.
@@ -5910,16 +5957,20 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
         if p.powers["mc_grand_ode"] <= 0:
             del p.powers["mc_grand_ode"]
 
-    # Jean, Dandelion Breeze -- PERMANENT, stacks are COPIES. The Block is
-    # paid whether or not a Swirl landed: the sentence is two clauses joined
-    # by a bare "and", not a consequence, and that is also the reading that
-    # keeps a Rare Power from being dead against an aura-less board.
-    for _ in range(p.powers.get("mc_dandelion_breeze", 0)):
+    # Jean, Dandelion Breeze -- PERMANENT, and since the 2026-10-11 Companion
+    # pass the stack IS the Block (6 [9]; copies add into one payment, Durin's
+    # Principle of Purity shape), so the upgrade reaches it. One Swirl a turn.
+    # The Block is paid whether or not a Swirl landed: the sentence is two
+    # clauses joined by a bare "and", not a consequence, and that is also the
+    # reading that keeps a Rare Power from being dead against an aura-less
+    # board.
+    n = p.powers.get("mc_dandelion_breeze", 0)
+    if n:
         target = _mc_most_auras(state)
         if target is not None:
             reactions.resolve_hit(state, target, "anemo", 0, "swirl_op")
-        p.block += C.MC_DANDELION_BREEZE_BLOCK
-        state.emit("block", amount=C.MC_DANDELION_BREEZE_BLOCK)
+        p.block += n
+        state.emit("block", amount=n)
 
     # Albedo, Solar Isotoma -- PERMANENT, stacks are COPIES. BOTH halves are
     # inside the condition ("if any enemy has an aura, deal 8 damage to that
@@ -6306,10 +6357,42 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
         override = "pyro"
     if p.powers.pop("mi_crowfeather", 0):
         override = "electro"
-    if p.powers.pop("mc_swirl_charge", 0):
-        override = p.mc_swirl_element or override
-        p.mc_swirl_element = ""
+    # Varka's banked Swirl (the Varka round 3 fix, 2026-10-10) no longer
+    # claims the element: the Attack keeps its own, and the bank is spent
+    # here and paid after the Attack as a separate hit of the element banked
+    # now (`companion_overhaul_card_end`). A Swirl this Attack makes re-banks
+    # for the next one.
+    n = p.powers.pop("mc_swirl_charge", 0)
+    state.mc_swirl_rider = (n, p.mc_swirl_element) if n else (0, "")
+    p.mc_swirl_element = ""
     return override
+
+
+def companion_overhaul_card_end(state: CombatState, card: Card,
+                                aim: Optional[Enemy]) -> None:
+    """Varka's Sturm und Drang rider, paid once the Attack has resolved: "your
+    next Attack deals 6 additional damage of the swirled element" as ONE
+    separate hit of the element banked when the Attack was played, through
+    the arm's companion door (as Durin's or Bennett's pulse), on the enemy the Attack aimed at if it is alive, or on
+    every living enemy for an Attack that aims at none. Its own Oath scope,
+    as Baron Bunny's burst. C# twin: `SwirlChargePower.OnSpent`."""
+    n, element = state.mc_swirl_rider
+    state.mc_swirl_rider = (0, "")
+    if not n or not element or card.type != "attack":
+        return
+    if _card_aims_at_enemy(card):
+        targets = [aim] if aim is not None and aim.alive else []
+    else:
+        targets = list(state.living_enemies)
+    if not targets:
+        return
+    varka_oath.open_scope(state)
+    try:
+        for enemy in targets:
+            deal_damage_to_enemy(state, enemy, n, element=element,
+                                 source="companion")
+    finally:
+        varka_oath.close_scope(state)
 
 
 def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,
@@ -6344,7 +6427,7 @@ def companion_overhaul_before_enemy_hit(state: CombatState, enemy: Enemy,
     card's this-turn Strength loss does that job, before the attack.
     """
     p = state.player
-    # Dahlia, Sacramental Shower: "the next time an enemy attacks you, deal 9
+    # Dahlia, Sacramental Shower: "the next time an enemy attacks you, deal 12
     # Hydro damage to it FIRST" -- to IT, the attacker, and before its hit.
     if p.powers.get("mc_sacramental_shower", 0):
         _mc_spend_one(p, "mc_sacramental_shower")

@@ -199,16 +199,55 @@ def _no_draw_clause(c: dict[str, Any], relic: str) -> str:
     return ""
 
 
+#: The Klee round (2026-10-11): the powers on YOU that move a number a hand
+#: face prints. A face is worked out with no target (`PREVIEW_LEAVES_OUT_
+#: CLAUSE`), so an enemy's power is never in it. Split by the number they
+#: move, so a Block face under Strength names nothing.
+FACE_DAMAGE_MOVERS = ("strength", "weak", "shrink", "vigor")
+FACE_BLOCK_MOVERS = ("dexterity", "frail")
+#: The `Written:` note's tail where a power on you explains the difference.
+WRITTEN_FACE_MOVED_BY = " -- the difference is the board's: your {powers}.)"
+WRITTEN_FACE_NOTE = ("    (the line above this one is what the board is "
+                     "printing now; this is the card's own written face, off "
+                     "its sheet")
+
+
+def _face_movers(c: dict[str, Any], you: dict[str, Any] | None) -> list[str]:
+    """The powers on you that could have moved this face's number, by their
+    printed names: a damage face takes Strength, Weak, Shrink and Vigor, a
+    Block face Dexterity and Frail. Lane 5 read Shrink's 2 on Ka-pow! as
+    Weak's; the note now says which one is standing."""
+    if not you:
+        return []
+    text = str(c.get("written_face") or c.get("text") or "")
+    words: tuple[str, ...] = ()
+    if re.search(r"\bdamage\b", text, re.I):
+        words += FACE_DAMAGE_MOVERS
+    if re.search(r"\bBlock\b", text):
+        words += FACE_BLOCK_MOVERS
+    out: list[str] = []
+    for power in you.get("powers") or []:
+        stacks = power.get("stacks")
+        if (_fold(power.get("name")) in words and isinstance(stacks, int)
+                and stacks != 0 and power["name"] not in out):
+            out.append(str(power["name"]))
+    return out
+
+
 def _render_card(c: dict[str, Any], bullet: str = "-",
                  mark: str = "", raiser: dict[str, Any] | None = None,
-                 no_draw: str = "", copy_tag: str = "") -> list[str]:
+                 no_draw: str = "", copy_tag: str = "",
+                 you: dict[str, Any] | None = None) -> list[str]:
     """One card face. `mark` is a state the SCREEN is in about this row and
     not a fact about the card, so it goes at the END of the head, after the
     cost and the type -- the shape `EB-294` gave a picked bundle.
 
     `raiser` is `EB-752`'s held relic, or None: a rule that raises UNBLOCKED
     damage, which no damage face can fold and which therefore rides beside the
-    number instead of inside it."""
+    number instead of inside it.
+
+    `you` is the player, on a hand, so the `Written:` note can name the
+    power on you that moved the number (`_face_movers`)."""
     head = f"{bullet} **{c['title']}**"
     if c["upgraded"]:
         head += " (upgraded)"
@@ -282,9 +321,11 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # a board with nothing folding into it.
     if c.get("written_face"):
         out.append(f"    Written: {c['written_face']}")
-        out.append("    (the line above this one is what the board is "
-                   "printing now; this is the card's own written face, off "
-                   "its sheet -- the difference is the board's.)")
+        movers = _face_movers(c, you)
+        out.append(WRITTEN_FACE_NOTE + (
+            WRITTEN_FACE_MOVED_BY.format(powers=_and_list(
+                [f"**{m}**" for m in movers]))
+            if movers else " -- the difference is the board's.)"))
     if c.get("upgraded_face"):
         # The upgraded copy's cost slot, in the head line's own words, where
         # the upgrade moves a Spark price ("cost 2 Sparks" above, "cost 1
@@ -1660,6 +1701,24 @@ def _hit_on_you_source(hit: dict[str, Any],
     return ""
 
 
+def _in_play_order(hits: list[dict[str, Any]],
+                   applied: list[dict[str, Any]]
+                   ) -> list[tuple[str, dict[str, Any]]]:
+    """One row's hits and applied powers, in the order they happened.
+
+    The Klee round (2026-10-11): Fire! Fire! places a Bomb 7 and then sets
+    it off, and the page printed the hit above the "Put". The ledger stamps
+    both lists off one rising `seq`; where every entry carries one they merge
+    by it. An older mod sends none, and the page keeps its old order: every
+    hit, then every power.
+    """
+    tagged = ([("hit", h) for h in hits]
+              + [("applied", a) for a in applied])
+    if all(entry.get("seq") is not None for _, entry in tagged):
+        tagged.sort(key=lambda pair: pair[1]["seq"])
+    return tagged
+
+
 def _resolution_lines(rows: list[dict[str, Any]],
                       stage: bool = False,
                       enemies: list[dict[str, Any]] | None = None
@@ -1723,7 +1782,18 @@ def _resolution_lines(rows: list[dict[str, Any]],
                 out.append(RESOLUTION_NO_HITS_STAGE if stage
                            else RESOLUTION_NO_HITS)
             continue
-        for n, hit in enumerate(row["hits"], start=1):
+        n = 0
+        for kind, entry in _in_play_order(row["hits"], applied):
+            # 2026-09-26 (the Silent control seat): the powers it put on
+            # enemies.
+            if kind == "applied":
+                out.append((RESOLUTION_APPLIED if entry["amount"] > 0
+                            else RESOLUTION_REMOVED).format(
+                    power=entry["power"], n=abs(entry["amount"]),
+                    target=entry["target"] or "an enemy"))
+                continue
+            hit = entry
+            n += 1
             target = hit["target"] or "an enemy"
             # A body that died inside the play: the game hands the killing hit
             # to no damage hook, so the ledger files the death with no number.
@@ -1747,12 +1817,6 @@ def _resolution_lines(rows: list[dict[str, Any]],
             if hit["blocked"] > 0:
                 line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
             out.append(line)
-        # 2026-09-26 (the Silent control seat): the powers it put on enemies.
-        for a in applied:
-            out.append((RESOLUTION_APPLIED if a["amount"] > 0
-                        else RESOLUTION_REMOVED).format(
-                power=a["power"], n=abs(a["amount"]),
-                target=a["target"] or "an enemy"))
         out += oath_lines
         # And a kill the ledger did not file, read off the board: after the
         # numbered hits, because no place in their order is known.
@@ -3716,7 +3780,7 @@ def render(obs: dict[str, Any]) -> str:
         for i, card in enumerate(c["hand"]):
             out += _render_card(card, raiser=raiser, no_draw=no_draw,
                                 copy_tag=EXHAUST_COPY_TAG
-                                if i in exhausting else "")
+                                if i in exhausting else "", you=you)
             if wildfire is not None and _applies_pyro(card):
                 out.append(WILDFIRE_NOTE.format(n=wildfire))
             # The Varka payoff round (2026-10-10): where Four Winds'

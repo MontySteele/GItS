@@ -136,14 +136,8 @@ def test_the_grounded_tip_states_the_condition_and_the_payout():
     assert '"start of your turn, but only if you played no "' in tips
     assert '"[gold]Set off[/gold] card last turn.");' in tips
     assert "card prints what it pays." not in tips
-    sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
-        encoding="utf-8")
-    # `EB-622`: the payout moved 6 -> 4 (upgrade still `+2`, so 6 upgraded).
-    assert "gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold]" in sheet
-    # `EB-749` (R271 sec.5.1): the sheet row's own condition, held in step
-    # with the tip.
-    assert ("if you played no [gold]Set off[/gold] card last turn, gain 4 "
-            "[gold]Block[/gold]") in sheet
+    # (The sheet half left with the Grounded row: the Klee tempo paper,
+    # 2026-10-07, cut it. The tip stays until the power's engine pieces go.)
 
 
 def test_the_attach_is_scoped_to_the_quarantined_surface():
@@ -315,8 +309,6 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # and the first whose sentence comes and goes with the
                     # board.
                     "KLEEMOD-ARM_EMPTY_FIELD",
-                    # `EB-573`: what a merge keeps besides the Mine.
-                    "KLEEMOD-ARM_MERGE_RIDERS",
                     # `EB-709`: how many Plans a doubled carry-out is, on the
                     # one card that doubles one. A per-Plan reader's own face
                     # states its rate truthfully; what no face said is that a
@@ -366,28 +358,17 @@ def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
     assert "KLEEMOD-SWIRL_PREVIEW" not in keys
 
 
-def test_the_merge_row_says_riders_survive_it():
-    """`EB-573`. The rider the merge keeps, on the card that does the merging.
-
-    THE FIND (Klee r21 lane 1, (c) 4). "A Bomb 21 that was Jumpy's Bomb 8 two
-    merges and two turns ago still dropped Mine 3 on ALL when it went off. This
-    is a GOOD interaction and a large part of the kit's ceiling, and it is
-    completely undiscoverable except by accident."
-
-    Seen to FAIL: Careful Arrangement's face promises "a Mine if any of them
-    was" and says nothing about riders, and no badge counted one.
-    """
-    rows = {row["id"]: row for row in proto._rows()}
-    mergers = {rid for rid, row in rows.items() if gen.merges_bombs(row)}
-    assert mergers == {"proto_ko_careful_arrangement"}
+def test_no_row_merges_bombs_and_the_merge_rider_is_gone():
+    """`EB-573`'s merge-riders rider left with the merge (the Klee upper pass,
+    2026-10-11, pick 2 (a)). Exquisite Compound moves each Bomb AS ITSELF, so
+    a rider travels on its own charge the way a jump carries it, and there is
+    no sum left for a sentence to explain."""
     merge = (PROTOTYPE_DIR / "ProtoKoCarefulArrangement.cs").read_text(
         encoding="utf-8")
-    assert "ArmKeywordTips.ForMergeRiders(" in merge
-    # AND THE RIDER EXISTS TO SURVIVE: the one row that plants one.
-    riders = {rid for rid, row in rows.items()
-              if any(fx.get("payload_mine_all")
-                     for fx in gen.iter_effects(row.get("effects") or []))}
-    assert "proto_ko_jumpy_dumpty" in riders
+    assert "ForMergeRiders" not in merge
+    assert "GatherAllTo" in merge
+    assert "ForMergeRiders" not in TIPS_CS.read_text(encoding="utf-8")
+    assert not hasattr(gen, "merges_bombs")
 
 
 def test_a_set_off_row_on_a_bare_board_says_so():
@@ -454,8 +435,9 @@ def test_the_klee_tips_and_the_page_say_the_same_three_rules():
                                  "first. A random Set off picks an enemy "
                                  "with Bombs.")
     assert page["Set off"] == tips["SetOffKey"]
-    assert tips["MineKey"] == ("A Bomb that also goes off just before its "
-                               "enemy attacks. Any Set off spends it too.")
+    assert tips["MineKey"] == ("A Bomb that also goes off when its enemy "
+                               "attacks you. If it does not attack, the "
+                               "Mine waits. Any Set off spends it too.")
     assert page["Mine"] == tips["MineKey"]
     for gone in ("stacks beside the first", "Block stops it",
                  "the HP cap move it", "unless the Mine kills",
@@ -508,8 +490,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             "Gone after combat.",
-            "A [gold]Bomb[/gold] that also goes off just before its enemy ",
-            "attacks. Any ",
+            "A [gold]Bomb[/gold] that also goes off when its enemy attacks ",
+            "you. If it does not attack, the Mine waits. Any ",
             " spends it too.",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
@@ -1353,10 +1335,17 @@ GOLD_OP_TIPS = {"Summon": "the `stage_guest` op attaches ForSummon"}
 GOLD_NAMES = {
     "Bake-Kurage": "her pet, named on every Plan line; the Plan tip says "
                    "what it does",
-    "Bond of Life": "Arlecchino's power, titled on its own badge and the "
-                    "end-of-turn docket",
     "Shatters": "the Frozen reaction's preview, which the Cryo gem attaches, "
                 "defines a Shatter",
+    # Sucrose -- Mollis Favonius (the Varka payoff round, 2026-10-10) names
+    # the three reactions its 4 reaches, which the old "Elemental Reactions"
+    # overstated.
+    "Melt": "a reaction, defined by the reaction preview the Pyro and Cryo "
+            "gems attach and named on the reaction log",
+    "Vaporize": "a reaction, defined by the reaction preview the Pyro and "
+                "Hydro gems attach and named on the reaction log",
+    "Overloaded": "a reaction, defined by the reaction preview the Pyro and "
+                  "Electro gems attach and named on the reaction log",
 }
 
 

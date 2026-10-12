@@ -47,12 +47,12 @@ public class KleeSeatFixes20260925Tests
     public void Sparks_n_splash_prints_the_start_of_turn_rule_and_costs_one_upgraded()
     {
         const string rule =
-            "At the start of your turn, your largest [gold]Bomb[/gold] deals "
-          + "its size in [gold]Pyro[/gold] damage without going off.";
+            "At the start of your turn, your largest [gold]Bomb[/gold], on any "
+          + "enemy, deals its size in [gold]Pyro[/gold] damage without going off.";
         var card = new ProtoKoSparksNSplash();
         Assert.Equal(CardRarity.Rare, card.Rarity);
         Assert.Equal(CardType.Power, card.Type);
-        Assert.Equal(3, card.EnergyCost.Canonical);   // power cost sweep
+        Assert.Equal(2, card.EnergyCost.Canonical);   // the Klee upper pass, 2026-10-11
         Assert.Equal(rule, Face(card));
         // The badge says the same thing in the same words.
         Assert.Equal(rule, new BombEchoPower().Localization!
@@ -60,7 +60,7 @@ public class KleeSeatFixes20260925Tests
         // Upgrade (power cost sweep, 2026-09-30): Innate, cost unmoved.
         var up = Upgraded<ProtoKoSparksNSplash>();
         Assert.Contains(CardKeyword.Innate, up.Keywords);
-        Assert.Equal(3, up.EnergyCost.GetWithModifiers(CostModifiers.None));
+        Assert.Equal(2, up.EnergyCost.GetWithModifiers(CostModifiers.None));
     }
 
     [Fact]
@@ -98,12 +98,12 @@ public class KleeSeatFixes20260925Tests
     }
 
     [Fact]
-    public void A_bomb_4_placed_last_turn_is_read_as_8_and_stays()
+    public void A_bomb_4_placed_last_turn_is_read_as_6_and_stays()
     {
-        // REAL: the pick. A Bomb 4 placed last turn grows by rule 1's 4 at the
-        // start of the turn, and the echo reads the grown 8 -- reading takes
-        // nothing off the pile.
-        Assert.Equal(4, KleeOverhaulLaw.BombGrowth);
+        // REAL: the pick. A Bomb 4 placed last turn grows by rule 1's 2 at the
+        // start of the turn (4 until the Klee design review, 2026-10-08), and
+        // the echo reads the grown 6 -- reading takes nothing off the pile.
+        Assert.Equal(2, KleeOverhaulLaw.BombGrowth);
         var klee = Seat.Klee();
         var enemy = Seat.Klee(200).Creature;
         ProtoBombs.Board(klee.Creature, enemy);
@@ -113,8 +113,8 @@ public class KleeSeatFixes20260925Tests
         var (target, size) = ProtoBombPower.LargestBombFor(klee.Creature);
 
         Assert.Same(enemy, target);
-        Assert.Equal(8, size);
-        Assert.Equal(new[] { 8 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(6, size);
+        Assert.Equal(new[] { 6 }, pile.Charges.Select(c => c.Size));
     }
 
     [Fact]

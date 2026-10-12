@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoAlicesDetonator : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeExpansion.WithKapowPreview(base.ExtraHoverTips, this);
+        KleeExpansion.WithAlicesMinePreview(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_alices_detonator");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Detonator"),
-        ("description", "At the start of your turn, add {IfUpgraded:show:an upgraded|a} Ka-pow! to your hand."),
+        ("description", "At the start of your turn, add {IfUpgraded:show:an upgraded |}Alice's Mine to your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

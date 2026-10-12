@@ -832,18 +832,18 @@ CO_TENANCY_LEDGER = {
             "broadcast applies the mark, only a card play does, and a card "
             "play is strictly later",
         ("Powers/Prototype/KleeExpansionPowers.cs", "SecretBasePower"):
-            "(the Klee overhaul, R276). Klee's Secret Base reads "
-            "the board and places a Bomb. THE ORDERING QUESTION, answered: "
-            "its one co-tenant that writes the board is DodocoPower, so the "
-            "two do not run independently -- both call "
-            "KleeExpansion.RunTurnStartPlacements, whose per-turn ledger latch "
-            "runs Secret Base's check and then Dodoco's Mine in one fixed "
-            "order however the broadcast orders the two, the sim's "
-            "klee_overhaul._turn_start_expansion order",
+            "(the Klee overhaul, R276; v3 in the scaling pass, "
+            "klee-next 2026-10-05). Klee's Secret Base places a Bomb every "
+            "turn. THE ORDERING QUESTION, answered: its one co-tenant that "
+            "writes the board is DodocoPower, so the two do not run "
+            "independently -- both call KleeExpansion.RunTurnStartPlacements, "
+            "whose per-turn ledger latch places Secret Base's Bomb and then "
+            "Dodoco's Mine in one fixed order however the broadcast orders "
+            "the two, the sim's klee_overhaul._turn_start_expansion order",
         ("Powers/Prototype/KleeExpansionPowers.cs", "DodocoPower"):
             "(the Klee overhaul, R276). Dodoco's Mine, placed "
             "through the same sequencer as SecretBasePower above and AFTER "
-            "its check, so the one resource they share has one order. It "
+            "its Bomb, so the one resource they share has one order. It "
             "reads nothing else of this broadcast's",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BombEchoPower"):
             "(the Klee overhaul; moved here from "
@@ -862,13 +862,6 @@ CO_TENANCY_LEDGER = {
             "HeraldOfFrostPower's Cryo can land before or after it (the sim runs those earlier, in "
             "effects.player_turn_start_triggers), and SurpriseDispatchPower "
             "draws from the same rng",
-        ("Powers/Prototype/KleeExpansionPowers.cs", "AlicesDetonatorBasePower"):
-            "(the Klee overhaul, R276). Alice's Detonator adds a "
-            "Ka-pow! (upgraded on the Plus twin) to the hand per stack. THE "
-            "ORDERING QUESTION, answered: it reads nothing but its own "
-            "Amount, and its one write is the hand, the write NaptimePower, "
-            "LionsFangPower and BlazingDelightPower already make here on the "
-            "same terms -- no co-tenant reads the hand's contents",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "BlazingDelightPower"):
             "(the Klee overhaul, `EB-732`). Per-turn Energy plus "
             "one draw per stack. THE ORDERING QUESTION, answered: it reads "
@@ -903,6 +896,15 @@ CO_TENANCY_LEDGER = {
             "up. Two Melody Loops are on two different enemies by "
             "construction, because the card places the power on the body it "
             "targeted",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "SturmUndDrangPower"):
+            "(the 2026-10-11 Companion pass: Varka, Sturm und Drang). Swirls "
+            "a random enemy. THE ORDERING QUESTION, answered, and it is a "
+            "RACE filed as a BACKLOG line beside Durin's: the Swirl reads the "
+            "aura MelodyLoopPower, HeraldOfFrostPower, PurityStrikePower or "
+            "AncientSeaAuthorityPower lays, and it draws from "
+            "Rng.CombatTargets beside them. The sim runs it right after "
+            "Durin's hit (effects.companion_overhaul_turn_start); the mod "
+            "gives no order among same-broadcast tenants",
         ("Powers/Prototype/PrincipleOfPurity.cs", "PurityStrikePower"):
             "(the AoE trim, 2026-10-03: Durin, Principle of "
             "Purity). One powered Pyro hit at a random enemy. THE ORDERING "
@@ -967,14 +969,19 @@ CO_TENANCY_LEDGER = {
             "Klee kit-grant check: adds a card to the hand when the meter "
             "is charged",
         ("Powers/FontainePowers.cs", "MasqueRedDeathPower"):
-            "per-turn Strength mint",
+            "per-turn HP loss (1, unblockable) then Strength mint (2026-10-11 "
+            "Companion pass). The HP loss reads and writes only its owner's "
+            "HP, which no co-tenant here reads",
         ("Powers/FontainePowers.cs", "AncientSeaAuthorityPower"):
-            "co-op notes pick 4 (2026-10-02): Neuvillette's per-turn Hydro on "
-            "a random enemy. It writes one enemy aura and reads nothing a "
-            "co-tenant here writes; the sim applies it in "
-            "player_turn_start_triggers after the Strength mints, and no "
-            "co-tenant of this broadcast reads an enemy aura, so the order "
-            "cannot move a number",
+            "Neuvillette's per-turn 5 Hydro damage on a random enemy (the "
+            "2026-10-11 Companion pass; it applied Hydro only before). THE "
+            "ORDERING QUESTION, answered, and it is a RACE filed as a "
+            "BACKLOG line beside Durin's: the hit can react with the aura "
+            "MelodyLoopPower, HeraldOfFrostPower or PurityStrikePower lays "
+            "and it draws from Rng.CombatTargets beside them. The sim runs "
+            "it in player_turn_start_triggers after the Strength mints and "
+            "before the companion overhaul block; the mod gives no order "
+            "among same-broadcast tenants",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
             "Kokomi kit-grant check: adds a card when charged. Its input, the "
             "Charge meter, is minted a broadcast earlier (see "
@@ -1409,12 +1416,10 @@ def test_broadcast_co_tenancy_is_registered(hook):
 # --- the turn-end sequence, pinned ------------------------------------------
 
 # (call the sequencer makes, the sim line that puts it here)
-TURN_END_SEQUENCE = (
-    ("PayBondOfLife",
-     "effects.player_turn_end_triggers pays masque_red_death's Bond FIRST, "
-     "at the top of the function, so it eats the Block the turn produced "
-     "rather than the Kurage pulse's mending"),
-)
+# Empty since the 2026-10-11 Companion pass: Arlecchino's Bond of Life, the
+# last sequenced step (`PayBondOfLife`), left the card. The gates below still
+# pin that the sequencer walks the table, for the next ordered tenant.
+TURN_END_SEQUENCE: tuple = ()
 
 
 def _sequencer_body() -> str:

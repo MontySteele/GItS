@@ -82,9 +82,13 @@ from tier0.engine.state import Card, CombatState, Enemy, KleeCharge
 #: not: it went live in both engines with the round-11 pass and never reached
 #: this tuple, so the parity test that walks it never asked about it.
 OVERHAUL_OPS = frozenset((
-    "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+    "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
+    # The Klee scaling pass's Witch's Homework (klee-next, 2026-10-05).
+    "plant_homework_bomb",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test's read.
+    "damage_from_bombs",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
     "plant_bomb_copy_largest",
@@ -99,7 +103,7 @@ OVERHAUL_OPS = frozenset((
     #: Play!), random Companion cards made free this turn (Tag Along,
     #: Adventure Club) and Alice's Detonator's install.
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
-    "add_random_companion", "grant_kapow_each_turn",
+    "choose_companion", "grant_alices_mine_each_turn",
     #: THE STATUS PACKAGE's two (2026-10-01): every status in hand becomes a
     #: Pop! (Klee Can Explain!), and every status in hand is exhausted to grow
     #: the largest Bomb (Albedo -- Dust of Purification).
@@ -1220,37 +1224,32 @@ def block_absorbed(state: CombatState, enemy: Enemy, blocked: int,
 # THE CARD VERBS THAT ARE NOT A SET OFF
 # ---------------------------------------------------------------------------
 
-def merge_all_to(state: CombatState, dest: Optional[Enemy],
-                 growth: int) -> None:
-    """Careful Arrangement: move ALL your Bombs onto one enemy AS ONE Bomb,
-    which then grows by `growth`. `MergeAllTo`'s twin.
+def gather_all_to(state: CombatState, dest: Optional[Enemy],
+                  growth: int) -> None:
+    """Exquisite Compound: "Move all your Bombs onto the enemy. Each grows by
+    4 [6]." `GatherAllTo`'s twin.
 
-    TWO THINGS THE CARD TEXT DOES NOT SAY, and both are the mod's reported
-    defaults taken unchanged: the merged Bomb is a MINE if any merged charge
-    was one (merging must not silently delete the defence the player set up),
-    and it carries the payloads of every merged charge, summed. A merge is a
-    move, and a move loses nothing.
+    THE KLEE UPPER PASS (2026-10-11, `review/active/klee-upper-pass-2026-10-11.md`
+    pick 2 (a)) dropped the old merge: every Bomb that goes off pays a Spark,
+    so folding three into one threw two away. Each charge now lands on `dest`
+    as ITSELF -- a Mine stays a Mine, its payload rides with it -- and grows by
+    `growth`. The ones already on `dest` are hers too, so they grow as well.
 
     THE SOURCES ARE THE LIVING BOARD (`HittableEnemies`), so a corpse's pile is
     not gathered -- the sweep is what moves that one, and it moves it whole.
     """
     if dest is None or not live(state):
         return
-    size = 0
-    is_mine = False
-    payload = 0
-    merged = 0
+    moved: list[KleeCharge] = []
     for enemy in list(state.living_enemies):
-        for charge in take_all(enemy):
-            size += charge.size
-            is_mine |= charge.is_mine
-            payload += charge.payload_mine_all
-            merged += 1
-    if size == 0:
+        moved.extend(take_all(enemy))
+    if not moved:
         return
-    state.emit("ko_bombs_merged", to=dest.name, charges=merged, size=size,
+    state.emit("ko_bombs_gathered", to=dest.name, charges=len(moved),
                growth=growth)
-    place(state, dest, size + growth, is_mine, payload)
+    for charge in moved:
+        place(state, dest, charge.size + growth, charge.is_mine,
+              charge.payload_mine_all)
 
 
 def remove_largest_for_block(state: CombatState) -> int:
@@ -1338,10 +1337,15 @@ def block_for_largest_bomb(state: CombatState, cap: int) -> int:
     return gained
 
 
-def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
+def grow_largest_per_spark(state: CombatState, per_spark: int,
+                           only_on: Optional[Enemy] = None) -> int:
     """Stoke the Fuse (the round-11 pool pass): the SINGLE largest Bomb on the
     board grows by `per_spark` for every Spark the card spent. Returns the
     growth applied, 0 if nothing grew. `GrowLargestPerSpark`'s twin.
+
+    `only_on` restricts the walk to one enemy (the card aims since the Klee
+    pass round, pick 3 (b): "your largest Bomb on the enemy"); None keeps the
+    board-wide walk. A target holding no Bomb grows nothing.
 
     WHAT "PER SPARK SPENT" READS. The row's price is `spend_spark: all`, so
     the Sparks spent are exactly the bank as it stood when the card was played
@@ -1377,6 +1381,8 @@ def grow_largest_per_spark(state: CombatState, per_spark: int) -> int:
     best_index = -1
     best_size = 0
     for enemy in list(state.living_enemies):
+        if only_on is not None and enemy is not only_on:
+            continue
         for index, charge in enumerate(enemy.ko_charges):
             if charge.size > best_size:
                 best_enemy, best_index, best_size = enemy, index, charge.size
@@ -1581,19 +1587,20 @@ WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw N, +1 Energy
 PARTY_POPPERS = "ko_party_poppers"        # Spark-priced play: Bomb N
 LOOK_OUT = "ko_look_out"                  # a Mine goes off: N Block
 PATIENCE = "ko_patience"                  # quiet turn: largest grows N
-SECRET_BASE = "ko_secret_base"            # empty board at turn start: Bomb N
+SECRET_BASE = "ko_secret_base"            # turn start: Bomb N
 DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
 SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N to ALL
 SIT_TIGHT = "ko_sit_tight"                # held turn: N Block at turn end
-ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Ka-pow!
+ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Alice's Mine
 ALICES_DETONATOR_PLUS = "ko_alices_detonator_plus"  # ... an upgraded one
 
 #: Wait For It...'s printed payout, per copy. `WaitForItPower.Cards/Energy`.
 WAIT_FOR_IT_ENERGY = int(C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY)
 
-#: The one Ka-pow! Alice's Detonator hands over -- the starter's own row.
-KAPOW_ID = "proto_ko_kapow"
+#: The card Alice's Detonator hands over (2026-10-11; was the starter's
+#: Ka-pow!): Alice's Mine, an off-pool row, 0, Ethereal, Exhaust, a Mine 10.
+ALICES_MINE_ID = "proto_ko_alices_mine"
 
 
 def is_companion_card(state: CombatState, card: Optional[Card]) -> bool:
@@ -1661,13 +1668,13 @@ def spend_playdate(state: CombatState, card: Card) -> None:
 
 
 def boom_badge_factor(copies: int) -> int:
-    """What `copies` Boom Badges multiply the next Set off's Bombs by: x2 per
-    copy, 1 with none. `BoomBadgePower.FactorFor`'s twin.
+    """What `copies` Boom Badges multiply the next Set off's Bombs by: x2 with
+    any, 1 with none. `BoomBadgePower.FactorFor`'s twin.
 
-    EVERY COPY DOUBLES THE SAME NEXT SET OFF, Playdate's reading: two badges
-    are two sentences about one Set off, so they stack to x4 there rather than
-    queueing onto the Set off after it."""
-    return 2 ** int(copies) if copies > 0 else 1
+    BADGES DO NOT STACK (the Klee scaling pass, klee-next 2026-10-05,
+    `review/active/klee-scaling-pass-2026-10-05.md` sec.4 C): two badges on
+    one Set off are x2, not x4."""
+    return 2 if copies > 0 else 1
 
 
 def take_boom_badge(state: CombatState, card: Optional[Card] = None) -> int:
@@ -1847,10 +1854,19 @@ def random_companion_pool(state: CombatState) -> list[Card]:
                   key=lambda c: c.id)
 
 
-def add_random_companions(state: CombatState, amount: int) -> int:
-    """Tag Along and Adventure Club: `amount` random Companion cards into the
-    hand, free this turn. `KleeExpansion.AddRandomCompanions`'s twin.
-    Returns how many arrived."""
+#: The sim pilot's keep order for `choose_companions`: the rarest first.
+_COMPANION_KEEP_RANK = {"rare": 0, "uncommon": 1, "common": 2}
+
+
+def choose_companions(state: CombatState, amount: int, options: int) -> int:
+    """Tag Along (choose 1 of 3) and Adventure Club (choose 2 of 4): `options`
+    DISTINCT Companion cards off `random_companion_pool`, keep `amount`, each
+    free this turn. `KleeExpansion.ChooseCompanions`'s twin (the Klee upper
+    pass, 2026-10-11; they were random adds).
+
+    THE PICK IS THE PILOT'S, and this engine has no screen: it keeps the
+    rarest offered first, ties in offer order -- a fixed rule, so a replay
+    keeps what it kept. Returns how many arrived."""
     if not live(state) or amount <= 0:
         return 0
     import copy                                     # stdlib, local by habit
@@ -1858,15 +1874,18 @@ def add_random_companions(state: CombatState, amount: int) -> int:
     pool = random_companion_pool(state)
     if not pool:
         return 0
+    offered = state.rng.sample(pool, min(int(options), len(pool)))
+    state.emit("ko_companions_offered", cards=[c.id for c in offered])
+    ranked = sorted(offered,
+                    key=lambda c: _COMPANION_KEEP_RANK.get(c.rarity, 3))
     arrived = 0
-    for _ in range(int(amount)):
+    for pick in ranked[:int(amount)]:
         if len(state.player.hand) >= C.MAX_HAND_SIZE:
             break
-        pick = state.rng.choice(pool)
         card = copy.deepcopy(pick)
         card.free_this_turn = True
         state.player.hand.append(card)
-        state.emit("ko_random_companion", card=card.id)
+        state.emit("ko_companion_chosen", card=card.id)
         arrived += 1
     return arrived
 
@@ -1882,20 +1901,20 @@ def install_detonator(state: CombatState, upgraded: bool) -> None:
 
 
 def _turn_start_expansion(state: CombatState) -> None:
-    """The expansion's three start-of-turn Powers, after the draw and after
-    rule 1's growth (`AfterPlayerTurnStart`): Klee's Secret Base, Dodoco and
-    Alice's Detonator."""
-    import copy                                     # stdlib, local by habit
-    from tier0.content import loader                # late import: cycle
-
+    """The expansion's start-of-turn Powers, after the draw and after rule 1's
+    growth (`AfterPlayerTurnStart`): Klee's Secret Base and Dodoco. (Alice's
+    Detonator moved to `before_hand_draw` on 2026-10-11.)"""
     p = state.player
     # THE ORDER IS THE MOD'S ONE SEQUENCER (`KleeExpansion
     # .RunTurnStartPlacements`): Sparks 'n' Splash's echo reads the grown
-    # Bombs first (2026-09-25), then Secret Base reads the board BEFORE
-    # Dodoco's Mine lands, so none of the three can race.
+    # Bombs first (2026-09-25), then Klee's Secret Base's Bomb, then Dodoco's
+    # Mine.
     bomb_echo(state)
+    # Klee's Secret Base v3 (the scaling pass, klee-next 2026-10-05): "At the
+    # start of your turn, place a Bomb 4 [6] on a random enemy." The stack
+    # adds (two copies: one Bomb 8), placed after the growth.
     n = p.powers.get(SECRET_BASE, 0)
-    if n and not any_bomb_placed(state):
+    if n:
         living = list(state.living_enemies)
         if living:
             dest = state.rng.choice(living)
@@ -1908,13 +1927,25 @@ def _turn_start_expansion(state: CombatState) -> None:
             dest = state.rng.choice(living)
             state.emit("ko_dodoco", target=dest.name, size=n)
             place(state, dest, n, is_mine=True)
-    for key, cid in ((ALICES_DETONATOR, KAPOW_ID),
-                     (ALICES_DETONATOR_PLUS, KAPOW_ID + "+")):
+
+
+def before_hand_draw(state: CombatState) -> None:
+    """Alice's Detonator (2026-10-11): one Alice's Mine per copy (upgraded on
+    the Plus twin) BEFORE the turn's draw -- `AlicesDetonatorBasePower
+    .BeforeHandDraw`, the base game's Sentry Mode site."""
+    import copy                                     # stdlib, local by habit
+    from tier0.content import loader                # late import: cycle
+
+    if not live(state):
+        return
+    p = state.player
+    for key, cid in ((ALICES_DETONATOR, ALICES_MINE_ID),
+                     (ALICES_DETONATOR_PLUS, ALICES_MINE_ID + "+")):
         for _ in range(p.powers.get(key, 0)):
             if len(p.hand) >= C.MAX_HAND_SIZE:
                 break
             p.hand.append(copy.deepcopy(loader.get_card(cid)))
-            state.emit("ko_kapow_added", card=cid)
+            state.emit("ko_alices_mine_added", card=cid)
 
 
 def _turn_end_expansion(state: CombatState) -> None:
@@ -2116,12 +2147,19 @@ def exhaust_statuses(state: CombatState) -> int:
     return len(victims)
 
 
-def exhaust_statuses_grow_largest(state: CombatState, per: int) -> int:
+def exhaust_statuses_grow_largest(state: CombatState, per: int,
+                                  draw_each: int = 0) -> int:
     """Albedo -- Dust of Purification: "Exhaust every status in your hand.
-    Your largest Bomb grows by 6 [8] for each." One growth of `per` times the
-    count, after the exhausts; no Bomb and the exhausts still happen."""
+    Your largest Bomb grows by 6 [8] for each. Draw 1 card for each." One
+    growth of `per` times the count, after the exhausts; no Bomb and the
+    exhausts still happen. Then the draw, `draw_each` per status exhausted
+    (the 2026-10-11 Companion pass), after the growth as printed."""
     n = exhaust_statuses(state)
     if n and per > 0:
         grow_largest(state, int(per) * n)
     state.emit("ko_dust_of_purification", exhausted=n, per=int(per))
+    cards = int(draw_each) * n
+    if cards > 0:
+        state.draw(cards)
+        state.emit("extra_draw", amount=cards)   # A5 velocity accounting
     return n

@@ -58,7 +58,7 @@ public sealed class ProtoMcBarbaraMelodyLoop : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
+            new CalculationBaseVar(5m),
             new CalculationExtraVar(1m),
             new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new DynamicVar("PowerAmount", 3m)

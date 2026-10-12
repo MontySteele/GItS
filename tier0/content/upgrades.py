@@ -159,7 +159,7 @@ def _proto_grow(effects: list[dict]) -> dict | None:
     return next((fx for fx in effects
                  if (fx.get("op") == "grow_bombs"
                      and isinstance(fx.get("amount"), int))
-                 or (fx.get("op") == "merge_bombs"
+                 or (fx.get("op") == "gather_bombs"
                      and isinstance(fx.get("growth"), int))
                  or (fx.get("op") == "grow_largest_bomb"
                      and isinstance(fx.get("per_spark"), int))), None)
@@ -527,6 +527,9 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     # sets contributes and the index is byte-identical to what it was.
     reachable |= set(C.KLEE_OVERHAUL_STARTER_IDS)
     reachable |= set(C.KLEE_OVERHAUL_POOL_IDS)
+    # Rows her cards create at play (Pop!, Alice's Mine): the upgraded
+    # Alice's Detonator hands over Alice's Mine+, so it must resolve.
+    reachable |= set(C.KLEE_OFF_POOL_ROW_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_POOL_IDS)
     reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
@@ -794,6 +797,14 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                                   if fx.get("op") == "set_off"
                                   and int(fx.get("damage", 0) or 0) > 0),
                                  "damage", val)
+            if not ok:
+                # The Klee tempo paper (Simmer): the flat part of a
+                # `damage_from_bombs` hit, the codegen's third owner of the
+                # Damage var (`bomb_read_damage_var_effect`), same order.
+                ok = _bump_first((fx for fx in top
+                                  if fx.get("op") == "damage_from_bombs"
+                                  and int(fx.get("amount", 0) or 0) > 0),
+                                 "amount", val)
         elif key == "bomb_size":
             # EB-283, the overhaul Bomb's printed size (`plant_bomb.size`).
             # Distinct from `bomb_damage`, which is the SHIPPED Bomb's
@@ -814,7 +825,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # THE KOKOMI EXPANSION's Shoal Call rides the same key: its
             # Nips arrive upgraded.
             hit = next((fx for fx in top
-                        if fx.get("op") == "grant_kapow_each_turn"
+                        if fx.get("op") in ("grant_alices_mine_each_turn",
+                                            "plant_homework_bomb")
                         or (fx.get("op") == "kokomi"
                             and fx.get("kind") == "shoal_call")), None)
             # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into
@@ -843,7 +855,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                  if fx.get("op") == "block_largest_bomb"),
                 "cap", val)
         elif key == "grow":
-            # One key, three ops: `grow_bombs.amount`, `merge_bombs.growth`
+            # One key, three ops: `grow_bombs.amount`, `gather_bombs.growth`
             # and `grow_largest_bomb.per_spark` are all "how much the Bombs
             # grow", and a row carries at most one of them. The third is a
             # RATE rather than a flat amount and still takes this key, for
@@ -853,7 +865,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if fx.get("op") == "grow_bombs"), "amount", val)
             if not ok:
                 ok = _bump_first((fx for fx in top
-                                  if fx.get("op") == "merge_bombs"),
+                                  if fx.get("op") == "gather_bombs"),
                                  "growth", val)
             if not ok:
                 ok = _bump_first((fx for fx in top
@@ -886,6 +898,15 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                               if fx.get("op") == "spend_spark"
                               and isinstance(fx.get("amount"), int)),
                              "amount", val)
+            # A PRICE CUT TO NOTHING IS NO PRICE (Blazing Delight, the Klee
+            # upper pass 2026-10-11: 1 [0] Spark). `spend_spark` refuses an
+            # amount of 0, and the mod's gate reads 0 as free
+            # (`gen_klee_cards`, `spark_can_be_free`), so the op leaves.
+            if ok:
+                top[:] = [fx for fx in top
+                          if not (fx.get("op") == "spend_spark"
+                                  and isinstance(fx.get("amount"), int)
+                                  and fx["amount"] <= 0)]
         elif key == "mend":
             ok = _bump_first((fx for fx in top if fx.get("op") == "mend"),
                              "amount", val)
@@ -1020,17 +1041,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
-        elif key == "tide_draw":
-            # `EB-478`, R257. Tide Chart's FLAT half -- "draw 1 more", meaning
-            # one card on top of the one per Plan carried out. A key of its own
-            # rather than `draw`, because the two are different promises: a
-            # `draw` delta moves a number the card draws NOW, and this one
-            # moves a number paid next morning against a count the play cannot
-            # see. Binding it to `draw` would also make a row carrying both a
-            # cantrip and this op upgrade the wrong half.
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "draw_after_plans"),
-                             "amount", val)
         elif key == "draw_and_discard":
             # ONE DynamicVar read by two ops (Prepared: draw N, discard N).
             # Bumping only one of them would upgrade half a card, so this
@@ -1273,8 +1283,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # became an upgradable number the moment the look started handing
             # one of them over: "look at 2, bury 1" is no better for showing 3,
             # and "look at 3, TAKE 1" is. A key of its own rather than `draw`,
-            # for `tide_draw`'s reason -- these are different promises and one
-            # row could print both.
+            # because these are different promises and one row could print
+            # both.
             #
             # THE WHOLE SCRY FAMILY in one ordered walk, so a look-and-bury row
             # that later wants the same upgrade needs no key of its own. No row

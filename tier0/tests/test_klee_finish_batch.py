@@ -53,10 +53,11 @@ def test_the_status_readers_see_confiscated(overhaul):
 
 # 2. Finders Keepers draws ------------------------------------------------------
 
-def test_finders_keepers_is_4_upgrading_to_6(overhaul):
+def test_finders_keepers_is_6_upgrading_to_8(overhaul):
+    # 4 [6] until the Klee design review (2026-10-08): every placer +2.
     card = load("proto_ko_finders_keepers")
-    assert _first(card, "apply_power")["amount"] == 4
-    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 6
+    assert _first(card, "apply_power")["amount"] == 6
+    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 8
 
 
 # 3. Dodoco Tales opens at 5 ----------------------------------------------------
@@ -72,11 +73,11 @@ def test_mine_all_mine_is_damage_then_a_mine(overhaul):
     card = load("proto_ko_mine_all_mine")
     assert [fx["op"] for fx in card.effects] == ["damage", "plant_bomb"]
     assert _first(card, "damage")["amount"] == 8
-    assert _first(card, "plant_bomb")["size"] == 4
+    assert _first(card, "plant_bomb")["size"] == 6     # 4 until 2026-10-08
     assert _first(card, "plant_bomb")["mine"] is True
     up = _up("proto_ko_mine_all_mine")
     assert _first(up, "damage")["amount"] == 11
-    assert _first(up, "plant_bomb")["size"] == 6
+    assert _first(up, "plant_bomb")["size"] == 8
 
 
 def test_mine_all_mine_sets_nothing_off(overhaul):
@@ -85,7 +86,7 @@ def test_mine_all_mine_sets_nothing_off(overhaul):
     klee_overhaul.place(st, a, 5, is_mine=True)
     play(st, load("proto_ko_mine_all_mine"), aim=a)
     assert [(c.size, c.is_mine) for c in a.ko_charges] == [(5, True),
-                                                           (4, True)]
+                                                           (6, True)]
     assert a.hp < 200
 
 

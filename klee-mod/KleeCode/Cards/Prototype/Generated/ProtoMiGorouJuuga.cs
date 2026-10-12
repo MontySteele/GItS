@@ -52,7 +52,7 @@ public sealed class ProtoMiGorouJuuga : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Juuga: Forward Unto Victory"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

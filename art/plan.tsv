@@ -1517,7 +1517,9 @@ proto_ko_big_badda_boom	ImageGen/images/cards/klee/proto_ko_big_badda_boom.png	5
 proto_ko_the_big_one	ImageGen/images/cards/klee/proto_ko_the_big_one.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Sky Firework Card 8.png		splash	
 # proto_ko_alices_recipe <- alchemical_curiosity: a written alchemy note -- Alice's Recipe is a formula on paper
 proto_ko_alices_recipe	ImageGen/images/cards/klee/proto_ko_alices_recipe.png	500	380	contain	center	shortlist	1	png	Item Naganohara Fireworks Note.png		item	
-proto_ko_mine_toss	ImageGen/images/cards/klee/proto_ko_mine_toss.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item	
+proto_ko_mine_toss	ImageGen/images/cards/klee/proto_ko_mine_toss.png	500	380	contain	center	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item	krash_kaboom_mine
+# proto_ko_alices_mine <- mine_toss: Alice's Detonator's token (2026-10-11) shares Mine Toss's Krash-Kaboom Mine, a closer crop
+proto_ko_alices_mine	ImageGen/images/cards/klee/proto_ko_alices_mine.png	500	380	cover_autocrop	contain@0.02	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Krash-Kaboom Mine.png		item	krash_kaboom_mine
 # proto_ko_spinning_sparkler <- NEW: Klee in a burst of sparkles, the Sparkling Steps short. Was the fwoosh spare
 #   (Starlit Sky Firework Card 9), which showed Tighnari, not Klee; that painting is now worn by no card.
 proto_ko_spinning_sparkler	ImageGen/images/cards/klee/proto_ko_spinning_sparkler.png	500	380	cover	x0.63,y0.50@1.7	shortlist	1	png	Sparkling Steps 2022-07-13 - Klee Shorts.png		splash	
