@@ -39,6 +39,11 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
 {
     public override ModifierAlignment Alignment => ModifierAlignment.Good;
 
+    /// <summary>The Custom screen's tickbox icon (the official Spiral Abyss
+    /// emblem). <c>ModifierModel.Icon</c> falls back to the missing-icon
+    /// square when this does not resolve.</summary>
+    protected override string IconPath => KleePck.Path(AbyssMenu.IconFile) ?? base.IconPath;
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Spiral Abyss"),
@@ -142,6 +147,10 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         var isElite = combatRoom.RoomType == RoomType.Elite;
         var isBoss = combatRoom.RoomType == RoomType.Boss;
 
+        // The badges first (display only, AbyssDisplay): one per Shadow in
+        // force on every enemy that starts the fight.
+        foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, Record);
+
         if (Has(AbyssShadow.Herald))
         {
             foreach (var enemy in enemies) await HeraldBuff(enemy);
@@ -169,6 +178,8 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // an enemy too. The two elite-entry Shadows are about entering combat,
         // so a summon does not take them.
         if (creature.Side != CombatSide.Enemy) return;
+        // A summoned enemy wears the badges too (display only).
+        AbyssDisplay.ShowShadows(creature, Record);
         if (Has(AbyssShadow.Herald)) await HeraldBuff(creature);
     }
 

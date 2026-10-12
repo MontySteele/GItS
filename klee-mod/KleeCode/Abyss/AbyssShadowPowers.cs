@@ -1,0 +1,86 @@
+using System.Collections.Generic;
+using BaseLib.Abstracts;
+using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.Models;
+
+namespace KleeMod.Abyss;
+
+/// <summary>
+/// THE SHADOW BADGES (2026-10-12): in an Abyss combat every enemy wears one
+/// badge per Shadow in force, whose tooltip is the Shadow's text. DISPLAY
+/// ONLY: the Shadow's effect is the <see cref="SpiralAbyss"/> modifier's hook,
+/// and this power overrides no hook, so it changes nothing by being there.
+///
+/// PUT ON QUIETLY. <see cref="AbyssDisplay.ShowShadows"/> attaches it with
+/// <c>PowerModel.ApplyInternal</c> rather than <c>PowerCmd.Apply</c>, so no
+/// power-applied hook, no Artifact check and no combat-history row sees it: a
+/// listener that reacts to an enemy gaining a power never meets a badge.
+///
+/// <see cref="PowerStackType.Single"/>: the amount is hidden and always 1.
+/// </summary>
+public abstract class AbyssShadowPower : PowerModel, ILocalizationProvider
+{
+    public abstract AbyssShadow Shadow { get; }
+
+    /// <summary>The pck-relative icon, a literal per subclass so
+    /// <c>validate.ps1</c> S12 can see it (read by <c>KleePowerIcons</c>).</summary>
+    public abstract string IconFile { get; }
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", AbyssText.Name(Shadow)),
+        ("description", AbyssText.Text(Shadow)),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+}
+
+public sealed class AbyssClockShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.Clock;
+    public override string IconFile => "abyss/powers/shadow_clock.png";
+}
+
+public sealed class AbyssMageShieldShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.MageShield;
+    public override string IconFile => "abyss/powers/shadow_mage_shield.png";
+}
+
+public sealed class AbyssSheerColdShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.SheerCold;
+    public override string IconFile => "abyss/powers/shadow_sheer_cold.png";
+}
+
+public sealed class AbyssElementalMarkShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.ElementalMark;
+    public override string IconFile => "abyss/powers/shadow_elemental_mark.png";
+}
+
+public sealed class AbyssHeraldShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.Herald;
+    public override string IconFile => "abyss/powers/shadow_herald.png";
+}
+
+public sealed class AbyssRallyShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.Rally;
+    public override string IconFile => "abyss/powers/shadow_rally.png";
+}
+
+public sealed class AbyssRiptideShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.Riptide;
+    public override string IconFile => "abyss/powers/shadow_riptide.png";
+}
+
+public sealed class AbyssFatuiSkirmishersShadowPower : AbyssShadowPower
+{
+    public override AbyssShadow Shadow => AbyssShadow.FatuiSkirmishers;
+    public override string IconFile => "abyss/powers/shadow_fatui_skirmishers.png";
+}

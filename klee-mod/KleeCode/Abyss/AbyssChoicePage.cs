@@ -161,6 +161,13 @@ public static class AbyssChoicePage
             await CreatureCmd.GainMaxHp(creature, AbyssNumbers.FatefulFortuneMaxHp);
         }
 
+        // Per player, display only: this copy's owner gets a relic for the
+        // Blessing and the Abyss Shadows relic (AbyssDisplay; idempotent).
+        if (abyss != null && ancient.Owner is { } player)
+        {
+            await AbyssDisplay.GrantTo(player, abyss.Record);
+        }
+
         if (ancientFinished || ancientOptions.Count == 0)
         {
             ancient.StartPreFinished();

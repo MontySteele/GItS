@@ -43,6 +43,11 @@ public abstract class AbyssShieldPower : PowerModel, ILocalizationProvider
 {
     public abstract Element Element { get; }
 
+    /// <summary>The shield's own icon: the official Abyss Mage shield of its
+    /// element. A literal per subclass so <c>validate.ps1</c> S12 can see it
+    /// (read by <c>KleePowerIcons</c>).</summary>
+    public abstract string IconFile { get; }
+
     public Element Counter => AbyssElements.CounterOf(Element);
 
     public List<(string, string)>? Localization => new()
@@ -129,19 +134,23 @@ public abstract class AbyssShieldPower : PowerModel, ILocalizationProvider
 public sealed class HydroAbyssShieldPower : AbyssShieldPower
 {
     public override Element Element => Element.Hydro;
+    public override string IconFile => "abyss/powers/shield_hydro.png";
 }
 
 public sealed class PyroAbyssShieldPower : AbyssShieldPower
 {
     public override Element Element => Element.Pyro;
+    public override string IconFile => "abyss/powers/shield_pyro.png";
 }
 
 public sealed class ElectroAbyssShieldPower : AbyssShieldPower
 {
     public override Element Element => Element.Electro;
+    public override string IconFile => "abyss/powers/shield_electro.png";
 }
 
 public sealed class CryoAbyssShieldPower : AbyssShieldPower
 {
     public override Element Element => Element.Cryo;
+    public override string IconFile => "abyss/powers/shield_cryo.png";
 }
