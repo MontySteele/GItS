@@ -162,7 +162,8 @@ its HP, Block, whether it has ended its turn, and its companions; **Choices so
 far** shows its pick on the map, a shared event or a chest. `end turn` waits
 for both of you: the enemies act only once both players have ended. When a page
 opens with **WAITING**, say `act "wait"`: it holds (60 s, or `wait 120`, at most
-300) until the other player does something, then prints the new page. A
+300) until the other player does something, then prints the new page; `wait` returns at once when nothing waits on the
+other player. A
 WAITING page is not a stall and does not count toward the six-screen stop. A
 card that goes to another player is played `on "<their character>"`. Write only
 what you saw: do not guess at the other seat's reasons.
