@@ -101,8 +101,30 @@ def test_the_screen_passes_every_loop_found(combo, pre_fix):
 #: Repay floor as first built gave it Vigor on an empty Repay, which made it
 #: grow without end; the main session's ruling (2026-10-09) took its floor
 #: off, and it is inert again.
+#: Tutti!+ (0: each guest acts, draw 1) alone cycles inert too.
 KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
-               ("proto_fs_soothing_waters",), ("proto_fs_soothing_waters+",)}
+               ("proto_fs_soothing_waters",), ("proto_fs_soothing_waters+",),
+               ("proto_fs_tutti+",)}
+
+#: ACCEPTED LOOPS: productive cycles the sweep finds and [USER] has accepted,
+#: by base card set, each with its reason. A productive cycle not listed here
+#: fails the sweep.
+#:
+#: THE DIVERSITY PASS (2026-10-11). Tutti!+ costs 0 and draws 1, so with any
+#: 0-cost draw-1 card (Encore!, Interval Bell, Soothing Waters) and nothing
+#: else in the deck, every guest acts forever. [USER]: "Theoretical infinite
+#: loops in thin decks aren't automatically a problem - it's a problem if
+#: they are tirivial to assemble and execute". This one needs a deck thinned
+#: to those two cards, so it is not trivial, and the paper's 0-cost upgrade
+#: stands.
+_TUTTI_THIN_DECK = ("[USER], 2026-10-11: a theoretical loop in a thin deck "
+                    "is not a problem unless trivial to assemble; this one "
+                    "needs a deck thinned to Tutti!+ and the draw card")
+ACCEPTED_LOOPS = {
+    frozenset({"proto_fs_tutti", "proto_fs_encore"}): _TUTTI_THIN_DECK,
+    frozenset({"proto_fs_tutti", "proto_fs_interval_bell"}): _TUTTI_THIN_DECK,
+    frozenset({"proto_fs_tutti", "proto_fs_soothing_waters"}): _TUTTI_THIN_DECK,
+}
 
 #: THE POOL TO 75 (2026-10-09). The ruled batch, built as written, gave the
 #: sweep 81 productive cycles over 16 thin-deck card sets, every set but one
@@ -120,7 +142,9 @@ TAB_UP = "proto_fs_salons_tab+"
 @pytest.mark.battery
 def test_the_post_fix_sweep_finds_no_productive_cycle():
     found = P.search_env(False, None)
-    assert {_base_set(f.cards) for f in found if f.productive} == set()
+    productive = {_base_set(f.cards) for f in found if f.productive}
+    assert productive - set(ACCEPTED_LOOPS) == set(), "an unrecorded loop"
+    assert productive == set(ACCEPTED_LOOPS), "an accepted loop is gone"
     assert {f.cards for f in found if not f.productive} == KNOWN_INERT
 
 
@@ -131,7 +155,19 @@ def test_no_named_combination_is_a_productive_loop(name):
     best single-turn run. (The six-turn runs are reported by `--named`, not
     pinned here.)"""
     row = P.named_report(name)
+    if name in ACCEPTED_NAMED:
+        # The accepted loop, and only through Tutti!+ (0 cost).
+        assert row["single_turn"]["productive"], name
+        assert "proto_fs_tutti+" in row["single_turn"]["cards"], name
+        return
     assert not row["single_turn"]["productive"], name
+
+
+#: Named combinations whose best run is an accepted loop. Since the diversity
+#: pass (2026-10-11), two Tutti!+ (0: each guest acts, draw 1) with
+#: Charlotte's draw on stage cycle in a deck thinned to them; the same
+#: thin-deck loop as ACCEPTED_LOOPS, under the same ruling.
+ACCEPTED_NAMED = {"tutti_showstopper_house": _TUTTI_THIN_DECK}
 
 
 def test_soothing_waters_alone_grows_nothing_with_nothing_drained():

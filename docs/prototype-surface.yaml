@@ -3027,13 +3027,11 @@
              {op: draw, amount: 1}]}
 
 # Tutti!: Common, and it draws 1 (the diversity pass, sec.2: the floor).
-# Its upgrade draws 2 instead of costing 0 (Claude, under the loop ruling,
-# 2026-10-11: the 0-cost upgrade looped with any 0-cost draw-1 card).
 - {id: proto_fs_tutti, name: "Tutti!", character: furina,
-   upgrade: {draw: +1},
+   upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common, retain: true,
-   description: "Each guest acts. {IfUpgraded:show:Draw 2 cards.|Draw 1 card.}",
+   description: "Each guest acts. Draw 1 card.",
    effects: [{op: furina, kind: act_all},
              {op: draw, amount: 1}]}
 

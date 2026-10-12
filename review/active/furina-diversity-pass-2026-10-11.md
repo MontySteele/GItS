@@ -147,5 +147,5 @@ Claude raised three watch items before the ruling: Bravura's multi-hit with no c
 > 3) Yeah, let's keep an eye on this
 
 - **Picks 1-5 (a).** Section 2 and section 3 build as written.
-- Claude, under the loop ruling: Tutti!'s upgrade draws 2 instead of costing 0 (the 0-cost upgrade looped with any 0-cost draw-1 card).
+- **Tutti!+ costs 0, as written.** The loop probe found Tutti!+ looping with any 0-cost draw-1 card (Encore!, Interval Bell, Soothing Waters) in a deck thinned to those two cards. [USER]: "Theoretical infinite loops in thin decks aren't automatically a problem - it's a problem if they are tirivial to assemble and execute". This one needs a thinned deck, so the upgrade stays cost 0 (no extra draw), and the probe records the loop as accepted (`tier0/tests/test_furina_loop_probe.py`, `ACCEPTED_LOOPS`).
 - **Watch in the next round:** Bravura's damage against the bank it spent; Spend triggers per turn under Full House; Furina's draws and Energy per turn after the two cuts.
