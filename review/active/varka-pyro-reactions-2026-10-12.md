@@ -85,3 +85,7 @@ The first draft's pair was "Stoke the Flames: Apply Pyro to an enemy. Gain 2 [3]
 2. **Stoke the Flames.**
    - **(a) Default:** "Gain 2 [3] Pyro Oath. Your next Pyro Attack this turn deals 5 [7] additional damage."
    - (b) Keep it until your own Pyro run.
+
+## Ruled (2026-10-12)
+
+[USER]: "On Varka - agreed on both options". Both defaults (a): Ember Cleave becomes "Deal 7 [9] Pyro damage. Gain 2 [3] Strength this turn."; Stoke the Flames becomes "Gain 2 [3] Pyro Oath. Your next Pyro Attack this turn deals 5 [7] additional damage." The Exhaust rider is retired from both.

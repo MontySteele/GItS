@@ -25,10 +25,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Varka Pyro paper** (`varka-pyro-reactions-2026-10-12.md`, two picks,
-  defaults (a), revised on [USER]'s note that a Pyro application with no hit
-  Melts for 0): Ember Cleave deals 7 and gives 2 Strength this turn; Stoke
-  the Flames gives 2 Pyro Oath and 5 to the next Pyro Attack.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
