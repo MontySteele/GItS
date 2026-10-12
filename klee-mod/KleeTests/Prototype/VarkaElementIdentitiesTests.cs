@@ -282,7 +282,8 @@ public class VarkaElementIdentitiesTests : IDisposable
     [InlineData("ProtoVkEmberCleave", true)]
     [InlineData("ProtoVkShatter", true)]
     [InlineData("ProtoVkDeepFreeze", true)]
-    [InlineData("ProtoVkStokeTheFlames", false)]          // a gain, no element
+    // The Pyro pass (2026-10-11): its face no longer prints the switch.
+    [InlineData("ProtoVkStokeTheFlames", true)]
     public void A_card_that_switches_his_element_carries_the_switch_tip(
         string card, bool tipped)
     {

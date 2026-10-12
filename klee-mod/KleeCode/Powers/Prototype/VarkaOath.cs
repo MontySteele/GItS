@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -1679,7 +1680,7 @@ public static class VarkaCards
     // secs.3-4). Sim twins: varka_oath._combo_kind.
 
     /// <summary>Stoke the Flames: "Pyro becomes your current element. Gain
-    /// 2 [3] Pyro Oath." After the row's own Exhaust, the switch, then one
+    /// 2 [3] Pyro Oath." The switch, then one
     /// gain (the Varka payoff round, 2026-10-10: switch first, so Dawn Wind's
     /// March, Oath Unto Death and every current-element gain listener see the
     /// gain as the current element's). The switch is a non-Knight card's, so
@@ -1696,12 +1697,52 @@ public static class VarkaCards
                              (int)Var(card, "VkAmount"));
     }
 
-    /// <summary>Ember Cleave: "Deal 9 [12] Pyro damage." The Exhaust is the
-    /// row's own op, after this one.</summary>
+    /// <summary>Ember Cleave: "Deal 9 [12] Pyro damage."</summary>
     public static Task PyroStrike(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
                    Var(card, "VkBase"), Element.Pyro);
+
+    /// <summary>Ashen Oath (the Pyro pass, 2026-10-11): "Gain 2 Pyro Oath."
+    /// A gain that switches nothing (Stoke's <see cref="GainPyroOath"/>
+    /// switches first). Sim twin: the `pyro_oath` kind.</summary>
+    public static async Task PyroOath(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || !VarkaOath.Live(owner)) return;
+        await VarkaOath.Gain(choiceContext, owner, Element.Pyro,
+                             (int)Var(card, "VkAmount"));
+    }
+
+    /// <summary>THE PYRO PASS's rider (2026-10-11, pick 1 b; Stoke the
+    /// Flames and Ember Cleave): "You may Exhaust a card for 1 additional
+    /// Pyro Oath." Any card in hand, a Status or a Curse included (True
+    /// Grit's pool), picked on a 0-to-1 hand selection: Purity's
+    /// <c>CardSelectorPrefs(prompt, 0, n)</c>, so choosing none is allowed,
+    /// and an empty hand does nothing. The gain is a plain one: both cards
+    /// made Pyro current earlier in the play. Sim twin:
+    /// <c>varka_oath._exhaust_for_pyro_oath</c>.</summary>
+    public static async Task ExhaustForPyroOath(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var player = card.Owner;
+        var owner = player?.Creature;
+        if (player == null || owner == null) return;
+        ExhaustSelection.Open(card);
+        var picked = (await CardSelectCmd.FromHand(
+            choiceContext, player,
+            new CardSelectorPrefs(CardSelectorPrefs.ExhaustSelectionPrompt, 0, 1),
+            static _ => true, card)).ToList();
+        foreach (var victim in picked)
+        {
+            ExhaustSelection.Record(card, victim);
+            await CardCmd.Exhaust(choiceContext, victim);
+        }
+        ExhaustSelection.Close(card);
+        if (picked.Count == 0 || !VarkaOath.Live(owner)) return;
+        await VarkaOath.Gain(choiceContext, owner, Element.Pyro, 1);
+    }
 
     /// <summary>Weak plus Vulnerable on <paramref name="enemy"/>, in stacks
     /// (Shatter's count). 0 for none. PURE apart from the reads.</summary>

@@ -2005,7 +2005,7 @@
       "block": 2
     },
     "proto_vk_blazing_charge": {
-      "varka_base": 2
+      "varka_base": 3
     },
     "proto_vk_boreas_unbound": {
       "innate": true
@@ -2142,7 +2142,7 @@
       "varka_upgraded": true
     },
     "proto_vk_pyre_oath": {
-      "innate": true
+      "power_amount": 1
     },
     "proto_vk_rally_to_the_banner": {
       "cost": -1
@@ -2174,7 +2174,8 @@
       "power_amount": 1
     },
     "proto_vk_stoke_the_flames": {
-      "varka_amount": 1
+      "varka_amount": 1,
+      "buff": 2
     },
     "proto_vk_storm_battery": {
       "varka_per": 1

@@ -780,39 +780,6 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Ashen Oath, was Pyre Oath (the combo pass, 2026-10-04, sec.3;
-/// renamed and paying 2 a card since the forced-Amber round, 2026-10-10;
-/// the class keeps its old name with the card id): "Whenever you
-/// Exhaust a card, gain 2 Pyro Oath." Feel No Pain's shape paying Oath: one
-/// gain per card exhausted, of the stack's amount, through
-/// <see cref="VarkaOath.Gain"/> (so Oath Unto Death, Dawn Wind's March and
-/// Boreas's Fang see it). Any card of his, a Status included. Sim twin:
-/// <c>varka_oath.on_card_exhausted</c>, from
-/// <c>refpowers.after_card_exhausted</c>.</summary>
-public sealed class PyreOathPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Ashen Oath"),
-        ("description",
-            "Whenever you [gold]Exhaust[/gold] a card, gain "
-          + "[blue]{Amount}[/blue] [gold]Pyro[/gold] [gold]Oath[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterCardExhausted(
-        PlayerChoiceContext choiceContext, CardModel card, bool causedByEthereal)
-    {
-        if (Owner == null || Amount <= 0 || !VarkaOath.Live(Owner)) return;
-        if (card?.Owner?.Creature != Owner) return;
-        Flash();
-        await VarkaOath.Gain(choiceContext, Owner, Element.Pyro, (int)Amount);
-    }
-}
-
 /// <summary>
 /// Retaliating Tide (element identities sec.4, in Unbroken Tide's place): "At
 /// the end of your turn, deal damage equal to your Block, up to your Hydro

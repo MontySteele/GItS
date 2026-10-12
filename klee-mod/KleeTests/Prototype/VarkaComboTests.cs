@@ -78,7 +78,7 @@ public class VarkaComboTests : IDisposable
             Assert.Null(typeof(ProtoVkShatter).Assembly.GetType(
                 "KleeMod.Cards.Prototype.Generated." + gone));
         }
-        Assert.Null(typeof(PyreOathPower).Assembly.GetType(
+        Assert.Null(typeof(WildfireOathPower).Assembly.GetType(
             "KleeMod.Powers.OathOfTheKnightsPower"));
         Assert.DoesNotContain(Calls("VarkaOath", "TurnStart"),
                               c => c.Contains("OathOfTheKnights"));
@@ -116,14 +116,19 @@ public class VarkaComboTests : IDisposable
     // ---- sec.3: Pyro burns -------------------------------------------------------
 
     [Fact]
-    public void Stoke_the_flames_exhausts_a_chosen_card_then_gains_pyro()
+    public void Stoke_the_flames_gains_pyro_powers_the_next_attack_then_may_exhaust()
     {
+        // The Pyro pass (2026-10-11, pick 1 b).
         Assert.Equal(2m, Var(new ProtoVkStokeTheFlames(), "VkAmount"));
         Assert.Equal(3m, Var(Upgraded<ProtoVkStokeTheFlames>(), "VkAmount"));
+        Assert.Equal(3m, Var(new ProtoVkStokeTheFlames(), "PowerAmount"));
+        Assert.Equal(5m, Var(Upgraded<ProtoVkStokeTheFlames>(), "PowerAmount"));
         var play = Calls("ProtoVkStokeTheFlames", "OnPlay");
-        Assert.Contains("CardSelectCmd.FromHand", play);
-        Assert.Contains("CardCmd.Exhaust", play);
-        Assert.Contains("VarkaCards.GainPyroOath", play);
+        Assert.DoesNotContain("CardSelectCmd.FromHand", play);
+        var gain = play.IndexOf("VarkaCards.GainPyroOath");
+        var buff = play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal));
+        var rider = play.IndexOf("VarkaCards.ExhaustForPyroOath");
+        Assert.True(gain >= 0 && gain < buff && buff < rider);
         // The Varka payoff round (2026-10-10): "Pyro becomes your current
         // element" FIRST, through the non-Knight path Unwavering Banner
         // holds, then the gain, so Dawn Wind's March sees a current-element
@@ -134,57 +139,66 @@ public class VarkaComboTests : IDisposable
         var makes = Calls("VarkaOath", "CardMakesCurrent");
         Assert.Contains("VarkaOath.BannerHolds", makes);
         Assert.Contains("VarkaOath.SetCurrent", makes);
-        // The text pass of 2026-10-08: rule 6 golds the element.
-        Assert.Equal("[gold]Exhaust[/gold] a card. [gold]Pyro[/gold] becomes "
-                     + "your [gold]current element[/gold]. Gain "
-                     + "{VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
+        // The switch prints as the switch tip (the 120-character ceiling).
+        Assert.Contains("ArmKeywordTips.ForElementSwitch",
+                        Il.Calls(Il.Method("ProtoVkStokeTheFlames", "get_ExtraHoverTips")));
+        Assert.Equal("Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. "
+                     + "Your next Attack deals {PowerAmount:diff()} additional "
+                     + "damage. You may [gold]Exhaust[/gold] a card for 1 "
+                     + "additional [gold]Pyro[/gold] [gold]Oath[/gold].",
                      Face(new ProtoVkStokeTheFlames()));
     }
 
     [Fact]
-    public void Ember_cleave_hits_9_pyro_then_exhausts()
+    public void The_exhaust_rider_is_a_0_to_1_hand_pick_that_pays_1_pyro()
+    {
+        // "You may Exhaust a card for 1 additional Pyro Oath."
+        var rider = Calls("VarkaCards", "ExhaustForPyroOath");
+        Assert.True(rider.IndexOf("CardSelectCmd.FromHand")
+                    < rider.IndexOf("CardCmd.Exhaust"));
+        Assert.True(rider.IndexOf("CardCmd.Exhaust")
+                    < rider.IndexOf("VarkaOath.Gain"));
+        Assert.DoesNotContain("VarkaOath.CardMakesCurrent", rider);
+    }
+
+    [Fact]
+    public void Ember_cleave_hits_9_pyro_gains_1_then_may_exhaust()
     {
         Assert.Equal(9m, Var(new ProtoVkEmberCleave(), "VkBase"));
         Assert.Equal(12m, Var(Upgraded<ProtoVkEmberCleave>(), "VkBase"));
         var play = Calls("ProtoVkEmberCleave", "OnPlay");
-        Assert.True(play.IndexOf("VarkaCards.PyroStrike")
-                    < play.IndexOf("CardCmd.Exhaust"));
         Assert.Contains("VarkaCards.ElementHit", Calls("VarkaCards", "PyroStrike"));
-        // Varka payoff fix (2026-10-08): "Gain 1 Pyro Oath", after the Exhaust.
         Assert.Equal(1m, Var(new ProtoVkEmberCleave(), "VkAmount"));
-        Assert.True(play.IndexOf("CardCmd.Exhaust")
+        Assert.DoesNotContain("CardSelectCmd.FromHand", play);
+        Assert.True(play.IndexOf("VarkaCards.PyroStrike")
                     < play.IndexOf("VarkaCards.GainPyroOath"));
+        Assert.True(play.IndexOf("VarkaCards.GainPyroOath")
+                    < play.IndexOf("VarkaCards.ExhaustForPyroOath"));
     }
 
     [Fact]
-    public void Pyre_oath_gains_pyro_on_every_exhaust()
+    public void Ashen_oath_gains_strength_and_pyro_oath()
     {
-        Assert.Equal(PowerStackType.Counter, new PyreOathPower().StackType);
-        Assert.Contains("VarkaOath.Gain",
-                        Calls("PyreOathPower", "AfterCardExhausted"));
-        Assert.DoesNotContain(CardKeyword.Innate,
-                              new ProtoVkPyreOath().CanonicalKeywords);
-        Assert.Contains(CardKeyword.Innate, Upgraded<ProtoVkPyreOath>().Keywords);
-        // Varka payoff fix (2026-10-08): "Exhaust a card" on play, after the
-        // Power lands, so its own Exhaust pays.
-        var play = Calls("ProtoVkPyreOath", "OnPlay");
-        Assert.True(play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal))
-                    < play.IndexOf("CardCmd.Exhaust"));
-        Assert.Contains("CardSelectCmd.FromHand", play);
-    }
-
-    [Fact]
-    public void Pyre_oath_is_ashen_oath_and_pays_2()
-    {
-        // The forced-Amber round (2026-10-10): renamed (the id and the class
-        // are kept) and pays 2 a card; the power's status-list name too.
+        // The Pyro pass (2026-10-11): "Gain 2 [3] Strength. Gain 2 Pyro
+        // Oath." Its Exhaust-trigger power left with it; the gain switches
+        // nothing.
         string Title(BaseLib.Abstracts.ILocalizationProvider m) =>
             m.Localization!.Single(r => r.Item1 == "title").Item2;
         Assert.Equal("Ashen Oath", Title(new ProtoVkPyreOath()));
-        Assert.Equal("Ashen Oath", Title(new PyreOathPower()));
-        var card = new ProtoVkPyreOath().Localization!
-            .Single(r => r.Item1 == "description").Item2;
-        Assert.Contains("gain 2 [gold]Pyro[/gold] [gold]Oath[/gold]", card);
+        Assert.Null(typeof(WildfireOathPower).Assembly.GetType(
+            "KleeMod.Powers.PyreOathPower"));
+        Assert.DoesNotContain(CardKeyword.Innate, Upgraded<ProtoVkPyreOath>().Keywords);
+        Assert.Equal(2m, Var(new ProtoVkPyreOath(), "PowerAmount"));
+        Assert.Equal(3m, Var(Upgraded<ProtoVkPyreOath>(), "PowerAmount"));
+        Assert.Equal(2m, Var(new ProtoVkPyreOath(), "VkAmount"));
+        var play = Calls("ProtoVkPyreOath", "OnPlay");
+        Assert.Contains("VarkaCards.PyroOath", play);
+        Assert.DoesNotContain("CardSelectCmd.FromHand", play);
+        Assert.DoesNotContain("VarkaOath.CardMakesCurrent",
+                              Calls("VarkaCards", "PyroOath"));
+        Assert.Equal("Gain {PowerAmount:diff()} [gold]Strength[/gold]. Gain "
+                     + "{VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
+                     Face(new ProtoVkPyreOath()));
     }
 
     // ---- sec.4: Cryo shatters ----------------------------------------------------
