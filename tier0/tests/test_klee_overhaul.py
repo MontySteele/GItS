@@ -351,9 +351,6 @@ def test_the_numbers_are_the_briefs_placeholders():
     # TWO since the Klee design review (2026-10-08, sec.4.6, ruled): four
     # paid every Bomb to wait. (Four from the round-5 packet to then.)
     assert C.KLEE_OVERHAUL_BOMB_GROWTH == 2
-    # A MULTIPLIER since the 2026-09-02 balance pass: Alice's Recipe doubles
-    # the turn's growth ("your Bombs grow twice each turn").
-    assert C.KLEE_OVERHAUL_ALICE_MULTIPLIER == 2
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1
     # FIVE since R242 pick 1: rule 4's opening bank. [USER]: "Regent starts
     # with 3 stars ... so 1 is a reasonable compromise."

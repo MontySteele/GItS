@@ -75,11 +75,15 @@
    effects: [{op: multiply_set_off, multiplier: 4},
              {op: set_off, target: enemy}]}
 
+# Reworked 2026-10-11 ([USER]: "bumping the cost to 3 and making it 'Every bomb
+# you place makes every other bomb grow by 2'"; "let's make it affect both").
+# Provenance note, "Alice's Recipe rework".
 - {id: proto_ko_alices_recipe, name: "Alice's Recipe", character: klee,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   description: "Your [gold]Bombs[/gold] grow twice each turn.",
-   effects: [{op: apply_power, power: ko_alices_recipe, amount: 1, target: self}]}
+   cost: 3, type: power, rarity: rare,
+   upgrade: {power_amount: +1},
+   description: "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by 2.",
+   effects: [{op: apply_power, power: ko_alices_recipe, amount: 2, target: self}]}
 
 # --- Spray, everything explodes now (packet sec.4) ---
 

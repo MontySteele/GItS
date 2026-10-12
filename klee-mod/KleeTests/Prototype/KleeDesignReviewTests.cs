@@ -48,7 +48,6 @@ public class KleeDesignReviewTests
     public void The_rules_grow_two_and_open_with_three()
     {
         Assert.Equal(2, KleeOverhaulLaw.BombGrowth);
-        Assert.Equal(4, KleeOverhaulLaw.BombGrowth * KleeOverhaulLaw.AliceMultiplier);
         Assert.Equal(3, KleeOverhaulLaw.OpeningSpark);
         Assert.Contains("Start each combat with 3.", ArmKeywordTips.SparkBody(true));
     }

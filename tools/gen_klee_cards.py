@@ -3073,7 +3073,8 @@ APPLY_POWERS = {
     # are here for form; every slice row carries its own `description:`, which is
     # the surface's own face channel (EB-215).
     "ko_alices_recipe": ("AlicesRecipePower", None,
-        "Your [gold]Bombs[/gold] grow twice each turn."),
+        "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your "
+        "other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by {X}."),
     "ko_chained_reactions": ("ChainedReactionsPower", None,
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),

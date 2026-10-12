@@ -18,22 +18,55 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// Alice's Recipe: "Your Bombs grow twice each turn." The brief's own gloss is
-/// "Breaks rule 1", and it breaks it by MULTIPLYING the turn's growth rather
-/// than adding to it -- see <c>ProtoBombPower.GrowthFor</c>, which is the one
-/// place the two modifiers compose.
+/// Alice's Recipe (reworked 2026-10-11; [USER]: "Every bomb you place makes
+/// every other bomb grow by 2 - an exponential ramp - upgrade raises the
+/// effect to 3", then "let's make it affect both"): "Whenever you place a
+/// Bomb or Mine, your other Bombs and Mines grow by 2." Stacks are the growth,
+/// so two copies add.
 ///
+/// PLACEMENT ONLY. <c>ProtoBombPower.Place</c> calls <see cref="GrowBeforePlacement"/>
+/// unless the charge is <c>relocated</c> -- a jump, Exquisite Compound's move
+/// and Alice's Masterpiece's remnant carry a charge that was already placed.
+/// A card that places on ALL enemies reaches <c>Place</c> once per charge, so
+/// it counts once per charge. The growth runs BEFORE the new charge lands,
+/// which is what makes it "your OTHER Bombs" without having to find the new
+/// one again. Growing places nothing, so it cannot re-trigger itself.
+/// Sim twin: <c>klee_overhaul.place</c>'s <c>relocated</c> branch.
 /// </summary>
 public sealed class AlicesRecipePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Recipe"),
-        ("description", "Your [gold]Bombs[/gold] grow twice each turn."),
+        ("description",
+            "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your "
+          + "other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by "
+          + "[blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The growth one placement pays, 0 without the power.</summary>
+    public static int GrowthFor(Creature? applier) =>
+        applier?.Powers.OfType<AlicesRecipePower>().Sum(p => p.Amount) ?? 0;
+
+    /// <summary>
+    /// Grow every charge <paramref name="applier"/> already has out, on any
+    /// enemy, Mines included, by the Recipe's stacks. PURE: no command, no
+    /// placement, nothing that can go off. Called by <c>ProtoBombPower.Place</c>
+    /// before a fresh (not relocated) charge lands.
+    /// </summary>
+    public static void GrowBeforePlacement(Creature applier)
+    {
+        var amount = GrowthFor(applier);
+        var combat = applier.CombatState;
+        if (amount <= 0 || combat == null) return;
+        foreach (var enemy in combat.Enemies.ToList())
+        {
+            ProtoBombPower.GrowOn(enemy, applier, amount);
+        }
+    }
 }
 
 /// <summary>

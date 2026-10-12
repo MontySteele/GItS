@@ -173,7 +173,6 @@ MIRRORED: dict[str, object] = {
     # are placeholders and not claims -- but they are the placeholders both
     # sides have to agree on.
     "KleeOverhaulLaw.BombGrowth": C.KLEE_OVERHAUL_BOMB_GROWTH,
-    "KleeOverhaulLaw.AliceMultiplier": C.KLEE_OVERHAUL_ALICE_MULTIPLIER,
     "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
     # SIX now: R242 pick 1 gave rule 4 a second number, the opening bank, and
     # R248 (`EB-344`) a third -- the Spark Grounded pays on a held turn, which

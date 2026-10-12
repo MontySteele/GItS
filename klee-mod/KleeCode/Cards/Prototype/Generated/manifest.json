@@ -1435,7 +1435,7 @@
       "bomb_size": 5
     },
     "proto_ko_alices_recipe": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_ko_all_of_my_treasures": {
       "cost": -1

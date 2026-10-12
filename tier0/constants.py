@@ -146,9 +146,6 @@ SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
 # review/active/klee-design-review-2026-10-08.md sec.4.6, ruled; it was 4):
 # a Bomb cashed now is worth what it was, a Bomb held is worth less.
 KLEE_OVERHAUL_BOMB_GROWTH = 2        # rule 1: every Bomb, start of her turn
-# Alice's Recipe MULTIPLIES the turn's growth ("your Bombs grow twice each
-# turn"), balance pass 2026-09-02.
-KLEE_OVERHAUL_ALICE_MULTIPLIER = 2
 KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 # RULE 4's OPENING SPARK (R242 pick 1, [USER]: "Regent starts with 3 stars and
 # has to generate more through cards, so 1 is a reasonable compromise"). It is a
