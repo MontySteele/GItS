@@ -92,7 +92,6 @@ ESCOFFIER_ACT_DAMAGE_UPGRADED = T.ESCOFFIER_ACT_UPGRADED
 ESCOFFIER_LINE_REPAY = T.ESCOFFIER_LINE_REPAY
 ENSEMBLE_SEATS = T.ENSEMBLE_SEATS
 SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
-NEAR_LINE = T.NEAR_LINE
 HIGH_STAKES_EVERY = T.HIGH_STAKES_EVERY
 HIGH_STAKES_EVERY_UPGRADED = T.HIGH_STAKES_EVERY_UPGRADED
 HYMN_THRESHOLD = T.HYMN_THRESHOLD
@@ -649,10 +648,10 @@ def repay_left(player) -> int:
     return int(player.ftd.repay_left_this_play) if active(player) else 0
 
 
-def near_line(player) -> bool:
-    """Against the Tide: within 5 HP of the Drain line, or
-    at or below it."""
-    return active(player) and T.near_line(player)
+def drained_this_turn(player) -> bool:
+    """Against the Tide (2026-10-12): "If you Drained this turn" -- 1 or more
+    HP drained this turn by any Drain, her cards' or a guest's act."""
+    return active(player) and T.drained_this_turn(player)
 
 
 def none_drained(player) -> bool:

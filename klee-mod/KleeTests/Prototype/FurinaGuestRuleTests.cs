@@ -561,14 +561,6 @@ public class FurinaGuestRuleTests
     }
 
     [Fact]
-    public void Within_five_hp_of_the_line_is_near_it()
-    {
-        Assert.True(FurinaStageLaw.NearTheLine(44, 39));
-        Assert.True(FurinaStageLaw.NearTheLine(39, 39));
-        Assert.False(FurinaStageLaw.NearTheLine(45, 39));
-    }
-
-    [Fact]
     public void Grand_entrance_repays_after_a_guest_star_and_star_turn_reads_fanfare()
     {
         Assert.Contains("StageDirector.RepayFloor",
