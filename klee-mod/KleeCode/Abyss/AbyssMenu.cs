@@ -38,6 +38,10 @@ public static class AbyssMenu
 {
     internal const string LocPrefix = "KLEE_SPIRAL_ABYSS";
 
+    /// <summary>The official Spiral Abyss emblem: the menu button's icon and
+    /// the modifier tickbox's (<see cref="SpiralAbyss"/>).</summary>
+    internal const string IconFile = "abyss/ui/spiral_abyss.png";
+
     /// <summary>Set by the Abyss button, spent by the next Custom-screen init.</summary>
     internal static bool Pending;
 
@@ -93,7 +97,19 @@ public static class AbyssMenu
         button.Connect(NClickableControl.SignalName.Released,
             Callable.From<NButton>(_ => onPressed()));
         button.SetIconAndLocalization(LocPrefix);
+        SetIcon(button);
         return button;
+    }
+
+    /// <summary>The copy wears the Custom button's icon until this swaps it
+    /// for the Abyss emblem. A missing pack leaves the borrowed icon.</summary>
+    private static void SetIcon(NSubmenuButton button)
+    {
+        var path = KleePck.Path(IconFile);
+        var icon = button.GetNodeOrNull<TextureRect>("Icon");
+        if (path == null || icon == null) return;
+        var texture = ResourceLoader.Load<Texture2D>(path);
+        if (texture != null) icon.Texture = texture;
     }
 
     internal static void OpenSingleplayer(NSingleplayerSubmenu submenu)

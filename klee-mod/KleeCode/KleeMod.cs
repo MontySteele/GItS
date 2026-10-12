@@ -41,6 +41,11 @@ public static class KleeMod
         // logs proof-of-merge so a stale/missing pack shows up in godot.log.
         KleePck.LogStatus();
 
+        // THE SPIRAL ABYSS's display relics join the base game's never-rolled
+        // DeprecatedRelicPool before the pools are built (RelicModel.Pool
+        // throws for a poolless relic). See Abyss/AbyssDisplay.cs.
+        Abyss.AbyssDisplay.RegisterPool();
+
         // THE TEYVAT RUN FRAME ARM's still portraits (spike item 3,
         // -p:TeyvatFrame=true). A no-op with the arm off, one dictionary write
         // per dressed body with it on.

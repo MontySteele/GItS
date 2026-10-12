@@ -2816,3 +2816,26 @@ proto_fs_standing_room_only	ImageGen/images/cards/furina/proto_fs_standing_room_
 proto_fs_surging_waters	ImageGen/images/cards/furina/proto_fs_surging_waters.png	500	380	cover	x0.72,y0.66@1.4	shortlist	1	png	Anniversary Memories Album Wallpaper 12 - Underwater Storm in Fontaine - Aether.png		splash	
 proto_fs_the_deluge	ImageGen/images/cards/furina/proto_fs_the_deluge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Archon Quest When All Return to the Waters.png		splash	
 proto_fs_undercurrent	ImageGen/images/cards/furina/proto_fs_undercurrent.png	500	380	cover	x0.46,y0.46@1.2	shortlist	1	png	Archon Quest Proof of Guilt.png		splash	
+# ---------- Spiral Abyss icons (2026-10-12): menu emblem, display relics, Shadow badges, Abyss Mage shields -> res://abyss/ ----------
+abyss_ui_spiral_abyss	ImageGen/images/abyss/ui/spiral_abyss.png	256	256	contain	center	auto	1	png	UI Spiral Abyss.png		icon
+abyss_relic_ley_line	ImageGen/images/abyss/relics/ley_line.png	256	256	contain	center	auto	1	png	Icon Ley Line Disorder.png		icon
+abyss_relic_abyssal_moon	ImageGen/images/abyss/relics/abyssal_moon.png	256	256	contain	center	auto	1	png	Iridescent Moon Icon.png		icon
+abyss_relic_moonlit_rest	ImageGen/images/abyss/relics/moonlit_rest.png	256	256	contain	center	auto	1	png	Item Sweet Madame.png		icon
+abyss_relic_first_strike	ImageGen/images/abyss/relics/first_strike.png	256	256	contain	center	auto	1	png	Sword Unaligned.png		icon
+abyss_relic_elemental_burst	ImageGen/images/abyss/relics/elemental_burst.png	256	256	contain	center	auto	1	png	Battle-Line Detonation Character Card Skill.png		icon
+abyss_relic_resonance	ImageGen/images/abyss/relics/resonance.png	256	256	contain	center	auto	1	png	Elemental Resonance.png		icon
+abyss_relic_crystallize	ImageGen/images/abyss/relics/crystallize.png	256	256	cover	center	auto	1	png	Crystallize Shield Hydro.png		icon
+abyss_relic_fateful_fortune	ImageGen/images/abyss/relics/fateful_fortune.png	256	256	contain	center	auto	1	png	Item Intertwined Fate.png		icon
+abyss_relic_abyss_shadows	ImageGen/images/abyss/relics/abyss_shadows.png	256	256	contain	center	auto	1	png	Abyss Lector Violet Lightning Icon.png		icon
+abyss_power_shadow_clock	ImageGen/images/abyss/powers/shadow_clock.png	256	256	contain	center	auto	1	png	Icon Clock.png		icon
+abyss_power_shadow_mage_shield	ImageGen/images/abyss/powers/shadow_mage_shield.png	256	256	contain	center	auto	1	png	Hydro Abyss Mage Icon.png		icon
+abyss_power_shadow_sheer_cold	ImageGen/images/abyss/powers/shadow_sheer_cold.png	256	256	contain	center	auto	1	svg	Element Cryo.svg		icon
+abyss_power_shadow_elemental_mark	ImageGen/images/abyss/powers/shadow_elemental_mark.png	256	256	contain	center	auto	1	svg	Element Pyro.svg		icon
+abyss_power_shadow_herald	ImageGen/images/abyss/powers/shadow_herald.png	256	256	contain	center	auto	1	png	Abyss Herald Wicked Torrents Icon.png		icon
+abyss_power_shadow_rally	ImageGen/images/abyss/powers/shadow_rally.png	256	256	contain	center	auto	1	png	Item Rally Banner.png		icon
+abyss_power_shadow_riptide	ImageGen/images/abyss/powers/shadow_riptide.png	256	256	contain	center	auto	1	png	Riptide Buff Icon.png		icon
+abyss_power_shadow_fatui_skirmishers	ImageGen/images/abyss/powers/shadow_fatui_skirmishers.png	256	256	contain	center	auto	1	png	Fatui Electrohammer Vanguard Icon.png		icon
+abyss_power_shield_hydro	ImageGen/images/abyss/powers/shield_hydro.png	256	256	contain	center	auto	1	png	Hydro Shield Character Card Skill.png		icon
+abyss_power_shield_pyro	ImageGen/images/abyss/powers/shield_pyro.png	256	256	contain	center	auto	1	png	Pyro Shield Character Card Skill.png		icon
+abyss_power_shield_electro	ImageGen/images/abyss/powers/shield_electro.png	256	256	contain	center	auto	1	png	Electro Shield Character Card Skill.png		icon
+abyss_power_shield_cryo	ImageGen/images/abyss/powers/shield_cryo.png	256	256	contain	center	auto	1	png	Cryo Shield Character Card Skill.png		icon

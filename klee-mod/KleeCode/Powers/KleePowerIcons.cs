@@ -88,9 +88,12 @@ internal static class KleePowerIcons
         // Block off the arm's explosion ledger for a turn nothing went off.
         SitTightPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         DodocoPower => KleePck.Path("klee/powers/bomb.png"),
-        // THE SPIRAL ABYSS (2026-10-12): the Abyss Mage Shield borrows the
-        // nearest shipped shield shape until its own icon is drawn (BACKLOG).
-        AbyssShieldPower => KleePck.Path("kokomi/powers/vigil_of_the_deep.png"),
+        // THE SPIRAL ABYSS (2026-10-12): each Abyss Mage Shield wears the
+        // official shield of its element, and each Shadow badge its own icon.
+        // The paths are literals on the subclasses (validate.ps1 S12 reads
+        // them there).
+        AbyssShieldPower shield => KleePck.Path(shield.IconFile),
+        AbyssShadowPower shadow => KleePck.Path(shadow.IconFile),
         SparkKnightPower =>
             KleePck.Path("klee/powers/spark_threshold_down.png"),
         AlicesDetonatorBasePower =>

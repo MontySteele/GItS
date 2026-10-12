@@ -640,7 +640,11 @@ if (-not (Test-Path $kurageSrc)) { Note-Skip 'kokomi\summon' $kurageSrc } else {
     if ($files) { Copy-Item $files.FullName -Destination $to }
 }
 
-foreach ($character in 'furina', 'kokomi', 'varka') {
+# 'abyss' (2026-10-12) is not a character: it is the Spiral Abyss mode's own
+# namespace (ui\ for the menu emblem, powers\ for the Shadow badges and the
+# four Abyss Mage shields, relics\ for the display relics), and it takes the
+# same three surfaces through the same copy, so it rides this loop.
+foreach ($character in 'furina', 'kokomi', 'varka', 'abyss') {
     $charSrc = Join-Path $src $character
     foreach ($d in 'ui', 'powers', 'relics', 'potions', 'model') {
         $from = Join-Path $charSrc $d

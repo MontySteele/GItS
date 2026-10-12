@@ -245,8 +245,14 @@ and all eight of each apply through the modifier's hooks, saved with the run.
 Riptide was rewritten before the build ([USER], 2026-10-12): "Riptide sounds
 insanely dangerous for enemies that open with a single very high hit as a block
 check; the rest all look good." The act's element is Hydro, Pyro, Electro for
-acts 1 to 3. Headless pins: `KleeTests/SpiralAbyssTests.cs`. Next: the live
-check listed in the build PR, then one solo and one co-op seat on the mode.
+acts 1 to 3. What was taken shows in the run (display only, effects stay in
+the modifier): every player gets one relic per Blessing and an "Abyss Shadows"
+relic listing the Shadows, every enemy wears one badge per Shadow, and the menu
+button, tickbox and the four Abyss Mage shields have official icons
+(`Abyss/AbyssDisplay.cs`, `art/plan.tsv` `abyss_*`). Headless pins:
+`KleeTests/SpiralAbyssTests.cs`, `KleeTests/SpiralAbyssDisplayTests.cs`. Next:
+the live checks listed in the build and display PRs, then one solo and one
+co-op seat on the mode.
 
 ## Live cell
 
