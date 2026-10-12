@@ -165,7 +165,15 @@ public class ShatterRemovesFrozenTests
         // halves are pinned in one test so neither can move without the other.
         var face = string.Join(" ", Il.Strings(
             Il.Method("FrozenPower", "get_Localization")));
-        Assert.Contains("Until it acts", face);
+        // The Varka forced-Amber round (2026-10-10) rewrote the face in the
+        // record's words: "Its next action deals 50% less damage. Attacking it
+        // ends the freeze and deals 6 unblockable damage." (a seat read
+        // "Shatters it for 6" as a bonus). The freeze is still one action
+        // long, said by "its next action".
+        Assert.Contains("Its next action deals 50% less damage. ", face);
+        Assert.Contains("Attacking it ends the ", face);
+        Assert.Contains("freeze and deals ", face);
+        Assert.DoesNotContain("Shatters it for", face);
 
         Assert.Contains("PowerCmd.TickDownDuration",
             Il.Calls(Il.Method("FrozenPower", "AfterSideTurnEnd")));

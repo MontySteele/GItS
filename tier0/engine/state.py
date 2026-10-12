@@ -1249,6 +1249,11 @@ class CombatState:
     # Attack and nothing else. Saved and restored across a free play with the
     # rest of the per-card context (`combat._FREE_PLAY_CONTEXT`).
     mc_attack_element_override: str = ""
+    # Varka's Sturm und Drang rider (the Varka round 3 fix, 2026-10-10): the
+    # bank spent on THIS Attack and the element banked, paid after it
+    # resolves (`effects.companion_overhaul_card_end`). Per-card, saved
+    # across a free play with the override above.
+    mc_swirl_rider: tuple = (0, "")
     # THE INAZUMA COMPANION OVERHAUL (C.COMPANION_OVERHAUL). Damage
     # this CARD PLAY has actually put on enemy HP, which is what Gorou's Inuzaka
     # All-Round Defense reads: "Gain Block equal to half the damage dealt". A

@@ -88,7 +88,7 @@ here. "Shipped" means it exists on the current sheet in some form.
 | The Little Hexenzirkel (Luna VII) | Klee founded her own coven in Chinju Forest after Alice's challenge: Qiqi, Yaoyao, Sayu, then Prune; "little" because they all still have growing to do; each brings an imaginary friend | Prune's card only | Her second companion path: **her own coven**, off-region on purpose (§7) |
 | Prune (Luna VII) | Self-styled witch hunter from Nod-Krai chasing Alice, who "kidnapped" her imaginary friend Descartes so that Klee would make a friend; Anemo; her hammer **absorbs the element she Swirls** | Prune — Witch Hunt (Swirl, Klee-personal) | The canonical way to give Klee an off-element bomb: Prune's Swirl converts the next explosion (§7) |
 | The Red Knight of Stormbearer Mountains | Too many charges, half a mountain gone | no | The Big One's flavour; the Cook loop's signature moment |
-| Fish blasting | Her hobby; gets her confiscated | Fish Blasting, adds Confiscated | Kept as is: AoE with a cost card |
+| Fish blasting | Her hobby; gets her confiscated | Fish Blasting, adds Confiscated | AoE with a cost card; since 2026-10-11 the cost card is a Dazed (9 to ALL) |
 
 Nothing on the current sheet is contradicted by her story. What the current
 sheet **misses** is the half of her story that is about other people
@@ -107,7 +107,9 @@ the cook-or-cash decision, and none of them is "the bomb is a shield."
 Seven sentences. If a rule is not here, it is a card.
 
 1. **Bomb.** A numbered charge on an enemy. At the start of Klee's turn every
-   Bomb grows by **4** (placeholder). A Bomb never goes off on its own.
+   Bomb grows by **2**. A Bomb never goes off on its own.
+   (2026-10-08, design review: growth 4 to 2; Alice's Recipe still doubles
+   it, to 4.)
 2. **Set off.** Only a card that says *Set off* makes Bombs go off. It sets
    off every Bomb on the target, **one at a time, before the rest of the card
    resolves**, each dealing its number as Pyro damage. Plain Attacks, a co-op
@@ -118,8 +120,9 @@ Seven sentences. If a rule is not here, it is a card.
    enemy: the third jumps. A partner or a poison killed the enemy: all of them
    jump.)
 4. **Spark.** Each Bomb that goes off gives Klee 1 Spark, and she starts
-   every combat with 1 (R242). Some cards cost Sparks instead of energy,
+   every combat with 3. Some cards cost Sparks instead of energy,
    printed as a badge. No cap. Lost at the end of combat.
+   (2026-10-08, design review: opening Sparks 1 to 3, Regent's 3 Stars.)
 5. **Pyro.** Every Klee Attack applies Pyro, except the base game's Strike,
    which applies nothing ([USER], 2026-09-02: the basic cards are supposed
    to be bad), and so does every explosion. An
@@ -189,8 +192,9 @@ the plan the starter teaches.
   turn.
 - **You draft:** Fish-Flavored Bait and Forbidden Fun (plain Attacks that
   keep pressure without cashing), Chain Fuse and Explosives Workshop (grow
-  faster), Exquisite Compound (pile every Bomb onto one enemy, which also
-  makes one big reacting number), Grounded and Sorry, Jean... (defence), Big
+  faster), Exquisite Compound (move every Bomb onto one enemy, each
+  growing 4 [6]; no merge since the upper pass of 2026-10-11, so each still
+  pays its Spark), Grounded and Sorry, Jean... (defence), Big
   Badda Boom and The Big One (*Set off* with a multiplier), Quick Fuse and
   Countdown (*Set off* on a Skill).
 - **The payoff moment:** the Red Knight of Stormbearer Mountains. A single
@@ -229,7 +233,8 @@ mint the Sparks for the next one. The hallway plan and the Shiv analogue.
 Explosions are Pyro, so a Bomb set off on an enemy carrying a foreign aura
 reacts: Vaporize on Hydro, Melt on Cryo, Overload splash on Electro. The
 multiplier lands on the cooked number, and since bombs go off one at a time,
-on the *first* one, which is why Exquisite Compound is a React card.
+on the *first* one, which is why Exquisite Compound (every Bomb on one
+enemy) is a React card.
 
 - **A turn looks like:** a companion applies Hydro this turn, and next turn
   she sets off the bomb for one and a half times its size. Sequencing is the
@@ -271,8 +276,8 @@ on the *first* one, which is why Exquisite Compound is a React card.
 - **Sparks → Attacks** (Tinder Toss, Common; Boom-Boom Strike, Uncommon), **→ setup and defence**
   (Dig In, Powder Charge; Blast Shield and Return to Sender, pass two),
   **→ cards** (Bottomless Bag; Once More!, a Set off card back), **→ energy**
-  (Sparkling Burst, Uncommon, 3 Sparks; Sugar Rush, Rare; Blazing Delight,
-  Rare Power, 5 Sparks). R270 lifted draft 4's "energy only at Rare" line:
+  (Sparkling Burst, Uncommon, 1 Spark; Sugar Rush, Rare; Blazing Delight,
+  Rare Power, 1 [0] Spark, the upper pass of 2026-10-11). R270 lifted draft 4's "energy only at Rare" line:
   Regent sells Energy for Stars at Uncommon, and what keeps Sparks from
   being a second energy pool is the price, three explosions per Energy.
 - **Reactions → Sparks:** Flash Point. React feeds Spray.
@@ -301,7 +306,8 @@ Set off, Spark, Companion, Retain and Exhaust. Numbers are starting values.
 - **The Companion route (6):** Playdate, Team Effort, Tag Along, Come Back
   and Play!, Friendship Bracelet (cut by the status package, §5.7),
   Adventure Club.
-- **Retrieval (2):** Treasure Map, Alice's Detonator.
+- **Retrieval (2):** Treasure Map, Alice's Detonator. (Since 2026-10-11
+  Alice's Detonator adds Alice's Mine, not a Ka-pow!: see §5.7's note.)
 
 Two names moved on a clash with shipped cards: Hide and Seek became Hiding
 Spot (now **Windtrace**, the lore pass of 2026-10-01), and Jumpy Dumpty Mk.II is **Jumpy Dumpty Mk.III**.
@@ -330,9 +336,35 @@ Dazed; the "mega turn now, suffer later" cards pay the heavy one, two
 Confiscated that stay all combat. A status is a card of Status type or Status
 rarity (Confiscated counts; curses do not).
 
+**2026-10-11 ([USER], after his runs):** "I think that Fish Blasting needs to
+give Dazed rather than Confiscated - Confiscated is too punishing - and I'm
+not sure if 8 aoe for 1 energy is actually worth punishing with Dazed";
+"Lisa's Treats also underwhelmed; I rarely needed the energy."; "Actually,
+should we tag Confiscated with Exhaust? Currently we're using it as a
+drawback mechanism to load the deck but it builds over time."; "And agreed
+with a) on both." So: Fish Blasting (Attack 1, Common) deals 9 [12] to ALL
+and adds a Dazed (Ironclad's Breakthrough); Lisa's Treats adds one
+Confiscated, not two (Defect's Turbo); Confiscated Exhausts when played, as
+the base game's Slimed does, so it no longer stays all combat once paid for.
+
+The same day: "Tinder Box also looks weak? ... having this deal 3 and AoE set
+off feels a little underwhelming for a draw." On 5 [8] to ALL: "I'm good with
+a)". So Tinder Toss (Attack 0 plus 1 Spark, Common) sets off ALL enemies and
+deals 5 [8] to ALL, was 3 [5] (Thunderclap: 4 to ALL and Vulnerable for 1).
+And: "I also wonder if Alice's Detonator is actually any good. In decks that
+want to cook, you can just keep your starting Ka-Pow! handy. In decks
+prioritizing rapid detonation, this still feels underwhelming, plus your
+discard pile fills up with Ka-Pow!'s. What about instead treating this like
+Necrobinder's Sentry Gaze and having it add a 0 cost card with Ethereal and
+Exhaust that adds a Mine for 10 (15 on upgrade)? Same damage rate at 1 energy
+lower, but the damage is delayed a turn." So Alice's Detonator (Power 1, Rare)
+adds Alice's Mine to her hand at the start of each turn, before the draw
+(Sentry Mode's Sweeping Gaze); Alice's Mine is a 0-cost Token Skill, Ethereal
+and Exhaust: "Place a Mine 10 [15] on an enemy." Mine Toss's own Mine.
+
 - **Loaders:** Forbidden Fun (Attack 0, Common, 10 [14], a Dazed), It Wasn't
   Me! (Skill 0, Common, 6 [9] Block, a Dazed), Lisa's Treats (Skill 0,
-  Uncommon, 2 [3] Energy, 2 Confiscated), Red Knight (Attack 2, Rare, 22 [28]
+  Uncommon, 2 [3] Energy, a Confiscated since 2026-10-11), Red Knight (Attack 2, Rare, 22 [28]
   to ALL, 2 Confiscated).
 - **Payoffs and answers:** Finders Keepers (Power 1, Uncommon: a Confiscated
   played places a Bomb 5 [7]), Klee Can Explain! (Skill 1, Uncommon: 6 [8]

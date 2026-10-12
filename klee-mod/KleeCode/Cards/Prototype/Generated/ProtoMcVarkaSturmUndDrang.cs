@@ -53,7 +53,7 @@ public sealed class ProtoMcVarkaSturmUndDrang : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Varka — Sturm und Drang"),
-        ("description", "Whenever a [gold]Swirl[/gold] happens, your next Attack deals {PowerAmount:diff()} additional damage of the swirled element."),
+        ("description", "At the start of your turn, [gold]Swirl[/gold] a random enemy. Each [gold]Swirl[/gold] gives your next Attack {PowerAmount:diff()} additional damage of that element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

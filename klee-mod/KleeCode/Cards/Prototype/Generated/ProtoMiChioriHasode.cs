@@ -52,7 +52,7 @@ public sealed class ProtoMiChioriHasode : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chiori — Fluttering Hasode"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 6 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold]."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,7 +71,7 @@ public sealed class ProtoMiChioriHasode : CustomCardModel, ICompanionCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<TamotoPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        SummonDamage.Note<TamotoPower>(Owner.Creature, this, 6);
+        SummonDamage.Note<TamotoPower>(Owner.Creature, this, 7);
     }
 
     protected override void OnUpgrade()

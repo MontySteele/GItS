@@ -95,8 +95,10 @@ public sealed class PlaydatePower : PowerModel, ILocalizationProvider
 /// enemy, Rapid Fire every roll, Pocket Match its one charge. The factor
 /// MULTIPLIES the ledger's armed multiplier, so with The Big One it is x8.
 ///
-/// EVERY COPY DOUBLES THE SAME NEXT SET OFF (<see cref="FactorFor"/>),
-/// Playdate's reading: two badges are two sentences about one Set off. Spent
+/// BADGES DO NOT STACK (the scaling pass, klee-next 2026-10-05,
+/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 C): the factor is 2
+/// whatever the stack (<see cref="FactorFor"/>); two badges used to be x4.
+/// The card gained Retain in the same change. Spent
 /// whether or not the aimed enemy held a Bomb, because that card was the next
 /// Set off. A Mine answering an attack is not a Set off and never reads it.
 /// Expires at the end of the turn it was played on. Sim twin:
@@ -109,16 +111,16 @@ public sealed class BoomBadgePower : PowerModel, ILocalizationProvider
         ("title", "Boom Badge"),
         ("description",
             "The next time you [gold]Set off[/gold] this turn, your "
-          + "[gold]Bombs[/gold] deal double damage."),
+          + "[gold]Bombs[/gold] deal double damage. Does not stack."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>What <paramref name="copies"/> badges multiply the next Set
-    /// off's Bombs by: x2 per copy, 1 with none. PURE.</summary>
-    public static int FactorFor(int copies) =>
-        copies <= 0 ? 1 : 1 << System.Math.Min(copies, 20);
+    /// off's Bombs by: x2 with any, 1 with none. "Does not stack" (the
+    /// scaling pass, klee-next). PURE.</summary>
+    public static int FactorFor(int copies) => copies <= 0 ? 1 : 2;
 
     /// <summary>
     /// A Set off is happening: take every badge on <paramref name="klee"/> and
@@ -391,11 +393,21 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Klee's Secret Base: "At the start of your turn, if no enemy has a Bomb of
-/// yours, place a Bomb 5 on a random enemy." <c>AfterPlayerTurnStart</c>, which
-/// runs after the growth hook (<c>BeforeSideTurnStart</c>) -- the spec's "after
-/// Bombs grow" -- so the fresh Bomb does not grow on the turn it arrives. Two
-/// copies check in turn, so the second sees the first one's Bomb.
+/// Klee's Secret Base, v3 of the scaling pass (klee-next, 2026-10-05,
+/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 A): "At the start of
+/// your turn, place a Bomb 4 [6] on a random enemy." A Counter, so copies stack
+/// like Noxious Fumes: two copies are one Power of 8 and place ONE Bomb 8.
+///
+/// <c>AfterPlayerTurnStart</c>, which runs after rule 1's growth
+/// (<c>BeforeSideTurnStart</c>), so the fresh Bomb shows its printed size when
+/// she acts. It goes through the expansion's one sequencer
+/// (<see cref="KleeExpansion.RunTurnStartPlacements"/>): after the echo, before
+/// Dodoco's Mine. The Bomb is an ordinary placement
+/// (<see cref="ProtoBombPower.PlaceOnRandom"/>, Pop!'s door): a random LIVING
+/// enemy, none means nothing, and it grows nothing itself.
+///
+/// v1 ("if no enemy has a Bomb of yours, place a Bomb 5") and the scaling
+/// pass's first draft ("Your Bombs are placed 3 [4] bigger") are gone.
 /// </summary>
 public sealed class SecretBasePower : PowerModel, ILocalizationProvider
 {
@@ -403,18 +415,22 @@ public sealed class SecretBasePower : PowerModel, ILocalizationProvider
     {
         ("title", "Klee's Secret Base"),
         ("description",
-            "At the start of your turn, if no enemy has a [gold]Bomb[/gold] of "
-          + "yours, place a [gold]Bomb[/gold] [blue]{Amount}[/blue] on a "
-          + "random enemy."),
+            "At the start of your turn, place a [gold]Bomb[/gold] "
+          + "[blue]{Amount}[/blue] on a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>The check and the Bomb, in the one fixed order the
-    /// expansion's start-of-turn placements take
-    /// (<see cref="KleeExpansion.RunTurnStartPlacements"/>): this Power's
-    /// question is asked before Dodoco's Mine lands.</summary>
+    /// <summary>The size of the one Bomb <paramref name="klee"/>'s Secret
+    /// Base places this turn: the summed stack (two copies, 8), 0 with none.
+    /// PURE.</summary>
+    public static int BombSizeFor(Creature? klee) =>
+        klee == null ? 0 : klee.Powers.OfType<SecretBasePower>().Sum(p => p.Amount);
+
+    /// <summary>The Bomb, in the one fixed order the expansion's
+    /// start-of-turn placements take
+    /// (<see cref="KleeExpansion.RunTurnStartPlacements"/>).</summary>
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -443,7 +459,7 @@ public sealed class DodocoPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>Through the same sequencer as Klee's Secret Base, so the
-    /// Mine lands AFTER that Power has read the board.</summary>
+    /// Mine lands AFTER that Power's Bomb.</summary>
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
@@ -553,11 +569,14 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Alice's Detonator: "At the start of your turn, add a Ka-pow! to your hand."
-/// The starter's own card (<see cref="ProtoKoKapow"/>: 0, Retain, Set off,
-/// Deal 4), one per copy, added AFTER the turn's draw
-/// (<c>AfterPlayerTurnStart</c>, Blazing Delight's site and reason). No prompt
-/// of any kind.
+/// Alice's Detonator: "At the start of your turn, add Alice's Mine to your
+/// hand." Since 2026-10-11 ([USER]: "What about instead treating this like
+/// Necrobinder's Sentry Gaze and having it add a 0 cost card with Ethereal and
+/// Exhaust that adds a Mine for 10 (15 on upgrade)?") the card is
+/// <see cref="ProtoKoAlicesMine"/> (0, Ethereal, Exhaust, a Mine 10 [15]); it
+/// was the starter's Ka-pow!. One per copy, added BEFORE the turn's draw
+/// (<c>BeforeHandDraw</c>), the base game's <c>SentryModePower</c> (Sweeping
+/// Gaze) site and command. No prompt of any kind.
 ///
 /// TWO POWERS AND ONE RULE: the upgraded card's copies arrive upgraded, and a
 /// Power has no upgrade of its own and a copy count cannot also carry a flag,
@@ -567,13 +586,13 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
 /// </summary>
 public abstract class AlicesDetonatorBasePower : PowerModel, ILocalizationProvider
 {
-    /// <summary>Do this Power's Ka-pow!s arrive upgraded?</summary>
+    /// <summary>Do this Power's Alice's Mines arrive upgraded?</summary>
     public abstract bool Upgraded { get; }
 
-    /// <summary>The badge previews the Ka-pow! it adds, as the card does
-    /// (Infinite Blades' Shiv), upgraded on the Plus twin.</summary>
+    /// <summary>The badge previews the Alice's Mine it adds, as the card does
+    /// (Sentry Mode's Sweeping Gaze), upgraded on the Plus twin.</summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        new[] { HoverTipFactory.FromCard<ProtoKoKapow>(Upgraded) };
+        new[] { HoverTipFactory.FromCard<ProtoKoAlicesMine>(Upgraded) };
 
     public abstract List<(string, string)>? Localization { get; }
 
@@ -598,15 +617,16 @@ public abstract class AlicesDetonatorBasePower : PowerModel, ILocalizationProvid
         }
     }
 
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
+    public override async Task BeforeHandDraw(
+        Player player, PlayerChoiceContext choiceContext,
+        ICombatState combatState)
     {
         if (Owner == null || player.Creature != Owner) return;
         var combat = Owner.CombatState;
         if (combat == null) return;
         for (var copy = 0; copy < Amount; copy++)
         {
-            var card = combat.CreateCard(ModelDb.Card<ProtoKoKapow>(), player);
+            var card = combat.CreateCard(ModelDb.Card<ProtoKoAlicesMine>(), player);
             if (card == null) continue;
             if (Upgraded && card.IsUpgradable && !card.IsUpgraded)
             {
@@ -628,11 +648,11 @@ public sealed class AlicesDetonatorPower : AlicesDetonatorBasePower
         ("title", "Alice's Detonator"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] "
-          + "[gold]Ka-pow![/gold] to your hand."),
+          + "[gold]Alice's Mine[/gold] to your hand."),
     };
 }
 
-/// <summary>The upgraded Alice's Detonator: the same rule, and each Ka-pow! it
+/// <summary>The upgraded Alice's Detonator: the same rule, and each Alice's Mine it
 /// adds arrives upgraded.</summary>
 public sealed class AlicesDetonatorPlusPower : AlicesDetonatorBasePower
 {
@@ -643,6 +663,6 @@ public sealed class AlicesDetonatorPlusPower : AlicesDetonatorBasePower
         ("title", "Alice's Detonator+"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] upgraded "
-          + "[gold]Ka-pow![/gold] to your hand."),
+          + "[gold]Alice's Mine[/gold] to your hand."),
     };
 }

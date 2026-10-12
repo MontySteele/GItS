@@ -59,7 +59,8 @@ public class AoeTrimTests
     public void Mine_toss_and_red_knight_are_single_target()
     {
         Assert.Equal(TargetType.AnyEnemy, new ProtoKoMineToss().TargetType);
-        Assert.Equal(7m, new ProtoKoMineToss().DynamicVars["BombSize"].BaseValue);
+        // 11 since the Klee Commons pass (2026-10-11).
+        Assert.Equal(11m, new ProtoKoMineToss().DynamicVars["BombSize"].BaseValue);
         Assert.Equal(TargetType.AnyEnemy, new ProtoKoRedKnight().TargetType);
         Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKoMineToss", "OnPlay")),
                               c => c.Contains("PlaceOnAll"));
@@ -74,10 +75,27 @@ public class AoeTrimTests
         Assert.Contains("{PowerAmount:diff()}", face);
         Assert.Contains("{IfUpgraded:show:75|50}%", face);
         Assert.Contains("{IfUpgraded:show:6|4} additional damage", face);
-        Assert.Equal(6m, Upgraded<ProtoMcDurinPrincipleOfPurity>()
+        // 7 [9] since the 2026-10-11 Companion pass (was 4 [6]).
+        Assert.Equal(9m, Upgraded<ProtoMcDurinPrincipleOfPurity>()
             .DynamicVars["PowerAmount"].BaseValue);
         var play = Il.Calls(Il.Method("ProtoMcDurinPrincipleOfPurity", "OnPlay"));
         Assert.Contains(play, c => c.Contains("get_IsUpgraded"));
+    }
+
+    [Fact]
+    public void Dandelion_breeze_is_cost_1_both_states_and_upgrades_its_block()
+    {
+        // The 2026-10-11 Companion pass, as amended: cost 1 [1], "gain 6 [9]
+        // Block". The power's Amount IS the Block, so the upgrade reaches it.
+        var face = Face(new ProtoMcJeanDandelionBreeze());
+        Assert.Contains("gain {PowerAmount:diff()} [gold]Block[/gold]", face);
+        Assert.Equal(1, new ProtoMcJeanDandelionBreeze().EnergyCost.Canonical);
+        var up = Upgraded<ProtoMcJeanDandelionBreeze>();
+        Assert.Equal(1, up.EnergyCost.Canonical);
+        Assert.Equal(9m, up.DynamicVars["PowerAmount"].BaseValue);
+        var fire = Il.Calls(Il.Method("DandelionBreezePower", "FireVolley"));
+        Assert.Contains(fire, c => c.Contains("CreatureCmd.GainBlock"));
+        Assert.Contains(fire, c => c.Contains("get_Amount"));
     }
 
     [Fact]

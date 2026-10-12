@@ -568,6 +568,9 @@ _FREE_PLAY_CONTEXT = (
     # play that consumed Bennett's rider would otherwise hand the element to
     # the outer Attack as well.
     "mc_attack_element_override",
+    # And Varka's Sturm und Drang rider, spent at card start and paid at its
+    # end (the Varka round 3 fix, 2026-10-10).
+    "mc_swirl_rider",
     "sparks_at_play", "current_x", "current_card_cost",
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
@@ -790,6 +793,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
     refpowers.before_hand_draw(state)                # Hook.BeforeHandDraw
+    klee_overhaul.before_hand_draw(state)            # Alice's Detonator
     state.draw(C.CARDS_DRAWN_PER_TURN + refpowers.hand_draw_bonus(p),
                from_hand_draw=True)
     # StS2 sites E/F (AfterPlayerTurnStart, AfterSideTurnStart) -- AFTER the
@@ -931,7 +935,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # (C.KLEE_OVERHAUL). Sit Tight's end-of-turn Block, AHEAD of
     # the shipped triggers: the mod pays it as a power tenant of
     # `BeforeSideTurnEnd`, before the model-driven `TurnEndSequencer`, so
-    # Arlecchino's Bond of Life counts it (`klee_overhaul.sit_tight_turn_end`).
+    # Arlecchino's Bond of Life counted it (gone 2026-10-11; `sit_tight_turn_end`).
     klee_overhaul.sit_tight_turn_end(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     # (C.KLEE_OVERHAUL). The overhaul's end of turn: Alice's

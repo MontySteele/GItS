@@ -6440,7 +6440,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-436`: the hit is in the sentence now. Trimmed 2026-09-08 with
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
-        "Mine": [" that also goes off just before its enemy ", "attacks."],
+        "Mine": [" that also goes off when its enemy attacks ",
+                 "you. If it does not attack, the Mine waits. Any "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -7055,7 +7056,7 @@ def test_the_reactions_are_defined_wherever_the_screen_shows_an_element():
     # the preamble -- "damage to ALL enemies" is what splash meant -- and the
     # numbers it exists for are both still here.
     assert "6 damage to ALL enemies and applies 1 Weak" in page
-    assert "Shatters for 6 unblockable damage" in page
+    assert "ends the freeze and deals 6 unblockable damage" in page
     # `EB-366`: no unqualified "Bosses can't be Frozen" here. Since
     # 2026-09-29 the row carries the boss rule in one sentence that names the
     # room, which is true on a `monster` page too -- see the test below.
@@ -7092,7 +7093,8 @@ def test_the_boss_substitution_prints_in_a_boss_room():
     boss["state_type"] = "boss"
 
     assert "Bosses can't be Frozen" not in blindplay.observe(elite)
-    assert "Shatters for 6 unblockable damage" in blindplay.observe(elite)
+    assert ("ends the freeze and deals 6 unblockable damage"
+            in blindplay.observe(elite))
 
     # 2026-09-29 (a Furina seat met "Frozen" on Vantom and was hit for 26):
     # the rule is one sentence on the Frozen row, qualified by the room, so
@@ -7408,9 +7410,9 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
         # commit, so the anchor holds the clause that says when it closes.
         # The text pass of 2026-10-08: a Shatter ends the freeze (BACKLOG
         # line 51), said on both sides.
-        "Frozen": ["ts next action deals 50% less. Until it acts, an Attack "
-                   "on it Shatters for ", " unblockable damage and ends the "
-                   "freeze."],
+        # The Varka forced-Amber round (2026-10-10): the badge's words.
+        "Frozen": ["ts next action deals 50% less damage. Attacking it ends "
+                   "the freeze and deals ", " unblockable damage."],
         # `EB-465`'s two trigger elements, held in step off the same
         # `keywordFallback` table the six above come from.
         # The element port (2026-09-28) moved both, in the C# and here, and
@@ -7716,8 +7718,9 @@ def test_a_keyword_on_an_offered_face_is_defined_even_when_unreachable():
     """
     page = blindplay.observe(_shattering_pressure_reward_state())
 
-    assert "- **Shatter** — The first Attack to hit a Frozen enemy" in page
-    assert "ends the freeze" in page
+    # The Varka forced-Amber round (2026-10-10): the Frozen badge's words.
+    assert "- **Shatter** — Attacking a Frozen enemy ends the freeze" in page
+    assert "Only a Frozen enemy can be Shattered." in page
 
 
 def test_the_shatter_row_is_the_mods_own_number():
@@ -7726,8 +7729,12 @@ def test_the_shatter_row_is_the_mods_own_number():
     src = (REPO / "tier0" / "constants.py").read_text(encoding="utf-8")
     assert re.search(
         rf"SHATTER_DAMAGE\s*=\s*{blindplay_notes.SHATTER_DAMAGE}\b", src)
-    assert (f"deals {blindplay_notes.SHATTER_DAMAGE} additional damage"
-            in blindplay_notes.GAME_KEYWORDS["Shatter"])
+    # The Varka forced-Amber round (2026-10-10): unblockable damage, never
+    # "additional" (a seat read it as a bonus on the Attack).
+    row = blindplay_notes.GAME_KEYWORDS["Shatter"]
+    assert (f"deals {blindplay_notes.SHATTER_DAMAGE} unblockable damage"
+            in row)
+    assert "additional" not in row
 
 
 def test_a_reaction_the_screen_names_is_defined_though_it_is_unreachable():
@@ -8715,7 +8722,7 @@ _R12_SMITH = (
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
-     "At the start of your turn, add a Ka-pow! to your hand."),
+     "At the start of your turn, add Alice's Mine to your hand."),
     ("KLEEMOD-PROTO_MC_FISCHL_OZ",
      "At the end of your turn, Oz deals 5 Electro damage to a random "
      "enemy."),
@@ -8744,7 +8751,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
         "Deal 10 damage. Drain 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
-        "At the start of your turn, add an upgraded Ka-pow! to your hand.")
+        "At the start of your turn, add an upgraded Alice's Mine to your hand.")
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
         "Draw 1 card. At the end of your turn, Oz deals 5 Electro damage to "
         "a random enemy.")
@@ -8814,17 +8821,19 @@ def test_the_smith_prints_the_keyword_an_upgrade_adds():
 
     Seen to FAIL: no surface on the page carried a keyword delta at all.
     """
-    assert qa_packet.upgrade_keywords("KLEEMOD-PROTO_KO_SORRY_JEAN") == (
+    # Sorry, Jean... left with the Klee tempo paper (2026-10-07); Favonius
+    # Escort is the same Retain-on-upgrade shape.
+    assert qa_packet.upgrade_keywords("KLEEMOD-PROTO_KO_FAVONIUS_ESCORT") == (
         "Retain",)
     assert qa_packet.upgrade_keywords("KLEEMOD-NOT_A_CARD") == ()
 
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_KO_SORRY_JEAN", "name": "Sorry, Jean...",
+        {"id": "KLEEMOD-PROTO_KO_FAVONIUS_ESCORT", "name": "Favonius Escort",
          "cost": "1", "type": "Skill",
-         "description": "Remove one of your Bombs and gain Block equal to its "
-                        "size."})
+         "description": "Remove your largest Bomb. Gain Block equal to twice "
+                        "its size."})
 
     page = blindplay.observe(smith)
 
@@ -10645,17 +10654,17 @@ def test_a_smith_row_prints_one_upgrade_line_and_not_two():
 
 
 #: The rows whose upgrade cuts the Spark price and nothing else (Once More!
-#: left with the Klee-only companions, 2026-10-03):
+#: left with the Klee-only companions, 2026-10-03; Sparkling Burst's upgrade
+#: is an Energy since the Klee upper pass, 2026-10-11, and Blazing Delight's
+#: cuts its 1 Spark to none):
 #: (wire id, title, energy cost on the wire, face, the upgraded cost slot).
 _SPARK_PRICE_UPGRADES = [
-    ("KLEEMOD-PROTO_KO_SPARKLING_BURST", "Sparkling Burst", "0",
-     "Gain 1 Energy. If a Bomb went off this turn, gain 1 more.", "1 Spark"),
     ("KLEEMOD-PROTO_KO_BOOM_BADGE", "Boom Badge", "0",
      "The next time you Set off this turn, your Bombs deal double damage.",
      "1 Spark"),
     ("KLEEMOD-PROTO_KO_BLAZING_DELIGHT", "Blazing Delight", "2",
      "At the start of your turn, gain 1 Energy and draw 1 card.",
-     "2 and 2 Sparks"),
+     "2"),
 ]
 
 
@@ -10704,23 +10713,25 @@ def test_an_upgraded_copy_in_hand_shows_its_upgraded_spark_price():
     """The seat page read a card's Spark price off the CLASS, whose index
     holds the unupgraded price, so Sparkling Burst+ in hand printed "cost 2
     Sparks" while the card charges 1. The copy's own `is_upgraded` flag now
-    picks the upgraded price. Seen to FAIL: the head read "cost 2 Sparks"."""
+    picks the upgraded price. Seen to FAIL: the head read "cost 2 Sparks".
+    (Boom Badge since the Klee upper pass, 2026-10-11, which moved Sparkling
+    Burst's upgrade off its price.)"""
     fight, _smith = upgrade_run_states()
     fight = json.loads(json.dumps(fight))
-    card = {"id": "KLEEMOD-PROTO_KO_SPARKLING_BURST", "type": "Skill",
+    card = {"id": "KLEEMOD-PROTO_KO_BOOM_BADGE", "type": "Skill",
             "cost": "0", "can_play": True, "index": 99,
-            "description": "Gain 1 Energy. If a Bomb went off this turn, "
-                           "gain 1 more."}
+            "description": "The next time you Set off this turn, your Bombs "
+                           "deal double damage."}
     fight["player"]["hand"] = [
-        {**card, "name": "Sparkling Burst+", "is_upgraded": True},
-        {**card, "name": "Sparkling Burst", "index": 98}]
+        {**card, "name": "Boom Badge+", "is_upgraded": True},
+        {**card, "name": "Boom Badge", "index": 98}]
     page = blindplay.observe(fight)
-    assert "**Sparkling Burst+** (upgraded) — cost 1 Spark, skill" in page
-    assert "**Sparkling Burst** — cost 2 Sparks, skill" in page
+    assert "**Boom Badge+** (upgraded) — cost 1 Spark, skill" in page
+    assert "**Boom Badge** — cost 2 Sparks, skill" in page
     assert qa_packet.spark_price_for(
-        "KLEEMOD-PROTO_KO_SPARKLING_BURST", True) == 1
+        "KLEEMOD-PROTO_KO_BOOM_BADGE", True) == 1
     assert qa_packet.spark_price_for(
-        "KLEEMOD-PROTO_KO_SPARKLING_BURST", False) == 2
+        "KLEEMOD-PROTO_KO_BOOM_BADGE", False) == 2
 
 
 # --- The offline sitting's page rows -----------------------------------------

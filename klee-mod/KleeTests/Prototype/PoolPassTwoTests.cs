@@ -140,6 +140,58 @@ public class PoolPassTwoTests
     }
 
     [Fact]
+    public void Stoke_the_fuse_grows_the_largest_bomb_on_the_aimed_enemy_only()
+    {
+        // REAL. The Klee pass round, pick 3 (b) (2026-10-11): a seat grew a
+        // minion's Bomb when it meant the boss's, so the card aims and the
+        // walk is restricted to that enemy. The bigger Bomb is on A; aimed at
+        // B, B's largest grows and A's is untouched. Twin:
+        // `test_stoke_the_fuse_grows_the_largest_bomb_on_the_aimed_enemy`.
+        var klee = Seat.Klee();
+        var a = Seat.Klee(200).Creature;
+        var b = Seat.Klee(200).Creature;
+        ProtoBombs.Board(klee.Creature, a, b);
+
+        var pileA = ProtoBombs.Place(a, klee.Creature,
+                                     new ProtoBombs.Charge(12));
+        var pileB = ProtoBombs.Place(b, klee.Creature,
+                                     new ProtoBombs.Charge(3),
+                                     new ProtoBombs.Charge(7));
+
+        Assert.Equal(10, ProtoBombPower.GrowLargestPerSpark(
+            klee.Creature, perSpark: 5, sparksSpent: 2, onlyOn: b));
+
+        Assert.Equal(new[] { 12 }, pileA.Charges.Select(c => c.Size));
+        Assert.Equal(new[] { 3, 17 }, pileB.Charges.Select(c => c.Size));
+    }
+
+    [Fact]
+    public void Stoke_the_fuse_aimed_at_a_bomb_less_enemy_grows_nothing()
+    {
+        // The target holds none of her Bombs: nothing grows, even with a Bomb
+        // on the other enemy.
+        var klee = Seat.Klee();
+        var a = Seat.Klee(200).Creature;
+        var b = Seat.Klee(200).Creature;
+        ProtoBombs.Board(klee.Creature, a, b);
+        var pileA = ProtoBombs.Place(a, klee.Creature,
+                                     new ProtoBombs.Charge(12));
+
+        Assert.Equal(0, ProtoBombPower.GrowLargestPerSpark(
+            klee.Creature, perSpark: 5, sparksSpent: 2, onlyOn: b));
+        Assert.Equal(new[] { 12 }, pileA.Charges.Select(c => c.Size));
+    }
+
+    [Fact]
+    public void Stoke_the_fuse_aims_at_one_enemy()
+    {
+        // The card declares AnyEnemy and hands its target to the walk.
+        var card = new ProtoKoStokeTheFuse();
+        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
+        Assert.Contains("on the enemy", Face(card));
+    }
+
+    [Fact]
     public void Stoke_the_fuse_upgraded_pays_four_per_spark()
     {
         // The rate is the row's one printed number and the only thing the

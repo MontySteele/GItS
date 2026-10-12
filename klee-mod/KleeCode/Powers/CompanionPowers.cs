@@ -23,7 +23,8 @@ namespace KleeMod.Powers;
 /// </summary>
 public static class CompanionConstants
 {
-    public const int MasqueBondBlock = 5;      // MASQUE_BOND_BLOCK owed per turn
+    public const int MasqueHpLoss = 1;         // MASQUE_HP_LOSS per turn start
+    public const int AncientSeaDamage = 5;     // ANCIENT_SEA_DMG per turn start
 }
 
 /// <summary>

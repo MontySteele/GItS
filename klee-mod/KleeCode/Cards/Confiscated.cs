@@ -19,7 +19,11 @@ namespace KleeMod.Cards;
 /// rolled as a reward; generated add_card bodies create instances via
 /// CombatState.CreateCard. It IS in KleeExtraCardPool -- a card that belongs
 /// to no pool at all throws "You monster!" out of CardModel.Pool the moment it
-/// is drawn (see that file).
+/// is drawn (see that file). Exhaust since 2026-10-11 ([USER]: "Actually,
+/// should we tag Confiscated with Exhaust? Currently we're using it as a
+/// drawback mechanism to load the deck but it builds over time."), the
+/// keyword Slimed carries; the face still reads "Does nothing." and the game
+/// appends "Exhaust." from the keyword.
 /// </summary>
 public sealed class Confiscated : CustomCardModel
 {
@@ -30,6 +34,9 @@ public sealed class Confiscated : CustomCardModel
         ("title", "Confiscated"),
         ("description", "Does nothing."),
     };
+
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
 
     public Confiscated()
         : base(1, CardType.Status, CardRarity.Status, TargetType.Self, autoAdd: false)

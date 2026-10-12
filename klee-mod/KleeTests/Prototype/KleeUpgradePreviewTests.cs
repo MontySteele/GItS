@@ -73,16 +73,24 @@ public class KleeUpgradePreviewTests
     }
 
     [Fact]
-    public void Sparkling_bursts_preview_greens_its_price_two_to_one() =>
-        AssertPreviewGreensThePrice<ProtoKoSparklingBurst>(2, 1);
+    public void Sparkling_bursts_preview_leaves_its_one_spark_price_alone()
+    {
+        // The Klee upper pass (2026-10-11): its upgrade is an Energy now, so
+        // the price stays 1 and the preview paints nothing green.
+        var canonical = new ProtoKoSparklingBurst();
+        var preview = Preview(canonical);
+        Assert.Equal(1, SparkCost.PrintedPriceOf(preview));
+        Assert.False(SparkCost.PriceJustUpgraded(preview));
+    }
 
     [Fact]
     public void Boom_badges_preview_greens_its_price_two_to_one() =>
         AssertPreviewGreensThePrice<ProtoKoBoomBadge>(2, 1);
 
     [Fact]
-    public void Blazing_delights_preview_greens_its_price_three_to_two() =>
-        AssertPreviewGreensThePrice<ProtoKoBlazingDelight>(3, 2);
+    public void Blazing_delights_preview_greens_its_price_one_to_none() =>
+        // The Klee upper pass (2026-10-11): 1 [0] Spark, was 3 [2].
+        AssertPreviewGreensThePrice<ProtoKoBlazingDelight>(1, 0);
 
     [Fact]
     public void An_upgrade_that_is_not_a_preview_is_not_green()

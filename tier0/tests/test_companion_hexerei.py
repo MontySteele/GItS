@@ -132,6 +132,29 @@ def test_sucrose_adds_nothing_to_a_reaction_that_deals_nothing(
     assert not _paid(state, "mc_mollis_favonius")
 
 
+def test_sucrose_names_the_three_reactions_it_pays():
+    """The Varka payoff round (2026-10-10): the face said "Elemental
+    Reactions" and the code pays three (`CompanionHexerei.DamagingReactions`).
+    Card, Power and table name the same three."""
+    import re
+    from pathlib import Path
+    repo = Path(__file__).resolve().parents[2]
+    words = ("[gold]Melt[/gold], [gold]Vaporize[/gold] and "
+             "[gold]Overloaded[/gold] deal")
+    card = loader.get_card("proto_mc_sucrose_mollis_favonius")
+    sheet = (repo / "docs" / "prototype-surface.yaml").read_text(
+        encoding="utf-8")
+    row = sheet.split("id: proto_mc_sucrose_mollis_favonius", 1)[1]
+    assert words in row.split("effects:", 1)[0]
+    cs = (repo / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+          / "CompanionHexerei.cs").read_text(encoding="utf-8")
+    table = re.search(r"DamagingReactions =\s*\{([^}]*)\}", cs).group(1)
+    assert sorted(re.findall(r"Reaction\.(\w+)", table)) == [
+        "Melt", "Overload", "Vaporize"]
+    assert "[gold]Melt[/gold], [gold]Vaporize[/gold] and" in cs
+    assert card is not None
+
+
 def test_sucrose_pays_once_per_overload_and_not_once_per_splashed_body(
         overhaul):
     state = _state()

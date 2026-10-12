@@ -142,7 +142,10 @@ SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
 # claims (slice packet sec.1: "No number in it is a claim"). They are named here
 # because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
 # mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
-KLEE_OVERHAUL_BOMB_GROWTH = 4        # rule 1: every Bomb, start of her turn
+# Rule 1 at 2 since the Klee design review (2026-10-08,
+# review/active/klee-design-review-2026-10-08.md sec.4.6, ruled; it was 4):
+# a Bomb cashed now is worth what it was, a Bomb held is worth less.
+KLEE_OVERHAUL_BOMB_GROWTH = 2        # rule 1: every Bomb, start of her turn
 # Alice's Recipe MULTIPLIES the turn's growth ("your Bombs grow twice each
 # turn"), balance pass 2026-09-02.
 KLEE_OVERHAUL_ALICE_MULTIPLIER = 2
@@ -151,8 +154,10 @@ KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 # has to generate more through cards, so 1 is a reasonable compromise"). It is a
 # KIT rule and not a relic clause -- the brief's rule 4 carries the line -- so
 # the mod grants it from the arm's own turn-1 site and the relic's face is
-# unchanged. C# twin `KleeOverhaulLaw.OpeningSpark`.
-KLEE_OVERHAUL_OPENING_SPARK = 1
+# unchanged. C# twin `KleeOverhaulLaw.OpeningSpark`. 3 since the Klee design
+# review (2026-10-08, sec.4.6, ruled; it was 1): Regent's own 3 Stars, so a
+# Spark card is live on turn one.
+KLEE_OVERHAUL_OPENING_SPARK = 3
 # GROUNDED'S SPARK (`EB-344`, ruled R248). The held turn pays a Spark as well as
 # the Block: "At the start of your turn, if none of your Bombs went off last
 # turn, gain 6 Block and 1 Spark." The Block is the CARD's number and moves on
@@ -221,7 +226,7 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # 24 / 33 / 21.
 KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
     "proto_ko_forbidden_fun",
-    "proto_ko_it_wasnt_me",
+    # It Wasn't Me! cut by the Klee tempo paper (2026-10-07).
     "proto_ko_lisas_treats",
     "proto_ko_red_knight",
     "proto_ko_finders_keepers",
@@ -236,6 +241,31 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
     "proto_ko_up_in_smoke",
     "proto_ko_behind_jeans_desk",
     "proto_ko_kitchen_alchemy",
+)
+
+# THE KLEE TEMPO PAPER (2026-10-07, ruled,
+# review/active/klee-tempo-paper-2026-10-07.md sec.3): five rows in for It
+# Wasn't Me!, Sorry, Jean..., Grounded, Sit Tight and Experiment in Progress,
+# appended after the status package in the sheet's own order. Cook's damage
+# that leaves the Bombs cooking (Simmer, Taste Test), Spray's damage without
+# spending the bank (Tinkering, Dodoco Tag) and out of it (Explosive Spark).
+# The pool stays 78, 25 / 32 / 21.
+KLEE_TEMPO_IDS: tuple[str, ...] = (
+    "proto_ko_simmer",                          # Common
+    "proto_ko_taste_test",                      # Uncommon
+    "proto_ko_tinkering",                       # Uncommon
+    "proto_ko_dodoco_tag",                      # Uncommon
+    "proto_ko_explosive_spark",                 # Common
+)
+
+# THE KLEE DESIGN REVIEW (2026-10-08, ruled,
+# review/active/klee-design-review-2026-10-08.md sec.4.4 and 4.5): two Common
+# rows in for Playdate and Pop!, appended after the tempo paper's in the
+# sheet's own order. Her normal attack (place and set off in one card) and
+# Spray's fuel for a Dazed. The pool stays 78, 25 / 32 / 21.
+KLEE_DESIGN_REVIEW_IDS: tuple[str, ...] = (
+    "proto_ko_fire_fire",                       # Common
+    "proto_ko_blasting_spree",                  # Common
 )
 
 # THE KLEE-ONLY COMPANIONS (2026-10-03,
@@ -312,6 +342,28 @@ KLEE_OWN_COMPANION_IDS: tuple[str, ...] = (
 # a Common for the same reason. Vermillion Pact was held out of slice one (it
 # touches the shared reaction funnel) and arrived with the pool pass
 # (`EB-491`), in the block below.
+#: STAGING GRANT-ONLY ROWS (the Klee scaling pass, klee-next 2026-10-05,
+#: review/active/klee-scaling-pass-2026-10-05.md sec.4 B). A row a staging
+#: round grants at embark (`understudy.embark --arm`) and NO offer surface
+#: shows: in no `Slice()`, no `*_OVERHAUL_POOL_IDS` and no draftable pool.
+#: `tools/lint_arm_pool_parity.py` and `tools/card_distinctness_report.py`
+#: skip it.
+STAGING_GRANT_IDS: tuple[str, ...] = (
+    "proto_ko_witchs_homework_next",
+)
+
+#: OFF-POOL ROWS (the Klee design review, 2026-10-08, sec.4.4). A row another
+#: card CREATES at play and NO offer surface shows: in no `Slice()`, no
+#: `*_OVERHAUL_POOL_IDS` and no draftable pool, but compiled and in her
+#: `CardPool` so it resolves. Pop! is the one: Klee Can Explain! transforms
+#: statuses into it. `tools/lint_arm_pool_parity.py` and
+#: `tools/card_distinctness_report.py` skip it as they skip a staging row.
+KLEE_OFF_POOL_ROW_IDS: tuple[str, ...] = (
+    "proto_ko_pop",
+    # Alice's Detonator's token (2026-10-11), made at turn start.
+    "proto_ko_alices_mine",
+)
+
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8; Fish-Flavored Bait cut by the status pile's defence,
     # 2026-10-01)
@@ -322,7 +374,8 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_alices_recipe",
     # Spray (8 -- Pop! is the packet sec.4 table's first Spray row and it
     # OFFERS from draft 4, R242; Fwoosh! was cut by R271 sec.4)
-    "proto_ko_pop",
+    # Pop! left the pool at the Klee design review (2026-10-08); its row stays
+    # for Klee Can Explain! (`KLEE_OFF_POOL_ROW_IDS`).
     "proto_ko_mine_toss",
     "proto_ko_tinder_toss",
     "proto_ko_quick_fuse",
@@ -341,8 +394,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_booby_trap",
     "proto_ko_dig_in",
     "proto_ko_run_away",
-    "proto_ko_grounded",
-    "proto_ko_sorry_jean",
+    # Grounded and Sorry, Jean... cut by the Klee tempo paper (2026-10-07).
     # THE DEFENCE SHELF (2 -- R252, Klee round 9 pick 1 at its default). The
     # pick drafted four; the R253 charter audit withdrew two of them (Fire
     # Safety and Safety Lesson) and they are on no surface. What is left is
@@ -417,13 +469,13 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Alice's Detonator), and more Mines and Spray (the rest). Its own block
     # at the end of the tuple, like the slices above it.
     "proto_ko_hiding_spot",
-    "proto_ko_playdate",
+    # Playdate cut by the Klee design review (2026-10-08).
     "proto_ko_jumpy_dumpty_mk_iii",
     # Spinning Sparkler cut by the status pile's defence (2026-10-01).
     "proto_ko_mine_all_mine",
     "proto_ko_team_effort",
     "proto_ko_one_more_charge",
-    "proto_ko_sit_tight",
+    # Sit Tight cut by the Klee tempo paper (2026-10-07).
     "proto_ko_treasure_map",
     "proto_ko_tag_along",
     "proto_ko_come_back_and_play",
@@ -432,7 +484,7 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_duck_and_run",
     "proto_ko_party_poppers",
     "proto_ko_look_out",
-    "proto_ko_patience_klee",
+    # Experiment in Progress cut by the Klee tempo paper (2026-10-07).
     "proto_ko_secret_base",
     "proto_ko_half_a_mountain",
     "proto_ko_favonius_escort",
@@ -449,7 +501,11 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Split Charge, Fish Fry, Friendship Bracelet). The pool is 78 (24 / 33
     # / 21).
     *KLEE_STATUS_PACKAGE_IDS,
-    # THE KLEE-ONLY COMPANIONS (2026-10-03), after it. Still 78, 24 / 33 / 21.
+    # THE KLEE TEMPO PAPER (2026-10-07), after it. Still 78, 25 / 32 / 21.
+    *KLEE_TEMPO_IDS,
+    # THE KLEE DESIGN REVIEW (2026-10-08), after it. Still 78, 25 / 32 / 21.
+    *KLEE_DESIGN_REVIEW_IDS,
+    # THE KLEE-ONLY COMPANIONS (2026-10-03), after it. Still 78, 25 / 32 / 21.
     *KLEE_OWN_COMPANION_IDS,
 )
 
@@ -506,21 +562,20 @@ KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
 # (`tools/lint_constant_parity.py`); the numbers a CARD prints stay on the card
 # row, and only a number a POWER carries lands here.
 MC_SIGNATURE_MIX_BLOCK = 4      # Diona: Block per turn, 2 turns
-MC_GLACIAL_WALTZ_DMG = 6        # Kaeya: Cryo damage per turn, 3 turns
+MC_GLACIAL_WALTZ_DMG = 7        # Kaeya: Cryo damage per turn, 3 turns
 MC_ISOTOMA_DMG = 8              # Albedo: end-of-turn damage on an aura'd enemy
 MC_ISOTOMA_BLOCK = 4            # Albedo: the Crystallize half
-MC_DANDELION_BREEZE_BLOCK = 6   # Jean: Block per end of turn
 MC_OZ_DMG = 5                   # Fischl: Oz's Electro volley, no turn limit
 MC_REVELATION_BLOCK = 5         # Nicole: Block at the start of your turn
 MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line
-MC_LIGHTNING_ROSE_DMG = 5       # Lisa: Electro damage per turn, 3 turns
+MC_LIGHTNING_ROSE_DMG = 6       # Lisa: Electro damage per turn, 3 turns
 MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
 # THE SECOND WAVE -- the thirteen rows the first pass left out. Same rule as
 # the eleven above: a number the CARD prints stays on the card row (Diona's 6
 # Block, Bennett's 4, Favonian Favor's 3, Sturm und Drang's 6, Mika's 1) and
 # only a number a POWER carries is named here, because these are the ones no
 # row can render.
-MC_SHOWER_DMG = 9               # Dahlia: the Shower's answer to one attack
+MC_SHOWER_DMG = 12              # Dahlia: the Shower's answer to one attack
 MC_LIGHTNING_FANG_BONUS = 3     # Razor: damage his Attacks gain, 2 turns
 MC_BARON_BUNNY_DMG = 8          # Amber: the Pyro the decoy answers with
 MC_LIGHTFALL_BASE = 8           # Eula: the blade's own damage
@@ -634,11 +689,11 @@ MC_LIONS_FANG_DRAW = 1
 # (`tools/lint_constant_parity.py`). Every one is the workshop's sec.3 printed
 # text, re-priced in its sec.8 -- nothing is derived and nothing is picked.
 MI_WAR_BANNER_DEXTERITY = 2     # Gorou: Dexterity while the banner stands
-MI_JUUGA_DMG = 6                # Gorou: Geo damage per turn, 3 turns
-MI_DARUMA_DMG = 6               # Sayu: the Daruma's hit above 70% HP
-MI_DARUMA_BLOCK = 6             # Sayu: and the Block below it
-MI_SANCTIFYING_RING_DMG = 5     # Shinobu: Electro to ALL, per turn, 3 turns
-MI_SANCTIFYING_RING_BLOCK = 5   # Shinobu: and the Block that rides it
+MI_JUUGA_DMG = 7                # Gorou: Geo damage per turn, 3 turns
+MI_DARUMA_DMG = 9               # Sayu: the Daruma's hit above 70% HP
+MI_DARUMA_BLOCK = 9             # Sayu: and the Block below it
+MI_SANCTIFYING_RING_DMG = 6     # Shinobu: Electro to ALL, per turn, 3 turns
+MI_SANCTIFYING_RING_BLOCK = 6   # Shinobu: and the Block that rides it
 MI_BLAZING_BARRIER_BLOCK = 3    # Thoma: Block per absorbing hit
 MI_OOYOROI_DMG = 5              # Thoma: Pyro per Attack you play, 2 turns
 MI_OOYOROI_BLOCK = 3            # Thoma: and the Block per Attack
@@ -652,7 +707,7 @@ MI_SOUMETSU_FINALE = 16         # Ayaka: and the hit it ends on
 MI_KYOUKA_BONUS = 4             # Ayato: damage your Attacks gain, 2 turns
 MI_KYOUKA_FINALE = 12           # Ayato: the illusion that pops when it ends
 MI_SURPRISE_DISPATCH_DMG = 10   # Kirara: the parcel, next turn
-MI_TAMOTO_DMG = 6               # Chiori: Geo per turn, ignoring Block
+MI_TAMOTO_DMG = 7               # Chiori: Geo per turn, ignoring Block
 
 # THE INAZUMA UNIVERSALS, WHOLE -- the workshop's sec.3 in its own character
 # order. TWENTY-FOUR, and the number is worth writing down: its sec.4 counts
@@ -778,7 +833,7 @@ COVEN_PERSONAL_POOL_IDS: tuple[str, ...] = (
 # above: a number the CARD prints stays on the card row, and only a number a
 # POWER carries lands here, because the C# mirrors are compared BY VALUE
 # (`tools/lint_constant_parity.py`). Every one is R236's printed text.
-CVN_HERALD_BLOCK = 3            # Qiqi: Block at the start of each turn
+CVN_HERALD_BLOCK = 4            # Qiqi: Block at the start of each turn
 CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 
 # =============================================================================
@@ -1199,7 +1254,8 @@ OZ_DMG = 3                        # Oz end-of-turn hit (applies electro)
 WITCHS_FLAME_BURST = 3            # Durin: Burst Energy per consumed Pyro aura
 SOLAR_ISOTOMA_BLOCK = 3           # block per attack hit vs aura'd enemy
 CELESTIAL_GIFT_BLOCK = 4          # Nicole: block at start of turn
-MASQUE_BOND_BLOCK = 5             # Arlecchino: Bond of Life, Block owed per turn
+MASQUE_HP_LOSS = 1                # Arlecchino: HP lost at the start of each turn
+ANCIENT_SEA_DMG = 5               # Neuvillette: Hydro damage at the start of each turn
 
 
 # --- Furina: Encore & Fanfare (kickoff §4) ---

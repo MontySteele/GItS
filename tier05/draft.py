@@ -624,9 +624,11 @@ def _max_hp_hit(card: Card, fx: dict) -> float:
 #: Named as a set rather than eleven `if op ==` arms because they take ONE
 #: pricing decision between them -- see `_op_price`.
 KLEE_OVERHAUL_OPS = frozenset((
-    "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+    "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test's read.
+    "damage_from_bombs",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
     # THE POOL PASS's two (`EB-491`): All of My Treasures! and Split Charge.
@@ -640,14 +642,17 @@ KLEE_OVERHAUL_OPS = frozenset((
     # above -- the arm's verbs, quarantined, and no published world drafts
     # them.
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
-    "add_random_companion", "grant_kapow_each_turn",
+    "choose_companion", "grant_alices_mine_each_turn",
     # THE STATUS PACKAGE's two (2026-10-01): Klee Can Explain!'s transform and
     # Albedo -- Dust of Purification's exhaust-and-grow. Same decision.
     "transform_statuses_into", "exhaust_statuses_grow_largest",
     # DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy's op. Same
     # decision; `lose_strength` resolves off the arm too, but only her
     # prototype row prints it, so no drafted number moves.
-    "lose_strength"))
+    "lose_strength",
+    # THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's Homework's
+    # grant-only row. Same decision -- no pool offers it.
+    "plant_homework_bomb"))
 
 #: VARKA's two verbs (the Oath rework, review/active/varka-paper-kit-
 #: 2026-09-28.md): `varka` (one kind per Oath rule, `tier0/engine/varka_oath`)
@@ -2150,19 +2155,21 @@ STATIC_OP_PRICING: dict[str, str] = {
             "resolve it, so there is no sim behaviour to price (slice packet "
             "sec.5; prototype surface only -- no shipped row prints it and no "
             "drafted number moves)"
-       for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+       for op in ("set_off", "plant_bomb", "grow_bombs", "gather_bombs",
                   "remove_bomb_for_block", "block_largest_bomb",
                   "grow_largest_bomb", "damage_set_off_total",
+                  "damage_from_bombs",
                   "multiply_set_off", "draw_per_set_off",
                   "companion_mark_hand", "mine_bombs",
                   "plant_bomb_copy_largest",
                   "return_to_hand",
                   "grow_largest", "multiply_largest_bomb",
-                  "fetch_from_discard", "add_random_companion",
-                  "grant_kapow_each_turn",
+                  "fetch_from_discard", "choose_companion",
+                  "grant_alices_mine_each_turn",
                   "transform_statuses_into",
                   "exhaust_statuses_grow_largest",
-                  "lose_strength")},
+                  "lose_strength",
+                  "plant_homework_bomb")},
     # --- VARKA, the Oath rework (varka_oath, Varka seats only) ---
     **{op: "ZERO: VARKA's Oath verbs resolve in tier0 only for a Varka seat, "
             "and no pool offers a proto_vk_ row to this "

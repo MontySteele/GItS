@@ -361,9 +361,9 @@ def test_grand_ode_swirls_every_enemy_and_ticks(overhaul):
 def test_dandelion_breeze_pays_its_block_even_with_no_aura_on_the_board(
         overhaul):
     st = make_state()
-    st.player.powers["mc_dandelion_breeze"] = 1
+    st.player.powers["mc_dandelion_breeze"] = 6
     effects.companion_overhaul_turn_end(st)
-    assert st.player.block == C.MC_DANDELION_BREEZE_BLOCK
+    assert st.player.block == 6
 
 
 def test_dandelion_breeze_swirls_the_aura_bearer(overhaul):
@@ -371,10 +371,27 @@ def test_dandelion_breeze_swirls_the_aura_bearer(overhaul):
     the spread and the bearer's aura is consumed, which is what a Swirl is."""
     st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
     st.enemies[1].aura = "cryo"
-    st.player.powers["mc_dandelion_breeze"] = 1
+    st.player.powers["mc_dandelion_breeze"] = 6
     effects.companion_overhaul_turn_end(st)
     assert [e.aura for e in st.enemies] == ["cryo", None]
-    assert st.player.block == C.MC_DANDELION_BREEZE_BLOCK
+    assert st.player.block == 6
+
+
+def test_dandelion_breeze_is_cost_1_both_states_and_upgrades_its_block(
+        overhaul):
+    """2026-10-11 Companion pass, as amended: cost 1 [1], "gain 6 [9]
+    Block". The stack is the Block, so the upgrade reaches the payment."""
+    from tier0.content import upgrades
+    base = loader.get_card("proto_mc_jean_dandelion_breeze")
+    up = upgrades.apply_upgrade(loader.get_card("proto_mc_jean_dandelion_breeze"))
+    assert (base.cost, up.cost) == (1, 1)
+    assert base.effects[0]["amount"] == 6
+    assert up.effects[0]["amount"] == 9
+    st = make_state()
+    effects.resolve_card(st, up)
+    assert st.player.powers["mc_dandelion_breeze"] == 9
+    effects.companion_overhaul_turn_end(st)
+    assert st.player.block == 9
 
 
 def test_the_isotoma_pays_nothing_without_an_aura(overhaul):

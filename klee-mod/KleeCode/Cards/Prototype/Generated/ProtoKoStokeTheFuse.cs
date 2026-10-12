@@ -42,7 +42,7 @@ public sealed class ProtoKoStokeTheFuse : CustomCardModel, ISparkPricedCard, ISp
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stoke the Fuse"),
-        ("description", "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] grows by {Grow:diff()} per [gold]Spark[/gold] spent."),
+        ("description", "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] on the enemy grows by {Grow:diff()} per [gold]Spark[/gold] spent."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -68,7 +68,7 @@ public sealed class ProtoKoStokeTheFuse : CustomCardModel, ISparkPricedCard, ISp
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKoStokeTheFuse()
-        : base(0, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(0, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
@@ -76,7 +76,8 @@ public sealed class ProtoKoStokeTheFuse : CustomCardModel, ISparkPricedCard, ISp
     {
         var sparksSpent = SparkPower.SparksAtPlay(Owner.Creature);
         if (!await SparkPower.Spend(choiceContext, Owner.Creature, sparksSpent, this)) return;
-        ProtoBombPower.GrowLargestPerSpark(Owner.Creature, DynamicVars["Grow"].IntValue, sparksSpent);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        ProtoBombPower.GrowLargestPerSpark(Owner.Creature, DynamicVars["Grow"].IntValue, sparksSpent, onlyOn: cardPlay.Target);
     }
 
     protected override void OnUpgrade()

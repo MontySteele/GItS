@@ -81,13 +81,8 @@ public class Round18Tests
                         badge);
         Assert.DoesNotContain("went off last turn", badge);
         Assert.DoesNotContain("on the field", badge);
-
-        var card = new ProtoKoGrounded().Localization!
-            .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("if you played no [gold]Set off[/gold] card last turn",
-                        card);
-        Assert.DoesNotContain("went off last turn", card);
-        Assert.DoesNotContain("on the field", card);
+        // (The card half left with the Grounded row: the Klee tempo paper,
+        // 2026-10-07, cut it.)
     }
 
     // ==================================================================

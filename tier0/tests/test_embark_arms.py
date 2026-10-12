@@ -221,3 +221,42 @@ def test_the_kind_is_recorded_beside_every_grant(monkeypatch):
                         lambda *a, **k: {"status": "ok", "card_name": "x"})
     granted = embark.grant_arms([ARM])
     assert [g["kind"] for g in granted] == ["prototype"]
+
+
+# ------------------------------------------- the Klee scaling pass's relic --
+
+def test_a_relic_grant_goes_through_give_relic_by_its_wire_id(monkeypatch):
+    """The Klee scaling pass (klee-next, 2026-10-05): round 1's third arm
+    opens with the staging tempo relic. `--relic` is the game's own
+    `RelicCmd.Obtain` through the bridge, so `AfterObtained` (which removes
+    Pounding Surprise) runs as on a drop."""
+    calls: list[tuple[str, str]] = []
+
+    def fake(relic_id, why):
+        calls.append((relic_id, why))
+        return {"status": "queued", "message": "granted"}
+
+    monkeypatch.setattr(bridge, "give_relic", fake)
+    granted = embark.grant_relics(["KLEEMOD-POUNDING_SURPRISE_NEXT"])
+    assert [c[0] for c in calls] == ["KLEEMOD-POUNDING_SURPRISE_NEXT"]
+    assert calls[0][1].strip()
+    assert granted == [{"relic": "KLEEMOD-POUNDING_SURPRISE_NEXT",
+                        "message": "granted"}]
+
+
+def test_a_failed_relic_grant_stops_the_embark(monkeypatch):
+    monkeypatch.setattr(bridge, "give_relic",
+                        lambda *a, **k: {"status": "error",
+                                         "message": "no relic matches"})
+    with pytest.raises(embark.EmbarkError) as excinfo:
+        embark.grant_relics(["KLEEMOD-NOPE"])
+    assert "no relic matches" in str(excinfo.value)
+
+
+def test_the_lane_command_carries_the_relic_after_the_arms():
+    (cmd,) = embark.lane_commands(
+        ["lane1"], characters=["klee"], seeds=["SEED"], ascension=None,
+        max_actions=0, arms=["proto_ko_secret_base"],
+        relics=["KLEEMOD-POUNDING_SURPRISE_NEXT"])
+    assert cmd[-4:] == ["--arm", "proto_ko_secret_base",
+                        "--relic", "KLEEMOD-POUNDING_SURPRISE_NEXT"]

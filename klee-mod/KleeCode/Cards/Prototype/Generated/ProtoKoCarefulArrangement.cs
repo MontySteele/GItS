@@ -35,20 +35,20 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoCarefulArrangement : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(ArmKeywordTips.ForMergeRiders(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this), this), this);
+        ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(base.ExtraHoverTips, this, false), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_careful_arrangement");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Exquisite Compound"),
-        ("description", "Move all your [gold]Bombs[/gold] onto the enemy as one [gold]Bomb[/gold]. It grows by {Grow:diff()}, and is a [gold]Mine[/gold] if any of them were."),
+        ("description", "Move all your [gold]Bombs[/gold] onto the enemy. Each grows by {Grow:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Grow", 5m)
+            new DynamicVar("Grow", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,11 +61,11 @@ public sealed class ProtoKoCarefulArrangement : CustomCardModel
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ProtoBombPower.MergeAllTo(choiceContext, cardPlay.Target, Owner.Creature, DynamicVars["Grow"].IntValue, this);
+        await ProtoBombPower.GatherAllTo(choiceContext, cardPlay.Target, Owner.Creature, DynamicVars["Grow"].IntValue, this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Grow"].UpgradeValueBy(3m);
+        DynamicVars["Grow"].UpgradeValueBy(2m);
     }
 }

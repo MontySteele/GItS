@@ -48,7 +48,7 @@ public sealed class ProtoKoBombsAway : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 4m),
+            new DynamicVar("BombSize", 6m),
             new CalculationBaseVar(4m),
             new CalculationExtraVar(2m),
             new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => ProtoBombPower.EnemiesHoldingChargeFrom(card.Owner.Creature))

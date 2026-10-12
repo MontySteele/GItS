@@ -33,7 +33,7 @@ kits; its calibration bands are retired, and the sim does not gate kit balance
 
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
-| `klee` | Klee | 70 | Mondstadt | Pyro | Balance (frozen until the suite runs) | 78 |
+| `klee` | Klee | 70 | Mondstadt | Pyro | Balance (`klee-next` promoted 2026-10-11) | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype (the Salon's Tab; pool-75 rulings and the block gap built) | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Prototype (combo pass built) | 78 |
@@ -54,17 +54,38 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `review/active/klee-brief-2026-09-01.md` (sec.3, the rules: Bombs grow at the
   start of her turn and go off only to a *Set off* card or a Mine answering an
   attack; each Bomb that goes off gives a Spark, which some cards cost). Pool
-  78 (24 / 33 / 21); seven relics of her own and three potions. **She is
-  measured on the real game and frozen on `main`** between suite runs
-  (`review/active/klee-balance-measurement-2026-10-05.md`, ruled 2026-10-05):
-  changes go to `klee-next` and reach `main` in one promotion PR carrying the
-  suite record.
-  **Staging:** branch `klee-next`, build `0.2.4556+next` (the design review);
-  latest record `review/records/klee-suite-4-2026-10-08.md`, suite 5 in
-  progress; papers `review/active/klee-tempo-paper-2026-10-07.md` and
-  `review/active/klee-design-review-2026-10-08.md` (ruled; growth 4 to 2,
-  three opening Sparks). Next: suite 5; if it passes, the promotion PR and
-  [USER]'s run on that build (design review pick 5).
+  78 (25 / 32 / 21; Boom Badge to Common, [USER] 2026-10-07:
+  "Agreed on Boom Badge, but let's keep powers out of Common and leave Secret
+  Base at Uncommon."); seven relics of her own and three potions. **Promoted
+  2026-10-11 without a suite record** ([USER]: "personally I think the current
+  builds are all much better than the old frozen one and I'm about ready to
+  override the previous frozen build with the current characters"): `klee-next`
+  reached `main` in one PR (#940) and the suite requirement was waived for that
+  promotion only. She stays at Balance; later changes again go to `klee-next`
+  and reach `main` by promotion (`operations/stage-gate.md`). Latest suite
+  record `review/records/klee-suite-4-2026-10-08.md`. What the promotion
+  carried: the scaling pass (`review/active/klee-scaling-pass-2026-10-05.md`;
+  Secret Base places a Bomb 4 [6] each turn, Boom Badge Retains and does not
+  stack); the tempo paper (`review/active/klee-tempo-paper-2026-10-07.md`;
+  [USER]: "I personally found Blast Shield and Kitchen Alchemy quite useful in
+  my runs, so I'm not sure I buy that they should go. Otherwise agreed."): out
+  It Wasn't Me!, Sorry, Jean..., Grounded, Sit Tight, Experiment in Progress;
+  in Simmer, Taste Test, Tinkering, Dodoco Tag, Explosive Spark; the design
+  review (`review/active/klee-design-review-2026-10-08.md`; [USER]: "Nope, this
+  all looks good. I'm now in agreement with all picks."): Bombs grow 2 a turn,
+  3 opening Sparks, every drafted Bomb or Mine placer prints 2 bigger; in Fire!
+  Fire! and Blasting Spree; out Playdate and Pop! (Pop! stays off-pool for Klee
+  Can Explain!); 2026-10-11 ([USER]: "Confiscated is too punishing"; "Lisa's
+  Treats also underwhelmed"; "should we tag Confiscated with Exhaust?"): Fish
+  Blasting 9 [12] to ALL and a Dazed, Lisa's Treats one Confiscated,
+  Confiscated Exhausts; Tinder Toss 5 [8] to ALL; Alice's Detonator adds
+  Alice's Mine (0, Ethereal, Exhaust, a Mine 10 [15]) each turn, Sentry Mode's
+  shape; the Commons pass (`review/active/klee-commons-pass-2026-10-11.md`,
+  seven numbers) and the Uncommons and Rares pass
+  (`review/active/klee-upper-pass-2026-10-11.md`, all defaults): ten numbers,
+  Exquisite Compound moves each Bomb (no merge), Tag Along and Adventure Club
+  choose 1 of 3 and 2 of 4; Stoke the Fuse aims at an enemy. **Next:** [USER]'s
+  playtest on the promoted build, after the recent buffs.
 - **Kokomi: Prototype.** Brief `review/active/kokomi-brief-2026-09-01.md`
   (sec.2, the rules). A card with a Plan line can be played on the
   Bake-Kurage instead, and it is carried out at the start of her next turn,

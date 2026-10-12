@@ -56,6 +56,28 @@ public class KleeR276ExpansionTests
     private static IReadOnlyCollection<string> Play(string type) =>
         Il.Calls(Il.Method(type, "OnPlay"));
 
+    /// <summary>A source file under klee-mod/KleeCode, line comments
+    /// stripped (`PoolPassThreeTests.Printed`'s idiom).</summary>
+    private static string Printed(string relativePath)
+    {
+        var relative = System.IO.Path.Combine("klee-mod", "KleeCode",
+            relativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
+        var dir = new System.IO.DirectoryInfo(System.AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = System.IO.Path.Combine(dir.FullName, relative);
+            if (System.IO.File.Exists(candidate))
+            {
+                return System.Text.RegularExpressions.Regex.Replace(
+                    System.IO.File.ReadAllText(candidate),
+                    @"^\s*//.*$", string.Empty,
+                    System.Text.RegularExpressions.RegexOptions.Multiline);
+            }
+            dir = dir.Parent;
+        }
+        throw new System.IO.FileNotFoundException(relative);
+    }
+
     private static (Seat Klee, Creature A, Creature B) Board()
     {
         var klee = Seat.Klee();
@@ -71,21 +93,19 @@ public class KleeR276ExpansionTests
     {
         // class, rarity, type, energy
         new object[] { typeof(ProtoKoHidingSpot), CardRarity.Common, CardType.Skill, 1 },
-        new object[] { typeof(ProtoKoPlaydate), CardRarity.Common, CardType.Skill, 0 },
+        // Playdate cut by the Klee design review (2026-10-08).
         new object[] { typeof(ProtoKoJumpyDumptyMkIii), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoMineAllMine), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoTeamEffort), CardRarity.Uncommon, CardType.Attack, 1 },
         new object[] { typeof(ProtoKoOneMoreCharge), CardRarity.Uncommon, CardType.Skill, 1 },
-        new object[] { typeof(ProtoKoSitTight), CardRarity.Uncommon, CardType.Skill, 0 },
-        new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 1 },
+        new object[] { typeof(ProtoKoTreasureMap), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoTagAlong), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoComeBackAndPlay), CardRarity.Uncommon, CardType.Skill, 0 },
-        new object[] { typeof(ProtoKoBoomBadge), CardRarity.Uncommon, CardType.Skill, 0 },
+        new object[] { typeof(ProtoKoBoomBadge), CardRarity.Common, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoWaitForIt), CardRarity.Uncommon, CardType.Skill, 0 },
         new object[] { typeof(ProtoKoDuckAndRun), CardRarity.Uncommon, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoPartyPoppers), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoLookOut), CardRarity.Uncommon, CardType.Power, 1 },
-        new object[] { typeof(ProtoKoPatienceKlee), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoSecretBase), CardRarity.Uncommon, CardType.Power, 1 },
         new object[] { typeof(ProtoKoHalfAMountain), CardRarity.Rare, CardType.Skill, 1 },
         new object[] { typeof(ProtoKoFavoniusEscort), CardRarity.Rare, CardType.Skill, 1 },
@@ -118,11 +138,14 @@ public class KleeR276ExpansionTests
         // 28 since the Klee status package (2026-10-01) cut Fish Fry and
         // Friendship Bracelet, 27 since its sec.5 (defence in the status
         // pile) cut Spinning Sparkler; 26 since the Klee-only companions
-        // (2026-10-03) cut Second Surprise. The package's ten follow them (the
-        // three companion rows after it are not `ProtoKo`).
-        Assert.Equal(26, names.Count);
-        Assert.Equal(26, names.Distinct().Count());
-        var tail = slice.Skip(slice.Count - 36).Take(26).ToList();
+        // (2026-10-03) cut Second Surprise; 24 since the Klee tempo paper
+        // (2026-10-07) cut Sit Tight and Experiment in Progress. The
+        // package's nine and the tempo five follow them (the three companion
+        // rows after those are not `ProtoKo`). 23 since the Klee design
+        // review (2026-10-08) cut Playdate; its two follow the tempo five.
+        Assert.Equal(23, names.Count);
+        Assert.Equal(23, names.Distinct().Count());
+        var tail = slice.Skip(slice.Count - 39).Take(23).ToList();
         for (var i = 0; i < names.Count; i++)
         {
             Assert.Contains(names[i], tail[i]);
@@ -177,9 +200,10 @@ public class KleeR276ExpansionTests
         Assert.Contains("CardPileCmd.Draw", grow);
 
         var card = new ProtoKoOneMoreCharge();
-        // Klee balance review, pick 4a, 2026-09-25. 5 -> 8, upgrade still +3.
-        Assert.Equal(8m, card.DynamicVars["Grow"].BaseValue);
-        Assert.Equal(11m, Upgraded<ProtoKoOneMoreCharge>().DynamicVars["Grow"].BaseValue);
+        // Klee balance review, pick 4a, 2026-09-25. 5 -> 8, upgrade still +3;
+        // the Klee upper pass, 2026-10-11: 12 [15].
+        Assert.Equal(12m, card.DynamicVars["Grow"].BaseValue);
+        Assert.Equal(15m, Upgraded<ProtoKoOneMoreCharge>().DynamicVars["Grow"].BaseValue);
         Assert.Contains("If it is now 20 or more, draw 1 card.", Face(card));
     }
 
@@ -236,10 +260,10 @@ public class KleeR276ExpansionTests
 
         var card = new ProtoKoJumpyDumptyMkIii();
         Assert.Equal(3m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(2m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(4m, card.DynamicVars["BombSize"].BaseValue);
         var up = Upgraded<ProtoKoJumpyDumptyMkIii>();
         Assert.Equal(4m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(3m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(5m, up.DynamicVars["BombSize"].BaseValue);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
     }
 
@@ -290,7 +314,7 @@ public class KleeR276ExpansionTests
         Assert.True(setOff >= 0 && hit > setOff && place > hit);
         var up = Upgraded<ProtoKoWindblumeFireworks>();
         Assert.Equal(14m, up.DynamicVars.Damage.BaseValue);
-        Assert.Equal(8m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(10m, up.DynamicVars["BombSize"].BaseValue);
     }
 
     [Fact]
@@ -322,10 +346,10 @@ public class KleeR276ExpansionTests
     {
         var card = new ProtoKoHidingSpot();
         Assert.Equal(6m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(3m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(5m, card.DynamicVars["BombSize"].BaseValue);
         var up = Upgraded<ProtoKoHidingSpot>();
         Assert.Equal(8m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5m, up.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(7m, up.DynamicVars["BombSize"].BaseValue);
         Assert.Contains("ProtoBombPower.PlaceOnRandom", Play("ProtoKoHidingSpot"));
         Assert.Contains("[gold]Mine[/gold]", Face(card));
     }
@@ -348,10 +372,8 @@ public class KleeR276ExpansionTests
         Assert.False(power.TryModifyEnergyCostInCombat(friend, 0m, out _));
         // Two Playdates are two sentences about the same next card.
         Assert.Equal(0m, PlaydatePower.Discounted(1m, 2));
-
-        var card = new ProtoKoPlaydate();
-        Assert.Equal(3m, card.DynamicVars["BombSize"].BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKoPlaydate>().DynamicVars["BombSize"].BaseValue);
+        // The card left with its row (Klee design review, 2026-10-08); the
+        // power stays registered.
     }
 
     [Fact]
@@ -390,19 +412,48 @@ public class KleeR276ExpansionTests
         var fetch = Il.Calls(Il.Method("KleeExpansion", "FetchFromDiscard"));
         Assert.Contains("CardSelectCmd.FromSimpleGrid", fetch);
         Assert.Contains("CardPileCmd.Add", fetch);
-        Assert.Contains(Il.Calls(Il.Method("ProtoKoTreasureMap", "OnUpgrade")),
-                        c => c.Contains("EnergyCost.UpgradeBy"));
+        // The Klee upper pass (2026-10-11): costs 0; the upgrade grows the
+        // largest Bomb 6 instead of 3, in place of its old cost cut.
+        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKoTreasureMap", "OnUpgrade")),
+                              c => c.Contains("EnergyCost.UpgradeBy"));
+        Assert.Equal((3m, 6m),
+            (new ProtoKoTreasureMap().DynamicVars["Grow"].BaseValue,
+             Upgraded<ProtoKoTreasureMap>().DynamicVars["Grow"].BaseValue));
         Assert.Contains("{IfUpgraded:show: Draw 1 card.|}",
                         Face(new ProtoKoComeBackAndPlay()));
     }
 
     [Fact]
-    public void Tag_along_and_adventure_club_add_random_companions_free_this_turn()
+    public void Tag_along_and_adventure_club_choose_companions_free_this_turn()
     {
-        // STRUCTURAL: a combat-scope copy, cost 0 this turn, into the hand.
-        var add = Il.Calls(Il.Method("KleeExpansion", "AddRandomCompanions"));
-        Assert.Contains(add, c => c.Contains("SetThisTurn"));
-        Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", add);
+        // The Klee upper pass (2026-10-11, pick 3 (a)): a choice, the base
+        // game's Discovery shape. STRUCTURAL, because the screens need a
+        // running game: distinct options off the companion pool on the
+        // card-generation stream, a choose-a-card screen for one of three
+        // and a grid for two of four (the screen throws on more than three),
+        // then a combat-scope copy, cost 0 this turn, into the hand.
+        var choose = Il.Calls(Il.Method("KleeExpansion", "ChooseCompanions"));
+        Assert.Contains("KleeExpansion.RandomCompanionPool", choose);
+        Assert.Contains(choose, c => c.Contains("TakeRandom"));
+        Assert.Contains(choose, c => c.Contains("CombatCardGeneration"));
+        Assert.Contains("CardSelectCmd.FromChooseACardScreen", choose);
+        Assert.Contains("CardSelectCmd.FromSimpleGrid", choose);
+        Assert.Contains(choose, c => c.Contains("SetThisTurn"));
+        Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", choose);
+        Assert.DoesNotContain(choose, c => c.Contains("CombatTargets"));
+
+        // Each row asks for its own keep and offer: 1 of 3, 2 of 4.
+        Assert.Contains("await KleeExpansion.ChooseCompanions(choiceContext, Owner, 1, 3);",
+                        Printed("Cards/Prototype/Generated/ProtoKoTagAlong.cs"));
+        Assert.Contains("await KleeExpansion.ChooseCompanions(choiceContext, Owner, 2, 4);",
+                        Printed("Cards/Prototype/Generated/ProtoKoAdventureClub.cs"));
+        Assert.Equal("Choose 1 of 3 [gold]Companion[/gold] cards to add to your hand. "
+                     + "It costs 0 this turn.", Face(new ProtoKoTagAlong()));
+        Assert.Equal("Choose 2 of 4 [gold]Companion[/gold] cards to add to your hand. "
+                     + "They cost 0 this turn.", Face(new ProtoKoAdventureClub()));
+        // The grid's prompt is injected with the other selection prompts.
+        Assert.Equal("Choose 2 Companion cards to add to your hand.",
+                     KleeExpansion.ChooseCompanionsPromptText);
 
         Assert.Contains(CardKeyword.Exhaust, new ProtoKoTagAlong().CanonicalKeywords);
         Assert.Contains(Il.Calls(Il.Method("ProtoKoTagAlong", "OnUpgrade")),
@@ -425,27 +476,8 @@ public class KleeR276ExpansionTests
         Assert.Equal(1, Upgraded<ProtoKoBoomBadge>().PrintedSparkPrice);
     }
 
-    [Fact]
-    public void Sit_tight_leaves_its_bonus_to_the_end_of_the_turn()
-    {
-        var card = new ProtoKoSitTight();
-        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
-        Assert.Equal(1, card.PrintedSparkPrice);
-        Assert.Equal(5m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(4m, card.DynamicVars["PowerAmount"].BaseValue);
-        var up = Upgraded<ProtoKoSitTight>();
-        Assert.Equal(7m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5m, up.DynamicVars["PowerAmount"].BaseValue);
-        // The play reads no ledger: it gains its 5 and installs the power.
-        var play = Play("ProtoKoSitTight");
-        Assert.DoesNotContain("KleeOverhaulLedger.get_SetOffThisTurn", play);
-        Assert.Contains("PowerCmd.Apply", play);
-        Assert.Equal(
-            "Gain {Block:diff()} [gold]Block[/gold]. At the end of your turn, "
-          + "gain {PowerAmount:diff()} [gold]Block[/gold] if none of your "
-          + "[gold]Bombs[/gold] went off.",
-            Face(card));
-    }
+    // Sit Tight's card pin left with the row (the Klee tempo paper,
+    // 2026-10-07); its power's pins below stay until the power goes.
 
     [Fact]
     public void Sit_tight_pays_only_on_a_turn_where_nothing_went_off()
@@ -508,8 +540,6 @@ public class KleeR276ExpansionTests
         // After the echo, on the strictly later broadcast.
         Assert.Contains("ProtoBombPower.GrowLargest",
                         Il.Calls(Il.Method("PatienceKleePower", "AfterSideTurnEnd")));
-        Assert.Equal(6m, Upgraded<ProtoKoPatienceKlee>()
-                             .DynamicVars["PowerAmount"].BaseValue);
         KleeOverhaulLedger.ResetAll();
     }
 
@@ -522,14 +552,17 @@ public class KleeR276ExpansionTests
         Assert.False(KleeExpansion.CostsSparks(new ProtoKoPop()));
         Assert.Contains("KleeExpansion.CostsSparks",
                         Il.Calls(Il.Method("PartyPoppersPower", "AfterCardPlayed")));
-        Assert.Equal(4m, Upgraded<ProtoKoPartyPoppers>()
+        // The Klee upper pass (2026-10-11): 7 [9].
+        Assert.Equal(7m, new ProtoKoPartyPoppers()
+                             .DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(9m, Upgraded<ProtoKoPartyPoppers>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 
     // ---- start of turn -----------------------------------------------------
 
     [Fact]
-    public void Secret_base_reads_the_board_before_dodocos_mine_lands()
+    public void Secret_base_and_dodoco_run_through_the_one_sequencer()
     {
         // REAL: the latch, once per turn per Klee.
         var klee = Seat.Klee().Creature;
@@ -541,8 +574,9 @@ public class KleeR276ExpansionTests
         Assert.True(ledger.TakeTurnStartPlacements());
         KleeOverhaulLedger.ResetAll();
 
-        // STRUCTURAL: both Powers call the one sequencer, which asks Secret
-        // Base's question before Dodoco's Mine is placed.
+        // STRUCTURAL: both Powers call the one sequencer, which takes the
+        // latch, places Klee's Secret Base's Bomb (v3, the scaling pass,
+        // klee-next 2026-10-05; KleeScalingPassTests) and then Dodoco's Mine.
         foreach (var type in new[] { "SecretBasePower", "DodocoPower" })
         {
             Assert.Contains("KleeExpansion.RunTurnStartPlacements",
@@ -550,38 +584,45 @@ public class KleeR276ExpansionTests
         }
         var run = Il.CallSequence(Il.Method("KleeExpansion", "RunTurnStartPlacements"))
             .ToList();
+        Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", run);
         Assert.True(run.IndexOf("KleeOverhaulLedger.TakeTurnStartPlacements")
-                    < run.IndexOf("ProtoBombPower.AnyPlacedBy"));
-        Assert.True(run.IndexOf("ProtoBombPower.AnyPlacedBy")
                     < run.LastIndexOf("ProtoBombPower.PlaceOnRandom"));
-        Assert.Equal(7m, Upgraded<ProtoKoSecretBase>()
-                             .DynamicVars["PowerAmount"].BaseValue);
-        // Power cost sweep, 2026-09-30: Mine 3, upgraded Mine 5, cost 1.
-        Assert.Equal(3m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKoDodoco>()
+        // Power cost sweep, 2026-09-30: cost 1. Mine 5, upgraded Mine 7
+        // since the Klee design review (2026-10-08).
+        Assert.Equal(5m, new ProtoKoDodoco().DynamicVars["PowerAmount"].BaseValue);
+        Assert.Equal(7m, Upgraded<ProtoKoDodoco>()
                              .DynamicVars["PowerAmount"].BaseValue);
     }
 
     [Fact]
-    public void Alices_detonator_adds_a_kapow_after_the_draw_upgraded_on_the_plus_card()
+    public void Alices_detonator_adds_alices_mine_before_the_draw_upgraded_on_the_plus_card()
     {
+        // 2026-10-11 ([USER]: "What about instead treating this like
+        // Necrobinder's Sentry Gaze ..."): Alice's Mine, not Ka-pow!, at
+        // Sentry Mode's site (BeforeHandDraw). Sim twin:
+        // `test_alices_detonator_adds_an_alices_mine_and_the_plus_an_upgraded_one`.
         Assert.False(((AlicesDetonatorBasePower)RuntimeHelpers
             .GetUninitializedObject(typeof(AlicesDetonatorPower))).Upgraded);
         Assert.True(((AlicesDetonatorBasePower)RuntimeHelpers
             .GetUninitializedObject(typeof(AlicesDetonatorPlusPower))).Upgraded);
         Assert.Contains("AlicesDetonatorBasePower.Install", Play("ProtoKoAlicesDetonator"));
-        var turn = Il.Calls(Il.Method("AlicesDetonatorBasePower", "AfterPlayerTurnStart"));
+        var turn = Il.Calls(Il.Method("AlicesDetonatorBasePower", "BeforeHandDraw"));
         Assert.Contains("CardModel.UpgradeInternal", turn);
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", turn);
         Assert.Contains(turn, c => c.Contains("CreateCard"));
-        Assert.Contains("{IfUpgraded:show:an upgraded|a} Ka-pow!",
+        // Which card: the IL call list drops ModelDb.Card's generic argument,
+        // so the class is pinned off the source instead.
+        var source = Printed("Powers/Prototype/KleeExpansionPowers.cs");
+        Assert.Contains("ModelDb.Card<ProtoKoAlicesMine>()", source);
+        Assert.DoesNotContain("ModelDb.Card<ProtoKoKapow>()", source);
+        Assert.Contains("{IfUpgraded:show:an upgraded |}Alice's Mine",
                         Face(new ProtoKoAlicesDetonator()));
         // No prompt of any kind.
         Assert.DoesNotContain(turn, c => c.StartsWith("CardSelectCmd"));
     }
 
     [Fact]
-    public void Alices_detonator_previews_the_kapow_it_adds_upgraded_on_the_plus()
+    public void Alices_detonator_previews_the_mine_it_adds_upgraded_on_the_plus()
     {
         // STRUCTURAL: `HoverTipFactory.FromCard` resolves through `ModelDb`,
         // which is outside the headless boundary. The card's tips end in the
@@ -589,8 +630,8 @@ public class KleeR276ExpansionTests
         // when the card is (Blade Dance's Shiv, the base game's shape).
         var tips = typeof(ProtoKoAlicesDetonator)
             .GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
-        Assert.Contains("KleeExpansion.WithKapowPreview", Il.Calls(tips));
-        var preview = Il.Calls(Il.Method("KleeExpansion", "WithKapowPreview"));
+        Assert.Contains("KleeExpansion.WithAlicesMinePreview", Il.Calls(tips));
+        var preview = Il.Calls(Il.Method("KleeExpansion", "WithAlicesMinePreview"));
         Assert.Contains("HoverTipFactory.FromCard", preview);
         Assert.Contains("CardModel.get_IsUpgraded", preview);
 
@@ -603,7 +644,28 @@ public class KleeR276ExpansionTests
         Assert.Contains("AlicesDetonatorBasePower.get_Upgraded", calls);
 
         // The face stays plain: the preview carries the card, not a gold word.
-        Assert.DoesNotContain("[gold]Ka-pow![/gold]", Face(new ProtoKoAlicesDetonator()));
+        Assert.DoesNotContain("[gold]Alice's Mine[/gold]", Face(new ProtoKoAlicesDetonator()));
+    }
+
+    [Fact]
+    public void Alices_mine_is_sweeping_gazes_shape_a_mine_10_or_15()
+    {
+        // 0, Token, Ethereal and Exhaust (the base game's Sweeping Gaze), and
+        // Mine Toss's own Mine call.
+        var card = new ProtoKoAlicesMine();
+        Assert.Equal(0, card.EnergyCost.Canonical);
+        Assert.Equal(CardType.Skill, card.Type);
+        Assert.Equal(CardRarity.Token, card.Rarity);
+        Assert.Contains(CardKeyword.Ethereal, card.CanonicalKeywords);
+        Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
+        Assert.Equal(10m, card.DynamicVars["BombSize"].BaseValue);
+        Assert.Equal(15m, Upgraded<ProtoKoAlicesMine>().DynamicVars["BombSize"].BaseValue);
+        var play = Play("ProtoKoAlicesMine");
+        Assert.Contains("ProtoBombPower.Place", play);
+        Assert.Equal(
+            Play("ProtoKoMineToss").Where(c => c.Contains("ProtoBombPower")),
+            play.Where(c => c.Contains("ProtoBombPower")));
+        Assert.Equal("Place a [gold]Mine[/gold] {BombSize:diff()} on an enemy.", Face(card));
     }
 
     // ---- the explosion's charge-aware door ----------------------------------

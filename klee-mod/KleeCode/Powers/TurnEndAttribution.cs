@@ -107,9 +107,6 @@ public sealed class TurnEndSource
 /// table and not two lists.</summary>
 public static class TurnEndAttribution
 {
-    public const string MasqueKey = "KLEEMOD-TURNEND_MASQUE";
-
-
     private static PowerModel? First<T>(Creature creature) where T : PowerModel =>
         creature.Powers.OfType<T>().FirstOrDefault();
 
@@ -125,33 +122,9 @@ public static class TurnEndAttribution
     /// </summary>
     public static readonly IReadOnlyList<TurnEndSource> Order = new TurnEndSource[]
     {
-        new()
-        {
-            Key = "masque",
-            TitleKey = MasqueKey,
-            Find = First<MasqueRedDeathPower>,
-            TurnsLeft = static _ => 0,
-            // What the Bond will actually take, which is capped by the Block
-            // standing right now. Quoting the flat constant would promise a
-            // payment a 2-Block creature cannot make.
-            Preview = static creature =>
-                $"-{Math.Min((int)creature.Block, CompanionConstants.MasqueBondBlock)}",
-            Buffed = static _ => false,
-            Body = static creature =>
-                $"[gold]Bond of Life[/gold] consumes the first "
-              + $"{CompanionConstants.MasqueBondBlock} Block you gain each "
-              + $"turn, and it is paid FIRST — before anything else here can "
-              + $"grant Block. You hold {(int)creature.Block}: it will take "
-              + $"{Math.Min((int)creature.Block, CompanionConstants.MasqueBondBlock)}.",
-            Resolve = static async (creature, choiceContext) =>
-            {
-                foreach (var masque in creature.Powers
-                             .OfType<MasqueRedDeathPower>().ToList())
-                {
-                    await masque.PayBondOfLife(choiceContext);
-                }
-            },
-        },
+        // Empty since the 2026-10-11 Companion pass, when Arlecchino's Bond
+        // of Life (the last entry) left the card. The sequencer and the
+        // docket stay, so the next ordered end-of-turn tenant lands here.
     };
 
     /// <summary>

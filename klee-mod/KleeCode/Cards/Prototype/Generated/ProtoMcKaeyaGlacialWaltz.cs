@@ -52,7 +52,7 @@ public sealed class ProtoMcKaeyaGlacialWaltz : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kaeya — Glacial Waltz"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 6 [gold]Cryo[/gold] damage to a random enemy."),
+        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 7 [gold]Cryo[/gold] damage to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
