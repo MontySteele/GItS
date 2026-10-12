@@ -25,6 +25,11 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi design pass** (`review/active/kokomi-design-pass-2026-10-11.md`,
+  picks 1-3): Plans stay her verb; three archetypes split on what the Plans buy
+  (Tactician, Warden, Undertow); the Casket counts only damaging Plans; Dusk
+  only on Warden cards. Defaults: all (a).
+
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
