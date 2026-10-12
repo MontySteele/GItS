@@ -50,7 +50,12 @@
 - **The fourth button.** The single-player menu builds its Standard, Daily and Custom buttons in `NSingleplayerSubmenu._Ready`. A Harmony patch adds "Spiral Abyss" beside them. The co-op host menu (`NMultiplayerHostSubmenu`) gets the same button.
 - **The mode.** The game has only three run modes (`GameMode`: Standard, Daily, Custom). An Abyss run is therefore a Custom run that carries one modifier, `SpiralAbyss`, with that modifier preset and locked. Custom runs already work in co-op: the host lobby runs in `GameMode.Custom` (`NCustomRunScreen.InitializeMultiplayerAsHost`).
 - **The rules engine.** A run modifier (`ModifierModel`) gets every combat hook and is saved with the run, along with its own properties. The base game's Murderous modifier gives every enemy 3 Strength this way. So the Blessings and power-ups held so far live in one saved modifier.
-- **Still open:** whether a mod's modifier has to be registered with the game by a patch. A census of how other mods add run modifiers is in flight.
+- **How other mods do it** (census of their public source, `mods-census/run-modifier-impl.md` in the session scratchpad):
+  - A mod's modifier is registered with the game automatically, but it shows in the Custom list only if added there. BaseLib's `CustomModifierModel` does that for you; StsNemesisDraft does it with a single patch.
+  - The co-op lobby already sends each player the chosen modifiers.
+  - CuratedChallenges2 adds a main-menu button the same way we would: it copies the Custom button in `NSingleplayerSubmenu._Ready`.
+  - Our button opens the Custom screen with the Abyss modifier already ticked (`NCustomRunScreen.SetTickedModifiers`), so no new lobby code is needed.
+  - No mod we found has a per-act choice of Blessings.
 
 **The structure:**
 - **Before each act's Ancient** (Neow in act 1), a screen offers three **Blessings**. Each one shows its **Shadow**: the enemy power-up it brings if you pass it over.
