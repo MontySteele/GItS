@@ -197,9 +197,13 @@ brief, with no amendment ceremony.
   character's base kit.** A character's basic functionality is identical solo and
   in co-op; co-op depth is added by a few multiplayer-only cards — the route
   StS2's own beta branch took. (R144)
-- **All art and audio is original or commissioned "in the StS style"** — no
-  extracted HoYoverse assets ship publicly (placeholder art in private builds is
-  fine). Naming: constellations for rares/upgrades, talent names for relics,
+- **Official HoYoverse art may ship in a free, clearly unofficial public
+  build; no HoYoverse audio ships** (amended 2026-10-12; [USER]:
+  "If Hoyo is openly tolerant of people using official assets, I wonder if we're going overboard on this."
+  then "On the art - yeah, let's go with a) and then debate how close we are to a distribution point."). The mod is never monetised and never presented as official,
+  and every image keeps its source row in `art/SOURCES.tsv`. Until the
+  distribution point is ruled (`review/active/distribution-readiness-2026-10-12.md`),
+  builds stay private. Naming: constellations for rares/upgrades, talent names for relics,
   voice lines for flavor. (principles §9, §3)
 
 ## Content authoring — card-sheet rules
