@@ -45,13 +45,13 @@ The seat records, the offer output (`k1/offers.txt`), the telemetry script (`k1/
 
 ## What to change
 
-1. **Built for round 2, all Claude's calls (`kokomi-round2-changes-2026-10-12`):**
+1. **Built for round 2, all Claude's calls (#1136):**
    - Jellyfish Drift deals 8, Watatsumi Drill 8, and Bubble Ward gives 7 Block.
    - Watchful Shoal 5, Coordinated Tide 6, Kurage Canopy +1, Grand Strategist 7.
    - Call the Generals' card costs 0 this turn. Watatsumi Muster and Shoal Call cost 0 and Exhaust.
    - Tideturn gets +2 per Plan, and Shoal of Spears goes to 5.
    - Nereid's Ascension gets a tip. Treatise counts Companions.
-   - The Tangled name is fixed.
+   - Tangled and Entangled are both base-game names (the debuff, and the label it puts on Attacks); no change.
 2. **Bugs, built in #1134:** Kelp Wall, Sea Glass Harvest, Tide Wall's text, and the Plan tip on cards that have no Plan line.
 3. **For [USER]: where her late growth comes from.** Round 2 tests the changes above first. If act 3 is still low, a Common growth card or Resolve of Watatsumi at Common goes to him as a pick.
 4. **BACKLOG:** on the seat page, the "face numbers leave out Vulnerable" note reads as wrong next to faces that do include it (lane 5b).
