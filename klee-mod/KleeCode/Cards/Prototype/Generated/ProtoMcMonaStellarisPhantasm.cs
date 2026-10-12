@@ -49,7 +49,7 @@ public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCa
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true), this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_mona_stellaris_phantasm");
 

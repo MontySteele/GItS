@@ -49,7 +49,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_razor_claw_and_thunder");
 

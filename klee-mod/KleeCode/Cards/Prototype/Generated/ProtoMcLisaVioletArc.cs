@@ -49,7 +49,7 @@ public sealed class ProtoMcLisaVioletArc : CustomCardModel, ICompanionCard, IWri
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_lisa_violet_arc");
 

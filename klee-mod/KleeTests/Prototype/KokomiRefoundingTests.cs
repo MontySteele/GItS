@@ -88,6 +88,22 @@ public class KokomiRefoundingTests
     }
 
     [Fact]
+    public void A_writable_companion_carries_the_companion_plan_tip_on_kokomi_only()
+    {
+        // Pre-round fix (2026-10-12): nothing said a Companion can be written.
+        // Every writable row attaches the tip; it is live off the same test
+        // that lets the card target the jellyfish, so a canonical copy (no
+        // owner) and every other character see nothing.
+        Assert.Contains("ArmKeywordTips.ForCompanionPlan",
+            Il.Calls(Il.Method("ProtoMiShinobuThundergrust", "get_ExtraHoverTips")));
+        Assert.False(KokomiCompanionPlan.OnKokomi(new ProtoMiShinobuThundergrust()));
+        Assert.Contains("KokomiCompanionPlan.OnKokomi",
+            Il.Calls(Il.Method("ArmKeywordTips", "ForCompanionPlan")));
+        Assert.Contains("KokomiCompanionPlan.OnKokomi",
+            Il.Calls(Il.Method("KokomiCompanionPlan", "TargetFor")));
+    }
+
+    [Fact]
     public void A_canonical_companion_prints_its_own_target()
     {
         var card = new ProtoMiShinobuThundergrust();

@@ -52,7 +52,7 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_diluc_searing_onslaught");
 

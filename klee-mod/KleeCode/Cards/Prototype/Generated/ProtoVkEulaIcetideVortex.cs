@@ -52,7 +52,7 @@ public sealed class ProtoVkEulaIcetideVortex : CustomCardModel, IElementalCard, 
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo), this);
+        ArmKeywordTips.ForOath(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_eula_icetide_vortex");
 

@@ -49,7 +49,7 @@ public sealed class ProtoVkAmberBaronBunny : CustomCardModel, ICompanionCard, IW
         new[] { KleeKeywords.Knight };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_amber_baron_bunny");
 

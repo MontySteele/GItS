@@ -1884,7 +1884,7 @@
       "power_amount": 1
     },
     "proto_mi_gorou_crystal_collapse": {
-      "cost": -1
+      "retain": true
     },
     "proto_mi_gorou_inuzaka": {
       "damage": 3,

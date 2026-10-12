@@ -7560,3 +7560,20 @@ Arrow dropped). The build before it is tagged
   roster for her pool with their own Plan lines (Inuzaka Block 11, War Banner
   3 Strength this turn, Juuga 6 Block at the end of 3 turns).
 - **Pool:** 78 at 21 / 36 / 21.
+
+## Kokomi pre-round fixes, 2026-10-12
+
+- **Crystal Collapse+ (`proto_mi_gorou_crystal_collapse`):** the upgrade was
+  cost 1 to 0, against the card paper's rule 2 ("No card with a Plan line
+  costs 0"). It now keeps cost 1 and gains Retain. The card prints no number,
+  so the Prototype default rule (`prototype_default_delta`) gives it nothing
+  (cost below 2, no Exhaust, no now-line); Retain is Grand Design's upgrade,
+  the pool's other Plan card with no number. A sim test holds every Plan row
+  at cost 1 or more on both faces.
+- **Companions as Plans, legibility:** a Companion card Kokomi holds carries
+  a Plan tip, "Play it on the Bake-Kurage to write it as a Plan. The Kurage
+  applies Hydro first." (`ArmKeywordTips.ForCompanionPlan`, live only on her;
+  the Plan and Bake-Kurage tips are at or near their ceilings and pinned). The
+  seat page marks a hand card the jellyfish takes whose face prints no Plan
+  line, "(can be written as a Plan)", and her Plan glossary row adds that any
+  Companion can be written and what its carry-out does.

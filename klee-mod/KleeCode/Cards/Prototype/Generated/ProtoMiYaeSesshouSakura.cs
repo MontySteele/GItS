@@ -46,7 +46,7 @@ public sealed class ProtoMiYaeSesshouSakura : CustomCardModel, ICompanionCard, I
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSakura(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_yae_sesshou_sakura");
 

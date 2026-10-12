@@ -343,7 +343,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_STAGE_ESCOFFIER",
                     # The text pass of 2026-10-08: the Plan tip a plan-only
                     # card carries in ForPlan's place (no line above, no flip).
-                    "KLEEMOD-ARM_PLAN_ONLY"}
+                    "KLEEMOD-ARM_PLAN_ONLY",
+                    # The Kokomi re-founding (2026-10-12): the Plan tip a
+                    # Companion carries while Kokomi holds it.
+                    "KLEEMOD-ARM_PLAN_COMPANION"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():

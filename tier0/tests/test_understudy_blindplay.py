@@ -5012,6 +5012,63 @@ def test_an_older_bridge_prints_the_form_and_no_waiting_line():
     assert "the jellyfish waits" not in page
 
 
+#: The Kokomi re-founding (2026-10-12): a Companion with no Plan line of its
+#: own, which the game lets onto the jellyfish on her board.
+WRITABLE_COMPANION = "Yoimiya — Firework Flare-Up"
+
+
+def _companion_hand(state: dict) -> dict:
+    """`_planning_hand`'s board with a writable Companion added to the hand,
+    and its Plan card printing a Plan line as a current face does (the
+    recording predates the line)."""
+    out = _planning_hand(state)
+    for card in out["player"]["hand"]:
+        if card["name"] == "All Streams Flow to the Sea":
+            card["description"] = "Gain 6 Block. Plan: Deal 9 damage."
+    companion = dict(out["player"]["hand"][0])
+    companion.update({"id": "PROTO_MI_YOIMIYA_FIREWORK_FLARE_UP",
+                      "name": WRITABLE_COMPANION,
+                      "description": "Deal 6 damage.", "keywords": [],
+                      "index": len(out["player"]["hand"]),
+                      "can_target_pet": True})
+    out["player"]["hand"].append(companion)
+    return out
+
+
+def test_a_companion_is_written_with_the_plan_verb_and_marked_in_hand():
+    """The Kokomi re-founding (2026-10-12): "Any Companion card can be
+    written as a Plan." The seat writes one with the verb a Plan card takes,
+    the hand marks it (its face prints no Plan line), and a Plan card that
+    says so on its face carries no mark."""
+    state = _companion_hand(plans_combat_state(TWO_PLANS))
+
+    res = blindplay.act(state, f'play "{WRITABLE_COMPANION}" on "Bake-Kurage"')
+    assert res["ok"], res
+    assert res["post"]["target"] == "41"
+
+    page = blindplay.observe(state)
+    marked = [line for line in page.splitlines()
+              if blindplay_notes.WRITABLE_TAG in line]
+    assert len(marked) == 1 and WRITABLE_COMPANION in marked[0], marked
+    assert 'on "Bake-Kurage"' in page
+
+    # With the Plan card barred, the Companion alone still offers the form.
+    barred = json.loads(json.dumps(state))
+    for card in barred["player"]["hand"]:
+        if card["name"] != WRITABLE_COMPANION:
+            card["can_target_pet"] = False
+    obs = blindplay.observation(barred)
+    assert any('on "Bake-Kurage"' in c for c in obs["commands"])
+
+
+def test_the_plan_row_says_any_companion_can_be_written():
+    """The page's Plan row is the tip word for word, then one clause on her
+    page only: any Companion can be written, and what its carry-out does."""
+    page = blindplay.observe(_companion_hand(plans_combat_state(TWO_PLANS)))
+    assert blindplay.ARM_KEYWORDS["Plan"] + blindplay_notes.PLAN_COMPANION_CLAUSE in page
+    assert blindplay_notes.PLAN_COMPANION_CLAUSE not in blindplay.ARM_KEYWORDS["Plan"]
+
+
 def test_the_plan_word_left_the_modifier_rule_to_the_panel():
     """`EB-599`'s rule is unchanged -- her Strength folds when the Plan is
     WRITTEN, the target's Vulnerable is read at carry-out -- and since the

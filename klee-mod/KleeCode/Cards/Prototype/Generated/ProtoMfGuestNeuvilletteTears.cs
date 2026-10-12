@@ -52,7 +52,7 @@ public sealed class ProtoMfGuestNeuvilletteTears : CustomCardModel, IElementalCa
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("guest_neuvillette_tears");
 

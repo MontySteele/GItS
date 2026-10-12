@@ -46,7 +46,7 @@ public sealed class ProtoMfArlecchinoMasqueRedDeath : CustomCardModel, ICompanio
     public string? Nation => "fontaine";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("arlecchino_masque_red_death");
 

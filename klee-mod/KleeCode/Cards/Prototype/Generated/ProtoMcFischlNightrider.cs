@@ -52,7 +52,7 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOz(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForOz(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_nightrider");
 

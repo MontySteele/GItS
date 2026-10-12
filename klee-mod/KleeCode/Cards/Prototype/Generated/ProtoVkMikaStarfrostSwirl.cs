@@ -49,7 +49,7 @@ public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard,
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_mika_starfrost_swirl");
 

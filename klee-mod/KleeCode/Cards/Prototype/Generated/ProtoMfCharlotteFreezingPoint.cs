@@ -52,7 +52,7 @@ public sealed class ProtoMfCharlotteFreezingPoint : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("charlotte_freezing_point");
 

@@ -46,7 +46,7 @@ public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionC
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_durin_binary_form");
 

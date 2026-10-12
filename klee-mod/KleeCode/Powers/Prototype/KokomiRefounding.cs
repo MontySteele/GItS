@@ -303,7 +303,19 @@ public static class KokomiCompanionPlan
     /// </summary>
     public static TargetType TargetFor(CardModel card, TargetType printed)
     {
-        if (!card.IsMutable) return printed;
+        if (!OnKokomi(card)) return printed;
+        if (printed == TargetType.AnyEnemy) return KokomiTargets.PetOrEnemy;
+        if (printed == TargetType.AnyAlly) return KokomiTargets.PetOrAlly;
+        return KokomiTargets.PetOrSelf;
+    }
+
+    /// <summary>Is this card held by Kokomi, so it can be written as a Plan?
+    /// <see cref="TargetFor"/>'s test, and the Companion Plan tip's
+    /// (<c>ArmKeywordTips.ForCompanionPlan</c>). A canonical copy has no owner
+    /// (its getter throws), so it answers false.</summary>
+    public static bool OnKokomi(CardModel card)
+    {
+        if (!card.IsMutable) return false;
         Creature? owner;
         try
         {
@@ -311,12 +323,9 @@ public static class KokomiCompanionPlan
         }
         catch (System.Exception)
         {
-            return printed;
+            return false;
         }
-        if (!KokomiOverhaul.LiveFor(owner)) return printed;
-        if (printed == TargetType.AnyEnemy) return KokomiTargets.PetOrEnemy;
-        if (printed == TargetType.AnyAlly) return KokomiTargets.PetOrAlly;
-        return KokomiTargets.PetOrSelf;
+        return KokomiOverhaul.LiveFor(owner);
     }
 
     /// <summary>Write a played Companion as a Plan: one clause holding the

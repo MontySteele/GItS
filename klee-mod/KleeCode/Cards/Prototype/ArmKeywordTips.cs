@@ -127,6 +127,11 @@ public static class ArmKeywordTips
     // 2026-10-08, sec.5). Same title, so the hover still reads "Plan".
     public const string PlanOnlyKey = "KLEEMOD-ARM_PLAN_ONLY";
 
+    // THE KOKOMI RE-FOUNDING (2026-10-12), and NOT A KEYWORD ROW: the Plan tip
+    // a Companion card carries while Kokomi holds it. Any Companion can be
+    // written, and no face or tip said so. Same title, so it reads "Plan".
+    public const string CompanionPlanKey = "KLEEMOD-ARM_PLAN_COMPANION";
+
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
     // with the play. It lives in this class because it is a sentence about the
@@ -380,6 +385,28 @@ public static class ArmKeywordTips
         With(inherited, PlanOnlyKey,
             "Play the card on the [gold]Bake-Kurage[/gold]. Plans happen next "
           + "turn in order, and their [gold]Block[/gold] lasts that turn.");
+
+    /// <summary>
+    /// THE KOKOMI RE-FOUNDING (2026-10-12): "Any Companion card can be
+    /// written as a Plan" (design pass pick 4 (a)), and nothing on screen
+    /// said so. Attached by <c>gen_klee_cards.emit</c> to every
+    /// <see cref="IWritableCompanion"/> row, and printed only while the card's
+    /// owner is Kokomi (<see cref="KokomiCompanionPlan.OnKokomi"/>), the
+    /// same test that lets it target the Bake-Kurage.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCompanionPlan(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        if (!KokomiCompanionPlan.OnKokomi(card)) return inherited;
+        return With(inherited, CompanionPlanKey, CompanionPlanText);
+    }
+
+    /// <summary><see cref="ForCompanionPlan"/>'s sentence. INTERNAL, as
+    /// <see cref="KnightTipText"/> is: every public string constant here is a
+    /// tip key.</summary>
+    internal const string CompanionPlanText =
+        "Play it on the [gold]Bake-Kurage[/gold] to write it as a "
+      + "[gold]Plan[/gold]. The Kurage applies [gold]Hydro[/gold] first.";
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
