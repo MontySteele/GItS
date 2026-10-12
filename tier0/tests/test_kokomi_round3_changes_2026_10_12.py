@@ -100,7 +100,8 @@ def test_a_played_sting_deals_3_more():
     st.enemies[0].powers["vulnerable"] = 0
     hp = st.enemies[0].hp
     _play(st, card(kokomi_plan.STING_ID))
-    assert hp - st.enemies[0].hp == 7 + 3
+    # The Sting's 4 since the jellyfish build (2026-10-12).
+    assert hp - st.enemies[0].hp == 4 + 3
 
 
 def test_an_upgraded_sting_counts_and_brine_sting_does_not():
@@ -118,11 +119,11 @@ def test_a_written_sting_carries_the_bonus_to_every_enemy():
     st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
     write(st, card(kokomi_plan.STING_ID))
     (entry,) = st.kk_plan_queue
-    assert entry.clauses[0]["amount"] == 5 + 3
+    assert entry.clauses[0]["amount"] == 3 + 3
     before = [e.hp for e in st.enemies]
     carry_out(st)
     lost = [b - e.hp for b, e in zip(before, st.enemies)]
-    assert all(x >= 8 for x in lost), lost
+    assert all(x >= 6 for x in lost), lost
 
 
 def test_a_played_ward_gains_3_more_and_frail_bites_it():
@@ -131,14 +132,14 @@ def test_a_played_ward_gains_3_more_and_frail_bites_it():
     st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
     st.player.block = 0
     _play(st, card(kokomi_plan.WARD_ID))
-    assert st.player.block == 7 + 3
+    assert st.player.block == 4 + 3
     st = kokomi_state()
     _attacking(st)
     st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
     st.player.powers["frail"] = 1
     st.player.block = 0
     _play(st, card(kokomi_plan.WARD_ID))
-    assert st.player.block == int((7 + 3) * 0.75)
+    assert st.player.block == int((4 + 3) * 0.75)
 
 
 def test_other_cards_get_nothing():
@@ -157,7 +158,7 @@ def test_a_flipped_ward_carries_out_its_now_line_with_the_bonus():
     assert kokomi_plan.flip(st, 0)
     st.player.block = 0
     carry_out(st)
-    assert st.player.block == 7 + 3
+    assert st.player.block == 4 + 3
 
 
 # --- Coordinated Tide: before the plan bus -----------------------------------

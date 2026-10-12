@@ -158,8 +158,8 @@ public class KokomiOpenPlanTests : IDisposable
         Assert.Contains("KokomiPlan.ChooseLines", Seq("KokomiPlan", "ResolveAll"));
         Assert.Contains("KokomiPlan.ChooseLines",
                         Seq("KokomiPlan", "ResolveFront"));
-        Assert.Contains("KokomiPlan.ChooseLines",
-                        Seq("KokomiPlan", "ResolveAllNow"));
+        // (Spring Tide's ResolveAllNow left with the card, the jellyfish
+        // build, 2026-10-12.)
     }
 
     [Fact]

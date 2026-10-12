@@ -44,7 +44,7 @@ public sealed class ProtoKkJellyfishDrift : CustomCardModel, IElementalCard, ICh
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithStingPreview(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this, false);
+        KokomiCards.WithStingPreview(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_jellyfish_drift");
 
@@ -57,7 +57,7 @@ public sealed class ProtoKkJellyfishDrift : CustomCardModel, IElementalCard, ICh
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,6 +80,6 @@ public sealed class ProtoKkJellyfishDrift : CustomCardModel, IElementalCard, ICh
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

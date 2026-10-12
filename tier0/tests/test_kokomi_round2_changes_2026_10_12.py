@@ -29,10 +29,9 @@ def _amount(c):
     return c.effects[0]["amount"]
 
 
+# The three jellyfish generators moved again in the jellyfish build
+# (2026-10-12): `test_kokomi_jellyfish_build_2026_10_12`.
 @pytest.mark.parametrize("cid,base,up", [
-    ("proto_kk_jellyfish_drift", 8, 11),
-    ("proto_kk_watatsumi_drill", 8, 11),
-    ("proto_kk_bubble_ward", 7, 10),
     ("proto_kk_coordinated_tide", 6, 9),
     ("proto_kk_kurage_canopy", 3, 4),
     ("proto_kk_grand_strategist", 7, 10),
@@ -47,8 +46,8 @@ def test_tideturn_is_8_per_plan_waiting_and_10_upgraded():
     assert _up("proto_kk_tideturn").effects[0]["amount_formula"]["per"] == 10
 
 
-@pytest.mark.parametrize("cid", ["proto_kk_watatsumi_muster",
-                                 "proto_kk_shoal_call"])
+# Shoal Call is Blade Dance since the jellyfish build (2026-10-12): cost 1.
+@pytest.mark.parametrize("cid", ["proto_kk_watatsumi_muster"])
 def test_the_generators_cost_0_exhaust_and_cannot_be_written(cid):
     row = _row(cid)
     assert row.cost == 0 and row.exhaust

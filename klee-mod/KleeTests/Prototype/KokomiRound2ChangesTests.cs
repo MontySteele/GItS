@@ -39,16 +39,8 @@ public class KokomiRound2ChangesTests
         where T : CardModel, new() =>
         (upgraded ? Upgraded<T>() : new T()).DynamicVars[name].IntValue;
 
-    [Fact]
-    public void The_jellyfish_generators_hit_and_block_harder()
-    {
-        Assert.Equal((8, 11), (Var<ProtoKkJellyfishDrift>("Damage"),
-                               Var<ProtoKkJellyfishDrift>("Damage", true)));
-        Assert.Equal((8, 11), (Var<ProtoKkWatatsumiDrill>("Damage"),
-                               Var<ProtoKkWatatsumiDrill>("Damage", true)));
-        Assert.Equal((7, 10), (Var<ProtoKkBubbleWard>("Block"),
-                               Var<ProtoKkBubbleWard>("Block", true)));
-    }
+    // The jellyfish generators moved again in the jellyfish build
+    // (2026-10-12): `KokomiJellyfishBuildTests`.
 
     [Fact]
     public void The_engine_powers_pay_more()
@@ -66,10 +58,11 @@ public class KokomiRound2ChangesTests
     }
 
     [Fact]
-    public void Muster_and_shoal_call_cost_0_and_exhaust()
+    public void Muster_costs_0_and_exhausts()
     {
-        foreach (var card in new CardModel[]
-                 { new ProtoKkWatatsumiMuster(), new ProtoKkShoalCall() })
+        // Shoal Call is Blade Dance since the jellyfish build (2026-10-12):
+        // cost 1 (`KokomiJellyfishBuildTests`).
+        foreach (var card in new CardModel[] { new ProtoKkWatatsumiMuster() })
         {
             Assert.Equal(0, card.EnergyCost.Canonical);
             Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);

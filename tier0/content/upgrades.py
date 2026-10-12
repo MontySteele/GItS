@@ -523,8 +523,8 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     # Rows her cards create at play (Pop!, Alice's Mine): the upgraded
     # Alice's Detonator hands over Alice's Mine+, so it must resolve.
     reachable |= set(C.KLEE_OFF_POOL_ROW_IDS)
-    # Kokomi's jellyfish cards (the re-founding, 2026-10-12): Shoal Call+
-    # hands over upgraded Stings.
+    # Kokomi's jellyfish cards (the re-founding, 2026-10-12): generated, and
+    # a smith or an in-hand upgrade must still resolve them.
     reachable |= set(C.KOKOMI_OFF_POOL_ROW_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_POOL_IDS)
@@ -818,16 +818,14 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # R276 (Alice's Detonator): the granted Ka-pow! arrives upgraded.
             # A flag on the install op, read when the Power is installed --
             # the codegen's play-time `IsUpgraded` read, one engine over.
-            # THE KOKOMI EXPANSION's Shoal Call rides the same key: its
-            # Stings arrive upgraded (Nips before the re-founding), and so do
-            # the re-founding's generated Companions (Orders from the Shrine,
-            # Watatsumi Muster).
+            # The re-founding's generated Companions ride the same key
+            # (Orders from the Shrine, Watatsumi Muster). (Shoal Call left
+            # it in the jellyfish build, 2026-10-12: its upgrade adds a Sting.)
             hit = next((fx for fx in top
                         if fx.get("op") in ("grant_alices_mine_each_turn",
                                             "plant_homework_bomb")
                         or (fx.get("op") == "kokomi"
-                            and fx.get("kind") in ("shoal_call",
-                                                   "add_companion",
+                            and fx.get("kind") in ("add_companion",
                                                    "add_companions"))),
                        None)
             # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into

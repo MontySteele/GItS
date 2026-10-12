@@ -7813,3 +7813,70 @@ Texts and numbers are the paper's; every Spend rate is unchanged.
   "When to play it"): "Its damage is the Fanfare you hold. Play it when the
   bank is worth it." Derived from the row (`starter_spends_the_bank`: a basic
   card whose damage is what its spend-all took), so it rides this card only.
+
+## Kokomi jellyfish build, 2026-10-12
+
+`review/active/kokomi-jellyfish-growth-2026-10-12.md` sec.3 and its Ruled
+section, ruled 2026-10-12 at all defaults ([USER]: "Good with all defaults."
+and "I'm actually totally fine with 0-cost plans"). The Ruled section
+overrides the draft: the Sting and Ward keep their Plan lines. The card
+paper's rule 2 ("No card with a Plan line costs 0") is lifted;
+`test_kokomi_refounding.test_the_jellyfish_are_the_only_0_cost_plan_rows`
+now pins the two tokens as the only 0-cost Plan rows.
+
+- **Sting (`proto_kk_sting`):** cost 0, "Deal 4 [6] Hydro damage. Plan: Deal
+  3 [4] Hydro damage to ALL enemies." Ethereal, Exhaust (was 1: 7 [10], Plan
+  5 [7]).
+- **Ward (`proto_kk_ward`):** cost 0, "Gain 4 [6] Block. Plan: Apply 1 [2]
+  Weak to ALL enemies." Ethereal, Exhaust (was 1: 7 [10] Block).
+- **Generators,** at the Silent's StS2 rates: Jellyfish Drift 6 [8] (was
+  8 [11]; the upgrade is now an explicit +2), Watatsumi Drill 6 [9] (was
+  8 [11]), Bubble Ward 5 [8] Block (was 7 [10]; explicit +3).
+- **Shoal Call (`proto_kk_shoal_call`):** the base game's Blade Dance. Cost 1,
+  Exhaust, "Add 3 [4] Stings to your hand." Plain Stings on both faces (was
+  0, 2 Stings, upgraded Stings on the upgraded card); upgrade key
+  `kokomi_amount: 1`, and it leaves `upgraded_grant` in both engines.
+- **Endless Shoal (`proto_kk_endless_shoal`):** Uncommon Power, cost 1,
+  "Whenever the Bake-Kurage carries out a Plan, add a Sting to your hand."
+  (was a Rare at 2 [1] that copied a carried-out Sting or Ward). Paid once per
+  CARRY-OUT at the tail of `KokomiPlan.ResolveEntry`
+  (`kokomi_plan.note_carried_out`), so a Plan carried out twice (Nereid's
+  Ascension's first entry, Second Wave's follower) gives two Stings; copies of
+  the Power add one each. **Upgrade: Innate**, the choice the brief left open:
+  the paper fixes cost 1 with no cost upgrade, and Innate is Kurage Bloom's
+  upgrade and the base game's Infinite Blades', the card it is priced against.
+  It takes Measured Breath's Uncommon slot.
+- **All Streams Flow to the Sea (`proto_kk_all_streams_flow`):** new Rare
+  Attack, cost 1, "Deal 4 [8] Hydro damage, plus 2 for each Sting you played
+  this combat.", with Sango Isshin's in-combat line. Count
+  `stings_played_this_combat` (`KokomiOverhaulLedger.StingsPlayedThisCombat`).
+  A new id: the 2026-10-01 card of the same name
+  (`proto_kk_all_streams_flow_to_the_sea`) stays cut and pinned absent. It
+  takes Endless Shoal's old Rare slot.
+- **The Shape of Water (`proto_kk_the_shape_of_water`):** new Uncommon Attack,
+  cost 1, "Deal 6 [8] Hydro damage for each Sting you played this turn.", with
+  the in-combat line (Tideturn's form). Count `stings_played_this_turn`
+  (`KokomiOverhaulLedger.StingsPlayedThisTurn`, cleared on the turn roll,
+  `kokomi_plan.roll_turn`). It takes Spring Tide's slot.
+- **What "played" means.** A Sting played face-up: from her hand, or any
+  other face-up play of one. Writing it on the Bake-Kurage is not a play, and
+  neither is a carry-out (a flipped Sting's now-line included): Treatise's
+  reading (`TreatisePower.AfterCardPlayed`). The writer is
+  `ProtoBakeKuragePower.AfterCardPlayed` (the marker every board has), gated
+  on `KokomiPlan.PlayedOnPet` and `KokomiPlan.IsCarryingOut`; the sim twin is
+  `kokomi_plan.note_sting_played`, beside `note_face_up_plan_card`. Brine
+  Sting is not a Sting.
+- **Cut:** Measured Breath and Spring Tide. Their engine verbs went with them
+  in both engines (`draw_if_no_plan`, `spring_tide`, `KokomiCards.DrawIfNoPlan`
+  and `.SpringTide`, `KokomiPlan.ResolveAllNow` / `kokomi_plan.resolve_all_now`
+  and the drain's mid-turn flag). Their paintings are `KNOWN_STALE`.
+- **Pool:** 78, 21 / 37 / 20 (was 21 / 36 / 21). The two new rows are last in
+  her order after the re-founding's (`C.KOKOMI_JELLYFISH_IDS`).
+- **Faces:** a face that names a Sting previews a plain one
+  (`KokomiCards.WithStingPreview` lost its upgraded flag), so Endless Shoal,
+  All Streams and The Shape of Water carry the Sting tip.
+- **Telemetry** (the paper's first check line): each Kokomi fight record
+  carries `stings_made`, `stings_played`, `stings_written` and `stings_lost`
+  (a Sting Exhausted by Ethereal at her turn's end). Mod feed only.
+- **Art:** the two new rows are `KNOWN_MISSING`; the legacy
+  `all_streams_flow.png` is a candidate, unseen.

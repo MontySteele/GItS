@@ -44,7 +44,7 @@ public sealed class ProtoKkKurageBarrage : CustomCardModel, IElementalCard, ICha
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithStingPreview(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this, false);
+        KokomiCards.WithStingPreview(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_kurage_barrage");
 

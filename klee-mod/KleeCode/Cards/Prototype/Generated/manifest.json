@@ -86,6 +86,7 @@
     "proto_fs_undercurrent",
     "proto_fs_universal_revelry",
     "proto_fs_velvet_curtain",
+    "proto_kk_all_streams_flow",
     "proto_kk_ambush",
     "proto_kk_at_waters_edge",
     "proto_kk_brace_for_the_tide",
@@ -118,7 +119,6 @@
     "proto_kk_kurages_oath",
     "proto_kk_kurages_wake",
     "proto_kk_masterstroke",
-    "proto_kk_measured_breath",
     "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
     "proto_kk_opening_gambit",
@@ -143,7 +143,6 @@
     "proto_kk_shoal_of_spears",
     "proto_kk_slack_water",
     "proto_kk_spearhead",
-    "proto_kk_spring_tide",
     "proto_kk_steady_tide",
     "proto_kk_sting",
     "proto_kk_suffocating_deep",
@@ -151,6 +150,7 @@
     "proto_kk_tactical_relay",
     "proto_kk_tamakushis_wrath",
     "proto_kk_the_moon_a_ship",
+    "proto_kk_the_shape_of_water",
     "proto_kk_tidal_rebuke",
     "proto_kk_tidal_riposte",
     "proto_kk_tidal_screen",
@@ -506,6 +506,7 @@
     "proto_fs_undercurrent": "furina",
     "proto_fs_universal_revelry": "furina",
     "proto_fs_velvet_curtain": "furina",
+    "proto_kk_all_streams_flow": "kokomi",
     "proto_kk_ambush": "kokomi",
     "proto_kk_at_waters_edge": "kokomi",
     "proto_kk_brace_for_the_tide": "kokomi",
@@ -538,7 +539,6 @@
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_kurages_wake": "kokomi",
     "proto_kk_masterstroke": "kokomi",
-    "proto_kk_measured_breath": "kokomi",
     "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
     "proto_kk_opening_gambit": "kokomi",
@@ -563,7 +563,6 @@
     "proto_kk_shoal_of_spears": "kokomi",
     "proto_kk_slack_water": "kokomi",
     "proto_kk_spearhead": "kokomi",
-    "proto_kk_spring_tide": "kokomi",
     "proto_kk_steady_tide": "kokomi",
     "proto_kk_sting": "kokomi",
     "proto_kk_suffocating_deep": "kokomi",
@@ -571,6 +570,7 @@
     "proto_kk_tactical_relay": "kokomi",
     "proto_kk_tamakushis_wrath": "kokomi",
     "proto_kk_the_moon_a_ship": "kokomi",
+    "proto_kk_the_shape_of_water": "kokomi",
     "proto_kk_tidal_rebuke": "kokomi",
     "proto_kk_tidal_riposte": "kokomi",
     "proto_kk_tidal_screen": "kokomi",
@@ -1142,6 +1142,9 @@
       "block": 3,
       "furina_amount": 1
     },
+    "proto_kk_all_streams_flow": {
+      "formula_base": 4
+    },
     "proto_kk_ambush": {
       "plan_damage": 3
     },
@@ -1188,7 +1191,7 @@
       "formula_per": 1
     },
     "proto_kk_endless_shoal": {
-      "cost": -1
+      "innate": true
     },
     "proto_kk_evening_watch": {
       "kokomi_amount": 2
@@ -1211,7 +1214,7 @@
       "power_amount": 3
     },
     "proto_kk_jellyfish_drift": {
-      "damage": 3
+      "damage": 2
     },
     "proto_kk_joint_orders": {
       "block": 3
@@ -1241,9 +1244,6 @@
     },
     "proto_kk_masterstroke": {
       "plan_damage": 12
-    },
-    "proto_kk_measured_breath": {
-      "block": 3
     },
     "proto_kk_moons_reflection": {
       "cost": -1
@@ -1313,7 +1313,7 @@
       "block": 3
     },
     "proto_kk_shoal_call": {
-      "upgraded_grant": true
+      "kokomi_amount": 1
     },
     "proto_kk_shoal_of_spears": {
       "damage": 1
@@ -1325,15 +1325,12 @@
     "proto_kk_spearhead": {
       "damage": 4
     },
-    "proto_kk_spring_tide": {
-      "cost": -1
-    },
     "proto_kk_steady_tide": {
       "block": 3
     },
     "proto_kk_sting": {
-      "damage": 3,
-      "plan_damage": 2
+      "damage": 2,
+      "plan_damage": 1
     },
     "proto_kk_suffocating_deep": {
       "damage": 3
@@ -1352,6 +1349,9 @@
     "proto_kk_the_moon_a_ship": {
       "block": 4,
       "plan_mend": 2
+    },
+    "proto_kk_the_shape_of_water": {
+      "formula_per": 2
     },
     "proto_kk_tidal_rebuke": {
       "cost": -1
@@ -1393,7 +1393,7 @@
       "power_amount": 1
     },
     "proto_kk_ward": {
-      "block": 3,
+      "block": 2,
       "plan_power_amount": 1
     },
     "proto_kk_watatsumi_drill": {

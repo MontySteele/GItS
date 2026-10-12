@@ -24,12 +24,6 @@ namespace KleeMod.Powers;
 /// </summary>
 public static partial class KokomiCards
 {
-    /// <summary>Spring Tide: "The Bake-Kurage carries out all your Plans now."
-    /// <see cref="KokomiPlan.ResolveAllNow"/>.</summary>
-    public static Task SpringTide(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
-        KokomiPlan.ResolveAllNow(choiceContext, card.Owner?.Creature);
-
     /// <summary>
     /// Kurage's Mercy (multiplayer): "Each player Mends 8 [12]." Every living
     /// player in the fight, Kokomi included, through the one Mend rule

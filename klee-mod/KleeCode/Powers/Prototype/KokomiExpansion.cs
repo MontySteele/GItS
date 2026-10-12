@@ -29,18 +29,6 @@ public static partial class KokomiCards
     private static int Amount(CardModel card) =>
         card.DynamicVars["KkAmount"].IntValue;
 
-    /// <summary>Measured Breath: "If no Plan is waiting, draw 2 cards."
-    /// </summary>
-    public static async Task DrawIfNoPlan(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        var owner = card.Owner;
-        if (owner?.Creature == null) return;
-        if (!KokomiOverhaul.LiveFor(owner.Creature)) return;
-        if (KokomiPlan.PlansHeld(owner.Creature) > 0) return;
-        await CardPileCmd.Draw(choiceContext, Amount(card), owner);
-    }
-
     /// <summary>Suffocating Deep: "Double each enemy's Weak and Vulnerable."
     /// </summary>
     public static async Task DoubleWeakVulnerable(

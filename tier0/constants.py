@@ -965,8 +965,19 @@ KOKOMI_OFF_POOL_ROW_IDS: tuple[str, ...] = (
     "proto_kk_ward",
 )
 
-# THE OFFERABLE POOL, WHOLE: 78 (21 / 36 / 21) since the re-founding
-# (2026-10-12), in the sheet's own order, then Gorou's four. The pool's
+# THE JELLYFISH BUILD (2026-10-12, review/active/kokomi-jellyfish-growth-
+# 2026-10-12.md sec.3, ruled): All Streams Flow to the Sea (Rare) and The
+# Shape of Water (Uncommon), appended after the re-founding's rows in the
+# sheet's order. Measured Breath and Spring Tide are cut; Endless Shoal moved
+# Rare to Uncommon in its own slot.
+KOKOMI_JELLYFISH_IDS: tuple[str, ...] = (
+    "proto_kk_all_streams_flow",
+    "proto_kk_the_shape_of_water",
+)
+
+# THE OFFERABLE POOL, WHOLE: 78, 21 / 37 / 20 since the jellyfish build
+# (21 / 36 / 21 from the re-founding, 2026-10-12), in the sheet's own order,
+# then Gorou's four. The pool's
 # history is in git (`git show kokomi-casket-frozen-2026-10-12:tier0/constants.py`).
 # `tools/lint_arm_pool_parity.py` compares this tuple,
 # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER.
@@ -999,7 +1010,6 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_jellyfish_drift",
     "proto_kk_brine_sting",
     "proto_kk_undertide_lance",
-    "proto_kk_measured_breath",
     "proto_kk_grand_design",
     "proto_kk_masterstroke",
     "proto_kk_drowning_pressure",
@@ -1015,7 +1025,6 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_shoal_call",
     "proto_kk_kurage_canopy",
     "proto_kk_tidal_screen",
-    "proto_kk_spring_tide",
     "proto_kk_shoal_of_spears",
     "proto_kk_seas_reproach",
     "proto_kk_tidal_rebuke",
@@ -1026,6 +1035,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_flotsam_surge",
     "proto_kk_riptide_ruin",
     *KOKOMI_REFOUNDING_IDS,
+    *KOKOMI_JELLYFISH_IDS,
     *KOKOMI_OWN_COMPANION_IDS,
 )
 

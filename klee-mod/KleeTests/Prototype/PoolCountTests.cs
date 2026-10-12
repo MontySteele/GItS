@@ -66,9 +66,12 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Kokomi_is_78_and_21_36_21_with_two_ancients_and_five_coop()
+    public void Kokomi_is_78_and_21_37_20_with_two_ancients_and_five_coop()
     {
-        AssertPool("KokomiOverhaulRoster", "Slice", 21, 36, 21);
+        // The jellyfish build (2026-10-12): Measured Breath (U) and Spring
+        // Tide (R) cut, Endless Shoal R -> U, All Streams Flow to the Sea (R)
+        // and The Shape of Water (U) added: 21 / 36 / 21 -> 21 / 37 / 20.
+        AssertPool("KokomiOverhaulRoster", "Slice", 21, 37, 20);
         AssertAncients("Kokomi");
         AssertTier("KokomiOverhaulRoster", "MultiplayerSlice");
     }

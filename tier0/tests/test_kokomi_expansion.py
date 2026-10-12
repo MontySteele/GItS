@@ -36,9 +36,10 @@ from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import (  # noqa: F401
     carry_out, kokomi_state, overhaul, plan_card, plan_line)
 
-#: The batch's rows still in her pool after the re-founding (2026-10-12).
+#: The batch's rows still in her pool after the re-founding (2026-10-12)
+#: and the jellyfish build (2026-10-12), which cut Measured Breath.
 NEW = (
-    "proto_kk_undertide_lance", "proto_kk_measured_breath",
+    "proto_kk_undertide_lance",
     "proto_kk_grand_design", "proto_kk_masterstroke",
     "proto_kk_drowning_pressure", "proto_kk_undercurrent_snare",
     "proto_kk_at_waters_edge", "proto_kk_ceremonial_garment",
@@ -82,7 +83,8 @@ def test_the_batchs_survivors_are_in_the_pool_and_the_cuts_are_not(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert set(NEW) <= set(ids)
     rows = {c.id for c in loader.prototype_cards()}
-    for cid in CUT + ("proto_kk_all_streams_flow_to_the_sea",):
+    for cid in CUT + ("proto_kk_all_streams_flow_to_the_sea",
+                      "proto_kk_measured_breath"):
         assert cid not in ids and cid not in rows
     assert "proto_kk_the_clouds_like_waves" not in C.KOKOMI_OVERHAUL_POOL_IDS
     assert "proto_kk_the_clouds_like_waves" not in {
@@ -124,19 +126,6 @@ def test_undertide_lance_plans_a_flat_eighteen(overhaul):
     kokomi_plan.schedule(st, plan_card([{"op": "block", "amount": 1}]))
     kokomi_plan.resolve_all(st)
     assert enemy.hp == 200 - 18
-
-
-def test_measured_breath_draws_only_on_an_empty_queue(overhaul):
-    st = kokomi_state()
-    _library(st)
-    _write(st, "proto_kk_measured_breath")
-    assert st.player.block == 6 and len(st.player.hand) == 2
-
-    st = kokomi_state(enemies=[make_enemy(hp=200, intents=QUIET)])
-    _library(st)
-    kokomi_plan.schedule(st, plan_card([{"op": "block", "amount": 1}]))
-    _write(st, "proto_kk_measured_breath")
-    assert st.player.block == 6 and len(st.player.hand) == 0
 
 
 # --- Tide Control ---------------------------------------------------------------
@@ -313,14 +302,16 @@ def test_tidal_riposte_answers_a_fully_blocked_hit_once(overhaul):
 
 # --- Plan volume ------------------------------------------------------------------------
 
-def test_shoal_call_adds_two_stings_upgraded_when_it_is(overhaul):
-    """The re-founding (2026-10-12): Stings, not Nips."""
+def test_shoal_call_is_blade_dance(overhaul):
+    """The jellyfish build (2026-10-12): the base game's Blade Dance. Cost 1,
+    Exhaust, "Add 3 [4] Stings to your hand." -- plain Stings on both faces;
+    the upgrade adds a fourth."""
+    row = _row("proto_kk_shoal_call")
+    assert row.cost == 1 and row.exhaust and row.rarity == "uncommon"
     st = kokomi_state()
     _write(st, "proto_kk_shoal_call")
-    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 2
+    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 3
     st = kokomi_state()
     _write(st, _up("proto_kk_shoal_call"))
-    assert all(c.id == kokomi_plan.STING_ID + upgrades.SUFFIX
-               for c in st.player.hand)
-    assert len(st.player.hand) == 2
+    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 4
 

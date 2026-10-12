@@ -143,6 +143,18 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null) return Task.CompletedTask;
         if (!KokomiOverhaul.LiveFor(Owner)) return Task.CompletedTask;
+        // THE JELLYFISH BUILD (2026-10-12): a Sting PLAYED -- face-up, not
+        // written on the Bake-Kurage and not a carry-out (Treatise's
+        // reading) -- counts for All Streams Flow to the Sea and The Shape
+        // of Water. Sim twin: `kokomi_plan.note_sting_played`.
+        if (cardPlay.Card is global::KleeMod.Cards.Prototype.Generated.ProtoKkSting
+            && cardPlay.Card.Owner?.Creature == Owner
+            && !KokomiPlan.PlayedOnPet(cardPlay)
+            && !KokomiPlan.IsCarryingOut(Owner.Player))
+        {
+            KokomiOverhaulLedger.For(Owner).NoteStingPlayed();
+            return Task.CompletedTask;
+        }
         if (cardPlay.Card is not ICompanionCard) return Task.CompletedTask;
         if (cardPlay.Card.Owner?.Creature != Owner) return Task.CompletedTask;
         var ledger = KokomiOverhaulLedger.For(Owner);

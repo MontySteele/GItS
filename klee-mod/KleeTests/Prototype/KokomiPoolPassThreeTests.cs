@@ -220,11 +220,11 @@ public class KokomiPoolPassThreeTests
         // drains on one turn and each pays its own first entry, which is the
         // drain-local reading "the next Plan" already takes. Twin:
         // `test_nereids_doubles_only_the_first_plan_of_a_drain`.
-        // POOL COMPLETION (2026-10-01): through `firstTimes`, which a
-        // mid-turn drain (Spring Tide) sets to 1.
+        // Through `firstTimes` (Spring Tide's mid-turn drain, which set it
+        // to 1, left with the card in the jellyfish build, 2026-10-12).
         var source = Source("KokomiPlan", power: true);
         Assert.Contains("index == 0 ? firstTimes : 1", source);
-        Assert.Contains("midTurn ? 1 : CarryOutTimes(kokomi)", source);
+        Assert.Contains("var firstTimes = CarryOutTimes(kokomi);", source);
     }
 
     [Fact]

@@ -199,7 +199,11 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     seven added last; Riptide Ruin is the Rare, in Coral Sanctuary's place.
 
     STILL SEVENTY-EIGHT SINCE THE RE-FOUNDING (2026-10-12): 24 cut (Shell
-    Guard among them), 20 new rows and Gorou's four Companions added."""
+    Guard among them), 20 new rows and Gorou's four Companions added.
+
+    STILL SEVENTY-EIGHT SINCE THE JELLYFISH BUILD (2026-10-12): Measured
+    Breath and Spring Tide cut, All Streams Flow to the Sea and The Shape of
+    Water added after the re-founding's rows."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == 78
     assert len(set(ids)) == 78
@@ -231,16 +235,20 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
            "proto_kk_tidal_resonance", "proto_kk_salt_in_the_wound",
            "proto_kk_lull", "proto_kk_kurage_school", "proto_kk_the_long_game",
            "proto_kk_patient_tide", "proto_kk_deep_current",
-           "proto_kk_massed_volley", "proto_kk_signal_arrow"}
+           "proto_kk_massed_volley", "proto_kk_signal_arrow",
+           # The jellyfish build (2026-10-12).
+           "proto_kk_measured_breath", "proto_kk_spring_tide"}
     assert not cut & set(ids)
     # THE RE-FOUNDING (2026-10-12) rewrote the order: the 54 rows kept, in
     # the sheet's order, then the 20 new rows and Gorou's four Companions,
     # LAST (`C.KOKOMI_REFOUNDING_IDS`, `C.KOKOMI_OWN_COMPANION_IDS`).
     own = C.KOKOMI_OWN_COMPANION_IDS
     new = C.KOKOMI_REFOUNDING_IDS
-    assert len(new) == 20 and len(own) == 4
+    jelly = C.KOKOMI_JELLYFISH_IDS
+    assert len(new) == 20 and len(own) == 4 and len(jelly) == 2
     assert ids[-4:] == own
-    assert ids[-24:-4] == new
+    assert ids[-6:-4] == jelly
+    assert ids[-26:-6] == new
     assert all(cid.startswith("proto_mi_gorou_") for cid in own)
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
@@ -389,10 +397,14 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     Plan, Feigned Retreat, Moon Signal and Chain of Command (Uncommon) and
     All Streams Flow to the Sea (Rare) cut; two Commons and four Uncommons
     added, and Riptide Ruin (Rare) in Coral Sanctuary's place: 21 / 36 /
-    21."""
+    21.
+
+    THE JELLYFISH BUILD (2026-10-12): Measured Breath (Uncommon) and Spring
+    Tide (Rare) cut, Endless Shoal moved Rare to Uncommon, All Streams Flow to
+    the Sea (Rare) and The Shape of Water (Uncommon) added: 21 / 37 / 20."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 21, "uncommon": 36, "rare": 21}
+        "common": 21, "uncommon": 37, "rare": 20}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):
