@@ -1,4 +1,4 @@
-# The run around the kits: a Spiral Abyss layer, and each character's story in the run (2026-10-12)
+# The run around the kits: a Spiral Abyss mode, and each character's story in the run (2026-10-12)
 
 **Why.** [USER], after a debrief with the friend who co-op tests:
 
@@ -37,31 +37,42 @@
 
 **Why our first frame was flat.** The frame ruled on 2026-09-14 changed names, art, music and event words, and froze every enemy mechanic, so nothing in it changed a decision.
 
-## 2. The Spiral Abyss layer (the run)
+## 2. The Spiral Abyss mode (the run)
+
+**Ruled 2026-10-12.** [USER]: "I know that StS2 does have a 'custom mode' screen ... Could we hijack the UI entirely and add a 4th option for Spiral Abyss runs? I'm thinking that the start of the run offers a choice of 3 boons and then grants enemies one of three power ups based on what you didn't take, per floor. stacking. This would be a new screen before each act's Ancients." Dropped: Corrosion ("leads to a very quick death basically always (you probably take more than 30 enemy hits to block in a floor)") and Halves ("in co-op, every enemy hits both players, so that idea wouldn't work").
 
 **In Genshin:**
 - The Spiral Abyss is floors of chambers. Each floor has a **Ley Line Disorder**, a rule on every fight there.
-- Floors 9 to 12 also carry the **Blessing of the Abyssal Moon**, which changes each cycle and is not chosen.
-- The pressures are a clock (stars for clear time) and, on floors 9 to 12, **two teams taking alternate halves**. That is a natural co-op hook.
+- Floors 9 to 12 also carry the **Blessing of the Abyssal Moon**, which changes each cycle.
 - Abyss Mages carry elemental shields: plain hits chip them, and the right element breaks them fast.
 
-**For us,** five Disorders. Each changes a decision for the base five and all four kits:
+**What the game's code already gives us** (decompiled StS2 0.111.0):
+- **The fourth button.** The single-player menu builds its Standard, Daily and Custom buttons in `NSingleplayerSubmenu._Ready`. A Harmony patch adds "Spiral Abyss" beside them. The co-op host menu (`NMultiplayerHostSubmenu`) gets the same button.
+- **The mode.** The game has only three run modes (`GameMode`: Standard, Daily, Custom). An Abyss run is therefore a Custom run that carries one modifier, `SpiralAbyss`, with that modifier preset and locked. Custom runs already work in co-op: the host lobby runs in `GameMode.Custom` (`NCustomRunScreen.InitializeMultiplayerAsHost`).
+- **The rules engine.** A run modifier (`ModifierModel`) gets every combat hook and is saved with the run, along with its own properties. The base game's Murderous modifier gives every enemy 3 Strength this way. So the Blessings and power-ups held so far live in one saved modifier.
+- **Still open:** whether a mod's modifier has to be registered with the game by a patch. A census of how other mods add run modifiers is in flight.
 
-| Disorder | Rule | What it changes |
-|---|---|---|
-| **The Clock** | From turn 4, every enemy gains 2 Strength at the start of each turn. | Speed beats turtling. Klee's tempo pays; Kokomi's one-turn Plan delay is taxed; Furina Drains early and races; Varka casts Four Winds' Ascension sooner. |
-| **Corrosion** | The first 3 damage of every enemy attack ignores Block. | HP becomes the resource. Furina's Drain buffer is contested and Block is worth less; drafting shifts to kill speed. |
-| **The act's Ley Line** | Each enemy turn, every enemy without an aura takes the act's element. An enemy wearing an aura deals 1 less. | The base five get a damage cut. Every kit gets a reaction target each turn: Klee's Pyro, Varka's Swirl, Kokomi's Hydro, Furina's guests. |
-| **Elemental shield** (on the act's elites) | A shield counted in hits. Each hit removes 1, any reaction 3, and the counter element breaks all of it. | The base five answer with multi-hit cards; the kits answer with reactions. This is a Genshin shield, not Plated Armor. |
-| **Halves** (co-op) | Each enemy attacks the player who hit it last. | Who draws aggro, the thing a co-op pair talks about. |
+**The structure:**
+- **Before each act's Ancient** (Neow in act 1), a screen offers three **Blessings**. Each one shows its **Shadow**: the enemy power-up it brings if you pass it over.
+- You take one Blessing, and the enemies take a Shadow from the two you passed (pick 1).
+- **Both stack:** by act 3 you hold three Blessings, and every enemy carries three Shadows.
+- **The first build reuses the event screen** for these choices: three options, a portrait, and co-op sync that already works. A bespoke screen follows if that reads poorly.
+- **In co-op,** each player takes their own Blessing, and the enemies take one Shadow per player. That matches co-op enemies' higher HP.
 
-- **How you enter it:** a Neow boon, "Enter the Abyss". That needs no new screen, and in co-op it is a shared run setting. The frame's code is behind a compile flag today (`Teyvat/TeyvatFrame.cs`), so a run-level switch is new work.
-- **Why opt-in first:** every kit is measured against the base five on the normal run (`EXPERIMENTS.md`).
-- **Where it can go later:**
-  - the Disorders move onto the normal run at an ascension;
-  - or the Abyss becomes act 3's alternate zone, the way Underdocks is act 1's (the old frame's spike was built for that fork).
-- **Not in the first build:** enemies putting an element on you. The mod has no player-side aura; that would be the largest new system here, so it waits.
-- **Starting point:** the Disorder paper starts from the Genshin boss dossiers, which already describe Andrius and others in StS terms. This layer breaks the enemy-mechanics freeze of R272, sec.1.1, and it says so.
+**First-draft pools.** The Abyss paper fills these out, about eight of each. Every entry changes a decision for the base five and for the kits.
+
+| Blessings (yours) | Shadows (the enemies') |
+|---|---|
+| **The act's Ley Line:** each enemy turn, every enemy without an aura takes the act's element, and an aura-wearer deals 1 less. | **The Clock:** from turn 4, every enemy gains 2 Strength at the start of each turn. |
+| **Abyssal Moon:** every third card you play in a turn deals 4 damage to ALL enemies. | **Elemental shield** on elites: a shield counted in hits. Each hit removes 1, a reaction removes 3, and the counter element breaks all of it. |
+| **Heal 4 HP** after each combat. | Enemies have **15% more HP**. |
+| Your **first Attack** each combat is played twice. | Enemies start each combat with **Block equal to their Strength × 3**. |
+
+- **Why a separate mode:** every kit is measured against the base five on the normal run (`EXPERIMENTS.md`), so the Abyss stays out of that run.
+- **Later,** the Abyss could become act 3's alternate zone in the normal run, the way Underdocks is act 1's.
+- **Not in the first build:** enemies putting an element on you. The mod has no player-side aura, and that would be the largest new system here.
+- **Starting point:** the Shadow pool starts from the Genshin boss dossiers. This mode breaks the enemy-mechanics freeze of R272, sec.1.1, and it says so.
+- **An idea for later, not a pick: a split run.** [USER]: "two distinct teams going up the same floor with some kinds of shared resources". It would double a run's length (about 1 hour solo and 2 hours in co-op today).
 
 ## 3. Each character's story in the run
 
@@ -89,6 +100,8 @@ Ordered by what your friend meets first in a run:
 
 My plan is to name them after her constellations, as card names already use the game's names; the prose stays ours. Klee's waits for her next branch, because she is at Balance. Six measured relic upgrades per character would be four relic trees and is not proposed.
 
+**Ruled 2026-10-12** (all of items 1 to 6, Klee first): "Otherwise agreed on adding more dialogue to flesh out each character further."
+
 **All the words are ours.** I write every line in each character's voice, never quoting the game's dialogue. The first batch, Klee's introduction, greetings, act-1 event and lines, goes to you and your friend before the rest is written.
 
 ## 4. Cost
@@ -99,14 +112,11 @@ My plan is to name them after her constellations, as card names already use the 
 | Ancient greetings | One build: the lookup patch plus 4 × 4 lines |
 | Story events | One build per character: three event classes each, 12 in all |
 | Constellation names | Text only; Klee's on her next branch |
-| The Abyss layer | Its own paper, then the toggle, the five Disorders and the shields over two or three builds |
+| The Abyss mode | Its own paper (the two pools), then the menu button and modifier, the choice screen, and the pools, over two or three builds |
 
 ## For [USER]
 
-1. **The run layer.**
-   - **(a) Default:** lift the hold now. The Abyss is an opt-in mode entered through a Neow boon: five Disorders, hit-counted elemental shields on elites, and Halves in co-op. Its own paper comes next.
-   - (b) The Abyss as act 3's alternate zone in the normal run.
-   - (c) Keep the hold: elemental enemies only, when the kits are done.
-2. **Her story in the run.**
-   - **(a) Default:** all of section 3's items 1 to 6, Klee first, her batch read by you and your friend before the rest.
-   - (b) Introductions and combat lines only, for now.
+1. **Which Shadow the enemies take,** when you pass over two Blessings:
+   - **(a) Default:** you choose. You take your Blessing, then pick which of the two passed Shadows the enemies get. Both choices are informed.
+   - (b) One of the two, at random. Both are shown before you choose, so you know the risk.
+   - (c) Both. That makes six Shadows by act 3, against three Blessings.

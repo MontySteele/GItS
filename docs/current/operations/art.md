@@ -1,6 +1,6 @@
 ## Art pipeline
 
-Tier F art never ships and never enters the repo; only the ledgers
+Tier F art never enters the repo. It may ship in a free public build (`LAW.md`, amended 2026-10-12); only the ledgers
 (`art/SOURCES.tsv`, `art/plan.tsv`) and the tools are tracked.
 
 ```sh

@@ -25,11 +25,15 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **The run around the kits** (`run-frame-and-lore-2026-10-12.md`, two picks,
-  defaults (a)): lift the run-frame hold for an opt-in Spiral Abyss mode (five
-  Disorders, elemental shields, co-op Halves); each character's story in the
-  run (intro, Ancient greetings, three story events, combat, death, victory and
-  pair lines), Klee first.
+- **The run around the kits** (`run-frame-and-lore-2026-10-12.md`). Ruled
+  2026-10-12: a fourth main-menu mode, "Spiral Abyss", with a choice of three
+  blessings before each act's Ancient and an enemy power-up from what you passed,
+  stacking; Corrosion and Halves dropped; all the story items. One pick open:
+  which passed card's enemy power-up applies.
+- **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
+  defaults (a)): a closed beta now, public early access once Varka and Furina
+  reach Balance; a GitHub release first. The PR also amends `LAW.md`'s art line
+  (official art may ship in a free, clearly unofficial build), so [USER] merges it.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
