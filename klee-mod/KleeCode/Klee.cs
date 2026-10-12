@@ -62,7 +62,8 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Klee"),
-        ("description", "The Spark Knight of Mondstadt."),
+        // The intro (Klee story batch 1 sec.1), from her story table.
+        ("description", Story.KleeStory.Table.Intro),
         ("titleObject", "Klee"),
         ("pronounSubject", "she"),
         ("pronounObject", "her"),

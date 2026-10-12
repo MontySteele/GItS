@@ -1370,6 +1370,9 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             ? auraBefore
             : Element.None;
         ledger.NoteExplosion(reacted, dealt, vulnerablePaid);
+        // Klee's story: "KABOOM!" for one Bomb landing 30 or more, once a
+        // combat. A speech bubble only.
+        Story.StoryLines.AfterBombWentOff(applier, charge.IsMine, dealt);
         // TELEMETRY ONLY: the per-seat counts `PlayTelemetry` samples --
         // whether this charge reacted, and for a Mine whether an enemy's
         // attack set it off (`byAttack`, rule 6) rather than a Set off.

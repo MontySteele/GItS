@@ -207,6 +207,19 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # KLEE'S STORY (2026-10-12): Confinement's "After 3 combats" is a story
+    # Curse's length; these strings print their own numbers.
+    ("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs",
+     "StoryRules.ConfinementCombats", "3"):
+        "the totem's own fire cap, not the story Curse's length",
+    # A Letter from Jean's "Upgrade 2 random cards that place a Bomb" is the
+    # event's own count (the ruled paper's text), not a Bomb or Singer number.
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.SingerRepayUpgraded", "2"):
+        "the story event's upgrade count, not the Singer's repay",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "KleeOverhaulLaw.BombGrowth", "2"):
+        "the story event's upgrade count, not the Bomb's growth",
     # THE SPIRAL ABYSS MODE (2026-10-12): Resonance's "draw 1 card" is a run
     # modifier's number; these cards print their own draw, not Resonance's.
     ("klee-mod/KleeCode/Cards/Kokomi/PrincessOfWatatsumi.cs",

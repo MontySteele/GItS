@@ -74,6 +74,8 @@ public static class KleeOffPoolCards
         {
             // The status package's token (Confiscated), created at play.
             ModelDb.Card<Confiscated>(),
+            // Klee's story Curse (Starsnatch Cliff), given by that event only.
+            ModelDb.Card<Confinement>(),
         };
         return cards;
     }
