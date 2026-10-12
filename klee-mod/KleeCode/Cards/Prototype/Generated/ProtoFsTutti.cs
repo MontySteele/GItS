@@ -44,7 +44,7 @@ public sealed class ProtoFsTutti : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tutti!"),
-        ("description", "Each guest acts. Draw 1 card."),
+        ("description", "Each guest acts. {IfUpgraded:show:Draw 2 cards.|Draw 1 card.}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -68,6 +68,6 @@ public sealed class ProtoFsTutti : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

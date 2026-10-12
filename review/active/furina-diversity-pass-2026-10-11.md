@@ -147,4 +147,5 @@ Claude raised three watch items before the ruling: Bravura's multi-hit with no c
 > 3) Yeah, let's keep an eye on this
 
 - **Picks 1-5 (a).** Section 2 and section 3 build as written.
+- Claude, under the loop ruling: Tutti!'s upgrade draws 2 instead of costing 0 (the 0-cost upgrade looped with any 0-cost draw-1 card).
 - **Watch in the next round:** Bravura's damage against the bank it spent; Spend triggers per turn under Full House; Furina's draws and Energy per turn after the two cuts.

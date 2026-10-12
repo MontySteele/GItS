@@ -1127,7 +1127,7 @@
       "formula_base": 3
     },
     "proto_fs_tutti": {
-      "cost": -1
+      "draw": 1
     },
     "proto_fs_undercurrent": {
       "formula_base": 2

@@ -198,8 +198,15 @@ public class FurinaDiversityPassTests : IDisposable
     [Fact]
     public void The_floors_print_and_call_what_the_paper_says()
     {
-        Assert.Equal("Each guest acts. Draw 1 card.", Face(new ProtoFsTutti()));
+        Assert.Equal("Each guest acts. {IfUpgraded:show:Draw 2 cards.|Draw 1 card.}",
+                     Face(new ProtoFsTutti()));
         Assert.Contains("CardPileCmd.Draw", Generated("ProtoFsTutti"));
+        // Under the loop ruling (2026-10-11): the upgrade draws 2 and the
+        // cost stays 1 (a 0-cost Tutti!+ looped with any 0-cost draw-1 card).
+        Assert.Equal(1, new ProtoFsTutti().DynamicVars.Cards.IntValue);
+        var tutti = Upgraded(new ProtoFsTutti());
+        Assert.Equal(2, tutti.DynamicVars.Cards.IntValue);
+        Assert.DoesNotContain("EnergyCost.UpgradeBy", Generated("ProtoFsTutti"));
         Assert.StartsWith("Draw 1 card. Choose a guest.", Face(new ProtoFsFinalBow()));
         var bow = Generated("ProtoFsFinalBow");
         Assert.True(bow.IndexOf("CardPileCmd.Draw", StringComparison.Ordinal)
