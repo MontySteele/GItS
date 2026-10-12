@@ -62,13 +62,13 @@ The existing three-tier policy remains binding:
 
 - **Tier P — programmatic:** safe placeholders for development. A missing
   portrait must degrade to this, never to a broken card node.
-- **Tier F — found/official/fan:** private playtest builds only. Every source
-  must be logged when fetched.
-- **Tier O — original/commissioned:** the only art permitted in a public build.
+- **Tier F — found/official/fan:** official art may ship in a free public build
+  (`LAW.md`, amended 2026-10-12); fan art never ships. Every source must be
+  logged when fetched.
+- **Tier O — original/commissioned:** always permitted in a public build.
 
-Official Genshin art is useful for a consistent private playtest, but is not
-distribution-safe. Nothing in this pass changes the public-release rule in
-`teyvat-spire-design-principles.md` §9.
+Official Genshin art is the build's art, private or public; the public-release
+rule is `LAW.md`'s, amended 2026-10-12.
 
 ### Furina register rules
 

@@ -95,8 +95,8 @@ finished and an unfilled bill is invisible everywhere except the coverage
 tool.** That is the whole reason the tool was taught the roster before this
 pass started.
 
-Policy is unchanged and binding: **Tier F (found/official) is private-playtest
-only**; a public build needs Tier O. See `teyvat-spire-design-principles.md` §9.
+Policy, amended 2026-10-12 (`LAW.md`): **official Tier F art may ship in a free
+public build**; fan art never ships. See `teyvat-spire-design-principles.md` §9.
 
 ## 2. THE SCARCITY RULING WAS MADE ON AN INCOMPLETE INVENTORY
 
