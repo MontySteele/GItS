@@ -118,6 +118,12 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_kk_measured_breath": (
+        "The Kokomi jellyfish build (2026-10-12, review/active/kokomi-jellyfish-growth-2026-10-12.md) cut this row: Endless Shoal takes its Uncommon slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_spring_tide": (
+        "The Kokomi jellyfish build (2026-10-12, review/active/kokomi-jellyfish-growth-2026-10-12.md) cut this row: The Shape of Water takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_shell_guard": (
         "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -559,6 +565,8 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
+    "proto_kk_all_streams_flow": "The Kokomi jellyfish build (review/active/kokomi-jellyfish-growth-2026-10-12.md, ruled 2026-10-12); no painting yet. The legacy all_streams_flow.png (a cut 2026-10-01 card of the same name) is a candidate, unseen.",
+    "proto_kk_the_shape_of_water": "The Kokomi jellyfish build (review/active/kokomi-jellyfish-growth-2026-10-12.md, ruled 2026-10-12); no painting yet.",
     "proto_kk_call_the_generals": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
     "proto_kk_coordinated_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
     "proto_kk_dawn_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",

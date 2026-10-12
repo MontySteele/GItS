@@ -2631,11 +2631,11 @@ VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: it as `amount`, rendered and upgraded as the card's `KkAmount` var (upgrade
 #: key `kokomi_amount`). Sim twin: `kokomi_plan.KINDS` / `kokomi_plan.kind`.
 KOKOMI_KINDS = {
-    "draw_if_no_plan": "DrawIfNoPlan",
     "double_weak_vulnerable": "DoubleWeakVulnerable",
-    # THE RE-FOUNDING (2026-10-12): Shoal Call adds Stings (upgraded on the
-    # upgraded card, `upgraded_grant`); `add_sting` / `add_ward` add plain
-    # ones (Powers/Prototype/KokomiRefounding.cs).
+    # THE RE-FOUNDING (2026-10-12): Shoal Call adds N Stings (Blade Dance
+    # since the jellyfish build, 2026-10-12: plain Stings, the upgrade adds
+    # one); `add_sting` / `add_ward` add one plain card
+    # (Powers/Prototype/KokomiRefounding.cs).
     "shoal_call": "ShoalCall",
     "add_sting": "AddSting",
     "add_ward": "AddWard",
@@ -2654,12 +2654,12 @@ KOKOMI_KINDS = {
     "block_per_attacker": "BlockPerAttacker",
     "double_block": "DoubleBlock",
     "exhaust_statuses": "ExhaustStatuses",
-    # POOL COMPLETION (2026-10-01): Spring Tide, and the multiplayer Kurage's
-    # Mercy (`amount` is the Mend).
-    "spring_tide": "SpringTide",
+    # POOL COMPLETION (2026-10-01): the multiplayer Kurage's Mercy (`amount`
+    # is the Mend). (Spring Tide and Measured Breath's kinds left with the
+    # cards, the jellyfish build, 2026-10-12.)
     "kurages_mercy": "KuragesMercy",
 }
-KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "shoal_call",
+KOKOMI_KIND_AMOUNT = {"shoal_call",
                       "add_companions", "grand_design",
                       "block_per_attacker", "exhaust_statuses",
                       "kurages_mercy"}
@@ -3351,8 +3351,7 @@ APPLY_POWERS = {
         "Reaction[/gold], deal {X} damage to ALL enemies."),
     "kk_endless_shoal": ("EndlessShoalPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Sting[/gold] or [gold]Ward[/gold], add a copy of it to your "
-        "hand."),
+        "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
     "kk_dawn_tide": ("DawnTidePower", None,
         "At the start of your turn, the [gold]Bake-Kurage[/gold] applies "
         "[gold]Hydro[/gold] to ALL enemies."),
@@ -6147,6 +6146,14 @@ KOKOMI_CASKET_COUNTS = {
     "plans_carried_out_this_combat":
         "static (card, _) => KokomiOverhaulLedger.For("
         "card.Owner.Creature).PlansCarriedOutThisCombat",
+    # The jellyfish build (2026-10-12): All Streams Flow to the Sea and The
+    # Shape of Water, Stings played face-up this combat and this turn.
+    "stings_played_this_combat":
+        "static (card, _) => KokomiOverhaulLedger.For("
+        "card.Owner.Creature).StingsPlayedThisCombat",
+    "stings_played_this_turn":
+        "static (card, _) => KokomiOverhaulLedger.For("
+        "card.Owner.Creature).StingsPlayedThisTurn",
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
 }
@@ -8137,8 +8144,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "upgraded_grant": any(e["op"] in ("grant_alices_mine_each_turn",
                                           "plant_homework_bomb")
                               or (e["op"] == "kokomi"
-                                  and e.get("kind") in ("shoal_call",
-                                                        "add_companion",
+                                  and e.get("kind") in ("add_companion",
                                                         "add_companions"))
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
@@ -16835,14 +16841,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # THE KOKOMI RE-FOUNDING (2026-10-12): a face that names a jellyfish card
     # previews it, the same Blade Dance shape. Derived from the golded word,
     # so a row that hands over a Sting or a Ward carries the preview the day
-    # it is written; Shoal Call's upgraded face previews the upgraded Sting.
+    # it is written. Every Sting handed over is a plain one since the
+    # jellyfish build (2026-10-12).
     if "[gold]Sting" in desc:
-        upgraded_sting = ("true" if any(
-            eff.get("op") == "kokomi" and eff.get("kind") == "shoal_call"
-            for eff in card.get("effects", [])) else "false")
         tips_expr = ("KokomiCards.WithStingPreview("
-                     f"{tips_expr or 'base.ExtraHoverTips'}, this, "
-                     f"{upgraded_sting})")
+                     f"{tips_expr or 'base.ExtraHoverTips'})")
     if "[gold]Ward" in desc:
         tips_expr = ("KokomiCards.WithWardPreview("
                      f"{tips_expr or 'base.ExtraHoverTips'})")

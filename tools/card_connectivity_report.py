@@ -597,7 +597,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # DEPTH does not move and what it will do does, which is a write.
     "redirect_queued_plans": [_hook("private", "kurage", "write")],
     # THE EXPANSION, BATCH ONE (2026-09-29). The `kokomi` op's kinds read or
-    # write the queue (Measured Breath, Grand Design), the hand (Shoal Call,
+    # write the queue (Grand Design), the hand (Shoal Call,
     # the jellyfish and Companion generators) or Block -- filed on the queue,
     # the channel every one of them touches or is priced against.
     "kokomi": [_hook("private", "kurage", "use")],

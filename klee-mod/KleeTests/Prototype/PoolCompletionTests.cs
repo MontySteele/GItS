@@ -97,11 +97,8 @@ public class PoolCompletionTests : IDisposable
                       screen.DynamicVars.Block.IntValue));
         Assert.Equal(10, Upgraded<ProtoKkTidalScreen>().DynamicVars.Block.IntValue);
 
-        // (Kurage School and Patient Tide left in the re-founding, 2026-10-12.)
-        var spring = new ProtoKkSpringTide();
-        Assert.Equal((CardRarity.Rare, 1), (spring.Rarity, spring.EnergyCost.Canonical));
-        Assert.True(Exhausts(spring));
-        Assert.Equal(0, UpCost<ProtoKkSpringTide>());
+        // (Kurage School and Patient Tide left in the re-founding, 2026-10-12;
+        // Spring Tide in the jellyfish build, 2026-10-12.)
 
         // The Rare pass (2026-10-04): 4 [5] a hit; since the re-founding one
         // hit per Plan waiting. Kokomi round 2 (2026-10-12): 5 [6].
@@ -158,17 +155,14 @@ public class PoolCompletionTests : IDisposable
     }
 
     [Fact]
-    public void Spring_tide_drains_the_whole_queue_mid_turn()
+    public void Spring_tide_left_with_its_mid_turn_drain()
     {
-        Assert.Contains(Seq("ProtoKkSpringTide", "OnPlay"),
-                        c => c.Contains("KokomiCards.SpringTide"));
-        Assert.Contains(Seq("KokomiCards", "SpringTide"),
-                        c => c.Contains("KokomiPlan.ResolveAllNow"));
-        var now = Seq("KokomiPlan", "ResolveAllNow");
-        var clear = now.FindIndex(c => c.Contains("List`1.Clear"));
-        var drain = now.FindIndex(c => c.Contains("KokomiPlan.Drain"));
-        Assert.True(clear >= 0 && drain > clear,
-                    "the queue is emptied before the first clause runs");
+        // The jellyfish build (2026-10-12) cut Spring Tide; its verb and
+        // the mid-turn drain went with it.
+        Assert.Null(typeof(KokomiCards).GetMethod("SpringTide"));
+        Assert.Null(typeof(KokomiPlan).GetMethod("ResolveAllNow"));
+        Assert.Null(typeof(KokomiCards).Assembly
+            .GetType("KleeMod.Cards.Prototype.Generated.ProtoKkSpringTide"));
     }
 
     [Fact]

@@ -64,14 +64,21 @@ public static partial class KokomiCards
                                                         owner);
             made++;
         }
+        // The jellyfish build (2026-10-12): Stings made this fight, for
+        // telemetry (the paper's first check line).
+        if (kind == Jellyfish.Sting && made > 0)
+        {
+            KokomiOverhaulLedger.For(owner.Creature!).NoteStingsMade(made);
+        }
         return made;
     }
 
-    /// <summary>Shoal Call: "Add 2 [upgraded] Stings to your hand."</summary>
+    /// <summary>Shoal Call (the jellyfish build, 2026-10-12, the base game's
+    /// Blade Dance): "Add 3 [4] Stings to your hand." Plain Stings on both
+    /// faces; the upgrade adds one.</summary>
     public static Task ShoalCall(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
-        AddJellyfish(card.Owner, Jellyfish.Sting, Amount(card),
-                     card.IsUpgraded);
+        AddJellyfish(card.Owner, Jellyfish.Sting, Amount(card), false);
 
     /// <summary>Jellyfish Drift, Kurage Barrage: "Add a Sting to your hand."
     /// The Sting is never upgraded by the card's own upgrade.</summary>
@@ -85,14 +92,14 @@ public static partial class KokomiCards
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         AddJellyfish(card.Owner, Jellyfish.Ward, 1, false);
 
-    /// <summary>A face that names a Sting previews one (Blade Dance's shape);
-    /// Shoal Call's upgraded face previews the upgraded Sting.</summary>
+    /// <summary>A face that names a Sting previews one (Blade Dance's
+    /// shape). Every Sting handed over is a plain one since the jellyfish
+    /// build (2026-10-12).</summary>
     public static IEnumerable<IHoverTip> WithStingPreview(
-        IEnumerable<IHoverTip> tips, CardModel card, bool upgradedWithCard)
+        IEnumerable<IHoverTip> tips)
     {
         foreach (var tip in tips) yield return tip;
-        yield return HoverTipFactory.FromCard<ProtoKkSting>(
-            upgradedWithCard && card.IsUpgraded);
+        yield return HoverTipFactory.FromCard<ProtoKkSting>(false);
     }
 
     /// <summary>A face that names a Ward previews one.</summary>
@@ -524,27 +531,23 @@ public static class KokomiRefounding
 
     /// <summary>
     /// A Plan was just carried out; <paramref name="card"/> is the card that
-    /// wrote it. Endless Shoal adds a copy of a Sting or Ward to her hand
-    /// (Coordinated Tide's hit moved inside the carry-out,
-    /// <see cref="CoordinatedTide"/>). Once per carry-out, either line. Sim
-    /// twin: <c>kokomi_plan.note_carried_out</c>.
+    /// wrote it. Endless Shoal (the jellyfish build, 2026-10-12): "Whenever
+    /// the Bake-Kurage carries out a Plan, add a Sting to your hand." Any
+    /// Plan, either line; once per CARRY-OUT, so a Plan carried out twice
+    /// (Nereid's Ascension, Second Wave) gives two Stings, and copies add one
+    /// each. (Coordinated Tide's hit is inside the carry-out,
+    /// <see cref="CoordinatedTide"/>.) Sim twin:
+    /// <c>kokomi_plan.note_carried_out</c>.
     /// </summary>
     public static async Task OnCarriedOut(PlayerChoiceContext choiceContext,
                                           Creature kokomi, CardModel? card)
     {
-        if (card == null || !KokomiOverhaul.LiveFor(kokomi)) return;
-        if (IsJellyfish(card) && kokomi.CombatState is { } combat
-            && kokomi.Player is { } player)
-        {
-            var copies = (int)kokomi.Powers.OfType<EndlessShoalPower>()
-                .Sum(p => p.Amount);
-            for (var i = 0; i < copies; i++)
-            {
-                var copy = combat.CloneCard(card);
-                await CardPileCmd.AddGeneratedCardToCombat(copy, PileType.Hand,
-                                                            player);
-            }
-        }
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var stings = (int)kokomi.Powers.OfType<EndlessShoalPower>()
+            .Sum(p => p.Amount);
+        if (stings <= 0) return;
+        await KokomiCards.AddJellyfish(kokomi.Player,
+            KokomiCards.Jellyfish.Sting, stings, upgraded: false);
     }
 
     /// <summary>Gorou, General's War Banner's Plan line: "Gain 3 Strength
@@ -765,10 +768,10 @@ public sealed class GrandStrategistPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Endless Shoal: "Whenever the Bake-Kurage carries out a Sting or
-/// Ward, add a copy of it to your hand." Paid from
-/// <see cref="KokomiRefounding.OnCarriedOut"/>; copies add one each.
-/// </summary>
+/// <summary>Endless Shoal (the jellyfish build, 2026-10-12): "Whenever the
+/// Bake-Kurage carries out a Plan, add a Sting to your hand." Paid from
+/// <see cref="KokomiRefounding.OnCarriedOut"/>, once per carry-out; copies
+/// add one each.</summary>
 public sealed class EndlessShoalPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -776,8 +779,9 @@ public sealed class EndlessShoalPower : PowerModel, ILocalizationProvider
         ("title", "Endless Shoal"),
         ("description",
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Sting[/gold] or [gold]Ward[/gold], add a copy of it to "
-          + "your hand."),
+          + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
+          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
+          + "hand."),
     };
 
     public override PowerType Type => PowerType.Buff;

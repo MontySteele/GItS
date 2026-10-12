@@ -232,6 +232,10 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # the end of her turns. Mod-side ledger and hook reads with no
             # wire route.
             "ethereal_lost", "plans_written", "plans_carried_out",
+            # 2026-10-12 (the Kokomi jellyfish build): Stings made, played
+            # face-up, written and lost to Ethereal per fight. Mod-side
+            # ledger and hook reads with no wire route.
+            "stings_made", "stings_played", "stings_written", "stings_lost",
             "run_id", "run_instance", "fight_index", "encounter",
             "detonations", "corpse_detonations",
             # EB-118. One row per resolved Exhaust selection, in the SIM's

@@ -50,9 +50,10 @@ public class KokomiExpansionTests : IDisposable
     private static readonly string[] Batch =
     {
         // The re-founding (2026-10-12) cut Weight of the Plan, Lull, The Long
-        // Game, Salt in the Wound, Tidal Resonance and Kurage Swarm.
+        // Game, Salt in the Wound, Tidal Resonance and Kurage Swarm; the
+        // jellyfish build (2026-10-12) cut Measured Breath.
         "ProtoKkUndertideLance",
-        "ProtoKkMeasuredBreath", "ProtoKkGrandDesign",
+        "ProtoKkGrandDesign",
         "ProtoKkMasterstroke",
         "ProtoKkDrowningPressure",
         "ProtoKkUndercurrentSnare",
@@ -219,13 +220,14 @@ public class KokomiExpansionTests : IDisposable
     // ---- Plan volume -----------------------------------------------------------------
 
     [Fact]
-    public void Shoal_call_adds_stings_upgraded_when_it_is()
+    public void Shoal_call_is_blade_dance_with_plain_stings()
     {
-        // The re-founding (2026-10-12): Stings, not Nips.
+        // The jellyfish build (2026-10-12): "Add 3 [4] Stings to your hand."
+        // Plain Stings on both faces; the upgrade adds one.
         var calls = Seq("KokomiCards", "ShoalCall");
         Assert.Contains(calls, c => c.Contains("KokomiCards.AddJellyfish"));
-        Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
-        Assert.Contains("{IfUpgraded:show:upgraded |}[gold]Stings[/gold]",
-                        Face(new ProtoKkShoalCall()));
+        Assert.DoesNotContain(calls, c => c.Contains("get_IsUpgraded"));
+        Assert.Equal("Add {KkAmount:diff()} [gold]Stings[/gold] to your hand.",
+                     Face(new ProtoKkShoalCall()));
     }
 }

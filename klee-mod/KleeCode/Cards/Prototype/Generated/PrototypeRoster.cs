@@ -312,6 +312,7 @@ public static class PrototypeRoster
     private static List<CardModel> BuildKokomi() =>
         new()
         {
+            ModelDb.Card<ProtoKkAllStreamsFlow>(),
             ModelDb.Card<ProtoKkAmbush>(),
             ModelDb.Card<ProtoKkAtWatersEdge>(),
             ModelDb.Card<ProtoKkBraceForTheTide>(),
@@ -344,7 +345,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkKuragesOath>(),
             ModelDb.Card<ProtoKkKuragesWake>(),
             ModelDb.Card<ProtoKkMasterstroke>(),
-            ModelDb.Card<ProtoKkMeasuredBreath>(),
             ModelDb.Card<ProtoKkMoonsReflection>(),
             ModelDb.Card<ProtoKkNereidsAscension>(),
             ModelDb.Card<ProtoKkOpeningGambit>(),
@@ -369,7 +369,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkShoalOfSpears>(),
             ModelDb.Card<ProtoKkSlackWater>(),
             ModelDb.Card<ProtoKkSpearhead>(),
-            ModelDb.Card<ProtoKkSpringTide>(),
             ModelDb.Card<ProtoKkSteadyTide>(),
             ModelDb.Card<ProtoKkSting>(),
             ModelDb.Card<ProtoKkSuffocatingDeep>(),
@@ -377,6 +376,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkTacticalRelay>(),
             ModelDb.Card<ProtoKkTamakushisWrath>(),
             ModelDb.Card<ProtoKkTheMoonAShip>(),
+            ModelDb.Card<ProtoKkTheShapeOfWater>(),
             ModelDb.Card<ProtoKkTidalRebuke>(),
             ModelDb.Card<ProtoKkTidalRiposte>(),
             ModelDb.Card<ProtoKkTidalScreen>(),

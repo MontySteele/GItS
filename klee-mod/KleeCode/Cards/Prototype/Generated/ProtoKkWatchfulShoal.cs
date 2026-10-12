@@ -38,7 +38,7 @@ public sealed class ProtoKkWatchfulShoal : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(base.ExtraHoverTips, this, false));
+        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(base.ExtraHoverTips));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_watchful_shoal");
 

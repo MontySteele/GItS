@@ -1323,6 +1323,12 @@ class CombatState:
     # at 0 and `roll_turn` never clears it).
     # `KokomiOverhaulLedger.PlansCarriedOutThisCombat`'s twin.
     kk_plans_carried_out_this_combat: int = 0
+    # The jellyfish build (2026-10-12): Stings played face-up (never written
+    # or carried out), this combat (All Streams Flow to the Sea) and this turn
+    # (The Shape of Water; cleared by `kokomi_plan.roll_turn`).
+    # `KokomiOverhaulLedger.StingsPlayedThisCombat` / `...ThisTurn`'s twins.
+    kk_stings_played_this_combat: int = 0
+    kk_stings_played_this_turn: int = 0
     # THE EXPANSION, BATCH ONE: All Streams Flow to the Sea's pending gift,
     # "your next Plan this turn is carried out once, plus once for each Plan
     # cancelled". None while nothing is pending; the count (0 or more) while

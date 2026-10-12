@@ -59,12 +59,14 @@ public class KokomiRefoundingTests
     // ---- the jellyfish -----------------------------------------------------
 
     [Fact]
-    public void Sting_and_ward_are_ethereal_exhausting_one_cost_tokens()
+    public void Sting_and_ward_are_ethereal_exhausting_zero_cost_tokens()
     {
+        // Cost 0 since the jellyfish build (2026-10-12), with their Plan
+        // lines (`KokomiJellyfishBuildTests`).
         foreach (var card in new CardModel[] { new ProtoKkSting(),
                                                new ProtoKkWard() })
         {
-            Assert.Equal(1, card.EnergyCost.Canonical);
+            Assert.Equal(0, card.EnergyCost.Canonical);
             Assert.Equal(CardRarity.Token, card.Rarity);
             Assert.Contains(CardKeyword.Ethereal, card.CanonicalKeywords);
             Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);

@@ -330,6 +330,17 @@ def _runtime_count(state: CombatState, token: str,
         # carry-outs, per fight. C# twin:
         # `KokomiOverhaulLedger.PlansCarriedOutThisCombat`.
         return state.kk_plans_carried_out_this_combat
+    if token == "stings_played_this_combat":
+        # The jellyfish build (2026-10-12) -- All Streams Flow to the Sea,
+        # "plus 2 for each Sting you played this combat". A face-up play
+        # (`kokomi_plan.note_sting_played`), never a write or a carry-out.
+        # C# twin: `KokomiOverhaulLedger.StingsPlayedThisCombat`.
+        return state.kk_stings_played_this_combat
+    if token == "stings_played_this_turn":
+        # The jellyfish build -- The Shape of Water, "for each Sting you
+        # played this turn". Cleared by `kokomi_plan.roll_turn`. C# twin:
+        # `KokomiOverhaulLedger.StingsPlayedThisTurn`.
+        return state.kk_stings_played_this_turn
     if token == "debuffs_on_target":
         # CURRENT-KIT USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
         # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
@@ -3434,6 +3445,10 @@ RUNTIME_COUNT_NAMES = frozenset({
     # pass's per-turn counts, the Casket's own and the Energy paid left with
     # the re-founding, 2026-10-12.)
     "plans_carried_out_this_combat",
+    # The jellyfish build (2026-10-12): All Streams Flow to the Sea and The
+    # Shape of Water, Stings played face-up. Same registry reason.
+    "stings_played_this_combat",
+    "stings_played_this_turn",
     # CURRENT-KIT USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -5343,6 +5358,9 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # (C.KOKOMI_OVERHAUL). Core pass, TREATISE: a card with a Plan
     # line played NORMALLY -- a write returned above, before any of this.
     kokomi_plan.note_face_up_plan_card(state, card)
+    # The jellyfish build (2026-10-12): a Sting played face-up counts for
+    # All Streams Flow to the Sea and The Shape of Water.
+    kokomi_plan.note_sting_played(state, card)
 
 
 def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
