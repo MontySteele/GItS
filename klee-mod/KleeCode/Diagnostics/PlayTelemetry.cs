@@ -762,7 +762,8 @@ internal static class PlayTelemetry
         {
             if (!causedByEthereal || card?.Owner is not { } player) return;
             if (!KokomiOverhaul.LiveFor(player.Creature)) return;
-            RecordEtherealLost(player);
+            RecordEtherealLost(player,
+                sting: card is global::KleeMod.Cards.Prototype.Generated.ProtoKkSting);
         }
         catch (Exception e)
         {
@@ -771,12 +772,15 @@ internal static class PlayTelemetry
     }
 
     /// <summary>The hook-free half of <see cref="EtherealLost"/>, and the
-    /// test seam.</summary>
-    internal static void RecordEtherealLost(Player player)
+    /// test seam. <paramref name="sting"/>: the card lost was a Sting (the
+    /// jellyfish build, 2026-10-12: Stings made, played, written and lost
+    /// per fight).</summary>
+    internal static void RecordEtherealLost(Player player, bool sting = false)
     {
         if (!Open.TryGetValue(player, out var record)) return;
         record.IsKokomi = true;
         record.EtherealLost++;
+        if (sting) record.StingsLost++;
     }
 
     /// <summary>
@@ -2006,6 +2010,9 @@ internal static class PlayTelemetry
         /// <summary>The Kokomi re-founding (2026-10-12): her cards Ethereal
         /// Exhausted this fight (<see cref="EtherealLost"/>).</summary>
         public int EtherealLost;
+        /// <summary>The jellyfish build (2026-10-12): the Stings among
+        /// <see cref="EtherealLost"/>.</summary>
+        public int StingsLost;
         /// <summary>2026-10-10 (the whole-run round 2). [round, Spend cards
         /// in hand] as each of her turns opens, after the draw
         /// (<see cref="SpendCardsTurnStart"/>).</summary>
@@ -2285,6 +2292,16 @@ internal static class PlayTelemetry
                   .Append(KokomiLedger?.PlansWrittenThisCombat ?? 0);
                 sb.Append(",\"plans_carried_out\":")
                   .Append(KokomiLedger?.PlansCarriedOutThisCombat ?? 0);
+                // The jellyfish build (2026-10-12, the paper's first check
+                // line): Stings made, played face-up, written as Plans and
+                // lost to Ethereal this fight.
+                sb.Append(",\"stings_made\":")
+                  .Append(KokomiLedger?.StingsMadeThisCombat ?? 0);
+                sb.Append(",\"stings_played\":")
+                  .Append(KokomiLedger?.StingsPlayedThisCombat ?? 0);
+                sb.Append(",\"stings_written\":")
+                  .Append(KokomiLedger?.StingsWrittenThisCombat ?? 0);
+                sb.Append(",\"stings_lost\":").Append(StingsLost);
             }
             if (IsVarka)
             {

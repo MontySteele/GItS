@@ -34,7 +34,9 @@ namespace KleeMod.Powers;
 ///     <c>KokomiPlan.ResolveAll</c> before the first clause runs.
 ///
 /// PER COMBAT, AGAIN: <see cref="PlansWrittenThisCombat"/> and
-/// <see cref="PlansCarriedOutThisCombat"/> (Sango Isshin and telemetry). The
+/// <see cref="PlansCarriedOutThisCombat"/> (Sango Isshin and telemetry), and
+/// since the jellyfish build (2026-10-12) the Stings played (All Streams Flow
+/// to the Sea; per turn for The Shape of Water), made and written. The
 /// Tamakushi Casket's count left with the Casket (the re-founding,
 /// 2026-10-12).
 ///
@@ -162,6 +164,41 @@ public sealed class KokomiOverhaulLedger
         PlansWrittenThisCombat++;
     }
 
+    /// <summary>
+    /// THE JELLYFISH BUILD (2026-10-12): Stings PLAYED -- face-up, the
+    /// now-line -- this combat (All Streams Flow to the Sea) and this turn
+    /// (The Shape of Water). A write is not a play and neither is a
+    /// carry-out: Treatise's reading. Written by
+    /// <c>ProtoBakeKuragePower.AfterCardPlayed</c>, the marker every board
+    /// has. Sim twins: <c>CombatState.kk_stings_played_this_combat</c> /
+    /// <c>kk_stings_played_this_turn</c>.
+    /// </summary>
+    public int StingsPlayedThisCombat { get; private set; }
+
+    /// <inheritdoc cref="StingsPlayedThisCombat"/>
+    public int StingsPlayedThisTurn { get; private set; }
+
+    /// <summary>Telemetry (the jellyfish paper's first check line): Stings
+    /// made and Stings written this combat. Lost Stings are counted on the
+    /// fight record (<c>PlayTelemetry.EtherealLost</c>).</summary>
+    public int StingsMadeThisCombat { get; private set; }
+
+    /// <inheritdoc cref="StingsMadeThisCombat"/>
+    public int StingsWrittenThisCombat { get; private set; }
+
+    /// <summary>One Sting played face-up.</summary>
+    public void NoteStingPlayed()
+    {
+        StingsPlayedThisCombat++;
+        StingsPlayedThisTurn++;
+    }
+
+    /// <summary><paramref name="made"/> Stings added to her hand.</summary>
+    public void NoteStingsMade(int made) => StingsMadeThisCombat += made;
+
+    /// <summary>One Sting written as a Plan.</summary>
+    public void NoteStingWritten() => StingsWrittenThisCombat++;
+
     /// <summary>THE EXPANSION, BATCH ONE: All Streams Flow to the Sea's
     /// pending gift for the next Plan written this turn (null when none is
     /// pending). Per turn; <see cref="RollTo"/> clears it. Sim twin:
@@ -267,6 +304,8 @@ public sealed class KokomiOverhaulLedger
         // boundary is the card on the entry and never this slot.
         LastCompanionPlayedThisTurn = null;
         NextPlanExtra = null;
+        // The jellyfish build (2026-10-12): The Shape of Water's "this turn".
+        StingsPlayedThisTurn = 0;
         _round = round;
     }
 }

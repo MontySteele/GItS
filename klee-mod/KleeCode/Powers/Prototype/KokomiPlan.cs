@@ -948,6 +948,11 @@ public static class KokomiPlan
         // The whole-run telemetry's count of Plans written (Moon's
         // Reflection's included). Sim twin: `kokomi_plan.schedule`.
         ledger.NotePlanWritten();
+        // The jellyfish build (2026-10-12): a written Sting, for telemetry.
+        if (source is global::KleeMod.Cards.Prototype.Generated.ProtoKkSting)
+        {
+            ledger.NoteStingWritten();
+        }
         await Sync(choiceContext, kokomi,
             SparkPower.SourceOf(source), before);
         // THE RE-FOUNDING (2026-10-12): the write payoffs -- Watchful
@@ -1260,8 +1265,7 @@ public static class KokomiPlan
     /// nobody is playing any more.
     /// </summary>
     private static async Task Drain(
-        PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due,
-        bool midTurn = false)
+        PlayerChoiceContext choiceContext, Creature kokomi, List<Entry> due)
     {
         var player = kokomi.Player;
         var doubleNext = false;
@@ -1271,11 +1275,9 @@ public static class KokomiPlan
         // approximate: both flags are cleared at the top of every entry, so
         // whatever is pending was written by the entry immediately before.
         string? riderSource = null;
-        // POOL COMPLETION (2026-10-01), SPRING TIDE: a MID-TURN drain is
-        // neither a morning nor a Dusk, so Nereid's Ascension does not double
-        // its first entry -- <see cref="ResolveFront"/>'s reading, for the
-        // whole queue. `kokomi_plan._drain`'s `mid_turn` is the twin.
-        var firstTimes = midTurn ? 1 : CarryOutTimes(kokomi);
+        // (Spring Tide's mid-turn drain left with the card, the jellyfish
+        // build, 2026-10-12.)
+        var firstTimes = CarryOutTimes(kokomi);
         for (var index = 0; index < due.Count; index++)
         {
             var entry = due[index];
@@ -1300,7 +1302,7 @@ public static class KokomiPlan
             for (var i = 0; i < times; i++)
             {
                 var (wroteDouble, wroteExtra) = await ResolveEntry(
-                    choiceContext, kokomi, entry, onPlay: midTurn,
+                    choiceContext, kokomi, entry, onPlay: false,
                     doubleDamage: doubleThis,
                     drainEntries: due.Count);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
@@ -1668,46 +1670,6 @@ public static class KokomiPlan
         {
             if (kokomi.IsDead) return;
             await ResolveNow(choiceContext, kokomi, front);
-        }
-    }
-
-    /// <summary>
-    /// SPRING TIDE (pool completion, 2026-10-01): "The Bake-Kurage carries
-    /// out all your Plans now."
-    ///
-    /// THE WHOLE QUEUE, IN ORDER ("all your Plans"), through
-    /// <see cref="Drain"/> -- so a rider reaches the entry behind it, and
-    /// every carry-out rings the plan bus and pays Kurage Canopy. MID-TURN: Nereid's Ascension does not double the first
-    /// entry, the morning's depth is untouched and the cap does not apply.
-    /// The queue is emptied before the first clause runs, so a Plan written
-    /// afterwards waits for the morning. An empty queue is a printed no-op.
-    /// Sim twin: <c>kokomi_plan.resolve_all_now</c>.
-    /// </summary>
-    public static async Task ResolveAllNow(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-
-        Rebase(kokomi);
-        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
-        {
-            return;
-        }
-        var due = new List<Entry>(queue);
-        int before = queue.Count;
-        queue.Clear();
-        await Sync(choiceContext, kokomi, "rule:carried_out_now", before);
-        // A PLAN STAYS OPEN (pick 5a): each the line it was flipped to.
-        due = ChooseLines(due);
-        try
-        {
-            await Drain(choiceContext, kokomi, due, midTurn: true);
-        }
-        finally
-        {
-            Vfx.KokomiPlanStrip.Refresh(kokomi);
         }
     }
 

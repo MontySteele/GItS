@@ -162,8 +162,8 @@ internal static class KokomiOverhaulRoster
     };
 
     /// <summary>The slice's own 78 rows, without the Ancient tail
-    /// <see cref="OfferablePool"/> adds: 21 / 36 / 21 since the re-founding
-    /// (2026-10-12), in the sheet's own order, then Gorou's four. The pool's
+    /// <see cref="OfferablePool"/> adds: 21 / 37 / 20 since the jellyfish
+    /// build (2026-10-12), in the sheet's own order, then Gorou's four. The pool's
     /// history is in git (tag <c>kokomi-casket-frozen-2026-10-12</c>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
@@ -195,7 +195,6 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkJellyfishDrift>(),
         ModelDb.Card<ProtoKkBrineSting>(),
         ModelDb.Card<ProtoKkUndertideLance>(),
-        ModelDb.Card<ProtoKkMeasuredBreath>(),
         ModelDb.Card<ProtoKkGrandDesign>(),
         ModelDb.Card<ProtoKkMasterstroke>(),
         ModelDb.Card<ProtoKkDrowningPressure>(),
@@ -211,7 +210,6 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkShoalCall>(),
         ModelDb.Card<ProtoKkKurageCanopy>(),
         ModelDb.Card<ProtoKkTidalScreen>(),
-        ModelDb.Card<ProtoKkSpringTide>(),
         ModelDb.Card<ProtoKkShoalOfSpears>(),
         ModelDb.Card<ProtoKkSeasReproach>(),
         ModelDb.Card<ProtoKkTidalRebuke>(),
@@ -244,6 +242,12 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkEndlessShoal>(),
         ModelDb.Card<ProtoKkDawnTide>(),
         ModelDb.Card<ProtoKkTamakushisWrath>(),
+        // THE JELLYFISH BUILD (2026-10-12, review/active/kokomi-jellyfish-
+        // growth-2026-10-12.md sec.3): two growth cards, LAST, in the sheet's
+        // own order (`C.KOKOMI_JELLYFISH_IDS`). Measured Breath and Spring
+        // Tide are cut.
+        ModelDb.Card<ProtoKkAllStreamsFlow>(),
+        ModelDb.Card<ProtoKkTheShapeOfWater>(),
         // GOROU'S FOUR, her own cards since the re-founding (the ruling's
         // pick 3), ids kept: `C.KOKOMI_OWN_COMPANION_IDS`, LAST.
         ModelDb.Card<ProtoMiGorouInuzaka>(),

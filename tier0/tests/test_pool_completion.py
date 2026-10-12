@@ -123,32 +123,15 @@ def test_tidal_screen_blocks_now_and_draws_two_from_the_plan(overhaul):
     assert _up("proto_kk_tidal_screen").effects[0]["amount"] == 10
 
 
-def test_spring_tide_carries_the_whole_queue_out_now(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
-    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "next_plan_extra_carry_out"}], cid="proto_kk_rider"))
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "energy", "amount": 1}], cid="proto_kk_next"))
-    st.player.energy = 0
-    kokomi_plan.kind(st, {"op": "kokomi", "kind": "spring_tide"},
-                     _row("proto_kk_spring_tide"), None)
-    assert st.kk_plan_queue == []
-    # The rider reaches the entry behind it (twice), and Nereid's Ascension
-    # does NOT double a mid-turn drain's first entry.
-    assert st.kk_plans_carried_out_this_combat == 1 + 2
-    assert st.player.energy == 2
-    # The emptied queue can be written again for the morning.
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    assert len(st.kk_plan_queue) == 1
-
-
-def test_spring_tide_on_an_empty_queue_is_a_printed_no_op(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
-    kokomi_plan.resolve_all_now(st)
-    assert _events(st, "plan_front_empty")
-    assert _row("proto_kk_spring_tide").exhaust
-    assert _up("proto_kk_spring_tide").cost == 0
+def test_spring_tide_is_cut_and_its_kind_with_it(overhaul):
+    """The jellyfish build (2026-10-12) cut Spring Tide (The Shape of Water
+    takes its slot), and its `spring_tide` kind and mid-turn drain went with
+    it, in both engines."""
+    assert "proto_kk_spring_tide" not in C.KOKOMI_OVERHAUL_POOL_IDS
+    assert "proto_kk_spring_tide" not in {
+        c.id for c in loader.prototype_cards()}
+    assert "spring_tide" not in kokomi_plan.KINDS
+    assert not hasattr(kokomi_plan, "resolve_all_now")
 
 
 def test_seas_reproach_answers_her_weak_and_vulnerable(overhaul):

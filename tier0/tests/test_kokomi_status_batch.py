@@ -4,7 +4,8 @@ Paper `review/active/kokomi-status-batch-2026-10-01.md`, ruled: "the 7
 removals are good", "Agreed on the Plan text change". Seven cards built here
 (Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge,
 Abyssal Salvage, and Riptide Ruin, the Rare that replaced the cut Coral
-Sanctuary), so the pool is 78 (21 / 36 / 21). The C# twin is
+Sanctuary), so the pool is 78 (21 / 37 / 20 since the jellyfish build,
+2026-10-12). The C# twin is
 `KleeTests/Prototype/KokomiStatusBatchTests.cs`. NOTHING MEASURED HERE IS
 QUOTABLE (R215 B).
 
@@ -69,7 +70,8 @@ def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
         assert cid not in rows
     assert "proto_kk_coral_sanctuary" not in rows
     rarity = collections.Counter(_row(cid).rarity for cid in ids)
-    assert rarity == {"common": 21, "uncommon": 36, "rare": 21}
+    # The jellyfish build (2026-10-12): 21 / 37 / 20.
+    assert rarity == {"common": 21, "uncommon": 37, "rare": 20}
     # The re-founding (2026-10-12) cut Turning Tide and Abyssal Salvage.
     for cid in ("proto_kk_turning_tide", "proto_kk_abyssal_salvage"):
         assert cid not in ids

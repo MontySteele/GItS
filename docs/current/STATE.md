@@ -101,10 +101,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Casket's count, Open the Casket and Dusk: the Tamakushi Casket now gains 3
   Block at the end of her turn while a Plan is waiting (the Watatsumi Casket
   5). Ethereal is the base keyword and a written card is not lost to it.
-  Stings and Wards are her generated jellyfish (cost 1, Ethereal, Exhaust).
+  Stings and Wards are her generated jellyfish (Ethereal, Exhaust; cost 0
+  with a Plan line since the jellyfish build, below).
   A written Companion is carried out at its printed rate after the
   Bake-Kurage applies Hydro to its target; Gorou's four are her own cards
-  with their own Plan lines. Pool 78 (21 / 36 / 21) plus five co-op cards
+  with their own Plan lines. Pool 78 (21 / 37 / 20) plus five co-op cards
   and two Ancients. The build before it is tagged
   `kokomi-casket-frozen-2026-10-12`. Three seat rounds and a forced test
   ran on 2026-10-12 (`review/records/kokomi-round-{1,2,3}-2026-10-12.md`,
@@ -112,8 +113,16 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   act-2 bosses the wall (her own damage 45% of base; an Ironclad control
   died there too); act-3 own-card damage about 62% of base. Watchful Shoal
   is now "Your Stings deal 3 additional damage. Your Wards gain 3
-  additional Block." (a growth test, reversible). Next: [USER]'s run on
-  0.2.5020, then the late-growth pick (QUEUE).
+  additional Block." (a growth test, reversible). The jellyfish build
+  (`review/active/kokomi-jellyfish-growth-2026-10-12.md`, ruled at all
+  defaults) makes Stings the Silent's Shivs with a Plan line (Sting 0: 4 [6],
+  Plan 3 [4] to ALL; Ward 0: 4 [6] Block, Plan 1 [2] Weak to ALL), prices
+  the generators at the Silent's rates (Shoal Call is Blade Dance), makes
+  Endless Shoal the Uncommon "a Sting per Plan carried out", and adds All
+  Streams Flow to the Sea (Rare) and The Shape of Water (Uncommon); Measured
+  Breath and Spring Tide are cut. Telemetry counts Stings made, played,
+  written and lost per fight. Next: a Kokomi seat round on that build, then
+  [USER]'s run on it.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:

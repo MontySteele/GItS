@@ -98,9 +98,10 @@ def test_a_written_ethereal_card_is_not_exhausted_at_the_end_of_the_turn():
 # --- Stings and Wards -------------------------------------------------------
 
 @pytest.mark.parametrize("cid", [kokomi_plan.STING_ID, kokomi_plan.WARD_ID])
-def test_a_jellyfish_card_is_ethereal_costs_1_and_exhausts(cid):
+def test_a_jellyfish_card_is_ethereal_costs_0_and_exhausts(cid):
+    """Cost 0 since the jellyfish build (2026-10-12); still a Plan line."""
     c = loader.get_card(cid)
-    assert c.cost == 1 and c.is_ethereal and c.exhaust
+    assert c.cost == 0 and c.is_ethereal and c.exhaust
     assert c.rarity == "token" and c.plan
 
 
@@ -279,10 +280,12 @@ def test_watchful_shoal_pays_nothing_for_writing_an_ethereal_card():
     assert st.player.block == 0
 
 
-def test_endless_shoal_copies_a_carried_out_sting():
+def test_endless_shoal_adds_a_sting_for_any_carried_out_plan():
+    """The jellyfish build (2026-10-12): "Whenever the Bake-Kurage carries
+    out a Plan, add a Sting to your hand." Any Plan, not only a Sting."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.ENDLESS_SHOAL] = 1
-    write(st, card(kokomi_plan.STING_ID))
+    write(st, card("proto_kk_brine_sting"))
     st.player.hand.clear()
     carry_out(st)
     assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID]
@@ -309,10 +312,13 @@ def test_juugas_plan_line_is_6_block_at_the_end_of_3_turns():
         assert st.player.powers.get("mi_juuga_guard", 0) == left
 
 
-def test_no_card_with_a_plan_line_costs_0_upgraded_either():
-    """Card paper rule 2: "No card with a Plan line costs 0." Crystal
-    Collapse's `+` cost 0 until 2026-10-12; it gains Retain instead, and
-    every other Plan row is held to the rule on both faces."""
+def test_the_jellyfish_are_the_only_0_cost_plan_rows():
+    """Card paper rule 2 ("No card with a Plan line costs 0") was LIFTED by
+    the jellyfish ruling (2026-10-12, [USER]: "I'm actually totally fine with
+    0-cost plans"); the rule that stands is that no Plan happens within her
+    own turn. Today only the two jellyfish tokens are 0-cost Plan rows, so a
+    new one is a deliberate change of this pin, not an accident. Crystal
+    Collapse+ keeps cost 1 and gains Retain (2026-10-12)."""
     from pathlib import Path
 
     import yaml
@@ -329,6 +335,9 @@ def test_no_card_with_a_plan_line_costs_0_upgraded_either():
                                            row.get("effects", []),
                                            bool(row.get("exhaust")),
                                            row["plan"]))
+        if row["id"] in (kokomi_plan.STING_ID, kokomi_plan.WARD_ID):
+            assert row["cost"] == 0 and "cost" not in delta, row["id"]
+            continue
         assert row["cost"] >= 1, row["id"]
         assert row["cost"] + delta.get("cost", 0) >= 1, row["id"]
     up = upgrades.apply_upgrade(card("proto_mi_gorou_crystal_collapse"))

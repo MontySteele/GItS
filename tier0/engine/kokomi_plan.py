@@ -300,7 +300,7 @@ KURAGE_BLOOM = "kk_kurage_bloom"                 # turn start: N Stings
 WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg, Wards +N Block
 COORDINATED_TIDE = "kk_coordinated_tide"         # Ethereal carried out: N
 GRAND_STRATEGIST = "kk_grand_strategist"         # a Plan's reaction: N to ALL
-ENDLESS_SHOAL = "kk_endless_shoal"               # Sting/Ward carried out: copy
+ENDLESS_SHOAL = "kk_endless_shoal"               # a Plan carried out: N Stings
 DAWN_TIDE = "kk_dawn_tide"                       # turn start: Hydro to ALL
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
@@ -1020,8 +1020,7 @@ def resolve_all(state: CombatState) -> None:
                    pending=len(state.kk_plan_queue))
 
 
-def _drain(state: CombatState, due: list[PlanEntry], why: str,
-           mid_turn: bool = False) -> None:
+def _drain(state: CombatState, due: list[PlanEntry], why: str) -> None:
     """CARRY A LIST OF PLANS OUT, IN ORDER -- the one loop both drains share
     (the morning's, and `EB-643`'s dusk).
 
@@ -1059,10 +1058,9 @@ def _drain(state: CombatState, due: list[PlanEntry], why: str,
     #: One slot for both riders: an entry printing both is one card, and two
     #: entries in a row each writing one leave only the later card pending.
     rider_source: Optional[str] = None
-    # POOL COMPLETION (2026-10-01), SPRING TIDE: a MID-TURN drain is not the
-    # start of a turn or a Dusk, so Nereid's Ascension does not double its
-    # first entry (`resolve_front`'s reading, for the whole queue).
-    first_times = 1 if mid_turn else carry_out_times(state)
+    # (Spring Tide's mid-turn drain left with the card, the jellyfish build,
+    # 2026-10-12.)
+    first_times = carry_out_times(state)
     for index, entry in enumerate(due):
         if state.over or not state.player.alive:
             return
@@ -1135,35 +1133,6 @@ def resolve_front(state: CombatState) -> None:
         if state.over or not state.player.alive:
             return
         _resolve_entry(state, entry, why="change_of_plans")
-
-
-def resolve_all_now(state: CombatState) -> None:
-    """SPRING TIDE (pool completion, 2026-10-01): "The Bake-Kurage carries out
-    all your Plans now."
-
-    THE WHOLE QUEUE, IN ORDER, Dusk Plans included: "all your Plans". It is a
-    DRAIN (`_drain`), so "the Plan after this one" riders (Second Wave,
-    Opening Gambit) reach the entry behind them, and each carry-out rings the
-    plan bus and counts for the Casket and Kurage Canopy. MID-TURN, so
-    Nereid's Ascension does not double the first entry (`resolve_front`'s
-    reading, which this extends) and the morning's depth is not touched. Not
-    capped: the cap is a rule about the morning.
-
-    THE QUEUE IS EMPTIED BEFORE THE FIRST CLAUSE RUNS (`resolve_all`'s rule),
-    so a Plan written afterwards -- by a carry-out or by the next card -- waits
-    for the morning: "a volume turn can pay twice". `KokomiPlan.ResolveAllNow`
-    is the twin.
-    """
-    if not live(state):
-        return
-    if not state.kk_plan_queue:
-        state.emit("plan_front_empty")
-        return
-    due = list(state.kk_plan_queue)
-    state.kk_plan_queue.clear()
-    state.emit("plan_resolve_all_now", plans=len(due))
-    choose_lines(state, due)
-    _drain(state, due, why="spring_tide", mid_turn=True)
 
 
 def carry_out_times(state: CombatState) -> int:
@@ -1274,7 +1243,7 @@ def carry_out_now_line(state: CombatState, entry: PlanEntry) -> None:
     line is skipped -- the fight is over.
 
     THE OUTER CONTEXT IS SAVED AND RESTORED (`combat.resolve_free_play`'s
-    contract), because Change of Plans and Spring Tide carry Plans out inside
+    contract), because Change of Plans carries a Plan out inside
     a card's own play.
     """
     from tier0.engine import combat, effects        # late import: cycle
@@ -1814,6 +1783,8 @@ def roll_turn(state: CombatState) -> None:
     state.kk_plans_this_morning = 0
     # THE EXPANSION: All Streams' gift says "this turn" and dies with it.
     state.kk_next_plan_extra = None
+    # The jellyfish build (2026-10-12): The Shape of Water's "this turn".
+    state.kk_stings_played_this_turn = 0
     # Crystal Collapse's "this turn". It is CLEARED rather than handed over:
     # the capture happens while the Plan is written, so what survives the
     # boundary is the captured card on the entry and never the list.
@@ -2170,27 +2141,20 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
     k = fx.get("kind")
     p = state.player
     amount = int(fx.get("amount", 0))
-    if k == "draw_if_no_plan":
-        # MEASURED BREATH: "If no Plan is waiting, draw 2."
-        if not state.kk_plan_queue:
-            state.draw(amount)
-    elif k == "double_weak_vulnerable":
+    if k == "double_weak_vulnerable":
         # SUFFOCATING DEEP: "Double each enemy's Weak and Vulnerable."
         for e in list(state.living_enemies):
             for name in ("weak", "vulnerable"):
                 have = int(e.powers.get(name, 0))
                 if have > 0:
                     powers.apply_power(state, e, name, have, applier=p)
-    elif k == "spring_tide":
-        # SPRING TIDE (pool completion): the whole queue, now.
-        resolve_all_now(state)
     elif k == "kurages_mercy":
         # KURAGE'S MERCY (pool completion, multiplayer): each player Mends.
         kurages_mercy(state, amount)
     elif k == "shoal_call":
-        # SHOAL CALL (the re-founding): "Add 2 [upgraded] Stings to your hand."
-        add_jellyfish(state, STING_ID, amount,
-                      upgraded=bool(fx.get("upgraded")))
+        # SHOAL CALL (the jellyfish build, 2026-10-12): Blade Dance, "Add 3
+        # [4] Stings to your hand." Plain Stings on both faces.
+        add_jellyfish(state, STING_ID, amount, upgraded=False)
     elif k == "add_sting":
         # Jellyfish Drift, Kurage Barrage: "Add a Sting to your hand."
         add_jellyfish(state, STING_ID, 1, upgraded=False)
@@ -2235,9 +2199,8 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
 #: The `kokomi` op's kinds and the numeric field each prints. The codegen's
 #: `KOKOMI_KINDS` / `KOKOMI_KIND_FIELDS` are the twin; `validate_op` is the
 #: loader's check.
-KINDS = {"draw_if_no_plan": ("amount",), "double_weak_vulnerable": (),
+KINDS = {"double_weak_vulnerable": (),
          # POOL COMPLETION (2026-10-01).
-         "spring_tide": (),
          "kurages_mercy": ("amount",),
          # THE RE-FOUNDING (2026-10-12).
          "shoal_call": ("amount",), "add_sting": (), "add_ward": (),
@@ -2254,7 +2217,7 @@ def validate_op(card_id: str, fx: dict) -> None:
     if k not in KINDS:
         raise ValueError(f"card {card_id!r}: unknown kokomi kind {k!r}")
     allowed = {"op", "kind", *KINDS[k]}
-    if k in ("shoal_call", "add_companion", "add_companions"):
+    if k in ("add_companion", "add_companions"):
         allowed.add("upgraded")      # the `upgraded_grant` key's flag
     unknown = set(fx) - allowed
     if unknown:
@@ -2498,25 +2461,33 @@ def coordinated_tide(state: CombatState, entry: PlanEntry) -> None:
 
 
 def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
-    """A Plan was just carried out. ENDLESS SHOAL adds a copy of a Sting or
-    Ward to her hand (Coordinated Tide is `coordinated_tide`, before the plan
-    bus). Once per carry-out, either line.
+    """A Plan was just carried out. ENDLESS SHOAL (the jellyfish build,
+    2026-10-12): "Whenever the Bake-Kurage carries out a Plan, add a Sting to
+    your hand." Any Plan, either line; once per CARRY-OUT, so a Plan carried
+    out twice (Nereid's Ascension, Second Wave) gives two Stings, and copies
+    add one each. Coordinated Tide is `coordinated_tide`, before the plan bus.
     `KokomiRefounding.OnCarriedOut` is the twin."""
-    import copy as _copy
-
-    from tier0.engine import effects                # late import: cycle
-    card = entry.source
-    if not live(state) or card is None:
+    if not live(state):
         return
-    p = state.player
-    base = card.id.rstrip("+")
-    if base in (STING_ID, WARD_ID):
-        n = int(p.powers.get(ENDLESS_SHOAL, 0))
-        for _ in range(n):
-            if len(p.hand) >= C.MAX_HAND_SIZE:
-                break
-            effects._add_token(state, _copy.deepcopy(card), "hand")
-            state.emit("plan_endless_shoal", card=card.id)
+    n = int(state.player.powers.get(ENDLESS_SHOAL, 0))
+    if n > 0:
+        added = add_jellyfish(state, STING_ID, n, upgraded=False)
+        state.emit("plan_endless_shoal", card=entry.card_id, amount=added)
+
+
+def note_sting_played(state: CombatState, card: Card) -> None:
+    """The jellyfish build (2026-10-12): a Sting PLAYED -- face-up, its
+    now-line -- counts for All Streams Flow to the Sea (this combat) and The
+    Shape of Water (this turn). Called by `effects._resolve_card_bound` beside
+    `note_face_up_plan_card`; a write returns before it, and a carry-out is
+    not her play (`kk_carrying_out`), Treatise's reading.
+    `ProtoBakeKuragePower.AfterCardPlayed` is the twin."""
+    if not live(state) or card.id.rstrip("+") != STING_ID:
+        return
+    if state.kk_carrying_out:
+        return
+    state.kk_stings_played_this_combat += 1
+    state.kk_stings_played_this_turn += 1
 
 
 def grand_strategist(state: CombatState) -> None:

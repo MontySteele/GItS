@@ -8666,16 +8666,16 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
                 "Deal 7 damage.", "Deal 7 Pyro damage.").replace(
                 "Set off.", "Set off the enemy.")
     # Deep Current, the card the seat guessed on, was cut by the Kokomi
-    # re-founding (2026-10-12); Jellyfish Drift is a hit that upgrades the
-    # same way, 5 to 8.
+    # re-founding (2026-10-12); Jellyfish Drift is a hit that upgrades, 6 to
+    # 8 since the jellyfish build (2026-10-12).
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KK_JELLYFISH_DRIFT", "name": "Jellyfish Drift",
          "cost": "1", "type": "Attack",
-         "description": "Deal 5 Hydro damage. Add a Sting to your hand."})
+         "description": "Deal 6 Hydro damage. Add a Sting to your hand."})
     page = blindplay.observe(smith)
 
     # Both faces, one under the other.
-    assert "    Deal 5 Hydro damage. Add a Sting to your hand." in page
+    assert "    Deal 6 Hydro damage. Add a Sting to your hand." in page
     assert ("    Upgraded: Deal 8 Hydro damage. Add a Sting to your "
             "hand.") in page
     # And the screen's own rows, including one whose printed face carries the

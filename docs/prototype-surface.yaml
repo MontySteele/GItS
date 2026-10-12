@@ -1589,23 +1589,25 @@
 
 - {id: proto_kk_bubble_ward, name: "Bubble Ward", character: kokomi,
    authored_by: [claude],
-   # The re-founding (2026-10-12): cost 1, Block now and a Ward. No upgrade
-   # on the paper: the Prototype-stage default (Block +3).
-   # Kokomi round 2 (2026-10-12): Block 5 -> 7 [10].
+   # The re-founding (2026-10-12): cost 1, Block now and a Ward. Round 2:
+   # Block 5 -> 7 [10]. The jellyfish build (2026-10-12): 5 [8], Cloak and
+   # Dagger's rate.
    cost: 1, type: skill, rarity: common,
-   description: "Gain 7 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your hand.",
-   effects: [{op: block, amount: 7},
-             {op: kokomi, kind: add_ward}]}
+   description: "Gain 5 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your hand.",
+   effects: [{op: block, amount: 5},
+             {op: kokomi, kind: add_ward}],
+   upgrade: {block: 3}}
 
 - {id: proto_kk_jellyfish_drift, name: "Jellyfish Drift", character: kokomi,
    authored_by: [claude],
-   # The re-founding (2026-10-12): cost 1, a hit now and a Sting. No upgrade
-   # on the paper: the Prototype-stage default (damage +3).
-   # Kokomi round 2 (2026-10-12): damage 5 -> 8 [11].
+   # The re-founding (2026-10-12): cost 1, a hit now and a Sting. Round 2:
+   # 5 -> 8 [11]. The jellyfish build (2026-10-12): 6 [8], the Silent's rate
+   # now that a Sting costs 0.
    cost: 1, type: attack, rarity: common,
-   description: "Deal 8 [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your hand.",
-   effects: [{op: damage, amount: 8, target: enemy},
-             {op: kokomi, kind: add_sting}]}
+   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your hand.",
+   effects: [{op: damage, amount: 6, target: enemy},
+             {op: kokomi, kind: add_sting}],
+   upgrade: {damage: 2}}
 
 - {id: proto_kk_brine_sting, name: "Brine Sting", character: kokomi,
    authored_by: [claude],
@@ -1633,14 +1635,9 @@
    # 12 to ALL / Plan 22.
    upgrade: {damage: 3, plan_damage: 4}}
 
-- {id: proto_kk_measured_breath, name: "Measured Breath", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 6 [gold]Block[/gold]. If no [gold]Plan[/gold] is waiting, draw {KkAmount:diff()} card{KkAmount:plural:|s}.",
-   effects: [{op: block, amount: 6},
-             {op: kokomi, kind: draw_if_no_plan, amount: 2}],
-   # 9 Block.
-   upgrade: {block: 3}}
+# MEASURED BREATH IS CUT (the jellyfish build, 2026-10-12,
+# review/active/kokomi-jellyfish-growth-2026-10-12.md sec.3): Endless Shoal
+# takes its Uncommon slot. Provenance note, "Kokomi jellyfish build".
 
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
@@ -1780,13 +1777,13 @@
 
 - {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
    authored_by: [claude],
-   # Kokomi round 2 (2026-10-12): cost 1 -> 0, and Exhaust. The Stings keep their cost.
-   cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   # The re-founding (2026-10-12): Stings, not Nips. The Stings arrive
-   # upgraded: a play-time read, the face's own swap.
-   description: "Add {KkAmount:diff()} {IfUpgraded:show:upgraded |}[gold]Stings[/gold] to your hand.",
-   effects: [{op: kokomi, kind: shoal_call, amount: 2}],
-   upgrade: {upgraded_grant: true}}
+   # The jellyfish build (2026-10-12): the base game's Blade Dance. Cost 1,
+   # Exhaust, 3 [4] plain Stings (the upgrade adds a Sting; it no longer
+   # hands over upgraded ones).
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Add {KkAmount:diff()} [gold]Stings[/gold] to your hand.",
+   effects: [{op: kokomi, kind: shoal_call, amount: 3}],
+   upgrade: {kokomi_amount: 1}}
 
 # --- THE PAYOFF PASS (2026-10-01, ruled): Second Thoughts is cut; two
 # Uncommons pay for Plan volume in Block, and in Energy and cards. LAST in the
@@ -1816,15 +1813,9 @@
    # 10 Block; the Plan line does not upgrade.
    upgrade: {block: 3}}
 
-- {id: proto_kk_spring_tide, name: "Spring Tide", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
-   # Change of Plans for the whole queue, in order and
-   # with the drain's riders; mid-turn, so Nereid's Ascension does not double
-   # its first entry. The emptied queue can be written again for the morning.
-   description: "The [gold]Bake-Kurage[/gold] carries out all your [gold]Plans[/gold] now.",
-   effects: [{op: kokomi, kind: spring_tide}],
-   upgrade: {cost: -1}}
+# SPRING TIDE IS CUT (the jellyfish build, 2026-10-12,
+# review/active/kokomi-jellyfish-growth-2026-10-12.md sec.3): The Shape of
+# Water takes its slot. Provenance note, "Kokomi jellyfish build".
 
 - {id: proto_kk_shoal_of_spears, name: "Shoal of Spears", character: kokomi,
    authored_by: [claude],
@@ -1970,10 +1961,11 @@
 - {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 8 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your hand.",
-   effects: [{op: damage, amount: 8, target: enemy},
+   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your hand.",
+   effects: [{op: damage, amount: 6, target: enemy},
              {op: kokomi, kind: add_ward}],
-   # 11 damage. Kokomi round 2 (2026-10-12): 6 [9] -> 8 [11].
+   # 9 damage. Kokomi round 2 (2026-10-12): 6 [9] -> 8 [11]; the jellyfish
+   # build (2026-10-12): back to 6 [9].
    upgrade: {damage: 3}}
 
 - {id: proto_kk_orders_from_the_shrine, name: "Orders from the Shrine", character: kokomi,
@@ -2097,10 +2089,13 @@
 
 - {id: proto_kk_endless_shoal, name: "Endless Shoal", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Sting[/gold] or [gold]Ward[/gold], add a copy of it to your hand.",
+   # The jellyfish build (2026-10-12): Uncommon, cost 1. Per CARRY-OUT: a
+   # Plan carried out twice gives two Stings. Innate on upgrade, Kurage
+   # Bloom's (and Infinite Blades') upgrade. Provenance note.
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add a [gold]Sting[/gold] to your hand.",
    effects: [{op: apply_power, power: kk_endless_shoal, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   upgrade: {innate: true}}
 
 - {id: proto_kk_dawn_tide, name: "Dawn Tide", character: kokomi,
    authored_by: [claude],
@@ -2118,26 +2113,56 @@
    # 38 / Plan 24.
    upgrade: {damage: 8, plan_damage: 6}}
 
+# --- THE JELLYFISH BUILD (2026-10-12, review/active/kokomi-jellyfish-growth-
+# 2026-10-12.md sec.3): two growth cards, LAST in her pool's order. "Played"
+# is face-up, never written: provenance note, "Kokomi jellyfish build". ---
+
+- {id: proto_kk_all_streams_flow, name: "All Streams Flow to the Sea", character: kokomi,
+   authored_by: [claude],
+   # Sango Isshin's jellyfish twin: one card per half that grows over a fight.
+   cost: 1, type: attack, rarity: rare,
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Sting[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 4, per: 2,
+                               count: stings_played_this_combat}}],
+   # 8, plus 2 per Sting.
+   upgrade: {formula_base: 4}}
+
+- {id: proto_kk_the_shape_of_water, name: "The Shape of Water", character: kokomi,
+   authored_by: [claude],
+   # Her normal attack's last hit, the Silent's Finisher: one hit, so a
+   # damage-cutting boss takes it whole.
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Sting[/gold] you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 0, per: 6,
+                               count: stings_played_this_turn}}],
+   # 8 each.
+   upgrade: {formula_per: 2}}
+
 # The jellyfish cards (card paper sec.1 rule 4): generated, in no pool
 # (`C.KOKOMI_OFF_POOL_ROW_IDS`), Ethereal, Exhaust when played or carried out.
 
 - {id: proto_kk_sting, name: "Sting", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: attack, rarity: token, ethereal: true, exhaust: true,
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage to ALL enemies.",
-   effects: [{op: damage, amount: 7, target: enemy}],
-   plan: [{op: damage, amount: 5, target: all_enemies}],
-   # 10 / Plan 7.
-   upgrade: {damage: 3, plan_damage: 2}}
+   # The jellyfish build (2026-10-12): the Silent's Shiv, with its Plan line
+   # ([USER]: "I'm actually totally fine with 0-cost plans").
+   cost: 0, type: attack, rarity: token, ethereal: true, exhaust: true,
+   description: "Deal 4 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 3 [gold]Hydro[/gold] damage to ALL enemies.",
+   effects: [{op: damage, amount: 4, target: enemy}],
+   plan: [{op: damage, amount: 3, target: all_enemies}],
+   # 6 / Plan 4.
+   upgrade: {damage: 2, plan_damage: 1}}
 
 - {id: proto_kk_ward, name: "Ward", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: token, ethereal: true, exhaust: true,
-   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
-   effects: [{op: block, amount: 7}],
+   # The jellyfish build (2026-10-12): cost 0, with its Plan line.
+   cost: 0, type: skill, rarity: token, ethereal: true, exhaust: true,
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: block, amount: 4}],
    plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
-   # 10 Block / Plan 2 Weak.
-   upgrade: {block: 3, plan_power_amount: 1}}
+   # 6 Block / Plan 2 Weak.
+   upgrade: {block: 2, plan_power_amount: 1}}
 
 # THE INAZUMA COMPANION OVERHAUL, beside the Mondstadt block:
 # these ARE Inazuma's Universal companion pool.
