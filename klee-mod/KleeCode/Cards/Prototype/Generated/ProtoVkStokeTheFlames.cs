@@ -45,14 +45,14 @@ public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stoke the Flames"),
-        ("description", "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next Attack deals {PowerAmount:diff()} additional damage. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold]."),
+        ("description", "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next [gold]Pyro[/gold] Attack this turn deals {VkBase:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DynamicVar("VkAmount", 2m),
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("VkBase", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,13 +65,12 @@ public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await VarkaCards.GainPyroOath(choiceContext, this, cardPlay);
-        await PowerCmd.Apply<NextAttackUpPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        await VarkaCards.ExhaustForPyroOath(choiceContext, this, cardPlay);
+        await VarkaCards.NextPyroAttack(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars["VkBase"].UpgradeValueBy(2m);
         DynamicVars["VkAmount"].UpgradeValueBy(1m);
     }
 }

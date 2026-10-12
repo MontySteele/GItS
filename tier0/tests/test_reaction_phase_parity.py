@@ -1154,6 +1154,11 @@ CO_TENANCY_LEDGER = {
             "turn', Grand Master's Order's boundary exactly. Removes itself "
             "and touches nothing a co-tenant reads. Sim twin: "
             "`varka_oath.turn_start` pops it",
+        ("Powers/Prototype/VarkaPowers.cs", "StokeTheFlamesPower"):
+            "(Varka Pyro paper 2, 2026-10-12). Stoke the Flames' "
+            "'this turn', PassionOverloadPower's shape. Removes itself and "
+            "touches nothing a co-tenant reads. Sim twin: "
+            "`varka_oath.turn_end` pops it",
         ("Powers/Prototype/VarkaPowers.cs", "GrandMastersOrderPower"):
             "(Varka, prototype batch one). Grand Master's Order's "
             "'this turn', ReplayNextCompanionPower's boundary exactly. Removes "

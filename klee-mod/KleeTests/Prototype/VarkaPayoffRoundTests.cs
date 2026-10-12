@@ -43,11 +43,14 @@ public class VarkaPayoffRoundTests : IDisposable
             .Single(l => l.Item1 == "description").Item2;
 
     [Fact]
-    public void Ember_cleave_switches_before_it_gains_too()
+    public void Stoke_switches_before_it_gains()
     {
-        // Ember Cleave's gain is the `gain_pyro_oath` kind, Stoke's.
+        // Stoke's gain is the `gain_pyro_oath` kind. (Ember Cleave's left it
+        // in Pyro paper 2, 2026-10-12.)
         Assert.Contains("VarkaCards.GainPyroOath",
-                        Calls("ProtoVkEmberCleave", "OnPlay"));
+                        Calls("ProtoVkStokeTheFlames", "OnPlay"));
+        Assert.DoesNotContain("VarkaCards.GainPyroOath",
+                              Calls("ProtoVkEmberCleave", "OnPlay"));
         var gain = Calls("VarkaCards", "GainPyroOath");
         Assert.True(gain.IndexOf("VarkaOath.CardMakesCurrent")
                     < gain.IndexOf("VarkaOath.Gain"), string.Join(", ", gain));

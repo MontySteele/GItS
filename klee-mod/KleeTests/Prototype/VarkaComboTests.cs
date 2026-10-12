@@ -116,19 +116,23 @@ public class VarkaComboTests : IDisposable
     // ---- sec.3: Pyro burns -------------------------------------------------------
 
     [Fact]
-    public void Stoke_the_flames_gains_pyro_powers_the_next_attack_then_may_exhaust()
+    public void Stoke_the_flames_gains_pyro_then_powers_the_next_pyro_attack()
     {
-        // The Pyro pass (2026-10-11, pick 1 b).
+        // Pyro paper 2 (2026-10-12): "Gain 2 [3] Pyro Oath. Your next Pyro
+        // Attack this turn deals 5 [7] additional damage." The rider is gone.
         Assert.Equal(2m, Var(new ProtoVkStokeTheFlames(), "VkAmount"));
         Assert.Equal(3m, Var(Upgraded<ProtoVkStokeTheFlames>(), "VkAmount"));
-        Assert.Equal(3m, Var(new ProtoVkStokeTheFlames(), "PowerAmount"));
-        Assert.Equal(5m, Var(Upgraded<ProtoVkStokeTheFlames>(), "PowerAmount"));
+        Assert.Equal(5m, Var(new ProtoVkStokeTheFlames(), "VkBase"));
+        Assert.Equal(7m, Var(Upgraded<ProtoVkStokeTheFlames>(), "VkBase"));
         var play = Calls("ProtoVkStokeTheFlames", "OnPlay");
         Assert.DoesNotContain("CardSelectCmd.FromHand", play);
+        Assert.DoesNotContain(play, c => c.Contains("NextAttackUpPower"));
         var gain = play.IndexOf("VarkaCards.GainPyroOath");
-        var buff = play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal));
-        var rider = play.IndexOf("VarkaCards.ExhaustForPyroOath");
-        Assert.True(gain >= 0 && gain < buff && buff < rider);
+        var buff = play.IndexOf("VarkaCards.NextPyroAttack");
+        Assert.True(gain >= 0 && gain < buff);
+        Assert.Contains(Il.CallSequence(Il.Method("VarkaCards", "NextPyroAttack")),
+                        c => c.Contains("PowerCmd.Apply<StokeTheFlamesPower>"));
+        Assert.Null(typeof(VarkaCards).GetMethod("ExhaustForPyroOath"));
         // The Varka payoff round (2026-10-10): "Pyro becomes your current
         // element" FIRST, through the non-Knight path Unwavering Banner
         // holds, then the gain, so Dawn Wind's March sees a current-element
@@ -143,37 +147,53 @@ public class VarkaComboTests : IDisposable
         Assert.Contains("ArmKeywordTips.ForElementSwitch",
                         Il.Calls(Il.Method("ProtoVkStokeTheFlames", "get_ExtraHoverTips")));
         Assert.Equal("Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. "
-                     + "Your next Attack deals {PowerAmount:diff()} additional "
-                     + "damage. You may [gold]Exhaust[/gold] a card for 1 "
-                     + "additional [gold]Pyro[/gold] [gold]Oath[/gold].",
+                     + "Your next [gold]Pyro[/gold] Attack this turn deals "
+                     + "{VkBase:diff()} additional damage.",
                      Face(new ProtoVkStokeTheFlames()));
     }
 
     [Fact]
-    public void The_exhaust_rider_is_a_0_to_1_hand_pick_that_pays_1_pyro()
+    public void Stokes_power_pays_pyro_attack_hits_and_ends_with_the_turn()
     {
-        // "You may Exhaust a card for 1 additional Pyro Oath."
-        var rider = Calls("VarkaCards", "ExhaustForPyroOath");
-        Assert.True(rider.IndexOf("CardSelectCmd.FromHand")
-                    < rider.IndexOf("CardCmd.Exhaust"));
-        Assert.True(rider.IndexOf("CardCmd.Exhaust")
-                    < rider.IndexOf("VarkaOath.Gain"));
-        Assert.DoesNotContain("VarkaOath.CardMakesCurrent", rider);
+        // Only a powered Pyro hit of an Attack card takes the bonus.
+        Assert.True(StokeTheFlamesPower.Applies(true, true, Element.Pyro));
+        Assert.False(StokeTheFlamesPower.Applies(true, true, Element.Anemo));
+        Assert.False(StokeTheFlamesPower.Applies(true, true, Element.Cryo));
+        Assert.False(StokeTheFlamesPower.Applies(true, false, Element.Pyro));
+        Assert.False(StokeTheFlamesPower.Applies(false, true, Element.Pyro));
+        // Spent only by a play a Pyro hit paid; gone at the turn's end.
+        Assert.Contains("PowerCmd.Remove",
+                        Calls("StokeTheFlamesPower", "AfterSideTurnEnd"));
+        Assert.Contains("PowerCmd.Remove",
+                        Calls("StokeTheFlamesPower", "AfterCardPlayed"));
+        Assert.Equal("Your next [gold]Pyro[/gold] Attack this turn deals "
+                     + "[blue]{Amount}[/blue] additional damage.",
+                     Face(new StokeTheFlamesPower()));
     }
 
     [Fact]
-    public void Ember_cleave_hits_9_pyro_gains_1_then_may_exhaust()
+    public void Ember_cleave_is_setup_strike_in_pyro()
     {
-        Assert.Equal(9m, Var(new ProtoVkEmberCleave(), "VkBase"));
-        Assert.Equal(12m, Var(Upgraded<ProtoVkEmberCleave>(), "VkBase"));
+        // Pyro paper 2 (2026-10-12): "Deal 7 [9] Pyro damage. Gain 2 [3]
+        // Strength this turn." No Oath gain, no Exhaust rider.
+        Assert.Equal(7m, Var(new ProtoVkEmberCleave(), "VkBase"));
+        Assert.Equal(9m, Var(Upgraded<ProtoVkEmberCleave>(), "VkBase"));
+        Assert.Equal(2m, Var(new ProtoVkEmberCleave(), "VkAmount"));
+        Assert.Equal(3m, Var(Upgraded<ProtoVkEmberCleave>(), "VkAmount"));
         var play = Calls("ProtoVkEmberCleave", "OnPlay");
         Assert.Contains("VarkaCards.ElementHit", Calls("VarkaCards", "PyroStrike"));
-        Assert.Equal(1m, Var(new ProtoVkEmberCleave(), "VkAmount"));
         Assert.DoesNotContain("CardSelectCmd.FromHand", play);
-        Assert.True(play.IndexOf("VarkaCards.PyroStrike")
-                    < play.IndexOf("VarkaCards.GainPyroOath"));
-        Assert.True(play.IndexOf("VarkaCards.GainPyroOath")
-                    < play.IndexOf("VarkaCards.ExhaustForPyroOath"));
+        Assert.DoesNotContain("VarkaCards.GainPyroOath", play);
+        Assert.True(play.IndexOf("VarkaCards.PyroStrike") >= 0
+                    && play.IndexOf("VarkaCards.PyroStrike")
+                       < play.IndexOf("VarkaCards.TemporaryStrength"));
+        Assert.Contains(Il.CallSequence(Il.Method("VarkaCards", "TemporaryStrength")),
+                        c => c.Contains("PowerCmd.Apply<EmberCleavePower>"));
+        Assert.True(typeof(MegaCrit.Sts2.Core.Models.Powers.TemporaryStrengthPower)
+            .IsAssignableFrom(typeof(EmberCleavePower)));
+        Assert.Equal("Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain "
+                     + "{VkAmount:diff()} [gold]Strength[/gold] this turn.",
+                     Face(new ProtoVkEmberCleave()));
     }
 
     [Fact]

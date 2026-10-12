@@ -7409,6 +7409,27 @@ enemies, bit I agree that we need something better as the main engine."
   included; no pick or an empty hand pays nothing. The sim's pilot takes it
   only when the hand holds a Status or a Curse.
 
+## Varka Pyro paper 2, 2026-10-12
+
+Paper `review/active/varka-pyro-reactions-2026-10-12.md`, sec.3, ruled at
+both defaults (a). [USER]: "On Varka - agreed on both options".
+
+- **Ember Cleave**: "Deal 7 [9] Pyro damage. Gain 2 [3] Strength this
+  turn." The base game's Setup Strike in Pyro. The Strength is the new
+  `temp_strength` kind: C# `EmberCleavePower`, a `TemporaryStrengthPower`
+  (Setup Strike's and Flex's shape); sim the existing `temp_strength`
+  power. Its Oath gain and the Exhaust rider are gone, so it no longer
+  makes Pyro current before the hit (the hit's Pyro still does, on the open
+  Oath's rule).
+- **Stoke the Flames**: "Gain 2 [3] Pyro Oath. Your next Pyro Attack this
+  turn deals 5 [7] additional damage." The rider is gone. The bonus is the
+  new `next_pyro_attack` kind (C# `StokeTheFlamesPower`, sim
+  `vk_next_pyro_attack`): additive, before the reaction multiplier, on each
+  Pyro hit of the next Attack card that deals one; that Attack spends it,
+  an Attack with no Pyro hit leaves it standing, and it ends with the turn.
+- The `exhaust_for_pyro_oath` kind had no other card and is deleted in
+  both engines.
+
 ## Furina: the diversity pass, 2026-10-11
 
 `review/active/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled

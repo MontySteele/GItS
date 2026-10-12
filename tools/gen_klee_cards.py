@@ -2512,10 +2512,13 @@ VARKA_KINDS = {
     "shatter": "Shatter",
     "deep_freeze": "DeepFreeze",
     # THE PYRO PASS (2026-10-11, review/active/varka-pyro-pass-2026-10-11.md):
-    # Ashen Oath's gain, which switches nothing, and the optional rider "You
-    # may Exhaust a card. If you do, gain 1 more Pyro Oath."
+    # Ashen Oath's gain, which switches nothing.
     "pyro_oath": "PyroOath",
-    "exhaust_for_pyro_oath": "ExhaustForPyroOath",
+    # PYRO PAPER 2 (2026-10-12, review/active/varka-pyro-reactions-2026-10-12.md):
+    # Ember Cleave's "Gain 2 Strength this turn" (Setup Strike's) and Stoke's
+    # "Your next Pyro Attack this turn deals 5 additional damage".
+    "temp_strength": "TemporaryStrength",
+    "next_pyro_attack": "NextPyroAttack",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2542,6 +2545,9 @@ VARKA_KIND_FIELDS = {
     "shatter": ("base", "per"),
     # The Pyro pass (2026-10-11).
     "pyro_oath": ("amount",),
+    # Pyro paper 2 (2026-10-12).
+    "temp_strength": ("amount",),
+    "next_pyro_attack": ("base",),
 }
 #: A field a kind MAY print; absent, the rule's own default holds (Vow of the
 #: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).

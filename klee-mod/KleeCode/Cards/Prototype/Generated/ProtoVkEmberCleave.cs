@@ -46,21 +46,21 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro), this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_ember_cleave");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ember Cleave"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold]."),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Strength[/gold] this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 9m),
-            new DynamicVar("VkAmount", 1m)
+            new DynamicVar("VkBase", 7m),
+            new DynamicVar("VkAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -73,12 +73,12 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await VarkaCards.PyroStrike(choiceContext, this, cardPlay);
-        await VarkaCards.GainPyroOath(choiceContext, this, cardPlay);
-        await VarkaCards.ExhaustForPyroOath(choiceContext, this, cardPlay);
+        await VarkaCards.TemporaryStrength(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["VkBase"].UpgradeValueBy(3m);
+        DynamicVars["VkBase"].UpgradeValueBy(2m);
+        DynamicVars["VkAmount"].UpgradeValueBy(1m);
     }
 }

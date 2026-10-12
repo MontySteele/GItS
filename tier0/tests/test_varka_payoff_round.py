@@ -65,17 +65,17 @@ def _row(card_id):
     return next(r for r in rows if r.get("id") == card_id)
 
 
-def test_ember_cleave_gain_sees_pyro_current(varka):
-    # Its hit makes Pyro current (the open Oath) and credits 1; its own gain
-    # then lands as the current element's: Dawn Wind's March pays twice.
+def test_ember_cleave_hit_makes_pyro_current(varka):
+    # Its hit makes Pyro current (the open Oath) and credits 1, which Dawn
+    # Wind's March pays on. Pyro paper 2 (2026-10-12): no gain of its own.
     st = _state()
     led = V.ledger(st.player)
     led.current = "electro"
     st.player.powers[V.DAWN_WINDS_MARCH] = 4
     st.player.hand = []
     _play(st, _vk("ember_cleave"))
-    assert led.current == "pyro" and led.oath["pyro"] == 2
-    assert st.player.block == 8
+    assert led.current == "pyro" and led.oath["pyro"] == 1
+    assert st.player.block == 4
 
 
 def test_stoke_the_flames_switch_lands_before_the_gain(varka):
@@ -118,12 +118,14 @@ def test_a_wolfpack_copy_exhausts_and_fires_again(varka):
 
 
 def test_the_sheet_strings(varka):
-    # The Pyro pass (2026-10-11, pick 1 b): the Exhaust is an optional rider.
+    # Pyro paper 2 (2026-10-12): the Exhaust rider retired from both.
     assert _row(_vk("stoke_the_flames"))["description"] == (
         "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your "
-        "next Attack deals {PowerAmount:diff()} additional damage. You may "
-        "[gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] "
-        "[gold]Oath[/gold].")
+        "next [gold]Pyro[/gold] Attack this turn deals {VkBase:diff()} "
+        "additional damage.")
+    assert _row(_vk("ember_cleave"))["description"] == (
+        "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain "
+        "{VkAmount:diff()} [gold]Strength[/gold] this turn.")
     assert _row(_vk("wolfpack"))["description"] == (
         "Whenever you play Four Winds' Ascension, shuffle a copy of it into "
         "your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].")
@@ -133,10 +135,14 @@ def test_the_sheet_strings(varka):
         "Whenever another card would, gain 1 [gold]Oath[/gold] of your "
         "[gold]current element[/gold] instead.")
     # Numbers held.
-    assert _row(_vk("stoke_the_flames"))["upgrade"] == {"varka_amount": 1,
-                                                        "buff": 2}
+    stoke = _row(_vk("stoke_the_flames"))
+    assert stoke["upgrade"] == {"varka_amount": 1, "varka_base": 2}
+    assert stoke["effects"][0]["amount"] == 2
+    assert stoke["effects"][1] == {"op": "varka", "kind": "next_pyro_attack",
+                                   "base": 5}
     ember = _row(_vk("ember_cleave"))
-    assert ember["upgrade"] == {"varka_base": 3}
-    assert ember["effects"][0]["base"] == 9
-    assert ember["effects"][1]["amount"] == 1
-    assert ember["effects"][2]["kind"] == "exhaust_for_pyro_oath"
+    assert ember["upgrade"] == {"varka_base": 2, "varka_amount": 1}
+    assert ember["effects"][0]["base"] == 7
+    assert ember["effects"][1] == {"op": "varka", "kind": "temp_strength",
+                                   "amount": 2}
+    assert len(ember["effects"]) == 2

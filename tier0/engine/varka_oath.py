@@ -121,9 +121,20 @@ THE COMBO PASS (review/active/varka-combo-pass-2026-10-04.md, ruled
     too and, not being a card, gains nothing.
   * KINDS `gain_pyro_oath` (Stoke the Flames; since the 2026-10-05 seat
     round it also makes Pyro current, `card_makes_current`), `pyro_strike`
-    (Ember Cleave),
+    (Ember Cleave's hit),
     `shatter` (stacks of Weak plus Vulnerable on the aim, read before the
     hit) and `deep_freeze` (double the aim's Weak and Vulnerable).
+
+VARKA PYRO PAPER 2 (2026-10-12, review/active/varka-pyro-reactions-2026-10-12.md):
+  * KIND `temp_strength` (Ember Cleave, "Gain 2 Strength this turn"): the
+    shared `temp_strength` power, Setup Strike's.
+  * KIND `next_pyro_attack` (Stoke the Flames, "Your next Pyro Attack this
+    turn deals 5 additional damage"): the `NEXT_PYRO_ATTACK` power. Each Pyro
+    hit of an Attack card takes it in `effects.deal_damage_to_enemy`'s
+    additive phase (`pyro_attack_bonus`); the amount standing when the play
+    began is latched in `begin_play` and spent in `end_play` only when a Pyro
+    hit took it, so an Attack with no Pyro hit leaves it standing. It ends
+    with the turn (`turn_end`). C# twin: `StokeTheFlamesPower`.
 
 VARKA WILDFIRE OATH AND SHORT CIRCUIT (2026-10-03):
   * WILDFIRE OATH is Pyro's Absolute Zero: "Whenever you apply Pyro to an
@@ -190,8 +201,9 @@ WEATHERVANE = "vk_weathervane"
 TWIN_GALES = "vk_twin_gales"
 EYE_OF_STORMTERROR = "vk_eye_of_stormterror"
 THE_ORDER_ANSWERS = "vk_the_order_answers"
-#: The Pyro pass (2026-10-11): "If you do, gain 1 more Pyro Oath."
-EXHAUST_RIDER_OATH = 1
+#: Pyro paper 2 (2026-10-12): Stoke the Flames' "Your next Pyro Attack this
+#: turn deals 5 additional damage" (`pyro_attack_bonus`).
+NEXT_PYRO_ATTACK = "vk_next_pyro_attack"
 #: Unwavering Banner's "gain 1 Oath of your current element instead".
 BANNER_OATH = 1
 #: Eye of Stormterror: "The first 3 times you Swirl each turn".
@@ -238,7 +250,9 @@ KINDS = frozenset({
     # THE COMBO PASS (2026-10-04).
     "gain_pyro_oath", "pyro_strike", "shatter", "deep_freeze",
     # THE PYRO PASS (2026-10-11).
-    "pyro_oath", "exhaust_for_pyro_oath",
+    "pyro_oath",
+    # PYRO PAPER 2 (2026-10-12).
+    "temp_strength", "next_pyro_attack",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -264,6 +278,9 @@ KIND_FIELDS = {
     "shatter": ("base", "per"),
     # The Pyro pass (2026-10-11).
     "pyro_oath": ("amount",),
+    # Pyro paper 2 (2026-10-12).
+    "temp_strength": ("amount",),
+    "next_pyro_attack": ("base",),
 }
 #: A field a kind MAY print (codegen's `VARKA_OPTIONAL_FIELDS`): Vow of the
 #: Blade's `amount: 2` (Varka co-op fixes, 2026-10-11); absent means 1.
@@ -331,6 +348,9 @@ class VarkaLedger:
     play_target_pyro: list = field(default_factory=list)
     no_apply_credit: int = 0          # > 0 inside a hit that credits nothing
     stormward_in_bonus: int = 0       # Stormward's part of this play's bonus
+    #: Per play, innermost last: [Stoke's bonus standing when the play
+    #: began (0 for a non-Attack), has a Pyro hit taken it].
+    play_pyro_rider: list = field(default_factory=list)
     #: Unwavering Banner (the combo pass): has the outermost open play paid
     #: its "gain 1 Oath instead" yet.
     banner_paid: bool = False
@@ -575,6 +595,9 @@ def begin_play(state, card) -> None:
     aim = state.card_aim
     open_scope(state, open_oath=not is_knight(card),
                target_pyro=bool(aim is not None and aim.aura == "pyro"))
+    led.play_pyro_rider.append(
+        [_power(state.player, NEXT_PYRO_ATTACK)
+         if card.type == "attack" else 0, False])
     if is_knight(card):
         led.knights_this_turn += 1
         led.knights_this_combat += 1
@@ -588,9 +611,19 @@ def end_play(state, card=None) -> None:
     `note_hit` since co-op notes pick 2.)"""
     close_scope(state)
     led = ledger(state.player)
-    if led is None or card is None:
+    if led is None:
         return
     p = state.player
+    if led.play_pyro_rider:
+        amount, paid = led.play_pyro_rider.pop()
+        if paid:
+            left = _power(p, NEXT_PYRO_ATTACK) - amount
+            if left > 0:
+                p.powers[NEXT_PYRO_ATTACK] = left
+            else:
+                p.powers.pop(NEXT_PYRO_ATTACK, None)
+    if card is None:
+        return
     wolves = _power(p, WOLFPACK)
     if wolves and card.id.rstrip("+") == ASCENSION_ID:
         # WOLFPACK (the Varka payoff round, 2026-10-10): "shuffle a copy of
@@ -763,6 +796,20 @@ def on_debuff_applied(state, target, name: str, stacks: int) -> None:
                                  source="card", powered=False)
 
 
+def pyro_attack_bonus(state) -> int:
+    """`effects.deal_damage_to_enemy`, on a Pyro hit of an Attack card:
+    Stoke the Flames' bonus latched for the play in flight, marked spent.
+    0 outside a play, for a non-Attack, or with none standing."""
+    led = ledger(state.player)
+    if led is None or not led.play_pyro_rider:
+        return 0
+    top = led.play_pyro_rider[-1]
+    if top[0] <= 0:
+        return 0
+    top[1] = True
+    return top[0]
+
+
 def card_hits_anemo(state, card) -> bool:
     """Is this card's (first) hit Anemo? Stormward Stance's 'Anemo Attacks'."""
     from tier0.engine import effects                # late: cycle
@@ -878,6 +925,8 @@ def turn_end(state) -> None:
     led = ledger(state.player)
     if led is None:
         return
+    # Stoke the Flames' "this turn" ran out, spent or not.
+    state.player.powers.pop(NEXT_PYRO_ATTACK, None)
     copies = _power(state.player, OATHBOUND_AEGIS)
     if copies:
         _block(state, (sum(led.oath.values()) // 2) * copies,
@@ -1251,18 +1300,25 @@ def _combo_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
         # Oath." The switch first, a non-Knight card's, so Unwavering Banner
         # holds it (2026-10-05 seat round); then the gain, a gain and not an
         # application, which sees Pyro current (Varka payoff round,
-        # 2026-10-10). Ember Cleave's gain is this kind too.
+        # 2026-10-10).
         card_makes_current(state, "pyro")
         gain(state, "pyro", fx["amount"], "gain_pyro_oath")
     elif kind == "pyro_strike":
-        # Ember Cleave: "Deal 9 Pyro damage."
+        # Ember Cleave: "Deal 7 Pyro damage."
         _card_hit(state, card, aim, fx["base"], "pyro")
     elif kind == "pyro_oath":
         # Ashen Oath (the Pyro pass, 2026-10-11): "Gain 2 Pyro Oath." A gain
         # that switches nothing.
         gain(state, "pyro", fx["amount"], "pyro_oath")
-    elif kind == "exhaust_for_pyro_oath":
-        _exhaust_for_pyro_oath(state, card)
+    elif kind == "temp_strength":
+        # Ember Cleave (Pyro paper 2, 2026-10-12): "Gain 2 Strength this
+        # turn." Setup Strike's power, taken back at his turn end.
+        powers.apply_power(state, p, "temp_strength", fx["amount"])
+    elif kind == "next_pyro_attack":
+        # Stoke the Flames (Pyro paper 2): "Your next Pyro Attack this turn
+        # deals 5 additional damage." Read in `pyro_attack_bonus`.
+        p.powers[NEXT_PYRO_ATTACK] = (_power(p, NEXT_PYRO_ATTACK)
+                                      + fx["base"])
     elif kind == "shatter":
         # "Deal 5 Cryo damage, plus 2 for each Weak and Vulnerable on the
         # enemy." Stacks, read before the hit.
@@ -1281,29 +1337,6 @@ def _combo_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     else:
         return False
     return True
-
-
-def _exhaust_for_pyro_oath(state, card) -> None:
-    """THE PYRO PASS's rider (2026-10-11, pick 1 b; Stoke the Flames and
-    Ember Cleave): "You may Exhaust a card for 1 additional Pyro Oath." Any card in hand, a Status or a Curse included (True Grit's
-    pool); choosing none is allowed, and an empty hand does nothing. C# twin:
-    `VarkaCards.ExhaustForPyroOath` (a 0-to-1 hand selection).
-
-    The "may" is the PILOT's choice, not a rule: the sim takes the rider
-    only when the hand holds a Status or a Curse, the use the ruling names
-    ("tactical use of Exhaust vs status enemies"), and the shared
-    `exhaust_from` op then makes the pick.
-    """
-    from tier0.engine import effects                # late: cycle
-    pool = effects.exhaust_pool(state, {"op": "exhaust_from",
-                                        "select": "chosen"})
-    if not any(c.is_junk for c in pool):
-        return
-    before = state.exhausted_this_card
-    effects._op_exhaust_from(state, {"op": "exhaust_from", "select": "chosen",
-                                     "amount": 1}, card)
-    if state.exhausted_this_card > before:
-        gain(state, "pyro", EXHAUST_RIDER_OATH, "exhaust_for_pyro_oath")
 
 
 def op_varka(state, fx: dict, card) -> None:

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
-using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -1661,7 +1660,6 @@ public static class VarkaCards
     /// March, Oath Unto Death and every current-element gain listener see the
     /// gain as the current element's). The switch is a non-Knight card's, so
     /// Unwavering Banner holds it (<see cref="VarkaOath.CardMakesCurrent"/>).
-    /// Ember Cleave's gain is this kind too, so it switches first as well.
     /// </summary>
     public static async Task GainPyroOath(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -1673,7 +1671,7 @@ public static class VarkaCards
                              (int)Var(card, "VkAmount"));
     }
 
-    /// <summary>Ember Cleave: "Deal 9 [12] Pyro damage."</summary>
+    /// <summary>Ember Cleave: "Deal 7 [9] Pyro damage."</summary>
     public static Task PyroStrike(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
@@ -1691,33 +1689,33 @@ public static class VarkaCards
                              (int)Var(card, "VkAmount"));
     }
 
-    /// <summary>THE PYRO PASS's rider (2026-10-11, pick 1 b; Stoke the
-    /// Flames and Ember Cleave): "You may Exhaust a card for 1 additional
-    /// Pyro Oath." Any card in hand, a Status or a Curse included (True
-    /// Grit's pool), picked on a 0-to-1 hand selection: Purity's
-    /// <c>CardSelectorPrefs(prompt, 0, n)</c>, so choosing none is allowed,
-    /// and an empty hand does nothing. The gain is a plain one: both cards
-    /// made Pyro current earlier in the play. Sim twin:
-    /// <c>varka_oath._exhaust_for_pyro_oath</c>.</summary>
-    public static async Task ExhaustForPyroOath(
+    /// <summary>Ember Cleave (Pyro paper 2, 2026-10-12): "Gain 2 [3]
+    /// Strength this turn." The base game's Setup Strike: a
+    /// <see cref="TemporaryStrengthPower"/> named for its card
+    /// (<see cref="EmberCleavePower"/>). Sim twin: the `temp_strength` kind,
+    /// the shared `temp_strength` power.</summary>
+    public static async Task TemporaryStrength(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
-        var player = card.Owner;
-        var owner = player?.Creature;
-        if (player == null || owner == null) return;
-        ExhaustSelection.Open(card);
-        var picked = (await CardSelectCmd.FromHand(
-            choiceContext, player,
-            new CardSelectorPrefs(CardSelectorPrefs.ExhaustSelectionPrompt, 0, 1),
-            static _ => true, card)).ToList();
-        foreach (var victim in picked)
-        {
-            ExhaustSelection.Record(card, victim);
-            await CardCmd.Exhaust(choiceContext, victim);
-        }
-        ExhaustSelection.Close(card);
-        if (picked.Count == 0 || !VarkaOath.Live(owner)) return;
-        await VarkaOath.Gain(choiceContext, owner, Element.Pyro, 1);
+        var owner = card.Owner?.Creature;
+        var amount = (int)Var(card, "VkAmount");
+        if (owner == null || amount <= 0) return;
+        await PowerCmd.Apply<EmberCleavePower>(
+            choiceContext, owner, amount, applier: owner, cardSource: card);
+    }
+
+    /// <summary>Stoke the Flames (Pyro paper 2, 2026-10-12): "Your next Pyro
+    /// Attack this turn deals 5 [7] additional damage."
+    /// <see cref="StokeTheFlamesPower"/>. Sim twin: the `next_pyro_attack`
+    /// kind.</summary>
+    public static async Task NextPyroAttack(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        var amount = (int)Var(card, "VkBase");
+        if (owner == null || amount <= 0) return;
+        await PowerCmd.Apply<StokeTheFlamesPower>(
+            choiceContext, owner, amount, applier: owner, cardSource: card);
     }
 
     /// <summary>Weak plus Vulnerable on <paramref name="enemy"/>, in stacks
