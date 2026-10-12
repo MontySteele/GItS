@@ -481,8 +481,10 @@ class _Ledger:
 class _Session:
     made: list = []
 
-    def __init__(self, stamp, instance, args, install_bridge, world):
+    def __init__(self, stamp, instance, args, install_bridge, world,
+                 extra_env=None):
         self.stamp, self.instance, self.args = stamp, instance, args
+        self.extra_env = extra_env
         self.install_bridge = install_bridge
         self.world = world
         self.ledger = _Ledger(Path(f"reversibility-{stamp}.json"))
@@ -604,8 +606,8 @@ def _embark(world, tmp_path, lanes=("lane2", "lane3"), **kw):
     kw.setdefault("port_free", lambda port: True)
     return embark_coop.embark(
         list(lanes), ["KLEEMOD-KLEE", "KLEEMOD-FURINA"], wire=world,
-        session_factory=lambda stamp, inst, args, ib: _Session(
-            stamp, inst, args, ib, world),
+        session_factory=lambda stamp, inst, args, ib, **kw: _Session(
+            stamp, inst, args, ib, world, **kw),
         lane_factory=_lane(tmp_path), clock=clock, sleep=clock.sleep, **kw)
 
 
@@ -806,3 +808,72 @@ def test_port_mismatch_reads():
     assert "serves no fastmp_port" in embark_coop.port_mismatch({}, 33772)
     assert "reads back" in embark_coop.port_mismatch(
         {"fastmp_port": "x"}, 33772)
+
+
+# ------------------------------------------- the Spiral Abyss (2026-10-12) --
+
+class _AbyssWorld(_World):
+    """The same pair, whose run reads back the modifiers `modifiers` names
+    (`None`: a bridge that serves no `run.modifiers`)."""
+
+    def __init__(self, modifiers=("KLEEMOD-SPIRAL_ABYSS",), **kw):
+        super().__init__(**kw)
+        self.modifiers = modifiers
+
+    def get_state(self):
+        state = super().get_state()
+        if state.get("state_type") == "map" and self.modifiers is not None:
+            state["run"]["modifiers"] = list(self.modifiers)
+        return state
+
+
+def test_an_abyss_pair_launches_both_games_with_the_variable(coop_dirs):
+    world = _AbyssWorld()
+    blob = _embark(world, coop_dirs, abyss=True)
+    assert [s.extra_env for s in _Session.made] == [{"GITS_ABYSS": "1"}] * 2
+    assert blob["abyss_requested"] is True
+    assert blob["abyss"] == {"lane2": True, "lane3": True}
+    for label in ("lane2", "lane3"):
+        side = json.loads(Path(blob["lane_sidecars"][label])
+                          .read_text(encoding="utf-8"))
+        assert side["abyss_requested"] is True and side["abyss"] is True
+        assert side["run_modifiers"] == ["KLEEMOD-SPIRAL_ABYSS"]
+
+
+def test_a_plain_pair_clears_the_variable_on_both_games(coop_dirs):
+    world = _World()
+    blob = _embark(world, coop_dirs)
+    assert [s.extra_env for s in _Session.made] == [{"GITS_ABYSS": ""}] * 2
+    assert blob["abyss_requested"] is False
+
+
+def test_an_abyss_pair_whose_run_lacks_it_is_refused(coop_dirs):
+    with pytest.raises(embark_coop.EmbarkError,
+                       match="abyss_not_honoured: lane2"):
+        _embark(_AbyssWorld(modifiers=()), coop_dirs, abyss=True)
+
+
+def test_an_older_bridge_leaves_the_abyss_unread_not_refused(coop_dirs):
+    blob = _embark(_AbyssWorld(modifiers=None), coop_dirs, abyss=True)
+    assert blob["abyss"] == {"lane2": None, "lane3": None}
+
+
+def test_the_coop_cli_passes_abyss_and_prints_it(monkeypatch, capsys):
+    seen = {}
+
+    def fake(lanes, chars, **kw):
+        seen.update(kw)
+        return {"stamp": "S", "host": "lane2", "lanes": ["lane2", "lane3"],
+                "run_seed": "SEED", "fastmp_port": 33772,
+                "character_actual": {"lane2": "Klee", "lane3": "Furina"},
+                "ascension": {"lane2": 0, "lane3": 0},
+                "abyss_requested": True,
+                "abyss": {"lane2": True, "lane3": True}}
+
+    monkeypatch.setattr(embark_coop, "embark", fake)
+    code = embark.main(["--coop", "--lanes", "2,3", "--characters",
+                        "klee,furina", "--abyss"])
+    assert code == 0 and seen["abyss"] is True
+    out = capsys.readouterr().out
+    assert "lane2 (host): Klee  abyss  ascension 0" in out
+    assert "lane3 (client): Furina  abyss  ascension 0" in out

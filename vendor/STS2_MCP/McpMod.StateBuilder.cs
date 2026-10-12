@@ -637,7 +637,10 @@ public static partial class McpMod
         {
             ["act"] = runState.CurrentActIndex + 1,
             ["floor"] = runState.TotalFloor,
-            ["ascension"] = runState.AscensionLevel
+            ["ascension"] = runState.AscensionLevel,
+            // GItS LOCAL EDIT (2026-10-12, `embark --abyss`): the run's
+            // modifier ids, read back by the embark (gits/GitsAbyssLane.cs).
+            ["modifiers"] = GitsRunModifierIds(runState)
         };
 
         // GItS LOCAL EDIT (2026-10-08). The Klee kit's Bomb growth and opening
@@ -1925,7 +1928,10 @@ public static partial class McpMod
         state["in_dialogue"] = inDialogue;
 
         // Event body text
-        state["body"] = SafeGetText(() => eventModel.Description);
+        // GItS LOCAL EDIT (2026-10-12): the Spiral Abyss page's body, read
+        // off the local copy it is shown on (gits/GitsAbyssLane.cs).
+        state["body"] = GitsAbyssPageBody(
+            eventRoom, SafeGetText(() => eventModel.Description));
 
         // Options from UI
         var options = new List<Dictionary<string, object?>>();

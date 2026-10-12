@@ -132,7 +132,7 @@ def test_the_embark_hands_the_game_the_knight_and_records_it(
         tmp_path, monkeypatch):
     _stubs(tmp_path, monkeypatch)
     blob = embark.embark("VARKA", knight="Pyro")
-    assert _Session.made[-1].extra_env == {"GITS_VARKA_KNIGHT": "pyro"}
+    assert _Session.made[-1].extra_env["GITS_VARKA_KNIGHT"] == "pyro"
     assert blob["varka_knight_requested"] == "pyro"
     on_disk = json.loads((tmp_path / f"embark-{blob['stamp']}.json")
                          .read_text(encoding="utf-8"))
@@ -143,7 +143,7 @@ def test_no_knight_assigns_it_empty_so_a_stray_export_cannot_reach_the_game(
         tmp_path, monkeypatch):
     _stubs(tmp_path, monkeypatch)
     blob = embark.embark("VARKA")
-    assert _Session.made[-1].extra_env == {"GITS_VARKA_KNIGHT": ""}
+    assert _Session.made[-1].extra_env["GITS_VARKA_KNIGHT"] == ""
     assert blob["varka_knight_requested"] == ""
 
 

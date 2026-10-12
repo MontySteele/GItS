@@ -344,7 +344,8 @@ def embark(character: str, *, hold: bool = False,
            lane: object = None,
            max_actions: int = 0,
            install_bridge: bool = True,
-           knight: str | None = None) -> dict[str, Any]:
+           knight: str | None = None,
+           abyss: bool = False) -> dict[str, Any]:
     """Launch (or attach), embark, read the seed back, and LEAVE IT RUNNING.
 
     Returns the sidecar dict. Raises rather than tearing down on failure: a
@@ -365,6 +366,11 @@ def embark(character: str, *, hold: bool = False,
     launch that fails half way still leaves the cap the operator asked for
     rather than the previous round's spent count. `0` clears the budget, which
     is every round before this row.
+
+    `abyss` (2026-10-12) sets `GITS_ABYSS=1` on the launched game, so the
+    run the character select starts carries the Spiral Abyss modifier
+    (`klee-mod/KleeCode/Abyss/AbyssLane.cs`), and reads the run's modifiers
+    back: a run that does not carry it fails `abyss_not_honoured`.
 
     `chosen_ascension` is posted beside the seed (character picked, confirm
     not fired) through `bridge.set_ascension`; `None` leaves the character's
@@ -410,7 +416,8 @@ def embark(character: str, *, hold: bool = False,
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
     session = soak.Session(stamp, do_setup=not hold, intent="",
                            instance=instance, install_bridge=install_bridge,
-                           extra_env={VARKA_KNIGHT_ENV: forced})
+                           extra_env={VARKA_KNIGHT_ENV: forced,
+                                      **abyss_env(abyss)})
     sidecar = {
         "stamp": stamp,
         "ledger": str(session.ledger.path),
@@ -426,6 +433,8 @@ def embark(character: str, *, hold: bool = False,
         # The Varka payoff round (2026-10-10): a forced starting Knight is a
         # fact about the run, in its manifest; "" is the seed's own roll.
         "varka_knight_requested": forced,
+        # 2026-10-12: a Spiral Abyss run is a fact about the run, too.
+        "abyss_requested": bool(abyss),
         "max_actions_store": str(blindplay_shape.budget_path(lane)),
         # 2026-10-08: the install this lane launched, so the sealed record
         # finds the deployed build from any checkout (`build_version`).
@@ -484,6 +493,15 @@ def embark(character: str, *, hold: bool = False,
         "ascension": int(((state.get("run") or {}).get("ascension")) or 0),
         "run_log": str(driver.log),
     })
+    # 2026-10-12: the run's modifiers, read back like the seed. `None` is a
+    # bridge that predates `run.modifiers`.
+    modifiers = (state.get("run") or {}).get("modifiers")
+    sidecar["run_modifiers"] = modifiers
+    sidecar["abyss"] = abyss_read_back(modifiers)
+    if abyss and sidecar["abyss"] is False:
+        _write_sidecar(stamp, sidecar)
+        raise EmbarkError(f"abyss_not_honoured: asked for a Spiral Abyss run, "
+                          f"the run's modifiers read back {modifiers!r}")
     if (chosen_ascension is not None
             and sidecar["ascension"] != chosen_ascension):
         # The lobby said yes and the run says otherwise. Written first, so the
@@ -770,11 +788,42 @@ def varka_knight(value: str | None) -> str:
     return word
 
 
+#: 2026-10-12: the variable the mod reads to put the Spiral Abyss modifier
+#: on the run the character select starts (`AbyssLane.EnvVar`).
+ABYSS_ENV = "GITS_ABYSS"
+#: The modifier id's stem (`SpiralAbyss`'s ModelId entry carries it).
+ABYSS_MODIFIER = "SPIRAL_ABYSS"
+
+
+def abyss_env(abyss: bool) -> dict[str, str]:
+    """The launched game's `GITS_ABYSS`: "1", or "" so a stray export in the
+    caller's shell cannot reach the game."""
+    return {ABYSS_ENV: "1" if abyss else ""}
+
+
+def abyss_read_back(modifiers: Any) -> bool | None:
+    """Whether a run's read-back modifier ids carry the Spiral Abyss; `None`
+    where the wire sent no list (a bridge older than `run.modifiers`)."""
+    if not isinstance(modifiers, list):
+        return None
+    return any(ABYSS_MODIFIER in str(m).upper() for m in modifiers)
+
+
+def abyss_word(value: Any) -> str:
+    """The status rows' word: `abyss`, `abyss (unread)`, or ""."""
+    if value is True:
+        return "abyss"
+    if value is None:
+        return "abyss (unread)"
+    return ""
+
+
 def lane_commands(labels: list[str], *, characters: list[str | None],
                   seeds: list[str | None], ascension: int | None,
                   max_actions: int, arms: list[str],
                   relics: list[str] | None = None,
-                  knights: list[str | None] | None = None
+                  knights: list[str | None] | None = None,
+                  abyss: bool = False
                   ) -> list[list[str]]:
     """The single-lane embark command each lane runs."""
     out = []
@@ -795,6 +844,8 @@ def lane_commands(labels: list[str], *, characters: list[str | None],
             cmd += ["--relic", relic]
         if varka_knight(knight):
             cmd += ["--varka-knight", varka_knight(knight)]
+        if abyss:
+            cmd += ["--abyss"]
         out.append(cmd)
     return out
 
@@ -849,6 +900,8 @@ def embark_lanes(labels: list[str], commands: list[list[str]], *,
             "character": blob.get("character_actual") or "",
             "run_seed": blob.get("run_seed") or "",
             "ascension": blob.get("ascension"),
+            "abyss": (blob.get("abyss") if blob.get("abyss_requested")
+                      else False),
             "stamp": blob.get("stamp") or "",
             "error": ("" if code == 0 else
                       next((ln for ln in reversed(text.splitlines())
@@ -861,8 +914,11 @@ def render_lane_rows(rows: list[dict]) -> str:
     out = []
     for r in rows:
         if r["exit"] == 0:
+            mode = abyss_word(r.get("abyss", False))
             out.append(f"{r['lane']}  port {r['port']}  UP  "
-                       f"{r['character']}  seed {r['run_seed']}  "
+                       f"{r['character']}  "
+                       + (f"{mode}  " if mode else "")
+                       + f"seed {r['run_seed']}  "
                        f"ascension {r['ascension']}  stamp {r['stamp']}  "
                        f"log {r['log']}")
         else:
@@ -968,6 +1024,15 @@ def main(argv: list[str] | None = None) -> int:
                          "With a parallel --lanes: one per lane, or one for "
                          "all; `roll` keeps a lane's seed roll. Ignored by a "
                          "--hold embark, which launches nothing")
+    ap.add_argument("--abyss", action="store_true",
+                    help="SPIRAL ABYSS: the run carries the Spiral Abyss "
+                         "modifier, as a run from the menu's Abyss button "
+                         "does (the choice page over each act's Ancient, the "
+                         "Blessings and Shadows), through GITS_ABYSS=1 on the "
+                         "launched game. Solo, parallel --lanes (every lane) "
+                         "and --coop (the host's run carries it to the "
+                         "client). The embark reads the run's modifiers back "
+                         "and fails abyss_not_honoured without it")
     ap.add_argument("--seeds", default="", metavar="S1,S2,...",
                     help="with a parallel --lanes: one chosen seed per lane, "
                          "in --lanes order")
@@ -1000,6 +1065,11 @@ def main(argv: list[str] | None = None) -> int:
         from understudy import embark_coop
         return embark_coop.run_cli(args)
 
+    if args.abyss and args.hold:
+        print("embark error: --abyss needs a launch (GITS_ABYSS goes on the "
+              "game this embark starts); a --hold embark launches nothing",
+              file=sys.stderr)
+        return 2
     if args.lanes:
         return _lanes_cli(args)
     if args.seeds or args.characters:
@@ -1023,7 +1093,8 @@ def main(argv: list[str] | None = None) -> int:
                       instance=instance, lane=args.lane,
                       max_actions=args.max_actions,
                       install_bridge=install_bridge,
-                      knight=args.varka_knight)
+                      knight=args.varka_knight,
+                      abyss=args.abyss)
     except (EmbarkError, ValueError) as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2
@@ -1034,6 +1105,10 @@ def main(argv: list[str] | None = None) -> int:
           f"(read back off the wire, R95)")
     print(f"screen:    {blob.get('screen')}  floor {blob.get('floor')}  "
           f"ascension {blob.get('ascension')}")
+    if blob.get("abyss_requested"):
+        print(f"mode:      {abyss_word(blob.get('abyss'))}  (Spiral Abyss "
+              f"modifier through {ABYSS_ENV}; run modifiers "
+              f"{blob.get('run_modifiers')!r})")
     granted = blob.get("arms_granted") or []
     if granted:
         print(f"arms granted: "
@@ -1116,7 +1191,7 @@ def _lanes_cli(args: argparse.Namespace) -> int:
                                  ascension=args.ascension,
                                  max_actions=args.max_actions, arms=args.arms,
                                  relics=args.relics,
-                                 knights=knights)
+                                 knights=knights, abyss=args.abyss)
     except (EmbarkError, ValueError) as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2
