@@ -550,15 +550,14 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void Sango_isshin_hits_all_enemies_per_plan_carried_out_this_turn()
+    public void Sango_isshin_hits_all_enemies_per_plan_carried_out_this_combat()
     {
-        // The Casket pass (2026-09-28), with a base since 2026-09-29: "Deal 8
-        // damage to ALL enemies, plus 6 for each Plan carried out this turn"
-        // (10 + 8 upgraded). The count is the ledger's, one per carry-out; no
-        // quarter of Max HP any more.
+        // [USER]'s run (2026-10-11): "Deal 8 damage to ALL enemies, plus 2
+        // for each Plan carried out this combat" (10 + 3 upgraded). The count
+        // is the ledger's per-combat one, one per carry-out.
         var card = new ProtoKkSangoIsshin();
         Assert.Equal(8m, card.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(6m, card.DynamicVars.ExtraDamage.BaseValue);
+        Assert.Equal(2m, card.DynamicVars.ExtraDamage.BaseValue);
         var vars = Il.Calls(Il.Method("ProtoKkSangoIsshin", "get_CanonicalVars"))
             .Concat(typeof(ProtoKkSangoIsshin)
                 .GetNestedTypes(HeadlessGame.All)
@@ -566,7 +565,8 @@ public class KokomiOverhaulRuleTests
                 .Where(m => m.GetMethodBody() != null)
                 .SelectMany(Il.Calls))
             .ToList();
-        Assert.Contains(vars, c => c.Contains("get_PlansCarriedOutThisTurn"));
+        Assert.Contains(vars, c => c.Contains("get_PlansCarriedOutThisCombat"));
+        Assert.DoesNotContain(vars, c => c.Contains("get_PlansCarriedOutThisTurn"));
         var calls = Il.Calls(typeof(ProtoKkSangoIsshin)
             .GetMethod("OnPlay", HeadlessGame.All)!);
         Assert.Contains("DamageCmd.Attack", calls);

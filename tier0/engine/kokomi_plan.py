@@ -1502,6 +1502,8 @@ def _note_plan_resolved(state: CombatState,
     # THE CASKET PASS (2026-09-28): the count Feint and Sango Isshin read,
     # and the relic's +1 -- once per CARRY-OUT, so a doubled one counts twice.
     state.kk_plans_carried_out_this_turn += 1
+    # Sango Isshin's per-fight count ([USER]'s run, 2026-10-11).
+    state.kk_plans_carried_out_this_combat += 1
     note_casket_carry_out(state)
     # THE PAYOFF PASS, KURAGE CANOPY: "Whenever the Bake-Kurage carries out
     # a Plan, gain 2 Block." Per carry-out, so a doubled one pays twice.

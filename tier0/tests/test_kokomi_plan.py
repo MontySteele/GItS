@@ -544,23 +544,48 @@ def test_damage_quarter_max_hp_rounds_down(overhaul):
     assert enemy.hp == 40
 
 
-def test_sango_isshin_pays_six_to_all_per_plan_carried_out(overhaul):
-    """THE CASKET PASS (2026-09-28), with a base since 2026-09-29: "Deal 8
-    damage to ALL enemies, plus 6 for each Plan carried out this turn." A turn
-    with none carried out deals the base 8; two carry-outs deal 20 to each."""
+def test_sango_isshin_pays_two_to_all_per_plan_carried_out_this_combat(overhaul):
+    """[USER]'s run (2026-10-11): "plans this combat" rather than "plans this
+    turn". "Deal 8 damage to ALL enemies, plus 2 for each Plan carried out
+    this combat." The turn boundary does not clear the count."""
     a, b = make_enemy(hp=60, name="a"), make_enemy(hp=60, name="b")
     st = kokomi_state(enemies=[a, b], hp=80)
     card = loader.get_card("proto_kk_sango_isshin")
 
-    assert st.kk_plans_carried_out_this_turn == 0
+    assert st.kk_plans_carried_out_this_combat == 0
     effects.resolve_card(st, card)
     assert (a.hp, b.hp) == (52, 52)
 
     carry_out(st, [{"op": "draw", "amount": 1}])
+    kokomi_plan.roll_turn(st)
     carry_out(st, [{"op": "draw", "amount": 1}])
-    assert st.kk_plans_carried_out_this_turn == 2
+    assert st.kk_plans_carried_out_this_turn == 1
+    assert st.kk_plans_carried_out_this_combat == 2
     effects.resolve_card(st, card)
-    assert (a.hp, b.hp) == (32, 32)
+    assert (a.hp, b.hp) == (40, 40)                 # 8 + 2 x 2
+
+
+def test_the_combat_count_counts_a_twice_carried_plan_twice(overhaul):
+    """Every carry-out adds, Second Wave's doubled one included -- the rule
+    the per-turn count keeps (`KokomiOverhaulLedger.NotePlanCarriedOut`
+    raises both counts together)."""
+    st = kokomi_state(enemies=[make_enemy(hp=100)])
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": "next_plan_extra_carry_out"}], cid="proto_kk_wave"))
+    kokomi_plan.schedule(st, plan_card(
+        [{"op": "energy", "amount": 1}], cid="proto_kk_after"))
+    kokomi_plan.resolve_all(st)
+    assert st.kk_plans_carried_out_this_combat == 3
+
+
+def test_a_new_fight_starts_the_combat_count_at_zero(overhaul):
+    """A `CombatState` is one fight, so a new one starts the count at 0 (the
+    C# ledger is likewise one per combat)."""
+    st = kokomi_state(enemies=[make_enemy(hp=100)])
+    carry_out(st, [{"op": "energy", "amount": 1}])
+    assert st.kk_plans_carried_out_this_combat == 1
+    fresh = kokomi_state(enemies=[make_enemy(hp=100)])
+    assert fresh.kk_plans_carried_out_this_combat == 0
 
 def test_the_condition_is_written_wherever_a_plan_is_carried_out(overhaul):
     """"Carried out" is one event with two doors -- the morning queue and
@@ -1423,13 +1448,20 @@ def test_change_of_plans_draws_after_the_carry_out(overhaul):
     """Kokomi whole-run round 2 (2026-10-10): "The Bake-Kurage carries out
     your first Plan now. Draw 1 card." The Kokomi card pass (2026-10-11):
     draws 2, Exhaust stays. Playable on an empty jellyfish, since the draw
-    still does something."""
+    still does something. [USER]'s run (2026-10-11): "insanely good with the
+    upgrade removing Exhaust - it's an auto pick" -- the upgrade keeps
+    Exhaust and draws 3."""
+    from tier0.content import upgrades
     from tier0.engine import combat
 
     card = loader.get_card("proto_kk_change_of_plans")
     assert card.cost == 0 and card.exhaust
     assert card.effects == [{"op": "carry_out_front_plan"},
                             {"op": "draw", "amount": 2}]
+    up = upgrades.apply_upgrade(loader.get_card("proto_kk_change_of_plans"))
+    assert up.cost == 0 and up.exhaust
+    assert up.effects == [{"op": "carry_out_front_plan"},
+                          {"op": "draw", "amount": 3}]
     assert kokomi_plan.carry_out_only(card) is False
     st = kokomi_state(enemies=[make_enemy(hp=40)])
     st.player.energy = 3

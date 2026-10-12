@@ -330,6 +330,12 @@ def _runtime_count(state: CombatState, token: str,
         # carry-out this turn, a doubled one twice, written at the plan bus.
         # The C# twin is `KokomiOverhaulLedger.PlansCarriedOutThisTurn`.
         return state.kk_plans_carried_out_this_turn
+    if token == "plans_carried_out_this_combat":
+        # CURRENT-KIT USE ONLY ([USER]'s Kokomi run, 2026-10-11) -- Sango
+        # Isshin, "for each Plan carried out this combat". The same
+        # carry-outs, per fight. C# twin:
+        # `KokomiOverhaulLedger.PlansCarriedOutThisCombat`.
+        return state.kk_plans_carried_out_this_combat
     if token == "plans_written_this_turn":
         # CURRENT-KIT USE ONLY (pool completion, 2026-10-01) -- Shoal of
         # Spears, "for each Plan you wrote this turn". Every write onto the
@@ -3438,6 +3444,8 @@ RUNTIME_COUNT_NAMES = frozenset({
     # Isshin's carry-outs this turn, and Driftglass's and Depths' Judgment's
     # Casket. Same registry reason as the rows above.
     "plans_carried_out_this_turn",
+    # Sango Isshin, per fight ([USER]'s Kokomi run, 2026-10-11).
+    "plans_carried_out_this_combat",
     "casket_count",
     # CURRENT-KIT USE ONLY (pool completion, 2026-10-01) -- Shoal of Spears'
     # Plans written this turn. Same registry reason.

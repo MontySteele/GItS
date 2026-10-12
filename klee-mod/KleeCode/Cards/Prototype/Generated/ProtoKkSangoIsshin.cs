@@ -51,15 +51,15 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin"),
-        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(8m),
-            new ExtraDamageVar(6m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisTurn)
+            new ExtraDamageVar(2m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisCombat)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,7 +81,7 @@ public sealed class ProtoKkSangoIsshin : CustomCardModel, IElementalCard, IChara
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
         DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

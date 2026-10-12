@@ -6161,6 +6161,11 @@ KOKOMI_CASKET_COUNTS = {
     "plans_carried_out_this_turn":
         "static (card, _) => KokomiOverhaulLedger.For("
         "card.Owner.Creature).PlansCarriedOutThisTurn",
+    # [USER]'s Kokomi run (2026-10-11): Sango Isshin's "this combat"
+    # (`KokomiOverhaulLedger.PlansCarriedOutThisCombat`, never rolled).
+    "plans_carried_out_this_combat":
+        "static (card, _) => KokomiOverhaulLedger.For("
+        "card.Owner.Creature).PlansCarriedOutThisCombat",
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
     # THE EXPANSION, BATCH ONE (2026-09-29): Weight of the Plan's "the Energy
