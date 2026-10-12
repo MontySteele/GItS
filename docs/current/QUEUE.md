@@ -25,10 +25,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Varka Block paper** (`varka-block-paper-2026-10-12.md`, two picks, both
-  default): (1) no raise to his Block, which already beats the base five's on
-  every turn; (2) Rippling Guard becomes "Gain 7 [10] Block. Apply your current
-  element to an enemy.", Block that fits every element.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's

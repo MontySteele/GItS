@@ -90,3 +90,10 @@ The window spans #1114, which raised Rippling Guard's floor. Seat take rates on 
    - **(a) Default:** Rippling Guard becomes "Gain 7 [10] Block. Apply your current element to an enemy."
    - (b) Frost Ward becomes that card instead, and Rippling Guard stays.
    - (c) Something else (say what).
+
+## Ruled 2026-10-12: both picks (a)
+
+[USER]: "On Varka - agreed on both defaults"
+
+- **Pick 1 (a):** no raise to his Block.
+- **Pick 2 (a):** Rippling Guard becomes "Gain 7 [10] Block. Apply your current element to an enemy." Stormward Stance goes to 4 [6] with it (Claude's call).
