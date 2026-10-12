@@ -1,74 +1,88 @@
-# Kokomi: what she does besides writing Plans (2026-10-11)
+# Kokomi: Plans and Ethereal, the Casket gone (2026-10-12)
 
-**Why.** From [USER]'s run (`review/records/kokomi-user-run-2026-10-11.md`): "I won the Kokomi run, but honestly... it felt clunky. Not difficult, but clunky. The early game was slow and the late game was Plan Spam." After the first diagnosis:
+**Why.** From [USER]'s run (`review/records/kokomi-user-run-2026-10-11.md`): "I won the Kokomi run, but honestly... it felt clunky. Not difficult, but clunky. The early game was slow and the late game was Plan Spam." Then, over three rounds of this paper's first draft:
 
-> "lots of small plans" vs "one really big plan" is not actually compelling as an archetype split, so the runs devolve into one note builds.
->
-> I think this calls for a deeper design pass first to figure out what Kokomi should actually do.
->
-> The Plan mechanic is fine; I just don't think it can carry a character by itself with no other archetype options.
+> "lots of small plans" vs "one really big plan" is not actually compelling as an archetype split, so the runs devolve into one note builds. ... The Plan mechanic is fine; I just don't think it can carry a character by itself with no other archetype options.
 
-This paper sets the direction only. The card-by-card list follows the ruling, as its own paper.
+> Kokomi is a support type character, so I'm thinking the answer comes from one archetype flavored through Companion cards and another archetype that flavors with her jellyfish. ... it should tie into the established machinery or the Plan track so we aren't inventing a second piece of bespoke kit just for her.
 
-**Source.** A census of her 78-card pool on `main` (session scratchpad, `kokomi-archetype-census.md`): every card tagged from its text, with offers and takes from `tools/offer_report.py` over five lanes (2026-10-08 to 2026-10-11; the pool changed during the window) and plays from fight telemetry.
+> it's dangerous having multiple archetypes with isolated payoff structures. Players should feel like they can slightly dip off of their main drafting strategy without having one side brick the other. ... I actually wonder if the Casket itself is the problem and we should leave the Plan track as the only piece of core machinery on the kit, then balance around a normal amount of Strength, not 10 to 20. One random idea - we haven't used Ethereal much so far in character design.
 
-## 1. What the pool does today
+On the relic: "Let's tentatively go with option 1."
 
-**Plans are the whole pool.** 34 of 78 cards carry a Plan line, 24 read a Plan count, 15 cost 0, and 20 draw or give Energy. Only 4 cards carry none of those tags.
+Ruled out on the way: Block and debuff archetypes (Varka already has both), and a Casket that forks between two archetypes (whichever way you open it, one side is bricked).
 
-**The other archetypes exist on paper, but nobody drafts them.**
+This paper sets the direction. The card-by-card list follows the ruling, as its own paper.
 
-| Theme | Cards that build it | Cards that pay it off | Payoffs taken |
-|---|---|---|---|
-| Plans and the Casket | 34 | 24 | Flood Tide 76%, Grand Design 78%, Masterstroke 75%, Surging Shoal 82% |
-| Block | 15 (11 are Plans) | 5: 1 Common, 1 Uncommon, 3 Rare | 4 of 59 offers (7%) |
-| Weak and Vulnerable | 11 (8 are Plans) | 6 | 16%; Ceremonial Garment, Sea's Reproach, At Water's Edge never taken |
-| Statuses | 2 | 4 | 14% |
+**Source.** A census of her 78-card pool on `main` (session scratchpad, `kokomi-archetype-census.md`): each card tagged from its text, offers and takes from `tools/offer_report.py` over five lanes (2026-10-08 to 2026-10-11; the pool changed during the window), plays from fight telemetry.
 
-Watatsumi's Grace, Tidal Rebuke and Tidal Riposte have also never been taken. Coral Crash was taken 2 of 30 times, and Drowning Pressure 1 of 20.
+## 1. Why every run is the same deck
 
-## 2. Why every run is the same deck
+- **The Casket feeds every deck.** Every Plan adds a point, and every point is Strength. The Plan payoffs are taken 75% to 82% of the time (Flood Tide, Grand Design, Masterstroke, Surging Shoal). Her other payoffs are almost never taken: Block payoffs 4 of 59 offers, and Watatsumi's Grace, Tidal Rebuke, Tidal Riposte, Ceremonial Garment, Sea's Reproach and At Water's Edge never.
+- **Eight things to count.** Her cards read the Casket, Plans carried out this turn, Plans waiting, Plans written this turn, Energy paid for waiting Plans, "only" or "exactly one" Plan, the first Plan or the Plan after this one, and 0-cost Plans written.
+- **A free engine.** 15 of 78 cards cost 0, and Kurage Swarm, Kurage School and Shoal Call multiply the 0-cost Plans. A late turn is clicking Plans.
+- **A slow start.** A Plan pays next turn, and act-1 fights last about 3 turns. The seats lost a median 12.5% of max HP in each act-1 normal fight.
 
-1. **The Casket feeds every deck.** Every Plan adds a point and every point is Strength, so a Block deck and a debuff deck both end up as Strength decks. Their own payoffs never beat that.
-2. **The other payoffs are Rare only.** Block has one Common and one Uncommon payoff; the debuff payoffs are mostly Rare Powers. There is nothing in acts 1 and 2 to start those decks with.
-3. **Too many things to count.** Her cards read eight different Plan numbers: the Casket; Plans carried out this turn; Plans waiting; Plans written this turn; Energy paid for waiting Plans; "only" or "exactly one" Plan; the first Plan, or the Plan after this one; 0-cost Plans written. The base characters each track one or two.
-4. **The engine is free.** 15 cards cost 0, and Kurage Swarm, Kurage School and Shoal Call multiply the 0-cost Plans. A late turn is clicking Plans.
-5. **The start is slow.** A Plan pays next turn, and an act-1 fight lasts about 3 turns. The seats lost a median 12.5% of max HP in each act-1 normal fight.
+## 2. The proposal
 
-## 3. The proposal: Plans are her verb, and the archetypes split on what they buy
+### 2.1 What stays
 
-Like the Watcher's Stances, Plans are what every Kokomi deck does. **What the Plans buy** is the draft. Each archetype has Commons that start it, an Uncommon payoff and a Rare finisher, and each pays off from its own number, never from a Plan count:
+The Plan rules (brief sec.2, rules 1 to 6): the Bake-Kurage, Plan lines, carry-out order, Dusk, the queue. Her starter cards. Nereid's Ascension and the order riders (Opening Gambit, Second Wave), which make queue order a decision.
 
-- **The Tactician: Plans that hit.** Attack Plans fill the Casket, which becomes Strength. This is today's deck, narrowed: Grand Design, Flood Tide, Masterstroke and Surging Shoal stay here.
-- **The Warden: Plans that guard.** Block sized to the next attack (Tide Wall), Block kept between turns (Watatsumi's Grace) and Block turned into damage (Coral Crash, Tidal Rebuke, Tidal Riposte). It pays off from the Block she holds. The four Dusk Plans live here, because Dusk is when Block matters.
-- **The Undertow: Plans that weaken.** Weak and Vulnerable land before the swing, and the payoffs count debuffs (Drowning Pressure, Ceremonial Garment, Sea's Reproach). This is the strategist reading the enemy, as GPT's review put it.
-- **Small component: the flotsam.** Statuses she adds and turns into Sea Glass, as now.
+### 2.2 The Casket goes
 
-What changes for all three:
-- **The Casket counts only Plans that deal damage** (pick 2). A Warden or Undertow deck no longer gets Strength for free. It needs its own payoffs, which this pass moves down to Common and Uncommon.
-- **One count per archetype.** Cards read the Casket, the Plans waiting, or their own archetype's number (Block, debuffs). The other counters go, including Sango Isshin's new per-combat count, which moves to the Casket.
-- **The engine is trimmed.** Kurage Swarm and Kurage School go, and the 0-cost Plan Commons are cut down so that writing a Plan has a price. Draw moves toward a base character's density.
-- **A faster start.** Each archetype's Commons get a now-line that pays this turn, so act 1 is not a turn behind.
+The Tamakushi Casket's count, Open the Casket, and the 10 cards that read or feed the count (Shell Guard, Driftglass, Depths' Judgment, Coral Tithe, Flood Tide, What the Tokoyo Returns, Abyssal Salvage, Grand Design, Kurage Swarm, What the Tokoyo Took). Her Strength comes from ordinary cards at a base-game level: one Uncommon in the Inflame class, no per-Plan Strength.
 
-The pool stays at 78 and the starter is untouched. Kurage's Oath (Block now, or damage to ALL) already belongs to both the Warden and the Tactician, and Slack Water to the Undertow.
+### 2.3 The starter relic
 
-## 4. The alternative: the Bake-Kurage as an engine
+"At the end of your turn, if a Plan is waiting, gain 3 Block." (Tentatively ruled.) It pays for writing at least one Plan a turn and covers her slow start, as Burning Blood covers the Ironclad. The relic can keep the Tamakushi Casket's name and art.
 
-A second engine beside Plans: the jellyfish grows and acts on its own (a Hydro hit each turn, sized by cards that feed it), closer to her Genshin kit. Her brief's rule 4 ("Nothing happens by itself. No bank, no pulse") ruled this out in an earlier draft, so it needs your pick. It would also sit close to Furina's guests and the Necrobinder's Osty.
+### 2.4 Ethereal is how the pool talks to Plans
 
-## 5. Next
+Ethereal is the base game's keyword: a card still in hand at the end of the turn Exhausts. Writing a card as a Plan takes it out of the hand, so **writing an Ethereal card as a Plan already saves it.** No new rule is needed. Her turn becomes "now, later, or lose it", and her Ethereal cards can be printed above rate, because the price is timing.
 
-After the ruling: a card paper (what each of the 78 cards becomes, kept, moved or cut, with take rates), then the build, a seat round and your run.
+### 2.5 Two flavours on one track
+
+Both flavours make Ethereal cards and spend them through Plans, so both read the same payoffs. A deck can lean one way and dip the other without either side going dead.
+
+- **The Commander (her allies).** Some of her cards call Companions: "Add 2 random Inazuma Companions to your hand. They are Ethereal." A Companion card can be written as a Plan and is carried out as printed (pick 4). Her Plans apply Hydro, and the Companions bring Pyro, Electro and Cryo, so the order of the queue sets up the reactions at dawn. Gorou's four cards become her signature.
+- **The Kurage (the jellyfish).** Some of her cards make small Ethereal jellyfish cards, shaped like Nip (a sting, a ward, a mend for a partner in co-op), which cost Energy and are hers to use, write or lose. Kurage cards make them bigger or more frequent. The jellyfish still never acts on its own (rule 4); it acts through the cards it hands you.
+- **Shared payoffs** read the track both flavours use: "Whenever you write an Ethereal card as a Plan ...", "Whenever a Plan causes a reaction ...", Plans waiting. No payoff reads a resource only one flavour makes.
+- **Klee's Companion cards** pay for playing a Companion. Kokomi's pay for writing one as a Plan and for the reactions at dawn, so the two kits draft Companions differently.
+
+### 2.6 The spam is designed out
+
+Generated cards cost Energy, never 0. The 0-cost Plan Commons are cut down, Kurage School goes, and Shoal Call becomes a Kurage card that makes Ethereal jellyfish cards. Draw moves toward a base character's density. Cards read only Plans waiting or a trigger.
+
+### 2.7 The start
+
+The relic's Block, and Commons whose now-line pays this turn.
+
+## 3. Risks
+
+- **Losing cards feels bad.** Above-rate numbers must be visible on the card, and Ethereal cards come from her own generators, not as random handouts.
+- **Volume.** Two generator flavours could rebuild the spam. Generated cards cost Energy, and the card paper caps generators per rarity.
+- **Companion supply.** The Commander needs Companions beyond the fourth reward slot; the generators supply them, so the slot stays a bonus, as ruled for the Companion pass.
+- **The relic** could make "write one Plan, pass" the safe default. 3 Block is sized under a Defend so that it is not.
+
+## 4. Next
+
+Fable's review (below), your picks, then the card paper: what each of the 78 cards keeps, changes or loses, with take rates. Then the build, a seat round and your run.
 
 ## For [USER]
 
-1. **Her direction.**
-   - **(a) Default:** Plans stay her verb, and three archetypes split on what the Plans buy (Tactician, Warden, Undertow), with the flotsam as a small component.
-   - (b) The jellyfish as a second engine beside Plans (reopens rule 4).
-   - (c) Something else (say what).
+1. **Direction.**
+   - **(a) Default:** Plans and Ethereal are the spine, with the Commander and the Kurage as two flavours on shared payoffs.
+   - (b) Something else (say what).
 2. **The Casket.**
-   - **(a) Default:** it counts only Plans that deal damage.
-   - (b) It counts every Plan, and the Warden and Undertow payoffs are made strong enough to beat Strength.
-3. **Dusk.**
-   - **(a) Default:** Dusk stays only on Warden cards, where its end-of-turn timing changes the Block.
-   - (b) Retire Dusk; those cards become ordinary Block cards.
+   - **(a) Default:** removed, with its 10 cards; Strength at a base-game level.
+   - (b) Kept as one Rare card's effect, not the relic.
+3. **The starter relic** (this changes her starter).
+   - **(a) Default:** "At the end of your turn, if a Plan is waiting, gain 3 Block."
+   - (b) Another (say what).
+4. **Companions as Plans.**
+   - **(a) Default:** any Companion card can be written as a Plan and is carried out as printed.
+   - (b) Only the Companions her own cards generate.
+5. **Dusk.**
+   - **(a) Default:** it stays; the card paper cuts the Dusk cards that are only slow Block.
+   - (b) Retire it.
