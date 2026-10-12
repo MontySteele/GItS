@@ -66,7 +66,7 @@ PLAN_KINDS = frozenset((
     # R276 PICK 1, THE HALVES REWRITE. See `FIRST_ATTACK_TWICE` and the four
     # beside it.
     "first_attack_twice",
-    "block_front_intent",
+    "block_max_intent",
     # THE CO-OP SET: Joint Orders' "They draw 2 cards" and Coordinated
     # Strike's "each other player's Attacks deal 3 additional damage". Both
     # are about ANOTHER player, and tier 0 seats one (`engine/coop.py`).
@@ -76,7 +76,7 @@ PLAN_KINDS = frozenset((
     "each_player_energy", "each_player_draw",
     # THE STATUS BATCH (2026-10-01): clauses that read the hand just drawn.
     # See `BLOCK_PER_STATUS_IN_HAND`.
-    "block_per_status_in_hand", "transform_statuses_in_hand",
+    "block_per_status_in_hand", "transform_statuses_in_draw_pile",
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and Gorou's two
     # Plan lines. See `ADD_STINGS` and the two beside it.
     "add_stings", "strength_this_turn", "juuga_guard",
@@ -98,7 +98,7 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     # R276. A switch: "your first Attack" has no size to print.
     "first_attack_twice",
     # THE STATUS BATCH: "every status and curse".
-    "transform_statuses_in_hand",
+    "transform_statuses_in_draw_pile",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -127,7 +127,7 @@ PLAN_AIMED_OPS = frozenset((
 #: Block" to its Plan, and no key adds a Plan clause, so the clause is written
 #: at 0 and a 0 flat Block is carried out as nothing (Dexterity does not feed a
 #: clause the face does not print).
-PLAN_ZERO_AMOUNT_OPS = frozenset(("block_front_intent", "block",
+PLAN_ZERO_AMOUNT_OPS = frozenset(("block_max_intent", "block",
                                  # POOL COMPLETION: Tactical Relay's draw is
                                  # written at 0 and added by the upgrade.
                                  "each_player_draw"))
@@ -162,7 +162,7 @@ PLAN_ONLY_OPS = frozenset((
                            # you wrote this"), so a now-line spelling would be
                            # a different, unpriced card.
                            "first_attack_twice",
-                           "block_front_intent",
+                           "block_max_intent",
                            # Kokomi core pass: "next turn" is the carry-out.
                            # THE CO-OP SET: the player is the one captured
                            # when the Plan was written, and "next turn" is the
@@ -174,18 +174,23 @@ PLAN_ONLY_OPS = frozenset((
                            # THE STATUS BATCH: each reads the hand just
                            # drawn, which only a Plan can see.
                            "block_per_status_in_hand",
-                           "transform_statuses_in_hand",
+                           "transform_statuses_in_draw_pile",
                            # THE RE-FOUNDING: each names the carry-out turn.
                            "add_stings", "strength_this_turn",
                            "juuga_guard"))
 
 #: THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md).
-#: Kelp Wall's "plus 3 for each status or curse in your hand" and Sea Glass
-#: Harvest's transform. "In your hand" is the hand just drawn, read when the
-#: clause runs. `KokomiPlan.Kind.BlockPerStatusInHand` and the one beside it are
-#: the twins; the bodies are `KokomiStatusBatch`.
+#: Kelp Wall's "plus 3 for each status or curse in your hand when written" and
+#: Sea Glass Harvest's transform. THE KOKOMI ROUND-1 FIXES (2026-10-12): both
+#: used to read the hand at carry-out, which seats found empty of the
+#: statuses they wrote the Plan for. Kelp Wall now counts the hand WHEN THE
+#: PLAN IS WRITTEN (`schedule` stamps `written_count` on the clause, the
+#: number the face's preview showed) and Sea Glass Harvest transforms the
+#: DRAW PILE, so the dead draws still to come convert.
+#: `KokomiPlan.Kind.BlockPerStatusInHand` and the one beside it are the twins;
+#: the bodies are `KokomiStatusBatch`.
 BLOCK_PER_STATUS_IN_HAND = "block_per_status_in_hand"
-TRANSFORM_STATUSES_IN_HAND = "transform_statuses_in_hand"
+TRANSFORM_STATUSES_IN_DRAW_PILE = "transform_statuses_in_draw_pile"
 #: Sea Glass Harvest's token, in no pool. `SeaGlass.cs` is the twin.
 SEA_GLASS = "kk_sea_glass"
 
@@ -292,7 +297,7 @@ WATATSUMI_RESISTANCE = "kk_watatsumi_resistance"
 #: `Powers/Prototype/KokomiRefounding.cs`.
 SANGONOMIYAS_ORDERS = "kk_sangonomiyas_orders"   # turn start: N Companions
 KURAGE_BLOOM = "kk_kurage_bloom"                 # turn start: N Stings
-WATCHFUL_SHOAL = "kk_watchful_shoal"             # Ethereal written: N Block
+WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg, Wards +N Block
 COORDINATED_TIDE = "kk_coordinated_tide"         # Ethereal carried out: N
 GRAND_STRATEGIST = "kk_grand_strategist"         # a Plan's reaction: N to ALL
 ENDLESS_SHOAL = "kk_endless_shoal"               # Sting/Ward carried out: copy
@@ -374,7 +379,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
         # times", on the flat hit only.
         if op == "damage":
             allowed.add("strength_times")
-        if op == TRANSFORM_STATUSES_IN_HAND:
+        if op == TRANSFORM_STATUSES_IN_DRAW_PILE:
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
@@ -749,8 +754,11 @@ def hers(state: CombatState, card: Optional[Card], amount: int,
     folded = _enchanted(card, amount)
     if folded <= 0:
         return folded
-    return folded + (int(state.player.powers.get("strength", 0))
-                     * max(1, int(strength_times)))
+    # Kokomi round-3 changes (2026-10-12): Watchful Shoal's Sting bonus,
+    # folded where her Strength is.
+    return (folded + watchful_shoal_bonus(state, card, STING_ID)
+            + int(state.player.powers.get("strength", 0))
+            * max(1, int(strength_times)))
 
 
 def schedule(state: CombatState, card: Card,
@@ -843,6 +851,15 @@ def schedule(state: CombatState, card: Card,
                 if c.get("target") == "enemies_intending_attack" else c
                 for c in body]
         label = plan_aimed_label(card, caught)
+    # KELP WALL COUNTS AT WRITING TIME (Kokomi round-1 fixes, 2026-10-12):
+    # "plus 3 for each status or curse in your hand when written" is the hand
+    # on screen NOW, the number the face's preview printed. Copied, never
+    # mutated, for Flank's reason above. `KokomiPlan.Schedule` is the twin.
+    if any(c.get("op") == BLOCK_PER_STATUS_IN_HAND for c in body):
+        held_now = len(statuses_in_hand(state))
+        body = [dict(c, written_count=held_now)
+                if c.get("op") == BLOCK_PER_STATUS_IN_HAND else c
+                for c in body]
     # All Streams Flow to the Sea's pending gift, taken by the first Plan
     # written after it this turn (a count of 0 is still taken: "once, plus
     # once for each Plan cancelled" with none cancelled is once).
@@ -1349,6 +1366,10 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
                                 drain_entries=drain_entries)
         finally:
             state.kk_carrying_out = was
+    # Kokomi round-3 changes (2026-10-12): Coordinated Tide lands before the
+    # plan bus, the C#'s order since its hit moved into the carry-out's
+    # results line (`KokomiPlan.ResolveEntry`).
+    coordinated_tide(state, entry)
     _note_plan_resolved(state, entry)
     note_carried_out(state, entry)
     return wrote[0], wrote[1]
@@ -1493,13 +1514,13 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # `KokomiPlan.Kind.AllyDraw` / `OthersAttackDamageThisTurn`, is where
         # the rule lives.
         coop.no_other_player(state, op)
-    elif op == "block_front_intent":
-        # R276, TIDE WALL: "Gain Block equal to the damage the enemy intends
-        # to deal" (+ the upgrade's flat bonus). The FRONT enemy's intent read
-        # AT CARRY-OUT, which is after the coming enemy turn's intents are up;
+    elif op == "block_max_intent":
+        # R276, TIDE WALL: "Gain Block, plus the most damage an enemy
+        # intends" (Kokomi round-3 changes, 2026-10-12: the LARGEST intent,
+        # no longer the front enemy's). Read AT CARRY-OUT, which is after the coming enemy turn's intents are up;
         # a multi-hit intent counts every hit and a non-attack intent is 0.
         # POWERED, the flat planned Block's funnel.
-        intended = front_intent_damage(state)
+        intended = max_intent_damage(state)
         gained = powers.modify_block_gained(p, intended + amount)
         if gained:
             p.block += gained
@@ -1519,8 +1540,8 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == PLAY_COPY_OF_COMPANION:
         _play_copy(state, entry.card)
     elif op == BLOCK_PER_STATUS_IN_HAND:
-        block_per_status(state, amount)
-    elif op == TRANSFORM_STATUSES_IN_HAND:
+        block_per_status(state, amount, clause.get("written_count"))
+    elif op == TRANSFORM_STATUSES_IN_DRAW_PILE:
         transform_statuses(state, bool(clause.get("upgraded")))
     else:                                   # unreachable: shape-checked at load
         raise ValueError(f"unknown plan clause {op!r}")
@@ -1543,10 +1564,14 @@ def statuses_in_hand(state: CombatState) -> list[Card]:
     return [c for c in state.player.hand if is_status_or_curse(c)]
 
 
-def block_per_status(state: CombatState, rate: int) -> int:
-    """KELP WALL: "plus 3 for each status or curse in your hand". Powered,
-    the flat planned Block's funnel."""
-    n = len(statuses_in_hand(state))
+def block_per_status(state: CombatState, rate: int,
+                     written_count: Optional[int] = None) -> int:
+    """KELP WALL: "plus 3 for each status or curse in your hand when
+    written". Powered, the flat planned Block's funnel. `written_count` is
+    the count `schedule` stamped when the Plan was written (Kokomi round-1
+    fixes, 2026-10-12); None (a clause no writer stamped) reads the hand."""
+    n = (len(statuses_in_hand(state)) if written_count is None
+         else int(written_count))
     if n <= 0 or rate <= 0:
         state.emit("plan_kelp_wall", statuses=n, amount=0)
         return 0
@@ -1582,14 +1607,16 @@ def sea_glass_card(upgraded: bool = False) -> Card:
 
 
 def transform_statuses(state: CombatState, upgraded: bool) -> int:
-    """SEA GLASS HARVEST: "Transform every status and curse in your hand into
-    Sea Glass [Sea Glass+]." In place, as `CardCmd.Transform` swaps a card
-    where it stands."""
-    hand = state.player.hand
+    """SEA GLASS HARVEST: "Transform every status and curse in your draw
+    pile into Sea Glass [Sea Glass+]." The DRAW PILE since the Kokomi round-1
+    fixes (2026-10-12): the carry-out found the hand empty of what the Plan
+    was written for, so it converts the dead draws still to come. In place,
+    as `CardCmd.Transform` swaps a card where it stands."""
+    pile = state.player.draw_pile
     n = 0
-    for i, card in enumerate(list(hand)):
+    for i, card in enumerate(list(pile)):
         if is_status_or_curse(card):
-            hand[i] = sea_glass_card(upgraded)
+            pile[i] = sea_glass_card(upgraded)
             n += 1
     state.emit("plan_sea_glass", transformed=n, upgraded=upgraded)
     return n
@@ -1976,18 +2003,26 @@ def redirect_queued_plans(state: CombatState, target: Optional[Enemy]) -> None:
 
 
 
-def front_intent_damage(state: CombatState) -> int:
-    """Tide Wall's read (R276): the total damage the FRONT enemy's current
-    intent would deal her, every hit counted, through the same estimate the
-    potions use (`potions._intent_damage`: its Strength and Weak, her
-    Vulnerable). 0 for no front enemy or a non-attack intent. The C# twin is
+def intent_damage(state: CombatState, enemy: Optional[Enemy]) -> int:
+    """The total damage ONE enemy's current intent would deal her, every hit
+    counted, through the same estimate the potions use
+    (`potions._intent_damage`: its Strength and Weak, her Vulnerable). 0 for
+    no enemy or a non-attack intent. The C# twin is
     `KokomiOverhaulKit.IntendedDamage`, which asks the game's own
     `AttackIntent.GetTotalDamage` -- the number the intent badge shows."""
     from tier0.engine import potions               # late import: cycle
-    front = front_enemy(state)
-    if front is None or not _intends_to_attack(front):
+    if enemy is None or not _intends_to_attack(enemy):
         return 0
-    return int(potions._intent_damage(state, front))
+    return int(potions._intent_damage(state, enemy))
+
+
+def max_intent_damage(state: CombatState) -> int:
+    """Tide Wall's read (R276; Kokomi round-3 changes, 2026-10-12): the MOST
+    damage any one living enemy intends, not the front body's, which read 0
+    against the Queen while her minion attacked. 0 with no enemies. The C#
+    twin is `KokomiOverhaulKit.MostIntendedDamage`."""
+    return max((intent_damage(state, e) for e in state.living_enemies),
+               default=0)
 
 
 def spend_first_attack_twice(state: CombatState, card: Card) -> int:
@@ -2011,8 +2046,14 @@ def note_face_up_plan_card(state: CombatState, card: Card) -> None:
     line normally, draw 1 card." Called by `effects._resolve_card_bound` after
     a card with a `plan:` line resolves its NOW-line; a write returns before
     it. `TreatisePower.AfterCardPlayed` is the twin. Copies add cards, still
-    once a turn."""
-    if not live(state) or not card.plan:
+    once a turn.
+
+    KOKOMI ROUND 2 (2026-10-12): "a card you could have written as a Plan"
+    -- `can_be_written`, so a Companion card counts too. A carry-out is not
+    her play (`kk_carrying_out`): a written Companion's copy draws nothing."""
+    if not live(state) or not can_be_written(card):
+        return
+    if state.kk_carrying_out:
         return
     n = int(state.player.powers.get(TREATISE, 0))
     if n and claim_once_per_turn(state, TREATISE):
@@ -2303,9 +2344,11 @@ def add_companions(state: CombatState, amount: int,
 
 def call_the_generals(state: CombatState) -> int:
     """CALL THE GENERALS: "Choose 1 of 3 random Rare Inazuma Companion cards.
-    Add it to your hand. It is Ethereal." The pilot keeps the first offered
-    (all three are Rare; a fixed rule, so a replay keeps what it kept).
-    `KokomiCards.CallTheGenerals` is the twin."""
+    Add it to your hand. It is Ethereal. It costs 0 this turn." The pilot
+    keeps the first offered (all three are Rare; a fixed rule, so a replay
+    keeps what it kept). The cost-0 rider is Kokomi round 2's (2026-10-12),
+    the base game's Discovery template (`free_this_turn`, swept at the turn
+    boundary). `KokomiCards.CallTheGenerals` is the twin."""
     if not live(state):
         return 0
     pool = generated_companions(state, "rare")
@@ -2316,6 +2359,7 @@ def call_the_generals(state: CombatState) -> int:
     if len(state.player.hand) >= C.MAX_HAND_SIZE:
         return 0
     card = _generate(offered[0])
+    card.free_this_turn = True
     state.player.hand.append(card)
     state.emit("kk_companion_added", card=card.id)
     return 1
@@ -2411,29 +2455,52 @@ def carry_out_companion(state: CombatState, card: Optional[Card]) -> None:
         state.kurage_aim = was
 
 
+def watchful_shoal_bonus(state: CombatState, card: Optional[Card],
+                         jellyfish_id: str) -> int:
+    """WATCHFUL SHOAL (Kokomi round-3 changes, 2026-10-12): "Your Stings deal
+    N additional damage. Your Wards gain N additional Block." The stack when
+    `card` is the jellyfish `jellyfish_id` (either upgrade), else 0. Read by
+    `effects._op_damage` (a Sting's now-line, played or flipped),
+    `effects._op_block` (a Ward's now-line) and `hers` (a Sting's Plan line,
+    folded at writing). `WatchfulShoalPower` is the twin."""
+    if card is None or not live(state):
+        return 0
+    if card.id not in (jellyfish_id, jellyfish_id + "+"):
+        return 0
+    return int(state.player.powers.get(WATCHFUL_SHOAL, 0))
+
+
 def note_written(state: CombatState, card: Card) -> None:
-    """A Plan was just written by `card`. WATCHFUL SHOAL pays Block for an
-    Ethereal card, WATATSUMI RESISTANCE a Sting for a Companion card.
-    `KokomiRefounding.OnWritten` is the twin."""
+    """A Plan was just written by `card`. WATATSUMI RESISTANCE pays a Sting
+    for a Companion card (Watchful Shoal left this bus in the Kokomi round-3
+    changes, 2026-10-12). `KokomiRefounding.OnWritten` is the twin."""
     if not live(state) or card is None:
         return
-    p = state.player
-    if card.is_ethereal:
-        n = int(p.powers.get(WATCHFUL_SHOAL, 0))
-        if n:
-            # RAW, like every power-sourced Block in the arm (NC-11).
-            p.block += n
-            state.emit("block", amount=n)
-            state.emit("plan_watchful_shoal", amount=n)
     from tier0.engine import companion_hexerei      # late import: cycle
     if companion_hexerei.counts_as_companion(state, card):
         watatsumi_resistance(state)
 
 
+def coordinated_tide(state: CombatState, entry: PlanEntry) -> None:
+    """COORDINATED TIDE: a Plan written by an Ethereal card was carried out,
+    so hit the front enemy. Once per carry-out, either line, outside the
+    carrying window. `KokomiRefounding.CoordinatedTide` is the twin."""
+    from tier0.engine import effects                # late import: cycle
+    card = entry.source
+    if not live(state) or card is None or not card.is_ethereal:
+        return
+    n = int(state.player.powers.get(COORDINATED_TIDE, 0))
+    front = front_enemy(state)
+    if n and front is not None:
+        state.emit("plan_coordinated_tide", target=front.name, amount=n)
+        effects.deal_damage_to_enemy(state, front, n, element="hydro",
+                                     source="plan", powered=False)
+
+
 def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
-    """A Plan was just carried out. COORDINATED TIDE hits the front enemy for
-    an Ethereal card; ENDLESS SHOAL adds a copy of a Sting or Ward to her
-    hand. Once per carry-out, either line.
+    """A Plan was just carried out. ENDLESS SHOAL adds a copy of a Sting or
+    Ward to her hand (Coordinated Tide is `coordinated_tide`, before the plan
+    bus). Once per carry-out, either line.
     `KokomiRefounding.OnCarriedOut` is the twin."""
     import copy as _copy
 
@@ -2442,13 +2509,6 @@ def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
     if not live(state) or card is None:
         return
     p = state.player
-    if card.is_ethereal:
-        n = int(p.powers.get(COORDINATED_TIDE, 0))
-        front = front_enemy(state)
-        if n and front is not None:
-            state.emit("plan_coordinated_tide", target=front.name, amount=n)
-            effects.deal_damage_to_enemy(state, front, n, element="hydro",
-                                         source="plan", powered=False)
     base = card.id.rstrip("+")
     if base in (STING_ID, WARD_ID):
         n = int(p.powers.get(ENDLESS_SHOAL, 0))

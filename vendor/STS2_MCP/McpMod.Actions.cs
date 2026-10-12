@@ -893,6 +893,25 @@ public static partial class McpMod
         return Error("No card selection screen is open");
     }
 
+    // GItS LOCAL EDIT (Gnarled Hammer stall, 2026-10-12). THE ENCHANT
+    // SCREEN'S PREVIEW WAS NEVER CONFIRMED. `NDeckEnchantSelectScreen` names
+    // its preview containers `%EnchantSinglePreviewContainer` /
+    // `%EnchantMultiPreviewContainer` (its `_Ready`); `BuildCardSelectState`
+    // learned both spellings under `EB-263`, but confirm and cancel here
+    // still looked only for the upgrade and removal spellings. So on Gnarled
+    // Hammer (min 0, max 3, not cancelable) `confirm` missed the open
+    // preview and pressed the grid's main `Confirm` -- which on that screen
+    // is wired to `PreviewSelection`, not to completion -- and every press
+    // added three more preview cards ("What you have picked" grew 3, 6, 12)
+    // while the screen stayed up. `skip` likewise missed the preview's
+    // `Cancel` and, with `%Close` disabled, said selection was mandatory.
+    // One list now serves confirm and cancel.
+    private static readonly string[] GitsSelectPreviewContainers =
+    {
+        "%UpgradeSinglePreviewContainer", "%UpgradeMultiPreviewContainer", "%PreviewContainer",
+        "%EnchantSinglePreviewContainer", "%EnchantMultiPreviewContainer",
+    };
+
     private static Dictionary<string, object?> ExecuteConfirmSelection()
     {
         var overlay = NOverlayStack.Instance?.Peek();
@@ -903,11 +922,13 @@ public static partial class McpMod
 
         // Check all preview containers (upgrade uses UpgradeSinglePreviewContainer / UpgradeMultiPreviewContainer,
         // NDeckCardSelectScreen uses PreviewContainer with %PreviewConfirm)
-        foreach (var containerName in new[] { "%UpgradeSinglePreviewContainer", "%UpgradeMultiPreviewContainer", "%PreviewContainer" })
+        bool previewOpen = false;
+        foreach (var containerName in GitsSelectPreviewContainers)
         {
             var container = screen.GetNodeOrNull<Godot.Control>(containerName);
             if (container?.Visible == true)
             {
+                previewOpen = true;
                 var confirm = container.GetNodeOrNull<NConfirmButton>("Confirm")
                               ?? container.GetNodeOrNull<NConfirmButton>("%PreviewConfirm");
                 if (confirm is { IsEnabled: true })
@@ -921,6 +942,15 @@ public static partial class McpMod
                 }
             }
         }
+
+        // GItS LOCAL EDIT (Gnarled Hammer stall, 2026-10-12). A PREVIEW IS
+        // OPEN AND ITS OWN CONFIRM IS NOT ENABLED: do not fall through to the
+        // grid's main Confirm. On `NDeckEnchantSelectScreen` that button is
+        // wired to `PreviewSelection`, not to completion, so pressing it under
+        // an open preview re-runs the preview -- which appends another set of
+        // preview cards and never closes the screen.
+        if (previewOpen)
+            return Error("The preview is open but its confirm button is not enabled - read the state again");
 
         // Try main confirm button
         var mainConfirm = screen.GetNodeOrNull<NConfirmButton>("Confirm")
@@ -979,7 +1009,7 @@ public static partial class McpMod
             return Error("No card selection screen is open");
 
         // If preview is showing, cancel back to selection
-        foreach (var containerName in new[] { "%UpgradeSinglePreviewContainer", "%UpgradeMultiPreviewContainer", "%PreviewContainer" })
+        foreach (var containerName in GitsSelectPreviewContainers)
         {
             var container = screen.GetNodeOrNull<Godot.Control>(containerName);
             if (container?.Visible == true)

@@ -135,6 +135,14 @@ public static class ArmKeywordTips
     // written, and no face or tip said so. Same title, so it reads "Plan".
     public const string CompanionPlanKey = "KLEEMOD-ARM_PLAN_COMPANION";
 
+    // THE KOKOMI ROUND-1 FIXES (2026-10-12), and NOT A KEYWORD ROW: the Plan
+    // tip a card carries when its face NAMES Plans but prints no Plan line of
+    // its own (Press the Advantage, Treatise, Breakwater ...). PlanKey's
+    // "Instead of the line above, play it on the Bake-Kurage" told a seat
+    // Press the Advantage could be written, and the jellyfish refused it.
+    // Same title, so it reads "Plan".
+    public const string PlanNoLineKey = "KLEEMOD-ARM_PLAN_NO_LINE";
+
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
     // with the play. It lives in this class because it is a sentence about the
@@ -145,6 +153,11 @@ public static class ArmKeywordTips
     // key's reason: it is a sentence about the one card that doubles a
     // carry-out, printed where that card is met.
     public const string PlanTwiceKey = "KLEEMOD-ARM_PLAN_TWICE";
+
+    // KOKOMI ROUND 2 (2026-10-12), A RIDER AND NOT A KEYWORD: Nereid's
+    // Ascension carries its first Plan out twice, and a seat could not tell
+    // that the Plan's debuffs double too.
+    public const string NereidsTwiceKey = "KLEEMOD-ARM_PLAN_TWICE_DEBUFFS";
 
     // `EB-575`. THE FOURTH KEY HERE THAT TITLES NO KEYWORD, and the only one
     // whose sentence appears and disappears with the board. A `Set off` or a
@@ -389,6 +402,17 @@ public static class ArmKeywordTips
             "Play the card on the [gold]Bake-Kurage[/gold]. Plans happen next "
           + "turn in order, and their [gold]Block[/gold] lasts that turn.");
 
+    /// <summary>The Kokomi round-1 fixes (2026-10-12): <see cref="ForPlan"/>
+    /// for a card that names Plans and has no Plan line, so cannot be
+    /// written. Attached by <c>gen_klee_cards.emit</c> in ForPlan's place on
+    /// a row with no <c>plan:</c>.</summary>
+    public static IEnumerable<IHoverTip> ForPlanNoLine(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PlanNoLineKey,
+            "A card with a Plan line can be played on the "
+          + "[gold]Bake-Kurage[/gold] to happen next turn. This card has no "
+          + "Plan line.");
+
     /// <summary>
     /// THE KOKOMI RE-FOUNDING (2026-10-12): "Any Companion card can be
     /// written as a Plan" (design pass pick 4 (a)), and nothing on screen
@@ -409,7 +433,9 @@ public static class ArmKeywordTips
     /// tip key.</summary>
     internal const string CompanionPlanText =
         "Play it on the [gold]Bake-Kurage[/gold] to write it as a "
-      + "[gold]Plan[/gold]. The Kurage applies [gold]Hydro[/gold] first.";
+      + "[gold]Plan[/gold]. Next turn the Kurage applies [gold]Hydro[/gold], "
+      + "then it is played: [gold]Strength[/gold] and [gold]Weak[/gold] "
+      + "count.";
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
@@ -470,6 +496,20 @@ public static class ArmKeywordTips
             "A [gold]Plan[/gold] carried out twice counts as two. Every "
           + "clause that counts [gold]Plans[/gold] carried out pays for "
           + "both.");
+
+    /// <summary>
+    /// Kokomi round 2 (2026-10-12): on Nereid's Ascension, what "twice"
+    /// covers. Its doubled carry-out doubled a Plan's debuffs and the Tainted
+    /// it caused (Kokomi round 1, lane 3), and no face said so.
+    /// `gen_klee_cards.emit` raises it off the row's
+    /// <c>kk_nereids_ascension</c> power.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForNereidsTwice(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, NereidsTwiceKey,
+            "Twice means twice: the [gold]Plan[/gold]'s debuffs, and any "
+          + "Tainted it causes, double too. A [gold]Plan[/gold] carried out "
+          + "early is carried out once.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

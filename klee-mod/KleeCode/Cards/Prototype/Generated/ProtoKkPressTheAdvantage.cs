@@ -44,7 +44,7 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
+        ArmKeywordTips.ForPlanNoLine(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_press_the_advantage");
 

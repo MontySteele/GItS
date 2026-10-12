@@ -440,6 +440,10 @@ public static class KleeMod
                     // doubled carry-out is, on the card that doubles it.
                     [Cards.ArmKeywordTips.PlanTwiceKey + ".title"] =
                         "Twice means two Plans",
+                    // Kokomi round 2 (2026-10-12). The rider on Nereid's
+                    // Ascension: its doubled Plan doubles the debuffs too.
+                    [Cards.ArmKeywordTips.NereidsTwiceKey + ".title"] =
+                        "Twice means twice",
                     // `EB-389`. The line a card grows while a rider overrides
                     // the element it prints. A title row, not a keyword: it is
                     // a fact about THIS card on THIS board, and it comes and
@@ -492,6 +496,9 @@ public static class KleeMod
                     // Companion carries while Kokomi holds it.
                     [Cards.ArmKeywordTips.CompanionPlanKey + ".title"] =
                         "Plan",
+                    // The Kokomi round-1 fixes (2026-10-12): the Plan tip on
+                    // a card that names Plans and has no Plan line.
+                    [Cards.ArmKeywordTips.PlanNoLineKey + ".title"] = "Plan",
                     [Cards.ArmKeywordTips.GuestStarKey + ".title"] =
                         "Guest Star",
                     [Cards.ArmKeywordTips.CharlotteKey + ".title"] =

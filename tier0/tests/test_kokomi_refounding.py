@@ -268,12 +268,15 @@ def test_grand_strategist_answers_a_reaction_a_plan_caused():
     assert st.enemies[1].hp <= back - 5
 
 
-def test_watchful_shoal_pays_block_for_a_written_ethereal_card():
+def test_watchful_shoal_pays_nothing_for_writing_an_ethereal_card():
+    """Kokomi round-3 changes (2026-10-12): Watchful Shoal is the jellyfish's
+    Accuracy now (`test_kokomi_round3_changes_2026_10_12`); writing pays
+    nothing."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
     st.player.block = 0
     write(st, card("proto_kk_riptide_guard"))
-    assert st.player.block == 3
+    assert st.player.block == 0
 
 
 def test_endless_shoal_copies_a_carried_out_sting():

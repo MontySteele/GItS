@@ -25,6 +25,12 @@ namespace KleeMod.Powers;
 /// (2026-10-11): the face says "without writing it as a Plan" instead, because
 /// seats read "normally" as jargon.
 ///
+/// KOKOMI ROUND 2 (2026-10-12): any card that can be written as a Plan
+/// (<see cref="KokomiRefounding.CanBeWritten"/>: a Plan line, or a Companion
+/// card) counts, played without writing it. A carry-out is not a play of
+/// hers (<see cref="KokomiPlan.IsCarryingOut"/>): a written Companion's
+/// carried-out copy draws nothing.
+///
 /// ONCE PER TURN on the ledger's shared latch
 /// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed before the
 /// draw. Copies stack the amount: two copies draw 2, still once a turn.
@@ -36,9 +42,9 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         ("title", "Treatise"),
         ("description",
-            "The first time each turn you play a card with a [gold]Plan[/gold] "
-          + "line without writing it as a Plan, draw [blue]{Amount}[/blue] "
-          + "card{Amount:plural:|s}."),
+            "Once a turn, when you play a card you could write as a "
+          + "[gold]Plan[/gold] instead of writing it, draw "
+          + "[blue]{Amount}[/blue] card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -50,10 +56,11 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || Amount <= 0) return;
         if (cardPlay.Card.Owner?.Creature != Owner) return;
-        if (cardPlay.Card is not IPlannedCard { PlanClauses.Count: > 0 }) return;
+        if (!KokomiRefounding.CanBeWritten(cardPlay.Card)) return;
         if (KokomiPlan.PlayedOnPet(cardPlay)) return;
         var player = Owner.Player;
         if (player == null) return;
+        if (KokomiPlan.IsCarryingOut(player)) return;
         if (!KokomiOverhaulLedger.ClaimOncePerTurn(Owner, nameof(TreatisePower)))
         {
             return;
@@ -62,8 +69,20 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
         // turn on which it did not fire looked the same as one on which it
         // did. The row counts the cards that reached the hand (a full hand or
         // empty piles draw none, and a zero files nothing).
+        // Kokomi pre-run fixes (2026-10-12): still read as silent by four
+        // seats, so the power flashes in game and names itself as the draw's
+        // source on the page's "Since last page" line ("drew X (Treatise)").
+        Flash();
         var before = PileType.Hand.GetPile(player).Cards.Count;
-        await CardPileCmd.Draw(choiceContext, Amount, player);
+        ResolutionLedger.DrawSource = "Treatise";
+        try
+        {
+            await CardPileCmd.Draw(choiceContext, Amount, player);
+        }
+        finally
+        {
+            ResolutionLedger.DrawSource = string.Empty;
+        }
         var drawn = PileType.Hand.GetPile(player).Cards.Count - before;
         RelicAnswerLog.NoteGain("Treatise", drawn, drawn == 1 ? "card" : "cards");
     }

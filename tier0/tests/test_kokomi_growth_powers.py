@@ -35,8 +35,9 @@ def test_the_generals_banner_stays_out_and_the_pool_is_78(overhaul):
     assert rarity == {"common": 21, "uncommon": 36, "rare": 21}
 
 
-def test_kurage_canopy_prints_2_and_3(overhaul):
+def test_kurage_canopy_prints_3_and_4(overhaul):
     # Ceremonial Garment left this pin in the Kokomi card pass (2026-10-11):
     # 1 [2] per stack (`test_kokomi_casket_pass.test_the_moved_numbers`).
-    assert _row("proto_kk_kurage_canopy").effects[0]["amount"] == 2
-    assert _up("proto_kk_kurage_canopy").effects[0]["amount"] == 3
+    # Kokomi round 2 (2026-10-12): 2 [3] -> 3 [4].
+    assert _row("proto_kk_kurage_canopy").effects[0]["amount"] == 3
+    assert _up("proto_kk_kurage_canopy").effects[0]["amount"] == 4

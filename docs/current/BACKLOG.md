@@ -80,6 +80,9 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 
+- Incoming lists Ripple Basin ("if you did not play any Attacks this turn, gain 4 Block") under "Not counted" because no wire field says whether an Attack was played this turn (`ResolutionLedger` rows carry no card type); add the type (or an attacks-played count) to the bridge and fold the Block in `blindplay_render._turn_end_facts`. A Kokomi seat added it by hand (round 2026-10-12, lane 1).
+- Albedo — Dust of Purification is a Companion Kokomi can write as a Plan, and its body ("Exhaust every status in your hand ... draw 1 card for each") reads the hand at carry-out, the defect Kelp Wall and Sea Glass Harvest had; flagged in the Kokomi round-1 fixes, not redesigned.
+
 - No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
 - Incoming ignores Mines that fire first and Look Out!'s Block from them; the "Put Mine N on ..." lines after Big Badda Boom read as five Mines from one Bomb.
 - Ka-pow!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
@@ -181,3 +184,5 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `SKIP-10.9` mechanics the sim does not model, promoted only on demand. Enemy: Back Attack, untargetable Burrow, Ethereal/Hex auras, pick-your-poison curses, damage caps (Hard to Kill, Plating, Hardened Shell), Artifact, Thorns, on-hit status injection, every-N-cards intents, buff-all-enemies, block-an-ally, random-no-repeat AI, self-stun, Slimed self-exhaust, the minor powers, Soul Siphon stat theft, Blessed Antler, Philosopher's Stone. C# with no sim twin: the deferred-settle machinery (`SpotlightSystem`, `FurinaResources`) and per-dealer reaction windows (R1).
 - Furina screen (wave 2026-10-12): Crashing Waves silently spends Fanfare under 4 for no hit; Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
 - Varka screen (wave 2026-10-12): Sayu's random Swirl gives no warning on an enemy with no aura; Amber: Sharpshooter's "if the enemy already has Pyro" loses its second hit when a Melt eats the Pyro first; Cycle of Seasons' damage has no line of its own on the played page.
+- Seat page: the note "Face numbers leave out the enemy's Vulnerable and Slow until a card is aimed" (`understudy/blindplay_notes.py` ENEMY_FOLD_NOTE) read as wrong to a Kokomi seat beside faces that already folded Vulnerable (round 1 2026-10-12, lane 5b); check which faces fold it and say so per card.
+- Vambrace's preview shows doubled Block on every Block card in hand, but only the first Block card each combat doubles; a Kokomi seat spent it early on that reading (round 2 2026-10-12, lane 4b).

@@ -1257,6 +1257,15 @@ def starter_spends_the_bank(card: dict) -> bool:
                     for eff in ops))
 
 
+def doubles_the_first_plan(card: dict) -> bool:
+    """Kokomi round 2 (2026-10-12): does this row apply Nereid's Ascension,
+    whose first Plan each turn is carried out twice? Asked of the effect, so
+    the tip follows the power, not an id."""
+    return any(e.get("op") == "apply_power"
+               and e.get("power") == "kk_nereids_ascension"
+               for e in card.get("effects") or [])
+
+
 def arm_keywords_printed(description: str) -> list[ArmKeyword]:
     """The arm keywords this face prints as keywords, in table order."""
     printed = set(golded_tokens(description))
@@ -2750,7 +2759,7 @@ PLAN_CLAUSE_KINDS = {
     "first_attack_twice": "FirstAttackTwice",
     # Kokomi core pass, CHAIN OF COMMAND: "Next turn, the first Companion card
     # you play costs 0." Stolen Chapter's switch, narrowed to Companions.
-    "block_front_intent": "BlockFrontIntent",
+    "block_max_intent": "BlockMaxIntent",
     # THE CO-OP SET. Joint Orders' "They draw 2 cards" (the player captured
     # when the Plan is written) and Coordinated Strike's "each other player's
     # Attacks deal 3 additional damage" (Battle Plan's clause, mirrored).
@@ -2768,7 +2777,7 @@ PLAN_CLAUSE_KINDS = {
     # Kelp Wall's Block per status or curse, Tidecleanse's exhaust,
     # Sea Glass Harvest's transform, Turning Tide's discard-and-draw.
     "block_per_status_in_hand": "BlockPerStatusInHand",
-    "transform_statuses_in_hand": "TransformStatusesInHand",
+    "transform_statuses_in_draw_pile": "TransformStatusesInDrawPile",
     # THE RE-FOUNDING (2026-10-12). Kurage's Wake's "Add 2 Stings to your
     # hand", and Gorou's Plan lines (card paper sec.3): War Banner's "Gain 3
     # Strength this turn" and Juuga's "For 3 turns, at the end of your turn
@@ -2793,7 +2802,7 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "first_attack_twice",
                        # THE STATUS BATCH: "every status and curse" prints
                        # no size.
-                       "transform_statuses_in_hand"}
+                       "transform_statuses_in_draw_pile"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2831,7 +2840,7 @@ PLAN_ONLY_OPS = {
                  # R276. Each names the carry-out turn or the writing, so a
                  # now-line spelling would be a different, unpriced card.
                  "first_attack_twice",
-                 "block_front_intent",
+                 "block_max_intent",
                  # Kokomi core pass, Chain of Command: "next turn".
                  # THE CO-OP SET: both name the carry-out turn, and the first
                  # a player captured at writing.
@@ -2842,7 +2851,7 @@ PLAN_ONLY_OPS = {
                  "each_player_energy", "each_player_draw",
                  # THE STATUS BATCH: each reads the hand just drawn.
                  "block_per_status_in_hand",
-                 "transform_statuses_in_hand",
+                 "transform_statuses_in_draw_pile",
                  # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
                  # Gorou's two Plan lines name the carry-out turn.
                  "add_stings", "strength_this_turn", "juuga_guard"}
@@ -2853,7 +2862,7 @@ PLAN_ONLY_OPS = {
 #: adds a Block clause the base face does not print, so it is written at 0 and
 #: `KokomiPlan` carries a 0 flat Block out as nothing. The sim's twin is
 #: `kokomi_plan.PLAN_ZERO_AMOUNT_OPS`.
-PLAN_ZERO_AMOUNT_OPS = {"block_front_intent", "block",
+PLAN_ZERO_AMOUNT_OPS = {"block_max_intent", "block",
                         # POOL COMPLETION: Tactical Relay's draw, added by
                         # the upgrade.
                         "each_player_draw"}
@@ -3325,8 +3334,8 @@ APPLY_POWERS = {
     "kk_kurage_bloom": ("KurageBloomPower", None,
         "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
     "kk_watchful_shoal": ("WatchfulShoalPower", None,
-        "Whenever you write an [gold]Ethereal[/gold] card as a "
-        "[gold]Plan[/gold], gain {X} [gold]Block[/gold]."),
+        "Your [gold]Stings[/gold] deal {X} additional damage. Your "
+        "[gold]Wards[/gold] gain {X} additional [gold]Block[/gold]."),
     "kk_coordinated_tide": ("CoordinatedTidePower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out an "
         "[gold]Ethereal[/gold] card, deal {X} [gold]Hydro[/gold] damage to "
@@ -8128,7 +8137,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
         # writing card's IsUpgraded when the Plan is carried out.
-        or any(e.get("op") == "transform_statuses_in_hand"
+        or any(e.get("op") == "transform_statuses_in_draw_pile"
                for e in plan_line),
         # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
         # play time off `IsUpgraded`; the face carries its own
@@ -16735,6 +16744,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForBankDamage("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # Kokomi round 2 (2026-10-12): Nereid's Ascension's rider, the same
+        # shape -- what its "twice" covers (the Plan's debuffs too).
+        if doubles_the_first_plan(card):
+            tips_expr = (
+                "ArmKeywordTips.ForNereidsTwice("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the
         # definition of a word. A `Set off` row and the merge are PLAYABLE with
@@ -16790,6 +16805,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             # says so (`_plan_only_line`'s test, the one its target follows).
             if attach == "ArmKeywordTips.ForPlan" and is_plan_only(card):
                 attach = "ArmKeywordTips.ForPlanOnly"
+            # The Kokomi round-1 fixes (2026-10-12): a face that NAMES Plans
+            # with no Plan line of its own cannot be written, so its tip says
+            # so instead of "play it on the Bake-Kurage" (Press the
+            # Advantage, refused by the jellyfish).
+            elif attach == "ArmKeywordTips.ForPlan" and not card.get("plan"):
+                attach = "ArmKeywordTips.ForPlanNoLine"
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above

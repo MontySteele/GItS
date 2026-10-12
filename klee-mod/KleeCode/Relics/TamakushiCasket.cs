@@ -74,7 +74,12 @@ public class TamakushiCasket : CustomRelicModel
     /// between the Casket and its upgrade.</summary>
     internal static string Face(int block) =>
         "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
-      + "[blue]" + block + "[/blue] [gold]Block[/gold].";
+      + "[blue]" + block + "[/blue] [gold]Block[/gold]. A "
+      // Kokomi pre-run fixes (2026-10-12): two seats wrote Block Plans for
+      // the hit coming this turn. `ProtoBakeKuragePower.AfterPlayerTurnStart`
+      // carries Plans out after her turn-start Block clear.
+      + "[gold]Plan[/gold]'s own [gold]Block[/gold] comes at the start of "
+      + "your next turn.";
 
     /// <summary>
     /// Rule 1's jellyfish, made true by the relic too.

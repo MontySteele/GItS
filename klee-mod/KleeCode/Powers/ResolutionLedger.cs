@@ -79,6 +79,18 @@ public static class ResolutionLedger
     /// <summary>The most hits one resolution will file.</summary>
     public const int MaxHits = 40;
 
+    /// <summary>
+    /// Kokomi pre-run fixes (2026-10-12): WHO DREW, while a power draws. Four
+    /// seats over two rounds wrote that Treatise never drew; telemetry says it
+    /// drew about 0.8 a turn. Its draw was filed as a `drawn` event under
+    /// whatever card row was open (the Plan card that triggered it) or under
+    /// no card at all, so the page never named Treatise. A power that draws
+    /// sets this around its draw; <c>PlayTelemetryHooks.AfterCardDrawn</c>
+    /// files it as the event's `Power`, and the page prints it as the draw's
+    /// source. Empty everywhere else.
+    /// </summary>
+    public static string DrawSource { get; set; } = string.Empty;
+
     /// <summary>One landed hit, as the page prints it: the body, the HP that
     /// came off it, what its Block ate, and the id the page names bodies by.
     ///

@@ -1173,7 +1173,7 @@
       "damage": 3
     },
     "proto_kk_coordinated_tide": {
-      "power_amount": 2
+      "power_amount": 3
     },
     "proto_kk_coral_bulwark": {
       "block": 3
@@ -1217,6 +1217,7 @@
       "block": 3
     },
     "proto_kk_kelp_wall": {
+      "block": 2,
       "plan_block": 3
     },
     "proto_kk_kurage_barrage": {
@@ -1408,7 +1409,7 @@
       "power_amount": 5
     },
     "proto_kk_watchful_shoal": {
-      "power_amount": 1
+      "power_amount": 2
     },
     "proto_ko_adventure_club": {
       "cost": -1

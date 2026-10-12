@@ -7578,6 +7578,200 @@ Arrow dropped). The build before it is tagged
   line, "(can be written as a Plan)", and her Plan glossary row adds that any
   Companion can be written and what its carry-out does.
 
+## Kokomi round-1 fixes, 2026-10-12
+
+Defects the first Plans + Ethereal seat round found. Claude's calls; no
+design beyond the defects.
+
+- **Kelp Wall (`proto_kk_kelp_wall`):** the preview counted the hand when the
+  card was played, the carry-out counted the hand next morning, and a seat
+  saw "(Gains 12 Block)" carried out as 9 four times. The Plan now pays the
+  count of statuses and curses in the hand when it is WRITTEN, the number the
+  preview shows (`KokomiPlan.Planned.WrittenCount`, stamped by `Schedule`;
+  sim `written_count`, stamped by `kokomi_plan.schedule`). Face: "plus 3 for
+  each status or curse in your hand when written."
+- **Sea Glass Harvest (`proto_kk_sea_glass_harvest`):** its Plan found no
+  status in the carry-out hand ("0 cards transformed"). It now transforms
+  every status and curse in the DRAW PILE, so dead draws still to come
+  convert. The clause is renamed in both engines and the codegen:
+  `transform_statuses_in_hand` to `transform_statuses_in_draw_pile`,
+  `TransformStatusesInHand` to `TransformStatusesInDrawPile`.
+- **Tide Wall (`proto_kk_tide_wall`):** "plus the damage the front enemy
+  intends next turn" read to a seat as the intent shown when written. The
+  behaviour reads the front enemy's intent at carry-out, which is the attack
+  it makes that turn; the face now says "plus the front enemy's intended
+  damage." Pinned in both engines.
+- **Treatise (`proto_kk_treatise`):** no engine change. Its trigger is a
+  card that PRINTS a Plan line (`IPlannedCard`); the seat that never saw it
+  draw played Shinobu and Kirara, Companions that can be written as a Plan
+  but print no Plan line. Pinned in C#.
+- **Press the Advantage (`proto_kk_press_the_advantage`) and the 16 other
+  rows that name Plans with no Plan line:** they carried the writing tip
+  ("Instead of the line above, play it on the Bake-Kurage"), and a seat tried
+  to write Press the Advantage and was refused. The card is right (no
+  `plan:`, an enemy target); such rows now carry `ArmKeywordTips.ForPlanNoLine`
+  ("A card with a Plan line can be played on the Bake-Kurage to happen next
+  turn. This card has no Plan line."), attached by `gen_klee_cards.emit`.
+
+## Kokomi round-2 changes, 2026-10-12
+
+Source: the Fable round-1 review (session scratchpad
+`k1/fable-review-round1.md`, sec.5 "Claude can ship", changes 1-3, 5 and 6)
+and the round record `review/records/kokomi-round-1-2026-10-12.md`. Claude's
+calls at Prototype; no design beyond the review's list. Both engines; sim
+pins in `tier0/tests/test_kokomi_round2_changes_2026_10_12.py`, C# pins in
+`klee-mod/KleeTests/Prototype/KokomiRound2ChangesTests.cs`.
+
+- **The jellyfish generators at a Common attack's rate.** Jellyfish Drift
+  (`proto_kk_jellyfish_drift`) 5 to 8 damage [11]; Watatsumi Drill
+  (`proto_kk_watatsumi_drill`) 6 [9] to 8 [11]; Bubble Ward
+  (`proto_kk_bubble_ward`) 5 to 7 Block [10]. Stings and Wards unchanged.
+- **The engine Powers worth a card.** Watchful Shoal
+  (`proto_kk_watchful_shoal`) 3 [4] to 5 [7]; Coordinated Tide
+  (`proto_kk_coordinated_tide`) 4 [6] to 6 [9]; Kurage Canopy
+  (`proto_kk_kurage_canopy`) 2 [3] to 3 [4]; Grand Strategist
+  (`proto_kk_grand_strategist`) 5 [8] to 7 [10].
+- **Call the Generals (`proto_kk_call_the_generals`):** the chosen card
+  costs 0 this turn (the base game's Discovery template; still Ethereal; its
+  own cost and upgrade unchanged). The Rare Inazuma Companions cost 2 or 3,
+  so the 1-Energy card handed over a card she could not play that turn.
+  `KokomiCards.CallTheGenerals` sets `EnergyCost.SetThisTurn(0)`; the sim sets
+  `free_this_turn`.
+- **Watatsumi Muster (`proto_kk_watatsumi_muster`) and Shoal Call
+  (`proto_kk_shoal_call`):** cost 1 to 0, and Exhaust. The cards they make
+  keep their own costs. Neither has a Plan line and neither is a Companion,
+  so neither can be written (`can_be_written` / `CanBeWritten`) and the
+  no-0-cost-Plan rule holds.
+- **Tideturn (`proto_kk_tideturn`):** 6 [8] to 8 [10] per Plan waiting.
+- **Shoal of Spears (`proto_kk_shoal_of_spears`):** 4 [5] to 5 [6] a hit.
+- **Nereid's Ascension (`proto_kk_nereids_ascension`):** a hover tip,
+  `ArmKeywordTips.ForNereidsTwice` (title "Twice means twice"): "Twice means
+  twice: the Plan's debuffs, and any Tainted it causes, double too." A round-1
+  seat saw its doubled carry-out double a Plan's debuffs and the Tainted it
+  caused, unprinted. `gen_klee_cards.emit` attaches it off the row's
+  `kk_nereids_ascension` power (`doubles_the_first_plan`).
+- **Treatise (`proto_kk_treatise`):** any card that can be written as a Plan
+  counts, played without writing it (a Plan line, or a Companion card). Face:
+  "The first time each turn you play a card you could have written as a
+  Plan, draw 1 card." A carry-out is not her play: a written Companion's
+  carried-out copy draws nothing (`KokomiPlan.IsCarryingOut`, sim
+  `kk_carrying_out`). Reverses the round-1 fixes' "no engine change" note.
+- **"Entangled" (the brief's text fix):** no Kokomi row, token or tip prints
+  "Entangled" or "Tangled". In the base game both names are real: Tangled is
+  the debuff on the player (Vine Shambler's Grasping Vines) and Entangled is
+  the affliction it puts on Attack cards
+  (`docs/current/dossiers/enemies/vine-shambler.md`). No change.
+
+## Kokomi round-3 changes, 2026-10-12
+
+Source: the Fable round-2 review (session scratchpad
+`k2/fable-review-round2.md`, sec.4 "Claude can ship", changes 1-5, and the
+default of its growth pick for Watchful Shoal's shape) and the round record
+`review/records/kokomi-round-2-2026-10-12.md`. Claude's calls at Prototype;
+no design beyond the review's list. Both engines; sim pins in
+`tier0/tests/test_kokomi_round3_changes_2026_10_12.py`, C# pins in
+`klee-mod/KleeTests/Prototype/KokomiRound3ChangesTests.cs`. Pool stays 78.
+
+- **A Plan's face and an expiring Vulnerable.** The face (`PlanDamageVar`)
+  and the waiting-Plan "(after Vulnerable)" note fold the target's
+  Vulnerable only when it is 2 or more when written
+  (`KokomiPlan.VulnerableAtMorning`): it ticks down once in the enemy's turn,
+  so a Vulnerable of 1 is gone when the Plan lands. Seats read Oath 13 and
+  saw 9, Lance 27 and 18, Undertow 12 and 8. The carry-out is unchanged: it
+  reads the Vulnerable the body wears then (`ElementalHit.Deal`). C# only;
+  the sim prints no face.
+- **Coordinated Tide (`proto_kk_coordinated_tide`) on the results line.** Its
+  hit now lands inside the carry-out's window
+  (`KokomiRefounding.CoordinatedTide`, called from `KokomiPlan.ResolveEntry`
+  after the clauses, with the carrying window already closed so it is still
+  not the Plan's own reaction) and is named as a rider on the carry-out row,
+  so the page prints "Inside the same beat: Coordinated Tide 6 on X." It used
+  to land after the row was written. It now resolves before the plan bus
+  (Kurage Canopy); the sim (`kokomi_plan.coordinated_tide`) takes the same
+  order. Number and rule unchanged.
+- **Tide Wall (`proto_kk_tide_wall`):** the Plan reads the most damage any
+  one enemy intends (`KokomiOverhaulKit.MostIntendedDamage`, sim
+  `max_intent_damage`), not the front enemy's, which read 0 against the
+  Queen while her minion attacked. Still read at carry-out. Face: "Plan: Gain
+  6 Block, plus the most damage an enemy intends." The clause op is renamed
+  `block_front_intent` to `block_max_intent` (C# `Kind.BlockMaxIntent`).
+- **Treatise (`proto_kk_treatise`):** face only. "Once a turn, when you play a
+  card you could write as a Plan instead of writing it, draw 1 card." Three
+  round-2 seats read "could have written" as writing counting too. "Plan
+  card" was not used: a Companion has no Plan line and still counts.
+- **Kelp Wall (`proto_kk_kelp_wall`):** now-line "Gain 5 [7] Block. Draw 1
+  card." (was the draw alone; two rounds, five records, never a good draw).
+  Plan line unchanged.
+- **Watchful Shoal (`proto_kk_watchful_shoal`), rewritten:** "Your Stings deal
+  3 [5] additional damage. Your Wards gain 3 [5] additional Block." The base
+  game's Accuracy on the jellyfish line, the shape the review's growth pick
+  defaults to; same id, name, slot and art. A test of a growth card at
+  Prototype, not the ruling of that pick. It reaches every jellyfish number:
+  a Sting's or Ward's now-line, played or carried out by a flip, through the
+  power's `ModifyDamageAdditive` / `ModifyBlockAdditive` (so the card preview
+  shows it); a Sting's Plan line folded at writing beside her Strength
+  (`KokomiPlan.Hers` asks `WatchfulShoalPower.StingBonus`; sim `hers` asks
+  `watchful_shoal_bonus`), which is also what the Plan face previews. A Sting
+  written before the Power was played keeps its written number, as with
+  Strength. A Ward's Plan line (Weak) gains no Block. Brine Sting is not a
+  Sting. The old write-an-Ethereal-card Block payment is gone.
+
+## Kokomi pre-run fixes, 2026-10-12
+
+Source: the Fable round-3 review (session scratchpad
+`k3/fable-review-round3.md`, sec.4 "Claude can ship", items 1-7), before
+[USER]'s own Kokomi run. Claude's calls at Prototype; legibility and text
+only, no number and no rule moves. C# pins in
+`klee-mod/KleeTests/Prototype/KokomiPreRunFixesTests.cs`, page pins in
+`tier0/tests/test_kokomi_prerun_fixes_2026_10_12.py`. Pool stays 78.
+
+- **Treatise's draw is named.** `TreatisePower` flashes when it draws and sets
+  `ResolutionLedger.DrawSource` around the draw; `PlayTelemetryHooks.
+  AfterCardDrawn` files it as the `drawn` event's power, and the page's
+  "Since last page" line reads "drew X (Treatise)" instead of crediting the
+  Plan card the draw happened under, or nobody. Four seats over two rounds
+  said it never drew; telemetry says about +0.8 a turn.
+- **A written Companion is played.** The page's written-number note now says
+  a written Companion is the exception: it is played as a card next turn, so
+  her Strength and Weak then count (`KokomiCompanionPlan.CarryOut`
+  auto-plays a clone; behaviour unchanged). The Companion Plan tip
+  (`ArmKeywordTips.CompanionPlanText`): "Play it on the Bake-Kurage to write
+  it as a Plan. Next turn the Kurage applies Hydro, then it is played:
+  Strength and Weak count." The page's sheet-face line under a hand card,
+  which read "Written:", is now "Unmodified:" on every arm: on a Kokomi page
+  "written" is the Plan verb, and two seats read the sheet face as the number
+  a Plan would carry (lane 4's Drift "Written: Deal 8" under -2 Strength was
+  the card's own sheet number, not a Plan preview; the live face above it
+  folded the Strength).
+- **Tide Wall (`proto_kk_tide_wall`)**, face: "plus the most damage an enemy
+  intends when it is carried out."
+- **Tamakushi Casket** (and the Watatsumi Casket, one face), face: "At the end
+  of your turn, if a Plan is waiting, gain 3 Block. A Plan's own Block comes
+  at the start of your next turn." Plans are carried out in
+  `ProtoBakeKuragePower.AfterPlayerTurnStart`, after her turn-start Block
+  clear, so a Block Plan never meets the attacks of the turn it was written.
+  The page's Casket row follows the face word for word.
+- **`observe --define`** answers "Surrounded" and "turns you"
+  (`blindplay_notes.DEFINE_ONLY_WORDS`): the base game's facing rule, x1.5
+  from behind, a targeted card or potion turns you.
+- **Nereid's Ascension and Change of Plans.** Correct as built: the doubling is
+  the morning drain's first entry (`KokomiPlan.Drain`, `midTurn`), and a Plan
+  carried out early by Change of Plans or Spring Tide is carried out once, as
+  the face's "At the start of your turn" says. The Nereid rider tip adds "A
+  Plan carried out early is carried out once."
+- **A waiting damage Plan into Block** (page only). A front-aimed damage Plan
+  in the queue prints "(into Block N)" when the front body keeps its Block
+  through its turn (Burrowed, Barricade), run down by the Plans ahead, and
+  "(into the Block it gains on its turn)" when it intends to Defend. Block
+  that falls at the enemy's turn start is not named.
+- **Treatise's rule, checked against round 4 lane 4** ("never drew").
+  Not a bug. Every turn of that run with no extra draw was a turn its Plan
+  cards were written on the Bake-Kurage (the seat's record: "wrote both
+  Stings as plans", "never drew a card when I wrote a Plan"), which by rule
+  draws nothing; the turns it played one directly drew one (Seapunk turn 2,
+  Punch Construct turn 1). Pinned on the real rows, a generated Sting
+  included and across turns, in both engines.
+
 ## Furina Spend outlet paper, 2026-10-12
 
 `review/active/furina-spend-outlet-2026-10-12.md` sec.2, ruled 2026-10-12 at

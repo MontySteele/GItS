@@ -1279,11 +1279,11 @@
 
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
-   # Kokomi core pass: pays for playing a Plan card's now-line, not for a
-   # carry-out. "Without writing it as a Plan" = not on the Bake-Kurage.
-   # 2026-10-11 Kokomi card pass: cost 1 -> 0.
+   # Pays for a play not written on the Bake-Kurage, never a carry-out.
+   # Cost 0 (2026-10-11); Companions count (round 2); face reworded in the
+   # Kokomi round-3 changes (2026-10-12). Provenance note.
    cost: 0, type: power, rarity: uncommon,
-   description: "The first time each turn you play a card with a [gold]Plan[/gold] line without writing it as a Plan, draw 1 card.",
+   description: "Once a turn, when you play a card you could write as a [gold]Plan[/gold] instead of writing it, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1328,12 +1328,12 @@
 - {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1: the intent, read at carry-out. THE CLEANUP PASS
-   # (2026-09-29): `amount` is a flat 6 under it, because the Plan "gave 0
-   # Block twice on Empower turns" (a seat). Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the front enemy intends next turn.",
+   # R276 pick 1: the intent, read at carry-out, a flat 6 under it. Kokomi
+   # round-3 changes (2026-10-12): the LARGEST intent on the board, not the
+   # front enemy's. Provenance note.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the most damage an enemy intends when it is carried out.",
    effects: [{op: block, amount: 4}],
-   plan: [{op: block_front_intent, amount: 6}],
+   plan: [{op: block_max_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
    upgrade: {block: 2, plan_block: 3}}
 
@@ -1566,8 +1566,8 @@
    cost: 1, type: attack, rarity: uncommon,
    description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 6, count: plans_held}}],
-   # 8 each. 2026-10-11 Kokomi card pass: 4 [5] -> 6 [8].
+              amount_formula: {base: 0, per: 8, count: plans_held}}],
+   # 10 each. 2026-10-11 Kokomi card pass: 4 [5] -> 6 [8]. Kokomi round 2 (2026-10-12): 8 [10].
    upgrade: {formula_per: 2}}
 
 # MOON SIGNAL IS CUT (the status batch, 2026-10-01,
@@ -1591,18 +1591,20 @@
    authored_by: [claude],
    # The re-founding (2026-10-12): cost 1, Block now and a Ward. No upgrade
    # on the paper: the Prototype-stage default (Block +3).
+   # Kokomi round 2 (2026-10-12): Block 5 -> 7 [10].
    cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your hand.",
-   effects: [{op: block, amount: 5},
+   description: "Gain 7 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your hand.",
+   effects: [{op: block, amount: 7},
              {op: kokomi, kind: add_ward}]}
 
 - {id: proto_kk_jellyfish_drift, name: "Jellyfish Drift", character: kokomi,
    authored_by: [claude],
    # The re-founding (2026-10-12): cost 1, a hit now and a Sting. No upgrade
    # on the paper: the Prototype-stage default (damage +3).
+   # Kokomi round 2 (2026-10-12): damage 5 -> 8 [11].
    cost: 1, type: attack, rarity: common,
-   description: "Deal 5 [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your hand.",
-   effects: [{op: damage, amount: 5, target: enemy},
+   description: "Deal 8 [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your hand.",
+   effects: [{op: damage, amount: 8, target: enemy},
              {op: kokomi, kind: add_sting}]}
 
 - {id: proto_kk_brine_sting, name: "Brine Sting", character: kokomi,
@@ -1778,7 +1780,8 @@
 
 - {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
+   # Kokomi round 2 (2026-10-12): cost 1 -> 0, and Exhaust. The Stings keep their cost.
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
    # The re-founding (2026-10-12): Stings, not Nips. The Stings arrive
    # upgraded: a play-time read, the face's own swap.
    description: "Add {KkAmount:diff()} {IfUpgraded:show:upgraded |}[gold]Stings[/gold] to your hand.",
@@ -1796,8 +1799,8 @@
    # Ascension, All Streams) pays twice. `KurageCanopyPower` rides the plan
    # bus beside her Ancient.
    description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
-   effects: [{op: apply_power, power: kk_kurage_canopy, amount: 2, target: self}],
-   # 3 Block.
+   effects: [{op: apply_power, power: kk_kurage_canopy, amount: 3, target: self}],
+   # 4 Block. Kokomi round 2 (2026-10-12): 2 [3] -> 3 [4].
    upgrade: {power_amount: 1}}
 
 # --- POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
@@ -1829,9 +1832,9 @@
    # The re-founding (2026-10-12): one hit per Plan waiting (was per Plan
    # written this turn).
    description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies once for each [gold]Plan[/gold] waiting.",
-   effects: [{op: damage, amount: 4, target: all_enemies,
+   effects: [{op: damage, amount: 5, target: all_enemies,
               times: plans_held}],
-   # 5 a hit.
+   # 6 a hit. Kokomi round 2 (2026-10-12): 4 [5] -> 5 [6].
    upgrade: {damage: 1}}
 
 - {id: proto_kk_seas_reproach, name: "Sea's Reproach", character: kokomi,
@@ -1871,15 +1874,16 @@
 - {id: proto_kk_kelp_wall, name: "Kelp Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # The count is read when the clause runs; a card an earlier Plan of the
-   # same morning drew is counted.
-   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: draw, amount: 1}],
+   # The count is the hand WHEN THE PLAN IS WRITTEN (round-1 fixes); the
+   # now-line gains 5 [7] Block before its draw (Kokomi round-3 changes,
+   # 2026-10-12). Provenance note.
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand when written.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block, amount: 5}, {op: draw, amount: 1}],
    plan: [{op: block, amount: 9},
           {op: block_per_status_in_hand, amount: 3}],
-   # Plan 12; the rate does not upgrade. 2026-10-11 Kokomi card pass: 7 [10]
-   # -> 9 [12].
-   upgrade: {plan_block: 3}}
+   # now 7 Block; Plan 12; the rate does not upgrade. 2026-10-11 Kokomi card
+   # pass: 7 [10] -> 9 [12].
+   upgrade: {block: 2, plan_block: 3}}
 
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
@@ -1895,11 +1899,12 @@
 - {id: proto_kk_sea_glass_harvest, name: "Sea Glass Harvest", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Defect's Compact on the next hand, curses included. Sea Glass is a token
-   # in no pool: 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   # Defect's Compact on the draw pile, curses included (Kokomi round-1
+   # fixes, 2026-10-12; provenance note). Sea Glass is a token in no pool:
+   # 0, "Gain 1 [2] Energy. Exhaust."
+   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
    effects: [{op: block, amount: 10}],
-   plan: [{op: transform_statuses_in_hand}],
+   plan: [{op: transform_statuses_in_draw_pile}],
    # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13].
    # 13 Block; the Sea Glass arrives upgraded.
    upgrade: {block: 3, upgraded_grant: true}}
@@ -1965,10 +1970,10 @@
 - {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your hand.",
-   effects: [{op: damage, amount: 6, target: enemy},
+   description: "Deal 8 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your hand.",
+   effects: [{op: damage, amount: 8, target: enemy},
              {op: kokomi, kind: add_ward}],
-   # 9 damage.
+   # 11 damage. Kokomi round 2 (2026-10-12): 6 [9] -> 8 [11].
    upgrade: {damage: 3}}
 
 - {id: proto_kk_orders_from_the_shrine, name: "Orders from the Shrine", character: kokomi,
@@ -1990,7 +1995,9 @@
 
 - {id: proto_kk_watatsumi_muster, name: "Watatsumi Muster", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
+   # Kokomi round 2 (2026-10-12): cost 1 -> 0, and Exhaust. The cards it makes keep
+   # their own costs.
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
    description: "Add {KkAmount} random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] cards to your hand. They are [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: add_companions, amount: 2}],
    upgrade: {upgraded_grant: true}}
@@ -2020,19 +2027,22 @@
 
 - {id: proto_kk_watchful_shoal, name: "Watchful Shoal", character: kokomi,
    authored_by: [claude],
+   # Kokomi round-3 changes (2026-10-12): the jellyfish line's Accuracy.
+   # Same id, name and art; both lines of a Sting, a Ward's now-line.
+   # Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you write an [gold]Ethereal[/gold] card as a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
+   description: "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} additional [gold]Block[/gold].",
    effects: [{op: apply_power, power: kk_watchful_shoal, amount: 3, target: self}],
-   # 4 Block.
-   upgrade: {power_amount: 1}}
+   # 5 and 5.
+   upgrade: {power_amount: 2}}
 
 - {id: proto_kk_coordinated_tide, name: "Coordinated Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "Whenever the [gold]Bake-Kurage[/gold] carries out an [gold]Ethereal[/gold] card, deal {PowerAmount:diff()} [gold]Hydro[/gold] damage to the front enemy.",
-   effects: [{op: apply_power, power: kk_coordinated_tide, amount: 4, target: self}],
-   # 6 damage.
-   upgrade: {power_amount: 2}}
+   effects: [{op: apply_power, power: kk_coordinated_tide, amount: 6, target: self}],
+   # 9 damage. Kokomi round 2 (2026-10-12): 4 [6] -> 6 [9].
+   upgrade: {power_amount: 3}}
 
 - {id: proto_kk_reserves, name: "Reserves", character: kokomi,
    authored_by: [claude],
@@ -2072,14 +2082,16 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    description: "Whenever a [gold]Plan[/gold] causes an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies.",
-   effects: [{op: apply_power, power: kk_grand_strategist, amount: 5, target: self}],
-   # 8 damage.
+   effects: [{op: apply_power, power: kk_grand_strategist, amount: 7, target: self}],
+   # 10 damage. Kokomi round 2 (2026-10-12): 5 [8] -> 7 [10].
    upgrade: {power_amount: 3}}
 
 - {id: proto_kk_call_the_generals, name: "Call the Generals", character: kokomi,
    authored_by: [claude],
+   # Kokomi round 2 (2026-10-12): the chosen card costs 0 this turn (the base game's
+   # Discovery template).
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 1 of 3 random Rare Inazuma [gold]Companion[/gold] cards. Add it to your hand. It is [gold]Ethereal[/gold].",
+   description: "Choose 1 of 3 random Rare Inazuma [gold]Companion[/gold] cards. Add it to your hand. It is [gold]Ethereal[/gold]. It costs 0 this turn.",
    effects: [{op: kokomi, kind: call_the_generals}],
    upgrade: {cost: -1}}
 

@@ -144,11 +144,11 @@ public class WatatsumiCasketTests
         Assert.Equal(5, WatatsumiCasket.WatatsumiBlock);
         Assert.Equal(
             "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
-          + "[blue]3[/blue] [gold]Block[/gold].",
+          + "[blue]3[/blue] [gold]Block[/gold]." + KokomiPreRunFixesTests.CasketTail,
             Face(Bare<TamakushiCasket>()));
         Assert.Equal(
             "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
-          + "[blue]5[/blue] [gold]Block[/gold].",
+          + "[blue]5[/blue] [gold]Block[/gold]." + KokomiPreRunFixesTests.CasketTail,
             Face(Bare<WatatsumiCasket>()));
     }
 

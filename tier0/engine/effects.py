@@ -1561,6 +1561,8 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
     base += sum(state.player.powers.get(f"tag_damage_{t}", 0)
                 for t in card.tags)
+    # Watchful Shoal (Kokomi round-3 changes): Kokomi's Accuracy on a Sting.
+    base += kokomi_plan.watchful_shoal_bonus(state, card, kokomi_plan.STING_ID)
     # PhantomBladesPower pays only on the FIRST tagged card played each turn
     # ("num > 0 -> return 0", counting CardPlaysFinished this turn). The
     # playing card has not finished, so the first one sees a count of zero
@@ -1692,6 +1694,9 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     # per play off a state latch, which under-counted every multi-gain card.
     # Frail bites it, exactly as the hook order does: the enchant additive
     # lands before the multiplicative listeners.
+    # Watchful Shoal (Kokomi round-3 changes): a Ward's extra Block, an
+    # additive like Dexterity, so Frail bites it.
+    raw += kokomi_plan.watchful_shoal_bonus(state, card, kokomi_plan.WARD_ID)
     for _ in range(times):
         amount = raw + card.enchant_block
         # Frail bites each printed card-block gain before the refpower funnel.
@@ -5138,7 +5143,7 @@ OPS = {
     # THE CO-OP SET's two Plan clauses about another player (`engine/coop.py`).
     coop.ALLY_DRAW: _op_kokomi_plan_only,
     coop.OTHERS_ATTACK_DAMAGE_THIS_TURN: _op_kokomi_plan_only,
-    "block_front_intent": _op_kokomi_plan_only,
+    "block_max_intent": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
     # and re-aim what is already written (Converging Tide). They are the
@@ -5152,7 +5157,7 @@ OPS = {
     # THE STATUS BATCH (2026-10-01): plan-only clauses that read the hand
     # just drawn.
     "block_per_status_in_hand": _op_kokomi_plan_only,
-    "transform_statuses_in_hand": _op_kokomi_plan_only,
+    "transform_statuses_in_draw_pile": _op_kokomi_plan_only,
     # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's
     # two Plan lines and a written Companion's clause.
     "add_stings": _op_kokomi_plan_only,
