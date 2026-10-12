@@ -118,10 +118,12 @@ def test_a_wolfpack_copy_exhausts_and_fires_again(varka):
 
 
 def test_the_sheet_strings(varka):
+    # The Pyro pass (2026-10-11, pick 1 b): the Exhaust is an optional rider.
     assert _row(_vk("stoke_the_flames"))["description"] == (
-        "[gold]Exhaust[/gold] a card. [gold]Pyro[/gold] becomes your "
-        "[gold]current element[/gold]. Gain {VkAmount:diff()} "
-        "[gold]Pyro[/gold] [gold]Oath[/gold].")
+        "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your "
+        "next Attack deals {PowerAmount:diff()} additional damage. You may "
+        "[gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] "
+        "[gold]Oath[/gold].")
     assert _row(_vk("wolfpack"))["description"] == (
         "Whenever you play Four Winds' Ascension, shuffle a copy of it into "
         "your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].")
@@ -131,8 +133,10 @@ def test_the_sheet_strings(varka):
         "Whenever another card would, gain 1 [gold]Oath[/gold] of your "
         "[gold]current element[/gold] instead.")
     # Numbers held.
-    assert _row(_vk("stoke_the_flames"))["upgrade"] == {"varka_amount": 1}
+    assert _row(_vk("stoke_the_flames"))["upgrade"] == {"varka_amount": 1,
+                                                        "buff": 2}
     ember = _row(_vk("ember_cleave"))
     assert ember["upgrade"] == {"varka_base": 3}
     assert ember["effects"][0]["base"] == 9
-    assert ember["effects"][2]["amount"] == 1
+    assert ember["effects"][1]["amount"] == 1
+    assert ember["effects"][2]["kind"] == "exhaust_for_pyro_oath"

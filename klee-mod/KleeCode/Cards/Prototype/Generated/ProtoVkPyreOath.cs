@@ -38,20 +38,21 @@ public sealed class ProtoVkPyreOath : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_pyre_oath");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ashen Oath"),
-        ("description", "[gold]Exhaust[/gold] a card. Whenever you [gold]Exhaust[/gold] a card, gain 2 [gold]Pyro[/gold] [gold]Oath[/gold]."),
+        ("description", "Gain {PowerAmount:diff()} [gold]Strength[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 2m),
+            new DynamicVar("VkAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,26 +64,12 @@ public sealed class ProtoVkPyreOath : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<PyreOathPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
-        {
-            ExhaustSelection.Open(this);
-            var toExhaust = (await CardSelectCmd.FromHand(
-                choiceContext, Owner,
-                new CardSelectorPrefs(
-                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
-                static _ => true, this)).ToList();
-            foreach (var victim in toExhaust)
-            {
-                ExhaustSelection.Record(this, victim);
-                await CardCmd.Exhaust(choiceContext, victim);
-            }
-
-            ExhaustSelection.Close(this);
-        }
+        await PowerCmd.Apply<StrengthPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await VarkaCards.PyroOath(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

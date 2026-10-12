@@ -424,8 +424,6 @@ internal static class KleePowerIcons
         AssemblyAtTheCathedralPower =>
             KleePck.Path("klee/powers/study_buddy.png"),
         WildfireOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
-        // The combo pass (2026-10-04): Pyro's Exhaust engine.
-        PyreOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
         RetaliatingTidePower => KleePck.Path("varka/powers/hydro_wind.png"),
         AbsoluteZeroPower => KleePck.Path("varka/powers/cryo_wind.png"),
         OathUntoDeathPower =>

@@ -7380,6 +7380,35 @@ Blade is weak."
   first offered Knight of the current element, else the first offered
   (`varka_oath.order_answers_pick`).
 
+## Varka Pyro pass, 2026-10-11
+
+Paper `review/active/varka-pyro-pass-2026-10-11.md`, pick 1 ruled (b):
+"I lean towards b) which allows for some tactical use of Exhaust vs status
+enemies, bit I agree that we need something better as the main engine."
+
+- **Ashen Oath** (`proto_vk_pyre_oath`, id kept): "Gain 2 [3] Strength. Gain
+  2 Pyro Oath.", was the Exhaust-trigger power, upgrade Innate. Its power
+  (`vk_pyre_oath`, C# `PyreOathPower`) had no other card and is deleted in
+  both engines. The gain is the new `pyro_oath` kind, which switches
+  nothing (Stoke's `gain_pyro_oath` switches first).
+- **Stoke the Flames**: "Gain 2 [3] Pyro Oath. Your next Attack deals 3 [5]
+  additional damage. You may Exhaust a card for 1 additional Pyro Oath." It
+  still makes Pyro current first; the paper's "Pyro becomes your current
+  element." and the rider's "If you do, gain 1 more" did not fit the
+  120-character, 4-sentence ceiling and "N additional" rule, so the switch
+  prints as the switch tip (Ember Cleave's) and the rider reads "for 1
+  additional". The bonus is the existing `buff_next_attack`
+  (`NextAttackUpPower`, Vanguard's Valor's). Bennett's Passion Overload
+  power also applies Pyro, so it was not reused; the existing power lasts
+  until the next Attack, so the face drops the paper's "this turn".
+- **Ember Cleave**: "Deal 9 [12] Pyro damage. Gain 1 Pyro Oath. You may
+  Exhaust a card for 1 additional Pyro Oath."
+- **Blazing Charge**: base 8 [11], was 5 [7]; 2 per Pyro Oath unchanged.
+- The rider is the new `exhaust_for_pyro_oath` kind: a 0-to-1 hand pick
+  (Purity's `CardSelectorPrefs(prompt, 0, n)`), any card, a Status or Curse
+  included; no pick or an empty hand pays nothing. The sim's pilot takes it
+  only when the hand holds a Status or a Curse.
+
 ## Furina: the diversity pass, 2026-10-11
 
 `review/active/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled

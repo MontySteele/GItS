@@ -377,8 +377,9 @@ def test_the_switch_element_each_row_declares():
         "pathfinders_mark": None, "noelle_steadfast_maid": None,
         "northwind_avatar": None,
         # The combo pass (2026-10-04): Gale Mantle left; its Pyro and Cryo
-        # cards declare their own element, and Stoke the Flames applies none.
-        "stoke_the_flames": None, "ember_cleave": "pyro",
+        # cards declare their own element. Stoke the Flames applies none,
+        # but since the Pyro pass (2026-10-11) its gain's switch is tipped.
+        "stoke_the_flames": "pyro", "ember_cleave": "pyro",
         "pyre_oath": None, "shatter": "cryo", "deep_freeze": "cryo",
     }
     got = {k: gen.varka_switch_element(rows[_vk(k)], profile) for k in want}

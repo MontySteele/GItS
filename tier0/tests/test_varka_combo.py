@@ -15,7 +15,7 @@ import pytest
 from tier0.content import loader
 from tier0.engine import combat, effects
 from tier0.engine import varka_oath as V
-from tier0.engine.state import CombatState, Enemy
+from tier0.engine.state import Card, CombatState, Enemy
 
 
 @pytest.fixture
@@ -63,6 +63,11 @@ def _led(st):
     return V.ledger(st.player)
 
 
+def _burn():
+    return Card(id="burn", name="Burn", cost=0, type="status",
+                rarity="status", effects=[])
+
+
 def _pool():
     return {c.id: c for c in loader.prototype_cards()
             if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"}
@@ -101,7 +106,8 @@ def test_the_new_rows_and_their_upgrades(varka):
     assert (cleave.cost, cleave.type) == (1, "attack")
     pyre = loader.get_card(_vk("pyre_oath"))
     assert (pyre.cost, pyre.type, pyre.innate) == (1, "power", False)
-    assert loader.get_card(_vk("pyre_oath") + "+").innate is True
+    # The Pyro pass (2026-10-11): the upgrade is 3 Strength, not Innate.
+    assert loader.get_card(_vk("pyre_oath") + "+").innate is False
     shatter = loader.get_card(_vk("shatter"))
     assert (shatter.cost, shatter.type) == (1, "attack")
     freeze = loader.get_card(_vk("deep_freeze"))
@@ -113,17 +119,34 @@ def test_the_new_rows_and_their_upgrades(varka):
 # 2. Pyro burns.
 # ---------------------------------------------------------------------------
 
-def test_stoke_the_flames_exhausts_a_chosen_card_and_gains_2_pyro(varka):
+def test_stoke_the_flames_gains_2_pyro_and_powers_the_next_attack(varka):
+    # The Pyro pass (2026-10-11, pick 1 b): "Pyro becomes your current
+    # element. Gain 2 Pyro Oath. Your next Attack deals 3 additional damage.
+    # You may Exhaust a card. If you do, gain 1 more Pyro Oath."
     st = _state(element="hydro")
     st.player.hand = [loader.get_card("defend")]
     _play(st, _vk("stoke_the_flames"))
-    assert [c.id for c in st.player.exhaust_pile] == ["defend"]
+    # The sim's pilot spends no card of his own on the rider.
+    assert st.player.exhaust_pile == []
     assert _led(st).oath["pyro"] == 2
+    assert st.player.powers["next_attack_up"] == 3
     # The 2026-10-05 seat round: "Pyro becomes your current element."
     assert _led(st).current == "pyro"
-    st.player.hand = [loader.get_card("defend")]
     _play(st, _vk("stoke_the_flames") + "+")
     assert _led(st).oath["pyro"] == 2 + 3
+    assert st.player.powers["next_attack_up"] == 3 + 5
+
+
+def test_stoke_the_flames_rider_exhausts_a_status_for_1_more(varka):
+    st = _state(element="hydro")
+    st.player.hand = [loader.get_card("defend"), _burn()]
+    _play(st, _vk("stoke_the_flames"))
+    assert [c.id for c in st.player.exhaust_pile] == ["burn"]
+    assert _led(st).oath["pyro"] == 2 + V.EXHAUST_RIDER_OATH
+    st = _state(element="hydro")
+    st.player.hand = []                             # an empty hand: nothing
+    _play(st, _vk("stoke_the_flames"))
+    assert _led(st).oath["pyro"] == 2
 
 
 def test_stoke_the_flames_switches_before_its_gain(varka):
@@ -148,13 +171,13 @@ def test_the_banner_holds_stoke_the_flames(varka):
     assert led.oath["pyro"] == 2 and led.oath["electro"] == 1
 
 
-def test_ember_cleave_hits_9_pyro_then_exhausts(varka):
+def test_ember_cleave_hits_9_pyro_and_gains_1(varka):
     st = _state()
     st.player.hand = [loader.get_card("defend")]
     _play(st, _vk("ember_cleave"))
     e = st.enemies[0]
     assert e.hp == 91 and e.aura == "pyro"
-    assert [c.id for c in st.player.exhaust_pile] == ["defend"]
+    assert st.player.exhaust_pile == []             # the rider is optional
     # Its own application, then the Varka payoff fix's (2026-10-08) "Gain 1
     # Pyro Oath".
     assert _led(st).oath["pyro"] == 1 + 1
@@ -162,6 +185,16 @@ def test_ember_cleave_hits_9_pyro_then_exhausts(varka):
     st = _state()
     _play(st, _vk("ember_cleave") + "+")
     assert st.enemies[0].hp == 88
+
+
+def test_ember_cleave_rider_exhausts_a_status_for_1_more(varka):
+    # The Pyro pass (2026-10-11, pick 1 b): "You may Exhaust a card. If you
+    # do, gain 1 more Pyro Oath."
+    st = _state(element="hydro")
+    st.player.hand = [_burn()]
+    _play(st, _vk("ember_cleave"))
+    assert [c.id for c in st.player.exhaust_pile] == ["burn"]
+    assert _led(st).oath["pyro"] == 1 + 1 + V.EXHAUST_RIDER_OATH
 
 
 def test_ember_cleave_gains_its_oath_with_nothing_to_exhaust(varka):
@@ -173,31 +206,21 @@ def test_ember_cleave_gains_its_oath_with_nothing_to_exhaust(varka):
     assert _led(st).oath["pyro"] == 1 + 1
 
 
-def test_pyre_oath_lands_first_then_its_own_exhaust_pays(varka):
-    # Varka payoff fix (2026-10-08): "Exhaust a card" on play (the paper's
-    # "up to 2", read as exactly 1: `exhaust_from` takes no "up to"). The
-    # Power goes on first, so its own Exhaust pays (2 Oath since Ashen Oath,
-    # the forced-Amber round, 2026-10-10).
-    st = _state(element="hydro")
-    st.player.hand = [loader.get_card("defend")]
-    _play(st, _vk("pyre_oath"))
-    assert [c.id for c in st.player.exhaust_pile] == ["defend"]
-    assert _led(st).oath["pyro"] == 2
-
-
-def test_ashen_oath_gains_2_pyro_per_exhausted_card(varka):
-    # The forced-Amber round (2026-10-10): Pyre Oath is Ashen Oath and pays 2
-    # a card. The id is kept.
+def test_ashen_oath_gains_2_strength_and_2_pyro_oath(varka):
+    # The Pyro pass (2026-10-11): "Gain 2 [3] Strength. Gain 2 Pyro Oath."
+    # Its gain switches nothing; the Exhaust-trigger power left with it.
     assert loader.get_card(_vk("pyre_oath")).name == "Ashen Oath"
+    assert not hasattr(V, "PYRE_OATH")
     st = _state(element="hydro")
-    _play(st, _vk("pyre_oath"))
-    assert st.player.powers[V.PYRE_OATH] == 2
+    led = _led(st)
+    led.current = "electro"
     st.player.hand = [loader.get_card("defend")]
-    _play(st, _vk("stoke_the_flames"))
-    assert _led(st).oath["pyro"] == 2 + 2
-    # A card that exhausts itself is an Exhaust too.
-    _play(st, _vk("dawn_patrol"))
-    assert _led(st).oath["pyro"] == 6
+    _play(st, _vk("pyre_oath"))
+    assert st.player.powers["strength"] == 2
+    assert led.oath["pyro"] == 2 and led.current == "electro"
+    assert [c.id for c in st.player.hand] == ["defend"]
+    _play(st, _vk("pyre_oath") + "+")
+    assert st.player.powers["strength"] == 2 + 3
 
 
 # ---------------------------------------------------------------------------

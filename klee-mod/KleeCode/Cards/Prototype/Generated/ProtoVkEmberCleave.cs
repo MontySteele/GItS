@@ -53,7 +53,7 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ember Cleave"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]."),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -73,22 +73,8 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await VarkaCards.PyroStrike(choiceContext, this, cardPlay);
-        {
-            ExhaustSelection.Open(this);
-            var toExhaust = (await CardSelectCmd.FromHand(
-                choiceContext, Owner,
-                new CardSelectorPrefs(
-                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
-                static _ => true, this)).ToList();
-            foreach (var victim in toExhaust)
-            {
-                ExhaustSelection.Record(this, victim);
-                await CardCmd.Exhaust(choiceContext, victim);
-            }
-
-            ExhaustSelection.Close(this);
-        }
         await VarkaCards.GainPyroOath(choiceContext, this, cardPlay);
+        await VarkaCards.ExhaustForPyroOath(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
