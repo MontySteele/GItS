@@ -2457,6 +2457,23 @@ def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):
     assert st.player.block == 9, "a non-attack intent reads 0, plus 9"
 
 
+def test_tide_wall_reads_the_intent_shown_at_carry_out(overhaul):
+    """Kokomi round-1 fixes (2026-10-12): the face says "the front enemy's
+    intended damage", and it is the intent ON SCREEN WHEN THE PLAN IS
+    CARRIED OUT -- the attack that enemy makes that turn -- not the one shown
+    when it was written. Written over a 5; the intent moves on to a 14; the
+    Plan pays 6 + 14."""
+    front = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 5},
+                                       {"kind": "attack", "amount": 14}])
+    st = kokomi_state(enemies=[front])
+    st.player.block = 0
+    assert kokomi_plan.front_intent_damage(st) == 5
+    kokomi_plan.schedule(st, _arm_card("proto_kk_tide_wall"))
+    front.intent_index += 1
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == 6 + 14
+
+
 # --- the Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md) ---
 
 def _up(cid):

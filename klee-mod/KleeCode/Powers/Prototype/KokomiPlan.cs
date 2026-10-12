@@ -152,13 +152,17 @@ public static class KokomiPlan
         EachPlayerEnergy,
         EachPlayerDraw,
         // THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-
-        // 2026-10-01.md). Plans that read the hand just drawn, which rule 2's
-        // after-the-draw resolution is what makes possible: Kelp Wall's Block
-        // per status or curse and Sea Glass Harvest's transform into Sea
-        // Glass. Bodies in <see cref="KokomiStatusBatch"/>; sim twins
-        // `kokomi_plan`, the same names.
+        // 2026-10-01.md): Kelp Wall's Block per status or curse and Sea Glass
+        // Harvest's transform into Sea Glass. THE KOKOMI ROUND-1 FIXES
+        // (2026-10-12): both used to read the hand at carry-out, which seats
+        // found empty of the statuses they wrote the Plan for. Kelp Wall now
+        // counts the hand WHEN WRITTEN (<see cref="Planned.WrittenCount"/>,
+        // stamped by <see cref="Schedule"/>: the number the preview showed)
+        // and Sea Glass Harvest transforms the DRAW PILE. Bodies in
+        // <see cref="KokomiStatusBatch"/>; sim twins `kokomi_plan`, the same
+        // names.
         BlockPerStatusInHand,
-        TransformStatusesInHand,
+        TransformStatusesInDrawPile,
         // THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-
         // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
         // Gorou's War Banner "Gain 3 Strength this turn" and Juuga "For 3
@@ -235,10 +239,15 @@ public static class KokomiPlan
     /// printed number, the hit when she lost no HP since the Plan was
     /// written; <paramref name="WrittenHp"/> is her HP at that moment,
     /// stamped by <see cref="Schedule"/> and null until then.</para>
+    /// <para><paramref name="WrittenCount"/> (Kokomi round-1 fixes,
+    /// 2026-10-12) is Kelp Wall's count of statuses and curses in her hand
+    /// when the Plan was written, stamped by <see cref="Schedule"/>; null on
+    /// a clause no writer stamped, which reads the hand.</para>
     public readonly record struct Planned(
         Kind Kind, int Amount, Aim Aim, CardModel? Card = null,
         int Times = 1, IReadOnlyList<string>? Targets = null,
-        int Alt = 0, int? WrittenHp = null, int StrengthTimes = 1);
+        int Alt = 0, int? WrittenHp = null, int StrengthTimes = 1,
+        int? WrittenCount = null);
 
     /// <summary>
     /// ONE PLAN: the card that wrote it and the clauses it wrote. The card is
@@ -889,6 +898,22 @@ public static class KokomiPlan
                 }
             }
             label = AimedLabel(source, caught);
+        }
+        // KELP WALL COUNTS AT WRITING TIME (Kokomi round-1 fixes,
+        // 2026-10-12): "plus 3 for each status or curse in your hand when
+        // written" is the hand on screen NOW, the number the face's preview
+        // (<see cref="PlanStatusBlockVar"/>) printed. Sim twin:
+        // `kokomi_plan.schedule`, `written_count`.
+        if (body.Any(c => c.Kind == Kind.BlockPerStatusInHand))
+        {
+            var heldNow = KokomiStatusBatch.StatusesInHand(player);
+            for (var i = 0; i < body.Count; i++)
+            {
+                if (body[i].Kind == Kind.BlockPerStatusInHand)
+                {
+                    body[i] = body[i] with { WrittenCount = heldNow };
+                }
+            }
         }
         // THE CO-OP SET, JOINT ORDERS: "Plan: They draw 2 cards" remembers
         // the player it is for, and it is fixed HERE, when the Plan is
@@ -2240,12 +2265,13 @@ public static class KokomiPlan
                 await PlayCopy(choiceContext, kokomi, plan.Card);
                 return null;
 
-            // THE STATUS BATCH (2026-10-01). Each reads the hand as it
-            // stands when the clause runs.
+            // THE STATUS BATCH (2026-10-01). Kelp Wall pays the count it was
+            // written with; Sea Glass Harvest reads the draw pile now
+            // (Kokomi round-1 fixes, 2026-10-12).
             case Kind.BlockPerStatusInHand:
                 return await KokomiStatusBatch.BlockPerStatus(
-                    kokomi, plan.Amount);
-            case Kind.TransformStatusesInHand:
+                    kokomi, plan.Amount, plan.WrittenCount);
+            case Kind.TransformStatusesInDrawPile:
                 return await KokomiStatusBatch.TransformStatuses(
                     player, entry?.Source?.IsUpgraded ?? false);
         }
@@ -2288,7 +2314,7 @@ public static class KokomiPlan
         // The two riders produce no number at all and fall to the default.
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",
-        Kind.TransformStatusesInHand => "cards transformed",
+        Kind.TransformStatusesInDrawPile => "cards transformed",
         // THE RE-FOUNDING (2026-10-12).
         Kind.AddStings => "cards added",
         Kind.StrengthThisTurn => "Strength",
@@ -2318,9 +2344,11 @@ public static class KokomiPlan
         Kind.BlockFrontIntent =>
             KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
                 + plan.Amount,
-        // THE STATUS BATCH: Kelp Wall's rate times the statuses in hand.
+        // THE STATUS BATCH: Kelp Wall's rate times the statuses in hand
+        // when the Plan was written (Kokomi round-1 fixes, 2026-10-12).
         Kind.BlockPerStatusInHand =>
-            plan.Amount * KokomiStatusBatch.StatusesInHand(kokomi.Player),
+            plan.Amount * (plan.WrittenCount
+                ?? KokomiStatusBatch.StatusesInHand(kokomi.Player)),
         _ => plan.Amount,
     };
 

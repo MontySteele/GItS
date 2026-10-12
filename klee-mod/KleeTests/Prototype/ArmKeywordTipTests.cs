@@ -390,7 +390,11 @@ public class ArmKeywordTipTests
         // FORTY with the Kokomi pre-round fixes (2026-10-12):
         // `ForCompanionPlan`, a live rider titled "Plan" on a Companion she
         // holds ("any Companion can be written as a Plan").
-        Assert.Equal(40, attaches.Count);
+        // FORTY-ONE with the Kokomi round-1 fixes (2026-10-12):
+        // `ForPlanNoLine`, the Plan tip on a face that names Plans and has
+        // no Plan line (Press the Advantage was refused by the jellyfish).
+        Assert.Equal(41, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");
         Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");

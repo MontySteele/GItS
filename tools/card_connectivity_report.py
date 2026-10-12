@@ -636,8 +636,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # discard-then-draw, each on the vocabulary its base-game twin uses.
     "block_per_status_in_hand": [_hook("shared", "hand_contents", "read"),
                                  _hook("shared", "block_held", "write")],
-    "transform_statuses_in_hand": [_hook("shared", "junk_remove", "write"),
-                                   _hook("shared", "hand_contents", "write")],
+    # Sea Glass Harvest reads the DRAW PILE since the Kokomi round-1 fixes
+    # (2026-10-12): the Plan converts the dead draws still to come.
+    "transform_statuses_in_draw_pile": [
+        _hook("shared", "junk_remove", "write"),
+        _hook("shared", "draw_pile", "write")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

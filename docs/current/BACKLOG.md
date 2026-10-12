@@ -80,6 +80,9 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 
+- Incoming lists Ripple Basin ("if you did not play any Attacks this turn, gain 4 Block") under "Not counted" because no wire field says whether an Attack was played this turn (`ResolutionLedger` rows carry no card type); add the type (or an attacks-played count) to the bridge and fold the Block in `blindplay_render._turn_end_facts`. A Kokomi seat added it by hand (round 2026-10-12, lane 1).
+- Albedo — Dust of Purification is a Companion Kokomi can write as a Plan, and its body ("Exhaust every status in your hand ... draw 1 card for each") reads the hand at carry-out, the defect Kelp Wall and Sea Glass Harvest had; flagged in the Kokomi round-1 fixes, not redesigned.
+
 - No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
 - Incoming ignores Mines that fire first and Look Out!'s Block from them; the "Put Mine N on ..." lines after Big Badda Boom read as five Mines from one Bomb.
 - Ka-pow!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.

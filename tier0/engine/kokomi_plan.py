@@ -76,7 +76,7 @@ PLAN_KINDS = frozenset((
     "each_player_energy", "each_player_draw",
     # THE STATUS BATCH (2026-10-01): clauses that read the hand just drawn.
     # See `BLOCK_PER_STATUS_IN_HAND`.
-    "block_per_status_in_hand", "transform_statuses_in_hand",
+    "block_per_status_in_hand", "transform_statuses_in_draw_pile",
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and Gorou's two
     # Plan lines. See `ADD_STINGS` and the two beside it.
     "add_stings", "strength_this_turn", "juuga_guard",
@@ -98,7 +98,7 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     # R276. A switch: "your first Attack" has no size to print.
     "first_attack_twice",
     # THE STATUS BATCH: "every status and curse".
-    "transform_statuses_in_hand",
+    "transform_statuses_in_draw_pile",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -174,18 +174,23 @@ PLAN_ONLY_OPS = frozenset((
                            # THE STATUS BATCH: each reads the hand just
                            # drawn, which only a Plan can see.
                            "block_per_status_in_hand",
-                           "transform_statuses_in_hand",
+                           "transform_statuses_in_draw_pile",
                            # THE RE-FOUNDING: each names the carry-out turn.
                            "add_stings", "strength_this_turn",
                            "juuga_guard"))
 
 #: THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md).
-#: Kelp Wall's "plus 3 for each status or curse in your hand" and Sea Glass
-#: Harvest's transform. "In your hand" is the hand just drawn, read when the
-#: clause runs. `KokomiPlan.Kind.BlockPerStatusInHand` and the one beside it are
-#: the twins; the bodies are `KokomiStatusBatch`.
+#: Kelp Wall's "plus 3 for each status or curse in your hand when written" and
+#: Sea Glass Harvest's transform. THE KOKOMI ROUND-1 FIXES (2026-10-12): both
+#: used to read the hand at carry-out, which seats found empty of the
+#: statuses they wrote the Plan for. Kelp Wall now counts the hand WHEN THE
+#: PLAN IS WRITTEN (`schedule` stamps `written_count` on the clause, the
+#: number the face's preview showed) and Sea Glass Harvest transforms the
+#: DRAW PILE, so the dead draws still to come convert.
+#: `KokomiPlan.Kind.BlockPerStatusInHand` and the one beside it are the twins;
+#: the bodies are `KokomiStatusBatch`.
 BLOCK_PER_STATUS_IN_HAND = "block_per_status_in_hand"
-TRANSFORM_STATUSES_IN_HAND = "transform_statuses_in_hand"
+TRANSFORM_STATUSES_IN_DRAW_PILE = "transform_statuses_in_draw_pile"
 #: Sea Glass Harvest's token, in no pool. `SeaGlass.cs` is the twin.
 SEA_GLASS = "kk_sea_glass"
 
@@ -374,7 +379,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
         # times", on the flat hit only.
         if op == "damage":
             allowed.add("strength_times")
-        if op == TRANSFORM_STATUSES_IN_HAND:
+        if op == TRANSFORM_STATUSES_IN_DRAW_PILE:
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
@@ -843,6 +848,15 @@ def schedule(state: CombatState, card: Card,
                 if c.get("target") == "enemies_intending_attack" else c
                 for c in body]
         label = plan_aimed_label(card, caught)
+    # KELP WALL COUNTS AT WRITING TIME (Kokomi round-1 fixes, 2026-10-12):
+    # "plus 3 for each status or curse in your hand when written" is the hand
+    # on screen NOW, the number the face's preview printed. Copied, never
+    # mutated, for Flank's reason above. `KokomiPlan.Schedule` is the twin.
+    if any(c.get("op") == BLOCK_PER_STATUS_IN_HAND for c in body):
+        held_now = len(statuses_in_hand(state))
+        body = [dict(c, written_count=held_now)
+                if c.get("op") == BLOCK_PER_STATUS_IN_HAND else c
+                for c in body]
     # All Streams Flow to the Sea's pending gift, taken by the first Plan
     # written after it this turn (a count of 0 is still taken: "once, plus
     # once for each Plan cancelled" with none cancelled is once).
@@ -1519,8 +1533,8 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == PLAY_COPY_OF_COMPANION:
         _play_copy(state, entry.card)
     elif op == BLOCK_PER_STATUS_IN_HAND:
-        block_per_status(state, amount)
-    elif op == TRANSFORM_STATUSES_IN_HAND:
+        block_per_status(state, amount, clause.get("written_count"))
+    elif op == TRANSFORM_STATUSES_IN_DRAW_PILE:
         transform_statuses(state, bool(clause.get("upgraded")))
     else:                                   # unreachable: shape-checked at load
         raise ValueError(f"unknown plan clause {op!r}")
@@ -1543,10 +1557,14 @@ def statuses_in_hand(state: CombatState) -> list[Card]:
     return [c for c in state.player.hand if is_status_or_curse(c)]
 
 
-def block_per_status(state: CombatState, rate: int) -> int:
-    """KELP WALL: "plus 3 for each status or curse in your hand". Powered,
-    the flat planned Block's funnel."""
-    n = len(statuses_in_hand(state))
+def block_per_status(state: CombatState, rate: int,
+                     written_count: Optional[int] = None) -> int:
+    """KELP WALL: "plus 3 for each status or curse in your hand when
+    written". Powered, the flat planned Block's funnel. `written_count` is
+    the count `schedule` stamped when the Plan was written (Kokomi round-1
+    fixes, 2026-10-12); None (a clause no writer stamped) reads the hand."""
+    n = (len(statuses_in_hand(state)) if written_count is None
+         else int(written_count))
     if n <= 0 or rate <= 0:
         state.emit("plan_kelp_wall", statuses=n, amount=0)
         return 0
@@ -1582,14 +1600,16 @@ def sea_glass_card(upgraded: bool = False) -> Card:
 
 
 def transform_statuses(state: CombatState, upgraded: bool) -> int:
-    """SEA GLASS HARVEST: "Transform every status and curse in your hand into
-    Sea Glass [Sea Glass+]." In place, as `CardCmd.Transform` swaps a card
-    where it stands."""
-    hand = state.player.hand
+    """SEA GLASS HARVEST: "Transform every status and curse in your draw
+    pile into Sea Glass [Sea Glass+]." The DRAW PILE since the Kokomi round-1
+    fixes (2026-10-12): the carry-out found the hand empty of what the Plan
+    was written for, so it converts the dead draws still to come. In place,
+    as `CardCmd.Transform` swaps a card where it stands."""
+    pile = state.player.draw_pile
     n = 0
-    for i, card in enumerate(list(hand)):
+    for i, card in enumerate(list(pile)):
         if is_status_or_curse(card):
-            hand[i] = sea_glass_card(upgraded)
+            pile[i] = sea_glass_card(upgraded)
             n += 1
     state.emit("plan_sea_glass", transformed=n, upgraded=upgraded)
     return n
