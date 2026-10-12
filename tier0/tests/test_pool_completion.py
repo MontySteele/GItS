@@ -233,8 +233,8 @@ def test_interval_bells_spend_is_three_then_two(arm):
 # --- the Rare pass (2026-10-04) ------------------------------------------------
 
 def test_shoal_of_spears_is_one_hit_per_plan_waiting(overhaul):
-    """One hit of 4 per Plan waiting (per Plan written this turn until the
-    re-founding, 2026-10-12), so her Strength counts on each hit; with no
+    """One hit of 5 per Plan waiting (4 until Kokomi round 2; per Plan
+    written this turn until the re-founding, 2026-10-12), so her Strength counts on each hit; with no
     Plan waiting it deals nothing."""
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
                                make_enemy(hp=300, intents=QUIET)])
@@ -245,5 +245,5 @@ def test_shoal_of_spears_is_one_hit_per_plan_waiting(overhaul):
         kokomi_plan.schedule(st, plan_card(
             [{"op": "energy", "amount": 1}], cid=f"proto_kk_w{i}"))
     _play(st, "proto_kk_shoal_of_spears")
-    assert [e.hp for e in st.enemies] == [300 - 3 * 6, 300 - 3 * 6]
+    assert [e.hp for e in st.enemies] == [300 - 3 * 7, 300 - 3 * 7]
 

@@ -50,15 +50,16 @@ public class KokomiPayoffPassTests : IDisposable
     // ---- Kurage Canopy -------------------------------------------------------
 
     [Fact]
-    public void Kurage_canopy_is_a_one_cost_uncommon_power_of_two_block_three_upgraded()
+    public void Kurage_canopy_is_a_one_cost_uncommon_power_of_three_block_four_upgraded()
     {
         var card = new ProtoKkKurageCanopy();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Power, card.Type);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Equal(2, card.DynamicVars["PowerAmount"].IntValue);
+        // Kokomi round 2 (2026-10-12): 2 [3] -> 3 [4].
+        Assert.Equal(3, card.DynamicVars["PowerAmount"].IntValue);
         var up = Upgraded<ProtoKkKurageCanopy>();
-        Assert.Equal(3, up.DynamicVars["PowerAmount"].IntValue);
+        Assert.Equal(4, up.DynamicVars["PowerAmount"].IntValue);
         Assert.Equal(1, up.EnergyCost.Canonical);
         Assert.Contains("carries out a [gold]Plan[/gold]", Face(card));
         Assert.Contains(Seq("ProtoKkKurageCanopy", "OnPlay"),

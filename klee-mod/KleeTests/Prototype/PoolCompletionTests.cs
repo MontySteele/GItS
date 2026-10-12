@@ -104,9 +104,9 @@ public class PoolCompletionTests : IDisposable
         Assert.Equal(0, UpCost<ProtoKkSpringTide>());
 
         // The Rare pass (2026-10-04): 4 [5] a hit; since the re-founding one
-        // hit per Plan waiting.
-        Assert.Equal(4, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);
-        Assert.Equal(5, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
+        // hit per Plan waiting. Kokomi round 2 (2026-10-12): 5 [6].
+        Assert.Equal(5, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);
+        Assert.Equal(6, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
         // The Kokomi card pass (2026-10-11): Sea's Reproach 1 [0].
         Assert.Equal(1, new ProtoKkSeasReproach().EnergyCost.Canonical);
         Assert.Equal(0, UpCost<ProtoKkSeasReproach>());

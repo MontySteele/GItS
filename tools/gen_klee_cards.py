@@ -1240,6 +1240,15 @@ def doubles_a_carry_out(card: dict) -> bool:
                for clause in card.get("plan") or [])
 
 
+def doubles_the_first_plan(card: dict) -> bool:
+    """Kokomi round 2 (2026-10-12): does this row apply Nereid's Ascension,
+    whose first Plan each turn is carried out twice? Asked of the effect, so
+    the tip follows the power, not an id."""
+    return any(e.get("op") == "apply_power"
+               and e.get("power") == "kk_nereids_ascension"
+               for e in card.get("effects") or [])
+
+
 def arm_keywords_printed(description: str) -> list[ArmKeyword]:
     """The arm keywords this face prints as keywords, in table order."""
     printed = set(golded_tokens(description))
@@ -16711,6 +16720,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if doubles_a_carry_out(card):
             tips_expr = (
                 "ArmKeywordTips.ForPlanTwice("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # Kokomi round 2 (2026-10-12): Nereid's Ascension's rider, the same
+        # shape -- what its "twice" covers (the Plan's debuffs too).
+        if doubles_the_first_plan(card):
+            tips_expr = (
+                "ArmKeywordTips.ForNereidsTwice("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the

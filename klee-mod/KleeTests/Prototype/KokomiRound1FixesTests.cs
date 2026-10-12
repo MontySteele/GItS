@@ -14,8 +14,8 @@ namespace KleeMod.Tests.Prototype;
 /// Ethereal seat round found. Kelp Wall pays the status count of the hand it
 /// was WRITTEN from (the number its preview shows); Sea Glass Harvest
 /// transforms the DRAW PILE; Tide Wall's face names the intent it reads at
-/// carry-out; Treatise's trigger is a printed Plan line, which a Companion
-/// does not have; Press the Advantage names Plans, has no Plan line, and its
+/// carry-out; Treatise's trigger (widened to any card that can be written by
+/// Kokomi round 2, 2026-10-12); Press the Advantage names Plans, has no Plan line, and its
 /// tip now says so. The suite is headless (no live combat), so behaviour is
 /// pinned off the compiled methods and the card objects. Sim twins:
 /// <c>tier0/tests/test_kokomi_status_batch.py</c> and
@@ -86,12 +86,13 @@ public class KokomiRound1FixesTests
     // ---- Treatise ------------------------------------------------------------------
 
     [Fact]
-    public void Treatise_fires_on_a_printed_plan_line_and_not_on_a_companion()
+    public void Treatise_fires_on_any_card_that_can_be_written()
     {
-        // TreatisePower's gate is `IPlannedCard { PlanClauses.Count: > 0 }`.
-        // Every Kokomi card that prints a Plan line passes it; a Companion,
-        // which can be WRITTEN as a Plan but prints no Plan line, does not --
-        // the seat that "never saw it draw" played Shinobu and Kirara.
+        // Round 1 found a Companion did not trigger it (the seat that "never
+        // saw it draw" played Shinobu and Kirara). Kokomi round 2
+        // (2026-10-12) widened the gate to `KokomiRefounding.CanBeWritten`: a
+        // printed Plan line, or a Companion card. A carry-out is not a play
+        // of hers (`KokomiPlan.IsCarryingOut`).
         foreach (var card in new CardModel[]
                  { new ProtoKkKelpWall(), new ProtoKkTideWall(),
                    new ProtoKkKuragesOath(), new ProtoKkSlackWater() })
@@ -108,7 +109,12 @@ public class KokomiRound1FixesTests
         }
         var calls = Il.CallSequence(Il.Method("TreatisePower", "AfterCardPlayed"))
             .ToList();
+        Assert.Contains(calls, c => c.Contains("KokomiRefounding.CanBeWritten"));
         Assert.Contains(calls, c => c.Contains("KokomiPlan.PlayedOnPet"));
+        var carrying = calls.FindIndex(c => c.Contains("KokomiPlan.IsCarryingOut"));
+        var claim = calls.FindIndex(
+            c => c.Contains("KokomiOverhaulLedger.ClaimOncePerTurn"));
+        Assert.True(carrying >= 0 && claim > carrying);
         Assert.Contains(calls, c => c.Contains("CardPileCmd.Draw"));
     }
 

@@ -145,9 +145,11 @@ public static partial class KokomiCards
 
     /// <summary>
     /// Call the Generals: "Choose 1 of 3 random Rare Inazuma Companion cards.
-    /// Add it to your hand. It is Ethereal." Klee's Tag Along screen
-    /// (<c>CardSelectCmd.FromChooseACardScreen</c>, skippable, the base
-    /// game's discovery), without the cost-0 rider.
+    /// Add it to your hand. It is Ethereal. It costs 0 this turn." Klee's Tag
+    /// Along screen (<c>CardSelectCmd.FromChooseACardScreen</c>, skippable,
+    /// the base game's discovery) with its cost-0 rider since Kokomi round 2
+    /// (2026-10-12): the Rare Inazuma Companions cost 2 or 3, so a 1-Energy
+    /// card handed over a card she could not play that turn.
     /// </summary>
     public static async Task CallTheGenerals(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -167,8 +169,9 @@ public static partial class KokomiCards
         var pick = await CardSelectCmd.FromChooseACardScreen(
             choiceContext, offered, owner, canSkip: true);
         if (pick == null) return;
-        await CardPileCmd.AddGeneratedCardToCombat(
-            KokomiCompanionPlan.Generate(pick), PileType.Hand, owner);
+        var made = KokomiCompanionPlan.Generate(pick);
+        made.EnergyCost.SetThisTurn(0);
+        await CardPileCmd.AddGeneratedCardToCombat(made, PileType.Hand, owner);
     }
 
     /// <summary>

@@ -319,6 +319,9 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # states its rate truthfully; what no face said is that a
                     # card can make the queue longer than the queue looks.
                     "KLEEMOD-ARM_PLAN_TWICE",
+                    # Kokomi round 2 (2026-10-12): what Nereid's Ascension's
+                    # "twice" covers, on that card.
+                    "KLEEMOD-ARM_PLAN_TWICE_DEBUFFS",
                     # Varka, element identities sec.7 (2026-10-01): "this
                     # card would switch your current element", a fact about
                     # the card on the board, titling no keyword.
