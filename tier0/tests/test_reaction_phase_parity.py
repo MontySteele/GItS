@@ -744,8 +744,24 @@ CO_TENANCY_LEDGER = {
             "deals no damage, grants no Block and touches no element. The sim "
             "resets the same counts at the top of her turn "
             "(`tier0/engine/furina_stage.py`)",
+        ("Abyss/SpiralAbyss.cs", "SpiralAbyss"):
+            "(the Spiral Abyss mode, 2026-10-12; only in a run carrying the "
+            "modifier). Clears Abyssal Moon's per-player card count at the top "
+            "of the player's turn. THE ORDERING QUESTION, answered: the count "
+            "is the modifier's own per-combat table, which no co-tenant reads "
+            "or writes; it deals no damage and touches no element. No sim twin: "
+            "tier 0.5 models no run modifier",
     },
     "AfterSideTurnStart": {
+        ("Abyss/SpiralAbyss.cs", "SpiralAbyss"):
+            "(the Spiral Abyss mode, 2026-10-12; only in a run carrying the "
+            "modifier). Player side: Resonance's turn-1 Energy. Enemy side: the "
+            "Ley Line's aura on every bare enemy, then the Clock's Strength. "
+            "THE ORDERING QUESTION, answered: the one co-tenant that writes "
+            "board state, AuraPower, ticks only on the PLAYER side, and this "
+            "tenant applies auras only on the ENEMY side, so the two never act "
+            "in the same broadcast; Energy and Strength are read by no "
+            "co-tenant. No sim twin: tier 0.5 models no run modifier",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/AuraPower.cs", "AuraPower"):

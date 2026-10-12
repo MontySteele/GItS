@@ -365,7 +365,36 @@ _VARKA_ITEMS_REASON = (
     "built C# first (operations/prototype.md); no sim twin exists until "
     "Balance.")
 
+#: THE SPIRAL ABYSS MODE (review/active/spiral-abyss-pools-2026-10-12.md):
+#: a run modifier's printed numbers. The mode is not measured against the base
+#: five (paper sec.1) and the sim models no run modifier, so none has a twin.
+_ABYSS_REASON = (
+    "THE SPIRAL ABYSS MODE (review/active/spiral-abyss-pools-2026-10-12.md). A "
+    "run modifier's Blessing or Shadow number, tuned by play; tier 0.5 models "
+    "no run modifier, so no sim twin exists.")
+
 UNMIRRORED: dict[str, str] = {
+    "AbyssNumbers.LeyLineDamageReduction": _ABYSS_REASON,
+    "AbyssNumbers.AbyssalMoonEvery": _ABYSS_REASON,
+    "AbyssNumbers.AbyssalMoonDamage": _ABYSS_REASON,
+    "AbyssNumbers.MoonlitRestHeal": _ABYSS_REASON,
+    "AbyssNumbers.ElementalBurstDamage": _ABYSS_REASON,
+    "AbyssNumbers.ResonanceEnergy": _ABYSS_REASON,
+    "AbyssNumbers.ResonanceDraw": _ABYSS_REASON,
+    "AbyssNumbers.ResonanceTurn": _ABYSS_REASON,
+    "AbyssNumbers.CrystallizeBlock": _ABYSS_REASON,
+    "AbyssNumbers.FatefulFortuneMaxHp": _ABYSS_REASON,
+    "AbyssNumbers.ClockFromRound": _ABYSS_REASON,
+    "AbyssNumbers.ClockStrength": _ABYSS_REASON,
+    "AbyssNumbers.MageShieldHits": _ABYSS_REASON,
+    "AbyssNumbers.MageShieldPerHit": _ABYSS_REASON,
+    "AbyssNumbers.MageShieldPerReaction": _ABYSS_REASON,
+    "AbyssNumbers.SheerColdHpLoss": _ABYSS_REASON,
+    "AbyssNumbers.HeraldHpBonus": _ABYSS_REASON,
+    "AbyssNumbers.RallyStrength": _ABYSS_REASON,
+    "AbyssNumbers.RiptideStrength": _ABYSS_REASON,
+    "AbyssNumbers.FatuiPlating": _ABYSS_REASON,
+    "AbyssDraft.OptionCount": _ABYSS_REASON,
     "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
     "BottledResolve.Oath": _VARKA_ITEMS_REASON,
     "KnightsCommission.Oath": _VARKA_ITEMS_REASON,
