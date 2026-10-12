@@ -151,6 +151,11 @@ public static class ArmKeywordTips
     // carry-out, printed where that card is met.
     public const string PlanTwiceKey = "KLEEMOD-ARM_PLAN_TWICE";
 
+    // KOKOMI ROUND 2 (2026-10-12), A RIDER AND NOT A KEYWORD: Nereid's
+    // Ascension carries its first Plan out twice, and a seat could not tell
+    // that the Plan's debuffs double too.
+    public const string NereidsTwiceKey = "KLEEMOD-ARM_PLAN_TWICE_DEBUFFS";
+
     // `EB-575`. THE FOURTH KEY HERE THAT TITLES NO KEYWORD, and the only one
     // whose sentence appears and disappears with the board. A `Set off` or a
     // merge played with no Bomb anywhere is ACCEPTED, charges its Energy and
@@ -486,6 +491,19 @@ public static class ArmKeywordTips
             "A [gold]Plan[/gold] carried out twice counts as two. Every "
           + "clause that counts [gold]Plans[/gold] carried out pays for "
           + "both.");
+
+    /// <summary>
+    /// Kokomi round 2 (2026-10-12): on Nereid's Ascension, what "twice"
+    /// covers. Its doubled carry-out doubled a Plan's debuffs and the Tainted
+    /// it caused (Kokomi round 1, lane 3), and no face said so.
+    /// `gen_klee_cards.emit` raises it off the row's
+    /// <c>kk_nereids_ascension</c> power.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForNereidsTwice(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, NereidsTwiceKey,
+            "Twice means twice: the [gold]Plan[/gold]'s debuffs, and any "
+          + "Tainted it causes, double too.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

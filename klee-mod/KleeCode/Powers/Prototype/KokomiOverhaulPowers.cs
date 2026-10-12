@@ -25,6 +25,12 @@ namespace KleeMod.Powers;
 /// (2026-10-11): the face says "without writing it as a Plan" instead, because
 /// seats read "normally" as jargon.
 ///
+/// KOKOMI ROUND 2 (2026-10-12): any card that can be written as a Plan
+/// (<see cref="KokomiRefounding.CanBeWritten"/>: a Plan line, or a Companion
+/// card) counts, played without writing it. A carry-out is not a play of
+/// hers (<see cref="KokomiPlan.IsCarryingOut"/>): a written Companion's
+/// carried-out copy draws nothing.
+///
 /// ONCE PER TURN on the ledger's shared latch
 /// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed before the
 /// draw. Copies stack the amount: two copies draw 2, still once a turn.
@@ -36,8 +42,8 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         ("title", "Treatise"),
         ("description",
-            "The first time each turn you play a card with a [gold]Plan[/gold] "
-          + "line without writing it as a Plan, draw [blue]{Amount}[/blue] "
+            "The first time each turn you play a card you could have written "
+          + "as a [gold]Plan[/gold], draw [blue]{Amount}[/blue] "
           + "card{Amount:plural:|s}."),
     };
 
@@ -50,10 +56,11 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || Amount <= 0) return;
         if (cardPlay.Card.Owner?.Creature != Owner) return;
-        if (cardPlay.Card is not IPlannedCard { PlanClauses.Count: > 0 }) return;
+        if (!KokomiRefounding.CanBeWritten(cardPlay.Card)) return;
         if (KokomiPlan.PlayedOnPet(cardPlay)) return;
         var player = Owner.Player;
         if (player == null) return;
+        if (KokomiPlan.IsCarryingOut(player)) return;
         if (!KokomiOverhaulLedger.ClaimOncePerTurn(Owner, nameof(TreatisePower)))
         {
             return;

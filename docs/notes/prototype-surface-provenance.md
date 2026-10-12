@@ -7612,3 +7612,52 @@ design beyond the defects.
   `plan:`, an enemy target); such rows now carry `ArmKeywordTips.ForPlanNoLine`
   ("A card with a Plan line can be played on the Bake-Kurage to happen next
   turn. This card has no Plan line."), attached by `gen_klee_cards.emit`.
+
+## Kokomi round-2 changes, 2026-10-12
+
+Source: the Fable round-1 review (session scratchpad
+`k1/fable-review-round1.md`, sec.5 "Claude can ship", changes 1-3, 5 and 6)
+and the round record `review/records/kokomi-round-1-2026-10-12.md`. Claude's
+calls at Prototype; no design beyond the review's list. Both engines; sim
+pins in `tier0/tests/test_kokomi_round2_changes_2026_10_12.py`, C# pins in
+`klee-mod/KleeTests/Prototype/KokomiRound2ChangesTests.cs`.
+
+- **The jellyfish generators at a Common attack's rate.** Jellyfish Drift
+  (`proto_kk_jellyfish_drift`) 5 to 8 damage [11]; Watatsumi Drill
+  (`proto_kk_watatsumi_drill`) 6 [9] to 8 [11]; Bubble Ward
+  (`proto_kk_bubble_ward`) 5 to 7 Block [10]. Stings and Wards unchanged.
+- **The engine Powers worth a card.** Watchful Shoal
+  (`proto_kk_watchful_shoal`) 3 [4] to 5 [7]; Coordinated Tide
+  (`proto_kk_coordinated_tide`) 4 [6] to 6 [9]; Kurage Canopy
+  (`proto_kk_kurage_canopy`) 2 [3] to 3 [4]; Grand Strategist
+  (`proto_kk_grand_strategist`) 5 [8] to 7 [10].
+- **Call the Generals (`proto_kk_call_the_generals`):** the chosen card
+  costs 0 this turn (the base game's Discovery template; still Ethereal; its
+  own cost and upgrade unchanged). The Rare Inazuma Companions cost 2 or 3,
+  so the 1-Energy card handed over a card she could not play that turn.
+  `KokomiCards.CallTheGenerals` sets `EnergyCost.SetThisTurn(0)`; the sim sets
+  `free_this_turn`.
+- **Watatsumi Muster (`proto_kk_watatsumi_muster`) and Shoal Call
+  (`proto_kk_shoal_call`):** cost 1 to 0, and Exhaust. The cards they make
+  keep their own costs. Neither has a Plan line and neither is a Companion,
+  so neither can be written (`can_be_written` / `CanBeWritten`) and the
+  no-0-cost-Plan rule holds.
+- **Tideturn (`proto_kk_tideturn`):** 6 [8] to 8 [10] per Plan waiting.
+- **Shoal of Spears (`proto_kk_shoal_of_spears`):** 4 [5] to 5 [6] a hit.
+- **Nereid's Ascension (`proto_kk_nereids_ascension`):** a hover tip,
+  `ArmKeywordTips.ForNereidsTwice` (title "Twice means twice"): "Twice means
+  twice: the Plan's debuffs, and any Tainted it causes, double too." A round-1
+  seat saw its doubled carry-out double a Plan's debuffs and the Tainted it
+  caused, unprinted. `gen_klee_cards.emit` attaches it off the row's
+  `kk_nereids_ascension` power (`doubles_the_first_plan`).
+- **Treatise (`proto_kk_treatise`):** any card that can be written as a Plan
+  counts, played without writing it (a Plan line, or a Companion card). Face:
+  "The first time each turn you play a card you could have written as a
+  Plan, draw 1 card." A carry-out is not her play: a written Companion's
+  carried-out copy draws nothing (`KokomiPlan.IsCarryingOut`, sim
+  `kk_carrying_out`). Reverses the round-1 fixes' "no engine change" note.
+- **"Entangled" (the brief's text fix):** no Kokomi row, token or tip prints
+  "Entangled" or "Tangled". In the base game both names are real: Tangled is
+  the debuff on the player (Vine Shambler's Grasping Vines) and Entangled is
+  the affliction it puts on Attack cards
+  (`docs/current/dossiers/enemies/vine-shambler.md`). No change.

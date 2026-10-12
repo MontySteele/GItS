@@ -2534,9 +2534,10 @@ def test_core_pass_faces(overhaul):
     faces = _faces()
     assert faces["proto_kk_ambush"] == (
         "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage.")
+    # Kokomi round 2 (2026-10-12): any card that can be written counts.
     assert faces["proto_kk_treatise"] == (
-        "The first time each turn you play a card with a [gold]Plan[/gold] "
-        "line without writing it as a Plan, draw 1 card.")
+        "The first time each turn you play a card you could have written as "
+        "a [gold]Plan[/gold], draw 1 card.")
 
 
 def test_core_pass_second_waves_hit_applies_hydro(overhaul):

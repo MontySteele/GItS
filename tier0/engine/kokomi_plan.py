@@ -2031,8 +2031,14 @@ def note_face_up_plan_card(state: CombatState, card: Card) -> None:
     line normally, draw 1 card." Called by `effects._resolve_card_bound` after
     a card with a `plan:` line resolves its NOW-line; a write returns before
     it. `TreatisePower.AfterCardPlayed` is the twin. Copies add cards, still
-    once a turn."""
-    if not live(state) or not card.plan:
+    once a turn.
+
+    KOKOMI ROUND 2 (2026-10-12): "a card you could have written as a Plan"
+    -- `can_be_written`, so a Companion card counts too. A carry-out is not
+    her play (`kk_carrying_out`): a written Companion's copy draws nothing."""
+    if not live(state) or not can_be_written(card):
+        return
+    if state.kk_carrying_out:
         return
     n = int(state.player.powers.get(TREATISE, 0))
     if n and claim_once_per_turn(state, TREATISE):
@@ -2323,9 +2329,11 @@ def add_companions(state: CombatState, amount: int,
 
 def call_the_generals(state: CombatState) -> int:
     """CALL THE GENERALS: "Choose 1 of 3 random Rare Inazuma Companion cards.
-    Add it to your hand. It is Ethereal." The pilot keeps the first offered
-    (all three are Rare; a fixed rule, so a replay keeps what it kept).
-    `KokomiCards.CallTheGenerals` is the twin."""
+    Add it to your hand. It is Ethereal. It costs 0 this turn." The pilot
+    keeps the first offered (all three are Rare; a fixed rule, so a replay
+    keeps what it kept). The cost-0 rider is Kokomi round 2's (2026-10-12),
+    the base game's Discovery template (`free_this_turn`, swept at the turn
+    boundary). `KokomiCards.CallTheGenerals` is the twin."""
     if not live(state):
         return 0
     pool = generated_companions(state, "rare")
@@ -2336,6 +2344,7 @@ def call_the_generals(state: CombatState) -> int:
     if len(state.player.hand) >= C.MAX_HAND_SIZE:
         return 0
     card = _generate(offered[0])
+    card.free_this_turn = True
     state.player.hand.append(card)
     state.emit("kk_companion_added", card=card.id)
     return 1

@@ -88,22 +88,23 @@ public class KokomiCorePassTests
         Assert.DoesNotContain(CardKeyword.Innate, card.Keywords);
         Assert.Contains(CardKeyword.Innate,
                         Upgraded<ProtoKkTreatise>().Keywords);
+        // Kokomi round 2 (2026-10-12): any card that can be written counts.
         Assert.Equal(
-            "The first time each turn you play a card with a "
-          + "[gold]Plan[/gold] line without writing it as a Plan, draw 1 "
-          + "card.", Face(card));
+            "The first time each turn you play a card you could have "
+          + "written as a [gold]Plan[/gold], draw 1 card.", Face(card));
     }
 
     [Fact]
     public void Treatise_power_says_without_writing_it_as_a_plan()
     {
         // Kokomi round 5 (2026-10-11): two seats read "normally" as jargon.
-        // The power's words follow the card's; the behaviour is unchanged.
+        // The power's words follow the card's. Kokomi round 2 (2026-10-12):
+        // any card that can be written counts (a Companion card too).
         var text = new TreatisePower().Localization!
             .Single(row => row.Item1 == "description").Item2;
         Assert.Equal(
-            "The first time each turn you play a card with a "
-          + "[gold]Plan[/gold] line without writing it as a Plan, draw "
+            "The first time each turn you play a card you could have written "
+          + "as a [gold]Plan[/gold], draw "
           + "[blue]{Amount}[/blue] card{Amount:plural:|s}.", text);
         Assert.DoesNotContain("normally", text);
     }

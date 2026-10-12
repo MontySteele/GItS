@@ -393,7 +393,11 @@ public class ArmKeywordTipTests
         // FORTY-ONE with the Kokomi round-1 fixes (2026-10-12):
         // `ForPlanNoLine`, the Plan tip on a face that names Plans and has
         // no Plan line (Press the Advantage was refused by the jellyfish).
-        Assert.Equal(41, attaches.Count);
+        //
+        // FORTY-TWO with Kokomi round 2 (2026-10-12): `ForNereidsTwice`, a
+        // rider on Nereid's Ascension (its doubled Plan doubles the debuffs).
+        Assert.Equal(42, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
         Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");
         Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
