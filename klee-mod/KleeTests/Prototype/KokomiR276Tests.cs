@@ -146,7 +146,11 @@ public class KokomiR276Tests
     {
         var resolve = Il.CallSequence(Il.Method("KokomiPlan", "ResolveOne"));
         Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.FirstAttackTwice"));
-        Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.IntendedDamage"));
+        // Kokomi round-3 changes (2026-10-12): the largest intent, which
+        // asks each enemy's `IntendedDamage`.
+        Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.MostIntendedDamage"));
+        Assert.Contains(Il.Calls(Il.Method("KokomiOverhaulKit", "MostIntendedDamage")),
+                        c => c.Contains("KokomiOverhaulKit.IntendedDamage"));
     }
 
     [Fact]

@@ -407,10 +407,11 @@ def _runtime_count(state: CombatState, token: str,
         return furina_stage.count(p)
     if token == "stage_fanfare":
         return furina_stage.fanfare(p)
-    # The diversity pass (2026-10-11): Packed House's "for every 5 Fanfare"
-    # (the C# `FurinaStage.FanfareFives`).
-    if token == "stage_fanfare_fives":
-        return furina_stage.fanfare_fives(p)
+    # Packed House's "plus 1 for every 4 Fanfare you have" (the Spend outlet
+    # paper, ruled 2026-10-12; was every 5 under the diversity pass)
+    # (the C# `FurinaStage.FanfareFours`).
+    if token == "stage_fanfare_fours":
+        return furina_stage.fanfare_fours(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -1566,6 +1567,8 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
     base += sum(state.player.powers.get(f"tag_damage_{t}", 0)
                 for t in card.tags)
+    # Watchful Shoal (Kokomi round-3 changes): Kokomi's Accuracy on a Sting.
+    base += kokomi_plan.watchful_shoal_bonus(state, card, kokomi_plan.STING_ID)
     # PhantomBladesPower pays only on the FIRST tagged card played each turn
     # ("num > 0 -> return 0", counting CardPlaysFinished this turn). The
     # playing card has not finished, so the first one sees a count of zero
@@ -1697,6 +1700,9 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     # per play off a state latch, which under-counted every multi-gain card.
     # Frail bites it, exactly as the hook order does: the enchant additive
     # lands before the multiplicative listeners.
+    # Watchful Shoal (Kokomi round-3 changes): a Ward's extra Block, an
+    # additive like Dexterity, so Frail bites it.
+    raw += kokomi_plan.watchful_shoal_bonus(state, card, kokomi_plan.WARD_ID)
     for _ in range(times):
         amount = raw + card.enchant_block
         # Frail bites each printed card-block gain before the refpower funnel.
@@ -3373,7 +3379,7 @@ RUNTIME_COUNT_NAMES = frozenset({
     # The Spend paper (2026-10-10).
     "stage_spent_fours",
     # The diversity pass (2026-10-11).
-    "stage_spent_threes", "stage_fanfare_fives",
+    "stage_spent_threes", "stage_fanfare_fours",
     # THE POOL TO 75 (2026-10-09).
     "stage_drains", "stage_drained", "stage_repays_turn",
     "stage_repaid",
@@ -5143,7 +5149,7 @@ OPS = {
     # THE CO-OP SET's two Plan clauses about another player (`engine/coop.py`).
     coop.ALLY_DRAW: _op_kokomi_plan_only,
     coop.OTHERS_ATTACK_DAMAGE_THIS_TURN: _op_kokomi_plan_only,
-    "block_front_intent": _op_kokomi_plan_only,
+    "block_max_intent": _op_kokomi_plan_only,
     # `EB-643`, R265. THE THREE NOW-LINES THAT OPERATE ON THE QUEUE: take the
     # newest Plan back (Second Thoughts), cash the whole queue in (Ebb Tide),
     # and re-aim what is already written (Converging Tide). They are the
@@ -5157,7 +5163,7 @@ OPS = {
     # THE STATUS BATCH (2026-10-01): plan-only clauses that read the hand
     # just drawn.
     "block_per_status_in_hand": _op_kokomi_plan_only,
-    "transform_statuses_in_hand": _op_kokomi_plan_only,
+    "transform_statuses_in_draw_pile": _op_kokomi_plan_only,
     # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's
     # two Plan lines and a written Companion's clause.
     "add_stings": _op_kokomi_plan_only,

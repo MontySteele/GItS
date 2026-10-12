@@ -62,13 +62,14 @@ def test_the_pass_cuts_second_thoughts_and_canopy_stays(overhaul):
 def test_kurage_canopy_blocks_per_carry_out(overhaul):
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
     _write(st, "proto_kk_kurage_canopy")
-    assert st.player.powers[kokomi_plan.KURAGE_CANOPY] == 2
+    # Kokomi round 2 (2026-10-12): 3 a carry-out (was 2).
+    assert st.player.powers[kokomi_plan.KURAGE_CANOPY] == 3
     st.player.block = 0
     for i in range(2):
         kokomi_plan.schedule(st, plan_card(
             [{"op": "energy", "amount": 1}], cid=f"proto_kk_p{i}"))
     kokomi_plan.resolve_all(st)
-    assert st.player.block == 2 * 2
+    assert st.player.block == 2 * 3
 
 
 def test_kurage_canopy_pays_a_doubled_carry_out_twice(overhaul):
@@ -86,8 +87,9 @@ def test_kurage_canopy_pays_a_doubled_carry_out_twice(overhaul):
     assert st.player.block == 3 * 2
 
 
-def test_kurage_canopy_upgrades_to_three(overhaul):
+def test_kurage_canopy_upgrades_to_four(overhaul):
+    # Kokomi round 2 (2026-10-12): 3 [4] (was 2 [3]).
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
     _write(st, _up("proto_kk_kurage_canopy"))
-    assert st.player.powers[kokomi_plan.KURAGE_CANOPY] == 3
+    assert st.player.powers[kokomi_plan.KURAGE_CANOPY] == 4
     assert _up("proto_kk_kurage_canopy").cost == 1

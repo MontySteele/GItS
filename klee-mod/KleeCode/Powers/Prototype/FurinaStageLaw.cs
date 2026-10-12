@@ -225,9 +225,10 @@ public static class FurinaStageLaw
     /// <c>furina_stage.BRAVURA_SPENT_PER</c>.</summary>
     public const int BravuraSpentPer = 3;
 
-    /// <summary>Packed House: "plus 1 for every 5 Fanfare you have."
+    /// <summary>Packed House: "plus 1 for every 4 Fanfare you have" (the
+    /// Spend outlet paper, ruled 2026-10-12; was 5).
     /// Mirrors <c>furina_stage.PACKED_HOUSE_FANFARE_PER</c>.</summary>
-    public const int PackedHouseFanfarePer = 5;
+    public const int PackedHouseFanfarePer = 4;
 
     /// <summary>
     /// Rule 1: THE DRAIN BUFFER (2026-10-11; [USER]: "There should be a

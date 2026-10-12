@@ -159,10 +159,10 @@ public static class FurinaStage
     public static int SpentThrees(CardModel? card) =>
         Spent(card) / FurinaStageLaw.BravuraSpentPer;
 
-    /// <summary>`stage_fanfare_fives` (the diversity pass, 2026-10-11): her
-    /// Fanfare in fives, rounded down -- Packed House's "plus 1 for every 5
+    /// <summary>`stage_fanfare_fours` (the Spend outlet paper, 2026-10-12):
+    /// her Fanfare in fours, rounded down -- Packed House's "plus 1 for every 4
     /// Fanfare you have" (read, never spent).</summary>
-    public static int FanfareFives(Creature? owner) =>
+    public static int FanfareFours(Creature? owner) =>
         FanfareOf(owner) / FurinaStageLaw.PackedHouseFanfarePer;
 
     /// <summary>`stage_spent` as a face prints it: before the play, the

@@ -121,10 +121,10 @@ public static class KokomiPlan
         //   Battle Plan: "This turn, your Attacks deal N more damage."
         // Feigned Retreat hits harder when she lost no HP since the Plan was
         // WRITTEN (<see cref="Planned.WrittenHp"/>, stamped by
-        // <see cref="Schedule"/>), and Tide Wall blocks the front enemy's
+        // <see cref="Schedule"/>), and Tide Wall blocks the largest enemy
         // intent, read at carry-out. Sim twins: `kokomi_plan`, same names.
         FirstAttackTwice,
-        BlockFrontIntent,
+        BlockMaxIntent,
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md), two clauses
         // about ANOTHER player, and a one-seat fight has none:
         //   Joint Orders: "Plan: They draw 2 cards." THEY is the player the
@@ -152,13 +152,17 @@ public static class KokomiPlan
         EachPlayerEnergy,
         EachPlayerDraw,
         // THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-
-        // 2026-10-01.md). Plans that read the hand just drawn, which rule 2's
-        // after-the-draw resolution is what makes possible: Kelp Wall's Block
-        // per status or curse and Sea Glass Harvest's transform into Sea
-        // Glass. Bodies in <see cref="KokomiStatusBatch"/>; sim twins
-        // `kokomi_plan`, the same names.
+        // 2026-10-01.md): Kelp Wall's Block per status or curse and Sea Glass
+        // Harvest's transform into Sea Glass. THE KOKOMI ROUND-1 FIXES
+        // (2026-10-12): both used to read the hand at carry-out, which seats
+        // found empty of the statuses they wrote the Plan for. Kelp Wall now
+        // counts the hand WHEN WRITTEN (<see cref="Planned.WrittenCount"/>,
+        // stamped by <see cref="Schedule"/>: the number the preview showed)
+        // and Sea Glass Harvest transforms the DRAW PILE. Bodies in
+        // <see cref="KokomiStatusBatch"/>; sim twins `kokomi_plan`, the same
+        // names.
         BlockPerStatusInHand,
-        TransformStatusesInHand,
+        TransformStatusesInDrawPile,
         // THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-
         // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
         // Gorou's War Banner "Gain 3 Strength this turn" and Juuga "For 3
@@ -235,10 +239,15 @@ public static class KokomiPlan
     /// printed number, the hit when she lost no HP since the Plan was
     /// written; <paramref name="WrittenHp"/> is her HP at that moment,
     /// stamped by <see cref="Schedule"/> and null until then.</para>
+    /// <para><paramref name="WrittenCount"/> (Kokomi round-1 fixes,
+    /// 2026-10-12) is Kelp Wall's count of statuses and curses in her hand
+    /// when the Plan was written, stamped by <see cref="Schedule"/>; null on
+    /// a clause no writer stamped, which reads the hand.</para>
     public readonly record struct Planned(
         Kind Kind, int Amount, Aim Aim, CardModel? Card = null,
         int Times = 1, IReadOnlyList<string>? Targets = null,
-        int Alt = 0, int? WrittenHp = null, int StrengthTimes = 1);
+        int Alt = 0, int? WrittenHp = null, int StrengthTimes = 1,
+        int? WrittenCount = null);
 
     /// <summary>
     /// ONE PLAN: the card that wrote it and the clauses it wrote. The card is
@@ -889,6 +898,22 @@ public static class KokomiPlan
                 }
             }
             label = AimedLabel(source, caught);
+        }
+        // KELP WALL COUNTS AT WRITING TIME (Kokomi round-1 fixes,
+        // 2026-10-12): "plus 3 for each status or curse in your hand when
+        // written" is the hand on screen NOW, the number the face's preview
+        // (<see cref="PlanStatusBlockVar"/>) printed. Sim twin:
+        // `kokomi_plan.schedule`, `written_count`.
+        if (body.Any(c => c.Kind == Kind.BlockPerStatusInHand))
+        {
+            var heldNow = KokomiStatusBatch.StatusesInHand(player);
+            for (var i = 0; i < body.Count; i++)
+            {
+                if (body[i].Kind == Kind.BlockPerStatusInHand)
+                {
+                    body[i] = body[i] with { WrittenCount = heldNow };
+                }
+            }
         }
         // THE CO-OP SET, JOINT ORDERS: "Plan: They draw 2 cards" remembers
         // the player it is for, and it is fixed HERE, when the Plan is
@@ -1783,6 +1808,9 @@ public static class KokomiPlan
         // causes an Elemental Reaction" reads this window, open for exactly
         // the clauses of one carry-out (<see cref="IsCarryingOut"/>).
         var seat = kokomi.Player;
+        // Kokomi round-3 changes (2026-10-12): what else landed in this
+        // carry-out's window, named on the results line (Coordinated Tide).
+        var riders = new List<Rider>();
         if (seat != null) _carrying.Add(seat);
         try
         {
@@ -1814,6 +1842,20 @@ public static class KokomiPlan
                     asked = wanted;
                 }
             }
+            // COORDINATED TIDE, INSIDE THE WINDOW (Kokomi round-3 changes,
+            // 2026-10-12): it used to land after the line below was written,
+            // so the page printed the Sting and never the Tide's hit. Either
+            // line, once per carry-out, as before. The carrying window closes
+            // first, as it did when the hit came after it: the Tide is not
+            // the Plan's own reaction (Grand Strategist) or play.
+            if (seat != null) _carrying.Remove(seat);
+            if (await KokomiRefounding.CoordinatedTide(
+                    choiceContext, kokomi, entry.Returns) is { } tide)
+            {
+                riders.Add(new Rider("Coordinated Tide", tide.Amount,
+                                     EnemyName(tide.Target),
+                                     tide.Target.CombatId.ToString() ?? ""));
+            }
         }
         finally
         {
@@ -1831,7 +1873,7 @@ public static class KokomiPlan
                      entry.Now && entry.TwoLine
                          ? NowLineTitle(entry.Title) : entry.Title,
                      number, Moved(before, kokomi),
-                     onPlay, kind, asked, System.Array.Empty<Rider>());
+                     onPlay, kind, asked, riders);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -1847,8 +1889,8 @@ public static class KokomiPlan
                 await listener.OnPlanResolved(choiceContext, kokomi);
             }
         }
-        // THE RE-FOUNDING (2026-10-12): Coordinated Tide (an Ethereal card
-        // carried out) and Endless Shoal (a Sting or Ward carried out). Once
+        // THE RE-FOUNDING (2026-10-12): Endless Shoal (a Sting or Ward
+        // carried out; Coordinated Tide moved inside the window above). Once
         // per carry-out, either line, like the bus above. Sim twin:
         // `kokomi_plan.note_carried_out`.
         await KokomiRefounding.OnCarriedOut(choiceContext, kokomi,
@@ -2134,13 +2176,15 @@ public static class KokomiPlan
                 }
                 return null;
 
-            case Kind.BlockFrontIntent:
+            case Kind.BlockMaxIntent:
                 // R276, TIDE WALL. POWERED, the flat planned Block's funnel.
-                // The front enemy's intent is read NOW, at carry-out, after
-                // the coming enemy turn's intents are up.
+                // The intents are read NOW, at carry-out, after the coming
+                // enemy turn's intents are up. Kokomi round-3 changes
+                // (2026-10-12): the LARGEST intent on the board, not the
+                // front body's, which read 0 against the Queen.
                 return (int)await CreatureCmd.GainBlock(
                     kokomi,
-                    KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
+                    KokomiOverhaulKit.MostIntendedDamage(kokomi)
                         + plan.Amount,
                     ValueProp.Move, null);
 
@@ -2240,12 +2284,13 @@ public static class KokomiPlan
                 await PlayCopy(choiceContext, kokomi, plan.Card);
                 return null;
 
-            // THE STATUS BATCH (2026-10-01). Each reads the hand as it
-            // stands when the clause runs.
+            // THE STATUS BATCH (2026-10-01). Kelp Wall pays the count it was
+            // written with; Sea Glass Harvest reads the draw pile now
+            // (Kokomi round-1 fixes, 2026-10-12).
             case Kind.BlockPerStatusInHand:
                 return await KokomiStatusBatch.BlockPerStatus(
-                    kokomi, plan.Amount);
-            case Kind.TransformStatusesInHand:
+                    kokomi, plan.Amount, plan.WrittenCount);
+            case Kind.TransformStatusesInDrawPile:
                 return await KokomiStatusBatch.TransformStatuses(
                     player, entry?.Source?.IsUpgraded ?? false);
         }
@@ -2282,13 +2327,13 @@ public static class KokomiPlan
         Kind.Block => "Block",
         Kind.Mend => "HP healed",
         Kind.Damage or Kind.DamageQuarterMaxHp => "damage",
-        Kind.BlockFrontIntent => "Block",
+        Kind.BlockMaxIntent => "Block",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
         // The two riders produce no number at all and fall to the default.
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",
-        Kind.TransformStatusesInHand => "cards transformed",
+        Kind.TransformStatusesInDrawPile => "cards transformed",
         // THE RE-FOUNDING (2026-10-12).
         Kind.AddStings => "cards added",
         Kind.StrengthThisTurn => "Strength",
@@ -2314,13 +2359,14 @@ public static class KokomiPlan
         switch
     {
         Kind.DamageQuarterMaxHp => KokomiRules.QuarterOfMaxHp(kokomi),
-        // R276. Tide Wall asks for the intent plus its bonus.
-        Kind.BlockFrontIntent =>
-            KokomiOverhaulKit.IntendedDamage(FrontEnemy(kokomi), kokomi)
-                + plan.Amount,
-        // THE STATUS BATCH: Kelp Wall's rate times the statuses in hand.
+        // R276. Tide Wall asks for the largest intent plus its bonus.
+        Kind.BlockMaxIntent =>
+            KokomiOverhaulKit.MostIntendedDamage(kokomi) + plan.Amount,
+        // THE STATUS BATCH: Kelp Wall's rate times the statuses in hand
+        // when the Plan was written (Kokomi round-1 fixes, 2026-10-12).
         Kind.BlockPerStatusInHand =>
-            plan.Amount * KokomiStatusBatch.StatusesInHand(kokomi.Player),
+            plan.Amount * (plan.WrittenCount
+                ?? KokomiStatusBatch.StatusesInHand(kokomi.Player)),
         _ => plan.Amount,
     };
 
@@ -2828,8 +2874,7 @@ public static class KokomiPlan
         var written = WrittenFrontDamage(entry);
         if (written <= 0) return false;
         var front = FrontEnemy(kokomi);
-        if (front == null
-            || !front.Powers.OfType<VulnerablePower>().Any(p => p.Amount > 0))
+        if (front == null || !VulnerableAtMorning(front))
             return false;
         return PlannedDamage(front, written) > written;
     }
@@ -2930,11 +2975,27 @@ public static class KokomiPlan
     /// same reason: it is one-shot rather than standing state, and an
     /// all-enemies Plan consumes the aura the rest of the volley would have
     /// reacted with, so there is no one multiplier for the line.
+    ///
+    /// ONLY A VULNERABLE THAT WILL STILL BE UP (Kokomi round-3 changes,
+    /// 2026-10-12). The Plan lands next morning, after the enemy's turn has
+    /// ticked its Vulnerable down by one, so a Vulnerable of 1 is gone by
+    /// then: seats read Oath 13 and saw 9, Lance 27 and 18. The face folds the
+    /// target's Vulnerable only at 2 or more
+    /// (<see cref="VulnerableAtMorning"/>). The carry-out itself is
+    /// unchanged: <see cref="ElementalHit.Deal"/> reads the Vulnerable the
+    /// body wears THEN.
     /// </summary>
     public static int PlannedDamage(Creature? target, int amount) =>
-        target == null
+        target == null || !VulnerableAtMorning(target)
             ? amount
             : (int)SimDamagePipeline.TargetMods(target, amount);
+
+    /// <summary>Will <paramref name="target"/> still wear Vulnerable when a
+    /// Plan written now is carried out? Its Vulnerable ticks down once at the
+    /// end of the enemy turn between, so 2 or more.</summary>
+    public static bool VulnerableAtMorning(Creature target) =>
+        (target.Powers.OfType<VulnerablePower>().FirstOrDefault()?.Amount ?? 0)
+            >= 2;
 
     /// <summary>
     /// `EB-599`. HER SIDE OF A PLAN LINE, FOLDED AT WRITING TIME -- her
@@ -2975,7 +3036,11 @@ public static class KokomiPlan
     {
         var folded = Enchanted(source, amount);
         if (folded <= 0 || kokomi == null) return folded;
+        // Kokomi round-3 changes (2026-10-12): Watchful Shoal's Sting bonus,
+        // folded where her Strength is, because a planned hit never reaches
+        // the engine's damage hooks.
         return folded
+             + WatchfulShoalPower.StingBonus(kokomi, source)
              + (int)(kokomi.Powers.OfType<StrengthPower>()
                            .FirstOrDefault()?.Amount ?? 0)
                * System.Math.Max(1, strengthTimes);

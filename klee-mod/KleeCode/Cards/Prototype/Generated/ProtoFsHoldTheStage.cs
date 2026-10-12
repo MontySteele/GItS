@@ -45,7 +45,7 @@ public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard, IStag
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hold the Stage"),
-        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 12: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -53,7 +53,7 @@ public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard, IStag
         {
             new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
-            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 12))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 16))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,7 +65,7 @@ public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard, IStag
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 12);
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 16);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 

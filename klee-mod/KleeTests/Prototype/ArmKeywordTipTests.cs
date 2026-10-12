@@ -390,8 +390,21 @@ public class ArmKeywordTipTests
         // FORTY with the Kokomi pre-round fixes (2026-10-12):
         // `ForCompanionPlan`, a live rider titled "Plan" on a Companion she
         // holds ("any Companion can be written as a Plan").
-        Assert.Equal(40, attaches.Count);
+        // FORTY-ONE with the Kokomi round-1 fixes (2026-10-12):
+        // `ForPlanNoLine`, the Plan tip on a face that names Plans and has
+        // no Plan line (Press the Advantage was refused by the jellyfish).
+        //
+        // FORTY-TWO with Kokomi round 2 (2026-10-12): `ForNereidsTwice`, a
+        // rider on Nereid's Ascension (its doubled Plan doubles the debuffs).
+        //
+        // FORTY-THREE with the Spend outlet paper (2026-10-12):
+        // `ForBankDamage`, a rider on her starter spend-all saying when to
+        // play it (two seats played Rising Applause at 0 to 4 damage).
+        Assert.Equal(43, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
+        Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");
         Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");
+        Assert.Contains(attaches, m => m.Name == "ForBankDamage");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");

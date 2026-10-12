@@ -45,7 +45,7 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kelp Wall"),
-        ("description", "Draw 1 card.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand when written.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -61,6 +61,7 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new BlockVar(5m, ValueProp.Move),
             new CardsVar(1),
             new UnsourcedBlockVar("PlanBlock", 9m, ValueProp.Move),
             new PlanStatusBlockVar(9m, 3)
@@ -93,11 +94,13 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
     public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Block.UpgradeValueBy(2m);
         DynamicVars["PlanBlock"].UpgradeValueBy(3m);
     }
 }

@@ -1,0 +1,185 @@
+"""Kokomi round-3 changes (2026-10-12), the sim side.
+
+From the Fable round-2 review and the round record
+`review/records/kokomi-round-2-2026-10-12.md`; provenance note "Kokomi
+round-3 changes, 2026-10-12". The C# twins are
+`klee-mod/KleeTests/Prototype/KokomiRound3ChangesTests.cs` (the Plan face's
+Vulnerable fold and Coordinated Tide's results line are C#-only: the sim
+prints no face and no page). NOTHING MEASURED HERE IS QUOTABLE (R215 B):
+shape assertions about an engine.
+"""
+
+from tier0.content import loader, upgrades
+from tier0.engine import combat, kokomi_plan
+from tier0.tests.test_kokomi_refounding import (  # noqa: F401
+    caches, card, carry_out, kokomi_state, write)
+from tier0.tests.test_arm_keyword_tips import proto
+
+
+def _rows():
+    return {r["id"]: r for r in proto._rows()}
+
+
+def _attacking(st):
+    """Every enemy intends an attack, so the pilot plays a card face-up."""
+    for e in st.enemies:
+        e.intents = [{"kind": "attack", "amount": 5}]
+
+
+def _play(st, c):
+    st.player.hand.append(c)
+    assert not kokomi_plan.plan_aimed_at_pet(st, c)
+    combat.play_card(st, c)
+
+
+# --- Tide Wall: the largest intent ------------------------------------------
+
+def test_tide_wall_reads_the_biggest_intent_not_the_front_one():
+    """The Queen's shape: the front body intends nothing and the one behind
+    it attacks. The Plan used to read 0."""
+    st = kokomi_state(n_enemies=2)
+    write(st, card("proto_kk_tide_wall"))
+    st.enemies[1].intents = [{"kind": "attack", "amount": 9, "times": 2}]
+    assert kokomi_plan.intent_damage(st, st.enemies[0]) == 0
+    assert kokomi_plan.max_intent_damage(st) == 18
+    st.player.block = 0
+    carry_out(st)
+    assert st.player.block == 6 + 18
+    assert _rows()["proto_kk_tide_wall"]["description"].endswith(
+        "plus the most damage an enemy intends when it is carried out.")
+
+
+def test_no_enemies_intend_nothing():
+    st = kokomi_state()
+    st.enemies.clear()
+    assert kokomi_plan.max_intent_damage(st) == 0
+
+
+# --- Treatise: the face ------------------------------------------------------
+
+def test_treatise_face_says_writing_does_not_count():
+    assert _rows()["proto_kk_treatise"]["description"] == (
+        "Once a turn, when you play a card you could write as a "
+        "[gold]Plan[/gold] instead of writing it, draw 1 card.")
+
+
+# --- Kelp Wall: the now-line -------------------------------------------------
+
+def test_kelp_wall_now_line_blocks_and_draws():
+    row = loader.get_card("proto_kk_kelp_wall")
+    assert row.effects[0] == {"op": "block", "amount": 5}
+    assert row.effects[1] == {"op": "draw", "amount": 1}
+    up = upgrades.apply_upgrade(loader.get_card("proto_kk_kelp_wall"))
+    assert up.effects[0]["amount"] == 7
+    assert up.plan[0]["amount"] == 12
+    st = kokomi_state()
+    _attacking(st)
+    st.player.draw_pile = [card("proto_kk_evening_watch")]
+    st.player.block = 0
+    _play(st, card("proto_kk_kelp_wall"))
+    assert st.player.block == 5
+    assert [c.id for c in st.player.hand] == ["proto_kk_evening_watch"]
+
+
+# --- Watchful Shoal: the jellyfish's Accuracy --------------------------------
+
+def test_watchful_shoal_numbers_and_face():
+    row = loader.get_card("proto_kk_watchful_shoal")
+    up = upgrades.apply_upgrade(loader.get_card("proto_kk_watchful_shoal"))
+    assert (row.effects[0]["amount"], up.effects[0]["amount"]) == (3, 5)
+    assert _rows()["proto_kk_watchful_shoal"]["description"] == (
+        "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional "
+        "damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} "
+        "additional [gold]Block[/gold].")
+
+
+def test_a_played_sting_deals_3_more():
+    st = kokomi_state()
+    _attacking(st)
+    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
+    st.enemies[0].powers["vulnerable"] = 0
+    hp = st.enemies[0].hp
+    _play(st, card(kokomi_plan.STING_ID))
+    assert hp - st.enemies[0].hp == 7 + 3
+
+
+def test_an_upgraded_sting_counts_and_brine_sting_does_not():
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
+    sting = upgrades.apply_upgrade(loader.get_card(kokomi_plan.STING_ID))
+    assert kokomi_plan.watchful_shoal_bonus(
+        st, sting, kokomi_plan.STING_ID) == 3
+    assert kokomi_plan.watchful_shoal_bonus(
+        st, card("proto_kk_brine_sting"), kokomi_plan.STING_ID) == 0
+
+
+def test_a_written_sting_carries_the_bonus_to_every_enemy():
+    st = kokomi_state(n_enemies=2)
+    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
+    write(st, card(kokomi_plan.STING_ID))
+    (entry,) = st.kk_plan_queue
+    assert entry.clauses[0]["amount"] == 5 + 3
+    before = [e.hp for e in st.enemies]
+    carry_out(st)
+    lost = [b - e.hp for b, e in zip(before, st.enemies)]
+    assert all(x >= 8 for x in lost), lost
+
+
+def test_a_played_ward_gains_3_more_and_frail_bites_it():
+    st = kokomi_state()
+    _attacking(st)
+    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
+    st.player.block = 0
+    _play(st, card(kokomi_plan.WARD_ID))
+    assert st.player.block == 7 + 3
+    st = kokomi_state()
+    _attacking(st)
+    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
+    st.player.powers["frail"] = 1
+    st.player.block = 0
+    _play(st, card(kokomi_plan.WARD_ID))
+    assert st.player.block == int((7 + 3) * 0.75)
+
+
+def test_other_cards_get_nothing():
+    st = kokomi_state()
+    _attacking(st)
+    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
+    st.player.block = 0
+    _play(st, card("proto_kk_coral_bulwark"))
+    assert st.player.block == 8
+
+
+def test_a_flipped_ward_carries_out_its_now_line_with_the_bonus():
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
+    write(st, card(kokomi_plan.WARD_ID))
+    assert kokomi_plan.flip(st, 0)
+    st.player.block = 0
+    carry_out(st)
+    assert st.player.block == 7 + 3
+
+
+# --- Coordinated Tide: before the plan bus -----------------------------------
+
+def test_coordinated_tide_lands_before_the_plan_bus():
+    """The C# moved the Tide's hit inside the carry-out's results line, which
+    puts it before the plan bus (Kurage Canopy); the sim keeps that order."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.COORDINATED_TIDE] = 6
+    st.player.powers[kokomi_plan.KURAGE_CANOPY] = 3
+    write(st, card(kokomi_plan.STING_ID))
+    carry_out(st)
+    events = [e["event"] for e in st.log]
+    assert (events.index("plan_coordinated_tide")
+            < events.index("plan_kurage_canopy"))
+
+
+def test_the_page_prints_the_tide_rider_the_bridge_now_sends():
+    """`KokomiPlan.ResolveEntry` names Coordinated Tide as a rider on the
+    carry-out row; the blind page prints riders after the Plan's line."""
+    from understudy import blindplay_render
+    said = {"riders": [{"source": "Coordinated Tide", "amount": 6,
+                        "target": "Queen", "combat_id": "2"}]}
+    assert blindplay_render._rider_clause(said) == (
+        " Inside the same beat: Coordinated Tide 6 on Queen.")

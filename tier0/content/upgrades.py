@@ -245,7 +245,7 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     # offer screen cannot see.
     "plan_block": ("block",
                    # R276, Tide Wall: the flat bonus on top of the intent.
-                   "block_front_intent"),
+                   "block_max_intent"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
     "plan_draw": ("draw",
@@ -834,7 +834,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # Sea Glass+, a flag on the plan clause.
             if hit is None:
                 hit = next((fx for fx in (getattr(card, "plan", None) or [])
-                            if fx.get("op") == "transform_statuses_in_hand"),
+                            if fx.get("op")
+                            == "transform_statuses_in_draw_pile"),
                            None)
             ok = hit is not None and val is True
             if ok:

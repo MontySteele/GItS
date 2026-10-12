@@ -38,14 +38,14 @@ public sealed class ProtoKkTreatise : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_treatise");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Treatise"),
-        ("description", "The first time each turn you play a card with a [gold]Plan[/gold] line without writing it as a Plan, draw 1 card."),
+        ("description", "Once a turn, when you play a card you could write as a [gold]Plan[/gold] instead of writing it, draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

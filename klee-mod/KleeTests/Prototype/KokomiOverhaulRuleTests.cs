@@ -279,7 +279,7 @@ public class KokomiOverhaulRuleTests
         // TWENTY-THREE SINCE R276 PICK 1, the halves rewrite: Pincer's
         // `FirstAttackTwice`, Stolen Chapter's `FirstCardFree`, Feigned
         // Retreat's `DamageIfUnhurt`, Battle Plan's `AttackDamageThisTurn`
-        // and Tide Wall's `BlockFrontIntent`. `NextAttackDamage` and
+        // and Tide Wall's `BlockMaxIntent`. `NextAttackDamage` and
         // `BlockPerPlanThisMorning` are KEPT with no row spelling them, the
         // `DrawPerPlanThisTurn` precedent above.
         //
@@ -319,13 +319,13 @@ public class KokomiOverhaulRuleTests
                     "ReplayExhausted", "PlayCopyOfCompanion",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
                     "FirstAttackTwice",
-                    "BlockFrontIntent", "AllyDraw",
+                    "BlockMaxIntent", "AllyDraw",
                     "OthersAttackDamageThisTurn",
                     // POOL COMPLETION (2026-10-01): Tactical Relay's two.
                     "EachPlayerEnergy", "EachPlayerDraw",
                     // THE STATUS BATCH (2026-10-01): the two that read the
                     // hand just drawn.
-                    "BlockPerStatusInHand", "TransformStatusesInHand",
+                    "BlockPerStatusInHand", "TransformStatusesInDrawPile",
                     // THE RE-FOUNDING (2026-10-12).
                     "AddStings", "StrengthThisTurn", "JuugaGuard",
                     "PlayCompanion" },

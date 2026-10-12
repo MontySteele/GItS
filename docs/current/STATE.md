@@ -164,7 +164,12 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Tidal Flourish, Spirited Aria, Crashing Waves and Hold the Stage, and
   Navia's act Spends half the bank and Freminet's a quarter (pick 2,
   ruled 2026-10-10); the rest built at the paper's defaults, picks open on
-  #1014. Next: a seat round ([USER]:
+  #1014. The Spend outlet paper
+  (`review/active/furina-spend-outlet-2026-10-12.md`, ruled 2026-10-12, all
+  defaults): Spirited Aria spends up to 12, Crashing Waves and Hold the Stage
+  up to 16; Packed House is a Skill, "Gain 5 [8] Block, plus 1 for every 4
+  Fanfare you have."; Rising Applause+ gains Retain, with a when-to-play tip.
+  Next: a seat round ([USER]:
   "Yes - let's test it with a seat"). At her
   finish line, re-ask her motion look (`AS2-B5`, dropped
   from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).

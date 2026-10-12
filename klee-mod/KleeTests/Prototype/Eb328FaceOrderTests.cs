@@ -127,7 +127,8 @@ public class Eb328FaceOrderTests
         // keep: the morning's hit is an Unpowered mirror hit, so the native
         // Vulnerable declines it and `SimDamagePipeline.TargetMods` is the one
         // place it is applied.
-        var vulnerable = Seat.Kokomi(30).WithPower<VulnerablePower>(1).Creature;
+        // Vulnerable 2: still up at the morning (Kokomi round-3 changes).
+        var vulnerable = Seat.Kokomi(30).WithPower<VulnerablePower>(2).Creature;
         Assert.Equal(6, KokomiPlan.PlannedDamage(vulnerable, 4));
         Assert.Equal(4, KokomiPlan.PlannedDamage(null, 4));
         Assert.Equal(

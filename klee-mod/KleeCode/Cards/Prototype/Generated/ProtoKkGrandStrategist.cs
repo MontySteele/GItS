@@ -38,7 +38,7 @@ public sealed class ProtoKkGrandStrategist : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_grand_strategist");
 
@@ -51,7 +51,7 @@ public sealed class ProtoKkGrandStrategist : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

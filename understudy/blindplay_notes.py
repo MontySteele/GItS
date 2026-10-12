@@ -1254,11 +1254,18 @@ PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans at "
 # it landed -- and the mirror is `EB-659`'s finding, that a planned BLOCK is
 # yours and Frail does cut it. Two clauses, one rule, both predictable from
 # the sentence.
+#
+# KOKOMI PRE-RUN FIXES (2026-10-12): AND THE EXCEPTION. A written Companion is
+# not a clause the jellyfish deals: `KokomiCompanionPlan.CarryOut` auto-plays
+# a clone of the card, a real play of hers, so her Weak and Strength at that
+# moment move it (round 3 lane 5: Shinobu written as "Deal 8" landed 6).
 PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
                             "planned HIT is the jellyfish's, so Shrink or Weak "
                             "on you never cuts it, before or after you write "
                             "it; a planned BLOCK is yours, so Frail does cut "
-                            "it.")
+                            "it. A written Companion is the exception: it is "
+                            "played as a card next turn, so your Strength "
+                            "and Weak then count.")
 #: Kokomi whole-run round 2026-10-10. The same fact, said for Strength alone.
 PLAN_STRENGTH_NOTE = "- Strength is read when the Plan is written."
 
@@ -1320,6 +1327,20 @@ PLAN_PAST_LETHAL_CLAUSE = (
 # in 6 Block, and the subtraction is the one a seat would otherwise do by hand
 # off `PLAN_BLOCK_NOTE`.
 PLAN_PAST_LETHAL_BLOCK = " behind {block} Block"
+
+# KOKOMI PRE-RUN FIXES (2026-10-12): A WAITING HIT INTO BLOCK. Round 3 lane 5b
+# fed 24 into a Burrowed Tunneler's Block, and lane 2b: "the Block was
+# invisible in my planning". An enemy's Block normally falls at the start of
+# its own turn, so what a morning Plan meets is the Block it KEEPS (Burrowed,
+# Barricade) and the Block it RAISES on its turn (a Defend intent).
+# `PLAN_BLOCK_NOTE` is the rule; these are the board's instance of it, on the
+# front-aimed damage rows the Block will eat.
+PLAN_INTO_BLOCK_CLAUSE = " (into Block {block})"
+PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE = (" (into Block {block}, plus the Block "
+                                     "it gains on its turn)")
+PLAN_INTO_DEFEND_CLAUSE = " (into the Block it gains on its turn)"
+#: The enemy powers that keep a body's Block across its turn start.
+BLOCK_KEEPING_POWERS = frozenset({"burrowed", "barricade"})
 
 
 AURA_NOTE = ("*An aura is tagged `(aura)` rather than `(buff)` or "
@@ -1519,8 +1540,11 @@ def _summon_row(hay: str) -> str:
 #: THE KOKOMI RE-FOUNDING (2026-10-12). The Tamakushi Casket's face
 #: (`TamakushiCasket.Face`), markup folded out, with the Block off the
 #: mirrored constant. The count and Open the Casket are retired.
+#: Kokomi pre-run fixes (2026-10-12): and when a Plan's own Block arrives,
+#: because two round-3 seats wrote a Block Plan for this turn's hit.
 CASKET_ROW = (f"At the end of your turn, if a Plan is waiting, gain "
-              f"{CASKET_BLOCK} Block.")
+              f"{CASKET_BLOCK} Block. A Plan's own Block comes at the start "
+              f"of your next turn.")
 
 ARM_KEYWORDS: dict[str, str] = {
     # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and
@@ -3095,6 +3119,34 @@ def _arm_row_text(word: str, growth: int = BOMB_GROWTH) -> str:
 GLOSSARY_TABLES: tuple[dict[str, str], ...] = (
     ARM_KEYWORDS, GAME_KEYWORDS, REACTION_KEYWORDS, ELEMENT_KEYWORDS,
     BASE_KEYWORDS)
+
+
+#: Kokomi pre-run fixes (2026-10-12): base-game words the board prints
+#: (`BEHIND_CLAUSE`, `TURNS_YOU_TAG`) that no glossary table defines, for
+#: `observe --define` only. Round 3 lane 5 asked for both at the Kaiser Crab,
+#: got nothing, and took the doubled Lasers for four turns. The rule is
+#: `SurroundedPower`'s (0.111.0 decompile; dossiers `crusher.md` and
+#: `rocket.md` sec.4.1): the side you are not facing hits you for x1.5, and
+#: a targeted card or potion turns you to face its target.
+DEFINE_ONLY_WORDS: dict[str, str] = {
+    "Surrounded": ("Enemies are on both sides of you. Attacks from the enemy "
+                   "behind you deal 50% more damage. Playing a card or potion "
+                   "on an enemy turns you to face it, which puts the other "
+                   "side behind you."),
+    "turns you": ("While you are Surrounded, playing this card on an enemy "
+                  "turns you to face that enemy. The other side is then "
+                  "behind you, and its attacks deal 50% more damage."),
+}
+
+
+def define_only_definition(word: str) -> tuple[str, str] | None:
+    """`(word, text)` from `DEFINE_ONLY_WORDS`, matched case-insensitively
+    and ignoring the brackets the hand tag prints (`(turns you)`)."""
+    want = word.strip().strip("()").strip().casefold()
+    for name, text in DEFINE_ONLY_WORDS.items():
+        if name.casefold() == want:
+            return name, text
+    return None
 
 
 def glossary_definition(word: str, growth: int | None = None

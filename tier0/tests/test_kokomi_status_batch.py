@@ -8,8 +8,10 @@ Sanctuary), so the pool is 78 (21 / 36 / 21). The C# twin is
 `KleeTests/Prototype/KokomiStatusBatchTests.cs`. NOTHING MEASURED HERE IS
 QUOTABLE (R215 B).
 
-The load-bearing reading: a Plan resolves after the next turn's draw (brief
-sec.2 rule 2), so "in your hand" on a Plan is the hand just drawn.
+THE KOKOMI ROUND-1 FIXES (2026-10-12): Kelp Wall counts the hand WHEN THE
+PLAN IS WRITTEN (the number its preview shows) and Sea Glass Harvest
+transforms the DRAW PILE; both used to read the carry-out hand, which seats
+found empty of the statuses they wrote the Plan for.
 
 THE RE-FOUNDING (2026-10-12) cut Turning Tide and Abyssal Salvage and made
 Tidecleanse's Exhaust its now-line; their old tests left with them.
@@ -51,7 +53,7 @@ def _filler(n):
 
 
 def _carry_out(st, card):
-    """Write `card`'s Plan and carry it out against the hand as it stands."""
+    """Write `card`'s Plan and carry it out at once."""
     kokomi_plan.schedule(st, card)
     kokomi_plan.resolve_all(st)
 
@@ -86,21 +88,33 @@ def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
     }
 
 
-# --- the next hand: a Plan reads the hand drawn before it ----------------------
+# --- Kelp Wall: the count is the hand it was written from ---------------------
 
-def test_a_plan_reads_the_hand_drawn_that_morning(overhaul):
-    """Kelp Wall written today; tomorrow's draw brings two Dazed; the Plan,
-    carried out after the draw, counts them. The real turn loop drives it."""
+def test_kelp_wall_counts_the_hand_when_written_not_the_morning_hand(overhaul):
+    """Kokomi round-1 fixes (2026-10-12). Written over a hand of two Dazed;
+    the hand is then emptied and tomorrow's draw brings three more. The Plan,
+    carried out by the real turn loop, pays for the TWO it was written with."""
     st = _quiet_state()
+    st.player.hand = [statuses.make_status("dazed"),
+                      statuses.make_status("dazed")]
     kokomi_plan.schedule(st, _row("proto_kk_kelp_wall"))
+    assert st.kk_plan_queue[-1].clauses[1]["written_count"] == 2
     st.player.hand = []
-    st.player.draw_pile = ([statuses.make_status("dazed"),
-                            statuses.make_status("dazed")] + _filler(8))
+    st.player.draw_pile = ([statuses.make_status("dazed")] * 3
+                           + _filler(8))
     combat._player_turn(st, lambda s: None)
     kelp = [e for e in st.log if e["event"] == "plan_kelp_wall"]
     assert kelp and kelp[0]["statuses"] == 2
     # The Kokomi card pass (2026-10-11): Plan 9 [12] (was 7 [10]).
     assert st.player.block == 9 + 3 * 2
+
+
+def test_kelp_wall_written_count_does_not_touch_the_printed_row(overhaul):
+    row = _row("proto_kk_kelp_wall")
+    st = _quiet_state()
+    st.player.hand = [statuses.make_status("wound")]
+    kokomi_plan.schedule(st, row)
+    assert all("written_count" not in c for c in row.plan)
 
 
 def test_kelp_wall_pays_the_flat_block_on_a_clean_hand(overhaul):
@@ -115,6 +129,18 @@ def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
     st.player.hand = [statuses.make_status("wound")]
     _carry_out(st, _up("proto_kk_kelp_wall"))
     assert st.player.block == 12 + 3
+
+
+def test_kelp_wall_pays_its_written_count_after_the_hand_is_played_out(
+        overhaul):
+    """The seat's case: the statuses were played (or exhausted) after the
+    Plan was written; the preview's number is still the number paid."""
+    st = _quiet_state()
+    st.player.hand = [statuses.make_status("wound")] * 2
+    kokomi_plan.schedule(st, _row("proto_kk_kelp_wall"))
+    st.player.hand = []
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == 9 + 3 * 2
 
 
 # --- Tidecleanse -------------------------------------------------------------------
@@ -166,28 +192,34 @@ def test_tidecleanse_draws_nothing(overhaul):
 
 # --- Sea Glass Harvest ---------------------------------------------------------------
 
-def test_sea_glass_harvest_transforms_statuses_and_curses(overhaul):
+def test_sea_glass_harvest_transforms_the_draw_piles_statuses_and_curses(
+        overhaul):
+    """Kokomi round-1 fixes (2026-10-12): the DRAW PILE, in place; the hand
+    is left alone."""
     st = _quiet_state()
     curse = plan_card([], cid="proto_kk_curse_probe")
     curse.type, curse.rarity = "curse", "curse"
     keep = _filler(1)[0]
-    st.player.hand = [statuses.make_status("dazed"), keep, curse]
+    held = statuses.make_status("wound")
+    st.player.hand = [held]
+    st.player.draw_pile = [statuses.make_status("dazed"), keep, curse]
     _carry_out(st, _row("proto_kk_sea_glass_harvest"))
-    ids = [c.id for c in st.player.hand]
+    ids = [c.id for c in st.player.draw_pile]
     assert ids == [kokomi_plan.SEA_GLASS, keep.id, kokomi_plan.SEA_GLASS]
-    glass = st.player.hand[0]
+    assert st.player.hand == [held]
+    glass = st.player.draw_pile[0]
     assert glass.cost == 0 and glass.exhaust
     assert glass.effects == [{"op": "energy", "amount": 1}]
 
 
 def test_sea_glass_harvest_upgraded_makes_sea_glass_plus(overhaul):
     up = _up("proto_kk_sea_glass_harvest")
-    assert up.plan == [{"op": "transform_statuses_in_hand",
+    assert up.plan == [{"op": "transform_statuses_in_draw_pile",
                         "upgraded": True}]
     st = _quiet_state()
-    st.player.hand = [statuses.make_status("wound")]
+    st.player.draw_pile = [statuses.make_status("wound")]
     _carry_out(st, up)
-    assert st.player.hand[0].effects == [{"op": "energy", "amount": 2}]
+    assert st.player.draw_pile[0].effects == [{"op": "energy", "amount": 2}]
 
 
 # --- Flotsam Surge ------------------------------------------------------------------------
@@ -227,7 +259,7 @@ def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
 # --- the shape check -------------------------------------------------------------------------
 
 @pytest.mark.parametrize("op", ["block_per_status_in_hand",
-                                "transform_statuses_in_hand"])
+                                "transform_statuses_in_draw_pile"])
 def test_the_two_surviving_clauses_are_plan_only(op):
     assert op in kokomi_plan.PLAN_KINDS
     assert op in kokomi_plan.PLAN_ONLY_OPS

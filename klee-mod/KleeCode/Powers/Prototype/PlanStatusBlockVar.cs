@@ -25,8 +25,9 @@ namespace KleeMod.Powers;
 ///
 /// The flat term is read off the row's own <c>PlanBlock</c> var, so an
 /// upgraded copy previews its upgraded number. The hand is the hand at
-/// preview time; the Plan counts the hand it lands in, which is the same
-/// "live, not promised" reading Driftglass's preview takes of the Casket.
+/// preview time, and since the Kokomi round-1 fixes (2026-10-12) that is the
+/// count the Plan keeps: <c>KokomiPlan.Schedule</c> stamps the hand's count
+/// when the Plan is written, so the number shown is the number paid.
 ///
 /// PREVIEW ONLY: nothing queues or pays off this var.
 /// </summary>

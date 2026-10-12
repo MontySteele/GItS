@@ -196,6 +196,11 @@ def test_every_prototype_face_printing_a_keyword_attaches_its_tip(keyword):
         if attach == "ArmKeywordTips.ForPlan" and \
                 "ArmKeywordTips.ForPlanOnly(" in text:
             attach = "ArmKeywordTips.ForPlanOnly"
+        # The Kokomi round-1 fixes (2026-10-12): a face that names Plans and
+        # has no Plan line carries the reader's tip (it cannot be written).
+        if attach == "ArmKeywordTips.ForPlan" and \
+                "ArmKeywordTips.ForPlanNoLine(" in text:
+            attach = "ArmKeywordTips.ForPlanNoLine"
         if f"{attach}(" not in text:
             missing.append(path.stem)
     assert missing == [], f"{keyword.word}: {missing}"
@@ -314,6 +319,12 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # states its rate truthfully; what no face said is that a
                     # card can make the queue longer than the queue looks.
                     "KLEEMOD-ARM_PLAN_TWICE",
+                    # Kokomi round 2 (2026-10-12): what Nereid's Ascension's
+                    # "twice" covers, on that card.
+                    "KLEEMOD-ARM_PLAN_TWICE_DEBUFFS",
+                    # The Spend outlet paper (2026-10-12): the rider on her
+                    # starter spend-all saying when to play it.
+                    "KLEEMOD-ARM_STAGE_BANK_DAMAGE",
                     # Varka, element identities sec.7 (2026-10-01): "this
                     # card would switch your current element", a fact about
                     # the card on the board, titling no keyword.
@@ -346,7 +357,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_PLAN_ONLY",
                     # The Kokomi re-founding (2026-10-12): the Plan tip a
                     # Companion carries while Kokomi holds it.
-                    "KLEEMOD-ARM_PLAN_COMPANION"}
+                    "KLEEMOD-ARM_PLAN_COMPANION",
+                    # The Kokomi round-1 fixes (2026-10-12): the Plan tip a
+                    # card that names Plans with no Plan line carries.
+                    "KLEEMOD-ARM_PLAN_NO_LINE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -847,6 +861,8 @@ NO_GLOSSARY_ROW_OWED = {
     "Sting": "a token card the page prints with its own face once it is added",
     "Stings": "a token card the page prints with its own face once it is added",
     "Ward": "a token card the page prints with its own face once it is added",
+    # Watchful Shoal (Kokomi round-3 changes, 2026-10-12).
+    "Wards": "a token card the page prints with its own face once it is added",
     "Sea Glass": "a token card the page prints with its own face once added",
     # The elements. None is a glossary row and none should be: the element is
     # the card's own indicator (`blindplay_faces._element` puts it on the card
@@ -1333,9 +1349,10 @@ GOLD_BASE_GAME = {"Block", "Energy", "Exhaust", "Exhausted", "Exhausts",
 GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}
 #: A card the face makes, golded as the base golds `OVERCLOCK`'s Burn.
 #: Sting, Stings and Ward since the Kokomi re-founding (2026-10-12), which
-#: also preview the card they name (`KokomiCards.WithStingPreview`).
+#: also preview the card they name (`KokomiCards.WithStingPreview`); Wards
+#: since Watchful Shoal's rewrite (Kokomi round-3 changes, 2026-10-12).
 GOLD_CREATED_CARDS = {"Dazed", "Confiscated", "Sting", "Stings", "Ward",
-                      "Sea Glass"}
+                      "Wards", "Sea Glass"}
 #: Words whose tip attaches off an op rather than off the table.
 GOLD_OP_TIPS = {"Summon": "the `stage_guest` op attaches ForSummon"}
 #: Names, each defined somewhere a reader meets it.
