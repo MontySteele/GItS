@@ -130,3 +130,11 @@ A whole-run seat round, then [USER]'s run. Lines: no card taken from over 70% of
 3. **Gorou's four cards.**
    - **(a) Default:** offered to Kokomi only, as her Personal Companions.
    - (b) Offered to everyone; only Kokomi can write their Plan lines.
+
+## Ruled 2026-10-12
+
+[USER]: "Yep - let's freeze the current Kokomi build as a reference (like we previously did with Klee), then build this new one. 1) a 2) a 3) If they're offered only to Kokomi, then they should just go into Kokomi's own card pool and count against its size limit, not the shared Companion pool. I've generally moved away from having Companion-slot cards do different things for different characters as opposed to just being in the character's deck space when needed."
+
+- **Picks 1 and 2 (a).**
+- **Pick 3:** Gorou's four cards leave the shared Companion pool and join Kokomi's own pool, counting against 78 (2 Common, 2 Uncommon). They are her cards now, with the Plan lines in sec.3. To make room, four more go: Deep Current and Massed Volley (Commons with no flavour), Commander's Eye (Gorou covers the Commander at Uncommon) and Signal Arrow. The pool stays 78 at 21 / 36 / 21.
+- **Reference:** the build before this pass is frozen at tag `kokomi-casket-frozen-2026-10-12`.
