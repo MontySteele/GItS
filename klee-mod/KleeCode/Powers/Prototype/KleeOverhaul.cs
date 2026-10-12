@@ -13,13 +13,6 @@ public static class KleeOverhaulLaw
     /// review (2026-10-08, sec.4.6, ruled; it was 4).</summary>
     public const int BombGrowth = 2;
 
-    /// <summary>
-    /// Alice's Recipe: growth is MULTIPLIED by this while the power is up --
-    /// "your Bombs grow twice each turn". Mirrors
-    /// <c>C.KLEE_OVERHAUL_ALICE_MULTIPLIER</c>.
-    /// </summary>
-    public const int AliceMultiplier = 2;
-
     /// <summary>Rule 4, and Pounding Surprise's whole body under this arm.
     /// Mirrors <c>C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION</c>.</summary>
     public const int SparkPerExplosion = 1;

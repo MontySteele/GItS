@@ -875,18 +875,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 
     /// <summary>
     /// Rule 1's growth NUMBER for one Klee, right now. PURE: the base
-    /// <see cref="KleeOverhaulLaw.BombGrowth"/>, MULTIPLIED by
-    /// <see cref="KleeOverhaulLaw.AliceMultiplier"/> while Alice's Recipe is up
-    /// ("your Bombs grow twice each turn"). The brief's own gloss on Alice is
-    /// "Breaks rule 1".
+    /// <see cref="KleeOverhaulLaw.BombGrowth"/>. (Alice's Recipe doubled it
+    /// until 2026-10-11; it now grows on placement, <see cref="AlicesRecipePower"/>.)
     /// </summary>
-    public static int GrowthFor(Creature? klee)
-    {
-        if (klee == null) return KleeOverhaulLaw.BombGrowth;
-        return klee.Powers.OfType<AlicesRecipePower>().Any()
-            ? KleeOverhaulLaw.BombGrowth * KleeOverhaulLaw.AliceMultiplier
-            : KleeOverhaulLaw.BombGrowth;
-    }
+    public static int GrowthFor(Creature? klee) => KleeOverhaulLaw.BombGrowth;
 
     // ---- rule 1: growth at the start of Klee's turn ---------------------
 
@@ -1788,6 +1780,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // merge and a split carry a Bomb that was already placed, so they pass
         // `relocated` and the Charm is paid once per Bomb, when it arrives.
         if (!relocated) size += Relics.DodocoCharm.BonusFor(applier);
+        // ALICE'S RECIPE (reworked 2026-10-11): a fresh placement grows every
+        // charge already out; a move does not. Before the charge lands, so the
+        // new one is not among "your other Bombs".
+        if (!relocated) AlicesRecipePower.GrowBeforePlacement(applier);
         var mark = ResolutionLedger.MarkApplied();
         var power = await PowerCmd.Apply<ProtoBombPower>(
             choiceContext, target, 1, applier: applier, cardSource: cardSource);

@@ -7442,3 +7442,29 @@ the paper's.
   (`furina` kind `summon_random`), after its 4 seats apply.
 - **Cut:** Gentle Current, Surging Waters, Pay the Tab, Sold Out.
 - Pool 78, 23 / 35 / 20 (was 21 / 37 / 20).
+
+## Alice's Recipe rework, 2026-10-11
+
+`proto_ko_alices_recipe`. [USER], after his Klee run on 0.2.4969: "I do think
+Alice's Recipe is now probably underpowered since the bombs only grow by 2 a
+turn". Ruled: "Let's change it to something different. How about bumping the
+cost to 3 and making it "Every bomb you place makes every other bomb grow by
+2" - an exponential ramp - upgrade raises the effect to 3. This is pretty
+strong but feels possibly justified as a high cost Rare." Then, on Mines:
+"let's make it affect both".
+
+- **Now:** Rare Power, 3. "Whenever you place a Bomb or Mine, your other Bombs
+  and Mines grow by 2 [3]." Stacks are the growth; copies add.
+- **Was:** cost 2 [1], "Your Bombs grow twice each turn" (rule 1's growth
+  multiplied by `KLEE_OVERHAUL_ALICE_MULTIPLIER`, now deleted with its C#
+  mirror `KleeOverhaulLaw.AliceMultiplier`).
+- **Placement, not a move.** Every fresh placement grows every charge Klee
+  already has out, on any enemy, before the new one lands (so it is never
+  among "your other Bombs"). A card that places on ALL enemies counts once per
+  charge. A jump, Exquisite Compound's move and Alice's Masterpiece's remnant
+  are `relocated` and pay nothing, the Dodoco Charm's flag. A Mine is a Bomb
+  with a fuse in both engines (one charge type with a Mine flag), so a Mine
+  placed triggers it and a Mine out grows. Growing places nothing, so it
+  cannot re-trigger itself. Engines: `ProtoBombPower.Place` calls
+  `AlicesRecipePower.GrowBeforePlacement`; sim `klee_overhaul.place`
+  (`relocated=`).

@@ -102,12 +102,11 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void Rule1_alices_recipe_doubles_the_turns_growth()
+    public void Rule1_alices_recipe_no_longer_touches_the_turns_growth()
     {
-        // "Your Bombs grow TWICE each turn" (balance pass 2026-09-02).
-        var alice = Seat.Klee().WithPower<AlicesRecipePower>(1);
-        Assert.Equal(KleeOverhaulLaw.BombGrowth * KleeOverhaulLaw.AliceMultiplier,
-                     GrowthFor(alice.Creature));
+        // Reworked 2026-10-11: it grows on placement (AlicesRecipeTests).
+        var alice = Seat.Klee().WithPower<AlicesRecipePower>(2);
+        Assert.Equal(KleeOverhaulLaw.BombGrowth, GrowthFor(alice.Creature));
     }
 
     [Fact]

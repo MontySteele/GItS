@@ -214,13 +214,101 @@ def test_rule1_growth_is_the_constant_by_default(overhaul):
     assert klee_overhaul.growth_for(klee_state()) == C.KLEE_OVERHAUL_BOMB_GROWTH
 
 
-def test_rule1_alices_recipe_doubles_the_growth(overhaul):
-    """`Rule1_alices_recipe_doubles_the_turns_growth` -- the 2026-09-02
-    balance pass: "your Bombs grow twice each turn"."""
+# --- Alice's Recipe (reworked 2026-10-11) -----------------------------------
+# [USER]: "Every bomb you place makes every other bomb grow by 2 - an
+# exponential ramp - upgrade raises the effect to 3", then "let's make it
+# affect both". C# twin: `AlicesRecipeTests`.
+
+def _sizes(enemy):
+    return [c.size for c in enemy.ko_charges]
+
+
+def test_alices_recipe_no_longer_touches_the_turns_growth(overhaul):
     state = klee_state()
-    state.player.powers[klee_overhaul.ALICES_RECIPE] = 1
-    assert klee_overhaul.growth_for(state) == (
-        C.KLEE_OVERHAUL_BOMB_GROWTH * C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
+    state.player.powers[klee_overhaul.ALICES_RECIPE] = 2
+    assert klee_overhaul.growth_for(state) == C.KLEE_OVERHAUL_BOMB_GROWTH
+
+
+def test_alices_recipe_the_row(overhaul):
+    from tier0.content import upgrades
+    card = load("proto_ko_alices_recipe")
+    assert (card.cost, card.type, card.rarity) == (3, "power", "rare")
+    assert card.effects == [{"op": "apply_power", "power": "ko_alices_recipe",
+                             "amount": 2, "target": "self"}]
+    plus = upgrades.apply_upgrade(card)
+    assert plus.cost == 3
+    assert plus.effects[0]["amount"] == 3
+
+
+def test_alices_recipe_a_placement_grows_every_other_charge(overhaul):
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 5)
+    klee_overhaul.place(state, a, 4, is_mine=True)
+    klee_overhaul.place(state, b, 3)
+    state.player.powers[klee_overhaul.ALICES_RECIPE] = 2
+    klee_overhaul.place(state, a, 6)
+    # Every other charge, on any enemy, Mines included; the new one is not.
+    assert _sizes(a) == [7, 6, 6]
+    assert _sizes(b) == [5]
+
+
+def test_alices_recipe_a_mine_placement_triggers_it(overhaul):
+    a = make_enemy(hp=200)
+    state = klee_state([a])
+    klee_overhaul.place(state, a, 5)
+    state.player.powers[klee_overhaul.ALICES_RECIPE] = 2
+    klee_overhaul.place(state, a, 8, is_mine=True)
+    assert _sizes(a) == [7, 8]
+
+
+def test_alices_recipe_counts_once_per_charge_placed_on_all(overhaul):
+    """Blasting Spree places a Bomb 6 on ALL enemies: two charges, two
+    triggers. a's old 5 grows twice; a's new 6 grows when b's lands."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 5)
+    state.player.powers[klee_overhaul.ALICES_RECIPE] = 2
+    effects.resolve_card(state, load("proto_ko_blasting_spree"))
+    assert _sizes(a) == [9, 8]
+    assert _sizes(b) == [6]
+
+
+def test_alices_recipe_a_mine_placed_on_all_counts_per_mine(overhaul):
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    state.player.powers[klee_overhaul.ALICES_RECIPE] = 3      # upgraded
+    for enemy in (a, b):
+        klee_overhaul.place(state, enemy, 4, is_mine=True)
+    assert _sizes(a) == [7] and _sizes(b) == [4]
+    assert klee_overhaul.mine_count(a) == 1
+
+
+def test_alices_recipe_a_move_is_not_a_placement(overhaul):
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 5)
+    klee_overhaul.place(state, b, 3)
+    state.player.powers[klee_overhaul.ALICES_RECIPE] = 2
+    klee_overhaul.gather_all_to(state, a, 0)          # Exquisite Compound
+    assert sorted(_sizes(a)) == [3, 5]
+    b.hp = 0
+    klee_overhaul.place(state, b, 1)                  # lands on the corpse: +2
+    assert sorted(_sizes(a)) == [5, 7]
+    klee_overhaul.sweep_jumps(state)                  # the jump pays nothing
+    assert sorted(_sizes(a)) == [1, 5, 7]
+
+
+def test_alices_recipe_copies_stack(overhaul):
+    a = make_enemy(hp=200)
+    state = klee_state([a])
+    klee_overhaul.place(state, a, 5)
+    card = load("proto_ko_alices_recipe")
+    effects.resolve_card(state, card)
+    effects.resolve_card(state, card)
+    assert state.player.powers[klee_overhaul.ALICES_RECIPE] == 4
+    klee_overhaul.place(state, a, 1)
+    assert _sizes(a) == [9, 1]
 
 
 def test_rule1_the_turn_start_hook_grows_and_does_not_detonate(overhaul):

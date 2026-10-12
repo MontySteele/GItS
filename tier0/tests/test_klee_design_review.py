@@ -27,9 +27,8 @@ def _first(card, op):
 
 # --- The rules ----------------------------------------------------------------
 
-def test_rule_1_grows_two_and_alice_still_doubles_it(overhaul):
+def test_rule_1_grows_two(overhaul):
     assert C.KLEE_OVERHAUL_BOMB_GROWTH == 2
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH * C.KLEE_OVERHAUL_ALICE_MULTIPLIER == 4
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.turn = 2

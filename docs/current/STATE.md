@@ -84,8 +84,12 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   seven numbers) and the Uncommons and Rares pass
   (`review/active/klee-upper-pass-2026-10-11.md`, all defaults): ten numbers,
   Exquisite Compound moves each Bomb (no merge), Tag Along and Adventure Club
-  choose 1 of 3 and 2 of 4; Stoke the Fuse aims at an enemy. **Next:** [USER]'s
-  playtest on the promoted build, after the recent buffs.
+  choose 1 of 3 and 2 of 4; Stoke the Fuse aims at an enemy. [USER]'s run
+  2026-10-11 on 0.2.4969 ("Overall much improved!"; a fair act-3 death,
+  `review/records/klee-user-run-2026-10-11.md`) reworked Alice's Recipe: cost
+  3, "Whenever you place a Bomb or Mine, your other Bombs and Mines grow by
+  2 [3]." **Next:** [USER]'s higher-ascension (A3 to A5) runs, which read her
+  deep scaling.
 - **Kokomi: Prototype.** Brief `review/active/kokomi-brief-2026-09-01.md`
   (sec.2, the rules). A card with a Plan line can be played on the
   Bake-Kurage instead, and it is carried out at the start of her next turn,

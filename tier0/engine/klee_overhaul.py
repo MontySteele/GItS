@@ -5,8 +5,7 @@ THE RULED BRIEF'S SEVEN RULES (`review/active/klee-brief-2026-09-01.md` sec.3),
 slice one (`review/active/klee-overhaul-slice-1-2026-09-01.md`):
 
   1. **Bomb.** A numbered charge on an enemy. Every Bomb grows by
-     `C.KLEE_OVERHAUL_BOMB_GROWTH` at the start of Klee's turn, plus one per
-     Explosives Workshop stack, the whole doubled by Alice's Recipe. A Bomb
+     `C.KLEE_OVERHAUL_BOMB_GROWTH` at the start of Klee's turn. A Bomb
      never goes off on its own.
   2. **Set off.** Only a card that says *Set off* makes Bombs go off. Every
      Bomb on the target goes off ONE AT A TIME, each a Pyro hit for its own
@@ -30,9 +29,9 @@ THE C# IS THE SPEC, and where its prose and its code disagree the CODE is what
 this file mirrors. The places that matters are recorded at their sites below;
 the ones a reader should know before reading anything else:
 
-  * ALICE'S RECIPE MULTIPLIES, AND THE WORKSHOP IS ADDED FIRST. `GrowthFor`
-    sums the base and the Workshop stacks and doubles the result -- "your Bombs
-    grow twice each turn", the card's own face. See `growth_for`.
+  * ALICE'S RECIPE GROWS ON PLACEMENT (reworked 2026-10-11): every fresh
+    placement grows the charges already out, Mines included; a move does not.
+    See `place`.
   * A SET OFF AIMED AT A CORPSE JUMPS the whole pile rather than fizzling;
     `SetOff` takes the charges first and its per-charge death test then sends
     every one of them to `JumpCharges`. See `set_off`.
@@ -113,7 +112,7 @@ OVERHAUL_OPS = frozenset((
 #: each site so the sheet's `power:` values and the readers cannot drift. Every
 #: one is applied by an ordinary `apply_power` op off a card row, and every one
 #: names its C# class in `tools/gen_klee_cards.POWER_CS`.
-ALICES_RECIPE = "ko_alices_recipe"            # growth doubled
+ALICES_RECIPE = "ko_alices_recipe"            # a placement grows the others
 CHAINED_REACTIONS = "ko_chained_reactions"    # other Bombs grow per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
 GROUNDED = "ko_grounded"                      # Block for the quiet turn
@@ -205,20 +204,11 @@ def live(state: CombatState) -> bool:
 # ---------------------------------------------------------------------------
 
 def growth_for(state: CombatState) -> int:
-    """Rule 1's growth NUMBER for this Klee, right now. `GrowthFor`'s twin.
-
-    The base `C.KLEE_OVERHAUL_BOMB_GROWTH`, MULTIPLIED by
-    `C.KLEE_OVERHAUL_ALICE_MULTIPLIER` while Alice's Recipe is up ("your Bombs
-    grow twice each turn").
-
-    EVERY NUMBER IS READ, NEVER HARDCODED. Rule 1's growth is a placeholder the
-    brief says is not a claim, and it has already moved once (3 to 4) inside
-    this branch's own lifetime.
+    """Rule 1's growth NUMBER for this Klee, right now. `GrowthFor`'s twin:
+    the base `C.KLEE_OVERHAUL_BOMB_GROWTH`. (Alice's Recipe doubled it until
+    2026-10-11; it now grows on placement, see `place`.)
     """
-    growth = int(C.KLEE_OVERHAUL_BOMB_GROWTH)
-    if state.player.powers.get(ALICES_RECIPE, 0):
-        growth *= int(C.KLEE_OVERHAUL_ALICE_MULTIPLIER)
-    return growth
+    return int(C.KLEE_OVERHAUL_BOMB_GROWTH)
 
 
 def grow_pile(enemy: Enemy, amount: int) -> None:
@@ -299,7 +289,7 @@ def take_mines(enemy: Enemy) -> list[KleeCharge]:
 
 
 def place(state: CombatState, enemy: Enemy, size: int, is_mine: bool = False,
-          payload_mine_all: int = 0) -> None:
+          payload_mine_all: int = 0, relocated: bool = False) -> None:
     """Plant one charge. `Place`'s twin, and the SINGLE entry point for every
     source: a card's `plant_bomb`, a jump's landing and a payload's Mines all
     arrive here.
@@ -308,7 +298,18 @@ def place(state: CombatState, enemy: Enemy, size: int, is_mine: bool = False,
     (`CanReceivePowers`, which does not test `IsDead`) and this engine's own
     `CORPSE_TARGETABLE_OPS` reading for `place_bomb`. The sweep is what moves
     it off again.
+
+    ALICE'S RECIPE (reworked 2026-10-11; [USER]: "Every bomb you place makes
+    every other bomb grow by 2", then "let's make it affect both"): a FRESH
+    placement first grows every charge already out, on any enemy, Mines
+    included, by the power's stacks. `relocated` is a MOVE (a jump, Exquisite
+    Compound) and pays nothing, as `ProtoBombPower.Place`'s flag of the same
+    name. Growing places nothing, so it cannot re-trigger itself.
     """
+    recipe = 0 if relocated else int(state.player.powers.get(ALICES_RECIPE, 0))
+    if recipe > 0:
+        for other in state.enemies:
+            grow_pile(other, recipe)
     enemy.ko_charges.append(
         KleeCharge(size=int(size), is_mine=bool(is_mine),
                    payload_mine_all=int(payload_mine_all)))
@@ -671,7 +672,7 @@ def jump_charges(state: CombatState, from_enemy: Optional[Enemy],
                    frm=from_enemy.name if from_enemy is not None else None,
                    to=dest.name, size=charge.size, mine=charge.is_mine)
         place(state, dest, charge.size, charge.is_mine,
-              charge.payload_mine_all)
+              charge.payload_mine_all, relocated=True)
 
 
 def largest_index(enemy: Enemy) -> int:
@@ -1249,7 +1250,7 @@ def gather_all_to(state: CombatState, dest: Optional[Enemy],
                growth=growth)
     for charge in moved:
         place(state, dest, charge.size + growth, charge.is_mine,
-              charge.payload_mine_all)
+              charge.payload_mine_all, relocated=True)
 
 
 def remove_largest_for_block(state: CombatState) -> int:
