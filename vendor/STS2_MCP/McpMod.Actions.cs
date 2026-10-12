@@ -407,6 +407,17 @@ public static partial class McpMod
 
         int index = indexElem.GetInt32();
 
+        // GItS LOCAL EDIT (Klee's Ancient greeting, 2026-10-12): an option
+        // button is clickable by ForceClick while an Ancient's exchange still
+        // has a line to go, which a player cannot do (the buttons sit below
+        // the dialogue, unfocusable, until the last line). A page change then
+        // wiped the greeting unread and left its hitbox up over no lines.
+        // The same test the state read uses for `in_dialogue`.
+        var gitsAncientLayout = FindFirst<NAncientEventLayout>(uiRoom);
+        var gitsDialogueHitbox = gitsAncientLayout?.GetNodeOrNull<NClickableControl>("%DialogueHitbox");
+        if (gitsDialogueHitbox != null && gitsDialogueHitbox.Visible && gitsDialogueHitbox.IsEnabled)
+            return Error("Ancient dialogue in progress - use advance_dialogue until it ends, then choose");
+
         var buttons = FindAll<NEventOptionButton>(uiRoom);
 
         if (buttons.Count == 0)
