@@ -59,8 +59,14 @@ public static class DamageCredit
     public const string Power = "power";
 
     /// <summary>One open scope: the seat it credits, the kind, and a label
-    /// that stands in for a card name when the hit has no card.</summary>
-    public sealed record Frame(Player? Owner, string Kind, string? Label);
+    /// that stands in for a card name when the hit has no card.
+    /// <paramref name="Cause"/> (2026-10-12, the Swirl credit) is what set
+    /// this scope off when that is not the scope itself: the card a
+    /// reaction's hit came from, or an outer scope's label in parentheses
+    /// ("(Bomb)"). Null when nothing named one; the telemetry then asks which
+    /// card was resolving (`swirl_damage_by_card`).</summary>
+    public sealed record Frame(Player? Owner, string Kind, string? Label,
+                               string? Cause = null);
 
     private static readonly AsyncLocal<Frame?> _current = new();
 
@@ -88,13 +94,19 @@ public static class DamageCredit
 
     /// <summary>Opens a scope that replaces any open one. The owner is
     /// <paramref name="source"/>'s seat (a pet answers its owner), or the
-    /// outer scope's owner when the source names none.</summary>
-    public static Scope Open(Creature? source, string kind, string? label = null)
+    /// outer scope's owner when the source names none. The cause is
+    /// <paramref name="cause"/>, else the outer scope's cause, else the
+    /// outer scope's label in parentheses.</summary>
+    public static Scope Open(Creature? source, string kind, string? label = null,
+                             string? cause = null)
     {
         try
         {
             var prior = _current.Value;
-            _current.Value = new Frame(OwnerOf(source) ?? prior?.Owner, kind, label);
+            var why = cause ?? prior?.Cause
+                ?? (prior?.Label is { } outer ? "(" + outer + ")" : null);
+            _current.Value = new Frame(OwnerOf(source) ?? prior?.Owner, kind, label,
+                                       why);
             return new Scope(prior);
         }
         catch (Exception)

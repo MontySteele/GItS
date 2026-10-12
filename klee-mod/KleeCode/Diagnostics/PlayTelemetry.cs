@@ -367,6 +367,154 @@ internal static class PlayTelemetry
         record.SpendCardPlays.Add((round, name ?? "", Math.Max(0, enemiesAlive)));
     }
 
+    // ------------------------------------------------- draws and Energy ---
+
+    /// <summary>
+    /// 2026-10-12 (the Furina/Varka round's watch items and Kokomi round 3's
+    /// Iron Club): one card drawn by this seat, the turn's own draw and an
+    /// effect's draw alike, filed to the round it was drawn in
+    /// (`cards_drawn_by_turn`). Every character. A read (rule 1).
+    /// </summary>
+    internal static void CardDrawn(CardModel? card)
+    {
+        try
+        {
+            var owner = card?.Owner;
+            if (owner == null || !Open.ContainsKey(owner)) return;
+            var round = CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0;
+            RecordCardDrawn(owner, round);
+        }
+        catch (Exception e)
+        {
+            Warn("CardDrawn", e);
+        }
+    }
+
+    /// <summary>A turn that opened and drew nothing still has its row, 0.
+    /// </summary>
+    private static void NoteDrawRow(FightRecord record, int round)
+    {
+        if (!record.CardsDrawn.ContainsKey(round)) record.CardsDrawn[round] = 0;
+    }
+
+    /// <summary>The hook-free half of <see cref="CardDrawn"/>, and the test
+    /// seam.</summary>
+    internal static void RecordCardDrawn(Player player, int round)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        record.CardsDrawn.TryGetValue(round, out var running);
+        record.CardsDrawn[round] = running + 1;
+    }
+
+    /// <summary>
+    /// 2026-10-12: the seat's Energy once its turn has started, after every
+    /// turn-start effect (read on <c>AfterPlayerTurnStartLate</c>, which runs
+    /// after the <c>AfterPlayerTurnStart</c> listeners), the first column of
+    /// `energy_by_turn`. Every character. A read (rule 1).
+    /// </summary>
+    internal static void EnergyTurnStart(Player player)
+    {
+        try
+        {
+            var combat = CombatManager.Instance?.DebugOnlyGetState();
+            if (combat == null || !Open.ContainsKey(player)) return;
+            var energy = player.PlayerCombatState?.Energy ?? 0;
+            RecordEnergyTurnStart(player, combat.RoundNumber, energy);
+        }
+        catch (Exception e)
+        {
+            Warn("EnergyTurnStart", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="EnergyTurnStart"/>, and the
+    /// test seam. A second reading in one round keeps the first.</summary>
+    internal static void RecordEnergyTurnStart(Player player, int round, int energy)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        if (record.EnergyTurnStart.ContainsKey(round)) return;
+        record.EnergyTurnStart[round] = Math.Max(0, energy);
+    }
+
+    /// <summary>
+    /// 2026-10-12: Energy a card of this seat's spent (the game's
+    /// <c>AfterEnergySpent</c>, which a card's payment raises), filed to the
+    /// round: the second column of `energy_by_turn`. A read (rule 1).
+    /// </summary>
+    internal static void EnergySpent(CardModel? card, int amount)
+    {
+        try
+        {
+            var owner = card?.Owner;
+            if (owner == null || amount <= 0 || !Open.ContainsKey(owner)) return;
+            var round = CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0;
+            RecordEnergySpent(owner, round, amount);
+        }
+        catch (Exception e)
+        {
+            Warn("EnergySpent", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="EnergySpent"/>, and the
+    /// test seam.</summary>
+    internal static void RecordEnergySpent(Player player, int round, int amount)
+    {
+        if (amount <= 0 || !Open.TryGetValue(player, out var record)) return;
+        record.EnergySpentByRound.TryGetValue(round, out var running);
+        record.EnergySpentByRound[round] = running + amount;
+    }
+
+    /// <summary>
+    /// 2026-10-12 (the Furina/Varka round): Varka's Oath in each element and
+    /// his current element as each of his turns ENDS (`oath_by_turn`,
+    /// `current_element_by_turn`), and the most of each element any of those
+    /// readings held (`oath_peak`). Varka only: anyone else writes no key.
+    /// A read; the ledger read is the one `cards_played` already makes.
+    /// </summary>
+    private static void NoteOath(FightRecord record, Creature creature, int round)
+    {
+        try
+        {
+            if (!VarkaOath.Live(creature)) return;
+            var oath = VarkaOathLedger.Elements
+                .Select(e => (Name: e.ToString(), Count: VarkaOath.Count(creature, e)))
+                .ToList();
+            RecordOath(record, round, oath, VarkaOath.Current(creature).ToString());
+        }
+        catch (Exception e)
+        {
+            Warn("NoteOath", e);
+        }
+    }
+
+    private static void RecordOath(FightRecord record, int round,
+                                   IReadOnlyList<(string Name, int Count)> oath,
+                                   string current)
+    {
+        record.IsVarka = true;
+        var row = new Dictionary<string, int>();
+        foreach (var (name, count) in oath)
+        {
+            row[name] = count;
+            record.OathPeak[name] = record.OathPeak.TryGetValue(name, out var held)
+                ? Math.Max(held, count) : count;
+        }
+        record.OathByTurn.Add((round, row));
+        record.CurrentElementByTurn.Add((round, current));
+    }
+
+    /// <summary>Test seam: a Varka turn-end Oath reading for one seat,
+    /// with no ledger. The mod never calls it.</summary>
+    internal static void RecordOathForTest(Player player, int round,
+                                           string[] names, int[] counts,
+                                           string current)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        RecordOath(record, round,
+                   names.Zip(counts, (n, c) => (n, c)).ToList(), current);
+    }
+
     /// <summary>The hook-free half of <see cref="SpendCardsTurnStart"/>, and
     /// the test seam.</summary>
     internal static void RecordSpendCardsTurnStart(Player player, int round,
@@ -407,6 +555,7 @@ internal static class PlayTelemetry
                 record.IncomingByTurn.Add(new[] { round, telegraphed, attackers });
                 record.EnemyPoolByTurn.Add(new[] { round, pool });
                 record.EnemyHpByTurn.Add(new[] { round, hp });
+                NoteDrawRow(record, round);
                 NoteFanfareTurnStart(record, creature, round);
                 NoteKokomiTurnStart(record, creature, round);
                 // REACTIONS RIDE ALONG, because the counter already exists and
@@ -553,6 +702,7 @@ internal static class PlayTelemetry
             });
             record.HpLastSeen = (int)creature.CurrentHp;
             NoteStage(record, creature);
+            NoteOath(record, creature, round);
         }
     }
 
@@ -968,12 +1118,55 @@ internal static class PlayTelemetry
 
         var (owner, kind, source) = Credit(dealer, cardSource);
         if (owner == null || !Open.TryGetValue(owner, out var dealt)) return false;
-        FileHit(dealt, kind, source, unblocked, blocked);
+        FileHit(dealt, kind, source, unblocked, blocked,
+                SwirlKey(dealt, kind, cardSource));
         return unblocked > 0;
     }
 
+    /// <summary>The Swirl's own label on its <see cref="DamageCredit"/>
+    /// scope (<c>ReactionEffects.Resolve</c> labels a reaction by name).
+    /// </summary>
+    private const string SwirlLabel = "Swirl";
+
+    /// <summary>
+    /// 2026-10-12 -- WHICH CARD A SWIRL'S DAMAGE CAME FROM
+    /// (`swirl_damage_by_card`; the Furina/Varka round: "Converging Winds'
+    /// multi-enemy bonus cannot be read"). A Swirl's flat hit has no card, so
+    /// `damage_by_source` files it under "(Swirl)" and keeps doing so. This
+    /// names it, in order: the card the reaction's hit came from (the scope's
+    /// cause), an outer scope's label ("(Bomb)"), the card this seat was
+    /// resolving when it landed, else "(no card)" (a turn-start Swirl such as
+    /// Sturm und Drang's). Null for any hit that is not a Swirl's.
+    /// </summary>
+    private static string? SwirlKey(FightRecord record, string kind,
+                                    CardModel? cardSource)
+    {
+        if (kind != DamageCredit.Reaction) return null;
+        var frame = DamageCredit.Current;
+        if (frame?.Label != SwirlLabel) return null;
+        if (!string.IsNullOrEmpty(frame.Cause)) return frame.Cause;
+        if (cardSource != null) return CardName(cardSource);
+        return ResolvingCard(record) ?? "(no card)";
+    }
+
+    /// <summary>The innermost play this seat has open, by name, or null.
+    /// The mod keys a play window by its card; a test may key it by name.
+    /// </summary>
+    private static string? ResolvingCard(FightRecord record)
+    {
+        for (var i = record.PlayBlockStack.Count - 1; i >= 0; i--)
+        {
+            switch (record.PlayBlockStack[i].Key)
+            {
+                case CardModel card: return CardName(card);
+                case string name when name.Length > 0: return name;
+            }
+        }
+        return null;
+    }
+
     private static void FileHit(FightRecord record, string kind, string source,
-                             int unblocked, int blocked)
+                             int unblocked, int blocked, string? swirl = null)
     {
         if (unblocked > 0)
         {
@@ -981,6 +1174,11 @@ internal static class PlayTelemetry
             record.DamageBySource[source] = running + unblocked;
             record.DamageByKind.TryGetValue(kind, out var byKind);
             record.DamageByKind[kind] = byKind + unblocked;
+            if (swirl != null)
+            {
+                record.SwirlDamageByCard.TryGetValue(swirl, out var bySwirl);
+                record.SwirlDamageByCard[swirl] = bySwirl + unblocked;
+            }
         }
 
         record.DamageBlocked += Math.Max(0, blocked);
@@ -991,7 +1189,8 @@ internal static class PlayTelemetry
     /// <summary>One hit in flight: who it credits, and what stood in front of
     /// it when it started.</summary>
     private readonly record struct PendingHit(
-        Player? Owner, string Kind, string Source, Player? Victim, int Hp, int Block);
+        Player? Owner, string Kind, string Source, Player? Victim, int Hp, int Block,
+        string? Swirl = null);
 
     private static readonly Dictionary<Creature, List<PendingHit>> Pending = new();
 
@@ -1024,8 +1223,9 @@ internal static class PlayTelemetry
             else
             {
                 var (owner, kind, source) = Credit(dealer, cardSource);
-                if (owner == null || !Open.ContainsKey(owner)) return;
-                hit = new PendingHit(owner, kind, source, null, hp, block);
+                if (owner == null || !Open.TryGetValue(owner, out var record)) return;
+                hit = new PendingHit(owner, kind, source, null, hp, block,
+                                     SwirlKey(record, kind, cardSource));
             }
 
             if (!Pending.TryGetValue(target, out var stack))
@@ -1079,7 +1279,7 @@ internal static class PlayTelemetry
             }
 
             if (hit.Owner == null || !Open.TryGetValue(hit.Owner, out var dealt)) return;
-            FileHit(dealt, hit.Kind, hit.Source, hit.Hp, hit.Block);
+            FileHit(dealt, hit.Kind, hit.Source, hit.Hp, hit.Block, hit.Swirl);
             dealt.KillingBlows++;
         }
         catch (Exception e)
@@ -1166,6 +1366,7 @@ internal static class PlayTelemetry
     {
         foreach (var (player, record) in Open)
         {
+            NoteDrawRow(record, round);
             if (player.Creature is { } creature)
             {
                 NoteFanfareTurnStart(record, creature, round);
@@ -1831,6 +2032,32 @@ internal static class PlayTelemetry
         public readonly List<int[]> BlockAtTurnEnd = new();
         public readonly List<int[]> StrengthByTurn = new();
         public readonly List<int[]> ReactionsByTurn = new();
+        /// <summary>2026-10-12. Cards this seat drew, by round, every turn
+        /// opened counted (0 with none) (<see cref="CardDrawn"/>).</summary>
+        public readonly SortedDictionary<int, int> CardsDrawn = new();
+        /// <summary>2026-10-12. The seat's Energy once each turn started,
+        /// after the turn-start effects (<see cref="EnergyTurnStart"/>).
+        /// </summary>
+        public readonly SortedDictionary<int, int> EnergyTurnStart = new();
+        /// <summary>2026-10-12. Energy its cards spent, by round
+        /// (<see cref="EnergySpent"/>).</summary>
+        public readonly SortedDictionary<int, int> EnergySpentByRound = new();
+        /// <summary>2026-10-12. True for a Varka seat (<see cref="NoteOath"/>).
+        /// </summary>
+        public bool IsVarka;
+        /// <summary>2026-10-12. [round, {element: Oath}] at each turn end.
+        /// </summary>
+        public readonly List<(int Round, Dictionary<string, int> Oath)> OathByTurn = new();
+        /// <summary>2026-10-12. The most Oath of each element any turn-end
+        /// reading held.</summary>
+        public readonly Dictionary<string, int> OathPeak = new();
+        /// <summary>2026-10-12. [round, current element] at each turn end.
+        /// </summary>
+        public readonly List<(int Round, string Element)> CurrentElementByTurn = new();
+        /// <summary>2026-10-12. A Swirl's damage by the card behind it
+        /// (<see cref="SwirlKey"/>); the same damage stays under "(Swirl)" in
+        /// <see cref="DamageBySource"/>.</summary>
+        public readonly Dictionary<string, int> SwirlDamageByCard = new();
         /// <summary>-1 until the first turn sample; the counter is monotonic
         /// across combats, so a fight's own count is a difference.</summary>
         public int ReactionsAtStart = -1;
@@ -2042,6 +2269,11 @@ internal static class PlayTelemetry
                 sb.Append(",\"guest_evictions\":").Append(Stage.GuestEvictions);
                 sb.Append(",\"guest_repeat_acts\":")
                   .Append(Stage.GuestRepeatActs);
+                // 2026-10-12 (the Furina/Varka round): the guest acts Full
+                // House answered (a copy in play, the fight not over),
+                // whether or not there was Fanfare to Spend.
+                sb.Append(",\"full_house_triggers\":")
+                  .Append(Stage.FullHouseTriggers);
             }
             if (IsKokomi)
             {
@@ -2054,6 +2286,32 @@ internal static class PlayTelemetry
                 sb.Append(",\"plans_carried_out\":")
                   .Append(KokomiLedger?.PlansCarriedOutThisCombat ?? 0);
             }
+            if (IsVarka)
+            {
+                // 2026-10-12 (the Furina/Varka round): his Oath by element
+                // and his current element as each turn ended, and the most
+                // of each element a turn end held.
+                sb.Append(",\"oath_by_turn\":[");
+                for (var i = 0; i < OathByTurn.Count; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append('[').Append(OathByTurn[i].Round).Append(',');
+                    IntMap(sb, OathByTurn[i].Oath);
+                    sb.Append(']');
+                }
+                sb.Append(']');
+                sb.Append(",\"oath_peak\":");
+                IntMap(sb, OathPeak);
+                sb.Append(",\"current_element_by_turn\":[");
+                for (var i = 0; i < CurrentElementByTurn.Count; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append('[').Append(CurrentElementByTurn[i].Round).Append(',');
+                    Quote(sb, CurrentElementByTurn[i].Element);
+                    sb.Append(']');
+                }
+                sb.Append(']');
+            }
             sb.Append(",\"turns\":").Append(Turns);
             sb.Append(',');
             Str(sb, "outcome", Outcome);
@@ -2064,6 +2322,21 @@ internal static class PlayTelemetry
             Pairs(sb, "block_at_turn_end", BlockAtTurnEnd);
             Pairs(sb, "strength_by_turn", StrengthByTurn);
             Pairs(sb, "reactions_by_turn", ReactionsByTurn);
+            // 2026-10-12. Every character: cards drawn each round (the
+            // opening draw and effects' draws), and [round, Energy at the
+            // turn's start after its effects, Energy spent]; -1 not read.
+            Pairs(sb, "cards_drawn_by_turn",
+                  CardsDrawn.Select(p => new[] { p.Key, p.Value }).ToList());
+            Pairs(sb, "energy_by_turn",
+                  EnergyTurnStart.Keys.Union(EnergySpentByRound.Keys)
+                      .OrderBy(r => r)
+                      .Select(r => new[]
+                      {
+                          r,
+                          EnergyTurnStart.TryGetValue(r, out var start) ? start : -1,
+                          EnergySpentByRound.TryGetValue(r, out var spent) ? spent : 0,
+                      })
+                      .ToList());
             sb.Append(",\"cards_played\":[");
             for (var i = 0; i < CardsPlayed.Count; i++)
             {
@@ -2151,6 +2424,10 @@ internal static class PlayTelemetry
             }
 
             sb.Append('}');
+            // 2026-10-12. A Swirl's damage by the card behind it; the same
+            // damage stays under "(Swirl)" in `damage_by_source`.
+            sb.Append(",\"swirl_damage_by_card\":");
+            IntMap(sb, SwirlDamageByCard);
             // 2026-10-06. What reactions are worth, per seat. Additive keys,
             // human feed only (`understudy/README.md`).
             sb.Append(",\"reactions_by_type\":");
@@ -2398,6 +2675,8 @@ public sealed class PlayTelemetryHooks : AbstractModel
     public override Task AfterCardDrawn(PlayerChoiceContext choiceContext,
                                         CardModel card, bool fromHandDraw)
     {
+        // 2026-10-12: every draw, the turn's own included, per round.
+        PlayTelemetry.CardDrawn(card);
         if (fromHandDraw || card == null) return Task.CompletedTask;
         try
         {
@@ -2420,6 +2699,23 @@ public sealed class PlayTelemetryHooks : AbstractModel
     {
         PlayTelemetry.BlockCardTurn(player);
         PlayTelemetry.SpendCardsTurnStart(player);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>2026-10-12: the Energy a turn opens with, read after every
+    /// <c>AfterPlayerTurnStart</c> listener has run (`energy_by_turn`).
+    /// </summary>
+    public override Task AfterPlayerTurnStartLate(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        PlayTelemetry.EnergyTurnStart(player);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>2026-10-12: Energy a card spent (`energy_by_turn`).</summary>
+    public override Task AfterEnergySpent(CardModel card, int amount)
+    {
+        PlayTelemetry.EnergySpent(card, amount);
         return Task.CompletedTask;
     }
 
