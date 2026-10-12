@@ -59,7 +59,7 @@ public sealed class ProtoVkBlazingCharge : CustomCardModel, IElementalCard, ICha
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 5m),
+            new DynamicVar("VkBase", 8m),
             new DynamicVar("VkPer", 2m)
         };
 
@@ -77,6 +77,6 @@ public sealed class ProtoVkBlazingCharge : CustomCardModel, IElementalCard, ICha
 
     protected override void OnUpgrade()
     {
-        DynamicVars["VkBase"].UpgradeValueBy(2m);
+        DynamicVars["VkBase"].UpgradeValueBy(3m);
     }
 }

@@ -402,7 +402,9 @@ def _translate(state, fx):
             yield {"op": "apply_power", "power": "vk_oath_proxy",
                    "amount": amt, "target": "self"}
     # --- the combo pass's kinds (2026-10-04) ---
-    elif kind == "gain_pyro_oath":
+    elif kind in ("gain_pyro_oath", "pyro_oath"):
+        # `pyro_oath`: Ashen Oath's gain (the Pyro pass, 2026-10-11). The
+        # optional Exhaust rider is priced at nothing.
         yield {"op": "apply_power", "power": "vk_oath_proxy", "amount": amt,
                "target": "self"}
     elif kind == "pyro_strike":

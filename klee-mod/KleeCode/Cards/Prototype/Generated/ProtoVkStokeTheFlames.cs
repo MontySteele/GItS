@@ -38,20 +38,21 @@ public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_stoke_the_flames");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stoke the Flames"),
-        ("description", "[gold]Exhaust[/gold] a card. [gold]Pyro[/gold] becomes your [gold]current element[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]."),
+        ("description", "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next Attack deals {PowerAmount:diff()} additional damage. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkAmount", 2m)
+            new DynamicVar("VkAmount", 2m),
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,26 +64,14 @@ public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        {
-            ExhaustSelection.Open(this);
-            var toExhaust = (await CardSelectCmd.FromHand(
-                choiceContext, Owner,
-                new CardSelectorPrefs(
-                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
-                static _ => true, this)).ToList();
-            foreach (var victim in toExhaust)
-            {
-                ExhaustSelection.Record(this, victim);
-                await CardCmd.Exhaust(choiceContext, victim);
-            }
-
-            ExhaustSelection.Close(this);
-        }
         await VarkaCards.GainPyroOath(choiceContext, this, cardPlay);
+        await PowerCmd.Apply<NextAttackUpPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await VarkaCards.ExhaustForPyroOath(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
         DynamicVars["VkAmount"].UpgradeValueBy(1m);
     }
 }

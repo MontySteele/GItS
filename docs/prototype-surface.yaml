@@ -4011,9 +4011,11 @@
 - {id: proto_vk_blazing_charge, name: "Blazing Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
+   # The Pyro pass (2026-10-11, review/active/varka-pyro-pass-2026-10-11.md):
+   # base 5 [7] to 8 [11], the floor every new card is held to.
    description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].",
-   effects: [{op: varka, kind: blazing_charge, target: enemy, base: 5, per: 2}],
-   upgrade: {varka_base: 2}}
+   effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 2}],
+   upgrade: {varka_base: 3}}
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
@@ -4301,24 +4303,26 @@
 
 - {id: proto_vk_stoke_the_flames, name: "Stoke the Flames", character: varka,
    authored_by: [claude],
-   # "Exhaust a card" is True Grit+'s: the player chooses, any card in hand.
    # 2026-10-05 Pyro becomes current; 2026-10-08 costs 0; 2026-10-10 the switch
-   # before the gain. Provenance note, "Varka payoff round, 2026-10-10".
+   # before the gain. 2026-10-11 the Pyro pass (next-Attack bonus, optional
+   # Exhaust). Provenance note, "Varka Pyro pass, 2026-10-11".
    cost: 0, type: skill, rarity: common,
-   description: "[gold]Exhaust[/gold] a card. [gold]Pyro[/gold] becomes your [gold]current element[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
-   effects: [{op: exhaust_from, select: chosen, amount: 1},
-             {op: varka, kind: gain_pyro_oath, amount: 2}],
-   upgrade: {varka_amount: 1}}
+   description: "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next Attack deals {PowerAmount:diff()} additional damage. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold].",
+   effects: [{op: varka, kind: gain_pyro_oath, amount: 2},
+             {op: buff_next_attack, amount: 3},
+             {op: varka, kind: exhaust_for_pyro_oath}],
+   upgrade: {varka_amount: 1, buff: 2}}
 
 - {id: proto_vk_ember_cleave, name: "Ember Cleave", character: varka,
    authored_by: [claude],
-   # Varka payoff fix, 2026-10-08: adds "Gain 1 Pyro Oath", even with no card
-   # to Exhaust. 2026-10-10: that gain makes Pyro current first, as Stoke's.
+   # Varka payoff fix, 2026-10-08: adds "Gain 1 Pyro Oath". 2026-10-10: that
+   # gain makes Pyro current first, as Stoke's. 2026-10-11 the Pyro pass: the
+   # Exhaust is an optional rider. Provenance note, "Varka Pyro pass".
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. [gold]Exhaust[/gold] a card. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold].",
    effects: [{op: varka, kind: pyro_strike, target: enemy, base: 9},
-             {op: exhaust_from, select: chosen, amount: 1},
-             {op: varka, kind: gain_pyro_oath, amount: 1}],
+             {op: varka, kind: gain_pyro_oath, amount: 1},
+             {op: varka, kind: exhaust_for_pyro_oath}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_shatter, name: "Icebreaker", character: varka,
@@ -4335,14 +4339,14 @@
 
 - {id: proto_vk_pyre_oath, name: "Ashen Oath", character: varka,
    authored_by: [claude],
-   # Varka payoff fix, 2026-10-08: the paper's "Exhaust up to 2 cards" is built
-   # as exactly 1 (`exhaust_from` takes no "up to"); provenance note.
-   # Forced-Amber round (2026-10-10): was Pyre Oath, paid 1; provenance note.
+   # Forced-Amber round (2026-10-10): was Pyre Oath, paid 1. The Pyro pass
+   # (2026-10-11): Inflame plus 2 Pyro Oath, a gain that switches nothing.
+   # Provenance note, "Varka Pyro pass, 2026-10-11".
    cost: 1, type: power, rarity: uncommon,
-   description: "[gold]Exhaust[/gold] a card. Whenever you [gold]Exhaust[/gold] a card, gain 2 [gold]Pyro[/gold] [gold]Oath[/gold].",
-   effects: [{op: apply_power, power: vk_pyre_oath, amount: 2, target: self},
-             {op: exhaust_from, select: chosen, amount: 1}],
-   upgrade: {innate: true}}
+   description: "Gain {PowerAmount:diff()} [gold]Strength[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold].",
+   effects: [{op: apply_power, power: strength, amount: 2, target: self},
+             {op: varka, kind: pyro_oath, amount: 2}],
+   upgrade: {power_amount: +1}}
 
 - {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
    authored_by: [claude],

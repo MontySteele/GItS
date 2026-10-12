@@ -191,8 +191,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `review/records/varka-solo-check-2026-10-07.md` (1 win of 5 on the base
   seeds) and `review/records/varka-offers-round-2026-10-08.md` (all five
   reached act 3, none won; Pyro and Cryo payoffs offered and passed, Pyro
-  taken at 10%). Next: a card paper reworking the Pyro and Cryo payoffs
-  (project review pick 10), then [USER]'s next Varka run.
+  taken at 10%). The Pyro pass is built
+  (`review/active/varka-pyro-pass-2026-10-11.md`, pick 1 b: Ashen Oath gives
+  Strength, Stoke the Flames powers the next Attack, the Exhaust is an
+  optional rider); next a two-seat Varka round.
 
 ## Elements
 

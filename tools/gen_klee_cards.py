@@ -1202,6 +1202,11 @@ def varka_switch_element(card: dict,
             for element in VARKA_KIND_ELEMENTS.get(effect.get("kind"), ()):
                 if element in VARKA_OATH_ELEMENTS:
                     last = element
+            # The Pyro pass (2026-10-11): Stoke the Flames' face no longer
+            # prints its switch (the 120-character ceiling), so its gain
+            # carries the switch tip, as Ember Cleave's hit does.
+            if effect.get("kind") in VARKA_KIND_SWITCHES:
+                last = VARKA_KIND_SWITCHES[effect["kind"]]
     return last
 
 
@@ -2505,6 +2510,11 @@ VARKA_KINDS = {
     "pyro_strike": "PyroStrike",
     "shatter": "Shatter",
     "deep_freeze": "DeepFreeze",
+    # THE PYRO PASS (2026-10-11, review/active/varka-pyro-pass-2026-10-11.md):
+    # Ashen Oath's gain, which switches nothing, and the optional rider "You
+    # may Exhaust a card. If you do, gain 1 more Pyro Oath."
+    "pyro_oath": "PyroOath",
+    "exhaust_for_pyro_oath": "ExhaustForPyroOath",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2530,6 +2540,8 @@ VARKA_KIND_FIELDS = {
     "gain_pyro_oath": ("amount",),
     "pyro_strike": ("base",),
     "shatter": ("base", "per"),
+    # The Pyro pass (2026-10-11).
+    "pyro_oath": ("amount",),
 }
 #: A field a kind MAY print; absent, the rule's own default holds (Vow of the
 #: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).
@@ -2586,6 +2598,9 @@ VARKA_KIND_ELEMENTS = {
     "pyro_strike": ("pyro",),
     "shatter": ("cryo",),
 }
+#: A kind that makes an element current without a hit of its own
+#: (`VarkaCards.GainPyroOath`'s `CardMakesCurrent`), for the switch tip.
+VARKA_KIND_SWITCHES = {"gain_pyro_oath": "pyro"}
 #: A kind that AIMS but whose row needs no `target:` of its own, because the
 #: card's own damage op already aims it (Ascension, Northwind Avatar).
 VARKA_IMPLIED_AIM_KINDS = {"ascension_hit", "avatar_hit"}
@@ -3590,10 +3605,6 @@ APPLY_POWERS = {
     # Varka Wildfire Oath and Short Circuit (2026-10-03): Pyro's Absolute
     # Zero. Retaliating Tide in Unbroken Tide's place (element identities
     # sec.4).
-    # The combo pass (2026-10-04): Pyro's Exhaust engine.
-    "vk_pyre_oath": ("PyreOathPower", None,
-        "Whenever you [gold]Exhaust[/gold] a card, gain {X} [gold]Pyro[/gold] "
-        "[gold]Oath[/gold]."),
     "vk_wildfire_oath": ("WildfireOathPower", None,
         "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
