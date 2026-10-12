@@ -458,6 +458,83 @@ def test_a_session_waits_without_spending_an_action_or_a_stall(tmp_path):
     assert "Furina has not acted yet" in thread.sent[1]
 
 
+# ---------------------------------------- wait returns at once if free ----
+
+from tier0.tests.test_understudy_blindplay import (  # noqa: E402
+    card_reward_state, event_state, rest_state, shop_state, treasure_state)
+
+
+def _voted_event(me_voted: bool, shared: bool = True) -> dict:
+    return _coop({"state_type": "event",
+                  "event": {"event_name": "A Fork", "is_shared": shared,
+                            "options": [{"index": 0, "title": "Left"}],
+                            "votes": [
+                                {"player": "Klee", "is_local": True,
+                                 "voted": me_voted,
+                                 "vote_option": 0 if me_voted else None},
+                                {"player": "Furina", "is_local": False,
+                                 "voted": False, "vote_option": None}],
+                            "all_voted": False}}, [KLEE, FURINA])
+
+
+@pytest.mark.parametrize("state", [
+    coop_combat(me_ready=False),
+    coop_combat(me_ready=False, partner_ready=True),
+    coop_map(False, False), coop_map(False, True),
+    _voted_event(False), _voted_event(True, shared=False),
+    _coop(rest_state(), [KLEE, FURINA]), _coop(shop_state(), [KLEE, FURINA]),
+    _coop(event_state(), [KLEE, FURINA]),
+    _coop(card_reward_state(), [KLEE, FURINA]),
+    _coop(treasure_state(), [KLEE, FURINA]),
+])
+def test_a_seat_with_its_own_move_is_not_blocked_on_the_partner(state):
+    assert not blindplay_coop.blocked_on_partner(state)
+    assert not blindplay.observation(state)["coop"]["waiting"]
+
+
+@pytest.mark.parametrize("state", [
+    coop_combat(me_ready=True), coop_combat(me_ready=True,
+                                            partner_ready=True),
+    coop_combat(me_alive=False), coop_map(True, False), _voted_event(True),
+])
+def test_a_seat_waiting_on_the_partner_is_blocked(state):
+    assert blindplay_coop.blocked_on_partner(state)
+
+
+def test_blocked_matches_the_banner_on_every_waiting_page():
+    for state in (coop_combat(me_ready=True), coop_map(True, False),
+                  _voted_event(True), coop_combat(me_alive=False)):
+        assert blindplay.observation(state)["coop"]["waiting"]
+        assert blindplay_coop.blocked_on_partner(state)
+
+
+def test_an_unblocked_session_wait_returns_at_once_and_is_not_a_stall(
+        tmp_path):
+    free = coop_combat(me_ready=False)
+    thread = blindplay.ScriptedThread(
+        [{"command": "wait 100", "thinking": "x"}] * 3)
+    s = blindplay.Session(thread, wire=blindplay.ScriptedWire([free]),
+                          session_id="t", log_root=tmp_path,
+                          budget=blindplay.Budget(max_stalls=2),
+                          settle_delay_s=0.0)
+    s.wait_poll_s = 30.0          # a real wait would hang the test
+    summary = s.run()
+    assert summary["actions"] == 0
+    rows = [json.loads(line) for line in (tmp_path / "t" / "transcript.jsonl")
+            .read_text(encoding="utf-8").splitlines()]
+    assert [r["waited_s"] for r in rows if r["kind"] == "wait"] == [0.0] * 3
+    assert not any(r["kind"] == "stall" for r in rows)
+    assert "Not waiting: nothing here waits on Furina" in thread.sent[1]
+
+
+def test_cmd_wait_prints_the_page_at_once_when_free(monkeypatch, capsys):
+    monkeypatch.setattr(blindplay_coop, "wait_for_partner",
+                        lambda *a, **k: pytest.fail("slept"))
+    rc = blindplay._cmd_wait(coop_combat(me_ready=False), 100, True)
+    out = capsys.readouterr().out
+    assert rc == 0 and out.startswith("Not waiting: nothing here waits on")
+
+
 def test_the_session_seed_of_a_coop_run_comes_off_the_lane_sidecar(
         monkeypatch):
     monkeypatch.setattr(bridge, "get_state", lambda: coop_combat())

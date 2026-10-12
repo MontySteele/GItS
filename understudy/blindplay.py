@@ -701,6 +701,15 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
         print(f"Would wait up to {seconds}s for the other player; nothing "
               f"was waited for.")
         return 0
+    if not blindplay_coop.blocked_on_partner(state):
+        print(blindplay_coop.not_waiting_line(state))
+        print()
+        try:
+            print(_page(screen_page(state, full=not _brief_on(args)), args))
+        except (qa_packet.PacketLeak, BlindPlayError) as exc:
+            print(f"REFUSED: {exc}", file=_refusal_stream(args))
+            return 1
+        return 0
     try:
         latest, waited, moved = blindplay_coop.wait_for_partner(
             bridge, state, seconds)

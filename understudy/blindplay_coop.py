@@ -347,6 +347,34 @@ def wait_for_partner(wire: Any, state: dict[str, Any], seconds: int, *,
     return latest, clock() - start, False
 
 
+def blocked_on_partner(state: dict[str, Any]) -> bool:
+    """Whether this seat has nothing to do but wait on the other player.
+
+    The very predicate that writes the page's **WAITING** banner
+    (`coop_block`), plus one fight case the banner leaves silent: both seats
+    have ended and the enemies are acting, which the seat can only sit out.
+    A screen this cannot read keeps the old behaviour (a full wait).
+    """
+    info = coop_block(state)
+    if info is None:
+        return True
+    if info["waiting"]:
+        return True
+    st = _text(state.get("state_type"))
+    if st in COMBAT_SCREENS and isinstance(state.get("battle"), dict):
+        if _me(state).get("is_ready_to_end_turn") is True:
+            return True
+        if _blob(state, "battle").get("is_play_phase") is False:
+            return True
+    return False
+
+
+def not_waiting_line(state: dict[str, Any]) -> str:
+    """What `wait` answers with, at once, when nothing waits on the partner."""
+    return (f"Not waiting: nothing here waits on {partner_name(state)}; "
+            f"it's your move. The page now:")
+
+
 def wait_line(waited: float, moved: bool, state: dict[str, Any]) -> str:
     """The one sentence `wait` answers with, ahead of the new page."""
     who = partner_name(state) if is_coop(state) else "the other player"

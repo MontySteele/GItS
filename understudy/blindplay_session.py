@@ -16,7 +16,9 @@ from pathlib import Path
 from typing import Any
 
 from understudy import authorship, bridge, offer_log, qa_packet, seat
-from understudy.blindplay_coop import WAIT_POLL_S, wait_for_partner, wait_line
+from understudy.blindplay_coop import (WAIT_POLL_S, blocked_on_partner,
+                                       not_waiting_line, wait_for_partner,
+                                       wait_line)
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, settle_board, _text
@@ -557,6 +559,7 @@ class Session:
         in_fight = False
         last_page_sha = ""
         stalls = 0
+        free_wait = False
         while True:
             if self.actions >= self.budget.max_actions:
                 self.stopped = "max_actions"
@@ -578,7 +581,9 @@ class Session:
             # not a screen this seat cannot get off -- it is the other seat's
             # turn -- so it does not count toward the stall stop. The wall
             # clock still bounds it.
-            waiting = bool((obs.get("coop") or {}).get("waiting"))
+            waiting = (bool((obs.get("coop") or {}).get("waiting"))
+                       or free_wait)
+            free_wait = False
             if page_sha == last_page_sha and not waiting:
                 stalls += 1
                 if stalls >= self.budget.max_stalls:
@@ -707,6 +712,13 @@ class Session:
                 # CO-OP: nothing is posted and nothing is charged. The wire is
                 # watched until the other player moves it, and the seat is
                 # told how long that took before it reads the new page.
+                if not blocked_on_partner(state):
+                    feedback = not_waiting_line(state)
+                    free_wait = True      # not a stall either
+                    self.transcript.write(kind="wait", seconds=0,
+                                          waited_s=0.0, moved=False,
+                                          blocked=False)
+                    continue
                 latest, waited, moved = wait_for_partner(
                     self.wire, state, int(res["printed"]["seconds"]),
                     poll=self.wait_poll_s)
