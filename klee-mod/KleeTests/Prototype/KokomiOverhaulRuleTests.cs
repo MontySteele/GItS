@@ -325,7 +325,7 @@ public class KokomiOverhaulRuleTests
                     "EachPlayerEnergy", "EachPlayerDraw",
                     // THE STATUS BATCH (2026-10-01): the two that read the
                     // hand just drawn.
-                    "BlockPerStatusInHand", "TransformStatusesInHand",
+                    "BlockPerStatusInHand", "TransformStatusesInDrawPile",
                     // THE RE-FOUNDING (2026-10-12).
                     "AddStings", "StrengthThisTurn", "JuugaGuard",
                     "PlayCompanion" },

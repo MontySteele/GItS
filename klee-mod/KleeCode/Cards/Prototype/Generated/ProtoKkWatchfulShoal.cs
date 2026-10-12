@@ -38,7 +38,7 @@ public sealed class ProtoKkWatchfulShoal : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForEthereal(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForEthereal(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_watchful_shoal");
 

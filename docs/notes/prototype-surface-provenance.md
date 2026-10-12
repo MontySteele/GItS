@@ -7577,3 +7577,38 @@ Arrow dropped). The build before it is tagged
   seat page marks a hand card the jellyfish takes whose face prints no Plan
   line, "(can be written as a Plan)", and her Plan glossary row adds that any
   Companion can be written and what its carry-out does.
+
+## Kokomi round-1 fixes, 2026-10-12
+
+Defects the first Plans + Ethereal seat round found. Claude's calls; no
+design beyond the defects.
+
+- **Kelp Wall (`proto_kk_kelp_wall`):** the preview counted the hand when the
+  card was played, the carry-out counted the hand next morning, and a seat
+  saw "(Gains 12 Block)" carried out as 9 four times. The Plan now pays the
+  count of statuses and curses in the hand when it is WRITTEN, the number the
+  preview shows (`KokomiPlan.Planned.WrittenCount`, stamped by `Schedule`;
+  sim `written_count`, stamped by `kokomi_plan.schedule`). Face: "plus 3 for
+  each status or curse in your hand when written."
+- **Sea Glass Harvest (`proto_kk_sea_glass_harvest`):** its Plan found no
+  status in the carry-out hand ("0 cards transformed"). It now transforms
+  every status and curse in the DRAW PILE, so dead draws still to come
+  convert. The clause is renamed in both engines and the codegen:
+  `transform_statuses_in_hand` to `transform_statuses_in_draw_pile`,
+  `TransformStatusesInHand` to `TransformStatusesInDrawPile`.
+- **Tide Wall (`proto_kk_tide_wall`):** "plus the damage the front enemy
+  intends next turn" read to a seat as the intent shown when written. The
+  behaviour reads the front enemy's intent at carry-out, which is the attack
+  it makes that turn; the face now says "plus the front enemy's intended
+  damage." Pinned in both engines.
+- **Treatise (`proto_kk_treatise`):** no engine change. Its trigger is a
+  card that PRINTS a Plan line (`IPlannedCard`); the seat that never saw it
+  draw played Shinobu and Kirara, Companions that can be written as a Plan
+  but print no Plan line. Pinned in C#.
+- **Press the Advantage (`proto_kk_press_the_advantage`) and the 16 other
+  rows that name Plans with no Plan line:** they carried the writing tip
+  ("Instead of the line above, play it on the Bake-Kurage"), and a seat tried
+  to write Press the Advantage and was refused. The card is right (no
+  `plan:`, an enemy target); such rows now carry `ArmKeywordTips.ForPlanNoLine`
+  ("A card with a Plan line can be played on the Bake-Kurage to happen next
+  turn. This card has no Plan line."), attached by `gen_klee_cards.emit`.

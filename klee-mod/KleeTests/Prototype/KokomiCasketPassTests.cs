@@ -194,7 +194,7 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(4m, card.DynamicVars.Block.BaseValue);
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
                    + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the "
-                   + "damage the front enemy intends next turn.",
+                   + "front enemy's intended damage.",
                      Face(card));
     }
 

@@ -2751,7 +2751,7 @@ PLAN_CLAUSE_KINDS = {
     # Kelp Wall's Block per status or curse, Tidecleanse's exhaust,
     # Sea Glass Harvest's transform, Turning Tide's discard-and-draw.
     "block_per_status_in_hand": "BlockPerStatusInHand",
-    "transform_statuses_in_hand": "TransformStatusesInHand",
+    "transform_statuses_in_draw_pile": "TransformStatusesInDrawPile",
     # THE RE-FOUNDING (2026-10-12). Kurage's Wake's "Add 2 Stings to your
     # hand", and Gorou's Plan lines (card paper sec.3): War Banner's "Gain 3
     # Strength this turn" and Juuga's "For 3 turns, at the end of your turn
@@ -2776,7 +2776,7 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "first_attack_twice",
                        # THE STATUS BATCH: "every status and curse" prints
                        # no size.
-                       "transform_statuses_in_hand"}
+                       "transform_statuses_in_draw_pile"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2825,7 +2825,7 @@ PLAN_ONLY_OPS = {
                  "each_player_energy", "each_player_draw",
                  # THE STATUS BATCH: each reads the hand just drawn.
                  "block_per_status_in_hand",
-                 "transform_statuses_in_hand",
+                 "transform_statuses_in_draw_pile",
                  # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
                  # Gorou's two Plan lines name the carry-out turn.
                  "add_stings", "strength_this_turn", "juuga_guard"}
@@ -8111,7 +8111,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
         # writing card's IsUpgraded when the Plan is carried out.
-        or any(e.get("op") == "transform_statuses_in_hand"
+        or any(e.get("op") == "transform_statuses_in_draw_pile"
                for e in plan_line),
         # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
         # play time off `IsUpgraded`; the face carries its own
@@ -16767,6 +16767,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             # says so (`_plan_only_line`'s test, the one its target follows).
             if attach == "ArmKeywordTips.ForPlan" and is_plan_only(card):
                 attach = "ArmKeywordTips.ForPlanOnly"
+            # The Kokomi round-1 fixes (2026-10-12): a face that NAMES Plans
+            # with no Plan line of its own cannot be written, so its tip says
+            # so instead of "play it on the Bake-Kurage" (Press the
+            # Advantage, refused by the jellyfish).
+            elif attach == "ArmKeywordTips.ForPlan" and not card.get("plan"):
+                attach = "ArmKeywordTips.ForPlanNoLine"
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above

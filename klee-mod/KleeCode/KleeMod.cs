@@ -488,6 +488,9 @@ public static class KleeMod
                     // Companion carries while Kokomi holds it.
                     [Cards.ArmKeywordTips.CompanionPlanKey + ".title"] =
                         "Plan",
+                    // The Kokomi round-1 fixes (2026-10-12): the Plan tip on
+                    // a card that names Plans and has no Plan line.
+                    [Cards.ArmKeywordTips.PlanNoLineKey + ".title"] = "Plan",
                     [Cards.ArmKeywordTips.GuestStarKey + ".title"] =
                         "Guest Star",
                     [Cards.ArmKeywordTips.CharlotteKey + ".title"] =

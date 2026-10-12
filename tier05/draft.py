@@ -698,7 +698,7 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "each_player_energy", "each_player_draw",
     # THE STATUS BATCH (2026-10-01): four plan clauses that read the hand
     # just drawn, priced ZERO in `_op_price` (a hand fact).
-    "block_per_status_in_hand", "transform_statuses_in_hand",
+    "block_per_status_in_hand", "transform_statuses_in_draw_pile",
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's two Plan
     # lines and a written Companion's clause, each with its own branch in
     # `_op_price` on this set's terms.
@@ -969,10 +969,11 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Tide Wall: the flat bonus only. The intent is a board fact an offer
         # screen cannot read, so that part is a deliberate ZERO.
         return _neutral_amount(fx, 0)
-    if op in ("block_per_status_in_hand", "transform_statuses_in_hand"):
-        # THE STATUS BATCH (2026-10-01). ZERO: each pays off the statuses
-        # and curses in the hand a Plan sees next turn, a fight fact an
-        # offer screen cannot read. Kelp Wall's flat Block is priced by its
+    if op in ("block_per_status_in_hand", "transform_statuses_in_draw_pile"):
+        # THE STATUS BATCH (2026-10-01). ZERO: each pays off statuses and
+        # curses (Kelp Wall's in the hand it was written from, Sea Glass
+        # Harvest's in the draw pile), a fight fact an offer screen cannot
+        # read. Kelp Wall's flat Block is priced by its
         # own `block` clause.
         return 0.0
     if op == "kokomi":
@@ -2216,9 +2217,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "block_per_status_in_hand": "ZERO: a rate per status or curse in the "
                                 "hand a Plan sees, a fight fact an offer "
                                 "screen cannot read",
-    "transform_statuses_in_hand": "ZERO: worth the statuses it turns to "
-                                  "Energy, a fight fact an offer screen "
-                                  "cannot read",
+    "transform_statuses_in_draw_pile": "ZERO: worth the statuses in the draw "
+                                       "pile it turns to Energy, a fight "
+                                       "fact an offer screen cannot read",
     # --- the co-op set (review/records/coop-set-2026-09-25.md) ---
     # POOL COMPLETION (2026-10-01): Tactical Relay, a multiplayer-only row.
     "each_player_energy": "ZERO: a multiplayer-only row's clause, never "

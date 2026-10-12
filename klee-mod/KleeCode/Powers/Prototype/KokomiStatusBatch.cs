@@ -24,10 +24,12 @@ namespace KleeMod.Powers;
 /// <c>docs/notes/prototype-surface-provenance.md</c>, "Kokomi status batch,
 /// 2026-10-01".
 ///
-/// Rule 2 resolves a Plan after the next turn's draw, so "in your hand" on a
-/// Plan is that hand, before she acts, and Plans carried out earlier in the
-/// same morning have already changed it (a card one drew is seen by the
-/// next). Each body reads the hand at the moment its clause runs.
+/// THE KOKOMI ROUND-1 FIXES (2026-10-12): the two Plan bodies used to read
+/// the hand at carry-out, and seats found it empty of the statuses they wrote
+/// the Plan for (an Ethereal one exhausted, the rest discarded with the hand).
+/// Kelp Wall now pays the count stamped when the Plan was WRITTEN
+/// (<c>KokomiPlan.Planned.WrittenCount</c>) and Sea Glass Harvest transforms
+/// the statuses and curses in the DRAW PILE, the dead draws still to come.
 ///
 /// BASE-GAME MACHINERY WHERE IT EXISTS: the transform is Defect's Compact's
 /// (<c>CardCmd.Transform</c> over <c>IsTransformable</c> cards), and the status
@@ -42,11 +44,14 @@ public static class KokomiStatusBatch
         card != null
         && (card.Type == CardType.Status || card.Type == CardType.Curse);
 
-    private static List<CardModel> HandStatuses(Player? player)
+    private static List<CardModel> HandStatuses(Player? player) =>
+        PileStatuses(player, PileType.Hand);
+
+    private static List<CardModel> PileStatuses(Player? player, PileType type)
     {
         if (player == null) return new List<CardModel>();
-        var hand = PileType.Hand.GetPile(player);
-        return hand?.Cards.Where(IsStatusOrCurse).ToList()
+        var pile = type.GetPile(player);
+        return pile?.Cards.Where(IsStatusOrCurse).ToList()
             ?? new List<CardModel>();
     }
 
@@ -59,12 +64,15 @@ public static class KokomiStatusBatch
     public static int ExhaustCount(int held, int cap) =>
         held <= 0 || cap <= 0 ? 0 : System.Math.Min(held, cap);
 
-    /// <summary>Kelp Wall: "plus 3 for each status or curse in your hand".
-    /// Powered Block, rule 3's reading of every planned Block. A hand with
-    /// none pays nothing.</summary>
-    public static async Task<int?> BlockPerStatus(Creature kokomi, int rate)
+    /// <summary>Kelp Wall: "plus 3 for each status or curse in your hand
+    /// when written". Powered Block, rule 3's reading of every planned Block.
+    /// <paramref name="writtenCount"/> is the count stamped when the Plan was
+    /// written; null (no writer stamped it) reads the hand. None pays
+    /// nothing.</summary>
+    public static async Task<int?> BlockPerStatus(Creature kokomi, int rate,
+                                                  int? writtenCount = null)
     {
-        var n = StatusesInHand(kokomi.Player);
+        var n = writtenCount ?? StatusesInHand(kokomi.Player);
         if (n <= 0 || rate <= 0) return 0;
         return (int)await CreatureCmd.GainBlock(
             kokomi, rate * n, ValueProp.Move, null);
@@ -98,14 +106,15 @@ public static class KokomiStatusBatch
     }
 
     /// <summary>Sea Glass Harvest: "Transform every status and curse in your
-    /// hand into Sea Glass [Sea Glass+]." Compact's body with curses added;
+    /// draw pile into Sea Glass [Sea Glass+]." Compact's body with curses
+    /// added, over the draw pile since the Kokomi round-1 fixes (2026-10-12);
     /// a curse the game will not transform stays.</summary>
     public static async Task<int?> TransformStatuses(Player player,
                                                      bool upgraded)
     {
         var combat = player.Creature?.CombatState;
         if (combat == null) return 0;
-        var targets = HandStatuses(player)
+        var targets = PileStatuses(player, PileType.Draw)
             .Where(c => c.IsTransformable).ToList();
         if (targets.Count == 0) return 0;
         var swaps = new List<CardTransformation>();

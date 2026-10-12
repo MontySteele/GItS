@@ -114,7 +114,9 @@ public class KokomiStatusBatchTests : IDisposable
     public void Plans_are_carried_out_after_the_draw_so_they_read_that_hand()
     {
         // Rule 2: the morning drain is AfterPlayerTurnStart, which follows the
-        // hand draw; each clause body reads the hand when it runs.
+        // hand draw. Since the Kokomi round-1 fixes (2026-10-12) Kelp Wall
+        // pays the count it was written with (the hand read is the fallback)
+        // and Sea Glass Harvest reads the draw pile.
         Assert.Contains(Seq("ProtoBakeKuragePower", "AfterPlayerTurnStart"),
                         c => c.Contains("KokomiPlan.ResolveAll"));
         var one = Seq("KokomiPlan", "ResolveOne");
@@ -123,7 +125,7 @@ public class KokomiStatusBatchTests : IDisposable
         {
             Assert.Contains(one, c => c.Contains(body));
         }
-        Assert.Contains(Seq("KokomiStatusBatch", "HandStatuses"),
+        Assert.Contains(Seq("KokomiStatusBatch", "PileStatuses"),
                         c => c.Contains("GetPile"));
         Assert.Contains(Seq("KokomiStatusBatch", "BlockPerStatus"),
                         c => c.Contains("KokomiStatusBatch.StatusesInHand"));
@@ -206,7 +208,7 @@ public class KokomiStatusBatchTests : IDisposable
         // The Kokomi card pass (2026-10-11): 10 [13] Block.
         Assert.Equal(10m, card.DynamicVars.Block.BaseValue);
         Assert.Equal(13m, Upgraded<ProtoKkSeaGlassHarvest>().DynamicVars.Block.BaseValue);
-        Assert.Equal(KokomiPlan.Kind.TransformStatusesInHand,
+        Assert.Equal(KokomiPlan.Kind.TransformStatusesInDrawPile,
                      Assert.Single(card.PlanClauses).Kind);
         Assert.Contains("[gold]Sea Glass[/gold]{IfUpgraded:show:+|}", Face(card));
         var body = Seq("KokomiStatusBatch", "TransformStatuses");

@@ -132,6 +132,14 @@ public static class ArmKeywordTips
     // written, and no face or tip said so. Same title, so it reads "Plan".
     public const string CompanionPlanKey = "KLEEMOD-ARM_PLAN_COMPANION";
 
+    // THE KOKOMI ROUND-1 FIXES (2026-10-12), and NOT A KEYWORD ROW: the Plan
+    // tip a card carries when its face NAMES Plans but prints no Plan line of
+    // its own (Press the Advantage, Treatise, Breakwater ...). PlanKey's
+    // "Instead of the line above, play it on the Bake-Kurage" told a seat
+    // Press the Advantage could be written, and the jellyfish refused it.
+    // Same title, so it reads "Plan".
+    public const string PlanNoLineKey = "KLEEMOD-ARM_PLAN_NO_LINE";
+
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
     // with the play. It lives in this class because it is a sentence about the
@@ -385,6 +393,17 @@ public static class ArmKeywordTips
         With(inherited, PlanOnlyKey,
             "Play the card on the [gold]Bake-Kurage[/gold]. Plans happen next "
           + "turn in order, and their [gold]Block[/gold] lasts that turn.");
+
+    /// <summary>The Kokomi round-1 fixes (2026-10-12): <see cref="ForPlan"/>
+    /// for a card that names Plans and has no Plan line, so cannot be
+    /// written. Attached by <c>gen_klee_cards.emit</c> in ForPlan's place on
+    /// a row with no <c>plan:</c>.</summary>
+    public static IEnumerable<IHoverTip> ForPlanNoLine(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PlanNoLineKey,
+            "A card with a Plan line can be played on the "
+          + "[gold]Bake-Kurage[/gold] to happen next turn. This card has no "
+          + "Plan line.");
 
     /// <summary>
     /// THE KOKOMI RE-FOUNDING (2026-10-12): "Any Companion card can be

@@ -1328,10 +1328,10 @@
 - {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1: the intent, read at carry-out. THE CLEANUP PASS
-   # (2026-09-29): `amount` is a flat 6 under it, because the Plan "gave 0
-   # Block twice on Empower turns" (a seat). Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the damage the front enemy intends next turn.",
+   # R276 pick 1: the intent, read at carry-out; a flat 6 under it (the
+   # cleanup pass, 2026-09-29). Face reworded in the Kokomi round-1 fixes
+   # (2026-10-12). Provenance note.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the front enemy's intended damage.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_front_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
@@ -1871,9 +1871,10 @@
 - {id: proto_kk_kelp_wall, name: "Kelp Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # The count is read when the clause runs; a card an earlier Plan of the
-   # same morning drew is counted.
-   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
+   # Kokomi round-1 fixes (2026-10-12): the count is the hand WHEN THE PLAN
+   # IS WRITTEN (the number the preview shows), not the carry-out hand,
+   # which seats found empty. Provenance note.
+   description: "Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand when written.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: draw, amount: 1}],
    plan: [{op: block, amount: 9},
           {op: block_per_status_in_hand, amount: 3}],
@@ -1895,11 +1896,12 @@
 - {id: proto_kk_sea_glass_harvest, name: "Sea Glass Harvest", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Defect's Compact on the next hand, curses included. Sea Glass is a token
-   # in no pool: 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your hand into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   # Defect's Compact on the draw pile, curses included (Kokomi round-1
+   # fixes, 2026-10-12; provenance note). Sea Glass is a token in no pool:
+   # 0, "Gain 1 [2] Energy. Exhaust."
+   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
    effects: [{op: block, amount: 10}],
-   plan: [{op: transform_statuses_in_hand}],
+   plan: [{op: transform_statuses_in_draw_pile}],
    # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13].
    # 13 Block; the Sea Glass arrives upgraded.
    upgrade: {block: 3, upgraded_grant: true}}
