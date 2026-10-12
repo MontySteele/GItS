@@ -38,20 +38,20 @@ public sealed class ProtoKkWatchfulShoal : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForEthereal(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this), this);
+        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(base.ExtraHoverTips, this, false));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_watchful_shoal");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watchful Shoal"),
-        ("description", "Whenever you write an [gold]Ethereal[/gold] card as a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

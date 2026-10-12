@@ -7661,3 +7661,57 @@ pins in `tier0/tests/test_kokomi_round2_changes_2026_10_12.py`, C# pins in
   the debuff on the player (Vine Shambler's Grasping Vines) and Entangled is
   the affliction it puts on Attack cards
   (`docs/current/dossiers/enemies/vine-shambler.md`). No change.
+
+## Kokomi round-3 changes, 2026-10-12
+
+Source: the Fable round-2 review (session scratchpad
+`k2/fable-review-round2.md`, sec.4 "Claude can ship", changes 1-5, and the
+default of its growth pick for Watchful Shoal's shape) and the round record
+`review/records/kokomi-round-2-2026-10-12.md`. Claude's calls at Prototype;
+no design beyond the review's list. Both engines; sim pins in
+`tier0/tests/test_kokomi_round3_changes_2026_10_12.py`, C# pins in
+`klee-mod/KleeTests/Prototype/KokomiRound3ChangesTests.cs`. Pool stays 78.
+
+- **A Plan's face and an expiring Vulnerable.** The face (`PlanDamageVar`)
+  and the waiting-Plan "(after Vulnerable)" note fold the target's
+  Vulnerable only when it is 2 or more when written
+  (`KokomiPlan.VulnerableAtMorning`): it ticks down once in the enemy's turn,
+  so a Vulnerable of 1 is gone when the Plan lands. Seats read Oath 13 and
+  saw 9, Lance 27 and 18, Undertow 12 and 8. The carry-out is unchanged: it
+  reads the Vulnerable the body wears then (`ElementalHit.Deal`). C# only;
+  the sim prints no face.
+- **Coordinated Tide (`proto_kk_coordinated_tide`) on the results line.** Its
+  hit now lands inside the carry-out's window
+  (`KokomiRefounding.CoordinatedTide`, called from `KokomiPlan.ResolveEntry`
+  after the clauses, with the carrying window already closed so it is still
+  not the Plan's own reaction) and is named as a rider on the carry-out row,
+  so the page prints "Inside the same beat: Coordinated Tide 6 on X." It used
+  to land after the row was written. It now resolves before the plan bus
+  (Kurage Canopy); the sim (`kokomi_plan.coordinated_tide`) takes the same
+  order. Number and rule unchanged.
+- **Tide Wall (`proto_kk_tide_wall`):** the Plan reads the most damage any
+  one enemy intends (`KokomiOverhaulKit.MostIntendedDamage`, sim
+  `max_intent_damage`), not the front enemy's, which read 0 against the
+  Queen while her minion attacked. Still read at carry-out. Face: "Plan: Gain
+  6 Block, plus the most damage an enemy intends." The clause op is renamed
+  `block_front_intent` to `block_max_intent` (C# `Kind.BlockMaxIntent`).
+- **Treatise (`proto_kk_treatise`):** face only. "Once a turn, when you play a
+  card you could write as a Plan instead of writing it, draw 1 card." Three
+  round-2 seats read "could have written" as writing counting too. "Plan
+  card" was not used: a Companion has no Plan line and still counts.
+- **Kelp Wall (`proto_kk_kelp_wall`):** now-line "Gain 5 [7] Block. Draw 1
+  card." (was the draw alone; two rounds, five records, never a good draw).
+  Plan line unchanged.
+- **Watchful Shoal (`proto_kk_watchful_shoal`), rewritten:** "Your Stings deal
+  3 [5] additional damage. Your Wards gain 3 [5] additional Block." The base
+  game's Accuracy on the jellyfish line, the shape the review's growth pick
+  defaults to; same id, name, slot and art. A test of a growth card at
+  Prototype, not the ruling of that pick. It reaches every jellyfish number:
+  a Sting's or Ward's now-line, played or carried out by a flip, through the
+  power's `ModifyDamageAdditive` / `ModifyBlockAdditive` (so the card preview
+  shows it); a Sting's Plan line folded at writing beside her Strength
+  (`KokomiPlan.Hers` asks `WatchfulShoalPower.StingBonus`; sim `hers` asks
+  `watchful_shoal_bonus`), which is also what the Plan face previews. A Sting
+  written before the Power was played keeps its written number, as with
+  Strength. A Ward's Plan line (Weak) gains no Block. Brine Sting is not a
+  Sting. The old write-an-Ethereal-card Block payment is gone.

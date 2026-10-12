@@ -474,8 +474,9 @@ public static class KokomiRefounding
 
     /// <summary>
     /// A Plan was just written; <paramref name="written"/> is the card that
-    /// wrote it. Watchful Shoal pays Block for an Ethereal card, Watatsumi
-    /// Resistance a Sting for a Companion card. Sim twin:
+    /// wrote it. Watatsumi Resistance pays a Sting for a Companion card
+    /// (Watchful Shoal left this bus in the Kokomi round-3 changes,
+    /// 2026-10-12). Sim twin:
     /// <c>kokomi_plan.note_written</c>.
     /// </summary>
     public static async Task OnWritten(PlayerChoiceContext choiceContext,
@@ -483,17 +484,6 @@ public static class KokomiRefounding
     {
         if (kokomi == null || written == null) return;
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (IsEthereal(written))
-        {
-            var block = (int)kokomi.Powers.OfType<WatchfulShoalPower>()
-                .Sum(p => p.Amount);
-            if (block > 0)
-            {
-                // NC-11: power-sourced Block stays raw.
-                await CreatureCmd.GainBlock(kokomi, block,
-                                            ValueProp.Unpowered, null);
-            }
-        }
         if (CompanionHexerei.CountsAsCompanion(written))
         {
             var stings = (int)kokomi.Powers.OfType<WatatsumiResistancePower>()
@@ -507,26 +497,42 @@ public static class KokomiRefounding
     }
 
     /// <summary>
+    /// Coordinated Tide: a Plan written by an Ethereal
+    /// <paramref name="card"/> is being carried out, so hit the front enemy.
+    /// Returns the body and what the hit delivered, or null when nothing was
+    /// dealt. Called INSIDE the carry-out's window
+    /// (<c>KokomiPlan.ResolveEntry</c>, Kokomi round-3 changes, 2026-10-12),
+    /// so the Plan results line names it as a rider and its HP loss is
+    /// measured with the Plan's; before, it landed after the line was
+    /// written and the page never printed it. Sim twin:
+    /// <c>kokomi_plan.note_carried_out</c>.
+    /// </summary>
+    public static async Task<(Creature Target, int Amount)?> CoordinatedTide(
+        PlayerChoiceContext choiceContext, Creature kokomi, CardModel? card)
+    {
+        if (card == null || !KokomiOverhaul.LiveFor(kokomi)) return null;
+        if (!IsEthereal(card)) return null;
+        var hit = (int)kokomi.Powers.OfType<CoordinatedTidePower>()
+            .Sum(p => p.Amount);
+        var front = KokomiPlan.FrontEnemy(kokomi);
+        if (hit <= 0 || front == null) return null;
+        var dealt = await ElementalHit.Deal(choiceContext, front,
+                                            Element.Hydro, hit, kokomi,
+                                            powered: false);
+        return (front, dealt);
+    }
+
+    /// <summary>
     /// A Plan was just carried out; <paramref name="card"/> is the card that
-    /// wrote it. Coordinated Tide hits the front enemy for an Ethereal card;
-    /// Endless Shoal adds a copy of a Sting or Ward to her hand. Once per
-    /// carry-out, either line. Sim twin: <c>kokomi_plan.note_carried_out</c>.
+    /// wrote it. Endless Shoal adds a copy of a Sting or Ward to her hand
+    /// (Coordinated Tide's hit moved inside the carry-out,
+    /// <see cref="CoordinatedTide"/>). Once per carry-out, either line. Sim
+    /// twin: <c>kokomi_plan.note_carried_out</c>.
     /// </summary>
     public static async Task OnCarriedOut(PlayerChoiceContext choiceContext,
                                           Creature kokomi, CardModel? card)
     {
         if (card == null || !KokomiOverhaul.LiveFor(kokomi)) return;
-        if (IsEthereal(card))
-        {
-            var hit = (int)kokomi.Powers.OfType<CoordinatedTidePower>()
-                .Sum(p => p.Amount);
-            var front = KokomiPlan.FrontEnemy(kokomi);
-            if (hit > 0 && front != null)
-            {
-                await ElementalHit.Deal(choiceContext, front, Element.Hydro,
-                                        hit, kokomi, powered: false);
-            }
-        }
         if (IsJellyfish(card) && kokomi.CombatState is { } combat
             && kokomi.Player is { } player)
         {
@@ -663,8 +669,20 @@ public sealed class KurageBloomPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Watchful Shoal: "Whenever you write an Ethereal card as a Plan,
-/// gain 3 Block." Paid from <see cref="KokomiRefounding.OnWritten"/>.
+/// <summary>
+/// Watchful Shoal (Kokomi round-3 changes, 2026-10-12): "Your Stings deal 3
+/// additional damage. Your Wards gain 3 additional Block." The base game's
+/// Accuracy, on the jellyfish.
+///
+/// THREE PLACES A JELLYFISH NUMBER IS MADE, and this reaches each:
+/// a Sting's or Ward's NOW-LINE, played or carried out by a flip, goes
+/// through the engine's hooks (<see cref="ModifyDamageAdditive"/>,
+/// <see cref="ModifyBlockAdditive"/>), which is also what folds the face; a
+/// Sting's PLAN LINE is an unpowered planned hit the hooks never see, so its
+/// bonus is folded at writing with her Strength
+/// (<see cref="KokomiPlan.Hers"/> asks <see cref="StingBonus"/>), and the
+/// face's <c>PlanDamageVar</c> previews the same call. A Ward's Plan line
+/// gains no Block. Sim twin: <c>kokomi_plan.watchful_shoal_bonus</c>.
 /// </summary>
 public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
 {
@@ -672,14 +690,40 @@ public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
     {
         ("title", "Watchful Shoal"),
         ("description",
-            "Whenever you write an [gold]Ethereal[/gold] card as a "
-          + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] "
-          + "[gold]Block[/gold]."),
+            "Your [gold]Stings[/gold] deal [blue]{Amount}[/blue] additional "
+          + "damage. Your [gold]Wards[/gold] gain [blue]{Amount}[/blue] "
+          + "additional [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The Plan-line bonus a Sting written now carries: the stack
+    /// on <paramref name="kokomi"/>, 0 for any other card.</summary>
+    public static int StingBonus(Creature? kokomi, CardModel? card)
+    {
+        if (kokomi == null || card is not ProtoKkSting) return 0;
+        return (int)kokomi.Powers.OfType<WatchfulShoalPower>()
+            .Sum(p => p.Amount);
+    }
+
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (Owner == null || dealer != Owner || target == Owner) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;
+        return cardSource is ProtoKkSting ? Amount : 0m;
+    }
+
+    public override decimal ModifyBlockAdditive(
+        Creature target, decimal block, ValueProp props,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (Owner == null || target != Owner) return 0m;
+        return cardSource is ProtoKkWard ? Amount : 0m;
+    }
 }
 
 /// <summary>Coordinated Tide: "Whenever the Bake-Kurage carries out an

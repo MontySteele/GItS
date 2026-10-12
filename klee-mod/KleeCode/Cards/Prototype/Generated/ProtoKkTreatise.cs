@@ -45,7 +45,7 @@ public sealed class ProtoKkTreatise : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Treatise"),
-        ("description", "The first time each turn you play a card you could have written as a [gold]Plan[/gold], draw 1 card."),
+        ("description", "Once a turn, when you play a card you could write as a [gold]Plan[/gold] instead of writing it, draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

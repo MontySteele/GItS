@@ -33,7 +33,6 @@ def _amount(c):
     ("proto_kk_jellyfish_drift", 8, 11),
     ("proto_kk_watatsumi_drill", 8, 11),
     ("proto_kk_bubble_ward", 7, 10),
-    ("proto_kk_watchful_shoal", 5, 7),
     ("proto_kk_coordinated_tide", 6, 9),
     ("proto_kk_kurage_canopy", 3, 4),
     ("proto_kk_grand_strategist", 7, 10),

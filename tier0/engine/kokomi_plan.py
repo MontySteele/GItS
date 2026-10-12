@@ -66,7 +66,7 @@ PLAN_KINDS = frozenset((
     # R276 PICK 1, THE HALVES REWRITE. See `FIRST_ATTACK_TWICE` and the four
     # beside it.
     "first_attack_twice",
-    "block_front_intent",
+    "block_max_intent",
     # THE CO-OP SET: Joint Orders' "They draw 2 cards" and Coordinated
     # Strike's "each other player's Attacks deal 3 additional damage". Both
     # are about ANOTHER player, and tier 0 seats one (`engine/coop.py`).
@@ -127,7 +127,7 @@ PLAN_AIMED_OPS = frozenset((
 #: Block" to its Plan, and no key adds a Plan clause, so the clause is written
 #: at 0 and a 0 flat Block is carried out as nothing (Dexterity does not feed a
 #: clause the face does not print).
-PLAN_ZERO_AMOUNT_OPS = frozenset(("block_front_intent", "block",
+PLAN_ZERO_AMOUNT_OPS = frozenset(("block_max_intent", "block",
                                  # POOL COMPLETION: Tactical Relay's draw is
                                  # written at 0 and added by the upgrade.
                                  "each_player_draw"))
@@ -162,7 +162,7 @@ PLAN_ONLY_OPS = frozenset((
                            # you wrote this"), so a now-line spelling would be
                            # a different, unpriced card.
                            "first_attack_twice",
-                           "block_front_intent",
+                           "block_max_intent",
                            # Kokomi core pass: "next turn" is the carry-out.
                            # THE CO-OP SET: the player is the one captured
                            # when the Plan was written, and "next turn" is the
@@ -297,7 +297,7 @@ WATATSUMI_RESISTANCE = "kk_watatsumi_resistance"
 #: `Powers/Prototype/KokomiRefounding.cs`.
 SANGONOMIYAS_ORDERS = "kk_sangonomiyas_orders"   # turn start: N Companions
 KURAGE_BLOOM = "kk_kurage_bloom"                 # turn start: N Stings
-WATCHFUL_SHOAL = "kk_watchful_shoal"             # Ethereal written: N Block
+WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg, Wards +N Block
 COORDINATED_TIDE = "kk_coordinated_tide"         # Ethereal carried out: N
 GRAND_STRATEGIST = "kk_grand_strategist"         # a Plan's reaction: N to ALL
 ENDLESS_SHOAL = "kk_endless_shoal"               # Sting/Ward carried out: copy
@@ -754,8 +754,11 @@ def hers(state: CombatState, card: Optional[Card], amount: int,
     folded = _enchanted(card, amount)
     if folded <= 0:
         return folded
-    return folded + (int(state.player.powers.get("strength", 0))
-                     * max(1, int(strength_times)))
+    # Kokomi round-3 changes (2026-10-12): Watchful Shoal's Sting bonus,
+    # folded where her Strength is.
+    return (folded + watchful_shoal_bonus(state, card, STING_ID)
+            + int(state.player.powers.get("strength", 0))
+            * max(1, int(strength_times)))
 
 
 def schedule(state: CombatState, card: Card,
@@ -1363,6 +1366,10 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
                                 drain_entries=drain_entries)
         finally:
             state.kk_carrying_out = was
+    # Kokomi round-3 changes (2026-10-12): Coordinated Tide lands before the
+    # plan bus, the C#'s order since its hit moved into the carry-out's
+    # results line (`KokomiPlan.ResolveEntry`).
+    coordinated_tide(state, entry)
     _note_plan_resolved(state, entry)
     note_carried_out(state, entry)
     return wrote[0], wrote[1]
@@ -1507,13 +1514,13 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # `KokomiPlan.Kind.AllyDraw` / `OthersAttackDamageThisTurn`, is where
         # the rule lives.
         coop.no_other_player(state, op)
-    elif op == "block_front_intent":
-        # R276, TIDE WALL: "Gain Block equal to the damage the enemy intends
-        # to deal" (+ the upgrade's flat bonus). The FRONT enemy's intent read
-        # AT CARRY-OUT, which is after the coming enemy turn's intents are up;
+    elif op == "block_max_intent":
+        # R276, TIDE WALL: "Gain Block, plus the most damage an enemy
+        # intends" (Kokomi round-3 changes, 2026-10-12: the LARGEST intent,
+        # no longer the front enemy's). Read AT CARRY-OUT, which is after the coming enemy turn's intents are up;
         # a multi-hit intent counts every hit and a non-attack intent is 0.
         # POWERED, the flat planned Block's funnel.
-        intended = front_intent_damage(state)
+        intended = max_intent_damage(state)
         gained = powers.modify_block_gained(p, intended + amount)
         if gained:
             p.block += gained
@@ -1996,18 +2003,26 @@ def redirect_queued_plans(state: CombatState, target: Optional[Enemy]) -> None:
 
 
 
-def front_intent_damage(state: CombatState) -> int:
-    """Tide Wall's read (R276): the total damage the FRONT enemy's current
-    intent would deal her, every hit counted, through the same estimate the
-    potions use (`potions._intent_damage`: its Strength and Weak, her
-    Vulnerable). 0 for no front enemy or a non-attack intent. The C# twin is
+def intent_damage(state: CombatState, enemy: Optional[Enemy]) -> int:
+    """The total damage ONE enemy's current intent would deal her, every hit
+    counted, through the same estimate the potions use
+    (`potions._intent_damage`: its Strength and Weak, her Vulnerable). 0 for
+    no enemy or a non-attack intent. The C# twin is
     `KokomiOverhaulKit.IntendedDamage`, which asks the game's own
     `AttackIntent.GetTotalDamage` -- the number the intent badge shows."""
     from tier0.engine import potions               # late import: cycle
-    front = front_enemy(state)
-    if front is None or not _intends_to_attack(front):
+    if enemy is None or not _intends_to_attack(enemy):
         return 0
-    return int(potions._intent_damage(state, front))
+    return int(potions._intent_damage(state, enemy))
+
+
+def max_intent_damage(state: CombatState) -> int:
+    """Tide Wall's read (R276; Kokomi round-3 changes, 2026-10-12): the MOST
+    damage any one living enemy intends, not the front body's, which read 0
+    against the Queen while her minion attacked. 0 with no enemies. The C#
+    twin is `KokomiOverhaulKit.MostIntendedDamage`."""
+    return max((intent_damage(state, e) for e in state.living_enemies),
+               default=0)
 
 
 def spend_first_attack_twice(state: CombatState, card: Card) -> int:
@@ -2440,29 +2455,52 @@ def carry_out_companion(state: CombatState, card: Optional[Card]) -> None:
         state.kurage_aim = was
 
 
+def watchful_shoal_bonus(state: CombatState, card: Optional[Card],
+                         jellyfish_id: str) -> int:
+    """WATCHFUL SHOAL (Kokomi round-3 changes, 2026-10-12): "Your Stings deal
+    N additional damage. Your Wards gain N additional Block." The stack when
+    `card` is the jellyfish `jellyfish_id` (either upgrade), else 0. Read by
+    `effects._op_damage` (a Sting's now-line, played or flipped),
+    `effects._op_block` (a Ward's now-line) and `hers` (a Sting's Plan line,
+    folded at writing). `WatchfulShoalPower` is the twin."""
+    if card is None or not live(state):
+        return 0
+    if card.id not in (jellyfish_id, jellyfish_id + "+"):
+        return 0
+    return int(state.player.powers.get(WATCHFUL_SHOAL, 0))
+
+
 def note_written(state: CombatState, card: Card) -> None:
-    """A Plan was just written by `card`. WATCHFUL SHOAL pays Block for an
-    Ethereal card, WATATSUMI RESISTANCE a Sting for a Companion card.
-    `KokomiRefounding.OnWritten` is the twin."""
+    """A Plan was just written by `card`. WATATSUMI RESISTANCE pays a Sting
+    for a Companion card (Watchful Shoal left this bus in the Kokomi round-3
+    changes, 2026-10-12). `KokomiRefounding.OnWritten` is the twin."""
     if not live(state) or card is None:
         return
-    p = state.player
-    if card.is_ethereal:
-        n = int(p.powers.get(WATCHFUL_SHOAL, 0))
-        if n:
-            # RAW, like every power-sourced Block in the arm (NC-11).
-            p.block += n
-            state.emit("block", amount=n)
-            state.emit("plan_watchful_shoal", amount=n)
     from tier0.engine import companion_hexerei      # late import: cycle
     if companion_hexerei.counts_as_companion(state, card):
         watatsumi_resistance(state)
 
 
+def coordinated_tide(state: CombatState, entry: PlanEntry) -> None:
+    """COORDINATED TIDE: a Plan written by an Ethereal card was carried out,
+    so hit the front enemy. Once per carry-out, either line, outside the
+    carrying window. `KokomiRefounding.CoordinatedTide` is the twin."""
+    from tier0.engine import effects                # late import: cycle
+    card = entry.source
+    if not live(state) or card is None or not card.is_ethereal:
+        return
+    n = int(state.player.powers.get(COORDINATED_TIDE, 0))
+    front = front_enemy(state)
+    if n and front is not None:
+        state.emit("plan_coordinated_tide", target=front.name, amount=n)
+        effects.deal_damage_to_enemy(state, front, n, element="hydro",
+                                     source="plan", powered=False)
+
+
 def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
-    """A Plan was just carried out. COORDINATED TIDE hits the front enemy for
-    an Ethereal card; ENDLESS SHOAL adds a copy of a Sting or Ward to her
-    hand. Once per carry-out, either line.
+    """A Plan was just carried out. ENDLESS SHOAL adds a copy of a Sting or
+    Ward to her hand (Coordinated Tide is `coordinated_tide`, before the plan
+    bus). Once per carry-out, either line.
     `KokomiRefounding.OnCarriedOut` is the twin."""
     import copy as _copy
 
@@ -2471,13 +2509,6 @@ def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
     if not live(state) or card is None:
         return
     p = state.player
-    if card.is_ethereal:
-        n = int(p.powers.get(COORDINATED_TIDE, 0))
-        front = front_enemy(state)
-        if n and front is not None:
-            state.emit("plan_coordinated_tide", target=front.name, amount=n)
-            effects.deal_damage_to_enemy(state, front, n, element="hydro",
-                                         source="plan", powered=False)
     base = card.id.rstrip("+")
     if base in (STING_ID, WARD_ID):
         n = int(p.powers.get(ENDLESS_SHOAL, 0))

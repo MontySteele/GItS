@@ -1216,6 +1216,7 @@
       "block": 3
     },
     "proto_kk_kelp_wall": {
+      "block": 2,
       "plan_block": 3
     },
     "proto_kk_kurage_barrage": {

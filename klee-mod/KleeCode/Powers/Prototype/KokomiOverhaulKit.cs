@@ -43,7 +43,7 @@ public static class KokomiOverhaulKit
     /// number the intent badge shows (its Strength and Weak, her Vulnerable).
     /// 0 for no enemy, a sleeping one or a non-attack intent. A state read
     /// must never throw, so a failing intent reads 0. Sim twin:
-    /// <c>kokomi_plan.front_intent_damage</c>.
+    /// <c>kokomi_plan.intent_damage</c>.
     /// </summary>
     public static int IntendedDamage(Creature? enemy, Creature? kokomi)
     {
@@ -60,6 +60,27 @@ public static class KokomiOverhaulKit
         {
             return 0;
         }
+    }
+
+    /// <summary>
+    /// TIDE WALL's read since the Kokomi round-3 changes (2026-10-12): the
+    /// most damage any one enemy intends, each enemy's
+    /// <see cref="IntendedDamage"/>, the largest taken. The front body alone
+    /// read 0 against the Queen, whose minion attacks. 0 for no enemies.
+    /// Sim twin: <c>kokomi_plan.max_intent_damage</c>.
+    /// </summary>
+    public static int MostIntendedDamage(Creature? kokomi)
+    {
+        var enemies = kokomi?.CombatState?.HittableEnemies;
+        if (enemies == null) return 0;
+        var most = 0;
+        foreach (var enemy in enemies)
+        {
+            if (enemy.IsDead) continue;
+            var intended = IntendedDamage(enemy, kokomi);
+            if (intended > most) most = intended;
+        }
+        return most;
     }
 
     /// <summary>
