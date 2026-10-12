@@ -1092,7 +1092,8 @@
       "formula_base": 3
     },
     "proto_fs_standing_ovation": {
-      "block": 2
+      "block": 2,
+      "retain": true
     },
     "proto_fs_standing_ovation_all": {
       "retain": true

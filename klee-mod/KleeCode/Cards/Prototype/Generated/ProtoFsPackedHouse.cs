@@ -45,32 +45,27 @@ public sealed class ProtoFsPackedHouse : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Packed House"),
-        ("description", "Deal {CalculationBase:diff()} damage, plus 1 for every 5 [gold]Fanfare[/gold] you have.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold], plus 1 for every 4 [gold]Fanfare[/gold] you have.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
-            new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.FanfareFives(card.Owner?.Creature))
+            new CalculationBaseVar(5m),
+            new CalculationExtraVar(1m),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.FanfareFours(card.Owner?.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoFsPackedHouse()
-        : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithElementHitFx(this)
-            .Execute(choiceContext);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()

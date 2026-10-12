@@ -2611,7 +2611,7 @@
                          {op: damage, amount: 12, target: enemy}]}]}]}
 
 - {id: proto_fs_standing_ovation, name: "Rising Applause", character: furina,
-   upgrade: {block: +2},
+   upgrade: {block: +2, retain: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: basic,
    description: "Gain 5 [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much [gold]Hydro[/gold] damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
@@ -2732,8 +2732,8 @@
    upgrade: {formula_base: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 8: deal 1 more for each. Draw 1 for every 4 spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_up_to, amount: 8},
+   description: "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 12: deal 1 more for each. Draw 1 for every 4 spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_up_to, amount: 12},
              {op: damage,
               amount_formula: {base: 8, per: 1, count: stage_spent},
               target: enemy},
@@ -2936,8 +2936,8 @@
    upgrade: {formula_base: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 12: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: stage_spend_up_to, amount: 12},
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: stage_spend_up_to, amount: 16},
              {op: block,
               amount_formula: {base: 6, per: 1, count: stage_spent}}]}
 
@@ -3063,8 +3063,8 @@
    upgrade: {damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 12: hit once more for every 4.",
-   effects: [{op: stage_spend_up_to, amount: 12},
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16: hit once more for every 4.",
+   effects: [{op: stage_spend_up_to, amount: 16},
              {op: damage, amount: 4, target: enemy, applies_element: true,
               times_formula: {base: 2, per: 1, count: stage_spent_fours}}]}
 
@@ -3406,15 +3406,16 @@
    effects: [{op: apply_power, power: fs_full_house, amount: 4,
               target: self}]}
 
-# Packed House: the hoard, a small component.
+# Packed House: the hoard's Block card, a small component. A Skill since the
+# Spend outlet paper (ruled 2026-10-12); it was "Deal 4 damage, plus 1 for
+# every 5 Fanfare you have". It reads the bank and never spends it.
 - {id: proto_fs_packed_house, name: "Packed House", character: furina,
    upgrade: {formula_base: +3},
    authored_by: [claude],
-   register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {CalculationBase:diff()} damage, plus 1 for every 5 [gold]Fanfare[/gold] you have.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage,
-              amount_formula: {base: 4, per: 1, count: stage_fanfare_fives},
-              target: enemy}]}
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus 1 for every 4 [gold]Fanfare[/gold] you have.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 5, per: 1, count: stage_fanfare_fours}}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

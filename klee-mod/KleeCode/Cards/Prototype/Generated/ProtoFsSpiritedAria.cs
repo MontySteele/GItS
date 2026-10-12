@@ -45,7 +45,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IStag
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spirited Aria"),
-        ("description", "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 8: deal 1 more for each. Draw 1 for every 4 spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 12: deal 1 more for each. Draw 1 for every 4 spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -53,7 +53,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IStag
         {
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 8))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 12))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,7 +65,7 @@ public sealed class ProtoFsSpiritedAria : CustomCardModel, ICharacterCard, IStag
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 8);
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 12);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

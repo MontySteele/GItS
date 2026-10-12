@@ -7577,3 +7577,24 @@ Arrow dropped). The build before it is tagged
   seat page marks a hand card the jellyfish takes whose face prints no Plan
   line, "(can be written as a Plan)", and her Plan glossary row adds that any
   Companion can be written and what its carry-out does.
+
+## Furina Spend outlet paper, 2026-10-12
+
+`review/active/furina-spend-outlet-2026-10-12.md` sec.2, ruled 2026-10-12 at
+all four defaults ([USER]: "For Furina - generally agree across the board.").
+Texts and numbers are the paper's; every Spend rate is unchanged.
+
+- **Caps:** Spirited Aria spends up to 12 (was 8); Crashing Waves and Hold the
+  Stage up to 16 (were 12; the sim slice's `ftd_hold_the_stage` too). Tidal
+  Flourish stays at 10.
+- **Packed House (`proto_fs_packed_house`):** Common Skill 1, "Gain 5 [8]
+  Block, plus 1 for every 4 Fanfare you have." It reads the bank and never
+  spends it (count `stage_fanfare_fours`, `FurinaStageLaw.PackedHouseFanfarePer`
+  4; was the Attack "Deal 4 damage, plus 1 for every 5 Fanfare you have",
+  count `stage_fanfare_fives`). The in-combat line previews the Block, The
+  Show Must Go On's form.
+- **Rising Applause+ (`proto_fs_standing_ovation`):** gains Retain; the base
+  starter is unchanged. Its rider tip (`ArmKeywordTips.ForBankDamage`, titled
+  "When to play it"): "Its damage is the Fanfare you hold; play it when the
+  bank is worth it." Derived from the row (`starter_spends_the_bank`: a basic
+  card whose damage is what its spend-all took), so it rides this card only.
