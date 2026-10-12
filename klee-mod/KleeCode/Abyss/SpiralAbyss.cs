@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Powers;
+using KleeMod.Relics;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -275,16 +276,46 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
 
     // ---- Card plays ------------------------------------------------------
 
+    /// <summary>
+    /// First Strike: "Your first Attack each combat is played twice."
+    ///
+    /// SETTLED FROM THE DECOMPILE (sts2.dll, 2026-10-12), because two seats
+    /// reported it never doubling. <c>CardModel.OnPlayWrapper</c> calls
+    /// <c>GeneratePlayCount</c> -- which runs this hook -- BEFORE its play loop,
+    /// and the loop is what appends <c>CombatHistory.CardPlayStarted</c> for
+    /// each play (CardModel.cs ~1887 then ~1929). So the play being sized is
+    /// never in the history yet, and an empty history means "this is the
+    /// first". The history is cleared at every combat's end
+    /// (<c>CombatManager.EndCombatInternal</c>), so the count is per combat,
+    /// and it is filtered to the card's owner, so in co-op each player's first
+    /// Attack doubles. Echo Form counts the same history the same way.
+    /// What the seats saw is not this hook: in the first four fights of the
+    /// lane 2 godot log Varka's Fury is never his first Attack, and the page's
+    /// turn log printed a doubled card as one row with nothing saying it
+    /// played twice (it now does: <c>ResolutionLedger</c>'s play count).
+    /// </summary>
     public override int ModifyCardPlayCount(CardModel card, Creature? target, int playCount)
     {
         if (!Has(AbyssBlessing.FirstStrike)) return playCount;
         var owner = card.Owner;
         if (owner == null) return playCount;
-        var attackAlready = CombatManager.Instance.History.CardPlaysStarted.Any(e =>
-            e.CardPlay.Player == owner
-            && e.CardPlay.IsFirstInSeries
-            && e.CardPlay.Card.Type == CardType.Attack);
+        var attackAlready = AbyssRules.AttackAlreadyStarted(
+            CombatManager.Instance.History.CardPlaysStarted.Select(e =>
+                (e.CardPlay.Player, e.CardPlay.IsFirstInSeries,
+                 e.CardPlay.Card.Type == CardType.Attack)),
+            owner);
         return playCount + AbyssRules.FirstStrikeExtraPlays(card.Type == CardType.Attack, attackAlready);
+    }
+
+    /// <summary>The receipt the base game's Throwing Axe gives for the same
+    /// effect: the owner's First Strike relic flashes when it doubles a card.
+    /// Display only; the game calls this only on a model that changed the
+    /// count, and First Strike is the only thing here that does.</summary>
+    public override Task AfterModifyingCardPlayCount(CardModel card)
+    {
+        var relic = card.Owner?.Relics.OfType<AbyssFirstStrikeRelic>().FirstOrDefault();
+        relic?.Flash();
+        return Task.CompletedTask;
     }
 
     public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)

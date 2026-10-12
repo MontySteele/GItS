@@ -318,6 +318,29 @@ public class ResolutionLedgerTests
                      ResolutionLedger.Snapshot().Count);
     }
 
+    /// <summary>The Spiral Abyss seat round (2026-10-12): whose card a row
+    /// is, so a co-op page keeps the partner's plays out of "What you
+    /// played", and how many times it played, so a doubled card says so. A
+    /// row opened without them reads as before: no owner, not known to be
+    /// anyone's, played once.</summary>
+    [Fact]
+    public void A_row_carries_its_owner_and_its_play_count()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("strike", "Strike", false, "Varka", false, 2);
+        ResolutionLedger.ClosePlay();
+        ResolutionLedger.OpenPlay("defend", "Defend", false);
+        ResolutionLedger.ClosePlay();
+
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Equal("Varka", rows[0]["owner"]);
+        Assert.Equal(false, rows[0]["is_local"]);
+        Assert.Equal(2, rows[0]["play_count"]);
+        Assert.Equal("", rows[1]["owner"]);
+        Assert.Null(rows[1]["is_local"]);
+        Assert.Equal(1, rows[1]["play_count"]);
+    }
+
     // ---------------------------------------------------------- the shape ---
 
     /// <summary>The wire keys ARE the contract:
@@ -330,7 +353,8 @@ public class ResolutionLedgerTests
         ResolutionLedger.NoteHit(null, 6, 0);
 
         var row = ResolutionLedger.Snapshot()[0];
-        Assert.Equal(new[] { "card_id", "card", "auto_played", "carried",
+        Assert.Equal(new[] { "card_id", "card", "auto_played", "owner",
+                             "is_local", "play_count", "carried",
                              "overflowed", "hits", "applied", "summoned",
                              "oath", "fang_ascension", "fang_relic",
                              "swirl_no_aura", "swirl_on_aura", "between",

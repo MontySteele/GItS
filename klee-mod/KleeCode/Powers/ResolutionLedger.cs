@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 
@@ -193,6 +194,18 @@ public static class ResolutionLedger
 
         public bool Carried { get; set; }
         public bool Overflowed { get; set; }
+
+        /// <summary>The Spiral Abyss seat round (2026-10-12). WHOSE card, and
+        /// how many times it played. In co-op both players' plays resolve in
+        /// each game process, and the page printed the partner's under "What
+        /// you played"; <c>IsLocal</c> is <c>LocalContext.IsMe</c> of the
+        /// play's player (null where the ledger was not told), and
+        /// <c>Owner</c> their character's printed name. <c>PlayCount</c> is
+        /// <c>CardPlay.PlayCount</c>: a card First Strike or Echo Form doubled
+        /// printed as one row with nothing saying it played twice.</summary>
+        public string Owner { get; init; } = string.Empty;
+        public bool? IsLocal { get; init; }
+        public int PlayCount { get; init; } = 1;
     }
 
     /// <summary>
@@ -356,9 +369,15 @@ public static class ResolutionLedger
     public static void OpenPlay(CardPlay? cardPlay)
     {
         if (cardPlay?.Card == null || !cardPlay.IsFirstInSeries) return;
+        bool? isLocal = null;
+        try { isLocal = cardPlay.Player == null ? null : LocalContext.IsMe(cardPlay.Player); }
+        catch { isLocal = null; }
         OpenPlay(Safe(() => cardPlay.Card.Id.Entry),
                  Safe(() => cardPlay.Card.Title?.ToString()),
-                 cardPlay.IsAutoPlay);
+                 cardPlay.IsAutoPlay,
+                 Safe(() => cardPlay.Player?.Character?.Title?.GetFormattedText()),
+                 isLocal,
+                 cardPlay.PlayCount);
     }
 
     /// <summary>
@@ -372,14 +391,20 @@ public static class ResolutionLedger
     /// overload above is the only caller in shipped code and this is the only
     /// place a row is minted, so the two cannot drift.
     /// </summary>
-    public static void OpenPlay(string cardId, string card, bool autoPlayed)
+    public static void OpenPlay(string cardId, string card, bool autoPlayed,
+                                string owner = "", bool? isLocal = null, int playCount = 1)
     {
         if (Rows.Count >= MaxRows)
         {
             _open = null;
             return;
         }
-        var row = new Resolved(cardId, card, autoPlayed);
+        var row = new Resolved(cardId, card, autoPlayed)
+        {
+            Owner = owner ?? string.Empty,
+            IsLocal = isLocal,
+            PlayCount = playCount < 1 ? 1 : playCount,
+        };
         Rows.Add(row);
         _open = row;
         _between = null;
@@ -646,6 +671,9 @@ public static class ResolutionLedger
             ["card_id"] = row.CardId,
             ["card"] = row.Card,
             ["auto_played"] = row.AutoPlayed,
+            ["owner"] = row.Owner,
+            ["is_local"] = row.IsLocal,
+            ["play_count"] = row.PlayCount,
             ["carried"] = row.Carried,
             ["overflowed"] = row.Overflowed,
             ["hits"] = row.Hits.ConvertAll(hit =>

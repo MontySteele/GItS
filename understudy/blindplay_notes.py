@@ -3615,6 +3615,13 @@ RESOLUTION_CARRIED_CLAUSE = " *(since you ended your last turn)*"
 #: silently truncated, because a reader adding up forty lines that should be
 #: forty-three has been handed the `EB-518` error in a new place.
 RESOLUTION_OVERFLOW_CLAUSE = " *(more hits landed than this page will list)*"
+#: The Spiral Abyss seat round (2026-10-12): a card the game played more than
+#: once (First Strike, Echo Form). Its hits from every play are listed under
+#: it; without this a seat holding First Strike read "never doubled".
+RESOLUTION_REPLAYED_CLAUSE = " *(played {times} times; the hits of every play are below)*"
+#: The co-op partner's plays this turn, under the other-player section and
+#: never under yours (the same seat round: "What you played" listed them).
+PARTNER_RESOLUTIONS_HEADING = "### What {partner} played this turn"
 #: Printed under the section when every row on it was played by the game --
 #: the turn the reader never saw, with its contents on the page at last.
 RESOLUTION_AUTO_TURN_NOTE = (

@@ -307,18 +307,18 @@ def test_a_seat_that_is_down_waits_for_the_other():
 
 def test_the_map_vote_prints_both_choices_and_waits_after_yours():
     obs = blindplay.observation(coop_map(me_voted=True, partner_voted=False))
-    assert obs["coop"]["votes"] == ["You: Monster (path 2)",
-                                    "Furina: not chosen yet"]
+    assert obs["coop"]["votes"] == ["You voted for Monster (path 2)",
+                                    "Furina has not voted yet"]
     assert "the party moves when both of you have chosen" \
         in obs["coop"]["waiting"]
     assert obs["commands"][0] == blindplay_coop.WAIT_COMMAND
     assert 'go "<node>"' in obs["commands"]
     page = blindplay.render(obs)
-    assert "Choices so far:\n- You: Monster (path 2)\n- Furina: not chosen " \
-           "yet" in page
+    assert "Votes so far:\n- You voted for Monster (path 2)\n- Furina has " \
+           "not voted yet" in page
     theirs = blindplay.observation(coop_map(me_voted=False,
                                             partner_voted=True))
-    assert theirs["coop"]["votes"][1] == "Furina: Monster (path 1)"
+    assert theirs["coop"]["votes"][1] == "Furina voted for Monster (path 1)"
     assert theirs["coop"]["waiting"] == ""
 
 
@@ -334,7 +334,7 @@ def test_a_shared_event_and_a_chest_report_their_votes():
                                         "vote_option": None}],
                              "all_voted": False}}, [KLEE, FURINA])
     lines, mine, everyone = blindplay_coop.votes(event)
-    assert lines == ["You: Right", "Furina: not chosen yet"]
+    assert lines == ["You voted for Right", "Furina has not voted yet"]
     assert mine and not everyone
     chest = _coop({"state_type": "treasure",
                    "treasure": {"relics": [{"index": 0, "name": "Anchor"}],
@@ -342,7 +342,7 @@ def test_a_shared_event_and_a_chest_report_their_votes():
                                           "is_local": False, "voted": True,
                                           "vote_relic_index": 0}],
                                 "all_bid": False}}, [KLEE, FURINA])
-    assert blindplay_coop.votes(chest)[0] == ["Furina: Anchor"]
+    assert blindplay_coop.votes(chest)[0] == ["Furina bid on Anchor"]
 
 
 # -------------------------------------------------------- the ally target --
@@ -954,3 +954,124 @@ def test_the_coop_cli_passes_abyss_and_prints_it(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "lane2 (host): Klee  abyss  ascension 0" in out
     assert "lane3 (client): Furina  abyss  ascension 0" in out
+
+
+# ------------------------------------ the Spiral Abyss seat round, 2026-10-12 --
+
+def _abyss_vote_page(last_vote=None, votes=None, shared=True, options=None):
+    event = {"event_name": "Neow", "is_shared": shared,
+             "options": options or [
+                 {"index": 0, "title": "Jade Shield", "was_chosen": True},
+                 {"index": 1, "title": "First Strike"}]}
+    if votes is not None:
+        event["votes"] = votes
+        event["all_voted"] = all(v.get("voted") for v in votes)
+    if last_vote is not None:
+        event["last_vote"] = last_vote
+    return _coop({"state_type": "event", "event": event}, [KLEE, FURINA])
+
+
+def test_a_split_vote_says_what_each_chose_and_what_the_draw_gave():
+    """"I chose Crystallize but got First Strike": the party's vote is said."""
+    state = _abyss_vote_page(shared=False, last_vote={
+        "chosen": "First Strike", "split": True,
+        "votes": [{"player": "Klee", "is_local": True,
+                   "choice": "Jade Shield"},
+                  {"player": "Furina", "is_local": False,
+                   "choice": "First Strike", "inferred": True}]},
+        options=[{"index": 0, "title": "Leave"}])
+    page = blindplay.render(blindplay.observation(state))
+    assert ("**The party's vote: you chose Jade Shield; Furina chose First "
+            "Strike. The vote split, and the game drew one of the votes at "
+            "random: the party got First Strike.**") in page
+
+
+def test_an_agreed_vote_says_what_the_party_got():
+    state = _abyss_vote_page(shared=False, last_vote={
+        "chosen": "First Strike", "split": False,
+        "votes": [{"player": "Klee", "is_local": True,
+                   "choice": "First Strike"},
+                  {"player": "Furina", "is_local": False,
+                   "choice": "First Strike"}]})
+    assert blindplay_coop.vote_outcome(state) == [
+        "The party's vote: you chose First Strike; Furina chose First "
+        "Strike. The party got First Strike."]
+
+
+def test_an_open_vote_marks_nothing_taken_and_reads_as_votes():
+    """The page marked a Blessing "TAKEN, by Klee" while the party voted."""
+    state = _abyss_vote_page(votes=[
+        {"player": "Klee", "is_local": True, "voted": False,
+         "vote_option": None},
+        {"player": "Furina", "is_local": False, "voted": True,
+         "vote_option": 0}])
+    page = blindplay.render(blindplay.observation(state))
+    assert "TAKEN" not in page
+    assert "- Furina voted for Jade Shield" in page
+
+
+def test_a_shared_event_pick_is_a_vote_and_a_chest_pick_is_a_bid():
+    from understudy.blindplay_session import taken_line
+    res = {"verb": "choose", "printed": {
+        "option": "Jade Shield", "text": "Start each combat with 8 Block."}}
+    event = _abyss_vote_page(votes=[
+        {"player": "Klee", "is_local": True, "voted": False},
+        {"player": "Furina", "is_local": False, "voted": False}])
+    line = taken_line(res, event)
+    assert line.startswith("Voted for: Jade Shield")
+    assert "Took" not in line
+    chest = _coop({"state_type": "treasure",
+                   "treasure": {"relics": [{"index": 0, "name": "Anchor"}],
+                                "is_bidding_phase": True,
+                                "bids": [{"player": "Klee", "is_local": True,
+                                          "voted": False}]}},
+                  [KLEE, FURINA])
+    line = taken_line({"verb": "choose", "printed": {"option": "Anchor"}},
+                      chest)
+    assert line.startswith("Bid on: Anchor.")
+    # Singleplayer is untouched.
+    assert taken_line({"verb": "choose", "printed": {"option": "Anchor"}},
+                      {"state_type": "treasure"}).startswith("Took: Anchor")
+
+
+def test_a_coop_chest_says_it_is_a_bid_and_then_who_received_what():
+    open_chest = _coop({"state_type": "treasure", "treasure": {
+        "relics": [{"index": 0, "name": "Tungsten Rod"},
+                   {"index": 1, "name": "Lasting Candy"}],
+        "is_bidding_phase": True,
+        "bids": [{"player": "Klee", "is_local": True, "voted": False,
+                  "vote_relic_index": None},
+                 {"player": "Furina", "is_local": False, "voted": True,
+                  "vote_relic_index": 0}]}}, [KLEE, FURINA])
+    page = blindplay.render(blindplay.observation(open_chest))
+    assert blindplay_coop.CHEST_BID_LINE in page
+    assert "- Furina bid on Tungsten Rod" in page
+    shared_out = _coop({"state_type": "treasure", "treasure": {
+        "relics": [], "relic_results": [
+            {"player": "Klee", "is_local": True, "bid": "Tungsten Rod",
+             "received": "Lasting Candy", "how": "ConsolationPrize"},
+            {"player": "Furina", "is_local": False, "bid": "Tungsten Rod",
+             "received": "Tungsten Rod", "how": "FoughtOver"}]}},
+        [KLEE, FURINA])
+    assert blindplay_coop.chest_outcome(shared_out) == [
+        "The chest is shared out: You received Lasting Candy (bid on "
+        "Tungsten Rod, which went to the other player); Furina received "
+        "Tungsten Rod (both bid on it; the draw went this way)."]
+
+
+def test_the_partners_plays_are_not_listed_as_yours():
+    """"What you played this turn" listed the partner's cards."""
+    state = coop_combat()
+    state["player"]["resolutions"] = [
+        {"card": "Strike", "is_local": True, "owner": "Klee",
+         "play_count": 2, "hits": [{"target": "Nibbit", "amount": 6},
+                                   {"target": "Nibbit", "amount": 6}]},
+        {"card": "Fanfare Call", "is_local": False, "owner": "Furina",
+         "hits": []}]
+    page = blindplay.render(blindplay.observation(state))
+    mine = page.split("## What you played this turn, and what it did")[1]
+    mine = mine.split("\n## ")[0].split("\n### ")[0]
+    assert "**Strike**" in mine and "played two times" in mine
+    assert "Fanfare Call" not in mine
+    theirs = page.split("### What Furina played this turn")[1]
+    assert "**Fanfare Call**" in theirs

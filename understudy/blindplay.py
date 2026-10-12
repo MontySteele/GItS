@@ -654,7 +654,7 @@ def cmd_act(args) -> int:
     if not live:
         if _brief_on(args):
             print("Not sent (a dry run or a saved state): "
-                  + (taken_line(res) or args.command))
+                  + (taken_line(res, state) or args.command))
         return 0
     post = dict(res["post"] or {})
     action = post.pop("action")
@@ -680,7 +680,8 @@ def cmd_act(args) -> int:
     # Project review 2026-10-08, pick 10: the card offer this answered, if
     # any, and what was taken (`understudy/offer_log.py`). Never raises.
     offer_log.record(state, res, args.command)
-    said = [line for line in (taken_line(res), _result_line(result)) if line]
+    said = [line for line in (taken_line(res, state), _result_line(result))
+            if line]
     for line in said or [ACT_SENT_SILENT]:
         print(line)
     # `EB-456`: charged AFTER the post, so an act the wire never saw is not

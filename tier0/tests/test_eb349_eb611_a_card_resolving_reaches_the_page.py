@@ -167,7 +167,10 @@ def test_the_reader_carries_the_keys_the_mod_sends():
         ["card", "auto_played", "carried", "overflowed", "hits",
          "summoned", "applied", "oath", "fang_ascension",
          # The Varka payoff round (2026-10-10).
-         "fang_relic", "swirl_no_aura", "swirl_on_aura"])
+         "fang_relic", "swirl_no_aura", "swirl_on_aura",
+         # The Spiral Abyss seat round (2026-10-12): whose card, and how
+         # many times it played.
+         "owner", "is_local", "play_count"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
          "source", "self",
