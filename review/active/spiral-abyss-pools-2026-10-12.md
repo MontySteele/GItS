@@ -42,6 +42,8 @@ This paper fills the two pools and sets the build. It has no picks. Tell me if a
 
 Ruled 2026-10-12, [USER]: "Riptide sounds insanely dangerous for enemies that open with a single very high hit as a block check; the rest all look good." Riptide was rewritten.
 
+**Shadows do not grow by act** (ruled 2026-10-12). Each act adds one Shadow at its printed strength; three stacked by act 3 are the ramp. [USER], on that pick: "Let's go with a) and see how that plays". For comparison, the ARAM: Mayhem mod gives enemies 1, 2 and 3 runes by act, scaled by act (census `mods-census/aram-mayhem.md` in the session scratchpad).
+
 ## 4. The build
 
 - **The menu button.** A patch on `NSingleplayerSubmenu._Ready` and `NMultiplayerHostSubmenu` copies the Custom button as "Spiral Abyss". The button opens the Custom screen with the Abyss modifier already ticked and locked. Co-op comes free, because the lobby already sends modifiers to each player.
