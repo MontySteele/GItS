@@ -584,6 +584,44 @@ public class KleeStoryTests
         }
     }
 
+    // ---- A page change mid-exchange closes the dialogue -------------------------
+
+    [Fact]
+    public void A_clear_mid_exchange_closes_the_dialogue_and_a_last_line_clear_is_untouched()
+    {
+        // The game's IsDialogueOnLastLine is `current >= count - 1`.
+        Assert.True(AncientDialogueClose.MidExchange(0, 2));   // greeting on line 0: close
+        Assert.False(AncientDialogueClose.MidExchange(1, 2));  // last line: the base path
+        Assert.False(AncientDialogueClose.MidExchange(0, 1));  // a one-line dialogue
+        Assert.False(AncientDialogueClose.MidExchange(0, 0));  // nothing set
+
+        // Every private field the patch reads resolves on the real layout.
+        foreach (var f in new[]
+                 {
+                     AncientDialogueClose.DialogueField, AncientDialogueClose.CurrentLineField,
+                     AncientDialogueClose.HitboxField, AncientDialogueClose.FakeNextField,
+                     AncientDialogueClose.ContentContainerField, AncientDialogueClose.OriginalHeightField,
+                 })
+        {
+            Assert.NotNull(f);
+        }
+        Assert.Equal(typeof(int), AncientDialogueClose.CurrentLineField!.FieldType);
+        Assert.Equal(typeof(float), AncientDialogueClose.OriginalHeightField!.FieldType);
+        Assert.True(typeof(MegaCrit.Sts2.Core.Nodes.GodotExtensions.NClickableControl)
+            .IsAssignableFrom(AncientDialogueClose.HitboxField!.FieldType));
+
+        // Structural: a prefix that reads the state and a postfix that closes.
+        var patch = typeof(AncientDialogueClose).Assembly.GetTypes()
+            .Single(t => t.Name == "NAncientEventLayout_ClearDialogue_Close_Patch");
+        var info = patch.GetCustomAttribute<HarmonyLib.HarmonyPatch>()!.info;
+        Assert.Equal(typeof(MegaCrit.Sts2.Core.Nodes.Events.NAncientEventLayout), info.declaringType);
+        Assert.Equal("ClearDialogue", info.methodName);
+        Assert.Contains("AncientDialogueClose.IsMidExchange",
+            Il.Calls(patch.GetMethod("Prefix", HeadlessGame.All)!));
+        Assert.Contains("AncientDialogueClose.Close",
+            Il.Calls(patch.GetMethod("Postfix", HeadlessGame.All)!));
+    }
+
     // ---- Helpers ---------------------------------------------------------------
 
     private static T Mutable<T>(T card) where T : CardModel
