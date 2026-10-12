@@ -1,4 +1,4 @@
-# Varka: Pyro's Commons set up the reactions (2026-10-12)
+# Varka: Pyro is the hit that cashes the reactions (2026-10-12)
 
 **Why.** After the Pyro pass (`varka-pyro-pass-2026-10-11.md`), [USER] said his Pyro core "is still 'up for grabs' if we can't make the Strength / Exhaust ideas work out". That pass ruled pick 1 (b): Strength on Ashen Oath, "next Attack" on Stoke the Flames, and the Exhaust kept as an optional rider.
 
@@ -24,7 +24,11 @@ Two seat rounds have now played the pass:
 
 But Melt, Vaporize and Overloaded each come up only about once a fight (0.7 to 1.1 per fight across the six runs). The first draft's "+3 to each of them this turn" would have been worth about 3 damage a fight.
 
-**What gives him more of those reactions is putting Pyro on an enemy.** His Knights already leave Cryo, Hydro and Electro behind them. Wildfire Oath, Sharpshooter and Kindled Edge all want Pyro on the target.
+**How the two amplifiers actually fire.** [USER], on the first proposal: "applying the second element instantly causes the reaction. For Overload, that's fine; for melt and vape, this would react for 0*1.5 or 0*1.75 = 0 damage." That is the code: an application reacts (`ReactionPreviewNoHitTests.cs`), and Melt and Vaporize multiply only the hit that triggers them (`AuraPower.ModifyDamageMultiplicative`).
+- So a Pyro application with no hit wastes a Cryo or Hydro aura.
+- It also sets the order the other way round. His Cryo and Hydro Knights (Kaeya, Barbara, Mika) apply with no hit, so a Pyro aura followed by one of them is the same 0 × 1.75.
+- **Melt and Vaporize come from a Pyro hit landing on the aura a Knight left.** Pyro is the hitter, not the applier.
+- Strength and "next Attack deals N additional damage" are added before the multiplier (`NextAttackUpPower.ModifyDamageAdditive`), so a Melt multiplies them too. This is why Strength, the one Pyro idea that works, belongs with the reactions.
 
 ## 2. Anemo, and the half-and-half deck
 
@@ -35,21 +39,28 @@ But Melt, Vaporize and Overloaded each come up only about once a fight (0.7 to 1
 - His starting element's own cards were 7 to 20% of plays.
 - Every seat drafted the half-and-half deck, and 5 of 6 reached the act-3 boss.
 
-So Anemo is not stuck in a supporting role. If anything, the elements are the side half, and Pyro's job should be the one that half-and-half deck already wants: more reactions.
+So Anemo is not stuck in a supporting role. If anything, the elements are the side half, and Pyro's job should be the one that half-and-half deck already wants: a bigger hit to cash the auras his Knights leave, and Strength that every Attack in the deck uses, Anemo included.
 
 **Oath is still unread.** Telemetry records no Oath counts. The fields are being added, and whether switch decks and mono decks both bank a lot of Oath waits for the next round.
 
 ## 3. The proposal
 
+The first draft's pair was "Stoke the Flames: Apply Pyro to an enemy. Gain 2 [3] Pyro Oath." and "Ember Cleave: Deal 9 [12] Pyro damage. Draw 1 card." Both are withdrawn:
+- Stoke's application wastes the aura it reacts with (section 1).
+- On Ember Cleave, [USER]: "The new Ember Cleave sounds like an Electro card." His draw lives on Electro (Charged Lunge, Static Field, Pulsating Witch, Short Circuit).
+
 | Card | Today | Proposed |
 |---|---|---|
-| **Stoke the Flames** (C Skill, 0) | "Gain 2 Pyro Oath. Your next Attack deals 3 additional damage. You may Exhaust a card for 1 additional Pyro Oath." [3 Oath, 5] | "Apply Pyro to an enemy. Gain 2 [3] Pyro Oath." |
-| **Ember Cleave** (C Attack, 1) | "Deal 9 Pyro damage. Gain 1 Pyro Oath. You may Exhaust a card for 1 additional Pyro Oath." [12] | "Deal 9 [12] Pyro damage. Draw 1 card." |
+| **Ember Cleave** (C Attack, 1) | "Deal 9 Pyro damage. Gain 1 Pyro Oath. You may Exhaust a card for 1 additional Pyro Oath." [12] | "Deal 7 [9] Pyro damage. Gain 2 [3] Strength this turn." |
+| **Stoke the Flames** (C Skill, 0) | "Gain 2 Pyro Oath. Your next Attack deals 3 additional damage. You may Exhaust a card for 1 additional Pyro Oath." [3 Oath, 5] | "Gain 2 [3] Pyro Oath. Your next Pyro Attack this turn deals 5 [7] additional damage." |
 
 **Why these two cards:**
-- **Stoke makes its own reaction.** Played after a Knight's Cryo, Hydro or Electro, it turns that aura into a Melt, Vaporize or Overloaded on the next hit, for 0 Energy. It also arms Wildfire Oath, Sharpshooter and Kindled Edge, and gives a Swirl a Pyro aura to spread. This is the shape of Pathfinder's Mark, which applies an element.
-- **Ember Cleave gets a floor with a job:** a Pyro hit that replaces itself. It is the Pyro twin of Charged Lunge and the base game's Pommel Strike (9 damage, draw 1). It is no longer a second reaction-conditional Common; Kindled Edge keeps that job.
-- **The Exhaust rider is retired** from both. Pick 1 (b) kept it "for tactical use of Exhaust vs status enemies"; across two rounds the two cards were taken once.
+- **Pyro's job is Strength and the hit.** The Knights leave Cryo and Hydro; a Pyro hit cashes them at ×1.75 or ×1.5, and both cards' bonuses sit inside that multiplier.
+- **Ember Cleave is the base game's Setup Strike** (Ironclad Common: 7 damage, 2 Strength this turn), in Pyro. Its Strength reaches every later Attack that turn: Diluc's two hits, Four Winds' Ascension, and his Anemo Attacks. This gives the half-and-half deck a reason to carry it. It is Pyro's own card, not a draw card.
+- **Stoke keeps its shape** with the rider cut and a bigger number. It now names a Pyro Attack, so it is Pyro's setup, not a generic one. On a Melt, its 5 becomes about 9.
+  - It is the weaker of the two changes: the current card (Oath plus 3) was taken 1 of 19, though the Exhaust rider was part of that card.
+  - The alternative is to leave Stoke alone until your Pyro run.
+- **The Exhaust rider is retired** from both. Pick 1 (b) of the Pyro pass kept it "for tactical use of Exhaust vs status enemies"; across two rounds the two cards were taken once.
 
 **Unchanged:** Ashen Oath, Kindled Edge, Blazing Charge, Wildfire Oath, Diluc, Sharpshooter, Baron Bunny, and the starter Knight.
 
@@ -57,16 +68,20 @@ So Anemo is not stuck in a supporting role. If anything, the elements are the si
 
 ## 4. Risks and checks
 
-- **A free Pyro application can stack with his apply-to-ALL cards:** Gleeful Songs, Pulsating Witch, Pathfinder's Mark+ and Tempest. Watch damaging reactions per turn on the turns Stoke is played.
+- **Strength this turn on a 1-cost Common is strong with multi-hit cards.** Diluc hits twice and Tempest of the Four Winds four times. Setup Strike is a base-game Common at the same numbers, so this is the base game's rate.
+- **Ashen Oath plus Ember Cleave plus a Melt** is the Pyro turn this paper wants. Watch the biggest single Pyro hit per fight.
 - **Check lines for the next round:**
   - The Pyro take rate pooled, against about 10% of 94 today.
   - Each changed card taken at least once.
-  - Damaging reactions per fight in a Pyro start, against about 1 today.
-- **This is judged on Sonnet take rates alone.** You haven't played the Strength pass yet; your last Pyro run came before it. Option (b) is the honest alternative.
+  - Melt and Vaporize per fight in a Pyro start, against about 1 today.
+- **This is judged on Sonnet take rates alone.** You haven't played the Strength pass yet. Option (b) is the honest alternative.
 
 ## For [USER]
 
-1. **Pyro's Commons.**
-   - **(a) Default:** Stoke the Flames becomes "Apply Pyro to an enemy. Gain 2 [3] Pyro Oath." Ember Cleave becomes "Deal 9 [12] Pyro damage. Draw 1 card." Strength stays on Ashen Oath.
-   - (b) Keep the current pass until your own Pyro run reads it.
-   - (c) Something else (say what).
+1. **Ember Cleave.**
+   - **(a) Default:** "Deal 7 [9] Pyro damage. Gain 2 [3] Strength this turn."
+   - (b) A big hit instead: "Lose 2 HP. Deal 13 [17] Pyro damage." (the base game's Hemokinesis, at Common).
+   - (c) Keep it until your own Pyro run.
+2. **Stoke the Flames.**
+   - **(a) Default:** "Gain 2 [3] Pyro Oath. Your next Pyro Attack this turn deals 5 [7] additional damage."
+   - (b) Keep it until your own Pyro run.
