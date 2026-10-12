@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard
+public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPlannedCard, INowLineCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,15 +46,24 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForDexterity(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForDexterity(BaseKeywordTips.ForStrength(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_gorou_war_banner");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mi_gorou_war_banner");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — General's War Banner"),
-        ("description", "Gain {PowerAmount:diff()} [gold]Dexterity[/gold] for 2 turns."),
+        ("description", "Gain {PowerAmount:diff()} [gold]Dexterity[/gold] for 2 turns.\nOr [gold]plan[/gold]: Gain 3 [gold]Strength[/gold] this turn."),
     };
+
+    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
+    /// was written. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.StrengthThisTurn, 3, KokomiPlan.Aim.Self),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -65,11 +74,29 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoMiGorouWarBanner()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrSelf, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
+            cardPlay = nowLine;
+        }
+        await PlayNowLine(choiceContext, cardPlay);
+    }
+
+    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
+    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.None;
+
+    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
+    /// out by the Bake-Kurage when the player chooses it for a Plan
+    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
+    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<DexterityPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         await PowerCmd.Apply<WarBannerPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);

@@ -7528,3 +7528,35 @@ Furina is at Prototype.
   `furina_tide.drained_this_turn` (off `drained_hp_this_turn`). Nothing
   else read `stage_near_line`, so it is removed with `NearLine`,
   `NearTheLine` and `NEAR_LINE`.
+
+## Kokomi re-founding, 2026-10-12
+
+Direction `review/active/kokomi-design-pass-2026-10-11.md` (all five picks
+(a), with pick 4's two tiers) and cards
+`review/active/kokomi-card-paper-2026-10-12.md` (PR #1125, ruled: Gorou's
+four join her pool, Deep Current, Massed Volley, Commander's Eye and Signal
+Arrow dropped). The build before it is tagged
+`kokomi-casket-frozen-2026-10-12`.
+
+- **Retired:** the Casket's count, Open the Casket and Dusk (keyword, tip,
+  engine path). The Tamakushi Casket keeps its id, name and art and reads "At
+  the end of your turn, if a Plan is waiting, gain 3 Block."
+  (`KokomiOverhaulLaw.CasketBlock`, `C.KOKOMI_OVERHAUL_CASKET_BLOCK`); the
+  Watatsumi Casket (Touch of Orobas) is the same at 5.
+- **Cut, 24 rows:** Shell Guard, Driftglass, Depths' Judgment, Coral Tithe,
+  Flood Tide, What the Tokoyo Returns, What the Tokoyo Took, Abyssal Salvage,
+  Kurage Swarm, Nip, Current Read, Vanguard, Weight of the Plan, Turning
+  Tide, Stolen Chapter, Tidal Resonance, Salt in the Wound, Lull, Kurage
+  School, The Long Game, Patient Tide, Deep Current, Massed Volley, Signal
+  Arrow. Their paintings are `KNOWN_STALE`.
+- **New, 21 rows:** the paper's 20 plus Grand Design, a new card under the
+  old id ("Write up to 3 cards from your hand as Plans. They cost 0.").
+  Beside them, in no pool, the two generated jellyfish tokens, Sting and
+  Ward (cost 1, Ethereal, Exhaust). The new ones owe art (`KNOWN_MISSING`).
+- **Companions as Plans:** any Companion card without a Plan line is written
+  as one clause holding the card; next turn the Bake-Kurage applies Hydro to
+  the front enemy, then a free copy plays (at that enemy if it aims at one)
+  and Exhausts. Gorou's four (`proto_mi_gorou_*`) left the shared Inazuma
+  roster for her pool with their own Plan lines (Inuzaka Block 11, War Banner
+  3 Strength this turn, Juuga 6 Block at the end of 3 turns).
+- **Pool:** 78 at 21 / 36 / 21.

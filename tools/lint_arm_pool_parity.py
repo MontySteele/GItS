@@ -91,7 +91,10 @@ ARMS: tuple[tuple[str, Path, str, str], ...] = (
 # constant that lists them: Klee's three own Companion cards (the Klee-only
 # companions, 2026-10-03), which keep their `proto_mc_` ids -- renaming breaks
 # saves, art paths and the seat bridge (legacy cleanup pick 1).
-ARM_GUESTS: dict[str, str] = {"klee_overhaul": "KLEE_OWN_COMPANION_IDS"}
+ARM_GUESTS: dict[str, str] = {"klee_overhaul": "KLEE_OWN_COMPANION_IDS",
+                              # Gorou's four (the Kokomi re-founding,
+                              # 2026-10-12), the same shape.
+                              "kokomi_overhaul": "KOKOMI_OWN_COMPANION_IDS"}
 # The co-op set's multiplayer tiers: arm label -> (roster file, method name,
 # sheet id prefix, sim mirror constant). The method is parsed with
 # `TIER_RE_FOR` below. (Furina's tier left with v2, 2026-10-05.)
@@ -230,7 +233,8 @@ def main() -> int:
                      # An off-pool row (`C.KLEE_OFF_POOL_ROW_IDS`, Pop! since
                      # the Klee design review) is created at play by another
                      # card and offered nowhere.
-                     and row["id"] not in C.KLEE_OFF_POOL_ROW_IDS]
+                     and row["id"] not in C.KLEE_OFF_POOL_ROW_IDS
+                     and row["id"] not in C.KOKOMI_OFF_POOL_ROW_IDS]
         for cid in sheet_ids:
             if cid not in roster_ids:
                 findings.append(

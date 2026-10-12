@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard
+public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard, IWritableCompanion
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -59,6 +59,14 @@ public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard
         ("description", "Apply [gold]Cryo[/gold] and {PowerAmount:diff()} [gold]Weak[/gold] to an enemy."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -74,6 +82,11 @@ public sealed class ProtoVkMikaStarfrostSwirl : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Cryo, Owner.Creature);
         await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);

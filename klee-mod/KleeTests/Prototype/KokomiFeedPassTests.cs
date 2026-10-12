@@ -40,82 +40,19 @@ public class KokomiFeedPassTests : IDisposable
         ((CustomCardModel)card).Localization!
             .First(r => r.Item1 == "description").Item2;
 
-    private static void AssertFeedShape(CardModel card)
-    {
-        Assert.Equal((CardType.Skill, CardRarity.Common, 0),
-                     (card.Type, card.Rarity, card.EnergyCost.Canonical));
-        // Plan-only: "Plan:", no "or" (2026-10-01).
-        Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: ",
-                          Face(card));
-    }
-
     [Fact]
-    public void Bubble_ward_plans_five_block_seven_upgraded()
+    public void Brine_sting_is_a_one_cost_attack_with_a_vulnerable_plan()
     {
-        var card = new ProtoKkBubbleWard();
-        AssertFeedShape(card);
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Block, 5, KokomiPlan.Aim.Self),
-                     (clause.Kind, clause.Amount, clause.Aim));
-        Assert.Equal(7, Upgraded<ProtoKkBubbleWard>().PlanClauses.Single().Amount);
-    }
-
-    [Fact]
-    public void Nip_plans_seven_damage_to_the_front_enemy_nine_upgraded()
-    {
-        var card = new ProtoKkNip();
-        AssertFeedShape(card);
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Damage, 7, KokomiPlan.Aim.FrontEnemy),
-                     (clause.Kind, clause.Amount, clause.Aim));
-        Assert.Equal(9, Upgraded<ProtoKkNip>().PlanClauses.Single().Amount);
-    }
-
-    [Fact]
-    public void Jellyfish_drift_plans_six_to_all_eight_upgraded()
-    {
-        // Kokomi whole-run round 2026-10-10: Plan 2 [3] -> 3 [4]; Plan pricing
-        // (2026-10-11): 6 [8].
-        var card = new ProtoKkJellyfishDrift();
-        AssertFeedShape(card);
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Damage, 6, KokomiPlan.Aim.AllEnemies),
-                     (clause.Kind, clause.Amount, clause.Aim));
-        Assert.Equal(8, Upgraded<ProtoKkJellyfishDrift>().PlanClauses.Single().Amount);
-    }
-
-    [Fact]
-    public void Current_read_plans_a_draw_and_its_upgrade_adds_two_block()
-    {
-        // No upgrade key adds a Plan clause, so the Block clause is written at
-        // 0 and printed only upgraded; `KokomiPlan` carries a 0 flat Block out
-        // as nothing, never a Dexterity-sized Block.
-        var card = new ProtoKkCurrentRead();
-        AssertFeedShape(card);
-        Assert.Equal(new[] { (KokomiPlan.Kind.Draw, 1), (KokomiPlan.Kind.Block, 0) },
-                     card.PlanClauses.Select(c => (c.Kind, c.Amount)).ToArray());
-        Assert.Equal(new[] { (KokomiPlan.Kind.Draw, 1), (KokomiPlan.Kind.Block, 2) },
-                     Upgraded<ProtoKkCurrentRead>().PlanClauses
-                         .Select(c => (c.Kind, c.Amount)).ToArray());
-        Assert.Contains("{IfUpgraded:show: Gain 2 [gold]Block[/gold].|}", Face(card));
-    }
-
-    [Fact]
-    public void Brine_sting_plans_four_damage_then_one_weak_two_upgraded()
-    {
-        // The growth Powers (2026-10-10): damage before the Weak; Plan pricing
-        // (2026-10-11): 4.
+        // The re-founding (2026-10-12): "Deal 8 Hydro damage. Or plan: Apply
+        // 1 Vulnerable to ALL enemies." [11].
         var card = new ProtoKkBrineSting();
-        AssertFeedShape(card);
-        Assert.Equal(new[]
-            {
-                (KokomiPlan.Kind.Damage, 4, KokomiPlan.Aim.FrontEnemy),
-                (KokomiPlan.Kind.ApplyWeak, 1, KokomiPlan.Aim.FrontEnemy),
-            },
-            card.PlanClauses.Select(c => (c.Kind, c.Amount, c.Aim)).ToArray());
-        Assert.Equal(new[] { 4, 2 },
-                     Upgraded<ProtoKkBrineSting>().PlanClauses
-                         .Select(c => c.Amount).ToArray());
+        Assert.Equal((CardType.Attack, CardRarity.Common, 1),
+                     (card.Type, card.Rarity, card.EnergyCost.Canonical));
+        Assert.Equal(8m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(11m, Upgraded<ProtoKkBrineSting>().DynamicVars.Damage.BaseValue);
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal((KokomiPlan.Kind.ApplyVulnerable, 1, KokomiPlan.Aim.AllEnemies),
+                     (clause.Kind, clause.Amount, clause.Aim));
     }
 
     [Fact]
@@ -135,31 +72,13 @@ public class KokomiFeedPassTests : IDisposable
         foreach (var card in new CardModel[]
                  {
                      new ProtoKkAmbush(), new ProtoKkReadTheField(),
-                     new ProtoKkStolenChapter(), new ProtoKkRiptide(),
+                     new ProtoKkRiptide(),
                      new ProtoKkPincer(),
-                     new ProtoKkSignalArrow(), new ProtoKkSurgingShoal(),
+                     new ProtoKkSurgingShoal(),
                  })
         {
             Assert.Equal(CardRarity.Uncommon, card.Rarity);
         }
     }
 
-    [Fact]
-    public void The_offer_ends_with_the_five_and_holds_no_exposed_flank()
-    {
-        var slice = Il.CallSequence(Il.Method("KokomiOverhaulRoster", "Slice"))
-            .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
-            .ToList();
-        // SIXTY-NINE since expansion batch one (2026-09-29), whose 22 rows
-        // follow the five; SEVENTY since the payoff pass (2026-10-01);
-        // SEVENTY-EIGHT since pool completion and since the status batch
-        // (2026-10-01), which cut six rows ahead of the five; the growth
-        // Powers (2026-10-10) cut The General's Banner ahead of them too.
-        Assert.Equal(78, slice.Count);
-        Assert.Equal(new[] { "ProtoKkBubbleWard", "ProtoKkNip", "ProtoKkJellyfishDrift",
-                             "ProtoKkCurrentRead", "ProtoKkBrineSting" },
-                     slice.Skip(34).Take(5).Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
-                          .ToArray());
-        Assert.DoesNotContain(slice, c => c.Contains("ProtoKkExposedFlank"));
-    }
 }

@@ -78,7 +78,7 @@ public sealed class ProtoKkTacticalRelay : CustomCardModel, ICharacterCard, IPla
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
     }
 
     protected override void OnUpgrade()

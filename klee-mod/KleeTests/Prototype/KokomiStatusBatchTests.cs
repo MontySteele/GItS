@@ -51,36 +51,12 @@ public class KokomiStatusBatchTests : IDisposable
 
     private static readonly string[] Batch =
     {
+        // Turning Tide and Abyssal Salvage left in the re-founding (2026-10-12).
         "ProtoKkKelpWall", "ProtoKkTidecleanse", "ProtoKkSeaGlassHarvest",
-        "ProtoKkTurningTide", "ProtoKkFlotsamSurge", "ProtoKkAbyssalSalvage",
-        "ProtoKkRiptideRuin",
+        "ProtoKkFlotsamSurge", "ProtoKkRiptideRuin",
     };
 
     // ---- the offer -----------------------------------------------------------
-
-    [Fact]
-    public void The_offer_is_seventy_eight_with_the_seven_last_and_the_seven_gone()
-    {
-        var slice = Seq("KokomiOverhaulRoster", "Slice")
-            .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
-            .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
-            .ToList();
-        Assert.Equal(78, slice.Count);
-        Assert.Equal(Batch, slice.Skip(70).Take(7).ToArray());
-        foreach (var gone in new[] { "Rally", "PearlDiver", "BattlePlan",
-                                     "FeignedRetreat", "MoonSignal",
-                                     "ChainOfCommand",
-                                     "AllStreamsFlowToTheSea",
-                                     "CoralSanctuary" })
-        {
-            Assert.DoesNotContain(slice, c => c == "ProtoKk" + gone);
-            Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
-                "KleeMod.Cards.Prototype.Generated.ProtoKk" + gone));
-        }
-        // Sea Glass is a token in no pool, off-pool beside Open the Casket.
-        Assert.Contains(Seq("KokomiOffPoolCards", "BuildAll"),
-                        c => c.Contains("SeaGlass"));
-    }
 
     [Fact]
     public void The_seven_rows_have_the_papers_types_costs_and_rarities()
@@ -90,9 +66,7 @@ public class KokomiStatusBatchTests : IDisposable
             (new ProtoKkKelpWall(), CardType.Skill, 1, CardRarity.Common),
             (new ProtoKkTidecleanse(), CardType.Skill, 0, CardRarity.Common),
             (new ProtoKkSeaGlassHarvest(), CardType.Skill, 1, CardRarity.Uncommon),
-            (new ProtoKkTurningTide(), CardType.Skill, 0, CardRarity.Uncommon),
             (new ProtoKkFlotsamSurge(), CardType.Attack, 1, CardRarity.Uncommon),
-            (new ProtoKkAbyssalSalvage(), CardType.Power, 1, CardRarity.Uncommon),
             (new ProtoKkRiptideRuin(), CardType.Attack, 2, CardRarity.Rare),
         };
         foreach (var (card, type, cost, rarity) in shapes)
@@ -113,8 +87,6 @@ public class KokomiStatusBatchTests : IDisposable
                    + "ALL enemies.", Face(new ProtoKkKuragesOath()));
         Assert.Contains("\nOr [gold]plan[/gold]: ",
                         Face(new ProtoKkSlackWater()));
-        Assert.Contains("\nOr [gold]dusk[/gold] [gold]plan[/gold]: ",
-                        Face(new ProtoKkShellOfSanctuary()));
     }
 
     [Fact]
@@ -122,9 +94,8 @@ public class KokomiStatusBatchTests : IDisposable
     {
         // The main session's call (2026-10-01): "or" only under a now-line.
         Assert.Equal("Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: "
-                   + "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage.", Face(new ProtoKkNip()));
-        Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].\n[gold]Dusk[/gold] "
-                        + "[gold]Plan[/gold]: ", Face(new ProtoKkBreakwater()));
+                   + "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage.",
+                     Face(new ProtoKkMasterstroke()));
         Assert.DoesNotContain("Or [gold]", Face(new ProtoKkBraceForTheTide()));
     }
 
@@ -148,9 +119,7 @@ public class KokomiStatusBatchTests : IDisposable
                         c => c.Contains("KokomiPlan.ResolveAll"));
         var one = Seq("KokomiPlan", "ResolveOne");
         foreach (var body in new[] { "KokomiStatusBatch.BlockPerStatus",
-                                     "KokomiStatusBatch.ExhaustStatuses",
-                                     "KokomiStatusBatch.TransformStatuses",
-                                     "KokomiStatusBatch.DiscardAndDraw" })
+                                     "KokomiStatusBatch.TransformStatuses" })
         {
             Assert.Contains(one, c => c.Contains(body));
         }
@@ -167,7 +136,7 @@ public class KokomiStatusBatchTests : IDisposable
             new MegaCrit.Sts2.Core.Models.Cards.Dazed()));
         Assert.True(KokomiStatusBatch.IsStatusOrCurse(
             new MegaCrit.Sts2.Core.Models.Cards.Wound()));
-        Assert.False(KokomiStatusBatch.IsStatusOrCurse(new ProtoKkNip()));
+        Assert.False(KokomiStatusBatch.IsStatusOrCurse(new ProtoKkAmbush()));
         Assert.False(KokomiStatusBatch.IsStatusOrCurse(null));
     }
 
@@ -195,19 +164,22 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Tidecleanse ------------------------------------------------------------------------
 
     [Fact]
-    public void Tidecleanse_applies_weak_now_and_plans_up_to_two_three_upgraded()
+    public void Tidecleanse_exhausts_up_to_two_three_upgraded_then_applies_weak()
     {
+        // The re-founding (2026-10-12): no Plan line; the Exhaust is the
+        // now-line, first, then the Weak.
         var card = new ProtoKkTidecleanse();
-        var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.ExhaustStatusesInHand, 2),
-                     (clause.Kind, clause.Amount));
-        Assert.Equal(3, Assert.Single(
-            Upgraded<ProtoKkTidecleanse>().PlanClauses).Amount);
-        Assert.Contains(Seq("ProtoKkTidecleanse", "PlayNowLine"),
-                        c => c.Contains("WeakPower"));
-        // [USER]'s run (2026-10-11): the card pass's draw comes off.
-        Assert.DoesNotContain(Seq("ProtoKkTidecleanse", "PlayNowLine"),
-                              c => c.Contains("CardPileCmd.Draw"));
+        Assert.False(typeof(IPlannedCard).IsAssignableFrom(card.GetType()));
+        Assert.Equal(2m, card.DynamicVars["KkAmount"].BaseValue);
+        Assert.Equal(3m, Upgraded<ProtoKkTidecleanse>()
+                             .DynamicVars["KkAmount"].BaseValue);
+        var play = Seq("ProtoKkTidecleanse", "OnPlay");
+        var exhaust = play.FindIndex(c => c.Contains("KokomiCards.ExhaustStatuses"));
+        var weak = play.FindIndex(c => c.Contains("WeakPower"));
+        Assert.True(exhaust >= 0 && weak > exhaust, string.Join(", ", play));
+        Assert.DoesNotContain(play, c => c.Contains("CardPileCmd.Draw"));
+        Assert.Contains(Seq("KokomiCards", "ExhaustStatuses"),
+                        c => c.Contains("KokomiStatusBatch.ExhaustStatuses"));
         var body = Seq("KokomiStatusBatch", "ExhaustStatuses");
         Assert.Contains(body, c => c.Contains("CardSelectCmd.FromHand"));
         Assert.Contains(body, c => c.Contains("CardCmd.Exhaust"));
@@ -264,21 +236,6 @@ public class KokomiStatusBatchTests : IDisposable
 
     // ---- Turning Tide ----------------------------------------------------------------------------
 
-    [Fact]
-    public void Turning_tide_is_gamblers_brew_on_the_next_hand()
-    {
-        var card = new ProtoKkTurningTide();
-        Assert.Equal(KokomiPlan.Kind.DiscardAndDraw,
-                     Assert.Single(card.PlanClauses).Kind);
-        // The Kokomi card pass (2026-10-11): draw 2 [3].
-        Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
-        Assert.Equal(3m, Upgraded<ProtoKkTurningTide>().DynamicVars.Cards.BaseValue);
-        var body = Seq("KokomiStatusBatch", "DiscardAndDraw");
-        var pick = body.FindIndex(c => c.Contains("CardSelectCmd.FromHandForDiscard"));
-        var swap = body.FindIndex(c => c.Contains("CardCmd.DiscardAndDraw"));
-        Assert.True(pick >= 0 && swap > pick);
-    }
-
     // ---- Flotsam Surge ------------------------------------------------------------------------------
 
     [Fact]
@@ -316,48 +273,4 @@ public class KokomiStatusBatchTests : IDisposable
 
     // ---- Abyssal Salvage ------------------------------------------------------------------------------
 
-    /// <summary>The Kokomi card pass (2026-10-11, pick 2): "The first time
-    /// each turn you draw a status, Exhaust it. The Casket gains 1." Upgrade:
-    /// Innate. The draw hook asks the status test, then claims the turn's
-    /// latch, THEN Exhausts and feeds the Casket, so only the first status
-    /// drawn each turn is taken. It no longer reads the exhaust.</summary>
-    [Fact]
-    public void Abyssal_salvage_exhausts_the_first_status_drawn_each_turn()
-    {
-        var drawn = Seq("AbyssalSalvagePower", "AfterCardDrawn");
-        var status = drawn.FindIndex(c => c.Contains("KleeStatusPackage.IsStatus"));
-        var claim = drawn.FindIndex(c => c.Contains("KokomiOverhaulLedger.ClaimOncePerTurn"));
-        var exhaust = drawn.FindIndex(c => c.Contains("CardCmd.Exhaust"));
-        var casket = drawn.FindIndex(c => c.Contains("KokomiOverhaulKit.GainCasket"));
-        Assert.True(status >= 0 && claim > status && exhaust > claim
-                    && casket > exhaust);
-        Assert.DoesNotContain(drawn, c => c.Contains("IsStatusOrCurse"));
-        Assert.Null(typeof(AbyssalSalvagePower).GetMethod(
-            "AfterCardExhausted",
-            System.Reflection.BindingFlags.Public
-            | System.Reflection.BindingFlags.Instance
-            | System.Reflection.BindingFlags.DeclaredOnly));
-        Assert.Null(typeof(AbyssalSalvagePower).Assembly.GetType(
-            "KleeMod.Powers.AbyssalSalvagePlusPower"));
-
-        // Once a turn, on the ledger's latch: the second claim in a turn is
-        // refused, the next turn's is granted.
-        var ledger = new KokomiOverhaulLedger();
-        ledger.RollTo(1);
-        Assert.True(ledger.Claim(nameof(AbyssalSalvagePower)));
-        Assert.False(ledger.Claim(nameof(AbyssalSalvagePower)));
-        ledger.RollTo(2);
-        Assert.True(ledger.Claim(nameof(AbyssalSalvagePower)));
-
-        var play = Seq("ProtoKkAbyssalSalvage", "OnPlay");
-        Assert.Contains(play, c => c.Contains("AbyssalSalvagePower"));
-        var card = new ProtoKkAbyssalSalvage();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.DoesNotContain(CardKeyword.Innate, card.CanonicalKeywords);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkAbyssalSalvage>().Keywords);
-        Assert.Equal("The first time each turn you draw a status, "
-                     + "[gold]Exhaust[/gold] it. The [gold]Casket[/gold] "
-                     + "gains 1.", Face(card));
-    }
 }

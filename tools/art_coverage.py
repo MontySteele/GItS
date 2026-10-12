@@ -118,6 +118,69 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_kk_shell_guard": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_depths_judgment": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_coral_tithe": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_what_the_tokoyo_took": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_abyssal_salvage": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_kurage_swarm": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_nip": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_current_read": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_vanguard": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_weight_of_the_plan": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_turning_tide": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_stolen_chapter": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_tidal_resonance": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_salt_in_the_wound": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_lull": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_kurage_school": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_the_long_game": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_patient_tide": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_deep_current": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_massed_volley": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_signal_arrow": (
+        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_vk_knights_muster": (
         "Legacy cleanup stage 6 (2026-10-02, #832) deleted this retired Varka row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -496,7 +559,28 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
-    "proto_kk_flood_tide": "Kokomi's growth Powers (review/active/kokomi-growth-powers-2026-10-10.md, ruled 2026-10-10); no painting yet.",
+    "proto_kk_call_the_generals": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_coordinated_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_dawn_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_endless_shoal": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_grand_strategist": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_kurage_barrage": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_kurage_bloom": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_kurages_wake": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_orders_from_the_shrine": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_reserves": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_resolve_of_watatsumi": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_riptide_guard": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_sangonomiyas_orders": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_spearhead": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_steady_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_sting": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_tamakushis_wrath": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_tidal_surge": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_ward": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_watatsumi_drill": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_watatsumi_muster": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
+    "proto_kk_watchful_shoal": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
     "proto_fs_private_box": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_the_masquerade": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_the_show_must_go_on": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",

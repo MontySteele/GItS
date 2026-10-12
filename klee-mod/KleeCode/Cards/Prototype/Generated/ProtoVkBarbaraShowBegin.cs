@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard
+public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, IWritableCompanion
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -59,6 +59,14 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard
         ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -75,6 +83,11 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         await VarkaCards.GleefulSongs(choiceContext, this, cardPlay);
     }
 

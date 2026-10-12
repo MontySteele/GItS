@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, ICompanionCard, IPlannedCard, INowLineCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Geo;
@@ -52,32 +52,60 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
         new[] { KleeKeywords.AppliesGeo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo);
+        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo), this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_gorou_inuzaka");
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mi_gorou_inuzaka");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Inuzaka All-Round Defense"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the unblocked damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the unblocked damage.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
+
+    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
+    /// was written. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.Block, DynamicVars["PlanBlock"].IntValue, KokomiPlan.Aim.Self),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new UnsourcedBlockVar("PlanBlock", 11m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoMiGorouInuzaka()
-        : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Common, KokomiTargets.PetOrEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
+            cardPlay = nowLine;
+        }
+        await PlayNowLine(choiceContext, cardPlay);
+    }
+
+    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
+    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.FrontEnemy;
+
+    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
+    /// out by the Bake-Kurage when the player chooses it for a Plan
+    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
+    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         CompanionOverhaulLedger.For(Owner.Creature).BeginPlay();
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -92,5 +120,6 @@ public sealed class ProtoMiGorouInuzaka : CustomCardModel, IElementalCard, IComp
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PlanBlock"].UpgradeValueBy(3m);
     }
 }

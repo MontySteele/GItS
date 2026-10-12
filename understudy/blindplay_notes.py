@@ -22,7 +22,7 @@ from understudy.blindplay_faces import (GUEST_STAR_ELEMENTS, _GUEST_STAR_RE,
 from understudy.blindplay_read import _fold
 from understudy.blindplay_shape import (AURA_DURATION_TURNS, BOMB_GROWTH,
                                         bomb_growth,
-                                        CASKET_PER_PLAN,
+                                        CASKET_BLOCK,
                                         CRYSTALLIZE_BLOCK, OPENING_SPARK,
                                         SHATTER_DAMAGE,
                                         FRAIL_BLOCK_PCT, VULNERABLE_TAKEN_PCT,
@@ -71,7 +71,7 @@ POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
 # `EB-701`. NOTHING ON THE PAGE SAID WHEN "THE END OF YOUR TURN" IS.
 #
 # THE FIND (Kokomi r30 lane 1, debrief 5). No line says that end-of-turn
-# effects -- a companion's end-of-turn hit, a Dusk Plan -- resolve BEFORE the
+# effects -- a companion's end-of-turn hit, a Plan -- resolve BEFORE the
 # enemies act; the seat learned it from a Gas Bomb dying without its Death
 # Blow, which is a rule learned from a body that did not do the thing the page
 # had just telegraphed.
@@ -88,7 +88,8 @@ POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
 # 2026-09-26 (control seat, Ironclad): THE EXAMPLES ARE THE BOARD'S. The note
 # named "a performer's act, a Dusk Plan" on an Ironclad board, two words from
 # kits the seat was not playing. A kit's example is named only where its block
-# is on the board (`blindplay_render._turn_order_note`).
+# is on the board (`blindplay_render._turn_order_note`). (Kokomi's example, a
+# Dusk Plan, left with Dusk in the re-founding, 2026-10-12.)
 TURN_ORDER_NOTE = (
     "*The end of your turn is a step of its own, and it comes BEFORE the "
     "enemies act: everything that fires at the end of your turn -- "
@@ -97,7 +98,6 @@ TURN_ORDER_NOTE = (
     "by one of those never takes the intent this page printed for it.*")
 TURN_ORDER_POWER = "a power's end-of-turn trigger"
 TURN_ORDER_PERFORMER = "a performer's act"
-TURN_ORDER_DUSK = "a Dusk Plan"
 TURN_ORDER_ORB = "an orb's passive"
 
 #: 2026-09-26 (control seat, Defect): "The Thieving Hopper's stolen card is
@@ -1506,11 +1506,11 @@ def _summon_row(hay: str) -> str:
 #: carries its act, and a hit's Bow is learned in play. Every Stage row now
 #: follows its tip word for word. The history is in git.
 
-#: THE CASKET PASS (2026-09-28). The Tamakushi Casket's tip, markup folded
-#: out, with the per-Plan number off the mirrored constant.
-CASKET_ROW = (f"Your relic. Each Plan the Bake-Kurage carries out adds "
-              f"{CASKET_PER_PLAN}. Open the Casket turns the count into "
-              f"Strength.")
+#: THE KOKOMI RE-FOUNDING (2026-10-12). The Tamakushi Casket's face
+#: (`TamakushiCasket.Face`), markup folded out, with the Block off the
+#: mirrored constant. The count and Open the Casket are retired.
+CASKET_ROW = (f"At the end of your turn, if a Plan is waiting, gain "
+              f"{CASKET_BLOCK} Block.")
 
 ARM_KEYWORDS: dict[str, str] = {
     # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and
@@ -1547,13 +1547,8 @@ ARM_KEYWORDS: dict[str, str] = {
     "Plan": ("Instead of the line above, play it on the Bake-Kurage; "
              "click to flip. Plans happen next turn in order, and their "
              "Block lasts that turn."),
-    # `EB-643` (R265). THE POOL PASS'S ONE NEW WORD, and it is a rule about
-    # WHEN and nothing else: everything else about a Dusk Plan is a Plan, and
-    # the row above says all of it. What a reader cannot get from anywhere else
-    # is that the Block arrives in time for the swing. Same sentence as
-    # `ArmKeywordTips.ForDusk`.
-    "Dusk": ("Dusk: the Bake-Kurage carries this Plan out at the end of this "
-             "turn, before enemies act."),
+    # (`EB-643`'s Dusk row left with the word in the Kokomi re-founding,
+    # 2026-10-12.)
     "Mend": ("Mend N: heal N HP, but never above the HP you had at the "
              "start of this combat."),
     # VARKA (the Oath rework), in step with `ArmKeywordTips.ForOath`,
@@ -1586,17 +1581,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # non-attack hit in this mod does, so it reacts, it takes the target's
     # Vulnerable, and it leaves Hydro behind.
     #
-    # THE CASKET PASS (2026-09-28) REWROTE THE ROW with the relic: the strike
-    # is retired and the relic COUNTS carried-out Plans. The row answers the
-    # SHORT name too ("the Casket gains 2") -- see its pattern -- and
-    # `Open the Casket` is the relic's token. Both follow
-    # `ArmKeywordTips.ForCasket` / `ForOpenTheCasket` word for word.
+    # THE CASKET PASS (2026-09-28) retired the strike for a count; THE KOKOMI
+    # RE-FOUNDING (2026-10-12) retired the count and its token, Open the
+    # Casket. The relic gives Block at the end of her turn while a Plan is
+    # waiting, and the row is its face (`TamakushiCasket.Face`) word for word.
     "Tamakushi Casket": CASKET_ROW,
-    # 2026-10-10 ([USER], after his Kokomi playtest): it starts at 0 and
-    # each play raises its cost by 1.
-    "Open the Casket": ("Retain. Costs 0, rising by 1 each play. Gain "
-                        "Strength equal to the Casket's count, then empty "
-                        "it. Under Grand Design it is not emptied."),
     # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three
     # readers read any Companion play now, so the word and its row left the
@@ -1939,10 +1928,8 @@ _ARM_KEYWORD_CHARACTER: dict[str, str] = {"Oz": "klee"}
 # silence about the character is not evidence it is somebody else's.
 _ARM_KEYWORD_ARM: dict[str, str] = {
     "Bomb": "klee", "Set off": "klee", "Spark": "klee", "Mine": "klee",
-    "Plan": "kokomi", "Dusk": "kokomi", "Mend": "kokomi",
+    "Plan": "kokomi", "Mend": "kokomi",
     "Tamakushi Casket": "kokomi",
-    # THE CASKET PASS (2026-09-28).
-    "Open the Casket": "kokomi",
     "Spend": "furina", "Fanfare": "furina", "Drain": "furina",
     "Repay": "furina",
     "Encore": "furina", "Spotlighted": "furina",
@@ -2019,17 +2006,10 @@ _ARM_KEYWORD_RE = {
     "Spark": re.compile(r"\bSparks?\b"),
     "Mine": re.compile(r"\bMines?\b"),
     "Plan": re.compile(r"\bPlans?\b"),
-    # `EB-643`. NO PLURAL: the word names one moment. It fires on the two rows
-    # that print it and on the strip line a queued Dusk entry draws.
-    "Dusk": re.compile(r"\bDusk\b"),
     "Mend": re.compile(r"\bMends?\b"),
-    # THE CASKET PASS (2026-09-28). The relic by either name (the count is
-    # printed by its short one, "the Casket gains 2", though not inside the
-    # token's name, which has a row of its own), and the token. NO PLURALS:
-    # there is one of each.
-    "Tamakushi Casket": re.compile(
-        r"\bTamakushi Casket\b|(?<!Open the )\bCasket\b"),
-    "Open the Casket": re.compile(r"\bOpen the Casket\b"),
+    # THE CASKET PASS (2026-09-28). The relic by either name. NO PLURAL:
+    # there is one.
+    "Tamakushi Casket": re.compile(r"\bTamakushi Casket\b|\bCasket\b"),
     # `EB-377`'s `Swirl` is printed as a verb, so it conjugates the way
     # `Mend` does. (Its sibling `Hexerei` was retired by R276 pick 2.)
     "Swirl": re.compile(r"\bSwirls?\b"),
@@ -2303,6 +2283,11 @@ BASE_KEYWORDS: dict[str, str] = {
     # The Repay floor (ruled 2026-10-09): Soothing Waters and Pneuma Tides
     # pay the base game's Vigor. `BaseKeywordTips.ForVigor` says the same.
     "Vigor": ("Your next Attack deals additional damage."),
+    # THE KOKOMI RE-FOUNDING (2026-10-12): five of her faces print Ethereal
+    # (and her generated cards carry it). The base game's rule, in step
+    # with `BaseKeywordTips.ForEthereal`.
+    "Ethereal": ("If this card is in your hand at the end of your turn, it "
+                 "is Exhausted."),
     # The three enchantments (`EB-355` is the same gap at the enchant screen).
     # A card wears one for the rest of the run and the page prints it in the
     # card's own `enchantment` field (`EB-181`), which is a badge and not a
@@ -2346,6 +2331,7 @@ _BASE_KEYWORD_RE = {
     "Strength": re.compile(r"\bStrength\b"),
     "Dexterity": re.compile(r"\bDexterity\b"),
     "Vigor": re.compile(r"\bVigor\b"),
+    "Ethereal": re.compile(r"\bEthereal\b"),
     "Sharp": re.compile(r"\bSharp\b"),
     "Nimble": re.compile(r"\bNimble\b"),
     "Swift": re.compile(r"\bSwift\b"),

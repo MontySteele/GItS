@@ -70,7 +70,8 @@ public sealed class KokomiCardPool : CardPoolModel
 ///
 /// Both halves are load-bearing. IN the pool, because CardModel.Pool falls
 /// through to MockCardPool and throws the moment a poolless card is drawn --
-/// and her tokens (Open the Casket, Sea Glass) are dealt into hand. OUT of
+/// and her tokens (Sea Glass; Sting and Ward are sheet rows) are dealt into
+/// hand. OUT of
 /// rewards, because a token is granted, never drafted.
 /// </summary>
 public static class KokomiOffPoolCards
@@ -86,10 +87,7 @@ public static class KokomiOffPoolCards
     private static List<CardModel> BuildAll()
     {
         var cards = new List<CardModel>();
-        // THE CASKET PASS (2026-09-28): the Tamakushi Casket's hand-written
-        // token, dealt by the relic and in no pool -- Furina's Ethereal
-        // Spotlight's footing.
-        cards.Add(ModelDb.Card<Cards.Prototype.OpenTheCasket>());
+        // (Open the Casket left with the Casket, the re-founding, 2026-10-12.)
         // THE STATUS BATCH (2026-10-01): Sea Glass Harvest's token, made only
         // by its Plan's transform and in no pool.
         cards.Add(ModelDb.Card<Cards.Prototype.SeaGlass>());

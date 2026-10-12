@@ -235,9 +235,7 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #: `gen_klee_cards.PLAN_UPGRADE_VARS`; the three move together or a smithed
 #: prototype is two different cards.
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
-    "plan_damage": ("damage",
-                    # THE EXPANSION: Undertide Lance's planned hit.
-                    "damage_if_alone"),
+    "plan_damage": ("damage",),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
     # so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`
@@ -246,9 +244,6 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     # never touches (`EB-685`): a rate that smithed would scale with a deck the
     # offer screen cannot see.
     "plan_block": ("block",
-                   "block_per_plan_held",
-                   # THE EXPANSION: Evening Watch's per-enemy rate.
-                   "block_per_attacking_enemy",
                    # R276, Tide Wall: the flat bonus on top of the intent.
                    "block_front_intent"),
     "plan_mend": ("mend",),
@@ -258,8 +253,6 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
                   "each_player_draw"),
     # R276, Battle Plan: "your Attacks deal N more damage" this turn.
     "plan_attack_bonus": (),
-    # THE STATUS BATCH (2026-10-01), Tidecleanse: "Exhaust up to 2 [3]".
-    "plan_exhaust": ("exhaust_statuses_in_hand",),
 }
 
 
@@ -530,6 +523,9 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     # Rows her cards create at play (Pop!, Alice's Mine): the upgraded
     # Alice's Detonator hands over Alice's Mine+, so it must resolve.
     reachable |= set(C.KLEE_OFF_POOL_ROW_IDS)
+    # Kokomi's jellyfish cards (the re-founding, 2026-10-12): Shoal Call+
+    # hands over upgraded Stings.
+    reachable |= set(C.KOKOMI_OFF_POOL_ROW_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     reachable |= set(C.KOKOMI_OVERHAUL_POOL_IDS)
     reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
@@ -823,12 +819,17 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # A flag on the install op, read when the Power is installed --
             # the codegen's play-time `IsUpgraded` read, one engine over.
             # THE KOKOMI EXPANSION's Shoal Call rides the same key: its
-            # Nips arrive upgraded.
+            # Stings arrive upgraded (Nips before the re-founding), and so do
+            # the re-founding's generated Companions (Orders from the Shrine,
+            # Watatsumi Muster).
             hit = next((fx for fx in top
                         if fx.get("op") in ("grant_alices_mine_each_turn",
                                             "plant_homework_bomb")
                         or (fx.get("op") == "kokomi"
-                            and fx.get("kind") == "shoal_call")), None)
+                            and fx.get("kind") in ("shoal_call",
+                                                   "add_companion",
+                                                   "add_companions"))),
+                       None)
             # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into
             # Sea Glass+, a flag on the plan clause.
             if hit is None:

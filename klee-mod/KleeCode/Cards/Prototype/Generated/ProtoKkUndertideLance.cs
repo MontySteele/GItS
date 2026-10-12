@@ -51,7 +51,7 @@ public sealed class ProtoKkUndertideLance : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertide Lance"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to the front enemy, doubled if carried out alone."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to the front enemy."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,14 +60,14 @@ public sealed class ProtoKkUndertideLance : CustomCardModel, IElementalCard, ICh
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.DamageIfAlone, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(9m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(14m)
+            new KokomiPlan.PlanDamageVar(18m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,7 +81,7 @@ public sealed class ProtoKkUndertideLance : CustomCardModel, IElementalCard, ICh
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
             cardPlay = nowLine;
         }

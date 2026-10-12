@@ -781,15 +781,6 @@ CO_TENANCY_LEDGER = {
             "nothing, so either order leaves the same number. It deals no "
             "damage, grants no Block and touches no element. NO SIM TWIN "
             "ORDERS IT: the sim models the shipped Ancient only",
-        ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
-            "(the Kokomi overhaul; pool completion, 2026-10-01). "
-            "Patient Tide hands back the Energy it banked at her last turn's "
-            "end. THE ORDERING QUESTION, answered: this broadcast fires after "
-            "the energy reset, and the co-tenants that also write Energy (the "
-            "morning drain's Energy clauses, The Long Game) all ADD to it, so "
-            "any order leaves the same number; nothing here reads Energy. The "
-            "sim adds the kept Energy on the refill line (`combat._player_turn`, "
-            "`kokomi_plan.patient_tide_kept`)",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "(the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
             "resolution point: the Plans she wrote last turn happen here, in "
@@ -809,7 +800,13 @@ CO_TENANCY_LEDGER = {
             "Plan's Energy would both be wiped by the setup that follows them. "
             "The brief's own script C requires the later hook -- its turn 2 "
             "opens on FIVE energy, which is three plus the Plan's two. The "
-            "reading is recorded in full on the method",
+            "reading is recorded in full on the method. THE RE-FOUNDING "
+            "(2026-10-12): a carried-out Plan may also play a written "
+            "Companion's copy, and Dawn Tide's Hydro follows the drain inside "
+            "this same override (`kokomi_plan.dawn_tide` after `resolve_all`); "
+            "the two Powers that add cards at turn start are staged into "
+            "AfterPlayerTurnStartLate so they land after the Plans, the sim's "
+            "`turn_start_generators`",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
             "(the Klee overhaul). Raw per-turn Block mint on a "
             "condition, the same shape as MetallicizePower below. THE "
@@ -1062,6 +1059,17 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
+        ("Relics/TamakushiCasket.cs", "TamakushiCasket"):
+            "(the Kokomi re-founding, 2026-10-12). \"At the end of your "
+            "turn, if a Plan is waiting, gain 3 Block\" -- Orichalcum's hook. "
+            "THE ORDERING QUESTION, answered: what it READS is the "
+            "Bake-Kurage's queue, which no co-tenant of this broadcast writes "
+            "(Dusk's end-of-turn drain was retired the same day). What it "
+            "WRITES is her Block, raw; the co-tenants that read Block are "
+            "Varka's Retaliating Tide (another character) and the sequencer's "
+            "Bond of Life, which reads Block only as a damage outcome, never "
+            "this broadcast. Sim twin: kokomi_plan.casket_block, after the "
+            "pilot's flips",
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
             "(the Furina stage, FURINA_STAGE). RULE 10: each "
             "performer on the stage performs a FLAT act -- Usher 3 Block to "
@@ -1111,31 +1119,6 @@ CO_TENANCY_LEDGER = {
             "so the Bond counts this Block as gained this turn -- and the sim "
             "pays it at the same point, `klee_overhaul.sit_tight_turn_end` "
             "called ahead of `effects.player_turn_end_triggers`",
-        ("Powers/Prototype/KokomiPoolCompletion.cs", "PatientTidePower"):
-            "(the Kokomi overhaul; pool completion, 2026-10-01). "
-            "Patient Tide banks up to N of her unspent Energy. THE ORDERING "
-            "QUESTION, answered: it READS Energy and writes only its own "
-            "field; the one co-tenant that could move her Energy here is the "
-            "Dusk drain, and no Dusk Plan in her pool pays Energy (Breakwater, "
-            "Shell of Sanctuary, Evening Watch, Brace for the Tide and Slack "
-            "Water's Weak). The sim banks after the Dusk drain "
-            "(`kokomi_plan.patient_tide_bank` after `resolve_dusk`)",
-        ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
-            "(the Kokomi overhaul, C.KOKOMI_OVERHAUL). DUSK "
-            "(`EB-643`, R265): every dusk entry in the Plan queue is carried "
-            "out here, at the end of her turn, before the enemies act -- which "
-            "is the printed promise and the only clause of the face a card can "
-            "tell apart. THE ORDERING QUESTION, answered: what it READS and "
-            "WRITES is the jellyfish's own queue, and the only other writers "
-            "of that queue are card PLAYS and the morning drain, both outside "
-            "this broadcast. What it PAYS is Block, a Weak and (through a "
-            "carry-out) a Hydro hit; the co-tenants here that also move those "
-            "are the sequencer's volleys, which belong to the SHIPPED "
-            "Klee kit and cannot be in a Kokomi deck. The two "
-            "kit-grant checks and the pending-draw flush read a meter and a "
-            "draw debt, neither of which a Plan touches. The sim runs it at "
-            "the same site (`combat._player_turn`, `kokomi_plan.resolve_dusk` "
-            "beside `klee_overhaul.turn_end`) and for the same reason",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "kit-grant check, turn-end site; its body documents the "
             "models-after-powers broadcast order it leans on",
@@ -1207,11 +1190,6 @@ CO_TENANCY_LEDGER = {
             "(the Kokomi overhaul, R276). Pincer's carry-out, "
             "\"this turn\", on the same-turn boundary (FLAG-1 / R114). "
             "Removes itself and touches nothing else",
-        ("Powers/Prototype/KokomiOverhaulPowers.cs",
-         "FirstCardFreePower"):
-            "(the Kokomi overhaul, R276). Stolen Chapter's "
-            "carry-out, \"this turn\", on the same boundary. Removes itself "
-            "and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "ReplayNextCompanionPower"):

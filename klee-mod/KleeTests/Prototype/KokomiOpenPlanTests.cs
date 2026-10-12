@@ -42,7 +42,7 @@ public class KokomiOpenPlanTests : IDisposable
     [Fact]
     public void Every_two_line_row_carries_its_now_line_and_a_plan_only_row_does_not()
     {
-        var types = typeof(ProtoKkNip).Assembly.GetTypes()
+        var types = typeof(ProtoKkMasterstroke).Assembly.GetTypes()
             .Where(t => t.Name.StartsWith("ProtoKk", StringComparison.Ordinal)
                         && typeof(IPlannedCard).IsAssignableFrom(t))
             .ToList();
@@ -50,9 +50,10 @@ public class KokomiOpenPlanTests : IDisposable
         Assert.Contains(typeof(ProtoKkKuragesOath), types);
         Assert.True(typeof(INowLineCard).IsAssignableFrom(
             typeof(ProtoKkKuragesOath)));
-        Assert.False(typeof(INowLineCard).IsAssignableFrom(typeof(ProtoKkNip)));
-        // Thirty two-line rows on the 78 (the sim's census agrees).
-        Assert.Equal(30, types.Count(t =>
+        Assert.False(typeof(INowLineCard).IsAssignableFrom(typeof(ProtoKkMasterstroke)));
+        // Thirty-one two-line ProtoKk rows since the re-founding (2026-10-12),
+        // Sting and Ward and the co-op rows included.
+        Assert.Equal(31, types.Count(t =>
             typeof(INowLineCard).IsAssignableFrom(t)));
     }
 
@@ -79,13 +80,11 @@ public class KokomiOpenPlanTests : IDisposable
     }
 
     [Fact]
-    public void Only_a_two_line_plan_that_is_not_dusk_offers_the_choice()
+    public void Only_a_two_line_plan_offers_the_choice()
     {
         Assert.True(new KokomiPlan.Entry(new ProtoKkKuragesOath(), OneHit)
             .TwoLine);
-        Assert.False(new KokomiPlan.Entry(new ProtoKkKuragesOath(), OneHit,
-                                          Dusk: true).TwoLine);
-        Assert.False(new KokomiPlan.Entry(new ProtoKkNip(), OneHit).TwoLine);
+        Assert.False(new KokomiPlan.Entry(new ProtoKkMasterstroke(), OneHit).TwoLine);
         Assert.False(new KokomiPlan.Entry(null, OneHit).TwoLine);
     }
 
@@ -101,7 +100,7 @@ public class KokomiOpenPlanTests : IDisposable
         var due = new List<KokomiPlan.Entry>
         {
             new(oath, OneHit),
-            new(new ProtoKkNip(), OneHit, Now: true),
+            new(new ProtoKkMasterstroke(), OneHit, Now: true),
         };
         var lines = KokomiPlan.ChooseLines(due);
         Assert.False(lines[0].Now);          // never flipped: the Plan line
@@ -113,7 +112,7 @@ public class KokomiOpenPlanTests : IDisposable
     {
         var queue = new List<KokomiPlan.Entry>
         {
-            new(new ProtoKkNip(), OneHit),
+            new(new ProtoKkMasterstroke(), OneHit),
             new(new ProtoKkKuragesOath(), OneHit),
         };
         Assert.True(KokomiPlan.FlipAt(queue, 1));
@@ -143,26 +142,24 @@ public class KokomiOpenPlanTests : IDisposable
     {
         var queue = new List<KokomiPlan.Entry>
         {
-            new(new ProtoKkNip(), OneHit),
-            new(new ProtoKkKuragesOath(), OneHit, Dusk: true),
+            new(new ProtoKkMasterstroke(), OneHit),
+            new(null, OneHit),
         };
         Assert.False(KokomiPlan.FlipAt(queue, 0));   // Plan-only
-        Assert.False(KokomiPlan.FlipAt(queue, 1));   // Dusk
+        Assert.False(KokomiPlan.FlipAt(queue, 1));   // no card behind it
         Assert.False(KokomiPlan.FlipAt(queue, 2));   // no such Plan
         Assert.False(KokomiPlan.FlipAt(queue, -1));
         Assert.All(queue, e => Assert.False(e.Now));
     }
 
     [Fact]
-    public void Every_door_that_carries_plans_out_reads_the_flips_but_dusk()
+    public void Every_door_that_carries_plans_out_reads_the_flips()
     {
         Assert.Contains("KokomiPlan.ChooseLines", Seq("KokomiPlan", "ResolveAll"));
         Assert.Contains("KokomiPlan.ChooseLines",
                         Seq("KokomiPlan", "ResolveFront"));
         Assert.Contains("KokomiPlan.ChooseLines",
                         Seq("KokomiPlan", "ResolveAllNow"));
-        Assert.DoesNotContain("KokomiPlan.ChooseLines",
-                              Seq("KokomiPlan", "ResolveDusk"));
     }
 
     [Fact]

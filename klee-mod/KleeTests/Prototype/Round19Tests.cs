@@ -546,7 +546,9 @@ public class Round19Tests
 
     [Theory]
     [InlineData(typeof(ProtoKkSlackWater))]     // it paid on this one
-    [InlineData(typeof(ProtoKkDeepCurrent))]    // and not on this one
+    // Deep Current, the card it did not pay on, left her pool in the
+    // re-founding (2026-10-12); Undertow is the Kokomi Attack in its place.
+    [InlineData(typeof(ProtoKkUndertow))]
     public void EB409_neither_card_the_relic_was_measured_on_wears_the_tag(
         Type row)
     {

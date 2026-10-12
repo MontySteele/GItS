@@ -49,76 +49,6 @@ public class KokomiPoolPassFiveTests
     // 1. BREAKWATER -- the wall behind the engine, counting the queue
     // ======================================================================
 
-    [Fact]
-    public void Breakwater_pays_a_base_and_a_rate_off_the_plans_it_holds()
-    {
-        var card = new ProtoKkBreakwater();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-
-        Assert.Equal(2, card.PlanClauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Block, card.PlanClauses[0].Kind);
-        Assert.Equal(5, card.PlanClauses[0].Amount);
-        // NOT TIDE WALL'S COUNT ANY MORE. `BlockPerPlanThisMorning` is the
-        // depth of a drain that has FINISHED, and a Dusk Plan lands on the
-        // evening of the turn it was written on -- so the old spelling read 0
-        // every time the morning had been empty, which is what r27's seats
-        // saw. This one reads the queue as it stands.
-        Assert.Equal(KokomiPlan.Kind.BlockPerPlanHeld,
-                     card.PlanClauses[1].Kind);
-        Assert.Equal(3, card.PlanClauses[1].Amount);
-        // The 2026-09-25 text pass: the Bake-Kurage is not named twice.
-        Assert.EndsWith("and 3 more for each [gold]Plan[/gold] waiting.", Face(card));
-    }
-
-    [Fact]
-    public void The_held_count_is_the_pending_queue_and_not_the_ledger()
-    {
-        // STRUCTURAL, for this file's stated split. The clause reads
-        // <see cref="KokomiPlan.PlansHeld"/> -- the pending queue, LIVE at the
-        // moment the entry resolves -- and never
-        // `KokomiOverhaulLedger.PlansThisMorning`, which is the number Tide
-        // Wall reads and the one pass four wrongly gave this card. Twin:
-        // `test_breakwater_pays_for_the_plans_the_jellyfish_is_holding`.
-        var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
-        Assert.Contains("KokomiPlan.PlansHeld", Il.Calls(resolve));
-
-        var source = Source("KokomiPlan", power: true);
-        Assert.Contains("case Kind.BlockPerPlanHeld:", source);
-        Assert.Contains("plan.Amount * PlansHeld(kokomi)", source);
-    }
-
-    [Fact]
-    public void The_dusk_entries_leave_the_queue_before_the_first_clause_runs()
-    {
-        // THE TWO EXCLUSIONS THE FACE NEEDS ARE BY CONSTRUCTION AND NOT BY A
-        // FILTER: `ResolveDusk` removes every dusk entry from the queue and
-        // only then drains them, so the Breakwater is never one of the Plans
-        // it pays for and neither is a second Dusk Plan written the same turn
-        // -- a Dusk sibling is not waiting for the next morning either. Twin:
-        // `test_breakwater_never_counts_itself_or_a_second_dusk_plan`.
-        var calls = Il.Calls(typeof(KokomiPlan).GetMethod("ResolveDusk", All)!)
-            .ToList();
-        var removed = calls.FindIndex(c => c.Contains("RemoveAll"));
-        var drained = calls.FindIndex(c => c.Contains("Drain"));
-        Assert.True(removed >= 0 && drained > removed,
-                    "the dusk entries must leave the queue before the drain");
-    }
-
-    [Fact]
-    public void Breakwaters_smith_moves_the_base_and_not_the_rate()
-    {
-        // `upgrades.PLAN_DELTA_OPS` binds `plan_block` to the FLAT clause
-        // first, so the wall gets taller and the rate stays where it is. A
-        // rate that smithed would scale with a deck the offer screen cannot
-        // see -- pass four's argument, and the pass did not move it.
-        var source = Source("ProtoKkBreakwater");
-        Assert.Contains("PlanBlock\"].UpgradeValueBy(2m)", source);
-        Assert.Contains("new KokomiPlan.Planned("
-                        + "KokomiPlan.Kind.BlockPerPlanHeld, 3,",
-                        source);
-    }
-
     // ======================================================================
     // 2. SLACK WATER -- R267 pick 1 reversed this pass's phase move
     // ======================================================================
@@ -146,28 +76,6 @@ public class KokomiPoolPassFiveTests
         Assert.DoesNotContain("[gold]Dusk[/gold]", Face(card));
         // The status batch (2026-10-01): "Or plan:".
         Assert.Contains("Or [gold]plan[/gold]", Face(card));
-    }
-
-    [Fact]
-    public void The_two_half_row_carries_no_dusk_argument_or_tip()
-    {
-        // R267 pick 1, the other half of the reversal: `plan_dusk:` is a fact
-        // about the row's PLAN LINE, so taking it off the row takes `dusk:`
-        // off the one `Schedule` call the codegen emits and the Dusk tip off
-        // the card. THE MACHINERY IS UNTOUCHED -- pass five widened nothing to
-        // add it and nothing narrows to remove it. The card is still playable
-        // on an enemy (`KokomiTargets.PetOrEnemy`), which is a two-half row's
-        // own shape and not the phase's.
-        var source = Source("ProtoKkSlackWater");
-        Assert.Contains("if (KokomiPlan.PlayedOnPet(cardPlay))", source);
-        Assert.DoesNotContain("dusk:", source);
-        Assert.DoesNotContain("ArmKeywordTips.ForDusk", source);
-        Assert.Contains("KokomiTargets.PetOrEnemy", source);
-        // The Dusk row that IS written-only still is, tip and all.
-        Assert.Contains("KokomiTargets.PetOnly", Source("ProtoKkBreakwater"));
-        // Expansion batch one (2026-09-29): the paid Energy rides the write.
-        Assert.Contains("this, PlanClauses, dusk: true, paid: ",
-                        Source("ProtoKkBreakwater"));
     }
 
     // ======================================================================

@@ -619,6 +619,12 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             {
                 await Act(creature, juuga, () => juuga.FireVolley(choiceContext));
             }
+            // THE KOKOMI RE-FOUNDING (2026-10-12): Juuga's Plan line, its
+            // Block beside its volley.
+            foreach (var guard in creature.Powers.OfType<JuugaGuardPower>().ToList())
+            {
+                await Act(creature, guard, () => guard.Guard(choiceContext));
+            }
             foreach (var daruma in creature.Powers.OfType<MujiMujiDarumaPower>().ToList())
             {
                 await Act(creature, daruma, () => daruma.FireVolley(choiceContext));

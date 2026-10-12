@@ -14,8 +14,8 @@ namespace KleeMod.Tests.Prototype;
 /// playtest: "Varka and Kokomi need Ancient relics for Orobas" -- both
 /// starters fell through BaseLib's <c>GetUpgradeReplacement()</c> to the
 /// Circlet. Main-session design: Wolf's Gravestone (Boreas's Fang upgraded)
-/// and the Watatsumi Casket (the Tamakushi Casket upgraded, starting each
-/// combat at 3). Each upgrade SUBCLASSES its starter, so every reader that
+/// and the Watatsumi Casket (the Tamakushi Casket upgraded; since the
+/// re-founding, 2026-10-12, 5 Block in place of 3). Each upgrade SUBCLASSES its starter, so every reader that
 /// finds the starter by type finds the upgrade.
 ///
 /// <c>ModelDb</c> is not booted headless, so the hand-over is pinned off the
@@ -125,78 +125,41 @@ public class WolfsGravestoneTests : IDisposable
 }
 
 
-/// <summary>The Watatsumi Casket: the Tamakushi Casket, starting each combat
-/// with 3.</summary>
-[Collection(KleeOverhaulArm.Name)]
-public class WatatsumiCasketTests : IDisposable
+/// <summary>The Kokomi re-founding (2026-10-12): the Tamakushi Casket is
+/// "At the end of your turn, if a Plan is waiting, gain 3 Block."; the
+/// Watatsumi Casket is the same sentence at 5 Block.</summary>
+public class WatatsumiCasketTests
 {
+    private static T Bare<T>() where T : class =>
+        (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
 
-    public WatatsumiCasketTests()
-    {
-        KokomiOverhaulLedger.ResetAll();
-    }
+    private static string Face(TamakushiCasket relic) =>
+        relic.Localization!.First(r => r.Item1 == "description").Item2;
 
-    public void Dispose()
+    [Fact]
+    public void The_casket_pays_3_block_and_the_watatsumi_casket_5()
     {
-        KokomiOverhaulLedger.ResetAll();
+        Assert.Equal(3, Bare<TamakushiCasket>().Block);
+        Assert.Equal(5, Bare<WatatsumiCasket>().Block);
+        Assert.Equal(5, WatatsumiCasket.WatatsumiBlock);
+        Assert.Equal(
+            "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
+          + "[blue]3[/blue] [gold]Block[/gold].",
+            Face(Bare<TamakushiCasket>()));
+        Assert.Equal(
+            "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
+          + "[blue]5[/blue] [gold]Block[/gold].",
+            Face(Bare<WatatsumiCasket>()));
     }
 
     [Fact]
-    public void The_watatsumi_casket_starts_the_combat_at_three()
+    public void It_pays_only_while_a_plan_is_waiting()
     {
-        var seat = Seat.Kokomi().WithRelic<WatatsumiCasket>();
-        TamakushiCasket.SeedOpeningCount(seat.Creature);
-        Assert.Equal(3, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-        Assert.Equal(3, WatatsumiCasket.WatatsumiOpeningCount);
-
-        // The relic sits at the start of combat, before the jellyfish.
-        var start = Il.CallSequence(Il.Method("TamakushiCasket", "BeforeCombatStart"))
-            .ToList();
-        var seed = start.IndexOf("TamakushiCasket.SeedOpeningCount");
-        Assert.True(seed >= 0 && start.IndexOf("BakeKuragePet.Summon") > seed);
+        Assert.False(TamakushiCasket.Pays(0));
+        Assert.True(TamakushiCasket.Pays(1));
+        Assert.True(TamakushiCasket.Pays(3));
+        var turnEnd = Il.Calls(Il.Method("TamakushiCasket", "BeforeSideTurnEnd"));
+        Assert.Contains(turnEnd, c => c.Contains("KokomiPlan.PlansHeld"));
+        Assert.Contains(turnEnd, c => c.Contains("CreatureCmd.GainBlock"));
     }
-
-    [Fact]
-    public void The_tamakushi_casket_still_starts_at_zero()
-    {
-        var seat = Seat.Kokomi().WithRelic<TamakushiCasket>();
-        TamakushiCasket.SeedOpeningCount(seat.Creature);
-        Assert.Equal(0, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-    }
-
-    [Fact]
-    public void It_counts_carry_outs_and_open_the_casket_reads_its_count()
-    {
-        var seat = Seat.Kokomi().WithRelic<WatatsumiCasket>();
-        TamakushiCasket.SeedOpeningCount(seat.Creature);
-        // The base relic's carry-out add finds the upgrade by type.
-        TamakushiCasket.NoteCarriedOut(seat.Creature);
-        Assert.Equal(4, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-
-        // Open the Casket empties the one ledger every reader shares.
-        Assert.Contains("KokomiOverhaulLedger.EmptyCasket",
-            Il.CallSequence(Il.Method("KokomiOverhaulKit", "OpenCasket")));
-        Assert.Equal(4, KokomiOverhaulLedger.For(seat.Creature).EmptyCasket());
-        Assert.Equal(0, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-    }
-
-    [Fact]
-    public void The_counter_and_the_token_are_the_base_relics()
-    {
-        foreach (var name in new[] { "get_ShowCounter", "get_DisplayAmount",
-                                     "BeforeHandDraw", "BeforeCombatStart",
-                                     "TryModifyCardRewardOptions" })
-        {
-            Assert.Equal(typeof(TamakushiCasket),
-                typeof(WatatsumiCasket).GetMethod(name, HeadlessGame.All)!
-                    .DeclaringType);
-        }
-        Assert.Equal(3, Bare().OpeningCount);
-        Assert.Equal(0, ((TamakushiCasket)RuntimeHelpers
-            .GetUninitializedObject(typeof(TamakushiCasket))).OpeningCount);
-    }
-
-    private static WatatsumiCasket Bare() =>
-        (WatatsumiCasket)RuntimeHelpers.GetUninitializedObject(
-            typeof(WatatsumiCasket));
 }

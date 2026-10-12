@@ -306,6 +306,37 @@ public sealed class JuugaPower : PowerModel, ILocalizationProvider
     }
 }
 
+/// <summary>
+/// Gorou, Juuga's Plan line (the Kokomi re-founding, 2026-10-12, card paper
+/// sec.3): "For 3 turns, at the end of your turn gain 6 Block." Amount is
+/// TURNS REMAINING; <see cref="JuugaPower"/>'s shape with Block for the hit,
+/// walked beside it at the end of her turn. Power-sourced Block stays raw
+/// (NC-11). Sim twin: <c>mi_juuga_guard</c>.
+/// </summary>
+public sealed class JuugaGuardPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Juuga: Forward Unto Victory"),
+        ("description",
+            "At the end of your turn, gain "
+          + $"[blue]{CompanionOverhaulLaw.JuugaGuardBlock}[/blue] "
+          + "[gold]Block[/gold]. "
+          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal async Task Guard(PlayerChoiceContext choiceContext)
+    {
+        await CreatureCmd.GainBlock(Owner, CompanionOverhaulLaw.JuugaGuardBlock,
+                                    ValueProp.Unpowered, null);
+        await PowerCmd.TickDownDuration(this);
+    }
+}
+
 // ---------------------------------------------------------------------------
 // SAYU
 // ---------------------------------------------------------------------------

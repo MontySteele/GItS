@@ -41,7 +41,7 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
 
     public Element CompanionElement => Element.Geo;
 
-    public string? PersonalPool => "kokomi";
+    public string? PersonalPool => null;
 
     public string? Nation => "inazuma";
 
@@ -80,7 +80,7 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
     }
 
     protected override void OnUpgrade()

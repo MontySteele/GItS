@@ -330,6 +330,11 @@ public static class CompanionOverhaulReactions
         await CompanionHexerei.OnReaction(
             choiceContext, reaction, target, dealer, consumedAura);
 
+        // THE KOKOMI RE-FOUNDING (2026-10-12): Grand Strategist, "Whenever a
+        // Plan causes an Elemental Reaction". Sim twin: the same read in
+        // `effects.companion_overhaul_reaction`.
+        await KokomiRefounding.OnReaction(choiceContext, dealer);
+
         if (reaction != Reaction.Swirl) return;
 
         // THE INAZUMA ARM'S Swirl WINDOW, counted here and nowhere else:

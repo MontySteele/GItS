@@ -5,22 +5,23 @@ defaults. Kokomi's one Common, seven Rares and two multiplayer cards; Furina's
 three Uncommons and three Rares; the Body Slam repricing. The three Ancient
 cards (sec.3) are game-side only and pinned in C# alone. The C# twin is
 `klee-mod/KleeTests/Prototype/PoolCompletionTests.cs`. Readings: the
-provenance note, "Pool completion, 2026-10-01". NOTHING MEASURED HERE IS
-QUOTABLE (R215 B).
+provenance note, "Pool completion, 2026-10-01". THE KOKOMI RE-FOUNDING
+(2026-10-12) cut Kurage School and Patient Tide and made Watatsumi Resistance
+pay for written Companions in Stings; their old tests left with them. NOTHING
+MEASURED HERE IS QUOTABLE (R215 B).
 """
 
 from __future__ import annotations
 
 import copy
-import inspect
 import random
 
 import pytest
 
 from tier0 import constants as C
 from tier0.content import loader, upgrades
-from tier0.engine import combat, effects, furina_stage, kokomi_plan, powers
-from tier0.engine.state import Card, CombatState, Enemy, Player
+from tier0.engine import combat, furina_stage, kokomi_plan, powers
+from tier0.engine.state import CombatState, Enemy, Player
 from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import (  # noqa: F401
     kokomi_state, overhaul, plan_card)
@@ -62,14 +63,12 @@ def _events(st, name):
 # KOKOMI (sec.4, sec.6)
 # ===========================================================================
 
-def test_her_pool_is_seventy_eight_with_the_eight_last(overhaul):
+def test_her_pool_is_seventy_eight(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    # The status batch (2026-10-01) cut seven and appended seven after these.
+    # The re-founding (2026-10-12) rewrote the pool's order; the count holds.
     assert len(ids) == len(set(ids)) == 78
-    # The growth Powers (2026-10-10) appended Flood Tide after those.
-    assert ids[-16:-8] == C.KOKOMI_POOL_COMPLETION_IDS
-    rarities = [_row(cid).rarity for cid in C.KOKOMI_POOL_COMPLETION_IDS]
-    assert rarities.count("common") == 1 and rarities.count("rare") == 7
+    for cut in ("proto_kk_kurage_school", "proto_kk_patient_tide"):
+        assert cut not in ids
     # Her co-op tier is the base game's shape: three Uncommons, two Rares.
     assert C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS[-2:] == (
         "proto_kk_tactical_relay", "proto_kk_kurages_mercy")
@@ -131,18 +130,14 @@ def test_spring_tide_carries_the_whole_queue_out_now(overhaul):
         [{"op": "next_plan_extra_carry_out"}], cid="proto_kk_rider"))
     kokomi_plan.schedule(st, plan_card(
         [{"op": "energy", "amount": 1}], cid="proto_kk_next"))
-    dusk = plan_card([{"op": "block", "amount": 4}], cid="proto_kk_dusk")
-    dusk.plan_dusk = True
-    kokomi_plan.schedule(st, dusk)
     st.player.energy = 0
     kokomi_plan.kind(st, {"op": "kokomi", "kind": "spring_tide"},
                      _row("proto_kk_spring_tide"), None)
     assert st.kk_plan_queue == []
-    # The rider reaches the entry behind it (twice), the Dusk Plan goes too,
-    # and Nereid's Ascension does NOT double a mid-turn drain's first entry.
-    assert st.kk_plans_carried_out_this_turn == 1 + 2 + 1
+    # The rider reaches the entry behind it (twice), and Nereid's Ascension
+    # does NOT double a mid-turn drain's first entry.
+    assert st.kk_plans_carried_out_this_combat == 1 + 2
     assert st.player.energy == 2
-    assert st.player.block == 4
     # The emptied queue can be written again for the morning.
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
     assert len(st.kk_plan_queue) == 1
@@ -154,61 +149,6 @@ def test_spring_tide_on_an_empty_queue_is_a_printed_no_op(overhaul):
     assert _events(st, "plan_front_empty")
     assert _row("proto_kk_spring_tide").exhaust
     assert _up("proto_kk_spring_tide").cost == 0
-
-
-def test_kurage_school_copies_only_zero_cost_plan_cards(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
-    nip = _up("proto_kk_nip")
-    paid_plan = _row("proto_kk_ambush")             # 1-cost, a Plan line
-    free_plain = Card(id="proto_kk_free", name="free", cost=0, type="skill")
-    school = _row("proto_kk_kurage_school")
-    st.player.hand = [nip, paid_plan, free_plain, school]
-    st.player.energy = 5
-    combat.play_card(st, school)
-    copies = [c for c in st.player.hand if c.id == nip.id]
-    assert len(copies) == 2                        # the Nip and its copy
-    assert copies[1] is not nip and copies[1].id.endswith(upgrades.SUFFIX)
-    assert sum(1 for c in st.player.hand if c.id == paid_plan.id) == 1
-    assert sum(1 for c in st.player.hand if c.id == "proto_kk_free") == 1
-
-
-def test_shoal_of_spears_counts_the_plans_written_this_turn(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
-                               make_enemy(hp=300, intents=QUIET)])
-    for i in range(3):
-        kokomi_plan.schedule(st, plan_card(
-            [{"op": "energy", "amount": 1}], cid=f"proto_kk_w{i}"))
-    kokomi_plan.resolve_all_now(st)                # carried out: still counts
-    assert st.kk_plans_written_this_turn == 3
-    _play(st, "proto_kk_shoal_of_spears")
-    assert [e.hp for e in st.enemies] == [300 - 12, 300 - 12]
-    kokomi_plan.roll_turn(st)
-    assert st.kk_plans_written_this_turn == 0
-    assert effects._runtime_count(st, "plans_written_this_turn", None) == 0
-
-
-@pytest.mark.parametrize("unspent,cap,kept", [(0, 2, 0), (1, 2, 1),
-                                              (5, 2, 2), (5, 3, 3)])
-def test_patient_tide_keeps_up_to_its_cap(overhaul, unspent, cap, kept):
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
-    st.player.powers[kokomi_plan.PATIENT_TIDE] = cap
-    st.player.energy = unspent
-    kokomi_plan.patient_tide_bank(st)
-    assert kokomi_plan.patient_tide_kept(st) == kept
-    assert kokomi_plan.patient_tide_kept(st) == 0  # taken once
-
-
-def test_patient_tide_is_banked_after_dusk_and_paid_on_the_refill():
-    src = inspect.getsource(combat)
-    assert (src.index("kokomi_plan.resolve_dusk(state)")
-            < src.index("kokomi_plan.patient_tide_bank(state)"))
-    refill = src.index("p.energy = refpowers.energy_for_turn(state)")
-    assert src.index("p.energy += kokomi_plan.patient_tide_kept(state)",
-                     refill) - refill < 400
-
-
-def test_patient_tide_upgrades_to_three(overhaul):
-    assert _up("proto_kk_patient_tide").effects[0]["amount"] == 3
 
 
 def test_seas_reproach_answers_her_weak_and_vulnerable(overhaul):
@@ -228,18 +168,6 @@ def test_seas_reproach_answers_her_weak_and_vulnerable(overhaul):
     # The Kokomi card pass (2026-10-11): 1 [0] (was 2 [1]).
     assert (_row("proto_kk_seas_reproach").cost,
             _up("proto_kk_seas_reproach").cost) == (1, 0)
-
-
-def test_watatsumi_resistance_adds_a_nip_per_companion_play(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
-    st.player.powers[kokomi_plan.WATATSUMI_RESISTANCE] = 1
-    companion = Card(id="probe_companion", name="c", cost=0, type="skill",
-                     tags=["companion"])
-    kokomi_plan.note_companion_played(st, companion)
-    assert [c.id for c in st.player.hand] == [kokomi_plan.NIP_ID]
-    kokomi_plan.note_companion_played(st, Card(id="plain", name="p", cost=0,
-                                               type="skill"))
-    assert len(st.player.hand) == 1
 
 
 def test_tactical_relay_plans_energy_for_each_player(overhaul):
@@ -304,9 +232,10 @@ def test_interval_bells_spend_is_three_then_two(arm):
 
 # --- the Rare pass (2026-10-04) ------------------------------------------------
 
-def test_shoal_of_spears_is_one_hit_per_plan_written(overhaul):
-    """One hit of 4 per Plan written this turn, so her Strength counts on
-    each hit; with no Plan written it deals nothing."""
+def test_shoal_of_spears_is_one_hit_per_plan_waiting(overhaul):
+    """One hit of 4 per Plan waiting (per Plan written this turn until the
+    re-founding, 2026-10-12), so her Strength counts on each hit; with no
+    Plan waiting it deals nothing."""
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
                                make_enemy(hp=300, intents=QUIET)])
     st.player.powers["strength"] = 2
@@ -318,25 +247,3 @@ def test_shoal_of_spears_is_one_hit_per_plan_written(overhaul):
     _play(st, "proto_kk_shoal_of_spears")
     assert [e.hp for e in st.enemies] == [300 - 3 * 6, 300 - 3 * 6]
 
-
-def test_a_nip_she_is_handed_exhausts_and_a_drafted_one_does_not(overhaul):
-    """Shoal Call's and Watatsumi Resistance's Nips and Kurage School's
-    copies Exhaust when played, as a Shiv does; the pool row is unchanged."""
-    assert not _row(kokomi_plan.NIP_ID).exhaust
-    st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
-    _play(st, "proto_kk_shoal_call")
-    st.player.powers[kokomi_plan.WATATSUMI_RESISTANCE] = 1
-    kokomi_plan.note_companion_played(st, Card(
-        id="probe_companion", name="c", cost=0, type="skill",
-        tags=["companion"]))
-    drafted = _row(kokomi_plan.NIP_ID)
-    st.player.hand.append(drafted)
-    _play(st, "proto_kk_kurage_school")
-    handed = [c for c in st.player.hand if c is not drafted]
-    assert len(handed) == 3 + 4 and all(c.exhaust for c in handed)
-    assert not drafted.exhaust
-    for c in list(st.player.hand):
-        st.player.energy = 5
-        combat.play_card(st, c)
-    assert drafted in st.player.discard_pile
-    assert all(c in st.player.exhaust_pile for c in handed)

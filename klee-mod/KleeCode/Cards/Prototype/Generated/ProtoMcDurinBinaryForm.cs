@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IModalCard
+public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion, IModalCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Pyro;
@@ -62,6 +62,14 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
         ("description", "Choose one, then draw 1 card. [gold]White[/gold]: Deal {IfUpgraded:show:8|6} [gold]Pyro[/gold] damage to ALL enemies. [gold]Dark[/gold]: Deal {IfUpgraded:show:5|4} [gold]Pyro[/gold] damage to an enemy 3 times."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     // EB-184: what each mode does about AIMING, in sheet order.
     // The card's own TargetType is fixed before a mode is chosen (the
     // game aims first), so it answers for the card and not for the
@@ -89,6 +97,11 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         var modeOptions = new List<CardModel>
         {
             ModalChoice.CreateMatchingOption<ProtoMcDurinBinaryFormModeA>(Owner, this),

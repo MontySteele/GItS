@@ -51,7 +51,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feint"),
-        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting.\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -68,7 +68,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
         {
             new CalculationBaseVar(6m),
             new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisTurn),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.PlansHeld(card.Owner.Creature)),
             new DynamicVar("PlanPowerAmount", 1m)
         };
 
@@ -83,7 +83,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
             cardPlay = nowLine;
         }

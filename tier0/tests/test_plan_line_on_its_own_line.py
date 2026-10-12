@@ -6,6 +6,9 @@
 2. [USER]: "Can we move all Plan lines to the next line down?" Every emitted
    face that prints a Plan clause starts it on a new line, done once in
    `gen_klee_cards.plan_line_on_its_own_line`; the sheet keeps one-line prose.
+
+Dusk was retired by the Kokomi re-founding (2026-10-12); its spellings left
+these pins with it.
 """
 from __future__ import annotations
 
@@ -21,9 +24,8 @@ import gen_prototype_cards as proto             # noqa: E402
 
 _FACE = re.compile(r'\("description", "(.*?)"\),\n', re.S)
 # THE STATUS BATCH (2026-10-01, sec.3 pick 2): every Plan clause prints
-# "Or plan:" (or "Or dusk plan:").
-_CLAUSE = re.compile(
-    r"Or (?:\[gold\]dusk\[/gold\] )?\[gold\]plan\[/gold\]:")
+# "Or plan:".
+_CLAUSE = re.compile(r"Or \[gold\]plan\[/gold\]:")
 
 
 def test_kurages_oath_now_line_is_six_and_upgrades_both_halves():
@@ -43,8 +45,6 @@ def test_the_break_is_a_plan_clause_only():
     f = gen.plan_line_on_its_own_line
     assert f("Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 1.") == (
         "Gain 6 [gold]Block[/gold].\n[gold]Plan[/gold]: Draw 1.")
-    assert f("Draw 1. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain 5.") == (
-        "Draw 1.\n[gold]Dusk[/gold] [gold]Plan[/gold]: Gain 5.")
     # A face that opens with its Plan, and a sentence ABOUT a Plan, stay.
     for same in ("[gold]Plan[/gold]: Draw 1.",
                  "Cancel your last [gold]Plan[/gold]: its card returns.",
@@ -71,10 +71,9 @@ def test_every_emitted_plan_clause_opens_a_line():
 def test_the_status_batch_face_says_or():
     """THE STATUS BATCH (2026-10-01, sec.3 pick 2, [USER]: "Agreed on the
     Plan text change"). A Plan line under a now-line prints "Or plan:", the
-    starter's Kurage's Oath and Slack Water included; a Dusk Plan there
-    prints "Or dusk plan:"; the sheet keeps "Plan:". A PLAN-ONLY row keeps
-    "Plan:" ("Dusk Plan:") under "Play on the Bake-Kurage." (the main
-    session's call, 2026-10-01)."""
+    starter's Kurage's Oath and Slack Water included; the sheet keeps
+    "Plan:". A PLAN-ONLY row keeps "Plan:" under "Play on the Bake-Kurage."
+    (the main session's call, 2026-10-01)."""
     def face(stem):
         text = (proto.OUT_DIR / f"{stem}.cs").read_text(encoding="utf-8")
         return _FACE.search(text).group(1)
@@ -82,22 +81,20 @@ def test_the_status_batch_face_says_or():
         "Gain {Block:diff()} [gold]Block[/gold].\\nOr [gold]plan[/gold]: "
         "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies.")
     assert "\\nOr [gold]plan[/gold]: " in face("ProtoKkSlackWater")
-    assert "\\nOr [gold]dusk[/gold] [gold]plan[/gold]: " in face(
-        "ProtoKkShellOfSanctuary")
     # Plan-only rows: no "or", because there is no line above to choose.
-    assert face("ProtoKkNip") == (
+    # Masterstroke since the re-founding (2026-10-12) cut Nip.
+    assert face("ProtoKkMasterstroke") == (
         "Play on the [gold]Bake-Kurage[/gold].\\n[gold]Plan[/gold]: "
         "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage.")
-    assert face("ProtoKkBreakwater").startswith(
-        "Play on the [gold]Bake-Kurage[/gold].\\n[gold]Dusk[/gold] "
-        "[gold]Plan[/gold]: ")
     plan_only = 0
     for path in sorted(proto.OUT_DIR.glob("ProtoK*.cs")):
         for one in _FACE.findall(path.read_text(encoding="utf-8")):
             if one.startswith("Play on the [gold]Bake-Kurage[/gold]."):
                 plan_only += 1
                 assert "Or [gold]" not in one, (path.name, one)
-    assert plan_only >= 8
+    # Masterstroke and Tactical Relay since the re-founding (2026-10-12)
+    # cut the 0-cost Plan-only feed and Dusk.
+    assert plan_only >= 2
     f = gen.plan_line_says_or
     row = {"plan": [{"op": "draw", "amount": 1}],
            "effects": [{"op": "block", "amount": 1}]}

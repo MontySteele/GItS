@@ -166,55 +166,6 @@ public sealed class FirstAttackTwicePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// STOLEN CHAPTER's carry-out (R276 pick 1): "This turn, the first card you
-/// play costs 0." The cost seam, which is handed no
-/// <c>CardPlay</c> -- and needs none here: a card written on the Bake-Kurage IS
-/// played and paid for, so the first card is the first card either way. An
-/// auto-play pays nothing and does not spend it. Removed at the end of her
-/// turn either way. Sim twin: <c>kokomi_plan.FIRST_CARD_FREE</c>.
-/// </summary>
-public sealed class FirstCardFreePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Stolen Chapter"),
-        ("description",
-            "This turn, the first card you play costs 0."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override bool TryModifyEnergyCostInCombat(
-        CardModel card, decimal originalCost, out decimal modifiedCost)
-    {
-        modifiedCost = originalCost;
-        if (card.Owner?.Creature != Owner) return false;
-        if (originalCost <= 0m) return false;
-        modifiedCost = 0m;
-        return true;
-    }
-
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        if (cardPlay.Card.Owner?.Creature != Owner) return;
-        if (cardPlay.IsAutoPlay) return;
-        if (!cardPlay.IsLastInSeries) return;
-        await PowerCmd.Remove(this);
-    }
-
-    public override async Task AfterSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
-    {
-        if (side != CombatSide.Player) return;
-        await PowerCmd.Remove(this);
-    }
-}
-
-/// <summary>
 /// NEREID'S ASCENSION (Rare Power, 2): "The Bake-Kurage carries out your
 /// first Plan twice." `EB-492`, narrowed by `EB-655`.
 ///
@@ -251,8 +202,7 @@ public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
         ("title", "Nereid's Ascension"),
         ("description",
             "At the start of your turn, the [gold]Bake-Kurage[/gold] "
-          + "carries out your first [gold]Plan[/gold] twice."
-          + " Your first [gold]Dusk[/gold] [gold]Plan[/gold] is doubled too."),
+          + "carries out your first [gold]Plan[/gold] twice."),
     };
 
     public override PowerType Type => PowerType.Buff;

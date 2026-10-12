@@ -96,18 +96,6 @@ def test_the_turn_order_note_names_no_kit_word_on_a_base_board():
     assert "Dusk" not in page
 
 
-def test_a_dusk_plan_board_still_names_the_dusk_plan():
-    state = _combat("kokomi", status=[PLATING])
-    state["player"]["kokomi_plans"] = {
-        "pet": True, "pet_name": "Bake-Kurage", "pet_entity_id": "KURAGE",
-        "pending": 1, "twice": False,
-        "queue": [{"name": "Dusk: Slack Water", "clauses": 1}],
-        "carried_out": []}
-    page = blindplay.observe(state)
-    assert "a Dusk Plan" in page
-    assert "a performer's act" not in page
-
-
 # --------------------------------------------- Necrobinder: Osty's HP --
 
 OSTY = {"id": "OSTY", "entity_id": "7", "name": "Osty", "alive": True,

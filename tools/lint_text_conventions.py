@@ -256,7 +256,11 @@ FRONT_ENEMY = re.compile(r"\bfront enemy\b")
 #: the target on its Plan line, because the line is a single big hit whose
 #: aim decides the card. Tide Wall (2026-10-11): its Plan Block reads one
 #: enemy's intent, and a seat read "the enemy" as every attacker.
-FRONT_ENEMY_ALLOWED = {"PlanKey", "proto_kk_undertide_lance", "proto_kk_tide_wall"}
+#: Coordinated Tide (the Kokomi re-founding, 2026-10-12): a Power's own hit,
+#: not a Plan line, so no tip carries its aim; the card paper prints it.
+FRONT_ENEMY_ALLOWED = {"PlanKey", "proto_kk_undertide_lance", "proto_kk_tide_wall",
+                       "proto_kk_coordinated_tide",
+                       "CoordinatedTidePower.description"}
 #: `more-damage`'s two counters: "N more" there is a count growing, not a
 #: bonus on a hit, and rule 8 is about the hit.
 MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",

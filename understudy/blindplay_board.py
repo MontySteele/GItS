@@ -1582,12 +1582,12 @@ def name_answer_rows(answers: list[dict[str, Any]],
 
 
 #: Where a two-line face turns from its now-line to its Plan line.
-_OR_PLAN = re.compile(r"\s*Or (?:dusk )?plan:\s*")
+_OR_PLAN = re.compile(r"\s*Or plan:\s*")
 
 
 def split_plan_lines(text: Any) -> tuple[str, str]:
     """A two-line face's (now-line, Plan line), split where the face prints
-    "Or plan:" ("Or dusk plan:"). A face with no such words is all now-line."""
+    "Or plan:". A face with no such words is all now-line."""
     parts = _OR_PLAN.split(_text(text), maxsplit=1)
     if len(parts) == 2:
         return parts[0].strip(), parts[1].strip()

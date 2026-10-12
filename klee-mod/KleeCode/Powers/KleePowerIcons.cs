@@ -136,25 +136,12 @@ internal static class KleePowerIcons
         ProtoCeremonialGarmentPower => KleePck.Path(
             "kokomi/powers/ceremonial_garment.png"),
         AtWatersEdgePower => KleePck.Path("klee/powers/solar_isotoma.png"),
-        GrandDesignPower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
-        // THE GROWTH POWERS (2026-10-10): Flood Tide feeds the Casket, so it
-        // wears the Casket-feeding badge until it has its own.
-        FloodTidePower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
-        KurageSwarmPower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
         // THE PAYOFF PASS (2026-10-01): Kurage Canopy is her Ancient's Block
         // per carry-out, so it wears that badge.
         KurageCanopyPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
-        // THE STATUS BATCH (2026-10-01): Abyssal Salvage feeds the Casket, so
-        // it wears Kurage Swarm's Casket-feeding badge until it has its own.
-        AbyssalSalvagePower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
         // POOL COMPLETION (2026-10-01): the six new Powers and three Ancient
         // Powers borrow the nearest shipped shape, the block above's rule.
-        PatientTidePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         SeasReproachPower => KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
         WatatsumiResistancePower => KleePck.Path(
@@ -165,8 +152,21 @@ internal static class KleePowerIcons
             "klee/powers/bomb_damage_up.png"),
         CenterOfAttentionPower => KleePck.Path(
             "furina/powers/limelight.png"),
-        TheLongGamePower => KleePck.Path("klee/powers/spark_per_turn.png"),
-        TheLongGamePlusPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        // THE RE-FOUNDING (2026-10-12): the seven new Powers and the two Plan
+        // clocks borrow the nearest shipped shape, the block above's rule. Art
+        // is commissioned when a slice is ACCEPTED.
+        SangonomiyasOrdersPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+        KurageBloomPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        WatchfulShoalPower => KleePck.Path(
+            "kokomi/powers/vigil_of_the_deep.png"),
+        CoordinatedTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        GrandStrategistPower => KleePck.Path(
+            "klee/powers/amp_reaction_up.png"),
+        EndlessShoalPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        DawnTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        WarBannerPlanPower => KleePck.Path("klee/powers/celestial_gift.png"),
+        JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         // The four with no shipped Kokomi power to borrow from -- the Plan
@@ -180,10 +180,9 @@ internal static class KleePowerIcons
         // is the same card, paying on the Plan instead of in Charge.
         PrincessOfWatatsumiPlanPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
-        // R276: Pincer's and Stolen Chapter's carry-outs borrow the nearest
-        // shipped SHAPE, the block above's rule: a replay, and a free card.
+        // R276: Pincer's carry-out borrows the nearest shipped SHAPE, the
+        // block above's rule: a replay.
         FirstAttackTwicePower => KleePck.Path("klee/powers/study_buddy.png"),
-        FirstCardFreePower => KleePck.Path("klee/powers/friendly_visit.png"),
         TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
         // `EB-668`. Battle Plan's rider borrows the icon of the shipped power
         // that already means "your next Attack hits harder" -- the same

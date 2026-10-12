@@ -56,13 +56,12 @@ def test_a_two_line_card_writes_an_open_plan(overhaul):
     assert entry.now_card is not None and kokomi_plan.two_line(entry)
 
 
-def test_a_plan_only_card_and_a_dusk_plan_do_not(overhaul):
+def test_a_plan_only_card_does_not(overhaul):
+    # Masterstroke since the re-founding (2026-10-12) cut Nip and Dusk.
     st = kokomi_state()
-    kokomi_plan.schedule(st, _row("proto_kk_nip"))
-    kokomi_plan.schedule(st, _row("proto_kk_shell_of_sanctuary"))   # Dusk
-    nip, dusk = st.kk_plan_queue
-    assert not kokomi_plan.two_line(nip)
-    assert dusk.dusk and not kokomi_plan.two_line(dusk)
+    kokomi_plan.schedule(st, _row("proto_kk_masterstroke"))
+    (only,) = st.kk_plan_queue
+    assert not kokomi_plan.two_line(only)
 
 
 # --- no chooser: the Plan line by default, a flip for the now-line ----------
@@ -76,7 +75,7 @@ def test_no_chooser_by_default_the_plan_line_is_carried_out(overhaul):
     kokomi_plan.resolve_all(st)
     assert st.player.block == 0
     assert enemy.hp < 200
-    assert st.kk_plans_carried_out_this_turn == 1
+    assert st.kk_plans_carried_out_this_combat == 1
 
 
 def test_the_pilot_keeps_the_plan_line(overhaul):
@@ -102,7 +101,7 @@ def test_a_flipped_plan_carries_out_its_now_line(overhaul):
     kokomi_plan.resolve_all(st)
     assert st.player.block == 6
     assert enemy.hp == 200
-    assert st.kk_plans_carried_out_this_turn == 1
+    assert st.kk_plans_carried_out_this_combat == 1
     assert any(e["event"] == "plan_line_chosen" and e["line"] == "now"
                for e in st.log)
 
@@ -121,7 +120,7 @@ def test_flipping_back_restores_the_plan_line(overhaul):
 
 def test_a_flip_needs_a_two_line_plan_her_turn_and_a_real_index(overhaul):
     st = kokomi_state(enemies=[_quiet()])
-    kokomi_plan.schedule(st, _row("proto_kk_nip"))
+    kokomi_plan.schedule(st, _row("proto_kk_masterstroke"))
     kokomi_plan.schedule(st, _row("proto_kk_kurages_oath"))
     assert not kokomi_plan.flip(st, 0)               # Plan-only
     assert not kokomi_plan.flip(st, 5)               # no such Plan
@@ -155,7 +154,7 @@ def test_every_carry_out_of_an_entry_takes_its_line(overhaul):
     kokomi_plan.resolve_all(st)
     assert st.player.block == 12
     assert st.enemies[0].hp == 200
-    assert st.kk_plans_carried_out_this_turn == 2
+    assert st.kk_plans_carried_out_this_combat == 2
 
 
 def test_a_now_line_writes_no_rider(overhaul):
@@ -176,9 +175,6 @@ def test_split_plan_lines():
     assert blindplay_board.split_plan_lines(
         "Gain 6 Block. Or plan: Deal 7 damage to ALL enemies.") == (
         "Gain 6 Block.", "Deal 7 damage to ALL enemies.")
-    assert blindplay_board.split_plan_lines(
-        "Draw 1 card. Or dusk plan: Gain 8 Block.") == (
-        "Draw 1 card.", "Gain 8 Block.")
 
 
 def _waiting(line="plan"):

@@ -41,7 +41,8 @@ def _fresh_fight():
 #: One word per kit, each the kit's own and each a word another kit's prose can
 #: say by accident -- which is the whole find.
 OWNED = {"klee": ("Spark", "Bomb", "Mine"),
-         "kokomi": ("Plan", "Dusk", "Mend"),
+         # (Dusk retired with the Kokomi re-founding, 2026-10-12.)
+         "kokomi": ("Plan", "Mend"),
          # THE SALON'S TAB (2026-10-05): the HP loan's two verbs are the
          # Stage words beside Spend now; Bow and the front seat left with v2.
          "furina": ("Spend", "Drain", "Repay")}
@@ -50,7 +51,7 @@ OWNED = {"klee": ("Spark", "Bomb", "Mine"),
 #: whole acceptance in both directions.
 EVERY_WORD = ("Spend 2 Sparks to place a Bomb and a Mine, then give the "
               "front performer Fanfare, Drain 3, Repay 2, Mend 3 and write a "
-              "Plan at Dusk.")
+              "Plan.")
 
 
 def _reward(character: str, text: str = EVERY_WORD) -> str:

@@ -4039,46 +4039,10 @@ def test_a_reaction_with_no_source_still_prints():
     assert "off ." not in page
 
 
-def test_a_dusk_plan_prints_one_timing_on_every_surface():
-    """`EB-680`. ONE PLAN, THREE TIMINGS, ALL ON ONE RUN.
-
-    R265's Dusk lines are carried out at the END of the turn they are written
-    on, before the enemies act. The Kokomi r27 lane-2 seat met a Dusk Plan
-    whose card said the end of this turn, whose badge and queue line said the
-    start of the next, and whose carry-out heading, one turn later, said the
-    start of THIS turn. The badge is fixed at its source
-    (`ProtoBakeKuragePower`, `PendingPlansPower`); these are the page's two.
-
-    Seen to FAIL: the queue row was silent and the carry-out row filed under
-    the morning's heading.
-    """
-    queued = dict(TWO_PLANS, pending=2, queue=[
-        {"name": "Dusk: Breakwater", "clauses": 1},
-        {"name": "Kurage's Oath", "clauses": 1}])
-    page = blindplay.observe(plans_combat_state(queued))
-    assert "1. **Dusk: Breakwater** — Dusk: this one is carried out at the "            "END of this turn instead, before the enemies act" in page
-    assert "2. **Kurage's Oath**" in page
-    assert page.count("END of this turn instead") == 1
-
-    done = blindplay.observe(plans_combat_state(morning_of(
-        {"card": "Dusk: Breakwater", "number": 5,
-         "line": "Bake-Kurage: Dusk: Breakwater, 5", "kind": "Block",
-         "asked": 5},
-        {"card": "Kurage's Oath", "number": 7,
-         "line": "Bake-Kurage: Kurage's Oath, 7", "kind": "Damage",
-         "asked": 7})))
-    assert "carried these out at the END of your last turn, before the "            "enemies acted:" in done
-    assert "carried these out at the start of this turn, front first:" in done
-    dusk_at = done.index("END of your last turn")
-    morning_at = done.index("start of this turn, front first")
-    assert dusk_at < morning_at, "the earlier moment is filed first"
-    assert done.index("Dusk: Breakwater, 5") < morning_at
-    assert done.index("Kurage's Oath, 7") > morning_at
-
-
-def test_a_morning_with_no_dusk_entry_reads_exactly_as_it_did():
-    """The other half: a build or a turn with no Dusk line prints one heading
-    and no clause, which is every board before R265."""
+def test_a_morning_reads_under_one_heading():
+    """`EB-680` filed Dusk carry-outs under a heading of their own; Dusk left
+    in the Kokomi re-founding (2026-10-12), and every carry-out is a morning
+    one under one heading."""
     page = blindplay.observe(plans_combat_state(morning_of(
         {"card": "Kurage's Oath", "number": 7,
          "line": "Bake-Kurage: Kurage's Oath, 7", "kind": "Damage",
@@ -6406,6 +6370,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # sentence, so the badges file is the other half of the mod's text.
     src = tips_src + (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
                       / "FurinaStageBadges.cs").read_text(encoding="utf-8")
+    # The Tamakushi Casket's row is the relic's own face since the Kokomi
+    # re-founding (2026-10-12): `TamakushiCasket.Face`.
+    src += (REPO / "klee-mod" / "KleeCode" / "Relics"
+            / "TamakushiCasket.cs").read_text(encoding="utf-8")
     anchors = {
         # `EB-343` (R248) rewrote the word: it gained a fourth rule and
         # [USER] held it to the 135-character tip ceiling (PR #340), so
@@ -6464,12 +6432,6 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Plan": ["Instead of the line above, play it on the ",
                  "; click to flip. Plans happen next turn ",
                  "in order, and their ", " lasts that turn."],
-        # `EB-643` (R265). The pool pass's one new word, and a rule about WHEN
-        # alone: everything else about a Dusk Plan is a Plan and the row above
-        # says all of it. The sentence straddles two `[gold]` spans on the mod
-        # side, so the anchors are the halves that are whole.
-        "Dusk": [": the ", " carries this ",
-                 " out at the end of this turn, before enemies "],
         "Mend": [": heal N HP, but never above the HP you had",
                  "at the start of this combat"],
         # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276
@@ -6529,19 +6491,14 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-348` widened both copies to the rule the ping actually has:
         # it is a real Hydro HIT, so it reacts, takes the target's Vulnerable
         # and re-arms Hydro. Same fold-out, one clause longer.
-        # THE CASKET PASS (2026-09-28) retired the strike: the relic COUNTS
-        # carried-out Plans, and the per-Plan number is interpolated on both
-        # sides (`KokomiOverhaulLaw.CasketPerPlan`,
-        # `blindplay_shape.CASKET_PER_PLAN`), so the anchors are the prose
+        # THE CASKET PASS (2026-09-28) retired the strike for a count; THE
+        # KOKOMI RE-FOUNDING (2026-10-12) retired the count and Open the
+        # Casket. The row is the relic's face (`TamakushiCasket.Face`), the
+        # Block interpolated on both sides (`KokomiOverhaulLaw.CasketBlock`,
+        # `blindplay_shape.CASKET_BLOCK`), so the anchors are the prose
         # either side of it and of the golded spans.
-        "Tamakushi Casket": [
-            "Your relic. Each ", "carries out adds ",
-            " turns the count into "],
-        # And the relic's token, named by What the Tokoyo Returns.
-        "Open the Casket": ["Retain. Costs 0, rising by 1 each play. Gain ",
-                            " equal to the ",
-                            "Casket's count, then empty it. Under ",
-                            "it is not emptied."],
+        "Tamakushi Casket": ["At the end of your turn, if a ",
+                             " is waiting, gain "],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then
@@ -8651,17 +8608,19 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
             row["description"] = row["description"].replace(
                 "Deal 7 damage.", "Deal 7 Pyro damage.").replace(
                 "Set off.", "Set off the enemy.")
+    # Deep Current, the card the seat guessed on, was cut by the Kokomi
+    # re-founding (2026-10-12); Jellyfish Drift is a hit that upgrades the
+    # same way, 5 to 8.
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_KK_DEEP_CURRENT", "name": "Deep Current",
+        {"id": "KLEEMOD-PROTO_KK_JELLYFISH_DRIFT", "name": "Jellyfish Drift",
          "cost": "1", "type": "Attack",
-         "description": "Deal 8 Hydro damage to ALL enemies."})
+         "description": "Deal 5 Hydro damage. Add a Sting to your hand."})
     page = blindplay.observe(smith)
 
-    # The card the seat guessed on, both faces, one under the other (8 and 11
-    # since the Kokomi kit review, 2026-10-05; it was 6 to 9 when the seat
-    # met it).
-    assert "    Deal 8 Hydro damage to ALL enemies." in page
-    assert "    Upgraded: Deal 11 Hydro damage to ALL enemies." in page
+    # Both faces, one under the other.
+    assert "    Deal 5 Hydro damage. Add a Sting to your hand." in page
+    assert ("    Upgraded: Deal 8 Hydro damage. Add a Sting to your "
+            "hand.") in page
     # And the screen's own rows, including one whose printed face carries the
     # game's appended keyword sentence -- which is why the match is a search
     # over the face rather than the whole of it.
@@ -8969,6 +8928,9 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         "Dexterity": [" the wearer gains. It ", "does not decay."],
         # The Repay floor (ruled 2026-10-09).
         "Vigor": ["Your next Attack deals additional damage."],
+        # The Kokomi re-founding (2026-10-12).
+        "Ethereal": ["If this card is in your hand at the end of your "
+                     "turn, it is "],
     }
     page_only = {"Sharp", "Nimble", "Swift", "Bond of Life", "Exhaust"}
     # `EB-597`. A THIRD CLASS, AND SHRINK IS ITS ONLY MEMBER SO FAR: a word no

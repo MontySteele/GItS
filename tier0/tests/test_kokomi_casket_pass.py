@@ -12,8 +12,12 @@ card spends the gauge: "We don't need this to be the equivalent to Regent's
 stars or Klee's sparks. This should feel like a distinct effect." On the
 Commons: "they shouldn't just be 10 copies of 'do x damage, or plan y'".
 
-The sim half. The C# twin is `KleeTests/Prototype/KokomiCasketPassTests.cs`.
-NOTHING MEASURED HERE IS QUOTABLE (R215 B).
+THE RE-FOUNDING (2026-10-12) retired the count, Open the Casket and the
+count's readers (Driftglass, Depths' Judgment, What the Tokoyo Returns and
+Took); their tests left with them. What stays is the pass's re-keyed payoffs
+and moved numbers that survive, at their current values.
+
+The sim half. NOTHING MEASURED HERE IS QUOTABLE (R215 B).
 """
 
 from __future__ import annotations
@@ -24,12 +28,6 @@ from tier0.engine import effects, kokomi_plan
 from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import (  # noqa: F401
     carry_out, counts, kokomi_state, overhaul, plan_card)
-
-
-def _casket(**kw):
-    st = kokomi_state(**kw)
-    st.player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
-    return st
 
 
 def _row(cid):
@@ -47,228 +45,7 @@ def _hit(state, card):
     return before - enemy.hp
 
 
-# --- A. the relic counts carry-outs ----------------------------------------
-
-def test_each_plan_carried_out_adds_one_while_she_holds_the_casket(overhaul):
-    st = _casket(enemies=[make_enemy(hp=100)])
-    assert st.kk_casket == 0
-    carry_out(st, [{"op": "energy", "amount": 1}])
-    assert st.kk_casket == C.KOKOMI_OVERHAUL_CASKET_PER_PLAN == 1
-    carry_out(st, [{"op": "energy", "amount": 1}])
-    assert st.kk_casket == 2
-
-    # Without the relic: nothing. It is the relic's sentence.
-    bare = kokomi_state(enemies=[make_enemy(hp=100)])
-    carry_out(bare, [{"op": "energy", "amount": 1}])
-    assert bare.kk_casket == 0
-
-
-def test_a_plan_carried_out_twice_counts_twice(overhaul):
-    """Second Wave's rider and Nereid's Ascension each make one entry two
-    carry-outs, and each carry-out adds (the same rule every per-Plan reader
-    in the arm keeps, `EB-709`)."""
-    st = _casket(enemies=[make_enemy(hp=100)])
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "next_plan_extra_carry_out"}], cid="proto_kk_wave"))
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "energy", "amount": 1}], cid="proto_kk_after"))
-    kokomi_plan.resolve_all(st)
-    assert st.kk_casket == 3                # 1 + 2
-    assert st.kk_plans_carried_out_this_turn == 3
-
-    asc = _casket(enemies=[make_enemy(hp=100)])
-    asc.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
-    carry_out(asc, [{"op": "energy", "amount": 1}])
-    assert asc.kk_casket == 2
-
-
-def test_dusk_and_change_of_plans_count_too(overhaul):
-    st = _casket(enemies=[make_enemy(hp=100)])
-    kokomi_plan.schedule(st, loader.get_card("proto_kk_breakwater"))
-    kokomi_plan.resolve_dusk(st)
-    assert st.kk_casket == 1
-    kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    kokomi_plan.resolve_front(st)
-    assert st.kk_casket == 2
-
-
-def test_the_count_is_per_fight_and_never_rolled_by_the_turn(overhaul):
-    st = _casket(enemies=[make_enemy(hp=100)])
-    carry_out(st, [{"op": "energy", "amount": 1}])
-    kokomi_plan.roll_turn(st)
-    assert st.kk_casket == 1
-    assert st.kk_plans_carried_out_this_turn == 0
-
-
-# --- B. Open the Casket ------------------------------------------------------
-
-def test_the_token_is_a_zero_cost_retain_skill_in_no_pool(overhaul):
-    """2026-10-01, the four-kit review, Kokomi pick 1: no Exhaust. 2026-10-10,
-    after [USER]'s Kokomi playtest: "I think that the casket should start at
-    0 and then have a ramping cost (goes up by 1 each time)". Printed 0."""
-    card = kokomi_plan.open_the_casket_card()
-    assert (card.cost, card.type, card.rarity) == (0, "skill", "token")
-    assert card.retain and not card.exhaust
-    assert card.id not in C.KOKOMI_OVERHAUL_POOL_IDS
-
-
-def test_the_token_is_reshuffled_and_opens_again_from_zero(overhaul):
-    """It pays more than once: played, it goes to the discard pile, comes back
-    with the deck, and the second opening finds only what the Casket gathered
-    since the first."""
-    from tier0.engine import combat
-    st = _casket(enemies=[make_enemy(hp=100)])
-    token = kokomi_plan.open_the_casket_card()
-    st.player.hand.append(token)
-    st.player.energy = 3
-    st.kk_casket = 3
-    combat.play_card(st, token)
-    assert st.player.energy == 3                     # the first play is free
-    assert st.player.powers.get("strength") == 3
-    assert st.kk_casket == 0
-    assert token in st.player.discard_pile           # not exhausted
-    assert token not in st.player.exhaust_pile
-    # The Casket fills again from 0; the deck comes round.
-    carry_out(st, [{"op": "energy", "amount": 1}])
-    carry_out(st, [{"op": "energy", "amount": 1}])
-    assert st.kk_casket == 2
-    st.shuffle_discard_into_draw()
-    st.draw(1)
-    assert token in st.player.hand
-    st.player.energy = 3
-    combat.play_card(st, token)
-    assert st.player.energy == 2                     # the second costs 1
-    assert st.player.powers.get("strength") == 5     # 3 + 2
-    assert st.kk_casket == 0
-
-
-def test_each_play_raises_its_cost_by_one_for_the_combat(overhaul):
-    """2026-10-10, after [USER]'s Kokomi playtest: "That means the casket is
-    free the first play, costs 1 the second, and then at 2+ becomes
-    difficult. That way it has obvious use in a short hallway fight". The
-    base game's Modded: "Increase this card's cost by 1." 0, 1, 2, 3 -- per
-    copy, upgraded or not, and the price `card_cost` reports is the price
-    `play_card` takes. `OpenTheCasket.OnPlay`'s `AddThisCombat(1)` is the
-    twin."""
-    from tier0.engine import combat
-    for upgraded in (False, True):
-        st = _casket(enemies=[make_enemy(hp=500)])
-        token = kokomi_plan.open_the_casket_card(upgraded=upgraded)
-        seen = []
-        for _ in range(4):
-            st.player.hand.append(token)
-            st.player.energy = 5
-            seen.append(combat.card_cost(st, token))
-            combat.play_card(st, token)
-            assert st.player.energy == 5 - seen[-1]
-            for pile in (st.player.discard_pile, st.player.hand,
-                         st.player.draw_pile):
-                if token in pile:
-                    pile.remove(token)
-        assert seen == [0, 1, 2, 3]
-    # A fresh copy -- the one the relic deals each combat -- starts at 0.
-    assert combat.card_cost(_casket(), kokomi_plan.open_the_casket_card()) == 0
-
-
-def test_a_fetched_open_keeps_its_ramped_cost(overhaul):
-    """What the Tokoyo Returns (and Grand Design's morning fetch, which calls
-    it) MOVES the played copy back to hand; it makes no new one, so the ramp
-    comes with it."""
-    from tier0.engine import combat
-    st = _casket(enemies=[make_enemy(hp=100)])
-    token = kokomi_plan.open_the_casket_card()
-    st.player.hand.append(token)
-    st.player.energy = 3
-    combat.play_card(st, token)
-    assert token in st.player.discard_pile
-    kokomi_plan.fetch_open_casket(st)
-    assert token in st.player.hand
-    assert combat.card_cost(st, token) == 1
-
-
-def test_opening_grants_strength_equal_to_the_count_and_empties_it(overhaul):
-    st = _casket(enemies=[make_enemy(hp=100)])
-    st.kk_casket = 3
-    effects.resolve_card(st, kokomi_plan.open_the_casket_card())
-    assert st.player.powers.get("strength") == 3 * \
-        C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT
-    assert st.kk_casket == 0
-    # "the casket keeps counting"
-    carry_out(st, [{"op": "energy", "amount": 1}])
-    assert st.kk_casket == 1
-
-
-def test_the_upgraded_token_also_draws_one_card(overhaul):
-    """The Kokomi kit review (2026-10-05): the upgrade changed nothing.
-    Upgraded, it also draws 1 card, after the Strength; cost and Retain
-    stay. `OpenTheCasket.cs` is the twin."""
-    up = kokomi_plan.open_the_casket_card(upgraded=True)
-    assert (up.cost, up.retain, up.exhaust) == (0, True, False)
-    st = _casket(enemies=[make_enemy(hp=100)])
-    st.player.draw_pile = [kokomi_plan.open_the_casket_card()]
-    st.kk_casket = 2
-    effects.resolve_card(st, up)
-    assert st.player.powers.get("strength") == 2 *         C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT
-    assert len(st.player.hand) == 1
-    # The base token draws nothing.
-    st2 = _casket(enemies=[make_enemy(hp=100)])
-    st2.player.draw_pile = [kokomi_plan.open_the_casket_card()]
-    effects.resolve_card(st2, kokomi_plan.open_the_casket_card())
-    assert st2.player.hand == []
-
-
-def test_an_empty_casket_grants_nothing(overhaul):
-    st = _casket(enemies=[make_enemy(hp=100)])
-    effects.resolve_card(st, kokomi_plan.open_the_casket_card())
-    assert "strength" not in st.player.powers
-
-
-def test_the_relic_deals_the_token_on_turn_one_only(overhaul):
-    st = _casket(enemies=[make_enemy(hp=100)])
-    st.turn = 1
-    kokomi_plan.deal_open_the_casket(st)
-    assert [c.id for c in st.player.hand] == [kokomi_plan.OPEN_THE_CASKET]
-    st.turn = 2
-    kokomi_plan.deal_open_the_casket(st)
-    assert len(st.player.hand) == 1
-
-    bare = kokomi_state(enemies=[make_enemy(hp=100)])
-    bare.turn = 1
-    kokomi_plan.deal_open_the_casket(bare)
-    assert bare.player.hand == []
-
-
-def test_the_token_retains(overhaul):
-    """A whole fight: the token dealt on turn one is still in hand on turn
-    two if it was not played."""
-    from tier0.engine.combat import run_fight
-    ids = list(C.KOKOMI_OVERHAUL_STARTER_IDS)
-    player = loader.build_player_from_ids("kokomi", ids)
-    player.relic_hooks = [loader.OVERHAUL_CASKET_HOOK]
-    seen = {}
-
-    def pilot(state):
-        seen.setdefault(state.turn, [c.id for c in state.player.hand])
-        return None
-
-    run_fight(player, [make_enemy(hp=400)], pilot, seed=3)
-    assert kokomi_plan.OPEN_THE_CASKET in seen[1]
-    assert kokomi_plan.OPEN_THE_CASKET in seen[2]
-
-
 # --- C. the re-keyed payoffs -------------------------------------------------
-
-def test_feint_is_six_plus_three_per_carry_out(overhaul):
-    # The cleanup pass (2026-09-29): a base of 6; 9 plus 3 per Plan upgraded.
-    st = kokomi_state(enemies=[make_enemy(hp=100)])
-    assert _hit(st, _row("proto_kk_feint")) == 6
-    carry_out(st, [{"op": "energy", "amount": 1}])
-    assert _hit(st, _row("proto_kk_feint")) == 9
-    up = _up("proto_kk_feint")
-    assert up.effects[0]["amount_formula"] == {
-        "base": 9, "per": 3, "count": "plans_carried_out_this_turn"}
-    assert up.plan[0]["amount"] == 2
-
 
 def test_sango_isshin_is_eight_plus_two_to_all_per_carry_out_this_combat(overhaul):
     # [USER]'s run (2026-10-11): this combat, 2 per Plan; 10 plus 3 upgraded.
@@ -294,9 +71,6 @@ def test_the_moved_numbers(overhaul):
     assert _up("proto_kk_pincer").effects[0]["amount"] == 6
     assert _row("proto_kk_opening_gambit").effects[0]["amount"] == 7
     assert _up("proto_kk_opening_gambit").effects[0]["amount"] == 9
-    # The Kokomi kit review (2026-10-05): 8 [11], Cleave's numbers.
-    assert _row("proto_kk_deep_current").effects[0]["amount"] == 8
-    assert _up("proto_kk_deep_current").effects[0]["amount"] == 11
     # Ceremonial Garment costs 1; the Kokomi card pass (2026-10-11): 1 [2]
     # per stack of Weak and Vulnerable (was 2 [3] per debuff).
     garment = _row("proto_kk_ceremonial_garment")
@@ -305,40 +79,26 @@ def test_the_moved_numbers(overhaul):
     rip = _row("proto_kk_riptide")
     assert (rip.effects[0]["amount"], rip.effects[0]["bonus_vs_debuff"]) == \
         (11, 3)
-    # [USER], co-op playtest 2026-09-30: "Riptide - buff the Draw from 1 to
-    # 2, and upgrades to 3".
-    assert rip.plan == [{"op": "energy", "amount": 2},
-                        {"op": "draw", "amount": 2}]
+    # The re-founding (2026-10-12): the Plan is "Draw 3 cards" (4 upgraded).
+    assert rip.plan == [{"op": "draw", "amount": 3}]
     rip_up = _up("proto_kk_riptide")
     assert (rip_up.effects[0]["amount"],
             rip_up.effects[0]["bonus_vs_debuff"]) == (14, 4)
-    assert rip_up.plan == [{"op": "energy", "amount": 2},
-                           {"op": "draw", "amount": 3}]
+    assert rip_up.plan == [{"op": "draw", "amount": 4}]
 
 
 # --- G. the thirteen ------------------------------------------------------------
 
 def test_the_commons(overhaul):
-    volley = _row("proto_kk_massed_volley")
-    # The Kokomi card pass (2026-10-11): 4 [5] x3.
-    assert (volley.cost, volley.effects[0]["amount"],
-            volley.effects[0]["times"]) == (1, 4, 3)
-    assert _up("proto_kk_massed_volley").effects[0]["amount"] == 5
-
-    arrow = _row("proto_kk_signal_arrow")
-    assert arrow.effects[0]["amount"] == 7
-    assert arrow.plan == [{"op": "damage", "amount": 4,
-                           "target": "all_enemies", "times": 2}]
-    arrow_up = _up("proto_kk_signal_arrow")
-    assert arrow_up.effects[0]["amount"] == 10
-    assert arrow_up.plan[0]["amount"] == 5
-
+    # The re-founding (2026-10-12): the Plan is 12 to ALL enemies (16
+    # upgraded), with no Strength rider.
     shoal = _row("proto_kk_surging_shoal")
-    assert (shoal.cost, shoal.effects[0]["amount"], shoal.plan[0]["amount"]) \
-        == (2, 14, 22)
+    assert (shoal.cost, shoal.effects[0]["amount"]) == (2, 14)
+    assert shoal.plan == [{"op": "damage", "amount": 12,
+                           "target": "all_enemies"}]
     shoal_up = _up("proto_kk_surging_shoal")
     assert (shoal_up.effects[0]["amount"], shoal_up.plan[0]["amount"]) == \
-        (18, 28)
+        (18, 16)
 
     # Pearl Diver left the pool in the status batch (2026-10-01).
     # The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
@@ -351,25 +111,18 @@ def test_the_commons(overhaul):
     assert press_up.effects[0]["else"][0]["amount"] == 9
     assert press_up.effects[0]["then"][0]["amount"] == 14
 
+    # The re-founding (2026-10-12): Dusk retired; 6 Block now, then the draw.
     shell = _row("proto_kk_shell_of_sanctuary")
-    assert shell.plan_dusk
-    assert shell.effects == [{"op": "draw", "amount": 1}]
-    assert shell.plan == [{"op": "block", "amount": 9}]
-    assert _up("proto_kk_shell_of_sanctuary").plan == [
-        {"op": "block", "amount": 12}]
-
-    # The cleanup pass (2026-09-29): a base of 6, upgraded 8.
-    glass = _row("proto_kk_driftglass")
-    st = kokomi_state(enemies=[make_enemy(hp=100)])
-    assert _hit(st, glass) == 6
-    st.kk_casket = 4
-    assert _hit(st, glass) == 10
-    assert _up("proto_kk_driftglass").effects[0]["amount_formula"]["base"] == 8
+    assert shell.plan == []
+    assert shell.effects == [{"op": "block", "amount": 6},
+                             {"op": "draw", "amount": 1}]
+    assert _up("proto_kk_shell_of_sanctuary").effects[0]["amount"] == 9
 
 
 def test_no_common_increases_deck_size(overhaul):
-    """LAW: a Kokomi Common never adds a card. Open the Casket is the relic's
-    token, not a Common's."""
+    """LAW: a Kokomi Common never adds a card to the DECK. (The re-founding's
+    Commons that hand her a Sting, a Ward or a Companion add it to the hand
+    for the combat, through the `kokomi` op, not a deck op.)"""
     creating = {"add_card", "generate_from_pool", "choose_companion"}
     for cid in C.KOKOMI_OVERHAUL_POOL_IDS:
         card = _row(cid)
@@ -380,30 +133,6 @@ def test_no_common_increases_deck_size(overhaul):
 
 
 def test_the_uncommons_and_the_rare(overhaul):
-    # What the Tokoyo Returns: fetch the token from the draw pile or the
-    # discard pile (2026-10-01: it no longer exhausts).
-    for pile in ("draw_pile", "discard_pile"):
-        st = _casket(enemies=[make_enemy(hp=100)])
-        setattr(st.player, pile, [kokomi_plan.open_the_casket_card()])
-        effects.resolve_card(st, _row("proto_kk_what_the_tokoyo_returns"))
-        assert [c.id for c in st.player.hand] == [kokomi_plan.OPEN_THE_CASKET]
-        assert getattr(st.player, pile) == []
-    # None in either: nothing happens, and the Exhaust Pile is not searched.
-    empty = _casket(enemies=[make_enemy(hp=100)])
-    empty.player.exhaust_pile = [kokomi_plan.open_the_casket_card()]
-    effects.resolve_card(empty, _row("proto_kk_what_the_tokoyo_returns"))
-    assert empty.player.hand == []
-    returns = _row("proto_kk_what_the_tokoyo_returns")
-    assert (returns.cost, returns.exhaust) == (1, True)
-    assert _up("proto_kk_what_the_tokoyo_returns").cost == 0
-
-    # Depths' Judgment: 3 x the count (4 x upgraded).
-    st = kokomi_state(enemies=[make_enemy(hp=100)])
-    st.kk_casket = 5
-    assert _hit(st, _row("proto_kk_depths_judgment")) == 15
-    assert _up("proto_kk_depths_judgment").effects[0]["amount_formula"][
-        "per"] == 4
-
     # Tideturn: 6 per Plan waiting (8 upgraded; the Kokomi card pass,
     # 2026-10-11).
     st = kokomi_state(enemies=[make_enemy(hp=100)])
@@ -425,15 +154,6 @@ def test_the_uncommons_and_the_rare(overhaul):
     assert current_up.effects[0]["amount"] == 3
     assert current_up.plan[0]["amount"] == 4
 
-    # What the Tokoyo Took: double the count. Rare, 2, Exhaust (1 upgraded).
-    took = _row("proto_kk_what_the_tokoyo_took")
-    assert (took.rarity, took.cost, took.exhaust) == ("rare", 2, True)
-    assert _up("proto_kk_what_the_tokoyo_took").cost == 1
-    st = _casket(enemies=[make_enemy(hp=100)])
-    st.kk_casket = 3
-    effects.resolve_card(st, took)
-    assert st.kk_casket == 6
-
 
 # --- F. the offer -------------------------------------------------------------
 
@@ -443,7 +163,8 @@ def test_the_offer_is_seventy(overhaul):
     # batch one (2026-09-29) cut The Clouds Like Waves and added 22; the
     # payoff pass (2026-10-01) cut Second Thoughts and added two; pool
     # completion (2026-10-01) added eight; the status batch (2026-10-01)
-    # cut seven and added seven.
+    # cut seven and added seven; the re-founding (2026-10-12) cut 24 and
+    # added 20 and Gorou's four.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == 78
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
@@ -451,7 +172,12 @@ def test_the_offer_is_seventy(overhaul):
                 "proto_kk_sea_salt_prayer", "proto_kk_salt_line",
                 "proto_kk_scout_ahead", "proto_kk_song_of_pearls",
                 "proto_kk_exposed_flank", "proto_kk_second_thoughts",
-                "proto_kk_pearl_diver", "proto_kk_moon_signal"):
+                "proto_kk_pearl_diver", "proto_kk_moon_signal",
+                # The re-founding (2026-10-12).
+                "proto_kk_driftglass", "proto_kk_depths_judgment",
+                "proto_kk_what_the_tokoyo_returns",
+                "proto_kk_what_the_tokoyo_took", "proto_kk_massed_volley",
+                "proto_kk_signal_arrow", "proto_kk_deep_current"):
         assert cut not in ids
         assert cut not in {c.id for c in loader.prototype_cards()}
     # And the co-op five (three, and pool completion's two) stay outside the

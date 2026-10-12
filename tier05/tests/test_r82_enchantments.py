@@ -163,6 +163,9 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
                     "proto_mc_kaeya_frostgnaw",
                     "proto_mf_freminet_pressurized_floe",
                     "proto_mi_itto_superlative_superstrength",
+                    # Kokomi's own card since the re-founding (2026-10-12):
+                    # its Plan line is "Gain 11 Block".
+                    "proto_mi_gorou_inuzaka",
                     "proto_vk_crosswind"}
     reference = {c.id for c in loader._card_index().values()
                  if c.type == "attack"

@@ -15,7 +15,6 @@ import random
 
 from tier0.content import loader, upgrades, yaml_memo
 from tier0.engine import furina_stage as FS
-from tier0.engine import kokomi_plan
 from tier0.engine import varka_oath as V
 from tier0.engine.state import CombatState, Enemy, Player
 from tier0.tests.test_kokomi_plan import kokomi_state, overhaul  # noqa: F401
@@ -40,24 +39,6 @@ def _up(cid):
 
 def _power_of(card):
     return next(fx for fx in card.effects if fx.get("op") == "apply_power")
-
-
-def test_the_long_game_upgrade_installs_the_drawing_twin(overhaul):
-    assert _power_of(_row("proto_kk_the_long_game"))["power"] == \
-        kokomi_plan.LONG_GAME
-    up = _up("proto_kk_the_long_game")
-    assert _power_of(up)["power"] == kokomi_plan.LONG_GAME_PLUS
-    assert up.cost == 1
-    st = kokomi_state()
-    st.player.draw_pile = [loader.get_card("proto_kk_nip") for _ in range(3)]
-    st.player.hand = []
-    st.player.powers[kokomi_plan.LONG_GAME_PLUS] = 1
-    st.player.energy = 3
-    kokomi_plan.long_game(st, 1)
-    assert st.player.energy == 4
-    assert len(st.player.hand) == 1
-    kokomi_plan.long_game(st, 2)                    # two waiting: nothing
-    assert (st.player.energy, len(st.player.hand)) == (4, 1)
 
 
 def test_sworn_brotherhood_gains_the_current_element_only(varka):

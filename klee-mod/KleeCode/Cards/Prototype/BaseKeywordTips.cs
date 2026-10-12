@@ -63,6 +63,7 @@ public static class BaseKeywordTips
     public const string StrengthKey = "KLEEMOD-BASE_STRENGTH";
     public const string DexterityKey = "KLEEMOD-BASE_DEXTERITY";
     public const string VigorKey = "KLEEMOD-BASE_VIGOR";
+    public const string EtherealKey = "KLEEMOD-BASE_ETHEREAL";
 
     /// <summary>
     /// The word the row was filed for. Both halves matter and neither is on
@@ -192,6 +193,17 @@ public static class BaseKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, VigorKey,
             "Your next Attack deals additional damage.");
+
+    /// <summary>The base game's Ethereal, on a face that names it for the
+    /// cards it makes (the Kokomi re-founding, 2026-10-12: Orders from the
+    /// Shrine, Watatsumi Muster, Sangonomiya's Orders, Watchful Shoal,
+    /// Coordinated Tide). A card that carries the keyword gets the game's
+    /// own tip.</summary>
+    public static IEnumerable<IHoverTip> ForEthereal(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, EtherealKey,
+            "If this card is in your hand at the end of your turn, it is "
+          + "Exhausted.");
 
     /// <summary>
     /// One tip, appended after whatever the card already carries -- the same

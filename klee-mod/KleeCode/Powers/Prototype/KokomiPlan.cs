@@ -101,26 +101,8 @@ public static class KokomiPlan
         // WRITTEN -- see <see cref="Schedule"/> -- and a copy of it is played
         // for free at the morning.
         PlayCopyOfCompanion,
-        // `EB-685`, POOL PASS FIVE. Breakwater: "Dusk Plan: Gain 5 Block,
-        // plus 3 for each Plan the Bake-Kurage is HOLDING."
-        //
-        // WHY IT IS NOT THE LINE ABOVE, which is the count pool pass four gave
-        // it: <see cref="BlockPerPlanThisMorning"/> is the MORNING's depth,
-        // and a Dusk Plan lands on the evening of the turn it was written on
-        // -- so a Breakwater written after an empty morning read 0 and paid
-        // its base, which is what r27's two seats saw on four plays out of
-        // four. The wall now rises on the turn the engine is WRITTEN.
-        //
-        // THE COUNT IS <see cref="PlansHeld"/> READ LIVE, at the moment this
-        // entry resolves, and the two exclusions the face needs are true BY
-        // CONSTRUCTION rather than by a filter: <see cref="ResolveDusk"/>
-        // takes every dusk entry off the queue before the first clause runs,
-        // so this entry is never one of the Plans it pays for and neither is a
-        // second Dusk Plan written the same turn. What is left is exactly
-        // "written this turn and still waiting for the next morning". A Plan
-        // hurried out by Change of Plans has already left the queue and does
-        // not count. Sim twin: `kokomi_plan.BLOCK_PER_PLAN_HELD`.
-        BlockPerPlanHeld,
+        // (`EB-685`'s BlockPerPlanHeld left with Dusk, the re-founding,
+        // 2026-10-12: Breakwater counts the Plans waiting on its now-line.)
         // Opening Gambit: "the next Plan deals double damage." Second Wave:
         // "the next Plan is carried out twice." A RIDER, written by the entry
         // that prints it and spent by the entry carried out immediately after
@@ -136,14 +118,12 @@ public static class KokomiPlan
         // head start can buy. The three switches mean THIS TURN, the turn the
         // Plan is carried out on:
         //   Pincer: "This turn, your first Attack is played twice."
-        //   Stolen Chapter: "This turn, the first card you play costs 0."
         //   Battle Plan: "This turn, your Attacks deal N more damage."
         // Feigned Retreat hits harder when she lost no HP since the Plan was
         // WRITTEN (<see cref="Planned.WrittenHp"/>, stamped by
         // <see cref="Schedule"/>), and Tide Wall blocks the front enemy's
         // intent, read at carry-out. Sim twins: `kokomi_plan`, same names.
         FirstAttackTwice,
-        FirstCardFree,
         BlockFrontIntent,
         // THE CO-OP SET (review/records/coop-set-2026-09-25.md), two clauses
         // about ANOTHER player, and a one-seat fight has none:
@@ -161,19 +141,9 @@ public static class KokomiPlan
         // `others_attack_damage_this_turn`, both inert with one seat.
         AllyDraw,
         OthersAttackDamageThisTurn,
-        // THE EXPANSION, BATCH ONE (2026-09-29). Lull: "If it is the only
-        // Plan carried out this morning, gain 2 Energy." Undertide Lance:
-        // "Deal 16 damage, doubled if no other Plan is carried out this
-        // morning." ALONE means no OTHER entry in the same drain (the same
-        // entry carried out twice is one Plan; a Dusk drain is its own; Change
-        // of Plans is a drain of one). Evening Watch: "Gain 5 Block for each
-        // enemy intending to attack", counted at carry-out. Brace for the
-        // Tide: "Double your Block", unpowered. Appended last. Sim twins:
-        // `kokomi_plan.ENERGY_IF_ALONE` and the three beside it.
-        EnergyIfAlone,
-        DamageIfAlone,
-        BlockPerAttackingEnemy,
-        DoubleBlock,
+        // (The expansion's EnergyIfAlone, DamageIfAlone,
+        // BlockPerAttackingEnemy and DoubleBlock left with Lull, Undertide
+        // Lance's old Plan and Dusk, the re-founding, 2026-10-12.)
         // POOL COMPLETION (2026-10-01, multiplayer). Tactical Relay: "Plan:
         // Each player gains 1 Energy [and draws 1 card]." EVERY living player
         // in the fight, Kokomi included (<see cref="EachPlayer"/>); the draw
@@ -184,14 +154,24 @@ public static class KokomiPlan
         // THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-
         // 2026-10-01.md). Plans that read the hand just drawn, which rule 2's
         // after-the-draw resolution is what makes possible: Kelp Wall's Block
-        // per status or curse, Tidecleanse's exhaust of up to N, Sea Glass
-        // Harvest's transform into Sea Glass, Turning Tide's discard-and-draw.
-        // Appended last. Bodies in <see cref="KokomiStatusBatch"/>; sim twins
+        // per status or curse and Sea Glass Harvest's transform into Sea
+        // Glass. Bodies in <see cref="KokomiStatusBatch"/>; sim twins
         // `kokomi_plan`, the same names.
         BlockPerStatusInHand,
-        ExhaustStatusesInHand,
         TransformStatusesInHand,
-        DiscardAndDraw,
+        // THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-
+        // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
+        // Gorou's War Banner "Gain 3 Strength this turn" and Juuga "For 3
+        // turns, at the end of your turn gain 6 Block" (amount = the turns);
+        // and a written Companion (design pass pick 4 (a)), whose clause
+        // holds the card and is carried out at its printed rate after the
+        // Bake-Kurage applies Hydro to its target
+        // (<see cref="KokomiCompanionPlan.CarryOut"/>). Sim twins
+        // `kokomi_plan`, the same names.
+        AddStings,
+        StrengthThisTurn,
+        JuugaGuard,
+        PlayCompanion,
     }
 
     /// <summary>
@@ -229,10 +209,11 @@ public static class KokomiPlan
 
     /// <summary>
     /// One scheduled clause. <paramref name="Card"/> is set for
-    /// <see cref="Kind.ReplayExhausted"/> (Moon's Reflection's chosen card)
-    /// and for <see cref="Kind.PlayCopyOfCompanion"/> (Crystal Collapse's
-    /// captured Companion), and is the one place a Plan holds an object rather
-    /// than a number. Both are filled in when the Plan is written, never read
+    /// <see cref="Kind.ReplayExhausted"/> (Moon's Reflection's chosen card),
+    /// for <see cref="Kind.PlayCopyOfCompanion"/> (Crystal Collapse's
+    /// captured Companion) and for <see cref="Kind.PlayCompanion"/> (the
+    /// written Companion itself), and is the one place a Plan holds an object
+    /// rather than a number. Both are filled in when the Plan is written, never read
     /// off the board at carry-out.
     ///
     /// <paramref name="Times"/> IS HOW MANY SEPARATE HITS THE CLAUSE IS
@@ -265,14 +246,6 @@ public static class KokomiPlan
     /// on the jellyfish -- and for nothing else; the clauses are the whole of
     /// what will happen.
     /// </summary>
-    /// <param name="Dusk">`EB-643`, R265. This Plan is carried out at the END
-    /// of the turn it was written on, before the enemies act
-    /// (<see cref="ResolveDusk"/>), instead of at the start of her next one.
-    /// A property of the WRITING CARD's printed face (`plan_dusk:` on the row)
-    /// and not of its clauses, deliberately: Dusk is WHEN the whole line
-    /// lands, so a card cannot have one dusk clause and one morning clause any
-    /// more than it can be played on two turns -- and <see cref="Kind"/> stays
-    /// closed on what a Plan DOES.</param>
     /// <param name="AimOverride">`EB-643`. Converging Tide's stamp: the
     /// <c>CombatId</c> of the body every <see cref="Aim.FrontEnemy"/> clause
     /// of this entry lands on instead of the front, or null.
@@ -284,12 +257,6 @@ public static class KokomiPlan
     /// front where that body is gone (<see cref="Aimed"/>), which is the
     /// arm's standing rule for a Plan pointed at something it no longer
     /// finds.</param>
-    /// <param name="Paid">THE EXPANSION, BATCH ONE (2026-09-29). The Energy
-    /// actually paid for the card that wrote this Plan -- the play's own
-    /// <c>Resources.EnergySpent</c>, after every reduction; an X card's is
-    /// what it paid. The Big Plan reads the sum over the queue
-    /// (<see cref="EnergyWaiting"/>) and Grand Design reads it per carry-out.
-    /// Sim twin: `PlanEntry.paid`.</param>
     /// <param name="Extra">All Streams Flow to the Sea's gift: this entry is
     /// carried out once plus this many more times. Sim twin:
     /// `PlanEntry.extra`.</param>
@@ -304,16 +271,15 @@ public static class KokomiPlan
     /// carry-out of the entry takes it.
     /// Sim twin: `PlanEntry.line == "now"`.</param>
     public sealed record Entry(CardModel? Source, IReadOnlyList<Planned> Clauses,
-                              string? Label = null, bool Dusk = false,
-                              string? AimOverride = null, int Paid = 0,
+                              string? Label = null,
+                              string? AimOverride = null,
                               int Extra = 0, CardModel? Writer = null,
                               bool Now = false)
     {
         /// <summary>A PLAN STAYS OPEN: does this Plan offer the choice? A
         /// two-line card's own line (Moon's Reflection's found card
-        /// included), and not a Dusk Plan. Sim twin:
-        /// `kokomi_plan.two_line`.</summary>
-        public bool TwoLine => !Dusk && Source is INowLineCard;
+        /// included). Sim twin: `kokomi_plan.two_line`.</summary>
+        public bool TwoLine => Source is INowLineCard;
 
         /// <summary>The card a cancel returns to the hand.</summary>
         public CardModel? Returns => Writer ?? Source;
@@ -325,22 +291,9 @@ public static class KokomiPlan
         /// different thing every time it is written, so the strip has to say
         /// which card it caught -- "Crystal Collapse: Gorou &#8212; Juuga",
         /// or "Crystal Collapse: nothing" for a turn with no other Companion
-        /// in it. Every other Plan is its own card's name, unchanged.
-        ///
-        /// `EB-643`: A DUSK ENTRY SAYS SO, and it is a prefix on the strip's
-        /// line rather than a second badge or a colour. The queue is ONE
-        /// queue and two of its entries now land at different moments, so a
-        /// player reading the column has to be able to tell which -- and
-        /// "Dusk: Breakwater" is the smallest thing that says it. The
-        /// carry-out lines that <see cref="Announce"/> builds are unchanged:
-        /// by the time one is said the beat has happened, and WHEN it
-        /// happened is what the reader just watched.</summary>
-        public string Title => Dusk ? "Dusk: " + Named : Named;
-
-        /// <summary>The line without the Dusk mark -- `Title`'s old body,
-        /// split out so the prefix above is one word rather than a second
-        /// copy of the fallback chain.</summary>
-        private string Named =>
+        /// in it. Every other Plan is its own card's name, unchanged. (The
+        /// "Dusk: " prefix left with Dusk, 2026-10-12.)</summary>
+        public string Title =>
             Label ?? Source?.Title.ToString() ?? "Plan";
     }
 
@@ -535,8 +488,8 @@ public static class KokomiPlan
     /// </summary>
     /// <summary>
     /// `EB-650`, R266 (2026-09-07). THE SENTENCE SAID "A TURN" AND THE RULE IS
-    /// ABOUT THE MORNING. <see cref="ResolveDusk"/> is not capped -- a Dusk
-    /// Plan has waited for nothing -- so under a declared cap a turn could
+    /// ABOUT THE MORNING. The Dusk drain (retired 2026-10-12) was not capped
+    /// -- a Dusk Plan had waited for nothing -- so under a declared cap a turn could
     /// carry out more Plans than the face claimed was its limit, which is the
     /// r24 defect one word over. "At the start of your turn" is the drain the
     /// cap binds.
@@ -578,6 +531,19 @@ public static class KokomiPlan
     /// so only a morning hit spares its aura.</summary>
     private static readonly HashSet<Player> _morning = new();
 
+    /// <summary>THE RE-FOUNDING (2026-10-12): the seats whose Plan is being
+    /// carried out right now, one entry's clauses at a time
+    /// (<see cref="ResolveEntry"/>). Grand Strategist reads it.</summary>
+    private static readonly HashSet<Player> _carrying = new();
+
+    /// <summary>Is a Plan of this seat being carried out right now? Grand
+    /// Strategist's "Whenever a Plan causes an Elemental Reaction": a
+    /// reaction inside this window was caused by the Plan -- its own hit, or
+    /// a written Companion's Hydro and hit. Sim twin:
+    /// `state.kk_carrying_out`.</summary>
+    public static bool IsCarryingOut(Player? player) =>
+        player != null && _carrying.Contains(player);
+
     /// <summary>This turn's carry-out lines, in the order they were said.
     /// Cleared at the top of every morning, so a page never shows yesterday's.
     /// </summary>
@@ -618,6 +584,7 @@ public static class KokomiPlan
         _showing.Clear();
         _carriedOut.Clear();
         _summonHits.Clear();
+        _carrying.Clear();
         // `EB-643`: the cached environment read too, so a test that declares a
         // cap and one that does not cannot see each other's answer.
         _planCap = null;
@@ -662,15 +629,6 @@ public static class KokomiPlan
     /// </summary>
     public static int PlansHeld(Creature? kokomi) =>
         Pending(kokomi?.Player).Count;
-
-    /// <summary>
-    /// THE EXPANSION, BATCH ONE: "the Energy paid for the Plans waiting"
-    /// (Weight of the Plan) -- the sum of <see cref="Entry.Paid"/> over this
-    /// seat's queue. A 0-cost feeder adds nothing, by construction. Sim twin:
-    /// `kokomi_plan.plan_energy_waiting`.
-    /// </summary>
-    public static int EnergyWaiting(Creature? kokomi) =>
-        Pending(kokomi?.Player).Sum(e => System.Math.Max(0, e.Paid));
 
     /// <summary>
     /// WHAT TO DRAW ON THE JELLYFISH RIGHT NOW: the morning's remaining Plans
@@ -821,8 +779,12 @@ public static class KokomiPlan
     /// is `kokomi_plan.plan_aimed_at_pet`, which refuses on
     /// `force_random_targeting` and `kurage_autoplaying` for the same reason.
     /// </summary>
+    /// <remarks>THE RE-FOUNDING (2026-10-12): Grand Design's free write is
+    /// the one auto-play that writes, because the card it plays was CHOSEN
+    /// to be written (<see cref="KokomiRefounding.WriteFree"/>).</remarks>
     public static bool PlayedOnPet(CardPlay cardPlay) =>
-        !cardPlay.IsAutoPlay && BakeKuragePet.Is(cardPlay.Target);
+        (!cardPlay.IsAutoPlay || KokomiRefounding.IsFreeWrite(cardPlay.Card))
+        && BakeKuragePet.Is(cardPlay.Target);
 
     /// <summary>
     /// Write one Plan down: rule 2's whole engine side.
@@ -832,21 +794,13 @@ public static class KokomiPlan
     /// happens NOW and is STILL queued for the start of her next turn. Reading
     /// it as "instead" would delete rule 2 rather than break it.
     /// </summary>
-    /// <param name="dusk">`EB-643`, R265. Write this Plan as a DUSK Plan: it
-    /// is carried out at the end of the turn it was written on, before the
-    /// enemies act (<see cref="ResolveDusk"/>), instead of next morning. The
-    /// generated card passes it only where its row declares `plan_dusk:`, so
-    /// every card authored before the field existed emits exactly the call it
-    /// always did. <see cref="ScheduleFromExhaust"/> never passes it: Moon's
-    /// Reflection contributes another card's LINE and not its face, and Dusk
-    /// is a fact about the face.</param>
-    /// <param name="paid">THE EXPANSION, BATCH ONE: the Energy the play
-    /// paid for the writing card (<c>cardPlay.Resources.EnergySpent</c>),
-    /// kept on the entry as <see cref="Entry.Paid"/>.</param>
+    /// <param name="writer">The card that was played to write this Plan where
+    /// it is not <paramref name="source"/> (Moon's Reflection's found card).
+    /// The write payoffs (<see cref="KokomiRefounding.OnWritten"/>) read the
+    /// card that was written, which is this one where it is set.</param>
     public static async Task Schedule(
         PlayerChoiceContext choiceContext, Creature? kokomi, CardModel? source,
-        IReadOnlyList<Planned> clauses, bool dusk = false, int paid = 0,
-        CardModel? writer = null)
+        IReadOnlyList<Planned> clauses, CardModel? writer = null)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var player = kokomi!.Player;
@@ -885,8 +839,7 @@ public static class KokomiPlan
         // queued here is the number the face printed.
         for (var i = 0; i < body.Count; i++)
         {
-            if (body[i].Kind == Kind.Damage
-                || body[i].Kind == Kind.DamageIfAlone)
+            if (body[i].Kind == Kind.Damage)
             {
                 body[i] = body[i] with
                 {
@@ -963,20 +916,21 @@ public static class KokomiPlan
         var ledger = KokomiOverhaulLedger.For(kokomi);
         var extra = ledger.NextPlanExtra ?? 0;
         ledger.NextPlanExtra = null;
-        var entry = new Entry(source, body, label, dusk,
-                              Paid: System.Math.Max(0, paid), Extra: extra,
+        var entry = new Entry(source, body, label, Extra: extra,
                               Writer: writer);
         int before = queue.Count;
         queue.Add(entry);
-        // POOL COMPLETION (2026-10-01), SHOAL OF SPEARS: "for each Plan you
-        // wrote this turn". Every write, Moon's Reflection's included. Sim
-        // twin: `state.kk_plans_written_this_turn` in `kokomi_plan.schedule`.
+        // The whole-run telemetry's count of Plans written (Moon's
+        // Reflection's included). Sim twin: `kokomi_plan.schedule`.
         ledger.NotePlanWritten();
-        // KURAGE SWARM: "Whenever you write a Plan that costs 0, the Casket
-        // gains 1." The cost paid, after reductions.
-        if (entry.Paid == 0) KurageSwarmPower.Note(kokomi);
         await Sync(choiceContext, kokomi,
             SparkPower.SourceOf(source), before);
+        // THE RE-FOUNDING (2026-10-12): the write payoffs -- Watchful
+        // Shoal's Block for an Ethereal card, Watatsumi Resistance's Sting
+        // for a Companion. After the queue moved, so a payoff reads the Plan
+        // as written. Sim twin: `kokomi_plan.note_written`.
+        await KokomiRefounding.OnWritten(choiceContext, kokomi,
+                                         entry.Returns);
 
         // `EB-570`: A PLAN IS ONLY EVER QUEUED HERE. The Moon Overlooks the
         // Waters used to carry the entry out on the spot as well -- "Plans
@@ -1141,12 +1095,6 @@ public static class KokomiPlan
         // ORDER for the next morning -- not discarded, not re-sorted, because
         // the whole trial is about whether queue order becomes a decision. At
         // 0, which is the default, this is the list it always was.
-        //
-        // DUSK ENTRIES CANNOT BE IN THIS QUEUE. <see cref="ResolveDusk"/>
-        // drains them at the end of the turn they were written on, so by the
-        // next morning the queue holds only entries that waited for one --
-        // which is what makes "dusk carry-outs are not counted against the
-        // morning cap" true by construction rather than by a filter.
         var cap = PlanCap;
         var due = cap > 0 && queue.Count > cap
             ? new List<Entry>(queue.GetRange(0, cap))
@@ -1369,61 +1317,6 @@ public static class KokomiPlan
         card + ": no Plan followed";
 
     /// <summary>
-    /// `EB-643` (R265), DUSK: "the Bake-Kurage carries this Plan out at the
-    /// end of this turn, before enemies act."
-    ///
-    /// THE HOOK IS <c>ProtoBakeKuragePower.BeforeSideTurnEnd</c> on the PLAYER
-    /// side, which is the nearest broadcast this mod has to the printed
-    /// sentence and the one the sim mirrors (`combat._player_turn`, beside
-    /// `klee_overhaul.turn_end`). What the point buys is the whole promise:
-    /// the Block is on her before the swing, which is the only clause of the
-    /// face a card can tell apart.
-    ///
-    /// A DUSK CARRY-OUT IS A CARRY-OUT. It goes through
-    /// <see cref="ResolveEntry"/> like every other, so the plan bus rings on
-    /// it and Sango Isshin's condition is met.
-    ///
-    /// IT DOES NOT TOUCH `PlansThisMorning`, and that is the one place the two
-    /// drains differ on purpose: Tide Wall, Well Laid and Tide Chart all print
-    /// "this morning", and an evening is not one.
-    ///
-    /// NOT CAPPED. <see cref="PlanCap"/> is a rule about the MORNING -- "at
-    /// most N Plans a morning, the rest wait" -- and a Dusk Plan has already
-    /// waited for nothing.
-    ///
-    /// THE DUSK ENTRIES LEAVE THE QUEUE AND THE OTHERS STAY, taken before the
-    /// first clause runs for <see cref="ResolveAll"/>'s reason: a Dusk Plan
-    /// whose body writes another Plan must not carry its own child out on the
-    /// same boundary.
-    /// </summary>
-    public static async Task ResolveDusk(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-
-        Rebase(kokomi);
-        if (!_queues.TryGetValue(player, out var queue) || queue.Count == 0)
-        {
-            return;
-        }
-        var due = queue.Where(e => e.Dusk).ToList();
-        if (due.Count == 0) return;
-        queue.RemoveAll(e => e.Dusk);
-        int before = queue.Count + due.Count;
-        await Sync(choiceContext, kokomi, "rule:dusk_drain", before);
-        try
-        {
-            await Drain(choiceContext, kokomi, due);
-        }
-        finally
-        {
-            Vfx.KokomiPlanStrip.Refresh(kokomi);
-        }
-    }
-
-    /// <summary>
     /// EBB TIDE (`EB-643`): "cancel every Plan you have queued; gain 1 Energy
     /// and draw 1 card for each."
     ///
@@ -1559,7 +1452,8 @@ public static class KokomiPlan
     /// <summary>
     /// The lines the due entries are carried out as: each keeps the line it
     /// was flipped to while it waited, and an entry that cannot offer the
-    /// choice (Plan-only, Dusk) is always its Plan line. No screen (pick 5a).
+    /// choice (Plan-only, a written Companion) is always its Plan line. No
+    /// screen (pick 5a).
     /// Returns the entries in the same order.
     /// </summary>
     public static List<Entry> ChooseLines(List<Entry> due) =>
@@ -1685,8 +1579,8 @@ public static class KokomiPlan
     /// <summary>
     /// A two-line card's two lines as text, for the blind page's waiting list:
     /// the now-line, and the Plan line without its "Or plan:" head. Read off
-    /// the card's own rendered face, split where the face prints "Or plan:"
-    /// ("Or dusk plan:"). Empty strings where the face could not be read.
+    /// the card's own rendered face, split where the face prints "Or plan:".
+    /// Empty strings where the face could not be read.
     /// </summary>
     internal static (string Now, string Plan) LineTexts(CardModel? card)
     {
@@ -1703,31 +1597,6 @@ public static class KokomiPlan
         return SplitFace(text);
     }
 
-    /// <summary>
-    /// SEAT PAGE 7 (2026-10-05): a waiting Dusk entry's Plan line as text, off
-    /// the card's own rendered face (numbers filled, the upgrade honoured), so
-    /// the blind page's "Incoming this turn" can count its Block. A Dusk entry
-    /// is never two-line (<see cref="Entry.TwoLine"/>), so this is a separate
-    /// read: the "Or dusk plan:" split where the face has one (Shell of
-    /// Sanctuary, Evening Watch), else the text after "Dusk Plan:"
-    /// (Breakwater). Empty where the face could not be read.
-    /// </summary>
-    internal static string DuskPlanText(CardModel? card)
-    {
-        var (now, plan) = LineTexts(card);
-        return plan.Length > 0 ? plan : DuskPlanLine(now);
-    }
-
-    /// <summary>The text after a face's "Dusk Plan:", or empty. Pure, for
-    /// <see cref="DuskPlanText"/> and its headless pin.</summary>
-    internal static string DuskPlanLine(string face)
-    {
-        const string mark = "Dusk Plan:";
-        var at = (face ?? "").IndexOf(mark,
-                                      System.StringComparison.OrdinalIgnoreCase);
-        return at < 0 ? "" : face!.Substring(at + mark.Length).Trim();
-    }
-
     /// <summary><see cref="LineTexts"/>'s split of a rendered face, its tags
     /// stripped. Pure, so a headless test can read it.</summary>
     internal static (string Now, string Plan) SplitFace(string? text)
@@ -1736,11 +1605,6 @@ public static class KokomiPlan
             text ?? "", @"\[[^\]]*\]", "");
         var at = text.IndexOf("Or plan:", System.StringComparison.Ordinal);
         var head = "Or plan:".Length;
-        if (at < 0)
-        {
-            at = text.IndexOf("Or dusk plan:", System.StringComparison.Ordinal);
-            head = "Or dusk plan:".Length;
-        }
         if (at < 0) return (text.Trim(), "");
         return (text.Substring(0, at).Trim(),
                 text.Substring(at + head).Trim());
@@ -1786,10 +1650,9 @@ public static class KokomiPlan
     /// SPRING TIDE (pool completion, 2026-10-01): "The Bake-Kurage carries
     /// out all your Plans now."
     ///
-    /// THE WHOLE QUEUE, IN ORDER, Dusk Plans included ("all your Plans"),
-    /// through <see cref="Drain"/> -- so a rider reaches the entry behind it,
-    /// and every carry-out rings the plan bus and counts for the Casket and
-    /// Kurage Canopy. MID-TURN: Nereid's Ascension does not double the first
+    /// THE WHOLE QUEUE, IN ORDER ("all your Plans"), through
+    /// <see cref="Drain"/> -- so a rider reaches the entry behind it, and
+    /// every carry-out rings the plan bus and pays Kurage Canopy. MID-TURN: Nereid's Ascension does not double the first
     /// entry, the morning's depth is untouched and the cap does not apply.
     /// The queue is emptied before the first clause runs, so a Plan written
     /// afterwards waits for the morning. An empty queue is a printed no-op.
@@ -1916,6 +1779,11 @@ public static class KokomiPlan
         // the clause itself moves.
         string? kind = null;
         int? asked = null;
+        // THE RE-FOUNDING (2026-10-12): Grand Strategist's "Whenever a Plan
+        // causes an Elemental Reaction" reads this window, open for exactly
+        // the clauses of one carry-out (<see cref="IsCarryingOut"/>).
+        var seat = kokomi.Player;
+        if (seat != null) _carrying.Add(seat);
         try
         {
             // A PLAN STAYS OPEN (2026-10-01): the player chose the now-line.
@@ -1949,6 +1817,7 @@ public static class KokomiPlan
         }
         finally
         {
+            if (seat != null) _carrying.Remove(seat);
             // `EB-329`, THE OTHER HALF OF THE ROW: A LINE EVEN WHEN THE PLAN'S
             // KILL ENDS THE FIGHT. The round-5 act-1 seat banked two Plans for
             // an exactly-lethal morning, and "the next screen was the reward
@@ -1970,11 +1839,6 @@ public static class KokomiPlan
         // resolution both pass through, and both are the card's printed
         // "carried out a Plan this turn".
         KokomiOverhaulLedger.For(kokomi).NotePlanCarriedOut();
-        // THE CASKET PASS (2026-09-28): "Each Plan the Bake-Kurage carries
-        // out adds 1 to the Casket." HERE, beside Sango Isshin's fact and for
-        // its reason: this is the one place a Plan is carried out, once per
-        // carry-out, so a doubled carry-out adds twice.
-        Relics.TamakushiCasket.NoteCarriedOut(kokomi);
 
         foreach (var power in kokomi.Powers.ToList())
         {
@@ -1983,6 +1847,12 @@ public static class KokomiPlan
                 await listener.OnPlanResolved(choiceContext, kokomi);
             }
         }
+        // THE RE-FOUNDING (2026-10-12): Coordinated Tide (an Ethereal card
+        // carried out) and Endless Shoal (a Sting or Ward carried out). Once
+        // per carry-out, either line, like the bus above. Sim twin:
+        // `kokomi_plan.note_carried_out`.
+        await KokomiRefounding.OnCarriedOut(choiceContext, kokomi,
+                                            entry.Returns);
         return (wroteDouble, wroteExtra);
     }
 
@@ -2204,38 +2074,30 @@ public static class KokomiPlan
                 await KokomiOverhaulKit.FirstAttackTwice(choiceContext, kokomi);
                 return null;
 
-            case Kind.FirstCardFree:
-                // R276, STOLEN CHAPTER. A switch; no number on the beat.
-                await KokomiOverhaulKit.FirstCardFree(choiceContext, kokomi);
-                return null;
+            // THE RE-FOUNDING (2026-10-12).
+            case Kind.AddStings:
+                return await KokomiCards.AddJellyfish(
+                    player, KokomiCards.Jellyfish.Sting, plan.Amount,
+                    upgraded: false);
 
-            // THE EXPANSION, BATCH ONE (2026-09-29).
-            case Kind.EnergyIfAlone:
-                if (drainEntries > 1) return 0;
-                await PlayerCmd.GainEnergy(plan.Amount, player);
+            case Kind.StrengthThisTurn:
+                await KokomiRefounding.StrengthThisTurn(
+                    choiceContext, kokomi, plan.Amount);
                 return plan.Amount;
 
-            case Kind.DamageIfAlone:
-                return await Hit(choiceContext, kokomi, plan,
-                                 drainEntries > 1 ? plan.Amount
-                                                  : plan.Amount * 2,
-                                 entry, doubleDamage);
+            case Kind.JuugaGuard:
+                await PowerCmd.Apply<JuugaGuardPower>(
+                    choiceContext, kokomi, plan.Amount, applier: kokomi,
+                    cardSource: null);
+                return null;
 
-            case Kind.BlockPerAttackingEnemy:
-            {
-                var attackers = IntendingAttack(kokomi).Count;
-                if (attackers <= 0) return 0;
-                return (int)await CreatureCmd.GainBlock(
-                    kokomi, plan.Amount * attackers, ValueProp.Move, null);
-            }
-
-            case Kind.DoubleBlock:
-            {
-                var standing = (int)kokomi.Block;
-                if (standing <= 0) return 0;
-                return (int)await CreatureCmd.GainBlock(
-                    kokomi, standing, ValueProp.Unpowered, null);
-            }
+            case Kind.PlayCompanion:
+                // The Companion prints its own numbers as it resolves; this
+                // clause produced none of its own (`EB-317`'s line names the
+                // card alone).
+                await KokomiCompanionPlan.CarryOut(choiceContext, kokomi,
+                                                   plan.Card);
+                return null;
 
             case Kind.AllyDraw:
             {
@@ -2341,19 +2203,6 @@ public static class KokomiPlan
                 return (int)await CreatureCmd.GainBlock(
                     kokomi, plan.Amount, ValueProp.Move, null);
 
-            case Kind.BlockPerPlanHeld:
-                // BREAKWATER (`EB-685`). POWERED, the flat planned Block's
-                // funnel exactly and for the reason Tide Wall's branch above
-                // states. The count is the QUEUE AS IT STANDS RIGHT NOW --
-                // <see cref="PlansHeld"/>, read live rather than once at the
-                // drain -- and <see cref="Kind.BlockPerPlanHeld"/> carries the
-                // whole argument for why. An empty queue pays nothing, a
-                // printed no-op: a Breakwater with no Plan standing behind it
-                // is the base alone.
-                return (int)await CreatureCmd.GainBlock(
-                    kokomi, plan.Amount * PlansHeld(kokomi),
-                    ValueProp.Move, null);
-
             case Kind.Mend:
                 // Mend returns the HP that actually landed, which is the
                 // honest number: "Mend 10" into 4 points of room says 4.
@@ -2396,15 +2245,9 @@ public static class KokomiPlan
             case Kind.BlockPerStatusInHand:
                 return await KokomiStatusBatch.BlockPerStatus(
                     kokomi, plan.Amount);
-            case Kind.ExhaustStatusesInHand:
-                return await KokomiStatusBatch.ExhaustStatuses(
-                    choiceContext, player, plan.Amount, entry?.Source);
             case Kind.TransformStatusesInHand:
                 return await KokomiStatusBatch.TransformStatuses(
                     player, entry?.Source?.IsUpgraded ?? false);
-            case Kind.DiscardAndDraw:
-                return await KokomiStatusBatch.DiscardAndDraw(
-                    choiceContext, player, entry?.Source);
         }
         return null;
     }
@@ -2436,22 +2279,19 @@ public static class KokomiPlan
         // POOL COMPLETION: Tactical Relay's figure is HER share of it.
         Kind.EachPlayerEnergy => "Energy",
         Kind.EachPlayerDraw => "cards drawn",
-        Kind.Block
-            or Kind.BlockPerPlanHeld or Kind.BlockPerAttackingEnemy
-            or Kind.DoubleBlock => "Block",
-        Kind.EnergyIfAlone => "Energy",
+        Kind.Block => "Block",
         Kind.Mend => "HP healed",
-        Kind.Damage or Kind.DamageQuarterMaxHp
-            or Kind.DamageIfAlone => "damage",
+        Kind.Damage or Kind.DamageQuarterMaxHp => "damage",
         Kind.BlockFrontIntent => "Block",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
         // The two riders produce no number at all and fall to the default.
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",
-        Kind.ExhaustStatusesInHand => "cards exhausted",
         Kind.TransformStatusesInHand => "cards transformed",
-        Kind.DiscardAndDraw => "cards drawn",
+        // THE RE-FOUNDING (2026-10-12).
+        Kind.AddStings => "cards added",
+        Kind.StrengthThisTurn => "Strength",
         _ => null,
     };
 
@@ -2473,16 +2313,6 @@ public static class KokomiPlan
     private static int? AskedFor(Creature kokomi, Planned plan) => plan.Kind
         switch
     {
-        // `EB-685`. A FIFTH SCALED KIND, and it reads the QUEUE rather than a
-        // ledger -- asked here BEFORE the clause runs, which for this one is
-        // the same moment the clause itself asks: `ResolveDusk` has already
-        // emptied the dusk entries out, and nothing between here and the
-        // `GainBlock` touches the queue.
-        Kind.BlockPerPlanHeld => plan.Amount * PlansHeld(kokomi),
-        // THE EXPANSION: Evening Watch's rate times the attackers on screen.
-        Kind.BlockPerAttackingEnemy =>
-            plan.Amount * IntendingAttack(kokomi).Count,
-        Kind.DoubleBlock => (int)kokomi.Block,
         Kind.DamageQuarterMaxHp => KokomiRules.QuarterOfMaxHp(kokomi),
         // R276. Tide Wall asks for the intent plus its bonus.
         Kind.BlockFrontIntent =>
@@ -2951,10 +2781,7 @@ public static class KokomiPlan
     {
         // A PLAN STAYS OPEN (2026-10-01): a two-line Plan carries both lines
         // while it waits, so the choice is readable a turn early (sec.3).
-        // SEAT PAGE 7 (2026-10-05): and a Dusk entry carries its Plan line,
-        // so the blind page can count its Block before the enemies act.
         var (now, plan) = entry.TwoLine ? LineTexts(entry.Source)
-            : entry.Dusk ? ("", DuskPlanText(entry.Source))
             : ("", "");
         return new Dictionary<string, object?>
             {
@@ -3366,7 +3193,7 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
         ("title", "Plan"),
         ("description",
             // THE 2026-09-25 TEXT PASS: the count and the order, nothing else.
-            // The Dusk timing is the `Dusk` tip's alone, and "later debuffs do
+            // "Later debuffs do
             // not change what you wrote" is the panel's
             // (`blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`). Spec:
             // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.

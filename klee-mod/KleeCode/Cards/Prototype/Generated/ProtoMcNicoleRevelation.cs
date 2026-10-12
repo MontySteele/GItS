@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard
+public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard, IWritableCompanion
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -56,6 +56,14 @@ public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard
         ("description", "At the start of your turn, gain 5 [gold]Block[/gold], and 2 [gold]Strength[/gold] if you ended last turn with [gold]Block[/gold]."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -71,6 +79,11 @@ public sealed class ProtoMcNicoleRevelation : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         await PowerCmd.Apply<RevelationPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 

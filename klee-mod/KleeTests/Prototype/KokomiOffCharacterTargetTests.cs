@@ -159,19 +159,19 @@ public class KokomiOffCharacterTargetTests
     {
         WithDistinctSpellings(() =>
         {
-            var vanguard = new ProtoKkVanguard();        // PetOrEnemy
+            var ambush = new ProtoKkAmbush();        // PetOrEnemy
             var jointOrders = new ProtoKkJointOrders();  // PetOrAlly
-            var breakwater = new ProtoKkBreakwater();    // PetOnly
+            var masterstroke = new ProtoKkMasterstroke();    // PetOnly
             var kelpWall = new ProtoKkKelpWall();        // PetOrSelf
 
-            Assert.True(NoLegalTarget(vanguard, null));
+            Assert.True(NoLegalTarget(ambush, null));
             Assert.True(NoLegalTarget(jointOrders, null));
-            Assert.True(NoLegalTarget(breakwater, null));
+            Assert.True(NoLegalTarget(masterstroke, null));
             // Its self half is always there; BaseLib's roll finds the player.
             Assert.False(NoLegalTarget(kelpWall, null));
 
             // A filled target is never refused.
-            Assert.False(NoLegalTarget(vanguard, Enemy()));
+            Assert.False(NoLegalTarget(ambush, Enemy()));
         });
     }
 
@@ -211,14 +211,14 @@ public class KokomiOffCharacterTargetTests
         WithDistinctSpellings(() =>
         {
             var necro = Seat.Of(new Necrobinder()).WithCombatState();
-            var card = Owned(new ProtoKkBreakwater(), necro);
+            var card = Owned(new ProtoKkMasterstroke(), necro);
             Assert.True(PlanOnlyUnplayable(card));      // no pet at all
 
             Osty(necro);
             Assert.True(PlanOnlyUnplayable(card));      // Osty is not the Kurage
 
             // A pet-or-enemy card is not greyed: it still has the enemy.
-            Assert.False(PlanOnlyUnplayable(Owned(new ProtoKkVanguard(), necro)));
+            Assert.False(PlanOnlyUnplayable(Owned(new ProtoKkAmbush(), necro)));
         });
     }
 
@@ -229,7 +229,7 @@ public class KokomiOffCharacterTargetTests
         {
             var kokomi = Seat.Kokomi().WithCombatState();
             Kurage(kokomi);
-            Assert.False(PlanOnlyUnplayable(Owned(new ProtoKkBreakwater(), kokomi)));
+            Assert.False(PlanOnlyUnplayable(Owned(new ProtoKkMasterstroke(), kokomi)));
             Assert.False(LacksTheKurage(kokomi.Player));
         });
     }

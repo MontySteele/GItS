@@ -460,7 +460,11 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         # `effects.inazuma_overhaul_turn_end`, pinned by
                         # `test_inazuma_companion_overhaul.py`, and this
                         # assertion is where the two walks are held level.
-                        "JuugaPower", "MujiMujiDarumaPower",
+                        "JuugaPower",
+                        # Juuga's Plan line (the Kokomi re-founding,
+                        # 2026-10-12): its Block on the same clock, beside
+                        # the volley (`mi_juuga_guard` in the sim).
+                        "JuugaGuardPower", "MujiMujiDarumaPower",
                         "SanctifyingRingPower", "SesshouSakuraPower",
                         "SoumetsuPower", "KyoukaPower", "TamotoPower",
                         "CrimsonOoyoroiPower", "WarBannerPower",

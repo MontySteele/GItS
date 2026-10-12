@@ -90,43 +90,24 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   3, "Whenever you place a Bomb or Mine, your other Bombs and Mines grow by
   2 [3]." **Next:** [USER]'s higher-ascension (A3 to A5) runs, which read her
   deep scaling.
-- **Kokomi: Prototype.** Brief `review/active/kokomi-brief-2026-09-01.md`
-  (sec.2, the rules). A card with a Plan line can be played on the
-  Bake-Kurage instead, and it is carried out at the start of her next turn,
-  after the draw; the line prints "Or plan:" under the now-line. When it
-  carries out a two-line Plan it uses the Plan line, and a click on a waiting
-  Plan flips it to the now-line (`review/active/kokomi-delay-pays-2026-10-01.md`).
-  The Tamakushi Casket counts the Plans carried out; Open the Casket (cost 0,
-  then 1 more each play this combat, ruled by [USER] after his run
-  2026-10-10; Retain, no Exhaust) gives Strength equal to the count and
-  empties it. Pool
-  78 (21 / 36 / 21) plus five co-op cards and two Ancients; relics are the
-  Casket and its upgrade beside the Silent's borrowed roster. Latest round
-  `review/records/kokomi-review-round-2026-10-05.md`: one run reached the
-  final boss, one lost the act-2 boss; the damage gap against
-  the control stands. Next: [USER] plays (a central rule changed; co-op with a
-  friend may stand in); the damage gap is a paper after that run. Growth
-  Powers built 2026-10-10 (`review/active/kokomi-growth-powers-2026-10-10.md`):
-  Flood Tide replaces The General's Banner, Grand Design keeps the Casket's
-  count. Whole-run round 2
-  (`review/records/kokomi-fullrun-round-2-2026-10-10.md`): 0 of 5, level with
-  the same-night base; Flood Tide works and Plan damage no longer collapses
-  late (act 3 53.3 a fight, was 5.7); act 1 still bleeds. Round-2 fixes:
-  Grand Design puts Open the Casket into her hand each turn, Change of Plans
-  draws 1, Open the Casket shows its count. Its two picks were settled by
-  [USER]'s run and rulings after it. Plan pricing built 2026-10-11
-  (`review/active/kokomi-plan-pricing-2026-10-11.md`, ratio 1.3): nine
-  next-turn Plans pay 1.3 times the base on-turn rate, Kurage's Oath's Plan
-  is 9 [12] to ALL and Slack Water deals 6 [9]. Rounds 3 to 5 and a card
-  pass followed (`review/records/kokomi-fullrun-round-3-2026-10-11.md`):
-  round 5 won 1 of 5 and reached the base seats' floors or deeper on every
-  seed. Ruled 2026-10-11 ("I think defaults here are fine"): Treatise draws
-  when you play a Plan card's first line, not when you write it. Next:
-  [USER]'s full run on the build with the round-5 fixes, watching act 3's
-  damage and the Queen's Bound turns. [USER]'s run on 0.2.4969
-  (`review/records/kokomi-user-run-2026-10-11.md`) won but felt "clunky";
-  Tidecleanse lost its draw, Sango Isshin counts Plans this combat, Change of
-  Plans' upgrade keeps Exhaust, and a clean-up paper is next.
+- **Kokomi: Prototype, re-founded 2026-10-12.** Brief
+  `review/active/kokomi-brief-2026-09-01.md` (sec.2, the rules). A card with
+  a Plan line, or any Companion card, can be played on the Bake-Kurage
+  instead, and it is carried out at the start of her next turn, after the
+  draw; a click on a waiting Plan flips it to the now-line
+  (`review/active/kokomi-delay-pays-2026-10-01.md`). The re-founding
+  (direction `review/active/kokomi-design-pass-2026-10-11.md`, cards
+  `review/active/kokomi-card-paper-2026-10-12.md`, both ruled) retired the
+  Casket's count, Open the Casket and Dusk: the Tamakushi Casket now gains 3
+  Block at the end of her turn while a Plan is waiting (the Watatsumi Casket
+  5). Ethereal is the base keyword and a written card is not lost to it.
+  Stings and Wards are her generated jellyfish (cost 1, Ethereal, Exhaust).
+  A written Companion is carried out at its printed rate after the
+  Bake-Kurage applies Hydro to its target; Gorou's four are her own cards
+  with their own Plan lines. Pool 78 (21 / 36 / 21) plus five co-op cards
+  and two Ancients. The build before it is tagged
+  `kokomi-casket-frozen-2026-10-12`. Next: a seat round on the re-founded
+  build, then [USER]'s run.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:

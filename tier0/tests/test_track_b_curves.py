@@ -226,10 +226,12 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # at each turn start, and each Spend card play with the enemies
             # alive. Mod-side hand and hook reads with no wire route.
             "spend_card_names_turn_start", "spend_card_plays",
-            # 2026-10-10 (the Kokomi whole-run round): the Casket's count as
-            # each turn opens, and the Plans written and carried out per
-            # fight. Mod-side ledger reads with no wire route.
-            "casket_turn_start", "plans_written", "plans_carried_out",
+            # 2026-10-10 (the Kokomi whole-run round): the Plans written and
+            # carried out per fight; 2026-10-12 (the re-founding, which
+            # retired the Casket's count): the Ethereal cards she lost at
+            # the end of her turns. Mod-side ledger and hook reads with no
+            # wire route.
+            "ethereal_lost", "plans_written", "plans_carried_out",
             "run_id", "run_instance", "fight_index", "encounter",
             "detonations", "corpse_detonations",
             # EB-118. One row per resolved Exhaust selection, in the SIM's
