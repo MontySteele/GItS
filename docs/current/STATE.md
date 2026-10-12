@@ -106,8 +106,14 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Bake-Kurage applies Hydro to its target; Gorou's four are her own cards
   with their own Plan lines. Pool 78 (21 / 36 / 21) plus five co-op cards
   and two Ancients. The build before it is tagged
-  `kokomi-casket-frozen-2026-10-12`. Next: a seat round on the re-founded
-  build, then [USER]'s run.
+  `kokomi-casket-frozen-2026-10-12`. Three seat rounds and a forced test
+  ran on 2026-10-12 (`review/records/kokomi-round-{1,2,3}-2026-10-12.md`,
+  `kokomi-growth-test-2026-10-12.md`): 0 wins in 32; act 1 her safest yet;
+  act-2 bosses the wall (her own damage 45% of base; an Ironclad control
+  died there too); act-3 own-card damage about 62% of base. Watchful Shoal
+  is now "Your Stings deal 3 additional damage. Your Wards gain 3
+  additional Block." (a growth test, reversible). Next: [USER]'s run on
+  0.2.5020, then the late-growth pick (QUEUE).
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
