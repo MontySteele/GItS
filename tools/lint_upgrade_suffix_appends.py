@@ -120,6 +120,15 @@ SITES: dict[tuple[str, str, str], dict] = dict((
           "`_card_index()` keys and carry no mark. A generation pool is never "
           "a run deck, so the deck-only decoration cannot arrive here. The "
           "`has_upgrade(pick.id)` guard covers the already-upgraded row too."),
+    _site("tier0/engine/kokomi_plan.py", "add_companions",
+          "pick.id + upgrades.SUFFIX",
+          "sheet", "has_upgrade",
+          "Orders from the Shrine+ / Watatsumi Muster+ (the Kokomi "
+          "re-founding, 2026-10-12): an upgraded generated Companion. `pick` "
+          "is drawn from `generated_companions` -> "
+          "`klee_overhaul.random_companion_pool` -> "
+          "`loader.companion_roster_replacement`, sheet rows whose ids carry "
+          "no mark; the `has_upgrade(pick.id)` guard covers a row with none."),
     _site("tier0/engine/effects.py", "_op_add_card", "cid + upgrades.SUFFIX",
           "sheet", "degrade",
           "HiddenDaggers+ / StormOfSteel+ (`created_upgraded`). `cid` is "

@@ -9,6 +9,9 @@
    played after both, and it cancels the NEWEST Plan, which was Vanguard.
 4. [USER]: "Riptide - buff the Draw from 1 to 2, and upgrades to 3".
 
+THE RE-FOUNDING (2026-10-12) cut Nip and Vanguard and made Riptide's Plan
+"Draw 3 cards" (4 upgraded); the pins below read surviving rows.
+
 The C# twin is `KleeTests/Prototype/KokomiCoopPlaytestFixesTests.cs`.
 NOTHING MEASURED HERE IS QUOTABLE (R215 B).
 """
@@ -43,23 +46,24 @@ def test_the_sim_ticks_auras_before_the_morning_drain():
 
 
 def test_a_plan_hit_lands_a_whole_hydro_aura(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=60)])
-    kokomi_plan.schedule(st, _row("proto_kk_nip"))
+    st = kokomi_state(enemies=[make_enemy(hp=100)])
+    kokomi_plan.schedule(st, _row("proto_kk_masterstroke"))
     kokomi_plan.resolve_all(st)
     enemy = st.enemies[0]
     assert enemy.aura == "hydro"
     assert enemy.aura_turns_left == reactions.aura_duration(st)
 
 
-def test_riptide_and_vanguard_plans_pay_three_energy(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=60)])
+def test_two_energy_plans_on_two_entries_add(overhaul):
+    """War Council twice since the re-founding (Riptide's Plan is a draw and
+    Vanguard is cut): two Energy clauses on two entries add."""
+    st = kokomi_state(enemies=[make_enemy(hp=100)])
     _deck(st)
     st.player.energy = 0
-    kokomi_plan.schedule(st, _row("proto_kk_riptide"))
-    kokomi_plan.schedule(st, _row("proto_kk_vanguard"))
+    kokomi_plan.schedule(st, _row("proto_kk_war_council"))
+    kokomi_plan.schedule(st, _row("proto_kk_war_council"))
     kokomi_plan.resolve_all(st)
-    assert st.player.energy == 3
-    assert len(st.player.hand) == 2
+    assert st.player.energy == 2 + 2
 
 
 QUIET = [{"kind": "block", "amount": 5}]
@@ -76,9 +80,9 @@ def _write(st, cid, energy=10):
 
 # --- Kokomi follow-ups, 2026-10-01: a cancel is an undo ---------------------
 
-def test_riptide_draws_two_and_three_upgraded(overhaul):
-    st = kokomi_state(enemies=[make_enemy(hp=60)])
+def test_riptide_draws_three_and_four_upgraded(overhaul):
+    st = kokomi_state(enemies=[make_enemy(hp=100)])
     _deck(st)
     kokomi_plan.schedule(st, upgrades.apply_upgrade(_row("proto_kk_riptide")))
     kokomi_plan.resolve_all(st)
-    assert len(st.player.hand) == 3
+    assert len(st.player.hand) == 4

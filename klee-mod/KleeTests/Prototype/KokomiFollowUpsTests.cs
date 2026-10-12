@@ -36,7 +36,7 @@ public class KokomiFollowUpsTests : IDisposable
     [Fact]
     public void A_moons_reflection_plan_gives_back_moons_reflection()
     {
-        var found = new ProtoKkVanguard();
+        var found = new ProtoKkAmbush();
         var moon = new ProtoKkMoonsReflection();
         var clauses = Array.Empty<KokomiPlan.Planned>();
         Assert.Same(moon,

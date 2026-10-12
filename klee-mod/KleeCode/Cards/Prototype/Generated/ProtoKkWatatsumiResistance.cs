@@ -38,14 +38,14 @@ public sealed class ProtoKkWatatsumiResistance : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanion(base.ExtraHoverTips, this);
+        KokomiCards.WithStingPreview(ArmKeywordTips.ForCompanion(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this), this, false);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_watatsumi_resistance");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi Resistance"),
-        ("description", "Whenever you play a [gold]Companion[/gold] card, add a [gold]Nip[/gold] to your hand. It [gold]Exhausts[/gold]."),
+        ("description", "Whenever you write a [gold]Companion[/gold] card as a [gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

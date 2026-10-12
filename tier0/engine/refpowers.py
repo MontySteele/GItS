@@ -1152,12 +1152,6 @@ def after_card_drawn(state: CombatState, card: Card,
     if p.powers.get("ko_finders_keepers"):
         from tier0.engine import klee_overhaul     # late import (cycle)
         klee_overhaul.finders_keepers(state, card)
-    # The Kokomi card pass (2026-10-11), ABYSSAL SALVAGE: the first status
-    # drawn each turn is Exhausted and the Casket gains 1. Dead unless the
-    # Power is up. `AbyssalSalvagePower.AfterCardDrawn`.
-    if p.powers.get("kk_abyssal_salvage"):
-        from tier0.engine import kokomi_plan     # late import (cycle)
-        kokomi_plan.abyssal_salvage(state, card)
     randomise_cost_on_draw(state, card)
 
 

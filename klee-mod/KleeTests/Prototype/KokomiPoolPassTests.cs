@@ -98,21 +98,19 @@ public class KokomiPoolPassTests
     // ======================================================================
 
     [Fact]
-    public void Riptide_hits_all_enemies_now_and_plans_energy_and_a_card()
+    public void Riptide_hits_all_enemies_now_and_plans_a_draw()
     {
         // R276 pick 1: the now-line is the AoE; the Plan line is what only a
-        // head start buys, 1 Energy and a card on the carry-out turn.
+        // head start buys. The re-founding (2026-10-12): "Draw 3 cards".
         var card = new ProtoKkRiptide();
         Assert.Equal(2, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
         // Uncommon since the feed pass (2026-09-29).
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
 
-        var clauses = card.PlanClauses;
-        Assert.Equal(2, clauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Energy, clauses[0].Kind);
-        Assert.Equal(KokomiPlan.Kind.Draw, clauses[1].Kind);
-        Assert.All(clauses, c => Assert.Equal(KokomiPlan.Aim.Self, c.Aim));
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal((KokomiPlan.Kind.Draw, KokomiPlan.Aim.Self),
+                     (clause.Kind, clause.Aim));
     }
 
     [Fact]

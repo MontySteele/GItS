@@ -125,7 +125,9 @@ public class InazumaCompanionOverhaulTests
         var inazuma = Il.Method("CompanionOverhaulRoster", "InazumaUniversals");
         var referenced = Il.CallSequence(inazuma)
             .Count(c => c.StartsWith("ModelDb.Card"));
-        Assert.Equal(24, referenced);
+        // 21 since the Kokomi re-founding (2026-10-12): Gorou's three are her
+        // own cards.
+        Assert.Equal(21, referenced);
 
         var mondstadt = Il.Method("CompanionOverhaulRoster", "Universals");
         // 35 since the AoE trim (2026-10-03) split Durin in two; 39 since the
@@ -172,7 +174,9 @@ public class InazumaCompanionOverhaulTests
         // Dexterity, and Dexterity is a thing this engine already has -- so it
         // applies the base game's own power and a second, private CLOCK that
         // takes those two stacks back when it runs out.
-        var play = typeof(ProtoMiGorouWarBanner).GetMethod("OnPlay", All)!;
+        // Her own two-line card since the re-founding (2026-10-12): the
+        // printed effect is the now-line.
+        var play = typeof(ProtoMiGorouWarBanner).GetMethod("PlayNowLine", All)!;
         // CallSequence, not Calls: only the ordered reader names a generic
         // method's type argument, and the type argument IS the assertion here.
         var applies = Il.CallSequence(play)
@@ -357,7 +361,9 @@ public class InazumaCompanionOverhaulTests
         // The ledger has to start at zero when the play does, or the card
         // banks the last card's damage. Emitted only for a row that asks --
         // the same arrangement Kokomi's `BeginPlay` has.
-        var play = typeof(ProtoMiGorouInuzaka).GetMethod("OnPlay", All)!;
+        // Her own two-line card since the re-founding (2026-10-12): the
+        // printed effect is the now-line.
+        var play = typeof(ProtoMiGorouInuzaka).GetMethod("PlayNowLine", All)!;
         var sequence = Il.CallSequence(play).ToList();
         var open = sequence.FindIndex(c => c.Contains("BeginPlay"));
         var bank = sequence.FindIndex(c => c.Contains("BlockHalfDamage"));

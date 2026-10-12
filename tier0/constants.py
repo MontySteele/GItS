@@ -687,6 +687,7 @@ MC_LIONS_FANG_DRAW = 1
 # text, re-priced in its sec.8 -- nothing is derived and nothing is picked.
 MI_WAR_BANNER_DEXTERITY = 2     # Gorou: Dexterity while the banner stands
 MI_JUUGA_DMG = 7                # Gorou: Geo damage per turn, 3 turns
+MI_JUUGA_GUARD_BLOCK = 6        # Gorou: Juuga's Plan line, Block per turn, 3 turns
 MI_DARUMA_DMG = 9               # Sayu: the Daruma's hit above 70% HP
 MI_DARUMA_BLOCK = 9             # Sayu: and the Block below it
 MI_SANCTIFYING_RING_DMG = 6     # Shinobu: Electro to ALL, per turn, 3 turns
@@ -714,9 +715,8 @@ MI_TAMOTO_DMG = 7               # Chiori: Geo per turn, ignoring Block
 # Uncommons. The ENUMERATION is what is built; the Personal is not a Universal
 # and is not here, and neither is any stand-in.
 INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
-    "proto_mi_gorou_inuzaka",
-    "proto_mi_gorou_war_banner",
-    "proto_mi_gorou_juuga",
+    # Gorou's three left for Kokomi's own pool (the re-founding, 2026-10-12;
+    # `KOKOMI_OWN_COMPANION_IDS`). Twenty-one.
     "proto_mi_sayu_fuuin_dash",
     "proto_mi_sayu_daruma",
     "proto_mi_sayu_naptime",
@@ -753,7 +753,8 @@ INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
 # is what keeps it out of anybody else's slot -- the same door Prune has come
 # through since the shipped Mondstadt sheet.
 INAZUMA_OVERHAUL_PERSONAL_IDS: tuple[str, ...] = (
-    "proto_mi_gorou_crystal_collapse",
+    # EMPTY SINCE THE RE-FOUNDING (2026-10-12): Crystal Collapse is in
+    # Kokomi's own pool (`KOKOMI_OWN_COMPANION_IDS`). The seam stays.
 )
 
 # The nation this second replacement owns.
@@ -882,21 +883,17 @@ CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 
 # THE NUMBER THE RULES CARRY, and it is one. Draft 6's rules are structural --
 # where a card lands and when -- so almost every figure is a CARD's and stays
-# on its row. The relic's strike is the exception: it is a rule the Tamakushi
-# Casket carries, printed on the relic and on no card, so it is named here for
+# on its row. The starting relic's Block is the exception: a rule the Tamakushi
+# Casket carries, printed on the relic and on no card, named here for
 # `tools/lint_constant_parity.py` to compare the C# mirror BY VALUE.
-# THE CASKET PASS (2026-09-28) REPLACED THE STRIKE. The relic used to answer
-# every debuff she applied with a 2 Hydro hit (`KOKOMI_OVERHAUL_CASKET_STRIKE`,
-# retired); it now COUNTS the Plans the Bake-Kurage carries out, and Open the
-# Casket turns the count into Strength. [USER]: "1 strength per point seems
-# fine; we can adjust down if we need to." Mirrored BY VALUE against
-# `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
-KOKOMI_OVERHAUL_CASKET_PER_PLAN = 1            # added per carried-out Plan
-KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT = 1  # Open the Casket's rate
-# THE EXPANSION, BATCH ONE (2026-09-29): the rule number The Long Game
-# prints, "if exactly one Plan is waiting". Mirrored BY VALUE against
-# `KokomiOverhaulLaw` by `tools/lint_constant_parity.py`.
-KOKOMI_EXPANSION_LONG_GAME_WAITING = 1
+# THE RE-FOUNDING (2026-10-12, review/active/kokomi-design-pass-2026-10-11.md
+# pick 3, ruled): the Casket's count and Open the Casket are gone; the relic
+# reads "At the end of your turn, if a Plan is waiting, gain 3 Block."
+KOKOMI_OVERHAUL_CASKET_BLOCK = 3
+# Call the Generals' "Choose 1 of 3 random Rare Inazuma Companions" (the card
+# paper's Rare): how many are offered. Mirrored BY VALUE against
+# `KokomiCompanionPlan.GeneralsOffered`.
+KOKOMI_GENERALS_OFFERED = 3
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one
@@ -922,22 +919,91 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE KOKOMI EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
-# 2026-09-29.md, ruled): four decks, 12 Uncommon and 10 Rare, in the sheet's
-# own order. Watatsumi's Grace replaces The Clouds Like Waves Rippling (pick
-# 3), which left the pool. Appended LAST to `KOKOMI_OVERHAUL_POOL_IDS`.
-KOKOMI_EXPANSION_BATCH_ONE_IDS: tuple[str, ...] = (
-    "proto_kk_weight_of_the_plan",
-    "proto_kk_lull",
+# THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md
+# sec.2, ruled): 25 cut, 17 changed, 21 new (Commander's Eye was dropped by the
+# ruling). Grand Design keeps its old id and slot; the other 20 are here,
+# appended LAST to `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's order.
+KOKOMI_REFOUNDING_IDS: tuple[str, ...] = (
+    "proto_kk_tidal_surge",
+    "proto_kk_riptide_guard",
+    "proto_kk_watatsumi_drill",
+    "proto_kk_orders_from_the_shrine",
+    "proto_kk_kurages_wake",
+    "proto_kk_watatsumi_muster",
+    "proto_kk_sangonomiyas_orders",
+    "proto_kk_kurage_bloom",
+    "proto_kk_kurage_barrage",
+    "proto_kk_watchful_shoal",
+    "proto_kk_coordinated_tide",
+    "proto_kk_reserves",
+    "proto_kk_spearhead",
+    "proto_kk_steady_tide",
+    "proto_kk_resolve_of_watatsumi",
+    "proto_kk_grand_strategist",
+    "proto_kk_call_the_generals",
+    "proto_kk_endless_shoal",
+    "proto_kk_dawn_tide",
+    "proto_kk_tamakushis_wrath",
+)
+
+# GOROU'S FOUR, HER OWN CARDS (the card paper's ruling, pick 3: "they should
+# just go into Kokomi's own card pool and count against its size limit, not the
+# shared Companion pool"). Still Companion cards, ids kept (renaming breaks
+# saves, art paths and the seat bridge), appended LAST to her pool; the
+# `KLEE_OWN_COMPANION_IDS` precedent. 2 Common, 2 Uncommon.
+KOKOMI_OWN_COMPANION_IDS: tuple[str, ...] = (
+    "proto_mi_gorou_inuzaka",
+    "proto_mi_gorou_war_banner",
+    "proto_mi_gorou_juuga",
+    "proto_mi_gorou_crystal_collapse",
+)
+
+# The jellyfish cards (card paper sec.1 rule 4), Sting and Ward: generated by
+# her cards, in no pool, the `KLEE_OFF_POOL_ROW_IDS` shape.
+KOKOMI_OFF_POOL_ROW_IDS: tuple[str, ...] = (
+    "proto_kk_sting",
+    "proto_kk_ward",
+)
+
+# THE OFFERABLE POOL, WHOLE: 78 (21 / 36 / 21) since the re-founding
+# (2026-10-12), in the sheet's own order, then Gorou's four. The pool's
+# history is in git (`git show kokomi-casket-frozen-2026-10-12:tier0/constants.py`).
+# `tools/lint_arm_pool_parity.py` compares this tuple,
+# `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER.
+KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    "proto_kk_feint",
+    "proto_kk_ambush",
+    "proto_kk_read_the_field",
+    "proto_kk_treatise",
+    "proto_kk_war_council",
+    "proto_kk_nereids_ascension",
+    "proto_kk_coral_bulwark",
+    "proto_kk_tide_wall",
+    "proto_kk_the_moon_a_ship",
+    "proto_kk_sango_isshin",
+    "proto_kk_change_of_plans",
+    "proto_kk_undertow",
+    "proto_kk_moons_reflection",
+    "proto_kk_riptide",
+    "proto_kk_pincer",
+    "proto_kk_flank",
+    "proto_kk_opening_gambit",
+    "proto_kk_second_wave",
+    "proto_kk_breakwater",
+    "proto_kk_surging_shoal",
+    "proto_kk_press_the_advantage",
+    "proto_kk_shell_of_sanctuary",
+    "proto_kk_tideturn",
+    "proto_kk_pearl_current",
+    "proto_kk_bubble_ward",
+    "proto_kk_jellyfish_drift",
+    "proto_kk_brine_sting",
     "proto_kk_undertide_lance",
     "proto_kk_measured_breath",
     "proto_kk_grand_design",
-    "proto_kk_the_long_game",
     "proto_kk_masterstroke",
     "proto_kk_drowning_pressure",
-    "proto_kk_salt_in_the_wound",
     "proto_kk_undercurrent_snare",
-    "proto_kk_tidal_resonance",
     "proto_kk_at_waters_edge",
     "proto_kk_ceremonial_garment",
     "proto_kk_suffocating_deep",
@@ -947,189 +1013,20 @@ KOKOMI_EXPANSION_BATCH_ONE_IDS: tuple[str, ...] = (
     "proto_kk_watatsumis_grace",
     "proto_kk_tidal_riposte",
     "proto_kk_shoal_call",
-    "proto_kk_kurage_swarm",
-)
-
-# THE PAYOFF PASS (2026-10-01, [USER]: "Sounds good! Please proceed!"): two
-# Uncommons that pay for Plan volume in something other than damage, appended
-# LAST to `KOKOMI_OVERHAUL_POOL_IDS`; Second Thoughts left the pool.
-KOKOMI_PAYOFF_PASS_IDS: tuple[str, ...] = (
     "proto_kk_kurage_canopy",
-    "proto_kk_coral_tithe",
-)
-
-# POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
-# sec.4, ruled at the defaults): one Common and seven Rares, appended LAST to
-# `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's own order. Coral Crash moved to
-# Common in place (sec.6). The pool is 78 (21 / 36 / 21).
-KOKOMI_POOL_COMPLETION_IDS: tuple[str, ...] = (
     "proto_kk_tidal_screen",
     "proto_kk_spring_tide",
-    "proto_kk_kurage_school",
     "proto_kk_shoal_of_spears",
-    "proto_kk_patient_tide",
     "proto_kk_seas_reproach",
     "proto_kk_tidal_rebuke",
     "proto_kk_watatsumi_resistance",
-)
-
-# THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md,
-# ruled): six cards that deal with statuses and curses through the next hand,
-# appended LAST to `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's own order. Seven
-# rows left the pool (Rally, Pearl Diver, Battle Plan, Feigned Retreat, Moon
-# Signal, Chain of Command, All Streams Flow to the Sea). The paper's seventh
-# card, the Rare Coral Sanctuary, was cut; Riptide Ruin (ruled 2026-10-01)
-# took its slot, a second status source. The pool is 78 (21 / 36 / 21).
-KOKOMI_STATUS_BATCH_IDS: tuple[str, ...] = (
     "proto_kk_kelp_wall",
     "proto_kk_tidecleanse",
     "proto_kk_sea_glass_harvest",
-    "proto_kk_turning_tide",
     "proto_kk_flotsam_surge",
-    "proto_kk_abyssal_salvage",
     "proto_kk_riptide_ruin",
-)
-
-# THE GROWTH POWERS (2026-10-10, review/active/kokomi-growth-powers-
-# 2026-10-10.md, ruled "Agreed on both"): one Uncommon Power that grows the
-# Casket every turn, appended LAST to `KOKOMI_OVERHAUL_POOL_IDS`. The General's
-# Banner left the pool for it; the pool stays 78 (21 / 36 / 21).
-KOKOMI_GROWTH_POWERS_IDS: tuple[str, ...] = (
-    "proto_kk_flood_tide",
-)
-
-# THE OFFERABLE POOL, WHOLE (slice draft 6 sec.4). SEVENTY-EIGHT rows since the
-# status batch (2026-10-01: seven cut, seven added, Riptide Ruin the Rare);
-# SEVENTY-EIGHT rows since
-# pool completion (2026-10-01: eight added); SEVENTY since the
-# payoff pass (2026-10-01: Second Thoughts cut, two added; expansion batch one,
-# 2026-09-29, made it 69), in the packet's own order
-# -- the Tactician, the
-# Priestess, the Commander, then the currencies, the one replay, the tempo
-# shelf and the pool pass. `EB-335` filed R246 pick 2's defensive pair with the
-# Priestess because that is the plan they answer for; round 9 pick 1's rows are
-# last, in the sheet's order. THE SHELF IS TWO AND NOT FOUR: Held Tide and
-# Tidal Rhythm were withdrawn on the R253 charter audit and are not built.
-# `_pool_substitutions` cannot express this (it is a one-for-one map and this
-# is "her pool is these and nothing else"), so `loader.pool_replacement` is its
-# sibling seam, read at the same single door.
-#
-# THE MOON OVERLOOKS THE WATERS IS WITHDRAWN (`EB-570`, round 20's door read,
-# the loop's cut). "Plans also happen now" deleted the kit's one question
-# rather than answering it: rule 2 makes a Plan land a turn late, and a Rare
-# that pays the delay off outright made writing never worse than playing (r17
-# "the best of the six", r20). Battle Plan is why no smaller adjustment
-# reached it -- its Plan line is double its play line, so ANY now-copy takes
-# the price off waiting -- and the doctrine audit returned
-# REQUIRES_MODIFICATION on both smaller shapes (a half now-copy, and a
-# one-turn Exhaust Skill). The row and its pins left the surface under R213
-# B's deletion rule, exactly as Rolling Tide's did (`EB-552`). The Casket
-# pass (2026-09-28) cut Tide Chart, Cleansing Wave, Ripple, Well Laid,
-# Sea-Salt Prayer and Salt Line and appended thirteen rows: forty-six. The
-# cleanup pass (2026-09-29) cut Scout Ahead and Song of Pearls: forty-four.
-# Song of Pearls' power is gone from both engines. The feed pass
-# (2026-09-29) cut Exposed Flank and appended five 0-cost Plan-only Commons:
-# forty-eight.
-KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
-    # The Tactician -- Plans, and the cards that pay per Plan (6)
-    "proto_kk_feint",
-    "proto_kk_ambush",
-    "proto_kk_read_the_field",
-    "proto_kk_treatise",
-    "proto_kk_war_council",
-    "proto_kk_nereids_ascension",
-    # The Priestess -- Block through the jellyfish, Mend at Rare (7)
-    "proto_kk_deep_current",
-    "proto_kk_coral_bulwark",
-    "proto_kk_tide_wall",
-    "proto_kk_shell_guard",
-    "proto_kk_the_moon_a_ship",
-    "proto_kk_sango_isshin",
-    # The Commander -- Gorou, go (4)
-    "proto_kk_vanguard",
-    # The General's Banner left on 2026-10-10 (the growth Powers); Rising
-    # Tide takes its slot, LAST.
-    # Currencies, tempo, and the one replay (5)
-    "proto_kk_stolen_chapter",
-    "proto_kk_change_of_plans",
-    "proto_kk_undertow",
-    "proto_kk_moons_reflection",
-    # THE TEMPO SHELF (round 9 pick 1, 2026-09-04) was Tide Chart and Ripple;
-    # the Casket pass (2026-09-28) cut both.
-    # POOL PASS ONE (`EB-492`, review/records/kokomi-pool-pass-2026-09-05.md):
-    # Plan density in the OFFER rather than in the starter -- three Attacks
-    # with a Plan line, the morning's payoff on a Common Attack, and a Skill
-    # that does both halves only when planned. LAST, in the sheet's own order,
-    # for the reason the shelf above is last.
-    "proto_kk_riptide",
-    "proto_kk_pincer",
-    "proto_kk_flank",
-    # POOL PASS TWO (`EB-643`, R265): the answer to "the Plan plays itself".
-    # Seven rows that make the QUEUE something the player operates on rather
-    # than something that empties on a timer -- two riders on the next Plan
-    # (Opening Gambit, Second Wave), a draw that reads the entries after it
-    # (Scout Ahead), two now-lines that cancel or re-aim what is already
-    # written (Second Thoughts, Converging Tide) and the DUSK row whose Plan
-    # lands at the END of the turn it was written on (Breakwater). LAST, in
-    # the sheet's own order, for the reason the pass above is
-    # last (`tools/lint_arm_pool_parity.py` compares the tuple,
-    # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER).
-    #
-    # EIGHT UNTIL `EB-649` (round 23): Ebb Tide drew three times on the cap
-    # lane and was played none of them, so the row left the sheet and this
-    # tuple. Its op stays registered with nothing spelling it --
-    # `kokomi_plan.cancel_all_plans_cash` says why. SIX SINCE POOL PASS THREE
-    # (`EB-655`): Converging Tide re-aimed a queued Plan, a decision about a
-    # queue this pass deliberately makes shallower, and left the sheet the same
-    # way -- `kokomi_plan.redirect_queued_plans` stays registered with nothing
-    # spelling it. FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch lost
-    # every draft comparison in r27 and Slack Water's Plan half moved to Dusk,
-    # which is the job Night Watch was rebuilt for one pass earlier. It spelled
-    # no op of its own, so nothing stays registered behind it. FOUR SINCE THE
-    # CLEANUP PASS (2026-09-29): Scout Ahead was cut; its draw clause left
-    # in the hygiene pass (2026-10-11).
-    # THREE SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts was cut, and
-    # its `cancel_last_plan` op stays registered with nothing spelling it.
-    "proto_kk_opening_gambit",
-    "proto_kk_second_wave",
-    "proto_kk_breakwater",
-    # THE CASKET PASS (2026-09-28). The Tamakushi Casket counts the Plans the
-    # Bake-Kurage carries out, and Open the Casket (a relic token, in no pool)
-    # turns the count into Strength. Thirteen rows, LAST in the sheet's own
-    # order: seven Commons, five Uncommons, one Rare.
-    "proto_kk_massed_volley",
-    "proto_kk_signal_arrow",
-    "proto_kk_surging_shoal",
-    "proto_kk_press_the_advantage",
-    "proto_kk_shell_of_sanctuary",
-    "proto_kk_driftglass",
-    "proto_kk_what_the_tokoyo_returns",
-    "proto_kk_depths_judgment",
-    "proto_kk_tideturn",
-    "proto_kk_pearl_current",
-    "proto_kk_what_the_tokoyo_took",
-    # THE FEED PASS (2026-09-29): five 0-cost Plan-only Commons, the cheap
-    # feed for the Plan queue. LAST, in the sheet's own order.
-    "proto_kk_bubble_ward",
-    "proto_kk_nip",
-    "proto_kk_jellyfish_drift",
-    "proto_kk_current_read",
-    "proto_kk_brine_sting",
-    # THE EXPANSION, BATCH ONE (2026-09-29): the 22 rows of
-    # `KOKOMI_EXPANSION_BATCH_ONE_IDS` above, LAST, in the sheet's own order.
-    *KOKOMI_EXPANSION_BATCH_ONE_IDS,
-    # THE PAYOFF PASS (2026-10-01): Kurage Canopy and Coral Tithe. The pool
-    # was 70 (19 / 37 / 14).
-    *KOKOMI_PAYOFF_PASS_IDS,
-    # POOL COMPLETION (2026-10-01): eight rows. The pool was 78 (21 / 36 /
-    # 21).
-    *KOKOMI_POOL_COMPLETION_IDS,
-    # THE STATUS BATCH (2026-10-01): seven rows, LAST. The pool is 78 (21 /
-    # 36 / 21); Riptide Ruin is the Rare, in Coral Sanctuary's place.
-    *KOKOMI_STATUS_BATCH_IDS,
-    # THE GROWTH POWERS (2026-10-10): Flood Tide, LAST, in The General's
-    # Banner's Uncommon slot. Still 78 (21 / 36 / 21).
-    *KOKOMI_GROWTH_POWERS_IDS,
+    *KOKOMI_REFOUNDING_IDS,
+    *KOKOMI_OWN_COMPANION_IDS,
 )
 
 # THE CO-OP SET's Kokomi tier, on `KLEE_OVERHAUL_MULTIPLAYER_IDS`'s
@@ -1149,8 +1046,7 @@ KOKOMI_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
 # (`EB-643`, R265). "At most N Plans a morning; the rest wait, in order" is a
 # TRIAL and not a shipped rule, so the default is 0 and 0 means unlimited: with
 # it unset the drain is what it was, which `tier0/tests/test_kokomi_plan.py`
-# pins as a whole-log digest rather than intends. DUSK carry-outs are not
-# counted against it -- they are not a morning (`kokomi_plan.resolve_dusk`).
+# pins as a whole-log digest rather than intends.
 #
 # WHAT IT IS NOT: a balance number, and not a `lint_constant_parity` mirror.
 # The mod reads its own toggle out of the environment at load

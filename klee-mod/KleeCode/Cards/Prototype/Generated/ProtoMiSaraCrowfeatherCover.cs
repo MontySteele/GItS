@@ -31,7 +31,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiSaraCrowfeatherCover : CustomCardModel, ICompanionCard
+public sealed class ProtoMiSaraCrowfeatherCover : CustomCardModel, ICompanionCard, IWritableCompanion
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -52,6 +52,14 @@ public sealed class ProtoMiSaraCrowfeatherCover : CustomCardModel, ICompanionCar
         ("description", "Your next Attack this turn deals {PowerAmount:diff()} additional damage and applies [gold]Electro[/gold]."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -67,6 +75,11 @@ public sealed class ProtoMiSaraCrowfeatherCover : CustomCardModel, ICompanionCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         await PowerCmd.Apply<CrowfeatherCoverPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 

@@ -87,14 +87,12 @@ public class LiveLooks8bTests
     public void The_headline_var_reads_the_same_ledger_count_the_play_reads()
     {
         // The face and the play ask one object: the calculated var's
-        // multiplier is the ledger's per-turn carry-out count, and the play
-        // deals that var.
+        // multiplier is the queue's count (the re-founding, 2026-10-12: "for
+        // each Plan waiting"), and the play deals that var.
         var card = Source(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
             "ProtoKkFeint.cs"));
-        Assert.Contains(
-            "KokomiOverhaulLedger.For(card.Owner.Creature).PlansCarriedOutThisTurn",
-            card);
+        Assert.Contains("KokomiPlan.PlansHeld(card.Owner.Creature)", card);
 
         var var_ = Source(Path.Combine(
             "klee-mod", "KleeCode", "Powers", "Prototype",

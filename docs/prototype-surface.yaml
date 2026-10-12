@@ -1238,13 +1238,11 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # THE CASKET PASS (2026-09-28): keyed to the COUNT of carry-outs this turn.
-   # THE CLEANUP PASS (2026-09-29): base 4 -> 6 (upgraded 9), for the
-   # zero-floor problem Sango Isshin had. Provenance note.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # The re-founding (2026-10-12, card paper sec.2): per Plan waiting (was
+   # per Plan carried out this turn); the Plan line is unchanged.
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 6, per: 3,
-                               count: plans_carried_out_this_turn}}],
+              amount_formula: {base: 6, per: 3, count: plans_held}}],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy}],
    # 9, plus 3 each / Plan 2 Vulnerable.
    upgrade: {formula_base: 3, plan_power_amount: 1}}
@@ -1305,24 +1303,15 @@
 - {id: proto_kk_nereids_ascension, name: "Nereid's Ascension", character: kokomi,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   # POOL PASS THREE (`EB-655`): THE FIRST PLAN, NOT EVERY PLAN. Doubling
-   # every Plan paid for writing MORE, which is the shape the pass undoes.
-   description: "At the start of your turn, your first [gold]Plan[/gold] is carried out twice. So is your first [gold]Dusk[/gold] [gold]Plan[/gold].",
+   # POOL PASS THREE (`EB-655`): THE FIRST PLAN, NOT EVERY PLAN. The Dusk
+   # sentence left with Dusk (the re-founding, 2026-10-12).
+   description: "At the start of your turn, your first [gold]Plan[/gold] is carried out twice.",
    effects: [{op: apply_power, power: kk_nereids_ascension, amount: 1, target: self}],
    # Cost 3 -> 2 (Kokomi whole-run round 2026-10-10; brief sec.5 says 2).
    # The upgrade makes it Innate, so its no-Plan turn is turn one.
    upgrade: {innate: true}}
 
 # --- the Priestess: Block through the jellyfish, Mend at Rare (packet sec.4) ---
-
-- {id: proto_kk_deep_current, name: "Deep Current", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   # THE KIT REVIEW (2026-10-05): 8 [11] (was 7 [9]), Cleave's numbers.
-   # Provenance note, "Kokomi kit review, 2026-10-05".
-   description: "Deal 8 [gold]Hydro[/gold] damage to ALL enemies.",
-   upgrade: {damage: 3},
-   effects: [{op: damage, amount: 8, target: all_enemies}]}
 
 - {id: proto_kk_coral_bulwark, name: "Coral Bulwark", character: kokomi,
    authored_by: [claude],
@@ -1347,18 +1336,6 @@
    plan: [{op: block_front_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
    upgrade: {block: 2, plan_block: 3}}
-
-- {id: proto_kk_shell_guard, name: "Shell Guard", character: kokomi,
-   authored_by: [claude],
-   # THE CLEANUP PASS (2026-09-29): Uncommon -> Common, numbers unchanged. The
-   # kit's only Casket-reading Block goes where the deck is short of Block.
-   cost: 1, type: skill, rarity: common,
-   # Re-aimed after the Casket pass retired the strike it paid on (main
-   # session, 2026-09-28): the Casket's defensive reader.
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 5, per: 1, count: casket_count}}],
-   upgrade: {formula_base: 3}}
 
 # THE CLOUDS LIKE WAVES RIPPLING IS CUT (EXPANSION BATCH ONE, 2026-09-29):
 # Watatsumi's Grace replaces it (paper pick 3). Tombstoned in
@@ -1396,18 +1373,6 @@
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
 # note, "Kokomi status batch, 2026-10-01".
 
-- {id: proto_kk_vanguard, name: "Vanguard", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common, exhaust: true,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Apply 1 [gold]Vulnerable[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain 1 [gold]Energy[/gold].",
-   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy},
-             {op: draw, amount: 1}],
-   plan: [{op: energy, amount: 1}],
-   # now 2 Vulnerable; the Plan line does not upgrade.
-   upgrade: {power_amount: 1}}
-
 # THE GENERAL'S BANNER IS CUT (the growth Powers, 2026-10-10,
 # review/active/kokomi-growth-powers-2026-10-10.md, pick 2). Provenance
 # note, "Kokomi growth Powers, 2026-10-10".
@@ -1417,19 +1382,6 @@
 # note, "Kokomi status batch, 2026-10-01".
 
 # --- currencies, tempo, and the one replay (packet sec.4) ---
-
-- {id: proto_kk_stolen_chapter, name: "Stolen Chapter", character: kokomi,
-   authored_by: [claude],
-   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
-   # card that does a thing now AND writes a Plan sits at a higher rarity.
-   cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Next turn, the first card you play costs 0.",
-   effects: [{op: draw, amount: 2}],
-   plan: [{op: first_card_free}],
-   # now draw 3; the Plan line does not upgrade.
-   upgrade: {draw: 1}}
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
@@ -1472,16 +1424,13 @@
 
 - {id: proto_kk_riptide, name: "Riptide", character: kokomi,
    authored_by: [claude],
-   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
-   # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 2, type: attack, rarity: uncommon,
-   # THE CASKET PASS (2026-09-28): 11 to ALL, 3 more on a debuffed enemy;
-   # the Plan is 2 Energy and a card.
-   # 2026-09-30 [USER]: Plan draw 1 -> 2, upgraded 3 (provenance note).
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} additional damage to debuffed ones. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} card{PlanCards:plural:|s}.",
+   # The re-founding (2026-10-12): the Plan is "Draw 3 cards" (was 2 Energy
+   # and a draw); the upgrade still adds 1 to the Plan's draw.
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} additional damage to debuffed ones. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards.",
    effects: [{op: damage, amount: 11, target: all_enemies, bonus_vs_debuff: 3}],
-   plan: [{op: energy, amount: 2}, {op: draw, amount: 2}],
-   # 14 / 4 more, and the Plan's draw 2 -> 3 (the Energy does not move).
+   plan: [{op: draw, amount: 3}],
+   # 14 / 4 more, and the Plan's draw 3 -> 4.
    upgrade: {damage: 3, bonus_vs_debuff: 1, plan_draw: 1}}
 
 - {id: proto_kk_pincer, name: "Pincer", character: kokomi,
@@ -1560,15 +1509,13 @@
 - {id: proto_kk_breakwater, name: "Breakwater", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # POOL PASS FIVE (`EB-685`): THE COUNT IS THE QUEUE AT DUSK -- the Plans
-   # written this turn and still waiting -- never this entry itself. Pass
-   # four read the morning, which a Plan written today cannot be in.
-   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], and 3 more for each [gold]Plan[/gold] waiting.",
-   effects: [],
-   plan: [{op: block, amount: 5},
-          {op: block_per_plan_held, amount: 3}],
-   plan_dusk: true,
-   upgrade: {plan_block: 2}}
+   # The re-founding (2026-10-12): Dusk is retired, so the Plans-waiting
+   # Block is the now-line.
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Plan[/gold] waiting.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 6, per: 3, count: plans_held}}],
+   # 8, plus 3 each.
+   upgrade: {formula_base: 2}}
 
 # NIGHT WATCH IS RETIRED (POOL PASS FIVE, `EB-685`): it lost every draft
 # comparison in r27 and Slack Water's Dusk half is its job. It spelled no op
@@ -1578,36 +1525,16 @@
 # (`lint_arm_pool_parity` compares BY ORDER). Rulings and readings:
 # docs/notes/prototype-surface-provenance.md. ---
 
-- {id: proto_kk_massed_volley, name: "Massed Volley", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 4 [gold]Hydro[/gold] damage 3 times.",
-   effects: [{op: damage, amount: 4, target: enemy, times: 3}],
-   # 2026-10-11 Kokomi card pass: 3 [4] -> 4 [5], 3 times.
-   upgrade: {damage: 1}}
-
-- {id: proto_kk_signal_arrow, name: "Signal Arrow", character: kokomi,
-   authored_by: [claude],
-   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
-   # card that does a thing now AND writes a Plan sits at a higher rarity.
-   cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage to ALL enemies twice.",
-   effects: [{op: damage, amount: 7, target: enemy}],
-   plan: [{op: damage, amount: 4, target: all_enemies, times: 2}],
-   # 10 / Plan 5 twice (Plan pricing 2026-10-11: Plan 3 -> 4).
-   upgrade: {damage: 3, plan_damage: 1}}
-
 - {id: proto_kk_surging_shoal, name: "Surging Shoal", character: kokomi,
    authored_by: [claude],
-   # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
-   # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 2, type: attack, rarity: uncommon,
-   # THE BIG-PLAN PASS (2026-10-04): Strength counts twice on the Plan line.
-   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 22 [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] twice.",
+   # The re-founding (2026-10-12): the Plan line goes to ALL enemies, with
+   # no Strength rider (it was written for the Casket's Strength).
+   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage to ALL enemies.",
    effects: [{op: damage, amount: 14, target: enemy}],
-   plan: [{op: damage, amount: 22, target: front_enemy, strength_times: 2}],
-   # 18 / Plan 28.
-   upgrade: {damage: 4, plan_damage: 6}}
+   plan: [{op: damage, amount: 12, target: all_enemies}],
+   # 18 / Plan 16.
+   upgrade: {damage: 4, plan_damage: 4}}
 
 # PEARL DIVER IS CUT (the status batch, 2026-10-01,
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
@@ -1628,40 +1555,11 @@
 - {id: proto_kk_shell_of_sanctuary, name: "Shell of Sanctuary", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Draw 1 card. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
-   effects: [{op: draw, amount: 1}],
-   plan: [{op: block, amount: 9}],
-   plan_dusk: true,
-   # Plan 12; the now-line does not upgrade.
-   upgrade: {plan_block: 3}}
-
-- {id: proto_kk_driftglass, name: "Driftglass", character: kokomi,
-   authored_by: [claude], art_of: driftglass,
-   cost: 1, type: attack, rarity: common,
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each point in the [gold]Casket[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   # THE CLEANUP PASS (2026-09-29): base 5 -> 6.
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 6, per: 1, count: casket_count}}],
-   # 8, plus 1 each.
-   upgrade: {formula_base: 2}}
-
-- {id: proto_kk_what_the_tokoyo_returns, name: "What the Tokoyo Returns", character: kokomi,
-   authored_by: [claude], art_of: what_the_tokoyo_returns,
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   # 2026-10-01 (the four-kit review, Kokomi pick 1): Open the Casket lost its
-   # Exhaust, so this fetches it from the draw or discard pile instead.
-   description: "Put [gold]Open the Casket[/gold] into your hand from your [gold]Draw Pile[/gold] or [gold]Discard Pile[/gold].",
-   effects: [{op: fetch_open_casket}],
-   upgrade: {cost: -1}}
-
-- {id: proto_kk_depths_judgment, name: "Depths' Judgment", character: kokomi,
-   authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon,
-   description: "Deal [gold]Hydro[/gold] damage equal to {ExtraDamage:diff()} times the [gold]Casket[/gold]'s count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 3, count: casket_count}}],
-   # 4 times.
-   upgrade: {formula_per: 1}}
+   # The re-founding (2026-10-12): Dusk is retired; Block now, then the draw.
+   description: "Gain 6 [gold]Block[/gold]. Draw 1 card.",
+   effects: [{op: block, amount: 6}, {op: draw, amount: 1}],
+   # 9 Block.
+   upgrade: {block: 3}}
 
 - {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
    authored_by: [claude], art_of: tideturn,
@@ -1685,104 +1583,52 @@
    # 3 x4 / Plan 4 x3 (Plan pricing 2026-10-11: Plan 2 -> 3).
    upgrade: {damage: 1, plan_damage: 1}}
 
-- {id: proto_kk_what_the_tokoyo_took, name: "What the Tokoyo Took", character: kokomi,
-   authored_by: [claude],
-   cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Double the [gold]Casket[/gold]'s count.",
-   effects: [{op: casket_double}],
-   upgrade: {cost: -1}}
-
-# --- THE FEED PASS (2026-09-29): five 0-cost Plan-only Commons, the cheap feed
-# for the Plan queue. LAST in the sheet's order (`lint_arm_pool_parity` compares
-# BY ORDER). Provenance note, "the feed pass". ---
+# --- THE FEED PASS (2026-09-29): 0-cost Plan-only Commons; the re-founding
+# (2026-10-12) made the three left cost 1, with now-lines. LAST in the sheet's
+# order (`lint_arm_pool_parity` compares BY ORDER). ---
 
 - {id: proto_kk_bubble_ward, name: "Bubble Ward", character: kokomi,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
-   effects: [],
-   plan: [{op: block, amount: 5}],
-   # Plan 7 (Plan pricing 2026-10-11: Plan 4 -> 5).
-   upgrade: {plan_block: 2}}
-
-- {id: proto_kk_nip, name: "Nip", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage.",
-   effects: [],
-   plan: [{op: damage, amount: 7, target: front_enemy}],
-   # Plan 9 (Plan pricing 2026-10-11: Plan 5 -> 7).
-   upgrade: {plan_damage: 2}}
+   # The re-founding (2026-10-12): cost 1, Block now and a Ward. No upgrade
+   # on the paper: the Prototype-stage default (Block +3).
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 5 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your hand.",
+   effects: [{op: block, amount: 5},
+             {op: kokomi, kind: add_ward}]}
 
 - {id: proto_kk_jellyfish_drift, name: "Jellyfish Drift", character: kokomi,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "[gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage to ALL enemies.",
-   effects: [],
-   # Kokomi whole-run round 2026-10-10: Plan 2 -> 3 (at 2 it was a third of
-   # Astral Pulse). Plan pricing 2026-10-11: 3 -> 6, the 1.3 ratio.
-   plan: [{op: damage, amount: 6, target: all_enemies}],
-   # Plan 8 to ALL.
-   upgrade: {plan_damage: 2}}
-
-- {id: proto_kk_current_read, name: "Current Read", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   # The upgrade ADDS the Block clause. No upgrade key adds a Plan clause, so
-   # the clause is written at 0 and printed only once upgraded.
-   description: "[gold]Plan[/gold]: Draw 1 card.{IfUpgraded:show: Gain 2 [gold]Block[/gold].|}",
-   effects: [],
-   plan: [{op: draw, amount: 1}, {op: block, amount: 0}],
-   # Plan: draw 1, gain 2 Block.
-   upgrade: {plan_block: 2}}
+   # The re-founding (2026-10-12): cost 1, a hit now and a Sting. No upgrade
+   # on the paper: the Prototype-stage default (damage +3).
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your hand.",
+   effects: [{op: damage, amount: 5, target: enemy},
+             {op: kokomi, kind: add_sting}]}
 
 - {id: proto_kk_brine_sting, name: "Brine Sting", character: kokomi,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   # The growth Powers (2026-10-10), Claude ships: a 3 damage hit added
-   # under Neutralize's 3 damage and 1 Weak, a turn late. Plan pricing
-   # 2026-10-11: damage 3 -> 4.
-   description: "[gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold].",
-   effects: [],
-   plan: [{op: damage, amount: 4, target: front_enemy},
-          {op: apply_power, power: weak, amount: 1, target: front_enemy}],
-   # Plan 4 damage, 2 Weak.
-   upgrade: {plan_power_amount: 1}}
+   # The re-founding (2026-10-12): cost 1, a hit now, Vulnerable to ALL as
+   # the Plan line.
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
+   effects: [{op: damage, amount: 8, target: enemy}],
+   plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies}],
+   # 11 damage; the Plan line does not upgrade.
+   upgrade: {damage: 3}}
 
 # --- THE EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
 # 2026-09-29.md, ruled): 22 rows, LAST in the sheet's order. Readings and the
 # upgrades the paper leaves open: provenance note, "expansion batch one". ---
 
-# The Big Plan: its cards read the Energy paid for the Plans waiting, which a
-# 0-cost feeder never adds to.
-
-- {id: proto_kk_weight_of_the_plan, name: "Weight of the Plan", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Energy[/gold] paid for the [gold]Plans[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 8, per: 4, count: plan_energy_waiting}}],
-   # 10, plus 4 each. 2026-10-11 Kokomi card pass: was 5 [7], plus 3.
-   upgrade: {formula_base: 2}}
-
-- {id: proto_kk_lull, name: "Lull", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: If it is the only [gold]Plan[/gold] carried out at the start of your turn, gain 2 [gold]Energy[/gold].",
-   effects: [{op: block, amount: 7}],
-   plan: [{op: energy_if_alone, amount: 2}],
-   # 10 Block; the Plan line does not upgrade.
-   upgrade: {block: 3}}
-
 - {id: proto_kk_undertide_lance, name: "Undertide Lance", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   # Main session, 2026-09-29: 8/16 -> 6/12 (the sim read it dominant).
-   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 14 [gold]Hydro[/gold] damage to the front enemy, doubled if carried out alone.",
+   # The re-founding (2026-10-12): the Plan is a flat 18 to the front enemy
+   # (the "carried out alone" doubling is gone).
+   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 18 [gold]Hydro[/gold] damage to the front enemy.",
    effects: [{op: damage, amount: 9, target: all_enemies}],
-   plan: [{op: damage_if_alone, amount: 14, target: front_enemy}],
-   # 12 to ALL / Plan 18 (Plan pricing 2026-10-11: Plan 12 -> 14).
-   # 2026-10-11 Kokomi card pass: the now-line 6 [9] -> 9 [12].
+   plan: [{op: damage, amount: 18, target: front_enemy}],
+   # 12 to ALL / Plan 22.
    upgrade: {damage: 3, plan_damage: 4}}
 
 - {id: proto_kk_measured_breath, name: "Measured Breath", character: kokomi,
@@ -1796,34 +1642,24 @@
 
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   # The growth Powers (2026-10-10, ruled): the Casket keeps its count,
-   # ratio 1/1. Round 2 (2026-10-10): Open also comes to hand each turn.
-   # Provenance note, "Kokomi whole-run round 2".
-   description: "[gold]Open the Casket[/gold] no longer empties the [gold]Casket[/gold]. At the start of your turn, put it into your hand.",
-   effects: [{op: apply_power, power: kk_grand_design, amount: 1, target: self}],
-   # Cost 1.
-   upgrade: {cost: -1}}
-
-- {id: proto_kk_the_long_game, name: "The Long Game", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, if exactly one [gold]Plan[/gold] is waiting, gain 1 [gold]Energy[/gold]{IfUpgraded:show: and draw 1 card|}.",
-   effects: [{op: apply_power, power: kk_the_long_game, amount: 1, target: self}],
-   # Power cost sweep, 2026-09-30: upgraded, the card installs the twin
-   # that also draws (`upgraded_power`).
-   upgrade: {upgraded_power: kk_the_long_game_plus}}
+   # The re-founding (2026-10-12, card paper sec.2): a new card under the old
+   # name and art. Each card chosen is written as if played on the
+   # Bake-Kurage, for 0 Energy.
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Write up to {KkAmount:diff()} cards from your hand as [gold]Plans[/gold]. They cost 0.",
+   effects: [{op: kokomi, kind: grand_design, amount: 3}],
+   upgrade: {retain: true}}
 
 - {id: proto_kk_masterstroke, name: "Masterstroke", character: kokomi,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare, retain: true,
-   # THE BIG-PLAN PASS (2026-10-04): Strength counts 3 times. Flat Strength
-   # per hit paid a 0-cost Nip as much as this; provenance note.
-   description: "[gold]Plan[/gold]: Deal 35 [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] 3 times.",
+   # The re-founding (2026-10-12): a flat 42, no Strength rider (it was
+   # written for the Casket's Strength).
+   description: "[gold]Plan[/gold]: Deal 42 [gold]Hydro[/gold] damage.",
    effects: [],
-   plan: [{op: damage, amount: 35, target: front_enemy, strength_times: 3}],
-   # Plan 45 (Plan pricing 2026-10-11: Plan 30 -> 35).
-   upgrade: {plan_damage: 10}}
+   plan: [{op: damage, amount: 42, target: front_enemy}],
+   # Plan 54.
+   upgrade: {plan_damage: 12}}
 
 # ALL STREAMS FLOW TO THE SEA IS CUT (the status batch, 2026-10-01,
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
@@ -1842,36 +1678,15 @@
    # 4 each.
    upgrade: {formula_per: 1}}
 
-- {id: proto_kk_salt_in_the_wound, name: "Salt in the Wound", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   # 2026-10-11 Kokomi card pass: always draws 1, and 1 more if the enemy
-   # has Weak; the upgrade is 2 Vulnerable (was draw 2 on Weak).
-   description: "Apply 1 [gold]Vulnerable[/gold]. Draw 1 card, or 2 if the enemy has [gold]Weak[/gold].",
-   effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy},
-             {op: draw, amount: 1},
-             {op: conditional, if: target_has_power_weak,
-              then: [{op: draw, amount: 1}]}],
-   # 2 Vulnerable.
-   upgrade: {power_amount: 1}}
-
 - {id: proto_kk_undercurrent_snare, name: "Undercurrent Snare", character: kokomi,
    authored_by: [claude],
-   # 2026-10-11 Kokomi card pass: cost 1 -> 0.
-   cost: 0, type: skill, rarity: uncommon,
+   # The re-founding (2026-10-12): cost 0 -> 1 (no Plan card costs 0).
+   cost: 1, type: skill, rarity: uncommon,
    description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: apply_power, power: weak, amount: 2, target: enemy}],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies}],
    # Plan 2 Vulnerable to ALL; the now-line does not upgrade.
    upgrade: {plan_power_amount: 1}}
-
-- {id: proto_kk_tidal_resonance, name: "Tidal Resonance", character: kokomi,
-   authored_by: [claude],
-   # 2026-10-11 Kokomi card pass: cost 1 -> 0.
-   cost: 0, type: skill, rarity: uncommon,
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Draw {KkAmount:diff()} card{KkAmount:plural:|s} for each enemy that already had an element.",
-   # No upgrade on the paper: the Prototype-stage rule's default stands.
-   effects: [{op: kokomi, kind: resonance, amount: 1}]}
 
 - {id: proto_kk_at_waters_edge, name: "At Water's Edge", character: kokomi,
    authored_by: [claude],
@@ -1906,7 +1721,7 @@
    # 13 to ALL. 2026-10-11 Kokomi card pass: 6 [9] -> 10 [13].
    upgrade: {damage: 3}}
 
-# Dusk Guard: Block that is paid off, and guarded (paper sec.4).
+# Guard: Block that is paid off, and guarded (paper sec.4).
 
 - {id: proto_kk_coral_crash, name: "Coral Crash", character: kokomi,
    authored_by: [claude],
@@ -1921,22 +1736,21 @@
 - {id: proto_kk_evening_watch, name: "Evening Watch", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Draw 1 card. [gold]Dusk[/gold] [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] for each enemy intending to attack.",
-   effects: [{op: draw, amount: 1}],
-   plan: [{op: block_per_attacking_enemy, amount: 5}],
-   plan_dusk: true,
-   # Plan 7 each; the now-line does not upgrade.
-   upgrade: {plan_block: 2}}
+   # The re-founding (2026-10-12): Dusk is retired; the Block per attacker is
+   # the now-line, counted when it is played.
+   description: "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending to attack. Draw 1 card.",
+   effects: [{op: kokomi, kind: block_per_attacker, amount: 4},
+             {op: draw, amount: 1}],
+   # 6 each.
+   upgrade: {kokomi_amount: 2}}
 
 - {id: proto_kk_brace_for_the_tide, name: "Brace for the Tide", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Dusk[/gold] [gold]Plan[/gold]: Double your [gold]Block[/gold].",
-   # No upgrade on the paper; the rule's default (Exhaust off) would undo
-   # paper sec.4 guard 2, so it costs 0 instead (flagged in the build PR).
-   effects: [],
-   plan: [{op: double_block}],
-   plan_dusk: true,
+   # The re-founding (2026-10-12): the base game's Entrench, cost 2 [1], no
+   # Exhaust; Dusk is retired.
+   cost: 2, type: skill, rarity: uncommon,
+   description: "Double your [gold]Block[/gold].",
+   effects: [{op: kokomi, kind: double_block}],
    upgrade: {cost: -1}}
 
 - {id: proto_kk_watatsumis_grace, name: "Watatsumi's Grace", character: kokomi,
@@ -1960,22 +1774,16 @@
    # 7.
    upgrade: {power_amount: 2}}
 
-# Plan volume: more feed, and a Casket payoff for writing it.
+# Plan volume: more feed.
 
 - {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Add {KkAmount:diff()} [gold]Nips[/gold] to your hand.{IfUpgraded:show: They are upgraded.|} They [gold]Exhaust[/gold].",
+   # The re-founding (2026-10-12): Stings, not Nips. The Stings arrive
+   # upgraded: a play-time read, the face's own swap.
+   description: "Add {KkAmount:diff()} {IfUpgraded:show:upgraded |}[gold]Stings[/gold] to your hand.",
    effects: [{op: kokomi, kind: shoal_call, amount: 2}],
-   # The Nips arrive upgraded: a play-time read, the face's own swap.
    upgrade: {upgraded_grant: true}}
-
-- {id: proto_kk_kurage_swarm, name: "Kurage Swarm", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   description: "Whenever you write a [gold]Plan[/gold] that costs 0, the [gold]Casket[/gold] gains 1 more.",
-   effects: [{op: apply_power, power: kk_kurage_swarm, amount: 1, target: self}],
-   upgrade: {innate: true}}
 
 # --- THE PAYOFF PASS (2026-10-01, ruled): Second Thoughts is cut; two
 # Uncommons pay for Plan volume in Block, and in Energy and cards. LAST in the
@@ -1991,18 +1799,6 @@
    effects: [{op: apply_power, power: kk_kurage_canopy, amount: 2, target: self}],
    # 3 Block.
    upgrade: {power_amount: 1}}
-
-- {id: proto_kk_coral_tithe, name: "Coral Tithe", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   # The count is read and emptied only while she holds a Casket (the
-   # Tamakushi Casket or its Orobas upgrade, the Watatsumi Casket); without
-   # one the card does nothing. Rounds down: 7 at every 2 pays 3.
-   description: "Empty the [gold]Casket[/gold]. Gain 1 [gold]Energy[/gold] and draw 1 card for every {KkAmount:diff()} in it.",
-   effects: [{op: kokomi, kind: coral_tithe, amount: 2}],
-   # 2026-10-11 Kokomi card pass: every 3 [2] -> every 2, and the upgrade
-   # adds Retain. On watch: the first number back down if too strong.
-   upgrade: {retain: true}}
 
 # --- POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
 # sec.4): one Common and seven Rares, LAST in the sheet's order; the pool is 78
@@ -2020,44 +1816,23 @@
 - {id: proto_kk_spring_tide, name: "Spring Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   # Change of Plans for the whole queue, Dusk Plans included, in order and
+   # Change of Plans for the whole queue, in order and
    # with the drain's riders; mid-turn, so Nereid's Ascension does not double
    # its first entry. The emptied queue can be written again for the morning.
    description: "The [gold]Bake-Kurage[/gold] carries out all your [gold]Plans[/gold] now.",
    effects: [{op: kokomi, kind: spring_tide}],
    upgrade: {cost: -1}}
 
-- {id: proto_kk_kurage_school, name: "Kurage School", character: kokomi,
-   authored_by: [claude],
-   # 2026-10-11 Kokomi card pass: costs 0; the upgrade adds Retain.
-   cost: 0, type: skill, rarity: rare, exhaust: true,
-   # "0-cost" is the card's cost as it stands in hand; the copies are exact
-   # (an upgraded Nip copies upgraded). The hand is read once, before the
-   # first copy is added, and a full hand stops the copying.
-   description: "Add a copy of each 0-cost card with a [gold]Plan[/gold] line in your hand to your hand. The copies [gold]Exhaust[/gold].",
-   effects: [{op: kokomi, kind: kurage_school}],
-   upgrade: {retain: true}}
-
 - {id: proto_kk_shoal_of_spears, name: "Shoal of Spears", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: rare,
-   # "Wrote" counts every Plan written onto the Bake-Kurage this turn, Moon's
-   # Reflection's included; a Plan cancelled or carried out since still counts.
-   # THE RARE PASS (2026-10-04): one hit per Plan written; provenance note.
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies once for each [gold]Plan[/gold] you wrote this turn.",
+   # The re-founding (2026-10-12): one hit per Plan waiting (was per Plan
+   # written this turn).
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies once for each [gold]Plan[/gold] waiting.",
    effects: [{op: damage, amount: 4, target: all_enemies,
-              times: plans_written_this_turn}],
+              times: plans_held}],
    # 5 a hit.
    upgrade: {damage: 1}}
-
-- {id: proto_kk_patient_tide, name: "Patient Tide", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   # Copies add to the cap.
-   description: "At the end of your turn, keep up to {PowerAmount:diff()} unspent [gold]Energy[/gold].",
-   effects: [{op: apply_power, power: kk_patient_tide, amount: 2, target: self}],
-   # keep 3.
-   upgrade: {power_amount: 1}}
 
 - {id: proto_kk_seas_reproach, name: "Sea's Reproach", character: kokomi,
    authored_by: [claude],
@@ -2083,8 +1858,9 @@
 - {id: proto_kk_watatsumi_resistance, name: "Watatsumi Resistance", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   # One Nip per Companion play; copies add.
-   description: "Whenever you play a [gold]Companion[/gold] card, add a [gold]Nip[/gold] to your hand. It [gold]Exhausts[/gold].",
+   # The re-founding (2026-10-12): pays for WRITING a Companion, in Stings.
+   # One Sting per Companion written; copies add.
+   description: "Whenever you write a [gold]Companion[/gold] card as a [gold]Plan[/gold], add a [gold]Sting[/gold] to your hand.",
    effects: [{op: apply_power, power: kk_watatsumi_resistance, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -2108,14 +1884,13 @@
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   # "Up to": she chooses which when she holds more. [USER]'s run
-   # (2026-10-11) took off the card pass's draw: "too good" as a Common
-   # cycler (provenance: "Kokomi: three fixes after [USER]'s run").
-   description: "Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand.",
-   effects: [{op: apply_power, power: weak, amount: 1, target: enemy}],
-   plan: [{op: exhaust_statuses_in_hand, amount: 2}],
-   # Plan up to 3.
-   upgrade: {plan_exhaust: 1}}
+   # The re-founding (2026-10-12): no Plan line; the Exhaust is the
+   # now-line, first. "Up to": she chooses which when she holds more.
+   description: "[gold]Exhaust[/gold] up to {KkAmount:diff()} statuses or curses in your hand. Apply 1 [gold]Weak[/gold].",
+   effects: [{op: kokomi, kind: exhaust_statuses, amount: 2},
+             {op: apply_power, power: weak, amount: 1, target: enemy}],
+   # Up to 3 (the old Plan line's upgrade, carried over).
+   upgrade: {kokomi_amount: 1}}
 
 - {id: proto_kk_sea_glass_harvest, name: "Sea Glass Harvest", character: kokomi,
    authored_by: [claude],
@@ -2129,16 +1904,6 @@
    # 13 Block; the Sea Glass arrives upgraded.
    upgrade: {block: 3, upgraded_grant: true}}
 
-- {id: proto_kk_turning_tide, name: "Turning Tide", character: kokomi,
-   authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon,
-   # Gambler's Brew on the next hand: any number, none included.
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Plan[/gold]: Discard any number of cards, then draw that many.",
-   effects: [{op: draw, amount: 2}],
-   plan: [{op: discard_and_draw}],
-   # 2026-10-11 Kokomi card pass: draw 2 [3] (was 1 [2]).
-   upgrade: {draw: 1}}
-
 - {id: proto_kk_flotsam_surge, name: "Flotsam Surge", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
@@ -2150,15 +1915,6 @@
              {op: add_card, card: status_dazed, zone: discard, amount: 2}],
    # 17 to ALL.
    upgrade: {damage: 4}}
-
-- {id: proto_kk_abyssal_salvage, name: "Abyssal Salvage", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   # 2026-10-11 Kokomi card pass (review/active/kokomi-card-pass-2026-10-11.md):
-   # once a turn, off the draw. Statuses only, not curses. Copies add Casket.
-   description: "The first time each turn you draw a status, [gold]Exhaust[/gold] it. The [gold]Casket[/gold] gains 1.",
-   effects: [{op: apply_power, power: kk_abyssal_salvage, amount: 1, target: self}],
-   upgrade: {innate: true}}
 
 - {id: proto_kk_riptide_ruin, name: "Riptide Ruin", character: kokomi,
    authored_by: [claude],
@@ -2172,49 +1928,241 @@
    # 12 to ALL, twice.
    upgrade: {damage: 3}}
 
-# --- THE GROWTH POWERS (2026-10-10, ruled): Flood Tide, in The General's
-# Banner's Uncommon slot, LAST. Provenance note, "Kokomi growth Powers,
-# 2026-10-10". ---
+# THE RE-FOUNDING CUT 24 ROWS (2026-10-12, review/active/kokomi-card-paper-
+# 2026-10-12.md sec.2 and its ruling): the Casket's ten, the 0-cost Plans,
+# the spam and extra counts, and Deep Current, Massed Volley, Signal Arrow.
 
-- {id: proto_kk_flood_tide, name: "Flood Tide", character: kokomi,
+# Cut by name: Shell Guard, Driftglass, Depths' Judgment, Coral Tithe, Flood
+# Tide, What the Tokoyo Returns, Abyssal Salvage, Kurage Swarm, What the Tokoyo
+# Took, Nip, Current Read, Vanguard, Weight of the Plan, Turning Tide.
+
+# And: Stolen Chapter, Tidal Resonance, Salt in the Wound, Lull, Kurage
+# School, The Long Game, Patient Tide. Grand Design is a new card under its
+# old name. Provenance note, "Kokomi re-founding, 2026-10-12".
+
+# --- THE RE-FOUNDING (2026-10-12, card paper sec.2 "New"): 21 rows, LAST in
+# the sheet's order; Commander's Eye was dropped by the ruling. Gorou's four
+# follow as her own cards (`C.KOKOMI_OWN_COMPANION_IDS`). ---
+
+- {id: proto_kk_tidal_surge, name: "Tidal Surge", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common, ethereal: true,
+   description: "Deal 11 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 [gold]Hydro[/gold] damage to ALL enemies.",
+   effects: [{op: damage, amount: 11, target: enemy}],
+   plan: [{op: damage, amount: 8, target: all_enemies}],
+   # 14 / Plan 10.
+   upgrade: {damage: 3, plan_damage: 2}}
+
+- {id: proto_kk_riptide_guard, name: "Riptide Guard", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common, ethereal: true,
+   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 2 cards.",
+   effects: [{op: block, amount: 10}],
+   plan: [{op: draw, amount: 2}],
+   # 13 Block; the Plan line does not upgrade.
+   upgrade: {block: 3}}
+
+- {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your hand.",
+   effects: [{op: damage, amount: 6, target: enemy},
+             {op: kokomi, kind: add_ward}],
+   # 9 damage.
+   upgrade: {damage: 3}}
+
+- {id: proto_kk_orders_from_the_shrine, name: "Orders from the Shrine", character: kokomi,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] card to your hand. It is [gold]Ethereal[/gold].",
+   effects: [{op: kokomi, kind: add_companion}],
+   # The Companion arrives upgraded: a play-time read, the face's own swap.
+   upgrade: {upgraded_grant: true}}
+
+- {id: proto_kk_kurages_wake, name: "Kurage's Wake", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 2 [gold]Stings[/gold] to your hand.",
+   effects: [{op: damage, amount: 4, target: enemy, times: 2}],
+   plan: [{op: add_stings, amount: 2}],
+   # 5 twice; the Plan line does not upgrade.
+   upgrade: {damage: 1}}
+
+- {id: proto_kk_watatsumi_muster, name: "Watatsumi Muster", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Add {KkAmount} random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] cards to your hand. They are [gold]Ethereal[/gold].",
+   effects: [{op: kokomi, kind: add_companions, amount: 2}],
+   upgrade: {upgraded_grant: true}}
+
+- {id: proto_kk_sangonomiyas_orders, name: "Sangonomiya's Orders", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Copies add. After her hand draw, before the Bake-Kurage carries out
-   # last turn's Plans (The Long Game's site).
-   description: "At the start of your turn, the [gold]Casket[/gold] gains 1.",
-   effects: [{op: apply_power, power: kk_flood_tide, amount: 1, target: self}],
+   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] card to your hand. It is [gold]Ethereal[/gold].",
+   effects: [{op: apply_power, power: kk_sangonomiyas_orders, amount: 1, target: self}],
    upgrade: {innate: true}}
+
+- {id: proto_kk_kurage_bloom, name: "Kurage Bloom", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, add a [gold]Sting[/gold] to your hand.",
+   effects: [{op: apply_power, power: kk_kurage_bloom, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_kk_kurage_barrage, name: "Kurage Barrage", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 3 [gold]Hydro[/gold] damage 3 times. Add a [gold]Sting[/gold] to your hand.",
+   effects: [{op: damage, amount: 3, target: enemy, times: 3},
+             {op: kokomi, kind: add_sting}],
+   # 4 a hit.
+   upgrade: {damage: 1}}
+
+- {id: proto_kk_watchful_shoal, name: "Watchful Shoal", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you write an [gold]Ethereal[/gold] card as a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
+   effects: [{op: apply_power, power: kk_watchful_shoal, amount: 3, target: self}],
+   # 4 Block.
+   upgrade: {power_amount: 1}}
+
+- {id: proto_kk_coordinated_tide, name: "Coordinated Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out an [gold]Ethereal[/gold] card, deal {PowerAmount:diff()} [gold]Hydro[/gold] damage to the front enemy.",
+   effects: [{op: apply_power, power: kk_coordinated_tide, amount: 4, target: self}],
+   # 6 damage.
+   upgrade: {power_amount: 2}}
+
+- {id: proto_kk_reserves, name: "Reserves", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Put a card from your [gold]Exhaust Pile[/gold] into your hand. It is [gold]Ethereal[/gold].",
+   effects: [{op: kokomi, kind: reserves}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_spearhead, name: "Spearhead", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon, ethereal: true,
+   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
+   effects: [{op: damage, amount: 14, target: enemy}],
+   plan: [{op: apply_power, power: vulnerable, amount: 2, target: all_enemies}],
+   # 18 damage; the Plan line does not upgrade.
+   upgrade: {damage: 4}}
+
+- {id: proto_kk_steady_tide, name: "Steady Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, ethereal: true,
+   description: "Gain 13 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 3 cards.",
+   effects: [{op: block, amount: 13}],
+   plan: [{op: draw, amount: 3}],
+   # 16 Block; the Plan line does not upgrade.
+   upgrade: {block: 3}}
+
+- {id: proto_kk_resolve_of_watatsumi, name: "Resolve of Watatsumi", character: kokomi,
+   authored_by: [claude],
+   # Inflame's rate (an Uncommon, 1 Energy, 2 Strength).
+   cost: 1, type: power, rarity: uncommon,
+   description: "Gain 2 [gold]Strength[/gold].",
+   effects: [{op: apply_power, power: strength, amount: 2, target: self}],
+   # 3 Strength.
+   upgrade: {power_amount: 1}}
+
+- {id: proto_kk_grand_strategist, name: "Grand Strategist", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   description: "Whenever a [gold]Plan[/gold] causes an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies.",
+   effects: [{op: apply_power, power: kk_grand_strategist, amount: 5, target: self}],
+   # 8 damage.
+   upgrade: {power_amount: 3}}
+
+- {id: proto_kk_call_the_generals, name: "Call the Generals", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Choose 1 of 3 random Rare Inazuma [gold]Companion[/gold] cards. Add it to your hand. It is [gold]Ethereal[/gold].",
+   effects: [{op: kokomi, kind: call_the_generals}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_endless_shoal, name: "Endless Shoal", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Sting[/gold] or [gold]Ward[/gold], add a copy of it to your hand.",
+   effects: [{op: apply_power, power: kk_endless_shoal, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_dawn_tide, name: "Dawn Tide", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, the [gold]Bake-Kurage[/gold] applies [gold]Hydro[/gold] to ALL enemies.",
+   effects: [{op: apply_power, power: kk_dawn_tide, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_kk_tamakushis_wrath, name: "Tamakushi's Wrath", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare, ethereal: true,
+   description: "Deal 30 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 18 [gold]Hydro[/gold] damage to ALL enemies.",
+   effects: [{op: damage, amount: 30, target: enemy}],
+   plan: [{op: damage, amount: 18, target: all_enemies}],
+   # 38 / Plan 24.
+   upgrade: {damage: 8, plan_damage: 6}}
+
+# The jellyfish cards (card paper sec.1 rule 4): generated, in no pool
+# (`C.KOKOMI_OFF_POOL_ROW_IDS`), Ethereal, Exhaust when played or carried out.
+
+- {id: proto_kk_sting, name: "Sting", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: token, ethereal: true, exhaust: true,
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage to ALL enemies.",
+   effects: [{op: damage, amount: 7, target: enemy}],
+   plan: [{op: damage, amount: 5, target: all_enemies}],
+   # 10 / Plan 7.
+   upgrade: {damage: 3, plan_damage: 2}}
+
+- {id: proto_kk_ward, name: "Ward", character: kokomi,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: token, ethereal: true, exhaust: true,
+   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: block, amount: 7}],
+   plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   # 10 Block / Plan 2 Weak.
+   upgrade: {block: 3, plan_power_amount: 1}}
 
 # THE INAZUMA COMPANION OVERHAUL, beside the Mondstadt block:
 # these ARE Inazuma's Universal companion pool.
 # Source, readings and hooks: docs/notes/prototype-surface-provenance.md.
 
-- {id: proto_mi_gorou_inuzaka, name: "Gorou — Inuzaka All-Round Defense", character: klee,
+- {id: proto_mi_gorou_inuzaka, name: "Gorou — Inuzaka All-Round Defense", character: kokomi,
    authored_by: [claude],
+   # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3):
+   # in her pool, out of the shared roster, with a Plan line.
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: geo,
    cost: 1, type: attack,
-   description: "Deal 8 [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the unblocked damage.",
+   description: "Deal 8 [gold]Geo[/gold] damage. Gain [gold]Block[/gold] equal to half the unblocked damage. [gold]Plan[/gold]: Gain 11 [gold]Block[/gold].",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
-             {op: block_half_damage}]}
+             {op: block_half_damage}],
+   plan: [{op: block, amount: 11}]}
 
-- {id: proto_mi_gorou_war_banner, name: "Gorou — General's War Banner", character: klee,
+- {id: proto_mi_gorou_war_banner, name: "Gorou — General's War Banner", character: kokomi,
    authored_by: [claude],
+   # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3).
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
-   # `EB-403`: the take-back clause is `WarBannerPower`'s own. `EB-415`: it
-   # hands back WHAT IT GRANTED, so the clause names no second number.
-   # Provenance: docs/notes/prototype-surface-provenance.md.
-   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns.",
+   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns. [gold]Plan[/gold]: Gain 3 [gold]Strength[/gold] this turn.",
    effects: [{op: apply_power, power: dexterity, amount: 2, target: self},
-             {op: apply_power, power: mi_war_banner, amount: 2, target: self}]}
+             {op: apply_power, power: mi_war_banner, amount: 2, target: self}],
+   plan: [{op: strength_this_turn, amount: 3}]}
 
 # 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
-- {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: klee,
+- {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: kokomi,
    authored_by: [claude],
+   # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3).
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy.",
-   effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}]}
+   # The paper's Plan line ("For 3 turns, at the end of your turn gain 6
+   # Block") shortened to the 120-character card ceiling.
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
+   effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
+   plan: [{op: juuga_guard, amount: 3}]}
 
 - {id: proto_mi_sayu_fuuin_dash, name: "Sayu — Yoohoo Art: Fuuin Dash", character: klee,
    authored_by: [claude],
@@ -2586,13 +2534,13 @@
 # review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
 # note, "Klee-only companions, 2026-10-03".
 
-# Kokomi's Personal, PR: gorou-personal
-# THE INAZUMA WORKSHOP'S ONE PERSONAL (R236 sec.3 Gorou). Not a Universal and
-# not in `C.INAZUMA_OVERHAUL_POOL_IDS`; reasoning in docs/notes/.
+# Kokomi's own card since the re-founding (2026-10-12): Gorou's four are in
+# her pool (`C.KOKOMI_OWN_COMPANION_IDS`), not the shared roster.
 - {id: proto_mi_gorou_crystal_collapse, name: "Gorou — Crystal Collapse", character: kokomi,
    authored_by: [claude],
+   # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3):
+   # in her pool rather than her Personal companion slot.
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
-   personal_pool: kokomi,
    cost: 1, type: skill,
    description: "[gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn.",
    effects: [],

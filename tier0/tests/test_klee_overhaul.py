@@ -632,7 +632,10 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
     # `R250` pick 1, the same as Vanguard above -- a real Plan-only shape,
     # not a real row, since round-4d left only Nereid's Ascension (cost 2,
     # which reaches the cost clause first) with an empty now-line.
-    assert delta("proto_kk_stolen_chapter") == {}
+    # Stolen Chapter (Draw 2 at cost 1) was the real row until the Kokomi
+    # re-founding cut it (2026-10-12); its shape, synthetic.
+    assert upgrades.prototype_default_delta(
+        "proto_kk_x", 1, [{"op": "draw", "amount": 2}]) == {}
     assert upgrades.prototype_default_delta("proto_kk_x", 1, []) == {}
 
 

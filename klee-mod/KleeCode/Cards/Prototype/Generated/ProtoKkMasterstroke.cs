@@ -44,14 +44,14 @@ public sealed class ProtoKkMasterstroke : CustomCardModel, IElementalCard, IChar
         new[] { CardKeyword.Retain, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(ArmKeywordTips.ForPlanOnly(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this);
+        ArmKeywordTips.ForPlanOnly(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_masterstroke");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Masterstroke"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage. [gold]Strength[/gold] affects this [gold]Plan[/gold] 3 times."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,13 +60,13 @@ public sealed class ProtoKkMasterstroke : CustomCardModel, IElementalCard, IChar
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy, StrengthTimes: 3),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new KokomiPlan.PlanDamageVar(35m, 3)
+            new KokomiPlan.PlanDamageVar(42m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,11 +78,11 @@ public sealed class ProtoKkMasterstroke : CustomCardModel, IElementalCard, IChar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
+        await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanDamage"].UpgradeValueBy(10m);
+        DynamicVars["PlanDamage"].UpgradeValueBy(12m);
     }
 }

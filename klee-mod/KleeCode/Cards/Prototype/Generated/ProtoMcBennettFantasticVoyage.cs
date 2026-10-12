@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcBennettFantasticVoyage : CustomCardModel, ICompanionCard
+public sealed class ProtoMcBennettFantasticVoyage : CustomCardModel, ICompanionCard, IWritableCompanion
 {
     /// <summary>Block arrives from a conditional row, so this card declares no
     /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
@@ -63,6 +63,14 @@ public sealed class ProtoMcBennettFantasticVoyage : CustomCardModel, ICompanionC
         ("description", "If you are above 70% HP, gain 3 [gold]Strength[/gold]. Otherwise, gain 10 [gold]Block[/gold]."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -78,6 +86,11 @@ public sealed class ProtoMcBennettFantasticVoyage : CustomCardModel, ICompanionC
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         if (Owner.Creature.CurrentHp * 100m > Owner.Creature.MaxHp * 70m)
         {
             await PowerCmd.Apply<StrengthPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);

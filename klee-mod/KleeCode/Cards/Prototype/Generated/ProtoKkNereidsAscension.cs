@@ -38,14 +38,14 @@ public sealed class ProtoKkNereidsAscension : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForDusk(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_nereids_ascension");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nereid's Ascension"),
-        ("description", "At the start of your turn, your first [gold]Plan[/gold] is carried out twice. So is your first [gold]Dusk[/gold] [gold]Plan[/gold]."),
+        ("description", "At the start of your turn, your first [gold]Plan[/gold] is carried out twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

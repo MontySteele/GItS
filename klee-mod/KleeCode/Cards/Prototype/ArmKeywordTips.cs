@@ -73,11 +73,8 @@ public static class ArmKeywordTips
     public const string OzKey = "KLEEMOD-ARM_OZ";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
-    public const string DuskKey = "KLEEMOD-ARM_DUSK";
-    public const string CasketKey = "KLEEMOD-ARM_CASKET";
-    // THE CASKET PASS (2026-09-28): the relic's token, named by What the
-    // Tokoyo Returns.
-    public const string OpenTheCasketKey = "KLEEMOD-ARM_OPEN_THE_CASKET";
+    // (`Dusk`, `Tamakushi Casket` and `Open the Casket` left with the rules
+    // they named, the Kokomi re-founding, 2026-10-12.)
     public const string SwirlKey = "KLEEMOD-ARM_SWIRL";
     // 2026-09-25 (the afternoon Klee seats): `Companion` is printed golded on
     // Klee's readers and on the Kokomi and Furina arms' faces, and nothing on
@@ -352,8 +349,7 @@ public static class ArmKeywordTips
     /// The long forms stay where there is room for them, on the blind-play
     /// panel (`blindplay_notes.PLAN_AIM_NOTE`, `PLAN_BLOCK_NOTE`,
     /// `PLAN_COUNT_NOTE`, `PLAN_WRITTEN_NUMBER_NOTE`), and the history of each
-    /// clause is in git. The Dusk timing is stated only on
-    /// <see cref="ForDusk"/>. Spec and census:
+    /// clause is in git. Spec and census:
     /// `review/records/text-pass-2026-09-25/`.
     ///
     /// "INSTEAD OF THE LINE ABOVE" (the status batch, 2026-10-01,
@@ -384,33 +380,6 @@ public static class ArmKeywordTips
         With(inherited, PlanOnlyKey,
             "Play the card on the [gold]Bake-Kurage[/gold]. Plans happen next "
           + "turn in order, and their [gold]Block[/gold] lasts that turn.");
-
-    /// <summary>
-    /// `EB-643` (R265), THE POOL PASS'S ONE NEW WORD, and it is a rule about
-    /// WHEN and nothing else: a Dusk Plan is carried out at the END of the turn
-    /// it was written on, before the enemies act, instead of at the start of
-    /// her next one.
-    ///
-    /// A WORD OF ITS OWN RATHER THAN A CLAUSE ON <see cref="ForPlan"/>, for
-    /// two reasons and either would do. The Plan tip was at its 135-character
-    /// ceiling when this word was added, and since the 2026-09-25 text pass
-    /// this tip is the ONE place the Dusk timing is stated. And
-    /// the two rows that print the word print it in place of "Plan:", so the
-    /// player meets `Dusk` where a definition can sit beside it.
-    ///
-    /// "BEFORE ENEMIES ACT" IS THE LOAD-BEARING HALF and it is why the whole
-    /// rule fits in one sentence: everything else about a Dusk Plan is a Plan
-    /// (it is written by playing the card on the jellyfish, it is one entry in
-    /// one queue, Change of Plans can still hurry it, the plan bus still rings
-    /// on it), and the tip beside this one says all of that. What a player cannot
-    /// get from anywhere else is that the Block arrives in time for the swing.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForDusk(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, DuskKey,
-            "[gold]Dusk[/gold]: the [gold]Bake-Kurage[/gold] carries this "
-          + "[gold]Plan[/gold] out at the end of this turn, before enemies "
-          + "act.");
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
@@ -487,47 +456,6 @@ public static class ArmKeywordTips
         With(inherited, MendKey,
             "[gold]Mend N[/gold]: heal N HP, but never above the HP you had "
           + "at the start of this combat.");
-
-    /// <summary>
-    /// `EB-625`. WHAT THE CASKET IS, on every face that names it -- by its
-    /// full name (Shell Guard) or, since the Casket pass (2026-09-28), by the
-    /// short one ("the Casket gains 2", "for each point in the Casket").
-    ///
-    /// THE CASKET PASS REWROTE THE SENTENCE with the relic: it used to be the
-    /// debuff strike, and the relic now COUNTS the Plans the Bake-Kurage
-    /// carries out. "Your relic" first, which is the half the relic's own face
-    /// cannot say; then what fills it and what empties it. The per-Plan number
-    /// is read off <see cref="KokomiOverhaulLaw.CasketPerPlan"/>, the constant
-    /// the relic adds.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForCasket(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, CasketKey,
-            "Your relic. Each [gold]Plan[/gold] the [gold]Bake-Kurage[/gold] "
-          + "carries out adds " + KokomiOverhaulLaw.CasketPerPlan + ". "
-          + "[gold]Open the Casket[/gold] turns the count into "
-          + "[gold]Strength[/gold].");
-
-    /// <summary>
-    /// THE CASKET PASS (2026-09-28). The token the Tamakushi Casket deals into
-    /// her opening hand, on the face that names it (What the Tokoyo Returns).
-    /// Its own card text, restated, because the card is in no pool and a
-    /// player may meet the name before the card. The text pass of 2026-10-08
-    /// added the upgrade's draw (`OpenTheCasket.OnPlay`, `IsUpgraded`).
-    /// 2026-10-10 ([USER], after his Kokomi playtest): it starts at 0 and
-    /// each play raises its cost by 1 (`EnergyCost.AddThisCombat(1)`).
-    /// Kokomi round 5 (2026-10-11): Grand Design carries this tip and keeps
-    /// the Casket (`GrandDesignPower.Keeps`), so the tip says so. The upgrade's
-    /// draw left the tip to make room under the 135 ceiling; the card's own
-    /// face still prints it.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForOpenTheCasket(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, OpenTheCasketKey,
-            "Retain. Costs 0, rising by 1 each play. Gain "
-          + "[gold]Strength[/gold] equal to the "
-          + "Casket's count, then empty it. Under [gold]Grand Design[/gold] "
-          + "it is not emptied.");
 
     /// <summary>
     /// `EB-575`. THE BOARD THIS CARD NEEDS, AND WHAT IT DOES WITHOUT IT.

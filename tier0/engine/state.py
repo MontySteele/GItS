@@ -58,6 +58,11 @@ RETIRED_CARD_FIELDS = {
         "(bonus_formula: N_per_M_fanfare) or gates on it "
         "(if: fanfare_at_least_N); a card that wants to raise the player's "
         "permanent baseline grants a floor (op: gain_fanfare_floor)."),
+    "plan_dusk": (
+        "Dusk is retired (the Kokomi re-founding, 2026-10-12, "
+        "review/active/kokomi-design-pass-2026-10-11.md pick 5): every Plan "
+        "is carried out at the start of her next turn. A row that wanted a "
+        "Plan that lands this turn prints its effect on the now-line."),
 }
 
 
@@ -268,16 +273,8 @@ class Card:
     # prints a Plan, and `tools/gen_klee_cards.card_level_reason` refuses one
     # on any character but Kokomi.
     plan: list[dict] = field(default_factory=list)
-    # `EB-643`, DUSK: this row's Plan line is carried out at the END of the
-    # turn it was written on, before the enemies act, instead of next morning.
-    #
-    # A FLAG ON THE ROW AND NOT A CLAUSE, deliberately, and the reason is what
-    # the word means: Dusk is WHEN the whole line lands, so a card cannot have
-    # one dusk clause and one morning clause any more than it can be played on
-    # two turns. It also keeps the clause table closed -- `PLAN_KINDS` still
-    # types what a Plan DOES, and this types when. `plan_dusk:` on the sheet,
-    # `KokomiPlan.Entry.Dusk` on the entry the card writes.
-    plan_dusk: bool = False
+    # (`EB-643`'s `plan_dusk` left with Dusk, the Kokomi re-founding,
+    # 2026-10-12.)
     # SLY -- ONE field, ONE word, one trigger (EB-71, R174; formerly two
     # near-identical mechanics, `sly` and `sly_keyword`). Effects that fire
     # when this card is discarded BY A CARD EFFECT. The end-of-turn hand
@@ -1060,38 +1057,33 @@ class PlanEntry:
     Flank's set does; this holds the object, because this engine never tears a
     dead creature down.
 
-      dusk  -- `EB-643`. This Plan is carried out at the END of the turn it
-               was written on, before the enemies act, instead of next
-               morning (`kokomi_plan.resolve_dusk`). A property of the WRITING
-               CARD's face (`plan_dusk:` on the row) and not of the clauses,
-               which is why it sits on the entry beside them.
+      source -- the card that wrote this Plan (the re-founding,
+               2026-10-12): Coordinated Tide reads whether it is Ethereal and
+               Endless Shoal whether it is a Sting or Ward when the Plan is
+               carried out (`kokomi_plan.note_carried_out`).
     """
     card_id: str
     clauses: list[dict] = field(default_factory=list)
     card: Optional["Card"] = None
     label: Optional[str] = None
-    dusk: bool = False
     aim_override: Optional["Enemy"] = None
-    # THE EXPANSION, BATCH ONE (2026-09-29). `paid` is the Energy actually
-    # paid for the card that wrote this Plan (after reductions; an X cost
-    # counts what was paid): the Big Plan's axis ("the Energy paid for the
-    # Plans waiting") and Grand Design's "a Plan that cost 2 or more" both
-    # read it. `extra` is All Streams Flow to the Sea's gift to the next Plan
-    # written this turn: carried out once, plus once per Plan it cancelled.
-    # `KokomiPlan.Entry.Paid` / `Extra` are the twins.
-    paid: int = 0
+    # THE EXPANSION, BATCH ONE (2026-09-29). `extra` is All Streams Flow to
+    # the Sea's gift to the next Plan written this turn: carried out once,
+    # plus once per Plan it cancelled. `KokomiPlan.Entry.Extra` is the twin.
+    # (`paid` left with the cards that read the Energy paid, 2026-10-12.)
     extra: int = 0
     # A PLAN STAYS OPEN (2026-10-01, ruled; review/active/
     # kokomi-delay-pays-2026-10-01.md sec.2). `now_card` is the card whose
     # now-line this Plan may be carried out as instead: set by `schedule`
     # only for a Plan written from a TWO-LINE card's own line (Moon's
     # Reflection's found card included), never for a Plan-only card or a
-    # Dusk Plan. `line` is the line it will be carried out as, "plan" (the
+    # written Companion. `line` is the line it will be carried out as, "plan" (the
     # default) or "now" once the player has flipped it while it waits
     # (`kokomi_plan.flip`, pick 5a).
     # `KokomiPlan.Entry.Now` is the twin of `line`.
     now_card: Optional["Card"] = None
     line: str = "plan"
+    source: Optional["Card"] = None
 
 @dataclass
 class CombatState:
@@ -1326,23 +1318,11 @@ class CombatState:
     # which runs BEFORE the drain, so a morning with no Plans reads zero.
     # `KokomiOverhaulLedger.PlansThisMorning`'s twin.
     kk_plans_this_morning: int = 0
-    # (C.KOKOMI_OVERHAUL), THE CASKET PASS (2026-09-28). How many
-    # Plans the Bake-Kurage carried out THIS TURN -- Feint's and Sango
-    # Isshin's count -- written at the one place a Plan is carried out
-    # (`kokomi_plan._note_plan_resolved`, once per carry-out, so a doubled one
-    # counts twice) and cleared by `kokomi_plan.roll_turn`.
-    # `KokomiOverhaulLedger.PlansCarriedOutThisTurn`'s twin.
-    kk_plans_carried_out_this_turn: int = 0
     # [USER]'s Kokomi run (2026-10-11): Sango Isshin counts THIS COMBAT. The
     # same carry-outs, per fight (a `CombatState` is one fight, so it starts
     # at 0 and `roll_turn` never clears it).
     # `KokomiOverhaulLedger.PlansCarriedOutThisCombat`'s twin.
     kk_plans_carried_out_this_combat: int = 0
-    # And THE TAMAKUSHI CASKET'S COUNT, per fight (a `CombatState` is one
-    # fight): +1 per carry-out while she holds the relic, moved by Pearl Diver,
-    # Moon Signal and What the Tokoyo Took, emptied by Open the Casket. The
-    # turn roll never touches it. `KokomiOverhaulLedger.CasketCount`'s twin.
-    kk_casket: int = 0
     # THE EXPANSION, BATCH ONE: All Streams Flow to the Sea's pending gift,
     # "your next Plan this turn is carried out once, plus once for each Plan
     # cancelled". None while nothing is pending; the count (0 or more) while
@@ -1350,13 +1330,13 @@ class CombatState:
     # (`kokomi_plan.schedule`), cleared by `kokomi_plan.roll_turn`.
     # `KokomiOverhaulLedger.NextPlanExtra`'s twin.
     kk_next_plan_extra: Optional[int] = None
-    # POOL COMPLETION (2026-10-01). Shoal of Spears' "for each Plan you wrote
-    # this turn" (every write, cleared by `kokomi_plan.roll_turn`;
-    # `KokomiOverhaulLedger.PlansWrittenThisTurn`'s twin), and Patient Tide's
-    # Energy kept across the turn boundary (banked at her turn end, handed
-    # back after the refill; `PatientTidePower`'s twin).
-    kk_plans_written_this_turn: int = 0
-    kk_patient_tide_kept: int = 0
+    # THE RE-FOUNDING (2026-10-12). `kk_carrying_out` is Grand Strategist's
+    # window, open while one Plan's clauses run (`kokomi_plan._resolve_entry`;
+    # `KokomiPlan.IsCarryingOut`'s twin). `kk_free_write` is Grand Design's
+    # free write in flight (`kokomi_plan.write_free`;
+    # `KokomiRefounding.IsFreeWrite`'s twin).
+    kk_carrying_out: bool = False
+    kk_free_write: Optional["Card"] = None
     # (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s

@@ -146,7 +146,6 @@ public class KokomiR276Tests
     {
         var resolve = Il.CallSequence(Il.Method("KokomiPlan", "ResolveOne"));
         Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.FirstAttackTwice"));
-        Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.FirstCardFree"));
         Assert.Contains(resolve, c => c.Contains("KokomiOverhaulKit.IntendedDamage"));
     }
 
@@ -163,19 +162,6 @@ public class KokomiR276Tests
         Assert.Contains(Il.Calls(Il.Method("FirstAttackTwicePower",
                                            "AfterSideTurnEnd")),
                         c => c.Contains("PowerCmd.Remove"));
-    }
-
-    [Fact]
-    public void Stolen_chapters_switch_zeroes_a_cost_and_is_spent_by_a_real_play()
-    {
-        Assert.Contains(
-            Il.Calls(Il.Method("FirstCardFreePower", "AfterCardPlayed")),
-            c => c.Contains("get_IsAutoPlay"));
-        Assert.Contains(Il.Calls(Il.Method("FirstCardFreePower",
-                                           "AfterSideTurnEnd")),
-                        c => c.Contains("PowerCmd.Remove"));
-        Assert.NotNull(typeof(FirstCardFreePower).GetMethod(
-            "TryModifyEnergyCostInCombat", HeadlessGame.All));
     }
 
     [Fact]

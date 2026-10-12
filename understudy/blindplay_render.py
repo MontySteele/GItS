@@ -118,7 +118,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_APPLIED,
                                         RESOLUTION_REMOVED,
                                         STOLEN_CARD_CLAUSE,
-                                        TURN_ORDER_DUSK, TURN_ORDER_NOTE,
+                                        TURN_ORDER_NOTE,
                                         TURN_ORDER_ORB,
                                         TURN_ORDER_PERFORMER,
                                         TURN_ORDER_POWER,
@@ -475,50 +475,18 @@ def _render_carry_out(pl: dict[str, Any]) -> list[str]:
         out.append("- These fired at the end of your last turn, before the "
                    "enemies acted:")
         out += _carry_out_rows(pl["summon_hits"])
-    # `EB-680`. A DUSK PLAN DID NOT HAPPEN THIS MORNING, so it is not filed
-    # under the morning's heading.
-    #
-    # R265's Dusk lines are carried out at the END of the turn they are written
-    # on, before the enemies act -- so by the time a seat reads this list they
-    # are one turn and one enemy phase old, and the heading said "at the start
-    # of this turn". Kokomi r27 lane 2: one Dusk Plan's timing printed three
-    # ways at once, the card saying the end of this turn, the badge and the
-    # queue saying the start of the next, and this heading saying the start of
-    # THIS one. Two of the three are fixed at their source; this is the third.
-    #
-    # READ OFF THE MOD'S OWN MARK, which is `KokomiPlan.Entry.Title`'s "Dusk: "
-    # prefix -- the same string the strip draws and the same one `Announce`
-    # passes through as the carry-out's `card`. No new wire field, and a build
-    # that predates the prefix files every row under the morning exactly as it
-    # did.
-    dusk = [row for row in pl["carried_out"] if _is_dusk(row)]
-    morning = [row for row in pl["carried_out"] if not _is_dusk(row)]
-    if dusk:
-        out.append(f"- The {pl['pet_name']} carried these out at the END of "
-                   "your last turn, before the enemies acted:")
-        out += _carry_out_rows(dusk)
-    if morning:
+    # (`EB-680`'s Dusk heading left with Dusk, the Kokomi re-founding,
+    # 2026-10-12: every carry-out is a morning one again.)
+    if pl["carried_out"]:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
-        out += _carry_out_rows(morning)
+        out += _carry_out_rows(pl["carried_out"])
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not at the start of the "
                    "turn:")
         out += _carry_out_rows(pl["fired_now"])
     return out
-
-
-#: `EB-680`. The mark `KokomiPlan.Entry.Title` puts on a Dusk entry, which is
-#: the only place the wire says which timing an entry has. Case-sensitive and
-#: anchored, because it is a prefix the mod writes and not a word a card face
-#: might happen to use.
-_DUSK_MARK = "Dusk: "
-
-
-def _is_dusk(row: dict[str, Any]) -> bool:
-    """Is this queued or carried-out Plan a DUSK entry? (`EB-680`)"""
-    return str(row.get("card") or row.get("name") or "").startswith(_DUSK_MARK)
 
 
 def _front_body(enemies: list[dict[str, Any]]) -> dict[str, Any] | None:
@@ -1319,32 +1287,6 @@ def _casket_aura_clause(you: dict[str, Any]) -> str:
     return ""
 
 
-#: The Tamakushi Casket's own clause, "... adds 1 to the Casket." Matched on
-#: the relic's words, `_casket_aura_clause`'s discipline, not on its name.
-#: Kokomi whole-run round 2026-10-10: the Watatsumi Casket (Touch of Orobas's
-#: upgrade) ends "Each Plan it carries out adds 1." with no "to the Casket",
-#: and the line vanished. The board row carries no relic id (`relic_faces`
-#: prints only what the game prints), so the clause both texts share matches.
-_CASKET_COUNT_TEXT = re.compile(
-    r"\bto the Casket\b|\bit carries out adds\b", re.IGNORECASE)
-
-
-def _casket_count_line(you: dict[str, Any]) -> list[str]:
-    """`- Casket: N`, the count on the Tamakushi Casket's icon (2026-09-28).
-
-    The count is the relic's `counter` off the wire (`ShowCounter` /
-    `DisplayAmount`, `TamakushiCasket.cs`), the number the game draws on the
-    icon. Printed beside the Bake-Kurage because that is where a reader
-    deciding when to open the Casket is looking. `[]` with no such relic or
-    no counter on it (out of combat the icon draws none).
-    """
-    for relic in you.get("relics") or []:
-        counter = str(relic.get("counter") or "").strip()
-        if counter and _CASKET_COUNT_TEXT.search(str(relic.get("text") or "")):
-            return [f"- Casket: {counter}"]
-    return []
-
-
 def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
     """A rider the game folds into every row and pays out once.
 
@@ -1968,10 +1910,9 @@ def _end_of_turn_on_board(c: dict[str, Any]) -> bool:
     sides of the board: an enemy's own end-of-turn trigger resolves in the same
     step and a reader planning a kill needs the order either way.
 
-    AND THE TWO KIT BLOCKS, which carry the two effects the seat named. A Dusk
-    entry is a Plan whose carry-out moved to the end of THIS turn, and the
-    stage's performers act at the end of your turn by rule -- neither is a
-    power and neither would be found by reading the power rows alone.
+    AND THE STAGE, whose performers act at the end of your turn by rule --
+    not a power, and not found by reading the power rows alone. (Kokomi's
+    Dusk entries were the other kit block until Dusk left, 2026-10-12.)
     """
     powers = list(c["you"]["powers"])
     for e in c["enemies"]:
@@ -1980,10 +1921,7 @@ def _end_of_turn_on_board(c: dict[str, Any]) -> bool:
         return True
     if _orb_end_of_turn(c):
         return True
-    if c.get("stage") is not None:
-        return True
-    plans = c.get("plans") or {}
-    return any(_is_dusk(e) for e in (plans.get("queue") or []))
+    return c.get("stage") is not None
 
 
 def _orb_lines(orbs: dict[str, Any] | None) -> list[str]:
@@ -2031,15 +1969,14 @@ def _turn_order_note(c: dict[str, Any]) -> str:
 
     A kit's word is named only where that kit's block is on the board: the
     Ironclad control seat read "a performer's act, a Dusk Plan" on its own
-    board and met two words it could not look up.
+    board and met two words it could not look up. (Kokomi's Dusk example
+    left with Dusk, 2026-10-12.)
     """
     examples = [TURN_ORDER_POWER]
     if _orb_end_of_turn(c):
         examples.append(TURN_ORDER_ORB)
     if c.get("stage") is not None:
         examples.append(TURN_ORDER_PERFORMER)
-    if c.get("plans"):
-        examples.append(TURN_ORDER_DUSK)
     return TURN_ORDER_NOTE.format(examples=", ".join(examples))
 
 
@@ -2997,19 +2934,12 @@ _PER_CARD_RELIC = re.compile(
     r"end of your turn, gain (\d+) Block for each card in your hand", re.I)
 #: Beating Remnant: "You cannot lose more than 20 HP in a single turn."
 _HP_LOSS_CAP = re.compile(r"lose more than (\d+) HP", re.I)
-#: SEAT PAGE 7 (2026-10-05): Kokomi's waiting Dusk Plans, which the
-#: Bake-Kurage carries out at the end of this turn, before the enemies act
-#: (`ProtoBakeKuragePower.BeforeSideTurnEnd`). Counted only off the entry's
-#: own Plan text on the wire (`plan_line`, numbers filled); an entry with no
-#: text, or whose Block the page cannot count (Double your Block), is named.
-DUSK_FOLD_NAME = "{name} (Dusk Plan)"
-_DUSK_FLAT_BLOCK = re.compile(r"^Gain (\d+) Block\.?$", re.I)
-#: Breakwater: the count is the queue left once the Dusk entries are out.
-_DUSK_PER_PLAN = re.compile(
-    r"^Gain (\d+) Block, and (\d+) more for each Plan waiting\.?$", re.I)
-#: Evening Watch: the living enemies with an attack shown.
-_DUSK_PER_ATTACKER = re.compile(
-    r"^Gain (\d+) Block for each enemy intending to attack\.?$", re.I)
+#: THE KOKOMI RE-FOUNDING (2026-10-12): the Tamakushi Casket, "At the end
+#: of your turn, if a Plan is waiting, gain 3 Block" (its upgrade the same at
+#: 5). Counted when the queue on the page is not empty. It replaces SEAT PAGE
+#: 7's Dusk fold, which left with Dusk.
+_PLAN_WAITING_RELIC = re.compile(
+    r"end of your turn, if a Plan is waiting, gain (\d+) Block", re.I)
 
 
 def _plain_name(title: Any) -> str:
@@ -3027,80 +2957,38 @@ def _named_sum(parts: list[tuple[str, int]]) -> tuple[str, int, bool]:
     return who, sum(n for _name, n in parts), len(parts) > 1
 
 
-def _dusk_block_number(text: str, morning: int, attackers: int) -> int | None:
-    """One Dusk entry's Block off its Plan text, 0 where it gives no Block,
-    `None` where the page cannot count it."""
-    text = re.sub(r"^.*\bplan:\s*", "", text.strip(), flags=re.I | re.S)
-    if not text:
-        return None
-    found = _DUSK_FLAT_BLOCK.match(text)
-    if found:
-        return int(found.group(1))
-    found = _DUSK_PER_PLAN.match(text)
-    if found:
-        return int(found.group(1)) + int(found.group(2)) * morning
-    found = _DUSK_PER_ATTACKER.match(text)
-    if found:
-        return int(found.group(1)) * attackers
-    return None if re.search(r"\bBlock\b", text, re.I) else 0
-
-
-def _dusk_facts(plans: dict[str, Any] | None,
-                enemies: list[dict[str, Any]]
-                ) -> tuple[list[tuple[str, int]], list[str]]:
-    """The waiting Dusk Plans' Block: `(counted, named)`. Nereid's Ascension
-    carries the first Dusk entry out twice (`KokomiPlan.Drain`)."""
-    queue = (plans or {}).get("queue") or []
-    morning = sum(1 for e in queue if not _is_dusk(e))
-    attackers = sum(1 for e in enemies
-                    if not e.get("phase_flip")
-                    and not (isinstance(e.get("hp"), int) and e["hp"] <= 0)
-                    and any(_fold(i.get("type")) == "attack"
-                            for i in e.get("intents") or []))
-    counted: list[tuple[str, int]] = []
-    named: list[str] = []
-    first = True
-    for entry in queue:
-        if not _is_dusk(entry):
-            continue
-        name = DUSK_FOLD_NAME.format(
-            name=str(entry.get("name") or "")[len(_DUSK_MARK):])
-        n = _dusk_block_number(str(entry.get("plan_line") or ""), morning,
-                               attackers)
-        times = 2 if first and (plans or {}).get("twice") else 1
-        first = False
-        if n is None:
-            if name not in named:
-                named.append(name)
-        elif n > 0:
-            counted += [(name, n)] * times
-    return counted, named
-
-
 def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
                     pets: list[dict[str, Any]],
-                    dusk: tuple[list[tuple[str, int]], list[str]] = ([], [])
-                    ) -> dict[str, Any]:
+                    plans_waiting: bool = False) -> dict[str, Any]:
     """What lands between the end of your turn and the enemies' hits, off the
     wire's own numbers, as if the turn ended now; what the page cannot count
-    goes in `unknown`, by name. SEAT PAGE 7: `dusk` is `_dusk_facts`'s."""
-    block_parts: list[tuple[str, int]] = list(dusk[0])
+    goes in `unknown`, by name. `plans_waiting`: the Bake-Kurage's queue is
+    not empty (the Tamakushi Casket's condition)."""
+    block_parts: list[tuple[str, int]] = []
     hit_parts: list[tuple[str, int]] = []
     hp_parts: list[tuple[str, int]] = []
-    unknown: list[str] = list(dusk[1])
+    unknown: list[str] = []
     block_now = int(you.get("block") or 0)
     cap = None
-    for relic in you.get("relics") or []:
+    relics = you.get("relics") or []
+    casket = any(_PLAN_WAITING_RELIC.search(str(r.get("text") or ""))
+                 for r in relics) and plans_waiting
+    for relic in relics:
         name, text = str(relic.get("name") or ""), str(relic.get("text") or "")
         found = _HP_LOSS_CAP.search(text)
         if found:
             cap = (name, int(found.group(1)))
             continue
+        found = _PLAN_WAITING_RELIC.search(text)
+        if found:
+            if plans_waiting:
+                block_parts.append((name, int(found.group(1))))
+            continue
         found = _NO_BLOCK_RELIC.search(text)
         if found:
-            if block_now == 0 and dusk[0]:
-                # Whether the Dusk Block lands before this relic looks is
-                # not on the page: named, never counted.
+            if block_now == 0 and casket:
+                # The Casket and this relic share one end-of-turn moment and
+                # their order is not on the page: named, never counted.
                 unknown.append(name)
             elif block_now == 0:
                 block_parts.append((name, int(found.group(1))))
@@ -3217,7 +3105,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
             else:
                 total += part
     facts = _turn_end_facts(you, hand or [], pets or [],
-                            _dusk_facts(plans, enemies))
+                            bool((plans or {}).get("queue")))
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     if not any_attack and not (facts["hit"] or facts["hp"]):
@@ -3547,10 +3435,8 @@ def render(obs: dict[str, Any]) -> str:
             # else.
             pl = c["plans"]
             out += ["", f"## The {pl['pet_name']}", ""]
-            # 2026-09-28 (Kokomi seat): the Casket's count, where the Plans
-            # that fill it are read. It was only the relic row's "(N)", and a
-            # seat timing Open the Casket read the Plan block and never saw it.
-            out += _casket_count_line(you)
+            # (The Casket's count line, 2026-09-28, left with the count in
+            # the Kokomi re-founding, 2026-10-12.)
             if pl["pet"]:
                 out.append(f"- The {pl['pet_name']} is on the field for the "
                            "whole fight. Enemies cannot touch it. Play a card "
@@ -3611,11 +3497,6 @@ def render(obs: dict[str, Any]) -> str:
                 out.append("- Nothing is planned. Nothing will be carried "
                            "out at the start of your next turn.")
             else:
-                # `EB-680`: the queue is ONE queue and two of its entries
-                # land at different moments, so the line that says WHEN says
-                # it per entry rather than once for all of them. The Dusk
-                # clause rides the entry's own row, where a reader deciding
-                # whether to write another one is looking.
                 out.append(
                     f"- Planned, and carried out at the start of your next "
                     f"turn in this order ({pl['pending']}):")
@@ -3624,9 +3505,6 @@ def render(obs: dict[str, Any]) -> str:
                 past_lethal = _past_lethal_clauses(pl, c.get("enemies") or [])
                 for i, e in enumerate(pl["queue"], 1):
                     out.append(f"  {i}. **{e['name']}**"
-                               + (" — Dusk: this one is carried out at the "
-                                  "END of this turn instead, before the "
-                                  "enemies act" if _is_dusk(e) else "")
                                + past_lethal.get(i - 1, ""))
                     # A PLAN STAYS OPEN (2026-10-01), pick 5 (a): both
                     # lines while it waits, the one it will be carried out
@@ -3647,14 +3525,12 @@ def render(obs: dict[str, Any]) -> str:
                             other=plan_text if now else e["now_line"],
                             n=i))
                 if pl["twice"]:
-                    # 2026-09-28 (Kokomi seat): with a Dusk Plan in the
-                    # list above, "your FIRST Plan" read as entry 1. The Rare
-                    # doubles the first entry of EACH drain
-                    # (`KokomiPlan.Drain`): the morning's and the Dusk's.
+                    # The Rare doubles the first entry of the morning's drain
+                    # (`KokomiPlan.Drain`). (Its Dusk half left with Dusk,
+                    # 2026-10-12.)
                     out.append("- Nereid's Ascension: the jellyfish carries "
                                "out your FIRST Plan twice at the start of "
-                               "your turn, and your first Dusk Plan twice "
-                               "at the end of it.")
+                               "your turn.")
             # `EB-329`: which of the two numbers under a Plan is which, once,
             # at the foot of the section rather than under the last card.
             if _board_note_wanted(pl):

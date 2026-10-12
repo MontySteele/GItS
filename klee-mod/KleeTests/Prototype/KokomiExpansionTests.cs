@@ -49,57 +49,25 @@ public class KokomiExpansionTests : IDisposable
 
     private static readonly string[] Batch =
     {
-        "ProtoKkWeightOfThePlan", "ProtoKkLull", "ProtoKkUndertideLance",
-        "ProtoKkMeasuredBreath", "ProtoKkGrandDesign", "ProtoKkTheLongGame",
+        // The re-founding (2026-10-12) cut Weight of the Plan, Lull, The Long
+        // Game, Salt in the Wound, Tidal Resonance and Kurage Swarm.
+        "ProtoKkUndertideLance",
+        "ProtoKkMeasuredBreath", "ProtoKkGrandDesign",
         "ProtoKkMasterstroke",
-        "ProtoKkDrowningPressure", "ProtoKkSaltInTheWound",
-        "ProtoKkUndercurrentSnare", "ProtoKkTidalResonance",
+        "ProtoKkDrowningPressure",
+        "ProtoKkUndercurrentSnare",
         "ProtoKkAtWatersEdge", "ProtoKkCeremonialGarment",
         "ProtoKkSuffocatingDeep", "ProtoKkCoralCrash", "ProtoKkEveningWatch",
         "ProtoKkBraceForTheTide", "ProtoKkWatatsumisGrace",
-        "ProtoKkTidalRiposte", "ProtoKkShoalCall", "ProtoKkKurageSwarm",
+        "ProtoKkTidalRiposte", "ProtoKkShoalCall",
     };
 
     // ---- the offer -------------------------------------------------------
 
     [Fact]
-    public void The_offer_is_seventy_with_the_batch_before_the_payoff_pass()
-    {
-        var slice = Seq("KokomiOverhaulRoster", "Slice")
-            .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
-            .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
-            .ToList();
-        // SEVENTY since the payoff pass (2026-10-01): Second Thoughts cut
-        // ahead of the batch, two rows after it; pool completion (2026-10-01)
-        // eight more; the status batch (2026-10-01) cut All Streams Flow to
-        // the Sea and five rows ahead of the batch, and appended seven.
-        Assert.Equal(78, slice.Count);
-        Assert.Equal(Batch, slice.Skip(39).Take(21).ToArray());
-        Assert.DoesNotContain(slice, c => c.Contains("AllStreams"));
-        Assert.DoesNotContain(slice, c => c.Contains("CloudsLikeWaves"));
-        Assert.Null(typeof(KokomiOverhaulKit).Assembly
-            .GetType("KleeMod.Powers.CloudsLikeWavesPower"));
-    }
-
-    [Fact]
-    public void The_batch_is_twelve_uncommon_and_ten_rare()
-    {
-        var asm = typeof(ProtoKkNip).Assembly;
-        var rarities = Batch
-            .Select(n => ((CardModel)Activator.CreateInstance(
-                asm.GetType("KleeMod.Cards.Prototype.Generated." + n)!)!).Rarity)
-            .ToList();
-        // Pool completion (2026-10-01, paper sec.6): Coral Crash is Common.
-        Assert.Equal(11, rarities.Count(r => r == CardRarity.Uncommon));
-        Assert.Equal(1, rarities.Count(r => r == CardRarity.Common));
-        // The status batch (2026-10-01) cut All Streams Flow to the Sea.
-        Assert.Equal(9, rarities.Count(r => r == CardRarity.Rare));
-    }
-
-    [Fact]
     public void No_face_in_the_batch_says_morning()
     {
-        var asm = typeof(ProtoKkNip).Assembly;
+        var asm = typeof(ProtoKkMasterstroke).Assembly;
         foreach (var n in Batch)
         {
             var card = (CardModel)Activator.CreateInstance(
@@ -112,44 +80,6 @@ public class KokomiExpansionTests : IDisposable
     // ---- the Big Plan -------------------------------------------------------
 
     [Fact]
-    public void A_write_carries_the_energy_the_play_paid()
-    {
-        Assert.Contains("KokomiPlan.Schedule",
-                        Il.Calls(Il.Method("ProtoKkMasterstroke", "OnPlay")));
-        Assert.Contains("CardPlay.get_Resources",
-                        Il.Calls(Il.Method("ProtoKkMasterstroke", "OnPlay")));
-        var entry = new KokomiPlan.Entry(null,
-            Array.Empty<KokomiPlan.Planned>(), Paid: 3, Extra: 2);
-        Assert.Equal((3, 2), (entry.Paid, entry.Extra));
-    }
-
-    [Fact]
-    public void Weight_of_the_plan_reads_the_energy_waiting()
-    {
-        var card = new ProtoKkWeightOfThePlan();
-        Assert.Equal((CardType.Attack, 1), (card.Type, card.EnergyCost.Canonical));
-        Assert.Contains("Energy", Face(card));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkWeightOfThePlan",
-                                           "get_CanonicalVars")),
-                        c => c.Contains("KokomiPlan.EnergyWaiting"));
-    }
-
-    [Fact]
-    public void Lull_and_undertide_lance_plan_their_alone_clauses()
-    {
-        var lull = Assert.Single(new ProtoKkLull().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.EnergyIfAlone, 2), (lull.Kind, lull.Amount));
-        var lance = Assert.Single(new ProtoKkUndertideLance().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.DamageIfAlone, 14, KokomiPlan.Aim.FrontEnemy),
-                     (lance.Kind, lance.Amount, lance.Aim));
-        Assert.Equal(18, Assert.Single(
-            Upgraded<ProtoKkUndertideLance>().PlanClauses).Amount);
-        // The drain hands its entry count to every carry-out.
-        Assert.Contains(Seq("KokomiPlan", "Drain"),
-                        c => c.Contains("ResolveEntry"));
-    }
-
-    [Fact]
     public void Masterstroke_is_a_retained_plan_only_attack()
     {
         var card = new ProtoKkMasterstroke();
@@ -158,37 +88,10 @@ public class KokomiExpansionTests : IDisposable
         Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
         Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].", Face(card));
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Damage, 35), (clause.Kind, clause.Amount));
-        Assert.Equal(45, Upgraded<ProtoKkMasterstroke>().PlanClauses.Single().Amount);
-    }
-
-    [Fact]
-    public void Kurage_swarm_feeds_the_casket()
-    {
-        // Grand Design left the plan bus when it was bent (2026-10-10);
-        // `KokomiGrowthPowersTests` pins its new reading.
-        Assert.DoesNotContain(Seq("KokomiPlan", "ResolveEntry"),
-                              c => c.Contains("GrandDesignPower"));
-        Assert.Contains(Seq("KokomiPlan", "Schedule"),
-                        c => c.Contains("KurageSwarmPower.Note"));
-        Assert.Equal(1, new ProtoKkKurageSwarm().EnergyCost.Canonical);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkKurageSwarm>().Keywords);
-
-        KokomiOverhaulLedger.ResetAll();
-        var swarm = Seat.Kokomi().WithPower<KurageSwarmPower>(1);
-        KurageSwarmPower.Note(swarm.Creature);
-        Assert.Equal(1, KokomiOverhaulLedger.For(swarm.Creature).CasketCount);
-    }
-
-    [Fact]
-    public void The_long_game_reads_the_pre_drain_queue()
-    {
-        var start = Seq("ProtoBakeKuragePower", "AfterPlayerTurnStart");
-        var game = start.FindIndex(c => c.Contains("TheLongGamePower.Signal"));
-        var drain = start.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));
-        Assert.True(game >= 0 && drain > game);
-        Assert.Equal(1, KokomiOverhaulLaw.LongGameWaiting);
+        // The re-founding (2026-10-12): a flat 42 [54], no Strength rider.
+        Assert.Equal((KokomiPlan.Kind.Damage, 42, 1),
+                     (clause.Kind, clause.Amount, clause.StrengthTimes));
+        Assert.Equal(54, Upgraded<ProtoKkMasterstroke>().PlanClauses.Single().Amount);
     }
 
     // ---- Tide Control ---------------------------------------------------------
@@ -201,7 +104,7 @@ public class KokomiExpansionTests : IDisposable
                         .Single();
         var target = Seat.Kokomi()
             .WithPower<WeakPower>(2).WithPower<VulnerablePower>(1).Creature;
-        var attack = new ProtoKkMassedVolley();
+        var attack = new ProtoKkPincer();
         // The Kokomi card pass (2026-10-11): stacks, so Weak 2 + Vulnerable 1
         // is 3 (it counted 2 distinct debuffs before).
         Assert.Equal(3m, power.ModifyDamageAdditive(
@@ -272,39 +175,13 @@ public class KokomiExpansionTests : IDisposable
                      (snare.Kind, snare.Amount, snare.Aim));
         Assert.Equal(2, Upgraded<ProtoKkUndercurrentSnare>().PlanClauses
                             .Single().Amount);
-        // The Kokomi card pass (2026-10-11): draw 1, or 2 on Weak; the
-        // upgrade is 2 Vulnerable.
-        Assert.Equal(1m, new ProtoKkSaltInTheWound().DynamicVars["PowerAmount"].BaseValue);
-        Assert.Equal(2m, Upgraded<ProtoKkSaltInTheWound>()
-                             .DynamicVars["PowerAmount"].BaseValue);
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkSaltInTheWound", "OnPlay")),
-                        c => c.Contains("CardPileCmd.Draw"));
+        // The re-founding (2026-10-12): Undercurrent Snare costs 1.
+        Assert.Equal(1, new ProtoKkUndercurrentSnare().EnergyCost.Canonical);
         Assert.Contains(Il.Calls(Il.Method("ProtoKkSuffocatingDeep", "OnPlay")),
                         c => c.Contains("KokomiCards.DoubleWeakVulnerable"));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkTidalResonance", "OnPlay")),
-                        c => c.Contains("KokomiCards.Resonance"));
     }
 
     // ---- Dusk Guard ----------------------------------------------------------------
-
-    [Fact]
-    public void Evening_watch_and_brace_are_dusk_plans()
-    {
-        var watch = Assert.Single(new ProtoKkEveningWatch().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.BlockPerAttackingEnemy, 5),
-                     (watch.Kind, watch.Amount));
-        Assert.Equal(7, Upgraded<ProtoKkEveningWatch>().PlanClauses.Single().Amount);
-        var brace = Assert.Single(new ProtoKkBraceForTheTide().PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.DoubleBlock, brace.Kind);
-        Assert.Contains(CardKeyword.Exhaust,
-                        Upgraded<ProtoKkBraceForTheTide>().CanonicalKeywords);
-        Assert.Contains("Or [gold]dusk[/gold] [gold]plan[/gold]",
-                        Face(new ProtoKkEveningWatch()));
-        // Plan-only: no line above to choose, so no "or" (2026-10-01).
-        Assert.Contains("\n[gold]Dusk[/gold] [gold]Plan[/gold]: ",
-                        Face(new ProtoKkBraceForTheTide()));
-        Assert.DoesNotContain("Or [gold]", Face(new ProtoKkBraceForTheTide()));
-    }
 
     [Fact]
     public void Watatsumis_grace_keeps_up_to_its_cap_the_sturdy_clamp_way()
@@ -342,12 +219,13 @@ public class KokomiExpansionTests : IDisposable
     // ---- Plan volume -----------------------------------------------------------------
 
     [Fact]
-    public void Shoal_call_adds_nips_upgraded_when_it_is()
+    public void Shoal_call_adds_stings_upgraded_when_it_is()
     {
+        // The re-founding (2026-10-12): Stings, not Nips.
         var calls = Seq("KokomiCards", "ShoalCall");
-        Assert.Contains(calls, c => c.Contains("ProtoKkNip"));
+        Assert.Contains(calls, c => c.Contains("KokomiCards.AddJellyfish"));
         Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
-        Assert.Contains("{IfUpgraded:show: They are upgraded.|}",
+        Assert.Contains("{IfUpgraded:show:upgraded |}[gold]Stings[/gold]",
                         Face(new ProtoKkShoalCall()));
     }
 }

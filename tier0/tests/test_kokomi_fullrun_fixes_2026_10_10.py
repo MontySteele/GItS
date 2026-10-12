@@ -12,15 +12,14 @@ import pytest
 
 from understudy import blindplay
 
+# `TamakushiCasket.cs`, `WatatsumiCasket.Localization`, as the wire prints
+# them since the Kokomi re-founding (2026-10-12): no count.
 TAMAKUSHI = {"id": "KLEEMOD-TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
-             "description": "Start each combat with the Bake-Kurage and Open "
-                            "the Casket in hand. Each Plan it carries out "
-                            "adds 1 to the Casket."}
-# `TamakushiCasket.cs`, `WatatsumiCasket.Localization`, as the wire prints it.
+             "description": "At the end of your turn, if a Plan is waiting, "
+                            "gain 3 Block."}
 WATATSUMI = {"id": "KLEEMOD-WATATSUMI_CASKET", "name": "Watatsumi Casket",
-             "description": "Start each combat with the Bake-Kurage, Open the "
-                            "Casket in hand and 3 in the Casket. Each Plan it "
-                            "carries out adds 1."}
+             "description": "At the end of your turn, if a Plan is waiting, "
+                            "gain 5 Block."}
 
 
 @pytest.fixture(autouse=True)
@@ -53,12 +52,13 @@ def _kokomi(relics=(), **player) -> dict:
 
 @pytest.mark.parametrize("relic", [TAMAKUSHI, WATATSUMI],
                          ids=["tamakushi", "watatsumi"])
-def test_the_casket_line_prints_for_either_casket(relic):
-    """The line vanished with the Watatsumi Casket (Touch of Orobas's
-    upgrade): its text has no "to the Casket"."""
+def test_neither_casket_prints_a_count_line(relic):
+    """The count line printed for either Casket while the relic counted
+    Plans; the re-founding (2026-10-12) retired the count, so a stray counter
+    on the wire prints nothing."""
     page = blindplay.observe(_kokomi([dict(relic, counter=4)]))
     at = page.index("## The Bake-Kurage")
-    assert "- Casket: 4" in page[at:]
+    assert "- Casket:" not in page[at:]
 
 
 def test_another_counted_relic_prints_no_casket_line():

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Electro;
@@ -62,6 +62,14 @@ public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalC
         ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. Your Attacks against enemies holding an aura deal 6 additional damage."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -79,6 +87,11 @@ public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalC
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

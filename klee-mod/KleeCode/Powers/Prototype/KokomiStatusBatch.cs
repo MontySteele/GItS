@@ -16,8 +16,10 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE STATUS BATCH (2026-10-01, ruled): the bodies of the four Plan clauses
-/// that read the hand just drawn. Paper
+/// THE STATUS BATCH (2026-10-01, ruled): the bodies of the clauses that read
+/// the hand -- Kelp Wall's and Sea Glass Harvest's Plans, and since the
+/// re-founding (2026-10-12) Tidecleanse's now-line Exhaust. (Turning Tide's
+/// discard-and-draw and Abyssal Salvage left with their cards.) Paper
 /// <c>review/active/kokomi-status-batch-2026-10-01.md</c> sec.2; readings in
 /// <c>docs/notes/prototype-surface-provenance.md</c>, "Kokomi status batch,
 /// 2026-10-01".
@@ -28,9 +30,8 @@ namespace KleeMod.Powers;
 /// next). Each body reads the hand at the moment its clause runs.
 ///
 /// BASE-GAME MACHINERY WHERE IT EXISTS: the transform is Defect's Compact's
-/// (<c>CardCmd.Transform</c> over <c>IsTransformable</c> cards), the
-/// discard-and-draw is Gambler's Brew's (<c>CardSelectCmd.FromHandForDiscard</c>
-/// then <c>CardCmd.DiscardAndDraw</c>), and the status test is the card's own
+/// (<c>CardCmd.Transform</c> over <c>IsTransformable</c> cards), and the status
+/// test is the card's own
 /// <c>CardType.Status</c> / <c>CardType.Curse</c>. Sim twins:
 /// <c>tier0/engine/kokomi_plan</c>, the same names.
 /// </summary>
@@ -118,22 +119,6 @@ public static class KokomiStatusBatch
         return targets.Count;
     }
 
-    /// <summary>Turning Tide: "Discard any number of cards, then draw that
-    /// many." Gambler's Brew's screen and call, none included.</summary>
-    public static async Task<int?> DiscardAndDraw(
-        PlayerChoiceContext choiceContext, Player player, CardModel? source)
-    {
-        if (source == null) return 0;
-        var picked = (await CardSelectCmd.FromHandForDiscard(
-            choiceContext, player,
-            new CardSelectorPrefs(new LocString("cards", DiscardPromptKey),
-                                  0, 999999999),
-            null, source)).ToList();
-        if (picked.Count == 0) return 0;
-        await CardCmd.DiscardAndDraw(choiceContext, picked, picked.Count);
-        return picked.Count;
-    }
-
     /// <summary>Tidecleanse's screen, merged into the `cards` table by
     /// <c>KleeMod.InjectLocStrings</c>.</summary>
     public const string ExhaustPromptKey =
@@ -141,61 +126,4 @@ public static class KokomiStatusBatch
 
     public const string ExhaustPromptText =
         "Choose statuses or curses to Exhaust.";
-
-    /// <summary>Turning Tide's screen.</summary>
-    public const string DiscardPromptKey =
-        "KLEEMOD-KOKOMI_DISCARD_AND_DRAW.selectionScreenPrompt";
-
-    public const string DiscardPromptText =
-        "Choose any number of cards to discard. Draw that many.";
-}
-
-/// <summary>
-/// Abyssal Salvage (the Kokomi card pass, 2026-10-11, pick 2): "The first time
-/// each turn you draw a status, Exhaust it. The Casket gains 1." Damage
-/// Report's trigger (<see cref="DamageReportPower.AfterCardDrawn"/>: per card
-/// drawn, a status by <see cref="KleeStatusPackage.IsStatus"/>, curses not
-/// included), once a turn on the ledger's shared latch
-/// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed by the first
-/// status she draws. The status is Exhausted from her hand, then the Casket
-/// gains the Power's amount: copies add Casket, still once a turn. It read
-/// "Whenever a status or curse is Exhausted, the Casket gains 1" before the
-/// pass. Sim twin: <c>kokomi_plan.abyssal_salvage</c>, read at
-/// <c>refpowers.after_card_drawn</c>.
-/// </summary>
-public sealed class AbyssalSalvagePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Abyssal Salvage"),
-        ("description",
-            "The first time each turn you draw a status, "
-          + "[gold]Exhaust[/gold] it. The [gold]Casket[/gold] gains "
-          + "[blue]{Amount}[/blue]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterCardDrawn(
-        PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
-    {
-        if (Owner == null || Amount <= 0) return;
-        if (card?.Owner?.Creature != Owner) return;
-        if (!KleeStatusPackage.IsStatus(card)) return;
-        if (!KokomiOverhaul.LiveFor(Owner)) return;
-        var player = Owner.Player;
-        if (player == null) return;
-        if (!KokomiOverhaulLedger.ClaimOncePerTurn(
-                Owner, nameof(AbyssalSalvagePower)))
-        {
-            return;
-        }
-        if (PileType.Hand.GetPile(player).Cards.Contains(card))
-        {
-            await CardCmd.Exhaust(choiceContext, card);
-        }
-        KokomiOverhaulKit.GainCasket(Owner, Amount);
-    }
 }

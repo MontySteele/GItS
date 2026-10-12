@@ -211,12 +211,16 @@ public static class KleeMod
                 // release build.
                 [Powers.KokomiPlan.ReflectionPromptKey] =
                     Powers.KokomiPlan.ReflectionPromptText,
-                // THE STATUS BATCH (2026-10-01): Tidecleanse's and Turning
-                // Tide's hand screens, on the same terms.
+                // THE STATUS BATCH (2026-10-01): Tidecleanse's hand screen,
+                // on the same terms.
                 [Powers.KokomiStatusBatch.ExhaustPromptKey] =
                     Powers.KokomiStatusBatch.ExhaustPromptText,
-                [Powers.KokomiStatusBatch.DiscardPromptKey] =
-                    Powers.KokomiStatusBatch.DiscardPromptText,
+                // THE KOKOMI RE-FOUNDING (2026-10-12): Reserves' Exhaust Pile
+                // pick and Grand Design's hand pick, on the same terms.
+                [Powers.KokomiRefounding.ReservesPromptKey] =
+                    Powers.KokomiRefounding.ReservesPromptText,
+                [Powers.KokomiRefounding.GrandDesignPromptKey] =
+                    Powers.KokomiRefounding.GrandDesignPromptText,
                 // R276, the Klee pool expansion's two discard-pile picks
                 // (Treasure Map, Come Back and Play!), on the same terms.
                 [Powers.KleeExpansion.SetOffPromptKey] =
@@ -427,19 +431,6 @@ public static class KleeMod
                         "No Bomb on the field",
                     [Cards.ArmKeywordTips.MendKey + ".title"] = "Mend",
                     [Cards.ArmKeywordTips.PlanKey + ".title"] = "Plan",
-                    // `EB-643` (R265): the pool pass's one new word, and it is
-                    // a rule about WHEN -- the Bake-Kurage carries a Dusk Plan
-                    // out at the end of the turn it was written on. Same
-                    // raw-key hazard as every row here.
-                    [Cards.ArmKeywordTips.DuskKey + ".title"] = "Dusk",
-                    // `EB-625`: the relic behind Shell Guard's payout, on
-                    // the face that names it. Same raw-key hazard as every
-                    // row here.
-                    [Cards.ArmKeywordTips.CasketKey + ".title"] =
-                        "Tamakushi Casket",
-                    // THE CASKET PASS (2026-09-28): the token the relic deals.
-                    [Cards.ArmKeywordTips.OpenTheCasketKey + ".title"] =
-                        "Open the Casket",
                     // `EB-378`. The rider, not a keyword: the rows whose Hydro
                     // arrives with the jellyfish's carry-out rather than with
                     // the play.
@@ -547,6 +538,8 @@ public static class KleeMod
                     [Cards.BaseKeywordTips.DexterityKey + ".title"] =
                         "Dexterity",
                     [Cards.BaseKeywordTips.VigorKey + ".title"] = "Vigor",
+                    [Cards.BaseKeywordTips.EtherealKey + ".title"] =
+                        "Ethereal",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

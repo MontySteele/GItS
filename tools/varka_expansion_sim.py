@@ -13,7 +13,7 @@ same file run on the pre-expansion commit (41 rows) and on main (78) is the
 paired pool comparison (`--against`).
 
 RUN -- the stylised act the earlier Varka sims used (PR #768,
-`tools/kokomi_expansion_sim.py`): the tier-0.5 act-1 pools, floors
+`tools/kokomi_expansion_sim.py`, removed 2026-10-12 with the Casket): the tier-0.5 act-1 pools, floors
 N N N N E R N N E R B, then a rest and an act-2 boss from the act-2 boss pool.
 A card reward of three after every non-boss-2 fight (rarity C/U/R 60/37/3
 after a normal fight, 50/40/10 after an elite or the boss), rests heal 30%.

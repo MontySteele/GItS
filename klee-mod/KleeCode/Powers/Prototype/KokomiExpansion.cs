@@ -41,29 +41,6 @@ public static partial class KokomiCards
         await CardPileCmd.Draw(choiceContext, Amount(card), owner);
     }
 
-    /// <summary>Tidal Resonance: "Apply Hydro to ALL enemies. Draw 1 card for
-    /// each enemy that already had an element." Counted before the Hydro
-    /// lands; "an element" is a standing aura.</summary>
-    public static async Task Resonance(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        var owner = card.Owner;
-        var kokomi = owner?.Creature;
-        var combat = kokomi?.CombatState;
-        if (owner == null || combat == null) return;
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var living = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
-        var had = living.Count(e => e.Powers.OfType<AuraPower>().Any());
-        foreach (var enemy in living)
-        {
-            if (enemy.IsDead) continue;
-            await ElementalHit.ApplyOnly(choiceContext, enemy, Element.Hydro,
-                                         kokomi);
-        }
-        var cards = had * Amount(card);
-        if (cards > 0) await CardPileCmd.Draw(choiceContext, cards, owner);
-    }
-
     /// <summary>Suffocating Deep: "Double each enemy's Weak and Vulnerable."
     /// </summary>
     public static async Task DoubleWeakVulnerable(
@@ -93,63 +70,6 @@ public static partial class KokomiCards
                     cardSource: card);
             }
         }
-    }
-
-    /// <summary>Coral Tithe (the payoff pass, 2026-10-01): "Empty the Casket.
-    /// Gain 1 Energy and draw 1 card for every 3 in it." Only while she holds
-    /// a Casket, found the way the relic's own carry-out add finds it
-    /// (<c>GetRelic&lt;TamakushiCasket&gt;</c>, which also finds the Orobas
-    /// upgrade <see cref="Relics.WatatsumiCasket"/>); without one, nothing.
-    /// Rounds down. Sim twin: <c>kokomi_plan.coral_tithe</c>.</summary>
-    public static async Task CoralTithe(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        var owner = card.Owner;
-        var kokomi = owner?.Creature;
-        if (owner == null || kokomi == null) return;
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (owner.GetRelic<Relics.TamakushiCasket>() == null) return;
-        var per = Amount(card);
-        var points = KokomiOverhaulLedger.For(kokomi).EmptyCasket();
-        Relics.TamakushiCasket.Refresh(kokomi);
-        var n = CoralTithePaid(points, per);
-        if (n <= 0) return;
-        await PlayerCmd.GainEnergy(n, owner);
-        await CardPileCmd.Draw(choiceContext, n, owner);
-    }
-
-    /// <summary>Coral Tithe's arithmetic: one Energy and one card for every
-    /// <paramref name="per"/> points, rounded down (7 at every 3 pays 2).
-    /// </summary>
-    public static int CoralTithePaid(int points, int per) =>
-        per <= 0 || points <= 0 ? 0 : points / per;
-
-    /// <summary>Shoal Call: "Add 2 Nips to your hand. [They are upgraded.]"
-    /// The Nip is the feed pass's pool row itself.</summary>
-    public static async Task ShoalCall(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        var owner = card.Owner;
-        var combat = owner?.Creature?.CombatState;
-        if (owner == null || combat == null) return;
-        if (!KokomiOverhaul.LiveFor(owner.Creature)) return;
-        for (var i = 0; i < Amount(card); i++)
-        {
-            var nip = combat.CreateCard<ProtoKkNip>(owner);
-            if (card.IsUpgraded) nip.UpgradeInternal();
-            await CardPileCmd.AddGeneratedCardToCombat(
-                Exhausting(nip), PileType.Hand, owner);
-        }
-    }
-
-    /// <summary>The Rare pass (2026-10-04): a card she is HANDED Exhausts
-    /// when it is played, as a Shiv does -- Shoal Call's and Watatsumi
-    /// Resistance's Nips and Kurage School's copies. A drafted Nip is
-    /// unchanged. Sim twin: <c>kokomi_plan._exhausting</c>.</summary>
-    public static T Exhausting<T>(T card) where T : CardModel
-    {
-        card.AddKeyword(CardKeyword.Exhaust);
-        return card;
     }
 }
 
@@ -190,85 +110,6 @@ public static class KokomiExpansion
     }
 }
 
-/// <summary>Grand Design, bent (the growth Powers, 2026-10-10, ruled):
-/// "Open the Casket no longer empties the Casket. At the start of your turn,
-/// put it into your hand." The stack means nothing:
-/// <see cref="KokomiOverhaulKit.OpenCasket"/> reads only whether it is worn,
-/// and the Strength stays the whole count. The second sentence (Kokomi
-/// whole-run round 2, 2026-10-10) is <see cref="Signal"/>, paid from
-/// <see cref="ProtoBakeKuragePower"/>'s morning beside Flood Tide. Sim twins:
-/// <c>kokomi_plan.open_casket</c>, <c>kokomi_plan.grand_design_fetch</c>.
-/// </summary>
-public sealed class GrandDesignPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Grand Design"),
-        ("description",
-            "[gold]Open the Casket[/gold] no longer empties the "
-          + "[gold]Casket[/gold]. At the start of your turn, put it into "
-          + "your hand."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>Is Grand Design worn? The one read the Open makes.</summary>
-    public static bool Keeps(Creature? kokomi) =>
-        kokomi != null
-        && kokomi.Powers.OfType<GrandDesignPower>().Any(p => p.Amount > 0);
-
-    /// <summary>"At the start of your turn, put it into your hand." One Open
-    /// in hand is enough: if one is already there nothing moves (no second
-    /// copy is made, and copies of the Power do not fetch twice). Otherwise
-    /// <see cref="KokomiOverhaulKit.FetchOpenCasket"/> moves the first one
-    /// from the draw pile, then the discard pile; an exhausted Open stays
-    /// gone.</summary>
-    public static async Task Signal(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi) || !Keeps(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-        if (HoldsOpen(CardPile.Get(PileType.Hand, player)?.Cards)) return;
-        await KokomiOverhaulKit.FetchOpenCasket(choiceContext, kokomi);
-    }
-
-    /// <summary>Is an Open the Casket already in this pile (the hand)?</summary>
-    public static bool HoldsOpen(IEnumerable<CardModel>? hand) =>
-        KokomiOverhaulKit.FindOpenCasket(hand) != null;
-}
-
-/// <summary>Flood Tide (the growth Powers, 2026-10-10, ruled): "At the start
-/// of your turn, the Casket gains 1." Copies add. Paid from
-/// <see cref="ProtoBakeKuragePower"/>'s morning, after the hand draw and
-/// before the Plans, The Long Game's site. Sim twin:
-/// <c>kokomi_plan.rising_tide</c>.</summary>
-public sealed class FloodTidePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Flood Tide"),
-        ("description",
-            "At the start of your turn, the [gold]Casket[/gold] gains "
-          + "[blue]{Amount}[/blue]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public static void Signal(Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var n = (int)kokomi!.Powers.OfType<FloodTidePower>()
-            .Sum(p => p.Amount);
-        if (n <= 0) return;
-        KokomiOverhaulKit.GainCasket(kokomi, n);
-    }
-}
-
 /// <summary>Kurage Canopy (the payoff pass, 2026-10-01): "Whenever the
 /// Bake-Kurage carries out a Plan, gain 2 Block." On the plan bus
 /// (<see cref="IKokomiPlanListener"/>), which <c>KokomiPlan.ResolveEntry</c>
@@ -299,71 +140,6 @@ public sealed class KurageCanopyPower
         if (!KokomiOverhaul.LiveFor(Owner)) return;
         await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
     }
-}
-
-/// <summary>The Long Game: "At the start of your turn, if exactly one Plan is
-/// waiting, gain 1 Energy." The queue is read before the morning drains it,
-/// Moon Signal's read (<see cref="ProtoBakeKuragePower"/>). Sim twin:
-/// <c>kokomi_plan.long_game</c>.</summary>
-public sealed class TheLongGamePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "The Long Game"),
-        ("description",
-            "At the start of your turn, if exactly one [gold]Plan[/gold] is "
-          + "waiting, gain [blue]{Amount}[/blue] [gold]Energy[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>Both twins at once: the base power's Energy, and
-    /// <see cref="TheLongGamePlusPower"/>'s Energy and draw (power cost
-    /// sweep, 2026-09-30). The draw needs <paramref name="choiceContext"/>.
-    /// </summary>
-    public static async Task Signal(Creature? kokomi, int waiting,
-                                    PlayerChoiceContext? choiceContext = null)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-        if (waiting != KokomiOverhaulLaw.LongGameWaiting) return;
-        var energy = (int)kokomi.Powers.OfType<TheLongGamePower>()
-            .Sum(p => p.Amount);
-        var plus = (int)kokomi.Powers.OfType<TheLongGamePlusPower>()
-            .Sum(p => p.Amount);
-        if (energy + plus > 0)
-        {
-            await PlayerCmd.GainEnergy(energy + plus, player);
-        }
-        if (plus > 0 && choiceContext != null)
-        {
-            await CardPileCmd.Draw(choiceContext, plus, player);
-        }
-    }
-}
-
-/// <summary>The Long Game+ (power cost sweep, 2026-09-30): "At the start of
-/// your turn, if exactly one Plan is waiting, gain 1 Energy and draw 1 card."
-/// The upgraded card installs this twin instead of
-/// <see cref="TheLongGamePower"/>, whose <c>Signal</c> pays both. Sim twin:
-/// <c>kokomi_plan.long_game</c>.</summary>
-public sealed class TheLongGamePlusPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "The Long Game+"),
-        ("description",
-            "At the start of your turn, if exactly one [gold]Plan[/gold] is "
-          + "waiting, gain [blue]{Amount}[/blue] [gold]Energy[/gold] and draw "
-          + "[blue]{Amount}[/blue] {Amount:plural:card|cards}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>At Water's Edge (her C1; the Kokomi card pass, 2026-10-11). The
@@ -496,32 +272,5 @@ public sealed class TidalRipostePower : PowerModel, ILocalizationProvider
         if (result.BlockedDamage <= 0 || result.UnblockedDamage > 0) return;
         await ElementalHit.Deal(choiceContext, dealer, Element.Hydro,
                                 (int)Amount, Owner, powered: false);
-    }
-}
-
-/// <summary>Kurage Swarm: "Whenever you write a Plan that costs 0, the Casket
-/// gains 1." The cost paid, after reductions (<see
-/// cref="KokomiPlan.Entry.Paid"/>). Sim twin: <c>kokomi_plan.schedule</c>.
-/// </summary>
-public sealed class KurageSwarmPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Kurage Swarm"),
-        ("description",
-            "Whenever you write a [gold]Plan[/gold] that costs 0, the "
-          + "[gold]Casket[/gold] gains [blue]{Amount}[/blue] more."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public static void Note(Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var swarm = kokomi!.Powers.OfType<KurageSwarmPower>().FirstOrDefault();
-        if (swarm == null || swarm.Amount <= 0) return;
-        KokomiOverhaulKit.GainCasket(kokomi, (int)swarm.Amount);
     }
 }

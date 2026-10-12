@@ -56,10 +56,9 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         ("description",
             // THE 2026-09-25 TEXT PASS ("the existing text is often very
             // verbose and unintuitive"). Two plain facts: enemies cannot
-            // reach it, and it holds the Plans until her next turn. The Dusk
-            // timing it used to restate is stated once, on the `Dusk` tip
-            // (`ArmKeywordTips.ForDusk`), and "any number" lives on the
-            // blind-play panel (`blindplay_notes.PLAN_COUNT_NOTE`). Spec:
+            // reach it, and it holds the Plans until her next turn. "Any
+            // number" lives on the blind-play panel
+            // (`blindplay_notes.PLAN_COUNT_NOTE`). Spec:
             // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.
             "Enemies can't target it. It holds your [gold]Plans[/gold] "
           + "until your next turn."
@@ -111,45 +110,12 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || player.Creature != Owner) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
-        // THE EXPANSION, BATCH ONE: The Long Game reads the queue HERE, just
-        // before the drain empties it, so a queue the morning is about to
-        // empty still counts.
-        var waiting = KokomiPlan.PlansHeld(Owner);
-        await TheLongGamePower.Signal(Owner, waiting, choiceContext);
-        // THE GROWTH POWERS (2026-10-10): Flood Tide, at the same site.
-        // Sim twin: `kokomi_plan.rising_tide`, beside `long_game`.
-        FloodTidePower.Signal(Owner);
-        // Kokomi whole-run round 2 (2026-10-10): Grand Design puts Open the
-        // Casket into her hand. Sim twin: `kokomi_plan.grand_design_fetch`.
-        await GrandDesignPower.Signal(choiceContext, Owner);
         await KokomiPlan.ResolveAll(choiceContext, Owner);
-    }
-
-    /// <summary>
-    /// `EB-643` (R265), DUSK's resolution point: "the Bake-Kurage carries this
-    /// Plan out at the end of this turn, before enemies act."
-    ///
-    /// <c>BeforeSideTurnEnd</c> ON THE PLAYER SIDE, which is the nearest
-    /// broadcast this mod has to the printed sentence and the one the sim
-    /// mirrors (`combat._player_turn`, beside `klee_overhaul.turn_end`). What
-    /// this point buys is the whole promise: the Block is on her before the
-    /// swing, which is the only clause of the face a card can tell apart. The
-    /// morning hook one method up is deliberately NOT reused -- a Dusk Plan
-    /// that landed next morning would be an ordinary Plan wearing a new word.
-    ///
-    /// HOSTED HERE for the reason the morning drain is: rule 1 guarantees this
-    /// power is on her for every turn of every combat, so a boundary hung off
-    /// it happens on every board. <see cref="KokomiPlan.ResolveDusk"/> returns
-    /// early where nothing dusk is queued, which is most turns.
-    /// </summary>
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
-    {
-        if (side != CombatSide.Player) return;
-        if (Owner == null) return;
-        if (!KokomiOverhaul.LiveFor(Owner)) return;
-        await KokomiPlan.ResolveDusk(choiceContext, Owner);
+        // THE RE-FOUNDING (2026-10-12): Dawn Tide, AFTER the morning's Plans,
+        // so the Hydro it applies is standing for her own turn rather than
+        // spent by a Plan that reacts with it. Sim twin:
+        // `kokomi_plan.dawn_tide`, after `resolve_all`.
+        await DawnTidePower.Signal(choiceContext, Owner);
     }
 
     /// <summary>

@@ -76,15 +76,15 @@ public class KokomiCoopPlaytestFixesTests : IDisposable
     }
 
     [Fact]
-    public void Riptide_plans_two_energy_and_two_cards_three_upgraded()
+    public void Riptide_plans_three_cards_four_upgraded()
     {
+        // The re-founding (2026-10-12): "Plan: Draw 3 cards."; the upgrade
+        // still adds one to the Plan's draw.
         var plan = new ProtoKkRiptide().PlanClauses;
-        Assert.Equal(
-            new[] { (KokomiPlan.Kind.Energy, 2), (KokomiPlan.Kind.Draw, 2) },
-            plan.Select(c => (c.Kind, c.Amount)).ToArray());
+        Assert.Equal(new[] { (KokomiPlan.Kind.Draw, 3) },
+                     plan.Select(c => (c.Kind, c.Amount)).ToArray());
         var up = Upgraded<ProtoKkRiptide>().PlanClauses;
-        Assert.Equal(
-            new[] { (KokomiPlan.Kind.Energy, 2), (KokomiPlan.Kind.Draw, 3) },
-            up.Select(c => (c.Kind, c.Amount)).ToArray());
+        Assert.Equal(new[] { (KokomiPlan.Kind.Draw, 4) },
+                     up.Select(c => (c.Kind, c.Amount)).ToArray());
     }
 }

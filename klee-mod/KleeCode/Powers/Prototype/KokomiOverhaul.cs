@@ -101,32 +101,20 @@ public static class KokomiOverhaul
 /// <summary>
 /// The numbers the overhaul's RULES carry. Draft 6's rules are structural --
 /// where a card lands and when -- so almost every figure is a CARD's and stays
-/// on its row. The relic's are the exception: Tamakushi Casket carries a rule
-/// printed on the relic and on no card.
+/// on its row. The starting relic's is the exception: the Tamakushi Casket
+/// carries a rule printed on the relic and on no card.
 ///
-/// THE CASKET PASS (2026-09-28) REPLACED THE ONE THAT WAS HERE. The relic's
-/// debuff strike (`CasketStrike`, a 2 Hydro hit per debuff she applied) is
-/// gone; the relic counts the Plans the Bake-Kurage carries out instead, and
-/// Open the Casket turns the count into Strength. [USER]: "an artifact that
-/// grants / tracks an alternative energy that builds by 1 for every Plan
-/// played, and adds one 0-cost Retain / Exhaust card that converts that energy
-/// into Strength." "1 strength per point seems fine; we can adjust down if we
-/// need to."
+/// THE RE-FOUNDING (2026-10-12, design pass pick 3, ruled) REPLACED THE ONES
+/// THAT WERE HERE. The Casket's count, Open the Casket and The Long Game are
+/// gone; the relic reads "At the end of your turn, if a Plan is waiting, gain
+/// 3 Block."
 ///
-/// MIRRORED BY VALUE from tier0, which is why they are named constants rather
-/// than literals at the call site (<c>tools/lint_constant_parity.py</c>).
+/// MIRRORED BY VALUE from tier0, which is why it is a named constant rather
+/// than a literal at the call site (<c>tools/lint_constant_parity.py</c>).
 /// </summary>
 public static class KokomiOverhaulLaw
 {
-    /// <summary>What one carried-out Plan adds to the Casket. Mirrors
-    /// <c>C.KOKOMI_OVERHAUL_CASKET_PER_PLAN</c>.</summary>
-    public const int CasketPerPlan = 1;
-
-    /// <summary>Open the Casket's rate: Strength per point in the Casket.
-    /// Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT</c>.</summary>
-    public const int CasketStrengthPerPoint = 1;
-
-    /// <summary>The Long Game's "if exactly one Plan is waiting". Mirrors
-    /// <c>C.KOKOMI_EXPANSION_LONG_GAME_WAITING</c>.</summary>
-    public const int LongGameWaiting = 1;
+    /// <summary>The Tamakushi Casket's Block at the end of her turn while a
+    /// Plan is waiting. Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_BLOCK</c>.</summary>
+    public const int CasketBlock = 3;
 }

@@ -87,6 +87,11 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MI_JUUGA_DMG</c>.</summary>
     public const int JuugaDamage = 7;
 
+    /// <summary>Gorou, Juuga's Plan line (the Kokomi re-founding,
+    /// 2026-10-12): Block per end of turn, 3 turns. Mirrors
+    /// <c>C.MI_JUUGA_GUARD_BLOCK</c>.</summary>
+    public const int JuugaGuardBlock = 6;
+
     /// <summary>Sayu, Muji-Muji Daruma: the hit above 70% HP.
     /// Mirrors <c>C.MI_DARUMA_DMG</c>.</summary>
     public const int DarumaDamage = 9;

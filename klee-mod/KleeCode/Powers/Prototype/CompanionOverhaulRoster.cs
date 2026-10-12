@@ -141,6 +141,10 @@ internal static class CompanionOverhaulRoster
     /// built. A Personal is Kokomi's kit rather than a companion offer, and no
     /// stand-in is a Universal either, so neither is here.
     ///
+    /// TWENTY-ONE SINCE THE KOKOMI RE-FOUNDING (2026-10-12): Gorou's three
+    /// are Kokomi's own cards (<c>C.KOKOMI_OWN_COMPANION_IDS</c>), in her
+    /// pool and not in the shared roster.
+    ///
     /// NOTHING WAS DROPPED. Every one of the twenty-four prints inside the
     /// grammar the emitter speaks once this arm's fifteen powers exist -- which
     /// is what most of <c>CompanionOverhaulInazuma.cs</c> is -- so the rule the
@@ -149,9 +153,6 @@ internal static class CompanionOverhaulRoster
     /// </summary>
     private static IEnumerable<CardModel> InazumaUniversals() => new CardModel[]
     {
-        ModelDb.Card<ProtoMiGorouInuzaka>(),
-        ModelDb.Card<ProtoMiGorouWarBanner>(),
-        ModelDb.Card<ProtoMiGorouJuuga>(),
         ModelDb.Card<ProtoMiSayuFuuinDash>(),
         ModelDb.Card<ProtoMiSayuDaruma>(),
         ModelDb.Card<ProtoMiSayuNaptime>(),
@@ -216,9 +217,10 @@ internal static class CompanionOverhaulRoster
     /// tier0 twin: <c>C.INAZUMA_OVERHAUL_PERSONAL_IDS</c>, added to
     /// <c>companion_roster_replacement</c> beside the two pool lists and kept
     /// out of both.
+    ///
+    /// EMPTY SINCE THE KOKOMI RE-FOUNDING (2026-10-12): Crystal Collapse is in
+    /// her own pool. The seam stays.
     /// </summary>
-    private static IEnumerable<CardModel> InazumaPersonals() => new CardModel[]
-    {
-        ModelDb.Card<ProtoMiGorouCrystalCollapse>(),
-    };
+    private static IEnumerable<CardModel> InazumaPersonals() =>
+        System.Array.Empty<CardModel>();
 }

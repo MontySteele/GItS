@@ -675,9 +675,6 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "mend", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
     "play_copy_of_companion",
-    # POOL PASS FIVE (`EB-685`). Breakwater's count, with its own branch in
-    # `_op_price` on this set's EB-311 terms.
-    "block_per_plan_held",
     # POOL PASS TWO (`EB-643`, R265). Three now-lines that operate on the
     # QUEUE and three drain-positional plan clauses, each with its own branch
     # in `_op_price` on this set's own EB-311 terms.
@@ -688,26 +685,24 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # own branch in `_op_price` on the same terms.
     # R276 PICK 1, the halves rewrite: five plan clauses, each with its own
     # branch in `_op_price` on the same terms.
-    "first_attack_twice", "first_card_free",
+    "first_attack_twice",
     "block_front_intent",
-    # Kokomi core pass: Chain of Command's switch.
     # THE CO-OP SET: two plan clauses about ANOTHER player, priced ZERO in
     # `_op_price` -- the one-seat drafter has nobody for them to pay.
     "ally_draw", "others_attack_damage_this_turn",
-    # THE CASKET PASS (2026-09-28): the four verbs on the Tamakushi Casket's
-    # count, each with its own branch in `_op_price` on this set's terms.
-    "casket_double", "fetch_open_casket", "open_casket",
-    # THE EXPANSION, BATCH ONE (2026-09-29): four plan clauses and the one
-    # now-line op with a `kind:`, each with its own branch in `_op_price`.
-    "energy_if_alone", "damage_if_alone", "block_per_attacking_enemy",
-    "double_block", "kokomi",
+    # THE EXPANSION, BATCH ONE (2026-09-29): the one now-line op with a
+    # `kind:`, with its own branch in `_op_price`.
+    "kokomi",
     # POOL COMPLETION (2026-10-01): Tactical Relay's two clauses, priced
     # ZERO beside the co-op set's -- a multiplayer-only row.
     "each_player_energy", "each_player_draw",
     # THE STATUS BATCH (2026-10-01): four plan clauses that read the hand
     # just drawn, priced ZERO in `_op_price` (a hand fact).
-    "block_per_status_in_hand", "exhaust_statuses_in_hand",
-    "transform_statuses_in_hand", "discard_and_draw"))
+    "block_per_status_in_hand", "transform_statuses_in_hand",
+    # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's two Plan
+    # lines and a written Companion's clause, each with its own branch in
+    # `_op_price` on this set's terms.
+    "add_stings", "strength_this_turn", "juuga_guard", "play_companion"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -877,14 +872,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # One point of Block per point Mended. See STATIC_MEND_VALUE for why
         # this is not `heal`'s share and what the cap does to the direction.
         return _neutral_amount(fx, 0) * STATIC_MEND_VALUE
-    if op == "block_per_plan_held":
-        # Breakwater (`EB-685`, pool pass five). THE SAME PRICE AS THE LINE
-        # ABOVE, and the equality is the point: `EB-685` moved WHICH Plans the
-        # clause counts -- the queue at dusk rather than the morning just
-        # drained -- and not the refusal to guess how many there will be. ONE
-        # held Plan is the neutral single-unit estimate, since Plan density is
-        # still a deck fact an offer screen cannot read.
-        return _neutral_amount(fx, 0)
     if op == "next_plan_double_damage":
         # Opening Gambit's rider (`EB-643`). ZERO, and it is a REFUSAL that
         # says why rather than a dial: what this doubles is the next entry's
@@ -954,51 +941,44 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Pincer: one Attack played again -- `replay_next_companion`'s rule,
         # one replay at STATIC_CARD_COPY_VALUE.
         return STATIC_CARD_COPY_VALUE
-    if op in ("first_card_free"):
-        # Stolen Chapter, and Chain of Command's Companion-only twin: energy
-        # in another costume, so `cost_mod`'s rule and its measured dead dial.
-        return STATIC_ENERGY_VALUE
+    # THE RE-FOUNDING (2026-10-12).
+    if op == "add_stings":
+        # Kurage's Wake: N jellyfish cards to play or write next turn -- N
+        # neutral cards, `STATIC_AUTOPLAY_VALUE` each, the price this file
+        # puts on a card resolved without being drafted.
+        return _neutral_amount(fx, 0) * STATIC_AUTOPLAY_VALUE
+    if op == "strength_this_turn":
+        # Gorou's War Banner: Strength for one turn is a damage rider on the
+        # turn's Attacks, how many a deck fact -- ZERO, the refusal
+        # `next_plan_double_damage` makes.
+        return 0.0
+    if op == "juuga_guard":
+        # Gorou's Juuga: N turns of the rule's Block, at face.
+        return _neutral_amount(fx, 0) * C.MI_JUUGA_GUARD_BLOCK
+    if op == "play_companion":
+        # A written Companion: one neutral card resolved without being paid
+        # for again, `play_copy_of_companion`'s price. Never on a sheet row
+        # (the writer mints it), so this is the price of the rule.
+        return STATIC_AUTOPLAY_VALUE
     if op in ("ally_draw", "others_attack_damage_this_turn",
               "each_player_energy", "each_player_draw"):
         # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
         # multiplayer-only row is never offered to this drafter anyway.
         return 0.0
-    if op in ("casket_double", "fetch_open_casket",
-              "open_casket"):
-        # THE CASKET PASS (2026-09-28). ZERO, and a refusal that says why:
-        # every one of the four is worth Strength a LATER Open the Casket
-        # grants, off a count the whole deck fills -- a quantity about the
-        # drafted deck and the fight, not about this card, which is the
-        # reading `next_plan_double_damage` makes. The card's printed draw or
-        # damage, where it has one, is priced by its own clause.
-        return 0.0
     if op == "block_front_intent":
         # Tide Wall: the flat bonus only. The intent is a board fact an offer
         # screen cannot read, so that part is a deliberate ZERO.
         return _neutral_amount(fx, 0)
-    # THE EXPANSION, BATCH ONE (2026-09-29).
-    if op == "energy_if_alone":
-        # Lull: its Energy at face. Whether it lands alone is a queue fact an
-        # offer screen cannot read.
-        return _neutral_amount(fx, 0) * STATIC_ENERGY_VALUE
-    if op == "damage_if_alone":
-        # Undertide Lance: its printed hit, not the doubling (a queue fact).
-        return _neutral_amount(fx, 0) * aoe
-    if op == "block_per_attacking_enemy":
-        # Evening Watch: its rate for ONE attacker, the neutral estimate.
-        return _neutral_amount(fx, 0)
-    if op in ("block_per_status_in_hand", "exhaust_statuses_in_hand",
-              "transform_statuses_in_hand", "discard_and_draw"):
+    if op in ("block_per_status_in_hand", "transform_statuses_in_hand"):
         # THE STATUS BATCH (2026-10-01). ZERO: each pays off the statuses
         # and curses in the hand a Plan sees next turn, a fight fact an
         # offer screen cannot read. Kelp Wall's flat Block is priced by its
         # own `block` clause.
         return 0.0
-    if op in ("double_block", "kokomi"):
-        # ZERO: Brace doubles the Block standing at dusk, and each `kokomi`
-        # kind pays off a board, queue or hand fact (Plans waiting, Weak on
-        # the target, auras standing, stacks to double) an offer screen
-        # cannot read.
+    if op == "kokomi":
+        # ZERO: each `kokomi` kind pays off a board, queue or hand fact
+        # (Plans waiting, Block standing, the hand, the Exhaust Pile, stacks
+        # to double) or hands over cards an offer screen cannot value.
         return 0.0
     if op == "remove_debuff":
         # Cleansing Wave: one debuff off HER. The mirror of putting one onto an
@@ -2187,9 +2167,6 @@ STATIC_OP_PRICING: dict[str, str] = {
     "damage_quarter_max_hp": "printed damage: the character sheet's Max HP "
                              "times the fraction the op names, then the AoE "
                              "multiple -- _PRICED_INLINE, it needs the card",
-    "block_per_plan_held": "its printed Block for ONE held Plan -- the same "
-                           "neutral single-unit estimate, since Plan density "
-                           "is a deck fact an offer screen cannot read",
     "next_plan_double_damage": "ZERO, and it is a refusal: what it doubles is "
                                "the NEXT entry's damage, a quantity about the "
                                "drafted deck and not about this card",
@@ -2218,41 +2195,30 @@ STATIC_OP_PRICING: dict[str, str] = {
     # --- R276 pick 1, the Kokomi halves rewrite ---
     "first_attack_twice": "STATIC_CARD_COPY_VALUE, one Attack played again -- "
                           "replay_next_companion's rule",
-    "first_card_free": "ZERO: energy in another costume, so cost_mod's rule "
-                       "and cost_mod's measured dead dial (STATIC_ENERGY_VALUE)",
     "block_front_intent": "its flat bonus only; ZERO for the intent part, a "
                           "board fact an offer screen cannot read",
-    # --- the Casket pass (2026-09-28) ---
-    "casket_double": "ZERO, casket_gain's reason: doubling a count the offer "
-                     "screen cannot see",
-    "fetch_open_casket": "ZERO, casket_gain's reason: a second opening of a "
-                         "count the offer screen cannot see",
-    "open_casket": "ZERO: the relic's token, in no pool and never offered; "
-                   "what it grants is the Casket's count at play",
     # --- the Kokomi expansion, batch one (2026-09-29) ---
-    "energy_if_alone": "its Energy at face (STATIC_ENERGY_VALUE); whether it "
-                       "lands alone is a queue fact an offer screen cannot "
-                       "read",
-    "damage_if_alone": "its printed hit at face, not the doubling -- a queue "
-                       "fact an offer screen cannot read",
-    "block_per_attacking_enemy": "its rate for ONE attacker, the neutral "
-                                 "single-unit estimate",
-    "double_block": "ZERO: doubles the Block standing at dusk, a board fact "
-                    "an offer screen cannot read",
     "kokomi": "ZERO: each kind pays off a board, queue or hand fact (Plans "
-              "waiting, Weak on the target, auras, stacks) an offer screen "
-              "cannot read",
+              "waiting, Block standing, the hand, the Exhaust Pile, stacks) "
+              "or hands over cards an offer screen cannot value",
+    # --- the Kokomi re-founding (2026-10-12) ---
+    "add_stings": "STATIC_AUTOPLAY_VALUE per jellyfish card handed over -- "
+                  "one neutral card resolved without being drafted, each",
+    "strength_this_turn": "ZERO: a one-turn damage rider on the turn's "
+                          "Attacks, how many a deck fact an offer screen "
+                          "cannot read",
+    "juuga_guard": "its turns at C.MI_JUUGA_GUARD_BLOCK each, at face",
+    "play_companion": "STATIC_AUTOPLAY_VALUE: a written Companion is one "
+                      "neutral card resolved free next turn, "
+                      "play_copy_of_companion's price; the writer mints the "
+                      "clause, so it is on no sheet row",
     # --- the Kokomi status batch (2026-10-01) ---
     "block_per_status_in_hand": "ZERO: a rate per status or curse in the "
                                 "hand a Plan sees, a fight fact an offer "
                                 "screen cannot read",
-    "exhaust_statuses_in_hand": "ZERO: worth the statuses it clears, a "
-                                "fight fact an offer screen cannot read",
     "transform_statuses_in_hand": "ZERO: worth the statuses it turns to "
                                   "Energy, a fight fact an offer screen "
                                   "cannot read",
-    "discard_and_draw": "ZERO: a mulligan of the next hand, worth what that "
-                        "hand holds, which an offer screen cannot read",
     # --- the co-op set (review/records/coop-set-2026-09-25.md) ---
     # POOL COMPLETION (2026-10-01): Tactical Relay, a multiplayer-only row.
     "each_player_energy": "ZERO: a multiplayer-only row's clause, never "

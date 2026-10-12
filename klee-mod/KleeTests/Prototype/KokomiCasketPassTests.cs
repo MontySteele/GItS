@@ -68,219 +68,7 @@ public class KokomiCasketPassTests : IDisposable
 
     // ---- A. the relic ------------------------------------------------------
 
-    [Fact]
-    public void The_casket_counts_one_per_carry_out_while_she_holds_it()
-    {
-        KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi().WithRelic<TamakushiCasket>();
-        Assert.Equal(0, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-
-        TamakushiCasket.NoteCarriedOut(seat.Creature);
-        TamakushiCasket.NoteCarriedOut(seat.Creature);
-        Assert.Equal(2, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-        Assert.Equal(1, KokomiOverhaulLaw.CasketPerPlan);
-
-        // A Kokomi without the relic adds nothing: it is the relic's sentence.
-        KokomiOverhaulLedger.ResetAll();
-        var bare = Seat.Kokomi();
-        TamakushiCasket.NoteCarriedOut(bare.Creature);
-        Assert.Equal(0, KokomiOverhaulLedger.For(bare.Creature).CasketCount);
-    }
-
-    [Fact]
-    public void The_count_is_added_once_per_carry_out_so_a_doubled_plan_adds_twice()
-    {
-        // `ResolveEntry` is one CARRY-OUT (the drain calls it `times` times for
-        // Second Wave and Nereid's Ascension), and the relic's add sits in it
-        // beside Sango Isshin's fact -- not in the drain, which is once per
-        // ENTRY.
-        var entry = Seq("KokomiPlan", "ResolveEntry");
-        var fact = entry.FindIndex(c => c.Contains("NotePlanCarriedOut"));
-        var add = entry.FindIndex(c => c.Contains("TamakushiCasket.NoteCarriedOut"));
-        Assert.True(fact >= 0 && add > fact);
-        Assert.DoesNotContain(Seq("KokomiPlan", "Drain"),
-                              c => c.Contains("TamakushiCasket.NoteCarriedOut"));
-        // And the ledger's per-turn count moves with each carry-out too.
-        KokomiOverhaulLedger.ResetAll();
-        var ledger = KokomiOverhaulLedger.For(Seat.Kokomi().Creature);
-        ledger.RollTo(2);
-        ledger.NotePlanCarriedOut();
-        ledger.NotePlanCarriedOut();
-        Assert.Equal(2, ledger.PlansCarriedOutThisTurn);
-        ledger.RollTo(3);
-        Assert.Equal(0, ledger.PlansCarriedOutThisTurn);
-    }
-
-    [Fact]
-    public void The_casket_empties_on_open_and_keeps_counting()
-    {
-        KokomiOverhaulLedger.ResetAll();
-        var ledger = KokomiOverhaulLedger.For(Seat.Kokomi().Creature);
-        ledger.RollTo(1);
-        ledger.AddToCasket(3);
-        Assert.Equal(3, ledger.EmptyCasket());
-        Assert.Equal(0, ledger.CasketCount);
-        ledger.AddToCasket(1);
-        Assert.Equal(1, ledger.CasketCount);
-        // The turn roll never touches it: the count is per combat.
-        ledger.RollTo(2);
-        Assert.Equal(1, ledger.CasketCount);
-        // Nothing takes it down but the open.
-        ledger.AddToCasket(-5);
-        Assert.Equal(1, ledger.CasketCount);
-        ledger.DoubleCasket();
-        Assert.Equal(2, ledger.CasketCount);
-    }
-
-    [Fact]
-    public void The_relic_face_the_token_and_the_counter()
-    {
-        var face = string.Concat(Il.Strings(
-            Il.Method("TamakushiCasket", "get_Localization")));
-        Assert.Contains("[gold]Open the Casket[/gold] in hand", face);
-        Assert.Contains(" carries out adds ", face);
-        Assert.DoesNotContain("debuff", face);
-        // The debuff strike is gone.
-        Assert.Null(typeof(TamakushiCasket).GetMethod("Strike", HeadlessGame.All));
-        // The token is dealt before the first hand draw, RadiantPearl's site.
-        var deal = Il.Calls(Il.Method("TamakushiCasket", "BeforeHandDraw"));
-        Assert.Contains(deal, c => c.Contains("CreateCard"));
-        Assert.Contains(deal, c => c.Contains("CardPileCmd.AddGeneratedCardsToCombat"));
-        // The count is on the icon, the base game's counter idiom.
-        Assert.Contains(Il.Calls(Il.Method("TamakushiCasket", "get_DisplayAmount")),
-                        c => c.Contains("get_CasketCount"));
-        // The companion slot is kept.
-        Assert.NotNull(typeof(TamakushiCasket).GetMethod(
-            "TryModifyCardRewardOptions", HeadlessGame.All
-            | System.Reflection.BindingFlags.DeclaredOnly));
-    }
-
     // ---- B. Open the Casket -----------------------------------------------
-
-    [Fact]
-    public void Open_the_casket_is_a_zero_cost_retain_token_that_does_not_exhaust()
-    {
-        // 2026-10-01, the four-kit review, Kokomi pick 1: no Exhaust, so it
-        // repeats. 2026-10-10, after [USER]'s Kokomi playtest: "I think that
-        // the casket should start at 0 and then have a ramping cost (goes up
-        // by 1 each time)". Printed 0; each play raises it (below).
-        var card = new OpenTheCasket();
-        Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(CardRarity.Token, card.Rarity);
-        Assert.Contains(CardKeyword.Retain, card.Keywords);
-        Assert.DoesNotContain(CardKeyword.Exhaust, card.Keywords);
-        Assert.Equal("Gain [gold]Strength[/gold] equal to the [gold]Casket[/gold]'s "
-                   + "count, then empty it.{IfUpgraded:show: Draw 1 card.|} "
-                   + "Increase this card's cost by 1."
-                   + "{InCombat:{CasketStrength}|}", Face(card));
-        // In no pool: the offer is the Slice, and the token is not in it.
-        Assert.DoesNotContain(Seq("KokomiOverhaulRoster", "Slice"),
-                              c => c.Contains("OpenTheCasket"));
-    }
-
-    [Fact]
-    public void Open_the_casket_upgraded_also_draws_one_card_after_the_strength()
-    {
-        // The Kokomi kit review (2026-10-05): the upgrade changed nothing.
-        // Upgraded, it also draws 1 card; cost and Retain stay.
-        var card = new OpenTheCasket();
-        Assert.Equal(1m, Var(card, "Cards"));
-        var play = Seq("OpenTheCasket", "OnPlay");
-        var open = play.FindIndex(c => c.Contains("KokomiOverhaulKit.OpenCasket"));
-        var gate = play.FindIndex(c => c.Contains("get_IsUpgraded"));
-        var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
-        Assert.True(open >= 0 && gate > open && draw > gate);
-    }
-
-    [Fact]
-    public void Each_play_raises_its_cost_by_one_for_the_combat()
-    {
-        // 2026-10-10, after [USER]'s Kokomi playtest: "That means the casket
-        // is free the first play, costs 1 the second, and then at 2+ becomes
-        // difficult." The base game's Modded: "Increase this card's cost by
-        // 1." -- EnergyCost.AddThisCombat(1), the last thing OnPlay does,
-        // after the Strength and the upgrade's draw.
-        var play = Seq("OpenTheCasket", "OnPlay");
-        var open = play.FindIndex(c => c.Contains("KokomiOverhaulKit.OpenCasket"));
-        var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
-        var ramp = play.FindIndex(c => c.Contains("AddThisCombat"));
-        Assert.True(open >= 0 && draw > open && ramp > draw);
-        Assert.Equal(1, play.Count(c => c.Contains("AddThisCombat")));
-        Assert.DoesNotContain(play, c => c.Contains("AddThisTurn")
-                                       || c.Contains("UntilPlayed"));
-    }
-
-    [Fact]
-    public void The_ramp_lives_on_the_copy_so_the_shown_cost_is_the_true_cost()
-    {
-        // Per CARD INSTANCE, as Modded's: a combat-scoped local modifier the
-        // engine itself prices with, so the face, the bridge and the Energy
-        // spent all read one number. 0, 1, 2, 3 across four plays.
-        var card = new OpenTheCasket();
-        Seat.Set(card, "IsMutable", true);
-        var seen = new List<int>();
-        for (var i = 0; i < 4; i++)
-        {
-            seen.Add(card.EnergyCost.GetWithModifiers(CostModifiers.Local));
-            card.EnergyCost.AddThisCombat(1);   // what OnPlay ends with
-        }
-        Assert.Equal(new[] { 0, 1, 2, 3 }, seen);
-        // A fresh copy -- the one the relic deals each combat -- starts at 0.
-        var fresh = new OpenTheCasket();
-        Seat.Set(fresh, "IsMutable", true);
-        Assert.Equal(0, fresh.EnergyCost.GetWithModifiers(CostModifiers.Local));
-    }
-
-    [Fact]
-    public void A_fetched_open_is_moved_not_remade_so_it_keeps_its_ramp()
-    {
-        // What the Tokoyo Returns and Grand Design's morning fetch MOVE the
-        // copy already in the draw or discard pile (CardPileCmd.Add); neither
-        // makes a new one, which would start back at 0.
-        var fetch = Seq("KokomiOverhaulKit", "FetchOpenCasket");
-        Assert.Contains(fetch, c => c.Contains("CardPileCmd.Add"));
-        Assert.DoesNotContain(fetch, c => c.Contains("CreateCard")
-                                        || c.Contains("CloneCard")
-                                        || c.Contains("AddGeneratedCardToCombat"));
-        var signal = Seq("GrandDesignPower", "Signal");
-        Assert.Contains(signal, c => c.Contains("FetchOpenCasket"));
-        Assert.DoesNotContain(signal, c => c.Contains("CreateCard")
-                                         || c.Contains("AddGeneratedCardToCombat"));
-    }
-
-    [Fact]
-    public void What_the_tokoyo_returns_fetches_from_the_draw_pile_then_the_discard_pile()
-    {
-        // 2026-10-01: Open the Casket no longer exhausts, so the fetch looks
-        // where it now goes -- the draw pile, then the discard pile, never the
-        // Exhaust Pile.
-        Assert.Equal(new[] { PileType.Draw, PileType.Discard },
-                     KokomiOverhaulKit.FetchOpenCasketPiles);
-        var seq = Seq("KokomiOverhaulKit", "FetchOpenCasket");
-        Assert.Contains(seq, c => c.Contains("FindOpenCasket"));
-        Assert.True(seq.FindIndex(c => c.Contains("FindOpenCasket"))
-                    < seq.FindIndex(c => c.Contains("CardPileCmd.Add")));
-        // The search: the first Open the Casket in a pile, or nothing.
-        var token = new OpenTheCasket();
-        Assert.Same(token, KokomiOverhaulKit.FindOpenCasket(
-            new CardModel[] { new ProtoKkNip(), token }));
-        Assert.Null(KokomiOverhaulKit.FindOpenCasket(
-            new CardModel[] { new ProtoKkNip() }));
-        Assert.Null(KokomiOverhaulKit.FindOpenCasket(null));
-    }
-
-    [Fact]
-    public void Opening_empties_first_and_grants_strength_equal_to_the_count()
-    {
-        Assert.Contains(Il.Calls(Il.Method("OpenTheCasket", "OnPlay")),
-                        c => c.Contains("KokomiOverhaulKit.OpenCasket"));
-        var open = Seq("KokomiOverhaulKit", "OpenCasket");
-        var empty = open.FindIndex(c => c.Contains("EmptyCasket"));
-        var strength = open.FindIndex(c => c.Contains("PowerCmd.Apply"));
-        Assert.True(empty >= 0 && strength > empty);
-        Assert.Equal(1, KokomiOverhaulLaw.CasketStrengthPerPoint);
-    }
 
     // ---- C. the re-keyed payoffs ------------------------------------------
 
@@ -325,19 +113,19 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(6m, Upgraded<ProtoKkPincer>().DynamicVars.Damage.BaseValue);
         Assert.Equal(7m, new ProtoKkOpeningGambit().DynamicVars.Damage.BaseValue);
         Assert.Equal(9m, Upgraded<ProtoKkOpeningGambit>().DynamicVars.Damage.BaseValue);
-        // The Kokomi kit review (2026-10-05): Deep Current 8 [11] to ALL, and
-        // Ceremonial Garment costs 1; the Kokomi card pass (2026-10-11): 1 [2]
-        // per stack of Weak and Vulnerable.
-        Assert.Equal(8m, new ProtoKkDeepCurrent().DynamicVars.Damage.BaseValue);
-        Assert.Equal(11m, Upgraded<ProtoKkDeepCurrent>().DynamicVars.Damage.BaseValue);
+        // The Kokomi kit review (2026-10-05): Ceremonial Garment costs 1; the
+        // Kokomi card pass (2026-10-11): 1 [2] per stack of Weak and
+        // Vulnerable. (Deep Current left in the re-founding, 2026-10-12.)
         Assert.Equal(1, new ProtoKkCeremonialGarment().EnergyCost.Canonical);
         Assert.Equal(1m, Var(new ProtoKkCeremonialGarment(), "PowerAmount"));
         Assert.Equal(2m, Var(Upgraded<ProtoKkCeremonialGarment>(), "PowerAmount"));
         var riptide = new ProtoKkRiptide();
         Assert.Equal(11m, riptide.DynamicVars.Damage.BaseValue);
         Assert.Equal(3m, riptide.DynamicVars.ExtraDamage.BaseValue);
-        Assert.Equal((KokomiPlan.Kind.Energy, 2),
-                     (riptide.PlanClauses[0].Kind, riptide.PlanClauses[0].Amount));
+        // The re-founding (2026-10-12): the Plan is "Draw 3 cards".
+        Assert.Equal((KokomiPlan.Kind.Draw, 3),
+                     (riptide.PlanClauses.Single().Kind,
+                      riptide.PlanClauses.Single().Amount));
     }
 
     // ---- G. the thirteen --------------------------------------------------
@@ -345,28 +133,17 @@ public class KokomiCasketPassTests : IDisposable
     [Fact]
     public void The_commons()
     {
-        // The Kokomi card pass (2026-10-11): 4 [5], 3 times.
-        var volley = new ProtoKkMassedVolley();
-        Assert.Equal(4m, volley.DynamicVars.Damage.BaseValue);
-        Assert.Equal(5m, Upgraded<ProtoKkMassedVolley>().DynamicVars.Damage.BaseValue);
-        Assert.Equal("Deal {Damage:diff()} [gold]Hydro[/gold] damage 3 times.", Face(volley));
-
-        var arrow = new ProtoKkSignalArrow();
-        Assert.Equal(7m, arrow.DynamicVars.Damage.BaseValue);
-        var arrowPlan = arrow.PlanClauses.Single();
-        Assert.Equal((KokomiPlan.Kind.Damage, 4, 2, KokomiPlan.Aim.AllEnemies),
-                     (arrowPlan.Kind, arrowPlan.Amount, arrowPlan.Times, arrowPlan.Aim));
-        var arrowUp = Upgraded<ProtoKkSignalArrow>();
-        Assert.Equal(10m, arrowUp.DynamicVars.Damage.BaseValue);
-        Assert.Equal(5, arrowUp.PlanClauses.Single().Amount);
-
+        // (Massed Volley and Signal Arrow left in the re-founding, 2026-10-12.)
+        // The re-founding: Surging Shoal's Plan is 12 [16] to ALL enemies.
         var shoal = new ProtoKkSurgingShoal();
         Assert.Equal(2, shoal.EnergyCost.Canonical);
         Assert.Equal(14m, shoal.DynamicVars.Damage.BaseValue);
-        Assert.Equal(22, shoal.PlanClauses.Single().Amount);
+        Assert.Equal((12, KokomiPlan.Aim.AllEnemies),
+                     (shoal.PlanClauses.Single().Amount,
+                      shoal.PlanClauses.Single().Aim));
         var shoalUp = Upgraded<ProtoKkSurgingShoal>();
         Assert.Equal(18m, shoalUp.DynamicVars.Damage.BaseValue);
-        Assert.Equal(28, shoalUp.PlanClauses.Single().Amount);
+        Assert.Equal(16, shoalUp.PlanClauses.Single().Amount);
 
         // Pearl Diver left the pool in the status batch (2026-10-01).
 
@@ -380,86 +157,25 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Contains(Il.Calls(Il.Method("ProtoKkPressTheAdvantage", "OnPlay")),
                         c => c.Contains("KokomiPlan.PlansHeld"));
 
+        // The re-founding (2026-10-12): Dusk is retired; 6 [9] Block now and
+        // a draw, no Plan line.
         var shell = new ProtoKkShellOfSanctuary();
         Assert.Equal(1m, shell.DynamicVars.Cards.BaseValue);
-        Assert.Equal(9m, Var(shell, "PlanBlock"));
-        Assert.Equal(12m, Var(Upgraded<ProtoKkShellOfSanctuary>(), "PlanBlock"));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkShellOfSanctuary", "OnPlay")),
-                        c => c.Contains("KokomiPlan.Schedule"));
-        // The status batch (2026-10-01): "Or dusk plan:".
-        Assert.Contains("Or [gold]dusk[/gold] [gold]plan[/gold]", Face(shell));
+        Assert.Equal(6m, shell.DynamicVars.Block.BaseValue);
+        Assert.Equal(9m, Upgraded<ProtoKkShellOfSanctuary>().DynamicVars.Block.BaseValue);
+        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkShellOfSanctuary", "OnPlay")),
+                              c => c.Contains("KokomiPlan.Schedule"));
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.", Face(shell));
 
-        // The cleanup pass (2026-09-29): a base of 6, upgraded 8.
-        var glass = new ProtoKkDriftglass();
-        Assert.Equal(6m, Var(glass, "CalculationBase"));
-        Assert.Equal(1m, Var(glass, "ExtraDamage"));
-        Assert.Equal(8m, Var(Upgraded<ProtoKkDriftglass>(), "CalculationBase"));
-
-        // Commons never increase deck size (LAW): none of the seven creates a card.
-        foreach (var type in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
-                                     "ProtoKkSurgingShoal",
+        // None of these creates a card.
+        foreach (var type in new[] { "ProtoKkSurgingShoal",
                                      "ProtoKkPressTheAdvantage",
-                                     "ProtoKkShellOfSanctuary", "ProtoKkDriftglass" })
+                                     "ProtoKkShellOfSanctuary" })
         {
             Assert.DoesNotContain(Il.Calls(Il.Method(type, "OnPlay")),
                                   c => c.Contains("CreateCard")
                                     || c.Contains("AddGeneratedCard"));
         }
-    }
-
-    [Fact]
-    public void What_the_tokoyo_returns_is_a_one_cost_exhaust_fetch()
-    {
-        var returns = new ProtoKkWhatTheTokoyoReturns();
-        Assert.Equal(1, returns.EnergyCost.Canonical);
-        Assert.Contains(CardKeyword.Exhaust, returns.Keywords);
-        Assert.Equal(0, Upgraded<ProtoKkWhatTheTokoyoReturns>().EnergyCost
-            .GetWithModifiers(CostModifiers.None));
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkWhatTheTokoyoReturns", "OnPlay")),
-                        c => c.Contains("KokomiOverhaulKit.FetchOpenCasket"));
-        Assert.Contains(Il.Calls(Il.Method("KokomiOverhaulKit", "FetchOpenCasket")),
-                        c => c.Contains("CardPileCmd.Add"));
-        // 2026-10-01: Open the Casket no longer exhausts.
-        Assert.Equal("Put [gold]Open the Casket[/gold] into your hand from "
-                     + "your [gold]Draw Pile[/gold] or [gold]Discard "
-                     + "Pile[/gold].", Face(returns));
-    }
-
-    [Fact]
-    public void A_plan_can_gain_the_casket()
-    {
-        KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi();
-        KokomiOverhaulKit.GainCasket(seat.Creature, 2);
-        Assert.Equal(2, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-    }
-
-    [Fact]
-    public void Shell_guard_is_five_block_plus_one_per_point_in_the_casket()
-    {
-        // Re-aimed by the main session (2026-09-28) after the Casket pass
-        // left its strike clause dead: Skill, cost 1, base 8 upgraded, the
-        // in-combat Block preview like Pneuma Refrain's. A Common since the
-        // cleanup pass (2026-09-29).
-        var card = new ProtoKkShellGuard();
-        Assert.Equal((CardType.Skill, CardRarity.Common, 1),
-                     (card.Type, card.Rarity, card.EnergyCost.Canonical));
-        Assert.Equal(5m, Var(card, "CalculationBase"));
-        Assert.Equal(1m, Var(card, "CalculationExtra"));
-        var up = Upgraded<ProtoKkShellGuard>();
-        Assert.Equal(8m, Var(up, "CalculationBase"));
-        Assert.Equal(1m, Var(up, "CalculationExtra"));
-        Assert.Equal("Gain {CalculationBase:diff()} [gold]Block[/gold], plus "
-                   + "{CalculationExtra:diff()} for each point in the "
-                   + "[gold]Casket[/gold].{InCombat:\n(Gains "
-                   + "{CalculatedBlock:diff()} [gold]Block[/gold])|}",
-                     Face(card));
-        Assert.Contains("CasketCount",
-                        string.Join(" ", typeof(ProtoKkShellGuard)
-                            .GetNestedTypes(HeadlessGame.All)
-                            .SelectMany(t => t.GetMethods(HeadlessGame.All))
-                            .Where(m => m.GetMethodBody() != null)
-                            .SelectMany(Il.Calls)));
     }
 
     [Fact]
@@ -483,37 +199,6 @@ public class KokomiCasketPassTests : IDisposable
     }
 
     // ---- F. the offer -----------------------------------------------------
-
-    [Fact]
-    public void The_offer_is_forty_eight_rows_with_the_thirteen_and_without_the_six()
-    {
-        // Forty-six after the Casket pass; the cleanup pass (2026-09-29) cut
-        // Scout Ahead and Song of Pearls; the feed pass (2026-09-29) cut
-        // Exposed Flank and added five.
-        var slice = Seq("KokomiOverhaulRoster", "Slice");
-        // SIXTY-NINE since expansion batch one (2026-09-29); SEVENTY since
-        // the payoff pass (2026-10-01); SEVENTY-EIGHT since pool completion;
-        // still SEVENTY-EIGHT since the status batch (2026-10-01), which cut
-        // Pearl Diver and Moon Signal among seven and added seven.
-        Assert.Equal(78, slice.Count(c => c.StartsWith("ModelDb.Card")));
-        foreach (var row in new[] { "ProtoKkMassedVolley", "ProtoKkSignalArrow",
-                                    "ProtoKkSurgingShoal",
-                                    "ProtoKkPressTheAdvantage",
-                                    "ProtoKkShellOfSanctuary", "ProtoKkDriftglass",
-                                    "ProtoKkWhatTheTokoyoReturns",
-                                    "ProtoKkDepthsJudgment", "ProtoKkTideturn",
-                                    "ProtoKkPearlCurrent",
-                                    "ProtoKkWhatTheTokoyoTook" })
-        {
-            Assert.Contains(slice, c => c.EndsWith("<" + row + ">",
-                                                   StringComparison.Ordinal));
-        }
-        foreach (var gone in new[] { "TideChart", "CleansingWave", "Ripple",
-                                     "WellLaid", "SeaSaltPrayer", "SaltLine" })
-        {
-            Assert.DoesNotContain(slice, c => c.Contains("ProtoKk" + gone));
-        }
-    }
 
     // ---- H. the retired Garment tip ---------------------------------------
 

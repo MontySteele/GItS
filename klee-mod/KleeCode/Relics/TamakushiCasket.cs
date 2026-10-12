@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
-using KleeMod.Cards.Prototype;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -15,63 +14,38 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Relics;
 
 /// <summary>
 /// TAMAKUSHI CASKET -- the Kokomi overhaul's starting relic.
 ///
-/// THE CASKET PASS (2026-09-28) REWROTE IT. It used to answer every debuff she
-/// applied with a 2 Hydro hit (`CasketStrike`); that trigger is gone. It now
-/// COUNTS: each Plan the Bake-Kurage carries out adds 1 to the Casket, and the
-/// Open the Casket token it deals into her opening hand turns the count into
-/// Strength. [USER], 2026-09-28, on why this and not a Vigor-style relic:
-/// Vigor "devolves into 'solve for lethal, press the I Win button'"; the
-/// design is "an artifact that grants / tracks an alternative energy that
-/// builds by 1 for every Plan played, and adds one 0-cost Retain / Exhaust card
-/// that converts that energy into Strength." Counting is "when it's carried
-/// out"; "the casket keeps counting" after it is opened; and no card SPENDS
-/// the count: "We don't need this to be the equivalent to Regent's stars or
-/// Klee's sparks. This should feel like a distinct effect."
+/// THE RE-FOUNDING (2026-10-12) REWROTE IT, and kept its name and art
+/// (<c>review/active/kokomi-design-pass-2026-10-11.md</c> pick 3, ruled; card
+/// paper sec.1 rule 1): "At the end of your turn, if a Plan is waiting, gain
+/// 3 Block." The count it kept since the Casket pass (2026-09-28) and the
+/// Open the Casket token it dealt are gone with the Casket. About 9 Block in a
+/// three-turn act-1 fight, against Burning Blood's 6 HP; with no 0-cost Plan
+/// left, the Plan it asks for costs Energy, so the condition is a real price.
 ///
-/// THE TOKEN PAYS MORE THAN ONCE (2026-10-01, the four-kit review, Kokomi
-/// pick 1): Open the Casket costs 1 and has no Exhaust, so it cycles with the
-/// deck. [USER]: "if it's repeatable, it should probably cost energy, though,
-/// to make this a real choice and not just button mashing when it comes up?"
-/// This relic still deals ONE copy, on turn one; nothing here assumed the
-/// Exhaust. Since 2026-10-10 ([USER], after his Kokomi playtest) it starts at
-/// 0 and each play raises that copy's cost by 1 for the combat; the fresh
-/// copy this relic deals each combat is the reset.
-///
-/// THE COUNT LIVES ON THE ARM'S LEDGER, NOT ON THIS INSTANCE
-/// (<see cref="KokomiOverhaulLedger.CasketCount"/>): per combat by
-/// construction (a new combat's ledger starts at 0), readable by a card's
-/// calculated var with no relic lookup, and one number for every reader --
-/// the cards, the counter below and the blind page. This relic is where the
-/// carry-out ADDS (<see cref="NoteCarriedOut"/>) and where the count is SHOWN.
-///
-/// THE COUNTER ON THE ICON, the base game's idiom (`Kunai`, `Pen Nib`):
-/// <see cref="ShowCounter"/> in combat and <see cref="DisplayAmount"/> the
-/// count, redrawn by <see cref="Refresh"/> whenever anything moves it. The
-/// bridge carries a relic's counter as `counter` whenever the icon draws one
-/// (`McpMod.StateBuilder`), so the blind page prints "Tamakushi Casket (N)"
-/// with no new wire field.
+/// THE HOOK IS ORICHALCUM'S (<c>BeforeSideTurnEnd</c>, her side): the Block is
+/// on her before the enemies act, and the Plans the Bake-Kurage holds are read
+/// at that moment (<see cref="KokomiPlan.PlansHeld"/>). Power-sourced Block
+/// stays raw, the base relic's <c>ValueProp.Unpowered</c>. Sim twin:
+/// <c>kokomi_plan.casket_block</c>, at the same end-of-turn site.
 ///
 /// THE WHOLE FILE IS QUARANTINED, for the reason it always was:
 /// <c>tools/lint_unique_names.py</c> reads relic names out of
 /// <c>klee-mod/KleeCode/Relics/*.cs</c>, so it sits here under
 /// <c>#if PROTOTYPE_CARDS</c> rather than under <c>Powers/Prototype/</c>.
 ///
-/// IT KEEPS THE COMPANION REWARD SLOT, which is not a Charge rule and which the
-/// Commander loop draws its whole army from.
+/// IT KEEPS THE COMPANION REWARD SLOT, which the Commander draws from.
 ///
 /// NOT SEALED: <see cref="WatatsumiCasket"/>, the Touch of Orobas upgrade, IS
-/// a Tamakushi Casket with an opening count, so every
+/// a Tamakushi Casket with more Block, so every
 /// <c>GetRelic&lt;TamakushiCasket&gt;</c> (the game's is an <c>is T</c> test)
-/// -- the carry-out add, the counter, the token -- finds either relic. The
-/// cards never look for the relic at all: Shell Guard, Driftglass, Depths'
-/// Judgment, What the Tokoyo Took, Open the Casket, Kurage Swarm and Grand
-/// Design read the ledger's count.
+/// finds either relic.
 /// </summary>
 public class TamakushiCasket : CustomRelicModel
 {
@@ -83,128 +57,58 @@ public class TamakushiCasket : CustomRelicModel
     public override RelicModel? GetUpgradeReplacement() =>
         ModelDb.Relic<WatatsumiCasket>().ToMutable();
 
-    /// <summary>What the Casket holds when a combat starts. The Tamakushi
-    /// Casket 0; <see cref="WatatsumiCasket"/> 3.</summary>
-    public virtual int OpeningCount => 0;
-
-    /// <summary>The combat this relic last seeded, so a second call in one
-    /// combat seeds nothing.</summary>
-    private object? _seededCombat;
+    /// <summary>The Block at the end of her turn while a Plan is waiting.
+    /// The Tamakushi Casket <see cref="KokomiOverhaulLaw.CasketBlock"/>;
+    /// <see cref="WatatsumiCasket"/> more.</summary>
+    public virtual int Block => KokomiOverhaulLaw.CasketBlock;
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
-    /// <summary>
-    /// The face, inside the 120-character relic ceiling -- which is why the
-    /// ruled "Each Plan the Bake-Kurage carries out" prints as "Each Plan it
-    /// carries out" (127 characters otherwise). The two keyword tips
-    /// (<see cref="ArmKeywordTips.ForCasket"/>,
-    /// <see cref="ArmKeywordTips.ForOpenTheCasket"/>) carry the rest.
-    /// </summary>
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tamakushi Casket"),
-        ("description",
-            "Start each combat with the [gold]Bake-Kurage[/gold] and "
-          + "[gold]Open the Casket[/gold] in hand. Each [gold]Plan[/gold] it "
-          + "carries out adds " + KokomiOverhaulLaw.CasketPerPlan
-          + " to the Casket."),
+        ("description", Face(KokomiOverhaulLaw.CasketBlock)),
     };
 
-    /// <summary>The token's card, on the relic's own hover -- the base game's
-    /// shape for a relic that deals a card (`RadiantPearl`).</summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        HoverTipFactory.FromCardWithCardHoverTips<OpenTheCasket>();
+    /// <summary>The face, one sentence, the number the only difference
+    /// between the Casket and its upgrade.</summary>
+    internal static string Face(int block) =>
+        "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
+      + "[blue]" + block + "[/blue] [gold]Block[/gold].";
 
     /// <summary>
-    /// The count on the icon, in combat only (Kunai's rule): out of combat
-    /// there is no count to show.
-    /// </summary>
-    public override bool ShowCounter =>
-        Owner?.Creature?.CombatState != null
-        && KokomiOverhaul.LiveFor(Owner.Creature);
-
-    public override int DisplayAmount =>
-        Owner?.Creature is { CombatState: not null } kokomi
-            ? KokomiOverhaulLedger.For(kokomi).CasketCount
-            : 0;
-
-    /// <summary>
-    /// The relic's first clause, made true by the relic itself.
-    /// <c>KokomiRules.InstallAll</c> already summons the jellyfish from the
-    /// same hook because rule 1 is a KIT rule; both calls are idempotent.
+    /// Rule 1's jellyfish, made true by the relic too.
+    /// <c>KokomiRules.InstallAll</c> already summons it from the same hook
+    /// because rule 1 is a KIT rule; both calls are idempotent.
     /// </summary>
     public override async Task BeforeCombatStart()
     {
         if (!KokomiOverhaul.LiveFor(Owner?.Creature)) return;
-        SeedOpeningCount(Owner!.Creature);
         await BakeKuragePet.Summon(Owner);
-        Refresh(Owner!.Creature);
     }
 
-    /// <summary>
-    /// "... and Open the Casket in hand": dealt before the first hand draw,
-    /// the site and the command `RadiantPearl` uses for its Luminesce, so the
-    /// token is in hand beside the opening draw rather than instead of a card
-    /// of it.
-    /// </summary>
-    public override async Task BeforeHandDraw(
-        Player player, PlayerChoiceContext choiceContext,
-        ICombatState combatState)
+    /// <summary>"At the end of your turn, if a Plan is waiting, gain 3
+    /// Block." Her side only, and only while the Bake-Kurage holds a
+    /// Plan.</summary>
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
     {
-        if (player != Owner) return;
-        if (!KokomiOverhaul.LiveFor(Owner?.Creature)) return;
-        if (Owner!.PlayerCombatState?.TurnNumber != 1) return;
-        var token = Owner.Creature.CombatState!.CreateCard<OpenTheCasket>(Owner);
-        await CardPileCmd.AddGeneratedCardsToCombat(
-            new List<CardModel> { token }, PileType.Hand, Owner);
-    }
-
-    /// <summary>
-    /// "Each Plan the Bake-Kurage carries out adds 1 to the Casket."
-    /// Called by <c>KokomiPlan.ResolveEntry</c> -- the one place a Plan is
-    /// carried out -- once per CARRY-OUT, so a Plan carried out twice (Second
-    /// Wave, Nereid's Ascension) adds twice, and morning, Dusk and Change of
-    /// Plans all count. A Kokomi not holding the relic adds nothing: it is the
-    /// relic's sentence. Sim twin: <c>kokomi_plan.note_casket_carry_out</c>.
-    /// </summary>
-    public static void NoteCarriedOut(Creature? kokomi)
-    {
+        var kokomi = Owner?.Creature;
+        if (kokomi == null || !participants.Contains(kokomi)) return;
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (kokomi!.Player?.GetRelic<TamakushiCasket>() == null) return;
-        KokomiOverhaulLedger.For(kokomi).AddToCasket(
-            KokomiOverhaulLaw.CasketPerPlan);
-        Refresh(kokomi);
+        if (!Pays(KokomiPlan.PlansHeld(kokomi))) return;
+        Flash();
+        await CreatureCmd.GainBlock(kokomi, Block, ValueProp.Unpowered, null);
     }
 
-    /// <summary>
-    /// The opening count onto this combat's ledger: the Watatsumi Casket's
-    /// "starts each combat with 3". Nothing for the Tamakushi Casket (0), and
-    /// once per combat per relic.
-    /// </summary>
-    public static void SeedOpeningCount(Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var relic = kokomi!.Player?.GetRelic<TamakushiCasket>();
-        if (relic == null || relic.OpeningCount <= 0) return;
-        var combat = (object?)kokomi.CombatState;
-        if (combat != null && ReferenceEquals(relic._seededCombat, combat)) return;
-        relic._seededCombat = combat;
-        KokomiOverhaulLedger.For(kokomi).AddToCasket(relic.OpeningCount);
-        Refresh(kokomi);
-    }
-
-    /// <summary>Redraw the counter after anything moved the count.</summary>
-    public static void Refresh(Creature? kokomi)
-    {
-        var relic = kokomi?.Player?.GetRelic<TamakushiCasket>();
-        relic?.InvokeDisplayAmountChanged();
-    }
+    /// <summary>Does a queue this deep pay? Any Plan waiting. PURE.</summary>
+    public static bool Pays(int plansWaiting) => plansWaiting > 0;
 
     /// <summary>
     /// The relic's own name, for any line that names it. A second spelling of
     /// the title above on purpose: `tools/lint_unique_names.py` reads the
     /// literal inside the <c>("title", "...")</c> tuple.
-    /// `KurageBeatTests` pins the two together.
     /// </summary>
     internal const string SourceName = "Tamakushi Casket";
 
@@ -249,11 +153,12 @@ public class TamakushiCasket : CustomRelicModel
 /// <summary>
 /// WATATSUMI CASKET -- the Tamakushi Casket upgraded, Touch of Orobas's
 /// hand-over (main-session design, 2026-09-30, from [USER]'s co-op playtest:
-/// "Varka and Kokomi need Ancient relics for Orobas"). Identical to the
-/// Tamakushi Casket in every way, except the Casket starts each combat with
-/// 3. It IS a Tamakushi Casket (see its header), so the carry-out add, the
-/// counter, the Open the Casket token and the companion reward slot are the
-/// base's, and the only difference is <see cref="OpeningCount"/>.
+/// "Varka and Kokomi need Ancient relics for Orobas"). Since the re-founding
+/// (2026-10-12) it is the same sentence at 5 Block (the smallest change that
+/// keeps it an upgrade of a 3-Block relic; it started combat with 3 in the
+/// Casket before). It IS a Tamakushi Casket (see its header), so the hook and
+/// the companion reward slot are the base's, and the only difference is
+/// <see cref="Block"/>.
 ///
 /// ANCIENT, NEVER STARTER (see <c>ExplosiveFrags</c>). ICON: the Tamakushi
 /// Casket's own fallback chain, as Pearl of Insight reuses the Pearl's.
@@ -266,18 +171,14 @@ public sealed class WatatsumiCasket : TamakushiCasket
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi Casket"),
-        ("description",
-            "Start each combat with the [gold]Bake-Kurage[/gold], "
-          + "[gold]Open the Casket[/gold] in hand and [blue]"
-          + WatatsumiOpeningCount + "[/blue] in the Casket. Each "
-          + "[gold]Plan[/gold] it carries out adds "
-          + KokomiOverhaulLaw.CasketPerPlan + "."),
+        ("description", Face(WatatsumiBlock)),
     };
 
-    /// <summary>The Casket's count at the start of every combat.</summary>
-    public const int WatatsumiOpeningCount = 3;
+    /// <summary>The Block at the end of her turn while a Plan is waiting.
+    /// </summary>
+    public const int WatatsumiBlock = 5;
 
-    public override int OpeningCount => WatatsumiOpeningCount;
+    public override int Block => WatatsumiBlock;
 
     /// <summary>Already the upgrade: nothing further for Orobas.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;

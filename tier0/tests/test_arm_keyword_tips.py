@@ -598,13 +598,14 @@ def test_the_numerals_are_interpolated_from_the_arms_law():
     assert "FurinaStageLaw.CharlotteActRepayUpgraded" in badges
     # Kokomi's two draft-6 sentences carry no number at all: the Plan rule is
     # structural and the Mend rule's bound is her entry HP, not a constant.
-    # The relic's number -- what a carried-out Plan adds to the Casket since
-    # the Casket pass (2026-09-28) -- is interpolated on the relic's face and
-    # on the Casket's tip (`KokomiOverhaulLaw.CasketPerPlan`).
+    # The relic's number -- its Block at the end of her turn while a Plan
+    # is waiting, since the re-founding (2026-10-12) -- is interpolated on the
+    # relic's face (`KokomiOverhaulLaw.CasketBlock`); no card names the relic
+    # any more, so the Casket's tip is retired.
     casket = (REPO / "klee-mod" / "KleeCode" / "Relics"
               / "TamakushiCasket.cs").read_text(encoding="utf-8")
-    assert "KokomiOverhaulLaw.CasketPerPlan" in casket
-    assert "KokomiOverhaulLaw.CasketPerPlan" in tips
+    assert "KokomiOverhaulLaw.CasketBlock" in casket
+    assert "KokomiOverhaulLaw.CasketPerPlan" not in casket + tips
     assert "KokomiOverhaulLaw.CasketStrike" not in casket + tips
 
 
@@ -741,7 +742,8 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
     parametrised join above and fail here. Five since the Varka expansion
     (2026-10-01): Barbara: Wellspring Hymn prints Frail, the word the join
     above carried for tomorrow. Six since the Repay floor (2026-10-09):
-    Soothing Waters and Pneuma Tides print Vigor."""
+    Soothing Waters and Pneuma Tides print Vigor. Seven since the Kokomi
+    re-founding (2026-10-12): five faces name Ethereal."""
     printed = {keyword.word
                for path in _prototype_files()
                for description in _descriptions(
@@ -749,7 +751,7 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
                for keyword in gen.BASE_KEYWORDS
                if keyword.attach in gen.base_keyword_tip_calls(description)}
     assert printed == {"Vulnerable", "Weak", "Strength", "Dexterity",
-                       "Frail", "Vigor"}
+                       "Frail", "Vigor", "Ethereal"}
 
 
 def test_the_row_the_defect_was_filed_against_carries_the_vulnerable_tip():
@@ -838,8 +840,10 @@ NO_GLOSSARY_ROW_OWED = {
     # The text pass of 2026-10-08 golded the cards a face makes, as the base
     # golds `OVERCLOCK`'s Burn: like Dazed, the page prints each with its own
     # face once it is added.
-    "Nip": "a token card the page prints with its own face once it is added",
-    "Nips": "a token card the page prints with its own face once it is added",
+    # The Kokomi re-founding (2026-10-12): Stings and Wards replace Nips.
+    "Sting": "a token card the page prints with its own face once it is added",
+    "Stings": "a token card the page prints with its own face once it is added",
+    "Ward": "a token card the page prints with its own face once it is added",
     "Sea Glass": "a token card the page prints with its own face once added",
     # The elements. None is a glossary row and none should be: the element is
     # the card's own indicator (`blindplay_faces._element` puts it on the card
@@ -857,7 +861,6 @@ NO_GLOSSARY_ROW_OWED = {
     "Lightfall Sword": "the face's own placed object, ruled in the next clause",
     "Sakura": "the face's own placed object, ruled in the next clause",
     "Bake-Kurage": "her pet, whose whole panel is a section of the page",
-    "Tamakushi Casket": "a relic, printed with its own text in the relic list",
     # Furina's meters. All three are RESOURCES the page prints on the player
     # line with their amount and their maximum (`EB-181`'s `resource_info`),
     # which is the standing `Block` and `Energy` have, and the reframe's two
@@ -892,12 +895,10 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 # Vermillion Pact, text pass 2026-09-25: "the Attack that Set
                 # it off".
                 "Set it off": "Set off",
-                # The Casket pass (2026-09-28): the relic's short name, one
-                # row and one tip with its full name.
-                "Casket": "Tamakushi Casket",
-                # The status batch (2026-10-01): "Or plan:" and "Or dusk
-                # plan:" print the two words in lower case.
-                "plan": "Plan", "dusk": "Dusk",
+                # The status batch (2026-10-01): "Or plan:" prints the word
+                # in lower case. (The Casket's short name and "dusk" left with
+                # the re-founding, 2026-10-12.)
+                "plan": "Plan",
                 # High Stakes (the Spend round, 2026-10-10): "HP you have
                 # Drained and not Repaid" (the page's Repay row matches it).
                 "Repaid": "Repay"}
@@ -1328,7 +1329,10 @@ GOLD_BASE_GAME = {"Block", "Energy", "Exhaust", "Exhausted", "Exhausts",
 #: the Applies tip and the reaction previews (`KleeCardTooltips.ForCard`).
 GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}
 #: A card the face makes, golded as the base golds `OVERCLOCK`'s Burn.
-GOLD_CREATED_CARDS = {"Dazed", "Confiscated", "Nip", "Nips", "Sea Glass"}
+#: Sting, Stings and Ward since the Kokomi re-founding (2026-10-12), which
+#: also preview the card they name (`KokomiCards.WithStingPreview`).
+GOLD_CREATED_CARDS = {"Dazed", "Confiscated", "Sting", "Stings", "Ward",
+                      "Sea Glass"}
 #: Words whose tip attaches off an op rather than off the table.
 GOLD_OP_TIPS = {"Summon": "the `stage_guest` op attaches ForSummon"}
 #: Names, each defined somewhere a reader meets it.

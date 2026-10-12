@@ -12,8 +12,9 @@ using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// The verbs that belong to no rule -- Rally's discount, the cleanse, the
-/// Casket's verbs. Kept out of <see cref="KokomiRules"/> because that file is
+/// The verbs that belong to no rule -- Pincer's switch, Tide Wall's read, the
+/// cleanse and the debuff counts. (The Casket's verbs left with the Casket,
+/// the re-founding, 2026-10-12.) Kept out of <see cref="KokomiRules"/> because that file is
 /// the RULES and these are cards. The one shared EVENT that used to live here
 /// ("she applied a debuff to an enemy") left with its last reader, The Clouds
 /// Like Waves Rippling (expansion batch one, 2026-09-29).
@@ -32,19 +33,6 @@ public static class KokomiOverhaulKit
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         if (kokomi!.Powers.OfType<FirstAttackTwicePower>().Any()) return;
         await PowerCmd.Apply<FirstAttackTwicePower>(
-            choiceContext, kokomi, 1, applier: kokomi, cardSource: null);
-    }
-
-    /// <summary>
-    /// STOLEN CHAPTER's carry-out (R276): "This turn, the first card you play
-    /// costs 0." ONE STACK, ALWAYS, for the same reason.
-    /// </summary>
-    public static async Task FirstCardFree(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (kokomi!.Powers.OfType<FirstCardFreePower>().Any()) return;
-        await PowerCmd.Apply<FirstCardFreePower>(
             choiceContext, kokomi, 1, applier: kokomi, cardSource: null);
     }
 
@@ -97,101 +85,6 @@ public static class KokomiOverhaulKit
         if (debuff == null) return;
         await PowerCmd.Remove(debuff);
     }
-
-    // ---- THE CASKET PASS (2026-09-28) ----------------------------------
-    //
-    // The Tamakushi Casket's count and the four verbs that touch it. The count
-    // is <see cref="KokomiOverhaulLedger.CasketCount"/>; the relic adds 1 per
-    // carry-out (<see cref="Relics.TamakushiCasket.NoteCarriedOut"/>). Every
-    // verb below redraws the relic's counter. Sim twins: the `casket` block
-    // in `tier0/engine/kokomi_plan.py`.
-
-    /// <summary>
-    /// "The Casket gains N" -- Pearl Diver's Plan and Moon Signal. Unlike the
-    /// relic's own +1 it asks for no relic: the card says the Casket gains,
-    /// and the count is the arm's.
-    /// </summary>
-    public static void GainCasket(Creature? kokomi, int amount)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi) || amount <= 0) return;
-        KokomiOverhaulLedger.For(kokomi!).AddToCasket(amount);
-        Relics.TamakushiCasket.Refresh(kokomi);
-    }
-
-    /// <summary>What the Tokoyo Took: "Double the Casket's count." A Task
-    /// so the emitted <c>OnPlay</c> awaits it like every other verb.</summary>
-    public static Task DoubleCasket(Creature? kokomi)
-    {
-        if (KokomiOverhaul.LiveFor(kokomi))
-        {
-            KokomiOverhaulLedger.For(kokomi!).DoubleCasket();
-            Relics.TamakushiCasket.Refresh(kokomi);
-        }
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Open the Casket: "Gain Strength equal to the Casket's count, then empty
-    /// it." At <see cref="KokomiOverhaulLaw.CasketStrengthPerPoint"/> per
-    /// point. An empty Casket grants nothing (and applies no zero-stack
-    /// power). The relic keeps counting from 0.
-    ///
-    /// GRAND DESIGN (bent 2026-10-10): "Open the Casket no longer empties the
-    /// Casket." Worn, the count stays and the Strength is still the whole
-    /// count. Sim twin: <c>kokomi_plan.open_casket</c>.
-    /// </summary>
-    public static async Task OpenCasket(
-        PlayerChoiceContext choiceContext, Creature? kokomi,
-        CardModel? cardSource)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var ledger = KokomiOverhaulLedger.For(kokomi!);
-        var points = GrandDesignPower.Keeps(kokomi)
-            ? ledger.CasketCount
-            : ledger.EmptyCasket();
-        Relics.TamakushiCasket.Refresh(kokomi);
-        var strength = points * KokomiOverhaulLaw.CasketStrengthPerPoint;
-        if (strength <= 0) return;
-        await PowerCmd.Apply<StrengthPower>(
-            choiceContext, kokomi!, strength, applier: kokomi,
-            cardSource: cardSource);
-    }
-
-    /// <summary>
-    /// What the Tokoyo Returns: "Put Open the Casket into your hand from your
-    /// draw pile or discard pile." The draw pile is searched first, then the
-    /// discard pile; the FIRST one found moves, and none in either means
-    /// nothing happens. Open the Casket lost its Exhaust on 2026-10-01 (the
-    /// four-kit review, Kokomi pick 1), so the Exhaust Pile this card used to
-    /// search no longer holds it. <c>CardPileCmd.Add</c> to the hand is the
-    /// move.
-    /// Sim twin: <c>kokomi_plan.fetch_open_casket</c>.
-    /// </summary>
-    public static async Task FetchOpenCasket(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-        Cards.Prototype.OpenTheCasket? token = null;
-        foreach (var pile in FetchOpenCasketPiles)
-        {
-            token = FindOpenCasket(CardPile.Get(pile, player)?.Cards);
-            if (token != null) break;
-        }
-        if (token == null) return;
-        await CardPileCmd.Add(token, PileType.Hand, CardPilePosition.Top);
-    }
-
-    /// <summary>Where What the Tokoyo Returns looks, in order: "from your
-    /// draw pile or discard pile". Never the Exhaust Pile.</summary>
-    public static readonly PileType[] FetchOpenCasketPiles =
-        { PileType.Draw, PileType.Discard };
-
-    /// <summary>The first Open the Casket in a pile, or null.</summary>
-    public static Cards.Prototype.OpenTheCasket? FindOpenCasket(
-        System.Collections.Generic.IEnumerable<CardModel>? pile) =>
-        pile?.OfType<Cards.Prototype.OpenTheCasket>().FirstOrDefault();
 
     /// <summary>
     /// Undertow's "if the enemy has a debuff". The definition is the ENGINE'S

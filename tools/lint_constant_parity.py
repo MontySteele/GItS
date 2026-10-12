@@ -241,17 +241,14 @@ MIRRORED: dict[str, object] = {
     # on the relic and on no card -- because its rules are structural and every
     # other figure is a CARD's, on its own row. The six draft 2 declared went
     # with the pulse, the Garment and the Tide.
-    # THE CASKET PASS (2026-09-28) retired the strike; the relic now counts
-    # carried-out Plans and Open the Casket turns the count into Strength.
-    "KokomiOverhaulLaw.CasketPerPlan": C.KOKOMI_OVERHAUL_CASKET_PER_PLAN,
-    "KokomiOverhaulLaw.CasketStrengthPerPoint":
-        C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT,
-    # THE EXPANSION, BATCH ONE (2026-09-29): The Long Game's threshold.
-    "KokomiOverhaulLaw.LongGameWaiting":
-        C.KOKOMI_EXPANSION_LONG_GAME_WAITING,
-    # POOL COMPLETION (2026-10-01): the hand limit Kurage School, Casting
-    # Agent and Watatsumi Resistance stop at.
-    "KokomiPoolCompletion.MaxHandSize": C.MAX_HAND_SIZE,
+    # THE CASKET PASS (2026-09-28) retired the strike; THE RE-FOUNDING
+    # (2026-10-12) retired the count: the relic's one number is its Block at
+    # the end of her turn while a Plan is waiting.
+    "KokomiOverhaulLaw.CasketBlock": C.KOKOMI_OVERHAUL_CASKET_BLOCK,
+    # THE RE-FOUNDING: Gorou's Juuga, its Plan line's Block per turn, and
+    # Call the Generals' "1 of 3".
+    "CompanionOverhaulLaw.JuugaGuardBlock": C.MI_JUUGA_GUARD_BLOCK,
+    "KokomiCompanionPlan.GeneralsOffered": C.KOKOMI_GENERALS_OFFERED,
     # THE FURINA STAGE (`furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the
@@ -388,11 +385,12 @@ UNMIRRORED: dict[str, str] = {
     "FireworksStand.Threshold": _ARM_ITEMS_REASON,
     "OperaGlasses.Fanfare": _ARM_ITEMS_REASON,
     "GrandTheaterProgram.Fanfare": _ARM_ITEMS_REASON,
-    "WatatsumiCasket.WatatsumiOpeningCount":
+    "WatatsumiCasket.WatatsumiBlock":
         "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"
-        "session design from the co-op playtest). A Prototype-stage relic "
-        "number built C# first; tier05 has no Orobas row for the arm, and "
-        "the sim twin lands at Balance.",
+        "session design from the co-op playtest; 5 Block since the "
+        "re-founding, 2026-10-12). A Prototype-stage relic number built C# "
+        "first; tier05 has no Orobas row for the arm, and the sim twin lands "
+        "at Balance.",
     "ShrapnelPower.Shred":
         "THE CO-OP SET, SECOND BATCH (review/active/coop-concepts-2026-09-27.md). "
         "Shrapnel's printed '50% more': the multiplier another player's Attack "

@@ -560,7 +560,11 @@ def extract(state: CombatState, hp_start: int) -> FightStats:
             energy_by_turn[ev["turn"]] = (energy_by_turn.get(ev["turn"], 0)
                                           + ev["cost"])
             cid = ev["card"]
-            card_plays[cid] = card_plays.get(cid, 0) + 1
+            # A written Companion's carry-out (`plan_carry`, the Kokomi
+            # re-founding) is the Plan's play, not a second play of a card
+            # already counted when she wrote it.
+            if not ev.get("plan_carry"):
+                card_plays[cid] = card_plays.get(cid, 0) + 1
             # EB-17. `drawn_turn` is -1 for an instance that never reached
             # hand by a draw, and -1 can never equal a turn number, so the
             # comparison needs no separate "was it drawn" branch.

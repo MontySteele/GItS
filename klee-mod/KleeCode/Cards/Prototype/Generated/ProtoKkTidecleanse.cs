@@ -32,70 +32,44 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkTidecleanse : CustomCardModel, ICharacterCard, IPlannedCard, INowLineCard
+public sealed class ProtoKkTidecleanse : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForWeak(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_tidecleanse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidecleanse"),
-        ("description", "Apply 1 [gold]Weak[/gold].\nOr [gold]plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand."),
+        ("description", "[gold]Exhaust[/gold] up to {KkAmount:diff()} statuses or curses in your hand. Apply 1 [gold]Weak[/gold]."),
     };
-
-    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
-    /// was written. Carried out by the Bake-Kurage at the start of her next
-    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
-    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
-        new[]
-        {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ExhaustStatusesInHand, DynamicVars["PlanExhaust"].IntValue, KokomiPlan.Aim.Self),
-        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanExhaust", 2m)
+            new DynamicVar("KkAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkTidecleanse()
-        : base(0, CardType.Skill, CardRarity.Common, KokomiTargets.PetOrEnemy, autoAdd: false)
+        : base(0, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
-            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
-            cardPlay = nowLine;
-        }
-        await PlayNowLine(choiceContext, cardPlay);
-    }
-
-    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
-    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
-    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.FrontEnemy;
-
-    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
-    /// out by the Bake-Kurage when the player chooses it for a Plan
-    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
-    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
+        await KokomiCards.ExhaustStatuses(choiceContext, this, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanExhaust"].UpgradeValueBy(1m);
+        DynamicVars["KkAmount"].UpgradeValueBy(1m);
     }
 }

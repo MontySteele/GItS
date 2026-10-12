@@ -45,13 +45,12 @@ public class KokomiPoolPassThreeTests
     // ======================================================================
 
     [Fact]
-    public void Feints_now_line_reads_the_carry_out_count_and_not_the_flag()
+    public void Feints_now_line_reads_the_plans_waiting_and_not_the_flag()
     {
-        // The Casket pass re-keyed it off the yes/no onto the count: one
-        // definition, the ledger's `PlansCarriedOutThisTurn`, the same count
-        // Sango Isshin reads. Twin: `test_feint_pays_three_per_carry_out`.
+        // The re-founding (2026-10-12): "plus 3 for each Plan waiting", the
+        // queue's own count (`KokomiPlan.PlansHeld`).
         var source = Source("ProtoKkFeint");
-        Assert.Contains("PlansCarriedOutThisTurn", source);
+        Assert.Contains("KokomiPlan.PlansHeld", source);
         Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkFeint", "OnPlay")),
                               c => c.Contains("PlanCarriedOutThisTurn"));
     }
@@ -186,20 +185,16 @@ public class KokomiPoolPassThreeTests
         var face = Face(card);
         Assert.Contains("{Damage:diff()}", face);
         Assert.Contains("{ExtraDamage:diff()}", face);
-        // [USER], 2026-09-30: the Plan draws 2, upgraded 3.
-        Assert.Contains("Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} "
-                        + "card{PlanCards:plural:|s}.", face);
+        // The re-founding (2026-10-12): the Plan is "Draw 3 cards" [4].
+        Assert.Contains("Or [gold]plan[/gold]: Draw {PlanCards:diff()} cards.",
+                        face);
         var source = Source("ProtoKkRiptide");
         Assert.Contains("new DamageVar(11m", source);
         Assert.Contains("new ExtraDamageVar(3m)", source);
         Assert.Contains("DynamicVars.Damage.UpgradeValueBy(3m)", source);
         Assert.Contains("DynamicVars.ExtraDamage.UpgradeValueBy(1m)", source);
-        var clauses = card.PlanClauses;
-        Assert.Equal(2, clauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Energy, clauses[0].Kind);
-        Assert.Equal(2, clauses[0].Amount);
-        Assert.Equal(KokomiPlan.Kind.Draw, clauses[1].Kind);
-        Assert.Equal(2, clauses[1].Amount);
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal((KokomiPlan.Kind.Draw, 3), (clause.Kind, clause.Amount));
     }
 
     // ======================================================================
@@ -239,46 +234,6 @@ public class KokomiPoolPassThreeTests
         // the number Tide Wall, Well Laid and Tide Chart all read.
         Assert.Contains("due.Count + (CarryOutTimes(kokomi) > 1 ? 1 : 0)",
                         Source("KokomiPlan", power: true));
-    }
-
-    // ======================================================================
-    // 6. THE DUSK ROWS -- written-only
-    // ======================================================================
-
-    [Fact]
-    public void Both_dusk_rows_target_the_pet_alone_and_print_where_they_go()
-    {
-        // `EB-646` priced the face-up half to the Dusk line and the seat still
-        // never played it, so the now-line comes off instead. The plan-only
-        // shape does the rest: `KokomiTargets.PetOnly`, and the face LEADS
-        // with the instruction (`gen_klee_cards._plan_only_line`), so a play
-        // that is not a write is refused with the reason printed.
-        // ONE ROW SINCE POOL PASS FIVE (`EB-685`): Night Watch is retired
-        // and Slack Water carries the Dusk Weak with its now-line intact, so
-        // it is not written-only and is pinned in KokomiPoolPassFiveTests.
-        foreach (var (card, name) in new (CardModel, string)[]
-                 {
-                     (new ProtoKkBreakwater(), "ProtoKkBreakwater"),
-                 })
-        {
-            Assert.Contains("KokomiTargets.PetOnly", Source(name));
-            Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].",
-                              Face(card));
-            // Plan-only, so "Dusk Plan:" with no "or" (2026-10-01).
-            Assert.Contains("[gold]Dusk[/gold] [gold]Plan[/gold]:", Face(card));
-            Assert.DoesNotContain("Or [gold]", Face(card));
-            // No now-line at all: the whole body is the write.
-            Assert.DoesNotContain("CreatureCmd.GainBlock", Source(name));
-        }
-    }
-
-    [Fact]
-    public void The_written_only_rows_still_write_a_dusk_plan()
-    {
-        // THE SHAPE, which pool pass four kept: the row writes a Dusk entry
-        // and has no now-line. The CLAUSES moved at `EB-679` and again at
-        // `EB-685`, and are pinned in `KokomiPoolPassFiveTests`.
-        Assert.Contains("dusk: true", Source("ProtoKkBreakwater"));
     }
 
     // ======================================================================

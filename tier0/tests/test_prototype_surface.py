@@ -1097,12 +1097,15 @@ def test_the_war_banner_badge_says_the_banner_takes_the_dexterity_back():
     which is on the player for exactly as long as the Dexterity is.
     """
     row = _war_banner_row()
+    # The Kokomi re-founding (2026-10-12) gave the banner a Plan line of its
+    # own, on its own sentence after the now-line.
     assert row["description"] == (
-        "Gain 2 [gold]Dexterity[/gold] for 2 turns.")
+        "Gain 2 [gold]Dexterity[/gold] for 2 turns. [gold]Plan[/gold]: Gain "
+        "3 [gold]Strength[/gold] this turn.")
     emitted = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
                / "Generated" / "ProtoMiGorouWarBanner.cs").read_text(
                    encoding="utf-8")
-    assert "[gold]Dexterity[/gold] for 2 turns.\")" in emitted
+    assert "[gold]Dexterity[/gold] for 2 turns." in emitted
     power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
              / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
     banner = power.split("class WarBannerPower")[1].split("class ")[0]

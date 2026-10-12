@@ -161,11 +161,23 @@ def test_personal_pool_companions_are_not_banner_eligible():
     # teammate, not a shared-pool 5-star draw. (`prune_witch_hunt` was the
     # shipped example; it left with the shipped sheets, legacy cleanup
     # stage 6.)
-    personal = {c.id for c in loader.companion_roster_replacement()
-                if c.personal_pool is not None}
-    assert personal, "no Personal on the roster; the assertion is vacuous"
-    for nation in rewards.designed_nations():
-        assert not personal & {c.id for c in rewards.five_star_roster(nation)}
+    # The live roster has no Personal since the Kokomi re-founding
+    # (2026-10-12) moved Gorou's into her own pool, so the rule is checked on
+    # a synthetic one: a 5-star Personal is filtered, its twin is not.
+    personal = Card(id="star5_personal", name="P", cost=2, type="power",
+                    rarity="rare", role_c="buffer", star=5,
+                    nation="mondstadt", personal_pool="klee")
+    shared = _fake_roster(1)[0]
+    monkey = pytest.MonkeyPatch()
+    try:
+        monkey.setattr(rewards, "_companion_roster",
+                       lambda: [personal, shared])
+        rewards.five_star_roster.cache_clear()
+        ids = {c.id for c in rewards.five_star_roster("mondstadt")}
+    finally:
+        monkey.undo()
+        rewards.five_star_roster.cache_clear()
+    assert ids == {shared.id}
 
 
 def test_a_companion_carries_its_nation_and_a_kit_card_none():

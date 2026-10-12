@@ -79,7 +79,7 @@ public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlann
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.Ally) is not { } nowLine) return;
             cardPlay = nowLine;
         }

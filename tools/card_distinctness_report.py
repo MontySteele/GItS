@@ -226,7 +226,7 @@ def surface_pools() -> list[tuple[str, list[dict]]]:
     # Klee-only companions, 2026-10-03) is measured with that kit, not with
     # its nation's shared pool.
     from tier0 import constants as _C
-    own = set(_C.KLEE_OWN_COMPANION_IDS)
+    own = set(_C.KLEE_OWN_COMPANION_IDS) | set(_C.KOKOMI_OWN_COMPANION_IDS)
     out = []
     for ch in SURFACE_CHARACTERS:
         out.append((ch, [r for r in rows
@@ -237,7 +237,8 @@ def surface_pools() -> list[tuple[str, list[dict]]]:
                          and r.get("id") not in _C.STAGING_GRANT_IDS
                          # An off-pool row (Pop!, Klee design review
                          # 2026-10-08) is created at play, never offered.
-                         and r.get("id") not in _C.KLEE_OFF_POOL_ROW_IDS]))
+                         and r.get("id") not in _C.KLEE_OFF_POOL_ROW_IDS
+                         and r.get("id") not in _C.KOKOMI_OFF_POOL_ROW_IDS]))
     nations = sorted({r["nation"] for r in rows if r.get("nation")})
     for nation in nations:
         out.append((f"{nation}-companions",

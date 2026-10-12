@@ -18,19 +18,6 @@ namespace KleeMod.Tests.Prototype;
 /// </summary>
 public class PowerCostSweep20260930Tests
 {
-    [Fact]
-    public void The_long_game_upgraded_installs_the_drawing_twin()
-    {
-        var play = string.Join(" ",
-            Il.CallSequence(Il.Method("ProtoKkTheLongGame", "OnPlay")));
-        Assert.Contains("PowerCmd.Apply<TheLongGamePower>", play);
-        Assert.Contains("PowerCmd.Apply<TheLongGamePlusPower>", play);
-        Assert.Contains("get_IsUpgraded", play);
-        Assert.Equal(1, new ProtoKkTheLongGame().EnergyCost.Canonical);
-        var signal = string.Join(" ",
-            Il.CallSequence(Il.Method("TheLongGamePower", "Signal")));
-        Assert.Contains("CardPileCmd.Draw", signal);
-    }
 
     [Fact]
     public void Sworn_brotherhood_gains_the_current_element_both_faces()

@@ -579,11 +579,11 @@ internal static class PlayTelemetry
     }
 
     /// <summary>
-    /// The Kokomi whole-run round (2026-10-10): the Casket's count as each of
-    /// her turns opens, and her overhaul ledger held for the fight's Plan
-    /// counts (<see cref="FightRecord.KokomiLedger"/>). Kokomi only: anyone
-    /// else writes no row and no key. A read; <c>Peek</c> creates no ledger
-    /// (rule 1), and a turn with none yet reads a count of 0.
+    /// The Kokomi whole-run round (2026-10-10): her overhaul ledger held for
+    /// the fight's Plan counts (<see cref="FightRecord.KokomiLedger"/>).
+    /// Kokomi only: anyone else writes no row and no key. A read; <c>Peek</c>
+    /// creates no ledger (rule 1). (The Casket's count per turn left with the
+    /// Casket, the re-founding, 2026-10-12.)
     /// </summary>
     private static void NoteKokomiTurnStart(FightRecord record,
                                             Creature creature, int round)
@@ -594,12 +594,39 @@ internal static class PlayTelemetry
             record.IsKokomi = true;
             var ledger = KokomiOverhaulLedger.Peek(creature);
             if (ledger != null) record.KokomiLedger = ledger;
-            record.CasketTurnStart.Add(new[] { round, ledger?.CasketCount ?? 0 });
         }
         catch (Exception e)
         {
             Warn("NoteKokomiTurnStart", e);
         }
+    }
+
+    /// <summary>
+    /// THE KOKOMI RE-FOUNDING (2026-10-12, card paper sec.5: "Ethereal cards
+    /// lost per fight reported"). A card of hers that Ethereal Exhausted at the
+    /// end of her turn -- a card she neither played nor wrote. Kokomi only.
+    /// </summary>
+    internal static void EtherealLost(CardModel? card, bool causedByEthereal)
+    {
+        try
+        {
+            if (!causedByEthereal || card?.Owner is not { } player) return;
+            if (!KokomiOverhaul.LiveFor(player.Creature)) return;
+            RecordEtherealLost(player);
+        }
+        catch (Exception e)
+        {
+            Warn("EtherealLost", e);
+        }
+    }
+
+    /// <summary>The hook-free half of <see cref="EtherealLost"/>, and the
+    /// test seam.</summary>
+    internal static void RecordEtherealLost(Player player)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        record.IsKokomi = true;
+        record.EtherealLost++;
     }
 
     /// <summary>
@@ -1775,8 +1802,9 @@ internal static class PlayTelemetry
         /// <summary>Her overhaul ledger for this fight, held from the first
         /// turn-start read on, so a stale-flush still reads it.</summary>
         public KokomiOverhaulLedger? KokomiLedger;
-        /// <summary>[round, Casket count] as each of her turns opens.</summary>
-        public readonly List<int[]> CasketTurnStart = new();
+        /// <summary>The Kokomi re-founding (2026-10-12): her cards Ethereal
+        /// Exhausted this fight (<see cref="EtherealLost"/>).</summary>
+        public int EtherealLost;
         /// <summary>2026-10-10 (the whole-run round 2). [round, Spend cards
         /// in hand] as each of her turns opens, after the draw
         /// (<see cref="SpendCardsTurnStart"/>).</summary>
@@ -2017,10 +2045,10 @@ internal static class PlayTelemetry
             }
             if (IsKokomi)
             {
-                // 2026-10-10, the Kokomi whole-run round: the Casket's count
-                // as each turn opened, [round, count], and the Plans written
-                // and carried out this fight (0 when no ledger was read).
-                Pairs(sb, "casket_turn_start", CasketTurnStart);
+                // 2026-10-10, the Kokomi whole-run round: the Plans written
+                // and carried out this fight (0 when no ledger was read); the
+                // re-founding (2026-10-12): her Ethereal cards lost.
+                sb.Append(",\"ethereal_lost\":").Append(EtherealLost);
                 sb.Append(",\"plans_written\":")
                   .Append(KokomiLedger?.PlansWrittenThisCombat ?? 0);
                 sb.Append(",\"plans_carried_out\":")
@@ -2480,6 +2508,15 @@ public sealed class PlayTelemetryHooks : AbstractModel
         CombatSide side, IEnumerable<Creature> participants)
     {
         if (side == CombatSide.Player) PlayTelemetry.CloseTurn();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The Kokomi re-founding (2026-10-12): an Ethereal card of
+    /// hers Exhausted at her turn's end, counted per fight.</summary>
+    public override Task AfterCardExhausted(PlayerChoiceContext choiceContext,
+        CardModel card, bool causedByEthereal)
+    {
+        PlayTelemetry.EtherealLost(card, causedByEthereal);
         return Task.CompletedTask;
     }
 

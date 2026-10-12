@@ -264,7 +264,9 @@ def test_every_personal_is_smithable_in_the_sim(overhaul):
     from tier0.content import upgrades
     personals = (C.COVEN_PERSONAL_POOL_IDS + C.INAZUMA_OVERHAUL_PERSONAL_IDS
                  + (PRUNE, QIQI))
-    assert len(personals) == 3
+    # Two since the Kokomi re-founding (2026-10-12): Gorou's Personal moved
+    # into Kokomi's own pool, where her upgrade index answers for it.
+    assert len(personals) == 2
     for cid in personals:
         assert upgrades.has_upgrade(cid), cid
         plus = upgrades.apply_upgrade(loader.get_card(cid))

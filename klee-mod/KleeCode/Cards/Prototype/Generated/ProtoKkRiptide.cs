@@ -51,7 +51,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} additional damage to debuffed ones.\nOr [gold]plan[/gold]: Gain 2 [gold]Energy[/gold] and draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} additional damage to debuffed ones.\nOr [gold]plan[/gold]: Draw {PlanCards:diff()} cards."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,6 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Energy, 2, KokomiPlan.Aim.Self),
             new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
@@ -69,7 +68,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
         {
             new DamageVar(11m, ValueProp.Move),
             new ExtraDamageVar(3m),
-            new DynamicVar("PlanCards", 2m)
+            new DynamicVar("PlanCards", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -83,7 +82,7 @@ public sealed class ProtoKkRiptide : CustomCardModel, IElementalCard, ICharacter
     {
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, paid: cardPlay.Resources.EnergySpent);
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
             if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
             cardPlay = nowLine;
         }

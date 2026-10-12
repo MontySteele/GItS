@@ -385,14 +385,16 @@ public class ArmKeywordTipTests
         // `ForNavia`, `ForNeuvillette` and `ForEscoffier`.
         // FORTY-TWO with the Klee upper pass (2026-10-11): `EB-573`'s
         // `ForMergeRiders` left with the merge it explained.
-        Assert.Equal(42, attaches.Count);
+        // THIRTY-NINE with the Kokomi re-founding (2026-10-12): `ForDusk`,
+        // `ForCasket` and `ForOpenTheCasket` left with Dusk and the Casket.
+        Assert.Equal(39, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");
         Assert.Contains(attaches, m => m.Name == "ForKnight");
         Assert.DoesNotContain(attaches, m => m.Name == "ForAbsorb");
         Assert.DoesNotContain(attaches, m => m.Name == "ForWind");
-        Assert.Contains(attaches, m => m.Name == "ForOpenTheCasket");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForOpenTheCasket");
         Assert.DoesNotContain(attaches, m => m.Name == "ForFade");
         Assert.DoesNotContain(attaches, m => m.Name == "ForCue");
         Assert.DoesNotContain(attaches, m => m.Name == "ForRehearsal");
@@ -416,8 +418,8 @@ public class ArmKeywordTipTests
         Assert.DoesNotContain(attaches, m => m.Name == "ForFrontPerformer");
         Assert.DoesNotContain(attaches, m => m.Name == "ForBackPerformer");
         Assert.DoesNotContain(attaches, m => m.Name == "ForRotate");
-        Assert.Contains(attaches, m => m.Name == "ForDusk");
-        Assert.Contains(attaches, m => m.Name == "ForCasket");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForDusk");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForCasket");
         Assert.Contains(attaches, m => m.Name == "ForPlanElement");
         Assert.DoesNotContain(attaches, m => m.Name == "ForCovenSpark");
         Assert.Contains(attaches, m => m.Name == "ForEmptyField");

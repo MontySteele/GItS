@@ -10,12 +10,14 @@ QUOTABLE (R215 B).
 
 The load-bearing reading: a Plan resolves after the next turn's draw (brief
 sec.2 rule 2), so "in your hand" on a Plan is the hand just drawn.
+
+THE RE-FOUNDING (2026-10-12) cut Turning Tide and Abyssal Salvage and made
+Tidecleanse's Exhaust its now-line; their old tests left with them.
 """
 
 from __future__ import annotations
 
 import collections
-import dataclasses
 
 import pytest
 
@@ -56,11 +58,9 @@ def _carry_out(st, card):
 
 # --- the pool -----------------------------------------------------------------
 
-def test_the_batch_cuts_seven_and_adds_seven(overhaul):
+def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == 78
-    # The growth Powers (2026-10-10) appended Flood Tide after the seven.
-    assert ids[-8:-1] == C.KOKOMI_STATUS_BATCH_IDS
     rows = {c.id: c for c in loader.prototype_cards()}
     for cid in CUT:
         assert cid not in ids
@@ -68,15 +68,20 @@ def test_the_batch_cuts_seven_and_adds_seven(overhaul):
     assert "proto_kk_coral_sanctuary" not in rows
     rarity = collections.Counter(_row(cid).rarity for cid in ids)
     assert rarity == {"common": 21, "uncommon": 36, "rare": 21}
+    # The re-founding (2026-10-12) cut Turning Tide and Abyssal Salvage.
+    for cid in ("proto_kk_turning_tide", "proto_kk_abyssal_salvage"):
+        assert cid not in ids
+    survivors = ("proto_kk_kelp_wall", "proto_kk_tidecleanse",
+                 "proto_kk_sea_glass_harvest", "proto_kk_flotsam_surge",
+                 "proto_kk_riptide_ruin")
     shapes = {cid: (_row(cid).type, _row(cid).cost, _row(cid).rarity)
-              for cid in C.KOKOMI_STATUS_BATCH_IDS}
+              for cid in survivors}
+    assert set(survivors) <= set(ids)
     assert shapes == {
         "proto_kk_kelp_wall": ("skill", 1, "common"),
         "proto_kk_tidecleanse": ("skill", 0, "common"),
         "proto_kk_sea_glass_harvest": ("skill", 1, "uncommon"),
-        "proto_kk_turning_tide": ("skill", 0, "uncommon"),
         "proto_kk_flotsam_surge": ("attack", 1, "uncommon"),
-        "proto_kk_abyssal_salvage": ("power", 1, "uncommon"),
         "proto_kk_riptide_ruin": ("attack", 2, "rare"),
     }
 
@@ -114,21 +119,30 @@ def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
 
 # --- Tidecleanse -------------------------------------------------------------------
 
+def _play_now(st, card):
+    st.player.energy = 3
+    st.player.hand.append(card)
+    combat.play_card(st, card)
+
+
 def test_tidecleanse_exhausts_up_to_two(overhaul):
+    """The re-founding (2026-10-12): the Exhaust is the now-line, first."""
     st = _quiet_state()
     st.player.hand = [statuses.make_status("dazed"),
                       statuses.make_status("wound"),
                       statuses.make_status("slimed")] + _filler(2)
-    _carry_out(st, _row("proto_kk_tidecleanse"))
+    card = _row("proto_kk_tidecleanse")
+    assert card.plan == []
+    _play_now(st, card)
     assert len(kokomi_plan.statuses_in_hand(st)) == 1
-    assert len(st.player.exhaust_pile) == 2
+    assert sum(c.id.startswith("status_") for c in st.player.exhaust_pile) == 2
     assert len(st.player.hand) == 3
 
 
 def test_tidecleanse_upgraded_exhausts_three(overhaul):
     st = _quiet_state()
     st.player.hand = [statuses.make_status("dazed") for _ in range(4)]
-    _carry_out(st, _up("proto_kk_tidecleanse"))
+    _play_now(st, _up("proto_kk_tidecleanse"))
     assert len(st.player.hand) == 1
 
 
@@ -145,6 +159,7 @@ def test_tidecleanse_draws_nothing(overhaul):
     """[USER]'s run (2026-10-11): "Tidecleanse as a cycling card at Common is
     too good" -- the card pass's "Draw 1 card." comes off."""
     assert _row("proto_kk_tidecleanse").effects == [
+        {"op": "kokomi", "kind": "exhaust_statuses", "amount": 2},
         {"op": "apply_power", "power": "weak", "amount": 1,
          "target": "enemy"}]
 
@@ -173,19 +188,6 @@ def test_sea_glass_harvest_upgraded_makes_sea_glass_plus(overhaul):
     st.player.hand = [statuses.make_status("wound")]
     _carry_out(st, up)
     assert st.player.hand[0].effects == [{"op": "energy", "amount": 2}]
-
-
-# --- Turning Tide -----------------------------------------------------------------------
-
-def test_turning_tide_discards_the_clogs_and_draws_that_many(overhaul):
-    st = _quiet_state()
-    st.player.hand = [statuses.make_status("wound"),
-                      statuses.make_status("wound")] + _filler(1)
-    st.player.draw_pile = _filler(5)
-    _carry_out(st, _row("proto_kk_turning_tide"))
-    assert not kokomi_plan.statuses_in_hand(st)
-    assert len(st.player.hand) == 3
-    assert len(st.player.discard_pile) == 2
 
 
 # --- Flotsam Surge ------------------------------------------------------------------------
@@ -222,80 +224,10 @@ def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
     assert (up["amount"], up["times"]) == (12, 2)
 
 
-# --- Abyssal Salvage -----------------------------------------------------------------------
-
-def test_abyssal_salvage_exhausts_only_the_first_status_drawn_each_turn(overhaul):
-    """The Kokomi card pass (2026-10-11, pick 2): "The first time each turn
-    you draw a status, Exhaust it. The Casket gains 1." The first status
-    drawn leaves her hand for the exhaust pile and the Casket gains 1; the
-    second status that turn stays in hand; the next turn pays again."""
-    st = _quiet_state()
-    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
-    st.player.hand = []
-    first, second = statuses.make_status("dazed"), statuses.make_status("wound")
-    st.player.draw_pile = [first, second] + _filler(3)
-    st.draw(3)
-    assert first in st.player.exhaust_pile and first not in st.player.hand
-    assert second in st.player.hand
-    assert st.kk_casket == 1
-    assert len(st.player.hand) == 2
-    kokomi_plan.roll_turn(st)
-    third = statuses.make_status("dazed")
-    st.player.draw_pile = [third] + _filler(1)
-    st.draw(1)
-    assert third in st.player.exhaust_pile and st.kk_casket == 2
-
-
-def test_abyssal_salvage_ignores_curses_and_her_own_cards(overhaul):
-    """Statuses only: a curse or a card of hers drawn first neither pays nor
-    spends the turn's trigger."""
-    st = _quiet_state()
-    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
-    st.player.hand = []
-    curse = dataclasses.replace(_filler(1)[0], id="probe_curse", type="curse",
-                                rarity="curse")
-    dazed = statuses.make_status("dazed")
-    st.player.draw_pile = _filler(1) + [curse, dazed]
-    st.draw(3)
-    assert curse in st.player.hand
-    assert dazed in st.player.exhaust_pile and st.kk_casket == 1
-
-
-def test_abyssal_salvage_upgrade_is_innate(overhaul):
-    row, up = _row("proto_kk_abyssal_salvage"), _up("proto_kk_abyssal_salvage")
-    assert not row.innate and up.innate
-    assert up.effects == row.effects == [
-        {"op": "apply_power", "power": kokomi_plan.ABYSSAL_SALVAGE,
-         "amount": 1, "target": "self"}]
-    assert not hasattr(kokomi_plan, "ABYSSAL_SALVAGE_PLUS")
-
-
-def test_abyssal_salvage_no_longer_reads_the_exhaust(overhaul):
-    from tier0.engine import refpowers
-    st = _quiet_state()
-    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
-    refpowers.exhaust_card(st, statuses.make_status("dazed"))
-    assert st.kk_casket == 0
-
-
-def test_a_dazed_in_the_opening_hand_pays(overhaul):
-    """The turn-start hand draw is a draw: a Dazed in it is Exhausted."""
-    st = _quiet_state()
-    st.player.powers[kokomi_plan.ABYSSAL_SALVAGE] = 1
-    st.player.hand = []
-    dazed = statuses.make_status("dazed")
-    st.player.draw_pile = [dazed] + _filler(8)
-    combat._player_turn(st, lambda s: None)
-    assert dazed in st.player.exhaust_pile
-    assert st.kk_casket >= 1
-
-
 # --- the shape check -------------------------------------------------------------------------
 
 @pytest.mark.parametrize("op", ["block_per_status_in_hand",
-                                "exhaust_statuses_in_hand",
-                                "transform_statuses_in_hand",
-                                "discard_and_draw"])
-def test_the_four_clauses_are_plan_only(op):
+                                "transform_statuses_in_hand"])
+def test_the_two_surviving_clauses_are_plan_only(op):
     assert op in kokomi_plan.PLAN_KINDS
     assert op in kokomi_plan.PLAN_ONLY_OPS

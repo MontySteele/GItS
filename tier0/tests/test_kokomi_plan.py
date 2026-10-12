@@ -135,7 +135,10 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # Tide.
     # FORTY with pool completion (2026-10-01): Tidal Screen, and the
     # multiplayer Tactical Relay.
-    assert len(planned) == 40
+    # THIRTY-SEVEN with the re-founding (2026-10-12): Dusk retired (Breakwater,
+    # Evening Watch and Brace for the Tide are now-lines), Tidecleanse's Plan
+    # line gone, cut rows out, Kurage's Wake and Gorou's three Plan lines in.
+    assert len(planned) == 37
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -492,27 +495,10 @@ def test_skittish_does_not_fire_on_a_carry_out(overhaul):
 
 # --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) ---------------
 
-def test_shell_guard_is_the_caskets_defensive_reader(overhaul):
-    """SHELL GUARD, re-aimed (main session, 2026-09-28) after the Casket pass
-    retired the strike it paid on: "Gain 5 Block, plus 1 for each point in
-    the Casket." Block through the ordinary funnel (Dexterity and Frail
-    count)."""
-    st = kokomi_state(enemies=[make_enemy(hp=60)])
-    effects.resolve_card(st, loader.get_card("proto_kk_shell_guard"))
-    assert st.player.block == 5
-    st2 = kokomi_state(enemies=[make_enemy(hp=60)])
-    st2.kk_casket = 4
-    effects.resolve_card(st2, loader.get_card("proto_kk_shell_guard"))
-    assert st2.player.block == 9
-    assert not hasattr(kokomi_plan, "SHELL_GUARD")
-    assert not hasattr(kokomi_plan, "close_shell_guard")
-
-
-def test_both_defensive_rows_load_and_smith(overhaul):
-    """The two rows themselves, off the sheet. Tide Wall since the cleanup
-    pass (2026-09-29): 4 Block now, Plan 6 Block plus the intent, upgrading to
-    6 and 9 plus the intent. Shell Guard since its re-aim (2026-09-28): 5 plus
-    1 per Casket point, base 8 upgraded; a Common since the cleanup pass."""
+def test_tide_wall_loads_and_smiths(overhaul):
+    """Tide Wall since the cleanup pass (2026-09-29): 4 Block now, Plan 6
+    Block plus the intent, upgrading to 6 and 9 plus the intent. (Shell Guard
+    left with the Casket count, the re-founding, 2026-10-12.)"""
     from tier0.content import upgrades
 
     wall = loader.get_card("proto_kk_tide_wall")
@@ -523,15 +509,6 @@ def test_both_defensive_rows_load_and_smith(overhaul):
     assert up.effects[0]["amount"] == 6
     assert up.plan[0]["amount"] == 9
 
-    guard = loader.get_card("proto_kk_shell_guard")
-    assert guard.rarity == "common" and guard.cost == 1
-    assert guard.type == "skill"
-    assert guard.plan == []
-    assert guard.effects == [{"op": "block", "amount_formula": {
-        "base": 5, "per": 1, "count": "casket_count"}}]
-    up = upgrades.apply_upgrade(guard)
-    assert up.effects[0]["amount_formula"] == {
-        "base": 8, "per": 1, "count": "casket_count"}
 
 
 def test_damage_quarter_max_hp_rounds_down(overhaul):
@@ -559,7 +536,6 @@ def test_sango_isshin_pays_two_to_all_per_plan_carried_out_this_combat(overhaul)
     carry_out(st, [{"op": "draw", "amount": 1}])
     kokomi_plan.roll_turn(st)
     carry_out(st, [{"op": "draw", "amount": 1}])
-    assert st.kk_plans_carried_out_this_turn == 1
     assert st.kk_plans_carried_out_this_combat == 2
     effects.resolve_card(st, card)
     assert (a.hp, b.hp) == (40, 40)                 # 8 + 2 x 2
@@ -1104,9 +1080,10 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     This is that claim made falsifiable: a Plan written on turn N leaves Block
     and Energy standing when the pilot gets to decide on turn N+1.
     """
-    # Riptide since the Casket pass (2026-09-28) cut Ripple: its Plan line is
-    # 2 Energy and a card.
-    ids = ["proto_kk_read_the_field"] * 4 + ["proto_kk_riptide"] * 4
+    # Riptide since the Casket pass (2026-09-28) cut Ripple; War Council
+    # since the re-founding (2026-10-12) made Riptide's Plan a draw: its Plan
+    # line is 2 Energy.
+    ids = ["proto_kk_read_the_field"] * 4 + ["proto_kk_war_council"] * 4
     player = loader.build_player_from_ids("kokomi", ids)
     seen = {}
 
@@ -1120,7 +1097,7 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     run_fight(player, [make_enemy(hp=400, intents=BLOCKER)], pilot, seed=3)
     # Turn 2 opens with BOTH: the Block turn 1's Read the Field Plans wrote
     # (8 apiece, past a block clear that would have zeroed it) and the Energy
-    # its Riptide Plans wrote (2 apiece, past an energy reset that would
+    # its War Council Plans wrote (2 apiece, past an energy reset that would
     # have overwritten it). Under the pre-draw hook the slice's prose asks for,
     # both of these read exactly the turn's own defaults.
     block, energy = seen[2]
@@ -1173,10 +1150,9 @@ def test_every_row_in_her_pool_resolves(overhaul):
         # a draw-reading row looks at is built from `strike`.
         state.player.draw_pile = [loader.get_card("strike")
                                   for _ in range(5)]
-        # Salt Line until the Casket pass cut it; any card will do, and
-        # Open the Casket gives What the Tokoyo Returns one to fetch.
-        state.player.exhaust_pile = [loader.get_card("proto_kk_ambush"),
-                                     kokomi_plan.open_the_casket_card()]
+        # Salt Line until the Casket pass cut it; any card will do (Reserves
+        # takes one back).
+        state.player.exhaust_pile = [loader.get_card("proto_kk_ambush")]
         state.kk_plan_queue = []
         kokomi_plan.schedule(state, loader.get_card("proto_kk_ambush"))
         state.card_aim = state.enemies[0]
@@ -1652,13 +1628,6 @@ def well_laid():
 # ladder, and nothing here is quotable (R215 B).
 
 
-def dusk_card(clauses, effects_=None, cid="proto_kk_dusk_probe"):
-    """A probe row whose Plan line is a DUSK line."""
-    card = plan_card(clauses, effects_, cid=cid)
-    card.plan_dusk = True
-    return card
-
-
 def hit(amount, target="front_enemy"):
     return {"op": "damage", "amount": amount, "target": target}
 
@@ -1756,18 +1725,6 @@ def test_the_no_follower_line_names_the_card_that_wrote_the_rider(overhaul):
     kokomi_plan.resolve_all(st)
     said = [e for e in st.log if e["event"] == "plan_no_follower"]
     assert [e["card"] for e in said] == ["proto_kk_opening_gambit"]
-
-
-def test_a_dusk_rider_with_no_follower_says_so_too(overhaul):
-    """The dusk drain is the same loop, so it finishes the same sentence and
-    marks WHICH drain ran out."""
-    st = kokomi_state()
-    kokomi_plan.schedule(st, dusk_card(
-        [{"op": kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT}],
-        cid="proto_kk_dusk_wave"))
-    kokomi_plan.resolve_dusk(st)
-    said = [e for e in st.log if e["event"] == "plan_no_follower"]
-    assert len(said) == 1 and said[0]["why"] == "dusk"
 
 
 def test_change_of_plans_never_says_no_plan_followed(overhaul):
@@ -1917,92 +1874,6 @@ def test_a_plan_written_after_the_redirect_aims_at_the_front(overhaul):
     assert front.hp == 70 and back.hp == 80
 
 
-# --- DUSK -----------------------------------------------------------------
-
-def test_a_dusk_plan_lands_at_the_end_of_the_turn_it_was_written_on(overhaul):
-    """Breakwater's 7 Block is on her when the enemy hits."""
-    st = kokomi_state()
-    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
-                                       cid="proto_kk_breakwater"))
-    assert st.player.block == 0
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.block == 7
-    assert st.kk_plan_queue == []
-
-
-def test_a_dusk_drain_leaves_the_morning_entries_where_they_are(overhaul):
-    st = kokomi_state()
-    kokomi_plan.schedule(st, plan_card([hit(5)], cid="proto_kk_morning"))
-    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
-                                       cid="proto_kk_breakwater"))
-    kokomi_plan.resolve_dusk(st)
-    assert [e.card_id for e in st.kk_plan_queue] == ["proto_kk_morning"]
-
-
-def test_a_dusk_carry_out_is_a_carry_out(overhaul):
-    """The `plan_carried_out` event fires. Treatise no longer draws on a
-    carry-out (core pass): it pays for a face-up play."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.TREATISE] = 1
-    st.player.draw_pile = [Card(id="strike", name="s", cost=1, type="attack",
-                                effects=[])]
-    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
-                                       cid="proto_kk_breakwater"))
-    kokomi_plan.resolve_dusk(st)
-    assert counts(st)["plan_carried_out"] == 1
-    assert counts(st)["plan_treatise"] == 0
-
-
-def test_a_dusk_carry_out_does_not_touch_the_mornings_depth(overhaul):
-    """Tide Wall, Well Laid and Tide Chart print this morning, and an evening
-    is not one."""
-    st = kokomi_state()
-    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
-                                       cid="proto_kk_breakwater"))
-    kokomi_plan.resolve_dusk(st)
-    assert st.kk_plans_this_morning == 0
-
-
-def test_change_of_plans_pops_a_dusk_entry_too(overhaul):
-    """The card says your front Plan, the queue is one queue, and a Dusk Plan
-    at the front of it is the front Plan."""
-    st = kokomi_state()
-    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 7}],
-                                       cid="proto_kk_breakwater"))
-    kokomi_plan.resolve_front(st)
-    assert st.player.block == 7
-    assert st.kk_plan_queue == []
-
-
-def test_a_dusk_rider_reaches_only_the_dusk_drain(overhaul):
-    """Riders written on a dusk entry apply to the next entry in THAT drain."""
-    enemy = make_enemy(hp=200)
-    st = kokomi_state(enemies=[enemy])
-    kokomi_plan.schedule(st, dusk_card(
-        [{"op": kokomi_plan.NEXT_PLAN_DOUBLE_DAMAGE}],
-        cid="proto_kk_dusk_gambit"))
-    kokomi_plan.schedule(st, plan_card([hit(13)], cid="proto_kk_riptide"))
-    kokomi_plan.resolve_dusk(st)
-    kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 13
-
-
-def test_the_sheets_one_dusk_row_is_the_only_one(overhaul):
-    """`plan_dusk:` is a ROW flag and the sheet is where it is declared.
-
-    R267 PICK 1 TOOK SLACK WATER BACK OFF IT. Pool pass five had moved the
-    starter's Plan half to Dusk; the brief names the next-morning Weak as the
-    kit's turn-one decision and a starter card is [USER]'s, so Breakwater is
-    the surface's only Dusk row again. The machinery is untouched --
-    `plan_dusk:` is still a fact about a row's Plan LINE and
-    `loader._validate_plan_dusk` still asks only that there be one."""
-    dusk = [c.id for c in loader.prototype_cards() if c.plan_dusk]
-    # The Casket pass (2026-09-28) added a second: Shell of Sanctuary.
-    # Expansion batch one (2026-09-29): Evening Watch, Brace for the Tide.
-    assert dusk == ["proto_kk_breakwater", "proto_kk_shell_of_sanctuary",
-                    "proto_kk_evening_watch", "proto_kk_brace_for_the_tide"]
-
-
 def _row(cid):
     return next(c for c in loader.prototype_cards() if c.id == cid)
 
@@ -2019,104 +1890,6 @@ def _faces():
     return {r["id"]: r["description"] for r in rows if "description" in r}
 
 
-def test_the_dusk_lines_are_written_only(overhaul):
-    """`EB-646` (round 23) priced the face-up half to the Dusk line and the
-    seat still never played it; `EB-655` (pool pass three) takes the now-line
-    off both rows instead. WRITTEN-ONLY: no `effects` at all, so the card's
-    only legal target is the Bake-Kurage (`gen_klee_cards._plan_only_line`,
-    `KokomiTargets.PetOnly`) and its whole face is the Dusk clause.
-
-    `EB-685` (pool pass five) LEAVES BREAKWATER THE ONLY ONE: Night Watch is
-    retired and Slack Water carries the Dusk Weak with its now-line intact.
-    What the pass moved on this row is the COUNT and not the shape."""
-    breakwater = _row("proto_kk_breakwater")
-    assert breakwater.effects == []
-    assert breakwater.plan == [
-        {"op": "block", "amount": 5},
-        {"op": "block_per_plan_held", "amount": 3},
-    ]
-    assert breakwater.upgrade == {"plan_block": 2}
-
-
-def _breakwater(st):
-    """Write the sheet's own Breakwater line onto the queue."""
-    kokomi_plan.schedule(st, dusk_card(
-        [{"op": "block", "amount": 5},
-         {"op": kokomi_plan.BLOCK_PER_PLAN_HELD, "amount": 3}],
-        cid="proto_kk_breakwater"))
-
-
-def test_breakwater_pays_for_the_plans_the_jellyfish_is_holding(overhaul):
-    """`EB-685`. THE WALL RISES ON THE TURN THE ENGINE IS WRITTEN: two Plans
-    written this turn and still waiting for the next morning pay 5 + 3 x 2 at
-    dusk. Pass four read the morning just drained, which a Plan written today
-    can never be in -- r27's two seats counted 0 on four plays out of four."""
-    st = kokomi_state()
-    _breakwater(st)
-    for i in range(2):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_p{i}"))
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.block == 5 + 3 * 2
-    # AND THE TWO IT COUNTED ARE STILL THERE: it paid for the queue, it did
-    # not spend it.
-    assert len(st.kk_plan_queue) == 2
-
-
-def test_breakwater_holding_nothing_pays_its_base_alone(overhaul):
-    """`EB-685`. Zero times three is the honest answer to "for each", so a
-    Breakwater with no Plan standing behind it is a plain 5 Block."""
-    st = kokomi_state()
-    _breakwater(st)
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.block == 5
-
-
-def test_breakwater_never_counts_itself_or_a_second_dusk_plan(overhaul):
-    """`EB-685`. BY CONSTRUCTION AND NOT BY A FILTER: `resolve_dusk` takes
-    every dusk entry off the queue before the first clause runs, so the count
-    excludes this entry and any Dusk Plan written beside it -- neither is
-    waiting for the next morning, which is what the face says."""
-    st = kokomi_state()
-    _breakwater(st)
-    kokomi_plan.schedule(st, dusk_card([{"op": "block", "amount": 1}],
-                                       cid="proto_kk_other_dusk"))
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.block == 5 + 1
-
-
-def test_a_plan_hurried_out_before_dusk_is_no_longer_held(overhaul):
-    """`EB-685`. Change of Plans carries the front Plan out and it LEAVES the
-    queue, so the wall behind the engine is one Plan shorter -- which is the
-    trade the two cards make with each other."""
-    st = kokomi_state()
-    for i in range(2):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_p{i}"))
-    _breakwater(st)
-    kokomi_plan.resolve_front(st)      # hurries proto_kk_p0 out of the queue
-    st.player.energy = 0
-    st.player.block = 0
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.block == 5 + 3 * 1
-
-
-def test_breakwaters_count_is_not_the_mornings_depth(overhaul):
-    """`EB-685`. The two counts part here, which is the whole pass: a deep
-    morning already drained buys nothing, and the queue written after it
-    buys the wall."""
-    st = kokomi_state()
-    for i in range(3):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_m{i}"))
-    kokomi_plan.resolve_all(st)
-    assert st.kk_plans_this_morning == 3
-    _breakwater(st)
-    st.player.block = 0
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.block == 5
-
-
 def test_slack_waters_plan_half_is_a_morning_line(overhaul):
     """R267 PICK 1. The starter is back to its pre-pass-five form: damage
     (6 since the Plan pricing, 2026-10-11) and a single Weak now, the
@@ -2125,7 +1898,6 @@ def test_slack_waters_plan_half_is_a_morning_line(overhaul):
     or one on every body tomorrow -- which is the brief's turn-one decision,
     and `ProtoKkSlackWater.OnPlay` schedules with no `dusk:` argument."""
     row = _row("proto_kk_slack_water")
-    assert row.plan_dusk is False
     assert row.effects == [
         {"op": "damage", "amount": 6, "target": "enemy"},
         {"op": "apply_power", "power": "weak", "amount": 1,
@@ -2232,24 +2004,6 @@ def test_a_capped_morning_reports_what_is_still_held(monkeypatch, overhaul):
     assert held[0]["pending"] == 1 == len(st.kk_plan_queue)
 
 
-def test_the_cap_does_not_count_dusk_carry_outs(monkeypatch, overhaul):
-    """A Dusk Plan has already waited for nothing, so the morning's allowance
-    is untouched by one."""
-    monkeypatch.setattr(C, "KOKOMI_PLAN_CAP", 2)
-    st = kokomi_state()
-    st.player.energy = 0
-    kokomi_plan.schedule(st, dusk_card([{"op": "energy", "amount": 1}],
-                                       cid="proto_kk_dusk"))
-    for i in range(2):
-        kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}],
-                                           cid=f"proto_kk_p{i}"))
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.energy == 1
-    kokomi_plan.resolve_all(st)
-    assert st.player.energy == 3
-    assert st.kk_plan_queue == []
-
-
 def test_the_cap_defaults_to_unlimited(overhaul):
     """0 is today's behaviour, which is what makes the toggle a trial."""
     assert C.KOKOMI_PLAN_CAP == 0
@@ -2285,24 +2039,24 @@ def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
 # docs/notes/prototype-surface-provenance.md, "Kokomi pool pass three".
 # =============================================================================
 
-def test_feint_pays_three_per_carry_out(overhaul):
-    """THE CASKET PASS (2026-09-28): "Deal 4 damage, plus 3 for each Plan
-    carried out this turn. Plan: Apply 1 Vulnerable." The count is the one
-    Sango Isshin reads, so "carried out this turn" has one definition. A base
-    of 6 since the cleanup pass (2026-09-29)."""
+def test_feint_pays_three_per_plan_waiting(overhaul):
+    """THE RE-FOUNDING (2026-10-12, card paper sec.2): "Deal 6 damage, plus 3
+    for each Plan waiting. Plan: Apply 1 Vulnerable." (Per Plan carried out
+    this turn before.) The count is Breakwater's, the queue's depth."""
     row = _row("proto_kk_feint")
     assert row.effects == [{"op": "damage", "target": "enemy",
                             "amount_formula": {
                                 "base": 6, "per": 3,
-                                "count": "plans_carried_out_this_turn"}}]
+                                "count": "plans_held"}}]
     assert row.plan == [{"op": "apply_power", "power": "vulnerable",
                          "amount": 1, "target": "front_enemy"}]
     enemy = make_enemy(hp=100)
     st = kokomi_state(enemies=[enemy])
     effects.resolve_card(st, row)
     assert 100 - enemy.hp == 6
-    carry_out(st, [{"op": "draw", "amount": 1}])
-    carry_out(st, [{"op": "draw", "amount": 1}])
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
     before = enemy.hp
     effects.resolve_card(st, row)
     assert before - enemy.hp == 6 + 3 * 2
@@ -2424,15 +2178,28 @@ def test_night_watch_is_off_the_sheet_and_out_of_the_pool(overhaul):
     assert "proto_kk_night_watch" not in C.KOKOMI_OVERHAUL_POOL_IDS
 
 
-def test_breakwaters_upgrade_moves_the_base_and_not_the_rate(overhaul):
-    """`EB-679`. `plan_block` binds to the FLAT clause first
-    (`upgrades.PLAN_DELTA_OPS`), so the wall gets taller and the morning it
-    reads is priced the same."""
+def test_breakwater_pays_per_plan_waiting(overhaul):
+    """THE RE-FOUNDING (2026-10-12): Dusk is retired, so Breakwater's
+    Plans-waiting Block is its now-line: "Gain 6 Block, plus 3 for each Plan
+    waiting." 8 base upgraded, the rate unchanged."""
     from tier0.content import upgrades
 
-    up = upgrades.apply_upgrade(_row("proto_kk_breakwater"))
-    assert up.plan == [{"op": "block", "amount": 7},
-                       {"op": "block_per_plan_held", "amount": 3}]
+    row = _row("proto_kk_breakwater")
+    assert row.plan == []
+    assert row.effects == [{"op": "block", "amount_formula": {
+        "base": 6, "per": 3, "count": "plans_held"}}]
+    up = upgrades.apply_upgrade(row)
+    assert up.effects[0]["amount_formula"] == {
+        "base": 8, "per": 3, "count": "plans_held"}
+    row = _row("proto_kk_breakwater")
+    st = kokomi_state()
+    effects.resolve_card(st, row)
+    assert st.player.block == 6
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}],
+                                           cid=f"proto_kk_p{i}"))
+    effects.resolve_card(st, row)
+    assert st.player.block == 6 + 6 + 3 * 2
 
 
 def test_riptide_adds_its_rider_per_debuffed_body(overhaul):
@@ -2454,14 +2221,13 @@ def test_riptide_adds_its_rider_per_debuffed_body(overhaul):
 def test_riptides_base_and_rider_upgrade_by_different_amounts(overhaul):
     """14 / 4 more (the Casket pass, 2026-09-28): the `damage` key moves the
     base it rides on and `bonus_vs_debuff` moves the rider's own number. The
-    Plan's draw goes 2 -> 3 ([USER], 2026-09-30); its 2 Energy does not move."""
+    Plan is "Draw 3 cards" since the re-founding (2026-10-12), 4 upgraded."""
     from tier0.content import upgrades
 
     up = upgrades.apply_upgrade(_row("proto_kk_riptide"))
     assert up.effects[0]["amount"] == 14
     assert up.effects[0]["bonus_vs_debuff"] == 4
-    assert up.plan == [{"op": "energy", "amount": 2},
-                       {"op": "draw", "amount": 3}]
+    assert up.plan == [{"op": "draw", "amount": 4}]
 
 
 def test_nereids_doubles_only_the_first_plan_of_a_drain(overhaul):
@@ -2493,20 +2259,6 @@ def test_a_one_plan_morning_under_nereids_is_still_paid(overhaul):
     assert st.player.energy == 2
 
 
-def test_the_dusk_drain_pays_its_own_first_entry(overhaul):
-    """"Each turn" is read as "each DRAIN": a morning and a dusk are two drains
-    on one turn and each pays its own first entry, which is the drain-local
-    reading "the next Plan" already takes."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.NEREIDS_ASCENSION] = 1
-    st.player.energy = 0
-    card = plan_card([{"op": "energy", "amount": 1}], cid="proto_kk_dusk")
-    card.plan_dusk = True
-    kokomi_plan.schedule(st, card)
-    kokomi_plan.resolve_dusk(st)
-    assert st.player.energy == 2
-
-
 def test_converging_tide_is_off_the_sheet_and_out_of_the_pool(overhaul):
     """`EB-655`. The row re-aimed a queued Plan, and this pass makes the queue
     shallower on purpose. The RESOLVER stays with nothing spelling it, which is
@@ -2515,16 +2267,6 @@ def test_converging_tide_is_off_the_sheet_and_out_of_the_pool(overhaul):
     assert not [c for c in loader.prototype_cards()
                 if c.id == "proto_kk_converging_tide"]
     assert "redirect_queued_plans" in effects.OPS
-
-
-def test_the_written_only_dusk_rows_can_only_be_written(overhaul):
-    """No now-line at all, so `plan_aimed_at_pet` is True whatever the board
-    intends -- the sim's reading of `KokomiTargets.PetOnly`, whose face leads
-    with "Play on the Bake-Kurage."."""
-    st = kokomi_state(enemies=[make_enemy(hp=200, intents=ATTACKER)])
-    row = _row("proto_kk_breakwater")
-    assert row.effects == []
-    assert kokomi_plan.plan_aimed_at_pet(st, row) is True
 
 
 def test_an_auto_play_never_aims_at_the_pet(overhaul):
@@ -2686,27 +2428,6 @@ def test_r276_pincer_plays_the_first_face_up_attack_twice(overhaul):
     st.player.hand.append(second)
     combat.play_card(st, second)
     assert enemy.hp == 200 - 3 * 5, "only the FIRST Attack is doubled"
-
-
-def test_r276_stolen_chapter_makes_the_first_card_free(overhaul):
-    """Stolen Chapter's Plan: "This turn, the first card you play costs 0."
-    Pure at the cost seam, spent by the first card paid for."""
-    from tier0.engine import combat
-    st = kokomi_state(enemies=[make_enemy(hp=200)])
-    carry_out(st, _arm_card("proto_kk_stolen_chapter").plan)
-    first = Card(id="proto_kk_c1", name="c1", cost=2, type="skill",
-                 effects=[{"op": "block", "amount": 1}])
-    second = Card(id="proto_kk_c2", name="c2", cost=2, type="skill",
-                  effects=[{"op": "block", "amount": 1}])
-    assert combat.card_cost(st, first) == 0
-    assert combat.card_cost(st, first) == 0, "asking does not spend it"
-    st.player.hand += [first, second]
-    st.player.energy = 3
-    combat.play_card(st, first)
-    assert st.player.energy == 3
-    assert combat.card_cost(st, second) == 2
-    combat.play_card(st, second)
-    assert st.player.energy == 1
 
 
 def test_r276_tide_wall_blocks_the_front_enemys_intent(overhaul):

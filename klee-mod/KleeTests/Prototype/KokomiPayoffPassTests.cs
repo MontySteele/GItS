@@ -47,23 +47,6 @@ public class KokomiPayoffPassTests : IDisposable
 
     // ---- the offer -------------------------------------------------------
 
-    [Fact]
-    public void The_offer_is_seventy_ending_with_the_two_and_without_second_thoughts()
-    {
-        var slice = Seq("KokomiOverhaulRoster", "Slice")
-            .Where(c => c.StartsWith("ModelDb.Card", StringComparison.Ordinal))
-            .Select(c => c.Substring(c.IndexOf('<') + 1).TrimEnd('>'))
-            .ToList();
-        // Pool completion (2026-10-01) appended eight after the two; the
-        // status batch (2026-10-01) cut seven ahead and appended seven.
-        Assert.Equal(78, slice.Count);
-        Assert.Equal(new[] { "ProtoKkKurageCanopy", "ProtoKkCoralTithe" },
-                     slice.Skip(60).Take(2).ToArray());
-        Assert.DoesNotContain(slice, c => c.Contains("SecondThoughts"));
-        Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
-            "KleeMod.Cards.Prototype.Generated.ProtoKkSecondThoughts"));
-    }
-
     // ---- Kurage Canopy -------------------------------------------------------
 
     [Fact]
@@ -106,70 +89,4 @@ public class KokomiPayoffPassTests : IDisposable
 
     // ---- Coral Tithe ---------------------------------------------------------
 
-    [Fact]
-    public void Coral_tithe_is_a_zero_cost_uncommon_skill_every_two_retain_upgraded()
-    {
-        // The Kokomi card pass (2026-10-11): every 2 at both levels; the
-        // upgrade adds Retain. On watch.
-        var card = new ProtoKkCoralTithe();
-        Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Equal(2, card.DynamicVars["KkAmount"].IntValue);
-        var up = Upgraded<ProtoKkCoralTithe>();
-        Assert.Equal(2, up.DynamicVars["KkAmount"].IntValue);
-        Assert.DoesNotContain(CardKeyword.Retain, card.CanonicalKeywords);
-        Assert.Contains(CardKeyword.Retain, up.Keywords);
-        Assert.Contains(Seq("ProtoKkCoralTithe", "OnPlay"),
-                        c => c.Contains("KokomiCards.CoralTithe"));
-    }
-
-    [Theory]
-    [InlineData(0, 3, 0)]
-    [InlineData(3, 3, 1)]
-    [InlineData(7, 3, 2)]
-    [InlineData(0, 2, 0)]
-    [InlineData(3, 2, 1)]
-    [InlineData(7, 2, 3)]
-    public void Coral_tithe_pays_one_for_every_n_rounded_down(int points, int per, int paid)
-    {
-        Assert.Equal(paid, KokomiCards.CoralTithePaid(points, per));
-    }
-
-    [Fact]
-    public void Coral_tithe_reads_the_casket_the_relics_way_then_empties_and_pays()
-    {
-        var calls = Seq("KokomiCards", "CoralTithe");
-        var relic = calls.FindIndex(c => c.Contains("GetRelic"));
-        var empty = calls.FindIndex(c => c.Contains("KokomiOverhaulLedger.EmptyCasket"));
-        var paid = calls.FindIndex(c => c.Contains("KokomiCards.CoralTithePaid"));
-        var energy = calls.FindIndex(c => c.Contains("PlayerCmd.GainEnergy"));
-        var draw = calls.FindIndex(c => c.Contains("CardPileCmd.Draw"));
-        Assert.True(relic >= 0 && empty > relic && paid > empty
-                    && energy > paid && draw > energy);
-    }
-
-    [Fact]
-    public void Coral_tithe_does_nothing_without_a_casket_and_empties_one_below_three()
-    {
-        // No Casket: the count is not touched.
-        KokomiOverhaulLedger.ResetAll();
-        var bare = Seat.Kokomi();
-        KokomiOverhaulLedger.For(bare.Creature).AddToCasket(7);
-        var card = new ProtoKkCoralTithe();
-        Seat.Set(card, "IsMutable", true);
-        Seat.Set(card, "Owner", bare.Player);
-        Assert.True(KokomiCards.CoralTithe(null!, card, null!).IsCompleted);
-        Assert.Equal(7, KokomiOverhaulLedger.For(bare.Creature).CasketCount);
-
-        // The Watatsumi Casket (the Orobas upgrade) is a Tamakushi Casket: an
-        // empty count runs to the end and pays nothing.
-        KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi().WithRelic<WatatsumiCasket>();
-        var held = new ProtoKkCoralTithe();
-        Seat.Set(held, "IsMutable", true);
-        Seat.Set(held, "Owner", seat.Player);
-        Assert.True(KokomiCards.CoralTithe(null!, held, null!).IsCompleted);
-        Assert.Equal(0, KokomiOverhaulLedger.For(seat.Creature).CasketCount);
-    }
 }

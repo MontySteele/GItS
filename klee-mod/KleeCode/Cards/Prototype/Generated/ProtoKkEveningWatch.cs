@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,70 +31,41 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkEveningWatch : CustomCardModel, ICharacterCard, IPlannedCard, INowLineCard
+public sealed class ProtoKkEveningWatch : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForDusk(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_evening_watch");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Evening Watch"),
-        ("description", "Draw 1 card.\nOr [gold]dusk[/gold] [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold] for each enemy intending to attack."),
+        ("description", "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending to attack. Draw 1 card."),
     };
-
-    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
-    /// was written. Carried out by the Bake-Kurage at the start of her next
-    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
-    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
-        new[]
-        {
-            new KokomiPlan.Planned(KokomiPlan.Kind.BlockPerAttackingEnemy, DynamicVars["PlanBlock"].IntValue, KokomiPlan.Aim.Self),
-        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1),
-            new DynamicVar("PlanBlock", 5m)
+            new DynamicVar("KkAmount", 4m),
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkEveningWatch()
-        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOrSelf, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses, dusk: true, paid: cardPlay.Resources.EnergySpent);
-            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
-            cardPlay = nowLine;
-        }
-        await PlayNowLine(choiceContext, cardPlay);
-    }
-
-    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
-    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
-    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.None;
-
-    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
-    /// out by the Bake-Kurage when the player chooses it for a Plan
-    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
-    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
+        await KokomiCards.BlockPerAttacker(choiceContext, this, cardPlay);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PlanBlock"].UpgradeValueBy(2m);
+        DynamicVars["KkAmount"].UpgradeValueBy(2m);
     }
 }

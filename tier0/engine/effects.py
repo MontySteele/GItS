@@ -324,29 +324,12 @@ def _runtime_count(state: CombatState, token: str,
         # handover (`kokomi_plan.roll_turn`), so this reads the one count
         # rather than minting a second.
         return state.companion_plays_this_turn
-    if token == "plans_carried_out_this_turn":
-        # CURRENT-KIT USE ONLY (the Casket pass, 2026-09-28) -- Feint and
-        # Sango Isshin, "for each Plan carried out this turn". Every
-        # carry-out this turn, a doubled one twice, written at the plan bus.
-        # The C# twin is `KokomiOverhaulLedger.PlansCarriedOutThisTurn`.
-        return state.kk_plans_carried_out_this_turn
     if token == "plans_carried_out_this_combat":
         # CURRENT-KIT USE ONLY ([USER]'s Kokomi run, 2026-10-11) -- Sango
         # Isshin, "for each Plan carried out this combat". The same
         # carry-outs, per fight. C# twin:
         # `KokomiOverhaulLedger.PlansCarriedOutThisCombat`.
         return state.kk_plans_carried_out_this_combat
-    if token == "plans_written_this_turn":
-        # CURRENT-KIT USE ONLY (pool completion, 2026-10-01) -- Shoal of
-        # Spears, "for each Plan you wrote this turn". Every write onto the
-        # Bake-Kurage this turn, counted at `kokomi_plan.schedule`. The C#
-        # twin is `KokomiOverhaulLedger.PlansWrittenThisTurn`.
-        return state.kk_plans_written_this_turn
-    if token == "casket_count":
-        # CURRENT-KIT USE ONLY (the Casket pass) -- Driftglass and Depths'
-        # Judgment, the Tamakushi Casket's count. The C# twin is
-        # `KokomiOverhaulLedger.CasketCount`.
-        return state.kk_casket
     if token == "debuffs_on_target":
         # CURRENT-KIT USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
         # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
@@ -360,11 +343,6 @@ def _runtime_count(state: CombatState, token: str,
         # Weak plus stacks of Vulnerable on the aimed enemy. The C# twin is
         # `KokomiOverhaulKit.WeakVulnStacks`.
         return kokomi_plan.weak_vuln_stacks(_default_target(state))
-    if token == "plan_energy_waiting":
-        # CURRENT-KIT USE ONLY (the Kokomi expansion, batch one) -- Weight of
-        # the Plan, "plus 3 for each Energy paid for the Plans waiting". The
-        # C# twin is `KokomiPlan.EnergyWaiting`.
-        return kokomi_plan.plan_energy_waiting(state)
     if token == "plans_held":
         # CURRENT-KIT USE ONLY (Kokomi round 9 pick 1, the tempo shelf) --
         # Tide Chart, "draw 1 card for each Plan the Bake-Kurage holds".
@@ -3440,19 +3418,10 @@ RUNTIME_COUNT_NAMES = frozenset({
     # CURRENT-KIT USE ONLY (the Kokomi card pass, 2026-10-11) -- Drowning
     # Pressure's Weak and Vulnerable stacks. Same registry reason.
     "weak_vuln_stacks_on_target",
-    # CURRENT-KIT USE ONLY (the Casket pass, 2026-09-28) -- Feint's and Sango
-    # Isshin's carry-outs this turn, and Driftglass's and Depths' Judgment's
-    # Casket. Same registry reason as the rows above.
-    "plans_carried_out_this_turn",
-    # Sango Isshin, per fight ([USER]'s Kokomi run, 2026-10-11).
+    # Sango Isshin, per fight ([USER]'s Kokomi run, 2026-10-11). (The Casket
+    # pass's per-turn counts, the Casket's own and the Energy paid left with
+    # the re-founding, 2026-10-12.)
     "plans_carried_out_this_combat",
-    "casket_count",
-    # CURRENT-KIT USE ONLY (pool completion, 2026-10-01) -- Shoal of Spears'
-    # Plans written this turn. Same registry reason.
-    "plans_written_this_turn",
-    # CURRENT-KIT USE ONLY (the Kokomi expansion, batch one) -- Weight of the
-    # Plan's "Energy paid for the Plans waiting". Same registry reason.
-    "plan_energy_waiting",
     # CURRENT-KIT USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -4882,31 +4851,6 @@ def _op_damage_quarter_max_hp(state: CombatState, fx: dict,
                              else "card")
 
 
-def _op_fetch_open_casket(state: CombatState, fx: dict, card: Card) -> None:
-    """What the Tokoyo Returns (the Casket pass, 2026-09-28). The first Open
-    the Casket in her draw pile, else her discard pile, goes to her hand; see
-    `kokomi_plan.fetch_open_casket`."""
-    if not kokomi_plan.live(state):
-        _op_kokomi_overhaul_off(state, fx, card)      # always raises
-    kokomi_plan.fetch_open_casket(state)
-
-
-def _op_casket_double(state: CombatState, fx: dict, card: Card) -> None:
-    """What the Tokoyo Took (the Casket pass): "Double the Casket's count"."""
-    if not kokomi_plan.live(state):
-        _op_kokomi_overhaul_off(state, fx, card)      # always raises
-    kokomi_plan.double_casket(state)
-
-
-def _op_open_casket(state: CombatState, fx: dict, card: Card) -> None:
-    """Open the Casket, the relic's token (the Casket pass): "Gain Strength
-    equal to the Casket's count, then empty it." See
-    `kokomi_plan.open_casket`."""
-    if not kokomi_plan.live(state):
-        _op_kokomi_overhaul_off(state, fx, card)      # always raises
-    kokomi_plan.open_casket(state)
-
-
 def _op_cancel_all_plans_cash(state: CombatState, fx: dict,
                               card: Card) -> None:
     """Ebb Tide (`EB-643`). Per ENTRY and not per carry-out; see
@@ -5179,17 +5123,7 @@ OPS = {
     # list through the body's own vocabulary check, and it refuses when it is
     # reached from an `effects:` list.
     "play_copy_of_companion": _op_kokomi_plan_only,
-    # FOUR, and the fourth is Tide Wall's (`EB-335`, R246 pick 2): "Gain N
-    # Block for each Plan the Bake-Kurage carries out this morning". Same
-    # terms, and plan-only for a reason of its own -- the count it multiplies
-    # is a fact about a MORNING, so a now-line spelling would print a number
-    # that is zero every time it is read.
-    # FIVE, and the fifth is Breakwater's (`EB-685`, pool pass five): "plus N
-    # Block for each Plan the Bake-Kurage is HOLDING". Same terms, and
-    # plan-only for the line above's reason one count over -- a now-line
-    # spelling would read the queue before the turn's Plans were written and
-    # pay for a queue the player has not built yet.
-    "block_per_plan_held": _op_kokomi_plan_only,
+    # (Breakwater's `block_per_plan_held` left with Dusk, 2026-10-12.)
     # `EB-643`'s (R265) riders. Same terms as the four above, and plan-only
     # for one reason they share: each names a POSITION in a running drain --
     # "the next Plan" -- so a now-line spelling would ask about a drain that
@@ -5199,7 +5133,6 @@ OPS = {
     # `EB-655`, Battle Plan's grant. Legal in a `plan:` list and nowhere else.
     # R276 PICK 1, the halves rewrite: five Plan-only clauses.
     "first_attack_twice": _op_kokomi_plan_only,
-    "first_card_free": _op_kokomi_plan_only,
     # Kokomi core pass: Chain of Command's switch, Stolen Chapter's narrowed.
     # THE CO-OP SET's two Plan clauses about another player (`engine/coop.py`).
     coop.ALLY_DRAW: _op_kokomi_plan_only,
@@ -5212,29 +5145,19 @@ OPS = {
     # answer to a queue that empties on a timer.
     "cancel_all_plans_cash": _op_cancel_all_plans_cash,
     "redirect_queued_plans": _op_redirect_queued_plans,
-    # THE CASKET PASS (2026-09-28). What the Tokoyo Returns and What the
-    # Tokoyo Took work the Tamakushi Casket's count; `open_casket` is the
-    # relic's token (built in `kokomi_plan.open_the_casket_card`, on no
-    # sheet); `casket_gain` is Pearl Diver's plan clause, legal in a `plan:`
-    # list and nowhere else.
-    "fetch_open_casket": _op_fetch_open_casket,
-    "casket_double": _op_casket_double,
-    "open_casket": _op_open_casket,
-    # THE KOKOMI EXPANSION, BATCH ONE: four plan-only clauses (Lull, Undertide
-    # Lance, Evening Watch, Brace for the Tide).
-    "energy_if_alone": _op_kokomi_plan_only,
-    "damage_if_alone": _op_kokomi_plan_only,
-    "block_per_attacking_enemy": _op_kokomi_plan_only,
-    "double_block": _op_kokomi_plan_only,
     # POOL COMPLETION (2026-10-01): Tactical Relay's two plan-only clauses.
     "each_player_energy": _op_kokomi_plan_only,
     "each_player_draw": _op_kokomi_plan_only,
-    # THE STATUS BATCH (2026-10-01): four plan-only clauses that read the
-    # hand just drawn.
+    # THE STATUS BATCH (2026-10-01): plan-only clauses that read the hand
+    # just drawn.
     "block_per_status_in_hand": _op_kokomi_plan_only,
-    "exhaust_statuses_in_hand": _op_kokomi_plan_only,
     "transform_statuses_in_hand": _op_kokomi_plan_only,
-    "discard_and_draw": _op_kokomi_plan_only,
+    # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's
+    # two Plan lines and a written Companion's clause.
+    "add_stings": _op_kokomi_plan_only,
+    "strength_this_turn": _op_kokomi_plan_only,
+    "juuga_guard": _op_kokomi_plan_only,
+    "play_companion": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -6097,6 +6020,13 @@ def inazuma_overhaul_turn_end(state: CombatState) -> None:
             deal_damage_to_enemy(state, enemy, C.MI_JUUGA_DMG,
                                  element="geo", source="companion")
         _mi_tick(p, "mi_juuga")
+    # THE KOKOMI RE-FOUNDING (2026-10-12): Juuga's Plan line, "For 3 turns, at
+    # the end of your turn gain 6 Block" -- beside its volley, the same clock.
+    # RAW, power-sourced Block (NC-11). `JuugaGuardPower.Guard` is the twin.
+    if p.powers.get("mi_juuga_guard", 0):
+        p.block += C.MI_JUUGA_GUARD_BLOCK
+        state.emit("block", amount=C.MI_JUUGA_GUARD_BLOCK)
+        _mi_tick(p, "mi_juuga_guard")
 
     # Sayu, Muji-Muji Daruma -- the nation's shape on a card: "if you are above
     # 70% HP deal 6 damage to a random enemy; otherwise gain 6 Block". The bar
@@ -6574,6 +6504,9 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
     # `tier0.engine.companion_hexerei` argues both, and why a volley that can
     # react again is safe to fire from inside this site.
     companion_hexerei.note_reaction(state, enemy, name, aura)
+    # THE KOKOMI RE-FOUNDING (2026-10-12): Grand Strategist, "Whenever a Plan
+    # causes an Elemental Reaction". `KokomiRefounding.OnReaction` is the twin.
+    kokomi_plan.grand_strategist(state)
     if name == "swirl":
         # THE INAZUMA ARM'S Swirl WINDOW. Heizou's Heartstopper
         # Strike prints "deals 4 more for each Swirl this turn", so the count

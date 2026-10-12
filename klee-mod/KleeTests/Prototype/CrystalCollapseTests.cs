@@ -131,13 +131,13 @@ public class CrystalCollapseTests
     // ---- THE POOL --------------------------------------------------------
 
     [Fact]
-    public void The_personal_is_in_the_roster_and_not_among_the_universals()
+    public void Crystal_collapse_is_her_own_card_and_the_personal_seam_stays()
     {
-        // A Personal is Kokomi's kit rather than a companion offer: it enters
-        // the ROSTER (a row that never did could not be offered to its own
-        // character either) and `CompanionPool` gates it by `PersonalPool`.
+        // The Kokomi re-founding (2026-10-12): Crystal Collapse is in her own
+        // pool, so it is no Personal any more; the Inazuma Personal list is
+        // empty and the seam stays.
         var card = new ProtoMiGorouCrystalCollapse();
-        Assert.Equal("kokomi", card.PersonalPool);
+        Assert.Null(card.PersonalPool);
         Assert.Equal("inazuma", card.Nation);
 
         // The roster type is `internal` to the mod, so it is reached by name

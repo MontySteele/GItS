@@ -577,11 +577,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # the queue it is being drained from -- and pays Block, which this
     # vocabulary carries as a private write nowhere; Block is the player's own
     # pool and no other Block op declares a hook for it.
-    # Breakwater (`EB-685`) reads the same jellyfish one drain over -- the
-    # queue as it STANDS at dusk rather than the morning just drained -- and
-    # pays Block, so it declares the line above's one hook for the line
-    # above's reason.
-    "block_per_plan_held": [_hook("private", "kurage", "read")],
     # POOL PASS TWO (`EB-643`, R265). SIX OPS, ONE CHANNEL: every one of them
     # is about the jellyfish's own queue, which this vocabulary already carries
     # as the private `kurage` channel -- so the hooks below say READ where the
@@ -601,41 +596,32 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Converging Tide stamps an aim onto entries already written: the queue's
     # DEPTH does not move and what it will do does, which is a write.
     "redirect_queued_plans": [_hook("private", "kurage", "write")],
-    # THE CASKET PASS (2026-09-28). The Tamakushi Casket's count is a
-    # private channel of hers, filled by the jellyfish's carry-outs, so it is
-    # filed on the `kurage` channel: Pearl Diver's gain and What the Tokoyo
-    # Took's doubling WRITE it, Open the Casket spends it (a write), and What
-    # the Tokoyo Returns reads the draw and discard piles (2026-10-01: the
-    # token lost its Exhaust and cycles with the deck).
-    # THE EXPANSION, BATCH ONE (2026-09-29). Lull and Undertide Lance read the
-    # drain they land in (the queue), Evening Watch's Block and Brace's
-    # doubling are Block the jellyfish writes, and the `kokomi` op's kinds
-    # read or write the queue (All Streams, Measured Breath), the auras
-    # (Tidal Resonance) and the hand (Shoal Call) -- filed on the queue, the
-    # channel every one of them touches or is priced against.
-    "energy_if_alone": [_hook("private", "kurage", "use")],
-    "damage_if_alone": [_hook("private", "kurage", "use")],
-    "block_per_attacking_enemy": [_hook("private", "kurage", "write")],
-    "double_block": [_hook("private", "kurage", "write")],
+    # THE EXPANSION, BATCH ONE (2026-09-29). The `kokomi` op's kinds read or
+    # write the queue (Measured Breath, Grand Design), the hand (Shoal Call,
+    # the jellyfish and Companion generators) or Block -- filed on the queue,
+    # the channel every one of them touches or is priced against.
     "kokomi": [_hook("private", "kurage", "use")],
+    # THE RE-FOUNDING (2026-10-12). Kurage's Wake's Plan line hands Stings to
+    # the hand; Gorou's two Plan lines are a one-turn Strength and a Block
+    # clock; a written Companion's clause plays the card -- each on the
+    # queue that carries it out.
+    "add_stings": [_hook("shared", "hand_contents", "write")],
+    "strength_this_turn": [_hook("private", "kurage", "use")],
+    "juuga_guard": [_hook("shared", "block_held", "write")],
+    "play_companion": [_hook("private", "kurage", "use")],
     # FURINA, THE POOL TO 75 (2026-10-09): the `furina` op's guest verbs
     # (Encore!, Tutti!, Final Bow, Casting Call, Gentle Current) act on, or
     # fetch for, her guest stage, filed on the stage channel the
     # `stage_*` ops write.
     "furina": [_hook("private", "stage", "write")],
-    "casket_double": [_hook("private", "kurage", "write")],
-    "open_casket": [_hook("private", "kurage", "write")],
-    "fetch_open_casket": [_hook("shared", "draw_pile", "use"),
-                          _hook("shared", "discard_pile", "use")],
-    # R276 PICK 1, the halves rewrite. Pincer's replay and Stolen Chapter's
-    # free card change what the next play IS, which is where `cost_mod` and
+    # R276 PICK 1, the halves rewrite. Pincer's replay (Stolen Chapter's
+    # free card left 2026-10-12) changes what the next play IS, where `cost_mod` and
     # `next_attack_damage` are filed; Battle Plan's per-Attack bonus is filed
     # with `next_attack_damage` for the same reason. Feigned Retreat is damage
     # that READS her HP ledger since the writing, and Tide Wall reads the
     # front enemy's intent, which this vocabulary has no state for -- EMPTY
     # and disclosed, `remove_debuff`'s argument.
     "first_attack_twice": [_hook("shared", "card_identity", "write")],
-    "first_card_free": [_hook("shared", "card_identity", "write")],
     "block_front_intent": [],
     # THE CO-OP SET: both land on ANOTHER player, whom this vocabulary has no
     # state for -- EMPTY and disclosed, `remove_debuff`'s argument.
@@ -650,13 +636,8 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # discard-then-draw, each on the vocabulary its base-game twin uses.
     "block_per_status_in_hand": [_hook("shared", "hand_contents", "read"),
                                  _hook("shared", "block_held", "write")],
-    "exhaust_statuses_in_hand": [_hook("shared", "junk_remove", "write"),
-                                 _hook("shared", "exhaust_pile", "write")],
     "transform_statuses_in_hand": [_hook("shared", "junk_remove", "write"),
                                    _hook("shared", "hand_contents", "write")],
-    "discard_and_draw": [_hook("shared", "hand_contents", "use"),
-                         _hook("shared", "discard_pile", "write"),
-                         _hook("shared", "draw_pile", "use")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

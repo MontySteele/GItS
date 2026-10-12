@@ -60,24 +60,6 @@ public class KokomiPoolPassTwoTests
         Assert.Contains("NextPlanExtraCarryOut", names);
     }
 
-    [Fact]
-    public void The_entry_carries_dusk_and_an_aim_override_and_no_creature()
-    {
-        // Rule 3's discipline, re-asserted for the two fields `EB-643` adds.
-        // `Dusk` is a bool -- a fact about the writing card's FACE -- and
-        // `AimOverride` is a `CombatId` STRING, which is the difference that
-        // matters: a Plan written last turn cannot hold a reference to a
-        // creature the game has torn down, so the override is resolved against
-        // the live board at carry-out.
-        var entry = typeof(KokomiPlan.Entry);
-        Assert.Equal(typeof(bool), entry.GetProperty("Dusk", All)!.PropertyType);
-        Assert.Equal(typeof(string),
-                     entry.GetProperty("AimOverride", All)!.PropertyType);
-        Assert.DoesNotContain(
-            entry.GetProperties(All),
-            p => p.PropertyType.Name == "Creature");
-    }
-
     // ======================================================================
     // 2. THE RIDERS -- Opening Gambit and Second Wave
     // ======================================================================
@@ -237,7 +219,7 @@ public class KokomiPoolPassTwoTests
     {
         // THE PAYOFF PASS (2026-10-01): the row left the pool; its cancel
         // (`KokomiPlan.CancelLast`) left with legacy cleanup stage 5.
-        Assert.Null(typeof(ProtoKkNip).Assembly.GetType(
+        Assert.Null(typeof(ProtoKkAmbush).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoKkSecondThoughts"));
         Assert.Null(typeof(KokomiPlan).GetMethod("CancelLast", All));
     }
@@ -318,35 +300,6 @@ public class KokomiPoolPassTwoTests
     // ======================================================================
 
     [Fact]
-    public void Breakwater_writes_a_dusk_wall_that_reads_the_queue()
-    {
-        var card = new ProtoKkBreakwater();
-        Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(CardRarity.Common, card.Rarity);
-
-        // `EB-679` (pool pass four) made the flat 6 a base AND A RATE: the
-        // wall behind the engine. `EB-685` (pool pass five) fixed its PHASE --
-        // the count is the queue AT DUSK and not the morning already drained,
-        // which a Plan written today can never be part of. The clause pins are
-        // in `KokomiPoolPassFiveTests`; what belongs here is the two-clause
-        // shape pool pass two's Dusk flag carries.
-        Assert.Equal(2, card.PlanClauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Block, card.PlanClauses[0].Kind);
-        Assert.Equal(5, card.PlanClauses[0].Amount);
-        Assert.Equal(KokomiPlan.Kind.BlockPerPlanHeld,
-                     card.PlanClauses[1].Kind);
-        Assert.Equal(3, card.PlanClauses[1].Amount);
-        // THE UPGRADE MOVES THE BASE AND NOT THE RATE (5 -> 7).
-        Assert.Contains(Il.Calls(Il.Method("ProtoKkBreakwater", "OnUpgrade")),
-                        c => c.Contains("UpgradeValueBy"));
-        // THE FLAG RIDES THE WRITE, because Dusk is a fact about WHEN this
-        // card's line lands and the entry is the only thing that survives the
-        // play.
-        Assert.Contains("dusk: true",
-                        Source("ProtoKkBreakwater"));
-    }
-
-    [Fact]
     public void The_multi_body_weak_is_slack_waters_morning_plan_half()
     {
         // R267 PICK 1. Pass five moved this line to Dusk on the way past;
@@ -367,46 +320,6 @@ public class KokomiPoolPassTwoTests
         // The dusk argument is passed only where the row declares it, so every
         // card authored before the field existed is byte-identical.
         Assert.DoesNotContain("dusk:", Source("ProtoKkFeint"));
-    }
-
-    [Fact]
-    public void Dusk_is_drained_before_the_enemies_act()
-    {
-        // THE HOOK: `BeforeSideTurnEnd` on the PLAYER side, which is the
-        // nearest broadcast this mod has to the printed sentence -- the Block
-        // is on her before the swing, which is the only clause of the face a
-        // card can tell apart. The sim runs it at the same site
-        // (`combat._player_turn`, `kokomi_plan.resolve_dusk`). Twin:
-        // `test_a_dusk_plan_lands_at_the_end_of_the_turn_it_was_written_on`.
-        var hook = typeof(ProtoBakeKuragePower)
-            .GetMethod("BeforeSideTurnEnd", All)!;
-        Assert.Contains("KokomiPlan.ResolveDusk", Il.Calls(hook));
-    }
-
-    [Fact]
-    public void The_dusk_drain_takes_the_dusk_entries_and_leaves_the_rest()
-    {
-        // The dusk entries leave the queue and the others stay, taken before
-        // the first clause runs for `ResolveAll`'s reason. It goes through the
-        // SHARED `Drain`, so a dusk carry-out is a carry-out -- the plan bus
-        // rings on it and `NotePlanCarriedOut` fires. Twins:
-        // `test_a_dusk_drain_leaves_the_morning_entries_where_they_are`,
-        // `test_a_dusk_carry_out_is_a_carry_out`.
-        var calls = Il.Calls(typeof(KokomiPlan)
-            .GetMethod("ResolveDusk", All)!).ToList();
-        Assert.Contains(calls, c => c.Contains("RemoveAll"));
-        Assert.Contains("KokomiPlan.Drain", calls);
-    }
-
-    [Fact]
-    public void The_dusk_drain_does_not_touch_the_mornings_depth()
-    {
-        // Tide Wall, Well Laid and Tide Chart all print "this morning", and an
-        // evening is not one. Twin:
-        // `test_a_dusk_carry_out_does_not_touch_the_mornings_depth`.
-        Assert.DoesNotContain(
-            Il.Calls(typeof(KokomiPlan).GetMethod("ResolveDusk", All)!),
-            c => c.Contains("NoteMorning"));
     }
 
     // ======================================================================
@@ -456,17 +369,6 @@ public class KokomiPoolPassTwoTests
         Assert.Contains(calls, c => c.Contains("KokomiPlan.get_PlanCap"));
         Assert.Contains(calls, c => c.Contains("List`1.GetRange"));
         Assert.Contains(calls, c => c.Contains("List`1.InsertRange"));
-    }
-
-    [Fact]
-    public void The_cap_is_not_read_by_the_dusk_drain()
-    {
-        // A Dusk Plan has already waited for nothing, so the morning's
-        // allowance is untouched by one. Twin:
-        // `test_the_cap_does_not_count_dusk_carry_outs`.
-        Assert.DoesNotContain(
-            Il.Calls(typeof(KokomiPlan).GetMethod("ResolveDusk", All)!),
-            c => c.Contains("PlanCap"));
     }
 
     // ======================================================================

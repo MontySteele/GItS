@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanionCard
+public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanionCard, IWritableCompanion
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -56,6 +56,14 @@ public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanio
         ("description", "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by {Grow:diff()} for each. Draw 1 card for each."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -71,6 +79,11 @@ public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanio
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         await KleeStatusPackage.ExhaustStatusesGrowLargest(choiceContext, Owner, DynamicVars["Grow"].IntValue, 1);
     }
 

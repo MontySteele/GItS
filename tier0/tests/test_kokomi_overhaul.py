@@ -55,8 +55,10 @@ OVERHAUL_OPS = ("mend", "remove_debuff",
 #: `OPS` only because the loader validates a `plan:` list through the same
 #: vocabulary check the body takes, and they refuse from a body always -- with
 #: the flag on as well as off, which is what separates them from the rest.
+#: (Breakwater's `block_per_plan_held` left with Dusk, the re-founding,
+#: 2026-10-12; a written Companion's `play_companion` is the second now.)
 PLAN_ONLY_OPS = ("play_copy_of_companion",
-                 "block_per_plan_held")
+                 "play_companion")
 
 
 @pytest.fixture
@@ -194,12 +196,16 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     SEVENTY-EIGHT SINCE POOL COMPLETION (2026-10-01): eight added last.
 
     STILL SEVENTY-EIGHT SINCE THE STATUS BATCH (2026-10-01): seven cut,
-    seven added last; Riptide Ruin is the Rare, in Coral Sanctuary's place."""
+    seven added last; Riptide Ruin is the Rare, in Coral Sanctuary's place.
+
+    STILL SEVENTY-EIGHT SINCE THE RE-FOUNDING (2026-10-12): 24 cut (Shell
+    Guard among them), 20 new rows and Gorou's four Companions added."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == 78
     assert len(set(ids)) == 78
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
-    assert {"proto_kk_tide_wall", "proto_kk_shell_guard"} <= set(ids)
+    assert "proto_kk_tide_wall" in ids
+    assert "proto_kk_shell_guard" not in ids
     assert {"proto_kk_riptide", "proto_kk_pincer",
             "proto_kk_flank"} <= set(ids)
     cut = {"proto_kk_tide_chart", "proto_kk_cleansing_wave", "proto_kk_ripple",
@@ -211,42 +217,31 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
            "proto_kk_rally", "proto_kk_pearl_diver", "proto_kk_battle_plan",
            "proto_kk_feigned_retreat", "proto_kk_moon_signal",
            "proto_kk_chain_of_command",
-           "proto_kk_all_streams_flow_to_the_sea"}
+           "proto_kk_all_streams_flow_to_the_sea",
+           # The growth Powers (2026-10-10).
+           "proto_kk_the_generals_banner",
+           # The re-founding (2026-10-12), card paper sec.2-3.
+           "proto_kk_shell_guard", "proto_kk_driftglass",
+           "proto_kk_depths_judgment", "proto_kk_coral_tithe",
+           "proto_kk_flood_tide", "proto_kk_what_the_tokoyo_returns",
+           "proto_kk_what_the_tokoyo_took", "proto_kk_abyssal_salvage",
+           "proto_kk_kurage_swarm", "proto_kk_nip", "proto_kk_current_read",
+           "proto_kk_vanguard", "proto_kk_weight_of_the_plan",
+           "proto_kk_turning_tide", "proto_kk_stolen_chapter",
+           "proto_kk_tidal_resonance", "proto_kk_salt_in_the_wound",
+           "proto_kk_lull", "proto_kk_kurage_school", "proto_kk_the_long_game",
+           "proto_kk_patient_tide", "proto_kk_deep_current",
+           "proto_kk_massed_volley", "proto_kk_signal_arrow"}
     assert not cut & set(ids)
-    # The growth Powers (2026-10-10): Flood Tide LAST, The General's
-    # Banner gone.
-    assert "proto_kk_the_generals_banner" not in ids
-    assert ids[-1:] == C.KOKOMI_GROWTH_POWERS_IDS
-    ids = ids[:-1]
-    # The status batch (2026-10-01): seven rows LAST before it.
-    assert ids[-7:] == C.KOKOMI_STATUS_BATCH_IDS
-    ids = ids[:-7]
-    # Pool completion (2026-10-01): eight rows LAST before them.
-    assert ids[-8:] == C.KOKOMI_POOL_COMPLETION_IDS
-    ids = ids[:-8]
-    # The payoff pass (2026-10-01): two rows LAST before them.
-    assert ids[-2:] == C.KOKOMI_PAYOFF_PASS_IDS == (
-        "proto_kk_kurage_canopy", "proto_kk_coral_tithe")
-    ids = ids[:-2]
-    # Expansion batch one (2026-09-29): 22 rows LAST, Watatsumi's Grace
-    # among them in The Clouds Like Waves' place; 21 since the status batch
-    # cut All Streams Flow to the Sea.
-    assert len(C.KOKOMI_EXPANSION_BATCH_ONE_IDS) == 21
-    assert ids[-21:] == C.KOKOMI_EXPANSION_BATCH_ONE_IDS
-    ids = ids[:-21]
-    assert ids[-5:] == (
-        "proto_kk_bubble_ward", "proto_kk_nip", "proto_kk_jellyfish_drift",
-        "proto_kk_current_read", "proto_kk_brine_sting")
-    # The Casket pass's thirteen, eleven since the status batch cut Pearl
-    # Diver and Moon Signal.
-    assert ids[-16:-5] == (
-        "proto_kk_massed_volley", "proto_kk_signal_arrow",
-        "proto_kk_surging_shoal",
-        "proto_kk_press_the_advantage", "proto_kk_shell_of_sanctuary",
-        "proto_kk_driftglass", "proto_kk_what_the_tokoyo_returns",
-        "proto_kk_depths_judgment", "proto_kk_tideturn",
-        "proto_kk_pearl_current",
-        "proto_kk_what_the_tokoyo_took")
+    # THE RE-FOUNDING (2026-10-12) rewrote the order: the 54 rows kept, in
+    # the sheet's order, then the 20 new rows and Gorou's four Companions,
+    # LAST (`C.KOKOMI_REFOUNDING_IDS`, `C.KOKOMI_OWN_COMPANION_IDS`).
+    own = C.KOKOMI_OWN_COMPANION_IDS
+    new = C.KOKOMI_REFOUNDING_IDS
+    assert len(new) == 20 and len(own) == 4
+    assert ids[-4:] == own
+    assert ids[-24:-4] == new
+    assert all(cid.startswith("proto_mi_gorou_") for cid in own)
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
     assert {"proto_kk_opening_gambit", "proto_kk_second_wave",
@@ -261,25 +256,27 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids
 
 
-def test_the_arm_carries_exactly_two_rule_numbers():
+def test_the_arm_carries_exactly_one_rule_number():
     """Draft 6's rules are STRUCTURAL -- where a card lands and when -- so
-    almost every figure is a card's and stays on its row. Two are not, each
-    printed with no `amount` field behind it: since the Casket pass
-    (2026-09-28) the relic's per-Plan count and Open the Casket's Strength
-    rate. Rally's discount, Battle Plan's bonus and Moon Signal's threshold
-    left with their cards (legacy cleanup stage 5). They are named so
-    `lint_constant_parity` can compare the C# mirrors BY VALUE."""
-    assert C.KOKOMI_OVERHAUL_CASKET_PER_PLAN == 1
-    assert C.KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT == 1
-    assert not hasattr(C, "KOKOMI_OVERHAUL_CASKET_STRIKE")
+    almost every figure is a card's and stays on its row. One is not, printed
+    with no `amount` field behind it: since the re-founding (2026-10-12) the
+    relic's Block at the end of her turn while a Plan is waiting. (The Casket
+    pass's per-Plan count and Open the Casket's Strength rate left with the
+    count; Rally's discount, Battle Plan's bonus and Moon Signal's threshold
+    left with their cards in legacy cleanup stage 5.) It is named so
+    `lint_constant_parity` can compare the C# mirror BY VALUE."""
+    assert C.KOKOMI_OVERHAUL_CASKET_BLOCK == 3
+    for gone in ("KOKOMI_OVERHAUL_CASKET_STRIKE",
+                 "KOKOMI_OVERHAUL_CASKET_PER_PLAN",
+                 "KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT"):
+        assert not hasattr(C, gone)
     named = {n for n in dir(C) if n.startswith("KOKOMI_OVERHAUL")}
     # `KOKOMI_OVERHAUL_MULTIPLAYER_IDS` is the co-op set's offer list, an id
     # list like the two beside it and not a rule number.
     assert named == {"KOKOMI_OVERHAUL_POOL_IDS",
                      "KOKOMI_OVERHAUL_STARTER_IDS",
                      "KOKOMI_OVERHAUL_MULTIPLAYER_IDS",
-                     "KOKOMI_OVERHAUL_CASKET_PER_PLAN",
-                     "KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT"}
+                     "KOKOMI_OVERHAUL_CASKET_BLOCK"}
 
 
 # --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------

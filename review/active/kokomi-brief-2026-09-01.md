@@ -67,41 +67,32 @@ the Bake-Kurage carries it out at the start of her next turn.
 4. **Nothing happens by itself.** No bank, no pulse, no automatic replay.
    If the jellyfish is doing something, a card you played and paid for told
    it to.
-5. **Dusk (R265 trial, still on).** A card whose Plan line says **Dusk**
-   is carried out at the end of this turn, before enemies act, instead of
-   the next morning. It is the kit's only "protect now" written line and
-   is a pool shape, not a starter one.
+5. **Ethereal (2026-10-12; Dusk retired).** Ethereal is the base game's
+   keyword: a card still in her hand at the end of the turn is Exhausted. A
+   card she writes as a Plan has left her hand, so Ethereal never takes it.
+   Her jellyfish cards, Sting and Ward, are generated, cost 1, are Ethereal
+   and Exhaust when played or carried out. Dusk ("carried out at the end of
+   this turn") is retired with its keyword. (Re-founding, 2026-10-12:
+   `review/active/kokomi-design-pass-2026-10-11.md` and
+   `review/active/kokomi-card-paper-2026-10-12.md`, both ruled.)
 6. **The queue is a resource (R265).** Pool rows may read the queue (how
    many Plans wait, which is first), reorder it, hurry it (Change of Plans
    carries out the first Plan now) or cancel it (Second Thoughts returns
    the last Plan's card and cost). No cap on the queue: R266 retired the
    two-Plan cap as a rule; a free turn is priced by the faces, not by a
    throughput limit.
-7. **The Casket counts (2026-09-28).** Her relic, the Tamakushi Casket,
-   gains 1 each time the Bake-Kurage carries out a Plan -- in the morning,
-   at Dusk or hurried by Change of Plans, and a Plan carried out twice adds
-   twice. The count is per combat and starts at 0. Open the Casket (a Retain
-   token the relic puts in her opening hand; it costs 0, and each play
-   raises its cost by 1 for the combat) turns the count into
-   Strength, 1 per point, and empties it; the Casket keeps counting. Since
-   2026-10-01 it has no Exhaust and cycles with the deck, so it pays more
-   than once (the four-kit review, Kokomi pick 1). [USER]:
-   "On your new picks agree all around - I think that if it's repeatable,
-   it should probably cost energy, though, to make this a real choice and
-   not just button mashing when it comes up?" It cost 1 from then until
-   2026-10-10, when, after his Kokomi run, [USER] ruled: "I think that the
-   casket should start at 0 and then have a ramping cost (goes up by 1 each
-   time) That means the casket is free the first play, costs 1 the second,
-   and then at 2+ becomes difficult. That way it has obvious use in a short
-   hallway fight".
-   The face takes the base game's Modded line, "Increase this card's cost
-   by 1."; the ramp is on the copy, so a fetched Open keeps it, and the
-   relic's fresh copy each combat is the reset.
-   Cards may read or add to the count; none spends it. [USER]: "We don't
-   need this to be the equivalent to Regent's stars or Klee's sparks. This
-   should feel like a distinct effect."
+7. **Companions as Plans; the Casket is Block (2026-10-12).** Any
+   Companion card can be written as a Plan. It is carried out next turn at
+   its printed rate, and the Bake-Kurage applies Hydro to its target first
+   (the front enemy), so it reacts with that Hydro. A generated Companion is
+   Ethereal and Exhausts. Gorou's four are her own cards and print their own
+   Plan lines at the 1.3 rate. Her relic, the Tamakushi Casket, reads: "At
+   the end of your turn, if a Plan is waiting, gain 3 Block." (the Watatsumi
+   Casket, 5). The count and Open the Casket are retired. (Same two papers;
+   the build before it is tagged `kokomi-casket-frozen-2026-10-12`.)
 
-Two printed keywords: Plan and Dusk. Mend appears only on Rare Exhaust
+Printed keywords: Plan, and the base game's Ethereal (Dusk retired
+2026-10-12). Mend appears only on Rare Exhaust
 cards, as the healing law already has it (`LAW.md`, card-sheet rules).
 
 ## 3. The decision, and why the old drafts had none

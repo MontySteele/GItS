@@ -31,7 +31,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfNeuvilletteAncientSeaAuthority : CustomCardModel, ICompanionCard
+public sealed class ProtoMfNeuvilletteAncientSeaAuthority : CustomCardModel, ICompanionCard, IWritableCompanion
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -52,6 +52,14 @@ public sealed class ProtoMfNeuvilletteAncientSeaAuthority : CustomCardModel, ICo
         ("description", "At the start of your turn, deal 5 [gold]Hydro[/gold] damage to a random enemy. Auras you apply last 1 additional turn."),
     };
 
+    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
+    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
+    public override TargetType TargetType =>
+        KokomiCompanionPlan.TargetFor(this, base.TargetType);
+
+    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
+    public TargetType PrintedTargetType => base.TargetType;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -67,6 +75,11 @@ public sealed class ProtoMfNeuvilletteAncientSeaAuthority : CustomCardModel, ICo
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
+            return;
+        }
         await PowerCmd.Apply<AncientSeaAuthorityPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 

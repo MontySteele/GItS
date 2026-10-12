@@ -306,24 +306,29 @@ public class KokomiOverhaulRuleTests
         //
         // THE HYGIENE PASS (2026-10-11) removed `DrawPerPlanThisTurn`, the
         // whole-drain count of the cut Scout Ahead, which no row spelled.
+        //
+        // THE RE-FOUNDING (2026-10-12) removed `BlockPerPlanHeld`,
+        // `FirstCardFree`, `EnergyIfAlone`, `DamageIfAlone`,
+        // `BlockPerAttackingEnemy`, `DoubleBlock`, `ExhaustStatusesInHand` and
+        // `DiscardAndDraw` with Dusk and the cut cards, and appended
+        // `AddStings`, `StrengthThisTurn`, `JuugaGuard` and `PlayCompanion`.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
-                    "BlockPerPlanHeld",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
-                    "FirstAttackTwice", "FirstCardFree",
+                    "FirstAttackTwice",
                     "BlockFrontIntent", "AllyDraw",
                     "OthersAttackDamageThisTurn",
-                    "EnergyIfAlone", "DamageIfAlone",
-                    "BlockPerAttackingEnemy", "DoubleBlock",
                     // POOL COMPLETION (2026-10-01): Tactical Relay's two.
                     "EachPlayerEnergy", "EachPlayerDraw",
-                    // THE STATUS BATCH (2026-10-01): the four that read the
+                    // THE STATUS BATCH (2026-10-01): the two that read the
                     // hand just drawn.
-                    "BlockPerStatusInHand", "ExhaustStatusesInHand",
-                    "TransformStatusesInHand", "DiscardAndDraw" },
+                    "BlockPerStatusInHand", "TransformStatusesInHand",
+                    // THE RE-FOUNDING (2026-10-12).
+                    "AddStings", "StrengthThisTurn", "JuugaGuard",
+                    "PlayCompanion" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -676,19 +681,6 @@ public class KokomiOverhaulRuleTests
                        | System.Reflection.BindingFlags.DeclaredOnly));
     }
 
-    [Fact]
-    public void The_casket_tip_names_the_count_and_not_a_strike()
-    {
-        // The Casket pass (2026-09-28): the relic COUNTS carried-out Plans,
-        // and the card-side tip says so off the law's own number.
-        var tip = string.Concat(Il.Strings(
-            typeof(global::KleeMod.Cards.ArmKeywordTips)
-                .GetMethod("ForCasket", HeadlessGame.All)!));
-        Assert.Contains("carries out adds ", tip);
-        Assert.Contains("turns the count into ", tip);
-        Assert.DoesNotContain("re-arms", tip);
-    }
-
     // ---- THE MEND RULE ---------------------------------------------------
 
     [Fact]
@@ -1025,9 +1017,9 @@ public class KokomiOverhaulRuleTests
         // STRUCTURAL, and the class's own header says why: the base var
         // reaches `CardModel.CombatState`, so the NUMBER needs a live combat
         // this harness cannot build. What is pinned is the wiring.
-        // Driftglass since the Casket pass (2026-09-28) cut Well Laid: the
-        // same aimed `CalculatedDamageVar` shape.
-        var calculated = (object)new ProtoKkDriftglass().DynamicVars
+        // Feint since the re-founding (2026-10-12) cut Driftglass: the same
+        // aimed `CalculatedDamageVar` shape.
+        var calculated = (object)new ProtoKkFeint().DynamicVars
             .CalculatedDamage;
         Assert.IsType<FrontFoldedDamageVar>(calculated);
         // The game's own var underneath, so nothing about the multiplier, the
@@ -1077,24 +1069,6 @@ public class KokomiOverhaulRuleTests
     }
 
     [Fact]
-    public void EB335_shell_guard_reads_the_casket_and_its_window_is_gone()
-    {
-        // Re-aimed (main session, 2026-09-28) after the Casket pass retired
-        // the strike it paid on: "Gain 5 Block, plus 1 for each point in the
-        // Casket." Its window power left both engines, so the jellyfish's
-        // turn-start hook closes nothing.
-        var card = new ProtoKkShellGuard();
-        Assert.Equal(5m, card.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(1m, card.DynamicVars["CalculationExtra"].BaseValue);
-        Assert.DoesNotContain(
-            Il.CallSequence(Il.Method("ProtoBakeKuragePower",
-                                      "AfterPlayerTurnStart")),
-            c => c.Contains("ShellGuardPower"));
-        Assert.DoesNotContain(typeof(KokomiOverhaul).Assembly.GetTypes(),
-                              t => t.Name == "ShellGuardPower");
-    }
-
-    [Fact]
     public void The_wire_carries_the_queue_and_the_pets_id()
     {
         // `EB-216`. A seat that cannot read the queue cannot play her, and a
@@ -1116,7 +1090,7 @@ public class KokomiOverhaulRuleTests
 
     [Theory]
     [InlineData("ProtoKkReadTheField", 10)]
-    [InlineData("ProtoKkBreakwater", 5)]
+    [InlineData("ProtoKkKelpWall", 9)]
     public void A_planned_blocks_printed_number_is_a_block_var(
         string card, int printed)
     {
@@ -1157,20 +1131,4 @@ public class KokomiOverhaulRuleTests
         Assert.Equal(printed, block.IntValue);
     }
 
-    [Fact]
-    public void The_scaled_block_clauses_keep_their_plain_var()
-    {
-        // The bound, and it is the row's one judgement: Tide Wall and
-        // Breakwater's second clause print a RATE -- Block PER Plan -- and a
-        // percentage folded into a rate is a number no card pays. Breakwater's
-        // own `PlanBlock` is its FLAT first clause and folds above; the rate
-        // beside it is a literal in the clause list and reaches no var at all.
-        var breakwater = new ProtoKkBreakwater();
-
-        Assert.Equal(2, breakwater.PlanClauses.Count);
-        Assert.Equal(KokomiPlan.Kind.Block, breakwater.PlanClauses[0].Kind);
-        Assert.Equal(KokomiPlan.Kind.BlockPerPlanHeld,
-                     breakwater.PlanClauses[1].Kind);
-        Assert.Equal(3, breakwater.PlanClauses[1].Amount);
-    }
 }

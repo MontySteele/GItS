@@ -66,19 +66,18 @@ public class PoolCompletionTests : IDisposable
     // ---- Kokomi: the offer ------------------------------------------------
 
     [Fact]
-    public void Her_offer_is_seventy_eight_with_the_eight_last()
+    public void Her_offer_is_seventy_eight_and_the_coop_tier_is_five()
     {
         var slice = Cards("KokomiOverhaulRoster", "Slice");
-        // The status batch (2026-10-01): seven cut ahead, seven appended.
+        // 78 since pool completion; since the re-founding (2026-10-12) it
+        // ends with Gorou's four, her own cards.
         Assert.Equal(78, slice.Count);
         Assert.Equal(new[]
             {
-                "ProtoKkTidalScreen", "ProtoKkSpringTide", "ProtoKkKurageSchool",
-                "ProtoKkShoalOfSpears", "ProtoKkPatientTide",
-                "ProtoKkSeasReproach", "ProtoKkTidalRebuke",
-                "ProtoKkWatatsumiResistance",
+                "ProtoMiGorouInuzaka", "ProtoMiGorouWarBanner",
+                "ProtoMiGorouJuuga", "ProtoMiGorouCrystalCollapse",
             },
-            slice.Skip(62).Take(8).ToArray());
+            slice.Skip(74).ToArray());
         var multiplayer = Cards("KokomiOverhaulRoster", "MultiplayerSlice");
         Assert.Equal(5, multiplayer.Count);
         Assert.Equal(new[] { "ProtoKkTacticalRelay", "ProtoKkKuragesMercy" },
@@ -98,27 +97,16 @@ public class PoolCompletionTests : IDisposable
                       screen.DynamicVars.Block.IntValue));
         Assert.Equal(10, Upgraded<ProtoKkTidalScreen>().DynamicVars.Block.IntValue);
 
-        // The Kokomi card pass (2026-10-11): Kurage School costs 0 and its
-        // upgrade adds Retain.
-        foreach (var (card, cost) in new (CardModel, int)[]
-                 {
-                     (new ProtoKkSpringTide(), 1), (new ProtoKkKurageSchool(), 0),
-                 })
-        {
-            Assert.Equal(CardRarity.Rare, card.Rarity);
-            Assert.Equal(cost, card.EnergyCost.Canonical);
-            Assert.True(Exhausts(card));
-        }
+        // (Kurage School and Patient Tide left in the re-founding, 2026-10-12.)
+        var spring = new ProtoKkSpringTide();
+        Assert.Equal((CardRarity.Rare, 1), (spring.Rarity, spring.EnergyCost.Canonical));
+        Assert.True(Exhausts(spring));
         Assert.Equal(0, UpCost<ProtoKkSpringTide>());
-        Assert.Equal(0, UpCost<ProtoKkKurageSchool>());
-        Assert.Contains(CardKeyword.Retain,
-                        Upgraded<ProtoKkKurageSchool>().Keywords);
 
-        // The Rare pass (2026-10-04): 4 [5] a hit, one hit per Plan written.
+        // The Rare pass (2026-10-04): 4 [5] a hit; since the re-founding one
+        // hit per Plan waiting.
         Assert.Equal(4, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);
         Assert.Equal(5, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
-        Assert.Equal(2, new ProtoKkPatientTide().DynamicVars["PowerAmount"].IntValue);
-        Assert.Equal(3, Upgraded<ProtoKkPatientTide>().DynamicVars["PowerAmount"].IntValue);
         // The Kokomi card pass (2026-10-11): Sea's Reproach 1 [0].
         Assert.Equal(1, new ProtoKkSeasReproach().EnergyCost.Canonical);
         Assert.Equal(0, UpCost<ProtoKkSeasReproach>());
@@ -156,17 +144,17 @@ public class PoolCompletionTests : IDisposable
     [Fact]
     public void A_card_she_is_handed_exhausts()
     {
-        // The Rare pass (2026-10-04): Shoal Call's and Watatsumi
-        // Resistance's Nips and Kurage School's copies Exhaust when played,
-        // as a Shiv does. All three go through the one helper.
-        Assert.Contains(Seq("KokomiCards", "ShoalCall"),
-                        c => c.Contains("Exhausting"));
-        Assert.Contains(Seq("KokomiCards", "KurageSchool"),
-                        c => c.Contains("Exhausting"));
-        Assert.Contains(Seq("WatatsumiResistancePower", "AfterCardPlayed"),
-                        c => c.Contains("Exhausting"));
-        Assert.Contains(Seq("KokomiCards", "Exhausting"),
-                        c => c.Contains("AddKeyword"));
+        // The Rare pass (2026-10-04), carried by the re-founding (2026-10-12):
+        // a card she is handed Exhausts when played, as a Shiv does. The
+        // jellyfish cards print it (Ethereal too); a generated Companion is
+        // given both by the one helper.
+        foreach (var card in new CardModel[] { new ProtoKkSting(), new ProtoKkWard() })
+        {
+            Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
+            Assert.Contains(CardKeyword.Ethereal, card.CanonicalKeywords);
+        }
+        var generate = Seq("KokomiCompanionPlan", "Generate");
+        Assert.Equal(2, generate.Count(c => c.Contains("AddKeyword")));
     }
 
     [Fact]
@@ -184,53 +172,6 @@ public class PoolCompletionTests : IDisposable
     }
 
     [Fact]
-    public void Kurage_school_copies_zero_cost_plan_cards_only()
-    {
-        Assert.True(KokomiCards.IsZeroCostPlan(new ProtoKkNip()));
-        Assert.False(KokomiCards.IsZeroCostPlan(new ProtoKkAmbush()));
-        Assert.False(KokomiCards.IsZeroCostPlan(new ProtoKkSaltInTheWound()));
-        Assert.False(KokomiCards.IsZeroCostPlan(null));
-        var calls = Seq("KokomiCards", "KurageSchool");
-        Assert.Contains(calls, c => c.Contains("CloneCard"));
-        Assert.Contains(calls, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
-    }
-
-    [Fact]
-    public void Shoal_of_spears_reads_the_plans_written_this_turn()
-    {
-        KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi();
-        var ledger = KokomiOverhaulLedger.For(seat.Creature);
-        ledger.NotePlanWritten();
-        ledger.NotePlanWritten();
-        Assert.Equal(2, ledger.PlansWrittenThisTurn);
-        ledger.RollTo(99);
-        Assert.Equal(0, ledger.PlansWrittenThisTurn);
-        Assert.Contains(Seq("KokomiPlan", "Schedule"),
-                        c => c.Contains("KokomiOverhaulLedger.NotePlanWritten"));
-    }
-
-    [Theory]
-    [InlineData(0, 2, 0)]
-    [InlineData(1, 2, 1)]
-    [InlineData(5, 2, 2)]
-    [InlineData(5, 3, 3)]
-    [InlineData(4, 0, 0)]
-    public void Patient_tide_keeps_up_to_its_cap(int unspent, int cap, int kept)
-    {
-        Assert.Equal(kept, PatientTidePower.Kept(unspent, cap));
-    }
-
-    [Fact]
-    public void Patient_tide_banks_at_turn_end_and_pays_after_the_refill()
-    {
-        Assert.Contains(Seq("PatientTidePower", "AfterPlayerTurnStart"),
-                        c => c.Contains("PlayerCmd.GainEnergy"));
-        Assert.Contains(Seq("PatientTidePower", "BeforeSideTurnEnd"),
-                        c => c.Contains("PatientTidePower.Kept"));
-    }
-
-    [Fact]
     public void Seas_reproach_pays_on_her_weak_and_vulnerable_with_hydro()
     {
         Assert.False(SeasReproachPower.Pays(null, 1m, null, null));
@@ -241,11 +182,16 @@ public class PoolCompletionTests : IDisposable
     }
 
     [Fact]
-    public void Watatsumi_resistance_adds_a_nip_per_companion_play()
+    public void Watatsumi_resistance_adds_a_sting_per_companion_written()
     {
-        var calls = Seq("WatatsumiResistancePower", "AfterCardPlayed");
-        Assert.Contains(calls, c => c.Contains("ProtoKkNip"));
-        Assert.Contains(calls, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
+        // The re-founding (2026-10-12): paid on WRITING a Companion, in
+        // Stings, from the one place a Plan is written.
+        Assert.Null(typeof(WatatsumiResistancePower).GetMethod(
+            "AfterCardPlayed", HeadlessGame.All
+            | System.Reflection.BindingFlags.DeclaredOnly));
+        var written = Seq("KokomiRefounding", "OnWritten");
+        Assert.Contains(written, c => c.Contains("WatatsumiResistancePower"));
+        Assert.Contains(written, c => c.Contains("KokomiCards.AddJellyfish"));
     }
 
     [Fact]
@@ -279,7 +225,7 @@ public class PoolCompletionTests : IDisposable
                         c => c.Contains("DivineStrategyPower.NowLine"));
         Assert.Contains(Seq("ProtoKkTidalScreen", "OnPlay"),
                         c => c.Contains("DivineStrategyPower.NowLine"));
-        Assert.DoesNotContain(Seq("ProtoKkNip", "OnPlay"),
+        Assert.DoesNotContain(Seq("ProtoKkMasterstroke", "OnPlay"),
                               c => c.Contains("DivineStrategyPower"));
         // Written first, then asked.
         var ambush = Seq("ProtoKkAmbush", "OnPlay");

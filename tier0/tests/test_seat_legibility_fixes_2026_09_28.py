@@ -22,10 +22,11 @@ def _fresh_run_ledger():
     blindplay.forget_run()
 
 
+# The relic's face since the Kokomi re-founding (2026-10-12), which retired
+# the count and the count line it printed.
 CASKET = {"id": "TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
-          "description": "Start each combat with the Bake-Kurage and Open the "
-                         "Casket in hand. Each Plan it carries out adds 1 to "
-                         "the Casket."}
+          "description": "At the end of your turn, if a Plan is waiting, "
+                         "gain 3 Block."}
 
 
 def _combat(character="Kokomi", relics=(), pets=(), **player) -> dict:
@@ -52,23 +53,7 @@ def _kokomi(counter, twice=False, queue=None) -> dict:
         "queue": queue or [], "carried_out": []})
 
 
-# ------------------------------------ 1. the Casket's count on the page --
-
-def test_the_casket_count_is_printed_beside_the_bake_kurage():
-    """Kokomi seat: "no screen shows the Casket's count, so I could not pick
-    when to open it"."""
-    page = blindplay.observe(_kokomi(3))
-    at = page.index("## The Bake-Kurage")
-    assert "- Casket: 3" in page[at:]
-
-
-def test_a_casket_count_of_zero_is_printed_not_dropped():
-    """`_text(0)` folded the counter to "" -- the relic row printed no count
-    until the first Plan landed."""
-    page = blindplay.observe(_kokomi(0))
-    assert "- Casket: 0" in page
-    assert "**Tamakushi Casket** (0)" in page
-
+# ------------- 1. the Casket's count on the page (retired 2026-10-12) --
 
 def test_no_casket_no_count_line():
     state = _kokomi(2)
@@ -107,25 +92,16 @@ def test_the_bridge_sends_the_result_on_the_singleplayer_page():
 
 # ------------------------------------- 3. Nereid's Ascension's two drains --
 
-def test_nereids_face_names_the_dusk_plan_too():
+def test_nereids_face_names_the_one_drain():
     """Seat: "the Nereid doubling went to the first non-Dusk Plan, which I
-    only inferred". The Rare doubles the first entry of each drain
-    (`KokomiPlan.Drain`), the morning's and the Dusk's."""
+    only inferred". The face named both drains until the re-founding
+    (2026-10-12) retired Dusk; now there is one drain, the morning's, and
+    the face names it."""
     sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
         encoding="utf-8")
-    # The text pass of 2026-10-08 (rule 15) kept both halves and cut the
-    # restated rule.
-    assert ("your first [gold]Plan[/gold] is carried out twice. So is your "
-            "first [gold]Dusk[/gold] [gold]Plan[/gold]."
-            ) in sheet
-
-
-def test_the_page_names_both_drains_under_the_queue():
-    page = blindplay.observe(_kokomi(1, twice=True, queue=[
-        {"name": "Dusk: Slack Water", "clauses": 1},
-        {"name": "Surging Shoal", "clauses": 1}]))
-    assert ("your FIRST Plan twice at the start of your turn, and your "
-            "first Dusk Plan twice at the end of it.") in page
+    assert ("At the start of your turn, your first [gold]Plan[/gold] is "
+            "carried out twice.") in sheet
+    assert "[gold]Dusk[/gold] [gold]Plan[/gold]" not in sheet
 
 
 # ------------------------------------------------- 4. the Mend cap --

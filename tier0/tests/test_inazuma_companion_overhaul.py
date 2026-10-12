@@ -74,7 +74,7 @@ def test_flag_off_ignore_block_is_not_reachable_and_block_still_eats():
     assert st.enemies[0].block == 12
 
 
-def test_all_twenty_four_are_offerable(overhaul):
+def test_all_twenty_one_are_offerable(overhaul):
     offerable = {c.id for cards in rewards.companion_pool().values()
                  for c in cards}
     assert set(C.INAZUMA_OVERHAUL_POOL_IDS) <= offerable
@@ -82,34 +82,39 @@ def test_all_twenty_four_are_offerable(overhaul):
 
 
 def test_the_pool_ids_and_the_sheet_agree(overhaul):
-    """Every `proto_mi_` row is on exactly one of the arm's two lists.
+    """Every `proto_mi_` row is on exactly one list.
 
-    TWO LISTS SINCE R236, and the split is the point: the twenty-four
-    Universals are the pool any character may be offered from, and the one
-    Personal is Kokomi's kit. A row on the sheet and on neither list could
-    not be offered at all; a row on a list and not on the sheet does not
-    exist."""
+    TWO LISTS SINCE R236: the Universals are the pool any character may be
+    offered from, and Gorou's Personal was Kokomi's kit. THE KOKOMI
+    RE-FOUNDING (2026-10-12) moved all four of Gorou's cards into Kokomi's
+    own pool (`C.KOKOMI_OWN_COMPANION_IDS`, counted against her 78), so the
+    Universals are twenty-one and the Personal list is empty. A row on the
+    sheet and on no list could not be offered at all; a row on a list and
+    not on the sheet does not exist."""
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mi_")}
+    own = set(C.KOKOMI_OWN_COMPANION_IDS)
     assert on_sheet == (set(C.INAZUMA_OVERHAUL_POOL_IDS)
-                        | set(C.INAZUMA_OVERHAUL_PERSONAL_IDS))
+                        | set(C.INAZUMA_OVERHAUL_PERSONAL_IDS) | own)
     assert not (set(C.INAZUMA_OVERHAUL_POOL_IDS)
-                & set(C.INAZUMA_OVERHAUL_PERSONAL_IDS))
-    assert len(C.INAZUMA_OVERHAUL_POOL_IDS) == 24
-    assert len(C.INAZUMA_OVERHAUL_PERSONAL_IDS) == 1
+                & (set(C.INAZUMA_OVERHAUL_PERSONAL_IDS) | own))
+    assert len(C.INAZUMA_OVERHAUL_POOL_IDS) == 21
+    assert len(C.INAZUMA_OVERHAUL_PERSONAL_IDS) == 0
+    assert own == {"proto_mi_gorou_inuzaka", "proto_mi_gorou_war_banner",
+                   "proto_mi_gorou_juuga", "proto_mi_gorou_crystal_collapse"}
 
 
 def test_the_rarity_split_is_the_workshops_enumeration(overhaul):
-    """9 Common, 11 Uncommon, 4 Rare. The workshop's sec.4 prints "12 Uncommon"
-    and counts Gorou's Kokomi-side PERSONAL among them; a Personal is not a
-    Universal and is not built, so the Universals' own split is one short in
-    that tier. Pinned so the discrepancy is a recorded fact rather than a
-    miscount somebody re-derives later."""
+    """9 Common, 11 Uncommon, 4 Rare until the re-founding. The workshop's
+    sec.4 printed "12 Uncommon" and counted Gorou's Kokomi-side PERSONAL
+    among them. THE KOKOMI RE-FOUNDING (2026-10-12) moved Gorou's three
+    Universals (two Common, one Uncommon) into Kokomi's own pool, so the
+    Universals are 7 / 10 / 4."""
     split = {}
     for cid in C.INAZUMA_OVERHAUL_POOL_IDS:
         card = loader.peek_card(cid)
         split[card.rarity] = split.get(card.rarity, 0) + 1
-    assert split == {"common": 9, "uncommon": 11, "rare": 4}
+    assert split == {"common": 7, "uncommon": 10, "rare": 4}
 
 
 def test_every_row_is_an_inazuma_universal(overhaul):
@@ -165,7 +170,10 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks():
         encoding="utf-8")
     body = src.split("def inazuma_overhaul_turn_end(")[1].split("\ndef ")[0]
     seen = list(dict.fromkeys(re.findall(r'"(mi_[a-z_]+)"', body)))
-    assert seen == ["mi_juuga", "mi_daruma", "mi_sanctifying_ring",
+    # `mi_juuga_guard` beside its volley since the Kokomi re-founding
+    # (2026-10-12): Juuga's Plan line, the same clock.
+    assert seen == ["mi_juuga", "mi_juuga_guard", "mi_daruma",
+                    "mi_sanctifying_ring",
                     "mi_sesshou_sakura", "mi_soumetsu", "mi_kyouka",
                     "mi_tamoto", "mi_crimson_ooyoroi", "mi_war_banner",
                     "mi_aurous_blaze", "mi_naptime", "mi_crowfeather"], seen

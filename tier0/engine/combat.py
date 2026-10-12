@@ -301,11 +301,6 @@ def card_cost(state: CombatState, card: Card) -> int:
                    // card.cost_reduction_per_fanfare)
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
-    # (C.KOKOMI_OVERHAUL). R276, STOLEN CHAPTER's carry-out: "This
-    # turn, the first card you play costs 0." PURE here; `play_card`
-    # spends it. `FirstCardFreePower` is the C# twin.
-    if state.player.powers.get(kokomi_plan.FIRST_CARD_FREE, 0):
-        cost = 0
     # (R276): Playdate's discount on the next Companion card.
     # `PlaydatePower.TryModifyEnergyCostInCombat`'s twin; 0 with the arm off.
     discount = klee_overhaul.playdate_discount(state, card)
@@ -358,8 +353,6 @@ def play_card(state: CombatState, card: Card) -> None:
         state.current_x = cost                # X = energy actually spent
     state.current_card_cost = cost
     p.energy -= cost
-    # R276. Stolen Chapter's switch is spent by the first card paid for.
-    kokomi_plan.spend_first_card_free(state, card)
     # EB-17: read the draw context BEFORE the instance leaves hand, then
     # release it -- an instance that is no longer in hand has no draw context,
     # and holding the entry past the play is what would let a freed card's
@@ -668,8 +661,13 @@ def resolve_free_play(state: CombatState, card: Card,
         # drawn. A Sly discard IS a hand card, and does carry its context.
         drawn_turn, first_copy = state.drawn_context(card)
         state.drawn_in_hand.pop(id(card), None)
+        # THE KOKOMI RE-FOUNDING (2026-10-12): a written Companion is played
+        # by the Bake-Kurage's carry-out, and that play is the PLAN's -- the
+        # card was already counted as played when she wrote it. `plan_carry`
+        # tells EB-17's per-id tally so (`metrics`), and nothing else.
         state.emit("play", card=card.id, cost=0, energy_left=p.energy,
-                   free=True, drawn_turn=drawn_turn, first_copy=first_copy)
+                   free=True, drawn_turn=drawn_turn, first_copy=first_copy,
+                   plan_carry=bool(getattr(state, "kk_carrying_out", False)))
         _finish_play(state, card, force_exhaust=force_exhaust)
     finally:
         for name, value in saved:
@@ -783,9 +781,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         return
 
     p.energy = refpowers.energy_for_turn(state)      # site C, + Pyre
-    # POOL COMPLETION: Patient Tide's kept Energy, on top of the refill (0
-    # without the Power; `kokomi_plan.patient_tide_bank` wrote it).
-    p.energy += kokomi_plan.patient_tide_kept(state)
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): Salon's Tab's
     # Energy arrives next turn. 0 for anyone else.
     p.energy += furina_tide.energy_kept(state)
@@ -850,18 +845,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # The settle/revive pair below is the `kurage_fire` block's, for its
     # reason: a planned hit can drop a phased boss, and Mend cannot kill her
     # but a reaction the hit causes can move the board under the loop.
-    # THE CASKET PASS (2026-09-28). The relic's token lands on turn one,
-    # before the drain. `ProtoBakeKuragePower.AfterPlayerTurnStart` and
-    # `TamakushiCasket.BeforeHandDraw` are the twins.
-    kokomi_plan.deal_open_the_casket(state)
-    # THE EXPANSION's The Long Game, off the same pre-drain queue.
-    kokomi_plan.long_game(state, len(state.kk_plan_queue))
-    # THE GROWTH POWERS (2026-10-10): Flood Tide, at the same site.
-    kokomi_plan.flood_tide(state)
-    # Kokomi whole-run round 2 (2026-10-10): Grand Design puts Open the
-    # Casket into her hand. `GrandDesignPower.Signal` is the twin.
-    kokomi_plan.grand_design_fetch(state)
     kokomi_plan.resolve_all(state)
+    # THE RE-FOUNDING (2026-10-12): Dawn Tide's Hydro, AFTER the morning's
+    # Plans (`DawnTidePower.Signal`, after `ResolveAll`), then the turn-start
+    # generators (Kurage Bloom, Sangonomiya's Orders; their own
+    # `AfterPlayerTurnStart` hooks, which follow the marker's).
+    kokomi_plan.dawn_tide(state)
+    kokomi_plan.turn_start_generators(state)
     _settle_phases(state)
     _revive_player_if_needed(state)
     if not p.alive or state.over:
@@ -943,29 +933,15 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Its Sparks 'n' Splash left this site on 2026-09-25 for the start of the
     # turn (`klee_overhaul.bomb_echo`, via `turn_start_late`).
     klee_overhaul.turn_end(state)
-    # (C.KOKOMI_OVERHAUL). DUSK (`EB-643`, R265): "the Bake-Kurage
-    # carries this Plan out at the end of this turn, before enemies act."
-    #
-    # HERE, at this engine's `BeforeSideTurnEnd` on the player side, which is
-    # the same site `klee_overhaul.turn_end` above takes and where the mod's
-    # `ProtoBakeKuragePower.BeforeSideTurnEnd` runs the same drain. It is
-    # AFTER the hand's own end-of-turn triggers, so a Dusk Block is the last
-    # thing on her side of the boundary; BEFORE `_settle_phases`, so a Dusk
-    # carry-out that kills settles the board it killed exactly as the turn-end
-    # burst one line up does; and before any enemy acts, which is the printed
-    # promise and the only clause of the sentence a card can tell apart.
-    # `kokomi_plan.resolve_dusk` carries the rest of the argument.
-    #
-    # A PLAN STAYS OPEN, PICK 5 (a) (2026-10-01): the pilot's flips first,
-    # its last act of the turn, while the queue it reads is the one the next
-    # morning will carry out (`kokomi_plan.pilot_flips`; the Plan line by
-    # default).
+    # (C.KOKOMI_OVERHAUL). A PLAN STAYS OPEN, PICK 5 (a) (2026-10-01): the
+    # pilot's flips, its last act of the turn, while the queue it reads is the
+    # one the next morning will carry out (`kokomi_plan.pilot_flips`; the Plan
+    # line by default). (Dusk's drain left this site on 2026-10-12.)
     kokomi_plan.pilot_flips(state)
-    kokomi_plan.resolve_dusk(state)
-    # POOL COMPLETION (2026-10-01), PATIENT TIDE: "At the end of your turn,
-    # keep up to 2 unspent Energy." Banked here, after the Dusk drain, and
-    # handed back after the next refill. `PatientTidePower` is the twin.
-    kokomi_plan.patient_tide_bank(state)
+    # THE RE-FOUNDING (2026-10-12): the Tamakushi Casket, "At the end of your
+    # turn, if a Plan is waiting, gain 3 Block." At this engine's
+    # `BeforeSideTurnEnd`, the relic's own hook.
+    kokomi_plan.casket_block(state)
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)
@@ -1062,10 +1038,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # turn -- the same shape X11's errata hit, and the same shape the X1 pin
     # still reports. That loop is governed by the X2 rarity law (R109).
     state.companion_cost_delta_this_turn = 0
-    # (C.KOKOMI_OVERHAUL). R276: Pincer's and Stolen Chapter's
-    # switches say "this turn" and die with it, on the same boundary.
+    # (C.KOKOMI_OVERHAUL). R276: Pincer's switch says "this turn" and dies
+    # with it, on the same boundary.
     state.player.powers.pop(kokomi_plan.FIRST_ATTACK_TWICE, None)
-    state.player.powers.pop(kokomi_plan.FIRST_CARD_FREE, None)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never

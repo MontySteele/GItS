@@ -31,8 +31,8 @@ namespace KleeMod.Powers;
 /// WHY THE RELIC MOVES TOO. The Pearl of Wisdom's printed body IS the exhaust
 /// funnel ("Whenever a card is Exhausted, gain Charge and Burst Energy"), which
 /// is the first thing the brief retires, so a run holding it would print a rule
-/// the arm has turned off. Tamakushi Casket takes the slot and carries the
-/// jellyfish's strike instead. THE COMPANION REWARD SLOT SURVIVES THE SWAP,
+/// the arm has turned off. Tamakushi Casket takes the slot (since 2026-10-12:
+/// Block at the end of her turn while a Plan is waiting). THE COMPANION REWARD SLOT SURVIVES THE SWAP,
 /// because it rides the relic in this mod purely for lifetime reasons and the
 /// slice's Commander loop draws its whole army from it.
 ///
@@ -44,7 +44,8 @@ namespace KleeMod.Powers;
 /// pick 2 added the two defensive rows `EB-335` builds, making it 28, and
 /// round 9 pick 1's tempo shelf added two more, making it 30, and the pool
 /// passes since have made it 39, and the Casket pass (2026-09-28) 46, and the
-/// cleanup pass (2026-09-29) 44, and the feed pass (2026-09-29) 48.
+/// cleanup pass (2026-09-29) 44, and the feed pass (2026-09-29) 48; it has been
+/// 78 since pool completion (2026-10-01), re-founded on 2026-10-12.
 ///
 /// THE OVERHAUL WINS WHERE IT MEETS THE KURAGE'S MEMORY. A dev build compiles
 /// this arm AND that one, and both want her starter. They are alternatives, not
@@ -161,117 +162,44 @@ internal static class KokomiOverhaulRoster
     };
 
     /// <summary>The slice's own 78 rows, without the Ancient tail
-    /// <see cref="OfferablePool"/> adds. FORTY-SIX since the Casket pass
-    /// (2026-09-28): six cut, thirteen added; FORTY-FOUR since the cleanup
-    /// pass (2026-09-29) cut Scout Ahead and Song of Pearls; FORTY-EIGHT since
-    /// the feed pass (2026-09-29) cut Exposed Flank and added five 0-cost
-    /// Plan-only Commons; SIXTY-NINE since expansion batch one (2026-09-29)
-    /// added 22 and cut The Clouds Like Waves Rippling; SEVENTY since the
-    /// payoff pass (2026-10-01) cut Second Thoughts and added Kurage Canopy
-    /// and Coral Tithe; SEVENTY-EIGHT since pool completion (2026-10-01)
-    /// added eight; still SEVENTY-EIGHT since the status batch (2026-10-01)
-    /// cut seven and added seven; still SEVENTY-EIGHT since the growth
-    /// Powers (2026-10-10) swapped The General's Banner for Flood Tide. The
-    /// Open the Casket token is in
-    /// no pool; the relic deals it (<see cref="Relics.TamakushiCasket"/>).</summary>
+    /// <see cref="OfferablePool"/> adds: 21 / 36 / 21 since the re-founding
+    /// (2026-10-12), in the sheet's own order, then Gorou's four. The pool's
+    /// history is in git (tag <c>kokomi-casket-frozen-2026-10-12</c>).</summary>
     private static CardModel[] Slice() => new CardModel[]
     {
-        // The Tactician -- Plans, and the cards that pay per Plan (6)
         ModelDb.Card<ProtoKkFeint>(),
         ModelDb.Card<ProtoKkAmbush>(),
         ModelDb.Card<ProtoKkReadTheField>(),
         ModelDb.Card<ProtoKkTreatise>(),
         ModelDb.Card<ProtoKkWarCouncil>(),
         ModelDb.Card<ProtoKkNereidsAscension>(),
-        // The Priestess -- Block through the jellyfish, Mend at Rare (7)
-        ModelDb.Card<ProtoKkDeepCurrent>(),
         ModelDb.Card<ProtoKkCoralBulwark>(),
-        // `EB-335`, R246 pick 2: the kit's own defence in act 2.
         ModelDb.Card<ProtoKkTideWall>(),
-        ModelDb.Card<ProtoKkShellGuard>(),
         ModelDb.Card<ProtoKkTheMoonAShip>(),
         ModelDb.Card<ProtoKkSangoIsshin>(),
-        // The Commander -- Gorou, go (4)
-        ModelDb.Card<ProtoKkVanguard>(),
-        // The General's Banner left on 2026-10-10 (the growth Powers); Rising
-        // Tide takes its slot, LAST.
-        // Currencies, tempo, and the one replay (5)
-        ModelDb.Card<ProtoKkStolenChapter>(),
         ModelDb.Card<ProtoKkChangeOfPlans>(),
         ModelDb.Card<ProtoKkUndertow>(),
         ModelDb.Card<ProtoKkMoonsReflection>(),
-        // THE TEMPO SHELF (round 9 pick 1, 2026-09-04) was Tide Chart and
-        // Ripple; the Casket pass (2026-09-28) cut both.
-        // POOL PASS ONE (`EB-492`,
-        // `review/active/kokomi-pool-pass-2026-09-05.md`): Plan density in the
-        // OFFER rather than in the starter. Three Attacks with a Plan line,
-        // the morning's payoff on a Common Attack, and a Skill that does both
-        // halves only when planned. LAST, in the sheet's own order, for the
-        // ordering reason the shelf above states.
         ModelDb.Card<ProtoKkRiptide>(),
         ModelDb.Card<ProtoKkPincer>(),
         ModelDb.Card<ProtoKkFlank>(),
-        // POOL PASS TWO (`EB-643`, R265): the QUEUE as something the player
-        // operates on rather than something that empties on a timer. Two
-        // riders on the entry that follows (Opening Gambit, Second Wave), a
-        // draw that counts the entries after it (Scout Ahead), two now-lines
-        // that unwrite what is already queued (Second Thoughts),
-        // and the DUSK row whose Plan lands at the end of the turn it was
-        // written on (Breakwater). LAST, in the sheet's own order, for the
-        // ordering reason the shelf above states.
-        //
-        // EIGHT UNTIL `EB-649` (round 23): Ebb Tide drew three times on the
-        // cap lane and was played none of them, so the row left the sheet and
-        // this slice with it. <c>KokomiPlan.CancelAllForCash</c> stays and
-        // says why. SIX SINCE POOL PASS THREE (`EB-655`): Converging Tide
-        // re-aimed a queued Plan, and this pass makes the queue shallower on
-        // purpose -- <c>KokomiPlan.RedirectQueued</c> stays with nothing
-        // spelling it. FIVE SINCE POOL PASS FIVE (`EB-685`): Night Watch
-        // lost every draft comparison in r27, and Slack Water's Plan half
-        // moved to Dusk -- the job Night Watch was rebuilt for one pass
-        // earlier. It spelled no rule of its own, so nothing stays behind it.
-        // FOUR SINCE THE CLEANUP PASS (2026-09-29): Scout Ahead was cut, and
-        // its clause left with legacy cleanup stage 5.
-        // THREE SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts was cut,
-        // and its cancel left with legacy cleanup stage 5.
         ModelDb.Card<ProtoKkOpeningGambit>(),
         ModelDb.Card<ProtoKkSecondWave>(),
         ModelDb.Card<ProtoKkBreakwater>(),
-        // THE CASKET PASS (2026-09-28): the Tamakushi Casket counts the Plans
-        // the Bake-Kurage carries out. Thirteen rows, LAST in the sheet's own
-        // order, for the ordering reason the shelf above states.
-        ModelDb.Card<ProtoKkMassedVolley>(),
-        ModelDb.Card<ProtoKkSignalArrow>(),
         ModelDb.Card<ProtoKkSurgingShoal>(),
         ModelDb.Card<ProtoKkPressTheAdvantage>(),
         ModelDb.Card<ProtoKkShellOfSanctuary>(),
-        ModelDb.Card<ProtoKkDriftglass>(),
-        ModelDb.Card<ProtoKkWhatTheTokoyoReturns>(),
-        ModelDb.Card<ProtoKkDepthsJudgment>(),
         ModelDb.Card<ProtoKkTideturn>(),
         ModelDb.Card<ProtoKkPearlCurrent>(),
-        ModelDb.Card<ProtoKkWhatTheTokoyoTook>(),
-        // THE FEED PASS (2026-09-29): five 0-cost Plan-only Commons, the cheap
-        // feed for the Plan queue. LAST, in the sheet's own order.
         ModelDb.Card<ProtoKkBubbleWard>(),
-        ModelDb.Card<ProtoKkNip>(),
         ModelDb.Card<ProtoKkJellyfishDrift>(),
-        ModelDb.Card<ProtoKkCurrentRead>(),
         ModelDb.Card<ProtoKkBrineSting>(),
-        // THE EXPANSION, BATCH ONE (2026-09-29): four decks, 12 Uncommon and
-        // 10 Rare; Watatsumi's Grace replaces The Clouds Like Waves Rippling.
-        // LAST, in the sheet's own order.
-        ModelDb.Card<ProtoKkWeightOfThePlan>(),
-        ModelDb.Card<ProtoKkLull>(),
         ModelDb.Card<ProtoKkUndertideLance>(),
         ModelDb.Card<ProtoKkMeasuredBreath>(),
         ModelDb.Card<ProtoKkGrandDesign>(),
-        ModelDb.Card<ProtoKkTheLongGame>(),
         ModelDb.Card<ProtoKkMasterstroke>(),
         ModelDb.Card<ProtoKkDrowningPressure>(),
-        ModelDb.Card<ProtoKkSaltInTheWound>(),
         ModelDb.Card<ProtoKkUndercurrentSnare>(),
-        ModelDb.Card<ProtoKkTidalResonance>(),
         ModelDb.Card<ProtoKkAtWatersEdge>(),
         ModelDb.Card<ProtoKkCeremonialGarment>(),
         ModelDb.Card<ProtoKkSuffocatingDeep>(),
@@ -281,37 +209,47 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkWatatsumisGrace>(),
         ModelDb.Card<ProtoKkTidalRiposte>(),
         ModelDb.Card<ProtoKkShoalCall>(),
-        ModelDb.Card<ProtoKkKurageSwarm>(),
-        // THE PAYOFF PASS (2026-10-01): Plan volume paid in Block and in
-        // Energy and cards. LAST, in the sheet's own order. The pool is 70.
         ModelDb.Card<ProtoKkKurageCanopy>(),
-        ModelDb.Card<ProtoKkCoralTithe>(),
-        // POOL COMPLETION (2026-10-01, paper sec.4): one Common and seven
-        // Rares, LAST, in the sheet's own order. The pool is 78 (21 / 36 /
-        // 21); Coral Crash became a Common in place (sec.6).
         ModelDb.Card<ProtoKkTidalScreen>(),
         ModelDb.Card<ProtoKkSpringTide>(),
-        ModelDb.Card<ProtoKkKurageSchool>(),
         ModelDb.Card<ProtoKkShoalOfSpears>(),
-        ModelDb.Card<ProtoKkPatientTide>(),
         ModelDb.Card<ProtoKkSeasReproach>(),
         ModelDb.Card<ProtoKkTidalRebuke>(),
         ModelDb.Card<ProtoKkWatatsumiResistance>(),
-        // THE STATUS BATCH (2026-10-01, ruled): seven cards on statuses and
-        // curses, LAST, in the sheet's own order. Seven rows were cut above
-        // (Rally, Chain of Command, Battle Plan, Feigned Retreat, Pearl Diver,
-        // Moon Signal, All Streams Flow to the Sea). The pool is 78 (21 / 36 /
-        // 21): Riptide Ruin is the Rare, in Coral Sanctuary's place.
         ModelDb.Card<ProtoKkKelpWall>(),
         ModelDb.Card<ProtoKkTidecleanse>(),
         ModelDb.Card<ProtoKkSeaGlassHarvest>(),
-        ModelDb.Card<ProtoKkTurningTide>(),
         ModelDb.Card<ProtoKkFlotsamSurge>(),
-        ModelDb.Card<ProtoKkAbyssalSalvage>(),
         ModelDb.Card<ProtoKkRiptideRuin>(),
-        // THE GROWTH POWERS (2026-10-10, ruled): Flood Tide, in The General's
-        // Banner's Uncommon slot, LAST. Still 78 (21 / 36 / 21).
-        ModelDb.Card<ProtoKkFloodTide>(),
+        // THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-
+        // 2026-10-12.md sec.2): twenty new rows, LAST, in the sheet's own
+        // order (Grand Design keeps its old slot and id).
+        ModelDb.Card<ProtoKkTidalSurge>(),
+        ModelDb.Card<ProtoKkRiptideGuard>(),
+        ModelDb.Card<ProtoKkWatatsumiDrill>(),
+        ModelDb.Card<ProtoKkOrdersFromTheShrine>(),
+        ModelDb.Card<ProtoKkKuragesWake>(),
+        ModelDb.Card<ProtoKkWatatsumiMuster>(),
+        ModelDb.Card<ProtoKkSangonomiyasOrders>(),
+        ModelDb.Card<ProtoKkKurageBloom>(),
+        ModelDb.Card<ProtoKkKurageBarrage>(),
+        ModelDb.Card<ProtoKkWatchfulShoal>(),
+        ModelDb.Card<ProtoKkCoordinatedTide>(),
+        ModelDb.Card<ProtoKkReserves>(),
+        ModelDb.Card<ProtoKkSpearhead>(),
+        ModelDb.Card<ProtoKkSteadyTide>(),
+        ModelDb.Card<ProtoKkResolveOfWatatsumi>(),
+        ModelDb.Card<ProtoKkGrandStrategist>(),
+        ModelDb.Card<ProtoKkCallTheGenerals>(),
+        ModelDb.Card<ProtoKkEndlessShoal>(),
+        ModelDb.Card<ProtoKkDawnTide>(),
+        ModelDb.Card<ProtoKkTamakushisWrath>(),
+        // GOROU'S FOUR, her own cards since the re-founding (the ruling's
+        // pick 3), ids kept: `C.KOKOMI_OWN_COMPANION_IDS`, LAST.
+        ModelDb.Card<ProtoMiGorouInuzaka>(),
+        ModelDb.Card<ProtoMiGorouWarBanner>(),
+        ModelDb.Card<ProtoMiGorouJuuga>(),
+        ModelDb.Card<ProtoMiGorouCrystalCollapse>(),
     };
 
     /// <summary>Her one starting relic under the arm. A list of one, so the

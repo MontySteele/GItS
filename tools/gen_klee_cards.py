@@ -596,12 +596,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # that UNWRITE a Plan, which is what the pool pass is for.
                   "cancel_all_plans_cash",
                   "redirect_queued_plans",
-                  # THE CASKET PASS (2026-09-28): the two now-lines that work
-                  # the Tamakushi Casket's count. What the Tokoyo Returns
-                  # fetches Open the Casket from the draw or discard pile, and
-                  # What the Tokoyo Took doubles the count. One verified call
-                  # site each on `KokomiOverhaulKit`.
-                  "fetch_open_casket", "casket_double",
+                  # (The Casket pass's `fetch_open_casket` and
+                  # `casket_double` left with the Casket, the Kokomi
+                  # re-founding, 2026-10-12.)
                   # VARKA (the Oath rework, 2026-09-29). Two verbs: Knights'
                   # Roll Call's "add a Knight to your hand, free this turn"
                   # (`VarkaRules.AddKnight`; the upgraded pick is a GRID,
@@ -624,11 +621,9 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # `EB-335`: Tide Wall's per-Plan Block scaler, plan-only for
                   # a reason of its own -- the count it multiplies is a fact
                   # about a MORNING.
-                  # `EB-685`: Breakwater's per-held-Plan Block scaler, and
-                  # plan-only one count over -- "the Plans the jellyfish is
-                  # HOLDING" read on a now-line is the queue before the turn's
-                  # Plans were written.
-                  "block_per_plan_held",
+                  # (`EB-685`'s `block_per_plan_held` left with Dusk, the
+                  # Kokomi re-founding, 2026-10-12: Breakwater reads the
+                  # Plans waiting on its now-line.)
                   # `EB-643`: the DRAIN-POSITIONAL clauses, plan-only
                   # for a reason they share -- each names a place in a running
                   # drain ("the next Plan", "after this one"), so a now-line
@@ -827,33 +822,10 @@ ARM_KEYWORDS = (
     # "plan" is the status batch's "Or plan:" (2026-10-01), the same word;
     # a Plan-only row keeps "Plan:".
     ArmKeyword("Plan", ("Plan", "Plans", "plan"), "ArmKeywordTips.ForPlan"),
-    # Kokomi's FOURTH, `EB-643` (R265). `Dusk` is the pool pass's one new word
-    # and it is a rule about WHEN: the Bake-Kurage carries a Dusk Plan out at
-    # the end of the turn it was written on, before the enemies act, instead of
-    # next morning. A word of its own rather than a clause on the Plan tip,
-    # because that tip is at its 135-character ceiling and carries five
-    # findings already -- and because a player meeting the word on a card needs
-    # the definition beside the word. NO PLURAL: it names one moment.
-    # "dusk" is the status batch's "Or dusk plan:" (2026-10-01).
-    ArmKeyword("Dusk", ("Dusk", "dusk"), "ArmKeywordTips.ForDusk"),
-    # Kokomi's THIRD, `EB-625`. `Tamakushi Casket` is her relic, and
-    # `Shell Guard` is written against it by name -- "whenever the Tamakushi
-    # Casket strikes" -- with nothing on screen saying what the Casket is or
-    # what makes it strike. `Grounded`'s shape and `Oz`'s: the attach travels
-    # with the printed word, so a second row naming the relic carries the
-    # definition the day it is authored. NO PLURAL: there is one Casket.
-    #
-    # THE CASKET PASS (2026-09-28). The relic now COUNTS, and five faces read
-    # or move the count by its SHORT name ("the Casket gains 2", "for each
-    # point in the Casket"). The short name is a second TOKEN of this row and
-    # not a row of its own: it is the same thing, so it is the same tip and
-    # the same key.
-    ArmKeyword("Tamakushi Casket", ("Tamakushi Casket", "Casket"),
-               "ArmKeywordTips.ForCasket"),
-    # And the token the relic deals into her opening hand, named by What the
-    # Tokoyo Returns, which fetches it back.
-    ArmKeyword("Open the Casket", ("Open the Casket",),
-               "ArmKeywordTips.ForOpenTheCasket"),
+    # (`Dusk`, `Tamakushi Casket` and `Open the Casket` left with the rules
+    # they named, the Kokomi re-founding, 2026-10-12: Dusk is retired and
+    # the Casket no longer counts. The jellyfish cards a face names, Sting
+    # and Ward, preview as cards instead -- `KokomiCards.WithJellyfishPreview`.)
     # The companion arm's one. `Swirl` is the shared Anemo reaction printed as
     # a VERB by ten Universals; the eight reaction PREVIEWS are board-aware and
     # say nothing over an aura-less board.
@@ -962,6 +934,9 @@ BASE_KEYWORDS = (
     # The Repay floor (ruled 2026-10-09): Soothing Waters and Pneuma Tides
     # print the base game's Vigor.
     ArmKeyword("Vigor", ("Vigor",), "BaseKeywordTips.ForVigor"),
+    # The Kokomi re-founding (2026-10-12): five faces name Ethereal for the
+    # cards they make.
+    ArmKeyword("Ethereal", ("Ethereal",), "BaseKeywordTips.ForEthereal"),
 )
 
 
@@ -2626,19 +2601,37 @@ VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: key `kokomi_amount`). Sim twin: `kokomi_plan.KINDS` / `kokomi_plan.kind`.
 KOKOMI_KINDS = {
     "draw_if_no_plan": "DrawIfNoPlan",
-    "resonance": "Resonance",
     "double_weak_vulnerable": "DoubleWeakVulnerable",
+    # THE RE-FOUNDING (2026-10-12): Shoal Call adds Stings (upgraded on the
+    # upgraded card, `upgraded_grant`); `add_sting` / `add_ward` add plain
+    # ones (Powers/Prototype/KokomiRefounding.cs).
     "shoal_call": "ShoalCall",
-    # THE PAYOFF PASS (2026-10-01): Coral Tithe; `amount` is the divisor.
-    "coral_tithe": "CoralTithe",
-    # POOL COMPLETION (2026-10-01): Spring Tide, Kurage School, and the
-    # multiplayer Kurage's Mercy (`amount` is the Mend).
+    "add_sting": "AddSting",
+    "add_ward": "AddWard",
+    # THE RE-FOUNDING: the Commander's generators (random Common Inazuma
+    # Companions, Ethereal; upgraded on the upgraded card) and Call the
+    # Generals (choose 1 of 3 random Rare Inazuma Companions).
+    "add_companion": "AddCompanion",
+    "add_companions": "AddCompanions",
+    "call_the_generals": "CallTheGenerals",
+    # THE RE-FOUNDING: Reserves, Grand Design (write up to N hand cards as
+    # Plans at 0), and three now-lines that were Dusk or Plan lines: Evening
+    # Watch's Block per attacker, Brace for the Tide's doubling, Tidecleanse's
+    # Exhaust.
+    "reserves": "Reserves",
+    "grand_design": "GrandDesign",
+    "block_per_attacker": "BlockPerAttacker",
+    "double_block": "DoubleBlock",
+    "exhaust_statuses": "ExhaustStatuses",
+    # POOL COMPLETION (2026-10-01): Spring Tide, and the multiplayer Kurage's
+    # Mercy (`amount` is the Mend).
     "spring_tide": "SpringTide",
-    "kurage_school": "KurageSchool",
     "kurages_mercy": "KuragesMercy",
 }
-KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "resonance", "shoal_call",
-                      "coral_tithe", "kurages_mercy"}
+KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "shoal_call",
+                      "add_companions", "grand_design",
+                      "block_per_attacker", "exhaust_statuses",
+                      "kurages_mercy"}
 #: No kind aims: none takes a `target`.
 KOKOMI_FIELDS = {"op", "kind", "amount"}
 #: `furina` (THE POOL TO 75, 2026-10-09, review/active/furina-pool-growth-
@@ -2700,10 +2693,7 @@ DAMAGE_QUARTER_MAX_HP_FIELDS = {"op", "target"}
 #: a `target` and has its own field set below.
 KOKOMI_BARE_OPS = {"remove_debuff",
                    "carry_out_front_plan", "plan_from_exhaust",
-                   "cancel_all_plans_cash",
-                   # THE CASKET PASS (2026-09-28): What the Tokoyo Returns and
-                   # What the Tokoyo Took. Neither prints a number.
-                   "fetch_open_casket", "casket_double"}
+                   "cancel_all_plans_cash"}
 
 #: Converging Tide's one field (`EB-643`): the enemy the queue re-aims at, which
 #: is the enemy the card was played on -- the same `target:` spelling every
@@ -2724,9 +2714,6 @@ PLAN_CLAUSE_KINDS = {
     "damage": "Damage",
     "damage_quarter_max_hp": "DamageQuarterMaxHp",
     "play_copy_of_companion": "PlayCopyOfCompanion",
-    # `EB-685` (pool pass five), BREAKWATER's count: the queue as it stands at
-    # dusk, never this entry itself. See `KokomiPlan.Kind.BlockPerPlanHeld`.
-    "block_per_plan_held": "BlockPerPlanHeld",
     # `EB-643` (R265), THE DRAIN-POSITIONAL CLAUSES. Opening Gambit and
     # Second Wave write a RIDER on the entry that follows them in the same
     # drain. Both are PLAN-ONLY below: each names a place in a running drain,
@@ -2745,7 +2732,6 @@ PLAN_CLAUSE_KINDS = {
     # the Plan was written (the entry records her HP then), and Tide Wall's
     # Block reads the front enemy's intent at carry-out.
     "first_attack_twice": "FirstAttackTwice",
-    "first_card_free": "FirstCardFree",
     # Kokomi core pass, CHAIN OF COMMAND: "Next turn, the first Companion card
     # you play costs 0." Stolen Chapter's switch, narrowed to Companions.
     "block_front_intent": "BlockFrontIntent",
@@ -2758,10 +2744,6 @@ PLAN_CLAUSE_KINDS = {
     # THE EXPANSION, BATCH ONE (2026-09-29). Lull's and Undertide Lance's "if
     # no other Plan is carried out this morning", Evening Watch's Block per
     # enemy intending to attack, Brace for the Tide's doubling.
-    "energy_if_alone": "EnergyIfAlone",
-    "damage_if_alone": "DamageIfAlone",
-    "block_per_attacking_enemy": "BlockPerAttackingEnemy",
-    "double_block": "DoubleBlock",
     # POOL COMPLETION (2026-10-01), Tactical Relay: "Each player gains 1
     # Energy [and draws 1 card]", every player in the fight.
     "each_player_energy": "EachPlayerEnergy",
@@ -2770,9 +2752,15 @@ PLAN_CLAUSE_KINDS = {
     # Kelp Wall's Block per status or curse, Tidecleanse's exhaust,
     # Sea Glass Harvest's transform, Turning Tide's discard-and-draw.
     "block_per_status_in_hand": "BlockPerStatusInHand",
-    "exhaust_statuses_in_hand": "ExhaustStatusesInHand",
     "transform_statuses_in_hand": "TransformStatusesInHand",
-    "discard_and_draw": "DiscardAndDraw",
+    # THE RE-FOUNDING (2026-10-12). Kurage's Wake's "Add 2 Stings to your
+    # hand", and Gorou's Plan lines (card paper sec.3): War Banner's "Gain 3
+    # Strength this turn" and Juuga's "For 3 turns, at the end of your turn
+    # gain 6 Block" (`amount` is the turns; the Block is the rule's,
+    # `CompanionOverhaulLaw.JuugaGuardBlock`).
+    "add_stings": "AddStings",
+    "strength_this_turn": "StrengthThisTurn",
+    "juuga_guard": "JuugaGuard",
     "apply_power": None,
 }
 
@@ -2786,13 +2774,10 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "next_plan_extra_carry_out",
                        # `EB-655`, Battle Plan's rider: the size is the rule's.
                        # R276: two switches, "the first ..." has no size.
-                       "first_attack_twice", "first_card_free",
-                       # Kokomi core pass, Chain of Command's switch.
-                       # THE EXPANSION: "Double your Block" prints no size.
-                       "double_block",
-                       # THE STATUS BATCH: "every status and curse" and "any
-                       # number" print no size.
-                       "transform_statuses_in_hand", "discard_and_draw"}
+                       "first_attack_twice",
+                       # THE STATUS BATCH: "every status and curse" prints
+                       # no size.
+                       "transform_statuses_in_hand"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2813,10 +2798,7 @@ PLAN_AIM_CS = {
     "enemies_intending_attack": "KokomiPlan.Aim.EnemiesIntendingAttack",
 }
 PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
-                  "apply_power",
-                  # R276, Feigned Retreat.
-                  # THE EXPANSION: Undertide Lance's planned hit.
-                  "damage_if_alone"}
+                  "apply_power"}
 #: The clauses a `times:` may repeat -- the flat hit, and nothing else
 #: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
 PLAN_TIMES_OPS = {"damage"}
@@ -2824,8 +2806,6 @@ PLAN_TIMES_OPS = {"damage"}
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
 PLAN_ONLY_OPS = {
                  "play_copy_of_companion",
-                 # `EB-685`, Breakwater's count. See `PLAN_CLAUSE_KINDS`.
-                 "block_per_plan_held",
                  # `EB-643`. The drain-positional clauses -- see
                  # `PLAN_CLAUSE_KINDS` above for the one reason all of them are
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
@@ -2834,7 +2814,7 @@ PLAN_ONLY_OPS = {
                  # `EB-655`, Battle Plan's rider.
                  # R276. Each names the carry-out turn or the writing, so a
                  # now-line spelling would be a different, unpriced card.
-                 "first_attack_twice", "first_card_free",
+                 "first_attack_twice",
                  "block_front_intent",
                  # Kokomi core pass, Chain of Command: "next turn".
                  # THE CO-OP SET: both name the carry-out turn, and the first
@@ -2842,14 +2822,14 @@ PLAN_ONLY_OPS = {
                  "ally_draw", "others_attack_damage_this_turn",
                  # THE CASKET PASS (2026-09-28): Pearl Diver's gain is what the
                  # carry-out buys; no row prints it on a now-line.
-                 # THE EXPANSION: each names a drain ("this morning", Dusk).
-                 "energy_if_alone", "damage_if_alone",
-                 "block_per_attacking_enemy", "double_block",
                  # POOL COMPLETION: Tactical Relay names the carry-out turn.
                  "each_player_energy", "each_player_draw",
                  # THE STATUS BATCH: each reads the hand just drawn.
-                 "block_per_status_in_hand", "exhaust_statuses_in_hand",
-                 "transform_statuses_in_hand", "discard_and_draw"}
+                 "block_per_status_in_hand",
+                 "transform_statuses_in_hand",
+                 # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
+                 # Gorou's two Plan lines name the carry-out turn.
+                 "add_stings", "strength_this_turn", "juuga_guard"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -2943,8 +2923,6 @@ PLAN_UPGRADE_VARS = {
     "plan_draw": "PlanCards",
     # R276, Battle Plan's per-Attack bonus.
     "plan_attack_bonus": "PlanAttackBonus",
-    # THE STATUS BATCH, Tidecleanse's "up to N".
-    "plan_exhaust": "PlanExhaust",
 }
 
 
@@ -3295,25 +3273,11 @@ APPLY_POWERS = {
     # reads only whether it is worn.
     "kk_nereids_ascension": ("NereidsAscensionPower", None,
         "At the start of your turn, your first [gold]Plan[/gold] is "
-        "carried out twice. So is your first [gold]Dusk[/gold] "
-        "[gold]Plan[/gold]."),
+        "carried out twice."),
     # THE EXPANSION, BATCH ONE (2026-09-29). Every class lives in
     # Powers/Prototype/KokomiExpansion.cs; every row states its own face.
-    # Bent 2026-10-10 (the growth Powers): a marker the Open reads.
-    "kk_grand_design": ("GrandDesignPower", None,
-        "[gold]Open the Casket[/gold] no longer empties the "
-        "[gold]Casket[/gold]. At the start of your turn, put it into your "
-        "hand."),
-    # THE GROWTH POWERS (2026-10-10). Class in KokomiExpansion.cs.
-    "kk_flood_tide": ("FloodTidePower", None,
-        "At the start of your turn, the [gold]Casket[/gold] gains {X}."),
-    "kk_the_long_game": ("TheLongGamePower", None,
-        "At the start of your turn, if exactly one [gold]Plan[/gold] is "
-        "waiting, gain {X} [gold]Energy[/gold]."),
-    # Power cost sweep, 2026-09-30: The Long Game+ installs this twin.
-    "kk_the_long_game_plus": ("TheLongGamePlusPower", None,
-        "At the start of your turn, if exactly one [gold]Plan[/gold] is "
-        "waiting, gain {X} [gold]Energy[/gold] and draw {X} card."),
+    # (Grand Design's, Flood Tide's and The Long Game's Powers left with the
+    # Casket and the cards, the re-founding, 2026-10-12.)
     "kk_at_waters_edge": ("AtWatersEdgePower", None,
         "The first time each turn you deal [gold]Hydro[/gold] damage to an "
         "enemy, apply {X} Weak and {X} Vulnerable to it."),
@@ -3324,29 +3288,43 @@ APPLY_POWERS = {
         "At the end of your turn, keep up to {X} of your Block."),
     "kk_tidal_riposte": ("TidalRipostePower", None,
         "Whenever an enemy's attack is fully Blocked, deal {X} damage to it."),
-    "kk_kurage_swarm": ("KurageSwarmPower", None,
-        "Whenever you write a [gold]Plan[/gold] that costs 0, the "
-        "[gold]Casket[/gold] gains {X}."),
     # THE PAYOFF PASS (2026-10-01). Kurage Canopy rides the plan bus
     # (`IKokomiPlanListener`); its class is in KokomiExpansion.cs.
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], gain {X} Block."),
-    # THE STATUS BATCH (2026-10-01); the Kokomi card pass (2026-10-11) moved
-    # it to the draw. Class in KokomiStatusBatch.cs.
-    "kk_abyssal_salvage": ("AbyssalSalvagePower", None,
-        "The first time each turn you draw a status, Exhaust it. The "
-        "[gold]Casket[/gold] gains {X}."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
-    "kk_patient_tide": ("PatientTidePower", None,
-        "At the end of your turn, keep up to {X} unspent "
-        "[gold]Energy[/gold]."),
     "kk_seas_reproach": ("SeasReproachPower", None,
         "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to "
         "an enemy, deal {X} damage to it."),
     "kk_watatsumi_resistance": ("WatatsumiResistancePower", None,
-        "Whenever you play a [gold]Companion[/gold] card, add a Nip to your "
+        "Whenever you write a [gold]Companion[/gold] card as a "
+        "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
+    # THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md
+    # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
+    "kk_sangonomiyas_orders": ("SangonomiyasOrdersPower", None,
+        "At the start of your turn, add a random Common Inazuma "
+        "[gold]Companion[/gold] card to your hand. It is "
+        "[gold]Ethereal[/gold]."),
+    "kk_kurage_bloom": ("KurageBloomPower", None,
+        "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
+    "kk_watchful_shoal": ("WatchfulShoalPower", None,
+        "Whenever you write an [gold]Ethereal[/gold] card as a "
+        "[gold]Plan[/gold], gain {X} [gold]Block[/gold]."),
+    "kk_coordinated_tide": ("CoordinatedTidePower", None,
+        "Whenever the [gold]Bake-Kurage[/gold] carries out an "
+        "[gold]Ethereal[/gold] card, deal {X} [gold]Hydro[/gold] damage to "
+        "the front enemy."),
+    "kk_grand_strategist": ("GrandStrategistPower", None,
+        "Whenever a [gold]Plan[/gold] causes an [gold]Elemental "
+        "Reaction[/gold], deal {X} damage to ALL enemies."),
+    "kk_endless_shoal": ("EndlessShoalPower", None,
+        "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+        "[gold]Sting[/gold] or [gold]Ward[/gold], add a copy of it to your "
         "hand."),
+    "kk_dawn_tide": ("DawnTidePower", None,
+        "At the start of your turn, the [gold]Bake-Kurage[/gold] applies "
+        "[gold]Hydro[/gold] to ALL enemies."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -4346,18 +4324,9 @@ CARD_FIELDS = {
     # takes neither, and why an arm whose Strike is its OWN card must say so.
     # `loader._validate_basic_tag` refuses the same two from the other side.
     "basic_tag",
-    # `EB-643` (R265), DUSK: this row's Plan line is carried out at the END of
-    # the turn it was written on, before the enemies act, instead of next
-    # morning.
-    #
-    # A ROW FIELD AND NOT A CLAUSE, deliberately, and the reason is what the
-    # word means: Dusk is WHEN the whole line lands, so a card cannot have one
-    # dusk clause and one morning clause any more than it can be played on two
-    # turns. It also keeps `PLAN_CLAUSE_KINDS` closed on what a Plan DOES.
-    # Prototype surface only, and only beside a `plan:` list -- both checked
-    # in `card_level_reason`, and `loader._validate_plan_dusk` refuses the same
-    # two from the other side.
-    "plan_dusk",
+    # (`EB-643`'s `plan_dusk` left with Dusk, the Kokomi re-founding,
+    # 2026-10-12: no Plan is carried out at the end of the turn it was
+    # written on any more.)
     # A9 (2026-07-28): Innate on the BASE card, not only as an upgrade delta.
     # tier0 needed nothing -- Card.innate already existed and combat's
     # surface_innate reads it on any card -- but the generator emitted the
@@ -4548,18 +4517,6 @@ def card_level_reason(
         if not isinstance(card.get("cost"), int):
             return ("cost_reduction_per_discard_this_turn on an X or "
                     "unprinted cost -- there is no number to discount")
-    # `EB-643`. DUSK SAYS WHEN A PLAN LANDS, so it needs a Plan to be about,
-    # and the value is literally `True` -- the `innate:` / `retain:`
-    # precedent, where only true is a ruling and `false` would be a second
-    # spelling of the default. `loader._validate_plan_dusk` is the twin.
-    dusk = card.get("plan_dusk")
-    if dusk is not None:
-        if dusk is not True:
-            return ("plan_dusk must be true -- it is a ruling and not a "
-                    "switch, the way `innate:` is")
-        if not card.get("plan"):
-            return ("plan_dusk on a row with no `plan:` line -- Dusk says "
-                    "WHEN a Plan is carried out, so there has to be one")
     # `EB-732` (Blast Shield). `return_to_hand` IS A FACT ABOUT THE WHOLE PLAY
     # and not a line in the body: the C# spells it as a
     # `GetResultLocationForCardPlay` override, which the game asks once and
@@ -4654,10 +4611,9 @@ RUNTIME_TIMES = {
     # R276 (Fireworks Finale): the Sparks the all-in price just spent, the
     # local `_stmt_spend_spark` declares ahead of the body.
     "sparks_spent": "sparksSpent",
-    # The Kokomi Rare pass (2026-10-04), Shoal of Spears: one hit per Plan
-    # written this turn (`effects._amount`'s token of the same name).
-    "plans_written_this_turn":
-        "KokomiOverhaulLedger.For(Owner.Creature).PlansWrittenThisTurn",
+    # The Kokomi re-founding (2026-10-12), Shoal of Spears: one hit per Plan
+    # waiting (`effects._amount`'s token of the same name).
+    "plans_held": "KokomiPlan.PlansHeld(Owner.Creature)",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -4666,8 +4622,7 @@ RUNTIME_TIMES = {
 RUNTIME_TIMES_TEXT = {
     "salon_members": " once per [gold]Salon Member[/gold]",
     "sparks_spent": " for each [gold]Spark[/gold] spent",
-    "plans_written_this_turn":
-        " once for each [gold]Plan[/gold] you wrote this turn",
+    "plans_held": " once for each [gold]Plan[/gold] waiting",
 }
 
 
@@ -6156,11 +6111,6 @@ def kokomi_companions_this_turn_calc_rider(
 #:     (`KokomiPlan.PlansHeld`, the reader Tide Chart's draw took).
 #: Sim twins: `effects._runtime_count`, the same three tokens.
 KOKOMI_CASKET_COUNTS = {
-    "casket_count": "static (card, _) => KokomiOverhaulLedger.For("
-                    "card.Owner.Creature).CasketCount",
-    "plans_carried_out_this_turn":
-        "static (card, _) => KokomiOverhaulLedger.For("
-        "card.Owner.Creature).PlansCarriedOutThisTurn",
     # [USER]'s Kokomi run (2026-10-11): Sango Isshin's "this combat"
     # (`KokomiOverhaulLedger.PlansCarriedOutThisCombat`, never rolled).
     "plans_carried_out_this_combat":
@@ -6168,15 +6118,6 @@ KOKOMI_CASKET_COUNTS = {
         "card.Owner.Creature).PlansCarriedOutThisCombat",
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
-    # THE EXPANSION, BATCH ONE (2026-09-29): Weight of the Plan's "the Energy
-    # paid for the Plans waiting" (`KokomiPlan.EnergyWaiting`).
-    "plan_energy_waiting": "static (card, _) => KokomiPlan.EnergyWaiting("
-                           "card.Owner.Creature)",
-    # POOL COMPLETION (2026-10-01): Shoal of Spears' "for each Plan you wrote
-    # this turn" (`KokomiOverhaulLedger.PlansWrittenThisTurn`).
-    "plans_written_this_turn":
-        "static (card, _) => KokomiOverhaulLedger.For("
-        "card.Owner.Creature).PlansWrittenThisTurn",
 }
 
 
@@ -7868,8 +7809,7 @@ def build_vars(card: dict) -> list[str]:
     plan_line = card.get("plan") or []
     for index, (key, var) in sorted(plan_var_effects(card).items()):
         amount = int(plan_line[index]["amount"])
-        if key == "plan_damage" and plan_line[index].get("op") in (
-                "damage", "damage_if_alone"):
+        if key == "plan_damage" and plan_line[index].get("op") == "damage":
             strength_times = plan_line[index].get("strength_times")
             out.append(
                 f'new KokomiPlan.PlanDamageVar({amount}m, {int(strength_times)})'
@@ -8166,7 +8106,9 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "upgraded_grant": any(e["op"] in ("grant_alices_mine_each_turn",
                                           "plant_homework_bomb")
                               or (e["op"] == "kokomi"
-                                  and e.get("kind") == "shoal_call")
+                                  and e.get("kind") in ("shoal_call",
+                                                        "add_companion",
+                                                        "add_companions"))
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
         # writing card's IsUpgraded when the Plan is carried out.
@@ -11980,20 +11922,6 @@ def build_body(
                 "await KokomiPlan.ResolveFront("
                 "choiceContext, Owner.Creature);")
 
-        elif op == "fetch_open_casket":
-            # What the Tokoyo Returns (the Casket pass, 2026-09-28; re-aimed
-            # 2026-10-01 when the token lost its Exhaust). The first Open the
-            # Casket in her draw pile, else her discard pile, goes to her
-            # hand; none in either, nothing happens.
-            lines.append(
-                "await KokomiOverhaulKit.FetchOpenCasket("
-                "choiceContext, Owner.Creature);")
-
-        elif op == "casket_double":
-            # What the Tokoyo Took (the Casket pass, 2026-09-28).
-            lines.append(
-                "await KokomiOverhaulKit.DoubleCasket(Owner.Creature);")
-
 
         elif op == "cancel_all_plans_cash":
             # Ebb Tide (`EB-643`). PER ENTRY and not per carry-out -- "for
@@ -14784,13 +14712,12 @@ def _face_riders(card: dict, text: str) -> str:
 
 #: THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md
 #: sec.3, pick 2): a broken Plan clause, as `plan_line_on_its_own_line` leaves
-#: it, and its Dusk form.
-_BROKEN_PLAN_CLAUSE = re.compile(
-    r"\n(\[gold\]Dusk\[/gold\] )?\[gold\]Plan\[/gold\]:")
+#: it. (Its Dusk form left with Dusk, 2026-10-12.)
+_BROKEN_PLAN_CLAUSE = re.compile(r"\n\[gold\]Plan\[/gold\]:")
 
 
 def plan_line_says_or(card: dict, text: str) -> str:
-    """A Plan line under a now-line prints "Or plan:" ("Or dusk plan:").
+    """A Plan line under a now-line prints "Or plan:".
 
     [USER], 2026-10-01: "Agreed on the Plan text change." Both seats on the
     78-card build planned a card expecting its now-line too; the face put the
@@ -14800,29 +14727,23 @@ def plan_line_says_or(card: dict, text: str) -> str:
 
     ONLY UNDER A NOW-LINE (the main session's call, 2026-10-01, after the
     first build read "on every card" literally): the "or" chooses between two
-    printed effects, so a PLAN-ONLY row keeps "Plan:" ("Dusk Plan:") under its
+    printed effects, so a PLAN-ONLY row keeps "Plan:" under its
     "Play on the Bake-Kurage." line, which is an instruction and not an
     alternative. The test is the one `_plan_only_line` and the card's target
     type use, `plan` and no `effects`, so the three cannot disagree.
     """
     if not card.get("plan") or not card.get("effects"):
         return text
-
-    def _or(m: re.Match) -> str:
-        if m.group(1):
-            return "\nOr [gold]dusk[/gold] [gold]plan[/gold]:"
-        return "\nOr [gold]plan[/gold]:"
-
-    return _BROKEN_PLAN_CLAUSE.sub(_or, text)
+    return _BROKEN_PLAN_CLAUSE.sub("\nOr [gold]plan[/gold]:", text)
 
 
-#: A Plan CLAUSE, not a mention of the word: `[gold]Plan[/gold]:` (or its Dusk
-#: form) opening a sentence, i.e. after `.`/`!`/`?` and the joining space.
+#: A Plan CLAUSE, not a mention of the word: `[gold]Plan[/gold]:` opening a
+#: sentence, i.e. after `.`/`!`/`?` and the joining space.
 #: "Cancel your last [gold]Plan[/gold]: its card returns" is a sentence ABOUT a
 #: Plan and does not match; a face that opens with its Plan has nothing before
 #: it to break from.
 _PLAN_CLAUSE_BREAK = re.compile(
-    r"(?<=[.!?]) +(?=(?:\[gold\]Dusk\[/gold\] )?\[gold\]Plan\[/gold\]:)")
+    r"(?<=[.!?]) +(?=\[gold\]Plan\[/gold\]:)")
 
 
 def plan_line_on_its_own_line(text: str) -> str:
@@ -15956,20 +15877,11 @@ def emit(
         # jellyfish?" is a property of the play rather than of a mode, a
         # keyword or a second card. A plan-ONLY row takes no branch at all --
         # it cannot be played anywhere else.
-        # `EB-643`. THE DUSK FLAG RIDES THE WRITE, because Dusk is a fact about
-        # WHEN this card's line lands and the entry is the only thing that
-        # survives the play. `dusk:` is passed only where the row declares it,
-        # so every card authored before the field existed emits exactly the
-        # call it always did.
-        dusk_arg = ", dusk: true" if card.get("plan_dusk") else ""
-        # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29). THE ENERGY PAID RIDES
-        # THE WRITE TOO: the Big Plan reads "the Energy paid for the Plans
-        # waiting" and Grand Design "a Plan that cost 2 or more", both the
-        # cost actually paid after reductions -- which is the play's own
-        # `Resources.EnergySpent` and nothing the card can recompute later.
+        # (`EB-643`'s Dusk flag and the expansion's Energy-paid argument left
+        # with Dusk and the cards that read the Energy paid, the Kokomi
+        # re-founding, 2026-10-12.)
         schedule = ("await KokomiPlan.Schedule(choiceContext, Owner.Creature, "
-                    f"this, PlanClauses{dusk_arg}, "
-                    "paid: cardPlay.Resources.EnergySpent);")
+                    "this, PlanClauses);")
         # POOL COMPLETION (2026-10-01), DIVINE STRATEGY (her Ancient,
         # hand-written): "The first time each turn you play a card on the
         # Bake-Kurage, its now-line happens too." A row with a now-line asks
@@ -16004,6 +15916,22 @@ def emit(
                     "await PlayNowLine(choiceContext, cardPlay);"]
         else:
             body = [schedule]
+    # THE KOKOMI RE-FOUNDING (2026-10-12, review/active/kokomi-design-pass-
+    # 2026-10-11.md pick 4 (a), ruled): ANY Companion card can be written as a
+    # Plan. A Companion row with no Plan line of its own takes the same one
+    # `if` at the top: played on the Bake-Kurage, it is written
+    # (`KokomiCompanionPlan.Write`) and carried out next turn at its printed
+    # rate, after the Bake-Kurage applies Hydro to its target. Its TargetType
+    # accepts the jellyfish only on Kokomi (`KokomiCompanionPlan.TargetFor`),
+    # so every other character plays it exactly as before.
+    companion_plan = is_companion(card) and not plan_body
+    if companion_plan:
+        body = ["if (KokomiPlan.PlayedOnPet(cardPlay))",
+                "{",
+                "    await KokomiCompanionPlan.Write(choiceContext, this, "
+                "cardPlay);",
+                "    return;",
+                "}"] + body
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
@@ -16057,6 +15985,9 @@ def emit(
         interfaces += ", IElementalCard"
     if is_companion(card):
         interfaces += ", ICompanionCard"
+        # THE KOKOMI RE-FOUNDING (2026-10-12): writable as a Plan on Kokomi.
+        if companion_plan:
+            interfaces += ", IWritableCompanion"
     elif profile.emit_character_identity:
         interfaces += ", ICharacterCard"
     # `EB-637` / `EB-644`. A row that fields a Salon member says so on the
@@ -16845,6 +16776,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
            for eff in card.get("effects", [])):
         tips_expr = ("KleeExpansion.WithAlicesMinePreview("
                      f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # THE KOKOMI RE-FOUNDING (2026-10-12): a face that names a jellyfish card
+    # previews it, the same Blade Dance shape. Derived from the golded word,
+    # so a row that hands over a Sting or a Ward carries the preview the day
+    # it is written; Shoal Call's upgraded face previews the upgraded Sting.
+    if "[gold]Sting" in desc:
+        upgraded_sting = ("true" if any(
+            eff.get("op") == "kokomi" and eff.get("kind") == "shoal_call"
+            for eff in card.get("effects", [])) else "false")
+        tips_expr = ("KokomiCards.WithStingPreview("
+                     f"{tips_expr or 'base.ExtraHoverTips'}, this, "
+                     f"{upgraded_sting})")
+    if "[gold]Ward" in desc:
+        tips_expr = ("KokomiCards.WithWardPreview("
+                     f"{tips_expr or 'base.ExtraHoverTips'})")
     # THE KLEE STATUS PACKAGE: Klee Can Explain! previews the card it makes,
     # Compact's Fuel tip.
     for eff in card.get("effects", []):
@@ -17047,6 +16992,23 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             " for no\n    /// target (the Varka expansion).</summary>\n"
             "    public override TargetType TargetType =>\n"
             "        IsUpgraded ? TargetType.AllEnemies : base.TargetType;")
+    # THE KOKOMI RE-FOUNDING (2026-10-12): a Companion row's target accepts
+    # the Bake-Kurage on Kokomi, and only there (`KokomiCompanionPlan`).
+    if companion_plan:
+        if wide_target_member:
+            raise SystemExit(
+                f"{card['id']}: a Companion row with its own live TargetType "
+                "cannot also take the Companion Plan's -- the two overrides "
+                "would collide")
+        wide_target_member = (
+            "\n\n    /// <summary>On Kokomi, this Companion card can also be"
+            " written as a Plan on\n    /// the Bake-Kurage (the re-founding,"
+            " 2026-10-12).</summary>\n"
+            "    public override TargetType TargetType =>\n"
+            "        KokomiCompanionPlan.TargetFor(this, base.TargetType);\n\n"
+            "    /// <summary>The target this Companion prints, which its"
+            " carry-out aims by.</summary>\n"
+            "    public TargetType PrintedTargetType => base.TargetType;")
     # EB-118 §4.5, the Spark cost line. Sparks are a PowerModel and not a
     # CustomResource, so BaseLib's SetCanonicalCost rail below cannot carry
     # this price: the gate is CardModel.IsPlayable, the extension point the
