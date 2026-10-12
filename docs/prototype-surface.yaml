@@ -1380,15 +1380,15 @@
 - {id: proto_kk_sango_isshin, name: "Sango Isshin", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   # THE CASKET PASS (2026-09-28): per carry-out this turn, to ALL.
-   # 2026-09-29: gains a base of 8. A seat (Kokomi run KK2EL3M3NTS9) named it
-   # NEVER AGAIN because it dealt 0 on turn 1 and after any turn with no Plans.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # Casket pass (2026-09-28): per carry-out, to ALL; base 8 since 2026-09-29.
+   # [USER]'s run (2026-10-11): counts Plans this combat, 2 per Plan (was 6
+   # this turn). Provenance: "Kokomi: three fixes after [USER]'s run".
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] carried out this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies,
-              amount_formula: {base: 8, per: 6,
-                               count: plans_carried_out_this_turn}}],
-   # 10, plus 8 per Plan.
-   upgrade: {formula_base: 2, formula_per: 2}}
+              amount_formula: {base: 8, per: 2,
+                               count: plans_carried_out_this_combat}}],
+   # 10, plus 3 per Plan.
+   upgrade: {formula_base: 2, formula_per: 1}}
 
 # --- the Commander: Gorou, go (packet sec.4) ---
 
@@ -1433,11 +1433,13 @@
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
-   # Whole-run round 1 (2026-10-10): cost 1 -> 0; round 2: draws 1 (0 of 8
-   # taken). 2026-10-11 Kokomi card pass: draws 2; Exhaust stays.
+   # 2026-10-10 rounds: cost 0, draws; 2026-10-11 card pass: draws 2.
+   # [USER]'s run (2026-10-11): "an auto pick" with Exhaust off on upgrade;
+   # the upgrade now keeps Exhaust and draws 3 (provenance, same section).
    cost: 0, type: skill, rarity: common, exhaust: true,
-   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 2 cards.",
-   effects: [{op: carry_out_front_plan}, {op: draw, amount: 2}]}
+   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw {Cards:diff()} cards.",
+   effects: [{op: carry_out_front_plan}, {op: draw, amount: 2}],
+   upgrade: {draw: 1}}
 
 - {id: proto_kk_undertow, name: "Undertow", character: kokomi,
    authored_by: [claude],
@@ -2106,12 +2108,11 @@
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   # "Up to": every status and curse when she holds that many or fewer; she
-   # chooses which when she holds more.
-   # 2026-10-11 Kokomi card pass: adds "Draw 1 card."
-   description: "Apply 1 [gold]Weak[/gold]. Draw 1 card. [gold]Plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand.",
-   effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
-             {op: draw, amount: 1}],
+   # "Up to": she chooses which when she holds more. [USER]'s run
+   # (2026-10-11) took off the card pass's draw: "too good" as a Common
+   # cycler (provenance: "Kokomi: three fixes after [USER]'s run").
+   description: "Apply 1 [gold]Weak[/gold]. [gold]Plan[/gold]: [gold]Exhaust[/gold] up to {PlanExhaust:diff()} statuses or curses in your hand.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: enemy}],
    plan: [{op: exhaust_statuses_in_hand, amount: 2}],
    # Plan up to 3.
    upgrade: {plan_exhaust: 1}}

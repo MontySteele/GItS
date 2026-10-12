@@ -123,7 +123,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   seed. Ruled 2026-10-11 ("I think defaults here are fine"): Treatise draws
   when you play a Plan card's first line, not when you write it. Next:
   [USER]'s full run on the build with the round-5 fixes, watching act 3's
-  damage and the Queen's Bound turns.
+  damage and the Queen's Bound turns. [USER]'s run on 0.2.4969
+  (`review/records/kokomi-user-run-2026-10-11.md`) won but felt "clunky";
+  Tidecleanse lost its draw, Sango Isshin counts Plans this combat, Change of
+  Plans' upgrade keeps Exhaust, and a clean-up paper is next.
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:

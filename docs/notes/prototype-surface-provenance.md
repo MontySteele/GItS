@@ -7468,3 +7468,25 @@ strong but feels possibly justified as a high cost Rare." Then, on Mines:
   cannot re-trigger itself. Engines: `ProtoBombPower.Place` calls
   `AlicesRecipePower.GrowBeforePlacement`; sim `klee_overhaul.place`
   (`relocated=`).
+
+## Kokomi: three fixes after [USER]'s run, 2026-10-11
+
+[USER] won a solo Kokomi run on 0.2.4969 and called it "clunky"
+(`review/records/kokomi-user-run-2026-10-11.md`). Three rows move.
+
+- **Tidecleanse** (`proto_kk_tidecleanse`). "Tidecleanse as a cycling card at
+  Common is too good". The card pass's "Draw 1 card." comes off: "Apply 1
+  Weak. Plan: Exhaust up to 2 [3] statuses or curses in your hand."
+- **Sango Isshin** (`proto_kk_sango_isshin`). "Sango Isshin should probably be
+  "plans this combat" rather than "plans this turn"". Now 8 [10] to ALL plus
+  2 [3] for each Plan carried out this combat (was 6 [8] per Plan this turn).
+  The count is a new token, `plans_carried_out_this_combat`: C#
+  `KokomiOverhaulLedger.PlansCarriedOutThisCombat` (already kept for
+  telemetry, one ledger per combat), sim
+  `CombatState.kk_plans_carried_out_this_combat`, raised beside the per-turn
+  count at every carry-out, so a Plan carried out twice counts twice.
+- **Change of Plans** (`proto_kk_change_of_plans`). "Change of Plans is
+  insanely good with the upgrade removing Exhaust - it's an auto pick". The
+  row now authors `upgrade: {draw: 1}`, so the Prototype default (which took
+  Exhaust off) no longer reaches it: the upgrade keeps Exhaust, costs 0 and
+  draws 3.

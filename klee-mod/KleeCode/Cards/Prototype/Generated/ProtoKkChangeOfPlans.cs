@@ -48,7 +48,7 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Change of Plans"),
-        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw 2 cards."),
+        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw {Cards:diff()} cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -72,6 +72,6 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        RemoveKeyword(CardKeyword.Exhaust);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }

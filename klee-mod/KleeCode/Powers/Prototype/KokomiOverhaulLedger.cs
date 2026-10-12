@@ -169,8 +169,10 @@ public sealed class KokomiOverhaulLedger
     public int PlansWrittenThisTurn { get; private set; }
 
     /// <summary>The Kokomi whole-run round (2026-10-10): Plans written and
-    /// carried out THIS COMBAT, for telemetry only. Never rolled; a new combat
-    /// is a new ledger. Carry-outs count as <see cref="PlansCarriedOutThisTurn"/>
+    /// carried out THIS COMBAT. Telemetry reads both; since [USER]'s run
+    /// (2026-10-11) Sango Isshin reads the carried-out count too (sim twin:
+    /// <c>CombatState.kk_plans_carried_out_this_combat</c>). Never rolled; a
+    /// new combat is a new ledger. Carry-outs count as <see cref="PlansCarriedOutThisTurn"/>
     /// does (a Plan carried out twice counts twice).</summary>
     public int PlansWrittenThisCombat { get; private set; }
 

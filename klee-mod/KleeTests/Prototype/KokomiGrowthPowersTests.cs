@@ -180,21 +180,24 @@ public class KokomiGrowthPowersTests
     [Fact]
     public void Change_of_plans_draws_two_after_the_carry_out()
     {
-        // The Kokomi card pass (2026-10-11): draws 2; Exhaust stays.
+        // The Kokomi card pass (2026-10-11): draws 2; Exhaust stays. [USER]'s
+        // run (2026-10-11): the upgrade keeps Exhaust and draws 3.
         var card = new ProtoKkChangeOfPlans();
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
         Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
         Assert.Equal("The [gold]Bake-Kurage[/gold] carries out your first "
-                   + "[gold]Plan[/gold] now. Draw 2 cards.", Face(card));
+                   + "[gold]Plan[/gold] now. Draw {Cards:diff()} cards.", Face(card));
         var play = Seq("ProtoKkChangeOfPlans", "OnPlay");
         var carry = play.FindIndex(c => c.Contains("KokomiPlan.ResolveFront"));
         var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
         Assert.True(carry >= 0 && carry < draw);
         // It draws on an empty jellyfish too, so the `EB-455` gate is gone.
         Assert.False(typeof(IUnplayableReasonCard).IsAssignableFrom(card.GetType()));
-        Assert.DoesNotContain(CardKeyword.Exhaust,
-                              Upgraded<ProtoKkChangeOfPlans>().Keywords);
+        var up = Upgraded<ProtoKkChangeOfPlans>();
+        Assert.Contains(CardKeyword.Exhaust, up.Keywords);
+        Assert.Equal(3m, up.DynamicVars.Cards.BaseValue);
+        Assert.Equal(0, up.EnergyCost.Canonical);
     }
 
     [Fact]

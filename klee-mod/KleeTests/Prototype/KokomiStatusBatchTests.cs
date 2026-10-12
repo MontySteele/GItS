@@ -205,6 +205,9 @@ public class KokomiStatusBatchTests : IDisposable
             Upgraded<ProtoKkTidecleanse>().PlanClauses).Amount);
         Assert.Contains(Seq("ProtoKkTidecleanse", "PlayNowLine"),
                         c => c.Contains("WeakPower"));
+        // [USER]'s run (2026-10-11): the card pass's draw comes off.
+        Assert.DoesNotContain(Seq("ProtoKkTidecleanse", "PlayNowLine"),
+                              c => c.Contains("CardPileCmd.Draw"));
         var body = Seq("KokomiStatusBatch", "ExhaustStatuses");
         Assert.Contains(body, c => c.Contains("CardSelectCmd.FromHand"));
         Assert.Contains(body, c => c.Contains("CardCmd.Exhaust"));

@@ -206,7 +206,7 @@ def test_the_max_hp_fraction_reads_the_character_sheet():
     seats her with -- not a constant invented here.
 
     SANGO ISSHIN LEFT THE OP (the Casket pass, 2026-09-28): it deals 8 to ALL,
-    plus 6 per Plan carried out this turn, now (the base since 2026-09-29), priced at the neutral single count
+    plus 2 per Plan carried out this combat (2026-10-11), priced at the neutral single count
     every live count here takes. The op stays registered and priced, which
     the rename test below holds.
     """
@@ -216,7 +216,8 @@ def test_the_max_hp_fraction_reads_the_character_sheet():
     hit = card.effects[0]
     assert hit["op"] == "damage"
     assert hit["target"] == "all_enemies"
-    assert hit["amount_formula"]["count"] == "plans_carried_out_this_turn"
+    # The user's run (2026-10-11): 2 per Plan carried out this combat.
+    assert hit["amount_formula"]["count"] == "plans_carried_out_this_combat"
     assert draft._static_power(card) > 0
 
 

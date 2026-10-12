@@ -609,8 +609,8 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
         return upgrades.prototype_default_delta(
             card.id, card.cost, card.effects, bool(card.exhaust))
 
-    # Change of Plans keeps its text and loses Exhaust.
-    assert delta("proto_kk_change_of_plans") == {"remove": "exhaust"}
+    # Change of Plans authors its own upgrade since [USER]'s run (2026-10-11),
+    # so the default rule no longer reaches it (pinned in test_kokomi_plan).
     assert delta("proto_kk_moons_reflection") == {"remove": "exhaust"}
 
     # The counted-power half: `weak` at 1 IS a printed number, so it never

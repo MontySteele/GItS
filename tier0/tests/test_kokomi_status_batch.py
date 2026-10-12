@@ -141,6 +141,14 @@ def test_tidecleanse_now_line_applies_weak(overhaul):
     assert not st.kk_plan_queue
 
 
+def test_tidecleanse_draws_nothing(overhaul):
+    """[USER]'s run (2026-10-11): "Tidecleanse as a cycling card at Common is
+    too good" -- the card pass's "Draw 1 card." comes off."""
+    assert _row("proto_kk_tidecleanse").effects == [
+        {"op": "apply_power", "power": "weak", "amount": 1,
+         "target": "enemy"}]
+
+
 # --- Sea Glass Harvest ---------------------------------------------------------------
 
 def test_sea_glass_harvest_transforms_statuses_and_curses(overhaul):

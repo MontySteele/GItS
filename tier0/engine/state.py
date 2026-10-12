@@ -1333,6 +1333,11 @@ class CombatState:
     # counts twice) and cleared by `kokomi_plan.roll_turn`.
     # `KokomiOverhaulLedger.PlansCarriedOutThisTurn`'s twin.
     kk_plans_carried_out_this_turn: int = 0
+    # [USER]'s Kokomi run (2026-10-11): Sango Isshin counts THIS COMBAT. The
+    # same carry-outs, per fight (a `CombatState` is one fight, so it starts
+    # at 0 and `roll_turn` never clears it).
+    # `KokomiOverhaulLedger.PlansCarriedOutThisCombat`'s twin.
+    kk_plans_carried_out_this_combat: int = 0
     # And THE TAMAKUSHI CASKET'S COUNT, per fight (a `CombatState` is one
     # fight): +1 per carry-out while she holds the relic, moved by Pearl Diver,
     # Moon Signal and What the Tokoyo Took, emptied by Open the Casket. The
