@@ -361,6 +361,40 @@ public class KleeStoryTests
     }
 
     [Fact]
+    public void BaseLibs_entry_registered_first_is_replaced_and_hers_repeats()
+    {
+        // The live order: BaseLib's PopulateLocKeys prefix (AddAncientDialogues)
+        // finds our NEOW.talk.KLEEMOD-KLEE.0-* rows and registers the entry
+        // first, the way AncientDialogueUtil.GetDialoguesForKey builds it:
+        // VisitIndex 0, not repeating. Our DialogueSet postfix runs after.
+        var set = BaseSet();
+        var baseLibs = new AncientDialogue("", "") { VisitIndex = 0 };
+        set.CharacterDialogues[KleeEntry] = new[] { baseLibs };
+
+        // The bug as seen on 0.2.5073: past her first visit the game gives the
+        // stock repeating line, never hers.
+        Assert.Same(set.AgnosticDialogues[1],
+                    set.GetValidDialogues(Character(KleeEntry), 3, 9, true).Single());
+
+        var added = StoryAncients.AddTo(set, "NEOW", populate: false, entryOf: _ => KleeEntry);
+        Assert.Equal(new[] { KleeEntry }, added);
+        var hers = set.CharacterDialogues[KleeEntry].Single();
+        Assert.NotSame(baseLibs, hers);
+        Assert.True(hers.IsRepeating);
+        Assert.Null(hers.VisitIndex);
+        foreach (var total in new[] { 1, 2, 5, 40 })
+        {
+            Assert.Same(hers, StoryAncients.StoryDialogueFor(set, KleeEntry, total));
+        }
+        // And the game's own repeating pool holds hers (BaseLib's never was).
+        Assert.Contains(hers, set.GetValidDialogues(Character(KleeEntry), 3, 9, true));
+
+        // A second pass over the same set leaves hers in place.
+        Assert.Empty(StoryAncients.AddTo(set, "NEOW", populate: false, entryOf: _ => KleeEntry));
+        Assert.Same(hers, set.CharacterDialogues[KleeEntry].Single());
+    }
+
+    [Fact]
     public void The_games_once_ever_introduction_still_comes_first()
     {
         var set = BaseSet();
