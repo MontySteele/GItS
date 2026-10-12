@@ -58,8 +58,6 @@ One short exchange per Ancient, on the first visit. Before the build, I check ea
 
 **Revised 2026-10-12.** [USER]: "Use American English, not British English, e.g. 'mom'. I think the intro's first line is probably fine but the second could use a different flavor. Confinement sounds punishing for decks that don't play a lot of bombs, especially in act 1." The intro now gives her a reason to climb (her mom's advice), and Confinement now runs out after three combats.
 
-## For [USER] (and your friend)
+## Ruled
 
-1. **This batch.**
-   - **(a) Default:** it goes in as written. I build these hooks (intro, Ancients, the event and Confinement, combat, end-of-run and pair lines) and write Klee's acts 2 and 3 in the same voice.
-   - (b) Say what to change first, line by line. I rewrite before building.
+[USER], 2026-10-12, after the revision: "Otherwise the dialogue looks good". Built as written; Klee's acts 2 and 3 follow in the same voice.
