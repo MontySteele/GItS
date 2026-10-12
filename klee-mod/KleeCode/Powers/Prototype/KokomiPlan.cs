@@ -121,12 +121,6 @@ public static class KokomiPlan
         // hurried out by Change of Plans has already left the queue and does
         // not count. Sim twin: `kokomi_plan.BLOCK_PER_PLAN_HELD`.
         BlockPerPlanHeld,
-        // `EB-679`'s WHOLE-DRAIN count, "each Plan carried out this turn, this
-        // one included": Scout Ahead briefly took it and R267 pick 3 took it
-        // back off. NO CARD SPELLS IT TODAY -- it is kept resolved the way the
-        // arm keeps other unrowed clauses, so a sheet can reach for it without
-        // a build. Still carry-outs and not entries, so Nereid's adds one.
-        DrawPerPlanThisTurn,
         // Opening Gambit: "the next Plan deals double damage." Second Wave:
         // "the next Plan is carried out twice." A RIDER, written by the entry
         // that prints it and spent by the entry carried out immediately after
@@ -616,21 +610,6 @@ public static class KokomiPlan
     private static readonly
         Dictionary<Player, List<CarriedOutPlan>> _summonHits = new();
 
-    /// <summary>
-    /// TIDE CHART'S PROMISE, per seat (`EB-478`, R257): what the next morning
-    /// owes, as a rate per Plan carried out and a flat number beside it.
-    ///
-    /// TWO NUMBERS AND NOT A LIST OF CARDS, because the promise is arithmetic.
-    /// Every copy played this turn adds its own `per` and its own flat, and the
-    /// morning after pays <c>Flat + Per * PlansThisMorning</c> in one draw --
-    /// so two base copies pay twice the depth, and an upgraded copy beside a
-    /// base one adds its extra card once. A list of sources would let two
-    /// copies read different counts on one morning, which is a rule nothing
-    /// printed. Sim twin: `state.kk_tide_chart_per` / `kk_tide_chart_flat`.
-    /// </summary>
-    private static readonly Dictionary<Player, (int Per, int Flat)>
-        _tideCharts = new();
-
     /// <summary>Test seam: forget everything. The mod never calls it.</summary>
     public static void ResetAll()
     {
@@ -639,7 +618,6 @@ public static class KokomiPlan
         _showing.Clear();
         _carriedOut.Clear();
         _summonHits.Clear();
-        _tideCharts.Clear();
         // `EB-643`: the cached environment read too, so a test that declares a
         // cap and one that does not cannot see each other's answer.
         _planCap = null;
@@ -656,10 +634,6 @@ public static class KokomiPlan
         // `EB-654`: and last fight's summon hits, for the same reason -- a
         // volley that landed in the fight before owes this one no receipt.
         _summonHits.Clear();
-        // A promise is a fact about ONE combat, like the queue above it: a
-        // Tide Chart played on the last turn of a fight owes nothing to the
-        // next one.
-        _tideCharts.Clear();
     }
 
     /// <summary>This seat's queue, front first. Never null.</summary>
@@ -1324,26 +1298,11 @@ public static class KokomiPlan
         // approximate: both flags are cleared at the top of every entry, so
         // whatever is pending was written by the entry immediately before.
         string? riderSource = null;
-        // `EB-679`, SCOUT AHEAD'S COUNT: THE WHOLE DRAIN, itself included,
-        // read ONCE before the first clause runs. Order-independence is the
-        // point of the redesign -- a reader whose number depends on where in
-        // the queue it sits is a card whose value is its position -- so this
-        // is computed here rather than per entry, the discipline
-        // <see cref="ResolveAll"/> already keeps for <c>PlansThisMorning</c>.
-        //
-        // ONE EXTRA FOR NEREID'S ASCENSION, the same term `ResolveAll` writes
-        // and for the same reason: the Rare carries the FIRST entry of a drain
-        // out twice, and every reader in this arm counts CARRY-OUTS
-        // (`EB-501`). It deliberately does NOT fold in an extra carry-out a
-        // later entry may write -- that rider is not on the board when the
-        // number is asked, which is the reading the old per-entry term took.
         // POOL COMPLETION (2026-10-01), SPRING TIDE: a MID-TURN drain is
         // neither a morning nor a Dusk, so Nereid's Ascension does not double
         // its first entry -- <see cref="ResolveFront"/>'s reading, for the
         // whole queue. `kokomi_plan._drain`'s `mid_turn` is the twin.
         var firstTimes = midTurn ? 1 : CarryOutTimes(kokomi);
-        var drainPlans = due.Count
-                       + (due.Count > 0 && firstTimes > 1 ? 1 : 0);
         for (var index = 0; index < due.Count; index++)
         {
             var entry = due[index];
@@ -1370,7 +1329,7 @@ public static class KokomiPlan
                 var (wroteDouble, wroteExtra) = await ResolveEntry(
                     choiceContext, kokomi, entry, onPlay: midTurn,
                     doubleDamage: doubleThis,
-                    drainPlans: drainPlans, drainEntries: due.Count);
+                    drainEntries: due.Count);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
                 // above: an entry doubled by Nereid's prints its rider twice
                 // and twice said twice is still twice.
@@ -1549,123 +1508,6 @@ public static class KokomiPlan
             queue[i] = queue[i] with { AimOverride = id };
         }
         Vfx.KokomiPlanStrip.Refresh(kokomi);
-    }
-
-    /// <summary>
-    /// TIDE CHART IS PLAYED: the draw is OWED, and paid next morning
-    /// (`EB-478`, R257).
-    ///
-    /// NOTHING IS DRAWN HERE, which is the whole redesign. The old row read
-    /// the queue at PLAY time -- "draw 1 card for each Plan the Bake-Kurage
-    /// holds" -- and drew zero on three plays out of four, because a seat
-    /// plays its cheap cards before it writes its Plans (Kokomi r15). The
-    /// promise is written down instead and read after the carry-outs, when
-    /// the number it multiplies is a fact rather than a guess.
-    ///
-    /// <paramref name="flat"/> IS THE UPGRADE'S HALF, folded in by the card
-    /// as an <c>IsUpgraded</c> literal rather than carried here as a flag:
-    /// this file holds what is owed, and which card owed it is the card's own
-    /// business. Sim twin: `kokomi_plan.promise_tide_chart`.
-    /// </summary>
-    /// <summary>The card's printed title, said once (`EB-503`): the morning's
-    /// draw line names the card that promised it, and the page's own naming
-    /// rule is "by printed title". Sim twin: the `tide_chart_paid` row's own
-    /// name.
-    /// </summary>
-    private const string TideChartTitle = "Tide Chart";
-
-    public static void PromiseDraw(Creature? kokomi, int flat, int per)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-        Rebase(kokomi);
-        var owed = _tideCharts.TryGetValue(player, out var had)
-            ? had
-            : (Per: 0, Flat: 0);
-        _tideCharts[player] = (owed.Per + per, owed.Flat + flat);
-    }
-
-    /// <summary>
-    /// WHAT THIS MORNING OWES: <c>Flat + Per * PlansThisMorning</c>, and zero
-    /// when nothing is promised (`EB-478`, R257).
-    ///
-    /// A PURE READ, split out of the payment for the reason the arithmetic in
-    /// <c>KokomiPlanLedgerTests</c> is split out of <c>Sync</c>: a draw needs a
-    /// live <c>CombatState</c> and the headless boundary does not reach one,
-    /// so the number is checkable here and the DRAW is pinned structurally.
-    ///
-    /// THE COUNT IS THE MORNING'S DEPTH, <c>PlansThisMorning</c> -- the same
-    /// number Tide Wall reads, written at the drain and cleared by the
-    /// ledger's own roll, so a morning with no Plans reads an honest zero
-    /// rather than yesterday's.
-    /// </summary>
-    public static int PromisedDraw(Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return 0;
-        var player = kokomi!.Player;
-        if (player == null) return 0;
-        if (!_tideCharts.TryGetValue(player, out var owed)) return 0;
-        return owed.Flat
-             + owed.Per * KokomiOverhaulLedger.For(kokomi).PlansThisMorning;
-    }
-
-    /// <summary>
-    /// THE MORNING AFTER: every Tide Chart promise is paid, in one draw.
-    ///
-    /// CALLED ONE LINE AFTER <see cref="ResolveAll"/>, from
-    /// <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c>, which is what the
-    /// face says -- "after the Bake-Kurage carries out its Plans". Called
-    /// unconditionally, because <see cref="ResolveAll"/> returns early on an
-    /// empty queue and a promise made on a turn that banked nothing still pays
-    /// its flat: the upgraded row draws 1 on an empty morning and the base row
-    /// draws 0, which is the ruled reading.
-    ///
-    /// THE COUNT IS THE MORNING'S DEPTH, <c>PlansThisMorning</c> -- the same
-    /// number Tide Wall reads, written at the drain and cleared by the
-    /// ledger's own roll, so a morning with no Plans reads an honest zero
-    /// rather than yesterday's. Sim twin: `kokomi_plan.pay_tide_charts`.
-    /// </summary>
-    public static async Task PayPromisedDraws(
-        PlayerChoiceContext choiceContext, Creature? kokomi)
-    {
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var player = kokomi!.Player;
-        if (player == null) return;
-
-        Rebase(kokomi);
-        var cards = PromisedDraw(kokomi);
-        // CLEARED BEFORE THE DRAW, not after: a promise that survived its own
-        // payment would pay twice on the next morning, and clearing first is
-        // the shape that cannot.
-        _tideCharts.Remove(player);
-        if (cards <= 0) return;
-        await CardPileCmd.Draw(choiceContext, cards, player);
-        // `EB-503`. THE ONE PLAN CARD THE BAKE-KURAGE BLOCK NEVER REPORTED ON.
-        // The r17 seat had two carry-outs pending, watched one extra card
-        // arrive, and found "no line anywhere" -- the draw happens inside the
-        // morning, after the jellyfish has finished speaking, and nothing said
-        // it was the Tide Chart's.
-        //
-        // A ROW AND NOT A BEAT, which is `NoteUnfinished`'s split and taken
-        // for a second reason here: `KurageBeat.Say` builds an
-        // `NSpeechBubbleVfx`, which needs a live scene tree, and this method
-        // is one of the few on this class the headless suite can reach
-        // (`KokomiOverhaulRuleTests` calls it directly). It still goes through
-        // `Record`, the one writer, so the draw files into the same list every
-        // carry-out lands in and the page needs to learn nothing --
-        // `KurageBeat.Line` gives it the ruled format ("Bake-Kurage: Tide
-        // Chart, 3") and `Kind.Draw`'s word the rest ("3 cards drawn").
-        //
-        // AFTER THE DRAW, not before, because the number the seat is owed is
-        // what arrived: this is the one site that knows both that a promise
-        // existed and what it came to.
-        //
-        // `onPlay: false` -- a morning event, so it files with the morning's
-        // carry-outs and not with the on-play doors.
-        Record(kokomi, new CarriedOutPlan(
-            TideChartTitle, cards, Vfx.KurageBeat.Line(TideChartTitle, cards),
-            null, false, NumberKind(Kind.Draw), cards, null));
     }
 
     /// <summary>
@@ -2036,9 +1878,6 @@ public static class KokomiPlan
     /// </summary>
     /// <param name="doubleDamage">`EB-643`. Opening Gambit's rider, spent on
     /// THIS entry by the drain that carried the entry before it out.</param>
-    /// <param name="drainPlans">`EB-679`. The whole-drain count, this entry
-    /// included, which no card spells today. The default is the honest answer
-    /// for a drain of one (<see cref="ResolveFront"/>).</param>
     /// <returns>`EB-643`. The riders THIS entry wrote, which the drain spends
     /// on the carry-out that follows it. They are handed back rather than stored because the clause
     /// that writes one is inside the loop below and the drain that spends it is
@@ -2047,7 +1886,7 @@ public static class KokomiPlan
     private static async Task<(bool Double, bool Extra)> ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
         bool onPlay = false, bool doubleDamage = false,
-        int drainPlans = 1, int drainEntries = 1)
+        int drainEntries = 1)
     {
         var wroteDouble = false;
         var wroteExtra = false;
@@ -2096,10 +1935,10 @@ public static class KokomiPlan
                 // they do is tell the drain about the entry that follows.
                 if (clause.Kind == Kind.NextPlanDoubleDamage) wroteDouble = true;
                 if (clause.Kind == Kind.NextPlanExtraCarryOut) wroteExtra = true;
-                var wanted = AskedFor(kokomi, clause, drainPlans);
+                var wanted = AskedFor(kokomi, clause);
                 var produced = await ResolveOne(choiceContext, kokomi, clause,
                                                 entry, doubleDamage,
-                                                drainPlans, drainEntries);
+                                                drainEntries);
                 if (number == null && produced != null)
                 {
                     number = produced;
@@ -2344,27 +2183,13 @@ public static class KokomiPlan
     private static async Task<int?> ResolveOne(
         PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
         Entry? entry = null, bool doubleDamage = false,
-        int drainPlans = 1, int drainEntries = 1)
+        int drainEntries = 1)
     {
         var player = kokomi.Player;
         if (player == null) return null;
 
         switch (plan.Kind)
         {
-            case Kind.DrawPerPlanThisTurn:
-            {
-                // `EB-679`'s WHOLE-DRAIN count, on no card since R267 pick 3.
-                // <paramref name="drainPlans"/> is read once for the drain --
-                // see <see cref="Drain"/> -- and the printed amount is the
-                // RATE. Change of Plans carries ONE entry out and pays 1.
-                var cards = plan.Amount * drainPlans;
-                if (cards > 0)
-                {
-                    await CardPileCmd.Draw(choiceContext, cards, player);
-                }
-                return cards;
-            }
-
             case Kind.NextPlanDoubleDamage:
             case Kind.NextPlanExtraCarryOut:
                 // THE RIDERS DO NOTHING HERE, and that is the whole of them:
@@ -2621,14 +2446,7 @@ public static class KokomiPlan
         Kind.BlockFrontIntent => "Block",
         Kind.ApplyWeak => "Weak",
         Kind.ApplyVulnerable => "Vulnerable",
-        // `EB-643`. The whole-drain draw's figure is cards, the same word
-        // Draw's is: the reader is asking what the number IS and not how it was
-        // derived, which is the argument the three damage kinds above make. The
-        // two riders produce no number at all and fall to the default, and
-        // `EB-718` puts Scout Ahead among them -- what it is worth is drawn at
-        // the LATER carry-outs, where it rides those beats by name
-        // (the retired Casket strike's rider, legacy cleanup stage 6).
-        Kind.DrawPerPlanThisTurn => "cards drawn",
+        // The two riders produce no number at all and fall to the default.
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",
         Kind.ExhaustStatusesInHand => "cards exhausted",
@@ -2652,23 +2470,9 @@ public static class KokomiPlan
     /// Command last turn's Companions -- so asking afterwards would answer a
     /// different question.
     /// </summary>
-    private static int? AskedFor(Creature kokomi, Planned plan,
-                                 int drainPlans = 1) => plan.Kind
+    private static int? AskedFor(Creature kokomi, Planned plan) => plan.Kind
         switch
     {
-        // `EB-643`. A FOURTH SCALED KIND, and it reads the DRAIN rather than a
-        // ledger -- which is why `drainPlans` is a parameter here and the other
-        // three are computed from state: nothing on the board says how deep the
-        // drain around this entry is, so the drain is the only thing that
-        // knows.
-        //
-        // SCOUT AHEAD IS NOT HERE ANY MORE (`EB-718`). It used to ask for
-        // `Amount * after`, the entries still queued, and that number was
-        // WRONG in the one case the card is for: Second Wave behind it doubles
-        // a carry-out the entry count cannot see. It is paid per later
-        // carry-out now, so there is no figure to ask for at this clause and
-        // nothing prints an entries-based estimate anywhere.
-        Kind.DrawPerPlanThisTurn => plan.Amount * drainPlans,
         // `EB-685`. A FIFTH SCALED KIND, and it reads the QUEUE rather than a
         // ledger -- asked here BEFORE the clause runs, which for this one is
         // the same moment the clause itself asks: `ResolveDusk` has already

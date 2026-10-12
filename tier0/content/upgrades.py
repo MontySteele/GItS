@@ -1020,17 +1020,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             for fx in hits:
                 fx["amount"] += val
             ok = bool(hits)
-        elif key == "tide_draw":
-            # `EB-478`, R257. Tide Chart's FLAT half -- "draw 1 more", meaning
-            # one card on top of the one per Plan carried out. A key of its own
-            # rather than `draw`, because the two are different promises: a
-            # `draw` delta moves a number the card draws NOW, and this one
-            # moves a number paid next morning against a count the play cannot
-            # see. Binding it to `draw` would also make a row carrying both a
-            # cantrip and this op upgrade the wrong half.
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "draw_after_plans"),
-                             "amount", val)
         elif key == "draw_and_discard":
             # ONE DynamicVar read by two ops (Prepared: draw N, discard N).
             # Bumping only one of them would upgrade half a card, so this
@@ -1273,8 +1262,8 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # became an upgradable number the moment the look started handing
             # one of them over: "look at 2, bury 1" is no better for showing 3,
             # and "look at 3, TAKE 1" is. A key of its own rather than `draw`,
-            # for `tide_draw`'s reason -- these are different promises and one
-            # row could print both.
+            # because these are different promises and one row could print
+            # both.
             #
             # THE WHOLE SCRY FAMILY in one ordered walk, so a look-and-bury row
             # that later wants the same upgrade needs no key of its own. No row

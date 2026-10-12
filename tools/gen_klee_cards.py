@@ -579,11 +579,6 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "mend", "remove_debuff",
                   "carry_out_front_plan", "plan_from_exhaust",
                   "damage_quarter_max_hp",
-                  # `EB-478`, R257: Tide Chart's promise. A now-line that draws
-                  # NOTHING now -- it is paid at the start of the next turn,
-                  # after the jellyfish has carried its Plans out, for the
-                  # Plans it actually carried out.
-                  "draw_after_plans",
                   # `EB-643`, R265: the three now-lines that operate on the
                   # QUEUE. Take the newest Plan back (Second Thoughts), cash
                   # the whole queue in (Ebb Tide), re-aim what is already
@@ -624,11 +619,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # HOLDING" read on a now-line is the queue before the turn's
                   # Plans were written.
                   "block_per_plan_held",
-                  # `EB-643`: the three DRAIN-POSITIONAL clauses, plan-only
+                  # `EB-643`: the DRAIN-POSITIONAL clauses, plan-only
                   # for a reason they share -- each names a place in a running
                   # drain ("the next Plan", "after this one"), so a now-line
                   # spelling would name a drain that is not running.
-                  "draw_per_plan_this_turn",
                   "next_plan_double_damage",
                   "next_plan_extra_carry_out",
                   # THE CASKET PASS (2026-09-28), Pearl Diver's "Plan: The
@@ -2614,7 +2608,6 @@ VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: key `kokomi_amount`). Sim twin: `kokomi_plan.KINDS` / `kokomi_plan.kind`.
 KOKOMI_KINDS = {
     "draw_if_no_plan": "DrawIfNoPlan",
-    "draw_if_target_weak": "DrawIfTargetWeak",
     "resonance": "Resonance",
     "double_weak_vulnerable": "DoubleWeakVulnerable",
     "shoal_call": "ShoalCall",
@@ -2626,11 +2619,10 @@ KOKOMI_KINDS = {
     "kurage_school": "KurageSchool",
     "kurages_mercy": "KuragesMercy",
 }
-KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "draw_if_target_weak", "resonance",
-                      "shoal_call", "coral_tithe", "kurages_mercy"}
-#: The kind that aims at the enemy the card was played on.
-KOKOMI_AIMED_KINDS = {"draw_if_target_weak"}
-KOKOMI_FIELDS = {"op", "kind", "target", "amount"}
+KOKOMI_KIND_AMOUNT = {"draw_if_no_plan", "resonance", "shoal_call",
+                      "coral_tithe", "kurages_mercy"}
+#: No kind aims: none takes a `target`.
+KOKOMI_FIELDS = {"op", "kind", "amount"}
 #: `furina` (THE POOL TO 75, 2026-10-09, review/active/furina-pool-growth-
 #: 2026-10-09.md sec.5): one kind per guest verb the grammar cannot spell,
 #: each ONE awaited `FurinaCards.<method>` call
@@ -2668,10 +2660,6 @@ CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
 # The Kokomi overhaul's own, same discipline (C.KOKOMI_OVERHAUL).
 MEND_FIELDS = {"op", "amount"}
 DAMAGE_QUARTER_MAX_HP_FIELDS = {"op", "target"}
-#: Tide Chart's two numbers (`EB-478`, R257): `per` is what one Plan carried
-#: out next morning is worth, `amount` is the FLAT half the upgrade buys. Both
-#: are on the ROW rather than in a rule, because both are printed.
-DRAW_AFTER_PLANS_FIELDS = {"op", "per", "amount"}
 
 #: The ops that are one whole printed clause and carry no number of their own.
 #: Any number they might carry belongs to a RULE, not to a card.
@@ -2710,14 +2698,10 @@ PLAN_CLAUSE_KINDS = {
     # `EB-685` (pool pass five), BREAKWATER's count: the queue as it stands at
     # dusk, never this entry itself. See `KokomiPlan.Kind.BlockPerPlanHeld`.
     "block_per_plan_held": "BlockPerPlanHeld",
-    # `EB-643` (R265), THE DRAIN-POSITIONAL CLAUSES. Scout Ahead counts the
-    # carry-outs that FOLLOW it (R267 pick 3; `EB-679`'s whole-drain spelling
-    # stays registered beside it, on no row), and Opening Gambit and Second
-    # Wave write a RIDER on the entry that follows them in the same drain. All
-    # of them are PLAN-ONLY below for one reason they share: each names a place
-    # in a running drain, and a now-line spelling would name a drain that is
-    # not running.
-    "draw_per_plan_this_turn": "DrawPerPlanThisTurn",
+    # `EB-643` (R265), THE DRAIN-POSITIONAL CLAUSES. Opening Gambit and
+    # Second Wave write a RIDER on the entry that follows them in the same
+    # drain. Both are PLAN-ONLY below: each names a place in a running drain,
+    # and a now-line spelling would name a drain that is not running.
     "next_plan_double_damage": "NextPlanDoubleDamage",
     "next_plan_extra_carry_out": "NextPlanExtraCarryOut",
     # `EB-668` (`EB-655` reopened), BATTLE PLAN: "the next Attack you play
@@ -2816,7 +2800,6 @@ PLAN_ONLY_OPS = {
                  # `EB-643`. The drain-positional clauses -- see
                  # `PLAN_CLAUSE_KINDS` above for the one reason all of them are
                  # here. `kokomi_plan.PLAN_ONLY_OPS` is the twin.
-                 "draw_per_plan_this_turn",
                  "next_plan_double_damage",
                  "next_plan_extra_carry_out",
                  # `EB-655`, Battle Plan's rider.
@@ -3276,9 +3259,6 @@ APPLY_POWERS = {
         "At the start of your turn, your first [gold]Plan[/gold] is "
         "carried out twice. So is your first [gold]Dusk[/gold] "
         "[gold]Plan[/gold]."),
-    "kk_generals_banner": ("GeneralsBannerPower", None,
-        "The first time each turn you play a [gold]Companion[/gold] card, "
-        "apply {X} [gold]Weak[/gold] to the front enemy."),
     # THE EXPANSION, BATCH ONE (2026-09-29). Every class lives in
     # Powers/Prototype/KokomiExpansion.cs; every row states its own face.
     # Bent 2026-10-10 (the growth Powers): a marker the Open reads.
@@ -4005,13 +3985,6 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # `KleeOverhaul.Enabled` -- off the arm the card
                        # upgrades exactly as `kit_spark` says.
                        "arm_block",
-                       # `EB-478`, R257. Tide Chart's FLAT half -- "draw 1
-                       # more", on top of the one per Plan carried out.
-                       # Emitted as the same play-time `IsUpgraded` read
-                       # `encore` takes (`_tide_draw_flat_expr`), because the
-                       # face states the rule in words and prints no figure a
-                       # var could keep honest.
-                       "tide_draw",
                        # Varka co-op pass 2026-09-30 (Tailwind Stride): the
                        # draw INSIDE a conditional's arms only; the card's own
                        # top-level draw is left alone. Rides the DrawThen /
@@ -5178,8 +5151,6 @@ def blocked_reason(
             kind = eff.get("kind")
             if kind not in KOKOMI_KINDS:
                 return f"kokomi kind {kind!r}"
-            if (eff.get("target") == "enemy") != (kind in KOKOMI_AIMED_KINDS):
-                return "kokomi: only draw_if_target_weak aims (target 'enemy')"
             if ("amount" in eff) != (kind in KOKOMI_KIND_AMOUNT):
                 return f"kokomi {kind} amount mismatch"
             if "amount" in eff and (not isinstance(eff["amount"], int)
@@ -5336,17 +5307,6 @@ def blocked_reason(
                 # `plan_reason`, which is the only place `front_enemy` is a
                 # legal spelling.
                 return f"damage_quarter_max_hp target '{eff.get('target')}'"
-        if op == "draw_after_plans":
-            unknown = set(eff) - DRAW_AFTER_PLANS_FIELDS
-            if unknown:
-                return (f"draw_after_plans field(s) {sorted(unknown)} "
-                        "not understood")
-            per, flat = eff.get("per"), eff.get("amount")
-            if not isinstance(per, int) or isinstance(per, bool) or per <= 0:
-                return "draw_after_plans per must be a positive literal int"
-            if not isinstance(flat, int) or isinstance(flat, bool) or flat < 0:
-                return ("draw_after_plans amount must be a literal int >= 0 "
-                        "-- the FLAT half, 0 on a row that pays per Plan only")
         if op == "redirect_queued_plans":
             # `EB-643`, Converging Tide. ONE FIELD and it is the aim, checked
             # against the same two spellings `damage_quarter_max_hp` above
@@ -8161,7 +8121,6 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                            for fx in iter_effects(effects)),
         # `EB-478`. Binds to the op that OWES the draw, the same one-owner rule
         # every key here keeps; tier0 bumps that op's `amount` and nothing else.
-        "tide_draw": any(e["op"] == "draw_after_plans" for e in effects),
         "burst_energy": any(e["op"] == "burst_energy" for e in effects),
         "cost": str(card.get("cost")) != "X",
         # R36: both keys ride the one discard_for_sparks effect.
@@ -9561,7 +9520,7 @@ def spark_price_expr(card: dict, eff: dict) -> str:
     """One literal `spend_spark` price, with its `spark_price` delta folded in
     as a play-time `IsUpgraded` read (`EB-491`).
 
-    `_tide_draw_flat_expr`'s shape, and this face prints NOTHING for the
+    `_encore_amount_expr`'s shape, and this face prints NOTHING for the
     number: a Spark price sits in the cost slot and the body does not restate
     it (`docs/current/text-conventions.md`, the Spark row), so the moved price
     reaches the player through the cost BADGE and the playability gate -- both
@@ -9623,21 +9582,6 @@ def _stmt_burst_energy(card: dict, eff: dict) -> str:
 def _encore_amount_expr(card: dict, eff: dict) -> str:
     base = int(eff["amount"])
     delta = encore_upgrade(card)
-    return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
-
-
-def _tide_draw_flat_expr(card: dict, eff: dict) -> str:
-    """Tide Chart's FLAT half, with its `tide_draw` delta folded in as a
-    play-time `IsUpgraded` read (`EB-478`, R257).
-
-    `_encore_amount_expr`'s shape one op over, and for the same reason: the
-    upgrade buys a number the face states in words rather than prints, so
-    there is no rendered figure a DynamicVar would be keeping honest. tier0
-    bumps this effect's `amount` (`upgrades.apply_upgrade`'s `tide_draw`), so
-    both engines move the same half of the same op.
-    """
-    base = int(eff.get("amount", 0))
-    delta = int(upgrade_plan(card)[0].get("tide_draw", 0))
     return f"(IsUpgraded ? {base + delta} : {base})" if delta else str(base)
 
 
@@ -11902,22 +11846,6 @@ def build_body(
             lines.append(
                 "await KokomiPlan.ScheduleFromExhaust("
                 "choiceContext, Owner, this);")
-
-        elif op == "draw_after_plans":
-            # Tide Chart (`EB-478`, R257). NOTHING IS DRAWN HERE: the play
-            # writes a promise, and `KokomiPlan.PayPromisedDraws` pays it at
-            # the top of the next turn, after the morning's carry-outs, for
-            # the Plans that were actually carried out.
-            #
-            # THE FLAT HALF IS AN `IsUpgraded` LITERAL and not a var, which is
-            # `_encore_amount_expr`'s shape and is here for its reason: the
-            # face states the rule rather than printing the number ("draw 1
-            # card for each, plus 1"), so there is no printed figure for a var
-            # to keep honest, and a `CardsVar` nothing reads would claim the
-            # `Cards` name this card never spends.
-            lines.append(
-                "KokomiPlan.PromiseDraw(Owner.Creature, "
-                f"{_tide_draw_flat_expr(card, eff)}, {int(eff['per'])});")
 
         elif op == "discard":
             # G6: an upgradeable count reads the VAR, so the loop bound and
@@ -15257,18 +15185,6 @@ def build_upgrade(card: dict) -> list[str]:
             "if (KleeOverhaul.Enabled) DynamicVars.Block.UpgradeValueBy("
             f"{int(deltas['arm_block'])}m);")
         lines.append("#endif")
-    if "tide_draw" in deltas:
-        # `EB-478`, R257. `encore`'s shape: the flat half is read at play time
-        # off IsUpgraded (`_tide_draw_flat_expr`), because the face states the
-        # rule in words -- "draw 1 card for each, plus 1" -- and prints no
-        # figure a var could keep honest.
-        done.add("tide_draw")
-        lines.append(
-            "// tide_draw: the promise's flat half reads IsUpgraded at play "
-            "time (KokomiPlan.PromiseDraw);")
-        lines.append(
-            "// tier0 twin: upgrades.apply key 'tide_draw', which bumps the "
-            "same op's `amount`.")
     for flat, where in (
             ("spark_price",
              "PrintedSparkPrice and the SparkPower.Spend beside it; tier0 "
@@ -15276,7 +15192,7 @@ def build_upgrade(card: dict) -> list[str]:
              "`spend_spark` amount both engines gate on"),):
         if flat not in deltas:
             continue
-        # `EB-491`. `tide_draw`'s shape: the number is read at PLAY time off
+        # `EB-491`. The number is read at PLAY time off
         # `IsUpgraded`, because the face either states the swap itself or
         # prints no figure at all, so there is no rendered number a DynamicVar
         # would be keeping honest.

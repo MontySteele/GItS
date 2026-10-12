@@ -472,6 +472,27 @@ public static partial class McpMod
         if (!button.Option.IsEnabled)
             return Error($"Rest option {index} ({button.Option.OptionId}) is disabled");
         string optionName = SafeGetText(() => button.Option.Title) ?? button.Option.OptionId;
+
+        // GItS LOCAL EDIT (co-op rest site Mend): Mend's click only opens a
+        // pick of the partner, and nothing made that pick, so Mend healed no
+        // one and never spent the rest action. Name the partner, click, then
+        // finish the pick on them. The why is in gits/GitsRestSiteMend.cs.
+        if (GitsRestSiteMend.IsMend(button.Option))
+        {
+            var partner = GitsRestSiteMend.Partner(restRoom);
+            if (partner == null)
+                return Error("Mend has no living partner to heal");
+            button.ForceClick();
+            var why = GitsRestSiteMend.AimAt(partner);
+            if (why != null)
+                return Error($"Mend was not carried out: {why}");
+            return new Dictionary<string, object?>
+            {
+                ["status"] = "ok",
+                ["message"] = $"Selecting rest site option: {optionName} (healing your partner)"
+            };
+        }
+
         button.ForceClick();
 
         return new Dictionary<string, object?>

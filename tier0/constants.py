@@ -975,9 +975,9 @@ KOKOMI_GROWTH_POWERS_IDS: tuple[str, ...] = (
 # pass (2026-09-28) cut Tide Chart, Cleansing Wave, Ripple, Well Laid,
 # Sea-Salt Prayer and Salt Line and appended thirteen rows: forty-six. The
 # cleanup pass (2026-09-29) cut Scout Ahead and Song of Pearls: forty-four.
-# Song of Pearls' power (`kokomi_plan.SONG_OF_PEARLS`) stays registered with
-# nothing granting it. The feed pass (2026-09-29) cut Exposed Flank and
-# appended five 0-cost Plan-only Commons: forty-eight.
+# Song of Pearls' power is gone from both engines. The feed pass
+# (2026-09-29) cut Exposed Flank and appended five 0-cost Plan-only Commons:
+# forty-eight.
 KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # The Tactician -- Plans, and the cards that pay per Plan (6)
     "proto_kk_feint",
@@ -1034,8 +1034,8 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # every draft comparison in r27 and Slack Water's Plan half moved to Dusk,
     # which is the job Night Watch was rebuilt for one pass earlier. It spelled
     # no op of its own, so nothing stays registered behind it. FOUR SINCE THE
-    # CLEANUP PASS (2026-09-29): Scout Ahead was cut, and its
-    # `draw_per_plan_after` op stays registered with nothing spelling it.
+    # CLEANUP PASS (2026-09-29): Scout Ahead was cut; its draw clause left
+    # in the hygiene pass (2026-10-11).
     # THREE SINCE THE PAYOFF PASS (2026-10-01): Second Thoughts was cut, and
     # its `cancel_last_plan` op stays registered with nothing spelling it.
     "proto_kk_opening_gambit",

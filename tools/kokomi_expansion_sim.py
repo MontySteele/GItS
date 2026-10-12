@@ -182,10 +182,6 @@ def _translate(state, fx):
         amt = fx.get("amount", 0)
         if kind == "draw_if_no_plan":
             return {"op": "draw", "amount": 0 if state.kk_plan_queue else amt}
-        if kind == "draw_if_target_weak":
-            weak = any(e.powers.get("weak", 0) > 0
-                       for e in state.living_enemies)
-            return {"op": "draw", "amount": amt if weak else 0}
         if kind == "resonance":
             had = sum(1 for e in state.living_enemies if e.aura)
             return {"op": "draw", "amount": amt * had}

@@ -858,13 +858,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Casket into her hand. `GrandDesignPower.Signal` is the twin.
     kokomi_plan.grand_design_fetch(state)
     kokomi_plan.resolve_all(state)
-    # `EB-478`, R257. TIDE CHART IS PAID HERE, one line after the morning
-    # and before anything else reads the hand: the face says "after the
-    # Bake-Kurage carries out its Plans, draw 1 card for each", so the
-    # count it multiplies is the depth the drain above just recorded.
-    # `ProtoBakeKuragePower.AfterPlayerTurnStart` calls
-    # `KokomiPlan.PayPromisedDraws` at exactly this point.
-    kokomi_plan.pay_tide_charts(state)
     _settle_phases(state)
     _revive_player_if_needed(state)
     if not p.alive or state.over:

@@ -63,7 +63,8 @@ public class KokomiPoolPassFourTests
     // ======================================================================
 
     // The row pin that stood here left with the card: the cleanup pass
-    // (2026-09-29) cut Scout Ahead. Its clause stays with nothing spelling it.
+    // (2026-09-29) cut Scout Ahead; its clause left in the hygiene pass
+    // (2026-10-11).
 
     [Fact]
     public void The_drains_count_is_carry_outs_and_is_paid_as_they_happen()
@@ -74,12 +75,10 @@ public class KokomiPoolPassFourTests
         // that follows draws the rate, which is what lets a Scout Ahead
         // written first and one written last answer differently AND what makes
         // Second Wave's doubled follower pay twice. Pass four's whole-drain
-        // term stays computed once above the loop for `DrawPerPlanThisTurn`,
-        // which no row spells. Twins:
-        // `test_scout_ahead_counts_the_plans_that_follow_it`,
-        // `test_scout_ahead_pays_second_waves_doubled_carry_out_twice`.
+        // term left with `DrawPerPlanThisTurn` in the hygiene pass
+        // (2026-10-11).
         var source = Source("KokomiPlan", power: true);
-        Assert.Contains("var drainPlans = due.Count", source);
+        Assert.DoesNotContain("var drainPlans = due.Count", source);
 
         // CARRY-OUTS AND NOT ENTRIES (`EB-501`, `EB-709`). Seen to FAIL
         // against the entries-based term: the 2026-09-08 review queued Scout
@@ -89,7 +88,7 @@ public class KokomiPoolPassFourTests
         Assert.Contains("CarryOutTimes(kokomi) > 1", source);
         var resolve = typeof(KokomiPlan).GetMethod("ResolveOne", All)!;
         Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "after");
-        Assert.Contains(resolve.GetParameters(), p => p.Name == "drainPlans");
+        Assert.DoesNotContain(resolve.GetParameters(), p => p.Name == "drainPlans");
     }
 
     // ======================================================================
