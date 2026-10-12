@@ -210,11 +210,13 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     # DROPPED 2026-10-11 (the diversity pass), reported stale by the lint:
     # Ensemble Cast's face ("You have 4 guest seats. Summon a random guest.")
     # no longer reads as a lone match once the corpus moved.
-    # FURINA, THE DIVERSITY PASS (2026-10-11): Final Bow draws 1 card as its
-    # floor, the base game's "Draw 1 card." -- a card's own draw, not
-    # Charlotte's line. "draw" fell under the common-word cap when the pass
-    # cut two draw cards. (Tutti!'s face is an IfUpgraded arm since the loop
-    # ruling and no longer matches.)
+    # FURINA, THE DIVERSITY PASS (2026-10-11): Tutti! and Final Bow draw 1
+    # card as their floor, the base game's "Draw 1 card." -- a card's own
+    # draw, not Charlotte's line. "draw" fell under the common-word cap when
+    # the pass cut two draw cards.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
+     "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "the card's own base-game draw, not Charlotte's line",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
      "FurinaStageLaw.CharlotteLineDraw", "1"):
         "the card's own base-game draw, not Charlotte's line",

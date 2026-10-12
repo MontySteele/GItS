@@ -147,13 +147,14 @@ def test_tutti_draws_1_and_final_bow_draws_1_first():
     st.player.draw_pile = [_card("proto_fs_bubble_aria") for _ in range(3)]
     _play(st, _card("proto_fs_tutti"))
     assert len(st.player.hand) == 1
-    # Under the loop ruling (2026-10-11): the upgrade draws 2, cost stays 1.
+    # The paper's upgrade, kept under [USER]'s loop ruling (2026-10-11):
+    # cost 0, the same draw.
     up = _card("proto_fs_tutti+")
-    assert up.cost == 1
+    assert up.cost == 0
     st = _furina()
     st.player.draw_pile = [_card("proto_fs_bubble_aria") for _ in range(3)]
     _play(st, up)
-    assert len(st.player.hand) == 2
+    assert len(st.player.hand) == 1
     st = _furina()
     st.player.draw_pile = [_card("proto_fs_bubble_aria") for _ in range(3)]
     _play(st, _card("proto_fs_final_bow"))         # empty stage: the draw
