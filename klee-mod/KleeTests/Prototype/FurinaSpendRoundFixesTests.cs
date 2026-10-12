@@ -142,14 +142,34 @@ public class FurinaSpendRoundFixesTests : IDisposable
     }
 
     [Fact]
-    public void High_stakes_no_longer_reads_the_line_and_against_the_tide_still_does()
+    public void High_stakes_refreshes_and_against_the_tide_reads_drained_this_turn()
     {
-        Assert.DoesNotContain("FurinaStage.NearLine",
-            Il.Calls(Il.Method("HighStakesPower", "ModifyDamageAdditive")));
-        Assert.Contains("FurinaStage.NearLine(Owner.Creature)",
+        // Against the Tide (2026-10-12, review/records/furina-varka-round-
+        // 2026-10-12.md): "If you Drained this turn", not "within 5 HP of
+        // your Drain line".
+        Assert.Contains("FurinaStage.DrainedThisTurn(Owner.Creature)",
                         Generated("ProtoFsAgainstTheTide"));
         Assert.Contains("HighStakesPower.Refresh",
             Il.Calls(Il.Method("FurinaStage", "RefreshBadges")));
+    }
+
+    [Fact]
+    public void Against_the_tide_reads_any_drain_this_turn_and_resets_at_her_turn()
+    {
+        var furina = Seat.Furina(80);
+        var ledger = FurinaStageLedger.For(furina.Creature);
+        Assert.False(FurinaStage.DrainedThisTurn(furina.Creature));
+        ledger.NoteDrain(1, 80);                          // 1 HP is enough
+        Assert.True(FurinaStage.DrainedThisTurn(furina.Creature));
+        ledger.NoteRepay(1);                              // a Repay undoes nothing
+        Assert.True(FurinaStage.DrainedThisTurn(furina.Creature));
+        ledger.OpenTurn();
+        Assert.False(FurinaStage.DrainedThisTurn(furina.Creature));
+        Assert.False(FurinaStage.DrainedThisTurn(Seat.Klee().Creature));
+        Assert.Equal("Deal {PlainDamage:diff()} damage. If you "
+                     + "[gold]Drained[/gold] this turn, deal "
+                     + "{BranchDamage:diff()} instead.",
+                     Face(new ProtoFsAgainstTheTide()));
     }
 
     // ---- 2. A Five-Century Act becomes visible ------------------------------

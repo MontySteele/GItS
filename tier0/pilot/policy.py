@@ -310,13 +310,13 @@ BLIND_PREDICATES = frozenset({
     # element changed this turn".
     "target_has_pyro",
     "element_changed_this_turn",
-    # FURINA, THE POOL TO 75 (2026-10-09): Against the Tide's "within 5 HP
-    # of your Drain line" and Clean Slate's "no drained HP left".
+    # FURINA, THE POOL TO 75 (2026-10-09): Clean Slate's "no drained HP
+    # left", and Against the Tide's "If you Drained this turn" (2026-10-12).
     # `effects._predicate` answers both live for a Furina seat, but her rows
     # are piloted by `furina_tide_pilot`, which prices them itself; no
     # published world drafts a `proto_fs_` row through this pilot, so blind
     # moves no measured number.
-    "stage_near_line",
+    "stage_drained_this_turn",
     "stage_none_drained",
 })
 BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()

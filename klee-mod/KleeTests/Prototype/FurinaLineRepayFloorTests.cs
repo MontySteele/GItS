@@ -209,16 +209,6 @@ public class FurinaLineRepayFloorTests
     // ---- the Drain line's guest and card edges -------------------------------
 
     [Fact]
-    public void Near_the_line_counts_any_hp_at_or_below_it()
-    {
-        Assert.True(FurinaStageLaw.NearTheLine(64, 59));
-        Assert.True(FurinaStageLaw.NearTheLine(59, 59));
-        Assert.True(FurinaStageLaw.NearTheLine(40, 59));
-        Assert.True(FurinaStageLaw.NearTheLine(1, 59));
-        Assert.False(FurinaStageLaw.NearTheLine(65, 59));
-    }
-
-    [Fact]
     public void A_five_century_act_reads_its_new_text_at_the_same_cost_and_rarity()
     {
         var card = new ProtoFsAFiveCenturyAct();

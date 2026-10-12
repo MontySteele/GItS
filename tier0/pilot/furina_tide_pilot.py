@@ -541,8 +541,8 @@ def card_damage(state, card) -> float:
                      if T.can_drain(state, n[0]) else 0)
     if k == "riptide":
         return float(n[1] if T.can_drain(state, n[0]) else 0)
-    if k == "near_line_hit":
-        return float(n[1] if T.near_line(state.player) else n[0])
+    if k == "drained_turn_hit":
+        return float(n[1] if T.drained_this_turn(state.player) else n[0])
     if k == "clean_slate":
         return float(n[0])
     if k == "hydro_hit_repay":
@@ -739,8 +739,9 @@ def value(state, card, playable: list, decider) -> float:
                 + GUEST_ACT * len(f.stage))
     if k in T.FIXED_DRAIN_KINDS:
         pass                                         # handled above
-    if k == "near_line_hit":
-        return _single(state, n[1] if T.near_line(state.player) else n[0])
+    if k == "drained_turn_hit":
+        return _single(state, n[1] if T.drained_this_turn(state.player)
+                       else n[0])
     if k == "clean_slate":
         v = _single(state, n[0]) + repay_value(state, n[1])
         if f.drained <= n[1]:

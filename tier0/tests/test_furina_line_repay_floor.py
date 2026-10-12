@@ -88,24 +88,6 @@ def test_a_drain_records_its_split_on_the_ledger_and_the_past_part_is_lost():
     assert st.player.hp == 77
 
 
-def test_near_the_line_is_five_or_less_of_buffer_left():
-    """Since the Drain buffer (2026-10-11) the line moves with her HP, so
-    "within 5 HP of your Drain line" reads the buffer she has left: a hit
-    never brings her near it, her Drains do."""
-    st = _furina()                                          # buffer 19
-    st.player.hp = 40
-    assert not FS.near_line(st.player)                      # a hit: 19 left
-    st.player.ftd.drained_above = 14                        # 5 left
-    assert FS.near_line(st.player)
-    st.player.ftd.drained_above = 13                        # 6 left
-    assert not FS.near_line(st.player)
-    st.player.ftd.drained_above = 19                        # none left
-    assert FS.near_line(st.player)
-    st.player.ftd.drained_above = 0
-    st.player.hp = 4                                        # line 0
-    assert FS.near_line(st.player)
-
-
 def test_a_five_century_act_reads_its_new_text():
     row = _card("proto_fs_a_five_century_act")
     assert (row.cost, row.rarity) == (2, "rare")

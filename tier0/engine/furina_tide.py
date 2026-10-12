@@ -172,7 +172,6 @@ ESCOFFIER_ACT_UPGRADED = 6
 ESCOFFIER_LINE_REPAY = 1           # line: whenever a guest acts, Repay 1
 ENSEMBLE_SEATS = 4                 # Ensemble Cast: 4 guest seats
 SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
-NEAR_LINE = 5                      # "within 5 HP of your Drain line"
 # High Stakes (the Spend round 2, 2026-10-10): "Your Attacks deal 1
 # additional damage for every 5 HP you have Drained this combat." [every 4].
 # The Spend rounds review (2026-10-10) made it every 4 [3], round 2's
@@ -518,7 +517,7 @@ CARDS: dict[str, Spec] = {
     "ftd_ousia_pledge": Spec("Ousia Pledge", 1, "skill", "common",
                              "drain_draw", (3, 2)),
     "ftd_against_the_tide": Spec("Against the Tide", 1, "attack",
-                                 "uncommon", "near_line_hit", (8, 14)),
+                                 "uncommon", "drained_turn_hit", (8, 14)),
     "ftd_pay_the_tab": Spec("Pay the Tab", 1, "skill", "uncommon",
                             "drain_draw", (6, 3)),
     "ftd_riptide_lunge": Spec("Riptide Lunge", 1, "attack", "uncommon",
@@ -807,11 +806,11 @@ def high_stakes_bonus(player) -> int:
     return sum(drained // e for e in everies if e > 0)
 
 
-def near_line(player) -> bool:
-    """Against the Tide: within 5 HP of the Drain line, or
-    at or below it (a Drain may go past it since 2026-10-09). The C# line is
-    the float line rounded up (`FurinaStageLaw.LineOf`)."""
-    return player.hp - line_hp(player) <= NEAR_LINE
+def drained_this_turn(player) -> bool:
+    """Against the Tide (2026-10-12): "If you Drained this turn" -- 1 or more
+    HP drained this turn by any Drain (the C# `FurinaStage.DrainedThisTurn`,
+    off `FurinaStageLedger.DrainedThisTurn`)."""
+    return player.ftd.drained_hp_this_turn > 0
 
 
 def capacity(state) -> int:
@@ -1762,9 +1761,9 @@ def resolve_card(state, card) -> None:
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1
             state.draw(n[1])
-    elif k == "near_line_hit":
+    elif k == "drained_turn_hit":
         _card_damage(state, card,
-                     n[1] if near_line(state.player) else n[0])
+                     n[1] if drained_this_turn(state.player) else n[0])
     elif k == "riptide":
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1

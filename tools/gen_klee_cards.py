@@ -1580,9 +1580,10 @@ PREDICATES_CS = {
     # R276 batch two: the empty-stage answers (Improvised Number, Between
     # Acts) ask the opposite question, at play time.
     "stage_empty": "!FurinaStage.Occupied(Owner.Creature)",
-    # THE POOL TO 75 (2026-10-09): Against the Tide's "within 5 HP of your
-    # Drain line" and Clean Slate's "no drained HP left".
-    "stage_near_line": "FurinaStage.NearLine(Owner.Creature)",
+    # Against the Tide's "If you Drained this turn" (2026-10-12, was "within
+    # 5 HP of your Drain line") and Clean Slate's "no drained HP left" (the
+    # pool to 75, 2026-10-09).
+    "stage_drained_this_turn": "FurinaStage.DrainedThisTurn(Owner.Creature)",
     "stage_none_drained": "FurinaStage.NoneDrained(Owner.Creature)",
     # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
     # first card you played this turn". The ledger counts a play AFTER it
@@ -1702,7 +1703,7 @@ PREDICATE_TEXT = {
     # "Spend N: <the big number> instead" and no generic clause can say that.
     "stage_occupied": "If a performer is on stage",
     "stage_empty": "If the stage is empty",
-    "stage_near_line": "If you are within 5 HP of your [gold]Drain[/gold] line",
+    "stage_drained_this_turn": "If you [gold]Drained[/gold] this turn",
     "stage_none_drained": "If you have no drained HP left",
     "first_card_this_turn": "If this is the first card you played this turn",
     "spotlight_moved_this_turn":
