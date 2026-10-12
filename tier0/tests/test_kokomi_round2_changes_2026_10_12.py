@@ -111,7 +111,7 @@ def test_nereids_ascension_carries_the_twice_tip():
     tips = TIPS_CS.read_text(encoding="utf-8")
     assert ("\"Twice means twice: the [gold]Plan[/gold]'s debuffs, and any \""
             in tips)
-    assert "\"Tainted it causes, double too.\"" in tips
+    assert "\"Tainted it causes, double too. A [gold]Plan[/gold] carried out \"" in tips
     for rid, row in {r["id"]: r for r in proto._rows()}.items():
         assert gen.doubles_the_first_plan(row) == (
             rid == "proto_kk_nereids_ascension"), rid

@@ -51,6 +51,7 @@ from understudy.blindplay_notes import (AURA_NOTE, ENEMY_HANDLE_NOTE,
                                         NO_REACTION_THIS_TURN,
                                         NO_RESOLUTIONS_THIS_TURN, POWER_NOTE,
                                         _INTENT_SOURCE_HEAD,
+                                        define_only_definition,
                                         glossary_definition)
 from understudy.blindplay_enemies import brief_by_name, briefs_mentioning
 from understudy.blindplay_render import BRIEFING_HEADING
@@ -317,6 +318,11 @@ def define(text: str, word: str, growth: int | None = None) -> str:
     found = glossary_definition(want, growth)
     if found:
         return f"- **{found[0]}** — {found[1]}{OFF_SCREEN_MARK}\n"
+    # Kokomi pre-run fixes (2026-10-12): base-game words the board prints and
+    # no glossary table defines (Surrounded, "turns you").
+    found = define_only_definition(want)
+    if found:
+        return f"- **{found[0]}** — {found[1]}\n"
     # 2026-10-05: an enemy's base-game briefing, by its base name, after
     # round 1 has stopped printing it.
     found = brief_by_name(want)

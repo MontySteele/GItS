@@ -69,8 +69,20 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
         // turn on which it did not fire looked the same as one on which it
         // did. The row counts the cards that reached the hand (a full hand or
         // empty piles draw none, and a zero files nothing).
+        // Kokomi pre-run fixes (2026-10-12): still read as silent by four
+        // seats, so the power flashes in game and names itself as the draw's
+        // source on the page's "Since last page" line ("drew X (Treatise)").
+        Flash();
         var before = PileType.Hand.GetPile(player).Cards.Count;
-        await CardPileCmd.Draw(choiceContext, Amount, player);
+        ResolutionLedger.DrawSource = "Treatise";
+        try
+        {
+            await CardPileCmd.Draw(choiceContext, Amount, player);
+        }
+        finally
+        {
+            ResolutionLedger.DrawSource = string.Empty;
+        }
         var drawn = PileType.Hand.GetPile(player).Cards.Count - before;
         RelicAnswerLog.NoteGain("Treatise", drawn, drawn == 1 ? "card" : "cards");
     }

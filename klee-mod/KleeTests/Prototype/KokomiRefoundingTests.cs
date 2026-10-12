@@ -40,7 +40,7 @@ public class KokomiRefoundingTests
         Assert.True(TamakushiCasket.Pays(1));
         Assert.Equal(
             "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
-            + "[blue]3[/blue] [gold]Block[/gold].",
+            + "[blue]3[/blue] [gold]Block[/gold]." + KokomiPreRunFixesTests.CasketTail,
             new TamakushiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
         Assert.Contains("[blue]5[/blue]", new WatatsumiCasket().Localization!

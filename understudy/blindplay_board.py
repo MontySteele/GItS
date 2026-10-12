@@ -1503,7 +1503,15 @@ def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         # build that sends neither.
                         "lost": _int(ev.get("lost")),
                         "past": _int(ev.get("past")),
-                        "source": _text(row.get("card"))})
+                        # Kokomi pre-run fixes (2026-10-12): a draw a POWER
+                        # made names that power (`ResolutionLedger.
+                        # DrawSource`, filed as the event's `power`), not
+                        # the card row it happened under: Treatise's draw
+                        # read as the Plan card's own, or as nobody's.
+                        "source": (_text(ev.get("power"))
+                                   if kind == "drawn"
+                                   and _text(ev.get("power"))
+                                   else _text(row.get("card")))})
     return out
 
 
