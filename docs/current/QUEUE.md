@@ -25,6 +25,10 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Furina Spend paper** (`furina-spend-outlet-2026-10-12.md`, four picks, all
+  default (a)): Drain floor unchanged; Spend caps raised (Spirited Aria 12,
+  Crashing Waves 16, Hold the Stage 16); Packed House a held-Fanfare Block card;
+  Rising Applause+ gains Retain.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
