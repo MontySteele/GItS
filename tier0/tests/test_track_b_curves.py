@@ -272,7 +272,16 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # the Mines an enemy's attack set off (`ProtoBombPower`'s
             # per-seat counters). In-engine facts the wire cannot see; MOD
             # FEED ONLY, added, never a rename.
-            "bomb_reactions", "mine_detonations_by_attack"}
+            "bomb_reactions", "mine_detonations_by_attack",
+            # 2026-10-12 (the Furina/Varka round's watch items). Every seat's
+            # cards drawn and Energy per turn (game hooks), a Swirl's damage
+            # by the card behind it (a `DamageCredit` scope's cause), Varka's
+            # Oath per turn, its peaks and his current element (his ledger),
+            # and Furina's Full House triggers (her stage ledger). The wire
+            # narrates none of them; MOD FEED ONLY, added, never a rename.
+            "cards_drawn_by_turn", "energy_by_turn", "swirl_damage_by_card",
+            "oath_by_turn", "oath_peak", "current_element_by_turn",
+            "full_house_triggers"}
 
 
 def _csharp_keys() -> set[str]:

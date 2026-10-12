@@ -753,6 +753,8 @@ public sealed class StageDirector
     {
         var cap = _stage.Mods.FullHouse;
         if (cap <= 0 || _board.Over) return 0;
+        // Telemetry (2026-10-12, `full_house_triggers`): the act it answered.
+        _stage.FullHouseTriggers++;
         return await SpendUpTo(cap, forPlay: false, source: FullHouseTitle);
     }
 

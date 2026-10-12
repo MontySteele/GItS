@@ -388,7 +388,10 @@ internal static class ReactionEffects
         using var credit = reaction == Reaction.None
             ? default
             : Diagnostics.DamageCredit.Open(
-                dealer, Diagnostics.DamageCredit.Reaction, reaction.ToString());
+                dealer, Diagnostics.DamageCredit.Reaction, reaction.ToString(),
+                // 2026-10-12: the card behind it, for `swirl_damage_by_card`.
+                cause: cardSource != null
+                    ? Diagnostics.PlayTelemetry.CardNameOf(cardSource) : null);
         if (reaction != Reaction.None)
         {
             TotalResolved++;

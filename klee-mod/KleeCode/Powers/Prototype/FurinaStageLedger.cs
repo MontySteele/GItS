@@ -341,6 +341,7 @@ public sealed class FurinaStageLedger
         BufferLeftAtCall = -1;
         GuestEvictions = 0;
         GuestRepeatActs = 0;
+        FullHouseTriggers = 0;
     }
 
     /// <summary>The combat's opening has been recorded.</summary>
@@ -619,6 +620,13 @@ public sealed class FurinaStageLedger
     /// <summary>The play telemetry's <c>guest_repeat_acts</c>: the acts a
     /// second copy of a guest already on stage made (2026-10-11).</summary>
     public int GuestRepeatActs { get; set; }
+
+    /// <summary>The play telemetry's <c>full_house_triggers</c> (the
+    /// Furina/Varka round, 2026-10-12): guest acts about to deal damage that
+    /// Full House answered (a copy in play, the fight not over), counted
+    /// whether or not there was Fanfare to Spend; what it spent is in the
+    /// Spends filed under "Full House".</summary>
+    public int FullHouseTriggers { get; set; }
 
     /// <summary>A High Stakes bonus of <paramref name="amount"/> landed.
     /// </summary>

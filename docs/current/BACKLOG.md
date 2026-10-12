@@ -16,7 +16,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Kits and display (the mod)
 
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
-- Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; telemetry has no draw field, so add one or check the relic in game.
+- Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; read `cards_drawn_by_turn` in her next round, or check the relic in game.
 - Dahlia — Sacramental Shower and Raiden — Musou no Hitotachi print their damage as fixed text, so the face ignores Strength and Weak; move them to the computed damage token like the other Companions.
 - `build_pck` skips three copy blocks whose sources are missing locally: `klee\mod_image.png`, `kokomi\potions`, `varka\potions` (deploy 2026-10-11, 0.2.4849+next).
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
@@ -77,9 +77,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Chained Reactions' +3 missed a two-Bomb Ka-pow! set-off (trace); Durin's start-of-turn tick skipped one fight (Fogmog, trace).
 - The Spark line vanishes at 0, and Snecko Oil's added Spark costs are unexplained; a Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1.
 - Wait For It... printed "Nothing ... landed" on paying turns; Weak shows different Pyro numbers on card and board; the Melt preview reads as if the whole Bomb pile multiplies.
-
-- Fight telemetry has no draws or Energy per turn and no Full House trigger count, so [USER]'s Furina watch items are unreadable from a round (`review/records/furina-varka-round-2026-10-12.md`); add both.
-- Fight telemetry credits Swirl damage to "(Swirl)", not to the card behind it, so Converging Winds' multi-enemy bonus cannot be read; credit it to the card (round 2026-10-12).
 
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 

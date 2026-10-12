@@ -9,6 +9,8 @@
     python tools/telemetry_report.py --fanfare --character Furina
     python tools/telemetry_report.py --block-gap --character Furina \
         --character base5
+    python tools/telemetry_report.py --tempo --character Varka \
+        --character Furina --character base5
     python tools/telemetry_report.py --coop --reactions
     python tools/telemetry_report.py --offers --character Varka --element pyro
     python tools/telemetry_report.py --character Klee --character base5 \\
@@ -103,6 +105,17 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      3 (2026-10-11): Block gained per card play (`card_play_block`, one
      entry per `cards_played` row), pooled, and per card for the cards that
      gained any.
+
+  7. With `--tempo` (the Furina/Varka round, 2026-10-12): cards drawn a
+     turn (`cards_drawn_by_turn`, every round counted) and the median
+     opening hand (round 1); the median Energy a turn opens with and the
+     Energy spent a turn (`energy_by_turn`), POOLED over the fights that
+     carry the keys (`nD`, `nE`), with spent over start (Energy gained
+     mid-turn is in neither, so this is not "unspent"). Then, where any
+     fight carries them: Swirl damage by the card behind it
+     (`swirl_damage_by_card`, pooled), Varka's median Oath peak by element
+     (`oath_peak`), and Furina's Full House triggers (`full_house_triggers`,
+     total and fights).
 
 CO-OP (`--coop`). Keeps only two-seat fights (`seats == 2`) instead of solo
 ones. Every co-op lane writes a row for BOTH seats of the same fight, so rows
@@ -605,6 +618,101 @@ def render_block_gap(bx: list[dict]) -> list[str]:
     return lines
 
 
+# ----------------------------------------------------------------- tempo ---
+
+def _rows_of(row: dict, key: str, width: int) -> list[list]:
+    """A record's `[[round, ...], ...]` rows at least `width` wide."""
+    return [e for e in row.get(key) or []
+            if isinstance(e, list) and len(e) >= width]
+
+
+def tempo_summary(group: str, rows: list[dict]) -> dict:
+    """Draws and Energy per turn, Swirl damage by card, Varka's Oath peaks
+    and Furina's Full House triggers (2026-10-12), over the fights that carry
+    each key."""
+    drawn = [r for r in rows if "cards_drawn_by_turn" in r]
+    draw_rows = [e for r in drawn
+                 for e in _rows_of(r, "cards_drawn_by_turn", 2)]
+    opening = [float(e[1]) for e in draw_rows if e[0] == 1]
+    energy = [r for r in rows if "energy_by_turn" in r]
+    energy_rows = [e for r in energy for e in _rows_of(r, "energy_by_turn", 3)]
+    started = [e for e in energy_rows
+               if isinstance(e[1], (int, float)) and e[1] >= 0]
+    spent = sum(e[2] for e in energy_rows if isinstance(e[2], (int, float)))
+    start_total = sum(e[1] for e in started)
+    spent_started = sum(e[2] for e in started
+                        if isinstance(e[2], (int, float)))
+    swirl: dict[str, int] = {}
+    for r in rows:
+        for name, dmg in (r.get("swirl_damage_by_card") or {}).items():
+            if isinstance(dmg, (int, float)):
+                swirl[str(name)] = swirl.get(str(name), 0) + int(dmg)
+    peaks: dict[str, list[float | None]] = {}
+    for r in rows:
+        for elem, n in (r.get("oath_peak") or {}).items():
+            if isinstance(n, (int, float)):
+                peaks.setdefault(str(elem), []).append(float(n))
+    full = [_num(r, "full_house_triggers") for r in rows
+            if "full_house_triggers" in r]
+    full = [v for v in full if v is not None]
+    return {
+        "group": group, "fights": len(rows),
+        "fights_with_draws": len(drawn),
+        "draws_per_turn": (sum(e[1] for e in draw_rows) / len(draw_rows)
+                           if draw_rows else None),
+        "opening_draw": _median(opening),
+        "fights_with_energy": len(energy),
+        "energy_start": _median([float(e[1]) for e in started]),
+        "energy_spent_per_turn": (spent / len(energy_rows)
+                                  if energy_rows else None),
+        "spent_share": (spent_started / start_total) if start_total else None,
+        "swirl_damage_by_card": swirl,
+        "oath_peak": {e: _median(v) for e, v in sorted(peaks.items())},
+        "fights_with_oath": sum(1 for r in rows if "oath_peak" in r),
+        "full_house_triggers": sum(full) if full else None,
+        "full_house_fights": sum(1 for v in full if v > 0),
+    }
+
+
+def tempo(grouped: dict[str, list[dict]]) -> list[dict]:
+    return [tempo_summary(g, rows) for g, rows in grouped.items()]
+
+
+def render_tempo(tx: list[dict]) -> list[str]:
+    lines = ["", "TEMPO (draws and Energy a turn, pooled over the nD / nE "
+             "fights with the keys; open = median round-1 draw)",
+             f"{'group':<16}{'n':>5}{'nD':>5}{'drw/t':>7}{'open':>6}"
+             f"{'nE':>5}{'E st':>6}{'E sp/t':>8}{'sp/st':>7}"]
+    for s in tx:
+        share = ("--" if s["spent_share"] is None
+                 else f"{100 * s['spent_share']:.0f}%")
+        lines.append(f"{s['group'][:15]:<16}{s['fights']:>5}"
+                     f"{s['fights_with_draws']:>5}"
+                     f"{_f(s['draws_per_turn']):>7}"
+                     f"{_f(s['opening_draw']):>6}"
+                     f"{s['fights_with_energy']:>5}"
+                     f"{_f(s['energy_start']):>6}"
+                     f"{_f(s['energy_spent_per_turn']):>8}{share:>7}")
+    for s in tx:
+        if s["oath_peak"]:
+            peaks = ", ".join(f"{e} {_f(v)}"
+                              for e, v in s["oath_peak"].items())
+            lines.append(f"  {s['group'][:15]}: median Oath peak "
+                         f"({s['fights_with_oath']} fights): {peaks}")
+        if s["full_house_triggers"] is not None:
+            lines.append(f"  {s['group'][:15]}: Full House triggers "
+                         f"{_f(s['full_house_triggers'], 0)} in "
+                         f"{s['full_house_fights']} fights")
+        swirl = sorted(s["swirl_damage_by_card"].items(),
+                       key=lambda kv: (-kv[1], kv[0]))
+        if swirl:
+            lines.append(f"  {s['group'][:15]}: Swirl damage by the card "
+                         "behind it")
+            for name, dmg in swirl[:12]:
+                lines.append(f"    {name[:28]:<29}{dmg:>6}")
+    return lines
+
+
 # ------------------------------------------------------------- reactions ---
 
 REACTION_KEYS = ("reactions_by_type", "amp_bonus_damage",
@@ -811,7 +919,8 @@ def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
            card_group: str | None, header: list[str], top: int,
            rx: list[dict] | None = None,
            fx: list[dict] | None = None,
-           bx: list[dict] | None = None) -> str:
+           bx: list[dict] | None = None,
+           tx: list[dict] | None = None) -> str:
     lines = list(header)
     lines.append("")
     lines.append("BY GROUP x ACT x KIND (medians across fights)")
@@ -864,6 +973,8 @@ def render(cells: list[Cell], comp: list[dict], card_rows: list[dict],
         lines.extend(render_fanfare(fx))
     if bx is not None:
         lines.extend(render_block_gap(bx))
+    if tx is not None:
+        lines.extend(render_tempo(tx))
     return "\n".join(lines)
 
 
@@ -903,6 +1014,7 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
         if getattr(args, "reactions", False) else None
     fx = fanfare(grouped) if getattr(args, "fanfare", False) else None
     bx = block_gap(grouped) if getattr(args, "block_gap", False) else None
+    tx = tempo(grouped) if getattr(args, "tempo", False) else None
     out = {"filters": {"since": args.since, "until": args.until,
                         "baseline_since": args.baseline_since or args.since,
                         "baseline_until": args.baseline_until or args.until,
@@ -924,6 +1036,8 @@ def build(args: argparse.Namespace, rows: list[dict]) -> dict:
         out["fanfare"] = fx
     if bx is not None:
         out["block_gap"] = bx
+    if tx is not None:
+        out["tempo"] = tx
     return out
 
 
@@ -985,6 +1099,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="add the block-gap section: turns opened with a "
                     "Block card in hand and damage incoming, and those that "
                     "gained no Block, by group (keys since 2026-10-10)")
+    ap.add_argument("--tempo", action="store_true",
+                    help="add the tempo section: cards drawn and Energy a "
+                    "turn, Swirl damage by card, Varka's Oath peaks and "
+                    "Furina's Full House triggers (keys since 2026-10-12)")
     ap.add_argument("--feed", choices=("bot", "human", "all"), default="all")
     ap.add_argument("--cards-for", help="the group whose cards are listed "
                     "(default: the first non-base5 group)")
@@ -1031,7 +1149,7 @@ def main(argv: list[str] | None = None) -> int:
                                      out["groups"].items())]
     print(render(cells, out["comparison"], out["cards"], out["cards_for"],
                  header, args.top, out.get("reactions"), out.get("fanfare"),
-                 out.get("block_gap")))
+                 out.get("block_gap"), out.get("tempo")))
     return 0
 
 

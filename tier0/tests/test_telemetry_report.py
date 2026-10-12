@@ -387,3 +387,63 @@ def test_help_prints_the_field_notes(capsys):
     text = capsys.readouterr().out
     assert "RUNNING TOTAL" in text and "never a sum" in text
     assert "EB-156" in text and "run_instance" in text
+
+
+# ------------------------------------------------------------------ tempo ---
+
+def test_tempo_pools_draws_energy_swirl_oath_and_full_house(tmp_path, capsys):
+    """The Furina/Varka round's watch items (2026-10-12): draws and Energy
+    a turn, Swirl damage by the card behind it, Varka's Oath peaks and
+    Furina's Full House triggers. Older records without the keys are left
+    out of each figure, not read as zero. C# twin: TempoTelemetryTests."""
+    rows = [
+        fight("Varka", cards_drawn_by_turn=[[1, 5], [2, 5], [3, 2]],
+              energy_by_turn=[[1, 3, 3], [2, 4, 2], [3, -1, 1]],
+              swirl_damage_by_card={"Converging Winds": 6, "(no card)": 2},
+              oath_peak={"Pyro": 3, "Hydro": 0}),
+        fight("Varka", cards_drawn_by_turn=[[1, 6]],
+              energy_by_turn=[[1, 3, 1]],
+              swirl_damage_by_card={"Converging Winds": 4},
+              oath_peak={"Pyro": 1, "Hydro": 2}),
+        fight("Varka"),                               # an older record
+        fight("Furina", full_house_triggers=4),
+        fight("Furina", full_house_triggers=0),
+    ]
+    out = run(tmp_path, rows, "--tempo", "--character", "Varka",
+              "--character", "Furina", capsys=capsys)
+    by = {s["group"]: s for s in out["tempo"]}
+    v = by["Varka"]
+    assert v["fights"] == 3 and v["fights_with_draws"] == 2
+    assert v["draws_per_turn"] == 18 / 4
+    assert v["opening_draw"] == 5.5
+    assert v["fights_with_energy"] == 2
+    assert v["energy_start"] == 3.0                   # 3, 4, 3; -1 unread
+    assert v["energy_spent_per_turn"] == 7 / 4
+    assert v["spent_share"] == 6 / 10                 # rows with a start
+    assert v["swirl_damage_by_card"] == {"Converging Winds": 10,
+                                         "(no card)": 2}
+    assert v["oath_peak"] == {"Hydro": 1.0, "Pyro": 2.0}
+    assert v["full_house_triggers"] is None
+    f = by["Furina"]
+    assert f["full_house_triggers"] == 4 and f["full_house_fights"] == 1
+    assert f["draws_per_turn"] is None and f["oath_peak"] == {}
+
+    d = write(tmp_path / "text", rows)
+    assert tr.main(["--dir", str(d), "--tempo", "--character", "Varka",
+                    "--character", "Furina"]) == 0
+    text = capsys.readouterr().out
+    assert "TEMPO (draws and Energy a turn" in text
+    assert "median Oath peak (2 fights): Hydro 1.0, Pyro 2.0" in text
+    assert "Full House triggers 4 in 1 fights" in text
+    assert "Converging Winds" in text
+
+
+def test_the_schema_names_the_tempo_keys():
+    readme = (REPO / "understudy" / "README.md").read_text(encoding="utf-8")
+    cs = (REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
+          ).read_text(encoding="utf-8")
+    for key in ("cards_drawn_by_turn", "energy_by_turn",
+                "swirl_damage_by_card", "oath_by_turn", "oath_peak",
+                "current_element_by_turn", "full_house_triggers"):
+        assert f"`{key}`" in readme, key
+        assert (f'\\"{key}\\":' in cs or f'"{key}"' in cs), key
