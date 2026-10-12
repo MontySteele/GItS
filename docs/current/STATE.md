@@ -216,12 +216,14 @@ switch is left, `-p:SwirlPays=false` (`Elements/TriggerRules.cs`), sim twin
 `lint_constant_parity`. Next: phase two (Burning and
 Dendro, `BACKLOG.md`).
 
-## The Teyvat run frame: on hold
+## The Spiral Abyss mode (paper next)
 
-Built behind `TeyvatFrame`, off in every build; nothing deleted, no further
-work (`operations/teyvat-frame.md`). [USER]: the first
-draft "wasn't very interesting". It returns only as **elemental enemies**: a
-short brief on elemental shields goes to [USER] when the kits are done.
+The old frame stays behind `TeyvatFrame`, off in every build
+(`operations/teyvat-frame.md`). The hold is lifted for a fourth main-menu mode,
+Spiral Abyss: before each act's Ancient you take one of three Blessings, the
+enemies take one of the passed Shadows at random, and both stack. A co-op party
+agrees on one Blessing. Ruled 2026-10-12 (`run-frame-and-lore-2026-10-12.md`),
+with each character's story in the run, Klee first.
 
 ## Live cell
 

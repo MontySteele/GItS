@@ -59,10 +59,10 @@
 
 **The structure:**
 - **Before each act's Ancient** (Neow in act 1), a screen offers three **Blessings**. Each one shows its **Shadow**: the enemy power-up it brings if you pass it over.
-- You take one Blessing, and the enemies take a Shadow from the two you passed (pick 1).
+- You take one Blessing. The enemies take one of the two passed Shadows at random; both are shown before you choose, so you know the risk.
 - **Both stack:** by act 3 you hold three Blessings, and every enemy carries three Shadows.
 - **The first build reuses the event screen** for these choices: three options, a portrait, and co-op sync that already works. A bespoke screen follows if that reads poorly.
-- **In co-op,** each player takes their own Blessing, and the enemies take one Shadow per player. That matches co-op enemies' higher HP.
+- **In co-op,** the party agrees on one Blessing, and the enemies take one Shadow, as in solo.
 
 **First-draft pools.** The Abyss paper fills these out, about eight of each. Every entry changes a decision for the base five and for the kits.
 
@@ -119,9 +119,6 @@ My plan is to name them after her constellations, as card names already use the 
 | Constellation names | Text only; Klee's on her next branch |
 | The Abyss mode | Its own paper (the two pools), then the menu button and modifier, the choice screen, and the pools, over two or three builds |
 
-## For [USER]
+## Ruled
 
-1. **Which Shadow the enemies take,** when you pass over two Blessings:
-   - **(a) Default:** you choose. You take your Blessing, then pick which of the two passed Shadows the enemies get. Both choices are informed.
-   - (b) One of the two, at random. Both are shown before you choose, so you know the risk.
-   - (c) Both. That makes six Shadows by act 3, against three Blessings.
+[USER], 2026-10-12: "I'm thinking that the co-op party has to agree on the blessing (just one blessing), and the enemy gets one Shadow selected at random." No picks remain. Next comes the Abyss paper (the two pools, about eight each), then the build: the menu button and modifier, the choice screen, the pools. The story work starts with Klee's first batch, for you and your friend to read.

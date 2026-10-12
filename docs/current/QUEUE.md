@@ -25,11 +25,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **The run around the kits** (`run-frame-and-lore-2026-10-12.md`). Ruled
-  2026-10-12: a fourth main-menu mode, "Spiral Abyss", with a choice of three
-  blessings before each act's Ancient and an enemy power-up from what you passed,
-  stacking; Corrosion and Halves dropped; all the story items. One pick open:
-  which passed card's enemy power-up applies.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. The PR also amends `LAW.md`'s art line
