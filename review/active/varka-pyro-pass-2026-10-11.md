@@ -62,3 +62,10 @@ A two-seat Varka round on the built pool. Lines:
    - **(a) Default:** Pyro powers up his Attacks (Strength and "next Attack" damage), the Exhaust lane is retired, and the four cards in section 2 build as written.
    - (b) The same, but the Exhaust stays as an optional rider ("You may Exhaust a card. If you do, gain 1 more Pyro Oath.").
    - (c) A different job for Pyro (say which).
+
+## Ruled 2026-10-11: pick 1 (b)
+
+[USER]: "I lean towards b) which allows for some tactical use of Exhaust vs status enemies, bit I agree that we need something better as the main engine."
+
+- Ashen Oath and Blazing Charge build as in section 2.
+- Stoke the Flames and Ember Cleave build as in section 2, plus the optional rider: "You may Exhaust a card. If you do, gain 1 more Pyro Oath." Choosing no card is allowed, and with an empty hand the rider does nothing.
