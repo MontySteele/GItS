@@ -1928,10 +1928,11 @@ public static partial class McpMod
         state["in_dialogue"] = inDialogue;
 
         // Event body text
-        // GItS LOCAL EDIT (2026-10-12): the Spiral Abyss page's body, read
-        // off the local copy it is shown on (gits/GitsAbyssLane.cs).
-        state["body"] = GitsAbyssPageBody(
-            eventRoom, SafeGetText(() => eventModel.Description));
+        // GItS LOCAL EDIT (2026-10-12): the page the player is shown, read
+        // off the local copy as plain text, for every event; the canonical
+        // event never has a page set, so this was always null
+        // (gits/GitsEventPage.cs, gits/GitsEventBody.cs).
+        state["body"] = GitsEventPageBody(eventRoom, eventModel);
 
         // Options from UI
         var options = new List<Dictionary<string, object?>>();

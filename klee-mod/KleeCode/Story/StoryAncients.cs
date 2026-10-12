@@ -23,6 +23,16 @@ namespace KleeMod.Story;
 /// after <c>AncientEventModel.DialogueSet</c> builds it; every other
 /// character keeps the agnostic set exactly as before.
 ///
+/// BASELIB GETS THERE FIRST, AND LOSES. BaseLib 3.4.x prefixes
+/// <c>AncientDialogueSet.PopulateLocKeys</c> (<c>AddAncientDialogues</c>) and
+/// registers, for every <c>CustomCharacterModel</c>, the dialogues it finds
+/// under <c>&lt;ANCIENT&gt;.talk.&lt;CHAR&gt;.N-*</c>: our rows. Its entry is
+/// <c>VisitIndex = 0</c> and not repeating, so it plays on her first visit
+/// only, and the stock repeating line wins every visit after (seen live on
+/// 0.2.5073). This postfix runs after <c>PopulateLocKeys</c>, so it is always
+/// last to touch the built set, and it replaces that entry with ours: one
+/// owner, whichever mod registered first and whatever BaseLib version.
+///
 /// EVERY VISIT, NOT ONLY THE FIRST (coordinator, 2026-10-12: the owner's
 /// profile has already met these Ancients as Klee, and the game's per-profile
 /// first visit would never show them). The dialogue is repeating with no
@@ -48,8 +58,9 @@ public static class StoryAncients
         $"{ancientEntry}.talk.{characterEntry}.0-{line}";
 
     /// <summary>
-    /// Add every story character's dialogue for this Ancient to the set, as a
-    /// two-line exchange (the Ancient, then her) on her first visit. Returns
+    /// Put every story character's dialogue for this Ancient in the set, as a
+    /// two-line exchange (the Ancient, then her) on every visit, replacing
+    /// any entry already there for her (BaseLib's, from the same rows). Returns
     /// the character keys it added. With <paramref name="populate"/> the lines
     /// are given their loc keys the way the game's own
     /// <c>PopulateLocKeys</c> gives them (which needs the loc tables up).
@@ -64,7 +75,15 @@ public static class StoryAncients
         {
             if (!story.Ancients.Any(a => a.AncientEntry == ancientEntry)) continue;
             var characterEntry = entryOf(story.Character);
-            if (set.CharacterDialogues.ContainsKey(characterEntry)) continue;
+            // ONE OWNER OF THE ENTRY. BaseLib's PopulateLocKeys prefix
+            // (AddAncientDialogues) scans the same `<ANCIENT>.talk.<CHAR>.0-*`
+            // rows and registers its own entry for every CustomCharacterModel
+            // before this postfix runs: a first-visit-only dialogue
+            // (VisitIndex 0, not repeating), so a profile that has met the
+            // Ancient as her never sees it again. Ours replaces whatever is
+            // there; the rows are ours, so nothing of anyone else's is lost.
+            if (set.CharacterDialogues.TryGetValue(characterEntry, out var existing)
+                && existing.Any(d => Added.TryGetValue(d, out _))) continue;
 
             var dialogue = new AncientDialogue("", "") { VisitIndex = null, IsRepeating = true };
             if (populate)
