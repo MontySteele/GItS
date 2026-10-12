@@ -89,6 +89,40 @@ public class SpiralAbyssTests
         Assert.Equal(0, AbyssRules.FirstStrikeExtraPlays(isAttack: false, false));
     }
 
+    /// <summary>The seat round (2026-10-12): "First Strike never doubled".
+    /// The game sizes a play BEFORE it files that play in the combat history
+    /// (sts2.dll CardModel.OnPlayWrapper: GeneratePlayCount, then the loop's
+    /// CardPlayStarted), so the first Attack meets a history with no Attack of
+    /// its owner's in it and is played twice; the second meets the first.
+    /// Per player: the partner's Attack does not spend yours.</summary>
+    [Fact]
+    public void FirstStrike_reads_the_history_per_player_and_per_first_play()
+    {
+        var klee = new object();
+        var varka = new object();
+        var none = new List<(object, bool, bool)>();
+        Assert.False(AbyssRules.AttackAlreadyStarted(none, klee));
+        Assert.Equal(1, AbyssRules.FirstStrikeExtraPlays(true, AbyssRules.AttackAlreadyStarted(none, klee)));
+
+        // A Skill first, then the first Attack: still doubled.
+        var skillOnly = new List<(object, bool, bool)> { (klee, true, false) };
+        Assert.False(AbyssRules.AttackAlreadyStarted(skillOnly, klee));
+
+        // The partner attacked first: Klee's first Attack still doubles.
+        var partner = new List<(object, bool, bool)> { (varka, true, true), (varka, false, true) };
+        Assert.False(AbyssRules.AttackAlreadyStarted(partner, klee));
+        Assert.True(AbyssRules.AttackAlreadyStarted(partner, varka));
+
+        // Klee's first Attack and its replay are in: the next one is not doubled.
+        var played = new List<(object, bool, bool)> { (klee, true, true), (klee, false, true) };
+        Assert.True(AbyssRules.AttackAlreadyStarted(played, klee));
+        Assert.Equal(0, AbyssRules.FirstStrikeExtraPlays(true, AbyssRules.AttackAlreadyStarted(played, klee)));
+
+        // A replay entry alone (no first play of its own) is not a new Attack.
+        var replayOnly = new List<(object, bool, bool)> { (klee, false, true) };
+        Assert.False(AbyssRules.AttackAlreadyStarted(replayOnly, klee));
+    }
+
     [Fact]
     public void ElementalBurst_pays_6_once_per_Power_played()
     {
@@ -120,6 +154,19 @@ public class SpiralAbyssTests
 
     [Fact]
     public void Crystallize_gives_8_Block() => Assert.Equal(8, AbyssNumbers.CrystallizeBlock);
+
+    /// <summary>The seat round (2026-10-12): the Blessing was called
+    /// "Crystallize", the name of a reaction, and the page's glossary explained
+    /// the reaction under it. It shows as Jade Shield; the save number 7 and
+    /// its text stay.</summary>
+    [Fact]
+    public void Blessing_7_shows_as_Jade_Shield()
+    {
+        Assert.Equal(7, (int)AbyssBlessing.Crystallize);
+        Assert.Equal("Jade Shield", AbyssText.Name(AbyssBlessing.Crystallize));
+        Assert.Equal("Start each combat with 8 Block.", AbyssText.Text(AbyssBlessing.Crystallize));
+        Assert.DoesNotContain(AbyssDraft.AllBlessings, b => AbyssText.Name(b).Contains("Crystallize"));
+    }
 
     [Fact]
     public void FatefulFortune_gives_12_Max_HP() => Assert.Equal(12, AbyssNumbers.FatefulFortuneMaxHp);

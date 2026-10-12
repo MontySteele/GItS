@@ -74,6 +74,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_AUTO_CLAUSE,
                                         RESOLUTION_CARRIED_CLAUSE,
                                         RESOLUTION_OVERFLOW_CLAUSE,
+                                        RESOLUTION_REPLAYED_CLAUSE,
+                                        PARTNER_RESOLUTIONS_HEADING,
                                         RESOLUTION_AUTO_TURN_NOTE,
                                         NO_RESOLUTIONS_THIS_TURN,
                                         INTENT_FOLD_CLAUSE,
@@ -1713,6 +1715,9 @@ def _in_play_order(hits: list[dict[str, Any]],
     return tagged
 
 
+_TIMES = {2: "two", 3: "three", 4: "four"}
+
+
 def _resolution_lines(rows: list[dict[str, Any]],
                       stage: bool = False,
                       enemies: list[dict[str, Any]] | None = None
@@ -1744,6 +1749,9 @@ def _resolution_lines(rows: list[dict[str, Any]],
             clauses += RESOLUTION_CARRIED_CLAUSE
         if row.get("overflowed"):
             clauses += RESOLUTION_OVERFLOW_CLAUSE
+        if (row.get("play_count") or 1) > 1:
+            clauses += RESOLUTION_REPLAYED_CLAUSE.format(
+                times=_TIMES.get(row["play_count"], str(row["play_count"])))
         out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
         # 2026-09-25 evening: the performer a random summon rolled.
         if row.get("summoned"):
@@ -4186,6 +4194,14 @@ def render(obs: dict[str, Any]) -> str:
     # `coop` key and print nothing here.
     if obs.get("coop"):
         out += coop_lines(obs["coop"])
+        # The Spiral Abyss seat round (2026-10-12): the partner's plays this
+        # turn, here and never under "What you played".
+        theirs = (obs.get("combat") or {}).get("partner_resolutions")
+        if theirs:
+            out += ["", PARTNER_RESOLUTIONS_HEADING.format(
+                partner=obs["coop"].get("partner") or "the other player"), ""]
+            out += _resolution_lines(
+                theirs, enemies=(obs.get("combat") or {}).get("enemies") or [])
 
     # `EB-473`: the relic row, on a screen that is not a fight, in the
     # combat header's own words and under its own heading. A relic claimed at

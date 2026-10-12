@@ -405,6 +405,11 @@ public static partial class McpMod
                 state["votes"] = votes;
                 state["all_voted"] = votes.All(v => v["voted"] is true);
             }
+            // GItS LOCAL EDIT (Spiral Abyss seat round, 2026-10-12): what the
+            // last shared vote in this room gave, after the game cleared the
+            // votes (gits/GitsCoopOutcomes.cs).
+            var lastVote = GitsLastSharedVoteFor(runState.CurrentRoom);
+            if (lastVote != null) state["last_vote"] = lastVote;
         }
         catch
         {
@@ -439,12 +444,16 @@ public static partial class McpMod
                 foreach (var player in runState.Players)
                 {
                     var vote = treasureSync.GetPlayerVote(player);
+                    // GItS LOCAL EDIT (Spiral Abyss seat round, 2026-10-12):
+                    // `GetPlayerVote` answers a `PlayerVote` object that is
+                    // never null, so `voted` was always true and the index
+                    // was the object. Its own fields say both.
                     bids.Add(new Dictionary<string, object?>
                     {
                         ["player"] = SafeGetText(() => player.Character.Title),
                         ["is_local"] = LocalContext.IsMe(player),
-                        ["voted"] = vote != null,
-                        ["vote_relic_index"] = vote
+                        ["voted"] = vote != null && vote.voteReceived,
+                        ["vote_relic_index"] = vote?.index
                     });
                 }
                 state["bids"] = bids;
@@ -455,6 +464,11 @@ public static partial class McpMod
         {
             // TreasureRoomRelicSynchronizer may not be available
         }
+
+        // GItS LOCAL EDIT (Spiral Abyss seat round, 2026-10-12): who received
+        // which relic once the bids resolved (gits/GitsCoopOutcomes.cs).
+        var award = GitsLastRelicAwardFor(treasureRoom);
+        if (award != null) state["relic_results"] = award["players"];
 
         // All players summary
         state["players"] = BuildAllPlayersState(runState);

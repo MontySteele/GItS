@@ -11,7 +11,8 @@ from __future__ import annotations
 from typing import Any
 
 from understudy import qa_packet
-from understudy.blindplay_coop import WAIT_COMMAND, ally_forms, coop_block
+from understudy.blindplay_coop import (WAIT_COMMAND, ally_forms, coop_block,
+                                      is_coop)
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         OUTSIDE_FIGHT_EVENTS, page_events,
                                         _event_option, _event_options,
@@ -673,6 +674,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # already been taken -- and so `choose` resolves against the same rows
         # the page printed.
         obs["options"] = [_event_option(o) for o in _event_options(state)]
+        # CO-OP (the Spiral Abyss seat round, 2026-10-12): while the party is
+        # still voting on a shared page nothing on it has been taken -- a
+        # row marked TAKEN beside "Klee voted for it" read as Klee having
+        # taken it. The votes are listed under the other player; what the
+        # vote gave is said at the top once it resolves.
+        if is_coop(state) and ev.get("is_shared") is True and ev.get("votes"):
+            for option in obs["options"]:
+                option["taken"] = False
         # `EB-396`: THE WARNING BEFORE THE CHOICE. An event every option of
         # which lands on a screen this tool cannot drive says so on each of
         # those options, so the seat that would otherwise be stranded there

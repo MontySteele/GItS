@@ -110,7 +110,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - The Neow bundle page printed one pack's rows jumbled (a line missing, its text under another card). Not reproduced; needs the raw `bundle_select` state from such a screen.
 - The Trial's first page printed only "Proceed", and `proceed` was then refused against its Accept / Reject options (the page read the event mid-transition).
 - The first rest at a rest site printed "Took: Rest." with "error Rest site room is not open" and still counted an action (see `EB-391`).
-- Co-op: the "What you played this turn" log lists the partner's cards as your own; players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; a contested chest pick is not announced, and the page reports "Took X" for a relic the partner's pick took instead (7 seats); `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted.
+- Co-op: players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted.
 - Enemy rules not on the page: Surrounded (which arm turns you; the debuff text only says "use targeting cards to change your orientation").
 - Enemy rules not on the page: Flutter's "50% less damage from Attacks" halved Bomb damage in one run and not in two others; say whether it applies to a Bomb.
 - Enemy rules not on the page: the final boss's Enrage (Strength per Skill), which the page does not warn about.

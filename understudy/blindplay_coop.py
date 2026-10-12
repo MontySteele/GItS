@@ -179,18 +179,106 @@ def votes(state: dict[str, Any]) -> tuple[list[str], bool, bool]:
     rows = _vote_rows(blob, key)
     if not rows:
         return [], True, True
+    # The Spiral Abyss seat round (2026-10-12): a partner's vote reads as a
+    # vote ("Klee voted for ..."), never as a thing taken, and a chest's as
+    # a bid. A bid with no relic is a skip.
+    verb = "bid on" if st == "treasure" else "voted for"
     lines, mine = [], False
     for v in rows:
-        who = ("You" if v.get("is_local") is True
+        local = v.get("is_local") is True
+        who = ("You" if local
                else _text(v.get("player")) or "The other player")
         if v.get("voted") is True:
-            lines.append(f"{who}: {name(v)}")
-            mine = mine or v.get("is_local") is True
+            if st == "treasure" and v.get("vote_relic_index") is None:
+                lines.append(f"{who} {'skip' if local else 'skips'} the "
+                             f"chest's relics")
+            else:
+                lines.append(f"{who} {verb} {name(v)}")
+            mine = mine or local
         else:
-            lines.append(f"{who}: not chosen yet")
+            lines.append(f"{who} {'have' if local else 'has'} not "
+                         f"{'bid' if st == 'treasure' else 'voted'} yet")
     everyone = (blob.get(done) is True
                 or all(v.get("voted") is True for v in rows))
     return lines, mine, everyone
+
+
+# ----------------------------------------------------------- the outcome --
+
+#: The one plain line a co-op chest page carries while the bids are open.
+CHEST_BID_LINE = ("This chest is shared: each of you bids on one relic. A "
+                  "relic only one of you bids on goes to that player; if you "
+                  "both bid on the same one, the game draws who gets it and "
+                  "the other gets a relic nobody bid on.")
+
+
+def _you_or(row: dict[str, Any]) -> str:
+    return ("You" if row.get("is_local") is True
+            else _text(row.get("player")) or "The other player")
+
+
+def vote_outcome(state: dict[str, Any]) -> list[str]:
+    """What the last shared vote in this room gave, once it resolved.
+
+    The Spiral Abyss seat round (2026-10-12): "I chose Crystallize but got
+    First Strike." The party votes; a split is settled by a random draw
+    between the votes (the game's own rule), and the votes then leave the
+    wire. The bridge keeps the result for the room (`event.last_vote`), and
+    this says it in one sentence.
+    """
+    last = _blob(state, "event").get("last_vote")
+    if _text(state.get("state_type")) != "event" or not isinstance(last, dict):
+        return []
+    chosen = _text(last.get("chosen"))
+    rows = [r for r in (last.get("votes") or []) if isinstance(r, dict)]
+    if not chosen or not rows:
+        return []
+    said = []
+    for r in rows:
+        who = _you_or(r)
+        pick = _text(r.get("choice"))
+        if pick:
+            said.append(f"{'you' if who == 'You' else who} chose {pick}")
+        elif who == "You":
+            said.append("your vote did not reach this game")
+        else:
+            said.append(f"{who}'s vote did not reach this game")
+    line = "The party's vote: " + "; ".join(said) + "."
+    if last.get("split") is True:
+        line += (f" The vote split, and the game drew one of the votes at "
+                 f"random: the party got {chosen}.")
+    else:
+        line += f" The party got {chosen}."
+    return [line]
+
+
+def chest_outcome(state: dict[str, Any]) -> list[str]:
+    """Who received which relic once a co-op chest's bids resolved."""
+    if _text(state.get("state_type")) != "treasure":
+        return []
+    rows = [r for r in (_blob(state, "treasure").get("relic_results") or [])
+            if isinstance(r, dict)]
+    if not rows:
+        return []
+    said = []
+    for r in rows:
+        who = _you_or(r)
+        got = _text(r.get("received"))
+        bid = _text(r.get("bid"))
+        if got:
+            part = f"{who} received {got}"
+            how = _text(r.get("how"))
+            if bid and bid != got:
+                part += (f" (bid on {bid}, which went to the other player)"
+                         if how == "ConsolationPrize" else f" (bid on {bid})")
+            elif how == "FoughtOver":
+                part += " (both bid on it; the draw went this way)"
+        elif r.get("skipped") is True:
+            part = f"{who} skipped the relics"
+        else:
+            part = f"{who} received no relic"
+        said.append(part)
+    return ["The chest is shared out: " + "; ".join(said) + "."]
 
 
 # ------------------------------------------------------------ the block --
@@ -225,8 +313,12 @@ def coop_block(state: dict[str, Any]) -> dict[str, Any] | None:
         waiting = (f"You have chosen; {who} has not yet"
                    + (f", and {what}" if what else "") + ". Say `wait`, or "
                    "choose again to change yours.")
+    outcome = vote_outcome(state) + chest_outcome(state)
+    if st == "treasure" and _blob(state, "treasure").get("bids"):
+        outcome = [CHEST_BID_LINE] + outcome
     return {"partner": who, "partners": _partner_rows(state),
-            "votes": lines, "waiting": waiting}
+            "votes": lines, "waiting": waiting, "outcome": outcome,
+            "vote_kind": st}
 
 
 def ally_forms(state: dict[str, Any]) -> list[str]:
@@ -411,13 +503,20 @@ def render_lines(info: dict[str, Any]) -> list[str]:
                        f"{pet['max_hp']}"
                        + (f", Block {pet['block']}" if pet["block"] else ""))
     if info["votes"]:
-        out += ["", "Choices so far:"]
+        out += ["", ("Bids so far:" if info.get("vote_kind") == "treasure"
+                     else "Votes so far:")]
         out += [f"- {line}" for line in info["votes"]]
     return out
 
 
 def banner(info: dict[str, Any] | None) -> list[str]:
     """The waiting sentence, at the top of the page, or nothing."""
-    if not info or not info.get("waiting"):
+    if not info:
         return []
-    return [f"**WAITING.** {info['waiting']}", ""]
+    out = [f"**{line}**" if line.startswith(("The party's vote",
+                                             "The chest is shared out"))
+           else line for line in info.get("outcome") or []]
+    out = out + [""] if out else []
+    if info.get("waiting"):
+        out += [f"**WAITING.** {info['waiting']}", ""]
+    return out

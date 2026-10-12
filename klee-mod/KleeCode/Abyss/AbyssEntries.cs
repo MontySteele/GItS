@@ -76,7 +76,10 @@ public static class AbyssText
         AbyssBlessing.FirstStrike => "First Strike",
         AbyssBlessing.ElementalBurst => "Elemental Burst",
         AbyssBlessing.Resonance => "Resonance",
-        AbyssBlessing.Crystallize => "Crystallize",
+        // Shown as Jade Shield (seat round, 2026-10-12): "Crystallize" is a
+        // reaction's name, and the page glossed the reaction under it. The
+        // member name and its save number 7 stay.
+        AbyssBlessing.Crystallize => "Jade Shield",
         AbyssBlessing.FatefulFortune => "Fateful Fortune",
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };

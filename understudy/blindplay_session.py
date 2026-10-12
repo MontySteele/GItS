@@ -17,8 +17,8 @@ from typing import Any
 
 from understudy import authorship, bridge, offer_log, qa_packet, seat
 from understudy.blindplay_coop import (WAIT_POLL_S, blocked_on_partner,
-                                       not_waiting_line, wait_for_partner,
-                                       wait_line)
+                                       is_coop, not_waiting_line,
+                                       wait_for_partner, wait_line)
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, settle_board, _text
@@ -763,7 +763,7 @@ class Session:
             # then the game's answer. A screen that says nothing about what
             # arrived leaves the tester with the row it took; a screen that
             # does say leaves it with both, in that order.
-            feedback = " ".join(x for x in (taken_line(res),
+            feedback = " ".join(x for x in (taken_line(res, state),
                                             _result_line(result)) if x)
             self.transcript.write(kind="result", action=action,
                                   summary=feedback)
@@ -890,7 +890,33 @@ _TAKEN_VERB = {"buy": "Bought", "go": "Went to", "skip": "Skipped"}
 _TAKEN_KEYS = ("option", "card", "bundle", "item", "node", "skipped")
 
 
-def taken_line(res: dict[str, Any]) -> str:
+#: CO-OP (the Spiral Abyss seat round, 2026-10-12). A choice on a shared
+#: event is a VOTE and a co-op chest pick is a BID: either can resolve to
+#: something else, so the line never says "Took". What the party got is said
+#: on the page once the vote or the bids resolve.
+COOP_VOTE_VERB = "Voted for"
+COOP_BID_VERB = "Bid on"
+COOP_VOTE_NOTE = (" (A vote: the party gets one option. If your votes "
+                  "differ, the game draws one of them at random; the page "
+                  "says what the party got.)")
+COOP_BID_NOTE = (" (A bid: the page says which relic you received once "
+                 "everyone has bid.)")
+
+
+def _coop_verb(state: dict[str, Any] | None) -> tuple[str, str]:
+    """`(verb, note)` for a choice that is a co-op vote or bid, else blank."""
+    if not isinstance(state, dict) or not is_coop(state):
+        return "", ""
+    st = _text(state.get("state_type"))
+    blob = state.get(st) if isinstance(state.get(st), dict) else {}
+    if st == "event" and blob.get("is_shared") is True:
+        return COOP_VOTE_VERB, COOP_VOTE_NOTE
+    if st == "treasure" and (blob.get("bids") or blob.get("is_bidding_phase")):
+        return COOP_BID_VERB, COOP_BID_NOTE
+    return "", ""
+
+
+def taken_line(res: dict[str, Any], state: dict[str, Any] | None = None) -> str:
     """What the tester just took, in the names the screen used (`EB-341`).
 
     THE DEFECT. A choice's outcome was legible only on some LATER screen. The
@@ -918,7 +944,9 @@ def taken_line(res: dict[str, Any]) -> str:
                  if _text(printed.get(k))), "")
     if not name:
         return ""
-    line = f"{_TAKEN_VERB.get(str(res.get('verb') or ''), 'Took')}: {name}"
+    coop_verb, coop_note = _coop_verb(state)
+    verb = coop_verb or _TAKEN_VERB.get(str(res.get('verb') or ''), 'Took')
+    line = f"{verb}: {name}"
     kind = _text(printed.get("kind"))
     if kind:
         line += f" ({kind})"
@@ -928,7 +956,7 @@ def taken_line(res: dict[str, Any]) -> str:
     body = _text(printed.get("text"))
     if body:
         line += f" — {body}"
-    line = line.rstrip(".") + "."
+    line = line.rstrip(".") + "." + coop_note
     # `EB-448`. WHAT THE ROW HANDED OVER, BY NAME. The sentence above is the
     # screen's promise ("Add a card to your deck"); these are the faces the
     # feed carried beside it and the page used to drop, so Klee r13's granted

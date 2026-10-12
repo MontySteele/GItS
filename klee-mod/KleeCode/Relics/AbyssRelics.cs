@@ -120,7 +120,10 @@ public sealed class AbyssResonanceRelic : AbyssBlessingRelic
 public sealed class AbyssCrystallizeRelic : AbyssBlessingRelic
 {
     public override AbyssBlessing Blessing => AbyssBlessing.Crystallize;
-    protected override string Title => "Crystallize";
+    // Jade Shield, not Crystallize (a reaction's name). The class name is
+    // the model id a saved run holds, and the icon is the same shield, so
+    // both stay.
+    protected override string Title => "Jade Shield";
     protected override string IconFile => "abyss/relics/crystallize.png";
 }
 

@@ -187,6 +187,19 @@ public static class AbyssRules
         && cardsPlayedThisTurnIncludingThis % AbyssNumbers.AbyssalMoonEvery == 0;
 
     /// <summary>First Strike: extra plays for this card.</summary>
+    /// <summary>First Strike's history read, as a pure function: has
+    /// <paramref name="owner"/> already started an Attack this combat? Each
+    /// entry is one play the combat history holds (who, whether it was the
+    /// first of its series, whether it was an Attack). A replay of a card is
+    /// not a new Attack; another player's Attack is not this player's. The
+    /// play being sized is not in the history yet (see
+    /// <c>SpiralAbyss.ModifyCardPlayCount</c>), so an empty history is
+    /// "no".</summary>
+    public static bool AttackAlreadyStarted<TPlayer>(
+        IEnumerable<(TPlayer Player, bool FirstInSeries, bool IsAttack)> started, TPlayer owner)
+        where TPlayer : class =>
+        started.Any(e => ReferenceEquals(e.Player, owner) && e.FirstInSeries && e.IsAttack);
+
     public static int FirstStrikeExtraPlays(bool isAttack, bool attackAlreadyPlayedThisCombat) =>
         isAttack && !attackAlreadyPlayedThisCombat ? 1 : 0;
 

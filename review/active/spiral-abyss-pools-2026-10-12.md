@@ -24,7 +24,7 @@ This paper fills the two pools and sets the build. It has no picks. Tell me if a
 | **First Strike** | Your first Attack each combat is played twice. | Burst openers. |
 | **Elemental Burst** | Whenever you play a Power, deal 6 damage to ALL enemies. | Burst blessings. Powers stop being a turn's dead tempo. |
 | **Resonance** | On turn 1 of each combat, gain 1 Energy and draw 1 card. | Elemental Resonance. It answers the "starter hand with no decision" opening our seats keep reporting. |
-| **Crystallize** | Start each combat with 8 Block. | Geo shields. |
+| **Jade Shield** | Start each combat with 8 Block. | Geo shields. Renamed from Crystallize: the name collided with the Crystallize reaction. |
 | **Fateful Fortune** | Gain 12 Max HP. | A plain pick, for a party that is losing. |
 
 ## 3. Shadows (eight)

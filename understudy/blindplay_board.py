@@ -778,7 +778,14 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # hook -- read off the board where the ledger did not file them.
         name_resolution_kills(resolved, _enemies(state),
                               combat["round"] or None)
-        combat["resolutions"] = resolved
+        # CO-OP (the Spiral Abyss seat round, 2026-10-12): both players'
+        # plays resolve in each game, and "What you played" listed the
+        # partner's. Theirs go under the other-player section.
+        theirs = [r for r in resolved if r.get("is_local") is False]
+        combat["resolutions"] = [r for r in resolved
+                                 if r.get("is_local") is not False]
+        if theirs:
+            combat["partner_resolutions"] = theirs
     # 2026-10-05: what happened that no other line of the page shows -- a
     # card drawn by an effect, a debuff Artifact negated, an enemy power that
     # fired, a card stolen or given back. Absent on an older mod.
@@ -1446,6 +1453,14 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
                     "auto_played": bool(row.get("auto_played")),
+                    # The Spiral Abyss seat round (2026-10-12): whose card
+                    # (`is_local` False is the co-op partner's; None on an
+                    # older mod, read as yours) and how many times it played.
+                    "owner": _text(row.get("owner")),
+                    "is_local": (row.get("is_local")
+                                 if isinstance(row.get("is_local"), bool)
+                                 else None),
+                    "play_count": max(1, _int(row.get("play_count")) or 1),
                     "carried": bool(row.get("carried")),
                     "overflowed": bool(row.get("overflowed")),
                     "hits": hits,
