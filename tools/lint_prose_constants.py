@@ -207,6 +207,23 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # THE SPIRAL ABYSS MODE (2026-10-12): Resonance's "draw 1 card" is a run
+    # modifier's number; these cards print their own draw, not Resonance's.
+    ("klee-mod/KleeCode/Cards/Kokomi/PrincessOfWatatsumi.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "the card's own draw, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "the card's own draw, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "the card's own draw, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Powers/Prototype/KokomiOverhaulPowers.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "the power's own draw, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "the power's own draw, not the Abyss Blessing's",
     # DROPPED 2026-10-11 (the diversity pass), reported stale by the lint:
     # Ensemble Cast's face ("You have 4 guest seats. Summon a random guest.")
     # no longer reads as a lone match once the corpus moved.

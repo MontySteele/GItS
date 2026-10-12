@@ -427,6 +427,11 @@ internal static class ReactionEffects
             // The listeners above and below keep their direct calls.
             ReactionEvents.Raise(reaction, target, dealer, cardSource);
 
+            // THE SPIRAL ABYSS (Abyss Mage Shield): a reaction on a shielded
+            // elite removes 3 hits. A no-op on any body without the shield,
+            // which is every body outside an Abyss run.
+            await Abyss.AbyssShieldPower.NoteReaction(choiceContext, target);
+
             // Courtroom Drama (R85): the FIRST reaction of the turn puts its
             // target on the stand. Counted PER DEALER -- the sim's
             // `reactions_this_turn == 1` in the only configuration it models

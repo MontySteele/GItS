@@ -232,6 +232,20 @@ work (`operations/teyvat-frame.md`). [USER]: the first
 draft "wasn't very interesting". It returns only as **elemental enemies**: a
 short brief on elemental shields goes to [USER] when the kits are done.
 
+## The Spiral Abyss mode: built, not yet played
+
+The fourth menu mode (`review/active/spiral-abyss-pools-2026-10-12.md`) is
+built under `klee-mod/KleeCode/Abyss/`: a "Spiral Abyss" button beside Custom
+(solo and co-op host) opens the Custom screen with the `SpiralAbyss` modifier
+ticked and locked; before each act's Ancient the run shows a page of three
+Blessings, the enemies take one of the two passed Shadows on a seeded roll,
+and all eight of each apply through the modifier's hooks, saved with the run.
+Riptide was rewritten before the build ([USER], 2026-10-12): "Riptide sounds
+insanely dangerous for enemies that open with a single very high hit as a block
+check; the rest all look good." The act's element is Hydro, Pyro, Electro for
+acts 1 to 3. Headless pins: `KleeTests/SpiralAbyssTests.cs`. Next: the live
+check listed in the build PR, then one solo and one co-op seat on the mode.
+
 ## Live cell
 
 A kit at Balance is measured on the real game (`EXPERIMENTS.md`, "Kit balance

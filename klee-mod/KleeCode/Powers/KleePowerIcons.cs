@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using KleeMod.Abyss;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
@@ -87,6 +88,9 @@ internal static class KleePowerIcons
         // Block off the arm's explosion ledger for a turn nothing went off.
         SitTightPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         DodocoPower => KleePck.Path("klee/powers/bomb.png"),
+        // THE SPIRAL ABYSS (2026-10-12): the Abyss Mage Shield borrows the
+        // nearest shipped shield shape until its own icon is drawn (BACKLOG).
+        AbyssShieldPower => KleePck.Path("kokomi/powers/vigil_of_the_deep.png"),
         SparkKnightPower =>
             KleePck.Path("klee/powers/spark_threshold_down.png"),
         AlicesDetonatorBasePower =>
