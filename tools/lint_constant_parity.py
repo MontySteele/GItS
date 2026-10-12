@@ -321,7 +321,7 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ReginaDrain": _stage("REGINA_DRAIN"),
     "FurinaStageLaw.StarTurnFanfarePer": _stage("STAR_TURN_FANFARE_PER"),
     # The diversity pass (2026-10-11): Bravura's "for every 3 spent" and
-    # Packed House's "for every 5 Fanfare".
+    # Packed House's "for every 4 Fanfare".
     "FurinaStageLaw.BravuraSpentPer": _stage("BRAVURA_SPENT_PER"),
     "FurinaStageLaw.PackedHouseFanfarePer": _stage("PACKED_HOUSE_FANFARE_PER"),
     # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md,

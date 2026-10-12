@@ -323,9 +323,9 @@ def test_fountain_of_lucine_repays_at_the_next_three_turn_starts():
     assert f.ledger["fountain_repaid"] == 18 and not f.fountains
 
 
-def test_hold_the_stage_spends_up_to_12_for_1_block_each():
-    # The Spend paper (2026-10-10): "Gain 6 Block. Spend up to 12: gain 1
-    # more for each." No chooser: the decider is not asked.
+def test_hold_the_stage_spends_up_to_16_for_1_block_each():
+    # The Spend paper (2026-10-10): "Gain 6 Block. Spend up to 16: gain 1
+    # more for each." (12 until the Spend outlet paper, 2026-10-12.) No chooser: the decider is not asked.
     st = _state()
     st.player.ftd.decider = _Says(False)
     _play(st, "ftd_hold_the_stage")              # nothing banked: 6
@@ -334,8 +334,8 @@ def test_hold_the_stage_spends_up_to_12_for_1_block_each():
     _play(st, "ftd_hold_the_stage")              # all 7
     assert st.player.block == 6 + 13 and st.player.ftd.fanfare == 0
     st.player.ftd.fanfare = 20
-    _play(st, "ftd_hold_the_stage")              # the cap, 12
-    assert st.player.block == 6 + 13 + 18 and st.player.ftd.fanfare == 8
+    _play(st, "ftd_hold_the_stage")              # the cap, 16
+    assert st.player.block == 6 + 13 + 22 and st.player.ftd.fanfare == 4
 
 
 def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_four():

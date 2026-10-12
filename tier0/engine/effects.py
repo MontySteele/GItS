@@ -407,10 +407,11 @@ def _runtime_count(state: CombatState, token: str,
         return furina_stage.count(p)
     if token == "stage_fanfare":
         return furina_stage.fanfare(p)
-    # The diversity pass (2026-10-11): Packed House's "for every 5 Fanfare"
-    # (the C# `FurinaStage.FanfareFives`).
-    if token == "stage_fanfare_fives":
-        return furina_stage.fanfare_fives(p)
+    # Packed House's "plus 1 for every 4 Fanfare you have" (the Spend outlet
+    # paper, ruled 2026-10-12; was every 5 under the diversity pass)
+    # (the C# `FurinaStage.FanfareFours`).
+    if token == "stage_fanfare_fours":
+        return furina_stage.fanfare_fours(p)
     if token == "hand_size":
         return len(p.hand)
     if token == "discards_this_card":
@@ -911,6 +912,12 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # splash is the reaction's damage, not Pyro damage, and is left alone.
     if element == "pyro" and source not in PURITY_DARK_EXCLUDED:
         dmg += state.player.powers.get("mc_purity_dark", 0)
+    # VARKA'S STOKE THE FLAMES (Pyro paper 2, 2026-10-12): "Your next Pyro
+    # Attack this turn deals 5 additional damage." Each Pyro hit of the
+    # Attack card in flight, same additive phase. 0 for anyone else. C# twin:
+    # `StokeTheFlamesPower.ModifyDamageAdditive`.
+    if element == "pyro" and source == "attack" and powered:
+        dmg += varka_oath.pyro_attack_bonus(state)
     # FURINA'S NEUVILLETTE (the pool to 75): "Your Hydro damage deals 2
     # more" [3], on the same additive phase and the same exclusions -- her
     # cards' Hydro, a guest's, his own act's. The C# twin is
@@ -3372,7 +3379,7 @@ RUNTIME_COUNT_NAMES = frozenset({
     # The Spend paper (2026-10-10).
     "stage_spent_fours",
     # The diversity pass (2026-10-11).
-    "stage_spent_threes", "stage_fanfare_fives",
+    "stage_spent_threes", "stage_fanfare_fours",
     # THE POOL TO 75 (2026-10-09).
     "stage_drains", "stage_drained", "stage_repays_turn",
     "stage_repaid",

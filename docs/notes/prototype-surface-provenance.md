@@ -7409,6 +7409,27 @@ enemies, bit I agree that we need something better as the main engine."
   included; no pick or an empty hand pays nothing. The sim's pilot takes it
   only when the hand holds a Status or a Curse.
 
+## Varka Pyro paper 2, 2026-10-12
+
+Paper `review/active/varka-pyro-reactions-2026-10-12.md`, sec.3, ruled at
+both defaults (a). [USER]: "On Varka - agreed on both options".
+
+- **Ember Cleave**: "Deal 7 [9] Pyro damage. Gain 2 [3] Strength this
+  turn." The base game's Setup Strike in Pyro. The Strength is the new
+  `temp_strength` kind: C# `EmberCleavePower`, a `TemporaryStrengthPower`
+  (Setup Strike's and Flex's shape); sim the existing `temp_strength`
+  power. Its Oath gain and the Exhaust rider are gone, so it no longer
+  makes Pyro current before the hit (the hit's Pyro still does, on the open
+  Oath's rule).
+- **Stoke the Flames**: "Gain 2 [3] Pyro Oath. Your next Pyro Attack this
+  turn deals 5 [7] additional damage." The rider is gone. The bonus is the
+  new `next_pyro_attack` kind (C# `StokeTheFlamesPower`, sim
+  `vk_next_pyro_attack`): additive, before the reaction multiplier, on each
+  Pyro hit of the next Attack card that deals one; that Attack spends it,
+  an Attack with no Pyro hit leaves it standing, and it ends with the turn.
+- The `exhaust_for_pyro_oath` kind had no other card and is deleted in
+  both engines.
+
 ## Furina: the diversity pass, 2026-10-11
 
 `review/active/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled
@@ -7771,3 +7792,24 @@ only, no number and no rule moves. C# pins in
   draws nothing; the turns it played one directly drew one (Seapunk turn 2,
   Punch Construct turn 1). Pinned on the real rows, a generated Sting
   included and across turns, in both engines.
+
+## Furina Spend outlet paper, 2026-10-12
+
+`review/active/furina-spend-outlet-2026-10-12.md` sec.2, ruled 2026-10-12 at
+all four defaults ([USER]: "For Furina - generally agree across the board.").
+Texts and numbers are the paper's; every Spend rate is unchanged.
+
+- **Caps:** Spirited Aria spends up to 12 (was 8); Crashing Waves and Hold the
+  Stage up to 16 (were 12; the sim slice's `ftd_hold_the_stage` too). Tidal
+  Flourish stays at 10.
+- **Packed House (`proto_fs_packed_house`):** Common Skill 1, "Gain 5 [8]
+  Block, plus 1 for every 4 Fanfare you have." It reads the bank and never
+  spends it (count `stage_fanfare_fours`, `FurinaStageLaw.PackedHouseFanfarePer`
+  4; was the Attack "Deal 4 damage, plus 1 for every 5 Fanfare you have",
+  count `stage_fanfare_fives`). The in-combat line previews the Block, The
+  Show Must Go On's form.
+- **Rising Applause+ (`proto_fs_standing_ovation`):** gains Retain; the base
+  starter is unchanged. Its rider tip (`ArmKeywordTips.ForBankDamage`, titled
+  "When to play it"): "Its damage is the Fanfare you hold. Play it when the
+  bank is worth it." Derived from the row (`starter_spends_the_bank`: a basic
+  card whose damage is what its spend-all took), so it rides this card only.

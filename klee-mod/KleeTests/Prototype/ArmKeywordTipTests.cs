@@ -396,10 +396,15 @@ public class ArmKeywordTipTests
         //
         // FORTY-TWO with Kokomi round 2 (2026-10-12): `ForNereidsTwice`, a
         // rider on Nereid's Ascension (its doubled Plan doubles the debuffs).
-        Assert.Equal(42, attaches.Count);
+        //
+        // FORTY-THREE with the Spend outlet paper (2026-10-12):
+        // `ForBankDamage`, a rider on her starter spend-all saying when to
+        // play it (two seats played Rising Applause at 0 to 4 damage).
+        Assert.Equal(43, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
         Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");
         Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");
+        Assert.Contains(attaches, m => m.Name == "ForBankDamage");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");

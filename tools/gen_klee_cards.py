@@ -1240,6 +1240,23 @@ def doubles_a_carry_out(card: dict) -> bool:
                for clause in card.get("plan") or [])
 
 
+def starter_spends_the_bank(card: dict) -> bool:
+    """The Spend outlet paper (2026-10-12): is this a STARTER whose damage is
+    the Fanfare its spend-all took? Two seats played Rising Applause at 0 to
+    4 damage, so the card carries a one-line rider saying when to play it
+    (`ArmKeywordTips.ForBankDamage`). Asked of the row rather than listed by
+    id; the pool's own spend-alls are drafted on purpose and carry nothing.
+    """
+    if card.get("rarity") != "basic":
+        return False
+    ops = card.get("effects") or []
+    return (any(eff.get("op") == "stage_spend_all" for eff in ops)
+            and any(eff.get("op") == "damage"
+                    and (eff.get("amount_formula") or {}).get("count")
+                    == "stage_spent"
+                    for eff in ops))
+
+
 def doubles_the_first_plan(card: dict) -> bool:
     """Kokomi round 2 (2026-10-12): does this row apply Nereid's Ascension,
     whose first Plan each turn is carried out twice? Asked of the effect, so
@@ -2495,10 +2512,13 @@ VARKA_KINDS = {
     "shatter": "Shatter",
     "deep_freeze": "DeepFreeze",
     # THE PYRO PASS (2026-10-11, review/active/varka-pyro-pass-2026-10-11.md):
-    # Ashen Oath's gain, which switches nothing, and the optional rider "You
-    # may Exhaust a card. If you do, gain 1 more Pyro Oath."
+    # Ashen Oath's gain, which switches nothing.
     "pyro_oath": "PyroOath",
-    "exhaust_for_pyro_oath": "ExhaustForPyroOath",
+    # PYRO PAPER 2 (2026-10-12, review/active/varka-pyro-reactions-2026-10-12.md):
+    # Ember Cleave's "Gain 2 Strength this turn" (Setup Strike's) and Stoke's
+    # "Your next Pyro Attack this turn deals 5 additional damage".
+    "temp_strength": "TemporaryStrength",
+    "next_pyro_attack": "NextPyroAttack",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2525,6 +2545,9 @@ VARKA_KIND_FIELDS = {
     "shatter": ("base", "per"),
     # The Pyro pass (2026-10-11).
     "pyro_oath": ("amount",),
+    # Pyro paper 2 (2026-10-12).
+    "temp_strength": ("amount",),
+    "next_pyro_attack": ("base",),
 }
 #: A field a kind MAY print; absent, the rule's own default holds (Vow of the
 #: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).
@@ -6535,10 +6558,10 @@ STAGE_COUNT_CS = {
                     "FurinaStage.Of(card.Owner?.Creature).Count",
     "stage_fanfare": "static (card, _) => "
                      "FurinaStage.FanfareOf(card.Owner?.Creature)",
-    # THE DIVERSITY PASS (2026-10-11): Packed House's "plus 1 for every 5
-    # Fanfare you have" (read, never spent).
-    "stage_fanfare_fives": "static (card, _) => "
-                           "FurinaStage.FanfareFives(card.Owner?.Creature)",
+    # Packed House's "plus 1 for every 4 Fanfare you have" (read, never
+    # spent; the Spend outlet paper, ruled 2026-10-12).
+    "stage_fanfare_fours": "static (card, _) => "
+                           "FurinaStage.FanfareFours(card.Owner?.Creature)",
     # THE REPAY FLOOR (ruled 2026-10-09): Surging Waters', Hydro Lance's and
     # Cleansing Torrent's "plus 1 for any HP it could not Repay" -- after the
     # card's Repay, what it could not return; before the play, what a Repay
@@ -16720,6 +16743,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if doubles_a_carry_out(card):
             tips_expr = (
                 "ArmKeywordTips.ForPlanTwice("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # The Spend outlet paper (2026-10-12): her starter spend-all says
+        # when to play it. A fact about THIS card, beside the riders above.
+        if starter_spends_the_bank(card):
+            tips_expr = (
+                "ArmKeywordTips.ForBankDamage("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # Kokomi round 2 (2026-10-12): Nereid's Ascension's rider, the same
         # shape -- what its "twice" covers (the Plan's debuffs too).

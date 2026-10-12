@@ -269,16 +269,16 @@ public class FurinaSpendUpToTests
             + "enemies. [gold]Spend[/gold] up to 10: deal 1 more for each.",
             Face(new ProtoFsTidalFlourish()));
         Assert.StartsWith(
-            "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 8: "
+            "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 12: "
             + "deal 1 more for each. Draw 1 for every 4 spent.",
             Face(new ProtoFsSpiritedAria()));
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. "
-            + "[gold]Spend[/gold] up to 12: hit once more for every 4.",
+            + "[gold]Spend[/gold] up to 16: hit once more for every 4.",
             Face(new ProtoFsCrashingWaves()));
         Assert.StartsWith(
             "Gain {CalculationBase:diff()} [gold]Block[/gold]. "
-            + "[gold]Spend[/gold] up to 12: gain 1 more for each.",
+            + "[gold]Spend[/gold] up to 16: gain 1 more for each.",
             Face(new ProtoFsHoldTheStage()));
 
         Assert.Equal(5m, new ProtoFsTidalFlourish().DynamicVars.CalculationBase.BaseValue);
@@ -293,9 +293,9 @@ public class FurinaSpendUpToTests
 
     [Theory]
     [InlineData("ProtoFsTidalFlourish", 10)]
-    [InlineData("ProtoFsSpiritedAria", 8)]
-    [InlineData("ProtoFsCrashingWaves", 12)]
-    [InlineData("ProtoFsHoldTheStage", 12)]
+    [InlineData("ProtoFsSpiritedAria", 12)]
+    [InlineData("ProtoFsCrashingWaves", 16)]
+    [InlineData("ProtoFsHoldTheStage", 16)]
     public void Each_card_spends_up_to_its_x_on_play_with_no_chooser(
         string type, int cap)
     {
@@ -316,7 +316,7 @@ public class FurinaSpendUpToTests
         Assert.Contains(
             "CardPileCmd.Draw(choiceContext, 0 + 1 * FurinaStage.SpentFours(this), Owner)",
             Generated("ProtoFsSpiritedAria"));
-        Assert.Contains("FurinaStage.SpentOrUpTo(card, 8)",
+        Assert.Contains("FurinaStage.SpentOrUpTo(card, 12)",
                         Generated("ProtoFsSpiritedAria"));
         Assert.Equal(4, FurinaStageLaw.SpendUpToEvery);
         Assert.Equal(2, FurinaStageLaw.NaviaSpendDivisor);

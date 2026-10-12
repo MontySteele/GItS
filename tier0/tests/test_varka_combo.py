@@ -119,34 +119,54 @@ def test_the_new_rows_and_their_upgrades(varka):
 # 2. Pyro burns.
 # ---------------------------------------------------------------------------
 
-def test_stoke_the_flames_gains_2_pyro_and_powers_the_next_attack(varka):
-    # The Pyro pass (2026-10-11, pick 1 b): "Pyro becomes your current
-    # element. Gain 2 Pyro Oath. Your next Attack deals 3 additional damage.
-    # You may Exhaust a card. If you do, gain 1 more Pyro Oath."
+def test_stoke_the_flames_gains_2_pyro_and_powers_the_next_pyro_attack(varka):
+    # Pyro paper 2 (2026-10-12): "Gain 2 [3] Pyro Oath. Your next Pyro Attack
+    # this turn deals 5 [7] additional damage." The Exhaust rider is gone.
     st = _state(element="hydro")
-    st.player.hand = [loader.get_card("defend")]
+    st.player.hand = [_burn()]
     _play(st, _vk("stoke_the_flames"))
-    # The sim's pilot spends no card of his own on the rider.
     assert st.player.exhaust_pile == []
     assert _led(st).oath["pyro"] == 2
-    assert st.player.powers["next_attack_up"] == 3
+    assert st.player.powers[V.NEXT_PYRO_ATTACK] == 5
+    assert "next_attack_up" not in st.player.powers
     # The 2026-10-05 seat round: "Pyro becomes your current element."
     assert _led(st).current == "pyro"
     _play(st, _vk("stoke_the_flames") + "+")
     assert _led(st).oath["pyro"] == 2 + 3
-    assert st.player.powers["next_attack_up"] == 3 + 5
+    assert st.player.powers[V.NEXT_PYRO_ATTACK] == 5 + 7
+    assert not hasattr(V, "EXHAUST_RIDER_OATH")
+    assert "exhaust_for_pyro_oath" not in V.KINDS
 
 
-def test_stoke_the_flames_rider_exhausts_a_status_for_1_more(varka):
+def test_stokes_bonus_rides_the_next_pyro_attack_and_is_spent(varka):
     st = _state(element="hydro")
-    st.player.hand = [loader.get_card("defend"), _burn()]
     _play(st, _vk("stoke_the_flames"))
-    assert [c.id for c in st.player.exhaust_pile] == ["burn"]
-    assert _led(st).oath["pyro"] == 2 + V.EXHAUST_RIDER_OATH
+    _play(st, _vk("ember_cleave"))
+    assert st.enemies[0].hp == 100 - (7 + 5)
+    assert V.NEXT_PYRO_ATTACK not in st.player.powers
+    # Spent: the next Pyro Attack takes nothing from it (Ember Cleave's own
+    # Strength 2 still counts).
+    _play(st, _vk("ember_cleave"))
+    assert st.enemies[0].hp == 100 - (7 + 5) - (7 + 2)
+
+
+def test_a_non_pyro_attack_leaves_stokes_bonus_standing(varka):
     st = _state(element="hydro")
-    st.player.hand = []                             # an empty hand: nothing
     _play(st, _vk("stoke_the_flames"))
-    assert _led(st).oath["pyro"] == 2
+    _play(st, _vk("shatter"))                       # Icebreaker: Cryo, 5
+    assert st.enemies[0].hp == 95
+    assert st.player.powers[V.NEXT_PYRO_ATTACK] == 5
+    st.enemies[0].aura = None                       # no Melt in the sum
+    _play(st, _vk("ember_cleave"))
+    assert st.enemies[0].hp == 95 - (7 + 5)
+    assert V.NEXT_PYRO_ATTACK not in st.player.powers
+
+
+def test_stokes_bonus_ends_with_the_turn(varka):
+    st = _state(element="hydro")
+    _play(st, _vk("stoke_the_flames"))
+    V.turn_end(st)
+    assert V.NEXT_PYRO_ATTACK not in st.player.powers
 
 
 def test_stoke_the_flames_switches_before_its_gain(varka):
@@ -171,39 +191,22 @@ def test_the_banner_holds_stoke_the_flames(varka):
     assert led.oath["pyro"] == 2 and led.oath["electro"] == 1
 
 
-def test_ember_cleave_hits_9_pyro_and_gains_1(varka):
-    st = _state()
-    st.player.hand = [loader.get_card("defend")]
-    _play(st, _vk("ember_cleave"))
-    e = st.enemies[0]
-    assert e.hp == 91 and e.aura == "pyro"
-    assert st.player.exhaust_pile == []             # the rider is optional
-    # Its own application, then the Varka payoff fix's (2026-10-08) "Gain 1
-    # Pyro Oath".
-    assert _led(st).oath["pyro"] == 1 + 1
-    assert _led(st).current == "pyro"
-    st = _state()
-    _play(st, _vk("ember_cleave") + "+")
-    assert st.enemies[0].hp == 88
-
-
-def test_ember_cleave_rider_exhausts_a_status_for_1_more(varka):
-    # The Pyro pass (2026-10-11, pick 1 b): "You may Exhaust a card. If you
-    # do, gain 1 more Pyro Oath."
+def test_ember_cleave_is_setup_strike_in_pyro(varka):
+    # Pyro paper 2 (2026-10-12): "Deal 7 [9] Pyro damage. Gain 2 [3]
+    # Strength this turn." No Oath gain, no Exhaust rider.
     st = _state(element="hydro")
     st.player.hand = [_burn()]
     _play(st, _vk("ember_cleave"))
-    assert [c.id for c in st.player.exhaust_pile] == ["burn"]
-    assert _led(st).oath["pyro"] == 1 + 1 + V.EXHAUST_RIDER_OATH
-
-
-def test_ember_cleave_gains_its_oath_with_nothing_to_exhaust(varka):
-    # The paper's reading: the Oath is gained even with no card left.
-    st = _state(element="hydro")
-    st.player.hand = []
-    _play(st, _vk("ember_cleave"))
+    e = st.enemies[0]
+    assert e.hp == 93 and e.aura == "pyro"
     assert st.player.exhaust_pile == []
-    assert _led(st).oath["pyro"] == 1 + 1
+    assert _led(st).oath["pyro"] == 1               # its application's credit
+    assert st.player.powers["temp_strength"] == 2
+    assert st.player.powers["strength"] == 2
+    st = _state(element="hydro")
+    _play(st, _vk("ember_cleave") + "+")
+    assert st.enemies[0].hp == 91
+    assert st.player.powers["strength"] == 3
 
 
 def test_ashen_oath_gains_2_strength_and_2_pyro_oath(varka):
@@ -281,9 +284,9 @@ def test_the_banner_holds_and_pays_1_oath_of_the_current_element(varka):
     # An on-element card is not a change: nothing.
     before = led.oath["pyro"]
     _play(st, _vk("ember_cleave"))
-    # Its application and its "Gain 1 Pyro Oath" (Varka payoff fix,
-    # 2026-10-08); no Banner payment.
-    assert led.oath["pyro"] == before + 2
+    # Its application only (Pyro paper 2, 2026-10-12: no Oath gain); no
+    # Banner payment.
+    assert led.oath["pyro"] == before + 1
     # A Knight still changes it.
     _play(st, _vk("kaeya_frostgnaw"))
     assert led.current == "cryo"
