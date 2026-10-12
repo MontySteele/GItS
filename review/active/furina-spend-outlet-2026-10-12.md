@@ -104,3 +104,9 @@ So the no-outlet death is a drafting shape. The outlets are in the pool.
    - **(a) Default:** Retain on the upgrade only.
    - (b) Retain on the base card too.
    - (c) No change.
+
+## Ruled (2026-10-12)
+
+[USER]: "For Furina - generally agree across the board. I'm fine with increasing the Drain limit to 1/3 or 1/2 if we want to, but it sounds like that's not really the issue."
+
+All four defaults (a): the Drain floor stays at a quarter of Max HP; Spirited Aria spends up to 12, Crashing Waves and Hold the Stage up to 16; Packed House becomes "Gain 5 [8] Block, plus 1 for every 4 Fanfare you have."; Rising Applause+ gains Retain. The Rising Applause tip is built with them. A bigger Drain floor (a third or a half) stays open to us if a later round shows the floor binding.
