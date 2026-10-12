@@ -2501,7 +2501,6 @@ VARKA_KINDS = {
     "storm_battery": "StormBattery",
     "frost_ward": "FrostWard",
     "gleeful_songs": "GleefulSongs",
-    "rippling_guard": "RipplingGuard",
     # Downburst's rider (2026-10-04, after spent auras went, #882).
     "swirled_oath": "SwirledOath",
     # THE COMBO PASS (2026-10-04, review/active/varka-combo-pass-2026-10-04.md
@@ -2534,7 +2533,6 @@ VARKA_KIND_FIELDS = {
     "storm_battery": ("per",),
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
-    "rippling_guard": ("base", "per"),
     "swirled_oath": ("amount",),
     # The combo pass (2026-10-04).
     "gain_pyro_oath": ("amount",),

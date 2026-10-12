@@ -7490,3 +7490,23 @@ strong but feels possibly justified as a high cost Rare." Then, on Mines:
   row now authors `upgrade: {draw: 1}`, so the Prototype default (which took
   Exhaust off) no longer reaches it: the upgrade keeps Exhaust, costs 0 and
   draws 3.
+
+## Varka Block paper, 2026-10-12
+
+Paper `review/active/varka-block-paper-2026-10-12.md`, both picks ruled (a)
+([USER]: "On Varka - agreed on both defaults"). Pick 1 (a) moves no number.
+
+- **Rippling Guard** (`proto_vk_rippling_guard`, pick 2 (a)): "Gain 7 [10]
+  Block. Apply your current element to an enemy." Was "Apply Hydro to an
+  enemy. Gain 6 Block, plus 1 [2] for each other card you played this turn."
+  The application is the existing `apply_current_element` kind (C#
+  `VarkaCards.ApplyCurrentElement`, sim `varka_oath`), an application by his
+  card that re-sets the element he already has. With no current element it
+  applies nothing, as that kind always has (Pathfinder's Mark's random
+  fallback is printed on its own face; this card prints none). The
+  `rippling_guard` kind, C# `VarkaCards.RipplingGuard` and the ledger's
+  per-turn play count (`VarkaOathLedger.PlaysThisTurn`, read by nothing
+  else) are gone.
+- **Stormward Stance** (`proto_vk_stormward_stance`, the paper's sec.3,
+  Claude's call): "Your Anemo Attacks deal 4 [6] additional damage", was
+  3 [5]. Accuracy's number.
