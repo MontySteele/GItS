@@ -911,6 +911,12 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     # splash is the reaction's damage, not Pyro damage, and is left alone.
     if element == "pyro" and source not in PURITY_DARK_EXCLUDED:
         dmg += state.player.powers.get("mc_purity_dark", 0)
+    # VARKA'S STOKE THE FLAMES (Pyro paper 2, 2026-10-12): "Your next Pyro
+    # Attack this turn deals 5 additional damage." Each Pyro hit of the
+    # Attack card in flight, same additive phase. 0 for anyone else. C# twin:
+    # `StokeTheFlamesPower.ModifyDamageAdditive`.
+    if element == "pyro" and source == "attack" and powered:
+        dmg += varka_oath.pyro_attack_bonus(state)
     # FURINA'S NEUVILLETTE (the pool to 75): "Your Hydro damage deals 2
     # more" [3], on the same additive phase and the same exclusions -- her
     # cards' Hydro, a guest's, his own act's. The C# twin is

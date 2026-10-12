@@ -423,6 +423,10 @@ internal static class KleePowerIcons
         AssemblyAtTheCathedralPower =>
             KleePck.Path("klee/powers/study_buddy.png"),
         WildfireOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
+        // Pyro paper 2 (2026-10-12): Ember Cleave's Strength this turn and
+        // Stoke the Flames' next Pyro Attack borrow Pyro's Vision badge.
+        EmberCleavePower => KleePck.Path("varka/powers/pyro_wind.png"),
+        StokeTheFlamesPower => KleePck.Path("varka/powers/pyro_wind.png"),
         RetaliatingTidePower => KleePck.Path("varka/powers/hydro_wind.png"),
         AbsoluteZeroPower => KleePck.Path("varka/powers/cryo_wind.png"),
         OathUntoDeathPower =>

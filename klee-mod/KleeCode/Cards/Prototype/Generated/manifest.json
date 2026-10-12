@@ -2045,7 +2045,8 @@
       "damage": 4
     },
     "proto_vk_ember_cleave": {
-      "varka_base": 3
+      "varka_base": 2,
+      "varka_amount": 1
     },
     "proto_vk_eula_icetide_vortex": {
       "damage": 4
@@ -2166,7 +2167,7 @@
     },
     "proto_vk_stoke_the_flames": {
       "varka_amount": 1,
-      "buff": 2
+      "varka_base": 2
     },
     "proto_vk_storm_battery": {
       "varka_per": 1

@@ -185,9 +185,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   seeds) and `review/records/varka-offers-round-2026-10-08.md` (all five
   reached act 3, none won; Pyro and Cryo payoffs offered and passed, Pyro
   taken at 10%). The Pyro pass is built
-  (`review/active/varka-pyro-pass-2026-10-11.md`, pick 1 b: Ashen Oath gives
-  Strength, Stoke the Flames powers the next Attack, the Exhaust is an
-  optional rider); next a two-seat Varka round.
+  (`review/active/varka-pyro-pass-2026-10-11.md`: Ashen Oath gives Strength)
+  and Pyro paper 2 on top of it
+  (`review/active/varka-pyro-reactions-2026-10-12.md`: Ember Cleave is Setup
+  Strike in Pyro, Stoke the Flames powers the next Pyro Attack this turn,
+  the Exhaust rider is retired); next a two-seat Varka round.
 
 ## Elements
 

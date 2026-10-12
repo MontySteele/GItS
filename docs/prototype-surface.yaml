@@ -4281,26 +4281,23 @@
 - {id: proto_vk_stoke_the_flames, name: "Stoke the Flames", character: varka,
    authored_by: [claude],
    # 2026-10-05 Pyro becomes current; 2026-10-08 costs 0; 2026-10-10 the switch
-   # before the gain. 2026-10-11 the Pyro pass (next-Attack bonus, optional
-   # Exhaust). Provenance note, "Varka Pyro pass, 2026-10-11".
+   # before the gain. 2026-10-12 Pyro paper 2: next Pyro Attack, no rider.
+   # Provenance notes, "Varka Pyro pass" and "Varka Pyro paper 2".
    cost: 0, type: skill, rarity: common,
-   description: "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next Attack deals {PowerAmount:diff()} additional damage. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold].",
+   description: "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next [gold]Pyro[/gold] Attack this turn deals {VkBase:diff()} additional damage.",
    effects: [{op: varka, kind: gain_pyro_oath, amount: 2},
-             {op: buff_next_attack, amount: 3},
-             {op: varka, kind: exhaust_for_pyro_oath}],
-   upgrade: {varka_amount: 1, buff: 2}}
+             {op: varka, kind: next_pyro_attack, base: 5}],
+   upgrade: {varka_amount: 1, varka_base: 2}}
 
 - {id: proto_vk_ember_cleave, name: "Ember Cleave", character: varka,
    authored_by: [claude],
-   # Varka payoff fix, 2026-10-08: adds "Gain 1 Pyro Oath". 2026-10-10: that
-   # gain makes Pyro current first, as Stoke's. 2026-10-11 the Pyro pass: the
-   # Exhaust is an optional rider. Provenance note, "Varka Pyro pass".
+   # 2026-10-12 Pyro paper 2: the base game's Setup Strike in Pyro, the Oath
+   # gain and the Exhaust rider gone. Provenance note, "Varka Pyro paper 2".
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. You may [gold]Exhaust[/gold] a card for 1 additional [gold]Pyro[/gold] [gold]Oath[/gold].",
-   effects: [{op: varka, kind: pyro_strike, target: enemy, base: 9},
-             {op: varka, kind: gain_pyro_oath, amount: 1},
-             {op: varka, kind: exhaust_for_pyro_oath}],
-   upgrade: {varka_base: 3}}
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Strength[/gold] this turn.",
+   effects: [{op: varka, kind: pyro_strike, target: enemy, base: 7},
+             {op: varka, kind: temp_strength, amount: 2}],
+   upgrade: {varka_base: 2, varka_amount: 1}}
 
 - {id: proto_vk_shatter, name: "Icebreaker", character: varka,
    authored_by: [claude],

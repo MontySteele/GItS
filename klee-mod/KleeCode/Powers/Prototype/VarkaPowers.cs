@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -1059,4 +1060,134 @@ public sealed class TheOrderAnswersPower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>
+/// Ember Cleave (Varka Pyro paper 2, 2026-10-12): "Gain 2 [3] Strength this
+/// turn." The base game's Setup Strike shape: a positive
+/// <see cref="TemporaryStrengthPower"/> named for its card, Strength now and
+/// taken back at the end of the turn. Sim twin: the `temp_strength` power.
+/// </summary>
+public sealed class EmberCleavePower : TemporaryStrengthPower, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Ember Cleave"),
+        ("description",
+            "Gain [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
+    };
+
+    public override AbstractModel OriginModel =>
+        ModelDb.Card<global::KleeMod.Cards.Prototype.Generated.ProtoVkEmberCleave>();
+}
+
+/// <summary>
+/// Stoke the Flames (Varka Pyro paper 2, 2026-10-12): "Your next Pyro Attack
+/// this turn deals 5 [7] additional damage."
+///
+/// ADDITIVE ON EACH PYRO HIT of the Attack card that takes it, before the
+/// reaction multiplier (<see cref="NextAttackUpPower"/>'s phase). A hit is
+/// Pyro when <see cref="AuraCmd.ElementOfPlay"/> says so, the one funnel the
+/// aura's reaction reads, so Ember Cleave's Pyro hit, Tempest's Pyro hit and
+/// a Pyro companion's Attack all qualify and an Anemo or Cryo hit does not.
+///
+/// SPENT ONLY BY AN ATTACK THAT DEALT PYRO DAMAGE. The amount standing when
+/// the Attack began is latched in <see cref="BeforeCardPlayed"/> (the
+/// <see cref="NextAttackRiderPower"/> idiom); a Pyro hit of that play marks it
+/// paid in <see cref="AfterDamageGiven"/>, and only a paid play spends it in
+/// <see cref="AfterCardPlayed"/>. An Attack with no Pyro hit leaves it
+/// standing. "This turn": removed at the end of the player's turn, spent or
+/// not. Sim twin: `varka_oath.NEXT_PYRO_ATTACK` and `pyro_attack_bonus`.
+/// </summary>
+public sealed class StokeTheFlamesPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Stoke the Flames"),
+        ("description",
+            "Your next [gold]Pyro[/gold] Attack this turn deals "
+          + "[blue]{Amount}[/blue] additional damage."),
+    };
+
+    private CardPlay? _spendingOn;
+    private int _spending;
+    private bool _paid;
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The condition on primitives. PURE.</summary>
+    public static bool Applies(bool poweredAttack, bool isAttackCard,
+                               Element hit) =>
+        poweredAttack && isAttackCard && hit == Element.Pyro;
+
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (dealer != Owner || target == Owner) return 0m;
+        return Applies(props.IsPoweredAttack(),
+                       cardSource is { Type: CardType.Attack },
+                       AuraCmd.ElementOfPlay(cardSource, dealer))
+            ? Amount : 0m;
+    }
+
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        _spendingOn = null;
+        _spending = 0;
+        _paid = false;
+        if (cardPlay.Card?.Type != CardType.Attack) return Task.CompletedTask;
+        if (cardPlay.Card?.Owner?.Creature != Owner) return Task.CompletedTask;
+        _spendingOn = cardPlay;
+        _spending = (int)Amount;
+        return Task.CompletedTask;
+    }
+
+    public override Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext, Creature dealer, DamageResult result,
+        ValueProp props, Creature target, CardModel? cardSource)
+    {
+        if (_spendingOn == null || dealer != Owner) return Task.CompletedTask;
+        if (!ReferenceEquals(cardSource, _spendingOn.Card))
+        {
+            return Task.CompletedTask;
+        }
+        if (Applies(props.IsPoweredAttack(),
+                    cardSource is { Type: CardType.Attack },
+                    AuraCmd.ElementOfPlay(cardSource, dealer)))
+        {
+            _paid = true;
+        }
+        return Task.CompletedTask;
+    }
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (!ReferenceEquals(_spendingOn, cardPlay)) return;
+        _spendingOn = null;
+        var spent = _spending;
+        var paid = _paid;
+        _spending = 0;
+        _paid = false;
+        if (!paid || spent <= 0) return;
+        if (Amount <= spent)
+        {
+            await PowerCmd.Remove(this);
+            return;
+        }
+        await PowerCmd.ModifyAmount(
+            choiceContext, this, -spent,
+            applier: Owner, cardSource: null, silent: true);
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
 }
