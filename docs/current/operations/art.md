@@ -31,6 +31,36 @@ coordinates are in the prepared canvas. Their rigs are
 `pck-src/{kokomi,varka}/model/combat.tscn`, which carry the optional
 `cast`, `power` and `idle_low` states beside the four the router requires.
 
+**Klee's mesh rig (`tools/klee_rig/`, 2026-10-12).** Klee's
+`pck-src/klee/model/combat.tscn` is GENERATED: a Skeleton2D (41 bones) and one
+skinned Polygon2D per cut layer, with the router contract (node paths, seven
+states, one-shot lengths, state machine) kept from the five-sprite scene it
+replaced. Edit `tools/klee_rig/klee.yaml` (joints in source pixels, skin
+rules, motion keys) and regenerate; never hand-edit the scene.
+
+```sh
+.venv/Scripts/python -m tools.klee_rig gen [--check]            # write / check combat.tscn (no art)
+.venv/Scripts/python -m tools.klee_rig extract --art-root <main checkout> [--check]   # re-cut klee_cells.json after the layers change
+.venv/Scripts/python -m tools.klee_rig verify --art-root <main checkout> [--godot]
+.venv/Scripts/python -m tools.klee_rig render --art-root <main checkout> --out <scratch dir>
+```
+
+`klee_cells.json` is the only art-derived input (an occupancy grid, no
+pixels), so `gen` and `tier0/tests/test_klee_rig.py` run anywhere. `verify`
+adds mesh coverage of every drawn texel when it can see the art; `--godot`
+loads the scene in MegaDot (every polygon's `get_bone_count() > 0`), renders
+RESET beside the old layered composite at 1x and 2x both facings (passes at a
+max channel difference of 2/255, the GPU's UV interpolation), and checks a
+flipped pose is the mirror of the unflipped one. `render` opens a MegaDot
+window briefly and writes a contact sheet and GIF per state at 1x and 2x, a
+4x joint close-up sheet and the rest pose with mesh and bones drawn over it,
+to a scratch dir (renders are never committed). Two traps the spec is built
+around: a `bones/0/path` line is dropped by the parser with no error (use the
+flat `bones = [...]` array), and a skinned Polygon2D ignores its own
+transform, so every layer offset rides a bone. The smoke layer carries the
+cutter's fill smeared from the arms' outlines behind each arm; the
+`ghost_arm_*` smoke regions make that patch ride the arm so it never shows.
+
 **The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for
 a figure. It scales the trimmed subject to FILL the plate and crops the
 overflow, so whenever the figure's aspect differs from the canvas it slices the
