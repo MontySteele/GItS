@@ -887,7 +887,7 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForBankDamage(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BankDamageKey,
-            "Its damage is the [gold]Fanfare[/gold] you hold; play it when "
+            "Its damage is the [gold]Fanfare[/gold] you hold. Play it when "
           + "the bank is worth it.");
 
     /// <summary>Rule 5 (the pool to 75, sec.3): where a guest goes. Since

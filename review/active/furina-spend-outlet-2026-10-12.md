@@ -74,7 +74,7 @@ So the no-outlet death is a drafting shape. The outlets are in the pool.
 - **The base card is unchanged.** Starter cards stay bad.
 - **The trade-off:** Retain rewards holding the bank, so it lowers how often she Spends mid-fight. On the upgrade alone it costs a smith or a shop, which keeps the "hold, then dump it all" deck a choice rather than the default.
 
-**4. A one-line tip on Rising Applause** (hygiene, no pick): "Its damage is the Fanfare you hold; play it when the bank is worth it." Two seats played it at 0 to 4 damage.
+**4. A one-line tip on Rising Applause** (hygiene, no pick): "Its damage is the Fanfare you hold. Play it when the bank is worth it." Two seats played it at 0 to 4 damage.
 
 **Unchanged:**
 - The Drain floor.

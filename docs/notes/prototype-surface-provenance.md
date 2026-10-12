@@ -7595,6 +7595,6 @@ Texts and numbers are the paper's; every Spend rate is unchanged.
   Show Must Go On's form.
 - **Rising Applause+ (`proto_fs_standing_ovation`):** gains Retain; the base
   starter is unchanged. Its rider tip (`ArmKeywordTips.ForBankDamage`, titled
-  "When to play it"): "Its damage is the Fanfare you hold; play it when the
+  "When to play it"): "Its damage is the Fanfare you hold. Play it when the
   bank is worth it." Derived from the row (`starter_spends_the_bank`: a basic
   card whose damage is what its spend-all took), so it rides this card only.

@@ -61,8 +61,8 @@ public class FurinaSpendOutletTests
         var tips = File.ReadAllText(Path.Combine(
             Round17Tests.Repo(), "klee-mod", "KleeCode", "Cards", "Prototype",
             "ArmKeywordTips.cs"));
-        Assert.Contains("\"Its damage is the [gold]Fanfare[/gold] you hold; "
-                        + "play it when \"", tips);
+        Assert.Contains("\"Its damage is the [gold]Fanfare[/gold] you hold. "
+                        + "Play it when \"", tips);
         Assert.Contains("\"the bank is worth it.\"", tips);
         var mod = File.ReadAllText(Path.Combine(
             Round17Tests.Repo(), "klee-mod", "KleeCode", "KleeMod.cs"));
