@@ -416,6 +416,18 @@ KNOWN_STALE = {
     "proto_fs_casting_agent": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_fs_gentle_current": (
+        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_pay_the_tab": (
+        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_sold_out": (
+        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_surging_waters": (
+        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_fs_cheered_on": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
