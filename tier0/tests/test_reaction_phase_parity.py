@@ -770,6 +770,14 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
+        ("Story/StoryLines.cs", "StoryCombatHooks"):
+            "(Klee's story, review/active/klee-story-batch-1-2026-10-12.md). "
+            "At a boss room's first player turn it shows the boss-entry or "
+            "pair speech bubbles, once a combat. THE ORDERING QUESTION, "
+            "answered: it reads only the room type, the round number and the "
+            "players' characters, and writes nothing but a speech bubble and "
+            "its own once-a-combat latch, so no co-tenant's order against it "
+            "can move a number; there is nothing for the sim to model",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state (the "
             "block-card turn sample, the Furina Spend round 2, 2026-10-10). "

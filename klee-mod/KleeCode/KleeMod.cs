@@ -133,7 +133,12 @@ public static class KleeMod
                     // play, in the schema the soak writes. Reads only -- see
                     // the three rules in PlayTelemetry.cs, the first of which
                     // is that a measurement must never desync a co-op table.
-                    .Concat(Diagnostics.PlayTelemetryHooks.Subscribe(combatState)));
+                    .Concat(Diagnostics.PlayTelemetryHooks.Subscribe(combatState))
+                    // Klee's story in the run (story batches 1 and 2): the
+                    // combat speech bubbles and Confinement's clock. Visual
+                    // and deck-only; inert with no story character at the
+                    // table.
+                    .Concat(Story.StoryCombatHooks.Subscribe(combatState)));
 
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
                  + ", and Varka (prototype)"
@@ -760,6 +765,11 @@ internal static class LocManager_Initialize_Patch
         // no-op with the arm off — `TeyvatLoc.Inject`'s first line is the
         // flag — so a release build merges not one row.
         Teyvat.TeyvatLoc.Inject();
+
+        // The story tables' rows (Klee story batches 1 and 2): event pages,
+        // Ancient exchanges and spoken lines. Disjoint keys from both merges
+        // above, and its own try/catch.
+        Story.StoryLoc.Inject();
     }
 }
 

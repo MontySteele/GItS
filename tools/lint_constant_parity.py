@@ -373,7 +373,17 @@ _ABYSS_REASON = (
     "run modifier's Blessing or Shadow number, tuned by play; tier 0.5 models "
     "no run modifier, so no sim twin exists.")
 
+#: KLEE'S STORY IN THE RUN (review/active/klee-story-batch-1-2026-10-12.md):
+#: when a speech bubble fires, and how long her story Curse lasts. Narrative
+#: content the sim does not model (tier 0.5 has no events or speech).
+_STORY_REASON = (
+    "KLEE'S STORY IN THE RUN (review/active/klee-story-batch-1-2026-10-12.md). "
+    "A story line's trigger or the story Curse's length; tier 0.5 models no "
+    "events, speech or curses, so no sim twin exists.")
+
 UNMIRRORED: dict[str, str] = {
+    "StoryRules.BigBombDamage": _STORY_REASON,
+    "StoryRules.ConfinementCombats": _STORY_REASON,
     "AbyssNumbers.LeyLineDamageReduction": _ABYSS_REASON,
     "AbyssNumbers.AbyssalMoonEvery": _ABYSS_REASON,
     "AbyssNumbers.AbyssalMoonDamage": _ABYSS_REASON,

@@ -162,14 +162,21 @@ internal static class RosterArt
     /// at all -- no Godot, or an image the engine refused to build from -- and
     /// that case is the pre-`EB-275` behaviour, unchanged.
     /// </summary>
+    /// <summary>Whether the last <see cref="CardPortrait"/> call found its
+    /// png (false: it answered the blank). A story event borrows card art for
+    /// its picture and keeps the base picture rather than draw a blank.</summary>
+    internal static bool LastResolved { get; private set; }
+
     public static Texture2D? CardPortrait(string cardId)
     {
         if (Cache.TryGetValue(cardId, out var node))
         {
             Recency.Remove(node);
             Recency.AddFirst(node);
+            LastResolved = true;
             return node.Value.Value;
         }
+        LastResolved = false;
         // Resolved-to-blank rows never reach the LRU -- see Unresolved.
         if (Unresolved.Contains(cardId)) return Blank();
 
@@ -205,6 +212,7 @@ internal static class RosterArt
         if (texture != null)
         {
             Remember(cardId, texture);
+            LastResolved = true;
             return texture;
         }
 
