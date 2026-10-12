@@ -25,12 +25,12 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Kokomi after the three rounds** (`review/records/kokomi-growth-test-2026-10-12.md`,
-  two picks, both default (a)): (1) late growth: (a) play her first and judge
-  it in your run, Watchful Shoal staying a jellyfish build-around; (b)
-  Resolve of Watatsumi to Common; (c) a Plan-track growth card; (d) accept a
-  late game carried by Companions. (2) generators roll Inazuma Commons only:
-  (a) keep; (b) widen to any Common.
+- **Kokomi jellyfish growth paper** (`kokomi-jellyfish-growth-2026-10-12.md`,
+  three picks, defaults (a)): Stings and Wards become 0-cost Shivs with no Plan
+  line and the generators move to the Silent's rates; Endless Shoal (a Sting per
+  Plan carried out), All Streams Flow to the Sea and The Shape of Water; built
+  and seat-tested before [USER]'s run. Read with the growth-test record's two
+  picks (`kokomi-growth-test-2026-10-12.md`).
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's

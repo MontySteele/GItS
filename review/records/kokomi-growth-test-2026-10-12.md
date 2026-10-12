@@ -15,7 +15,7 @@
 
 ## For [USER]
 
-1. **Late growth.** A design pass is under way first, built on research into her Genshin kit and lore, with a lore-grounded lean into the Sting build. It will add options here before your run ([USER]: "before we lock that in, can you kick off a research census of Kokomi's genshin kit and lore").
+1. **Late growth.** A design paper built on her Genshin kit and lore now proposes a Shiv-shaped jellyfish line: `review/active/kokomi-jellyfish-growth-2026-10-12.md`, three picks. If you take it, its picks replace this one. Otherwise:
    - **(a) Default:** play her as she is and judge it in your run. Watchful Shoal stays a jellyfish build-around.
    - (b) Move Resolve of Watatsumi ("Gain 2 Strength") to Common.
    - (c) A growth card on the Plan track.
