@@ -59,11 +59,11 @@ public class FurinaHighStakesPreviewTests
     }
 
     [Fact]
-    public void Bravura_in_hand_and_aimed_previews_the_same_bonus()
+    public void Bring_the_house_down_in_hand_and_aimed_previews_the_same_bonus()
     {
         InCombat(() =>
         {
-            var b = StakesBoard(new ProtoFsBravura());
+            var b = StakesBoard(new ProtoFsBringTheHouseDown());
             var formula = b.Card.DynamicVars.CalculatedDamage.Calculate(null);
 
             Assert.Equal(formula + Bonus, Preview(b.Card, null, inHand: true));
@@ -77,7 +77,7 @@ public class FurinaHighStakesPreviewTests
     {
         InCombat(() =>
         {
-            var b = StakesBoard(new ProtoFsBravura());
+            var b = StakesBoard(new ProtoFsBringTheHouseDown());
             var stakes = Assert.Single(
                 b.Furina.Creature.Powers.OfType<HighStakesPower>());
             var me = b.Furina.Creature;
@@ -105,7 +105,7 @@ public class FurinaHighStakesPreviewTests
     {
         InCombat(() =>
         {
-            var b = StakesBoard(new ProtoFsBravura(), inHand: false);
+            var b = StakesBoard(new ProtoFsBringTheHouseDown(), inHand: false);
             var formula = b.Card.DynamicVars.CalculatedDamage.Calculate(null);
             Assert.Equal(formula, Preview(b.Card, null, inHand: false));
         });

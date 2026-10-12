@@ -489,6 +489,10 @@ KNOWN_MISSING = {
     "proto_fs_the_masquerade": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_the_show_must_go_on": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
     "proto_fs_velvet_curtain": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
+    "proto_fs_headliner": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet.",
+    "proto_fs_the_leading_lady": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet.",
+    "proto_fs_the_full_house": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet. The v2 row proto_fs_full_house's painting (KNOWN_STALE) is a candidate, unseen.",
+    "proto_fs_packed_house": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet.",
 }
 
 

@@ -109,7 +109,7 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void Fountain_pneuma_tides_gentle_current_and_grand_entrance_pay_their_floor()
+    public void Fountain_pneuma_tides_and_grand_entrance_pay_their_floor()
     {
         // Fountain: each turn's Repay pays its own Block floor.
         var kit = StageKit.Of();
@@ -126,7 +126,7 @@ public class FurinaLineRepayFloorTests
             Il.Calls(Il.Method("FurinaStage", "GuestStar")));
         foreach (var card in new CardModel[]
                  {
-                     new ProtoFsFountainOfLucine(), new ProtoFsGentleCurrent(),
+                     new ProtoFsFountainOfLucine(),
                      new ProtoFsGrandEntrance(), new ProtoFsHymnOfManyWaters(),
                  })
         {
@@ -164,7 +164,6 @@ public class FurinaLineRepayFloorTests
     {
         foreach (var (type, n, damage) in new[]
                  {
-                     ("ProtoFsSurgingWaters", "card.DynamicVars[\"RepayAmount\"].IntValue", 6m),
                      ("ProtoFsHydroLance", "4", 14m),
                      ("ProtoFsCleansingTorrent", "4", 10m),
                  })
@@ -176,15 +175,13 @@ public class FurinaLineRepayFloorTests
                         < src.IndexOf("await DamageCmd.Attack(",
                                       System.StringComparison.Ordinal), type);
             var card = (CardModel)System.Activator.CreateInstance(
-                typeof(ProtoFsSurgingWaters).Assembly
+                typeof(ProtoFsHydroLance).Assembly
                     .GetType("KleeMod.Cards.Prototype.Generated." + type)!)!;
             Assert.Equal(damage, card.DynamicVars.CalculationBase.BaseValue);
             Assert.Equal(1m, card.DynamicVars.ExtraDamage.BaseValue);
             Assert.Contains("plus 1 for any HP it could not", Face(card));
         }
         // The upgrades still raise the damage.
-        Assert.Equal(9m, Upgraded(new ProtoFsSurgingWaters())
-            .DynamicVars.CalculationBase.BaseValue);
         Assert.Equal(18m, Upgraded(new ProtoFsHydroLance())
             .DynamicVars.CalculationBase.BaseValue);
         Assert.Equal(14m, Upgraded(new ProtoFsCleansingTorrent())
@@ -203,7 +200,7 @@ public class FurinaLineRepayFloorTests
     [Fact]
     public void Endless_waltz_is_cut()
     {
-        Assert.Null(typeof(ProtoFsSurgingWaters).Assembly.GetType(
+        Assert.Null(typeof(ProtoFsHydroLance).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoFsEndlessWaltz"));
         Assert.DoesNotContain(ArmPools.Named("KleeMod.Powers.FurinaStageRoster", "Pool"),
             c => c.GetType().Name.Contains("EndlessWaltz"));
@@ -258,14 +255,24 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void Bravuras_upgrade_raises_the_base_to_ten_and_keeps_two_per_point()
+    public void Bravura_deals_7_hydro_for_every_3_spent_and_9_upgraded()
     {
-        var plain = new ProtoFsBravura();
-        Assert.Equal(6m, plain.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(2m, plain.DynamicVars.ExtraDamage.BaseValue);
-        var up = Upgraded(new ProtoFsBravura());
-        Assert.Equal(10m, up.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(2m, up.DynamicVars.ExtraDamage.BaseValue);
+        // The diversity pass (2026-10-11): "Spend all your Fanfare. Deal 7
+        // Hydro damage for every 3 spent." [9]
+        Assert.Equal(7m, new ProtoFsBravura().DynamicVars.Damage.BaseValue);
+        Assert.Equal(9m, Upgraded(new ProtoFsBravura())
+            .DynamicVars.Damage.BaseValue);
+        Assert.Equal(3, FurinaStageLaw.BravuraSpentPer);
+        var src = Generated("ProtoFsBravura");
+        // Under 3 spent it deals nothing: the hit count is gated, since a
+        // 0 hit count would still swing once.
+        Assert.Contains("if ((0 + 1 * FurinaStage.SpentThrees(this)) > 0)", src);
+        Assert.Contains(".WithHitCount(0 + 1 * FurinaStage.SpentThrees(this))", src);
+        Assert.True(src.IndexOf("FurinaStage.SpendAll(",
+                                System.StringComparison.Ordinal)
+                    < src.IndexOf("DamageCmd.Attack(",
+                                  System.StringComparison.Ordinal));
+        Assert.Contains("Hydro", Face(new ProtoFsBravura()));
     }
 
     [Fact]
@@ -333,10 +340,11 @@ public class FurinaLineRepayFloorTests
     {
         // The block gap (ruled 2026-10-09): four more, 20 / 37 / 21. Navia
         // to Uncommon (2026-10-10): 20 / 38 / 20. Standing Ovation Common
-        // again (2026-10-11): 21 / 37 / 20.
+        // again (2026-10-11): 21 / 37 / 20. The diversity pass (2026-10-11):
+        // 23 / 35 / 20.
         var pool = ArmPools.Named("KleeMod.Powers.FurinaStageRoster", "Pool");
         Assert.Equal(78, pool.Count);
-        Assert.Equal((21, 37, 20),
+        Assert.Equal((23, 35, 20),
             (pool.Count(c => c.Rarity == CardRarity.Common),
              pool.Count(c => c.Rarity == CardRarity.Uncommon),
              pool.Count(c => c.Rarity == CardRarity.Rare)));

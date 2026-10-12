@@ -92,16 +92,16 @@ def test_an_in_combat_clause_does_not_hide_the_upgrade():
     """Bravura printed "not shown -- the face on this screen is not the
     sentence this card was written with": its template ends in an
     `{InCombat:...|}` arm with a hole of its own."""
-    # The Salon's Tab (2026-10-05): "Deal 6 damage, plus 2 per point."; the
-    # pool-75 round's ruling (2026-10-09) moved the upgrade to the base:
-    # [10, plus 2 per point].
-    face = "Spend all your Fanfare. Deal 6 damage, plus 2 per point."
-    assert qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_BRAVURA", face) == (
-        "Spend all your Fanfare. Deal 10 damage, plus 2 per point.", "")
+    # Bravura lost its in-combat line in the diversity pass (2026-10-11:
+    # one hit of 7 for every 3 spent), so Headliner carries the pin: the same
+    # `{InCombat:...|}` arm, its base raised 6 -> 9 by the upgrade.
+    face = "Deal 6 damage, plus 2 for each guest on stage."
+    assert qa_packet.upgrade_preview("KLEEMOD-PROTO_FS_HEADLINER", face) == (
+        "Deal 9 damage, plus 2 for each guest on stage.", "")
     # Printed in combat, the in-combat line is struck, not copied through.
     assert qa_packet.upgrade_preview(
-        "KLEEMOD-PROTO_FS_BRAVURA", face + "\n(Deals 11 damage)")[0] == (
-        "Spend all your Fanfare. Deal 10 damage, plus 2 per point.")
+        "KLEEMOD-PROTO_FS_HEADLINER", face + "\n(Deals 10 damage)")[0] == (
+        "Deal 9 damage, plus 2 for each guest on stage.")
 
 
 def test_a_numbered_defend_still_previews():

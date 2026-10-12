@@ -41,7 +41,7 @@ public sealed class ProtoFsEnsembleCast : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ensemble Cast"),
-        ("description", "You have 4 guest seats."),
+        ("description", "You have 4 guest seats. [gold]Summon[/gold] a random guest."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -60,6 +60,7 @@ public sealed class ProtoFsEnsembleCast : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<EnsembleCastPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await FurinaCards.SummonRandom(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

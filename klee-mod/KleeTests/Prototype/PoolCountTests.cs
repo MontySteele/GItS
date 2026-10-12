@@ -74,7 +74,7 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Furina_is_78_rows_and_20_38_20_with_two_ancients_and_no_coop()
+    public void Furina_is_78_rows_and_23_35_20_with_two_ancients_and_no_coop()
     {
         // THE SALON'S TAB (2026-10-05, proposal sec.16): the slice's 24 rows
         // (12 Common, 8 Uncommon, 4 Rare), and the pool to 39
@@ -91,8 +91,12 @@ public class PoolCountTests
         // (review/records/furina-drain-line-round-2026-10-09.md pick 2, ruled
         // 2026-10-09): 1 Common, 2 Uncommon, 1 Rare, 20 / 37 / 21. Guest
         // Star: Navia Rare -> Uncommon (2026-10-10): 20 / 38 / 20. Standing
-        // Ovation Common again (2026-10-11): 21 / 37 / 20.
-        AssertPool("FurinaStageRoster", "Pool", 21, 37, 20, size: 78);
+        // Ovation Common again (2026-10-11): 21 / 37 / 20. THE DIVERSITY PASS
+        // (review/active/furina-diversity-pass-2026-10-11.md, ruled
+        // 2026-10-11): Headliner, Packed House, Tutti! and Wriothesley to
+        // Common, Leading Lady and Full House Uncommon; Gentle Current,
+        // Surging Waters, Pay the Tab and Sold Out cut: 23 / 35 / 20.
+        AssertPool("FurinaStageRoster", "Pool", 23, 35, 20, size: 78);
         AssertAncients("Furina");
         Assert.Null(System.Type.GetType(
             "KleeMod.Powers.FurinaStageRoster, klee")?.GetMethod("MultiplayerRows"));

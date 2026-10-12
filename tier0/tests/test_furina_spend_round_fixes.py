@@ -167,7 +167,8 @@ def test_every_fixed_drain_refusal_says_zero_hp():
     texts = [p.read_text(encoding="utf-8")
              for p in GENERATED.glob("ProtoFs*.cs")]
     assert not [t for t in texts if "below your Drain line" in t]
-    assert sum(': "it would take you to 0 HP";' in t for t in texts) >= 11
+    # 10 since the diversity pass (2026-10-11) cut Pay the Tab.
+    assert sum(': "it would take you to 0 HP";' in t for t in texts) >= 10
 
 
 # ---- 5. Bubble Aria ------------------------------------------------------------

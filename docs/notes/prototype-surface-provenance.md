@@ -7408,3 +7408,34 @@ enemies, bit I agree that we need something better as the main engine."
   (Purity's `CardSelectorPrefs(prompt, 0, n)`), any card, a Status or Curse
   included; no pick or an empty hand pays nothing. The sim's pilot takes it
   only when the hand holds a Status or a Curse.
+
+## Furina: the diversity pass, 2026-10-11
+
+`review/active/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled
+2026-10-11 at all five defaults ([USER]: "I think that we can leave it as
+double-scaling for now and see if it goes overboard"). Texts and numbers are
+the paper's.
+
+- **New:** Headliner (`proto_fs_headliner`, Common Attack 1, 6 plus 2 a
+  guest [9 + 2]); Leading Lady (`proto_fs_the_leading_lady`, Uncommon Power
+  1: base Strength 1 [2] and `LeadingLadyPower`, +1 a guest on her powered
+  Attack hits; the face says "additional damage", the text pass's template
+  for the paper's "1 more damage"); Full House (`proto_fs_the_full_house`, Uncommon Power 1,
+  `FullHousePower`: a guest act about to deal damage Spends up to 4 [6] and
+  adds what it spent to each hit, `StageDirector.FullHouse`, sim
+  `furina_tide.full_house`); Packed House (`proto_fs_packed_house`, Common
+  Attack 1, 4 plus 1 every 5 Fanfare [7 + 1], count `stage_fanfare_fives`).
+  The two Power ids carry `the_` because `proto_fs_leading_lady` is
+  Gentilhomme Usher and `proto_fs_full_house` is a v2 row whose painting is
+  on disk (KNOWN_STALE).
+- **Changed:** Bravura, one Hydro hit of 7 [9] for every 3 spent (count
+  `stage_spent_threes`; under 3 spent no hit, the hit count gated); Tutti!
+  Common, draws 1, and its upgrade draws 2 at cost 1 (Claude, under the loop
+  ruling: the paper's 0-cost upgrade looped with any 0-cost draw-1 card); Guest Star: Wriothesley Common; Lynette's act hits a
+  random enemy with an aura, else any random enemy; Final Bow draws 1 first;
+  Casting Call draws 2 when no Guest Star is in the draw pile (`tutor_guest`
+  carries the 2 as `amount`; its upgrade still adds "Draw 1 card."); Ensemble
+  Cast summons a random guest not on stage, unupgraded, holding no card
+  (`furina` kind `summon_random`), after its 4 seats apply.
+- **Cut:** Gentle Current, Surging Waters, Pay the Tab, Sold Out.
+- Pool 78, 23 / 35 / 20 (was 21 / 37 / 20).

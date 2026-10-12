@@ -41,12 +41,13 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Final Bow"),
-        ("description", "Choose a guest. It acts {IfUpgraded:show:3 times|twice}, then leaves."),
+        ("description", "Draw 1 card. Choose a guest. It acts {IfUpgraded:show:3 times|twice}, then leaves."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new CardsVar(1),
             new DynamicVar("FsAmount", 2m)
         };
 
@@ -59,6 +60,7 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
         await FurinaCards.FinalBow(choiceContext, this, cardPlay);
     }
 

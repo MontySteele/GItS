@@ -228,7 +228,7 @@ def test_revelry_adds_to_drains_and_repays_and_copies_add():
 
 # ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3) ----
 
-def test_the_pool_is_78_rows_20_38_20():
+def test_the_pool_is_78_rows_23_35_20():
     # 10 / 17 / 7 since the 2026-10-09 playtest trim (Interval Bell and
     # Tidal Flourish to Uncommon); 12 / 15 / 7 before. THE POOL TO 75
     # (review/active/furina-pool-growth-2026-10-09.md sec.5): 41 rows more,
@@ -238,13 +238,15 @@ def test_the_pool_is_78_rows_20_38_20():
     # 20 / 37 / 21. Guest Star: Navia Rare -> Uncommon (2026-10-10, "I lean
     # more towards putting Navia to Uncommon first"): 20 / 38 / 20.
     # Standing Ovation Common again, Spend half (2026-10-11): 21 / 37 / 20.
+    # The diversity pass (2026-10-11): four in, four cut, Tutti! and
+    # Wriothesley to Common: 23 / 35 / 20.
     rows = {c.id: c for c in loader.prototype_cards()}
     rarities = [rows[cid].rarity for cid in FS.POOL_IDS]
     assert len(FS.POOL_IDS) == 78 == len(set(FS.POOL_IDS))
     assert "proto_fs_endless_waltz" not in rows
     assert rows["proto_fs_standing_ovation_all"].rarity == "common"
     assert (rarities.count("common"), rarities.count("uncommon"),
-            rarities.count("rare")) == (21, 37, 20)
+            rarities.count("rare")) == (23, 35, 20)
     assert rows["proto_fs_guest_star_navia"].rarity == "uncommon"
 
 

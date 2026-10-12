@@ -45,12 +45,13 @@ public sealed class ProtoFsCastingCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Casting Call"),
-        ("description", "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand.{IfUpgraded:show: Draw 1 card.|}"),
+        ("description", "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand. If you can't, draw {FsAmount:diff()} cards.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DynamicVar("FsAmount", 2m),
             new CardsVar(1)
         };
 

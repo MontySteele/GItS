@@ -2729,16 +2729,6 @@
 
 # --- REPAY (four) ---
 
-- {id: proto_fs_surging_waters, name: "Surging Waters", character: furina,
-   upgrade: {formula_base: +3, stage_repay: +1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: attack, rarity: common,
-   description: "[gold]Repay[/gold] 3. Deal {CalculationBase:diff()} damage, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_repay, amount: 3},
-             {op: damage,
-              amount_formula: {base: 6, per: 1, count: stage_repay_left},
-              target: enemy}]}
-
 # Hymn of Many Waters: Block 8 [11] -> 6 [8], Repay 3 [4] kept ([USER],
 # 2026-10-11: "Yeah, I think Hymn needs a trim."; provenance note).
 - {id: proto_fs_hymn_of_many_waters, name: "Hymn of Many Waters", character: furina,
@@ -2830,15 +2820,17 @@
                          {op: draw, amount: 1},
                          {op: stage_energy_next, amount: 1}]}]}]}
 
+# Bravura: one Hydro hit of 7 [9] for every 3 spent (the diversity pass,
+# review/active/furina-diversity-pass-2026-10-11.md sec.2, ruled 2026-10-11;
+# was 6, plus 2 a point, one hit).
 - {id: proto_fs_bravura, name: "Bravura", character: furina,
-   upgrade: {formula_base: +4},
+   upgrade: {damage: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.",
    effects: [{op: stage_spend_all},
-             {op: damage,
-              amount_formula: {base: 6, per: 2, count: stage_spent},
-              target: enemy}]}
+             {op: damage, amount: 7, target: enemy, applies_element: true,
+              times_formula: {base: 0, per: 1, count: stage_spent_threes}}]}
 
 # --- THE THREE POWERS (Uncommon) ---
 
@@ -2869,18 +2861,22 @@
    description: "[gold]Summon[/gold] Charlotte{IfUpgraded:show:+|}. Act: [gold]Repay[/gold] {GuestAct:diff()}.",
    effects: [{op: stage_guest, member: charlotte}]}
 
+# Wriothesley: Common (the diversity pass, sec.2): the company's Common
+# damage star.
 - {id: proto_fs_guest_star_wriothesley, name: "Guest Star: Wriothesley", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   register: salon, cost: 1, type: skill, rarity: common, exhaust: true,
    description: "[gold]Summon[/gold] Wriothesley{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Cryo[/gold] damage to a random enemy.",
    effects: [{op: stage_guest, member: wriothesley}]}
 
+# Lynette's act hits any enemy when none has an aura (the diversity pass,
+# sec.2: it did nothing before).
 - {id: proto_fs_guest_star_lynette, name: "Guest Star: Lynette", character: furina,
    upgrade: {guest_upgraded: true},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Anemo[/gold] damage to an enemy with an aura.",
+   description: "[gold]Summon[/gold] Lynette{IfUpgraded:show:+|}. Act: deal {GuestAct:diff()} [gold]Anemo[/gold] damage to an enemy, one with an aura if able.",
    effects: [{op: stage_guest, member: lynette}]}
 
 - {id: proto_fs_guest_star_clorinde, name: "Guest Star: Clorinde", character: furina,
@@ -3011,13 +3007,14 @@
 # Guests and stage (11): 1 Common, 5 Uncommon, 5 Rare.
 
 # Casting Call: an Uncommon tutor, not a random guest (taken on [USER]'s read).
-# The player picks when the draw pile holds more than one Guest Star.
+# The player picks when the draw pile holds more than one Guest Star. With
+# none it draws 2 (the diversity pass, sec.2: the floor).
 - {id: proto_fs_casting_call, name: "Casting Call", character: furina,
    upgrade: {add: {op: draw, amount: 1}},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand.",
-   effects: [{op: furina, kind: tutor_guest}]}
+   description: "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand. If you can't, draw {FsAmount:diff()} cards.",
+   effects: [{op: furina, kind: tutor_guest, amount: 2}]}
 
 # Encore!: one bought act. "Oldest guest" carries its tip (sec.5).
 - {id: proto_fs_encore, name: "Encore!", character: furina,
@@ -3029,20 +3026,26 @@
              {op: furina, kind: act_oldest},
              {op: draw, amount: 1}]}
 
+# Tutti!: Common, and it draws 1 (the diversity pass, sec.2: the floor).
+# Its upgrade draws 2 instead of costing 0 (Claude, under the loop ruling,
+# 2026-10-11: the 0-cost upgrade looped with any 0-cost draw-1 card).
 - {id: proto_fs_tutti, name: "Tutti!", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {draw: +1},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon, retain: true,
-   description: "Each guest acts.",
-   effects: [{op: furina, kind: act_all}]}
+   register: salon, cost: 1, type: skill, rarity: common, retain: true,
+   description: "Each guest acts. {IfUpgraded:show:Draw 2 cards.|Draw 1 card.}",
+   effects: [{op: furina, kind: act_all},
+             {op: draw, amount: 1}]}
 
-# Final Bow: the Review section's "chooses its guest". Its card returns.
+# Final Bow: the Review section's "chooses its guest". Its card returns. It
+# draws 1 first (the diversity pass, sec.2: the floor).
 - {id: proto_fs_final_bow, name: "Final Bow", character: furina,
    upgrade: {furina_amount: 1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Choose a guest. It acts {IfUpgraded:show:3 times|twice}, then leaves.",
-   effects: [{op: furina, kind: final_bow, amount: 2}]}
+   description: "Draw 1 card. Choose a guest. It acts {IfUpgraded:show:3 times|twice}, then leaves.",
+   effects: [{op: draw, amount: 1},
+             {op: furina, kind: final_bow, amount: 2}]}
 
 - {id: proto_fs_grand_entrance, name: "Grand Entrance", character: furina,
    upgrade: {power_amount: +2},
@@ -3068,13 +3071,16 @@
    effects: [{op: apply_power, power: fs_showstopper, amount: 1,
               target: self}]}
 
+# Ensemble Cast summons a random guest not on stage (the diversity pass,
+# sec.2: the floor).
 - {id: proto_fs_ensemble_cast, name: "Ensemble Cast", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "You have 4 guest seats.",
+   description: "You have 4 guest seats. [gold]Summon[/gold] a random guest.",
    effects: [{op: apply_power, power: fs_ensemble_cast, amount: 1,
-              target: self}]}
+              target: self},
+             {op: furina, kind: summon_random}]}
 
 - {id: proto_fs_guest_star_navia, name: "Guest Star: Navia", character: furina,
    upgrade: {guest_upgraded: true},
@@ -3146,17 +3152,6 @@
    cost_reduction_per_fanfare: 6,
    description: "Deal 15 damage. Costs 1 less for every 6 [gold]Fanfare[/gold] you have.",
    effects: [{op: damage, amount: 15, target: enemy}]}
-
-# Sold Out and Overdraft: Energy next turn (the 2026-10-09 build's loop
-# ruling, Interval Bell's fix; the loop probe found 16 thin-deck cycles).
-- {id: proto_fs_sold_out, name: "Sold Out", character: furina,
-   upgrade: {stage_spend: -2},
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Spend[/gold] {IfUpgraded:show:4|6}. Draw 2 cards. Gain 1 [gold]Energy[/gold] next turn.",
-   effects: [{op: stage_spend, amount: 6},
-             {op: draw, amount: 2},
-             {op: stage_energy_next, amount: 1}]}
 
 - {id: proto_fs_crescendo, name: "Crescendo", character: furina,
    upgrade: {innate: true},
@@ -3235,14 +3230,6 @@
               then: [{op: damage, amount: 14, target: enemy}],
               else: [{op: damage, amount: 8, target: enemy}]}]}
 
-- {id: proto_fs_pay_the_tab, name: "Pay the Tab", character: furina,
-   upgrade: {draw: +1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Drain[/gold] 6. Draw {Cards:diff()} cards.",
-   effects: [{op: stage_drain, amount: 6},
-             {op: draw, amount: 3}]}
-
 - {id: proto_fs_riptide_lunge, name: "Riptide Lunge", character: furina,
    upgrade: {damage: +3},
    authored_by: [claude],
@@ -3298,16 +3285,6 @@
    description: "[gold]Repay[/gold] 2. Draw 1 card.",
    effects: [{op: stage_repay, amount: 2},
              {op: draw, amount: 1}]}
-
-# Gentle Current Repays now (the Spend round 2, 2026-10-10: seats never paid
-# for "next turn"); Hymn of Many Waters' shape, smaller.
-- {id: proto_fs_gentle_current, name: "Gentle Current", character: furina,
-   upgrade: {block: +2, stage_repay: +1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
-   effects: [{op: block, amount: 5},
-             {op: stage_repay, amount: 3, floor: block}]}
 
 - {id: proto_fs_clean_slate, name: "Clean Slate", character: furina,
    upgrade: {damage: +3},
@@ -3439,6 +3416,51 @@
    description: "Gain [gold]Block[/gold] equal to your [gold]Fanfare[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block,
               amount_formula: {base: 0, per: 1, count: stage_fanfare}}]}
+
+# --- THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md
+# sec.2 and sec.3, ruled 2026-10-11, all defaults): four new cards, four cut
+# (Gentle Current, Surging Waters, Pay the Tab, Sold Out). Pool 78. ---
+
+# Headliner: style 1 (stars support, Furina hits).
+- {id: proto_fs_headliner, name: "Headliner", character: furina,
+   upgrade: {formula_base: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each guest on stage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage,
+              amount_formula: {base: 6, per: 2, count: stage_guests},
+              target: enemy}]}
+
+# Leading Lady: style 1's Power. The id is not `proto_fs_leading_lady`,
+# which Gentilhomme Usher holds.
+- {id: proto_fs_the_leading_lady, name: "Leading Lady", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "Gain {PowerAmount:diff()} [gold]Strength[/gold]. Your Attacks deal 1 additional damage for each guest on stage.",
+   effects: [{op: apply_power, power: strength, amount: 1, target: self},
+             {op: apply_power, power: fs_leading_lady, amount: 1,
+              target: self}]}
+
+# Full House: style 2's feed (stars hit, Furina feeds them). The id is not
+# `proto_fs_full_house`, a v2 row whose painting is still on disk.
+- {id: proto_fs_the_full_house, name: "Full House", character: furina,
+   upgrade: {power_amount: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {PowerAmount:diff()}: it deals that much more.",
+   effects: [{op: apply_power, power: fs_full_house, amount: 4,
+              target: self}]}
+
+# Packed House: the hoard, a small component.
+- {id: proto_fs_packed_house, name: "Packed House", character: furina,
+   upgrade: {formula_base: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "Deal {CalculationBase:diff()} damage, plus 1 for every 5 [gold]Fanfare[/gold] you have.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage,
+              amount_formula: {base: 4, per: 1, count: stage_fanfare_fives},
+              target: enemy}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

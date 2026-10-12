@@ -145,7 +145,12 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   (2026-10-11: "(b) a guest who's pushed out takes a bow"); at the end of her turn
   the guests act oldest first, then Showstopper Spends 5 and they act again,
   then Salon Solitaire Repays; an upgrade raises a guest's line or act. The
-  pool is the starter and 78 cards (21 / 37 / 20; Guest Star: Navia moved
+  pool is the starter and 78 cards (23 / 35 / 20 since the diversity pass,
+  built 2026-10-11 at all five defaults,
+  `review/active/furina-diversity-pass-2026-10-11.md`: two guest styles,
+  Headliner, Leading Lady, Full House and Packed House in, Gentle Current,
+  Surging Waters, Pay the Tab and Sold Out cut, Bravura 7 Hydro per 3 spent,
+  Tutti! and Wriothesley Common, four floors; Guest Star: Navia moved
   Rare to Uncommon 2026-10-10, "I lean more towards putting Navia to
   Uncommon first"; Standing Ovation Common again, "Spend half your
   Fanfare", 2026-10-11), built from that paper's
@@ -155,8 +160,8 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   now"; she had 7 Block cards in 74), and with the round's card
   numbers (Standing Ovation Uncommon, Bravura+ base 10, Crabaletta 20,
   Soloist's Solicitation 6, Commanding Gaze 2 Vulnerable, Freminet's act
-  Block, Neuvillette cost 1 and act on all HP lost); Overdraft and Sold Out
-  give their Energy next turn (the build's loop ruling). Relics: the
+  Block, Neuvillette cost 1 and act on all HP lost); Overdraft gives its
+  Energy next turn (the build's loop ruling). Relics: the
   starter Salon Solitaire ("At the end of your turn, Repay 1."; 2 before the
   2026-10-09 playtest trim), its Orobas upgrade The Curtain Never Falls
   (Repay 2; Ancient, never rolled), and two reward
