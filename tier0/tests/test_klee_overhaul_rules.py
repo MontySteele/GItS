@@ -483,15 +483,22 @@ def test_rule4_she_starts_every_combat_with_the_opening_spark(overhaul):
     assert state.log.index(opening[0]) < 40, "not on turn one"
 
 
+#: The rows ruled to mint Sparks without an explosion. The Klee tempo paper
+#: (2026-10-07, sec.3): Tinkering is "a Spark engine that does not need an
+#: explosion", paid for in a Confiscated.
+SPARK_MINTING_ROWS = {"proto_ko_tinkering"}
+
+
 def test_rule4_no_slice_row_mints_a_spark(overhaul):
     """`Rule4_no_slice_card_mints_a_spark`: "Under this flag Sparks come ONLY
     from explosions." Every slice row is swept, so a future row printing
-    `gain_spark` fails here rather than quietly opening a second income."""
+    `gain_spark` fails here rather than quietly opening a second income --
+    except the rows a ruling named (`SPARK_MINTING_ROWS`)."""
     rows = [c for c in loader.prototype_cards() if c.id.startswith("proto_ko_")]
     assert rows
-    for card in rows:
-        assert not any(fx.get("op") == "gain_spark" for fx in card.effects), \
-            card.id
+    minting = {card.id for card in rows
+               if any(fx.get("op") == "gain_spark" for fx in card.effects)}
+    assert minting == SPARK_MINTING_ROWS
 
 
 def test_rule4_the_upgraded_relics_opening_windfall_is_on(overhaul):
@@ -853,13 +860,12 @@ def test_the_payload_pays_from_inside_a_stacked_pile(overhaul):
     assert klee_overhaul.mine_count(b) == 1
 
 
-def test_a_merge_carries_every_payload_it_moved(overhaul):
-    """`A_merge_carries_every_payload_it_moved`, `EB-395`'s other suspect.
+def test_a_gather_carries_every_payload_it_moved(overhaul):
+    """`EB-395`'s other suspect, since the Klee upper pass (2026-10-11).
 
-    Careful Arrangement moves every Bomb onto one enemy AS ONE Bomb, and a
-    merge is a MOVE: the merged charge is a Mine if any part of it was and it
-    carries the summed payload, so a card whose face only says it moves Bombs
-    cannot delete a rider. Read here as the rider PAYING after the merge,
+    Exquisite Compound moves every Bomb onto one enemy, each AS ITSELF: a
+    charge's payload rides with it, so a card whose face only says it moves
+    Bombs cannot delete a rider. Read here as the rider PAYING after the move,
     rather than as the field surviving it.
     """
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
@@ -867,10 +873,10 @@ def test_a_merge_carries_every_payload_it_moved(overhaul):
     klee_overhaul.place(state, a, 8, payload_mine_all=3)   # Jumpy Dumpty
     klee_overhaul.place(state, b, 5)                       # Pop!, elsewhere
 
-    klee_overhaul.merge_all_to(state, b, growth=5)
+    klee_overhaul.gather_all_to(state, b, growth=4)
 
-    assert sizes(a) == [] and sizes(b) == [8 + 5 + 5]
-    assert b.ko_charges[0].payload_mine_all == 3
+    assert sizes(a) == [] and sorted(sizes(b)) == [5 + 4, 8 + 4]
+    assert sorted(c.payload_mine_all for c in b.ko_charges) == [0, 3]
 
     klee_overhaul.set_off(state, b)
 
@@ -1244,72 +1250,50 @@ def test_a_mine_peeks_the_multiplier_without_spending_it(overhaul):
 # THE CARD VERBS THAT ARE NOT A SET OFF
 # ---------------------------------------------------------------------------
 
-def test_careful_arrangement_merges_the_board_into_one_bomb(overhaul):
-    """`MergeAllTo`, and its TWO REPORTED DEFAULTS the card text does not
-    state: the merged Bomb is a MINE if any merged charge was one, and it
-    carries the payloads of every merged charge, summed. A merge is a move, and
-    a move loses nothing."""
+def test_exquisite_compound_gathers_the_board_and_grows_each_bomb(overhaul):
+    """`GatherAllTo` (the Klee upper pass, 2026-10-11, pick 2 (a)): "Move all
+    your Bombs onto the enemy. Each grows by 4 [6]." No merge: every charge
+    lands as itself, so three Bombs are still three Sparks when they go off.
+    The ones already on the aimed enemy grow too; a Mine stays a Mine and a
+    plain Bomb stays plain; a payload rides with its own charge."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 5, is_mine=True)
     klee_overhaul.place(state, a, 6)
     klee_overhaul.place(state, b, 7, payload_mine_all=3)
 
-    klee_overhaul.merge_all_to(state, b, growth=2)
+    klee_overhaul.gather_all_to(state, b, growth=4)
 
     assert a.ko_charges == []
-    assert sizes(b) == [5 + 6 + 7 + 2]
-    assert b.ko_charges[0].is_mine is True
-    assert b.ko_charges[0].payload_mine_all == 3
+    got = sorted((c.size, c.is_mine, c.payload_mine_all) for c in b.ko_charges)
+    assert got == [(5 + 4, True, 0), (6 + 4, False, 0), (7 + 4, False, 3)]
 
 
-def test_eb534_the_face_says_the_merged_pile_is_still_a_mine(overhaul):
-    """`EB-534`. TWO SEATS, OPPOSITE READS, AND THE FACE SAID NEITHER.
+def test_exquisite_compound_row_plays_four_and_six_upgraded(overhaul):
+    """The sheet row through the card path: 4, and 6 upgraded, per Bomb."""
+    for cid, growth in (("proto_ko_careful_arrangement", 4),
+                        ("proto_ko_careful_arrangement+", 6)):
+        # The play binds its aim to the lowest-HP enemy: b.
+        a, b = make_enemy(hp=200, name="a"), make_enemy(hp=100, name="b")
+        state = klee_state([a, b])
+        klee_overhaul.place(state, a, 5)
+        klee_overhaul.place(state, a, 3, is_mine=True)
 
-    Klee r18 lane 1 read Careful Arrangement as PRESERVING Mine status ("the
-    body line said so"); r19 lane 1 read it as converting Mines to plain Bombs
-    and never played the card, "worse than a blank card". The face said only
-    "as one Bomb".
+        effects.resolve_card(state, load(cid))
 
-    BOTH ENGINES PRESERVE IT and always did, for the reason above this test: a
-    merge is a MOVE and a move must not silently delete the defence the player
-    set up. So r18 was right and the fix is one clause on the card. This pin is
-    the SHEET against the ENGINE, in one place, so the clause cannot outlive the
-    behaviour or the other way round.
-    """
-    from pathlib import Path
-
-    import yaml
-
-    repo = Path(__file__).resolve().parents[2]
-    sheet = yaml.safe_load((repo / "docs" / "prototype-surface.yaml")
-                           .read_text(encoding="utf-8"))
-    row = next(r for r in sheet if r["id"] == "proto_ko_careful_arrangement")
-    assert "is a [gold]Mine[/gold] if any of them were" in row["description"]
-
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 4, is_mine=True)
-    klee_overhaul.place(state, b, 6)
-
-    klee_overhaul.merge_all_to(state, b, growth=5)
-
-    assert sizes(b) == [4 + 6 + 5]
-    assert b.ko_charges[0].is_mine is True, "the face's clause, played"
+        assert a.ko_charges == []
+        assert sorted((c.size, c.is_mine) for c in b.ko_charges) == [
+            (3 + growth, True), (5 + growth, False)]
 
 
-def test_eb534_a_merge_of_plain_bombs_stays_plain(overhaul):
-    """The other half of the clause, and the reason it reads "if any of them
-    was" rather than "a Mine": a board with no Mine on it merges into a plain
-    Bomb, so the card does not hand out a defence the player never placed."""
-    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
-    state = klee_state([a, b])
-    klee_overhaul.place(state, a, 4)
-    klee_overhaul.place(state, b, 6)
+def test_exquisite_compound_on_a_bare_board_places_nothing(overhaul):
+    """Nothing to move is nothing placed -- never a Bomb 4."""
+    a = make_enemy(hp=200, name="a")
+    state = klee_state([a])
 
-    klee_overhaul.merge_all_to(state, b, growth=5)
+    klee_overhaul.gather_all_to(state, a, growth=4)
 
-    assert b.ko_charges[0].is_mine is False
+    assert a.ko_charges == []
 
 
 def test_chain_fuse_grows_one_enemys_pile_only(overhaul):
@@ -1362,20 +1346,23 @@ def test_one_detonation_places_one_rider_mine_per_living_enemy(overhaul):
         ("a", 3), ("b", 3)]
 
 
-def test_sorry_jean_removes_the_largest_and_blocks_for_its_size(overhaul):
+def test_remove_bomb_for_block_removes_the_largest_and_blocks_for_its_size(
+        overhaul):
     """`The_emergency_exit_removes_one_charge_and_reports_its_size`, plus the
     reported default the card text does not state: THE LARGEST, the only
-    deterministic answer a player can plan around."""
+    deterministic answer a player can plan around. (Sorry, Jean... left with
+    the Klee tempo paper, 2026-10-07; Favonius Escort prints the same verb at
+    twice the size.)"""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 3)
     klee_overhaul.place(state, b, 11)
     klee_overhaul.place(state, b, 7)
 
-    effects.resolve_card(state, load("proto_ko_sorry_jean"))
+    effects.resolve_card(state, load("proto_ko_favonius_escort"))
 
     assert sizes(a) == [3] and sizes(b) == [7]
-    assert state.player.block == 11
+    assert state.player.block == 22
 
 
 def test_bomb_sized_block_takes_dexterity_like_every_other_card_block(overhaul):
@@ -1395,16 +1382,16 @@ def test_bomb_sized_block_takes_dexterity_like_every_other_card_block(overhaul):
     state.player.powers["dexterity"] = 2
     klee_overhaul.place(state, enemy, 13)
 
-    effects.resolve_card(state, load("proto_ko_sorry_jean"))
-    assert state.player.block == 15         # 13 + 2, and the charge is spent
+    effects.resolve_card(state, load("proto_ko_favonius_escort"))
+    assert state.player.block == 28         # 2 x 13 + 2, the charge spent
     assert sizes(enemy) == []
     # (Careful Now's half left with the row: the Klee status package,
     # 2026-10-01, cut it.)
 
 
-def test_sorry_jean_on_an_empty_board_is_a_printed_no_op(overhaul):
+def test_remove_bomb_for_block_on_an_empty_board_is_a_printed_no_op(overhaul):
     state = klee_state([make_enemy()])
-    effects.resolve_card(state, load("proto_ko_sorry_jean"))
+    effects.resolve_card(state, load("proto_ko_favonius_escort"))
     assert state.player.block == 0
 
 
@@ -1513,9 +1500,10 @@ def test_sparks_n_splash_fires_after_growth_and_leaves_the_bomb(overhaul):
     Klee had set her Bombs off, so it hit for nothing). "At the start of your
     turn, your largest Bomb deals its size in Pyro damage without going off."
 
-    A Bomb 4 placed last turn has grown to 8 by the time the echo reads it, so
-    it hits for 8 -- and the Bomb is still there, still 8."""
-    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 4, "the worked example assumes 4"
+    A Bomb 4 placed last turn has grown to 6 by the time the echo reads it, so
+    it hits for 6 -- and the Bomb is still there, still 6. (Growth 2 since the
+    Klee design review, 2026-10-08.)"""
+    assert C.KLEE_OVERHAUL_BOMB_GROWTH == 2, "the worked example assumes 2"
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     state.turn = 2
@@ -1524,8 +1512,8 @@ def test_sparks_n_splash_fires_after_growth_and_leaves_the_bomb(overhaul):
 
     _echo_turn(state)
 
-    assert enemy.hp == 200 - 8, "the grown Bomb (4 + 4) paid"
-    assert sizes(enemy) == [8], "the Bomb stays where it is"
+    assert enemy.hp == 200 - 6, "the grown Bomb (4 + 2) paid"
+    assert sizes(enemy) == [6], "the Bomb stays where it is"
 
 
 def test_sparks_n_splash_is_not_an_explosion(overhaul):
@@ -1542,11 +1530,11 @@ def test_sparks_n_splash_is_not_an_explosion(overhaul):
 
     _echo_turn(state)
 
-    assert enemy.hp == 200 - 10
+    assert enemy.hp == 200 - 8
     assert state.player.sparks == sparks
     assert counts(state)["ko_explosion"] == 0
     assert (state.ko_set_off_this_turn, state.ko_reacted_this_turn) == (0, 0)
-    assert sizes(enemy) == [10], "no Chained Reactions Bomb: nothing went off"
+    assert sizes(enemy) == [8], "no Chained Reactions Bomb: nothing went off"
     assert klee_overhaul.mine_count(enemy) == 1
 
 
@@ -1566,7 +1554,7 @@ def test_sparks_n_splash_hits_the_largest_bomb_on_the_board(overhaul):
     _echo_turn(state)
 
     assert small.hp == 200
-    assert big.hp == 200 - 13, "the 9, grown to 13"
+    assert big.hp == 200 - 11, "the 9, grown to 11"
 
     tie_a, tie_b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([tie_a, tie_b])
@@ -1575,7 +1563,7 @@ def test_sparks_n_splash_hits_the_largest_bomb_on_the_board(overhaul):
     klee_overhaul.place(state, tie_a, 6)
     klee_overhaul.place(state, tie_b, 6)
     _echo_turn(state)
-    assert (tie_a.hp, tie_b.hp) == (190, 200)
+    assert (tie_a.hp, tie_b.hp) == (192, 200)
 
 
 def test_sparks_n_splash_with_no_bomb_does_nothing(overhaul):
@@ -1603,8 +1591,8 @@ def test_sparks_n_splash_two_copies_are_two_hits(overhaul):
     _echo_turn(state)
 
     assert counts(state)["ko_bomb_echo"] == 2
-    assert enemy.hp == 200 - 2 * 9, "two hits, each the grown 5"
-    assert sizes(enemy) == [9, 7], "still not spent, by either copy"
+    assert enemy.hp == 200 - 2 * 7, "two hits, each the grown 5"
+    assert sizes(enemy) == [7, 5], "still not spent, by either copy"
 
 
 def test_sparks_n_splash_reads_the_board_before_dodoco_places(overhaul):
@@ -1642,7 +1630,7 @@ def test_sparks_n_splash_takes_a_bombs_damage_terms(overhaul):
     assert hit["source"] == klee_overhaul.ECHO_SOURCE
     assert klee_overhaul.ECHO_SOURCE not in ("attack",
                                              klee_overhaul.EXPLOSION_SOURCE)
-    assert hit["amount"] == 12, "8 x 1.5 Vulnerable, and no Strength"
+    assert hit["amount"] == 9, "6 x 1.5 Vulnerable, and no Strength"
     assert enemy.aura == "pyro"
     assert enemy.block == 0, "Skittish is an Attack-card rule and did not fire"
 
@@ -1762,43 +1750,43 @@ def companion(cid="proto_mc_friend", ctype="skill"):
 
 
 def test_coven_errand_places_one_bomb_with_no_companion_played(overhaul):
-    """"Place a Bomb 8" (5 until the Klee pre-Balance sweep). The else arm,
+    """"Place a Bomb 10" (5 until the Klee pre-Balance sweep, 8 until the Klee design review). The else arm,
     and the honest read of the card alone."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [8]
+    assert sizes(a) == [10]
     assert sizes(b) == []
 
 
 def test_coven_errand_grows_after_a_companion(overhaul):
     """AoE trim, 2026-10-03: "Place a Bomb 5 on an enemy, 8 if you played a
     Companion card this turn"; 8 / 12 since the Klee pre-Balance sweep
-    (2026-10-03). Still ONE Bomb on the aimed enemy."""
+    (2026-10-03); 10 / 14 since the Klee design review (2026-10-08). Still ONE Bomb on the aimed enemy."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [12]
+    assert sizes(a) == [14]
     assert sizes(b) == []
 
 
 def test_coven_errands_upgrade_moves_both_numbers(overhaul):
-    """"Upgrade: Bomb 10." The rider rides the printed size: 10, or 14."""
+    """"Upgrade: Bomb 12." The rider rides the printed size: 12, or 16."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
-    assert sizes(a) == [10]
+    assert sizes(a) == [12]
 
     state = klee_state([a := make_enemy(hp=200, name="a"),
                         b := make_enemy(hp=200, name="b")])
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand+"))
-    assert sizes(a) == [14]
+    assert sizes(a) == [16]
     assert sizes(b) == []
 
 
@@ -1814,27 +1802,27 @@ def test_the_companion_count_is_per_turn(overhaul):
 
 
 def test_witches_circle_plants_per_companion_and_nothing_for_her_own(overhaul):
-    """"Whenever you play a Companion card, place a Bomb 3 on a random
+    """"Whenever you play a Companion card, place a Bomb 5 on a random
     enemy." A plain Klee card pays nothing; a Companion pays once per play."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     effects.resolve_card(state, load("proto_ko_witches_circle"))
-    assert state.player.powers[klee_overhaul.WITCHES_CIRCLE] == 3
+    assert state.player.powers[klee_overhaul.WITCHES_CIRCLE] == 5
 
     combat._finish_play(state, probe([], cid="proto_ko_plain"))
     assert sizes(enemy) == []
     combat._finish_play(state, companion())
     combat._finish_play(state, companion())
-    assert sizes(enemy) == [3, 3]
+    assert sizes(enemy) == [5, 5]
 
 
 def test_witches_circle_upgrades_the_bomb_it_plants(overhaul):
-    """"Upgrade: Bomb 5." The stack IS the size, Chained Reactions' grammar."""
+    """"Upgrade: Bomb 7." The stack IS the size, Chained Reactions' grammar."""
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     effects.resolve_card(state, load("proto_ko_witches_circle+"))
     combat._finish_play(state, companion())
-    assert sizes(enemy) == [5]
+    assert sizes(enemy) == [7]
 
 
 def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
@@ -1855,7 +1843,7 @@ def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
 
     combat._finish_play(state, companion())
     combat._finish_play(state, plain)
-    assert sizes(a) == [3, 3]                       # the reader fired twice
+    assert sizes(a) == [5, 5]                       # the reader fired twice
     assert klee_overhaul.played_companion_this_turn(state) is True
     assert state.player.sparks == 0
     assert "companion:personal/play" not in [
@@ -1868,7 +1856,7 @@ def test_a_companion_play_feeds_the_readers_and_mints_no_spark(overhaul):
     combat._finish_play(state, companion())
     state.card_aim, state.card_aim_bound = a, True
     effects.resolve_card(state, load("proto_ko_coven_errand"))
-    assert sizes(a) == [12] and sizes(b) == []
+    assert sizes(a) == [14] and sizes(b) == []
     assert state.player.sparks == 0
 
 
@@ -1887,13 +1875,13 @@ def test_alices_introduction_magic_makes_the_hand_companions_for_one_turn(
     assert plain.is_companion is False      # the card itself never moved
     assert companion_hexerei.counts_as_companion(state, plain) is True
     combat._finish_play(state, plain)
-    assert sizes(enemy) == [3]
+    assert sizes(enemy) == [5]
 
     # ... AND NOT THE NEXT TURN. The window closes at the arm's turn end.
     klee_overhaul.turn_end(state)
     assert companion_hexerei.counts_as_companion(state, plain) is False
     combat._finish_play(state, plain)
-    assert sizes(enemy) == [3]
+    assert sizes(enemy) == [5]
 
 
 def test_alices_window_covers_the_hand_it_saw_and_not_a_later_draw(overhaul):
@@ -2098,9 +2086,9 @@ def test_stoke_the_fuse_upgraded_pays_seven_per_spark(overhaul):
 
 
 def test_stoke_the_fuse_grows_the_largest_of_two_bombs(overhaul):
-    """"Your largest Bomb", board-wide and ONE charge -- `block_largest_bomb`'s
-    scope with `grow_bombs`'s effect, and neither one's spread: the other
-    charges are exactly where they were."""
+    """"Your largest Bomb on the enemy", ONE charge -- `grow_bombs`'s effect
+    without its spread: the other charges are exactly where they were. The
+    aim binds to `a` (lowest-HP tie, first in order)."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     klee_overhaul.place(state, a, 4)
@@ -2111,6 +2099,39 @@ def test_stoke_the_fuse_grows_the_largest_of_two_bombs(overhaul):
 
     assert sizes(a) == [4, 9 + 10]         # the 9 took all of it
     assert sizes(b) == [7]
+
+
+def test_stoke_the_fuse_grows_the_largest_bomb_on_the_aimed_enemy(overhaul):
+    """The Klee pass round, pick 3 (b) (2026-10-11): the card aims. The bigger
+    Bomb is on `a`; aimed at `b` (lower HP, so the sim binds to it), `b`'s
+    largest grows and `a`'s is untouched. A seat grew a minion's Bomb when it
+    meant the boss's -- this is that fix. Twin:
+    `Stoke_the_fuse_grows_the_largest_bomb_on_the_aimed_enemy_only`."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=150, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 12)
+    klee_overhaul.place(state, b, 3)
+    klee_overhaul.place(state, b, 7)
+
+    stoke(state, [a, b], 2)
+
+    assert sizes(a) == [12]
+    assert sizes(b) == [3, 7 + 10]
+    assert state.player.sparks == 0
+
+
+def test_stoke_the_fuse_aimed_at_a_bomb_less_enemy_grows_nothing(overhaul):
+    """The target holds no Bomb: nothing grows, the Bomb on the other enemy
+    included, and the Sparks are still spent."""
+    a, b = make_enemy(hp=200, name="a"), make_enemy(hp=150, name="b")
+    state = klee_state([a, b])
+    klee_overhaul.place(state, a, 12)
+
+    stoke(state, [a, b], 2)
+
+    assert sizes(a) == [12]
+    assert sizes(b) == []
+    assert state.player.sparks == 0
 
 
 def test_stoke_the_fuse_sets_nothing_off(overhaul):
@@ -2185,12 +2206,13 @@ def test_treasures_copies_the_largest_bomb_onto_every_living_enemy(overhaul):
     assert sizes(dead) == []
 
 
-def test_treasures_is_a_two_cost_exhaust_that_retains_upgraded(overhaul):
-    """The row since the sweep: 2 Energy, Exhaust kept, Retain on upgrade."""
+def test_treasures_is_a_two_cost_exhaust_that_costs_one_upgraded(overhaul):
+    """The row since the Klee upper pass (2026-10-11): 2 [1] Energy, Exhaust
+    kept; the upgrade lowers the cost instead of adding Retain."""
     card, up = (load("proto_ko_all_of_my_treasures"),
                 load("proto_ko_all_of_my_treasures+"))
     assert card.cost == 2 and card.exhaust and not card.retain
-    assert up.cost == 2 and up.exhaust and up.retain
+    assert up.cost == 1 and up.exhaust and not up.retain
 
 
 def test_treasures_copies_a_mine_as_a_plain_bomb(overhaul):
@@ -2227,7 +2249,7 @@ def test_treasures_on_a_bomb_less_board_does_nothing(overhaul):
 def test_tinder_toss_sets_off_every_enemy_then_hits_every_enemy(overhaul):
     """`set_off` with `target: all_enemies` and NO aura filter, then a plain
     `damage` to all. THE ORDER IS THE RULE: Set off resolves on every enemy
-    FIRST, and only then does the 3 land."""
+    FIRST, and only then does the 5 land (3 until 2026-10-11)."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.player.sparks = 1
@@ -2236,13 +2258,13 @@ def test_tinder_toss_sets_off_every_enemy_then_hits_every_enemy(overhaul):
 
     effects.resolve_card(state, load("proto_ko_tinder_toss"))
 
-    # 7 + 3 and 5 + 3: the charge, then the card's own line.
-    assert (a.hp, b.hp) == (190, 192)
+    # 7 + 5 and 5 + 5: the charge, then the card's own line.
+    assert (a.hp, b.hp) == (188, 190)
     assert sizes(a) == [] and sizes(b) == []
 
 
-def test_tinder_toss_upgraded_hits_for_two_more(overhaul):
-    """`upgrade: {damage: +2}` moves the card's own line and NOT the charges,
+def test_tinder_toss_upgraded_hits_for_three_more(overhaul):
+    """`upgrade: {damage: +3}` (2026-10-11) moves the card's own line and NOT the charges,
     which carry their own sizes."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
@@ -2251,7 +2273,7 @@ def test_tinder_toss_upgraded_hits_for_two_more(overhaul):
 
     effects.resolve_card(state, load("proto_ko_tinder_toss+"))
 
-    assert (a.hp, b.hp) == (188, 195)
+    assert (a.hp, b.hp) == (185, 192)
 
 
 def test_tinder_toss_is_playable_on_a_bomb_less_board(overhaul):
@@ -2270,10 +2292,12 @@ def test_tinder_toss_is_playable_on_a_bomb_less_board(overhaul):
 
 # --- Fish Blasting: the status goes to the discard pile ---------------------
 
-def test_fish_blasting_adds_a_confiscated_into_the_discard_pile(overhaul):
+def test_fish_blasting_adds_a_dazed_into_the_discard_pile(overhaul):
     """Every status our cards make goes to the DISCARD pile, as the base game's
     do (Turbo, Overclock, Gunk Up, Boost Away, Fight Through). [USER],
-    2026-10-03: "I agree that we should adopt the same convention"."""
+    2026-10-03: "I agree that we should adopt the same convention". The
+    token is a Dazed and the hit 9 since 2026-10-11 ([USER]: "Confiscated is
+    too punishing")."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
     state.player.draw_pile = [probe([], cid="f%d" % i, ctype="skill")
@@ -2281,9 +2305,10 @@ def test_fish_blasting_adds_a_confiscated_into_the_discard_pile(overhaul):
 
     effects.resolve_card(state, load("proto_ko_fish_blasting"))
 
-    assert (a.hp, b.hp) == (192, 192)      # 8 to ALL since the balance review
-    assert [c.id for c in state.player.discard_pile].count("confiscated") == 1
-    assert not any(c.id == "confiscated" for c in state.player.draw_pile)
+    assert (a.hp, b.hp) == (191, 191)      # 9 to ALL since 2026-10-11
+    assert [c.id for c in state.player.discard_pile].count("status_dazed") == 1
+    assert not any(c.id == "confiscated" for c in state.player.discard_pile)
+    assert not any(c.id == "status_dazed" for c in state.player.draw_pile)
 
 
 def test_fish_blasting_sets_nothing_off(overhaul):
@@ -2302,7 +2327,7 @@ def test_fish_blasting_sets_nothing_off(overhaul):
 # --- Bombs Away!: Block keyed to the Bombs (AoE trim, 2026-10-03) ---------
 
 def test_bombs_away_places_one_bomb_and_blocks_per_bombed_enemy(overhaul):
-    """"Place a Bomb 4 on an enemy. Gain 4 Block, plus 2 for each enemy with
+    """"Place a Bomb 6 on an enemy. Gain 4 Block, plus 2 for each enemy with
     a Bomb." A Skill now; the count includes the Bomb it just placed."""
     a, b = make_enemy(hp=200, name="a"), make_enemy(hp=200, name="b")
     state = klee_state([a, b])
@@ -2314,7 +2339,7 @@ def test_bombs_away_places_one_bomb_and_blocks_per_bombed_enemy(overhaul):
     effects.resolve_card(state, card)
 
     assert (a.hp, b.hp) == (200, 200)
-    assert sizes(a) == [4] and sizes(b) == [3]
+    assert sizes(a) == [6] and sizes(b) == [3]
     assert state.player.block == 4 + 2 * 2
 
 

@@ -131,8 +131,9 @@ public class LiveBurn20260902Tests
             typeof(ArmKeywordTips)
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
-        Assert.EndsWith("A [gold]Bomb[/gold] that also goes off just before its "
-                     + "enemy attacks. Any [gold]Set off[/gold] spends it too.", body);
+        Assert.EndsWith("A [gold]Bomb[/gold] that also goes off when its enemy "
+                     + "attacks you. If it does not attack, the Mine waits. Any "
+                     + "[gold]Set off[/gold] spends it too.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
     }
 

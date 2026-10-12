@@ -62,7 +62,7 @@ public sealed class ProtoKoBoobyTrap : CustomCardModel, ISparkPricedCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 5m)
+            new DynamicVar("BombSize", 7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

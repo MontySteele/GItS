@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Extensions;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
@@ -57,6 +58,14 @@ public static class KleeExpansion
     public const string CompanionPromptText =
         "Choose a Companion card to put into your hand.";
 
+    /// <summary>Adventure Club's grid prompt (<see cref="ChooseCompanions"/>),
+    /// on the same terms.</summary>
+    public const string ChooseCompanionsPromptKey =
+        "KLEEMOD-CHOOSE_COMPANIONS.selectionScreenPrompt";
+
+    public const string ChooseCompanionsPromptText =
+        "Choose 2 Companion cards to add to your hand.";
+
     /// <summary>Is <paramref name="card"/> a Companion card?
     /// <c>CompanionHexerei.CountsAsCompanion</c>, the one reader. PURE.
     /// </summary>
@@ -67,14 +76,15 @@ public static class KleeExpansion
     /// R276 (Alice's Detonator): the card it adds, previewed as a hover tip,
     /// the base game's shape for a card that makes another (Blade Dance and
     /// Infinite Blades show a Shiv through <c>HoverTipFactory.FromCard</c>).
-    /// The upgraded Detonator previews the upgraded Ka-pow!, which is the one
-    /// its Power adds. Appended after <paramref name="tips"/>.
+    /// The upgraded Detonator previews the upgraded Alice's Mine (Ka-pow!
+    /// until 2026-10-11), which is the one its Power adds. Appended after
+    /// <paramref name="tips"/>.
     /// </summary>
-    public static IEnumerable<IHoverTip> WithKapowPreview(
+    public static IEnumerable<IHoverTip> WithAlicesMinePreview(
         IEnumerable<IHoverTip> tips, CardModel card)
     {
         foreach (var tip in tips) yield return tip;
-        yield return HoverTipFactory.FromCard<ProtoKoKapow>(card.IsUpgraded);
+        yield return HoverTipFactory.FromCard<ProtoKoAlicesMine>(card.IsUpgraded);
     }
 
     /// <summary>Does this card say Set off? The stamp, read. PURE.</summary>
@@ -150,30 +160,58 @@ public static class KleeExpansion
             .ToList();
 
     /// <summary>
-    /// Tag Along and Adventure Club: <paramref name="amount"/> random Companion
-    /// cards into the hand, each costing 0 this turn.
+    /// Tag Along ("Choose 1 of 3 Companion cards to add to your hand. It costs
+    /// 0 this turn.") and Adventure Club ("Choose 2 of 4 ... They cost 0 this
+    /// turn."): <paramref name="options"/> DISTINCT Companion cards off
+    /// <see cref="RandomCompanionPool"/>, the player keeps
+    /// <paramref name="amount"/> of them. The Klee upper pass (2026-10-11,
+    /// <c>review/active/klee-upper-pass-2026-10-11.md</c> pick 3 (a)); they
+    /// were random adds.
     ///
-    /// A COMBAT-SCOPE COPY (<c>CombatState.CreateCard</c>), the rule
-    /// <c>KokomiConscript.RollRecruit</c> records at length: a run-scope card
-    /// is refused by the pile it is added to. EACH ROLLS ITS OWN, so two can be
-    /// the same friend.
-    /// "Costs 0 this turn" is the base game's own temporary cost
-    /// (<c>EnergyCost.SetThisTurn</c>, the Guest Star generator's call).
+    /// THE BASE GAME'S DISCOVERY, line for line where it can be: the options
+    /// are <c>TakeRandom(count, Rng.CombatCardGeneration)</c> made as
+    /// combat-scope copies (<c>CardFactory.GetDistinctForCombat</c>'s body),
+    /// one is picked on <c>CardSelectCmd.FromChooseACardScreen</c> with
+    /// <c>canSkip: true</c>, and the pick costs 0 this turn and goes to the
+    /// hand through <c>AddGeneratedCardToCombat</c>.
+    ///
+    /// A CHOICE OF TWO FROM FOUR IS A GRID. The choose-a-card screen throws on
+    /// more than three cards and returns one (0.111.0 decompile), so more than
+    /// three options or more than one keep is <c>CardSelectCmd.FromSimpleGrid</c>
+    /// with that many to select -- <see cref="VarkaRules.AddKnight"/>'s screen.
+    /// Sim twin: <c>klee_overhaul.choose_companions</c>.
     /// </summary>
-    public static async Task AddRandomCompanions(
-        PlayerChoiceContext choiceContext, Player? owner, int amount)
+    public static async Task ChooseCompanions(
+        PlayerChoiceContext choiceContext, Player? owner, int amount,
+        int options)
     {
         var combat = owner?.Creature?.CombatState;
         if (owner == null || combat == null || amount <= 0) return;
-        var pool = RandomCompanionPool(owner);
-        if (pool.Count == 0) return;
+        var offered = RandomCompanionPool(owner)
+            .TakeRandom(options, owner.RunState.Rng.CombatCardGeneration)
+            .Select(c => combat.CreateCard(c, owner))
+            .Where(c => c != null)
+            .Cast<CardModel>()
+            .ToList();
+        if (offered.Count == 0) return;
 
-        for (var i = 0; i < amount; i++)
+        IEnumerable<CardModel> kept;
+        if (offered.Count <= 3 && amount == 1)
         {
-            var canonical = owner.RunState.Rng.CombatTargets.NextItem(pool);
-            if (canonical == null) break;
-            var card = combat.CreateCard(canonical, owner);
-            if (card == null) continue;
+            var pick = await CardSelectCmd.FromChooseACardScreen(
+                choiceContext, offered, owner, canSkip: true);
+            kept = pick == null ? Enumerable.Empty<CardModel>() : new[] { pick };
+        }
+        else
+        {
+            var keep = System.Math.Min(amount, offered.Count);
+            kept = await CardSelectCmd.FromSimpleGrid(
+                choiceContext, offered, owner,
+                new CardSelectorPrefs(
+                    new LocString(Table, ChooseCompanionsPromptKey), keep));
+        }
+        foreach (var card in kept.ToList())
+        {
             card.EnergyCost.SetThisTurn(0);
             await CardPileCmd.AddGeneratedCardToCombat(
                 card, PileType.Hand, owner);
@@ -181,13 +219,14 @@ public static class KleeExpansion
     }
 
     /// <summary>
-    /// R276, THE START-OF-TURN PLACEMENTS IN ONE FIXED ORDER: Klee's Secret
-    /// Base asks its question ("no enemy has a Bomb of yours") of the board as
-    /// the growth left it, and only then does Dodoco's Mine land. Both Powers
-    /// call this from <c>AfterPlayerTurnStart</c> -- after the draw and after
-    /// rule 1's growth -- and the ledger's per-turn latch makes the second call
-    /// a no-op, so the order is this method's and not the broadcast's. Sim
-    /// twin: <c>klee_overhaul._turn_start_expansion</c>, same order.
+    /// R276, THE START-OF-TURN PLACEMENTS IN ONE FIXED ORDER: the echo, then
+    /// Klee's Secret Base's Bomb, then Dodoco's Mine. Each Power calls this
+    /// from <c>AfterPlayerTurnStart</c> -- after the draw and after rule 1's
+    /// growth -- and the ledger's per-turn latch makes a second call a no-op,
+    /// so the order is this method's and not the broadcast's. Secret Base v3
+    /// (the scaling pass, klee-next 2026-10-05): ONE Bomb of the summed stack,
+    /// after the growth, so it shows its printed size. Sim twin:
+    /// <c>klee_overhaul._turn_start_expansion</c>, same order.
     ///
     /// SPARKS 'N' SPLASH GOES FIRST (2026-09-25): its echo reads the Bombs
     /// the growth just grew, before anything new is placed, and it is the
@@ -201,12 +240,12 @@ public static class KleeExpansion
         if (!KleeOverhaulLedger.For(klee).TakeTurnStartPlacements()) return;
         var echoes = klee.Powers.OfType<BombEchoPower>().Sum(p => p.Amount);
         if (echoes > 0) await BombEchoPower.Fire(choiceContext, klee, echoes);
-        foreach (var secretBase in klee.Powers.OfType<SecretBasePower>().ToList())
+        // Klee's Secret Base v3: copies add (a Counter), one Bomb of the sum.
+        var secretBase = SecretBasePower.BombSizeFor(klee);
+        if (secretBase > 0)
         {
-            if (ProtoBombPower.AnyPlacedBy(klee)) break;
-            await ProtoBombPower.PlaceOnRandom(choiceContext, klee,
-                                               secretBase.Amount, isMine: false,
-                                               payloadMineAll: 0,
+            await ProtoBombPower.PlaceOnRandom(choiceContext, klee, secretBase,
+                                               isMine: false, payloadMineAll: 0,
                                                cardSource: null);
         }
         foreach (var dodoco in klee.Powers.OfType<DodocoPower>().ToList())

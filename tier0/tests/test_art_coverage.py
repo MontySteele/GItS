@@ -289,6 +289,9 @@ STAND_IN_PROXIES = {
     # one is Rising Applause's) and wears the shipped Standing Ovation
     # picture, which is its own name's.
     "proto_fs_standing_ovation_all": "standing_ovation",
+    # The Klee scaling pass (klee-next, 2026-10-05): the grant-only run-long
+    # Witch's Homework II wears the pool Witch's Homework's picture.
+    "proto_ko_witchs_homework_next": "proto_ko_one_more_charge",
 }
 
 

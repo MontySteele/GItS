@@ -195,6 +195,32 @@ public class ResolutionLedgerTests
         Assert.Equal(0, hits[1]["blocked"]);
     }
 
+    /// <summary>The Klee round (2026-10-11): Fire! Fire! places its Bomb 7
+    /// and then sets it off, and the page printed the hit above the "Put".
+    /// Hits and applied powers share one rising `seq`, so the page can merge
+    /// the two lists in play order.</summary>
+    [Fact]
+    public void Hits_and_applied_powers_carry_one_rising_seq()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("fire_fire", "Fire! Fire!", false);
+        ResolutionLedger.NotePower("Toadpole", "Bomb", 7, "2");
+        ResolutionLedger.NoteHit(null, 15, 0);
+        ResolutionLedger.NoteKill("Toadpole", "2");
+        ResolutionLedger.ClosePlay();
+
+        var row = ResolutionLedger.Snapshot()[0];
+        var applied = (List<Dictionary<string, object?>>)row["applied"]!;
+        var hits = (List<Dictionary<string, object?>>)row["hits"]!;
+
+        var put = (long)applied[0]["seq"]!;
+        var hit = (long)hits[0]["seq"]!;
+        var kill = (long)hits[1]["seq"]!;
+        Assert.True(put > 0);
+        Assert.True(put < hit);
+        Assert.True(hit < kill);
+    }
+
     [Fact]
     public void One_body_dies_once()
     {
@@ -313,7 +339,8 @@ public class ResolutionLedgerTests
 
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
         Assert.Equal(new[] { "target", "amount", "blocked", "combat_id",
-                             "killed", "on_player", "source", "self" },
+                             "killed", "on_player", "source", "self",
+                             "seq" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
         // 2026-10-01: a hit on a player inside a play is marked as one.

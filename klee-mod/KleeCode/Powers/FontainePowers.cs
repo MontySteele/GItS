@@ -177,9 +177,14 @@ public sealed class NightVigilPower : PowerModel, ILocalizationProvider
 /// Hydro each turn as well, a free reaction partner for any kit. That
 /// reverses the old "authority over water, not more water" line, which kept
 /// it off Hydro for the mass-Frozen watchlist; the ruling is the newer fact.
-/// Amount counts copies (the upgrade is a cost cut), so each copy applies
-/// once. Through <see cref="ElementalHit.ApplyOnly"/>, the damage-less
-/// element door, so the application reacts and credits as any other does.
+/// Amount counts copies (the upgrade is a cost cut), so each copy hits
+/// once.
+///
+/// 2026-10-11 COMPANION PASS: the Hydro became "deal 5 Hydro damage to a
+/// random enemy" (<see cref="CompanionConstants.AncientSeaDamage"/>), a
+/// powered hit through <see cref="ElementalHit.Deal"/>, so the damage lays
+/// the Hydro and reacts and credits as any companion hit does. Sim twin: the
+/// `ancient_sea_authority` read in `effects.player_turn_start_triggers`.
 /// </summary>
 public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
 {
@@ -187,7 +192,9 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
     {
         ("title", "Heir to the Ancient Sea's Authority"),
         ("description",
-            "At the start of your turn, apply [gold]Hydro[/gold] to a random "
+            "At the start of your turn, deal "
+          + $"[blue]{CompanionConstants.AncientSeaDamage}[/blue] "
+          + "[gold]Hydro[/gold] damage to a random "
           + "enemy. Auras you apply last [blue]{Amount}[/blue] "
           + "additional {Amount:plural:turn|turns}."),
     };
@@ -200,12 +207,12 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
-        await ApplyHydro(choiceContext, player);
+        await HitHydro(choiceContext, player);
     }
 
-    /// <summary>The turn's Hydro: one random hittable enemy per copy.
+    /// <summary>The turn's Hydro hit: one random hittable enemy per copy.
     /// </summary>
-    internal async Task ApplyHydro(PlayerChoiceContext choiceContext, Player player)
+    internal async Task HitHydro(PlayerChoiceContext choiceContext, Player player)
     {
         for (var i = 0; i < Amount; i++)
         {
@@ -215,8 +222,9 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
             var target = player.RunState.Rng.CombatTargets.NextItem(enemies);
             if (target == null) return;
             Flash();
-            await ElementalHit.ApplyOnly(
-                choiceContext, target, Elements.Element.Hydro, Owner);
+            await ElementalHit.Deal(
+                choiceContext, target, Elements.Element.Hydro,
+                CompanionConstants.AncientSeaDamage, Owner);
         }
     }
 
@@ -227,30 +235,18 @@ public sealed class AncientSeaAuthorityPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Arlecchino, Masque of the Red Death: at the start of each turn gain Amount
-/// Strength, and each turn your Bond of Life eats the first
-/// <see cref="CompanionConstants.MasqueBondBlock"/> Block you gain.
-///
-/// Both halves are PER TURN. Amount is Strength per turn -- a ratchet, like
-/// Nicole's celestial_gift -- and the Bond is a flat constant that does not
-/// scale with it.
-///
-/// THE BOND IS PAID AT TURN END, NOT AT THE GAIN SITE, mirroring tier0
-/// exactly. Eating the first N at the moment Block is gained would need a
-/// funnel neither layer has, and the arithmetic is identical either way:
-/// eating the first N leaves max(0, gained - N), and so does subtracting N at
-/// the end and clamping at zero. Paying at the end is also universal, so Block
-/// from a power (Navia, Crystallize, Metallicize) cannot dodge the Bond the
-/// way a card-only funnel would let it.
-///
-/// The two orders differ only for a card that READS current Block mid-turn
-/// (the sim's `player_block` token -- Body Slam). That is reference-pool only
-/// and the refs take no companions, so the divergence is unreachable; the note
-/// exists so a future Block-reading roster card knows to revisit this.
+/// Arlecchino, Masque of the Red Death (2026-10-11 Companion pass): "At the
+/// start of your turn, lose 1 HP and gain 1 Strength." Amount is Strength per
+/// turn -- a ratchet, like Nicole's celestial_gift -- and the HP is a flat
+/// <see cref="CompanionConstants.MasqueHpLoss"/> that does not scale with it.
+/// The HP first, as printed: the base game's self-damage shape (Offering's,
+/// unblockable and unpowered). The Bond of Life Block clause, and the
+/// end-of-turn payment that carried it, left in the same pass.
 ///
 /// Strength is granted through the ordinary power path, which is what makes
 /// Kokomi's LAW 3 chokepoint convert it to Charge for her without a
-/// special case anywhere.
+/// special case anywhere. Sim twin: the `masque_red_death` read in
+/// `effects.player_turn_start_triggers`.
 /// </summary>
 public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
 {
@@ -258,10 +254,9 @@ public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
     {
         ("title", "Masque of the Red Death"),
         ("description",
-            "At the start of your turn, gain [blue]{Amount}[/blue] "
-          + "[gold]Strength[/gold]. Your [gold]Bond of Life[/gold] eats the "
-          + $"first [blue]{CompanionConstants.MasqueBondBlock}[/blue] "
-          + "[gold]Block[/gold] you gain each turn."),
+            "At the start of your turn, lose "
+          + $"[blue]{CompanionConstants.MasqueHpLoss}[/blue] HP and gain "
+          + "[blue]{Amount}[/blue] [gold]Strength[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -272,31 +267,13 @@ public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
+        Flash();
+        await CreatureCmd.Damage(
+            choiceContext, Owner, CompanionConstants.MasqueHpLoss,
+            ValueProp.Unblockable | ValueProp.Unpowered, dealer: null,
+            cardSource: null, cardPlay: null);
+        if (!Owner.IsAlive) return;
         await PowerCmd.Apply<StrengthPower>(
             choiceContext, Owner, Amount, applier: Owner, cardSource: null);
-    }
-
-    /// <summary>
-    /// NOT A BROADCAST OVERRIDE ANY MORE (EB-19/races-a). Driven by
-    /// TurnEndSequencer, which fires the four end-of-turn tenants that share
-    /// the player's Block and the enemy reaction board in the sim's fixed
-    /// order. The Bond is paid FIRST, strictly before the Kurage pulse's
-    /// Block grant: tier0 `effects.player_turn_end_triggers` deducts
-    /// MASQUE_BOND_BLOCK at the top of the function and only reaches
-    /// `kurage_summon` afterwards, so on a Kokomi+Arlecchino board the Bond
-    /// eats what the turn actually produced rather than the jellyfish's
-    /// mending -- a 5-Block-per-turn swing when the two race.
-    /// </summary>
-    /// v0.111.0 (`EB-171`): `CreatureCmd.LoseBlock` now takes the choice
-    /// context and the REMOVER. `remover: null` is the game's own documented
-    /// "removed by a power" case, which is exactly what the Bond is; the
-    /// context is the turn-end sequencer's, previously discarded at the
-    /// `Resolve` delegate and now passed down.
-    public async Task PayBondOfLife(PlayerChoiceContext choiceContext)
-    {
-        if (Owner == null || Owner.Block <= 0) return;
-        var paid = System.Math.Min(
-            Owner.Block, CompanionConstants.MasqueBondBlock);
-        await CreatureCmd.LoseBlock(choiceContext, Owner, paid, remover: null);
     }
 }

@@ -64,8 +64,9 @@ public class KeywordTitleRowTests
         var keywords = Keywords();
 
         // One from each family that owns hover tips.
+        // (The end-of-turn docket's family, KLEEMOD-TURNEND_MASQUE, left with
+        // Arlecchino's Bond of Life in the 2026-10-11 Companion pass.)
         Assert.Contains("KLEEMOD-ARM_BOMB", keywords);           // the arms' words
-        Assert.Contains("KLEEMOD-TURNEND_MASQUE", keywords);     // the docket
 
         // NOT a fully-qualified loc key: SlyGrant's prompt carries a dot and
         // belongs to whatever table declares it, not to card_keywords.
@@ -93,13 +94,13 @@ public class KeywordTitleRowTests
         // SEEN TO FAIL. The rule's decision, driven against a registration
         // that is missing one key -- the 0.2-634 state exactly.
         var keywords = Keywords();
-        var asIfMasqueHadNoRow = Registered()
-            .Where(s => s != "KLEEMOD-TURNEND_MASQUE.title").ToList();
+        var asIfBombHadNoRow = Registered()
+            .Where(s => s != "KLEEMOD-ARM_BOMB.title").ToList();
 
         var missing = keywords
-            .Where(k => !asIfMasqueHadNoRow.Contains($"{k}.title")).ToList();
+            .Where(k => !asIfBombHadNoRow.Contains($"{k}.title")).ToList();
 
-        Assert.Equal(new[] { "KLEEMOD-TURNEND_MASQUE" }, missing);
+        Assert.Equal(new[] { "KLEEMOD-ARM_BOMB" }, missing);
     }
 
     [Fact]

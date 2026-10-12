@@ -380,7 +380,11 @@ public sealed class GrandOdePower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Jean, Dandelion Breeze: "At the end of your turn, Swirl the enemy with the
-/// most auras and gain 6 Block." PERMANENT; Amount is the number of COPIES.
+/// most auras and gain 6 [9] Block." PERMANENT. Since the 2026-10-11
+/// Companion pass Amount IS the Block (copies add into one payment, Durin's
+/// <see cref="PurityStrikePower"/> shape), so the card's upgrade reaches it;
+/// one Swirl a turn. Sim twin: `mc_dandelion_breeze` in
+/// `effects.companion_overhaul_turn_end`.
 ///
 /// The Block is paid whether or not a Swirl landed -- the sentence is two
 /// clauses joined by "and", not a consequence -- which is also the reading
@@ -394,7 +398,7 @@ public sealed class DandelionBreezePower : PowerModel, ILocalizationProvider
         ("description",
             "At the end of your turn, [gold]Swirl[/gold] the enemy with the "
           + "most auras and gain "
-          + $"[blue]{CompanionOverhaulLaw.DandelionBreezeBlock}[/blue] [gold]Block[/gold]."),
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -403,19 +407,15 @@ public sealed class DandelionBreezePower : PowerModel, ILocalizationProvider
 
     internal async Task FireVolley(PlayerChoiceContext choiceContext)
     {
-        if (Owner.Player == null) return;
-        for (var i = 0; i < Amount; i++)
+        if (Owner.Player == null || Amount <= 0) return;
+        var target = CompanionOverhaulTargeting.MostAuras(CombatState);
+        if (target != null)
         {
-            var target = CompanionOverhaulTargeting.MostAuras(CombatState);
-            if (target != null)
-            {
-                await ElementalHit.ApplyOnly(
-                    choiceContext, target, Element.Anemo, Owner);
-            }
-            await CreatureCmd.GainBlock(
-                Owner, CompanionOverhaulLaw.DandelionBreezeBlock,
-                ValueProp.Unpowered, null, fast: true);
+            await ElementalHit.ApplyOnly(
+                choiceContext, target, Element.Anemo, Owner);
         }
+        await CreatureCmd.GainBlock(
+            Owner, Amount, ValueProp.Unpowered, null, fast: true);
     }
 }
 

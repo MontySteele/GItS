@@ -190,11 +190,12 @@ def test_the_element_override_order_puts_the_blanket_first():
     body = body.split("\ndef ")[0]
     riders = [m for m in re.findall(r'"(m[ci]_[a-z_]+)"', body)
               if m in ("mc_lightning_fang", "mi_kyouka",
-                       "mc_passion_overload", "mi_crowfeather",
-                       "mc_swirl_charge")]
+                       "mc_passion_overload", "mi_crowfeather")]
+    # Varka's banked Swirl left the element sequence in the Varka round 3
+    # fix (2026-10-10): its damage is a separate hit after the Attack.
     assert list(dict.fromkeys(riders)) == [
         "mc_lightning_fang", "mi_kyouka", "mc_passion_overload",
-        "mi_crowfeather", "mc_swirl_charge"]
+        "mi_crowfeather"]
 
 
 # ---------------------------------------------------------------------------
@@ -431,7 +432,7 @@ def test_the_ring_sweeps_the_board_and_guards_for_three_turns(overhaul):
                              make_enemy(hp=60, name="b")])
     _play(st, "proto_mi_shinobu_sanctifying_ring")
     effects.inazuma_overhaul_turn_end(st)
-    assert [e.hp for e in st.enemies] == [55, 55]
+    assert [e.hp for e in st.enemies] == [60 - C.MI_SANCTIFYING_RING_DMG] * 2
     assert st.player.block == C.MI_SANCTIFYING_RING_BLOCK
 
 
@@ -632,11 +633,11 @@ def test_superlative_superstrength_is_both_halves_whole(overhaul):
 def test_musou_reads_the_companions_you_played(overhaul):
     st = make_state(enemies=[make_enemy(hp=90)])
     _play(st, "proto_mi_raiden_musou_no_hitotachi")
-    assert st.enemies[0].hp == 70
+    assert st.enemies[0].hp == 63
     st = make_state(enemies=[make_enemy(hp=90)])
     st.companions_played = ["a", "b", "c"]
     _play(st, "proto_mi_raiden_musou_no_hitotachi")
-    assert st.enemies[0].hp == 90 - (20 + 15)
+    assert st.enemies[0].hp == 90 - (27 + 15)
 
 
 # ---------------------------------------------------------------------------
@@ -762,18 +763,21 @@ def test_the_parcel_goes_off_next_turn(overhaul):
     assert st.enemies[0].hp == 60 - C.MI_SURPRISE_DISPATCH_DMG
 
 
-def test_the_snack_hits_high_and_mends_low(overhaul):
+def test_the_snack_hits_and_mends_at_any_hp(overhaul):
+    """2026-10-11 Companion pass: "Swirl ALL enemies. Deal 14 damage to ALL
+    enemies and Mend 6." Both halves every time; the 70% branch is gone."""
     st = make_state(hp=80, enemies=[make_enemy(hp=90, name="a"),
                                     make_enemy(hp=90, name="b")])
     _play(st, "proto_mi_mizuki_anraku")
-    assert [e.hp for e in st.enemies] == [72, 72]
+    assert [e.hp for e in st.enemies] == [76, 76]
+    assert st.player.hp == 80                      # Mend restores, never past
 
     st = make_state(hp=80, enemies=[make_enemy(hp=90)])
     st.mi_entry_hp = 80
     st.player.hp = 30
     _play(st, "proto_mi_mizuki_anraku")
-    assert st.enemies[0].hp == 90
-    assert st.player.hp == 40
+    assert st.enemies[0].hp == 76                  # low HP still hits
+    assert st.player.hp == 36                      # and Mends 6
 
 
 def test_tamoto_walks_past_block(overhaul):

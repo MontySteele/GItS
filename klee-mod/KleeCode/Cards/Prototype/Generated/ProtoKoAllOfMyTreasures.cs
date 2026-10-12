@@ -68,6 +68,6 @@ public sealed class ProtoKoAllOfMyTreasures : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Retain);
+        EnergyCost.UpgradeBy(-1);
     }
 }

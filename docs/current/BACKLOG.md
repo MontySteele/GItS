@@ -17,11 +17,11 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; telemetry has no draw field, so add one or check the relic in game.
-- `KokomiExpansion.DrawIfTargetWeak` is dead after the Kokomi card pass (Salt in the Wound now uses the `target_has_power_weak` predicate); delete the `draw_if_target_weak` Plan kind with it: the helper, `gen_klee_cards.py`'s kind map and `KOKOMI_AIMED_KINDS` check, `kokomi_plan.py`'s `KINDS`/`AIMED_KINDS` branch and `kokomi_expansion_sim.py`'s twin.
 - Dahlia — Sacramental Shower and Raiden — Musou no Hitotachi print their damage as fixed text, so the face ignores Strength and Weak; move them to the computed damage token like the other Companions.
 - `build_pck` skips three copy blocks whose sources are missing locally: `klee\mod_image.png`, `kokomi\potions`, `varka\potions` (deploy 2026-10-11, 0.2.4849+next).
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
-- Art owed, Klee: Forbidden Fun, It Wasn't Me!, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Albedo — Dust of Purification (its plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched), Up in Smoke!, Behind Jean's Desk, Kitchen Alchemy, Cover Your Ears!; the two status-package Powers borrow Party Poppers' and Spark Knight's badges.
+- Art owed, Klee: Forbidden Fun, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Albedo — Dust of Purification (its plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched), Up in Smoke!, Behind Jean's Desk, Kitchen Alchemy, Cover Your Ears!; the two status-package Powers borrow Party Poppers' and Spark Knight's badges.
+- Klee tempo paper (2026-10-07, `klee-next`): delete the engine pieces only its five cuts used, in both engines -- `GroundedPower` (and its `Grounded` keyword tip and `KleeOverhaulLaw.GroundedSpark`), `SitTightPower`, `PatienceKleePower` and their sim twins (`ko_grounded`, `ko_sit_tight`, `ko_patience`), with their pins. Left registered so the cut could land without an engine sweep.
 - Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Turning Tide, Flotsam Surge, Abyssal Salvage, Flood Tide and the Sea Glass token; Abyssal Salvage and Flood Tide borrow the Princess of Watatsumi badge.
 - Art owed, pool completion: the 14 new rows and the three new Ancients (Alice's Masterpiece, Divine Strategy, Center of Attention).
 - Art owed: Durin — Principle of Purity wears Binary Form's picture (`art_of`); the three Purity powers borrow Binary Form's badge.
@@ -47,10 +47,8 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi text: the Neow bundle's Plan gloss omits "instead of playing it now"; the Casket tip does not say it ignores a debuff from a reaction set off by its own hit.
 - Kokomi's Plan list prints a waiting Plan's damage without the target's Vulnerable: a queued card is in no pile, so its numbers never refresh; `KokomiPlan.QueueRow` could send the front-target-folded number (`PlannedDamage(FrontEnemy, ...)`) for front-aimed Plans; `WrittenFrontDamage` has the same gap.
 - Kokomi: Smoggy ("you can only play 1 Skill per turn") refuses writing a Plan once a Skill is played; neither Smoggy's line nor the Bake-Kurage tip says writing a Plan counts as playing the card.
-- Kokomi: the cut cards' engine clauses (Tide Chart's, Song of Pearls' power, Scout Ahead's clause, The General's Banner's power) stay in both engines with nothing granting them; delete them (the brief's cleanup pass says BACKLOG lists them).
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
 - Furina: rename the four mismatched guest ids in one regen, moving their art keys and `KNOWN_MISSING` entries with them, after [USER]'s run and never mid-save.
-- Co-op rest site: Mend on the partner does not use up the rest action, so Smith or Rest is still accepted after it, and the heal sometimes does not show. About 10 seats on 3 seeds reported it (`review/records/coop-paired-round-2026-10-09.md`).
 - `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot is the owner's `progress.save` DiscoveredRelics list naming the retired relic (non-fatal); no alias is left in code. Harmless; drop the id from the save or let it be.
 - `EB-798` `ProtoKkBreakwater` is offered Nimble but Nimble pays it nothing (its only Block is the Plan's); planned-only Block is not `GainsBlock`, in both engines and `lint_enchant_parity`.
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
@@ -73,7 +71,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Jean+ is switched off when Dodoco+'s Mine goes off on the enemy's turn ("a Bomb went off last turn"); the face does not say so.
 - Perfect Timing's replay did not visibly fire when its first Set off killed the target.
 - Return to Sender turns only its own Block into a Bomb; check the face says so.
-- "Sorry, Jean..." removes the oldest Bomb without saying so.
 - Boom Badge's Retain reads as if the doubling carries over; "Witch's Homework" and "Witch's Homework II" read alike in hand lists.
 - Chained Reactions' +3 missed a two-Bomb Ka-pow! set-off (trace); Durin's start-of-turn tick skipped one fight (Fogmog, trace).
 - The Spark line vanishes at 0, and Snecko Oil's added Spark costs are unexplained; a Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1.

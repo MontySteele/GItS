@@ -1249,6 +1249,11 @@ class CombatState:
     # Attack and nothing else. Saved and restored across a free play with the
     # rest of the per-card context (`combat._FREE_PLAY_CONTEXT`).
     mc_attack_element_override: str = ""
+    # Varka's Sturm und Drang rider (the Varka round 3 fix, 2026-10-10): the
+    # bank spent on THIS Attack and the element banked, paid after it
+    # resolves (`effects.companion_overhaul_card_end`). Per-card, saved
+    # across a free play with the override above.
+    mc_swirl_rider: tuple = (0, "")
     # THE INAZUMA COMPANION OVERHAUL (C.COMPANION_OVERHAUL). Damage
     # this CARD PLAY has actually put on enemy HP, which is what Gorou's Inuzaka
     # All-Round Defense reads: "Gain Block equal to half the damage dealt". A
@@ -1321,18 +1326,6 @@ class CombatState:
     # which runs BEFORE the drain, so a morning with no Plans reads zero.
     # `KokomiOverhaulLedger.PlansThisMorning`'s twin.
     kk_plans_this_morning: int = 0
-    # (C.KOKOMI_OVERHAUL, `EB-478`): TIDE CHART'S PROMISE -- "Next
-    # turn, after the Bake-Kurage carries out its Plans, draw 1 card for each."
-    # TWO NUMBERS AND NOT A LIST OF CARDS, because the promise is arithmetic:
-    # every copy played this turn adds its `per` to the first and its flat
-    # `amount` to the second, and the morning after pays
-    # `flat + per * kk_plans_this_morning` in one draw. A list of sources would
-    # let two copies pay different counts on one morning, which is a rule
-    # nothing printed. Cleared BY THE PAYMENT (`kokomi_plan.pay_tide_charts`),
-    # so an unpaid promise cannot survive into a second morning.
-    # `KokomiPlan._tideCharts`'s twin.
-    kk_tide_chart_per: int = 0
-    kk_tide_chart_flat: int = 0
     # (C.KOKOMI_OVERHAUL), THE CASKET PASS (2026-09-28). How many
     # Plans the Bake-Kurage carried out THIS TURN -- Feint's and Sango
     # Isshin's count -- written at the one place a Plan is carried out

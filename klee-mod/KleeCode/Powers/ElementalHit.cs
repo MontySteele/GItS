@@ -119,7 +119,8 @@ internal static class ElementalHit
             amp = ReactionTable.AmplifierMultiplier(reaction, applier);
             ampReaction = reaction;
             dealt *= amp;
-            await ResolveOnAura(choiceContext, target, aura, element, applier);
+            await ResolveOnAura(choiceContext, target, aura, element, applier,
+                hadHit: true);
         }
 
         // The two halves and their order are the pipeline's, and they are what
@@ -320,7 +321,8 @@ internal static class ElementalHit
         }
         else
         {
-            await ResolveOnAura(choiceContext, target, aura, element, applier);
+            await ResolveOnAura(choiceContext, target, aura, element, applier,
+                hadHit: false);
         }
     }
 
@@ -381,9 +383,13 @@ internal static class ElementalHit
             ReactionLog.DetailNext(NoHitToAmplify);
     }
 
+    /// <param name="hadHit">True from <see cref="Deal"/> (a damaging hit,
+    /// every Bomb included), false from <see cref="ApplyOnly"/>. The Klee
+    /// round (2026-10-11, lane 2): a damaging Melt printed "nothing to
+    /// amplify" beside a correct 17, so the note runs only when false.</param>
     private static async Task ResolveOnAura(
         PlayerChoiceContext choiceContext, Creature target, AuraPower aura,
-        Element element, Creature? applier)
+        Element element, Creature? applier, bool hadHit)
     {
         switch (TriggerRules.Outcome(aura.Element, element))
         {
@@ -396,7 +402,7 @@ internal static class ElementalHit
                 var reaction = ReactionTable.Lookup(aura.Element, element);
                 var consumed = aura.Element;
                 await PowerCmd.Remove(aura);
-                NoteNoHit(consumed, element);
+                if (!hadHit) NoteNoHit(consumed, element);
                 await ReactionEffects.Resolve(
                     choiceContext, reaction, target, applier, null, consumed);
                 break;

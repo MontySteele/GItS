@@ -170,7 +170,9 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          "fang_relic", "swirl_no_aura", "swirl_on_aura"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
-         "source", "self"])
+         "source", "self",
+         # The Klee round (2026-10-11): the play-order stamp.
+         "seq"])
 
 
 def test_the_internal_id_never_crosses_onto_the_page():

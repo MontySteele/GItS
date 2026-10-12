@@ -52,19 +52,22 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
     assert len(ids) == 78
     # The Klee-only companions (2026-10-03): Solitary Confinement cut from the
     # package; her three Companion rows follow it.
-    assert ids[-13:-3] == C.KLEE_STATUS_PACKAGE_IDS
+    # The Klee tempo paper (2026-10-07): It Wasn't Me! cut from the package,
+    # and its five rows between the package and the companions.
+    assert ids[-19:-10] == C.KLEE_STATUS_PACKAGE_IDS
+    assert ids[-10:-5] == C.KLEE_TEMPO_IDS
+    assert ids[-5:-3] == C.KLEE_DESIGN_REVIEW_IDS
     assert ids[-3:] == C.KLEE_OWN_COMPANION_IDS
     rows = {c.id for c in loader.prototype_cards()}
     for cid in CUT + DEFENCE_CUT:
         assert cid not in ids
         assert cid not in rows
     rarity = collections.Counter(load(cid).rarity for cid in ids)
-    assert rarity == {"common": 24, "uncommon": 33, "rare": 21}
+    assert rarity == {"common": 25, "uncommon": 32, "rare": 21}
     shapes = {cid: (load(cid).type, load(cid).cost, load(cid).rarity)
               for cid in C.KLEE_STATUS_PACKAGE_IDS}
     assert shapes == {
         "proto_ko_forbidden_fun": ("attack", 0, "common"),
-        "proto_ko_it_wasnt_me": ("skill", 0, "common"),
         "proto_ko_lisas_treats": ("skill", 0, "uncommon"),
         "proto_ko_red_knight": ("attack", 2, "rare"),
         "proto_ko_finders_keepers": ("power", 1, "uncommon"),
@@ -80,8 +83,6 @@ def test_the_package_cuts_eight_and_adds_eight(overhaul):
 def test_the_papers_numbers_and_upgrades(overhaul):
     assert _first(load("proto_ko_forbidden_fun"), "damage")["amount"] == 10
     assert _first(_up("proto_ko_forbidden_fun"), "damage")["amount"] == 14
-    assert _first(load("proto_ko_it_wasnt_me"), "block")["amount"] == 6
-    assert _first(_up("proto_ko_it_wasnt_me"), "block")["amount"] == 9
     assert _first(load("proto_ko_lisas_treats"), "energy")["amount"] == 2
     assert _first(_up("proto_ko_lisas_treats"), "energy")["amount"] == 3
     # AoE trim, 2026-10-03: Red Knight is 34 to one enemy, Damage Report
@@ -89,8 +90,9 @@ def test_the_papers_numbers_and_upgrades(overhaul):
     assert _first(load("proto_ko_red_knight"), "damage")["amount"] == 34
     assert _first(_up("proto_ko_red_knight"), "damage")["amount"] == 40
     # Klee finish-line batch, 2026-10-03: Finders Keepers is 4 [6].
-    assert _first(load("proto_ko_finders_keepers"), "apply_power")["amount"] == 4
-    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 6
+    # 4 [6] until the Klee design review (2026-10-08): every placer +2.
+    assert _first(load("proto_ko_finders_keepers"), "apply_power")["amount"] == 6
+    assert _first(_up("proto_ko_finders_keepers"), "apply_power")["amount"] == 8
     assert _first(load("proto_ko_klee_can_explain"), "block")["amount"] == 6
     assert _first(_up("proto_ko_klee_can_explain"), "block")["amount"] == 8
     assert _first(load("proto_ko_damage_report"), "apply_power")["amount"] == 4
@@ -103,8 +105,7 @@ def test_the_papers_numbers_and_upgrades(overhaul):
 def test_the_loaders_pay_the_tier_the_paper_names(overhaul):
     """Light tax: one Dazed. Heavy tax: two Confiscated."""
     for cid, token, n in (("proto_ko_forbidden_fun", "status_dazed", 1),
-                          ("proto_ko_it_wasnt_me", "status_dazed", 1),
-                          ("proto_ko_lisas_treats", "confiscated", 2),
+                          ("proto_ko_lisas_treats", "confiscated", 1),   # 2026-10-11
                           ("proto_ko_red_knight", "confiscated", 2)):
         fx = _first(load(cid), "add_card")
         assert (fx["card"], fx["zone"], fx["amount"]) == (token, "discard", n)
@@ -198,6 +199,33 @@ def test_dust_of_purification_exhausts_statuses_into_the_largest_bomb(
     assert [c.id for c in st.player.hand] == ["proto_ko_chain_fuse"]
     assert len(st.player.exhaust_pile) == 2
     assert sizes(enemy) == [17]
+
+
+def test_dust_of_purification_draws_one_card_per_status(overhaul):
+    """2026-10-11 Companion pass: "... grows by 6 for each. Draw 1 card for
+    each." Two statuses exhausted: the Bomb grows 12 and two cards come in;
+    none exhausted, none drawn."""
+    assert _first(load(ALBEDO), "exhaust_statuses_grow_largest")[
+        "draw_each"] == 1
+    enemy = make_enemy(hp=200)
+    st = klee_state([enemy])
+    klee_overhaul.place(st, enemy, 5)
+    st.player.draw_pile = filler(4)
+    st.player.hand = [statuses.make_status("dazed"), _confiscated(),
+                      load("proto_ko_chain_fuse")]
+    play(st, load(ALBEDO))
+    assert sizes(enemy) == [17]
+    assert len(st.player.exhaust_pile) == 2
+    assert len(st.player.hand) == 3                 # Chain Fuse + 2 drawn
+    assert sum(c.id.startswith("filler") for c in st.player.hand) == 2
+    assert len(st.player.draw_pile) == 2
+
+    st = klee_state([make_enemy(hp=200)])
+    st.player.draw_pile = filler(4)
+    st.player.hand = [load("proto_ko_chain_fuse")]
+    play(st, load(ALBEDO))
+    assert [c.id for c in st.player.hand] == ["proto_ko_chain_fuse"]
+    assert len(st.player.draw_pile) == 4
 
 
 def test_dust_of_purification_is_in_klees_own_pool(overhaul):
@@ -323,3 +351,19 @@ def test_kitchen_alchemy_leaves_a_curse_in_hand(overhaul):
     assert st.player.hand == [curse]
     assert curse not in st.player.exhaust_pile
     assert enemy.powers.get("strength") == -2
+
+
+def test_confiscated_exhausts_when_played(overhaul):
+    """2026-10-11 ([USER]: "Actually, should we tag Confiscated with Exhaust?
+    Currently we're using it as a drawback mechanism to load the deck but it
+    builds over time."): Exhaust, the keyword the base game's Slimed carries.
+    Still playable for 1, still does nothing."""
+    st = klee_state()
+    card = _confiscated()
+    assert card.exhaust
+    st.player.hand = [card]
+    assert combat.card_playable(st, card)
+    combat.play_card(st, card)
+    assert [c.id for c in st.player.exhaust_pile] == ["confiscated"]
+    assert not any(c.id == "confiscated" for c in st.player.discard_pile)
+    assert st.player.energy == 4

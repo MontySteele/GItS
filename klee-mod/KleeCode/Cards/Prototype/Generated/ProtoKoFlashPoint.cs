@@ -54,7 +54,7 @@ public sealed class ProtoKoFlashPoint : CustomCardModel, IElementalCard, ISetOff
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move)
+            new DamageVar(9m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

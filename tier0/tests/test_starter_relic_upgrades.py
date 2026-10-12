@@ -48,6 +48,9 @@ STARTERS: dict[str, str] = {
     # starter, so every reader that finds the starter by type finds it too.
     "BoreasFang": "WolfsGravestone",               # Varka
     "TamakushiCasket": "WatatsumiCasket",          # Kokomi (the overhaul)
+    # The Klee scaling pass's staging tempo relic (klee-next, 2026-10-05,
+    # sec.4 D): a copy of Pounding Surprise, upgraded the same way.
+    "PoundingSurpriseNext": "ExplosiveFrags",
 }
 
 # Starters KNOWINGLY without an upgraded form, each with the reason and the

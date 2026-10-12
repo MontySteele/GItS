@@ -86,17 +86,17 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 9, 12 }, pile.Charges.Select(c => c.Size));
-        Assert.Equal(21, pile.TotalSize);
+        Assert.Equal(new[] { 7, 10 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(17, pile.TotalSize);
     }
 
     [Fact]
-    public void Rule1_growth_is_four_by_default()
+    public void Rule1_growth_is_two_by_default()
     {
-        // FOUR: the round-5 packet raised it from 3 to 5 and [USER] read 5
-        // back down the same day ("growth 5 is likely too much").
+        // TWO since the Klee design review (2026-10-08, sec.4.6): four
+        // paid every Bomb to wait.
         var klee = Seat.Klee();
-        Assert.Equal(4, KleeOverhaulLaw.BombGrowth);
+        Assert.Equal(2, KleeOverhaulLaw.BombGrowth);
         Assert.Equal(KleeOverhaulLaw.BombGrowth,
                      GrowthFor(klee.Creature));
     }
@@ -236,7 +236,11 @@ public class KleeOverhaulRuleTests
     /// THE POOL PASS's one named exception (`EB-491`, Flash Point). Every
     /// other card-borne Spark grant is still a finding.
     /// </summary>
-    private static readonly string[] SparkMintersAllowed = { "ProtoKoFlashPoint" };
+    // The Klee tempo paper (2026-10-07, sec.3) names a second: Tinkering is "a
+    // Spark engine that does not need an explosion", paid for in a
+    // Confiscated.
+    private static readonly string[] SparkMintersAllowed =
+        { "ProtoKoFlashPoint", "ProtoKoTinkering" };
 
     [Fact]
     public void Rule4_no_slice_card_mints_a_spark_except_the_named_one()
@@ -262,7 +266,8 @@ public class KleeOverhaulRuleTests
             .Select(m => m.DeclaringType!.Name)
             .Distinct()
             .ToList();
-        Assert.Equal(SparkMintersAllowed, minters);
+        Assert.Equal(SparkMintersAllowed.OrderBy(n => n, System.StringComparer.Ordinal),
+                     minters.OrderBy(n => n, System.StringComparer.Ordinal));
     }
 
     [Fact]
@@ -310,7 +315,7 @@ public class KleeOverhaulRuleTests
 
         pile.GrowBy(KleeOverhaulLaw.BombGrowth);
 
-        Assert.Equal(new[] { 8, 8 }, pile.Charges.Select(c => c.Size));
+        Assert.Equal(new[] { 6, 6 }, pile.Charges.Select(c => c.Size));
         Assert.True(pile.Charges[0].IsMine);
     }
 
@@ -409,23 +414,24 @@ public class KleeOverhaulRuleTests
     }
 
     [Fact]
-    public void A_merge_carries_every_payload_it_moved()
+    public void A_gather_carries_every_payload_it_moved()
     {
-        // `EB-395`'s other named suspect: Careful Arrangement moves every Bomb
-        // onto one enemy AS ONE Bomb, and a merge is a MOVE, so it loses
-        // nothing -- the merged charge is a Mine if any part of it was, and it
-        // carries the summed payload. Read off `MergeAllTo`'s own loop, which
-        // is the only place in the arm that folds charges together.
-        var il = Il.Calls(Method("MergeAllTo"));
+        // `EB-395`'s other named suspect: Exquisite Compound moves every Bomb
+        // onto one enemy, and since the Klee upper pass (2026-10-11) each one
+        // AS ITSELF -- a move loses nothing, so each charge keeps its Mine
+        // flag, its payload and its Homework mark, and grows by the card's
+        // number. Read off `GatherAllTo`'s own loop.
+        var il = Il.Calls(Method("GatherAllTo"));
 
         Assert.Contains("ProtoBombPower.Place", il);
         Assert.Contains("ProtoBombPower.TakeAll", il);
-        // The three fields the fold must READ, off the compiled method that
-        // folds them. A getter missing here is a rider deleted by a card whose
-        // face says it only moves Bombs.
+        // The fields each landing must READ, off the compiled method. A getter
+        // missing here is a rider deleted by a card whose face says it only
+        // moves Bombs.
         Assert.Contains(il, c => c.Contains("get_PayloadMineAll"));
         Assert.Contains(il, c => c.Contains("get_IsMine"));
         Assert.Contains(il, c => c.Contains("get_Size"));
+        Assert.Contains(il, c => c.Contains("get_Homework"));
     }
 
     // ---- RULE 7: the two per-turn counters -------------------------------
@@ -522,13 +528,8 @@ public class KleeOverhaulRuleTests
         // it is a constant mirrored against tier0 rather than a second reading
         // of the stack.
         Assert.Equal(1, KleeOverhaulLaw.GroundedSpark);
-
-        var upgrade = typeof(ProtoBombPower).Assembly
-            .GetType("KleeMod.Cards.Prototype.Generated.ProtoKoGrounded")!
-            .GetMethod("OnUpgrade", HeadlessGame.All)!;
-        var moved = Il.Strings(upgrade);
-        Assert.Contains("PowerAmount", moved);
-        Assert.Single(moved);
+        // (The card's upgrade half left with the Grounded row: the Klee tempo
+        // paper, 2026-10-07, cut it.)
 
         // The face states both halves, and the Spark numeral comes from the
         // constant rather than a typed literal (`EB-89`).

@@ -105,11 +105,8 @@ public class Round17Tests
     // the MORNING's, and The Moon's now-copy is single. The rule stands (D
     // default) and the face and the tip name the morning.
     //
-    // `EB-503` is the line that was never said: Tide Chart's draw happens
-    // inside the morning and nothing reported it. It is paid through
-    // `Announce`, the block's own door, so it is a beat over the pet and a row
-    // in the list every carry-out already lands in -- rather than a second
-    // narration idiom the page would have to learn.
+    // `EB-503` was Tide Chart's unreported draw; its pins left with Tide
+    // Chart's promise in the hygiene pass (2026-10-11).
 
     [Fact]
     public void The_mornings_depth_is_carry_outs_and_is_read_once()
@@ -125,18 +122,6 @@ public class Round17Tests
 
         Assert.True(times >= 0 && note > times, string.Join(", ", sequence));
         Assert.True(note < resolve, string.Join(", ", sequence));
-    }
-
-    [Fact]
-    public void The_three_readers_still_ask_the_one_ledger()
-    {
-        // What makes the fix a fix rather than three: the per-Plan clause and
-        // Tide Chart's promise read the same property. (R276 pick 1 re-aimed
-        // Well Laid and Tide Wall off the morning; the property and its two
-        // readers stand.)
-        Assert.Contains(
-            Il.Calls(Il.Method("KokomiPlan", "PromisedDraw")),
-            c => c.Contains("PlansThisMorning"));
     }
 
     [Fact]
@@ -166,37 +151,6 @@ public class Round17Tests
         Assert.Contains(
             Il.Calls(Il.Method("KokomiPlan", "ResolveAll")),
             c => c.Contains("CarryOutTimes"));
-    }
-
-    [Fact]
-    public void The_tide_charts_draw_says_so_in_the_block()
-    {
-        var sequence = Il.CallSequence(
-            Il.Method("KokomiPlan", "PayPromisedDraws"));
-        var draw = IndexOf(sequence, c => c.Contains("CardPileCmd.Draw"));
-        var said = IndexOf(sequence, c => c.Contains("Record"));
-
-        Assert.True(draw >= 0, string.Join(", ", sequence));
-        // AFTER the draw: the number the seat is owed is what arrived.
-        Assert.True(said > draw, string.Join(", ", sequence));
-    }
-
-    [Fact]
-    public void The_draw_line_names_the_card_and_the_kind()
-    {
-        var source = System.IO.File.ReadAllText(
-            System.IO.Path.Combine(Repo(), "klee-mod", "KleeCode", "Powers",
-                                   "Prototype", "KokomiPlan.cs"));
-
-        Assert.Contains("private const string TideChartTitle = \"Tide Chart\";",
-                        source);
-        Assert.Contains("Vfx.KurageBeat.Line(TideChartTitle, cards)", source);
-        Assert.Contains("NumberKind(Kind.Draw)", source);
-        // The word the page prints off `Kind.Draw`, so the row's number is
-        // read as cards and not as damage.
-        Assert.Equal("cards drawn", (string)typeof(KokomiPlan)
-            .GetMethod("NumberKind", All)!
-            .Invoke(null, new object[] { KokomiPlan.Kind.Draw })!);
     }
 
     // ==================================================================

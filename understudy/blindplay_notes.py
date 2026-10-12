@@ -1527,8 +1527,11 @@ ARM_KEYWORDS: dict[str, str] = {
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # Text pass 2026-09-25, in step with `ArmKeywordTips.ForMine`.
-    "Mine": ("A Bomb that also goes off just before its enemy attacks. Any "
-             "Set off spends it too."),
+    # The Klee round (2026-10-11): three of five seats read "goes off just
+    # before its enemy attacks" as "on the enemy's turn"; the tip now says
+    # it waits on a turn its enemy does not attack.
+    "Mine": ("A Bomb that also goes off when its enemy attacks you. If it "
+             "does not attack, the Mine waits. Any Set off spends it too."),
     # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
     # step with `ArmKeywordTips.ForPlan` word for word: the old row carried
     # six seats' edge cases (the aim and its Minion exception, Strength
@@ -2154,9 +2157,12 @@ GAME_KEYWORDS: dict[str, str] = {
                 "that already carry a different affliction are never stamped "
                 "and stay playable; potions, relics and end-of-turn triggers "
                 "are not card plays and are untouched."),
-    "Shatter": (f"The first Attack to hit a Frozen enemy before it acts deals "
-                f"{SHATTER_DAMAGE} additional damage and ends the freeze. "
-                "Only a Frozen enemy can be Shattered."),
+    # THE VARKA FORCED-AMBER ROUND (2026-10-10): "deals 6 additional damage"
+    # read as a bonus on the Attack (a seat's death). The sentence is the
+    # Frozen badge's own now: attacking it ends the freeze and deals 6.
+    "Shatter": (f"Attacking a Frozen enemy ends the freeze and deals "
+                f"{SHATTER_DAMAGE} unblockable damage. Only a Frozen enemy "
+                "can be Shattered."),
     # `EB-359`. THE GAME'S OWN TIP FOR THE WORD IS THE CARD-SIDE REMINDER
     # ("Gain 2 Tainted when played") and never what Tainted DOES; two seats
     # spent a card to read their own status line for it. The rule is that
@@ -2174,7 +2180,7 @@ _GAME_KEYWORD_RE = {
     "Ringing": re.compile(r"\bRinging\b"),
     # `EB-537`: the verb conjugates on the faces that print it -- Freminet's
     # power says "Your Shatters", the Salon paragraph says "no Shatter", and
-    # the Frozen row says "Shatters for 6".
+    # and older faces say "Shatters for 6".
     "Shatter": re.compile(r"\bShatter(?:s|ed|ing)?\b"),
     "Tainted": re.compile(r"\bTainted\b"),
 }
@@ -2489,10 +2495,12 @@ REACTION_KEYWORDS: dict[str, str] = {
     # `EB-517` PUT THE WINDOW ON IT, in the C# and here in one commit: the two
     # clauses read as independent riders and are one, because the freeze ticks
     # down at the end of the turn the halved action is taken on.
+    # The Varka forced-Amber round (2026-10-10): the badge's words, in the
+    # C# and here in one commit.
     "Frozen": ("Hydro on a Cryo aura, or Cryo on a Hydro aura. Its next "
-               "action deals 50% less. Until it acts, an Attack on it "
-               "Shatters for 6 unblockable damage and ends the freeze. In a "
-               "boss fight, only minions can be Frozen; the others become "
+               "action deals 50% less damage. Attacking it ends the freeze "
+               f"and deals {SHATTER_DAMAGE} unblockable damage. In a boss "
+               "fight, only minions can be Frozen; the others become "
                "Vulnerable instead."),
     # `EB-465`'s two, and they are the mod's own preview sentences the way the
     # six above are. `Swirl` is `ARM_KEYWORDS`' row VERBATIM rather than a

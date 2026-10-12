@@ -624,9 +624,11 @@ def _max_hp_hit(card: Card, fx: dict) -> float:
 #: Named as a set rather than eleven `if op ==` arms because they take ONE
 #: pricing decision between them -- see `_op_price`.
 KLEE_OVERHAUL_OPS = frozenset((
-    "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+    "set_off", "plant_bomb", "grow_bombs", "gather_bombs",
     "remove_bomb_for_block", "block_largest_bomb", "grow_largest_bomb",
     "damage_set_off_total",
+    # The Klee tempo paper (2026-10-07): Simmer and Taste Test's read.
+    "damage_from_bombs",
     "multiply_set_off", "draw_per_set_off", "companion_mark_hand",
     "mine_bombs",
     # THE POOL PASS's two (`EB-491`): All of My Treasures! and Split Charge.
@@ -640,14 +642,17 @@ KLEE_OVERHAUL_OPS = frozenset((
     # above -- the arm's verbs, quarantined, and no published world drafts
     # them.
     "grow_largest", "multiply_largest_bomb", "fetch_from_discard",
-    "add_random_companion", "grant_kapow_each_turn",
+    "choose_companion", "grant_alices_mine_each_turn",
     # THE STATUS PACKAGE's two (2026-10-01): Klee Can Explain!'s transform and
     # Albedo -- Dust of Purification's exhaust-and-grow. Same decision.
     "transform_statuses_into", "exhaust_statuses_grow_largest",
     # DEFENCE IN THE STATUS PILE (2026-10-01): Kitchen Alchemy's op. Same
     # decision; `lose_strength` resolves off the arm too, but only her
     # prototype row prints it, so no drafted number moves.
-    "lose_strength"))
+    "lose_strength",
+    # THE KLEE SCALING PASS (klee-next, 2026-10-05): Witch's Homework's
+    # grant-only row. Same decision -- no pool offers it.
+    "plant_homework_bomb"))
 
 #: VARKA's two verbs (the Oath rework, review/active/varka-paper-kit-
 #: 2026-09-28.md): `varka` (one kind per Oath rule, `tier0/engine/varka_oath`)
@@ -670,7 +675,6 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "mend", "remove_debuff",
     "carry_out_front_plan", "plan_from_exhaust", "damage_quarter_max_hp",
     "play_copy_of_companion",
-    "draw_after_plans",
     # POOL PASS FIVE (`EB-685`). Breakwater's count, with its own branch in
     # `_op_price` on this set's EB-311 terms.
     "block_per_plan_held",
@@ -678,7 +682,6 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # QUEUE and three drain-positional plan clauses, each with its own branch
     # in `_op_price` on this set's own EB-311 terms.
     "cancel_all_plans_cash", "redirect_queued_plans",
-    "draw_per_plan_this_turn",
     "next_plan_double_damage",
     "next_plan_extra_carry_out",
     # POOL PASS THREE (`EB-655`). Battle Plan's rider, a plan clause with its
@@ -882,28 +885,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # held Plan is the neutral single-unit estimate, since Plan density is
         # still a deck fact an offer screen cannot read.
         return _neutral_amount(fx, 0)
-    if op == "draw_after_plans":
-        # Tide Chart (`EB-478`, R257). ZERO, and it is `draw`'s zero rather
-        # than a refusal of its own: every draw op in this file is priced at
-        # STATIC_DRAW_VALUE, which the v3 flat-proxy sweep measured at 0.0, so
-        # a row that draws one card per Plan carried out is worth exactly what
-        # a row that draws one card is. The delay changes nothing a zero can
-        # express, and pricing it above `draw` would make the deferred version
-        # of a dead dial the only live one.
-        return (int(fx.get("amount", 0)) + int(fx.get("per", 1))) \
-            * STATIC_DRAW_VALUE
-    if op in ("draw_per_plan_this_turn"):
-        # Scout Ahead (`EB-643`, recounted at `EB-679`, back on the positional
-        # count at R267 pick 3 -- both spellings price the same). ZERO, and it is
-        # `draw_after_plans`' zero one row up rather than a refusal of its own:
-        # every draw op in this file is priced at STATIC_DRAW_VALUE, which the
-        # v3 flat-proxy sweep measured at 0.0, so a row that draws one card per
-        # carry-out is worth exactly what a row that draws one card is. ONE
-        # carry-out is the neutral single-unit estimate this file already takes
-        # three times over -- how deep a morning a deck banks is a deck fact an
-        # offer screen cannot read, and `EB-679` moved WHICH carry-outs are
-        # counted without moving that refusal.
-        return _neutral_amount(fx, 0) * STATIC_DRAW_VALUE
     if op == "next_plan_double_damage":
         # Opening Gambit's rider (`EB-643`). ZERO, and it is a REFUSAL that
         # says why rather than a dial: what this doubles is the next entry's
@@ -2174,19 +2155,21 @@ STATIC_OP_PRICING: dict[str, str] = {
             "resolve it, so there is no sim behaviour to price (slice packet "
             "sec.5; prototype surface only -- no shipped row prints it and no "
             "drafted number moves)"
-       for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+       for op in ("set_off", "plant_bomb", "grow_bombs", "gather_bombs",
                   "remove_bomb_for_block", "block_largest_bomb",
                   "grow_largest_bomb", "damage_set_off_total",
+                  "damage_from_bombs",
                   "multiply_set_off", "draw_per_set_off",
                   "companion_mark_hand", "mine_bombs",
                   "plant_bomb_copy_largest",
                   "return_to_hand",
                   "grow_largest", "multiply_largest_bomb",
-                  "fetch_from_discard", "add_random_companion",
-                  "grant_kapow_each_turn",
+                  "fetch_from_discard", "choose_companion",
+                  "grant_alices_mine_each_turn",
                   "transform_statuses_into",
                   "exhaust_statuses_grow_largest",
-                  "lose_strength")},
+                  "lose_strength",
+                  "plant_homework_bomb")},
     # --- VARKA, the Oath rework (varka_oath, Varka seats only) ---
     **{op: "ZERO: VARKA's Oath verbs resolve in tier0 only for a Varka seat, "
             "and no pool offers a proto_vk_ row to this "
@@ -2207,12 +2190,6 @@ STATIC_OP_PRICING: dict[str, str] = {
     "block_per_plan_held": "its printed Block for ONE held Plan -- the same "
                            "neutral single-unit estimate, since Plan density "
                            "is a deck fact an offer screen cannot read",
-    "draw_after_plans": "ZERO: STATIC_DRAW_VALUE, the same dead dial `draw` "
-                        "is priced on -- one card per Plan carried out, paid "
-                        "a turn later, is still draw",
-    "draw_per_plan_this_turn": "ZERO: STATIC_DRAW_VALUE on ONE carry-out -- "
-                           "the same dead dial `draw` is priced on, and the "
-                           "same neutral single-unit estimate",
     "next_plan_double_damage": "ZERO, and it is a refusal: what it doubles is "
                                "the NEXT entry's damage, a quantity about the "
                                "drafted deck and not about this card",

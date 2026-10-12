@@ -63,9 +63,16 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
             // "first" to distinguish it from. That is the eleven characters
             // the window clause needed to stay under the badge ceiling
             // (`docs/current/text-conventions.md`, 125).
-            "Its next action deals 50% less damage. Until it acts, an Attack "
-          + $"Shatters it for [blue]{ReactionConstants.ShatterDamage}[/blue] "
-          + "unblockable damage and removes Frozen."),
+            //
+            // THE VARKA FORCED-AMBER ROUND (2026-10-10): a seat read
+            // "Shatters it for 6" as a bonus on the Attack, so the face now
+            // says what attacking it does, in the record's words, and the word
+            // Shatter stays in the glossary only. The window still holds: the
+            // freeze ends when it acts, so "attacking it" is inside it.
+            "Its next action deals 50% less damage. Attacking it ends the "
+          + "freeze and deals "
+          + $"[blue]{ReactionConstants.ShatterDamage}[/blue] unblockable "
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Debuff;

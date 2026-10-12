@@ -303,13 +303,15 @@ public class KokomiOverhaulRuleTests
         // spelled: `DamagePerCompanionLastTurn`, `BlockPerPlanThisMorning`,
         // `DrawPerPlanAfter`, `NextAttackDamage`, `DamageIfUnhurt`,
         // `AttackDamageThisTurn`, `FirstCompanionFree` and `CasketGain`.
+        //
+        // THE HYGIENE PASS (2026-10-11) removed `DrawPerPlanThisTurn`, the
+        // whole-drain count of the cut Scout Ahead, which no row spelled.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp",
                     "ApplyWeak", "ApplyVulnerable",
                     "ReplayExhausted", "PlayCopyOfCompanion",
                     "BlockPerPlanHeld",
-                    "DrawPerPlanThisTurn",
                     "NextPlanDoubleDamage", "NextPlanExtraCarryOut",
                     "FirstAttackTwice", "FirstCardFree",
                     "BlockFrontIntent", "AllyDraw",
@@ -350,16 +352,11 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void Rule3_the_front_enemy_is_defined_once()
     {
-        // "Leftmost alive" is a rule and not a per-card habit, so the two
-        // things that read it -- a planned hit and The General's Banner --
-        // read the same function.
+        // "Leftmost alive" is a rule and not a per-card habit, so whatever
+        // reads it reads the same function.
         var front = typeof(KokomiPlan)
             .GetMethod("FrontEnemy", HeadlessGame.All)!;
         Assert.Contains("ICombatState.get_HittableEnemies", Il.Calls(front));
-
-        var banner = typeof(GeneralsBannerPower)
-            .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
-        Assert.Contains("KokomiPlan.FrontEnemy", Il.Calls(banner));
     }
 
     [Fact]
@@ -442,11 +439,6 @@ public class KokomiOverhaulRuleTests
             .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
         Assert.Contains("KokomiOverhaulLedger.NoteCompanionPlayed", Il.Calls(marker));
         Assert.Contains("KokomiOverhaulLedger.NoteCompanionCard", Il.Calls(marker));
-
-        var banner = typeof(GeneralsBannerPower)
-            .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
-        Assert.DoesNotContain(
-            "KokomiOverhaulLedger.NoteCompanionPlayed", Il.Calls(banner));
     }
 
     [Fact]
@@ -509,30 +501,6 @@ public class KokomiOverhaulRuleTests
         var calls = Il.CallSequence(hook).ToList();
         Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
                     < calls.IndexOf("CardPileCmd.Draw"));
-        KokomiOverhaulLedger.ResetAll();
-    }
-
-    [Fact]
-    public void The_generals_banner_weaks_once_a_turn_and_still_counts_them_all()
-    {
-        // [USER], live: "The General's Banner applies a LOT of Weak. Probably
-        // too strong."
-        var ledger = RolledLedger();
-        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
-        Assert.False(ledger.Claim(nameof(GeneralsBannerPower)));
-        ledger.RollTo(4);
-        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
-
-        // THE COUNTER IS NOT CAPPED WITH THE WEAK, and the order in the hook
-        // is what says so: every Companion play is counted (Chain of Command
-        // reads that count) and only the Weak is claimed.
-        var hook = typeof(GeneralsBannerPower)
-            .GetMethod("AfterCardPlayed", HeadlessGame.All)!;
-        var calls = Il.CallSequence(hook).ToList();
-        Assert.True(calls.IndexOf("KokomiOverhaulLedger.NoteCompanionPlayed")
-                    < calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn"));
-        Assert.True(calls.IndexOf("KokomiOverhaulLedger.ClaimOncePerTurn")
-                    < calls.IndexOf("PowerCmd.Apply<WeakPower>"));
         KokomiOverhaulLedger.ResetAll();
     }
 
@@ -612,19 +580,18 @@ public class KokomiOverhaulRuleTests
     public void The_caps_are_one_latch_set_and_do_not_shadow_each_other()
     {
         // ONE helper shared by the capped powers, keyed by the power's own
-        // name -- so a turn that pays Treatise still lets a Companion apply
-        // The General's Banner's Weak. (Song of Pearls left the set in the
-        // core pass: it fires once a turn by construction.)
+        // name -- so a turn that pays Treatise still lets At Water's Edge
+        // apply its Weak and Vulnerable.
         var ledger = RolledLedger();
         Assert.True(ledger.Claim(nameof(TreatisePower)));
-        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
+        Assert.True(ledger.Claim(nameof(AtWatersEdgePower)));
         Assert.False(ledger.Claim(nameof(TreatisePower)));
 
         // And the turn boundary clears them at once, which is why they
         // cannot come to disagree about when a turn began.
         ledger.RollTo(4);
         Assert.True(ledger.Claim(nameof(TreatisePower)));
-        Assert.True(ledger.Claim(nameof(GeneralsBannerPower)));
+        Assert.True(ledger.Claim(nameof(AtWatersEdgePower)));
         KokomiOverhaulLedger.ResetAll();
     }
 
@@ -1125,109 +1092,6 @@ public class KokomiOverhaulRuleTests
             c => c.Contains("ShellGuardPower"));
         Assert.DoesNotContain(typeof(KokomiOverhaul).Assembly.GetTypes(),
                               t => t.Name == "ShellGuardPower");
-    }
-
-    // --- `EB-478`: Tide Chart pays the morning after (R257) ---------------
-    //
-    // THE FIND (Kokomi r15). The old row read the queue AT PLAY TIME -- "draw
-    // 1 card for each Plan the Bake-Kurage holds" -- and drew ZERO on three
-    // plays out of four, because a seat plays its cheap cards before it writes
-    // its Plans. The redesign pays one turn later, for the Plans that were
-    // actually carried out, so the same play reads forward instead of
-    // backward.
-    //
-    // THE ARITHMETIC IS REAL AND THE DRAW IS STRUCTURAL, the split this file's
-    // header makes: `CardPileCmd.Draw` needs a live `CombatState`, so what is
-    // computed here is the number owed (`PromisedDraw`, a pure read) and what
-    // is pinned off the compiled method is that the payment draws it, after
-    // the morning.
-
-    private static Seat PromisedSeat(int flat, int per, int plans)
-    {
-        KokomiPlan.ResetAll();
-        KokomiOverhaulLedger.ResetAll();
-        var seat = Seat.Kokomi();
-        KokomiPlan.PromiseDraw(seat.Creature, flat, per);
-        KokomiOverhaulLedger.For(seat.Creature).NoteMorning(plans);
-        return seat;
-    }
-
-    [Fact]
-    public void EB478_tide_chart_pays_one_card_for_each_plan_carried_out()
-    {
-        try
-        {
-            // The base row, `{per: 1, amount: 0}`: two Plans carried out, two
-            // cards.
-            Assert.Equal(2, KokomiPlan.PromisedDraw(
-                PromisedSeat(flat: 0, per: 1, plans: 2).Creature));
-            // A morning that carried nothing out pays nothing, which is the
-            // price the base row is designed around.
-            Assert.Equal(0, KokomiPlan.PromisedDraw(
-                PromisedSeat(flat: 0, per: 1, plans: 0).Creature));
-            // The upgrade is one flat card on top -- the only reading that
-            // leaves the upgraded row live on an empty morning. tier0 bumps
-            // the same op's `amount` (`upgrades.apply_upgrade`'s `tide_draw`).
-            Assert.Equal(3, KokomiPlan.PromisedDraw(
-                PromisedSeat(flat: 1, per: 1, plans: 2).Creature));
-            Assert.Equal(1, KokomiPlan.PromisedDraw(
-                PromisedSeat(flat: 1, per: 1, plans: 0).Creature));
-            // A seat that never played one is owed nothing.
-            KokomiPlan.ResetAll();
-            Assert.Equal(0, KokomiPlan.PromisedDraw(Seat.Kokomi().Creature));
-        }
-        finally
-        {
-            KokomiPlan.ResetAll();
-            KokomiOverhaulLedger.ResetAll();
-        }
-    }
-
-    [Fact]
-    public void EB478_the_promise_is_paid_once_and_after_the_morning()
-    {
-        try
-        {
-            var seat = PromisedSeat(flat: 0, per: 1, plans: 2);
-            // A second copy played the same turn adds its own rate: the
-            // promise is arithmetic, not a list of cards.
-            KokomiPlan.PromiseDraw(seat.Creature, 0, 1);
-            Assert.Equal(4, KokomiPlan.PromisedDraw(seat.Creature));
-            // PAID ONCE. `PayPromisedDraws` removes the entry before it draws,
-            // so the next morning owes nothing without a new Tide Chart.
-            KokomiPlan.PayPromisedDraws(null!, seat.Creature).Wait();
-            Assert.Equal(0, KokomiPlan.PromisedDraw(seat.Creature));
-        }
-        finally
-        {
-            KokomiPlan.ResetAll();
-            KokomiOverhaulLedger.ResetAll();
-        }
-    }
-
-    [Fact]
-    public void EB478_the_payment_draws_and_runs_after_the_carry_outs()
-    {
-        // STRUCTURAL PIN (Il): the draw itself is outside the headless
-        // boundary, so what is checked is that the payment reaches
-        // `CardPileCmd.Draw` off the morning's own depth...
-        var pay = Il.Calls(Il.Method("KokomiPlan", "PayPromisedDraws"));
-        Assert.Contains("CardPileCmd.Draw", pay);
-        Assert.Contains("KokomiPlan.PromisedDraw", pay);
-        Assert.Contains("KokomiOverhaulLedger.get_PlansThisMorning",
-                        Il.Calls(Il.Method("KokomiPlan", "PromisedDraw")));
-        // ...and that the turn-start hook pays it AFTER the drain, which is
-        // what "after the Bake-Kurage carries out its Plans" says. Sim twin:
-        // `combat._player_turn` calls `kokomi_plan.pay_tide_charts` at exactly
-        // this point.
-        var turnStart = Il.CallSequence(
-            Il.Method("ProtoBakeKuragePower", "AfterPlayerTurnStart")).ToList();
-        var drain = turnStart.FindIndex(c => c.Contains("KokomiPlan.ResolveAll"));
-        var paid = turnStart.FindIndex(
-            c => c.Contains("KokomiPlan.PayPromisedDraws"));
-        Assert.True(drain >= 0, "the morning is gone");
-        Assert.True(paid > drain,
-                    "Tide Chart is paid before the Plans it is counting");
     }
 
     [Fact]
