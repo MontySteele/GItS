@@ -25,6 +25,11 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **The run around the kits** (`run-frame-and-lore-2026-10-12.md`, two picks,
+  defaults (a)): lift the run-frame hold for an opt-in Spiral Abyss mode (five
+  Disorders, elemental shields, co-op Halves); each character's story in the
+  run (intro, Ancient greetings, three story events, combat, death, victory and
+  pair lines), Klee first.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
