@@ -46,7 +46,7 @@ public sealed class ProtoMcNicoleLadderOfAscent : CustomCardModel, ICompanionCar
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanion(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_nicole_ladder_of_ascent");
 

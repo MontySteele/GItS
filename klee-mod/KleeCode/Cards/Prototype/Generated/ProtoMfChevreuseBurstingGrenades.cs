@@ -52,7 +52,7 @@ public sealed class ProtoMfChevreuseBurstingGrenades : CustomCardModel, IElement
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("chevreuse_bursting_grenades");
 

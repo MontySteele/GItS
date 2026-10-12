@@ -49,7 +49,7 @@ public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanion
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("lynette_astonishing_shift");
 

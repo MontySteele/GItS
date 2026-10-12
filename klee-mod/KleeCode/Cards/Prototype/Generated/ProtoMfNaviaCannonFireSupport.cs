@@ -46,7 +46,7 @@ public sealed class ProtoMfNaviaCannonFireSupport : CustomCardModel, ICompanionC
     public string? Nation => "fontaine";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanion(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("navia_cannon_fire_support");
 

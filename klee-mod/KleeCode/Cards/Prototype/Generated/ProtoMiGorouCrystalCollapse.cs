@@ -85,6 +85,6 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        AddKeyword(CardKeyword.Retain);
     }
 }

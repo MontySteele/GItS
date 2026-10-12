@@ -46,7 +46,7 @@ public sealed class ProtoMcDahliaFavonianFavor : CustomCardModel, ICompanionCard
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_dahlia_favonian_favor");
 

@@ -52,7 +52,7 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_sinful_hex");
 

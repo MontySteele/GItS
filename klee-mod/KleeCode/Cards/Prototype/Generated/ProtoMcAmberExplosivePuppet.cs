@@ -46,7 +46,7 @@ public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCar
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_amber_explosive_puppet");
 

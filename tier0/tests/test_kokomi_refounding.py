@@ -304,3 +304,29 @@ def test_juugas_plan_line_is_6_block_at_the_end_of_3_turns():
         effects.player_turn_end_triggers(st)
         assert st.player.block == C.MI_JUUGA_GUARD_BLOCK == 6
         assert st.player.powers.get("mi_juuga_guard", 0) == left
+
+
+def test_no_card_with_a_plan_line_costs_0_upgraded_either():
+    """Card paper rule 2: "No card with a Plan line costs 0." Crystal
+    Collapse's `+` cost 0 until 2026-10-12; it gains Retain instead, and
+    every other Plan row is held to the rule on both faces."""
+    from pathlib import Path
+
+    import yaml
+    from tier0.content import upgrades
+
+    sheet = Path(__file__).resolve().parents[2] / "docs" / "prototype-surface.yaml"
+    rows = yaml.safe_load(sheet.read_text(encoding="utf-8"))
+    plan_rows = [r for r in rows if r.get("plan")]
+    assert "proto_mi_gorou_crystal_collapse" in {r["id"] for r in plan_rows}
+    for row in plan_rows:
+        delta = row.get("upgrade") or ({} if row.get("no_upgrade") else
+                                       upgrades.prototype_default_delta(
+                                           row["id"], row.get("cost"),
+                                           row.get("effects", []),
+                                           bool(row.get("exhaust")),
+                                           row["plan"]))
+        assert row["cost"] >= 1, row["id"]
+        assert row["cost"] + delta.get("cost", 0) >= 1, row["id"]
+    up = upgrades.apply_upgrade(card("proto_mi_gorou_crystal_collapse"))
+    assert up.cost == 1 and up.retain

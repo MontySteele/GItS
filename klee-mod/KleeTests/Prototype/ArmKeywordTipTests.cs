@@ -387,7 +387,11 @@ public class ArmKeywordTipTests
         // `ForMergeRiders` left with the merge it explained.
         // THIRTY-NINE with the Kokomi re-founding (2026-10-12): `ForDusk`,
         // `ForCasket` and `ForOpenTheCasket` left with Dusk and the Casket.
-        Assert.Equal(39, attaches.Count);
+        // FORTY with the Kokomi pre-round fixes (2026-10-12):
+        // `ForCompanionPlan`, a live rider titled "Plan" on a Companion she
+        // holds ("any Companion can be written as a Plan").
+        Assert.Equal(40, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");
         Assert.Contains(attaches, m => m.Name == "ForCurrentElement");

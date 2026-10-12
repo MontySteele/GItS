@@ -46,7 +46,7 @@ public sealed class ProtoMfChevreuseVanguardsValor : CustomCardModel, ICompanion
     public string? Nation => "fontaine";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("chevreuse_vanguards_valor");
 

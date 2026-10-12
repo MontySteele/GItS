@@ -128,6 +128,18 @@ public class CrystalCollapseTests
         Assert.Equal("Plan", plain.Title);
     }
 
+    [Fact]
+    public void The_upgrade_keeps_its_cost_and_gains_retain()
+    {
+        // Card paper rule 2: "No card with a Plan line costs 0." The `+` cost
+        // 0 until 2026-10-12; it gains Retain and stays at 1.
+        var card = new ProtoMiGorouCrystalCollapse();
+        Assert.Equal(1, card.EnergyCost.Canonical);
+        var upgrade = Il.Calls(Il.Method("ProtoMiGorouCrystalCollapse", "OnUpgrade"));
+        Assert.Contains(upgrade, c => c.Contains("AddKeyword"));
+        Assert.DoesNotContain(upgrade, c => c.Contains("UpgradeBy"));
+    }
+
     // ---- THE POOL --------------------------------------------------------
 
     [Fact]

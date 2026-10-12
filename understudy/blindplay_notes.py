@@ -115,6 +115,16 @@ NOTHING_BEHIND_CLAUSE = " No enemy is behind you now."
 #: does not mark which cards turn her to face their target." Beside each
 #: hand card that takes `on`, only while you are Surrounded.
 TURNS_YOU_TAG = " (turns you)"
+#: The Kokomi re-founding (2026-10-12): "Any Companion card can be written
+#: as a Plan", and no face says so. Beside each hand card the jellyfish takes
+#: whose own face prints no Plan line.
+WRITABLE_TAG = " (can be written as a Plan)"
+#: And the Plan row says it on a Kokomi page, in step with the cards' tip
+#: (`ArmKeywordTips.ForCompanionPlan`), with what the carry-out does.
+PLAN_COMPANION_CLAUSE = (
+    " Any Companion card can be written too: next turn the Bake-Kurage "
+    "applies Hydro to the front enemy first, then the Companion plays free "
+    "and Exhausts.")
 
 #: 2026-09-26 (control seat, Ironclad): "Sozu: the tool said 'Took: Power
 #: Potion' and nothing arrived." Said beside the offer, before the claim.
@@ -3293,6 +3303,10 @@ def _keyword_rows(obs: dict[str, Any],
     for row in rows:
         if row["name"] == "Summon" and _arm_owns("Summon", who):
             row["text"] = _summon_row(hay)
+        # The Kokomi re-founding (2026-10-12): her Plan row also says any
+        # Companion can be written. On her row only, never the off-arm one.
+        if row["name"] == "Plan" and row["text"] == ARM_KEYWORDS["Plan"]:
+            row["text"] += PLAN_COMPANION_CLAUSE
     # 2026-09-26: the base game's words, off a haystack with the names of
     # the shelves, options, relics and potions struck (`_NAMED_ROW_KEYS`).
     names = _item_names(obs)

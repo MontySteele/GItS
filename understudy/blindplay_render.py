@@ -113,6 +113,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         BEHIND_CLAUSE, MAP_PATHS_HEAD,
                                         NOTHING_BEHIND_CLAUSE, ORB_ORDER_NOTE,
                                         TURNS_YOU_TAG,
+                                        WRITABLE_TAG,
                                         CONFIRM_TAKES_NOTHING_NOTE,
                                         POTION_BARRED_NOTE,
                                         RESOLUTION_APPLIED,
@@ -264,6 +265,10 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # that takes `on` turns you to face its target (the board sets it).
     if c.get("turns_you"):
         head += TURNS_YOU_TAG
+    # The Kokomi re-founding (2026-10-12): a card the jellyfish takes whose
+    # face prints no Plan line (any Companion).
+    if c.get("writable"):
+        head += WRITABLE_TAG
     # `EB-181`: the enchantment beside the title, where the game paints it and
     # where `(upgraded)` already sits -- the two facts a copy of a card can
     # differ by, on one line, so two copies of one title are told apart at a

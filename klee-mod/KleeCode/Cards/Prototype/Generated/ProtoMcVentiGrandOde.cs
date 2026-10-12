@@ -52,7 +52,7 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_venti_grand_ode");
 

@@ -49,7 +49,7 @@ public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanion
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLightfallSword(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForLightfallSword(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_eula_glacial_illumination");
 

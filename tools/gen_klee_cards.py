@@ -16752,6 +16752,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 "ArmKeywordTips.ForElementSwitch("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this, "
                 f"{ELEMENT_CS[switch_element]})")
+        # THE KOKOMI RE-FOUNDING (2026-10-12): a Companion she can write as a
+        # Plan says so while she holds it. A fact about THIS card on THIS
+        # board, so it sits with the riders above (live, Kokomi's only).
+        if companion_plan:
+            tips_expr = (
+                "ArmKeywordTips.ForCompanionPlan("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc, spark_priced):

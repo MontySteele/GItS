@@ -2545,7 +2545,10 @@
    description: "[gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn.",
    effects: [],
    plan: [{op: play_copy_of_companion}],
-   upgrade: {cost: -1}}
+   # 2026-10-12: Retain, not cost 0 ("no card with a Plan line costs 0",
+   # card paper rule 2). No printed number for the default rule to move;
+   # Retain is Grand Design's shape for a Plan card with none.
+   upgrade: {retain: true}}
 
 # stand-ins (the Hexerei family), PR: hexerei-standins. Albedo in Klee's own
 # pool, the other three shared, by the Klee-only companions (2026-10-03).

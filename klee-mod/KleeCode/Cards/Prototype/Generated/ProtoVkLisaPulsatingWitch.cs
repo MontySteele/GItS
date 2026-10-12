@@ -49,7 +49,7 @@ public sealed class ProtoVkLisaPulsatingWitch : CustomCardModel, ICompanionCard,
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this, Element.Electro);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_lisa_pulsating_witch");
 

@@ -49,7 +49,7 @@ public sealed class ProtoMcBarbaraShowBegin : CustomCardModel, ICompanionCard, I
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_barbara_show_begin");
 

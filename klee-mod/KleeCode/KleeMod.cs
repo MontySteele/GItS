@@ -484,6 +484,10 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",
+                    // The Kokomi re-founding (2026-10-12): the Plan tip a
+                    // Companion carries while Kokomi holds it.
+                    [Cards.ArmKeywordTips.CompanionPlanKey + ".title"] =
+                        "Plan",
                     [Cards.ArmKeywordTips.GuestStarKey + ".title"] =
                         "Guest Star",
                     [Cards.ArmKeywordTips.CharlotteKey + ".title"] =
