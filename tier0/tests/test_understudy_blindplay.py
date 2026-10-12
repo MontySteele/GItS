@@ -8716,9 +8716,11 @@ _R12_SMITH = (
     # The loop fix (2026-10-04) took Take the Stage's cost cut away; Guest
     # Star: Chevreuse's upgrade was the cost cut alone, and (the Salon's Tab,
     # 2026-10-05) every Guest Star's was; the pool to 75 (2026-10-09) gave
-    # the guests their line or act instead, and Tutti! takes the slot.
-    ("KLEEMOD-PROTO_FS_TUTTI",
-     "Each guest acts."),
+    # the guests their line or act instead, and Tutti! took the slot; the
+    # loop ruling (2026-10-11) gave Tutti!+ a draw, and Universal Revelry
+    # (2 to 1) takes it.
+    ("KLEEMOD-PROTO_FS_UNIVERSAL_REVELRY",
+     "Whenever you Drain or Repay, gain that much additional Fanfare."),
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
@@ -10689,7 +10691,9 @@ def test_the_smith_prints_a_spark_price_the_upgrade_cuts(
 
 
 def test_the_smith_prints_an_energy_cost_the_upgrade_cuts():
-    """A cost-only upgrade (Tutti!, 1 to 0, since the pool to 75; Guest Star:
+    """A cost-only upgrade (Universal Revelry, 2 to 1, since Tutti!'s
+    upgrade became a draw under the loop ruling, 2026-10-11; Tutti!, 1 to 0,
+    since the pool to 75; Guest Star:
     Chevreuse's until then; Salon Debut's until
     the 2026-10-04 loop fix) cuts the energy cost and nothing else, and
     the Smith said "its upgrade changes nothing this face prints". It now
@@ -10697,16 +10701,16 @@ def test_the_smith_prints_an_energy_cost_the_upgrade_cuts():
     Seen to FAIL: the page printed the no-number note."""
     smith = live("upgrade-fresh")
     smith = json.loads(json.dumps(smith.get("state", smith)))
-    face = "Each guest acts."
+    face = "Whenever you Drain or Repay, gain that much additional Fanfare."
     smith["card_select"]["cards"].append(
-        {"id": "KLEEMOD-PROTO_FS_TUTTI",
-         "name": "Tutti!",
-         "cost": "1", "type": "Skill", "description": face})
+        {"id": "KLEEMOD-PROTO_FS_UNIVERSAL_REVELRY",
+         "name": "Universal Revelry",
+         "cost": "2", "type": "Power", "description": face})
     page = blindplay.observe(smith)
-    assert f"    Upgraded: cost 0 — {face}" in page
+    assert f"    Upgraded: cost 1 — {face}" in page
     assert qa_packet.NO_PREVIEW_NO_NUMBER not in page
     assert qa_packet.upgraded_energy_delta(
-        "KLEEMOD-PROTO_FS_TUTTI") == -1
+        "KLEEMOD-PROTO_FS_UNIVERSAL_REVELRY") == -1
 
 
 def test_an_upgraded_copy_in_hand_shows_its_upgraded_spark_price():

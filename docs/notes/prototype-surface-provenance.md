@@ -7401,7 +7401,8 @@ the paper's.
   on disk (KNOWN_STALE).
 - **Changed:** Bravura, one Hydro hit of 7 [9] for every 3 spent (count
   `stage_spent_threes`; under 3 spent no hit, the hit count gated); Tutti!
-  Common, draws 1; Guest Star: Wriothesley Common; Lynette's act hits a
+  Common, draws 1, and its upgrade draws 2 at cost 1 (Claude, under the loop
+  ruling: the paper's 0-cost upgrade looped with any 0-cost draw-1 card); Guest Star: Wriothesley Common; Lynette's act hits a
   random enemy with an aura, else any random enemy; Final Bow draws 1 first;
   Casting Call draws 2 when no Guest Star is in the draw pile (`tutor_guest`
   carries the 2 as `amount`; its upgrade still adds "Draw 1 card."); Ensemble
