@@ -12,3 +12,14 @@
 - **The seats' own words:** lane 3's NEVER AGAIN was Watchful Shoal: "it buffs Stings and Wards and the deck had neither for most of the run". Lane 1 called it automatic. Lanes 2 and 4 won with Poison (Electro on Hydro) and never relied on it.
 
 **Reading.** Like the Silent's Accuracy, it pays only in a deck dense with tokens, and her Sting supply is too thin for it to be her general late growth. It can stay as a jellyfish build-around, but it does not answer the late-growth question. That question goes to [USER] (`QUEUE.md`) after his own run.
+
+## For [USER]
+
+1. **Late growth.** A design pass is under way first, built on research into her Genshin kit and lore, with a lore-grounded lean into the Sting build. It will add options here before your run ([USER]: "before we lock that in, can you kick off a research census of Kokomi's genshin kit and lore").
+   - **(a) Default:** play her as she is and judge it in your run. Watchful Shoal stays a jellyfish build-around.
+   - (b) Move Resolve of Watatsumi ("Gain 2 Strength") to Common.
+   - (c) A growth card on the Plan track.
+   - (d) Accept a late game carried by Companions, as a support character's would be.
+2. **The generators** (Orders from the Shrine, Watatsumi Muster, Sangonomiya's Orders). They roll only Inazuma Common Companions; General's War Banner was taken 0 of 44 times.
+   - **(a) Default:** keep it to Inazuma Commons.
+   - (b) Widen it to any Common Companion.
