@@ -49,10 +49,8 @@ def _rows():
 PAYOUTS = {
     "proto_fs_fountain_of_lucine": "PayBlock",
     "proto_fs_hymn_of_many_waters": "PayBlock",
-    "proto_fs_gentle_current": "PayBlock",
     "proto_fs_grand_entrance": "PayBlock",
     "proto_fs_pneuma_tides": "PayVigor",
-    "proto_fs_surging_waters": "PayDamage",
     "proto_fs_hydro_lance": "PayDamage",
     "proto_fs_cleansing_torrent": "PayDamage",
 }

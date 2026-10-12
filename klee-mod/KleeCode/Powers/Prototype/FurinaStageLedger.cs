@@ -126,6 +126,11 @@ public sealed record StageMods
     /// gains the HP it actually drained as Block, per copy.</summary>
     public int Masquerade { get; init; }
 
+    /// <summary>Full House (the diversity pass, 2026-10-11): the "Spend up
+    /// to" cap an act that deals damage takes, copies' caps added (4, 6
+    /// upgraded, a copy).</summary>
+    public int FullHouse { get; init; }
+
     public static readonly StageMods None = new();
 }
 

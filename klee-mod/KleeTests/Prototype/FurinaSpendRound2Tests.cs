@@ -151,30 +151,19 @@ public class FurinaSpendRound2Tests : IDisposable
         Assert.Equal(5, ledger.HighStakesDealt);
     }
 
-    // ---- 2. Gentle Current Repays now -----------------------------------------
+    // ---- 2. Gentle Current: cut in the diversity pass (2026-10-11) -----------
 
     [Fact]
-    public void Gentle_current_repays_on_play_with_its_block_floor()
+    public void Gentle_current_is_cut_and_the_block_floor_preview_stays()
     {
-        var card = new ProtoFsGentleCurrent();
-        Assert.Equal(
-            "Gain {Block:diff()} [gold]Block[/gold]. [gold]Repay[/gold] "
-            + "{RepayAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it "
-            + "could not [gold]Repay[/gold].{InCombat:{StageRepay}|}",
-            Face(card));
-        Assert.Equal(5, card.DynamicVars.Block.IntValue);
-        Assert.Equal(3, card.DynamicVars["RepayAmount"].IntValue);
-        var up = Upgraded(new ProtoFsGentleCurrent());
-        Assert.Equal(7, up.DynamicVars.Block.IntValue);
-        Assert.Equal(4, up.DynamicVars["RepayAmount"].IntValue);
-        var code = Generated("ProtoFsGentleCurrent");
-        Assert.Contains("FurinaStage.Repay(choiceContext, Owner.Creature, "
-                        + "DynamicVars[\"RepayAmount\"].IntValue, "
-                        + "StageFloor.Block)", code);
-        // The house preview: "(Repays N, +M Block)".
+        Assert.Null(typeof(HighStakesPower).Assembly.GetType(
+            "KleeMod.Cards.Prototype.Generated.ProtoFsGentleCurrent"));
+        // The house preview it shared with Hymn of Many Waters:
+        // "(Repays N, +M Block)".
         Assert.Contains("FurinaStageFacePreview.Repay(this, "
                         + "DynamicVars[\"RepayAmount\"].IntValue, "
-                        + "FurinaStageFacePreview.PayBlock)", code);
+                        + "FurinaStageFacePreview.PayBlock)",
+                        Generated("ProtoFsHymnOfManyWaters"));
         Assert.Equal("\n(Repays 1, +2 Block)",
                      FurinaStageFacePreview.Line(1, 3, "Block"));
     }

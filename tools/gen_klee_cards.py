@@ -2641,8 +2641,12 @@ FURINA_KINDS = {
     # THE BLOCK GAP (2026-10-09): Velvet Curtain's "Gain 2 Fanfare", the
     # ledger's gain (`FurinaStage.Gain`, Universal Revelry's path).
     "gain_fanfare": "GainFanfare",
+    # THE DIVERSITY PASS (2026-10-11): Ensemble Cast's "Summon a random
+    # guest" (one not on stage). Casting Call's `tutor_guest` now carries
+    # its floor's draw as `amount` ("If you can't, draw 2 cards").
+    "summon_random": "SummonRandom",
 }
-FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare"}
+FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest"}
 FURINA_FIELDS = {"op", "kind", "amount"}
 #: Alice's Detonator: no field -- the card is Alice's Mine (its own row), and
 #: whether it arrives upgraded is the card's own upgrade (`upgraded_grant`).
@@ -3214,6 +3218,14 @@ APPLY_POWERS = {
     "fs_the_masquerade": ("TheMasqueradePower", None,
         "Whenever you [gold]Drain[/gold], gain that much "
         "[gold]Block[/gold]."),
+    # THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md,
+    # ruled 2026-10-11). The classes live in
+    # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
+    "fs_leading_lady": ("LeadingLadyPower", None,
+        "Your Attacks deal {X} additional damage for each guest on stage."),
+    "fs_full_house": ("FullHousePower", None,
+        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}: "
+        "it deals that much more."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -6283,6 +6295,8 @@ def debuffs_on_target_calc_rider(
 #: token (`furina_stage.spent_fours`).
 STAGE_INLINE_COUNT_CS = {
     "stage_spent_fours": "FurinaStage.SpentFours(this)",
+    # THE DIVERSITY PASS (2026-10-11): Bravura's "for every 3 spent".
+    "stage_spent_threes": "FurinaStage.SpentThrees(this)",
 }
 
 
@@ -6555,6 +6569,10 @@ STAGE_COUNT_CS = {
                     "FurinaStage.Of(card.Owner?.Creature).Count",
     "stage_fanfare": "static (card, _) => "
                      "FurinaStage.FanfareOf(card.Owner?.Creature)",
+    # THE DIVERSITY PASS (2026-10-11): Packed House's "plus 1 for every 5
+    # Fanfare you have" (read, never spent).
+    "stage_fanfare_fives": "static (card, _) => "
+                           "FurinaStage.FanfareFives(card.Owner?.Creature)",
     # THE REPAY FLOOR (ruled 2026-10-09): Surging Waters', Hydro Lance's and
     # Cleansing Torrent's "plus 1 for any HP it could not Repay" -- after the
     # card's Repay, what it could not return; before the play, what a Repay
@@ -9432,6 +9450,11 @@ def _emit_damage_call(card: dict, eff: dict, lines: list[str], ctx: dict,
         # every 4" -- `base + per * <stage count>` hits, read as the play
         # resolves (the Spend comes first).
         call.append(f".WithHitCount({stage_times})")
+        # The diversity pass (2026-10-11), Bravura: "for every 3 spent" has
+        # no base hit, so under 3 spent it deals nothing -- gated like X,
+        # since DamageCmd would treat 0 hits as one swing.
+        if int(eff["times_formula"].get("base", 0)) <= 0:
+            times_guard = f"({stage_times})"
     elif "times_formula" in eff:
         # 2_plus_sparks (Gleeful Barrage), the sim's only times formula.
         # SparksAtPlay: R39 (2026-07-21 ruling) -- the sim computes times from

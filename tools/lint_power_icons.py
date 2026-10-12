@@ -73,6 +73,12 @@ ICON_DEBT: dict[str, str] = {
     # pick 2, ruled 2026-10-09): one new Power; its icon waits on the art pass.
     "TheMasqueradePower":
         "Furina block-gap Power; icon waits on the art pass, renders the placeholder",
+    # Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
+    # ruled 2026-10-11): two new Powers; their icons wait on the art pass.
+    "LeadingLadyPower":
+        "Furina diversity-pass Power; icon waits on the art pass, renders the placeholder",
+    "FullHousePower":
+        "Furina diversity-pass Power; icon waits on the art pass, renders the placeholder",
     # Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md):
     # eleven new Powers and Freminet's badges; their icons wait on the art
     # pass.

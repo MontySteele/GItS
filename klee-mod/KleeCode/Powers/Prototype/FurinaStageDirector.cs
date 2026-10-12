@@ -15,8 +15,9 @@ public enum StageTarget
     /// <summary>A random enemy.</summary>
     Random,
 
-    /// <summary>A random enemy with an aura; none, and nothing is hit
-    /// (Lynette's act).</summary>
+    /// <summary>A random enemy with an aura; none, and any random enemy
+    /// (Lynette's act, the diversity pass, 2026-10-11: "one with an aura if
+    /// able").</summary>
     Aura,
 }
 
@@ -156,6 +157,7 @@ public sealed class StageDirector
     public const string PneumaTidesTitle = "Pneuma Tides";
     public const string ReginaTitle = "Regina of All Waters";
     public const string MasqueradeTitle = "The Masquerade";
+    public const string FullHouseTitle = "Full House";
 
     private readonly FurinaStageLedger _stage;
     private readonly IStageBoard _board;
@@ -642,17 +644,17 @@ public sealed class StageDirector
                 if (!_board.Over) floor = System.Math.Max(0, number - moved);
                 break;
             case StagePerformer.Wriothesley:
-                moved = number;
+                moved = number + await FullHouse();
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Cryo);
                 break;
             case StagePerformer.Lynette:
-                moved = number;
+                moved = number + await FullHouse();
                 await _board.Damage(who, StageTarget.Aura, moved,
                                     Element.Anemo);
                 break;
             case StagePerformer.Clorinde:
-                moved = number;
+                moved = number + await FullHouse();
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Electro);
                 break;
@@ -666,13 +668,13 @@ public sealed class StageDirector
                 if (room > 0) await Drain(room);
                 if (!_board.Over)
                 {
-                    moved = number;
+                    moved = number + await FullHouse();
                     await _board.Damage(who, StageTarget.All, moved,
                                         Element.Pyro);
                 }
                 break;
             case StagePerformer.Chevreuse:
-                moved = number;
+                moved = number + await FullHouse();
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.None);
                 break;
@@ -703,6 +705,7 @@ public sealed class StageDirector
                                          NaviaSpendSource);
                 if (moved > 0 && !_board.Over)
                 {
+                    moved += await FullHouse();
                     await _board.Damage(who, StageTarget.Random, moved,
                                         Element.Geo);
                 }
@@ -713,12 +716,13 @@ public sealed class StageDirector
                 moved = _stage.HpLostSinceLastTurn;
                 if (moved > 0)
                 {
+                    moved += await FullHouse();
                     await _board.Damage(who, StageTarget.All, moved,
                                         Element.Hydro);
                 }
                 break;
             case StagePerformer.Escoffier:
-                moved = number;
+                moved = number + await FullHouse();
                 await _board.Damage(who, StageTarget.All, moved,
                                     Element.Cryo);
                 break;
@@ -735,6 +739,21 @@ public sealed class StageDirector
             await Repay(FurinaStageLaw.EscoffierLineRepay);
         }
         return true;
+    }
+
+    /// <summary>Full House (the diversity pass, 2026-10-11): "Whenever a
+    /// guest's act deals damage, Spend up to 4: it deals that much more."
+    /// [6] Called once by an act about to deal damage, before the hit; the
+    /// copies' caps add into one Spend, a Spend like any (Thunderous
+    /// Applause, Chevreuse and Crescendo answer it), filed under Full House.
+    /// Returns what it spent: the act's extra damage a hit (an act to ALL
+    /// adds it to every enemy). Sim twin: <c>furina_tide.full_house</c>.
+    /// </summary>
+    public async Task<int> FullHouse()
+    {
+        var cap = _stage.Mods.FullHouse;
+        if (cap <= 0 || _board.Over) return 0;
+        return await SpendUpTo(cap, forPlay: false, source: FullHouseTitle);
     }
 
     /// <summary>

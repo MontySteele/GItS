@@ -325,3 +325,70 @@ public sealed class TheMasqueradePower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 }
+
+// ======================================================================
+// THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md,
+// ruled 2026-10-11): the two guest styles' Powers.
+// ======================================================================
+
+/// <summary><i>Leading Lady</i> (style 1, stars support and Furina hits):
+/// "Gain 1 Strength. Your Attacks deal 1 additional damage for each guest
+/// on stage." [2 Strength] (The paper's "1 more damage", in the house
+/// template, rule 8 of the text pass: "additional damage".) The card applies the base game's Strength; this
+/// power is the second sentence. Its amount is the bonus a guest, so copies
+/// add. It adds to each powered Attack hit she deals, as Strength does
+/// (High Stakes' gates), so guest acts, which are unpowered, never take it.
+/// Sim twin: <c>furina_stage.leading_lady_bonus</c>.</summary>
+public sealed class LeadingLadyPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Leading Lady"),
+        ("description",
+            "Your Attacks deal [blue]{Amount}[/blue] additional damage for each "
+          + "guest on stage."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The bonus a hit now: the amount times the guests on stage.
+    /// PURE.</summary>
+    public int Bonus =>
+        IsMutable && Owner != null
+            ? Amount * FurinaStage.Of(Owner).Count
+            : 0;
+
+    /// <summary>Her Attacks only (a card's powered hit), no target asked
+    /// for (High Stakes' reading, so the face previews it).</summary>
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (dealer != Owner || target == Owner) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;
+        if (cardSource is not { Type: CardType.Attack }) return 0m;
+        return Bonus;
+    }
+}
+
+/// <summary><i>Full House</i> (style 2, stars hit and Furina feeds them):
+/// "Whenever a guest's act deals damage, Spend up to 4: it deals that much
+/// more." [6] A switch the director asks about
+/// (<see cref="StageDirector.FullHouse"/>); its amount is the cap, so
+/// copies add their caps into one Spend.</summary>
+public sealed class FullHousePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", StageDirector.FullHouseTitle),
+        ("description",
+            "Whenever a guest's act deals damage, [gold]Spend[/gold] up to "
+          + "[blue]{Amount}[/blue]: it deals that much more."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}

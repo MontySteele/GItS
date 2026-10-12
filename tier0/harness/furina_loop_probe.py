@@ -537,10 +537,12 @@ NAMED: dict[str, tuple[tuple[str, ...], tuple[str, ...],
         ("proto_fs_grand_entrance",),
         ((), ("sigewinne",))),
     # "Overdraft, Soothing Waters, Sold Out and Crescendo together. This is
-    # the one cycle not bounded by HP."
+    # the one cycle not bounded by HP." Sold Out was cut in the diversity
+    # pass (2026-10-11); Interval Bell, the other Spend-for-Energy-next-turn
+    # card, stands in.
     "energy_cycle": (
         ("proto_fs_overdraft", "proto_fs_soothing_waters",
-         "proto_fs_sold_out"),
+         "proto_fs_interval_bell"),
         ("proto_fs_crescendo",),
         ((),)),
 }

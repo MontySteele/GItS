@@ -32,28 +32,32 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsBravura : CustomCardModel, ICharacterCard, IStageSpendCard
+public sealed class ProtoFsBravura : CustomCardModel, IElementalCard, ICharacterCard, IStageSpendCard
 {
+    /// <summary>Sheet `applies_element: true` on this row's own damage: it applies Hydro whatever the cadence says.</summary>
+    public Element Element => Element.Hydro;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesHydro };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bravura");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bravura"),
-        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} per point.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
-            new ExtraDamageVar(2m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrFanfare(card))
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,15 +71,19 @@ public sealed class ProtoFsBravura : CustomCardModel, ICharacterCard, IStageSpen
     {
         await FurinaStage.SpendAll(choiceContext, Owner.Creature);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithElementHitFx(this)
-            .Execute(choiceContext);
+        if ((0 + 1 * FurinaStage.SpentThrees(this)) > 0)
+        {
+            await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+                .WithHitCount(0 + 1 * FurinaStage.SpentThrees(this))
+                .FromCard(this, cardPlay)
+                .Targeting(cardPlay.Target)
+                .WithElementHitFx(this)
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(4m);
+        DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

@@ -393,25 +393,11 @@ def test_the_repay_cards_and_their_counts():
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_rising_tide"))
     assert hp - st.enemies[0].hp == 6 + 3 * 2
-    before = st.player.ftd.drained
-    _play(st, _card("proto_fs_gentle_current"))
-    assert st.player.ftd.drained == before - 3       # Repays now (round 2)
     left = st.player.ftd.drained
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_grand_absolution"))
     assert st.player.ftd.drained == 0
     assert hp - st.enemies[0].hp == left
-
-
-def test_sold_out_draws_now_and_gives_its_energy_next_turn():
-    st = _furina()
-    st.player.ftd.fanfare = 6
-    st.player.draw_pile = [_card("proto_fs_bubble_aria") for _ in range(2)]
-    _play(st, _card("proto_fs_sold_out"))
-    assert st.player.energy == 8                 # paid 1, gained nothing now
-    assert st.player.ftd.energy_next == 1
-    assert len(st.player.hand) == 2
-    assert T.energy_kept(st) == 1
 
 
 def test_ebb_and_flow_nets_minus_two():

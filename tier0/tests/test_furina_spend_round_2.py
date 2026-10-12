@@ -15,6 +15,8 @@ import copy
 import json
 from pathlib import Path
 
+import pytest
+
 from tier0.content import loader
 from tier0.engine import combat, furina_stage as FS, furina_tide as T
 from tier0.tests.conftest import make_enemy, make_state
@@ -99,31 +101,12 @@ def test_the_end_of_turn_singer_no_longer_eats_the_bonus():
     assert FS.high_stakes_bonus(st) == 1
 
 
-# ---- 2. Gentle Current Repays now --------------------------------------------------
+# ---- 2. Gentle Current: cut in the diversity pass (2026-10-11) ------------
 
-def test_gentle_current_is_hymns_shape_with_smaller_numbers():
-    assert _sheet_row("proto_fs_gentle_current")["description"] == (
-        "Gain 5 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 "
-        "[gold]Block[/gold] for any HP it could not [gold]Repay[/gold].")
-    row = loader.get_card("proto_fs_gentle_current")
-    assert row.effects == [{"op": "block", "amount": 5},
-                           {"op": "stage_repay", "amount": 3,
-                            "floor": "block"}]
-    up = loader.get_card("proto_fs_gentle_current+")
-    assert up.effects[0]["amount"] == 7 and up.effects[1]["amount"] == 4
-    assert (row.cost, row.rarity, row.type) == (1, "common", "skill")
-
-
-def test_gentle_current_repays_on_play_and_floors_the_rest():
-    st = _furina()
-    FS.drain(st, 2)
-    st.player.block = 0
-    _play(st, _card("proto_fs_gentle_current"))
-    assert st.player.ftd.drained == 0
-    assert st.player.block == 5 + 1              # 3 - 2 could not Repay
-    st.player.block = 0
-    T.turn_start(st)
-    assert st.player.block == 0                  # nothing owed next turn
+def test_gentle_current_is_cut():
+    with pytest.raises(StopIteration):
+        _sheet_row("proto_fs_gentle_current")
+    assert not (GENERATED / "ProtoFsGentleCurrent.cs").exists()
 
 
 def test_the_next_turn_repay_is_gone_everywhere():
@@ -133,7 +116,7 @@ def test_the_next_turn_repay_is_gone_everywhere():
     assert T.CARDS["ftd_gentle_current"].n == (5, 3)
     for path in PROTO.glob("*.cs"):
         assert "RepayNextTurn" not in path.read_text(encoding="utf-8"), path
-    src = (GENERATED / "ProtoFsGentleCurrent.cs").read_text(encoding="utf-8")
+    src = (GENERATED / "ProtoFsHymnOfManyWaters.cs").read_text(encoding="utf-8")
     assert "FurinaStageFacePreview.PayBlock" in src
     assert 'DynamicVars["RepayAmount"].IntValue, StageFloor.Block)' in src
 

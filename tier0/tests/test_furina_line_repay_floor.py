@@ -119,8 +119,7 @@ def test_a_five_century_act_reads_its_new_text():
 # ---- the Repay floor ------------------------------------------------------------
 
 def test_the_damage_cards_repay_first_then_add_the_leftover():
-    for cid, base, n in (("proto_fs_surging_waters", 6, 3),
-                         ("proto_fs_hydro_lance", 14, 4),
+    for cid, base, n in (("proto_fs_hydro_lance", 14, 4),
                          ("proto_fs_cleansing_torrent", 10, 4)):
         row = _card(cid)
         assert [fx["op"] for fx in row.effects] == ["stage_repay", "damage"]
@@ -163,14 +162,6 @@ def test_soothing_waters_keeps_no_leftover_payout():
     _play(st, _card("proto_fs_soothing_waters"))
     assert not st.player.powers.get("next_attack_up")
     assert st.player.block == 0
-
-
-def test_gentle_current_pays_its_floor_now():
-    """The Spend round 2 (2026-10-10): "Gain 5 Block. Repay 3. Gain 1 Block
-    for any HP it could not Repay." Nothing drained: 5 + 3."""
-    st = _furina()
-    _play(st, _card("proto_fs_gentle_current"))
-    assert st.player.block == 5 + 3
 
 
 def test_fountain_pays_block_each_turn_and_pneuma_tides_vigor():
@@ -238,12 +229,14 @@ def test_the_ruled_card_numbers():
     assert _card("proto_fs_guest_star_neuvillette").cost == 1
 
 
-def test_bravuras_upgrade_raises_the_base_to_ten():
+def test_bravuras_upgrade_hits_9_for_every_3_spent():
+    # The diversity pass (2026-10-11): "Deal 7 Hydro damage for every 3
+    # spent." [9] (was 6 plus 2 a point [10]).
     st = _furina()
     st.player.ftd.fanfare = 5
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_bravura+"))
-    assert st.enemies[0].hp == hp - (10 + 2 * 5)
+    assert st.enemies[0].hp == hp - 9
 
 
 def test_freminets_act_gives_block():
