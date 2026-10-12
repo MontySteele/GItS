@@ -335,16 +335,46 @@ public class KleeStoryTests
     private static ModelId Character(string entry) => new("CHARACTER", entry);
 
     [Fact]
-    public void The_lookup_returns_Klees_exchange_for_Klee()
+    public void The_lookup_returns_Klees_exchange_for_Klee_on_every_visit()
     {
         var set = BaseSet();
         var added = StoryAncients.AddTo(set, "NEOW", populate: false, entryOf: _ => KleeEntry);
         Assert.Equal(new[] { KleeEntry }, added);
+        var hers = set.CharacterDialogues[KleeEntry][0];
+        Assert.Equal(2, hers.Lines.Count);
+        Assert.True(hers.IsRepeating);
+        Assert.Null(hers.VisitIndex);
 
-        var valid = set.GetValidDialogues(Character(KleeEntry), 0, 5, true).ToList();
-        Assert.Single(valid);
-        Assert.Same(set.CharacterDialogues[KleeEntry][0], valid[0]);
-        Assert.Equal(2, valid[0].Lines.Count);
+        // What the GetValidDialogues prefix answers: hers, visit after visit.
+        foreach (var total in new[] { 1, 5, 40 })
+        {
+            Assert.Same(hers, StoryAncients.StoryDialogueFor(set, KleeEntry, total));
+        }
+        // And the game's own pools would still include it (repeating).
+        Assert.Contains(hers, set.GetValidDialogues(Character(KleeEntry), 7, 9, true));
+
+        // Structural: the prefix asks the pure function and short-circuits.
+        var patch = typeof(StoryAncients).Assembly.GetTypes()
+            .Single(t => t.Name == "Ancient_GetValidDialogues_Story_Patch");
+        Assert.Contains("StoryAncients.StoryDialogueFor",
+            Il.Calls(patch.GetMethod("Prefix", HeadlessGame.All)!));
+    }
+
+    [Fact]
+    public void The_games_once_ever_introduction_still_comes_first()
+    {
+        var set = BaseSet();
+        var intro = new AncientDialogue("");
+        var withIntro = new AncientDialogueSet
+        {
+            FirstVisitEverDialogue = intro,
+            CharacterDialogues = set.CharacterDialogues,
+            AgnosticDialogues = set.AgnosticDialogues,
+        };
+        StoryAncients.AddTo(withIntro, "NEOW", populate: false, entryOf: _ => KleeEntry);
+        Assert.Null(StoryAncients.StoryDialogueFor(withIntro, KleeEntry, totalVisits: 0));
+        Assert.Same(intro, withIntro.GetValidDialogues(Character(KleeEntry), 0, 0, true).Single());
+        Assert.NotNull(StoryAncients.StoryDialogueFor(withIntro, KleeEntry, totalVisits: 1));
     }
 
     [Fact]
@@ -354,32 +384,29 @@ public class KleeStoryTests
         StoryAncients.AddTo(set, "NEOW", populate: false, entryOf: _ => KleeEntry);
         foreach (var other in new[] { "KLEEMOD-KOKOMI", "KLEEMOD-FURINA", "KLEEMOD-VARKA" })
         {
+            Assert.Null(StoryAncients.StoryDialogueFor(set, other, 5));
             var valid = set.GetValidDialogues(Character(other), 0, 5, true).ToList();
             Assert.Single(valid);
             Assert.Same(set.AgnosticDialogues[0], valid[0]);
         }
-        // A base character keeps its own.
+        // A base character keeps its own, and its lines are never taken for hers.
+        Assert.Null(StoryAncients.StoryDialogueFor(set, "IRONCLAD", 5));
         Assert.Same(set.CharacterDialogues["IRONCLAD"][0],
                     set.GetValidDialogues(Character("IRONCLAD"), 0, 5, true).Single());
     }
 
     [Fact]
-    public void Klees_exchange_is_her_first_visit_only_and_every_Ancient_has_one()
+    public void Every_Ancient_has_her_exchange_and_the_Architect_is_left_alone()
     {
-        var set = BaseSet();
-        StoryAncients.AddTo(set, "TANX", populate: false, entryOf: _ => KleeEntry);
-        var later = set.GetValidDialogues(Character(KleeEntry), 1, 5, true).ToList();
-        Assert.DoesNotContain(set.CharacterDialogues[KleeEntry][0], later);
-
         foreach (var a in Klee.Ancients)
         {
             var s = BaseSet();
             Assert.Single(StoryAncients.AddTo(s, a.AncientEntry, populate: false, entryOf: _ => KleeEntry));
         }
-        // An Ancient she has no line for (the Architect) is left as it was.
         var architect = BaseSet();
         Assert.Empty(StoryAncients.AddTo(architect, "THE_ARCHITECT", populate: false, entryOf: _ => KleeEntry));
         Assert.False(architect.CharacterDialogues.ContainsKey(KleeEntry));
+        Assert.Null(StoryAncients.StoryDialogueFor(architect, KleeEntry, 5));
     }
 
     [Fact]

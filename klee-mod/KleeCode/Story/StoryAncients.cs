@@ -23,16 +23,14 @@ namespace KleeMod.Story;
 /// after <c>AncientEventModel.DialogueSet</c> builds it; every other
 /// character keeps the agnostic set exactly as before.
 ///
-/// "THE FIRST VISIT" IS THE GAME'S FIRST VISIT. The dialogue carries
-/// <c>VisitIndex = 0</c>, which the game matches against this profile's
-/// visits to that Ancient AS this character
-/// (<c>AncientStats.GetVisitsAs</c>, counted at each run's end). So it plays
-/// on Klee's first meeting with each Ancient, exactly as a base character's
-/// first-visit line does, and never again on that profile. Two consequences
-/// the live check owes: a profile that has already met an Ancient as Klee
-/// does not see that Ancient's line, and the game's own once-ever
-/// introduction (<c>FirstVisitEverDialogue</c>, any character's very first
-/// meeting with that Ancient) still comes first, as it does for the base five.
+/// EVERY VISIT, NOT ONLY THE FIRST (coordinator, 2026-10-12: the owner's
+/// profile has already met these Ancients as Klee, and the game's per-profile
+/// first visit would never show them). The dialogue is repeating with no
+/// visit index, and <see cref="Ancient_GetValidDialogues_Story_Patch"/> hands
+/// it back on every visit (<see cref="StoryDialogueFor"/>) ahead of the
+/// agnostic and repeating pools. The game's own once-ever introduction
+/// (<c>FirstVisitEverDialogue</c>, anyone's very first meeting with that
+/// Ancient on the profile) still comes first, as it does for the base five.
 ///
 /// COMPOSES WITH THE SPIRAL ABYSS PAGE. The Abyss page replaces the
 /// Ancient's DESCRIPTION and OPTIONS (<c>AbyssChoicePage</c>, after
@@ -68,7 +66,7 @@ public static class StoryAncients
             var characterEntry = entryOf(story.Character);
             if (set.CharacterDialogues.ContainsKey(characterEntry)) continue;
 
-            var dialogue = new AncientDialogue("", "") { VisitIndex = 0 };
+            var dialogue = new AncientDialogue("", "") { VisitIndex = null, IsRepeating = true };
             if (populate)
             {
                 dialogue.PopulateLines(ancientEntry, characterEntry, 0);
@@ -77,11 +75,29 @@ public static class StoryAncients
                 dialogue.Lines[0].NextButtonText =
                     new LocString(Table, LineKey(ancientEntry, characterEntry, 0) + ".next");
             }
+            Added.AddOrUpdate(dialogue, new object());
             set.CharacterDialogues[characterEntry] = new[] { dialogue };
             added.Add(characterEntry);
         }
         return added;
     }
+
+    /// <summary>
+    /// The story dialogue the game should show this visit, or null to let the
+    /// game choose: hers on every visit, except the once-ever introduction
+    /// (the same first test <c>GetValidDialogues</c> makes).
+    /// </summary>
+    public static AncientDialogue? StoryDialogueFor(
+        AncientDialogueSet set, string characterEntry, int totalVisits)
+    {
+        if (totalVisits == 0 && set.FirstVisitEverDialogue != null) return null;
+        if (!set.CharacterDialogues.TryGetValue(characterEntry, out var own)) return null;
+        return own.FirstOrDefault(d => Added.TryGetValue(d, out _));
+    }
+
+    /// <summary>The dialogues this class added, so a base character's own
+    /// repeating lines are never mistaken for a story line.</summary>
+    internal static readonly ConditionalWeakTable<AncientDialogue, object> Added = new();
 
     /// <summary>
     /// The <c>ancients</c> rows: the Ancient's line, her answer, and the
@@ -156,6 +172,33 @@ internal static class AncientEventModel_DialogueSet_Story_Patch
         catch (Exception e)
         {
             Log.Error($"[{KleeMod.ModId}] story: Ancient greeting for {__instance.Id.Entry} failed: {e}");
+        }
+    }
+}
+
+/// <summary>
+/// EVERY VISIT: a story character's own exchange is the answer whenever the
+/// set holds one for her, after the game's once-ever introduction. Anyone
+/// else gets the game's own choice, untouched.
+/// </summary>
+[HarmonyPatch(typeof(AncientDialogueSet), nameof(AncientDialogueSet.GetValidDialogues))]
+internal static class Ancient_GetValidDialogues_Story_Patch
+{
+    [HarmonyPrefix]
+    private static bool Prefix(AncientDialogueSet __instance, ModelId characterId, int totalVisits,
+                               ref IEnumerable<AncientDialogue> __result)
+    {
+        try
+        {
+            var own = StoryAncients.StoryDialogueFor(__instance, characterId.Entry, totalVisits);
+            if (own == null) return true;
+            __result = new[] { own };
+            return false;
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] story: greeting lookup fell back to the game's: {e.Message}");
+            return true;
         }
     }
 }
