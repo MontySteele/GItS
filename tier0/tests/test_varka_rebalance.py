@@ -148,13 +148,29 @@ def test_gleeful_songs_pays_per_reacting_enemy(rebalance):
     assert st.enemies[2].aura == "hydro"
 
 
-def test_rippling_guard_counts_the_other_cards_played(rebalance):
+@pytest.mark.parametrize("element", V.ELEMENTS)
+def test_rippling_guard_applies_the_current_element(rebalance, element):
+    # The Varka Block paper (2026-10-12, pick 2 (a)): "Gain 7 [10] Block.
+    # Apply your current element to an enemy." It never switches him.
     st = _state()
-    _play(st, _attack(1))
+    V.ledger(st.player).current = element
     _play(st, _attack(1))
     _play(st, _vk("rippling_guard"))
-    assert st.player.block == 6 + 1 * 2         # co-op fixes, 2026-10-11
-    assert st.enemies[0].aura == "hydro"
+    assert st.player.block == 7                 # no per-card-played rider
+    assert st.enemies[0].aura == element
+    assert V.ledger(st.player).current == element
+    st = _state()
+    V.ledger(st.player).current = element
+    _play(st, _vk("rippling_guard") + "+")
+    assert st.player.block == 10
+
+
+def test_rippling_guard_without_a_current_element_applies_nothing(rebalance):
+    st = _state()
+    V.ledger(st.player).current = None
+    _play(st, _vk("rippling_guard"))
+    assert st.player.block == 7
+    assert st.enemies[0].aura is None
 
 
 def test_whisper_of_water_is_blur(rebalance):

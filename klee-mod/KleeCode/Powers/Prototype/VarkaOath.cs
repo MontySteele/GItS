@@ -135,16 +135,7 @@ public sealed class VarkaOathLedger
         return true;
     }
 
-    /// <summary>Cards he played this turn, replays included (the rebalance's
-    /// Rippling Guard reads the others; the playing card counts itself).
-    /// </summary>
-    public int PlaysThisTurn { get; private set; }
-
-    /// <summary>A card play opened (<see cref="VarkaOath.BeginPlay"/>).
-    /// </summary>
-    public void NotePlay() => PlaysThisTurn++;
-
-    /// <summary>A new round clears the turn's Knight, Swirl and play counts.
+    /// <summary>A new round clears the turn's Knight and Swirl counts.
     /// </summary>
     public void RollTo(int round)
     {
@@ -152,7 +143,6 @@ public sealed class VarkaOathLedger
         _round = round;
         KnightsThisTurn = 0;
         SwirlsThisTurn = 0;
-        PlaysThisTurn = 0;
     }
 
     // ---- reads ------------------------------------------------------------
@@ -505,7 +495,6 @@ public static class VarkaOath
         if (!Live(owner)) return;
         var ledger = VarkaOathLedger.For(owner!);
         ledger.OpenScope(open: !VarkaRules.IsKnight(card), card: card);
-        ledger.NotePlay();
         if (!VarkaRules.IsKnight(card)) return;
         ledger.NoteKnight();
         // Noelle (the expansion) is a Geo Knight: a Knight for every
@@ -1573,19 +1562,6 @@ public static class VarkaCards
         }
         await GainCardBlock(owner,
             Var(card, "VkBase") + Var(card, "VkPer") * reacted, cardPlay);
-    }
-
-    /// <summary>Rippling Guard: "Gain 3 Block, plus 2 [3] for each other card
-    /// you played this turn." The ledger counts this play too.</summary>
-    public static async Task RipplingGuard(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        var owner = card.Owner?.Creature;
-        if (owner == null || !VarkaOath.Live(owner)) return;
-        var others = System.Math.Max(
-            0, VarkaOathLedger.For(owner).PlaysThisTurn - 1);
-        await GainCardBlock(owner,
-            Var(card, "VkBase") + Var(card, "VkPer") * others, cardPlay);
     }
 
     /// <summary>A card's printed Block, powered (Dexterity, Frail).</summary>

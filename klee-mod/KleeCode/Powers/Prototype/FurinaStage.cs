@@ -474,11 +474,11 @@ public static class FurinaStage
             ? FurinaStageFacePreview.Room(owner, DrainedOf(owner)) : 0;
     }
 
-    /// <summary>Against the Tide: "within 5 HP of your Drain line".
-    /// </summary>
-    public static bool NearLine(Creature? owner) =>
-        LiveFor(owner)
-        && FurinaStageLaw.NearTheLine((int)owner!.CurrentHp, LineOf(owner));
+    /// <summary>Against the Tide (2026-10-12): "If you Drained this turn":
+    /// 1 or more HP drained this turn by any Drain, her cards' or a guest's
+    /// act. Mirrors <c>furina_stage.drained_this_turn</c>.</summary>
+    public static bool DrainedThisTurn(Creature? owner) =>
+        LiveFor(owner) && FurinaStageLedger.For(owner!).DrainedThisTurn > 0;
 
     /// <summary>Clean Slate: "If you have no drained HP left".</summary>
     public static bool NoneDrained(Creature? owner) =>

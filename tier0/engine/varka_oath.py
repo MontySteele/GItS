@@ -133,8 +133,9 @@ VARKA WILDFIRE OATH AND SHORT CIRCUIT (2026-10-03):
     Element-less and unpowered, per stack, so it never re-enters `note_hit`.
     C# twin: `VarkaOath.NoteApplication` -> `WildfireOathPower.OnPyroApplied`.
   * RAZOR: AWAKENING (`awakening`) hits the one enemy it is played on.
-  * KINDS `kindled_edge`, `storm_battery`, `frost_ward`, `gleeful_songs`,
-    and `rippling_guard`. (`echo_block`, Whisper of Water's next two turns,
+  * KINDS `kindled_edge`, `storm_battery`, `frost_ward` and
+    `gleeful_songs`. (`rippling_guard` left with the Varka Block paper,
+    2026-10-12: Rippling Guard applies the current element. `echo_block`, Whisper of Water's next two turns,
     left with the Hydro paper, 2026-10-10: Whisper applies the base Blur.)
 """
 
@@ -232,7 +233,6 @@ KINDS = frozenset({
     "electro_strike", "electro_all", "violet_storm",
     # THE REBALANCE (2026-10-03).
     "kindled_edge", "storm_battery", "frost_ward", "gleeful_songs",
-    "rippling_guard",
     # Downburst's rider (2026-10-04, after #882).
     "swirled_oath",
     # THE COMBO PASS (2026-10-04).
@@ -257,7 +257,6 @@ KIND_FIELDS = {
     "storm_battery": ("per",),
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
-    "rippling_guard": ("base", "per"),
     "swirled_oath": ("amount",),
     # The combo pass (2026-10-04).
     "gain_pyro_oath": ("amount",),
@@ -1227,11 +1226,6 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
             reactions.resolve_hit(state, e, "hydro", 0, "apply_aura_op")
             reacted += state.reactions_this_card > before
         _powered_block(state, card, fx["base"] + fx["per"] * reacted)
-    elif kind == "rippling_guard":
-        # "Gain 6 Block, plus 1 for each other card you played this turn."
-        # `cards_played_this_turn` already counts this play.
-        others = max(0, state.cards_played_this_turn - 1)
-        _powered_block(state, card, fx["base"] + fx["per"] * others)
     else:
         return False
     return True

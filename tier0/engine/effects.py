@@ -3271,9 +3271,9 @@ PREDICATE_NAMES = frozenset({
     # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
     # first card you played this turn".
     "first_card_this_turn",
-    # THE POOL TO 75 (2026-10-09): Against the Tide's "within 5 HP of your
-    # Drain line" and Clean Slate's "no drained HP left".
-    "stage_near_line",
+    # Against the Tide's "If you Drained this turn" (2026-10-12) and Clean
+    # Slate's "no drained HP left" (the pool to 75, 2026-10-09).
+    "stage_drained_this_turn",
     "stage_none_drained",
     # VARKA, THE OATH REWORK (`varka_oath.PREDICATES`): "if you have a
     # current element", "if you played a Knight this turn", "if it Swirls".
@@ -3666,8 +3666,8 @@ def _predicate(state: CombatState, name: str) -> bool:
         return any(not d["companion"] for d in state.exhaust_selection)
     if name == "card_exhausted_this_turn":
         return state.cards_exhausted_this_turn > 0
-    if name == "stage_near_line":
-        return furina_stage.near_line(state.player)
+    if name == "stage_drained_this_turn":
+        return furina_stage.drained_this_turn(state.player)
     if name == "stage_none_drained":
         return furina_stage.none_drained(state.player)
     if name == "hp_lost_this_turn":

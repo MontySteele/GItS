@@ -177,9 +177,6 @@ public static class FurinaStageLaw
     /// act again."</summary>
     public const int ShowstopperSpend = 5;
 
-    /// <summary>Against the Tide: "within 5 HP of your Drain line".</summary>
-    public const int NearLine = 5;
-
     /// <summary>High Stakes (the Spend round 2, 2026-10-10,
     /// <c>review/records/furina-spend-round-2-2026-10-10.md</c>): "Your
     /// Attacks deal 1 additional damage for every 5 HP you have Drained this
@@ -220,12 +217,6 @@ public static class FurinaStageLaw
     /// <summary>Star Turn: "Costs 1 less for every 6 Fanfare you have."
     /// </summary>
     public const int StarTurnFanfarePer = 6;
-
-    /// <summary>Is <paramref name="hp"/> within <see cref="NearLine"/> HP of
-    /// <paramref name="line"/>: at most 5 over it, or at or below it (a Drain
-    /// may go past the line since 2026-10-09, and any HP at or below the line
-    /// counts).</summary>
-    public static bool NearTheLine(int hp, int line) => hp - line <= NearLine;
 
     // ---- the diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
     // ruled 2026-10-11) -----------------------------------------------------

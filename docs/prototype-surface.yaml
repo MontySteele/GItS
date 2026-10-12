@@ -3170,14 +3170,14 @@
    effects: [{op: stage_drain, amount: 3},
              {op: draw, amount: 2}]}
 
-# Against the Tide: "within 5 HP of your Drain line" (the Review section; the
-# relic Repays every turn, so she never stays exactly on the line).
+# Against the Tide: "If you Drained this turn", any Drain of 1+ HP (2026-10-12;
+# was "within 5 HP of your Drain line"; see the provenance notes).
 - {id: proto_fs_against_the_tide, name: "Against the Tide", character: furina,
    upgrade: {conditional_damage: +3, conditional_then_damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {PlainDamage:diff()} damage. If you are within 5 HP of your [gold]Drain[/gold] line, deal {BranchDamage:diff()} instead.",
-   effects: [{op: conditional, if: stage_near_line,
+   description: "Deal {PlainDamage:diff()} damage. If you [gold]Drained[/gold] this turn, deal {BranchDamage:diff()} instead.",
+   effects: [{op: conditional, if: stage_drained_this_turn,
               then: [{op: damage, amount: 14, target: enemy}],
               else: [{op: damage, amount: 8, target: enemy}]}]}
 
@@ -3606,13 +3606,14 @@
 
 - {id: proto_vk_rippling_guard, name: "Rippling Guard", character: varka,
    # The rebalance (sec.3): replaces Wind Wall. No illustration yet.
-   # Varka co-op fixes (2026-10-11): 6 + 1 [2], was 3 + 2 [3] (provenance).
+   # Varka Block paper (2026-10-12, pick 2 (a)): any element, was Hydro and
+   # 6 + 1 [2] per card played (provenance).
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each other card you played this turn.",
-   effects: [{op: apply_aura, element: hydro, target: enemy},
-             {op: varka, kind: rippling_guard, base: 6, per: 1}],
-   upgrade: {varka_per: 1}}
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Apply your [gold]current element[/gold] to an enemy.",
+   effects: [{op: block, amount: 7},
+             {op: varka, kind: apply_current_element, target: enemy}],
+   upgrade: {block: 3}}
 
 - {id: proto_vk_frost_ward, name: "Frost Ward", character: varka,
    # The rebalance (sec.4): Cryo's payoff; replaces Favonius Drill.
@@ -3781,10 +3782,10 @@
 - {id: proto_vk_stormward_stance, name: "Stormward Stance", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Varka round 3 (2026-10-10): the 4-Oath gate dropped; "Every holder
-   # called it dead because of the gate."
+   # Varka round 3 (2026-10-10): the 4-Oath gate dropped. Varka Block paper
+   # (2026-10-12): 4 [6], was 3 [5] (provenance).
    description: "Your [gold]Anemo[/gold] Attacks deal {PowerAmount:diff()} additional damage.",
-   effects: [{op: apply_power, power: vk_stormward_stance, amount: 3, target: self}],
+   effects: [{op: apply_power, power: vk_stormward_stance, amount: 4, target: self}],
    upgrade: {power_amount: +2}}
 
 - {id: proto_vk_rally_to_the_banner, name: "Rally to the Banner", character: varka,
