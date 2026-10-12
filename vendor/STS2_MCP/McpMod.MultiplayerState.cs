@@ -289,7 +289,10 @@ public static partial class McpMod
         {
             ["act"] = runState.CurrentActIndex + 1,
             ["floor"] = runState.TotalFloor,
-            ["ascension"] = runState.AscensionLevel
+            ["ascension"] = runState.AscensionLevel,
+            // GItS LOCAL EDIT (2026-10-12, `embark --abyss`): the run's
+            // modifier ids, read back by the embark (gits/GitsAbyssLane.cs).
+            ["modifiers"] = GitsRunModifierIds(runState)
         };
 
         // All players summary (always included for multiplayer)

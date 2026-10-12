@@ -324,9 +324,11 @@ def _write(path: Path, blob: dict[str, Any]) -> None:
 
 def _default_session(stamp: str, instance: Any,
                      extra_args: tuple[str, ...],
-                     install_bridge: bool = True) -> Any:
+                     install_bridge: bool = True,
+                     extra_env: dict[str, str] | None = None) -> Any:
     return soak.Session(stamp, do_setup=True, intent="", instance=instance,
-                        install_bridge=install_bridge, extra_args=extra_args)
+                        install_bridge=install_bridge, extra_args=extra_args,
+                        extra_env=extra_env)
 
 
 # ----------------------------------------------------------------- embark --
@@ -335,6 +337,7 @@ def embark(lanes: list[str], characters: list[str], *,
            ascension: int | None = None, seed: str | None = None,
            max_actions: int = 0, client_id: int = DEFAULT_CLIENT_ID,
            install_bridge: bool = True,
+           abyss: bool = False,
            wire: Any = bridge,
            session_factory: Callable[..., Any] = _default_session,
            lane_factory: Callable[[str], Any] = instances.lane,
@@ -351,6 +354,12 @@ def embark(lanes: list[str], characters: list[str], *,
     launch otherwise refreshes it from THIS checkout's vendor tree when no game
     holds it, exactly as a singleplayer embark does -- which from a worktree
     carrying a bridge edit would be a deploy.
+
+    `abyss` (2026-10-12) launches both games with `GITS_ABYSS=1`. Only the
+    HOST's lobby adds the Spiral Abyss modifier (`AbyssLane.cs`); the run's
+    modifier list reaches the client inside the game's own begin-run message,
+    so the pair cannot disagree. Both lanes' read-back must carry it, or the
+    embark fails `abyss_not_honoured`.
     """
     from understudy import embark as single
     host_label, client_label = lanes
@@ -384,6 +393,7 @@ def embark(lanes: list[str], characters: list[str], *,
         **({"ascension_requested": ascension}
            if ascension is not None else {}),
         **({"seed_requested": seed} if seed else {}),
+        "abyss_requested": bool(abyss),
         "fastmp_port": port, "client_id": int(client_id),
         "lane_sidecars": {}, "state": "launching",
         "coop_guardrail": COOP_GUARDRAIL, "run_of_record": False,
@@ -401,7 +411,8 @@ def embark(lanes: list[str], characters: list[str], *,
         lane_stamp = f"{stamp}-{label}"
         budget = blindplay_shape.set_budget(max_actions, label,
                                             run=lane_stamp)
-        session = session_factory(lane_stamp, inst, args, install_bridge)
+        session = session_factory(lane_stamp, inst, args, install_bridge,
+                                  extra_env=single.abyss_env(abyss))
         sessions[label] = session
         lane_blob = {
             "stamp": lane_stamp, "ledger": str(session.ledger.path),
@@ -409,6 +420,7 @@ def embark(lanes: list[str], characters: list[str], *,
             **({"ascension_requested": ascension}
                if ascension is not None else {}),
             "max_actions": budget["cap"],
+            "abyss_requested": bool(abyss),
             "max_actions_store": str(blindplay_shape.budget_path(label)),
             **({"game_dir": str(inst.game_dir)}
                if inst.game_dir is not None else {}),
@@ -528,12 +540,15 @@ def embark(lanes: list[str], characters: list[str], *,
 
     mismatch = []
     blob.update({"state": "open", "run_seed": run_seed,
-                 "character_actual": {}, "ascension": {}})
+                 "character_actual": {}, "ascension": {}, "abyss": {}})
     for inst, who, _role, _p, _a in roles:
         read = reads[inst.label]
         actual = str((read.get("player") or {}).get("character") or "")
         asc = int(((read.get("run") or {}).get("ascension")) or 0)
+        modifiers = (read.get("run") or {}).get("modifiers")
+        carried = single.abyss_read_back(modifiers)
         lane_blobs[inst.label].update({
+            "run_modifiers": modifiers, "abyss": carried,
             "character_actual": actual, "run_seed": run_seed,
             "screen": str(read.get("state_type") or "unknown"),
             "floor": int(((read.get("run") or {}).get("floor")) or 0),
@@ -543,6 +558,10 @@ def embark(lanes: list[str], characters: list[str], *,
                               lane_blobs[inst.label])
         blob["character_actual"][inst.label] = actual
         blob["ascension"][inst.label] = asc
+        blob["abyss"][inst.label] = carried
+        if abyss and carried is False:
+            mismatch.append(f"abyss_not_honoured: {inst.label} reads back "
+                            f"the run's modifiers {modifiers!r}")
         if not soak.character_matches(who, actual):
             mismatch.append(f"character_mismatch: {inst.label} asked for "
                             f"{who}, the run reads back {actual!r}")
@@ -610,6 +629,7 @@ def teardown(lanes: list[str],
 def run_cli(args: Any) -> int:
     """`embark --coop ...`, from `embark.main`'s parsed arguments."""
     import sys
+    from understudy import embark as single
     try:
         lanes = parse_lanes(args.lanes)
         if args.teardown:
@@ -619,7 +639,8 @@ def run_cli(args: Any) -> int:
         blob = embark(lanes, chars, ascension=args.ascension, seed=args.seed,
                       max_actions=args.max_actions,
                       client_id=args.client_id,
-                      install_bridge=not args.keep_bridge)
+                      install_bridge=not args.keep_bridge,
+                      abyss=bool(getattr(args, "abyss", False)))
     except EmbarkError as exc:
         print(f"embark error: {exc}", file=sys.stderr)
         return 2
@@ -628,8 +649,11 @@ def run_cli(args: Any) -> int:
     print(f"fastmp:    UDP {blob.get('fastmp_port')} (this pair's own port)")
     for label in blob["lanes"]:
         role = "host" if label == blob["host"] else "client"
+        mode = (single.abyss_word((blob.get("abyss") or {}).get(label))
+                if blob.get("abyss_requested") else "")
         print(f"{label} ({role}): {blob['character_actual'].get(label)}  "
-              f"ascension {blob['ascension'].get(label)}")
+              + (f"{mode}  " if mode else "")
+              + f"ascension {blob['ascension'].get(label)}")
     print()
     print("The games are UP and the co-op run is OPEN. Nothing has been torn "
           "down.")

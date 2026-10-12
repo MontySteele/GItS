@@ -178,6 +178,26 @@ discards it, so every later roll of the seed is unchanged. It acts only when
 a new run is made (`BoreasFang.AfterObtained`); co-op and `--hold` do not take
 it.
 
+**A Spiral Abyss run** (2026-10-12). `--abyss` makes the run carry the Spiral
+Abyss modifier, as the menu's Abyss button does: the choice page over each
+act's Ancient, then the Blessings and Shadows. Solo, parallel `--lanes` (every
+lane) and `--coop`:
+
+```sh
+python -m understudy.embark --lane 1 --character klee --ascension 0 --abyss
+python -m understudy.embark --lanes 1,2 --characters klee,varka --abyss
+python -m understudy.embark --coop --lanes 2,3 --characters klee,furina --abyss
+```
+
+The embark sets `GITS_ABYSS=1` on the launched game (empty without the flag).
+The mod (`klee-mod/KleeCode/Abyss/AbyssLane.cs`) adds the modifier where the
+host's Standard lobby begins the run, so in co-op the client gets it inside the
+game's own begin-run message and the pair cannot disagree. The run is built as
+a Custom-mode run, exactly as the Abyss button's is. The embark reads the
+run's modifiers back off `run.modifiers` and fails `abyss_not_honoured`
+without it; the status row and the solo `mode:` line print `abyss`. `--hold`
+refuses it.
+
 What makes it safe (the 2026-09-25 round's second lane never came up when two
 lanes were embarked at the same moment):
 
