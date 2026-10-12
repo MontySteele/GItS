@@ -526,10 +526,10 @@ def spent_threes(spent: int) -> int:
     return max(0, int(spent)) // BRAVURA_SPENT_PER
 
 
-def fanfare_fives(player) -> int:
-    """`stage_fanfare_fives`: her Fanfare in fives, rounded down (Packed
-    House's "plus 1 for every 5 Fanfare you have"; the C#
-    `FurinaStage.FanfareFives`)."""
+def fanfare_fours(player) -> int:
+    """`stage_fanfare_fours`: her Fanfare in fours, rounded down (Packed
+    House's "plus 1 for every 4 Fanfare you have"; the C#
+    `FurinaStage.FanfareFours`)."""
     return fanfare(player) // PACKED_HOUSE_FANFARE_PER
 
 

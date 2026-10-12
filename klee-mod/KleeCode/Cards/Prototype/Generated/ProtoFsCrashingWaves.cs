@@ -51,7 +51,7 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crashing Waves"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 12: hit once more for every 4."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16: hit once more for every 4."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,7 +69,7 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 12);
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 16);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .WithHitCount(2 + 1 * FurinaStage.SpentFours(this))

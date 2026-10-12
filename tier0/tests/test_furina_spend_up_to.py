@@ -122,14 +122,14 @@ def test_spirited_aria_deals_8_plus_1_per_point_and_draws_per_4():
     assert st.enemies[0].hp == 300 - 11
     assert len(st.player.hand) == 0
     st.player.ftd.fanfare = 20
-    _play(st, _card("proto_fs_spirited_aria+"))         # 11 + 8, draw 2
-    assert st.enemies[0].hp == 300 - 11 - 19
-    assert len(st.player.hand) == 2
-    assert st.player.ftd.fanfare == 12
+    _play(st, _card("proto_fs_spirited_aria+"))         # 11 + 12, draw 3
+    assert st.enemies[0].hp == 300 - 11 - 23
+    assert len(st.player.hand) == 3
+    assert st.player.ftd.fanfare == 8
 
 
-def test_crashing_waves_hits_twice_plus_once_per_4_up_to_12():
-    for bank, hits, left in ((0, 2, 0), (3, 2, 0), (8, 4, 0), (30, 5, 18)):
+def test_crashing_waves_hits_twice_plus_once_per_4_up_to_16():
+    for bank, hits, left in ((0, 2, 0), (3, 2, 0), (8, 4, 0), (30, 6, 14)):
         st = _furina(bank)
         _play(st, _card("proto_fs_crashing_waves"))
         assert st.enemies[0].hp == 300 - 4 * hits, bank
@@ -139,7 +139,7 @@ def test_crashing_waves_hits_twice_plus_once_per_4_up_to_12():
     assert st.enemies[0].hp == 300 - 25
 
 
-def test_hold_the_stage_gains_6_plus_1_per_point_up_to_12():
+def test_hold_the_stage_gains_6_plus_1_per_point_up_to_16():
     st = _furina(0)
     _play(st, _card("proto_fs_hold_the_stage"))
     assert st.player.block == 6
@@ -147,9 +147,9 @@ def test_hold_the_stage_gains_6_plus_1_per_point_up_to_12():
     _play(st, _card("proto_fs_hold_the_stage"))
     assert st.player.block == 11
     st = _furina(40)
-    _play(st, _card("proto_fs_hold_the_stage+"))        # 8 + 12
-    assert st.player.block == 20
-    assert st.player.ftd.fanfare == 28
+    _play(st, _card("proto_fs_hold_the_stage+"))        # 8 + 16
+    assert st.player.block == 24
+    assert st.player.ftd.fanfare == 24
 
 
 def test_the_four_cards_have_no_chooser():

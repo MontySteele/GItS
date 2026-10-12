@@ -97,6 +97,9 @@ public static class ArmKeywordTips
     public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
     public const string DrainKey = "KLEEMOD-ARM_STAGE_DRAIN";
     public const string RepayKey = "KLEEMOD-ARM_STAGE_REPAY";
+    // THE SPEND OUTLET PAPER (2026-10-12), and NOT A KEYWORD ROW: a rider on
+    // her starter spend-all, the card two seats played for 0 to 4 damage.
+    public const string BankDamageKey = "KLEEMOD-ARM_STAGE_BANK_DAMAGE";
     public const string SummonKey = "KLEEMOD-ARM_STAGE_SUMMON";
     public const string GuestStarKey = "KLEEMOD-ARM_STAGE_GUEST_STAR";
     public const string CharlotteKey = "KLEEMOD-ARM_STAGE_CHARLOTTE";
@@ -915,6 +918,17 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForRepay(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, RepayKey, RepayBody);
+
+    /// <summary>The Spend outlet paper (2026-10-12, sec.2 item 4, hygiene):
+    /// two seats played Rising Applause at 0 to 4 damage. A rider about
+    /// THIS card, derived from the clause (<c>gen_klee_cards.
+    /// starter_spends_the_bank</c>): a starter whose damage is the
+    /// Fanfare its spend-all took.</summary>
+    public static IEnumerable<IHoverTip> ForBankDamage(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, BankDamageKey,
+            "Its damage is the [gold]Fanfare[/gold] you hold. Play it when "
+          + "the bank is worth it.");
 
     /// <summary>Rule 5 (the pool to 75, sec.3): where a guest goes. Since
     /// 2026-10-11 the guest a full stage pushes out acts once as it leaves

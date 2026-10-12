@@ -186,7 +186,7 @@ STAR_TURN_FANFARE_PER = 6          # Star Turn: 1 less per 6 Fanfare
 # The diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
 # ruled 2026-10-11).
 BRAVURA_SPENT_PER = 3              # Bravura: a hit for every 3 spent
-PACKED_HOUSE_FANFARE_PER = 5       # Packed House: +1 for every 5 Fanfare
+PACKED_HOUSE_FANFARE_PER = 4       # Packed House: +1 Block for every 4 Fanfare
 
 
 def _new_ledger() -> dict:
@@ -444,10 +444,10 @@ CARDS: dict[str, Spec] = {
     # Fountain of Lucine (1): At the start of your next 3 turns, Repay 3.
     "ftd_fountain": Spec("Fountain of Lucine", 1, "skill", "uncommon",
                          "fountain", (3,)),
-    # Hold the Stage (1): Gain 6 Block. Spend up to 12: gain 1 more for
-    # each. (The Spend paper.)
+    # Hold the Stage (1): Gain 6 Block. Spend up to 16: gain 1 more for
+    # each. (The Spend paper; 16 since the Spend outlet paper, 2026-10-12.)
     "ftd_hold_the_stage": Spec("Hold the Stage", 1, "skill", "uncommon",
-                               "upto_block", (6, 12)),
+                               "upto_block", (6, 16)),
     # Guest Star: Chevreuse (1). Line: whenever you Spend, apply 1
     # Vulnerable to a random enemy. Act: deal 4 damage to a random enemy.
     "ftd_chevreuse": Spec("Guest Star: Chevreuse", 1, "skill", "uncommon",

@@ -477,6 +477,10 @@ public static class KleeMod
                         "Fanfare",
                     [Cards.ArmKeywordTips.DrainKey + ".title"] = "Drain",
                     [Cards.ArmKeywordTips.RepayKey + ".title"] = "Repay",
+                    // The Spend outlet paper (2026-10-12): the rider on her
+                    // starter spend-all, not a keyword.
+                    [Cards.ArmKeywordTips.BankDamageKey + ".title"] =
+                        "When to play it",
                     // The "Drained N" counter's hover title.
                     [Vfx.DrainedCounter.TitleKey + ".title"] = "Drained",
                     [Cards.ArmKeywordTips.SummonKey + ".title"] = "Summon",
