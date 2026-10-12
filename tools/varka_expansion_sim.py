@@ -367,9 +367,6 @@ def _translate(state, fx):
                "target": "all_enemies"}
         yield {"op": "block", "amount": base + per * n}
         yield oath_proxy
-    elif kind == "rippling_guard":
-        yield {"op": "block",
-               "amount": base + per * state.cards_played_this_turn}
     elif kind == "echo_block":
         yield {"op": "block_next_turn", "amount": 2 * amt}
     elif kind == "tempest":
@@ -654,8 +651,6 @@ def _draft_ops(fx):
         return [{"op": "apply_aura", "element": "hydro",
                  "target": "all_enemies"},
                 {"op": "block", "amount": base + per}]
-    if kind == "rippling_guard":
-        return [{"op": "block", "amount": base + 2 * per}]
     if kind == "echo_block":
         return [{"op": "block_next_turn", "amount": 2 * amt}]
     if kind == "frost_ward":

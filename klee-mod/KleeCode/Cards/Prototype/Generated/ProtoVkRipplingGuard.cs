@@ -37,25 +37,21 @@ public sealed class ProtoVkRipplingGuard : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesHydro };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true), this, Element.Hydro);
+        ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_rippling_guard");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rippling Guard"),
-        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each other card you played this turn."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply your [gold]current element[/gold] to an enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 6m),
-            new DynamicVar("VkPer", 1m)
+            new BlockVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,13 +63,12 @@ public sealed class ProtoVkRipplingGuard : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
-        await VarkaCards.RipplingGuard(choiceContext, this, cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await VarkaCards.ApplyCurrentElement(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["VkPer"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

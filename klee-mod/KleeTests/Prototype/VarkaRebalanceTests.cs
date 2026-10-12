@@ -93,22 +93,21 @@ public class VarkaRebalanceTests : IDisposable
     }
 
     [Fact]
-    public void Rippling_guard_counts_the_other_plays_this_turn()
+    public void Rippling_guard_blocks_and_applies_the_current_element()
     {
+        // The Varka Block paper (2026-10-12, pick 2 (a)): "Gain 7 [10] Block.
+        // Apply your current element to an enemy." Without one, nothing lands
+        // (VarkaCards.ApplyCurrentElement returns on Element.None).
         var guard = new ProtoVkRipplingGuard();
         Assert.Equal(CardRarity.Common, guard.Rarity);
-        // Varka co-op fixes (2026-10-11): 6 + 1 [2], was 3 + 2 [3].
-        Assert.Equal(6m, Var(guard, "VkBase"));
-        Assert.Equal(1m, Var(guard, "VkPer"));
-        Assert.Equal(6m, Var(Upgraded<ProtoVkRipplingGuard>(), "VkBase"));
-        Assert.Equal(2m, Var(Upgraded<ProtoVkRipplingGuard>(), "VkPer"));
-        Assert.Contains("VarkaOathLedger.get_PlaysThisTurn",
-                        Calls("VarkaCards", "RipplingGuard"));
-        Assert.Contains("VarkaOathLedger.NotePlay", Calls("VarkaOath", "BeginPlay"));
-        var ledger = VarkaOathLedger.For(Seat.Varka().Creature);
-        ledger.NotePlay();
-        ledger.NotePlay();
-        Assert.Equal(2, ledger.PlaysThisTurn);
+        Assert.Equal(TargetType.AnyEnemy, guard.TargetType);
+        Assert.Equal(7m, Var(guard, "Block"));
+        Assert.Equal(10m, Var(Upgraded<ProtoVkRipplingGuard>(), "Block"));
+        var body = Il.Calls(Il.Method("ProtoVkRipplingGuard", "OnPlay"));
+        Assert.Contains("CreatureCmd.GainBlock", body);
+        Assert.Contains("VarkaCards.ApplyCurrentElement", body);
+        Assert.DoesNotContain("ElementalHit.ApplyOnly", body);
+        Assert.Null(typeof(VarkaCards).GetMethod("RipplingGuard"));
     }
 
     [Fact]
@@ -204,11 +203,12 @@ public class VarkaRebalanceTests : IDisposable
     public void Sworn_brotherhood_and_stormward_carry_round_3_numbers()
     {
         // Varka round 3 (2026-10-10): Sworn Brotherhood 2 [3] Oath of the
-        // current element; Stormward Stance 3 [5], no Oath gate.
+        // current element; Stormward Stance no Oath gate. The Varka Block
+        // paper (2026-10-12): Stormward Stance 4 [6], was 3 [5].
         Assert.Equal(2m, Var(new ProtoVkSwornBrotherhood(), "PowerAmount"));
         Assert.Equal(3m, Var(Upgraded<ProtoVkSwornBrotherhood>(), "PowerAmount"));
-        Assert.Equal(3m, Var(new ProtoVkStormwardStance(), "PowerAmount"));
-        Assert.Equal(5m, Var(Upgraded<ProtoVkStormwardStance>(), "PowerAmount"));
+        Assert.Equal(4m, Var(new ProtoVkStormwardStance(), "PowerAmount"));
+        Assert.Equal(6m, Var(Upgraded<ProtoVkStormwardStance>(), "PowerAmount"));
     }
 
     [Fact]
