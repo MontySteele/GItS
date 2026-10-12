@@ -193,3 +193,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi text (jellyfish round 2026-10-12): Tide Wall's Plan should say it reads the intent when carried out; the Plan tip should say Plan Block arrives at the start of next turn and whether Strength adds to Plan damage; Albedo - Solar Isotoma should say it needs an aura.
 - Bridge: card names renumber mid-turn ("Sting (3)" vanished after a play) and cause refusals; keep a card's name stable for the turn (Kokomi jellyfish round 2026-10-12, lane 1).
 - Varka text (ascension check 2026-10-12): a Knight Companion's element switch (Team Effort) shows only after the play; Kindled Edge switched him to Pyro with no "Element switch" line; Four Winds' Ascension returns after a mid-fight reshuffle, unprinted.
+- Abyss live check 2026-10-12 (0.2.5085): on the Ancient's choice page, long option text (Abyssal Moon's "If passed: Abyss Mage Shield ...") auto-shrinks to an unreadable size; shorten the Shadow lines on that page or give the option more height.
+- Seat page: `choose` prints "Took: X" before the bridge refuses it (seen when choosing mid-greeting); print "Took" only after the game accepts.
+- Seat page: an Ancient's greeting text is not printed, only "(the scene is still being told)"; print the dialogue lines so seats read the story.
