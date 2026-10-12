@@ -46,7 +46,7 @@ def test_tide_wall_reads_the_biggest_intent_not_the_front_one():
     carry_out(st)
     assert st.player.block == 6 + 18
     assert _rows()["proto_kk_tide_wall"]["description"].endswith(
-        "plus the most damage an enemy intends.")
+        "plus the most damage an enemy intends when it is carried out.")
 
 
 def test_no_enemies_intend_nothing():

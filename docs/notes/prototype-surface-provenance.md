@@ -7715,3 +7715,59 @@ no design beyond the review's list. Both engines; sim pins in
   written before the Power was played keeps its written number, as with
   Strength. A Ward's Plan line (Weak) gains no Block. Brine Sting is not a
   Sting. The old write-an-Ethereal-card Block payment is gone.
+
+## Kokomi pre-run fixes, 2026-10-12
+
+Source: the Fable round-3 review (session scratchpad
+`k3/fable-review-round3.md`, sec.4 "Claude can ship", items 1-7), before
+[USER]'s own Kokomi run. Claude's calls at Prototype; legibility and text
+only, no number and no rule moves. C# pins in
+`klee-mod/KleeTests/Prototype/KokomiPreRunFixesTests.cs`, page pins in
+`tier0/tests/test_kokomi_prerun_fixes_2026_10_12.py`. Pool stays 78.
+
+- **Treatise's draw is named.** `TreatisePower` flashes when it draws and sets
+  `ResolutionLedger.DrawSource` around the draw; `PlayTelemetryHooks.
+  AfterCardDrawn` files it as the `drawn` event's power, and the page's
+  "Since last page" line reads "drew X (Treatise)" instead of crediting the
+  Plan card the draw happened under, or nobody. Four seats over two rounds
+  said it never drew; telemetry says about +0.8 a turn.
+- **A written Companion is played.** The page's written-number note now says
+  a written Companion is the exception: it is played as a card next turn, so
+  her Strength and Weak then count (`KokomiCompanionPlan.CarryOut`
+  auto-plays a clone; behaviour unchanged). The Companion Plan tip
+  (`ArmKeywordTips.CompanionPlanText`): "Play it on the Bake-Kurage to write
+  it as a Plan. Next turn the Kurage applies Hydro, then it is played:
+  Strength and Weak count." The page's sheet-face line under a hand card,
+  which read "Written:", is now "Unmodified:" on every arm: on a Kokomi page
+  "written" is the Plan verb, and two seats read the sheet face as the number
+  a Plan would carry (lane 4's Drift "Written: Deal 8" under -2 Strength was
+  the card's own sheet number, not a Plan preview; the live face above it
+  folded the Strength).
+- **Tide Wall (`proto_kk_tide_wall`)**, face: "plus the most damage an enemy
+  intends when it is carried out."
+- **Tamakushi Casket** (and the Watatsumi Casket, one face), face: "At the end
+  of your turn, if a Plan is waiting, gain 3 Block. A Plan's own Block comes
+  at the start of your next turn." Plans are carried out in
+  `ProtoBakeKuragePower.AfterPlayerTurnStart`, after her turn-start Block
+  clear, so a Block Plan never meets the attacks of the turn it was written.
+  The page's Casket row follows the face word for word.
+- **`observe --define`** answers "Surrounded" and "turns you"
+  (`blindplay_notes.DEFINE_ONLY_WORDS`): the base game's facing rule, x1.5
+  from behind, a targeted card or potion turns you.
+- **Nereid's Ascension and Change of Plans.** Correct as built: the doubling is
+  the morning drain's first entry (`KokomiPlan.Drain`, `midTurn`), and a Plan
+  carried out early by Change of Plans or Spring Tide is carried out once, as
+  the face's "At the start of your turn" says. The Nereid rider tip adds "A
+  Plan carried out early is carried out once."
+- **A waiting damage Plan into Block** (page only). A front-aimed damage Plan
+  in the queue prints "(into Block N)" when the front body keeps its Block
+  through its turn (Burrowed, Barricade), run down by the Plans ahead, and
+  "(into the Block it gains on its turn)" when it intends to Defend. Block
+  that falls at the enemy's turn start is not named.
+- **Treatise's rule, checked against round 4 lane 4** ("never drew").
+  Not a bug. Every turn of that run with no extra draw was a turn its Plan
+  cards were written on the Bake-Kurage (the seat's record: "wrote both
+  Stings as plans", "never drew a card when I wrote a Plan"), which by rule
+  draws nothing; the turns it played one directly drew one (Seapunk turn 2,
+  Punch Construct turn 1). Pinned on the real rows, a generated Sting
+  included and across turns, in both engines.

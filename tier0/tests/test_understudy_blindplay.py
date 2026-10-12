@@ -12218,7 +12218,7 @@ def test_a_folded_face_prints_the_written_one_beside_it():
     now says both."""
     page = blindplay.observe(_folded_hand_state("Gain 6 Block."))
     assert "Gain 6 Block." in page
-    assert "Written: Gain 8 Block." in page
+    assert "Unmodified: Gain 8 Block." in page
     assert "the difference is the board's" in page
 
 
@@ -12227,7 +12227,7 @@ def test_an_upgraded_cards_written_face_is_the_upgraded_one():
     number is the canonical value plus its own OnUpgrade delta -- 8 + 3."""
     page = blindplay.observe(_folded_hand_state("Gain 9 Block.",
                                                 upgraded=True))
-    assert "Written: Gain 11 Block." in page
+    assert "Unmodified: Gain 11 Block." in page
 
 
 def test_an_unfolded_face_prints_no_written_line():
@@ -12284,7 +12284,7 @@ def test_a_branch_clause_un_folds_too_and_not_only_the_first_one():
          "description": ("Gain 10 Block. If you are below half HP, gain 6 "
                          "additional Block.")}]
     page = blindplay.observe(state)
-    assert ("Written: Gain 8 Block. If you are below half HP, gain 4 "
+    assert ("Unmodified: Gain 8 Block. If you are below half HP, gain 4 "
             "additional Block.") in page
 
 

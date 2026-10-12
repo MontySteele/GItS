@@ -106,6 +106,10 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_HYDRO_NOTE,
                                         PLAN_PAST_LETHAL_BLOCK,
                                         PLAN_PAST_LETHAL_CLAUSE,
+                                        PLAN_INTO_BLOCK_CLAUSE,
+                                        PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE,
+                                        PLAN_INTO_DEFEND_CLAUSE,
+                                        BLOCK_KEEPING_POWERS,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE, spark_opening_rule,
                                         SPARK_SOURCES_LINE,
@@ -206,7 +210,9 @@ def _no_draw_clause(c: dict[str, Any], relic: str) -> str:
 #: move, so a Block face under Strength names nothing.
 FACE_DAMAGE_MOVERS = ("strength", "weak", "shrink", "vigor")
 FACE_BLOCK_MOVERS = ("dexterity", "frail")
-#: The `Written:` note's tail where a power on you explains the difference.
+#: The label on a hand card's sheet face (`EB-700`), where the board moved it.
+UNMODIFIED_FACE_LABEL = "Unmodified:"
+#: The `Unmodified:` note's tail where a power on you explains the difference.
 WRITTEN_FACE_MOVED_BY = " -- the difference is the board's: your {powers}.)"
 WRITTEN_FACE_NOTE = ("    (the line above this one is what the board is "
                      "printing now; this is the card's own written face, off "
@@ -325,7 +331,11 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # directly above it. Absent wherever the two agree, which is every card on
     # a board with nothing folding into it.
     if c.get("written_face"):
-        out.append(f"    Written: {c['written_face']}")
+        # Kokomi pre-run fixes (2026-10-12): "Unmodified", not "Written".
+        # On a Kokomi page "written" is the Plan verb, and two round-3 seats
+        # read this sheet face as the number a Plan would carry (lane 4's
+        # Drift "Written: Deal 8" under -2 Strength; lane 5's Shinobu).
+        out.append(f"    {UNMODIFIED_FACE_LABEL} {c['written_face']}")
         movers = _face_movers(c, you)
         out.append(WRITTEN_FACE_NOTE + (
             WRITTEN_FACE_MOVED_BY.format(powers=_and_list(
@@ -556,6 +566,43 @@ def _past_lethal_clauses(pl: dict[str, Any],
                 queued=ahead)
         damage = entry.get("damage") or 0
         ahead += damage * 2 if index == 0 and pl.get("twice") else damage
+    return out
+
+
+def _into_block_clauses(pl: dict[str, Any],
+                        enemies: list[dict[str, Any]]) -> dict[int, str]:
+    """Kokomi pre-run fixes (2026-10-12): which waiting damage Plans land
+    in the front body's Block.
+
+    The Block a morning Plan meets is the Block the body KEEPS through its
+    turn start (`BLOCK_KEEPING_POWERS`) plus what it RAISES on its turn (a
+    Defend intent, whose size the feed does not send). Front-aimed damage
+    entries only, in queue order, with the kept Block run down by the damage
+    ahead (Nereid's doubled first entry counted, `_past_lethal_clauses`'
+    rule). A body keeping no Block and not defending: nothing.
+    """
+    body = _front_body(enemies)
+    if body is None:
+        return {}
+    keeps = any(_fold(p.get("name")) in BLOCK_KEEPING_POWERS
+                for p in body.get("powers") or [])
+    kept = (body.get("block") or 0) if keeps else 0
+    defends = any(_fold(i.get("type")) == "defend"
+                  for i in body.get("intents") or [])
+    out: dict[int, str] = {}
+    first = True
+    for index, entry in enumerate(pl.get("queue") or []):
+        damage = entry.get("damage") or 0
+        if entry.get("aim") != "front" or damage <= 0:
+            continue
+        if kept > 0:
+            out[index] = (PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE if defends
+                          else PLAN_INTO_BLOCK_CLAUSE).format(block=kept)
+        elif defends and first:
+            out[index] = PLAN_INTO_DEFEND_CLAUSE
+        first = False
+        kept = max(0, kept - (damage * 2 if index == 0 and pl.get("twice")
+                              else damage))
     return out
 
 
@@ -3508,8 +3555,10 @@ def render(obs: dict[str, Any]) -> str:
                 # `EB-773`: and which of them is written at a body the Plans
                 # ahead of it will already have killed.
                 past_lethal = _past_lethal_clauses(pl, c.get("enemies") or [])
+                into_block = _into_block_clauses(pl, c.get("enemies") or [])
                 for i, e in enumerate(pl["queue"], 1):
                     out.append(f"  {i}. **{e['name']}**"
+                               + into_block.get(i - 1, "")
                                + past_lethal.get(i - 1, ""))
                     # A PLAN STAYS OPEN (2026-10-01), pick 5 (a): both
                     # lines while it waits, the one it will be carried out

@@ -2680,9 +2680,12 @@ public sealed class PlayTelemetryHooks : AbstractModel
         if (fromHandDraw || card == null) return Task.CompletedTask;
         try
         {
+            // Kokomi pre-run fixes (2026-10-12): the power drawing, if one
+            // named itself (`ResolutionLedger.DrawSource`), rides as `Power`.
             ResolutionLedger.NoteEvent(ResolutionLedger.Drawn,
                                        card.Title?.ToString() ?? "",
-                                       string.Empty, string.Empty);
+                                       string.Empty,
+                                       ResolutionLedger.DrawSource);
         }
         catch (Exception e)
         {

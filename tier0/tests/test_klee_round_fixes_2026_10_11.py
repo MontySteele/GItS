@@ -134,13 +134,13 @@ def _power(name: str, amount: int, debuff: bool = True) -> dict:
 
 def test_the_written_note_names_the_block_power_on_you():
     page = blindplay.observe(_shrunk_attack([_power("Frail", 2)]))
-    assert "Written: Gain 8 Block." in page
+    assert "Unmodified: Gain 8 Block." in page
     assert "the difference is the board's: your **Frail**.)" in page
 
 
 def test_a_damage_power_is_not_named_on_a_block_face():
     page = blindplay.observe(_shrunk_attack([_power("Shrink", 1)]))
-    assert "Written: Gain 8 Block." in page
+    assert "Unmodified: Gain 8 Block." in page
     assert "the difference is the board's.)" in page
     assert "your **Shrink**" not in page
 
@@ -156,6 +156,6 @@ def test_the_written_note_names_shrink_on_a_damage_face():
                         "[gold]Bomb[/gold] on the enemy. Deal 4 "
                         "[gold]Pyro[/gold] damage."}]
     page = blindplay.observe(state)
-    assert "Written: Set off only your largest Bomb on the enemy. Deal 6 " \
+    assert "Unmodified: Set off only your largest Bomb on the enemy. Deal 6 " \
         "Pyro damage." in page
     assert "the difference is the board's: your **Shrink**.)" in page

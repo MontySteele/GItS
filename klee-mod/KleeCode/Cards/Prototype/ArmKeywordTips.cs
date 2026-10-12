@@ -430,7 +430,9 @@ public static class ArmKeywordTips
     /// tip key.</summary>
     internal const string CompanionPlanText =
         "Play it on the [gold]Bake-Kurage[/gold] to write it as a "
-      + "[gold]Plan[/gold]. The Kurage applies [gold]Hydro[/gold] first.";
+      + "[gold]Plan[/gold]. Next turn the Kurage applies [gold]Hydro[/gold], "
+      + "then it is played: [gold]Strength[/gold] and [gold]Weak[/gold] "
+      + "count.";
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
@@ -503,7 +505,8 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, NereidsTwiceKey,
             "Twice means twice: the [gold]Plan[/gold]'s debuffs, and any "
-          + "Tainted it causes, double too.");
+          + "Tainted it causes, double too. A [gold]Plan[/gold] carried out "
+          + "early is carried out once.");
 
     /// <summary>
     /// THE BOUND IS THE WHOLE POINT OF THIS ROW'S SECOND HALF. The Casket read

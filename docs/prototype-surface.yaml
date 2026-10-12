@@ -1331,7 +1331,7 @@
    # R276 pick 1: the intent, read at carry-out, a flat 6 under it. Kokomi
    # round-3 changes (2026-10-12): the LARGEST intent on the board, not the
    # front enemy's. Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the most damage an enemy intends.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the most damage an enemy intends when it is carried out.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_max_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.

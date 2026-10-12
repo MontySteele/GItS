@@ -80,7 +80,7 @@ public class KokomiRound1FixesTests
         Assert.DoesNotContain(Il.Calls(Il.Method("KokomiPlan", "Schedule")),
                               c => c.Contains("IntendedDamage"));
         var face = Face(new ProtoKkTideWall());
-        Assert.Contains("plus the most damage an enemy intends.", face);
+        Assert.Contains("plus the most damage an enemy intends", face);
         Assert.DoesNotContain("next turn", face);
     }
 
