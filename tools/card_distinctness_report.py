@@ -182,6 +182,11 @@ from collections import Counter, defaultdict
 import yaml
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# `surface_pools` imports `tier0.constants`. Run as a script from the repo
+# root, sys.path[0] is tools/, so the import failed locally
+# (`ModuleNotFoundError: tier0`) while CI's PYTHONPATH hid it.
+if REPO not in sys.path:
+    sys.path.insert(0, REPO)
 
 # (R213 B, BACKLOG EB-147): the prototype surface is not a pool,
 # so it has no distinctness. Feeding it in would be worse than useless -- the

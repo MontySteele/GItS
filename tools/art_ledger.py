@@ -153,6 +153,12 @@ CARD_SHEETS = [
 TOKENS_SHEET = "tier0/content/cards/tokens.yaml"
 TOKENS_DIR = "ImageGen/images/cards/furina"
 
+# Every staged card dir, mirroring tools/art_coverage.CARD_DIR_NAMES. A C#
+# art key may live in any of them; before Varka's dir was listed here his
+# cards defaulted to cards/klee and read as ~85 false MISSING-RENDER rows.
+CARD_DIRS = tuple(f"ImageGen/images/cards/{d}"
+                  for d in ("klee", "furina", "kokomi", "varka", "companions"))
+
 MOD_SRC = "klee-mod/KleeCode"
 SOURCES_TSV = "art/SOURCES.tsv"
 PLAN_TSV = "art/plan.tsv"
@@ -543,7 +549,8 @@ class Ledger:
         # Cards that ship in C# with no sheet row at all. Deploy stages every
         # character's card dir into one flat images/cards, so any of the four
         # dirs is a legal home; the ledger records whichever one holds it.
-        card_dirs = [d for _s, d, _o in CARD_SHEETS] + [TOKENS_DIR]
+        card_dirs = ([d for _s, d, _o in CARD_SHEETS] + [TOKENS_DIR]
+                     + list(CARD_DIRS))
         card_dirs = list(dict.fromkeys(card_dirs))
         for path in self._mod_files():
             text = path.read_text(encoding="utf-8", errors="replace")
