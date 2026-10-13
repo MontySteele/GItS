@@ -7565,6 +7565,80 @@ def calculated_block_var_type(card: dict) -> str:
             else "CalculatedBlockVar")
 
 
+#: THE DAMAGE PREVIEWS PASS (2026-10-13, [USER]: "Are there any other cards,
+#: in any pool, that don't show how much damage they actually do when
+#: accounting for conditional modifiers?"). A hit count a `HitsTotalDamageVar`
+#: multiplies one folded hit by, as a C# expression over `card`: the count the
+#: play takes, read before the play (Sparks banked, Plans waiting, Fanfare
+#: that Spend all would spend). Display only (Powers/Prototype/DamagePreviewVars.cs).
+PREVIEW_HIT_COUNTS = {
+    "sparks_spent": "SparkPower.SparksAtPlay(card.Owner!.Creature!)",
+    "plans_held_plus_one": "KokomiPlan.PlansHeld(card.Owner!.Creature!) + 1",
+    "stage_spent_threes": ("FurinaStage.SpentOrFanfare(card) / "
+                           "FurinaStageLaw.BravuraSpentPer"),
+}
+
+
+def _preview_hit_count(card: dict) -> str:
+    """The `HitsTotalDamageVar` count for the card's first counted hit."""
+    for eff in card.get("effects") or []:
+        if eff.get("op") != "damage":
+            continue
+        times = eff.get("times")
+        formula = eff.get("times_formula")
+        if isinstance(times, str) and times in PREVIEW_HIT_COUNTS:
+            return PREVIEW_HIT_COUNTS[times]
+        if isinstance(formula, dict) and str(
+                formula.get("count")) in PREVIEW_HIT_COUNTS:
+            base = int(formula.get("base", 0))
+            per = int(formula.get("per", 1))
+            return (f"{base} + {per} * "
+                    f"({PREVIEW_HIT_COUNTS[str(formula['count'])]})")
+    raise SystemExit(
+        f"gen_klee_cards: {card['id']}: the face prints {{TotalDamage}} but "
+        "no damage op has a hit count PREVIEW_HIT_COUNTS can read")
+
+
+def preview_token_vars(card: dict) -> list[str]:
+    """The damage previews pass (2026-10-13): the display-only in-combat
+    vars, each emitted ONLY where the face prints its token (the `{Shower`
+    rule). Nothing in the play reads them."""
+    text = str(card.get("description") or "")
+    effects = card.get("effects") or []
+    out: list[str] = []
+    if "{TotalDamage" in text:
+        out.append("new HitsTotalDamageVar(static card => "
+                   f"{_preview_hit_count(card)})")
+    if "{BombHit" in text:
+        read = next((DAMAGE_FROM_BOMBS_READS[e["read"]] for e in effects
+                     if e.get("op") == "damage_from_bombs"), None)
+        if read is None:
+            raise SystemExit(f"gen_klee_cards: {card['id']}: {{BombHit}} "
+                             "needs a damage_from_bombs op")
+        out.append(f"new BombReadDamageVar(ProtoBombPower.BombRead.{read})")
+    if "{BombEcho" in text:
+        if not any(e.get("op") == "damage_set_off_total" for e in effects):
+            raise SystemExit(f"gen_klee_cards: {card['id']}: {{BombEcho}} "
+                             "needs a damage_set_off_total op")
+        out.append("new SetOffEchoDamageVar()")
+    if "{SetOffBombs" in text:
+        mult = next((int(e["multiplier"]) for e in effects
+                     if e.get("op") == "multiply_set_off"), 1)
+        out.append(f"new SetOffBombsVar({mult})")
+    if "{PressureHit" in text:
+        out.append("new DebuffsAfterDamageVar()")
+    if "{BonusHit" in text:
+        bonus = next((int(e["bonus_if"]["amount"]) for e in effects
+                      if e.get("op") == "damage" and e.get("bonus_if")
+                      and e["bonus_if"].get("if")
+                      == "companion_played_this_turn"), None)
+        if bonus is None:
+            raise SystemExit(f"gen_klee_cards: {card['id']}: {{BonusHit}} "
+                             "needs a companion bonus_if on a damage op")
+        out.append(f"new CompanionBonusDamageVar({bonus})")
+    return out
+
+
 def build_vars(card: dict) -> list[str]:
     """DynamicVar declarations, in the order the effects use them."""
     out = []
@@ -8103,6 +8177,7 @@ def build_vars(card: dict) -> list[str]:
             'new CalculatedVar("Encore").WithMultiplier(static (card, _) => '
             f'SalonMemberPower.ReplacementDelta(card, {deploys}, '
             'SalonConstants.ReplacementNumericMultiplier))')
+    out.extend(preview_token_vars(card))
     # The arm's Block upgrade (`arm_block`): the branch Block it moves takes a
     # real var so the face renders `{Block:diff()}` and the Smith shows it.
     arm_block = arm_block_effect(card) if arm_block_upgrade(card) else None

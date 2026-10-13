@@ -51,13 +51,14 @@ public sealed class ProtoFsBravura : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bravura"),
-        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent."),
+        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move)
+            new DamageVar(7m, ValueProp.Move),
+            new HitsTotalDamageVar(static card => 0 + 1 * (FurinaStage.SpentOrFanfare(card) / FurinaStageLaw.BravuraSpentPer))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -62,7 +62,7 @@
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 12 [gold]Pyro[/gold] damage, then damage equal to what your [gold]Bombs[/gold] dealt.",
+   description: "[gold]Set off[/gold] the enemy. Deal 12 [gold]Pyro[/gold] damage, then damage equal to what your [gold]Bombs[/gold] dealt.{InCombat:\n(Then deals {BombEcho:diff()} damage)|}",
    upgrade: {damage: +4},
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
@@ -70,7 +70,7 @@
 - {id: proto_ko_the_big_one, name: "The Big One", character: klee,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.",
+   description: "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.{InCombat:\n([gold]Bombs[/gold]: {SetOffBombs} damage)|}",
    upgrade: {cost: -1},
    effects: [{op: multiply_set_off, multiplier: 4},
              {op: set_off, target: enemy}]}
@@ -499,7 +499,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # AoE trim, 2026-10-03 (sec.2): the Companion pays 6 more damage on the
    # aimed enemy instead of widening the Set off to ALL.
-   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.",
+   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.{InCombat:\n(Deals {BonusHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy},
              {op: damage, amount: 6, target: enemy,
@@ -646,7 +646,7 @@
 - {id: proto_ko_fireworks_finale, name: "Fireworks Finale", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: rare,
-   description: "Spend all your [gold]Sparks[/gold]. Deal 5 [gold]Pyro[/gold] damage to ALL enemies for each [gold]Spark[/gold] spent.",
+   description: "Spend all your [gold]Sparks[/gold]. Deal 5 [gold]Pyro[/gold] damage to ALL enemies for each [gold]Spark[/gold] spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: all},
              {op: damage, amount: 5, target: all_enemies, times: sparks_spent}]}
@@ -801,7 +801,7 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
@@ -809,7 +809,7 @@
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {cards: -1},
    effects: [{op: damage_from_bombs, read: target_total_double, target: enemy},
              {op: add_card, card: confiscated, zone: discard, amount: 2}]}
@@ -1056,7 +1056,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 2, type: attack,
-   description: "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.",
+   description: "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies, applies_element: true,
               amount_formula: {base: 0, per: 1, count: player_block}}],
    # POOL COMPLETION (2026-10-01, paper sec.6, the Body Slam note): cost 2 [1].
@@ -1678,9 +1678,9 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    # STACKS of Weak plus Vulnerable on the enemy. Kokomi level pass
-   # (2026-10-12): brings its own 1 and 1 first, a floor of 6 [8]; no
-   # in-combat preview (it would read before the debuffs). Provenance note.
-   description: "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.",
+   # (2026-10-12): brings its own 1 and 1 first, a floor of 6 [8]; its
+   # in-combat line counts them (damage previews, 2026-10-13). Provenance note.
+   description: "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {PressureHit:diff()} damage)|}",
    effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
              {op: apply_power, power: vulnerable, amount: 1, target: enemy},
              {op: damage, target: enemy,
@@ -1833,7 +1833,7 @@
    # The re-founding (2026-10-12): one hit per Plan waiting (was per Plan
    # written this turn).
    # Kokomi level pass (2026-10-12, sec.2): always hits at least once.
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    effects: [{op: damage, amount: 5, target: all_enemies,
               times: plans_held_plus_one}],
    # 6 a hit. Kokomi round 2 (2026-10-12): 4 [5] -> 5 [6].
@@ -2842,7 +2842,7 @@
    upgrade: {damage: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.",
+   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage, amount: 7, target: enemy, applies_element: true,
               times_formula: {base: 0, per: 1, count: stage_spent_threes}}]}

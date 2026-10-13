@@ -8054,6 +8054,9 @@ golded.
   damage for each Weak and Vulnerable on the enemy." The two debuffs land
   first, so the floor is 6 [8] before Vulnerable's multiplier. The in-combat
   damage line is dropped: it would read the enemy before the debuffs land.
+  The damage previews pass (2026-10-13) brought it back over a display var
+  that counts the card's own 1 and 1 (less any Artifact would negate) and
+  folds the Vulnerable they bring (`DebuffsAfterDamageVar`).
 - **Sea's Reproach:** 3 -> **5 [7]** per Weak or Vulnerable applied. The
   upgrade now moves the number (`power_amount: 2`) and the cost stays 1 on
   both faces (was 1 [0]); "5 [7]" is the paper's number, one upgrade axis.
