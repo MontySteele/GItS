@@ -42,8 +42,10 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         ("title", "Treatise"),
         ("description",
-            "The first time each turn you play a card you could have "
-          + "planned, draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
+            // Kokomi review 2026-10-13: the two kinds of card that count.
+            "The first time each turn you play a [gold]Plan[/gold] card or a "
+          + "[gold]Companion[/gold] without planning it, draw "
+          + "[blue]{Amount}[/blue] card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;

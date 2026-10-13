@@ -458,6 +458,34 @@ public static class KokomiRefounding
         card is IPlannedCard { PlanClauses.Count: > 0 }
         || card is IWritableCompanion;
 
+    /// <summary>Grand Design's gate (Kokomi review 2026-10-13): does her
+    /// hand hold a card, other than <paramref name="card"/> itself, that can
+    /// be planned? A canonical copy has no owner and answers false. Must
+    /// never throw: <c>IsPlayable</c> is read on every state poll. Sim twin:
+    /// <c>kokomi_plan.refuses_for_no_plan</c>.</summary>
+    public static bool AnyToPlan(CardModel card)
+    {
+        try
+        {
+            if (!card.IsMutable) return false;
+            var owner = card.Owner;
+            if (owner == null) return false;
+            return AnyOtherToPlan(PileType.Hand.GetPile(owner).Cards, card);
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>The hand read behind <see cref="AnyToPlan"/>, PURE: any card
+    /// in <paramref name="hand"/> but <paramref name="self"/> that
+    /// <see cref="CanBeWritten"/>.</summary>
+    public static bool AnyOtherToPlan(IEnumerable<CardModel> hand,
+                                      CardModel? self) =>
+        hand.Any(other => !ReferenceEquals(other, self)
+                          && CanBeWritten(other));
+
     /// <summary>Is this card Ethereal right now (its own keyword, or one it
     /// was given)?</summary>
     public static bool IsEthereal(CardModel? card) =>

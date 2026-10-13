@@ -207,18 +207,13 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
-    # THE CARD TEXT PASS (2026-10-12): Treatise's "draw 1 card" and Blazing
-    # Delight's energy icon `{energyPrefix:energyIcons(1)}` print each card's
-    # own number; the reworded context joined them to these constants.
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKkTreatise.cs",
-     "AbyssNumbers.ResonanceDraw", "1"):
-        "the card's own draw, not the Abyss Blessing's",
+    # THE CARD TEXT PASS (2026-10-12): Blazing Delight's energy icon
+    # `{energyPrefix:energyIcons(1)}` prints the card's own number; the
+    # reworded context joined it to these constants. (Treatise's pair left
+    # with its face, Kokomi review 2026-10-13.)
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
      "AbyssNumbers.ResonanceDraw", "1"):
         "the card's own draw, not the Abyss Blessing's",
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKkTreatise.cs",
-     "FurinaStageLaw.CharlotteLineDraw", "1"):
-        "the card's own draw, not Charlotte's line",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
      "FurinaStageLaw.CharlotteLineDraw", "1"):
         "the card's own draw, not Charlotte's line",

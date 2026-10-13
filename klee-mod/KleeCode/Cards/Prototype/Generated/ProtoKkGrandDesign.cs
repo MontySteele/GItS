@@ -31,7 +31,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard
+public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard, IUnplayableReasonCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -46,6 +46,17 @@ public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard
         ("title", "Grand Design"),
         ("description", "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. They cost 0."),
     };
+
+    // The Kokomi review (2026-10-13): unplayable while no other
+    // card in hand can be planned, rather than spending itself
+    // on nothing.
+    protected override bool IsPlayable =>
+        KokomiRefounding.AnyToPlan(this);
+
+    public string? UnplayableReason =>
+        KokomiRefounding.AnyToPlan(this)
+            ? null
+            : "no card in your hand can be planned";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

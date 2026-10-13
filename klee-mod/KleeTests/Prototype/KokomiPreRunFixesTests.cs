@@ -84,8 +84,9 @@ public class KokomiPreRunFixesTests
     [Fact]
     public void Tide_wall_says_when_the_intent_is_read()
     {
-        Assert.EndsWith("plus the most damage an enemy intends when it is "
-                      + "carried out.", Face(new ProtoKkTideWall()));
+        // Reworded in the Kokomi review (2026-10-13).
+        Assert.EndsWith("plus the biggest attack an enemy intends on the "
+                      + "turn it lands.", Face(new ProtoKkTideWall()));
     }
 
     [Fact]
