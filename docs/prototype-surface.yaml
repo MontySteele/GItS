@@ -3017,15 +3017,15 @@
    description: "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand. If you can't, draw {FsAmount:diff()} cards.",
    effects: [{op: furina, kind: tutor_guest, amount: 2}]}
 
-# Encore!: one bought act. "Oldest guest" carries its tip (sec.5).
+# Encore!: one free act. "Oldest guest" carries its tip (sec.5). Ruled
+# 2026-10-12 (furina-review-2026-10-12.md, pick 3): no Spend, no draw; the
+# upgrade adds Retain.
 - {id: proto_fs_encore, name: "Encore!", character: furina,
-   upgrade: {stage_spend: -1},
+   upgrade: {retain: true},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: common,
-   description: "[gold]Spend[/gold] {IfUpgraded:show:3|4}. Your [gold]oldest guest[/gold] acts. Draw 1 card.",
-   effects: [{op: stage_spend, amount: 4},
-             {op: furina, kind: act_oldest},
-             {op: draw, amount: 1}]}
+   description: "Your [gold]oldest guest[/gold] acts.",
+   effects: [{op: furina, kind: act_oldest}]}
 
 # Tutti!: Common, and it draws 1 (the diversity pass, sec.2: the floor).
 - {id: proto_fs_tutti, name: "Tutti!", character: furina,
@@ -3568,9 +3568,9 @@
 - {id: proto_vk_four_winds_ascension, name: "Four Winds' Ascension", character: varka,
    authored_by: [claude],
    # Created in combat, never in the deck; played, it goes to the discard
-   # pile. `dusty_tome`: no Ancient card yet, so Darv's Tome hands him this.
-   # Starter ruling 2026-10-03; upgrade cost 2 to 1 since the combo pass.
-   cost: 2, type: attack, rarity: basic, retain: true, tags: [dusty_tome],
+   # pile. Starter ruling 2026-10-03; upgrade cost 2 to 1 since the combo
+   # pass. Provenance note, "Varka review, 2026-10-12" (no `dusty_tome`).
+   cost: 2, type: attack, rarity: basic, retain: true,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
@@ -3579,7 +3579,8 @@
 - {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
    authored_by: [claude],
    # Starter ruling 2026-10-03 ([USER]: "single target but 0 energy ... we
-   # print too many AoE cards"): cost 0, one enemy; still Swirls.
+   # print too many AoE cards"): cost 0, one enemy; still Swirls. Archaic
+   # Tooth: Dandelion Gale (provenance note, "Varka review, 2026-10-12").
    cost: 0, type: attack, rarity: basic,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage.",
    effects: [{op: damage, amount: 4, target: enemy}],
@@ -4327,10 +4328,10 @@
 - {id: proto_vk_stoke_the_flames, name: "Stoke the Flames", character: varka,
    authored_by: [claude],
    # 2026-10-05 Pyro becomes current; 2026-10-08 costs 0; 2026-10-10 the switch
-   # before the gain. 2026-10-12 Pyro paper 2: next Pyro Attack, no rider.
-   # Provenance notes, "Varka Pyro pass" and "Varka Pyro paper 2".
+   # before the gain. 2026-10-12 Pyro paper 2, then the Varka review: the face
+   # prints the switch. Provenance notes, "Varka Pyro paper 2", "Varka review".
    cost: 0, type: skill, rarity: common,
-   description: "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next [gold]Pyro[/gold] Attack this turn deals {VkBase:diff()} additional damage.",
+   description: "[gold]Pyro[/gold] becomes your [gold]current element[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next [gold]Pyro[/gold] Attack this turn deals {VkBase:diff()} additional damage.",
    effects: [{op: varka, kind: gain_pyro_oath, amount: 2},
              {op: varka, kind: next_pyro_attack, base: 5}],
    upgrade: {varka_amount: 1, varka_base: 2}}
@@ -4339,9 +4340,10 @@
    authored_by: [claude],
    # 2026-10-12 Pyro paper 2: the base game's Setup Strike in Pyro, the Oath
    # gain and the Exhaust rider gone. Provenance note, "Varka Pyro paper 2".
+   # Varka review 2026-10-12, pick 1 (a): 7 [9] to 9 [11].
    cost: 1, type: attack, rarity: common,
    description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Strength[/gold] this turn.",
-   effects: [{op: varka, kind: pyro_strike, target: enemy, base: 7},
+   effects: [{op: varka, kind: pyro_strike, target: enemy, base: 9},
              {op: varka, kind: temp_strength, amount: 2}],
    upgrade: {varka_base: 2, varka_amount: 1}}
 

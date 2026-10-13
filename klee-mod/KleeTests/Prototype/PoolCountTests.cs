@@ -106,10 +106,12 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Varka_is_78_and_20_35_23()
+    public void Varka_is_78_and_20_35_23_with_two_ancients()
     {
-        // No Ancient and no co-op tier yet.
+        // His Ancients since the Varka review (ruled 2026-10-12); no co-op
+        // tier yet.
         AssertPool("VarkaRoster", "Pool", 20, 35, 23);
+        AssertAncients("Varka");
     }
 
     [Fact]

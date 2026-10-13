@@ -407,7 +407,8 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Contains("VarkaOath.NoApplyCredit", hit);
         Assert.Equal(15, VarkaCards.CurrentElementDamage(0m, 3m, 5));
         Assert.Equal(20, VarkaCards.CurrentElementDamage(10m, 2m, 5));
-        Assert.IsAssignableFrom<ITomeCard>(card);
+        // The Varka review (2026-10-12): his Ancients are the Tome's now.
+        Assert.False(card is ITomeCard);
     }
 
     [Fact]
@@ -803,8 +804,10 @@ public class VarkaPrototypeTests : IDisposable
     [Fact]
     public void His_pool_offers_the_forty_one_and_holds_the_rest()
     {
-        Assert.Contains("VarkaRoster.Pool",
+        Assert.Contains("VarkaRoster.OfferablePool",
                         Il.Calls(Il.Method("VarkaCardPool", "FilterThroughEpochs")));
+        Assert.Contains("VarkaRoster.Pool",
+                        Il.Calls(Il.Method("VarkaRoster", "OfferablePool")));
         var members = Il.Calls(Il.Method("VarkaCardPool", "GenerateAllCards"));
         Assert.Contains("VarkaRoster.Members", members);
         Assert.Contains("VarkaModalOptions.get_All", members);

@@ -2,6 +2,7 @@
 using KleeMod.Cards;
 using KleeMod.Cards.Furina;
 using KleeMod.Cards.Kokomi;
+using KleeMod.Cards.Varka;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod;
@@ -31,6 +32,7 @@ public static class RosterAncientCards
     private static List<CardModel>? _klee;
     private static List<CardModel>? _furina;
     private static List<CardModel>? _kokomi;
+    private static List<CardModel>? _varka;
 
     public static IReadOnlyList<CardModel> Klee => _klee ??= new List<CardModel>
     {
@@ -52,6 +54,19 @@ public static class RosterAncientCards
         ModelDb.Card<PrincessOfWatatsumi>(),
         // POOL COMPLETION (2026-10-01): her second, which bends rule 2.
         ModelDb.Card<DivineStrategy>(),
+    };
+
+    /// <summary>
+    /// VARKA'S TWO (the Varka review, ruled 2026-10-12). All Four Winds is
+    /// the Dusty Tome's; Dandelion Gale is the Archaic Tooth's, Windbound
+    /// Execution's replacement, listed so its <c>CardModel.Pool</c> resolves
+    /// to his. The vanilla Tome skips every Archaic Tooth card
+    /// (<c>ArchaicTooth.TranscendenceCards</c>), so it draws All Four Winds.
+    /// </summary>
+    public static IReadOnlyList<CardModel> Varka => _varka ??= new List<CardModel>
+    {
+        ModelDb.Card<AllFourWinds>(),
+        ModelDb.Card<DandelionGale>(),
     };
 }
 

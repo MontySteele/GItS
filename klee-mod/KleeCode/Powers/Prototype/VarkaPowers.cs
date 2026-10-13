@@ -72,7 +72,7 @@ public abstract class OathBadgePower : PowerModel, ILocalizationProvider
             if (!IsMutable || Owner == null) return Amount;
             var ledger = VarkaOathLedger.For(Owner);
             // Elixir of the Four Winds: this turn his cards read all four.
-            return Element == Element.None || ledger.AllFourThisTurn
+            return Element == Element.None || ledger.ReadsAllFour
                 ? ledger.Total : ledger.Oath(Element);
         }
     }
@@ -939,6 +939,28 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
                                        "Wolfpack", amount: made);
         }
     }
+}
+
+/// <summary>
+/// ALL FOUR WINDS, his Dusty Tome Ancient (the Varka review, ruled
+/// 2026-10-12): "Your cards read your Oath of every element together." The
+/// Elixir of the Four Winds' turn for the whole combat; the rule is the
+/// ledger's (<see cref="VarkaOathLedger.AllFourThisCombat"/>), set by the
+/// card's play. This badge says it is on.
+/// </summary>
+public sealed class AllFourWindsPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "All Four Winds"),
+        ("description",
+            "Your cards read your [gold]Oath[/gold] of every element "
+          + "together."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
 }
 
 /// <summary>Oathbound Aegis (re-aimed by the Varka defence paper,

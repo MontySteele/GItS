@@ -31,14 +31,20 @@ public sealed class VarkaCardPool : CardPoolModel
 
     public override bool IsColorless => false;
 
-    /// <summary>THE OFFER: the pool. The one door into reward rolls, the
-    /// shop and transforms (<c>GetUnlockedCards</c>).</summary>
+    /// <summary>THE OFFER: the pool and his Ancients
+    /// (<see cref="VarkaRoster.OfferablePool"/>). The one door into reward
+    /// rolls, the shop and transforms (<c>GetUnlockedCards</c>), which filter
+    /// Ancient rarity out; Darv's Dusty Tome is the Ancients' door.</summary>
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards) =>
-        VarkaRoster.Pool();
+        VarkaRoster.OfferablePool();
 
+    /// <summary>MEMBERSHIP: his generated rows, Change of Guard's faces, then
+    /// his Ancients (<c>RosterAncientCards.Varka</c>,
+    /// <c>tools/lint_ancient_coverage.py</c>).</summary>
     protected override CardModel[] GenerateAllCards() =>
         VarkaRoster.Members()
             .Concat(VarkaModalOptions.All)
+            .Concat(RosterAncientCards.Varka)
             .ToArray();
 }

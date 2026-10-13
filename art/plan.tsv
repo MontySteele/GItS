@@ -2576,8 +2576,8 @@ proto_kk_kelp_wall	ImageGen/images/cards/kokomi/proto_kk_kelp_wall.png	500	380	c
 proto_kk_kurage_canopy	ImageGen/images/cards/kokomi/proto_kk_kurage_canopy.png	500	380	cover	y0.42	shortlist	1	png	Bake-Kurage Summon.png		splash	kokomi_pool
 # proto_kk_kurage_school <- chibi Kokomi by the shore, Kokomi framed
 proto_kk_kurage_school	ImageGen/images/cards/kokomi/proto_kk_kurage_school.png	500	380	cover	x0.62,y0.48@1.4	shortlist	1	png	Kokomi, Paimon, And Aether.png		splash	kokomi_pool
-# proto_kk_kurage_swarm <- the Bake-Kurage, close on the bell (second use of the summon card)
-proto_kk_kurage_swarm	ImageGen/images/cards/kokomi/proto_kk_kurage_swarm.png	500	380	cover	x0.50,y0.33@1.3	shortlist	1	png	Bake-Kurage Summon.png		splash	kokomi_pool
+# proto_kk_sting <- the Bake-Kurage, close on the bell (second use of the summon card): the small offensive jellyfish. Was proto_kk_kurage_swarm's row (a cut card, its painting KNOWN_STALE); retargeted 2026-10-12.
+proto_kk_sting	ImageGen/images/cards/kokomi/proto_kk_sting.png	500	380	cover	x0.50,y0.33@1.3	shortlist	1	png	Bake-Kurage Summon.png		splash	kokomi_pool
 # proto_kk_kurages_mercy <- sticker: Kokomi thumbs up
 proto_kk_kurages_mercy	ImageGen/images/cards/kokomi/proto_kk_kurages_mercy.png	500	380	cover	y0.52	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 2.png		sticker	kokomi_pool
 # proto_kk_lull <- sticker: Kokomi asleep
@@ -2779,6 +2779,10 @@ kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	c
 kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool
 # Furina card-art picks, 38 rows ([USER] 2026-10-09: "all of the art picks are good enough for now")
 center_of_attention	ImageGen/images/cards/furina/center_of_attention.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 1.jpg		splash	
+# The Varka review (2026-10-12): his two Ancients. all_four_winds <- Venti, the god of the winds
+all_four_winds	ImageGen/images/cards/varka/all_four_winds.png	500	380	cover	center	shortlist	1	png	Character Venti Full Wish.png		splash	
+# dandelion_gale <- Jean, whose Dandelion Breeze is the gale
+dandelion_gale	ImageGen/images/cards/varka/dandelion_gale.png	500	380	cover	center	shortlist	1	png	Jean Birthday 2022.png		splash	
 proto_fs_a_five_century_act	ImageGen/images/cards/furina/proto_fs_a_five_century_act.png	500	380	cover	y0.25	shortlist	1	png	NPC Focalors.png		splash	
 proto_fs_against_the_tide	ImageGen/images/cards/furina/proto_fs_against_the_tide.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 2.png		splash	
 proto_fs_all_in	ImageGen/images/cards/furina/proto_fs_all_in.png	500	380	cover	x0.50,y0.50@1.3	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	
@@ -2839,3 +2843,96 @@ abyss_power_shield_hydro	ImageGen/images/abyss/powers/shield_hydro.png	256	256	c
 abyss_power_shield_pyro	ImageGen/images/abyss/powers/shield_pyro.png	256	256	contain	center	auto	1	png	Pyro Shield Character Card Skill.png		icon
 abyss_power_shield_electro	ImageGen/images/abyss/powers/shield_electro.png	256	256	contain	center	auto	1	png	Electro Shield Character Card Skill.png		icon
 abyss_power_shield_cryo	ImageGen/images/abyss/powers/shield_cryo.png	256	256	contain	center	auto	1	png	Cryo Shield Character Card Skill.png		icon
+# ---------- Art bill 2026-10-12: the 32 KNOWN_MISSING card keys (jellyfish build, Kokomi re-founding, Furina block gap and diversity pass) ----------
+# proto_kk_ward <- Kokomi holding a small jellyfish close at her guard: the defensive jellyfish
+proto_kk_ward	ImageGen/images/cards/kokomi/proto_kk_ward.png	500	380	cover	x0.50,y0.27@1.1	shortlist	1	gif	Sangonomiya Kokomi Dynamic Skin.gif	50	tcg	kokomi_pool
+# proto_kk_kurages_wake <- Kokomi with the Bake-Kurage at her side (the TCG card)
+proto_kk_kurages_wake	ImageGen/images/cards/kokomi/proto_kk_kurages_wake.png	500	380	cover	x0.40,y0.28	shortlist	1	png	Sangonomiya Kokomi Character Card.png		tcg	kokomi_pool
+# proto_kk_kurage_barrage <- Kokomi loosing a storm of water under the 2.1 key art
+proto_kk_kurage_barrage	ImageGen/images/cards/kokomi/proto_kk_kurage_barrage.png	500	380	cover	x0.50,y0.62@1.4	shortlist	1	png	Version 2.1 Wallpaper 3.png		splash	kokomi_pool
+# proto_kk_the_shape_of_water <- a fish shaped from water in her palm
+proto_kk_the_shape_of_water	ImageGen/images/cards/kokomi/proto_kk_the_shape_of_water.png	500	380	cover	x0.80,y0.37@2.6	shortlist	1	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
+# proto_kk_kurage_bloom <- a bloom of glowing jellyfish
+proto_kk_kurage_bloom	ImageGen/images/cards/kokomi/proto_kk_kurage_bloom.png	500	380	cover	x0.35	shortlist	1	png	Wildlife Moonglow Jellyfish Wild.png		splash	kokomi_pool
+# proto_kk_endless_shoal <- the Bake-Kurage rising at the shrine's foot
+proto_kk_endless_shoal	ImageGen/images/cards/kokomi/proto_kk_endless_shoal.png	500	380	cover	y0.80	shortlist	1	png	Sangonomiya Shrine Support Card.png		tcg	kokomi_pool
+# proto_kk_watchful_shoal <- the glowing undersea wood of Watatsumi, lights keeping watch
+proto_kk_watchful_shoal	ImageGen/images/cards/kokomi/proto_kk_watchful_shoal.png	500	380	cover	x0.75,y0.55@1.2	shortlist	1	png	Watatsumi Island Concept Art.png		splash	kokomi_pool
+# proto_kk_all_streams_flow <- Kokomi in a rush of water and fish
+proto_kk_all_streams_flow	ImageGen/images/cards/kokomi/proto_kk_all_streams_flow.png	500	380	cover	x0.50,y0.45	shortlist	1	png	Calendar Wallpaper February 2025.png		splash	kokomi_pool
+# proto_kk_tidal_surge <- Kokomi above the open sea
+proto_kk_tidal_surge	ImageGen/images/cards/kokomi/proto_kk_tidal_surge.png	500	380	cover	x0.62	shortlist	1	png	Character Teaser - "Sangonomiya Kokomi- The Ocean's Will" Wallpaper 1.png		splash	kokomi_pool
+# proto_kk_tamakushis_wrath <- Kokomi under the storm of the 2.1 key art
+proto_kk_tamakushis_wrath	ImageGen/images/cards/kokomi/proto_kk_tamakushis_wrath.png	500	380	cover	x0.50,y0.78@2.0	shortlist	1	png	Version 2.1 Wallpaper 3.png		splash	kokomi_pool
+# proto_kk_call_the_generals <- the Inazuma cast assembled
+proto_kk_call_the_generals	ImageGen/images/cards/kokomi/proto_kk_call_the_generals.png	500	380	cover	center	shortlist	1	png	Version 2.1 Wallpaper 1.png		splash	kokomi_pool
+# proto_kk_grand_strategist <- Kokomi at her desk of strategy books
+proto_kk_grand_strategist	ImageGen/images/cards/kokomi/proto_kk_grand_strategist.png	500	380	cover	x0.30	shortlist	1	png	Sangonomiya Kokomi TPRGT 2023 - Lumine.png		splash	kokomi_pool
+# proto_kk_dawn_tide <- Kokomi by the morning sea
+proto_kk_dawn_tide	ImageGen/images/cards/kokomi/proto_kk_dawn_tide.png	500	380	cover	y0.40	shortlist	1	png	Sangonomiya Kokomi Birthday 2025 - Shorts.jpg		splash	kokomi_pool
+# proto_kk_steady_tide <- sitting calm by the night tide
+proto_kk_steady_tide	ImageGen/images/cards/kokomi/proto_kk_steady_tide.png	500	380	cover	x0.45	shortlist	1	png	Sangonomiya Kokomi TPRGT 2024 - Lumine.png		splash	kokomi_pool
+# proto_kk_coordinated_tide <- Kokomi with Gorou and Heizou
+proto_kk_coordinated_tide	ImageGen/images/cards/kokomi/proto_kk_coordinated_tide.png	500	380	cover	y0.86	shortlist	1	png	Starlight Reverie Wallpaper Sangonomiya Kokomi Shikanoin Heizou Gorou.png		splash	kokomi_pool
+# proto_kk_orders_from_the_shrine <- a Watatsumi shrine
+proto_kk_orders_from_the_shrine	ImageGen/images/cards/kokomi/proto_kk_orders_from_the_shrine.png	500	380	cover	center	shortlist	1	png	Mouun Shrine.png		splash	kokomi_pool
+# proto_kk_watatsumi_muster <- the Watatsumi army gathered on the beach
+proto_kk_watatsumi_muster	ImageGen/images/cards/kokomi/proto_kk_watatsumi_muster.png	500	380	cover	center	shortlist	1	png	Story Quest Sangonomiya Kokomi A1 Victory Banquet.png		splash	kokomi_pool
+# proto_kk_sangonomiyas_orders <- Kokomi's written letter
+proto_kk_sangonomiyas_orders	ImageGen/images/cards/kokomi/proto_kk_sangonomiyas_orders.png	500	380	cover	x0.62	shortlist	1	png	Wishes From Teyvat Letter Sangonomiya Kokomi.png		splash	kokomi_pool
+# proto_kk_reserves <- Kokomi pulling a book from her shelves
+proto_kk_reserves	ImageGen/images/cards/kokomi/proto_kk_reserves.png	500	380	cover	y0.45	shortlist	1	png	Sangonomiya Kokomi Birthday 2024 - Shorts.png		splash	kokomi_pool
+# proto_kk_spearhead <- the Fang of Watatsumi
+proto_kk_spearhead	ImageGen/images/cards/kokomi/proto_kk_spearhead.png	500	380	cover	center	shortlist	1	png	World Quest Fang of Watatsumi.png		splash	kokomi_pool
+# proto_kk_resolve_of_watatsumi <- the Crown of Watatsumi
+proto_kk_resolve_of_watatsumi	ImageGen/images/cards/kokomi/proto_kk_resolve_of_watatsumi.png	500	380	cover	y0.30	shortlist	1	png	Crown of Watatsumi Equipment Card.png		tcg	kokomi_pool
+# proto_kk_riptide_guard <- Kokomi with a guarding fish of water
+proto_kk_riptide_guard	ImageGen/images/cards/kokomi/proto_kk_riptide_guard.png	500	380	cover	x0.60,y0.42@1.6	shortlist	1	png	Sangonomiya Kokomi Introduction Card.jpg		splash	kokomi_pool
+# proto_kk_watatsumi_drill <- Kokomi on the beach among supply crates
+proto_kk_watatsumi_drill	ImageGen/images/cards/kokomi/proto_kk_watatsumi_drill.png	500	380	cover	y0.45	shortlist	1	png	Sangonomiya Kokomi Birthday 2022 - Shorts.png		splash	kokomi_pool
+# proto_fs_private_box <- Furina's own seat at the Opera Epiclese
+proto_fs_private_box	ImageGen/images/cards/furina/proto_fs_private_box.png	500	380	cover	center	shortlist	1	png	Opera Epiclese - Furina's Seat.png		splash	
+# proto_fs_packed_house <- the Opera Epiclese lit for a full house
+proto_fs_packed_house	ImageGen/images/cards/furina/proto_fs_packed_house.png	500	380	cover	y0.45	shortlist	1	png	Opera Epiclese Support Card.png		tcg	
+# proto_fs_the_full_house <- Furina with her guests crowding in
+proto_fs_the_full_house	ImageGen/images/cards/furina/proto_fs_the_full_house.png	500	380	cover	center	shortlist	1	png	Furina Birthday 2024 - Shorts.png		splash	
+# proto_fs_headliner <- Furina beaming in the spotlight
+proto_fs_headliner	ImageGen/images/cards/furina/proto_fs_headliner.png	500	380	cover	y0.35	shortlist	1	png	Furina Birthday 2025.png		splash	
+# proto_fs_the_leading_lady <- the lady of the house in her finery
+proto_fs_the_leading_lady	ImageGen/images/cards/furina/proto_fs_the_leading_lady.png	500	380	cover	y0.46	shortlist	1	png	Fragrant Fantasy Furina Wallpaper.png		splash	
+# proto_fs_velvet_curtain <- Furina on her stage of bubbles
+proto_fs_velvet_curtain	ImageGen/images/cards/furina/proto_fs_velvet_curtain.png	500	380	cover	y0.45	shortlist	1	png	Starlit Letter Portrait Furina.png		splash	
+# proto_fs_the_masquerade <- the mask falls: Furina alone in the spotlight
+proto_fs_the_masquerade	ImageGen/images/cards/furina/proto_fs_the_masquerade.png	500	380	cover	x0.50,y0.55	shortlist	1	png	Archon Quest The Opera of Noirceur and Blancheur.png		splash	
+# proto_fs_the_show_must_go_on <- Furina's own card art
+proto_fs_the_show_must_go_on	ImageGen/images/cards/furina/proto_fs_the_show_must_go_on.png	500	380	cover	y0.33	shortlist	1	png	Furina Card.png		splash	
+# ---------- Varka's relic and potion icons (2026-10-12): each rendered Burning Blood / the base potion until now ----------
+# relic_knights_commission <- the Knights' arms
+relic_knights_commission	ImageGen/images/varka/relics/knights_commission.png	256	256	contain	center	shortlist	1	png	Item Favonius Coat of Arms.png		icon
+# relic_windblume_garland <- Mondstadt's flower
+relic_windblume_garland	ImageGen/images/varka/relics/windblume_garland.png	256	256	contain	center	shortlist	1	png	Item Windwheel Aster.png		icon
+# relic_dandelion_seeds <- exact name
+relic_dandelion_seeds	ImageGen/images/varka/relics/dandelion_seeds.png	256	256	contain	center	shortlist	1	png	Item Dandelion Seed.png		icon
+# relic_banner_of_the_west_wind <- a wind banner
+relic_banner_of_the_west_wind	ImageGen/images/varka/relics/banner_of_the_west_wind.png	256	256	contain	center	shortlist	1	png	Item Banner of the Wingalet.png		icon
+# relic_stormterrors_scale <- Stormterror's own drop
+relic_stormterrors_scale	ImageGen/images/varka/relics/stormterrors_scale.png	256	256	contain	center	shortlist	1	png	Item Dvalin's Plume.png		icon
+# relic_andriuss_howl <- Andrius's own drop
+relic_andriuss_howl	ImageGen/images/varka/relics/andriuss_howl.png	256	256	contain	center	shortlist	1	png	Item Spirit Locket of Boreas.png		icon
+# relic_favonius_duty_roster <- a posted roster
+relic_favonius_duty_roster	ImageGen/images/varka/relics/favonius_duty_roster.png	256	256	contain	center	shortlist	1	png	Item Notice Paper.png		icon
+# potion_bottled_resolve <- a steadying oil
+potion_bottled_resolve	ImageGen/images/varka/potions/bottled_resolve.png	256	256	contain	center	shortlist	1	png	Item Unmoving Essential Oil.png		icon
+# potion_bottled_gale <- the Anemo oil
+potion_bottled_gale	ImageGen/images/varka/potions/bottled_gale.png	256	256	contain	center	shortlist	1	png	Item Gushing Essential Oil.png		icon
+# potion_elixir_of_the_four_winds <- the wind potion
+potion_elixir_of_the_four_winds	ImageGen/images/varka/potions/elixir_of_the_four_winds.png	256	256	contain	center	shortlist	1	png	Item Windbarrier Potion.png		icon
+# ---------- Power icons closing lint_power_icons ICON_DEBT (2026-10-12) ----------
+# power_furina_guest_freminet <- the guest's face, as every guest badge
+power_furina_guest_freminet	ImageGen/images/furina/powers/guest_freminet.png	256	256	contain	center	shortlist	1	png	Freminet Icon.png		icon
+# power_furina_fountain_of_lucine <- exact name
+power_furina_fountain_of_lucine	ImageGen/images/furina/powers/fountain_of_lucine.png	256	256	contain	center	shortlist	1	png	Item Fontaine Lucine.png		icon
+# power_furina_ousia_surge <- Fontaine's Ousia/Pneuma attunement
+power_furina_ousia_surge	ImageGen/images/furina/powers/ousia_surge.png	256	256	contain	center	shortlist	1	png	Item Fontaine Attunement.png		icon
+# power_fontaine_masque_red_death <- the companion's face
+power_fontaine_masque_red_death	ImageGen/images/furina/powers/masque_red_death.png	256	256	contain	center	shortlist	1	png	Arlecchino Icon.png		icon

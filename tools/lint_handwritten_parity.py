@@ -360,7 +360,8 @@ def furina_number_findings(exp: "Expected", got: dict, where) -> list[str]:
 
 # Where a hand-written card can live. Furina's sit in a per-character
 # subdirectory; Klee's sit directly in Cards/.
-CS_SEARCH_DIRS = (CARDS_DIR, CARDS_DIR / "Furina", CARDS_DIR / "Kokomi")
+CS_SEARCH_DIRS = (CARDS_DIR, CARDS_DIR / "Furina", CARDS_DIR / "Kokomi",
+                  CARDS_DIR / "Varka")
 
 
 def kit_no_pile() -> list[str]:
@@ -693,7 +694,9 @@ ANCIENT_WITNESS: dict[str, dict] = {
 # first three were"; the rules they bend live in C# alone), so
 # `tier0/tests/test_eb30m_ancients.py` sets these three names aside by name.
 ARM_ONLY_ANCIENTS = frozenset((
-    "AlicesMasterpiece", "DivineStrategy", "CenterOfAttention"))
+    "AlicesMasterpiece", "DivineStrategy", "CenterOfAttention",
+    # The Varka review (ruled 2026-10-12): both of his, game-side only.
+    "AllFourWinds", "DandelionGale"))
 ANCIENT_WITNESS.update({
     "AlicesMasterpiece": {
         "why": "Klee's second Ancient (pool completion, 2026-10-01): a Power, "
@@ -717,6 +720,35 @@ ANCIENT_WITNESS.update({
         "hits": [],
         "upgrade_vars": [],
         "upgrade_cost": [-1],
+        "encore": [],
+        "fanfare_div": [],
+        "fanfare_tip": [],
+    },
+    "AllFourWinds": {
+        "why": "Varka's Dusty Tome Ancient (the Varka review, ruled "
+               "2026-10-12): a Power, 3 Energy, 2 upgraded; his cards read "
+               "his Oath of every element together for the combat (the "
+               "Elixir of the Four Winds' turn, all fight). No number on the "
+               "face but the cost.",
+        "cost": [3],
+        "vars": [],
+        "hits": [],
+        "upgrade_vars": [],
+        "upgrade_cost": [-1],
+        "encore": [],
+        "fanfare_div": [],
+        "fanfare_tip": [],
+    },
+    "DandelionGale": {
+        "why": "Varka's Archaic Tooth Ancient, Windbound Execution's "
+               "replacement (the Varka review, ruled 2026-10-12): an Attack, "
+               "1 Energy, 7 Anemo damage to ALL enemies, +3 upgraded; its "
+               "Swirls pay twice.",
+        "cost": [1],
+        "vars": [7],
+        "hits": [],
+        "upgrade_vars": [3],
+        "upgrade_cost": [],
         "encore": [],
         "fanfare_div": [],
         "fanfare_tip": [],

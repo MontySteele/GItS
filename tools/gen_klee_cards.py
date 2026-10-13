@@ -9780,8 +9780,8 @@ def stage_raise_amount(card: dict, eff: dict) -> str | None:
     if (op in STAGE_AMOUNT_VARS and stage_amount_upgrade(card, op)
             and eff is stage_amount_var_effect(card, op)):
         return f'DynamicVars["{STAGE_AMOUNT_VARS[op]}"].IntValue'
-    # THE POOL TO 75 (2026-10-09): a FIXED price an upgrade moves (Encore!
-    # "Spend 4 [3]", Sold Out, Overdraft "Drain 4 [3]", All In, Ebb and Flow)
+    # THE POOL TO 75 (2026-10-09): a FIXED price an upgrade moves (Sold Out,
+    # Overdraft "Drain 4 [3]", All In, Ebb and Flow)
     # is paid at the swapped number, the one its gate reads.
     if op == "stage_spend":
         return stage_spend_amount_cs(card, eff)
@@ -15708,6 +15708,44 @@ def stage_lines_face(desc: str, args: list[tuple[str, str]]) -> str:
     return desc
 
 
+#: The token of a Varka card's in-combat switch line (`VarkaOath.SwitchLine`).
+VARKA_SWITCH_TOKEN = "VarkaSwitch"
+
+
+def varka_switch_face_arg(card: dict, profile: "CharacterProfile"
+                          ) -> tuple[str, str] | None:
+    """`(token, C#)` for a Varka card's "(Makes Pyro current)" line, or None.
+
+    The Varka review (2026-10-12, sec.5): "a non-Knight card can move his
+    current element off his best Oath, and he only finds out afterward."
+    Every row whose play makes an element current (`varka_switch_element`,
+    Knights included, so the rule reads the same on every card) ends its face
+    in `{InCombat:{VarkaSwitch}|}`, Kokomi's Plan-preview seam, and the line
+    prints only while the play would CHANGE it (`VarkaOath.WouldSwitchTo`).
+    A face that already prints the switch (Stoke the Flames) carries none.
+    """
+    element = varka_switch_element(card, profile)
+    if element is None:
+        return None
+    if "becomes your [gold]current element" in str(card.get("description") or ""):
+        return None
+    return (VARKA_SWITCH_TOKEN,
+            f"VarkaOath.SwitchLine(this, {ELEMENT_CS[element]})")
+
+
+#: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
+#: the Replace version"). Orobas's relic transforms a starter card into its
+#: Ancient through the private `ArchaicTooth.TranscendenceUpgrades` map;
+#: BaseLib's `ArchaicToothTranscendenceUpgradesPatch` adds every card that
+#: implements `ITranscendenceCard` to it (BaseLib 3.4.7.0, read by decompile).
+#: So the starter row carries the mark and names its Ancient. The vanilla
+#: Dusty Tome skips every card in that map, which is what keeps the Tome on
+#: All Four Winds. Row id -> the hand-written Ancient's class.
+TRANSCENDENCE = {
+    "proto_vk_windbound_execution": "global::KleeMod.Cards.Varka.DandelionGale",
+}
+
+
 def emit(
     card: dict, profile: CharacterProfile = KLEE_PROFILE
 ) -> str:
@@ -16000,6 +16038,9 @@ def emit(
     # A face may carry a line break (the base game's `{InCombat:<break>...|}`
     # reader line), and a raw break inside a C# literal does not compile.
     face_args = stage_face_args(card)
+    switch_arg = varka_switch_face_arg(card, profile)
+    if switch_arg is not None:
+        face_args.append(switch_arg)
     desc = stage_lines_face(desc, face_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
@@ -16052,15 +16093,20 @@ def emit(
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
         interfaces += ", ISkillTagCard"
-    # VARKA (prototype batch one) HAS NO ANCIENT CARD, and Darv's Dusty Tome
-    # draws one from the character's pool: an empty draw NREs inside
-    # `Darv.GenerateInitialOptions` and the run softlocks at the act-two
-    # door (`RosterAncientCards`' header). BaseLib's own seam answers it
-    # without a card nobody designed: a pool card marked `ITomeCard` is what
-    # the Tome hands that character instead (`DustyTomePatch`, 0.111.0
-    # BaseLib, read by decompile). A row tagged `dusty_tome` carries the mark.
-    if "dusty_tome" in card.get("tags", []):
-        interfaces += ", ITomeCard"
+    # (The `dusty_tome` tag, BaseLib's `ITomeCard` on Four Winds' Ascension,
+    # left with Varka's Ancients, 2026-10-12: Darv's Tome draws from
+    # `RosterAncientCards.Varka` like every kit's.) THE ARCHAIC TOOTH: a
+    # starter row with an Ancient replacement carries BaseLib's mark
+    # (`TRANSCENDENCE`).
+    transcendence_member = ""
+    if card["id"] in TRANSCENDENCE:
+        interfaces += ", ITranscendenceCard"
+        transcendence_member = (
+            "\n\n    /// <summary>Orobas's Archaic Tooth turns this card into "
+            "its Ancient\n    /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`)."
+            "</summary>\n"
+            "    public CardModel GetTranscendenceTransformedCard() =>\n"
+            f"        ModelDb.Card<{TRANSCENDENCE[card['id']]}>();")
     # EB-26 D2 option (d). The apply mode is a property of the ROW, and the
     # mod's only per-application channel is the cardSource -- so the card
     # declares the mode and its ceiling, and the power reads it off the card
@@ -16976,10 +17022,14 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         # The in-combat Stage lines' tokens (`stage_face_args`). Added as
         # description arguments, the base game's own seam for a face word no
         # DynamicVar carries.
+        tokens = [t for t, _ in face_args]
         summary = (
             "Who this card's summon will Bow, on its in-combat line\n"
             "    /// (`FurinaStageBowPreview`)."
-            if [t for t, _ in face_args] == [STAGE_BOW_TOKEN] else
+            if tokens == [STAGE_BOW_TOKEN] else
+            "The element this card makes current, on its in-combat line\n"
+            "    /// (`VarkaOath.SwitchLine`)."
+            if tokens == [VARKA_SWITCH_TOKEN] else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'
@@ -17440,7 +17490,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{discard_discount_member}{stage_bow_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
+    }};{tags_member}{wide_target_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

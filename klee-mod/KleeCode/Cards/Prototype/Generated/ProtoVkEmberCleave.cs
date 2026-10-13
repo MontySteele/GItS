@@ -53,13 +53,22 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ember Cleave"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Strength[/gold] this turn."),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain {VkAmount:diff()} [gold]Strength[/gold] this turn.{InCombat:{VarkaSwitch}|}"),
     };
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 7m),
+            new DynamicVar("VkBase", 9m),
             new DynamicVar("VkAmount", 2m)
         };
 

@@ -139,6 +139,12 @@ REGISTRY: tuple[Lint, ...] = (
     # for months with every gate green -- and its second shape (the aura path
     # built by string concatenation) has no case for anyone to forget.
     _ci("power-icons",          "tools/lint_power_icons.py"),
+    # 2026-10-12: Varka's seven relics and three potions drew Burning Blood
+    # and the base potion for eleven days -- their icon paths are BUILT
+    # (`VarkaArmRelics.Icon(Slug)`, `ArmPotions.Image(...)`), so no
+    # string-reading gate saw them. Every relic and potion's icon must be an
+    # art/plan.tsv out-path.
+    _ci("relic-potion-icons",   "tools/lint_relic_potion_icons.py"),
     # 2026-08-30: three marker lines shipped to main inside BACKLOG.md when a
     # fold fixed a DUPLICATE-row finding without reading its context.
     _ci("conflict-markers",     "tools/lint_conflict_markers.py"),

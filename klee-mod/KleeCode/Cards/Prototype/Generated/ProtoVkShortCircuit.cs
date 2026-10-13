@@ -48,8 +48,17 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Short Circuit"),
-        ("description", "Discard 2 cards. Draw {Cards:diff()} card{Cards:plural:|s}. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy."),
+        ("description", "Discard 2 cards. Draw {Cards:diff()} card{Cards:plural:|s}. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.{InCombat:{VarkaSwitch}|}"),
     };
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

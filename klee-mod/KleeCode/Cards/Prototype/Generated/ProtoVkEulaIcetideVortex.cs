@@ -59,7 +59,7 @@ public sealed class ProtoVkEulaIcetideVortex : CustomCardModel, IElementalCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Eula: Icetide Vortex"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoVkEulaIcetideVortex : CustomCardModel, IElementalCard, 
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

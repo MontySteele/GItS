@@ -142,12 +142,12 @@ def test_stokes_bonus_rides_the_next_pyro_attack_and_is_spent(varka):
     st = _state(element="hydro")
     _play(st, _vk("stoke_the_flames"))
     _play(st, _vk("ember_cleave"))
-    assert st.enemies[0].hp == 100 - (7 + 5)
+    assert st.enemies[0].hp == 100 - (9 + 5)
     assert V.NEXT_PYRO_ATTACK not in st.player.powers
     # Spent: the next Pyro Attack takes nothing from it (Ember Cleave's own
     # Strength 2 still counts).
     _play(st, _vk("ember_cleave"))
-    assert st.enemies[0].hp == 100 - (7 + 5) - (7 + 2)
+    assert st.enemies[0].hp == 100 - (9 + 5) - (9 + 2)
 
 
 def test_a_non_pyro_attack_leaves_stokes_bonus_standing(varka):
@@ -158,7 +158,7 @@ def test_a_non_pyro_attack_leaves_stokes_bonus_standing(varka):
     assert st.player.powers[V.NEXT_PYRO_ATTACK] == 5
     st.enemies[0].aura = None                       # no Melt in the sum
     _play(st, _vk("ember_cleave"))
-    assert st.enemies[0].hp == 95 - (7 + 5)
+    assert st.enemies[0].hp == 95 - (9 + 5)
     assert V.NEXT_PYRO_ATTACK not in st.player.powers
 
 
@@ -193,19 +193,20 @@ def test_the_banner_holds_stoke_the_flames(varka):
 
 def test_ember_cleave_is_setup_strike_in_pyro(varka):
     # Pyro paper 2 (2026-10-12): "Deal 7 [9] Pyro damage. Gain 2 [3]
-    # Strength this turn." No Oath gain, no Exhaust rider.
+    # Strength this turn." No Oath gain, no Exhaust rider. The Varka review
+    # (2026-10-12, pick 1 (a)): 9 [11].
     st = _state(element="hydro")
     st.player.hand = [_burn()]
     _play(st, _vk("ember_cleave"))
     e = st.enemies[0]
-    assert e.hp == 93 and e.aura == "pyro"
+    assert e.hp == 91 and e.aura == "pyro"
     assert st.player.exhaust_pile == []
     assert _led(st).oath["pyro"] == 1               # its application's credit
     assert st.player.powers["temp_strength"] == 2
     assert st.player.powers["strength"] == 2
     st = _state(element="hydro")
     _play(st, _vk("ember_cleave") + "+")
-    assert st.enemies[0].hp == 91
+    assert st.enemies[0].hp == 89
     assert st.player.powers["strength"] == 3
 
 
