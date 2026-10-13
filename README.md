@@ -1,76 +1,92 @@
 # GItS — Teyvat Spire
 
-A Genshin-flavored playable roster (Klee, Furina, elemental reactions,
-Companion cards) for **Slay the Spire 2**, designed simulation-first:
+An unofficial, free fan mod for **Slay the Spire 2** that adds Genshin Impact
+characters as playable heroes, plus a Spiral Abyss run mode. It is not made by
+or affiliated with HoYoverse or Mega Crit.
 
-- `tier0/` — Python combat simulator (engine, card DSL, 7-axis scorecard).
-  Run the full test suite from the repo root: `python -m pytest -q`.
-- `tier05/` — draft/run-layer simulator on top of tier0.
-- `klee-mod/` — the actual C# mod. Design sheets in `docs/*.yaml` are the
-  single source of truth; the sims read them directly.
+## What's in it
 
-Project documentation lives in `docs/` — see `docs/README.md` for the index.
-Start from `CLAUDE.md`, which routes each task to the one document it needs.
+| Character | Element | Plays like | Stage |
+|---|---|---|---|
+| Klee | Pyro | Places Bombs that grow each turn, then sets them off for big hits | Balance |
+| Sangonomiya Kokomi | Hydro | Writes Plans that resolve next turn; jellyfish Stings and Wards | Prototype |
+| Furina | Hydro | Spends her own HP for power; guest stars act at the end of her turn | Prototype |
+| Varka | Anemo | A knight of every element who Swirls auras and builds Oath | Prototype |
 
-Two lookup files sit above the index:
+Every character has a 78-card pool, their own relics and potions, and two
+Ancient cards. All four share these systems:
 
-- `docs/current/RULINGS.md` — the frozen index of R numbers (R1 to R276).
-- `docs/current/QUEUE.md` — the open picks and who owes them.
+- **Elemental reactions:** Pyro, Hydro, Cryo and Electro auras react the way
+  they do in Genshin; Anemo Swirls them and Geo Crystallizes them.
+- **Companion cards:** other Genshin characters show up as cards.
+- **Spiral Abyss mode:** a fourth main-menu mode. Before each act's Ancient
+  you take one of three Blessings, and the enemies take one of the Shadows
+  you passed.
+
+Co-op works. Everyone in the lobby must run the same build.
+
+Characters move from Paper (a design brief) to Prototype (playable, being
+tuned) to Balance (numbers settled). `docs/current/STATE.md` has each
+character's current rules and next step.
+
+## Repo layout
+
+- `klee-mod/`: the C# mod. The name is historical; it holds every character.
+  Cards are generated from `docs/prototype-surface.yaml` by
+  `tools/gen_klee_cards.py`.
+- `tier0/` and `tier05/`: a Python combat and run simulator that mirrors the
+  mod's rules. It checks rules parity; balance is judged in the real game.
+- `understudy/`: the harness that lets AI playtest seats play the real game.
+- `tools/`: build, deploy, art and codegen scripts.
+- `docs/` and `review/`: design docs and records. Start from `CLAUDE.md`,
+  which routes each task to the one document it needs; `docs/README.md` is
+  the index.
+
+Tests: `python -m pytest -q` from the repo root runs the simulator suite, and
+`python tools/gates.py --full --dotnet` runs everything, the C# tests
+included.
 
 ## Building the mod
 
-Prerequisites (one-time):
+One-time setup:
 
-1. .NET SDK (the mod targets the game's bundled runtime; `dotnet build` is
-   driven for you by the deploy script).
-2. Slay the Spire 2 installed (Steam).
-3. [BaseLib](https://steamcommunity.com/sharedfiles/filedetails/?id=3737335127)
-   subscribed on the Steam Workshop (the mod's only dependency — see
-   `klee-mod/Klee/manifest.json` for the minimum version).
+1. The .NET SDK (the pinned version is in `docs/current/STATE.md`).
+2. Slay the Spire 2, installed through Steam.
+3. [BaseLib](https://steamcommunity.com/sharedfiles/filedetails/?id=3737335127),
+   subscribed on the Steam Workshop. It is the mod's only dependency; the
+   minimum version is in `klee-mod/Klee/manifest.json`.
 4. Copy `klee-mod/local.props.example` to `klee-mod/local.props` and set
-   `GameDir` (your game install) and `BaseLibDll` (the workshop BaseLib.dll).
-5. Card art is not in the repo (see `.gitignore` — Tier F art never ships
-   publicly). The art pipeline's output is expected under
-   `ImageGen/images/cards/`; without it, cards fall back to placeholders.
-6. The character-select `.pck` is also built locally:
-   `tools/build_pck.ps1`.
+   `GameDir` (your game install) and `BaseLibDll` (the Workshop BaseLib.dll).
+5. Art is not in the repo. The art pipeline writes it under
+   `ImageGen/images/` (the art docs are in `docs/current/operations/`).
+   Without it, cards fall back to placeholders.
 
-Build, validate, and deploy into the game's `mods/` folder (game must be
-closed — it holds a lock on the dll):
+Build and install with the game closed, since it locks the dll:
 
 ```powershell
-cd klee-mod
-.\build\deploy.ps1
+python tools\deploy_round.py --dry-run   # shows what it will do
+python tools\deploy_round.py             # rebuild the pck if stale, deploy, verify
 ```
 
-This stages a clean package under `klee-mod/dist/klee/` (manifest + dll +
-card art + pck), runs the static conformance checks in `build/validate.ps1`
-against exactly that staged package, and only then copies it to
-`<GameDir>/mods/klee/`.
+This builds the `.pck` and stages a validated package under
+`klee-mod/dist/klee/`. It copies the package to `<GameDir>/mods/klee/` and
+installs the playtest bridge. Then it prints the installed version.
 
-## Packaging a handoff zip (co-op / friends)
+## Sharing a build
 
 ```powershell
 cd klee-mod
 .\build\deploy.ps1 -Package
 ```
 
-This produces `klee-mod/dist/klee-v<version>.zip` — the exact validated
-package, art and pck included, with `klee/` as the archive root. The version
-in the filename is read from the staged manifest.
+This makes `klee-mod/dist/klee-v<version>.zip`, the validated package with art
+and pck, rooted at `klee/`. Recipients:
 
-Recipients:
+1. Extract it into `<game>/mods/` so it lands as `mods/klee/`.
+2. Subscribe to BaseLib (the version is in the manifest).
+3. Be on at least the manifest's `min_game_version`.
 
-1. Extract the zip into `<game>/mods/` so it lands as `mods/klee/`.
-2. Subscribe to BaseLib on the Steam Workshop (version per the manifest).
-3. Be on a game build at least the manifest's `min_game_version`.
-
-Rules of the road:
-
-- **Co-op is deterministic lockstep.** Everyone in a lobby must run the
-  *same* zip (and the same BaseLib) or the game will detect state
-  divergence. Bump the `version` in `klee-mod/Klee/manifest.json` before
-  every handoff so mismatches are visible in the filename.
-- **Hand the zip off privately** (DM, drive share). It contains the scraped
-  Tier F art, which is never distributed publicly — same reason
-  `ImageGen/images/`, `dist/`, and `*.zip` are all gitignored.
+Builds are shared privately for now. `docs/current/LAW.md` allows a free,
+clearly unofficial public build with official art and no audio. When that
+happens is still an open decision
+(`review/active/distribution-readiness-2026-10-12.md`).
