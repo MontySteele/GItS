@@ -59,7 +59,7 @@ public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yoimiya — Aurous Blaze"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage. For {PowerAmount:diff()} turns, whenever you play a Skill, deal 3 [gold]Pyro[/gold] damage to that enemy.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage. For {PowerAmount:diff()} turns, whenever you play a Skill, deal 3 [gold]Pyro[/gold] damage to that enemy.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -70,13 +70,14 @@ public sealed class ProtoMiYoimiyaAurousBlaze : CustomCardModel, IElementalCard,
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
 
-    /// <summary>The element this card makes current, on its in-combat line
-    /// (`VarkaOath.SwitchLine`).</summary>
+    /// <summary>This card's in-combat Oath lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`).</summary>
     protected override void AddExtraArgsToDescription(
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
+        description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

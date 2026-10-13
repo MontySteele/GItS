@@ -15919,6 +15919,46 @@ def varka_switch_face_arg(card: dict, profile: "CharacterProfile"
             f"VarkaOath.SwitchLine(this, {ELEMENT_CS[element]})")
 
 
+#: The token of a Pyro-applying card's in-combat Wildfire Oath line
+#: (`VarkaOath.WildfireLine`).
+VARKA_WILDFIRE_TOKEN = "VarkaWildfire"
+
+
+def applies_pyro(card: dict) -> bool:
+    """Does this row's play apply Pyro? An `apply_aura` of Pyro, a `varka`
+    kind whose hit carries it (`VARKA_KIND_ELEMENTS`), or damage that applies
+    the row's own element when that element is Pyro."""
+    for effect in _effects_everywhere(card):
+        if effect.get("op") == "apply_aura" and effect.get("element") == "pyro":
+            return True
+        if (effect.get("op") == "varka"
+                and "pyro" in VARKA_KIND_ELEMENTS.get(effect.get("kind"), ())):
+            return True
+        if (effect.get("op") == "damage" and effect.get("applies_element")
+                and card.get("element") == "pyro"):
+            return True
+    return False
+
+
+def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
+                            ) -> tuple[str, str] | None:
+    """`(token, C#)` for a Pyro-applying card's "(Wildfire Oath deals N)"
+    line, or None.
+
+    BACKLOG: "Wildfire Oath's damage has no preview on the card that applies
+    Pyro; a seat mis-added a lethal by 1." Every Varka row that applies Pyro,
+    and every shared Companion row that does (it is his card in his deck),
+    ends its face in `{InCombat:{VarkaWildfire}|}`, the switch line's seam;
+    the line prints only while a live Varka holds Wildfire Oath.
+    """
+    if profile.character_id != "varka" and not (
+            is_companion(card) and card.get("character") != "varka"):
+        return None
+    if not applies_pyro(card):
+        return None
+    return (VARKA_WILDFIRE_TOKEN, "VarkaOath.WildfireLine(this)")
+
+
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
 #: the Replace version"). Orobas's relic transforms a starter card into its
 #: Ancient through the private `ArchaicTooth.TranscendenceUpgrades` map;
@@ -16235,6 +16275,9 @@ def emit(
     switch_arg = varka_switch_face_arg(card, profile)
     if switch_arg is not None:
         face_args.append(switch_arg)
+    wildfire_arg = varka_wildfire_face_arg(card, profile)
+    if wildfire_arg is not None:
+        face_args.append(wildfire_arg)
     desc = stage_lines_face(desc, face_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
@@ -17241,6 +17284,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "The element this card makes current, on its in-combat line\n"
             "    /// (`VarkaOath.SwitchLine`)."
             if tokens == [VARKA_SWITCH_TOKEN] else
+            "This card's in-combat Oath lines\n"
+            "    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`)."
+            if set(tokens) <= {VARKA_SWITCH_TOKEN, VARKA_WILDFIRE_TOKEN} else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'
