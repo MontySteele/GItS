@@ -1540,11 +1540,11 @@ def _summon_row(hay: str) -> str:
 #: THE KOKOMI RE-FOUNDING (2026-10-12). The Tamakushi Casket's face
 #: (`TamakushiCasket.Face`), markup folded out, with the Block off the
 #: mirrored constant. The count and Open the Casket are retired.
-#: Kokomi pre-run fixes (2026-10-12): and when a Plan's own Block arrives,
-#: because two round-3 seats wrote a Block Plan for this turn's hit.
+#: (The Ancient audit, 2026-10-12, dropped the second sentence the Kokomi
+#: pre-run fixes added, "A Plan's own Block comes at the start of your next
+#: turn.")
 CASKET_ROW = (f"At the start of your turn, if a Plan is waiting, gain "
-              f"{CASKET_BLOCK} Block. A Plan's own Block comes at the start "
-              f"of your next turn.")
+              f"{CASKET_BLOCK} Block.")
 
 ARM_KEYWORDS: dict[str, str] = {
     # TEXT PASS 2026-09-25, in step with `ArmKeywordTips.ForBomb` and

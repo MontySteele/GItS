@@ -49,11 +49,11 @@ def test_the_sheet_face_is_labelled_unmodified_not_written():
     assert not any(line.strip().startswith("Written:") for line in lines)
 
 
-# --- 4. the Casket says when a Plan's Block arrives --------------------------
+# --- 4. the Casket row is one sentence again (the Ancient audit) ------------
 
-def test_the_casket_row_says_a_plans_block_comes_next_turn():
-    assert blindplay_notes.CASKET_ROW.endswith(
-        "A Plan's own Block comes at the start of your next turn.")
+def test_the_casket_row_is_the_one_sentence_face():
+    assert blindplay_notes.CASKET_ROW == (
+        "At the start of your turn, if a Plan is waiting, gain 3 Block.")
 
 
 # --- 5. Surrounded and "turns you" under --define ----------------------------

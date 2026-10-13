@@ -2365,31 +2365,26 @@ def test_a_no_element_mod_damage_card_played_by_kokomi_applies_nothing(
     assert effects._element_for(st, hit, fun) == "pyro"
 
 
-def test_r276_princess_of_watatsumi_pays_on_every_plan_under_the_arm(overhaul):
-    """Her Ancient under the arm: "Whenever the Bake-Kurage carries out a
-    Plan, gain 2 Block and draw 1 card." Every Plan, not once a turn. (The
-    shipped Charge drip its row still applies is read by nothing: Charge left
-    the sim on 2026-10-08.)"""
+def test_princess_of_watatsumi_is_a_bigger_oath(overhaul):
+    """The Ancient audit (ruled 2026-10-12): her Archaic Tooth card, "Gain 9
+    [12] Block. Draw 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies
+    five times." The sim row is its now-line (a Plan line is prototype
+    surface only); its Plan-bus Power left."""
     st = kokomi_state()
     st.player.draw_pile = [loader.get_card("defend") for _ in range(5)]
     princess = loader.get_card("princess_of_watatsumi")
-    effects.resolve_card(st, princess)
-    assert st.player.powers[kokomi_plan.PRINCESS_OF_WATATSUMI] == 2
-
-    clause = [{"op": "block", "amount": 1}]
-    kokomi_plan.schedule(st, plan_card(clause))
-    kokomi_plan.schedule(st, plan_card(clause))
+    assert princess.type == "skill"
+    assert not princess.plan
     hand, block = len(st.player.hand), st.player.block
-    kokomi_plan.resolve_all(st)
-    assert st.player.block == block + 2 * (1 + 2)
+    effects.resolve_card(st, princess)
+    assert st.player.block == block + 9
     assert len(st.player.hand) == hand + 2
+    assert not hasattr(kokomi_plan, "PRINCESS_OF_WATATSUMI")
 
 
-def test_r276_princess_upgrades_to_three_block():
+def test_princess_upgrades_to_twelve_block():
     up = loader.get_card("princess_of_watatsumi+")
-    amounts = {fx["power"]: fx["amount"] for fx in up.effects}
-    assert amounts == {"charge_per_turn": 4,
-                       kokomi_plan.PRINCESS_OF_WATATSUMI: 3}
+    assert [fx["amount"] for fx in up.effects] == [12, 2]
 
 
 # --- R276 pick 1: the halves rewrite's five new Plan clauses ---------------

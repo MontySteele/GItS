@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, ICharacterCard, IStageSpendCard
+public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, ICharacterCard, IStageSpendCard, ITranscendenceCard
 {
     /// <summary>Sheet cadence: damaging Skills, Burst-tagged cards, and skill-tagged cards apply Hydro.</summary>
     public Element Element => Element.Hydro;
@@ -53,6 +53,11 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, IC
         ("title", "Rising Applause"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Spend[/gold] all your [gold]Fanfare[/gold] and deal that much [gold]Hydro[/gold] damage.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
+
+    /// <summary>Orobas's Archaic Tooth turns this card into its Ancient
+    /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`).</summary>
+    public CardModel GetTranscendenceTransformedCard() =>
+        ModelDb.Card<global::KleeMod.Cards.Furina.AllTheWorldsAStage>();
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

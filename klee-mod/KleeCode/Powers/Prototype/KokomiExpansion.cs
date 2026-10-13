@@ -102,8 +102,8 @@ public static class KokomiExpansion
 /// Bake-Kurage carries out a Plan, gain 2 Block." On the plan bus
 /// (<see cref="IKokomiPlanListener"/>), which <c>KokomiPlan.ResolveEntry</c>
 /// calls once per CARRY-OUT, so a Plan carried out twice (Second Wave,
-/// Nereid's Ascension, All Streams) pays twice. POWERED Block, as her
-/// Ancient's (<see cref="PrincessOfWatatsumiPlanPower"/>). Sim twin:
+/// Nereid's Ascension, All Streams) pays twice. POWERED Block (rule 3: her
+/// Dexterity counts on what a Plan pays). Sim twin:
 /// <c>kokomi_plan._note_plan_resolved</c>.</summary>
 public sealed class KurageCanopyPower
     : PowerModel, ILocalizationProvider, IKokomiPlanListener

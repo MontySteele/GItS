@@ -73,11 +73,13 @@ internal static class UpgradedStarterRelics
 /// Klee's upgraded starter (Touch of Orobas), displayed as "Dodoco Tales".
 /// RATIFIED 2026-07-26.
 ///
-/// Her per-detonation Spark income is UNCHANGED at 1 -- this relic keeps the
-/// base behaviour rather than replacing it. The fixed opening windfall it was
-/// ratified with (3 Sparks) went with the shipped Sparks rule: under the
-/// current kit the relic's body is the first-explosion repair below
-/// (legacy cleanup stage 6 deleted the unread constant).
+/// Her per-explosion Spark income is the starter's 1 -- this relic keeps the
+/// base behaviour rather than replacing it -- and the first explosion each
+/// turn pays 2 (the repair, 2026-09-27). The fixed opening windfall it was
+/// ratified with (3 Sparks) went with the shipped Sparks rule and came back
+/// at 4 in the Klee finish-line batch (2026-10-03): with the kit's own 3
+/// opening Sparks, an upgraded Klee opens each combat at 7
+/// (<see cref="OpeningSparks"/>).
 ///
 /// WHY A WINDFALL AND NOT A RATE. The first attempt doubled the per-detonation
 /// grant, and that was rejected at red-pen as "way too good": a rate multiplies
@@ -119,10 +121,13 @@ internal static class UpgradedStarterRelics
 /// never removes.
 /// </summary>
 public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
-    // QUARANTINED, and the same seam Pounding Surprise takes: under the Klee
-    // overhaul this relic is the upgraded form of the Spark rule, so it listens
-    // to the arm's explosion bus too. Inside the switch, so a release build
-    // neither compiles the interface nor references it.
+    // The same seam Pounding Surprise takes: under the Klee overhaul this
+    // relic is the upgraded form of the Spark rule, so it listens to the
+    // arm's explosion bus too. ONE PAYMENT PER EXPLOSION (checked by the
+    // Ancient audit, 2026-10-12): the shipped detonation bus above rings only
+    // for the shipped BombPower, which nothing places any more; every Bomb
+    // and Mine is a ProtoBombPower and rings the explosion bus alone
+    // (AncientAuditTests pins it).
     , Powers.IProtoExplosionListener
 {
     /// <summary>
@@ -140,8 +145,9 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
 
     /// <summary>The opening bank (Klee finish-line batch, 2026-10-03, ruled
     /// "Agreed all around!"): "Start each combat with 4 more Sparks." On top
-    /// of the kit's <see cref="Powers.KleeOverhaulLaw.OpeningSpark"/>, so an
-    /// upgraded Klee opens at 5, the Regent's 3 -> 7 stars as the yardstick.
+    /// of the kit's <see cref="Powers.KleeOverhaulLaw.OpeningSpark"/> (3), so
+    /// an upgraded Klee opens at 7, the Regent's 3 -> 7 stars as the
+    /// yardstick.
     /// Sim twin: <c>touch_of_orobas_klee</c>'s <c>combat_start_spark</c>
     /// (tier05/content/relics.yaml).</summary>
     public const int OpeningSparks = 4;
@@ -165,13 +171,10 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         // Rare Power card of that name. See the class summary.
         ("title", "Dodoco Tales"),
         ("description",
-            // Under the arm the opening bank is gated OFF
-            // (`AfterPlayerTurnStart` below) and the repair of 2026-09-27
-            // (review/active/relics-potions-klee-furina-2026-09-27.md) is the
-            // arm's body: one extra Spark a turn, all of it earned. A loc row
-            // is registered once at boot, so the switch is the compile
-            // constant the deploy line sets, the same one Pounding Surprise's
-            // face reads.
+            // The repair of 2026-09-27
+            // (review/active/relics-potions-klee-furina-2026-09-27.md): one
+            // extra Spark a turn, all of it earned; and the opening bank,
+            // paid by the kit's opening site (`GrantOpeningSparks` below).
             "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
           + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]. "
           + "The first time each turn, gain [blue]" + FirstExplosionSparks
@@ -251,8 +254,8 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     /// The opening bank: <see cref="OpeningSparks"/> on Klee's first turn,
     /// paid from the kit's own opening site
     /// (<see cref="Powers.KleeOverhaulOpening.GrantSpark"/>: turn 1 after the
-    /// draw, per player, Klee only) right after the kit's Spark, so the first
-    /// hand sees all five and the two gains have one fixed order rather than
+    /// draw, per player, Klee only) right after the kit's Sparks, so the first
+    /// hand sees all seven and the two gains have one fixed order rather than
     /// two co-tenants of <c>AfterPlayerTurnStart</c>.
     /// </summary>
     public async Task GrantOpeningSparks(
@@ -290,59 +293,16 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
 }
 
 /// <summary>
-/// Furina's upgraded starter (Touch of Orobas). RATIFIED 2026-07-26 as red-pen
-/// ruling R2, a [USER] design superseding all three worksheet options.
+/// Furina's upgraded starter (Touch of Orobas): THE CURTAIN NEVER FALLS, Salon
+/// Solitaire upgraded. "At the end of your turn, Repay 2." (the Salon's Tab,
+/// 2026-10-05; 3 until the 2026-10-09 playtest trim). The Repay is the kit's
+/// (<see cref="Powers.FurinaStage.SingerOf"/>, at
+/// <see cref="Powers.FurinaStageLaw.SingerRepayUpgraded"/>); the starter's is
+/// 1. It keeps her companion reward slot.
 ///
-/// **Both Spotlight modes at once, permanently.** Her own cards generate
-/// Fanfare (Center Stage's half) AND her Companions are multiplied (Guest
-/// Cast's half), and conditions keying off "moved the Spotlight this turn" are
-/// ALWAYS ON — which is what makes this relic the selector-payoff enabler
-/// rather than merely a convenience.
-///
-/// THE UPGRADE REMOVES THE EXCLUSIVITY, NOT THE TARGETING (reading 1, ruled
-/// during implementation). Each half still applies only to its own card class:
-/// no numeric boost leaks onto Furina's cards, and her Companions still mint no
-/// Fanfare. What she gains is that she never has to choose. Every gate lives in
-/// <see cref="SpotlightSystem"/>, keyed off
-/// <see cref="SpotlightSystem.BothModes"/>, so this class holds no logic of its
-/// own beyond existing — which is the point: a relic that is a FLAG cannot
-/// drift from the system that reads it.
-///
-/// **THE SELECTOR CARD STOPS ARRIVING.** With both modes always on it has
-/// nothing left to choose, so this class deliberately does NOT override
-/// AfterPlayerTurnStart the way <see cref="EtherealSpotlightRelic"/> does. That
-/// touches Funnel Contract §3 (Spotlight is a designation event, one funnel):
-/// the funnel is not removed, moved or renamed and every existing caller still
-/// routes through it — but an upgraded Furina never FIRES it again, so the
-/// Spotlight beam goes quiet for that run. The cross-session note was filed in
-/// BOTH logs before this landed, per the contract's own rule:
-/// docs/archive/animation-sprint-2-log.md and docs/archive/red-pen-2026-07-26.md.
-///
-/// THIS DELIBERATELY BREAKS the "no new behaviour in a starter upgrade" rule,
-/// by user authority. The rule is OVERRIDDEN, not reinterpreted, and the
-/// override is recorded rather than quietly absorbed. Her no-passive-accrual
-/// law (kickoff §4) is NOT touched: this grants no resource per turn.
-///
-/// NAME is authored theatrical flavour like the rest of her sheet and rides the
-/// pending v1.7 lore/constellation audit.
-///
-/// SIM PARITY: MODELLED (EB-31). `touch_of_orobas_furina` in
-/// tier05/content/relics.yaml, owner-gated to her like its two siblings, with
-/// a single amount-less `spotlight_both_modes` hook -- the relic is a FLAG on
-/// both sides of the bridge, and tier0/engine/relics.py `spotlight_both_modes`
-/// is the sim's `BothModes`.
-///
-/// THIS BLOCK USED TO SAY "NOT MODELLED ... tier05 has no Spotlight-mode model
-/// to make always-on", and the premise was the wrong half. tier0 models the
-/// modes exactly -- `Player.spotlight` holds one designation at a time -- so
-/// what was missing was never a model, only the always-on READ. Recorded
-/// because the claim sat here for eleven days and was the reason nobody
-/// looked: a tier-0.5 Furina never received the upgrade, so no anchor or
-/// free-draft cell measured it and its value was unpriced.
-///
-/// The narrow relic-upgrade approach ([USER], option 1) is unchanged and is
-/// why there is still no table: three owner-gated rows that share no effect
-/// vocabulary, one per character.
+/// Its first form (red-pen ruling R2, 2026-07-26: both Spotlight modes at
+/// once, a flag on <c>SpotlightSystem</c>) retired with the shipped kits; the
+/// Ancient audit (2026-10-12) cut that class doc, which git keeps.
 /// </summary>
 public sealed class CurtainNeverFalls : CustomRelicModel
 {

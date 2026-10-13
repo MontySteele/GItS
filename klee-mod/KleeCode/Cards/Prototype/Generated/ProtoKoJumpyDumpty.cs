@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKoJumpyDumpty : CustomCardModel
+public sealed class ProtoKoJumpyDumpty : CustomCardModel, ITranscendenceCard
 {
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Innate };
@@ -47,6 +47,11 @@ public sealed class ProtoKoJumpyDumpty : CustomCardModel
         ("title", "Jumpy Dumpty"),
         ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. When it goes off, place a [gold]Mine[/gold] {PayloadMine:diff()} on ALL enemies."),
     };
+
+    /// <summary>Orobas's Archaic Tooth turns this card into its Ancient
+    /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`).</summary>
+    public CardModel GetTranscendenceTransformedCard() =>
+        ModelDb.Card<global::KleeMod.Cards.JumpyDumptyMkOmega>();
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

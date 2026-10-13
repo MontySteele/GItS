@@ -21,8 +21,8 @@ CASKET = {"name": "Tamakushi Casket",
           "text": "At the start of your turn, if a Plan is waiting, gain 3 "
                   "Block."}
 WATATSUMI = {"name": "Watatsumi Casket",
-             "text": "At the start of your turn, if a Plan is waiting, gain 5 "
-                     "Block."}
+             "text": "At the start of your turn, gain 3 Block for each Plan "
+                     "waiting."}
 
 
 def _you(hp=60, max_hp=80, block=0, relics=()):
