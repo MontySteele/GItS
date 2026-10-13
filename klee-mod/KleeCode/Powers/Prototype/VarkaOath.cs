@@ -152,9 +152,23 @@ public sealed class VarkaOathLedger
         _oath.TryGetValue(element, out var n) ? n : 0;
 
     /// <summary>The one count his cards read: the current element's, or all
-    /// four together on a turn he drank the Elixir of the Four Winds.
+    /// four together on a turn he drank the Elixir of the Four Winds, or for
+    /// the rest of a fight he played All Four Winds in.
     /// </summary>
-    public int CurrentOath => AllFourThisTurn ? Total : Oath(Current);
+    public int CurrentOath => ReadsAllFour ? Total : Oath(Current);
+
+    /// <summary>Do his cards read all four Oaths together now: the Elixir's
+    /// turn, or All Four Winds' combat?</summary>
+    public bool ReadsAllFour => AllFourThisTurn || AllFourThisCombat;
+
+    /// <summary>All Four Winds (his Ancient, the Varka review, ruled
+    /// 2026-10-12): "Your cards read your Oath of every element together."
+    /// The Elixir's effect for the whole combat; a new combat's ledger starts
+    /// without it.</summary>
+    public bool AllFourThisCombat { get; private set; }
+
+    /// <summary>All Four Winds is played.</summary>
+    public void ReadAllFourThisCombat() => AllFourThisCombat = true;
 
     private int _allFourRound = -1;
 
@@ -996,6 +1010,24 @@ public static class VarkaOath
         return VarkaRules.IsKnight(card)
             || !owner.HasPower<UnwaveringBannerPower>();
     }
+
+    /// <summary>
+    /// THE SWITCH PREVIEW (the Varka review, 2026-10-12, sec.5): "Any card of
+    /// his that would change the current element will show '(Makes Pyro
+    /// current)' in combat, the same in-combat preview Kokomi's Plans use."
+    /// The generated card ends its face in <c>{InCombat:{VarkaSwitch}|}</c>
+    /// and fills the token from here: the line on its own row while playing
+    /// the card would change his current element to
+    /// <paramref name="element"/> (<see cref="WouldSwitchTo"/>, the hover
+    /// tip's question), else empty.
+    /// </summary>
+    public static string SwitchLine(CardModel? card, Element element) =>
+        WouldSwitchTo(card, element) ? SwitchWords(element) : "";
+
+    /// <summary>The line itself, a line break then "(Makes Pyro current)".
+    /// PURE.</summary>
+    public static string SwitchWords(Element element) =>
+        $"\n(Makes {element} current)";
 
     /// <summary>The payout sentence for <paramref name="element"/>, the one
     /// the badge and the current-element tip print. PURE.</summary>

@@ -56,6 +56,9 @@ CHARACTERS = {
     "Klee": (CODE / "KleeCardPool.cs", CODE / "KleeOffPoolCards.cs"),
     "Furina": (CODE / "FurinaCardPool.cs", CODE / "FurinaCardPool.cs"),
     "Kokomi": (CODE / "KokomiCardPool.cs", CODE / "KokomiCardPool.cs"),
+    # The Varka review (ruled 2026-10-12): his two Ancients. He has no
+    # off-pool class, so his pool file stands in (the scan finds no marker).
+    "Varka": (CODE / "VarkaCardPool.cs", CODE / "VarkaCardPool.cs"),
 }
 
 # EB-284. THE SAME GATE ON THE ARMS, BECAUSE THEY REPLACE THE POOL THE GATE
@@ -77,6 +80,9 @@ CHARACTERS = {
 ARM_POOLS = {
     "Klee": CODE / "Powers" / "Prototype" / "KleeOverhaulRoster.cs",
     "Kokomi": CODE / "Powers" / "Prototype" / "KokomiOverhaulRoster.cs",
+    # Not an `*OverhaulRoster.cs`, so the sweep below cannot see it: listed
+    # by hand. `VarkaCardPool.FilterThroughEpochs` returns its OfferablePool.
+    "Varka": CODE / "Powers" / "Prototype" / "VarkaRoster.cs",
 }
 ARM_POOL_GLOB = "Powers/Prototype/*OverhaulRoster.cs"
 # The one `*OverhaulRoster.cs` that is NOT a character reward pool: the

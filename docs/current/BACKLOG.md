@@ -34,7 +34,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Klee finish-line batch, pinned headless only; watch in game and through the bridge: Dodoco Tales' opening Sparks (and the Spark row naming the relic), Finders Keepers' draw trigger, Confiscated playing as a Status (drag-to-play, frame, Klee Can Explain! / Kitchen Alchemy taking it), Mine, All Mine!'s Mine landing on the enemy its hit killed.
 - Pool completion: Divine Strategy's now-line, Center of Attention's free Spend and the two co-op cards (Tactical Relay, Kurage's Mercy) are pinned headless only; watch them in game and through the bridge.
 - Varka Hydro cards (Tidal Bulwark, Whisper of Water) went ungraded in two seats (each offered once, passed); they are read in [USER]'s run.
-- Varka has no Ancient card: Darv's Dusty Tome hands him an upgraded Four Winds' Ascension through BaseLib's `ITomeCard` (the row's `dusty_tome` tag) until one is designed; delete the tag with it.
+- Varka's Ancients (All Four Winds from Darv's Tome, Dandelion Gale from Orobas's Archaic Tooth on Windbound Execution) and his "(Makes Pyro current)" line are pinned headless only; watch them in game and through the bridge.
 - Verify Boreas's Fang saved starter element survives save/reload (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField`; no test exercises a real serialize/deserialize, so the Fang and Knight's Commission keep their deck fallback until then).
 - Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.
 - Varka's element-switch hover (`ArmKeywordTips.ForElementSwitch`) rides only his own `proto_vk_` rows; a Universal or another kit's card he drafts that applies an Oath element switches him too and says nothing.

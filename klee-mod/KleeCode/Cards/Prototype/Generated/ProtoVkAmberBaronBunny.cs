@@ -56,7 +56,7 @@ public sealed class ProtoVkAmberBaronBunny : CustomCardModel, ICompanionCard, IW
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Amber: Baron Bunny"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to a random enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to a random enemy.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -66,6 +66,15 @@ public sealed class ProtoVkAmberBaronBunny : CustomCardModel, ICompanionCard, IW
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

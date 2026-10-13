@@ -56,7 +56,7 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard, IWri
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lisa: Infinite Circuit"),
-        ("description", "Apply [gold]Electro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Attack you played this turn.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Apply [gold]Electro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Attack you played this turn.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -66,6 +66,15 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard, IWri
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

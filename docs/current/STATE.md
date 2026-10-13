@@ -196,13 +196,18 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `tier0/engine/varka_oath.py`). 80 HP, 99 gold; starter base Strike x4,
   Defend x4, Windbound Execution (0: 4 [6] Anemo) and one of four
   starter-only Knights, one per element, rolled per run; starting relic
-  Boreas's Fang, which adds Four Winds' Ascension (2, Retain: 10 [13] Anemo
-  then 3 [4] per Oath) the first time each combat he gains Oath. One Oath
+  Boreas's Fang, which adds Four Winds' Ascension (2, Retain: 10 Anemo then
+  3 per Oath; upgraded it costs 1) the first time each combat he gains Oath;
+  played, it returns after a reshuffle. One Oath
   count per element; his current element is that of his last Knight or of the
   last Pyro, Hydro, Cryo or Electro any card of his applied, and his cards
   read only its Oath. A Swirl he makes pays that element (Pyro 3 damage,
   Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL). Pool 78 (20 / 35 / 23),
-  thirteen pool Knights; his own relics and three potions. Latest records
+  thirteen pool Knights; his own relics and three potions; two Ancients (the
+  Varka review, `review/active/varka-review-2026-10-12.md`, ruled 2026-10-12:
+  "Both sound workable to me - Dandelion Gale could be the Replace
+  version"): All Four Winds from Darv's Tome, Dandelion Gale from Orobas's
+  Archaic Tooth on Windbound Execution. Latest records
   `review/records/varka-solo-check-2026-10-07.md` (1 win of 5 on the base
   seeds) and `review/records/varka-offers-round-2026-10-08.md` (all five
   reached act 3, none won; Pyro and Cryo payoffs offered and passed, Pyro
@@ -211,7 +216,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   and Pyro paper 2 on top of it
   (`review/active/varka-pyro-reactions-2026-10-12.md`: Ember Cleave is Setup
   Strike in Pyro, Stoke the Flames powers the next Pyro Attack this turn,
-  the Exhaust rider is retired); next a two-seat Varka round.
+  the Exhaust rider is retired). The Varka review (ruled 2026-10-12: "On
+  Varka - wow, ok, sounds like we've outright solved the open issues."): the
+  Pyro core is settled, Ember Cleave 9 [11], switch against mono unchanged, a
+  card that would change his current element says "(Makes Pyro current)" in
+  combat. Next: [USER]'s playtest, then Balance.
 
 ## Elements
 

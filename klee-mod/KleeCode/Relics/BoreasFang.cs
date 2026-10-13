@@ -26,7 +26,8 @@ namespace KleeMod.Relics;
 /// in combat (<c>CombatState.CreateCard</c>) and added through
 /// <c>CardPileCmd.AddGeneratedCardToCombat</c>, never in the deck (0.111.0
 /// decompile). Played, Ascension goes to the discard pile and comes back
-/// when he draws it.
+/// when he draws it; the face says so since the Varka review (2026-10-12: a
+/// seat was surprised by it): "It returns after a reshuffle."
 ///
 /// THE RULE IS NOT HERE. The first gain is <c>VarkaOath.Gain</c>'s question
 /// (the per-combat latch lives in the Oath ledger); this class is the relic
@@ -95,7 +96,7 @@ public class BoreasFang : CustomRelicModel
           + "element "
           + "becomes your [gold]current element[/gold]. The first time each "
           + "combat you gain [gold]Oath[/gold], add Four Winds' Ascension to "
-          + "your hand."),
+          + "your hand. It returns after a reshuffle."),
     };
 
     /// <summary>The words the face leans on. Knight joined with the co-op
@@ -247,7 +248,8 @@ public sealed class WolfsGravestone : BoreasFang
           + "element "
           + "becomes your [gold]current element[/gold]. The first time each "
           + "combat you gain [gold]Oath[/gold], add an upgraded [gold]Four "
-          + "Winds' Ascension[/gold] to your hand. It costs 0 this turn."),
+          + "Winds' Ascension[/gold] to your hand. It costs 0 this turn and "
+          + "returns after a reshuffle."),
     };
 
     public override bool AscensionUpgraded => true;

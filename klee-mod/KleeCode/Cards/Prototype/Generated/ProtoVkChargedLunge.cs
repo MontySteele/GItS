@@ -53,8 +53,17 @@ public sealed class ProtoVkChargedLunge : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charged Lunge"),
-        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage. Draw 1 card."),
+        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage. Draw 1 card.{InCombat:{VarkaSwitch}|}"),
     };
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

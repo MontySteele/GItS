@@ -60,10 +60,7 @@ internal static class VarkaRoster
     /// is what the game reads). The combo pass (2026-10-04) swapped five
     /// generic Block cards for five Pyro and Cryo cards, rarity for rarity.
     ///
-    /// NO ANCIENT CARD, because the paper designs none. Darv's Dusty Tome
-    /// draws an Ancient from this set and softlocks on an empty draw, so Four
-    /// Winds' Ascension carries BaseLib's <c>ITomeCard</c> mark instead
-    /// (the row's <c>dusty_tome</c> tag): the Tome hands him that, upgraded.
+    /// His Ancients are not here: <see cref="OfferablePool"/> adds them.
     /// </summary>
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
@@ -156,6 +153,16 @@ internal static class VarkaRoster
         ModelDb.Card<ProtoVkPyreOath>(),
         ModelDb.Card<ProtoVkDeepFreeze>(),
     };
+
+    /// <summary>
+    /// THE OFFER (<c>VarkaCardPool.FilterThroughEpochs</c>, which IS
+    /// <c>GetUnlockedCards</c>): the pool, then his Ancients (the Varka
+    /// review, ruled 2026-10-12), on <c>KokomiOverhaulRoster.OfferablePool</c>'s
+    /// terms. Darv's Dusty Tome draws its Ancient from this set and softlocks
+    /// on an empty draw; Ancient rarity never rolls anywhere else.
+    /// </summary>
+    internal static IEnumerable<CardModel> OfferablePool() =>
+        Pool().Concat(RosterAncientCards.Varka);
 
     /// <summary>
     /// Every card of his that must resolve <c>CardModel.Pool</c> to his pool:
