@@ -180,7 +180,9 @@ def test_the_reader_carries_the_keys_the_mod_sends():
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
          "source", "self",
          # The Klee round (2026-10-11): the play-order stamp.
-         "seq"])
+         "seq",
+         # BACKLOG, the Varka screen: the Power whose hit it was.
+         "by"])
 
 
 def test_the_internal_id_never_crosses_onto_the_page():

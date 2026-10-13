@@ -195,7 +195,7 @@ public class VarkaComboTests : IDisposable
         Assert.True(typeof(MegaCrit.Sts2.Core.Models.Powers.TemporaryStrengthPower)
             .IsAssignableFrom(typeof(EmberCleavePower)));
         Assert.Equal("Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain "
-                     + "{VkAmount:diff()} [gold]Strength[/gold] this turn.{InCombat:{VarkaSwitch}|}",
+                     + "{VkAmount:diff()} [gold]Strength[/gold] this turn.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}",
                      Face(new ProtoVkEmberCleave()));
     }
 

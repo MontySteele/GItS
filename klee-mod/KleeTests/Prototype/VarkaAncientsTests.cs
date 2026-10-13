@@ -192,7 +192,9 @@ public class VarkaAncientsTests : IDisposable
         foreach (var card in new CardModel[]
                  { new ProtoVkKindledEdge(), new ProtoVkAmberFieryRain() })
         {
-            Assert.EndsWith("{InCombat:{VarkaSwitch}|}", Face(card));
+            // BACKLOG: a Pyro card's Wildfire Oath line follows it.
+            Assert.EndsWith("{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}",
+                            Face(card));
         }
         // A face that prints the switch (Stoke the Flames) carries none.
         var stoke = Face(new ProtoVkStokeTheFlames());

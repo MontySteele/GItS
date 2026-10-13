@@ -364,7 +364,7 @@ public class ResolutionLedgerTests
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
         Assert.Equal(new[] { "target", "amount", "blocked", "combat_id",
                              "killed", "on_player", "source", "self",
-                             "seq" },
+                             "seq", "by" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
         // 2026-10-01: a hit on a player inside a play is marked as one.
