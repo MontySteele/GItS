@@ -15,11 +15,17 @@ line leaves this file. Closed picks are in git
   in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the
   electro (Oz) leg, so that order falls to this look (`BACKLOG.md` `EB-53`).
 
-- **Klee in motion** (next build): style G and her ground shadow are ruled
-  and built (`review/active/klee-visual-paper-2026-10-12.md`, "Style G
-  ruled"); what is left is [USER]'s look at them in motion in the game.
+- **Klee in motion** (next build): H1 + H3 lite shading, the new battle
+  stance and her ground shadow are ruled and built
+  (`review/active/klee-visual-paper-2026-10-12.md`); the bomb size is being
+  fixed. What is left is [USER]'s look at them in motion in the game.
 
 ## Open packets in `review/active/`
+
+- **Furina pool review** (`furina-pool-review-2026-10-13.md`, two picks,
+  defaults (a)): (1) Uncommon Block: Fountain of Lucine and Private Box print
+  8 Block; (2) the guest style: damaging acts +2, Freminet +2, Leading Lady
+  2 Strength.
 
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
