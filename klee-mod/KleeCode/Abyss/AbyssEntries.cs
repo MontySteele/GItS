@@ -7,7 +7,7 @@ namespace KleeMod.Abyss;
 /// <summary>
 /// THE SPIRAL ABYSS MODE's Blessings: the first eight
 /// (<c>review/active/spiral-abyss-pools-2026-10-12.md</c> sec.2) and round
-/// two's six (<c>review/active/abyss-pools-2-2026-10-12.md</c>). The numeric
+/// two's six (<c>review/ruled/abyss-pools-2-2026-10-12.md</c>). The numeric
 /// values are what the run save stores, so they never move: a new entry takes
 /// a new number.
 /// </summary>
@@ -22,7 +22,7 @@ public enum AbyssBlessing
     Resonance = 6,
     Crystallize = 7,
     FatefulFortune = 8,
-    // Round 2 (review/active/abyss-pools-2-2026-10-12.md): four This act,
+    // Round 2 (review/ruled/abyss-pools-2-2026-10-12.md): four This act,
     // two Whole run.
     Overflow = 9,
     VigorOfTheAbyss = 10,
@@ -54,7 +54,7 @@ public enum AbyssShadow
 }
 
 /// <summary>
-/// HOW LONG AN ENTRY LASTS (<c>review/active/abyss-pools-2-2026-10-12.md</c>,
+/// HOW LONG AN ENTRY LASTS (<c>review/ruled/abyss-pools-2-2026-10-12.md</c>,
 /// pick 1 (a)). Genshin's two layers: the Blessing of the Abyssal Moon lasts
 /// the whole cycle, a Ley Line Disorder one floor -- here, one act. A This act
 /// entry is in force only in the act it was taken in (the record keeps each

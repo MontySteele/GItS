@@ -2,6 +2,13 @@
 
 > **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
+**Status (2026-10-13): the calibration bands and the seven-axis scorecard are
+retired.** The band tests skip (`RETIRED_CALIBRATION`,
+`tier0/tests/retired_calibration.py`, legacy cleanup pick 5, 2026-10-01) and no
+axis value gates anything. The sim now checks rules parity with the mod, not
+balance; balance is measured on the real game (`STATE.md`). Where this map
+describes bands and axes, it describes that retired machinery.
+
 Scope: `tier0/harness/` (axes, metrics, report, runner) and `tier0/tests/`.
 
 ## 1. Purpose
@@ -13,8 +20,8 @@ normalized so `ref_ironclad/starter = 3.0`, `runner.py` is the CLI + scoring
 orchestration, and `report.py` is terminal presentation only. `tier0/tests/`
 (1236 tests; 1556 with `tier05/tests`) is not a unit-test suite for the engine —
 it is the repo's *gate wall*: engine pins, sheet/content lints, C#-parity
-regressions, art-pipeline checks, encoding and convention lints, frozen-battery
-calibration bands, and the understudy contracts, all executed from pytest.
+regressions, art-pipeline checks, encoding and convention lints, the retired
+(skipping) calibration bands, and the understudy contracts, all executed from pytest.
 
 What this module is explicitly NOT: it is not a source of ratified truth about
 designs. Seven-axis numbers are **reportable but not load-bearing** until the

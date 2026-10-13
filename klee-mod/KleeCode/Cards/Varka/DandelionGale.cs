@@ -16,7 +16,7 @@ namespace KleeMod.Cards.Varka;
 
 /// <summary>
 /// Varka's Archaic Tooth Ancient (the Varka review,
-/// review/active/varka-review-2026-10-12.md sec.6, ruled 2026-10-12:
+/// review/ruled/varka-review-2026-10-12.md sec.6, ruled 2026-10-12:
 /// "Dandelion Gale could be the Replace version"): Orobas's Archaic Tooth
 /// turns his starter Windbound Execution into it, as it turns Bash into Break.
 /// "Deal 7 [10] Anemo damage to ALL enemies. Swirl every aura. These Swirls

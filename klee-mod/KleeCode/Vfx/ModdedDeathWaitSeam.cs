@@ -16,7 +16,7 @@ namespace KleeMod.Vfx;
 /// spawns <c>NMonsterDeathVfx</c> and frees the node -- and that wait sits
 /// behind the SAME <c>_spineAnimator != null</c> gate that
 /// <c>StartDeathAnim</c>'s SFX and clip measurement sat behind
-/// (<c>:933-946</c>; `review/dispatch3/s13-engine-sockets.md` row "No animator,
+/// (<c>:933-946</c>; `review/dispatch3/s13-engine-sockets.md` (archived) row "No animator,
 /// at death", and `s16-animation/s16-body-base-simple-player-character.md`
 /// §Q5). <c>ModdedPlayerDeathSeam</c> repaired the RETURNED length, which is
 /// what <c>Hook.AfterDeath</c> waits on (<c>Commands/CreatureCmd.cs:513</c>);
@@ -50,7 +50,7 @@ namespace KleeMod.Vfx;
 /// WHAT A DEPLOY STILL HAS TO PROVE, and it is written here rather than
 /// claimed: whether the engine's gate lets the wait run at all for a
 /// spine-less body on THIS install. BaseLib 3.4.7 ships an async transpiler on
-/// <c>AnimDie</c> (`review/dispatch3/s16-animation/s16-sidecar-public-mods.md`
+/// <c>AnimDie</c> (`review/dispatch3/s16-animation/s16-sidecar-public-mods.md`, archived
 /// §4.1, <c>BaseLib@4a97642:Patches/UI/CustomAnimationPatch.cs:30-47</c>) whose
 /// death-wait name probe is <c>Dead</c> / <c>Die</c> / <c>die</c> -- and our
 /// scenes name the state <c>death</c>, which is not in that list (§4.2). So the

@@ -1,6 +1,6 @@
 """The Kokomi level pass (2026-10-12), the sim side.
 
-`review/active/kokomi-level-pass-2026-10-12.md`, ruled "On the Kokomi level
+`review/ruled/kokomi-level-pass-2026-10-12.md`, ruled "On the Kokomi level
 paper - agreed on all defaults": section 1's trims and section 2's floors.
 Provenance note "Kokomi level pass, 2026-10-12". The C# twin is
 `klee-mod/KleeTests/Prototype/KokomiLevelPassTests.cs`. NOTHING MEASURED HERE

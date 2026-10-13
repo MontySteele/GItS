@@ -1,6 +1,6 @@
 """KOKOMI GROWTH POWERS (2026-10-10): what survives the re-founding.
 
-Brief `review/active/kokomi-growth-powers-2026-10-10.md`, ruled ("Agreed on
+Brief `review/active/kokomi-growth-powers-2026-10-10.md` (archived), ruled ("Agreed on
 both"). THE RE-FOUNDING (2026-10-12) retired the Casket, so Flood Tide is cut,
 Grand Design is a new card under the old name, and Brine Sting is an Attack;
 those tests left with them (the re-founding's own tests cover the new rows).

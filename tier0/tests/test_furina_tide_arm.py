@@ -226,12 +226,12 @@ def test_revelry_adds_to_drains_and_repays_and_copies_add():
     assert FS.fanfare(st.player) == 11
 
 
-# ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3) ----
+# ---- the pool to 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3) ----
 
 def test_the_pool_is_78_rows_23_35_20():
     # 10 / 17 / 7 since the 2026-10-09 playtest trim (Interval Bell and
     # Tidal Flourish to Uncommon); 12 / 15 / 7 before. THE POOL TO 75
-    # (review/active/furina-pool-growth-2026-10-09.md sec.5): 41 rows more,
+    # (review/ruled/furina-pool-growth-2026-10-09.md sec.5): 41 rows more,
     # 20 / 35 / 20. The pool-75 round's rulings (2026-10-09): Endless Waltz
     # cut (Uncommon) and Standing Ovation Common -> Uncommon, 19 / 35 / 20.
     # The block gap (ruled 2026-10-09): 1 Common, 2 Uncommon, 1 Rare more,

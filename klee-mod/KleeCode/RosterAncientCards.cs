@@ -34,7 +34,7 @@ public static class RosterAncientCards
     private static List<CardModel>? _kokomi;
     private static List<CardModel>? _varka;
 
-    // THE ANCIENT AUDIT (review/active/ancient-audit-2026-10-12.md, ruled
+    // THE ANCIENT AUDIT (review/ruled/ancient-audit-2026-10-12.md, ruled
     // 2026-10-12: "Otherwise agreed.- let's fix them all"): every kit has one
     // Dusty Tome card and one Archaic Tooth card, like the base characters
     // and Varka. The first card of each list below is the Tooth's (its

@@ -1946,7 +1946,7 @@ proto_fs_thunderous_applause	ImageGen/images/cards/furina/proto_fs_thunderous_ap
 # proto_fs_tutti <- salon_debut: all three Salon Members in one frame -- everyone plays at once
 proto_fs_tutti	ImageGen/images/cards/furina/proto_fs_tutti.png	500	380	cover	center	shortlist	1	png	Salon Members Summon.png		tcg	
 # ---------- The Guest Cast 2026-09-25: eight Guest Star cards ----------
-# review/active/furina-guest-batch-2026-09-25.md. Each guest wears its own
+# review/ruled/furina-guest-batch-2026-09-25.md. Each guest wears its own
 # Wish splash, whole (cover_autocrop, the Companion wish rows' crop), with its
 # full-wish art and its character card behind it. PLANNED, NOT FETCHED: the
 # main session's art pass runs art_fetch and picks. Blank source_group keeps

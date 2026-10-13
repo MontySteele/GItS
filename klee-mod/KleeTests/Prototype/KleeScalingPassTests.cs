@@ -20,7 +20,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE KLEE SCALING PASS (staging branch `klee-next`, 2026-10-05,
-/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4): A Klee's Secret
+/// `review/ruled/klee-scaling-pass-2026-10-05.md` sec.4): A Klee's Secret
 /// Base (v3: a Bomb 4 [6] every turn), B the grant-only Witch's Homework II, C Boom Badge, D the tempo
 /// relic. Pure reads where the rule is pure; structural (IL) pins where the
 /// rule runs through <c>PowerCmd.Apply</c>, outside the headless boundary

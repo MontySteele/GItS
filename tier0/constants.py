@@ -79,7 +79,7 @@ CONTROL_UPTIME_CARRY = 0.40   # §2.2a detector: won fights with more than
                               # companion-sourced control flag SUPPORT_CARRY
                               # (propose-and-tune value from the errata)
 
-# --- Klee resources (spec §4.2; klee-character-design.md §3) ---
+# --- Klee resources (spec §4.2; klee-character-design.md §3, archived) ---
 # The shipped base rule's number ("at 3 Sparks, your next Attack costs 0").
 # The engine no longer runs the rule; the pilot's Spark hold heuristic reads
 # it (`combat.spark_threshold`).
@@ -143,7 +143,7 @@ SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
 # because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
 # mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
 # Rule 1 at 2 since the Klee design review (2026-10-08,
-# review/active/klee-design-review-2026-10-08.md sec.4.6, ruled; it was 4):
+# review/ruled/klee-design-review-2026-10-08.md sec.4.6, ruled; it was 4):
 # a Bomb cashed now is worth what it was, a Bomb held is worth less.
 KLEE_OVERHAUL_BOMB_GROWTH = 2        # rule 1: every Bomb, start of her turn
 KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
@@ -241,7 +241,7 @@ KLEE_STATUS_PACKAGE_IDS: tuple[str, ...] = (
 )
 
 # THE KLEE TEMPO PAPER (2026-10-07, ruled,
-# review/active/klee-tempo-paper-2026-10-07.md sec.3): five rows in for It
+# review/ruled/klee-tempo-paper-2026-10-07.md sec.3): five rows in for It
 # Wasn't Me!, Sorry, Jean..., Grounded, Sit Tight and Experiment in Progress,
 # appended after the status package in the sheet's own order. Cook's damage
 # that leaves the Bombs cooking (Simmer, Taste Test), Spray's damage without
@@ -256,7 +256,7 @@ KLEE_TEMPO_IDS: tuple[str, ...] = (
 )
 
 # THE KLEE DESIGN REVIEW (2026-10-08, ruled,
-# review/active/klee-design-review-2026-10-08.md sec.4.4 and 4.5): two Common
+# review/ruled/klee-design-review-2026-10-08.md sec.4.4 and 4.5): two Common
 # rows in for Playdate and Pop!, appended after the tempo paper's in the
 # sheet's own order. Her normal attack (place and set off in one card) and
 # Spray's fuel for a Dazed. The pool stays 78, 25 / 32 / 21.
@@ -340,7 +340,7 @@ KLEE_OWN_COMPANION_IDS: tuple[str, ...] = (
 # touches the shared reaction funnel) and arrived with the pool pass
 # (`EB-491`), in the block below.
 #: STAGING GRANT-ONLY ROWS (the Klee scaling pass, klee-next 2026-10-05,
-#: review/active/klee-scaling-pass-2026-10-05.md sec.4 B). A row a staging
+#: review/ruled/klee-scaling-pass-2026-10-05.md sec.4 B). A row a staging
 #: round grants at embark (`understudy.embark --arm`) and NO offer surface
 #: shows: in no `Slice()`, no `*_OVERHAUL_POOL_IDS` and no draftable pool.
 #: `tools/lint_arm_pool_parity.py` and `tools/card_distinctness_report.py`
@@ -885,7 +885,7 @@ CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 # on its row. The starting relic's Block is the exception: a rule the Tamakushi
 # Casket carries, printed on the relic and on no card, named here for
 # `tools/lint_constant_parity.py` to compare the C# mirror BY VALUE.
-# THE RE-FOUNDING (2026-10-12, review/active/kokomi-design-pass-2026-10-11.md
+# THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-design-pass-2026-10-11.md
 # pick 3, ruled): the Casket's count and Open the Casket are gone; the relic
 # reads "At the start of your turn, if a Plan is waiting, gain 3 Block." (start,
 # not end, since [USER]'s 2026-10-12 ruling).
@@ -919,7 +919,7 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_kk_slack_water",
 )
 
-# THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md
+# THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md
 # sec.2, ruled): 25 cut, 17 changed, 21 new (Commander's Eye was dropped by the
 # ruling). Grand Design keeps its old id and slot; the other 20 are here,
 # appended LAST to `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's order.
@@ -3170,7 +3170,8 @@ CONSTANTS_VERSION = 22
 # `score_offer` on EVERY arm, so every character's decks move. Every pre-v13
 # roster number in this repo is incomparable with v13 output -- the D12/D13
 # side-by-side table (both stamps labeled) is in
-# docs/sprint-sim-hygiene-log-2026-07-29.md. All v13 values are PROPOSED and
+# docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md (archived,
+# docs/ARCHIVE.md). All v13 values are PROPOSED and
 # await [USER] red pen; the deliberate ZEROS (draw/energy/spark/burst,
 # raise_fanfare_cap, crash_fanfare, strip_block, transform_in_hand,
 # remember_card) each carry their measurement or their reason at the

@@ -96,7 +96,7 @@ public sealed class PlaydatePower : PowerModel, ILocalizationProvider
 /// MULTIPLIES the ledger's armed multiplier, so with The Big One it is x8.
 ///
 /// BADGES DO NOT STACK (the scaling pass, klee-next 2026-10-05,
-/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 C): the factor is 2
+/// `review/ruled/klee-scaling-pass-2026-10-05.md` sec.4 C): the factor is 2
 /// whatever the stack (<see cref="FactorFor"/>); two badges used to be x4.
 /// The card gained Retain in the same change. Spent
 /// whether or not the aimed enemy held a Bomb, because that card was the next
@@ -394,7 +394,7 @@ public sealed class SitTightPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Klee's Secret Base, v3 of the scaling pass (klee-next, 2026-10-05,
-/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 A): "At the start of
+/// `review/ruled/klee-scaling-pass-2026-10-05.md` sec.4 A): "At the start of
 /// your turn, place a Bomb 4 [6] on a random enemy." A Counter, so copies stack
 /// like Noxious Fumes: two copies are one Power of 8 and place ONE Bomb 8.
 ///

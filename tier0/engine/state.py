@@ -60,7 +60,7 @@ RETIRED_CARD_FIELDS = {
         "permanent baseline grants a floor (op: gain_fanfare_floor)."),
     "plan_dusk": (
         "Dusk is retired (the Kokomi re-founding, 2026-10-12, "
-        "review/active/kokomi-design-pass-2026-10-11.md pick 5): every Plan "
+        "review/ruled/kokomi-design-pass-2026-10-11.md pick 5): every Plan "
         "is carried out at the start of her next turn. A row that wanted a "
         "Plan that lands this turn prints its effect on the now-line."),
 }
@@ -583,7 +583,7 @@ class KleeCharge:
 def fanfare_cap_base_term(max_hp: int) -> int:
     """The Fanfare ceiling's BASE term, taken from LIVE max HP (EB-97).
 
-    `docs/current/characters/furina-identity-record.md` (ex-LAW) says
+    `docs/current/characters/furina-identity-record.md` (ex-LAW, archived) says
     "Fanfare is capped at %maxHP", and the mod reads it that
     way every time it is asked: `FurinaResources.FanfareCap` computes
     `FanfareCapFraction * creature.MaxHp + capBonus` from the creature's

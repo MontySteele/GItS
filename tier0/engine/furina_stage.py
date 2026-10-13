@@ -20,7 +20,7 @@ THE RULES (the slice's docstring has them whole):
 3. FANFARE: +1 per HP lost from any cause (after Block) and +1 per HP
    repaid. Spend N and the spend-all cards pay it. Universal Revelry adds
    that much again to a Drain or a Repay, never a hit
-   (`review/active/furina-pool-40-2026-10-05.md` sec.2).
+   (`review/ruled/furina-pool-40-2026-10-05.md` sec.2).
 4. SALON SOLITAIRE: at the end of her turn, Repay 2, after the guests act.
 5. GUEST STARS (the pool to 75's rule, `review/active/furina-pool-growth-
    2026-10-09.md` sec.3): three seats (four with Ensemble Cast), guests
@@ -55,7 +55,7 @@ WRIOTHESLEY_ACT_DAMAGE = T.WRIOTHESLEY_ACT
 LYNETTE_ACT_DAMAGE = T.LYNETTE_ACT
 CLORINDE_ACT_DAMAGE = T.CLORINDE_ACT
 CLORINDE_PER_REPAY = T.CLORINDE_PER_REPAY
-# The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+# The pool to 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3).
 LYNEY_LINE_DROP = T.LYNEY_LINE_DROP
 LYNEY_ACT_DRAIN = T.LYNEY_ACT_DRAIN
 LYNEY_ACT_DAMAGE = T.LYNEY_ACT
@@ -73,7 +73,7 @@ NAVIA_SPEND_DIVISOR = T.NAVIA_SPEND_DIVISOR
 FREMINET_SPEND_DIVISOR = T.FREMINET_SPEND_DIVISOR
 SPEND_UP_TO_EVERY = T.SPEND_UP_TO_EVERY
 FOUNTAIN_TURNS = T.FOUNTAIN_TURNS
-# The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
+# The pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09): the guests' upgraded lines and acts (sec.3) and the new
 # numbers (sec.5).
 CHARLOTTE_ACT_REPAY_UPGRADED = T.CHARLOTTE_ACT_REPAY_UPGRADED
@@ -179,8 +179,8 @@ STARTER_IDS: tuple[str, ...] = (
 )
 
 #: THE SLICE'S 24 (sec.16), THE POOL TO 39's ten
-#: (`review/active/furina-pool-40-2026-10-05.md` sec.3) and THE POOL TO 75's
-#: 41 (`review/active/furina-pool-growth-2026-10-09.md` sec.5), in the C#
+#: (`review/ruled/furina-pool-40-2026-10-05.md` sec.3) and THE POOL TO 75's
+#: 41 (`review/ruled/furina-pool-growth-2026-10-09.md` sec.5), in the C#
 #: roster's order (`FurinaStageRoster.Pool`), less Endless Waltz (cut
 #: 2026-10-09, with Standing Ovation moved to Uncommon), and the block gap's
 #: four (ruled 2026-10-09), and the diversity pass (ruled 2026-10-11:
@@ -278,7 +278,7 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_private_box",
     "proto_fs_the_masquerade",
     "proto_fs_the_show_must_go_on",
-    # The diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
+    # The diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md,
     # ruled 2026-10-11): 2 Common, 2 Uncommon.
     "proto_fs_headliner",
     "proto_fs_the_leading_lady",          # Leading Lady

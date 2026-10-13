@@ -56,7 +56,7 @@ public static class FurinaStageLaw
     /// Electro damage to a random enemy."</summary>
     public const int ClorindePerRepay = 2;
 
-    // ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md) ------
+    // ---- the pool to 39 (review/ruled/furina-pool-40-2026-10-05.md) ------
 
     /// <summary>Lyney's line: "Your Drain buffer is 10 HP larger." (Furina
     /// round 5, 2026-10-11; it read "Your Drain line is 10 HP lower" before
@@ -95,7 +95,7 @@ public static class FurinaStageLaw
     /// Repay 3."</summary>
     public const int FountainTurns = 3;
 
-    // ---- the pool to 75 (review/active/furina-pool-growth-2026-10-09.md) --
+    // ---- the pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md) --
     // Sec.3's guest rule: a guest's upgrade raises its line or its act,
     // never its cost (the table of seven built guests, and sec.5's four).
 
@@ -121,7 +121,7 @@ public static class FurinaStageLaw
     public const int ClorindeActDamageUpgraded = 9;
 
     /// <summary>Freminet's act (the Spend paper, 2026-10-10,
-    /// <c>review/active/furina-spend-paper-2026-10-10.md</c> pick 2, ruled
+    /// <c>review/ruled/furina-spend-paper-2026-10-10.md</c> pick 2, ruled
     /// 2026-10-10): "Gain 3 Block. Spend a quarter of your Fanfare (rounded
     /// down): gain that much more Block." [6] (His line gives the Block of
     /// every Drain.) The 5 [8] Cryo hit left with this act.</summary>
@@ -218,7 +218,7 @@ public static class FurinaStageLaw
     /// </summary>
     public const int StarTurnFanfarePer = 6;
 
-    // ---- the diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
+    // ---- the diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md,
     // ruled 2026-10-11) -----------------------------------------------------
 
     /// <summary>Bravura: "Deal 7 Hydro damage for every 3 spent." Mirrors

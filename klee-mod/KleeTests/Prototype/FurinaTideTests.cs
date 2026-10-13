@@ -329,7 +329,7 @@ public class FurinaTideTests
                 .Single(r => r.Item1 == "description").Item2);
     }
 
-    // ---- the pool to 39 (review/active/furina-pool-40-2026-10-05.md) ------
+    // ---- the pool to 39 (review/ruled/furina-pool-40-2026-10-05.md) ------
 
     [Fact]
     public void Critics_darling_hits_for_each_drain_and_repay_but_not_a_hit()

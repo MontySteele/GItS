@@ -771,7 +771,7 @@ CO_TENANCY_LEDGER = {
     },
     "AfterPlayerTurnStart": {
         ("Story/StoryLines.cs", "StoryCombatHooks"):
-            "(Klee's story, review/active/klee-story-batch-1-2026-10-12.md). "
+            "(Klee's story, review/ruled/klee-story-batch-1-2026-10-12.md). "
             "At a boss room's first player turn it shows the boss-entry or "
             "pair speech bubbles, once a combat. THE ORDERING QUESTION, "
             "answered: it reads only the room type, the round number and the "

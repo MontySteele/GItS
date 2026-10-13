@@ -1,6 +1,6 @@
 """FURINA, THE POOL TO 75 in the one-seat sim.
 
-`review/active/furina-pool-growth-2026-10-09.md`, ruled 2026-10-09: sec.3's
+`review/ruled/furina-pool-growth-2026-10-09.md`, ruled 2026-10-09: sec.3's
 guest rule and sec.5's 41 cards, through the sheet's ops
 (`tier0/engine/furina_stage.py` on `tier0/engine/furina_tide.py`). One pin
 per rule. The C# twins are

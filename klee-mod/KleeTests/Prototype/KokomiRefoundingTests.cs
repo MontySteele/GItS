@@ -12,8 +12,8 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE KOKOMI RE-FOUNDING (2026-10-12): the direction in
-/// <c>review/active/kokomi-design-pass-2026-10-11.md</c>, the cards in
-/// <c>review/active/kokomi-card-paper-2026-10-12.md</c>. The Casket's count,
+/// <c>review/ruled/kokomi-design-pass-2026-10-11.md</c>, the cards in
+/// <c>review/ruled/kokomi-card-paper-2026-10-12.md</c>. The Casket's count,
 /// Open the Casket and Dusk are retired; the relic is Block while a Plan
 /// waits; Stings and Wards are her jellyfish; any Companion card can be
 /// written as a Plan.

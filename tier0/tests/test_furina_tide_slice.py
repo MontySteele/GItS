@@ -229,7 +229,7 @@ def test_the_draft_pool_is_the_slices_24_the_pool_40_ten_and_the_pool_75s_41():
 
 
 # ----------------------------------------------------------------------
-# The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+# The pool to 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3).
 # ----------------------------------------------------------------------
 def test_grand_deluge_drains_six_for_16_hydro_to_all():
     st = _state(enemies=2)
@@ -492,7 +492,7 @@ def _twin(st, variant):
 # `resolve_card`'s plain fixed-Drain branch once caught every kind in
 # FIXED_DRAIN_KINDS, so Undercurrent and Riptide Lunge crashed on the tuple
 # unpack and the rest resolved as "Drain N, deal M". Effects:
-# `review/active/furina-pool-growth-2026-10-09.md` sec.5.
+# `review/ruled/furina-pool-growth-2026-10-09.md` sec.5.
 
 def test_draft_judged_runs_past_seed_four():
     out = probe.run_job("draft/judged", runs=40, seed=1, jobs=1)

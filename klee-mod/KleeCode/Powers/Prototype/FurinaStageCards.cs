@@ -14,7 +14,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// FURINA'S CARD VERBS THE SHEET'S GRAMMAR CANNOT SPELL (the pool to 75,
-/// <c>review/active/furina-pool-growth-2026-10-09.md</c> sec.5): one method
+/// <c>review/ruled/furina-pool-growth-2026-10-09.md</c> sec.5): one method
 /// per <c>{op: furina, kind: ...}</c>, Varka's and Kokomi's shape. The row's
 /// one printed number is the card's <c>FsAmount</c> var, moved by the
 /// <c>furina_amount</c> upgrade key. Each method is one call into

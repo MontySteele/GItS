@@ -13,7 +13,7 @@ namespace KleeMod.Cards.Varka;
 
 /// <summary>
 /// Varka's Dusty Tome Ancient (the Varka review,
-/// review/active/varka-review-2026-10-12.md sec.6, ruled 2026-10-12: "Both
+/// review/ruled/varka-review-2026-10-12.md sec.6, ruled 2026-10-12: "Both
 /// sound workable to me"): "Your cards read your Oath of every element
 /// together." The Rare Elixir of the Four Winds' one-turn effect for the whole
 /// combat, and the review's "both at once" power, sold openly as the

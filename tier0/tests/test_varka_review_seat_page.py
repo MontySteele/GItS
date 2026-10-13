@@ -1,4 +1,4 @@
-"""THE VARKA REVIEW'S SEAT-PAGE FIXES (review/active/varka-review-2026-10-12.md,
+"""THE VARKA REVIEW'S SEAT-PAGE FIXES (review/ruled/varka-review-2026-10-12.md,
 sec.4 and sec.5, ruled 2026-10-12):
 
   * the "Pyro Oath (left)" line after a switch goes ("noise"); the Oath

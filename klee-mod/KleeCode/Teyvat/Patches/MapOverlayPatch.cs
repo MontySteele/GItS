@@ -20,7 +20,7 @@ namespace KleeMod.Teyvat.Patches;
 /// reused across two acts never carries Mondstadt's mark into Liyue.
 ///
 /// This is also the seam public sources already use for a map-screen overlay --
-/// `review/dispatch3/s12-public-patterns/s12c-act-map.md`, the "Map-screen
+/// `review/dispatch3/s12-public-patterns/s12c-act-map.md` (archived), the "Map-screen
 /// overlay" row: sts2-concept-map postfixes `NMapScreen.Open` and attaches its
 /// own Godot node as a child so visibility follows the screen, and
 /// Act4FinalAscent does the same on `_Ready`. Both are named there with commit

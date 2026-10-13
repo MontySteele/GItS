@@ -265,7 +265,7 @@ public class PoolCellCoverageTests
             // seamed by the widening ladder (the matrix test above); the full
             // sheet waits on the slice's play (proposal pick 1).
             //
-            // THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md
+            // THE POOL TO 39 (review/ruled/furina-pool-40-2026-10-05.md
             // sec.3) filled two: Rare/Power is four deep (Revelry, A
             // Five-Century Act, Critics' Darling, Bis!), and Rare/* is seven.
             // Rare/Attack (Let the People Rejoice), Rare/Skill (Singer,
@@ -276,7 +276,7 @@ public class PoolCellCoverageTests
             // Flourish moved to Uncommon, three deep with Bravura and Grand
             // Deluge.
             //
-            // THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md,
+            // THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md,
             // ruled 2026-10-09) fills the last two: Rare/Attack (Bring the
             // House Down, The Deluge, Grand Absolution) and Rare/Skill (All
             // In and three guests). No cell is short.

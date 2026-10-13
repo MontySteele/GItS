@@ -14,7 +14,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE KLEE DESIGN REVIEW (2026-10-08, ruled,
-/// review/active/klee-design-review-2026-10-08.md, all five picks at the
+/// review/ruled/klee-design-review-2026-10-08.md, all five picks at the
 /// defaults). [USER]: "Nope, this all looks good. I'm now in agreement with
 /// all picks." Rule 1 grows 2, rule 4 opens with 3, every drafted placer
 /// prints 2 bigger, Fire! Fire! and Blasting Spree in for Playdate and Pop!

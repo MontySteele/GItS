@@ -22,7 +22,7 @@ namespace KleeMod.Relics;
 /// TAMAKUSHI CASKET -- the Kokomi overhaul's starting relic.
 ///
 /// THE RE-FOUNDING (2026-10-12) REWROTE IT, and kept its name and art
-/// (<c>review/active/kokomi-design-pass-2026-10-11.md</c> pick 3, ruled; card
+/// (<c>review/ruled/kokomi-design-pass-2026-10-11.md</c> pick 3, ruled; card
 /// paper sec.1 rule 1): "At the start of your turn, if a Plan is waiting,
 /// gain 3 Block." The count it kept since the Casket pass (2026-09-28) and the
 /// Open the Casket token it dealt are gone with the Casket. About 9 Block in a

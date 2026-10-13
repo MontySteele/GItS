@@ -21,7 +21,7 @@ release Furina and this slice are one implementation. The slice's own
 
 THE RULES (paper sec.2, with sec.16's two changes: Restore is now REPAY, and
 the curtain call is the default; sec.17's edit: Curtain Rise's Drain mode
-deals 12; and `review/active/furina-pool-40-2026-10-05.md` sec.2: Universal
+deals 12; and `review/ruled/furina-pool-40-2026-10-05.md` sec.2: Universal
 Revelry reads Drain and Repay again, never hits):
 
 1. DRAIN N. Lose N HP for the bigger effect (a mode on some cards, a fixed
@@ -129,7 +129,7 @@ CLORINDE_PER_REPAY = 2       # "deal twice that much Electro"
 NEUVILLETTE_HYDRO_BONUS = 2  # line: "Your Hydro damage deals 2 more." [3]
 SALON_ENCORE_DAMAGE = 3      # Power: whenever you Drain, 3 to ALL
 THUNDEROUS_DAMAGE = 3        # Power: whenever you Spend, 3 to ALL
-# The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+# The pool to 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3).
 LYNEY_LINE_DROP = 10         # line: "Your Drain buffer is 10 HP larger."
                              # (2026-10-11: +10 to her Drain buffer; the line
                              # sits 10 HP lower)
@@ -146,7 +146,7 @@ LINE_MAX_HP_DIVISOR = 4      # the Drain buffer: entry Max HP // 4
 #: float share, by HP position.
 SHIPPED_LINE = "entry_minus_quarter_max"
 FOUNTAIN_TURNS = 3           # Fountain of Lucine: the next 3 turns
-# The pool to 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
+# The pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09). Sec.3: a guest's upgrade raises its line or its act.
 CHARLOTTE_ACT_REPAY_UPGRADED = 4
 SIGEWINNE_ACT_REPAY_UPGRADED = 4
@@ -155,7 +155,7 @@ LYNEY_ACT_UPGRADED = 11
 LYNETTE_ACT_UPGRADED = 6
 CHEVREUSE_LINE_WEAK_UPGRADED = 1   # upgraded line: also 1 Weak
 CLORINDE_ACT_UPGRADED = 9
-# The Spend paper (review/active/furina-spend-paper-2026-10-10.md pick 2,
+# The Spend paper (review/ruled/furina-spend-paper-2026-10-10.md pick 2,
 # ruled 2026-10-10): Freminet's act is "Gain 3 Block. Spend a quarter of your
 # Fanfare (rounded down): gain that much more Block." [6]; his 5 [8] Cryo hit
 # left with it. Navia's act Spends half and deals that much as Geo.
@@ -183,7 +183,7 @@ HYMN_THRESHOLD = 4                 # Hymn of Renewal: a Repay of 4 or more HP
 PRIMA_DONNA_FANFARE = 10           # Prima Donna: 10 or more Fanfare
 REGINA_DRAIN = 3                   # Regina of All Waters: Drain 3
 STAR_TURN_FANFARE_PER = 6          # Star Turn: 1 less per 6 Fanfare
-# The diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
+# The diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md,
 # ruled 2026-10-11).
 BRAVURA_SPENT_PER = 3              # Bravura: a hit for every 3 spent
 PACKED_HOUSE_FANFARE_PER = 4       # Packed House: +1 Block for every 4 Fanfare
@@ -424,7 +424,7 @@ CARDS: dict[str, Spec] = {
     # point.
     "ftd_rejoice": Spec("Let the People Rejoice", 2, "attack", "rare",
                         "rejoice", (2,)),
-    # --- The pool to 39 (review/active/furina-pool-40-2026-10-05.md
+    # --- The pool to 39 (review/ruled/furina-pool-40-2026-10-05.md
     # sec.3): seven Uncommons and three Rares. ---
     # Grand Deluge (2): Drain 6. Deal 16 Hydro damage to ALL enemies.
     "ftd_grand_deluge": Spec("Grand Deluge", 2, "attack", "uncommon",
@@ -462,7 +462,7 @@ CARDS: dict[str, Spec] = {
     # Act: Repay 2.
     "ftd_sigewinne": Spec("Guest Star: Sigewinne", 1, "skill", "uncommon",
                           "guest", (), "sigewinne", exhaust=True),
-    # --- THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md
+    # --- THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md
     # sec.5, ruled 2026-10-09): the 41, as the sheet prints them, base
     # numbers (the probe drafts no upgrades). ---
     # Guests and stage (11).

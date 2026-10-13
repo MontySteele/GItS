@@ -10,7 +10,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// THE KLEE SCALING PASS (staging branch `klee-next`, 2026-10-05,
-/// `review/active/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its
+/// `review/ruled/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its
 /// defaults). Where its four pieces live:
 ///
 ///   * A, Klee's Secret Base, is v3 now ("At the start of your turn, place a

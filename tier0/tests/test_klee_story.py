@@ -1,4 +1,4 @@
-"""Klee's story in the run (review/active/klee-story-batch-1-2026-10-12.md and
+"""Klee's story in the run (review/ruled/klee-story-batch-1-2026-10-12.md and
 klee-story-batch-2-2026-10-12.md): the C# story table against the sheet.
 
 The words are pinned against the papers by the C# suite

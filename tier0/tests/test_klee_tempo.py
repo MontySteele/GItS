@@ -1,6 +1,6 @@
 """THE KLEE TEMPO PAPER (2026-10-07, ruled): the sim half.
 
-`review/active/klee-tempo-paper-2026-10-07.md` sec.3. [USER]: "I personally
+`review/ruled/klee-tempo-paper-2026-10-07.md` sec.3. [USER]: "I personally
 found Blast Shield and Kitchen Alchemy quite useful in my runs, so I'm not
 sure I buy that they should go. Otherwise agreed." Five out (It Wasn't Me!,
 Sorry, Jean..., Grounded, Sit Tight, Experiment in Progress), five in. The

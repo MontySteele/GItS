@@ -1,6 +1,6 @@
 # PROTOTYPE SURFACE -- THE RELEASE POOL SHEET. Every card of every current kit
 # and the companion roster is a `proto_` row here, and each C# pool IS its
-# roster (legacy cleanup stage 4, review/active/legacy-cleanup-2026-10-01.md):
+# roster (legacy cleanup stage 4, review/ruled/legacy-cleanup-2026-10-01.md):
 # the rows are the game's reward pools, in every build and release, since the
 # current kits became the release build (2026-09-28). The old quarantine (R213
 # B: rows in no pool, deleted once a slice was ruled, an empty file the healthy
@@ -217,11 +217,11 @@
               then: [{op: block, amount: 4}]}]}
 
 # GROUNDED (proto_ko_grounded) IS CUT (Klee tempo paper, 2026-10-07,
-# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Provenance
 # note, "Klee tempo paper, 2026-10-07".
 
 # SORRY, JEAN... (proto_ko_sorry_jean) IS CUT (Klee tempo paper, 2026-10-07,
-# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Provenance
 # note, "Klee tempo paper, 2026-10-07".
 
 # --- the defence shelf (R252, Klee r9 pick 1): five rows, every one keyed to
@@ -468,7 +468,7 @@
              {op: plant_bomb, target: random_enemy, size: 5, mine: true}]}
 
 # PLAYDATE (proto_ko_playdate) IS CUT (Klee design review, 2026-10-08,
-# review/active/klee-design-review-2026-10-08.md sec.4.4). Provenance
+# review/ruled/klee-design-review-2026-10-08.md sec.4.4). Provenance
 # note, "Klee design review, 2026-10-08".
 
 - {id: proto_ko_jumpy_dumpty_mk_iii, name: "Jumpy Dumpty Mk.III", character: klee,
@@ -528,7 +528,7 @@
               upgraded_growth: 3}]}
 
 # SIT TIGHT (proto_ko_sit_tight) IS CUT (Klee tempo paper, 2026-10-07,
-# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Provenance
 # note, "Klee tempo paper, 2026-10-07".
 
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
@@ -594,7 +594,7 @@
    effects: [{op: apply_power, power: ko_look_out, amount: 4, target: self}]}
 
 # EXPERIMENT IN PROGRESS (proto_ko_patience_klee) IS CUT (Klee tempo paper, 2026-10-07,
-# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Provenance
 # note, "Klee tempo paper, 2026-10-07".
 
 # FRIENDSHIP BRACELET IS CUT (the Klee status package, 2026-10-01,
@@ -708,7 +708,7 @@
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
 
 # IT WASN'T ME! (proto_ko_it_wasnt_me) IS CUT (Klee tempo paper, 2026-10-07,
-# review/active/klee-tempo-paper-2026-10-07.md sec.3). Provenance
+# review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Provenance
 # note, "Klee tempo paper, 2026-10-07".
 
 # 2026-10-11 ([USER]: "Lisa's Treats also underwhelmed; I rarely needed the
@@ -889,7 +889,7 @@
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: block, amount: 3}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_kaeya_glacial_waltz, name: "Kaeya — Glacial Waltz", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: cryo,
@@ -920,7 +920,7 @@
    effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
              {op: swirl, target: enemy}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_jean_dandelion_breeze, name: "Jean — Dandelion Breeze", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
@@ -993,7 +993,7 @@
    effects: [{op: apply_aura, element: hydro, target: all_enemies},
              {op: apply_power, power: vulnerable, amount: 3, target: all_enemies}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_venti_grand_ode, name: "Venti — Wind's Grand Ode", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
@@ -1019,7 +1019,7 @@
    effects: [{op: apply_aura, element: electro, target: all_enemies},
              {op: draw, amount: 1}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_lisa_lightning_rose, name: "Lisa — Lightning Rose", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: electro,
@@ -1058,7 +1058,7 @@
    # POOL COMPLETION (2026-10-01, paper sec.6, the Body Slam note): cost 2 [1].
    upgrade: {cost: -1}}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_barbara_melody_loop, name: "Barbara — Melody Loop", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
@@ -1106,7 +1106,7 @@
 
 # White is the team form (every player's reactions); Dark is all the
 # holder's Pyro damage, Bombs and Mines included.
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_durin_principle_of_purity, name: "Durin — Principle of Purity", character: klee,
    authored_by: [claude], art_of: proto_mc_durin_binary_form,
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
@@ -1136,7 +1136,7 @@
    description: "For 2 turns, your Attacks apply [gold]Electro[/gold] and deal 3 additional damage.",
    effects: [{op: apply_power, power: mc_lightning_fang, amount: 2, target: self}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_varka_sturm_und_drang, name: "Varka — Sturm und Drang", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
@@ -1374,7 +1374,7 @@
 # note, "Kokomi status batch, 2026-10-01".
 
 # THE GENERAL'S BANNER IS CUT (the growth Powers, 2026-10-10,
-# review/active/kokomi-growth-powers-2026-10-10.md, pick 2). Provenance
+# kokomi-growth-powers-2026-10-10.md, archived, pick 2). Provenance
 # note, "Kokomi growth Powers, 2026-10-10".
 
 # CHAIN OF COMMAND IS CUT (the status batch, 2026-10-01,
@@ -1442,7 +1442,7 @@
    description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
    effects: [{op: damage, amount: 5, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}],
-   # 2026-10-11 Kokomi card pass (review/active/kokomi-card-pass-2026-10-11.md):
+   # 2026-10-11 Kokomi card pass (review/ruled/kokomi-card-pass-2026-10-11.md):
    # 5 twice; upgraded 6 twice. The Plan line does not upgrade.
    upgrade: {damage: 1}}
 
@@ -1638,7 +1638,7 @@
    upgrade: {damage: 3, plan_damage: 4}}
 
 # MEASURED BREATH IS CUT (the jellyfish build, 2026-10-12,
-# review/active/kokomi-jellyfish-growth-2026-10-12.md sec.3): Endless Shoal
+# review/ruled/kokomi-jellyfish-growth-2026-10-12.md sec.3): Endless Shoal
 # takes its Uncommon slot. Provenance note, "Kokomi jellyfish build".
 
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
@@ -1819,7 +1819,7 @@
    upgrade: {block: 3}}
 
 # SPRING TIDE IS CUT (the jellyfish build, 2026-10-12,
-# review/active/kokomi-jellyfish-growth-2026-10-12.md sec.3): The Shape of
+# review/ruled/kokomi-jellyfish-growth-2026-10-12.md sec.3): The Shape of
 # Water takes its slot. Provenance note, "Kokomi jellyfish build".
 
 - {id: proto_kk_shoal_of_spears, name: "Shoal of Spears", character: kokomi,
@@ -2193,7 +2193,7 @@
    # 10 Block; Plan 2 Strength.
    upgrade: {block: 3, plan_strength: 1}}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: kokomi,
    authored_by: [claude],
    # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3).
@@ -2212,7 +2212,7 @@
    description: "Deal 8 [gold]Anemo[/gold] damage to a random enemy and [gold]Swirl[/gold] it.",
    effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
@@ -2228,7 +2228,7 @@
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
@@ -2362,7 +2362,7 @@
    effects: [{op: block, amount: 8},
              {op: apply_power, power: mi_surprise_dispatch, amount: 1, target: self}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_mizuki_anraku, name: "Yumemizuki Mizuki — Anraku Secret Spring Therapy", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
@@ -2373,7 +2373,7 @@
              {op: damage, amount: 14, target: all_enemies, applies_element: false},
              {op: mend, amount: 6}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_chiori_hasode, name: "Chiori — Fluttering Hasode", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: geo,
@@ -2386,7 +2386,7 @@
 # bodies, upgrades and art; the three guest stars are Furina's. Provenance
 # note, "Fontaine companions ported, 2026-10-01". ---
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_chevreuse_interdiction_fire, name: "Chevreuse — Interdiction Fire", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
@@ -2395,7 +2395,7 @@
    description: "Deal 8 [gold]Pyro[/gold] damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]}
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_chevreuse_vanguards_valor, name: "Chevreuse — Vanguard's Valor", character: klee,
    upgrade: {buff: 2},
    authored_by: [claude],
@@ -2420,7 +2420,7 @@
    description: "[gold]Swirl[/gold] the enemy. Gain 5 [gold]Block[/gold].",
    effects: [{op: swirl, target: enemy}, {op: block, amount: 5}]}
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_lynette_box_trick, name: "Lynette — Bogglecat Box", character: klee,
    upgrade: {draw: 1},
    authored_by: [claude],
@@ -2429,7 +2429,7 @@
    description: "Gain 4 [gold]Block[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: block, amount: 4}, {op: draw, amount: 2}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
@@ -2438,7 +2438,7 @@
    description: "[gold]Swirl[/gold] the enemy. Deal 8 damage to ALL enemies.",
    effects: [{op: swirl, target: enemy}, {op: damage, amount: 8, target: all_enemies, applies_element: false}]}
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
@@ -2447,7 +2447,7 @@
    description: "Deal 7 [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_charlotte_enduring_frosthelm, name: "Charlotte — First-Person Shutter", character: klee,
    upgrade: {block: 2},
    authored_by: [claude],
@@ -2456,7 +2456,7 @@
    description: "Gain 4 [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
    effects: [{op: block, amount: 4}, {op: apply_aura, element: cryo, target: enemy}, {op: block_next_turn, amount: 4}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", character: klee,
    upgrade: {vulnerable: 1},
    authored_by: [claude],
@@ -2473,7 +2473,7 @@
    description: "Deal 8 [gold]Cryo[/gold] damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]}
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_freminet_pressurized_floe, name: "Freminet — Pressurized Floe: Backstroke", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
@@ -2482,7 +2482,7 @@
    description: "Deal 10 [gold]Cryo[/gold] damage. Gain 6 [gold]Block[/gold].",
    effects: [{op: damage, amount: 10, target: enemy, applies_element: true}, {op: block, amount: 6}]}
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_freminet_shattering_pressure, name: "Freminet — Shattering Pressure", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
@@ -2491,7 +2491,7 @@
    description: "Deal 5 [gold]Cryo[/gold] damage twice.",
    effects: [{op: damage, amount: 5, target: enemy, times: 2, applies_element: true}]}
 
-# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_navia_cannon_fire_support, name: "Navia — Cannon Fire Support", character: klee,
    upgrade: {power_amount: 2},
    authored_by: [claude],
@@ -2513,13 +2513,13 @@
    authored_by: [claude],
    # Co-op notes pick 4 (ruled 2026-10-02): plus a Hydro aura each turn, a
    # free reaction partner. The face is the power's (`ancient_sea_authority`).
-   # 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+   # 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
    art_of: neuvillette_ancient_sea_authority,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: hydro, cost: 1, type: power,
    description: "At the start of your turn, deal 5 [gold]Hydro[/gold] damage to a random enemy. Auras you apply last 1 additional turn.",
    effects: [{op: apply_power, power: ancient_sea_authority, amount: 1, target: self, note: "at the start of your turn deal 5 Hydro damage to a random enemy; auras you apply last 1 extra turn"}]}
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_arlecchino_masque_red_death, name: "Arlecchino — Masque of the Red Death", character: klee,
    upgrade: {power_amount: 1},
    authored_by: [claude],
@@ -2556,7 +2556,7 @@
 # shared, Sayu and Yaoyao cut by the Klee-only companions (2026-10-03).
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_prune_hexhunter_chime, name: "Prune — Ring-A-Ding-Ding! Hexhunter Chime", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
@@ -2571,7 +2571,7 @@
 # review/active/mondstadt-companions-2026-10-03.md sec.4). Provenance
 # note, "Klee-only companions, 2026-10-03".
 
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_qiqi_herald_of_frost, name: "Qiqi — Herald of Frost", character: klee,
    authored_by: [claude],
    nation: liyue, star: 5, rarity: uncommon, role_c: applier, element: cryo,
@@ -2608,7 +2608,7 @@
 
 # Klee status package (2026-10-01, ruled; lore pass pick 3): his sixth
 # constellation, in Tectonic Tide's place.
-# 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
+# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_albedo_dust_of_purification, name: "Albedo — Dust of Purification", character: klee,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
@@ -2829,7 +2829,7 @@
                          {op: stage_energy_next, amount: 1}]}]}]}
 
 # Bravura: one Hydro hit of 7 [9] for every 3 spent (the diversity pass,
-# review/active/furina-diversity-pass-2026-10-11.md sec.2, ruled 2026-10-11;
+# review/ruled/furina-diversity-pass-2026-10-11.md sec.2, ruled 2026-10-11;
 # was 6, plus 2 a point, one hit).
 - {id: proto_fs_bravura, name: "Bravura", character: furina,
    upgrade: {damage: +2},
@@ -2896,7 +2896,7 @@
 
 # --- THE TWO RARES ---
 
-# review/active/furina-pool-40-2026-10-05.md sec.2 (pick 1): back to the
+# review/ruled/furina-pool-40-2026-10-05.md sec.2 (pick 1): back to the
 # research paper's sec.15 text. Hits no longer count; a second copy adds
 # again (two copies give +2x, never multiplicative).
 - {id: proto_fs_universal_revelry, name: "Universal Revelry", character: furina,
@@ -2919,7 +2919,7 @@
               amount_formula: {base: 0, per: 2, count: stage_spent},
               target: all_enemies}]}
 
-# --- THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md sec.3,
+# --- THE POOL TO 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3,
 # ruled 2026-10-05, pick 2): seven Uncommons and three Rares, one Rare per
 # archetype. ---
 
@@ -3008,7 +3008,7 @@
    effects: [{op: apply_power, power: fs_bis, amount: 1,
               target: self}]}
 
-# --- THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md sec.5,
+# --- THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5,
 # ruled 2026-10-09): 41 rows, 10 / 18 / 13, three slots held. Provenance
 # note, "Furina: the pool to 75, 2026-10-09". ---
 
@@ -3423,7 +3423,7 @@
    effects: [{op: block,
               amount_formula: {base: 0, per: 1, count: stage_fanfare}}]}
 
-# --- THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md
+# --- THE DIVERSITY PASS (review/ruled/furina-diversity-pass-2026-10-11.md
 # sec.2 and sec.3, ruled 2026-10-11, all defaults): four new cards, four cut
 # (Gentle Current, Surging Waters, Pay the Tab, Sold Out). Pool 78. ---
 
@@ -3878,7 +3878,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: hydro,
    cost: 1, type: skill, personal_pool: varka,
-   # The Hydro paper (2026-10-10, review/active/varka-hydro-payoffs-2026-10-10.md):
+   # The Hydro paper (2026-10-10, review/ruled/varka-hydro-payoffs-2026-10-10.md):
    # the base game's Blur, so it pays off the turn's other Block cards. Was
    # "For 2 turns, at the start of your turn gain 4 [6] Block".
    description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, your [gold]Block[/gold] is not removed.",
@@ -4049,7 +4049,7 @@
 - {id: proto_vk_blazing_charge, name: "Blazing Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # The Pyro pass (2026-10-11, review/active/varka-pyro-pass-2026-10-11.md):
+   # The Pyro pass (2026-10-11, review/ruled/varka-pyro-pass-2026-10-11.md):
    # base 5 [7] to 8 [11], the floor every new card is held to.
    description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].",
    effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 2}],

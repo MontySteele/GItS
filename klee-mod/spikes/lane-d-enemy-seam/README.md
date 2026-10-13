@@ -61,7 +61,7 @@ RESULT: all checks passed.
 It **cannot** render anything. No `PackedScene` is parsed, no
 `NCreatureVisuals` is built, no pack is loaded. Godot is not running. Every
 claim it makes is about strings and method dispatch. The visual half is the
-live procedure in `review/dispatch3/tooling-laned-handoff.md`.
+live procedure in `review/dispatch3/tooling-laned-handoff.md` (archived, `docs/ARCHIVE.md`).
 
 ## Running an actual bite-check
 
