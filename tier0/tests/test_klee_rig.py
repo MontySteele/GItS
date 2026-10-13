@@ -52,9 +52,9 @@ def test_all_seven_animations_and_reset(scene_text):
 def test_one_shot_lengths_are_the_base_clock(scene_text):
     # The base skeletons' one-shots (klee-visual-paper-2026-10-12): attack
     # 0.93-1.5 s, cast 0.97-1.8, hurt 0.73-1.0, die 1.87-4.17. Set Off is a
-    # quick cheer, 0.85 s.
+    # quick cheer, 0.85 s; Jumpy Dumpty's two-handed heave is heavier, 1.2 s.
     for name, length in {"attack": 1.0, "hurt": 0.8, "death": 2.0, "cast": 1.0, "power": 1.0,
-                         "setoff": 0.85}.items():
+                         "setoff": 0.85, "jumpy": 1.2}.items():
         assert f'resource_name = "{name}"\nlength = {rig.fnum(length)}\n' in scene_text
 
 
@@ -71,6 +71,23 @@ def test_set_off_plays_its_own_model_sheet(scene_text):
     assert "hold_frame" not in spec["animations"]["setoff"]
     anims = verify.track_paths(scene_text)
     assert "Visuals/Facing/Model/SetOff:frame" in anims["setoff"]
+
+
+def test_jumpy_dumpty_plays_its_own_sheet_and_throws_the_big_bomb(scene_text):
+    spec = rig.load_spec()
+    assert spec["animations"]["jumpy"]["sheet"] == "jumpy"
+    anims = verify.track_paths(scene_text)
+    assert "Visuals/Facing/Model/Jumpy:frame" in anims["jumpy"]
+    nodes = verify.parse_nodes(scene_text)
+    big = nodes["Visuals/Facing/JumpyProjectile"]
+    assert big.type == "Sprite2D" and big.props["visible"] == "false"
+    assert 'path="res://klee/model/frames/klee_bomb_big.png" id="10_bomb_big"' in scene_text
+    # the attack still throws its own, smaller bomb
+    assert nodes["Visuals/Facing/ThrownProjectile"].props["texture"] == 'ExtResource("8_bomb")'
+    # every live state can cut to it, and it fades back to idle like a cast
+    sm = rig.state_machine()
+    assert 'id="Transition_idle_jumpy"]\nxfade_time = 0.1\nadvance_mode = 1' in sm
+    assert 'id="Transition_jumpy_idle"]\nxfade_time = 0.05\nswitch_mode = 2\nadvance_mode = 2' in sm
 
 
 def test_every_state_draws_one_sheet_from_the_manifest(scene_text):

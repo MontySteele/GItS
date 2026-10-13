@@ -39,7 +39,7 @@ REST_PPU = COMBAT_PPU * (0.38 / 0.285)  # 1.33x on screen; 2x texture under the 
 SELECT_PPU = 1700.0
 
 JOBS = [
-    {"clips": "idle,idle_low,attack,hurt,death,cast,setoff", "stills": "stance_a,stand", "ppu": COMBAT_PPU,
+    {"clips": "idle,idle_low,attack,hurt,death,cast,setoff,jumpy", "stills": "stance_a,stand", "ppu": COMBAT_PPU,
      "outline": OUTLINE_PX},
     {"clips": "merchant", "stills": "", "ppu": MERCHANT_PPU, "outline": OUTLINE_PX * MERCHANT_PPU / COMBAT_PPU},
     {"clips": "", "stills": "rest", "ppu": REST_PPU, "outline": OUTLINE_PX * REST_PPU / COMBAT_PPU},

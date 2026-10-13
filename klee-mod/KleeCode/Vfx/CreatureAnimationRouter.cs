@@ -76,6 +76,10 @@ internal static class CreatureAnimationRouter
         // splash). Sent by CardPlayMotion for an ISetOffCard; a scene without
         // the state lunges as for an attack.
         ["SetOff"] = new[] { "setoff", "attack" },
+        // Klee's Jumpy Dumpty cards: she heaves the head-sized bomb with both
+        // hands (2026-10-13). Sent by CardPlayMotion for a Jumpy Dumpty play;
+        // a scene without the state lunges as for an attack.
+        ["Jumpy"] = new[] { "jumpy", "attack" },
     };
 
     internal const string IdleState = "idle";
@@ -83,15 +87,17 @@ internal static class CreatureAnimationRouter
     internal const string CastState = "cast";
     internal const string PowerState = "power";
     internal const string SetOffState = "setoff";
+    internal const string JumpyState = "jumpy";
 
     /// <summary>
-    /// A Set Off play is ONE clip: the attack lunge and cast that the same
-    /// card's own commands send while it runs would cut the cheer short, so
-    /// while the tree is in <see cref="SetOffState"/> those three triggers
-    /// are absorbed. Hits and death still interrupt it. Pure.
+    /// A Set Off or Jumpy Dumpty play is ONE clip: the attack lunge and cast
+    /// that the same card's own commands send while it runs would cut it
+    /// short, so while the tree is in <see cref="SetOffState"/> or
+    /// <see cref="JumpyState"/> those three triggers are absorbed. Hits and
+    /// death still interrupt it. Pure.
     /// </summary>
     internal static bool AbsorbedBy(string? currentState, string trigger)
-        => currentState == SetOffState
+        => currentState is SetOffState or JumpyState
            && trigger is "Attack" or "Cast" or "PowerUp";
 
     /// <summary>
@@ -188,11 +194,12 @@ internal static class CreatureAnimationRouter
             // Travel to the current state is a no-op, so a double "Dead"
             // (StartDeathAnim re-entry) cannot restart the death animation.
             playback.Travel(target);
-            // A scene that throws (Klee's bomb) flies the projectile from its
-            // release frame; inert for every scene without one.
-            if (ThrownProjectile.Throws(current, target))
+            // A scene that throws (Klee's bomb, and Jumpy Dumpty's big one)
+            // flies the projectile from its release frame; inert for every
+            // scene without one.
+            if (ThrownProjectile.ProjectileFor(current, target) is { } node)
             {
-                ThrownProjectile.Schedule(creature, tree);
+                ThrownProjectile.Schedule(creature, tree, target, node);
             }
         }
     }

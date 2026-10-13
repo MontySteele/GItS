@@ -274,6 +274,73 @@ public class MotionPassTests
     }
 
     [Fact]
+    public void Jumpy_dumpty_takes_its_own_state_and_falls_back_to_the_attack()
+    {
+        // [USER], 2026-10-13: "I think the increased size would be fitting for
+        // her Jumpty Dumpty skill usage."
+        var withJumpy = Full.Append("jumpy").ToArray();
+        Assert.Equal("jumpy", Select("Jumpy", false, withJumpy));
+        Assert.Equal("jumpy", Select("Jumpy", true, withJumpy));
+        Assert.Equal("attack", Select("Jumpy", false, Full));
+        Assert.Equal("attack", Select("Jumpy", false, Contract));
+    }
+
+    [Fact]
+    public void A_jumpy_clip_absorbs_the_cards_own_lunge_but_not_a_hit()
+    {
+        bool Absorbed(string? current, string trigger) => (bool)Router()
+            .GetMethod("AbsorbedBy", All)!.Invoke(null, new object?[] { current, trigger })!;
+
+        Assert.True(Absorbed("jumpy", "Attack"));
+        Assert.True(Absorbed("jumpy", "Cast"));
+        Assert.True(Absorbed("jumpy", "PowerUp"));
+        Assert.False(Absorbed("jumpy", "Hit"));
+        Assert.False(Absorbed("jumpy", "Dead"));
+    }
+
+    [Fact]
+    public void The_three_jumpy_dumpty_cards_and_only_they_play_the_jumpy_clip()
+    {
+        bool IsJumpy(string typeName)
+        {
+            var type = Motion().Assembly.GetTypes().Single(t => t.FullName == typeName);
+            var card = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+            return (bool)Motion().GetMethod("IsJumpyPlay", All)!.Invoke(null, new[] { card })!;
+        }
+
+        Assert.True(IsJumpy("KleeMod.Cards.Prototype.Generated.ProtoKoJumpyDumpty"));
+        Assert.True(IsJumpy("KleeMod.Cards.Prototype.Generated.ProtoKoJumpyDumptyMkIii"));
+        Assert.True(IsJumpy("KleeMod.Cards.JumpyDumptyMkOmega"));
+        Assert.False(IsJumpy("KleeMod.Cards.Prototype.Generated.ProtoKoBangBang"));
+        Assert.Equal("Jumpy", (string)Motion().GetField("JumpyTrigger", All)!.GetValue(null)!);
+    }
+
+    [Fact]
+    public void A_fresh_entry_into_the_jumpy_clip_throws_the_big_bomb()
+    {
+        string? For(string? from, string to) => (string?)Thrown()
+            .GetMethod("ProjectileFor", All)!.Invoke(null, new object?[] { from, to });
+
+        Assert.Equal("ThrownProjectile", For("idle", "attack"));
+        Assert.Equal("JumpyProjectile", For("idle", "jumpy"));
+        Assert.Equal("JumpyProjectile", For("idle_low", "jumpy"));
+        Assert.Null(For("jumpy", "jumpy"));
+        Assert.Null(For("idle", "setoff"));
+
+        var scene = RepoFile("klee-mod/pck-src/klee/model/combat.tscn");
+        var block = Regex.Match(scene,
+            "\\[node name=\"JumpyProjectile\" type=\"Sprite2D\" parent=\"Visuals/Facing\"\\]\\n((?:.+\\n)+)");
+        Assert.True(block.Success, "no %JumpyProjectile under %Facing");
+        var body = block.Groups[1].Value;
+        Assert.Contains("unique_name_in_owner = true", body);
+        Assert.Contains("visible = false", body);
+        Assert.Contains("klee_bomb_big.png", scene);
+        var release = double.Parse(Regex.Match(body, "metadata/release = ([0-9.]+)").Groups[1].Value,
+            System.Globalization.CultureInfo.InvariantCulture);
+        Assert.InRange(release, 0.5, 1.0);
+    }
+
+    [Fact]
     public void Klees_scene_carries_the_bomb_and_the_hit_waits_for_it()
     {
         var scene = RepoFile("klee-mod/pck-src/klee/model/combat.tscn");

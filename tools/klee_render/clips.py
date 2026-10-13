@@ -18,6 +18,9 @@ A POSE is a dict:
   held    scale of the bomb parented to her near (right) hand, 0..1
   thrown  world position of the free bomb, or None (hidden)
   thrown_spin  degrees of spin on the free bomb
+  big     scale of the big Jumpy Dumpty held in BOTH hands, 0..1 (seated
+          between her two hands each frame; only the jumpy clip shows it)
+  big_thrown, big_spin  the big bomb in flight, as thrown / thrown_spin
 
 A CLIP is {length, fps, loop, keys: [(t, pose, ease)]}. Every key's pose must
 carry the same op list SHAPE (same kinds and bones in the same order); the
@@ -88,17 +91,22 @@ def arms(near, far, near_pole=(-0.6, 0.4, -0.2), far_pole=(0.2, 0.5, -1.0),
 
 
 def pose(ops, morphs=None, yaw=YAW, held=1.0, thrown=None, thrown_spin=0.0, root=(0, 0, 0),
-         root_rot=0.0):
+         root_rot=0.0, big=0.0, big_thrown=None, big_spin=0.0):
     return {"yaw": yaw, "morphs": dict(morphs or {}), "ops": ops, "held": held,
-            "thrown": thrown, "thrown_spin": thrown_spin, "root": root, "root_rot": root_rot}
+            "thrown": thrown, "thrown_spin": thrown_spin, "root": root, "root_rot": root_rot,
+            "big": big, "big_thrown": big_thrown, "big_spin": big_spin}
 
 
 # --------------------------------------------------------------------- stance A
 # Battle idle ([USER], 2026-10-13: "Agreed on the Silhouette change"): a wider,
 # lower stance than milestone 2's, the upper body leaning toward the enemy
 # (screen right), the chest still turned a little off-centre toward the viewer
-# as the base cast's are; the near (right) hand holds Jumpy Dumpty out in front
-# of her at its real size (about her head's), the far hand forward beside it.
+# as the base cast's are; the near (right) hand holds her bomb out in front of
+# her, the far hand forward beside it. The bomb is her normal-attack size, about
+# 60% of her head's width ([USER], 2026-10-13: "the new attack is probably too
+# big. ... It's noticeably smaller than her head. I think the increased size
+# would be fitting for her Jumpty Dumpty skill usage."); the head-sized one is
+# the Jumpy Dumpty clip's (JUMPY below).
 # Every combat clip plants her feet where stance A does (A_FRONT / A_BACK), so
 # a clip that starts or ends in idle never slides them.
 #
@@ -113,13 +121,22 @@ A_BACK = 0.15           # near foot back (milestone 2: 0.10)
 A_HEAD_TILT = -4.0      # the head takes back part of the lean
 NEAR_HOLD = (0.12, -0.065, -0.13)     # the bomb hand, from the chest
 HOLD_POLE = (-0.4, 0.6, -1.0)
-NEAR_HOLD_CURL = (22, 12)
-#: Jumpy Dumpty: radius in model units (her head is ~0.24 wide; milestone 2's
-#: bomb was 0.052, a fist-sized toy), and where it sits on her near hand in
-#: stance A, from the 手先.R bone head (render.py parents it to the wrist there).
-BOMB_R = 0.115
-HELD_AT = (0.07, 0.04, 0.08)
+NEAR_HOLD_CURL = (34, 16)             # closed in around the smaller bomb (the head-sized one: 22, 12)
+#: Her head's width at render, model units: the hair and face (the vertices the
+#: 頭 bone carries; hat brim and pigtails left out) across the screen in
+#: stance A, measured on the model in Blender, 2026-10-13. The hat brim spans
+#: 0.294, the face alone 0.166.
+HEAD_W = 0.217
+#: The normal bomb: its diameter 60% of her head's width, as her normal
+#: attack's is in the owner's reference shot from Genshin. Radius in model
+#: units (PR #1210's was 0.115, milestone 2's 0.052). Where it sits on her near
+#: hand in stance A, from the 手先.R bone head (render.py parents it to the
+#: wrist there).
+BOMB_R = round(0.6 * HEAD_W / 2, 3)   # 0.065
+HELD_AT = (0.035, 0.025, 0.05)
 HELD_YAW = 20.0
+#: Jumpy Dumpty's bomb: about her head's size, thrown two-handed by JUMPY.
+JUMPY_R = 0.115
 HIP = "足.R"
 NEAR_HANG = (-0.09, -0.06, 0.06)
 HANG_POLE = (-1.0, 0.5, 0.0)
@@ -447,6 +464,87 @@ PORTRAIT = pose(
     + arms(NEAR_HANG, (0.20, -0.06, -0.10), near_pole=HANG_POLE, near_anchor=HIP, far_curl=FAR_CURL),
     {"にこり": 1.0, "あ": 0.35}, held=0.0)
 
+# --------------------------------------------------------------------- jumpy dumpty
+# A Jumpy Dumpty play ([USER], 2026-10-13: "the increased size would be fitting
+# for her Jumpty Dumpty skill usage"): the small bomb goes away and the
+# head-sized one appears between both hands; she sinks, swings it back over her
+# near shoulder with both arms, then heaves it overhead toward the enemy, a
+# heavier, slower toss than the attack's, and a fresh small bomb pops back into
+# her hand as she settles into stance A. The free bomb is lifted out of the
+# cells by pack.py and flown by the game (KleeMod.Vfx.ThrownProjectile), as the
+# attack's is.
+#: The big bomb's centre from the midpoint of her two fingertips (render.py).
+BIG_AT = (0.0, -0.02, 0.0)
+
+
+def two_hands(c, near_pole=(-0.6, 0.3, -0.6), far_pole=(0.6, 0.3, -0.6)):
+    """Both wrists either side of a big bomb centred at `c` (from the chest):
+    the near (right) one on its screen-left side, the far one on its right."""
+    s = JUMPY_R + 0.035
+    return arms((c[0] - s, c[1] - 0.01, c[2] - 0.02), (c[0] + s, c[1] + 0.02, c[2] - 0.02),
+                near_pole=near_pole, far_pole=far_pole, near_curl=(40, 20), far_curl=(40, 20))
+
+
+def heave(c, drop=0.0, lean=0.0, twist=-14.0, head_turn=50.0, head_nod=3.0, swing=0.0, lift=0.0,
+          morphs=None, big=1.0, near_pole=(-0.6, 0.3, -0.6), far_pole=(0.6, 0.3, -0.6), **kw):
+    return pose(
+        stance(drop=A_DROP + drop, lean=A_LEAN + lean, twist=twist, head_turn=head_turn, head_nod=head_nod,
+               head_tilt=A_HEAD_TILT, front=A_FRONT, back=A_BACK)
+        + two_hands(c, near_pole=near_pole, far_pole=far_pole)
+        + pigtails(swing=swing, lift=lift),
+        morphs or {"にやり": 0.9, "あ": 0.2}, held=0.0, big=big, **kw)
+
+
+#: Chest-relative bomb centres: gathered in front, swung back over the near
+#: shoulder, and released high in front toward the enemy.
+J_GATHER = (0.06, -0.12, -0.06)
+J_BACK = (-0.19, 0.10, 0.12)
+J_RELEASE = (0.29, -0.12, 0.03)
+
+
+def jumpy_gather(k=1.0):
+    return heave(J_GATHER, drop=0.02 * k, lean=-2 * k, morphs={"にやり": 1.0, "あ": 0.3}, big=k)
+
+
+def jumpy_back():
+    return heave(J_BACK, drop=0.05, lean=-20, twist=-4, head_turn=48, head_nod=-4, swing=-8, lift=-4,
+                 morphs={"にやり": 1.0, "あ": 0.5}, near_pole=(-0.8, 0.0, -0.5), far_pole=(0.4, 0.2, -0.8))
+
+
+def jumpy_release(big=1.0, big_thrown=None):
+    return heave(J_RELEASE, drop=0.035, lean=14, twist=2, head_turn=36, head_nod=0, swing=10, lift=6,
+                 morphs={"にやり": 1.0, "あ": 0.9}, big=big, big_thrown=big_thrown,
+                 near_pole=(-0.2, 0.3, -1.0), far_pole=(0.3, 0.3, -1.0))
+
+
+def jumpy_follow():
+    return pose(
+        stance(drop=A_DROP + 0.04, lean=A_LEAN + 12, twist=0, head_turn=38, head_tilt=A_HEAD_TILT,
+               front=A_FRONT, back=A_BACK)
+        + arms((0.22, -0.10, 0.02), (0.26, -0.04, -0.02), near_pole=(0, 0.3, -1),
+               far_pole=(0.4, 0.3, -1.0), near_curl=(25, 10), far_curl=(25, 10))
+        + pigtails(swing=6),
+        {"にやり": 1.0, "あ": 0.5}, held=0.0)
+
+
+JUMPY = {
+    "length": 1.2, "fps": 20, "loop": False,
+    "keys": [
+        (0.0, idle_pose(0.5), "io"),
+        (0.06, jumpy_gather(0.0), "io"),
+        (0.18, jumpy_gather(1.0), "out"),
+        (0.45, jumpy_back(), "io"),
+        (0.55, jumpy_back(), "io"),
+        (0.66, jumpy_release(1.0), "in"),
+        (0.70, jumpy_release(0.0, big_thrown=(0.62, -0.10, 0.78)), "lin"),
+        (0.80, jumpy_follow() | {"big_thrown": (1.02, -0.10, 0.98), "big_spin": 90}, "out"),
+        (0.85, jumpy_follow(), "io"),
+        (0.98, jumpy_follow(), "io"),
+        (1.10, idle_pose(0.5) | {"held": 1.0}, "out"),
+        (1.2, idle_pose(0.5), "io"),
+    ],
+}
+
 CLIPS = {
     "idle": IDLE,
     "idle_low": IDLE_LOW,
@@ -455,6 +553,7 @@ CLIPS = {
     "death": DEATH,
     "cast": CAST,
     "setoff": SETOFF,
+    "jumpy": JUMPY,
     "merchant": MERCHANT,
 }
 

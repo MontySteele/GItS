@@ -1,4 +1,4 @@
-[gd_scene load_steps=75 format=3]
+[gd_scene load_steps=93 format=3]
 
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_idle.png" id="1_idle"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_idle_low.png" id="2_idle_low"]
@@ -7,7 +7,9 @@
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_death.png" id="5_death"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_cast.png" id="6_cast"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_setoff.png" id="7_setoff"]
+[ext_resource type="Texture2D" path="res://klee/model/frames/klee_jumpy.png" id="8_jumpy"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_bomb.png" id="8_bomb"]
+[ext_resource type="Texture2D" path="res://klee/model/frames/klee_bomb_big.png" id="10_bomb_big"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_shadow.png" id="9_shadow"]
 
 [sub_resource type="Animation" id="Animation_reset"]
@@ -99,7 +101,7 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/SetOff:self_modulate")
+tracks/7/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
@@ -111,19 +113,19 @@ tracks/7/keys = {
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/Attack:frame")
-tracks/8/interp = 0
+tracks/8/path = NodePath("Visuals/Facing/Model/SetOff:self_modulate")
+tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0]
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/9/type = "value"
 tracks/9/imported = false
 tracks/9/enabled = true
-tracks/9/path = NodePath("Visuals/Facing/Model/Cast:frame")
+tracks/9/path = NodePath("Visuals/Facing/Model/Attack:frame")
 tracks/9/interp = 0
 tracks/9/loop_wrap = true
 tracks/9/keys = {
@@ -135,7 +137,7 @@ tracks/9/keys = {
 tracks/10/type = "value"
 tracks/10/imported = false
 tracks/10/enabled = true
-tracks/10/path = NodePath("Visuals/Facing/Model/Death:frame")
+tracks/10/path = NodePath("Visuals/Facing/Model/Cast:frame")
 tracks/10/interp = 0
 tracks/10/loop_wrap = true
 tracks/10/keys = {
@@ -147,7 +149,7 @@ tracks/10/keys = {
 tracks/11/type = "value"
 tracks/11/imported = false
 tracks/11/enabled = true
-tracks/11/path = NodePath("Visuals/Facing/Model/Hurt:frame")
+tracks/11/path = NodePath("Visuals/Facing/Model/Death:frame")
 tracks/11/interp = 0
 tracks/11/loop_wrap = true
 tracks/11/keys = {
@@ -159,7 +161,7 @@ tracks/11/keys = {
 tracks/12/type = "value"
 tracks/12/imported = false
 tracks/12/enabled = true
-tracks/12/path = NodePath("Visuals/Facing/Model/Idle:frame")
+tracks/12/path = NodePath("Visuals/Facing/Model/Hurt:frame")
 tracks/12/interp = 0
 tracks/12/loop_wrap = true
 tracks/12/keys = {
@@ -171,7 +173,7 @@ tracks/12/keys = {
 tracks/13/type = "value"
 tracks/13/imported = false
 tracks/13/enabled = true
-tracks/13/path = NodePath("Visuals/Facing/Model/IdleLow:frame")
+tracks/13/path = NodePath("Visuals/Facing/Model/Idle:frame")
 tracks/13/interp = 0
 tracks/13/loop_wrap = true
 tracks/13/keys = {
@@ -183,10 +185,34 @@ tracks/13/keys = {
 tracks/14/type = "value"
 tracks/14/imported = false
 tracks/14/enabled = true
-tracks/14/path = NodePath("Visuals/Facing/Model/SetOff:frame")
+tracks/14/path = NodePath("Visuals/Facing/Model/IdleLow:frame")
 tracks/14/interp = 0
 tracks/14/loop_wrap = true
 tracks/14/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+tracks/15/type = "value"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath("Visuals/Facing/Model/Jumpy:frame")
+tracks/15/interp = 0
+tracks/15/loop_wrap = true
+tracks/15/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+tracks/16/type = "value"
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/path = NodePath("Visuals/Facing/Model/SetOff:frame")
+tracks/16/interp = 0
+tracks/16/loop_wrap = true
+tracks/16/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
@@ -284,10 +310,22 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/Idle:frame")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Idle:frame")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
@@ -384,10 +422,22 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/Attack:frame")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Attack:frame")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
@@ -496,10 +546,22 @@ tracks/7/keys = {
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/Hurt:frame")
-tracks/8/interp = 0
+tracks/8/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/Hurt:frame")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
@@ -608,10 +670,22 @@ tracks/7/keys = {
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/Death:frame")
-tracks/8/interp = 0
+tracks/8/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/Death:frame")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
@@ -708,10 +782,22 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/Cast:frame")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Cast:frame")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
@@ -820,10 +906,22 @@ tracks/7/keys = {
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/Cast:frame")
-tracks/8/interp = 0
+tracks/8/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/Cast:frame")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
@@ -933,10 +1031,22 @@ tracks/7/keys = {
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/IdleLow:frame")
-tracks/8/interp = 0
+tracks/8/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/IdleLow:frame")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0, 0.0667, 0.1333, 0.2, 0.2667, 0.3333, 0.4, 0.4667, 0.5333, 0.6, 0.6667, 0.7333, 0.8, 0.8667, 0.9333, 1, 1.0667, 1.1333, 1.2, 1.2667, 1.3333, 1.4, 1.4667, 1.5333, 1.6, 1.6667, 1.7333, 1.8, 1.8667, 1.9333, 2, 2.0667, 2.1333, 2.2, 2.2667, 2.3333),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
@@ -1033,14 +1143,138 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/SetOff:frame")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/SetOff:frame")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+}
+
+[sub_resource type="Animation" id="Animation_jumpy"]
+resource_name = "jumpy"
+length = 1.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/SetOff:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Jumpy:self_modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Jumpy:frame")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_klee"]
@@ -1052,6 +1286,7 @@ _data = {
 &"hurt": SubResource("Animation_hurt"),
 &"idle": SubResource("Animation_idle"),
 &"idle_low": SubResource("Animation_idle_low"),
+&"jumpy": SubResource("Animation_jumpy"),
 &"power": SubResource("Animation_power"),
 &"setoff": SubResource("Animation_setoff")
 }
@@ -1080,6 +1315,9 @@ animation = &"idle_low"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_setoff"]
 animation = &"setoff"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_jumpy"]
+animation = &"jumpy"
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_start_idle"]
 advance_mode = 2
 
@@ -1107,6 +1345,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_jumpy"]
+xfade_time = 0.1
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_attack"]
 xfade_time = 0.1
 advance_mode = 1
@@ -1131,6 +1373,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_jumpy"]
+xfade_time = 0.1
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_hurt"]
 xfade_time = 0.03
 advance_mode = 1
@@ -1151,6 +1397,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_jumpy"]
+xfade_time = 0.05
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_attack"]
 xfade_time = 0.05
 advance_mode = 1
@@ -1167,6 +1417,10 @@ xfade_time = 0.05
 advance_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_setoff"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_jumpy"]
 xfade_time = 0.05
 advance_mode = 1
 
@@ -1190,6 +1444,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_jumpy"]
+xfade_time = 0.05
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_attack"]
 xfade_time = 0.05
 advance_mode = 1
@@ -1210,6 +1468,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_jumpy"]
+xfade_time = 0.05
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_setoff_attack"]
 xfade_time = 0.05
 advance_mode = 1
@@ -1227,6 +1489,34 @@ xfade_time = 0.05
 advance_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_setoff_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_setoff_jumpy"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_jumpy_attack"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_jumpy_hurt"]
+xfade_time = 0.03
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_jumpy_death"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_jumpy_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_jumpy_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_jumpy_setoff"]
 xfade_time = 0.05
 advance_mode = 1
 
@@ -1251,6 +1541,11 @@ switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_setoff_idle"]
+xfade_time = 0.05
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_jumpy_idle"]
 xfade_time = 0.05
 switch_mode = 2
 advance_mode = 2
@@ -1284,11 +1579,13 @@ states/idle/node = SubResource("AnimationNodeAnimation_idle")
 states/idle/position = Vector2(327, 153)
 states/idle_low/node = SubResource("AnimationNodeAnimation_idle_low")
 states/idle_low/position = Vector2(327, 365)
+states/jumpy/node = SubResource("AnimationNodeAnimation_jumpy")
+states/jumpy/position = Vector2(470, 278)
 states/power/node = SubResource("AnimationNodeAnimation_power")
 states/power/position = Vector2(470, 64)
 states/setoff/node = SubResource("AnimationNodeAnimation_setoff")
 states/setoff/position = Vector2(186, 278)
-transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "attack", SubResource("Transition_idle_attack"), "idle", "hurt", SubResource("Transition_idle_hurt"), "idle", "death", SubResource("Transition_idle_death"), "idle", "cast", SubResource("Transition_idle_cast"), "idle", "power", SubResource("Transition_idle_power"), "idle", "setoff", SubResource("Transition_idle_setoff"), "idle_low", "attack", SubResource("Transition_idle_low_attack"), "idle_low", "hurt", SubResource("Transition_idle_low_hurt"), "idle_low", "death", SubResource("Transition_idle_low_death"), "idle_low", "cast", SubResource("Transition_idle_low_cast"), "idle_low", "power", SubResource("Transition_idle_low_power"), "idle_low", "setoff", SubResource("Transition_idle_low_setoff"), "attack", "hurt", SubResource("Transition_attack_hurt"), "attack", "death", SubResource("Transition_attack_death"), "attack", "cast", SubResource("Transition_attack_cast"), "attack", "power", SubResource("Transition_attack_power"), "attack", "setoff", SubResource("Transition_attack_setoff"), "hurt", "attack", SubResource("Transition_hurt_attack"), "hurt", "death", SubResource("Transition_hurt_death"), "hurt", "cast", SubResource("Transition_hurt_cast"), "hurt", "power", SubResource("Transition_hurt_power"), "hurt", "setoff", SubResource("Transition_hurt_setoff"), "cast", "attack", SubResource("Transition_cast_attack"), "cast", "hurt", SubResource("Transition_cast_hurt"), "cast", "death", SubResource("Transition_cast_death"), "cast", "power", SubResource("Transition_cast_power"), "cast", "setoff", SubResource("Transition_cast_setoff"), "power", "attack", SubResource("Transition_power_attack"), "power", "hurt", SubResource("Transition_power_hurt"), "power", "death", SubResource("Transition_power_death"), "power", "cast", SubResource("Transition_power_cast"), "power", "setoff", SubResource("Transition_power_setoff"), "setoff", "attack", SubResource("Transition_setoff_attack"), "setoff", "hurt", SubResource("Transition_setoff_hurt"), "setoff", "death", SubResource("Transition_setoff_death"), "setoff", "cast", SubResource("Transition_setoff_cast"), "setoff", "power", SubResource("Transition_setoff_power"), "attack", "idle", SubResource("Transition_attack_idle"), "hurt", "idle", SubResource("Transition_hurt_idle"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "setoff", "idle", SubResource("Transition_setoff_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle"), "death", "End", SubResource("Transition_death_end")]
+transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "attack", SubResource("Transition_idle_attack"), "idle", "hurt", SubResource("Transition_idle_hurt"), "idle", "death", SubResource("Transition_idle_death"), "idle", "cast", SubResource("Transition_idle_cast"), "idle", "power", SubResource("Transition_idle_power"), "idle", "setoff", SubResource("Transition_idle_setoff"), "idle", "jumpy", SubResource("Transition_idle_jumpy"), "idle_low", "attack", SubResource("Transition_idle_low_attack"), "idle_low", "hurt", SubResource("Transition_idle_low_hurt"), "idle_low", "death", SubResource("Transition_idle_low_death"), "idle_low", "cast", SubResource("Transition_idle_low_cast"), "idle_low", "power", SubResource("Transition_idle_low_power"), "idle_low", "setoff", SubResource("Transition_idle_low_setoff"), "idle_low", "jumpy", SubResource("Transition_idle_low_jumpy"), "attack", "hurt", SubResource("Transition_attack_hurt"), "attack", "death", SubResource("Transition_attack_death"), "attack", "cast", SubResource("Transition_attack_cast"), "attack", "power", SubResource("Transition_attack_power"), "attack", "setoff", SubResource("Transition_attack_setoff"), "attack", "jumpy", SubResource("Transition_attack_jumpy"), "hurt", "attack", SubResource("Transition_hurt_attack"), "hurt", "death", SubResource("Transition_hurt_death"), "hurt", "cast", SubResource("Transition_hurt_cast"), "hurt", "power", SubResource("Transition_hurt_power"), "hurt", "setoff", SubResource("Transition_hurt_setoff"), "hurt", "jumpy", SubResource("Transition_hurt_jumpy"), "cast", "attack", SubResource("Transition_cast_attack"), "cast", "hurt", SubResource("Transition_cast_hurt"), "cast", "death", SubResource("Transition_cast_death"), "cast", "power", SubResource("Transition_cast_power"), "cast", "setoff", SubResource("Transition_cast_setoff"), "cast", "jumpy", SubResource("Transition_cast_jumpy"), "power", "attack", SubResource("Transition_power_attack"), "power", "hurt", SubResource("Transition_power_hurt"), "power", "death", SubResource("Transition_power_death"), "power", "cast", SubResource("Transition_power_cast"), "power", "setoff", SubResource("Transition_power_setoff"), "power", "jumpy", SubResource("Transition_power_jumpy"), "setoff", "attack", SubResource("Transition_setoff_attack"), "setoff", "hurt", SubResource("Transition_setoff_hurt"), "setoff", "death", SubResource("Transition_setoff_death"), "setoff", "cast", SubResource("Transition_setoff_cast"), "setoff", "power", SubResource("Transition_setoff_power"), "setoff", "jumpy", SubResource("Transition_setoff_jumpy"), "jumpy", "attack", SubResource("Transition_jumpy_attack"), "jumpy", "hurt", SubResource("Transition_jumpy_hurt"), "jumpy", "death", SubResource("Transition_jumpy_death"), "jumpy", "cast", SubResource("Transition_jumpy_cast"), "jumpy", "power", SubResource("Transition_jumpy_power"), "jumpy", "setoff", SubResource("Transition_jumpy_setoff"), "attack", "idle", SubResource("Transition_attack_idle"), "hurt", "idle", SubResource("Transition_hurt_idle"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "setoff", "idle", SubResource("Transition_setoff_idle"), "jumpy", "idle", SubResource("Transition_jumpy_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle"), "death", "End", SubResource("Transition_death_end")]
 
 [node name="KleeCombat" type="Node2D"]
 
@@ -1326,16 +1623,16 @@ vframes = 4
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("3_attack")
 centered = false
-offset = Vector2(-128, -343)
+offset = Vector2(-106, -336)
 scale = Vector2(0.5, 0.5)
-hframes = 4
-vframes = 5
+hframes = 5
+vframes = 4
 
 [node name="Hurt" type="Sprite2D" parent="Visuals/Facing/Model"]
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("4_hurt")
 centered = false
-offset = Vector2(-84, -338)
+offset = Vector2(-84, -339)
 scale = Vector2(0.5, 0.5)
 hframes = 6
 vframes = 3
@@ -1362,18 +1659,35 @@ vframes = 3
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("7_setoff")
 centered = false
-offset = Vector2(-109, -354)
+offset = Vector2(-83, -354)
 scale = Vector2(0.5, 0.5)
 hframes = 6
 vframes = 3
 
+[node name="Jumpy" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = ExtResource("8_jumpy")
+centered = false
+offset = Vector2(-129, -330)
+scale = Vector2(0.5, 0.5)
+hframes = 5
+vframes = 5
+
 [node name="ThrownProjectile" type="Sprite2D" parent="Visuals/Facing"]
 unique_name_in_owner = true
 visible = false
-position = Vector2(123.5, -147)
+position = Vector2(67.5, -138.25)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("8_bomb")
-metadata/release = 0.5
+metadata/release = 0.45
+
+[node name="JumpyProjectile" type="Sprite2D" parent="Visuals/Facing"]
+unique_name_in_owner = true
+visible = false
+position = Vector2(93, -118.75)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("10_bomb_big")
+metadata/release = 0.7
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true

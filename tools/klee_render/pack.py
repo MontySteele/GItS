@@ -10,6 +10,8 @@ clip: <clip>/f_NNN.png + <clip>.json; per still: <name>.png + <name>.json) and w
                                         merchant loop), cells in reading order
   images/model/frames/klee_bomb.png     the thrown bomb, cut out of the attack
                                         sheet's release cell (split_thrown)
+  images/model/frames/klee_bomb_big.png Jumpy Dumpty's head-sized bomb, cut out
+                                        of the jumpy sheet's release cell
   images/model/frames/klee_shadow.png   her ground shadow: a soft painted
                                         ellipse sized to her footprint, drawn
                                         under her in combat and at the shop
@@ -51,13 +53,13 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "tools" / "klee_rig" / "klee_frames.json"
 
 #: combat clips, drawn at 0.5 (2x textures for 4K)
-COMBAT = ("idle", "idle_low", "attack", "hurt", "death", "cast", "setoff")
+COMBAT = ("idle", "idle_low", "attack", "hurt", "death", "cast", "setoff", "jumpy")
 COMBAT_SCALE = 0.5
 #: Spelled out, not formatted: art_lint's GENERATOR_OWNED rot check greps this
 #: file for every out-path's basename.
 SHEET_FILES = {"idle": "klee_idle.png", "idle_low": "klee_idle_low.png", "attack": "klee_attack.png",
                "hurt": "klee_hurt.png", "death": "klee_death.png", "cast": "klee_cast.png",
-               "setoff": "klee_setoff.png", "merchant": "klee_merchant.png"}
+               "setoff": "klee_setoff.png", "jumpy": "klee_jumpy.png", "merchant": "klee_merchant.png"}
 MERCHANT_SCALE = round(1 / 1.5, 6)
 MAX_SHEET = 4096
 PAD = 2
@@ -67,6 +69,9 @@ PAD = 2
 #: the cell edge a fifth of the way to the enemy.
 THROWN_CLIP = "attack"
 BOMB_FILE = "klee_bomb.png"
+#: Every clip that throws, and the sprite its free bomb is cut to: the attack's
+#: normal bomb and Jumpy Dumpty's head-sized one (the jumpy clip, 2026-10-13).
+THROWN_FILES = {"attack": BOMB_FILE, "jumpy": "klee_bomb_big.png"}
 
 #: The ground shadow (visual paper pick (a), 2026-10-13). The base cast each
 #: carry a `shadow` region in their own Spine skeleton (combat and shop alike):
@@ -140,7 +145,7 @@ def column_runs(alpha: Image.Image) -> list[tuple[int, int]]:
     return runs
 
 
-def split_thrown(sheet: Image.Image, rec: dict):
+def split_thrown(sheet: Image.Image, rec: dict, file: str = BOMB_FILE):
     """Lift the free bomb out of a throw clip's cells.
 
     In each cell the figure is the widest run of filled columns; any run wholly
@@ -167,7 +172,7 @@ def split_thrown(sheet: Image.Image, rec: dict):
                 piece = cell.crop(box)
                 py0, py1 = piece.getchannel("A").getbbox()[1::2]
                 bomb = piece.crop((0, py0, b - a, py1))
-                thrown = {"frame": i, "time": rec["times"][i], "file": BOMB_FILE,
+                thrown = {"frame": i, "time": rec["times"][i], "file": file,
                           "size": list(bomb.size), "at": [(a + b) / 2, (py0 + py1) / 2]}
             out.paste(Image.new("RGBA", (b - a, ch), (0, 0, 0, 0)), (x0 + a, y0))
     return out, bomb, thrown
@@ -313,11 +318,11 @@ def main(argv=None) -> int:
         assert not meta.get("keys_only"), f"{clip}: a --keys-only render is a preview, not frames"
         sheet, rec = sheet_for(R / clip, meta)
         rec["file"] = SHEET_FILES[clip]
-        if clip == THROWN_CLIP:
-            sheet, bomb, thrown = split_thrown(sheet, rec)
+        if clip in THROWN_FILES:
+            sheet, bomb, thrown = split_thrown(sheet, rec, THROWN_FILES[clip])
             assert bomb is not None, f"{clip}: no free bomb in any cell"
             rec["thrown"] = thrown
-            writes.append((out_frames / BOMB_FILE, bomb))
+            writes.append((out_frames / THROWN_FILES[clip], bomb))
         manifest["sheets"][clip] = rec
         writes.append((out_frames / rec["file"], sheet))
         print(f"{clip:9s} {rec['count']:3d} frames  cell {rec['cell']}  grid {rec['hframes']}x{rec['vframes']}"
