@@ -128,6 +128,12 @@ def test_the_paper_numbers_and_upgrades(varka):
     assert fx(_vk("razor_claw_and_thunder"), "varka")["amount"] == 3
     assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 8
     assert loader.get_card(_vk("lisa_pulsating_witch")).cost == 0
+    # The user's 2026-10-13 picks: Tailwind Stride draws 3 [4] with no
+    # condition; Storm Surge costs 1.
+    assert fx(_vk("tailwind_stride"), "draw")["amount"] == 3
+    assert fx(_vk("tailwind_stride") + "+", "draw")["amount"] == 4
+    assert [f["op"] for f in loader.get_card(_vk("tailwind_stride")).effects] == ["draw"]
+    assert loader.get_card(_vk("storm_surge")).cost == 1
     # Varka payoff fix (2026-10-08): every 3 [2] Cryo Oath, was 4 [3].
     assert fx(_vk("glacial_edict"), "varka")["amount"] == 3
     assert fx(_vk("glacial_edict") + "+", "varka")["amount"] == 2

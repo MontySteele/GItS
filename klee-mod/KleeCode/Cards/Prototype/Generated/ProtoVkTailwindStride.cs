@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -37,22 +36,18 @@ public sealed class ProtoVkTailwindStride : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(base.ExtraHoverTips, this);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_tailwind_stride");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tailwind Stride"),
-        ("description", "Draw 2 cards. If you have a [gold]current element[/gold], draw {DrawThen:diff()} additional card{DrawThen:plural:|s}."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(2),
-            new DynamicVar("DrawThen", 1m)
+            new CardsVar(3)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,14 +60,10 @@ public sealed class ProtoVkTailwindStride : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        if (VarkaOath.HasCurrent(Owner.Creature))
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars["DrawThen"].IntValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["DrawThen"].UpgradeValueBy(1m);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }
