@@ -367,3 +367,27 @@ def test_confiscated_exhausts_when_played(overhaul):
     assert [c.id for c in st.player.exhaust_pile] == ["confiscated"]
     assert not any(c.id == "confiscated" for c in st.player.discard_pile)
     assert st.player.energy == 4
+
+
+def test_dust_of_purification_carried_out_as_a_plan_reads_the_draw_pile(
+        overhaul):
+    """BACKLOG (Albedo -- Dust of Purification): written by Kokomi, the
+    carry-out comes before the turn's draw, so the exhaust reads the Draw
+    Pile, as Sea Glass Harvest's Plan does (Kokomi round-1 fixes). Played
+    face-up it still reads the hand. C# twin:
+    `KleeStatusPackage.ExhaustStatusesGrowLargest`."""
+    enemy = make_enemy(hp=200)
+    st = klee_state([enemy])
+    klee_overhaul.place(st, enemy, 5)
+    st.player.draw_pile = [statuses.make_status("dazed"), _confiscated()] \
+        + filler(3)
+    st.player.hand = [statuses.make_status("dazed")]
+    st.kk_carrying_out = True
+    assert klee_overhaul.exhaust_statuses_grow_largest(st, 6, 1) == 2
+    assert len(st.player.exhaust_pile) == 2
+    assert sizes(enemy) == [17]
+    # The hand's Dazed stays; two cards drawn from what is left.
+    assert len(st.player.hand) == 3
+    assert not any(klee_overhaul.is_status(c) for c in st.player.draw_pile)
+    st.kk_carrying_out = False
+    assert klee_overhaul.exhaust_statuses_grow_largest(st, 6, 1) == 1
