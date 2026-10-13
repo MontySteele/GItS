@@ -111,7 +111,7 @@ public class KokomiPoolPassTwoTests
         // The card text pass (2026-10-12, the Kokomi table, ruled by [USER])
         // words it "Your next Plan".
         var face = Face(new ProtoKkOpeningGambit());
-        Assert.EndsWith("Your next [gold]Plan[/gold] deals double damage.", face);
+        Assert.EndsWith("The next [gold]Plan[/gold] written this turn deals double damage.", face);
         Assert.DoesNotContain("after this one", face);
         Assert.DoesNotContain("carried out with this one", face);
     }
@@ -427,7 +427,7 @@ public class KokomiPoolPassTwoTests
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The "
           + "[gold]Plan[/gold] written after it this turn is carried out twice.",
             Face(new ProtoKkSecondWave()));
-        Assert.EndsWith("Your next [gold]Plan[/gold] deals double damage.",
+        Assert.EndsWith("The next [gold]Plan[/gold] written this turn deals double damage.",
                         Face(new ProtoKkOpeningGambit()));
         // Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     }
