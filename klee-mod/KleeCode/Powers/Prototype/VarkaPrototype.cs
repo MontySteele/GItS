@@ -20,12 +20,12 @@ public interface IVarkaCharacter
 ///   * OATH, one count per element, counted per card
 ///     (<see cref="VarkaOathLedger"/>); his CURRENT ELEMENT is the last
 ///     Knight's, and his cards read only its Oath (<see cref="VarkaOath"/>).
-///   * A Swirl he makes pays his current element: Pyro 3 damage to the enemy
-///     Swirled, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 damage to ALL
-///     (<see cref="VarkaLaw"/>).
-///   * BOREAS'S FANG adds Four Winds' Ascension to his hand the first time
-///     each combat he gains Oath (<c>Relics.BoreasFang</c>), and at the start
-///     of a run rolls his starter Knight.
+///   * BOREAS'S FANG (<c>Relics.BoreasFang</c>): a Swirl he makes pays his
+///     current element: Pyro 3 damage to the enemy Swirled, Hydro 3 Block,
+///     Cryo 1 Vulnerable, Electro 3 damage to ALL (<see cref="VarkaLaw"/>;
+///     the relic's since Starter (a), 2026-10-13). It makes his starter
+///     Knight's element current each combat, and at the start of a run rolls
+///     that Knight.
 ///   * CONVERGING WINDS, card-scoped: his Swirls deal its amount to ALL
 ///     enemies (<see cref="ConvergingWindsPower"/>, from
 ///     <see cref="VarkaOath.OnSwirl"/>).

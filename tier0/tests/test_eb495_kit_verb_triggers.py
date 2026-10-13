@@ -553,10 +553,13 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # carrying the element the card names (Blazing Charge, Thundering
     # Verdict, Razor, Tempest). The rebalance (2026-10-03) adds Kindled
     # Edge's "deal 7 more": the card's own second hit, with no element.
+    # Starter (a), 2026-10-13 adds `VarkaCards.GaleHit`: Dandelion Gale's
+    # second hit, the Ascension's on ALL enemies, the card's own hit.
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBombPower.cs",
+        "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",

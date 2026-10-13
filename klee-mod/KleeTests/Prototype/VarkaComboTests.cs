@@ -246,10 +246,11 @@ public class VarkaComboTests : IDisposable
     }
 
     [Fact]
-    public void Deep_freeze_retains_and_doubles_weak_and_vulnerable()
+    public void Deep_freeze_doubles_weak_and_vulnerable_without_retain()
     {
         var card = new ProtoVkDeepFreeze();
-        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
+        // Retain dropped 2026-10-13 ([USER]: "I think we should drop Retain").
+        Assert.DoesNotContain(CardKeyword.Retain, card.CanonicalKeywords);
         Assert.Equal(0, UpgradedCost<ProtoVkDeepFreeze>());
         var play = Calls("ProtoVkDeepFreeze", "OnPlay");
         Assert.True(play.IndexOf("ElementalHit.ApplyOnly")

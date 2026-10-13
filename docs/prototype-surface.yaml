@@ -3578,28 +3578,18 @@
 # 2026-09-29). Rules: Powers/Prototype/VarkaOath.cs, tier0/engine/varka_oath.py.
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md, "Varka".
 
-# --- created by Boreas's Fang (sec.4), and the starter (sec.5) ---
+# --- the starter (sec.5) ---
 
 - {id: proto_vk_four_winds_ascension, name: "Four Winds' Ascension", character: varka,
    authored_by: [claude],
-   # Created in combat, never in the deck; played, it goes to the discard
-   # pile. Starter ruling 2026-10-03; upgrade cost 2 to 1 since the combo
-   # pass. Provenance note, "Varka review, 2026-10-12" (no `dusty_tome`).
+   # In his starter deck since Starter (a), 2026-10-13; the Fang no longer
+   # makes it. Archaic Tooth: Dandelion Gale. Provenance notes, "Varka
+   # review, 2026-10-12" and "Varka starter, Fang and Tooth, 2026-10-13".
    cost: 2, type: attack, rarity: basic, retain: true,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {cost: -1}}
-
-- {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
-   authored_by: [claude],
-   # Starter ruling 2026-10-03 ([USER]: "single target but 0 energy ... we
-   # print too many AoE cards"): cost 0, one enemy; still Swirls. Archaic
-   # Tooth: Dandelion Gale (provenance note, "Varka review, 2026-10-12").
-   cost: 0, type: attack, rarity: basic,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage.",
-   effects: [{op: damage, amount: 4, target: enemy}],
-   upgrade: {damage: 2}}
 
 # The four starter-only Knights: one joins the starter at random each run.
 
@@ -4400,10 +4390,10 @@
 
 - {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
    authored_by: [claude],
-   # Upgrade cost 1 to 0 (2026-10-04). Payoff fix (2026-10-08): 1 Vulnerable;
-   # last pass (2026-10-12): 1 Weak too, both landing before the doubling, so
-   # a clean enemy ends on 2 of each. Provenance, "Varka last pass".
-   cost: 1, type: skill, rarity: uncommon, retain: true,
+   # Upgrade cost 1 to 0 (2026-10-04). Payoff fix: 1 Vulnerable; last pass:
+   # 1 Weak too, before the doubling. Retain dropped 2026-10-13. Provenance,
+   # "Varka last pass" and "Varka starter, Fang and Tooth, 2026-10-13".
+   cost: 1, type: skill, rarity: uncommon,
    description: "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy},

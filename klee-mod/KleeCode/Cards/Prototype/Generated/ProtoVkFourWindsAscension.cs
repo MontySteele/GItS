@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard, ICharacterCard, ITranscendenceCard
 {
     /// <summary>Sheet: all Varka attacks apply Anemo (catalyst-grade cadence).</summary>
     public Element Element => Element.Anemo;
@@ -53,6 +53,11 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
         ("title", "Four Winds' Ascension"),
         ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}"),
     };
+
+    /// <summary>Orobas's Archaic Tooth turns this card into its Ancient
+    /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`).</summary>
+    public CardModel GetTranscendenceTransformedCard() =>
+        ModelDb.Card<global::KleeMod.Cards.Varka.DandelionGale>();
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

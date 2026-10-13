@@ -295,7 +295,7 @@ public static class KleeMod
                     // no aura is left, so the sentence is the four above with
                     // the duration clause replaced by the reason there is none.
                     ["KLEEMOD-APPLIES_ANEMO.title"] = "Applies Anemo",
-                    // The Varka wave (2026-10-13): Windbound Execution's
+                    // The Varka wave (2026-10-13): an Anemo card's
                     // face never said a Swirl hits ALL enemies, so the tip
                     // every Anemo card hovers names the Swirl and its 2.
                     ["KLEEMOD-APPLIES_ANEMO.description"] =

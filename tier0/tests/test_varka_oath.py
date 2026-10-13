@@ -159,7 +159,9 @@ def test_the_ruled_rows_and_their_upgrades(varka):
 def test_every_row_resolves_and_every_upgrade_applies(varka):
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(V.ID_PREFIX)]
-    assert len(rows) == 84          # 47, and 84 since the expansion
+    # 47, 84 since the expansion, 83 since Windbound Execution retired
+    # (Starter (a), 2026-10-13).
+    assert len(rows) == 83
     for c in rows:
         loader.get_card(c.id)
         if c.no_upgrade:
@@ -182,7 +184,7 @@ def test_the_starter_and_the_helper(varka):
     p = V.build_player("hydro")
     ids = sorted(c.id for c in p.draw_pile)
     assert ids == sorted(["strike"] * 4 + ["defend"] * 4
-                         + [_vk("windbound_execution"),
+                         + [_vk("four_winds_ascension"),
                             _vk("barbara_melody_loop")])
     assert (p.hp, p.max_hp, p.character_id) == (80, 80, "varka")
     assert V.FANG in p.relic_hooks
@@ -224,11 +226,11 @@ def test_apply_and_swirl_are_separate_keys_in_one_scope(varka):
 
 
 def test_a_spread_credits_nothing(varka):
-    """Windbound Execution Swirls A's Pyro, consuming it; the spread's copies
+    """Four Winds' Ascension Swirls A's Pyro, consuming it; the spread's copies
     on B and C credit nothing (2026-10-03: no spent auras)."""
     st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b"),
                          _enemy(name="c")], fang=False)
-    _play(st, _vk("windbound_execution"))
+    _play(st, _vk("four_winds_ascension"))
     assert _led(st).oath == {"pyro": 1, "hydro": 0, "electro": 0, "cryo": 0}
     a, b, c = st.enemies
     assert a.aura is None and b.aura == "pyro" and c.aura == "pyro"
@@ -238,14 +240,14 @@ def test_a_spread_credits_nothing(varka):
 def test_northwind_credits_both_keys_and_ascension_only_the_swirl(varka):
     # Northwind: 10 Anemo Swirls the Pyro (+1 swirl-Pyro, flat 2, Pyro
     # payout 3), then 8 + 2 x 2 Pyro, which credits apply-Pyro.
-    st = _state(enemies=[_enemy(aura="pyro")], fang=False)
+    st = _state(enemies=[_enemy(aura="pyro")])
     led = _led(st)
     led.current, led.oath["pyro"] = "pyro", 1
     _play(st, _vk("northwind_avatar"))
     assert led.oath["pyro"] == 3
     assert st.enemies[0].hp == 100 - (10 + 2 + 3 + 12)
     # Ascension: 10 Anemo Swirls (+1), then 3 x 2 Pyro that credits nothing.
-    st = _state(enemies=[_enemy(aura="pyro")], fang=False)
+    st = _state(enemies=[_enemy(aura="pyro")])
     led = _led(st)
     led.current, led.oath["pyro"] = "pyro", 1
     _play(st, _vk("four_winds_ascension"))
@@ -333,12 +335,13 @@ def test_an_anemo_or_geo_card_neither_credits_nor_switches(
 
 
 def test_a_swirl_spread_does_not_switch(varka):
-    """Windbound Execution Swirls A's Pyro while Hydro is current: the
+    """Four Winds' Ascension Swirls A's Pyro while Hydro is current (0 Hydro
+    Oath, so its second hit deals nothing): the
     Swirl credits Pyro, its spread lands on B and C, and Hydro stays."""
     st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b"),
                          _enemy(name="c")], fang=False)
     _led(st).current = "hydro"
-    _play(st, _vk("windbound_execution"))
+    _play(st, _vk("four_winds_ascension"))
     assert _led(st).current == "hydro"
     assert _led(st).oath["pyro"] == 1
 
@@ -375,8 +378,7 @@ def test_the_open_oath_switch_off_is_the_old_rule(varka, monkeypatch):
 @pytest.mark.parametrize("current", ["pyro", "hydro", "cryo", "electro",
                                      None])
 def test_each_swirl_payout(varka, current):
-    st = _state(enemies=[_enemy(name="a", aura="cryo"), _enemy(name="b")],
-                fang=False)
+    st = _state(enemies=[_enemy(name="a", aura="cryo"), _enemy(name="b")])
     _led(st).current = current
     _play(st, _vk("jean_dandelion_breeze"))
     a, b = st.enemies
@@ -390,7 +392,7 @@ def test_each_swirl_payout(varka, current):
 
 
 def test_the_pyro_payout_is_unpowered_and_meets_vulnerable(varka):
-    st = _state(enemies=[_enemy(aura="cryo")], fang=False)
+    st = _state(enemies=[_enemy(aura="cryo")])
     _led(st).current = "pyro"
     st.player.powers["strength"] = 5
     st.enemies[0].powers["vulnerable"] = 2
@@ -551,15 +553,37 @@ def test_gale_sweep_hits_each_aura_once(varka):
 # 5. Boreas's Fang.
 # ---------------------------------------------------------------------------
 
-def test_the_fang_adds_ascension_on_the_first_gain_once(varka):
+def test_the_fang_adds_no_ascension(varka):
+    """Starter (a), 2026-10-13: the Ascension is in his starter deck, so the
+    plain Fang adds none."""
     st = _state()
     _play(st, _vk("amber_fiery_rain"))
-    assert _hand_ids(st) == [V.ASCENSION_ID]
-    assert st.player.hand[0].free_this_turn is False     # the Fang's is not
+    assert _hand_ids(st) == []
+    assert _led(st).fang_fired is False
+
+
+def test_the_gravestone_adds_ascension_on_the_first_gain_once(varka):
+    st = _state(fang_upgraded=True)
+    _play(st, _vk("amber_fiery_rain"))
+    assert _hand_ids(st) == [V.ASCENSION_ID + "+"]
     _play(st, _vk("kaeya_glacial_waltz"))
-    assert _hand_ids(st).count(V.ASCENSION_ID) == 1
+    assert _hand_ids(st).count(V.ASCENSION_ID + "+") == 1
     V.open_combat(st.player)                            # the next fight
     assert _led(st).fang_fired is False
+
+
+@pytest.mark.parametrize("fang,upgraded,paid", [
+    (True, False, True), (False, True, True), (False, False, False)])
+def test_the_swirl_payout_is_the_fangs(varka, fang, upgraded, paid):
+    """Starter (a), 2026-10-13: "Your Swirls also pay your current element."
+    is Boreas's Fang's (and Wolf's Gravestone's); with neither, a Swirl still
+    gains its Oath but pays nothing current."""
+    st = _state(enemies=[_enemy(name="a", aura="pyro")], fang=fang,
+                fang_upgraded=upgraded)
+    _led(st).current = "hydro"
+    V.on_swirl(st, st.enemies[0], "pyro")
+    assert _led(st).oath["pyro"] == 1
+    assert st.player.block == (V.SWIRL_HYDRO_BLOCK if paid else 0)
 
 
 def test_the_upgraded_fang_adds_it_upgraded_and_a_full_hand_discards(varka):
@@ -570,11 +594,11 @@ def test_the_upgraded_fang_adds_it_upgraded_and_a_full_hand_discards(varka):
     assert st.player.hand[0].free_this_turn is True
     V.gain(st, "hydro", 1)
     assert _hand_ids(st) == [V.ASCENSION_ID + "+"]
-    st = _state()
+    st = _state(fang_upgraded=True)
     st.player.hand = [loader.get_card("strike")
                       for _ in range(C.MAX_HAND_SIZE)]
     V.gain(st, "cryo", 1)
-    assert [c.id for c in st.player.discard_pile] == [V.ASCENSION_ID]
+    assert [c.id for c in st.player.discard_pile] == [V.ASCENSION_ID + "+"]
 
 
 def test_no_fang_no_ascension(varka):

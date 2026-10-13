@@ -2484,12 +2484,13 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
 
 #: The Varka payoff round (2026-10-10): Four Winds' Ascension's once-per-
 #: combat rule, under the card in the hand, in the base game's words for a
-#: relic that adds a card. Printed while Boreas's Fang (or Wolf's Gravestone)
-#: is held; Darv's Tome hands the same card with no such rule.
+#: relic that adds a card. Since Starter (a), 2026-10-13, the Ascension is in
+#: his starter deck and Boreas's Fang adds none; only Wolf's Gravestone still
+#: adds a copy, so the note says that copy is the extra one.
 ASCENSION_TITLE = "Four Winds' Ascension"
-ASCENSION_ONCE_NOTE = ("    - Added by {relic} the first time each combat you "
-                       "gain Oath. It is not in your deck.")
-ASCENSION_RELICS = ("Boreas's Fang", "Wolf's Gravestone")
+ASCENSION_ONCE_NOTE = ("    - {relic} adds a copy the first time each combat "
+                       "you gain Oath. That copy is not in your deck.")
+ASCENSION_RELICS = ("Wolf's Gravestone",)
 
 
 #: The Varka forced-Amber round (2026-10-10): Wildfire Oath's payout, under

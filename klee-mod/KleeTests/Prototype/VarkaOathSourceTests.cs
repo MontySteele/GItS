@@ -49,9 +49,9 @@ public class VarkaOathSourceTests : IDisposable
                      VarkaOath.GainLine("Amber: Precise Shot",
                          new[] { "+1 Pyro Oath (applied)" }, fang: null));
         Assert.Equal(
-            "Windbound Execution — +1 Pyro Oath (Swirl), +1 Pyro Oath. "
+            "Storm Surge — +1 Pyro Oath (Swirl), +1 Pyro Oath. "
             + "Boreas's Fang: Four Winds' Ascension",
-            VarkaOath.GainLine("Windbound Execution",
+            VarkaOath.GainLine("Storm Surge",
                 new[] { "+1 Pyro Oath (Swirl)", "+1 Pyro Oath" },
                 fang: "Boreas's Fang"));
         Assert.Equal(string.Empty,
@@ -107,7 +107,7 @@ public class VarkaOathSourceTests : IDisposable
         ResolutionLedger.NoteOath("Pyro", 1, "applied");
         ResolutionLedger.NoteFangAscension("Wolf's Gravestone");
         ResolutionLedger.ClosePlay();
-        ResolutionLedger.OpenPlay("windbound", "Windbound Execution", false);
+        ResolutionLedger.OpenPlay("storm_surge", "Storm Surge", false);
         ResolutionLedger.NoteOath("Pyro", 1, "Swirl");
         ResolutionLedger.ClosePlay();
 

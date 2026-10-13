@@ -137,7 +137,7 @@ def test_the_fang_makes_the_starter_element_current_on_turn_one(varka,
     V.turn_start(st)
     assert led.current == element
     assert sum(led.oath.values()) == 0                # no Oath gained
-    assert not led.fang_fired                         # Ascension still waits
+    assert not led.fang_fired                         # no gain, no Gravestone
 
 
 def test_the_fang_is_a_change_and_only_on_turn_one(varka):

@@ -43,7 +43,9 @@ def _enemy(hp=100, name="e", aura=None):
 
 def _state(n=1, element="pyro", enemies=None):
     enemies = enemies or [_enemy(name=f"e{i}") for i in range(n)]
-    p = V.build_player(element, fang=False)
+    # The Fang held, as in every run: since Starter (a), 2026-10-13 it pays
+    # his Swirls and adds no Ascension.
+    p = V.build_player(element)
     p.draw_pile = [loader.get_card("strike") for _ in range(10)]
     st = CombatState(player=p, enemies=enemies, rng=random.Random(0))
     st.turn = 1

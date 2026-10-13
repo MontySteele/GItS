@@ -66,7 +66,7 @@ def test_the_tag_reads_the_printed_element_not_an_override():
 
 def test_the_oath_note_says_whose_oath_a_swirl_gives():
     state = varka_state()
-    _hand(state, _card(state, "Windbound Execution",
+    _hand(state, _card(state, "Storm Surge",
                        "Deal 6 damage. Gain 1 Oath of your current element.",
                        "Anemo"))
     glossary = blindplay.observe(state).split("## Words on this screen", 1)[1]

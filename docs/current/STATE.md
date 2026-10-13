@@ -31,7 +31,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
-| `varka` | Varka | 80 | Mondstadt | Anemo | Prototype, Balance after [USER]'s playtest | 78 |
+| `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
 
 - Every kit: 78 draftable cards, plus two Ancient cards (one from Darv's
   Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card) and
@@ -118,27 +118,44 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 - **Next:** a card-pool review on [USER]'s playtest: Block first, then the
   conditional cards and the ones never taken. Otherwise she is left alone.
 
-**Varka: Prototype, near Balance.**
+**Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;
   `VarkaOath.cs`, sim twin `tier0/engine/varka_oath.py`):
   - **Oath:** one count per element.
   - **Current element:** that of his last Knight, or of the last Pyro, Hydro,
     Cryo or Electro any card of his applied. His cards read only its Oath; a
     card that would change it says "(Makes X current)" in combat.
-  - **Swirl:** a Swirl he makes pays his current element (Pyro 3 damage,
-    Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).
-- **Starter:** Windbound Execution and one of four starter Knights, rolled
-  per run. Boreas's Fang adds Four Winds' Ascension the first time each
-  combat he gains Oath.
+  - **Swirl:** a Swirl he makes gains 1 Oath of the element Swirled, and
+    while he holds Boreas's Fang it pays his current element (Pyro 3
+    damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).
+- **Starter:** Strike x4, Defend x4, Four Winds' Ascension and one of four
+  starter Knights, rolled per run (2026-10-13, [USER]: "I don't want to give
+  him two starting effects, so if we do (a), then I'd want to knock
+  Windbound Execution out of his starting deck and make Four Winds'
+  Ascension his second starter instead"; "Starter - (a)"). Windbound
+  Execution is retired. Boreas's Fang: "At the start of each combat, your
+  starting Knight's element becomes current. Your Swirls also pay your
+  current element." ([USER]: the Swirl bonus "is basically a second starter
+  relic untied to his actual relic"). Wolf's Gravestone, its Orobas upgrade,
+  says the same and adds an upgraded Ascension, free that turn, on his first
+  Oath gain each combat.
 - **Pool:** 78 (20 / 35 / 23), thirteen pool Knights, his own relics and
-  three potions. Ancients: All Four Winds (Tome) and Dandelion Gale (Tooth on
-  Windbound Execution).
-- **Latest:** the last pass (`review/ruled/varka-last-pass-2026-10-12.md`)
-  gave twelve always-skipped cards a floor and cut five costs. The overnight
-  wave on it (`review/records/varka-wave-2026-10-13.md`, 1 win in 5) found no
-  design problem; Four Winds' Ascension is the first number to watch.
-- **Next:** [USER]'s playtest, then Balance (`operations/stage-gate.md`),
-  then his visuals, story and events, as Klee had.
+  three potions. Ancients: All Four Winds (Tome), and Dandelion Gale from the
+  Archaic Tooth, replacing Four Winds' Ascension: 10 Anemo to ALL, then 3
+  per current Oath to each, Retain, 2 [1]; an upgraded Ascension becomes an
+  upgraded Gale ([USER]: "let's have the upgrade make it AoE and also reduce
+  the cost to 1 when upgraded", then "the ancient starts at 2, and upgrading
+  it at a campfire (or replacing an already-upgraded Ascension) takes it to
+  1"). Deep Freeze lost Retain ([USER]: "I think we should drop Retain").
+- **Latest:** [USER]'s playtest passed (2026-10-13: "Ok, a solid run on
+  Varka! Not too hard, but also not a total cakewalk. I think he's ready to
+  move to Balance, officially."). The starter, Fang, Gale and Deep Freeze
+  change (`varka-starter-fang-2026-10-13`) is the last change before the
+  freeze.
+- **Next:** per `operations/stage-gate.md` he is frozen on `main` once that
+  change merges. Later card changes go through `varka-next` with a suite
+  record; text-only fixes may land on `main`. Then his story, events and
+  visual checks in game, and the two-seat round on the starter change.
 
 ## Elements
 

@@ -740,15 +740,16 @@ ANCIENT_WITNESS.update({
         "fanfare_tip": [],
     },
     "DandelionGale": {
-        "why": "Varka's Archaic Tooth Ancient, Windbound Execution's "
-               "replacement (the Varka review, ruled 2026-10-12): an Attack, "
-               "1 Energy, 7 Anemo damage to ALL enemies, +3 upgraded; its "
-               "Swirls pay twice.",
-        "cost": [1],
-        "vars": [7],
+        "why": "Varka's Archaic Tooth Ancient, Four Winds' Ascension's "
+               "replacement (redesigned 2026-10-13: the Ascension made "
+               "bigger): an Attack, 2 Energy, 1 upgraded, Retain; 10 Anemo "
+               "damage to ALL enemies, then 3 per Oath of his current "
+               "element to each.",
+        "cost": [2],
+        "vars": [10, 3],
         "hits": [],
-        "upgrade_vars": [3],
-        "upgrade_cost": [],
+        "upgrade_vars": [],
+        "upgrade_cost": [-1],
         "encore": [],
         "fanfare_div": [],
         "fanfare_tip": [],
