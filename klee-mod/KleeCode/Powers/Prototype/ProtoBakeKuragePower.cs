@@ -143,6 +143,10 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null) return Task.CompletedTask;
         if (!KokomiOverhaul.LiveFor(Owner)) return Task.CompletedTask;
+        // THE KOKOMI REVIEW (2026-10-13): the strip's captions read the board
+        // (Tide Wall's total, the Block an Attack Plan lands in), so they are
+        // redrawn after every play, not only when the queue moves.
+        Vfx.KokomiPlanStrip.Refresh(Owner);
         // THE JELLYFISH BUILD (2026-10-12): a Sting PLAYED -- face-up, not
         // written on the Bake-Kurage and not a carry-out (Treatise's
         // reading) -- counts for All Streams Flow to the Sea and The Shape

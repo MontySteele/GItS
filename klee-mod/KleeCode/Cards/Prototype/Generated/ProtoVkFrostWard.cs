@@ -51,7 +51,7 @@ public sealed class ProtoVkFrostWard : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 5m),
+            new CardBlockNumberVar("VkBase", 5m),
             new DynamicVar("VkPer", 3m)
         };
 

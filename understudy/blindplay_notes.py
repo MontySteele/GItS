@@ -722,12 +722,21 @@ LAST_MORNING_NOTE = (
 # the other half unprompted -- "the numbered suffixes renumber inside a turn",
 # so `(1)` names a different card the moment the first one is played -- and
 # that is a fact about the handle, which belongs beside it.
+#
+# KOKOMI ROUND 2 (2026-10-13, lane 4): and the number now holds until the
+# next `observe`. A chained `play "Sting (3)"` then `play "Sting (4)"` was
+# refused because the hand had been re-counted between them; a numbered name
+# is now resolved against the hand this page printed
+# (`blindplay_grammar.resolve_shown_card`), so the note says so.
 HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
-                    "The copies are numbered in the order they are listed, "
-                    "and that number is a place in this list rather than "
-                    "anything the card carries: it is re-counted on every "
-                    "screen, so `(1)` names a different copy once one of them "
-                    "leaves your hand. An enchantment prints beside the "
+                    "The copies are numbered in the order they are listed. "
+                    "A number names the copy on the page you last read with "
+                    "`observe`, and it does not shift as you play: "
+                    "`play \"Sting (3)\"` then `play \"Sting (4)\"` plays "
+                    "the two copies this page shows, and a copy already "
+                    "played is refused rather than swapped for another. "
+                    "`observe` again to see the new numbers. An enchantment "
+                    "prints beside the "
                     "title where a card carries one, so where two copies show "
                     "none and differ only by one, this page cannot say which "
                     "is which.*")
@@ -1335,10 +1344,20 @@ PLAN_PAST_LETHAL_BLOCK = " behind {block} Block"
 # Barricade) and the Block it RAISES on its turn (a Defend intent).
 # `PLAN_BLOCK_NOTE` is the rule; these are the board's instance of it, on the
 # front-aimed damage rows the Block will eat.
-PLAN_INTO_BLOCK_CLAUSE = " (into Block {block})"
-PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE = (" (into Block {block}, plus the Block "
+# THE KOKOMI REVIEW (2026-10-13): worded "into 8 Block", the strip's caption.
+PLAN_INTO_BLOCK_CLAUSE = " (into {block} Block)"
+PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE = (" (into {block} Block, plus the Block "
                                      "it gains on its turn)")
 PLAN_INTO_DEFEND_CLAUSE = " (into the Block it gains on its turn)"
+# THE KOKOMI REVIEW (2026-10-13). Tide Wall paid 4 on a Defend turn and 29 on
+# an attack turn and "the screen never told me" (A F10): a waiting Block Plan
+# that reads the board prints its total against the board now (the wire's
+# `block_now`, Frail and Dexterity folded), and says the read is repeated.
+PLAN_BLOCK_NOW_CLAUSE = (" ({block} Block against the attacks intended now; "
+                         "it reads them again on the turn it lands)")
+# And which Plan is first, after Change of Plans moved the front (B2: "I
+# could not tell which Plan was first").
+PLAN_FIRST_CLAUSE = " (first)"
 #: The enemy powers that keep a body's Block across its turn start.
 BLOCK_KEEPING_POWERS = frozenset({"burrowed", "barricade"})
 

@@ -79,7 +79,7 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, I
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 6m),
+            new CardBlockNumberVar("VkBase", 6m),
             new DynamicVar("VkPer", 2m)
         };
 

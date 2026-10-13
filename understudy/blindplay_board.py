@@ -1745,7 +1745,15 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # Kokomi whole-run round 2 (2026-10-10): the printed Plan
               # line's number includes the front body's Vulnerable. Absent
               # on an older bridge, and then nothing is said.
-              "after_vulnerable": row.get("after_vulnerable") is True}
+              "after_vulnerable": row.get("after_vulnerable") is True,
+              # The Kokomi review (2026-10-13): a Block Plan that reads the
+              # board (Tide Wall) carries its total against the board now.
+              # Absent or null on every other entry and on an older bridge,
+              # and then nothing is said.
+              "block_now": (row.get("block_now")
+                            if isinstance(row.get("block_now"), int)
+                            and not isinstance(row.get("block_now"), bool)
+                            else None)}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

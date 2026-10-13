@@ -109,7 +109,8 @@ public class KokomiJellyfishBuildTests
     public void Shoal_call_is_blade_dance()
     {
         var call = new ProtoKkShoalCall();
-        Assert.Equal((CardRarity.Uncommon, 1),
+        // Common since the Kokomi review (2026-10-13), as Blade Dance is.
+        Assert.Equal((CardRarity.Common, 1),
                      (call.Rarity, call.EnergyCost.Canonical));
         Assert.Contains(CardKeyword.Exhaust, call.CanonicalKeywords);
         Assert.Equal((3, 4), (Var<ProtoKkShoalCall>("KkAmount"),

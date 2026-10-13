@@ -86,7 +86,8 @@ def test_the_generators_are_at_the_silents_rates(cid, base, up):
 
 def test_shoal_call_is_blade_dance_with_plain_stings():
     row = loader.get_card("proto_kk_shoal_call")
-    assert row.cost == 1 and row.exhaust and row.rarity == "uncommon"
+    # Common since the Kokomi review (2026-10-13).
+    assert row.cost == 1 and row.exhaust and row.rarity == "common"
     assert row.effects == [{"op": "kokomi", "kind": "shoal_call",
                             "amount": 3}]
     assert _up("proto_kk_shoal_call").effects[0]["amount"] == 4

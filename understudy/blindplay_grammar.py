@@ -449,6 +449,104 @@ def _numbered_titles(entries: list[dict[str, Any]]) -> list[str]:
     return _number_names([_card_title(e) for e in entries])
 
 
+#: KOKOMI ROUND 2 (2026-10-13, lane 4; the Furina wave saw it too). A
+#: NUMBERED CARD NAMES THE COPY ON THE PAGE YOU READ. A seat read `Sting (3)`
+#: and `Sting (4)` off one page and chained `play "Sting (3)"` then
+#: `play "Sting (4)"`; the second was refused, because the hand had been
+#: re-counted after the first play and held three Stings, and two Stings
+#: expired unused in the Matriarch fight. So `observe` remembers the hand it
+#: printed (`shown_hand`), and a numbered name typed before the next
+#: `observe` is resolved against THAT list: the copy it named, found again in
+#: the hand as it is now by its title and face. A copy already played through
+#: its number is refused, never re-aimed at a neighbour.
+SHOWN_CARD_PLAYED = ("{name!r} on the page you last read has been played "
+                     "since; the numbers do not shift until you `observe` "
+                     "again, so name a copy that is still in your hand")
+SHOWN_CARD_GONE = ("{name!r} on the page you last read is no longer in your "
+                   "hand")
+
+
+def shown_hand_key(state: dict[str, Any]) -> str:
+    """The turn a remembered hand belongs to: floor and battle round. A hand
+    remembered on another turn names nothing on this one."""
+    battle = state.get("battle") if isinstance(state.get("battle"), dict) else {}
+    run = state.get("run") if isinstance(state.get("run"), dict) else {}
+    return f"{run.get('floor')}|{battle.get('round')}"
+
+
+def shown_hand(state: dict[str, Any]) -> dict[str, Any] | None:
+    """What `observe` prints of the hand, to remember: each card's numbered
+    title and face, keyed on the turn; `None` where there is no hand or no
+    name repeats (nothing is numbered, so there is nothing to remember)."""
+    if _screen(state) not in COMBAT_SCREENS:
+        return None
+    hand = _hand(state)
+    titles = _numbered_titles(hand)
+    if not hand or titles == [_card_title(e) for e in hand]:
+        return None
+    return {"turn": shown_hand_key(state), "played": [],
+            "cards": [{"n": t, "title": _card_title(e),
+                       "up": _is_upgraded(e), "f": _card_face_key(e)}
+                      for t, e in zip(titles, hand)]}
+
+
+def resolve_shown_card(state: dict[str, Any], command: str,
+                       shown: dict[str, Any] | None
+                       ) -> tuple[str, int | None, str]:
+    """`(command, shown_index, refusal)` for a `play` that names a card by a
+    number the remembered page printed.
+
+    The command comes back with its card name rewritten to the name the SAME
+    copy carries in the hand now, and `shown_index` says which remembered row
+    it was (the caller marks it played once the play is sent). Untouched --
+    `(command, None, "")` -- for any other command, a name with no number, a
+    name the remembered page did not print, or a memory from another turn:
+    those resolve against the current hand exactly as before.
+
+    THE COPY IS FOUND BY ITS FACE. Same title and upgrade first; among those
+    the copy whose printed face is the remembered one; where none matches
+    exactly (a live number on a face moved, say Strength landed) and every
+    copy left prints one face, they are interchangeable and the first is
+    taken; where they differ, the current numbered names are the way out.
+    """
+    if not shown or shown.get("turn") != shown_hand_key(state):
+        return command, None, ""
+    try:
+        cmd = parse_command(command)
+    except BlindPlayError:
+        return command, None, ""
+    if cmd.verb != "play" or not _STALE_NUMBER.search(cmd.name or ""):
+        return command, None, ""
+    rows = [r for r in (shown.get("cards") or []) if isinstance(r, dict)]
+    want = _fold(cmd.name)
+    hit = next((j for j, r in enumerate(rows) if _fold(r.get("n")) == want),
+               None)
+    if hit is None:
+        return command, None, ""
+    row = rows[hit]
+    if hit in (shown.get("played") or []):
+        return command, None, SHOWN_CARD_PLAYED.format(name=row.get("n"))
+    hand = _hand(state)
+    titles = _numbered_titles(hand)
+    same = [i for i, e in enumerate(hand)
+            if _card_title(e) == row.get("title")
+            and _is_upgraded(e) == bool(row.get("up"))]
+    if not same:
+        return command, None, SHOWN_CARD_GONE.format(name=row.get("n"))
+    exact = [i for i in same if _card_face_key(hand[i]) == row.get("f")]
+    if exact:
+        pick = exact[0]
+    elif len({_card_face_key(hand[i]) for i in same}) == 1:
+        pick = same[0]
+    else:
+        return command, None, (
+            SHOWN_CARD_GONE.format(name=row.get("n"))
+            + " as it was printed; the copies now: "
+            + ", ".join(titles[i] for i in same))
+    rewritten = _QUOTED.sub(lambda _m: f'"{titles[pick]}"', command, count=1)
+    return rewritten, hit, ""
+
+
 def _card_face_key(entry: dict[str, Any]) -> str:
     c = _card_face(entry)
     return f"{c['title']}|{c['cost']}|{c['upgraded']}|{c['text']}"
@@ -1587,7 +1685,8 @@ def _card_offers(state: dict[str, Any]) -> list[str]:
 UNCLAIMED_KINDS = ("gold", "potion", "relic", "specialcard", "card")
 
 
-def unclaimed_rewards(state: dict[str, Any]) -> list[str]:
+def unclaimed_rewards(state: dict[str, Any],
+                      skipped_cards: int = 0) -> list[str]:
     """The printed names of the rewards still on a reward screen that
     `proceed` would leave behind; `[]` on any other screen.
 
@@ -1601,6 +1700,10 @@ def unclaimed_rewards(state: dict[str, Any]) -> list[str]:
     walked past Parrying Shield (lane 5). The bridge lists only the relics
     still on offer (`BuildTreasureState`: enabled, visible holders), so a
     taken relic is never held for.
+
+    KOKOMI ROUND 2 (2026-10-13, lane 5): `skipped_cards` card rows are
+    dropped, first first: a card reward the seat opened and `skip`ped is
+    already left on purpose, so it holds nothing (`card_skips`).
     """
     if _screen(state) == "treasure":
         return [o["name"] for o in (_named_option(r)
@@ -1609,9 +1712,16 @@ def unclaimed_rewards(state: dict[str, Any]) -> list[str]:
     if _screen(state) != "rewards":
         return []
     faces = observation(state).get("items") or []
-    return [str(f.get("name")) for r, f in zip(_reward_items(state), faces)
-            if isinstance(r, dict) and isinstance(f, dict) and f.get("name")
-            and _fold(r.get("type")) in UNCLAIMED_KINDS]
+    out: list[str] = []
+    for r, f in zip(_reward_items(state), faces):
+        if not (isinstance(r, dict) and isinstance(f, dict) and f.get("name")
+                and _fold(r.get("type")) in UNCLAIMED_KINDS):
+            continue
+        if _fold(r.get("type")) == "card" and skipped_cards > 0:
+            skipped_cards -= 1
+            continue
+        out.append(str(f.get("name")))
+    return out
 
 
 def _proceed(state: dict[str, Any]) -> Resolution:

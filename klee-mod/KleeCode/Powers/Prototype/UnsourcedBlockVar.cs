@@ -90,3 +90,53 @@ public sealed class UnsourcedBlockVar : BlockVar
         PreviewValue = num;
     }
 }
+
+/// <summary>
+/// THE KOKOMI REVIEW (2026-10-13), the Frail item, one kit over: a card's
+/// own flat Block printed under a token of its own (Varka's Frost Ward and
+/// Barbara: Gleeful Songs, <c>VkBase</c>), whose payout is
+/// <c>GainBlock(owner, n, ValueProp.Move, cardPlay)</c>. As a bare
+/// <c>DynamicVar</c> it printed 5 under Frail while the card gained 3.
+///
+/// The preview is the game's own <c>BlockVar.UpdateCardPreview</c>: the
+/// card's enchantment, then <c>Hook.ModifyBlock</c>'s fold with the card as
+/// the source (<c>FoldedCalculatedBlockVar.Fold</c>) -- so Frail and Dexterity
+/// fold exactly as they do on a base card's Block. IT IS NOT A <c>BlockVar</c>, AND THAT IS LOAD-BEARING:
+/// BaseLib reads <c>GainsBlock</c> off a <c>BlockVar</c> in the canonical
+/// vars, and <c>GainsBlock</c> is what Nimble's eligibility asks
+/// (`lint_enchant_parity`). The fix is the printed number, not which
+/// enchantments a card can take. <c>IntValue</c> stays <c>BaseValue</c>, so
+/// the play reads the printed number and the fold happens once.
+/// </summary>
+public sealed class CardBlockNumberVar : DynamicVar
+{
+    public CardBlockNumberVar(string name, decimal amount)
+        : base(name, amount)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        var num = BaseValue;
+        var enchantment = card.Enchantment;
+        if (enchantment != null)
+        {
+            num += enchantment.EnchantBlockAdditive(num);
+            num *= enchantment.EnchantBlockMultiplicative(num);
+            if (!card.IsEnchantmentPreview) EnchantedValue = num;
+        }
+        var owner = card.IsMutable ? card.Owner?.Creature : null;
+        var combat = owner == null ? null : card.CombatState ?? owner.CombatState;
+        if (runGlobalHooks && owner != null && combat != null)
+        {
+            // `FoldedCalculatedBlockVar.Fold`: `Hook.ModifyBlock`'s order
+            // (enchantment, additive, multiplier) with the card as the
+            // source, walked over the combat's listeners directly.
+            num = FoldedCalculatedBlockVar.Fold(combat, owner, BaseValue,
+                                                ValueProp.Move, card);
+        }
+        PreviewValue = num;
+    }
+}

@@ -1517,33 +1517,36 @@ def card_is_set_off_only(card: dict) -> bool:
     return True
 
 
-def card_is_carry_out_only(card: dict) -> bool:
-    """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
+def card_needs_a_waiting_plan(card: dict) -> bool:
+    """Is this row unplayable while the jellyfish holds no Plan? (`EB-455`,
+    widened by the Kokomi review 2026-10-13.)
 
-    True when every top-level effect that is not a cost is a
-    `carry_out_front_plan`. Such a card pays its energy, exhausts itself and
-    resolves to nothing -- `card_is_set_off_only`'s shape one mechanic over,
-    and the same argument: a card that looks playable and cannot do anything
-    is a play the reader has to LOSE to learn about.
+    True for any row with a top-level `carry_out_front_plan`. It began as
+    `card_is_set_off_only`'s shape one mechanic over -- a row whose WHOLE body
+    is a carry-out pays its energy and resolves to nothing (Kokomi r13 (b):
+    Change of Plans "was dead in hand three fights before it was good once").
 
-    THE FIND (Kokomi r13 (b)). Change of Plans "was dead in hand three fights
-    before it was good once and its face never says it needs a written Plan; a
-    first reader plays it into an empty jellyfish". When it did fire it was
-    excellent -- 2 energy for 21 damage and Weak on three, on the boss's second
-    turn -- so this is legibility and not balance: nothing the card DOES moves.
+    THE KOKOMI REVIEW (2026-10-13) MADE IT A RULE: Change of Plans draws too,
+    and seats still played it into an empty jellyfish for the draw alone (A
+    F9, F10; [USER]'s run: three fights where it only drew). Its face now
+    opens "Can only be played if a Plan is waiting.", Clash's template, and
+    the gate covers a carry-out BESIDE other effects as well.
 
     DERIVED FROM THE ROW, never a per-card flag, for the reason
-    `card_is_set_off_only` gives: a future row with this shape cannot be given
-    the gate by somebody remembering to. A `carry_out_front_plan` sitting
-    BESIDE another effect is NOT covered -- a card that also draws still does
-    something on an empty jellyfish, and refusing it would be a rules change.
-    Twin: `kokomi_plan.carry_out_only`.
+    `card_is_set_off_only` gives. Twin: `kokomi_plan.needs_a_waiting_plan`.
     """
-    rest = [eff for eff in card.get("effects", [])
-            if eff.get("op") not in _COST_OPS]
-    if not rest:
-        return False
-    return all(eff.get("op") == "carry_out_front_plan" for eff in rest)
+    return any(eff.get("op") == "carry_out_front_plan"
+               for eff in card.get("effects", []))
+
+
+def card_needs_a_plannable_card(card: dict) -> bool:
+    """Is this row unplayable while no OTHER card in hand can be planned?
+    (Kokomi review 2026-10-13.) Grand Design: "Plan up to 3 cards from your
+    Hand. They cost 0." played into a hand with nothing to plan spent a Rare
+    on nothing (C F11, "NEVER AGAIN: Grand Design"). Derived from the row's
+    `grand_design` kind. Twin: `kokomi_plan.needs_a_plannable_card`."""
+    return any(eff.get("op") == "kokomi" and eff.get("kind") == "grand_design"
+               for eff in card.get("effects", []))
 
 
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
@@ -2676,6 +2679,14 @@ VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
 #: each Weak and Vulnerable on the enemy"). The value is the C# var class
 #: (Powers/Prototype/VarkaOath.cs), display only.
 VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
+#: A kind whose `base` is the card's own flat Block, paid powered with the
+#: card play (`VarkaCards.GainCardBlock`): its `VkBase` is a
+#: `CardBlockNumberVar`, the game's `BlockVar` preview under that token, so the
+#: face folds Frail and Dexterity the way a base card's Block does (Kokomi
+#: review 2026-10-13, the Frail item) without turning on `GainsBlock`. The
+#: per-enemy `VkPer` stays a plain number: it is a rate, and a fold of a rate
+#: is a number no card pays.
+VARKA_BLOCK_BASE_KINDS = {"frost_ward", "gleeful_songs"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -7751,6 +7762,11 @@ def build_vars(card: dict) -> list[str]:
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
             for field in varka_fields(eff):
+                if field == "base" and eff["kind"] in VARKA_BLOCK_BASE_KINDS:
+                    out.append(
+                        f'new CardBlockNumberVar("{VARKA_VAR_FIELDS[field]}", '
+                        f'{int(eff[field])}m)')
+                    continue
                 out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
                            f'{int(eff[field])}m)')
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
@@ -7945,7 +7961,12 @@ def build_vars(card: dict) -> list[str]:
         # (live-looks-8c, #575); this is the same declaration one card over.
         # THE FLAT CLAUSE ONLY: the scaled Block clauses print a RATE, and a
         # percentage folded into a rate is a number no card pays.
-        elif key == "plan_block" and plan_line[index].get("op") == "block":
+        # Kokomi review 2026-10-13: Tide Wall's flat 6 is a flat clause too
+        # (`Kind.BlockMaxIntent` pays `GainBlock(kokomi, intent + 6,
+        # ValueProp.Move, null)`), and as a bare `DynamicVar` it printed 6
+        # under Frail while the Block beside it printed the folded number.
+        elif key == "plan_block" and plan_line[index].get("op") in (
+                "block", "block_max_intent"):
             out.append(
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
@@ -16342,7 +16363,8 @@ def emit(
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
     # into `BlockedByCardLogic` and has no slot for what the reason was.
-    if (card_is_set_off_only(card) or card_is_carry_out_only(card)
+    if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
+            or card_needs_a_plannable_card(card)
             or stage_fixed_price(card) is not None):
         interfaces += ", IUnplayableReasonCard"
 
@@ -17351,15 +17373,30 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # carry-out does NOTHING while the jellyfish holds no Plan. The r13 seat
     # met Change of Plans three times as a dead card before it was good once,
     # off a face that never says it needs one.
-    plan_gated = card_is_carry_out_only(card)
-    plan_gate_expr = (
-        "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
+    # The Kokomi review (2026-10-13) widened it to any row with a carry-out
+    # (Change of Plans: "Can only be played if a Plan is waiting.") and gave
+    # Grand Design its own gate one read over: no other card in hand that can
+    # be planned. One IsPlayable member, so the two never share a card.
+    plan_gated = (card_needs_a_waiting_plan(card)
+                  or card_needs_a_plannable_card(card))
+    if card_needs_a_waiting_plan(card):
+        plan_gate_expr = (
+            "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
+        plan_gate_why = "no Plan is waiting"
+        plan_gate_note = (
+            "    // `EB-455`, the carry-out gate (widened by the Kokomi review,\n"
+            "    // 2026-10-13): a card with a carry-out is unplayable while\n"
+            "    // the Bake-Kurage holds no Plan.\n")
+    else:
+        plan_gate_expr = "KokomiRefounding.AnyToPlan(this)"
+        plan_gate_why = "no card in your hand can be planned"
+        plan_gate_note = (
+            "    // The Kokomi review (2026-10-13): unplayable while no other\n"
+            "    // card in hand can be planned, rather than spending itself\n"
+            "    // on nothing.\n")
     plan_gate_member = (
-        "\n\n    // `EB-455`, the carry-out gate: a card whose whole body is\n"
-        "    // a carry-out is unplayable while the Bake-Kurage holds no\n"
-        "    // Plan, rather than paying its energy and exhausting itself\n"
-        "    // for nothing.\n"
-        "    protected override bool IsPlayable =>\n"
+        "\n\n" + plan_gate_note
+        + "    protected override bool IsPlayable =>\n"
         f"        {plan_gate_expr};"
         if plan_gated and not spark_price else "")
     # THE SALON'S TAB (2026-10-05): a FIXED Drain or Spend price at the top
@@ -17394,7 +17431,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "\n\n    public string? UnplayableReason =>\n"
         f"        {plan_gate_expr}\n"
         "            ? null\n"
-        '            : "no Plan is written";'
+        f'            : "{plan_gate_why}";'
         if plan_gated else "")
     # R213 E1: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
