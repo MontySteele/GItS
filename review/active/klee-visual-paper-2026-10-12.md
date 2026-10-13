@@ -89,7 +89,12 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
 [USER]: "On the Klee art pass - agreed with your first picks. Sounds like a plan!"
 
 - **Pick 1 (a):** render from the official Klee model. Ship the renders only.
-- **Pick 2 (a):** 0.62 of an adult.
+- **Pick 2, corrected the same evening.** [USER]: "I feel like Klee's scaling is off. She's estimated to be around 4'2" tall (50 inches); the scale you're proposing only makes sense if the other characters are 80 inches tall, which sounds wrong?"
+  - He is right. The 0.62 figure came from my census brief, not from her height.
+  - At 50 inches against adults of 5'6" to 5'10", she is 0.71 to 0.76 of an adult.
+  - The base adults' bodies average about 235 px at 1080p: Ironclad 245 in a crouch, Silent 193 to 224, Necrobinder 206 hovering, Regent 276 with his hat.
+  - **New target: about 170 px of body, 0.72 of an adult.** Today she is 182, so she shrinks only a little.
+  - She still reads small next to Silent, whose figure is drawn short (a hood, not a hat).
 - **Pick 3 (a):** all five screens.
 - **First milestone:** stance renders for your eyes before the rig is re-skinned.
 
