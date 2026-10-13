@@ -46,7 +46,14 @@ These need a reason to be taken. Each fix gives the card a floor or lowers an ov
 
 Your playtest closes him out. Then his visual, story and event wave runs, the same as Klee's. Then he and Klee become the Spiral Abyss test pair.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "On Varka - agreed with all defaults on both picks!"
+
+- **Pick 1 (a):** Northwind Avatar's second hit is 8 [12].
+- **Pick 2 (a):** all twelve fixes, as listed.
+
+## For [USER] (ruled above)
 
 1. **Northwind Avatar's second hit, 10 → 8 [12].**
    - **(a) Default:** yes.
