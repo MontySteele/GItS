@@ -49,8 +49,10 @@ Since milestone 2 of the visual paper (2026-10-12) the mesh rig is the
 **Set Off alt-art only**: it rests invisible and the `setoff` state cross-fades
 to it. Klee herself is `Visuals/Facing/Model`, one Sprite2D per frame sheet
 rendered from the official Klee model by `tools/klee_render/` (Blender +
-mmd_tools; `clips.py` poses, `render.py` renders, `pack.py` packs, `build.py`
-runs the lot). **The model never enters the repo or ImageGen** (its terms
+mmd_tools; `clips.py` poses, `render.py` renders (style G's shader half plus a
+`style` pass: the face/bomb protect mask and her surface-space grain),
+`post.py` paints style G's 2D half over every raw frame (numpy + Pillow),
+`pack.py` packs, `build.py` runs the lot). **The model never enters the repo or ImageGen** (its terms
 forbid redistribution); only the renders do.
 
 ```sh
@@ -58,7 +60,8 @@ forbid redistribution); only the renders do.
 .venv/Scripts/python tools/klee_render/pack.py --renders <scratch dir> --art-root <main checkout> [--check]
 ```
 
-`pack.py` is the one producer of `ImageGen/images/model/frames/*.png`,
+`pack.py` is the one producer of `ImageGen/images/model/frames/*.png` (her
+ground shadow `klee_shadow.png` among them),
 `model/klee_rest.png` and `ui/select_closeup.png`, and writes the committed
 manifest `tools/klee_rig/klee_frames.json` (cells, counts, times, feet
 anchors, no pixels) that `gen` reads for `combat.tscn` and the merchant scene

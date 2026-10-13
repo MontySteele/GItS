@@ -733,6 +733,31 @@ def _projectile_node(frames: dict) -> list[str]:
     ])]
 
 
+#: Her ground shadow (klee_frames.json "shadow", drawn by klee_render/pack.py).
+#: The base cast each draw theirs as a `shadow` region inside their own Spine
+#: skeleton, under the figure, at the feet; Klee's figure is sprites, so hers
+#: is a Sprite2D at the feet anchor, first under %Facing so it draws behind her
+#: and mirrors with her. Nothing animates it: it holds through the attack, the
+#: death sit and the flip, as the base shadows (on the root) do.
+SHADOW_ID = "13_shadow"
+SHADOW_NODE = "Shadow"
+
+
+def shadow_of(frames: dict) -> dict | None:
+    return frames.get("shadow")
+
+
+def _shadow_sprite(parent: str, shadow: dict, where: dict, ext_id: str) -> str:
+    tw, th = shadow["texture"]
+    w, h = where["size"]
+    return NL.join([
+        f'[node name="{SHADOW_NODE}" type="Sprite2D" parent="{parent}"]',
+        f"position = {vec2(where['center'])}",
+        f"scale = {vec2((w / tw, h / th))}",
+        f'texture = ExtResource("{ext_id}")',
+    ])
+
+
 def _bone_nodes(rig: Rig) -> list[str]:
     out = [f'[node name="Skeleton" type="Skeleton2D" parent="{RIG}"]']
     for name in rig.order:
@@ -799,7 +824,8 @@ def render_scene(spec: dict | None = None, cells: dict | None = None,
     ext = [(m.layer, m.texture) for m in meshes]
     sheets = rig.spec["model"]["sheets"]
     thrown = thrown_of(frames)
-    load_steps = (len(ext) + len(sheets) + (thrown is not None)
+    shadow = shadow_of(frames)
+    load_steps = (len(ext) + len(sheets) + (thrown is not None) + (shadow is not None)
                   + sum(s.count("[sub_resource") for s in subs) + 1)
     out = [f"[gd_scene load_steps={load_steps} format=3]", ""]
     for layer, tex in ext:
@@ -809,6 +835,8 @@ def render_scene(spec: dict | None = None, cells: dict | None = None,
                    f'id="{SHEET_IDS[name]}"]')
     if thrown is not None:
         out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{thrown["file"]}" id="{PROJECTILE_ID}"]')
+    if shadow is not None:
+        out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{shadow["file"]}" id="{SHADOW_ID}"]')
     out.append("")
     for s in subs:
         out += [s, ""]
@@ -816,6 +844,7 @@ def render_scene(spec: dict | None = None, cells: dict | None = None,
         '[node name="KleeCombat" type="Node2D"]',
         '[node name="Visuals" type="Node2D" parent="."]\nunique_name_in_owner = true',
         '[node name="Facing" type="Node2D" parent="Visuals"]\nunique_name_in_owner = true',
+        *([_shadow_sprite("Visuals/Facing", shadow, shadow["combat"], SHADOW_ID)] if shadow else []),
         f'[node name="Rig" type="Node2D" parent="Visuals/Facing"]\nmodulate = Color(1, 1, 1, 0)\n'
         f'position = {vec2(rig.spec["rig_position"])}',
         *_bone_nodes(rig),
@@ -839,7 +868,9 @@ def render_merchant_scene(frames: dict | None = None) -> str:
     """Klee at the shop: stance B (the bomb cradled) breathing on a loop.
 
     The base merchant rig is the combat skeleton at ~1.7x with its own
-    `relaxed_loop` (census T2); its feet sit on the node origin. BaseLib adds
+    `relaxed_loop` (census T2); its feet sit on the node origin, its
+    `shadow` region under them (hers: the Shadow sprite, first so it draws
+    behind). BaseLib adds
     this scene's ROOT as the NMerchantCharacter's first child and also copies
     the root's transform onto the merchant node itself, so the root is a bare
     Node2D and the scale lives on the sheet sprite below it. The idle needs no
@@ -860,11 +891,15 @@ def render_merchant_scene(frames: dict | None = None) -> str:
     lib = ('[sub_resource type="AnimationLibrary" id="AnimationLibrary_merchant"]' + NL + "_data = {" + NL
            + '&"RESET": SubResource("Animation_reset"),' + NL
            + '&"relaxed_loop": SubResource("Animation_relaxed")' + NL + "}")
+    shadow = shadow_of(frames)
     out = [
-        "[gd_scene load_steps=5 format=3]", "",
-        f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{rec["file"]}" id="1_sheet"]', "",
+        f"[gd_scene load_steps={5 + (shadow is not None)} format=3]", "",
+        f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{rec["file"]}" id="1_sheet"]',
+        *([f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{shadow["file"]}" id="2_shadow"]']
+          if shadow else []), "",
         reset, "", anim, "", lib, "",
         '[node name="KleeMerchant" type="Node2D"]', "",
+        *([_shadow_sprite(".", shadow, shadow["merchant"], "2_shadow"), ""] if shadow else []),
         NL.join([
             '[node name="Sheet" type="Sprite2D" parent="."]',
             'texture = ExtResource("1_sheet")',

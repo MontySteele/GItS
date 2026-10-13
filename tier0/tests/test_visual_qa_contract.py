@@ -138,8 +138,9 @@ def test_the_sample_contract_is_well_formed():
     # six above. The last four are the supporting pool's two guests, Lyney and
     # Escoffier, in the same shape. The last eleven are Kokomi's and Varka's
     # layer-cut combat rigs (2026-10-02): a committed combat.tscn each and
-    # the five and four Tier F layers they draw.
-    assert len(parsed.resources) == 446
+    # the five and four Tier F layers they draw. Klee's ground shadow
+    # (klee_shadow.png, 2026-10-13) is the latest.
+    assert len(parsed.resources) == 447
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -250,5 +251,5 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # cut layers over six bespoke boss bodies, and their six per-body
     # libraries), +16 for the stage's eight guest bodies (a scene and a
     # sprite each), +4 for the supporting pool's two guests.
-    assert report.checked["contract_resources"] == 446
+    assert report.checked["contract_resources"] == 447
     assert report.checked["package_files"] == 3

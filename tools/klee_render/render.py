@@ -10,11 +10,14 @@ commercial use, so it is read in place from the operator's scratch directory
 and only the rendered PNGs leave it (review/active/klee-visual-paper-2026-10-12.md).
 A .blend that embeds it is never saved by this script.
 
-Writes, per clip, <out>/<clip>/f_000.png ... on one fixed orthographic
-camera per clip (so the frames register), and <out>/<clip>.json with the
-canvas size, the pixel the ground origin (her feet's anchor) projects to, the
-fps and the frame times. Stills write <out>/<name>.png + .json the same way.
-`tools/klee_render/pack.py` trims and packs them into the game's sheets.
+Writes, per clip, <out>/raw/<clip>/f_000.png ... on one fixed orthographic
+camera per clip (so the frames register), each frame's style passes beside it
+in <out>/raw/<clip>/aux/f_000_X.png (R protect, G/B grain: see add_aovs), and
+<out>/<clip>.json with the canvas size, the pixel the ground origin (her
+feet's anchor) projects to, the fps and the frame times. Stills write
+<out>/raw/<name>.png (+ aux/<name>_X.png) and <out>/<name>.json the same way.
+`tools/klee_render/post.py` paints the raw frames into <out>/<clip>/ and
+<out>/<name>.png (style G's 2D half); `pack.py` trims and packs those.
 
 Units: `--ppu` is TEXTURE pixels per model unit. The pose library is
 tools/klee_render/clips.py (no bpy; importable anywhere).
@@ -23,6 +26,7 @@ import argparse
 import json
 import math
 import os
+import random
 import sys
 
 import addon_utils
@@ -47,8 +51,21 @@ args = ap.parse_args(argv)
 os.makedirs(args.out, exist_ok=True)
 
 MMD = "bl_ext.user_default.mmd_tools"
-SHADOW_TINT = (0.80, 0.64, 0.68)
-LINE_COLOR = (0.13, 0.07, 0.07)
+SHADOW_TINT = (0.80, 0.64, 0.68)       # the bomb's flat two-tone
+LINE_COLOR = (0.13, 0.07, 0.07)        # the bomb's lines, and a body material with no texture
+LINE_TINT = (0.42, 0.33, 0.35)         # body lines: the fill's own texture times this
+#: Style G, the shader half (ruled 2026-10-13, review/active/klee-visual-paper-2026-10-12.md).
+#: post.py holds the 2D half.
+STYLE = {
+    "shadow": (0.66, 0.52, 0.62),      # deep tone: cooler, a touch violet
+    "mid": (0.90, 0.80, 0.82),         # half tone
+    "mid_at": 0.22, "light_at": 0.40,  # the ramp's steps
+    "terminator_noise": 0.26,          # +- wobble of the light/shadow boundaries
+    "noise_scale": 22.0, "noise_stretch": 4.0, "noise_detail": 6.0, "noise_angle": 28.0,
+    "grain": 0.10,                     # +- value grain multiplied into the fill
+    # the `grain` AOV post.py grains with: fine stretched strokes, plus a coarse mottle
+    "grain2d_scale": 30.0, "grain2d_stretch": 4.0, "grain2d_angle": 62.0, "grain2d_mottle": 9.0,
+}
 UNLIT_MATS = {"脸", "眼白", "眼睛", "表情"}
 NO_LINE_MATS = {"眼白", "眼睛", "表情"}
 FINGERS = ["人指", "中指", "薬指", "小指"]
@@ -70,17 +87,62 @@ def load_model():
     return root, arm, mesh
 
 
-def toon_material(mat):
+def base_image(mat):
+    """The material's own colour texture (mmd_tools' base slot, else the
+    first image that is not a toon or sphere map)."""
     nt = mat.node_tree
     base = nt.nodes.get("mmd_base_tex")
     img = base.image if base else None
     if img is None:
         for n in nt.nodes:
             if n.type == "TEX_IMAGE" and n.image and "toon" not in n.image.name and "mc3" not in n.image.name:
-                img = n.image
-                break
+                return n.image
+    return img
+
+
+def uv_noise(nt, scale, stretch, detail, seed_off, angle=None, coord="UV"):
+    """Noise in the surface's own space (so it rides her), stretched along
+    one axis and rotated: a brush direction."""
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    mp = nt.nodes.new("ShaderNodeMapping")
+    mp.inputs["Scale"].default_value = (scale, scale * stretch, scale)
+    mp.inputs["Location"].default_value = (seed_off, seed_off * 0.37, 0)
+    mp.inputs["Rotation"].default_value = (0, 0, math.radians(STYLE["noise_angle"] if angle is None else angle))
+    nz = nt.nodes.new("ShaderNodeTexNoise")
+    nz.inputs["Detail"].default_value = detail
+    nz.inputs["Roughness"].default_value = 0.62
+    nt.links.new(tc.outputs[coord], mp.inputs["Vector"])
+    nt.links.new(mp.outputs["Vector"], nz.inputs["Vector"])
+    return nz
+
+
+def add_aovs(nt, protect, seed, coord="UV"):
+    """The one pass post.py reads, `style` (written beside each frame by the
+    compositor). R is `protect`: the face and the bomb, kept out of the line
+    fade and the Kuwahara. G and B are the brush grain as noise in the
+    surface's own space, so it moves with her and never crawls: fine
+    stretched strokes in G, a coarse mottle in B. One colour AOV, because a
+    VALUE AOV beside a COLOR one comes out black (Blender 5.2, measured)."""
+    fine = uv_noise(nt, STYLE["grain2d_scale"], STYLE["grain2d_stretch"], 2.0, seed + 23,
+                    angle=STYLE["grain2d_angle"], coord=coord)
+    coarse = uv_noise(nt, STYLE["grain2d_mottle"], 1.0, 2.0, seed + 41, coord=coord)
+    cc = nt.nodes.new("ShaderNodeCombineColor")
+    cc.inputs["Red"].default_value = 1.0 if protect else 0.0
+    nt.links.new(fine.outputs["Fac"], cc.inputs["Green"])
+    nt.links.new(coarse.outputs["Fac"], cc.inputs["Blue"])
+    aov = nt.nodes.new("ShaderNodeOutputAOV")
+    aov.aov_name = "style"
+    nt.links.new(cc.outputs["Color"], aov.inputs["Color"])
+
+
+def toon_material(mat, img):
+    """Style G's shader: a three-step constant ramp (deep, half, light)
+    whose terminators are wobbled by stretched UV-space noise, times
+    UV-space value grain. The face materials stay unlit."""
+    nt = mat.node_tree
     for n in list(nt.nodes):
         nt.nodes.remove(n)
+    seed = random.Random(mat.name).random() * 50
     out = nt.nodes.new("ShaderNodeOutputMaterial")
     tex = nt.nodes.new("ShaderNodeTexImage")
     tex.image = img
@@ -88,39 +150,103 @@ def toon_material(mat):
     emis = nt.nodes.new("ShaderNodeEmission")
     transp = nt.nodes.new("ShaderNodeBsdfTransparent")
     mix = nt.nodes.new("ShaderNodeMixShader")
+    # value grain multiplied into the fill
+    gz = uv_noise(nt, STYLE["noise_scale"] * 2.2, STYLE["noise_stretch"], 2.0, seed + 11)
+    gmap = nt.nodes.new("ShaderNodeMapRange")
+    gmap.inputs["From Min"].default_value = 0.3
+    gmap.inputs["From Max"].default_value = 0.7
+    gmap.inputs["To Min"].default_value = 1 - STYLE["grain"]
+    gmap.inputs["To Max"].default_value = 1 + STYLE["grain"]
+    nt.links.new(gz.outputs["Fac"], gmap.inputs["Value"])
+    gcol = nt.nodes.new("ShaderNodeCombineColor")
+    for k in ("Red", "Green", "Blue"):
+        nt.links.new(gmap.outputs["Result"], gcol.inputs[k])
+    grained = nt.nodes.new("ShaderNodeMix")
+    grained.data_type = "RGBA"
+    grained.blend_type = "MULTIPLY"
+    grained.inputs["Factor"].default_value = 1.0
+    nt.links.new(tex.outputs["Color"], grained.inputs[6])
+    nt.links.new(gcol.outputs["Color"], grained.inputs[7])
     if mat.name in UNLIT_MATS:
         nt.links.new(tex.outputs["Color"], emis.inputs["Color"])
     else:
         diff = nt.nodes.new("ShaderNodeBsdfDiffuse")
         s2r = nt.nodes.new("ShaderNodeShaderToRGB")
         bw = nt.nodes.new("ShaderNodeRGBToBW")
+        nz = uv_noise(nt, STYLE["noise_scale"], STYLE["noise_stretch"], STYLE["noise_detail"], seed)
+        wob = nt.nodes.new("ShaderNodeMath")
+        wob.operation = "MULTIPLY_ADD"
+        nt.links.new(nz.outputs["Fac"], wob.inputs[0])
+        wob.inputs[1].default_value = 2 * STYLE["terminator_noise"]
+        wob.inputs[2].default_value = -STYLE["terminator_noise"]
+        add = nt.nodes.new("ShaderNodeMath")
+        add.operation = "ADD"
+        nt.links.new(bw.outputs[0], add.inputs[0])
+        nt.links.new(wob.outputs[0], add.inputs[1])
         ramp = nt.nodes.new("ShaderNodeValToRGB")
         ramp.color_ramp.interpolation = "CONSTANT"
-        ramp.color_ramp.elements[0].position = 0.0
-        ramp.color_ramp.elements[0].color = (*SHADOW_TINT, 1)
-        ramp.color_ramp.elements[1].position = 0.32
-        ramp.color_ramp.elements[1].color = (1, 1, 1, 1)
+        e = ramp.color_ramp.elements
+        e[0].position = 0.0
+        e[0].color = (*STYLE["shadow"], 1)
+        e[1].position = STYLE["light_at"]
+        e[1].color = (1, 1, 1, 1)
+        e.new(STYLE["mid_at"]).color = (*STYLE["mid"], 1)
         mul = nt.nodes.new("ShaderNodeMix")
         mul.data_type = "RGBA"
         mul.blend_type = "MULTIPLY"
         mul.inputs["Factor"].default_value = 1.0
         nt.links.new(diff.outputs[0], s2r.inputs[0])
         nt.links.new(s2r.outputs["Color"], bw.inputs[0])
-        nt.links.new(bw.outputs[0], ramp.inputs["Fac"])
-        nt.links.new(tex.outputs["Color"], mul.inputs[6])
+        nt.links.new(add.outputs[0], ramp.inputs["Fac"])
+        nt.links.new(grained.outputs[2], mul.inputs[6])
         nt.links.new(ramp.outputs["Color"], mul.inputs[7])
         nt.links.new(mul.outputs[2], emis.inputs["Color"])
     nt.links.new(tex.outputs["Alpha"], mix.inputs["Fac"])
     nt.links.new(transp.outputs[0], mix.inputs[1])
     nt.links.new(emis.outputs[0], mix.inputs[2])
     nt.links.new(mix.outputs[0], out.inputs["Surface"])
+    add_aovs(nt, mat.name in UNLIT_MATS, seed)
     mat.surface_render_method = "BLENDED" if mat.name == "表情" else "DITHERED"
     mat.use_backface_culling = False
 
 
+def line_material(mat, img):
+    """The outline hull for one body material: that material's own texture
+    times LINE_TINT, so each line is a darker shade of the fill it rims
+    rather than one flat brown."""
+    lm = bpy.data.materials.new("line_" + mat.name)
+    nt = lm.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    emis = nt.nodes.new("ShaderNodeEmission")
+    if img is None:
+        emis.inputs["Color"].default_value = (*LINE_COLOR, 1)
+        nt.links.new(emis.outputs[0], out.inputs["Surface"])
+    else:
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = img
+        mul = nt.nodes.new("ShaderNodeMix")
+        mul.data_type = "RGBA"
+        mul.blend_type = "MULTIPLY"
+        mul.inputs["Factor"].default_value = 1.0
+        mul.inputs[7].default_value = (*LINE_TINT, 1)
+        nt.links.new(tex.outputs["Color"], mul.inputs[6])
+        nt.links.new(mul.outputs[2], emis.inputs["Color"])
+        transp = nt.nodes.new("ShaderNodeBsdfTransparent")
+        mix = nt.nodes.new("ShaderNodeMixShader")
+        nt.links.new(tex.outputs["Alpha"], mix.inputs["Fac"])
+        nt.links.new(transp.outputs[0], mix.inputs[1])
+        nt.links.new(emis.outputs[0], mix.inputs[2])
+        nt.links.new(mix.outputs[0], out.inputs["Surface"])
+        lm.surface_render_method = "DITHERED"
+    add_aovs(nt, False, random.Random(mat.name).random() * 50)
+    lm.use_backface_culling = True
+    return lm
+
+
 def flat_material(name, color, line=False, unlit=False):
     mat = bpy.data.materials.new(name)
-    mat.use_nodes = True
     nt = mat.node_tree
     for n in list(nt.nodes):
         nt.nodes.remove(n)
@@ -143,15 +269,20 @@ def flat_material(name, color, line=False, unlit=False):
         nt.links.new(bw.outputs[0], ramp.inputs["Fac"])
         nt.links.new(ramp.outputs["Color"], emis.inputs["Color"])
     nt.links.new(emis.outputs[0], out.inputs["Surface"])
+    # the bomb is protected (its face stays crisp); its grain is in object space
+    add_aovs(nt, not line, random.Random(name).random() * 50, coord="Object")
     return mat
 
 
-def add_outline(obj, line_mat, no_line_mats=()):
+def add_outline(obj, line_mats, no_line_mats=()):
+    """An inverted-hull outline: a Solidify shell whose faces take the line
+    material of the body material they came from (material_offset)."""
     me = obj.data
-    me.materials.append(line_mat)
-    off = len(me.materials) - 1
+    n = len(me.materials)
+    for lm in line_mats:
+        me.materials.append(lm)
     vg = obj.vertex_groups.new(name="outline_w")
-    skip = {i for i, m in enumerate(me.materials) if m and m.name in no_line_mats}
+    skip = {i for i, m in enumerate(me.materials[:n]) if m and m.name in no_line_mats}
     keep = set()
     for p in me.polygons:
         if p.material_index not in skip:
@@ -161,7 +292,7 @@ def add_outline(obj, line_mat, no_line_mats=()):
     mod.offset = 1.0
     mod.use_flip_normals = True
     mod.use_rim = False
-    mod.material_offset = off
+    mod.material_offset = n
     mod.vertex_group = "outline_w"
     mod.thickness_vertex_group = 0.0
     mod.use_quality_normals = True
@@ -195,6 +326,29 @@ def setup_render():
         sc.eevee.taa_render_samples = args.samples
     except AttributeError:
         pass
+    vl = sc.view_layers[0]
+    aov = vl.aovs.add()
+    aov.name = "style"
+    aov.type = "COLOR"
+    # the compositor writes the pass as a PNG beside each frame:
+    # R = protect, G = fine grain, B = coarse grain, A = the frame's alpha
+    ng = bpy.data.node_groups.new("aux", "CompositorNodeTree")
+    sc.compositing_node_group = ng
+    rl = ng.nodes.new("CompositorNodeRLayers")
+    sep = ng.nodes.new("CompositorNodeSeparateColor")
+    cc = ng.nodes.new("CompositorNodeCombineColor")
+    ng.links.new(rl.outputs["style"], sep.inputs[0])
+    for ch in ("Red", "Green", "Blue"):
+        ng.links.new(sep.outputs[ch], cc.inputs[ch])
+    ng.links.new(rl.outputs["Alpha"], cc.inputs["Alpha"])
+    fo = ng.nodes.new("CompositorNodeOutputFile")
+    fo.name = "aux_out"
+    fo.format.media_type = "IMAGE"
+    fo.format.file_format = "PNG"
+    fo.format.color_mode = "RGBA"
+    fo.format.color_depth = "8"
+    fo.file_output_items.new("RGBA", "X")
+    ng.links.new(cc.outputs[0], fo.inputs[0])
     world = bpy.data.worlds.new("w")
     world.use_nodes = True
     world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.0
@@ -527,6 +681,18 @@ def frame_camera(cam_ob, box, ppu, margin_px=8):
     return w, h, origin, (cx, cy)
 
 
+def render_to(path):
+    """Render the frame to `path`, and its passes to `aux/<stem>_X.png`
+    beside it (post.py's input)."""
+    sc = bpy.context.scene
+    fo = sc.compositing_node_group.nodes["aux_out"]
+    d, base = os.path.split(path)
+    fo.directory = os.path.join(d, "aux") + os.sep
+    fo.file_name = os.path.splitext(base)[0] + "_"
+    sc.render.filepath = path
+    bpy.ops.render.render(write_still=True)
+
+
 def reset_camera(cam_ob):
     cam_ob.matrix_world = Matrix.Identity(4)
     cam_ob.location = (0, -10, 0.55)
@@ -538,8 +704,11 @@ def reset_camera(cam_ob):
 def main():
     root, arm, mesh = load_model()
     cam_ob = setup_render()
+    body_lines = []
     for m in mesh.data.materials:
-        toon_material(m)
+        img = base_image(m)
+        toon_material(m, img)
+        body_lines.append(line_material(m, img))
     line = flat_material("line", LINE_COLOR, line=True)
     mats = {
         "bomb": flat_material("bomb", (0.86, 0.13, 0.08)),
@@ -551,7 +720,7 @@ def main():
         "white": flat_material("white", (1.0, 1.0, 1.0), unlit=True),
         "blush": flat_material("blush", (0.98, 0.55, 0.55), unlit=True),
     }
-    body_outline = add_outline(mesh, line, NO_LINE_MATS)
+    body_outline = add_outline(mesh, body_lines, NO_LINE_MATS)
     t_world = args.outline_px / args.ppu
     body_outline.thickness = t_world
 
@@ -630,7 +799,7 @@ def main():
             pts += world_box(frame_objs() + ([] if is_cradle else held_parts[1:] + thrown_parts[1:]))
         box = project(cam_ob, pts)
         w, h, origin, _c = frame_camera(cam_ob, box, args.ppu)
-        d = os.path.join(args.out, name)
+        d = os.path.join(args.out, "raw", name)
         os.makedirs(d, exist_ok=True)
         sc = bpy.context.scene
         for i, t in enumerate(times):
@@ -642,8 +811,7 @@ def main():
                 for p in thrown_parts:
                     p.hide_render = thrown.hide_render
             place_cradle()
-            sc.render.filepath = os.path.join(d, f"f_{i:03d}.png")
-            bpy.ops.render.render(write_still=True)
+            render_to(os.path.join(d, f"f_{i:03d}.png"))
         meta = {"clip": name, "fps": fps, "length": spec["length"], "loop": spec["loop"],
                 "motion_end": spec.get("motion_end"), "times": times, "canvas": [w, h],
                 "origin_px": [round(origin[0], 3), round(origin[1], 3)], "ppu": args.ppu,
@@ -677,8 +845,7 @@ def main():
         objs = [mesh, held, thrown, cradled] + held_parts[1:] + thrown_parts[1:] + cradled_parts[1:]
         box = project(cam_ob, world_box(objs))
         w, h, origin, _c = frame_camera(cam_ob, box, args.ppu)
-        bpy.context.scene.render.filepath = os.path.join(args.out, f"{name}.png")
-        bpy.ops.render.render(write_still=True)
+        render_to(os.path.join(args.out, "raw", f"{name}.png"))
         # where her hips (the seat) and head land, for anchoring stills
         inv = cam_ob.matrix_world.inverted()
 

@@ -15,10 +15,9 @@ line leaves this file. Closed picks are in git
   in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the
   electro (Oz) leg, so that order falls to this look (`BACKLOG.md` `EB-53`).
 
-- **Klee in motion** (build 0.2.5159): the toon-shading verdict ([USER],
-  2026-10-13: "The model doesn't 'quite' look like the existing art style. Is
-  there any kind of filtering we can apply"); a sheet of style-match variants
-  is being made for the pick.
+- **Klee in motion** (next build): style G and her ground shadow are ruled
+  and built (`review/active/klee-visual-paper-2026-10-12.md`, "Style G
+  ruled"); what is left is [USER]'s look at them in motion in the game.
 
 ## Open packets in `review/active/`
 
