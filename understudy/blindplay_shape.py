@@ -371,8 +371,57 @@ def count_action(lane: object = None) -> int:
         row["run"] = newest
     row["count"] = count + 1
     row["cap"] = cap
+    row["refused"] = 0
     _write_budget(row, lane)
     return row["count"]
+
+
+# THE REFUSAL STOP IS COUNTED BY THE BRIDGE (co-op paired round 2026-10-09,
+# finding 8). The brief makes three refused commands in a row a stop, and the
+# seat did the counting. A fight that ended partway through a batch turned the
+# rest of the batch into "The fight is over: nothing was sent." lines, which do
+# not start with REFUSED, so the seat never counted them and the run of
+# refusals went past three. The lane now keeps the streak beside its action
+# count: every refused `act` adds one, every sent `act` zeroes it, and a new
+# embark (`set_budget`) starts it at 0.
+MAX_REFUSALS = 3
+
+
+def refusal_streak(lane: object = None) -> int:
+    """Refused commands in a row on this lane's current run."""
+    row = _budget_row(lane)
+    held = str(row.get("run") or "")
+    newest = lane_embark_stamp(lane)
+    if newest and held and newest > held:
+        return 0
+    try:
+        return max(0, int(row.get("refused") or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def count_refusal(lane: object = None) -> int:
+    """Add one refused command to this lane's streak and return it."""
+    row = _budget_row(lane)
+    streak = refusal_streak(lane) + 1
+    newest = lane_embark_stamp(lane)
+    if newest and newest > str(row.get("run") or ""):
+        row["run"] = newest
+        row["count"] = 0
+    row["refused"] = streak
+    row["cap"] = read_budget(lane)["cap"]
+    row.setdefault("count", 0)
+    _write_budget(row, lane)
+    return streak
+
+
+def clear_refusal_streak(lane: object = None) -> None:
+    """A sent command ends the streak (on a lane with no cap, where
+    `count_action` is not called)."""
+    row = _budget_row(lane)
+    if row.get("refused"):
+        row["refused"] = 0
+        _write_budget(row, lane)
 
 
 # 2026-10-01 (Varka lane 2, act 3). A REFUSAL MUST NOT COST THE TURN. A seat
