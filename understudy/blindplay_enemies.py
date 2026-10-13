@@ -37,7 +37,8 @@ _DECIMILLIPEDE = (
     "Three segments, each looping Writhe (two hits), Constrict (hit, then "
     "Weak) and Bulk (hit, then Strength), offset so each turn brings one of "
     "each. Reattach: a segment at 0 HP is down and untargetable for two "
-    "turns, then returns at 25 HP; the fight ends only when all three are "
+    "turns, then returns at 25 HP (60 with two players, 90 with three); the "
+    "fight ends only when all three are "
     "down at once.")
 _KNIGHTS = "One of three Knights (Flail, Spectral, Magi) fought together."
 
@@ -213,6 +214,13 @@ ENEMY_BRIEFS: dict[str, tuple[str, str]] = {
         "Hard To Kill 9: no single hit takes more than 9 HP off it. Skitter "
         "(three 1-damage hits) is followed by Mandibles, and Mandibles by "
         "Enrage (permanent Strength)."),
+    # A seat read its flight turn as safe: "Soar" was defined nowhere.
+    "OWL_MAGISTRATE": (
+        "Owl Magistrate",
+        "Fixed four-turn loop: Scrutiny (one hit), Peck Assault (six hits), "
+        "Judicial Flight (no attack; gains Soar), Verdict (one heavy hit, "
+        "then Vulnerable 4 to you; Soar ends). Soar halves the damage your "
+        "Attacks deal to it for the one turn it is airborne."),
 }
 
 #: Every body of every act-1/2/3 elite and boss encounter in the shipped game.
