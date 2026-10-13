@@ -122,12 +122,18 @@ def test_the_paper_numbers_and_upgrades(varka):
     # Gleeful Songs' numbers moved with the rebalance (test_varka_rebalance).
     assert fx(_vk("mika_starfrost_swirl"), "apply_power")["amount"] == 2
     assert fx(_vk("mika_starfrost_swirl") + "+", "apply_power")["amount"] == 3
-    # The Electro Knights pass (2026-10-03): Razor 5 [7], +4; Pulsating
-    # Witch costs 0.
-    assert fx(_vk("razor_claw_and_thunder"), "varka")["base"] == 5
-    assert fx(_vk("razor_claw_and_thunder"), "varka")["amount"] == 4
-    assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 7
+    # Razor 6 [8], +3 (user, 2026-10-13; was 5 [7], +4 from the Electro
+    # Knights pass); Pulsating Witch costs 0.
+    assert fx(_vk("razor_claw_and_thunder"), "varka")["base"] == 6
+    assert fx(_vk("razor_claw_and_thunder"), "varka")["amount"] == 3
+    assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 8
     assert loader.get_card(_vk("lisa_pulsating_witch")).cost == 0
+    # The user's 2026-10-13 picks: Tailwind Stride draws 3 [4] with no
+    # condition; Storm Surge costs 1.
+    assert fx(_vk("tailwind_stride"), "draw")["amount"] == 3
+    assert fx(_vk("tailwind_stride") + "+", "draw")["amount"] == 4
+    assert [f["op"] for f in loader.get_card(_vk("tailwind_stride")).effects] == ["draw"]
+    assert loader.get_card(_vk("storm_surge")).cost == 1
     # Varka payoff fix (2026-10-08): every 3 [2] Cryo Oath, was 4 [3].
     assert fx(_vk("glacial_edict"), "varka")["amount"] == 3
     assert fx(_vk("glacial_edict") + "+", "varka")["amount"] == 2
@@ -196,7 +202,7 @@ def test_razor_hits_one_enemy_and_more_on_electro(varka):
     assert _led(st).current == "electro"
     st = _state(enemies=[_enemy(name="c")])
     _play(st, _vk("razor_claw_and_thunder"))
-    assert st.enemies[0].hp == 100 - 5 and st.enemies[0].aura == "electro"
+    assert st.enemies[0].hp == 100 - 6 and st.enemies[0].aura == "electro"
 
 
 def test_sharpshooter_shoots_again_only_on_pyro(varka):

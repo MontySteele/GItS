@@ -2183,7 +2183,7 @@
       "power_amount": 1
     },
     "proto_vk_tailwind_stride": {
-      "conditional_draw": 1
+      "draw": 1
     },
     "proto_vk_tempest_charge": {
       "damage": 3

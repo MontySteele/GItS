@@ -3740,10 +3740,11 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack, personal_pool: varka,
-   # The AoE trim: one enemy. 5 [7], +4: provenance, "Varka Electro
+   # The AoE trim: one enemy. 6 [8], +3 (was 5 [7], +4; user 2026-10-13:
+   # "9 damage with its rider effect is fine for a common"). Provenance, "Varka Electro
    # Knights, 2026-10-03". An Attack since the combo pass (2026-10-04).
    description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
-   effects: [{op: varka, kind: awakening, target: enemy, base: 5, amount: 4}],
+   effects: [{op: varka, kind: awakening, target: enemy, base: 6, amount: 3}],
    upgrade: {varka_base: 2}}
 
 - {id: proto_vk_mika_starfrost_swirl, name: "Mika: Suppressive Barrage", character: varka,
@@ -3831,12 +3832,12 @@
 
 - {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
    authored_by: [claude],
+   # Unconditional 3 [4] (user 2026-10-13: "When do you not have an
+   # element outside turn 1?"); was 2, +1 [2] with a current element.
    cost: 1, type: skill, rarity: uncommon,
-   description: "Draw 2 cards. If you have a [gold]current element[/gold], draw {DrawThen:diff()} additional card{DrawThen:plural:|s}.",
-   effects: [{op: draw, amount: 2},
-             {op: conditional, if: has_current_element,
-              then: [{op: draw, amount: 1}]}],
-   upgrade: {conditional_draw: 1}}
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: draw, amount: 3}],
+   upgrade: {draw: 1}}
 
 - {id: proto_vk_eye_of_the_storm, name: "Eye of the Storm", character: varka,
    authored_by: [claude],
@@ -3916,7 +3917,9 @@
 
 - {id: proto_vk_storm_surge, name: "Storm Surge", character: varka,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon,
+   # Costs 1, was 2 (user 2026-10-13: "It basically reads "deal 5 or 10
+   # AoE" as a 2 cost Uncommon").
+   cost: 1, type: attack, rarity: uncommon,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} additional damage.",
    effects: [{op: damage, amount: 5, target: all_enemies},
              {op: varka, kind: swirled_take_more, amount: 5}],
