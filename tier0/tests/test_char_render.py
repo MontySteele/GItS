@@ -437,3 +437,152 @@ def test_tight_box_ignores_the_faint_haze():
     im.paste(Image.new("RGBA", (10, 10), (255, 255, 255, 255)), (15, 15))
     assert pack.tight_box([im]) == (15, 15, 25, 25)
     assert pack.tight_box([im], floor=1) == (2, 2, 25, 25)
+
+
+# ------------------------------------------------------------------ Furina (phase A, review/active/furina-visual-paper-2026-10-13.md)
+fc = _load("furina_clips")
+
+
+def test_every_furina_clip_runs_forward_and_every_loop_closes():
+    assert set(fc.CLIPS) == {*pack.COMBAT_CLIPS["furina"], "merchant"}
+    for name, clip in fc.CLIPS.items():
+        times = [k[0] for k in clip["keys"]]
+        assert times == sorted(times) and times[0] == 0.0, name
+        assert times[-1] <= clip["length"] + 1e-9, name
+        for _t, pose, ease in clip["keys"]:
+            assert ease in EASES, name
+            assert {"yaw", "morphs", "ops", "root"} <= set(pose), name
+            assert {op[0] for op in pose["ops"]} <= OPS, name
+        if clip["loop"]:
+            assert times[-1] == clip["length"], name
+            assert clip["keys"][0][1] == clip["keys"][-1][1], f"{name}: loop does not close"
+
+
+def test_furina_starts_and_ends_her_clips_in_stance_a():
+    a = fc.idle_pose(0.5)
+    for name in fc.FROM_IDLE:
+        keys = fc.CLIPS[name]["keys"]
+        assert keys[0][1] == a, name
+        assert keys[-1][1] == a or (keys[-1][1]["yaw"] - a["yaw"]) % 360 == 0, name
+    feet = [("movew", "足ＩＫ.L"), ("movew", "足ＩＫ.R")]
+    for name in ("idle", "cast", "hurt"):
+        for _t, pose, _e in fc.CLIPS[name]["keys"]:
+            for kind, bone in feet:
+                got, want = _op(pose, kind, bone)[2], _op(a, kind, bone)[2]
+                assert got[:2] == want[:2], (name, _t, bone)
+
+
+def test_her_pack_has_no_sword_so_her_rapier_is_a_phantom():
+    cfg = chars.CHARS["furina"]
+    assert cfg["clips"] == "furina_clips" and cfg["blades"] == {} and cfg["prop"] is None
+    assert cfg["pmx"] == "furina/unpacked/【芙宁娜】.pmx", "the body PMX, not the 荒 variant"
+    assert set(fc.PHANTOM) == {"L"} and 0.5 < fc.PHANTOM["L"] < 1.0, "the far hand, about a rapier's length"
+    atk = fc.CLIPS["attack"]
+    (imp,) = atk["events"]["impact"]
+    assert atk["events"]["main"] == imp and any(abs(k[0] - imp) < 1e-9 for k in atk["keys"])
+    assert abs(imp * atk["fps"] - round(imp * atk["fps"])) < 1e-6, "the impact lands on a frame"
+    assert all(w["blade"] in fc.PHANTOM and w["from"] < imp <= w["to"] for w in atk["trails"])
+    assert any(abs(b["t"] - imp) < 1e-9 and b["kind"] == "thrust" for b in atk["bursts"]), "the streak at the hit"
+    # the thrust: the far hand locked out level at the enemy, past the stance's reach
+    hit = next(k[1] for k in atk["keys"] if abs(k[0] - imp) < 1e-9)
+    far = _op(hit, "hand", "L")[3]
+    assert far[0] > 0.5 and abs(far[2]) < 0.2, far
+    assert _op(hit, "movew", "足ＩＫ.L")[2][0] > _op(fc.idle_pose(0.5), "movew", "足ＩＫ.L")[2][0], "a lunge"
+
+
+def test_let_the_people_rejoice_spins_once_and_opens_into_the_flourish():
+    clip = fc.CLIPS["rejoice"]
+    yaws = [k[1]["yaw"] for k in clip["keys"]]
+    assert max(yaws) - min(yaws) >= 360, "one pirouette"
+    peak = next(k[1] for k in clip["keys"] if abs(k[0] - clip["events"]["main"]) < 1e-9)
+    far, near = _op(peak, "hand", "L")[3], _op(peak, "hand", "R")[3]
+    assert far[2] > 0.4, "the far arm flung high"
+    assert near[0] < -0.3, "the near arm wide"
+    assert _op(peak, "movew", "足ＩＫ.R")[2][2] > 0.05, "up on the front toe, the rear leg lifted"
+
+
+def test_every_guest_star_is_scaled_at_furinas_px_per_inch():
+    assert set(chars.GUESTS) == set(chars.GUEST_HEIGHTS_IN) == set(pack.GUEST_FILES["furina"])
+    assert len(chars.GUESTS) == 11
+    f = 250.0
+    for g, spec in chars.GUESTS.items():
+        assert spec["pmx"].startswith(f"{g}/unpacked/") and spec["pmx"].endswith(".pmx"), g
+        # the head bone lands at (height / 63) of Furina's head-bone px
+        head_px = spec["head"] * chars.guest_ppu(g, f)
+        want = chars.FURINA_HEAD * f * chars.GUEST_HEIGHTS_IN[g] / chars.CHARS["furina"]["height_in"]
+        assert abs(head_px / want - 1) < 1e-9, g
+    assert chars.guest_ppu("neuvillette", f) * chars.GUESTS["neuvillette"]["head"] > \
+        chars.guest_ppu("sigewinne", f) * chars.GUESTS["sigewinne"]["head"]
+    p = fc.guest_pose(1.0)
+    assert {op[0] for op in p["ops"]} <= OPS and p["yaw"] > 0, "standing, facing right"
+
+
+def test_the_thrust_streak_runs_along_the_blade_from_the_hand():
+    m = {**_meta(), "trails": [], "bursts": [{"t": 0.4, "blade": "L", "kind": "thrust", "scale": 1.0}]}
+    frames, first, pad = fx.clip_fx(m)
+    assert frames and first == 8
+    a = np.asarray(frames[0])[..., 3]
+    (bx, by), (tx, ty) = fx._sample_at(m, "L", 0.4)
+    for f in (0.2, 0.5, 0.9):
+        x, y = round(bx + (tx - bx) * f + pad), round(by + (ty - by) * f + pad)
+        assert a[y - 2:y + 3, x - 2:x + 3].max() > 150, f
+
+
+def test_the_stage_effects_are_neutral_deterministic_and_reach_the_stage():
+    assert set(fx.STAGE_EFFECTS) == set(pack.STAGE_FILES["furina"]) == {"spend", "drain", "repay"}
+    for name, make in fx.STAGE_EFFECTS.items():
+        frames, origin, to = make(200.0, 10)
+        again, _o, _t = make(200.0, 10)
+        assert len(frames) >= 6 and all(np.array_equal(np.asarray(a), np.asarray(b)) for a, b in zip(frames, again))
+        for im in frames:
+            arr = np.asarray(im)
+            assert (arr[..., 0] == arr[..., 1]).all() and (arr[..., 1] == arr[..., 2]).all(), (name, "colourless")
+        assert any(np.asarray(im)[..., 3].max() > 200 for im in frames), name
+        assert fx.hex_rgb(fx.STAGE_TINTS[name])
+        if name == "spend":
+            assert to is None
+            assert np.asarray(frames[0])[round(origin[1]), round(origin[0]), 3] > 200, "the burst starts on her"
+        else:
+            assert to[0] > origin[0] + 100 and abs(to[1] - origin[1]) < 1, "out to the stage, on her right"
+    # Drain leaves her, Repay arrives: the first frame's drops sit at the far end in each
+    for name, near_end in (("drain", 0), ("repay", 1)):
+        frames, origin, to = fx.STAGE_EFFECTS[name](200.0, 20)
+        a = np.asarray(frames[3])[..., 3].astype(float)
+        xs = np.nonzero(a.sum(0))[0]
+        mid = (origin[0] + to[0]) / 2
+        assert (xs.mean() < mid) == (near_end == 0), name
+
+
+def test_furinas_jobs_and_sheets():
+    job = build.jobs("furina")
+    assert set(job[0]["clips"].split(",")) == set(pack.COMBAT_CLIPS["furina"])
+    assert {"stance_a", "stand"} <= set(job[0]["stills"].split(","))
+    assert set(job[-1]["guests"].split(",")) == set(chars.GUESTS)
+    assert set(pack.SHEET_FILES["furina"]) == {*pack.COMBAT_CLIPS["furina"], "merchant"}
+    assert set(pack.FX_FILES["furina"]) == {"attack"}
+    # 63 in over a 68 in adult at 235 px: ~217.7 px from her model's 1.72 unit rest height
+    assert abs(build.combat_ppu("furina") * build.REST_HEIGHT["furina"] * chars.COMBAT_SCALE - 217.7) < 0.5
+
+
+def test_furinas_manifest_was_packed_at_her_ruled_height():
+    m = json.loads(pack.manifest_path("furina").read_text(encoding="utf-8"))
+    for clip in pack.COMBAT_CLIPS["furina"]:
+        rec = m["sheets"][clip]
+        assert abs(rec["ppu"] - build.combat_ppu("furina")) < 0.01, clip
+        assert sum(p["count"] for p in rec["pages"]) == rec["count"] == len(rec["times"]) == len(rec["frames"])
+        for p in rec["pages"]:
+            assert p["size"][0] <= pack.MAX_SHEET and p["size"][1] <= pack.MAX_SHEET
+    target = chars.body_px(chars.CHARS["furina"]["height_in"])
+    assert abs(m["measure"]["full_px"] / target - 1) < 0.06, m["measure"]
+    assert m["fx"]["attack"]["first_frame"] <= m["sheets"]["attack"]["main_frame"]
+    for name in ("spend", "drain", "repay"):
+        e = m["effects"][name]
+        assert e["count"] == len(e["frames"]) and e["uses"] == [] and e["tint"].startswith("#")
+    assert m["texture_import"] == "vram_compressed"
+    # every guest at Furina's px per inch: head-bone px over hers is height over 63 in
+    neck = m["measure"]["neck_px"]
+    assert set(m["guests"]) == set(chars.GUESTS)
+    for g, rec in m["guests"].items():
+        want = neck * chars.GUEST_HEIGHTS_IN[g] / chars.CHARS["furina"]["height_in"]
+        assert abs(rec["head_px"] / want - 1) < 0.04, (g, rec["head_px"], want)
+        assert rec["size"][0] <= pack.MAX_SHEET and 0 < rec["feet"][1] <= rec["size"][1]

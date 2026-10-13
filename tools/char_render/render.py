@@ -57,6 +57,8 @@ ap.add_argument("--ppu", type=float, default=0.0, help="texture px per unit; 0 =
 ap.add_argument("--outline-px", type=float, default=CH.OUTLINE_PX)
 ap.add_argument("--pitch", type=float, default=5.0)
 ap.add_argument("--samples", type=int, default=32)
+ap.add_argument("--guests", default="", help="Furina's guest stars (chars.GUESTS), one still each, at --ppu "
+                                             "(Furina's combat ppu) scaled by chars.guest_ppu")
 args = ap.parse_args(argv)
 os.makedirs(args.out, exist_ok=True)
 CFG = CH.CHARS[args.char]
@@ -80,10 +82,30 @@ def import_pmx(path):
     return root, arm, mesh
 
 
-def shade(mesh):
+def drop_overlays(mesh, cfg):
+    """Delete the faces of the overlay shells (chars.is_overlay) and hidden
+    materials outright. A guest's 颜+ blush overlay, merely hidden, still
+    rendered as a black mask over the whole face (Sigewinne, Escoffier,
+    Navia; probed 2026-10-13); with its faces gone the face reads. Vertex
+    groups and shape keys ride through BMesh."""
+    import bmesh
+    hide = cfg.get("hide_mats", set())
+    drop = [i for i, m in enumerate(mesh.data.materials) if CH.is_overlay(m.name) or m.name in hide]
+    if not drop:
+        return
+    bm = bmesh.new()
+    bm.from_mesh(mesh.data)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index in drop], context="FACES_ONLY")
+    bm.to_mesh(mesh.data)
+    bm.free()
+    mesh.data.update()
+
+
+def shade(mesh, cfg=None):
     """Style H1 on every material of one imported mesh, plus its hull."""
-    face, no_line = CFG["face_mats"], set(CFG["no_line_mats"])
-    hide = CFG.get("hide_mats", set())
+    cfg = cfg or CFG
+    face, no_line = cfg["face_mats"], set(cfg["no_line_mats"])
+    hide = cfg.get("hide_mats", set())
     lines = []
     for m in mesh.data.materials:
         if CH.is_overlay(m.name) or m.name in hide:
@@ -249,6 +271,20 @@ def set_frame(root, arm, mesh, blade_obs, caps, keys, t):
     T.upd()
 
 
+def phantom_points(cam_ob, ppu, arm):
+    """Per phantom blade (the pose library's PHANTOM, {side: length}): a line
+    from the hand's knuckles along the hand, as if it held a blade, in canvas
+    px -- Furina's empty-handed rapier."""
+    out = {}
+    pbs = arm.pose.bones
+    for side, length in getattr(LIB, "PHANTOM", {}).items():
+        w = arm.matrix_world @ pbs[f"手首.{side}"].head
+        k = arm.matrix_world @ pbs[f"{CFG['hand_tip']}.{side}"].head
+        d = (k - w).normalized()
+        out[side] = [T.to_px(cam_ob, ppu, k), T.to_px(cam_ob, ppu, k + d * length)]
+    return out
+
+
 def blade_points(cam_ob, ppu, blade_obs):
     """Per blade: the base (past the guard) and the tip, in canvas px."""
     out = {}
@@ -272,8 +308,61 @@ def place_prop(prop_root, arm, spec):
     T.upd()
 
 
+# ----------------------------------------------------------------- the guest stars
+def render_guests(names, furina_ppu):
+    """Each guest star in ONE neutral resting pose (the pose library's
+    guest_pose), shaded and outlined as Furina is, at chars.guest_ppu, as
+    <out>/raw/guest_<name>.png and its json. A fresh scene per guest."""
+    global CFG
+    base = CFG
+    for name in names:
+        g = CH.GUESTS[name]
+        CFG = {**base, "face_mats": base["face_mats"] | g.get("face", set()),
+               "no_line_mats": base["no_line_mats"] | g.get("face", set()),
+               "hide_mats": set(g.get("hide", set()))}
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        addon_utils.enable(T.MMD, default_set=True)
+        root, arm, mesh = import_pmx(model_path(g["pmx"]))
+        missing = [b for b in ("センター", "足ＩＫ.L", "足ＩＫ.R", "上半身", "上半身2", "首", "頭", "足.L", "足.R",
+                               "腕.L", "腕.R", "ひじ.L", "ひじ.R", "手首.L", "手首.R", "中指１.L", "中指１.R")
+                   if b not in arm.pose.bones]
+        if missing:
+            print("WARN guest", name, "missing bones", missing)
+            continue
+        cam_ob = T.setup_render(args.samples)
+        T.upd()
+        zs = [p.z for p in T.world_box([mesh])]
+        rest_h = max(zs) - min(zs)
+        head_u = (arm.matrix_world @ arm.pose.bones["頭"].head).z - min(zs)
+        ppu = CH.guest_ppu(name, furina_ppu)
+        drop_overlays(mesh, CFG)
+        shade(mesh).thickness = args.outline_px / ppu
+        k = g["head"] / CH.FURINA_HEAD
+        p = LIB.guest_pose(k)
+        cap = capture(root, arm, mesh, p)
+        set_frame(root, arm, mesh, {}, [cap], [(0.0, p, "io")], 0.0)
+        T.reset_camera(cam_ob, args.pitch, CFG.get("camera_height", 0.8) * k)
+        w, h, origin, _c = T.frame_camera(cam_ob, T.project(cam_ob, T.world_box([mesh])), ppu)
+        still = f"guest_{name}"
+        T.render_to(os.path.join(args.out, "raw", f"{still}.png"))
+        head = arm.matrix_world @ arm.pose.bones["頭"].head
+        meta = {"still": still, "guest": name, "char": "furina", "canvas": [w, h],
+                "origin_px": [round(origin[0], 3), round(origin[1], 3)], "ppu": round(ppu, 4),
+                "head_px": T.to_px(cam_ob, ppu, head), "rest_height_units": round(rest_h, 5),
+                "head_units": round(head_u, 5), "height_in": CH.GUEST_HEIGHTS_IN[name], "pitch": args.pitch,
+                "combat_scale": CH.COMBAT_SCALE}
+        with open(os.path.join(args.out, f"{still}.json"), "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=1)
+        print("STILL", still, (w, h), origin, f"ppu {ppu:.2f}",
+              f"head {head_u * ppu * CH.COMBAT_SCALE:.1f} px at 1080p")
+    CFG = base
+
+
 # ----------------------------------------------------------------- main
 def main():
+    if args.guests:
+        render_guests([g for g in args.guests.split(",") if g], args.ppu)
+        return
     bpy.ops.wm.read_factory_settings(use_empty=True)
     addon_utils.enable(T.MMD, default_set=True)
     root, arm, mesh = import_pmx(args.pmx or model_path(CFG["pmx"]))
@@ -326,11 +415,11 @@ def main():
             set_frame(root, arm, mesh, blade_obs, caps, keys, t)
             T.render_to(os.path.join(d, f"f_{i:03d}.png"))
         track = []
-        if blade_obs and not args.keys_only:
+        if (blade_obs or getattr(LIB, "PHANTOM", None)) and not args.keys_only:
             for i in range((len(times) - 1) * SUBSTEPS + 1):
                 t = round(i / (fps * SUBSTEPS), 6)
                 set_frame(root, arm, mesh, blade_obs, caps, keys, t)
-                track.append({"t": t, **blade_points(cam_ob, ppu, blade_obs)})
+                track.append({"t": t, **blade_points(cam_ob, ppu, blade_obs), **phantom_points(cam_ob, ppu, arm)})
         meta = {"clip": name, "char": args.char, "fps": fps, "length": spec["length"], "loop": spec["loop"],
                 "motion_end": spec.get("motion_end"), "times": times, "canvas": [w, h],
                 "origin_px": [round(origin[0], 3), round(origin[1], 3)], "ppu": round(ppu, 4),

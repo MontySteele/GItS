@@ -70,6 +70,37 @@ GUEST_HEIGHTS_IN = {
 }
 
 
+#: The guest stars' packs (scratch models/<guest>/unpacked/, all 观海
+#: adaptations on the shared bone set, probed 2026-10-13: every bone chars.py
+#: and toon.py pose is present in all eleven; none has a 手先 bone). `head`
+#: is the 頭 bone's height over the lowest vertex in raw PMX units, the
+#: measure each guest is scaled by (hats, ears and Sigewinne's antennae left
+#: out); `face` and `hide` add to FACE_MATS / the hidden overlays.
+FURINA_HEAD = 16.763
+GUESTS = {
+    "charlotte": {"pmx": "charlotte/unpacked/夏洛蒂.pmx", "head": 16.638},
+    "chevreuse": {"pmx": "chevreuse/unpacked/夏沃蕾.pmx", "head": 16.639},
+    "clorinde": {"pmx": "clorinde/unpacked/克洛琳德.pmx", "head": 18.931},
+    "escoffier": {"pmx": "escoffier/unpacked/爱可菲.pmx", "head": 17.134},
+    # his pack wears the diving helmet; the guest still shows his face
+    "freminet": {"pmx": "freminet/unpacked/菲米尼.pmx", "head": 17.567,
+                 "hide": {"头盔", "头盔表情1", "头盔表情2", "头盔表情3", "头盔表情4"}},
+    "lynette": {"pmx": "lynette/unpacked/【琳妮特】.pmx", "head": 16.630},
+    "lyney": {"pmx": "lyney/unpacked/林尼.pmx", "head": 17.541},
+    "navia": {"pmx": "navia/unpacked/娜维娅.pmx", "head": 19.067},
+    "neuvillette": {"pmx": "neuvillette/unpacked/那维莱特.pmx", "head": 20.676, "face": {"眉影"}},
+    "sigewinne": {"pmx": "sigewinne/unpacked/希格雯.pmx", "head": 12.061},
+    "wriothesley": {"pmx": "wriothesley/unpacked/莱欧斯利.pmx", "head": 20.327, "face": {"眉影"}},
+}
+
+
+def guest_ppu(guest: str, furina_ppu: float) -> float:
+    """A guest's texture px per unit: Furina's, times the guest's height over
+    hers (GUEST_HEIGHTS_IN over 63 in), over the guest's head-bone height
+    over hers -- so every guest stands at the same px per inch as Furina."""
+    return furina_ppu * (GUEST_HEIGHTS_IN[guest] / CHARS["furina"]["height_in"]) * (FURINA_HEAD / GUESTS[guest]["head"])
+
+
 def body_px(height_in: float) -> float:
     return height_in / ADULT_IN * BASE_ADULT_PX
 
@@ -167,6 +198,13 @@ CHARS = {
                         "wince": ("まばたき", "困る"), "sad": "悲しむ", "shock": "びっくり"},
         "stance": FURINA_STANCE,
         "prop": None,
+        # the full clip set (render.py --clips): her pose library. Her pack
+        # has no sword, so she has no blades; her attack's trail follows a
+        # phantom rapier off her far hand (furina_clips.PHANTOM).
+        "clips": "furina_clips",
+        "blades": {},
+        "hide_mats": set(),
+        "camera_height": 0.8,
     },
     "kokomi": {
         "pmx": "kokomi/unpacked/珊瑚宫心海.pmx",

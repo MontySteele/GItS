@@ -25,7 +25,9 @@ TRAIL_TAPER at the tail) and its tip is filled over the last TRAIL_AGE
 seconds, oldest faintest: a crescent. Each marked burst
 (`bursts` in the clip spec) adds a ring, a flash and radial streaks where the
 blade strikes ("slash"), or a flattened shock ring and rising streaks on the
-ground ("ground"). Every pixel length is at REF_PPU and scales with the clip's
+ground ("ground"), or a long thin streak along the blade from the hand out
+past the point ("thrust": Furina's phantom rapier). A trail window may set
+its own `inner` and `taper`. Every pixel length is at REF_PPU and scales with the clip's
 ppu. Deterministic: same meta, same pixels.
 """
 from __future__ import annotations
@@ -143,7 +145,8 @@ def trail_heat(meta, t, shape, shift, s):
             ages = [min(1.0, (t_hi - x["t"]) / age) for x in (a, b)]
             w = [(1 - g) ** 1.1 * fade for g in ages]
             pa, pb = a[win["blade"]], b[win["blade"]]
-            ka, kb = (TRAIL_INNER + (TRAIL_TAPER - TRAIL_INNER) * g for g in ages)
+            inner, taper = win.get("inner", TRAIL_INNER), win.get("taper", TRAIL_TAPER)
+            ka, kb = (inner + (taper - inner) * g for g in ages)
             ia, ib = _lerp(pa[0], pa[1], ka), _lerp(pb[0], pb[1], kb)
             ta, tb = pa[1], pb[1]
 
@@ -166,6 +169,25 @@ def burst_heat(meta, t, shape, shift, s):
             continue
         sc = b.get("scale", 1.0) * s * k
         rng = np.random.default_rng(rng_base + n)
+        if b["kind"] == "thrust":
+            # a rapier's thrust: a long thin streak along the blade, from the
+            # hand out past the point, flashing at the point and fading
+            (bx, by), (tx, ty) = _sample_at(meta, b["blade"], b["t"])
+            dx, dy = tx - bx, ty - by
+            reach = 1.0 + 0.35 * min(1.0, u * 3)
+            a = ((bx + shift[0]) * k, (by + shift[1]) * k)
+            e = ((bx + dx * reach + shift[0]) * k, (by + dy * reach + shift[1]) * k)
+            mid = (a[0] + (e[0] - a[0]) * 0.7, a[1] + (e[1] - a[1]) * 0.7)
+            fade = (1 - u) ** 1.2
+            w = 14 * sc * (1 - 0.5 * u)
+            stroke(buf, mid, a, w, fade)
+            stroke(buf, mid, e, w, fade)
+            if u < 0.35:
+                ys, xs = np.mgrid[0:shape[0], 0:shape[1]].astype(np.float32)
+                tip = ((tx + shift[0]) * k, (ty + shift[1]) * k)
+                fl = (1 - u / 0.35) * np.clip(1 - np.hypot(xs - tip[0], ys - tip[1]) / (40 * sc), 0, 1) ** 1.5
+                np.maximum(buf, fl, out=buf)
+            continue
         if b["kind"] == "ground":
             tips = [_sample_at(meta, sd, b["t"])[1] for sd in ("L", "R") if _sample_at(meta, sd, b["t"])]
             cx = sum(p[0] for p in tips) / len(tips)
@@ -340,3 +362,184 @@ def tint(im: Image.Image, color) -> Image.Image:
     rgb = np.array(color, np.float32)[None, None, :] * (1 - k[..., None]) + k[..., None]
     out = np.dstack([rgb, a[..., 3:4]])
     return Image.fromarray(np.round(np.clip(out, 0, 1) * 255).astype(np.uint8), "RGBA")
+
+
+# ------------------------------------------------------------------ Furina's stage effects
+#: Spend, Drain and Repay, the three moves of Furina's stage
+#: (review/active/furina-visual-paper-2026-10-13.md), as effect sprite clips of
+#: their own in the same heat format, every length at REF_PPU. Today none has
+#: a look of its own (the Fanfare number drops; the base damage and heal
+#: numbers play); phase B places them. Each returns (frames, origin, to):
+#: every frame on one cell, `origin` the anchor on Furina (her chest), `to`
+#: the other end in the same cell px (the stage: the first guest seat), or None.
+STAGE_FPS = 20
+STAGE_DX = 400           # px at REF_PPU from her chest to the first guest seat (about 200 screen px)
+STAGE_SEED = 23
+#: the tint each is meant to take: Spend the gold of the Fanfare, Drain and
+#: Repay Hydro (ReactionFx's Hydro)
+STAGE_TINTS = {"spend": "#ffd36b", "drain": ELEMENTS["hydro"], "repay": ELEMENTS["hydro"]}
+
+
+def _finish(heat, s):
+    """Supersampled heat -> one neutral RGBA frame (ground_burst's look)."""
+    heat = downsample(heat, SUPER)
+    glow = gauss(heat, GLOW_SIGMA * s)
+    alpha = np.clip(heat + glow * 0.9, 0, 1)
+    core = np.clip((heat - 0.55) / 0.45, 0, 1) ** 1.2
+    val = np.clip(0.50 + 0.50 * core, 0, 1)
+    out = np.zeros(heat.shape + (4,), np.uint8)
+    out[..., :3] = np.round(val * 255)[..., None].astype(np.uint8)
+    out[..., 3] = np.round(alpha * 255).astype(np.uint8)
+    out[out[..., 3] == 0] = 0
+    return Image.fromarray(out, "RGBA")
+
+
+def _disc(buf, c, r, val, power=1.4):
+    if r <= 0 or val <= 0:
+        return
+    H, W = buf.shape
+    x0, x1 = max(0, int(c[0] - r - 1)), min(W, int(c[0] + r + 2))
+    y0, y1 = max(0, int(c[1] - r - 1)), min(H, int(c[1] + r + 2))
+    if x0 >= x1 or y0 >= y1:
+        return
+    ys, xs = np.mgrid[y0:y1, x0:x1].astype(np.float32) + 0.5
+    v = val * np.clip(1 - np.hypot(xs - c[0], ys - c[1]) / r, 0, 1) ** power
+    sub = buf[y0:y1, x0:x1]
+    np.maximum(sub, v, out=sub)
+
+
+def _ring(buf, c, R, width, val, flat=1.0):
+    if val <= 0 or R <= 0:
+        return
+    H, W = buf.shape
+    x0, x1 = max(0, int(c[0] - R - width - 1)), min(W, int(c[0] + R + width + 2))
+    y0, y1 = max(0, int(c[1] - (R + width) * flat - 1)), min(H, int(c[1] + (R + width) * flat + 2))
+    if x0 >= x1 or y0 >= y1:
+        return
+    ys, xs = np.mgrid[y0:y1, x0:x1].astype(np.float32) + 0.5
+    v = val * np.clip(1 - np.abs(np.hypot(xs - c[0], (ys - c[1]) / flat) - R) / width, 0, 1)
+    sub = buf[y0:y1, x0:x1]
+    np.maximum(sub, v, out=sub)
+
+
+def _star(buf, c, r, val):
+    """A four-point sparkle: two thin crossed tapered lines and a hot dot."""
+    if r <= 0:
+        return
+    for ang in (0, 90, 180, 270):
+        a = math.radians(ang)
+        stroke(buf, (c[0] + math.cos(a) * r * 0.08, c[1] + math.sin(a) * r * 0.08),
+               (c[0] + math.cos(a) * r, c[1] + math.sin(a) * r), r * 0.22, val)
+    _disc(buf, c, r * 0.25, val, 1.0)
+
+
+def _drop(buf, c, vel, r, val):
+    """A water droplet moving along vel: a round head and a tapered tail behind it."""
+    _disc(buf, c, r, val, 0.8)
+    n = math.hypot(*vel)
+    if n > 1e-6:
+        back = (c[0] - vel[0] / n * r * 3.2, c[1] - vel[1] / n * r * 3.2)
+        stroke(buf, c, back, r * 1.6, val * 0.85)
+
+
+def spend_burst(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Spend: a golden burst of confetti and stage sparkle thrown up from
+    Furina -- a flash, a ring, forty spinning confetti slips flung out and
+    falling, and sparkles winking round her. 0.8 s."""
+    s = float(ppu) / REF_PPU
+    k = SUPER * s
+    W, H = int(round(640 * s)), int(round(620 * s))
+    origin = (W / 2, 380 * s)
+    rng = np.random.default_rng(STAGE_SEED)
+    pieces = [(rng.uniform(-math.pi * 0.95, -math.pi * 0.05), rng.uniform(260, 620), rng.uniform(0, 2 * math.pi),
+               rng.uniform(8, 22), rng.uniform(9, 15), rng.uniform(4, 7), rng.uniform(0.8, 1.0)) for _ in range(40)]
+    stars = [(rng.uniform(-230, 230), rng.uniform(-300, 60), rng.uniform(0.05, 0.55), rng.uniform(18, 34))
+             for _ in range(12)]
+    frames = []
+    for i in range(int(math.ceil(0.8 * fps))):
+        t = i / fps
+        u = t / 0.8
+        buf = np.zeros((H * SUPER, W * SUPER), np.float32)
+        cx, cy = origin[0] * SUPER, origin[1] * SUPER
+        if u < 0.2:
+            _disc(buf, (cx, cy), 90 * k, 1 - u / 0.2)
+        if u < 0.62:
+            _ring(buf, (cx, cy), (30 + 200 * (1 - (1 - min(1, u * 1.6)) ** 2)) * k, (10 * (1 - u) + 3) * k,
+                  (1 - u / 0.62) ** 1.3 * 0.8)
+        fade = 1.0 if u < 0.7 else max(0.0, 1 - (u - 0.7) / 0.3)
+        for ang, speed, spin0, spin_v, lw, lh, val in pieces:
+            # thrown out and up, then gravity
+            x = cx + math.cos(ang) * speed * t * k
+            y = cy + (math.sin(ang) * speed * t + 0.5 * 900 * t * t) * k
+            a = spin0 + spin_v * t
+            ca, sa = math.cos(a), math.sin(a)
+            flick = 0.55 + 0.45 * abs(math.cos(a * 1.7))        # a slip catching the light as it turns
+            hw, hh = lw * k / 2, lh * k / 2 * (0.4 + 0.6 * abs(ca))
+            quad = [(x + dx * ca - dy * sa, y + dx * sa + dy * ca) for dx, dy in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+            v = val * flick * fade
+            fill_quad(buf, quad, (v, v, v, v))
+        for dx, dy, t0, r in stars:
+            w = (t - t0) / 0.22
+            if 0 <= w <= 1:
+                _star(buf, (cx + dx * k, cy + dy * k), r * k * math.sin(math.pi * w), math.sin(math.pi * w))
+        frames.append(_finish(buf, s))
+    return frames, origin, None
+
+
+def _stream(ppu, fps, length, reverse, glow_end):
+    s = float(ppu) / REF_PPU
+    k = SUPER * s
+    W, H = int(round((STAGE_DX + 200) * s)), int(round(300 * s))
+    origin = (100 * s, 200 * s)                   # her chest
+    to = (origin[0] + STAGE_DX * s, origin[1])    # the first guest seat
+    rng = np.random.default_rng(STAGE_SEED + (1 if reverse else 0))
+    drops = [(rng.uniform(0.0, 0.45), rng.uniform(-50, 50), rng.uniform(0.32, 0.45), rng.uniform(10, 16),
+              rng.uniform(-24, 24)) for _ in range(16)]
+    ax, ay = to if reverse else origin
+    bx, by = origin if reverse else to
+    frames = []
+    for i in range(int(math.ceil(length * fps))):
+        t = i / fps
+        buf = np.zeros((H * SUPER, W * SUPER), np.float32)
+        for t0, lift, dur, r, wob in drops:
+            w = (t - t0) / dur
+            if not 0 <= w <= 1:
+                continue
+            # a drop leaves slowly and is pulled faster (Drain), or arrives
+            # fast and slows into her (Repay)
+            e = w * w if not reverse else 1 - (1 - w) ** 2
+            de = 2 * w if not reverse else 2 * (1 - w)
+            x = ax + (bx - ax) * e
+            y = ay + (by - ay) * e - math.sin(math.pi * e) * lift * s + wob * s * math.sin(6 * w)
+            vel = ((bx - ax) * de + 1e-3, -math.cos(math.pi * e) * math.pi * lift * s * de)
+            size = r * (1 - 0.35 * w) if not reverse else r * (0.65 + 0.35 * (1 - w))
+            fade = min(1.0, w / 0.12) * (min(1.0, (1 - w) / 0.12) if not reverse else 1.0)
+            _drop(buf, (x * SUPER, y * SUPER), vel, size * k, 0.95 * fade)
+        if glow_end:
+            # Repay's soft heal glow: a bloom on her as the drops arrive, a
+            # widening soft ring and a few motes rising
+            g = (t - 0.38) / 0.5
+            if 0 <= g <= 1:
+                cx, cy = origin[0] * SUPER, origin[1] * SUPER
+                _disc(buf, (cx, cy), (60 + 50 * g) * k, 0.75 * math.sin(math.pi * min(1, g * 1.4)) ** 0.8, 2.2)
+                _ring(buf, (cx, cy), (40 + 90 * g) * k, 14 * k, 0.6 * (1 - g) ** 1.2, flat=0.6)
+                for j in range(6):
+                    _disc(buf, (cx + (j - 2.5) * 22 * k, cy - (20 + 120 * g + 14 * (j % 3)) * k), 7 * k,
+                          0.8 * (1 - g), 1.0)
+        frames.append(_finish(buf, s))
+    return frames, origin, to
+
+
+def drain_stream(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Drain: Hydro droplets drawn out of Furina and pulled along a shallow
+    arc to the stage (the first guest seat), speeding as they go. 0.9 s."""
+    return _stream(ppu, fps, 0.9, reverse=False, glow_end=False)
+
+
+def repay_return(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Repay: the droplets come back from the stage and slow into her, then a
+    soft heal glow blooms on her. 1.0 s."""
+    return _stream(ppu, fps, 1.0, reverse=True, glow_end=True)
+
+
+STAGE_EFFECTS = {"spend": spend_burst, "drain": drain_stream, "repay": repay_return}

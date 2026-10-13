@@ -1,0 +1,136 @@
+# Furina visuals: the model pass, phase A, 2026-10-13
+
+This is phase A, as Varka's was (`review/active/varka-visual-paper-2026-10-13.md`): the renders, the pipeline changes, and the review sheets. Nothing is wired into the game. Phase B wires it (BACKLOG). Everything Klee and Varka ruled carries over: style H1 + H3 lite, a ground shadow, scale by real height, each frame trimmed and packed, and sheets imported VRAM-compressed at 2x. In battle she stands on the left, facing right, a little tilted.
+
+## What is built
+
+**The pipeline, generalized** (`tools/char_render/`). `build.py --char furina` renders, paints and packs her in one command, as it does Varka:
+- `furina_clips.py` is her pose library;
+- `render.py --guests` renders the guest stars;
+- `fx.py` adds her stage effects and a thrust streak;
+- `pack.py` packs per character (`COMBAT_CLIPS`, `STAGE_FILES`, `GUEST_FILES`).
+
+The body is `【芙宁娜】.pmx`, not the 荒 variant. The packs stay in the scratchpad, and only rendered PNGs leave it.
+
+**No sword.** Her official pack has the Salon trio, cakes, a statue and a scene, but no weapon. So she fights as the performer: the far arm swept toward the enemy palm-open, the near hand at her hip (the stance already in `chars.py`). Her rapier is a phantom. `render.py` records a line from her far hand's knuckles along her hand (0.72 units, about a rapier's blade) as if it were a blade, and `fx.py` draws the attack's trail and streak from it.
+
+**References first.** Before animating I pulled stills of her own moves from the wiki (scratch `furina-art/reference/`, with `NOTES.md` listing each URL and what it shows; never committed):
+- Character Details 3, frames 24 and 48: the thrust. The sword arm is locked out level at the target, she is side-on, and the rear foot is lifted, with a long golden line along the blade. This set the attack.
+- Let the People Rejoice preview, frames 24 to 30: up on one toe, back arched, one arm flung high and the other wide. This set the signature clip.
+- Salon Solitaire preview: the raised calling hand. This set the cast.
+- Menu idles: a heel lifted and her weight on one leg. This set the idle.
+
+**Clips** (`furina_clips.py`). Every combat clip starts and ends in stance A.
+
+| Clip | What it does | Length | Frames |
+|---|---|---|---|
+| idle | Stance A: the far arm swept out toward the enemy, palm open; the near hand at her hip; the rear heel up. The chest and the raised hand breathe, she blinks, and the coat tails sway. | 2.8 s loop | 34 at 12 fps |
+| idle_low | The performance flags: head and shoulders low, the far hand fallen to her chest, a sad brow. | 3.0 s loop | 30 at 10 fps |
+| attack | The empty-handed thrust. The far hand draws back to her shoulder and flicks a small circle (the flourish). Then it drives straight out at the enemy as she lunges onto the front foot, with the near arm flung back and up. The hit lands at full extension (frame 8). | 1.0 s | 20 |
+| cast | Salon Solitaire's call. She rises onto her toes with the far hand lifted high, palm up, and the near hand to her heart. | 1.0 s | 20 |
+| hurt | She flinches back, hands to her chest, wincing. | 0.8 s | 16 |
+| death | A swoon played to the house: the back of her hand to her brow, a sway back, then she sinks to her knees and folds forward. Holds from 1.6 s. | 2.2 s | 25 |
+| rejoice | Let the People Rejoice. She gathers, spins once on the spot with her arms drawn in, and opens into the flourish (frame 12): up on the front toe, rear leg lifted, both arms flung up and wide, delighted. She holds it, then settles. | 1.5 s | 30 |
+| merchant | Stance B: upright and pleased with herself, the near hand on her hip, the far hand turned up as if presenting the wares. It breathes. | 3.0 s loop | 30 at 10 fps |
+
+**Stills:**
+- rest site: sitting on the ground facing the fire, knees drawn up, hands on them;
+- select close-up: stance B, waist-up;
+- roster tile and the locked tile;
+- the ground shadow;
+- `stand`, used only for the height measure.
+
+The rest site is a still because BaseLib draws the rest site from one texture (Klee's backlog line).
+
+**The attack's effect layer.** It is neutral (R=G=B heat, A coverage) and tinted per element like Varka's. The flourish leaves a ribbon from near her hand out to the phantom point. The thrust itself sweeps no area, because it runs along the blade, so it gets a new burst kind, `thrust`: a long thin streak along the blade from her hand out past the point, flashing at the point. On the sheets it is tinted Hydro.
+
+**The stage effects** (`fx.STAGE_EFFECTS`). Spend, Drain and Repay have no look of their own today: the Fanfare number drops, and the base damage and heal numbers play. Each is now an effect sprite clip in the same neutral heat format. Each is recorded in the manifest under `effects` with its frames, cell, origin and intended tint. Its `uses` list is empty: no clip places it, and phase B plays it on the stage event.
+
+| Effect | What it shows | Length | Anchor | Tint |
+|---|---|---|---|---|
+| spend | A golden burst thrown up from her: a flash, a ring, forty spinning confetti slips flung out and falling, and sparkles winking round her. | 0.8 s, 16 frames | her chest | #ffd36b (Fanfare gold) |
+| drain | Hydro droplets drawn out of her and pulled along a shallow arc to the stage, speeding as they go. | 0.9 s, 18 frames | her chest, to the first guest seat (`to`) | #5cb8ff (Hydro) |
+| repay | The droplets come back from the stage and slow into her, then a soft heal glow blooms on her: a bloom, a widening ring, rising motes. | 1.0 s, 20 frames | the first guest seat, to her chest | #5cb8ff |
+
+The chest anchor is recorded as `stance_a.chest_px` (an offset from her feet).
+
+## The guest stars
+
+Each of the eleven is rendered in one neutral resting pose: standing easy, facing right like Furina, arms at the sides, a small smile. They get her shading and outline, and each is trimmed to a single still (`model/guests/guest_<name>.png`). Attacks are left out until their abilities settle.
+
+**Scale.** Every guest is drawn at Furina's px per inch (`chars.guest_ppu`). A guest's head bone stands at (its `GUEST_HEIGHTS_IN` over 63 in) times Furina's head-bone height. The head bone is measured from the lowest vertex, so hats, ears and Sigewinne's antennae do not count. The packs are not at one common scale, so each is solved from its own measured head height (research packet, sec. 8).
+
+The manifest records each guest's file, size, feet anchor, ppu and px. A test holds every guest's head px to its height over 63 in times Furina's neck px, within 4%. The px column below is head to foot with hats at 1080p. Today every guest is a flat 224 px sprite. Bounds today are 71 to 96 px wide; the new widths run 57.5 to 114.
+
+| Guest | Height (in) | Full px at 1080p | Head-bone px | Width px |
+|---|---|---|---|---|
+| Furina (for scale) | 63.0 | 220.2 | 169.9 | 93.5 |
+| Sigewinne | 52.0 | 184.6 | 138.8 | 79.0 |
+| Escoffier | 62.9 | 213.5 | 168.0 | 95.0 |
+| Chevreuse | 63.0 | 211.8 | 168.4 | 110.0 |
+| Charlotte | 63.1 | 210.6 | 168.5 | 57.5 |
+| Lynette | 63.3 | 202.6 | 168.7 | 85.0 |
+| Freminet | 66.0 | 208.8 | 176.2 | 61.0 |
+| Lyney | 66.7 | 222.6 | 177.2 | 60.5 |
+| Clorinde | 69.2 | 237.1 | 184.6 | 86.5 |
+| Navia | 70.0 | 227.1 | 186.9 | 90.5 |
+| Wriothesley | 76.1 | 235.8 | 204.0 | 114.0 |
+| Neuvillette | 76.4 | 238.1 | 204.6 | 92.5 |
+
+The lineup sheet (`f_guest_lineup.png`) lays them out as `FurinaStagePlacement` does: from her hitbox edge, a 20 px gap, then each body by its own width with 20 px between. It shows a three-seat line and two four-seat lines (Ensemble Cast).
+
+**Rig notes** (each pack probed before posing; `render.py` warns and skips a guest that lacks a posed bone). No rig failed.
+- All eleven are 观海 adaptations on the shared bone set. Every bone `chars.py` and `toon.py` pose is present, and none has a 手先 bone, so the middle finger stands in as the hand tip, as for Furina.
+- Clorinde, Lyney and Wriothesley lack the 真面目 morph. The guest pose does not use it.
+- **The black face (fixed).** Sigewinne, Escoffier and Navia carry a `颜+` blush overlay. Hidden the way Furina's `+` shells are, it still rendered as a solid black mask over the whole face. `render.py drop_overlays` now deletes the overlay and hidden-material faces outright for the guests, and the faces read. This is probably the same family as Kokomi's black hand. It is not changed for Furina, Kokomi or Varka.
+- **Freminet** wears his diving helmet in the pack (four overlapping 头盔表情 face-screen materials). The guest still hides the helmet (`GUESTS["freminet"]["hide"]`), which shows his face and cap.
+- **Sigewinne's** tail and fin ears are mesh, not chains. In a still they need nothing; her antennae are left out of the height measure.
+- Wriothesley and Neuvillette have a 眉影 brow-shadow material, added to their face (unlit, unlined) set.
+- Escoffier's black band at the thighs is her outfit, not a defect: forcing her sheer skin layers opaque changed nothing.
+
+## Measured
+
+- **Height.** Standing (`stand`), she is 213.2 px from hat to boot and 220.2 px in full at 1080p. The target is 217.7 (63 in over a 68 in adult, times 235 px; her model's rest height with the hat is 1.72 units). In stance A her neck sits at 164.4 px against 169.9 standing, and the figure is 128.5 px wide.
+- **Style** (L* p90 / C* p90, opaque pixels at 1080p):
+
+| Figure | L* p90 | C* p90 |
+|---|---|---|
+| Furina idle f0 | 76.3 | 31.4 |
+| Furina attack f8 | 76.0 | 32.1 |
+| Ironclad | 71.4 | 41.4 |
+| Silent | 68.9 | 24.9 |
+
+  Her white hair and shorts sit her lighter than the base pair. Her chroma is between them. H3 lite is the ruled fixed squeeze and was not retuned.
+- **Cost.** 13 frame sheets, 30.5 Mpx, 20.1 MB of PNG (Varka's are 92.1 Mpx). That is about 31 MB VRAM-compressed. The guest stills add 0.8 Mpx.
+
+## Where her graphics appear (the surface list for phase B)
+
+| # | Surface | Today | Phase A art |
+|---|---|---|---|
+| 1 | Combat | `pck-src/furina/model/combat.tscn` (Bounds -120..120 x -280) | The seven combat clips, the shadow and the attack's effect layer. Phase B generates the scene from the manifest, as `tools/varka_rig` does. |
+| 2 | Signature trigger | None | The `rejoice` clip. Phase B adds a trigger for Let the People Rejoice, as Varka's Ascension. |
+| 3 | Guests | `guest_<name>.tscn`, 224 px flat sprites cut from wiki screenshots (`tools/cut_guest_bodies.py`); Freminet has no scene (Osty fallback) | Eleven trimmed stills at her px per inch. Bounds are re-cut per width, and Freminet gets a scene. |
+| 4 | Spend, Drain, Repay | Numbers only | The three effect clips, played from `FurinaStageDirector`'s Spend, Drain and Repay beats. |
+| 5 | Merchant, rest, select, roster | Her current stills | Stance B loop, rest still, select close-up, roster tile and locked tile. |
+
+## Couldn't, or chose
+
+- **No sword prop** in the pack, so the attack is an empty-handed thrust with a phantom rapier in the effect layer. Taking a sword from another pack is ruled out: the packs' terms forbid moving parts between models.
+- **The death clip's last frames** fold her forward on her knees, and her long back hair swings out level with the head's tilt. It reads as a collapse at game scale, but it is the weakest clip.
+- **The roster tile** frames her head small, because her tall hat sets the tile's top line. Klee's tile frames hers larger.
+- **The coat tails** swing on three chains (HB2 to HB4). There is no cloth simulation.
+
+## For [USER]
+
+Sheets: `scratchpad/furina-art/sheets/`.
+- `a_compare_1080p.png`: her beside Ironclad, Klee, Varka (82 in) and Silent, at 1080p and 2x.
+- `b_strip_*.png`: every clip.
+- `c_idle.gif`, `c_attack_hydro.gif`, `c_rejoice.gif`: moving.
+- `d_stage_effects.png` and `d_spend.gif`, `d_drain.gif`, `d_repay.gif`: the three effects on her.
+- `e_shop_rest_select_roster.png`.
+- `f_guest_lineup.png`: the eleven at game scale and on stage.
+
+1. **Phase B.**
+   - **(a) Default:** wire it into the game as it is: her scenes, the Rejoice trigger, the guests' stills and the three stage effects.
+   - (b) Change the motion first: the stance, the thrust, the swoon, or the flourish.
+   - (c) Change the guests first: their pose, their scale, or Freminet's helmet.

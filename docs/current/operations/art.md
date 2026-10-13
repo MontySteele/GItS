@@ -95,9 +95,14 @@ in the clip's cell, an AtlasTexture margin in Godot); a clip too big for one
 4096 sheet continues on `_p2`, `_p3` pages. Pixels under the ground line
 are cut, so planted blades read as driven in. Varka's pose library is
 `varka_clips.py`; his paper is `review/active/varka-visual-paper-2026-10-13.md`.
+Furina's is `furina_clips.py` (phase A, `review/active/furina-visual-paper-2026-10-13.md`):
+no blades, a phantom rapier off her far hand (`PHANTOM`) for the attack's
+trail, her eleven guest stars as one still each (`render.py --guests`, at her
+px per inch: `chars.guest_ppu`), and Spend, Drain and Repay as stage effect
+clips (`fx.STAGE_EFFECTS`).
 
 ```sh
-.venv/Scripts/python tools/char_render/build.py --char varka --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
+.venv/Scripts/python tools/char_render/build.py --char varka|furina --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
 .venv/Scripts/python tools/char_render/pack.py --char varka --renders <scratch dir> --art-root <dir> [--check]
 ```
 

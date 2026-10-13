@@ -67,7 +67,10 @@ CH = _load(HERE / "chars.py", "char_render_chars")
 FX = _load(HERE / "fx.py", "char_render_fx")
 KP = _load(ROOT / "tools" / "klee_render" / "pack.py", "klee_render_pack")
 
-COMBAT = ("idle", "idle_low", "attack", "cast", "hurt", "death", "ascension")
+#: each kit's combat clips; COMBAT is Varka's (the first kit), kept by name
+COMBAT_CLIPS = {"varka": ("idle", "idle_low", "attack", "cast", "hurt", "death", "ascension"),
+                "furina": ("idle", "idle_low", "attack", "cast", "hurt", "death", "rejoice")}
+COMBAT = COMBAT_CLIPS["varka"]
 COMBAT_SCALE = CH.COMBAT_SCALE
 MERCHANT_SCALE = KP.MERCHANT_SCALE
 MAX_SHEET = 4096
@@ -79,12 +82,24 @@ GROUND_SLACK = 6.0
 #: producer for every out-path's basename.
 SHEET_FILES = {"varka": {"idle": "varka_idle.png", "idle_low": "varka_idle_low.png", "attack": "varka_attack.png",
                          "cast": "varka_cast.png", "hurt": "varka_hurt.png", "death": "varka_death.png",
-                         "ascension": "varka_ascension.png", "merchant": "varka_merchant.png"}}
-FX_FILES = {"varka": {"attack": "varka_attack_fx.png", "ascension": "varka_ascension_fx.png"}}
+                         "ascension": "varka_ascension.png", "merchant": "varka_merchant.png"},
+               "furina": {"idle": "furina_idle.png", "idle_low": "furina_idle_low.png",
+                          "attack": "furina_attack.png", "cast": "furina_cast.png", "hurt": "furina_hurt.png",
+                          "death": "furina_death.png", "rejoice": "furina_rejoice.png",
+                          "merchant": "furina_merchant.png"}}
+FX_FILES = {"varka": {"attack": "varka_attack_fx.png", "ascension": "varka_ascension_fx.png"},
+            "furina": {"attack": "furina_attack_fx.png"}}
 #: effect sprite clips a combat clip places (its spec's `effects`)
 EFFECT_FILES = {"varka": {"ground_burst": "varka_ground_burst.png"}}
-SHADOW_FILES = {"varka": "varka_shadow.png"}
-REST_FILES = {"varka": "varka_rest.png"}
+#: effect sprite clips no clip places, played by the game on a stage event
+#: (fx.STAGE_EFFECTS: Furina's Spend, Drain and Repay)
+STAGE_FILES = {"furina": {"spend": "furina_spend.png", "drain": "furina_drain.png", "repay": "furina_repay.png"}}
+SHADOW_FILES = {"varka": "varka_shadow.png", "furina": "furina_shadow.png"}
+REST_FILES = {"varka": "varka_rest.png", "furina": "furina_rest.png"}
+#: Furina's guest stars, one still each (render.py --guests), under model/guests/
+GUEST_FILES = {"furina": {g: f"guest_{g}.png" for g in (
+    "charlotte", "chevreuse", "clorinde", "escoffier", "freminet", "lynette", "lyney", "navia", "neuvillette",
+    "sigewinne", "wriothesley")}}
 
 
 #: the alpha a texel needs to widen a sheet's cell: the toon pass leaves a
@@ -278,7 +293,7 @@ def main(argv=None) -> int:
                 "texture_import": TEXTURE_IMPORT, "sheets": {}, "fx": {}, "effects": {}}
     uses = []
     writes = []
-    for clip in (*COMBAT, "merchant"):
+    for clip in (*COMBAT_CLIPS[char], "merchant"):
         meta, frames = load_clip(R, clip)
         sheets, rec = sheets_for(frames, meta["origin_px"], files[clip])
         rec.update({"fps": meta["fps"], "length": meta["length"], "loop": meta["loop"],
@@ -322,7 +337,24 @@ def main(argv=None) -> int:
         writes += [(out_frames / n, im) for n, im in esheets]
         print(f"effect {name}: {erec['count']} frames  cell {erec['cell']}  origin {erec['origin']}  uses {erec['uses']}")
 
-    # the scale check, on the upright reference still (varka_clips.STAND)
+    # the stage's own effect clips (fx.STAGE_EFFECTS), at the combat ppu: no
+    # clip places them; the game plays each on its stage event (phase B)
+    for name, file in STAGE_FILES.get(char, {}).items():
+        ppu = manifest["sheets"]["idle"]["ppu"]
+        frames, origin, to = FX.STAGE_EFFECTS[name](ppu, FX.STAGE_FPS)
+        esheets, erec = sheets_for(frames, origin, file)
+        erec.update({"fps": FX.STAGE_FPS, "ppu": ppu, "length": round(len(frames) / FX.STAGE_FPS, 4), "loop": False,
+                     "heat": "R=G=B heat (1 core, ~0.5 glow), A coverage; tint per element",
+                     "tint": FX.STAGE_TINTS[name], "uses": [],
+                     "anchor": "origin is Furina's chest" + ("; `to` the first guest seat" if to else "")})
+        if to:
+            # the far end, in the trimmed cell's px (as `origin`)
+            erec["to"] = [round(to[0] - origin[0] + erec["origin"][0]), round(to[1] - origin[1] + erec["origin"][1])]
+        manifest["effects"][name] = erec
+        writes += [(out_frames / n, im) for n, im in esheets]
+        print(f"stage {name}: {erec['count']} frames  cell {erec['cell']}  origin {erec['origin']}  to {erec.get('to')}")
+
+    # the scale check, on the upright reference still (the pose library's STAND)
     st = json.loads((R / "stand.json").read_text(encoding="utf-8"))
     manifest["measure"] = KP.body_metrics(R / "stand.png", st, COMBAT_SCALE)
     sa = json.loads((R / "stance_a.json").read_text(encoding="utf-8"))
@@ -331,6 +363,11 @@ def main(argv=None) -> int:
     # blade rises over his head in stance A, so the alpha top is no measure)
     for key, m in (("measure", st), ("stance_a", sa)):
         manifest[key]["neck_px"] = round((m["origin_px"][1] - m["head_px"][1]) * COMBAT_SCALE, 1)
+    # the chest, between the hips and the neck, as an offset from the feet
+    # anchor at 1080p: where an effect clip anchored "on her" goes (Furina's
+    # Spend, Drain and Repay)
+    manifest["stance_a"]["chest_px"] = [round(((sa["hips_px"][i] + sa["head_px"][i]) / 2 - sa["origin_px"][i])
+                                              * COMBAT_SCALE, 1) for i in (0, 1)]
     manifest["target_body_px"] = round(CH.body_px(CH.CHARS[char]["height_in"]), 1)
     print("standing at 1080p:", manifest["measure"], " stance A:", manifest["stance_a"],
           " target", manifest["target_body_px"])
@@ -363,6 +400,27 @@ def main(argv=None) -> int:
     writes.append((art / "ui" / "select_portrait.png", tile))
     writes.append((art / "ui" / "select_portrait_locked.png", locked_variant(tile)))
     manifest["portrait"] = {"file": "select_portrait.png", "size": list(KP.PORTRAIT_SIZE), "ppu": pm["ppu"]}
+
+    # the guest stars: one trimmed still each, its feet anchor and its size
+    # at 1080p (combat scale), drawn at Furina's px per inch (chars.guest_ppu)
+    if GUEST_FILES.get(char):
+        manifest["guests"] = {}
+        for g, file in GUEST_FILES[char].items():
+            gm = json.loads((R / f"guest_{g}.json").read_text(encoding="utf-8"))
+            s = float(gm["ppu"]) / FX.REF_PPU
+            im = ground_clip(Image.open(R / f"guest_{g}.png").convert("RGBA"), gm["origin_px"][1], s)
+            b = tight_box([im])
+            b = (max(0, b[0] - PAD), max(0, b[1] - PAD), min(im.width, b[2] + PAD), min(im.height, b[3] + PAD))
+            still = im.crop(b)
+            writes.append((art / "model" / "guests" / file, still))
+            metrics = KP.body_metrics(R / f"guest_{g}.png", gm, COMBAT_SCALE)
+            manifest["guests"][g] = {
+                "file": file, "size": list(still.size), "ppu": gm["ppu"], "height_in": gm["height_in"],
+                "feet": [round(gm["origin_px"][0] - b[0]), round(gm["origin_px"][1] - b[1])],
+                "head_px": round((gm["origin_px"][1] - gm["head_px"][1]) * COMBAT_SCALE, 1),
+                "full_px": metrics["full_px"], "width_px": round(still.width * COMBAT_SCALE, 1)}
+            print(f"guest {g:12s} {gm['height_in']:5.1f} in  full {metrics['full_px']:6.1f} px  "
+                  f"head {manifest['guests'][g]['head_px']:6.1f} px  width {manifest['guests'][g]['width_px']} px")
 
     text = json.dumps(manifest, indent=1, ensure_ascii=False) + "\n"
     mpath = manifest_path(char)
