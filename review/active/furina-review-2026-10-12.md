@@ -99,7 +99,16 @@ Your run had three guests on stage most fights, and that's when the style works.
 
 **Not proposed:** cutting anything. A few cards were 0 of 4 to 7 in wave 2 alone: Undercurrent, All In, Interval Bell, Star Turn, High Stakes, Rising Tide, Private Box and Fountain of Lucine. One wave is too small a sample, so they stay on the watch list.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "Honestly, that Furina block card sounds too good. Basically worth 14 per energy if you've got the Fanfare. Agreed on Encore! Let's otherwise leave her alone for now, touch up the Companions, do a review of the card text to unify the language after all recent changes, and then see how things look after one more overnight wave."
+
+- **Pick 1:** the Drain buffer stays a quarter.
+- **Pick 2:** no change. Bubble Aria and Packed House stay as they are.
+- **Pick 3:** Encore! only: "Your oldest guest acts." It costs 0, its upgrade adds Retain, and it no longer Spends or draws. Guest acts and Tutti! are unchanged.
+- **Next:** the overnight wave reads her as she stands.
+
+## For [USER] (ruled above)
 
 1. **Drain buffer.**
    - **(a) Default:** stays at a quarter of Max HP.
