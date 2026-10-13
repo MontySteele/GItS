@@ -94,3 +94,7 @@ Not changed, with the reason: Dawn Tide, Orders from the Shrine, Tamakushi's Wra
 
 1. **Kokomi's Prototype finish line.** The round answered its question: Wards are made and played wherever a source is drafted and Canopy is that source in a Plan deck; one run won and three of five reached an act-3 boss, against a base-five baseline of 0 of 5; the deaths are the base's act-3 wall and The Insatiable's race, with seat errors in every lane; no seat reported a text contradiction on the r3 changes; every seat's MOST WANTED turn was a Plan written the turn before. **(a) Default:** build the A-list, redeploy, and the next Kokomi play is [USER]'s own finish-line run; a further Sonnet round only if that run finds something. (b) One more five-seat round on the A-list build first. (c) Hold at Prototype; nothing this round supports it.
 2. **The Insatiable and the parked burst flag.** New fact, one line: across rounds 2 to 4 Kokomi is 4 wins and 4 losses against this boss, every win under 30 HP, while the base five's baseline all passed act 2. **(a) Default:** leave Nereid's Ascension parked as ruled and read the finish-line run first; the three wins came from the multipliers the kit already has. (b) Reopen the burst paper now, before the run.
+
+## Ruled
+
+[USER], 2026-10-13: "On Kokomi - (a) on both and I'll test it after the current fixes are done". Pick 1 (a): the A-list is built and deployed, and the next Kokomi play is [USER]'s finish-line run. Pick 2 (a): Nereid's Ascension stays parked until that run.
