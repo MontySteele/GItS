@@ -1,10 +1,12 @@
-"""Render every Klee surface from the official model and pack it: one command.
+"""Render every Klee surface from the official model, paint it and pack it: one command.
 
     python tools/klee_render/build.py --pmx <可莉2.0.pmx> --work <scratch dir> \
         [--blender <blender.exe>] [--art-root <main checkout>] [--only-render]
 
 The PMX stays wherever the operator keeps it (never in the repo: its terms
-forbid redistribution). `--work` receives the raw renders; `pack.py` then
+forbid redistribution). `--work` receives the raw renders (render.py, under
+<work>/raw), `post.py` paints style G's 2D half over every frame and still
+(the shader half is render.py's), and `pack.py` then
 writes the sheets/stills into <art-root>/ImageGen and the manifest
 tools/klee_rig/klee_frames.json. Run from a worktree with --art-root pointing
 at the main checkout (operations/art.md: ImageGen lives only there).
@@ -49,7 +51,7 @@ def main(argv=None) -> int:
     ap.add_argument("--work", required=True)
     ap.add_argument("--blender", default=BLENDER)
     ap.add_argument("--art-root", default=str(ROOT))
-    ap.add_argument("--only-render", action="store_true")
+    ap.add_argument("--only-render", action="store_true", help="render and paint; do not pack")
     args = ap.parse_args(argv)
     work = Path(args.work)
     work.mkdir(parents=True, exist_ok=True)
@@ -69,6 +71,9 @@ def main(argv=None) -> int:
         if res.returncode != 0 or "Traceback" in res.stdout + res.stderr:
             print(res.stdout[-3000:], res.stderr[-3000:])
             return 1
+    from post import main as post_main  # noqa: E402  (sibling module)
+    if post_main(["--renders", str(work)]) != 0:
+        return 1
     if args.only_render:
         return 0
     from pack import main as pack_main  # noqa: E402  (sibling module)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=78 format=3]
+[gd_scene load_steps=79 format=3]
 
 [ext_resource type="Texture2D" path="res://klee/model/layers/klee_combat_smoke.png" id="1_smoke"]
 [ext_resource type="Texture2D" path="res://klee/model/layers/klee_combat_floaters.png" id="2_floaters"]
@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_death.png" id="10_death"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_cast.png" id="11_cast"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_bomb.png" id="12_bomb"]
+[ext_resource type="Texture2D" path="res://klee/model/frames/klee_shadow.png" id="13_shadow"]
 
 [sub_resource type="Animation" id="Animation_reset"]
 length = 0.001
@@ -1665,6 +1666,11 @@ unique_name_in_owner = true
 
 [node name="Facing" type="Node2D" parent="Visuals"]
 unique_name_in_owner = true
+
+[node name="Shadow" type="Sprite2D" parent="Visuals/Facing"]
+position = Vector2(2.5, 0)
+scale = Vector2(0.5005, 0.498)
+texture = ExtResource("13_shadow")
 
 [node name="Rig" type="Node2D" parent="Visuals/Facing"]
 modulate = Color(1, 1, 1, 0)

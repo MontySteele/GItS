@@ -3,13 +3,18 @@
     python tools/klee_render/pack.py --renders <scratch dir> [--art-root <main checkout>] [--check]
     python tools/klee_render/pack.py --split-thrown [--art-root <main checkout>]
 
-Reads what tools/klee_render/render.py wrote (per clip: f_NNN.png + <clip>.json;
-per still: <name>.png + <name>.json) and writes, under <art-root>/ImageGen:
+Reads what tools/klee_render/post.py painted from render.py's raw frames (per
+clip: <clip>/f_NNN.png + <clip>.json; per still: <name>.png + <name>.json) and writes, under <art-root>/ImageGen:
 
   images/model/frames/klee_<clip>.png   one sheet per combat clip (and the
                                         merchant loop), cells in reading order
   images/model/frames/klee_bomb.png     the thrown bomb, cut out of the attack
                                         sheet's release cell (split_thrown)
+  images/model/frames/klee_shadow.png   her ground shadow: a soft painted
+                                        ellipse sized to her footprint, drawn
+                                        under her in combat and at the shop
+                                        (the base cast's is a `shadow` region in
+                                        each Spine skeleton; ours is a sprite)
   images/model/klee_rest.png            the seated rest-site still, padded so
                                         BaseLib's centred sprite puts her seat
                                         on the rest-site anchor
@@ -57,6 +62,19 @@ PAD = 2
 #: the cell edge a fifth of the way to the enemy.
 THROWN_CLIP = "attack"
 BOMB_FILE = "klee_bomb.png"
+
+#: The ground shadow (visual paper pick (a), 2026-10-13). The base cast each
+#: carry a `shadow` region in their own Spine skeleton (combat and shop alike):
+#: black, a flat ~0.39 alpha inside a ragged, brushy rim, about 0.19-0.29 as
+#: tall as wide (Ironclad 270x52 and Silent 221x63 atlas px). Klee is sprites,
+#: so hers is a sprite of the same look, under her feet anchor. The texture is
+#: 2x like the sheets; sizes below are 1080p px.
+SHADOW_FILE = "klee_shadow.png"
+SHADOW_ALPHA = 100 / 255          # the base shadows' plateau (Ironclad 101, Silent 100)
+SHADOW_ASPECT = 0.24              # height / width, between Ironclad and Silent
+SHADOW_SPAN = 1.9                 # width over her boots' span in stance A
+SHADOW_MIN_W = 0.55               # ... but at least this much of her full height
+SHADOW_FOOT_ROWS = 14             # texture px above the feet anchor that count as boots
 
 
 def alpha_box(ims):
@@ -184,6 +202,57 @@ def body_metrics(still: Path, meta: dict, scale: float) -> dict:
     }
 
 
+def foot_span(im: Image.Image, origin_y: float, rows: int = SHADOW_FOOT_ROWS) -> tuple[int, int]:
+    """[x0, x1) of the opaque texels in the band just above the feet anchor."""
+    a = im.getchannel("A")
+    y1 = min(a.height, round(origin_y) + 2)
+    band = a.crop((0, max(0, y1 - rows), a.width, y1)).point(lambda v: 255 if v > 128 else 0)
+    b = band.getbbox()
+    assert b is not None, "no boots above the feet anchor"
+    return b[0], b[2]
+
+
+def shadow_texture(w: int, h: int, seed: int = 11) -> Image.Image:
+    """A soft painted ellipse, black: a flat plateau whose rim is broken up by
+    brush-length noise, so it reads painted (as the base shadows do) rather
+    than as a vector ellipse. Deterministic: same size, same pixels."""
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+    u = (x + 0.5 - w / 2) / (w / 2)
+    v = (y + 0.5 - h / 2) / (h / 2)
+    rho = np.sqrt(u * u + v * v)
+    ang = np.arctan2(v, u)
+
+    def smooth_noise(shape, k):
+        n = rng.standard_normal(shape).astype(np.float32)
+        out = Image.fromarray(n, "F").resize((shape[1] * k, shape[0] * k), Image.BICUBIC)
+        return np.asarray(out)
+
+    # a ragged rim: angular noise (strokes along the edge) plus fine bristle
+    lobes = rng.standard_normal(9) * 0.035
+    rim = sum(lobes[i] * np.cos((i + 2) * ang + rng.uniform(0, 6.28)) for i in range(9))
+    bristle = smooth_noise((h // 2 + 2, w // 8 + 2), 8)[:h, :w] * 0.05         + smooth_noise((h // 2 + 2, w // 2 + 2), 2)[:h, :w] * 0.03
+    r = rho + rim + bristle
+    edge = np.clip((1.0 - r) / 0.22, 0, 1)
+    edge = edge * edge * (3 - 2 * edge)
+    streak = 1 + 0.06 * smooth_noise((h // 3 + 2, w // 12 + 2), 12)[:h, :w]
+    alpha = np.clip(SHADOW_ALPHA * edge * streak, 0, 1)
+    out = np.zeros((h, w, 4), np.uint8)
+    out[..., 3] = np.round(alpha * 255).astype(np.uint8)
+    return Image.fromarray(out, "RGBA")
+
+
+def shadow_for(im: Image.Image, origin, full_h: float, tex_scale: float) -> dict:
+    """Where her shadow sits in one figure's node space (1080p px): centred
+    under her boots on the feet anchor's line, its width from her stance."""
+    x0, x1 = foot_span(im, origin[1])
+    span = (x1 - x0) * tex_scale
+    w = max(SHADOW_SPAN * span, SHADOW_MIN_W * full_h)
+    return {"center": [round(((x0 + x1) / 2 - origin[0]) * tex_scale, 1), 0.0],
+            "size": [round(w, 1), round(w * SHADOW_ASPECT, 1)]}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--renders", help="render.py --out dir (combat + merchant + stills)")
@@ -223,6 +292,18 @@ def main(argv=None) -> int:
     sa = json.loads((R / "stance_a.json").read_text(encoding="utf-8"))
     manifest["measure"] = body_metrics(R / "stance_a.png", sa, COMBAT_SCALE)
     print("stance A at 1080p:", manifest["measure"])
+
+    # the ground shadow: one texture (2x, like the sheets), placed per figure
+    full_h = manifest["measure"]["full_px"]
+    combat = shadow_for(Image.open(R / "stance_a.png").convert("RGBA"), sa["origin_px"], full_h, COMBAT_SCALE)
+    mm = json.loads((R / "merchant.json").read_text(encoding="utf-8"))
+    shop_k = (mm["ppu"] * MERCHANT_SCALE) / (sa["ppu"] * COMBAT_SCALE)     # she is ~1.7x at the shop
+    merchant = shadow_for(Image.open(R / "merchant" / "f_000.png").convert("RGBA"), mm["origin_px"],
+                          full_h * shop_k, MERCHANT_SCALE)
+    tw, th = round(combat["size"][0] / COMBAT_SCALE), round(combat["size"][1] / COMBAT_SCALE)
+    writes.append((out_frames / SHADOW_FILE, shadow_texture(tw, th)))
+    manifest["shadow"] = {"file": SHADOW_FILE, "texture": [tw, th], "combat": combat, "merchant": merchant}
+    print("shadow   ", manifest["shadow"])
 
     # rest: BaseLib centres the texture at y = -0.1 h inside a 0.5 container,
     # so a point at (w/2, 0.6 h) of the texture lands on the anchor. Pad so
