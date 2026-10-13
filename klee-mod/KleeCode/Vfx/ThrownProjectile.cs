@@ -25,9 +25,15 @@ namespace KleeMod.Vfx;
 ///
 /// THE SCENE CONTRACT: a hidden <c>%ThrownProjectile</c> Sprite2D under
 /// <c>%Facing</c>, sitting where the bomb leaves her hand, with the attack
-/// clip's release time as <c>metadata/release</c>. Being under %Facing, a
-/// flipped Klee throws from the mirrored hand with no code here. Inert for
-/// every scene without the node.
+/// clip's release time as <c>metadata/release</c>; and, for the Jumpy Dumpty
+/// clip (2026-10-13), <c>%JumpyProjectile</c> the same way for its head-sized
+/// bomb. Being under %Facing, a flipped Klee throws from the mirrored hand
+/// with no code here. Inert for every scene without the node.
+///
+/// A Jumpy Dumpty play has no attack command of its own before the clip (two
+/// of its three cards are Skills), so <see cref="CardPlayMotion"/> notes the
+/// card's own target with <see cref="NoteAim(Creature, Creature?)"/> before
+/// it sends the trigger.
 ///
 /// THE AIM is the attack's own: <see cref="AttackCommand_Execute_ThrownAim"/>
 /// notes the command's single target before the wind-up (the same prefix
@@ -42,6 +48,8 @@ internal static class ThrownProjectile
     internal const string NodeName = "ThrownProjectile";
     internal const string ReleaseMeta = "release";
     internal const string AttackState = "attack";
+    internal const string JumpyNodeName = "JumpyProjectile";
+    internal const string JumpyState = "jumpy";
 
     /// <summary>Hand to target. The base's shiv throw lands its impact
     /// 0.15 s after it spawns (<c>NShivThrowVfx.PlaySequence</c>).</summary>
@@ -120,7 +128,23 @@ internal static class ThrownProjectile
     /// replays nothing, so it throws nothing either. Pure.
     /// </summary>
     internal static bool Throws(string? fromState, string toState)
-        => toState == AttackState && fromState != AttackState;
+        => ProjectileFor(fromState, toState) != null;
+
+    /// <summary>
+    /// The projectile node a travel throws, or null: the attack's bomb on a
+    /// fresh entry into the attack clip, Jumpy Dumpty's on a fresh entry into
+    /// the jumpy clip. Pure.
+    /// </summary>
+    internal static string? ProjectileFor(string? fromState, string toState)
+        => toState == fromState ? null
+           : toState == AttackState ? NodeName
+           : toState == JumpyState ? JumpyNodeName
+           : null;
+
+    /// <summary>The heavier toss's flight: Jumpy Dumpty's big bomb is slower,
+    /// arcs higher and pops bigger than the attack's.</summary>
+    internal static (float Seconds, float Lift, float Pop) FlightFor(string state)
+        => state == JumpyState ? (0.24f, 110f, 0.7f) : (FlightSeconds, ArcLift, PopScale);
 
     public static void NoteAim(AttackCommand command)
     {
@@ -142,13 +166,28 @@ internal static class ThrownProjectile
     }
 
     /// <summary>
-    /// Called by <see cref="CreatureAnimationRouter"/> as the tree enters
-    /// the attack clip. Schedules the throw at the clip's release frame.
+    /// A card play's own aim (Jumpy Dumpty): its single target when it has
+    /// one, else the side opposite the thrower.
     /// </summary>
-    public static void Schedule(NCreature creature, AnimationTree tree)
+    public static void NoteAim(Creature thrower, Creature? target)
+    {
+        Pending.AddOrUpdate(thrower, new Aim
+        {
+            Single = target,
+            Side = thrower.Side == CombatSide.Enemy ? CombatSide.Player : CombatSide.Enemy,
+            AtMs = Time.GetTicksMsec(),
+        });
+    }
+
+    /// <summary>
+    /// Called by <see cref="CreatureAnimationRouter"/> as the tree enters
+    /// a throwing clip (<see cref="ProjectileFor"/>). Schedules the throw at
+    /// the clip's release frame.
+    /// </summary>
+    public static void Schedule(NCreature creature, AnimationTree tree, string state, string node)
     {
         var visuals = creature.Visuals;
-        if (visuals?.GetNodeOrNull<Sprite2D>("%" + NodeName) is not { } template
+        if (visuals?.GetNodeOrNull<Sprite2D>("%" + node) is not { } template
             || NCombatRoom.Instance is not { } room)
         {
             return;
@@ -160,7 +199,7 @@ internal static class ThrownProjectile
         }
         double release = template.HasMeta(ReleaseMeta) ? template.GetMeta(ReleaseMeta).AsDouble() : 0.0;
         var landing = end.Value;
-        template.GetTree().CreateTimer(release).Timeout += () => Launch(template, tree, room, landing);
+        template.GetTree().CreateTimer(release).Timeout += () => Launch(template, tree, room, landing, state);
     }
 
     private static Vector2? ResolveAim(NCreature creature, NCombatRoom room)
@@ -197,14 +236,15 @@ internal static class ThrownProjectile
         return AimPoint(single, sideCentres);
     }
 
-    private static void Launch(Sprite2D template, AnimationTree tree, NCombatRoom room, Vector2 end)
+    private static void Launch(Sprite2D template, AnimationTree tree, NCombatRoom room, Vector2 end,
+        string state)
     {
         // A hurt or a death that cut the wind-up short means no bomb left her
         // hand; a room torn down mid-wind-up has nowhere to draw one.
         if (!GodotObject.IsInstanceValid(template) || !GodotObject.IsInstanceValid(tree)
             || !GodotObject.IsInstanceValid(room) || NCombatRoom.Instance != room
             || tree.Get("parameters/playback").Obj is not AnimationNodeStateMachinePlayback playback
-            || (string)playback.GetCurrentNode() != AttackState)
+            || (string)playback.GetCurrentNode() != state)
         {
             return;
         }
@@ -219,18 +259,19 @@ internal static class ThrownProjectile
         bomb.GlobalPosition = start;
         bomb.GlobalScale = template.GlobalScale;
 
+        var (seconds, lift, popScale) = FlightFor(state);
         float spin = end.X >= start.X ? SpinDegrees : -SpinDegrees;
         var tween = bomb.CreateTween();
         tween.TweenMethod(Callable.From<float>(t =>
         {
             if (!GodotObject.IsInstanceValid(bomb)) return;
-            bomb.GlobalPosition = ArcPoint(start, end, t, ArcLift);
+            bomb.GlobalPosition = ArcPoint(start, end, t, lift);
             bomb.RotationDegrees = spin * t;
-        }), 0f, 1f, FlightSeconds);
+        }), 0f, 1f, seconds);
         tween.Finished += () =>
         {
             if (GodotObject.IsInstanceValid(room) && NCombatRoom.Instance == room
-                && NFireBurstVfx.Create(end, PopScale) is { } pop)
+                && NFireBurstVfx.Create(end, popScale) is { } pop)
             {
                 room.CombatVfxContainer.AddChildSafely(pop);
                 pop.GlobalPosition = end;

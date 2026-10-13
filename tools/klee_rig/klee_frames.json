@@ -123,11 +123,11 @@
   },
   "attack": {
    "cell": [
-    453,
-    352
+    416,
+    345
    ],
-   "hframes": 4,
-   "vframes": 5,
+   "hframes": 5,
+   "vframes": 4,
    "count": 20,
    "fps": 20,
    "length": 1.0,
@@ -156,29 +156,29 @@
     0.95
    ],
    "origin": [
-    128,
-    343
+    106,
+    336
    ],
    "ppu": 300.0,
    "file": "klee_attack.png",
    "thrown": {
-    "frame": 10,
-    "time": 0.5,
+    "frame": 9,
+    "time": 0.45,
     "file": "klee_bomb.png",
     "size": [
-     76,
-     86
+     46,
+     51
     ],
     "at": [
-     375.0,
-     49.0
+     241.0,
+     59.5
     ]
    }
   },
   "hurt": {
    "cell": [
     204,
-    347
+    348
    ],
    "hframes": 6,
    "vframes": 3,
@@ -207,15 +207,15 @@
    ],
    "origin": [
     84,
-    338
+    339
    ],
    "ppu": 300.0,
    "file": "klee_hurt.png"
   },
   "death": {
    "cell": [
-    226,
-    356
+    211,
+    355
    ],
    "hframes": 7,
    "vframes": 5,
@@ -305,7 +305,7 @@
   },
   "setoff": {
    "cell": [
-    229,
+    203,
     362
    ],
    "hframes": 6,
@@ -335,11 +335,69 @@
     0.8
    ],
    "origin": [
-    109,
+    83,
     354
    ],
    "ppu": 300.0,
    "file": "klee_setoff.png"
+  },
+  "jumpy": {
+   "cell": [
+    485,
+    339
+   ],
+   "hframes": 5,
+   "vframes": 5,
+   "count": 24,
+   "fps": 20,
+   "length": 1.2,
+   "loop": false,
+   "motion_end": null,
+   "times": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0,
+    1.05,
+    1.1,
+    1.15
+   ],
+   "origin": [
+    129,
+    330
+   ],
+   "ppu": 300.0,
+   "file": "klee_jumpy.png",
+   "thrown": {
+    "frame": 14,
+    "time": 0.7,
+    "file": "klee_bomb_big.png",
+    "size": [
+     76,
+     87
+    ],
+    "at": [
+     315.0,
+     92.5
+    ]
+   }
   },
   "merchant": {
    "cell": [
@@ -427,12 +485,12 @@
  "rest": {
   "file": "klee_rest.png",
   "size": [
-   320,
+   282,
    417
   ],
   "ppu": 400.0,
   "seat_px": [
-   160,
+   141,
    250
   ]
  },

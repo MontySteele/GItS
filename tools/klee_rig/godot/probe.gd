@@ -49,7 +49,7 @@ func _process(_delta: float) -> bool:
 	var tree = inst.get_node_or_null("AnimationTree") as AnimationTree
 	if tree:
 		var sm = tree.tree_root as AnimationNodeStateMachine
-		for s in ["idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff"]:
+		for s in ["idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff", "jumpy"]:
 			if not sm.has_node(s):
 				_fail("state machine lacks " + s)
 		_drive(tree)
@@ -70,7 +70,7 @@ func _alpha(path: String, prop: String) -> float:
 func _state(tree: AnimationTree, label: String, sheet: String, frame: int) -> void:
 	# Which sheet shows, at which frame: the tree's own blend, read back.
 	var shown := []
-	for s in ["Idle", "IdleLow", "Attack", "Hurt", "Death", "Cast", "SetOff"]:
+	for s in ["Idle", "IdleLow", "Attack", "Hurt", "Death", "Cast", "SetOff", "Jumpy"]:
 		if _alpha("Visuals/Facing/Model/" + s, "self_modulate") > 0.5:
 			shown.append(s)
 	var spr = inst.get_node_or_null("Visuals/Facing/Model/" + sheet) as Sprite2D
@@ -115,6 +115,11 @@ func _drive(tree: AnimationTree) -> void:
 	_step(tree, 0.1)
 	_state(tree, "setoff->attack (the router, not the tree, absorbs this)", "Attack", -1)
 	_step(tree, 1.2)
+	pb.travel("jumpy")
+	_step(tree, 0.53)
+	_state(tree, "jumpy@0.53", "Jumpy", 10)
+	_step(tree, 0.9)
+	_state(tree, "jumpy->idle", "Idle", -1)
 	pb.travel("death")
 	_step(tree, 1.47)
 	_state(tree, "death@1.47", "Death", 28)

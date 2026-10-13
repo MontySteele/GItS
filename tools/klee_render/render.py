@@ -583,6 +583,9 @@ def capture(root, arm, mesh, p):
         "held": float(p.get("held", 1.0)),
         "thrown": None if p.get("thrown") is None else Vector(p["thrown"]),
         "spin": float(p.get("thrown_spin", 0.0)),
+        "big": float(p.get("big", 0.0)),
+        "big_thrown": None if p.get("big_thrown") is None else Vector(p["big_thrown"]),
+        "big_spin": float(p.get("big_spin", 0.0)),
     }
 
 
@@ -604,7 +607,34 @@ def at_time(keys, t):
     return len(keys) - 1, len(keys) - 1, 0.0, 0.0
 
 
-def set_frame(root, arm, mesh, held_ob, thrown_ob, caps, keys, t):
+def prop_scale(a, b, u, raw):
+    """A prop's scale between two keys: a drop happens AT the next key; a rise
+    grows it in."""
+    h = a if b < a and raw < 1.0 else a * (1 - u) + b * u
+    return b if raw >= 1.0 else h
+
+
+def prop_flight(pa, pb_, sa, sb, u, raw):
+    """A free prop's (position, spin) between two keys, or (None, 0)."""
+    if pa is not None and pb_ is not None:
+        return pa.lerp(pb_, u), sa * (1 - u) + sb * u
+    if raw >= 1.0 and pb_ is not None:
+        return pb_, sb
+    if raw <= 0.0 and pa is not None:
+        return pa, sa
+    return None, 0.0
+
+
+def place_big(arm, big_ob):
+    """The big Jumpy Dumpty sits between her two hands (clips.BIG_AT from the
+    midpoint of the fingertips), facing the camera."""
+    a = arm.matrix_world @ arm.pose.bones["手先.R"].head
+    b = arm.matrix_world @ arm.pose.bones["手先.L"].head
+    big_ob.location = (a + b) / 2 + Vector(C.BIG_AT)
+    big_ob.rotation_euler = (0, 0, math.radians(C.HELD_YAW))
+
+
+def set_frame(root, arm, mesh, held_ob, thrown_ob, caps, keys, t, big_ob=None, big_thrown_ob=None):
     i, j, u, raw = at_time(keys, t)
     a, b = caps[i], caps[j]
     for pb in arm.pose.bones:
@@ -627,25 +657,28 @@ def set_frame(root, arm, mesh, held_ob, thrown_ob, caps, keys, t):
     root.location = a["root"].lerp(b["root"], u)
     # held bomb: a drop to 0 happens AT the next key; a rise grows it in
     if held_ob is not None:
-        h = a["held"] if b["held"] < a["held"] and raw < 1.0 else a["held"] * (1 - u) + b["held"] * u
-        if raw >= 1.0:
-            h = b["held"]
+        h = prop_scale(a["held"], b["held"], u, raw)
         held_ob.hide_render = h < 0.02
         held_ob.scale = (max(h, 0.02),) * 3
     if thrown_ob is not None:
-        pa, pb_ = a["thrown"], b["thrown"]
-        pos = None
-        if pa is not None and pb_ is not None:
-            pos = pa.lerp(pb_, u)
-            spin = a["spin"] * (1 - u) + b["spin"] * u
-        elif raw >= 1.0 and pb_ is not None:
-            pos, spin = pb_, b["spin"]
-        elif raw <= 0.0 and pa is not None:
-            pos, spin = pa, a["spin"]
+        pos, spin = prop_flight(a["thrown"], b["thrown"], a["spin"], b["spin"], u, raw)
         thrown_ob.hide_render = pos is None
         if pos is not None:
             thrown_ob.location = pos
             thrown_ob.rotation_euler = (0, math.radians(spin), math.radians(20))
+    upd()
+    # the big Jumpy Dumpty: held in both hands, then flown, as the small one
+    if big_ob is not None:
+        h = prop_scale(a["big"], b["big"], u, raw)
+        big_ob.hide_render = h < 0.02
+        big_ob.scale = (max(h, 0.02),) * 3
+        place_big(arm, big_ob)
+    if big_thrown_ob is not None:
+        pos, spin = prop_flight(a["big_thrown"], b["big_thrown"], a["big_spin"], b["big_spin"], u, raw)
+        big_thrown_ob.hide_render = pos is None
+        if pos is not None:
+            big_thrown_ob.location = pos
+            big_thrown_ob.rotation_euler = (0, math.radians(spin), math.radians(20))
     upd()
 
 
@@ -748,8 +781,11 @@ def main():
     upd()
     held.matrix_world = want
     thrown, thrown_parts, thrown_lines = make_jumpy_dumpty(C.BOMB_R, mats, line)
-    cradled, cradled_parts, cradled_lines = make_jumpy_dumpty(0.064, mats, line)
-    for m_ in held_lines + thrown_lines + cradled_lines:
+    cradled, cradled_parts, cradled_lines = make_jumpy_dumpty(C.BOMB_R, mats, line)
+    # Jumpy Dumpty's own, head-sized: held in both hands, then thrown (clips.JUMPY)
+    big, big_parts, big_lines = make_jumpy_dumpty(C.JUMPY_R, mats, line)
+    big_thrown, big_thrown_parts, big_thrown_lines = make_jumpy_dumpty(C.JUMPY_R, mats, line)
+    for m_ in held_lines + thrown_lines + cradled_lines + big_lines + big_thrown_lines:
         m_.thickness = t_world
     upd()
 
@@ -757,6 +793,16 @@ def main():
         ob.hide_render = not on
         for p in parts:
             p.hide_render = not on
+
+    def sync_parts():
+        """Each bomb's face, ears and fuse follow its body's visibility."""
+        for ob, parts in ((held, held_parts), (thrown, thrown_parts), (big, big_parts),
+                          (big_thrown, big_thrown_parts)):
+            for p in parts:
+                p.hide_render = ob.hide_render
+
+    props = [held, thrown, big, big_thrown]
+    prop_parts = held_parts[1:] + thrown_parts[1:] + big_parts[1:] + big_thrown_parts[1:]
 
     meta_all = {}
     clip_names = [c for c in args.clips.split(",") if c]
@@ -767,6 +813,8 @@ def main():
         is_cradle = bool(spec.get("cradle"))
         show(held, held_parts, not is_cradle)
         show(thrown, thrown_parts, not is_cradle)
+        show(big, big_parts, False)
+        show(big_thrown, big_thrown_parts, False)
         show(cradled, cradled_parts, is_cradle)
         if is_cradle:
             # cradled between both hands at the chest; re-seated per frame
@@ -784,10 +832,17 @@ def main():
         def frame_objs():
             objs = [mesh]
             if not is_cradle:
-                objs += [held, thrown]
+                objs += props + prop_parts
             else:
-                objs += [cradled]
+                objs += [cradled] + cradled_parts[1:]
             return objs
+
+        def pose_at(t):
+            set_frame(root, arm, mesh, None if is_cradle else held, None if is_cradle else thrown,
+                      caps, keys, t, None if is_cradle else big, None if is_cradle else big_thrown)
+            if not is_cradle:
+                sync_parts()
+            place_cradle()
 
         def place_cradle():
             if is_cradle:
@@ -800,29 +855,15 @@ def main():
         reset_camera(cam_ob)
         pts = []
         for t in times:
-            set_frame(root, arm, mesh, None if is_cradle else held, None if is_cradle else thrown,
-                      caps, keys, t)
-            if not is_cradle:
-                for p in held_parts:
-                    p.hide_render = held.hide_render
-                for p in thrown_parts:
-                    p.hide_render = thrown.hide_render
-            place_cradle()
-            pts += world_box(frame_objs() + ([] if is_cradle else held_parts[1:] + thrown_parts[1:]))
+            pose_at(t)
+            pts += world_box(frame_objs())
         box = project(cam_ob, pts)
         w, h, origin, _c = frame_camera(cam_ob, box, args.ppu)
         d = os.path.join(args.out, "raw", name)
         os.makedirs(d, exist_ok=True)
         sc = bpy.context.scene
         for i, t in enumerate(times):
-            set_frame(root, arm, mesh, None if is_cradle else held, None if is_cradle else thrown,
-                      caps, keys, t)
-            if not is_cradle:
-                for p in held_parts:
-                    p.hide_render = held.hide_render
-                for p in thrown_parts:
-                    p.hide_render = thrown.hide_render
-            place_cradle()
+            pose_at(t)
             render_to(os.path.join(d, f"f_{i:03d}.png"))
         meta = {"clip": name, "fps": fps, "length": spec["length"], "loop": spec["loop"],
                 "motion_end": spec.get("motion_end"), "times": times, "canvas": [w, h],
@@ -839,14 +880,13 @@ def main():
         cap = capture(root, arm, mesh, p)
         show(held, held_parts, not is_cradle)
         show(thrown, thrown_parts, not is_cradle)
+        show(big, big_parts, False)
+        show(big_thrown, big_thrown_parts, False)
         show(cradled, cradled_parts, is_cradle)
         set_frame(root, arm, mesh, None if is_cradle else held, None if is_cradle else thrown,
                   [cap], [(0.0, p, "io")], 0.0)
         if not is_cradle:
-            for pp in held_parts:
-                pp.hide_render = held.hide_render
-            for pp in thrown_parts:
-                pp.hide_render = thrown.hide_render
+            sync_parts()
         else:
             a = arm.matrix_world @ arm.pose.bones["手先.R"].head
             b = arm.matrix_world @ arm.pose.bones["手先.L"].head
@@ -854,7 +894,7 @@ def main():
             cradled.rotation_euler = (0, 0, math.radians(30))
             upd()
         reset_camera(cam_ob)
-        objs = [mesh, held, thrown, cradled] + held_parts[1:] + thrown_parts[1:] + cradled_parts[1:]
+        objs = [mesh, cradled] + props + prop_parts + cradled_parts[1:]
         box = project(cam_ob, world_box(objs))
         w, h, origin, _c = frame_camera(cam_ob, box, args.ppu)
         render_to(os.path.join(args.out, "raw", f"{name}.png"))

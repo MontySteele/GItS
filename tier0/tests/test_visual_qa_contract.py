@@ -141,8 +141,10 @@ def test_the_sample_contract_is_well_formed():
     # the five and four Tier F layers they draw. Klee's ground shadow
     # (klee_shadow.png, 2026-10-13) is next. Then -3: her Set Off became a
     # sheet of the model (klee_setoff.png, +1) and the four splash-rig layers
-    # it replaced left the pack (-4; Dodoco stays for dodoco_pop.tscn).
-    assert len(parsed.resources) == 444
+    # it replaced left the pack (-4; Dodoco stays for dodoco_pop.tscn). Then
+    # +2: her Jumpy Dumpty clip (klee_jumpy.png) and its big thrown bomb
+    # (klee_bomb_big.png), 2026-10-13.
+    assert len(parsed.resources) == 446
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -253,6 +255,7 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # cut layers over six bespoke boss bodies, and their six per-body
     # libraries), +16 for the stage's eight guest bodies (a scene and a
     # sprite each), +4 for the supporting pool's two guests, -3 for Klee's
-    # Set Off (its own sheet in, four splash-rig layers out).
-    assert report.checked["contract_resources"] == 444
+    # Set Off (its own sheet in, four splash-rig layers out), +2 for her Jumpy
+    # Dumpty clip and its big bomb.
+    assert report.checked["contract_resources"] == 446
     assert report.checked["package_files"] == 3

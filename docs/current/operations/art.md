@@ -33,7 +33,7 @@ coordinates are in the prepared canvas. Their rigs are
 
 **Klee's combat scene (`tools/klee_rig/`).** Klee's
 `pck-src/klee/model/combat.tscn` is GENERATED, with the router contract (node
-paths, seven states plus `setoff`, one-shot lengths, state machine). Edit
+paths, seven states plus `setoff` and `jumpy`, one-shot lengths, state machine). Edit
 `tools/klee_rig/klee.yaml` (which sheet each state plays, its tint keys) and
 regenerate; never hand-edit the scene.
 
@@ -70,7 +70,7 @@ anchors, no pixels) that `gen` reads for `combat.tscn` and the merchant scene
 `klee_frames.json` is the only art-derived input, so `gen` and
 `tier0/tests/test_klee_rig.py` run anywhere. `verify --godot` loads the scene
 in MegaDot headless and steps the AnimationTree at 60 Hz through idle,
-attack, hurt, setoff and death, checking the visible sheet and its frame, and
+attack, hurt, setoff, jumpy and death, checking the visible sheet and its frame, and
 that the merchant loop autoplays. `render` opens a MegaDot window briefly and
 writes a contact sheet and GIF per state at 1x and 2x to a scratch dir
 (renders are never committed). The Skeleton2D rig of the old floating splash
