@@ -37,7 +37,7 @@ The Plan rules (brief sec.2, rules 1 to 4 and 6): the Bake-Kurage, Plan lines, c
 
 ### 2.3 The starter relic
 
-"At the end of your turn, if a Plan is waiting, gain 3 Block." (Tentatively ruled.) About 9 Block in a 3-turn act-1 fight, against Burning Blood's 6 HP. It pays for writing at least one Plan a turn; with no 0-cost Plans left (2.2), that Plan costs Energy, so the condition is a real price. The relic can keep the Tamakushi Casket's name and art.
+"At the start of your turn, if a Plan is waiting, gain 3 Block." (Tentatively ruled. It read "At the end of your turn" until [USER] ruled, 2026-10-12: "For Kokomi - let's have her starter relic apply block at the beginning of the turn rather than the end.") About 9 Block in a 3-turn act-1 fight, against Burning Blood's 6 HP. It pays for writing at least one Plan a turn; with no 0-cost Plans left (2.2), that Plan costs Energy, so the condition is a real price. The relic can keep the Tamakushi Casket's name and art.
 
 ### 2.4 Ethereal: what it changes
 

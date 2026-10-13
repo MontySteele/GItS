@@ -415,16 +415,6 @@ def _finish_play(state: CombatState, card: Card,
                for cid in state.companions_played):
             state.companions_played.append(card.id)
         state.companion_plays_this_turn += 1
-        # Navia, Cannon Fire Support: the pool pays the pool. Fires once per
-        # CARD PLAY, here beside companions_played, not once per replay inside
-        # the loop below -- Study Buddy's replay is one card being resolved
-        # twice, and paying it twice would make the two cards a combo rather
-        # than each doing its own job. Sitting before resolve_card also means
-        # Navia's own play does not pay itself: the power is not up yet.
-        navia = p.powers.get("cannon_fire_support", 0)
-        if navia:
-            p.block += navia
-            state.emit("cannon_fire_support", amount=navia, card=card.id)
         if state.replay_next_companion > 0:   # Study Buddy
             replays += state.replay_next_companion
             state.replay_next_companion = 0
@@ -733,6 +723,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # cap (the base game's Sturdy Clamp shape). None without the Power.
         kept = kokomi_plan.grace_keeps(state)
         p.block = 0 if kept is None else kept
+    # THE TAMAKUSHI CASKET (2026-10-12, [USER]: "let's have her starter relic
+    # apply block at the beginning of the turn rather than the end"): "At the
+    # start of your turn, if a Plan is waiting, gain 3 Block." StS2's
+    # `AfterBlockCleared`, the relic's own hook: after the clear, so the Block
+    # stays, and before `resolve_all` below empties the queue it reads.
+    kokomi_plan.casket_block(state)
 
     # THE COMPANION LEDGER'S HANDOVER, on the line above the clear rather than
     # in a hook of its own: this turn's count becomes last turn's, in the ONE
@@ -938,10 +934,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # one the next morning will carry out (`kokomi_plan.pilot_flips`; the Plan
     # line by default). (Dusk's drain left this site on 2026-10-12.)
     kokomi_plan.pilot_flips(state)
-    # THE RE-FOUNDING (2026-10-12): the Tamakushi Casket, "At the end of your
-    # turn, if a Plan is waiting, gain 3 Block." At this engine's
-    # `BeforeSideTurnEnd`, the relic's own hook.
-    kokomi_plan.casket_block(state)
+    # (The Tamakushi Casket's Block left this site on 2026-10-12 for the start
+    # of the turn, right after the Block clear: `kokomi_plan.casket_block`.)
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)

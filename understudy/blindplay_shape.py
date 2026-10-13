@@ -42,7 +42,7 @@ SHATTER_DAMAGE = 6
 
 #: `EB-625`, rewritten by the Casket pass (2026-09-28) and again by the Kokomi
 #: re-founding (2026-10-12), which retired the count. The Block the Tamakushi
-#: Casket gives at the end of her turn while a Plan is waiting --
+#: Casket gives at the start of her turn while a Plan is waiting --
 #: `KokomiOverhaulLaw.CasketBlock` in the mod and
 #: `C.KOKOMI_OVERHAUL_CASKET_BLOCK` in the sim. Mirrored here for
 #: `BOMB_GROWTH`'s reason (this module may not reach `tier0`) and held in step

@@ -282,8 +282,6 @@ def _outlet_rate(spec) -> float:
         return DRAW * n[2] / n[1]
     if k == "spend_debuff":
         return (DEBUFF * (n[2] - n[0]) + DEBUFF * n[3]) / n[1]
-    if k == "encore":
-        return (GUEST_ACT + DRAW) / n[0]
     if k == "sold_out":
         return (NEXT_ENERGY * 0.5 * n[1] + DRAW * n[2]) / n[0]
     if k == "house_down":
@@ -634,9 +632,6 @@ def value(state, card, playable: list, decider) -> float:
         if not T.playable(state, card):
             return 0.0
         price = T.price_of(f, n[0])
-        if k == "encore":
-            act = GUEST_ACT if f.stage else 0.0
-            return act + DRAW * n[1] - spend_cost(state, price)
         if k == "sold_out":
             # The Energy comes next turn (the 2026-10-09 loop ruling).
             return (NEXT_ENERGY * n[1] * 0.5 + DRAW * n[2]
@@ -729,6 +724,8 @@ def value(state, card, playable: list, decider) -> float:
         return 4.0 if has else 0.0
     if k == "tutti":
         return GUEST_ACT * len(f.stage)
+    if k == "encore":
+        return GUEST_ACT if f.stage else 0.0
     if k == "final_bow":
         return GUEST_ACT * n[0] - 2.0 if f.stage else 0.0
     if k == "star_turn":

@@ -143,13 +143,9 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
             // a log never ends a beat
         }
 
-        // shatter_bonus (Freminet, Shattering Pressure): a flat rider the sim
-        // adds inside the same raw `enemy.hp -=`, so it is unblockable and
-        // unamplified exactly like the base Shatter. Read off the DEALER --
-        // the sim reads state.player.powers, and the dealer is who broke the
-        // ice.
-        var shatter = ReactionConstants.ShatterDamage
-            + ShatterBonusPower.BonusFor(dealer);
+        // Freminet's shatter_bonus rider left with the Fontaine sanity check
+        // (2026-10-12): Shattering Pressure is a two-hit Cryo Attack now.
+        var shatter = ReactionConstants.ShatterDamage;
 
         // TELEMETRY ONLY: the Shatter is the breaker's reaction damage.
         using var credit = Diagnostics.DamageCredit.Open(

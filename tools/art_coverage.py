@@ -565,38 +565,12 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
-    "proto_kk_all_streams_flow": "The Kokomi jellyfish build (review/active/kokomi-jellyfish-growth-2026-10-12.md, ruled 2026-10-12); no painting yet. The legacy all_streams_flow.png (a cut 2026-10-01 card of the same name) is a candidate, unseen.",
-    "proto_kk_the_shape_of_water": "The Kokomi jellyfish build (review/active/kokomi-jellyfish-growth-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_call_the_generals": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_coordinated_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_dawn_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_endless_shoal": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_grand_strategist": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_kurage_barrage": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_kurage_bloom": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_kurages_wake": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_orders_from_the_shrine": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_reserves": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_resolve_of_watatsumi": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_riptide_guard": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_sangonomiyas_orders": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_spearhead": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_steady_tide": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_sting": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_tamakushis_wrath": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_tidal_surge": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_ward": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_watatsumi_drill": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_watatsumi_muster": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_kk_watchful_shoal": "The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md, ruled 2026-10-12); no painting yet.",
-    "proto_fs_private_box": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
-    "proto_fs_the_masquerade": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
-    "proto_fs_the_show_must_go_on": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
-    "proto_fs_velvet_curtain": "Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md pick 2, 2026-10-09); no painting yet.",
-    "proto_fs_headliner": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet.",
-    "proto_fs_the_leading_lady": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet.",
-    "proto_fs_the_full_house": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet. The v2 row proto_fs_full_house's painting (KNOWN_STALE) is a candidate, unseen.",
-    "proto_fs_packed_house": "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11); no painting yet.",
+    # Empty since 2026-10-12: the 32 keys listed here (24 Kokomi re-founding
+    # and jellyfish rows, Sting and Ward among them, and 8 Furina block-gap
+    # and diversity-pass rows) were painted by the missing-art census, whose
+    # plan rows are in art/plan.tsv under "Art bill 2026-10-12". An entry here
+    # is a card the player sees BLANK; tools/deploy_round.py now names every
+    # one in its summary, so adding one is a visible choice.
 }
 
 

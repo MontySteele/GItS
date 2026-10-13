@@ -45,15 +45,18 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
 
     public string? Nation => "fontaine";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesCryo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("charlotte_enduring_frosthelm");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — First-Person Shutter"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -76,7 +79,7 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoMfCharlotteEnduringFrosthelm()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
@@ -88,6 +91,8 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
             return;
         }
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Cryo, Owner.Creature);
         await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, (int)SpotlightSystem.PrintedBlock(this, 4), applier: Owner.Creature, cardSource: this);
     }
 

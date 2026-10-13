@@ -49,7 +49,7 @@ def test_the_relic_face_is_one_sentence_off_the_shared_number():
     `lint_constant_parity`."""
     relic = RELIC_CS.read_text(encoding="utf-8")
     assert "Face(KokomiOverhaulLaw.CasketBlock)" in relic
-    assert ('"At the end of your turn, if a [gold]Plan[/gold] is waiting, '
+    assert ('"At the start of your turn, if a [gold]Plan[/gold] is waiting, '
             'gain "') in relic
     assert "Open the Casket" not in relic[relic.index('("description",'):]
     assert C.KOKOMI_OVERHAUL_CASKET_BLOCK == 3
@@ -62,7 +62,7 @@ def test_the_debuff_answer_clause_is_silent_on_the_relic():
     from understudy import blindplay_render
 
     rx = blindplay_render._DEBUFF_ANSWERING_HIT
-    now = (f"At the end of your turn, if a [gold]Plan[/gold] is waiting, "
+    now = (f"At the start of your turn, if a [gold]Plan[/gold] is waiting, "
            f"gain {C.KOKOMI_OVERHAUL_CASKET_BLOCK} [gold]Block[/gold].")
     before = ("Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "
               "you apply lands a real [blue]2[/blue] [gold]Hydro[/gold] hit on "

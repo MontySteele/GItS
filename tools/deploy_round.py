@@ -208,6 +208,32 @@ def pck_decision(root: Path = REPO, pck_rel: str = PCK) -> tuple[bool, str]:
     return False, "pck is newer than both source trees"
 
 
+def art_debt(root: Path = REPO) -> str:
+    """One line naming every card the deploy would draw BLANK.
+
+    THE DEFECT (2026-10-12). Sting, Ward and thirty other cards shipped with no
+    portrait for days: the keys sat on `art_coverage.KNOWN_MISSING`, the one
+    check that reads pixels skips on any checkout without ImageGen, and the
+    deploy's staging step said "N shipped key(s) have no png" in a line
+    nobody read. The owner found them by playing. So the round's own summary
+    says it, by name, every time.
+    """
+    if str(REPO) not in sys.path:
+        sys.path.insert(0, str(REPO))
+    try:
+        from tools import shipped_card_art as sca
+    except Exception as exc:  # noqa: BLE001 -- a summary line never fails a deploy
+        return f"art debt:          UNKNOWN ({exc})"
+    images = root / "ImageGen" / "images" / "cards"
+    if not images.is_dir():
+        return "art debt:          UNKNOWN -- no ImageGen/images/cards here"
+    _ship, _dropped, missing = sca.plan(images)
+    if not missing:
+        return "art debt:          none -- every card the mod draws has a png"
+    return (f"art debt:          {len(missing)} card(s) draw BLANK: "
+            + ", ".join(missing))
+
+
 def verification(root: Path = REPO) -> list[str]:
     """The lines a deploy is read back on, off disk, and the branch built.
 
@@ -228,7 +254,8 @@ def verification(root: Path = REPO) -> list[str]:
     if game_dir is None:
         return ["installed version: UNKNOWN -- no readable klee-mod/local.props",
                 f"branch:            {current_branch(root) or '(detached)'}",
-                "bridge:            UNKNOWN", "staged images:     UNKNOWN"]
+                "bridge:            UNKNOWN", "staged images:     UNKNOWN",
+                art_debt(root)]
 
     manifest = game_dir / "mods" / "klee" / "manifest.json"
     try:
@@ -243,7 +270,8 @@ def verification(root: Path = REPO) -> list[str]:
             f"branch:            {current_branch(root) or '(detached)'}",
             f"bridge:            {'present' if bridge else 'ABSENT'} "
             f"({game_dir / 'mods' / 'STS2_MCP'})",
-            f"staged images:     {count} card png(s)"]
+            f"staged images:     {count} card png(s)",
+            art_debt(root)]
 
 
 def plan(args) -> list[list[str]]:
@@ -349,6 +377,7 @@ def main(argv: list[str]) -> int:
                   f"{'staging +next; ' if args.staging else ''}"
                   f"branch {current_branch() or '(detached)'}; "
                   f"{len(steps)} command(s); "
+                  f"{art_debt().split(':', 1)[1].strip()}; "
                   f"game {'UP -- ' + ', '.join(running) if running else 'closed'}")
             return 0
         print(f"pck:  {'REBUILD' if (args.pck or rebuild) else 'skip'} -- {why}"

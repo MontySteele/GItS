@@ -99,8 +99,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   (direction `review/active/kokomi-design-pass-2026-10-11.md`, cards
   `review/active/kokomi-card-paper-2026-10-12.md`, both ruled) retired the
   Casket's count, Open the Casket and Dusk: the Tamakushi Casket now gains 3
-  Block at the end of her turn while a Plan is waiting (the Watatsumi Casket
-  5). Ethereal is the base keyword and a written card is not lost to it.
+  Block at the start of her turn while a Plan is waiting (the Watatsumi Casket
+  5), after the turn's Block clear and before the waiting Plans are carried
+  out ([USER], 2026-10-12: "For Kokomi - let's have her starter relic apply
+  block at the beginning of the turn rather than the end."). Ethereal is the base keyword and a written card is not lost to it.
   Stings and Wards are her generated jellyfish (Ethereal, Exhaust; cost 0
   with a Plan line since the jellyfish build, below).
   A written Companion is carried out at its printed rate after the

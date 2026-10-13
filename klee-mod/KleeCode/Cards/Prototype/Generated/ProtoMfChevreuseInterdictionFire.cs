@@ -73,7 +73,7 @@ public sealed class ProtoMfChevreuseInterdictionFire : CustomCardModel, IElement
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(7m),
+            new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };

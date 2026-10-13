@@ -945,7 +945,7 @@
       "stage_repay": 1
     },
     "proto_fs_encore": {
-      "stage_spend": -1
+      "retain": true
     },
     "proto_fs_ensemble_cast": {
       "cost": -1
@@ -1859,7 +1859,7 @@
       "damage": 2
     },
     "proto_mf_freminet_shattering_pressure": {
-      "power_amount": 2
+      "damage": 2
     },
     "proto_mf_lynette_astonishing_shift": {
       "damage": 2

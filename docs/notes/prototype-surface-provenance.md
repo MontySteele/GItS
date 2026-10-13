@@ -7918,3 +7918,62 @@ sound workable to me - Dandelion Gale could be the Replace version.").
   enemies. Swirl every aura. These Swirls pay twice.", Crosscurrent's
   `PaysTwice` window around the hit). Witnessed by
   `tools/lint_handwritten_parity.ANCIENT_WITNESS`.
+
+## Furina: Encore! is a free act, 2026-10-12
+
+[USER]: "Agreed on Encore! Let's otherwise leave her alone for now"
+(`review/active/furina-review-2026-10-12.md`, "Ruled 2026-10-12", pick 3).
+
+- **Encore! (`proto_fs_encore`):** cost 0, Common Skill, "Your oldest guest
+  acts." It no longer Spends 4 [3] and no longer draws 1. Its upgrade adds
+  Retain (was: Spend 3). The act itself is unchanged
+  (`FurinaCards.ActOldest`; sim `act_oldest`). The card lost its Spend gate,
+  its unplayable reason and its Spend tip; it keeps the "oldest guest" tip.
+- **Sim twin:** `ftd_encore` carries no numbers and left `FIXED_SPEND_KINDS`;
+  the pilot values it at one guest act with a guest on stage and no longer
+  counts it as a Fanfare outlet. The sheet arm reads the new row as written.
+- **Loop probe:** Tutti!+ with Encore! is no longer an accepted thin-deck
+  loop, since Encore! no longer draws.
+- Guest acts and Tutti! are unchanged.
+
+## Fontaine sanity check, 2026-10-12
+
+`review/active/fontaine-companions-2026-10-12.md`, ruled: [USER] "On the
+Fontaine cards - I don't like to have cycling at Common, so Vanguard's Valor
+either needs a rarity bump or a power-up minus the draw effect. Otherwise
+looks good!" All three picks (a); Vanguard's Valor stays Common with no draw.
+
+- **`proto_mf_chevreuse_interdiction_fire`:** 8 [10] Pyro damage (was 7).
+- **`proto_mf_chevreuse_vanguards_valor`:** "Your next Attack deals 6 [8]
+  additional damage, plus 3 if an Elemental Reaction triggered this turn."
+  (was 3 [5]). No draw, by the ruling.
+- **`proto_mf_lynette_box_trick`:** "Gain 4 Block. Draw 2 [3] cards." (was
+  the draw alone).
+- **`proto_mf_charlotte_freezing_point`:** 7 [9] Cryo damage, draw 1 (was 6).
+- **`proto_mf_charlotte_enduring_frosthelm`:** adds "Apply Cryo to an enemy",
+  so it now targets an enemy. Block 4 [6] now and next turn, unchanged.
+- **`proto_mf_freminet_pressurized_floe`:** the 10 damage is Cryo
+  (`applies_element: true`); `role_c` applier.
+- **`proto_mf_freminet_shattering_pressure`:** an Uncommon 1-cost Attack,
+  "Deal 5 [7] Cryo damage twice." (was a Power, "Your Shatters deal 4
+  additional damage"). The `shatter_bonus` power is retired in both engines
+  (`ShatterBonusPower`, the `FrozenPower` read, the sim's read in
+  `effects.resolve_hit`). On a Hydro-wet enemy the first hit Freezes it and
+  the second hit Shatters that freeze, with no special case: the sim
+  snapshots `was_frozen` per hit, and in C# each hit is its own damage
+  broadcast, so the `FrozenPower` the first hit's reaction adds is absent
+  from that hit's `AfterDamageReceived` listeners and present for the
+  second's. In a boss room a non-minion takes Vulnerable instead of Frozen,
+  so the second hit is amplified rather than Shattering.
+- **`proto_mf_navia_cannon_fire_support`:** "Whenever an Elemental Reaction
+  happens, gain 4 [6] Block." (was 3 [5] per Companion card played). Read at
+  the one reaction site: C# `CompanionOverhaulReactions.Note` calls
+  `CannonFireSupportPower.OnReaction`; sim `effects.companion_overhaul_reaction`.
+  The card-play hook and its Navia-pays-herself snapshot left with the old
+  trigger. **Co-op:** every holder is paid for every reaction on the board,
+  whoever dealt it (red-pen R1's reading of a reaction as a board fact).
+  Dahlia's Favonian Favor still pays only its holder's own reactions.
+
+Pins: `tier0/tests/test_fontaine.py`,
+`tier0/tests/test_reaction_phase_parity.py::test_navia_pays_at_the_one_reaction_site_in_both_engines`.
+Untested in game until a deploy.

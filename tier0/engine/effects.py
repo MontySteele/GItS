@@ -1039,10 +1039,7 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
         # and a Shatter that left a stack behind would be a freeze the
         # player paid to end and did not.
         enemy.frozen = 0
-        # shatter_bonus (Freminet, Shattering Pressure): flat rider on the
-        # Shatter itself. Burst-direction growth -- every Shatter still
-        # ENDS a freeze, so this cannot become control uptime.
-        shatter = C.SHATTER_DAMAGE + state.player.powers.get("shatter_bonus", 0)
+        shatter = C.SHATTER_DAMAGE
         from tier0.engine import refpowers          # late import (cycle)
         shatter = int(refpowers._intangible_cap(enemy, shatter))  # R128: the
         #                            cap is per hit, and a direct-HP hit is
@@ -6523,6 +6520,14 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
         # RAW, like every other power-sourced Block in this arm (NC-11).
         p.block += n
         state.emit("block", amount=n)
+    # Navia, Cannon Fire Support (the Fontaine sanity check, 2026-10-12):
+    # "Whenever an Elemental Reaction happens, gain 4 Block." Any reaction,
+    # raw Block. C# twin: `CannonFireSupportPower.OnReaction`, which in co-op
+    # pays every holder for every reaction on the board.
+    navia = p.powers.get("cannon_fire_support", 0)
+    if navia:
+        p.block += navia
+        state.emit("cannon_fire_support", amount=navia)
     # Varka, Sturm und Drang: "Whenever a Swirl happens, your next Attack deals
     # 6 more damage OF THE SWIRLED ELEMENT." The amount banks as an ordinary
     # stack (so two Swirls before one Attack bank twice, which is what

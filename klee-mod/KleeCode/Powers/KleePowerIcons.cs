@@ -356,6 +356,50 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/guest_sigewinne.png"),
         ChevreuseUpgradedBadgePower =>
             KleePck.Path("furina/powers/guest_chevreuse.png"),
+        // THE ICON DEBT CLOSED (2026-10-12, the missing-art census): every
+        // power lint_power_icons carried as debt drew the base placeholder.
+        // Freminet's badges wear his face (art/plan.tsv
+        // power_furina_guest_freminet), as every guest's does; Fountain of
+        // Lucine, Ousia Surge and the Masque of the Red Death get their own
+        // icons from the same pass; the rest borrow the shipped sigil nearest
+        // their job, on the terms every borrow above takes, and the three
+        // Fontaine companion payoffs wear their companion's guest face.
+        FreminetBadgePower =>
+            KleePck.Path("furina/powers/guest_freminet.png"),
+        FreminetUpgradedBadgePower =>
+            KleePck.Path("furina/powers/guest_freminet.png"),
+        FountainOfLucinePower =>
+            KleePck.Path("furina/powers/fountain_of_lucine.png"),
+        OusiaSurgePower => KleePck.Path("furina/powers/ousia_surge.png"),
+        MasqueRedDeathPower =>
+            KleePck.Path("furina/powers/masque_red_death.png"),
+        AncientSeaAuthorityPower =>
+            KleePck.Path("furina/powers/guest_neuvillette.png"),
+        CannonFireSupportPower =>
+            KleePck.Path("furina/powers/guest_navia.png"),
+        NightVigilPower => KleePck.Path("furina/powers/guest_clorinde.png"),
+        TheMasqueradePower =>
+            KleePck.Path("furina/powers/fortissimo_guard.png"),
+        LeadingLadyPower => KleePck.Path("furina/powers/leading_role.png"),
+        FullHousePower => KleePck.Path("furina/powers/supporting_cast.png"),
+        CrescendoPower => KleePck.Path("furina/powers/rising_ovation.png"),
+        EnsembleCastPower => KleePck.Path("furina/powers/guest_cast.png"),
+        GrandEntrancePower => KleePck.Path("furina/powers/center_stage.png"),
+        HighStakesPower => KleePck.Path("furina/powers/courtroom_drama.png"),
+        HymnOfRenewalPower => KleePck.Path("furina/powers/stage_lights.png"),
+        PneumaTidesPower => KleePck.Path("furina/powers/ovation_trickle.png"),
+        PrimaDonnaPower =>
+            KleePck.Path("furina/powers/star_of_the_show.png"),
+        ReginaOfAllWatersPower =>
+            KleePck.Path("furina/powers/limelight.png"),
+        ShowstopperPower => KleePck.Path("furina/powers/top_billing.png"),
+        StandingRoomOnlyPower =>
+            KleePck.Path("furina/powers/standing_ovation.png"),
+        FiveCenturyActPower =>
+            KleePck.Path("furina/powers/unheard_confession.png"),
+        CriticsDarlingPower =>
+            KleePck.Path("furina/powers/the_gallery_stirs.png"),
+        BisPower => KleePck.Path("furina/powers/stagehands_encore.png"),
         // THE SUPPORTING POOL (2026-09-26): the two new guests' faces, from
         // the same art pass, and the batch's nine powers borrowing the
         // shipped Furina sigil nearest their job, on the terms every borrow
@@ -463,7 +507,6 @@ internal static class KleePowerIcons
         ReplayNextCompanionPower => KleePck.Path("klee/powers/study_buddy.png"),
         AttackUpThisTurnPower => KleePck.Path("klee/powers/fantastic_voyage.png"),
         NextAttackUpPower => KleePck.Path("klee/powers/passion_overload.png"),
-        ShatterBonusPower => KleePck.Path("klee/powers/shattering_pressure.png"),
         FrozenPower => KleePck.Path("klee/powers/frozen.png"),
 
         // FURINA. This block used to route all of her powers at KLEE textures

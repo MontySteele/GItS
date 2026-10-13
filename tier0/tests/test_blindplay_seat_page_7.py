@@ -1,14 +1,15 @@
-"""Seat page 7 (2026-10-05), rewritten by the Kokomi re-founding (2026-10-12).
+"""Seat page 7 (2026-10-05), rewritten by the Kokomi re-founding and again by
+the Casket's move to the start of the turn (both 2026-10-12).
 
 The page first counted a waiting Dusk Plan's Block into the incoming line: a
 Kokomi seat read that line overstating the damage, because the Bake-Kurage
 carried a Dusk Plan out at the END of the turn, before the enemies act. Dusk
-left with the re-founding, and what lands at that moment for her now is the
-Tamakushi Casket: "At the end of your turn, if a Plan is waiting, gain 3
-Block." (its Watatsumi upgrade the same at 5).
-
-Seat page 6's rule: counted where the wire gives the number (the relic's own
-text, and the queue the page prints), named where it does not.
+left with the re-founding, and the Tamakushi Casket's end-of-turn Block took
+its place in the line. Then [USER] ruled: "For Kokomi - let's have her starter
+relic apply block at the beginning of the turn rather than the end." The
+Casket now reads "At the start of your turn, if a Plan is waiting, gain 3
+Block." (its Watatsumi upgrade the same at 5): its Block lands after the hits
+the incoming line is about, so the line neither counts it nor names it.
 """
 from __future__ import annotations
 
@@ -17,10 +18,10 @@ from understudy import blindplay_render
 line = blindplay_render._incoming_line
 
 CASKET = {"name": "Tamakushi Casket",
-          "text": "At the end of your turn, if a Plan is waiting, gain 3 "
+          "text": "At the start of your turn, if a Plan is waiting, gain 3 "
                   "Block."}
 WATATSUMI = {"name": "Watatsumi Casket",
-             "text": "At the end of your turn, if a Plan is waiting, gain 5 "
+             "text": "At the start of your turn, if a Plan is waiting, gain 5 "
                      "Block."}
 
 
@@ -34,53 +35,28 @@ def _hit(n: int, name="Nibbit") -> dict:
         {"type": "Attack", "label": str(n), "title": "Butt"}]}
 
 
-def _plans(*queue: dict, twice=False) -> dict:
-    return {"pet": True, "pet_name": "Bake-Kurage", "pending": len(queue),
-            "twice": twice, "queue": list(queue)}
+PLAIN = ("- Incoming this turn: 12 (your Block 0): you would take 12. "
+         "You would be at 48/80 HP.")
 
 
-MORNING = {"name": "Slack Water", "clauses": 1, "plan_line": ""}
+def test_neither_casket_is_counted_before_the_hits():
+    for relic in (CASKET, WATATSUMI):
+        assert line([_hit(12)], _you(relics=[relic]), [], []) == PLAIN
 
 
-def test_the_casket_block_is_counted_while_a_plan_waits():
-    plans = _plans(MORNING)
-    assert line([_hit(12)], _you(relics=[CASKET]), [], [], plans) == (
-        "- Incoming this turn: 12 (your Block 0): you would take 9 "
-        "(Tamakushi Casket adds 3 Block first). "
-        "You would be at 51/80 HP.")
-
-
-def test_the_upgrade_is_counted_at_its_own_number():
-    plans = _plans(MORNING)
-    assert "Watatsumi Casket adds 5 Block first" in line(
-        [_hit(12)], _you(relics=[WATATSUMI]), [], [], plans)
-
-
-def test_no_plan_waiting_no_casket_block():
-    """The condition is the queue: empty or absent, nothing is folded and the
-    relic is not named either -- the page knows it gives nothing."""
-    plain = line([_hit(12)], _you(hp=30, block=4), [], [])
-    assert plain == ("- Incoming this turn: 12 (your Block 4): you would "
-                     "take 8. You would be at 22/80 HP.")
-    for plans in (None, _plans()):
-        assert line([_hit(12)], _you(hp=30, block=4, relics=[CASKET]), [],
-                    [], plans) == plain
-
-
-def test_orichalcum_is_named_beside_a_counted_casket():
-    """The two share one end-of-turn moment; which lands first is not on the
-    page."""
+def test_orichalcum_beside_the_casket_is_counted_as_usual():
+    """The two no longer share the end-of-turn moment, so Orichalcum is
+    folded in on its own number."""
     orichalcum = {"name": "Orichalcum",
                   "text": "If you end your turn without Block, gain 6 Block."}
-    got = line([_hit(12)], _you(relics=[CASKET, orichalcum]), [], [],
-               _plans(MORNING))
-    assert "you would take 9" in got
-    assert got.endswith(" Not counted: Orichalcum.")
+    got = line([_hit(12)], _you(relics=[CASKET, orichalcum]), [], [])
+    assert "you would take 6" in got
+    assert "Not counted" not in got
 
 
-def test_the_page_passes_the_plan_queue_to_the_line():
-    """End to end: a queue on the wire and the relic on the belt reach the
-    incoming line."""
+def test_the_page_does_not_fold_the_casket_with_a_plan_waiting():
+    """End to end: a queue on the wire and the relic on the belt leave the
+    incoming line at the telegraph."""
     from understudy import blindplay
     state = {"state_type": "monster",
              "player": {"character": "Kokomi", "hp": 60, "max_hp": 80,
@@ -105,4 +81,5 @@ def test_the_page_passes_the_plan_queue_to_the_line():
                                "title": "Bite"}],
                   "status": []}]}}
     page = blindplay.observe(state)
-    assert "(Tamakushi Casket adds 3 Block first)" in page
+    assert "Tamakushi Casket adds" not in page
+    assert "you would take 10" in page

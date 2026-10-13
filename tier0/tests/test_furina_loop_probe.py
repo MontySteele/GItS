@@ -111,17 +111,16 @@ KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
 #: fails the sweep.
 #:
 #: THE DIVERSITY PASS (2026-10-11). Tutti!+ costs 0 and draws 1, so with any
-#: 0-cost draw-1 card (Encore!, Interval Bell, Soothing Waters) and nothing
+#: 0-cost draw-1 card (Interval Bell, Soothing Waters) and nothing
 #: else in the deck, every guest acts forever. [USER]: "Theoretical infinite
 #: loops in thin decks aren't automatically a problem - it's a problem if
 #: they are tirivial to assemble and execute". This one needs a deck thinned
 #: to those two cards, so it is not trivial, and the paper's 0-cost upgrade
-#: stands.
+#: stands. (Encore! left this list on 2026-10-12: it no longer draws.)
 _TUTTI_THIN_DECK = ("[USER], 2026-10-11: a theoretical loop in a thin deck "
                     "is not a problem unless trivial to assemble; this one "
                     "needs a deck thinned to Tutti!+ and the draw card")
 ACCEPTED_LOOPS = {
-    frozenset({"proto_fs_tutti", "proto_fs_encore"}): _TUTTI_THIN_DECK,
     frozenset({"proto_fs_tutti", "proto_fs_interval_bell"}): _TUTTI_THIN_DECK,
     frozenset({"proto_fs_tutti", "proto_fs_soothing_waters"}): _TUTTI_THIN_DECK,
 }

@@ -32,7 +32,7 @@ namespace KleeMod.Powers;
 /// funnel ("Whenever a card is Exhausted, gain Charge and Burst Energy"), which
 /// is the first thing the brief retires, so a run holding it would print a rule
 /// the arm has turned off. Tamakushi Casket takes the slot (since 2026-10-12:
-/// Block at the end of her turn while a Plan is waiting). THE COMPANION REWARD SLOT SURVIVES THE SWAP,
+/// Block at the start of her turn while a Plan is waiting). THE COMPANION REWARD SLOT SURVIVES THE SWAP,
 /// because it rides the relic in this mod purely for lifetime reasons and the
 /// slice's Commander loop draws its whole army from it.
 ///
