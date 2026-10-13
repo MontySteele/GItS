@@ -95,8 +95,8 @@ def _power(name, text, stacks=1):
 
 
 def test_a_plain_end_of_turn_block_power_is_folded():
-    gale = _power("Gale Ward", "At the end of your turn, Swirl the enemy "
-                               "with the most auras and gain 6 Block.")
+    gale = _power("Gale Ward", "At the end of your turn, Swirl an enemy "
+                               "with an aura and gain 6 Block.")
     assert line(_hit(10), _you([gale]), [], []) == (
         "- Incoming this turn: 10 (your Block 0): you would take 4 "
         "(Gale Ward adds 6 Block first). You would be at 56/80 HP.")

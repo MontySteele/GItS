@@ -276,7 +276,8 @@ SIM_CALL_SITES = {
     ('effects.py', 10): ("'companion'", None, 'None'),
     ('effects.py', 11): ("'companion'", None, "'cryo'"),
     ('effects.py', 12): ("'companion'", None, "'electro'"),
-    ('effects.py', 13): ("'companion'", None, 'None'),
+    # Albedo's Solar Isotoma, Geo to ALL per Attack since 2026-10-13.
+    ('effects.py', 13): ("'companion'", None, "'geo'"),
     ('effects.py', 14): ("'companion'", None, 'None'),
     ('effects.py', 15): ("'companion'", None, "'geo'"),
     ('effects.py', 16): ("'companion'", None, 'None'),

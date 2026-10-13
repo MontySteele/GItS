@@ -20,14 +20,6 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MC_GLACIAL_WALTZ_DMG</c>.</summary>
     public const int GlacialWaltzDamage = 7;
 
-    /// <summary>Albedo, Solar Isotoma: the platform's own damage.
-    /// Mirrors <c>C.MC_ISOTOMA_DMG</c>.</summary>
-    public const int IsotomaDamage = 8;
-
-    /// <summary>Albedo, Solar Isotoma: the Crystallize half.
-    /// Mirrors <c>C.MC_ISOTOMA_BLOCK</c>.</summary>
-    public const int IsotomaBlock = 4;
-
     /// <summary>Fischl, Oz at Your Side: the Electro volley, no turn limit.
     /// Mirrors <c>C.MC_OZ_DMG</c>.</summary>
     public const int OzDamage = 5;

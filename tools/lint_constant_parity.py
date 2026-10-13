@@ -191,8 +191,6 @@ MIRRORED: dict[str, object] = {
     # grading a different card from the one the sim scored.
     "CompanionOverhaulLaw.SignatureMixBlock": C.MC_SIGNATURE_MIX_BLOCK,
     "CompanionOverhaulLaw.GlacialWaltzDamage": C.MC_GLACIAL_WALTZ_DMG,
-    "CompanionOverhaulLaw.IsotomaDamage": C.MC_ISOTOMA_DMG,
-    "CompanionOverhaulLaw.IsotomaBlock": C.MC_ISOTOMA_BLOCK,
     "CompanionOverhaulLaw.OzDamage": C.MC_OZ_DMG,
     "CompanionOverhaulLaw.RevelationBlock": C.MC_REVELATION_BLOCK,
     "CompanionOverhaulLaw.RevelationStrength": C.MC_REVELATION_STRENGTH,

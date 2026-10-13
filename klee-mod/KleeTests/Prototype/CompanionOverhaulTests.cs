@@ -276,7 +276,6 @@ public class CompanionOverhaulTests
     [InlineData(typeof(GlacialWaltzPower), CompanionOverhaulLaw.GlacialWaltzDamage)]
     [InlineData(typeof(MondstadtOzPower), CompanionOverhaulLaw.OzDamage)]
     [InlineData(typeof(LightningRosePower), CompanionOverhaulLaw.LightningRoseDamage)]
-    [InlineData(typeof(SolarIsotomaBloomPower), CompanionOverhaulLaw.IsotomaDamage)]
     [InlineData(typeof(RevelationPower), CompanionOverhaulLaw.RevelationBlock)]
     public void Every_power_face_prints_the_number_it_pays(Type type, int number)
     {
@@ -490,5 +489,74 @@ public class CompanionOverhaulTests
             .SelectMany(Il.Calls)
             .ToList();
         Assert.Contains("CompanionOverhaulTurnEnd.Subscribe", bodies);
+    }
+
+    // --- Albedo, Solar Isotoma (2026-10-13) ----------------------------------
+    // [USER]: "a Rare should be more dramatic and the Mondstadt pool already has
+    // powers for free block". STRUCTURAL: resolution is outside the headless
+    // boundary, so the arithmetic (one Geo hit per enemy of Amount x Attacks,
+    // Crystallize for Block, copies add, zero Attacks deals nothing) is
+    // asserted for real in the sim twin, test_companion_overhaul.py.
+
+    [Fact]
+    public void Isotoma_is_a_rare_1_cost_power_whose_amount_is_the_per_attack_damage()
+    {
+        var card = new ProtoMcAlbedoSolarIsotoma();
+        Assert.Equal(CardType.Power, card.Type);
+        Assert.Equal(CardRarity.Rare, card.Rarity);
+        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(2, card.DynamicVars["PowerAmount"].IntValue);
+        var play = typeof(ProtoMcAlbedoSolarIsotoma).GetMethod("OnPlay", All)!;
+        Assert.DoesNotContain(Il.Calls(play), c => c.Contains("CardPileCmd.Draw"));
+        var upgrade = typeof(ProtoMcAlbedoSolarIsotoma).GetMethod("OnUpgrade", All)!;
+        Assert.Contains(Il.Calls(upgrade), c => c.Contains("UpgradeValueBy"));
+    }
+
+    [Fact]
+    public void Isotoma_reads_the_attack_ledger_and_hits_with_geo_and_grants_no_block()
+    {
+        var volley = typeof(SolarIsotomaBloomPower).GetMethod("FireVolley", All)!;
+        var calls = Il.Calls(volley);
+        Assert.Contains("CompanionOverhaulLedger.For", calls);
+        Assert.Contains("CompanionOverhaulLedger.get_AttacksPlayedThisTurn", calls);
+        Assert.Contains(calls, c => c.Contains("ElementalHit.Deal"));
+        Assert.DoesNotContain(calls, c => c.Contains("CreatureCmd.GainBlock"));
+        Assert.DoesNotContain(calls, c => c.Contains("MostAuras"));
+        var face = ((ILocalizationProvider)new SolarIsotomaBloomPower())
+            .Localization!.Single(e => e.Item1 == "description").Item2;
+        Assert.Equal("At the end of your turn, deal [blue]{Amount}[/blue] "
+                   + "[gold]Geo[/gold] damage to ALL enemies for each Attack "
+                   + "you played this turn.", face);
+    }
+
+    [Fact]
+    public void Isotoma_counts_planned_attacks_and_stings()
+    {
+        // The ledger is written by the play watcher for every played card of
+        // type Attack. Writing a Kokomi Plan happens INSIDE the card's OnPlay
+        // (the play pipeline has already begun, so AfterCardPlayed follows),
+        // and a Sting is an Attack token.
+        var watcher = typeof(CompanionOverhaulPlayWatcher)
+            .GetMethod("AfterCardPlayed", All)!;
+        Assert.Contains("CompanionOverhaulLedger.NoteAttack", Il.Calls(watcher));
+        Assert.Equal(CardType.Attack, new ProtoKkSting().Type);
+        var stingPlay = typeof(ProtoKkSting).GetMethod("OnPlay", All)!;
+        Assert.Contains(Il.Calls(stingPlay), c => c.Contains("KokomiPlan.PlayedOnPet"));
+    }
+
+    [Fact]
+    public void Isotoma_copies_stack_as_a_counter()
+    {
+        var power = new SolarIsotomaBloomPower();
+        Assert.Equal(PowerStackType.Counter, power.StackType);
+    }
+
+    [Fact]
+    public void Jeans_breeze_says_an_enemy_with_an_aura()
+    {
+        var face = ((ILocalizationProvider)new DandelionBreezePower())
+            .Localization!.Single(e => e.Item1 == "description").Item2;
+        Assert.StartsWith("At the end of your turn, [gold]Swirl[/gold] an enemy "
+                        + "with an aura and gain", face);
     }
 }

@@ -59,10 +59,19 @@ def test_bubble_ward_is_6_and_9():
     assert _up("proto_kk_bubble_ward").effects[0]["amount"] == 9
 
 
-def test_albedo_names_the_enemy_with_the_most_auras():
+def test_albedo_deals_geo_to_all_per_attack():
+    # 2026-10-13: "a Rare should be more dramatic and the Mondstadt pool
+    # already has powers for free block".
     assert _face("proto_mc_albedo_solar_isotoma") == (
-        "At the end of your turn, if any enemy has an aura, deal 8 damage to "
-        "the enemy with the most auras and gain 4 [gold]Block[/gold].")
+        "At the end of your turn, deal 2 [gold]Geo[/gold] damage to ALL "
+        "enemies for each Attack you played this turn.")
+
+
+def test_jean_swirls_an_enemy_with_an_aura():
+    # An enemy holds at most one aura, so "the most auras" named nothing.
+    assert _face("proto_mc_jean_dandelion_breeze") == (
+        "At the end of your turn, [gold]Swirl[/gold] an enemy with an aura "
+        "and gain 6 [gold]Block[/gold].")
 
 
 def test_kurage_canopy_face():
