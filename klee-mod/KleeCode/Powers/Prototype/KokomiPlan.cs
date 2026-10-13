@@ -331,7 +331,8 @@ public static class KokomiPlan
         string Card, int? Number, string Line,
         IReadOnlyList<MovedOn>? Moved, bool OnPlay,
         string? Kind = null, int? Asked = null,
-        IReadOnlyList<Rider>? Riders = null, bool Unfinished = false);
+        IReadOnlyList<Rider>? Riders = null, bool Unfinished = false,
+        bool NoTarget = false);
 
     /// <summary>
     /// SOMETHING ELSE THAT LANDED INSIDE ONE PLAN'S WINDOW, by name and by
@@ -538,6 +539,13 @@ public static class KokomiPlan
     /// carried out right now, one entry's clauses at a time
     /// (<see cref="ResolveEntry"/>). Grand Strategist reads it.</summary>
     private static readonly HashSet<Player> _carrying = new();
+
+    /// <summary>The seats whose carry-out had a hit with no living body to
+    /// aim at (an earlier Plan that morning killed it). <see cref="Hit"/>
+    /// marks it inside the carrying window; the carry-out's row reads it as
+    /// <c>no_target</c>, so the page can tell "its target was already dead"
+    /// from a Plan that missed (Kokomi round 5, lane 3).</summary>
+    private static readonly HashSet<Player> _aimedAtNoOne = new();
 
     /// <summary>Is a Plan of this seat being carried out right now? Grand
     /// Strategist's "Whenever a Plan causes an Elemental Reaction": a
@@ -1722,6 +1730,7 @@ public static class KokomiPlan
         // Kokomi round-3 changes (2026-10-12): what else landed in this
         // carry-out's window, named on the results line (Coordinated Tide).
         var riders = new List<Rider>();
+        if (seat != null) _aimedAtNoOne.Remove(seat);
         if (seat != null) _carrying.Add(seat);
         try
         {
@@ -1780,11 +1789,13 @@ public static class KokomiPlan
             // the unwind path and not after it. Every number the board already
             // moved is still measured; the clauses that never ran moved
             // nothing, which is the honest reading.
+            var noTarget = seat != null && _aimedAtNoOne.Remove(seat)
+                           && number == null;
             Announce(kokomi,
                      entry.Now && entry.TwoLine
                          ? NowLineTitle(entry.Title) : entry.Title,
                      number, Moved(before, kokomi),
-                     onPlay, kind, asked, riders);
+                     onPlay, kind, asked, riders, noTarget);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -1825,12 +1836,14 @@ public static class KokomiPlan
     private static void Announce(Creature kokomi, string card, int? number,
                                  IReadOnlyList<MovedOn>? moved, bool onPlay,
                                  string? kind = null, int? asked = null,
-                                 IReadOnlyList<Rider>? riders = null)
+                                 IReadOnlyList<Rider>? riders = null,
+                                 bool noTarget = false)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
         Record(kokomi, new CarriedOutPlan(card, number, line, moved, onPlay,
-                                          kind, asked, riders));
+                                          kind, asked, riders,
+                                          NoTarget: noTarget));
     }
 
     /// <summary>
@@ -2438,11 +2451,13 @@ public static class KokomiPlan
             kokomi, Diagnostics.DamageCredit.Pet, "Bake-Kurage");
         var times = plan.Times < 1 ? 1 : plan.Times;
         int? first = null;
+        var aimedAtAnyone = false;
         for (var pass = 0; pass < times; pass++)
         {
             foreach (var target in Aimed(kokomi, plan, entry))
             {
                 if (target.IsDead) continue;
+                aimedAtAnyone = true;
                 var landed = await ElementalHit.Deal(
                     choiceContext, target, Element.Hydro, amount, kokomi,
                     powered: false);
@@ -2458,6 +2473,11 @@ public static class KokomiPlan
                 }
                 first ??= landed;
             }
+        }
+        if (!aimedAtAnyone && kokomi.Player is { } seat
+            && _carrying.Contains(seat))
+        {
+            _aimedAtNoOne.Add(seat);
         }
         return first;
     }
@@ -2575,6 +2595,8 @@ public static class KokomiPlan
             // whether the Plan happened at all.
             ["riders"] = said.Riders?.Select(RiderRow).ToList(),
             ["unfinished"] = said.Unfinished,
+            // A hit that found no living body to aim at (BACKLOG 2026-10-13).
+            ["no_target"] = said.NoTarget,
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for

@@ -3931,10 +3931,11 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         # the line's figure and the board's can be reconciled, and whether
         # the Plan ran at all. Both are things a sighted player watched
         # happen -- a relic striking, and a Plan the fight cut off -- and
-        # neither is a ledger row.
+        # neither is a ledger row. `no_target` (2026-10-13) is the same
+        # kind of fact: the Plan's target was already dead.
         assert set(row) == {"card", "number", "line", "kind", "asked",
                             "on_play", "board_read", "moved",
-                            "riders", "unfinished"}
+                            "riders", "unfinished", "no_target"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}
