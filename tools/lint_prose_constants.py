@@ -255,20 +255,6 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs",
      "AbyssNumbers.ResonanceDraw", "1"):
         "the power's own draw, not the Abyss Blessing's",
-    # Starfell Draft's "1 additional card" (abyss-pools-2, 2026-10-12) is a
-    # run modifier's reward count; these print their own draws and counts.
-    ("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs",
-     "AbyssNumbers.StarfellDraftExtraCards", "1"):
-        "a keyword tip's own count, not the Abyss Blessing's",
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
-     "AbyssNumbers.StarfellDraftExtraCards", "1"):
-        "the card's own draw, not the Abyss Blessing's",
-    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
-     "AbyssNumbers.StarfellDraftExtraCards", "1"):
-        "the card's own draw, not the Abyss Blessing's",
-    ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs",
-     "AbyssNumbers.StarfellDraftExtraCards", "1"):
-        "the power's own draw, not the Abyss Blessing's",
     # DROPPED 2026-10-11 (the diversity pass), reported stale by the lint:
     # Ensemble Cast's face ("You have 4 guest seats. Summon a random guest.")
     # no longer reads as a lone match once the corpus moved.

@@ -350,7 +350,7 @@ public static class AbyssRules
     /// card reward's roll (the game marks them all <c>IsCardReward</c>); any
     /// other draw of reward cards (a transform, a Neow pack) is left alone.</summary>
     public static int StarfellDraftCount(int cardCount, bool isCardReward) =>
-        isCardReward && cardCount > 0 ? cardCount + AbyssNumbers.StarfellDraftExtraCards : cardCount;
+        isCardReward && cardCount > 0 ? cardCount + 1 : cardCount;
 
     /// <summary>The shield after one reaction on its wearer.</summary>
     public static int ShieldAfterReaction(int hits) =>

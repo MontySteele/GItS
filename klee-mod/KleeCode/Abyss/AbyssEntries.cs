@@ -112,7 +112,6 @@ public static class AbyssNumbers
     public const int BattleRhythmStrength = 1;
     public const int BattleRhythmDexterity = 1;
     public const int WaveringMoonDamage = 3;
-    public const int StarfellDraftExtraCards = 1;
 
     public const int ClockFromRound = 5;
     public const int ClockStrength = 2;
@@ -180,7 +179,10 @@ public static class AbyssText
         AbyssBlessing.WaveringMoon =>
             $"Whenever you trigger an Elemental Reaction, deal {AbyssNumbers.WaveringMoonDamage} damage to ALL enemies.",
         AbyssBlessing.StarfellDraft =>
-            $"Card rewards show {AbyssNumbers.StarfellDraftExtraCards} additional card.",
+            // A word, not a tunable: "1 additional card" is the Blessing.
+            // (Kept off AbyssNumbers so the prose lint does not pair every
+            // card's "1 card" with it.)
+            "Card rewards show 1 additional card.",
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };
 

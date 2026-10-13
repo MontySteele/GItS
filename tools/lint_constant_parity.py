@@ -435,7 +435,6 @@ UNMIRRORED: dict[str, str] = {
     "AbyssNumbers.BattleRhythmStrength": _ABYSS_REASON,
     "AbyssNumbers.BattleRhythmDexterity": _ABYSS_REASON,
     "AbyssNumbers.WaveringMoonDamage": _ABYSS_REASON,
-    "AbyssNumbers.StarfellDraftExtraCards": _ABYSS_REASON,
     "AbyssNumbers.ThornyGroundThorns": _ABYSS_REASON,
     "AbyssNumbers.BulwarkBlock": _ABYSS_REASON,
     "AbyssNumbers.FrenzyStrength": _ABYSS_REASON,
