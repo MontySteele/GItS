@@ -15840,6 +15840,38 @@ def stage_spend_hits_call(card: dict) -> str | None:
             f"{int(spends[0]['amount'])})")
 
 
+#: BACKLOG (Furina: a Spend card silently plays its plain side): the token
+#: of a Spend mode's in-combat "(Not enough Fanfare)" line.
+STAGE_SPEND_SHORT_TOKEN = "StageSpendShort"
+
+
+def stage_spend_short_call(card: dict) -> str | None:
+    """The C# that fills a Spend mode's in-combat line, or None.
+
+    A `choose_one` whose mode is headed by a `stage_spend` is not offered
+    that mode when her Fanfare is short (`ModalChoice.SelectAffordableMode`),
+    so the plain mode played with no word said. The card now says it in
+    hand, "(Not enough Fanfare)", as a Drain mode says "(Not enough HP)".
+    Behaviour unchanged. The price is the gate's (`stage_spend_amount_cs`).
+    """
+    heads = []
+    for fx in card.get("effects") or []:
+        if fx.get("op") != "choose_one":
+            continue
+        for mode in fx.get("modes") or []:
+            body = mode.get("effects") or []
+            if body and body[0].get("op") == "stage_spend":
+                heads.append(body[0])
+    if not heads:
+        return None
+    if len({int(h.get("amount", 1)) for h in heads}) != 1:
+        raise ValueError(f"{card['id']}: a Spend mode preview reads one "
+                         "Spend price")
+    amount = (stage_spend_amount_cs(card, heads[0])
+              or str(int(heads[0].get("amount", 1))))
+    return f"FurinaStageFacePreview.SpendShort(this, {amount})"
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
     args = []
@@ -15847,7 +15879,9 @@ def stage_face_args(card: dict) -> list[tuple[str, str]]:
                         (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
                         (STAGE_REPAY_TOKEN, stage_repay_call(card)),
                         (STAGE_SPEND_HITS_TOKEN,
-                         stage_spend_hits_call(card))):
+                         stage_spend_hits_call(card)),
+                        (STAGE_SPEND_SHORT_TOKEN,
+                         stage_spend_short_call(card))):
         if call:
             args.append((token, call))
     return args

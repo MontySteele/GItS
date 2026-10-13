@@ -49,8 +49,17 @@ public sealed class ProtoFsBubbleAria : CustomCardModel, ICharacterCard, IStageS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bubble Aria"),
-        ("description", "Gain {IfUpgraded:show:8|6} [gold]Block[/gold]. [gold]Spend[/gold] 3: also draw 2 cards."),
+        ("description", "Gain {IfUpgraded:show:8|6} [gold]Block[/gold]. [gold]Spend[/gold] 3: also draw 2 cards.{InCombat:{StageSpendShort}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageSpendShort", FurinaStageFacePreview.SpendShort(this, 3));
+    }
 
     // EB-184: what each mode does about AIMING, in sheet order.
     // The card's own TargetType is fixed before a mode is chosen (the
