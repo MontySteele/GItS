@@ -45,6 +45,9 @@ public class VarkaAncientsTests : IDisposable
         return card;
     }
 
+    private static int UpgradedCost<T>() where T : CardModel, new() =>
+        Upgraded<T>().EnergyCost.GetWithModifiers(CostModifiers.None);
+
     /// <summary>The type argument of every <c>ModelDb.Card&lt;T&gt;()</c> call
     /// in the body, read off its IL (<c>ArmPools</c>' scan).</summary>
     private static List<Type> CardTypesCalled(System.Reflection.MethodBase method)
@@ -120,33 +123,45 @@ public class VarkaAncientsTests : IDisposable
     // ==== Dandelion Gale =====================================================
 
     [Fact]
-    public void Dandelion_gale_is_a_1_cost_anemo_aoe_whose_swirls_pay_twice()
+    public void Dandelion_gale_is_the_ascension_on_all_enemies_2_cost_1_upgraded()
     {
+        // The Archaic Tooth redesign (2026-10-13): "the ancient starts at 2,
+        // and upgrading it at a campfire (or replacing an already-upgraded
+        // Ascension) takes it to 1."
         var card = new DandelionGale();
         Assert.Equal(CardRarity.Ancient, card.Rarity);
         Assert.Equal(CardType.Attack, card.Type);
-        Assert.Equal(1, card.EnergyCost.Canonical);
+        Assert.Equal(2, card.EnergyCost.Canonical);
+        Assert.Equal(1, UpgradedCost<DandelionGale>());
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
+        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
         Assert.Equal(Element.Anemo, ((IElementalCard)card).Element);
-        Assert.Equal(7m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(10m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(3m, card.DynamicVars["VkPer"].BaseValue);
+        // The upgrade is the cost only.
         Assert.Equal(10m, Upgraded<DandelionGale>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(3m, Upgraded<DandelionGale>().DynamicVars["VkPer"].BaseValue);
+        Assert.Contains(card.DynamicVars.Values, v => v is VarkaCurrentElementHitVar);
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. "
-          + "[gold]Swirl[/gold] every aura. These [gold]Swirls[/gold] pay twice.",
+          + "Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your "
+          + "[gold]current element[/gold] to each, as that element."
+          + "{InCombat:\n(Deals {VkHit:diff()} damage)|}",
             Face(card));
-        // The hit runs inside Crosscurrent's pays-twice window.
+        // The Anemo hit on ALL, then the current-element hit on ALL.
         var play = Il.CallSequence(Il.Method("DandelionGale", "OnPlay")).ToList();
-        var open = play.IndexOf("VarkaOathLedger.set_PaysTwice");
         var hit = play.FindIndex(c => c.Contains("Execute"));
-        Assert.True(open >= 0 && hit > open);
-        Assert.Contains("VarkaOathLedger.set_PaysTwice", play.Skip(hit + 1));
+        Assert.True(hit >= 0 && play.IndexOf("VarkaCards.GaleHit") > hit);
+        var gale = Il.CallSequence(Il.Method("VarkaCards", "GaleHit")).ToList();
+        Assert.Contains("VarkaOath.NoApplyCredit", gale);
+        Assert.Contains(gale, c => c.Contains("TargetingAllOpponents"));
     }
 
     [Fact]
-    public void The_archaic_tooth_turns_windbound_execution_into_dandelion_gale()
+    public void The_archaic_tooth_turns_four_winds_ascension_into_dandelion_gale()
     {
-        Assert.IsAssignableFrom<ITranscendenceCard>(new ProtoVkWindboundExecution());
-        var made = Il.Method("ProtoVkWindboundExecution",
+        Assert.IsAssignableFrom<ITranscendenceCard>(new ProtoVkFourWindsAscension());
+        var made = Il.Method("ProtoVkFourWindsAscension",
                              "GetTranscendenceTransformedCard");
         Assert.Equal(typeof(CardModel), ((System.Reflection.MethodInfo)made).ReturnType);
         Assert.Contains(typeof(DandelionGale), CardTypesCalled(made));

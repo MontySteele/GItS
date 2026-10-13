@@ -1216,6 +1216,34 @@ public static class VarkaCards
         CurrentElementHit(choiceContext, card, cardPlay, 0m,
                           Var(card, "VkPer"), credit: false);
 
+    /// <summary>
+    /// Dandelion Gale's second hit (the Archaic Tooth redesign, 2026-10-13):
+    /// the Ascension's, "to each" enemy. One hit on ALL enemies carrying his
+    /// current element, read after the Anemo hit, crediting no Oath. Nothing
+    /// without a current element, or at 0 damage.
+    /// </summary>
+    public static async Task GaleHit(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        var element = VarkaOath.Current(owner);
+        if (owner == null || element == Element.None) return;
+        if (card.CombatState is not { } combat) return;
+        var damage = CurrentElementDamage(0m, Var(card, "VkPer"),
+                                          VarkaOath.CurrentOath(owner));
+        if (damage <= 0) return;
+        using (HitElement.Carry(card, element))
+        using (VarkaOath.NoApplyCredit(owner))
+        {
+            await DamageCmd.Attack(damage)
+                .FromCard(card, cardPlay)
+                .TargetingAllOpponents(combat)
+                .WithElementHitFx(element)
+                .SpawningHitVfxOnEachCreature()
+                .Execute(choiceContext);
+        }
+    }
+
     /// <summary>Northwind Avatar's second hit: "Then deal 8 [12], plus 2 per
     /// Oath, as your current element." It credits like any card.</summary>
     public static Task AvatarHit(

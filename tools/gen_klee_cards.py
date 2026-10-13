@@ -16015,7 +16015,9 @@ def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
 #: 2026-10-12: "Otherwise agreed.- let's fix them all") wires every kit's
 #: Tooth card the same way, and each kit's Tome then draws its other Ancient.
 TRANSCENDENCE = {
-    "proto_vk_windbound_execution": "global::KleeMod.Cards.Varka.DandelionGale",
+    # Varka starter (a), 2026-10-13: the Tooth moves to Four Winds' Ascension,
+    # his starter card now that Windbound Execution has left the deck.
+    "proto_vk_four_winds_ascension": "global::KleeMod.Cards.Varka.DandelionGale",
     "proto_ko_jumpy_dumpty": "global::KleeMod.Cards.JumpyDumptyMkOmega",
     "proto_kk_kurages_oath":
         "global::KleeMod.Cards.Kokomi.PrincessOfWatatsumi",
