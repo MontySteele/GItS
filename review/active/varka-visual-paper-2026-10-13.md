@@ -27,11 +27,11 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 |---|---|---|---|
 | idle | Stance A: a tight, ready battle stance. Knees bent, feet wide, weight forward. Both blades are held in a low guard, angled down and back at his sides with the tips off the ground, mirrored so they read as one pair. Only the chest breathes; the blades stay fixed in his hands. A blink, the coat skirt and belt tails sway. | 2.8 s loop | 34 at 12 fps |
 | idle_low | The same guard, worn down: shoulders and head low, both tips lowered together, still clear of the ground. | 3.0 s loop | 30 at 10 fps |
-| attack | One compact spin, then a double cleave. A crouch with both blades drawn back; a full turn on the spot with a small hop, both blades held out behind him at waist height so they sweep a ring (impact 1, frame 6, as they pass the enemy's side); both blades come up over his head together and down in front of him in a parallel V (impact 2, frame 11, the main one); a snap back to the guard. | 1.0 s | 20 |
+| attack | One continuous spin-to-slam. From a short wind-up, one turn on the spot carries both blades up a rising helix: level behind him, a little raised as they pass the enemy's side (light impact, frame 7), overhead as the last fifth of the turn begins, and on down in front of him as the turn brings him back to face the enemy (main impact, frame 12). A settle, then back to the guard. | 1.05 s | 21 |
 | cast | Both blades rise together beside him, then cross before him: the salute. | 1.0 s | 20 |
 | hurt | His body snaps back; the guard holds, both blades lifted together a little in his fixed grip. | 0.8 s | 16 |
 | death | He drives both blades into the ground either side, sinks to one knee between them, lets go and bows his head. It holds from 1.6 s. | 2.2 s | 25 |
-| ascension | For Four Winds' Ascension. He crouches, raises both blades overhead together and leaps straight up into one full turn in the air (his feet rise about a third of his height), then crashes down into a synced double strike before him (impact, frame 12, with a ground shock ring). Then he snaps back to the guard. | 1.3 s | 26 |
+| ascension | For Four Winds' Ascension. He crouches and jumps straight up (hips 0.80 units, 0.39 of his height), the lead blade swung up over his head and the other held back for balance. Coming down, the lead blade chops over the top and is driven point-first, near vertical, into the ground in front of him as he lands (impact, frame 10). A hard landing, low beside the planted blade; he pulls it out and is back in the guard. No turn. The ground burst is a separate effect clip (see Round 3). | 1.3 s | 26 |
 | merchant | Stance B: upright, both claymores planted either side, his hands on the hilts. It breathes. | 3.0 s loop | 30 at 10 fps |
 
 **Stills:**
@@ -43,8 +43,9 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 
 **The element layer** (`fx.py`). The body is rendered with no element colour. A separate colourless layer is cut from the blades' own swept arcs:
 - render.py records each blade's base and tip four times per frame;
-- one tapered crescent trail per blade, the two always over the same window: on the attack a ring segment for the spin and two parallel arcs for the cleave, a twin arc on the ascension;
-- impact bursts at the marked frames, centred between the two blades: a flash, a ring and streaks on the attack, and a flattened shock ring with rising streaks on the ground for the ascension.
+- one tapered crescent trail per blade: on the attack one ribbon per blade, the two over the same window, spiralling up through the spin and down into the slam; on the ascension one ribbon for the driven blade;
+- impact bursts at the attack's marked frames, centred between the two blades: a flash, a ring and streaks;
+- the ascension's ground burst, a separate effect clip placed at the blade's point and, mirrored, under the target (Round 3).
 
 R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A flat `modulate` tints it. The sheets use a two-line shader look: `mix(element, white, smoothstep(0.72, 1, heat))`. The element colours are the mod's own `ReactionFx.ElementFlashHex` (`klee-mod/KleeCode/Vfx/ReactionFx.cs`):
 
@@ -56,7 +57,7 @@ R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A 
 | Electro | #c08cff |
 | Cryo | #a8f0ff |
 
-**Data for phase B** (committed): `tools/char_render/varka_frames.json`. It holds each clip's logical cell and per-frame rects (page, rect, offset in the cell), pages, counts, times, feet anchors, the impact frames (`impact_frames`, `main_frame`), the fx layers' first frame and anchor, the shadow placement, the rest seat and the select framing.
+**Data for phase B** (committed): `tools/char_render/varka_frames.json`. It holds each clip's logical cell and per-frame rects (page, rect, offset in the cell), pages, counts, times, feet anchors, the impact frames (`impact_frames`, `main_frame`), the fx layers' first frame and anchor, the effect clips and where each is placed (`effects`), the shadow placement, the rest seat and the select framing.
 
 ## Measured
 
@@ -66,13 +67,13 @@ R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A 
 | Figure | L* p90 | C* p90 |
 |---|---|---|
 | Varka idle f0 | 68.1 | 24.6 |
-| Varka attack f11 | 65.8 | 23.1 |
+| Varka attack f12 | 67.0 | 23.3 |
 | Ironclad | 71.4 | 41.4 |
 | Silent | 68.9 | 24.9 |
 | Ironclad + Silent mean | 70.1 | 33.2 |
 
 His black coat and grey trousers sit him under the pair on both measures, near Silent. H3 lite is the ruled fixed squeeze and was not retuned.
-- **Cost.** After the motion redo: 15 files, 75.3 Mpx (98.5 after the review, 174 in 21 files at first). That is 301 MB of RGBA uncompressed at 2x, or about 75 MB VRAM-compressed (1 byte per texel), and 45 MB of PNG on disk. Klee's whole set is about 55 MB. Every combat clip now fits one 4096 page.
+- **Cost.** After Round 3: 16 files, 85.4 Mpx (75.3 after the motion redo, 98.5 after the review, 174 in 21 files at first). That is 342 MB of RGBA uncompressed at 2x, or about 85 MB VRAM-compressed (1 byte per texel), and 46 MB of PNG on disk. Klee's whole set is about 55 MB. Every combat clip now fits one 4096 page.
 
 ## Where his graphics appear (the surface list for phase B)
 
@@ -129,9 +130,47 @@ The model, the shading, the scale (78 in), the element trail layer, the texture 
 - **Cast, hurt, death and merchant** keep their beats with the blades in the same rigid, synced grip. The rest site leaned back a little; his upper body now leans 14 degrees toward the fire (it was 6), so he sits upright with his forearms on his knees.
 - **The trail layer** follows the new arcs: the spin's two trails are a ring segment, the cleave's two run parallel, and the slash bursts sit between the two blades.
 
+## Round 3: after [USER]'s second look (2026-10-13)
+
+[USER], on the round-2 sheets: "Much better! But there is one odd note - he half-twirls once, then instantly flips to slam them down. Could we make this smoother, with the twirl also raising the blades and the slam showing him spinning back, so it reads as one continuous animation rather than two halves? For the Four Winds' Ascension - let's drop the twirl and instead show him jumping up and then driving one blade into the ground, with a mirrored ground particle effect on him and the target enemy."
+
+Only the attack and the ascension changed. Idle, cast, hurt, death, the shop, the rest site, the model, shading, scale, trail colours and texture pipeline are as they were.
+
+**References.** Before animating, stills of his own moves were pulled from the wiki's talent demos and kit explainers. They stay in the scratch folder (`varka-art/reference/`, with `NOTES.md` listing each URL and beat) and are never committed.
+- Talent Demo 2 (his 5-hit string) and Talent Demo 3 (Windbound Execution): the blades held level through a spin, then rising cuts and an overhead arc down in front. This set the attack's helix: level, then up, then down in front.
+- Character Details 3, right panel (the special charged attack): a low crouch with both blades at his sides, then a spin with both out level. This set the wind-up.
+- Character Details 3, left panel (Four Winds' Ascension itself): a straight jump with the blades raised and knees tucked, then one claymore driven point-first, near vertical, into the ground, and a low crouch beside it with the other blade swept back. This set the whole ascension.
+- Talent Demo 1 (frames 15, 60, 63) and Character Details 3 (frames 16 to 34): radial cracks, a flat ring, and a column of light rising from the point. This set the ground burst.
+
+**The attack is one motion.** The turn and the blades' pitch are smooth curves of one parameter, keyed every half frame (`varka_clips.py`: `spin_turn`, `spin_pitch`, `helix`).
+- The turn eases in from the wind-up and eases out into the slam.
+- The pitch climbs the whole way, from level behind him (-18 degrees), over the top (90), to down in front (200), and speeds up over the top. Nothing holds at the top.
+- The overhead comes at about 300 degrees of the turn. The last 60 degrees bring him back to face the enemy as the blades come down.
+- Both blades stay mirrored and rigid in his grip.
+- One ribbon per blade runs the whole way (`trails`, `age` 0.22 s), spiralling up and coming down into the slam.
+- The new test `test_the_attack_is_one_continuous_motion` checks the join. From one half-frame step to the next, the yaw speed may change by at most a quarter of its peak, and each tip's vertical speed by at most 0.35 of its peak. The overhead must be passed while the yaw is still turning.
+- Impacts: the light one at frame 7, as the rising blades pass the enemy's side. The main one at frame 12, low and to the right.
+
+**The ascension drives one blade.**
+- The lead (far, left-hand) blade goes in at frame 10. Its grip is 1.42 units up, it leans 16 degrees toward the enemy, and its point is about a fifth of its length under the ground line, where `pack.py` cuts it. The other blade is held back for balance.
+- The jump's peak is 0.80 units at the hips, under half his 2.05 units of height.
+- The test `test_the_ascension_jumps_and_drives_one_blade_into_the_ground` checks: no turn, the jump under half his height, landed on the impact, the point at the ground line in front of him, and the other blade back.
+
+**The ground burst** is its own sprite clip, `fx.ground_burst()`, packed as `varka_ground_burst.png`: 11 frames at 20 fps (0.55 s).
+- What it draws: radial jagged cracks and an expanding flattened ring on the ground, plus a column of streaks rising from the point.
+- It uses the same neutral heat format as the trails, so the same element tint applies.
+- The manifest records it under `effects.ground_burst`, with its cell, origin (the ground point) and frames, and one `uses` entry: `clip` ascension, `start_frame` 10, `mirror` true, `both_positions` true. That entry has two `places`:
+  - `blade_tip`: the blade's crossing of the ground line, offset (273, 0) texture px from his feet anchor, `flip_h` false;
+  - `target`: the target's feet anchor, `flip_h` true.
+- Phase B places both copies from frame 10. The review sheets preview both, with a dummy target marker drawn 550 px to his right at 1080p.
+
+**Cost.** 16 files, 85.4 Mpx (the burst adds 4.1). That is about 85 MB VRAM-compressed and 46 MB of PNG.
+
+The sheets were regenerated in place: `b_strip_attack`, `b_strip_ascension`, `c_attack.gif`, `c_attack_anemo.gif`, `c_ascension.gif`, `c_ascension_pyro.gif`, `d_elements_attack`, `d_elements_ascension` and `a_compare_1080p`.
+
 ## For [USER]
 
-1. **Texture budget.** Taken at the default in the design review: keep 2x like Klee, and phase B imports his sheets VRAM-compressed (`texture_import` in the manifest). With the per-frame trim and the tighter guard that is about 75 MB.
-2. **The motion,** redone after your look ruling, on these sheets: `scratchpad/varka-art/sheets/` (`c_attack_anemo.gif` and `c_ascension_pyro.gif` show it moving).
+1. **Texture budget.** Taken at the default in the design review: keep 2x like Klee, and phase B imports his sheets VRAM-compressed (`texture_import` in the manifest). With the per-frame trim and the tighter guard that is about 85 MB.
+2. **The motion,** redone after your second look (Round 3), on these sheets: `scratchpad/varka-art/sheets/` (`c_attack_anemo.gif` and `c_ascension_pyro.gif` show it moving).
    - **(a) Default:** go to phase B as is.
-   - (b) Change the poses first: the guard, the spin, the leap.
+   - (b) Change the poses first: the guard, the spin-to-slam, the jump and drive, or the ground burst.

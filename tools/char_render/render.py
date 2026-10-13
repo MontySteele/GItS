@@ -25,7 +25,8 @@ finger bone, and it may carry BLADES (Varka's two claymores): PMX props placed
 per pose, each closed in its hand by IK (grip_hand). Each clip's json also
 records, per blade, where the blade's base and tip project (`blades`, SUBSTEPS
 samples per frame interval), which fx.py turns into the slash trails, and the
-clip's marked `events` (the impact times).
+clip's marked `events` (the impact times) and `effects` (separate sprite
+clips the game places, such as the Ascension's ground burst).
 """
 import argparse
 import importlib
@@ -335,6 +336,7 @@ def main():
                 "origin_px": [round(origin[0], 3), round(origin[1], 3)], "ppu": round(ppu, 4),
                 "pitch": args.pitch, "keys_only": args.keys_only, "events": dict(spec.get("events", {})),
                 "trails": spec.get("trails", []), "bursts": spec.get("bursts", []),
+                "effects": spec.get("effects", []),
                 "substeps": SUBSTEPS, "blades": track}
         with open(os.path.join(args.out, f"{name}.json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=1)

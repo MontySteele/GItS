@@ -17,6 +17,11 @@ tools/char_render/render.py's raw frames and writes, under
   model/frames/<char>_<clip>_fx.png   the clip's neutral slash trails and impact
                                       bursts (fx.py), from its first live frame
                                       to its last, tinted per element by the game
+  model/frames/<char>_ground_burst.png  an effect clip of its own (fx.ground_burst):
+                                      the manifest's `effects` says which clip
+                                      places it, from which frame, and where (the
+                                      Ascension: at the blade's point and,
+                                      mirrored, under the target)
   model/frames/<char>_shadow.png      the ground shadow (Klee's look)
   model/<char>_rest.png               the seated rest-site still, padded so
                                       BaseLib's centred sprite puts his seat on
@@ -76,6 +81,8 @@ SHEET_FILES = {"varka": {"idle": "varka_idle.png", "idle_low": "varka_idle_low.p
                          "cast": "varka_cast.png", "hurt": "varka_hurt.png", "death": "varka_death.png",
                          "ascension": "varka_ascension.png", "merchant": "varka_merchant.png"}}
 FX_FILES = {"varka": {"attack": "varka_attack_fx.png", "ascension": "varka_ascension_fx.png"}}
+#: effect sprite clips a combat clip places (its spec's `effects`)
+EFFECT_FILES = {"varka": {"ground_burst": "varka_ground_burst.png"}}
 SHADOW_FILES = {"varka": "varka_shadow.png"}
 REST_FILES = {"varka": "varka_rest.png"}
 
@@ -186,6 +193,40 @@ def frame_of(meta: dict, t: float) -> int:
     return min(range(len(meta["times"])), key=lambda i: abs(meta["times"][i] - t))
 
 
+def ground_point(meta: dict, side: str, t: float):
+    """Where a blade meets the ground line at time t, in the clip's canvas px:
+    the point at which its base-to-tip line crosses the feet anchor's row (its
+    tip when the tip is above the ground)."""
+    s = min((x for x in meta["blades"] if x.get(side)), key=lambda x: abs(x["t"] - t))
+    (bx, by), (tx, ty) = s[side]
+    gy = meta["origin_px"][1]
+    if ty <= gy or ty == by:
+        return tx, ty
+    k = max(0.0, min(1.0, (gy - by) / (ty - by)))
+    return bx + (tx - bx) * k, gy
+
+
+def effect_uses(meta: dict, clip: str) -> list[dict]:
+    """The manifest record of each effect a clip places: the clip, the start
+    frame, and every place (`blade_tip`: an offset in texture px from the
+    clip's feet anchor; `target`: the target's feet anchor), with `flip_h` on
+    the mirrored copy."""
+    out = []
+    for e in meta.get("effects", []):
+        places = []
+        for n, where in enumerate(e["places"]):
+            rec = {"at": where, "flip_h": bool(e.get("mirror")) and n > 0}
+            if where == "blade_tip":
+                gx, gy = ground_point(meta, e["blade"], e["t"])
+                rec.update({"blade": e["blade"],
+                            "offset_px": [round(gx - meta["origin_px"][0]), round(gy - meta["origin_px"][1])]})
+            places.append(rec)
+        out.append({"name": e["name"], "clip": clip, "start_frame": frame_of(meta, e["t"]),
+                    "mirror": bool(e.get("mirror")), "both_positions": set(e["places"]) == {"blade_tip", "target"},
+                    "places": places})
+    return out
+
+
 def rest_still(R: Path):
     """BaseLib centres the texture at y = -0.1 h inside a 0.5 container, so a
     point at (w/2, 0.6 h) of the texture lands on the anchor: pad so the seat
@@ -234,7 +275,8 @@ def main(argv=None) -> int:
                 "char": char, "combat_scale": COMBAT_SCALE, "merchant_scale": MERCHANT_SCALE,
                 # the texture budget pick (visual paper, pick 1, default): sheets stay
                 # 2x and the game imports them VRAM-compressed
-                "texture_import": TEXTURE_IMPORT, "sheets": {}, "fx": {}}
+                "texture_import": TEXTURE_IMPORT, "sheets": {}, "fx": {}, "effects": {}}
+    uses = []
     writes = []
     for clip in (*COMBAT, "merchant"):
         meta, frames = load_clip(R, clip)
@@ -262,6 +304,23 @@ def main(argv=None) -> int:
             writes += [(out_frames / name, im) for name, im in fsheets]
             print(f"  fx      frames {first}..{first + frec['count'] - 1}  cell {frec['cell']}  "
                   f"origin {frec['origin']}")
+        uses += effect_uses(meta, clip)
+
+    # the effect clips the combat clips place (fx.ground_burst), drawn at the combat ppu
+    for name, file in EFFECT_FILES.get(char, {}).items():
+        mine = [u for u in uses if u["name"] == name]
+        assert mine, f"{name}: no clip places it"
+        ppu = manifest["sheets"][mine[0]["clip"]]["ppu"]
+        fps = manifest["sheets"][mine[0]["clip"]]["fps"]
+        frames, origin = FX.ground_burst(ppu, fps)
+        esheets, erec = sheets_for(frames, origin, file)
+        erec.update({"fps": fps, "ppu": ppu, "length": round(len(frames) / fps, 4), "loop": False,
+                     "heat": "R=G=B heat (1 core, ~0.5 glow), A coverage; tint per element",
+                     "anchor": "origin is the ground point: put it on each place's point",
+                     "uses": [{k: v for k, v in u.items() if k != "name"} for u in mine]})
+        manifest["effects"][name] = erec
+        writes += [(out_frames / n, im) for n, im in esheets]
+        print(f"effect {name}: {erec['count']} frames  cell {erec['cell']}  origin {erec['origin']}  uses {erec['uses']}")
 
     # the scale check, on the upright reference still (varka_clips.STAND)
     st = json.loads((R / "stand.json").read_text(encoding="utf-8"))

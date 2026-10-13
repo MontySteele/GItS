@@ -159,21 +159,97 @@ def test_the_two_blades_move_in_sync():
     # ... rather than just raising them one after the other." Between any two
     # keys of a combat clip both blades turn through the same angle (in the
     # world, and in his body's frame), so neither lags or leads the other.
-    for name in ("attack", "ascension", "cast", "hurt", "idle", "idle_low"):
+    for name in ("attack", "cast", "hurt", "idle", "idle_low"):
         keys = vc.CLIPS[name]["keys"]
         for (t0, p0, _), (t1, p1, _) in zip(keys, keys[1:]):
             turn = [_angle(p0["blades"][s]["dir"], p1["blades"][s]["dir"]) for s in ("L", "R")]
             body = [_angle(_body_dir(p0, s), _body_dir(p1, s)) for s in ("L", "R")]
             assert abs(turn[0] - turn[1]) < 15, (name, t0, t1, turn)
             assert abs(body[0] - body[1]) < 15, (name, t0, t1, body)
-    # through the spin the blades are rigid in his hands: one body-frame pose
-    spin = [k[1] for k in vc.CLIPS["attack"]["keys"] if 0.15 < k[0] < 0.42]
-    assert len(spin) >= 3
-    for s in ("L", "R"):
-        assert all(np.allclose(_body_dir(p, s), _body_dir(spin[0], s)) for p in spin), s
-        assert all(abs(p["blades"][s]["dir"][2]) < 0.4 for p in spin), "near level: a shallow ring at the waist"
+    # the spin is a rising helix ([USER], round 3): through the turn the blades
+    # hold one line in his body's own vertical plane and only climb, from
+    # level behind him, over the top, to down in front
+    spin = [k[1] for k in vc.CLIPS["attack"]["keys"] if vc.SPIN_T0 - 1e-9 <= k[0] <= vc.SPIN_T1 + 1e-9]
+    assert len(spin) >= 15
+    pitch = [np.degrees(np.arctan2(_body_dir(p, "L")[2], -_body_dir(p, "L")[0])) % 360 for p in spin]
+    pitch = [a - 360 if a > 270 else a for a in pitch]
+    assert all(b > a for a, b in zip(pitch, pitch[1:])), pitch
+    assert pitch[0] < 0 and pitch[-1] > 180 and any(abs(a - 90) < 15 for a in pitch), "level, over the top, down"
     turns = [k[1]["yaw"] for k in vc.CLIPS["attack"]["keys"]]
     assert max(turns) - min(turns) >= 360, "a full turn"
+    # (the ascension drives ONE blade, [USER] round 3, the other held back for
+    # balance, so it is not a synced pair and is left out above)
+
+
+def _tip_height(pose, side):
+    """A blade tip's height over the ground, roughly: the chest's rest height
+    (lowered by the crouch, raised by the hop) plus the grip offset plus the
+    blade along its direction. Enough to see a jump in its speed."""
+    b = pose["blades"][side]
+    spec = chars.CHARS["varka"]["blades"][side]
+    reach = spec["grip"] - spec["tip"]
+    drop = -next(op for op in pose["ops"] if op[0] == "move" and op[1] == "センター")[2][2]
+    base = 0.0 if b["anchor"] == "ground" else 1.45 - drop + pose["root"][2]
+    return base + b["at"][2] + reach * b["dir"][2]
+
+
+def test_the_attack_is_one_continuous_motion():
+    # [USER], round 3: "he half-twirls once, then instantly flips to slam them
+    # down ... so it reads as one continuous animation rather than two halves".
+    # Through the spin-to-slam join the root's yaw speed and each blade tip's
+    # vertical speed change by no more than a fraction of their peak from one
+    # half-frame step to the next: no hold at the top, no snap into the slam.
+    keys = [k for k in vc.CLIPS["attack"]["keys"] if vc.SPIN_T0 - 1e-9 <= k[0] <= vc.SPIN_T1 + 1e-9]
+    ts = [k[0] for k in keys]
+    assert all(abs((b - a) - vc.SPIN_STEP) < 1e-6 for a, b in zip(ts, ts[1:])), "evenly keyed"
+    yaw = np.array([k[1]["yaw"] for k in keys])
+    vy = np.diff(yaw) / vc.SPIN_STEP
+    assert (vy >= 0).all() and vy.max() > 600, "one way round, fast"
+    assert np.abs(np.diff(vy)).max() <= 0.25 * vy.max(), np.abs(np.diff(vy)).max()
+    for side in ("L", "R"):
+        tip = np.array([_tip_height(k[1], side) for k in keys])
+        vt = np.diff(tip) / vc.SPIN_STEP
+        assert np.abs(np.diff(vt)).max() <= 0.35 * np.abs(vt).max(), (side, np.abs(np.diff(vt)).max())
+    # the overhead is passed mid-motion, not held: the yaw is still turning there
+    top = max(range(len(keys)), key=lambda i: _tip_height(keys[i][1], "L"))
+    assert 0 < top < len(keys) - 1 and vy[top - 1] > 0.25 * vy.max()
+    # and one ribbon per blade spans the whole of it
+    trails = vc.CLIPS["attack"]["trails"]
+    assert sorted(w["blade"] for w in trails) == ["L", "R"]
+    for w in trails:
+        assert w["from"] <= vc.SPIN_T0 + 0.05 and w["to"] >= vc.SPIN_T1
+
+
+def test_the_ascension_jumps_and_drives_one_blade_into_the_ground():
+    # [USER], round 3: "drop the twirl and instead show him jumping up and then
+    # driving one blade into the ground, with a mirrored ground particle effect
+    # on him and the target enemy"
+    clip = vc.CLIPS["ascension"]
+    keys = clip["keys"]
+    assert all((k[1]["yaw"] - vc.YAW) % 360 == 0 for k in keys), "no twirl"
+    hop = max(k[1]["root"][2] for k in keys)
+    assert 0.4 < hop <= 0.5 * build.REST_HEIGHT["varka"], "a jump, under half his height"
+    t = clip["events"]["main"]
+    imp = next(k[1] for k in keys if abs(k[0] - t) < 1e-9)
+    assert imp["root"][2] == 0, "landed on the impact"
+    d, bal = imp["blades"][vc.DRIVE], imp["blades"]["R" if vc.DRIVE == "L" else "L"]
+    assert d["anchor"] == "ground" and d["hand"] and d["dir"][2] < -0.9, "point-first, near vertical"
+    assert -0.40 <= _tip_height(imp, vc.DRIVE) <= 0.02, "its point at the ground line (cut below it)"
+    assert d["at"][0] > 0.3, "in front of him, toward the enemy"
+    assert bal["dir"][0] < -0.5, "the other blade held back for balance"
+    # the ground burst is its own clip, placed twice from the impact
+    (e,) = clip["effects"]
+    assert e["name"] == "ground_burst" and e["mirror"] and set(e["places"]) == {"blade_tip", "target"}
+    assert abs(e["t"] - t) < 1e-9 and e["blade"] == vc.DRIVE
+    frames, origin = fx.ground_burst()
+    again, _ = fx.ground_burst()
+    assert len(frames) >= 8 and all(np.array_equal(np.asarray(a), np.asarray(b)) for a, b in zip(frames, again))
+    for im in frames:
+        arr = np.asarray(im)
+        assert (arr[..., 0] == arr[..., 1]).all() and (arr[..., 1] == arr[..., 2]).all(), "colourless"
+    first = np.asarray(frames[1])[..., 3]
+    ox, oy = round(origin[0]), round(origin[1])
+    assert first[oy - 4:oy + 4, ox - 4:ox + 4].max() > 200, "it starts at the ground point"
 
 
 def test_the_impacts_are_marked_and_the_trails_cover_them():
@@ -186,24 +262,32 @@ def test_the_impacts_are_marked_and_the_trails_cover_them():
     for clip in (atk, asc):
         for t in clip["events"]["impact"]:
             assert abs(t * clip["fps"] - round(t * clip["fps"])) < 1e-6, (t, "an impact lands on a frame")
-            for side in ("L", "R"):
-                assert any(w["from"] <= t <= w["to"] and w["blade"] == side for w in clip["trails"]), (t, side)
-            assert any(abs(b["t"] - t) < 1e-9 for b in clip["bursts"]), t
-            # both blades strike toward the enemy (right), between chest and knee height
-            key = next(k[1] for k in clip["keys"] if abs(k[0] - t) < 1e-9)
-            for side in ("L", "R"):
-                b = key["blades"][side]
-                assert b["dir"][0] > 0.5, (t, side, b["dir"])
-                assert -0.65 < b["dir"][2] < 0.15 and -0.5 < b["at"][2] < 0.0, (t, side, b)
+            assert any(abs(k[0] - t) < 1e-9 for k in clip["keys"]), (t, "an impact is a key")
         for w in clip["trails"]:
             assert w["blade"] in ("L", "R") and 0 <= w["from"] < w["to"] <= clip["length"]
-        # the two blades' trails run over the same windows: a twin arc
-        assert sorted((w["from"], w["to"]) for w in clip["trails"] if w["blade"] == "L") == \
-            sorted((w["from"], w["to"]) for w in clip["trails"] if w["blade"] == "R")
-    # the cleave and the crash come from over his head, both blades up together
-    for clip, t in ((atk, imp[1]), (asc, asc["events"]["main"])):
-        before = max((k for k in clip["keys"] if k[0] < t), key=lambda k: k[0])[1]
-        assert all(before["blades"][s]["dir"][2] > 0.8 for s in ("L", "R")), "over the top"
+    for t in imp:
+        for side in ("L", "R"):
+            assert any(w["from"] <= t <= w["to"] and w["blade"] == side for w in atk["trails"]), (t, side)
+        assert any(abs(b["t"] - t) < 1e-9 for b in atk["bursts"]), t
+    # both blades strike toward the enemy (right): the light hit as they rise
+    # past his side, the main one between chest and knee height
+    light, main = (next(k[1] for k in atk["keys"] if abs(k[0] - t) < 1e-9) for t in imp)
+    for side in ("L", "R"):
+        b = light["blades"][side]
+        assert b["dir"][0] > 0.5 and -0.2 < b["dir"][2] < 0.6, (side, b["dir"], "rising past the enemy's side")
+        b = main["blades"][side]
+        assert b["dir"][0] > 0.5, (side, b["dir"])
+        assert -0.65 < b["dir"][2] < 0.15 and -0.5 < b["at"][2] < 0.0, (side, b)
+    # the two blades' trails run over the same windows: a twin ribbon
+    assert sorted((w["from"], w["to"]) for w in atk["trails"] if w["blade"] == "L") == \
+        sorted((w["from"], w["to"]) for w in atk["trails"] if w["blade"] == "R")
+    # the slam and the drive come from over his head
+    before = [k[1] for k in atk["keys"] if imp[1] - 0.15 <= k[0] < imp[1]]
+    assert any(all(p["blades"][s]["dir"][2] > 0.8 for s in ("L", "R")) for p in before), "over the top"
+    t = asc["events"]["main"]
+    before = [k[1] for k in asc["keys"] if t - 0.2 <= k[0] < t]
+    assert any(p["blades"][vc.DRIVE]["dir"][2] > 0.8 for p in before), "the driven blade comes over the top"
+    assert any(w["blade"] == vc.DRIVE and w["from"] <= t <= w["to"] for w in asc["trails"])
 
 
 def test_stance_b_plants_both_blades_with_his_hands_on_them():
@@ -302,6 +386,7 @@ def test_the_packer_names_every_sheet_it_writes():
     assert set(files) == {*pack.COMBAT, "merchant"}
     assert set(pack.COMBAT) | {"merchant"} == set(vc.CLIPS)
     assert set(pack.FX_FILES["varka"]) == {"attack", "ascension"}
+    assert set(pack.EFFECT_FILES["varka"]) == {"ground_burst"}
     job = build.jobs("varka")
     assert set(job[0]["clips"].split(",")) == set(pack.COMBAT)
     assert {"stance_a", "stand"} <= set(job[0]["stills"].split(","))
@@ -329,6 +414,17 @@ def test_the_manifest_was_packed_at_his_ruled_height():
     for clip in ("attack", "ascension"):
         f = m["fx"][clip]
         assert 0 <= f["first_frame"] and f["first_frame"] + f["count"] <= m["sheets"][clip]["count"]
+    # the ascension's ground burst: its own clip, placed twice from the impact,
+    # at the blade's point and mirrored under the target
+    gb = m["effects"]["ground_burst"]
+    assert gb["count"] == len(gb["frames"]) and gb["loop"] is False
+    (use,) = gb["uses"]
+    assert use["clip"] == "ascension" and use["start_frame"] == m["sheets"]["ascension"]["main_frame"]
+    assert use["mirror"] and use["both_positions"]
+    places = {p["at"]: p for p in use["places"]}
+    assert set(places) == {"blade_tip", "target"} and places["target"]["flip_h"] and not places["blade_tip"]["flip_h"]
+    dx, dy = places["blade_tip"]["offset_px"]
+    assert dx > 0 and abs(dy) <= 8, "on the ground, in front of him"
     assert m["portrait"]["size"] == [132, 195]
     assert m["texture_import"] == "vram_compressed", "visual paper, pick 1 (a)"
     # the low guard keeps stance A tight: no wider than the reviewed 295 px at 1080p

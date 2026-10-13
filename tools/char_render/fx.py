@@ -38,7 +38,7 @@ from PIL import Image
 REF_PPU = 263.4          # Varka's combat texture scale (2x of 1080p)
 TRAIL_INNER = 0.60       # the ribbon covers the blade from here (0 base, 1 tip) out to the tip, at its head
 TRAIL_TAPER = 0.85       # ... and its tail narrows to this, so the sweep reads as a crescent
-TRAIL_AGE = 0.13         # seconds of sweep a frame shows
+TRAIL_AGE = 0.13         # seconds of sweep a frame shows (a trail window's `age` overrides it)
 TRAIL_FADE = 0.12        # seconds the last ribbon takes to fade after the window closes
 GLOW_SIGMA = 7.0         # px at REF_PPU
 BURST_LEN = 0.26         # seconds a burst lasts
@@ -137,9 +137,10 @@ def trail_heat(meta, t, shape, shift, s):
             continue
         fade = 1.0 if t <= win["to"] else 1 - (t - win["to"]) / TRAIL_FADE
         t_hi = min(t, win["to"])
-        sm = _samples(meta, win["blade"], max(win["from"], t_hi - TRAIL_AGE), t_hi)
+        age = win.get("age", TRAIL_AGE)
+        sm = _samples(meta, win["blade"], max(win["from"], t_hi - age), t_hi)
         for a, b in zip(sm, sm[1:]):
-            ages = [min(1.0, (t_hi - x["t"]) / TRAIL_AGE) for x in (a, b)]
+            ages = [min(1.0, (t_hi - x["t"]) / age) for x in (a, b)]
             w = [(1 - g) ** 1.1 * fade for g in ages]
             pa, pb = a[win["blade"]], b[win["blade"]]
             ka, kb = (TRAIL_INNER + (TRAIL_TAPER - TRAIL_INNER) * g for g in ages)
@@ -242,6 +243,91 @@ def clip_fx(meta):
     first, last = live[0], live[-1]
     frames = [frame_layer(meta, meta["times"][i], s, pad) for i in range(first, last + 1)]
     return frames, first, pad
+
+
+# ------------------------------------------------------------------ the ground burst
+#: Four Winds' Ascension's ground burst ([USER], round 3: "a mirrored ground
+#: particle effect on him and the target enemy"), its own sprite clip: radial
+#: cracks and a flattened shock ring on the ground and a column of streaks
+#: rising from it (his Special E: scratch reference/NOTES.md, Talent Demo 1,
+#: Character Details 3). The game places it twice from the impact frame, at
+#: the blade's point and, flipped, under the target. Same heat format as the
+#: trail layer; every length at REF_PPU.
+GROUND_LEN = 0.55        # seconds
+GROUND_FLAT = 0.32       # the ground plane's squash under the 5-degree camera
+GROUND_UP, GROUND_DOWN, GROUND_HALF = 470, 160, 440   # the cell round the anchor, px at REF_PPU
+GROUND_SEED = 11
+
+
+def _segment(buf, a, b, width, va, vb):
+    """A constant-width strip from a to b, heat va at a and vb at b."""
+    (ax, ay), (bx, by) = a, b
+    n = math.hypot(bx - ax, by - ay)
+    if n < 1e-6:
+        return
+    nx, ny = -(by - ay) / n * width / 2, (bx - ax) / n * width / 2
+    fill_quad(buf, ((ax + nx, ay + ny), (bx + nx, by + ny), (bx - nx, by - ny), (ax - nx, ay - ny)), (va, vb, vb, va))
+
+
+def ground_burst_heat(u, shape, c, s):
+    """The burst at phase u (0..1) round ground point c (supersampled px)."""
+    buf = np.zeros(shape, np.float32)
+    k = SUPER * s
+    cx, cy = c
+    rng = np.random.default_rng(GROUND_SEED)
+    ys, xs = np.mgrid[0:shape[0], 0:shape[1]].astype(np.float32)
+    rr = np.hypot(xs - cx, (ys - cy) / GROUND_FLAT)
+    if u < 0.22:                                  # the flash, where the point went in
+        np.maximum(buf, (1 - u / 0.22) * np.clip(1 - rr / (100 * k), 0, 1) ** 1.4, out=buf)
+    R = (40 + 350 * (1 - (1 - u) ** 2)) * k       # the shock ring on the ground
+    wdt = (26 * (1 - u) + 4) * k
+    np.maximum(buf, np.clip(1 - np.abs(rr - R) / wdt, 0, 1) * (1 - u) ** 1.3, out=buf)
+    grow = min(1.0, u / 0.22)                     # the cracks: jagged, radial, on the ground
+    heat = 1.0 if u < 0.3 else max(0.0, 1 - (u - 0.3) / 0.7) ** 0.8
+    for i in range(9):
+        ang = 2 * math.pi * (i + rng.uniform(-0.3, 0.3)) / 9
+        length = rng.uniform(210, 380) * k * grow
+        pts, r = [(cx, cy)], 0.0
+        while r < length:
+            r = min(length, r + 34 * k)
+            j = rng.uniform(-12, 12) * k
+            px, py = math.cos(ang) * r - math.sin(ang) * j, math.sin(ang) * r + math.cos(ang) * j
+            pts.append((cx + px, cy + py * GROUND_FLAT))
+        for n, (a, b) in enumerate(zip(pts, pts[1:])):
+            f0, f1 = n / max(1, len(pts) - 1), (n + 1) / max(1, len(pts) - 1)
+            _segment(buf, a, b, (14 - 9 * f0) * k, heat * (1 - 0.5 * f0), heat * (1 - 0.5 * f1))
+    for i in range(11):                           # the column: streaks rising from the point
+        x = cx + rng.uniform(-100, 100) * k
+        length = rng.uniform(200, 360) * k
+        r0 = (6 + 90 * u) * k * rng.uniform(0.5, 1.0)
+        r1 = r0 + length * (0.3 + 0.7 * min(1.0, u * 3))
+        stroke(buf, (x, cy - r0), (x + rng.uniform(-12, 12) * k, cy - r1),
+               rng.uniform(11, 20) * k * (1 - 0.6 * u), (1 - u) ** 1.1)
+    return buf
+
+
+def ground_burst(ppu: float = REF_PPU, fps: int = 20):
+    """(frames, origin): the ground burst's neutral RGBA frames, every one on
+    the same cell, and the ground point's px in that cell (the anchor the game
+    puts on the blade's point or the target's feet). Deterministic."""
+    s = float(ppu) / REF_PPU
+    W, H = int(round(2 * GROUND_HALF * s)), int(round((GROUND_UP + GROUND_DOWN) * s))
+    origin = (W / 2, GROUND_UP * s)
+    shape = (H * SUPER, W * SUPER)
+    frames = []
+    for i in range(int(math.ceil(GROUND_LEN * fps))):
+        u = i / fps / GROUND_LEN
+        heat = downsample(ground_burst_heat(u, shape, (origin[0] * SUPER, origin[1] * SUPER), s), SUPER)
+        glow = gauss(heat, GLOW_SIGMA * s)
+        alpha = np.clip(heat + glow * 0.9, 0, 1)
+        core = np.clip((heat - 0.55) / 0.45, 0, 1) ** 1.2
+        val = np.clip(0.50 + 0.50 * core, 0, 1)
+        out = np.zeros((H, W, 4), np.uint8)
+        out[..., :3] = np.round(val * 255)[..., None].astype(np.uint8)
+        out[..., 3] = np.round(alpha * 255).astype(np.uint8)
+        out[out[..., 3] == 0] = 0
+        frames.append(Image.fromarray(out, "RGBA"))
+    return frames, origin
 
 
 def tint(im: Image.Image, color) -> Image.Image:
