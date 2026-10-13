@@ -113,6 +113,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_INTO_BLOCK_CLAUSE,
                                         PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE,
                                         PLAN_INTO_DEFEND_CLAUSE,
+                                        PLAN_BLOCK_NOW_CLAUSE,
+                                        PLAN_FIRST_CLAUSE,
                                         BLOCK_KEEPING_POWERS,
                                         POWER_NOTE, SELECTION_NOTE,
                                         SPARK_OPENING_RULE, spark_opening_rule,
@@ -3585,7 +3587,15 @@ def render(obs: dict[str, Any]) -> str:
                 past_lethal = _past_lethal_clauses(pl, c.get("enemies") or [])
                 into_block = _into_block_clauses(pl, c.get("enemies") or [])
                 for i, e in enumerate(pl["queue"], 1):
+                    # The Kokomi review (2026-10-13): the first Plan is
+                    # named as first, and a Block Plan that reads the board
+                    # prints its total against the board now.
                     out.append(f"  {i}. **{e['name']}**"
+                               + (PLAN_FIRST_CLAUSE
+                                  if i == 1 and len(pl["queue"]) > 1 else "")
+                               + (PLAN_BLOCK_NOW_CLAUSE.format(
+                                   block=e["block_now"])
+                                  if e.get("block_now") is not None else "")
                                + into_block.get(i - 1, "")
                                + past_lethal.get(i - 1, ""))
                     # A PLAN STAYS OPEN (2026-10-01), pick 5 (a): both

@@ -319,9 +319,10 @@ def test_tidal_riposte_answers_a_fully_blocked_hit_once(overhaul):
 def test_shoal_call_is_blade_dance(overhaul):
     """The jellyfish build (2026-10-12): the base game's Blade Dance. Cost 1,
     Exhaust, "Add 3 [4] Stings to your hand." -- plain Stings on both faces;
-    the upgrade adds a fourth."""
+    the upgrade adds a fourth. Common since the Kokomi review (2026-10-13),
+    as Blade Dance is."""
     row = _row("proto_kk_shoal_call")
-    assert row.cost == 1 and row.exhaust and row.rarity == "uncommon"
+    assert row.cost == 1 and row.exhaust and row.rarity == "common"
     st = kokomi_state()
     _write(st, "proto_kk_shoal_call")
     assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 3

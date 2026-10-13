@@ -1404,12 +1404,7 @@ def test_change_of_plans_is_unplayable_while_no_plan_is_written(overhaul):
     THE FIND (Kokomi r13 (b)). Change of Plans "was dead in hand three fights
     before it was good once and its face never says it needs a written Plan; a
     first reader plays it into an empty jellyfish". It is `EB-261`'s Set-off
-    gate one mechanic over: the card pays its energy, exhausts itself and
-    resolves to nothing.
-
-    Kokomi whole-run round 2 (2026-10-10): Change of Plans now also draws 1,
-    so it is no longer carry-out-only and the gate no longer applies to it
-    (the next test's rule). The gate itself is pinned on a probe row.
+    gate one mechanic over. A bare carry-out row is gated, as it always was.
     """
     from tier0.engine import combat
 
@@ -1417,7 +1412,7 @@ def test_change_of_plans_is_unplayable_while_no_plan_is_written(overhaul):
     st.player.energy = 3
     card = Card(id="proto_kk_probe", name="probe", cost=0, type="skill",
                 effects=[{"op": "carry_out_front_plan"}])
-    assert kokomi_plan.carry_out_only(card) is True
+    assert kokomi_plan.needs_a_waiting_plan(card) is True
 
     assert combat.card_playable(st, card) is False
     kokomi_plan.schedule(st, plan_card(ATTACKER))
@@ -1427,10 +1422,9 @@ def test_change_of_plans_is_unplayable_while_no_plan_is_written(overhaul):
 def test_change_of_plans_draws_after_the_carry_out(overhaul):
     """Kokomi whole-run round 2 (2026-10-10): "The Bake-Kurage carries out
     your first Plan now. Draw 1 card." The Kokomi card pass (2026-10-11):
-    draws 2, Exhaust stays. Playable on an empty jellyfish, since the draw
-    still does something. [USER]'s run (2026-10-11): "insanely good with the
-    upgrade removing Exhaust - it's an auto pick" -- the upgrade keeps
-    Exhaust and draws 3."""
+    draws 2, Exhaust stays; the upgrade keeps Exhaust and draws 3. THE KOKOMI
+    REVIEW (2026-10-13): "Can only be played if a Plan is waiting." -- seats
+    played it into an empty jellyfish for the draw alone (A F9, F10)."""
     from tier0.content import upgrades
     from tier0.engine import combat
 
@@ -1442,16 +1436,18 @@ def test_change_of_plans_draws_after_the_carry_out(overhaul):
     assert up.cost == 0 and up.exhaust
     assert up.effects == [{"op": "carry_out_front_plan"},
                           {"op": "draw", "amount": 3}]
-    assert kokomi_plan.carry_out_only(card) is False
+    assert kokomi_plan.needs_a_waiting_plan(card) is True
     st = kokomi_state(enemies=[make_enemy(hp=40)])
     st.player.energy = 3
+    assert combat.card_playable(st, card) is False
+    kokomi_plan.schedule(st, plan_card(ATTACKER))
     assert combat.card_playable(st, card) is True
 
 
-def test_a_carry_out_beside_another_effect_is_never_gated(overhaul):
-    """The clause is deliberately narrow, `set_off_only`'s rule: a card that
-    also draws still does something on an empty jellyfish, and refusing it
-    would be a rules change rather than a legibility fix."""
+def test_a_carry_out_beside_another_effect_is_gated_too(overhaul):
+    """The Kokomi review (2026-10-13) made the narrow `EB-455` clause a rule:
+    a card with a carry-out is unplayable on an empty jellyfish even when it
+    also draws."""
     from tier0.engine import combat
 
     st = kokomi_state(enemies=[make_enemy(hp=40)])
@@ -1460,22 +1456,24 @@ def test_a_carry_out_beside_another_effect_is_never_gated(overhaul):
                 effects=[{"op": "carry_out_front_plan"},
                          {"op": "draw", "amount": 1}])
 
-    assert kokomi_plan.carry_out_only(card) is False
-    assert combat.card_playable(st, card) is True
+    assert kokomi_plan.needs_a_waiting_plan(card) is True
+    assert combat.card_playable(st, card) is False
 
 
 def test_every_kokomi_row_agrees_with_the_emitters_own_gate(overhaul):
-    """The two implementations of `card_is_carry_out_only` are checked against
-    each other over the whole surface -- `test_klee_overhaul_rules`' pin on the
-    Set-off pair, which is the only way "the same list" stays true."""
+    """The two implementations of each gate are checked against each other
+    over the whole surface -- `test_klee_overhaul_rules`' pin on the Set-off
+    pair, which is the only way "the same list" stays true."""
     from tools import gen_klee_cards
 
     for card in loader.prototype_cards():
         if not card.id.startswith("proto_kk_"):
             continue
         row = {"effects": card.effects}
-        assert kokomi_plan.carry_out_only(card) == \
-            gen_klee_cards.card_is_carry_out_only(row), card.id
+        assert kokomi_plan.needs_a_waiting_plan(card) == \
+            gen_klee_cards.card_needs_a_waiting_plan(row), card.id
+        assert kokomi_plan.needs_a_plannable_card(card) == \
+            gen_klee_cards.card_needs_a_plannable_card(row), card.id
 
 
 # --- THE POOL PASS (`EB-492`) ----------------------------------------------
@@ -2527,9 +2525,10 @@ def test_core_pass_faces(overhaul):
     # Kokomi round 2 (2026-10-12): any card that can be written counts;
     # round 3 reworded the face so writing plainly does not.
     # The card text pass (2026-10-12): "plan" is her one verb.
+    # The Kokomi review (2026-10-13): the face names the two kinds of card.
     assert faces["proto_kk_treatise"] == (
-        "The first time each turn you play a card you could have planned, "
-        "draw 1 card.")
+        "The first time each turn you play a [gold]Plan[/gold] card or a "
+        "[gold]Companion[/gold] without planning it, draw 1 card.")
 
 
 def test_core_pass_second_waves_hit_applies_hydro(overhaul):

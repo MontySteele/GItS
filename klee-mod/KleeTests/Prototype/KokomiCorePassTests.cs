@@ -91,9 +91,10 @@ public class KokomiCorePassTests
         // Kokomi round 2 (2026-10-12): any card that can be written counts;
         // round 3 reworded the face so writing plainly does not.
         // The card text pass (2026-10-12): "plan" is her one verb.
+        // The Kokomi review (2026-10-13): the two kinds of card that count.
         Assert.Equal(
-            "The first time each turn you play a card you could have planned, "
-          + "draw 1 card.",
+            "The first time each turn you play a [gold]Plan[/gold] card or a "
+          + "[gold]Companion[/gold] without planning it, draw 1 card.",
             Face(card));
     }
 
@@ -105,9 +106,11 @@ public class KokomiCorePassTests
         // any card that can be written counts (a Companion card too).
         var text = new TreatisePower().Localization!
             .Single(row => row.Item1 == "description").Item2;
+        // The Kokomi review (2026-10-13): the card's words.
         Assert.Equal(
-            "The first time each turn you play a card you could have "
-          + "planned, draw [blue]{Amount}[/blue] card{Amount:plural:|s}.", text);
+            "The first time each turn you play a [gold]Plan[/gold] card or a "
+          + "[gold]Companion[/gold] without planning it, draw "
+          + "[blue]{Amount}[/blue] card{Amount:plural:|s}.", text);
         Assert.DoesNotContain("normally", text);
     }
 

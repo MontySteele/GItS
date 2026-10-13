@@ -45,8 +45,9 @@ def test_tide_wall_reads_the_biggest_intent_not_the_front_one():
     st.player.block = 0
     carry_out(st)
     assert st.player.block == 6 + 18
+    # Reworded in the Kokomi review (2026-10-13).
     assert _rows()["proto_kk_tide_wall"]["description"].endswith(
-        "plus the most damage an enemy intends when it is carried out.")
+        "plus the biggest attack an enemy intends on the turn it lands.")
 
 
 def test_no_enemies_intend_nothing():
@@ -58,10 +59,11 @@ def test_no_enemies_intend_nothing():
 # --- Treatise: the face ------------------------------------------------------
 
 def test_treatise_face_says_writing_does_not_count():
-    # The card text pass (2026-10-12): "plan" is her one verb.
+    # The card text pass (2026-10-12): "plan" is her one verb. The Kokomi
+    # review (2026-10-13): the face names the two kinds of card that count.
     assert _rows()["proto_kk_treatise"]["description"] == (
-        "The first time each turn you play a card you could have planned, "
-        "draw 1 card.")
+        "The first time each turn you play a [gold]Plan[/gold] card or a "
+        "[gold]Companion[/gold] without planning it, draw 1 card.")
 
 
 # --- Kelp Wall: the now-line -------------------------------------------------

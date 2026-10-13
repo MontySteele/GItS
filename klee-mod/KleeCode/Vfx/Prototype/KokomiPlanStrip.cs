@@ -92,11 +92,17 @@ internal static class KokomiPlanStrip
     /// line" at a glance, and the caption says which line it is.</summary>
     private static readonly Color FlippedTint = new(0.65f, 0.85f, 1f);
 
-    private const int LineFontSize = 16;
+    // 14 since the Kokomi review (2026-10-13): "into 12 Block" fits the
+    // 92-pixel picture.
+    private const int LineFontSize = 14;
 
     /// <summary>The caption under a two-line Plan.</summary>
     internal const string PlanLineCaption = "Plan line";
     internal const string NowLineCaption = "Now-line";
+
+    /// <summary>The mark on the top picture: the Plan carried out first
+    /// (Kokomi review 2026-10-13).</summary>
+    internal const string FirstCaption = "First";
 
     /// <summary>One element per seat, freed by the shared display skeleton the
     /// way the gauges are.</summary>
@@ -237,6 +243,24 @@ internal static class KokomiPlanStrip
             line.AddThemeColorOverride(ThemeConstants.Label.FontColor,
                                        CountColor);
             thumb.AddChildSafely(line);
+            // THE KOKOMI REVIEW (2026-10-13): "after Change of Plans I could
+            // not tell which Plan was first" (B2). The top picture says so.
+            var first = new Label
+            {
+                Name = "First",
+                Text = FirstCaption,
+                MouseFilter = Control.MouseFilterEnum.Ignore,
+                FocusMode = Control.FocusModeEnum.None,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Position = new Vector2(0f, 2f),
+                Size = new Vector2(ThumbWidth, LineFontSize + 6f),
+                Visible = false,
+            };
+            first.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
+                                           LineFontSize);
+            first.AddThemeColorOverride(ThemeConstants.Label.FontColor,
+                                        CountColor);
+            thumb.AddChildSafely(first);
             root.AddChildSafely(thumb);
         }
 
@@ -287,11 +311,13 @@ internal static class KokomiPlanStrip
             var thumb = root.GetNodeOrNull<TextureRect>("Plan" + i);
             if (thumb == null) continue;
             var line = thumb.GetNodeOrNull<Label>("Line");
+            var first = thumb.GetNodeOrNull<Label>("First");
             if (i >= pending.Count)
             {
                 thumb.Visible = false;
                 SetCard(thumb, null);
                 if (line != null) line.Visible = false;
+                if (first != null) first.Visible = false;
                 continue;
             }
             thumb.Visible = true;
@@ -301,10 +327,20 @@ internal static class KokomiPlanStrip
             var entry = pending[i];
             var flipped = entry.TwoLine && entry.Now;
             thumb.Modulate = flipped ? FlippedTint : Colors.White;
+            // THE KOKOMI REVIEW (2026-10-13): the first Plan is marked, and
+            // the caption reads the board -- Tide Wall's live total, or the
+            // Block an Attack Plan will land in (`KokomiPlan.StripCaption`).
+            if (first != null) first.Visible = i == 0 && pending.Count > 1;
             if (line != null)
             {
-                line.Visible = entry.TwoLine;
-                line.Text = flipped ? NowLineCaption : PlanLineCaption;
+                var kokomi = player.Creature;
+                var caption = KokomiPlan.StripCaption(
+                    entry.TwoLine, flipped,
+                    KokomiPlan.LiveBlock(entry, kokomi),
+                    KokomiPlan.KeptBlockAhead(entry, kokomi),
+                    KokomiPlan.DefendsAhead(entry, kokomi));
+                line.Visible = caption != null;
+                line.Text = caption ?? string.Empty;
             }
         }
 

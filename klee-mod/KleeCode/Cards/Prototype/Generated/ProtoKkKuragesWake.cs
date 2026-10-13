@@ -51,7 +51,7 @@ public sealed class ProtoKkKuragesWake : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Wake"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice.\nOr [gold]plan[/gold]: Add 2 [gold]Stings[/gold] to your [gold]Hand[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice.\nOr [gold]plan[/gold]: Add 3 [gold]Stings[/gold] to your [gold]Hand[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,7 @@ public sealed class ProtoKkKuragesWake : CustomCardModel, IElementalCard, IChara
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.AddStings, 2, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.AddStings, 3, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
