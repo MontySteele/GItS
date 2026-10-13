@@ -78,10 +78,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Exhaust, and have a Plan line.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
-- **Latest:** the level pass (`review/ruled/kokomi-level-pass-2026-10-12.md`)
-  took the big numbers down and gave the situational cards a floor; it is
-  unplayed. Records: `review/records/kokomi-round-{1,2,3}-2026-10-12.md`.
-- **Next:** a two-seat round on the level-pass build, then the review.
+- **Latest:** two five-seat rounds on 2026-10-13 (0/5, then 1/5 with every
+  run reaching the act 2 boss). The review
+  (`review/active/kokomi-review-2026-10-13.md`) was ruled all (a): the
+  build-now list shipped (#1205, #1206) and the Ward's Plan is now
+  single-target Weak (#1207). The jellyfish half is still rarely seen.
+- **Next:** [USER]'s playtest; the next seat round counts Stings made and
+  played per fight.
 
 **Furina: Prototype.**
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md`, sec.2):
@@ -100,10 +103,11 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Theater Program; one potion, Bottled Applause. Ancients: Center of
   Attention (Tome) and All the World's a Stage (Tooth on Rising Applause).
   Sim twin `tier0/engine/furina_tide.py`.
-- **Latest:** the Furina review (`review/ruled/furina-review-2026-10-12.md`)
-  made Encore! "Your oldest guest acts." at 0.
-- **Next:** one more overnight wave, then a card-pool review on [USER]'s
-  playtest. Otherwise she is left alone for now.
+- **Latest:** the overnight wave (`review/records/furina-wave-2026-10-13.md`,
+  1 win in 6) shipped its text and display fixes (#1202). Her Block pool is the
+  smallest of any character (12 cards, 41 Block printed; census in the record).
+- **Next:** a card-pool review on [USER]'s playtest: Block first, then the
+  conditional cards and the ones never taken. Otherwise she is left alone.
 
 **Varka: Prototype, near Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;
@@ -121,7 +125,9 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   three potions. Ancients: All Four Winds (Tome) and Dandelion Gale (Tooth on
   Windbound Execution).
 - **Latest:** the last pass (`review/ruled/varka-last-pass-2026-10-12.md`)
-  gave twelve always-skipped cards a floor and cut five costs; it is unplayed.
+  gave twelve always-skipped cards a floor and cut five costs. The overnight
+  wave on it (`review/records/varka-wave-2026-10-13.md`, 1 win in 5) found no
+  design problem; Four Winds' Ascension is the first number to watch.
 - **Next:** [USER]'s playtest, then Balance (`operations/stage-gate.md`),
   then his visuals, story and events, as Klee had.
 
