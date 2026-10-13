@@ -1498,12 +1498,11 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
 # ---------------------------------------------------------------------------
 
 def is_status_or_curse(card: Optional[Card]) -> bool:
-    """A status or a curse. `Card.is_junk` reads rarity, and an
-    enemy-injected status is built at rarity "basic" with type "status"
-    (`statuses.make_status`), so both are asked. `KokomiStatusBatch.
-    IsStatusOrCurse` reads the card's type."""
-    return card is not None and (card.type in ("status", "curse")
-                                 or card.is_junk)
+    """A status or a curse: `Card.is_junk`, which reads type and id as well
+    as rarity since `EB-241`, so an enemy-injected status (rarity "basic",
+    type "status") counts. `KokomiStatusBatch.IsStatusOrCurse` reads the
+    card's type."""
+    return card is not None and card.is_junk
 
 
 def statuses_in_hand(state: CombatState) -> list[Card]:
