@@ -2994,12 +2994,9 @@ _PER_CARD_RELIC = re.compile(
     r"end of your turn, gain (\d+) Block for each card in your hand", re.I)
 #: Beating Remnant: "You cannot lose more than 20 HP in a single turn."
 _HP_LOSS_CAP = re.compile(r"lose more than (\d+) HP", re.I)
-#: THE KOKOMI RE-FOUNDING (2026-10-12): the Tamakushi Casket, "At the end
-#: of your turn, if a Plan is waiting, gain 3 Block" (its upgrade the same at
-#: 5). Counted when the queue on the page is not empty. It replaces SEAT PAGE
-#: 7's Dusk fold, which left with Dusk.
-_PLAN_WAITING_RELIC = re.compile(
-    r"end of your turn, if a Plan is waiting, gain (\d+) Block", re.I)
+#: (The Tamakushi Casket's Block was counted here while it landed at the end
+#: of her turn. Since 2026-10-12 it lands at the start of her next turn,
+#: after the hits, so this line has nothing of it to count.)
 
 
 def _plain_name(title: Any) -> str:
@@ -3018,12 +3015,10 @@ def _named_sum(parts: list[tuple[str, int]]) -> tuple[str, int, bool]:
 
 
 def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
-                    pets: list[dict[str, Any]],
-                    plans_waiting: bool = False) -> dict[str, Any]:
+                    pets: list[dict[str, Any]]) -> dict[str, Any]:
     """What lands between the end of your turn and the enemies' hits, off the
     wire's own numbers, as if the turn ended now; what the page cannot count
-    goes in `unknown`, by name. `plans_waiting`: the Bake-Kurage's queue is
-    not empty (the Tamakushi Casket's condition)."""
+    goes in `unknown`, by name."""
     block_parts: list[tuple[str, int]] = []
     hit_parts: list[tuple[str, int]] = []
     hp_parts: list[tuple[str, int]] = []
@@ -3031,26 +3026,15 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
     block_now = int(you.get("block") or 0)
     cap = None
     relics = you.get("relics") or []
-    casket = any(_PLAN_WAITING_RELIC.search(str(r.get("text") or ""))
-                 for r in relics) and plans_waiting
     for relic in relics:
         name, text = str(relic.get("name") or ""), str(relic.get("text") or "")
         found = _HP_LOSS_CAP.search(text)
         if found:
             cap = (name, int(found.group(1)))
             continue
-        found = _PLAN_WAITING_RELIC.search(text)
-        if found:
-            if plans_waiting:
-                block_parts.append((name, int(found.group(1))))
-            continue
         found = _NO_BLOCK_RELIC.search(text)
         if found:
-            if block_now == 0 and casket:
-                # The Casket and this relic share one end-of-turn moment and
-                # their order is not on the page: named, never counted.
-                unknown.append(name)
-            elif block_now == 0:
+            if block_now == 0:
                 block_parts.append((name, int(found.group(1))))
             continue
         found = _PER_CARD_RELIC.search(text)
@@ -3138,8 +3122,7 @@ def _with_folds(line: str, clauses: list[str]) -> str:
 
 def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                    hand: list[dict[str, Any]] | None = None,
-                   pets: list[dict[str, Any]] | None = None,
-                   plans: dict[str, Any] | None = None) -> str:
+                   pets: list[dict[str, Any]] | None = None) -> str:
     """`- Incoming this turn: N (your Block B): you would take T.`
 
     The sum of every attack part shown; a part it cannot count is named as
@@ -3164,8 +3147,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                     unknown.append(name)
             else:
                 total += part
-    facts = _turn_end_facts(you, hand or [], pets or [],
-                            bool((plans or {}).get("queue")))
+    facts = _turn_end_facts(you, hand or [], pets or [])
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     if not any_attack and not (facts["hit"] or facts["hp"]):
@@ -3791,7 +3773,7 @@ def render(obs: dict[str, Any]) -> str:
         # player may take it.
         if c["enemies"] and not obs.get("coop"):
             out += ["", _incoming_line(c["enemies"], you, c["hand"],
-                                       c.get("pets"), c.get("plans"))
+                                       c.get("pets"))
                     + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the

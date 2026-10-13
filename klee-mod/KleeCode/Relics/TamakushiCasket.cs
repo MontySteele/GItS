@@ -23,17 +23,25 @@ namespace KleeMod.Relics;
 ///
 /// THE RE-FOUNDING (2026-10-12) REWROTE IT, and kept its name and art
 /// (<c>review/active/kokomi-design-pass-2026-10-11.md</c> pick 3, ruled; card
-/// paper sec.1 rule 1): "At the end of your turn, if a Plan is waiting, gain
-/// 3 Block." The count it kept since the Casket pass (2026-09-28) and the
+/// paper sec.1 rule 1): "At the start of your turn, if a Plan is waiting,
+/// gain 3 Block." The count it kept since the Casket pass (2026-09-28) and the
 /// Open the Casket token it dealt are gone with the Casket. About 9 Block in a
 /// three-turn act-1 fight, against Burning Blood's 6 HP; with no 0-cost Plan
 /// left, the Plan it asks for costs Energy, so the condition is a real price.
 ///
-/// THE HOOK IS ORICHALCUM'S (<c>BeforeSideTurnEnd</c>, her side): the Block is
-/// on her before the enemies act, and the Plans the Bake-Kurage holds are read
-/// at that moment (<see cref="KokomiPlan.PlansHeld"/>). Power-sourced Block
+/// START OF TURN, NOT END (2026-10-12, [USER]: "For Kokomi - let's have her
+/// starter relic apply block at the beginning of the turn rather than the
+/// end."). THE HOOK IS <c>AfterBlockCleared</c>, the base game's
+/// <c>BlockNextTurnPower</c>'s: <c>CombatManager.StartTurn</c> clears Block,
+/// broadcasts <c>AfterBlockCleared</c> for each creature starting its turn,
+/// and only then runs <c>SetupPlayerTurn</c> (energy, the draw,
+/// <c>AfterPlayerTurnStart</c>), where <c>ProtoBakeKuragePower</c> carries
+/// the waiting Plans out and clears the queue
+/// (<c>tier0/tests/test_reaction_phase_parity.TURN_START_BROADCAST_ORDER</c>).
+/// So the Block survives the clear, and the queue it reads
+/// (<see cref="KokomiPlan.PlansHeld"/>) is still last turn's Plans. Block
 /// stays raw, the base relic's <c>ValueProp.Unpowered</c>. Sim twin:
-/// <c>kokomi_plan.casket_block</c>, at the same end-of-turn site.
+/// <c>kokomi_plan.casket_block</c>, right after the turn's Block clear.
 ///
 /// THE WHOLE FILE IS QUARANTINED, for the reason it always was:
 /// <c>tools/lint_unique_names.py</c> reads relic names out of
@@ -57,7 +65,7 @@ public class TamakushiCasket : CustomRelicModel
     public override RelicModel? GetUpgradeReplacement() =>
         ModelDb.Relic<WatatsumiCasket>().ToMutable();
 
-    /// <summary>The Block at the end of her turn while a Plan is waiting.
+    /// <summary>The Block at the start of her turn while a Plan is waiting.
     /// The Tamakushi Casket <see cref="KokomiOverhaulLaw.CasketBlock"/>;
     /// <see cref="WatatsumiCasket"/> more.</summary>
     public virtual int Block => KokomiOverhaulLaw.CasketBlock;
@@ -73,7 +81,7 @@ public class TamakushiCasket : CustomRelicModel
     /// <summary>The face, one sentence, the number the only difference
     /// between the Casket and its upgrade.</summary>
     internal static string Face(int block) =>
-        "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
+        "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
       + "[blue]" + block + "[/blue] [gold]Block[/gold]. A "
       // Kokomi pre-run fixes (2026-10-12): two seats wrote Block Plans for
       // the hit coming this turn. `ProtoBakeKuragePower.AfterPlayerTurnStart`
@@ -92,15 +100,14 @@ public class TamakushiCasket : CustomRelicModel
         await BakeKuragePet.Summon(Owner);
     }
 
-    /// <summary>"At the end of your turn, if a Plan is waiting, gain 3
-    /// Block." Her side only, and only while the Bake-Kurage holds a
-    /// Plan.</summary>
-    public override async Task BeforeSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
+    /// <summary>"At the start of your turn, if a Plan is waiting, gain 3
+    /// Block." Her own Block clear only, and only while the Bake-Kurage still
+    /// holds last turn's Plans (they are carried out later this turn, in
+    /// <c>AfterPlayerTurnStart</c>).</summary>
+    public override async Task AfterBlockCleared(Creature creature)
     {
         var kokomi = Owner?.Creature;
-        if (kokomi == null || !participants.Contains(kokomi)) return;
+        if (kokomi == null || creature != kokomi) return;
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         if (!Pays(KokomiPlan.PlansHeld(kokomi))) return;
         Flash();
@@ -179,7 +186,7 @@ public sealed class WatatsumiCasket : TamakushiCasket
         ("description", Face(WatatsumiBlock)),
     };
 
-    /// <summary>The Block at the end of her turn while a Plan is waiting.
+    /// <summary>The Block at the start of her turn while a Plan is waiting.
     /// </summary>
     public const int WatatsumiBlock = 5;
 

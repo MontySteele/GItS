@@ -1083,17 +1083,6 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
-        ("Relics/TamakushiCasket.cs", "TamakushiCasket"):
-            "(the Kokomi re-founding, 2026-10-12). \"At the end of your "
-            "turn, if a Plan is waiting, gain 3 Block\" -- Orichalcum's hook. "
-            "THE ORDERING QUESTION, answered: what it READS is the "
-            "Bake-Kurage's queue, which no co-tenant of this broadcast writes "
-            "(Dusk's end-of-turn drain was retired the same day). What it "
-            "WRITES is her Block, raw; the co-tenants that read Block are "
-            "Varka's Retaliating Tide (another character) and the sequencer's "
-            "Bond of Life, which reads Block only as a damage outcome, never "
-            "this broadcast. Sim twin: kokomi_plan.casket_block, after the "
-            "pilot's flips",
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):
             "(the Furina stage, FURINA_STAGE). RULE 10: each "
             "performer on the stage performs a FLAT act -- Usher 3 Block to "

@@ -268,7 +268,7 @@ def test_the_arm_carries_exactly_one_rule_number():
     """Draft 6's rules are STRUCTURAL -- where a card lands and when -- so
     almost every figure is a card's and stays on its row. One is not, printed
     with no `amount` field behind it: since the re-founding (2026-10-12) the
-    relic's Block at the end of her turn while a Plan is waiting. (The Casket
+    relic's Block at the start of her turn while a Plan is waiting. (The Casket
     pass's per-Plan count and Open the Casket's Strength rate left with the
     count; Rally's discount, Battle Plan's bonus and Moon Signal's threshold
     left with their cards in legacy cleanup stage 5.) It is named so
