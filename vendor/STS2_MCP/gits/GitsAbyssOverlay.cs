@@ -6,7 +6,7 @@
 //   READ. `BuildEventState` ends by asking `GitsApplyAbyssScreen`: while the
 //   klee mod's overlay root sits under the event room, the event is that page
 //   (title "The Spiral Abyss", the whisper line, three options whose title is
-//   the Blessing and whose description is its text and "If passed: Shadow -
+//   the Blessing and whose description is its text and "Shadow: name -
 //   text"), `in_dialogue` is false, and `abyss_screen` carries the act title,
 //   the strip and, once the pick lands, the result line. When the overlay is
 //   gone the room is the ordinary Ancient page again.

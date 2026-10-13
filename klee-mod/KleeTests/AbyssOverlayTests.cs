@@ -8,6 +8,7 @@ using KleeMod.Abyss;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Nodes.Events;
+using MegaCrit.Sts2.Core.Nodes.GodotExtensions;
 using STS2_MCP;
 using Xunit;
 
@@ -56,7 +57,7 @@ public class AbyssOverlayTests
         Assert.Equal("Abyss Mage Shield", card.ShadowName);
         Assert.Equal(AbyssText.Text(AbyssShadow.MageShield), card.ShadowText);
         Assert.Equal(new[] { 0, 1, 2 }, content.Cards.Select(c => c.Index));
-        Assert.Equal("The Ley Line text\nIf passed: Rally — Rally text",
+        Assert.Equal("The Ley Line text\nShadow: Rally — Rally text",
             AbyssOverlayContent.BridgeDescription(card with
             {
                 BlessingText = "The Ley Line text", ShadowName = "Rally", ShadowText = "Rally text",
@@ -209,6 +210,109 @@ public class AbyssOverlayTests
         Assert.Contains("NEventLayout.OnSetupComplete", close);
     }
 
+    // ---- Controller focus (owner, 2026-10-12: "I don't see a way to select a
+    // Blessing from my controller") ---------------------------------------------
+
+    [Fact]
+    public void The_cards_run_the_game_clickables_own_wiring()
+    {
+        // ConnectSignals is what turns FocusEntered / MouseEntered into the
+        // clickable's Focused signal, and MousePressed into Released. Only the
+        // game's subclasses call it (from _Ready); a bare NClickableControl
+        // never did, so the cards never lit up.
+        var connect = AbyssOverlay.ConnectSignalsMethod;
+        Assert.NotNull(connect);
+        Assert.Equal(typeof(NClickableControl), connect!.DeclaringType);
+        Assert.Empty(connect.GetParameters());
+
+        Assert.Contains("MethodBase.Invoke", Il.Calls(Il.Method("AbyssOverlay", "WireClickable")));
+        // ... after the view has set the focus mode: Build runs first.
+        var open = Il.CallSequence(Il.Method("AbyssOverlay", "OpenIfShowing")).ToList();
+        Assert.Contains("AbyssOverlay.WireClickable", open);
+        Assert.True(open.IndexOf("AbyssOverlayView.Build") < open.IndexOf("AbyssOverlay.WireClickable"));
+
+        // Hover and focus reach the card through the one signal pair.
+        Assert.Contains("AbyssOverlayView.SetCardFocused", Il.Calls(Il.Method("AbyssOverlay", "MakeHit")));
+    }
+
+    [Fact]
+    public void The_room_and_the_layout_hand_controller_focus_to_the_cards()
+    {
+        // NEventRoom.DefaultFocusedControl asks the layout; the Ancient layout
+        // declares its own getter, which the screen patches.
+        var getter = AccessTools.PropertyGetter(typeof(NAncientEventLayout), nameof(NAncientEventLayout.DefaultFocusedControl));
+        Assert.NotNull(getter);
+        Assert.Equal(typeof(NAncientEventLayout), getter!.DeclaringType);
+        var patch = typeof(AbyssOverlay).Assembly.GetType(
+            "KleeMod.Abyss.NAncientEventLayout_DefaultFocusedControl_AbyssOverlay_Patch", throwOnError: true)!;
+        Assert.Equal((MethodType?)MethodType.Getter, patch.GetCustomAttributes<HarmonyPatch>().Single().info.methodType);
+        Assert.Contains("AbyssOverlayView.Hit", Il.Calls(Il.Method("AbyssOverlay", "FocusFor")));
+        // The first card is focused when the screen opens.
+        Assert.Contains("NodeUtil.TryGrabFocus", Il.Calls(Il.Method("AbyssOverlay", "Started")));
+    }
+
+    [Fact]
+    public void Left_and_right_walk_the_three_cards_and_wrap()
+    {
+        Assert.Equal((2, 1), AbyssOverlayView.Neighbors(0, 3));
+        Assert.Equal((0, 2), AbyssOverlayView.Neighbors(1, 3));
+        Assert.Equal((1, 0), AbyssOverlayView.Neighbors(2, 3));
+
+        // Every direction is named, so Godot never looks for a neighbour of
+        // its own behind the screen.
+        var wire = Il.Calls(Il.Method("AbyssOverlayView", "WireFocusNeighbors"));
+        foreach (var setter in new[]
+                 {
+                     "set_FocusNeighborLeft", "set_FocusNeighborRight", "set_FocusNeighborTop",
+                     "set_FocusNeighborBottom", "set_FocusNext", "set_FocusPrevious",
+                 })
+        {
+            Assert.Contains("Control." + setter, wire);
+        }
+        Assert.Contains("AbyssOverlayView.Neighbors", wire);
+        Assert.Contains("AbyssOverlayView.WireFocusNeighbors", Il.Calls(Il.Method("AbyssOverlayView", "Build")));
+    }
+
+    // ---- The SHADOW label and the X ---------------------------------------------
+
+    [Fact]
+    public void The_lower_band_is_labelled_SHADOW()
+    {
+        Assert.Equal("Shadow", AbyssOverlayContent.ShadowBandLabel);
+        Assert.Equal("SHADOW", AbyssOverlayView.BandLabel(AbyssOverlayContent.ShadowBandLabel));
+        Assert.Contains("AbyssOverlayView.BandLabel", Il.Calls(Il.Method("AbyssOverlayView", "BuildCard")));
+    }
+
+    [Fact]
+    public void The_X_marks_the_focused_card_and_this_players_pick_only()
+    {
+        Assert.False(AbyssOverlayView.ShowsCross(focused: false, chosen: false));
+        Assert.True(AbyssOverlayView.ShowsCross(focused: true, chosen: false));
+        Assert.True(AbyssOverlayView.ShowsCross(focused: false, chosen: true));
+        Assert.Contains("AbyssOverlayView.ShowsCross", Il.Calls(Il.Method("AbyssOverlayView", "Animate")));
+    }
+
+    [Fact]
+    public void The_X_is_one_outline_from_corner_to_corner()
+    {
+        var box = new Godot.Rect2(30, 26, 340, 200);
+        var points = AbyssOverlayView.CrossPolygon(box, 13f);
+        Assert.Equal(12, points.Length);
+        var centre = box.Position + box.Size / 2f;
+        // Point-symmetric about the band's centre: arm i mirrors arm i + 2.
+        for (var i = 0; i < 6; i++)
+        {
+            var mirrored = centre * 2f - points[i];
+            Assert.True(mirrored.DistanceTo(points[i + 6]) < 0.01f, $"point {i}");
+        }
+        // The inner corners sit close to the centre, the outer ones at the tips.
+        for (var i = 0; i < 4; i++)
+        {
+            Assert.True(points[i * 3 + 2].DistanceTo(centre) < 40f);
+            Assert.True(points[i * 3].DistanceTo(centre) > 150f);
+        }
+    }
+
     private static (Type, string) Target(string patchName)
     {
         var patch = typeof(AbyssOverlay).Assembly.GetType("KleeMod.Abyss." + patchName, throwOnError: true)!;
@@ -241,7 +345,7 @@ public class AbyssOverlayTests
         var options = (List<Dictionary<string, object?>>)state["options"]!;
         Assert.Equal(new[] { "The Ley Line", "Moonlit Rest", "First Strike" }, options.Select(o => o["title"]));
         Assert.Equal(new object?[] { 0, 1, 2 }, options.Select(o => o["index"]));
-        Assert.Equal(AbyssText.Text(AbyssBlessing.MoonlitRest) + "\nIf passed: Sheer Cold — "
+        Assert.Equal(AbyssText.Text(AbyssBlessing.MoonlitRest) + "\nShadow: Sheer Cold — "
                      + AbyssText.Text(AbyssShadow.SheerCold), options[1]["description"]);
         var screen = (Dictionary<string, object?>)state["abyss_screen"]!;
         Assert.Equal("The Spiral Abyss · Act 1", screen["subtitle"]);

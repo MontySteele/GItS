@@ -68,6 +68,17 @@ public static class AbyssOverlay
     public static readonly FieldInfo? LayoutEventField = AccessTools.Field(typeof(NEventLayout), "_event");
     internal static readonly FieldInfo? RoomEventField = AccessTools.Field(typeof(NEventRoom), "_event");
 
+    /// <summary>The game's clickable wires its own input in
+    /// <c>ConnectSignals</c> (FocusEntered/MouseEntered to its Focused
+    /// signal, MousePressed/MouseReleased to Released), and only its
+    /// subclasses call it, from their <c>_Ready</c>. A bare
+    /// <c>new NClickableControl()</c> never does, so the card never said it
+    /// was focused or hovered (no highlight, owner 2026-10-12: "I don't see a
+    /// way to select a Blessing from my controller"). The screen calls it
+    /// itself, after the view has set the card's focus mode.</summary>
+    public static readonly MethodInfo? ConnectSignalsMethod =
+        AccessTools.Method(typeof(NClickableControl), "ConnectSignals");
+
     private sealed class Session
     {
         public NAncientEventLayout Layout = null!;
@@ -125,6 +136,7 @@ public static class AbyssOverlay
         if (!session.Flow.Open()) return;
 
         session.View = AbyssOverlayView.Build(ViewData(session.Content), Fonts(), i => MakeHit(session, i));
+        for (var i = 0; i < session.View.CardCount; i++) WireClickable(session.View.Hit(i));
         session.View.Root.SetMeta(PageMeta, PageJson(session));
         room.AddChildSafely(session.View.Root);
         Sessions.AddOrUpdate(layout, session);
@@ -246,6 +258,20 @@ public static class AbyssOverlay
 
     // ---- Building ---------------------------------------------------------------
 
+    /// <summary>Run the game clickable's own signal wiring on a card (see
+    /// <see cref="ConnectSignalsMethod"/>). Its focus mode must be set first:
+    /// the clickable reads it to know it is controller-navigable.</summary>
+    internal static void WireClickable(Control hit)
+    {
+        if (hit is not NClickableControl clickable) return;
+        if (ConnectSignalsMethod == null)
+        {
+            Log.Error($"[{KleeMod.ModId}] Spiral Abyss screen: NClickableControl.ConnectSignals is gone; the cards will not highlight.");
+            return;
+        }
+        ConnectSignalsMethod.Invoke(clickable, null);
+    }
+
     private static Control MakeHit(Session session, int index)
     {
         var hit = new NClickableControl();
@@ -283,7 +309,7 @@ public static class AbyssOverlay
             Title = content.Title,
             Whisper = AbyssOverlayContent.Whisper,
             WholeRunTag = AbyssOverlayContent.WholeRunTag,
-            IfPassedLabel = AbyssOverlayContent.IfPassedLabel,
+            ShadowBandLabel = AbyssOverlayContent.ShadowBandLabel,
             BlessingsLabel = AbyssOverlayContent.BlessingsLabel,
             ShadowsLabel = AbyssOverlayContent.ShadowsLabel,
         };
@@ -404,7 +430,7 @@ public static class AbyssOverlay
 
     /// <summary>The JSON page the seat bridge reads off the root: the title,
     /// the whisper line, the three options (Blessing name; Blessing text and
-    /// "If passed: Shadow - text") and, once the pick lands, the result.</summary>
+    /// "Shadow: name - text") and, once the pick lands, the result.</summary>
     public static string PageJson(AbyssOverlayContent content, AbyssOverlayFlow flow)
     {
         var resolved = flow.Phase != AbyssOverlayPhase.Open;
