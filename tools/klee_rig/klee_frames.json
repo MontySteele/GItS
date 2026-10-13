@@ -160,7 +160,20 @@
     357
    ],
    "ppu": 300.0,
-   "file": "klee_attack.png"
+   "file": "klee_attack.png",
+   "thrown": {
+    "frame": 9,
+    "time": 0.45,
+    "file": "klee_bomb.png",
+    "size": [
+     38,
+     41
+    ],
+    "at": [
+     261.0,
+     80.5
+    ]
+   }
   },
   "hurt": {
    "cell": [

@@ -179,13 +179,20 @@ internal static class CreatureAnimationRouter
 
         if (tree.Get("parameters/playback").Obj is AnimationNodeStateMachinePlayback playback)
         {
-            if (AbsorbedBy(playback.GetCurrentNode(), trigger))
+            var current = playback.GetCurrentNode();
+            if (AbsorbedBy(current, trigger))
             {
                 return;
             }
             // Travel to the current state is a no-op, so a double "Dead"
             // (StartDeathAnim re-entry) cannot restart the death animation.
             playback.Travel(target);
+            // A scene that throws (Klee's bomb) flies the projectile from its
+            // release frame; inert for every scene without one.
+            if (ThrownProjectile.Throws(current, target))
+            {
+                ThrownProjectile.Schedule(creature, tree);
+            }
         }
     }
 

@@ -62,3 +62,45 @@ def test_the_manifest_was_rendered_at_the_ruled_scale():
     # 4'2" against 5'6"-5'10": 0.71-0.76 of an adult, hat to boot / to the feather.
     assert 0.68 <= m["hat_to_boot_px"] / BASE_ADULT_PX <= 0.78
     assert 0.68 <= m["full_px"] / BASE_ADULT_PX <= 0.78
+
+
+def test_split_thrown_lifts_the_free_bomb_out_of_the_cells_once():
+    """The thrown bomb is flown by the game (KleeMod.Vfx.ThrownProjectile):
+    a detached run right of the figure is erased from every cell and the
+    first one becomes the sprite, with where it sat. A second pass is a no-op."""
+    from PIL import Image
+
+    cw, ch = 40, 20
+    sheet = Image.new("RGBA", (cw * 2, ch * 2), (0, 0, 0, 0))
+    red = Image.new("RGBA", (1, 1), (255, 0, 0, 255))
+    for i in range(4):
+        x0, y0 = (i % 2) * cw, (i // 2) * ch
+        for x in range(2, 14):                      # the figure
+            for y in range(2, 18):
+                sheet.paste(red, (x0 + x, y0 + y))
+        if i in (1, 2):                             # the bomb in flight
+            bx = 20 + 8 * (i - 1)
+            for x in range(bx, bx + 4):
+                for y in range(5, 9):
+                    sheet.paste(red, (x0 + x, y0 + y))
+    rec = {"cell": [cw, ch], "hframes": 2, "count": 4, "times": [0.0, 0.05, 0.1, 0.15]}
+    out, bomb, thrown = pack.split_thrown(sheet, rec)
+    assert bomb.size == (4, 4)
+    assert thrown == {"frame": 1, "time": 0.05, "file": pack.BOMB_FILE, "size": [4, 4], "at": [22.0, 7.0]}
+    for i in range(4):
+        x0, y0 = (i % 2) * cw, (i // 2) * ch
+        cell = out.crop((x0, y0, x0 + cw, y0 + ch)).getchannel("A")
+        assert pack.column_runs(cell) == [(2, 14)], i
+    assert pack.split_thrown(out, rec)[1:] == (None, None)
+
+
+def test_the_scene_throws_from_where_the_bomb_left_her_hand():
+    frames = rig.load_frames()
+    thrown = frames["sheets"][pack.THROWN_CLIP]["thrown"]
+    assert thrown["file"] == pack.BOMB_FILE
+    ox, oy = frames["sheets"]["attack"]["origin"]
+    sc = frames["combat_scale"]
+    node = rig._projectile_node(frames)[0]
+    assert 'parent="Visuals/Facing"' in node and "visible = false" in node
+    assert f"position = {rig.vec2(((thrown['at'][0] - ox) * sc, (thrown['at'][1] - oy) * sc))}" in node
+    assert f"metadata/release = {rig.fnum(thrown['time'])}" in node
