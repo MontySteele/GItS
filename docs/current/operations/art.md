@@ -122,6 +122,23 @@ bespoke bosses and the four alpha cut-outs are excluded, and `rekey=2` starts
 eating real FX (`mirror_maiden`'s aura), so 1 is the value. Sheet:
 `art/contact_sheet_matte_2026-09-18.html`.
 
+**Art debt is said out loud (2026-10-12).** Sting, Ward and thirty other
+cards drew a blank portrait, and Varka's seven relics and three potions drew
+Burning Blood and the base potion, until the owner noticed in play. The cards
+sat on `art_coverage.KNOWN_MISSING` (the pixel check skips on CI); the relic
+and potion paths are built by helpers no string-reading gate followed. Now:
+`tools/deploy_round.py` prints an `art debt:` line naming every card that
+would draw blank; `test_every_shipped_key_has_planned_art_or_is_known_missing`
+holds every mod art key to an effective `plan.tsv` row in CI; and
+`tools/lint_relic_potion_icons.py` (CI) holds every relic and potion icon to a
+`plan.tsv` out-path. A new card batch adds its plan rows in the same PR, or
+its blank cards show up in every deploy summary.
+
+To place new rows without a full `art_process` pass (which would overwrite
+applied picks), render with `--assets <ids>` and promote with
+`--apply-picks <a picks file naming those ids at rank 1>`, both with
+`--art-root <main checkout>` from a worktree; `art_fetch.py --art-root` first.
+
 `art/plan.tsv` is UTF-8, LF in the index (`.gitattributes` normalises) — read with `encoding="utf-8", newline=""` and
 `rstrip("\r\n")`, or the last column silently stops matching. Depth:
 `docs/current/art/` and `docs/current/atlas/tools.md`.
