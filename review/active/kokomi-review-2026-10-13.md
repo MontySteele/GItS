@@ -69,6 +69,8 @@ Not changed, with the reason: Tidal Screen (E "weaker than Defend+") is 7 Block 
 
 ## For [USER]
 
+**Ruled 2026-10-13, all three (a).** [USER]: "Agreed on all defects" (defaults). The A-list stands as the jellyfish answer until the next round counts Stings; Kurage's Oath is unchanged; the Ward token becomes "Gain 4 Block. Plan: Apply 1 Weak." (upgraded 6 / 2).
+
 1. **The jellyfish half.**
    - **(a) Default:** the A-list only (Shoal Call to Common, Brine Sting to Uncommon, Wake's Plan 3 Stings). The next round reports Stings made and played per fight; a redesign waits for that number and your own run.
    - (b) The Tamakushi Casket leaves a Sting: "At the start of your turn, if a Plan from a card other than a Sting or Ward is waiting, add a Sting to your hand." (Watatsumi: a Sting and 3 Block.) Every run then sees the half; the guard clause is needed because a planned Sting would otherwise feed itself for nothing, and it is why this is not the default.
