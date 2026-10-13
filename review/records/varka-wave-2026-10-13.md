@@ -97,3 +97,13 @@ every kit (Kokomi's jellyfish and Barbara's kind of card).
 (b) Keep the rule; print a warning on cards that only apply.
 (c) Varka only: his "apply your current element" cards skip an aura they
 would amplify.
+
+**Ruled 2026-10-13: keep today's rule; no code change.** [USER]: "In Genshin,
+it's totally normal to just ruin a reaction by applying a super-low-damage Pyro
+setup skill to an enemy with Cryo before you get your big Pyro burst hit in
+(E.g. Bennet / Mavuika / Citlali teams) and managing that is just a skill
+issue. So I wonder if this change is overly generous or feels like an un-needed
+carve out." Then, on keeping the rule: "Sounds good!" The warning in (b)
+already exists: a card with no hit shows "This card deals no damage. Pyro plus
+Hydro is still consumed, and there is no hit here for the 1.5x to multiply."
+(KleeCardTooltips.NoHitBody, EB-338). Seat 3 wasted the aura with it on screen.
