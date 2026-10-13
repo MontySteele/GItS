@@ -268,11 +268,13 @@ public class PoolCompletionTests : IDisposable
         Assert.Contains(Seq("FurinaStage", "EnergyNextTurn"),
                         c => c.Contains("PowerCmd.Apply")
                              && c.Contains("EnergyNextTurnPower"));
-        Assert.Contains("gain 1 [gold]Energy[/gold] next turn instead",
+        // The card text pass (2026-10-12): "Next turn," and the energy icon;
+        // the bridge's mode label keeps the words.
+        Assert.Contains("also, next turn, gain {energyPrefix:energyIcons(1)}",
                         Face(new ProtoFsIntervalBell()));
         Assert.All(((IModalCard)Upgraded<ProtoFsIntervalBell>()).ModeLabels
                        .Skip(1),
-                   l => Assert.EndsWith("Energy[/gold] next turn instead", l));
+                   l => Assert.EndsWith("Next turn, gain 1 [gold]Energy[/gold]", l));
     }
 
     [Fact]

@@ -113,8 +113,9 @@ def test_lyneys_badge_says_his_drain_stops_at_the_line():
     src = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
            / "Powers" / "Prototype" / "FurinaStageBadges.cs").read_text(
                encoding="utf-8")
-    assert ('", never past your line (none at or below it). Deal " + act'
-            in src)
+    # The card text pass (2026-10-12): the face's words first, and no
+    # parentheses.
+    assert ('"It never [gold]Drains[/gold] past your line."' in src)
 
 
 # ---- 3. the curtain-call sentence --------------------------------------------

@@ -56,7 +56,7 @@ public sealed class ProtoVkBarbaraWhisperOfWater : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara: Whisper of Water"),
-        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Your [gold]Block[/gold] is not removed at the start of your next turn.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, your [gold]Block[/gold] is not removed.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

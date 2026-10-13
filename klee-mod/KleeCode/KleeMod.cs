@@ -471,6 +471,9 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.CurrentElementKey + ".title"] =
                         "Current element",
                     [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",
+                    // The card text pass (2026-10-12): Boreas's Fang's hover.
+                    [Cards.ArmKeywordTips.AscensionReturnKey + ".title"] =
+                        "Four Winds' Ascension",
                     // Co-op notes pick 2 (2026-10-02): the key is also
                     // `KleeKeywords.Knight`'s, the printed "Knight." line,
                     // and the keyword's own hover reads this row.

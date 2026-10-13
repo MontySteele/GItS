@@ -53,7 +53,7 @@ public sealed class ProtoVkVioletStorm : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Violet Storm"),
-        ("description", "Discard your hand. Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each card discarded.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Discard your [gold]Hand[/gold]. Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each card discarded.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

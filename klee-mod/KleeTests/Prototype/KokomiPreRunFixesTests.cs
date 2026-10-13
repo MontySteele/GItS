@@ -21,10 +21,9 @@ namespace KleeMod.Tests.Prototype;
 public class KokomiPreRunFixesTests
 {
     /// <summary>The sentence the Casket face gained, shared with the older
-    /// face tests that pin the whole string.</summary>
-    internal const string CasketTail =
-        " A [gold]Plan[/gold]'s own [gold]Block[/gold] comes at the start of "
-      + "your next turn.";
+    /// face tests that pin the whole string. EMPTY since the card text pass
+    /// (2026-10-12): the Casket "loses its second sentence".</summary>
+    internal const string CasketTail = "";
 
     private static string Face(CardModel card) =>
         ((CustomCardModel)card).Localization!
@@ -94,9 +93,13 @@ public class KokomiPreRunFixesTests
     }
 
     [Fact]
-    public void The_casket_says_when_a_plans_block_arrives()
+    public void The_casket_face_is_one_sentence()
     {
-        Assert.EndsWith(CasketTail, new TamakushiCasket().Localization!
-            .First(r => r.Item1 == "description").Item2);
+        // The card text pass (2026-10-12): the Casket loses its second
+        // sentence, "A Plan's own Block comes at the start of your next turn."
+        var face = new TamakushiCasket().Localization!
+            .First(r => r.Item1 == "description").Item2;
+        Assert.EndsWith("[gold]Block[/gold].", face);
+        Assert.DoesNotContain("next turn", face);
     }
 }

@@ -45,7 +45,7 @@ public sealed class ProtoKkOrdersFromTheShrine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Orders from the Shrine"),
-        ("description", "Add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] card to your hand. It is [gold]Ethereal[/gold]."),
+        ("description", "Add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It is [gold]Ethereal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

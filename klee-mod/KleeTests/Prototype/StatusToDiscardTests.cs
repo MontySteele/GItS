@@ -31,7 +31,6 @@ public class StatusToDiscardTests
         { "ProtoKoUpInSmoke", "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKoBehindJeansDesk", "Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKkFlotsamSurge", "Add 2 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
-        { "ProtoKkRiptideRuin", "Add 3 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
     };
 
     [Theory]

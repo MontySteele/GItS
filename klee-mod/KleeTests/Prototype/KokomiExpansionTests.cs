@@ -227,7 +227,7 @@ public class KokomiExpansionTests : IDisposable
         var calls = Seq("KokomiCards", "ShoalCall");
         Assert.Contains(calls, c => c.Contains("KokomiCards.AddJellyfish"));
         Assert.DoesNotContain(calls, c => c.Contains("get_IsUpgraded"));
-        Assert.Equal("Add {KkAmount:diff()} [gold]Stings[/gold] to your hand.",
+        Assert.Equal("Add {KkAmount:diff()} [gold]Stings[/gold] to your [gold]Hand[/gold].",
                      Face(new ProtoKkShoalCall()));
     }
 }

@@ -435,8 +435,8 @@ public sealed class NaptimePower : PowerModel, ILocalizationProvider
     /// is <see cref="StackType"/>'s own arithmetic and was printed nowhere.
     /// </summary>
     private const string Promise =
-        "If you play no Attacks this turn, draw [blue]{Amount}[/blue] "
-      + "card{Amount:plural:|s} at the start of your next turn. Copies add up.";
+        "Next turn, draw [blue]{Amount}[/blue] card{Amount:plural:|s} if you "
+      + "play no Attacks this turn. Copies add up.";
 
     /// <summary>The row key the missed face is filed under. Declared once so
     /// <see cref="Localization"/> and <see cref="SmartDescriptionLocKey"/>
@@ -619,11 +619,11 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
         // (`klee round 8, opus-act2.md`). The same split, for the same
         // reason, as `SalonPowers`' `{Slots}`.
         ("description",
-            "Marks your [gold]Block[/gold]. When it absorbs damage, gain "
+            "Marks your [gold]Block[/gold]. Whenever it absorbs damage, gain "
           + $"[blue]{CompanionOverhaulLaw.BlazingBarrierBlock}[/blue] "
           + "[gold]Block[/gold], marked too."),
         ("smartDescription",
-            "[blue]{Left}[/blue] [gold]Block[/gold] left. When it absorbs "
+            "[blue]{Left}[/blue] [gold]Block[/gold] left. Whenever it absorbs "
           + $"damage, gain [blue]{CompanionOverhaulLaw.BlazingBarrierBlock}[/blue] "
           + "[gold]Block[/gold], marked too."),
     };

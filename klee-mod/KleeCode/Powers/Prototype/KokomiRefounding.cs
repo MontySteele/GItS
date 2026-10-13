@@ -415,7 +415,7 @@ public static class KokomiRefounding
         "KLEEMOD-KOKOMI_RESERVES.selectionScreenPrompt";
 
     public const string ReservesPromptText =
-        "Choose a card to put into your hand.";
+        "Choose a card to put into your [gold]Hand[/gold].";
 
     /// <summary>Grand Design's hand screen.</summary>
     public const string GrandDesignPromptKey =
@@ -608,8 +608,9 @@ public sealed class SangonomiyasOrdersPower : PowerModel, ILocalizationProvider
         ("title", "Sangonomiya's Orders"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] random "
-          + "Common Inazuma [gold]Companion[/gold] "
-          + "{Amount:plural:card|cards} to your hand. "
+          + "Common Inazuma "
+          + "{Amount:plural:[gold]Companion[/gold]|[gold]Companions[/gold]} "
+          + "to your [gold]Hand[/gold]. "
           + "{Amount:plural:It is|They are} [gold]Ethereal[/gold]."),
     };
 
@@ -653,7 +654,7 @@ public sealed class KurageBloomPower : PowerModel, ILocalizationProvider
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] "
           + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "hand."),
+          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -758,7 +759,7 @@ public sealed class GrandStrategistPower : PowerModel, ILocalizationProvider
     {
         ("title", "Grand Strategist"),
         ("description",
-            "Whenever a [gold]Plan[/gold] causes an [gold]Elemental "
+            "Whenever a [gold]Plan[/gold] triggers an [gold]Elemental "
           + "Reaction[/gold], deal [blue]{Amount}[/blue] damage to ALL "
           + "enemies."),
     };
@@ -781,7 +782,7 @@ public sealed class EndlessShoalPower : PowerModel, ILocalizationProvider
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
           + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
           + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "hand."),
+          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

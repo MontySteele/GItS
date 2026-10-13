@@ -108,9 +108,11 @@ public class KokomiPoolPassTwoTests
         // card; "carried out with this one" (the census's undefined-jargon
         // example) is gone; and "after this one" keeps `EB-645`'s window
         // where "your next Plan" would have read as the next one WRITTEN.
+        // The card text pass (2026-10-12, the Kokomi table, ruled by [USER])
+        // words it "Your next Plan".
         var face = Face(new ProtoKkOpeningGambit());
-        Assert.EndsWith("The [gold]Plan[/gold] after this one deals double damage.", face);
-        Assert.DoesNotContain("next Plan", face);
+        Assert.EndsWith("Your next [gold]Plan[/gold] deals double damage.", face);
+        Assert.DoesNotContain("after this one", face);
         Assert.DoesNotContain("carried out with this one", face);
     }
 
@@ -419,11 +421,12 @@ public class KokomiPoolPassTwoTests
         // names the same window in plain words on all three rider faces --
         // "your next Plan" was ambiguous between the next carried out and the
         // next written (`EB-687`, `EB-645`).
+        // The card text pass (2026-10-12): "Your next Plan" on both.
         Assert.Equal(
-            "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The "
-          + "[gold]Plan[/gold] after this one is carried out twice.",
+            "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Your "
+          + "next [gold]Plan[/gold] is carried out twice.",
             Face(new ProtoKkSecondWave()));
-        Assert.EndsWith("The [gold]Plan[/gold] after this one deals double damage.",
+        Assert.EndsWith("Your next [gold]Plan[/gold] deals double damage.",
                         Face(new ProtoKkOpeningGambit()));
         // Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     }
@@ -460,9 +463,11 @@ public class KokomiPoolPassTwoTests
         // count and the order the Plans are carried out in.
         var face = new PendingPlansPower().Localization!
             .First(r => r.Item1 == "description").Item2;
+        // The card text pass (2026-10-12, rule 6): "Next turn," opens it.
         Assert.StartsWith(
-            "Carries out [blue]{Amount}[/blue] [gold]Plan{Amount:plural:|s}"
-          + "[/gold] at the start of your next turn, in order.", face);
+            "Next turn, the [gold]Bake-Kurage[/gold] carries out "
+          + "[blue]{Amount}[/blue] [gold]Plan{Amount:plural:|s}[/gold] in "
+          + "order.", face);
         Assert.DoesNotContain("Dusk", face);
         Assert.DoesNotContain("Later debuffs", face);
     }

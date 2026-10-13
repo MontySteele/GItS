@@ -1679,9 +1679,10 @@ def test_a_damageless_follower_is_unchanged_and_the_face_says_so(overhaul):
                                        cid="proto_kk_coral_bulwark"))
     kokomi_plan.resolve_all(st)
     assert st.player.block == 8
-    # THE 2026-09-25 TEXT PASS: the clause still names what it doubles.
+    # THE 2026-09-25 TEXT PASS: the clause still names what it doubles. The
+    # card text pass (2026-10-12) words it "Your next Plan".
     assert _faces()["proto_kk_opening_gambit"].endswith(
-        "The [gold]Plan[/gold] after this one deals double damage.")
+        "Your next [gold]Plan[/gold] deals double damage.")
 
 
 def test_a_rider_with_no_follower_says_so(overhaul):
@@ -1943,12 +1944,14 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # census's example of undefined jargon. "The Plan after this one" is the
     # same window in plain words on all three rider faces -- the next entry in
     # the drain, and the entries behind this one in it -- where "your next
-    # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`).
+    # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`). The card text
+    # pass (2026-10-12, Kokomi table, ruled by [USER]) words both "Your next
+    # Plan"; the drain's own line still says which entry took the rider.
     assert faces["proto_kk_second_wave"] == (
-        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] "
-        "after this one is carried out twice.")
+        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Your next "
+        "[gold]Plan[/gold] is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
-        "The [gold]Plan[/gold] after this one deals double damage.")
+        "Your next [gold]Plan[/gold] deals double damage.")
     # Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     for face in faces.values():
         assert "carried out with this one" not in face
@@ -2538,9 +2541,10 @@ def test_core_pass_faces(overhaul):
         "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage.")
     # Kokomi round 2 (2026-10-12): any card that can be written counts;
     # round 3 reworded the face so writing plainly does not.
+    # The card text pass (2026-10-12): "plan" is her one verb.
     assert faces["proto_kk_treatise"] == (
-        "Once a turn, when you play a card you could write as a "
-        "[gold]Plan[/gold] instead of writing it, draw 1 card.")
+        "The first time each turn you play a card you could have planned, "
+        "draw 1 card.")
 
 
 def test_core_pass_second_waves_hit_applies_hydro(overhaul):

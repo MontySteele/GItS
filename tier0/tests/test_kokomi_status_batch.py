@@ -241,9 +241,10 @@ def test_flotsam_surge_hits_all_and_discards_two_dazed(overhaul):
 
 # --- Riptide Ruin ------------------------------------------------------------------------
 
-def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
-    """The Rare in Coral Sanctuary's place (ruled 2026-10-01): "Deal 9 [12]
-    damage to ALL enemies twice. Add 3 Dazed into your Discard Pile." """
+def test_riptide_ruin_hits_all_twice_and_adds_no_dazed(overhaul):
+    """The Rare in Coral Sanctuary's place (ruled 2026-10-01). The card text
+    pass (2026-10-12): "Deal 11 [14] Hydro damage to ALL enemies twice." The
+    Dazed went and each hit gained 2."""
     st = kokomi_state(enemies=[make_enemy(hp=100), make_enemy(hp=100)])
     st.player.draw_pile = _filler(4)
     card = _row("proto_kk_riptide_ruin")
@@ -251,11 +252,11 @@ def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
     st.player.energy = 3
     st.player.hand.append(card)
     combat.play_card(st, card)
-    assert all(e.hp == 100 - 9 * 2 for e in st.enemies)
+    assert all(e.hp == 100 - 11 * 2 for e in st.enemies)
     dazed = [c for c in st.player.discard_pile if c.id == "status_dazed"]
-    assert len(dazed) == 3
+    assert dazed == []
     up = _up("proto_kk_riptide_ruin").effects[0]
-    assert (up["amount"], up["times"]) == (12, 2)
+    assert (up["amount"], up["times"]) == (14, 2)
 
 
 # --- the shape check -------------------------------------------------------------------------

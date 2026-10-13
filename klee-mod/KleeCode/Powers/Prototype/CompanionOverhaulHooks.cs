@@ -540,10 +540,10 @@ public sealed class IcyPawsPower : PowerModel, ILocalizationProvider
         // else, so `{Left}` written here was never bound and the placeholder
         // itself reached the screen.
         ("description",
-            "Marks your [gold]Block[/gold]. When it absorbs damage, apply "
+            "Marks your [gold]Block[/gold]. Whenever it absorbs damage, apply "
           + "[gold]Cryo[/gold] to the attacker."),
         ("smartDescription",
-            "[blue]{Left}[/blue] [gold]Block[/gold] left. When it absorbs "
+            "[blue]{Left}[/blue] [gold]Block[/gold] left. Whenever it absorbs "
           + "damage, apply [gold]Cryo[/gold] to the attacker."),
     };
 
@@ -1013,8 +1013,8 @@ public sealed class FavonianFavorPower : PowerModel, ILocalizationProvider
     {
         ("title", "Favonian Favor"),
         ("description",
-            "Whenever an [gold]Elemental Reaction[/gold] happens this turn, "
-          + "gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+            "Whenever you trigger an [gold]Elemental Reaction[/gold] this "
+          + "turn, gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

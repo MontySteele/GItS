@@ -1706,7 +1706,7 @@ ARM_KEYWORDS: dict[str, str] = {
                    "this card goes to your Discard Pile."),
     "oldest guest": ("The guest on stage longest: the one a fourth summon "
                      "would remove."),
-    "Charlotte": ("The first time one of your cards Repays each turn, draw 1 "
+    "Charlotte": ("The first time each turn one of your cards Repays, draw 1 "
                   "card. Act: Repay 2. Gain 1 Block for any HP it could not "
                   "Repay."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
@@ -2320,7 +2320,7 @@ BASE_KEYWORDS: dict[str, str] = {
     # THE KOKOMI RE-FOUNDING (2026-10-12): five of her faces print Ethereal
     # (and her generated cards carry it). The base game's rule, in step
     # with `BaseKeywordTips.ForEthereal`.
-    "Ethereal": ("If this card is in your hand at the end of your turn, it "
+    "Ethereal": ("If this card is in your Hand at the end of your turn, it "
                  "is Exhausted."),
     # The three enchantments (`EB-355` is the same gap at the enchant screen).
     # A card wears one for the rest of the run and the page prints it in the

@@ -55,7 +55,7 @@ Mechanics check: matches harvest (75/150/300 HP dummy, 3-turn cap, potion / 2-up
 
 ### Sounding the Beryl Shelf — Fontaine / Melusines of Merusea Village, salvage crew voice — loose — REUSED event-conversion-gallery.md, Crystal Sphere variant 2
 
-The Melusines of Merusea Village have gridded a sunken freight lot on the Beryl Region shelf: eleven squares by eleven of grey silt, cargo somewhere beneath it. A harbormistress in an oilskin cap explains the sounding charges — one clears a single square, or a three-by-three sweep — and warns that only crates bared completely can be winched up. The big one at the lot's heart is four squares across; three soundings will never strip it.
+The Melusines of Merusea Village have gridded a sunken freight lot on the Beryl Region shelf: eleven squares by eleven of gray silt, cargo somewhere beneath it. A harbormistress in an oilskin cap explains the sounding charges — one clears a single square, or a three-by-three sweep — and warns that only crates bared completely can be winched up. The big one at the lot's heart is four squares across; three soundings will never strip it.
 
 - **Buy Sounding Charges** — Pay 51-99 Gold. Divine 3 times.
 - **Take the Meropide Tab** — Gain a Debt. Divine 6 times.

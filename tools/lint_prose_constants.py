@@ -207,6 +207,30 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # THE CARD TEXT PASS (2026-10-12): Treatise's "draw 1 card" and Blazing
+    # Delight's energy icon `{energyPrefix:energyIcons(1)}` print each card's
+    # own number; the reworded context joined them to these constants.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKkTreatise.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "the card's own draw, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "the card's own draw, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKkTreatise.cs",
+     "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "the card's own draw, not Charlotte's line",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "the card's own draw, not Charlotte's line",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "AbyssNumbers.ResonanceEnergy", "1"):
+        "the card's own energy, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "FireworksStand.Energy", "1"):
+        "the card's own energy, not Fireworks Stand's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "WaitForItPower.ReactionEnergy", "1"):
+        "the card's own energy, not Wait For It's",
     # KLEE'S STORY (2026-10-12): Confinement's "After 3 combats" is a story
     # Curse's length; these strings print their own numbers.
     ("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs",

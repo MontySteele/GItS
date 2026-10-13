@@ -42,7 +42,7 @@ public sealed class ProtoKoVermillionPact : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparkborne Magic"),
-        ("description", "When a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] react, every other [gold]Bomb[/gold] it sets off reacts with the same aura."),
+        ("description", "Whenever a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] react, every other [gold]Bomb[/gold] in that [gold]Set off[/gold] reacts with the same aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -85,7 +85,10 @@ public class ArmRelicsPotionsTests
             Assert.Equal(new[] { "title", "description" },
                          loc.Select(r => r.Item1).ToArray());
             var face = loc[1].Item2;
-            Assert.DoesNotContain("{", face);
+            // The card text pass (2026-10-12, rule 3): the base game's energy
+            // icon, which every relic and potion face binds, is the one hole.
+            Assert.DoesNotContain("{", System.Text.RegularExpressions.Regex.Replace(
+                face, @"\{energyPrefix:energyIcons\(\d+\)\}", "E"));
             Assert.True(face.Length < 140, $"{loc[0].Item2}: {face}");
         }
     }

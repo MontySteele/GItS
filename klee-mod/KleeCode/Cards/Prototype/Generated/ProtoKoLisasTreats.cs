@@ -42,13 +42,13 @@ public sealed class ProtoKoLisasTreats : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lisa's Treats"),
-        ("description", "Gain {Energy:diff()} [gold]Energy[/gold]. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Gain {Energy:energyIcons()}. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Energy", 2m)
+            new EnergyVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

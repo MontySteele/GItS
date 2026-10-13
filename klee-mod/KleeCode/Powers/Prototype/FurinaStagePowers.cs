@@ -194,7 +194,7 @@ public sealed class OusiaSurgePower : PowerModel, ILocalizationProvider
     {
         ("title", "Ousia Surge"),
         ("description",
-            "The first time you [gold]Drain[/gold] each turn, draw "
+            "The first time each turn you [gold]Drain[/gold], draw "
           + "[blue]{Amount}[/blue] card."),
     };
 

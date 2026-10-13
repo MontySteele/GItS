@@ -189,7 +189,7 @@ public sealed class AlicesGuidebook : CustomRelicModel
         ("title", "Alice's Guidebook"),
         ("description",
             "At the start of your turn, your largest [gold]Bomb[/gold] grows "
-          + "[blue]" + Growth + "[/blue] more."),
+          + "by an additional [blue]" + Growth + "[/blue]."),
     };
 
     public override Task AfterPlayerTurnStartLate(
@@ -229,9 +229,9 @@ public sealed class FireworksStand : CustomRelicModel, IProtoExplosionListener
     {
         ("title", "Fireworks Stand"),
         ("description",
-            "Whenever one card sets off [blue]" + Threshold + "[/blue] or more "
-          + "[gold]Bombs[/gold], gain [blue]" + Energy + "[/blue] "
-          + "[gold]Energy[/gold]."),
+            "Whenever one card's [gold]Set off[/gold] makes [blue]" + Threshold
+          + "[/blue] or more [gold]Bombs[/gold] go off, gain "
+          + "{energyPrefix:energyIcons(" + Energy + ")}."),
     };
 
     /// <summary>Explosions counted for the card being played. Read by the

@@ -266,7 +266,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
    upgrade: {retain: true},
-   description: "All cards in your hand count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "All cards in your [gold]Hand[/gold] count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: companion_mark_hand},
              {op: draw, amount: 2}]}
 
@@ -356,7 +356,7 @@
 - {id: proto_ko_vermillion_pact, name: "Sparkborne Magic", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "When a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] react, every other [gold]Bomb[/gold] it sets off reacts with the same aura.",
+   description: "Whenever a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] react, every other [gold]Bomb[/gold] in that [gold]Set off[/gold] reacts with the same aura.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_vermillion_pact, amount: 1, target: self}]}
 
@@ -372,7 +372,7 @@
 - {id: proto_ko_blast_shield, name: "Blast Shield", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Gain 4 [gold]Block[/gold]. Return this card to your hand.",
+   description: "Gain 4 [gold]Block[/gold]. Return this card to your [gold]Hand[/gold].",
    upgrade: {block: +2},
    effects: [{op: spend_spark, amount: 1},
              {op: block, amount: 4},
@@ -402,7 +402,7 @@
 - {id: proto_ko_sparkling_burst, name: "Sparkling Burst", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Gain {Energy:diff()} [gold]Energy[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 1 more.",
+   description: "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain an additional {energyPrefix:energyIcons(1)}.",
    upgrade: {energy: +1},
    effects: [{op: spend_spark, amount: 1},
              {op: energy, amount: 1},
@@ -412,7 +412,7 @@
 - {id: proto_ko_blazing_delight, name: "Blazing Delight", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, gain 1 [gold]Energy[/gold] and draw 1 card.",
+   description: "At the start of your turn, gain {energyPrefix:energyIcons(1)} and draw 1 card.",
    upgrade: {spark_price: -1},
    effects: [{op: spend_spark, amount: 1},
              {op: apply_power, power: ko_blazing_delight, amount: 1,
@@ -499,7 +499,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # AoE trim, 2026-10-03 (sec.2): the Companion pays 6 more damage on the
    # aimed enemy instead of widening the Set off to ALL.
-   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 more if you played a [gold]Companion[/gold] card this turn.",
+   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy},
              {op: damage, amount: 6, target: enemy,
@@ -534,7 +534,7 @@
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Put a [gold]Set off[/gold] card from your discard pile into your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by 3.",
+   description: "Put a [gold]Set off[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 3.",
    upgrade: {grow: +3},
    effects: [{op: fetch_from_discard, filter: set_off},
              {op: grow_largest, amount: 3}]}
@@ -542,14 +542,14 @@
 - {id: proto_ko_tag_along, name: "Tag Along", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Choose 1 of 3 [gold]Companion[/gold] cards to add to your hand. It costs 0 this turn.",
+   description: "Choose 1 of 3 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. It costs 0 this turn.",
    upgrade: {remove: exhaust},
    effects: [{op: choose_companion, amount: 1, options: 3}]}
 
 - {id: proto_ko_come_back_and_play, name: "Come Back and Play!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Put a [gold]Companion[/gold] card from your discard pile into your hand.",
+   description: "Put a [gold]Companion[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
    upgrade: {add: {op: draw, amount: 1}},
    effects: [{op: fetch_from_discard, filter: companion}]}
 
@@ -567,7 +567,7 @@
 - {id: proto_ko_wait_for_it, name: "Wait For It...", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, retain: true,
-   description: "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw 2 cards and gain 1 [gold]Energy[/gold].",
+   description: "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw 2 cards and gain {energyPrefix:energyIcons(1)}.",
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_wait_for_it, amount: 2, target: self}]}
 
@@ -630,7 +630,7 @@
 - {id: proto_ko_adventure_club, name: "Adventure Club", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 2 of 4 [gold]Companion[/gold] cards to add to your hand. They cost 0 this turn.",
+   description: "Choose 2 of 4 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. They cost 0 this turn.",
    upgrade: {cost: -1},
    effects: [{op: choose_companion, amount: 2, options: 4}]}
 
@@ -679,7 +679,7 @@
 - {id: proto_ko_alices_detonator, name: "Alice's Detonator", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, add {IfUpgraded:show:an upgraded |}Alice's Mine to your hand.",
+   description: "At the start of your turn, add {IfUpgraded:show:an upgraded |}[gold]Alice's Mine[/gold] to your [gold]Hand[/gold].",
    upgrade: {upgraded_grant: true},
    effects: [{op: grant_alices_mine_each_turn}]}
 
@@ -717,7 +717,7 @@
 - {id: proto_ko_lisas_treats, name: "Lisa's Treats", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Gain 2 [gold]Energy[/gold]. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Gain {Energy:energyIcons()}. Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
    upgrade: {energy: +1},
    effects: [{op: energy, amount: 2},
              {op: add_card, card: confiscated, zone: discard, amount: 1}]}
@@ -737,7 +737,7 @@
    # Klee finish-line batch, 2026-10-03 ([USER]: "Finders Keepers seems too
    # niche to be useful"): Damage Report's draw-a-status trigger, was "play a
    # Confiscated" for a Bomb 5 [7].
-   description: "Whenever you draw a status, place a [gold]Bomb[/gold] 6 on a random enemy.",
+   description: "Whenever you draw a Status, place a [gold]Bomb[/gold] 6 on a random enemy.",
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_finders_keepers, amount: 6, target: self}]}
 
@@ -746,7 +746,7 @@
 - {id: proto_ko_klee_can_explain, name: "Klee Can Explain!", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 6 [gold]Block[/gold]. Transform every status in your hand into Pop!.",
+   description: "Gain 6 [gold]Block[/gold]. Transform every Status in your [gold]Hand[/gold] into [gold]Pop![/gold].",
    upgrade: {block: +2},
    effects: [{op: block, amount: 6},
              {op: transform_statuses_into, card: proto_ko_pop}]}
@@ -756,7 +756,7 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # AoE trim, 2026-10-03 (sec.2): Block per status drawn, was 5 to ALL.
-   description: "Whenever you draw a status, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
+   description: "Whenever you draw a Status, gain 4 [gold]Block[/gold] and 1 [gold]Spark[/gold].",
    upgrade: {power_amount: +2},
    effects: [{op: apply_power, power: ko_damage_report, amount: 4, target: self}]}
 
@@ -790,7 +790,7 @@
 - {id: proto_ko_kitchen_alchemy, name: "Kitchen Alchemy", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every status in your hand; they lose 1 more for each.",
+   description: "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every Status in your [gold]Hand[/gold]; they lose 1 more for each.",
    upgrade: {retain: true},
    effects: [{op: lose_strength, amount: 1, target: all_enemies, per_status: 1}]}
 
@@ -964,7 +964,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
    cost: 0, type: skill, exhaust: true,
-   description: "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "Gain {energyPrefix:energyIcons(1)}. Draw {Cards:diff()} card{Cards:plural:|s}.",
    upgrade: {draw: +1},
    effects: [{op: energy, amount: 1}, {op: draw, amount: 1}]}
 
@@ -1044,7 +1044,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: skill,
-   description: "Gain 6 [gold]Block[/gold]. When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker.",
+   description: "Gain 6 [gold]Block[/gold]. Whenever this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker.",
    effects: [{op: block, amount: 6},
              {op: apply_power, power: mc_icy_paws, amount: 6, target: self}]}
 
@@ -1085,7 +1085,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: buffer, element: hydro,
    cost: 1, type: skill,
-   description: "Gain 7 [gold]Block[/gold]. Whenever an [gold]Elemental Reaction[/gold] happens this turn, gain 3 [gold]Block[/gold].",
+   description: "Gain 7 [gold]Block[/gold]. Whenever you trigger an [gold]Elemental Reaction[/gold] this turn, gain 3 [gold]Block[/gold].",
    effects: [{op: block, amount: 7},
              {op: apply_power, power: mc_favonian_favor, amount: 3, target: self}]}
 
@@ -1124,7 +1124,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack,
-   description: "Deal 8 [gold]Electro[/gold] damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold].",
+   description: "Deal 8 [gold]Electro[/gold] damage. If this is the third Attack you played this turn, gain {energyPrefix:energyIcons(1)}.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: conditional, if: nth_attack_this_turn_3,
               then: [{op: energy, amount: 1}]}]}
@@ -1268,7 +1268,7 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: skill, rarity: uncommon,
-   description: "Look at the top {Scry:diff()} card{Scry:plural:|s} of your [gold]Draw Pile[/gold]. Put 1 into your hand and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   description: "Look at the top {Scry:diff()} card{Scry:plural:|s} of your [gold]Draw Pile[/gold]. Put 1 into your [gold]Hand[/gold] and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
    effects: [{op: scry_take, amount: 3}],
    plan: [{op: block, amount: 10}],
    # 4 seen / Plan 12: both halves move, one number each.
@@ -1283,7 +1283,7 @@
    # Cost 0 (2026-10-11); Companions count (round 2); face reworded in the
    # Kokomi round-3 changes (2026-10-12). Provenance note.
    cost: 0, type: power, rarity: uncommon,
-   description: "Once a turn, when you play a card you could write as a [gold]Plan[/gold] instead of writing it, draw 1 card.",
+   description: "The first time each turn you play a card you could have planned, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1292,7 +1292,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Gain 2 [gold]Energy[/gold].",
+   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Gain {energyPrefix:energyIcons(2)}.",
    effects: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
    plan: [{op: energy, amount: 2}],
    # now 2 Weak; the Plan line does not upgrade.
@@ -1427,7 +1427,7 @@
    cost: 2, type: attack, rarity: uncommon,
    # The re-founding (2026-10-12): the Plan is "Draw 3 cards" (was 2 Energy
    # and a draw); the upgrade still adds 1 to the Plan's draw.
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, {ExtraDamage:diff()} additional damage to debuffed ones. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Debuffed enemies take {ExtraDamage:diff()} additional. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards.",
    effects: [{op: damage, amount: 11, target: all_enemies, bonus_vs_debuff: 3}],
    plan: [{op: draw, amount: 3}],
    # 14 / 4 more, and the Plan's draw 3 -> 4.
@@ -1450,7 +1450,7 @@
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage to each enemy that intended to attack when you wrote this.",
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage to each enemy that intended to attack when planned.",
    effects: [{op: damage, amount: 8, target: enemy}],
    # `EB-492`, the intent-keyed aim. THE SET IS FIXED WHEN THE PLAN IS
    # WRITTEN -- R250's rule for an aimed Plan, applied to a set.
@@ -1470,7 +1470,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The [gold]Plan[/gold] after this one deals double damage.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. Your next [gold]Plan[/gold] deals double damage.",
    # THE CASKET PASS (2026-09-28): 5 -> 7 now. `applies_element: true`
    # (2026-10-05): the face prints Hydro, so the row declares it -- the element
    # lives on the card, not on who plays it ([USER]'s ruling).
@@ -1488,7 +1488,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] after this one is carried out twice.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Your next [gold]Plan[/gold] is carried out twice.",
    # `applies_element: true` (2026-10-05): the face prints Hydro, so the row
    # declares it rather than leaning on Kokomi's retired every-card cadence.
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
@@ -1593,7 +1593,7 @@
    # Block 5 -> 7 [10]. The jellyfish build (2026-10-12): 5 [8], Cloak and
    # Dagger's rate.
    cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your hand.",
+   description: "Gain 5 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your [gold]Hand[/gold].",
    effects: [{op: block, amount: 5},
              {op: kokomi, kind: add_ward}],
    upgrade: {block: 3}}
@@ -1604,7 +1604,7 @@
    # 5 -> 8 [11]. The jellyfish build (2026-10-12): 6 [8], the Silent's rate
    # now that a Sting costs 0.
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your hand.",
+   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 6, target: enemy},
              {op: kokomi, kind: add_sting}],
    upgrade: {damage: 2}}
@@ -1645,7 +1645,7 @@
    # name and art. Each card chosen is written as if played on the
    # Bake-Kurage, for 0 Energy.
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Write up to {KkAmount:diff()} cards from your hand as [gold]Plans[/gold]. They cost 0.",
+   description: "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. They cost 0.",
    effects: [{op: kokomi, kind: grand_design, amount: 3}],
    upgrade: {retain: true}}
 
@@ -1781,7 +1781,7 @@
    # Exhaust, 3 [4] plain Stings (the upgrade adds a Sting; it no longer
    # hands over upgraded ones).
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Add {KkAmount:diff()} [gold]Stings[/gold] to your hand.",
+   description: "Add {KkAmount:diff()} [gold]Stings[/gold] to your [gold]Hand[/gold].",
    effects: [{op: kokomi, kind: shoal_call, amount: 3}],
    upgrade: {kokomi_amount: 1}}
 
@@ -1854,7 +1854,7 @@
    cost: 1, type: power, rarity: rare,
    # The re-founding (2026-10-12): pays for WRITING a Companion, in Stings.
    # One Sting per Companion written; copies add.
-   description: "Whenever you write a [gold]Companion[/gold] card as a [gold]Plan[/gold], add a [gold]Sting[/gold] to your hand.",
+   description: "Whenever you plan a [gold]Companion[/gold] card, add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
    effects: [{op: apply_power, power: kk_watatsumi_resistance, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -1868,7 +1868,7 @@
    # The count is the hand WHEN THE PLAN IS WRITTEN (round-1 fixes); the
    # now-line gains 5 [7] Block before its draw (Kokomi round-3 changes,
    # 2026-10-12). Provenance note.
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand when written.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each Status or Curse in your [gold]Hand[/gold] when planned.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: block, amount: 5}, {op: draw, amount: 1}],
    plan: [{op: block, amount: 9},
           {op: block_per_status_in_hand, amount: 3}],
@@ -1881,7 +1881,7 @@
    cost: 0, type: skill, rarity: common,
    # The re-founding (2026-10-12): no Plan line; the Exhaust is the
    # now-line, first. "Up to": she chooses which when she holds more.
-   description: "[gold]Exhaust[/gold] up to {KkAmount:diff()} statuses or curses in your hand. Apply 1 [gold]Weak[/gold].",
+   description: "[gold]Exhaust[/gold] up to {KkAmount:diff()} Statuses or Curses in your [gold]Hand[/gold]. Apply 1 [gold]Weak[/gold].",
    effects: [{op: kokomi, kind: exhaust_statuses, amount: 2},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    # Up to 3 (the old Plan line's upgrade, carried over).
@@ -1893,7 +1893,7 @@
    # Defect's Compact on the draw pile, curses included (Kokomi round-1
    # fixes, 2026-10-12; provenance note). Sea Glass is a token in no pool:
    # 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every status and curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
    effects: [{op: block, amount: 10}],
    plan: [{op: transform_statuses_in_draw_pile}],
    # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13].
@@ -1915,13 +1915,12 @@
 - {id: proto_kk_riptide_ruin, name: "Riptide Ruin", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   # The status batch's Rare, in Coral Sanctuary's place (ruled 2026-10-01):
-   # a second status source, Flotsam Surge's shape at Rare size. Hydro
-   # through the arm's cadence like every damaging card of hers.
-   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies twice. Add 3 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
-   effects: [{op: damage, amount: 9, target: all_enemies, times: 2},
-             {op: add_card, card: status_dazed, zone: discard, amount: 3}],
-   # 12 to ALL, twice.
+   # The status batch's Rare (ruled 2026-10-01). The card text pass
+   # (2026-10-12, review/active/card-text-pass-2026-10-12.md): the Dazed
+   # went and each hit gained 2, 9 [12] -> 11 [14].
+   description: "Deal 11 [gold]Hydro[/gold] damage to ALL enemies twice.",
+   effects: [{op: damage, amount: 11, target: all_enemies, times: 2}],
+   # 14 to ALL, twice.
    upgrade: {damage: 3}}
 
 # THE RE-FOUNDING CUT 24 ROWS (2026-10-12, review/active/kokomi-card-paper-
@@ -1961,7 +1960,7 @@
 - {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your hand.",
+   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 6, target: enemy},
              {op: kokomi, kind: add_ward}],
    # 9 damage. Kokomi round 2 (2026-10-12): 6 [9] -> 8 [11]; the jellyfish
@@ -1971,7 +1970,7 @@
 - {id: proto_kk_orders_from_the_shrine, name: "Orders from the Shrine", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] card to your hand. It is [gold]Ethereal[/gold].",
+   description: "Add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: add_companion}],
    # The Companion arrives upgraded: a play-time read, the face's own swap.
    upgrade: {upgraded_grant: true}}
@@ -1979,7 +1978,7 @@
 - {id: proto_kk_kurages_wake, name: "Kurage's Wake", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 2 [gold]Stings[/gold] to your hand.",
+   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 2 [gold]Stings[/gold] to your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 4, target: enemy, times: 2}],
    plan: [{op: add_stings, amount: 2}],
    # 5 twice; the Plan line does not upgrade.
@@ -1990,28 +1989,28 @@
    # Kokomi round 2 (2026-10-12): cost 1 -> 0, and Exhaust. The cards it makes keep
    # their own costs.
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "Add {KkAmount} random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] cards to your hand. They are [gold]Ethereal[/gold].",
+   description: "Add {KkAmount} random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companions[/gold] to your [gold]Hand[/gold]. They are [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: add_companions, amount: 2}],
    upgrade: {upgraded_grant: true}}
 
 - {id: proto_kk_sangonomiyas_orders, name: "Sangonomiya's Orders", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] card to your hand. It is [gold]Ethereal[/gold].",
+   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
    effects: [{op: apply_power, power: kk_sangonomiyas_orders, amount: 1, target: self}],
    upgrade: {innate: true}}
 
 - {id: proto_kk_kurage_bloom, name: "Kurage Bloom", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, add a [gold]Sting[/gold] to your hand.",
+   description: "At the start of your turn, add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
    effects: [{op: apply_power, power: kk_kurage_bloom, amount: 1, target: self}],
    upgrade: {innate: true}}
 
 - {id: proto_kk_kurage_barrage, name: "Kurage Barrage", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 3 [gold]Hydro[/gold] damage 3 times. Add a [gold]Sting[/gold] to your hand.",
+   description: "Deal 3 [gold]Hydro[/gold] damage 3 times. Add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 3, target: enemy, times: 3},
              {op: kokomi, kind: add_sting}],
    # 4 a hit.
@@ -2039,7 +2038,7 @@
 - {id: proto_kk_reserves, name: "Reserves", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Put a card from your [gold]Exhaust Pile[/gold] into your hand. It is [gold]Ethereal[/gold].",
+   description: "Put a card from your [gold]Exhaust Pile[/gold] into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: reserves}],
    upgrade: {cost: -1}}
 
@@ -2073,7 +2072,7 @@
 - {id: proto_kk_grand_strategist, name: "Grand Strategist", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever a [gold]Plan[/gold] causes an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies.",
+   description: "Whenever a [gold]Plan[/gold] triggers an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies.",
    effects: [{op: apply_power, power: kk_grand_strategist, amount: 7, target: self}],
    # 10 damage. Kokomi round 2 (2026-10-12): 5 [8] -> 7 [10].
    upgrade: {power_amount: 3}}
@@ -2083,7 +2082,7 @@
    # Kokomi round 2 (2026-10-12): the chosen card costs 0 this turn (the base game's
    # Discovery template).
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 1 of 3 random Rare Inazuma [gold]Companion[/gold] cards. Add it to your hand. It is [gold]Ethereal[/gold]. It costs 0 this turn.",
+   description: "Choose 1 of 3 random Rare Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold] and costs 0 this turn.",
    effects: [{op: kokomi, kind: call_the_generals}],
    upgrade: {cost: -1}}
 
@@ -2093,7 +2092,7 @@
    # Plan carried out twice gives two Stings. Innate on upgrade, Kurage
    # Bloom's (and Infinite Blades') upgrade. Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add a [gold]Sting[/gold] to your hand.",
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
    effects: [{op: apply_power, power: kk_endless_shoal, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -2197,7 +2196,7 @@
    cost: 1, type: skill, exhaust: true,
    # The paper's Plan line ("For 3 turns, at the end of your turn gain 6
    # Block") shortened to the 120-character card ceiling.
-   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
    plan: [{op: juuga_guard, amount: 3}]}
 
@@ -2220,7 +2219,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: anemo,
    cost: 0, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. If you play no Attacks this turn, draw 2 cards next turn.",
+   description: "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.",
    effects: [{op: block, amount: 4},
              {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
 
@@ -2449,7 +2448,7 @@
    authored_by: [claude],
    art_of: charlotte_enduring_frosthelm,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: cryo, cost: 1, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
+   description: "Gain 4 [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
    effects: [{op: block, amount: 4}, {op: apply_aura, element: cryo, target: enemy}, {op: block_next_turn, amount: 4}]}
 
 # 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
@@ -2587,7 +2586,7 @@
    # in her pool rather than her Personal companion slot.
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn.",
+   description: "[gold]Plan[/gold]: Play a copy of the last other [gold]Companion[/gold] card you played this turn.",
    effects: [],
    plan: [{op: play_copy_of_companion}],
    # 2026-10-12: Retain, not cost 0 ("no card with a Plan line costs 0",
@@ -2606,7 +2605,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by 6 for each. Draw 1 card for each.",
+   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 6 for each. Draw 1 card for each.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6, draw_each: 1}]}
 
@@ -2719,11 +2718,11 @@
    upgrade: {mode_draw: [1, 1]},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Draw {IfUpgraded:show:3|2} cards. [gold]Drain[/gold] 4: also gain 2 [gold]Energy[/gold] next turn.",
+   description: "Draw {IfUpgraded:show:3|2} cards. [gold]Drain[/gold] 4: also, next turn, gain {energyPrefix:energyIcons(2)}.",
    effects: [{op: choose_one, modes: [
               {label: "Draw {IfUpgraded:show:3|2} cards",
                effects: [{op: draw, amount: 2}]},
-              {label: "[gold]Drain[/gold] 4: draw {IfUpgraded:show:3|2} cards and gain 2 [gold]Energy[/gold] next turn",
+              {label: "[gold]Drain[/gold] 4: draw {IfUpgraded:show:3|2} cards. Next turn, gain {energyPrefix:energyIcons(2)}",
                effects: [{op: stage_drain, amount: 4},
                          {op: draw, amount: 2},
                          {op: stage_energy_next, amount: 2}]}]}]}
@@ -2812,11 +2811,11 @@
    upgrade: {stage_spend: -1},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: uncommon,
-   description: "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead.",
+   description: "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: also, next turn, gain {energyPrefix:energyIcons(1)}.",
    effects: [{op: choose_one, modes: [
               {label: "Draw 1 card",
                effects: [{op: draw, amount: 1}]},
-              {label: "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card and gain 1 [gold]Energy[/gold] next turn instead",
+              {label: "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card. Next turn, gain {energyPrefix:energyIcons(1)}",
                effects: [{op: stage_spend, amount: 3},
                          {op: draw, amount: 1},
                          {op: stage_energy_next, amount: 1}]}]}]}
@@ -2930,7 +2929,7 @@
    upgrade: {innate: true},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "The first time you [gold]Drain[/gold] each turn, draw 1 card.",
+   description: "The first time each turn you [gold]Drain[/gold], draw 1 card.",
    effects: [{op: apply_power, power: fs_ousia_surge, amount: 1,
               target: self}]}
 
@@ -3014,7 +3013,7 @@
    upgrade: {add: {op: draw, amount: 1}},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand. If you can't, draw {FsAmount:diff()} cards.",
+   description: "Put a Guest Star from your [gold]Draw Pile[/gold] into your [gold]Hand[/gold]. If you can't, draw {FsAmount:diff()} cards.",
    effects: [{op: furina, kind: tutor_guest, amount: 2}]}
 
 # Encore!: one free act. "Oldest guest" carries its tip (sec.5). Ruled
@@ -3156,7 +3155,7 @@
    upgrade: {innate: true},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "The first time you [gold]Spend[/gold] each turn, draw 1 card.",
+   description: "The first time each turn you [gold]Spend[/gold], draw 1 card.",
    effects: [{op: apply_power, power: fs_crescendo, amount: 1,
               target: self}]}
 
@@ -3164,7 +3163,7 @@
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain 1 [gold]Energy[/gold].",
+   description: "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain {energyPrefix:energyIcons(1)}.",
    effects: [{op: apply_power, power: fs_prima_donna, amount: 1,
               target: self}]}
 
@@ -3206,7 +3205,7 @@
    upgrade: {stage_drain: -1},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: common,
-   description: "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Gain 1 [gold]Energy[/gold] next turn.",
+   description: "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Next turn, gain {energyPrefix:energyIcons(1)}.",
    effects: [{op: stage_drain, amount: 4},
              {op: stage_energy_next, amount: 1}]}
 
@@ -3270,7 +3269,7 @@
    upgrade: {stage_drain: -2},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Drain[/gold] {IfUpgraded:show:6|8}. Gain 2 [gold]Energy[/gold].",
+   description: "[gold]Drain[/gold] {IfUpgraded:show:6|8}. Gain {energyPrefix:energyIcons(2)}.",
    effects: [{op: stage_drain, amount: 8},
              {op: energy, amount: 2}]}
 
@@ -3471,7 +3470,7 @@
 - {id: proto_ko_pass_the_match, name: "Pass the Match", character: klee,
    authored_by: [claude], multiplayer: true,
    cost: 0, type: skill, rarity: uncommon,
-   description: "Choose another player. This turn, their next Attack [gold]Sets off[/gold] your [gold]Bombs[/gold] on each enemy it hits. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "Choose another player. [gold]Set off[/gold] each enemy their next Attack this turn hits. Draw {Cards:diff()} card{Cards:plural:|s}.",
    upgrade: {draw: 1},
    effects: [{op: apply_power, power: ko_pass_the_match, amount: 1, target: ally},
              {op: draw, amount: 1}]}
@@ -3486,7 +3485,7 @@
 - {id: proto_ko_knights_of_favonius, name: "Knights of Favonius", character: klee,
    authored_by: [claude], multiplayer: true,
    cost: 2, type: power, rarity: rare,
-   description: "Whenever another player plays an Attack, it [gold]Sets off[/gold] your [gold]Bombs[/gold] on each enemy it hits.",
+   description: "Whenever another player plays an Attack, [gold]Set off[/gold] each enemy it hits.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_knights_of_favonius, amount: 1, target: self}]}
 
@@ -3505,7 +3504,7 @@
 - {id: proto_ko_sparks_for_everyone, name: "Sparks for Everyone", character: klee,
    authored_by: [claude], multiplayer: true,
    cost: 2, type: power, rarity: rare,
-   description: "The first time each turn one of your [gold]Bombs[/gold] goes off, each other player gains 1 [gold]Energy[/gold].",
+   description: "The first time each turn one of your [gold]Bombs[/gold] goes off, each other player gains {energyPrefix:energyIcons(1)}.",
    upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_sparks_for_everyone, amount: 1, target: self}]}
 
@@ -3546,7 +3545,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # The upgrade ADDS the draw clause: written at 0, printed once upgraded
    # (Current Read's shape).
-   description: "[gold]Plan[/gold]: Each player gains 1 [gold]Energy[/gold]{IfUpgraded:show: and draws 1 card|}.",
+   description: "[gold]Plan[/gold]: Each player gains {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draws 1 card|}.",
    effects: [],
    plan: [{op: each_player_energy, amount: 1}, {op: each_player_draw, amount: 0}],
    upgrade: {plan_draw: 1}}
@@ -3808,7 +3807,7 @@
 - {id: proto_vk_knights_roll_call, name: "Knights' Roll Call", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Add {IfUpgraded:show:a [gold]Knight[/gold] you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn.",
+   description: "Add {IfUpgraded:show:a [gold]Knight[/gold] you choose|a random [gold]Knight[/gold]} to your [gold]Hand[/gold]. It costs 0 this turn.",
    effects: [{op: add_knight}],
    upgrade: {choose_knight: true}}
 
@@ -3850,7 +3849,7 @@
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: pyro,
    cost: 2, type: attack, personal_pool: varka,
    # The expansion's Knight pass (2026-10-01): the reaction's Energy.
-   description: "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit causes an [gold]Elemental Reaction[/gold], gain 1 [gold]Energy[/gold].",
+   description: "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit triggers an [gold]Elemental Reaction[/gold], gain {energyPrefix:energyIcons(1)}.",
    effects: [{op: damage, amount: 6, target: enemy, times: 2, applies_element: true},
              {op: conditional, if: reaction_triggered_by_this,
               then: [{op: energy, amount: 1}]}],
@@ -3872,7 +3871,7 @@
    # The Hydro paper (2026-10-10, review/active/varka-hydro-payoffs-2026-10-10.md):
    # the base game's Blur, so it pays off the turn's other Block cards. Was
    # "For 2 turns, at the start of your turn gain 4 [6] Block".
-   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Your [gold]Block[/gold] is not removed at the start of your next turn.",
+   description: "Apply [gold]Hydro[/gold] to an enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, your [gold]Block[/gold] is not removed.",
    effects: [{op: apply_aura, element: hydro, target: enemy},
              {op: block, amount: 4},
              {op: apply_power, power: blur, amount: 1, target: self}],
@@ -3932,7 +3931,7 @@
 - {id: proto_vk_boreas_unbound, name: "Boreas Unbound", character: varka,
    authored_by: [claude],
    cost: 3, type: power, rarity: rare,
-   description: "Whenever your [gold]current element[/gold] changes, gain 1 [gold]Energy[/gold].",
+   description: "Whenever your [gold]current element[/gold] changes, gain {energyPrefix:energyIcons(1)}.",
    effects: [{op: apply_power, power: vk_boreas_unbound, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3949,7 +3948,7 @@
 - {id: proto_vk_violet_storm, name: "Violet Storm", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: rare,
-   description: "Discard your hand. Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each card discarded.",
+   description: "Discard your [gold]Hand[/gold]. Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each card discarded.",
    effects: [{op: varka, kind: violet_storm, target: random_enemy, base: 8}],
    upgrade: {varka_base: 3}}
 
@@ -4007,7 +4006,7 @@
    # "more" is a second, element-less hit on the same enemy.
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it causes an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.",
    effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
    upgrade: {varka_base: 3}}
 
@@ -4142,7 +4141,7 @@
    # Gust Ward.
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your hand.",
+   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].",
    effects: [{op: varka, kind: storm_battery, target: all_enemies, per: 2}],
    upgrade: {varka_per: 1}}
 
@@ -4160,7 +4159,7 @@
 - {id: proto_vk_short_circuit, name: "Short Circuit", character: varka,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Discard 2 cards. Draw {Cards:diff()} card{Cards:plural:|s}. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.",
+   description: "Discard 2 cards. Draw {Cards:diff()} card{Cards:plural:|s}. Gain {energyPrefix:energyIcons(1)}. Apply [gold]Electro[/gold] to an enemy.",
    effects: [{op: discard, amount: 2, select: chosen},
              {op: draw, amount: 2},
              {op: energy, amount: 1},
@@ -4186,7 +4185,7 @@
 - {id: proto_vk_dawn_patrol, name: "Dawn Patrol", character: varka,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "Gain {energyPrefix:energyIcons(1)}. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: energy, amount: 1}, {op: draw, amount: 1}],
    upgrade: {draw: 1}}
 
@@ -4252,7 +4251,7 @@
    cost: 1, type: power, rarity: rare,
    # Varka payoff round, 2026-10-10: shuffled in, the copy Exhausts (was: to
    # the discard pile). Provenance note, "Varka payoff round, 2026-10-10".
-   description: "Whenever you play Four Winds' Ascension, shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].",
+   description: "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].",
    effects: [{op: apply_power, power: vk_wolfpack, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -4315,7 +4314,7 @@
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
    # Varka co-op fixes (2026-10-11): choose 1 of 3, upgraded (provenance).
-   description: "At the start of your turn, choose 1 of 3 random [gold]Knights[/gold]. Add it to your hand, upgraded.",
+   description: "At the start of your turn, choose 1 of 3 random [gold]Knights[/gold]. Add it to your [gold]Hand[/gold], upgraded.",
    effects: [{op: apply_power, power: vk_the_order_answers, amount: 1, target: self}],
    upgrade: {cost: -1}}
 

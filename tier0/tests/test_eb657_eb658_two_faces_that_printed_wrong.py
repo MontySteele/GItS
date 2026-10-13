@@ -122,9 +122,10 @@ def test_flanks_face_names_the_moment_the_intents_are_read():
     assert row["description"] == (
         "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 9 "
         "[gold]Hydro[/gold] damage to each enemy that "
-        "intended to attack when you wrote this.")
+        "intended to attack when planned.")
+    # The card text pass (2026-10-12): "when planned", her one verb.
     src = (GENERATED / "ProtoKkFlank.cs").read_text(encoding="utf-8")
-    assert "intended to attack when you wrote this." in src
+    assert "intended to attack when planned." in src
     assert "intends to attack." not in src
 
 

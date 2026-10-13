@@ -157,7 +157,7 @@ public class KokomiStatusBatchTests : IDisposable
                      (clauses[1].Kind, clauses[1].Amount));
         var up = Upgraded<ProtoKkKelpWall>().PlanClauses;
         Assert.Equal((12, 3), (up[0].Amount, up[1].Amount));
-        Assert.Contains("plus 3 for each status or curse in your hand",
+        Assert.Contains("plus 3 for each Status or Curse in your [gold]Hand[/gold]",
                         Face(card));
         Assert.Contains(Seq("KokomiStatusBatch", "BlockPerStatus"),
                         c => c.Contains("CreatureCmd.GainBlock"));
@@ -257,17 +257,19 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Riptide Ruin ------------------------------------------------------------------------------
 
     [Fact]
-    public void Riptide_ruin_hits_all_twice_for_nine_and_discards_three_dazed()
+    public void Riptide_ruin_hits_all_twice_for_eleven_and_adds_no_dazed()
     {
+        // The card text pass (2026-10-12): the Dazed went and each hit
+        // gained 2, 9 [12] -> 11 [14].
         var card = new ProtoKkRiptideRuin();
-        Assert.Equal(9m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(12m, Upgraded<ProtoKkRiptideRuin>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(11m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(14m, Upgraded<ProtoKkRiptideRuin>().DynamicVars.Damage.BaseValue);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
         var play = Seq("ProtoKkRiptideRuin", "OnPlay");
         Assert.Contains(play, c => c.Contains("WithHitCount"));
-        Assert.Contains(play, c => c.Contains("Dazed"));
-        Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
-        Assert.Contains("ALL enemies twice. Add 3 [gold]Dazed[/gold]",
+        Assert.DoesNotContain(play, c => c.Contains("Dazed"));
+        Assert.DoesNotContain(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
+        Assert.EndsWith("[gold]Hydro[/gold] damage to ALL enemies twice.",
                         Face(card));
         Assert.Equal(Element.Hydro,
                      Assert.IsAssignableFrom<IElementalCard>(card).Element);

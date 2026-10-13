@@ -40,14 +40,14 @@ public sealed class ProtoKoKnightsOfFavonius : CustomCardModel
         CardMultiplayerConstraint.MultiplayerOnly;
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSetOff(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_knights_of_favonius");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Knights of Favonius"),
-        ("description", "Whenever another player plays an Attack, it [gold]Sets off[/gold] your [gold]Bombs[/gold] on each enemy it hits."),
+        ("description", "Whenever another player plays an Attack, [gold]Set off[/gold] each enemy it hits."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

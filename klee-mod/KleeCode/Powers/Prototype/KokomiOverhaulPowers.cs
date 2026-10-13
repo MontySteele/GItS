@@ -42,9 +42,8 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         ("title", "Treatise"),
         ("description",
-            "Once a turn, when you play a card you could write as a "
-          + "[gold]Plan[/gold] instead of writing it, draw "
-          + "[blue]{Amount}[/blue] card{Amount:plural:|s}."),
+            "The first time each turn you play a card you could have "
+          + "planned, draw [blue]{Amount}[/blue] card{Amount:plural:|s}."),
     };
 
     public override PowerType Type => PowerType.Buff;

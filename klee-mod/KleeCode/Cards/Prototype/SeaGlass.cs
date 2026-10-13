@@ -34,14 +34,17 @@ public sealed class SeaGlass : CustomCardModel, ICharacterCard
     {
         ("title", "Sea Glass"),
         ("description",
-            "Gain {IfUpgraded:show:2|1} [gold]Energy[/gold]."),
+            "Gain {Energy:energyIcons()}."),
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
+    /// <summary>The card text pass (2026-10-12, rule 3): the face prints the
+    /// base game's energy icon, which reads an <c>EnergyVar</c>; the play
+    /// still pays <see cref="EnergyFor"/>.</summary>
     protected override IEnumerable<DynamicVar> CanonicalVars =>
-        System.Array.Empty<DynamicVar>();
+        new DynamicVar[] { new EnergyVar(EnergyFor(false)) };
 
     public SeaGlass()
         : base(0, CardType.Skill, CardRarity.Token, TargetType.Self,
@@ -60,5 +63,6 @@ public sealed class SeaGlass : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
+        DynamicVars["Energy"].UpgradeValueBy(EnergyFor(true) - EnergyFor(false));
     }
 }

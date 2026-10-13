@@ -58,9 +58,10 @@ def test_no_enemies_intend_nothing():
 # --- Treatise: the face ------------------------------------------------------
 
 def test_treatise_face_says_writing_does_not_count():
+    # The card text pass (2026-10-12): "plan" is her one verb.
     assert _rows()["proto_kk_treatise"]["description"] == (
-        "Once a turn, when you play a card you could write as a "
-        "[gold]Plan[/gold] instead of writing it, draw 1 card.")
+        "The first time each turn you play a card you could have planned, "
+        "draw 1 card.")
 
 
 # --- Kelp Wall: the now-line -------------------------------------------------

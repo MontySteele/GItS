@@ -42,7 +42,7 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparkling Burst"),
-        ("description", "Gain {Energy:diff()} [gold]Energy[/gold]. If a [gold]Bomb[/gold] went off this turn, gain 1 more."),
+        ("description", "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain an additional {energyPrefix:energyIcons(1)}."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -62,7 +62,7 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Energy", 1m)
+            new EnergyVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

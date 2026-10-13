@@ -137,7 +137,10 @@ _TEXT_REF = re.compile(r"\{([A-Za-z]\w*)[:}]")
 # (the base game's Body Slam: "Deal damage equal to your [gold]Block[/gold].
 # {InCombat:<break>(Deals {CalculatedDamage:diff()} damage)|}"). R276's Stage
 # readers print their rule off the board and their number in combat with it.
-PSEUDO_TOKENS = frozenset({"IfUpgraded", "InCombat"})
+# `energyPrefix` (the card text pass, 2026-10-12): the GAME binds it on every
+# card, power, relic and potion face (`CardModel`, `PowerModel`), and
+# `{energyPrefix:energyIcons(N)}` is the base game's fixed energy icon.
+PSEUDO_TOKENS = frozenset({"IfUpgraded", "InCombat", "energyPrefix"})
 
 # `EB-486`. A MOD VAR MAY NOT BE NAMED AFTER ITS TOKEN, and both of the ones
 # that are not say so out loud.

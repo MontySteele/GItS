@@ -42,7 +42,7 @@ public sealed class ProtoKoAlicesIntroductionMagic : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Introduction Magic"),
-        ("description", "All cards in your hand count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "All cards in your [gold]Hand[/gold] count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -241,7 +241,8 @@ public class FurinaSpendRound2Tests : IDisposable
     public void Charlottes_line_text_says_one_of_your_cards()
     {
         Assert.StartsWith(
-            "The first time one of your cards [gold]Repays[/gold] each turn, "
+            // The card text pass (2026-10-12, rule 5).
+            "The first time each turn one of your cards [gold]Repays[/gold], "
             + "draw 1 card. Act: [gold]Repay[/gold] 2.",
             StagePerformerBadge.ActText(StagePerformer.Charlotte));
         Assert.Contains("FurinaStageLedger.get_CardRepaying",

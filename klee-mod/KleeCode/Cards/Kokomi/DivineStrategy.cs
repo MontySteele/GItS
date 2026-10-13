@@ -39,8 +39,8 @@ public sealed class DivineStrategy : CustomCardModel, ICharacterCard
     {
         ("title", "Divine Strategy"),
         ("description",
-            "The first time each turn you play a card on the "
-          + "[gold]Bake-Kurage[/gold], the line above its [gold]Plan[/gold] happens now too."),
+            "The first time each turn you plan a card, its first line "
+          + "also happens now."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

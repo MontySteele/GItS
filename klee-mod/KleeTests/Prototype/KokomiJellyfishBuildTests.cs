@@ -128,7 +128,7 @@ public class KokomiJellyfishBuildTests
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal("Whenever the [gold]Bake-Kurage[/gold] carries out a "
                    + "[gold]Plan[/gold], add a [gold]Sting[/gold] to your "
-                   + "hand.", Face(card));
+                   + "[gold]Hand[/gold].", Face(card));
         var up = Upgraded<ProtoKkEndlessShoal>();
         Assert.Equal(1, up.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Innate, up.Keywords);

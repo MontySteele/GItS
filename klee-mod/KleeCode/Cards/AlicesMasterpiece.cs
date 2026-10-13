@@ -37,7 +37,7 @@ public sealed class AlicesMasterpiece : CustomCardModel, ICharacterCard
     {
         ("title", "Alice's Masterpiece"),
         ("description",
-            "When one of your [gold]Bombs[/gold] goes off, it stays on the "
+            "Whenever one of your [gold]Bombs[/gold] goes off, it stays on the "
           + "enemy at half its size, rounded down."),
     };
 

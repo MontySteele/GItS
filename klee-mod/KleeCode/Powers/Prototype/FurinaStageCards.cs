@@ -34,7 +34,7 @@ public static class FurinaCards
         "KLEEMOD-FURINA_CASTING_CALL.selectionScreenPrompt";
 
     public const string TutorPromptText =
-        "Choose a Guest Star to put into your hand.";
+        "Choose a Guest Star to put into your [gold]Hand[/gold].";
 
     /// <summary>Final Bow's grid prompt, on the same terms.</summary>
     public const string BowPromptKey =

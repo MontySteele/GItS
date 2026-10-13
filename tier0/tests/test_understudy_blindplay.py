@@ -6567,8 +6567,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # interpolated numeral.
         "Guest Star": ["Exhausts. Acts at the end of your turn. When it "
                        "leaves, this ", "card goes to your "],
-        "Charlotte": ["The first time one of your cards ", " each turn, draw ",
-                      " card. Act: "],
+        "Charlotte": ["The first time each turn one of your cards ",
+                      ", draw ", " card. Act: "],
         "Wriothesley": ["Whenever you ", ", deal that much ",
                         "damage to a random enemy. Act: deal "],
         "Lynette": ["The first time each turn an enemy makes you lose HP, "
@@ -8671,13 +8671,13 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KK_JELLYFISH_DRIFT", "name": "Jellyfish Drift",
          "cost": "1", "type": "Attack",
-         "description": "Deal 6 Hydro damage. Add a Sting to your hand."})
+         "description": "Deal 6 Hydro damage. Add a Sting to your Hand."})
     page = blindplay.observe(smith)
 
     # Both faces, one under the other.
-    assert "    Deal 6 Hydro damage. Add a Sting to your hand." in page
+    assert "    Deal 6 Hydro damage. Add a Sting to your Hand." in page
     assert ("    Upgraded: Deal 8 Hydro damage. Add a Sting to your "
-            "hand.") in page
+            "Hand.") in page
     # And the screen's own rows, including one whose printed face carries the
     # game's appended keyword sentence -- which is why the match is a search
     # over the face rather than the whole of it.
@@ -8738,7 +8738,7 @@ _R12_SMITH = (
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
-     "At the start of your turn, add Alice's Mine to your hand."),
+     "At the start of your turn, add Alice's Mine to your Hand."),
     ("KLEEMOD-PROTO_MC_FISCHL_OZ",
      "At the end of your turn, Oz deals 5 Electro damage to a random "
      "enemy."),
@@ -8767,7 +8767,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
         "Deal 10 damage. Drain 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
-        "At the start of your turn, add an upgraded Alice's Mine to your hand.")
+        "At the start of your turn, add an upgraded Alice's Mine to your Hand.")
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
         "Draw 1 card. At the end of your turn, Oz deals 5 Electro damage to "
         "a random enemy.")
@@ -8986,8 +8986,8 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # The Repay floor (ruled 2026-10-09).
         "Vigor": ["Your next Attack deals additional damage."],
         # The Kokomi re-founding (2026-10-12).
-        "Ethereal": ["If this card is in your hand at the end of your "
-                     "turn, it is "],
+        "Ethereal": ["If this card is in your ",
+                     " at the end of your turn, it is "],
     }
     page_only = {"Sharp", "Nimble", "Swift", "Bond of Life", "Exhaust"}
     # `EB-597`. A THIRD CLASS, AND SHRINK IS ITS ONLY MEMBER SO FAR: a word no

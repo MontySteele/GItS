@@ -48,7 +48,7 @@ public sealed class ProtoFsAllIn : CustomCardModel, ICharacterCard, IUnplayableR
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All In"),
-        ("description", "[gold]Drain[/gold] {IfUpgraded:show:6|8}. Gain 2 [gold]Energy[/gold].{InCombat:{StageDrainLine}|}"),
+        ("description", "[gold]Drain[/gold] {IfUpgraded:show:6|8}. Gain {energyPrefix:energyIcons(2)}.{InCombat:{StageDrainLine}|}"),
     };
 
     /// <summary>This card's in-combat Stage line

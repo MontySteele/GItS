@@ -51,7 +51,7 @@ public sealed class ProtoKkJellyfishDrift : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jellyfish Drift"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your hand."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage. Add a [gold]Sting[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

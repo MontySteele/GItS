@@ -45,7 +45,7 @@ public sealed class ProtoFsCrescendo : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crescendo"),
-        ("description", "The first time you [gold]Spend[/gold] each turn, draw 1 card."),
+        ("description", "The first time each turn you [gold]Spend[/gold], draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
