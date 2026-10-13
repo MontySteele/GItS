@@ -3582,12 +3582,9 @@
 
 - {id: proto_vk_four_winds_ascension, name: "Four Winds' Ascension", character: varka,
    authored_by: [claude],
-   # His starter card since 2026-10-13 ([USER]: "I don't want to give him two
-   # starting effects, so if we do (a), then I'd want to knock Windbound
-   # Execution out of his starting deck and make Four Winds' Ascension his
-   # second starter instead"; "Starter - (a)"). Boreas's Fang no longer
-   # creates it. Upgrade cost 2 to 1 since the combo pass. Archaic Tooth:
-   # Dandelion Gale. Provenance note, "Varka review, 2026-10-12".
+   # In his starter deck since Starter (a), 2026-10-13; the Fang no longer
+   # makes it. Archaic Tooth: Dandelion Gale. Provenance notes, "Varka
+   # review, 2026-10-12" and "Varka starter, Fang and Tooth, 2026-10-13".
    cost: 2, type: attack, rarity: basic, retain: true,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
@@ -4393,11 +4390,9 @@
 
 - {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
    authored_by: [claude],
-   # Upgrade cost 1 to 0 (2026-10-04). Payoff fix (2026-10-08): 1 Vulnerable;
-   # last pass (2026-10-12): 1 Weak too, both landing before the doubling, so
-   # a clean enemy ends on 2 of each. Provenance, "Varka last pass".
-   # Retain dropped 2026-10-13 ([USER]: "Deep Freeze looks really, really
-   # good now ... I think we should drop Retain").
+   # Upgrade cost 1 to 0 (2026-10-04). Payoff fix: 1 Vulnerable; last pass:
+   # 1 Weak too, before the doubling. Retain dropped 2026-10-13. Provenance,
+   # "Varka last pass" and "Varka starter, Fang and Tooth, 2026-10-13".
    cost: 1, type: skill, rarity: uncommon,
    description: "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
