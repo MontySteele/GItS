@@ -391,6 +391,10 @@ def test_the_seat_brief_says_the_lanes_cap_and_asks_for_notes():
     assert "120 accepted" not in text
     assert "Opus tester" not in text and "blind seat" in text.splitlines()[0]
     assert "After each fight, append one line to your notes file" in text
+    # Kokomi 2026-10-13: two seats stopped by choice after act 1 with the
+    # run alive; the notes are a budget-stop handoff, not leave to stop.
+    assert "Play the run to its end" in text
+    assert "If the round stops mid-act" not in text
 
 
 def test_observe_prints_the_lanes_cap(lanes, capsys):

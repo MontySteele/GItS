@@ -920,11 +920,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # "We do this in early so that it triggers before end-of-turn damage
     # effects" -- which is precisely what player_turn_end_triggers holds.
     refpowers.before_side_turn_end_early(state)
-    # (C.KLEE_OVERHAUL). Sit Tight's end-of-turn Block, AHEAD of
-    # the shipped triggers: the mod pays it as a power tenant of
-    # `BeforeSideTurnEnd`, before the model-driven `TurnEndSequencer`, so
-    # Arlecchino's Bond of Life counted it (gone 2026-10-11; `sit_tight_turn_end`).
-    klee_overhaul.sit_tight_turn_end(state)
+    # (Sit Tight's end-of-turn Block paid here, ahead of the shipped
+    # triggers, until its dead power left: Klee text-only fixes, 2026-10-13.)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     # (C.KLEE_OVERHAUL). The overhaul's end of turn: Alice's
     # window closes, Patience, Klee! grows and the one-turn windows close.

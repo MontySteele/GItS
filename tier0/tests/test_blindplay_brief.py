@@ -313,11 +313,12 @@ def test_define_says_when_no_table_has_the_word():
 
 def test_define_falls_back_to_the_glossary_marked_off_screen():
     """2026-10-02: an act-2 seat asked for Grounded, Companion and Bomb on a
-    screen that defined none of them and was told there was no definition."""
+    screen that defined none of them and was told there was no definition.
+    (Grounded left with its cut Power, 2026-10-13; Swirl stands in.)"""
     page = _page([TAINTED])
-    out = blindplay_brief.define(page, "grounded")
-    assert out == ("- **Grounded** — "
-                   + blindplay_notes.ARM_KEYWORDS["Grounded"]
+    out = blindplay_brief.define(page, "swirl")
+    assert out == ("- **Swirl** — "
+                   + blindplay_notes.ARM_KEYWORDS["Swirl"]
                    + blindplay_brief.OFF_SCREEN_MARK + "\n")
     assert out.rstrip("\n").endswith("(not on this screen)")
     assert blindplay_brief.define(page, '"Companion"').startswith(

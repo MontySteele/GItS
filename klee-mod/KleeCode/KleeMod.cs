@@ -430,10 +430,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
                     [Cards.ArmKeywordTips.MineKey + ".title"] = "Mine",
                     // Klee's fifth, Hexerei, was retired by R276 pick 2.
-                    // `EB-372`, Klee's sixth: a Power of hers that Kaeya's
-                    // Cold-Blooded Strike is written against, so the word
-                    // reaches a player who may never have drafted it.
-                    [Cards.ArmKeywordTips.GroundedKey + ".title"] = "Grounded",
+                    // Klee's sixth, Grounded (`EB-372`), left with its cut
+                    // Power (Klee text-only fixes, 2026-10-13).
                     // `EB-446`, Klee's seventh: the raven ANOTHER companion
                     // card puts out, named on a face that cannot grant him.
                     [Cards.ArmKeywordTips.OzKey + ".title"] = "Oz",
@@ -490,6 +488,15 @@ public static class KleeMod
                     // whose acts happen one after another.
                     [Cards.ArmKeywordTips.FinalBowInTurnKey + ".title"] =
                         "Final Bow",
+                    // Klee text-only fixes (2026-10-13): four riders.
+                    [Cards.ArmKeywordTips.BigBaddaBoomTotalKey + ".title"] =
+                        "Big Badda Boom",
+                    [Cards.ArmKeywordTips.BoomBadgeTurnKey + ".title"] =
+                        "Boom Badge",
+                    [Cards.ArmKeywordTips.LionsFangLastTurnKey + ".title"] =
+                        "Last turn",
+                    [Cards.ArmKeywordTips.PassTheMatchActingKey + ".title"] =
+                        "Pass the Match",
                     // Co-op notes pick 2 (2026-10-02): the key is also
                     // `KleeKeywords.Knight`'s, the printed "Knight." line,
                     // and the keyword's own hover reads this row.
@@ -729,6 +736,20 @@ public static class KleeMod
                       + "[blue]{DamageDecrease}%[/blue] less damage with "
                       + "every hit{Amount:cond:==1? next turn|>1? for the "
                       + "next [blue]{}[/blue] turns|}, a Skill's damage too.",
+                });
+
+            // `EB-677`. GLAM'S REPLAY ON A TIMED CARD. Kokomi r26 lane 1:
+            // Kyouka, replayed by Glam, ran 4 turns at +4 and not 2 at +8,
+            // and no face said which. The behaviour stays (the base game's
+            // stacking: a replayed power adds its turns); Glam's own row says
+            // so. The shipped sentence, read off `SlayTheSpire2.pck`'s
+            // `localization/eng/enchantments.json`, with one sentence added.
+            LocManager.Instance.GetTable("enchantments").MergeWith(
+                new Dictionary<string, string>
+                {
+                    ["GLAM.description"] =
+                        "This card has [gold]Replay[/gold] once per combat. "
+                      + "Replaying a card with turns adds its turns.",
                 });
 
             // Klee's character strings moved onto the model itself

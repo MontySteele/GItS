@@ -132,6 +132,7 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     BlindPlayError, BOARD_SETTLE_TRIES, budget_cap, budget_path, budget_spent,
     BUDGET_REACHED, COMBAT_SCREENS,
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
+    clear_refusal_streak, count_refusal, MAX_REFUSALS, refusal_streak,
     clear_refusal, mark_refusal, pending_refusal,
     card_skips, clear_card_skips, mark_card_skip,
     read_shown_hand, remember_shown_hand,
@@ -497,6 +498,22 @@ def budget_refusal(count: int, cap: int) -> str:
             f"({count} taken). The round stops here; nothing was posted.")
 
 
+#: The line every `act` gets once three commands in a row were refused.
+REFUSAL_STOP = "refusal stop"
+
+
+def refusal_stop_line(streak: int) -> str:
+    """The one line a seat past the refusal stop is given (`MAX_REFUSALS`)."""
+    return (f"{REFUSAL_STOP.upper()}: {streak} commands in a row were "
+            f"refused. The round stops here; nothing was sent.")
+
+
+def _refused(live: bool) -> None:
+    """Count one refused `act` toward the stop, and say so at the stop."""
+    if live and count_refusal() >= MAX_REFUSALS:
+        print(refusal_stop_line(refusal_streak()))
+
+
 #: What `act` prints when a refusal carried no sentence of its own.
 ACT_UNRESOLVED = "the command did not resolve against this screen"
 #: What `act` prints when the POST went out and nothing came back in words.
@@ -591,6 +608,13 @@ def cmd_act(args) -> int:
     if live and cap and count >= cap:
         print(budget_refusal(count, cap), file=out)
         return 2
+    # Co-op paired round 2026-10-09: a fight that ended partway through a
+    # batch left the rest of the batch refused past three with no stop. The
+    # streak is the lane's (`blindplay_shape.MAX_REFUSALS`), and every
+    # refusal below counts toward it, "The fight is over" included.
+    if live and refusal_streak() >= MAX_REFUSALS:
+        print(refusal_stop_line(refusal_streak()))
+        return 2
     # `EB-370`: `act` reads through `observation()` before it resolves
     # anything (`blindplay_grammar.act`), so a `PacketLeak` on the read path
     # it shares with `observe` used to reach here uncaught -- a seat that
@@ -619,6 +643,7 @@ def cmd_act(args) -> int:
         if board:
             mark_refusal(board, args.command, shown_why.split("; ")[0])
         print(f"REFUSED: {shown_why}")
+        _refused(live)
         return 1
     try:
         res = act(state, command)
@@ -648,10 +673,12 @@ def cmd_act(args) -> int:
                             args))
             except (qa_packet.PacketLeak, BlindPlayError) as exc:
                 print(f"REFUSED: {exc}", file=out)
+            _refused(live)
             return 1
         if board:
             mark_refusal(board, args.command, why.split(". ")[0])
         print(f"REFUSED: {why}")
+        _refused(live)
         return 1
     left = (unclaimed_rewards(state, skipped_cards=card_skips())
             if live and (res.get("post") or {}).get("action") == "proceed"
@@ -724,6 +751,8 @@ def cmd_act(args) -> int:
     # round run without one reads exactly as it always did.
     if cap:
         print(f"actions: {count_action()} of {cap}")
+    else:
+        clear_refusal_streak()
     return 0
 
 

@@ -53,16 +53,17 @@ public sealed class ProtoVkTempestOfTheFourWinds : CustomCardModel, IElementalCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tempest of the Four Winds"),
-        ("description", "Deal {VkBase:diff()} damage four times, as [gold]Pyro[/gold], [gold]Hydro[/gold], [gold]Cryo[/gold] and [gold]Electro[/gold].{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {VkBase:diff()} damage four times, as [gold]Pyro[/gold], [gold]Hydro[/gold], [gold]Cryo[/gold] and [gold]Electro[/gold].{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
 
-    /// <summary>The element this card makes current, on its in-combat line
-    /// (`VarkaOath.SwitchLine`).</summary>
+    /// <summary>This card's in-combat Oath lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`).</summary>
     protected override void AddExtraArgsToDescription(
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+        description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

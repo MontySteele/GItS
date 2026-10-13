@@ -100,7 +100,9 @@ opened and left with `skip` is already skipped: it does not hold `proceed`.
   reached`, so your own count is a courtesy and not the mechanism.
 - **Wall clock:** stop at `--max-wall-s` (typically 5400 s).
 - **Refusals:** three consecutive refused commands is a stop. A refusal is a
-  finding — write down what you asked for and what it said.
+  finding — write down what you asked for and what it said. The bridge counts
+  them too ("The fight is over" lines included) and answers every command
+  after the third with `REFUSAL STOP`.
 - **Stalls:** six identical screens running is a stop; it means the screen is
   one you cannot get off, which is itself the finding.
 
@@ -110,8 +112,9 @@ tidier place, and do not start a second session.
 ### Your notes
 
 After each fight, append one line to your notes file: the fight, the HP you
-ended on, and the one decision that mattered. If the round stops mid-act, these
-lines are the only handoff.
+ended on, and the one decision that mattered. Play the run to its end, a win or
+a death; the end of an act is not a stop. These lines are the handoff only when
+a budget above stops the run first.
 
 ### The record you write
 

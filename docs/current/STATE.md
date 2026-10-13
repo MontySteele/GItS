@@ -53,8 +53,9 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   cost; she opens with 3.
 - **Pool:** 78 (25 / 32 / 21); seven relics, three potions. Ancients: Alice's
   Masterpiece (Tome) and Jumpy Dumpty Mk.Omega (Tooth on Jumpy Dumpty).
-- **Process:** frozen on `main`; changes go to `klee-next` and arrive by
-  promotion.
+- **Process:** frozen on `main`; card and rule changes go to `klee-next`
+  and arrive by promotion. Text-only fixes (no number, no rule) land on
+  `main` directly (`docs/current/operations/stage-gate.md`, 2026-10-13).
 - **Records:** `review/records/klee-suite-4-2026-10-08.md` and
   `review/records/klee-user-run-2026-10-11.md`.
 - **Visuals** (`review/active/klee-visual-paper-2026-10-12.md`): rendered

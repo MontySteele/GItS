@@ -178,38 +178,6 @@ public class KleeSeatDefects20260926Tests
     }
 
     // ==================================================================
-    // 6. Sit Tight's status read "Sit Tight 4" on a turn it could not pay
-    // ==================================================================
-
-    [Fact]
-    public void Sit_tight_says_so_once_a_bomb_of_hers_has_gone_off()
-    {
-        Assert.Equal("X.smartDescription", SitTightPower.FaceKey("X", pays: true));
-        Assert.Equal("X." + SitTightPower.SpentKey,
-                     SitTightPower.FaceKey("X", pays: false));
-
-        var rows = ((ILocalizationProvider)System.Runtime.CompilerServices
-                .RuntimeHelpers.GetUninitializedObject(typeof(SitTightPower)))
-            .Localization!;
-        Assert.Contains(rows, r => r.Item1 == SitTightPower.SpentKey);
-        // The paying face has NO smart row, so it falls back to the plain one.
-        Assert.DoesNotContain(rows, r => r.Item1 == "smartDescription");
-
-        // RUN, on a seat: the face follows the ledger.
-        KleeOverhaulLedger.ResetAll();
-        var seat = Seat.Klee().WithPower<SitTightPower>(4);
-        var power = seat.Creature.Powers.OfType<SitTightPower>().Single();
-        Seat.Force(power, "Id", new ModelId("POWER", "KLEE_SIT_TIGHT_TEST"));
-        var key = typeof(SitTightPower).GetProperty(
-            "SmartDescriptionLocKey", All)!;
-        Assert.EndsWith(".smartDescription", (string)key.GetValue(power)!);
-        KleeOverhaulLedger.For(seat.Creature).NoteExplosion(false, 5);
-        Assert.EndsWith("." + SitTightPower.SpentKey,
-                        (string)key.GetValue(power)!);
-        KleeOverhaulLedger.ResetAll();
-    }
-
-    // ==================================================================
     // 9. The Bomb a card places on the body its own hit just killed
     // ==================================================================
 

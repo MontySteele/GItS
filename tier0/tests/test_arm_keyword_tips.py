@@ -96,48 +96,8 @@ def test_a_face_naming_several_keywords_owes_several_tips_in_table_order():
     assert calls == ["ArmKeywordTips.ForBomb", "ArmKeywordTips.ForMend"]
 
 
-# ------------------------------------------- EB-372: Grounded travels too --
-#
-# THE FINDING. `Grounded` is a Power card of Klee's, and Kaeya's Cold-Blooded
-# Strike is written against it by name -- "Next turn, Grounded triggers even
-# if you played a Set off card"
-# as on the field" (`EB-576`) -- as is the buff that card leaves behind.
-# A seat that drafted Kaeya and never drafted Grounded met the word on a card
-# face with nothing on the screen saying what it is, and read it as noise in
-# both acts (r9 act 1 sec.(c) 3, act 2 sec.(c) 2).
-#
-# THE FIX IS THE TABLE, which is what makes it travel: the attach is derived
-# from the printed face, so the definition rides every face that prints the
-# word whether or not the run holds the Power.
-
-
-def test_the_grounded_word_owes_its_definition_wherever_it_is_printed():
-    # TWO WORDS SINCE `EB-749`, and that is the table working rather than a
-    # widened claim: the corrected clause names `Set off` as well as
-    # `Grounded`, so the face that prints both owes both definitions. A reader
-    # meeting Kaeya without Klee's kit needs the second sentence exactly as
-    # much as the first.
-    assert gen.arm_keyword_tip_calls(
-        "Next turn, [gold]Grounded[/gold] triggers even if you played a "
-        "[gold]Set off[/gold] card.") == ["ArmKeywordTips.ForSetOff",
-                                          "ArmKeywordTips.ForGrounded"]
-    # The bare word in prose is not the keyword, the rule every row here is
-    # under: the span has to be golded.
-    assert gen.arm_keyword_tip_calls("This turn, Grounded counts nothing.")         == []
-
-
-def test_the_grounded_tip_states_the_condition_and_the_payout():
-    """The CONDITION, and what it pays (2026-10-02): Block with no number,
-    because the upgrade moves it, and the Spark off the shared constant."""
-    tips = TIPS_CS.read_text(encoding="utf-8")
-    assert '"A Power that gives [gold]Block[/gold] and "' in tips
-    assert ('+ KleeOverhaulLaw.GroundedSpark + " [gold]Spark[/gold] at the "'
-            in tips)
-    assert '"start of your turn, but only if you played no "' in tips
-    assert '"[gold]Set off[/gold] card last turn.");' in tips
-    assert "card prints what it pays." not in tips
-    # (The sheet half left with the Grounded row: the Klee tempo paper,
-    # 2026-10-07, cut it. The tip stays until the power's engine pieces go.)
+# (`EB-372`'s Grounded word and its two pins left with the cut Power, the
+# Klee text-only fixes of 2026-10-13. `Oz` keeps the same travelling shape.)
 
 
 def test_the_attach_is_scoped_to_the_quarantined_surface():
@@ -215,8 +175,9 @@ def test_every_prototype_face_printing_a_keyword_attaches_its_tip(keyword):
     assert printed, f"{keyword.word}: no prototype face prints it"
 
 
-#: Table keywords no card face prints today (see the test above).
-NO_CARD_FACE = frozenset({"Grounded"})
+#: Table keywords no card face prints today (see the test above). Empty
+#: since `Grounded` left the table (2026-10-13).
+NO_CARD_FACE: frozenset[str] = frozenset()
 
 
 def test_the_two_faces_the_row_names_render_their_keyword():
@@ -371,7 +332,13 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO",
                     # The Furina wave (2026-10-13): Final Bow's rider, its
                     # acts happen one after another.
-                    "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN"}
+                    "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN",
+                    # Klee text-only fixes (2026-10-13): four riders, each
+                    # a fact about one card.
+                    "KLEEMOD-ARM_KLEE_BIG_BADDA_BOOM_TOTAL",
+                    "KLEEMOD-ARM_KLEE_BOOM_BADGE_TURN",
+                    "KLEEMOD-ARM_KLEE_LIONS_FANG_LAST_TURN",
+                    "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -460,12 +427,13 @@ def test_the_klee_tips_and_the_page_say_the_same_three_rules():
     assert page["Bomb"] == tips["BombKey"].replace(
         "Grows " + growth, "Grows {growth}")
     assert tips["SetOffKey"] == ("Every Bomb on the enemy goes off, oldest "
-                                 "first. A random Set off picks an enemy "
-                                 "with Bombs.")
+                                 "first. Bombs on other enemies stay. A "
+                                 "random Set off picks an enemy with Bombs.")
     assert page["Set off"] == tips["SetOffKey"]
     assert tips["MineKey"] == ("A Bomb that also goes off when its enemy "
-                               "attacks you. If it does not attack, the "
-                               "Mine waits. Any Set off spends it too.")
+                               "attacks you, without the enemy's plain "
+                               "Bombs. Otherwise, it waits. Any Set off "
+                               "spends it too.")
     assert page["Mine"] == tips["MineKey"]
     for gone in ("stacks beside the first", "Block stops it",
                  "the HP cap move it", "unless the Mine kills",
@@ -519,7 +487,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "Start each combat with ",
             "Gone after combat.",
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks ",
-            "you. If it does not attack, the Mine waits. Any ",
+            "you, without the enemy's plain Bombs. Otherwise, it waits. Any ",
             " spends it too.",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the

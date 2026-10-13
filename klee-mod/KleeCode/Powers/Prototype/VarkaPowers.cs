@@ -648,6 +648,8 @@ public sealed class CycleOfSeasonsPower : PowerModel, ILocalizationProvider
         }
         Flash();
         var target = player.RunState.Rng.CombatTargets.NextItem(living);
+        // BACKLOG (the Varka screen): its own line on the played page.
+        using var by = ResolutionLedger.HitsBy("Cycle of Seasons");
         await ElementalHit.DealUnelemented(choiceContext, target, Amount,
                                            Owner, powered: false);
     }

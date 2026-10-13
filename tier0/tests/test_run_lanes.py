@@ -832,6 +832,14 @@ def test_the_soak_cli_reports_a_lane_that_is_not_a_lane(monkeypatch, capsys):
 
 # ------------------------------------------------------------ scenario -----
 
+@pytest.fixture(autouse=True)
+def _no_real_saved_run(monkeypatch):
+    """`scenario run` refuses a lane whose real profile holds a saved run, and
+    a seat may hold one on this machine right now; these tests are about the
+    lane binding, so they read no real profile."""
+    monkeypatch.setattr(scenario, "saved_runs", lambda appdata=None: [])
+
+
 def test_a_scenario_runs_in_a_lane_and_binds_it_before_the_cursor(
         tmp_path, monkeypatch):
     """The ordering IS the fix: `Runner.__init__` resets `LOG_WINDOW`, whose

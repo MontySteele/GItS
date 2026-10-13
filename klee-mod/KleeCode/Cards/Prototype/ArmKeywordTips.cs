@@ -69,7 +69,6 @@ public static class ArmKeywordTips
     public const string SetOffKey = "KLEEMOD-ARM_SET_OFF";
     public const string SparkKey = "KLEEMOD-ARM_SPARK";
     public const string MineKey = "KLEEMOD-ARM_MINE";
-    public const string GroundedKey = "KLEEMOD-ARM_GROUNDED";
     public const string OzKey = "KLEEMOD-ARM_OZ";
     public const string MendKey = "KLEEMOD-ARM_MEND";
     public const string PlanKey = "KLEEMOD-ARM_PLAN";
@@ -97,6 +96,12 @@ public static class ArmKeywordTips
     // The Furina wave (2026-10-13), A RIDER AND NOT A KEYWORD: Final Bow's
     // acts happen one after another.
     public const string FinalBowInTurnKey = "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN";
+    // Klee text-only fixes (2026-10-13), RIDERS AND NOT KEYWORDS: what four
+    // faces left a seat unsure of, each read off the code.
+    public const string BigBaddaBoomTotalKey = "KLEEMOD-ARM_KLEE_BIG_BADDA_BOOM_TOTAL";
+    public const string BoomBadgeTurnKey = "KLEEMOD-ARM_KLEE_BOOM_BADGE_TURN";
+    public const string LionsFangLastTurnKey = "KLEEMOD-ARM_KLEE_LIONS_FANG_LAST_TURN";
+    public const string PassTheMatchActingKey = "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING";
     // ELEMENT IDENTITIES sec.7 (2026-10-01): a rider that titles no keyword,
     // a fact about THIS card on THIS board -- playing it would switch his
     // current element. Four times in one round a seat lost the Oath it was
@@ -213,11 +218,15 @@ public static class ArmKeywordTips
     /// order inside the pile (`EB-432`, oldest first) and the aim of a random
     /// Set off (`EB-516`) stay; the text pass of 2026-09-25 dropped the Block,
     /// when-hit and aura clauses as edge cases a player learns by playing.
+    /// 2026-10-13 (text-only fix on main): a seat read Ka-pow!'s Set off as
+    /// reaching past its target, so the tip says the other enemies' Bombs stay
+    /// (<c>ProtoBombPower.SetOff</c> takes the target's pile only).
     /// </summary>
     public static IEnumerable<IHoverTip> ForSetOff(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SetOffKey,
             "Every [gold]Bomb[/gold] on the enemy goes off, oldest first. "
+          + "Bombs on other enemies stay. "
           + "A random Set off picks an enemy with Bombs.");
 
     /// <summary>Rule 4. The gain rate is read from
@@ -272,13 +281,15 @@ public static class ArmKeywordTips
     /// unless the Mine kills" and the Bomb tip's edge cases; the Bomb tip
     /// prints beside this one on every face that says Mine. 2026-10-03: a
     /// blind seat read a Mine as failing because a Set off had already spent
-    /// it, so the tip now says a Set off spends it too.
+    /// it, so the tip now says a Set off spends it too. 2026-10-13 (text-only
+    /// fix on main): an enemy's attack pops its Mines and leaves its plain
+    /// Bombs (<c>ProtoBombPower.TakeMines</c>), and the tip now says so.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMine(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, MineKey,
             "A [gold]Bomb[/gold] that also goes off when its enemy attacks "
-          + "you. If it does not attack, the Mine waits. Any "
+          + "you, without the enemy's plain Bombs. Otherwise, it waits. Any "
           + "[gold]Set off[/gold] spends it too.");
 
     /// <summary>
@@ -300,7 +311,7 @@ public static class ArmKeywordTips
     /// WHAT IT LEAVES TO THE CARDS. How much Oz deals and for how long are the
     /// two faces' own printed numbers, and both move on an upgrade, so the tip
     /// says what Oz IS and which card puts him out and stops there, the way
-    /// `ForGrounded` leaves its Block number to the Power card's own line.
+    /// the retired `ForGrounded` left its Block number to the Power card's own line.
     /// </summary>
     /// `EB-504`, the second of the two words whose rule is Klee's: the Power
     /// that fields Oz is hers, and Fischl's face is drafted by every
@@ -315,53 +326,6 @@ public static class ArmKeywordTips
             // conventions ban a dash of any kind in player text.
             "Fischl's raven. While you hold Oz, at Your Side, he makes an "
           + "[gold]Electro[/gold] hit at the end of your turn.");
-
-    /// <summary>
-    /// KLEE'S SIXTH, `EB-372`, AND IT IS A WORD THE KIT NAMES ON A FACE THE
-    /// PLAYER MAY NEVER HAVE OWNED.
-    ///
-    /// THE GAP. `Grounded` is a Power of Klee's, and Kaeya's Cold-Blooded
-    /// Strike is written against it -- "Next turn, Grounded pays even if you
-    /// played a Set off card" (`EB-749`) -- as is the buff that card leaves
-    /// behind
-    /// (<see cref="KleeMod.Powers.ColdBloodedPower"/>). A player who drafted
-    /// Kaeya without ever drafting Grounded meets the word on a card face with
-    /// nothing anywhere on the screen saying what it is, and the r9 seat read
-    /// it as noise in both acts (act 1 sec.(c) 3, act 2 sec.(c) 2).
-    ///
-    /// IT TRAVELS WITH THE WORD AND NOT WITH THE DECK. The attach is derived
-    /// from the printed face (`gen_klee_cards.arm_keyword_tip_calls`), so
-    /// Kaeya carries the definition because Kaeya prints the word -- whether or
-    /// not the run holds Grounded, which is the state the seat was actually in.
-    ///
-    /// WHAT IT SAYS AND WHAT IT LEAVES TO THE CARD. The CONDITION is the whole
-    /// rule and it is what a Kaeya reader needs: `EB-749` (R271 sec.5.1) moved
-    /// it to "you played no Set off card last turn" and the tip moved with it.
-    /// It names what Grounded pays (2026-10-02: a seat that never drafted the
-    /// Power could not read "its card prints what it pays"): the Spark off
-    /// <see cref="KleeOverhaulLaw.GroundedSpark"/>, and Block with no number,
-    /// because the upgrade moves the Block.
-    ///
-    /// KAEYA'S OWN CLAUSE MOVED WITH IT, as a TEXT correction and not a rule
-    /// change: the force-pay it describes is untouched, and the sentence now
-    /// says what that force-pay does against the condition Grounded actually
-    /// has.
-    /// </summary>
-    /// ONE METHOD WITH AN OPTIONAL CARD, and not an overload: a POWER raises
-    /// this tip too -- the buff Kaeya's card leaves behind prints the word for
-    /// the rest of the turn, after the card itself has gone -- and every other
-    /// attach here ignores its `card` argument anyway. A second entry point
-    /// would be a second thing for `ArmKeywordTipTests`' structural pin to
-    /// count, and it is the pin that proves every tip goes through `With`.
-    public static IEnumerable<IHoverTip> ForGrounded(
-        IEnumerable<IHoverTip> inherited, CardModel? card = null) =>
-        With(inherited, GroundedKey,
-            // A card TYPE is a plain word, never golded
-            // (`docs/current/text-conventions.md`, and the lint bites).
-            "A Power that gives [gold]Block[/gold] and "
-          + KleeOverhaulLaw.GroundedSpark + " [gold]Spark[/gold] at the "
-          + "start of your turn, but only if you played no "
-          + "[gold]Set off[/gold] card last turn.");
 
     // ---------------------------------------------------------- Kokomi -----
     //
@@ -437,8 +401,18 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card)
     {
         if (!KokomiCompanionPlan.OnKokomi(card)) return inherited;
-        return With(inherited, CompanionPlanKey, CompanionPlanText);
+        return With(inherited, CompanionPlanKey,
+            card is Prototype.Generated.ProtoMcAlbedoDustOfPurification
+                ? CompanionPlanText + " " + DustPlanText
+                : CompanionPlanText);
     }
+
+    /// <summary>BACKLOG (Albedo -- Dust of Purification): planned, its exhaust
+    /// reads the Draw Pile, as Sea Glass Harvest's Plan does
+    /// (<c>KleeStatusPackage.ExhaustStatusesGrowLargest</c>).</summary>
+    internal const string DustPlanText =
+        "Planned, it reads your [gold]Draw Pile[/gold] instead of your "
+      + "[gold]Hand[/gold].";
 
     /// <summary><see cref="ForCompanionPlan"/>'s sentence. INTERNAL, as
     /// <see cref="KnightTipText"/> is: every public string constant here is a
@@ -721,6 +695,54 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, FinalBowInTurnKey,
             "Its acts happen one after another, not all at once.");
+
+    /// <summary>
+    /// Klee text-only fix (2026-10-13): Big Badda Boom's second hit is
+    /// <see cref="KleeMod.Powers.ProtoBombPower.DealSetOffTotal"/>, the
+    /// ledger's total for THIS play only, counted before Block (each
+    /// explosion's <c>ElementalHit.Deal</c> return), and a Boom Badge doubles
+    /// the charge before it lands, so the total carries it once.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForBigBaddaBoomTotal(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, BigBaddaBoomTotalKey,
+            "Only the [gold]Bombs[/gold] this card sets off count, including "
+          + "damage to [gold]Block[/gold]. A doubled [gold]Bomb[/gold] counts "
+          + "its doubled damage.");
+
+    /// <summary>
+    /// Klee text-only fix (2026-10-13): Boom Badge's card Retains, while
+    /// <see cref="KleeMod.Powers.BoomBadgePower"/> is removed at the end of
+    /// the turn it was played. A seat played it on a turn with no Set off.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForBoomBadgeTurn(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, BoomBadgeTurnKey,
+            "Retain keeps the card, not the doubling. The doubling lasts only "
+          + "the turn you play it.");
+
+    /// <summary>
+    /// Klee text-only fix (2026-10-13): Lion's Fang reads
+    /// <c>KleeOverhaulLedger.SetOffLastTurn</c>, a whole round, so a Mine
+    /// answering an attack on the enemies' turn switches it off. A seat lost
+    /// Jean+ to Dodoco+'s Mine and the face did not say why.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForLionsFangLastTurn(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, LionsFangLastTurnKey,
+            "Mines that go off on the enemies' turn count too.");
+
+    /// <summary>
+    /// Klee text-only fix (2026-10-13): Pass the Match's power lasts the
+    /// turn and waits for the chosen player's next Attack, so a player who
+    /// has ended their turn can never spend it (three co-op seats,
+    /// `review/records/coop-paired-round-2026-10-09.md`).
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForPassTheMatchActing(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, PassTheMatchActingKey,
+            "Choose a player who has not ended their turn. If they have, it "
+          + "does nothing.");
 
     public static IEnumerable<IHoverTip> ForAscensionNoOath(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

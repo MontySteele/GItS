@@ -120,6 +120,23 @@ public class KokomiRound1FixesTests
         Assert.Contains(calls, c => c.Contains("CardPileCmd.Draw"));
     }
 
+    // ---- Albedo -- Dust of Purification ------------------------------------------
+
+    [Fact]
+    public void Dust_of_purification_written_as_a_plan_reads_the_draw_pile()
+    {
+        // BACKLOG (Albedo -- Dust of Purification): Sea Glass Harvest's fix.
+        // Carried out (before the turn's draw) its exhaust reads the Draw
+        // Pile; played face-up it reads the hand. Structural pin; the sim
+        // twin is behavioural (test_klee_status_package.py).
+        var calls = Il.Calls(Il.Method("KleeStatusPackage",
+                                       "ExhaustStatusesGrowLargest"));
+        Assert.Contains(calls, c => c.Contains("KokomiPlan.IsCarryingOut"));
+        Assert.Contains(calls, c => c.Contains("KleeStatusPackage.ExhaustStatuses"));
+        Assert.Contains(Il.Strings(Il.Method("ArmKeywordTips", "ForCompanionPlan")),
+                        s => s.Contains("[gold]Draw Pile[/gold] instead"));
+    }
+
     // ---- Press the Advantage -----------------------------------------------------------
 
     [Fact]

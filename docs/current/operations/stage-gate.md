@@ -72,6 +72,8 @@ that part is fixed.
 
 **The build is frozen until the metrics are recaptured** ([USER], 2026-10-05: "build is frozen until balance metrics are recaptured - aka we can make prototype changes, but not push them into the release build until the full suite is run"). A Balance kit's cards and rules on `main` (every build and release) do not change between suite runs. Changes to it are made on the staging branch `<kit>-next`, deployed for play and seats as a `+next` build (`tools/deploy_round.py --staging`), and reach `main` in one promotion PR that carries the suite record: the kit on the base-five baseline seeds through act 3 and the telemetry report, each change's one-line prediction graded.
 
+**Text-only fixes land on `main` under the freeze** ([USER], 2026-10-13: "Let's go with (a). Minor text cleanup doesn't need a whole character stage branch,"). A fix that changes no number and no rule (card wording, previews, tips, dead-code cleanup) may land on `main` directly while a kit is frozen. A real card change still goes through a fresh `<kit>-next` with a suite record.
+
 **Klee's 2026-10-11 promotion waived the suite record, once** ([USER], 2026-10-11: "personally I think the current builds are all much better than the old frozen one and I'm about ready to override the previous frozen build with the current characters"). `klee-next` reached `main` in #940 without a suite run; the freeze and the promotion rule above stand for her later changes.
 
 **Exit:** the bar is met on a suite run.

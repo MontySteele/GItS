@@ -476,32 +476,6 @@ public class KleeR276ExpansionTests
         Assert.Equal(1, Upgraded<ProtoKoBoomBadge>().PrintedSparkPrice);
     }
 
-    // Sit Tight's card pin left with the row (the Klee tempo paper,
-    // 2026-10-07); its power's pins below stay until the power goes.
-
-    [Fact]
-    public void Sit_tight_pays_only_on_a_turn_where_nothing_went_off()
-    {
-        // REAL: the ledger read is the whole condition, and it is rule 7's
-        // first counter -- ANY explosion this turn, before or after the card.
-        var klee = Seat.Klee().Creature;
-        KleeOverhaulLedger.ResetAll();
-        var ledger = KleeOverhaulLedger.For(klee);
-        Assert.True(SitTightPower.Pays(ledger));
-        // A Mine answering an attack passes no card but still went off.
-        ledger.NoteExplosion(reacted: false, damageDealt: 3);
-        Assert.False(SitTightPower.Pays(ledger));
-        KleeOverhaulLedger.ResetAll();
-
-        // STRUCTURAL: before the discard flush, it asks the ledger, pays
-        // Block and removes itself.
-        var turnEnd = Il.CallSequence(Il.Method("SitTightPower", "BeforeSideTurnEnd"))
-            .ToList();
-        Assert.Contains("SitTightPower.Pays", turnEnd);
-        Assert.Contains("CreatureCmd.GainBlock", turnEnd);
-        Assert.Contains("PowerCmd.Remove", turnEnd);
-    }
-
     [Fact]
     public void Wait_for_it_is_a_one_shot_on_her_next_reacting_bomb()
     {
@@ -526,21 +500,6 @@ public class KleeR276ExpansionTests
                                         new ProtoBombPower.ProtoCharge(5, false, 0),
                                         reacted: false);
         Assert.Contains(power, seat.Creature.Powers);
-    }
-
-    [Fact]
-    public void Patience_pays_only_on_a_turn_with_no_set_off_card()
-    {
-        var klee = Seat.Klee().Creature;
-        KleeOverhaulLedger.ResetAll();
-        var ledger = KleeOverhaulLedger.For(klee);
-        Assert.True(PatienceKleePower.Pays(ledger));
-        ledger.NoteSetOffCardPlayed(new ProtoKoKapow());
-        Assert.False(PatienceKleePower.Pays(ledger));
-        // After the echo, on the strictly later broadcast.
-        Assert.Contains("ProtoBombPower.GrowLargest",
-                        Il.Calls(Il.Method("PatienceKleePower", "AfterSideTurnEnd")));
-        KleeOverhaulLedger.ResetAll();
     }
 
     [Fact]

@@ -115,7 +115,6 @@ OVERHAUL_OPS = frozenset((
 ALICES_RECIPE = "ko_alices_recipe"            # a placement grows the others
 CHAINED_REACTIONS = "ko_chained_reactions"    # other Bombs grow per explosion
 BOMB_ECHO = "ko_bomb_echo"                    # Sparks 'n' Splash's echo
-GROUNDED = "ko_grounded"                      # Block for the quiet turn
 #: R244's Uncommon Power, the second reader: "Whenever you play a Companion
 #: card, place a Bomb N on a random enemy." (Hexerei until R276.) Stacks are the Bomb SIZE,
 #: Chained Reactions' grammar one trigger over -- and the ruling says in as
@@ -820,17 +819,15 @@ def turn_start(state: CombatState) -> None:
 
 
 def turn_start_late(state: CombatState) -> None:
-    """The two rules that read the turn AFTER it is set up -- rule 4's opening
-    Spark and Grounded's Block and Spark.
+    """The rules that read the turn AFTER it is set up -- rule 4's opening
+    Spark and the start-of-turn Powers.
 
     THE SITE IS `AfterPlayerTurnStart` on both sides, and both halves of the
     mod say why they need it rather than `BeforeCombatStart` or site A:
     `KleeOverhaulOpening` records that the sim fires its combat-start effects
     on TURN 1 after the block clear, the energy reset and the draw, and
-    `GroundedPower` pays before the turn's first decision rather than after it.
-    Since `EB-516` Grounded reads the BOARD and not the explosion ledger, so
-    the site is no longer forced by the roll -- it is kept because the payout
-    arriving before the turn's decisions is the card's whole shape.
+    a start-of-turn Power pays before the turn's first decision rather than
+    after it.
     """
     if not live(state):
         return
@@ -884,81 +881,15 @@ def turn_start_late(state: CombatState) -> None:
         state.emit("ko_blazing_delight", energy=n, cards=n)
         state.draw(n)
 
-    # GROUNDED: "if you played no Set off CARD last turn, gain N Block and 1
-    # Spark."
-    #
-    # `EB-749` (R271 sec.5.1) IS THE CONDITION IT HAS NOW, and the history is
-    # two moves rather than one. It first read "if none of your BOMBS WENT OFF
-    # last turn", and two seats in two rounds called that a trap in its own
-    # deck: under this relic something goes off on most turns even in a Cook
-    # deck, because Mines fire on the ENEMY's beat, so the card paid once in
-    # five fights. `EB-516` answered that by keying the payout to COOKING
-    # instead ("if you have a Bomb on the field"), which was payable but paid a
-    # deck for a board state it was holding anyway. R271 keys it to the
-    # PLAYER'S OWN ACT, and the two interactions that made the first version a
-    # trap are excepted BY CONSTRUCTION rather than by a clause:
-    #
-    #   * a MINE going off because its enemy attacked is not a Set off CARD, so
-    #     Cook's Mines no longer switch Grounded off;
-    #   * SPARKS 'N' SPLASH is not a Set off card either, so a turn on which
-    #     only it fired is still paid next turn.
-    #
-    # THE READ IS `ko_set_off_cards_last_turn`, whose one write site is
-    # `note_set_off_card` -- called from `effects._op_set_off`, which a Mine
-    # reaches with `card=None` and which a Power's end-of-turn hit never
-    # reaches at all. So neither exception is a special case here.
-    #
-    # BEFORE GROWTH IS IMMATERIAL, and it is said rather than relied on: this
-    # hook runs after `turn_start`, that hook GROWS and neither places nor
-    # removes a charge (rule 7), and nothing between the two plays a card.
-    #
-    # THE SPARK IS `EB-344` (ruled R248) AND IT RIDES THE SAME CONDITION, so a
-    # turn that grants no Block grants no Spark either and there is no second
-    # reading of "held" to keep in step. Rule 4 mints a Spark per EXPLOSION, so
-    # the held turn this card is written for is by construction the one turn
-    # that mints none. A flat `C.KLEE_OVERHAUL_GROUNDED_SPARK` and not `n`,
-    # because the upgrade moves the BLOCK (4 -> 6) and leaves the Spark at 1.
-    #
-    # UNPOWERED (`ValueProp.Unpowered` in `CreatureCmd.GainBlock`), so no
-    # Dexterity feeds it and no Frail bites it: it is a POWER's Block, not a
-    # card's printed Block.
-    # THE ONE READER OF KAEYA'S BLIND (C.COMPANION_OVERHAUL).
-    # Cold-Blooded Strike's stand-in makes Grounded pay this turn whatever its
-    # condition says, so the cover story is read HERE and not by zeroing the
-    # explosion counter, which Jean's stand-in also reads. `grounded_blind` is
-    # False on every tree with the companion arm off. THE WIRING NEVER MOVES --
-    # not for `EB-516` and not for `EB-749` -- and what moves with the
-    # condition is the stand-in's printed clause, which now reads "Next turn,
-    # Grounded pays even if you played a Set off card."
     # R276: Klee's Secret Base, Dodoco and Alice's Detonator, on the same
-    # `AfterPlayerTurnStart` beat as Blazing Delight and ahead of Grounded's
-    # early return.
+    # `AfterPlayerTurnStart` beat as Blazing Delight. (Grounded, which paid
+    # after them, left with its cut card: Klee text-only fixes, 2026-10-13.)
     _turn_start_expansion(state)
-
-    # `EB-533`: THE ANSWER IS EMITTED EITHER WAY. Klee r19 lane 1 logged the
-    # card every turn and it failed twice with "no near-miss line, I caught it
-    # only by diffing my own Block". The condition is unchanged and so is every
-    # payout; what is new is that the turn it says no says so. The mod's twin
-    # is `GroundedPower`'s latched badge face, which is the same claim on the
-    # surface that engine has.
-    n = state.player.powers.get(GROUNDED, 0)
-    if not n:
-        return
-    paid = state.ko_set_off_cards_last_turn == 0
-    if not paid:
-        state.emit("ko_grounded", amount=0, spark=0, paid=False)
-        return
-    state.player.block += n
-    state.emit("block", amount=n)
-    state.emit("ko_grounded", amount=n,
-               spark=int(C.KLEE_OVERHAUL_GROUNDED_SPARK), paid=True)
-    effects.gain_sparks(state, int(C.KLEE_OVERHAUL_GROUNDED_SPARK),
-                        source="power:grounded/held_turn")
 
 
 def turn_end(state: CombatState) -> None:
-    """The end of Klee's turn: Alice's window closes, then Patience, Klee! and
-    the one-turn windows (`_turn_end_expansion`).
+    """The end of Klee's turn: Alice's window closes, then the one-turn
+    windows (`_turn_end_expansion`).
 
     THE WINDOW CLOSES FIRST AND UNCONDITIONALLY (R244): Alice's Introduction
     Magic promises "this turn", and nothing between here and the enemy's half
@@ -973,7 +904,7 @@ def turn_end(state: CombatState) -> None:
     if not live(state):
         return
     companion_hexerei.roll_hand_marks(state)
-    # R276: Patience, Klee!, and the three one-turn windows close.
+    # R276: the three one-turn windows close.
     _turn_end_expansion(state)
 
 
@@ -1587,12 +1518,10 @@ BOOM_BADGE = "ko_boom_badge"              # next Set off: Bombs deal x2 per copy
 WAIT_FOR_IT = "ko_wait_for_it"            # first reaction: draw N, +1 Energy
 PARTY_POPPERS = "ko_party_poppers"        # Spark-priced play: Bomb N
 LOOK_OUT = "ko_look_out"                  # a Mine goes off: N Block
-PATIENCE = "ko_patience"                  # quiet turn: largest grows N
 SECRET_BASE = "ko_secret_base"            # turn start: Bomb N
 DODOCO = "ko_dodoco"                      # turn start: Mine N
 AFTERSHOCK = "ko_aftershock"              # first reaction a turn: copy Bomb
 SPARK_KNIGHT = "ko_spark_knight"          # each Spark gained: N to ALL
-SIT_TIGHT = "ko_sit_tight"                # held turn: N Block at turn end
 ALICES_DETONATOR = "ko_alices_detonator"            # turn start: Alice's Mine
 ALICES_DETONATOR_PLUS = "ko_alices_detonator_plus"  # ... an upgraded one
 
@@ -1950,40 +1879,10 @@ def before_hand_draw(state: CombatState) -> None:
 
 
 def _turn_end_expansion(state: CombatState) -> None:
-    """Patience, Klee!'s growth, then the three one-turn windows close.
-    `PatienceKleePower` grows at `AfterSideTurnEnd`."""
+    """The three one-turn windows close."""
     p = state.player
-    n = p.powers.get(PATIENCE, 0)
-    if n and state.ko_set_off_cards_this_turn == 0:
-        grown = grow_largest(state, n)
-        state.emit("ko_patience", amount=n, size=grown)
     for key in (PLAYDATE, BOOM_BADGE, WAIT_FOR_IT):
         p.powers.pop(key, None)
-
-
-def sit_tight_turn_end(state: CombatState) -> None:
-    """Sit Tight's delayed half: "At the end of this turn, if no Bomb of yours
-    went off this turn, gain 4 Block." `SitTightPower.BeforeSideTurnEnd`'s
-    twin.
-
-    "WENT OFF" IS RULE 7'S FIRST COUNTER, `ko_set_off_this_turn`, written once
-    per explosion by `note_explosion` -- any charge of hers, Bomb or Mine, for
-    any reason, a Mine answering an attack included. The stack is the sum of
-    the copies' numbers, so each copy pays. A Power's Block: raw, no Dexterity
-    or Frail (Look Out!'s line). The power is spent whether or not it paid.
-
-    CALLED AHEAD OF `effects.player_turn_end_triggers`, not from `turn_end`:
-    the mod pays it as a POWER tenant of `BeforeSideTurnEnd`, which the game
-    runs before the model-driven `TurnEndSequencer` -- so Arlecchino's Bond of
-    Life counts it as Block gained this turn in both engines."""
-    if not live(state):
-        return
-    p = state.player
-    n = p.powers.pop(SIT_TIGHT, 0)
-    if n and state.ko_set_off_this_turn == 0:
-        p.block += n
-        state.emit("block", amount=n)
-        state.emit("ko_sit_tight", amount=n)
 
 
 def _after_charge_exploded(state: CombatState, enemy: Enemy,
@@ -2135,15 +2034,17 @@ def transform_statuses_into(state: CombatState, card_id: str) -> int:
     return n
 
 
-def exhaust_statuses(state: CombatState) -> int:
+def exhaust_statuses(state: CombatState, pile: Optional[list] = None) -> int:
     """"Exhaust every status in your hand." Returns how many went; curses
     stay. Kitchen Alchemy's (reworked 2026-10-02) and Dust of Purification's
-    exhaust. `KleeStatusPackage.ExhaustStatuses`."""
+    exhaust. `pile` is the pile read, the hand by default.
+    `KleeStatusPackage.ExhaustStatuses`."""
     from tier0.engine import effects, refpowers     # late import: cycle
 
-    victims = [c for c in state.player.hand if is_status(c)]
+    held_in = state.player.hand if pile is None else pile
+    victims = [c for c in held_in if is_status(c)]
     for held in victims:
-        if effects.remove_instance(state.player.hand, held):
+        if effects.remove_instance(held_in, held):
             refpowers.exhaust_card(state, held)
     return len(victims)
 
@@ -2154,8 +2055,14 @@ def exhaust_statuses_grow_largest(state: CombatState, per: int,
     Your largest Bomb grows by 6 [8] for each. Draw 1 card for each." One
     growth of `per` times the count, after the exhausts; no Bomb and the
     exhausts still happen. Then the draw, `draw_each` per status exhausted
-    (the 2026-10-11 Companion pass), after the growth as printed."""
-    n = exhaust_statuses(state)
+    (the 2026-10-11 Companion pass), after the growth as printed.
+
+    WRITTEN BY KOKOMI AS A PLAN it reads the DRAW PILE (BACKLOG, Albedo --
+    Dust of Purification): the carry-out comes before the turn's draw, so the
+    hand it was written for is gone. Sea Glass Harvest's fix (Kokomi round-1
+    fixes, 2026-10-12), `state.kk_carrying_out` the window."""
+    n = exhaust_statuses(
+        state, state.player.draw_pile if state.kk_carrying_out else None)
     if n and per > 0:
         grow_largest(state, int(per) * n)
     state.emit("ko_dust_of_purification", exhausted=n, per=int(per))

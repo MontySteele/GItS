@@ -40,7 +40,7 @@ public sealed class ProtoKoPassTheMatch : CustomCardModel
         CardMultiplayerConstraint.MultiplayerOnly;
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForPassTheMatchActing(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_pass_the_match");
 

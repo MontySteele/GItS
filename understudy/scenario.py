@@ -1576,6 +1576,48 @@ def cmd_check(args) -> int:
     return 1 if bad else 0
 
 
+#: The save files that make a relaunched game RESUME a run instead of
+#: stopping at the main menu. Solo and co-op (`embark_coop.MP_SAVE`).
+SAVED_RUN_NAMES = ("current_run.save", "current_run_mp.save")
+
+
+def saved_runs(appdata: Path | str | None = None) -> list[Path]:
+    """Every saved run under a lane's `SlayTheSpire2/steam/` profile tree.
+
+    `appdata` is the lane's own tree; `None` is lane 0, the machine's
+    `%APPDATA%`. Run history (`saves/history`) is not a saved run and is not
+    matched: only a file the game resumes from on boot is.
+    """
+    root = Path(appdata if appdata is not None
+                else os.environ.get("APPDATA", "")).joinpath(
+        *instances.SETTINGS_RELATIVE)
+    if not root.is_dir():
+        return []
+    return sorted(path for name in SAVED_RUN_NAMES
+                  for path in root.glob(f"**/saves/{name}") if path.is_file())
+
+
+def saved_run_refusal(appdata: Path | str | None, label: str) -> str:
+    """The refusal `scenario run` prints when a launch would resume a run,
+    or `""` when the profile holds none.
+
+    2026-10: a scenario launched on a lane whose profile held a saved run;
+    the game resumed the old boss fight, the menu never became ready, and the
+    wait timed out with no reason given. Refusing up front names the file.
+    """
+    found = saved_runs(appdata)
+    if not found:
+        return ""
+    lines = [f"REFUSED: {label} holds a saved run, and a relaunched game "
+             "resumes it instead of reaching the main menu, so the scenario "
+             "could never start:"]
+    lines += [f"  {path}" for path in found]
+    lines.append("Abandon that run in the game, or move the file aside, then "
+                 "run again. To drive a game that is already up, pass "
+                 "--no-setup.")
+    return "\n".join(lines)
+
+
 def cmd_run(args) -> int:
     from understudy import soak
 
@@ -1594,6 +1636,16 @@ def cmd_run(args) -> int:
         return 2
     if instance is not None:
         bridge.use(instance)
+    # A LAUNCH ON A PROFILE THAT HOLDS A SAVED RUN NEVER REACHES THE MENU.
+    # Checked before anything is launched or written. `--no-setup` attaches
+    # to a game already up and launches nothing, so it is not refused.
+    if not args.no_setup:
+        refusal = saved_run_refusal(
+            instance.appdata if instance is not None else None,
+            f"lane {instance.label}" if instance is not None else "lane 0")
+        if refusal:
+            print(refusal, file=sys.stderr)
+            return 2
     stamp = time.strftime("%Y%m%d-%H%M%S")
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     # The lane goes in the file name for the reason `soak.RunDriver.log`

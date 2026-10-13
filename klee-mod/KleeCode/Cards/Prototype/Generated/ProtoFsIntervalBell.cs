@@ -45,8 +45,17 @@ public sealed class ProtoFsIntervalBell : CustomCardModel, ICharacterCard, IStag
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Interval Bell"),
-        ("description", "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: also, next turn, gain {energyPrefix:energyIcons(1)}."),
+        ("description", "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: also, next turn, gain {energyPrefix:energyIcons(1)}.{InCombat:{StageSpendShort}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageSpendShort", FurinaStageFacePreview.SpendShort(this, (IsUpgraded ? 2 : 3)));
+    }
 
     // EB-184: what each mode does about AIMING, in sheet order.
     // The card's own TargetType is fixed before a mode is chosen (the

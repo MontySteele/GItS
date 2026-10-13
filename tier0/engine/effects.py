@@ -3565,9 +3565,8 @@ def _predicate(state: CombatState, name: str) -> bool:
                 "it off `KleeOverhaulLedger` behind `-p:PrototypeCards=true`.")
         return klee_overhaul.played_companion_this_turn(state)
     if name == "no_bomb_went_off_this_turn":
-        # R276's Sit Tight printed it at play time; since 2026-09-23 the card
-        # pays at the end of the turn (`klee_overhaul.sit_tight_turn_end`) and
-        # no row prints this. Kept as vocabulary, on its neighbours' gate.
+        # R276's Sit Tight printed it at play time; the card and its
+        # end-of-turn power are gone and no row prints this. Kept as vocabulary, on its neighbours' gate.
         if not klee_overhaul.live(state):
             raise NotImplementedError(
                 f"predicate {name!r} belongs to the KLEE_OVERHAUL arm. It is "
