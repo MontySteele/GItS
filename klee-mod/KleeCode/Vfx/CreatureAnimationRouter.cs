@@ -80,6 +80,11 @@ internal static class CreatureAnimationRouter
         // hands (2026-10-13). Sent by CardPlayMotion for a Jumpy Dumpty play;
         // a scene without the state lunges as for an attack.
         ["Jumpy"] = new[] { "jumpy", "attack" },
+        // Varka's Four Winds' Ascension: he jumps and drives one blade into
+        // the ground, and the ground burst plays at its point and under the
+        // target (2026-10-13). Sent by CardPlayMotion for that card; a scene
+        // without the state lunges as for an attack.
+        ["Ascension"] = new[] { "ascension", "attack" },
     };
 
     internal const string IdleState = "idle";
@@ -88,16 +93,18 @@ internal static class CreatureAnimationRouter
     internal const string PowerState = "power";
     internal const string SetOffState = "setoff";
     internal const string JumpyState = "jumpy";
+    internal const string AscensionState = "ascension";
 
     /// <summary>
-    /// A Set Off or Jumpy Dumpty play is ONE clip: the attack lunge and cast
-    /// that the same card's own commands send while it runs would cut it
-    /// short, so while the tree is in <see cref="SetOffState"/> or
-    /// <see cref="JumpyState"/> those three triggers are absorbed. Hits and
-    /// death still interrupt it. Pure.
+    /// A Set Off, Jumpy Dumpty or Four Winds' Ascension play is ONE clip: the
+    /// attack lunge and cast that the same card's own commands send while it
+    /// runs would cut it short, so while the tree is in
+    /// <see cref="SetOffState"/>, <see cref="JumpyState"/> or
+    /// <see cref="AscensionState"/> those three triggers are absorbed. Hits
+    /// and death still interrupt it. Pure.
     /// </summary>
     internal static bool AbsorbedBy(string? currentState, string trigger)
-        => currentState is SetOffState or JumpyState
+        => currentState is SetOffState or JumpyState or AscensionState
            && trigger is "Attack" or "Cast" or "PowerUp";
 
     /// <summary>
@@ -201,6 +208,10 @@ internal static class CreatureAnimationRouter
             {
                 ThrownProjectile.Schedule(creature, tree, target, node);
             }
+            // Varka's element layer takes the played card's colour, and the
+            // Ascension's ground burst goes under its target; inert for every
+            // scene without the layer.
+            ElementTrail.OnTravel(creature, current, target);
         }
     }
 

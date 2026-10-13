@@ -6,8 +6,8 @@ owns the framing math; this script keeps only HIS numbers.
 
 Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
     ImageGen/images/varka/model/combat_model.png        240x280  static combat body
-    ImageGen/images/varka/ui/select_portrait.png        132x195
-    ImageGen/images/varka/ui/select_portrait_locked.png 132x195
+                                                         (the fallback; the game
+                                                         draws his model frames)
     ImageGen/images/varka/ui/selection_splash.png      1920x1200
     ImageGen/images/varka/ui/char_icon.png               88x88
     ImageGen/images/varka/ui/map_marker.png              49x64
@@ -24,6 +24,10 @@ He has no layered combat rig (no fence config in tools/combat_layer_fences/),
 so combat_model.png is the surface the game draws in battle, exactly as
 Kokomi's is.
 
+The roster tile (ui/select_portrait.png and its locked twin) left this script on
+2026-10-13: tools/char_render/pack.py draws it from his model, a face close-up
+like the base cast's, and one out-path has one producer.
+
 Usage: .venv/Scripts/python tools/gen_varka_stills.py [--art-root <checkout>] [--check]
 
 --art-root reads art/raw/ and writes ImageGen/ under another checkout, the way
@@ -37,7 +41,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from char_stills import alpha_bbox, fit, head_crop, locked_variant  # noqa: E402
+from char_stills import alpha_bbox, fit, head_crop  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_REL = Path("art") / "raw" / "Varka_Portrait.png"
@@ -45,7 +49,6 @@ UI_REL = Path("ImageGen") / "images" / "varka" / "ui"
 MODEL_REL = Path("ImageGen") / "images" / "varka" / "model"
 
 # Set by eye against rendered crops. Larger fraction = wider shot.
-PORTRAIT_HEAD_FRAC = 0.40
 ICON_HEAD_FRAC = 0.17
 MARKER_HEAD_FRAC = 0.21
 
@@ -75,10 +78,6 @@ def render(cutout):
     out = {}
     out[MODEL_REL / "combat_model.png"] = fit(cutout, 240, 280)
 
-    portrait = head_crop(cutout, 132, 195, head_frac=PORTRAIT_HEAD_FRAC,
-                         centre_on="head")
-    out[UI_REL / "select_portrait.png"] = portrait
-    out[UI_REL / "select_portrait_locked.png"] = locked_variant(portrait)
     out[UI_REL / "char_icon.png"] = head_crop(
         cutout, 88, 88, head_frac=ICON_HEAD_FRAC, centre_on="head")
     out[UI_REL / "map_marker.png"] = head_crop(

@@ -803,6 +803,10 @@ UNMIRRORED: dict[str, str] = {
     # Klee's thrown bomb (2026-10-13): flown by the game from her attack
     # clip's release frame to the target, the base NVfxProjectileHandler's
     # shape. The sim throws nothing; Klee.AttackAnimDelay waits for it.
+    # Varka's Four Winds' Ascension clip (2026-10-13): the trigger waits no
+    # cast delay, so the card's hit waits only Varka.AttackAnimDelay.
+    "CardPlayMotion.AscensionDelay":
+        "presentation: wait after the Ascension clip's trigger, in seconds.",
     "ThrownProjectile.FlightSeconds":
         "presentation: hand-to-target flight of the thrown bomb in seconds.",
     "ThrownProjectile.ArcLift":

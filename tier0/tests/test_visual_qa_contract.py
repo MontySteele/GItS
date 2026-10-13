@@ -143,8 +143,11 @@ def test_the_sample_contract_is_well_formed():
     # sheet of the model (klee_setoff.png, +1) and the four splash-rig layers
     # it replaced left the pack (-4; Dodoco stays for dodoco_pop.tscn). Then
     # +2: her Jumpy Dumpty clip (klee_jumpy.png) and its big thrown bomb
-    # (klee_bomb_big.png), 2026-10-13.
-    assert len(parsed.resources) == 446
+    # (klee_bomb_big.png), 2026-10-13. Then +9: Varka's model art (phase B,
+    # 2026-10-13) -- twelve frame sheets (seven combat clips, the shop loop,
+    # two element layers, the ground burst, his shadow) and his generated
+    # merchant scene in, his old rig's four layers out.
+    assert len(parsed.resources) == 455
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -256,6 +259,7 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # libraries), +16 for the stage's eight guest bodies (a scene and a
     # sprite each), +4 for the supporting pool's two guests, -3 for Klee's
     # Set Off (its own sheet in, four splash-rig layers out), +2 for her Jumpy
-    # Dumpty clip and its big bomb.
-    assert report.checked["contract_resources"] == 446
+    # Dumpty clip and its big bomb, +9 for Varka's model art (twelve sheets
+    # and his merchant scene in, four rig layers out).
+    assert report.checked["contract_resources"] == 455
     assert report.checked["package_files"] == 3

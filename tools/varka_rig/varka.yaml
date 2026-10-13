@@ -1,0 +1,77 @@
+# Varka's combat scene. `python -m tools.varka_rig gen` turns this file plus
+# the committed frame manifest (tools/char_render/varka_frames.json, written by
+# tools/char_render/pack.py) into klee-mod/pck-src/varka/model/combat.tscn and
+# merchant_character.tscn, byte-identically on every run.
+#
+# THE CONTRACT this file must keep is the router's (CreatureAnimationRouter.cs):
+# Visuals/Facing, Bounds, CenterPos, IntentPos, AnimationPlayer, AnimationTree,
+# the seven states plus `ascension` (Four Winds' Ascension). Every state plays
+# a frame sheet of the official model (review/active/varka-visual-paper-
+# 2026-10-13.md, phase A), and Klee's scene (tools/klee_rig) is the template.
+#
+# THE MODEL. `sheets` are the Sprite2D children of Visuals/Facing/Model, back
+# to front. Each frame is an AtlasTexture: region = the frame's rect on its
+# page, margin = its offset in the clip's cell, so every frame draws where the
+# untrimmed cell would. A state names the sheet it plays (`sheet`), at the
+# times the renderer drew; a one-shot longer than its frames holds the last.
+# `fx` are the neutral element layers drawn over the body (attack, ascension),
+# and the ground burst is the effect clip the ascension places twice.
+model:
+  sheets: [idle, idle_low, attack, hurt, death, cast, ascension]
+
+# Animations. A track drives one property of the model:
+#   model: a path under Visuals/Facing/Model ("" is Model itself)
+#   keys:  [[time, value, transition?], ...]   (transition: Godot easing)
+#
+# THE CLOCK is the rendered one: every clip's length is its manifest length
+# (attack 1.05 s, hurt 0.8, death 2.2, cast 1.0, ascension 1.3), which sits
+# inside the base skeletons' census (Klee's paper: attack 0.93-1.5 s, cast
+# 0.97-1.8, hurt 0.73-1.0, die 1.87-4.17).
+animations:
+  idle:
+    length: 2.8
+    loop: true
+    sheet: idle
+
+  idle_low:
+    length: 3.0
+    loop: true
+    sheet: idle_low
+    tracks:
+      - {model: "", prop: modulate, keys: [[0, [0.92, 0.9, 0.9, 1]], [3.0, [0.92, 0.9, 0.9, 1]]]}
+
+  # One continuous spin-to-slam; the light impact at frame 7, the main at 12.
+  attack:
+    length: 1.05
+    sheet: attack
+
+  hurt:
+    length: 0.8
+    sheet: hurt
+    tracks:
+      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.05, [1, 0.45, 0.4, 1]], [0.35, [1, 1, 1, 1]]]}
+
+  # Kneels between his planted blades, held from 1.6 s, then fades as Klee's.
+  death:
+    length: 2.2
+    sheet: death
+    tracks:
+      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.12, [1, 0.62, 0.6, 1]], [0.6, [1, 1, 1, 1]], [1.7, [1, 1, 1, 1]], [2.2, [1, 1, 1, 0]]]}
+
+  cast:
+    length: 1.0
+    sheet: cast
+
+  power:
+    length: 1.0
+    sheet: cast
+    tracks:
+      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1], 0.5], [0.38, [1.2, 1.45, 1.35, 1], 1.6], [1.0, [1, 1, 1, 1]]]}
+
+  # Four Winds' Ascension: he jumps and drives the lead blade into the ground
+  # (impact frame 10); the ground burst plays from that frame at the blade's
+  # point and, mirrored, under the target. One clip per play: the router
+  # absorbs the card's own attack lunge (AbsorbedBy).
+  ascension:
+    length: 1.3
+    sheet: ascension
