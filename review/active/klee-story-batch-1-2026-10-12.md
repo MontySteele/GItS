@@ -8,7 +8,9 @@ All words here are ours; none quote the game. Names (Jean, Alice, Dodoco, Starsn
 
 ## 1. The introduction (character select)
 
-> **Klee, Spark Knight of the Knights of Favonius.** Her mom, the adventurer Alice, always says the best treasure is at the top of the tallest place you can find. So Klee packed extra bombs, just in case the Spire says no.
+> **The Spark Knight of Mondstadt.** She packed extra bombs, just in case the Spire says no.
+
+(Shortened 2026-10-12. [USER]: "Klee's character intro on the character selection screen is like 3x longer than anyone else's. Good idea but we need to compress a bit." It was: "Klee, Spark Knight of the Knights of Favonius. Her mom, the adventurer Alice, always says the best treasure is at the top of the tallest place you can find. So Klee packed extra bombs, just in case the Spire says no.")
 
 ## 2. The Ancients greet her
 

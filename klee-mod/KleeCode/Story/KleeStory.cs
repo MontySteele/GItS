@@ -26,11 +26,9 @@ public static class KleeStory
         Character = typeof(Klee),
         Name = "Klee",
 
-        IntroTitle = "Klee, Spark Knight of the Knights of Favonius.",
+        IntroTitle = "The Spark Knight of Mondstadt.",
         IntroLine =
-            "Her mom, the adventurer Alice, always says the best treasure is at the top of "
-          + "the tallest place you can find. So Klee packed extra bombs, just in case the "
-          + "Spire says no.",
+            "She packed extra bombs, just in case the Spire says no.",
 
         Ancients = new[]
         {
