@@ -33,7 +33,9 @@ public sealed class AbyssOverlayContent
 
     public const string WholeRunTag = "Whole run";
 
-    public const string IfPassedLabel = "If passed";
+    /// <summary>The label over each card's lower band (owner, 2026-10-12:
+    /// "IF PASSED" renamed "SHADOW"; the view prints it in capitals).</summary>
+    public const string ShadowBandLabel = "Shadow";
 
     public const string BlessingsLabel = "Blessings";
 
@@ -83,9 +85,9 @@ public sealed class AbyssOverlayContent
     }
 
     /// <summary>The seat bridge's option text for a card: the Blessing's
-    /// text, then the Shadow it brings if passed.</summary>
+    /// text, then the card's Shadow under the screen's own label.</summary>
     public static string BridgeDescription(AbyssOverlayCard card) =>
-        $"{card.BlessingText}\nIf passed: {card.ShadowName} — {card.ShadowText}";
+        $"{card.BlessingText}\n{ShadowBandLabel}: {card.ShadowName} — {card.ShadowText}";
 
     /// <summary>The Blessing's icon in the pack: the same file its display
     /// relic wears (<c>Relics/AbyssRelics.cs</c>).</summary>
