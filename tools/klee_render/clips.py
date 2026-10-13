@@ -75,11 +75,12 @@ def pigtails(swing=0.0, lift=0.0):
 
 
 def arms(near, far, near_pole=(-0.6, 0.4, -0.2), far_pole=(0.2, 0.5, -1.0),
-         near_curl=(50, 20), far_curl=(38, 14)):
-    """near = (dx, dy, dz) of the near (right) wrist from the chest anchor;
-    far likewise for the far (left) wrist."""
+         near_curl=(50, 20), far_curl=(38, 14), near_anchor=CH):
+    """near = (dx, dy, dz) of the near (right) wrist from `near_anchor` (the
+    chest by default; her right hip, HIP, for an arm hanging at her side);
+    far likewise for the far (left) wrist, from the chest."""
     return [
-        ("hand", "R", CH, near, near_pole),
+        ("hand", "R", near_anchor, near, near_pole),
         ("curl", "R", near_curl[0], near_curl[1]),
         ("hand", "L", CH, far, far_pole),
         ("curl", "L", far_curl[0], far_curl[1]),
@@ -93,11 +94,20 @@ def pose(ops, morphs=None, yaw=YAW, held=1.0, thrown=None, thrown_spin=0.0, root
 
 
 # --------------------------------------------------------------------- stance A
-# Battle idle: bomb held low in the near hand, far hand forward at chest height
-# with the fingers loosely curled (milestone 1's flat palm was a curl that never
+# Battle idle: the near (right) arm hangs at her side on screen-left, elbow a
+# little out, the bomb held by its cap beside her hip; the far hand is forward
+# at chest height, loosely closed (milestone 1's flat palm was a curl that never
 # ran: the finger bones are spelled with full-width digits).
-NEAR_LOW = (0.05, -0.10, -0.18)
+#
+# The near hand is placed from her right HIP, not the chest: placed from the
+# chest (milestone 2 as first shipped) it swung across her belly, the upper arm
+# hid behind the coat, and screen-left read as armless ([USER], 2026-10-13: "why
+# do the idle loop ones have no right arm (Left side)?").
+HIP = "足.R"
+NEAR_HANG = (-0.09, -0.06, 0.06)
+HANG_POLE = (-1.0, 0.5, 0.0)
 FAR_READY = (0.24, -0.02, 0.02)
+FAR_CURL = (55, 30)
 SMIRK = {"にやり": 0.6}
 
 
@@ -111,8 +121,9 @@ def idle_pose(breath=0.0, sway=0.0, blink=0.0, swing=0.0):
     return pose(
         stance(drop=0.055 + 0.006 * (1 - b), lean=4.0 + 1.5 * (1 - b), head_nod=3.0 + 1.5 * (1 - b),
                sway=0.004 * sway)
-        + arms((NEAR_LOW[0], NEAR_LOW[1], NEAR_LOW[2] - 0.008 * (1 - b)),
-               (FAR_READY[0] - 0.006 * (1 - b), FAR_READY[1], FAR_READY[2] - 0.014 * (1 - b)))
+        + arms((NEAR_HANG[0], NEAR_HANG[1], NEAR_HANG[2] - 0.008 * (1 - b)),
+               (FAR_READY[0] - 0.006 * (1 - b), FAR_READY[1], FAR_READY[2] - 0.014 * (1 - b)),
+               near_pole=HANG_POLE, near_anchor=HIP, far_curl=FAR_CURL)
         + pigtails(swing=swing),
         m)
 
@@ -135,8 +146,8 @@ def low_pose(breath=0.0, swing=0.0):
     return pose(
         stance(drop=0.075 + 0.006 * (1 - b), lean=11 + 2 * (1 - b), twist=-12, head_turn=40,
                head_nod=13 + 2 * (1 - b), front=0.09, back=0.09)
-        + arms((0.03, -0.07, -0.24 - 0.006 * (1 - b)), (0.15, -0.03, -0.12 - 0.01 * (1 - b)),
-               far_pole=(0.4, 0.4, -1.0), far_curl=(48, 18))
+        + arms((-0.08, -0.05, 0.0 - 0.006 * (1 - b)), (0.15, -0.03, -0.12 - 0.01 * (1 - b)),
+               near_pole=HANG_POLE, near_anchor=HIP, far_pole=(0.4, 0.4, -1.0), far_curl=(55, 28))
         + pigtails(swing=swing),
         {"困る": 0.8, "Eye_Tired": 0.7, "あ": 0.15})
 
@@ -159,8 +170,7 @@ IDLE_LOW = {
 def windup(k=1.0):
     return pose(
         stance(drop=0.07, lean=-6 * k + 4 * (1 - k), twist=-6, head_turn=50, front=0.13, back=0.12)
-        + arms((-0.20 * k + NEAR_LOW[0] * (1 - k), -0.06, 0.25 * k + NEAR_LOW[2] * (1 - k)),
-               (0.27, -0.02, 0.10), near_pole=(-0.4, -0.6, -0.6), far_curl=(20, 8))
+        + arms((-0.20, -0.06, 0.25), (0.27, -0.02, 0.10), near_pole=(-0.4, -0.6, -0.6), far_curl=(30, 12))
         + pigtails(swing=-6 * k),
         {"にやり": 0.9, "あ": 0.2})
 
@@ -263,8 +273,10 @@ def death_pose(kind):
            ("rot", "頭", X, 22),
            ("rotw", "頭", Y, -10),
            ("rotw", BAG, Z, -25)]
-    ops += arms((-0.06, -0.08, -0.33), (0.13, -0.06, -0.33), near_pole=(-0.6, 0.3, 0.2),
-                far_pole=(0.6, 0.3, 0.2), near_curl=(25, 8), far_curl=(25, 8))
+    # the near hand props her up on the ground beside her hip, so the arm
+    # stays visible on screen-left instead of folding behind her knees
+    ops += arms((-0.11, -0.03, -0.05), (0.13, -0.06, -0.33), near_pole=(-1.0, 0.3, 0.3),
+                far_pole=(0.6, 0.3, 0.2), near_curl=(25, 8), far_curl=(25, 8), near_anchor=HIP)
     ops += pigtails(swing=-5)
     return pose(ops, {"はぅ": 1.0, "あ": 0.35, "困る": 0.6}, held=0.0, thrown=(0.30, -0.14, 0.05),
                 thrown_spin=200)
@@ -292,8 +304,9 @@ def cheer(k=1.0, crouch=0.0):
     return pose(
         stance(drop=0.055 + 0.05 * crouch, lean=4 - 8 * k, twist=-16, head_turn=46, head_nod=3 - 8 * k,
                front=0.10, back=0.09)
-        + arms((0.05, -0.10, -0.18 + 0.06 * k), (0.20 - 0.04 * k, -0.06, 0.02 + 0.30 * k),
-               far_pole=(0.4, 0.4, -1), far_curl=(28 - 18 * k, 10))
+        + arms((NEAR_HANG[0] - 0.01 * k, NEAR_HANG[1], NEAR_HANG[2] + 0.05 * k),
+               (0.20 - 0.04 * k, -0.06, 0.02 + 0.30 * k),
+               near_pole=HANG_POLE, near_anchor=HIP, far_pole=(0.4, 0.4, -1), far_curl=(40 - 22 * k, 14))
         + pigtails(swing=-4 * k + 4 * crouch, lift=8 * k),
         {"にこり": 0.6 + 0.4 * k, "あ": 0.5 * k})
 
