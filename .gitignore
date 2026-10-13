@@ -105,3 +105,6 @@ review/qa/*/closeness.json
 # `git add -f <path>`.
 review/qa/
 .gates/
+
+# Appended by every unseeded harness run (understudy/harness.py); local only.
+understudy/logs/phase0-unseeded.jsonl
