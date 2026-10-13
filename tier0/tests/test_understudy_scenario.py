@@ -935,3 +935,56 @@ def test_card_key_folds_the_games_rich_text_tags():
     # Every other spelling this function already folded still folds.
     assert (card_key("KLEEMOD-CORAL_GUARD") == card_key("coral_guard")
             == card_key("Coral Guard") == "coral guard")
+
+
+# --------------------------------------------- saved-run guard (BACKLOG) ---
+
+def _profile(tmp_path: Path) -> Path:
+    saves = tmp_path.joinpath("SlayTheSpire2", "steam", "7656", "modded",
+                              "profile1", "saves")
+    (saves / "history").mkdir(parents=True)
+    (saves / "history" / "1700000000.run").write_text("{}", encoding="utf-8")
+    (saves / "progress.save").write_text("{}", encoding="utf-8")
+    return saves
+
+
+def test_a_profile_with_only_history_and_progress_holds_no_saved_run(tmp_path):
+    _profile(tmp_path)
+    assert scenario.saved_runs(tmp_path) == []
+    assert scenario.saved_run_refusal(tmp_path, "lane 3") == ""
+
+
+@pytest.mark.parametrize("name", ["current_run.save", "current_run_mp.save"])
+def test_a_saved_run_is_found_and_the_refusal_names_the_file(tmp_path, name):
+    saved = _profile(tmp_path) / name
+    saved.write_text("{}", encoding="utf-8")
+    assert scenario.saved_runs(tmp_path) == [saved]
+    text = scenario.saved_run_refusal(tmp_path, "lane 3")
+    assert text.startswith("REFUSED: lane 3 holds a saved run")
+    assert str(saved) in text and "--no-setup" in text
+
+
+def _run_args(tmp_path, no_setup: bool):
+    import argparse
+    blob = {"name": "guard", "character": "klee", "steps": [
+        {"play": {"card": "Strike"}}, {"expect": {"player_block": 0}}]}
+    path = tmp_path / "guard.yaml"
+    path.write_text(yaml.safe_dump(blob), encoding="utf-8")
+    return argparse.Namespace(file=str(path), why="test", out="",
+                              no_setup=no_setup, lane=3)
+
+
+def test_scenario_run_refuses_a_lane_whose_profile_holds_a_saved_run(
+        tmp_path, monkeypatch, capsys):
+    from understudy import instances, soak
+    (_profile(tmp_path) / "current_run.save").write_text("{}", encoding="utf-8")
+    lane = instances.Instance(game_dir=tmp_path, port=15599,
+                              appdata=tmp_path, label="lane3")
+    monkeypatch.setattr(soak, "lane_setup", lambda value: (lane, True))
+    monkeypatch.setattr(bridge, "use", lambda inst: None)
+
+    def no_launch(*a, **k):
+        raise AssertionError("a refused scenario must launch nothing")
+    monkeypatch.setattr(soak, "run_scripted", no_launch)
+    assert scenario.cmd_run(_run_args(tmp_path, no_setup=False)) == 2
+    assert "REFUSED: lane lane3 holds a saved run" in capsys.readouterr().err

@@ -359,11 +359,12 @@ def classify(probe: Probe, *, alive: bool, wire_dead: bool,
                 "responding, and the bridge's ROOT endpoint still answers. "
                 "The two are served from different threads: `/` replies on "
                 "the ThreadPool worker, and `/api/v1/singleplayer` hops to "
-                "the game thread (`RunOnMainThread(BuildGameState)` then a "
-                "`GetResult()` with no timeout) whose queue is drained from "
-                "`SceneTree.ProcessFrame`. So the game thread has stopped "
-                f"reaching a process frame; this is `{STATE_STALL_KIND}`, and "
-                "every further read parks another worker on the same queue. "
+                "the game thread (`RunOnMainThread(BuildGameState)`, whose "
+                "queue is drained from `SceneTree.ProcessFrame`). So the game "
+                "thread has stopped reaching a process frame; this is "
+                f"`{STATE_STALL_KIND}`. A bridge built since EB-489's fix "
+                "answers each read with a timeout error after 15 s; an older "
+                "one parks another worker on the same queue per read. "
                 "Recovery is a teardown -- there is no unblocking it from "
                 "this side",
                 (f"root endpoint answers, {STATE_STALL_KIND}",), evidence)

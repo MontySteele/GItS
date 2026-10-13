@@ -110,8 +110,9 @@ tidier place, and do not start a second session.
 ### Your notes
 
 After each fight, append one line to your notes file: the fight, the HP you
-ended on, and the one decision that mattered. If the round stops mid-act, these
-lines are the only handoff.
+ended on, and the one decision that mattered. Play the run to its end, a win or
+a death; the end of an act is not a stop. These lines are the handoff only when
+a budget above stops the run first.
 
 ### The record you write
 
