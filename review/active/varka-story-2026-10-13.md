@@ -22,19 +22,19 @@ plot beats).
 
 ## 1. The introduction (character select)
 
-> **The Grand Master of the Knights of Favonius.** He marched most of the Knights north to fight the Abyss and left Jean the paperwork. The Spire is on the way home, more or less.
+> **The Grand Master of the Knights of Favonius.** He marched most of the Knights north to fight the Abyss and left Jean the paperwork. The Spire is the expedition's next front.
 
 ## 2. The Ancients greet him
 
 | Ancient | The Ancient | Varka |
 |---|---|---|
-| Neow | "A knight. A large one." | "Grand Master, if we're being formal. We're not." |
-| Orobas | "Your trinket hums. Let me make it sing." | "Teach it a marching song and we have a deal." |
+| Neow | "A knight. A large one." | "Grand Master, if we're being formal. Let's not." |
+| Orobas | "Your trinket hums. Let me make it sing." | "Teach it a drinking song and we have a deal." |
 | Pael | "You have bitten off more than you can chew." | "Every expedition starts that way." |
 | Tezcatara | "Warm yourself by my light." | "Gladly. It's been a long winter up north." |
-| Nonupeipe | "Two blades. One will." | "And four winds behind them." |
+| Nonupeipe | "Two blades. One will." | "And Lord Barbatos behind them." |
 | Tanx | "Do you fight for glory?" | "I fight so my knights get home. Glory can find its own way." |
-| Vakuu | "Trade with me." | "I have a stack of unsigned reports. Jean would pay you to take them." |
+| Vakuu | "Trade with me." | "I have a stack of unsigned reports. I'll pay you to take them." |
 | Darv | "I collect what others leave behind." | "Then you'll want my desk. I left it to Jean." |
 
 ## 3. Act 1: Dispatch from Mondstadt
@@ -43,35 +43,35 @@ plot beats).
 
 | Option | Effect | Why |
 |---|---|---|
-| **Sign every one of them.** | Upgrade 2 random cards. | Jean won't believe it. |
-| **Send them back to Jean.** | Gain 75 Gold. Add **Overdue Reports** to your deck. | The courier carries his travel pay too. The reports follow him anyway. |
-| **Write to the expedition.** | Choose 1 of 3 random Knights to add to your deck. | The Knights answer their Grand Master. |
+| **Stop to sign every one of them.** | Upgrade 2 random cards. | Jean won't believe it. |
+| **Sign them later.** | Gain 75 Gold. Add **Overdue Reports** to your deck. | The courier carries his travel pay too. The reports follow him anyway. |
+| **Request reinforcements for the expedition.** | Choose 1 of 3 random Knights to add to your deck. | The Knights answer their Grand Master. |
 
 **Overdue Reports** is a Varka-only curse built like Klee's Confinement: "Unplayable. After 3 combats, remove this from your deck." Jean always catches up with him eventually.
 
 ## 4. Act 2: The Wolf of the North
 
-> A grey wolf the size of a cart lies across the landing, and frost creeps out from under it. Andrius, the Wolf of the North, has come to see whether the Knight of Boreas still deserves the name.
+> Frost creeps across the landing, and a great grey wolf pads out of it. Boreas, Varka's partner, a fragment of Andrius, the old Wolf of the North, has come to see whether the Knight of Boreas still deserves the name.
 >
-> *"You have grown slow, Knight."* — *"And you've grown grey. Shall we?"*
+> *"You've gone soft, Knight."* — *"Soft? Come over here and say that."*
 
 | Option | Effect | Why |
 |---|---|---|
-| **Spar with him.** | Lose 12 HP. Upgrade 3 random cards. | The old god never goes easy. Neither did Varka, with Eula. |
-| **Bow to the old god.** | Heal 20 HP. | Even a Grand Master knows when to kneel. |
+| **Spar with him.** | Lose 12 HP. Upgrade 3 random cards. | Boreas never goes easy. Neither did Varka, with Eula. |
+| **Rest at his side.** | Heal 20 HP. | Even a Grand Master can take a breather. |
 | **Ask after the pack.** | Add an upgraded **Razor: Awakening** to your deck. | "The boy is eating well?" The wolves raised him; Varka taught him to fight. |
 
 ## 5. Act 3: The Long Way Home
 
-> Campfires on the stairs below, and banners in Favonius blue. Most of the expedition has come the long way round to walk him home. Three faces step out of the ranks first.
+> Campfires on the stairs below, and banners in Favonius blue. After five years away, most of the expedition has come the long way round to walk him home. Three faces step out of the ranks first.
 
 | Option | Effect | Their line |
 |---|---|---|
-| **Jean** | Add an upgraded **Jean — Wind Companion** to your deck. | "You owe me eleven months of reports, Grand Master." |
-| **Eula** | Add an upgraded **Eula: Icetide Vortex** to your deck. | "You still owe me a rematch. Don't you dare go easy." |
-| **Kaeya** | Add an upgraded **Kaeya: Hidden Strength** to your deck. | "The tavern's been quiet. Diluc almost misses you." |
+| **Jean** | Add an upgraded **Jean — Wind Companion** to your deck. | "You owe me five years of reports, Grand Master." |
+| **Kaeya** | Add an upgraded **Kaeya: Heart of the Abyss** to your deck. | "The tavern's been quiet. Diluc almost misses you." |
+| **Mika** | Add an upgraded **Mika: Suppressive Barrage** to your deck. | "Surveyor Mika, sir! I've mapped the whole way home." |
 
-These are his existing cards (`proto_vk_jean_dandelion_breeze`, `proto_vk_eula_icetide_vortex`, `proto_vk_kaeya_glacial_waltz`). Varka answers whichever knight steps out: "Good. Then we climb together, and we all go home."
+All three are Commons now (`proto_vk_jean_dandelion_breeze`, `proto_vk_kaeya_frostgnaw`, `proto_vk_mika_starfrost_swirl`). The first draft mixed rarities: Jean is a Common, Eula: Icetide Vortex an Uncommon, and Kaeya: Hidden Strength one of his starter Knights. Mika is the surveyor who served on the expedition. Varka answers whichever knight steps out: "Good. Then we climb together, and we all go home."
 
 ## 6. Lines in combat (speech bubbles)
 
@@ -79,22 +79,36 @@ These are his existing cards (`proto_vk_jean_dandelion_breeze`, `proto_vk_eula_i
 |---|---|
 | Entering a boss fight | "Knights, with me! ...Right. Just me, then." |
 | Below a third of his HP | "Still standing. That's the job." |
-| Four Winds' Ascension | "By the four winds!" |
-| Killing a boss | "Someone write that down. Not me." |
-| Losing the run | "Tell Jean... the reports are in my left boot." |
-| Winning the run | "Knights of Favonius, we're going home." |
+| Four Winds' Ascension | "By Lord Barbatos!" |
+| Killing a boss | "Someone write that down. Not me!" |
+| Losing the run | "Tell Jean... we're running a little late." |
+| Winning the run | "Knights of Favonius, we're going home!" |
 
 ## 7. Co-op pair lines (at each boss)
 
 | Pair | Lines |
 |---|---|
 | Varka and Klee | (written with Klee's batch) Varka: "Spark Knight. Same orders as always." Klee: "No bombs indoors. ...Is this indoors?" |
-| Varka and Kokomi | Varka: "A strategist. Good. I usually just charge." Kokomi: "I noticed. It's already in the plan." |
-| Varka and Furina | Furina: "The Grand Master himself! Do try not to upstage me." Varka: "Wouldn't dream of it. I'll be at the back, hitting things." |
+| Varka and Kokomi | Varka: "Priestess, I've studied your campaigns. A pincer?" Kokomi: "I was about to suggest the same. You take the left." |
+| Varka and Furina | Furina: "The Grand Master himself! Do try not to upstage me." Varka: "Wouldn't dream of it." |
 
 ## The arc in one line
 
-He left on an expedition and kept walking (intro), Mondstadt's paperwork finds him (act 1), the old god of the north tests the Knight of Boreas (act 2), and his Knights come to walk him home (act 3). His victory line closes it.
+He left on an expedition and kept walking (intro), Mondstadt's paperwork finds him (act 1), Boreas tests his partner (act 2), and his Knights come to walk him home (act 3). His victory line closes it.
+
+## Revised 2026-10-13
+
+[USER]'s edits are in place: the Neow, Orobas, Nonupeipe and Vakuu replies,
+the act 1 option names, Jean's "five years", the Ascension, boss-kill, loss
+and win lines, and the shorter Furina reply. "The lore on Andreas looks a
+little wrong. Boreas is Varka's partner - he is a fragment of Andreas, who
+faded back to the Ley Lines during Varka's story quest. I think the act 2
+event works using Boreas instead, though. Line 2 seems a touch too formal."
+"The expedition was gone for 5 whole years." "Also - are all of these cards
+the same rarity?" (No: act 3 now offers three Commons.) "The kokomi line
+needs a rework. Varka's own role in Nod-Krai is that of a strategist; he's
+not a dumb brute." Rewritten by Claude: the intro's third line, act 2, act
+3's Kaeya and Mika, the Kokomi pair.
 
 ## For [USER]
 
