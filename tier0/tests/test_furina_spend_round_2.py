@@ -142,7 +142,7 @@ def test_charlottes_line_draws_on_a_cards_repay():
 def test_charlottes_line_ignores_her_act_and_salon_solitaire():
     st = _charlotte()
     T.end_of_turn(st)                            # her act, then the Singer
-    assert st.player.ftd.drained == 8 - 2 - 1
+    assert st.player.ftd.drained == 8 - 3 - 1
     assert not st.player.ftd.charlotte_drew
     T.turn_start(st)
     assert not st.player.ftd.charlotte_drew

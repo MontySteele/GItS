@@ -2968,15 +2968,16 @@
    description: "[gold]Summon[/gold] Sigewinne{IfUpgraded:show:+|}. Act: [gold]Repay[/gold] {GuestAct:diff()}.",
    effects: [{op: stage_guest, member: sigewinne}]}
 
-# Fountain of Lucine: a Skill that leaves a Power counting the three turns
-# (`FountainOfLucinePower`; sim `furina_tide`'s schedule). Each play keeps
-# its own three turns.
+# Fountain of Lucine: Block now, and a Power owing one Repay at the start of
+# the next turn (`FountainOfLucinePower`; sim `furina_tide`'s schedule). Ruled
+# 2026-10-13: 8 [11] Block, Repay 3, no Block floor, no three turns.
 - {id: proto_fs_fountain_of_lucine, name: "Fountain of Lucine", character: furina,
-   upgrade: {power_amount: +1},
+   upgrade: {block: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "For 3 turns, at the start of your turn [gold]Repay[/gold] {PowerAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
-   effects: [{op: apply_power, power: fs_fountain_of_lucine, amount: 3,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Next turn, [gold]Repay[/gold] 3.",
+   effects: [{op: block, amount: 8},
+             {op: apply_power, power: fs_fountain_of_lucine, amount: 3,
               target: self}]}
 
 - {id: proto_fs_critics_darling, name: "Critics' Darling", character: furina,
@@ -3448,7 +3449,7 @@
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
    description: "Gain {PowerAmount:diff()} [gold]Strength[/gold]. Your Attacks deal 1 additional damage for each guest on stage.",
-   effects: [{op: apply_power, power: strength, amount: 1, target: self},
+   effects: [{op: apply_power, power: strength, amount: 2, target: self},
              {op: apply_power, power: fs_leading_lady, amount: 1,
               target: self}]}
 

@@ -519,7 +519,7 @@ def report(pre_fix: bool, jobs: int = 1) -> dict:
 #: ids; every base/upgraded variant of each is tried.
 NAMED: dict[str, tuple[tuple[str, ...], tuple[str, ...],
                        tuple[tuple[str, ...], ...]]] = {
-    # "Encore! with Escoffier": Escoffier's line Repays 1 on every act.
+    # "Encore! with Escoffier": Escoffier's line adds 2 to every damaging act.
     "encore_escoffier": (
         ("proto_fs_encore",), (),
         (("escoffier",), ("charlotte", "escoffier"),

@@ -55,7 +55,7 @@ public class FurinaRound3TelemetryTests : IDisposable
         Run(kit.Director.Act(kit.Stage.Seats[0]));
         var act = kit.Stage.Beats.Single(b => b.Event == FurinaStageLedger.ActEvent);
         Assert.Equal(0, act.Moved);
-        Assert.Equal(2, act.Floor);
+        Assert.Equal(3, act.Floor);
     }
 
     [Fact]
@@ -66,8 +66,8 @@ public class FurinaRound3TelemetryTests : IDisposable
         Run(kit.Director.Drain(1));
         Run(kit.Director.Act(kit.Stage.Seats[0]));
         var act = kit.Stage.Beats.Single(b => b.Event == FurinaStageLedger.ActEvent);
-        Assert.Equal(1, act.Moved);          // Repay 4 returns 1
-        Assert.Equal(3, act.Floor);          // +3 Block
+        Assert.Equal(1, act.Moved);          // Repay 5 returns 1
+        Assert.Equal(4, act.Floor);          // +4 Block
     }
 
     [Fact]

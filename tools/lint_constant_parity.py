@@ -274,7 +274,7 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ClorindePerRepay": _stage("CLORINDE_PER_REPAY"),
     # THE POOL TO 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3): the
     # three new guests' lines and acts, A Five-Century Act's line and
-    # Fountain of Lucine's three turns.
+    # Fountain of Lucine's one turn.
     "FurinaStageLaw.LyneyLineDrop": _stage("LYNEY_LINE_DROP"),
     "FurinaStageLaw.LyneyActDrain": _stage("LYNEY_ACT_DRAIN"),
     "FurinaStageLaw.LyneyActDamage": _stage("LYNEY_ACT_DAMAGE"),
@@ -282,7 +282,6 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ChevreuseActDamage": _stage("CHEVREUSE_ACT_DAMAGE"),
     "FurinaStageLaw.ChevreuseLineVulnerable": _stage("CHEVREUSE_LINE_VULNERABLE"),
     "FurinaStageLaw.DrainFloor": _stage("DRAIN_FLOOR"),
-    "FurinaStageLaw.FountainTurns": _stage("FOUNTAIN_TURNS"),
     # THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md, ruled
     # 2026-10-09): the guests' upgraded lines and acts (sec.3), the four new
     # guests and the new Powers' numbers (sec.5).
@@ -300,6 +299,7 @@ MIRRORED: dict[str, object] = {
     # The Spend paper (2026-10-10): Navia's half, Freminet's quarter, and
     # "for every 4".
     "FurinaStageLaw.NaviaSpendDivisor": _stage("NAVIA_SPEND_DIVISOR"),
+    "FurinaStageLaw.NaviaActMultiplier": _stage("NAVIA_ACT_MULTIPLIER"),
     "FurinaStageLaw.FreminetSpendDivisor": _stage("FREMINET_SPEND_DIVISOR"),
     "FurinaStageLaw.SpendUpToEvery": _stage("SPEND_UP_TO_EVERY"),
     "FurinaStageLaw.LineMaxHpDivisor": _stage("LINE_MAX_HP_DIVISOR"),
@@ -309,7 +309,8 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.NeuvilletteHydroBonusUpgraded": _stage("NEUVILLETTE_HYDRO_BONUS_UPGRADED"),
     "FurinaStageLaw.EscoffierActDamage": _stage("ESCOFFIER_ACT_DAMAGE"),
     "FurinaStageLaw.EscoffierActDamageUpgraded": _stage("ESCOFFIER_ACT_DAMAGE_UPGRADED"),
-    "FurinaStageLaw.EscoffierLineRepay": _stage("ESCOFFIER_LINE_REPAY"),
+    "FurinaStageLaw.EscoffierLineBonus": _stage("ESCOFFIER_LINE_BONUS"),
+    "FurinaStageLaw.EscoffierLineBonusUpgraded": _stage("ESCOFFIER_LINE_BONUS_UPGRADED"),
     "FurinaStageLaw.EnsembleSeats": _stage("ENSEMBLE_SEATS"),
     "FurinaStageLaw.ShowstopperSpend": _stage("SHOWSTOPPER_SPEND"),
     # High Stakes' divisor (the Spend round, 2026-10-10).

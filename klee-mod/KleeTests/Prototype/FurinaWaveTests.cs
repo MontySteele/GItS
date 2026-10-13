@@ -67,7 +67,7 @@ public class FurinaWaveTests
         Assert.Equal(FurinaStageLaw.LyneyActDrain, stopped[0].Moved);
         Assert.Equal(FurinaStageLedger.StoppedAtBuffer, stopped[0].Reason);
         // The damage lands either way, as before.
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
     }
 
     [Fact]

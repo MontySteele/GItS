@@ -266,19 +266,19 @@ def test_lyney_lowers_the_line_and_his_act_stops_at_it():
     assert T.line_hp(st.player) == 49
     T.act(st, "lyney")
     assert st.player.hp == 76 and f.drained == 2
-    assert all(e.hp == 200 - 8 for e in st.enemies)
+    assert all(e.hp == 200 - 5 for e in st.enemies)
     st.player.hp = 30                            # hit to 30: still Drains
     T.act(st, "lyney")
     assert st.player.hp == 28 and f.drained == 4 and f.drained_past == 0
-    assert all(e.hp == 200 - 16 for e in st.enemies)
+    assert all(e.hp == 200 - 10 for e in st.enemies)
     f.drained_above = 28                         # 1 HP of buffer: Drain 1
     st.player.hp = 50
     T.act(st, "lyney")
     assert st.player.hp == 49 and f.drained_past == 0
-    assert all(e.hp == 200 - 24 for e in st.enemies)
+    assert all(e.hp == 200 - 15 for e in st.enemies)
     T.act(st, "lyney")                           # none left: damage still
     assert st.player.hp == 49
-    assert all(e.hp == 200 - 32 for e in st.enemies)
+    assert all(e.hp == 200 - 20 for e in st.enemies)
 
 
 def test_a_five_century_act_returns_the_past_line_part_at_the_curtain():
@@ -297,7 +297,7 @@ def test_a_five_century_act_returns_the_past_line_part_at_the_curtain():
     assert plain.player.ftd.ledger["lost_past_line"] == 11
 
 
-def test_sigewinne_blocks_each_repay_and_her_act_repays_two():
+def test_sigewinne_blocks_each_repay_and_her_act_repays_three():
     st = _state()
     f = st.player.ftd
     f.stage = ["sigewinne"]
@@ -305,22 +305,22 @@ def test_sigewinne_blocks_each_repay_and_her_act_repays_two():
     T.repay(st, 3)
     assert st.player.block == 3
     T.act(st, "sigewinne")
-    assert st.player.block == 5 and f.drained == 1
+    assert st.player.block == 6 and f.drained == 0
 
 
-def test_fountain_of_lucine_repays_at_the_next_three_turn_starts():
+def test_fountain_of_lucine_blocks_now_and_repays_at_the_next_turn_start():
     st = _state()
     f = st.player.ftd
     T.drain(st, 20)
     _play(st, "ftd_fountain")
     _play(st, "ftd_fountain")
-    for _ in range(3):
-        T.turn_open(st)
-        T.turn_start(st)
-    assert f.ledger["fountain_repaid"] == 18 and f.drained == 2
+    assert st.player.block == 16                  # 8 a play
     T.turn_open(st)
     T.turn_start(st)
-    assert f.ledger["fountain_repaid"] == 18 and not f.fountains
+    assert f.ledger["fountain_repaid"] == 6 and f.drained == 14
+    T.turn_open(st)
+    T.turn_start(st)
+    assert f.ledger["fountain_repaid"] == 6 and not f.fountains
 
 
 def test_hold_the_stage_spends_up_to_16_for_1_block_each():
@@ -338,7 +338,7 @@ def test_hold_the_stage_spends_up_to_16_for_1_block_each():
     assert st.player.block == 6 + 13 + 22 and st.player.ftd.fanfare == 4
 
 
-def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_four():
+def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_five():
     st = _state()
     f = st.player.ftd
     f.stage = ["chevreuse"]
@@ -347,7 +347,7 @@ def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_four():
     T.spend_all(st)
     assert st.enemies[0].powers.get("vulnerable") == 2
     T.act(st, "chevreuse")
-    assert st.enemies[0].hp == 200 - 6        # 4, Vulnerable: 6
+    assert st.enemies[0].hp == 200 - 7        # 5, Vulnerable: 7
 
 
 def test_bis_keeps_half_a_spend_all_rounded_down():

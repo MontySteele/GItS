@@ -142,7 +142,7 @@ public class FurinaSpendUpToTests
     // ---- the guests' share-Spend (Navia half, Freminet a quarter) -------------
 
     [Fact]
-    public void Navias_act_spends_half_the_bank_and_deals_it_as_geo()
+    public void Navias_act_spends_a_third_of_the_bank_and_deals_twice_it_as_geo()
     {
         // A Spend first, so her line's discount is used up.
         var kit = StageKit.With(new StageMods { Thunderous = 3 }, 23,
@@ -151,12 +151,12 @@ public class FurinaSpendUpToTests
         Assert.Equal(22, kit.Stage.Fanfare);
         kit.Board.Log.Clear();
         Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Contains("damage Navia Random 11 Geo", kit.Board.Log);
-        Assert.Equal(11, kit.Stage.Fanfare);
+        Assert.Contains("damage Navia Random 14 Geo", kit.Board.Log);
+        Assert.Equal(15, kit.Stage.Fanfare);           // a third of 22 is 7
         // A guest's half-Spend is a Spend: Chevreuse and Thunderous fire.
         Assert.Contains("vulnerable Random 1", kit.Board.Log);
         Assert.Equal(1, Count(kit, "power "));
-        // 1 held: half is 0, no Spend, no damage.
+        // 1 held: a third is 0, no Spend, no damage.
         var poor = StageKit.With(1, StagePerformer.Navia);
         Run(poor.Director.Act(poor.Stage.Seats[0]));
         Assert.Equal(0, Count(poor, "damage "));
@@ -165,34 +165,34 @@ public class FurinaSpendUpToTests
     }
 
     [Fact]
-    public void Freminets_act_gains_three_block_then_a_quarter_of_the_bank_as_block()
+    public void Freminets_act_gains_four_block_then_a_quarter_of_the_bank_as_block()
     {
         var kit = StageKit.With(9, StagePerformer.Freminet);
         Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Equal(new[] { "block 3", "block 2" },        // a quarter of 9
+        Assert.Equal(new[] { "block 4", "block 2" },        // a quarter of 9
                      kit.Board.Log.Where(l => l.StartsWith("block ")));
         Assert.Equal(7, kit.Stage.Fanfare);
         Assert.Equal(0, Count(kit, "damage "));             // no Cryo hit
         var up = StageKit.Of();
         Run(up.Director.SummonGuest(StagePerformer.Freminet, true));
         Run(up.Director.Act(up.Stage.Seats[0]));
-        Assert.Equal(new[] { "block 6" },
+        Assert.Equal(new[] { "block 7" },
                      up.Board.Log.Where(l => l.StartsWith("block ")));
-        Assert.Equal(3, StageDirector.ActAmount(StagePerformer.Freminet, false));
-        Assert.Equal(6, StageDirector.ActAmount(StagePerformer.Freminet, true));
+        Assert.Equal(4, StageDirector.ActAmount(StagePerformer.Freminet, false));
+        Assert.Equal(7, StageDirector.ActAmount(StagePerformer.Freminet, true));
     }
 
     [Fact]
     public void Two_guests_split_the_bank_oldest_first()
     {
         // Freminet first: a quarter of 40 is 10 (Navia's line makes 2 of it
-        // free, the turn's first Spend), 32 left; Navia takes half, 16.
+        // free, the turn's first Spend), 32 left; Navia takes a third, 10, for 20.
         var kit = StageKit.With(new StageMods { Thunderous = 3 }, 40,
                                 StagePerformer.Freminet, StagePerformer.Navia);
         Assert.Equal(2, Run(kit.Director.ActAll()));
         Assert.Contains("block 10", kit.Board.Log);
-        Assert.Contains("damage Navia Random 16 Geo", kit.Board.Log);
-        Assert.Equal(16, kit.Stage.Fanfare);
+        Assert.Contains("damage Navia Random 20 Geo", kit.Board.Log);
+        Assert.Equal(22, kit.Stage.Fanfare);
         Assert.Equal(2, kit.Stage.SpendsThisTurn);
         Assert.Equal(2, Count(kit, "power "));              // two Spends
     }
@@ -201,17 +201,17 @@ public class FurinaSpendUpToTests
     public void Freminet_then_navia_on_40_with_no_discount()
     {
         // A Spend first uses up Navia's discount (41, 3 spent, 2 free: 40).
-        // Freminet takes a quarter of 40, 10 (30 left); Navia half of 30, 15.
+        // Freminet takes a quarter of 40, 10 (30 left); Navia a third of 30, 10, for 20.
         var kit = StageKit.With(41, StagePerformer.Freminet,
                                 StagePerformer.Navia);
         Run(kit.Director.Spend(3));
         Assert.Equal(40, kit.Stage.Fanfare);
         kit.Board.Log.Clear();
         Run(kit.Director.ActAll());
-        Assert.Equal(new[] { "block 3", "block 10" },
+        Assert.Equal(new[] { "block 4", "block 10" },
                      kit.Board.Log.Where(l => l.StartsWith("block ")));
-        Assert.Contains("damage Navia Random 15 Geo", kit.Board.Log);
-        Assert.Equal(15, kit.Stage.Fanfare);
+        Assert.Contains("damage Navia Random 20 Geo", kit.Board.Log);
+        Assert.Equal(20, kit.Stage.Fanfare);
     }
 
     [Fact]
@@ -220,14 +220,15 @@ public class FurinaSpendUpToTests
         var kit = StageKit.With(new StageMods { Showstopper = 1 }, 40,
                                 StagePerformer.Navia, StagePerformer.Freminet);
         Run(kit.Director.EndOfTurn(0));
-        // Round one: Navia 20 (2 free, 22 left), Freminet 5 (17 left).
-        // Showstopper Spends 5 (12 left). Round two: Navia 6, Freminet 1.
-        Assert.Equal(new[] { "damage Navia Random 20 Geo",
-                             "damage Navia Random 6 Geo" },
+        // Round one: Navia 13 for 26 (2 free, 29 left), Freminet 7 (22 left).
+        // Showstopper Spends 5 (17 left). Round two: Navia 5 for 10,
+        // Freminet 3.
+        Assert.Equal(new[] { "damage Navia Random 26 Geo",
+                             "damage Navia Random 10 Geo" },
                      kit.Board.Log.Where(l => l.StartsWith("damage ")));
-        Assert.Equal(new[] { "block 3", "block 5", "block 3", "block 1" },
+        Assert.Equal(new[] { "block 4", "block 7", "block 4", "block 3" },
                      kit.Board.Log.Where(l => l.StartsWith("block ")));
-        Assert.Equal(5, kit.Stage.Fanfare);
+        Assert.Equal(9, kit.Stage.Fanfare);
     }
 
     [Fact]
@@ -237,9 +238,9 @@ public class FurinaSpendUpToTests
                                 StagePerformer.Navia);
         var cues = FurinaStage.Forecast(kit.Stage).Cues;
         Assert.Equal(StageCueKind.Block, cues[0].Kind);
-        Assert.Equal(13, cues[0].Amount);                   // 3 + 10
+        Assert.Equal(14, cues[0].Amount);                   // 4 + 10
         Assert.Equal(StageCueKind.Damage, cues[1].Kind);
-        Assert.Equal(16, cues[1].Amount);
+        Assert.Equal(20, cues[1].Amount);
     }
 
     [Fact]
@@ -248,15 +249,15 @@ public class FurinaSpendUpToTests
         Assert.EndsWith(
             // The card text pass (2026-10-12): the face's words, no
             // parentheses.
-            "Act: gain 3 [gold]Block[/gold], and more for [gold]Fanfare[/gold]: "
+            "Act: gain 4 [gold]Block[/gold], and more for [gold]Fanfare[/gold]: "
             + "[gold]Spend[/gold] a quarter of it, rounded down, for that "
             + "much.",
             StagePerformerBadge.ActText(StagePerformer.Freminet));
-        Assert.Contains("Act: gain 6 [gold]Block[/gold], and more",
+        Assert.Contains("Act: gain 7 [gold]Block[/gold], and more",
             StagePerformerBadge.ActText(StagePerformer.Freminet, true));
         Assert.EndsWith(
-            "Act: [gold]Spend[/gold] half your [gold]Fanfare[/gold], rounded "
-            + "down, to deal that much [gold]Geo[/gold] damage to a random "
+            "Act: [gold]Spend[/gold] a third of your [gold]Fanfare[/gold] to "
+            + "deal twice that much [gold]Geo[/gold] damage to a random "
             + "enemy.",
             StagePerformerBadge.ActText(StagePerformer.Navia));
     }
@@ -324,7 +325,8 @@ public class FurinaSpendUpToTests
         Assert.Contains("FurinaStage.SpentOrUpTo(card, 12)",
                         Generated("ProtoFsSpiritedAria"));
         Assert.Equal(4, FurinaStageLaw.SpendUpToEvery);
-        Assert.Equal(2, FurinaStageLaw.NaviaSpendDivisor);
+        Assert.Equal(3, FurinaStageLaw.NaviaSpendDivisor);
+        Assert.Equal(2, FurinaStageLaw.NaviaActMultiplier);
         Assert.Equal(4, FurinaStageLaw.FreminetSpendDivisor);
     }
 
@@ -343,7 +345,7 @@ public class FurinaSpendUpToTests
         Assert.Equal(10, Run(kit.Director.SpendUpTo(10)));
         kit.Stage.EndPlay();
         Run(kit.Director.Act(kit.Stage.Seats[0]));   // Freminet: a quarter
-        Run(kit.Director.Act(kit.Stage.Seats[1]));   // Navia: half the rest
+        Run(kit.Director.Act(kit.Stage.Seats[1]));   // Navia: a third of the rest
         Assert.Equal(new[]
             {
                 // Navia's line makes the turn's first 2 free: 10 counted, 8
@@ -351,7 +353,7 @@ public class FurinaSpendUpToTests
                 new StageSpendRecord("Tidal Flourish+", 8, 20, 10),
                 new StageSpendRecord(StageDirector.FreminetSpendSource, 3, 12,
                                      -1),
-                new StageSpendRecord(StageDirector.NaviaSpendSource, 4, 9,
+                new StageSpendRecord(StageDirector.NaviaSpendSource, 3, 9,
                                      -1),
             },
             kit.Stage.Spends.ToArray());

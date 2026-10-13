@@ -368,14 +368,14 @@ public class FurinaTideTests
         Assert.True(StageKit.Run(kit.Director.Act(kit.Stage.Seats[0])));
         Assert.Equal(76, kit.Board.Hp);
         Assert.Equal(2, kit.Stage.Drained);
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
         // Hit to 30 (the Drain buffer, 2026-10-11): the buffer is whole, so
         // his Drain 2 goes ahead.
         var low = StageKit.At(30, 78, StagePerformer.Lyney);
         StageKit.Run(low.Director.Act(low.Stage.Seats[0]));
         Assert.Equal(28, low.Board.Hp);
         Assert.Equal(2, low.Stage.Drained);
-        Assert.Contains("damage Lyney All 8 Pyro", low.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", low.Board.Log);
         // With the buffer used up (the drain-line round, 2026-10-09) a
         // guest's Drain stops at the line: it drains 0 and still deals its
         // damage.
@@ -384,16 +384,16 @@ public class FurinaTideTests
         StageKit.Run(spent.Director.Act(spent.Stage.Seats[0]));
         Assert.Equal(31, spent.Board.Hp);
         Assert.Equal(29, spent.Stage.Drained);
-        Assert.Contains("damage Lyney All 8 Pyro", spent.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", spent.Board.Log);
         // At 2 HP: no Drain, the damage unchanged.
         var last = StageKit.At(2, 78, StagePerformer.Lyney);
         StageKit.Run(last.Director.Act(last.Stage.Seats[0]));
         Assert.Equal(2, last.Board.Hp);
-        Assert.Contains("damage Lyney All 8 Pyro", last.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", last.Board.Log);
     }
 
     [Fact]
-    public void Sigewinne_blocks_each_repay_and_her_act_repays_two()
+    public void Sigewinne_blocks_each_repay_and_her_act_repays_three()
     {
         var kit = StageKit.Of(StagePerformer.Sigewinne);
         Run(kit.Director.Drain(6));
@@ -402,19 +402,19 @@ public class FurinaTideTests
         kit.Board.Log.Clear();
         StageKit.Run(kit.Director.Act(kit.Stage.Seats[0]));
         // The pool to 75: her line gets a cue of its own before its Block.
-        Assert.Equal(new[] { "heal 2", "cue Sigewinne", "block 2" },
+        Assert.Equal(new[] { "heal 3", "cue Sigewinne", "block 3" },
                      kit.Board.Log);
     }
 
     [Fact]
-    public void Chevreuse_applies_vulnerable_on_every_spend_and_her_act_deals_four()
+    public void Chevreuse_applies_vulnerable_on_every_spend_and_her_act_deals_five()
     {
         var kit = StageKit.With(9, StagePerformer.Chevreuse);
         Run(kit.Director.Spend(3));
         Run(kit.Director.SpendAll());
         Assert.Equal(2, kit.Board.Log.Count(l => l == "vulnerable Random 1"));
         StageKit.Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Contains("damage Chevreuse Random 4 None", kit.Board.Log);
+        Assert.Contains("damage Chevreuse Random 5 None", kit.Board.Log);
     }
 
     [Fact]
@@ -433,22 +433,19 @@ public class FurinaTideTests
     }
 
     [Fact]
-    public void Fountain_of_lucine_repays_at_each_of_the_next_three_turn_starts()
+    public void Fountain_of_lucine_repays_once_at_the_next_turn_start()
     {
         var kit = StageKit.Of();
         Run(kit.Director.Drain(30));
-        kit.Stage.ScheduleRepay(3, FurinaStageLaw.FountainTurns);
-        kit.Stage.ScheduleRepay(4, FurinaStageLaw.FountainTurns);
+        kit.Stage.ScheduleRepay(3, 1);
+        kit.Stage.ScheduleRepay(4, 1);
         Assert.Equal(7, kit.Stage.RepayDueNext);
-        for (var turn = 0; turn < 3; turn++)
-        {
-            Assert.Equal(7, Run(kit.Director.TurnStartRepays()));
-        }
+        Assert.Equal(7, Run(kit.Director.TurnStartRepays()));
         Assert.False(kit.Stage.OwesRepays);
         Assert.Equal(0, Run(kit.Director.TurnStartRepays()));
-        Assert.Equal(78 - 30 + 21, kit.Board.Hp);
-        // One Repay per play: two plays are two Repays a turn.
-        Assert.Equal(6, kit.Board.Log.Count(l => l.StartsWith("heal ")));
+        Assert.Equal(78 - 30 + 7, kit.Board.Hp);
+        // One Repay per play: two plays are two Repays that turn.
+        Assert.Equal(2, kit.Board.Log.Count(l => l.StartsWith("heal ")));
         // Wired to her turn start.
         Assert.Contains("FurinaStage.FountainRepays",
             Il.Calls(Il.Method("FurinaStage", "TurnStart")));
@@ -509,7 +506,7 @@ public class FurinaTideTests
             StageKit.Run(kit.Director.SummonGuest(StagePerformer.Charlotte)));
         Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde,
                              StagePerformer.Charlotte }, kit.Company);
-        Assert.Equal(new[] { "damage Wriothesley Random 4 Cryo" },
+        Assert.Equal(new[] { "damage Wriothesley Random 5 Cryo" },
                      kit.Board.Hits.ToArray());
         Assert.Contains("return Wriothesley 0", kit.Board.Log);
     }
@@ -560,13 +557,13 @@ public class FurinaTideTests
         kit.Board.Log.Clear();
         StageKit.Run(kit.Director.EndOfTurn(FurinaStageLaw.SingerRepay));
         // Lynette finds no aura-wearer here (the board decides), then
-        // Charlotte Repays 2, then the Singer Repays 1 (the 2026-10-09
+        // Charlotte Repays 3, then the Singer Repays 1 (the 2026-10-09
         // playtest trim; was 2). The Spend round 2 (2026-10-10): neither is
         // a card's Repay, so Charlotte's line draws nothing.
-        Assert.Equal(new[] { "damage Lynette Aura 3 Anemo", "heal 2",
+        Assert.Equal(new[] { "damage Lynette Aura 5 Anemo", "heal 3",
                              "heal 1" },
                      kit.Board.Log);
-        Assert.Equal(3, kit.Stage.Drained);
+        Assert.Equal(2, kit.Stage.Drained);
     }
 
     [Fact]

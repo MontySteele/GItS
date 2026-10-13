@@ -46,7 +46,6 @@ public class FurinaDrainLineRoundTests
     {
         foreach (var (type, pay) in new[]
                  {
-                     ("ProtoFsFountainOfLucine", "PayBlock"),
                      ("ProtoFsHymnOfManyWaters", "PayBlock"),
                      ("ProtoFsGrandEntrance", "PayBlock"),
                      ("ProtoFsPneumaTides", "PayVigor"),
@@ -61,7 +60,8 @@ public class FurinaDrainLineRoundTests
                                      "ProtoFsBalanceTheBooks",
                                      "ProtoFsGrandAbsolution",
                                      "ProtoFsSingerOfManyWaters",
-                                     "ProtoFsRiptideLunge" })
+                                     "ProtoFsRiptideLunge",
+                                     "ProtoFsFountainOfLucine" })
         {
             Assert.DoesNotContain("FurinaStageFacePreview.Pay", Generated(type));
         }
@@ -83,14 +83,14 @@ public class FurinaDrainLineRoundTests
         Assert.Equal(49, kit.Board.Hp);
         Assert.Equal(29, kit.Stage.Drained);
         Assert.Equal(0, kit.Stage.DrainedPast);
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
         // At the line: 0 drained, the damage unchanged.
         Assert.Equal(0, kit.Director.GuestDrainRoom(2));
         kit.Board.Log.Clear();
         Run(kit.Director.Act(kit.Stage.Seats[0]));
         Assert.Equal(49, kit.Board.Hp);
         Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("lose "));
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class FurinaDrainLineRoundTests
     public void Lyneys_badge_says_his_drain_stops_at_the_line()
     {
         // The card text pass (2026-10-12): the face's words, no parentheses.
-        Assert.Contains(", deal 8 [gold]Pyro[/gold] damage to ALL enemies. "
+        Assert.Contains(", deal 5 [gold]Pyro[/gold] damage to ALL enemies. "
                         + "It never [gold]Drains[/gold] past your line.",
                         StagePerformerBadge.ActText(StagePerformer.Lyney));
     }

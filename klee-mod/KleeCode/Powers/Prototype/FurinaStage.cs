@@ -605,7 +605,7 @@ public static class FurinaStage
         if (applied > ledger.FountainSeen)
         {
             ledger.ScheduleRepay(applied - ledger.FountainSeen,
-                                 FurinaStageLaw.FountainTurns);
+                                 turns: 1);   // ruled 2026-10-13: the next turn only
             ledger.FountainSeen = applied;
         }
         using (ledger.CausedBy(FountainOfLucinePower.Title))
@@ -835,7 +835,8 @@ public static class FurinaStage
             StagePerformer.Freminet => new(seat.Who, seat.Key,
                 StageCueKind.Block, n + half, "", ""),
             StagePerformer.Navia => new(seat.Who, seat.Key,
-                StageCueKind.Damage, half, "Geo", StageForecastCue.Random),
+                StageCueKind.Damage,
+                half * FurinaStageLaw.NaviaActMultiplier, "Geo", StageForecastCue.Random),
             StagePerformer.Neuvillette => new(seat.Who, seat.Key,
                 StageCueKind.Damage, ledger.HpLostSinceLastTurn, "Hydro",
                 StageForecastCue.All),

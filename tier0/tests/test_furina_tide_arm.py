@@ -263,12 +263,15 @@ def test_the_arm_fountain_schedules_its_repay_at_her_turn_start():
     st = _furina()
     FS.drain(st, 10)
     effects.resolve_card(st, _row("proto_fs_fountain_of_lucine"))
+    assert st.player.block == 8                    # Gain 8 Block, now
     T.turn_start(st)
-    assert FS.drained(st.player) == 7
+    assert FS.drained(st.player) == 7              # Repay 3, the next turn
     T.turn_start(st)
     T.turn_start(st)
-    T.turn_start(st)
-    assert FS.drained(st.player) == 1
+    assert FS.drained(st.player) == 7              # and no later turn
+    st2 = _furina()
+    effects.resolve_card(st2, loader.get_card("proto_fs_fountain_of_lucine+"))
+    assert st2.player.block == 11
 
 
 def test_bis_on_the_arm_keeps_half_of_rising_applause():

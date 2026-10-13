@@ -162,60 +162,61 @@ def test_the_four_cards_have_no_chooser():
 
 # ---- the guests' share-Spend (Navia half, Freminet a quarter) ----------------------
 
-def test_navias_act_spends_half_and_deals_it_as_geo():
+def test_navias_act_spends_a_third_and_deals_twice_it_as_geo():
     st = _furina(23, stage=["navia", "chevreuse"])
     st.player.ftd.powers["thunderous"] = 1
     T.spend(st, 3)                                      # uses her discount
     assert st.player.ftd.fanfare == 22
     hp = st.enemies[0].hp
     T.act(st, "navia")
-    assert st.player.ftd.fanfare == 11
-    # 11 Geo plus Thunderous's 3, through the Vulnerable Chevreuse applied.
-    assert st.enemies[0].hp < hp - 11
+    assert st.player.ftd.fanfare == 15              # a third of 22 is 7
+    # 14 Geo plus Thunderous's 3, through the Vulnerable Chevreuse applied.
+    assert st.enemies[0].hp < hp - 14
     assert st.enemies[0].powers.get("vulnerable") == 2  # a Spend each
     poor = _furina(1, stage=["navia"])
     hp = poor.enemies[0].hp
-    T.act(poor, "navia")                                # half of 1 is 0
+    T.act(poor, "navia")                                # a third of 1 is 0
     assert poor.enemies[0].hp == hp
     assert poor.player.ftd.spends_this_turn == 0
 
 
-def test_freminets_act_gains_3_then_a_quarter_of_the_bank_as_block():
+def test_freminets_act_gains_4_then_a_quarter_of_the_bank_as_block():
     st = _furina(9, stage=["freminet"])
     hp = st.enemies[0].hp
     T.act(st, "freminet")
-    assert st.player.block == 3 + 2                     # a quarter of 9
+    assert st.player.block == 4 + 2                     # a quarter of 9
     assert st.player.ftd.fanfare == 7
     assert st.enemies[0].hp == hp                       # no Cryo hit
     up = _furina(0, stage=["freminet"])
     up.player.ftd.stage_up = {"freminet"}
     T.act(up, "freminet")
-    assert up.player.block == 6
+    assert up.player.block == 7
 
 
 def test_two_guests_split_the_bank_oldest_first():
     # Freminet first: a quarter of 40 is 10 (2 of it free, Navia's line on
-    # the turn's first Spend), 32 left; Navia takes half of that, 16.
+    # the turn's first Spend), 32 left; Navia takes a third of that, 10,
+    # for 20 Geo.
     st = _furina(40, stage=["freminet", "navia"])
     hp = st.enemies[0].hp
     T.act_all(st)
-    assert st.player.block == 3 + 10
-    assert st.enemies[0].hp == hp - 16
-    assert st.player.ftd.fanfare == 16
+    assert st.player.block == 4 + 10
+    assert st.enemies[0].hp == hp - 20
+    assert st.player.ftd.fanfare == 22
     assert st.player.ftd.spends_this_turn == 2
 
 
 def test_freminet_then_navia_on_40_with_no_discount():
     # A Spend first uses up Navia's discount (41, 3 spent, 2 free: 40).
-    # Freminet takes a quarter of 40, 10 (30 left); Navia half of 30, 15.
+    # Freminet takes a quarter of 40, 10 (30 left); Navia a third of 30, 10, for 20.
     st = _furina(41, stage=["freminet", "navia"])
     T.spend(st, 3)
     assert st.player.ftd.fanfare == 40
     hp = st.enemies[0].hp
     T.act_all(st)
-    assert st.player.block == 3 + 10
-    assert st.enemies[0].hp == hp - 15
-    assert st.player.ftd.fanfare == 15
+    assert st.player.block == 4 + 10
+    assert st.enemies[0].hp == hp - 20
+    assert st.player.ftd.fanfare == 20
 
 
 def test_showstopper_makes_each_take_their_share_again():
@@ -224,16 +225,17 @@ def test_showstopper_makes_each_take_their_share_again():
     st.player.ftd.singer = 0
     hp = st.enemies[0].hp
     T.end_of_turn(st)
-    # Round one: Navia 20 (2 free, 22 left), Freminet 5 (17 left).
-    # Showstopper Spends 5 (12 left). Round two: Navia 6, Freminet 1.
-    assert st.enemies[0].hp == hp - 26
-    assert st.player.block == 3 + 5 + 3 + 1
-    assert st.player.ftd.fanfare == 5
+    # Round one: Navia 13 (2 free, 29 left) for 26, Freminet 7 (22 left).
+    # Showstopper Spends 5 (17 left). Round two: Navia 5 for 10, Freminet 3.
+    assert st.enemies[0].hp == hp - 36
+    assert st.player.block == 4 + 7 + 4 + 3
+    assert st.player.ftd.fanfare == 9
 
 
 def test_the_constants_match_the_paper():
-    assert (T.FREMINET_ACT_BLOCK, T.FREMINET_ACT_BLOCK_UPGRADED) == (3, 6)
-    assert T.NAVIA_SPEND_DIVISOR == 2
+    assert (T.FREMINET_ACT_BLOCK, T.FREMINET_ACT_BLOCK_UPGRADED) == (4, 7)
+    assert T.NAVIA_SPEND_DIVISOR == 3
+    assert T.NAVIA_ACT_MULTIPLIER == 2
     assert T.FREMINET_SPEND_DIVISOR == 4
     assert not hasattr(T, "GUEST_SPEND_DIVISOR")
     assert T.SPEND_UP_TO_EVERY == 4

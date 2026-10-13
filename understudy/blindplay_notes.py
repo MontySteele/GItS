@@ -1726,13 +1726,13 @@ ARM_KEYWORDS: dict[str, str] = {
     "oldest guest": ("The guest on stage longest: the one a fourth summon "
                      "would remove."),
     "Charlotte": ("The first time each turn one of your cards Repays, draw 1 "
-                  "card. Act: Repay 2. Gain 1 Block for any HP it could not "
+                  "card. Act: Repay 3. Gain 1 Block for any HP it could not "
                   "Repay."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
-                    "enemy. Act: deal 4 Cryo damage to a random enemy."),
+                    "enemy. Act: deal 5 Cryo damage to a random enemy."),
     "Lynette": ("The first time each turn you lose HP to an enemy, gain "
-                "double Fanfare. Act: deal 3 Anemo damage to an enemy, "
-                "one with an aura if able."),
+                "that much Fanfare again. Act: deal 5 Anemo damage to an "
+                "enemy, aura first."),
     "Clorinde": ("Whenever you Repay, deal twice that much Electro damage to a "
                  "random enemy. Act: deal 6 Electro damage to a random enemy."),
     # 2026-09-06. THE WORD THE MOD PRINTS AND DEFINES NOWHERE. Five Furina

@@ -200,12 +200,12 @@ public class FurinaSpendRound2Tests : IDisposable
         var kit = StageKit.Of(StagePerformer.Charlotte);
         StageKit.Run(kit.Director.Drain(6));
         // The end of her turn under Salon Solitaire's cause: her act Repays
-        // 2, the Singer Repays 1, and nothing is drawn.
+        // 3, the Singer Repays 1, and nothing is drawn.
         using (kit.Stage.CausedBy(FurinaStage.SalonSolitaireTitle))
         {
             StageKit.Run(kit.Director.EndOfTurn(FurinaStageLaw.SingerRepay));
         }
-        Assert.Equal(3, kit.Stage.Drained);
+        Assert.Equal(2, kit.Stage.Drained);
         Assert.Equal(0, kit.Board.Drawn);
         Assert.False(kit.Stage.CharlotteDrewThisTurn);
         // A bare Repay outside any play (a turn-start Power) draws nothing.
@@ -243,7 +243,7 @@ public class FurinaSpendRound2Tests : IDisposable
         Assert.StartsWith(
             // The card text pass (2026-10-12, rule 5).
             "The first time each turn one of your cards [gold]Repays[/gold], "
-            + "draw 1 card. Act: [gold]Repay[/gold] 2.",
+            + "draw 1 card. Act: [gold]Repay[/gold] 3.",
             StagePerformerBadge.ActText(StagePerformer.Charlotte));
         Assert.Contains("FurinaStageLedger.get_CardRepaying",
                         Il.Calls(Il.Method("StageDirector", "Repay")));

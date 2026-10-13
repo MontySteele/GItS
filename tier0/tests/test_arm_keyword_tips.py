@@ -1321,7 +1321,7 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
         "goes to your Discard Pile.")
     assert rows["Charlotte"] == (
         "The first time each turn one of your cards Repays, draw 1 card. "
-        "Act: Repay 2. Gain 1 Block for any HP it could not Repay.")
+        "Act: Repay 3. Gain 1 Block for any HP it could not Repay.")
     for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",
                  "Mademoiselle Crabaletta", "Ousia", "Pneuma"):
         assert gone not in rows, gone

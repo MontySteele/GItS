@@ -72,17 +72,17 @@ def test_headliner_is_6_plus_2_a_guest():
 def test_leading_lady_gives_strength_and_1_a_guest_to_attacks():
     st = _furina()
     _play(st, _card("proto_fs_the_leading_lady"))
-    assert st.player.powers.get("strength") == 1
+    assert st.player.powers.get("strength") == 2
     assert FS.leading_lady_bonus(st) == 0
     FS.guest_star(st, "charlotte")
     FS.guest_star(st, "sigewinne")
     assert FS.leading_lady_bonus(st) == 2
     hp = st.enemies[0].hp
-    _play(st, _card("proto_fs_headliner"))          # 6 + 2 x 2, +1 Str, +2
-    assert hp - st.enemies[0].hp == 6 + 4 + 1 + 2
+    _play(st, _card("proto_fs_headliner"))          # 6 + 2 x 2, +2 Str, +2
+    assert hp - st.enemies[0].hp == 6 + 4 + 2 + 2
     st2 = _furina()
     _play(st2, _card("proto_fs_the_leading_lady+"))
-    assert st2.player.powers.get("strength") == 2
+    assert st2.player.powers.get("strength") == 3
 
 
 def test_leading_lady_skips_a_guest_act():

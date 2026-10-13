@@ -261,11 +261,11 @@ public sealed class BisPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// <i>Fountain of Lucine</i>: "At the start of your next 3 turns, Repay 3.
-/// Gain 1 Block for any HP it could not Repay." [4] (The Repay floor,
-/// 2026-10-09: each turn's Repay pays its own floor.) The card applies its Repay as this power's amount; at her turn start
-/// <see cref="FurinaStage"/> schedules what it has not yet seen for three
-/// turns (one schedule per play) and makes the Repays due. The number on the
+/// <i>Fountain of Lucine</i>: "Gain 8 Block. At the start of your next turn,
+/// Repay 3." (Ruled 2026-10-13: one turn, no Block floor; the card gives the
+/// Block.) The card applies its Repay as this power's amount; at her turn start
+/// <see cref="FurinaStage"/> schedules what it has not yet seen for one
+/// turn (one schedule per play) and makes the Repays due. The number on the
 /// icon is the Repay owed at her next turn start; the power leaves when
 /// nothing is owed.
 /// </summary>
@@ -278,12 +278,9 @@ public sealed class FountainOfLucinePower : PowerModel, ILocalizationProvider
         ("title", Title),
         ("description",
             "At the start of your turn, [gold]Repay[/gold] what this "
-          + "Fountain still owes. Gain 1 [gold]Block[/gold] for any HP it "
-          + "could not [gold]Repay[/gold]."),
+          + "Fountain still owes."),
         ("smartDescription",
-            "At the start of your turn, [gold]Repay[/gold] [blue]{Due}[/blue]. "
-          + "Gain 1 [gold]Block[/gold] for any HP it could not "
-          + "[gold]Repay[/gold]."),
+            "At the start of your turn, [gold]Repay[/gold] [blue]{Due}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;

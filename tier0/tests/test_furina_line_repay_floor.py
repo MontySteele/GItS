@@ -146,15 +146,14 @@ def test_soothing_waters_keeps_no_leftover_payout():
     assert st.player.block == 0
 
 
-def test_fountain_pays_block_each_turn_and_pneuma_tides_vigor():
+def test_fountain_has_no_floor_and_pneuma_tides_pays_vigor():
     st = _furina()
     effects.resolve_card(st, _card("proto_fs_fountain_of_lucine"))
+    assert st.player.block == 8                             # the card's own
+    st.player.block = 0
     FS.drain(st, 1)
     T.turn_start(st)
-    assert st.player.block == 2                             # 3 - 1
-    st.player.block = 0
-    T.turn_start(st)
-    assert st.player.block == 3
+    assert st.player.block == 0                             # no floor (2026-10-13)
     st = _furina()
     effects.resolve_card(st, _card("proto_fs_pneuma_tides"))
     T.turn_start(st)
@@ -168,13 +167,13 @@ def test_grand_entrance_charlotte_and_sigewinne_pay_block():
     assert st.player.block == 4
     st.player.block = 0
     T.act(st, "charlotte")
-    assert st.player.block == 2
+    assert st.player.block == 3                # Repay 3, nothing drained
     st = _furina()
     st.player.ftd.stage = ["sigewinne"]
     FS.drain(st, 1)
     T.act(st, "sigewinne")
-    # Her line's Block of the 1 returned, then the floor's 1.
-    assert st.player.block == 2
+    # Her line's Block of the 1 returned, then the floor's 2 (Repay 3).
+    assert st.player.block == 3
 
 
 def test_the_unchanged_repays_pay_no_floor():
@@ -222,19 +221,20 @@ def test_bravuras_upgrade_hits_9_for_every_3_spent():
 
 
 def test_freminets_act_gives_block():
-    # The Spend paper (ruled 2026-10-10): "Gain 3 Block. Spend a quarter of
+    # The Spend paper (ruled 2026-10-10; 4 [7] since the guest package,
+    # 2026-10-13): "Gain 4 Block. Spend a quarter of
     # your Fanfare (rounded down): gain that much more Block." [6]. No hit any
     # more.
     st = _furina()
     st.player.ftd.stage = ["freminet"]
     hp = [e.hp for e in st.enemies]
     T.act(st, "freminet")
-    assert st.player.block == 3
+    assert st.player.block == 4
     assert [e.hp for e in st.enemies] == hp
     st.player.ftd.stage_up = {"freminet"}
     st.player.block = 0
     T.act(st, "freminet")
-    assert st.player.block == 6
+    assert st.player.block == 7
 
 
 def test_neuvillette_acts_for_all_hp_lost_since_her_last_turn():

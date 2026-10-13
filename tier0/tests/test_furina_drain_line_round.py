@@ -47,7 +47,6 @@ def _rows():
 # ---- 1. the Repay preview names its payout -----------------------------------
 
 PAYOUTS = {
-    "proto_fs_fountain_of_lucine": "PayBlock",
     "proto_fs_hymn_of_many_waters": "PayBlock",
     "proto_fs_grand_entrance": "PayBlock",
     "proto_fs_pneuma_tides": "PayVigor",
@@ -58,7 +57,8 @@ PAYOUTS = {
 NO_PAYOUT = ("proto_fs_soothing_waters", "proto_fs_pneuma_refrain",
              "proto_fs_balance_the_books", "proto_fs_grand_absolution",
              "proto_fs_singer_of_many_waters", "proto_fs_riptide_lunge",
-             "proto_fs_clean_slate", "proto_fs_ebb_and_flow")
+             "proto_fs_clean_slate", "proto_fs_ebb_and_flow",
+             "proto_fs_fountain_of_lucine")
 
 
 @pytest.mark.parametrize("cid,pay", sorted(PAYOUTS.items()))
@@ -94,12 +94,12 @@ def test_lyneys_act_drains_only_the_room_above_the_line():
     assert T.guest_drain_room(st, T.LYNEY_ACT_DRAIN) == 1
     T.act(st, "lyney")
     assert st.player.hp == 49 and f.drained == 29 and f.drained_past == 0
-    assert all(e.hp == 200 - 8 for e in st.enemies)
+    assert all(e.hp == 200 - 5 for e in st.enemies)
     # At the line: no Drain, the damage unchanged.
     assert T.guest_drain_room(st, T.LYNEY_ACT_DRAIN) == 0
     T.act(st, "lyney")
     assert st.player.hp == 49 and f.drained == 29
-    assert all(e.hp == 200 - 16 for e in st.enemies)
+    assert all(e.hp == 200 - 10 for e in st.enemies)
 
 
 def test_the_players_own_drain_still_goes_past_the_line():

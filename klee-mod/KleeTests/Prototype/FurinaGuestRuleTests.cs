@@ -102,7 +102,7 @@ public class FurinaGuestRuleTests
                              StagePerformer.Charlotte }, kit.Company);
         Assert.Same(first, kit.Board.Returned.Single());
         // ...after it acts once on the way out (2026-10-11).
-        Assert.Equal(new[] { "damage Wriothesley Random 4 Cryo" },
+        Assert.Equal(new[] { "damage Wriothesley Random 5 Cryo" },
                      kit.Board.Hits.ToArray());
     }
 
@@ -147,7 +147,7 @@ public class FurinaGuestRuleTests
         Run(kit.Director.SummonGuest(StagePerformer.Clorinde));
         Assert.Equal(before + FurinaStageLaw.LyneyActDrain, kit.Stage.Drained);
         Assert.Equal(76, kit.Board.Hp);
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
         Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Lyney));
         Assert.DoesNotContain(StagePerformer.Lyney, kit.Company);
     }
@@ -249,7 +249,7 @@ public class FurinaGuestRuleTests
         Run(kit.Director.SummonGuest(StagePerformer.Lyney));
         Assert.Equal(before + FurinaStageLaw.LyneyActDrain, kit.Stage.Drained);
         Assert.Equal(76, kit.Board.Hp);
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
         Assert.Single(kit.Board.Hits);
         Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Lyney));
     }
@@ -322,10 +322,10 @@ public class FurinaGuestRuleTests
         Run(kit.Director.EndOfTurn(FurinaStageLaw.SingerRepay));
         var expected = new[]
         {
-            "damage Wriothesley Random 4 Cryo",
+            "damage Wriothesley Random 5 Cryo",
             "damage Clorinde Random 6 Electro",
             // Showstopper: Spend 5 (the bank held 5 + 4 drained), act again.
-            "damage Wriothesley Random 4 Cryo",
+            "damage Wriothesley Random 5 Cryo",
             "damage Clorinde Random 6 Electro",
             // Salon Solitaire, then Clorinde's line answers its Repay.
             "heal 1",
@@ -365,17 +365,17 @@ public class FurinaGuestRuleTests
     [Fact]
     public void Freminet_blocks_each_drain_and_acts_for_block()
     {
-        // His act since the Spend paper (ruled 2026-10-10): "Gain 3 Block.
-        // Spend a quarter of your Fanfare (rounded down): gain that much more
-        // Block." [6]
+        // His act since the Spend paper (ruled 2026-10-10; 4 [7] since the
+        // guest package, 2026-10-13): "Gain 4 Block. Spend a quarter of your
+        // Fanfare (rounded down): gain that much more Block."
         var kit = StageKit.Of(StagePerformer.Freminet);
         Run(kit.Director.Drain(4));
         Assert.Contains("block 4", kit.Board.Log);
         Run(kit.Director.Act(kit.Stage.Seats[0]));     // 4 Fanfare: +1
-        Assert.Contains("block 3", kit.Board.Log);
+        Assert.Contains("block 4", kit.Board.Log);
         Assert.Contains("block 1", kit.Board.Log);
         Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("damage Freminet"));
-        Assert.Equal(6, StageDirector.ActAmount(StagePerformer.Freminet, true));
+        Assert.Equal(7, StageDirector.ActAmount(StagePerformer.Freminet, true));
     }
 
     [Fact]
@@ -392,11 +392,11 @@ public class FurinaGuestRuleTests
         var all = StageKit.With(9, StagePerformer.Navia);
         Assert.Equal(9, Run(all.Director.SpendAll()));
         Assert.Equal(2, all.Stage.Fanfare);
-        // Her act Spends half the bank and deals that much as Geo (the Spend
-        // paper, 2026-10-10): half of the 2 kept is 1.
-        Run(all.Director.Act(all.Stage.Seats[0]));
-        Assert.Contains("damage Navia Random 1 Geo", all.Board.Log);
-        Assert.Equal(1, all.Stage.Fanfare);
+        // Her act Spends a third of the bank and deals twice that as Geo (the
+        // guest package, 2026-10-13): a third of 7 is 2, for 4.
+        var act = StageKit.With(7, StagePerformer.Navia);
+        Run(act.Director.Act(act.Stage.Seats[0]));
+        Assert.Contains("damage Navia Random 4 Geo", act.Board.Log);
     }
 
     [Fact]
@@ -411,17 +411,21 @@ public class FurinaGuestRuleTests
     }
 
     [Fact]
-    public void Escoffiers_line_repays_one_whenever_a_guest_acts_his_own_included()
+    public void Escoffiers_line_adds_two_to_every_damaging_act_his_own_included()
     {
-        var kit = StageKit.Of(StagePerformer.Charlotte, StagePerformer.Escoffier);
+        var kit = StageKit.Of(StagePerformer.Charlotte, StagePerformer.Escoffier,
+                              StagePerformer.Lyney);
         Run(kit.Director.Drain(10));
         kit.Board.Log.Clear();
         Run(kit.Director.ActAll());
-        Assert.Equal(2, kit.Beats(FurinaStageLedger.LineEvent, StagePerformer.Escoffier));
-        Assert.Contains("damage Escoffier All 4 Cryo", kit.Board.Log);
-        // Charlotte Repays 2, Escoffier 1 after each act.
-        Assert.Equal(new[] { "heal 2", "heal 1", "heal 1" },
-                     kit.Board.Log.Where(l => l.StartsWith("heal ")).ToArray());
+        // His own 4 lands as 6; Lyney's 5 as 7; Charlotte's Repay 2 is not
+        // damage and is not touched.
+        Assert.Contains("damage Escoffier All 6 Cryo", kit.Board.Log);
+        Assert.Contains("damage Lyney All 7 Pyro", kit.Board.Log);
+        Assert.Contains("heal 3", kit.Board.Log);
+        Assert.Equal(0, kit.Beats(FurinaStageLedger.LineEvent, StagePerformer.Escoffier));
+        Assert.Equal(2, FurinaStageLaw.EscoffierLineBonus);
+        Assert.Equal(3, FurinaStageLaw.EscoffierLineBonusUpgraded);
     }
 
     [Fact]
@@ -435,7 +439,7 @@ public class FurinaGuestRuleTests
         Run(chev.Director.SummonGuest(StagePerformer.Chevreuse, true));
         Run(chev.Director.Spend(1));
         Assert.Contains("weak Random 1", chev.Board.Log);
-        Assert.Contains("Repay[/gold] 4",
+        Assert.Contains("Repay[/gold] 5",
             StagePerformerBadge.ActText(StagePerformer.Charlotte, true));
         Assert.Contains("Weak", StagePerformerBadge.ActText(StagePerformer.Chevreuse, true));
     }
@@ -460,7 +464,7 @@ public class FurinaGuestRuleTests
     {
         var kit = StageKit.Of(StagePerformer.Wriothesley, StagePerformer.Clorinde);
         Assert.True(Run(kit.Director.ActOldest()));
-        Assert.Equal("damage Wriothesley Random 4 Cryo", kit.Board.Hits.Single());
+        Assert.Equal("damage Wriothesley Random 5 Cryo", kit.Board.Hits.Single());
         Assert.Equal(2, Run(kit.Director.ActAll()));
         Assert.False(Run(StageKit.Of().Director.ActOldest()));
         Assert.Contains("FurinaCards.ActOldest",

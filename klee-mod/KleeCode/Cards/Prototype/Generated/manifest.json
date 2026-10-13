@@ -954,7 +954,7 @@
       "furina_amount": 1
     },
     "proto_fs_fountain_of_lucine": {
-      "power_amount": 1
+      "block": 3
     },
     "proto_fs_grand_absolution": {
       "cost": -1
