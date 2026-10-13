@@ -655,8 +655,9 @@ public static class VarkaOath
 
     /// <summary>
     /// Every Oath gain: add it, pay Dawn Wind's March when it is the current
-    /// element's, and let Boreas's Fang add Four Winds' Ascension the first
-    /// time each combat (sec.4). One call is one gain event.
+    /// element's, and let Wolf's Gravestone add Four Winds' Ascension the
+    /// first time each combat (sec.4; the plain Fang no longer does since
+    /// Starter (a), 2026-10-13). One call is one gain event.
     /// </summary>
     public static async Task Gain(
         PlayerChoiceContext choiceContext, Creature varka, Element element,
@@ -692,8 +693,10 @@ public static class VarkaOath
         ResolutionLedger.NoteOath(element.ToString(), n, SourceWord(source));
         if (ledger.Scoped) ledger.NoteGainClause(clause);
         else global::KleeMod.Vfx.KurageBeat.Say(varka, clause);
+        // Starter (a), 2026-10-13: only Wolf's Gravestone still adds it;
+        // the Fang's Ascension is in his deck.
         if (!ledger.FangFired && varka.Player is { } player
-            && Relics.BoreasFang.HeldBy(player) is { } fang)
+            && Relics.BoreasFang.HeldBy(player) is { AddsAscension: true } fang)
         {
             ledger.FangFired = true;
             ResolutionLedger.NoteFangAscension(fang.RelicName);
@@ -856,7 +859,12 @@ public static class VarkaOath
         {
             await Gain(choiceContext, dealer, swirled, 1, OathSource.Swirl);
         }
-        var current = ledger.Current;
+        // Starter (a), 2026-10-13 ([USER]: "it's basically a second starter
+        // relic untied to his actual relic"): the current element's payout is
+        // Boreas's Fang's ("Your Swirls also pay your current element"). With
+        // no Fang held, nothing current is paid.
+        var current = Relics.BoreasFang.PaysSwirls(dealer.Player)
+            ? ledger.Current : Element.None;
         // Stormterror's Scale: "Your Swirls pay twice." The expansion:
         // Crosscurrent's Swirl pays twice too (the two multiply); Twin Gales
         // pays the element Swirled as well, once, when it is not the current

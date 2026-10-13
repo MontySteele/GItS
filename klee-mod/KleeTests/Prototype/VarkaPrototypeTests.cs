@@ -359,16 +359,56 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void A_gain_pays_dawn_winds_march_and_wakes_the_fang()
+    public void A_gain_pays_dawn_winds_march_and_wakes_the_gravestone()
     {
         var gain = Il.Calls(Il.Method("VarkaOath", "Gain"));
         Assert.Contains("VarkaOathLedger.Add", gain);
         Assert.Contains("CreatureCmd.GainBlock", gain);          // the March
         Assert.Contains("BoreasFang.HeldBy", gain);
+        // Starter (a), 2026-10-13: only a relic that still adds it does.
+        Assert.Contains("BoreasFang.get_AddsAscension", gain);
         Assert.Contains("BoreasFang.AddAscension", gain);
         // Regent's Forge: created in combat, added to the hand.
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat",
                         Il.Calls(Il.Method("BoreasFang", "AddAscension")));
+    }
+
+    private static T Bare<T>() where T : class =>
+        (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
+
+    [Fact]
+    public void The_fang_carries_the_swirl_payout_and_adds_no_ascension()
+    {
+        // Starter (a), 2026-10-13 ([USER]: "it's basically a second starter
+        // relic untied to his actual relic"; "Starter - (a)").
+        Assert.Equal(
+            "At the start of each combat, your starting [gold]Knight[/gold]'s "
+          + "element becomes current. Your [gold]Swirls[/gold] also pay your "
+          + "[gold]current element[/gold].",
+            ((ILocalizationProvider)Bare<BoreasFang>()).Localization!
+                .Single(l => l.Item1 == "description").Item2);
+        Assert.False(Bare<BoreasFang>().AddsAscension);
+        Assert.True(Bare<WolfsGravestone>().AddsAscension);
+        Assert.Contains("[gold]Swirls[/gold] also pay your [gold]current element[/gold]",
+            ((ILocalizationProvider)Bare<WolfsGravestone>()).Localization!
+                .Single(l => l.Item1 == "description").Item2);
+        // The payout reads the Fang before it pays the current element.
+        var swirl = Il.CallSequence(Il.Method("VarkaOath", "OnSwirl")).ToList();
+        var gate = swirl.IndexOf("BoreasFang.PaysSwirls");
+        var pay = swirl.IndexOf("VarkaOath.Pay");
+        Assert.True(gate >= 0 && pay > gate, string.Join(", ", swirl));
+        Assert.Contains("BoreasFang.HeldBy",
+                        Il.Calls(Il.Method("BoreasFang", "PaysSwirls")));
+        // The Fang's hover: Knight, current element (the payout table),
+        // Swirl and Oath; the Ascension's return is the Gravestone's.
+        var tips = Il.Calls(typeof(BoreasFang).GetProperty("ExtraHoverTips",
+            HeadlessGame.All)!.GetGetMethod(true)!);
+        Assert.Contains("ArmKeywordTips.ForSwirl", tips);
+        Assert.Contains("ArmKeywordTips.ForCurrentElement", tips);
+        Assert.DoesNotContain("ArmKeywordTips.ForAscensionReturn", tips);
+        Assert.Contains("ArmKeywordTips.ForAscensionReturn",
+            Il.Calls(typeof(WolfsGravestone).GetProperty("ExtraHoverTips",
+                HeadlessGame.All)!.GetGetMethod(true)!));
     }
 
     [Fact]

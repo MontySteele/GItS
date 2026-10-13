@@ -281,7 +281,8 @@ public class VarkaRebalanceTests : IDisposable
     [Fact]
     public void Ascension_costs_2_and_retains_like_sovereign_blade()
     {
-        // The Fang creates it with CombatState.CreateCard, which builds the
+        // In his starter deck since 2026-10-13; Wolf's Gravestone still
+        // creates a copy with CombatState.CreateCard, which builds the
         // model's canonical keywords, so a generated copy retains too.
         var card = new ProtoVkFourWindsAscension();
         Assert.Equal(2, card.EnergyCost.Canonical);

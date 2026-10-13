@@ -8213,3 +8213,12 @@ Freeze: "I think we should drop Retain."
   The vanilla Tooth upgrades the card it makes when the starter card was
   upgraded, so an upgraded Ascension becomes a 1-cost Gale.
 - `proto_vk_deep_freeze`: Retain dropped, base and upgraded.
+- Boreas's Fang (`Relics/BoreasFang.cs`, hand-written): "At the start of
+  each combat, your starting Knight's element becomes current. Your Swirls
+  also pay your current element." The current-element payout in
+  `VarkaOath.OnSwirl` (sim `varka_oath.on_swirl`) is gated on holding a Fang
+  (`BoreasFang.PaysSwirls`, sim `pays_swirls`); the Swirl's 1 Oath stays a
+  character rule, said by the Oath tip. The Fang adds no Ascension
+  (`AddsAscension` false). Wolf's Gravestone mirrors the Fang's words and
+  keeps its old bonus: the first Oath gain each combat adds an upgraded
+  Ascension that costs 0 that turn.

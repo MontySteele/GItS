@@ -34,10 +34,14 @@ THE RULES AS MODELLED:
     Four Winds' Ascension's elemental hit credit nothing. Outside a card play a scope is opened around the event (Baron
     Bunny's burst); an event with no scope open is its own scope.
   * GAIN EVENTS (any +n): Dawn Wind's March pays Block on a gain of the
-    current element; the first gain of the combat has Boreas's Fang add Four
-    Winds' Ascension to the hand (the discard pile if the hand is full).
+    current element; the first gain of the combat has Wolf's Gravestone add
+    an upgraded Four Winds' Ascension to the hand (the discard pile if the
+    hand is full). The plain Fang no longer adds one: since Starter (a),
+    2026-10-13, the Ascension is in his starter deck.
   * SWIRL PAYOUT: every Swirl he makes, after the shared Swirl (spread and the
-    flat 2), credits first and then pays his current element.
+    flat 2), credits first and then, while he holds Boreas's Fang (the
+    payout is the relic's since Starter (a), 2026-10-13), pays his current
+    element.
 
 READINGS TAKEN WHERE THE SPEC LEAVES ROOM (each also in the builder's report):
   * Tier 0 seats one player, so "dealt by Varka" is "the player is Varka":
@@ -94,7 +98,7 @@ VARKA DEFENCE (review/active/varka-defence-2026-10-01.md, ruled 2026-10-01):
     the starter Knight's element becomes current (`set_current`, not a
     Knight, so a change, as the C# Fang's is). The element is
     `Player.varka_starter_element` (`build_player`), else the first starter
-    Knight among his cards. No Oath, so the Ascension still waits.
+    Knight among his cards. No Oath.
 
 THE REBALANCE (review/active/varka-rebalance-2026-10-03.md secs.2-5, and the
 Varka part of review/active/aoe-trim-2026-10-03.md sec.4; simmed in PR #863,
@@ -441,8 +445,10 @@ def gain(state, element: str, n: int = 1, source: str = "gain") -> None:
     p = state.player
     if element == led.current:
         _block(state, _power(p, DAWN_WINDS_MARCH), "dawn_winds_march")
-    if not led.fang_fired and (FANG in p.relic_hooks
-                               or FANG_UPGRADED in p.relic_hooks):
+    # Starter (a), 2026-10-13: the Ascension is in his deck, so only Wolf's
+    # Gravestone (the Fang upgraded) still adds one. C# twin:
+    # `BoreasFang.AddsAscension`.
+    if not led.fang_fired and FANG_UPGRADED in p.relic_hooks:
         led.fang_fired = True
         _add_ascension(state, upgraded=FANG_UPGRADED in p.relic_hooks)
 
@@ -732,8 +738,11 @@ def on_swirl(state, enemy, aura: str) -> None:
     state.emit("varka_swirl", element=aura, target=enemy.name,
                current=led.current)
     credit(state, "swirl", aura)
-    cur = led.current
     p = state.player
+    # Starter (a), 2026-10-13: the current element's payout is Boreas's
+    # Fang's ("Your Swirls also pay your current element"); no Fang, no
+    # payout. C# twin: `BoreasFang.PaysSwirls`.
+    cur = led.current if pays_swirls(p) else None
     # Crosscurrent: "This Swirl pays twice." Twin Gales: the element Swirled
     # pays too, once, when it is not already the current one.
     for _ in range(2 if led.pays_twice else 1):
@@ -747,6 +756,13 @@ def on_swirl(state, enemy, aura: str) -> None:
     eye = _power(p, EYE_OF_STORMTERROR)
     if eye and led.swirls_this_turn <= EYE_OF_STORMTERROR_SWIRLS:
         state.draw(eye)
+
+
+def pays_swirls(player) -> bool:
+    """Do his Swirls pay his current element? While he holds Boreas's Fang
+    or Wolf's Gravestone (Starter (a), 2026-10-13)."""
+    hooks = getattr(player, "relic_hooks", ()) or ()
+    return FANG in hooks or FANG_UPGRADED in hooks
 
 
 def _pay(state, enemy, element: str) -> None:

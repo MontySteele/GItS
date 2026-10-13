@@ -124,22 +124,23 @@ def _with_ascension(state, relic="Boreas's Fang"):
     return state
 
 
-def test_the_ascension_in_hand_says_where_it_came_from():
-    page = blindplay.observe(_with_ascension(varka_state()))
-    head = page.index("**Four Winds' Ascension**")
-    note = page.index("    - Added by Boreas's Fang the first time each "
-                      "combat you gain Oath.")
-    assert note > head
-    gravestone = blindplay.observe(
+def test_the_ascension_in_hand_says_where_the_gravestone_copy_came_from():
+    # Starter (a), 2026-10-13: the Ascension is in his deck; only Wolf's
+    # Gravestone still adds a copy, so only it gets the note.
+    page = blindplay.observe(
         _with_ascension(varka_state(), "Wolf's Gravestone"))
-    assert ("Added by Wolf's Gravestone the first time each combat"
-            in gravestone)
+    head = page.index("**Four Winds' Ascension**")
+    note = page.index("    - Wolf's Gravestone adds a copy the first time "
+                      "each combat you gain Oath.")
+    assert note > head
+    fang = blindplay.observe(_with_ascension(varka_state()))
+    assert "adds a copy the first time" not in fang
 
 
 def test_no_note_without_the_relic():
-    state = _with_ascension(varka_state())
+    state = _with_ascension(varka_state(), "Wolf's Gravestone")
     state["player"]["relics"] = []
-    assert "Added by" not in blindplay.observe(state)
+    assert "adds a copy the first time" not in blindplay.observe(state)
 
 
 def test_wolfpack_and_twin_gales_are_said_since_last_page():

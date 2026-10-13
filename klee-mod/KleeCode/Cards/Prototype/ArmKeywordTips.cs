@@ -653,8 +653,9 @@ public static class ArmKeywordTips
     // ---------------------------------------------------- Varka -----------
 
     /// <summary>
-    /// Boreas's Fang's Four Winds' Ascension goes to the discard pile when
-    /// played and comes back when he draws it. The card text pass
+    /// Wolf's Gravestone's Four Winds' Ascension (the Fang's until Starter
+    /// (a), 2026-10-13) goes to the discard pile when played and comes back
+    /// when he draws it. The card text pass
     /// (2026-10-12) moved the clause off the relic's face into this hover.
     /// </summary>
     public static IEnumerable<IHoverTip> ForAscensionReturn(

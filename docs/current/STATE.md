@@ -125,14 +125,20 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   - **Current element:** that of his last Knight, or of the last Pyro, Hydro,
     Cryo or Electro any card of his applied. His cards read only its Oath; a
     card that would change it says "(Makes X current)" in combat.
-  - **Swirl:** a Swirl he makes pays his current element (Pyro 3 damage,
-    Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).
+  - **Swirl:** a Swirl he makes gains 1 Oath of the element Swirled, and
+    while he holds Boreas's Fang it pays his current element (Pyro 3
+    damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).
 - **Starter:** Four Winds' Ascension and one of four starter Knights, rolled
   per run (2026-10-13, [USER]: "I don't want to give him two starting
   effects, so if we do (a), then I'd want to knock Windbound Execution out
   of his starting deck and make Four Winds' Ascension his second starter
   instead"; "Starter - (a)"). Windbound Execution is retired. Boreas's Fang
-  adds Four Winds' Ascension the first time each combat he gains Oath.
+  now reads "At the start of each combat, your starting Knight's element
+  becomes current. Your Swirls also pay your current element." ([USER]: the
+  Swirl bonus "is basically a second starter relic untied to his actual
+  relic"); it no longer adds Four Winds' Ascension. Wolf's Gravestone (its
+  Orobas upgrade) says the same and still adds an upgraded Ascension, free
+  that turn, on his first Oath gain each combat.
 - **Pool:** 78 (20 / 35 / 23), thirteen pool Knights, his own relics and
   three potions. Ancients: All Four Winds (Tome) and Dandelion Gale (Tooth on
   Four Winds' Ascension: the Ascension on ALL enemies, 2 [1], Retain;
