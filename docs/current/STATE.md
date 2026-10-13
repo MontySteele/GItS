@@ -46,6 +46,10 @@ starter is the base Strike x4 and Defend x4 plus two cards of its own ([USER],
 No kit starts with a companion card; that returns after the kits, with the
 reaction display (`EB-410`) and the companion slot as a draft choice.
 
+**Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
+ruled 2026-10-12, picks 1, 2 and 4 at their defaults; pick 3, a Stellar-Conduct
+nod, parked). Her card stage starts once Varka reaches Balance.
+
 ## The kits (Paper, then Prototype, then Balance; `operations/stage-gate.md`)
 
 Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
@@ -92,8 +96,13 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `review/active/ancient-audit-2026-10-12.md`, ruled 2026-10-12: "Otherwise
   agreed.- let's fix them all"): Alice's Masterpiece ("Bombs or Mines") from
   Darv's Tome, and Jumpy Dumpty Mk.Omega, now Innate, from Orobas's Archaic
-  Tooth on Jumpy Dumpty. **Next:** [USER]'s higher-ascension (A3 to A5) runs, which read her
-  deep scaling.
+  Tooth on Jumpy Dumpty. Her visuals (`review/active/klee-visual-paper-2026-10-12.md`) are
+  rendered from the official model, which never leaves the scratchpad
+  (`tools/klee_render`, `tools/klee_rig`): stance A in combat, stance B at
+  the merchant and select, 0.72 of an adult; [USER], 2026-10-13: "The
+  model doesn't 'quite' look like the existing art style", so style-match
+  variants are next, and the thrown bomb becomes a projectile. **Next:**
+  [USER]'s higher-ascension (A3 to A5) runs, which read her deep scaling.
 - **Kokomi: Prototype, re-founded 2026-10-12.** Brief
   `review/active/kokomi-brief-2026-09-01.md` (sec.2, the rules). A card with
   a Plan line, or any Companion card, can be played on the Bake-Kurage
@@ -207,8 +216,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   defaults): Spirited Aria spends up to 12, Crashing Waves and Hold the Stage
   up to 16; Packed House is a Skill, "Gain 5 [8] Block, plus 1 for every 4
   Fanfare you have."; Rising Applause+ gains Retain, with a when-to-play tip.
-  Next: a seat round ([USER]:
-  "Yes - let's test it with a seat"). At her
+  The Furina review (`review/active/furina-review-2026-10-12.md`,
+  ruled 2026-10-12): Encore! is "Your oldest guest acts." at 0 (upgrade
+  Retain); the Drain buffer stays 1/4. Next: one more overnight wave, then a
+  card-pool review on [USER]'s playtest ("Let's otherwise leave her alone
+  for now"). At her
   finish line, re-ask her motion look (`AS2-B5`, dropped
   from QUEUE 2026-10-08; plan `git show 762e94d9^:docs/animation-sprint-2-plan.md`).
 - **Varka: Prototype, the combo pass built (2026-10-04).** Rules
@@ -266,18 +278,12 @@ switch is left, `-p:SwirlPays=false` (`Elements/TriggerRules.cs`), sim twin
 `lint_constant_parity`. Next: phase two (Burning and
 Dendro, `BACKLOG.md`).
 
-## The Spiral Abyss mode (paper next)
-
-The old frame stays behind `TeyvatFrame`, off in every build
-(`operations/teyvat-frame.md`). The hold is lifted for a fourth main-menu mode,
-Spiral Abyss: before each act's Ancient you take one of three Blessings, the
-enemies take one of the passed Shadows at random, and both stack. A co-op party
-agrees on one Blessing. Ruled 2026-10-12 (`run-frame-and-lore-2026-10-12.md`),
-with each character's story in the run, Klee first.
-
 ## The Spiral Abyss mode: built, not yet played
 
-The fourth menu mode (`review/active/spiral-abyss-pools-2026-10-12.md`) is
+The old frame stays behind `TeyvatFrame`, off in every build
+(`operations/teyvat-frame.md`). Ruled 2026-10-12
+(`run-frame-and-lore-2026-10-12.md`), with each character's story in the
+run, Klee first. The fourth menu mode (`review/active/spiral-abyss-pools-2026-10-12.md`) is
 built under `klee-mod/KleeCode/Abyss/`: a "Spiral Abyss" button beside Custom
 (solo and co-op host) opens the ordinary character select (character and
 ascension as usual) under a "Spiral Abyss" banner, and the run carries the

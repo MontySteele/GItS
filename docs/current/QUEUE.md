@@ -15,6 +15,11 @@ line leaves this file. Closed picks are in git
   in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the
   electro (Oz) leg, so that order falls to this look (`BACKLOG.md` `EB-53`).
 
+- **Klee in motion** (build 0.2.5159): the toon-shading verdict ([USER],
+  2026-10-13: "The model doesn't 'quite' look like the existing art style. Is
+  there any kind of filtering we can apply"); a sheet of style-match variants
+  is being made for the pick.
+
 ## Open packets in `review/active/`
 
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
@@ -33,10 +38,8 @@ line leaves this file. Closed picks are in git
     most once a turn; (2) no home nation until a Sumeru sheet exists; (3)
     Foresight provisional.
 
-  All defaults. [USER] now leans Yae for character five (2026-10-12: "I think
-  that Yae ... is probably the closest to Defect, so I'm leaning towards doing
-  that next instead"); a Yae proposal is being researched, and these two stay
-  as the alternatives.
+  All defaults. Yae is character five (`yae-proposal-2026-10-12.md`, ruled
+  2026-10-12); these two stay as the alternatives.
 
 ## Parked (they come back when their trigger fires)
 
