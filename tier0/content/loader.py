@@ -936,7 +936,7 @@ def guest_star_generation_pool(rarity: str) -> list[Card]:
     absent "by construction", and that was false for a row that is a
     companion AND personal: prune_witch_hunt is a shared-companion uncommon
     with PersonalPool "klee", so The Guest List and Command Performance could
-    mint a Klee kit card on Furina. LAW.md:98-110 makes personal-pool
+    mint a Klee kit card on Furina. LAW.md (Companions, "personal-pool Companions are its kit") makes personal-pool
     companions the character's kit, distinct from generated Guest Star
     cameos; rewards, the shop and the mod's own IsOfferable all filter, and
     this was the sole consumer that skipped it (EB-99).
