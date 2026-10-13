@@ -330,6 +330,42 @@ CAST = {
     ],
 }
 
+# --------------------------------------------------------------------- set off
+# A Set Off play ([USER], 2026-10-13: "let's pivot to animations based on the
+# new model instead" of the old floating-bombs splash): a little crouch, a hop
+# with both fists thrown up in a cheer -- no detonator, just "Boom!" -- eyes
+# squeezed into happy arcs, the pigtails flicking up as she peaks, and a
+# landing that settles back into stance A so the return to idle blends.
+HAPPY_EYES = {"ウィンク": 1.0, "ウィンク右": 1.0}
+
+
+def boom(k=1.0, crouch=0.0, lift=0.0, mouth=0.0):
+    """k 0..1 raises both fists from the chest to above her head; crouch bends
+    the knees; lift flicks the pigtails up (negative: they lag down)."""
+    return pose(
+        stance(drop=0.055 + 0.08 * crouch, lean=4 - 7 * k + 6 * crouch, twist=-16 + 4 * k, head_turn=40 - 10 * k,
+               head_nod=3 - 9 * k + 6 * crouch, front=0.10 + 0.01 * crouch, back=0.09 + 0.01 * crouch)
+        + arms((-0.10 - 0.04 * k, -0.07 + 0.02 * k, 0.02 + 0.27 * k),
+               (0.13 + 0.04 * k, -0.07 + 0.02 * k, 0.02 + 0.27 * k),
+               near_pole=(-1.0, 0.2, -0.5), far_pole=(1.0, 0.2, -0.5),
+               near_curl=(70, 35), far_curl=(70, 35))
+        + pigtails(swing=-2 * k, lift=lift),
+        {**HAPPY_EYES, "にこり": 1.0, "あ": mouth})
+
+
+SETOFF = {
+    "length": 0.85, "fps": 20, "loop": False,
+    "keys": [
+        (0.0, idle_pose(0.5), "io"),
+        (0.15, boom(0.25, crouch=1.0, lift=-4, mouth=0.2), "io"),
+        (0.32, boom(1.0, lift=4, mouth=0.9) | {"root": (0, 0, 0.075)}, "out"),
+        (0.42, boom(1.0, lift=14, mouth=1.0) | {"root": (0, 0, 0.065)}, "io"),
+        (0.55, boom(0.8, crouch=0.6, lift=6, mouth=0.6), "in"),
+        (0.65, boom(0.45, crouch=0.4, lift=-3, mouth=0.3), "out"),
+        (0.85, idle_pose(0.5), "io"),
+    ],
+}
+
 # --------------------------------------------------------------------- stance B
 # Cradling the bomb at her chest: the "cuter" stance, used where she is not in
 # a fight (the merchant).
@@ -380,6 +416,15 @@ SELECT = cradle(1.0) | {"morphs": {"にやり": 0.9, "あ": 0.25}, "cradle": Tru
 SELECT["ops"] = [op if op[1] not in ("首", "頭") or op[0] != "rotw" or op[2] != Z
                  else (op[0], op[1], op[2], op[3] * 0.55) for op in SELECT["ops"]]
 
+# --------------------------------------------------------------------- roster tile
+# The character-select roster tile (132x195): a face close-up like the base
+# cast's, head and shoulders, her face turned three-quarters toward the viewer
+# and lifted a little, smiling with her mouth open. No bomb in frame.
+PORTRAIT = pose(
+    stance(head_turn=24, head_nod=-4, head_tilt=-3, twist=-18)
+    + arms(NEAR_HANG, (0.20, -0.06, -0.10), near_pole=HANG_POLE, near_anchor=HIP, far_curl=FAR_CURL),
+    {"にこり": 1.0, "あ": 0.35}, held=0.0)
+
 CLIPS = {
     "idle": IDLE,
     "idle_low": IDLE_LOW,
@@ -387,8 +432,9 @@ CLIPS = {
     "hurt": HURT,
     "death": DEATH,
     "cast": CAST,
+    "setoff": SETOFF,
     "merchant": MERCHANT,
 }
 
-STILLS = {"rest": REST, "select": SELECT, "stance_a": IDLE["keys"][0][1]}
+STILLS = {"rest": REST, "select": SELECT, "portrait": PORTRAIT, "stance_a": IDLE["keys"][0][1]}
 

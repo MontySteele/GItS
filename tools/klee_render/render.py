@@ -863,8 +863,9 @@ def main():
             return [round((q.x + (w / args.ppu) / 2) * args.ppu, 3), round(((h / args.ppu) / 2 - q.y) * args.ppu, 3)]
 
         hips = arm.matrix_world @ arm.pose.bones["下半身"].head
+        head = arm.matrix_world @ arm.pose.bones["頭"].head      # the neck joint, under her chin
         meta = {"still": name, "canvas": [w, h], "origin_px": [round(origin[0], 3), round(origin[1], 3)],
-                "hips_px": px(hips), "ppu": args.ppu, "pitch": args.pitch}
+                "hips_px": px(hips), "head_px": px(head), "ppu": args.ppu, "pitch": args.pitch}
         with open(os.path.join(args.out, f"{name}.json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=1)
         print("STILL", name, (w, h), origin)

@@ -304,7 +304,10 @@ relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	cente
 #   exquisite_compound relic <- Constellation Exquisite Compound.png
 #   sparkly_explosion power  <- Constellation Sparkly Explosion.png
 # ---------- UI ----------
-select_portrait	ImageGen/images/ui/select_portrait.png	132	195	cover	top	auto	1	png	Character Klee Full Wish.png		splash
+# select_portrait (retired 2026-10-13): the roster tile is a face close-up rendered from the
+# official model by tools/klee_render/pack.py (owner: "a face zoom-in like the base game
+# characters"), which also derives select_portrait_locked.png; art_lint L11 GENERATOR_OWNED.
+# select_portrait	ImageGen/images/ui/select_portrait.png	132	195	cover	top	auto	1	png	Character Klee Full Wish.png		splash
 char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png		icon
 energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Pyro.svg		icon
 energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg		icon

@@ -1,183 +1,41 @@
-# Klee's combat rig: Skeleton2D + Bone2D + skinned Polygon2D, one mesh per
-# painted layer. `python -m tools.klee_rig gen` turns this file plus the
-# committed occupancy grid (klee_cells.json) into
-# klee-mod/pck-src/klee/model/combat.tscn, byte-identically on every run.
-#
-# COORDINATES. Bone joints, tips and weight regions are in SOURCE pixels of
-# ImageGen/images/model/character_klee_full_wish.png (1069x1245), the image the
-# layers were cut from (tools/combat_layer_fences/klee.yaml). The game draws
-# the combat derivatives, which are that whole canvas resized to the 240x280
-# combat box, so source (sx, sy) sits at rig-local
-# (sx * 240/1069 - 120, sy * 280/1245 - 140). Animation offsets (pos, amp) are
-# in RIG pixels, i.e. in-game pixels. Rotations are degrees, positive is
-# clockwise on screen (Godot, y down).
-#
-# SIDES are the viewer's: "Left" is screen-left. Klee's own right arm is the
-# raised one on screen-left (UpperArmLeft).
+# Klee's combat scene. `python -m tools.klee_rig gen` turns this file plus the
+# committed frame manifest (klee_frames.json, written by tools/klee_render/
+# pack.py) into klee-mod/pck-src/klee/model/combat.tscn, byte-identically on
+# every run.
 #
 # THE CONTRACT this file must keep is the router's (CreatureAnimationRouter.cs):
-# Visuals/Facing/Rig, Bounds, CenterPos, IntentPos, AnimationPlayer,
-# AnimationTree, the seven states plus `setoff`. Since milestone 2 the states
-# play frame sheets of the official model on the base game's clock (below).
-
-source_canvas: [1069, 1245]
-combat_box: [240, 280]
-rig_position: [0, -140]
-
-# z-order back -> front, as the cutter ships them and the old scene drew them.
-# `cell` is the mesh grid pitch in combat pixels.
-layers:
-  - {name: Smoke,    texture: klee_combat_smoke.png,    cell: 5}
-  - {name: Floaters, texture: klee_combat_floaters.png, cell: 4}
-  - {name: Dumpty,   texture: klee_combat_dumpty.png,   cell: 4}
-  - {name: Body,     texture: klee_combat_body.png,     cell: 3}
-  - {name: Dodoco,   texture: klee_combat_dodoco.png,   cell: 4}
-
-# Joints measured on the source image (grid crops, 2026-10-12). `tip` is the
-# far end of the segment a bone's skin weight is measured against; a bone
-# without `tip` is a point (Smoke) or carries no skin (roots).
-bones:
-  - {name: Figure,        parent: null,          at: [535, 760]}
-  - {name: Body,          parent: Figure,        at: [505, 790]}
-  - {name: Torso,         parent: Body,          at: [505, 775], tip: [525, 622]}
-  - {name: Head,          parent: Torso,         at: [527, 618], tip: [535, 440]}
-  - {name: PigtailLeft,   parent: Head,          at: [462, 616], tip: [440, 656]}
-  - {name: PigtailRight,  parent: Head,          at: [586, 610], tip: [598, 662]}
-  - {name: Feather,       parent: Head,          at: [662, 506], tip: [690, 428]}
-  - {name: UpperArmLeft,  parent: Torso,         at: [458, 604], tip: [404, 545]}
-  - {name: ForearmLeft,   parent: UpperArmLeft,  at: [404, 545], tip: [358, 508]}
-  - {name: HandLeft,      parent: ForearmLeft,   at: [358, 508], tip: [302, 468]}
-  - {name: UpperArmRight, parent: Torso,         at: [612, 618], tip: [682, 578]}
-  - {name: ForearmRight,  parent: UpperArmRight, at: [682, 578], tip: [732, 540]}
-  - {name: HandRight,     parent: ForearmRight,  at: [732, 540], tip: [810, 518]}
-  - {name: Hips,          parent: Body,          at: [495, 800], tip: [480, 885]}
-  - {name: ThighLeft,     parent: Hips,          at: [408, 892], tip: [402, 1022]}
-  - {name: ShinLeft,      parent: ThighLeft,     at: [402, 1022], tip: [410, 1215]}
-  - {name: ThighRight,    parent: Hips,          at: [490, 892], tip: [478, 1042]}
-  - {name: ShinRight,     parent: ThighRight,    at: [478, 1042], tip: [570, 1180]}
-  - {name: HemLeft,       parent: Hips,          at: [455, 770], tip: [365, 818]}
-  - {name: HemFront,      parent: Hips,          at: [515, 845], tip: [560, 912]}
-  - {name: HemBack,       parent: Hips,          at: [612, 770], tip: [652, 882]}
-  - {name: SmokeRoot,     parent: Figure,        at: [600, 460]}
-  - {name: SmokeTop,      parent: SmokeRoot,     at: [470, 110]}
-  - {name: SmokeRight,    parent: SmokeRoot,     at: [840, 240]}
-  - {name: SmokeCore,     parent: SmokeRoot,     at: [620, 380]}
-  - {name: SmokeLow,      parent: SmokeRoot,     at: [740, 720]}
-  - {name: FloatersRoot,  parent: Figure,        at: [535, 622]}
-  # Floater0..N are appended under FloatersRoot, one per island, at the
-  # island's centroid (klee_cells.json).
-  - {name: DumptyCenter,  parent: Figure,        at: [310, 250]}
-  - {name: DumptyTop,     parent: DumptyCenter,  at: [310, 70]}
-  - {name: DumptyBottom,  parent: DumptyCenter,  at: [310, 430]}
-  - {name: Dodoco,        parent: Figure,        at: [657, 762]}
-
-# How each layer's vertices are weighted.
-#   distance: w_i = 1 / (d_i + falloff)^power over the allowed bones, d_i the
-#             distance (rig px) to bone i's segment; top 4 kept, normalised.
-#             `regions` restrict the allowed bones; the first polygon (source
-#             px) containing the vertex wins, else `bones` applies.
-#   vertical: linear blend top -> bottom by height (squash-and-stretch).
-#   islands:  every island 100% to its own Floater bone.
-#   single:   one bone, 100%.
-#   smooth: N diffuses the weights N times along mesh edges afterwards, so a
-#   region edge is a soft band rather than a step that shears one cell row.
-skin:
-  Smoke:
-    mode: distance
-    power: 2
-    falloff: 6
-    bones: [SmokeTop, SmokeRight, SmokeCore, SmokeLow]
-    smooth: 3
-    # The cutter's fill_behind smears the arms' outline colours into the
-    # smoke BEHIND each arm (a dark glove-and-cuff ghost). Those patches ride
-    # the arm bones so the arm keeps covering them as it swings.
-    regions:
-      - name: ghost_arm_right
-        bones: [UpperArmRight, ForearmRight, HandRight]
-        polygon: [[600, 610], [690, 540], [740, 500], [860, 486], [866, 548],
-                  [768, 556], [722, 592], [690, 640], [665, 700], [600, 700]]
-      - name: ghost_arm_left
-        bones: [ForearmLeft, HandLeft]
-        polygon: [[268, 420], [362, 440], [384, 502], [300, 504], [268, 470]]
-  Floaters: {mode: islands}
-  Dumpty: {mode: vertical, top: DumptyTop, bottom: DumptyBottom}
-  Dodoco: {mode: single, bone: Dodoco}
-  Body:
-    mode: distance
-    power: 3
-    falloff: 1.5
-    smooth: 4          # diffuse weights over ~4 cells across region edges
-    bones: [Torso, Hips, HemLeft, HemFront, HemBack, ThighLeft, ThighRight,
-            UpperArmLeft, UpperArmRight]
-    regions:
-      - name: feather
-        bones: [Head, Feather]
-        polygon: [[662, 418], [702, 418], [700, 470], [686, 512], [664, 528],
-                  [656, 500]]
-      - name: pigtail_left
-        bones: [Head, PigtailLeft]
-        polygon: [[452, 628], [462, 610], [480, 614], [482, 642], [464, 670],
-                  [430, 664], [420, 640], [425, 616]]
-      - name: pigtail_right
-        bones: [Head, PigtailRight]
-        polygon: [[566, 598], [610, 596], [616, 640], [602, 674], [578, 670],
-                  [566, 632]]
-      - name: arm_left
-        bones: [Torso, UpperArmLeft, ForearmLeft, HandLeft]
-        polygon: [[278, 438], [335, 448], [368, 474], [405, 502], [428, 532],
-                  [434, 544], [458, 562], [458, 612], [452, 626], [425, 614],
-                  [395, 588], [362, 552], [335, 530], [300, 502], [278, 486]]
-      - name: arm_right
-        bones: [Torso, UpperArmRight, ForearmRight, HandRight]
-        polygon: [[612, 598], [640, 592], [672, 590], [678, 560], [720, 534],
-                  [748, 512], [790, 494], [834, 502], [834, 542], [772, 550],
-                  [742, 566], [706, 600], [676, 624], [632, 654], [612, 640]]
-      - name: head
-        bones: [Head]
-        polygon: [[372, 392], [722, 392], [722, 500], [676, 534], [672, 588],
-                  [612, 596], [566, 598], [540, 612], [478, 612], [460, 598],
-                  [458, 562], [434, 544], [404, 506], [372, 470]]
-      - name: leg_left
-        bones: [Hips, ThighLeft, ShinLeft]
-        polygon: [[320, 900], [441, 904], [441, 1040], [436, 1250], [320, 1250]]
-      - name: leg_right
-        bones: [Hips, ThighRight, ShinRight]
-        polygon: [[441, 904], [535, 904], [548, 935], [640, 960], [640, 1250],
-                  [436, 1250], [441, 1040]]
-
-# Islands smaller than this many alpha-weighted combat pixels join the
-# nearest big island's bone instead of getting one of their own.
-floater_min_mass: 20
+# Visuals/Facing, Bounds, CenterPos, IntentPos, AnimationPlayer, AnimationTree,
+# the seven states plus `setoff`. Every state plays a frame sheet of the
+# official model on the base game's clock (below).
+#
+# Until 2026-10-13 this file also specified a Skeleton2D rig of the old
+# floating-bombs splash (bones, skin rules, five cut layers), which `setoff`
+# cross-faded to. The owner retired it: "I tried doing a Set off that
+# triggered the old splash art, and I regret keeping that around - let's pivot
+# to animations based on the new model instead." git keeps it (the commit
+# that made this change).
 
 # ---------------------------------------------------------------------------
-# THE MODEL (milestone 2, 2026-10-12). Every state but `setoff` draws Klee
-# from frame sheets rendered off the official model (tools/klee_render; the
-# model itself never enters the repo). `sheets` are the Sprite2D children of
-# Visuals/Facing/Model, back to front; their cells, counts, times and feet
-# anchors come from the committed manifest klee_frames.json. A state names
-# the sheet it plays (`sheet`), at the times the renderer drew; a one-shot
-# longer than its frames holds the last one. The mesh rig above is the old
-# floating splash, kept as alt-art: it is invisible (Rig modulate alpha 0)
-# except in `setoff`, which cross-fades to it and back.
+# THE MODEL (milestone 2, 2026-10-12). Klee is drawn from frame sheets
+# rendered off the official model (tools/klee_render; the model itself never
+# enters the repo). `sheets` are the Sprite2D children of Visuals/Facing/Model,
+# back to front; their cells, counts, times and feet anchors come from the
+# committed manifest klee_frames.json. A state names the sheet it plays
+# (`sheet`), at the times the renderer drew; a one-shot longer than its frames
+# holds the last one.
 # ---------------------------------------------------------------------------
 model:
-  sheets: [idle, idle_low, attack, hurt, death, cast]
+  sheets: [idle, idle_low, attack, hurt, death, cast, setoff]
 
 # ---------------------------------------------------------------------------
-# Animations. A track drives one property of one node or bone:
-#   node:  a path under Visuals/Facing/Rig ("" is Rig itself), absolute values
+# Animations. A track drives one property of the model:
 #   model: a path under Visuals/Facing/Model ("" is Model itself)
-#   bone:  a bone name; rot (deg) / pos (rig px) / scale are DELTAS from rest
-# and is either
 #   keys:  [[time, value, transition?], ...]   (transition: Godot easing)
-#   wave:  {amp, phase (s), cycles (per loop), base} sampled 8x per cycle,
-#          cubic -- loops only.
-# `bones: [A, B]` on a track applies the same keys to several bones.
 #
 # THE CLOCK is the base game's (review/active/klee-visual-paper-2026-10-12.md,
 # from the census of the five base skeletons): attack ~1.0 s, cast ~1.0 s,
 # hurt ~0.8 s, death ~2.0 s, loops at their rendered length. Cross-fades are
-# on the state machine (rig.py XFADE).
+# on the state machine (rig.py xfade).
 # ---------------------------------------------------------------------------
 animations:
   idle:
@@ -218,31 +76,9 @@ animations:
     tracks:
       - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1], 0.5], [0.38, [1.45, 1.2, 0.85, 1], 1.6], [1.0, [1, 1, 1, 1]]]}
 
-  # Set Off: her bombs go up. Cross-fade (0.08 s) to the old floating splash
-  # -- Jumpy Dumpty, the smoke, the bell bombs -- play its lunge toward the
-  # target (the old attack keys, 0.1 s later), lift the smoke and floaters,
-  # hold, and cross-fade back to the standing figure.
+  # Set Off: a hop with both fists thrown up in a cheer, eyes squeezed happy
+  # (clips.SETOFF), landing back in stance A. One clip per Set Off play: the
+  # router absorbs the attack/cast the same play sends (AbsorbedBy).
   setoff:
-    length: 1.2
-    sheet: idle
-    hold_frame: 0
-    tracks:
-      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.08, [1, 1, 1, 0]], [1.0, [1, 1, 1, 0]], [1.15, [1, 1, 1, 1]]]}
-      - {node: "", prop: modulate, keys: [[0, [1, 1, 1, 0]], [0.08, [1, 1, 1, 1]], [1.0, [1, 1, 1, 1]], [1.15, [1, 1, 1, 0]]]}
-      - {node: "", prop: position, keys: [[0, [0, -140]], [0.1, [0, -140], 0.5], [0.25, [42, -140], 1.6], [0.45, [-5, -140]], [0.6, [0, -140]], [0.8, [0, -143]], [1.0, [0, -140]]]}
-      - {bone: UpperArmLeft,  prop: rot, keys: [[0, 0], [0.1, 0], [0.17, 8, 0.5], [0.27, 15, 2], [0.55, 0]]}
-      - {bone: ForearmLeft,   prop: rot, keys: [[0, 0], [0.1, 0], [0.17, 3], [0.29, 6, 2], [0.55, 0]]}
-      - {bone: UpperArmRight, prop: rot, keys: [[0, 0], [0.1, 0], [0.17, -8, 0.5], [0.27, 15, 2], [0.55, 0]]}
-      - {bone: ForearmRight,  prop: rot, keys: [[0, 0], [0.1, 0], [0.17, -3], [0.29, 6, 2], [0.55, 0]]}
-      - {bone: ThighLeft,  prop: rot, keys: [[0, 0], [0.1, 0], [0.25, -8, 2], [0.52, 0]]}
-      - {bone: ShinLeft,   prop: rot, keys: [[0, 0], [0.1, 0], [0.25, 8, 2], [0.52, 0]]}
-      - {bone: ThighRight, prop: rot, keys: [[0, 0], [0.1, 0], [0.25, -8, 2], [0.52, 0]]}
-      - {bone: ShinRight,  prop: rot, keys: [[0, 0], [0.1, 0], [0.25, 8, 2], [0.52, 0]]}
-      - {bone: [PigtailLeft, PigtailRight], prop: rot, keys: [[0, 0], [0.1, 0], [0.22, -6], [0.34, 4], [0.5, 0]]}
-      - {bone: DumptyCenter, prop: pos, keys: [[0, [0, 0]], [0.1, [0, 0]], [0.17, [-2, 0], 0.5], [0.3, [10, 7], 2], [0.55, [0, 0]]]}
-      - {bone: DumptyCenter, prop: rot, keys: [[0, 0], [0.1, 0], [0.17, -4], [0.3, 8, 2], [0.55, 0]]}
-      - {bone: DumptyTop,    prop: pos, keys: [[0, [0, 0]], [0.1, [0, 0]], [0.17, [0, 3]], [0.27, [0, -4], 2], [0.55, [0, 0]]]}
-      - {bone: DumptyBottom, prop: pos, keys: [[0, [0, 0]], [0.1, [0, 0]], [0.17, [0, -2]], [0.27, [0, 3], 2], [0.55, [0, 0]]]}
-      - {bone: [DumptyTop, DumptyBottom], prop: scale, keys: [[0, [1, 1]], [0.1, [1, 1]], [0.17, [1.07, 1]], [0.27, [0.92, 1], 2], [0.55, [1, 1]]]}
-      - {bone: SmokeRoot,    prop: pos, keys: [[0, [0, 0]], [0.15, [0, 0]], [0.3, [2, -5]], [0.58, [0, 0]]]}
-      - {bone: FloatersRoot, prop: pos, keys: [[0, [0, 0]], [0.15, [0, 0]], [0.3, [0, -8]], [0.58, [0, 0]]]}
+    length: 0.85
+    sheet: setoff

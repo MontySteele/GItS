@@ -586,15 +586,16 @@ if (-not (Test-Path $musicLedger)) { Note-Skip 'media\MUSIC.tsv' $musicLedger } 
     }
 }
 
-# Animation sprint 1 (Track B): pre-scaled combat layer sprites for the
-# animated combat scene. Full-res layer masters live in ImageGen/images/model
-# /layers; only the combat-scale derivatives in layers/combat ship, matching
-# how every other roster surface ships pre-sized art.
+# Animation sprint 1 (Track B) shipped Klee's combat layer sprites. One remains:
+# Dodoco, which pck-src/klee/vfx/dodoco_pop.tscn draws. The other four (smoke,
+# floaters, Jumpy Dumpty, body) were the floating-splash rig her Set Off
+# cross-faded to until 2026-10-13; Set Off is a clip of the model now and
+# nothing loads them, so they no longer ship.
 $layerSrc = Join-Path $src 'model\layers\combat'
 if (-not (Test-Path $layerSrc)) { Note-Skip 'klee\model\layers' $layerSrc } else {
     $to = Join-Path $work 'klee\model\layers'
     New-Item -ItemType Directory -Force -Path $to | Out-Null
-    Copy-Item (Join-Path $layerSrc '*.png') -Destination $to
+    Copy-Item (Join-Path $layerSrc 'klee_combat_dodoco.png') -Destination $to
 }
 
 # Klee's model frames (milestone 2, 2026-10-12): one sheet per combat state

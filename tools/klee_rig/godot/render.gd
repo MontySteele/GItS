@@ -1,8 +1,7 @@
 extends SceneTree
 
-# Klee mesh rig renderer (tools/klee_rig/render.py and verify.py copy this
-# into a scratch project and run it WITH a window -- skinning only happens on
-# a real renderer; under --headless the skeleton RID is a dummy).
+# Klee combat scene renderer (tools/klee_rig/render.py copies this into a
+# scratch project and runs it WITH a window: under --headless nothing draws).
 #
 # Job JSON (first user arg): {"passes": [{"scene": "res://...", "out": "<dir>",
 #   "prefix": "x", "scale": 1, "w": 300, "h": 340, "origin": [150, 320],
@@ -55,12 +54,6 @@ func _pass(cfg) -> void:
 				player.play(anim)
 				player.seek(float(times[i]), true)
 				player.pause()
-			if cfg.get("pin_rig", false):
-				# Review aid: hold Rig at rest so a crop stays on the joints.
-				var rig_node = inst.get_node("Visuals/Facing/Rig")
-				rig_node.position = Vector2(0, -140)
-				rig_node.rotation = 0.0
-				rig_node.modulate = Color(1, 1, 1, 1)
 			await process_frame
 			await process_frame
 			await RenderingServer.frame_post_draw

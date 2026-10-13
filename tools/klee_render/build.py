@@ -17,7 +17,8 @@ drawn at 0.5, so 150 screen px per unit at 1080p: her hat-to-boot height is
 (paper pick 2 as corrected: 4'2" against 5'6"-5'10"). The merchant draws her
 at 1.7x (base merchant scale over combat scale) from a 1.5x texture; the rest
 site at 1.33x (base 0.38 over 0.28-0.29) through BaseLib's 0.5 container; the
-select close-up is cropped by pack.py.
+select close-up and the roster tile
+(select_portrait.png) are cropped by pack.py.
 """
 from __future__ import annotations
 
@@ -37,11 +38,11 @@ REST_PPU = COMBAT_PPU * (0.38 / 0.285)  # 1.33x on screen; 2x texture under the 
 SELECT_PPU = 1700.0
 
 JOBS = [
-    {"clips": "idle,idle_low,attack,hurt,death,cast", "stills": "stance_a", "ppu": COMBAT_PPU,
+    {"clips": "idle,idle_low,attack,hurt,death,cast,setoff", "stills": "stance_a", "ppu": COMBAT_PPU,
      "outline": OUTLINE_PX},
     {"clips": "merchant", "stills": "", "ppu": MERCHANT_PPU, "outline": OUTLINE_PX * MERCHANT_PPU / COMBAT_PPU},
     {"clips": "", "stills": "rest", "ppu": REST_PPU, "outline": OUTLINE_PX * REST_PPU / COMBAT_PPU},
-    {"clips": "", "stills": "select", "ppu": SELECT_PPU, "outline": 6.0},
+    {"clips": "", "stills": "select,portrait", "ppu": SELECT_PPU, "outline": 6.0},
 ]
 
 

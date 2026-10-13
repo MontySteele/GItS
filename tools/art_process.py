@@ -59,7 +59,9 @@ shortlist  -> art/candidates/<asset_id>/r<rank>.png at target dims,
                  checkout, which is the point -- the branch's plan rendered
                  against, and into, the main checkout's pixels.
 
-Derived extras: ui/select_portrait_locked.png (desaturated+darkened).
+Derived extras: a select_portrait_locked.png (desaturated+darkened) beside any
+select_portrait.png a plan row produces (none today: every kit's tile has its
+own generator, Klee's tools/klee_render/pack.py since 2026-10-13).
 Updates art/manifest.csv status/tier/source columns in place.
 
 Requires Pillow: python3 -m venv .venv && .venv/bin/pip install pillow

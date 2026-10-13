@@ -605,23 +605,21 @@ GENERATOR_OWNED = {
     "ImageGen/images/model/frames/klee_hurt.png":           "klee_render/pack.py",
     "ImageGen/images/model/frames/klee_death.png":          "klee_render/pack.py",
     "ImageGen/images/model/frames/klee_cast.png":           "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_setoff.png":         "klee_render/pack.py",
     "ImageGen/images/model/frames/klee_merchant.png":       "klee_render/pack.py",
     "ImageGen/images/model/frames/klee_bomb.png":           "klee_render/pack.py",
     "ImageGen/images/model/frames/klee_shadow.png":         "klee_render/pack.py",
     "ImageGen/images/model/klee_rest.png":                  "klee_render/pack.py",
     "ImageGen/images/ui/select_closeup.png":                "klee_render/pack.py",
+    # The roster tile and its locked twin (2026-10-13): a face close-up from
+    # the same renders, the locked one derived from it by pack.py (as the
+    # other kits' stills generators derive theirs). Until then the tile was a
+    # plan.tsv crop of the wish splash and art_process derived the locked one.
+    "ImageGen/images/ui/select_portrait.png":               "klee_render/pack.py",
+    "ImageGen/images/ui/select_portrait_locked.png":        "klee_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",
-    # EB-163: Klee's locked select portrait is DERIVED, like Furina's and
-    # Kokomi's above -- but by art_process itself, which desaturates whatever
-    # select_portrait.png a plan row produced (the sp_outs loop). Furina's and
-    # Kokomi's were declared here because their own generators own them; Klee's
-    # never was, so the one derived surface with no declared producer was the
-    # one the ledger could not answer "where did this come from" about. A plan
-    # row claiming it would source the locked variant from the wiki instead of
-    # from the portrait it has to agree with, which is exactly what L11 stops.
-    "ImageGen/images/ui/select_portrait_locked.png":        "art_process.py",
     # EB-37: derived from each character's own char_icon.png, so a plan row
     # claiming one of these would be sourcing a halo from the wiki instead of
     # from the fill it has to agree with.
@@ -630,7 +628,7 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/ui/char_icon_outline.png":      "gen_char_icon_outlines.py",
     "ImageGen/images/varka/ui/char_icon_outline.png":       "gen_char_icon_outlines.py",
     # EB-161: the Mods screen's res://klee/mod_image.png. A composite of all
-    # three characters' select_portrait.png (a plan.tsv row on Klee's side,
+    # characters' select_portrait.png (klee_render/pack.py on Klee's side,
     # gen_furina_stills.py/gen_kokomi_stills.py on theirs), so no single
     # plan.tsv row could source it even if one wanted to claim it.
     "ImageGen/images/mod_image.png":                        "gen_mod_image.py",

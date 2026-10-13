@@ -185,6 +185,8 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
 - **Nothing animates it,** so it holds through the attack, the death sit and the facing flip, as the base shadows do on their root bone.
 - **The rest site has none yet.** The base rest-site skeletons carry shadows too, but the brief named combat and the shop. Her rest still is one BaseLib sprite, so a shadow there would be painted into `klee_rest.png`. It is listed in `BACKLOG.md`.
 
+**Set Off and the roster tile, 2026-10-13.** [USER]: "I tried doing a Set off that triggered the old splash art, and I regret keeping that around - let's pivot to animations based on the new model instead." and "Let's update Klee's small character cutout in the Character Select screen ... to be a face zoom-in like the base game characters." Set Off now plays its own 0.85 s clip of the model (a hop with both fists up, eyes squeezed happy, back to stance A); the splash rig and its four cut layers are gone (Dodoco stays for `dodoco_pop.tscn`). The roster tile (`select_portrait.png`, 132x195, + locked) is a head-and-shoulders close-up rendered from the model and packed by `pack.py`.
+
 **Left:** [USER]'s look at her in motion on the next build.
 
 ## For [USER] (ruled above)

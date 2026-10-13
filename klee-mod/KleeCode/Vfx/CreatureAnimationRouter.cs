@@ -71,9 +71,10 @@ internal static class CreatureAnimationRouter
         ["PowerUp"] = new[] { "power", "cast", "attack" },
         ["Hit"] = new[] { "hurt" },
         ["Dead"] = new[] { "death" },
-        // Klee's Set Off cards (milestone 2, 2026-10-12): her scene swaps to
-        // the floating-bombs splash for the play. Sent by CardPlayMotion for
-        // an ISetOffCard; a scene without the state lunges as for an attack.
+        // Klee's Set Off cards: her cheer clip, a hop with both fists up,
+        // rendered from the model (2026-10-13; until then the floating-bombs
+        // splash). Sent by CardPlayMotion for an ISetOffCard; a scene without
+        // the state lunges as for an attack.
         ["SetOff"] = new[] { "setoff", "attack" },
     };
 
@@ -85,7 +86,7 @@ internal static class CreatureAnimationRouter
 
     /// <summary>
     /// A Set Off play is ONE clip: the attack lunge and cast that the same
-    /// card's own commands send while it runs would cut the splash short, so
+    /// card's own commands send while it runs would cut the cheer short, so
     /// while the tree is in <see cref="SetOffState"/> those three triggers
     /// are absorbed. Hits and death still interrupt it. Pure.
     /// </summary>
