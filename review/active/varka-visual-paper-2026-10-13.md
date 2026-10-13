@@ -168,7 +168,11 @@ Only the attack and the ascension changed. Idle, cast, hurt, death, the shop, th
 
 The sheets were regenerated in place: `b_strip_attack`, `b_strip_ascension`, `c_attack.gif`, `c_attack_anemo.gif`, `c_ascension.gif`, `c_ascension_pyro.gif`, `d_elements_attack`, `d_elements_ascension` and `a_compare_1080p`.
 
-## For [USER]
+## Ruled
+
+[USER], 2026-10-13: "Ok, the Varka one looks good! I think doing more requires I see it in-game; let's ship it! (a)" Pick 2 is (a): phase B wires these sheets into the game as they are.
+
+## For [USER] (ruled above)
 
 1. **Texture budget.** Taken at the default in the design review: keep 2x like Klee, and phase B imports his sheets VRAM-compressed (`texture_import` in the manifest). With the per-frame trim and the tighter guard that is about 85 MB.
 2. **The motion,** redone after your second look (Round 3), on these sheets: `scratchpad/varka-art/sheets/` (`c_attack_anemo.gif` and `c_ascension_pyro.gif` show it moving).
