@@ -821,14 +821,6 @@ CO_TENANCY_LEDGER = {
             "the two Powers that add cards at turn start are staged into "
             "AfterPlayerTurnStartLate so they land after the Plans, the sim's "
             "`turn_start_generators`",
-        ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
-            "(the Klee overhaul). Raw per-turn Block mint on a "
-            "condition, the same shape as MetallicizePower below. THE "
-            "ORDERING QUESTION, answered: it READS the overhaul ledger's "
-            "last-turn explosion count and WRITES only Block. Nothing else "
-            "in the mod writes that ledger outside a card play or an "
-            "explosion, both of which are strictly later than this broadcast, "
-            "so no co-tenant can move the number it reads",
         ("Powers/Prototype/KleeOverhaulPowers.cs", "ReturnToSenderPower"):
             "(the Klee overhaul, `EB-732`). The BLOCK-MARK "
             "housekeeping half, IcyPawsPower's construction and its answer: "
@@ -1109,19 +1101,6 @@ CO_TENANCY_LEDGER = {
             "is enemy HP, element-less and unpowered; a power tenant runs "
             "ahead of the model-driven sequencer, whose volleys are other "
             "kits' and re-read the living enemies per hit",
-        ("Powers/Prototype/KleeExpansionPowers.cs", "SitTightPower"):
-            "(the Klee overhaul, R276). Sit Tight's delayed "
-            "Block: 4 per copy if rule 7's first counter is still 0, then the "
-            "power removes itself. THE ORDERING QUESTION, answered: what it "
-            "READS is the arm's explosion ledger, and nothing in this "
-            "broadcast sets a charge off -- the sequencer's volleys and the "
-            "Furina and Kokomi tenants never touch Klee's charges. What it WRITES is "
-            "Block, and the one co-tenant that reads Block is the "
-            "sequencer's Bond of Life (Arlecchino, draftable beside the "
-            "arm). A POWER tenant runs ahead of the model-driven sequencer, "
-            "so the Bond counts this Block as gained this turn -- and the sim "
-            "pays it at the same point, `klee_overhaul.sit_tight_turn_end` "
-            "called ahead of `effects.player_turn_end_triggers`",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "kit-grant check, turn-end site; its body documents the "
             "models-after-powers broadcast order it leans on",
@@ -1185,14 +1164,6 @@ CO_TENANCY_LEDGER = {
             "one-shot window closing unspent, SinfulHexPower's shape: what "
             "pays it is a reacting explosion during the turn, never this "
             "broadcast. Removes itself and touches nothing a co-tenant reads",
-        ("Powers/Prototype/KleeExpansionPowers.cs", "PatienceKleePower"):
-            "(the Klee overhaul, R276). Patience, Klee!'s growth "
-            "of the largest Bomb on a turn with no Set off card. THE "
-            "ORDERING QUESTION, answered: no co-tenant of this broadcast "
-            "reads or writes a charge (Sparks 'n' Splash, which read the "
-            "largest Bomb at BeforeSideTurnEnd, moved to the start of the "
-            "turn on 2026-09-25) -- the sim's order in "
-            "klee_overhaul.turn_end",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "FirstAttackTwicePower"):
             "(the Kokomi overhaul, R276). Pincer's carry-out, "

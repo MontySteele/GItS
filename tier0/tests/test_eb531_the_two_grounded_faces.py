@@ -85,28 +85,6 @@ def test_lions_fang_pays_when_nothing_went_off_last_turn(arms):
     assert state.player.block == before + 8
 
 
-def test_a_detonation_last_turn_silences_lions_fang_and_not_grounded(arms):
-    """THE DISCRIMINATOR. A Bomb went off last turn AND a Bomb stands on the
-    field now: Grounded's condition (`EB-516`, the board) is satisfied and
-    Lion's Fang's (the ledger) is not."""
-    state = _klee_state()
-    state.player.powers[lions_fang.LIONS_FANG] = 8
-    state.player.powers[klee_overhaul.GROUNDED] = 6
-    state.player.draw_pile = [loader.peek_card("strike")] * 3
-    klee_overhaul.place(state, state.enemies[0], 5)
-    klee_overhaul.set_off(state, state.enemies[0])
-    klee_overhaul.place(state, state.enemies[0], 4)
-    _next_turn(state)
-
-    before = state.player.block
-    lions_fang.turn_start(state)
-    assert state.player.block == before, "Lion's Fang paid off Grounded's rule"
-
-    before = state.player.block
-    klee_overhaul.turn_start_late(state)
-    assert state.player.block == before + 6
-
-
 # ----------------------------------------------------------------------
 # The faces, on the sheet and in the mod.
 # ----------------------------------------------------------------------
@@ -150,16 +128,3 @@ def test_lions_fang_reads_the_ledger_and_never_the_blind():
     assert "SetOffLastTurn > 0" in body
     assert "GroundedBlind" not in body
 
-
-def test_the_grounded_tip_and_the_glossary_still_say_the_same_thing():
-    """`EB-516` moved the condition and both printers moved with it; `EB-749`
-    (R271 sec.5.1) moved it again, onto the CARDS the player played. The row is
-    only closed while they still agree."""
-    from understudy import blindplay_notes
-
-    tip = _source("Cards/Prototype/ArmKeywordTips.cs")
-    glossary = blindplay_notes.ARM_KEYWORDS["Grounded"]
-
-    assert "only if you played no Set off card last turn" in glossary
-    assert "only if you played no [gold]Set off[/gold] card last turn" in (
-        tip.replace("\"\n          + \"", "").replace("\" + \"", ""))

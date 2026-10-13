@@ -653,10 +653,23 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// the APPLIER when the explosion lands, so a preview that ignored it would
     /// be predicting a number the board does not pay.
     ///
+    /// TWO MORE OF THE PLACER'S TERMS ARE IN (Klee text-only fix, 2026-10-13;
+    /// scaling rounds 1 and 2: "printed 12 and 4, and 18 and 10 landed").
+    /// Both are pure reads of powers on the applier, and both are what
+    /// <see cref="SetOff"/> and <see cref="Explode"/> pay: a waiting
+    /// <see cref="BoomBadgePower"/> doubles each charge
+    /// (<see cref="BoomBadgePower.FactorFor"/>, the factor
+    /// <see cref="BoomBadgePower.Spend"/> hands the Set off), and Durin's
+    /// <see cref="PurityDarkPower"/> adds its bonus to each Pyro hit before
+    /// the amplifier (<c>ElementalHit.Deal</c>'s additive step). Klee's Weak
+    /// and Strength stay out by rule (`EB-343`, R248).
+    ///
     /// ONE TERM IS STILL LEFT OUT, and it is one-shot rather than standing
     /// state: The Big One's DOUBLING, because reading it means
     /// <c>KleeOverhaulLedger.For</c>, which rolls per-turn counters, and a face
     /// is read on every state poll -- a tooltip may not have side effects.
+    /// Skulking Colony's Hardened Shell is not a damage term: it caps the HP
+    /// the enemy loses after Block each turn, and its own badge says so.
     /// </summary>
     public int PredictedSetOffDamage()
     {
@@ -684,6 +697,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         var teapot = TeapotMultiplier();
         var amplifier = PendingReactionMultiplier(target);
         var pact = Applier != null && VermillionPactPower.Holds(Applier);
+        var badge = BoomBadgePower.FactorFor(
+            Applier?.Powers.OfType<BoomBadgePower>().FirstOrDefault()?.Amount
+            ?? 0);
+        var dark = PurityDarkPower.BonusFor(Applier, Elements.Element.Pyro);
         for (var i = 0; i < _charges.Count; i++)
         {
             decimal paid;
@@ -697,7 +714,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 if (!pact) amplifier = 1m;
             }
             total += SimDamagePipeline.ResolveOnTarget(
-                target, _charges[i].Size, paid);
+                target, _charges[i].Size * badge + dark, paid);
         }
         return total;
     }

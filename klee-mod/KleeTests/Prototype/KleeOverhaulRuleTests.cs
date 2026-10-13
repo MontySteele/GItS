@@ -478,67 +478,6 @@ public class KleeOverhaulRuleTests
         Assert.Equal(0, ledger.SetOffLastTurn);
     }
 
-    // ---- EB-344 / R248: the held turn also grants a Spark ----------------
-
-    [Fact]
-    public void Grounded_pays_block_and_a_spark_behind_one_condition()
-    {
-        // STRUCTURAL (Il): the payout needs a live context -- both
-        // `CreatureCmd.GainBlock` and `SparkPower.Gain` are outside the
-        // headless boundary -- so what is read is the hook's own shape, which
-        // is where the rule lives.
-        //
-        // ONE CONDITION, TWO PAYOUTS is the whole claim, and the ORDER is what
-        // says it: the condition is read FIRST (the guard returns before
-        // either grant), then the Block, then the Spark. A turn that fails it
-        // therefore grants NEITHER, because there is one place to return from
-        // and it is above both.
-        //
-        // `EB-749` MOVED WHAT THE GUARD READS and left the shape: `EB-516`
-        // had it asking the BOARD, and R271 sec.5.1 has it asking the LEDGER's
-        // count of Set off CARDS played last turn. So the pin asks for
-        // `KleeOverhaulLedger.For` where it asked for the board, and adds the
-        // board's ABSENCE -- reading both would be two conditions.
-        var hook = typeof(GroundedPower)
-            .GetMethod("AfterPlayerTurnStart", HeadlessGame.All)!;
-        var sequence = Il.CallSequence(hook).ToList();
-
-        var ledgerAt = sequence.FindIndex(c => c == "KleeOverhaulLedger.For");
-        var blockAt = sequence.FindIndex(c => c == "CreatureCmd.GainBlock");
-        var sparkAt = sequence.FindIndex(c => c == "SparkPower.Gain");
-
-        Assert.True(ledgerAt >= 0, "the guard reads the ledger");
-        Assert.True(blockAt > ledgerAt, "the Block is behind the guard");
-        Assert.True(sparkAt > blockAt, "the Spark is behind the same guard");
-
-        // And the ledger is consulted ONCE, so there is no second reading of
-        // "quiet" for the two halves to drift apart on -- and the board is not
-        // consulted at all.
-        Assert.Single(sequence, c => c == "KleeOverhaulLedger.For");
-        Assert.DoesNotContain("ProtoBombPower.AnyPlacedBy", sequence);
-    }
-
-    [Fact]
-    public void Groundeds_spark_is_the_kits_rate_and_the_upgrade_is_the_block()
-    {
-        // The number's home. `Amount` is the BLOCK and the row's upgrade moves
-        // it (`{power_amount: +2}`, 4 -> 6 since `EB-622`); the Spark is 1 at both
-        // levels, so
-        // it is a constant mirrored against tier0 rather than a second reading
-        // of the stack.
-        Assert.Equal(1, KleeOverhaulLaw.GroundedSpark);
-        // (The card's upgrade half left with the Grounded row: the Klee tempo
-        // paper, 2026-10-07, cut it.)
-
-        // The face states both halves, and the Spark numeral comes from the
-        // constant rather than a typed literal (`EB-89`).
-        var face = new GroundedPower().Localization!
-            .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("[blue]{Amount}[/blue] [gold]Block[/gold]", face);
-        Assert.Contains("[blue]" + KleeOverhaulLaw.GroundedSpark
-                        + "[/blue] [gold]Spark[/gold]", face);
-    }
-
     [Fact]
     public void The_per_play_size_memory_is_opened_by_the_card_that_reads_it()
     {

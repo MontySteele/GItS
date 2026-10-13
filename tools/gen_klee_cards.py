@@ -799,12 +799,10 @@ ARM_KEYWORDS = (
     # Spark and the three readers read any Companion play now, and
     # `Companion` is a word every face already golds, so the row and its tip
     # left together.
-    # Klee's SIXTH, `EB-372`. `Grounded` is a Power of hers, and Kaeya's
-    # Cold-Blooded Strike is written against it by name -- so a player who
-    # drafted Kaeya without ever drafting Grounded met the word with nothing
-    # on the screen saying what it is, and the r9 seat read it as noise in
-    # both acts. NO PLURAL: the word names one Power.
-    ArmKeyword("Grounded", ("Grounded",), "ArmKeywordTips.ForGrounded"),
+    # Klee's SIXTH was `Grounded` (`EB-372`). The Power was cut by the Klee
+    # tempo paper (2026-10-07) and Kaeya's Cold-Blooded Strike, the face that
+    # named it, by the Mondstadt companions pass; the row, its tip and the
+    # dead Power left together (Klee text-only fixes, 2026-10-13).
     # Klee's SEVENTH, `EB-446`. `Oz` is a name one companion card is written
     # against and a DIFFERENT one grants: Fischl -- Nightrider prints "If Oz is
     # out" and cannot put him out, and the r7 seat played it five times without
@@ -1280,6 +1278,35 @@ def starter_spends_the_bank(card: dict) -> bool:
                     and (eff.get("amount_formula") or {}).get("count")
                     == "stage_spent"
                     for eff in ops))
+
+
+#: Klee text-only fixes (2026-10-13): four riders, each a fact the code
+#: decides and the face left a seat unsure of. Asked of the row's effects, so
+#: the tip follows the clause, not an id. The power ids are the rows' own.
+KLEE_TEXT_RIDERS = (
+    # Big Badda Boom: its second hit counts this play's Bombs only.
+    ("ArmKeywordTips.ForBigBaddaBoomTotal",
+     lambda e: e.get("op") == "damage_set_off_total"),
+    # Boom Badge: Retain keeps the card; the doubling ends with the turn.
+    ("ArmKeywordTips.ForBoomBadgeTurn",
+     lambda e: e.get("op") == "apply_power"
+     and e.get("power") == "ko_boom_badge"),
+    # Jean, Lion's Fang: "last turn" includes the enemies' turn.
+    ("ArmKeywordTips.ForLionsFangLastTurn",
+     lambda e: e.get("op") == "apply_power"
+     and e.get("power") == "mc_lions_fang"),
+    # Pass the Match: the chosen player must still be acting.
+    ("ArmKeywordTips.ForPassTheMatchActing",
+     lambda e: e.get("op") == "apply_power"
+     and e.get("power") == "ko_pass_the_match"),
+)
+
+
+def klee_text_rider_calls(card: dict) -> list[str]:
+    """The `KLEE_TEXT_RIDERS` attaches this row carries, in table order."""
+    ops = card.get("effects") or []
+    return [call for call, hit in KLEE_TEXT_RIDERS
+            if any(hit(e) for e in ops)]
 
 
 def final_bow_acts_in_turn(card: dict) -> bool:
@@ -3157,9 +3184,6 @@ APPLY_POWERS = {
     "ko_bomb_echo": ("BombEchoPower", None,
         "At the start of your turn, your largest [gold]Bomb[/gold], on any "
         "enemy, deals its size in [gold]Pyro[/gold] damage without going off."),
-    "ko_grounded": ("GroundedPower", None,
-        "At the start of your turn, if you have a [gold]Bomb[/gold] on the "
-        "field, gain {X} Block."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
@@ -3211,9 +3235,6 @@ APPLY_POWERS = {
         "[gold]Bomb[/gold] {X} on a random enemy."),
     "ko_look_out": ("LookOutPower", None,
         "Whenever one of your [gold]Mines[/gold] goes off, gain {X} Block."),
-    "ko_patience": ("PatienceKleePower", None,
-        "At the end of your turn, if you played no [gold]Set off[/gold] card "
-        "this turn, your largest [gold]Bomb[/gold] grows by {X}."),
     # THE KLEE STATUS PACKAGE (2026-10-01). Classes in
     # Powers/Prototype/KleeStatusPackage.cs.
     "ko_finders_keepers": ("FindersKeepersPower", None,
@@ -3235,9 +3256,6 @@ APPLY_POWERS = {
     "ko_spark_knight": ("SparkKnightPower", None,
         "Whenever you gain a [gold]Spark[/gold], deal {X} damage to a random "
         "enemy."),
-    "ko_sit_tight": ("SitTightPower", None,
-        "At the end of this turn, if no [gold]Bomb[/gold] of yours went off "
-        "this turn, gain {X} [gold]Block[/gold]."),
     # Jean's Lion's Fang (once a companion stand-in; in Klee's own pool since
     # the Klee-only companions, 2026-10-03). The class lives in
     # klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs.
@@ -16982,6 +17000,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForFinalBowInTurn("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # Klee text-only fixes (2026-10-13): the same rider shape.
+        for call in klee_text_rider_calls(card):
+            tips_expr = f"{call}({tips_expr or 'base.ExtraHoverTips'}, this)"
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the
         # definition of a word. A `Set off` row and the merge are PLAYABLE with

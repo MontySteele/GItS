@@ -175,10 +175,9 @@ MIRRORED: dict[str, object] = {
     "KleeOverhaulLaw.BombGrowth": C.KLEE_OVERHAUL_BOMB_GROWTH,
     "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
     # SIX now: R242 pick 1 gave rule 4 a second number, the opening bank, and
-    # R248 (`EB-344`) a third -- the Spark Grounded pays on a held turn, which
-    # is the one turn rule 4's per-explosion rate mints nothing.
+    # R248 (`EB-344`) a third -- the Spark Grounded paid on a held turn, which
+    # left with the cut card's power (2026-10-13).
     "KleeOverhaulLaw.OpeningSpark": C.KLEE_OVERHAUL_OPENING_SPARK,
-    "KleeOverhaulLaw.GroundedSpark": C.KLEE_OVERHAUL_GROUNDED_SPARK,
     "KleeOverhaulLaw.DamageReportSpark": C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK,
     "KleeOverhaulLaw.SparkSeedFloors": C.KLEE_OVERHAUL_SPARK_SEED_FLOORS,
     # R276, Wait For It...'s printed payout, on the same terms.

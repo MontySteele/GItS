@@ -155,13 +155,8 @@ KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
 # review (2026-10-08, sec.4.6, ruled; it was 1): Regent's own 3 Stars, so a
 # Spark card is live on turn one.
 KLEE_OVERHAUL_OPENING_SPARK = 3
-# GROUNDED'S SPARK (`EB-344`, ruled R248). The held turn pays a Spark as well as
-# the Block: "At the start of your turn, if none of your Bombs went off last
-# turn, gain 6 Block and 1 Spark." The Block is the CARD's number and moves on
-# upgrade (`power_amount: +2`); the Spark is the KIT's and does not, which is
-# why it is named here beside rule 4's other two rates rather than riding the
-# power's amount. C# twin `KleeOverhaulLaw.GroundedSpark`.
-KLEE_OVERHAUL_GROUNDED_SPARK = 1
+# (GROUNDED'S SPARK left with its cut card's dead power: Klee text-only fixes,
+# 2026-10-13.)
 # Damage Report's Spark per status drawn (Klee pre-Balance sweep, 2026-10-03);
 # flat at both levels. `KleeOverhaulLaw.DamageReportSpark`.
 KLEE_OVERHAUL_DAMAGE_REPORT_SPARK = 1

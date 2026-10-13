@@ -132,7 +132,7 @@ public class LiveBurn20260902Tests
                 .GetMethod("ForMine", HeadlessGame.All)!));
 
         Assert.EndsWith("A [gold]Bomb[/gold] that also goes off when its enemy "
-                     + "attacks you. If it does not attack, the Mine waits. Any "
+                     + "attacks you, without the enemy's plain Bombs. Otherwise, it waits. Any "
                      + "[gold]Set off[/gold] spends it too.", body);
         Assert.DoesNotContain("[gold]Weak[/gold]", body);
     }

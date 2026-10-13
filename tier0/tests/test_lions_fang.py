@@ -73,9 +73,10 @@ def test_jean_pays_on_a_quiet_turn_and_draws(arms):
 
 
 def test_eb513_a_power_that_pays_at_turn_start_stays_raw(arms):
-    """`EB-513`. Jean's Lion's Fang and Klee's own Grounded pay at the START
-    of a turn off a Power the card only granted -- a POWER's Block, not a
-    card's -- so Frail does not bite them, exactly as `GroundedPower` says."""
+    """`EB-513`. Jean's Lion's Fang pays at the START of a turn off a Power
+    the card only granted -- a POWER's Block, not a card's -- so Frail does
+    not bite it. (Klee's Grounded, its sibling here, left with its cut card's
+    dead power, 2026-10-13.)"""
     state = _klee_state()
     state.player.powers["frail"] = 2
     state.player.powers[lions_fang.LIONS_FANG] = 8
@@ -85,9 +86,3 @@ def test_eb513_a_power_that_pays_at_turn_start_stays_raw(arms):
     before = state.player.block
     lions_fang.turn_start(state)
     assert state.player.block == before + 8
-
-    state.player.powers[klee_overhaul.GROUNDED] = 6
-    klee_overhaul.place(state, state.enemies[0], 5)
-    before = state.player.block
-    klee_overhaul.turn_start_late(state)
-    assert state.player.block == before + 6

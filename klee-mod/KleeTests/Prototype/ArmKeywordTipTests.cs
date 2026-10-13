@@ -107,7 +107,8 @@ public class ArmKeywordTipTests
         // stay; the Block, when-hit and aura clauses left as edge cases.
         var printed = Printed("ForSetOff");
         Assert.EndsWith("Every [gold]Bomb[/gold] on the enemy goes off, oldest "
-                   + "first. A random Set off picks an enemy with Bombs.",
+                   + "first. Bombs on other enemies stay. A random Set off "
+                   + "picks an enemy with Bombs.",
                      printed);
     }
 
@@ -408,7 +409,15 @@ public class ArmKeywordTipTests
         // to" does not count).
         // 47 with the Furina wave (2026-10-13): `ForFinalBowInTurn`, Final
         // Bow's (its acts happen one after another).
-        Assert.Equal(47, attaches.Count);
+        // 50 with the Klee text-only fixes (2026-10-13): four riders,
+        // `ForBigBaddaBoomTotal`, `ForBoomBadgeTurn`, `ForLionsFangLastTurn`
+        // and `ForPassTheMatchActing`, and `ForGrounded` left with its cut
+        // Power.
+        Assert.Equal(50, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForBigBaddaBoomTotal");
+        Assert.Contains(attaches, m => m.Name == "ForBoomBadgeTurn");
+        Assert.Contains(attaches, m => m.Name == "ForLionsFangLastTurn");
+        Assert.Contains(attaches, m => m.Name == "ForPassTheMatchActing");
         Assert.Contains(attaches, m => m.Name == "ForFinalBowInTurn");
         Assert.Contains(attaches, m => m.Name == "ForAscensionNoOath");
         Assert.Contains(attaches, m => m.Name == "ForBisSpendUpTo");
