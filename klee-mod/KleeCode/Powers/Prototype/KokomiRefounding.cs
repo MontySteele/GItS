@@ -63,6 +63,14 @@ public static partial class KokomiCards
             await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand,
                                                         owner);
             made++;
+            // Kokomi round 3 A-list (2026-10-13): a full hand sent it to the
+            // discard pile; the page says so ("1 Sting to the discard pile
+            // (hand full)") rather than the seat reading it as lost.
+            if (card.Pile?.Type == PileType.Discard)
+            {
+                ResolutionLedger.NoteToDiscard(
+                    card.Title ?? (kind == Jellyfish.Sting ? "Sting" : "Ward"));
+            }
         }
         // The jellyfish build (2026-10-12): Stings made this fight, for
         // telemetry (the paper's first check line).

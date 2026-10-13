@@ -8149,3 +8149,40 @@ row was built separately (#1201).
 Pins: `tier0/tests/test_kokomi_review_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiReviewTests.cs`, and the updated card
 pins they replace. Untested in game until a deploy.
+
+## Kokomi round 3 A-list, 2026-10-13
+
+Review `review/active/kokomi-review-r3-2026-10-13.md` sections 4 and 5A (five
+Sonnet seats, 0/5; Stings made and played in every run). Built as written,
+with one text held:
+
+- **Second Wave:** "Deal 7 Hydro damage. Plan: The Plan written after it this
+  turn is carried out twice." Numbers and engine unchanged: `KokomiPlan.Drain`
+  holds the rider in a drain-local flag, so "next" was always the Plan written
+  after it the same turn, never the next morning.
+- **Opening Gambit: held.** "The Plan written after it this turn deals double
+  damage." renders at 121 of the 120-character card ceiling (`Or plan:`
+  counted), so `lint_text_conventions` rejects it; the face keeps "Your next
+  Plan" until the wording is picked (`BACKLOG.md`).
+- **Bubble Ward:** 6 [9] Block (was 5 [8]), Cloak and Dagger's 6 and a Shiv.
+- **Kurage Canopy:** "Whenever the Bake-Kurage carries out a Plan, add a Ward
+  to your Hand." (was 3 [4] Block). Endless Shoal's Ward twin, once per
+  carry-out. The upgraded card installs `KurageCanopyPlusPower`
+  (`upgraded_power: kk_kurage_canopy_plus`), whose Ward is upgraded. A full
+  hand sends the Ward to the discard pile in game (`KokomiCards.AddJellyfish`);
+  the sim stops it at the hand, its `_add_token` rule.
+- **Albedo, Solar Isotoma:** "...deal 8 damage to the enemy with the most
+  auras and gain 4 Block." The face now says what
+  `CompanionOverhaulTargeting.MostAuras` does.
+- **Page receipts:** a generated card a full hand sends to the discard pile
+  files a `discarded` event ("1 Sting to the discard pile (hand full)"), and an
+  Ethereal Exhaust at the turn's end files an `ethereal` event ("exhausted
+  (Ethereal): Sting x2"), both on the "Since last page" line.
+- **Strength on a Plan** is read when the Plan is written (`kokomi_plan.hers`,
+  `KokomiPlan.Hers`), now pinned; the Plan tip is at its 135-character
+  ceiling, so its clause is a `BACKLOG.md` line. Change of Plans' "no Energy"
+  (lane 4 F6) did not reproduce; also a `BACKLOG.md` line.
+
+Pins: `tier0/tests/test_kokomi_round3_alist_2026_10_13.py`,
+`klee-mod/KleeTests/Prototype/KokomiRound3AListTests.cs`. Untested in game
+until a deploy.

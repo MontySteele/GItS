@@ -98,22 +98,30 @@ public static class KokomiExpansion
     }
 }
 
-/// <summary>Kurage Canopy (the payoff pass, 2026-10-01): "Whenever the
-/// Bake-Kurage carries out a Plan, gain 2 Block." On the plan bus
+/// <summary>Kurage Canopy (the payoff pass, 2026-10-01; Kokomi round 3
+/// A-list, 2026-10-13): "Whenever the Bake-Kurage carries out a Plan, add a
+/// Ward to your Hand." Endless Shoal's Ward twin. On the plan bus
 /// (<see cref="IKokomiPlanListener"/>), which <c>KokomiPlan.ResolveEntry</c>
 /// calls once per CARRY-OUT, so a Plan carried out twice (Second Wave,
-/// Nereid's Ascension, All Streams) pays twice. POWERED Block (rule 3: her
-/// Dexterity counts on what a Plan pays). Sim twin:
+/// Nereid's Ascension, All Streams) pays twice; copies add one each. A full
+/// hand sends the Ward to the discard pile
+/// (<see cref="KokomiCards.AddJellyfish"/>). The upgraded card installs
+/// <see cref="KurageCanopyPlusPower"/>, whose Ward is upgraded. Sim twin:
 /// <c>kokomi_plan._note_plan_resolved</c>.</summary>
-public sealed class KurageCanopyPower
+public abstract class KurageCanopyBasePower
     : PowerModel, ILocalizationProvider, IKokomiPlanListener
 {
+    protected abstract bool UpgradedWard { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Kurage Canopy"),
+        ("title", UpgradedWard ? "Kurage Canopy+" : "Kurage Canopy"),
         ("description",
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold], gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+          + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
+          + (UpgradedWard ? "upgraded " : "")
+          + "{Amount:plural:[gold]Ward[/gold]|[gold]Wards[/gold]} to your "
+          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -126,8 +134,21 @@ public sealed class KurageCanopyPower
         if (kokomi != Owner) return;                 // co-op: your plans only
         if (Owner == null || Amount <= 0) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
-        await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Move, null);
+        await KokomiCards.AddJellyfish(Owner.Player,
+            KokomiCards.Jellyfish.Ward, (int)Amount, UpgradedWard);
     }
+}
+
+/// <summary>Kurage Canopy: a plain Ward per carry-out.</summary>
+public sealed class KurageCanopyPower : KurageCanopyBasePower
+{
+    protected override bool UpgradedWard => false;
+}
+
+/// <summary>Kurage Canopy+: an upgraded Ward per carry-out.</summary>
+public sealed class KurageCanopyPlusPower : KurageCanopyBasePower
+{
+    protected override bool UpgradedWard => true;
 }
 
 /// <summary>At Water's Edge (her C1; the Kokomi card pass, 2026-10-11). The

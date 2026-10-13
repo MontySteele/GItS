@@ -33,7 +33,8 @@ def _amount(c):
 # (2026-10-12): `test_kokomi_jellyfish_build_2026_10_12`.
 @pytest.mark.parametrize("cid,base,up", [
     ("proto_kk_coordinated_tide", 6, 9),
-    ("proto_kk_kurage_canopy", 3, 4),
+    # Kurage Canopy left this pin in the Kokomi round 3 A-list (2026-10-13):
+    # it makes Wards now (`test_kokomi_payoff_pass`).
     ("proto_kk_grand_strategist", 7, 10),
     ("proto_kk_shoal_of_spears", 5, 6),
 ])

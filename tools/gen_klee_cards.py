@@ -3387,10 +3387,16 @@ APPLY_POWERS = {
     "kk_tidal_riposte": ("TidalRipostePower", None,
         "Whenever an enemy's attack is fully Blocked, deal {X} damage to it."),
     # THE PAYOFF PASS (2026-10-01). Kurage Canopy rides the plan bus
-    # (`IKokomiPlanListener`); its class is in KokomiExpansion.cs.
+    # (`IKokomiPlanListener`); its class is in KokomiExpansion.cs. Kokomi
+    # round 3 A-list (2026-10-13): a Ward per carried-out Plan; the upgraded
+    # card installs the Plus power, whose Ward is upgraded (`upgraded_power`).
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold], gain {X} Block."),
+        "[gold]Plan[/gold], add a [gold]Ward[/gold] to your hand."),
+    "kk_kurage_canopy_plus": ("KurageCanopyPlusPower", None,
+        "Whenever the [gold]Bake-Kurage[/gold] carries out a "
+        "[gold]Plan[/gold], add an upgraded [gold]Ward[/gold] to your "
+        "hand."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
     "kk_seas_reproach": ("SeasReproachPower", None,
         "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to "

@@ -50,20 +50,26 @@ public class KokomiPayoffPassTests : IDisposable
     // ---- Kurage Canopy -------------------------------------------------------
 
     [Fact]
-    public void Kurage_canopy_is_a_one_cost_uncommon_power_of_three_block_four_upgraded()
+    public void Kurage_canopy_is_a_one_cost_uncommon_power_that_makes_wards()
     {
+        // Kokomi round 3 A-list (2026-10-13): "Whenever the Bake-Kurage
+        // carries out a Plan, add a Ward to your Hand." (was 3 [4] Block);
+        // the upgraded card installs the Plus power, whose Ward is upgraded.
         var card = new ProtoKkKurageCanopy();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Power, card.Type);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        // Kokomi round 2 (2026-10-12): 2 [3] -> 3 [4].
-        Assert.Equal(3, card.DynamicVars["PowerAmount"].IntValue);
+        Assert.False(card.DynamicVars.ContainsKey("PowerAmount"));
         var up = Upgraded<ProtoKkKurageCanopy>();
-        Assert.Equal(4, up.DynamicVars["PowerAmount"].IntValue);
         Assert.Equal(1, up.EnergyCost.Canonical);
-        Assert.Contains("carries out a [gold]Plan[/gold]", Face(card));
-        Assert.Contains(Seq("ProtoKkKurageCanopy", "OnPlay"),
-                        c => c.Contains("KurageCanopyPower"));
+        Assert.Equal("Whenever the [gold]Bake-Kurage[/gold] carries out a "
+                   + "[gold]Plan[/gold], add {IfUpgraded:show:an upgraded|a} "
+                   + "[gold]Ward[/gold] to your [gold]Hand[/gold].",
+                     Face(card));
+        var play = Seq("ProtoKkKurageCanopy", "OnPlay");
+        Assert.Contains(play, c => c.Contains("KurageCanopyPower"));
+        Assert.Contains(play, c => c.Contains("KurageCanopyPlusPower"));
+        Assert.Contains(play, c => c.Contains("get_IsUpgraded"));
     }
 
     [Fact]
@@ -74,8 +80,13 @@ public class KokomiPayoffPassTests : IDisposable
         // Streams' gift), so a doubled carry-out pays twice.
         Assert.True(typeof(IKokomiPlanListener)
             .IsAssignableFrom(typeof(KurageCanopyPower)));
-        var hook = Seq("KurageCanopyPower", "OnPlanResolved");
-        Assert.Contains("CreatureCmd.GainBlock", hook);
+        Assert.True(typeof(IKokomiPlanListener)
+            .IsAssignableFrom(typeof(KurageCanopyPlusPower)));
+        // A Ward per carry-out through the one jellyfish maker, whose full
+        // hand sends it to the discard pile (Endless Shoal's rule).
+        var hook = Seq("KurageCanopyBasePower", "OnPlanResolved");
+        Assert.Contains(hook, c => c.Contains("KokomiCards.AddJellyfish"));
+        Assert.DoesNotContain(hook, c => c.Contains("CreatureCmd.GainBlock"));
         Assert.DoesNotContain(hook,
             c => c.Contains("KokomiOverhaulLedger.ClaimOncePerTurn"));
         Assert.Contains("IKokomiPlanListener.OnPlanResolved",

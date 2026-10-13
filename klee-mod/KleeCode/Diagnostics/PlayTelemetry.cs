@@ -2840,6 +2840,23 @@ public sealed class PlayTelemetryHooks : AbstractModel
         CardModel card, bool causedByEthereal)
     {
         PlayTelemetry.EtherealLost(card, causedByEthereal);
+        // Kokomi round 3 A-list (2026-10-13): the page's "Since last page"
+        // line names what Ethereal took at the turn's end ("exhausted
+        // (Ethereal): Sting x2"); the local player's cards only.
+        try
+        {
+            if (causedByEthereal && card?.Owner is { } owner
+                && MegaCrit.Sts2.Core.Context.LocalContext.IsMe(owner))
+            {
+                ResolutionLedger.NoteEtherealExhaust(
+                    card.Title ?? card.Id.Entry);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] ethereal page event: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
         return Task.CompletedTask;
     }
 

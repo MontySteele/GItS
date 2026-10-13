@@ -78,13 +78,15 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Exhaust, and have a Plan line.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
-- **Latest:** two five-seat rounds on 2026-10-13 (0/5, then 1/5 with every
-  run reaching the act 2 boss). The review
-  (`review/active/kokomi-review-2026-10-13.md`) was ruled all (a): the
-  build-now list shipped (#1205, #1206) and the Ward's Plan is now
-  single-target Weak (#1207). The jellyfish half is still rarely seen.
-- **Next:** [USER]'s playtest; the next seat round counts Stings made and
-  played per fight.
+- **Latest:** round 3 on 2026-10-13 was 0/5, but Stings were made and
+  played in every run and her mean HP leaving the act-1 boss rose from 22 (round
+  1) to 49 of 80 (`review/active/kokomi-review-r3-2026-10-13.md`). Its A-list is
+  built: Second Wave's window text, Bubble Ward 6 [9], Kurage Canopy makes a
+  Ward per carried-out Plan, Albedo's target text, and page receipts for
+  hand-full discards and Ethereal Exhausts. Opening Gambit's new text is
+  held (one character over the card ceiling).
+- **Next:** [USER]'s pick in review r3 (default: his finish-line run on the
+  A-list build).
 
 **Furina: Prototype.**
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md`, sec.2):
