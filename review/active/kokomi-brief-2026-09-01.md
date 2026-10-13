@@ -87,8 +87,9 @@ the Bake-Kurage carries it out at the start of her next turn.
    (the front enemy), so it reacts with that Hydro. A generated Companion is
    Ethereal and Exhausts. Gorou's four are her own cards and print their own
    Plan lines at the 1.3 rate. Her relic, the Tamakushi Casket, reads: "At
-   the end of your turn, if a Plan is waiting, gain 3 Block." (the Watatsumi
-   Casket, 5). The count and Open the Casket are retired. (Same two papers;
+   the start of your turn, if a Plan is waiting, gain 3 Block." It lands
+   after the Block clear and before Plans resolve. (The Watatsumi Casket:
+   3 for each Plan waiting.) The count and Open the Casket are retired. (Same two papers;
    the build before it is tagged `kokomi-casket-frozen-2026-10-12`.)
 
 Printed keywords: Plan, and the base game's Ethereal (Dusk retired

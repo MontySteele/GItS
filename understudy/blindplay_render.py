@@ -229,6 +229,24 @@ WRITTEN_FACE_NOTE = ("    (the line above this one is what the board is "
                      "its sheet")
 
 
+_CLAUSE_SPLIT = re.compile(r"(?<=[.,])\s+|\s+and\s+|\s+then\s+")
+
+
+def _moved_clauses(c: dict[str, Any]) -> list[str] | None:
+    """The written face's clauses whose printed number differs from the
+    board's face, or None where the two do not split alike (then every clause
+    counts, the old reading)."""
+    written = str(c.get("written_face") or "")
+    board = str(c.get("text") or "")
+    if not written or not board:
+        return None
+    a = _CLAUSE_SPLIT.split(written)
+    b = _CLAUSE_SPLIT.split(board)
+    if len(a) != len(b):
+        return None
+    return [x for x, y in zip(a, b) if x != y]
+
+
 def _face_movers(c: dict[str, Any], you: dict[str, Any] | None) -> list[str]:
     """The powers on you that could have moved this face's number, by their
     printed names: a damage face takes Strength, Weak, Shrink and Vigor, a
@@ -237,6 +255,13 @@ def _face_movers(c: dict[str, Any], you: dict[str, Any] | None) -> list[str]:
     if not you:
         return []
     text = str(c.get("written_face") or c.get("text") or "")
+    # Kokomi round 4 (2026-10-13, lane 2 F10): only the clauses whose number
+    # MOVED. Itto prints Block and damage; Weak cut the damage and the line
+    # named Dexterity beside it, which read as a cut. Where the two faces
+    # split into the same clauses, a clause both print alike moves nothing.
+    moved = _moved_clauses(c)
+    if moved is not None:
+        text = " ".join(moved)
     words: tuple[str, ...] = ()
     if re.search(r"\bdamage\b", text, re.I):
         words += FACE_DAMAGE_MOVERS

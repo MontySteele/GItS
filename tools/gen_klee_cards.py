@@ -1566,6 +1566,15 @@ def card_needs_a_waiting_plan(card: dict) -> bool:
                for eff in card.get("effects", []))
 
 
+def card_needs_an_exhausted_card(card: dict) -> bool:
+    """Is this row unplayable while the Exhaust Pile is empty? (Kokomi round
+    4, 2026-10-13.) Moon's Reflection played into an empty pile spent its
+    cost, exhausted and did nothing (lane 1 F17, NEVER AGAIN). Derived from
+    the row's `plan_from_exhaust`. Twin: `kokomi_plan.needs_an_exhausted_card`."""
+    return any(eff.get("op") == "plan_from_exhaust"
+               for eff in card.get("effects", []))
+
+
 def card_needs_a_plannable_card(card: dict) -> bool:
     """Is this row unplayable while no OTHER card in hand can be planned?
     (Kokomi review 2026-10-13.) Grand Design: "Plan up to 3 cards from your
@@ -16480,6 +16489,7 @@ def emit(
     # into `BlockedByCardLogic` and has no slot for what the reason was.
     if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
             or card_needs_a_plannable_card(card)
+            or card_needs_an_exhausted_card(card)
             or stage_fixed_price(card) is not None):
         interfaces += ", IUnplayableReasonCard"
 
@@ -17498,9 +17508,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # (Change of Plans: "Can only be played if a Plan is waiting.") and gave
     # Grand Design its own gate one read over: no other card in hand that can
     # be planned. One IsPlayable member, so the two never share a card.
+    # Kokomi round 4 (2026-10-13) added Moon's Reflection's: unplayable
+    # while the Exhaust Pile is empty.
     plan_gated = (card_needs_a_waiting_plan(card)
-                  or card_needs_a_plannable_card(card))
-    if card_needs_a_waiting_plan(card):
+                  or card_needs_a_plannable_card(card)
+                  or card_needs_an_exhausted_card(card))
+    if card_needs_an_exhausted_card(card):
+        plan_gate_expr = "KokomiRefounding.AnyExhausted(this)"
+        plan_gate_why = "your Exhaust Pile is empty"
+        plan_gate_note = (
+            "    // Kokomi round 4 (2026-10-13): unplayable while the Exhaust\n"
+            "    // Pile is empty, rather than spending itself on nothing.\n")
+    elif card_needs_a_waiting_plan(card):
         plan_gate_expr = (
             "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
         plan_gate_why = "no Plan is waiting"

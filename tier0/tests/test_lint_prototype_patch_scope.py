@@ -134,8 +134,13 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # DrainedCounter.cs`) is the Fanfare gauge's clone, torn down by node
     # name with its scope at `Setup` (`DrainedCounter.AppliesTo` ->
     # `FurinaResources.IsFurina`), the same shape the Spark counter answered.
-    # An EIGHTH appearing here is the next review question.
-    assert len(markers) == 7, markers
+    # IT WENT SEVEN -> NINE ON 2026-10-13 (Kokomi review r4, item 3): the two
+    # `VigorPower` prefixes in `Powers/Prototype/KokomiSkillVigor.cs`, which
+    # stop Opening Gambit's and Second Wave's now-line (Skills) spending
+    # Vigor. Scoped by the hit's source card, the BakeKuragePet answer: the
+    # rule is the card's whoever plays it, and they resolve no seat.
+    # A TENTH appearing here is the next review question.
+    assert len(markers) == 9, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

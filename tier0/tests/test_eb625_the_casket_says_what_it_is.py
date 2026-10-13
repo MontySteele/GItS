@@ -6,7 +6,7 @@ face that named the relic (`ArmKeywordTips.ForCasket`), re-read by the Casket
 pass (2026-09-28) when the relic began to count Plans.
 
 THE RE-FOUNDING (2026-10-12) RETIRED THE COUNT. The relic keeps its id, name
-and art and now says one plain thing: "At the end of your turn, if a Plan is
+and art and now says one plain thing: "At the start of your turn, if a Plan is
 waiting, gain 3 Block." No card names it, so there is no tip to attach, and
 Shell Guard, Open the Casket and the count's readers are cut
 (`review/ruled/kokomi-design-pass-2026-10-11.md`,

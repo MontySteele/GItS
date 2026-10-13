@@ -509,6 +509,13 @@ def needs_a_plannable_card(card: Card) -> bool:
                for fx in card.effects)
 
 
+def needs_an_exhausted_card(card: Card) -> bool:
+    """Is this row unplayable while the Exhaust Pile is empty? (Kokomi round
+    4, 2026-10-13: Moon's Reflection.)
+    `gen_klee_cards.card_needs_an_exhausted_card`'s twin."""
+    return any(fx.get("op") == "plan_from_exhaust" for fx in card.effects)
+
+
 def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     """`card_playable`'s Plan clause (`EB-455`, the Kokomi review 2026-10-13):
     a card with a carry-out is unplayable while the Bake-Kurage holds no Plan,
@@ -531,6 +538,10 @@ def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     if needs_a_plannable_card(card):
         return not any(c is not card and can_be_written(c)
                        for c in state.player.hand)
+    # Kokomi round 4 (2026-10-13): Moon's Reflection, while the Exhaust Pile
+    # is empty ("your Exhaust Pile is empty").
+    if needs_an_exhausted_card(card):
+        return not any(c is not card for c in state.player.exhaust_pile)
     return False
 
 

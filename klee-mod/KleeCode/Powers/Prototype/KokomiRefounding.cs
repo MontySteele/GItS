@@ -507,8 +507,32 @@ public static class KokomiRefounding
         hand.ToList().Any(other => !ReferenceEquals(other, self)
                                    && CanBeWrittenSafely(other));
 
+    /// <summary>Kokomi round 4 (2026-10-13): does the owner's Exhaust Pile
+    /// hold a card? Moon's Reflection is unplayable while it does not, rather
+    /// than spending its cost and exhausting on nothing (lane 1 F17). A
+    /// canonical copy has no owner and answers true, and a throw answers true
+    /// (fails open, <see cref="AnyToPlan"/>'s rule). Sim twin:
+    /// <c>kokomi_plan.refuses_for_no_plan</c>.</summary>
+    public static bool AnyExhausted(CardModel card)
+    {
+        try
+        {
+            if (!card.IsMutable) return true;
+            var owner = card.Owner;
+            if (owner == null) return true;
+            return PileType.Exhaust.GetPile(owner).Cards.Count > 0;
+        }
+        catch (System.Exception e)
+        {
+            WarnOnce(ref _warnedExhaust,
+                     $"Moon's Reflection read of the Exhaust Pile threw: {e}");
+            return true;
+        }
+    }
+
     private static bool _warnedHand;
     private static bool _warnedCard;
+    private static bool _warnedExhaust;
 
     private static bool CanBeWrittenSafely(CardModel card)
     {
