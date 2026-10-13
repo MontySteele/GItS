@@ -1063,59 +1063,9 @@ def test_the_lint_reads_a_declaration_as_a_shadow_and_a_bare_name_as_a_clash(
     assert "SHADOW OF NOTHING" in orphan.stdout
 
 
-# --------------------- EB-403: the banner face and the Dexterity gloss ------
-
-def _war_banner_row() -> dict:
-    return next(r for r in yaml.safe_load(
-        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
-        if r["id"] == "proto_mi_gorou_war_banner")
-
-
-def test_the_war_banner_badge_says_the_banner_takes_the_dexterity_back():
-    """`EB-403`, and the twin, C# side.
-
-    The face printed "Gain 2 Dexterity for 2 turns" on a screen whose Dexterity
-    gloss says "It does not decay" (Kokomi round 10, run 1, (c) 1). Both are
-    true: the row grants real `DexterityPower`, and the `mi_war_banner` power
-    it applies beside it is a clock that hands 2 of it back when it runs out
-    (`WarBannerPower.Tick`). Nothing printed said so.
-
-    The clause is now on the card face and on the power's own tip, and the two
-    say the same thing.
-
-    `EB-415` TOOK THE SECOND NUMBER OFF THE FACE, and moved no number at all.
-    The take-back used to be the POWER's constant while the grant is the CARD's
-    upgradeable amount, so an upgraded banner granted 3 and handed 2 back. It
-    hands back what it granted now, which is not a number a printed face can
-    carry -- so the clause names none, and the live figure is on the badge's
-    smart row, the one branch `DynamicVars.AddTo` actually binds.
-
-    THE 2026-09-25 TEXT PASS took the clause off the CARD: "Gain 2 Dexterity
-    for 2 turns." is the base game's duration idiom ("for N turns",
-    `PANIC_BUTTON`, `STABLE_SERUM`) on its temporary-stat shape ("Gain N
-    Dexterity this turn", `ANTICIPATE`). The take-back stays on the badge,
-    which is on the player for exactly as long as the Dexterity is.
-    """
-    row = _war_banner_row()
-    # The Kokomi re-founding (2026-10-12) gave the banner a Plan line of its
-    # own, on its own sentence after the now-line.
-    assert row["description"] == (
-        "Gain 2 [gold]Dexterity[/gold] for 2 turns. [gold]Plan[/gold]: Gain "
-        "3 [gold]Strength[/gold] this turn.")
-    emitted = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
-               / "Generated" / "ProtoMiGorouWarBanner.cs").read_text(
-                   encoding="utf-8")
-    assert "[gold]Dexterity[/gold] for 2 turns." in emitted
-    power = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-             / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
-    banner = power.split("class WarBannerPower")[1].split("class ")[0]
-    assert '{Amount:plural:turn|turns}, then "' in banner
-    assert '+ "takes it back."' in banner       # the static compendium row
-    assert '[/blue] back."' in banner           # and the smart row's figure
-    # ...and the constant survives as the fallback for a banner nobody dealt.
-    assert "CompanionOverhaulLaw.WarBannerDexterity" in banner
-    assert row["upgrade"] is None if "upgrade" in row else True
-
+# --------------------- EB-403: the base Dexterity gloss ----------------------
+# (The War Banner face and badge pins left with the Kokomi level pass,
+# 2026-10-12: the card no longer prints Dexterity.)
 
 def test_the_base_dexterity_gloss_is_still_the_base_rule():
     """The other half of the row, and the half it would have been easy to get

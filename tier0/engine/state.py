@@ -1039,12 +1039,9 @@ class PlanEntry:
     dead by the time it resolves, so the target is a RULE (`front_enemy` /
     `all_enemies`) resolved at carry-out.
 
-    THE ONE EXCEPTION IS ON THE CLAUSE AND NOT HERE (`EB-492`): Flank's
-    `enemies_intending_attack` aim is a SET fixed when the Plan was written,
-    and `kokomi_plan.schedule` writes it onto a COPY of that clause as
-    `targets`. It is still not a rule this dataclass keeps -- an entry holds
-    what the card wrote -- and the carry-out filters the set to the bodies
-    still alive, so a stored corpse changes nothing.
+    (Flank's `enemies_intending_attack` aim used to be a set fixed when the
+    Plan was written; since the Kokomi level pass, 2026-10-12, it is read at
+    carry-out like every other aim.)
 
     THE SECOND EXCEPTION IS `aim_override`, AND IT IS `EB-643`'s ONE STORED
     BODY. Converging Tide's now-line re-aims Plans ALREADY WRITTEN, which is a
@@ -1300,14 +1297,13 @@ class CombatState:
     # `KokomiOverhaulLedger`'s twin.
     kk_plan_carried_out_this_turn: bool = False
     # (C.KOKOMI_OVERHAUL): THE COMPANION CARDS SHE PLAYED THIS
-    # TURN, in play order -- Crystal Collapse's "the last other Companion card
-    # you played this turn". A LIST rather than a single slot, because the
-    # card that reads it has already been recorded by the time it asks (see
-    # `kokomi_plan.last_other_companion`), so "other" needs the one before.
-    # Cleared at the ONE turn boundary this arm has, beside everything else
-    # that means "this turn"; the twin of
-    # `KokomiOverhaulLedger.LastCompanionPlayedThisTurn`.
-    kk_companions_this_turn: list["Card"] = field(default_factory=list)
+    # COMBAT, in play order -- Crystal Collapse's "the last Companion card you
+    # played" (combat-wide since the Kokomi level pass, 2026-10-12). A LIST
+    # rather than a single slot, because the card that reads it has already
+    # been recorded by the time it asks (see
+    # `kokomi_plan.last_other_companion`). The twin of
+    # `KokomiOverhaulLedger.LastCompanionPlayed`.
+    kk_companions_played: list["Card"] = field(default_factory=list)
     # (C.KOKOMI_OVERHAUL, `EB-335`): HOW MANY PLANS THIS MORNING'S
     # DRAIN HELD -- Tide Wall's "for each Plan the Bake-Kurage carries out this
     # morning". THE WHOLE MORNING'S DEPTH, written once at the top of

@@ -114,29 +114,27 @@ def test_the_pair_is_a_shape_and_not_a_card_special_case():
 
 
 # ---------------------------------------------------------------------------
-# `EB-658`. FLANK SAYS WHEN IT READS THE INTENTS
+# `EB-658`. FLANK SAYS WHEN IT READS THE INTENTS -- at carry-out since the
+# Kokomi level pass (2026-10-12), so the face states no moment at all.
 # ---------------------------------------------------------------------------
 
 def test_flanks_face_names_the_moment_the_intents_are_read():
     row = _sheet_row("proto_kk_flank")
     assert row["description"] == (
-        "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 9 "
-        "[gold]Hydro[/gold] damage to each enemy that "
-        "intended to attack when you wrote this.")
+        "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 "
+        "[gold]Hydro[/gold] damage to each enemy that intends to attack.")
     src = (GENERATED / "ProtoKkFlank.cs").read_text(encoding="utf-8")
-    assert "intended to attack when you wrote this." in src
-    assert "intends to attack." not in src
+    assert "each enemy that intends to attack." in src
+    assert "when you wrote this" not in src
 
 
-def test_flanks_rule_did_not_move():
-    """A FACE PASS AND NOTHING ELSE: the aim is the same aim, and both engines
-    still resolve it where they resolved it before."""
+def test_flanks_rule_reads_at_carry_out():
+    """The Kokomi level pass: the aim is the same aim, read when the Plan is
+    carried out, as Tide Wall reads its intent."""
     row = _sheet_row("proto_kk_flank")
-    assert row["plan"] == [{"op": "damage", "amount": 9,
+    assert row["plan"] == [{"op": "damage", "amount": 11,
                             "target": "enemies_intending_attack"}]
 
     sim = (REPO / "tier0" / "engine" / "kokomi_plan.py").read_text(
         encoding="utf-8")
-    # The set is snapshotted at WRITING time, which is the fact the face now
-    # states -- `schedule` rewrites the clause into a fixed body.
-    assert 'c.get("target") == "enemies_intending_attack"' in sim
+    assert "targets=list(caught)" not in sim

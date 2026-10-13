@@ -133,13 +133,16 @@ def test_no_common_increases_deck_size(overhaul):
 
 
 def test_the_uncommons_and_the_rare(overhaul):
-    # Tideturn: 8 per Plan waiting (10 upgraded; Kokomi round 2,
-    # 2026-10-12; 6 [8] since the Kokomi card pass, 2026-10-11).
+    # Tideturn: 8, plus 8 per Plan waiting (10 and 10 upgraded; the floor is
+    # the Kokomi level pass, 2026-10-12).
     st = kokomi_state(enemies=[make_enemy(hp=100)])
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    assert _hit(st, _row("proto_kk_tideturn")) == 16
-    assert _up("proto_kk_tideturn").effects[0]["amount_formula"]["per"] == 10
+    assert _hit(st, _row("proto_kk_tideturn")) == 24
+    up = _up("proto_kk_tideturn").effects[0]["amount_formula"]
+    assert (up["base"], up["per"]) == (10, 10)
+    assert _hit(kokomi_state(enemies=[make_enemy(hp=100)]),
+                _row("proto_kk_tideturn")) == 8
 
     # Moon Signal left the pool in the status batch (2026-10-01); its
     # power stays registered (`test_moon_signal_reads_the_queue_...`).

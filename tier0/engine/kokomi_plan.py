@@ -79,7 +79,7 @@ PLAN_KINDS = frozenset((
     "block_per_status_in_hand", "transform_statuses_in_draw_pile",
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and Gorou's two
     # Plan lines. See `ADD_STINGS` and the two beside it.
-    "add_stings", "strength_this_turn", "juuga_guard",
+    "add_stings", "gain_strength", "juuga_guard",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -109,10 +109,9 @@ PLAN_APPLY_POWERS = frozenset(("weak", "vulnerable"))
 #: self-facing clause (draw, energy, Block, Mend, the doubling) names no
 #: target at all, which is `Aim.Self`.
 #:
-#: `enemies_intending_attack` (`EB-492`, Flank) is the one aim that looks BACK:
-#: the set is fixed when the Plan is WRITTEN, off the intents the player was
-#: reading, and the carry-out lands on those of them still alive. See
-#: `schedule`, which does the capture, and `_aimed`, which resolves it.
+#: `enemies_intending_attack` (`EB-492`, Flank) is each enemy intending to
+#: attack, read off the board AT CARRY-OUT since the Kokomi level pass
+#: (2026-10-12), Tide Wall's read (`_aimed`).
 PLAN_AIMS = frozenset(("front_enemy", "all_enemies",
                        "enemies_intending_attack"))
 
@@ -176,11 +175,12 @@ PLAN_ONLY_OPS = frozenset((
                            "block_per_status_in_hand",
                            "transform_statuses_in_draw_pile",
                            # THE RE-FOUNDING: each names the carry-out turn.
-                           "add_stings", "strength_this_turn",
+                           "add_stings", "gain_strength",
                            "juuga_guard"))
 
 #: THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md).
-#: Kelp Wall's "plus 3 for each status or curse in your hand when written" and
+#: Kelp Wall's old "plus 3 for each status or curse in your hand when written"
+#: (no row spells it since the Kokomi level pass, 2026-10-12; registered) and
 #: Sea Glass Harvest's transform. THE KOKOMI ROUND-1 FIXES (2026-10-12): both
 #: used to read the hand at carry-out, which seats found empty of the
 #: statuses they wrote the Plan for. Kelp Wall now counts the hand WHEN THE
@@ -203,13 +203,13 @@ EACH_PLAYER_DRAW = "each_player_draw"
 
 #: THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md).
 #: Kurage's Wake's "Plan: Add 2 Stings to your hand"; Gorou's War Banner
-#: "Plan: Gain 3 Strength this turn" (Flex's `temp_strength`) and Juuga "Plan:
+#: "Plan: Gain 1 Strength" (permanent since the Kokomi level pass) and Juuga "Plan:
 #: For 3 turns, at the end of your turn gain 6 Block" (`amount` is the turns,
 #: the Block is `C.MI_JUUGA_GUARD_BLOCK`); and a written Companion, whose one
 #: clause holds the card (`carry_out_companion`). `KokomiPlan.Kind.AddStings`,
-#: `StrengthThisTurn`, `JuugaGuard`, `PlayCompanion` are the twins.
+#: `GainStrength`, `JuugaGuard`, `PlayCompanion` are the twins.
 ADD_STINGS = "add_stings"
-STRENGTH_THIS_TURN = "strength_this_turn"
+GAIN_STRENGTH = "gain_strength"
 JUUGA_GUARD = "juuga_guard"
 PLAY_COMPANION = "play_companion"
 #: Juuga's Plan line's power on her: stacks are TURNS REMAINING.
@@ -248,10 +248,13 @@ REPLAY_EXHAUSTED = "replay_exhausted"
 
 #: Crystal Collapse's clause (R236, the Inazuma workshop's one Personal). The
 #: SHEET spells it, unlike `replay_exhausted` above, because the card prints
-#: it: "Plan: play a copy of the last other Companion card you played this
-#: turn." What it holds is decided when the Plan is WRITTEN and carried out at
-#: the morning, which is the whole shape of the card -- see `schedule`.
+#: it: "Plan: Play a copy of the last Companion card you played" (combat-wide
+#: since the Kokomi level pass, 2026-10-12). What it holds is decided when the
+#: Plan is WRITTEN and carried out at the morning -- see `schedule`.
 PLAY_COPY_OF_COMPANION = "play_copy_of_companion"
+#: The card that holds that clause, which never counts as its own "last
+#: Companion" (the Kokomi level pass, 2026-10-12).
+CRYSTAL_COLLAPSE_ID = "proto_mi_gorou_crystal_collapse"
 
 #: Sango Isshin's divisor. An inline literal on BOTH sides -- the C# writes
 #: `(int)kokomi.MaxHp / 4` in `KokomiRules.QuarterOfMaxHp` and holds no named
@@ -463,22 +466,17 @@ def _aimed(state: CombatState, clause: dict,
     `target` (a self-facing one) is empty by construction -- it names no target
     at all.
 
-    THE WHOLE CLAUSE AND NOT JUST ITS AIM (`EB-492`), because one aim reads
-    something the clause carries: `enemies_intending_attack` resolves the set
-    `schedule` captured, filtered to the bodies STILL ALIVE. An enemy whose
-    intent changed overnight is still in the set -- the set was the point --
-    and one that died drops out, which is the same "a Plan that lands on
-    nothing lands on nothing" rule every other aim already keeps.
-    `KokomiPlan.Aimed` is the twin; it holds combat IDS where this holds the
-    `Enemy` objects, because the game tears a dead creature down and this
-    engine never does (`Enemy.alive` is a read of `hp`).
+    `enemies_intending_attack` (Flank) reads the intents on the board at
+    carry-out since the Kokomi level pass (2026-10-12), as Tide Wall does.
+    `KokomiPlan.Aimed` is the twin.
     """
     aim = clause.get("target")
     if aim == "all_enemies":
         return list(state.living_enemies)
     if aim == "enemies_intending_attack":
-        caught = clause.get("targets") or []
-        return [e for e in caught if e.alive]
+        # The Kokomi level pass (2026-10-12): the intents on the board at
+        # carry-out, as Tide Wall reads them. `KokomiPlan.Aimed`'s twin.
+        return [e for e in state.living_enemies if _intends_to_attack(e)]
     if aim == "front_enemy":
         # `EB-643`, CONVERGING TIDE. The one aim a now-line may re-point:
         # "every queued Plan aims at this enemy instead of the front". The
@@ -626,8 +624,11 @@ def _intends_to_attack(enemy: Enemy) -> bool:
 
 def last_other_companion(state: CombatState,
                          card: Card) -> Optional[Card]:
-    """"The last other Companion card you played this turn" -- Crystal
-    Collapse's whole reading, and the ONE place it is decided.
+    """"The last Companion card you played" -- Crystal Collapse's whole
+    reading, and the ONE place it is decided. COMBAT-WIDE since the Kokomi
+    level pass (2026-10-12), and Crystal Collapse itself never counts (a copy
+    of it would only write the same Plan again): the C# ledger never records
+    it (`KokomiOverhaulLedger.NoteCompanionCard`).
 
     BY IDENTITY, not by id, and it has to be here rather than "the last entry
     of the list": `combat._finish_play` records a play BEFORE the card's body
@@ -642,8 +643,8 @@ def last_other_companion(state: CombatState,
     the identity test is what makes the two engines say so for the same
     reason rather than by accident.
     """
-    for played in reversed(state.kk_companions_this_turn):
-        if played is not card:
+    for played in reversed(state.kk_companions_played):
+        if played is not card and played.id.split("+")[0] != CRYSTAL_COLLAPSE_ID:
             return played
     return None
 
@@ -663,21 +664,6 @@ def plan_label(card: Card, held: Optional[Card]) -> str:
     """
     short = card.name.split("—")[-1].strip() or card.name
     return f"{short}: {held.name if held is not None else 'nothing'}"
-
-
-def plan_aimed_label(card: Card, caught: Sequence[Enemy]) -> str:
-    """What the strip prints for a Plan that CAUGHT A SET (`EB-492`).
-
-    `plan_label`'s argument one aim over, and `KokomiPlan.AimedLabel`'s twin: a
-    Plan whose targets were decided when it was written means a different thing
-    every time it is written, and a player who cannot see which bodies it
-    caught cannot plan around it. "Flank: nothing" is the honest line for a
-    Plan written into a board of Defends -- it is queued, it will fire, and it
-    will hit no one.
-    """
-    if not caught:
-        return f"{card.name}: nothing"
-    return f"{card.name}: " + ", ".join(e.name for e in caught)
 
 
 def _enchanted(card: Optional[Card], amount: int) -> int:
@@ -819,11 +805,10 @@ def schedule(state: CombatState, card: Card,
                                 int(c.get("strength_times", 1))))
             if c.get("op") == "damage" else c
             for c in body]
-    # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card. "The
-    # last other Companion card you played THIS TURN" is a fact about the turn
-    # the Plan was written on, and the Plan resolves on the next one -- so
-    # asking at carry-out would read a turn the face never named and, on the
-    # usual morning, find nothing at all. The captured card rides `entry.card`,
+    # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card: "the
+    # last Companion card you played" (combat-wide since the Kokomi level
+    # pass, 2026-10-12), so the strip names what it caught. The captured card
+    # rides `entry.card`,
     # the one field a Plan already uses to hold an object (`replay_exhausted`),
     # and an EMPTY capture is written down rather than refused: the face says
     # what it does with nothing, and a Plan that silently declined to queue
@@ -834,23 +819,9 @@ def schedule(state: CombatState, card: Card,
                               for c in body):
         held = last_other_companion(state, card)
         label = plan_label(card, held)
-    # `EB-492`, FLANK CAPTURES ITS SET AT WRITING TIME, and it is Crystal
-    # Collapse's argument one aim over: "each enemy that intends to attack" is
-    # a fact about the intents ON SCREEN NOW, which is what the player is
-    # reading when they decide to write the Plan; asking again at carry-out
-    # would answer about the NEXT turn's intents, a different question the face
-    # never asked. An EMPTY set is written down rather than refused -- the Plan
-    # is real, the strip shows it, and what it carries out is nothing.
-    #
-    # THE CLAUSE IS COPIED, never mutated: `body` is a shallow list of the
-    # ROW's own dicts, and writing a capture into one of them would put this
-    # turn's board on the printed card.
-    if any(c.get("target") == "enemies_intending_attack" for c in body):
-        caught = [e for e in state.living_enemies if _intends_to_attack(e)]
-        body = [dict(c, targets=list(caught))
-                if c.get("target") == "enemies_intending_attack" else c
-                for c in body]
-        label = plan_aimed_label(card, caught)
+    # FLANK READS AT CARRY-OUT since the Kokomi level pass (2026-10-12):
+    # "each enemy that intends to attack" is the board when the Plan is
+    # carried out, Tide Wall's read (`_aimed`). Nothing is captured here.
     # KELP WALL COUNTS AT WRITING TIME (Kokomi round-1 fixes, 2026-10-12):
     # "plus 3 for each status or curse in your hand when written" is the hand
     # on screen NOW, the number the face's preview printed. Copied, never
@@ -1465,10 +1436,11 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == ADD_STINGS:
         # THE RE-FOUNDING, KURAGE'S WAKE: "Add 2 Stings to your hand."
         add_jellyfish(state, STING_ID, amount, upgraded=False)
-    elif op == STRENGTH_THIS_TURN:
-        # GOROU'S WAR BANNER: "Gain 3 Strength this turn." Flex's shape.
-        powers.apply_power(state, p, "temp_strength", amount)
-        state.emit("plan_strength_this_turn", amount=amount)
+    elif op == GAIN_STRENGTH:
+        # GOROU'S WAR BANNER: "Gain 1 Strength." Permanent since the Kokomi
+        # level pass (2026-10-12): her own slow Strength line.
+        powers.apply_power(state, p, "strength", amount)
+        state.emit("plan_gain_strength", amount=amount)
     elif op == JUUGA_GUARD:
         # GOROU'S JUUGA: "For 3 turns, at the end of your turn gain 6 Block."
         # Stacks are turns; `effects.inazuma_overhaul_turn_end` pays it.
@@ -1785,10 +1757,8 @@ def roll_turn(state: CombatState) -> None:
     state.kk_next_plan_extra = None
     # The jellyfish build (2026-10-12): The Shape of Water's "this turn".
     state.kk_stings_played_this_turn = 0
-    # Crystal Collapse's "this turn". It is CLEARED rather than handed over:
-    # the capture happens while the Plan is written, so what survives the
-    # boundary is the captured card on the entry and never the list.
-    state.kk_companions_this_turn.clear()
+    # (Crystal Collapse's memory is combat-wide since the Kokomi level pass,
+    # 2026-10-12, so the turn boundary leaves it alone.)
 
 
 # ---------------------------------------------------------------------------
@@ -1807,7 +1777,7 @@ def note_companion_played(state: CombatState, card: Card) -> None:
     # CRYSTAL COLLAPSE'S MEMORY: this hook is the arm's one definition of
     # "she played a Companion card". (Watatsumi Resistance reads WRITES since
     # the re-founding, 2026-10-12: `note_written`.)
-    state.kk_companions_this_turn.append(card)
+    state.kk_companions_played.append(card)
 
 
 def kurages_mercy(state: CombatState, amount: int) -> int:
@@ -2161,9 +2131,10 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
     elif k == "add_ward":
         # Bubble Ward, Watatsumi Drill: "Add a Ward to your hand."
         add_jellyfish(state, WARD_ID, 1, upgraded=False)
-    elif k == "add_companion":
-        # Orders from the Shrine: "Add a random Common Inazuma Companion".
-        add_companions(state, 1, upgraded=bool(fx.get("upgraded")))
+    elif k == "choose_common_companion":
+        # Orders from the Shrine (the Kokomi level pass, 2026-10-12): "Choose
+        # 1 of 3 random Common Inazuma Companions to add into your Hand."
+        choose_common_companion(state)
     elif k == "add_companions":
         # Watatsumi Muster: "Add 2 random ...".
         add_companions(state, amount, upgraded=bool(fx.get("upgraded")))
@@ -2204,7 +2175,7 @@ KINDS = {"double_weak_vulnerable": (),
          "kurages_mercy": ("amount",),
          # THE RE-FOUNDING (2026-10-12).
          "shoal_call": ("amount",), "add_sting": (), "add_ward": (),
-         "add_companion": (), "add_companions": ("amount",),
+         "choose_common_companion": (), "add_companions": ("amount",),
          "call_the_generals": (), "reserves": (),
          "grand_design": ("amount",), "block_per_attacker": ("amount",),
          "double_block": (), "exhaust_statuses": ("amount",)}
@@ -2217,7 +2188,7 @@ def validate_op(card_id: str, fx: dict) -> None:
     if k not in KINDS:
         raise ValueError(f"card {card_id!r}: unknown kokomi kind {k!r}")
     allowed = {"op", "kind", *KINDS[k]}
-    if k in ("add_companion", "add_companions"):
+    if k == "add_companions":
         allowed.add("upgraded")      # the `upgraded_grant` key's flag
     unknown = set(fx) - allowed
     if unknown:
@@ -2303,6 +2274,27 @@ def add_companions(state: CombatState, amount: int,
         state.emit("kk_companion_added", card=card.id)
         added += 1
     return added
+
+
+def choose_common_companion(state: CombatState) -> int:
+    """ORDERS FROM THE SHRINE (the Kokomi level pass, 2026-10-12): "Choose 1
+    of 3 random Common Inazuma Companions to add into your Hand. It is
+    Ethereal." Call the Generals' screen at Common, no cost-0 rider; the pilot
+    keeps the first offered, `call_the_generals`'s fixed rule.
+    `KokomiCards.ChooseCommonCompanion` is the twin."""
+    if not live(state):
+        return 0
+    pool = generated_companions(state, "common")
+    if not pool:
+        return 0
+    offered = state.rng.sample(pool, min(GENERALS_OFFERED, len(pool)))
+    state.emit("kk_companions_offered", cards=[c.id for c in offered])
+    if len(state.player.hand) >= C.MAX_HAND_SIZE:
+        return 0
+    card = _generate(offered[0])
+    state.player.hand.append(card)
+    state.emit("kk_companion_added", card=card.id)
+    return 1
 
 
 def call_the_generals(state: CombatState) -> int:

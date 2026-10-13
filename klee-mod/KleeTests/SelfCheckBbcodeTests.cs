@@ -157,7 +157,7 @@ public class SelfCheckBbcodeTests
         var required = new[] { "MasqueRedDeathPower" };
         foreach (var name in required.Concat(new[]
                  {
-                     "WarBannerPower", "SoumetsuPower", "SesshouSakuraPower",
+                     "SoumetsuPower", "SesshouSakuraPower",
                      "SanctifyingRingPower", "MujiMujiDarumaPower",
                  }))
         {

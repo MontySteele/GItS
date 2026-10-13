@@ -311,7 +311,7 @@ public class KokomiOverhaulRuleTests
         // `FirstCardFree`, `EnergyIfAlone`, `DamageIfAlone`,
         // `BlockPerAttackingEnemy`, `DoubleBlock`, `ExhaustStatusesInHand` and
         // `DiscardAndDraw` with Dusk and the cut cards, and appended
-        // `AddStings`, `StrengthThisTurn`, `JuugaGuard` and `PlayCompanion`.
+        // `AddStings`, `GainStrength`, `JuugaGuard` and `PlayCompanion`.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp",
@@ -327,7 +327,7 @@ public class KokomiOverhaulRuleTests
                     // hand just drawn.
                     "BlockPerStatusInHand", "TransformStatusesInDrawPile",
                     // THE RE-FOUNDING (2026-10-12).
-                    "AddStings", "StrengthThisTurn", "JuugaGuard",
+                    "AddStings", "GainStrength", "JuugaGuard",
                     "PlayCompanion" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
@@ -1090,7 +1090,7 @@ public class KokomiOverhaulRuleTests
 
     [Theory]
     [InlineData("ProtoKkReadTheField", 10)]
-    [InlineData("ProtoKkKelpWall", 9)]
+    [InlineData("ProtoKkKelpWall", 12)]
     public void A_planned_blocks_printed_number_is_a_block_var(
         string card, int printed)
     {

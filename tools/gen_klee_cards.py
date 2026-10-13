@@ -833,9 +833,11 @@ ARM_KEYWORDS = (
     # 2026-09-25 (the afternoon Klee seats): `Companion`, golded on Klee's
     # readers (Witches' Circle, Coven Errand, Playdate ...) and on the Kokomi
     # and Furina arms' faces, and defined nowhere on screen. The retired
-    # Hexerei row above left the word untipped. NO PLURAL: every face prints
-    # "[gold]Companion[/gold] card" or "each [gold]Companion[/gold]".
-    ArmKeyword("Companion", ("Companion",), "ArmKeywordTips.ForCompanion"),
+    # Hexerei row above left the word untipped. The plural since the Kokomi
+    # level pass (2026-10-12): Orders from the Shrine's "Choose 1 of 3 random
+    # Common Inazuma [gold]Companions[/gold]", the card-text pass's wording.
+    ArmKeyword("Companion", ("Companion", "Companions"),
+               "ArmKeywordTips.ForCompanion"),
     # THE FURINA REFRAME'S FOUR ARE GONE (`EB-723`, R269). `Deploy`, `Evoke`,
     # `Drain` and `Encore` left this table with the eleven `proto_fr_` rows
     # that printed them: draft 6's precedent one character over ("a table row
@@ -2642,7 +2644,9 @@ KOKOMI_KINDS = {
     # THE RE-FOUNDING: the Commander's generators (random Common Inazuma
     # Companions, Ethereal; upgraded on the upgraded card) and Call the
     # Generals (choose 1 of 3 random Rare Inazuma Companions).
-    "add_companion": "AddCompanion",
+    # The Kokomi level pass (2026-10-12): Orders from the Shrine chooses 1 of
+    # 3 Common Inazuma Companions (was `add_companion`, one at random).
+    "choose_common_companion": "ChooseCommonCompanion",
     "add_companions": "AddCompanions",
     "call_the_generals": "CallTheGenerals",
     # THE RE-FOUNDING: Reserves, Grand Design (write up to N hand cards as
@@ -2790,7 +2794,7 @@ PLAN_CLAUSE_KINDS = {
     # gain 6 Block" (`amount` is the turns; the Block is the rule's,
     # `CompanionOverhaulLaw.JuugaGuardBlock`).
     "add_stings": "AddStings",
-    "strength_this_turn": "StrengthThisTurn",
+    "gain_strength": "GainStrength",
     "juuga_guard": "JuugaGuard",
     "apply_power": None,
 }
@@ -2860,7 +2864,7 @@ PLAN_ONLY_OPS = {
                  "transform_statuses_in_draw_pile",
                  # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
                  # Gorou's two Plan lines name the carry-out turn.
-                 "add_stings", "strength_this_turn", "juuga_guard"}
+                 "add_stings", "gain_strength", "juuga_guard"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -2951,6 +2955,8 @@ PLAN_UPGRADE_VARS = {
     "plan_block": "PlanBlock",
     "plan_mend": "PlanMend",
     "plan_power_amount": "PlanPowerAmount",
+    # The Kokomi level pass (2026-10-12), War Banner's planned Strength.
+    "plan_strength": "PlanStrength",
     "plan_draw": "PlanCards",
     # R276, Battle Plan's per-Attack bonus.
     "plan_attack_bonus": "PlanAttackBonus",
@@ -3405,12 +3411,8 @@ APPLY_POWERS = {
     "strength": ("StrengthPower", None,
         "Gain {X} [gold]Strength[/gold]."),
     # The base game's other flat stat, given a sheet spelling by the Inazuma
-    # companion overhaul: Gorou's General's War Banner is the first row in the
-    # repo to print Dexterity. REAL Dexterity, not a private modifier, so it
-    # means what every other Dexterity in the engine means; the card's "for 2
-    # turns" is a SECOND power beside it (`mi_war_banner`), which takes these
-    # two stacks back when its clock runs out. tier0 has read a `dexterity`
-    # power stack since the block funnel was written.
+    # companion overhaul (Gorou's General's War Banner printed it until the
+    # Kokomi level pass, 2026-10-12). REAL Dexterity, not a private modifier.
     "dexterity": ("DexterityPower", None,
         "Gain {X} [gold]Dexterity[/gold]."),
     # The base game's Blur (Silent), first printed by Varka's Barbara:
@@ -3509,8 +3511,6 @@ APPLY_POWERS = {
     # Mondstadt second wave built. The {X} templates are here for form; every
     # row carries its own `description:` (EB-215). Sim twins:
     # tier0.engine.effects' `inazuma_overhaul_*` block.
-    "mi_war_banner": ("WarBannerPower", None,
-        "You have 2 more [gold]Dexterity[/gold]. Lasts {X} more turn(s)."),
     "mi_juuga": ("JuugaPower", None,
         "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
         "a random enemy. Lasts {X} more turn(s)."),
@@ -4641,6 +4641,9 @@ RUNTIME_TIMES = {
     # The Kokomi re-founding (2026-10-12), Shoal of Spears: one hit per Plan
     # waiting (`effects._amount`'s token of the same name).
     "plans_held": "KokomiPlan.PlansHeld(Owner.Creature)",
+    # The Kokomi level pass (2026-10-12), Shoal of Spears: "plus once more for
+    # each Plan waiting" -- always at least one hit.
+    "plans_held_plus_one": "KokomiPlan.PlansHeld(Owner.Creature) + 1",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -4650,6 +4653,7 @@ RUNTIME_TIMES_TEXT = {
     "salon_members": " once per [gold]Salon Member[/gold]",
     "sparks_spent": " for each [gold]Spark[/gold] spent",
     "plans_held": " once for each [gold]Plan[/gold] waiting",
+    "plans_held_plus_one": ", plus once more for each [gold]Plan[/gold] waiting",
 }
 
 
@@ -8141,8 +8145,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "upgraded_grant": any(e["op"] in ("grant_alices_mine_each_turn",
                                           "plant_homework_bomb")
                               or (e["op"] == "kokomi"
-                                  and e.get("kind") in ("add_companion",
-                                                        "add_companions"))
+                                  and e.get("kind") == "add_companions")
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
         # writing card's IsUpgraded when the Plan is carried out.
