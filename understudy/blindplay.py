@@ -526,10 +526,14 @@ def refusal_board(state: dict[str, Any]) -> str:
 
 
 #: What a `proceed` that would leave rewards behind gets, the first time.
+#: The Furina wave (2026-10-13): a chest's relic and a card offer too, so the
+#: sentence names the screen it is on.
 PROCEED_PAST_REWARDS = (
-    "this reward screen still holds {left}. Take each with "
+    "this {where} still holds {left}. Take each with "
     "`choose \"<name>\"`; nothing was sent. Say `proceed` again to leave "
     "them behind")
+#: The screen word for each screen a `proceed` is held on.
+PROCEED_HOLD_WHERE = {"rewards": "reward screen", "treasure": "chest"}
 
 #: What an `end turn` typed right after a refusal, on the same board, gets.
 END_TURN_AFTER_REFUSAL = (
@@ -639,6 +643,7 @@ def cmd_act(args) -> int:
         else:
             mark_refusal(key, args.command, "rewards left")
             print("REFUSED: " + PROCEED_PAST_REWARDS.format(
+                where=PROCEED_HOLD_WHERE.get(_screen(state), "screen"),
                 left=", ".join(left)))
             return 1
     if board and res["verb"] == "end turn":

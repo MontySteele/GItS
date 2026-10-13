@@ -94,6 +94,9 @@ public static class ArmKeywordTips
     // Design-session call (2026-10-13), A RIDER AND NOT A KEYWORD: Bis!
     // keeps half of a spend-all only, never of a "Spend up to".
     public const string BisSpendUpToKey = "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO";
+    // The Furina wave (2026-10-13), A RIDER AND NOT A KEYWORD: Final Bow's
+    // acts happen one after another.
+    public const string FinalBowInTurnKey = "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN";
     // ELEMENT IDENTITIES sec.7 (2026-10-01): a rider that titles no keyword,
     // a fact about THIS card on THIS board -- playing it would switch his
     // current element. Four times in one round a seat lost the Oath it was
@@ -706,6 +709,19 @@ public static class ArmKeywordTips
             "A card that [gold]Spends[/gold] up to an amount does not count, "
           + "even if it empties your [gold]Fanfare[/gold].");
 
+    /// <summary>
+    /// The Furina wave (2026-10-13, "To change now" 4): Final Bow's guest
+    /// acts one act at a time, each resolving before the next
+    /// (<c>StageDirector</c>'s act loop). A seat read
+    /// "It acts twice" as one blow: the second kill set off the first kill's
+    /// Crab Rage. `gen_klee_cards.emit` raises it off the row's
+    /// <c>final_bow</c> effect.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForFinalBowInTurn(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, FinalBowInTurnKey,
+            "Its acts happen one after another, not all at once.");
+
     public static IEnumerable<IHoverTip> ForAscensionNoOath(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, AscensionNoOathKey, "This hit does not gain Oath.");
@@ -935,9 +951,10 @@ public static class ArmKeywordTips
     /// (2026-10-11): the line is the first 1/4 of her Max HP she drains each
     /// combat, counted in HP drained, so a hit never uses it up.
     /// The 2026-10-11 playtest ("the tooltips for Fanfare and Drain are
-    /// rather verbose (Drain moreso)"): one sentence. The line's number and
-    /// its definition live on the Drained counter's hover
-    /// (<c>Vfx.DrainedCounter.LineSentence</c>).</summary>
+    /// rather verbose (Drain moreso)"): one sentence. The buffer left lives
+    /// on the Drained counter's hover
+    /// (<c>Vfx.DrainedCounter.BufferSentence</c>; since the Furina wave,
+    /// 2026-10-13, the line is words there, never a second number).</summary>
     internal const string DrainBody =
         "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns "
       + "after combat; more than that only [gold]Repay[/gold] returns.";
@@ -966,12 +983,19 @@ public static class ArmKeywordTips
     /// two seats played Rising Applause at 0 to 4 damage. A rider about
     /// THIS card, derived from the clause (<c>gen_klee_cards.
     /// starter_spends_the_bank</c>): a starter whose damage is the
-    /// Fanfare its spend-all took.</summary>
+    /// Fanfare its spend-all took. THE FURINA WAVE (2026-10-13, "To change
+    /// now" 2): it opens with where Fanfare comes from. Turn 1 of fight 1
+    /// was no decision in all six runs: at 0 Fanfare the card read as "a
+    /// worse Defend", and nothing said lost HP becomes Fanfare.</summary>
     public static IEnumerable<IHoverTip> ForBankDamage(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, BankDamageKey,
-            "Its damage is the [gold]Fanfare[/gold] you hold. Play it when "
-          + "the bank is worth it.");
+        With(inherited, BankDamageKey, BankDamageBody);
+
+    /// <summary><see cref="ForBankDamage"/>'s words.</summary>
+    internal const string BankDamageBody =
+        "Whenever you lose HP, gain that much [gold]Fanfare[/gold]. Its "
+      + "damage is the [gold]Fanfare[/gold] you hold: play it when "
+      + "the bank is worth it.";
 
     /// <summary>Rule 5 (the pool to 75, sec.3): where a guest goes. Since
     /// 2026-10-11 the guest a full stage pushes out acts once as it leaves

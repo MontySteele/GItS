@@ -356,7 +356,10 @@ public static class KleeMod
                     // `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Attacking it ends the freeze and deals [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage.",
-                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
+                    // The Furina wave (2026-10-13, "To change now" 5): the title says
+                    // what lands. A seat read "Frozen (Boss)" as a freeze and
+                    // trusted it at a boss, which only gains Vulnerable.
+                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Vulnerable (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion can't be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
@@ -483,6 +486,10 @@ public static class KleeMod
                     // which Spends count.
                     [Cards.ArmKeywordTips.BisSpendUpToKey + ".title"] =
                         "Bis!",
+                    // The Furina wave (2026-10-13): the rider on Final Bow,
+                    // whose acts happen one after another.
+                    [Cards.ArmKeywordTips.FinalBowInTurnKey + ".title"] =
+                        "Final Bow",
                     // Co-op notes pick 2 (2026-10-02): the key is also
                     // `KleeKeywords.Knight`'s, the printed "Knight." line,
                     // and the keyword's own hover reads this row.

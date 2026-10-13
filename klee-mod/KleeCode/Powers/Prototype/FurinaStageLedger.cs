@@ -1016,6 +1016,21 @@ public sealed class FurinaStageLedger
     /// <summary>A guest's line fired (the pool to 75, sec.3).</summary>
     public const string LineEvent = "line";
 
+    /// <summary>THE FURINA WAVE (2026-10-13, "To change now" 1): a Drain
+    /// that runs with no choice from the player (a guest's act, Regina of
+    /// All Waters) stopped at the line. <see cref="StageBeat.Moved"/> is the
+    /// HP it did not drain; the reason is <see cref="StoppedAtBuffer"/> or
+    /// <see cref="StoppedAtHp"/>. A seat saw Lyney's Drain refused with no
+    /// word said.</summary>
+    public const string StoppedEvent = "stopped";
+
+    /// <summary>The Drain buffer is used up: the Drain would go past the
+    /// line.</summary>
+    public const string StoppedAtBuffer = "buffer";
+
+    /// <summary>The Drain would take her to 0 HP.</summary>
+    public const string StoppedAtHp = "hp";
+
     /// <summary>A duplicate Guest Star moved its guest to the newest seat.
     /// </summary>
     public const string MoveEvent = "repeat";

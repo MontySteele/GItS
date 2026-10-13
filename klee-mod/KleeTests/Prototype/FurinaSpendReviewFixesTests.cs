@@ -75,7 +75,7 @@ public class FurinaSpendReviewFixesTests
             // 2 HP of Drain buffer left (the Drain buffer, 2026-10-11).
             ledger.NoteDrain(ledger.BufferLeft - 2,
                              (int)b.Furina.Creature.CurrentHp);
-            Assert.Equal(FurinaStageFacePreview.PastLine(ledger.Line)
+            Assert.Equal(FurinaStageFacePreview.PastLine
                          + "\n(+4 Block: The Masquerade)\n(+4 Block: Freminet)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
 

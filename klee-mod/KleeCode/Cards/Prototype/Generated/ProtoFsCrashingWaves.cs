@@ -51,8 +51,17 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crashing Waves"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16: hit once more for every 4."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16: hit once more for every 4.{InCombat:{StageSpendHits}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageSpendHits", FurinaStageFacePreview.SpendUpToHits(this, 16));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

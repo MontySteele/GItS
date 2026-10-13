@@ -31,7 +31,7 @@ public class FurinaDrainLostCounterTests
         Assert.Equal("Drained [blue]0[/blue] HP",
                      DrainedCounter.DrainedPhrase(0, 0));
         Assert.DoesNotContain("past your line:",
-                              DrainedCounter.HoverBody(5, 59, "", past: 0));
+                              DrainedCounter.HoverBody(5, 13, past: 0));
     }
 
     [Fact]
@@ -46,8 +46,9 @@ public class FurinaDrainLostCounterTests
         Assert.True(StageKit.Run(kit.Director.Drain(7)));
         Assert.Equal((19, 4), (kit.Stage.DrainedAbove, kit.Stage.DrainedPast));
 
-        var body = DrainedCounter.HoverBody(kit.Stage.Drained, kit.Stage.Line,
-                                            kit.Stage.LineWhy,
+        var body = DrainedCounter.HoverBody(kit.Stage.Drained,
+                                            kit.Stage.BufferLeft,
+                                            kit.Stage.Line <= 0,
                                             kit.Stage.DrainedPast);
         Assert.Contains("\n" + DrainedCounter.DrainedPhrase(23, 4) + ".\n",
                         body);
@@ -57,7 +58,8 @@ public class FurinaDrainLostCounterTests
         Assert.Equal(4, StageKit.Run(kit.Director.Repay(4)));
         Assert.Equal(0, kit.Stage.DrainedPast);
         var after = DrainedCounter.HoverBody(kit.Stage.Drained,
-                                             kit.Stage.Line, kit.Stage.LineWhy,
+                                             kit.Stage.BufferLeft,
+                                             kit.Stage.Line <= 0,
                                              kit.Stage.DrainedPast);
         Assert.Contains("\nDrained [blue]19[/blue] HP.\n", after);
         Assert.DoesNotContain("past your line:", after);
