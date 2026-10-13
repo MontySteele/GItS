@@ -134,6 +134,54 @@ public sealed class AbyssFatefulFortuneRelic : AbyssBlessingRelic
     protected override string IconFile => "abyss/relics/fateful_fortune.png";
 }
 
+public sealed class AbyssOverflowRelic : AbyssBlessingRelic
+{
+    public override AbyssBlessing Blessing => AbyssBlessing.Overflow;
+    protected override string Title => "Overflow";
+    // A stand-in icon until its own is fetched (BACKLOG, art owed).
+    protected override string IconFile => "abyss/relics/elemental_burst.png";
+}
+
+public sealed class AbyssVigorOfTheAbyssRelic : AbyssBlessingRelic
+{
+    public override AbyssBlessing Blessing => AbyssBlessing.VigorOfTheAbyss;
+    protected override string Title => "Vigor of the Abyss";
+    // A stand-in icon until its own is fetched (BACKLOG, art owed).
+    protected override string IconFile => "abyss/relics/first_strike.png";
+}
+
+public sealed class AbyssMoonlitSpringRelic : AbyssBlessingRelic
+{
+    public override AbyssBlessing Blessing => AbyssBlessing.MoonlitSpring;
+    protected override string Title => "Moonlit Spring";
+    // A stand-in icon until its own is fetched (BACKLOG, art owed).
+    protected override string IconFile => "abyss/relics/moonlit_rest.png";
+}
+
+public sealed class AbyssBattleRhythmRelic : AbyssBlessingRelic
+{
+    public override AbyssBlessing Blessing => AbyssBlessing.BattleRhythm;
+    protected override string Title => "Battle Rhythm";
+    // A stand-in icon until its own is fetched (BACKLOG, art owed).
+    protected override string IconFile => "abyss/relics/resonance.png";
+}
+
+public sealed class AbyssWaveringMoonRelic : AbyssBlessingRelic
+{
+    public override AbyssBlessing Blessing => AbyssBlessing.WaveringMoon;
+    protected override string Title => "Wavering Moon";
+    // A stand-in icon until its own is fetched (BACKLOG, art owed).
+    protected override string IconFile => "abyss/relics/abyssal_moon.png";
+}
+
+public sealed class AbyssStarfellDraftRelic : AbyssBlessingRelic
+{
+    public override AbyssBlessing Blessing => AbyssBlessing.StarfellDraft;
+    protected override string Title => "Starfell Draft";
+    // A stand-in icon until its own is fetched (BACKLOG, art owed).
+    protected override string IconFile => "abyss/relics/fateful_fortune.png";
+}
+
 /// <summary>
 /// "ABYSS SHADOWS": one relic on every player, granted with the run's first
 /// Shadow, whose text lists the Shadows in force. The list is a

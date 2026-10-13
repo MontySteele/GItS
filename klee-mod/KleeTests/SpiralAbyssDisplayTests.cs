@@ -41,7 +41,7 @@ public class SpiralAbyssDisplayTests
     public void Each_Blessing_has_its_own_relic_with_the_Blessings_text()
     {
         var types = AbyssDraft.AllBlessings.Select(AbyssDisplay.RelicTypeFor).ToList();
-        Assert.Equal(8, types.Distinct().Count());
+        Assert.Equal(14, types.Distinct().Count());
         foreach (var b in AbyssDraft.AllBlessings)
         {
             var relic = (AbyssBlessingRelic)Uninit(AbyssDisplay.RelicTypeFor(b));
@@ -242,7 +242,7 @@ public class SpiralAbyssDisplayTests
             Assert.Equal(AbyssText.Name(power.Shadow), loc["title"]);
             Assert.Equal(AbyssText.Text(power.Shadow), loc["description"]);
         }
-        Assert.Equal(8, AbyssDisplay.PowerTypes.Distinct().Count());
+        Assert.Equal(12, AbyssDisplay.PowerTypes.Distinct().Count());
 
         // STRUCTURAL: the quiet attach, never PowerCmd.Apply (whose hooks a
         // power-applied listener would hear).

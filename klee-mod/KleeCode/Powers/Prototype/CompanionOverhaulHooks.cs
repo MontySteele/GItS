@@ -381,9 +381,13 @@ public static class CompanionOverhaulReactions
     public static decimal DamageMultiplier(Creature? dealer)
     {
         if (dealer == null || dealer.IsEnemy) return 1m;
+        // THE SPIRAL ABYSS (Overflow, this act): "Elemental Reactions deal
+        // double damage". 1 outside an Abyss run or without Overflow in
+        // force, so the pipeline is unchanged there. Multiplies White's.
+        var overflow = Abyss.SpiralAbyss.OverflowFactor(dealer);
         var percent = PurityWhitePower.TeamPercent(dealer);
-        if (percent <= 0) return 1m;
-        return 1m + percent / 100m;
+        if (percent <= 0) return overflow;
+        return (1m + percent / 100m) * overflow;
     }
 }
 

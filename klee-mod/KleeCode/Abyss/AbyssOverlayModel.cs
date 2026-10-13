@@ -6,15 +6,26 @@ namespace KleeMod.Abyss;
 
 /// <summary>One card on the Blessing screen: the Blessing it gives (upper
 /// half) and the Shadow that joins the enemies' roll if it is passed (lower
-/// half). Every string is the paper's, through <see cref="AbyssText"/>.</summary>
+/// half). Every string is the paper's, through <see cref="AbyssText"/>. The
+/// tags are each entry's duration, "Whole run" or "This act"
+/// (<c>review/active/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)).</summary>
 public sealed record AbyssOverlayCard(
     int Index, AbyssBlessing Blessing, AbyssShadow Shadow,
     string BlessingName, string BlessingText, string ShadowName, string ShadowText,
-    string BlessingIconFile, string ShadowIconFile);
+    string BlessingIconFile, string ShadowIconFile,
+    string BlessingTag = AbyssOverlayContent.WholeRunTag,
+    string ShadowTag = AbyssOverlayContent.WholeRunTag);
 
-/// <summary>One icon in the top-right strip: a Blessing taken or a Shadow in
-/// force, with its hover text.</summary>
-public sealed record AbyssOverlayStripEntry(string Name, string Text, string IconFile);
+/// <summary>One icon in the top-right strip: a Blessing or Shadow in force,
+/// with its hover text and its duration.</summary>
+public sealed record AbyssOverlayStripEntry(
+    string Name, string Text, string IconFile, string Duration = AbyssOverlayContent.WholeRunTag)
+{
+    /// <summary>The hover text: the entry's text, then its duration.</summary>
+    public string HoverText => $"{Text}\n[gold]{Duration}[/gold]";
+
+    public bool ThisAct => Duration == AbyssOverlayContent.ThisActTag;
+}
 
 /// <summary>
 /// THE SPIRAL ABYSS BLESSING SCREEN'S WORDS (owner, 2026-10-12: "a pop-up
@@ -32,6 +43,8 @@ public sealed class AbyssOverlayContent
       + "the enemies take one of the Shadows you pass.";
 
     public const string WholeRunTag = "Whole run";
+
+    public const string ThisActTag = "This act";
 
     /// <summary>The label over each card's lower band (owner, 2026-10-12:
     /// "IF PASSED" renamed "SHADOW"; the view prints it in capitals).</summary>
@@ -68,18 +81,27 @@ public sealed class AbyssOverlayContent
     /// visit.</summary>
     public bool HasStrip => BlessingsTaken.Count > 0 || ShadowsInForce.Count > 0;
 
+    /// <summary>The screen for <paramref name="offer"/>'s act. The strip
+    /// lists what is in force in that act: a This act entry of an earlier act
+    /// has dropped off by the time the next act's page is up.</summary>
     public static AbyssOverlayContent For(AbyssOffer offer, AbyssRecord record)
     {
         var cards = offer.Options.Select((o, i) => new AbyssOverlayCard(
             i, o.Blessing, o.Shadow,
             AbyssText.Name(o.Blessing), AbyssText.Text(o.Blessing),
             AbyssText.Name(o.Shadow), AbyssText.Text(o.Shadow),
-            BlessingIconFile(o.Blessing), ShadowIconFile(o.Shadow))).ToList();
-        var blessings = record.Blessings.Where(b => b != AbyssBlessing.None)
-            .Select(b => new AbyssOverlayStripEntry(AbyssText.Name(b), AbyssText.Text(b), BlessingIconFile(b)))
+            BlessingIconFile(o.Blessing), ShadowIconFile(o.Shadow),
+            AbyssDurations.Tag(AbyssDurations.Of(o.Blessing)),
+            AbyssDurations.Tag(AbyssDurations.Of(o.Shadow)))).ToList();
+        var blessings = record.BlessingsInForce(offer.ActIndex)
+            .Select(b => new AbyssOverlayStripEntry(
+                AbyssText.Name(b), AbyssText.Text(b), BlessingIconFile(b),
+                AbyssDurations.Tag(AbyssDurations.Of(b))))
             .ToList();
-        var shadows = record.Shadows.Where(s => s != AbyssShadow.None)
-            .Select(s => new AbyssOverlayStripEntry(AbyssText.Name(s), AbyssText.Text(s), ShadowIconFile(s)))
+        var shadows = record.ShadowsInForce(offer.ActIndex)
+            .Select(s => new AbyssOverlayStripEntry(
+                AbyssText.Name(s), AbyssText.Text(s), ShadowIconFile(s),
+                AbyssDurations.Tag(AbyssDurations.Of(s))))
             .ToList();
         return new AbyssOverlayContent(TitleFor(offer.ActIndex), cards, blessings, shadows);
     }
@@ -101,6 +123,12 @@ public sealed class AbyssOverlayContent
         AbyssBlessing.Resonance => "abyss/relics/resonance.png",
         AbyssBlessing.Crystallize => "abyss/relics/crystallize.png",
         AbyssBlessing.FatefulFortune => "abyss/relics/fateful_fortune.png",
+        AbyssBlessing.Overflow => "abyss/relics/elemental_burst.png",
+        AbyssBlessing.VigorOfTheAbyss => "abyss/relics/first_strike.png",
+        AbyssBlessing.MoonlitSpring => "abyss/relics/moonlit_rest.png",
+        AbyssBlessing.BattleRhythm => "abyss/relics/resonance.png",
+        AbyssBlessing.WaveringMoon => "abyss/relics/abyssal_moon.png",
+        AbyssBlessing.StarfellDraft => "abyss/relics/fateful_fortune.png",
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };
 
@@ -116,6 +144,10 @@ public sealed class AbyssOverlayContent
         AbyssShadow.Rally => "abyss/powers/shadow_rally.png",
         AbyssShadow.Riptide => "abyss/powers/shadow_riptide.png",
         AbyssShadow.FatuiSkirmishers => "abyss/powers/shadow_fatui_skirmishers.png",
+        AbyssShadow.ThornyGround => "abyss/powers/shadow_herald.png",
+        AbyssShadow.Bulwark => "abyss/powers/shadow_fatui_skirmishers.png",
+        AbyssShadow.Frenzy => "abyss/powers/shadow_rally.png",
+        AbyssShadow.Withering => "abyss/powers/shadow_sheer_cold.png",
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 }

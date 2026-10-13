@@ -184,7 +184,7 @@ public static class AbyssChoicePage
         // Blessing and the Abyss Shadows relic (AbyssDisplay; idempotent).
         if (abyss != null && ancient.Owner is { } player)
         {
-            await AbyssDisplay.GrantTo(player, abyss.Record);
+            await AbyssDisplay.GrantTo(player, abyss.Record, offer.ActIndex);
         }
 
         if (ancientFinished || ancientOptions.Count == 0)

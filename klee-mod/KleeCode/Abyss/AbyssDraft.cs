@@ -48,9 +48,9 @@ public sealed class AbyssOffer
 /// roll, and two co-op peers draw the same page without a message.
 ///
 /// NO ENTRY REPEATS IN A RUN (paper sec.1): a Blessing already taken and a
-/// Shadow already on the enemies are never offered again. Passed entries can
-/// come back in a later act -- three acts need nine Blessing slots and the
-/// pool has eight, so "never offered twice" cannot be what the rule means.
+/// Shadow already on the enemies are never offered again, a This act one
+/// included after its act has ended. Passed entries can come back in a later
+/// act, This act ones included (round two, pick 1 (a)).
 /// </summary>
 public static class AbyssDraft
 {
@@ -76,14 +76,42 @@ public static class AbyssDraft
         rng.Shuffle(shadows);
 
         var count = Math.Min(OptionCount, Math.Min(blessings.Count, shadows.Count));
+        var picked = MixedPage(blessings, count);
         var options = new List<AbyssOption>(count);
         for (var i = 0; i < count; i++)
         {
-            options.Add(new AbyssOption(blessings[i], shadows[i]));
+            options.Add(new AbyssOption(picked[i], shadows[i]));
         }
 
         var roll = rng.NextInt(2);
         return new AbyssOffer(actIndex, options, roll);
+    }
+
+    /// <summary>
+    /// EACH PAGE MIXES BOTH DURATIONS (pick 1 (a)): at least one Whole run and
+    /// one This act Blessing whenever the pool still holds both, so every pick
+    /// is a real choice between a big push for this act and a smaller edge for
+    /// the rest of the run. From the shuffled pool: the first entry of each
+    /// duration, then the next entries in shuffled order to fill the page,
+    /// kept in shuffled order. With one duration left, the page is simply the
+    /// first <paramref name="count"/> entries. Pure: no draw of its own.
+    /// </summary>
+    public static IReadOnlyList<AbyssBlessing> MixedPage(IReadOnlyList<AbyssBlessing> shuffled, int count)
+    {
+        if (count <= 0) return Array.Empty<AbyssBlessing>();
+        var chosen = new HashSet<int>();
+        foreach (var duration in new[] { AbyssDuration.WholeRun, AbyssDuration.ThisAct })
+        {
+            if (chosen.Count >= count) break;
+            for (var i = 0; i < shuffled.Count; i++)
+            {
+                if (AbyssDurations.Of(shuffled[i]) != duration) continue;
+                chosen.Add(i);
+                break;
+            }
+        }
+        for (var i = 0; i < shuffled.Count && chosen.Count < count; i++) chosen.Add(i);
+        return chosen.OrderBy(i => i).Select(i => shuffled[i]).ToList();
     }
 
     /// <summary>The page for <paramref name="actIndex"/> given a record.</summary>
@@ -114,6 +142,50 @@ public sealed class AbyssRecord
     public bool Has(AbyssBlessing b) => _blessings.Contains(b);
 
     public bool Has(AbyssShadow s) => _shadows.Contains(s);
+
+    /// <summary>Is Blessing <paramref name="b"/> in force in act
+    /// <paramref name="currentAct"/>? A Whole run Blessing is once taken; a
+    /// This act one only in the act it was taken in.</summary>
+    public bool HasInForce(AbyssBlessing b, int currentAct)
+    {
+        for (var i = 0; i < _blessings.Count; i++)
+        {
+            if (_blessings[i] == b
+                && AbyssDurations.InForce(AbyssDurations.Of(b), ActAt(i), currentAct)) return true;
+        }
+        return false;
+    }
+
+    /// <summary>Is Shadow <paramref name="s"/> on the enemies in act
+    /// <paramref name="currentAct"/>?</summary>
+    public bool HasInForce(AbyssShadow s, int currentAct)
+    {
+        for (var i = 0; i < _shadows.Count; i++)
+        {
+            if (_shadows[i] == s
+                && AbyssDurations.InForce(AbyssDurations.Of(s), ActAt(i), currentAct)) return true;
+        }
+        return false;
+    }
+
+    /// <summary>The Blessings in force in act <paramref name="currentAct"/>,
+    /// in the order taken: what the strip and the relics show.</summary>
+    public IReadOnlyList<AbyssBlessing> BlessingsInForce(int currentAct) =>
+        _blessings.Where((b, i) => b != AbyssBlessing.None
+            && AbyssDurations.InForce(AbyssDurations.Of(b), ActAt(i), currentAct)).ToList();
+
+    /// <summary>The Shadows in force in act <paramref name="currentAct"/>,
+    /// in the order applied: what the badges, the strip and the Abyss Shadows
+    /// relic show.</summary>
+    public IReadOnlyList<AbyssShadow> ShadowsInForce(int currentAct) =>
+        _shadows.Where((s, i) => s != AbyssShadow.None
+            && AbyssDurations.InForce(AbyssDurations.Of(s), ActAt(i), currentAct)).ToList();
+
+    /// <summary>The act entry <paramref name="i"/> was taken in. The three
+    /// lists are saved in step; a short acts list (never written by this
+    /// build) reads as act -1, so a This act entry it cannot place is out of
+    /// force rather than in force forever.</summary>
+    private int ActAt(int i) => i < _acts.Count ? _acts[i] : -1;
 
     /// <summary>
     /// Record act <paramref name="actIndex"/>'s pick. IDEMPOTENT per act: a
@@ -246,6 +318,39 @@ public static class AbyssRules
         if (counter != Element.None && hitElement == counter) return 0;
         return Math.Max(0, hits - AbyssNumbers.MageShieldPerHit);
     }
+
+    // ---- Round two (review/active/abyss-pools-2-2026-10-12.md) -------------
+
+    /// <summary>Vigor of the Abyss: "while you are above half HP, your
+    /// Attacks deal 3 additional damage". A player's powered attack (the hits
+    /// Strength adds to), while current HP is strictly more than half of max.</summary>
+    public static decimal VigorDamageDelta(bool dealerIsPlayer, bool isPoweredAttack, int currentHp, int maxHp) =>
+        dealerIsPlayer && isPoweredAttack && maxHp > 0 && currentHp * 2 > maxHp
+            ? AbyssNumbers.VigorDamage
+            : 0m;
+
+    /// <summary>Overflow: "Elemental Reactions deal double damage". The
+    /// factor on a reaction's OWN damage (the amplifier's share, Overload's
+    /// splash, Swirl's flat hit), at the one seam that scales it
+    /// (<c>CompanionOverhaulReactions.DamageMultiplier</c>). A reaction an
+    /// enemy causes is not doubled.</summary>
+    public static decimal OverflowFactor(bool dealerIsPlayer) =>
+        dealerIsPlayer ? AbyssNumbers.OverflowMultiplier : 1m;
+
+    /// <summary>The end-of-combat heal: Moonlit Rest's 4 (whole run) and
+    /// Moonlit Spring's 8 (this act), which stack.</summary>
+    public static int CombatEndHeal(bool moonlitRest, bool moonlitSpring) =>
+        (moonlitRest ? AbyssNumbers.MoonlitRestHeal : 0) + (moonlitSpring ? AbyssNumbers.MoonlitSpringHeal : 0);
+
+    /// <summary>Wavering Moon: "Whenever you trigger an Elemental Reaction":
+    /// a reaction a player dealt.</summary>
+    public static bool WaveringMoonFires(bool dealerIsPlayer) => dealerIsPlayer;
+
+    /// <summary>Starfell Draft: "Card rewards show 1 additional card". Any
+    /// card reward's roll (the game marks them all <c>IsCardReward</c>); any
+    /// other draw of reward cards (a transform, a Neow pack) is left alone.</summary>
+    public static int StarfellDraftCount(int cardCount, bool isCardReward) =>
+        isCardReward && cardCount > 0 ? cardCount + 1 : cardCount;
 
     /// <summary>The shield after one reaction on its wearer.</summary>
     public static int ShieldAfterReaction(int hits) =>
