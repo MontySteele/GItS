@@ -86,7 +86,7 @@ public static class AbyssChoicePage
     }
 
     internal static string OptionDescription(AbyssBlessing b, AbyssShadow s) =>
-        $"{AbyssText.Text(b)}\n[red]If passed:[/red] [gold]{AbyssText.Name(s)}[/gold]. "
+        $"{AbyssText.Text(b)}\n[red]Shadow:[/red] [gold]{AbyssText.Name(s)}[/gold]. "
         + AbyssText.Text(s);
 
     /// <summary>Events showing the Abyss page right now. A weak table, so a

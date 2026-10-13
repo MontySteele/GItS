@@ -12,7 +12,7 @@ public sealed class AbyssOverlayViewData
     public string Title = "";
     public string Whisper = "";
     public string WholeRunTag = "";
-    public string IfPassedLabel = "";
+    public string ShadowBandLabel = "";
     public string BlessingsLabel = "";
     public string ShadowsLabel = "";
     public List<Card> Cards = new();
@@ -55,7 +55,7 @@ public sealed class AbyssOverlayFonts
 ///
 /// A CARD: a cream upper half (the Blessing icon in a gold diamond, its name,
 /// its text, a "Whole run" tag) over a dark lower band with a crimson edge
-/// ("If passed", the Shadow's badge, name and text). Text is never shrunk:
+/// ("Shadow", the Shadow's badge, name and text). Text is never shrunk:
 /// every text node fits its content, so a long text makes the card taller,
 /// and <see cref="EqualizeSections"/> gives the three upper halves one height
 /// so the cream/dark line runs straight across.
@@ -64,6 +64,14 @@ public sealed class AbyssOverlayFonts
 /// <c>NClickableControl</c> in the run, so hover, controller focus and
 /// <c>ForceClick</c> are the game's own; a plain control in the rig. It is the
 /// card slot's top child, the size of the card, and draws nothing.
+///
+/// FOCUS AND HOVER LOOK THE SAME. The game's clickable reports a mouse hover
+/// and a controller focus through one signal (<c>Focused</c>), and the caller
+/// routes it to <see cref="SetCardFocused"/>: the card lifts, takes the pale
+/// outline, and a red X is drawn across its Shadow band (owner, 2026-10-12:
+/// "put a big red X over the Shadow of the Blessing the user has highlighted
+/// - that way it's extremely clear that that Shadow is being discarded when
+/// you get the Blessing"). The X stays on this player's own pick or vote.
 /// </summary>
 public sealed class AbyssOverlayView
 {
@@ -103,6 +111,18 @@ public sealed class AbyssOverlayView
     public static readonly Color Crimson = new("B3263A");
     public static readonly Color CrimsonText = new("F06A6A");
     public static readonly Color FocusGlow = new("78FFFEC0");
+    /// <summary>The X's stroke: the game's red (StsColors.disabledRed),
+    /// semi-transparent so the Shadow's text still reads through it.</summary>
+    public static readonly Color CrossFill = new(0.749f, 0.188f, 0.188f, 0.62f);
+    /// <summary>The X's glow: StsColors.redGlow, faint.</summary>
+    public static readonly Color CrossGlow = new(1f, 0f, 0f, 0.26f);
+    public static readonly Color CrossOutline = new(0.16f, 0.02f, 0.04f, 0.7f);
+    /// <summary>Half the X's stroke width, and the glow's extra reach.</summary>
+    internal const float CrossHalfWidth = 13f;
+    internal const float CrossGlowReach = 10f;
+    /// <summary>How far the X's tips sit inside the Shadow band's edge.</summary>
+    internal const float CrossInsetX = 30f;
+    internal const float CrossInsetY = 26f;
     public static readonly Color Backdrop = new(0f, 0f, 0f, 0.78f);
 
     public Control Root { get; }
@@ -125,6 +145,7 @@ public sealed class AbyssOverlayView
         public MarginContainer Slot = null!;
         public Control Hit = null!;
         public Panel Outline = null!;
+        public Control Cross = null!;
         public PanelContainer Upper = null!;
         public Control VoteSlot = null!;
         public bool Focused;
@@ -192,18 +213,7 @@ public sealed class AbyssOverlayView
             view._cards.Add(BuildCard(row, data, data.Cards[i], fonts, makeHit(i), i));
         }
 
-        // Left/right walk between the cards, wrapping, the way the game's
-        // option list wraps up/down.
-        for (var i = 0; i < view._cards.Count; i++)
-        {
-            var hit = view._cards[i].Hit;
-            var left = view._cards[(i + view._cards.Count - 1) % view._cards.Count].Hit;
-            var right = view._cards[(i + 1) % view._cards.Count].Hit;
-            hit.FocusNeighborLeft = hit.GetPathTo(left);
-            hit.FocusNeighborRight = hit.GetPathTo(right);
-            hit.FocusNeighborTop = hit.GetPathTo(hit);
-            hit.FocusNeighborBottom = hit.GetPathTo(hit);
-        }
+        view.WireFocusNeighbors();
 
         if (data.Blessings.Count > 0 || data.Shadows.Count > 0)
         {
@@ -299,22 +309,33 @@ public sealed class AbyssOverlayView
         tagRow.AddChild(tag);
         up.AddChild(tagRow);
 
-        // ---- Lower half: the Shadow if passed ----
-        var lower = new PanelContainer
+        // ---- Lower half: the Shadow, with the X drawn over it ----
+        // A zero-margin stack: the band and the X both fill it, so the X
+        // spans the band whatever its height.
+        var shadowStack = new MarginContainer
         {
+            Name = "ShadowBand",
             MouseFilter = Control.MouseFilterEnum.Ignore,
             SizeFlagsVertical = Control.SizeFlags.ExpandFill,
         };
+        foreach (var side in new[] { "margin_left", "margin_right", "margin_top", "margin_bottom" })
+        {
+            shadowStack.AddThemeConstantOverride(side, 0);
+        }
+        body.AddChild(shadowStack);
+
+        var lower = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
         lower.AddThemeStyleboxOverride("panel", Box(ShadowBand, Crimson, 3, 5, 3, 3, 0, 0, 14, 14, 22, 18));
-        body.AddChild(lower);
+        shadowStack.AddChild(lower);
 
         var low = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
         low.AddThemeConstantOverride("separation", 8);
         lower.AddChild(low);
 
-        var passed = MakeLabel(data.IfPassedLabel.ToUpperInvariant(), fonts.Bold, SmallSize, CrimsonText);
-        passed.HorizontalAlignment = HorizontalAlignment.Center;
-        low.AddChild(passed);
+        var bandLabel = MakeLabel(BandLabel(data.ShadowBandLabel), fonts.Bold, SmallSize, CrimsonText);
+        bandLabel.Name = "ShadowLabel";
+        bandLabel.HorizontalAlignment = HorizontalAlignment.Center;
+        low.AddChild(bandLabel);
 
         var shadowRow = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore, Alignment = BoxContainer.AlignmentMode.Center };
         shadowRow.AddThemeConstantOverride("separation", 10);
@@ -344,6 +365,16 @@ public sealed class AbyssOverlayView
         votes.AddThemeConstantOverride("separation", 6);
         low.AddChild(votes);
 
+        var cross = new Control
+        {
+            Name = "ShadowCross",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            Modulate = new Color(1, 1, 1, 0),
+        };
+        cross.Draw += () => DrawCross(cross);
+        cross.Resized += cross.QueueRedraw;
+        shadowStack.AddChild(cross);
+
         // ---- Outline (focus / chosen) and the clickable, on top ----
         var outline = new Panel { MouseFilter = Control.MouseFilterEnum.Ignore, Modulate = new Color(1, 1, 1, 0) };
         outline.AddThemeStyleboxOverride("panel", Box(new Color(0, 0, 0, 0), FocusGlow, 4, 4, 4, 4, 16, 16, 16, 16, 0, 0, expand: 5));
@@ -356,6 +387,7 @@ public sealed class AbyssOverlayView
 
         nodes.Hit = hit;
         nodes.Outline = outline;
+        nodes.Cross = cross;
         nodes.VoteSlot = votes;
         return nodes;
     }
@@ -503,11 +535,16 @@ public sealed class AbyssOverlayView
         tree.ProcessFrame += Step;
     }
 
+    /// <summary>Is card i's Shadow crossed out?</summary>
+    public bool IsCrossed(int index) => index >= 0 && index < _cards.Count
+        && ShowsCross(_cards[index].Focused, _cards[index].Chosen);
+
     private void Animate(CardNodes card)
     {
         card.Tween?.Kill();
         var lifted = card.Focused ? Lift : 0f;
         var outlineA = card.Focused || card.Chosen ? 1f : 0f;
+        var crossA = ShowsCross(card.Focused, card.Chosen) ? 1f : 0f;
         var outline = card.Chosen ? Gold : FocusGlow;
         if (card.Outline.GetThemeStylebox("panel") is StyleBoxFlat box) box.BorderColor = outline;
         var from = card.Slot.GetThemeConstant("margin_bottom");
@@ -515,6 +552,93 @@ public sealed class AbyssOverlayView
         card.Tween.TweenMethod(Callable.From<float>(v => SetLift(card.Slot, v)), (float)from, lifted, 0.12)
             .SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Quad);
         card.Tween.TweenProperty(card.Outline, "modulate:a", outlineA, 0.12);
+        card.Tween.TweenProperty(card.Cross, "modulate:a", crossA, 0.12);
+    }
+
+    // ---- Controller focus ----------------------------------------------------
+
+    /// <summary>Card i's left and right neighbours: the row wraps, the way the
+    /// game's option list wraps up and down.</summary>
+    public static (int Left, int Right) Neighbors(int index, int count) =>
+        ((index + count - 1) % count, (index + 1) % count);
+
+    /// <summary>Left/right (and the focus-next/previous pair) walk the cards;
+    /// up/down stay put. Every direction is named, so Godot never goes looking
+    /// for a neighbour of its own (the Ancient's hidden option buttons, the
+    /// top bar).</summary>
+    private void WireFocusNeighbors()
+    {
+        for (var i = 0; i < _cards.Count; i++)
+        {
+            var hit = _cards[i].Hit;
+            var (l, r) = Neighbors(i, _cards.Count);
+            var left = hit.GetPathTo(_cards[l].Hit);
+            var right = hit.GetPathTo(_cards[r].Hit);
+            var self = hit.GetPathTo(hit);
+            hit.FocusNeighborLeft = left;
+            hit.FocusNeighborRight = right;
+            hit.FocusPrevious = left;
+            hit.FocusNext = right;
+            hit.FocusNeighborTop = self;
+            hit.FocusNeighborBottom = self;
+        }
+    }
+
+    // ---- The X over a discarded Shadow ----------------------------------------
+
+    /// <summary>The band label as the card prints it.</summary>
+    public static string BandLabel(string label) => label.ToUpperInvariant();
+
+    /// <summary>The X shows on the card this player is pointing at (hover or
+    /// controller focus) and on their own pick or vote: taking that Blessing
+    /// discards that Shadow.</summary>
+    public static bool ShowsCross(bool focused, bool chosen) => focused || chosen;
+
+    /// <summary>The X as ONE outline (12 points: two outer corners per arm and
+    /// the inner corner between each pair of arms), so a semi-transparent
+    /// fill does not darken where the strokes cross. Arms run from the centre
+    /// of <paramref name="box"/> to its corners; <paramref name="half"/> is
+    /// half the stroke width.</summary>
+    public static Vector2[] CrossPolygon(Rect2 box, float half)
+    {
+        var c = box.Position + box.Size / 2f;
+        // Clockwise on screen (y down): top-left, top-right, bottom-right,
+        // bottom-left.
+        var tips = new[]
+        {
+            box.Position, new Vector2(box.End.X, box.Position.Y),
+            box.End, new Vector2(box.Position.X, box.End.Y),
+        };
+        var dirs = new Vector2[4];
+        for (var i = 0; i < 4; i++) dirs[i] = (tips[i] - c).Normalized();
+        var points = new List<Vector2>(12);
+        for (var i = 0; i < 4; i++)
+        {
+            var d = dirs[i];
+            var next = dirs[(i + 1) % 4];
+            // The side facing the previous arm, then the side facing the next.
+            var side = new Vector2(-d.Y, d.X) * half;
+            points.Add(tips[i] - side);
+            points.Add(tips[i] + side);
+            var halfAngle = Mathf.Acos(Mathf.Clamp(d.Dot(next), -1f, 1f)) / 2f;
+            var bisector = (d + next).Normalized();
+            points.Add(c + bisector * (half / Mathf.Sin(halfAngle)));
+        }
+        return points.ToArray();
+    }
+
+    private static void DrawCross(Control node)
+    {
+        var size = node.Size;
+        var box = new Rect2(CrossInsetX, CrossInsetY, size.X - 2 * CrossInsetX, size.Y - 2 * CrossInsetY);
+        if (box.Size.X <= 2 * CrossHalfWidth || box.Size.Y <= 2 * CrossHalfWidth) return;
+        node.DrawColoredPolygon(CrossPolygon(box, CrossHalfWidth + CrossGlowReach), CrossGlow);
+        var stroke = CrossPolygon(box, CrossHalfWidth);
+        node.DrawColoredPolygon(stroke, CrossFill);
+        var ring = new Vector2[stroke.Length + 1];
+        stroke.CopyTo(ring, 0);
+        ring[^1] = stroke[0];
+        node.DrawPolyline(ring, CrossOutline, 3f, antialiased: true);
     }
 
     private static void SetLift(MarginContainer slot, float lift)
