@@ -33,7 +33,7 @@ def _combat(**kw) -> metrics.FightStats:
         won=True, turns=5, hp_start=80, hp_end=80, total_damage_dealt=0,
         damage_by_turn={}, energy_by_turn={}, total_block_gained=0,
         damage_blocked=0, energy_spent=0, cards_drawn_extra=0,
-        energy_generated_extra=0, healing=0, encore_absorbed=0,
+        energy_generated_extra=0, healing=0,
         debuff_stacks_applied=0, debuffed_intents=0, aura_intents=0,
         total_intents=0, reactions=0, reaction_damage=0, auras_wasted=0)
     base.update(kw)

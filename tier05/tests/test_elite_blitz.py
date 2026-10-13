@@ -28,7 +28,6 @@ class FakeRun:
     node_kinds: list = field(default_factory=list)
     fight_stats: list = field(default_factory=list)
     relics_by_act: list = field(default_factory=list)
-    kurage_traces: list = field(default_factory=list)
 
 
 def _one_act(kinds):
@@ -124,23 +123,6 @@ def test_the_pool_separates_total_hp_from_the_largest_body():
     # GARDENER x4 (four ~28s). The largest body must come from the former.
     assert pool["largest_body"] > pool["smallest_body"] * 2
     assert pool["max_total"] >= pool["largest_body"]
-
-
-def test_p95_over_body_is_the_reader_hierarchy_as_a_number():
-    from tier05 import kurage_telemetry as kt
-    trace = kt.KurageTrace(amounts=[10] * 19 + [100], charges=[5] * 20)
-    run = FakeRun(node_kinds=_one_act(["E"]), fight_stats=[FakeFight()],
-                  kurage_traces=[(0, trace)])
-    act = eb.aggregate([run])[0]
-    # RE-HOMED, sim-hygiene sprint 2026-07-29: same correction as
-    # test_kurage_telemetry -- elite_blitz priced its tail nearest-rank under a
-    # docstring claiming it matched run_metrics. The repo now has ONE
-    # percentile (tier05.stats, linear), so p95 of these 20 pulses interpolates
-    # (14.5) instead of snapping to the single 100. The RELATION this test is
-    # about -- p95 divided by the act's largest single body -- is untouched.
-    assert round(act["p95_pulse"], 1) == 14.5
-    assert (act["p95_over_largest_body"]
-            == act["p95_pulse"] / act["pool"]["largest_body"])
 
 
 def test_a_cohort_that_meets_no_elite_prints_nothing():

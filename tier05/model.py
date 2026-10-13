@@ -36,9 +36,8 @@ from tier0.engine.combat import run_fight
 from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import (acts, aura_telemetry, burst_telemetry, conditional_telemetry,
-                    draft, encore_telemetry, events,
-                    fanfare_telemetry, kurage_telemetry, overlap_telemetry,
+from tier05 import (acts, aura_telemetry, conditional_telemetry,
+                    draft, events, fanfare_telemetry, overlap_telemetry,
                     maps, potions as potion_pool, rewards, route, shop)
 from tier05 import relics as relic_pool
 
@@ -237,12 +236,6 @@ class RunResult:
     #                    a per-COMBAT rate derived from these must be rescaled
     #                    by the observed fight count, never by a template
     #                    constant (see fanfare_telemetry.per_run).
-    burst_traces: list = field(default_factory=list)     # C5: (act_index,
-    #                    {source: (energy, events)}) per fight.
-    kurage_traces: list = field(default_factory=list)    # P2: (act_index,
-    #                    KurageTrace) per fight, in order. Empty traces
-    #                    (pulses == 0) for every character that never fields
-    #                    a Bake-Kurage, which is all of them but Kokomi.
     relics_by_act: list = field(default_factory=list)    # C2 (addendum): how
     #                    many GRANTED relics were held as each act's boss
     #                    resolved, in act order. `relics` above is overwritten
@@ -260,12 +253,6 @@ class RunResult:
     aura_traces: list = field(default_factory=list)      # Curtain Call R85:
     #                    (act_index, AuraTrace) per fight -- hydro-application
     #                    uptime, the Track B retype tripwire (sprint log §4).
-    encore_traces: list = field(default_factory=list)    # Salon UI Track 3:
-    #                    (act_index, EncoreTrace) per fight -- D8's saturation
-    #                    prerequisite. Act-tagged like the five above because
-    #                    "the bar fills faster than the stage drains it" is a
-    #                    claim about late acts, where the stage is largest.
-    #                    Empty for every character without Encore.
     conditional_traces: list = field(default_factory=list)  # Salon UI Track 4:
     #                    (act_index, ConditionalTrace) per fight -- rider
     #                    fire-rates, D4's near-dead-condition question.
@@ -713,16 +700,10 @@ class _RunCtx:
         log = state.log
         self.res.fanfare_traces.append(                # pass 4 Q1a
             (act_i, fanfare_telemetry.trace(log)))
-        self.res.kurage_traces.append(                 # P2 (playtest sprint)
-            (act_i, kurage_telemetry.trace(log)))
-        self.res.burst_traces.append(                  # C5 (Neap Tide v2.1)
-            (act_i, burst_telemetry.trace(log)))
         self.res.overlap_traces.append(                # C4 (Neap Tide addendum)
             (act_i, overlap_telemetry.trace(log)))
         self.res.aura_traces.append(                   # Curtain Call R85 Track D
             (act_i, aura_telemetry.trace(log)))
-        self.res.encore_traces.append(                 # Salon UI Track 3
-            (act_i, encore_telemetry.trace(log)))
         self.res.conditional_traces.append(            # Salon UI Track 4
             (act_i, conditional_telemetry.trace(log)))
 

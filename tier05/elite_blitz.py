@@ -33,36 +33,22 @@ METRIC DEFINITIONS, fixed here so no later run can redefine them mid-sweep:
                    granted relics held as each act's boss resolved. This is the
                    power-growth control: an act-2 collapse means something
                    different if the run arrived with 2 relics than with 6.
-- p95 pulse vs pool
-                   the act's elite p95 pulse against that act's elite HP POOL
-                   -- both the encounter totals and the largest single body.
-                   The pulse is single-target, so `p95 / largest body` is the
-                   fraction of a real health bar one turn-end tick removes. It
-                   is the number the §2.2 reader hierarchy is actually about,
-                   and C1 is the record of what happens when a tail is printed
-                   with nothing to be large relative to.
+- pool             the act's elite HP POOL: the encounter totals and the
+                   largest single body. (The Kurage pulse tail it was printed
+                   against left with the shipped Kokomi kit, 2026-10-13.)
 
 WHAT THIS DOES NOT MEASURE, said plainly. Elite HP pools are the DESIGNED bands
 from the act pools, not the rolled HP of the encounters this cohort actually
 met -- rolled HP is not carried on RunResult. Within a band the spread is a few
-points, so the ratio is a good estimate and a bad exact figure. Do not read the
-third decimal.
+points, so the pool is a good estimate and a bad exact figure.
 """
 
 from __future__ import annotations
 
 from tier0 import constants as C
-from tier05 import acts, kurage_telemetry, stats
+from tier05 import acts
 
 FIGHT_KINDS = ("N", "E", "B")
-
-
-# It used to say "nearest-rank, matching kurage_telemetry._percentile and
-# run_metrics._percentile" -- and run_metrics interpolated, so the sentence was
-# false and this reader was the second convention it warned about. Fixed by the
-# sim-hygiene sprint (2026-07-29): ONE percentile, linear, in tier05.stats.
-# p95_pulse therefore MOVED (reported telemetry, never a ratified band).
-_percentile = stats.percentile
 
 
 def _band_mid(hp) -> float:
@@ -76,9 +62,9 @@ def elite_hp_pool(act: int) -> dict:
     """The act's designed elite encounters: total HP and largest single body.
 
     Both, because they answer different questions. Total is what the fight
-    costs in aggregate; largest body is what a SINGLE-TARGET term like the
-    Kurage pulse is measured against, and a 4-body swarm with the same total
-    is a completely different check.
+    costs in aggregate; largest body is what a SINGLE-TARGET term is measured
+    against, and a 4-body swarm with the same total is a completely different
+    check.
     """
     totals, bodies = [], []
     for enc in acts.pools(act).get("elite", []):
@@ -123,7 +109,6 @@ def aggregate(results: list) -> dict:
     cleared: dict[int, int] = {}
     hp_costs: dict[int, list[int]] = {}
     relics: dict[int, list[int]] = {}
-    pulses: dict[int, list[int]] = {}
 
     for r in results:
         contexts = _fight_contexts(r)
@@ -142,14 +127,11 @@ def aggregate(results: list) -> dict:
                 hp_costs.setdefault(act, []).append(fs.hp_start - fs.hp_end)
         for act, count in enumerate(r.relics_by_act):
             relics.setdefault(act, []).append(count)
-        for act, trace in r.kurage_traces:
-            pulses.setdefault(act, []).extend(trace.amounts)
 
     per_act = {}
-    for act in sorted(set(attempted) | set(relics) | set(pulses)):
+    for act in sorted(set(attempted) | set(relics)):
         costs = hp_costs.get(act, [])
         held = relics.get(act, [])
-        p95 = _percentile(pulses.get(act, []), 0.95)
         pool = elite_hp_pool(act)
         per_act[act] = {
             "attempted": attempted.get(act, 0),
@@ -161,12 +143,7 @@ def aggregate(results: list) -> dict:
             "max_hp_cost": max(costs) if costs else 0,
             "mean_relics": (sum(held) / len(held)) if held else 0.0,
             "boundary_runs": len(held),
-            "p95_pulse": p95,
             "pool": pool,
-            # The §2.2 question, as a number: what fraction of the act's
-            # largest elite body does one turn-end pulse remove at the tail?
-            "p95_over_largest_body": (p95 / pool["largest_body"]
-                                      if pool.get("largest_body") else 0.0),
         }
     return per_act
 
@@ -179,7 +156,7 @@ def format_block(per_act: dict) -> str:
     lines = ["  C2 elite blitz (report-only, R14)",
              f"    {'act':>4} {'attempts/run':>13} {'clear%':>7} "
              f"{'hp cost':>8} {'worst':>6} {'relics@boss':>12} "
-             f"{'p95 pulse':>10} {'biggest body':>13} {'p95/body':>9}"]
+             f"{'biggest body':>13}"]
     for act, a in sorted(per_act.items()):
         pool = a["pool"]
         lines.append(
@@ -187,15 +164,7 @@ def format_block(per_act: dict) -> str:
             f"{a['clear_rate'] * 100:7.1f} {a['mean_hp_cost']:8.1f} "
             f"{a['max_hp_cost']:6d} "
             f"{a['mean_relics']:6.2f} (n={a['boundary_runs']:<3}) "
-            f"{a['p95_pulse']:10.0f} {pool.get('largest_body', 0):13.0f} "
-            f"{a['p95_over_largest_body']:9.2f}")
+            f"{pool.get('largest_body', 0):13.0f}")
     lines.append("    (hp cost is WON elites only; pools are designed bands, "
                  "not rolled HP)")
     return "\n".join(lines)
-
-
-def pulse_tail(results: list) -> dict:
-    """Convenience: the kurage tail by act, so a caller wanting both blocks
-    does not re-walk the traces. Same aggregation kurage_telemetry does."""
-    return kurage_telemetry.by_act(
-        [pair for r in results for pair in r.kurage_traces])

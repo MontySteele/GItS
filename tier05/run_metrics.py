@@ -758,23 +758,6 @@ def _ungated(required: set[str], r: RunResult) -> set[str]:
             if loader.get_card(cid).star != 5}
 
 
-def encore_census(results: list[RunResult]) -> dict:
-    """EB-20w: the EB-20 fight census pooled over a run cohort.
-
-    Delegates every definition to `tier0.harness.metrics.encore_census_profile`
-    over the cohort's `fight_stats` -- per-card grant/spend attribution, peak,
-    empty-turn rate, and the Fanfare-leg split are all the fight census's, not
-    restated here, so the run-layer number and the `--encore-census` fight
-    number can never be two definitions wearing one name. The saturation half
-    (dry/full/runway rates) stays with `tier05/encore_telemetry.py`, which
-    reads the event log rather than FightStats.
-
-    Same fence as the profile itself: measures, picks nothing -- the D8 lever
-    is [USER]'s. Returns {} for a cohort with no Encore in it."""
-    return t0_metrics.encore_census_profile(
-        [s for r in results for s in r.fight_stats])
-
-
 def floor_kind_labels(results: list[RunResult]) -> list[str]:
     """Per floor, the mix of node kinds the cohort actually walked.
 

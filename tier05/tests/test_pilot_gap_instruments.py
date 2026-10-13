@@ -6,8 +6,8 @@ will make a ruling out of it. Each test below is written against a specific
 way the change could have been wrong, not against the implementation.
 
 The three:
-  1. `encore_telemetry` gains a RUNWAY rate -- the sim analogue of the bar a
-     playtester reads as "I am not going to run out".
+  1. `encore_telemetry` gained a RUNWAY rate (its reader left with the
+     shipped Encore buffer, 2026-10-13; its tests went with it).
   2. `fanfare_telemetry` gains a per-SOURCE reduction, so a realistic drafted
      run can be asked where its Fanfare came from. The fight log does not
      survive onto a RunResult, so before this the question was answerable
@@ -22,12 +22,7 @@ from __future__ import annotations
 
 import pytest
 
-from tier05 import cells, encore_telemetry, fanfare_telemetry
-
-
-def _upkeep(members: int, encore: int, cost: int = 1) -> dict:
-    return {"event": "salon_upkeep", "members": members, "encore": encore,
-            "cost": cost * members}
+from tier05 import cells, fanfare_telemetry
 
 
 def _turn(total: int = 10, cap: int = 40) -> dict:
@@ -38,43 +33,6 @@ def _turn(total: int = 10, cap: int = 40) -> dict:
 def _gain(source: str, requested: int, total: int = 10) -> dict:
     return {"event": "gain_fanfare", "source": source, "requested": requested,
             "wasted": 0, "total": total}
-
-
-# --- 1. the runway rate -------------------------------------------------
-
-def test_the_runway_rate_measures_turns_of_bill_not_a_single_turn():
-    """A three-member stage holding 3 can tick THIS turn and is broke the
-    next. Full rate says yes to it; the runway rate is the column that says
-    what a playtester actually sees, and conflating the two is what let the
-    sim call a bar 'full' that nobody would describe that way."""
-    turns = encore_telemetry.RUNWAY_SATURATED_TURNS
-    barely = encore_telemetry.trace([_upkeep(3, 3)])
-    saturated = encore_telemetry.trace([_upkeep(3, 3 * turns)])
-
-    assert barely.full_rate == 1.0
-    assert barely.runway_rate == 0.0
-    assert saturated.full_rate == 1.0
-    assert saturated.runway_rate == 1.0
-
-
-def test_the_runway_threshold_is_the_whole_stage_bill_not_one_member():
-    """Scaling with the stage is the point: five members cost five times
-    what one does, so the same held Encore is a shorter runway. A threshold
-    read off a single member's cost would report a big stage as MORE
-    saturated than a small one on identical Encore."""
-    turns = encore_telemetry.RUNWAY_SATURATED_TURNS
-    held = 3 * turns
-    assert encore_telemetry.trace([_upkeep(3, held)]).runway_rate == 1.0
-    assert encore_telemetry.trace([_upkeep(5, held)]).runway_rate == 0.0
-
-
-def test_the_runway_rate_survives_pooling():
-    agg = encore_telemetry.aggregate([
-        encore_telemetry.trace([_upkeep(1, 99), _upkeep(1, 0)]),
-    ])
-    assert agg["runway_rate"] == pytest.approx(0.5)
-    assert f"runway{encore_telemetry.RUNWAY_SATURATED_TURNS}+" in \
-        encore_telemetry.format_row("probe", agg)
 
 
 # --- 2. the per-source reduction ----------------------------------------

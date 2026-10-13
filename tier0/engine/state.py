@@ -146,6 +146,13 @@ def remove_instance(pile: list, card: "Card") -> bool:
     return False
 
 
+# `Card.is_junk`'s two vocabularies (`EB-241`): the kinds a Status or a Curse
+# is spelled with, as a rarity or a type, and the id namespaces the engine
+# mints them under (`statuses.STATUS_ID_PREFIX`; the `curse_` sheet rows).
+JUNK_KINDS = ("status", "curse")
+JUNK_ID_PREFIXES = ("status_", "curse_")
+
+
 @dataclass
 class Card:
     id: str
@@ -470,8 +477,16 @@ class Card:
         2026-08-23). One predicate shared by the conscript pool, the
         chosen-exhaust pool and the Charge funnel so the three cannot
         drift apart. Lives on Card because refpowers and effects both need
-        it and neither may import the other."""
-        return self.rarity in ("status", "curse")
+        it and neither may import the other.
+
+        `EB-241`: asked three ways, any one of which is enough. RARITY (the
+        sheet rows: `curses.yaml`, Confiscated), TYPE (an enemy-injected
+        status is synthesized by `statuses.make_status` at type "status" and
+        rarity "basic", so a rarity-only read let Dazed through), and the ID
+        NAMESPACE (`status_` / `curse_`, which `curse_spore_mind` carries on
+        a skill-typed row)."""
+        return (self.rarity in JUNK_KINDS or self.type in JUNK_KINDS
+                or self.id.startswith(JUNK_ID_PREFIXES))
 
     @classmethod
     def from_dict(cls, d: dict) -> "Card":
