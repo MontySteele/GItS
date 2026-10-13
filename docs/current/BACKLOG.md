@@ -18,7 +18,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; read `cards_drawn_by_turn` in her next round, or check the relic in game.
 - Dahlia — Sacramental Shower and Raiden — Musou no Hitotachi print their damage as fixed text, so the face ignores Strength and Weak; move them to the computed damage token like the other Companions.
-- `build_pck` skips three copy blocks whose sources are missing locally: `klee\mod_image.png`, `kokomi\potions`, `varka\potions` (deploy 2026-10-11, 0.2.4849+next).
+- `build_pck` skips two copy blocks whose sources are missing locally: `klee\mod_image.png` (made by `tools/gen_mod_image.py`) and `kokomi\potions` (deploy 2026-10-11, 0.2.4849+next).
 - Furina wave 2 (2026-10-12): Bis! ("Whenever you Spend all your Fanfare, keep half") does not fire when a "Spend up to" card empties the bank; a seat read it the other way. Make the face say which Spends count.
 - Furina/Varka wave 2: the next-Attack bonus previews (Sturm und Drang, Vigor, Stoke the Flames) show on every Attack in hand though they pay one card; show them once, or say "next".
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
@@ -54,12 +54,11 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Card reward card off screen but still selectable by controller (user, co-op). Cause not found; `Diagnostics/RewardRowProbe.cs` writes a "reward row OFF SCREEN" WARN to godot.log naming the card and where its holder and body are; read that line after the next sighting and fix from it.
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning, where a Swirl or Crystallize on a burning enemy consumes the held Pyro and Burning keeps ticking; and Dendro ported as ruled (the non-reacting pairs, the Core rules and their previews), tested on Kirara and Emilie. Neither engine has Burning or Dendro today.
 - Show the amplifier: a Melt or Vaporize prints no factor on the face or in the seat log (Rosaria's Melt printed "Deal 15" from a written 9; "Vaporize on X" with no x1.5; Klee's log printed "nothing to amplify" beside a hit multiplied by 1.75); a hit carrying an element chosen at play (Four Winds' Ascension, Northwind Avatar) previews no amplifier either (multiplier pinned by `A_current_element_hit_amplifies_like_any_hit`).
-- Kokomi text: the Neow bundle's Plan gloss omits "instead of playing it now"; the Casket tip does not say it ignores a debuff from a reaction set off by its own hit.
+- Kokomi text: the Neow bundle's Plan gloss omits "instead of playing it now".
 - Kokomi's Plan list prints a waiting Plan's damage without the target's Vulnerable: a queued card is in no pile, so its numbers never refresh; `KokomiPlan.QueueRow` could send the front-target-folded number (`PlannedDamage(FrontEnemy, ...)`) for front-aimed Plans; `WrittenFrontDamage` has the same gap.
 - Kokomi: Smoggy ("you can only play 1 Skill per turn") refuses writing a Plan once a Skill is played; neither Smoggy's line nor the Bake-Kurage tip says writing a Plan counts as playing the card.
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
 - Furina: rename the four mismatched guest ids in one regen, moving their art keys with them, after [USER]'s run and never mid-save.
-- `EB-807` `Unknown RelicModel ID: RELIC.KLEEMOD-TAMANOOYAS_CASKET` once per boot is the owner's `progress.save` DiscoveredRelics list naming the retired relic (non-fatal); no alias is left in code. Harmless; drop the id from the save or let it be.
 - `EB-798` `ProtoKkBreakwater` is offered Nimble but Nimble pays it nothing (its only Block is the Plan's); planned-only Block is not `GainsBlock`, in both engines and `lint_enchant_parity`.
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
 - `EB-65` the four Furina power badges draw shrunk card portraits; they want badge-kind icons like Klee's.
@@ -69,13 +68,16 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
+- Furina screen (wave 2026-10-12): Crashing Waves silently spends Fanfare under 4 for no hit; Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
+- Varka screen (wave 2026-10-12): Sayu's random Swirl gives no warning on an enemy with no aura; Amber: Sharpshooter's "if the enemy already has Pyro" loses its second hit when a Melt eats the Pyro first; Cycle of Seasons' damage has no line of its own on the played page.
+- Vambrace's preview shows doubled Block on every Block card in hand, but only the first Block card each combat doubles; a Kokomi seat spent it early on that reading (round 2 2026-10-12, lane 4b).
+- Kokomi text (jellyfish round 2026-10-12): the Plan tip does not say whether Strength adds to Plan damage.
+- Varka text (ascension check 2026-10-12): a Knight Companion's element switch (Team Effort) shows only after the play; Kindled Edge switched him to Pyro with no "Element switch" line; Four Winds' Ascension returns after a mid-fight reshuffle, unprinted.
 
 ### Klee faces (under the freeze: fix on `klee-next`)
 
 - The printed Bomb number leaves out Boom Badge's doubling (also after Boom Badge+ is played), Weak, Durin's Dark +6 and Hardened Shell's cap; the test relic's "Bomb 6" shows as 10 on her first turn with no word why.
 - Big Badda Boom: "then damage equal to what your Bombs dealt" does not say whether Bombs set off earlier in the turn count, counts only damage past Block, and it is unclear whether Boom Badge doubles it.
-- Treasure Map plays and spends its Energy with no Set off card in the discard pile, and its face does not say it needs one.
-- Jumpy Dumpty prints "place a Mine 3 on ALL enemies" but refuses to play without a named target (it aims the first Bomb); the face does not say a target is needed.
 - Ka-pow!'s Set off reaches only the targeted enemy's Bombs and seemed to set off only the oldest Bomb once (check the code); nothing on the card says so.
 - Mine text does not say whether the enemy's other Bombs go off with it, or that it consumes the aura set for the big Bomb.
 - Jean+ is switched off when Dodoco+'s Mine goes off on the enemy's turn ("a Bomb went off last turn"); the face does not say so.
@@ -94,17 +96,13 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
 - Incoming ignores Mines that fire first and Look Out!'s Block from them; the "Put Mine N on ..." lines after Big Badda Boom read as five Mines from one Bomb.
 - Ka-pow!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
-- The glossary's Bomb entry ("Only Vulnerable and the HP cap move it") and Set off entry ("A random one picks a Bombed enemy first") read as unclear.
 - The resolution rows do not say which hit was which (Four Winds' Ascension+ read "2, 3, 9, 36" unlabelled); needs a source label per hit on `ResolutionLedger`'s wire and in `blindplay_render`'s hit rows.
 - Draws made by effects print nothing (Eye of Stormterror on a Swirl, Static Field, Tempest Charge); list cards drawn outside the turn's draw in "Since last page".
 - Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it".
 - Oathsworn Strike's line printed "Deals 29" and hit 31 on a Vulnerable target; the hand preview folds no target's Vulnerable, and the page does not say so.
 - An autoplaying relic (the Earring) plays the first turn with no line saying what it will play or played.
-- Copy numbers renumber after a play, so "Frantic Escape (2)" picked the other copy; name copies by something stable (cost or upgrade) or warn on renumber.
-- Open the Casket was tried from hand while it sat in the discard pile; the page should print the pile it is in.
-- The Tamakushi Casket printed "(1)" between fights; its counter is combat-only (`TamakushiCasket.ShowCounter`), so the page reads `DisplayAmount` before combat state clears.
+- Copy numbers renumber after a play, so "Frantic Escape (2)" picked the other copy; name copies by something stable (cost or upgrade) or warn on renumber. The bridge renumbers mid-turn too ("Sting (3)" vanished after a play and the next command was refused; Kokomi jellyfish round 2026-10-12, lane 1).
 - A Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained; check the brief page lists the player's debuffs.
-- The Weak gloss says it cuts a Bomb's damage (it does not: a Bomb carries the target's modifiers only).
 - The Tainted per-hit note still gives two readings for a multi-hit, the same double count the Weak note had before #650.
 - Pocket Match's play log listed 3 and left out its own 5 damage.
 - Tender prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only.
@@ -135,6 +133,9 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - A Plan carried out with no living enemy to aim at (an earlier Plan that morning killed it) prints "no enemy lost HP", like a Plan that missed (Kokomi round 5, lane 3). The wire cannot tell the two apart: `KokomiPlan.Hit` returns null when `Aimed` finds no living body, so the row is `number` null, `moved` []; add a field to `CarriedOutRow` (e.g. `no_target`) and print "its target was already dead" in `blindplay_render._render_moved`.
 
 - Furina's Incoming forecast leaves out the guests' end-of-turn Block (Freminet), so it reads too pessimistic; and Frozen on a boss, and whether a guest's act ends a freeze, are not printed (round 2026-10-12, lane 2).
+- Seat page: the note "Face numbers leave out the enemy's Vulnerable and Slow until a card is aimed" (`understudy/blindplay_notes.py` ENEMY_FOLD_NOTE) read as wrong to a Kokomi seat beside faces that already folded Vulnerable (round 1 2026-10-12, lane 5b); check which faces fold it and say so per card.
+- Seat page: `choose` prints "Took: X" before the bridge refuses it (seen when choosing mid-greeting); print "Took" only after the game accepts.
+- Seat page: an Ancient's greeting text is not printed, only "(the scene is still being told)"; print the dialogue lines so seats read the story.
 
 ## Harness, bridge and tools
 
@@ -164,38 +165,19 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Sim
 
-- Kokomi status batch: the stock sim pilot cannot read the next-hand Plans (Kelp Wall's count, Tidecleanse, Sea Glass Harvest, Turning Tide) or plan for statuses it has not drawn; their census rates are unread.
-- Pool completion: run paper sec.7's sim checks on the built pools (`review/ruled/pool-completion-2026-10-01.md`): each of Kokomi's four decks within 10 points of Plan volume with the new Rares granted, and no new card taken from over 70% of offers or played in under 5% of the fights where it is held.
 - The sim's last shipped-kit leftovers (after #975): the shipped Fanfare meter, the shipped Bomb detonation, and the encore, kurage and burst telemetry readers wired into `model.py` and `runner.py`; delete them.
 - Legacy cleanup stage 6: one shipped leftover stays in every generated card because removing it changes the emitted C# of current rows: the Spotlight print fold (`SpotlightSystem.PrintedDamage/PrintedBlock*`, `SpotlitBlockVar`, the codegen's `spotlight_calc_rider` / `spotlight_block_rider`). Drop it in one regen with a deploy check, riding Klee's next promotion PR.
 - The old shipped `BombPower.cs` is placed by no card (its keyword row, `KleeKeywords.Bomb` and `includesBombRules` went in #972) but 9 C# test files, `PlayTelemetry` and two relics' listener bus still read it; move those readers and delete it.
 - `tools/card_connectivity_report.py` does not know the current kits' Plan, Stage and overhaul ops; its row-classification test is `xfail(strict)` until the vocabulary covers them.
 - `EB-241` `Card.is_junk` is rarity-only; make it type- and namespace-aware.
-- `EB-32` the pilot block-panic rung; lands under its own `POLICY_VERSION` bump and window.
 - `M13` `ROUTE_REGRET_MARGIN` has no derivation (Option D, no margin, stands); draft the slate and build `C2` (`review/records/regret-margin-registration-2026-08-12.md`).
 - `EB-84` enchant eligibility live smoke: three of four shapes watched; the `souls_power` to local Exhaust shape still needs a door (an Exhaust-enchant grantor with a Power in the deck).
-- The pilot heuristic (`tier0/pilot/policy.py`) does not price the full-stage Bow, and it still counts an arrival act.
 
 ## Parked: start only when the named trigger fires
 
-- Parked by the measurement ruling (2026-10-05: a Balance kit is measured on the real game, so the sim re-baseline is not its gate); they wake only if the sim becomes a gate again:
-  - `EB-195` the next re-baseline window: one twelve-arm table carrying the HP moves, the `POLICY_VERSION` bump for `PILOT_BURST_DIVISOR`'s removal, `EB-255` and `EB-810`.
-  - `EB-255` `archetype_shares` excludes starters by rarity, so 13 starter rows read back as drafts; exclude by membership inside `EB-195`'s bump.
-  - `EB-810` the sim's act-2 Louse has no Curl Up 14; wire it inside `EB-195`'s bump.
-  - The tier-0.5 Aeonglass (`tier05/content/act3_pool.yaml`) lacks Withering Presence, the growing Strength ramp, Wither upgrades and Artifact, and its Ebb is a stale 22; port it from `docs/current/dossiers/enemies/aeonglass.md`.
 - `EB-70` the starter-offer retune (`EB-27p`); wakes when a kit's design sweep reaches the Wings / Little Hexenzirkul class (R134).
 - `EB-80` Kokomi prevention-on-curve review; wakes if a Kokomi playtest shows she needs more warding.
-- `EB-33/34/35` repricing exhibits (The Gallery Stirs 0.0 at offer, Vulnerable as a flat debuff, no defensive term in `_reaction_value`); wake when the `_static_power` repricing session convenes.
 - `EB-651` a doubled `The other side` heading seen once and not reproduced; wakes on a sighting carrying the page sha.
 - `EB-12` `bridge_unreachable` with the game alive, seen once; wakes on a second observation (`hangwatch` now classifies it).
 - `EB-15` the seed's `lobby` route is unreachable in standard singleplayer; wakes with a Custom run or a hosted lobby.
 - `SKIP-10.9` mechanics the sim does not model, promoted only on demand. Enemy: Back Attack, untargetable Burrow, Ethereal/Hex auras, pick-your-poison curses, damage caps (Hard to Kill, Plating, Hardened Shell), Artifact, Thorns, on-hit status injection, every-N-cards intents, buff-all-enemies, block-an-ally, random-no-repeat AI, self-stun, Slimed self-exhaust, the minor powers, Soul Siphon stat theft, Blessed Antler, Philosopher's Stone. C# with no sim twin: the deferred-settle machinery (`SpotlightSystem`, `FurinaResources`) and per-dealer reaction windows (R1).
-- Furina screen (wave 2026-10-12): Crashing Waves silently spends Fanfare under 4 for no hit; Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
-- Varka screen (wave 2026-10-12): Sayu's random Swirl gives no warning on an enemy with no aura; Amber: Sharpshooter's "if the enemy already has Pyro" loses its second hit when a Melt eats the Pyro first; Cycle of Seasons' damage has no line of its own on the played page.
-- Seat page: the note "Face numbers leave out the enemy's Vulnerable and Slow until a card is aimed" (`understudy/blindplay_notes.py` ENEMY_FOLD_NOTE) read as wrong to a Kokomi seat beside faces that already folded Vulnerable (round 1 2026-10-12, lane 5b); check which faces fold it and say so per card.
-- Vambrace's preview shows doubled Block on every Block card in hand, but only the first Block card each combat doubles; a Kokomi seat spent it early on that reading (round 2 2026-10-12, lane 4b).
-- Kokomi text (jellyfish round 2026-10-12): Tide Wall's Plan should say it reads the intent when carried out; the Plan tip should say Plan Block arrives at the start of next turn and whether Strength adds to Plan damage; Albedo - Solar Isotoma should say it needs an aura.
-- Bridge: card names renumber mid-turn ("Sting (3)" vanished after a play) and cause refusals; keep a card's name stable for the turn (Kokomi jellyfish round 2026-10-12, lane 1).
-- Varka text (ascension check 2026-10-12): a Knight Companion's element switch (Team Effort) shows only after the play; Kindled Edge switched him to Pyro with no "Element switch" line; Four Winds' Ascension returns after a mid-fight reshuffle, unprinted.
-- Seat page: `choose` prints "Took: X" before the bridge refuses it (seen when choosing mid-greeting); print "Took" only after the game accepts.
-- Seat page: an Ancient's greeting text is not printed, only "(the scene is still being told)"; print the dialogue lines so seats read the story.
