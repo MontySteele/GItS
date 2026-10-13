@@ -21,6 +21,12 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Varka wave, pick 1** (`review/records/varka-wave-2026-10-13.md`): an
+  element applied without a hit (Barbara, Rippling Guard) Vaporizes or Melts
+  for 0 and wastes the aura. (a) default: a hitless application never sets
+  off Melt or Vaporize and leaves the aura; (b) keep, print a warning;
+  (c) Varka's cards only.
+
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
