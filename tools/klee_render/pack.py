@@ -323,10 +323,14 @@ def main(argv=None) -> int:
         print(f"{clip:9s} {rec['count']:3d} frames  cell {rec['cell']}  grid {rec['hframes']}x{rec['vframes']}"
               f"  sheet {sheet.size}  origin {rec['origin']}")
 
-    # stance A measured at combat scale: the scale check
+    # the scale check, measured at combat scale on the upright reference still
+    # (clips.STAND), so the lower battle stance never reads as a smaller Klee;
+    # stance A's own height beside it
+    st = json.loads((R / "stand.json").read_text(encoding="utf-8"))
+    manifest["measure"] = body_metrics(R / "stand.png", st, COMBAT_SCALE)
     sa = json.loads((R / "stance_a.json").read_text(encoding="utf-8"))
-    manifest["measure"] = body_metrics(R / "stance_a.png", sa, COMBAT_SCALE)
-    print("stance A at 1080p:", manifest["measure"])
+    manifest["stance_a"] = body_metrics(R / "stance_a.png", sa, COMBAT_SCALE)
+    print("standing at 1080p:", manifest["measure"], " stance A:", manifest["stance_a"])
 
     # the ground shadow: one texture (2x, like the sheets), placed per figure
     full_h = manifest["measure"]["full_px"]

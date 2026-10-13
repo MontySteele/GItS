@@ -94,19 +94,36 @@ def pose(ops, morphs=None, yaw=YAW, held=1.0, thrown=None, thrown_spin=0.0, root
 
 
 # --------------------------------------------------------------------- stance A
-# Battle idle: the near (right) arm hangs at her side on screen-left, elbow a
-# little out, the bomb held by its cap beside her hip; the far hand is forward
-# at chest height, loosely closed (milestone 1's flat palm was a curl that never
-# ran: the finger bones are spelled with full-width digits).
+# Battle idle ([USER], 2026-10-13: "Agreed on the Silhouette change"): a wider,
+# lower stance than milestone 2's, the upper body leaning toward the enemy
+# (screen right), the chest still turned a little off-centre toward the viewer
+# as the base cast's are; the near (right) hand holds Jumpy Dumpty out in front
+# of her at its real size (about her head's), the far hand forward beside it.
+# Every combat clip plants her feet where stance A does (A_FRONT / A_BACK), so
+# a clip that starts or ends in idle never slides them.
 #
-# The near hand is placed from her right HIP, not the chest: placed from the
-# chest (milestone 2 as first shipped) it swung across her belly, the upper arm
-# hid behind the coat, and screen-left read as armless ([USER], 2026-10-13: "why
-# do the idle loop ones have no right arm (Left side)?").
+# The near hand is placed in FRONT of her chest, the arm reaching toward the
+# enemy, so it reads on its own: milestone 2 placed it across her belly from the
+# chest, the upper arm hid behind the coat, and screen-left read as armless
+# ([USER], 2026-10-13: "why do the idle loop ones have no right arm (Left side)?").
+A_DROP = 0.12           # hips lowered (milestone 2: 0.055)
+A_LEAN = 13.0           # upper body toward the enemy, degrees (milestone 2: 4)
+A_FRONT = 0.17          # far foot toward the enemy (milestone 2: 0.11)
+A_BACK = 0.15           # near foot back (milestone 2: 0.10)
+A_HEAD_TILT = -4.0      # the head takes back part of the lean
+NEAR_HOLD = (0.12, -0.065, -0.13)     # the bomb hand, from the chest
+HOLD_POLE = (-0.4, 0.6, -1.0)
+NEAR_HOLD_CURL = (22, 12)
+#: Jumpy Dumpty: radius in model units (her head is ~0.24 wide; milestone 2's
+#: bomb was 0.052, a fist-sized toy), and where it sits on her near hand in
+#: stance A, from the 手先.R bone head (render.py parents it to the wrist there).
+BOMB_R = 0.115
+HELD_AT = (0.07, 0.04, 0.08)
+HELD_YAW = 20.0
 HIP = "足.R"
 NEAR_HANG = (-0.09, -0.06, 0.06)
 HANG_POLE = (-1.0, 0.5, 0.0)
-FAR_READY = (0.24, -0.02, 0.02)
+FAR_READY = (0.29, -0.015, 0.0)
 FAR_CURL = (55, 30)
 SMIRK = {"にやり": 0.6}
 #: The morphs that swap her eyes for the drawn overlay (the 表情 material):
@@ -126,11 +143,11 @@ def idle_pose(breath=0.0, sway=0.0, blink=0.0, swing=0.0):
         m["ウィンク"] = blink
         m["ウィンク右"] = blink
     return pose(
-        stance(drop=0.055 + 0.006 * (1 - b), lean=4.0 + 1.5 * (1 - b), head_nod=3.0 + 1.5 * (1 - b),
-               sway=0.004 * sway)
-        + arms((NEAR_HANG[0], NEAR_HANG[1], NEAR_HANG[2] - 0.008 * (1 - b)),
+        stance(drop=A_DROP + 0.006 * (1 - b), lean=A_LEAN + 1.5 * (1 - b), head_nod=3.0 + 1.5 * (1 - b),
+               head_tilt=A_HEAD_TILT, front=A_FRONT, back=A_BACK, sway=0.004 * sway)
+        + arms((NEAR_HOLD[0], NEAR_HOLD[1], NEAR_HOLD[2] - 0.010 * (1 - b)),
                (FAR_READY[0] - 0.006 * (1 - b), FAR_READY[1], FAR_READY[2] - 0.014 * (1 - b)),
-               near_pole=HANG_POLE, near_anchor=HIP, far_curl=FAR_CURL)
+               near_pole=HOLD_POLE, near_curl=NEAR_HOLD_CURL, far_curl=FAR_CURL)
         + pigtails(swing=swing),
         m)
 
@@ -151,10 +168,11 @@ IDLE = {
 def low_pose(breath=0.0, swing=0.0):
     b = breath
     return pose(
-        stance(drop=0.075 + 0.006 * (1 - b), lean=11 + 2 * (1 - b), twist=-12, head_turn=40,
-               head_nod=13 + 2 * (1 - b), front=0.09, back=0.09)
-        + arms((-0.08, -0.05, 0.0 - 0.006 * (1 - b)), (0.15, -0.03, -0.12 - 0.01 * (1 - b)),
-               near_pole=HANG_POLE, near_anchor=HIP, far_pole=(0.4, 0.4, -1.0), far_curl=(55, 28))
+        stance(drop=A_DROP + 0.02 + 0.006 * (1 - b), lean=A_LEAN + 7 + 2 * (1 - b), twist=-12, head_turn=40,
+               head_nod=13 + 2 * (1 - b), head_tilt=A_HEAD_TILT, front=A_FRONT, back=A_BACK)
+        + arms((NEAR_HOLD[0] - 0.01, NEAR_HOLD[1], NEAR_HOLD[2] - 0.05 - 0.006 * (1 - b)),
+               (FAR_READY[0] - 0.03, FAR_READY[1], FAR_READY[2] - 0.08 - 0.01 * (1 - b)),
+               near_pole=HOLD_POLE, near_curl=NEAR_HOLD_CURL, far_pole=(0.4, 0.4, -1.0), far_curl=(55, 28))
         + pigtails(swing=swing),
         {"困る": 0.8, "Eye_Tired": 0.7, "あ": 0.15})
 
@@ -176,7 +194,8 @@ IDLE_LOW = {
 
 def windup(k=1.0):
     return pose(
-        stance(drop=0.07, lean=-6 * k + 4 * (1 - k), twist=-6, head_turn=50, front=0.13, back=0.12)
+        stance(drop=A_DROP + 0.015, lean=-6 * k + A_LEAN * (1 - k), twist=-6, head_turn=50,
+               front=A_FRONT, back=A_BACK)
         + arms((-0.20, -0.06, 0.25), (0.27, -0.02, 0.10), near_pole=(-0.4, -0.6, -0.6), far_curl=(30, 12))
         + pigtails(swing=-6 * k),
         {"にやり": 0.9, "あ": 0.2})
@@ -184,7 +203,8 @@ def windup(k=1.0):
 
 def release(held=1.0, thrown=None):
     return pose(
-        stance(drop=0.08, lean=12, twist=4, head_turn=34, front=0.14, back=0.12)
+        stance(drop=A_DROP + 0.025, lean=A_LEAN + 8, twist=4, head_turn=34, head_tilt=A_HEAD_TILT,
+               front=A_FRONT, back=A_BACK)
         + arms((0.24, -0.08, 0.16), (-0.08, 0.06, -0.12), near_pole=(0, 0.3, -1),
                far_pole=(0.6, 0.3, -0.5), near_curl=(12, 4), far_curl=(45, 15))
         + pigtails(swing=8),
@@ -193,7 +213,8 @@ def release(held=1.0, thrown=None):
 
 def follow(held=0.0):
     return pose(
-        stance(drop=0.075, lean=10, twist=0, head_turn=40, front=0.14, back=0.12)
+        stance(drop=A_DROP + 0.02, lean=A_LEAN + 6, twist=0, head_turn=40, head_tilt=A_HEAD_TILT,
+               front=A_FRONT, back=A_BACK)
         + arms((0.20, -0.10, -0.02), (-0.04, 0.05, -0.12), near_pole=(0, 0.3, -1),
                far_pole=(0.6, 0.3, -0.5), near_curl=(30, 10), far_curl=(45, 15))
         + pigtails(swing=4),
@@ -220,15 +241,15 @@ ATTACK = {
 
 def recoil(k=1.0):
     return pose(
-        [("movew", "センター", (-0.03 * k, 0, -0.055 - 0.01 * k)),
-         ("movew", "足ＩＫ.L", (0.08, 0.015, 0)),
-         ("movew", "足ＩＫ.R", (-0.10, -0.01, 0)),
-         ("rotw", "上半身", Y, 4 - 22 * k),
+        [("movew", "センター", (-0.03 * k, 0, -A_DROP - 0.01 * k)),
+         ("movew", "足ＩＫ.L", (A_FRONT, 0.015, 0)),
+         ("movew", "足ＩＫ.R", (-A_BACK, -0.01, 0)),
+         ("rotw", "上半身", Y, A_LEAN - 26 * k),
          ("rotw", "上半身", Z, -14 - 4 * k),
          ("rotw", "首", Z, 20 - 4 * k),
          ("rotw", "頭", Z, 30 - 6 * k),
          ("rot", "頭", X, 3 + 4 * k),
-         ("rotw", "頭", Y, -10 * k),
+         ("rotw", "頭", Y, A_HEAD_TILT * (1 - k) - 10 * k),
          ("rotw", BAG, Z, -25)]
         + arms((0.06 - 0.01 * k, -0.11, -0.16 + 0.20 * k), (0.24 - 0.10 * k, -0.04, 0.02 + 0.06 * k),
                near_pole=(-0.6, 0.2, -0.6), far_pole=(0.6, 0.3, -1), near_curl=(55, 25), far_curl=(55, 25))
@@ -267,7 +288,7 @@ def death_pose(kind):
                     far_pole=(0.6, 0.3, -1), near_curl=(30, 10), far_curl=(30, 10))
         ops += pigtails(swing=6)
         return pose(ops, {"はぅ": 1.0, "あ": 0.3}, held=0.0,
-                    thrown=(0.10, -0.12, 0.06))
+                    thrown=(0.14, -0.14, BOMB_R))
     # sat down hard on the ground, legs out in front, slumped and dizzy
     ops = [("move", "センター", (-0.02, 0, -0.45)),
            ("movew", "足ＩＫ.L", (0.20, -0.16, 0)),
@@ -285,7 +306,7 @@ def death_pose(kind):
     ops += arms((-0.11, -0.03, -0.05), (0.13, -0.06, -0.33), near_pole=(-1.0, 0.3, 0.3),
                 far_pole=(0.6, 0.3, 0.2), near_curl=(25, 8), far_curl=(25, 8), near_anchor=HIP)
     ops += pigtails(swing=-5)
-    return pose(ops, {"はぅ": 1.0, "あ": 0.35, "困る": 0.6}, held=0.0, thrown=(0.30, -0.14, 0.05),
+    return pose(ops, {"はぅ": 1.0, "あ": 0.35, "困る": 0.6}, held=0.0, thrown=(0.34, -0.16, BOMB_R),
                 thrown_spin=200)
 
 
@@ -294,7 +315,7 @@ DEATH = {
     "keys": [
         (0.0, idle_pose(0.5), "io"),
         (0.12, recoil(1.0), "out"),
-        (0.25, recoil(1.0) | {"held": 0.0, "thrown": (0.06, -0.12, 0.45)}, "io"),
+        (0.25, recoil(1.0) | {"held": 0.0, "thrown": (0.20, -0.14, 0.45)}, "io"),
         (0.62, death_pose("kneel"), "in"),
         (0.95, death_pose("sit"), "in"),
         (1.10, death_pose("sit") | {"root": (0, 0, 0.025)}, "out"),
@@ -309,11 +330,11 @@ DEATH = {
 
 def cheer(k=1.0, crouch=0.0):
     return pose(
-        stance(drop=0.055 + 0.05 * crouch, lean=4 - 8 * k, twist=-16, head_turn=46, head_nod=3 - 8 * k,
-               front=0.10, back=0.09)
-        + arms((NEAR_HANG[0] - 0.01 * k, NEAR_HANG[1], NEAR_HANG[2] + 0.05 * k),
+        stance(drop=A_DROP + 0.05 * crouch, lean=A_LEAN - 12 * k, twist=-16, head_turn=46, head_nod=3 - 8 * k,
+               head_tilt=A_HEAD_TILT * (1 - k), front=A_FRONT, back=A_BACK)
+        + arms((NEAR_HOLD[0] - 0.02 * k, NEAR_HOLD[1], NEAR_HOLD[2] + 0.03 * k),
                (0.20 - 0.04 * k, -0.06, 0.02 + 0.30 * k),
-               near_pole=HANG_POLE, near_anchor=HIP, far_pole=(0.4, 0.4, -1), far_curl=(40 - 22 * k, 14))
+               near_pole=HOLD_POLE, near_curl=NEAR_HOLD_CURL, far_pole=(0.4, 0.4, -1), far_curl=(40 - 22 * k, 14))
         + pigtails(swing=-4 * k + 4 * crouch, lift=8 * k),
         {"にこり": 0.6 + 0.4 * k, "あ": 0.5 * k})
 
@@ -343,8 +364,9 @@ def boom(k=1.0, crouch=0.0, lift=0.0, mouth=0.0):
     """k 0..1 raises both fists from the chest to above her head; crouch bends
     the knees; lift flicks the pigtails up (negative: they lag down)."""
     return pose(
-        stance(drop=0.055 + 0.08 * crouch, lean=4 - 7 * k + 6 * crouch, twist=-16 + 4 * k, head_turn=40 - 10 * k,
-               head_nod=3 - 9 * k + 6 * crouch, front=0.10 + 0.01 * crouch, back=0.09 + 0.01 * crouch)
+        stance(drop=A_DROP + 0.06 * crouch, lean=A_LEAN - 13 * k + 6 * crouch, twist=-16 + 4 * k,
+               head_turn=40 - 10 * k, head_nod=3 - 9 * k + 6 * crouch, head_tilt=A_HEAD_TILT * (1 - k),
+               front=A_FRONT, back=A_BACK)
         + arms((-0.10 - 0.04 * k, -0.07 + 0.02 * k, 0.02 + 0.27 * k),
                (0.13 + 0.04 * k, -0.07 + 0.02 * k, 0.02 + 0.27 * k),
                near_pole=(-1.0, 0.2, -0.5), far_pole=(1.0, 0.2, -0.5),
@@ -407,7 +429,7 @@ REST = pose(
      ("curl", "R", 35, 12),
      ("hand", "L", "ひざ.L", (0.0, -0.02, 0.04), (0.6, 0.2, -1)),
      ("curl", "L", 35, 12)],
-    {"にこり": 0.8}, yaw=45, held=0.0, thrown=(-0.17, -0.12, 0.05))
+    {"にこり": 0.8}, yaw=45, held=0.0, thrown=(-0.25, -0.12, BOMB_R))
 
 # --------------------------------------------------------------------- character select
 # A waist-up close-up of stance B: grinning, the bomb cradled at her chest,
@@ -436,5 +458,16 @@ CLIPS = {
     "merchant": MERCHANT,
 }
 
-STILLS = {"rest": REST, "select": SELECT, "portrait": PORTRAIT, "stance_a": IDLE["keys"][0][1]}
+# --------------------------------------------------------------------- scale reference
+# Milestone 2's upright stance A, without the bomb: the still pack.py measures
+# her on-screen height on, so the ruled scale (about 165 px hat to boot at
+# 1080p) is checked on a standing figure and a lower battle stance never reads
+# as a smaller Klee.
+STAND = pose(
+    stance()
+    + arms(NEAR_HANG, (0.24, -0.02, 0.02), near_pole=HANG_POLE, near_anchor=HIP, far_curl=FAR_CURL),
+    SMIRK, held=0.0)
+
+STILLS = {"rest": REST, "select": SELECT, "portrait": PORTRAIT, "stance_a": IDLE["keys"][0][1],
+          "stand": STAND}
 

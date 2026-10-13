@@ -59,9 +59,64 @@ def test_the_manifest_was_rendered_at_the_ruled_scale():
         assert frames["sheets"][clip]["ppu"] == build.COMBAT_PPU, clip
     assert frames["combat_scale"] == pack.COMBAT_SCALE
     m = frames["measure"]
-    # 4'2" against 5'6"-5'10": 0.71-0.76 of an adult, hat to boot / to the feather.
+    # 4'2" against 5'6"-5'10": 0.71-0.76 of an adult, hat to boot / to the feather,
+    # measured standing (clips.STAND): the battle stance's crouch is pose, not scale.
     assert 0.68 <= m["hat_to_boot_px"] / BASE_ADULT_PX <= 0.78
     assert 0.68 <= m["full_px"] / BASE_ADULT_PX <= 0.78
+    assert "stand" in next(j for j in build.JOBS if j["ppu"] == build.COMBAT_PPU)["stills"].split(",")
+    # the battle stance is lower than standing, and wider
+    a = frames["stance_a"]
+    assert a["hat_to_boot_px"] < m["hat_to_boot_px"] and a["width_px"] > m["width_px"]
+
+
+def _op(pose, kind, bone):
+    return next(op for op in pose["ops"] if op[0] == kind and op[1] == bone)
+
+
+def test_stance_a_is_wide_low_and_leans_toward_the_enemy():
+    # [USER], 2026-10-13: "Agreed on the Silhouette change" -- a wider, lower
+    # stance leaning toward the enemy (screen right), a head-sized bomb held out
+    # in front; the chest stays turned a little off-centre toward the viewer.
+    idle, stand = clips.idle_pose(0.0), clips.STAND
+    assert _op(idle, "movew", "足ＩＫ.L")[2][0] > _op(stand, "movew", "足ＩＫ.L")[2][0]
+    assert _op(idle, "movew", "足ＩＫ.R")[2][0] < _op(stand, "movew", "足ＩＫ.R")[2][0]
+    assert _op(idle, "move", "センター")[2][2] < _op(stand, "move", "センター")[2][2]
+    lean = [op for op in idle["ops"] if op[:3] == ("rotw", "上半身", clips.Y)][0][3]
+    assert lean >= 10, "leans toward the enemy (+X)"
+    twist = [op for op in idle["ops"] if op[:3] == ("rotw", "上半身", clips.Z)][0][3]
+    assert twist < 0 and idle["yaw"] == clips.YAW, "chest still off-centre toward the viewer"
+    assert idle["held"] == 1.0 and clips.BOMB_R >= 0.10, "Jumpy Dumpty about her head's size"
+    near = next(op for op in idle["ops"] if op[:2] == ("hand", "R"))
+    assert near[2] == clips.CH and near[3][0] > 0, "the bomb hand reaches toward the enemy"
+
+
+def test_every_combat_clip_that_leaves_idle_keeps_her_feet_planted():
+    # Feet are IK targets; if a key moved them, the blend out of idle would slide them.
+    feet = [("movew", "足ＩＫ.L"), ("movew", "足ＩＫ.R")]
+    a = clips.idle_pose(0.5)
+    for name in ("idle", "idle_low", "attack", "hurt", "cast", "setoff"):
+        clip = clips.CLIPS[name]
+        for _t, pose, _e in clip["keys"]:
+            for kind, bone in feet:
+                assert _op(pose, kind, bone)[2] == _op(a, kind, bone)[2], (name, _t, bone)
+        if name not in ("idle", "idle_low"):
+            assert clip["keys"][0][1] == a and clip["keys"][-1][1]["ops"] == a["ops"], name
+
+
+def test_style_is_h1_plus_h3_lite():
+    # [USER], 2026-10-13: "Let's do H1 + H3 lite."
+    render = (ROOT / "tools" / "klee_render" / "render.py").read_text(encoding="utf-8")
+    assert '"shadow": (0.52, 0.37, 0.40)' in render and '"mid_at": 0.30, "light_at": 0.52' in render
+    assert '"light": (0.94, 0.92, 0.91)' in render
+    post = _load("post")
+    assert post.H3_KNEE == 20.0 and abs(post.H3_SQUEEZE - 0.808) < 1e-9
+    import numpy as np
+    rgb = np.array([[[0.86, 0.13, 0.08], [0.5, 0.5, 0.5]]], np.float32)
+    lab0, lab1 = post.to_lab(rgb), post.to_lab(post.h3_lite(rgb))
+    c0, c1 = np.hypot(lab0[..., 1], lab0[..., 2]), np.hypot(lab1[..., 1], lab1[..., 2])
+    assert abs(c1[0, 0] - (20 + (c0[0, 0] - 20) * post.H3_SQUEEZE)) < 0.5   # chroma squeezed
+    assert abs(lab1[0, 0, 0] - lab0[0, 0, 0]) < 0.5                          # L* kept
+    assert abs(c1[0, 1] - c0[0, 1]) < 0.5                                     # a grey untouched
 
 
 def test_split_thrown_lifts_the_free_bomb_out_of_the_cells_once():

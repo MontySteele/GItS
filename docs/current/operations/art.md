@@ -46,9 +46,9 @@ regenerate; never hand-edit the scene.
 Every state, Set Off's cheer included, draws Klee as `Visuals/Facing/Model`,
 one Sprite2D per frame sheet
 rendered from the official Klee model by `tools/klee_render/` (Blender +
-mmd_tools; `clips.py` poses, `render.py` renders (style G's shader half plus a
+mmd_tools; `clips.py` poses, `render.py` renders (style H1 + H3 lite's shader half, H1, plus a
 `style` pass: the face/bomb protect mask and her surface-space grain),
-`post.py` paints style G's 2D half over every raw frame (numpy + Pillow),
+`post.py` paints the 2D half (style G's chain plus H3 lite) over every raw frame (numpy + Pillow),
 `pack.py` packs, `build.py` runs the lot). **The model never enters the repo or ImageGen** (its terms
 forbid redistribution); only the renders do.
 
@@ -64,7 +64,7 @@ ground shadow `klee_shadow.png` among them),
 manifest `tools/klee_rig/klee_frames.json` (cells, counts, times, feet
 anchors, no pixels) that `gen` reads for `combat.tscn` and the merchant scene
 `pck-src/klee/model/merchant_character.tscn`. The scale lives in `build.py`:
-300 texture px per model unit drawn at 0.5, so about 165 px hat-to-boot at
+300 texture px per model unit drawn at 0.5, so about 165 px hat-to-boot standing (`clips.STAND`) at
 1080p.
 
 `klee_frames.json` is the only art-derived input, so `gen` and
