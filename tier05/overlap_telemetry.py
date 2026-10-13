@@ -80,12 +80,6 @@ whoever compares against it later:
   * honor_guard is drafted 0.0% in priest and assist cells -- it is
     `archetypes: [commander]`, so its columns are structurally empty
     elsewhere. Read this table PER PLAN or the zeroes will read as a finding.
-
-RELATED, AND NOT THE SAME INSTRUMENT. kurage_telemetry also prints a block
-labelled C4 ("Before Sun and Moon overlap"). That one is measured at PULSE
-time -- what the amp was worth when the jellyfish fired. This one is measured
-at DECK and PLAY time. They answer different halves of the same ratification
-and neither replaces the other.
 """
 
 from __future__ import annotations
@@ -120,8 +114,7 @@ def trace(log: list[dict]) -> OverlapTrace:
 
     Taken from the log rather than from a counter on the player because the
     fight log does not survive onto the RunResult -- only the reduced trace
-    does, the same reason burst_telemetry and kurage_telemetry are shaped this
-    way. Powers are counted as plays: `before_sun_and_moon` is a Power, so it
+    does. Powers are counted as plays: `before_sun_and_moon` is a Power, so it
     is cast exactly once per copy per combat, and that IS its play rate.
     """
     out = OverlapTrace()
@@ -155,11 +148,11 @@ def aggregate(results: list) -> dict:
     plays: dict[str, list[int]] = {c: [] for c in WATCHED}
     wins = [bool(r.won) for r in results]
 
-    # STRICT attribute access, not getattr-with-default. The runner already
-    # reads kurage_traces this way on purpose: a default here would swallow a
-    # real RunResult regression -- the field silently disappearing would render
-    # as "nobody played these cards", which is a legible and completely wrong
-    # answer. A missing field should be an AttributeError, loudly.
+    # STRICT attribute access, not getattr-with-default: a default here
+    # would swallow a real RunResult regression -- the field silently
+    # disappearing would render as "nobody played these cards", which is a
+    # legible and completely wrong answer. A missing field should be an
+    # AttributeError, loudly.
     for r in results:
         deck = list(r.deck_ids or [])
         per_card: dict[str, int] = {}
