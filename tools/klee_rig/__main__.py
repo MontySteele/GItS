@@ -1,7 +1,7 @@
 """Klee mesh rig: generate, check, extract, verify, render.
 
-    python -m tools.klee_rig gen                    # write combat.tscn
-    python -m tools.klee_rig gen --check            # exit 1 if combat.tscn is stale
+    python -m tools.klee_rig gen                    # write combat.tscn + merchant_character.tscn
+    python -m tools.klee_rig gen --check            # exit 1 if either scene is stale
     python -m tools.klee_rig extract [--art-root <main checkout>] [--check]
     python -m tools.klee_rig verify [--art-root <main checkout>] [--godot]
     python -m tools.klee_rig render --out <dir> [--art-root <main checkout>]
@@ -40,17 +40,19 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     if args.cmd == "gen":
-        text = rig.render_scene()
-        if args.check:
-            current = rig.SCENE.read_text(encoding="utf-8") if rig.SCENE.exists() else ""
-            if current != text:
-                print(f"STALE: {rig.SCENE} differs from the generator; run `python -m tools.klee_rig gen`.")
-                return 1
-            print("combat.tscn is current.")
-            return 0
-        rig.SCENE.write_text(text, encoding="utf-8", newline="\n")
-        print(f"wrote {rig.SCENE.relative_to(rig.ROOT)} ({len(text)} bytes)")
-        return 0
+        stale = 0
+        for path, text in ((rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene())):
+            if args.check:
+                current = path.read_text(encoding="utf-8") if path.exists() else ""
+                if current != text:
+                    print(f"STALE: {path} differs from the generator; run `python -m tools.klee_rig gen`.")
+                    stale = 1
+                else:
+                    print(f"{path.name} is current.")
+                continue
+            path.write_text(text, encoding="utf-8", newline="\n")
+            print(f"wrote {path.relative_to(rig.ROOT)} ({len(text)} bytes)")
+        return stale
 
     if args.cmd == "extract":
         from . import cells

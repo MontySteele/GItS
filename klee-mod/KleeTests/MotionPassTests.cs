@@ -90,6 +90,42 @@ public class MotionPassTests
     }
 
     [Fact]
+    public void Set_off_takes_its_own_state_and_falls_back_to_the_attack()
+    {
+        var withSetOff = Full.Append("setoff").ToArray();
+        Assert.Equal("setoff", Select("SetOff", false, withSetOff));
+        Assert.Equal("setoff", Select("SetOff", true, withSetOff));
+        // Every other scene: the lunge, as the card's attack would have.
+        Assert.Equal("attack", Select("SetOff", false, Full));
+        Assert.Equal("attack", Select("SetOff", false, Contract));
+    }
+
+    [Fact]
+    public void A_set_off_clip_absorbs_the_cards_own_lunge_but_not_a_hit()
+    {
+        bool Absorbed(string? current, string trigger) => (bool)Router()
+            .GetMethod("AbsorbedBy", All)!.Invoke(null, new object?[] { current, trigger })!;
+
+        Assert.True(Absorbed("setoff", "Attack"));
+        Assert.True(Absorbed("setoff", "Cast"));
+        Assert.True(Absorbed("setoff", "PowerUp"));
+        Assert.False(Absorbed("setoff", "Hit"));
+        Assert.False(Absorbed("setoff", "Dead"));
+        Assert.False(Absorbed("idle", "Attack"));
+        Assert.False(Absorbed(null, "Attack"));
+    }
+
+    [Fact]
+    public void Klees_scene_opts_in_to_the_idle_desync()
+    {
+        var scene = RepoFile("klee-mod/pck-src/klee/model/combat.tscn");
+        var key = (string)Il.Method("IdleDesync", "Apply").DeclaringType!
+            .GetField("OptInMeta", All)!.GetValue(null)!;
+        Assert.Contains($"metadata/{key} = true", scene);
+        Assert.Contains("states/setoff/node = SubResource(", scene);
+    }
+
+    [Fact]
     public void Low_health_is_the_bases_quarter_line()
     {
         // CharacterModel.IsLowHealth: GetHpPercentRemaining() <= 0.25.
@@ -149,9 +185,11 @@ public class MotionPassTests
     }
 
     [Theory]
-    [InlineData("klee-mod/pck-src/klee/model/combat.tscn")]
-    [InlineData("klee-mod/pck-src/furina/model/combat.tscn")]
-    public void Klee_and_Furina_carry_the_three_new_states(string path)
+    // Klee's one-shots run on the base game's clock since her model frames
+    // (2026-10-12: base casts 0.97-1.8 s); Furina's keep the motion pass's.
+    [InlineData("klee-mod/pck-src/klee/model/combat.tscn", 0.9, 1.1)]
+    [InlineData("klee-mod/pck-src/furina/model/combat.tscn", 0.3, 0.5)]
+    public void Klee_and_Furina_carry_the_three_new_states(string path, double min, double max)
     {
         var scene = RepoFile(path);
         foreach (var state in new[] { "cast", "power", "idle_low" })
@@ -160,14 +198,14 @@ public class MotionPassTests
             Assert.Contains($"&\"{state}\": SubResource(\"Animation_{state}\")", scene);
         }
 
-        // Each one-shot is short (the base's own cast windows are 0.25-0.5 s)
-        // and returns to idle on its own.
+        // Each one-shot has its scene's own length band and returns to idle
+        // on its own.
         foreach (var state in new[] { "cast", "power" })
         {
             var length = double.Parse(Regex.Match(scene,
                 $"resource_name = \"{state}\"\\nlength = ([0-9.]+)").Groups[1].Value,
                 System.Globalization.CultureInfo.InvariantCulture);
-            Assert.InRange(length, 0.3, 0.5);
+            Assert.InRange(length, min, max);
             Assert.Contains($"\"{state}\", \"idle\", SubResource(", scene);
         }
 

@@ -27,6 +27,8 @@ internal static class KleeSceneTelemetry
         "klee/model/combat_visuals.tscn",
         "klee/model/rest_character.tscn",
         "klee/model/character_sprite.tscn",
+        // Her model-frame shop idle since 2026-10-12 (tools/klee_rig).
+        "klee/model/merchant_character.tscn",
         "klee/ui/character_icon.tscn",
         "klee/ui/char_select_bg_klee.tscn",
         "furina/model/combat.tscn",

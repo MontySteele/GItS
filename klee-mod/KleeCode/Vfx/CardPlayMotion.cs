@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HarmonyLib;
+using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -43,6 +44,16 @@ internal static class CardPlayMotion
 {
     internal const string CastTrigger = "Cast";
     internal const string PowerUpTrigger = "PowerUp";
+    internal const string SetOffTrigger = "SetOff";
+
+    /// <summary>
+    /// A Set Off card of this mod plays Klee's Set Off clip, whatever its
+    /// type: the floating-bombs splash kept as alt-art for exactly these
+    /// plays (review/active/klee-visual-paper-2026-10-12.md). Same delay as
+    /// a cast. A scene without a `setoff` state lunges as for an attack.
+    /// </summary>
+    internal static bool IsSetOffPlay(CardModel card, bool definedByThisMod)
+        => definedByThisMod && card is ISetOffCard;
 
     /// <summary>
     /// The trigger a play of this card should send, or null for none. Pure:
@@ -73,7 +84,8 @@ internal static class CardPlayMotion
 
         RefreshLowHealth(card);
 
-        var trigger = TriggerFor(card.Type, DefinedByThisMod(card));
+        var ours = DefinedByThisMod(card);
+        var trigger = IsSetOffPlay(card, ours) ? SetOffTrigger : TriggerFor(card.Type, ours);
         if (trigger == null) return;
         var character = card.Owner!.Character;
         var delay = trigger == PowerUpTrigger

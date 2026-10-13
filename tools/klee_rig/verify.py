@@ -8,8 +8,11 @@ Static (no art, no engine; tier0/tests/test_klee_rig.py runs these):
     old centred sprite's corner), every vertex's weights sum to 1 with at
     most four bones, and every Bone2D's position equals its rest;
   * the contract: Visuals/Facing/Rig, Bounds, CenterPos, IntentPos,
-    AnimationPlayer, AnimationTree, the seven states plus RESET, the
-    one-shot lengths, the state machine block, and every track's node exists.
+    AnimationPlayer, AnimationTree, the eight states plus RESET, the
+    one-shot lengths, the state machine block, and every track's node exists;
+  * the model: one Sprite2D per sheet under Visuals/Facing/Model, its grid
+    and anchor from klee_frames.json, and each state's frame track stepping
+    through exactly the frames the manifest lists.
 
 With art (`--art-root`): klee_cells.json still matches the PNGs, and every
 texel the old sprite could draw (alpha > 0, grown one texel for filtering)
@@ -32,7 +35,7 @@ from . import rig
 CONTRACT_NODES = ("Visuals", "Visuals/Facing", "Visuals/Facing/Rig", "Bounds",
                   "CenterPos", "IntentPos", "AnimationPlayer", "AnimationTree")
 REST_TOLERANCE = 2
-STATES = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low")
+STATES = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff")
 
 HEAD_RE = re.compile(r'^\[node name="([^"]+)" type="([^"]+)"(?: parent="([^"]+)")?\]')
 
@@ -164,6 +167,29 @@ def static_problems(text: str) -> list[str]:
             bad.append(f"{a}: length is not {length}")
     if rig.STATE_MACHINE not in text:
         bad.append("state machine block differs from the contract")
+    frames = rig.load_frames()
+    spec = rig.load_spec()
+    for name in spec["model"]["sheets"]:
+        rec = frames["sheets"][name]
+        n = nodes.get(f"{rig.MODEL}/{rig.SHEET_NODE[name]}")
+        if n is None or n.type != "Sprite2D":
+            bad.append(f"sheet {name}: no Sprite2D under {rig.MODEL}")
+            continue
+        if n.props.get("hframes") != str(rec["hframes"]) or n.props.get("vframes") != str(rec["vframes"]):
+            bad.append(f"sheet {name}: grid differs from klee_frames.json")
+        if rec["hframes"] * rec["vframes"] < rec["count"]:
+            bad.append(f"sheet {name}: {rec['count']} frames do not fit its grid")
+    for state, anim in spec["animations"].items():
+        if "hold_frame" in anim:
+            continue
+        want = len(frames["sheets"][anim["sheet"]]["times"])
+        block = text[text.index(f'resource_name = "{state}"'):]
+        block = block[:block.index("[sub_resource")]
+        node = rig.SHEET_NODE[anim["sheet"]]
+        i = block.index(f'NodePath("{rig.MODEL}/{node}:frame")')
+        times = block[i:].split('"times": PackedFloat32Array(', 1)[1].split(")", 1)[0]
+        if len(times.split(",")) != want:
+            bad.append(f"{state}: frame track has {len(times.split(','))} keys, manifest {want}")
     return bad
 
 
@@ -219,7 +245,9 @@ def godot_problems(art_root: Path, work: Path | None) -> list[str]:
                                "prefix": f"{kind}_s{scale}_f{facing}_", "scale": scale,
                                "w": 300 * scale, "h": 340 * scale,
                                "origin": [150 * scale, 320 * scale], "facing": facing,
-                               "jobs": [["RESET", [0]]]})
+                               # The splash rig rests invisible since milestone
+                               # 2; setoff at 0.6 s shows it alone, at rest.
+                               "jobs": [["setoff", [0.6]] if kind == "combat" else ["RESET", [0]]]})
     # Facing parity: CreatureFacing flips Visuals/Facing's x scale. A posed
     # frame flipped must be the mirror image of the unflipped one, or the
     # skin is being computed in the wrong space under a negative scale.
@@ -227,9 +255,9 @@ def godot_problems(art_root: Path, work: Path | None) -> list[str]:
         passes.append({"scene": "res://klee/model/combat.tscn", "out": out.as_posix(),
                        "prefix": f"posed_f{facing}_", "scale": 1, "w": 300, "h": 340,
                        "origin": [150, 320], "facing": facing,
-                       "jobs": [["attack", [0.17]], ["death", [0.6]]]})
+                       "jobs": [["setoff", [0.27]], ["death", [0.6]]]})
     engine.render(work, passes)
-    for anim in ("attack", "death"):
+    for anim in ("setoff", "death"):
         a = np.asarray(Image.open(out / f"posed_f1_{anim}_000.png"), dtype=np.int16)
         b = np.asarray(Image.open(out / f"posed_f-1_{anim}_000.png"), dtype=np.int16)[:, ::-1]
         d = np.abs(a - b)
@@ -238,7 +266,7 @@ def godot_problems(art_root: Path, work: Path | None) -> list[str]:
             bad.append(f"{anim}: flipped pose is not the mirror of the unflipped pose")
     for scale in (1, 2):
         for facing in (1, -1):
-            a = np.asarray(Image.open(out / f"combat_s{scale}_f{facing}_RESET_000.png"), dtype=np.int16)
+            a = np.asarray(Image.open(out / f"combat_s{scale}_f{facing}_setoff_000.png"), dtype=np.int16)
             b = np.asarray(Image.open(out / f"reference_s{scale}_f{facing}_RESET_000.png"), dtype=np.int16)
             d = np.abs(a - b)
             print(f"REST|scale={scale}|facing={facing}|max_diff={int(d.max())}|"

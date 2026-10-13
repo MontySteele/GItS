@@ -1,8 +1,16 @@
-"""Klee's bone-and-mesh combat rig: spec + occupancy grid -> combat.tscn.
+"""Klee's combat scene: spec + occupancy grid + frame manifest -> combat.tscn.
 
 Pure text generation, no pixels and no engine: `klee.yaml` (bones, skin rules,
-motion) and `klee_cells.json` (the committed occupancy grid `cells.py` made
-from the art) go in, the scene text comes out. Every number is rounded and
+motion), `klee_cells.json` (the committed occupancy grid `cells.py` made
+from the art) and `klee_frames.json` (the committed manifest of the frame
+sheets tools/klee_render renders from the official model) go in, the scene
+text comes out.
+
+Two figures live in the scene. `Visuals/Facing/Model` is Klee herself since
+milestone 2 (2026-10-12): one Sprite2D per frame sheet, cross-faded by
+self_modulate and stepped by a discrete `frame` track. `Visuals/Facing/Rig`
+is the older skinned-mesh rig of the floating splash, kept as alt-art for her
+Set Off plays: invisible (modulate alpha 0) in every state but `setoff`. Every number is rounded and
 every collection is walked in a fixed order, so two runs are byte-identical.
 
 Engine facts this file is written around (MegaDot 4.5.1, measured in the
@@ -35,22 +43,44 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SPEC = HERE / "klee.yaml"
 CELLS = HERE / "klee_cells.json"
+FRAMES = HERE / "klee_frames.json"
 SCENE = ROOT / "klee-mod" / "pck-src" / "klee" / "model" / "combat.tscn"
 TEX_DIR = "res://klee/model/layers"
 RIG = "Visuals/Facing/Rig"
+MODEL = "Visuals/Facing/Model"
+FRAME_DIR = "res://klee/model/frames"
 NL = "\n"
 
-#: The router contract, in the order the old scene's library listed them.
-ANIMATION_ORDER = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low")
-#: Lengths the old scene shipped for the one-shots; the router, the death
-#: seam (lint_constant_parity: death = 1.0) and VFX timing were tuned to them.
-ONE_SHOT_LENGTHS = {"attack": 0.5, "hurt": 0.4, "death": 1.0, "cast": 0.4, "power": 0.5}
-#: RESET values for node tracks (the old scene's).
-NODE_REST = {
-    ":position": (0.0, -140.0),
-    ":rotation": 0.0,
-    ":modulate": (1.0, 1.0, 1.0, 1.0),
-}
+#: The router contract (CreatureAnimationRouter.cs) plus `setoff`.
+ANIMATION_ORDER = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff")
+#: The one-shots on the base game's clock (the paper's census: attack
+#: 0.93-1.5 s, cast 0.97-1.8, hurt 0.73-1.0, die 1.87-4.17). The death seam
+#: measures the clip, so ModdedPlayerDeathSeam follows this number on its own.
+ONE_SHOT_LENGTHS = {"attack": 1.0, "hurt": 0.8, "death": 2.0, "cast": 1.0, "power": 1.0, "setoff": 1.2}
+#: Sheet name (manifest key) -> its Sprite2D under Model.
+SHEET_NODE = {"idle": "Idle", "idle_low": "IdleLow", "attack": "Attack", "hurt": "Hurt",
+              "death": "Death", "cast": "Cast"}
+PROP_KIND = {":position": "vec2", ":rotation": "float", ":modulate": "color",
+             ":self_modulate": "color", ":frame": "int"}
+PROP_ORDER = [":position", ":rotation", ":modulate", ":self_modulate", ":frame"]
+
+
+def node_rest(path: str):
+    """RESET value of a node track. The splash rig rests INVISIBLE; the model
+    rests on its idle sheet's first frame."""
+    node, prop = path.split(":")
+    prop = ":" + prop
+    if prop == ":position":
+        return (0.0, -140.0)
+    if prop == ":rotation":
+        return 0.0
+    if prop == ":frame":
+        return 0
+    if node == RIG and prop == ":modulate":
+        return (1.0, 1.0, 1.0, 0.0)
+    if prop == ":self_modulate":
+        return (1.0, 1.0, 1.0, 1.0 if node == f"{MODEL}/Idle" else 0.0)
+    return (1.0, 1.0, 1.0, 1.0)
 
 
 # ---------------------------------------------------------------------------
@@ -93,6 +123,10 @@ def load_spec(path: Path = SPEC) -> dict:
 
 
 def load_cells(path: Path = CELLS) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_frames(path: Path = FRAMES) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -317,11 +351,12 @@ def build_meshes(rig: Rig) -> list[Mesh]:
 @dataclass
 class Track:
     path: str
-    kind: str                 # "vec2" | "float" | "color"
+    kind: str                 # "vec2" | "float" | "color" | "int"
     times: list[float]
     values: list
     transitions: list[float]
     interp: int = 1
+    update: int = 0           # 1 = discrete (the sheet's frame index)
 
 
 PROP = {"rot": "rotation", "pos": "position", "scale": "scale"}
@@ -368,9 +403,10 @@ def _expand(rig: Rig, anim: dict, tr: dict) -> list[Track]:
             out += _expand(rig, anim, sub)
         return out
     prop = tr["prop"]
-    if "node" in tr:
-        node = tr["node"]
-        path = RIG + (f"/{node}" if node else "") + f":{prop}"
+    if "node" in tr or "model" in tr:
+        node = tr["node"] if "node" in tr else tr["model"]
+        base = RIG if "node" in tr else MODEL
+        path = base + (f"/{node}" if node else "") + f":{prop}"
         kind = {"position": "vec2", "rotation": "float", "modulate": "color"}[prop]
         conv = (lambda v: (float(v[0]), float(v[1]))) if kind == "vec2" else \
                (lambda v: tuple(float(c) for c in v)) if kind == "color" else float
@@ -407,13 +443,38 @@ def _make(tr: dict, length: float, path: str, kind: str, conv) -> Track:
     return Track(path, kind, times, values, trans, interp=1)
 
 
-def build_animations(rig: Rig) -> dict[str, tuple[dict, list[Track]]]:
+def sheet_tracks(rig: Rig, frames: dict, anim: dict) -> list[Track]:
+    """Show this state's sheet (self_modulate alpha 1, every other sheet 0)
+    and step its frame at the times the renderer drew them."""
+    sheet = anim["sheet"]
+    rec = frames["sheets"][sheet]
+    length = float(anim["length"])
+    out = []
+    for name in rig.spec["model"]["sheets"]:
+        a = 1.0 if name == sheet else 0.0
+        out.append(Track(f"{MODEL}/{SHEET_NODE[name]}:self_modulate", "color", [0.0], [(1.0, 1.0, 1.0, a)], [1.0]))
+    if "hold_frame" in anim:
+        times, values = [0.0], [int(anim["hold_frame"])]
+    else:
+        times = [float(t) for t in rec["times"]]
+        values = list(range(len(times)))
+        assert times[-1] < length + 1e-9, f"{sheet}: frames run past the state's length"
+        if anim.get("loop"):
+            assert abs(len(times) / rec["fps"] - length) < 1e-6, f"{sheet}: loop length != frames / fps"
+    out.append(Track(f"{MODEL}/{SHEET_NODE[sheet]}:frame", "int", times, values, [1.0] * len(times),
+                     interp=0, update=1))
+    return out
+
+
+def build_animations(rig: Rig, frames: dict | None = None) -> dict[str, tuple[dict, list[Track]]]:
+    frames = frames or load_frames()
     out = {}
     for name in ANIMATION_ORDER:
         anim = rig.spec["animations"][name]
         tracks: list[Track] = []
-        for tr in anim["tracks"]:
+        for tr in anim.get("tracks", ()):
             tracks += _expand(rig, anim, tr)
+        tracks += sheet_tracks(rig, frames, anim)
         paths = [t.path for t in tracks]
         assert len(paths) == len(set(paths)), f"{name}: duplicate track"
         out[name] = (anim, tracks)
@@ -431,15 +492,18 @@ def reset_tracks(rig: Rig, anims) -> list[Track]:
     bone_paths = [p for p in seen if "/Skeleton/" in p]
     order = {f"{RIG}/Skeleton/{rig.path(b)}": i for i, b in enumerate(rig.order)}
     bone_paths.sort(key=lambda p: (order[p.split(":")[0]], p))
-    node_paths.sort(key=lambda p: (p.count("/"), [":position", ":rotation", ":modulate"].index(p[p.index(":"):]), p))
+    node_paths.sort(key=lambda p: (p.count("/"), PROP_ORDER.index(p[p.index(":"):]), p))
     out = []
     for p in node_paths:
         prop = p[p.index(":"):]
-        v = NODE_REST[prop]
+        v = node_rest(p)
         if p.startswith(f"{RIG}/") and prop == ":position":
             raise AssertionError(f"layer node position is not animatable on a skinned mesh: {p}")
-        kind = {":position": "vec2", ":rotation": "float", ":modulate": "color"}[prop]
-        out.append(Track(p, kind, [0.0], [v], [1.0]))
+        kind = PROP_KIND[prop]
+        if kind == "int":
+            out.append(Track(p, kind, [0.0], [v], [1.0], interp=0, update=1))
+        else:
+            out.append(Track(p, kind, [0.0], [v], [1.0]))
     for p in bone_paths:
         node, prop = p.split(":")
         bone = node.rsplit("/", 1)[1]
@@ -462,6 +526,8 @@ def _lit(kind: str, v) -> str:
         return vec2(v)
     if kind == "color":
         return color(v)
+    if kind == "int":
+        return str(int(v))
     return fnum(v)
 
 
@@ -484,120 +550,112 @@ def animation_block(anim_id: str, name: str | None, length: float, loop: bool,
             f"tracks/{i}/keys = {{",
             '"times": PackedFloat32Array(' + ", ".join(num(x) for x in t.times) + "),",
             '"transitions": PackedFloat32Array(' + ", ".join(num(x) for x in t.transitions) + "),",
-            '"update": 0,',
+            f'"update": {t.update},',
             '"values": [' + ", ".join(_lit(t.kind, v) for v in t.values) + "]",
             "}",
         ]
     return NL.join(lines)
 
 
-# The state machine and the non-rig nodes are the old scene's, verbatim: the
-# router's contract is these names, conditions and transitions.
-STATE_MACHINE = '''[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_cast"]
-animation = &"cast"
+# ---------------------------------------------------------------------------
+# the state machine
+# ---------------------------------------------------------------------------
+#: States as the router names them, with their editor positions.
+SM_STATES = {"idle": (327, 153), "attack": (327, 64), "hurt": (327, 278), "death": (470, 153),
+             "cast": (186, 64), "power": (470, 64), "idle_low": (327, 365), "setoff": (186, 278)}
+#: One-shots the router travels to; each returns to idle at its end.
+SM_ONE_SHOTS = ("attack", "hurt", "cast", "power", "setoff")
+#: Every live state can cut straight to any one-shot or to death, so a hit
+#: during a throw shows at once rather than queueing behind it.
+SM_SOURCES = ("idle", "idle_low", "attack", "hurt", "cast", "power", "setoff")
+SM_TARGETS = ("attack", "hurt", "death", "cast", "power", "setoff")
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_power"]
-animation = &"power"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_idle_low"]
-animation = &"idle_low"
+def xfade(src: str, dst: str) -> float:
+    """Cross-fade times from the base skeletons' SpineAnimationMix (census
+    1c): default 0.05 s, 0.1 s from idle into an attack, ~0.03 s into a hurt,
+    0.1 s out of one. Set Off fades itself (its clip cross-fades the two
+    figures), and a hurt cuts straight to death as the base does."""
+    if dst == "setoff" or (src == "setoff" and dst == "idle"):
+        return 0.0
+    if src == "hurt" and dst == "death":
+        return 0.0
+    if dst == "hurt":
+        return 0.03
+    if dst == "attack" and src in ("idle", "idle_low"):
+        return 0.1
+    if src == "hurt" and dst == "idle":
+        return 0.1
+    return 0.05
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
-animation = &"attack"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_death"]
-animation = &"death"
+def _transition(tid: str, xf: float, switch: int, advance: int, cond: str | None = None) -> str:
+    lines = [f'[sub_resource type="AnimationNodeStateMachineTransition" id="{tid}"]']
+    if xf:
+        lines.append(f"xfade_time = {fnum(xf)}")
+    if switch:
+        lines.append(f"switch_mode = {switch}")
+    lines.append(f"advance_mode = {advance}")
+    if cond:
+        lines.append(f'advance_condition = &"{cond}"')
+    return NL.join(lines)
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hurt"]
-animation = &"hurt"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_idle"]
-animation = &"idle"
+def state_machine() -> str:
+    """The AnimationTree graph. advance_mode 1 (enabled) is what lets
+    `Travel` use a transition and so cross-fade; the old scene's were 0
+    (disabled), so every Travel teleported and every clip snapped."""
+    blocks = []
+    for st in SM_STATES:
+        blocks.append(f'[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_{st}"]'
+                      + NL + f'animation = &"{st}"')
+    edges = [("Start", "idle", _transition("Transition_start_idle", 0, 0, 2))]
+    for src in SM_SOURCES:
+        for dst in SM_TARGETS:
+            if src != dst:
+                edges.append((src, dst, _transition(f"Transition_{src}_{dst}", xfade(src, dst), 0, 1)))
+    for src in SM_ONE_SHOTS:
+        edges.append((src, "idle", _transition(f"Transition_{src}_idle", xfade(src, "idle"), 2, 2)))
+    edges.append(("idle", "idle_low", _transition("Transition_idle_idle_low", 0.4, 0, 2, "low_hp")))
+    edges.append(("idle_low", "idle", _transition("Transition_idle_low_idle", 0.4, 0, 2, "healthy")))
+    edges.append(("death", "End", _transition("Transition_death_end", 0, 2, 0)))
+    blocks += [e[2] for e in edges]
+    sm = ['[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_klee"]',
+          "states/End/position = Vector2(628, 153)",
+          "states/Start/position = Vector2(186, 153)"]
+    for st in sorted(SM_STATES):
+        x, y = SM_STATES[st]
+        sm.append(f'states/{st}/node = SubResource("AnimationNodeAnimation_{st}")')
+        sm.append(f"states/{st}/position = Vector2({x}, {y})")
+    ids = [e[2].split('id="')[1].split('"')[0] for e in edges]
+    sm.append("transitions = [" + ", ".join(f'"{e[0]}", "{e[1]}", SubResource("{i}")'
+                                             for e, i in zip(edges, ids)) + "]")
+    blocks.append(NL.join(sm))
+    return (NL + NL).join(blocks)
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_start_idle"]
-advance_mode = 2
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_death"]
-advance_mode = 0
+STATE_MACHINE = state_machine()
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_hurt"]
-advance_mode = 0
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_idle"]
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_death_end"]
-switch_mode = 2
-advance_mode = 0
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_death"]
-advance_mode = 0
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_attack"]
-advance_mode = 0
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_idle"]
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_death"]
-advance_mode = 0
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_idle"]
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_idle"]
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_idle_low"]
-xfade_time = 0.4
-advance_mode = 2
-advance_condition = &"low_hp"
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_idle"]
-xfade_time = 0.4
-advance_mode = 2
-advance_condition = &"healthy"
-
-[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_klee"]
-states/End/position = Vector2(628, 153)
-states/Start/position = Vector2(186, 153)
-states/attack/node = SubResource("AnimationNodeAnimation_attack")
-states/attack/position = Vector2(327, 64)
-states/cast/node = SubResource("AnimationNodeAnimation_cast")
-states/cast/position = Vector2(186, 64)
-states/death/node = SubResource("AnimationNodeAnimation_death")
-states/death/position = Vector2(470, 153)
-states/hurt/node = SubResource("AnimationNodeAnimation_hurt")
-states/hurt/position = Vector2(327, 278)
-states/idle/node = SubResource("AnimationNodeAnimation_idle")
-states/idle/position = Vector2(327, 153)
-states/idle_low/node = SubResource("AnimationNodeAnimation_idle_low")
-states/idle_low/position = Vector2(327, 365)
-states/power/node = SubResource("AnimationNodeAnimation_power")
-states/power/position = Vector2(470, 64)
-transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "death", SubResource("Transition_idle_death"), "idle", "hurt", SubResource("Transition_idle_hurt"), "hurt", "idle", SubResource("Transition_hurt_idle"), "death", "End", SubResource("Transition_death_end"), "hurt", "death", SubResource("Transition_hurt_death"), "idle", "attack", SubResource("Transition_idle_attack"), "attack", "idle", SubResource("Transition_attack_idle"), "attack", "death", SubResource("Transition_attack_death"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle")]'''
-
-TAIL_NODES = '''[node name="Bounds" type="Control" parent="."]
+#: Bounds/CenterPos/IntentPos fit the figure (about 177 px to the feather at
+#: 1080p, klee_frames.json "measure"): the base Silent's are a 244 px box for
+#: a 224 px figure, CenterPos at ~0.65 of the height.
+TAIL_NODES = """[node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
 offset_left = -120.0
-offset_top = -280.0
+offset_top = -200.0
 offset_right = 120.0
 offset_bottom = 0.0
 mouse_filter = 2
 
 [node name="CenterPos" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, -112)
+position = Vector2(0, -100)
 
 [node name="IntentPos" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, -350)
+position = Vector2(0, -270)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
@@ -610,7 +668,38 @@ unique_name_in_owner = true
 active = true
 callback_mode_discrete = 0
 tree_root = SubResource("AnimationNodeStateMachine_klee")
-anim_player = NodePath("../AnimationPlayer")'''
+anim_player = NodePath("../AnimationPlayer")
+metadata/idle_desync = true"""
+
+
+def _model_nodes(rig: Rig, frames: dict) -> list[str]:
+    """Visuals/Facing/Model and one Sprite2D per sheet. The sprite's offset
+    puts the cell's feet anchor on the node origin; scale 0.5 because the
+    sheets are drawn at 2x for a 4K screen."""
+    sc = frames["combat_scale"]
+    out = ['[node name="Model" type="Node2D" parent="Visuals/Facing"]']
+    for name in rig.spec["model"]["sheets"]:
+        rec = frames["sheets"][name]
+        node = SHEET_NODE[name]
+        ox, oy = rec["origin"]
+        lines = [f'[node name="{node}" type="Sprite2D" parent="{MODEL}"]']
+        if name != "idle":
+            lines.append("self_modulate = Color(1, 1, 1, 0)")
+        lines += [
+            f'texture = ExtResource("{SHEET_IDS[name]}")',
+            "centered = false",
+            f"offset = {vec2((-ox, -oy))}",
+            f"scale = {vec2((sc, sc))}",
+            f"hframes = {rec['hframes']}",
+            f"vframes = {rec['vframes']}",
+        ]
+        out.append(NL.join(lines))
+    return out
+
+
+SHEET_IDS = {name: f"{6 + i}_{name}" for i, name in enumerate(
+    ("idle", "idle_low", "attack", "hurt", "death", "cast"))}
+
 
 def _bone_nodes(rig: Rig) -> list[str]:
     out = [f'[node name="Skeleton" type="Skeleton2D" parent="{RIG}"]']
@@ -654,10 +743,12 @@ EXT_IDS = {"Smoke": "1_smoke", "Floaters": "2_floaters", "Dumpty": "3_dumpty",
            "Body": "4_body", "Dodoco": "5_dodoco"}
 
 
-def render_scene(spec: dict | None = None, cells: dict | None = None) -> str:
+def render_scene(spec: dict | None = None, cells: dict | None = None,
+                 frames: dict | None = None) -> str:
     rig = Rig(spec or load_spec(), cells or load_cells())
+    frames = frames or load_frames()
     meshes = build_meshes(rig)
-    anims = build_animations(rig)
+    anims = build_animations(rig, frames)
     for name, length in ONE_SHOT_LENGTHS.items():
         assert float(anims[name][0]["length"]) == length, f"{name} length changed"
 
@@ -674,10 +765,14 @@ def render_scene(spec: dict | None = None, cells: dict | None = None) -> str:
     subs.append(STATE_MACHINE)
 
     ext = [(m.layer, m.texture) for m in meshes]
-    load_steps = len(ext) + sum(s.count("[sub_resource") for s in subs) + 1
+    sheets = rig.spec["model"]["sheets"]
+    load_steps = len(ext) + len(sheets) + sum(s.count("[sub_resource") for s in subs) + 1
     out = [f"[gd_scene load_steps={load_steps} format=3]", ""]
     for layer, tex in ext:
         out.append(f'[ext_resource type="Texture2D" path="{TEX_DIR}/{tex}" id="{EXT_IDS[layer]}"]')
+    for name in sheets:
+        out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{frames["sheets"][name]["file"]}" '
+                   f'id="{SHEET_IDS[name]}"]')
     out.append("")
     for s in subs:
         out += [s, ""]
@@ -685,11 +780,69 @@ def render_scene(spec: dict | None = None, cells: dict | None = None) -> str:
         '[node name="KleeCombat" type="Node2D"]',
         '[node name="Visuals" type="Node2D" parent="."]\nunique_name_in_owner = true',
         '[node name="Facing" type="Node2D" parent="Visuals"]\nunique_name_in_owner = true',
-        f'[node name="Rig" type="Node2D" parent="Visuals/Facing"]\nposition = {vec2(rig.spec["rig_position"])}',
+        f'[node name="Rig" type="Node2D" parent="Visuals/Facing"]\nmodulate = Color(1, 1, 1, 0)\n'
+        f'position = {vec2(rig.spec["rig_position"])}',
         *_bone_nodes(rig),
         *[_polygon_node(rig, m, EXT_IDS[m.layer]) for m in meshes],
+        *_model_nodes(rig, frames),
         TAIL_NODES,
     ]
     for n in nodes:
         out += [n, ""]
     return NL.join(out).rstrip(NL) + NL
+
+
+# ---------------------------------------------------------------------------
+# the merchant scene
+# ---------------------------------------------------------------------------
+MERCHANT_SCENE = ROOT / "klee-mod" / "pck-src" / "klee" / "model" / "merchant_character.tscn"
+
+
+def render_merchant_scene(frames: dict | None = None) -> str:
+    """Klee at the shop: stance B (the bomb cradled) breathing on a loop.
+
+    The base merchant rig is the combat skeleton at ~1.7x with its own
+    `relaxed_loop` (census T2); its feet sit on the node origin. BaseLib adds
+    this scene's ROOT as the NMerchantCharacter's first child and also copies
+    the root's transform onto the merchant node itself, so the root is a bare
+    Node2D and the scale lives on the sheet sprite below it. The idle needs no
+    script: the AnimationPlayer autoplays it (MerchantSpineBindingPatch skips
+    the base's Spine binding, which would otherwise try to play it).
+    """
+    frames = frames or load_frames()
+    rec = frames["sheets"]["merchant"]
+    sc = frames["merchant_scale"]
+    ox, oy = rec["origin"]
+    times = [float(t) for t in rec["times"]]
+    assert abs(len(times) / rec["fps"] - rec["length"]) < 1e-6
+    anim = animation_block("Animation_relaxed", "relaxed_loop", float(rec["length"]), True,
+                           [Track("Sheet:frame", "int", times, list(range(len(times))), [1.0] * len(times),
+                                  interp=0, update=1)])
+    reset = animation_block("Animation_reset", None, 0.001, False,
+                            [Track("Sheet:frame", "int", [0.0], [0], [1.0], interp=0, update=1)])
+    lib = ('[sub_resource type="AnimationLibrary" id="AnimationLibrary_merchant"]' + NL + "_data = {" + NL
+           + '&"RESET": SubResource("Animation_reset"),' + NL
+           + '&"relaxed_loop": SubResource("Animation_relaxed")' + NL + "}")
+    out = [
+        "[gd_scene load_steps=5 format=3]", "",
+        f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{rec["file"]}" id="1_sheet"]', "",
+        reset, "", anim, "", lib, "",
+        '[node name="KleeMerchant" type="Node2D"]', "",
+        NL.join([
+            '[node name="Sheet" type="Sprite2D" parent="."]',
+            'texture = ExtResource("1_sheet")',
+            "centered = false",
+            f"offset = {vec2((-ox, -oy))}",
+            f"scale = {vec2((sc, sc))}",
+            f"hframes = {rec['hframes']}",
+            f"vframes = {rec['vframes']}",
+        ]), "",
+        NL.join([
+            '[node name="AnimationPlayer" type="AnimationPlayer" parent="."]',
+            "libraries = {",
+            '&"": SubResource("AnimationLibrary_merchant")',
+            "}",
+            'autoplay = "relaxed_loop"',
+        ]),
+    ]
+    return NL.join(out) + NL

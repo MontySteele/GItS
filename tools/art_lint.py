@@ -595,6 +595,19 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/ui/energy_orb/layer4_ring.png":     "gen_energy_orb_layers.py",
     "ImageGen/images/furina/ui/energy_orb/layer5_gloss.png":    "gen_energy_orb_layers.py",
     "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
+    # Klee's model frames, rest still and select close-up (milestone 2,
+    # 2026-10-12): rendered from the official model (which never enters the
+    # repo) and packed by one script; tools/klee_rig/klee_frames.json is the
+    # committed manifest of their cells and anchors.
+    "ImageGen/images/model/frames/klee_idle.png":           "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_idle_low.png":       "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_attack.png":         "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_hurt.png":           "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_death.png":          "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_cast.png":           "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_merchant.png":       "klee_render/pack.py",
+    "ImageGen/images/model/klee_rest.png":                  "klee_render/pack.py",
+    "ImageGen/images/ui/select_closeup.png":                "klee_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",

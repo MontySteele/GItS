@@ -90,9 +90,9 @@ internal static class ModdedPlayerDeathSeam
     /// <summary>
     /// The length reported for a spine-less player body that has no death clip
     /// to measure -- a flat portrait with no %AnimationTree at all. One second:
-    /// Klee's shipped death clip, the shorter of the two this mod ships
-    /// (<c>pck-src/klee/model/combat.tscn</c>, <c>Animation_death</c>
-    /// <c>length = 1.0</c>), so the fallback can never out-wait a real clip.
+    /// Klee's death clip until 2026-10-12 and still shorter than every death
+    /// clip this mod ships (Klee 2.0 since her model frames, Furina 1.2,
+    /// Varka 1.2, Kokomi 1.3), so the fallback can never out-wait a real clip.
     /// </summary>
     internal const float FallbackDeathAnimLength = 1.0f;
 
