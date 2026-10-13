@@ -106,8 +106,8 @@ public class KokomiRound3ChangesTests
         Assert.Contains(most, c => c.Contains("KokomiOverhaulKit.IntendedDamage"));
         Assert.Contains(most, c => c.Contains("HittableEnemies"));
         Assert.DoesNotContain(most, c => c.Contains("FrontEnemy"));
-        Assert.EndsWith("plus the most damage an enemy intends when it is "
-                        + "carried out.",
+        Assert.EndsWith("plus the biggest attack an enemy intends on the "
+                        + "turn it lands.",
                         Face(new ProtoKkTideWall()));
     }
 

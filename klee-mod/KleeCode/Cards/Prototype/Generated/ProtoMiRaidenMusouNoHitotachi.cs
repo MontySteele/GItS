@@ -52,14 +52,14 @@ public sealed class ProtoMiRaidenMusouNoHitotachi : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
+        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_raiden_musou_no_hitotachi");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Raiden Shogun — Musou no Hitotachi"),
-        ("description", "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage. Deals {ExtraDamage:diff()} additional damage for each [gold]Companion[/gold] card you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage. Deals {ExtraDamage:diff()} additional damage for each [gold]Companion[/gold] card you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMiRaidenMusouNoHitotachi : CustomCardModel, IElementalC
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

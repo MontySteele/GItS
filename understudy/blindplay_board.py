@@ -841,9 +841,15 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         combat["oath"] = oath
         # The Varka review (2026-10-12): the "Pyro Oath (left)" badge's line
         # goes, since a seat called it "noise"; the Oath counts above stay.
+        # The Varka wave (2026-10-13): a badge at 0 ("Hydro Oath 0" on turn
+        # 1, a Knight that made Hydro current before any Hydro Oath) left a
+        # seat asking what it was FOR. The block above says it in words, so
+        # a 0 badge's line goes too.
         combat["you"]["powers"] = [
             pw for pw in combat["you"]["powers"]
-            if not _OATH_LEFT.match(_text(pw.get("name")))]
+            if not _OATH_LEFT.match(_text(pw.get("name")))
+            and not (_OATH_NAME.match(_text(pw.get("name")))
+                     and _int(pw.get("stacks")) == 0)]
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -1060,6 +1066,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
         elif event == "hit":
             # A Power's hit (the drain-line round, 2026-10-09): its reach.
             why = "all" if reason == "all" else "random"
+        elif event == "stopped":
+            # The Furina wave (2026-10-13): why a no-choice Drain stopped.
+            why = "hp" if reason == "hp" else "buffer"
         else:
             why = ""
         log.append({
@@ -1475,6 +1484,13 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         for ev in (row.get("events") or [])
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "wolfpack"),
+                    # The Varka wave (2026-10-13): what Stoke the Flames
+                    # added to this Attack's Pyro hits, on its line.
+                    "stoked": sum(
+                        _int(ev.get("amount"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "stoked"),
                     "swirl_no_aura": _int(row.get("swirl_no_aura")),
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
@@ -1729,7 +1745,15 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # Kokomi whole-run round 2 (2026-10-10): the printed Plan
               # line's number includes the front body's Vulnerable. Absent
               # on an older bridge, and then nothing is said.
-              "after_vulnerable": row.get("after_vulnerable") is True}
+              "after_vulnerable": row.get("after_vulnerable") is True,
+              # The Kokomi review (2026-10-13): a Block Plan that reads the
+              # board (Tide Wall) carries its total against the board now.
+              # Absent or null on every other entry and on an older bridge,
+              # and then nothing is said.
+              "block_now": (row.get("block_now")
+                            if isinstance(row.get("block_now"), int)
+                            and not isinstance(row.get("block_now"), bool)
+                            else None)}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

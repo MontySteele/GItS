@@ -295,8 +295,11 @@ public static class KleeMod
                     // no aura is left, so the sentence is the four above with
                     // the duration clause replaced by the reason there is none.
                     ["KLEEMOD-APPLIES_ANEMO.title"] = "Applies Anemo",
+                    // The Varka wave (2026-10-13): Windbound Execution's
+                    // face never said a Swirl hits ALL enemies, so the tip
+                    // every Anemo card hovers names the Swirl and its 2.
                     ["KLEEMOD-APPLIES_ANEMO.description"] =
-                        "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Anemo[/gold] never stays on an enemy.",
+                        $"No aura: nothing happens. Another aura: it [gold]Swirls[/gold], dealing [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies and spreading that element.",
                     ["KLEEMOD-APPLIES_GEO.title"] = "Applies Geo",
                     ["KLEEMOD-APPLIES_GEO.description"] =
                         "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",
@@ -353,7 +356,10 @@ public static class KleeMod
                     // `gen_keyword_loc.py`'s reader.
                     ["KLEEMOD-FROZEN_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Attacking it ends the freeze and deals [blue]{Elements.ReactionConstants.ShatterDamage}[/blue] unblockable damage.",
-                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Frozen (Boss)",
+                    // The Furina wave (2026-10-13, "To change now" 5): the title says
+                    // what lands. A seat read "Frozen (Boss)" as a freeze and
+                    // trusted it at a boss, which only gains Vulnerable.
+                    ["KLEEMOD-FROZEN_BOSS_PREVIEW.title"] = "Reaction preview: Vulnerable (Boss)",
                     ["KLEEMOD-FROZEN_BOSS_PREVIEW.description"] =
                         $"[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion can't be Frozen; it gains [blue]{Elements.ReactionConstants.FrozenBossVuln}[/blue] [gold]Vulnerable[/gold] instead.",
                     ["KLEEMOD-SWIRL_PREVIEW.title"] = "Reaction preview: Swirl",
@@ -480,6 +486,10 @@ public static class KleeMod
                     // which Spends count.
                     [Cards.ArmKeywordTips.BisSpendUpToKey + ".title"] =
                         "Bis!",
+                    // The Furina wave (2026-10-13): the rider on Final Bow,
+                    // whose acts happen one after another.
+                    [Cards.ArmKeywordTips.FinalBowInTurnKey + ".title"] =
+                        "Final Bow",
                     // Co-op notes pick 2 (2026-10-02): the key is also
                     // `KleeKeywords.Knight`'s, the printed "Knight." line,
                     // and the keyword's own hover reads this row.

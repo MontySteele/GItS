@@ -56,7 +56,7 @@ def test_the_ward_costs_0_and_keeps_its_plan_line():
     assert row.is_ethereal and row.exhaust
     assert row.effects == [{"op": "block", "amount": 4}]
     assert row.plan == [{"op": "apply_power", "power": "weak", "amount": 1,
-                         "target": "all_enemies"}]
+                         "target": "front_enemy"}]
     assert up.effects[0]["amount"] == 6 and up.plan[0]["amount"] == 2
 
 
@@ -86,7 +86,8 @@ def test_the_generators_are_at_the_silents_rates(cid, base, up):
 
 def test_shoal_call_is_blade_dance_with_plain_stings():
     row = loader.get_card("proto_kk_shoal_call")
-    assert row.cost == 1 and row.exhaust and row.rarity == "uncommon"
+    # Common since the Kokomi review (2026-10-13).
+    assert row.cost == 1 and row.exhaust and row.rarity == "common"
     assert row.effects == [{"op": "kokomi", "kind": "shoal_call",
                             "amount": 3}]
     assert _up("proto_kk_shoal_call").effects[0]["amount"] == 4

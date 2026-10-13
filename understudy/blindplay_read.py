@@ -81,6 +81,16 @@ _SPRITE_RUN = re.compile(
     r"(?:\[[A-Za-z0-9_]+\.(?:png|jpg|jpeg|svg|webp)\])+", re.I)
 
 
+# 2026-10-13 (Kokomi wave, lane 5): a Plan line written by the mod reached the
+# packet as a bare RESOURCE PATH, not a bracketed tag -- War Council's "Gain
+# res://images/packed/sprite_fonts/silent_energy_icon.png" twice over -- and
+# the leak check refused every screen after it, so the seat could not act. It
+# is the same pip, so it is folded back into the bracketed tag form first and
+# rendered by the same register.
+_RES_PATH = re.compile(
+    r"res://(?:[A-Za-z0-9_]+/)*([A-Za-z0-9_]+)\.(png|jpg|jpeg|svg|webp)", re.I)
+
+
 def _icon_name(stem: str) -> str:
     words = [w for w in stem.split("_") if w]
     for w in words:
@@ -143,6 +153,7 @@ def _spaced(text: str) -> str:
         if rendered[-1].isalnum() and after.isalnum():
             rendered += " "
         return rendered
+    text = _RES_PATH.sub(lambda m: f"[{m.group(1)}.{m.group(2)}]", text)
     return _SPRITE_RUN.sub(one, text)
 
 

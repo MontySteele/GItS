@@ -2787,7 +2787,158 @@ public static class KokomiPlan
                 // and a seat read the number rising as the Plan changing.
                 // The page says "(after Vulnerable)" where it did.
                 ["after_vulnerable"] = RaisedByVulnerable(entry, kokomi),
+                // Kokomi review 2026-10-13: a Block Plan that reads the
+                // board (Tide Wall) carries its total against the board as it
+                // stands, Frail and Dexterity folded; null for every other
+                // entry. The page prints it beside the name.
+                ["block_now"] = LiveBlock(entry, kokomi),
             };
+    }
+
+    /// <summary>
+    /// THE KOKOMI REVIEW (2026-10-13), Tide Wall's live total. "Tide Wall
+    /// paid 4 on a Defend turn and 29 on an attack turn ... the screen never
+    /// told me" (A F10). The Block this entry would give if it were carried
+    /// out on the board as it stands: each Block clause's
+    /// <see cref="AskedFor"/>, folded through <c>Hook.ModifyBlock</c> with the
+    /// payout's own arguments (<see cref="Kind.Block"/>'s
+    /// <c>GainBlock(kokomi, n, ValueProp.Move, null)</c>), so Frail and
+    /// Dexterity read it as the carry-out will.
+    ///
+    /// ONLY FOR AN ENTRY THAT READS THE BOARD (<see cref="Kind.BlockMaxIntent"/>):
+    /// a flat Block Plan already prints its number on its face. Null for
+    /// every other entry, for a flipped Plan (its now-line is carried out
+    /// instead) and where there is no combat to read. The intents it reads
+    /// are the ones up NOW; the carry-out reads them again on the turn it
+    /// lands, which is what the face says.
+    /// </summary>
+    public static int? LiveBlock(Entry entry, Creature? kokomi)
+    {
+        if (kokomi?.CombatState is not { } combat) return null;
+        if (entry.Now && entry.TwoLine) return null;
+        if (!entry.Clauses.Any(c => c.Kind == Kind.BlockMaxIntent)) return null;
+        try
+        {
+            var total = 0m;
+            foreach (var clause in entry.Clauses)
+            {
+                if (clause.Kind is not (Kind.Block or Kind.BlockMaxIntent
+                                        or Kind.BlockPerStatusInHand))
+                {
+                    continue;
+                }
+                var asked = AskedFor(kokomi, clause) ?? 0;
+                if (asked <= 0) continue;
+                total += FoldUnsourcedBlock(combat, kokomi, asked);
+            }
+            return (int)total;
+        }
+        catch (System.Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// <c>Hook.ModifyBlock</c>'s fold for a Block with no card source -- the
+    /// carry-out's own arguments (<c>ValueProp.Move</c>, no card, no play) --
+    /// walked over the combat's listeners directly, as
+    /// <c>FoldedCalculatedBlockVar.Fold</c> does and for its reason: the
+    /// hook's own walk yields nothing while the combat manager says the
+    /// combat is ending, and a display read is not a dispatch. Every
+    /// listener's additive term (Dexterity), then every multiplier (Frail),
+    /// floored at 0.
+    /// </summary>
+    internal static decimal FoldUnsourcedBlock(
+        ICombatState combat, Creature kokomi, decimal block)
+    {
+        var num = block;
+        var listeners = combat.IterateHookListeners().ToList();
+        foreach (var model in listeners)
+        {
+            num += model.ModifyBlockAdditive(kokomi, num, ValueProp.Move,
+                                             null, null);
+        }
+        foreach (var model in listeners)
+        {
+            num *= model.ModifyBlockMultiplicative(kokomi, num, ValueProp.Move,
+                                                   null, null);
+        }
+        return System.Math.Max(0m, num);
+    }
+
+    /// <summary>
+    /// THE KOKOMI REVIEW (2026-10-13): "Plans into enemy Block" -- three seats
+    /// on four turns wrote an Attack Plan into Block they had been warned
+    /// about (C F4, C F14, B F8, A F5). The Block the front body will still
+    /// be standing in at the morning, which is its Block NOW only where it
+    /// keeps Block through its own turn start (the game's own
+    /// <c>Hook.ShouldClearBlock</c>: Barricade, Burrowed); a body that clears
+    /// it meets the Plan with whatever it gains on its turn, which no intent
+    /// prices (<see cref="DefendsAhead"/>). 0 for an entry with no front
+    /// damage written, a flipped Plan, or no front body.
+    /// </summary>
+    public static int KeptBlockAhead(Entry entry, Creature? kokomi)
+    {
+        if (entry.Now && entry.TwoLine) return 0;
+        if (WrittenAim(entry) != "front") return 0;
+        var front = FrontEnemy(kokomi);
+        if (front == null || front.CombatState is not { } combat) return 0;
+        try
+        {
+            if (front.Block <= 0) return 0;
+            return MegaCrit.Sts2.Core.Hooks.Hook.ShouldClearBlock(
+                    combat, front, out _)
+                ? 0
+                : (int)front.Block;
+        }
+        catch (System.Exception)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>Does the front body intend to Defend this turn? Its Block
+    /// will be up when a waiting Attack Plan lands. False with no front
+    /// damage written or no front body.</summary>
+    public static bool DefendsAhead(Entry entry, Creature? kokomi)
+    {
+        if (entry.Now && entry.TwoLine) return false;
+        if (WrittenAim(entry) != "front") return false;
+        var front = FrontEnemy(kokomi);
+        try
+        {
+            return front?.Monster?.NextMove?.Intents.Any(
+                intent => intent.IntentType ==
+                    MegaCrit.Sts2.Core.MonsterMoves.Intents.IntentType.Defend)
+                ?? false;
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// THE KOKOMI REVIEW (2026-10-13): the words under one waiting Plan's
+    /// picture on the strip, or null for none. PURE over its inputs, so a
+    /// headless test can read every branch.
+    ///
+    /// ONE LINE, IN THIS ORDER. A flipped Plan says it is the now-line (the
+    /// tint says so too). A Plan that reads the board prints its total
+    /// ("Block 29"). An Attack Plan says what Block it will land in ("into 8
+    /// Block", or "into Block" where the body defends and the size is not
+    /// known). A two-line Plan otherwise says "Plan line".
+    /// </summary>
+    public static string? StripCaption(bool twoLine, bool flipped,
+                                       int? blockNow, int keptBlock,
+                                       bool defends)
+    {
+        if (twoLine && flipped) return Vfx.KokomiPlanStrip.NowLineCaption;
+        if (blockNow is { } block) return $"Block {block}";
+        if (keptBlock > 0) return $"into {keptBlock} Block";
+        if (defends) return "into Block";
+        return twoLine ? Vfx.KokomiPlanStrip.PlanLineCaption : null;
     }
 
     /// <summary>Does the front body's Vulnerable raise the damage this entry
@@ -2870,11 +3021,30 @@ public static class KokomiPlan
             await PowerCmd.Apply<PendingPlansPower>(
                 choiceContext, kokomi, count, applier: kokomi,
                 cardSource: null, silent: true);
-            return;
         }
-        await PowerCmd.ModifyAmount(
-            choiceContext, badge, count - badge.Amount, applier: kokomi,
-            cardSource: null, silent: true);
+        else
+        {
+            await PowerCmd.ModifyAmount(
+                choiceContext, badge, count - badge.Amount, applier: kokomi,
+                cardSource: null, silent: true);
+        }
+        // THE KOKOMI REVIEW (2026-10-13): "The Plan badge text ('Next turn,
+        // the Bake-Kurage carries out 1 Plan') stayed even when 2 plans were
+        // written" (D2). `PowerCmd` runs the power-amount modifier chain
+        // (`Hook.ModifyPowerAmountGiven` / `Received`) on the way in, and the
+        // badge is a COUNT, not a buff any modifier may resize. So the
+        // queue's depth is written over whatever the chain left.
+        PinBadge(kokomi, count);
+    }
+
+    /// <summary>Set the badge's amount to the queue's depth, whatever the
+    /// modifier chain did to it (Kokomi review 2026-10-13). No badge, no
+    /// write. Display only: the badge is read by nothing that decides.</summary>
+    public static void PinBadge(Creature kokomi, int count)
+    {
+        var badge = kokomi.Powers.OfType<PendingPlansPower>().FirstOrDefault();
+        if (badge == null || count <= 0 || badge.Amount == count) return;
+        badge.SetAmount(count);
     }
 
     /// <summary>

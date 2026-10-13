@@ -48,7 +48,7 @@ public sealed class ProtoKkWard : CustomCardModel, ICharacterCard, IPlannedCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ward"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -57,7 +57,7 @@ public sealed class ProtoKkWard : CustomCardModel, ICharacterCard, IPlannedCard,
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -133,6 +133,8 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     BUDGET_REACHED, COMBAT_SCREENS,
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
     clear_refusal, mark_refusal, pending_refusal,
+    card_skips, clear_card_skips, mark_card_skip,
+    read_shown_hand, remember_shown_hand,
     MAX_ACTIONS_ENV, read_budget, set_budget,
     HAZARD_EVENT_TITLES, HAZARD_EVENTS, _is_rate_limited,
     AURA_DURATION_TURNS, BOMB_GROWTH, CRYSTALLIZE_BLOCK, FRAIL_BLOCK_PCT,
@@ -206,7 +208,8 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
     _potion_aims_at_an_enemy,
     _pet_target, _play, _proceed, _QUALIFIER, _QUOTED, _refuse, Resolution,
     _resolve_enemy, _rest_keyword, SELF_TARGETS, _skip, _split_qualifier,
-    _STALE_NUMBER, unclaimed_rewards, _use_potion, VERBS)
+    _STALE_NUMBER, unclaimed_rewards, _use_potion, VERBS,
+    resolve_shown_card, shown_hand)
 from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
@@ -368,6 +371,11 @@ def cmd_observe(args) -> int:
         else:
             print(_page(screen_page(state, full=not _brief_on(args)),
                         args))
+            # Kokomi round 2 (2026-10-13): the hand as printed, so a
+            # numbered name typed before the next `observe` names the copy
+            # this page showed (`resolve_shown_card`).
+            if not getattr(args, "raw_file", ""):
+                remember_shown_hand(shown_hand(state))
             # 2026-10-08: the lane's cap on every page, which is where the
             # seat brief now tells the seat to read it.
             count, cap = budget_spent()
@@ -526,10 +534,14 @@ def refusal_board(state: dict[str, Any]) -> str:
 
 
 #: What a `proceed` that would leave rewards behind gets, the first time.
+#: The Furina wave (2026-10-13): a chest's relic and a card offer too, so the
+#: sentence names the screen it is on.
 PROCEED_PAST_REWARDS = (
-    "this reward screen still holds {left}. Take each with "
+    "this {where} still holds {left}. Take each with "
     "`choose \"<name>\"`; nothing was sent. Say `proceed` again to leave "
     "them behind")
+#: The screen word for each screen a `proceed` is held on.
+PROCEED_HOLD_WHERE = {"rewards": "reward screen", "treasure": "chest"}
 
 #: What an `end turn` typed right after a refusal, on the same board, gets.
 END_TURN_AFTER_REFUSAL = (
@@ -596,8 +608,20 @@ def cmd_act(args) -> int:
     # The screen the lane's last page was rendered on, read BEFORE `act`
     # (whose observation rolls the run ledger onto this screen).
     prev_screen = _text((_held_run().get("here") or {}).get("screen"))
+    # Kokomi round 2 (2026-10-13, lane 4): a numbered card name means the copy
+    # the last `observe` printed under it, not the copy the re-counted hand
+    # gives that number now (`resolve_shown_card`).
+    shown = read_shown_hand() if live else None
+    command, shown_row, shown_why = resolve_shown_card(
+        state, args.command, shown)
+    if shown_why:
+        board = refusal_board(state)
+        if board:
+            mark_refusal(board, args.command, shown_why.split("; ")[0])
+        print(f"REFUSED: {shown_why}")
+        return 1
     try:
-        res = act(state, args.command)
+        res = act(state, command)
     except qa_packet.PacketLeak as exc:
         print(f"REFUSED: {exc}", file=out)
         return 1
@@ -629,7 +653,7 @@ def cmd_act(args) -> int:
             mark_refusal(board, args.command, why.split(". ")[0])
         print(f"REFUSED: {why}")
         return 1
-    left = (unclaimed_rewards(state)
+    left = (unclaimed_rewards(state, skipped_cards=card_skips())
             if live and (res.get("post") or {}).get("action") == "proceed"
             else [])
     if left:
@@ -639,6 +663,7 @@ def cmd_act(args) -> int:
         else:
             mark_refusal(key, args.command, "rewards left")
             print("REFUSED: " + PROCEED_PAST_REWARDS.format(
+                where=PROCEED_HOLD_WHERE.get(_screen(state), "screen"),
                 left=", ".join(left)))
             return 1
     if board and res["verb"] == "end turn":
@@ -677,6 +702,17 @@ def cmd_act(args) -> int:
     # `EB-341`: the row that was taken, then the game's answer -- the same two
     # lines, in the same order, the session hands its seat.
     clear_refusal()
+    # Kokomi round 2 (2026-10-13, lane 5): a sent `skip` on a card reward is
+    # the deliberate skip, so the reward screen's `proceed` hold no longer
+    # holds for that card row (`card_skips`); a sent `proceed` leaves the
+    # screen and starts the count again.
+    if shown is not None and shown_row is not None:
+        shown["played"] = sorted(set(shown.get("played") or []) | {shown_row})
+        remember_shown_hand(shown)
+    if action == "skip_card_reward":
+        mark_card_skip()
+    elif action == "proceed":
+        clear_card_skips()
     # Project review 2026-10-08, pick 10: the card offer this answered, if
     # any, and what was taken (`understudy/offer_log.py`). Never raises.
     offer_log.record(state, res, args.command)

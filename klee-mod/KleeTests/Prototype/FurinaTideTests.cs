@@ -721,22 +721,25 @@ public class FurinaTideTests
         // past it is lost unless Repaid.
         const string Why = "your HP minus your Drain buffer: 1/4 of your Max "
                          + "HP, less what you have drained";
-        Assert.Equal("Drain line [blue]59[/blue] HP (" + Why + "): HP you "
-                     + "[gold]Drain[/gold] past it is lost unless you "
-                     + "[gold]Repay[/gold] it.",
-                     DrainedCounter.LineSentence(59, Why));
+        // The Furina wave (2026-10-13): the hover leads with the buffer
+        // left; the line is words there, never a second number.
+        Assert.Equal("Drain buffer: [blue]15[/blue] HP left. [gold]Drain"
+                     + "[/gold] inside it returns after combat; past it (past "
+                     + "your line), only [gold]Repay[/gold] returns.",
+                     DrainedCounter.BufferSentence(15));
         Assert.Equal(Why, stage.LineWhy);
         Assert.Contains("plus 10 with Lyney on stage",
                         FurinaStageLaw.LineWhy(lyney: true));
         var body = DrainedCounter.HoverBody(seat.Creature);
         // At 78 HP with 4 of the 19 buffer drained, the line is 63.
         Assert.Equal(63, stage.Line);
-        Assert.StartsWith(DrainedCounter.LineSentence(63, stage.LineWhy), body);
+        Assert.StartsWith(DrainedCounter.BufferSentence(15), body);
+        Assert.DoesNotContain("Drain line", body);
         Assert.Contains("\nDrained [blue]4[/blue] HP.\n", body);
         Assert.Contains("Drained [blue]9[/blue] HP ([blue]3[/blue] past "
                         + "your line: lost unless you [gold]Repay[/gold]).",
-                        DrainedCounter.HoverBody(9, 59, "", past: 3));
-        Assert.Equal(DrainedCounter.HoverBody(0, 0, ""),
+                        DrainedCounter.HoverBody(9, 0, past: 3));
+        Assert.Equal(DrainedCounter.HoverBody(0, 0),
                      DrainedCounter.HoverBody(null));
 
         // Headless-safe, and on the funnel the Fanfare gauge rides.
@@ -826,8 +829,9 @@ public class FurinaTideTests
                 30, FurinaStageLaw.LineWhy(lyney: false)));
         // The Drain line rule (2026-10-09): past the line is a warning, and
         // the one refusal left is a Drain to 0 HP.
-        Assert.Equal("\n(Past your Drain line of 59 HP)",
-                     FurinaStageFacePreview.PastLine(59));
+        // The Furina wave (2026-10-13): no line number on the face.
+        Assert.Equal("\n(Past your Drain buffer)",
+                     FurinaStageFacePreview.PastLine);
         Assert.Equal("\n(Not enough HP)", FurinaStageFacePreview.NotEnoughHp);
         // Off a combat the tip adds nothing.
         Assert.Equal("", FurinaStageFacePreview.LineNow(new ProtoFsOusiaPledge()));

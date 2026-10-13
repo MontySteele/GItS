@@ -216,3 +216,21 @@ def test_the_mod_source_label_is_scrubbed_from_any_text():
     # The bare tip name is left for the tip filter.
     assert _text("WhatMod") == "WhatMod"
     assert _text("No label here.") == "No label here."
+
+
+def test_stoke_the_flames_prints_on_the_attack_that_took_it():
+    """The Varka wave (2026-10-13): a seat "never saw the number change in the
+    log, and could not tell if Four Winds' Pyro half qualified". The mod files
+    a `stoked` event on the Attack's own row (`StokeTheFlamesPower`), and the
+    page prints it there, once."""
+    state = varka_state()
+    state["player"]["resolutions"] = [
+        _row("Four Winds' Ascension", hits=True, events=[
+            _ev("stoked", 9101, card="Four Winds' Ascension",
+                power="Stoke the Flames", amount=5)]),
+        _row("Strike", hits=True)]
+    page = blindplay.observe(state)
+    section = page.split("- **Four Winds' Ascension**", 1)[1]
+    row = section.split("- **Strike**", 1)[0]
+    assert "  Stoke the Flames: its Pyro damage was 5 higher." in row
+    assert page.count("Stoke the Flames: its Pyro damage") == 1

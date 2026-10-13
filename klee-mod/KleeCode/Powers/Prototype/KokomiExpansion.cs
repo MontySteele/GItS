@@ -243,7 +243,8 @@ public sealed class TidalRipostePower : PowerModel, ILocalizationProvider
         ("title", "Tidal Riposte"),
         ("description",
             "Whenever an enemy's attack is fully [gold]Blocked[/gold], deal "
-          + "[blue]{Amount}[/blue] damage to it."),
+          // Kokomi review 2026-10-13: the attacker alone.
+          + "[blue]{Amount}[/blue] damage to that enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;

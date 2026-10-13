@@ -41,7 +41,10 @@ public class MondstadtCompanionsTests
         Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
         Assert.Equal(
-            "Apply [gold]Hydro[/gold] and {PowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies.",
+            // The Varka wave (2026-10-13): in Varka's deck it makes Hydro his
+            // current element, and says so in combat.
+            "Apply [gold]Hydro[/gold] and {PowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."
+            + "{InCombat:{VarkaSwitch}|}",
             Face(card));
         Assert.Equal(3m, card.DynamicVars["PowerAmount"].BaseValue);
         Assert.Equal(4m, Upgraded<ProtoMcMonaStellarisPhantasm>()

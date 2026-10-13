@@ -400,6 +400,61 @@ def clear_refusal(lane: object = None) -> None:
     drop_state(refusal_mark_path(lane))
 
 
+# KOKOMI ROUND 2 (2026-10-13, lane 5). A DELIBERATE `skip` IS THE SKIP. The
+# Furina wave's hold (#1202) holds `proceed` once past a card offer on a
+# reward screen, and a card reward the seat opened and skipped is still a row
+# on that screen, so the seat had to say `proceed` twice after already saying
+# `skip`. Each sent `skip` on a card reward leaves a count here; the hold drops
+# that many card rows, and any sent `proceed` clears the count.
+def card_skip_path(lane: object = None) -> Path:
+    return lane_state_dir(lane) / f"_blindplay-card-skips-lane{lane_tag(lane)}.json"
+
+
+def card_skips(lane: object = None, now: float | None = None) -> int:
+    """How many card rewards were skipped on the reward screen still up
+    (fresh within `REFUSAL_MARK_TTL_S` of the last skip)."""
+    row = read_state_json(card_skip_path(lane))
+    if not isinstance(row, dict):
+        return 0
+    now = time.time() if now is None else now
+    try:
+        if now - float(row.get("at") or 0) > REFUSAL_MARK_TTL_S:
+            return 0
+        return max(0, int(row.get("count") or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def mark_card_skip(lane: object = None, now: float | None = None) -> None:
+    now = time.time() if now is None else now
+    row = {"count": card_skips(lane, now) + 1, "at": now}
+    write_atomic(card_skip_path(lane), json.dumps(row))
+
+
+def clear_card_skips(lane: object = None) -> None:
+    drop_state(card_skip_path(lane))
+
+
+# KOKOMI ROUND 2 (2026-10-13, lane 4). The hand the last `observe` printed,
+# numbered as printed, so a chained `play "Sting (4)"` names the copy the seat
+# read (`blindplay_grammar.resolve_shown_card`). Overwritten by each
+# `observe`; a hand with no repeated name clears it.
+def shown_hand_path(lane: object = None) -> Path:
+    return lane_state_dir(lane) / f"_blindplay-shown-hand-lane{lane_tag(lane)}.json"
+
+
+def remember_shown_hand(row: dict | None, lane: object = None) -> None:
+    if row is None:
+        drop_state(shown_hand_path(lane))
+    else:
+        write_atomic(shown_hand_path(lane), json.dumps(row))
+
+
+def read_shown_hand(lane: object = None) -> dict | None:
+    row = read_state_json(shown_hand_path(lane))
+    return row if isinstance(row, dict) else None
+
+
 def pending_refusal(board: str, lane: object = None,
                     now: float | None = None) -> dict | None:
     """The refusal left on THIS board, if it is fresh; else `None`."""

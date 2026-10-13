@@ -49,7 +49,11 @@ Kokomi: during your turn, `flip <n>` (or `flip "<card>"`) switches Plan n in you
 Two things on one screen printing the same name are NUMBERED in printed order —
 `Water's Edge (1)` / `Water's Edge (2)` — and an upgraded copy is separated by
 `(upgraded)` / `(not upgraded)`. A bare name that is ambiguous is refused with
-the working forms listed back; use one of those.
+the working forms listed back; use one of those. A numbered card in your hand
+names the copy on the page you last read with `observe` and does not shift as
+you play, so `play "Sting (3)"` then `play "Sting (4)"` plays the two copies
+that page showed; a copy already played is refused. `observe` again for new
+numbers.
 
 ### What blindness means here
 
@@ -84,8 +88,10 @@ slow` is not a stop: nothing was sent, so `observe` again in a minute.
 
 Two commands are held once, with the reason printed: an `end turn` typed
 right after a refused command on an unchanged board, and a `proceed` (or
-`leave`) that would walk past gold, a potion or a relic still on a reward
-screen. Say it again to go ahead anyway.
+`leave`) that would walk past gold, a potion, a relic or a card offer still on
+a reward screen, or a relic still in an open chest. Say it again to go ahead
+anyway; that second `proceed` is how you skip on purpose. A card offer you
+opened and left with `skip` is already skipped: it does not hold `proceed`.
 
 ### Your budget
 

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
+public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard, IUnplayableReasonCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -48,8 +48,19 @@ public sealed class ProtoKkChangeOfPlans : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Change of Plans"),
-        ("description", "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw {Cards:diff()} cards."),
+        ("description", "Can only be played if a [gold]Plan[/gold] is waiting. The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw {Cards:diff()} cards."),
     };
+
+    // `EB-455`, the carry-out gate (widened by the Kokomi review,
+    // 2026-10-13): a card with a carry-out is unplayable while
+    // the Bake-Kurage holds no Plan.
+    protected override bool IsPlayable =>
+        KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0;
+
+    public string? UnplayableReason =>
+        KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0
+            ? null
+            : "no Plan is waiting";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -63,7 +63,7 @@ public static class FurinaStageBowPreview
 ///
 /// THE DRAIN LINE. Since the Drain line rule (2026-10-09) a Drain may go
 /// past the line, so the card says so in hand, before the play: "(Past your
-/// Drain line of 59 HP)" while the Drain would take her past it. The one
+/// Drain buffer)" while the Drain would take her past it. The one
 /// refusal left -- a Drain to 0 HP -- reads "(Not enough HP)", because the
 /// game's chooser has no greyed option
 /// (<see cref="ModalChoice.SelectAffordableMode"/>). The gate is
@@ -77,7 +77,7 @@ public static class FurinaStageBowPreview
 public static class FurinaStageFacePreview
 {
     /// <summary>"(Not enough HP)" while a Drain of <paramref name="amount"/>
-    /// would take her to 0 HP; "(Past your Drain line of 59 HP)" while it
+    /// would take her to 0 HP; "(Past your Drain buffer)" while it
     /// would take her past the line; then the Block the Drain pays and who
     /// pays it (<see cref="DrainBlock(int, int, bool)"/>). Empty otherwise,
     /// and off a combat or a Furina board.</summary>
@@ -92,9 +92,7 @@ public static class FurinaStageFacePreview
         // The Spend round (2026-10-10): with A Five-Century Act in play the
         // HP drained past the line returns at the curtain call too, so the
         // tag says that instead of naming a line that costs nothing.
-        return (ledger.Mods.FiveCenturyAct > 0
-                   ? PastLineReturns
-                   : PastLine(FurinaStage.LineOf(owner)))
+        return (ledger.Mods.FiveCenturyAct > 0 ? PastLineReturns : PastLine)
              + block;
     }
 
@@ -131,16 +129,48 @@ public static class FurinaStageFacePreview
     /// <summary>The tag under A Five-Century Act: the HP drained past the
     /// line returns after combat.</summary>
     public const string PastLineReturns =
-        "\n(Past your Drain line: returns after combat)";
+        "\n(Past your Drain buffer: returns after combat)";
 
     /// <summary>The refusal's words: a Drain cannot take her to 0 HP.
     /// </summary>
     public const string NotEnoughHp = "\n(Not enough HP)";
 
+    /// <summary>THE FURINA WAVE (2026-10-13, "To change now" 3): what a
+    /// "Spend up to <paramref name="cap"/>: hit once more for every 4" buys
+    /// now -- "(Spends 2: no extra hit)", "(Spends 6: 1 more hit)". Crashing
+    /// Waves spent a bank of 2 for nothing and said nothing. Read through
+    /// <see cref="FurinaStage.SpentOrUpTo"/>, the count the play takes, so
+    /// the face and the play agree. Empty with nothing to spend, off a
+    /// combat or a Furina board.</summary>
+    public static string SpendUpToHits(CardModel card, int cap) =>
+        Owner(card) is null
+            ? ""
+            : SpendUpToHitsWords(FurinaStage.SpentOrUpTo(card, cap));
+
+    /// <summary>The words, for the pins.</summary>
+    public static string SpendUpToHitsWords(int spend)
+    {
+        if (spend <= 0) return "";
+        var more = spend / FurinaStageLaw.SpendUpToEvery;
+        var buys = more switch
+        {
+            0 => "no extra hit",
+            1 => "1 more hit",
+            _ => more.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                 + " more hits",
+        };
+        return "\n(Spends "
+             + spend.ToString(System.Globalization.CultureInfo.InvariantCulture)
+             + ": " + buys + ")";
+    }
+
     /// <summary>The warning's words, for the pins: the HP drained past the
-    /// line is lost unless Repaid.</summary>
-    public static string PastLine(int line) =>
-        $"\n(Past your Drain line of {line} HP)";
+    /// line is lost unless Repaid. THE FURINA WAVE (2026-10-13, "To change
+    /// now" 1): no line number. "(Past your Drain line of 59 HP)" was a
+    /// second Drain number beside the buffer; the face now says it in the
+    /// buffer's words, as the counter and the seat page do, and the Drain
+    /// tip says what past it costs.</summary>
+    public const string PastLine = "\n(Past your Drain buffer)";
 
     /// <summary>The Drain tip's in-combat sentence (the pool-75 round,
     /// 2026-10-09: every record missed where the line sat): "Your Drain line

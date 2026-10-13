@@ -89,7 +89,8 @@ into = blindplay_render._into_block_clauses
 def test_kept_block_is_run_down_by_the_plans_ahead():
     clauses = into(_plans(_hit(24), _hit(10), _hit(5)),
                    _body(32, powers=["Burrowed"]))
-    assert clauses == {0: " (into Block 32)", 1: " (into Block 8)"}
+    # Worded "into 8 Block" since the Kokomi review (2026-10-13).
+    assert clauses == {0: " (into 32 Block)", 1: " (into 8 Block)"}
 
 
 def test_block_that_falls_at_its_turn_start_is_not_named():
@@ -101,7 +102,7 @@ def test_a_defend_intent_names_the_block_it_will_raise():
         0: " (into the Block it gains on its turn)"}
     assert into(_plans(_hit(9)), _body(5, powers=["Barricade"],
                                        intents=["Defend"])) == {
-        0: " (into Block 5, plus the Block it gains on its turn)"}
+        0: " (into 5 Block, plus the Block it gains on its turn)"}
 
 
 def test_only_front_aimed_damage_rows_carry_it():

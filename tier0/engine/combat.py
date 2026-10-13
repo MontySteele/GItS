@@ -188,7 +188,9 @@ def card_playable(state: CombatState, card: Card) -> bool:
     # over: a card whose whole body is a carry-out pays its energy, exhausts
     # itself and does NOTHING while the jellyfish holds no Plan. The r13 seat
     # met Change of Plans three times as a dead card off a face that never says
-    # it needs one. DERIVED FROM THE ROW -- `kokomi_plan.carry_out_only`.
+    # it needs one. DERIVED FROM THE ROW -- `kokomi_plan.needs_a_waiting_plan`
+    # (any carry-out since the Kokomi review 2026-10-13) and Grand Design's
+    # `needs_a_plannable_card`.
     if kokomi_plan.refuses_for_no_plan(state, card):
         return False
     # FURINA (the Salon's Tab, 2026-10-05): a FIXED Drain or Spend price is

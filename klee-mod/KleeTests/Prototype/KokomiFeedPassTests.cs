@@ -46,7 +46,8 @@ public class KokomiFeedPassTests : IDisposable
         // The re-founding (2026-10-12): "Deal 8 Hydro damage. Or plan: Apply
         // 1 Vulnerable to ALL enemies." [11].
         var card = new ProtoKkBrineSting();
-        Assert.Equal((CardType.Attack, CardRarity.Common, 1),
+        // Uncommon since the Kokomi review (2026-10-13).
+        Assert.Equal((CardType.Attack, CardRarity.Uncommon, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal(8m, card.DynamicVars.Damage.BaseValue);
         Assert.Equal(11m, Upgraded<ProtoKkBrineSting>().DynamicVars.Damage.BaseValue);

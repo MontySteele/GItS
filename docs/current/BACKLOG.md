@@ -49,6 +49,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning, where a Swirl or Crystallize on a burning enemy consumes the held Pyro and Burning keeps ticking; and Dendro ported as ruled (the non-reacting pairs, the Core rules and their previews), tested on Kirara and Emilie. Neither engine has Burning or Dendro today.
 - Show the amplifier: a Melt or Vaporize prints no factor on the face or in the seat log (Rosaria's Melt printed "Deal 15" from a written 9; "Vaporize on X" with no x1.5; Klee's log printed "nothing to amplify" beside a hit multiplied by 1.75); a hit carrying an element chosen at play (Four Winds' Ascension, Northwind Avatar) previews no amplifier either (multiplier pinned by `A_current_element_hit_amplifies_like_any_hit`).
 - Kokomi's Plan list prints a waiting Plan's damage without the target's Vulnerable: a queued card is in no pile, so its numbers never refresh; `KokomiPlan.QueueRow` could send the front-target-folded number (`PlannedDamage(FrontEnemy, ...)`) for front-aimed Plans; `WrittenFrontDamage` has the same gap.
+- Kokomi round 2 (0.2.5212, lane 3): Grand Design+ printed "no card in your hand can be planned" on most turns of a deck about two-thirds Plan cards and Companions, but headless the gate matches the Bake-Kurage's drop target for every card class, printed and upgraded (`KokomiRoundTwoFixesTests`), and the sim matches every row; the cause is not found. The gate now fails open and writes its first throw to godot.log ("Grand Design gate:"): after the next Kokomi round read that line, and have the seat record the hand on any Grand Design refusal. Grand Design+ Retains, so a refusal after the turn's Plans were played is correct and may be what the seat saw.
 - Kokomi: Smoggy ("you can only play 1 Skill per turn") refuses writing a Plan once a Skill is played; neither Smoggy's line nor the Bake-Kurage tip says writing a Plan counts as playing the card.
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
 - Furina: rename the four mismatched guest ids in one regen, moving their art keys with them, after [USER]'s run and never mid-save.
@@ -61,7 +62,8 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
-- Furina screen (wave 2026-10-12): Crashing Waves silently spends Fanfare under 4 for no hit; Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
+- Furina screen (wave 2026-10-12): Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
+- Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher (telemetry: 18 enemy Block all fight, Crusher's own Guarded Strike; Crusher then died to Tidal Bulwark and Blazing Charge). The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Varka screen (wave 2026-10-12): Sayu's random Swirl gives no warning on an enemy with no aura; Amber: Sharpshooter's "if the enemy already has Pyro" loses its second hit when a Melt eats the Pyro first; Cycle of Seasons' damage has no line of its own on the played page.
 - Vambrace's preview shows doubled Block on every Block card in hand, but only the first Block card each combat doubles; a Kokomi seat spent it early on that reading (round 2 2026-10-12, lane 4b).
 - Kokomi text (jellyfish round 2026-10-12): the Plan tip does not say whether Strength adds to Plan damage.
@@ -146,6 +148,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-193` `game_ref/role_tempo_canon.json` predates the int-var reader fix; regenerate it (46 cards gain `has_body`).
 - `EB-667` the Smith shows no upgrade for Ultimate Strike; its numbers are published nowhere the repo reads.
 - `EB-71` no committed sheet prints `sly_autoplay`, so the `CardKeyword.Sly` rail has never run in game; whoever prints the first one checks it live.
+- The shown-hand numbering (Kokomi round 2, `resolve_shown_card`) and the card-skip count reach only `blindplay act`; the in-process `Session` driver re-reads the hand each call and still re-counts numbers. Wire them in if a Session seat chains numbered plays.
 
 ## Sim
 
@@ -165,3 +168,4 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-12` `bridge_unreachable` with the game alive, seen once; wakes on a second observation (`hangwatch` now classifies it).
 - `EB-15` the seed's `lobby` route is unreachable in standard singleplayer; wakes with a Custom run or a hosted lobby.
 - `SKIP-10.9` mechanics the sim does not model, promoted only on demand. Enemy: Back Attack, untargetable Burrow, Ethereal/Hex auras, pick-your-poison curses, damage caps (Hard to Kill, Plating, Hardened Shell), Artifact, Thorns, on-hit status injection, every-N-cards intents, buff-all-enemies, block-an-ally, random-no-repeat AI, self-stun, Slimed self-exhaust, the minor powers, Soul Siphon stat theft, Blessed Antler, Philosopher's Stone. C# with no sim twin: the deferred-settle machinery (`SpotlightSystem`, `FurinaResources`) and per-dealer reaction windows (R1).
+- Seat brief (`docs/current/operations/seat-brief.md`): two of five Kokomi seats (2026-10-13) stopped by choice after act 1 with the run alive, reading the "if the round stops mid-act, these lines are the only handoff" wording as leave to stop. Say a run is played to its end; the handoff lines are for budget stops only.

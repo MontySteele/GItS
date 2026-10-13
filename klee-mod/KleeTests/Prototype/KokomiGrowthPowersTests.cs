@@ -55,14 +55,17 @@ public class KokomiGrowthPowersTests
         Assert.Equal(0, card.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Exhaust, card.CanonicalKeywords);
         Assert.Equal(2m, card.DynamicVars.Cards.BaseValue);
-        Assert.Equal("The [gold]Bake-Kurage[/gold] carries out your first "
+        // The Kokomi review (2026-10-13): only with a Plan waiting.
+        Assert.Equal("Can only be played if a [gold]Plan[/gold] is waiting. "
+                   + "The [gold]Bake-Kurage[/gold] carries out your first "
                    + "[gold]Plan[/gold] now. Draw {Cards:diff()} cards.", Face(card));
         var play = Seq("ProtoKkChangeOfPlans", "OnPlay");
         var carry = play.FindIndex(c => c.Contains("KokomiPlan.ResolveFront"));
         var draw = play.FindIndex(c => c.Contains("CardPileCmd.Draw"));
         Assert.True(carry >= 0 && carry < draw);
-        // It draws on an empty jellyfish too, so the `EB-455` gate is gone.
-        Assert.False(typeof(IUnplayableReasonCard).IsAssignableFrom(card.GetType()));
+        // The Kokomi review (2026-10-13): the `EB-455` gate is back, as a
+        // rule -- it draws too, but only with a Plan waiting.
+        Assert.True(typeof(IUnplayableReasonCard).IsAssignableFrom(card.GetType()));
         var up = Upgraded<ProtoKkChangeOfPlans>();
         Assert.Contains(CardKeyword.Exhaust, up.Keywords);
         Assert.Equal(3m, up.DynamicVars.Cards.BaseValue);

@@ -1280,10 +1280,10 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    # Pays for a play not written on the Bake-Kurage, never a carry-out.
-   # Cost 0 (2026-10-11); Companions count (round 2); face reworded in the
-   # Kokomi round-3 changes (2026-10-12). Provenance note.
+   # Cost 0 (2026-10-11); Companions count (round 2); face reworded again in
+   # the Kokomi review 2026-10-13. Provenance note.
    cost: 0, type: power, rarity: uncommon,
-   description: "The first time each turn you play a card you could have planned, draw 1 card.",
+   description: "The first time each turn you play a [gold]Plan[/gold] card or a [gold]Companion[/gold] without planning it, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1328,10 +1328,10 @@
 - {id: proto_kk_tide_wall, name: "Tide Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1: the intent, read at carry-out, a flat 6 under it. Kokomi
-   # round-3 changes (2026-10-12): the LARGEST intent on the board, not the
-   # front enemy's. Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the most damage an enemy intends when it is carried out.",
+   # R276 pick 1: the intent, read at carry-out, a flat 6 under it; the
+   # largest intent on the board (2026-10-12). Face and live total: Kokomi
+   # review 2026-10-13. Provenance note.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the biggest attack an enemy intends on the turn it lands.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_max_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
@@ -1385,10 +1385,11 @@
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
-   # 2026-10-11: draws 2 [3], the upgrade keeps Exhaust. Kokomi level pass
-   # (2026-10-12): Common -> Uncommon, text unchanged. Provenance note.
+   # 2026-10-11: draws 2 [3], the upgrade keeps Exhaust. Uncommon since the
+   # level pass; unplayable while no Plan is waiting since the Kokomi review
+   # 2026-10-13. Provenance note.
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw {Cards:diff()} cards.",
+   description: "Can only be played if a [gold]Plan[/gold] is waiting. The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw {Cards:diff()} cards.",
    effects: [{op: carry_out_front_plan}, {op: draw, amount: 2}],
    upgrade: {draw: 1}}
 
@@ -1614,8 +1615,9 @@
 - {id: proto_kk_brine_sting, name: "Brine Sting", character: kokomi,
    authored_by: [claude],
    # The re-founding (2026-10-12): cost 1, a hit now, Vulnerable to ALL as
-   # the Plan line.
-   cost: 1, type: attack, rarity: common,
+   # the Plan line. Kokomi review 2026-10-13: Uncommon, swapped with Shoal
+   # Call. Provenance note.
+   cost: 1, type: attack, rarity: uncommon,
    description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 8, target: enemy}],
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies}],
@@ -1643,9 +1645,9 @@
 
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
-   # The re-founding (2026-10-12, card paper sec.2): a new card under the old
-   # name and art. Each card chosen is written as if played on the
-   # Bake-Kurage, for 0 Energy.
+   # The re-founding (2026-10-12): each card chosen is written as if played
+   # on the Bake-Kurage, for 0 Energy. Kokomi review 2026-10-13: unplayable
+   # when no other card in hand can be planned. Provenance note.
    cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. They cost 0.",
    effects: [{op: kokomi, kind: grand_design, amount: 3}],
@@ -1771,9 +1773,9 @@
 - {id: proto_kk_tidal_riposte, name: "Tidal Riposte", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   # "Fully Blocked": a hit Block absorbed whole (0 HP lost because of Block),
-   # once per hit.
-   description: "Whenever an enemy's attack is fully blocked, deal {PowerAmount:diff()} damage to it.",
+   # "Fully Blocked": a hit Block absorbed whole, once per hit. It hits the
+   # attacker alone ("that enemy", Kokomi review 2026-10-13).
+   description: "Whenever an enemy's attack is fully blocked, deal {PowerAmount:diff()} damage to that enemy.",
    effects: [{op: apply_power, power: kk_tidal_riposte, amount: 5, target: self}],
    # 7.
    upgrade: {power_amount: 2}}
@@ -1782,10 +1784,10 @@
 
 - {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
    authored_by: [claude],
-   # The jellyfish build (2026-10-12): the base game's Blade Dance. Cost 1,
-   # Exhaust, 3 [4] plain Stings (the upgrade adds a Sting; it no longer
-   # hands over upgraded ones).
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   # The jellyfish build (2026-10-12): the base game's Blade Dance, 3 [4]
+   # plain Stings. Common since the Kokomi review 2026-10-13, as Blade Dance
+   # is, swapped with Brine Sting. Provenance note.
+   cost: 1, type: skill, rarity: common, exhaust: true,
    description: "Add {KkAmount:diff()} [gold]Stings[/gold] to your [gold]Hand[/gold].",
    effects: [{op: kokomi, kind: shoal_call, amount: 3}],
    upgrade: {kokomi_amount: 1}}
@@ -1979,9 +1981,11 @@
 - {id: proto_kk_kurages_wake, name: "Kurage's Wake", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 2 [gold]Stings[/gold] to your [gold]Hand[/gold].",
+   # Kokomi review 2026-10-13: the Plan adds 3 Stings (was 2), the 1.3
+   # rate on a 1-Energy Plan.
+   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 3 [gold]Stings[/gold] to your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 4, target: enemy, times: 2}],
-   plan: [{op: add_stings, amount: 2}],
+   plan: [{op: add_stings, amount: 3}],
    # 5 twice; the Plan line does not upgrade.
    upgrade: {damage: 1}}
 
@@ -2159,9 +2163,9 @@
    authored_by: [claude],
    # The jellyfish build (2026-10-12): cost 0, with its Plan line.
    cost: 0, type: skill, rarity: token, ethereal: true, exhaust: true,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold].",
    effects: [{op: block, amount: 4}],
-   plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   plan: [{op: apply_power, power: weak, amount: 1, target: front_enemy}],
    # 6 Block / Plan 2 Weak.
    upgrade: {block: 2, plan_power_amount: 1}}
 

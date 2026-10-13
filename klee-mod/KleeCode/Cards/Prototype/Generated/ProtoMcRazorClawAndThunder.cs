@@ -52,14 +52,14 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_razor_claw_and_thunder");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Claw and Thunder"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If this is the third Attack you played this turn, gain {energyPrefix:energyIcons(1)}."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If this is the third Attack you played this turn, gain {energyPrefix:energyIcons(1)}.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -52,14 +52,14 @@ public sealed class ProtoMfChevreuseBurstingGrenades : CustomCardModel, IElement
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("chevreuse_bursting_grenades");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chevreuse — Ring of Bursting Grenades"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage to ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage to ALL enemies.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMfChevreuseBurstingGrenades : CustomCardModel, IElement
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

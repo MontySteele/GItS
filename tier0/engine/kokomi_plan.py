@@ -487,33 +487,48 @@ def _aimed(state: CombatState, clause: dict,
     return []
 
 
-def carry_out_only(card: Card) -> bool:
-    """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
+def needs_a_waiting_plan(card: Card) -> bool:
+    """Is this row unplayable while the jellyfish holds no Plan? (`EB-455`,
+    widened by the Kokomi review 2026-10-13.)
 
-    `gen_klee_cards.card_is_carry_out_only`'s twin, clause for clause: true
-    when every top-level effect that is not a cost is a `carry_out_front_plan`.
-    Such a card pays its energy, exhausts itself and resolves to nothing --
-    `klee_overhaul.set_off_only`'s shape one mechanic over, and its argument.
-
-    A carry-out sitting BESIDE another effect is not covered: a card that also
-    draws still does something on an empty jellyfish.
+    `gen_klee_cards.card_needs_a_waiting_plan`'s twin, clause for clause: true
+    for any row with a top-level `carry_out_front_plan`. Change of Plans draws
+    too, and its face now opens "Can only be played if a Plan is waiting."
     """
-    rest = [fx for fx in card.effects
-            if fx.get("op") not in ("spend_spark", "spend_charge")]
-    if not rest:
-        return False
-    return all(fx.get("op") == "carry_out_front_plan" for fx in rest)
+    return any(fx.get("op") == "carry_out_front_plan" for fx in card.effects)
+
+
+def needs_a_plannable_card(card: Card) -> bool:
+    """Is this row unplayable while no OTHER card in hand can be planned?
+    (Kokomi review 2026-10-13: Grand Design.)
+    `gen_klee_cards.card_needs_a_plannable_card`'s twin."""
+    return any(fx.get("op") == "kokomi" and fx.get("kind") == "grand_design"
+               for fx in card.effects)
 
 
 def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
-    """`card_playable`'s Plan clause: a carry-out-only card is unplayable while
-    the Bake-Kurage holds no Plan (`EB-455`).
+    """`card_playable`'s Plan clause (`EB-455`, the Kokomi review 2026-10-13):
+    a card with a carry-out is unplayable while the Bake-Kurage holds no Plan,
+    and Grand Design while no other card in hand can be planned.
 
-    The mod refuses it at `CardModel.IsPlayable` and prints the reason through
-    `IUnplayableReasonCard` ("no Plan is written"); this is that refusal at
-    this engine's twin seam, exactly as `klee_overhaul.refuses_for_no_bomb` is.
+    The mod refuses both at `CardModel.IsPlayable` and prints the reason
+    through `IUnplayableReasonCard` ("no Plan is waiting" / "no card in your
+    hand can be planned"); this is that refusal at this engine's twin seam,
+    exactly as `klee_overhaul.refuses_for_no_bomb` is.
+
+    Kokomi round 2 (2026-10-13): pinned row by row, printed and upgraded, to
+    count exactly the Plan-line rows and Companions
+    (`test_kokomi_round_2_fixes_2026_10_13`). The C# read now fails open on a
+    throw (`KokomiRefounding.AnyToPlan`); a sim read cannot throw here.
     """
-    return live(state) and carry_out_only(card) and not state.kk_plan_queue
+    if not live(state):
+        return False
+    if needs_a_waiting_plan(card) and not state.kk_plan_queue:
+        return True
+    if needs_a_plannable_card(card):
+        return not any(c is not card and can_be_written(c)
+                       for c in state.player.hand)
+    return False
 
 
 def plan_aimed_at_pet(state: CombatState, card: Card) -> bool:

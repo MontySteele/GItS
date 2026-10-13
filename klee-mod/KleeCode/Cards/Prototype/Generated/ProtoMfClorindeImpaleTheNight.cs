@@ -52,14 +52,14 @@ public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("clorinde_impale_the_night");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Clorinde — Impale the Night"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. Your Attacks against enemies holding an aura deal 6 additional damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. Your Attacks against enemies holding an aura deal 6 additional damage.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalC
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

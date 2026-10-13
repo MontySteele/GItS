@@ -8092,3 +8092,60 @@ golded.
 Pins: `tier0/tests/test_kokomi_level_pass_2026_10_12.py`,
 `klee-mod/KleeTests/Prototype/KokomiLevelPassTests.cs`, and the updated card
 pins they replace. Untested in game until a deploy.
+
+## Kokomi review, 2026-10-13
+
+Section 4.A ("Build now") of Fable's review of the level-pass wave (five
+Sonnet runs, 0 of 5), decided and built as written. War Council's Energy-icon
+row was built separately (#1201).
+
+- **Tide Wall** (`proto_kk_tide_wall`): "Gain 4 Block. Plan: Gain 6 Block,
+  plus the biggest attack an enemy intends on the turn it lands." The
+  behaviour is unchanged and confirmed: `KokomiPlan.ResolveOne`,
+  `Kind.BlockMaxIntent`, reads `KokomiOverhaulKit.MostIntendedDamage` at
+  carry-out. The Plan strip's caption under a waiting Tide Wall and the seat
+  page's queue row print its total against the board now ("Block 29";
+  `KokomiPlan.LiveBlock`, wire key `block_now`, Frail and Dexterity folded),
+  and the page says the read is repeated on the turn it lands. Its `PlanBlock`
+  is now an `UnsourcedBlockVar`, so the printed 6 folds Frail (the Frail item).
+- **A waiting Attack Plan into Block.** The strip's caption under a
+  front-aimed Attack Plan says what Block it lands in: "into 8 Block" where
+  the front body keeps its Block through its turn (`KokomiPlan.KeptBlockAhead`,
+  the game's own `Hook.ShouldClearBlock`), "into Block" where it intends to
+  Defend. The page's existing clause is reworded "into 8 Block". A body's
+  Block NOW is not printed where it falls at the body's turn start, because
+  that is not the Block the Plan meets (`PLAN_BLOCK_NOTE`; rule 3 unchanged).
+- **Grand Design:** unplayable when no other card in hand can be planned
+  (`KokomiRefounding.AnyToPlan`, reason "no card in your hand can be
+  planned"; sim `kokomi_plan.needs_a_plannable_card`). Text unchanged.
+- **Change of Plans:** "Can only be played if a Plan is waiting." in front.
+  The `EB-455` carry-out gate now covers any row with a carry-out
+  (`gen_klee_cards.card_needs_a_waiting_plan`, sim
+  `kokomi_plan.needs_a_waiting_plan`), reason "no Plan is waiting".
+- **Treatise:** "The first time each turn you play a Plan card or a Companion
+  without planning it, draw 1 card." The code already counted exactly this:
+  Masterstroke can only be played on the Bake-Kurage (`KokomiTargets.PetOnly`),
+  so it is always planned and never counts. The power's face matches.
+- **Plan badge:** `RefreshBadge` pins the badge to the queue's depth after the
+  power-amount modifier chain (`KokomiPlan.PinBadge`). The strip marks the
+  top picture "First" when two or more Plans wait, and the page marks queue
+  row 1 "(first)". The strip is redrawn after every card she plays.
+- **Frail on printed Block.** Every Kokomi Block number that a play pays
+  already folded Frail except Tide Wall's Plan 6 (above). Across the kits the
+  one other flat card Block on a bare `DynamicVar` was Varka's `VkBase` on
+  Frost Ward and Barbara: Gleeful Songs, now a `CardBlockNumberVar` (the game's
+  `BlockVar` preview, not a `BlockVar`, so `GainsBlock` and Nimble's
+  eligibility do not move). Rates ("4 Block for each enemy...", Varka's
+  `VkPer`) and Power triggers stay printed as written. Literal Block numbers
+  on companion faces (e.g. Albedo's "gain 4 Block") are not vars and are not
+  folded.
+- **Tidal Riposte:** "...deal 5 [7] damage to that enemy." It hits the
+  attacker alone (`TidalRipostePower.AfterDamageReceived`), never ALL.
+- **Rarity swap:** Shoal Call Uncommon -> **Common** (Blade Dance's rarity),
+  Brine Sting Common -> **Uncommon**. Texts unchanged; the pool stays 78 at
+  **20 / 38 / 20**.
+- **Kurage's Wake:** "Plan: Add 3 Stings to your Hand." (was 2).
+
+Pins: `tier0/tests/test_kokomi_review_2026_10_13.py`,
+`klee-mod/KleeTests/Prototype/KokomiReviewTests.cs`, and the updated card
+pins they replace. Untested in game until a deploy.

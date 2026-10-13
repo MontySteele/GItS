@@ -52,14 +52,14 @@ public sealed class ProtoMfGuestNeuvilletteJudgment : CustomCardModel, IElementa
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("guest_neuvillette_judgment");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Neuvillette — Equitable Judgment"),
-        ("description", "Lose {HpLoss} HP. Deal {CalculatedDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies."),
+        ("description", "Lose {HpLoss} HP. Deal {CalculatedDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMfGuestNeuvilletteJudgment : CustomCardModel, IElementa
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Hydro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

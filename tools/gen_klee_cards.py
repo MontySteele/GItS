@@ -1164,6 +1164,30 @@ def varka_switch_element(card: dict,
     current, no Unwavering Banner for a non-Knight) is
     `ArmKeywordTips.ForElementSwitch`'s live question.
     """
+    # THE SHARED COMPANIONS (Varka wave, 2026-10-13: Lisa's Violet Arc made
+    # Electro current with no line saying so). A shared Companion row is
+    # emitted once, under Klee's profile, yet in Varka's deck it is a card of
+    # his and its element switches him like any other. So the question is the
+    # ROW's, not the profile's: a shared Companion that applies its element
+    # (an `apply_aura`, or damage that carries it) carries the line, and
+    # `VarkaOath.WouldSwitchTo` prints it only for a live Varka owner.
+    if is_companion(card) and card.get("character") != "varka":
+        element = card.get("element")
+        if element not in VARKA_OATH_ELEMENTS:
+            return None
+        applies = any(e.get("op") == "apply_aura"
+                      and e.get("element") in VARKA_OATH_ELEMENTS
+                      for e in _effects_everywhere(card))
+        applies = applies or any(e.get("applies_element")
+                                 for e in companion_damage_effects(card))
+        if not applies:
+            return None
+        last = element
+        for effect in _effects_everywhere(card):
+            if (effect.get("op") == "apply_aura"
+                    and effect.get("element") in VARKA_OATH_ELEMENTS):
+                last = effect["element"]
+        return last
     if profile.character_id != "varka":
         return None
     if is_companion(card):
@@ -1256,6 +1280,16 @@ def starter_spends_the_bank(card: dict) -> bool:
                     and (eff.get("amount_formula") or {}).get("count")
                     == "stage_spent"
                     for eff in ops))
+
+
+def final_bow_acts_in_turn(card: dict) -> bool:
+    """The Furina wave (2026-10-13, "To change now" 4): does this row make a
+    guest act several times and leave (Final Bow)? Its acts happen one after
+    another, and a seat read them as simultaneous: the second kill set off
+    the first kill's Crab Rage. Asked of the effect, so the tip follows the
+    clause, not an id."""
+    return any(e.get("op") == "furina" and e.get("kind") == "final_bow"
+               for e in card.get("effects") or [])
 
 
 def keeps_half_a_spend_all(card: dict) -> bool:
@@ -1483,33 +1517,36 @@ def card_is_set_off_only(card: dict) -> bool:
     return True
 
 
-def card_is_carry_out_only(card: dict) -> bool:
-    """Does this row do NOTHING while the jellyfish holds no Plan? (`EB-455`.)
+def card_needs_a_waiting_plan(card: dict) -> bool:
+    """Is this row unplayable while the jellyfish holds no Plan? (`EB-455`,
+    widened by the Kokomi review 2026-10-13.)
 
-    True when every top-level effect that is not a cost is a
-    `carry_out_front_plan`. Such a card pays its energy, exhausts itself and
-    resolves to nothing -- `card_is_set_off_only`'s shape one mechanic over,
-    and the same argument: a card that looks playable and cannot do anything
-    is a play the reader has to LOSE to learn about.
+    True for any row with a top-level `carry_out_front_plan`. It began as
+    `card_is_set_off_only`'s shape one mechanic over -- a row whose WHOLE body
+    is a carry-out pays its energy and resolves to nothing (Kokomi r13 (b):
+    Change of Plans "was dead in hand three fights before it was good once").
 
-    THE FIND (Kokomi r13 (b)). Change of Plans "was dead in hand three fights
-    before it was good once and its face never says it needs a written Plan; a
-    first reader plays it into an empty jellyfish". When it did fire it was
-    excellent -- 2 energy for 21 damage and Weak on three, on the boss's second
-    turn -- so this is legibility and not balance: nothing the card DOES moves.
+    THE KOKOMI REVIEW (2026-10-13) MADE IT A RULE: Change of Plans draws too,
+    and seats still played it into an empty jellyfish for the draw alone (A
+    F9, F10; [USER]'s run: three fights where it only drew). Its face now
+    opens "Can only be played if a Plan is waiting.", Clash's template, and
+    the gate covers a carry-out BESIDE other effects as well.
 
     DERIVED FROM THE ROW, never a per-card flag, for the reason
-    `card_is_set_off_only` gives: a future row with this shape cannot be given
-    the gate by somebody remembering to. A `carry_out_front_plan` sitting
-    BESIDE another effect is NOT covered -- a card that also draws still does
-    something on an empty jellyfish, and refusing it would be a rules change.
-    Twin: `kokomi_plan.carry_out_only`.
+    `card_is_set_off_only` gives. Twin: `kokomi_plan.needs_a_waiting_plan`.
     """
-    rest = [eff for eff in card.get("effects", [])
-            if eff.get("op") not in _COST_OPS]
-    if not rest:
-        return False
-    return all(eff.get("op") == "carry_out_front_plan" for eff in rest)
+    return any(eff.get("op") == "carry_out_front_plan"
+               for eff in card.get("effects", []))
+
+
+def card_needs_a_plannable_card(card: dict) -> bool:
+    """Is this row unplayable while no OTHER card in hand can be planned?
+    (Kokomi review 2026-10-13.) Grand Design: "Plan up to 3 cards from your
+    Hand. They cost 0." played into a hand with nothing to plan spent a Rare
+    on nothing (C F11, "NEVER AGAIN: Grand Design"). Derived from the row's
+    `grand_design` kind. Twin: `kokomi_plan.needs_a_plannable_card`."""
+    return any(eff.get("op") == "kokomi" and eff.get("kind") == "grand_design"
+               for eff in card.get("effects", []))
 
 
 ELEMENT_CS = {"pyro": "Element.Pyro", "hydro": "Element.Hydro",
@@ -2642,6 +2679,14 @@ VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
 #: each Weak and Vulnerable on the enemy"). The value is the C# var class
 #: (Powers/Prototype/VarkaOath.cs), display only.
 VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
+#: A kind whose `base` is the card's own flat Block, paid powered with the
+#: card play (`VarkaCards.GainCardBlock`): its `VkBase` is a
+#: `CardBlockNumberVar`, the game's `BlockVar` preview under that token, so the
+#: face folds Frail and Dexterity the way a base card's Block does (Kokomi
+#: review 2026-10-13, the Frail item) without turning on `GainsBlock`. The
+#: per-enemy `VkPer` stays a plain number: it is a rate, and a fold of a rate
+#: is a number no card pays.
+VARKA_BLOCK_BASE_KINDS = {"frost_ward", "gleeful_songs"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -6259,14 +6304,17 @@ def plus_block_calc_rider(
     count = reader[len(prefix):]
     # Varka last pass (2026-10-12): Tidal Bulwark gains its own Block first,
     # so the preview counts that Block too (its printed number; Dexterity
-    # is not previewed).
+    # is not previewed). The Varka wave (2026-10-13): only while it is still
+    # to come -- the hit reads this var AFTER the play gained it, and counted
+    # it twice (`PendingOwnBlock`).
     effects = card.get("effects") or []
     own_block = ""
     for e in effects:
         if e is eff:
             break
         if e.get("op") == "block" and e.get("target", "self") == "self":
-            own_block = " + (int)card.DynamicVars.Block.BaseValue"
+            own_block = (" + PendingOwnBlock.For(card, "
+                         "(int)card.DynamicVars.Block.BaseValue)")
             break
     return (int(formula.get("base", 0)), 1, (
         f"{prefix}(int)card.Owner.Creature.Block{own_block}"
@@ -7714,6 +7762,11 @@ def build_vars(card: dict) -> list[str]:
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
             for field in varka_fields(eff):
+                if field == "base" and eff["kind"] in VARKA_BLOCK_BASE_KINDS:
+                    out.append(
+                        f'new CardBlockNumberVar("{VARKA_VAR_FIELDS[field]}", '
+                        f'{int(eff[field])}m)')
+                    continue
                 out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
                            f'{int(eff[field])}m)')
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
@@ -7908,7 +7961,12 @@ def build_vars(card: dict) -> list[str]:
         # (live-looks-8c, #575); this is the same declaration one card over.
         # THE FLAT CLAUSE ONLY: the scaled Block clauses print a RATE, and a
         # percentage folded into a rate is a number no card pays.
-        elif key == "plan_block" and plan_line[index].get("op") == "block":
+        # Kokomi review 2026-10-13: Tide Wall's flat 6 is a flat clause too
+        # (`Kind.BlockMaxIntent` pays `GainBlock(kokomi, intent + 6,
+        # ValueProp.Move, null)`), and as a bare `DynamicVar` it printed 6
+        # under Frail while the Block beside it printed the folded number.
+        elif key == "plan_block" and plan_line[index].get("op") in (
+                "block", "block_max_intent"):
             out.append(
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
         else:
@@ -15742,12 +15800,43 @@ def stage_later_repay_call(card: dict) -> str | None:
             f'{int(nested[0].get("amount", 1))}, {first})')
 
 
+#: THE FURINA WAVE (2026-10-13, `review/records/furina-wave-2026-10-13.md`,
+#: "To change now" 3): the token of a "Spend up to X: hit once more for
+#: every 4" row's in-combat line.
+STAGE_SPEND_HITS_TOKEN = "StageSpendHits"
+
+
+def stage_spend_hits_call(card: dict) -> str | None:
+    """The C# that fills a "Spend up to X: hit once more for every 4" row's
+    in-combat line, or None.
+
+    The Furina wave (2026-10-13): Crashing Waves spent a bank of 2 for no
+    extra hit and said nothing ("A preview should say 'spends 2, no extra
+    hit'", lane 3). The face prints what the bank buys now: "(Spends 2: no
+    extra hit)", "(Spends 6: 1 more hit)". DERIVED FROM THE CLAUSE -- a
+    damage op whose hit count reads `stage_spent_fours` after a top-level
+    `stage_spend_up_to` -- so a second such row carries it the day it exists.
+    """
+    spends = [fx for fx in card.get("effects") or []
+              if fx.get("op") == "stage_spend_up_to"]
+    hits = [fx for fx in card.get("effects") or []
+            if fx.get("op") == "damage"
+            and isinstance(fx.get("times_formula"), dict)
+            and fx["times_formula"].get("count") == "stage_spent_fours"]
+    if len(spends) != 1 or not hits:
+        return None
+    return ("FurinaStageFacePreview.SpendUpToHits(this, "
+            f"{int(spends[0]['amount'])})")
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
     args = []
     for token, call in ((STAGE_BOW_TOKEN, stage_bow_preview_call(card)),
                         (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
-                        (STAGE_REPAY_TOKEN, stage_repay_call(card))):
+                        (STAGE_REPAY_TOKEN, stage_repay_call(card)),
+                        (STAGE_SPEND_HITS_TOKEN,
+                         stage_spend_hits_call(card))):
         if call:
             args.append((token, call))
     return args
@@ -16274,7 +16363,8 @@ def emit(
     # EB-261 / EB-264. A card refused by its OWN gate carries the sentence the
     # page prints, because `CardModel.CanPlay` collapses every mod-side refusal
     # into `BlockedByCardLogic` and has no slot for what the reason was.
-    if (card_is_set_off_only(card) or card_is_carry_out_only(card)
+    if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
+            or card_needs_a_plannable_card(card)
             or stage_fixed_price(card) is not None):
         interfaces += ", IUnplayableReasonCard"
 
@@ -16876,6 +16966,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForAscensionNoOath("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # The Furina wave (2026-10-13): Final Bow's acts are in turn.
+        if final_bow_acts_in_turn(card):
+            tips_expr = (
+                "ArmKeywordTips.ForFinalBowInTurn("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the
         # definition of a word. A `Set off` row and the merge are PLAYABLE with
@@ -17278,15 +17373,30 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # carry-out does NOTHING while the jellyfish holds no Plan. The r13 seat
     # met Change of Plans three times as a dead card before it was good once,
     # off a face that never says it needs one.
-    plan_gated = card_is_carry_out_only(card)
-    plan_gate_expr = (
-        "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
+    # The Kokomi review (2026-10-13) widened it to any row with a carry-out
+    # (Change of Plans: "Can only be played if a Plan is waiting.") and gave
+    # Grand Design its own gate one read over: no other card in hand that can
+    # be planned. One IsPlayable member, so the two never share a card.
+    plan_gated = (card_needs_a_waiting_plan(card)
+                  or card_needs_a_plannable_card(card))
+    if card_needs_a_waiting_plan(card):
+        plan_gate_expr = (
+            "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
+        plan_gate_why = "no Plan is waiting"
+        plan_gate_note = (
+            "    // `EB-455`, the carry-out gate (widened by the Kokomi review,\n"
+            "    // 2026-10-13): a card with a carry-out is unplayable while\n"
+            "    // the Bake-Kurage holds no Plan.\n")
+    else:
+        plan_gate_expr = "KokomiRefounding.AnyToPlan(this)"
+        plan_gate_why = "no card in your hand can be planned"
+        plan_gate_note = (
+            "    // The Kokomi review (2026-10-13): unplayable while no other\n"
+            "    // card in hand can be planned, rather than spending itself\n"
+            "    // on nothing.\n")
     plan_gate_member = (
-        "\n\n    // `EB-455`, the carry-out gate: a card whose whole body is\n"
-        "    // a carry-out is unplayable while the Bake-Kurage holds no\n"
-        "    // Plan, rather than paying its energy and exhausting itself\n"
-        "    // for nothing.\n"
-        "    protected override bool IsPlayable =>\n"
+        "\n\n" + plan_gate_note
+        + "    protected override bool IsPlayable =>\n"
         f"        {plan_gate_expr};"
         if plan_gated and not spark_price else "")
     # THE SALON'S TAB (2026-10-05): a FIXED Drain or Spend price at the top
@@ -17321,7 +17431,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "\n\n    public string? UnplayableReason =>\n"
         f"        {plan_gate_expr}\n"
         "            ? null\n"
-        '            : "no Plan is written";'
+        f'            : "{plan_gate_why}";'
         if plan_gated else "")
     # R213 E1: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --

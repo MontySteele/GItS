@@ -26,7 +26,7 @@ in place from the operator's scratch directory and only rendered PNGs leave it.
 
 SCALE (docs/current/LAW.md, "Scale by real heights"): body px at 1080p =
 canon height / ADULT_IN * BASE_ADULT_PX. Genshin publishes no heights; the
-figures below are the usual estimates for each body type (Klee's ruled
+figures below are [USER]'s ruled heights (2026-10-13) (Klee's ruled
 4'2" = 50 in is the anchor this law was ruled on). The official MMD packs are
 NOT at one common scale (Klee's 2021 pack and the 观海 packs differ by ~1.4x
 at the head bone), so each character's ppu is solved from its own measured
@@ -139,7 +139,7 @@ VARKA_STANCE = pose(
 CHARS = {
     "furina": {
         "pmx": "furina/unpacked/【芙宁娜】.pmx",
-        "height_in": 64.0,          # medium female body type
+        "height_in": 63.0,          # ruled 2026-10-13
         "hand_tip": "中指１",        # no 手先 bone in the 观海 packs: the middle finger's base stands in
         "face_mats": FACE_MATS,
         "no_line_mats": NO_LINE_MATS,
@@ -150,7 +150,7 @@ CHARS = {
     },
     "kokomi": {
         "pmx": "kokomi/unpacked/珊瑚宫心海.pmx",
-        "height_in": 64.0,          # medium female body type
+        "height_in": 63.0,          # ruled 2026-10-13
         "hand_tip": "中指１",
         "face_mats": FACE_MATS,
         "no_line_mats": NO_LINE_MATS,
@@ -161,7 +161,7 @@ CHARS = {
     },
     "varka": {
         "pmx": "varka/unpacked/法尔伽.pmx",
-        "height_in": 74.0,          # tall male body type
+        "height_in": 78.0,          # ruled 2026-10-13: his custom in-game model is tall
         "hand_tip": "中指１",
         "face_mats": FACE_MATS,
         "no_line_mats": NO_LINE_MATS,

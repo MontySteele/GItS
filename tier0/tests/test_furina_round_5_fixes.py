@@ -37,7 +37,8 @@ def _stage(raw: dict) -> dict:
 def _drain_line(raw: dict) -> str:
     lines = blindplay_render._render_stage(
         _stage(raw), {"block": 0, "hp": 74, "max_hp": 78})
-    return next(ln for ln in lines if ln.startswith("- Drained "))
+    return next(ln for ln in lines
+                if ln.startswith(("- Drained ", "- Drain buffer")))
 
 
 # ---- 1. Freminet's act is Block ------------------------------------------------
@@ -73,21 +74,21 @@ def test_a_zero_line_reads_in_buffer_words():
     line = _drain_line(_wire(drain_line=0, drain_buffer=19,
                              drain_buffer_left=13))
     assert line == (
-        "- Drained 6 HP. Drain buffer 13 of 19 left: your HP is inside it, "
-        "so all your Drain returns after combat. Drain line 0 HP.")
+        "- Drain buffer: 13 HP left. Your HP is inside it, so all your "
+        "Drain returns after combat.")
     assert "your HP minus" not in line
 
 
 def test_the_zero_line_wins_over_five_century_act_on_a_buffer_build():
     line = _drain_line(_wire(drain_line=0, past_returns=True))
-    assert line.startswith("- Drained 6 HP. Drain buffer 13 of 19 left: "
-                           "your HP is inside it")
+    assert line.startswith("- Drain buffer: 13 HP left. Your HP is "
+                           "inside it")
 
 
 def test_a_non_zero_buffer_line_is_unchanged():
     assert _drain_line(_wire()) == (
-        "- Drained 6 HP. Drain buffer 13 of 19 left: Drain inside it returns "
-        "after combat; past it, only Repay returns. Drain line 61 HP.")
+        "- Drain buffer: 13 HP left. Drain inside it returns after combat; "
+        "past it (past your line), only Repay returns.")
 
 
 # ---- 3. Lyney ----------------------------------------------------------------

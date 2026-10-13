@@ -47,15 +47,18 @@ def _stage(raw: dict, hp: int = 74, max_hp: int = 78) -> list[str]:
 
 
 def _drain_line(raw: dict) -> str:
-    return next(ln for ln in _stage(raw) if ln.startswith("- Drained "))
+    return next(ln for ln in _stage(raw)
+                if ln.startswith(("- Drained ", "- Drain buffer")))
 
 
 # ---- 1. the buffer leads ------------------------------------------------------
 
 def test_the_drain_counter_leads_with_the_buffer():
+    # The Furina wave (2026-10-13): one number, the buffer left
+    # (`test_furina_wave_2026_10_13.py`).
     assert _drain_line(_wire()) == (
-        "- Drained 6 HP. Drain buffer 13 of 19 left: Drain inside it returns "
-        "after combat; past it, only Repay returns. Drain line 61 HP.")
+        "- Drain buffer: 13 HP left. Drain inside it returns after combat; "
+        "past it (past your line), only Repay returns.")
 
 
 def test_the_board_reads_the_buffer_off_the_wire():
@@ -71,17 +74,17 @@ def test_the_past_part_still_says_what_it_costs():
     line = _drain_line(_wire(drained=25, drained_past=6,
                              drain_buffer_left=0, drain_line=49))
     assert line == (
-        "- Drained 25 HP (6 past your line: lost unless you Repay). Drain "
-        "buffer 0 of 19 left: Drain inside it returns after combat; past it, "
-        "only Repay returns. Drain line 49 HP.")
+        "- Drain buffer: 0 HP left. Drain inside it returns after combat; "
+        "past it (past your line), only Repay returns. 6 HP drained past "
+        "it: lost unless you Repay.")
 
 
 def test_a_five_century_act_returns_the_past_part_too():
     line = _drain_line(_wire(drained=25, drained_past=6, past_returns=True,
                              drain_buffer_left=0, drain_line=49))
     assert line == (
-        "- Drained 25 HP (6 past your line). Drain buffer 0 of 19 left: all "
-        "your Drain returns after combat, past it too. Drain line 49 HP.")
+        "- Drain buffer: 0 HP left. All your Drain returns after combat, "
+        "past it too.")
 
 
 def test_the_zero_line_sentence_stays():

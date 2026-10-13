@@ -49,14 +49,14 @@ public sealed class ProtoMcLisaVioletArc : CustomCardModel, ICompanionCard, IWri
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_lisa_violet_arc");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lisa — Violet Arc"),
-        ("description", "Apply [gold]Electro[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Apply [gold]Electro[/gold] to ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -66,6 +66,15 @@ public sealed class ProtoMcLisaVioletArc : CustomCardModel, ICompanionCard, IWri
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
