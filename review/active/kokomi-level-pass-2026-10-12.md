@@ -79,7 +79,16 @@ A two-seat Kokomi round on the new build. Then the review you asked for, "once t
 - the share of damage from Block-to-damage;
 - take rates for the cards in section 2.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "On the Kokomi level paper - agreed on all defaults"
+
+- **Pick 1 (a):** all of section 1's trims.
+- **Pick 2 (a):** all of section 2's floors.
+
+The cards are written to the card-text pass's house rules, with "plan" as the verb.
+
+## For [USER] (ruled above)
 
 1. **The trims in section 1.**
    - **(a) Default:** all of them.
