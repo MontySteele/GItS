@@ -381,6 +381,27 @@ def test_the_traps_fire_inside_a_real_enemy_turn(overhaul):
     assert st.player.hp == hp_before - 4      # 10 in, 6 blocked
 
 
+def test_the_shower_card_face_prints_the_live_shower_token():
+    """Dahlia, Sacramental Shower: the face prints `{Shower:diff()}`, the
+    var its badge already folds Strength and Weak through, and the generated
+    card declares that var. The base number is the sim's constant."""
+    root = Path(__file__).resolve().parents[2]
+    sheet = (root / "docs" / "prototype-surface.yaml").read_text(
+        encoding="utf-8")
+    row = sheet[sheet.index("id: proto_mc_dahlia_sacramental_shower"):]
+    row = row[:row.index(chr(10) + "- {")]
+    assert "deal {Shower:diff()} [gold]Hydro[/gold] damage" in row
+    card = (root / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+            / "Generated" / "ProtoMcDahliaSacramentalShower.cs").read_text(
+                encoding="utf-8")
+    assert "new ShowerVar()" in card
+    hooks = (root / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+             / "CompanionOverhaulHooks.cs").read_text(encoding="utf-8")
+    assert ("internal ShowerVar() : base(Token, "
+            "CompanionOverhaulLaw.ShowerDamage)") in hooks
+    assert C.MC_SHOWER_DMG == 12
+
+
 def test_a_trap_that_kills_the_attacker_stops_its_hit(overhaul):
     st = make_state(enemies=[make_enemy(hp=5,
                                         intents=[{"kind": "attack",

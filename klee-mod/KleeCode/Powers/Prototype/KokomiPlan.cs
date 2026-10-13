@@ -2447,8 +2447,16 @@ public static class KokomiPlan
         if (doubleDamage) amount *= 2;
         // TELEMETRY ONLY: a Plan's hit is the Bake-Kurage's (`EB-334`), so it
         // is Kokomi's pet damage. The applier the engine reads is unchanged.
+        // `damage_by_source` files it under the card that wrote the Plan
+        // (the one a cancel would return), so a Plan card's damage reads per
+        // card; "(Bake-Kurage)" only where no card is known. The same name is
+        // the cause a reaction inside the hit reports.
+        var writer = entry?.Returns;
+        var writerName = writer == null
+            ? null : Diagnostics.PlayTelemetry.CardNameOf(writer);
         using var credit = Diagnostics.DamageCredit.Open(
-            kokomi, Diagnostics.DamageCredit.Pet, "Bake-Kurage");
+            kokomi, Diagnostics.DamageCredit.Pet, "Bake-Kurage",
+            cause: writerName, card: writerName);
         var times = plan.Times < 1 ? 1 : plan.Times;
         int? first = null;
         var aimedAtAnyone = false;
@@ -2669,6 +2677,39 @@ public static class KokomiPlan
             .Sum(clause => clause.Amount * System.Math.Max(1, clause.Times));
 
     /// <summary>
+    /// What <see cref="WrittenFrontDamage"/> will deal at the front body:
+    /// the written number with that body's Vulnerable folded, the call the
+    /// card face prints (<see cref="PlannedDamage"/>). An entry Converging
+    /// Tide has stamped at another body keeps its written number, since the
+    /// front is not where it lands.
+    /// </summary>
+    public static int ForecastFrontDamage(Entry entry, Creature? kokomi)
+    {
+        var written = WrittenFrontDamage(entry);
+        if (written <= 0 || entry.AimOverride != null) return written;
+        return PlannedDamage(FrontEnemy(kokomi), written);
+    }
+
+    /// <summary>
+    /// Set a waiting two-line Plan's printed plan-line damage to what it will
+    /// deal. Only for an entry with exactly one front damage clause whose
+    /// card prints <see cref="PlanDamageVar"/>, and not for one aimed
+    /// elsewhere by Converging Tide. Display only.
+    /// </summary>
+    private static void ShowQueuedPlanDamage(Entry entry, Creature? kokomi)
+    {
+        if (entry.AimOverride != null || entry.Source == null) return;
+        var front = entry.Clauses
+            .Where(c => c.Kind == Kind.Damage && c.Aim == Aim.FrontEnemy)
+            .ToList();
+        if (front.Count != 1) return;
+        if (!entry.Source.DynamicVars.TryGetValue(PlanDamageVar.VarName,
+                                                  out var v)
+            || v is not PlanDamageVar planVar) return;
+        planVar.ShowQueued(PlannedDamage(FrontEnemy(kokomi), front[0].Amount));
+    }
+
+    /// <summary>
     /// `EB-773`. WHERE this queued entry's damage lands, in one word.
     ///
     /// "front" is the single-target aim `PLAN_AIM_NOTE` describes and the only
@@ -2752,6 +2793,11 @@ public static class KokomiPlan
     {
         // A PLAN STAYS OPEN (2026-10-01): a two-line Plan carries both lines
         // while it waits, so the choice is readable a turn early (sec.3).
+        // The Plan list prints what the Plan will deal: a queued card is in
+        // no pile, so the game never refreshes its face, and the plan line
+        // is set here to the written number with the front body's Vulnerable
+        // folded (`PlannedDamage`), before the face is read.
+        if (entry.TwoLine) ShowQueuedPlanDamage(entry, kokomi);
         var (now, plan) = entry.TwoLine ? LineTexts(entry.Source)
             : ("", "");
         return new Dictionary<string, object?>
@@ -2779,8 +2825,10 @@ public static class KokomiPlan
                 // A FLIPPED PLAN WRITES NOTHING AT THE FRONT: its now-line is
                 // carried out instead, at printed size, and the forecast
                 // follows the flip (pick 5a).
+                // And the number is what the morning will deal: the front
+                // body's Vulnerable folded, the face's own `PlannedDamage`.
                 ["damage"] = entry.Now && entry.TwoLine
-                    ? 0 : WrittenFrontDamage(entry),
+                    ? 0 : ForecastFrontDamage(entry, kokomi),
                 ["aim"] = entry.Now && entry.TwoLine ? "" : WrittenAim(entry),
                 // Kokomi whole-run round 2 (2026-10-10): the printed Plan
                 // line folds the front body's Vulnerable (`PlanDamageVar`),
@@ -3227,11 +3275,18 @@ public static class KokomiPlan
         /// number <see cref="Schedule"/> queues.</summary>
         private readonly int _strengthTimes;
 
+        public const string VarName = "PlanDamage";
+
         public PlanDamageVar(decimal amount, int strengthTimes = 1)
-            : base("PlanDamage", amount)
+            : base(VarName, amount)
         {
             _strengthTimes = strengthTimes;
         }
+
+        /// <summary>A queued card is in no pile, so nothing refreshes its
+        /// face; <see cref="QueueRow"/> sets the number the Plan will deal
+        /// before the Plan list reads it.</summary>
+        internal void ShowQueued(int amount) => PreviewValue = amount;
 
         public override void UpdateCardPreview(
             CardModel card, CardPreviewMode previewMode, Creature? target,

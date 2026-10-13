@@ -188,6 +188,59 @@ public class DamageCreditTelemetryTests : IDisposable
     }
 
     [Fact]
+    public void A_plan_carry_out_files_under_the_card_that_wrote_it()
+    {
+        // 2026-10-13: `KokomiPlan.Hit` names the writing card on its pet
+        // scope, so `damage_by_source` reads per Plan card; the kind stays
+        // `pet`, and a reaction inside the hit keeps its own key.
+        var kokomi = Seat.Kokomi();
+        Open(kokomi, 1, 0);
+        var enemy = Enemy();
+        using (DamageCredit.Open(kokomi.Creature, DamageCredit.Pet, "Bake-Kurage",
+                                 cause: "Kurage's Oath", card: "Kurage's Oath"))
+        {
+            using (DamageCredit.OpenIfNone(kokomi.Creature, DamageCredit.Element))
+                Hit(enemy, 9);
+            using (DamageCredit.Open(kokomi.Creature, DamageCredit.Reaction, "Frozen"))
+                Hit(enemy, 2);
+        }
+
+        var r = Record(kokomi);
+        Assert.Equal(9, Source(r, "Kurage's Oath"));
+        Assert.Equal(0, Source(r, "(Bake-Kurage)"));
+        Assert.Equal(9, Kind(r, DamageCredit.Pet));
+        Assert.Equal(2, Source(r, "(Frozen)"));
+    }
+
+    [Fact]
+    public void A_pet_scope_with_no_card_keeps_its_label()
+    {
+        var kokomi = Seat.Kokomi();
+        Open(kokomi, 1, 0);
+        using (DamageCredit.Open(kokomi.Creature, DamageCredit.Pet, "Bake-Kurage",
+                                 card: ""))
+            Hit(Enemy(), 5);
+        Assert.Equal(5, Source(Record(kokomi), "(Bake-Kurage)"));
+    }
+
+    [Fact]
+    public void A_hit_on_the_seat_files_the_block_it_broke_as_absorbed()
+    {
+        // 2026-10-13, `damage_absorbed`: the seat's own Block that hits on
+        // it broke, beside `damage_blocked` (the enemy Block its hits broke).
+        var kokomi = Seat.Kokomi();
+        Open(kokomi, 1, 0);
+        Hit(kokomi.Creature, 4, blocked: 7);
+        Hit(kokomi.Creature, 0, blocked: 5);
+        Hit(Enemy(), 6, blocked: 3, dealer: kokomi.Creature);
+
+        var r = Record(kokomi);
+        Assert.Equal(12, r.GetProperty("damage_absorbed").GetInt32());
+        Assert.Equal(3, r.GetProperty("damage_blocked").GetInt32());
+        Assert.Equal(4, r.GetProperty("damage_taken").GetInt32());
+    }
+
+    [Fact]
     public async Task A_scope_flows_through_an_await_and_never_back_to_the_caller()
     {
         var klee = Seat.Klee();
@@ -357,6 +410,7 @@ public class DamageCreditTelemetryTests : IDisposable
     [InlineData("BombEchoPower", "Fire", "DamageCredit.Open")]
     [InlineData("BombPower", "ResolvePayload", "DamageCredit.Open")]
     [InlineData("KokomiPlan", "Hit", "DamageCredit.Open")]
+    [InlineData("KokomiPlan", "Hit", "PlayTelemetry.CardNameOf")]
     [InlineData("GameStageBoard", "Damage", "DamageCredit.Open")]
     public void Each_dealerless_path_opens_its_credit_scope(
         string type, string method, string call)

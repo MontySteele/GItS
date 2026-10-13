@@ -1135,14 +1135,38 @@ internal sealed class ShowerVar : DynamicVar
     }
 
     private int Live =>
-        _owner is PowerModel { Owner: not null } power
-            ? (int)SimDamagePipeline.DealerMods(power.Owner, BaseValue)
-            : (int)BaseValue;
+        _owner switch
+        {
+            PowerModel { Owner: not null } power =>
+                (int)SimDamagePipeline.DealerMods(power.Owner, BaseValue),
+            // On the card face the fold lives in PreviewValue
+            // (`UpdateCardPreview` below), so both formatter paths agree.
+            CardModel => (int)PreviewValue,
+            _ => (int)BaseValue,
+        };
 
     protected override decimal GetBaseValueForIConvertible() => Live;
 
     public override string ToString() =>
         Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// THE CARD FACE READS THE SAME CALL. Dahlia, Sacramental Shower prints
+    /// <c>{Shower:diff()}</c>, so the card in hand previews the holder's
+    /// Strength and Weak exactly as the badge it places does. A canonical
+    /// (compendium or reward) copy has no owner and the getter asserts, so it
+    /// keeps its base: <see cref="KokomiPlan.PlanDamageVar"/>'s guard.
+    /// </summary>
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        PreviewValue = BaseValue;
+        if (!runGlobalHooks || !card.IsMutable) return;
+        var holder = card.Owner?.Creature;
+        if (holder == null) return;
+        PreviewValue = (int)SimDamagePipeline.DealerMods(holder, BaseValue);
+    }
 }
 
 /// <summary>

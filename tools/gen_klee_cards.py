@@ -7990,6 +7990,15 @@ def build_vars(card: dict) -> list[str]:
                      if fx.get("op") == "block"
                      and isinstance(fx.get("amount"), int)), 0)
         out.append(f'new PlanStatusBlockVar({flat}m, {status_rate})')
+    # Dahlia, Sacramental Shower: the face prints the power's own live var,
+    # `ShowerVar` (the `{Shower}` token the stored badge already prints), so
+    # the card and the badge fold Strength and Weak through one call.
+    # Emitted only where the face prints the token.
+    if "{Shower" in str(card.get("description") or "") and any(
+            fx.get("op") == "apply_power"
+            and fx.get("power") == "mc_sacramental_shower"
+            for fx in card.get("effects") or []):
+        out.append('new ShowerVar()')
     if added_encore_salon(card) is not None:
         base, deploys = added_encore_salon(card)
         # Same trio as salon_calc_var_decls, for the upgrade-appended encore

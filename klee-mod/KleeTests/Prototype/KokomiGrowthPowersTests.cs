@@ -90,6 +90,36 @@ public class KokomiGrowthPowersTests
     }
 
     [Fact]
+    public void A_queue_row_sends_what_the_plan_will_deal()
+    {
+        // Kokomi Plan list: a queued card is in no pile, so its face never
+        // refreshes; the row's `damage` folds the front body's Vulnerable
+        // (`PlannedDamage`), and the plan line is set to the same number
+        // before the face is read.
+        var row = Il.Calls(typeof(KokomiPlan).GetMethod("QueueRow", HeadlessGame.All)!);
+        Assert.Contains("KokomiPlan.ForecastFrontDamage", row);
+        Assert.Contains("KokomiPlan.ShowQueuedPlanDamage", row);
+        var forecast = Seq("KokomiPlan", "ForecastFrontDamage");
+        Assert.Contains(forecast, c => c.Contains("KokomiPlan.FrontEnemy"));
+        Assert.Contains(forecast, c => c.Contains("KokomiPlan.PlannedDamage"));
+        var shown = Seq("KokomiPlan", "ShowQueuedPlanDamage");
+        Assert.Contains(shown, c => c.Contains("KokomiPlan.PlannedDamage"));
+        Assert.Contains(shown, c => c.Contains("PlanDamageVar.ShowQueued"));
+        // No board: the written number, unfolded.
+        var damage = new KokomiPlan.Planned(
+            KokomiPlan.Kind.Damage, 8, KokomiPlan.Aim.FrontEnemy);
+        Assert.Equal(8, KokomiPlan.ForecastFrontDamage(
+            new KokomiPlan.Entry(null, new[] { damage }), null));
+        // Converging Tide's stamp keeps the written number.
+        Assert.Equal(8, KokomiPlan.ForecastFrontDamage(
+            new KokomiPlan.Entry(null, new[] { damage }, AimOverride: "7"),
+            null));
+        Assert.Equal(0, KokomiPlan.ForecastFrontDamage(
+            new KokomiPlan.Entry(null, System.Array.Empty<KokomiPlan.Planned>()),
+            null));
+    }
+
+    [Fact]
     public void Grand_design_left_the_plan_bus()
     {
         Assert.DoesNotContain(Seq("KokomiPlan", "ResolveEntry"),

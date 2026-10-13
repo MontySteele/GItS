@@ -254,6 +254,10 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             "damage_by_kind", "damage_blocked", "killing_blows",
             "block_gained_by_turn", "block_gained", "block_given",
             "mine_detonations",
+            # 2026-10-13. Block on the seat's own creature that hits on it
+            # broke, beside `damage_blocked`. A mod-side hook read with no
+            # wire route; MOD FEED ONLY, added, never a rename.
+            "damage_absorbed",
             # 2026-10-05. The seat's Strength at each turn end, read off the
             # base game's `StrengthPower` for every character. MOD FEED ONLY,
             # added, never a rename.

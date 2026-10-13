@@ -64,9 +64,13 @@ public static class DamageCredit
     /// this scope off when that is not the scope itself: the card a
     /// reaction's hit came from, or an outer scope's label in parentheses
     /// ("(Bomb)"). Null when nothing named one; the telemetry then asks which
-    /// card was resolving (`swirl_damage_by_card`).</summary>
+    /// card was resolving (`swirl_damage_by_card`).
+    /// <paramref name="Card"/> (2026-10-13) is the card a hit with no card of
+    /// its own is credited to in `damage_by_source`, where the scope knows
+    /// one: a carried-out Plan's hit files under the card that wrote the
+    /// Plan, not under "(Bake-Kurage)". Null keeps the label.</summary>
     public sealed record Frame(Player? Owner, string Kind, string? Label,
-                               string? Cause = null);
+                               string? Cause = null, string? Card = null);
 
     private static readonly AsyncLocal<Frame?> _current = new();
 
@@ -96,9 +100,10 @@ public static class DamageCredit
     /// <paramref name="source"/>'s seat (a pet answers its owner), or the
     /// outer scope's owner when the source names none. The cause is
     /// <paramref name="cause"/>, else the outer scope's cause, else the
-    /// outer scope's label in parentheses.</summary>
+    /// outer scope's label in parentheses. <paramref name="card"/> is the
+    /// card name the scope's card-less hits are credited to.</summary>
     public static Scope Open(Creature? source, string kind, string? label = null,
-                             string? cause = null)
+                             string? cause = null, string? card = null)
     {
         try
         {
@@ -106,7 +111,7 @@ public static class DamageCredit
             var why = cause ?? prior?.Cause
                 ?? (prior?.Label is { } outer ? "(" + outer + ")" : null);
             _current.Value = new Frame(OwnerOf(source) ?? prior?.Owner, kind, label,
-                                       why);
+                                       why, string.IsNullOrEmpty(card) ? null : card);
             return new Scope(prior);
         }
         catch (Exception)

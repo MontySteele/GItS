@@ -53,7 +53,7 @@ public sealed class ProtoMcDahliaSacramentalShower : CustomCardModel, ICompanion
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dahlia — Sacramental Shower"),
-        ("description", "The next time an enemy attacks you, deal 12 [gold]Hydro[/gold] damage to it first.{IfUpgraded:show: Draw 1 card.|}"),
+        ("description", "The next time an enemy attacks you, deal {Shower:diff()} [gold]Hydro[/gold] damage to it first.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -67,7 +67,8 @@ public sealed class ProtoMcDahliaSacramentalShower : CustomCardModel, ICompanion
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new CardsVar(1),
+            new ShowerVar()
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

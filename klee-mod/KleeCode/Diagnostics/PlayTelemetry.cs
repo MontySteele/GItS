@@ -1074,7 +1074,9 @@ internal static class PlayTelemetry
     ///      seat and the kind: `element`, `reaction`, `bomb`, `pet`, `power`.
     ///
     /// The source key is the card when the game hands one over, else the
-    /// scope's label in parentheses ("(Bomb)", "(Overload)", "(Bake-Kurage)"),
+    /// card the scope names (a carried-out Plan names the card that wrote it,
+    /// 2026-10-13), else the scope's label in parentheses ("(Bomb)",
+    /// "(Overload)", "(Bake-Kurage)"),
     /// else `(uncredited)` as before. Measurement only: nothing here is read
     /// back by the game.
     /// </summary>
@@ -1086,7 +1088,8 @@ internal static class PlayTelemetry
         {
             var frame = DamageCredit.Current;
             var label = frame?.Kind == DamageCredit.Pet ? frame.Label ?? "pet" : "pet";
-            return (master, DamageCredit.Pet, card ?? "(" + label + ")");
+            var named = frame?.Kind == DamageCredit.Pet ? frame.Card : null;
+            return (master, DamageCredit.Pet, card ?? named ?? "(" + label + ")");
         }
 
         if (dealer?.Player is { } own)
@@ -1096,7 +1099,10 @@ internal static class PlayTelemetry
 
         if (DamageCredit.Current is { Owner: { } owner } scope)
         {
-            return (owner, scope.Kind, card ?? "(" + (scope.Label ?? scope.Kind) + ")");
+            // A scope that names a card (a carried-out Plan names the card
+            // that wrote it) files under that card; else its label.
+            return (owner, scope.Kind,
+                    card ?? scope.Card ?? "(" + (scope.Label ?? scope.Kind) + ")");
         }
 
         return (null, string.Empty, string.Empty);
@@ -1115,7 +1121,12 @@ internal static class PlayTelemetry
 
         if (target?.Player is { } victim)
         {
-            if (unblocked <= 0 || !Open.TryGetValue(victim, out var taken)) return false;
+            if (!Open.TryGetValue(victim, out var taken)) return false;
+            // `damage_absorbed`: the Block on this seat's own creature that
+            // a hit on it broke (`damage_blocked` is the enemy Block this
+            // seat's hits broke).
+            taken.DamageAbsorbed += Math.Max(0, blocked);
+            if (unblocked <= 0) return false;
             taken.DamageTaken += unblocked;
             return target.IsDead;
         }
@@ -1278,7 +1289,11 @@ internal static class PlayTelemetry
             Pending.Remove(creature);
             if (hit.Victim != null)
             {
-                if (Open.TryGetValue(hit.Victim, out var taken)) taken.DamageTaken += hit.Hp;
+                if (Open.TryGetValue(hit.Victim, out var taken))
+                {
+                    taken.DamageTaken += hit.Hp;
+                    taken.DamageAbsorbed += hit.Block;
+                }
                 return;
             }
 
@@ -2125,6 +2140,12 @@ internal static class PlayTelemetry
         public readonly Dictionary<string, int> DebuffsFromReactions = new();
         /// <summary>Block this seat's credited hits broke.</summary>
         public int DamageBlocked;
+        /// <summary>Block on this seat's own creature that hits on it broke
+        /// (`damage_absorbed`), beside `damage_blocked`, the enemy Block this
+        /// seat's hits broke. Kokomi round 5 (lane 5, Kaiser Crab) read 192
+        /// `block_gained` beside 11 `damage_blocked`, and no field said how
+        /// much of her Block took a hit.</summary>
+        public int DamageAbsorbed;
         /// <summary>Hits of this seat's that killed (filed through
         /// <see cref="RecordDeath"/>).</summary>
         public int KillingBlows;
@@ -2456,6 +2477,7 @@ internal static class PlayTelemetry
             sb.Append(",\"debuffs_from_reactions\":");
             IntMap(sb, DebuffsFromReactions);
             sb.Append(",\"damage_blocked\":").Append(DamageBlocked);
+            sb.Append(",\"damage_absorbed\":").Append(DamageAbsorbed);
             sb.Append(",\"killing_blows\":").Append(KillingBlows);
             sb.Append(",\"block_gained_by_turn\":[");
             first = true;
