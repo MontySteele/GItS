@@ -1,53 +1,57 @@
-"""Pose and style-G toon-render one official kit model headless, in Blender.
+"""Pose, animate and toon-render one official kit model headless, in Blender.
 
     blender -b --factory-startup -P tools/char_render/render.py -- \
-        --char furina --pmx <【芙宁娜】.pmx> --out <scratch dir> \
-        [--prop <武器.pmx>] [--stills rest,stance] [--ppu N]
+        --char varka --models <scratch>/models --out <scratch dir> --ppu N \
+        [--clips idle,attack,...] [--stills stance_a,rest,...] [--keys-only] [--outline-px 2.2]
 
-THE MODEL NEVER ENTERS THE REPO. The PMX is read in place from the
+    (first look, any kit:  --char furina --pmx <pmx> [--prop <pmx>] --stills rest,stance)
+
+THE MODELS NEVER ENTER THE REPO. Each pack is read in place from the
 operator's scratch directory (models/<char>/unpacked/); its terms forbid
 redistribution and commercial use, so only the rendered PNGs leave it. No
 .blend is ever saved.
 
-Writes, per still, <out>/raw/<name>.png with its `style` pass in
-<out>/raw/aux/<name>_X.png (R protect, G/B surface-space grain: the same pass
-tools/klee_render/post.py reads) and <out>/<name>.json (canvas, the feet
-anchor's pixel, ppu, the measured rest height).
+The same contract as tools/klee_render/render.py, which this mirrors for any
+kit whose chars.CHARS entry names a pose library (`clips`): per clip,
+<out>/raw/<clip>/f_NNN.png with its `style` pass in aux/, and <out>/<clip>.json
+(canvas, the feet anchor's pixel, fps, frame times); per still <out>/raw/<name>.png
+and <out>/<name>.json. tools/klee_render/post.py paints them and
+tools/char_render/pack.py packs them. The shader, posing and framing are
+tools/char_render/toon.py, shared with Klee's renderer (one STYLE).
 
-WHAT IS COPIED, AND WHAT TO MERGE BACK. The shader half of style G
-(toon_material, line_material, add_aovs, uv_noise, add_outline,
-setup_render) and the posing/framing helpers are copied from
-tools/klee_render/render.py as of 2026-10-13 (#1195), because that file is a
-Blender script with its argparse and main() at import time and was being
-edited by another workstream. The copies differ only where Klee was
-hard-coded: the unlit/no-line material sets come from chars.py, the `+`
-overlay shells are hidden (chars.is_overlay), the hand tip falls back to a
-finger bone, and a PMX prop (Varka's claymore) is placed per pose. When the
-look settles, factor the shared shader and posing into one module both
-renderers import (STYLE must stay single-sourced), and let Klee's pose
-library and bomb stay Klee's.
+What a kit adds over Klee: its unlit and line-less material sets come from
+chars.py, the `+` overlay shells are hidden, the hand tip falls back to a
+finger bone, and it may carry BLADES (Varka's two claymores): PMX props placed
+per pose, each closed in its hand by IK (grip_hand). Each clip's json also
+records, per blade, where the blade's base and tip project (`blades`, SUBSTEPS
+samples per frame interval), which fx.py turns into the slash trails, and the
+clip's marked `events` (the impact times).
 """
 import argparse
+import importlib
 import json
 import math
 import os
-import random
 import sys
 
 import addon_utils
 import bpy
-from mathutils import Matrix, Quaternion, Vector
+from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import chars as CH  # noqa: E402
+import toon as T  # noqa: E402
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 ap = argparse.ArgumentParser()
 ap.add_argument("--char", required=True, choices=sorted(CH.CHARS))
-ap.add_argument("--pmx", required=True)
+ap.add_argument("--models", default="", help="scratch models root (models/<char>/unpacked/...)")
+ap.add_argument("--pmx", default="", help="the body PMX (default: <models>/chars.CHARS[char]['pmx'])")
 ap.add_argument("--out", required=True)
-ap.add_argument("--prop", default="", help="the character's prop PMX (chars.CHARS[...]['prop'])")
-ap.add_argument("--stills", default="rest,stance")
+ap.add_argument("--prop", default="", help="first look only: a single prop PMX placed by the stance's `prop`")
+ap.add_argument("--clips", default="")
+ap.add_argument("--stills", default="")
+ap.add_argument("--keys-only", action="store_true", help="render each clip's key poses only")
 ap.add_argument("--ppu", type=float, default=0.0, help="texture px per unit; 0 = solve from canon height")
 ap.add_argument("--outline-px", type=float, default=CH.OUTLINE_PX)
 ap.add_argument("--pitch", type=float, default=5.0)
@@ -55,27 +59,13 @@ ap.add_argument("--samples", type=int, default=32)
 args = ap.parse_args(argv)
 os.makedirs(args.out, exist_ok=True)
 CFG = CH.CHARS[args.char]
-
-MMD = "bl_ext.user_default.mmd_tools"
-LINE_COLOR = (0.13, 0.07, 0.07)
-LINE_TINT = (0.42, 0.33, 0.35)
-#: Style G, the shader half -- a copy of tools/klee_render/render.py STYLE
-#: (ruled 2026-10-13). Keep the two equal until they are merged.
-STYLE = {
-    "shadow": (0.66, 0.52, 0.62),
-    "mid": (0.90, 0.80, 0.82),
-    "mid_at": 0.22, "light_at": 0.40,
-    "terminator_noise": 0.26,
-    "noise_scale": 22.0, "noise_stretch": 4.0, "noise_detail": 6.0, "noise_angle": 28.0,
-    "grain": 0.10,
-    "grain2d_scale": 30.0, "grain2d_stretch": 4.0, "grain2d_angle": 62.0, "grain2d_mottle": 9.0,
-}
-FINGERS = ["人指", "中指", "薬指", "小指"]
-DIGITS = "１２３"
+LIB = importlib.import_module(CFG["clips"]) if CFG.get("clips") else None
+#: blade samples per frame interval, recorded for the trails
+SUBSTEPS = 4
 
 
-def upd():
-    bpy.context.view_layer.update()
+def model_path(rel):
+    return os.path.join(args.models, rel)
 
 
 # ----------------------------------------------------------------- scene
@@ -89,353 +79,37 @@ def import_pmx(path):
     return root, arm, mesh
 
 
-def base_image(mat):
-    nt = mat.node_tree
-    base = nt.nodes.get("mmd_base_tex")
-    img = base.image if base else None
-    if img is None:
-        for n in nt.nodes:
-            if n.type == "TEX_IMAGE" and n.image and "toon" not in n.image.name and "mc3" not in n.image.name:
-                return n.image
-    return img
-
-
-# ----------------------------------------------------------------- style G (copied)
-def uv_noise(nt, scale, stretch, detail, seed_off, angle=None, coord="UV"):
-    tc = nt.nodes.new("ShaderNodeTexCoord")
-    mp = nt.nodes.new("ShaderNodeMapping")
-    mp.inputs["Scale"].default_value = (scale, scale * stretch, scale)
-    mp.inputs["Location"].default_value = (seed_off, seed_off * 0.37, 0)
-    mp.inputs["Rotation"].default_value = (0, 0, math.radians(STYLE["noise_angle"] if angle is None else angle))
-    nz = nt.nodes.new("ShaderNodeTexNoise")
-    nz.inputs["Detail"].default_value = detail
-    nz.inputs["Roughness"].default_value = 0.62
-    nt.links.new(tc.outputs[coord], mp.inputs["Vector"])
-    nt.links.new(mp.outputs["Vector"], nz.inputs["Vector"])
-    return nz
-
-
-def add_aovs(nt, protect, seed, coord="UV"):
-    fine = uv_noise(nt, STYLE["grain2d_scale"], STYLE["grain2d_stretch"], 2.0, seed + 23,
-                    angle=STYLE["grain2d_angle"], coord=coord)
-    coarse = uv_noise(nt, STYLE["grain2d_mottle"], 1.0, 2.0, seed + 41, coord=coord)
-    cc = nt.nodes.new("ShaderNodeCombineColor")
-    cc.inputs["Red"].default_value = 1.0 if protect else 0.0
-    nt.links.new(fine.outputs["Fac"], cc.inputs["Green"])
-    nt.links.new(coarse.outputs["Fac"], cc.inputs["Blue"])
-    aov = nt.nodes.new("ShaderNodeOutputAOV")
-    aov.aov_name = "style"
-    nt.links.new(cc.outputs["Color"], aov.inputs["Color"])
-
-
-def hidden_material(mat):
-    """An overlay shell (chars.is_overlay): nothing drawn, nothing in the passes."""
-    nt = mat.node_tree
-    for n in list(nt.nodes):
-        nt.nodes.remove(n)
-    out = nt.nodes.new("ShaderNodeOutputMaterial")
-    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
-    nt.links.new(tr.outputs[0], out.inputs["Surface"])
-    mat.surface_render_method = "DITHERED"
-
-
-def toon_material(mat, img, unlit):
-    nt = mat.node_tree
-    for n in list(nt.nodes):
-        nt.nodes.remove(n)
-    seed = random.Random(mat.name).random() * 50
-    out = nt.nodes.new("ShaderNodeOutputMaterial")
-    tex = nt.nodes.new("ShaderNodeTexImage")
-    tex.image = img
-    tex.interpolation = "Linear"
-    emis = nt.nodes.new("ShaderNodeEmission")
-    transp = nt.nodes.new("ShaderNodeBsdfTransparent")
-    mix = nt.nodes.new("ShaderNodeMixShader")
-    gz = uv_noise(nt, STYLE["noise_scale"] * 2.2, STYLE["noise_stretch"], 2.0, seed + 11)
-    gmap = nt.nodes.new("ShaderNodeMapRange")
-    gmap.inputs["From Min"].default_value = 0.3
-    gmap.inputs["From Max"].default_value = 0.7
-    gmap.inputs["To Min"].default_value = 1 - STYLE["grain"]
-    gmap.inputs["To Max"].default_value = 1 + STYLE["grain"]
-    nt.links.new(gz.outputs["Fac"], gmap.inputs["Value"])
-    gcol = nt.nodes.new("ShaderNodeCombineColor")
-    for k in ("Red", "Green", "Blue"):
-        nt.links.new(gmap.outputs["Result"], gcol.inputs[k])
-    grained = nt.nodes.new("ShaderNodeMix")
-    grained.data_type = "RGBA"
-    grained.blend_type = "MULTIPLY"
-    grained.inputs["Factor"].default_value = 1.0
-    nt.links.new(tex.outputs["Color"], grained.inputs[6])
-    nt.links.new(gcol.outputs["Color"], grained.inputs[7])
-    if unlit:
-        nt.links.new(tex.outputs["Color"], emis.inputs["Color"])
-    else:
-        diff = nt.nodes.new("ShaderNodeBsdfDiffuse")
-        s2r = nt.nodes.new("ShaderNodeShaderToRGB")
-        bw = nt.nodes.new("ShaderNodeRGBToBW")
-        nz = uv_noise(nt, STYLE["noise_scale"], STYLE["noise_stretch"], STYLE["noise_detail"], seed)
-        wob = nt.nodes.new("ShaderNodeMath")
-        wob.operation = "MULTIPLY_ADD"
-        nt.links.new(nz.outputs["Fac"], wob.inputs[0])
-        wob.inputs[1].default_value = 2 * STYLE["terminator_noise"]
-        wob.inputs[2].default_value = -STYLE["terminator_noise"]
-        add = nt.nodes.new("ShaderNodeMath")
-        add.operation = "ADD"
-        nt.links.new(bw.outputs[0], add.inputs[0])
-        nt.links.new(wob.outputs[0], add.inputs[1])
-        ramp = nt.nodes.new("ShaderNodeValToRGB")
-        ramp.color_ramp.interpolation = "CONSTANT"
-        e = ramp.color_ramp.elements
-        e[0].position = 0.0
-        e[0].color = (*STYLE["shadow"], 1)
-        e[1].position = STYLE["light_at"]
-        e[1].color = (1, 1, 1, 1)
-        e.new(STYLE["mid_at"]).color = (*STYLE["mid"], 1)
-        mul = nt.nodes.new("ShaderNodeMix")
-        mul.data_type = "RGBA"
-        mul.blend_type = "MULTIPLY"
-        mul.inputs["Factor"].default_value = 1.0
-        nt.links.new(diff.outputs[0], s2r.inputs[0])
-        nt.links.new(s2r.outputs["Color"], bw.inputs[0])
-        nt.links.new(add.outputs[0], ramp.inputs["Fac"])
-        nt.links.new(grained.outputs[2], mul.inputs[6])
-        nt.links.new(ramp.outputs["Color"], mul.inputs[7])
-        nt.links.new(mul.outputs[2], emis.inputs["Color"])
-    nt.links.new(tex.outputs["Alpha"], mix.inputs["Fac"])
-    nt.links.new(transp.outputs[0], mix.inputs[1])
-    nt.links.new(emis.outputs[0], mix.inputs[2])
-    nt.links.new(mix.outputs[0], out.inputs["Surface"])
-    add_aovs(nt, unlit, seed)
-    # DITHERED everywhere: EEVEE writes no AOV from a BLENDED surface, so a
-    # blended material falls out of the protect mask (Klee's 表情, 2026-10-13)
-    mat.surface_render_method = "DITHERED"
-    mat.use_backface_culling = False
-
-
-def line_material(mat, img, protect):
-    lm = bpy.data.materials.new("line_" + mat.name)
-    nt = lm.node_tree
-    for n in list(nt.nodes):
-        nt.nodes.remove(n)
-    out = nt.nodes.new("ShaderNodeOutputMaterial")
-    emis = nt.nodes.new("ShaderNodeEmission")
-    if img is None:
-        emis.inputs["Color"].default_value = (*LINE_COLOR, 1)
-        nt.links.new(emis.outputs[0], out.inputs["Surface"])
-    else:
-        tex = nt.nodes.new("ShaderNodeTexImage")
-        tex.image = img
-        mul = nt.nodes.new("ShaderNodeMix")
-        mul.data_type = "RGBA"
-        mul.blend_type = "MULTIPLY"
-        mul.inputs["Factor"].default_value = 1.0
-        mul.inputs[7].default_value = (*LINE_TINT, 1)
-        nt.links.new(tex.outputs["Color"], mul.inputs[6])
-        nt.links.new(mul.outputs[2], emis.inputs["Color"])
-        transp = nt.nodes.new("ShaderNodeBsdfTransparent")
-        mix = nt.nodes.new("ShaderNodeMixShader")
-        nt.links.new(tex.outputs["Alpha"], mix.inputs["Fac"])
-        nt.links.new(transp.outputs[0], mix.inputs[1])
-        nt.links.new(emis.outputs[0], mix.inputs[2])
-        nt.links.new(mix.outputs[0], out.inputs["Surface"])
-        lm.surface_render_method = "DITHERED"
-    add_aovs(nt, protect, random.Random(mat.name).random() * 50)
-    lm.use_backface_culling = True
-    return lm
-
-
-def add_outline(obj, line_mats, no_line_mats=()):
-    me = obj.data
-    n = len(me.materials)
-    for lm in line_mats:
-        me.materials.append(lm)
-    vg = obj.vertex_groups.new(name="outline_w")
-    skip = {i for i, m in enumerate(me.materials[:n]) if m and m.name in no_line_mats}
-    keep = set()
-    for p in me.polygons:
-        if p.material_index not in skip:
-            keep.update(p.vertices)
-    vg.add(list(keep), 1.0, "REPLACE")
-    mod = obj.modifiers.new("outline", "SOLIDIFY")
-    mod.offset = 1.0
-    mod.use_flip_normals = True
-    mod.use_rim = False
-    mod.material_offset = n
-    mod.vertex_group = "outline_w"
-    mod.thickness_vertex_group = 0.0
-    mod.use_quality_normals = True
-    return mod
-
-
 def shade(mesh):
-    """Style G on every material of one imported mesh, plus its hull."""
+    """Style H1 on every material of one imported mesh, plus its hull."""
     face, no_line = CFG["face_mats"], set(CFG["no_line_mats"])
+    hide = CFG.get("hide_mats", set())
     lines = []
     for m in mesh.data.materials:
-        if CH.is_overlay(m.name):
-            hidden_material(m)
+        if CH.is_overlay(m.name) or m.name in hide:
+            T.hidden_material(m)
             no_line.add(m.name)
-            lines.append(line_material(m, None, False))
+            lines.append(T.line_material(m, None, False))
             continue
-        img = base_image(m)
-        toon_material(m, img, m.name in face)
-        lines.append(line_material(m, img, m.name in face))
-    return add_outline(mesh, lines, no_line)
+        img = T.base_image(m)
+        T.toon_material(m, img, m.name in face)
+        lines.append(T.line_material(m, img, m.name in face))
+    return T.add_outline(mesh, lines, no_line)
 
 
-def setup_render():
-    sc = bpy.context.scene
-    for eng in ("BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"):
-        try:
-            sc.render.engine = eng
-            break
-        except TypeError:
-            continue
-    sc.render.film_transparent = True
-    sc.render.image_settings.file_format = "PNG"
-    sc.render.image_settings.color_mode = "RGBA"
-    sc.view_settings.view_transform = "Standard"
-    sc.view_settings.look = "None"
-    try:
-        sc.eevee.taa_render_samples = args.samples
-    except AttributeError:
-        pass
-    vl = sc.view_layers[0]
-    aov = vl.aovs.add()
-    aov.name = "style"
-    aov.type = "COLOR"
-    ng = bpy.data.node_groups.new("aux", "CompositorNodeTree")
-    sc.compositing_node_group = ng
-    rl = ng.nodes.new("CompositorNodeRLayers")
-    sep = ng.nodes.new("CompositorNodeSeparateColor")
-    cc = ng.nodes.new("CompositorNodeCombineColor")
-    ng.links.new(rl.outputs["style"], sep.inputs[0])
-    for ch in ("Red", "Green", "Blue"):
-        ng.links.new(sep.outputs[ch], cc.inputs[ch])
-    ng.links.new(rl.outputs["Alpha"], cc.inputs["Alpha"])
-    fo = ng.nodes.new("CompositorNodeOutputFile")
-    fo.name = "aux_out"
-    fo.format.media_type = "IMAGE"
-    fo.format.file_format = "PNG"
-    fo.format.color_mode = "RGBA"
-    fo.format.color_depth = "8"
-    fo.file_output_items.new("RGBA", "X")
-    ng.links.new(cc.outputs[0], fo.inputs[0])
-    world = bpy.data.worlds.new("w")
-    world.use_nodes = True
-    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.0
-    sc.world = world
-    sun = bpy.data.lights.new("key", "SUN")
-    sun.energy = 3.2
-    sun.use_shadow = False
-    sun_ob = bpy.data.objects.new("key", sun)
-    sc.collection.objects.link(sun_ob)
-    sun_ob.rotation_euler = (math.radians(50), 0, math.radians(-40))
-    cam = bpy.data.cameras.new("cam")
-    cam.type = "ORTHO"
-    cam_ob = bpy.data.objects.new("cam", cam)
-    sc.collection.objects.link(cam_ob)
-    sc.camera = cam_ob
-    return cam_ob
-
-
-# ----------------------------------------------------------------- posing (copied)
-def rotate_world(arm, name, axis, deg):
-    upd()
-    pb = arm.pose.bones[name]
-    M = pb.matrix.copy()
-    loc = M.translation.copy()
-    R = Matrix.Rotation(math.radians(deg), 4, Vector(axis).normalized())
-    pb.matrix = Matrix.Translation(loc) @ R @ Matrix.Translation(-loc) @ M
-    upd()
-
-
-def aim(arm, name, direction, twist=0.0):
-    upd()
-    pb = arm.pose.bones[name]
-    cur = (pb.tail - pb.head).normalized()
-    d = Vector(direction).normalized()
-    q = cur.rotation_difference(d)
-    M = pb.matrix.copy()
-    loc = M.translation.copy()
-    R = q.to_matrix().to_4x4()
-    if twist:
-        R = Matrix.Rotation(math.radians(twist), 4, d) @ R
-    pb.matrix = Matrix.Translation(loc) @ R @ Matrix.Translation(-loc) @ M
-    upd()
-
-
-def move(arm, name, delta):
-    upd()
-    pb = arm.pose.bones[name]
-    M = pb.matrix.copy()
-    M.translation += Vector(delta)
-    pb.matrix = M
-    upd()
-
-
-def w2a_dir(arm, v):
-    return arm.matrix_world.to_3x3().normalized().inverted() @ Vector(v)
-
-
-def hand_to(arm, side, anchor, offset_w, pole_w):
-    upd()
+# ----------------------------------------------------------------- posing
+def palm(arm, side):
+    """The palm centre in armature space: between the wrist and the hand tip
+    (手先 where the model has one, else chars' finger-bone stand-in)."""
     pbs = arm.pose.bones
-    sh = pbs[f"腕.{side}"]
-    a = (pbs[f"ひじ.{side}"].bone.head_local - sh.bone.head_local).length
-    b = (pbs[f"手首.{side}"].bone.head_local - pbs[f"ひじ.{side}"].bone.head_local).length
-    S = sh.head.copy()
-    T = pbs[anchor].head + w2a_dir(arm, offset_w)
-    dv = T - S
-    d = min(dv.length, (a + b) * 0.995)
-    u = dv.normalized()
-    cos_a = max(-1.0, min(1.0, (a * a + d * d - b * b) / (2 * a * d)))
-    sin_a = math.sqrt(1 - cos_a * cos_a)
-    P = w2a_dir(arm, pole_w)
-    p = (P - P.dot(u) * u).normalized()
-    E = S + a * (cos_a * u + sin_a * p)
-    Tc = S + u * d
-    aim(arm, f"腕.{side}", E - S)
-    upd()
-    aim(arm, f"ひじ.{side}", Tc - pbs[f"ひじ.{side}"].head)
-
-
-def curl(arm, side, finger_deg, thumb_deg):
-    sgn = 1 if side == "L" else -1
-    for i, f in enumerate(FINGERS):
-        spread = 1.0 + 0.12 * i
-        for seg, dg in enumerate(DIGITS):
-            n = f"{f}{dg}.{side}"
-            if n in arm.pose.bones:
-                pb = arm.pose.bones[n]
-                pb.rotation_mode = "QUATERNION"
-                k = (1.0, 1.1, 0.8)[seg]
-                pb.rotation_quaternion = Quaternion((0, 0, 1), math.radians(finger_deg * spread * k * sgn))
-    for seg, dg in enumerate("１２"):
-        n = f"親指{dg}.{side}"
-        if n in arm.pose.bones:
-            pb = arm.pose.bones[n]
-            pb.rotation_mode = "QUATERNION"
-            pb.rotation_quaternion = Quaternion((1, 0, 0), math.radians(thumb_deg))
-    upd()
-
-
-def reset(root, arm, mesh):
-    for pb in arm.pose.bones:
-        pb.rotation_mode = "QUATERNION"
-        pb.matrix_basis = Matrix.Identity(4)
-    if mesh.data.shape_keys:
-        for k in mesh.data.shape_keys.key_blocks[1:]:
-            k.value = 0.0
-    root.rotation_euler = (0, 0, 0)
-    root.location = (0, 0, 0)
-    upd()
+    tip = f"手先.{side}" if f"手先.{side}" in pbs else f"{CFG['hand_tip']}.{side}"
+    return (pbs[f"手首.{side}"].head + pbs[tip].head) / 2
 
 
 def apply_pose(root, arm, mesh, p):
-    reset(root, arm, mesh)
-    root.rotation_euler = (0, 0, math.radians(p["yaw"]))
-    upd()
+    T.reset(root, arm, mesh)
+    root.rotation_euler = (0, math.radians(p.get("root_rot", 0.0)), math.radians(p["yaw"]))
+    root.location = p.get("root", (0, 0, 0))
+    T.upd()
     keys = mesh.data.shape_keys.key_blocks
     for k, v in p["morphs"].items():
         if k in keys:
@@ -443,149 +117,242 @@ def apply_pose(root, arm, mesh, p):
         else:
             print("WARN missing morph", k)
     for op in p["ops"]:
-        kind = op[0]
-        if kind == "rot":
-            rotate_world(arm, op[1], op[2], op[3])
-        elif kind == "move":
-            move(arm, op[1], op[2])
-        elif kind == "rotw":
-            rotate_world(arm, op[1], w2a_dir(arm, op[2]), op[3])
-        elif kind == "aimw":
-            aim(arm, op[1], w2a_dir(arm, op[2]), op[3] if len(op) > 3 else 0.0)
-        elif kind == "movew":
-            move(arm, op[1], w2a_dir(arm, op[2]))
-        elif kind == "hand":
-            hand_to(arm, op[1], op[2], op[3], op[4])
-        elif kind == "curl":
-            curl(arm, op[1], op[2], op[3])
-        else:
-            raise ValueError(op)
-    upd()
+        T.run_op(arm, op)
+    T.upd()
 
 
-def hand_point(arm, side):
-    """The palm centre in world space: between the wrist and the hand tip
-    (手先 where the model has one, else chars' finger-bone stand-in)."""
-    pbs = arm.pose.bones
-    tip = f"手先.{side}" if f"手先.{side}" in pbs else f"{CFG['hand_tip']}.{side}"
-    return arm.matrix_world @ ((pbs[f"手首.{side}"].head + pbs[tip].head) / 2)
-
-
-def place_prop(prop_root, arm, spec):
-    """Blade along local -Y (tip), flat faces along local Z. The grip point
-    (local +Y spec['grip']) goes to the palm, the blade along spec['dir'],
-    the flat turned toward the viewer, then rolled by spec['roll']."""
+def blade_frame(spec):
+    """The blade's world rotation: local -Y along spec['dir'] (guard to
+    tip), the flat (local Z) turned toward the viewer, then rolled
+    spec['roll'] degrees about the blade."""
     d = Vector(spec["dir"]).normalized()
     view = Vector((0, -1, 0))
-    zf = (view - view.dot(d) * d)
+    zf = view - view.dot(d) * d
     zf = zf.normalized() if zf.length > 1e-6 else Vector((1, 0, 0))
     zf = Matrix.Rotation(math.radians(spec.get("roll", 0.0)), 3, d) @ zf
     yl = -d
     xl = yl.cross(zf).normalized()
-    R = Matrix((xl, yl, zf)).transposed().to_4x4()
-    grip_w = R @ Vector((0, spec["grip"], 0))
-    prop_root.matrix_world = Matrix.Translation(hand_point(arm, spec["side"]) - grip_w.to_3d()) @ R
-    upd()
+    zf = xl.cross(yl).normalized()
+    return Matrix((xl, yl, zf)).transposed().to_quaternion()
 
 
-# ----------------------------------------------------------------- framing (copied)
-def world_box(objs):
-    dg = bpy.context.evaluated_depsgraph_get()
-    pts = []
-    for o in objs:
-        if o.hide_render:
+def anchor_point(arm, anchor):
+    if anchor == "ground":
+        return Vector((0, 0, 0))
+    return arm.matrix_world @ arm.pose.bones[anchor].head
+
+
+def place_blade(ob, grip_w, rot, g):
+    """The blade object so its point local +Y `g` (where the hand closes)
+    sits at grip_w."""
+    R = rot.to_matrix().to_4x4()
+    ob.matrix_world = Matrix.Translation(grip_w - (R @ Vector((0, g, 0, 0))).to_3d()) @ R
+    T.upd()
+
+
+def grip_hand(arm, side, grip_w, rot, pole):
+    """IK the arm so the palm closes on the handle at grip_w, the hand turned
+    across the handle (knuckles square to the blade). A few passes: the palm
+    offset depends on where the forearm ends up."""
+    inv = arm.matrix_world.inverted()
+    G = inv @ grip_w
+    blade = (inv.to_3x3() @ (rot.to_matrix() @ Vector((0, -1, 0)))).normalized()
+    target = G.copy()
+    for _ in range(4):
+        T.wrist_to(arm, side, target, pole)
+        pbs = arm.pose.bones
+        fore = (pbs[f"手首.{side}"].head - pbs[f"ひじ.{side}"].head).normalized()
+        across = fore - fore.dot(blade) * blade
+        if across.length > 1e-4:
+            T.aim(arm, f"手首.{side}", across.normalized())
+        err = G - palm(arm, side)
+        if err.length < 1e-4:
+            break
+        target = target + err
+    T.upd()
+
+
+def capture(root, arm, mesh, p):
+    """Resolve a pose to the numbers the renderer interpolates."""
+    apply_pose(root, arm, mesh, p)
+    blades = {}
+    for side, spec in (p.get("blades") or {}).items():
+        bl = {"anchor": spec.get("anchor", "上半身2"), "at": Vector(spec["at"]), "rot": blade_frame(spec),
+              "hand": bool(spec.get("hand", True)), "pole": Vector(spec.get("pole", (0.0, 0.5, -1.0))),
+              # where on the handle the hand closes: the grip, or the pommel to rest on
+              "grip": float(spec.get("grip", CFG["blades"][side]["grip"]))}
+        blades[side] = bl
+        if bl["hand"]:
+            grip_hand(arm, side, anchor_point(arm, bl["anchor"]) + bl["at"], bl["rot"], bl["pole"])
+            T.curl(arm, side, *spec.get("curl", (80, 40)))
+    bones = {}
+    for pb in arm.pose.bones:
+        loc, rot, sc = pb.matrix_basis.decompose()
+        bones[pb.name] = (loc.copy(), rot.copy(), sc.copy())
+    return {
+        "bones": bones,
+        "morphs": {k.name: k.value for k in mesh.data.shape_keys.key_blocks[1:] if k.value},
+        "root_rot": (0.0, math.radians(p.get("root_rot", 0.0)), math.radians(p["yaw"])),
+        "root": Vector(p.get("root", (0, 0, 0))),
+        "blades": blades,
+    }
+
+
+def set_frame(root, arm, mesh, blade_obs, caps, keys, t):
+    i, j, u, _raw = T.at_time(keys, t)
+    a, b = caps[i], caps[j]
+    for pb in arm.pose.bones:
+        la, qa, sa = a["bones"][pb.name]
+        lb, qb, sb = b["bones"][pb.name]
+        if qa.dot(qb) < 0:
+            qb = -qb
+        pb.rotation_mode = "QUATERNION"
+        pb.matrix_basis = Matrix.LocRotScale(la.lerp(lb, u), qa.slerp(qb, u), sa.lerp(sb, u))
+    kb = mesh.data.shape_keys.key_blocks
+    for k in kb[1:]:
+        k.value = 0.0
+    step = getattr(LIB, "STEP_MORPHS", set())
+    for n in set(a["morphs"]) | set(b["morphs"]):
+        va, vb = a["morphs"].get(n, 0.0), b["morphs"].get(n, 0.0)
+        kb[n].value = (vb if u >= 0.5 else va) if n in step else va * (1 - u) + vb * u
+    root.rotation_euler = tuple(x * (1 - u) + y * u for x, y in zip(a["root_rot"], b["root_rot"]))
+    root.location = a["root"].lerp(b["root"], u)
+    T.upd()
+    for side, ob in blade_obs.items():
+        ba, bb = a["blades"].get(side), b["blades"].get(side)
+        if ba is None and bb is None:
+            ob.hide_render = True
             continue
-        oe = o.evaluated_get(dg)
-        mw = oe.matrix_world
-        pts += [mw @ Vector(c) for c in oe.bound_box]
-    return pts
+        ob.hide_render = False
+        ba, bb = ba or bb, bb or ba
+        if ba["anchor"] == bb["anchor"]:
+            g = anchor_point(arm, ba["anchor"]) + ba["at"].lerp(bb["at"], u)
+        else:
+            g = (anchor_point(arm, ba["anchor"]) + ba["at"]).lerp(anchor_point(arm, bb["anchor"]) + bb["at"], u)
+        qa, qb = ba["rot"], bb["rot"]
+        if qa.dot(qb) < 0:
+            qb = -qb
+        r = qa.slerp(qb, u)
+        place_blade(ob, g, r, ba["grip"] * (1 - u) + bb["grip"] * u)
+        if ba["hand"] and bb["hand"]:
+            grip_hand(arm, side, g, r, ba["pole"].lerp(bb["pole"], u))
+    T.upd()
 
 
-def project(cam_ob, pts):
-    inv = cam_ob.matrix_world.inverted()
-    xs, ys = [], []
-    for p in pts:
-        q = inv @ p
-        xs.append(q.x)
-        ys.append(q.y)
-    return min(xs), max(xs), min(ys), max(ys)
+def blade_points(cam_ob, ppu, blade_obs):
+    """Per blade: the base (past the guard) and the tip, in canvas px."""
+    out = {}
+    for side, ob in blade_obs.items():
+        if ob.hide_render:
+            out[side] = None
+            continue
+        spec = CFG["blades"][side]
+        mw = ob.matrix_world
+        out[side] = [T.to_px(cam_ob, ppu, mw @ Vector((0, spec["base"], 0))),
+                     T.to_px(cam_ob, ppu, mw @ Vector((0, spec["tip"], 0)))]
+    return out
 
 
-def frame_camera(cam_ob, box, ppu, margin_px=8):
-    sc = bpy.context.scene
-    x0, x1, y0, y1 = box
-    m = margin_px / ppu
-    x0, x1, y0, y1 = x0 - m, x1 + m, y0 - m, y1 + m
-    w = max(2, int(math.ceil((x1 - x0) * ppu)))
-    h = max(2, int(math.ceil((y1 - y0) * ppu)))
-    sc.render.resolution_x = w
-    sc.render.resolution_y = h
-    sc.render.resolution_percentage = 100
-    cam_ob.data.ortho_scale = max(w, h) / ppu
-    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-    cam_ob.matrix_world = cam_ob.matrix_world @ Matrix.Translation((cx, cy, 0))
-    upd()
-    inv = cam_ob.matrix_world.inverted()
-    g = inv @ Vector((0, 0, 0))
-    origin = ((g.x + (w / ppu) / 2) * ppu, ((h / ppu) / 2 - g.y) * ppu)
-    return w, h, origin
-
-
-def render_to(path):
-    sc = bpy.context.scene
-    fo = sc.compositing_node_group.nodes["aux_out"]
-    d, base = os.path.split(path)
-    fo.directory = os.path.join(d, "aux") + os.sep
-    fo.file_name = os.path.splitext(base)[0] + "_"
-    sc.render.filepath = path
-    bpy.ops.render.render(write_still=True)
-
-
-def reset_camera(cam_ob):
-    cam_ob.matrix_world = Matrix.Identity(4)
-    cam_ob.location = (0, -10, 0.8)
-    cam_ob.rotation_euler = (math.radians(90 - args.pitch), 0, 0)
-    upd()
+# ----------------------------------------------------------------- first look (one prop)
+def place_prop(prop_root, arm, spec):
+    """The first look's single prop: its grip (local +Y spec['grip']) at the palm."""
+    R = blade_frame(spec).to_matrix().to_4x4()
+    grip_w = R @ Vector((0, spec["grip"], 0, 0))
+    prop_root.matrix_world = Matrix.Translation(arm.matrix_world @ palm(arm, spec["side"]) - grip_w.to_3d()) @ R
+    T.upd()
 
 
 # ----------------------------------------------------------------- main
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    addon_utils.enable(MMD, default_set=True)
-    root, arm, mesh = import_pmx(args.pmx)
-    prop = None
-    if args.prop:
-        prop = import_pmx(args.prop)
-    cam_ob = setup_render()
+    addon_utils.enable(T.MMD, default_set=True)
+    root, arm, mesh = import_pmx(args.pmx or model_path(CFG["pmx"]))
+    blade_obs = {}
+    if LIB is not None and CFG.get("blades"):
+        for side, spec in CFG["blades"].items():
+            _r, _a, m_ = import_pmx(model_path(spec["pmx"]))
+            m_.parent = None
+            m_.modifiers.clear()            # a rigid prop: no armature to follow
+            m_.matrix_world = Matrix.Identity(4)
+            blade_obs[side] = m_
+    prop = import_pmx(args.prop) if args.prop else None
+    cam_ob = T.setup_render(args.samples)
 
     # the rest height, measured before any shading or hull, sets the scale
-    upd()
-    zs = [p.z for p in world_box([mesh])]
+    T.upd()
+    zs = [p.z for p in T.world_box([mesh])]
     rest_h = max(zs) - min(zs)
     ppu = args.ppu or CH.target_ppu(args.char, rest_h)
     print(f"SCALE rest height {rest_h:.4f} u -> ppu {ppu:.2f} -> {rest_h * ppu * CH.COMBAT_SCALE:.1f} px at 1080p")
 
     shade(mesh).thickness = args.outline_px / ppu
+    for ob in blade_obs.values():
+        shade(ob).thickness = args.outline_px / ppu
     if prop:
         shade(prop[2]).thickness = args.outline_px / ppu
+    cam_h = CFG.get("camera_height", 0.8)
+    objs = [mesh] + list(blade_obs.values())
 
-    poses = {"rest": CH.REST, "stance": CFG["stance"]}
+    for name in [c for c in args.clips.split(",") if c]:
+        spec = LIB.CLIPS[name]
+        keys = spec["keys"]
+        caps = [capture(root, arm, mesh, k[1]) for k in keys]
+        fps = spec["fps"]
+        if args.keys_only:
+            times = [k[0] for k in keys]
+        elif spec.get("motion_end"):
+            times = [round(i / fps, 6) for i in range(int(round(spec["motion_end"] * fps)) + 1)]
+        else:
+            times = [round(i / fps, 6) for i in range(int(round(spec["length"] * fps)))]
+        T.reset_camera(cam_ob, args.pitch, cam_h)
+        pts = []
+        for t in times:
+            set_frame(root, arm, mesh, blade_obs, caps, keys, t)
+            pts += T.world_box(objs)
+        w, h, origin, _c = T.frame_camera(cam_ob, T.project(cam_ob, pts), ppu)
+        d = os.path.join(args.out, "raw", name)
+        os.makedirs(d, exist_ok=True)
+        for i, t in enumerate(times):
+            set_frame(root, arm, mesh, blade_obs, caps, keys, t)
+            T.render_to(os.path.join(d, f"f_{i:03d}.png"))
+        track = []
+        if blade_obs and not args.keys_only:
+            for i in range((len(times) - 1) * SUBSTEPS + 1):
+                t = round(i / (fps * SUBSTEPS), 6)
+                set_frame(root, arm, mesh, blade_obs, caps, keys, t)
+                track.append({"t": t, **blade_points(cam_ob, ppu, blade_obs)})
+        meta = {"clip": name, "char": args.char, "fps": fps, "length": spec["length"], "loop": spec["loop"],
+                "motion_end": spec.get("motion_end"), "times": times, "canvas": [w, h],
+                "origin_px": [round(origin[0], 3), round(origin[1], 3)], "ppu": round(ppu, 4),
+                "pitch": args.pitch, "keys_only": args.keys_only, "events": dict(spec.get("events", {})),
+                "trails": spec.get("trails", []), "bursts": spec.get("bursts", []),
+                "substeps": SUBSTEPS, "blades": track}
+        with open(os.path.join(args.out, f"{name}.json"), "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=1)
+        print("CLIP", name, len(times), "frames", (w, h), "origin", origin)
+
+    stills = dict(getattr(LIB, "STILLS", {}))
+    stills.setdefault("rest", CH.REST)
+    stills.setdefault("stance", CFG["stance"])
     for name in [s for s in args.stills.split(",") if s]:
-        p = poses[name]
-        apply_pose(root, arm, mesh, p)
-        objs = [mesh]
+        p = stills[name]
+        cap = capture(root, arm, mesh, p)
+        set_frame(root, arm, mesh, blade_obs, [cap], [(0.0, p, "io")], 0.0)
+        fobjs = list(objs)
         if prop:
             on = p.get("prop") is not None
             prop[2].hide_render = not on
             if on:
                 place_prop(prop[0], arm, p["prop"])
-                objs.append(prop[2])
-        reset_camera(cam_ob)
-        box = project(cam_ob, world_box(objs))
-        w, h, origin = frame_camera(cam_ob, box, ppu)
-        render_to(os.path.join(args.out, "raw", f"{name}.png"))
+                fobjs.append(prop[2])
+        T.reset_camera(cam_ob, args.pitch, cam_h)
+        w, h, origin, _c = T.frame_camera(cam_ob, T.project(cam_ob, T.world_box(fobjs)), ppu)
+        T.render_to(os.path.join(args.out, "raw", f"{name}.png"))
+        hips = arm.matrix_world @ arm.pose.bones["下半身"].head
+        head = arm.matrix_world @ arm.pose.bones["頭"].head      # the neck joint, under the chin
         meta = {"still": name, "char": args.char, "canvas": [w, h],
                 "origin_px": [round(origin[0], 3), round(origin[1], 3)], "ppu": round(ppu, 4),
+                "hips_px": T.to_px(cam_ob, ppu, hips), "head_px": T.to_px(cam_ob, ppu, head),
                 "rest_height_units": round(rest_h, 5), "pitch": args.pitch, "combat_scale": CH.COMBAT_SCALE}
         with open(os.path.join(args.out, f"{name}.json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=1)
