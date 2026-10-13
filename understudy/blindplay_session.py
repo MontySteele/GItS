@@ -763,8 +763,7 @@ class Session:
             # then the game's answer. A screen that says nothing about what
             # arrived leaves the tester with the row it took; a screen that
             # does say leaves it with both, in that order.
-            feedback = " ".join(x for x in (taken_line(res, state),
-                                            _result_line(result)) if x)
+            feedback = " ".join(answer_lines(res, state, result))
             self.transcript.write(kind="result", action=action,
                                   summary=feedback)
 
@@ -879,6 +878,23 @@ def _result_line(result: Any) -> str:
                     f"changed)")
         return "(the game answered with something this tool will not repeat)"
     return text
+
+
+def refused(result: Any) -> bool:
+    """Did the bridge refuse the POST? The bridge files a refusal as
+    `status: "error"` with its reason under `error`
+    (`vendor/STS2_MCP/McpMod.Helpers.cs`)."""
+    return (isinstance(result, dict)
+            and _text(result.get("status")) == "error")
+
+
+def answer_lines(res: dict[str, Any], state: dict[str, Any] | None,
+                 result: Any) -> list[str]:
+    """`taken_line`, then the game's answer (`EB-341`). A refused POST took
+    nothing, so it prints no "Took" line, only the refusal: a seat choosing
+    mid-greeting read "Took: X" and then the bridge's no (2026-10-12)."""
+    took = "" if refused(result) else taken_line(res, state)
+    return [x for x in (took, _result_line(result)) if x]
 
 
 # What each verb's answer opens with. A word per verb rather than one flat

@@ -18,6 +18,18 @@ from understudy import bridge, frames, instances, local_tester, soak
 QA = Path(__file__).resolve().parents[1] / "review" / "qa" / "two-instance"
 
 
+def verdict(out: list[dict]) -> int:
+    """0 when every frame is whole, else 1 (`EB-802`). The capture goes
+    through `frames.capture`, which measures the PrintWindow clip and reports
+    `complete`; a clipped frame is not a frame to read, so the run fails
+    rather than filing it."""
+    bad = [o for o in out if o.get("complete") is not True]
+    for o in bad:
+        print(f"INCOMPLETE frame for {o.get('lane')}: "
+              f"{o.get('complete_note') or 'no complete flag'}")
+    return 1 if bad else 0
+
+
 def main() -> int:
     lanes = []
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -46,7 +58,7 @@ def main() -> int:
     print(json.dumps(out, indent=1, default=str))
     (QA / "frames.json").write_text(
         json.dumps(out, indent=1, default=str) + "\n", encoding="utf-8")
-    return 0
+    return verdict(out)
 
 
 if __name__ == "__main__":
