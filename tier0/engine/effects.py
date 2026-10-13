@@ -5930,13 +5930,15 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
             + C.MC_LIGHTFALL_PER_ATTACK * enemy.mc_lightfall_tally,
             element=None, source="companion")
         enemy.mc_lightfall_tally = 0
-    # Dahlia, Favonian Favor and Bennett, Passion Overload -- both say THIS
-    # TURN, and both are therefore popped whole here whether or not they ever
-    # paid. Bennett's is the one that can also be spent early: an Attack
-    # consumes it at `companion_overhaul_card_start`, and this is the other
-    # end of the same promise.
+    # Dahlia, Favonian Favor, Bennett, Passion Overload and Mika, Starfrost
+    # Swirl -- all three say THIS TURN, and all three are therefore popped
+    # whole here whether or not they ever paid. Bennett's and Mika's can also
+    # be spent early: an Attack consumes each at
+    # `companion_overhaul_card_start`, and this is the other end of the same
+    # promise.
     p.powers.pop("mc_favonian_favor", None)
     p.powers.pop("mc_passion_overload", None)
+    p.powers.pop("mc_starfrost_discount", None)
     # The Hexerei stand-ins' two this-turn windows close on the same line and
     # for the same reading. `tier0.engine.companion_hexerei`.
     companion_hexerei.roll_turn_end(state)
@@ -6234,7 +6236,8 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
     for enemy in state.living_enemies:
         if enemy.powers.get("mc_lightfall_sword", 0):
             enemy.mc_lightfall_tally += 1
-    # Mika, Starfrost Swirl -- "your next Attack costs 1 less". The DISCOUNT is
+    # Mika, Starfrost Swirl -- "your next Attack this turn costs 1 less" (the
+    # unused discount is popped at turn end, beside Bennett's). The DISCOUNT is
     # read in `combat.card_cost`, which is pure and is called by the playability
     # gate as well; the CONSUMPTION is here, at the one site both play paths
     # reach, so a card cannot be priced twice or refunded.

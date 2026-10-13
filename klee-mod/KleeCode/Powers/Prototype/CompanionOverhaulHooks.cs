@@ -873,10 +873,13 @@ public sealed class SwirlChargePower : NextAttackRiderPower, ILocalizationProvid
 }
 
 /// <summary>
-/// Mika, Starfrost Swirl: "Your next Attack costs 1 less."
+/// Mika, Starfrost Swirl: "Your next Attack this turn costs 1 less."
 ///
-/// NO TURN LIMIT, because the card prints none -- it is spent by the next
-/// Attack whenever that is. <c>TryModifyEnergyCostInCombat</c> is the hook, and
+/// "THIS TURN" is the removal in <c>AfterSideTurnEnd</c>, mirrored exactly from
+/// <see cref="PassionOverloadPower"/> (the user's ruling, 2026-10-13: a
+/// discount that banked across turns was too much at Common). The unused
+/// discount is gone at the end of the player's turn; the sim pops it on the
+/// same line as Bennett's. <c>TryModifyEnergyCostInCombat</c> is the hook, and
 /// it is PURE: the consumption is the rider latch, so the cost query may be
 /// asked as often as the screen likes.
 /// </summary>
@@ -885,9 +888,18 @@ public sealed class StarfrostDiscountPower : NextAttackRiderPower, ILocalization
     public List<(string, string)>? Localization => new()
     {
         ("title", "Starfrost Swirl"),
-        ("description", "Your next Attack costs [blue]{Amount}[/blue] less."
-                      + CardTypeClause),
+        ("description",
+            "Your next Attack this turn costs [blue]{Amount}[/blue] less."
+          + CardTypeClause),
     };
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
 
     public override bool TryModifyEnergyCostInCombat(
         CardModel card, decimal originalCost, out decimal modifiedCost)

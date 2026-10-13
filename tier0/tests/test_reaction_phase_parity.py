@@ -1210,6 +1210,11 @@ CO_TENANCY_LEDGER = {
             "QUESTION, answered: a removal reads nothing and writes only its "
             "own existence, so it has no position to defend. It is NOT in "
             "CompanionOverhaulTurnEnd's walk for that reason",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "StarfrostDiscountPower"):
+            "(Mika's discount made 'this turn', the user's ruling "
+            "2026-10-13). PassionOverloadPower's own this-turn EXPIRY, line "
+            "for line: it removes itself and reads nothing, so it has no "
+            "position to defend and is NOT in CompanionOverhaulTurnEnd's walk",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "FavonianFavorPower"):
             "(the Mondstadt companion overhaul, second wave). The "
             "same this-turn expiry, one card over: the Block it pays is paid "

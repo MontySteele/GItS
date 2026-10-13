@@ -1170,7 +1170,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies. Your next Attack costs 1 less.",
+   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies. Your next Attack this turn costs 1 less.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
