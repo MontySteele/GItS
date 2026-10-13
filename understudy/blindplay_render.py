@@ -2902,6 +2902,11 @@ EVENT_HP_RETURNED_LOST = ("Drained {n} HP returned; {lost} past your line "
 EVENT_HP_RETURNED_PAST = "Drained {n} HP returned, {past} of it past your line"
 #: The Varka payoff round (2026-10-10). Wolfpack firing: the copy goes into
 #: the draw pile, where no other line of the page shows it arrive.
+#: Kokomi round 3 A-list (2026-10-13): a generated card a full hand sent to
+#: the discard pile (the base game's rule; it is drawn later, not lost), and
+#: what Ethereal Exhausted at the turn's end. Seats read both as "vanished".
+EVENT_TO_DISCARD = "{n} {card} to the discard pile (hand full)"
+EVENT_ETHEREAL = "exhausted (Ethereal): {cards}"
 EVENT_WOLFPACK = ("Wolfpack shuffled {n} of Four Winds' Ascension into your "
                   "draw pile (it Exhausts when played)")
 #: And under Twin Gales, what each Swirl paid ("Numbers held"; a line, not a
@@ -3259,6 +3264,15 @@ def _stage_block_clause(stage: dict[str, Any] | None) -> str:
     return ""
 
 
+def _plural_card(card: str, n: int) -> str:
+    """"Sting", "Stings"; an upgraded "Ward+" reads "Wards+"."""
+    if n == 1:
+        return card
+    if card.endswith("+"):
+        return card[:-1] + "s+"
+    return card + "s"
+
+
 def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
     """The phrases for one kind of event, repeats counted."""
     counted: dict[tuple, int] = {}
@@ -3293,6 +3307,19 @@ def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
             return []
         return [EVENT_WOLFPACK.format(
             n="a copy" if total == 1 else f"{total} copies")]
+    if kind == "discarded":
+        by_card: dict[str, int] = {}
+        for (card, _t, _p, _s, _o), n in counted.items():
+            by_card[card] = by_card.get(card, 0) + n
+        return [EVENT_TO_DISCARD.format(n=n, card=_plural_card(card, n))
+                for card, n in by_card.items() if card]
+    if kind == "ethereal":
+        by_card = {}
+        for (card, _t, _p, _s, _o), n in counted.items():
+            by_card[card] = by_card.get(card, 0) + n
+        cards = [card + (f" x{n}" if n > 1 else "")
+                 for card, n in by_card.items() if card]
+        return [EVENT_ETHEREAL.format(cards=", ".join(cards))] if cards else []
     for (card, target, power, _s, on_player), n in counted.items():
         times = f" x{n}" if n > 1 else ""
         if kind == "negated":

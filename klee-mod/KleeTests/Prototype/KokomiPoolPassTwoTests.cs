@@ -421,10 +421,11 @@ public class KokomiPoolPassTwoTests
         // names the same window in plain words on all three rider faces --
         // "your next Plan" was ambiguous between the next carried out and the
         // next written (`EB-687`, `EB-645`).
-        // The card text pass (2026-10-12): "Your next Plan" on both.
+        // The card text pass (2026-10-12): "Your next Plan" on both. Kokomi
+        // round 3 A-list (2026-10-13): Second Wave names the window.
         Assert.Equal(
-            "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Your "
-          + "next [gold]Plan[/gold] is carried out twice.",
+            "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The "
+          + "[gold]Plan[/gold] written after it this turn is carried out twice.",
             Face(new ProtoKkSecondWave()));
         Assert.EndsWith("Your next [gold]Plan[/gold] deals double damage.",
                         Face(new ProtoKkOpeningGambit()));

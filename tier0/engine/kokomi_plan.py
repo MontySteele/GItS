@@ -278,10 +278,13 @@ AT_WATERS_EDGE = "kk_at_waters_edge"      # first Hydro hit a turn: Weak N + Vul
 CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per Weak/Vuln stack, Attacks
 WATATSUMIS_GRACE = "kk_watatsumis_grace"  # keep up to N Block at turn end
 TIDAL_RIPOSTE = "kk_tidal_riposte"        # N to an attacker fully Blocked
-#: THE PAYOFF PASS (2026-10-01): Kurage Canopy, "Whenever the Bake-Kurage
-#: carries out a Plan, gain N Block." Per carry-out, on the plan bus.
-#: `KurageCanopyPower` is the twin.
+#: THE PAYOFF PASS (2026-10-01): Kurage Canopy. Kokomi round 3 A-list
+#: (2026-10-13): "Whenever the Bake-Kurage carries out a Plan, add a Ward to
+#: your Hand." Per carry-out, on the plan bus; the upgraded card installs the
+#: Plus power, whose Ward is upgraded. `KurageCanopyPower` /
+#: `KurageCanopyPlusPower` are the twins.
 KURAGE_CANOPY = "kk_kurage_canopy"
+KURAGE_CANOPY_PLUS = "kk_kurage_canopy_plus"
 #: POOL COMPLETION (2026-10-01, paper sec.4). Sea's Reproach: "Whenever you
 #: apply Weak or Vulnerable to an enemy, deal N damage to it." Watatsumi
 #: Resistance (since the re-founding): "Whenever you write a Companion card as
@@ -1359,15 +1362,17 @@ def _note_plan_resolved(state: CombatState,
     # Sango Isshin's per-fight count ([USER]'s run, 2026-10-11), once per
     # CARRY-OUT, so a doubled one counts twice.
     state.kk_plans_carried_out_this_combat += 1
-    # THE PAYOFF PASS, KURAGE CANOPY: "Whenever the Bake-Kurage carries out
-    # a Plan, gain 2 Block." Per carry-out, so a doubled one pays twice.
-    # POWERED (rule 3). `KurageCanopyPower` is the twin.
-    canopy = int(p.powers.get(KURAGE_CANOPY, 0))
-    if canopy:
-        amount = powers.modify_block_gained(p, canopy)
-        p.block += amount
-        state.emit("block", amount=amount)
-        state.emit("plan_kurage_canopy", amount=amount)
+    # THE PAYOFF PASS, KURAGE CANOPY (Kokomi round 3 A-list, 2026-10-13):
+    # "Whenever the Bake-Kurage carries out a Plan, add a Ward to your Hand."
+    # Per carry-out, so a doubled one pays twice; Canopy+ makes Ward+.
+    # `KurageCanopyBasePower` is the twin.
+    for power_id, upgraded in ((KURAGE_CANOPY, False),
+                               (KURAGE_CANOPY_PLUS, True)):
+        canopy = int(p.powers.get(power_id, 0))
+        if canopy:
+            added = add_jellyfish(state, WARD_ID, canopy, upgraded=upgraded)
+            state.emit("plan_kurage_canopy", amount=added,
+                       upgraded=upgraded)
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,

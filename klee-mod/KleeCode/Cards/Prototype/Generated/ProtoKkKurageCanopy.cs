@@ -38,20 +38,20 @@ public sealed class ProtoKkKurageCanopy : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this);
+        KokomiCards.WithWardPreview(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_kurage_canopy");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Canopy"),
-        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,18 @@ public sealed class ProtoKkKurageCanopy : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<KurageCanopyPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<KurageCanopyPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<KurageCanopyPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        // upgraded_power: the upgraded card installs KurageCanopyPlusPower, read off IsUpgraded when the card is played.
     }
 }

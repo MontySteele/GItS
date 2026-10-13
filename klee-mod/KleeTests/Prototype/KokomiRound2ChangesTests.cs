@@ -49,8 +49,8 @@ public class KokomiRound2ChangesTests
         // (`KokomiRound3ChangesTests`).
         Assert.Equal((6, 9), (Var<ProtoKkCoordinatedTide>("PowerAmount"),
                               Var<ProtoKkCoordinatedTide>("PowerAmount", true)));
-        Assert.Equal((3, 4), (Var<ProtoKkKurageCanopy>("PowerAmount"),
-                              Var<ProtoKkKurageCanopy>("PowerAmount", true)));
+        // Kurage Canopy makes Wards since the Kokomi round 3 A-list
+        // (2026-10-13; `KokomiPayoffPassTests`).
         Assert.Equal((7, 10), (Var<ProtoKkGrandStrategist>("PowerAmount"),
                                Var<ProtoKkGrandStrategist>("PowerAmount", true)));
         Assert.Equal((5, 6), (Var<ProtoKkShoalOfSpears>("Damage"),

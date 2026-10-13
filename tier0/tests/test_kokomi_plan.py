@@ -1935,9 +1935,11 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # Plan" read as the next one WRITTEN (`EB-687`, `EB-645`). The card text
     # pass (2026-10-12, Kokomi table, ruled by [USER]) words both "Your next
     # Plan"; the drain's own line still says which entry took the rider.
+    # Kokomi round 3 A-list (2026-10-13): Second Wave names the window --
+    # the Plan written after it this turn, never the next morning's.
     assert faces["proto_kk_second_wave"] == (
-        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Your next "
-        "[gold]Plan[/gold] is carried out twice.")
+        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The "
+        "[gold]Plan[/gold] written after it this turn is carried out twice.")
     assert faces["proto_kk_opening_gambit"].endswith(
         "Your next [gold]Plan[/gold] deals double damage.")
     # Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).

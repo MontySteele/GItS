@@ -1517,7 +1517,11 @@ PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned",
                     "shattered", "curtain",
                     # The Varka payoff round (2026-10-10): Wolfpack shuffled
                     # copies in; what a Swirl paid under Twin Gales.
-                    "wolfpack", "paid")
+                    "wolfpack", "paid",
+                    # Kokomi round 3 A-list (2026-10-13): a generated card
+                    # sent to the discard pile by a full hand, and the
+                    # turn's end Ethereal Exhaust.
+                    "discarded", "ethereal")
 #: The event kinds a page OUTSIDE a fight prints (the reward screen after it).
 OUTSIDE_FIGHT_EVENTS = frozenset({"curtain"})
 

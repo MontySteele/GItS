@@ -53,7 +53,7 @@ public sealed class ProtoMcAlbedoSolarIsotoma : CustomCardModel, ICompanionCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Solar Isotoma"),
-        ("description", "{IfUpgraded:show:Draw 1 card. |}At the end of your turn, if any enemy has an aura, deal 8 damage to that enemy and gain 4 [gold]Block[/gold]."),
+        ("description", "{IfUpgraded:show:Draw 1 card. |}At the end of your turn, if any enemy has an aura, deal 8 damage to the enemy with the most auras and gain 4 [gold]Block[/gold]."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

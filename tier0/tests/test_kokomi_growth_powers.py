@@ -36,9 +36,9 @@ def test_the_generals_banner_stays_out_and_the_pool_is_78(overhaul):
     assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
 
 
-def test_kurage_canopy_prints_3_and_4(overhaul):
-    # Ceremonial Garment left this pin in the Kokomi card pass (2026-10-11):
-    # 1 [2] per stack (`test_kokomi_casket_pass.test_the_moved_numbers`).
-    # Kokomi round 2 (2026-10-12): 2 [3] -> 3 [4].
-    assert _row("proto_kk_kurage_canopy").effects[0]["amount"] == 3
-    assert _up("proto_kk_kurage_canopy").effects[0]["amount"] == 4
+def test_kurage_canopy_installs_one_ward_power_and_its_plus(overhaul):
+    # Kokomi round 3 A-list (2026-10-13): a Ward per carry-out (was 3 [4]
+    # Block); the upgraded card installs the Plus power (Ward+).
+    assert _row("proto_kk_kurage_canopy").effects[0]["amount"] == 1
+    assert _up("proto_kk_kurage_canopy").effects[0]["power"] == (
+        "kk_kurage_canopy_plus")

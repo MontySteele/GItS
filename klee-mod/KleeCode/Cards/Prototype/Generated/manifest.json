@@ -1230,7 +1230,7 @@
       "innate": true
     },
     "proto_kk_kurage_canopy": {
-      "power_amount": 1
+      "upgraded_power": "kk_kurage_canopy_plus"
     },
     "proto_kk_kurages_mercy": {
       "kokomi_amount": 4

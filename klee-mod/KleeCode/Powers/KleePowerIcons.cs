@@ -147,6 +147,8 @@ internal static class KleePowerIcons
         // per carry-out, so it wears that badge.
         KurageCanopyPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
+        KurageCanopyPlusPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
         // POOL COMPLETION (2026-10-01): the six new Powers and three Ancient
         // Powers borrow the nearest shipped shape, the block above's rule.
         SeasReproachPower => KleePck.Path(

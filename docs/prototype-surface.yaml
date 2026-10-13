@@ -909,7 +909,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: power,
-   description: "At the end of your turn, if any enemy has an aura, deal 8 damage to that enemy and gain 4 [gold]Block[/gold].",
+   description: "At the end of your turn, if any enemy has an aura, deal 8 damage to the enemy with the most auras and gain 4 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mc_isotoma_bloom, amount: 1, target: self}]}
 
 - {id: proto_mc_jean_gale_blade, name: "Jean — Gale Blade", character: klee,
@@ -1489,7 +1489,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Your next [gold]Plan[/gold] is carried out twice.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] written after it this turn is carried out twice.",
    # `applies_element: true` (2026-10-05): the face prints Hydro, so the row
    # declares it rather than leaning on Kokomi's retired every-card cadence.
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
@@ -1593,11 +1593,11 @@
 - {id: proto_kk_bubble_ward, name: "Bubble Ward", character: kokomi,
    authored_by: [claude],
    # The re-founding (2026-10-12): cost 1, Block now and a Ward. Round 2:
-   # Block 5 -> 7 [10]. The jellyfish build (2026-10-12): 5 [8], Cloak and
-   # Dagger's rate.
+   # Block 5 -> 7 [10]. The jellyfish build (2026-10-12): 5 [8]. Kokomi
+   # round 3 A-list (2026-10-13): 6 [9], Cloak and Dagger's 6 and a Shiv.
    cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: block, amount: 5},
+   description: "Gain 6 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: block, amount: 6},
              {op: kokomi, kind: add_ward}],
    upgrade: {block: 3}}
 
@@ -1799,13 +1799,12 @@
 - {id: proto_kk_kurage_canopy, name: "Kurage Canopy", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Per CARRY-OUT: a Plan carried out twice (Second Wave, Nereid's
-   # Ascension, All Streams) pays twice. `KurageCanopyPower` rides the plan
-   # bus beside her Ancient.
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
-   effects: [{op: apply_power, power: kk_kurage_canopy, amount: 3, target: self}],
-   # 4 Block. Kokomi round 2 (2026-10-12): 2 [3] -> 3 [4].
-   upgrade: {power_amount: 1}}
+   # Kokomi round 3 A-list (2026-10-13): a Ward per CARRY-OUT, Endless
+   # Shoal's Ward twin (was 3 [4] Block); upgraded, the Ward is upgraded.
+   # Provenance note, "Kokomi round 3 A-list, 2026-10-13".
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: apply_power, power: kk_kurage_canopy, amount: 1, target: self}],
+   upgrade: {upgraded_power: kk_kurage_canopy_plus}}
 
 # --- POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
 # sec.4): one Common and seven Rares, LAST in the sheet's order; the pool is 78

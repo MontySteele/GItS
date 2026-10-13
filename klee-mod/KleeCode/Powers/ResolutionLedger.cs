@@ -249,6 +249,26 @@ public static class ResolutionLedger
     /// to the Pyro hits of the Attack `Card`, on that play's own line.
     /// </summary>
     public const string Stoked = "stoked";
+    /// <summary>Kokomi round 3 A-list (2026-10-13): a generated card (a
+    /// Sting or a Ward) went to the discard pile because the hand was full,
+    /// the base game's rule; and a card Ethereal Exhausted at the end of the
+    /// turn. Seats read both as "lost silently" (review r3, section 4).
+    /// </summary>
+    public const string ToDiscard = "discarded";
+    public const string EtherealExhausted = "ethereal";
+
+    /// <summary>"<paramref name="card"/> went to the discard pile (hand
+    /// full)."</summary>
+    public static void NoteToDiscard(string card) =>
+        NoteEvent(ToDiscard, card, string.Empty, string.Empty,
+                  onPlayer: true);
+
+    /// <summary>"<paramref name="card"/> Exhausted (Ethereal)." Filed
+    /// between plays, past the player-turn-end mark, so it is carried to
+    /// the next turn's page.</summary>
+    public static void NoteEtherealExhaust(string card) =>
+        NoteEvent(EtherealExhausted, card, string.Empty, string.Empty,
+                  onPlayer: true);
 
     private static long _seq =
         System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000;
