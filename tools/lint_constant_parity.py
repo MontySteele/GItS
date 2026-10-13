@@ -409,7 +409,7 @@ UNMIRRORED: dict[str, str] = {
     "AbyssOverlayView.CrossInsetX": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.CrossInsetY": _ABYSS_SCREEN_REASON,
     "StoryRules.BigBombDamage": _STORY_REASON,
-    "StoryRules.ConfinementCombats": _STORY_REASON,
+    "StoryRules.StoryCurseCombats": _STORY_REASON,
     "AbyssNumbers.LeyLineDamageReduction": _ABYSS_REASON,
     "AbyssNumbers.AbyssalMoonEvery": _ABYSS_REASON,
     "AbyssNumbers.AbyssalMoonDamage": _ABYSS_REASON,

@@ -41,10 +41,12 @@ public sealed class VarkaCardPool : CardPoolModel
 
     /// <summary>MEMBERSHIP: his generated rows, Change of Guard's faces, then
     /// his Ancients (<c>RosterAncientCards.Varka</c>,
-    /// <c>tools/lint_ancient_coverage.py</c>).</summary>
+    /// <c>tools/lint_ancient_coverage.py</c>), then his story Curse (Overdue
+    /// Reports, which only Dispatch from Mondstadt gives).</summary>
     protected override CardModel[] GenerateAllCards() =>
         VarkaRoster.Members()
             .Concat(VarkaModalOptions.All)
             .Concat(RosterAncientCards.Varka)
+            .Append(ModelDb.Card<Cards.OverdueReports>())
             .ToArray();
 }

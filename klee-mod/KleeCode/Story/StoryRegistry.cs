@@ -12,10 +12,11 @@ namespace KleeMod.Story;
 /// </summary>
 public static class StoryRegistry
 {
-    /// <summary>The tables. Kokomi, Furina and Varka add theirs here.</summary>
+    /// <summary>The tables. Kokomi and Furina add theirs here.</summary>
     public static readonly IReadOnlyList<CharacterStory> All = new[]
     {
         KleeStory.Table,
+        VarkaStory.Table,
     };
 
     /// <summary>The table for this character, or null.</summary>
@@ -94,12 +95,77 @@ public static class StoryRules
         return story.Pairs.FirstOrDefault(p => present.Contains(p.Partner));
     }
 
-    /// <summary>Confinement: "After 3 combats, remove this from your deck."</summary>
-    public const int ConfinementCombats = 3;
+    /// <summary>A story Curse (Klee's Confinement, Varka's Overdue Reports):
+    /// "After 3 combats, remove this from your deck."</summary>
+    public const int StoryCurseCombats = 3;
 
     /// <summary>One more combat served; true when it is the last.</summary>
-    public static bool ConfinementServedOut(int combatsServed) =>
-        combatsServed >= ConfinementCombats;
+    public static bool StoryCurseServedOut(int combatsServed) =>
+        combatsServed >= StoryCurseCombats;
+
+    /// <summary>Whether this card's play is the character's signature
+    /// moment (Varka: Four Winds' Ascension), by her table.</summary>
+    public static bool IsSignaturePlay(CharacterStory story, Type? card) =>
+        card != null && story.SignatureCard == card;
+
+    /// <summary>
+    /// WHO SPEAKS AT A BOSS'S ENTRY, by seat. Each story character speaks
+    /// once: in a pair exchange if one is written for her and someone at the
+    /// table, held in EITHER character's table (Klee's table holds the Varka
+    /// and Klee pair), else her own boss line. A pair stands in for both its
+    /// speakers' solo lines, so a fight opens on two bubbles, not three.
+    /// Seats are walked in order; a seat's own table is asked first.
+    /// </summary>
+    public static List<BossEntrySpeech> BossEntryPlan(IReadOnlyList<Type> seats)
+    {
+        var plan = new List<BossEntrySpeech>();
+        var spoken = new HashSet<int>();
+        for (var i = 0; i < seats.Count; i++)
+        {
+            if (spoken.Contains(i)) continue;
+            var own = StoryRegistry.For(seats[i]);
+            BossEntrySpeech? pair = null;
+            if (own != null)
+            {
+                foreach (var p in own.Pairs)
+                {
+                    var j = FreeSeat(seats, spoken, i, p.Partner);
+                    if (j >= 0) { pair = new BossEntrySpeech(own, i, p, j); break; }
+                }
+            }
+            if (pair == null)
+            {
+                for (var j = 0; j < seats.Count && pair == null; j++)
+                {
+                    if (j == i || spoken.Contains(j)) continue;
+                    var other = StoryRegistry.For(seats[j]);
+                    var p = other?.Pairs.FirstOrDefault(x => x.Partner == seats[i]);
+                    if (p != null) pair = new BossEntrySpeech(other!, j, p, i);
+                }
+            }
+            if (pair != null)
+            {
+                plan.Add(pair);
+                spoken.Add(pair.OwnerSeat);
+                spoken.Add(pair.PartnerSeat);
+            }
+            else if (own != null)
+            {
+                plan.Add(new BossEntrySpeech(own, i, null, -1));
+                spoken.Add(i);
+            }
+        }
+        return plan;
+    }
+
+    private static int FreeSeat(IReadOnlyList<Type> seats, HashSet<int> spoken, int self, Type character)
+    {
+        for (var j = 0; j < seats.Count; j++)
+        {
+            if (j != self && !spoken.Contains(j) && seats[j] == character) return j;
+        }
+        return -1;
+    }
 
     /// <summary>The sheet id of a card from its <c>Id.Entry</c>:
     /// <c>KLEEMOD-PROTO_KO_POP</c> -> <c>proto_ko_pop</c>.</summary>
@@ -132,6 +198,12 @@ public static class StoryRules
         return picked;
     }
 }
+
+/// <summary>One speech at a boss's entry: the table <see cref="Story"/> whose
+/// rows are spoken, the seat that owns it, and either a pair exchange with
+/// the partner's seat or (<see cref="Pair"/> null) the owner's solo line.</summary>
+public sealed record BossEntrySpeech(
+    CharacterStory Story, int OwnerSeat, PairExchange? Pair, int PartnerSeat);
 
 /// <summary>
 /// Once-a-combat latches. Keyed by the combat (a fresh combat is a fresh

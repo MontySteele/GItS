@@ -233,7 +233,7 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     # KLEE'S STORY (2026-10-12): Confinement's "After 3 combats" is a story
     # Curse's length; these strings print their own numbers.
     ("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs",
-     "StoryRules.ConfinementCombats", "3"):
+     "StoryRules.StoryCurseCombats", "3"):
         "the totem's own fire cap, not the story Curse's length",
     # A Letter from Jean's "Upgrade 2 random cards that place a Bomb" is the
     # event's own count (the ruled paper's text), not a Bomb or Singer number.
@@ -243,6 +243,24 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Story/KleeStory.cs",
      "KleeOverhaulLaw.BombGrowth", "2"):
         "the story event's upgrade count, not the Bomb's growth",
+    # VARKA'S STORY (2026-10-13, review/active/varka-story-2026-10-13.md):
+    # "Upgrade 2 random cards" and "Upgrade 3 random cards" are the story
+    # events' own counts (the ruled paper's text), not a Furina number.
+    ("klee-mod/KleeCode/Story/VarkaStory.cs",
+     "FurinaStageLaw.SingerRepayUpgraded", "2"):
+        "the story event's upgrade count, not the Singer's repay",
+    ("klee-mod/KleeCode/Story/VarkaStory.cs",
+     "FurinaStageLaw.EscoffierLineBonusUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/VarkaStory.cs",
+     "FurinaStageLaw.HighStakesEveryUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/VarkaStory.cs",
+     "FurinaStageLaw.NaviaLineDiscountUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/VarkaStory.cs",
+     "FurinaStageLaw.NeuvilletteHydroBonusUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
     # THE SPIRAL ABYSS MODE (2026-10-12): Resonance's "draw 1 card" is a run
     # modifier's number; these cards print their own draw, not Resonance's.
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",

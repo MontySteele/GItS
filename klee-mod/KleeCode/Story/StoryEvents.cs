@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Events;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
@@ -16,6 +17,7 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Runs;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Story;
 
@@ -91,13 +93,18 @@ public abstract class StoryEventModel : EventModel
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
         var entry = Id.Entry;
-        return Data.Options.Select(o => new EventOption(
-                this,
-                () => Choose(o),
-                new LocString(Table, OptionTitleKey(entry, o)),
-                new LocString(Table, OptionDescriptionKey(entry, o)),
-                InitialOptionKey(o.Key),
-                TipsFor(o.Effect)))
+        return Data.Options.Select(o =>
+            {
+                var option = new EventOption(
+                    this,
+                    () => Choose(o),
+                    new LocString(Table, OptionTitleKey(entry, o)),
+                    new LocString(Table, OptionDescriptionKey(entry, o)),
+                    InitialOptionKey(o.Key),
+                    TipsFor(o.Effect));
+                // The game's own lethal warning for an HP cost (Brain Leech's).
+                return o.Effect.HpLoss > 0 ? option.ThatDoesDamage(o.Effect.HpLoss) : option;
+            })
             .ToList();
     }
 
@@ -155,13 +162,55 @@ public abstract class StoryEventModel : EventModel
                 break;
             case StoryEffectKind.UpgradeRandomBombCards:
                 var story = Story;
-                var candidates = owner.Deck.Cards
-                    .Where(c => c.IsUpgradable && StoryRules.PlacesBomb(story, c.Id.Entry))
-                    .ToList();
-                var picks = StoryRules.PickRandom(candidates, effect.Amount, n => Rng.NextInt(n));
-                if (picks.Count > 0) CardCmd.Upgrade(picks, CardPreviewStyle.EventLayout);
+                UpgradeRandom(owner, effect.Amount, c => StoryRules.PlacesBomb(story, c.Id.Entry));
+                break;
+            case StoryEffectKind.UpgradeRandomCards:
+                UpgradeRandom(owner, effect.Amount, _ => true);
+                break;
+            case StoryEffectKind.LoseHpUpgradeRandomCards:
+                // Dense Vegetation's HP cost: unblockable, unpowered.
+                await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), owner.Creature,
+                    effect.HpLoss, ValueProp.Unblockable | ValueProp.Unpowered, null, null);
+                UpgradeRandom(owner, effect.Amount, _ => true);
+                break;
+            case StoryEffectKind.ChooseFromPoolToDeck:
+                await ChooseFromPool(owner, effect);
+                break;
+            case StoryEffectKind.Nothing:
                 break;
         }
+    }
+
+    /// <summary>"Upgrade N random cards": up to N distinct upgradable deck
+    /// cards that pass <paramref name="filter"/>, drawn on the event's Rng.</summary>
+    private void UpgradeRandom(Player owner, int count, Func<CardModel, bool> filter)
+    {
+        var candidates = owner.Deck.Cards.Where(c => c.IsUpgradable && filter(c)).ToList();
+        var picks = StoryRules.PickRandom(candidates, count, n => Rng.NextInt(n));
+        if (picks.Count > 0) CardCmd.Upgrade(picks, CardPreviewStyle.EventLayout);
+    }
+
+    /// <summary>
+    /// "Choose 1 of 3 random Knights to add to your deck": <c>Amount</c>
+    /// distinct cards from the table's <see cref="CharacterStory.ChoicePool"/>
+    /// (Knights' Roll Call's draw, <c>VarkaRules.DrawDistinct</c>'s shape, on
+    /// the event's Rng), picked on the game's add-to-deck grid (Brain Leech's
+    /// Share Knowledge). The screen's prompt is the option's own line.
+    /// </summary>
+    private async Task ChooseFromPool(Player owner, StoryEffect effect)
+    {
+        var pool = Story.ChoicePool?.Invoke() ?? Array.Empty<CardModel>();
+        var offered = StoryRules.PickRandom(pool, effect.Amount, n => Rng.NextInt(n))
+            .Select(c => new CardCreationResult(owner.RunState.CreateCard(c, owner)))
+            .ToList();
+        if (offered.Count == 0) return;
+        var option = Data.Options.First(o => o.Effect == effect);
+        var prefs = new CardSelectorPrefs(
+            new LocString(Table, OptionDescriptionKey(Id.Entry, option)), 1)
+        {
+            Cancelable = false,
+        };
+        await SelectCardsToAddToDeckFromGrid(offered, prefs);
     }
 
     public static bool IsRemovableCurse(CardModel card) =>
