@@ -36,15 +36,16 @@ MODEL = "Visuals/Facing/Model"
 FRAME_DIR = "res://klee/model/frames"
 NL = "\n"
 
-#: The router contract (CreatureAnimationRouter.cs) plus `setoff`.
-ANIMATION_ORDER = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff")
+#: The router contract (CreatureAnimationRouter.cs) plus `setoff` and `jumpy`.
+ANIMATION_ORDER = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff", "jumpy")
 #: The one-shots on the base game's clock (the paper's census: attack
 #: 0.93-1.5 s, cast 0.97-1.8, hurt 0.73-1.0, die 1.87-4.17). The death seam
 #: measures the clip, so ModdedPlayerDeathSeam follows this number on its own.
-ONE_SHOT_LENGTHS = {"attack": 1.0, "hurt": 0.8, "death": 2.0, "cast": 1.0, "power": 1.0, "setoff": 0.85}
+ONE_SHOT_LENGTHS = {"attack": 1.0, "hurt": 0.8, "death": 2.0, "cast": 1.0, "power": 1.0, "setoff": 0.85,
+                    "jumpy": 1.2}
 #: Sheet name (manifest key) -> its Sprite2D under Model.
 SHEET_NODE = {"idle": "Idle", "idle_low": "IdleLow", "attack": "Attack", "hurt": "Hurt",
-              "death": "Death", "cast": "Cast", "setoff": "SetOff"}
+              "death": "Death", "cast": "Cast", "setoff": "SetOff", "jumpy": "Jumpy"}
 PROP_KIND = {":position": "vec2", ":rotation": "float", ":modulate": "color",
              ":self_modulate": "color", ":frame": "int"}
 PROP_ORDER = [":position", ":rotation", ":modulate", ":self_modulate", ":frame"]
@@ -243,13 +244,14 @@ def animation_block(anim_id: str, name: str | None, length: float, loop: bool,
 # ---------------------------------------------------------------------------
 #: States as the router names them, with their editor positions.
 SM_STATES = {"idle": (327, 153), "attack": (327, 64), "hurt": (327, 278), "death": (470, 153),
-             "cast": (186, 64), "power": (470, 64), "idle_low": (327, 365), "setoff": (186, 278)}
+             "cast": (186, 64), "power": (470, 64), "idle_low": (327, 365), "setoff": (186, 278),
+             "jumpy": (470, 278)}
 #: One-shots the router travels to; each returns to idle at its end.
-SM_ONE_SHOTS = ("attack", "hurt", "cast", "power", "setoff")
+SM_ONE_SHOTS = ("attack", "hurt", "cast", "power", "setoff", "jumpy")
 #: Every live state can cut straight to any one-shot or to death, so a hit
 #: during a throw shows at once rather than queueing behind it.
-SM_SOURCES = ("idle", "idle_low", "attack", "hurt", "cast", "power", "setoff")
-SM_TARGETS = ("attack", "hurt", "death", "cast", "power", "setoff")
+SM_SOURCES = ("idle", "idle_low", "attack", "hurt", "cast", "power", "setoff", "jumpy")
+SM_TARGETS = ("attack", "hurt", "death", "cast", "power", "setoff", "jumpy")
 
 
 def xfade(src: str, dst: str) -> float:
@@ -261,7 +263,7 @@ def xfade(src: str, dst: str) -> float:
         return 0.0
     if dst == "hurt":
         return 0.03
-    if dst == "attack" and src in ("idle", "idle_low"):
+    if dst in ("attack", "jumpy") and src in ("idle", "idle_low"):
         return 0.1
     if src == "hurt" and dst == "idle":
         return 0.1
@@ -377,37 +379,43 @@ def _model_nodes(spec: dict, frames: dict) -> list[str]:
 
 
 SHEET_IDS = {name: f"{1 + i}_{name}" for i, name in enumerate(
-    ("idle", "idle_low", "attack", "hurt", "death", "cast", "setoff"))}
+    ("idle", "idle_low", "attack", "hurt", "death", "cast", "setoff", "jumpy"))}
 
 #: The thrown bomb (klee_frames.json "thrown", cut by klee_render/pack.py).
 PROJECTILE_ID = "8_bomb"
 #: KleeMod.Vfx.ThrownProjectile's scene contract: a hidden sprite at the hand
 #: as of the release frame, under %Facing so a flipped Klee throws from the
-#: mirrored hand, with the release time of the attack clip as metadata.
+#: mirrored hand, with the release time of its clip as metadata.
 PROJECTILE_NODE = "ThrownProjectile"
 PROJECTILE_RELEASE_META = "release"
+#: Every clip that throws: (its state, the node, the texture's id). Jumpy
+#: Dumpty's head-sized bomb is the jumpy clip's (2026-10-13).
+PROJECTILES = (("attack", PROJECTILE_NODE, PROJECTILE_ID),
+               ("jumpy", "JumpyProjectile", "10_bomb_big"))
 
 
-def thrown_of(frames: dict) -> dict | None:
-    return frames["sheets"]["attack"].get("thrown")
+def thrown_of(frames: dict, clip: str = "attack") -> dict | None:
+    rec = frames["sheets"].get(clip)
+    return rec.get("thrown") if rec else None
 
 
-def _projectile_node(frames: dict) -> list[str]:
-    """The thrown bomb, drawn by the game from the release frame to the
+def _projectile_node(frames: dict, clip: str = "attack") -> list[str]:
+    """A thrown bomb, drawn by the game from the release frame to the
     target (the base's NVfxProjectileHandler shape), never by the cells."""
-    thrown = thrown_of(frames)
+    thrown = thrown_of(frames, clip)
     if thrown is None:
         return []
+    node, ext_id = next((n, i) for c, n, i in PROJECTILES if c == clip)
     sc = frames["combat_scale"]
-    ox, oy = frames["sheets"]["attack"]["origin"]
+    ox, oy = frames["sheets"][clip]["origin"]
     ax, ay = thrown["at"]
     return [NL.join([
-        f'[node name="{PROJECTILE_NODE}" type="Sprite2D" parent="Visuals/Facing"]',
+        f'[node name="{node}" type="Sprite2D" parent="Visuals/Facing"]',
         "unique_name_in_owner = true",
         "visible = false",
         f"position = {vec2(((ax - ox) * sc, (ay - oy) * sc))}",
         f"scale = {vec2((sc, sc))}",
-        f'texture = ExtResource("{PROJECTILE_ID}")',
+        f'texture = ExtResource("{ext_id}")',
         f"metadata/{PROJECTILE_RELEASE_META} = {fnum(thrown['time'])}",
     ])]
 
@@ -457,16 +465,17 @@ def render_scene(spec: dict | None = None, frames: dict | None = None) -> str:
     subs.append(STATE_MACHINE)
 
     sheets = spec["model"]["sheets"]
-    thrown = thrown_of(frames)
+    throws = [(clip, ext_id, thrown_of(frames, clip)) for clip, _n, ext_id in PROJECTILES
+              if thrown_of(frames, clip) is not None]
     shadow = shadow_of(frames)
-    load_steps = (len(sheets) + (thrown is not None) + (shadow is not None)
+    load_steps = (len(sheets) + len(throws) + (shadow is not None)
                   + sum(s.count("[sub_resource") for s in subs) + 1)
     out = [f"[gd_scene load_steps={load_steps} format=3]", ""]
     for name in sheets:
         out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{frames["sheets"][name]["file"]}" '
                    f'id="{SHEET_IDS[name]}"]')
-    if thrown is not None:
-        out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{thrown["file"]}" id="{PROJECTILE_ID}"]')
+    for _clip, ext_id, thrown in throws:
+        out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{thrown["file"]}" id="{ext_id}"]')
     if shadow is not None:
         out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{shadow["file"]}" id="{SHADOW_ID}"]')
     out.append("")
@@ -478,7 +487,7 @@ def render_scene(spec: dict | None = None, frames: dict | None = None) -> str:
         '[node name="Facing" type="Node2D" parent="Visuals"]\nunique_name_in_owner = true',
         *([_shadow_sprite("Visuals/Facing", shadow, shadow["combat"], SHADOW_ID)] if shadow else []),
         *_model_nodes(spec, frames),
-        *_projectile_node(frames),
+        *(n for clip, _n, _i in PROJECTILES for n in _projectile_node(frames, clip)),
         TAIL_NODES,
     ]
     for n in nodes:

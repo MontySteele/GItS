@@ -2,6 +2,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HarmonyLib;
+using KleeMod.Cards;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -45,6 +47,19 @@ internal static class CardPlayMotion
     internal const string CastTrigger = "Cast";
     internal const string PowerUpTrigger = "PowerUp";
     internal const string SetOffTrigger = "SetOff";
+    internal const string JumpyTrigger = "Jumpy";
+
+    /// <summary>
+    /// A Jumpy Dumpty card plays Klee's Jumpy Dumpty clip, whatever its type:
+    /// she heaves the head-sized bomb with both hands ([USER], 2026-10-13:
+    /// "I think the increased size would be fitting for her Jumpty Dumpty
+    /// skill usage"; her normal attack's bomb is about 60% of her head). The
+    /// starter, its Mk.III and the Archaic Tooth's Mk.Omega. Ahead of Set Off
+    /// should a Jumpy Dumpty ever also set off. A scene without a `jumpy`
+    /// state lunges as for an attack.
+    /// </summary>
+    internal static bool IsJumpyPlay(CardModel card)
+        => card is ProtoKoJumpyDumpty or ProtoKoJumpyDumptyMkIii or JumpyDumptyMkOmega;
 
     /// <summary>
     /// A Set Off card of this mod plays Klee's Set Off clip, whatever its
@@ -86,8 +101,16 @@ internal static class CardPlayMotion
         RefreshLowHealth(card);
 
         var ours = DefinedByThisMod(card);
-        var trigger = IsSetOffPlay(card, ours) ? SetOffTrigger : TriggerFor(card.Type, ours);
+        var trigger = IsJumpyPlay(card) ? JumpyTrigger
+            : IsSetOffPlay(card, ours) ? SetOffTrigger
+            : TriggerFor(card.Type, ours);
         if (trigger == null) return;
+        if (trigger == JumpyTrigger)
+        {
+            // the big bomb flies at the card's own target (the starter and
+            // Mk.III aim at one enemy; Mk.Omega at all, so the side's centre)
+            ThrownProjectile.NoteAim(creature, cardPlay!.Target);
+        }
         var character = card.Owner!.Character;
         var delay = trigger == PowerUpTrigger
             ? character.PowerUpAnimDelay

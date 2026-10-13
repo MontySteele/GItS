@@ -5,7 +5,7 @@
 #
 # THE CONTRACT this file must keep is the router's (CreatureAnimationRouter.cs):
 # Visuals/Facing, Bounds, CenterPos, IntentPos, AnimationPlayer, AnimationTree,
-# the seven states plus `setoff`. Every state plays a frame sheet of the
+# the seven states plus `setoff` and `jumpy`. Every state plays a frame sheet of the
 # official model on the base game's clock (below).
 #
 # Until 2026-10-13 this file also specified a Skeleton2D rig of the old
@@ -25,7 +25,7 @@
 # holds the last one.
 # ---------------------------------------------------------------------------
 model:
-  sheets: [idle, idle_low, attack, hurt, death, cast, setoff]
+  sheets: [idle, idle_low, attack, hurt, death, cast, setoff, jumpy]
 
 # ---------------------------------------------------------------------------
 # Animations. A track drives one property of the model:
@@ -82,3 +82,11 @@ animations:
   setoff:
     length: 0.85
     sheet: setoff
+
+  # Jumpy Dumpty: she heaves the head-sized bomb two-handed (clips.JUMPY),
+  # flown by the game from JumpyProjectile at its release; the card's own
+  # attack/cast are absorbed like Set Off's (AbsorbedBy). [USER], 2026-10-13:
+  # "the increased size would be fitting for her Jumpty Dumpty skill usage."
+  jumpy:
+    length: 1.2
+    sheet: jumpy

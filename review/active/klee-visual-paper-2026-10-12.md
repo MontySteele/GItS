@@ -203,9 +203,19 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
 
 - **Wider and lower.** Feet 0.17 forward and 0.15 back (were 0.11 and 0.10), hips dropped 0.12 (were 0.055).
 - **Leaning toward the enemy.** The upper body leans 13 degrees toward screen right (was 4); the head takes 4 of it back. Her chest stays turned a little off-centre toward the viewer (yaw 14, twist -14), as the base cast's are.
-- **A bigger bomb, held out in front.** Jumpy Dumpty is now radius 0.115 (was 0.052), about the size of her head. Her near hand holds it out toward the enemy and the far hand steadies it from beyond.
+- **A bigger bomb, held out in front.** Jumpy Dumpty is now radius 0.115 (was 0.052), about the size of her head (superseded below: the held bomb is 0.065, and 0.115 is Jumpy Dumpty's clip). Her near hand holds it out toward the enemy and the far hand steadies it from beyond.
 - **Every combat clip plants her feet where stance A does,** so attack, hurt, cast, Set Off and the low-HP idle blend out of and back into idle without sliding. Cast and the low-HP idle keep the bomb in her hand in front of her; Set Off raises it overhead; the dropped bomb in death and beside her at the rest site sits on the ground at its new size. The shop and select cradle (stance B) are unchanged.
 - **Her scale is unchanged.** The scale check now measures an upright still (`clips.STAND`, the old stance A without the bomb): 165.9 px hat to boot and 177.4 px to the feather at 1080p (were 164.8 and 176.8). Stance A itself is 153.9 px hat to boot and 92.0 px wide (standing: 77.5).
+
+## Two bomb sizes, ruled 2026-10-13
+
+[USER], on the stance above: "Actually - the new attack is probably too big. ... It's noticeably smaller than her head. I think the increased size would be fitting for her Jumpty Dumpty skill usage." In his reference shot from Genshin, her normal-attack bomb is about 60% of her head's width.
+
+- **Her head is 0.217 model units wide at render** (`clips.HEAD_W`): the hair and face the head bone carries, across the screen in stance A, measured on the model in Blender. Her hat brim spans 0.294 and her face alone 0.166. At 1080p that is about 33 px.
+- **The normal bomb is radius 0.065** (`clips.BOMB_R`, 60% of the head across; was 0.115). It is the one she holds in idle, throws in the attack, holds in cast and the low-HP idle, drops in death, sets beside her at the rest site, and cradles at the shop and on character select (that one was 0.064, so it barely moves). Her near hand closes in a little around it (finger curl 34, was 22). The attack's thrown sprite, `klee_bomb.png`, is 46 by 51 texture px.
+- **Jumpy Dumpty's bomb keeps radius 0.115** (`clips.JUMPY_R`), and has its own clip, `jumpy` (1.2 s; the attack is 1.0). The small bomb goes away and the big one appears between both hands; she swings it back past her near shoulder, then heaves it two-handed from her chest toward the enemy; a fresh small bomb pops back into her hand as she settles into stance A. Its thrown sprite, `klee_bomb_big.png` (76 by 87), is cut from the release cell (0.70 s) and flown by the game from a new `%JumpyProjectile` node, slower, higher and with a bigger pop than the attack's.
+- **Which cards play it.** Jumpy Dumpty, Jumpy Dumpty Mk.III and Jumpy Dumpty Mk.Omega send a `Jumpy` trigger instead of their cast (or, for Mk.Omega, instead of the attack lunge), the way the Set Off cards send `SetOff`. While the clip plays the router absorbs the card's own attack and cast, so it plays once; a hit or a death still cuts in. The big bomb aims at the card's target, or the middle of the enemy side for Mk.Omega.
+- **Not changed:** the stance, H1 + H3 lite, her scale (165.9 px hat to boot standing).
 
 ## For [USER] (ruled above)
 

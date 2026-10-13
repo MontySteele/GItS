@@ -3,14 +3,14 @@
 Static (no art, no engine; tier0/tests/test_klee_rig.py runs these):
   * the scene is what the generator writes now (byte-identical rerun);
   * the contract: Visuals/Facing, Bounds, CenterPos, IntentPos,
-    AnimationPlayer, AnimationTree, the eight states plus RESET, the
+    AnimationPlayer, AnimationTree, the nine states plus RESET, the
     one-shot lengths, the state machine block, and every track's node exists;
   * the model: one Sprite2D per sheet under Visuals/Facing/Model, its grid
     and anchor from klee_frames.json, and each state's frame track stepping
     through exactly the frames the manifest lists.
 
 With `--godot`: MegaDot loads the scene headless (probe.gd), steps the
-AnimationTree through idle, attack, hurt, setoff and death and reads back
+AnimationTree through idle, attack, hurt, setoff, jumpy and death and reads back
 which sheet shows at which frame, and checks the merchant loop autoplays.
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ from . import rig
 
 CONTRACT_NODES = ("Visuals", "Visuals/Facing", "Visuals/Facing/Model", "Bounds",
                   "CenterPos", "IntentPos", "AnimationPlayer", "AnimationTree")
-STATES = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff")
+STATES = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "setoff", "jumpy")
 
 HEAD_RE = re.compile(r'^\[node name="([^"]+)" type="([^"]+)"(?: parent="([^"]+)")?\]')
 

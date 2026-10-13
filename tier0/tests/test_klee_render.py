@@ -85,16 +85,57 @@ def test_stance_a_is_wide_low_and_leans_toward_the_enemy():
     assert lean >= 10, "leans toward the enemy (+X)"
     twist = [op for op in idle["ops"] if op[:3] == ("rotw", "上半身", clips.Z)][0][3]
     assert twist < 0 and idle["yaw"] == clips.YAW, "chest still off-centre toward the viewer"
-    assert idle["held"] == 1.0 and clips.BOMB_R >= 0.10, "Jumpy Dumpty about her head's size"
+    assert idle["held"] == 1.0 and idle["big"] == 0.0
     near = next(op for op in idle["ops"] if op[:2] == ("hand", "R"))
     assert near[2] == clips.CH and near[3][0] > 0, "the bomb hand reaches toward the enemy"
+
+
+def test_the_normal_bomb_is_60_percent_of_her_head_and_jumpy_dumptys_is_head_sized():
+    # [USER], 2026-10-13: "Actually - the new attack is probably too big. ...
+    # It's noticeably smaller than her head. I think the increased size would
+    # be fitting for her Jumpty Dumpty skill usage." In the owner's Genshin
+    # reference her normal-attack bomb is about 60% of her head's width.
+    assert 0.20 <= clips.HEAD_W <= 0.24, "hair and face across the screen, measured on the model"
+    assert abs(2 * clips.BOMB_R / clips.HEAD_W - 0.6) < 0.01
+    assert clips.JUMPY_R == 0.115 and clips.JUMPY_R > 1.6 * clips.BOMB_R
+    render = (ROOT / "tools" / "klee_render" / "render.py").read_text(encoding="utf-8")
+    # the held, thrown, dropped and cradled bombs are all the normal one
+    assert render.count("make_jumpy_dumpty(C.BOMB_R,") == 3
+    assert render.count("make_jumpy_dumpty(C.JUMPY_R,") == 2
+    # and the shipped manifest's bomb sprites carry those sizes: the attack's
+    # about 60% of the head at render, Jumpy Dumpty's about the head's
+    ppu = build.COMBAT_PPU
+    sheets = rig.load_frames()["sheets"]
+    small = sheets["attack"]["thrown"]["size"][0] / ppu
+    large = sheets["jumpy"]["thrown"]["size"][0] / ppu
+    assert 2 * clips.BOMB_R * 0.9 <= small <= 2 * clips.BOMB_R * 1.3, small
+    assert 2 * clips.JUMPY_R * 0.9 <= large <= 2 * clips.JUMPY_R * 1.3, large
+
+
+def test_jumpy_dumpty_heaves_the_big_bomb_two_handed_and_ends_in_idle():
+    jd = clips.CLIPS["jumpy"]
+    assert 1.0 <= jd["length"] <= 1.4 and not jd["loop"], "a heavier toss than the 1.0 s attack"
+    first, last = jd["keys"][0][1], jd["keys"][-1][1]
+    assert first == clips.idle_pose(0.5) and last == clips.idle_pose(0.5)
+    poses = [k[1] for k in jd["keys"]]
+    held_big = [p for p in poses if p["big"] == 1.0]
+    assert held_big and all(p["held"] == 0.0 for p in held_big), "the small bomb is put away"
+    for p in held_big:          # both hands on it, either side
+        near = next(op for op in p["ops"] if op[:2] == ("hand", "R"))[3]
+        far = next(op for op in p["ops"] if op[:2] == ("hand", "L"))[3]
+        assert far[0] - near[0] > 2 * clips.JUMPY_R
+    flying = [p["big_thrown"] for p in poses if p["big_thrown"] is not None]
+    assert len(flying) >= 2 and flying[-1][0] > flying[0][0], "thrown toward the enemy"
+    assert all(p["thrown"] is None for p in poses), "the small bomb is not thrown"
+    assert "jumpy" in pack.COMBAT and pack.THROWN_FILES["jumpy"] == "klee_bomb_big.png"
+    assert "jumpy" in next(j for j in build.JOBS if j["ppu"] == build.COMBAT_PPU)["clips"].split(",")
 
 
 def test_every_combat_clip_that_leaves_idle_keeps_her_feet_planted():
     # Feet are IK targets; if a key moved them, the blend out of idle would slide them.
     feet = [("movew", "足ＩＫ.L"), ("movew", "足ＩＫ.R")]
     a = clips.idle_pose(0.5)
-    for name in ("idle", "idle_low", "attack", "hurt", "cast", "setoff"):
+    for name in ("idle", "idle_low", "attack", "hurt", "cast", "setoff", "jumpy"):
         clip = clips.CLIPS[name]
         for _t, pose, _e in clip["keys"]:
             for kind, bone in feet:
