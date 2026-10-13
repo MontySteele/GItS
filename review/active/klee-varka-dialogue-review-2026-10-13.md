@@ -56,3 +56,7 @@ The final full Python run passed: **8,142 passed, 129 skipped**. All **27 CI lin
 The C# story tests could not run because this machine has no configured `GameDir`. No game build or live visual check was performed. The first Python run's 16 Git-tooling failures were resolved by selecting the installed Git 2.53 instead of the worktree's default Git 2.13. The cleanup is a local draft on `dialogue-cleanup-1013`, not a deployed build.
 
 1. **Recommended:** review this text-only cleanup as the next dialogue draft. The source papers contain every revised story line; the diff includes the character barks and Architect text. No gameplay pick is needed.
+
+## Ruled
+
+[USER], 2026-10-13: "I actually like the new Klee line better than the old one. I like the tone of the new Varka one better, but you're right that it doesn't really tie the expedition to the spire or why they're climbing it. I actually think the act 3 one is fine as-is. Varka's going up, and he's telling the others to go down and he'll meet them when he's done." Taken as written, except the last sentence of Varka's introduction, which Claude rewrote to tie the expedition to the Spire: "The Abyss's trail runs up the Spire, so up he goes. Then he's getting his people home."

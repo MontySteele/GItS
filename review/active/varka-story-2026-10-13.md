@@ -22,7 +22,7 @@ plot beats).
 
 ## 1. The introduction (character select)
 
-> **The Grand Master of the Knights of Favonius.** He led the Knights north against the Abyss, leaving Mondstadt in Jean's care. Now there's a Spire to climb, and he's getting his people home.
+> **The Grand Master of the Knights of Favonius.** He led the Knights north against the Abyss, leaving Mondstadt in Jean's care. The Abyss's trail runs up the Spire, so up he goes. Then he's getting his people home.
 
 ## 2. The Ancients greet him
 
