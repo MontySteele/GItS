@@ -685,7 +685,6 @@ MC_LIONS_FANG_DRAW = 1
 # POWER carries lands here, because the C# mirrors are compared BY VALUE
 # (`tools/lint_constant_parity.py`). Every one is the workshop's sec.3 printed
 # text, re-priced in its sec.8 -- nothing is derived and nothing is picked.
-MI_WAR_BANNER_DEXTERITY = 2     # Gorou: Dexterity while the banner stands
 MI_JUUGA_DMG = 7                # Gorou: Geo damage per turn, 3 turns
 MI_JUUGA_GUARD_BLOCK = 6        # Gorou: Juuga's Plan line, Block per turn, 3 turns
 MI_DARUMA_DMG = 9               # Sayu: the Daruma's hit above 70% HP

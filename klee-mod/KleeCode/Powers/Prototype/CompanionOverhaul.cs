@@ -79,10 +79,6 @@ public static class CompanionOverhaulLaw
     // number a POWER carries lands here. Mirrored by value from tier0's `MI_*`
     // block by <c>tools/lint_constant_parity.py</c>.
 
-    /// <summary>Gorou, General's War Banner: the Dexterity it lends and takes
-    /// back. Mirrors <c>C.MI_WAR_BANNER_DEXTERITY</c>.</summary>
-    public const int WarBannerDexterity = 2;
-
     /// <summary>Gorou, Juuga: Geo damage per end of turn, 3 turns.
     /// Mirrors <c>C.MI_JUUGA_DMG</c>.</summary>
     public const int JuugaDamage = 7;

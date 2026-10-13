@@ -72,7 +72,7 @@ def test_kelp_wall_now_line_blocks_and_draws():
     assert row.effects[1] == {"op": "draw", "amount": 1}
     up = upgrades.apply_upgrade(loader.get_card("proto_kk_kelp_wall"))
     assert up.effects[0]["amount"] == 7
-    assert up.plan[0]["amount"] == 12
+    assert up.plan[0]["amount"] == 15        # the Kokomi level pass
     st = kokomi_state()
     _attacking(st)
     st.player.draw_pile = [card("proto_kk_evening_watch")]

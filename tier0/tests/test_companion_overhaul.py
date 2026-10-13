@@ -467,7 +467,7 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         "JuugaGuardPower", "MujiMujiDarumaPower",
                         "SanctifyingRingPower", "SesshouSakuraPower",
                         "SoumetsuPower", "KyoukaPower", "TamotoPower",
-                        "CrimsonOoyoroiPower", "WarBannerPower",
+                        "CrimsonOoyoroiPower",
                         "AurousBlazePower",
                         # (Klee's coven Yuegui, last before the latch, was
                         # cut by the Klee-only companions, 2026-10-03.)

@@ -702,7 +702,7 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's two Plan
     # lines and a written Companion's clause, each with its own branch in
     # `_op_price` on this set's terms.
-    "add_stings", "strength_this_turn", "juuga_guard", "play_companion"))
+    "add_stings", "gain_strength", "juuga_guard", "play_companion"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -947,11 +947,10 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # neutral cards, `STATIC_AUTOPLAY_VALUE` each, the price this file
         # puts on a card resolved without being drafted.
         return _neutral_amount(fx, 0) * STATIC_AUTOPLAY_VALUE
-    if op == "strength_this_turn":
-        # Gorou's War Banner: Strength for one turn is a damage rider on the
-        # turn's Attacks, how many a deck fact -- ZERO, the refusal
-        # `next_plan_double_damage` makes.
-        return 0.0
+    if op == "gain_strength":
+        # Gorou's War Banner (the Kokomi level pass, 2026-10-12): permanent
+        # Strength, the now-line Strength price.
+        return _neutral_amount(fx, 0) * STATIC_STRENGTH_VALUE
     if op == "juuga_guard":
         # Gorou's Juuga: N turns of the rule's Block, at face.
         return _neutral_amount(fx, 0) * C.MI_JUUGA_GUARD_BLOCK
@@ -2205,9 +2204,8 @@ STATIC_OP_PRICING: dict[str, str] = {
     # --- the Kokomi re-founding (2026-10-12) ---
     "add_stings": "STATIC_AUTOPLAY_VALUE per jellyfish card handed over -- "
                   "one neutral card resolved without being drafted, each",
-    "strength_this_turn": "ZERO: a one-turn damage rider on the turn's "
-                          "Attacks, how many a deck fact an offer screen "
-                          "cannot read",
+    "gain_strength": "STATIC_STRENGTH_VALUE per Strength, the now-line "
+                     "apply_power strength price (permanent Strength)",
     "juuga_guard": "its turns at C.MI_JUUGA_GUARD_BLOCK each, at face",
     "play_companion": "STATIC_AUTOPLAY_VALUE: a written Companion is one "
                       "neutral card resolved free next turn, "

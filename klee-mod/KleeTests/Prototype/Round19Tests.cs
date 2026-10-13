@@ -464,9 +464,9 @@ public class Round19Tests
         // WHY THE DEFECT WAS FLANK-SHAPED, pinned so a new row that bakes a
         // name into a line inherits the reason rather than the bug: the two
         // row types that carry names also carry the handle the page renames
-        // them by, and `AimedLabel` carries neither.
-        Assert.Contains("KokomiPlan.EnemyName",
-                        Il.Calls(Il.Method("KokomiPlan", "AimedLabel")));
+        // them by. (Flank's `AimedLabel`, the one that carried neither, left
+        // with the Kokomi level pass, 2026-10-12.)
+        Assert.Null(typeof(KokomiPlan).GetMethod("AimedLabel", All));
 
         var moved = typeof(KokomiPlan).GetNestedType("MovedOn", All)!;
         var rider = typeof(KokomiPlan).GetNestedType("Rider", All)!;

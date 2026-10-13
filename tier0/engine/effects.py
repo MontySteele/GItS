@@ -366,6 +366,11 @@ def _runtime_count(state: CombatState, token: str,
         # longer holds. The C# twin is `KokomiPlan.PlansHeld`, the length of
         # the same queue read at the same moment.
         return len(state.kk_plan_queue)
+    if token == "plans_held_plus_one":
+        # CURRENT-KIT USE ONLY (the Kokomi level pass, 2026-10-12) -- Shoal of
+        # Spears, "plus once more for each Plan waiting": one hit, and one more
+        # per Plan the jellyfish holds. C# twin: `KokomiPlan.PlansHeld + 1`.
+        return len(state.kk_plan_queue) + 1
     if token == "swirls_this_turn":
         # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
         return state.mi_swirls_this_turn
@@ -1923,48 +1928,6 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("energy", amount=amount)
 
 
-#: `EB-415`. The sidecar key the banner banks its grant under -- the same name
-#: as the power, exactly as `power_payloads` and `summon_damage` are keyed.
-WAR_BANNER = "mi_war_banner"
-
-
-def war_banner_grant(state: CombatState) -> int:
-    """How much Dexterity the standing banner(s) handed out.
-
-    The arm's constant is the fallback and not the rule: a banner raised by
-    anything but its own card -- a test seat, the understudy's power door --
-    never wrote the sidecar, and `C.MI_WAR_BANNER_DEXTERITY` is what that
-    banner would have granted.
-    """
-    banked = state.player.timed_power_amounts.get(WAR_BANNER)
-    if not banked:
-        return C.MI_WAR_BANNER_DEXTERITY
-    return banked[0][0] or C.MI_WAR_BANNER_DEXTERITY
-
-
-def _bank_war_banner_grant(state: CombatState, card: Card) -> None:
-    """Add the Dexterity THIS play granted to the standing banner's ledger.
-
-    The number is read off the card's own effects rather than off a constant,
-    which is the whole of `EB-415`: the row applies `dexterity` and then this
-    clock, the upgrade moves the FIRST of those to 3, and the take-back was
-    reading the second one's constant. A row that applies the clock without a
-    Dexterity grant beside it banks nothing and keeps the fallback.
-    """
-    granted = sum(int(eff.get("amount", 0))
-                  for eff in card.effects
-                  if eff.get("op") == "apply_power"
-                  and eff.get("power") == "dexterity"
-                  and eff.get("target", "self") == "self"
-                  and isinstance(eff.get("amount"), int))
-    if granted <= 0:
-        return
-    instances = state.player.timed_power_amounts.setdefault(
-        WAR_BANNER, [[0, 0]])
-    instances[0][0] += granted
-    instances[0][1] = state.player.powers.get(WAR_BANNER, 0)
-
-
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     if fx.get("target") == coop.ALLY:
         # THE CO-OP SET (Pass the Match, Guest of Honor): a power placed ON
@@ -2009,17 +1972,6 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         # High Stakes (the Spend round, 2026-10-10): its amount is a divisor,
         # so each copy is recorded on its own (`furina_stage`).
         furina_stage.note_power_applied(state, fx["power"], amount)
-        # `EB-415`. THE BANNER BANKS WHAT ITS CARD JUST GRANTED. `powers` is a
-        # name -> int map holding TURNS REMAINING for this clock, so the
-        # Dexterity it will owe back has nowhere else to live; the sidecar
-        # `timed_power_amounts` is the engine's one answer to "this power needs
-        # a field beside its stack count" and this is its second user. Read off
-        # the CARD's own effects, so the upgraded face (3 Dexterity) banks 3 --
-        # which is the whole defect: the take-back was the arm's constant, 2,
-        # and every upgraded play leaked the difference. The mod's twin banks
-        # the same number at `WarBannerPower.AfterPowerAmountChanged`.
-        if fx["power"] == "mi_war_banner":
-            _bank_war_banner_grant(state, card)
     else:
         # `times` re-picks the target EVERY pass. BouncingFlask throws three
         # separate flasks at three separately-rolled random enemies, so
@@ -3428,6 +3380,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # validates every count token at LOAD off this set, so a token only the
     # resolver knows is a card that raises the first time it is played.
     "plans_held",
+    # CURRENT-KIT USE ONLY (the Kokomi level pass, 2026-10-12) -- Shoal of
+    # Spears' hit count, one more than the Plans held. Same registry reason.
+    "plans_held_plus_one",
     # CURRENT-KIT USE ONLY (`EB-492`) -- Well Laid's "for each Plan the
     # Bake-Kurage carried out this morning". Registered here as well as
     # resolved in `_runtime_count` for this registry's own reason: the loader
@@ -5179,7 +5134,7 @@ OPS = {
     # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's
     # two Plan lines and a written Companion's clause.
     "add_stings": _op_kokomi_plan_only,
-    "strength_this_turn": _op_kokomi_plan_only,
+    "gain_strength": _op_kokomi_plan_only,
     "juuga_guard": _op_kokomi_plan_only,
     "play_companion": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
@@ -6023,7 +5978,6 @@ def inazuma_overhaul_turn_end(state: CombatState) -> None:
         mi_kyouka             Ayato   -- the clock, and the 12 it ends on
         mi_tamoto             Chiori  -- Geo volley, ignoring Block
         mi_crimson_ooyoroi    Thoma   -- the clock only; it fires on Attacks
-        mi_war_banner         Gorou   -- the clock, and the Dexterity it takes
         mi_naptime            Sayu    -- the promise, kept or broken
         mi_crowfeather        Sara    -- "this turn", popped whole
 
@@ -6148,31 +6102,12 @@ def inazuma_overhaul_turn_end(state: CombatState) -> None:
                                  ignore_block=True)
         _mi_tick(p, "mi_tamoto")
 
-    # ---- the three clocks that fire nothing here ---------------------------
+    # ---- the clocks that fire nothing here ---------------------------------
     # Thoma, Crimson Ooyoroi -- what it does happens on every Attack the player
     # plays (`companion_overhaul_card_played`); this is only the clock.
     _mi_tick(p, "mi_crimson_ooyoroi")
-    # Gorou, General's War Banner -- the clock, and at zero it TAKES BACK the
-    # Dexterity it granted. Granting real Dexterity rather than a private
-    # modifier is what makes "2 Dexterity" mean what every other Dexterity in
-    # the engine means; the stack it hands back is ITS OWN, so a banner that
-    # expires beside somebody else's Dexterity leaves that alone.
-    #
-    # `EB-415`: "its own" is the amount it BANKED at play (`war_banner_grant`),
-    # not the arm's constant -- the upgraded face grants 3 and the constant is
-    # 2, so reading the constant here leaked 1 permanent Dexterity a play. The
-    # ledger goes with the power, because a sidecar a power's expiry does not
-    # clear is an amount that pays again on the next banner.
-    if _mi_tick(p, "mi_war_banner"):
-        owed = war_banner_grant(state)
-        p.timed_power_amounts.pop(WAR_BANNER, None)
-        left = p.powers.get("dexterity", 0) - owed
-        if left > 0:
-            p.powers["dexterity"] = left
-        else:
-            p.powers.pop("dexterity", None)
     # Yoimiya, Aurous Blaze -- "for 2 turns", hosted on the ENEMY: the clock,
-    # where the mod's walk ticks it (after the banner). The sim had no clock
+    # where the mod's walk ticks it (after Ooyoroi). The sim had no clock
     # for it before the AoE trim (2026-10-03).
     for enemy in state.enemies:
         _mi_tick(enemy, "mi_aurous_blaze")

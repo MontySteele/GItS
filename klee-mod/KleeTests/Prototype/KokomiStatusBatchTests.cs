@@ -145,20 +145,16 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Kelp Wall ---------------------------------------------------------------------
 
     [Fact]
-    public void Kelp_wall_plans_nine_plus_three_per_status_twelve_upgraded()
+    public void Kelp_wall_plans_a_flat_twelve_fifteen_upgraded()
     {
+        // The Kokomi level pass (2026-10-12): the status count went.
         var card = new ProtoKkKelpWall();
         Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
-        var clauses = card.PlanClauses;
-        Assert.Equal(2, clauses.Count);
-        // The Kokomi card pass (2026-10-11): Plan 9 [12].
-        Assert.Equal((KokomiPlan.Kind.Block, 9), (clauses[0].Kind, clauses[0].Amount));
-        Assert.Equal((KokomiPlan.Kind.BlockPerStatusInHand, 3),
-                     (clauses[1].Kind, clauses[1].Amount));
-        var up = Upgraded<ProtoKkKelpWall>().PlanClauses;
-        Assert.Equal((12, 3), (up[0].Amount, up[1].Amount));
-        Assert.Contains("plus 3 for each Status or Curse in your [gold]Hand[/gold]",
-                        Face(card));
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal((KokomiPlan.Kind.Block, 12), (clause.Kind, clause.Amount));
+        Assert.Equal(15, Assert.Single(Upgraded<ProtoKkKelpWall>().PlanClauses).Amount);
+        Assert.DoesNotContain("status or curse", Face(card));
+        // The clause's own machinery stays registered for a later row.
         Assert.Contains(Seq("KokomiStatusBatch", "BlockPerStatus"),
                         c => c.Contains("CreatureCmd.GainBlock"));
     }
@@ -241,11 +237,12 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Flotsam Surge ------------------------------------------------------------------------------
 
     [Fact]
-    public void Flotsam_surge_hits_all_for_thirteen_and_discards_two_dazed()
+    public void Flotsam_surge_hits_all_for_ten_and_discards_two_dazed()
     {
+        // The Kokomi level pass (2026-10-12): 13 [17] -> 10 [13].
         var card = new ProtoKkFlotsamSurge();
-        Assert.Equal(13m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(17m, Upgraded<ProtoKkFlotsamSurge>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(10m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(13m, Upgraded<ProtoKkFlotsamSurge>().DynamicVars.Damage.BaseValue);
         var play = Seq("ProtoKkFlotsamSurge", "OnPlay");
         Assert.Contains(play, c => c.Contains("CreateCard<Dazed>")
                                  || c.Contains("Dazed"));
@@ -259,8 +256,8 @@ public class KokomiStatusBatchTests : IDisposable
     [Fact]
     public void Riptide_ruin_hits_all_twice_for_eleven_and_adds_no_dazed()
     {
-        // The card text pass (2026-10-12): the Dazed went and each hit
-        // gained 2, 9 [12] -> 11 [14].
+        // The card text pass / Kokomi level pass (2026-10-12): 11 [14], the
+        // Dazed went.
         var card = new ProtoKkRiptideRuin();
         Assert.Equal(11m, card.DynamicVars.Damage.BaseValue);
         Assert.Equal(14m, Upgraded<ProtoKkRiptideRuin>().DynamicVars.Damage.BaseValue);
@@ -269,8 +266,8 @@ public class KokomiStatusBatchTests : IDisposable
         Assert.Contains(play, c => c.Contains("WithHitCount"));
         Assert.DoesNotContain(play, c => c.Contains("Dazed"));
         Assert.DoesNotContain(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
-        Assert.EndsWith("[gold]Hydro[/gold] damage to ALL enemies twice.",
-                        Face(card));
+        Assert.Equal("Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice.",
+                     Face(card));
         Assert.Equal(Element.Hydro,
                      Assert.IsAssignableFrom<IElementalCard>(card).Element);
     }

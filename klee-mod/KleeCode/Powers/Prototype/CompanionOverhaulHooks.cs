@@ -92,7 +92,7 @@ public sealed class CompanionOverhaulLedger
         // guard is a null check because the alternative is a table-wide wipe.
         // This method is a ROLL-ON-READ lookup called from speculative sites
         // -- a face's multiplier lambda (`ProtoMiHeizouHeartstopper`), a
-        // smart-description getter (`WarBannerPower.MissedFor`, "on every
+        // smart-description getter (a power's `MissedFor`, "on every
         // tooltip read") -- and any of them can be handed a card whose owner
         // is off the board: a compendium copy, a reward-screen copy, a deck
         // view. Answering `null` there used to set `_combat` to null and drop
