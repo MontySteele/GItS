@@ -23,8 +23,10 @@ so his right side, .R, is nearest the camera), plus BLADES:
 A CLIP is {length, fps, loop, keys: [(t, pose, ease)], events, trails, bursts}:
 `events` names marked times (the impacts; `main` is the one the hit lands
 on), `trails` the windows in which a blade leaves a slash trail and `bursts`
-the impact flashes (fx.py draws both, colourless). Every combat clip plants his feet
-where stance A does, so blends in and out of idle never slide them.
+the impact flashes (fx.py draws both, colourless). Every combat clip starts and
+ends with his feet where stance A plants them, so blends in and out of idle never
+slide them; a spin turns him on the spot (`turned`), and his two blades always
+move as one pair (`pair`).
 
 THE SCALE: the model stands 2.05 units (import 0.08); every offset below is in
 those units, about 1.86x Klee's. His ruled height is 78 in (chars.py).
@@ -46,40 +48,57 @@ TAILS = ["d.L", "d.R", "d2.L", "d2.R"]
 CAPE = "pf_0_0"
 
 # ------------------------------------------------------------------ stance A
-# Knees a little bent, feet a little wider, weight forward. The near hand's
-# claymore rests on his shoulder (blade up and back, angled behind his head);
-# the leading blade stays low and forward toward the enemy. The shoulder rest
-# keeps his footprint near his body (design review, 2026-10-13: the trailing
-# rear blade made the old stance twice as wide as he is tall).
-A_DROP = 0.10            # hips lowered: knees slightly bent
-A_LEAN = 10.0            # upper body toward the enemy (weight forward)
+# A tight, ready battle stance ([USER], 2026-10-13: the first takes were "a
+# little lame ... floppy"): knees bent, weight forward, both claymores held in
+# a low guard, angled down and back at his sides, tips off the ground. The two
+# blades mirror each other about his body (the far one behind his legs, the
+# near one before them), so on screen they read as a parallel pair. Only the
+# chest breathes; the blades stay fixed in his hands.
+A_DROP = 0.13            # hips lowered: knees bent
+A_LEAN = 12.0            # upper body toward the enemy (weight forward)
 A_FRONT = 0.34           # far foot toward the enemy
 A_BACK = 0.31            # near foot back
 A_FRONT_Y, A_BACK_Y = 0.03, -0.04
 A_TWIST = -14.0
 STERN = {"真面目": 0.55, "にやり": 0.15}
-#: the leading blade (far hand): low before him, angled forward and down and
-#: a little toward the viewer, its tip about knee height toward the enemy
-LEAD_AT = (0.30, -0.04, -0.38)
-LEAD_DIR = (0.68, -0.58, -0.44)
-LEAD_ROLL = 30.0         # the flat turned partly off the viewer: edge-on, a blade reads as a hairline
-LEAD_POLE = (0.4, 0.5, -1.0)
-#: the near hand's blade on his shoulder: the hand before his chest, the
-#: blade up and back over the shoulder, behind his head
-REAR_AT = SHOULDER_AT = (-0.02, -0.24, -0.17)
-REAR_DIR = SHOULDER_DIR = (-0.40, 0.55, 0.73)
-REAR_POLE = SHOULDER_POLE = (0.1, -0.5, -1.0)
-REAR_ROLL = -25.0
+#: the low guard, both hands at his hips, both blades down and back
+GUARD_L_AT = (-0.10, 0.10, -0.42)
+GUARD_R_AT = (-0.04, -0.22, -0.46)
+GUARD_DIR = (-0.62, 0.52, -0.40)       # the far blade's; the near blade mirrors it in Y
+GUARD_POLE = (-0.4, 0.7, -0.5)
+LEAD_ROLL, REAR_ROLL = 20.0, -20.0
+
+
+def unit(v):
+    n = math.sqrt(sum(c * c for c in v))
+    return tuple(c / n for c in v)
+
+
+def mirror(v):
+    """The near hand's twin of a far-hand vector: the same, reflected in Y."""
+    return (v[0], -v[1], v[2])
+
+
+def pair(at_l, d_l, pole=GUARD_POLE, at_r=None, roll=LEAD_ROLL, d_r=None, pole_r=None):
+    """Both blades IN SYNC: by default the near (R) blade mirrors the far (L)
+    one about his body (direction and pole reflected in Y), so on screen they
+    run parallel and move as one; `d_r` gives a crossed pair instead (an X)."""
+    at_r = at_r if at_r is not None else mirror(at_l)
+    d_r = d_r if d_r is not None else mirror(d_l)
+    pole_r = pole_r if pole_r is not None else mirror(pole)
+    return {"L": blade(at_l, unit(d_l), unit(pole), roll=roll),
+            "R": blade(at_r, unit(d_r), unit(pole_r), roll=-roll)}
 
 
 def stance(drop=A_DROP, lean=A_LEAN, twist=A_TWIST, head_turn=34.0, head_nod=4.0, head_tilt=-2.0,
-           front=A_FRONT, back=A_BACK, sway=0.0):
+           front=A_FRONT, back=A_BACK, sway=0.0, lift=0.0, tuck=0.0):
     """Feet planted wide (far foot toward the enemy), chest toward the viewer,
-    head to the right."""
+    head to the right. `lift` raises both feet (a hop), `tuck` draws them in
+    under him."""
     return [
         ("move", "センター", (sway, 0, -drop)),
-        ("movew", "足ＩＫ.L", (front, A_FRONT_Y, 0)),
-        ("movew", "足ＩＫ.R", (-back, A_BACK_Y, 0)),
+        ("movew", "足ＩＫ.L", (front * (1 - 0.6 * tuck), A_FRONT_Y, lift + 0.20 * tuck)),
+        ("movew", "足ＩＫ.R", (-back * (1 - 0.6 * tuck), A_BACK_Y, lift + 0.26 * tuck)),
         ("rotw", "上半身", Y, lean),
         ("rotw", "上半身", Z, twist),
         ("rotw", "首", Z, head_turn * 0.4),
@@ -120,48 +139,78 @@ def add(v, dv):
     return tuple(a + b for a, b in zip(v, dv))
 
 
+def rot_z(v, deg):
+    c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+    return (c * v[0] - s * v[1], s * v[0] + c * v[1], v[2])
+
+
+def turned(p, deg):
+    """Pose p turned rigidly `deg` degrees about the vertical through his
+    feet (a spin): the root's yaw turns, and every WORLD vector of the pose
+    (world-axis rotations, foot moves, hand offsets, every blade's grip
+    offset, direction and elbow pole) turns with it. Bone-local ops
+    ("rot", "move") ride along with the root. A whole turn changes the yaw
+    only: the same picture."""
+    q = dict(p)
+    q["yaw"] = p["yaw"] + deg
+    if deg % 360 == 0:
+        return q
+    ops = []
+    for op in p["ops"]:
+        k = op[0]
+        if k in ("rotw", "aimw", "movew"):
+            op = (k, op[1], rot_z(op[2], deg)) + tuple(op[3:])
+        elif k == "hand":
+            op = (k, op[1], op[2], rot_z(op[3], deg), rot_z(op[4], deg))
+        ops.append(op)
+    q["ops"] = ops
+    q["blades"] = {s: {**b, "at": rot_z(b["at"], deg), "dir": rot_z(b["dir"], deg), "pole": rot_z(b["pole"], deg)}
+                   for s, b in p["blades"].items()}
+    q["root"] = rot_z(p["root"], deg)
+    return q
+
+
 def idle_pose(breath=0.0, swing=0.0, blink=0.0):
-    """breath 0..1: the in-breath raises the chest and lifts both blades a hair."""
+    """breath 0..1: the in-breath raises the chest a hair; the blades ride
+    with the hands, fixed in the grip."""
     b = breath
     m = dict(STERN)
     if blink:
         m["まばたき"] = blink
-    lift = (0, 0, 0.012 * b)
+    lift = (0, 0, 0.008 * b)
     return pose(
-        stance(drop=A_DROP + 0.012 * (1 - b), lean=A_LEAN + 2.0 * (1 - b), head_nod=4.0 + 2.0 * (1 - b))
+        stance(drop=A_DROP + 0.010 * (1 - b), lean=A_LEAN + 1.5 * (1 - b), head_nod=4.0 + 1.5 * (1 - b))
         + cloth(swing),
         m,
-        blades={"L": blade(add(LEAD_AT, lift), LEAD_DIR, LEAD_POLE, roll=LEAD_ROLL),
-                "R": blade(add(REAR_AT, lift), REAR_DIR, REAR_POLE, roll=REAR_ROLL)})
+        blades=pair(add(GUARD_L_AT, lift), GUARD_DIR, at_r=add(GUARD_R_AT, lift)))
 
 
 IDLE = {
     "length": 2.8, "fps": 12, "loop": True,
     "keys": [
-        (0.0, idle_pose(0.0, swing=-1.5), "io"),
-        (1.4, idle_pose(1.0, swing=1.5), "io"),
-        (1.75, idle_pose(0.8, swing=1.2), "io"),
-        (1.82, idle_pose(0.77, swing=1.1, blink=1.0), "io"),
-        (1.9, idle_pose(0.74, swing=1.0), "io"),
-        (2.8, idle_pose(0.0, swing=-1.5), "io"),
+        (0.0, idle_pose(0.0, swing=-1.0), "io"),
+        (1.4, idle_pose(1.0, swing=1.0), "io"),
+        (1.75, idle_pose(0.8, swing=0.8), "io"),
+        (1.82, idle_pose(0.77, swing=0.7, blink=1.0), "io"),
+        (1.9, idle_pose(0.74, swing=0.6), "io"),
+        (2.8, idle_pose(0.0, swing=-1.0), "io"),
     ],
 }
 
 # ------------------------------------------------------------------ low HP
-# Shoulders down, head low; the shoulder blade has slid down, and both tips
-# drag on the ground before him.
+# The same guard, worn down: shoulders and head low, both tips lowered
+# together toward the ground before his feet (still clear of it).
 
 
 def low_pose(breath=0.0, swing=0.0):
     b = breath
     return pose(
-        stance(drop=A_DROP + 0.03 + 0.01 * (1 - b), lean=A_LEAN + 9 + 3 * (1 - b), head_turn=28,
-               head_nod=16 + 3 * (1 - b))
+        stance(drop=A_DROP + 0.03 + 0.008 * (1 - b), lean=A_LEAN + 8 + 2 * (1 - b), head_turn=28,
+               head_nod=16 + 2 * (1 - b))
         + cloth(swing),
         {"困る": 0.6, "真面目": 0.3, "あ": 0.2},
-        blades={"L": blade((0.28, -0.04, -0.48 - 0.01 * (1 - b)), (0.88, -0.06, -0.47), (0.4, 0.4, -1.0), roll=LEAD_ROLL),
-                "R": blade((0.02, -0.24, -0.50 - 0.01 * (1 - b)), (0.58, -0.40, -0.71), (-0.2, -0.4, -1.0),
-                           roll=REAR_ROLL)})
+        blades=pair(add(GUARD_L_AT, (0.04, 0, -0.06 - 0.006 * (1 - b))), (-0.50, 0.58, -0.46),
+                    at_r=add(GUARD_R_AT, (0.04, 0, -0.06 - 0.006 * (1 - b)))))
 
 
 IDLE_LOW = {
@@ -174,61 +223,78 @@ IDLE_LOW = {
 }
 
 # ------------------------------------------------------------------ attack
-# An X cut at the enemy (design review, 2026-10-13). Strike 1: the leading
-# blade is hauled up and back over his head and cleaves diagonally down to
-# low front-right (impact 1, frame 6). Strike 2, the main one: the near blade
-# comes off his shoulder, from behind over the top and DOWN in front of him,
-# crossing the first cut (impact 2, frame 11) and ending low in front. At both
-# impacts the striking blade points right, toward the enemy, between chest
-# and knee height. Then he puts the near blade back on his shoulder.
+# One compact spin, then a double cleave ([USER], 2026-10-13: "Varka's a highly
+# acrobatic character who tends to do spins and attack with both claymores in
+# sync at the same time"). Both blades move together throughout, rigid in his
+# grip, and every move is a short, hard snap between held key poses:
+#   wind-up    a crouch, both blades drawn back at his hips (frame 2)
+#   the spin   a full turn on the spot with a small hop, both blades held out
+#              behind him at waist height, so they sweep a flat ring; the
+#              first impact is where they pass the enemy's side (frame 6)
+#   the cleave both blades come up over his head together and down in front
+#              of him in a parallel V at the enemy: the main impact (frame 11)
+#   back to the low guard.
 
 
-def atk(lead, rear, lean=A_LEAN, twist=A_TWIST, drop=A_DROP, head_turn=34.0, swing=0.0, morphs=None):
-    return pose(stance(drop=drop, lean=lean, twist=twist, head_turn=head_turn) + cloth(swing),
-                morphs or {"怒り": 0.5, "真面目": 0.4},
-                blades={"L": lead, "R": rear})
+def atk(blades, lean=A_LEAN, twist=A_TWIST, drop=A_DROP, head_turn=34.0, swing=0.0, lift=0.0, tuck=0.0,
+        morphs=None, turn=0.0, hop=0.0):
+    p = pose(stance(drop=drop, lean=lean, twist=twist, head_turn=head_turn, lift=lift, tuck=tuck) + cloth(swing),
+             morphs or {"怒り": 0.5, "真面目": 0.4}, blades=blades, root=(0, 0, hop))
+    return turned(p, turn)
 
 
-SHOULDER = blade(SHOULDER_AT, SHOULDER_DIR, SHOULDER_POLE, roll=REAR_ROLL)
-#: strike 1, the lead blade: wound up high and back, over the top, cleaved down
-LEAD_UP = blade((0.02, 0.02, 0.30), (-0.45, 0.12, 0.88), (0.6, 0.3, -0.4), roll=LEAD_ROLL)
-LEAD_OVER = blade((0.22, -0.02, 0.24), (0.42, -0.06, 0.90), (0.6, 0.3, -0.6), roll=LEAD_ROLL)
-LEAD_DOWN = blade((0.44, -0.06, -0.30), (0.90, -0.12, -0.42), (0.3, 0.5, -1.0), roll=LEAD_ROLL)
-#: strike 2, the near blade: off the shoulder to high behind, over the top,
-#: down in front through the enemy, crossing the first cut steeper
-REAR_BACK = blade((-0.04, -0.20, 0.30), (-0.62, 0.10, 0.78), (-0.2, -0.3, -1.0), roll=REAR_ROLL)
-REAR_OVER = blade((0.16, -0.24, 0.34), (0.30, -0.12, 0.95), (0.0, -0.4, -1.0), roll=REAR_ROLL)
-REAR_DOWN = blade((0.30, -0.30, -0.02), (0.62, -0.18, -0.76), (-0.2, -0.4, -1.0), roll=REAR_ROLL)
-REAR_LOW = blade((0.32, -0.28, -0.20), (0.75, -0.20, -0.63), (-0.2, -0.4, -1.0), roll=REAR_ROLL)
-#: back to the shoulder: tip up in front first, so the turn never sweeps under
-REAR_RAISE = blade((0.10, -0.28, -0.04), (0.22, -0.20, 0.95), (0.0, -0.5, -1.0), roll=REAR_ROLL)
+#: the spin: both blades held out behind him at waist height, tips a little
+#: low, so the ring they sweep is a shallow cone that reads from the side
+SPIN_DIR = (-0.92, 0.12, -0.32)
+SPIN = pair((-0.26, 0.10, -0.34), SPIN_DIR, pole=(-0.3, 0.8, -0.4), at_r=(-0.24, -0.18, -0.44))
+#: the wind-up: the same blade line, the hands drawn further back and low
+WIND = pair((-0.30, 0.10, -0.44), SPIN_DIR, pole=(-0.3, 0.8, -0.5), at_r=(-0.28, -0.18, -0.52))
+#: over the top: both blades up and a little back over his head
+OVER = pair((-0.02, 0.10, 0.40), (-0.40, 0.10, 0.91), pole=(0.2, 0.8, 0.2), at_r=(-0.06, -0.14, 0.34),
+            d_r=(-0.16, -0.10, 0.98))
+#: the cleave: both down in front of him at the enemy, a parallel V
+CLEAVE = pair((0.40, 0.08, -0.18), (0.92, 0.14, -0.34), pole=(0.2, 0.8, -0.6), at_r=(0.38, -0.14, -0.30),
+              d_r=(0.80, -0.14, -0.58))
+SETTLE = pair((0.38, 0.08, -0.23), (0.90, 0.14, -0.40), pole=(0.2, 0.8, -0.6), at_r=(0.36, -0.14, -0.35),
+              d_r=(0.78, -0.14, -0.62))
+#: on the way back to the guard: both blades swung out to his sides, low, so
+#: the turn from forward to back never drags a tip through the ground
+SIDE = pair((0.04, 0.16, -0.34), (0.0, 0.95, -0.28), pole=(-0.2, 0.9, -0.4), at_r=(0.04, -0.24, -0.38))
+
+ATK_SPIN = dict(lean=A_LEAN + 4, drop=A_DROP + 0.02, swing=6, lift=0.02, tuck=0.25, hop=0.10,
+                morphs={"怒り": 0.6, "真面目": 0.3})
 
 ATTACK = {
-    "length": 0.95, "fps": 20, "loop": False,
+    "length": 1.0, "fps": 20, "loop": False,
     "keys": [
         (0.0, idle_pose(0.5), "io"),
-        (0.16, atk(LEAD_UP, SHOULDER, lean=-4, twist=-8, drop=A_DROP + 0.03, head_turn=40, swing=-3), "io"),
-        (0.24, atk(LEAD_OVER, SHOULDER, lean=A_LEAN, twist=-14, drop=A_DROP + 0.04, swing=1), "in"),
-        (0.30, atk(LEAD_DOWN, SHOULDER, lean=A_LEAN + 12, twist=-18, drop=A_DROP + 0.06, swing=3), "out"),
-        (0.38, atk(LEAD_DOWN, REAR_BACK, lean=A_LEAN + 2, twist=-10, drop=A_DROP + 0.05, head_turn=38, swing=-2,
-                   morphs={"怒り": 0.6, "真面目": 0.3}), "io"),
-        (0.47, atk(LEAD_DOWN, REAR_OVER, lean=A_LEAN + 6, twist=-14, drop=A_DROP + 0.04, swing=1,
-                   morphs={"怒り": 0.6, "あ": 0.3}), "in"),
-        (0.55, atk(LEAD_DOWN, REAR_DOWN, lean=A_LEAN + 14, twist=-20, drop=A_DROP + 0.07, head_turn=30, swing=4,
-                   morphs={"怒り": 0.7, "あ": 0.5}), "out"),
-        (0.64, atk(LEAD_DOWN, REAR_LOW, lean=A_LEAN + 12, twist=-18, drop=A_DROP + 0.07, head_turn=30, swing=2), "io"),
-        (0.80, atk(blade(LEAD_AT, LEAD_DIR, LEAD_POLE, roll=LEAD_ROLL), REAR_RAISE, lean=A_LEAN + 2, swing=-1), "io"),
-        (0.95, idle_pose(0.5), "io"),
+        (0.10, atk(WIND, lean=A_LEAN + 14, twist=-6, drop=A_DROP + 0.12, head_turn=38, swing=-3), "out"),
+        (0.18, atk(SPIN, turn=60, **ATK_SPIN), "in"),
+        (0.30, atk(SPIN, turn=180, **ATK_SPIN), "lin"),
+        (0.40, atk(SPIN, turn=300, **ATK_SPIN), "lin"),
+        (0.45, atk(SPIN, turn=360, lean=A_LEAN + 4, drop=A_DROP + 0.06, swing=3, morphs={"怒り": 0.6}), "out"),
+        (0.50, atk(OVER, turn=360, lean=-6, drop=A_DROP - 0.04, head_turn=38, swing=-2,
+                   morphs={"怒り": 0.6, "あ": 0.3}), "out"),
+        (0.55, atk(CLEAVE, turn=360, lean=A_LEAN + 22, twist=-18, drop=A_DROP + 0.10, head_turn=30, swing=5,
+                   morphs={"怒り": 0.8, "あ": 0.6}), "in"),
+        (0.62, atk(SETTLE, turn=360, lean=A_LEAN + 20, twist=-18, drop=A_DROP + 0.11, head_turn=30, swing=2,
+                   morphs={"怒り": 0.7, "あ": 0.3}), "out"),
+        (0.76, atk(SIDE, turn=360, lean=A_LEAN + 6, drop=A_DROP + 0.04, swing=-2), "io"),
+        (0.88, turned(idle_pose(0.5), 360), "out"),
+        (1.0, turned(idle_pose(0.5), 360), "io"),
     ],
     # the impacts the game should time its hit to; "main" is the second
     "events": {"impact": [0.30, 0.55], "main": 0.55},
-    "trails": [{"blade": "L", "from": 0.16, "to": 0.32}, {"blade": "R", "from": 0.40, "to": 0.58}],
-    "bursts": [{"t": 0.30, "blade": "L", "kind": "slash", "scale": 0.8},
-               {"t": 0.55, "blade": "R", "kind": "slash", "scale": 1.0}],
+    # the spin's two trails sweep a flat ring; the cleave's two run parallel
+    "trails": [{"blade": "L", "from": 0.18, "to": 0.42}, {"blade": "R", "from": 0.18, "to": 0.42},
+               {"blade": "L", "from": 0.47, "to": 0.57}, {"blade": "R", "from": 0.47, "to": 0.57}],
+    "bursts": [{"t": 0.30, "blade": "both", "kind": "slash", "scale": 0.8},
+               {"t": 0.55, "blade": "both", "kind": "slash", "scale": 1.0}],
 }
 
 # ------------------------------------------------------------------ cast
-# Both blades raised and crossed before him: a knightly salute.
+# Both blades raised and crossed before him: a knightly salute. They rise
+# together, up past his sides (never one after the other), then cross.
 
 
 def salute(k=1.0):
@@ -237,40 +303,63 @@ def salute(k=1.0):
                head_nod=4 - 4 * k)
         + cloth(-1.5 * k),
         {"真面目": 0.9},
-        blades={"L": blade((0.20, -0.30, -0.02), (-0.36, -0.06, 0.93), (0.8, 0.2, -0.6), roll=20),
-                "R": blade((0.02, -0.34, -0.02), (0.42, -0.06, 0.90), (-0.8, 0.2, -0.6), roll=-20)})
+        blades=pair((0.20, -0.30, -0.02), (-0.36, -0.06, 0.93), pole=(0.8, 0.2, -0.6), at_r=(0.02, -0.34, -0.02),
+                    d_r=(0.42, -0.06, 0.90), pole_r=(-0.8, 0.2, -0.6)))
+
+
+def raised():
+    """Halfway up: both blades up beside him, parallel."""
+    return pose(stance(drop=A_DROP, lean=A_LEAN - 4, head_turn=32) + cloth(-1),
+                {"真面目": 0.8},
+                blades=pair((0.02, 0.16, -0.12), (-0.10, 0.40, 0.91), pole=(-0.6, 0.6, -0.5),
+                            at_r=(0.0, -0.28, -0.12)))
 
 
 CAST = {
     "length": 1.0, "fps": 20, "loop": False,
     "keys": [
         (0.0, idle_pose(0.5), "io"),
-        (0.32, salute(1.0), "io"),
+        (0.14, raised(), "out"),
+        (0.26, salute(1.0), "out"),
         (0.70, salute(1.0), "io"),
-        (1.0, idle_pose(0.5), "io"),
+        (0.82, raised(), "io"),
+        (1.0, idle_pose(0.5), "out"),
     ],
 }
 
 # ------------------------------------------------------------------ hurt
-# A flinch back behind the crossed blades.
+# A flinch: his body snaps back, the guard held firm, both blades lifted
+# together a little in his fixed grip.
+
+
+def flinch(k=1.0):
+    return pose(
+        stance(drop=A_DROP + 0.03 * k, lean=A_LEAN - 18 * k, twist=A_TWIST - 6 * k, head_turn=30 - 8 * k,
+               head_nod=4 + 8 * k, head_tilt=-2 - 6 * k)
+        + cloth(-5 * k),
+        {"まばたき": 0.8 * k, "怒り": 0.6, "あ": 0.3 * k},
+        blades=pair(add(GUARD_L_AT, (-0.04 * k, 0, 0.06 * k)), (-0.66, 0.54, -0.30 + 0.05 * (1 - k)),
+                    at_r=add(GUARD_R_AT, (-0.04 * k, 0, 0.06 * k))))
 
 
 def guard(k=1.0):
+    """The crossed guard (the death clip's first beat): both blades up and
+    crossed before him."""
     return pose(
         stance(drop=A_DROP + 0.03 * k, lean=A_LEAN - 20 * k, twist=A_TWIST - 6 * k, head_turn=30 - 8 * k,
                head_nod=4 + 8 * k, head_tilt=-2 - 6 * k)
         + cloth(-5 * k),
         {"まばたき": 0.8 * k, "怒り": 0.6, "あ": 0.3 * k},
-        blades={"L": blade((0.22, -0.28, -0.20), (-0.45, -0.06, 0.89), (0.8, 0.2, -0.6), roll=20),
-                "R": blade((0.02, -0.32, -0.18), (0.50, -0.06, 0.86), (-0.8, 0.2, -0.6), roll=-20)})
+        blades=pair((0.22, -0.28, -0.20), (-0.45, -0.06, 0.89), pole=(0.8, 0.2, -0.6), at_r=(0.02, -0.32, -0.18),
+                    d_r=(0.50, -0.06, 0.86), pole_r=(-0.8, 0.2, -0.6)))
 
 
 HURT = {
     "length": 0.8, "fps": 20, "loop": False,
     "keys": [
         (0.0, idle_pose(0.5), "io"),
-        (0.10, guard(1.0), "out"),
-        (0.32, guard(0.85), "io"),
+        (0.08, flinch(1.0), "out"),
+        (0.30, flinch(0.85), "io"),
         (0.80, idle_pose(0.5), "io"),
     ],
 }
@@ -344,50 +433,51 @@ DEATH = {
 }
 
 # ------------------------------------------------------------------ ascension
-# Four Winds' Ascension: a crouch, a leap with both blades raised overhead,
-# and a crash down that drives both into the ground before him (the impact);
-# then he rises back into stance A. He leaps straight up, so he lands where he
-# stood and the return to idle never slides.
+# Four Winds' Ascension, the signature: a crouch, a leaping spin (one full
+# turn in the air, about a third of his height up) with both blades raised
+# overhead together, and a crash down into a synced double strike before him
+# (the impact); then a snap back to the low guard. He leaps straight up, so he
+# lands where he stood and the return to idle never slides.
 
 
-def asc(blades, root_z=0.0, drop=A_DROP, lean=A_LEAN, twist=A_TWIST, tuck=0.0, flare=0.0, head_nod=4.0,
-        morphs=None):
-    ops = [
-        ("move", "センター", (0, 0, -drop)),
-        ("movew", "足ＩＫ.L", (A_FRONT - 0.06 * tuck, A_FRONT_Y, 0.22 * tuck)),
-        ("movew", "足ＩＫ.R", (-A_BACK + 0.06 * tuck, A_BACK_Y, 0.30 * tuck)),
-        ("rotw", "上半身", Y, lean),
-        ("rotw", "上半身", Z, twist),
-        ("rotw", "首", Z, 34 * 0.4),
-        ("rotw", "頭", Z, 34 * 0.6),
-        ("rot", "頭", X, head_nod),
-        ("rotw", "頭", Y, -2),
-    ] + cloth(0.0, flare)
-    return pose(ops, morphs or {"怒り": 0.7, "あ": 0.5}, blades=blades, root=(0, 0, root_z))
+def asc(blades, hop=0.0, drop=A_DROP, lean=A_LEAN, twist=A_TWIST, tuck=0.0, flare=0.0, head_nod=4.0,
+        morphs=None, turn=0.0, swing=0.0):
+    p = pose(stance(drop=drop, lean=lean, twist=twist, head_nod=head_nod, tuck=tuck) + cloth(swing, flare),
+             morphs or {"怒り": 0.7, "あ": 0.5}, blades=blades, root=(0, 0, hop))
+    return turned(p, turn)
 
 
-OVERHEAD = {"L": blade((0.10, 0.00, 0.50), (-0.30, 0.08, 0.95), (0.8, 0.3, 0.2), roll=10),
-            "R": blade((-0.02, -0.06, 0.48), (-0.55, 0.02, 0.83), (-0.8, 0.3, 0.2), roll=-10)}
-SLAMMED = {"L": blade((0.52, -0.02, -0.46), (0.89, -0.06, -0.45), (0.3, 0.5, -1.0), roll=LEAD_ROLL),
-           "R": blade((0.40, -0.22, -0.48), (0.85, -0.12, -0.51), (-0.3, 0.3, -1.0), roll=REAR_ROLL)}
-CROUCH = {"L": blade((0.24, -0.02, -0.50), (0.90, -0.06, -0.42), LEAD_POLE, roll=LEAD_ROLL),
-          "R": blade((0.04, -0.26, -0.34), (-0.20, 0.30, 0.93), SHOULDER_POLE, roll=REAR_ROLL)}
+#: overhead: both blades straight up together, hands high, held rigid through the turn
+OVERHEAD = pair((0.06, 0.10, 0.46), (-0.10, 0.22, 0.97), pole=(-0.4, 0.8, 0.0), at_r=(-0.04, -0.14, 0.44))
+#: wound back over his head for the crash
+WOUND = pair((-0.02, 0.10, 0.42), (-0.42, 0.10, 0.90), pole=(0.2, 0.8, 0.2), at_r=(-0.06, -0.14, 0.36))
+#: slammed: both down before him at the enemy, a parallel V, tips just clear
+SLAMMED = pair((0.44, 0.08, -0.24), (0.90, 0.14, -0.38), pole=(0.2, 0.8, -0.6), at_r=(0.42, -0.14, -0.36),
+               d_r=(0.78, -0.14, -0.60))
+CROUCH = pair((-0.22, 0.10, -0.48), (-0.80, 0.34, -0.46), pole=(-0.3, 0.8, -0.5), at_r=(-0.18, -0.20, -0.54))
+LEAP = dict(drop=A_DROP - 0.04, lean=-2, tuck=1.0, flare=-6, head_nod=-4, swing=4)
 
 ASCENSION = {
     "length": 1.3, "fps": 20, "loop": False,
     "keys": [
         (0.0, idle_pose(0.5), "io"),
-        (0.18, asc(CROUCH, drop=A_DROP + 0.12, lean=A_LEAN + 10, head_nod=0), "io"),
-        (0.42, asc(OVERHEAD, root_z=0.55, drop=A_DROP - 0.04, lean=-6, tuck=1.0, flare=-6, head_nod=-6), "out"),
-        (0.50, asc(OVERHEAD, root_z=0.58, drop=A_DROP - 0.04, lean=-4, tuck=1.0, flare=-8, head_nod=-6), "io"),
-        (0.64, asc(SLAMMED, root_z=0.0, drop=A_DROP + 0.22, lean=A_LEAN + 20, flare=8, head_nod=10,
+        (0.16, asc(CROUCH, drop=A_DROP + 0.16, lean=A_LEAN + 12, head_nod=0, swing=-3), "out"),
+        (0.24, asc(OVERHEAD, hop=0.30, **LEAP), "out"),
+        (0.32, asc(OVERHEAD, hop=0.60, turn=120, **LEAP), "lin"),
+        (0.40, asc(OVERHEAD, hop=0.66, turn=240, **LEAP), "lin"),
+        (0.48, asc(OVERHEAD, hop=0.56, turn=360, **LEAP), "lin"),
+        (0.54, asc(WOUND, hop=0.36, turn=360, drop=A_DROP - 0.04, lean=-8, tuck=0.6, flare=-4, head_nod=-6), "out"),
+        (0.60, asc(SLAMMED, turn=360, drop=A_DROP + 0.24, lean=A_LEAN + 22, flare=8, head_nod=10, swing=5,
                    morphs={"怒り": 0.9, "あ": 0.8}), "in"),
-        (0.82, asc(SLAMMED, drop=A_DROP + 0.20, lean=A_LEAN + 18, flare=3, head_nod=8), "out"),
-        (1.3, idle_pose(0.5), "io"),
+        (0.74, asc(SLAMMED, turn=360, drop=A_DROP + 0.22, lean=A_LEAN + 20, flare=3, head_nod=8, swing=2), "out"),
+        (1.00, atk(SIDE, turn=360, lean=A_LEAN + 6, drop=A_DROP + 0.06, swing=-2), "io"),
+        (1.14, turned(idle_pose(0.5), 360), "out"),
+        (1.3, turned(idle_pose(0.5), 360), "io"),
     ],
-    "events": {"impact": [0.64], "main": 0.64},
-    "trails": [{"blade": "L", "from": 0.48, "to": 0.66}, {"blade": "R", "from": 0.48, "to": 0.66}],
-    "bursts": [{"t": 0.64, "blade": "both", "kind": "ground", "scale": 1.3}],
+    # on a frame (12 at 20 fps), so the main frame is the slam itself
+    "events": {"impact": [0.60], "main": 0.60},
+    "trails": [{"blade": "L", "from": 0.50, "to": 0.62}, {"blade": "R", "from": 0.50, "to": 0.62}],
+    "bursts": [{"t": 0.60, "blade": "both", "kind": "ground", "scale": 1.3}],
 }
 
 # ------------------------------------------------------------------ stance B
@@ -438,7 +528,7 @@ REST = pose(
     [("move", "センター", (0, 0, -1.04)),
      ("movew", "足ＩＫ.L", (0.62, 0.16, 0.0)),
      ("movew", "足ＩＫ.R", (0.52, -0.22, 0.0)),
-     ("rotw", "上半身", Y, 6),
+     ("rotw", "上半身", Y, 14),
      ("rotw", "上半身", Z, -14),
      ("rotw", "首", Z, 8),
      ("rotw", "頭", Z, 12),

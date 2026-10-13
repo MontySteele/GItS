@@ -25,13 +25,13 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 
 | Clip | What it does | Length | Frames |
 |---|---|---|---|
-| idle | Stance A: knees a little bent, feet wide, weight forward. The near blade rests on his shoulder, up and back behind his head. The lead blade is low and forward toward the enemy. Slow breathing, a blink, the coat skirt and belt tails sway. | 2.8 s loop | 34 at 12 fps |
-| idle_low | Shoulders down, head low. The shoulder blade has slid down, and both tips drag on the ground before him. | 3.0 s loop | 30 at 10 fps |
-| attack | An X cut at the enemy. The lead blade is hauled up and back over his head and cleaves down to low front-right (impact 1, frame 6). The near blade comes off his shoulder, from behind over the top and down in front of him, crossing the first cut (impact 2, frame 11, the main one). He puts it back on his shoulder. | 0.95 s | 19 |
-| cast | Both blades raised and crossed before him: the salute. | 1.0 s | 20 |
-| hurt | He flinches back behind the crossed blades. | 0.8 s | 16 |
+| idle | Stance A: a tight, ready battle stance. Knees bent, feet wide, weight forward. Both blades are held in a low guard, angled down and back at his sides with the tips off the ground, mirrored so they read as one pair. Only the chest breathes; the blades stay fixed in his hands. A blink, the coat skirt and belt tails sway. | 2.8 s loop | 34 at 12 fps |
+| idle_low | The same guard, worn down: shoulders and head low, both tips lowered together, still clear of the ground. | 3.0 s loop | 30 at 10 fps |
+| attack | One compact spin, then a double cleave. A crouch with both blades drawn back; a full turn on the spot with a small hop, both blades held out behind him at waist height so they sweep a ring (impact 1, frame 6, as they pass the enemy's side); both blades come up over his head together and down in front of him in a parallel V (impact 2, frame 11, the main one); a snap back to the guard. | 1.0 s | 20 |
+| cast | Both blades rise together beside him, then cross before him: the salute. | 1.0 s | 20 |
+| hurt | His body snaps back; the guard holds, both blades lifted together a little in his fixed grip. | 0.8 s | 16 |
 | death | He drives both blades into the ground either side, sinks to one knee between them, lets go and bows his head. It holds from 1.6 s. | 2.2 s | 25 |
-| ascension | For Four Winds' Ascension. He crouches, leaps straight up with both blades overhead, and crashes down driving both into the ground before him (impact, frame 13). Then he rises back into stance A. | 1.3 s | 26 |
+| ascension | For Four Winds' Ascension. He crouches, raises both blades overhead together and leaps straight up into one full turn in the air (his feet rise about a third of his height), then crashes down into a synced double strike before him (impact, frame 12, with a ground shock ring). Then he snaps back to the guard. | 1.3 s | 26 |
 | merchant | Stance B: upright, both claymores planted either side, his hands on the hilts. It breathes. | 3.0 s loop | 30 at 10 fps |
 
 **Stills:**
@@ -43,8 +43,8 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 
 **The element layer** (`fx.py`). The body is rendered with no element colour. A separate colourless layer is cut from the blades' own swept arcs:
 - render.py records each blade's base and tip four times per frame;
-- one tapered crescent trail per blade: two arcs on the attack, a twin arc on the ascension;
-- impact bursts at the marked frames: a flash, a ring and streaks on the attack, and a flattened shock ring with rising streaks on the ground for the ascension.
+- one tapered crescent trail per blade, the two always over the same window: on the attack a ring segment for the spin and two parallel arcs for the cleave, a twin arc on the ascension;
+- impact bursts at the marked frames, centred between the two blades: a flash, a ring and streaks on the attack, and a flattened shock ring with rising streaks on the ground for the ascension.
 
 R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A flat `modulate` tints it. The sheets use a two-line shader look: `mix(element, white, smoothstep(0.72, 1, heat))`. The element colours are the mod's own `ReactionFx.ElementFlashHex` (`klee-mod/KleeCode/Vfx/ReactionFx.cs`):
 
@@ -60,19 +60,19 @@ R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A 
 
 ## Measured
 
-- **Height.** Standing (`stand`), he is 265.5 px from hair to boot and 270.5 px in full at 1080p. The target is 269.6 (78 in over a 68 in adult, times 235 px). That is 1.13 to 1.15 of the base adults. In stance A his neck sits at 222.8 px against 238.7 standing (the crouch), and the figure with both blades is 294.5 px wide (it was 473). The shoulder blade's tip rises over his head, to 316 px.
+- **Height.** Standing (`stand`), he is 265.5 px from hair to boot and 270.5 px in full at 1080p. The target is 269.6 (78 in over a 68 in adult, times 235 px). That is 1.13 to 1.15 of the base adults. In stance A his neck sits at 218.8 px against 238.7 standing (the crouch), and the figure with both blades is 255.5 px wide (294.5 in the reviewed take, 473 in the first). Nothing rises over his head: the guard's full height is 249.9 px.
 - **Style** (L* p90 / C* p90, opaque pixels at 1080p):
 
 | Figure | L* p90 | C* p90 |
 |---|---|---|
-| Varka idle f0 | 69.7 | 24.4 |
-| Varka attack f11 | 66.7 | 23.9 |
+| Varka idle f0 | 68.1 | 24.6 |
+| Varka attack f11 | 65.8 | 23.1 |
 | Ironclad | 71.4 | 41.4 |
 | Silent | 68.9 | 24.9 |
 | Ironclad + Silent mean | 70.1 | 33.2 |
 
 His black coat and grey trousers sit him under the pair on both measures, near Silent. H3 lite is the ruled fixed squeeze and was not retuned.
-- **Cost.** After the review: 15 files, 98.5 Mpx (it was 174 Mpx in 21 files). That is 376 MB of RGBA uncompressed at 2x, or about 94 MB VRAM-compressed (1 byte per texel), and 48 MB of PNG on disk. Klee's whole set is about 55 MB. Every combat clip now fits one 4096 page.
+- **Cost.** After the motion redo: 15 files, 75.3 Mpx (98.5 after the review, 174 in 21 files at first). That is 301 MB of RGBA uncompressed at 2x, or about 75 MB VRAM-compressed (1 byte per texel), and 45 MB of PNG on disk. Klee's whole set is about 55 MB. Every combat clip now fits one 4096 page.
 
 ## Where his graphics appear (the surface list for phase B)
 
@@ -116,9 +116,22 @@ The main session reviewed phase A's sheets. Five notes; four changed the art.
 - **Texture budget:** pick 1's default, plus a tighter trim. Each frame is now cut to its own pixels and shelf-packed, rather than every frame taking the clip's widest box. In Godot that is an AtlasTexture whose margin restores the cell. With the narrower idle, the set went from 174 to 98.5 Mpx.
 - Unchanged and approved: stance B (the shop), the select close-up, the roster tile, the element trail layer and its colours, and the scale.
 
+## Revised after [USER]'s look (2026-10-13)
+
+[USER], on the reviewed sheets: "I think that the model and shading is mostly excellent! But the pose and the atack animations look... a little lame. Varka's a highly acrobatic character who tends to do spins and attack with both claymores in sync at the same time using spins and flips, rather than just raising them one after the other. I think that trying to go overboard here would make him stand out too much, but we can look for an edit that is less... 'floppy'"
+
+The model, the shading, the scale (78 in), the element trail layer, the texture pipeline, the select close-up and the roster tile are unchanged. The motion was redone:
+- **Both claymores move in sync,** mirrored or parallel, never one raised after the other. In code (`pair()` in `varka_clips.py`) the near blade is the far blade reflected about his body, unless a pose names a crossed pair. The test `test_the_two_blades_move_in_sync` checks that between any two keys of every combat clip both blades turn through the same angle, within 15 degrees, in the world and in his body's frame.
+- **Rigid, not floppy.** The blades stay fixed in the grip: through the spin and the leap they hold one pose relative to his body. `render.py` now interpolates the blades in the root's own frame, so a turn carries them round with him instead of cutting the chord. Moves are short snaps between held poses (hard ease into each impact, a small settle after), not slow even blends.
+- **Stance A** is a low guard: both blades down and back at his sides, tips off the ground, knees bent, weight forward. 255.5 px wide at 1080p.
+- **The attack** is one compact spin and a double cleave (see the clip table). His feet stay inside the guard's footprint; the spin's hop is 0.10 units, and they are planted for the main impact.
+- **The ascension** is a modest leaping spin, not a flip: a flip with blades this long drives them through the ground when he is upside down. His hips rise 0.66 units at the top (a third of his 2.05), and the impact frame is kept in the manifest.
+- **Cast, hurt, death and merchant** keep their beats with the blades in the same rigid, synced grip. The rest site leaned back a little; his upper body now leans 14 degrees toward the fire (it was 6), so he sits upright with his forearms on his knees.
+- **The trail layer** follows the new arcs: the spin's two trails are a ring segment, the cleave's two run parallel, and the slash bursts sit between the two blades.
+
 ## For [USER]
 
-1. **Texture budget.** Taken at the default in the design review: keep 2x like Klee, and phase B imports his sheets VRAM-compressed (`texture_import` in the manifest). With the per-frame trim that is about 94 MB.
-2. **The look,** on these sheets: `scratchpad/varka-art/sheets/`.
+1. **Texture budget.** Taken at the default in the design review: keep 2x like Klee, and phase B imports his sheets VRAM-compressed (`texture_import` in the manifest). With the per-frame trim and the tighter guard that is about 75 MB.
+2. **The motion,** redone after your look ruling, on these sheets: `scratchpad/varka-art/sheets/` (`c_attack_anemo.gif` and `c_ascension_pyro.gif` show it moving).
    - **(a) Default:** go to phase B as is.
-   - (b) Change the poses first: the blade angles, the trail width, the rest pose.
+   - (b) Change the poses first: the guard, the spin, the leap.

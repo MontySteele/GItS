@@ -170,8 +170,10 @@ def burst_heat(meta, t, shape, shift, s):
             cx = sum(p[0] for p in tips) / len(tips)
             cy = meta["origin_px"][1]
         else:
-            bl = _sample_at(meta, b["blade"], b["t"])
-            cx, cy = _lerp(bl[0], bl[1], 0.72)
+            # "both": the two blades strike together; the flash sits between them
+            sides = ("L", "R") if b["blade"] == "both" else (b["blade"],)
+            pts = [_lerp(bl[0], bl[1], 0.72) for bl in (_sample_at(meta, sd, b["t"]) for sd in sides)]
+            cx, cy = sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)
         cx, cy = (cx + shift[0]) * k, (cy + shift[1]) * k
         flat = 0.30 if b["kind"] == "ground" else 1.0
         ys, xs = np.mgrid[0:shape[0], 0:shape[1]].astype(np.float32)

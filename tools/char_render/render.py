@@ -36,7 +36,7 @@ import sys
 
 import addon_utils
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Euler, Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import chars as CH  # noqa: E402
@@ -215,9 +215,17 @@ def set_frame(root, arm, mesh, blade_obs, caps, keys, t):
     for n in set(a["morphs"]) | set(b["morphs"]):
         va, vb = a["morphs"].get(n, 0.0), b["morphs"].get(n, 0.0)
         kb[n].value = (vb if u >= 0.5 else va) if n in step else va * (1 - u) + vb * u
-    root.rotation_euler = tuple(x * (1 - u) + y * u for x, y in zip(a["root_rot"], b["root_rot"]))
+    ru = tuple(x * (1 - u) + y * u for x, y in zip(a["root_rot"], b["root_rot"]))
+    root.rotation_euler = ru
     root.location = a["root"].lerp(b["root"], u)
     T.upd()
+    # The blades interpolate in the root's own frame, so a key pair that turns
+    # him (a spin: the root's yaw changes) carries the blades round with his
+    # body instead of cutting the chord; for keys at one root rotation this is
+    # the plain world lerp.
+    Ra, Rb, Ru = (Euler(e, "XYZ").to_matrix() for e in (a["root_rot"], b["root_rot"], ru))
+    Ia, Ib = Ra.transposed(), Rb.transposed()
+    qIa, qIb, qRu = Ia.to_quaternion(), Ib.to_quaternion(), Ru.to_quaternion()
     for side, ob in blade_obs.items():
         ba, bb = a["blades"].get(side), b["blades"].get(side)
         if ba is None and bb is None:
@@ -225,17 +233,18 @@ def set_frame(root, arm, mesh, blade_obs, caps, keys, t):
             continue
         ob.hide_render = False
         ba, bb = ba or bb, bb or ba
+        at = Ru @ (Ia @ ba["at"]).lerp(Ib @ bb["at"], u)
         if ba["anchor"] == bb["anchor"]:
-            g = anchor_point(arm, ba["anchor"]) + ba["at"].lerp(bb["at"], u)
+            g = anchor_point(arm, ba["anchor"]) + at
         else:
             g = (anchor_point(arm, ba["anchor"]) + ba["at"]).lerp(anchor_point(arm, bb["anchor"]) + bb["at"], u)
-        qa, qb = ba["rot"], bb["rot"]
+        qa, qb = qIa @ ba["rot"], qIb @ bb["rot"]
         if qa.dot(qb) < 0:
             qb = -qb
-        r = qa.slerp(qb, u)
+        r = qRu @ qa.slerp(qb, u)
         place_blade(ob, g, r, ba["grip"] * (1 - u) + bb["grip"] * u)
         if ba["hand"] and bb["hand"]:
-            grip_hand(arm, side, g, r, ba["pole"].lerp(bb["pole"], u))
+            grip_hand(arm, side, g, r, Ru @ (Ia @ ba["pole"]).lerp(Ib @ bb["pole"], u))
     T.upd()
 
 
