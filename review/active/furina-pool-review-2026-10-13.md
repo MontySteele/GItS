@@ -87,18 +87,54 @@ hit). The acts do not. Lyney, an Uncommon, has the biggest act in the cast,
 and the Rare Escoffier's ALL act is half of it. A flat +2 (the 2026-10-12
 proposal) would widen that gap, so it is withdrawn.
 
-**Proposal:** price the acts by rarity, lines unchanged.
-- **Lyney:** 8 [11] to ALL becomes 5 [7] to ALL. Still the only Uncommon that
-  hits ALL, with the bigger buffer.
-- **Escoffier:** 4 [6] to ALL becomes 7 [10] to ALL, above Lyney.
-- **Lynette:** 3 [6] becomes 5 [8], the Uncommon rate (her target needs an
-  aura).
-- **Leading Lady:** "Gain 2 [3] Strength. Your Attacks deal 1 additional
-  damage for each guest on stage." Up from 1 [2], in line with the
-  Ironclad's Inflame, also a 1-Energy Uncommon Strength Power.
-- The rest stay: Charlotte and Wriothesley are Commons at the Lightning rate
-  with build-around lines; Chevreuse, Freminet, Sigewinne and Navia are paid
-  through their lines.
+[USER] then: "Escoffier still looks a bit underpowered. 'Whenever a guest
+acts, Repay 1' is typically 'repay 3 at end of turn', vs 'Repay 2 [4]' for
+Siegwinne. Neuvillette's passive 'Your Hydro damage deals 2 [3] more' also
+seems low, but his end of turn effect looks quite good. Can you send this
+whole thing off to a Fable reviewer to come up with a Guest Star package
+with effects that make sense for each character's lore and are also balanced
+for their rarity and their card cost?"
+
+The Fable package is `furina-guest-package-2026-10-13.md` beside this file:
+orb numbers read from the game's DLL, a yardstick per rarity, every guest
+priced, loops walked. Its anchor: the Defect's Fusion (1 Energy, Exhaust,
+Uncommon, a Plasma orb) is the one base card shaped like a Guest Star. Bands,
+as damage-equivalent a turn: **Common 5 to 6, Uncommon 7 to 9, Rare 10 to 13
+alone and more with company.** Today, Charlotte (3.5) and Sigewinne (5) sit
+under their bands, Lyney (14) and Neuvillette (20+) over, Escoffier at the
+bottom of hers.
+
+**Proposal (the package, with my changes to it):**
+
+| Guest | Change |
+|---|---|
+| Charlotte (C) | Act Repay 2 [4] becomes **Repay 3 [5]** |
+| Wriothesley (C) | Act 4 [7] becomes **5 [8]** |
+| Lynette (U) | Act 3 [6] becomes **5 [8]**; line reworded "gain that much Fanfare again" |
+| Chevreuse (U) | Act 4 becomes **5** |
+| Freminet (U) | Act Block 3 [6] becomes **4 [7]** |
+| Sigewinne (U) | Act Repay 2 [4] becomes **Repay 3 [5]** |
+| Lyney (U) | Act 8 [11] to ALL becomes **5 [7] to ALL**; Drain 2 and the buffer line stay |
+| Navia (U) | Act becomes **"Spend a third of your Fanfare, rounded down: deal twice that much Geo damage to a random enemy"** (today: half, 1 for 1) |
+| Clorinde (R) | No change: Rare-sized once Charlotte and Sigewinne Repay 3 |
+| Neuvillette (R) | No change (below) |
+| Escoffier (R) | Line becomes **"Your guests' acts deal 2 [3] more damage."** Act 4 [6] to ALL stays, and her own line lifts it to 6 [9] |
+| Leading Lady | **Gain 2 [3] Strength** (up from 1 [2]) |
+
+Where I differ from the package:
+- **Lyney flat, not growing.** The package makes him 3 [5] to ALL, growing 1
+  a turn on stage (a Dark orb). That needs a counter on him and a rule to
+  track, which you have pushed back on before; flat 5 [7] lands within a
+  point of it over a normal fight. The growing shape is pick 4.
+- **Neuvillette unchanged,** with the package's reason: his +2 is per hit,
+  and Bravura is one hit per 3 Fanfare spent, so a 36-Fanfare Bravura gets
+  +24. His act is already the biggest in the cast.
+
+Escoffier's new line is the stage's Defragment: a Rare that makes every other
+guest worth seating, which is what the guest style lacked. The guest deck it
+makes (Wriothesley, Lyney, Escoffier) deals about 23 a turn from three
+exhausted cards before Tutti!, Encore! or Showstopper multiply it. The
+package walks seven loops (sec.4 there); none makes a resource from itself.
 
 ## 3. Looked at, not changed
 
@@ -121,11 +157,17 @@ proposal) would widen that gap, so it is withdrawn.
    - **(a) Default:** Fountain of Lucine "Gain 8 [11] Block. At the start of
      your next turn, Repay 3." Private Box unchanged.
    - (b) No change.
-2. **The guest style.**
-   - **(a) Default:** Lyney 5 [7] to ALL, Escoffier 7 [10] to ALL, Lynette
-     5 [8], Leading Lady 2 [3] Strength.
+2. **The guest package.**
+   - **(a) Default:** the table above.
    - (b) Leading Lady only.
    - (c) Leave the guests until your playtest.
+3. **Escoffier's line** (if 2a).
+   - **(a) Default:** "Your guests' acts deal 2 [3] more damage."
+   - (b) "Whenever a guest acts, Repay 2 [3]": dead with nothing drained, 6
+     Repay a turn with three guests.
+4. **Lyney's shape** (if 2a).
+   - **(a) Default:** flat 5 [7] to ALL.
+   - (b) 3 [5] to ALL, growing 1 each turn he is on stage.
 
 After the build, a five-seat Furina round reads both: Block cards in the
 death hands, and the guests' share of damage.

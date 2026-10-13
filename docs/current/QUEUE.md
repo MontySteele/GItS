@@ -22,9 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Furina pool review** (`furina-pool-review-2026-10-13.md`, two picks,
-  defaults (a)): (1) Uncommon Block: Fountain of Lucine prints 8 Block; (2) the guest style: acts priced by rarity (Lyney down,
-  Escoffier and Lynette up), Leading Lady 2 Strength.
+- **Furina pool review** (`furina-pool-review-2026-10-13.md`, four picks,
+  defaults (a)): (1) Uncommon Block: Fountain of Lucine prints 8 Block; (2) the Fable guest package priced by rarity; (3) Escoffier's
+  line; (4) Lyney's shape.
 
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
