@@ -11,7 +11,7 @@ Batch 1's act-1 event leaves her having blasted the fish or not. These two event
 
 > A Favonius pigeon lands on Klee's backpack with a letter tied to its leg. It is in Jean's handwriting.
 >
-> *"Klee — Albedo told me where you went. I am not angry. (I am a little angry.) Eat proper meals, stay close to your friends, and do not, under any circumstances, blow up anything that is holding the Spire up. — Jean, Acting Grand Master"*
+> *"Klee — Albedo told me where you went. We are coming to find you. Until then, stay with your friends and remember to eat. Keep your bombs away from the stairs and pillars. I want you home safely. — Jean, Acting Grand Master"*
 
 | Option | Effect | Why |
 |---|---|---|
@@ -21,16 +21,20 @@ Batch 1's act-1 event leaves her having blasted the fish or not. These two event
 
 ## Act 3: The Knights Come Looking
 
-> Footsteps on the stairs below. Three familiar voices argue about who gets to bring Klee home. When they see her, they stop arguing.
+> Klee hears her name from the stairs below. Kaeya spots her first and waves. Noelle hurries up beside him, and Albedo lets out a quiet sigh of relief.
 
 | Option | Effect | Their line |
 |---|---|---|
-| **Kaeya** | Add an upgraded **Kaeya — Glacial Waltz** to your deck. | "Shh. I won't tell Jean if you don't." |
-| **Noelle** | Add an upgraded **Noelle — Breastplate** to your deck. | "I brought snacks. And a shield. Mostly the shield." |
-| **Albedo** | Add an upgraded **Albedo — Solar Isotoma** to your deck. | "I'll take notes. You do the exploding." |
+| **Kaeya** | Add an upgraded **Kaeya — Glacial Waltz** to your deck. | "There you are! Shall we finish your adventure together? Jean's waiting for us." |
+| **Noelle** | Add an upgraded **Noelle — Breastplate** to your deck. | "Are you hurt, Klee? Here, have something to eat. I'll stay with you." |
+| **Albedo** | Add an upgraded **Albedo — Solar Isotoma** to your deck. | "I'm glad you're safe. Show me where you're going, and we'll find a way up." |
 
-These are her existing Companion cards (`proto_mc_kaeya_glacial_waltz`, `proto_mc_noelle_breastplate`, `proto_mc_albedo_solar_isotoma`). Klee answers whichever knight she picks: "Klee knew you'd come! ...Klee's still not going home until the top, though."
+These are her existing Companion cards (`proto_mc_kaeya_glacial_waltz`, `proto_mc_noelle_breastplate`, `proto_mc_albedo_solar_isotoma`). Klee answers whichever knight she picks: "You found me! Can we see what's at the top before we go home? Please?"
 
 ## The arc in one line
 
-She sneaks off to the Spire (intro), breaks a promise or keeps it (act 1), hears from home (act 2), and the Knights come to her instead of taking her back (act 3). Her victory line ("Wait till Jean hears! ...Actually, maybe don't tell Jean.") closes it.
+She sneaks off to the Spire (intro), breaks a promise or keeps it (act 1), hears from home (act 2), and the Knights come to her instead of taking her back (act 3). Her victory line ("I made it all the way up! Mom's gonna be so proud!") closes it.
+
+## Dialogue cleanup, 2026-10-13
+
+[USER]: "I want to do a clean-up pass on both, since some things feel oddly stilted to me." The current lines above reflect that pass. Voice, lore caveats, and the other dialogue surfaces are reviewed in `review/active/klee-varka-dialogue-review-2026-10-13.md`. Event effects and story outcomes are unchanged.

@@ -16,7 +16,7 @@ public static class KleeStory
 {
     /// <summary>Klee's answer to whichever knight she picks (batch 2, act 3).</summary>
     public const string KnightsAnswer =
-        "Klee knew you'd come! ...Klee's still not going home until the top, though.";
+        "You found me! Can we see what's at the top before we go home? Please?";
 
     private static string KnightsResult(string knight, string line) =>
         knight + ": \"" + line + "\"\n" + "Klee: \"" + KnightsAnswer + "\"";
@@ -28,43 +28,43 @@ public static class KleeStory
 
         IntroTitle = "The Spark Knight of Mondstadt.",
         IntroLine =
-            "Mom says the best treasure is at the top of the tallest place. Klee brought bombs for anything in the way.",
+            "Mom says there's treasure up there! Klee packed Dodoco, some snacks, and lots of bombs. We're going all the way to the top!",
 
         Ancients = new[]
         {
             new AncientExchange("Neow", "NEOW",
                 "A child. Carrying... fire.",
-                "It's not fire yet! Klee hasn't lit it."),
+                "Don't worry! I haven't lit the fuse yet."),
             new AncientExchange("Orobas", "OROBAS",
                 "Your trinket hums. Let me make it sing.",
-                "Can it go [i]boom[/i] louder?"),
+                "Ooh! Can you make it go [i]boom[/i] louder?"),
             new AncientExchange("Pael", "PAEL",
                 "You have bitten off more than you can chew, little one.",
-                "Klee only bites cookies. Bombs are for throwing."),
+                "But I haven't eaten anything! Do you have snacks?"),
             new AncientExchange("Tezcatara", "TEZCATARA",
                 "Warm yourself by my light.",
-                "Klee makes her own light. Want to see?"),
+                "It's so warm! Dodoco, come closer!"),
             new AncientExchange("Nonupeipe", "NONUPEIPE",
                 "Small hands. Many sparks.",
-                "Mom says a good bomb needs small hands."),
+                "I made these myself! Mom showed me how."),
             new AncientExchange("Tanx", "TANX",
                 "Do you fight for glory?",
-                "Klee fights so Jean doesn't find out she left."),
+                "I'm looking for treasure! I'll bring some back for everyone."),
             new AncientExchange("Vakuu", "VAKUU",
                 "Trade with me.",
-                "Klee has... three pebbles and a Dodoco."),
+                "You can have this shiny pebble! But Dodoco stays with me."),
             new AncientExchange("Darv", "DARV",
                 "I collect what others leave behind.",
-                "Klee leaves craters. Do you want one?"),
+                "Oh! Have you seen any little round bombs? I dropped one..."),
         },
 
         Lines = new CombatLines(
-            BossEntry: "Klee's never blown up anything that big!",
-            LowHp: "Owie... Klee's okay. Klee's [i]fine[/i].",
+            BossEntry: "Whoa, look how big it is! Stand back, Dodoco!",
+            LowHp: "Ow... Can we rest for a little bit?",
             Signature: "KABOOM!",
-            BossKill: "Klee's gonna need a bigger backpack.",
-            RunLoss: "Klee... wants to go home now.",
-            RunWin: "Wait till Jean hears! ...Actually, maybe don't tell Jean."),
+            BossKill: "We did it! Did you see, Dodoco?",
+            RunLoss: "Jean... can you come get me?",
+            RunWin: "I made it all the way up! Mom's gonna be so proud!"),
 
         Pairs = new[]
         {
@@ -73,7 +73,7 @@ public static class KleeStory
                 "Can the jellyfish carry bombs?"),
             new PairExchange(typeof(Furina), "Furina",
                 "A little explosion would make a fine finale.",
-                "Klee does [i]big[/i] explosions!"),
+                "How big? I brought lots!"),
             new PairExchange(typeof(Varka), "Varka",
                 "Spark Knight. Same orders as always.",
                 "No bombs indoors. ...Is this indoors?"),
@@ -109,12 +109,10 @@ public static class KleeStory
                 EventType: typeof(KleeLetterFromJean),
                 Title: "A Letter from Jean",
                 Body:
-                    "A Favonius pigeon lands on Klee's backpack with a letter tied to its leg. "
-                  + "It is in Jean's handwriting.\n\n"
-                  + "[i]\"Klee — Albedo told me where you went. I am not angry. (I am a little "
-                  + "angry.) Eat proper meals, stay close to your friends, and do not, under any "
-                  + "circumstances, blow up anything that is holding the Spire up. — Jean, Acting "
-                  + "Grand Master\"[/i]",
+                    "A Favonius pigeon lands on Klee's backpack with a letter tied to its leg. It is in Jean's "
+                  + "handwriting.\n\n[i]\"Klee — Albedo told me where you went. We are coming to find you. Until "
+                  + "then, stay with your friends and remember to eat. Keep your bombs away from the stairs "
+                  + "and pillars. I want you home safely. — Jean, Acting Grand Master\"[/i]",
                 Options: new[]
                 {
                     new StoryOption("READ_IT_TWICE", "Read it twice.",
@@ -135,22 +133,21 @@ public static class KleeStory
                 EventType: typeof(KleeKnightsComeLooking),
                 Title: "The Knights Come Looking",
                 Body:
-                    "Footsteps on the stairs below. Three familiar voices argue about who gets to "
-                  + "bring Klee home. When they see her, they stop arguing.",
+                    "Klee hears her name from the stairs below. Kaeya spots her first and waves. Noelle hurries up beside him, and Albedo lets out a quiet sigh of relief.",
                 Options: new[]
                 {
                     new StoryOption("KAEYA", "Kaeya",
                         "Add an upgraded [gold]Kaeya — Glacial Waltz[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcKaeyaGlacialWaltz)),
-                        KnightsResult("Kaeya", "Shh. I won't tell Jean if you don't.")),
+                        KnightsResult("Kaeya", "There you are! Shall we finish your adventure together? Jean's waiting for us.")),
                     new StoryOption("NOELLE", "Noelle",
                         "Add an upgraded [gold]Noelle — Breastplate[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcNoelleBreastplate)),
-                        KnightsResult("Noelle", "I brought snacks. And a shield. Mostly the shield.")),
+                        KnightsResult("Noelle", "Are you hurt, Klee? Here, have something to eat. I'll stay with you.")),
                     new StoryOption("ALBEDO", "Albedo",
                         "Add an upgraded [gold]Albedo — Solar Isotoma[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcAlbedoSolarIsotoma)),
-                        KnightsResult("Albedo", "I'll take notes. You do the exploding.")),
+                        KnightsResult("Albedo", "I'm glad you're safe. Show me where you're going, and we'll find a way up.")),
                 },
                 Portrait: () => KleeArt.CardPortrait("proto_ko_favonius_escort"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png"),

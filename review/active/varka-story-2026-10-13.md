@@ -22,7 +22,7 @@ plot beats).
 
 ## 1. The introduction (character select)
 
-> **The Grand Master of the Knights of Favonius.** He marched most of the Knights north to fight the Abyss and left Jean the paperwork. The Spire is the expedition's next front.
+> **The Grand Master of the Knights of Favonius.** He led the Knights north against the Abyss, leaving Mondstadt in Jean's care. The Abyss's trail runs up the Spire, so up he goes. Then he's getting his people home.
 
 ## 2. The Ancients greet him
 
@@ -30,12 +30,12 @@ plot beats).
 |---|---|---|
 | Neow | "A knight. A large one." | "Grand Master, if we're being formal. Let's not." |
 | Orobas | "Your trinket hums. Let me make it sing." | "Teach it a drinking song and we have a deal." |
-| Pael | "You have bitten off more than you can chew." | "Every expedition starts that way." |
+| Pael | "You have bitten off more than you can chew." | "Ha! I've had worse odds. Let's see what we're dealing with." |
 | Tezcatara | "Warm yourself by my light." | "Gladly. It's been a long winter up north." |
 | Nonupeipe | "Two blades. One will." | "And Lord Barbatos behind them." |
-| Tanx | "Do you fight for glory?" | "I fight so my knights get home. Glory can find its own way." |
+| Tanx | "Do you fight for glory?" | "A good story never hurts. But first, I've got people to bring home." |
 | Vakuu | "Trade with me." | "I have a stack of unsigned reports. I'll pay you to take them." |
-| Darv | "I collect what others leave behind." | "Then you'll want my desk. I left it to Jean." |
+| Darv | "I collect what others leave behind." | "Found a whetstone, by any chance? Mine's about worn through." |
 
 ## 3. Act 1: Dispatch from Mondstadt
 
@@ -51,7 +51,7 @@ plot beats).
 
 ## 4. Act 2: The Wolf of the North
 
-> Frost creeps across the landing, and a great grey wolf pads out of it. Boreas, Varka's partner, a fragment of Andrius, the old Wolf of the North, has come to see whether the Knight of Boreas still deserves the name.
+> Frost spreads across the landing. Boreas takes shape beside Varka, stretches, and bares his teeth. The wolf carries a fragment of Andrius's spirit, but Varka knows that look well enough: his old partner wants a spar.
 >
 > *"You've gone soft, Knight."* — *"Soft? Come over here and say that."*
 
@@ -63,23 +63,23 @@ plot beats).
 
 ## 5. Act 3: The Long Way Home
 
-> Campfires on the stairs below, and banners in Favonius blue. After five years away, most of the expedition has come the long way round to walk him home. Jean is at the head of the column. "You owe me five years of reports, Grand Master." Three faces step out of the ranks behind her.
+> Favonius banners come into view on the stairs below. His expedition has caught up, with familiar faces from Mondstadt among them. After five years away, Varka has quite a welcome waiting. Jean folds her arms. "You owe me five years of reports, Grand Master." Eula, Noelle, and Diluc step forward.
 
 | Option | Effect | Their line |
 |---|---|---|
 | **Eula** | Add an upgraded **Eula: Icetide Vortex** to your deck. | "You still owe me a rematch. Don't you dare go easy." |
 | **Noelle** | Add an upgraded **Noelle: Steadfast Maid** to your deck. | "Welcome back, Grand Master! Please, let me take the front line." |
 | **Diluc** | Add an upgraded **Diluc: Searing Onslaught** to your deck. | "Angel's Share is holding your usual table. Don't keep it waiting." |
-| **Wave them back to the column.** | Nothing. | "Save it for the tavern. We've still got a Spire to finish." |
+| **Wave them back to the column.** | Nothing. | "Stay with the others. I'll meet you all at the foot of the stairs." |
 
-All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, but he still keeps a table for him at his tavern. When one steps out, Varka answers: "Good. Then we climb together, and we all go home."
+All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, but he still keeps a table for him at his tavern. When one steps out, Varka answers: "Ha, good to have you here! Come on, we're nearly there."
 
 ## 6. Lines in combat (speech bubbles)
 
 | When | Varka says |
 |---|---|
-| Entering a boss fight | "Knights, with me! ...Right. Just me, then." |
-| Below a third of his HP | "Still standing. That's the job." |
+| Entering a boss fight | "Well, you're a big one! Let's make some room." |
+| Below a third of his HP | "Easy now. I've got another round in me." |
 | Four Winds' Ascension | "By Lord Barbatos!" |
 | Killing a boss | "Someone write that down. Not me!" |
 | Losing the run | "Tell Jean... we're running a little late." |
@@ -90,7 +90,7 @@ All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noe
 | Pair | Lines |
 |---|---|
 | Varka and Klee | (written with Klee's batch) Varka: "Spark Knight. Same orders as always." Klee: "No bombs indoors. ...Is this indoors?" |
-| Varka and Kokomi | Varka: "You've got your planning face on. Mind if I borrow it?" Kokomi: "Only if you take the left flank." |
+| Varka and Kokomi | Varka: "See that gap on the left? Bet I can get us through." Kokomi: "I see it. Go ahead; I'll cover you." |
 | Varka and Furina | Furina: "The Grand Master himself! Do try not to upstage me." Varka: "Wouldn't dream of it." |
 
 ## The arc in one line
@@ -129,3 +129,7 @@ sounds off, and Diluc reads a little too edgy." Both rewritten.
 1. **The batch.**
    - **(a) Default:** build it as written.
    - (b) Changes first (name the lines).
+
+## Dialogue cleanup, 2026-10-13
+
+[USER]: "I want to do a clean-up pass on both, since some things feel oddly stilted to me." The current lines above reflect that pass. Voice, lore caveats, and the other dialogue surfaces are reviewed in `review/active/klee-varka-dialogue-review-2026-10-13.md`. Event effects and story outcomes are unchanged.
