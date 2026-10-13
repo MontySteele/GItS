@@ -297,8 +297,9 @@ public class KleeOverhaulRoundTwentyTests
     [Fact]
     public void EB571_the_added_draw_leads_the_card_face()
     {
-        foreach (var card in new CustomCardModel[]
-                 { new ProtoMcAlbedoSolarIsotoma(), new ProtoMcFischlOz() })
+        // Albedo left this list on 2026-10-13: Solar Isotoma's upgrade is now
+        // 3 per Attack, so it adds no draw.
+        foreach (var card in new CustomCardModel[] { new ProtoMcFischlOz() })
         {
             var face = Face(card);
             // The clause is the FIRST sentence after the family tag, and the

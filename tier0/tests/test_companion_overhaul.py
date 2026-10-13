@@ -394,27 +394,88 @@ def test_dandelion_breeze_is_cost_1_both_states_and_upgrades_its_block(
     assert st.player.block == 9
 
 
-def test_the_isotoma_pays_nothing_without_an_aura(overhaul):
-    """Both halves are inside the condition -- "if any enemy has an aura, deal
-    8 damage to that enemy AND gain 4 Block" is one guarded sentence, unlike
-    Jean's, whose clauses are joined by a bare "and"."""
-    st = make_state()
-    st.player.powers["mc_isotoma_bloom"] = 1
+# --- Albedo, Solar Isotoma (2026-10-13) ------------------------------------
+# [USER]: "a Rare should be more dramatic and the Mondstadt pool already has
+# powers for free block". "At the end of your turn, deal 2 [3] Geo damage to
+# ALL enemies for each Attack you played this turn." The stack IS the
+# per-Attack damage. C# twin: `SolarIsotomaBloomPower`.
+
+def test_the_isotoma_card_is_2_and_3_per_attack_at_cost_1(overhaul):
+    base = loader.get_card("proto_mc_albedo_solar_isotoma")
+    up = upgrades.apply_upgrade(
+        loader.get_card("proto_mc_albedo_solar_isotoma"))
+    assert (base.cost, up.cost) == (1, 1)
+    assert base.type == "power" and base.rarity == "rare"
+    assert base.effects[0]["amount"] == 2
+    assert up.effects[0]["amount"] == 3
+
+
+def test_the_isotoma_deals_nothing_with_no_attack_played(overhaul):
+    st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
+    st.player.powers["mc_isotoma_bloom"] = 2
+    st.attacks_played_this_turn = 0
     effects.companion_overhaul_turn_end(st)
+    assert [e.hp for e in st.enemies] == [50, 50]
     assert st.player.block == 0
-    assert st.enemies[0].hp == 50
 
 
-def test_the_isotoma_hits_the_aura_bearer_and_pays_block(overhaul):
+def test_the_isotoma_is_one_geo_hit_per_enemy(overhaul):
+    st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b"),
+                             make_enemy(name="c")])
+    st.player.powers["mc_isotoma_bloom"] = 2
+    st.attacks_played_this_turn = 3
+    effects.companion_overhaul_turn_end(st)
+    assert [e.hp for e in st.enemies] == [44, 44, 44]
+    hits = [(e["target"], e["amount"]) for e in st.log
+            if e.get("event") == "damage"]
+    assert hits == [("a", 6), ("b", 6), ("c", 6)]   # ONE hit each, 2 x 3
+
+
+def test_the_isotoma_crystallizes_an_aurad_enemy_for_block(overhaul):
     st = make_state(enemies=[make_enemy(name="a"), make_enemy(name="b")])
     st.enemies[1].aura = "hydro"
-    st.player.powers["mc_isotoma_bloom"] = 1
+    st.player.powers["mc_isotoma_bloom"] = 2
+    st.attacks_played_this_turn = 1
     effects.companion_overhaul_turn_end(st)
-    assert st.enemies[0].hp == 50
-    assert st.enemies[1].hp == 50 - C.MC_ISOTOMA_DMG
-    # No element on the damage, so the aura it found is still standing.
-    assert st.enemies[1].aura == "hydro"
-    assert st.player.block == C.MC_ISOTOMA_BLOCK
+    assert st.enemies[0].hp == 48
+    assert st.enemies[1].aura is None          # Crystallize consumed it
+    assert st.player.block == C.CRYSTALLIZE_BLOCK
+
+
+def test_two_isotomas_add_their_per_attack_damage(overhaul):
+    st = make_state()
+    effects.resolve_card(st, loader.get_card("proto_mc_albedo_solar_isotoma"))
+    effects.resolve_card(st, upgrades.apply_upgrade(
+        loader.get_card("proto_mc_albedo_solar_isotoma")))
+    assert st.player.powers["mc_isotoma_bloom"] == 5
+    st.attacks_played_this_turn = 2
+    effects.companion_overhaul_turn_end(st)
+    assert st.enemies[0].hp == 50 - 10
+
+
+def test_the_isotoma_counts_planned_and_face_up_stings(overhaul):
+    """Every Attack play counts: writing a Plan is a card play (it runs the
+    play pipeline and `refpowers.after_card_played`), and a Sting is an
+    Attack token."""
+    import copy
+    from tier0.engine import combat, kokomi_plan
+    from tier0.tests.test_kokomi_refounding import kokomi_state, write
+    st = kokomi_state(n_enemies=2)
+    st.player.powers["mc_isotoma_bloom"] = 2
+    sting = copy.deepcopy(loader.get_card(kokomi_plan.STING_ID))
+    assert sting.type == "attack"
+    write(st, sting)                                  # a Plan written
+    assert st.attacks_played_this_turn == 1
+    for e in st.enemies:
+        e.intents = [{"kind": "attack", "amount": 5}]
+    face_up = copy.deepcopy(loader.get_card(kokomi_plan.STING_ID))
+    st.player.hand.append(face_up)
+    assert not kokomi_plan.plan_aimed_at_pet(st, face_up)
+    combat.play_card(st, face_up)                     # a Sting played now
+    assert st.attacks_played_this_turn == 2
+    before = [e.hp for e in st.enemies]
+    effects.companion_overhaul_turn_end(st)
+    assert [b - e.hp for b, e in zip(before, st.enemies)] == [4, 4]
 
 
 def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):

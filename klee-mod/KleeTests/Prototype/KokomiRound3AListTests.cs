@@ -37,12 +37,23 @@ public class KokomiRound3AListTests
     }
 
     [Fact]
-    public void Albedo_names_the_enemy_with_the_most_auras()
+    public void Albedo_deals_geo_to_all_per_attack()
     {
-        Assert.EndsWith("At the end of your turn, if any enemy has an aura, deal "
-                   + "8 damage to the enemy with the most auras and gain 4 "
-                   + "[gold]Block[/gold].",
+        // 2026-10-13: "a Rare should be more dramatic and the Mondstadt pool
+        // already has powers for free block".
+        Assert.Equal("At the end of your turn, deal {PowerAmount:diff()} "
+                   + "[gold]Geo[/gold] damage to ALL enemies for each Attack "
+                   + "you played this turn.",
                      Face(new ProtoMcAlbedoSolarIsotoma()));
+    }
+
+    [Fact]
+    public void Jean_swirls_an_enemy_with_an_aura()
+    {
+        Assert.Equal("At the end of your turn, [gold]Swirl[/gold] an enemy "
+                   + "with an aura and gain {PowerAmount:diff()} "
+                   + "[gold]Block[/gold].",
+                     Face(new ProtoMcJeanDandelionBreeze()));
     }
 
     [Fact]

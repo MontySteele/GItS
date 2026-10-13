@@ -3504,11 +3504,11 @@ APPLY_POWERS = {
         "At the end of your turn, deal 6 damage and apply [gold]Cryo[/gold] to "
         "a random enemy. Lasts {X} more turn(s)."),
     "mc_isotoma_bloom": ("SolarIsotomaBloomPower", None,
-        "At the end of your turn, if any enemy has an aura, deal 8 damage to "
-        "that enemy and gain 4 [gold]Block[/gold]."),
+        "At the end of your turn, deal {X} [gold]Geo[/gold] damage to ALL "
+        "enemies for each Attack you played this turn."),
     "mc_dandelion_breeze": ("DandelionBreezePower", None,
-        "At the end of your turn, [gold]Swirl[/gold] the enemy with the most "
-        "auras and gain {X} [gold]Block[/gold]."),
+        "At the end of your turn, [gold]Swirl[/gold] an enemy with an aura "
+        "and gain {X} [gold]Block[/gold]."),
     "mc_oz": ("MondstadtOzPower", None,
         "At the end of your turn, Oz deals 5 damage and applies "
         "[gold]Electro[/gold] to a random enemy."),

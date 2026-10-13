@@ -53,7 +53,7 @@ public sealed class ProtoMcJeanDandelionBreeze : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Dandelion Breeze"),
-        ("description", "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "At the end of your turn, [gold]Swirl[/gold] an enemy with an aura and gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

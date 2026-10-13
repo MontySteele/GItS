@@ -560,8 +560,6 @@ KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
 # row, and only a number a POWER carries lands here.
 MC_SIGNATURE_MIX_BLOCK = 4      # Diona: Block per turn, 2 turns
 MC_GLACIAL_WALTZ_DMG = 7        # Kaeya: Cryo damage per turn, 3 turns
-MC_ISOTOMA_DMG = 8              # Albedo: end-of-turn damage on an aura'd enemy
-MC_ISOTOMA_BLOCK = 4            # Albedo: the Crystallize half
 MC_OZ_DMG = 5                   # Fischl: Oz's Electro volley, no turn limit
 MC_REVELATION_BLOCK = 5         # Nicole: Block at the start of your turn
 MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line

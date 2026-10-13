@@ -5811,7 +5811,7 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
         mc_oz                Electro volley, one target per stack
         mc_grand_ode         Anemo Swirl, every enemy
         mc_dandelion_breeze  Anemo Swirl on the aura-bearer, then Block
-        mc_isotoma_bloom     unelemented damage on the aura-bearer, then Block
+        mc_isotoma_bloom     Geo to ALL enemies, per Attack played this turn
         mc_revelation        the LATCH, last
 
     THE ORDER IS LAW, and the C# twin (`CompanionOverhaulTurnEnd`) walks the
@@ -5885,21 +5885,20 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
         p.block += n
         state.emit("block", amount=n)
 
-    # Albedo, Solar Isotoma -- PERMANENT, stacks are COPIES. BOTH halves are
-    # inside the condition ("if any enemy has an aura, deal 8 damage to that
-    # enemy AND gain 4 Block" is one guarded sentence, unlike Jean's), so no
-    # aura on the board means no damage and no Block. The damage carries NO
-    # element, because the card's text names none, and it runs the pipeline
-    # (NC-1: power-sourced damage scales with the player) while the Block
-    # stays raw (NC-11).
-    for _ in range(p.powers.get("mc_isotoma_bloom", 0)):
-        target = _mc_most_auras(state)
-        if target is None:
-            break
-        deal_damage_to_enemy(state, target, C.MC_ISOTOMA_DMG,
-                             element=None, source="companion")
-        p.block += C.MC_ISOTOMA_BLOCK
-        state.emit("block", amount=C.MC_ISOTOMA_BLOCK)
+    # Albedo, Solar Isotoma (2026-10-13) -- PERMANENT, and the stack IS the
+    # per-Attack damage (2 [3]; copies add, Jean's shape above). "Deal 2 Geo
+    # damage to ALL enemies for each Attack you played this turn": ONE Geo hit
+    # per living enemy of stack x Attacks, so an aura'd enemy Crystallizes off
+    # the reaction table (aura consumed, the player gains Block). The count is
+    # `attacks_played_this_turn`, which `refpowers.after_card_played` writes
+    # for every Attack play -- a Plan WRITE included, since writing a Plan is
+    # a card play. No Attacks, no hit. C# twin: `SolarIsotomaBloomPower`.
+    n = p.powers.get("mc_isotoma_bloom", 0)
+    if n and state.attacks_played_this_turn > 0:
+        dmg = n * state.attacks_played_this_turn
+        for enemy in list(state.living_enemies):
+            deal_damage_to_enemy(state, enemy, dmg,
+                                 element="geo", source="companion")
 
     # ---- the second wave's four end-of-turn readers, still before the latch -
     # THE LATCH STAYS LAST, which is why these go here rather than after it:

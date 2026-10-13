@@ -1682,10 +1682,7 @@
       "grow": 2
     },
     "proto_mc_albedo_solar_isotoma": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "power_amount": 1
     },
     "proto_mc_amber_explosive_puppet": {
       "add": {

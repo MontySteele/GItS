@@ -53,7 +53,7 @@ public sealed class ProtoMcAlbedoSolarIsotoma : CustomCardModel, ICompanionCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Solar Isotoma"),
-        ("description", "{IfUpgraded:show:Draw 1 card. |}At the end of your turn, if any enemy has an aura, deal 8 damage to the enemy with the most auras and gain 4 [gold]Block[/gold]."),
+        ("description", "At the end of your turn, deal {PowerAmount:diff()} [gold]Geo[/gold] damage to ALL enemies for each Attack you played this turn."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -67,7 +67,7 @@ public sealed class ProtoMcAlbedoSolarIsotoma : CustomCardModel, ICompanionCard,
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -84,15 +84,11 @@ public sealed class ProtoMcAlbedoSolarIsotoma : CustomCardModel, ICompanionCard,
             await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
             return;
         }
-        await PowerCmd.Apply<SolarIsotomaBloomPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
+        await PowerCmd.Apply<SolarIsotomaBloomPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

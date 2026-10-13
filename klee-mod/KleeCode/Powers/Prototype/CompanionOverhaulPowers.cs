@@ -379,8 +379,10 @@ public sealed class GrandOdePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Jean, Dandelion Breeze: "At the end of your turn, Swirl the enemy with the
-/// most auras and gain 6 [9] Block." PERMANENT. Since the 2026-10-11
+/// Jean, Dandelion Breeze: "At the end of your turn, Swirl an enemy with an
+/// aura and gain 6 [9] Block." (An enemy holds at most one aura, so the old
+/// "the enemy with the most auras" named a choice that never existed; the
+/// engine still picks the first aura-bearer in board order.) PERMANENT. Since the 2026-10-11
 /// Companion pass Amount IS the Block (copies add into one payment, Durin's
 /// <see cref="PurityStrikePower"/> shape), so the card's upgrade reaches it;
 /// one Swirl a turn. Sim twin: `mc_dandelion_breeze` in
@@ -396,8 +398,8 @@ public sealed class DandelionBreezePower : PowerModel, ILocalizationProvider
     {
         ("title", "Dandelion Breeze"),
         ("description",
-            "At the end of your turn, [gold]Swirl[/gold] the enemy with the "
-          + "most auras and gain "
+            "At the end of your turn, [gold]Swirl[/gold] an enemy with an "
+          + "aura and gain "
           + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
@@ -420,52 +422,35 @@ public sealed class DandelionBreezePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Albedo, Solar Isotoma: "At the end of your turn, if any enemy has an aura,
-/// deal 8 damage to that enemy and gain 4 Block." PERMANENT; Amount is the
-/// number of COPIES.
+/// Albedo, Solar Isotoma (2026-10-13): "At the end of your turn, deal 2 [3]
+/// Geo damage to ALL enemies for each Attack you played this turn."
+/// PERMANENT. Amount IS the per-Attack damage, so copies add into one hit
+/// (Jean's <see cref="DandelionBreezePower"/> shape) and the card's upgrade
+/// reaches it.
 ///
-/// THE DAMAGE CARRIES NO ELEMENT, because the card's text names none. It runs
-/// the sim's damage pipeline exactly as <c>WitchsFlamePower</c> (retired)'s does
-/// (NC-1: power-sourced damage scales with the player) and the Block stays raw
-/// (NC-11) -- adjacent, opposite, both the base game's shape.
+/// THE COUNT IS THE ARM'S ONE LEDGER,
+/// <see cref="CompanionOverhaulLedger.AttacksPlayedThisTurn"/>, written by
+/// <see cref="CompanionOverhaulPlayWatcher.AfterCardPlayed"/> for every play
+/// of an Attack card by this owner. Writing a Kokomi Plan is a card play (the
+/// card is played onto the Bake-Kurage and its <c>OnPlay</c> writes the
+/// Plan), so a planned Attack counts; a Plan CARRIED OUT is not a card play
+/// (<see cref="KokomiPlan.CarryOutNowLine"/>) and does not. Tokens count:
+/// Sting is a <c>CardType.Attack</c>. Sim twin: `state.attacks_played_this_turn`.
 ///
-/// "That enemy" is the aura-bearer the check found, which is the same
-/// most-auras pick Jean's Breeze uses. One helper, so two Rares cannot
-/// disagree about which enemy "the one with an aura" is.
-///
-/// Both halves are inside the condition: no aura on the board, no damage and
-/// no Block. "If any enemy has an aura, deal 8 damage to that enemy AND gain 4
-/// Block" reads as one guarded sentence -- unlike Jean's, whose two clauses are
-/// joined by a bare "and" with no condition in front of them.
+/// ONE HIT PER ENEMY, of per-Attack damage times the count, through
+/// <see cref="ElementalHit.Deal"/> -- so the hit applies Geo, and an enemy
+/// already holding an aura Crystallizes off the existing reaction table (aura
+/// consumed, the player gains Block). No Attacks, no hit.
 /// </summary>
 public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
 {
-    /// <summary>
-    /// ONE FACE, AND IT IS THE STANDING CLAUSE (`EB-571`).
-    ///
-    /// THE FIND `EB-556` ANSWERED (Klee r20 lane 1, (c) 3): "the upgraded card
-    /// reads '... gain 4 Block. Draw 1 card.' but the buff on my status line
-    /// reads '... gain 4 Block.' with no draw ... the one place where two
-    /// screens disagreed about the same effect." Its answer was a second smart
-    /// row on this badge, restating the card's added clause.
-    ///
-    /// `EB-571` ANSWERED IT THE OTHER WAY ROUND, and the reason is WHEN the
-    /// clause resolves. The Prototype-stage rule appends the draw to the
-    /// generated `OnPlay`, so it happens as the card is played -- while this
-    /// badge is only ever about what the power does at the END of a turn.
-    /// Restating an on-play clause here made the badge say the draw was part
-    /// of the later line. So the sentence moved to the FRONT of the card's own
-    /// face, where the order says when it happens, and the badge keeps the one
-    /// row it can honestly carry. The two smart rows and the upgrade-aware
-    /// plumbing that chose between them went with it.
-    /// </summary>
     public List<(string, string)>? Localization => new()
     {
         ("title", "Solar Isotoma"),
         ("description",
-            "At the end of your turn, if any enemy has an aura, deal "
-          + $"[blue]{CompanionOverhaulLaw.IsotomaDamage}[/blue] damage to that enemy and "
-          + $"gain [blue]{CompanionOverhaulLaw.IsotomaBlock}[/blue] [gold]Block[/gold]."),
+            "At the end of your turn, deal [blue]{Amount}[/blue] "
+          + "[gold]Geo[/gold] damage to ALL enemies for each Attack you "
+          + "played this turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -474,22 +459,17 @@ public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
 
     internal async Task FireVolley(PlayerChoiceContext choiceContext)
     {
-        if (Owner.Player == null) return;
-        for (var i = 0; i < Amount; i++)
+        if (Owner.Player == null || Amount <= 0) return;
+        var attacks = CompanionOverhaulLedger.For(Owner).AttacksPlayedThisTurn;
+        if (attacks <= 0) return;
+        var damage = (int)Amount * attacks;
+        var board = CombatState?.HittableEnemies.ToList();
+        if (board == null) return;
+        foreach (var enemy in board)
         {
-            var target = CompanionOverhaulTargeting.MostAuras(CombatState);
-            if (target == null) return;
-
-            var dealt = SimDamagePipeline.DealerMods(
-                Owner, CompanionOverhaulLaw.IsotomaDamage);
-            await CreatureCmd.Damage(
-                choiceContext, target,
-                (int)SimDamagePipeline.TargetMods(target, dealt),
-                ValueProp.Unpowered, dealer: null, cardSource: null,
-                cardPlay: null);
-            await CreatureCmd.GainBlock(
-                Owner, CompanionOverhaulLaw.IsotomaBlock,
-                ValueProp.Unpowered, null, fast: true);
+            if (enemy.IsDead) continue;
+            await ElementalHit.Deal(
+                choiceContext, enemy, Element.Geo, damage, Owner);
         }
     }
 }
@@ -510,10 +490,11 @@ public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
 ///     mc_oz                (Electro volley, one target per stack)
 ///     mc_grand_ode         (Anemo Swirl, every enemy)
 ///     mc_dandelion_breeze  (Anemo Swirl on the aura-bearer, then Block)
-///     mc_isotoma_bloom     (unelemented damage on the aura-bearer, then Block)
+///     mc_isotoma_bloom     (Geo to every enemy, per Attack played this turn)
 ///     mc_revelation        (the latch, LAST -- see RevelationPower)
 ///
-/// The latch is last on purpose: two of the six GRANT Block, and Nicole's
+/// The latch is last on purpose: two of the six can GRANT Block (Jean's
+/// directly, Albedo's through a Crystallize), and Nicole's
 /// question is whether the player ended the turn holding any.
 ///
 /// AfterSideTurnEnd, NOT Before. <see cref="TurnEndSequencer"/> owns

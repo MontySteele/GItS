@@ -909,8 +909,12 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: power,
-   description: "At the end of your turn, if any enemy has an aura, deal 8 damage to the enemy with the most auras and gain 4 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: mc_isotoma_bloom, amount: 1, target: self}]}
+   # 2026-10-13 ([USER]: "a Rare should be more dramatic and the Mondstadt
+   # pool already has powers for free block"). The stack IS the per-Attack
+   # damage, so copies add and the upgrade reaches it.
+   upgrade: {power_amount: +1},
+   description: "At the end of your turn, deal 2 [gold]Geo[/gold] damage to ALL enemies for each Attack you played this turn.",
+   effects: [{op: apply_power, power: mc_isotoma_bloom, amount: 2, target: self}]}
 
 - {id: proto_mc_jean_gale_blade, name: "Jean — Gale Blade", character: klee,
    authored_by: [claude],
@@ -926,7 +930,7 @@
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 1, type: power,
    upgrade: {power_amount: +3},
-   description: "At the end of your turn, [gold]Swirl[/gold] the enemy with the most auras and gain 6 [gold]Block[/gold].",
+   description: "At the end of your turn, [gold]Swirl[/gold] an enemy with an aura and gain 6 [gold]Block[/gold].",
    effects: [{op: apply_power, power: mc_dandelion_breeze, amount: 6, target: self}]}
 
 - {id: proto_mc_fischl_nightrider, name: "Fischl — Nightrider", character: klee,
