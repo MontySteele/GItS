@@ -645,6 +645,35 @@ def test_mika_does_not_discount_her_own_card(overhaul):
     assert st.player.powers["mc_starfrost_discount"] == 1
 
 
+# "THIS TURN" (the user's ruling, 2026-10-13: a discount that banked across
+# turns was too much at Common). The unused discount is popped at turn end
+# beside Bennett's Passion Overload, the rider whose shape it mirrors.
+
+def test_starfrost_discounts_an_attack_played_the_same_turn(overhaul):
+    st = make_state(enemies=[make_enemy(hp=90)])
+    _play(st, "proto_mc_mika_starfrost_swirl")
+    attack = _attack(cost=2)
+    assert combat.card_cost(st, attack) == 1
+    effects.resolve_card(st, attack)
+    assert "mc_starfrost_discount" not in st.player.powers
+
+
+def test_starfrost_expires_unused_at_turn_end(overhaul):
+    st = make_state(enemies=[make_enemy(hp=90)])
+    _play(st, "proto_mc_mika_starfrost_swirl")
+    assert st.player.powers["mc_starfrost_discount"] == 1
+    effects.player_turn_end_triggers(st)
+    assert "mc_starfrost_discount" not in st.player.powers
+
+
+def test_starfrost_does_not_discount_an_attack_next_turn(overhaul):
+    st = make_state(enemies=[make_enemy(hp=90)])
+    _play(st, "proto_mc_mika_starfrost_swirl")
+    effects.player_turn_end_triggers(st)
+    effects.player_turn_start_triggers(st)
+    assert combat.card_cost(st, _attack(cost=2)) == 2
+
+
 # ---------------------------------------------------------------------------
 # THE ORDER LAWS, AGAINST THE OTHER ENGINE'S SOURCE
 # ---------------------------------------------------------------------------

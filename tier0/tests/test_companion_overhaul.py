@@ -490,7 +490,9 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
     matters and it is driven by the listener like the six; the other three are
     a tick and two removals, which cannot change an outcome by running in a
     different order, so they keep their own `AfterSideTurnEnd` broadcast in the
-    mod exactly as the shipped `AttackUpThisTurnPower` does."""
+    mod exactly as the shipped `AttackUpThisTurnPower` does. Mika's Starfrost
+    discount joined that broadcast group as a third removal when it became
+    "this turn" (2026-10-13)."""
     src = (REPO / "tier0" / "engine" / "effects.py").read_text(
         encoding="utf-8")
     body = src.split("def companion_overhaul_turn_end(")[1]
@@ -503,7 +505,8 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                     "mc_grand_ode", "mc_dandelion_breeze",
                     "mc_isotoma_bloom",
                     "mc_lightfall_sword", "mc_favonian_favor",
-                    "mc_passion_overload", "mc_lightning_fang"], seen
+                    "mc_passion_overload", "mc_starfrost_discount",
+                    "mc_lightning_fang"], seen
 
     cs = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
           / "CompanionOverhaulPowers.cs").read_text(encoding="utf-8")

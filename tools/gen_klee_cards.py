@@ -3636,7 +3636,7 @@ APPLY_POWERS = {
         "Counts its owner's [gold]Attacks[/gold]. When it falls, deals 8 "
         "damage plus 5 per [gold]Attack[/gold] counted. Falls in {X} turn(s)."),
     "mc_starfrost_discount": ("StarfrostDiscountPower", None,
-        "Your next [gold]Attack[/gold] costs {X} less."),
+        "Your next [gold]Attack[/gold] this turn costs {X} less."),
     # THE INAZUMA COMPANION OVERHAUL (R213 B), on the SAME flag
     # pair as the Mondstadt rows above. Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulInazuma.cs and is
