@@ -45,7 +45,7 @@ public sealed class ProtoKkTidecleanse : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidecleanse"),
-        ("description", "[gold]Exhaust[/gold] up to {KkAmount:diff()} statuses or curses in your hand. Apply 1 [gold]Weak[/gold]."),
+        ("description", "[gold]Exhaust[/gold] up to {KkAmount:diff()} Statuses or Curses in your [gold]Hand[/gold]. Apply 1 [gold]Weak[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

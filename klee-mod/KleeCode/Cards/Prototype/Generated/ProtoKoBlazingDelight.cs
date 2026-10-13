@@ -42,7 +42,7 @@ public sealed class ProtoKoBlazingDelight : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Blazing Delight"),
-        ("description", "At the start of your turn, gain 1 [gold]Energy[/gold] and draw 1 card."),
+        ("description", "At the start of your turn, gain {energyPrefix:energyIcons(1)} and draw 1 card."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

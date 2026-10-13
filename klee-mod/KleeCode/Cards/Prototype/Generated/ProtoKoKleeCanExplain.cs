@@ -42,7 +42,7 @@ public sealed class ProtoKoKleeCanExplain : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Klee Can Explain!"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Transform every status in your hand into Pop!."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Transform every Status in your [gold]Hand[/gold] into [gold]Pop![/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

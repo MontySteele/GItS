@@ -44,7 +44,7 @@ public sealed class ProtoVkDawnPatrol : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dawn Patrol"),
-        ("description", "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {energyPrefix:energyIcons(1)}. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

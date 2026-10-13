@@ -40,14 +40,14 @@ public sealed class ProtoKoPassTheMatch : CustomCardModel
         CardMultiplayerConstraint.MultiplayerOnly;
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSetOff(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_pass_the_match");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pass the Match"),
-        ("description", "Choose another player. This turn, their next Attack [gold]Sets off[/gold] your [gold]Bombs[/gold] on each enemy it hits. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Choose another player. [gold]Set off[/gold] each enemy their next Attack this turn hits. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

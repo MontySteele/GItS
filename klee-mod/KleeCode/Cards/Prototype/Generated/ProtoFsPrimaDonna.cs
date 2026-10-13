@@ -45,7 +45,7 @@ public sealed class ProtoFsPrimaDonna : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prima Donna"),
-        ("description", "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain 1 [gold]Energy[/gold]."),
+        ("description", "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain {energyPrefix:energyIcons(1)}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

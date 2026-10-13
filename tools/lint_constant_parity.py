@@ -210,7 +210,6 @@ MIRRORED: dict[str, object] = {
     # and the same reason: BOTH engines play these cards, so the two
     # implementations have to agree on them by value or a seat is grading a
     # different card from the one the sim scored.
-    "CompanionOverhaulLaw.WarBannerDexterity": C.MI_WAR_BANNER_DEXTERITY,
     "CompanionOverhaulLaw.JuugaDamage": C.MI_JUUGA_DMG,
     "CompanionOverhaulLaw.DarumaDamage": C.MI_DARUMA_DMG,
     "CompanionOverhaulLaw.DarumaBlock": C.MI_DARUMA_BLOCK,
@@ -404,6 +403,10 @@ UNMIRRORED: dict[str, str] = {
     "AbyssOverlayView.DiamondSize": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.BadgeSize": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.StripIconSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossHalfWidth": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossGlowReach": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossInsetX": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossInsetY": _ABYSS_SCREEN_REASON,
     "StoryRules.BigBombDamage": _STORY_REASON,
     "StoryRules.ConfinementCombats": _STORY_REASON,
     "AbyssNumbers.LeyLineDamageReduction": _ABYSS_REASON,

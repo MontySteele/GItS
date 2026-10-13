@@ -56,7 +56,7 @@ public sealed class ProtoMcSucroseCatalystConversion : CustomCardModel, ICompani
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Catalyst Conversion"),
-        ("description", "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {energyPrefix:energyIcons(1)}. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

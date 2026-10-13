@@ -45,7 +45,7 @@ public sealed class ProtoKoKitchenAlchemy : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitchen Alchemy"),
-        ("description", "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every status in your hand; they lose 1 more for each."),
+        ("description", "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every Status in your [gold]Hand[/gold]; they lose 1 more for each."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

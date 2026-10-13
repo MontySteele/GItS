@@ -59,7 +59,7 @@ public class VarkaPayoffRoundTests : IDisposable
     [Fact]
     public void Wolfpack_says_shuffle_and_exhaust_on_card_and_power()
     {
-        const string face = "Whenever you play Four Winds' Ascension, shuffle "
+        const string face = "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle "
                           + "a copy of it into your [gold]Draw Pile[/gold]. The "
                           + "copy [gold]Exhausts[/gold].";
         Assert.Equal(face, Face(new ProtoVkWolfpack()));

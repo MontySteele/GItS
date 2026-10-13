@@ -3,7 +3,7 @@
 
 WHAT IT GUARDS. Every string the two PROTOTYPE arms and the companion arm
 print in the game -- card faces, mode faces, the arm keyword tips, the power
-badges, the two relics and the one selection prompt -- against the length
+badges, the four kits' relics and the one selection prompt -- against the length
 ceilings measured on the base game's own loc tables and the spellings the
 conventions page fixes. The owner's ask, 2026-09-02: never print "a Yu-Gi-Oh
 card's worth of text", and spell one word one way within a character and
@@ -78,19 +78,13 @@ MAX_SENTENCES = 4         # the base's longest card is four sentences
 #: joined; the retired Furina reframe (`fr`) has no rows left.
 IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|mf|fs|vk)_")
 
-#: THE DEFERRED ROWS (text pass 2026-10-08). Klee is frozen at Balance on
-#: `main` and her rows move on `klee-next`, so the spellings the pass widened
-#: are held for her rows by (row id, spelling name) until that branch lands
-#: the edits written out in `docs/notes/klee-text-pass-pending-2026-10-08.md`.
-#: ROT SEMANTICS, like `EXCEPTIONS`: an entry whose spelling no longer fires
-#: fails, so the list can only shrink.
-KLEE_PENDING = "docs/notes/klee-text-pass-pending-2026-10-08.md"
-DEFERRED: dict[tuple[str, str], str] = {
-    ("proto_ko_team_effort", "more-damage"): KLEE_PENDING,
-    ("proto_ko_sparkling_burst", "more-damage"): KLEE_PENDING,
-    ("proto_ko_treasure_map", "pile-plain"): KLEE_PENDING,
-    ("proto_ko_come_back_and_play", "pile-plain"): KLEE_PENDING,
-}
+#: THE DEFERRED ROWS (text pass 2026-10-08): spellings held for named rows by
+#: (row id, spelling name). ROT SEMANTICS, like `EXCEPTIONS`: an entry whose
+#: spelling no longer fires fails, so the list can only shrink. EMPTY since the
+#: card text pass of 2026-10-12 (`review/active/card-text-pass-2026-10-12.md`,
+#: rules 1 and 8): Team Effort, Sparkling Burst, Treasure Map and Come Back and
+#: Play! took the spellings they were held from.
+DEFERRED: dict[tuple[str, str], str] = {}
 
 # --- the exceptions: id -> reason. Rot semantics, see the module doc. ----
 EXCEPTIONS = {
@@ -126,6 +120,22 @@ EXCEPTIONS = {
         "prints nowhere is not a rule a round can read. The 2026-09-25 Kokomi "
         "text pass took the default face to 61 of 125 and the capped one to "
         "134; what is left over is the cap's own sentence"),
+    "BoreasFang.description": (
+        "the card text pass (2026-10-12, `review/active/card-text-pass-"
+        "2026-10-12.md`) gives this face word for word: the starting element "
+        "and the first-Oath Ascension are two rules of the one starting "
+        "relic, and the reshuffle clause already moved into the hover"),
+    "WolfsGravestone.description": (
+        "Boreas's Fang's face, worded by the same paper, plus 'It is upgraded "
+        "and costs 0 this turn.'"),
+    "LynetteKey": (
+        "the card text pass (2026-10-12) found the guest tips had never been "
+        "read: `_act_texts` measured the act-amount switch and `_tip_body` "
+        "missed the `card.IsUpgraded` argument, so every guest tip rendered "
+        "empty. Lynette's is the one over the tip ceiling, at 146: her line "
+        "and her act, the act in the card face's own words. The pass changed "
+        "wording to its rules only and this tip breaks none of them, so it is "
+        "carried here for a later trim rather than rewritten unasked"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.
@@ -233,7 +243,32 @@ SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
      "'[gold]Elemental Reaction[/gold]', the shipped spelling"),
     ("otherwise-comma", re.compile(r"\bOtherwise [a-z]"), "'Otherwise, ...'"),
     ("parenthesis", re.compile(r"[()]"), "no parentheses"),
+    # THE CARD TEXT PASS (2026-10-12, `review/active/card-text-pass-2026-10-12.md`),
+    # its house rules wherever a regex can hold them. Rule 1: the base golds
+    # "Hand" 103 times and never writes "your hand".
+    ("hand-plain", re.compile(r"\b(?:your|the|in|from|to|into) hand\b"),
+     "'[gold]Hand[/gold]', capital and gold"),
+    # Rule 2: Status and Curse are capitalized, as the base's card types are.
+    ("status-lowercase", re.compile(r"\b(?:status|statuses|curse|curses)\b"),
+     "'Status', 'Curse', capitalized"),
+    # Rule 5: "The first time each turn you ...".
+    ("first-time-order", re.compile(
+        r"\b[Oo]nce (?:a|per|each) turn\b|\bfirst time (?:you|one of)\b[^.]*\beach turn\b"),
+     "'The first time each turn you ...'"),
+    # Rule 7: a reaction is triggered.
+    ("reaction-verb", re.compile(r"\bcaus\w* an? (?:\w+ )?Elemental Reaction"),
+     "'triggers an [gold]Elemental Reaction[/gold]'"),
+    # Rule 12: American English ([USER], 2026-10-12).
+    ("british", re.compile(
+        r"\b(?:colour|honour|favour|armour|behaviour|neighbour|grey|centre|"
+        r"theatre|defence|offence|travelled|cancelled|jewellery)\w*", re.I),
+     "American English: 'gray', 'color', 'defense', 'theater'"),
 ]
+#: Rule 6 of the card text pass (2026-10-12): a delayed effect opens with
+#: "Next turn," and "At the start of your next turn" goes. A card, mode,
+#: power or relic face only: a TIP explains a rule ("Plans happen next turn")
+#: rather than printing an effect.
+NEXT_TURN = re.compile(r"\bstart of your next turn\b|(?<![Yy]our )\bnext turn\b(?!,)")
 #: Regexes over the RAW text (markup matters).
 RAW_SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
     ("gold-cardtype", re.compile(r"\[gold\]Attacks?\[/gold\]|\[gold\]Skills?\[/gold\]|\[gold\]Powers?\[/gold\]"),
@@ -248,7 +283,23 @@ RAW_SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
      "keywords, elements and piles are Capitalised and [gold]"),
     ("printed-exhaust", re.compile(r"(^|\.\s)Exhaust\.(\s|$)"),
      "Exhaust is the keyword rail, never a sentence"),
+    # Card text pass (2026-10-12) rule 1: Hand joins the golded piles.
+    ("bare-hand", re.compile(r"(?<!\[gold\])\bHand\b(?![^\[]*\[/gold\])"),
+     "'[gold]Hand[/gold]'"),
 ]
+#: Card text pass (2026-10-12) rule 3: energy is the base game's icon,
+#: `{Energy:energyIcons()}` or `{energyPrefix:energyIcons(N)}`, never the word.
+#: A card, mode, power or relic face only: a keyword TIP is a plain string the
+#: game does not format, so it cannot draw the icon (Sparks' "instead of
+#: Energy"). Read over the RAW text with holes blanked.
+ENERGY_WORD = re.compile(r"(?<!Burst )(?<!\[gold\]Burst )\bEnergy\b")
+#: Card text pass (2026-10-12) rule 9: "Set off" is golded wherever it is
+#: printed, and it is the verb "[gold]Set off[/gold]", never prose "sets off"
+#: or a golded "Sets off". Faces only, for `ENERGY_WORD`'s reason: the Set
+#: off tip's own body names the word it defines.
+SET_OFF_PROSE = re.compile(
+    r"\[gold\]Sets off\[/gold\]|(?<!\[gold\])\b[Ss]ets? off\b(?![^\[]*\[/gold\])")
+FACE_SURFACES = ("card", "mode", "power", "relic")
 #: Card faces only: a Plan line never names the front enemy (the rule is the
 #: word's); the rows allowed to are listed below.
 FRONT_ENEMY = re.compile(r"\bfront enemy\b")
@@ -372,6 +423,11 @@ _ACT_ARM = re.compile(
 def _act_texts() -> dict[str, str]:
     src = read(MOD / "Powers" / "Prototype" / "FurinaStageBadges.cs")
     body = src[src.index("public static string ActText"):]
+    # The card text pass (2026-10-12): the method holds TWO switches, the act
+    # amounts and then the text, and reading to the first `_ =>` measured the
+    # amounts switch -- every guest tip rendered empty and met no rule. The
+    # text is the `return who switch`.
+    body = body[body.index("return who switch"):]
     body = body[:body.index("_ =>") + 4]
     return {who: csharp_text(expr) for who, expr in _ACT_ARM.findall(body)}
 
@@ -384,7 +440,11 @@ def _tip_body(body: str, consts: dict[str, str]) -> str:
     name = body.strip()
     if re.fullmatch(r"\w+", name) and name in consts:
         return consts[name]
-    act = re.fullmatch(r"StagePerformerBadge\.ActText\(StagePerformer\.(\w+)\)", name)
+    # `, card.IsUpgraded)` too (the card text pass, 2026-10-12): every guest
+    # tip passes the upgrade, and the old pattern read none of them.
+    act = re.fullmatch(
+        r"StagePerformerBadge\.ActText\(StagePerformer\.(\w+)(?:,\s*[\w.]+)?\)",
+        name)
     if act:
         return _act_texts().get(act.group(1), "")
     return csharp_text(body)
@@ -781,6 +841,15 @@ def potion_rows() -> list[Row]:
     return loc_rows(sorted((MOD / "Potions").glob("*.cs")), "card", "proto")
 
 
+#: The four kits' relics, gated since the card text pass (2026-10-12): its
+#: house rules cover every relic of the kits, so they are held to them here
+#: rather than only reported. The Abyss's relics stay in the report.
+KIT_RELIC_FILES = ("PoundingSurprise.cs", "PoundingSurpriseNext.cs",
+                   "TamakushiCasket.cs", "KleeArmRelics.cs",
+                   "UpgradedStarterRelics.cs", "FurinaStageRelics.cs",
+                   "SalonSolitaire.cs", "BoreasFang.cs", "VarkaArmRelics.cs")
+
+
 def prototype_rows() -> list[Row]:
     LOC_TALLY.clear()
     return (card_rows(MOD / "Cards" / "Prototype" / "Generated", IN_SCOPE)
@@ -788,8 +857,8 @@ def prototype_rows() -> list[Row]:
             + base_tip_rows()
             + keyword_fallback_rows()
             + loc_rows(sorted((MOD / "Powers" / "Prototype").glob("*.cs")), "power", "proto")
-            + loc_rows([MOD / "Relics" / "PoundingSurprise.cs",
-                        MOD / "Relics" / "TamakushiCasket.cs"], "relic", "proto")
+            + loc_rows([MOD / "Relics" / name for name in KIT_RELIC_FILES],
+                       "relic", "proto")
             + furina_arm_rows()
             + prompt_rows()
             + potion_rows()
@@ -809,7 +878,7 @@ def report_rows() -> list[Row]:
     powers = [p for p in sorted((MOD / "Powers").glob("*.cs"))]
     rows += loc_rows(powers, "power", "shipped")
     relics = [p for p in sorted((MOD / "Relics").glob("*.cs"))
-              if p.name not in ("PoundingSurprise.cs", "TamakushiCasket.cs")]
+              if p.name not in KIT_RELIC_FILES]
     rows += loc_rows(relics, "relic", "shipped")
     return rows
 
@@ -853,6 +922,16 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
                     deferred_seen.add((base, name))
                     continue
                 out.append(f"{tag}: {name}: {instead}: {row.raw}")
+        if row.surface in FACE_SURFACES:
+            if NEXT_TURN.search(text):
+                out.append(f"{tag}: next-turn: 'Next turn, ...' opens a "
+                           f"delayed effect: {text}")
+            if ENERGY_WORD.search(holes_blanked):
+                out.append(f"{tag}: energy-word: the energy icon, "
+                           f"{{energyPrefix:energyIcons(N)}}: {row.raw}")
+            if SET_OFF_PROSE.search(holes_blanked):
+                out.append(f"{tag}: set-off-prose: '[gold]Set off[/gold]', "
+                           f"the verb: {row.raw}")
         if (row.surface in ("card", "mode") or row.surface == "tip"
                 or row.surface == "power") \
                 and FRONT_ENEMY.search(text) and row.ident not in FRONT_ENEMY_ALLOWED:
@@ -951,6 +1030,18 @@ def self_test() -> list[str]:
         Row("card", "fx_upgrade", "Deal 6 damage.{IfUpgraded:show: Then draw 2 cards and gain 3 Block.|}", "fixture"),
         Row("tip", "fx_tip", "A " + "very " * 30 + "long tip.", "fixture"),
         Row("card", "fx_largest", "Your largest [gold]Bomb[/gold] grows by 3.", "fixture"),
+        Row("card", "fx_hand", "Add a [gold]Sting[/gold] to your hand.", "fixture"),
+        Row("card", "fx_bare_hand", "Add a [gold]Sting[/gold] to your Hand.", "fixture"),
+        Row("card", "fx_status", "Whenever you draw a status, draw 1 card.", "fixture"),
+        Row("card", "fx_once", "Once a turn, when you play a Skill, draw 1 card.", "fixture"),
+        Row("card", "fx_first", "The first time you [gold]Spend[/gold] each turn, draw 1 card.", "fixture"),
+        Row("card", "fx_cause", "If it causes an [gold]Elemental Reaction[/gold], draw 1 card.", "fixture"),
+        Row("card", "fx_grey", "Gain 4 [gold]Block[/gold]. The grey sky clears.", "fixture"),
+        Row("card", "fx_next", "Gain 1 [gold]Strength[/gold] next turn.", "fixture"),
+        Row("power", "fx_next_start", "Gain [blue]3[/blue] [gold]Block[/gold] at the start of your next turn.", "fixture"),
+        Row("card", "fx_energy", "Gain 2 [gold]Energy[/gold].", "fixture"),
+        Row("relic", "fx_sets_off", "Whenever one card sets off 3 [gold]Bombs[/gold], draw 1 card.", "fixture"),
+        Row("power", "fx_sets_off_gold", "Your next Attack [gold]Sets off[/gold] the enemy.", "fixture"),
     ]
     expected = {"fx_long": ("> 120", "sentences", "reaction-lowercase", "more-damage"),
                 "fx_target": ("target-word",), "fx_every": ("every-enemy",),
@@ -958,7 +1049,14 @@ def self_test() -> list[str]:
                 "fx_bare": ("bare-keyword",), "fx_gold_type": ("gold-cardtype",),
                 "fx_plan_front": ("front-enemy",), "fx_lasts": ("lasts-more",),
                 "fx_dash": ("dash",), "fx_upgrade": ("upgrade clause",),
-                "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-where",)}
+                "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-where",),
+                "fx_hand": ("hand-plain",), "fx_bare_hand": ("bare-hand",),
+                "fx_status": ("status-lowercase",), "fx_once": ("first-time-order",),
+                "fx_first": ("first-time-order",), "fx_cause": ("reaction-verb",),
+                "fx_grey": ("british",), "fx_next": ("next-turn",),
+                "fx_next_start": ("next-turn",), "fx_energy": ("energy-word",),
+                "fx_sets_off": ("set-off-prose",),
+                "fx_sets_off_gold": ("set-off-prose",)}
     found = findings_for(fixture, {}, gate=False)
     for ident, needles in expected.items():
         mine = [f for f in found if f"[{ident}]" in f]
@@ -971,6 +1069,9 @@ def self_test() -> list[str]:
         Row("power", "ok_c", "At the end of your turn, deal [blue]6[/blue] [gold]Cryo[/gold] damage to a random enemy. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}.", "fixture"),
         Row("card", "ok_d", "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.", "fixture"),
         Row("card", "ok_e", "Your largest [gold]Bomb[/gold], on any enemy, grows by 3.", "fixture"),
+        Row("card", "ok_f", "Next turn, gain {energyPrefix:energyIcons(1)}. Add a [gold]Sting[/gold] to your [gold]Hand[/gold].", "fixture"),
+        Row("card", "ok_g", "The first time each turn you play a Status, [gold]Set off[/gold] the enemy.", "fixture"),
+        Row("tip", "ok_h", "Some cards cost [gold]Sparks[/gold] instead of Energy. Plans happen next turn.", "fixture"),
     ]
     for f in findings_for(clean, {}, gate=False):
         bad.append(f"self-test: clean fixture raised {f}")
@@ -1001,7 +1102,7 @@ def main(argv: list[str]) -> int:
         bad = self_test()
         for line in bad:
             print(line)
-        print("self-test: 13 bad + 5 clean case(s) + the EB-777 semicolon "
+        print("self-test: 25 bad + 8 clean case(s) + the EB-777 semicolon "
               f"face, {len(bad)} failure(s)")
         return 1 if bad else 0
     if "--report" in argv:

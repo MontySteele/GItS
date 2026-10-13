@@ -108,10 +108,10 @@ public sealed class WatatsumiResistancePower : PowerModel, ILocalizationProvider
     {
         ("title", "Watatsumi Resistance"),
         ("description",
-            "Whenever you write a [gold]Companion[/gold] card as a "
-          + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
+            "Whenever you plan a [gold]Companion[/gold] card, add "
+          + "[blue]{Amount}[/blue] "
           + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "hand."),
+          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -151,8 +151,8 @@ public sealed class DivineStrategyPower : PowerModel, ILocalizationProvider
     {
         ("title", "Divine Strategy"),
         ("description",
-            "The first time each turn you play a card on the "
-          + "[gold]Bake-Kurage[/gold], the line above its [gold]Plan[/gold] happens now too."),
+            "The first time each turn you plan a card, its first line "
+          + "also happens now."),
     };
 
     public override PowerType Type => PowerType.Buff;

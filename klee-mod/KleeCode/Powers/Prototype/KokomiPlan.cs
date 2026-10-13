@@ -96,10 +96,10 @@ public static class KokomiPlan
         ApplyVulnerable,
         ReplayExhausted,
         // R236, Gorou's Crystal Collapse (the Inazuma workshop's one
-        // Personal): "Plan: play a copy of the last other Companion card you
-        // played this turn." The card it holds is captured when the Plan is
-        // WRITTEN -- see <see cref="Schedule"/> -- and a copy of it is played
-        // for free at the morning.
+        // Personal): "Plan: Play a copy of the last Companion card you
+        // played" (combat-wide since the Kokomi level pass, 2026-10-12). The
+        // card it holds is captured when the Plan is WRITTEN -- see
+        // <see cref="Schedule"/> -- and a copy of it is played at the morning.
         PlayCopyOfCompanion,
         // (`EB-685`'s BlockPerPlanHeld left with Dusk, the re-founding,
         // 2026-10-12: Breakwater counts the Plans waiting on its now-line.)
@@ -165,7 +165,8 @@ public static class KokomiPlan
         TransformStatusesInDrawPile,
         // THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-
         // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
-        // Gorou's War Banner "Gain 3 Strength this turn" and Juuga "For 3
+        // Gorou's War Banner "Gain 1 Strength" (permanent since the Kokomi
+        // level pass, 2026-10-12) and Juuga "For 3
         // turns, at the end of your turn gain 6 Block" (amount = the turns);
         // and a written Companion (design pass pick 4 (a)), whose clause
         // holds the card and is carried out at its printed rate after the
@@ -173,7 +174,7 @@ public static class KokomiPlan
         // (<see cref="KokomiCompanionPlan.CarryOut"/>). Sim twins
         // `kokomi_plan`, the same names.
         AddStings,
-        StrengthThisTurn,
+        GainStrength,
         JuugaGuard,
         PlayCompanion,
     }
@@ -191,17 +192,10 @@ public static class KokomiPlan
     /// writing. It also makes the strip honest -- what it draws is what will
     /// happen, not what was true when the card was played.
     ///
-    /// <see cref="EnemiesIntendingAttack"/> IS THE ONE AIM THAT LOOKS BACK, and
-    /// it looks at IDs rather than at creatures (`EB-492`, Flank). "Each enemy
-    /// that intends to attack" is a fact about the intents ON SCREEN WHEN THE
-    /// PLAN WAS WRITTEN -- that is what a player is reading when they choose to
-    /// write it, and re-asking the board at carry-out would answer about NEXT
-    /// turn's intents instead. So the SET is fixed at writing and stored on the
-    /// clause as <see cref="Planned.Targets"/>, a list of
-    /// <c>Creature.CombatId</c>s: an enemy whose intent later changes is still
-    /// hit, and one that died is simply not on the board to resolve. Ids and
-    /// not references keeps the rule above intact -- nothing here holds a
-    /// creature the game has torn down.
+    /// <see cref="EnemiesIntendingAttack"/> (`EB-492`, Flank) is "each enemy
+    /// that intends to attack", read off the board AT CARRY-OUT since the
+    /// Kokomi level pass (2026-10-12), Tide Wall's read. It used to capture
+    /// the set when the Plan was written, and seats misread that.
     /// </summary>
     public enum Aim
     {
@@ -862,7 +856,7 @@ public static class KokomiPlan
         if (body.Any(c => c.Kind == Kind.PlayCopyOfCompanion))
         {
             held = KokomiOverhaulLedger.For(kokomi)
-                                       .LastCompanionPlayedThisTurn;
+                                       .LastCompanionPlayed;
             if (held == source) held = null;
             for (var i = 0; i < body.Count; i++)
             {
@@ -873,32 +867,10 @@ public static class KokomiPlan
             }
             label = Label(source, held);
         }
-        // `EB-492`, FLANK CAPTURES ITS SET AT WRITING TIME, and the argument is
-        // Crystal Collapse's above with one word changed: "each enemy that
-        // intends to attack" is a fact about the intents ON SCREEN NOW, which
-        // is what the player is reading when they decide to write the Plan.
-        // Asking again at carry-out would answer about the NEXT turn's intents
-        // -- a different question, and one the face never asked.
-        //
-        // AN EMPTY SET IS WRITTEN DOWN rather than refused, exactly as an empty
-        // Crystal Collapse capture is: the Plan is real, the strip has to show
-        // it, and what it carries out is nothing.
-        if (body.Any(c => c.Aim == Aim.EnemiesIntendingAttack))
-        {
-            var caught = IntendingAttack(kokomi);
-            for (var i = 0; i < body.Count; i++)
-            {
-                if (body[i].Aim == Aim.EnemiesIntendingAttack)
-                {
-                    body[i] = body[i] with
-                    {
-                        Targets = caught.Select(e => e.CombatId.ToString())
-                                        .ToList(),
-                    };
-                }
-            }
-            label = AimedLabel(source, caught);
-        }
+        // FLANK READS AT CARRY-OUT since the Kokomi level pass (2026-10-12):
+        // "each enemy that intends to attack" is the board when the Plan is
+        // carried out, as Tide Wall reads it (<see cref="Aimed"/>). Seats
+        // misread the old "when you wrote this", so nothing is captured here.
         // KELP WALL COUNTS AT WRITING TIME (Kokomi round-1 fixes,
         // 2026-10-12): "plus 3 for each status or curse in your hand when
         // written" is the hand on screen NOW, the number the face's preview
@@ -1044,29 +1016,6 @@ public static class KokomiPlan
             .Where(IsAlive)
             .Where(CurtainCallHooks.IntendsAttack)
             .ToList() ?? new List<Creature>();
-
-    /// <summary>
-    /// What the strip prints for a Plan that CAUGHT A SET (`EB-492`).
-    ///
-    /// THE SAME ARGUMENT <see cref="Label"/> MAKES, one aim over: a Plan whose
-    /// targets were decided when it was written means a different thing every
-    /// time it is written, and a player who cannot see which bodies it caught
-    /// cannot plan around it. "Flank: nothing" is the honest line for a Plan
-    /// written into a board of Defends -- it is queued, it will fire, and it
-    /// will hit no one.
-    /// </summary>
-    private static string AimedLabel(CardModel? source,
-                                     IReadOnlyList<Creature> caught)
-    {
-        var name = source?.Title.ToString() ?? "Plan";
-        if (caught.Count == 0) return $"{name}: nothing";
-        var names = caught.Select(EnemyName)
-                          .Where(n => n.Length > 0)
-                          .ToList();
-        return names.Count == 0
-            ? $"{name}: {caught.Count}"
-            : $"{name}: {string.Join(", ", names)}";
-    }
 
     /// <summary>Keyed on the VERB, the way Rally's search screen was: one
     /// screen, one string, however many carriers eventually print it.</summary>
@@ -2020,9 +1969,9 @@ public static class KokomiPlan
     /// line showed it: the bridge names every body through
     /// `SafeGetText`, which resolves a `LocString` with `GetFormattedText`, and
     /// every OTHER row this class emits carries a `CombatId` the page renames
-    /// from its own fight memory (`MovedOn`, `Rider`). <see cref="AimedLabel"/>
-    /// bakes its names into a string with no id on it, so it is the one place
-    /// an unresolved title could survive to the screen.
+    /// from its own fight memory (`MovedOn`, `Rider`). Flank's old strip
+    /// label baked its names into a string with no id on it (retired by the
+    /// Kokomi level pass, 2026-10-12, when Flank moved to a carry-out read).
     ///
     /// THE GUARD IS THE SAME GUARD, one call further in: `GetFormattedText`
     /// throws on a model whose loc table has not been built
@@ -2084,8 +2033,8 @@ public static class KokomiPlan
                     player, KokomiCards.Jellyfish.Sting, plan.Amount,
                     upgraded: false);
 
-            case Kind.StrengthThisTurn:
-                await KokomiRefounding.StrengthThisTurn(
+            case Kind.GainStrength:
+                await KokomiRefounding.GainStrength(
                     choiceContext, kokomi, plan.Amount);
                 return plan.Amount;
 
@@ -2298,7 +2247,7 @@ public static class KokomiPlan
         Kind.TransformStatusesInDrawPile => "cards transformed",
         // THE RE-FOUNDING (2026-10-12).
         Kind.AddStings => "cards added",
-        Kind.StrengthThisTurn => "Strength",
+        Kind.GainStrength => "Strength",
         _ => null,
     };
 
@@ -2364,13 +2313,9 @@ public static class KokomiPlan
     /// <summary>
     /// The bodies one clause lands on, resolved AT CARRY-OUT.
     ///
-    /// THE WHOLE CLAUSE AND NOT JUST ITS AIM (`EB-492`), because one aim reads
-    /// something the clause carries: <see cref="Aim.EnemiesIntendingAttack"/>
-    /// resolves the ids <see cref="Schedule"/> captured, filtered to the bodies
-    /// STILL ON THE BOARD. An enemy whose intent changed overnight is still in
-    /// the set -- the set was the point -- and one that died is off
-    /// <c>HittableEnemies</c> and drops out, which is the same "a Plan that
-    /// lands on nothing lands on nothing" rule every other aim already keeps.
+    /// <see cref="Aim.EnemiesIntendingAttack"/> (Flank) reads the intents on
+    /// the board AT CARRY-OUT since the Kokomi level pass (2026-10-12), as
+    /// Tide Wall does: the living, hittable enemies that intend to attack.
     /// </summary>
     /// <param name="entry">`EB-643`. The entry the clause belongs to, for its
     /// <see cref="Entry.AimOverride"/> alone: Converging Tide re-points
@@ -2385,15 +2330,11 @@ public static class KokomiPlan
         if (combat == null) yield break;
         if (plan.Aim == Aim.EnemiesIntendingAttack)
         {
-            var caught = plan.Targets;
-            if (caught == null || caught.Count == 0) yield break;
-            foreach (var enemy in combat.HittableEnemies.Where(IsAlive)
-                                        .ToList())
+            // The Kokomi level pass (2026-10-12): the intents on the board at
+            // carry-out, Tide Wall's read.
+            foreach (var enemy in IntendingAttack(kokomi))
             {
-                if (caught.Contains(enemy.CombatId.ToString()))
-                {
-                    yield return enemy;
-                }
+                yield return enemy;
             }
             yield break;
         }
@@ -3224,9 +3165,9 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
             // not change what you wrote" is the panel's
             // (`blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`). Spec:
             // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.
-            "Carries out [blue]{Amount}[/blue] "
-          + "[gold]Plan{Amount:plural:|s}[/gold] at the start of your next "
-          + "turn, in order."
+            "Next turn, the [gold]Bake-Kurage[/gold] carries out "
+          + "[blue]{Amount}[/blue] [gold]Plan{Amount:plural:|s}[/gold] in "
+          + "order."
           // `EB-653` (round 24). AND THE CAP, WHERE IT BINDS. Empty on an
           // unconfigured build, which is every build but a cap lane's; the
           // sentence is `KokomiPlan.CapSentence`'s, spelled once for both

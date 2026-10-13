@@ -92,7 +92,7 @@ public sealed class CompanionOverhaulLedger
         // guard is a null check because the alternative is a table-wide wipe.
         // This method is a ROLL-ON-READ lookup called from speculative sites
         // -- a face's multiplier lambda (`ProtoMiHeizouHeartstopper`), a
-        // smart-description getter (`WarBannerPower.MissedFor`, "on every
+        // smart-description getter (a power's `MissedFor`, "on every
         // tooltip read") -- and any of them can be handed a card whose owner
         // is off the board: a compendium copy, a reward-screen copy, a deck
         // view. Answering `null` there used to set `_combat` to null and drop
@@ -540,10 +540,10 @@ public sealed class IcyPawsPower : PowerModel, ILocalizationProvider
         // else, so `{Left}` written here was never bound and the placeholder
         // itself reached the screen.
         ("description",
-            "Marks your [gold]Block[/gold]. When it absorbs damage, apply "
+            "Marks your [gold]Block[/gold]. Whenever it absorbs damage, apply "
           + "[gold]Cryo[/gold] to the attacker."),
         ("smartDescription",
-            "[blue]{Left}[/blue] [gold]Block[/gold] left. When it absorbs "
+            "[blue]{Left}[/blue] [gold]Block[/gold] left. Whenever it absorbs "
           + "damage, apply [gold]Cryo[/gold] to the attacker."),
     };
 
@@ -1013,8 +1013,8 @@ public sealed class FavonianFavorPower : PowerModel, ILocalizationProvider
     {
         ("title", "Favonian Favor"),
         ("description",
-            "Whenever an [gold]Elemental Reaction[/gold] happens this turn, "
-          + "gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
+            "Whenever you trigger an [gold]Elemental Reaction[/gold] this "
+          + "turn, gain [blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

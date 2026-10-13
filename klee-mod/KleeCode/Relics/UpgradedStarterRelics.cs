@@ -176,12 +176,13 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
             // extra Spark a turn, all of it earned; and the opening bank,
             // paid by the kit's opening site (`GrantOpeningSparks` below).
             "Whenever a [gold]Bomb[/gold] goes off, gain [blue]"
-          + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold]. "
-          + "The first time each turn, gain [blue]" + FirstExplosionSparks
-          + "[/blue] instead. "
-          // Klee finish-line batch, 2026-10-03: the opening bank.
+          + Powers.KleeOverhaulLaw.SparkPerExplosion + "[/blue] [gold]Spark[/gold], "
+          + "or [blue]" + FirstExplosionSparks
+          + "[/blue] the first time each turn. "
+          // Klee finish-line batch, 2026-10-03: the opening bank. "additional"
+          // since the card text pass (2026-10-12, rule 8).
           + "Start each combat with [blue]" + OpeningSparks
-          + "[/blue] more [gold]Sparks[/gold]."
+          + "[/blue] additional [gold]Sparks[/gold]."
             ),
     };
 

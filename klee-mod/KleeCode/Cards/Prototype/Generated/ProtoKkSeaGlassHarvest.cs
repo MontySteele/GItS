@@ -45,7 +45,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sea Glass Harvest"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Transform every status and curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Transform every Status and Curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

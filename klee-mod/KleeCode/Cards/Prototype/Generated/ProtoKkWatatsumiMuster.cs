@@ -48,7 +48,7 @@ public sealed class ProtoKkWatatsumiMuster : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi Muster"),
-        ("description", "Add {KkAmount} random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] cards to your hand. They are [gold]Ethereal[/gold]."),
+        ("description", "Add {KkAmount} random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companions[/gold] to your [gold]Hand[/gold]. They are [gold]Ethereal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

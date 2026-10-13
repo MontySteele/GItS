@@ -143,7 +143,8 @@ public class VarkaDefenceTests : IDisposable
         // Wolf's Gravestone is a Fang and inherits it.
         Assert.True(typeof(BoreasFang).IsAssignableFrom(typeof(WolfsGravestone)));
         var fang = (BoreasFang)RuntimeHelpers.GetUninitializedObject(typeof(BoreasFang));
-        Assert.Contains("current element", ((ILocalizationProvider)fang)
+        // The card text pass (2026-10-12): "... element becomes current."
+        Assert.Contains("becomes current", ((ILocalizationProvider)fang)
             .Localization!.Single(l => l.Item1 == "description").Item2);
     }
 }

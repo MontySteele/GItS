@@ -45,7 +45,7 @@ public sealed class ProtoKkBubbleWard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bubble Ward"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Add a [gold]Ward[/gold] to your hand."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Add a [gold]Ward[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -6567,8 +6567,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # interpolated numeral.
         "Guest Star": ["Exhausts. Acts at the end of your turn. When it "
                        "leaves, this ", "card goes to your "],
-        "Charlotte": ["The first time one of your cards ", " each turn, draw ",
-                      " card. Act: "],
+        "Charlotte": ["The first time each turn one of your cards ",
+                      ", draw ", " card. Act: "],
         "Wriothesley": ["Whenever you ", ", deal that much ",
                         "damage to a random enemy. Act: deal "],
         "Lynette": ["The first time each turn an enemy makes you lose HP, "
@@ -8671,13 +8671,13 @@ def test_the_smith_prints_the_upgraded_face_beside_the_current_one():
     smith["card_select"]["cards"].append(
         {"id": "KLEEMOD-PROTO_KK_JELLYFISH_DRIFT", "name": "Jellyfish Drift",
          "cost": "1", "type": "Attack",
-         "description": "Deal 6 Hydro damage. Add a Sting to your hand."})
+         "description": "Deal 6 Hydro damage. Add a Sting to your Hand."})
     page = blindplay.observe(smith)
 
     # Both faces, one under the other.
-    assert "    Deal 6 Hydro damage. Add a Sting to your hand." in page
+    assert "    Deal 6 Hydro damage. Add a Sting to your Hand." in page
     assert ("    Upgraded: Deal 8 Hydro damage. Add a Sting to your "
-            "hand.") in page
+            "Hand.") in page
     # And the screen's own rows, including one whose printed face carries the
     # game's appended keyword sentence -- which is why the match is a search
     # over the face rather than the whole of it.
@@ -8738,7 +8738,7 @@ _R12_SMITH = (
     # Legacy cleanup stage 6: the shipped An Invitation left with its sheet;
     # Alice's Detonator is the current row whose upgrade swaps one arm.
     ("KLEEMOD-PROTO_KO_ALICES_DETONATOR",
-     "At the start of your turn, add Alice's Mine to your hand."),
+     "At the start of your turn, add Alice's Mine to your Hand."),
     ("KLEEMOD-PROTO_MC_FISCHL_OZ",
      "At the end of your turn, Oz deals 5 Electro damage to a random "
      "enemy."),
@@ -8767,7 +8767,7 @@ def test_the_two_arm_swap_writes_the_upgraded_arm():
     assert qa_packet.upgraded_face(*_R12_SMITH[0]) == (
         "Deal 10 damage. Drain 3: deal 16 instead.")
     assert qa_packet.upgraded_face(*_R12_SMITH[2]) == (
-        "At the start of your turn, add an upgraded Alice's Mine to your hand.")
+        "At the start of your turn, add an upgraded Alice's Mine to your Hand.")
     assert qa_packet.upgraded_face(*_R12_SMITH[3]) == (
         "Draw 1 card. At the end of your turn, Oz deals 5 Electro damage to "
         "a random enemy.")
@@ -8986,8 +8986,8 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # The Repay floor (ruled 2026-10-09).
         "Vigor": ["Your next Attack deals additional damage."],
         # The Kokomi re-founding (2026-10-12).
-        "Ethereal": ["If this card is in your hand at the end of your "
-                     "turn, it is "],
+        "Ethereal": ["If this card is in your ",
+                     " at the end of your turn, it is "],
     }
     page_only = {"Sharp", "Nimble", "Swift", "Bond of Life", "Exhaust"}
     # `EB-597`. A THIRD CLASS, AND SHRINK IS ITS ONLY MEMBER SO FAR: a word no
@@ -9341,45 +9341,8 @@ def test_the_bridge_answers_the_enemy_half_the_way_it_answers_the_pet_half():
     assert "enemy.IsAlive" in body
 
 
-# ------------- EB-403: the banner face and the base Dexterity gloss ---------
-
-def test_the_banner_face_and_the_dexterity_gloss_agree_on_one_page():
-    """`EB-403`, the page half of the twin.
-
-    Kokomi round 10, run 1, (c) 1: the face printed "Gain 2 Dexterity for 2
-    turns" and the same screen's Dexterity gloss said "It does not decay".
-    Both sentences were true -- the row grants real `DexterityPower`, and the
-    `mi_war_banner` clock beside it hands 2 of it back when it runs out -- and
-    together they read as a contradiction, because nothing printed named the
-    take-back.
-
-    The base gloss is the base RULE and does not move. The face carries the
-    exception now, so the two can be read on one screen.
-
-    `EB-415` dropped the take-back's own NUMBER from the face, because the
-    banner hands back what it granted and the upgraded face grants 3.
-
-    THE 2026-09-25 TEXT PASS took the clause off the FACE: "for 2 turns" is
-    the base game's own duration idiom (`PANIC_BUTTON`, `STABLE_SERUM`) and
-    the temporary stat it prints is the base's "Gain N Dexterity this turn"
-    shape (`ANTICIPATE`) stretched over two turns. The take-back is stated
-    on the `General's War Banner` badge (`WarBannerPower`), which is on the
-    player while the Dexterity is.
-    """
-    import yaml
-    row = next(r for r in yaml.safe_load(
-        (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
-        if r["id"] == "proto_mi_gorou_war_banner")
-    state = combat_state()
-    card = state["player"]["hand"][0]
-    card["name"] = "Gorou - General's War Banner (proto)"
-    card["description"] = row["description"]
-    page = blindplay.render(blindplay.observation(state))
-    assert "Gain 2 Dexterity for 2 turns." in page
-    assert "does not decay" in page          # the base rule, still printed
-    badge = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-             / "CompanionOverhaulInazuma.cs").read_text(encoding="utf-8")
-    assert "takes it back." in badge[badge.index("class WarBannerPower"):]
+# (EB-403's banner face pin left with the Kokomi level pass, 2026-10-12: the
+# War Banner no longer prints Dexterity.)
 
 
 # --------------------- EB-404: a keyword in a TITLE defines nothing --------

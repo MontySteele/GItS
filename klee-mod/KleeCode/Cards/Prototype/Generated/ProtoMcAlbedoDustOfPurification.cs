@@ -53,7 +53,7 @@ public sealed class ProtoMcAlbedoDustOfPurification : CustomCardModel, ICompanio
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Albedo — Dust of Purification"),
-        ("description", "[gold]Exhaust[/gold] every status in your hand. Your largest [gold]Bomb[/gold], on any enemy, grows by {Grow:diff()} for each. Draw 1 card for each."),
+        ("description", "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by {Grow:diff()} for each. Draw 1 card for each."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

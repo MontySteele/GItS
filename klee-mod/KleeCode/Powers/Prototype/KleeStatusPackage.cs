@@ -143,7 +143,7 @@ public sealed class FindersKeepersPower : PowerModel, ILocalizationProvider
     {
         ("title", "Finders Keepers"),
         ("description",
-            "Whenever you draw a status, place a "
+            "Whenever you draw a Status, place a "
           + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
     };
 
@@ -178,7 +178,7 @@ public sealed class DamageReportPower : PowerModel, ILocalizationProvider
     {
         ("title", "Damage Report"),
         ("description",
-            "Whenever you draw a status, gain [blue]{Amount}[/blue] "
+            "Whenever you draw a Status, gain [blue]{Amount}[/blue] "
           + "[gold]Block[/gold] and [blue]" + KleeOverhaulLaw.DamageReportSpark
           + "[/blue] [gold]Spark[/gold]."),
     };

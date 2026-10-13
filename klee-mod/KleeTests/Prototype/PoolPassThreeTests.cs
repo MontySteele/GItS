@@ -226,7 +226,8 @@ public class PoolPassThreeTests
             .First(r => r.Item1 == "description").Item2;
 
         Assert.Equal(card, power);
-        Assert.Contains("every other [gold]Bomb[/gold] it sets off", card);
+        // The card text pass (2026-10-12, rule 9): the golded verb.
+        Assert.Contains("every other [gold]Bomb[/gold] in that [gold]Set off[/gold]", card);
     }
 
     [Fact]

@@ -41,7 +41,7 @@ public sealed class ProtoVkWolfpack : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wolfpack"),
-        ("description", "Whenever you play Four Winds' Ascension, shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold]."),
+        ("description", "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

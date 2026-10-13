@@ -44,20 +44,20 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesDazedCard: true);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_riptide_ruin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide Ruin"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice. Add 3 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(9m, ValueProp.Move)
+            new DamageVar(11m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -76,13 +76,6 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        {
-            for (var i = 0; i < 3; i++)
-            {
-                var token = CombatState!.CreateCard<MegaCrit.Sts2.Core.Models.Cards.Dazed>(Owner);
-                await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
-            }
-        }
     }
 
     protected override void OnUpgrade()

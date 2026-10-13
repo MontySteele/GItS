@@ -649,17 +649,13 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             {
                 await Act(creature, tamoto, () => tamoto.FireVolley(choiceContext));
             }
-            // The three clocks that fire nothing here: a tick, a tick that
-            // hands back its Dexterity, and a mark on an enemy body. Grouped
+            // The two clocks that fire nothing here: a tick and a mark on an
+            // enemy body. Grouped
             // last because none of them can change an outcome by running in a
             // different order.
             foreach (var ooyoroi in creature.Powers.OfType<CrimsonOoyoroiPower>().ToList())
             {
                 await PowerCmd.TickDownDuration(ooyoroi);
-            }
-            foreach (var banner in creature.Powers.OfType<WarBannerPower>().ToList())
-            {
-                await Act(creature, banner, () => banner.Tick(choiceContext));
             }
             var marked = creature.CombatState?.HittableEnemies.ToList();
             if (marked != null)

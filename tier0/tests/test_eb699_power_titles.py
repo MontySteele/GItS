@@ -157,8 +157,11 @@ def test_saras_window_is_named_for_its_effect(scrape):
 
 def test_the_lint_can_see_a_power_titled_after_its_own_card(scrape):
     """Non-vacuity: the rule permits the ordinary case, so a green run is not
-    a scrape that found nothing. Gorou's banner IS titled after its card."""
+    a scrape that found nothing. Sangonomiya's Orders IS titled after its card
+    (Gorou's banner was the example until the Kokomi level pass retired its
+    power, 2026-10-12)."""
     _, power_titles, appliers = scrape
 
-    assert power_titles["WarBannerPower"] == "General's War Banner"
-    assert "ProtoMiGorouWarBanner" in _reachable("WarBannerPower", appliers)
+    assert power_titles["SangonomiyasOrdersPower"] == "Sangonomiya's Orders"
+    assert "ProtoKkSangonomiyasOrders" in _reachable(
+        "SangonomiyasOrdersPower", appliers)

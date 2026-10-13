@@ -208,7 +208,9 @@ public sealed class KokomiOverhaulLedger
     private int _round = -1;
 
     /// <summary>
-    /// The last Companion card she played this turn, or null (R236).
+    /// The last Companion card she played this COMBAT, or null (R236; combat-
+    /// wide since the Kokomi level pass, 2026-10-12: "Play a copy of the last
+    /// Companion card you played").
     ///
     /// Crystal Collapse's whole reading, and it is a CARD rather than a count
     /// because the Plan plays a copy of it. Written by
@@ -218,12 +220,11 @@ public sealed class KokomiOverhaulLedger
     /// have and a memory that only exists while a Power is out is a memory
     /// that reads null on most boards.
     ///
-    /// "OTHER" IS THE CALLER'S. This is the last Companion, full stop; the
-    /// identity test that makes it the last OTHER one lives at the single
-    /// site that reads it (<c>KokomiPlan.Schedule</c>), so the fact and the
-    /// card's reading of it stay separable.
+    /// CRYSTAL COLLAPSE IS NEVER RECORDED (<see cref="NoteCompanionCard"/>):
+    /// a copy of it would only write the same Plan again, so its own plays
+    /// leave the last Companion where it was.
     /// </summary>
-    public CardModel? LastCompanionPlayedThisTurn { get; private set; }
+    public CardModel? LastCompanionPlayed { get; private set; }
 
     /// <summary>One Companion play finished.</summary>
     public void NoteCompanionPlayed() => CompanionsPlayedThisTurn++;
@@ -232,8 +233,12 @@ public sealed class KokomiOverhaulLedger
     /// from the counter above because the two have different writers: the
     /// counter is The General's Banner's hook and this is the marker
     /// power's.</summary>
-    public void NoteCompanionCard(CardModel card) =>
-        LastCompanionPlayedThisTurn = card;
+    public void NoteCompanionCard(CardModel card)
+    {
+        if (card is global::KleeMod.Cards.Prototype.Generated
+                .ProtoMiGorouCrystalCollapse) return;
+        LastCompanionPlayed = card;
+    }
 
     /// <summary>
     /// THE ONE ONCE-PER-TURN GATE, and the three powers that cap a payoff at a
@@ -299,10 +304,8 @@ public sealed class KokomiOverhaulLedger
         // round zeroes this before `ResolveAll` writes the new morning's depth
         // -- which is what makes a morning with no Plans read an honest zero.
         PlansThisMorning = 0;
-        // CLEARED rather than handed over, unlike the count above: Crystal
-        // Collapse captures while the Plan is WRITTEN, so what survives the
-        // boundary is the card on the entry and never this slot.
-        LastCompanionPlayedThisTurn = null;
+        // (The last Companion played is combat-wide since the Kokomi level
+        // pass, 2026-10-12, so a turn boundary leaves it alone.)
         NextPlanExtra = null;
         // The jellyfish build (2026-10-12): The Shape of Water's "this turn".
         StingsPlayedThisTurn = 0;

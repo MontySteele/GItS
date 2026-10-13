@@ -128,7 +128,7 @@ public class KokomiJellyfishBuildTests
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal("Whenever the [gold]Bake-Kurage[/gold] carries out a "
                    + "[gold]Plan[/gold], add a [gold]Sting[/gold] to your "
-                   + "hand.", Face(card));
+                   + "[gold]Hand[/gold].", Face(card));
         var up = Upgraded<ProtoKkEndlessShoal>();
         Assert.Equal(1, up.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Innate, up.Keywords);
@@ -241,8 +241,9 @@ public class KokomiJellyfishBuildTests
                 asm.GetType("KleeMod.Cards.Prototype.Generated." + n)!)!)
             .GroupBy(c => c.Rarity)
             .ToDictionary(g => g.Key, g => g.Count());
-        Assert.Equal(21, rarity[CardRarity.Common]);
-        Assert.Equal(37, rarity[CardRarity.Uncommon]);
+        // The Kokomi level pass (2026-10-12): Change of Plans C -> U.
+        Assert.Equal(20, rarity[CardRarity.Common]);
+        Assert.Equal(38, rarity[CardRarity.Uncommon]);
         Assert.Equal(20, rarity[CardRarity.Rare]);
     }
 }

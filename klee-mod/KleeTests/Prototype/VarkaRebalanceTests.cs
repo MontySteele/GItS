@@ -123,8 +123,9 @@ public class VarkaRebalanceTests : IDisposable
         Assert.DoesNotContain(play, c => c.Contains("VarkaCards"));
         Assert.False(new ProtoVkBarbaraWhisperOfWater().DynamicVars.ContainsKey("VkAmount"));
         // The Varka review (2026-10-12): a Knight's face ends in its switch line.
-        Assert.EndsWith("Your [gold]Block[/gold] is not removed at the start of your "
-                        + "next turn.{InCombat:{VarkaSwitch}|}",
+        // The card text pass (2026-10-12, rule 6): "Next turn," opens it.
+        Assert.EndsWith("Next turn, your [gold]Block[/gold] is not removed."
+                        + "{InCombat:{VarkaSwitch}|}",
                         new ProtoVkBarbaraWhisperOfWater().Localization!
                             .Single(p => p.Item1 == "description").Item2);
     }

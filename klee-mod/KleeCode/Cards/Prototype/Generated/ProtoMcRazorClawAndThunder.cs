@@ -59,7 +59,7 @@ public sealed class ProtoMcRazorClawAndThunder : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Razor — Claw and Thunder"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If this is the third Attack you played this turn, gain 1 [gold]Energy[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If this is the third Attack you played this turn, gain {energyPrefix:energyIcons(1)}."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

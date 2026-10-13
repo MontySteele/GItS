@@ -45,7 +45,7 @@ public sealed class ProtoFsOusiaSurge : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ousia Surge"),
-        ("description", "The first time you [gold]Drain[/gold] each turn, draw 1 card."),
+        ("description", "The first time each turn you [gold]Drain[/gold], draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

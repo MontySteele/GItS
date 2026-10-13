@@ -79,16 +79,17 @@ def test_her_pool_is_seventy_eight(overhaul):
 
 def test_coral_crash_is_body_slam_and_tidal_rebuke_keeps_no_exhaust(overhaul):
     crash = _row("proto_kk_coral_crash")
-    # The Kokomi card pass (2026-10-11): costs 0; the upgrade adds 4 damage.
+    # The Kokomi level pass (2026-10-12): Body Slam's price, 1 [0], and the
+    # "+4" upgrade went.
     assert (crash.rarity, crash.cost, _up("proto_kk_coral_crash").cost) == (
-        "common", 0, 0)
+        "common", 1, 0)
     assert crash.effects[0]["amount_formula"]["base"] == 0
     assert _up("proto_kk_coral_crash").effects[0]["amount_formula"] == {
-        "base": 4, "per": 1, "count": "player_block"}
+        "base": 0, "per": 1, "count": "player_block"}
     rebuke = _row("proto_kk_tidal_rebuke")
-    # The Rare pass (2026-10-04): cost 2 -> 1 [0], and Retain.
+    # The Kokomi level pass (2026-10-12): 2 [1], and Retain.
     assert (rebuke.rarity, rebuke.cost, _up("proto_kk_tidal_rebuke").cost) == (
-        "rare", 1, 0)
+        "rare", 2, 1)
     assert not rebuke.exhaust and rebuke.retain
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
                                make_enemy(hp=300, intents=QUIET)])
@@ -148,9 +149,11 @@ def test_seas_reproach_answers_her_weak_and_vulnerable(overhaul):
     powers.apply_power(st, st.player, "weak", 1, applier=st.player)
     powers.apply_power(st, enemy, "poison", 1, applier=st.player)
     assert enemy.hp == hp
-    # The Kokomi card pass (2026-10-11): 1 [0] (was 2 [1]).
+    # The Kokomi level pass (2026-10-12): 5 [7] damage, cost 1 both faces.
     assert (_row("proto_kk_seas_reproach").cost,
-            _up("proto_kk_seas_reproach").cost) == (1, 0)
+            _up("proto_kk_seas_reproach").cost) == (1, 1)
+    assert _row("proto_kk_seas_reproach").effects[0]["amount"] == 5
+    assert _up("proto_kk_seas_reproach").effects[0]["amount"] == 7
 
 
 def test_tactical_relay_plans_energy_for_each_player(overhaul):
@@ -216,17 +219,17 @@ def test_interval_bells_spend_is_three_then_two(arm):
 # --- the Rare pass (2026-10-04) ------------------------------------------------
 
 def test_shoal_of_spears_is_one_hit_per_plan_waiting(overhaul):
-    """One hit of 5 per Plan waiting (4 until Kokomi round 2; per Plan
-    written this turn until the re-founding, 2026-10-12), so her Strength counts on each hit; with no
-    Plan waiting it deals nothing."""
+    """One hit of 5, plus one more per Plan waiting (the floor is the Kokomi
+    level pass, 2026-10-12), so her Strength counts on each hit; with no Plan
+    waiting it still hits once."""
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
                                make_enemy(hp=300, intents=QUIET)])
     st.player.powers["strength"] = 2
     _play(st, "proto_kk_shoal_of_spears")
-    assert [e.hp for e in st.enemies] == [300, 300]
+    assert [e.hp for e in st.enemies] == [300 - 7, 300 - 7]
     for i in range(3):
         kokomi_plan.schedule(st, plan_card(
             [{"op": "energy", "amount": 1}], cid=f"proto_kk_w{i}"))
     _play(st, "proto_kk_shoal_of_spears")
-    assert [e.hp for e in st.enemies] == [300 - 3 * 7, 300 - 3 * 7]
+    assert [e.hp for e in st.enemies] == [300 - 7 - 4 * 7, 300 - 7 - 4 * 7]
 

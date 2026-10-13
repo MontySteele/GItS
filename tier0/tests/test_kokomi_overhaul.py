@@ -401,10 +401,12 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
 
     THE JELLYFISH BUILD (2026-10-12): Measured Breath (Uncommon) and Spring
     Tide (Rare) cut, Endless Shoal moved Rare to Uncommon, All Streams Flow to
-    the Sea (Rare) and The Shape of Water (Uncommon) added: 21 / 37 / 20."""
+    the Sea (Rare) and The Shape of Water (Uncommon) added: 21 / 37 / 20.
+    THE KOKOMI LEVEL PASS (2026-10-12): Change of Plans Common -> Uncommon,
+    20 / 38 / 20."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 21, "uncommon": 37, "rare": 20}
+        "common": 20, "uncommon": 38, "rare": 20}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

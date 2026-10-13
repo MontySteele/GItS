@@ -42,7 +42,7 @@ public sealed class ProtoKoAlicesDetonator : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Detonator"),
-        ("description", "At the start of your turn, add {IfUpgraded:show:an upgraded |}Alice's Mine to your hand."),
+        ("description", "At the start of your turn, add {IfUpgraded:show:an upgraded |}[gold]Alice's Mine[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

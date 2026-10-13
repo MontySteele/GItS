@@ -225,8 +225,8 @@ public sealed class PassTheMatchPower : PowerModel, ILocalizationProvider
     {
         ("title", "Pass the Match"),
         ("description",
-            "This turn, your next Attack [gold]Sets off[/gold] Klee's "
-          + "[gold]Bombs[/gold] on each enemy it hits."),
+            "[gold]Set off[/gold] Klee's [gold]Bombs[/gold] on each enemy "
+          + "your next Attack this turn hits."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -297,8 +297,8 @@ public sealed class KnightsOfFavoniusPower : PowerModel, ILocalizationProvider
     {
         ("title", "Knights of Favonius"),
         ("description",
-            "Whenever another player plays an Attack, it [gold]Sets off[/gold] "
-          + "your [gold]Bombs[/gold] on each enemy it hits."),
+            "Whenever another player plays an Attack, [gold]Set off[/gold] "
+          + "each enemy it hits."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -497,7 +497,7 @@ public sealed class SparksForEveryonePower
         ("title", "Sparks for Everyone"),
         ("description",
             "The first time each turn one of your [gold]Bombs[/gold] goes off, "
-          + "each other player gains [blue]{Amount}[/blue] [gold]Energy[/gold]."),
+          + "each other player gains {Amount:energyIcons()}."),
     };
 
     public override PowerType Type => PowerType.Buff;

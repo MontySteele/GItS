@@ -111,7 +111,7 @@ public static partial class KokomiCards
     }
 
     /// <summary>
-    /// Orders from the Shrine, Watatsumi Muster: "Add N random Common Inazuma
+    /// Watatsumi Muster: "Add N random Common Inazuma
     /// Companion cards to your hand. They are Ethereal." Distinct cards off
     /// <see cref="KokomiCompanionPlan.Generated"/>, the run's companion
     /// roster (Klee's Tag Along door, <c>TakeRandom</c> on
@@ -122,12 +122,33 @@ public static partial class KokomiCards
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         AddCompanionCards(card, Amount(card));
 
-    /// <summary>Orders from the Shrine: "Add a random Common Inazuma
-    /// Companion card to your hand." One of <see cref="AddCompanions"/>.
+    /// <summary>
+    /// Orders from the Shrine (the Kokomi level pass, 2026-10-12): "Choose 1
+    /// of 3 random Common Inazuma Companions to add into your Hand. It is
+    /// Ethereal." Call the Generals' screen at Common, without its cost-0
+    /// rider; the card's upgrade is its cost, so the pick arrives as it is.
     /// </summary>
-    public static Task AddCompanion(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
-        AddCompanionCards(card, 1);
+    public static async Task ChooseCommonCompanion(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner;
+        var combat = owner?.Creature?.CombatState;
+        if (owner == null || combat == null) return;
+        if (!KokomiOverhaul.LiveFor(owner.Creature)) return;
+        var offered = KokomiCompanionPlan.Generated(owner, CardRarity.Common)
+            .TakeRandom(KokomiCompanionPlan.GeneralsOffered,
+                        owner.RunState.Rng.CombatCardGeneration)
+            .Select(c => combat.CreateCard(c, owner))
+            .Where(c => c != null)
+            .Cast<CardModel>()
+            .ToList();
+        if (offered.Count == 0) return;
+        var pick = await CardSelectCmd.FromChooseACardScreen(
+            choiceContext, offered, owner, canSkip: true);
+        if (pick == null) return;
+        await CardPileCmd.AddGeneratedCardToCombat(
+            KokomiCompanionPlan.Generate(pick), PileType.Hand, owner);
+    }
 
     private static async Task AddCompanionCards(CardModel card, int amount)
     {
@@ -415,7 +436,7 @@ public static class KokomiRefounding
         "KLEEMOD-KOKOMI_RESERVES.selectionScreenPrompt";
 
     public const string ReservesPromptText =
-        "Choose a card to put into your hand.";
+        "Choose a card to put into your [gold]Hand[/gold].";
 
     /// <summary>Grand Design's hand screen.</summary>
     public const string GrandDesignPromptKey =
@@ -550,14 +571,14 @@ public static class KokomiRefounding
             KokomiCards.Jellyfish.Sting, stings, upgraded: false);
     }
 
-    /// <summary>Gorou, General's War Banner's Plan line: "Gain 3 Strength
-    /// this turn." The base game's Flex shape (a positive
-    /// <c>TemporaryStrengthPower</c>).</summary>
-    public static Task StrengthThisTurn(PlayerChoiceContext choiceContext,
-                                        Creature kokomi, int amount) =>
+    /// <summary>Gorou, General's War Banner's Plan line: "Gain 1 Strength."
+    /// Permanent since the Kokomi level pass (2026-10-12), her own slow
+    /// Strength line. Sim twin: `kokomi_plan`'s `GAIN_STRENGTH`.</summary>
+    public static Task GainStrength(PlayerChoiceContext choiceContext,
+                                    Creature kokomi, int amount) =>
         amount <= 0
             ? Task.CompletedTask
-            : PowerCmd.Apply<WarBannerPlanPower>(
+            : PowerCmd.Apply<StrengthPower>(
                 choiceContext, kokomi, amount, applier: kokomi,
                 cardSource: null);
 
@@ -582,22 +603,6 @@ public static class KokomiRefounding
     }
 }
 
-/// <summary>Gorou, General's War Banner, its Plan line: "Gain 3 Strength this
-/// turn." Flex's shape: Strength now, taken back at the end of the turn. Sim
-/// twin: <c>temp_strength</c>.</summary>
-public sealed class WarBannerPlanPower : TemporaryStrengthPower, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "General's War Banner"),
-        ("description",
-            "Gain [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
-    };
-
-    public override AbstractModel OriginModel =>
-        ModelDb.Card<ProtoMiGorouWarBanner>();
-}
-
 /// <summary>Sangonomiya's Orders: "At the start of your turn, add a random
 /// Common Inazuma Companion card to your hand. It is Ethereal." Copies add
 /// one each. Sim twin: <c>kokomi_plan.turn_start_generators</c>.</summary>
@@ -608,8 +613,9 @@ public sealed class SangonomiyasOrdersPower : PowerModel, ILocalizationProvider
         ("title", "Sangonomiya's Orders"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] random "
-          + "Common Inazuma [gold]Companion[/gold] "
-          + "{Amount:plural:card|cards} to your hand. "
+          + "Common Inazuma "
+          + "{Amount:plural:[gold]Companion[/gold]|[gold]Companions[/gold]} "
+          + "to your [gold]Hand[/gold]. "
           + "{Amount:plural:It is|They are} [gold]Ethereal[/gold]."),
     };
 
@@ -653,7 +659,7 @@ public sealed class KurageBloomPower : PowerModel, ILocalizationProvider
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] "
           + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "hand."),
+          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -758,7 +764,7 @@ public sealed class GrandStrategistPower : PowerModel, ILocalizationProvider
     {
         ("title", "Grand Strategist"),
         ("description",
-            "Whenever a [gold]Plan[/gold] causes an [gold]Elemental "
+            "Whenever a [gold]Plan[/gold] triggers an [gold]Elemental "
           + "Reaction[/gold], deal [blue]{Amount}[/blue] damage to ALL "
           + "enemies."),
     };
@@ -781,7 +787,7 @@ public sealed class EndlessShoalPower : PowerModel, ILocalizationProvider
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
           + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
           + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "hand."),
+          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

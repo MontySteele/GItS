@@ -45,13 +45,13 @@ public sealed class ProtoKkSeasReproach : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sea's Reproach"),
-        ("description", "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal 3 damage to it."),
+        ("description", "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal {PowerAmount:diff()} damage to it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoKkSeasReproach : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SeasReproachPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SeasReproachPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

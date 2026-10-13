@@ -82,8 +82,9 @@ public class CoopSetTests
     public void The_faces_are_the_designs_words()
     {
         Assert.Equal(
-            "Choose another player. This turn, their next Attack [gold]Sets off[/gold] "
-            + "your [gold]Bombs[/gold] on each enemy it hits. Draw {Cards:diff()} "
+            // The card text pass (2026-10-12): "Set off" is the golded verb.
+            "Choose another player. [gold]Set off[/gold] each enemy their next "
+            + "Attack this turn hits. Draw {Cards:diff()} "
             + "card{Cards:plural:|s}.",
             Face(new ProtoKoPassTheMatch()));
         Assert.Equal(

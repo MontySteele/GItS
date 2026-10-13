@@ -51,7 +51,7 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Drowning Pressure"),
-        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -72,6 +72,8 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
