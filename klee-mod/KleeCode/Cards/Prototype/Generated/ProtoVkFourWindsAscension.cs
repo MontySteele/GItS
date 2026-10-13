@@ -51,14 +51,15 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Four Winds' Ascension"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(10m, ValueProp.Move),
-            new DynamicVar("VkPer", 3m)
+            new DynamicVar("VkPer", 3m),
+            new VarkaCurrentElementHitVar()
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

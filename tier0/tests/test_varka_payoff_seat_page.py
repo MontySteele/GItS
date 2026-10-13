@@ -116,9 +116,9 @@ def _with_ascension(state, relic="Boreas's Fang"):
     card.update({"id": "KLEEMOD-PROTO_VK_FOUR_WINDS_ASCENSION",
                  "name": "Four Winds' Ascension", "type": "Attack",
                  "cost": "2", "keywords": [],
-                 "description": "Deal 10 Anemo damage. Then deal 3 for each "
-                                "Oath of your current element, as that "
-                                "element, in one hit."})
+                 "description": "Deal 10 Anemo damage. Then deal 3 damage "
+                                "per Oath of your current element, as "
+                                "that element."})
     hand.append(card)
     state["player"]["relics"][0]["name"] = relic
     return state

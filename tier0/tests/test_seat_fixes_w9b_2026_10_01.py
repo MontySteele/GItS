@@ -115,16 +115,22 @@ def test_a_frozen_artifact_blocked_is_said_on_the_row_and_the_preview():
 
 # ---- 8. Four Winds' Ascension -----------------------------------------------
 
-def test_four_winds_says_its_oath_damage_is_one_hit():
-    """20 then 39: Strength counts once on the Oath hit, because it is one."""
+def test_four_winds_prints_its_oath_hit_total_in_combat():
+    """20 then 39: Strength counts once on the Oath hit, because it is one.
+    Text pass 2026-10-13 ([USER]: "I don't think we need the 'as one hit'
+    bit"): the words go, the in-combat total says it, the hit stays one."""
     sheet = _read("docs", "prototype-surface.yaml")
     row = sheet[sheet.index("id: proto_vk_four_winds_ascension"):]
     row = row[:row.index("\n\n")]
-    assert "as that element, in one hit." in row
+    assert "in one hit" not in row
+    assert ("damage per [gold]Oath[/gold] of your [gold]current element"
+            "[/gold], as that element.{InCombat:\\n(Deals {VkHit:diff()} "
+            "damage)|}") in row
     assert "per: 3" in row                      # no number moved
     card = _read("klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
                  "ProtoVkFourWindsAscension.cs")
-    assert "as that element, in one hit." in card
+    assert "in one hit" not in card
+    assert "new VarkaCurrentElementHitVar()" in card
 
 
 # ---- 9. `use potion 1` -------------------------------------------------------
