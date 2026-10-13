@@ -482,7 +482,10 @@ def shown_hand(state: dict[str, Any]) -> dict[str, Any] | None:
         return None
     hand = _hand(state)
     titles = _numbered_titles(hand)
-    if not hand or titles == [_card_title(e) for e in hand]:
+    # Kokomi round 4 (2026-10-13): a hand with no repeat is remembered too,
+    # so a copy a play adds after this page is numbered on from it
+    # (`_with_new_copies`).
+    if not hand:
         return None
     return {"turn": shown_hand_key(state), "played": [],
             "cards": [{"n": t, "title": _card_title(e),
@@ -522,7 +525,16 @@ def resolve_shown_card(state: dict[str, Any], command: str,
     hit = next((j for j, r in enumerate(rows) if _fold(r.get("n")) == want),
                None)
     if hit is None:
-        return command, None, ""
+        # Kokomi round 4 (2026-10-13, lane 1 F9): a copy a play ADDED since
+        # the page is numbered on from the page's own count, so the numbers
+        # the seat counted hold for the rest of the turn.
+        grown = _with_new_copies(state, rows, shown.get("played") or [])
+        hit = next((j for j, r in enumerate(grown)
+                    if _fold(r.get("n")) == want), None)
+        if hit is None:
+            return command, None, ""
+        rows = grown
+        shown["cards"] = grown
     row = rows[hit]
     if hit in (shown.get("played") or []):
         return command, None, SHOWN_CARD_PLAYED.format(name=row.get("n"))
@@ -545,6 +557,36 @@ def resolve_shown_card(state: dict[str, Any], command: str,
             + ", ".join(titles[i] for i in same))
     rewritten = _QUOTED.sub(lambda _m: f'"{titles[pick]}"', command, count=1)
     return rewritten, hit, ""
+
+
+def _with_new_copies(state: dict[str, Any], rows: list[dict[str, Any]],
+                     played: list[int]) -> list[dict[str, Any]]:
+    """The remembered rows plus one row per copy a play has ADDED to the hand
+    since the page was printed (Kokomi round 4, 2026-10-13, lane 1 F9).
+
+    A page showed two Stings; a play made two more; the seat counted four and
+    typed `Sting (3)`, which the re-counted hand (two left after two plays)
+    refused. Per title the page printed, the copies in hand beyond those the
+    page showed and has not seen played are new, and they take the next
+    numbers, in hand order: `Sting (3)`, `Sting (4)`. A title the page never
+    printed keeps the hand's own numbers. Pure; the caller keeps the result.
+    """
+    out = [dict(r) for r in rows]
+    done = set(played)
+    groups: dict[tuple[str, bool], list[dict[str, Any]]] = {}
+    for e in _hand(state):
+        groups.setdefault((_card_title(e), _is_upgraded(e)), []).append(e)
+    for (title, up), cards in groups.items():
+        mine = [j for j, r in enumerate(rows)
+                if r.get("title") == title and bool(r.get("up")) == up]
+        if not mine:
+            continue
+        left = sum(1 for j in mine if j not in done)
+        for k in range(len(cards) - left):
+            e = cards[left + k]
+            out.append({"n": f"{title} ({len(mine) + k + 1})", "title": title,
+                        "up": up, "f": _card_face_key(e)})
+    return out
 
 
 def _card_face_key(entry: dict[str, Any]) -> str:

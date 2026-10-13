@@ -1474,6 +1474,8 @@ def test_every_kokomi_row_agrees_with_the_emitters_own_gate(overhaul):
             gen_klee_cards.card_needs_a_waiting_plan(row), card.id
         assert kokomi_plan.needs_a_plannable_card(card) == \
             gen_klee_cards.card_needs_a_plannable_card(row), card.id
+        assert kokomi_plan.needs_an_exhausted_card(card) == \
+            gen_klee_cards.card_needs_an_exhausted_card(row), card.id
 
 
 # --- THE POOL PASS (`EB-492`) ----------------------------------------------

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkMoonsReflection : CustomCardModel, ICharacterCard
+public sealed class ProtoKkMoonsReflection : CustomCardModel, ICharacterCard, IUnplayableReasonCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -50,6 +50,16 @@ public sealed class ProtoKkMoonsReflection : CustomCardModel, ICharacterCard
         ("title", "Moon's Reflection"),
         ("description", "Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, carry out its [gold]Plan[/gold], or play it if it has none."),
     };
+
+    // Kokomi round 4 (2026-10-13): unplayable while the Exhaust
+    // Pile is empty, rather than spending itself on nothing.
+    protected override bool IsPlayable =>
+        KokomiRefounding.AnyExhausted(this);
+
+    public string? UnplayableReason =>
+        KokomiRefounding.AnyExhausted(this)
+            ? null
+            : "your Exhaust Pile is empty";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
