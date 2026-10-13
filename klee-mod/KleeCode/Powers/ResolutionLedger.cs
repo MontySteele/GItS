@@ -206,6 +206,12 @@ public static class ResolutionLedger
         public string Owner { get; init; } = string.Empty;
         public bool? IsLocal { get; init; }
         public int PlayCount { get; init; } = 1;
+
+        /// <summary>Seat page backlog (2026-10-13): the card's type as the
+        /// game prints it ("Attack", "Skill", "Power"...), so the page can
+        /// say whether an Attack was played this turn (Ripple Basin's 4
+        /// Block). "" where the ledger was not told.</summary>
+        public string CardType { get; init; } = string.Empty;
     }
 
     /// <summary>
@@ -432,7 +438,8 @@ public static class ResolutionLedger
                  cardPlay.IsAutoPlay,
                  Safe(() => cardPlay.Player?.Character?.Title?.GetFormattedText()),
                  isLocal,
-                 cardPlay.PlayCount);
+                 cardPlay.PlayCount,
+                 Safe(() => cardPlay.Card.Type.ToString()));
     }
 
     /// <summary>
@@ -447,7 +454,8 @@ public static class ResolutionLedger
     /// place a row is minted, so the two cannot drift.
     /// </summary>
     public static void OpenPlay(string cardId, string card, bool autoPlayed,
-                                string owner = "", bool? isLocal = null, int playCount = 1)
+                                string owner = "", bool? isLocal = null, int playCount = 1,
+                                string cardType = "")
     {
         if (Rows.Count >= MaxRows)
         {
@@ -459,6 +467,7 @@ public static class ResolutionLedger
             Owner = owner ?? string.Empty,
             IsLocal = isLocal,
             PlayCount = playCount < 1 ? 1 : playCount,
+            CardType = cardType ?? string.Empty,
         };
         Rows.Add(row);
         _open = row;
@@ -729,6 +738,7 @@ public static class ResolutionLedger
             ["owner"] = row.Owner,
             ["is_local"] = row.IsLocal,
             ["play_count"] = row.PlayCount,
+            ["card_type"] = row.CardType,
             ["carried"] = row.Carried,
             ["overflowed"] = row.Overflowed,
             ["hits"] = row.Hits.ConvertAll(hit =>

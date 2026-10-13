@@ -341,6 +341,23 @@ public class ResolutionLedgerTests
         Assert.Equal(1, rows[1]["play_count"]);
     }
 
+    /// <summary>Seat page backlog (2026-10-13): a row carries the card's
+    /// type, so the page can tell whether an Attack was played this turn
+    /// (Ripple Basin). A row opened without it reads "".</summary>
+    [Fact]
+    public void A_row_carries_its_card_type()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("strike", "Strike", false, cardType: "Attack");
+        ResolutionLedger.ClosePlay();
+        ResolutionLedger.OpenPlay("defend", "Defend", false);
+        ResolutionLedger.ClosePlay();
+
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Equal("Attack", rows[0]["card_type"]);
+        Assert.Equal("", rows[1]["card_type"]);
+    }
+
     // ---------------------------------------------------------- the shape ---
 
     /// <summary>The wire keys ARE the contract:
@@ -354,7 +371,7 @@ public class ResolutionLedgerTests
 
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "owner",
-                             "is_local", "play_count", "carried",
+                             "is_local", "play_count", "card_type", "carried",
                              "overflowed", "hits", "applied", "summoned",
                              "oath", "fang_ascension", "fang_relic",
                              "swirl_no_aura", "swirl_on_aura", "between",

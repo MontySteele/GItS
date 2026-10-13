@@ -527,6 +527,19 @@ ATTACK_BUFF_NOTE = (
 ENEMY_FOLD_NOTE = (
     "*Face numbers leave out the enemy's Vulnerable and Slow until a card is "
     "aimed; the hit lands higher.*")
+# SEAT PAGE BACKLOG (2026-10-13; a Kokomi seat, round 1 2026-10-12, lane 5b).
+# Off Furina's stage, an arm card's calculated face -- the "(Deals N damage)"
+# line -- is a `FrontFoldedDamageVar`, which DOES fold the front enemy's
+# Vulnerable and Slow (`gen_klee_cards`: every `proto_` calculated damage
+# face). The note above read wrong beside one, so the page names those cards:
+# with the note where other faces leave them out, alone where none does.
+ENEMY_FOLD_NOTE_EXCEPT = (
+    "*Face numbers leave out the enemy's Vulnerable and Slow until a card is "
+    "aimed; the hit lands higher. Not the \"(Deals N damage)\" line on "
+    "{cards}: it already counts the front enemy's.*")
+ENEMY_FOLD_NOTE_ONLY = (
+    "*The \"(Deals N damage)\" line on {cards} already counts the front "
+    "enemy's Vulnerable and Slow.*")
 # `EB-605`. TWO NUMBERS FOR ONE BOMB IN ONE SENTENCE.
 #
 # THE FIND (Klee r22 lane 1 re-run (c) 2, fight 6 turn 4). "`Bomb 6 ... Bomb

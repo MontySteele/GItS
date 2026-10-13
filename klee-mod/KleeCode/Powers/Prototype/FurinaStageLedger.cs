@@ -1121,16 +1121,22 @@ public sealed class FurinaStageLedger
         return snapshot;
     }
 
-    private static Dictionary<string, object?>? ForecastSnapshot(
+    /// <summary>The wire's view of a forecast. Public so the Block sum is
+    /// pinned headlessly (`FurinaSpendUpToTests`).</summary>
+    public static Dictionary<string, object?>? ForecastSnapshot(
         StageForecast? forecast, int fanfare)
     {
         if (forecast == null) return null;
         return new Dictionary<string, object?>
         {
-            // No guest act moves Fanfare or gives Block directly (Charlotte's
-            // Repay prints its Fanfare as it lands): the page's two figures.
+            // No guest act moves Fanfare directly (Charlotte's Repay prints
+            // its Fanfare as it lands). Freminet's act gives Block, unpowered
+            // (`StageDirector`), and the page's Incoming line adds it (seat
+            // page backlog, 2026-10-13: it was a hard-coded 0).
             ["fanfare_after"] = fanfare,
-            ["block"] = 0,
+            ["block"] = forecast.Cues
+                .Where(cue => cue.Kind == StageCueKind.Block)
+                .Sum(cue => cue.Amount),
             ["acts"] = forecast.Cues
                 .Select(cue => (object?)new Dictionary<string, object?>
                 {

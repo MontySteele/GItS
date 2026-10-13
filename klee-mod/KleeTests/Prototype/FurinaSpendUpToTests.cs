@@ -243,6 +243,19 @@ public class FurinaSpendUpToTests
         Assert.Equal(20, cues[1].Amount);
     }
 
+    /// <summary>Seat page backlog (2026-10-13): the wire's forecast Block is
+    /// Freminet's act, not a hard-coded 0, so the page's Incoming line adds
+    /// the guests' end-of-turn Block.</summary>
+    [Fact]
+    public void The_forecast_snapshot_sends_freminets_block()
+    {
+        var kit = StageKit.With(40, StagePerformer.Freminet,
+                                StagePerformer.Navia);
+        var wire = FurinaStageLedger.ForecastSnapshot(
+            FurinaStage.Forecast(kit.Stage), kit.Stage.Fanfare)!;
+        Assert.Equal(14, wire["block"]);
+    }
+
     [Fact]
     public void The_two_guests_badges_print_their_share_spend()
     {
