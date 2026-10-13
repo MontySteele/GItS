@@ -53,32 +53,52 @@ would make that 17.
 Asked on 2026-10-12 (you ruled Encore! only and "leave her alone for now").
 **New fact:** a second wave in a row passed on the guests. Charlotte was
 skipped 8 times and taken twice, Lynette 4 of 4, Leading Lady and Encore!
-every time. The guest-heavy deck (seat 5) died 6 short of the act 3 boss; the
-winner's guests were a minority.
+every time.
 
-The reason is unchanged: a guest's act is small and takes no Strength.
+Every Guest Star costs 1 and Exhausts. A guest stays on stage (three seats)
+and has a **line**, a passive while it is on stage, and an **act** at the
+end of each of your turns. The first draft of this section listed the acts
+only. The full texts (`FurinaStageBadges.ActText`, numbers from
+`FurinaStageLaw.cs`; upgrades in brackets):
 
-| Guest | Act now |
-|---|---|
-| Wriothesley (Common) | 4 [7] Cryo to a random enemy |
-| Lynette | 3 [6] Anemo to an enemy with an aura |
-| Chevreuse | 4 to a random enemy |
-| Clorinde (Rare) | 6 [9] Electro to a random enemy |
-| Lyney | Drain 2, 8 [11] Pyro to ALL |
-| Escoffier (Rare) | 4 [6] Cryo to ALL |
-| Freminet | 3 [6] Block, plus Fanfare |
-| Charlotte, Sigewinne | Repay 2 [4] |
+| Guest | Line (passive) | Act (each turn) |
+|---|---|---|
+| Charlotte (C) | First time each turn a card Repays, draw 1 | Repay 2 [4] |
+| Wriothesley (C) | Whenever you Drain, that much Cryo to a random enemy | 4 [7] Cryo, random enemy |
+| Lynette (U) | First time each turn you lose HP to an enemy, double Fanfare | 3 [6] Anemo, an enemy with an aura |
+| Chevreuse (U) | Whenever you Spend, 1 Vulnerable [and 1 Weak] to a random enemy | 4, random enemy |
+| Freminet (U) | Whenever you Drain, gain that much Block | 3 [6] Block, plus a quarter of your Fanfare spent as Block |
+| Sigewinne (U) | Whenever you Repay, gain that much Block | Repay 2 [4] |
+| Lyney (U) | Drain buffer 10 larger | Drain 2, 8 [11] Pyro to ALL |
+| Navia (U) | First Spend each turn costs 2 [3] less | Spend half your Fanfare as Geo damage, random enemy |
+| Clorinde (R) | Whenever you Repay, twice that much Electro, random enemy | 6 [9] Electro, random enemy |
+| Neuvillette (R) | Your Hydro damage deals 2 [3] more | Hydro to ALL equal to HP lost since your last turn |
+| Escoffier (R) | Whenever a guest acts, Repay 1 | 4 [6] Cryo to ALL |
 
-And Leading Lady, the prima donna's guest payoff, is "Gain 1 [2] Strength.
-Your Attacks deal 1 additional damage for each guest on stage": one Strength
-for a 1-Energy Power, the price of the Ironclad's Inflame.
+[USER] (2026-10-13), against a Defect orb: "Lyney is clearly extremely
+strong. Escoffier is priced close to a Glass orb. Wriothesley, Lynette
+Chevreuse are all priced close to the going rate of a Lightning orb.
+Freminet is close to a Frost orb. Charlotte, Siegwinne are lower, but priced
+in Drain / Repay. These don't line up at all with their rarities."
 
-**Proposal:**
-- **Every damaging act +2, Freminet's Block +2** (the 2026-10-12 numbers):
-  Wriothesley 6 [9], Lynette 5 [8], Chevreuse 6, Clorinde 8 [11], Lyney 10
-  [13] to ALL, Escoffier 6 [8] to ALL, Freminet 5 [8]. Repay acts unchanged.
+The lines are where most of the value is, and they mostly do line up: the
+Rares' lines scale (Clorinde doubles every Repay, Neuvillette every Hydro
+hit). The acts do not. Lyney, an Uncommon, has the biggest act in the cast,
+and the Rare Escoffier's ALL act is half of it. A flat +2 (the 2026-10-12
+proposal) would widen that gap, so it is withdrawn.
+
+**Proposal:** price the acts by rarity, lines unchanged.
+- **Lyney:** 8 [11] to ALL becomes 5 [7] to ALL. Still the only Uncommon that
+  hits ALL, with the bigger buffer.
+- **Escoffier:** 4 [6] to ALL becomes 7 [10] to ALL, above Lyney.
+- **Lynette:** 3 [6] becomes 5 [8], the Uncommon rate (her target needs an
+  aura).
 - **Leading Lady:** "Gain 2 [3] Strength. Your Attacks deal 1 additional
-  damage for each guest on stage."
+  damage for each guest on stage." Up from 1 [2], in line with the
+  Ironclad's Inflame, also a 1-Energy Uncommon Strength Power.
+- The rest stay: Charlotte and Wriothesley are Commons at the Lightning rate
+  with build-around lines; Chevreuse, Freminet, Sigewinne and Navia are paid
+  through their lines.
 
 ## 3. Looked at, not changed
 
@@ -102,8 +122,8 @@ for a 1-Energy Power, the price of the Ironclad's Inflame.
      your next turn, Repay 3." Private Box unchanged.
    - (b) No change.
 2. **The guest style.**
-   - **(a) Default:** damaging acts +2, Freminet +2, Leading Lady 2 [3]
-     Strength.
+   - **(a) Default:** Lyney 5 [7] to ALL, Escoffier 7 [10] to ALL, Lynette
+     5 [8], Leading Lady 2 [3] Strength.
    - (b) Leading Lady only.
    - (c) Leave the guests until your playtest.
 
