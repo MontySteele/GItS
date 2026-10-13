@@ -277,7 +277,14 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
             ResourceLoader.Load<Texture2D>(path));
     }
 
-    public override float AttackAnimDelay => 0.15f;
+    /// <summary>
+    /// The hit lands as her thrown bomb does: the attack clip releases it at
+    /// 0.45 s (combat.tscn %ThrownProjectile metadata/release) and it flies
+    /// <see cref="Vfx.ThrownProjectile.FlightSeconds"/>. At the base's 0.15
+    /// the damage landed before the bomb left her hand. Fast mode caps the
+    /// wait at 0.25 s regardless (<c>CreatureCmd.TriggerAnim</c>).
+    /// </summary>
+    public override float AttackAnimDelay => 0.6f;
 
     public override float CastAnimDelay => 0.25f;
 

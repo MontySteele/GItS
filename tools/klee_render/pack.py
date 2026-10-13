@@ -1,12 +1,15 @@
 """Pack Klee's rendered frames into the game's sheets and stills.
 
     python tools/klee_render/pack.py --renders <scratch dir> [--art-root <main checkout>] [--check]
+    python tools/klee_render/pack.py --split-thrown [--art-root <main checkout>]
 
 Reads what tools/klee_render/render.py wrote (per clip: f_NNN.png + <clip>.json;
 per still: <name>.png + <name>.json) and writes, under <art-root>/ImageGen:
 
   images/model/frames/klee_<clip>.png   one sheet per combat clip (and the
                                         merchant loop), cells in reading order
+  images/model/frames/klee_bomb.png     the thrown bomb, cut out of the attack
+                                        sheet's release cell (split_thrown)
   images/model/klee_rest.png            the seated rest-site still, padded so
                                         BaseLib's centred sprite puts her seat
                                         on the rest-site anchor
@@ -49,6 +52,12 @@ MERCHANT_SCALE = round(1 / 1.5, 6)
 MAX_SHEET = 4096
 PAD = 2
 
+#: The clip whose free (thrown) bomb is lifted out of the cells and flown by
+#: the game instead (KleeMod.Vfx.ThrownProjectile): baked in, it was clipped at
+#: the cell edge a fifth of the way to the enemy.
+THROWN_CLIP = "attack"
+BOMB_FILE = "klee_bomb.png"
+
 
 def alpha_box(ims):
     box = None
@@ -83,6 +92,76 @@ def sheet_for(clip_dir: Path, meta: dict):
     }
 
 
+def column_runs(alpha: Image.Image) -> list[tuple[int, int]]:
+    """Runs of columns holding any opaque texel, left to right, as [x0, x1)."""
+    w, h = alpha.size
+    px = alpha.load()
+    filled = [any(px[x, y] for y in range(h)) for x in range(w)]
+    runs, start = [], None
+    for x, on in enumerate(filled + [False]):
+        if on and start is None:
+            start = x
+        elif not on and start is not None:
+            runs.append((start, x))
+            start = None
+    return runs
+
+
+def split_thrown(sheet: Image.Image, rec: dict):
+    """Lift the free bomb out of a throw clip's cells.
+
+    In each cell the figure is the widest run of filled columns; any run wholly
+    to its right is the bomb in flight, detached from her hand. Those texels
+    are erased in every cell, and the bomb as first seen (the release cell) is
+    returned as its own sprite with where it sat. Returns (sheet, bomb, thrown)
+    with bomb and thrown None when no cell carries a detached run -- a sheet
+    already split, so running this twice changes nothing.
+    """
+    cw, ch = rec["cell"]
+    cols = rec["hframes"]
+    out = sheet.copy()
+    bomb = thrown = None
+    for i in range(rec["count"]):
+        x0, y0 = (i % cols) * cw, (i // cols) * ch
+        cell = out.crop((x0, y0, x0 + cw, y0 + ch))
+        runs = column_runs(cell.getchannel("A"))
+        if len(runs) < 2:
+            continue
+        figure = max(runs, key=lambda r: r[1] - r[0])
+        for a, b in (r for r in runs if r[0] >= figure[1]):
+            box = (a, 0, b, ch)
+            if bomb is None:
+                piece = cell.crop(box)
+                py0, py1 = piece.getchannel("A").getbbox()[1::2]
+                bomb = piece.crop((0, py0, b - a, py1))
+                thrown = {"frame": i, "time": rec["times"][i], "file": BOMB_FILE,
+                          "size": list(bomb.size), "at": [(a + b) / 2, (py0 + py1) / 2]}
+            out.paste(Image.new("RGBA", (b - a, ch), (0, 0, 0, 0)), (x0 + a, y0))
+    return out, bomb, thrown
+
+
+def split_existing(art_root: Path) -> int:
+    """`--split-thrown`: split the attack sheet already on disk (no renders
+    needed) and record the bomb in the manifest. Idempotent."""
+    frames_dir = art_root / "ImageGen" / "images" / "model" / "frames"
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    rec = manifest["sheets"][THROWN_CLIP]
+    path = frames_dir / rec["file"]
+    sheet, bomb, thrown = split_thrown(Image.open(path).convert("RGBA"), rec)
+    if bomb is None:
+        assert "thrown" in rec and (frames_dir / BOMB_FILE).exists(), \
+            f"{path.name} has no free bomb and no {BOMB_FILE} was cut before"
+        print(f"{path.name} already split; bomb at {rec['thrown']['at']}")
+        return 0
+    sheet.save(path, optimize=True)
+    bomb.save(frames_dir / BOMB_FILE, optimize=True)
+    rec["thrown"] = thrown
+    MANIFEST.write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n",
+                        encoding="utf-8", newline="\n")
+    print("wrote", path, "and", frames_dir / BOMB_FILE, thrown)
+    return 0
+
+
 def body_metrics(still: Path, meta: dict, scale: float) -> dict:
     """Her on-screen height at 1080p: the full alpha box (feather tip to boot)
     and hat-top to boot (the first row wider than the feather)."""
@@ -107,10 +186,16 @@ def body_metrics(still: Path, meta: dict, scale: float) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--renders", required=True, help="render.py --out dir (combat + merchant + stills)")
+    ap.add_argument("--renders", help="render.py --out dir (combat + merchant + stills)")
     ap.add_argument("--art-root", default=str(ROOT))
     ap.add_argument("--check", action="store_true", help="only report; write nothing")
+    ap.add_argument("--split-thrown", action="store_true",
+                    help="lift the free bomb out of the attack sheet on disk; needs no renders")
     args = ap.parse_args(argv)
+    if args.split_thrown:
+        return split_existing(Path(args.art_root))
+    if not args.renders:
+        ap.error("--renders is required unless --split-thrown")
     R = Path(args.renders)
     art = Path(args.art_root) / "ImageGen" / "images"
     out_frames = art / "model" / "frames"
@@ -124,6 +209,11 @@ def main(argv=None) -> int:
         assert not meta.get("keys_only"), f"{clip}: a --keys-only render is a preview, not frames"
         sheet, rec = sheet_for(R / clip, meta)
         rec["file"] = SHEET_FILES[clip]
+        if clip == THROWN_CLIP:
+            sheet, bomb, thrown = split_thrown(sheet, rec)
+            assert bomb is not None, f"{clip}: no free bomb in any cell"
+            rec["thrown"] = thrown
+            writes.append((out_frames / BOMB_FILE, bomb))
         manifest["sheets"][clip] = rec
         writes.append((out_frames / rec["file"], sheet))
         print(f"{clip:9s} {rec['count']:3d} frames  cell {rec['cell']}  grid {rec['hframes']}x{rec['vframes']}"

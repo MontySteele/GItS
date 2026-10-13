@@ -802,6 +802,17 @@ UNMIRRORED: dict[str, str] = {
         "waits on it, and the sim draws nothing.",
     "KleeCombatVfx.LobDuration":
         "presentation: bomb-toss animation length in seconds.",
+    # Klee's thrown bomb (2026-10-13): flown by the game from her attack
+    # clip's release frame to the target, the base NVfxProjectileHandler's
+    # shape. The sim throws nothing; Klee.AttackAnimDelay waits for it.
+    "ThrownProjectile.FlightSeconds":
+        "presentation: hand-to-target flight of the thrown bomb in seconds.",
+    "ThrownProjectile.ArcLift":
+        "presentation: thrown-bomb arc height in pixels.",
+    "ThrownProjectile.SpinDegrees":
+        "presentation: the thrown bomb's spin over its flight.",
+    "ThrownProjectile.PopScale":
+        "presentation: scale of the base fire burst on the bomb's arrival.",
     "KleeCombatVfx.MaxConcurrentPops":
         "presentation: how many pop effects may overlap before they are "
         "dropped. A frame-rate guard, not a rule -- the sim resolves every "

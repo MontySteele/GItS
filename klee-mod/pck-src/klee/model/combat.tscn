@@ -1,4 +1,4 @@
-[gd_scene load_steps=77 format=3]
+[gd_scene load_steps=78 format=3]
 
 [ext_resource type="Texture2D" path="res://klee/model/layers/klee_combat_smoke.png" id="1_smoke"]
 [ext_resource type="Texture2D" path="res://klee/model/layers/klee_combat_floaters.png" id="2_floaters"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_hurt.png" id="9_hurt"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_death.png" id="10_death"]
 [ext_resource type="Texture2D" path="res://klee/model/frames/klee_cast.png" id="11_cast"]
+[ext_resource type="Texture2D" path="res://klee/model/frames/klee_bomb.png" id="12_bomb"]
 
 [sub_resource type="Animation" id="Animation_reset"]
 length = 0.001
@@ -2052,6 +2053,14 @@ offset = Vector2(-73, -371)
 scale = Vector2(0.5, 0.5)
 hframes = 7
 vframes = 3
+
+[node name="ThrownProjectile" type="Sprite2D" parent="Visuals/Facing"]
+unique_name_in_owner = true
+visible = false
+position = Vector2(67.5, -138.25)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("12_bomb")
+metadata/release = 0.45
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true

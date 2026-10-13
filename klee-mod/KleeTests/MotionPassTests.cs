@@ -221,6 +221,94 @@ public class MotionPassTests
         Assert.Matches("resource_name = \"idle_low\"\\nlength = [0-9.]+\\nloop_mode = 1", scene);
     }
 
+    private static Type Thrown() => Il.Method("ThrownProjectile", "ArcPoint").DeclaringType!;
+
+    private static Godot.Vector2 Arc(Godot.Vector2 a, Godot.Vector2 b, float t) =>
+        (Godot.Vector2)Thrown().GetMethod("ArcPoint", All)!
+            .Invoke(null, new object[] { a, b, t, 70f })!;
+
+    [Fact]
+    public void The_thrown_bomb_runs_hand_to_target_over_an_arc_either_way()
+    {
+        var hand = new Godot.Vector2(100, -140);
+        var enemy = new Godot.Vector2(700, -100);
+        Assert.Equal(hand, Arc(hand, enemy, 0f));
+        Assert.Equal(enemy, Arc(hand, enemy, 1f));
+        // Mid-flight it rides above the straight line (up is -Y on screen),
+        // and a flipped Klee throwing leftward arcs up too, not down.
+        Assert.True(Arc(hand, enemy, 0.5f).Y < -120 - 60);
+        var mirrored = new Godot.Vector2(-100, -140);
+        var leftEnemy = new Godot.Vector2(-700, -100);
+        Assert.True(Arc(mirrored, leftEnemy, 0.5f).Y < -120 - 60);
+        Assert.InRange(Arc(mirrored, leftEnemy, 0.5f).X, -420, -380);
+    }
+
+    [Fact]
+    public void The_bomb_aims_at_its_target_or_the_middle_of_the_side()
+    {
+        Godot.Vector2? Aim(Godot.Vector2? single, params Godot.Vector2[] side) =>
+            (Godot.Vector2?)Thrown().GetMethod("AimPoint", All)!
+                .Invoke(null, new object?[] { single, side.ToList() });
+
+        var a = new Godot.Vector2(600, -100);
+        var b = new Godot.Vector2(800, -120);
+        Assert.Equal(a, Aim(a, a, b));
+        // AoE, random targets, or no command behind the trigger: the side.
+        Assert.Equal(new Godot.Vector2(700, -110), Aim(null, a, b));
+        Assert.Null(Aim(null));
+    }
+
+    [Fact]
+    public void Only_a_fresh_entry_into_the_attack_clip_throws()
+    {
+        bool Throws(string? from, string to) => (bool)Thrown()
+            .GetMethod("Throws", All)!.Invoke(null, new object?[] { from, to })!;
+
+        Assert.True(Throws("idle", "attack"));
+        Assert.True(Throws("idle_low", "attack"));
+        Assert.True(Throws(null, "attack"));
+        // A no-op travel replays nothing, so it throws nothing.
+        Assert.False(Throws("attack", "attack"));
+        Assert.False(Throws("idle", "cast"));
+        Assert.False(Throws("idle", "setoff"));
+    }
+
+    [Fact]
+    public void Klees_scene_carries_the_bomb_and_the_hit_waits_for_it()
+    {
+        var scene = RepoFile("klee-mod/pck-src/klee/model/combat.tscn");
+        var name = (string)Thrown().GetField("NodeName", All)!.GetValue(null)!;
+        var meta = (string)Thrown().GetField("ReleaseMeta", All)!.GetValue(null)!;
+        var block = Regex.Match(scene,
+            $"\\[node name=\"{name}\" type=\"Sprite2D\" parent=\"Visuals/Facing\"\\]\\n((?:.+\\n)+)");
+        Assert.True(block.Success, "no %ThrownProjectile under %Facing");
+        var body = block.Groups[1].Value;
+        Assert.Contains("unique_name_in_owner = true", body);
+        Assert.Contains("visible = false", body);
+        Assert.Contains("klee_bomb.png", scene);
+        var release = double.Parse(Regex.Match(body, $"metadata/{meta} = ([0-9.]+)").Groups[1].Value,
+            System.Globalization.CultureInfo.InvariantCulture);
+        Assert.InRange(release, 0.2, 0.8);
+
+        // The damage lands as the bomb does, not before it leaves her hand.
+        var flight = (float)Thrown().GetField("FlightSeconds", All)!.GetValue(null)!;
+        var klee = Router().Assembly.GetTypes().Single(t => t.FullName == "KleeMod.Klee");
+        var model = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(klee);
+        var delay = (float)klee.GetProperty("AttackAnimDelay")!.GetValue(model)!;
+        Assert.InRange(delay, release + flight - 0.05, release + flight + 0.05);
+    }
+
+    [Fact]
+    public void The_aim_is_noted_by_a_prefix_on_the_attack_command()
+    {
+        var patch = Thrown().Assembly.GetTypes()
+            .Single(t => t.Name == "AttackCommand_Execute_ThrownAim");
+        var info = patch.GetCustomAttribute<HarmonyPatch>()!.info;
+        Assert.Equal("AttackCommand", info.declaringType.Name);
+        Assert.Equal("Execute", info.methodName);
+        Assert.NotNull(patch.GetMethod("Prefix", All)!.GetCustomAttribute<HarmonyPrefix>());
+    }
+
     private static string RepoFile(string relativePath)
     {
         var relative = relativePath.Replace('/', Path.DirectorySeparatorChar);

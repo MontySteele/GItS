@@ -700,6 +700,38 @@ def _model_nodes(rig: Rig, frames: dict) -> list[str]:
 SHEET_IDS = {name: f"{6 + i}_{name}" for i, name in enumerate(
     ("idle", "idle_low", "attack", "hurt", "death", "cast"))}
 
+#: The thrown bomb (klee_frames.json "thrown", cut by klee_render/pack.py).
+PROJECTILE_ID = "12_bomb"
+#: KleeMod.Vfx.ThrownProjectile's scene contract: a hidden sprite at the hand
+#: as of the release frame, under %Facing so a flipped Klee throws from the
+#: mirrored hand, with the release time of the attack clip as metadata.
+PROJECTILE_NODE = "ThrownProjectile"
+PROJECTILE_RELEASE_META = "release"
+
+
+def thrown_of(frames: dict) -> dict | None:
+    return frames["sheets"]["attack"].get("thrown")
+
+
+def _projectile_node(frames: dict) -> list[str]:
+    """The thrown bomb, drawn by the game from the release frame to the
+    target (the base's NVfxProjectileHandler shape), never by the cells."""
+    thrown = thrown_of(frames)
+    if thrown is None:
+        return []
+    sc = frames["combat_scale"]
+    ox, oy = frames["sheets"]["attack"]["origin"]
+    ax, ay = thrown["at"]
+    return [NL.join([
+        f'[node name="{PROJECTILE_NODE}" type="Sprite2D" parent="Visuals/Facing"]',
+        "unique_name_in_owner = true",
+        "visible = false",
+        f"position = {vec2(((ax - ox) * sc, (ay - oy) * sc))}",
+        f"scale = {vec2((sc, sc))}",
+        f'texture = ExtResource("{PROJECTILE_ID}")',
+        f"metadata/{PROJECTILE_RELEASE_META} = {fnum(thrown['time'])}",
+    ])]
+
 
 def _bone_nodes(rig: Rig) -> list[str]:
     out = [f'[node name="Skeleton" type="Skeleton2D" parent="{RIG}"]']
@@ -766,13 +798,17 @@ def render_scene(spec: dict | None = None, cells: dict | None = None,
 
     ext = [(m.layer, m.texture) for m in meshes]
     sheets = rig.spec["model"]["sheets"]
-    load_steps = len(ext) + len(sheets) + sum(s.count("[sub_resource") for s in subs) + 1
+    thrown = thrown_of(frames)
+    load_steps = (len(ext) + len(sheets) + (thrown is not None)
+                  + sum(s.count("[sub_resource") for s in subs) + 1)
     out = [f"[gd_scene load_steps={load_steps} format=3]", ""]
     for layer, tex in ext:
         out.append(f'[ext_resource type="Texture2D" path="{TEX_DIR}/{tex}" id="{EXT_IDS[layer]}"]')
     for name in sheets:
         out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{frames["sheets"][name]["file"]}" '
                    f'id="{SHEET_IDS[name]}"]')
+    if thrown is not None:
+        out.append(f'[ext_resource type="Texture2D" path="{FRAME_DIR}/{thrown["file"]}" id="{PROJECTILE_ID}"]')
     out.append("")
     for s in subs:
         out += [s, ""]
@@ -785,6 +821,7 @@ def render_scene(spec: dict | None = None, cells: dict | None = None,
         *_bone_nodes(rig),
         *[_polygon_node(rig, m, EXT_IDS[m.layer]) for m in meshes],
         *_model_nodes(rig, frames),
+        *_projectile_node(frames),
         TAIL_NODES,
     ]
     for n in nodes:

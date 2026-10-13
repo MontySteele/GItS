@@ -606,6 +606,7 @@ GENERATOR_OWNED = {
     "ImageGen/images/model/frames/klee_death.png":          "klee_render/pack.py",
     "ImageGen/images/model/frames/klee_cast.png":           "klee_render/pack.py",
     "ImageGen/images/model/frames/klee_merchant.png":       "klee_render/pack.py",
+    "ImageGen/images/model/frames/klee_bomb.png":           "klee_render/pack.py",
     "ImageGen/images/model/klee_rest.png":                  "klee_render/pack.py",
     "ImageGen/images/ui/select_closeup.png":                "klee_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
