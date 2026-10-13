@@ -31,6 +31,18 @@ figures below are [USER]'s ruled heights (2026-10-13) (Klee's ruled
 NOT at one common scale (Klee's 2021 pack and the 观海 packs differ by ~1.4x
 at the head bone), so each character's ppu is solved from its own measured
 rest height, never shared.
+
+PROPORTIONS (ruled 2026-10-13): [USER]: "Hmm. Ok, let's give Varka the height
+boost and use these proportion. (a)." The reference is modelmetrics.net's
+"Genshin Impact - Character Heights" chart (v1.0, 2026), which measures the
+official models head to foot without shoes, hair or hats. Its centimetres are
+model sizes, not canon heights; only their ratios are used, anchored on
+Furina = 63 in (scale 63 / 150.5 in per chart cm). That puts Neuvillette at
+76.4 in against his canon 192 cm (75.6 in). Klee, Furina and Kokomi keep their
+ruled heights (the chart is within 3% of each). Varka moves to 82 in (chart
+196.4 cm, a size above the other tall males) at his next re-render; until then
+`ruled_height_in` holds it. GUEST_HEIGHTS_IN holds Furina's guest stars from
+the same chart.
 """
 from __future__ import annotations
 
@@ -48,6 +60,14 @@ OUTLINE_PX = 2.2         # texture px at combat scale (1.1 screen px), as Klee's
 FACE_MATS = {"颜", "顏1", "颜2", "顏2", "二重", "睫", "睫眉", "眉", "白目", "目", "目光", "星目", "口舌", "齿", "齒"}
 #: Drawn without a hull: the eyes and mouth parts sit inside the face.
 NO_LINE_MATS = {"二重", "睫", "睫眉", "眉", "白目", "目", "目光", "星目", "口舌", "齿", "齒"}
+
+
+# Furina's guest stars, chart cm x 63 / 150.5 (see PROPORTIONS above).
+GUEST_HEIGHTS_IN = {
+    "sigewinne": 52.0, "escoffier": 62.9, "chevreuse": 63.0,
+    "charlotte": 63.1, "lynette": 63.3, "freminet": 66.0, "lyney": 66.7,
+    "clorinde": 69.2, "navia": 70.0, "wriothesley": 76.1, "neuvillette": 76.4,
+}
 
 
 def body_px(height_in: float) -> float:
@@ -162,6 +182,9 @@ CHARS = {
     "varka": {
         "pmx": "varka/unpacked/法尔伽.pmx",
         "height_in": 78.0,          # ruled 2026-10-13: his custom in-game model is tall
+        # 82 in ruled later the same day (PROPORTIONS above); 78 stays live
+        # until his re-render, because the packed manifest was built at 78.
+        "ruled_height_in": 82.0,
         "hand_tip": "中指１",
         "face_mats": FACE_MATS,
         "no_line_mats": NO_LINE_MATS,
