@@ -38,6 +38,12 @@ namespace KleeMod.Abyss;
 /// (<see cref="AbyssRecord.Record"/> is idempotent per act), and Fateful
 /// Fortune's Max HP is each player's own.
 ///
+/// SEEN AS ITS OWN SCREEN (owner, 2026-10-12: "All of these options are tiny
+/// text on the Ancient screen"). The page is still the model; the player sees
+/// it through <see cref="AbyssOverlay"/>, a full-screen Blessing screen over
+/// the room that hides the Ancient's layout, holds its greeting until the
+/// pick lands, and clicks this page's options for the player.
+///
 /// Normal runs: every patch here starts by asking whether the run carries
 /// <see cref="SpiralAbyss"/>, and returns untouched if it does not.
 /// </summary>
@@ -55,7 +61,7 @@ public static class AbyssChoicePage
     /// <summary>The Abyss page's rows for the <c>events</c> table: the page,
     /// and one title per Blessing and one description per (Blessing, Shadow)
     /// pair, since an option shows both.</summary>
-    internal static Dictionary<string, string> LocRows()
+    public static Dictionary<string, string> LocRows()
     {
         var rows = new Dictionary<string, string>
         {
@@ -63,8 +69,13 @@ public static class AbyssChoicePage
                 "[gold]The Spiral Abyss[/gold] stirs before the Ancient. Take one "
               + "Blessing. The enemies take one of the two Shadows you pass, at random.",
         };
+        foreach (var s in AbyssDraft.AllShadows)
+        {
+            rows[StripTitleKey(AbyssText.Name(s))] = AbyssText.Name(s);
+        }
         foreach (var b in AbyssDraft.AllBlessings)
         {
+            rows[StripTitleKey(AbyssText.Name(b))] = AbyssText.Name(b);
             rows[OptionTitleKey(b)] = AbyssText.Name(b);
             foreach (var s in AbyssDraft.AllShadows)
             {
@@ -83,6 +94,14 @@ public static class AbyssChoicePage
     private static readonly ConditionalWeakTable<EventModel, AbyssOffer> Showing = new();
 
     internal static bool IsShowing(EventModel? e) => e != null && Showing.TryGetValue(e, out _);
+
+    /// <summary>The offer an event copy is showing, or null.</summary>
+    internal static AbyssOffer? OfferOf(EventModel e) => Showing.TryGetValue(e, out var offer) ? offer : null;
+
+    /// <summary>The Blessing screen's strip tooltips: one title row per
+    /// Blessing and Shadow name.</summary>
+    public static string StripTitleKey(string name) =>
+        $"{KeyPrefix}.strip.{new string(name.Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant()}.title";
 
     private static readonly MethodInfo? SetEventStateMethod = AccessTools.Method(
         typeof(EventModel), "SetEventState",
@@ -171,12 +190,25 @@ public static class AbyssChoicePage
         if (ancientFinished || ancientOptions.Count == 0)
         {
             ancient.StartPreFinished();
-            return;
         }
-        SetEventStateMethod!.Invoke(ancient, new object[]
+        else
         {
-            ancientDescription ?? ancient.InitialDescription, ancientOptions,
-        });
+            SetEventStateMethod!.Invoke(ancient, new object[]
+            {
+                ancientDescription ?? ancient.InitialDescription, ancientOptions,
+            });
+        }
+
+        // The Blessing screen over this machine's room (if this is its copy)
+        // shows the result, fades, and lets the Ancient's greeting play.
+        try
+        {
+            AbyssOverlay.OnChosen(ancient, offer, index);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{KleeMod.ModId}] Spiral Abyss screen could not close: {e}");
+        }
     }
 }
 

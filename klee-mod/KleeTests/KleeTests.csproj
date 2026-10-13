@@ -59,6 +59,14 @@
              Link="Vendor/GitsFastMpPort.cs" />
   </ItemGroup>
 
+  <!-- The Spiral Abyss Blessing screen's wire shape (2026-10-12), on the
+       same terms: `GitsAbyssPage.cs` holds no Godot, Harmony or game type, so
+       the mod's page JSON is pinned against the bridge's reading of it. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsAbyssPage.cs"
+             Link="Vendor/GitsAbyssPage.cs" />
+  </ItemGroup>
+
   <!-- EB-184's per-mode aiming reader, on the same terms and for the same
        reason. `GitsModalTargeting.cs` reads two members off a played card BY
        NAME and holds no game type of its own, so the decision that repairs the

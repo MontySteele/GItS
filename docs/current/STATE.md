@@ -254,9 +254,16 @@ the modifier): every player gets one relic per Blessing and an "Abyss Shadows"
 relic listing the Shadows, every enemy wears one badge per Shadow, and the menu
 button, tickbox and the four Abyss Mage shields have official icons
 (`Abyss/AbyssDisplay.cs`, `art/plan.tsv` `abyss_*`). Headless pins:
-`KleeTests/SpiralAbyssTests.cs`, `KleeTests/SpiralAbyssDisplayTests.cs`. Next:
-the live checks listed in the build and display PRs, then one solo and one
-co-op seat on the mode.
+`KleeTests/SpiralAbyssTests.cs`, `KleeTests/SpiralAbyssDisplayTests.cs`. The
+pick is its own screen ([USER], 2026-10-12: "All of these options are tiny
+text on the Ancient screen. Could we get a pop-up on-screen with the choice of
+three blessings before the Ancient screen loads?"): `Abyss/AbyssOverlay.cs`
+draws three tall cards (Blessing over Shadow-if-passed) over the room, holds
+the Ancient's greeting until the pick lands, drives the co-op vote and shows
+its result; the seat bridge reads it as a "The Spiral Abyss" page
+(`KleeTests/AbyssOverlayTests.cs`, renders by `tools/abyss_overlay_rig`). Next:
+the live checks listed in the build, display and screen PRs, then one solo and
+one co-op seat on the mode.
 
 ## Live cell
 

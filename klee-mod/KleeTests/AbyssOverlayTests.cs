@@ -1,0 +1,279 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using HarmonyLib;
+using KleeMod.Abyss;
+using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Multiplayer.Game;
+using MegaCrit.Sts2.Core.Nodes.Events;
+using STS2_MCP;
+using Xunit;
+
+namespace KleeMod.Tests;
+
+/// <summary>
+/// THE SPIRAL ABYSS BLESSING SCREEN (owner, 2026-10-12: "a pop-up on-screen
+/// with the choice of three blessings before the Ancient screen loads").
+///
+/// On the suite's usual terms (README.md, the headless boundary): the words,
+/// the open/close sequence, the co-op result and the bridge's page run for
+/// real; the Harmony seams and the order "page back, then screen closes, then
+/// greeting" are STRUCTURAL pins, because a room, a layout and a vote need the
+/// game. What only the game can show -- the screen over the room, the fade,
+/// controller focus, two machines voting -- is the PR's live-check list, and
+/// the look is the rig's (tools/abyss_overlay_rig).
+/// </summary>
+public class AbyssOverlayTests
+{
+    private static AbyssOffer Offer(int act = 0) => new(act, new[]
+    {
+        new AbyssOption(AbyssBlessing.LeyLine, AbyssShadow.MageShield),
+        new AbyssOption(AbyssBlessing.MoonlitRest, AbyssShadow.SheerCold),
+        new AbyssOption(AbyssBlessing.FirstStrike, AbyssShadow.Riptide),
+    }, 0);
+
+    // ---- The words ------------------------------------------------------------
+
+    [Fact]
+    public void The_title_names_the_act_and_Neow_is_act_one()
+    {
+        Assert.Equal("The Spiral Abyss · Act 1", AbyssOverlayContent.TitleFor(0));
+        Assert.Equal("The Spiral Abyss · Act 3", AbyssOverlayContent.TitleFor(2));
+        Assert.Equal("The Abyss whispers, urging you deeper. Take one Blessing; the enemies take one of the Shadows you pass.",
+                     AbyssOverlayContent.Whisper);
+    }
+
+    [Fact]
+    public void Each_card_carries_its_Blessing_and_the_Shadow_it_brings_if_passed()
+    {
+        var content = AbyssOverlayContent.For(Offer(), new AbyssRecord());
+        Assert.Equal(3, content.Cards.Count);
+        var card = content.Cards[0];
+        Assert.Equal("The Ley Line", card.BlessingName);
+        Assert.Equal(AbyssText.Text(AbyssBlessing.LeyLine), card.BlessingText);
+        Assert.Equal("Abyss Mage Shield", card.ShadowName);
+        Assert.Equal(AbyssText.Text(AbyssShadow.MageShield), card.ShadowText);
+        Assert.Equal(new[] { 0, 1, 2 }, content.Cards.Select(c => c.Index));
+        Assert.Equal("The Ley Line text\nIf passed: Rally — Rally text",
+            AbyssOverlayContent.BridgeDescription(card with
+            {
+                BlessingText = "The Ley Line text", ShadowName = "Rally", ShadowText = "Rally text",
+            }));
+    }
+
+    [Fact]
+    public void The_strip_is_empty_on_the_first_visit_and_lists_what_the_run_holds_after()
+    {
+        Assert.False(AbyssOverlayContent.For(Offer(), new AbyssRecord()).HasStrip);
+
+        var record = new AbyssRecord();
+        record.Record(0, AbyssBlessing.Crystallize, AbyssShadow.Herald);
+        record.Record(1, AbyssBlessing.Resonance, AbyssShadow.Clock);
+        var content = AbyssOverlayContent.For(Offer(2), record);
+        Assert.True(content.HasStrip);
+        Assert.Equal(new[] { "Jade Shield", "Resonance" }, content.BlessingsTaken.Select(e => e.Name));
+        Assert.Equal(new[] { "Abyss Herald", "The Clock" }, content.ShadowsInForce.Select(e => e.Name));
+        Assert.Equal(AbyssText.Text(AbyssShadow.Clock), content.ShadowsInForce[1].Text);
+    }
+
+    [Fact]
+    public void The_icons_are_the_ones_the_relics_and_badges_already_wear()
+    {
+        foreach (var b in AbyssDraft.AllBlessings)
+        {
+            var relic = RuntimeHelpers.GetUninitializedObject(AbyssDisplay.RelicTypeFor(b));
+            var file = relic.GetType().GetProperty("IconFile", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)!
+                .GetValue(relic);
+            Assert.Equal(file, AbyssOverlayContent.BlessingIconFile(b));
+        }
+        foreach (var s in AbyssDraft.AllShadows)
+        {
+            var power = (AbyssShadowPower)RuntimeHelpers.GetUninitializedObject(AbyssDisplay.PowerTypeFor(s));
+            Assert.Equal(power.IconFile, AbyssOverlayContent.ShadowIconFile(s));
+        }
+    }
+
+    [Fact]
+    public void Every_strip_entry_has_a_tooltip_title_row()
+    {
+        var rows = AbyssChoicePage.LocRows();
+        foreach (var name in AbyssDraft.AllBlessings.Select(AbyssText.Name)
+                     .Concat(AbyssDraft.AllShadows.Select(AbyssText.Name)))
+        {
+            Assert.Equal(name, rows[AbyssChoicePage.StripTitleKey(name)]);
+        }
+    }
+
+    // ---- The sequence -------------------------------------------------------
+
+    [Fact]
+    public void Solo_the_screen_opens_holds_the_dialogue_takes_one_pick_and_closes_once()
+    {
+        var flow = new AbyssOverlayFlow();
+        Assert.False(flow.HoldsDialogue);
+        Assert.True(flow.Open());
+        Assert.False(flow.Open());
+        Assert.True(flow.HoldsDialogue);
+
+        Assert.False(flow.Vote(3, 3));
+        Assert.True(flow.Vote(1, 3));
+        Assert.False(flow.Vote(1, 3));
+
+        Assert.Equal(0, flow.Resolve(1, "Moonlit Rest", coop: false, split: false));
+        Assert.Null(flow.ResultLine);
+        Assert.Equal(AbyssOverlayPhase.Closing, flow.Phase);
+        Assert.True(flow.HoldsDialogue);
+        Assert.False(flow.Vote(0, 3));
+
+        Assert.True(flow.BeginFade());
+        Assert.True(flow.FinishFade());
+        Assert.False(flow.FinishFade());
+        Assert.False(flow.HoldsDialogue);
+        // A pick already made is never offered again by this screen.
+        Assert.False(flow.Open());
+    }
+
+    [Fact]
+    public void In_coop_a_vote_can_change_and_the_result_line_shows_before_the_fade()
+    {
+        var flow = new AbyssOverlayFlow();
+        flow.Open();
+        Assert.True(flow.Vote(0, 3));
+        Assert.True(flow.Vote(2, 3));
+        Assert.Equal(2, flow.LocalVote);
+
+        Assert.Equal(AbyssOverlayFlow.CoopResultSeconds, flow.Resolve(0, "The Ley Line", coop: true, split: true));
+        Assert.Equal(1.5, AbyssOverlayFlow.CoopResultSeconds);
+        Assert.Equal(AbyssOverlayPhase.Resolving, flow.Phase);
+        Assert.Equal("The vote split; the draw gave The Ley Line.", flow.ResultLine);
+        Assert.True(flow.HoldsDialogue);
+        // The other copy of the shared event resolves too: nothing more.
+        Assert.Null(flow.Resolve(0, "The Ley Line", coop: true, split: true));
+        Assert.False(flow.FinishFade());
+        Assert.True(flow.BeginFade());
+        Assert.True(flow.FinishFade());
+    }
+
+    [Fact]
+    public void The_result_line_says_whether_the_vote_split()
+    {
+        Assert.Equal("The party chose Moonlit Rest.", AbyssOverlayFlow.ResultLineFor("Moonlit Rest", split: false));
+        Assert.Equal("The vote split; the draw gave Moonlit Rest.", AbyssOverlayFlow.ResultLineFor("Moonlit Rest", split: true));
+
+        Assert.False(AbyssVoteOutcome.Split(new int?[] { 1, 1 }, 1));
+        Assert.True(AbyssVoteOutcome.Split(new int?[] { 0, 2 }, 2));
+        Assert.True(AbyssVoteOutcome.Split(new int?[] { 0, 1, 1 }, 1));
+        // A client that never received the host's vote: its own lost, so
+        // the partner's was the result and the vote split.
+        Assert.True(AbyssVoteOutcome.Split(new int?[] { 0, null }, 2));
+        Assert.False(AbyssVoteOutcome.Split(new int?[] { 2, null }, 2));
+    }
+
+    // ---- The seams (structural) -----------------------------------------------
+
+    [Fact]
+    public void The_screen_hooks_the_layout_before_the_dialogue_and_owns_the_vote_display()
+    {
+        Assert.Equal((typeof(NAncientEventLayout), nameof(NAncientEventLayout.SetDialogue)),
+                     Target("NAncientEventLayout_SetDialogue_AbyssOverlay_Patch"));
+        Assert.Equal((typeof(NAncientEventLayout), nameof(NAncientEventLayout.OnSetupComplete)),
+                     Target("NAncientEventLayout_OnSetupComplete_AbyssOverlay_Patch"));
+        Assert.Equal((typeof(NAncientEventLayout), nameof(NAncientEventLayout.DefaultFocusedControl)),
+                     Target("NAncientEventLayout_DefaultFocusedControl_AbyssOverlay_Patch"));
+        Assert.Equal((typeof(NEventLayout), nameof(NEventLayout.BeforeSharedOptionChosen)),
+                     Target("NEventLayout_BeforeSharedOptionChosen_AbyssOverlay_Patch"));
+        Assert.Equal((typeof(EventSynchronizer), "ChooseOptionForSharedEvent"),
+                     Target("EventSynchronizer_ChooseOptionForSharedEvent_AbyssOverlay_Patch"));
+        // The patched members exist on this game build.
+        Assert.NotNull(AccessTools.Method(typeof(EventSynchronizer), "ChooseOptionForSharedEvent"));
+        Assert.NotNull(AbyssOverlay.LayoutEventField);
+    }
+
+    [Fact]
+    public void The_pick_puts_the_Ancient_page_back_before_the_screen_closes_and_the_greeting_resumes_last()
+    {
+        var chosen = Il.Calls(Il.Method("AbyssChoicePage", "OnChosen"));
+        Assert.Contains("AbyssOverlay.OnChosen", chosen);
+        Assert.Contains("MethodBase.Invoke", chosen);
+
+        var click = Il.Calls(Il.Method("AbyssOverlay", "Click"));
+        Assert.Contains("NEventRoom.OptionButtonClicked", click);
+        Assert.Contains("AbyssOverlayFlow.Vote", click);
+
+        var close = Il.Calls(Il.Method("AbyssOverlay", "Close"));
+        Assert.Contains("AbyssOverlayFlow.FinishFade", close);
+        Assert.Contains("NAncientEventLayout.SetDialogue", close);
+        // A virtual call resolves to the declaring type.
+        Assert.Contains("NEventLayout.OnSetupComplete", close);
+    }
+
+    private static (Type, string) Target(string patchName)
+    {
+        var patch = typeof(AbyssOverlay).Assembly.GetType("KleeMod.Abyss." + patchName, throwOnError: true)!;
+        var attr = patch.GetCustomAttributes<HarmonyPatch>().Single().info;
+        return (attr.declaringType, attr.methodName);
+    }
+
+    // ---- The bridge's page ----------------------------------------------------
+
+    [Fact]
+    public void The_bridge_reads_the_screen_as_its_own_page()
+    {
+        Assert.Equal(GitsAbyssPage.MetaKey, AbyssOverlay.PageMeta);
+        Assert.Equal(GitsAbyssPage.RootName, AbyssOverlayView.RootName);
+
+        var content = AbyssOverlayContent.For(Offer(), new AbyssRecord());
+        var flow = new AbyssOverlayFlow();
+        flow.Open();
+        var json = AbyssOverlay.PageJson(content, flow);
+        Assert.True(GitsAbyssPage.IsOpen(json));
+
+        var state = new Dictionary<string, object?>
+        {
+            ["event_name"] = "Neow", ["in_dialogue"] = true, ["options"] = new List<Dictionary<string, object?>>(),
+        };
+        Assert.True(GitsAbyssPage.Apply(state, json));
+        Assert.Equal("The Spiral Abyss", state["event_name"]);
+        Assert.Equal(AbyssOverlayContent.Whisper, state["body"]);
+        Assert.Equal(false, state["in_dialogue"]);
+        var options = (List<Dictionary<string, object?>>)state["options"]!;
+        Assert.Equal(new[] { "The Ley Line", "Moonlit Rest", "First Strike" }, options.Select(o => o["title"]));
+        Assert.Equal(new object?[] { 0, 1, 2 }, options.Select(o => o["index"]));
+        Assert.Equal(AbyssText.Text(AbyssBlessing.MoonlitRest) + "\nIf passed: Sheer Cold — "
+                     + AbyssText.Text(AbyssShadow.SheerCold), options[1]["description"]);
+        var screen = (Dictionary<string, object?>)state["abyss_screen"]!;
+        Assert.Equal("The Spiral Abyss · Act 1", screen["subtitle"]);
+        Assert.Equal(false, screen["resolved"]);
+    }
+
+    [Fact]
+    public void Once_the_pick_lands_the_page_offers_nothing_and_says_what_was_taken()
+    {
+        var content = AbyssOverlayContent.For(Offer(), new AbyssRecord());
+        var flow = new AbyssOverlayFlow();
+        flow.Open();
+        flow.Vote(1, 3);
+        flow.Resolve(1, "Moonlit Rest", coop: true, split: false);
+        var json = AbyssOverlay.PageJson(content, flow);
+        Assert.False(GitsAbyssPage.IsOpen(json));
+
+        var state = new Dictionary<string, object?>();
+        GitsAbyssPage.Apply(state, json);
+        Assert.Empty((List<Dictionary<string, object?>>)state["options"]!);
+        var screen = (Dictionary<string, object?>)state["abyss_screen"]!;
+        Assert.Equal(true, screen["resolved"]);
+        Assert.Equal("Moonlit Rest", screen["chosen"]);
+        Assert.Equal("The party chose Moonlit Rest.", screen["result"]);
+    }
+
+    [Fact]
+    public void Unreadable_json_leaves_the_room_as_it_was()
+    {
+        var state = new Dictionary<string, object?> { ["event_name"] = "Neow" };
+        Assert.False(GitsAbyssPage.Apply(state, "not json"));
+        Assert.Equal("Neow", state["event_name"]);
+        Assert.False(GitsAbyssPage.IsOpen("not json"));
+    }
+}

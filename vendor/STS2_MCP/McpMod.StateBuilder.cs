@@ -2030,6 +2030,11 @@ public static partial class McpMod
         }
         state["options"] = options;
 
+        // GItS LOCAL EDIT (the Spiral Abyss Blessing screen, 2026-10-12):
+        // while the klee mod's Blessing screen is up over the Ancient's room,
+        // the event is that page (gits/GitsAbyssOverlay.cs).
+        GitsApplyAbyssScreen(state, uiRoom);
+
         return state;
     }
 

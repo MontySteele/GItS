@@ -381,7 +381,29 @@ _STORY_REASON = (
     "A story line's trigger or the story Curse's length; tier 0.5 models no "
     "events, speech or curses, so no sim twin exists.")
 
+#: THE SPIRAL ABYSS BLESSING SCREEN (2026-10-12): pixel sizes of a UI
+#: screen, not game numbers.
+_ABYSS_SCREEN_REASON = (
+    "THE SPIRAL ABYSS BLESSING SCREEN (klee-mod/KleeCode/Abyss/AbyssOverlayView.cs). "
+    "A layout size in pixels at 1920x1080, or how long the screen shows its result or fades; "
+    "no game rule reads it, so no sim twin exists.")
+
 UNMIRRORED: dict[str, str] = {
+    "AbyssOverlayFlow.CoopResultSeconds": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayFlow.FadeSeconds": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CardWidth": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CardGap": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.Lift": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.TitleSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.WhisperSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.NameSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.BodySize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.SmallSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.ResultSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.IconSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.DiamondSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.BadgeSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.StripIconSize": _ABYSS_SCREEN_REASON,
     "StoryRules.BigBombDamage": _STORY_REASON,
     "StoryRules.ConfinementCombats": _STORY_REASON,
     "AbyssNumbers.LeyLineDamageReduction": _ABYSS_REASON,
