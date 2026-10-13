@@ -76,8 +76,13 @@ Block against the base five's goes into the pool review.
 
 ## For the pool review (on [USER]'s playtest)
 
-- Block: census against the base five first; the wave says decks die
-  Block-less, not that the pool lacks Block.
+- Block: the census (run the same night) says her pool has as many Block cards
+  as the base five but the weakest Block. 12 of 78 cards give Block (level
+  with Defect and Regent), yet they print 41 Block in all, the lowest of any
+  character (base five 61 to 121; Kokomi 84, Varka 85). Only 3 are flat and
+  unconditional, none prints more than 7, and 5 print 0 at play. Her
+  Block per Energy (5.9) sits with Silent and Defect. The wave's Block-less
+  deaths are the pool, not only the draft.
 - The conditional cards above, each needing a floor or a cut: Fountain of
   Lucine, Soothing Waters, Standing Ovation, Packed House, Tutti!.
 - Encore!, Lynette, Leading Lady, Charlotte: offered and passed.
