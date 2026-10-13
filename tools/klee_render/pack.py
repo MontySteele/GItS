@@ -19,6 +19,11 @@ clip: <clip>/f_NNN.png + <clip>.json; per still: <name>.png + <name>.json) and w
                                         BaseLib's centred sprite puts her seat
                                         on the rest-site anchor
   images/ui/select_closeup.png          the character-select close-up, 1920x1080
+  images/ui/select_portrait.png         the roster tile, 132x195: a face close-up
+                                        like the base cast's tiles (2026-10-13)
+  images/ui/select_portrait_locked.png  the same tile, desaturated and darkened
+                                        (char_stills.locked_variant, as the
+                                        other kits derive theirs)
 
 and the committed manifest tools/klee_rig/klee_frames.json (sizes, frame
 counts, times and anchors -- no pixels), which `python -m tools.klee_rig gen`
@@ -46,13 +51,13 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "tools" / "klee_rig" / "klee_frames.json"
 
 #: combat clips, drawn at 0.5 (2x textures for 4K)
-COMBAT = ("idle", "idle_low", "attack", "hurt", "death", "cast")
+COMBAT = ("idle", "idle_low", "attack", "hurt", "death", "cast", "setoff")
 COMBAT_SCALE = 0.5
 #: Spelled out, not formatted: art_lint's GENERATOR_OWNED rot check greps this
 #: file for every out-path's basename.
 SHEET_FILES = {"idle": "klee_idle.png", "idle_low": "klee_idle_low.png", "attack": "klee_attack.png",
                "hurt": "klee_hurt.png", "death": "klee_death.png", "cast": "klee_cast.png",
-               "merchant": "klee_merchant.png"}
+               "setoff": "klee_setoff.png", "merchant": "klee_merchant.png"}
 MERCHANT_SCALE = round(1 / 1.5, 6)
 MAX_SHEET = 4096
 PAD = 2
@@ -75,6 +80,16 @@ SHADOW_ASPECT = 0.24              # height / width, between Ironclad and Silent
 SHADOW_SPAN = 1.9                 # width over her boots' span in stance A
 SHADOW_MIN_W = 0.55               # ... but at least this much of her full height
 SHADOW_FOOT_ROWS = 14             # texture px above the feet anchor that count as boots
+
+#: The roster tile (the character-select screen's small cutout; owner,
+#: 2026-10-13: "a face zoom-in like the base game characters"). Framed like
+#: the other kits' tiles: the hat top a little under the tile's top edge (the
+#: feather may crop), the neck joint just under the tile's middle, the head
+#: centred. Rendered at SELECT_PPU (~5x the tile) and downsampled here.
+PORTRAIT_SIZE = (132, 195)
+PORTRAIT_HAT_AT = 0.05            # hat top, as a fraction of the tile's height
+PORTRAIT_NECK_AT = 0.42           # the neck joint (render.py head_px), likewise
+PORTRAIT_X_SHIFT = 0.04           # head centre right of the tile's centre, of its width
 
 
 def alpha_box(ims):
@@ -200,6 +215,26 @@ def body_metrics(still: Path, meta: dict, scale: float) -> dict:
         "hat_to_boot_px": round((foot - hat_top) * scale, 1),
         "width_px": round((bx[2] - bx[0]) * scale, 1),
     }
+
+
+def portrait_tile(im: Image.Image, meta: dict) -> Image.Image:
+    """The roster tile: crop the portrait still around her head (hat top and
+    neck joint placed per PORTRAIT_*), then downsample once to the tile."""
+    a = im.getchannel("A")
+    w, h = im.size
+    px = a.load()
+    wide = 24 * meta["ppu"] / 300          # body_metrics' hat-top run, at this scale
+    hat_top = next(y for y in range(h) if sum(1 for x in range(w) if px[x, y] > 128) >= wide)
+    hx, neck = meta["head_px"]
+    tile_h = (neck - hat_top) / (PORTRAIT_NECK_AT - PORTRAIT_HAT_AT)
+    tile_w = tile_h * PORTRAIT_SIZE[0] / PORTRAIT_SIZE[1]
+    x0 = hx - tile_w * (0.5 + PORTRAIT_X_SHIFT)
+    y0 = hat_top - PORTRAIT_HAT_AT * tile_h
+    box = tuple(round(v) for v in (x0, y0, x0 + tile_w, y0 + tile_h))
+    canvas = Image.new("RGBA", (box[2] - box[0], box[3] - box[1]), (0, 0, 0, 0))
+    canvas.alpha_composite(im.crop((max(0, box[0]), max(0, box[1]), min(w, box[2]), min(h, box[3]))),
+                           (max(0, -box[0]), max(0, -box[1])))
+    return canvas.resize(PORTRAIT_SIZE, Image.LANCZOS, reducing_gap=3.0)
 
 
 def foot_span(im: Image.Image, origin_y: float, rows: int = SHADOW_FOOT_ROWS) -> tuple[int, int]:
@@ -335,6 +370,15 @@ def main(argv=None) -> int:
     canvas.paste(sel, (1260 - sel.width // 2, 36), sel)
     writes.append((art / "ui" / "select_closeup.png", canvas))
     manifest["select"] = {"file": "select_closeup.png", "size": [1920, 1080], "figure_h": target_h}
+
+    # the roster tile and its locked twin (derived from it, never re-cropped)
+    sys.path.insert(0, str(ROOT / "tools"))
+    from char_stills import locked_variant  # noqa: E402
+    pm = json.loads((R / "portrait.json").read_text(encoding="utf-8"))
+    tile = portrait_tile(Image.open(R / "portrait.png").convert("RGBA"), pm)
+    writes.append((art / "ui" / "select_portrait.png", tile))
+    writes.append((art / "ui" / "select_portrait_locked.png", locked_variant(tile)))
+    manifest["portrait"] = {"file": "select_portrait.png", "size": list(PORTRAIT_SIZE), "ppu": pm["ppu"]}
 
     if args.check:
         current = MANIFEST.read_text(encoding="utf-8") if MANIFEST.exists() else ""

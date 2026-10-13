@@ -31,23 +31,20 @@ coordinates are in the prepared canvas. Their rigs are
 `pck-src/{kokomi,varka}/model/combat.tscn`, which carry the optional
 `cast`, `power` and `idle_low` states beside the four the router requires.
 
-**Klee's mesh rig (`tools/klee_rig/`, 2026-10-12).** Klee's
-`pck-src/klee/model/combat.tscn` is GENERATED: a Skeleton2D (41 bones) and one
-skinned Polygon2D per cut layer, with the router contract (node paths, seven
-states, one-shot lengths, state machine) kept from the five-sprite scene it
-replaced. Edit `tools/klee_rig/klee.yaml` (joints in source pixels, skin
-rules, motion keys) and regenerate; never hand-edit the scene.
+**Klee's combat scene (`tools/klee_rig/`).** Klee's
+`pck-src/klee/model/combat.tscn` is GENERATED, with the router contract (node
+paths, seven states plus `setoff`, one-shot lengths, state machine). Edit
+`tools/klee_rig/klee.yaml` (which sheet each state plays, its tint keys) and
+regenerate; never hand-edit the scene.
 
 ```sh
 .venv/Scripts/python -m tools.klee_rig gen [--check]            # write / check combat.tscn (no art)
-.venv/Scripts/python -m tools.klee_rig extract --art-root <main checkout> [--check]   # re-cut klee_cells.json after the layers change
 .venv/Scripts/python -m tools.klee_rig verify --art-root <main checkout> [--godot]
 .venv/Scripts/python -m tools.klee_rig render --art-root <main checkout> --out <scratch dir>
 ```
 
-Since milestone 2 of the visual paper (2026-10-12) the mesh rig is the
-**Set Off alt-art only**: it rests invisible and the `setoff` state cross-fades
-to it. Klee herself is `Visuals/Facing/Model`, one Sprite2D per frame sheet
+Every state, Set Off's cheer included, draws Klee as `Visuals/Facing/Model`,
+one Sprite2D per frame sheet
 rendered from the official Klee model by `tools/klee_render/` (Blender +
 mmd_tools; `clips.py` poses, `render.py` renders (style G's shader half plus a
 `style` pass: the face/bomb protect mask and her surface-space grain),
@@ -62,31 +59,24 @@ forbid redistribution); only the renders do.
 
 `pack.py` is the one producer of `ImageGen/images/model/frames/*.png` (her
 ground shadow `klee_shadow.png` among them),
-`model/klee_rest.png` and `ui/select_closeup.png`, and writes the committed
+`model/klee_rest.png`, `ui/select_closeup.png` and the roster tile
+`ui/select_portrait.png` (+ `_locked`, derived from it), and writes the committed
 manifest `tools/klee_rig/klee_frames.json` (cells, counts, times, feet
 anchors, no pixels) that `gen` reads for `combat.tscn` and the merchant scene
 `pck-src/klee/model/merchant_character.tscn`. The scale lives in `build.py`:
 300 texture px per model unit drawn at 0.5, so about 165 px hat-to-boot at
 1080p.
 
-`klee_cells.json` and `klee_frames.json` are the only art-derived inputs, so
-`gen` and `tier0/tests/test_klee_rig.py` run anywhere. `verify`
-adds mesh coverage of every drawn texel when it can see the art; `--godot`
-loads the scene in MegaDot (every polygon's `get_bone_count() > 0`; headless,
-it also steps the AnimationTree at 60 Hz through idle, attack, hurt, setoff and
-death and checks the visible sheet, its frame and which figure shows, and
-that the merchant loop autoplays), renders the splash at rest (`setoff` at
-0.6 s) beside the old layered composite at 1x and 2x both facings (passes at a
-max channel difference of 2/255, the GPU's UV interpolation), and checks a
-flipped pose is the mirror of the unflipped one. `render` opens a MegaDot
-window briefly and writes a contact sheet and GIF per state at 1x and 2x, a
-4x joint close-up sheet and the rest pose with mesh and bones drawn over it,
-to a scratch dir (renders are never committed). Two traps the spec is built
-around: a `bones/0/path` line is dropped by the parser with no error (use the
-flat `bones = [...]` array), and a skinned Polygon2D ignores its own
-transform, so every layer offset rides a bone. The smoke layer carries the
-cutter's fill smeared from the arms' outlines behind each arm; the
-`ghost_arm_*` smoke regions make that patch ride the arm so it never shows.
+`klee_frames.json` is the only art-derived input, so `gen` and
+`tier0/tests/test_klee_rig.py` run anywhere. `verify --godot` loads the scene
+in MegaDot headless and steps the AnimationTree at 60 Hz through idle,
+attack, hurt, setoff and death, checking the visible sheet and its frame, and
+that the merchant loop autoplays. `render` opens a MegaDot window briefly and
+writes a contact sheet and GIF per state at 1x and 2x to a scratch dir
+(renders are never committed). The Skeleton2D rig of the old floating splash
+that `setoff` used to cross-fade to was retired on 2026-10-13 (owner: "I
+regret keeping that around"); its cut layers no longer ship, except Dodoco,
+which `pck-src/klee/vfx/dodoco_pop.tscn` draws.
 
 **The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for
 a figure. It scales the trimmed subject to FILL the plate and crops the

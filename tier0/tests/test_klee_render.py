@@ -104,3 +104,32 @@ def test_the_scene_throws_from_where_the_bomb_left_her_hand():
     assert 'parent="Visuals/Facing"' in node and "visible = false" in node
     assert f"position = {rig.vec2(((thrown['at'][0] - ox) * sc, (thrown['at'][1] - oy) * sc))}" in node
     assert f"metadata/release = {rig.fnum(thrown['time'])}" in node
+
+
+def test_set_off_is_a_short_cheer_that_lands_back_in_stance_a():
+    # Set Off plays a clip of the model (owner, 2026-10-13: "let's pivot to
+    # animations based on the new model instead" of the old splash art):
+    # 0.8-0.9 s, eyes squeezed happy at the peak, ending on the idle pose so
+    # the return to idle blends.
+    so = clips.CLIPS["setoff"]
+    assert 0.8 <= so["length"] <= 0.9 and not so["loop"]
+    first, last = so["keys"][0][1], so["keys"][-1][1]
+    assert first == clips.idle_pose(0.5) and last == clips.idle_pose(0.5)
+    peak = max(so["keys"], key=lambda k: k[1].get("root", (0, 0, 0))[2])[1]
+    assert peak["root"][2] > 0.04, "no hop"
+    assert all(peak["morphs"].get(m) == 1.0 for m in clips.HAPPY_EYES)
+    assert "setoff" in pack.COMBAT and rig.load_frames()["sheets"]["setoff"]["count"] == 17
+
+
+def test_the_roster_tile_is_packed_from_the_model_at_its_size():
+    # The character-select tile is a face close-up rendered from the model and
+    # downsampled once; pack.py owns it and its locked twin (one producer).
+    assert pack.PORTRAIT_SIZE == (132, 195)
+    assert 0 < pack.PORTRAIT_HAT_AT < pack.PORTRAIT_NECK_AT < 0.5   # the face in the upper half
+    assert "portrait" in clips.STILLS
+    job = next(j for j in build.JOBS if "portrait" in j["stills"].split(","))
+    assert job["ppu"] / build.COMBAT_PPU * 330 > 4 * 195, "not rendered well above the tile's size"
+    assert rig.load_frames()["portrait"]["size"] == [132, 195]
+    plan = (ROOT / "art" / "plan.tsv").read_text(encoding="utf-8")
+    assert not any(l.split("\t")[1:2] == ["ImageGen/images/ui/select_portrait.png"]
+                   for l in plan.splitlines() if not l.startswith("#"))

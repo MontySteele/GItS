@@ -25,7 +25,7 @@ a single badge naming only one of them undersells what installing this mod
 gets you -- unlike Downfall's badges, which are one submod each. The three
 existing `<character>/ui/select_portrait.png` files (already GENERATOR_OWNED
 by gen_furina_stills.py / gen_kokomi_stills.py for Furina and Kokomi, and by
-art/plan.tsv's `select_portrait` row for Klee) are EXACTLY this problem
+tools/klee_render/pack.py for Klee since 2026-10-13) are EXACTLY this problem
 already solved once: a small per-character identity thumbnail, framed on the
 face, meant to sit in a list next to text -- the character-select row is the
 same shape of screen as the Mods row. `selection_splash.png` was tried first

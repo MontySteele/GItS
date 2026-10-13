@@ -48,9 +48,10 @@ internal static class CardPlayMotion
 
     /// <summary>
     /// A Set Off card of this mod plays Klee's Set Off clip, whatever its
-    /// type: the floating-bombs splash kept as alt-art for exactly these
-    /// plays (review/active/klee-visual-paper-2026-10-12.md). Same delay as
-    /// a cast. A scene without a `setoff` state lunges as for an attack.
+    /// type: a hop with both fists thrown up, rendered from the model
+    /// (review/active/klee-visual-paper-2026-10-12.md; the floating-bombs
+    /// splash it replaced was retired 2026-10-13). Same delay as a cast. A
+    /// scene without a `setoff` state lunges as for an attack.
     /// </summary>
     internal static bool IsSetOffPlay(CardModel card, bool definedByThisMod)
         => definedByThisMod && card is ISetOffCard;
