@@ -87,8 +87,10 @@ are PMX props each closed in a hand by IK, and every clip's json records the
 blades' projected base and tip), `tools/klee_render/post.py` paints them,
 `fx.py` draws the colourless slash trails and impact bursts the game tints
 per element, and `pack.py` writes `ImageGen/images/<char>/...` plus the
-committed manifest `tools/char_render/<char>_frames.json`. A clip too big for
-one 4096 sheet continues on `_p2`, `_p3` pages. Pixels under the ground line
+committed manifest `tools/char_render/<char>_frames.json`. Each frame is
+trimmed to its own pixels and shelf-packed (`frames`: page, rect, and offset
+in the clip's cell, an AtlasTexture margin in Godot); a clip too big for one
+4096 sheet continues on `_p2`, `_p3` pages. Pixels under the ground line
 are cut, so planted blades read as driven in. Varka's pose library is
 `varka_clips.py`; his paper is `review/active/varka-visual-paper-2026-10-13.md`.
 

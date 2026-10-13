@@ -101,10 +101,13 @@ def test_he_carries_a_claymore_in_each_hand():
             assert set(pose["blades"]) == {"R", "L"}, (name, _t)
             for side, b in pose["blades"].items():
                 assert abs(np.linalg.norm(b["dir"]) - 1) < 0.08, (name, _t, side)
-    # the leading (far-hand) blade is higher than the trailing one in stance A
+    # stance A (design review, 2026-10-13): the near blade rests on his
+    # shoulder, up and back behind his head; the leading blade low and forward
     idle = vc.idle_pose(0.0)
-    assert idle["blades"]["L"]["at"][2] > idle["blades"]["R"]["at"][2]
-    assert idle["blades"]["L"]["dir"][0] > 0 > idle["blades"]["R"]["dir"][0], "lead forward, rear trailing"
+    lead, rear = idle["blades"]["L"], idle["blades"]["R"]
+    assert lead["dir"][0] > 0 > lead["dir"][2], "lead low and forward"
+    assert rear["dir"][0] < 0 < rear["dir"][2] and rear["dir"][2] > 0.6, "near blade up and back on the shoulder"
+    assert rear["at"][2] > lead["at"][2], "the shoulder hand rides above the lead hand"
 
 
 def test_every_combat_clip_that_leaves_idle_keeps_his_feet_planted():
@@ -136,6 +139,19 @@ def test_the_impacts_are_marked_and_the_trails_cover_them():
         for w in clip["trails"]:
             assert w["blade"] in ("L", "R") and 0 <= w["from"] < w["to"] <= clip["length"]
     assert {w["blade"] for w in atk["trails"]} == {"L", "R"}, "one arc per blade"
+    # an X cut at the enemy (design review, 2026-10-13): at each impact the
+    # striking blade points right (toward the enemy) and down, and each strike
+    # winds up from above/behind, so its trail sweeps over the top into the hit
+    for t, side in zip(imp, ("L", "R")):
+        key = next(k for k in atk["keys"] if abs(k[0] - t) < 1e-9)
+        d = key[1]["blades"][side]["dir"]
+        assert d[0] > 0.5 and d[2] < 0, (t, side, d)
+        w = next(w for w in atk["trails"] if w["blade"] == side)
+        start = max((k for k in atk["keys"] if k[0] <= w["from"] + 1e-9), key=lambda k: k[0])
+        assert start[1]["blades"][side]["dir"][2] > 0.5, (side, "the swing starts blade-up")
+    # the second cut crosses the first: steeper, from a higher hand
+    k1 = next(k for k in atk["keys"] if abs(k[0] - imp[1]) < 1e-9)[1]["blades"]
+    assert k1["R"]["dir"][2] < k1["L"]["dir"][2] and k1["R"]["at"][2] > k1["L"]["at"][2]
     assert {w["blade"] for w in asc["trails"]} == {"L", "R"}, "a twin arc"
 
 
@@ -144,7 +160,11 @@ def test_stance_b_plants_both_blades_with_his_hands_on_them():
     for side in ("L", "R"):
         assert b[side]["anchor"] == "ground" and b[side]["hand"] and b[side]["dir"][2] < -0.95
     assert b["L"]["at"][0] > 0 > b["R"]["at"][0], "one either side"
-    assert all(not bl["hand"] for bl in vc.REST["blades"].values()), "laid down at the rest site"
+    # the rest site: both blades planted upright behind him, and he sits upright
+    for bl in vc.REST["blades"].values():
+        assert not bl["hand"] and bl["anchor"] == "ground" and bl["dir"][2] < -0.95
+        assert bl["at"][0] < 0, "behind him, away from the fire"
+    assert abs(_op(vc.REST, "rotw", "上半身")[3]) <= 15, "upright, not reclining"
 
 
 # ------------------------------------------------------------------ the trail layer
@@ -191,13 +211,33 @@ def test_tint_keeps_alpha_and_the_white_core():
 
 
 # ------------------------------------------------------------------ the packer
-def test_layout_pages_a_clip_too_big_for_one_sheet():
-    assert pack.layout(20, 300, 330) == (5, 4, 1)          # Klee-sized: one near-square sheet
-    cols, rpp, pages = pack.layout(19, 1200, 1100)
-    assert cols == 3 and rpp == 3 and pages == 3
-    assert cols * 1200 <= pack.MAX_SHEET and rpp * 1100 <= pack.MAX_SHEET
+def test_shelf_packs_in_order_and_pages_what_does_not_fit():
+    place, pages = pack.shelf([(300, 330)] * 20)
+    assert len(pages) == 1 and pages[0][0] <= pack.MAX_SHEET
+    assert [p[1:] for p in place[:2]] == [(0, 0), (300, 0)], "reading order"
+    place, pages = pack.shelf([(1200, 1100)] * 19)
+    assert len(pages) > 1 and all(w <= pack.MAX_SHEET and h <= pack.MAX_SHEET for w, h in pages)
+    assert sorted({p[0] for p in place}) == list(range(len(pages)))
     assert pack.page_name("varka_attack.png", 0) == "varka_attack.png"
     assert pack.page_name("varka_attack.png", 2) == "varka_attack_p3.png"
+
+
+def test_each_frame_is_trimmed_to_its_own_texels_and_lands_where_its_cell_would():
+    frames = []
+    for k in range(3):
+        im = Image.new("RGBA", (200, 100), (0, 0, 0, 0))
+        im.paste(Image.new("RGBA", (20, 30), (255, 0, 0, 255)), (10 + 60 * k, 50))
+        frames.append(im)
+    sheets, rec = pack.sheets_for(frames, (100, 90), "x.png")
+    pad = pack.PAD
+    assert rec["cell"] == [140 + 2 * pad, 30 + 2 * pad] and rec["origin"] == [90 + pad, 40 + pad]
+    for k, fr in enumerate(rec["frames"]):
+        x, y, w, h = fr["rect"]
+        assert (w, h) == (20 + 2 * pad, 30 + 2 * pad), "its own box, not the union"
+        assert fr["offset"] == [60 * k, 0]
+        page = sheets[fr["page"]][1]
+        assert np.array_equal(np.asarray(page.crop((x, y, x + w, y + h))),
+                              np.asarray(frames[k].crop((10 - pad + fr["offset"][0], 50 - pad, 10 - pad + fr["offset"][0] + w, 50 - pad + h))))
 
 
 def test_ground_clip_cuts_below_the_feet_anchor_only():
@@ -223,13 +263,30 @@ def test_the_manifest_was_packed_at_his_ruled_height():
         rec = m["sheets"][clip]
         assert abs(rec["ppu"] - build.combat_ppu("varka")) < 0.01, clip
         assert sum(p["count"] for p in rec["pages"]) == rec["count"] == len(rec["times"])
+        assert len(rec["frames"]) == rec["count"]
         for p in rec["pages"]:
-            assert p["hframes"] * rec["cell"][0] <= pack.MAX_SHEET and p["vframes"] * rec["cell"][1] <= pack.MAX_SHEET
+            assert p["size"][0] <= pack.MAX_SHEET and p["size"][1] <= pack.MAX_SHEET
+        for fr in rec["frames"]:
+            x, y, w, h = fr["rect"]
+            pw, ph = rec["pages"][fr["page"]]["size"]
+            assert x + w <= pw and y + h <= ph, (clip, fr)
+            assert fr["offset"][0] + w <= rec["cell"][0] and fr["offset"][1] + h <= rec["cell"][1], (clip, fr)
     target = chars.body_px(chars.CHARS["varka"]["height_in"])
     assert abs(m["measure"]["hat_to_boot_px"] / target - 1) < 0.06, m["measure"]
-    assert m["stance_a"]["hat_to_boot_px"] < m["measure"]["hat_to_boot_px"], "the battle stance crouches"
+    assert m["stance_a"]["neck_px"] < m["measure"]["neck_px"], "the battle stance crouches"
     assert m["sheets"]["attack"]["main_frame"] == m["sheets"]["attack"]["impact_frames"][1]
     for clip in ("attack", "ascension"):
         f = m["fx"][clip]
         assert 0 <= f["first_frame"] and f["first_frame"] + f["count"] <= m["sheets"][clip]["count"]
     assert m["portrait"]["size"] == [132, 195]
+    assert m["texture_import"] == "vram_compressed", "visual paper, pick 1 (a)"
+    # the shoulder rest keeps stance A narrower than he is tall
+    assert m["stance_a"]["width_px"] < 1.3 * m["stance_a"]["full_px"], m["stance_a"]
+
+
+def test_tight_box_ignores_the_faint_haze():
+    im = Image.new("RGBA", (40, 40), (0, 0, 0, 0))
+    im.putpixel((2, 2), (255, 255, 255, 3))
+    im.paste(Image.new("RGBA", (10, 10), (255, 255, 255, 255)), (15, 15))
+    assert pack.tight_box([im]) == (15, 15, 25, 25)
+    assert pack.tight_box([im], floor=1) == (2, 2, 25, 25)

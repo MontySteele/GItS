@@ -25,9 +25,9 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 
 | Clip | What it does | Length | Frames |
 |---|---|---|---|
-| idle | Stance A: wide planted feet, weight forward. The lead blade is low and forward, its tip at knee height. The rear blade trails low. Slow breathing, a blink, the coat skirt and belt tails sway. | 2.8 s loop | 34 at 12 fps |
-| idle_low | Shoulders down, head low, both tips at the ground. | 3.0 s loop | 30 at 10 fps |
-| attack | The lead blade is hauled overhead and cleaves down (impact 1, frame 6). The rear blade sweeps up across it (impact 2, frame 11, the main one). | 0.95 s | 19 |
+| idle | Stance A: knees a little bent, feet wide, weight forward. The near blade rests on his shoulder, up and back behind his head. The lead blade is low and forward toward the enemy. Slow breathing, a blink, the coat skirt and belt tails sway. | 2.8 s loop | 34 at 12 fps |
+| idle_low | Shoulders down, head low. The shoulder blade has slid down, and both tips drag on the ground before him. | 3.0 s loop | 30 at 10 fps |
+| attack | An X cut at the enemy. The lead blade is hauled up and back over his head and cleaves down to low front-right (impact 1, frame 6). The near blade comes off his shoulder, from behind over the top and down in front of him, crossing the first cut (impact 2, frame 11, the main one). He puts it back on his shoulder. | 0.95 s | 19 |
 | cast | Both blades raised and crossed before him: the salute. | 1.0 s | 20 |
 | hurt | He flinches back behind the crossed blades. | 0.8 s | 16 |
 | death | He drives both blades into the ground either side, sinks to one knee between them, lets go and bows his head. It holds from 1.6 s. | 2.2 s | 25 |
@@ -35,7 +35,7 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 | merchant | Stance B: upright, both claymores planted either side, his hands on the hilts. It breathes. | 3.0 s loop | 30 at 10 fps |
 
 **Stills:**
-- rest site: seated by the fire, both blades leaning beside him;
+- rest site: sitting upright on the ground facing the fire, knees up and forearms on them, both blades planted upright behind him;
 - select close-up: stance B waist-up, bleeding off the bottom;
 - roster tile: a face close-up, 132x195, plus the locked tile;
 - the ground shadow;
@@ -56,23 +56,23 @@ R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A 
 | Electro | #c08cff |
 | Cryo | #a8f0ff |
 
-**Data for phase B** (committed): `tools/char_render/varka_frames.json`. It holds cells, pages, counts, times, feet anchors, the impact frames (`impact_frames`, `main_frame`), the fx layers' first frame and anchor, the shadow placement, the rest seat and the select framing.
+**Data for phase B** (committed): `tools/char_render/varka_frames.json`. It holds each clip's logical cell and per-frame rects (page, rect, offset in the cell), pages, counts, times, feet anchors, the impact frames (`impact_frames`, `main_frame`), the fx layers' first frame and anchor, the shadow placement, the rest seat and the select framing.
 
 ## Measured
 
-- **Height.** Standing (`stand`), he is 265.5 px from hair to boot and 270.5 px in full at 1080p. The target is 269.6 (78 in over a 68 in adult, times 235 px). That is 1.13 to 1.15 of the base adults. Stance A crouches to 245.7 px and spreads to 473 px wide with the blades.
+- **Height.** Standing (`stand`), he is 265.5 px from hair to boot and 270.5 px in full at 1080p. The target is 269.6 (78 in over a 68 in adult, times 235 px). That is 1.13 to 1.15 of the base adults. In stance A his neck sits at 222.8 px against 238.7 standing (the crouch), and the figure with both blades is 294.5 px wide (it was 473). The shoulder blade's tip rises over his head, to 316 px.
 - **Style** (L* p90 / C* p90, opaque pixels at 1080p):
 
 | Figure | L* p90 | C* p90 |
 |---|---|---|
-| Varka idle f0 | 65.6 | 22.5 |
-| Varka attack f11 | 67.0 | 23.1 |
+| Varka idle f0 | 69.7 | 24.4 |
+| Varka attack f11 | 66.7 | 23.9 |
 | Ironclad | 71.4 | 41.4 |
 | Silent | 68.9 | 24.9 |
 | Ironclad + Silent mean | 70.1 | 33.2 |
 
 His black coat and grey trousers sit him under the pair on both measures, near Silent. H3 lite is the ruled fixed squeeze and was not retuned.
-- **Cost.** 18 sheet files, 170 Mpx: about 650 MB of RGBA if uncompressed at 2x, as Klee's are. Klee's whole set is about 55 MB. The figure is 1.6 times her height, and the blades span about three times her width. Pick 1 below.
+- **Cost.** After the review: 15 files, 98.5 Mpx (it was 174 Mpx in 21 files). That is 376 MB of RGBA uncompressed at 2x, or about 94 MB VRAM-compressed (1 byte per texel), and 48 MB of PNG on disk. Klee's whole set is about 55 MB. Every combat clip now fits one 4096 page.
 
 ## Where his graphics appear (the surface list for phase B)
 
@@ -99,16 +99,26 @@ From `klee-mod/KleeCode/Varka.cs`, `tools/build_pck.ps1` and Klee's wiring:
 - **The blades are as long as he is tall,** at 0.77 and 0.91 of his height. Three poses bend because of it:
   - With his hands at chest height, a planted blade's tip sits about 0.1 to 0.3 units in the ground. `pack.py` cuts every pixel under the ground line (anchor + 6 px), so the tips read as driven in.
   - "Hands on the pommels" became hands on the hilts. The pommels would sit at his collarbone.
-  - Laid flat, a blade is a hairline from the game's 5-degree camera, so at the rest site both blades lean beside him instead.
+  - Laid flat, a blade is a hairline from the game's 5-degree camera, so at the rest site both blades stand planted behind him instead.
 - **The blades' flats are turned 25 to 30 degrees off the viewer** in combat. Edge-on they read as wires at 1080p.
 - **Secondary motion** is a swing of the coat skirt's twelve chains, the belt tails and the shoulder cape. There is no cloth simulation.
 
+## Revised after review (2026-10-13)
+
+The main session reviewed phase A's sheets. Five notes; four changed the art.
+
+- **The attack aimed the wrong way.** The second strike rose and ended with the blade pointing up behind him, and its trail swept over his back. The enemy is to his right. It is now an X cut at the enemy:
+  - Strike 1: the lead blade goes up and back over his head and cleaves down to low front-right (frame 6).
+  - Strike 2, the main one: the near blade comes off his shoulder, from behind over the top and down in front of him, crossing the first cut steeper from a higher hand (frame 11). It ends low in front, then goes back on his shoulder.
+  - At both impacts the striking blade points right, between chest and knee height. Both trails sweep from above and behind into the hit on his right. The impact bursts are placed from the blade's own position at the impact frame, so they moved with it.
+- **The idle was too wide.** The rear blade trailed far behind him. The near blade now rests on his shoulder, up and back behind his head, and the lead blade stays low and forward. His knees bend a little less, his feet are a little wider and his weight is forward. Stance A went from 473 to 294.5 px wide at 1080p (with both blades; his body alone is about 112). idle_low, the crouch before the ascension leap, and every clip that starts or ends in stance A were reworked to match. Their feet stay where idle plants them.
+- **The rest site read as lying down,** and the ground line cut him. He now sits upright on the ground facing the fire, knees up and forearms on them. Both blades are planted upright behind him, and only their tips and his coat tail go under the ground line.
+- **Texture budget:** pick 1's default, plus a tighter trim. Each frame is now cut to its own pixels and shelf-packed, rather than every frame taking the clip's widest box. In Godot that is an AtlasTexture whose margin restores the cell. With the narrower idle, the set went from 174 to 98.5 Mpx.
+- Unchanged and approved: stance B (the shop), the select close-up, the roster tile, the element trail layer and its colours, and the scale.
+
 ## For [USER]
 
-1. **Texture budget** (650 MB uncompressed at 2x).
-   - **(a) Default:** keep 2x like Klee, and have phase B import his sheets VRAM-compressed (about a quarter of the size).
-   - (b) Pack him at 1x: a quarter of the size, sharp at 1080p and soft at 4K.
-   - (c) Both.
+1. **Texture budget.** Taken at the default in the design review: keep 2x like Klee, and phase B imports his sheets VRAM-compressed (`texture_import` in the manifest). With the per-frame trim that is about 94 MB.
 2. **The look,** on these sheets: `scratchpad/varka-art/sheets/`.
    - **(a) Default:** go to phase B as is.
    - (b) Change the poses first: the blade angles, the trail width, the rest pose.

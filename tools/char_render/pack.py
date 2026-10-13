@@ -8,10 +8,12 @@ bladed kit needs. Reads what tools/klee_render/post.py painted from
 tools/char_render/render.py's raw frames and writes, under
 <art-root>/ImageGen/images/<char>/:
 
-  model/frames/<char>_<clip>.png      one sheet per combat clip and the shop loop,
-                                      cells in reading order; a clip too big for
-                                      one MAX_SHEET texture continues on
-                                      <char>_<clip>_p2.png, ... (`pages`)
+  model/frames/<char>_<clip>.png      one sheet per combat clip and the shop loop:
+                                      each frame trimmed to its own texels and
+                                      shelf-packed in reading order (`frames`:
+                                      page, rect, offset in the clip's cell); a
+                                      clip too big for one MAX_SHEET texture
+                                      continues on <char>_<clip>_p2.png, ... (`pages`)
   model/frames/<char>_<clip>_fx.png   the clip's neutral slash trails and impact
                                       bursts (fx.py), from its first live frame
                                       to its last, tinted per element by the game
@@ -78,6 +80,25 @@ SHADOW_FILES = {"varka": "varka_shadow.png"}
 REST_FILES = {"varka": "varka_rest.png"}
 
 
+#: the alpha a texel needs to widen a sheet's cell: the toon pass leaves a
+#: faint 1-3/255 haze past the outline that no screen shows, and a union box
+#: over every frame pays for it on every cell
+ALPHA_FLOOR = 4
+#: how phase B's generator imports the sheets (Godot's compress/mode 2)
+TEXTURE_IMPORT = "vram_compressed"
+
+
+def tight_box(frames: list, floor: int = ALPHA_FLOOR):
+    """The union box of every texel at alpha >= floor across the frames."""
+    box = None
+    for im in frames:
+        b = im.getchannel("A").point(lambda v: 255 if v >= floor else 0).getbbox()
+        if b is None:
+            continue
+        box = b if box is None else (min(box[0], b[0]), min(box[1], b[1]), max(box[2], b[2]), max(box[3], b[3]))
+    return box
+
+
 def manifest_path(char: str) -> Path:
     return HERE / f"{char}_frames.json"
 
@@ -96,40 +117,58 @@ def page_name(file: str, page: int) -> str:
     return file if page == 0 else file.replace(".png", f"_p{page + 1}.png")
 
 
-def layout(n: int, cw: int, ch: int, max_sheet: int = MAX_SHEET):
-    """(cols, rows per page, pages): Klee's near-square grid when one sheet
-    holds every cell, else as many full-width pages as it takes."""
-    cols = max(1, min(n, max_sheet // cw, math.ceil(math.sqrt(n * ch / cw))))
-    if math.ceil(n / cols) * ch <= max_sheet:
-        return cols, math.ceil(n / cols), 1
-    cols = max(1, min(n, max_sheet // cw))
-    rpp = max(1, max_sheet // ch)
-    return cols, rpp, math.ceil(n / (cols * rpp))
+def shelf(sizes: list, max_sheet: int = MAX_SHEET):
+    """Pack (w, h) rects in reading order onto shelves: a page about as wide
+    as it is tall (never over max_sheet), a new shelf when a row is full, a
+    new page when a shelf would run off the bottom. Returns ([(page, x, y)],
+    [(page_w, page_h)])."""
+    area = sum(w * h for w, h in sizes)
+    W = min(max_sheet, max(max(w for w, _h in sizes), math.ceil(math.sqrt(area * 1.15))))
+    place, pages = [], []
+    page, x, y, row_h, used_w = 0, 0, 0, 0, 0
+    for w, h in sizes:
+        if x and x + w > W:                      # next shelf
+            x, y, row_h = 0, y + row_h, 0
+        if y + h > max_sheet:                    # next page
+            pages.append((used_w, y))
+            page, x, y, row_h, used_w = page + 1, 0, 0, 0, 0
+        place.append((page, x, y))
+        x += w
+        row_h = max(row_h, h)
+        used_w = max(used_w, x)
+    pages.append((used_w, y + row_h))
+    return place, pages
 
 
 def sheets_for(frames: list, origin, file: str):
-    """Trim every frame to the union alpha box, lay the cells out (paging if
-    need be) and return ([(file, sheet)], record)."""
-    x0, y0, x1, y1 = KP.alpha_box(frames)
-    x0, y0 = max(0, x0 - PAD), max(0, y0 - PAD)
-    x1, y1 = min(frames[0].width, x1 + PAD), min(frames[0].height, y1 + PAD)
-    cw, ch = x1 - x0, y1 - y0
-    n = len(frames)
-    cols, rpp, npages = layout(n, cw, ch)
-    per = cols * rpp
+    """Every frame trimmed to its OWN visible texels (tight_box, plus PAD),
+    shelf-packed onto as few MAX_SHEET pages as it takes. The record keeps
+    the clip's logical cell (the union box) and origin, and per frame the
+    page, its rect on that page and its offset inside the cell: in Godot an
+    AtlasTexture with region = rect and margin = (offset, cell - rect size)
+    draws it exactly where the untrimmed cell would. Returns
+    ([(file, sheet)], record)."""
+    ux0, uy0, ux1, uy1 = tight_box(frames)
+    ux0, uy0 = max(0, ux0 - PAD), max(0, uy0 - PAD)
+    ux1, uy1 = min(frames[0].width, ux1 + PAD), min(frames[0].height, uy1 + PAD)
+    boxes = []
+    for im in frames:
+        b = tight_box([im]) or (ux0, uy0, ux0 + 1, uy0 + 1)
+        boxes.append((max(ux0, b[0] - PAD), max(uy0, b[1] - PAD), min(ux1, b[2] + PAD), min(uy1, b[3] + PAD)))
+    place, sizes = shelf([(b[2] - b[0], b[3] - b[1]) for b in boxes])
+    sheets = [Image.new("RGBA", sz, (0, 0, 0, 0)) for sz in sizes]
+    recs = []
+    for im, b, (pg, x, y) in zip(frames, boxes, place):
+        sheets[pg].paste(im.crop(b), (x, y))
+        recs.append({"page": pg, "rect": [x, y, b[2] - b[0], b[3] - b[1]], "offset": [b[0] - ux0, b[1] - uy0]})
     out, pages = [], []
-    for p in range(npages):
-        chunk = frames[p * per:(p + 1) * per]
-        rows = math.ceil(len(chunk) / cols)
-        sheet = Image.new("RGBA", (cols * cw, rows * ch), (0, 0, 0, 0))
-        for i, im in enumerate(chunk):
-            sheet.paste(im.crop((x0, y0, x1, y1)), ((i % cols) * cw, (i // cols) * ch))
-        name = page_name(file, p)
+    for pg, sheet in enumerate(sheets):
+        name = page_name(file, pg)
         out.append((name, sheet))
-        pages.append({"file": name, "count": len(chunk), "hframes": cols, "vframes": rows})
-    rec = {"cell": [cw, ch], "count": n, "pages": pages,
+        pages.append({"file": name, "count": sum(1 for r in recs if r["page"] == pg), "size": list(sheet.size)})
+    rec = {"cell": [ux1 - ux0, uy1 - uy0], "count": len(frames), "pages": pages, "frames": recs,
            # whole texels, so a sprite's offset never lands between two
-           "origin": [round(origin[0] - x0), round(origin[1] - y0)]}
+           "origin": [round(origin[0] - ux0), round(origin[1] - uy0)]}
     return out, rec
 
 
@@ -190,9 +229,12 @@ def main(argv=None) -> int:
     out_frames = art / "model" / "frames"
     files = SHEET_FILES[char]
     manifest = {"_doc": f"Generated by tools/char_render/pack.py from renders of the official {char} model "
-                        "(never committed). Cells, pages, counts, times, anchors and events only; the sheets "
+                        "(never committed). Cells, per-frame rects, pages, counts, times, anchors and events only; the sheets "
                         f"live in ImageGen/images/{char}/model/frames.",
-                "char": char, "combat_scale": COMBAT_SCALE, "merchant_scale": MERCHANT_SCALE, "sheets": {}, "fx": {}}
+                "char": char, "combat_scale": COMBAT_SCALE, "merchant_scale": MERCHANT_SCALE,
+                # the texture budget pick (visual paper, pick 1, default): sheets stay
+                # 2x and the game imports them VRAM-compressed
+                "texture_import": TEXTURE_IMPORT, "sheets": {}, "fx": {}}
     writes = []
     for clip in (*COMBAT, "merchant"):
         meta, frames = load_clip(R, clip)
@@ -208,7 +250,7 @@ def main(argv=None) -> int:
         manifest["sheets"][clip] = rec
         writes += [(out_frames / name, im) for name, im in sheets]
         print(f"{clip:10s} {rec['count']:3d} frames  cell {rec['cell']}  pages "
-              f"{[(p['hframes'], p['vframes']) for p in rec['pages']]}  origin {rec['origin']}")
+              f"{[tuple(p['size']) for p in rec['pages']]}  origin {rec['origin']}")
         if clip in FX_FILES.get(char, {}):
             layers, first, pad = FX.clip_fx(meta)
             assert layers, f"{clip}: no trail or burst marked"
@@ -226,6 +268,10 @@ def main(argv=None) -> int:
     manifest["measure"] = KP.body_metrics(R / "stand.png", st, COMBAT_SCALE)
     sa = json.loads((R / "stance_a.json").read_text(encoding="utf-8"))
     manifest["stance_a"] = KP.body_metrics(R / "stance_a.png", sa, COMBAT_SCALE)
+    # the neck joint's height over the feet: the crouch measure (the shoulder
+    # blade rises over his head in stance A, so the alpha top is no measure)
+    for key, m in (("measure", st), ("stance_a", sa)):
+        manifest[key]["neck_px"] = round((m["origin_px"][1] - m["head_px"][1]) * COMBAT_SCALE, 1)
     manifest["target_body_px"] = round(CH.body_px(CH.CHARS[char]["height_in"]), 1)
     print("standing at 1080p:", manifest["measure"], " stance A:", manifest["stance_a"],
           " target", manifest["target_body_px"])
