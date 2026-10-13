@@ -28,9 +28,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Klee tempo paper (2026-10-07, `klee-next`): delete the engine pieces only its five cuts used, in both engines -- `GroundedPower` (and its `Grounded` keyword tip and `KleeOverhaulLaw.GroundedSpark`), `SitTightPower`, `PatienceKleePower` and their sim twins (`ko_grounded`, `ko_sit_tight`, `ko_patience`), with their pins. Left registered so the cut could land without an engine sweep.
 - Lynette's Guest Star tip is 146 characters against the 135 ceiling; it has a lint exception (text pass 2026-10-12). Trim it and drop the exception.
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
-- `tools/art_ledger.py` reports about 115 false MISSING-RENDER rows because it looks under `cards/klee/` for every kit.
-- The card-distinctness lint fails when run locally with `ModuleNotFoundError: tier0` (CI passes); fix its import path.
-- `power_furina_all_the_worlds_a_stage` is an unused row in `art/plan.tsv`; delete it.
 - Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Flotsam Surge and the Sea Glass token.
 - Art owed, Spiral Abyss mode (2026-10-12): the menu emblem and The Ley Line are 64px wiki sources upscaled 4x, and seven are nearest-official stand-ins (Abyssal Moon = Iridescent Moon, Moonlit Rest = Sweet Madame, First Strike = Sword Unaligned, Elemental Burst = Battle-Line Detonation, Crystallize = Crystallize Shield Hydro, Sheer Cold = Element Cryo, Elemental Mark = Element Pyro).
 - Art owed, Spiral Abyss round two (2026-10-12): the ten new entries borrow the first eight's icons until their own are fetched (Overflow = Elemental Burst, Vigor of the Abyss = First Strike, Moonlit Spring = Moonlit Rest, Battle Rhythm = Resonance, Wavering Moon = Abyssal Moon, Starfell Draft = Fateful Fortune; Thorny Ground = Abyss Herald, Bulwark = Fatui Skirmishers, Frenzy = Rally, Withering = Sheer Cold), so two cards on one page can share an icon.
@@ -134,7 +131,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Furina's Incoming forecast leaves out the guests' end-of-turn Block (Freminet), so it reads too pessimistic; and Frozen on a boss, and whether a guest's act ends a freeze, are not printed (round 2026-10-12, lane 2).
 - Seat page: the note "Face numbers leave out the enemy's Vulnerable and Slow until a card is aimed" (`understudy/blindplay_notes.py` ENEMY_FOLD_NOTE) read as wrong to a Kokomi seat beside faces that already folded Vulnerable (round 1 2026-10-12, lane 5b); check which faces fold it and say so per card.
-- Seat page: `choose` prints "Took: X" before the bridge refuses it (seen when choosing mid-greeting); print "Took" only after the game accepts.
 - Seat page: an Ancient's greeting text is not printed, only "(the scene is still being told)"; print the dialogue lines so seats read the story.
 
 ## Harness, bridge and tools
@@ -144,16 +140,13 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Bridge: Jumpy Dumpty refused without a target, a Durin chooser answered "still opening", and Mawler died at end of turn with no printed cause.
 - Drowning Beacon's "Bottle" potion reward: trace the bridge on the event's custom reward screen (is it shown, or left behind on `proceed`). The mod matches the base event.
 - Bridge `ModeLabels`/`RecordChoice` still carry the sheet's literal numbers for mode faces; read them from the card's vars instead.
-- Soak: `soak_screens._escape` answers the Crystal Sphere with `crystal_sphere_proceed`, which the game refuses while divinations are owed; spend them first as the seat page's `reveal` does (`blindplay_shape.sphere_reveal_action`).
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
-- Fight telemetry: log Witch's Homework II's run-long Bomb size (`HomeworkGrowth`) per fight, so its prediction can be graded.
 - Fight telemetry has no field for Block that absorbed hits on the player: `damage_blocked` is enemy Block her own hits broke (`PlayTelemetry.FileHit`), so it does not track `block_gained` (Kokomi round 5, lane 5 Kaiser Crab: 192 gained, 11 broken). Add a `damage_absorbed` beside it if a review needs it.
 - Fight telemetry credits a Plan carry-out's damage to "(Bake-Kurage)" in `damage_by_source` (`KokomiPlan.Hit`'s `DamageCredit` scope), not to the card that wrote the Plan, so a Plan card's damage cannot be read per card.
 - `scenario run` cannot start on a lane whose profile holds a saved run: the relaunched game resumed the old boss fight and the menu never became ready.
 - An embark was never reverted (all its ledger rows APPLIED, the game still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
 - `test_local_tester` is flaky: it failed once and passed on re-run with no change.
 - The seat harness sometimes sends end-turn twice in a row (seat rounds); find which path repeats it.
-- `EB-802` `understudy/twolane_frames.py` may carry the PrintWindow clip `frames.py` fixed; route it through the same capture, and make a frame-reading row refuse `complete: false`.
 - `EB-799` `vendor/STS2_MCP/STS2_MCP.csproj` ignores `klee-mod/local.props`, so a bare `dotnet build` of the bridge fails in a worktree; read `local.props` (until then pass `-p:STS2GameDir=...`).
 - `EB-489` bound the bridge's main-thread hop so one stalled frame cannot hang `/api/v1/singleplayer` for the life of the process.
 - `EB-391` the `rest` verb sometimes fails its first call on an open rest site ("Rest site room is not open"); game-side race.

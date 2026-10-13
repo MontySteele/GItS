@@ -210,8 +210,8 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
 from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
-    post_when_the_room_is_open, RECORD_DISCLAIMER, record_schema,
-    _result_line, ROOM_NOT_OPEN, RUN_QUESTIONS,
+    answer_lines, post_when_the_room_is_open, RECORD_DISCLAIMER,
+    record_schema, refused, _result_line, ROOM_NOT_OPEN, RUN_QUESTIONS,
     ScriptedThread, ScriptedWire, Session, taken_line, Transcript)
 from understudy.blindplay_record import (   # noqa: E402,F401  (re-export)
     AUDIT_EXTRA, audit_markdown, build_version, _game_dir, game_version,
@@ -680,8 +680,7 @@ def cmd_act(args) -> int:
     # Project review 2026-10-08, pick 10: the card offer this answered, if
     # any, and what was taken (`understudy/offer_log.py`). Never raises.
     offer_log.record(state, res, args.command)
-    said = [line for line in (taken_line(res, state), _result_line(result))
-            if line]
+    said = answer_lines(res, state, result)
     for line in said or [ACT_SENT_SILENT]:
         print(line)
     # `EB-456`: charged AFTER the post, so an act the wire never saw is not

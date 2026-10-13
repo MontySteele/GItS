@@ -11,8 +11,18 @@ from __future__ import annotations
 
 import json
 
+from understudy.crystal_sphere import sphere_reveal_action
 from understudy.soak_shape import (DECISION_SCREENS, HAZARD_EVENT_TITLES,
                                    HAZARD_EVENTS)
+
+
+def _sphere_action(state: dict) -> dict:
+    """The Crystal Sphere's next move: spend an owed divination first, as the
+    seat page's `reveal` does, because the game refuses
+    `crystal_sphere_proceed` while divinations are owed."""
+    blob = state.get("crystal_sphere")
+    return (sphere_reveal_action(blob if isinstance(blob, dict) else {})
+            or {"action": "crystal_sphere_proceed"})
 
 def _hazard_event(state: dict) -> tuple[str, str] | None:
     """`(identity, why)` when this screen is a registered hazard, else `None`.
@@ -122,7 +132,7 @@ def _mechanical_action(state: dict) -> dict | None:
         return ({"action": "combat_select_card", "card_index": 0} if cards
                 else {"action": "combat_confirm_selection"})
     if st == "crystal_sphere":
-        return {"action": "crystal_sphere_proceed"}
+        return _sphere_action(state)
     if st in DECISION_SCREENS:
         return None
     if st == "menu":
@@ -138,12 +148,13 @@ def _escape(state: dict) -> dict | None:
     Every one of these screens advertises a way out; the walker just never had
     a reason to use it until a full potion belt made `claim_reward` a no-op.
     """
+    if str(state.get("state_type")) == "crystal_sphere":
+        return _sphere_action(state)
     return {
         "rewards": {"action": "proceed"},
         "treasure": {"action": "proceed"},
         "relic_select": {"action": "skip_relic_selection"},
         "hand_select": {"action": "combat_confirm_selection"},
-        "crystal_sphere": {"action": "crystal_sphere_proceed"},
     }.get(str(state.get("state_type")))
 
 

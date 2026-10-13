@@ -715,3 +715,16 @@ def test_card_universe_matches_art_coverage_on_this_repo():
 
     assert ledger_ids == coverage_ids
     assert expected == len(coverage_ids)
+
+
+def test_a_csharp_card_whose_art_is_in_the_varka_dir_is_covered(root):
+    # BACKLOG 2026-10-13: Varka's dir was not among the card dirs, so every
+    # proto_vk_ portrait defaulted to cards/klee and read as MISSING-RENDER.
+    _write(root, "klee-mod/KleeCode/VarkaFixture.cs",
+           'class V { object P => RosterArt.CardPortrait("proto_vk_fixture"); }\n')
+    _png(root, "ImageGen/images/cards/varka/proto_vk_fixture.png")
+    led = art_ledger.Ledger(root)
+    assert not [f for f in checks(led, "MISSING-RENDER")
+                if "proto_vk_fixture" in f.surface_id]
+    row = next(r for r in led.rows if r.surface_id.endswith("proto_vk_fixture"))
+    assert row.rendered_present
