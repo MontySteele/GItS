@@ -238,8 +238,12 @@ with each character's story in the run, Klee first.
 
 The fourth menu mode (`review/active/spiral-abyss-pools-2026-10-12.md`) is
 built under `klee-mod/KleeCode/Abyss/`: a "Spiral Abyss" button beside Custom
-(solo and co-op host) opens the Custom screen with the `SpiralAbyss` modifier
-ticked and locked; before each act's Ancient the run shows a page of three
+(solo and co-op host) opens the ordinary character select (character and
+ascension as usual) under a "Spiral Abyss" banner, and the run carries the
+`SpiralAbyss` modifier as a Standard run that counts for ascension ([USER],
+2026-10-12: "I'd prefer it have the normal screen where you select the
+character and ascension rather than the custom mode screen"; Custom mode can
+still tick it); before each act's Ancient the run shows a page of three
 Blessings, the enemies take one of the two passed Shadows on a seeded roll,
 and all eight of each apply through the modifier's hooks, saved with the run.
 Riptide was rewritten before the build ([USER], 2026-10-12): "Riptide sounds

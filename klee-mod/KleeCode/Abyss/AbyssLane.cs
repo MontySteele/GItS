@@ -36,9 +36,14 @@ namespace KleeMod.Abyss;
 /// 2. <c>NCharacterSelectScreen.BeginRun</c> drops a Standard run's modifiers
 ///    (it logs an error and passes <c>Array.Empty</c>). A list carrying the
 ///    Abyss is carried past it instead, and the screen sees an empty one.
-/// 3. <c>RunState.CreateForNewRun</c> takes the carried list, and the
-///    Custom screen's <see cref="GameMode.Custom"/>, in place of the empty
-///    list and <see cref="GameMode.Standard"/> the Standard screen passes.
+/// 3. <c>RunState.CreateForNewRun</c> takes the carried list in place of the
+///    empty one the Standard screen passes. The game mode stays
+///    <see cref="GameMode.Standard"/>, so the run counts for ascension, wins
+///    and epochs like any Standard run (2026-10-12; it was Custom before).
+///
+/// The Abyss MENU BUTTON (<see cref="AbyssMenu"/>) shares seams 2 and 3: it
+/// arms the lobby's own list when the character select opens, and seam 1 then
+/// finds the Abyss already carried.
 ///
 /// From there the run is the Abyss button's run: the modifier's
 /// <c>AfterRunCreated</c> clears its record, the choice page goes over Neow
@@ -105,18 +110,23 @@ public static class AbyssLane
         return Array.Empty<ModifierModel>();
     }
 
-    /// <summary>Seam 3: the held list and <see cref="GameMode.Custom"/> in
-    /// place of an empty Standard run's, spending the hold; anything else
-    /// passes untouched.</summary>
-    public static void Release(ref IReadOnlyList<ModifierModel> modifiers, ref GameMode gameMode)
+    /// <summary>Seam 3: the held list in place of an empty Standard run's,
+    /// spending the hold; anything else passes untouched. The game mode is
+    /// read, never changed: an Abyss run is a Standard run.</summary>
+    public static void Release(ref IReadOnlyList<ModifierModel> modifiers, GameMode gameMode)
     {
         var held = _carried;
         if (held == null) return;
         if (modifiers.Count != 0 || gameMode != GameMode.Standard) return;
         _carried = null;
         modifiers = held;
-        gameMode = GameMode.Custom;
     }
+
+    /// <summary>Whether a list is held for the next run.</summary>
+    public static bool Holding => _carried != null;
+
+    /// <summary>Drop any held list (the main menu, <see cref="AbyssMenu.Disarm"/>).</summary>
+    public static void ClearHold() => _carried = null;
 }
 
 /// <summary>Seam 1, on the host or the singleplayer lobby.</summary>
@@ -168,11 +178,11 @@ internal static class NCharacterSelectScreen_BeginRun_AbyssLane_Patch
 internal static class RunState_CreateForNewRun_AbyssLane_Patch
 {
     [HarmonyPrefix]
-    private static void Prefix(ref IReadOnlyList<ModifierModel> modifiers, ref GameMode gameMode)
+    private static void Prefix(ref IReadOnlyList<ModifierModel> modifiers, GameMode gameMode)
     {
         try
         {
-            AbyssLane.Release(ref modifiers, ref gameMode);
+            AbyssLane.Release(ref modifiers, gameMode);
         }
         catch (Exception e)
         {
