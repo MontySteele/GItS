@@ -406,7 +406,10 @@ public class ArmKeywordTipTests
         // `ForAscensionNoOath`, the rider on Four Winds' Ascension's element
         // hit (it gains no Oath), and `ForBisSpendUpTo`, Bis!'s (a "Spend up
         // to" does not count).
-        Assert.Equal(46, attaches.Count);
+        // 47 with the Furina wave (2026-10-13): `ForFinalBowInTurn`, Final
+        // Bow's (its acts happen one after another).
+        Assert.Equal(47, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForFinalBowInTurn");
         Assert.Contains(attaches, m => m.Name == "ForAscensionNoOath");
         Assert.Contains(attaches, m => m.Name == "ForBisSpendUpTo");
         Assert.Contains(attaches, m => m.Name == "ForAscensionReturn");

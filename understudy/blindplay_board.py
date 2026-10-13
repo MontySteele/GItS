@@ -1066,6 +1066,9 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
         elif event == "hit":
             # A Power's hit (the drain-line round, 2026-10-09): its reach.
             why = "all" if reason == "all" else "random"
+        elif event == "stopped":
+            # The Furina wave (2026-10-13): why a no-choice Drain stopped.
+            why = "hp" if reason == "hp" else "buffer"
         else:
             why = ""
         log.append({

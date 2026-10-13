@@ -171,9 +171,14 @@ def test_proceed_past_an_unclaimed_potion_is_held_once(monkeypatch, capsys):
     assert [a for a, _ in wire.posts] == ["proceed"]
 
 
-def test_a_card_offer_alone_does_not_hold_proceed(monkeypatch):
-    """Skipping a card reward is the screen's own choice, not a drop."""
+def test_a_card_offer_alone_holds_proceed_once(monkeypatch, capsys):
+    """The Furina wave (2026-10-13, "To change now" 7): a card offer is held
+    too (a seat walked past an event's Uncommon Power); a second `proceed`
+    is the deliberate skip."""
     wire = _live(monkeypatch, _rewards(CARD))
+    assert _act("proceed") == 1
+    assert "this reward screen still holds" in capsys.readouterr().out
+    assert wire.posts == []
     assert _act("proceed") == 0
     assert [a for a, _ in wire.posts] == ["proceed"]
 

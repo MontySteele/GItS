@@ -37,8 +37,8 @@ namespace KleeMod.Vfx;
 /// <see cref="SparkCounter.PlaceInColumn"/>. The face is the drained HP in
 /// the base game's style for a number over art, cream with a dark outline in
 /// the glyph's bottom-right corner (<see cref="FurinaCounterFace"/>), inside
-/// a thin red ring (<see cref="RingColour"/>); the hover is the line
-/// and the Drain rule. No HP-bar tick: the counter is the reading.
+/// a thin red ring (<see cref="RingColour"/>); the hover is the Drain
+/// buffer left and the Drain rule. No HP-bar tick: the counter is the reading.
 ///
 /// THE FEED is <see cref="FurinaStage.RefreshBadges"/>, the funnel every
 /// Drain, Repay and turn already takes. No <c>_Process</c>.
@@ -73,28 +73,29 @@ public static class DrainedCounter
     /// <summary>The number the counter draws: her drained HP.</summary>
     public static int Read(Creature? creature) => FurinaStage.DrainedOf(creature);
 
-    /// <summary>The hover's first sentence, the one the paper names. Pure.
-    /// 2026-10-05: and WHERE THE LINE COMES FROM ("Drain line 30 HP (the HP
-    /// you started this fight with, minus 1/4 of your Max HP)"); seats
-    /// connected it late. The
-    /// Drain line rule (2026-10-09): a Drain may go past it.
+    /// <summary>The hover's first sentence. Pure. THE FURINA WAVE
+    /// (2026-10-13, `review/records/furina-wave-2026-10-13.md`, "To change
+    /// now" 1): ONE Drain number, the buffer she has left, and that Drain
+    /// inside it returns after combat -- the seat page's words
+    /// (<c>blindplay_render.STAGE_DRAIN_BUFFER_LINE</c>). Four seats read
+    /// the buffer and the "Drain line 59 HP" it replaced as two numbers for
+    /// one rule; the line keeps its meaning in words ("past your line", the
+    /// words Lyney's act and Regina of All Waters print), never as a second
+    /// number. At a line of 0 her HP is inside the buffer, so all of it
+    /// returns (the Spend round 2, 2026-10-10); under A Five-Century Act the
+    /// part past it returns too (the Spend round, 2026-10-10).
     /// </summary>
-    public static string LineSentence(int line, string why,
-                                      bool pastReturns = false) =>
-        "Drain line [blue]"
-      + line.ToString(CultureInfo.InvariantCulture) + "[/blue] HP"
-      + (string.IsNullOrEmpty(why) ? "" : " (" + why + ")")
-      // The Spend round 2 (2026-10-10): a line of 0 says that all her Drain
-      // returns (nothing can go past it).
-      + (line <= 0
-            ? ": " + FurinaStageLaw.LineZeroReturns.Replace(
-                  "Drain", "[gold]Drain[/gold]") + "."
+    public static string BufferSentence(int bufferLeft, bool lineZero = false,
+                                        bool pastReturns = false) =>
+        "Drain buffer: [blue]"
+      + bufferLeft.ToString(CultureInfo.InvariantCulture) + "[/blue] HP left. "
+      + (lineZero
+            ? "Your HP is inside it, so all your [gold]Drain[/gold] returns "
+              + "after combat."
          : pastReturns
-            // The Spend round (2026-10-10): A Five-Century Act returns the
-            // HP drained past the line too, so nothing past it is lost.
-            ? "."
-            : ": HP you [gold]Drain[/gold] past it is lost unless you "
-              + "[gold]Repay[/gold] it.");
+            ? "All your [gold]Drain[/gold] returns after combat, past it too."
+            : "[gold]Drain[/gold] inside it returns after combat; past it "
+              + "(past your line), only [gold]Repay[/gold] returns.");
 
     /// <summary>THE "LOST FOR GOOD" COUNTER (the quarter-line round,
     /// 2026-10-10, "What to change" 1): the drained count and, when any of
@@ -116,11 +117,12 @@ public static class DrainedCounter
                     : ": lost unless you [gold]Repay[/gold])")
             : "");
 
-    /// <summary>The hover's body: the line, the drained count (and how much
-    /// of it is past the line) and the rule. Pure.</summary>
-    public static string HoverBody(int drained, int line, string why,
-                                   int past = 0, bool pastReturns = false) =>
-        LineSentence(line, why, pastReturns) + "\n"
+    /// <summary>The hover's body: the buffer left, the drained count (and
+    /// how much of it is past the buffer) and the rule. Pure.</summary>
+    public static string HoverBody(int drained, int bufferLeft,
+                                   bool lineZero = false, int past = 0,
+                                   bool pastReturns = false) =>
+        BufferSentence(bufferLeft, lineZero, pastReturns) + "\n"
       + DrainedPhrase(drained, past, pastReturns)
       + ".\n" + ArmKeywordTips.DrainBody;
 
@@ -129,10 +131,10 @@ public static class DrainedCounter
     {
         if (creature == null || !FurinaStage.LiveFor(creature))
         {
-            return HoverBody(0, 0, "");
+            return HoverBody(0, 0);
         }
         var ledger = FurinaStageLedger.For(creature);
-        return HoverBody(ledger.Drained, ledger.Line, ledger.LineWhy,
+        return HoverBody(ledger.Drained, ledger.BufferLeft, ledger.Line <= 0,
                          ledger.DrainedPast,
                          ledger.Mods.FiveCenturyAct > 0);
     }

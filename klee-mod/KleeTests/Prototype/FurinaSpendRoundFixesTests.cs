@@ -183,15 +183,17 @@ public class FurinaSpendRoundFixesTests : IDisposable
             global::KleeMod.Vfx.DrainedCounter.DrainedPhrase(12, 4));
         Assert.Equal("Drained [blue]12[/blue] HP ([blue]4[/blue] past your line)",
                      global::KleeMod.Vfx.DrainedCounter.DrainedPhrase(12, 4, true));
-        var hover = global::KleeMod.Vfx.DrainedCounter.HoverBody(12, 30, "", 4, true);
+        var hover = global::KleeMod.Vfx.DrainedCounter.HoverBody(12, 0, false, 4, true);
         // The hover's own two lines drop it; the Drain tip under them still
-        // states the rule as it stands without the power.
+        // states the rule as it stands without the power. The Furina wave
+        // (2026-10-13): the buffer left leads, with no line number.
         Assert.StartsWith(
-            "Drain line [blue]30[/blue] HP.\nDrained [blue]12[/blue] HP "
+            "Drain buffer: [blue]0[/blue] HP left. All your [gold]Drain[/gold] "
+            + "returns after combat, past it too.\nDrained [blue]12[/blue] HP "
             + "([blue]4[/blue] past your line).\n", hover);
-        Assert.Contains("past it is lost unless",
-                        global::KleeMod.Vfx.DrainedCounter.HoverBody(12, 30, "", 4));
-        Assert.Equal("\n(Past your Drain line: returns after combat)",
+        Assert.Contains("only [gold]Repay[/gold] returns",
+                        global::KleeMod.Vfx.DrainedCounter.HoverBody(12, 0, false, 4));
+        Assert.Equal("\n(Past your Drain buffer: returns after combat)",
                      FurinaStageFacePreview.PastLineReturns);
     }
 
@@ -205,10 +207,10 @@ public class FurinaSpendRoundFixesTests : IDisposable
             // 2 HP of Drain buffer left (the Drain buffer, 2026-10-11).
             ledger.NoteDrain(ledger.BufferLeft - 2,
                              (int)b.Furina.Creature.CurrentHp);
-            Assert.Equal(FurinaStageFacePreview.PastLine(ledger.Line),
+            Assert.Equal(FurinaStageFacePreview.PastLine,
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
             ledger.ModsOverride = new StageMods { FiveCenturyAct = 1 };
-            Assert.Equal("\n(Past your Drain line: returns after combat)",
+            Assert.Equal("\n(Past your Drain buffer: returns after combat)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
             // Within the buffer nothing is printed either way.
             ledger.NoteRepay(ledger.Drained);

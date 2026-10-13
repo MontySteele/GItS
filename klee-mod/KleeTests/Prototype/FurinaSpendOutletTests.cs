@@ -61,8 +61,12 @@ public class FurinaSpendOutletTests
         var tips = File.ReadAllText(Path.Combine(
             Round17Tests.Repo(), "klee-mod", "KleeCode", "Cards", "Prototype",
             "ArmKeywordTips.cs"));
-        Assert.Contains("\"Its damage is the [gold]Fanfare[/gold] you hold. "
-                        + "Play it when \"", tips);
+        // The Furina wave (2026-10-13): it opens with where Fanfare comes
+        // from (`FurinaWaveTests`).
+        Assert.Contains("\"Whenever you lose HP, gain that much "
+                        + "[gold]Fanfare[/gold]. Its \"", tips);
+        Assert.Contains("\"damage is the [gold]Fanfare[/gold] you hold: play "
+                        + "it when \"", tips);
         Assert.Contains("\"the bank is worth it.\"", tips);
         var mod = File.ReadAllText(Path.Combine(
             Round17Tests.Repo(), "klee-mod", "KleeCode", "KleeMod.cs"));

@@ -1282,6 +1282,16 @@ def starter_spends_the_bank(card: dict) -> bool:
                     for eff in ops))
 
 
+def final_bow_acts_in_turn(card: dict) -> bool:
+    """The Furina wave (2026-10-13, "To change now" 4): does this row make a
+    guest act several times and leave (Final Bow)? Its acts happen one after
+    another, and a seat read them as simultaneous: the second kill set off
+    the first kill's Crab Rage. Asked of the effect, so the tip follows the
+    clause, not an id."""
+    return any(e.get("op") == "furina" and e.get("kind") == "final_bow"
+               for e in card.get("effects") or [])
+
+
 def keeps_half_a_spend_all(card: dict) -> bool:
     """Design-session call (2026-10-13): does this row apply Bis!, which
     keeps half of a spend-all and never of a "Spend up to"? Asked of the
@@ -15769,12 +15779,43 @@ def stage_later_repay_call(card: dict) -> str | None:
             f'{int(nested[0].get("amount", 1))}, {first})')
 
 
+#: THE FURINA WAVE (2026-10-13, `review/records/furina-wave-2026-10-13.md`,
+#: "To change now" 3): the token of a "Spend up to X: hit once more for
+#: every 4" row's in-combat line.
+STAGE_SPEND_HITS_TOKEN = "StageSpendHits"
+
+
+def stage_spend_hits_call(card: dict) -> str | None:
+    """The C# that fills a "Spend up to X: hit once more for every 4" row's
+    in-combat line, or None.
+
+    The Furina wave (2026-10-13): Crashing Waves spent a bank of 2 for no
+    extra hit and said nothing ("A preview should say 'spends 2, no extra
+    hit'", lane 3). The face prints what the bank buys now: "(Spends 2: no
+    extra hit)", "(Spends 6: 1 more hit)". DERIVED FROM THE CLAUSE -- a
+    damage op whose hit count reads `stage_spent_fours` after a top-level
+    `stage_spend_up_to` -- so a second such row carries it the day it exists.
+    """
+    spends = [fx for fx in card.get("effects") or []
+              if fx.get("op") == "stage_spend_up_to"]
+    hits = [fx for fx in card.get("effects") or []
+            if fx.get("op") == "damage"
+            and isinstance(fx.get("times_formula"), dict)
+            and fx["times_formula"].get("count") == "stage_spent_fours"]
+    if len(spends) != 1 or not hits:
+        return None
+    return ("FurinaStageFacePreview.SpendUpToHits(this, "
+            f"{int(spends[0]['amount'])})")
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
     args = []
     for token, call in ((STAGE_BOW_TOKEN, stage_bow_preview_call(card)),
                         (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
-                        (STAGE_REPAY_TOKEN, stage_repay_call(card))):
+                        (STAGE_REPAY_TOKEN, stage_repay_call(card)),
+                        (STAGE_SPEND_HITS_TOKEN,
+                         stage_spend_hits_call(card))):
         if call:
             args.append((token, call))
     return args
@@ -16902,6 +16943,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if ascension_hit_gains_no_oath(card):
             tips_expr = (
                 "ArmKeywordTips.ForAscensionNoOath("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # The Furina wave (2026-10-13): Final Bow's acts are in turn.
+        if final_bow_acts_in_turn(card):
+            tips_expr = (
+                "ArmKeywordTips.ForFinalBowInTurn("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the

@@ -352,6 +352,34 @@ public sealed class StageDirector
         _stage.GuestDrainRoom(amount, _board.Hp);
 
     /// <summary>
+    /// A no-choice Drain of <paramref name="amount"/> (a guest's act, Regina
+    /// of All Waters): drain the room above the line and, when any of it
+    /// did not fit, say so in the stage log (the Furina wave, 2026-10-13:
+    /// "Lyney's Drain was stopped: your Drain buffer is used up."). The
+    /// rule does not move. <paramref name="who"/> is the guest, or
+    /// <paramref name="source"/> the Power. Returns the HP drained.
+    /// </summary>
+    public async Task<int> NoChoiceDrain(int amount, StagePerformer who = default,
+                                         string source = "")
+    {
+        var room = GuestDrainRoom(amount);
+        var drained = 0;
+        var reason = FurinaStageLedger.StoppedAtBuffer;
+        if (room > 0)
+        {
+            if (await Drain(room)) drained = room;
+            else reason = FurinaStageLedger.StoppedAtHp;
+        }
+        if (drained < amount && !_board.Over)
+        {
+            _stage.Note(new StageBeat(FurinaStageLedger.StoppedEvent, who, -1,
+                                      _stage.Fanfare, amount - drained,
+                                      reason, Source: source));
+        }
+        return drained;
+    }
+
+    /// <summary>
     /// Rule 1, Drain N: lose N HP, mark it drained -- above the line or past
     /// it (2026-10-09) -- gain that much Fanfare, then the Drain readers --
     /// Salon's Encore, Wriothesley's and Freminet's lines, Ousia Surge. False
@@ -557,8 +585,9 @@ public sealed class StageDirector
         for (var i = 0; i < copies; i++)
         {
             if (_board.Over) break;
-            var room = GuestDrainRoom(FurinaStageLaw.ReginaDrain);
-            if (room <= 0 || !await Drain(room)) break;
+            // The Furina wave (2026-10-13): a stop says so in the log.
+            if (await NoChoiceDrain(FurinaStageLaw.ReginaDrain,
+                                    source: ReginaTitle) <= 0) break;
             done++;
             if (!_board.Over) await _board.Strength(1);
         }
@@ -665,8 +694,9 @@ public sealed class StageDirector
                 // player, so its Drain stops at the line (the drain-line
                 // round, 2026-10-09): it drains only the room above the
                 // line, 0 with none, and the damage lands either way.
-                var room = GuestDrainRoom(FurinaStageLaw.LyneyActDrain);
-                if (room > 0) await Drain(room);
+                // The Furina wave (2026-10-13): a stop says so in the log.
+                await NoChoiceDrain(FurinaStageLaw.LyneyActDrain,
+                                    StagePerformer.Lyney);
                 if (!_board.Over)
                 {
                     moved = number + await FullHouse();

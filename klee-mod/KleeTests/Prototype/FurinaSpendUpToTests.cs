@@ -274,9 +274,12 @@ public class FurinaSpendUpToTests
             "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 12: "
             + "deal 1 more for each. Draw 1 for every 4 spent.",
             Face(new ProtoFsSpiritedAria()));
+        // The Furina wave (2026-10-13): and its in-combat line, what the
+        // bank buys now (`FurinaWaveTests`).
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. "
-            + "[gold]Spend[/gold] up to 16: hit once more for every 4.",
+            + "[gold]Spend[/gold] up to 16: hit once more for every 4."
+            + "{InCombat:{StageSpendHits}|}",
             Face(new ProtoFsCrashingWaves()));
         Assert.StartsWith(
             "Gain {CalculationBase:diff()} [gold]Block[/gold]. "

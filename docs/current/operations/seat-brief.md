@@ -84,8 +84,9 @@ slow` is not a stop: nothing was sent, so `observe` again in a minute.
 
 Two commands are held once, with the reason printed: an `end turn` typed
 right after a refused command on an unchanged board, and a `proceed` (or
-`leave`) that would walk past gold, a potion or a relic still on a reward
-screen. Say it again to go ahead anyway.
+`leave`) that would walk past gold, a potion, a relic or a card offer still on
+a reward screen, or a relic still in an open chest. Say it again to go ahead
+anyway; that second `proceed` is how you skip on purpose.
 
 ### Your budget
 

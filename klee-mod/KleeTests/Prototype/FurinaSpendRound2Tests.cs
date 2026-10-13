@@ -255,17 +255,19 @@ public class FurinaSpendRound2Tests : IDisposable
     public void A_line_of_zero_says_all_your_drain_returns()
     {
         var why = FurinaStageLaw.LineWhyBase;
+        // The Furina wave (2026-10-13): the counter says it in the buffer's
+        // words, with no line number.
         Assert.Equal(
-            "Drain line [blue]0[/blue] HP (" + why + "): all your "
-            + "[gold]Drain[/gold] returns after combat.",
-            global::KleeMod.Vfx.DrainedCounter.LineSentence(0, why));
+            "Drain buffer: [blue]13[/blue] HP left. Your HP is inside it, so "
+            + "all your [gold]Drain[/gold] returns after combat.",
+            global::KleeMod.Vfx.DrainedCounter.BufferSentence(13, lineZero: true));
         Assert.Equal(
             "\nYour Drain line is 0: " + why + ". All your Drain returns "
             + "after combat.",
             FurinaStageFacePreview.LineNowWords(0, why));
         // Any other line reads as before.
-        Assert.Contains("past it is lost unless",
-            global::KleeMod.Vfx.DrainedCounter.LineSentence(30, why));
+        Assert.Contains("only [gold]Repay[/gold] returns",
+            global::KleeMod.Vfx.DrainedCounter.BufferSentence(13));
         Assert.Equal("\nYour Drain line is 30: " + why + ".",
                      FurinaStageFacePreview.LineNowWords(30, why));
         Assert.Equal("all your Drain returns after combat",

@@ -1579,9 +1579,12 @@ def _card_offers(state: dict[str, Any]) -> list[str]:
     return out
 
 
-#: The reward rows `proceed` would drop: every kind but a card offer (whose
-#: skip is the screen's own) and the optional card removal.
-UNCLAIMED_KINDS = ("gold", "potion", "relic", "specialcard")
+#: The reward rows `proceed` would drop: every kind but the optional card
+#: removal. THE FURINA WAVE (2026-10-13, "To change now" 7): a card offer
+#: too. A seat left "The Future of Potions?"'s reward screen with its
+#: Uncommon Power untaken (lane 1); a second `proceed` still skips it, and
+#: `skip` on the card chooser is still the card's own way out.
+UNCLAIMED_KINDS = ("gold", "potion", "relic", "specialcard", "card")
 
 
 def unclaimed_rewards(state: dict[str, Any]) -> list[str]:
@@ -1592,7 +1595,17 @@ def unclaimed_rewards(state: dict[str, Any]) -> list[str]:
     Iron on a reward screen (the run history has it, `was_picked: false`),
     and the seat walked on without it and reported "Ransack gave me no
     potion". The same silent drop lost two seats their gold (2026-09-28/29).
+
+    THE FURINA WAVE (2026-10-13, "To change now" 7): and the relic still in
+    an open chest. A seat typed `observe` and `proceed` in one call and
+    walked past Parrying Shield (lane 5). The bridge lists only the relics
+    still on offer (`BuildTreasureState`: enabled, visible holders), so a
+    taken relic is never held for.
     """
+    if _screen(state) == "treasure":
+        return [o["name"] for o in (_named_option(r)
+                                    for r in _relic_options(state))
+                if o["name"] and o["enabled"]]
     if _screen(state) != "rewards":
         return []
     faces = observation(state).get("items") or []

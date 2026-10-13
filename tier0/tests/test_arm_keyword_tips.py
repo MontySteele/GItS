@@ -368,7 +368,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # Ascension's rider, its element hit gains no Oath.
                     "KLEEMOD-ARM_VARKA_ASCENSION_NO_OATH",
                     # And Bis!'s rider: a "Spend up to" does not count.
-                    "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO"}
+                    "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO",
+                    # The Furina wave (2026-10-13): Final Bow's rider, its
+                    # acts happen one after another.
+                    "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():

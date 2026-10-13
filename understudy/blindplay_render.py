@@ -2178,29 +2178,29 @@ STAGE_DRAIN_PAST_RETURNS = " ({past} past your line)"
 #: are `FurinaStageLaw.LineZeroReturns`.
 STAGE_DRAIN_LINE_ZERO = ("- Drained {drained} HP. Drain line 0 HP{why}: all "
                          "your Drain returns after combat.")
-#: FURINA ROUND 3 (2026-10-11, review change 1): the counter leads with the
-#: buffer, the model [USER] ruled in, and prints the line as a derived number.
-#: Three seats called the line-first sentence dense, and two read the rule
-#: right off the Drain keyword tip, which already says it in buffer words.
-#: The rule is unchanged. Used where the build sends the buffer.
-STAGE_DRAIN_BUFFER_LINE = ("- Drained {drained} HP{past}. Drain buffer "
-                           "{left} of {buffer} left: Drain inside it returns "
-                           "after combat; past it, only Repay returns. Drain "
-                           "line {line} HP.")
+#: THE FURINA WAVE (2026-10-13, `review/records/furina-wave-2026-10-13.md`,
+#: "To change now" 1): ONE Drain number, the buffer she has left, and that
+#: Drain inside it returns after combat. Four seats read "Drain buffer 19 of
+#: 19 left" and "Drain line 59 HP" as two numbers for one rule, so the line's
+#: number left the page; its meaning stays as words ("past your line"), the
+#: words Lyney's act and Regina of All Waters print. The rule is unchanged.
+#: Used where the build sends the buffer (Furina round 3, 2026-10-11, on).
+STAGE_DRAIN_BUFFER_LINE = ("- Drain buffer: {left} HP left. Drain inside it "
+                           "returns after combat; past it (past your line), "
+                           "only Repay returns.{past}")
+#: The HP she drained past the buffer, only when there is any: it is the one
+#: other Drain fact a turn is priced on (what Repay can still win back).
+STAGE_DRAIN_BUFFER_PAST = " {past} HP drained past it: lost unless you Repay."
 #: The same, with A Five-Century Act in play: the past part returns too.
-STAGE_DRAIN_BUFFER_LINE_RETURNS = ("- Drained {drained} HP{past}. Drain "
-                                   "buffer {left} of {buffer} left: all your "
-                                   "Drain returns after combat, past it too. "
-                                   "Drain line {line} HP.")
+STAGE_DRAIN_BUFFER_LINE_RETURNS = ("- Drain buffer: {left} HP left. All your "
+                                   "Drain returns after combat, past it "
+                                   "too.")
 #: FURINA ROUND 5 (2026-10-11, review change 2): a line of 0 on a buffer
-#: build, in the buffer's words. The zero test used to run first, so a
-#: buffer build printed the old "Drain line 0 HP (your HP minus your Drain
-#: buffer...)" (`lane1:71`, `lane3:52`). At 0 her HP is inside what is left
-#: of the buffer, and a Drain never takes her to 0, so all of it returns.
-STAGE_DRAIN_BUFFER_LINE_ZERO = ("- Drained {drained} HP. Drain buffer {left} "
-                                "of {buffer} left: your HP is inside it, so "
-                                "all your Drain returns after combat. Drain "
-                                "line 0 HP.")
+#: build, in the buffer's words. At 0 her HP is inside what is left of the
+#: buffer, and a Drain never takes her to 0, so all of it returns.
+STAGE_DRAIN_BUFFER_LINE_ZERO = ("- Drain buffer: {left} HP left. Your HP is "
+                                "inside it, so all your Drain returns after "
+                                "combat.")
 #: Seat page 3: where the line comes from (2026-10-09; since the Drain buffer,
 #: 2026-10-11, "your HP minus your Drain buffer: 1/4 of your Max HP, less
 #: what you have drained"); seats connected it to its source only late.
@@ -2271,6 +2271,16 @@ STAGE_LOG_GAIN = "  - You gained {n} Fanfare{src}: {before} → {after}."
 STAGE_LOG_SPEND = "  - You spent {n} Fanfare: {before} → {after}."
 STAGE_LOG_DRAIN = "  - You drained {n} HP."
 STAGE_LOG_REPAY = "  - You repaid {n} HP."
+#: THE FURINA WAVE (2026-10-13, "To change now" 1): a Drain that runs with
+#: no choice from the player (a guest's act, Regina of All Waters) stops at
+#: the line, and the page used to say nothing: "Lyney's drain was refused
+#: without telling me it was refused" (lane 3). `{who}` is the guest or the
+#: Power; the reason is the mod's (`FurinaStageLedger.StoppedEvent`).
+STAGE_LOG_STOPPED = "  - {who} Drain was stopped: {why}."
+STAGE_STOPPED_WHY = {
+    "buffer": "your Drain buffer is used up",
+    "hp": "it would take you to 0 HP",
+}
 #: The drain-line round (2026-10-09): a Power's hit (Critics' Darling, Salon's
 #: Encore, Thunderous Applause) has a log line, so a seat can see it.
 STAGE_LOG_HIT = "  - **{src}** dealt {n} damage to {to}."
@@ -2510,20 +2520,24 @@ def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
         returns = bool(stage.get("past_returns"))
         line_words = STAGE_DRAIN_LINE_RETURNS if returns else STAGE_DRAIN_LINE
         if stage.get("buffer") is not None:
-            # Furina round 3: the buffer first, the line derived. Round 5:
-            # the buffer's words win at a line of 0 too.
-            line_words = (STAGE_DRAIN_BUFFER_LINE_ZERO if stage["line"] <= 0
-                          else STAGE_DRAIN_BUFFER_LINE_RETURNS if returns
-                          else STAGE_DRAIN_BUFFER_LINE)
+            # The Furina wave (2026-10-13): one number, the buffer left.
+            # Round 5: the buffer's words win at a line of 0 too.
+            words = (STAGE_DRAIN_BUFFER_LINE_ZERO if stage["line"] <= 0
+                     else STAGE_DRAIN_BUFFER_LINE_RETURNS if returns
+                     else STAGE_DRAIN_BUFFER_LINE)
+            out.append(words.format(
+                left=stage.get("buffer_left") or 0,
+                past=(STAGE_DRAIN_BUFFER_PAST.format(past=past)
+                      if past > 0 else "")))
+            line_words = ""
         elif stage["line"] <= 0:
             line_words = STAGE_DRAIN_LINE_ZERO
         past_words = STAGE_DRAIN_PAST_RETURNS if returns else STAGE_DRAIN_PAST
-        out.append(line_words.format(
-            drained=stage.get("drained", 0), line=stage["line"],
-            past=past_words.format(past=past) if past > 0 else "",
-            why=STAGE_DRAIN_WHY.format(why=why) if why else "",
-            buffer=stage.get("buffer"),
-            left=stage.get("buffer_left") or 0))
+        if line_words:
+            out.append(line_words.format(
+                drained=stage.get("drained", 0), line=stage["line"],
+                past=past_words.format(past=past) if past > 0 else "",
+                why=STAGE_DRAIN_WHY.format(why=why) if why else ""))
     if not seats:
         out.append(STAGE_EMPTY_LINE)
         return out
@@ -2710,6 +2724,12 @@ def _render_stage_log(stage: dict[str, Any]) -> list[str]:
             out.append(STAGE_LOG_DRAIN.format(n=row["moved"]))
         elif event == "repay":
             out.append(STAGE_LOG_REPAY.format(n=row["moved"]))
+        elif event == "stopped":
+            name = row.get("source") or who
+            out.append(STAGE_LOG_STOPPED.format(
+                who=f"**{name}**" + ("'" if name.endswith("s") else "'s"),
+                why=STAGE_STOPPED_WHY.get(row.get("why") or "",
+                                          STAGE_STOPPED_WHY["buffer"])))
         elif event == "hit" and row.get("source"):
             out.append(STAGE_LOG_HIT.format(
                 src=row["source"], n=row["moved"],
