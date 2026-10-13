@@ -52,7 +52,7 @@ def _screen_state(resolved: bool = False) -> dict:
     room, with `GitsAbyssPage.Apply` laid over it."""
     options = [] if resolved else [
         {"index": i, "title": b,
-         "description": f"{bt}\nIf passed: {s} — {st}",
+         "description": f"{bt}\nShadow: {s} — {st}",
          "is_locked": False, "is_proceed": False, "was_chosen": False,
          "keywords": []}
         for i, (b, bt, s, st) in enumerate(CARDS)]
@@ -86,7 +86,7 @@ def test_the_screen_reads_as_its_own_page():
     for blessing, text, shadow, shadow_text in CARDS:
         assert blessing in page
         assert text in page
-        assert f"If passed: {shadow}" in page
+        assert f"Shadow: {shadow}" in page
         assert shadow_text in page
     # Not the Ancient's: no dialogue to advance and nothing of Neow's.
     assert "Neow" not in page
@@ -147,5 +147,8 @@ def test_the_render_rig_prints_the_models_words():
         return m.group(1) + m.group(2)
 
     assert whisper(rig) == whisper(model) == WHISPER
+    # The band label (owner, 2026-10-12: "IF PASSED" renamed "SHADOW").
+    assert 'ShadowBandLabel = "Shadow"' in rig
+    assert 'ShadowBandLabel = "Shadow"' in model
     for path in re.findall(r'"(abyss/(?:relics|powers)/[a-z_]+\.png)"', model):
         assert f'"{path}"' in rig
