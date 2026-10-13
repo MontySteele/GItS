@@ -503,3 +503,37 @@ public sealed class FoldedCalculatedBlockVar : CalculatedBlockVar
         return System.Math.Max(0m, num);
     }
 }
+
+/// <summary>
+/// "Gain 6 Block. Deal damage equal to your Block" (Tidal Bulwark, the Varka
+/// last pass, 2026-10-12): the card's own Block, counted by its damage only
+/// while that Block is still to come.
+///
+/// THE DEFECT (the Varka wave, 2026-10-13, lane 5 fight 7). The preview adds
+/// the card's own Block to the Block he holds, which is right in the hand. But
+/// the same var is read again for the hit itself, AFTER the play gained that
+/// Block, so the hit counted it twice: Tidal Bulwark+ printed 8 and dealt 16,
+/// through the Lagavulin Matriarch's 12 Plating Block, and woke it. The sim
+/// twin (`effects._calc_amount`'s `plus`) reads the Block once, at the hit.
+///
+/// While the card resolves it sits in the Play pile (the base game's
+/// <c>CardModel.OnPlayWrapper</c>), so there the Block is already his and the
+/// pending term is 0. PURE.
+/// </summary>
+public static class PendingOwnBlock
+{
+    public static int For(CardModel card, int own)
+    {
+        CardPile? pile;
+        try
+        {
+            pile = card.Pile;
+        }
+        catch (System.Exception)
+        {
+            // A canonical (compendium) copy asserts on Owner.
+            return own;
+        }
+        return pile?.Type == PileType.Play ? 0 : own;
+    }
+}

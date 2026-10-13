@@ -52,14 +52,14 @@ public sealed class ProtoMiSaraTenguStormcall : CustomCardModel, IElementalCard,
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_sara_tengu_stormcall");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kujou Sara — Tengu Stormcall"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. Next turn, your Attacks deal 5 additional damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. Next turn, your Attacks deal 5 additional damage.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMiSaraTenguStormcall : CustomCardModel, IElementalCard,
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

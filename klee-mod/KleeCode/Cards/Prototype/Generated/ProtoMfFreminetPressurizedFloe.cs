@@ -52,14 +52,14 @@ public sealed class ProtoMfFreminetPressurizedFloe : CustomCardModel, IElemental
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("freminet_pressurized_floe");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Pressurized Floe: Backstroke"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain {Block:diff()} [gold]Block[/gold].{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMfFreminetPressurizedFloe : CustomCardModel, IElemental
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

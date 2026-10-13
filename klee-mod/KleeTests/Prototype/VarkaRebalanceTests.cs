@@ -157,6 +157,18 @@ public class VarkaRebalanceTests : IDisposable
                         card.Localization!.Single(p => p.Item1 == "description").Item2);
     }
 
+    [Fact]
+    public void Tidal_bulwarks_own_block_counts_only_while_it_is_still_to_come()
+    {
+        // The Varka wave (2026-10-13): the hit reads CalculatedDamage AFTER
+        // the play gained the Block, so the own-Block term is 0 while the
+        // card is in the Play pile; anywhere else (the hand's preview) it is
+        // the printed Block.
+        var card = new ProtoVkTidalBulwark();
+        Assert.Equal(6, PendingOwnBlock.For(card, 6));
+        Assert.Equal(8, PendingOwnBlock.For(Upgraded<ProtoVkTidalBulwark>(), 8));
+    }
+
     // ---- sec.4: payoffs that borrow -----------------------------------------
 
     [Fact]

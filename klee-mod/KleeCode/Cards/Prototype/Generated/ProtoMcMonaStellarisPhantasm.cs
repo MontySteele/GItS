@@ -49,14 +49,14 @@ public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCa
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true), this), this);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true), this, Element.Hydro), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_mona_stellaris_phantasm");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mona — Stellaris Phantasm"),
-        ("description", "Apply [gold]Hydro[/gold] and {PowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
+        ("description", "Apply [gold]Hydro[/gold] and {PowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -66,6 +66,15 @@ public sealed class ProtoMcMonaStellarisPhantasm : CustomCardModel, ICompanionCa
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Hydro));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -309,3 +309,17 @@ def test_a_card_whose_only_effect_was_oath_does_not_say_nothing_landed():
     assert "  +2 Hydro Oath" in page
     section = page.split("- **Change of Guard**", 1)[1]
     assert "Nothing this page can count" not in section.split("\n\n", 1)[0]
+
+
+def test_a_zero_oath_badge_prints_no_power_line():
+    """The Varka wave (2026-10-13): "Hydro Oath 0 (buff)" on turn 1 (a Knight
+    made Hydro current before any Hydro Oath) and the seat "could not tell what
+    it was FOR". The Oath block says it in words; the 0 badge's line goes. A
+    badge with a count keeps its line."""
+    zero = ("Your current element is Hydro. Your Swirls give you 3 Block. "
+            "Oath: Pyro 0, Hydro 0, Electro 0, Cryo 0.")
+    page = blindplay.observe(varka_state(badge=("Hydro Oath", zero, 0)))
+    assert _block(page)[0] == "- Current element: Hydro."
+    assert "Hydro Oath 0" not in page
+    kept = blindplay.observe(varka_state())
+    assert "Pyro Oath 2" in kept

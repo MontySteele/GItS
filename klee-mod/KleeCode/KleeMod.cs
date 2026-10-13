@@ -295,8 +295,11 @@ public static class KleeMod
                     // no aura is left, so the sentence is the four above with
                     // the duration clause replaced by the reason there is none.
                     ["KLEEMOD-APPLIES_ANEMO.title"] = "Applies Anemo",
+                    // The Varka wave (2026-10-13): Windbound Execution's
+                    // face never said a Swirl hits ALL enemies, so the tip
+                    // every Anemo card hovers names the Swirl and its 2.
                     ["KLEEMOD-APPLIES_ANEMO.description"] =
-                        "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Anemo[/gold] never stays on an enemy.",
+                        $"No aura: nothing happens. Another aura: it [gold]Swirls[/gold], dealing [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies and spreading that element.",
                     ["KLEEMOD-APPLIES_GEO.title"] = "Applies Geo",
                     ["KLEEMOD-APPLIES_GEO.description"] =
                         "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",

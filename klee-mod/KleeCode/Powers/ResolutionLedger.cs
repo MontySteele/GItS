@@ -245,6 +245,10 @@ public static class ResolutionLedger
     /// body Swirled).</summary>
     public const string Wolfpack = "wolfpack";
     public const string SwirlPaid = "paid";
+    /// <summary>The Varka wave (2026-10-13): Stoke the Flames added `Amount`
+    /// to the Pyro hits of the Attack `Card`, on that play's own line.
+    /// </summary>
+    public const string Stoked = "stoked";
 
     private static long _seq =
         System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000;

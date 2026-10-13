@@ -52,14 +52,14 @@ public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, IElemen
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("freminet_shattering_pressure");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Shattering Pressure"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage twice."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage twice.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, IElemen
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
