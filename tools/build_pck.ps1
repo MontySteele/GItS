@@ -1275,21 +1275,22 @@ if (-not (Test-Path $keywordSrc)) {
 # survive the fallback, so a non-repeating-only set crashes on the SECOND
 # win. No -attack rows: BaseLib's default EndAttackers=Both is the base
 # game's own finale (character VFX barrage + Architect's counter).
-# PLACEHOLDER dialogue text -- naming/writing pass, user red-pen.
+# Klee and Varka: dialogue cleanup, review/active/klee-varka-dialogue-review-2026-10-13.md.
+# Furina and Kokomi remain outside that pass.
 [IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'
 {
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.ancient": "You have climbed far, little spark. Show me what you carried up my Spire.",
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "Klee brought the BIGGEST boom! Ready? Da-da-da!",
+  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "I saved this one for the top! You might wanna cover your ears!",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You spent no blood on my stairs, only paper and patience. Tell me what that bought you.",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Every plan I burned on the way up. Read them, and you will find the last one already written.",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. Every wind in your city climbed my Spire behind you. Which of them carried you here?",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. You have brought your people far. Will you turn back now?",
   "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "All four. A knight never rides alone, and Mondstadt's wind was never mine to keep."
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "After all those stairs? Come on, let's finish this. My people are waiting."
 }
 '@)
 
