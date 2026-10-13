@@ -206,7 +206,10 @@ def toon_material(mat, img):
     nt.links.new(emis.outputs[0], mix.inputs[2])
     nt.links.new(mix.outputs[0], out.inputs["Surface"])
     add_aovs(nt, mat.name in UNLIT_MATS, seed)
-    mat.surface_render_method = "BLENDED" if mat.name == "表情" else "DITHERED"
+    # DITHERED for every material, the expression overlay (表情: the drawn
+    # > < eyes of はぅ) included: EEVEE writes no AOV from a BLENDED surface,
+    # so the overlay fell out of the protect mask and post.py faded its lines
+    mat.surface_render_method = "DITHERED"
     mat.use_backface_culling = False
 
 
@@ -240,7 +243,10 @@ def line_material(mat, img):
         nt.links.new(emis.outputs[0], mix.inputs[2])
         nt.links.new(mix.outputs[0], out.inputs["Surface"])
         lm.surface_render_method = "DITHERED"
-    add_aovs(nt, False, random.Random(mat.name).random() * 50)
+    # a face material's hull is protected too: where her eyes squeeze shut
+    # (はぅ) the face's own hull shows through the closed socket, and left
+    # unprotected it punched a hole in the mask right under the "> <"
+    add_aovs(nt, mat.name in UNLIT_MATS, random.Random(mat.name).random() * 50)
     lm.use_backface_culling = True
     return lm
 
@@ -611,7 +617,10 @@ def set_frame(root, arm, mesh, held_ob, thrown_ob, caps, keys, t):
     for k in kb[1:]:
         k.value = 0.0
     for n in names:
-        kb[n].value = a["morphs"].get(n, 0.0) * (1 - u) + b["morphs"].get(n, 0.0) * u
+        va, vb = a["morphs"].get(n, 0.0), b["morphs"].get(n, 0.0)
+        # an overlay-eyes morph steps (clips.STEP_MORPHS): part-way, its
+        # drawn eyes sit behind the skin and the face reads blank
+        kb[n].value = (vb if u >= 0.5 else va) if n in C.STEP_MORPHS else va * (1 - u) + vb * u
     root.rotation_euler = tuple(x * (1 - u) + y * u for x, y in zip(a["root_rot"], b["root_rot"]))
     root.location = a["root"].lerp(b["root"], u)
     # held bomb: a drop to 0 happens AT the next key; a rise grows it in
