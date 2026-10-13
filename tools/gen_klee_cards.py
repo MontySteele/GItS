@@ -3661,14 +3661,11 @@ APPLY_POWERS = {
     "vk_the_order_answers": ("TheOrderAnswersPower", None,
         "At the start of your turn, add {X} random [gold]Knight[/gold] to "
         "your hand."),
-    # Fontaine (2026-07-21 ruling). shatter_bonus is a flat rider the sim adds
-    # inside the Shatter's raw HP subtraction, so FrozenPower reads it there.
-    "shatter_bonus": ("ShatterBonusPower", None,
-        "Your [gold]Shatters[/gold] deal {X} additional damage."),
     # Fontaine 5-star Rares (R64, 2026-07-25). Amounts live on the cards, so
     # none of these adds a constant for the parity lint to drift on.
+    # Navia keys on reactions since the Fontaine sanity check (2026-10-12).
     "cannon_fire_support": ("CannonFireSupportPower", None,
-        "Whenever you play a [gold]Companion[/gold] card, gain {X} "
+        "Whenever an [gold]Elemental Reaction[/gold] happens, gain {X} "
         "[gold]Block[/gold]."),
     "night_vigil": ("NightVigilPower", None,
         "Your Attacks against enemies holding an aura deal {X} additional "

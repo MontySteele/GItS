@@ -3,8 +3,10 @@
 Sheet-structure locks: the ratified roster and the Cryo application
 budget are enforced here so a later card edit answers to the kickoff's
 convergence levers, not to a review. Plus the three DSL additions the
-sheet flagged inline (reaction_triggered_this_turn, block_next_turn,
-shatter_bonus) and the Guest Star reward exclusions.
+sheet flagged inline (reaction_triggered_this_turn, block_next_turn) and the
+Guest Star reward exclusions. The Fontaine sanity check (2026-10-12,
+review/active/fontaine-companions-2026-10-12.md, ruled) retired shatter_bonus
+and moved Navia onto reactions.
 """
 
 import random
@@ -71,8 +73,11 @@ def test_fontaine_sheet_loads_ratified_roster():
 
 
 def test_cryo_application_budget():
-    """Convergence lever 1: Charlotte and Freminet each get exactly ONE
-    Cryo-applying card; the sheet must not quietly grow a second."""
+    """Convergence lever 1, as the Fontaine sanity check (2026-10-12) ruled
+    it: First-Person Shutter applies Cryo (Charlotte 2), and Backstroke and
+    Shattering Pressure deal Cryo damage (Freminet 3). The sheet must not
+    quietly grow another."""
+    budget = {"charlotte": 2, "freminet": 3}
     for char in ("charlotte", "freminet"):
         appliers = []
         for c in _fontaine_cards():
@@ -84,7 +89,7 @@ def test_cryo_application_budget():
                             and fx.get("element") == "cryo")):
                     appliers.append(c.id)
                     break
-        assert len(appliers) == 1, (char, appliers)
+        assert len(appliers) == budget[char], (char, appliers)
 
 
 def test_healing_law_holds_on_fontaine_sheet():
@@ -164,13 +169,30 @@ def test_vanguards_valor_scales_on_any_reaction():
     card = loader.get_card("proto_mf_chevreuse_vanguards_valor")
     st.reactions_this_turn = 0
     effects.resolve_card(st, card)
-    assert st.player.powers.get("next_attack_up", 0) == 3   # base only
+    assert st.player.powers.get("next_attack_up", 0) == 6   # base only
     st.player.powers.pop("next_attack_up")
     # Any reaction this turn -- swirl by another card counts (the ruling:
     # never a dead draw off-Pyro/Electro).
     st.reactions_this_turn = 1
     effects.resolve_card(st, card)
-    assert st.player.powers.get("next_attack_up", 0) == 6   # base + rider
+    assert st.player.powers.get("next_attack_up", 0) == 9   # base + rider
+
+
+def test_vanguards_valor_draws_nothing():
+    """Ruled 2026-10-12: "I don't like to have cycling at Common", so the
+    power-up came without the draw."""
+    card = loader.get_card("proto_mf_chevreuse_vanguards_valor")
+    assert card.rarity == "common"
+    assert not any(fx.get("op") == "draw" for fx in card.effects)
+
+
+def test_bogglecat_box_blocks_and_draws():
+    st = make_state(enemies=[make_enemy(hp=200)])
+    st.player.draw_pile = [Card(id=f"filler{i}", name="f", cost=1, type="skill")
+                           for i in range(5)]
+    effects.resolve_card(st, loader.get_card("proto_mf_lynette_box_trick"))
+    assert st.player.block == 4
+    assert len(st.player.hand) == 2
 
 
 def test_reactions_this_turn_resets_at_turn_start():
@@ -186,40 +208,47 @@ def test_frosthelm_blocks_now_and_next_turn():
     st = make_state(enemies=[make_enemy(hp=200)])
     effects.resolve_card(st, loader.get_card("proto_mf_charlotte_enduring_frosthelm"))
     assert st.player.block == 4
+    assert st.enemies[0].aura == "cryo"     # 2026-10-12: it applies Cryo
     assert st.player.powers["block_next_turn"] == 4
     combat._player_turn(st, lambda s: None)   # resets block, then trigger
     assert st.player.block == 4
     assert "block_next_turn" not in st.player.powers   # consumed, no carry
 
 
-# --- DSL: shatter_bonus (Freminet) ---
+# --- Freminet (the Fontaine sanity check, 2026-10-12) ---
 
-def test_shatter_bonus_adds_to_shatter_damage():
+def test_shattering_pressure_second_hit_shatters_the_first_hits_freeze():
+    """"Deal 5 [7] Cryo damage twice." On a Hydro-wet enemy the first hit
+    Freezes it (and cannot Shatter the freeze it made, LAW "Canonical
+    Frozen"); the second hit is a new hit on a Frozen enemy, so it Shatters.
+    No special case: `resolve_hit` snapshots `was_frozen` per hit."""
     st = make_state(enemies=[make_enemy(hp=200)])
     e = st.enemies[0]
-    # Freeze: hydro aura + cryo attack (Pers), then cash with the untagged
-    # attack (Backstroke) under Shattering Pressure.
-    effects.resolve_card(st, loader.get_card("proto_mf_guest_neuvillette_tears"))
-    effects.resolve_card(st, loader.get_card("proto_mf_freminet_pers_deploy"))
-    assert e.frozen
-    effects.resolve_card(st, loader.get_card("proto_mf_freminet_shattering_pressure"))
-    hp_before = e.hp
-    effects.resolve_card(st, loader.get_card("proto_mf_freminet_pressurized_floe"))
+    e.aura = "hydro"
+    e.aura_turns_left = C.AURA_DURATION_TURNS
+    card = loader.get_card("proto_mf_freminet_shattering_pressure")
+    assert card.type == "attack" and card.rarity == "uncommon" and card.cost == 1
+    effects.resolve_card(st, card)
+    shatters = [ev for ev in st.log if ev["event"] == "shatter"]
+    assert len(shatters) == 1
     assert not e.frozen
-    shatters = [ev for ev in st.log if ev["event"] == "damage"
-                and ev.get("source") == "shatter"]
-    assert shatters and shatters[-1]["base"] == C.SHATTER_DAMAGE + 4
-    assert hp_before - e.hp == 10 + C.SHATTER_DAMAGE + 4
+    assert 200 - e.hp == 5 + 5 + C.SHATTER_DAMAGE
+    # The second hit's Cryo found no aura (Frozen consumed the Hydro), so it
+    # stays on the enemy.
+    assert e.aura == "cryo"
 
 
-def test_backstroke_applies_no_element():
-    # Budget guard: the flag is explicit on the sheet; the hit must not
-    # apply cryo even under a catalyst-cadence player.
+def test_backstroke_deals_cryo():
     st = make_state(enemies=[make_enemy(hp=200)])
-    st.player.cadence = "catalyst"
-    st.player.element = "pyro"
     effects.resolve_card(st, loader.get_card("proto_mf_freminet_pressurized_floe"))
-    assert st.enemies[0].aura is None
+    assert st.enemies[0].aura == "cryo"
+    assert st.enemies[0].hp == 190
+    assert st.player.block == 6
+
+
+def test_shatter_bonus_is_retired():
+    assert not any(fx.get("power") == "shatter_bonus"
+                   for c in _fontaine_cards() for fx in c.effects)
 
 
 # --- 5-star Rares (R64, 2026-07-25): the four new powers ---
@@ -248,26 +277,29 @@ def _probe_attack(amount, *, times=1, element=None):
                 element=element, effects=[fx])
 
 
-def test_cannon_fire_support_pays_on_every_companion_play():
-    """Navia's trigger is the CARD TYPE, not an element -- deliberately, so
-    nothing here pre-commits Crystallize (Zhongli's archetype owns it)."""
+def test_cannon_fire_support_pays_on_every_reaction():
+    """2026-10-12, pick 3: "Whenever an Elemental Reaction happens, gain 4 [6]
+    Block." Any reaction, from any card; a Companion play alone pays nothing."""
     st = make_state(enemies=[make_enemy(hp=200)])
     _play(st, "proto_mf_navia_cannon_fire_support")
-    # Her own play does not pay itself: the hook runs before resolution, so the
-    # power is not up yet when her own card play is observed.
+    assert st.player.powers["cannon_fire_support"] == 4
     assert st.player.block == 0
-    assert st.player.powers["cannon_fire_support"] == 3
 
-    _play(st, "proto_mf_lynette_box_trick")
-    assert st.player.block == 3
-    _play(st, "proto_mf_charlotte_snappy_silhouette")
-    assert st.player.block == 6
+    _play(st, "proto_mf_lynette_box_trick")              # Companion, no reaction
+    assert st.player.block == 4                          # Bogglecat's own 4
+    st.player.block = 0
+
+    st.enemies[0].aura = "hydro"
+    st.enemies[0].aura_turns_left = C.AURA_DURATION_TURNS
+    _play_card(st, _probe_attack(4, element="pyro"))     # Vaporize
+    assert st.player.block == 4
 
 
-def test_cannon_fire_support_ignores_non_companion_cards():
+def test_cannon_fire_support_ignores_hits_that_do_not_react():
     st = make_state(enemies=[make_enemy(hp=200)])
-    st.player.powers["cannon_fire_support"] = 3
-    _play_card(st, _probe_attack(4))                     # not a Companion
+    st.player.powers["cannon_fire_support"] = 4
+    _play_card(st, _probe_attack(4))                     # no element
+    _play_card(st, _probe_attack(4, element="cryo"))     # lays an aura only
     assert st.player.block == 0
 
 
@@ -289,7 +321,7 @@ def test_night_vigil_pays_only_against_an_aura_and_only_on_attacks():
     before = e.hp
     effects.resolve_card(st, loader.get_card("proto_mf_chevreuse_interdiction_fire"))
     melt = C.MELT_MULT                    # pyro onto cryo
-    assert before - e.hp == int((7 + 3) * melt)
+    assert before - e.hp == int((8 + 3) * melt)
 
 
 def test_night_vigil_does_not_pay_bombs_or_summons():

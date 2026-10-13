@@ -8,14 +8,6 @@ commit message, the document the ruling changes is edited in place, and the
 line leaves this file. Closed picks are in git
 (`git show 2b73880a:docs/current/QUEUE.md` for the last copy in the old form).
 
-## [USER]'s merges (PRs that amend `LAW.md` or `EXPERIMENTS.md`)
-
-- **#929**, the ruled Balance measurement text (2026-10-05, "looks good to
-  me!"): `stage-gate.md`'s Balance paragraph and `EXPERIMENTS.md`'s kit-balance
-  section. Brought up to date with `main` on 2026-10-08 (conflict resolved), CI green.
-- **#966**, `LAW.md` wording: every reaction consumes its aura (the 2026-10-03
-  ruling), and reaction credit is damage only (Burst is gone).
-
 ## Eyes-on looks (materials ready; no build waits on them)
 
 - **End-of-turn docket:** does the end of turn read legibly, is the per-seat
@@ -27,8 +19,8 @@ line leaves this file. Closed picks are in git
 
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
-  reach Balance; a GitHub release first. The PR also amends `LAW.md`'s art line
-  (official art may ship in a free, clearly unofficial build), so [USER] merges it.
+  reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
+  merged.)
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
@@ -41,7 +33,10 @@ line leaves this file. Closed picks are in git
     most once a turn; (2) no home nation until a Sumeru sheet exists; (3)
     Foresight provisional.
 
-  All defaults.
+  All defaults. [USER] now leans Yae for character five (2026-10-12: "I think
+  that Yae ... is probably the closest to Defect, so I'm leaning towards doing
+  that next instead"); a Yae proposal is being researched, and these two stay
+  as the alternatives.
 
 ## Parked (they come back when their trigger fires)
 

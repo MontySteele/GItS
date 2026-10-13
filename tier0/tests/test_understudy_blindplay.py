@@ -8755,8 +8755,8 @@ def test_the_upgraded_face_moves_the_number_the_delta_names():
         "Deal 7 Hydro damage. If the enemy has a debuff, deal 10 instead.") == (
         "Deal 10 Hydro damage. If the enemy has a debuff, deal 13 instead.")
     assert qa_packet.upgraded_face(
-        "KLEEMOD-PROTO_MF_LYNETTE_BOX_TRICK", "Draw 2 cards.") == (
-        "Draw 3 cards.")
+        "KLEEMOD-PROTO_MF_LYNETTE_BOX_TRICK", "Gain 4 Block. Draw 2 cards.") == (
+        "Gain 4 Block. Draw 3 cards.")
 
 
 def test_the_two_arm_swap_writes_the_upgraded_arm():

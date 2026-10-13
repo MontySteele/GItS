@@ -1534,61 +1534,37 @@ def test_the_sequenced_powers_do_not_take_the_broadcast_back(rel, cls):
 #
 # So: a power ADDED during OnPlay is absent from the BeforeCardPlayed listener
 # list and PRESENT in the AfterCardPlayed one. That asymmetry is the whole of
-# M5 -- it is why Navia's own play paid itself in C# and does not in the sim --
-# and it is also the fix, used as a presence snapshot.
+# M5 -- it is why Navia's own play paid itself in C# and not in the sim, until
+# her card left card plays for reactions (2026-10-12).
 
-def test_navias_own_play_does_not_pay_itself():
-    """EB-19/M5. The sim states the rule; the C# had to be taught it.
-
-    combat.play_card reads `cannon_fire_support` beside the companions_played
-    record site, BEFORE resolve_card, and says so in-line: "Sitting before
-    resolve_card also means Navia's own play does not pay itself: the power is
-    not up yet." The C# equivalent is not a power read but a listener
-    enumeration, and AfterCardPlayed enumerates after OnPlay installed the
-    power -- so she paid. BeforeCardPlayed is the only broadcast that
-    enumerates early enough to answer "was this power already up", and it
-    cannot award Block (no PlayerChoiceContext), which is why the pay still
-    settles at AfterCardPlayed off a snapshot.
-    """
-    source = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
+def test_navia_pays_at_the_one_reaction_site_in_both_engines():
+    """The Fontaine sanity check (2026-10-12, pick 3): Cannon Fire Support
+    pays on "an Elemental Reaction happens", not on a Companion play, so the
+    M5 card-play snapshot above went with the old trigger. Both engines now
+    read it where a reaction resolves: C# `CompanionOverhaulReactions.Note`
+    (called from `ReactionEffects.Resolve`), ahead of its dealer guard so a
+    dealer-less reaction pays too; the sim `effects.companion_overhaul_reaction`
+    (called from `reactions._react`)."""
+    fontaine = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
         encoding="utf-8")
-    spans = _class_spans(source)
+    spans = _class_spans(fontaine)
     mine = [s for s in spans if s[0] == "CannonFireSupportPower"]
     assert mine, "CannonFireSupportPower not found"
-    start, end = mine[0][1], mine[0][2]
-    body = source[start:end]
+    body = fontaine[mine[0][1]:mine[0][2]]
+    assert "AfterCardPlayed" not in body and "BeforeCardPlayed" not in body
 
-    assert re.search(
-        r"public\s+override\s+Task\s+BeforeCardPlayed\s*\(", body), (
-        "CannonFireSupportPower no longer snapshots at BeforeCardPlayed, the "
-        "only card-play broadcast that enumerates before OnPlay installs a "
-        "power. Without it her own play pays itself again.")
+    hooks = (SOURCE / "Powers" / "Prototype" / "CompanionOverhaulHooks.cs"
+             ).read_text(encoding="utf-8")
+    note = method_body(hooks, r"internal\s+static\s+async\s+Task\s+Note\s*\(")
+    assert note.index("CannonFireSupportPower.OnReaction") < note.index(
+        "if (dealer == null) return;"), note
 
-    after = method_body(
-        body, r"public\s+override\s+async\s+Task\s+AfterCardPlayed\s*\(")
-    # The pay is gated on the snapshot, and the snapshot check comes first.
-    assert "_presentAtPlayStart.Remove(cardPlay)" in after, after
-    assert after.index("_presentAtPlayStart") < after.index(
-        "CreatureCmd.GainBlock"), after
-
-    sim = (ROOT / "tier0" / "engine" / "combat.py").read_text(encoding="utf-8")
-    assert "Navia's own play does not pay itself" in sim, (
-        "combat.py no longer states the rule this mirrors; if the sim moved, "
-        "this decision needs re-deriving, not re-pinning.")
-
-
-def test_the_navia_snapshot_survives_nested_plays():
-    """A field would be clobbered by a card that plays a card.
-
-    Order for a nested play is Before(A), OnPlay(A) -> Before(B), OnPlay(B),
-    After(B), After(A). A single `_lastSeen` field holds B by the time After(A)
-    runs, so A silently stops paying. CardPlay is a class with reference
-    identity and one fresh instance per play index, so a set keyed on it is
-    exact.
-    """
-    source = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
+    sim = (ROOT / "tier0" / "engine" / "effects.py").read_text(encoding="utf-8")
+    start = sim.index("def companion_overhaul_reaction(")
+    assert 'p.powers.get("cannon_fire_support", 0)' in sim[start:start + 4000]
+    combat_src = (ROOT / "tier0" / "engine" / "combat.py").read_text(
         encoding="utf-8")
-    assert "HashSet<CardPlay>" in source, source
+    assert "cannon_fire_support" not in combat_src
 
 
 def test_no_comment_reasserts_the_refuted_drain_first_order():

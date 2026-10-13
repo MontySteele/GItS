@@ -46,14 +46,14 @@ public sealed class ProtoMfNaviaCannonFireSupport : CustomCardModel, ICompanionC
     public string? Nation => "fontaine";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("navia_cannon_fire_support");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Navia — Cannon Fire Support"),
-        ("description", "Whenever you play a [gold]Companion[/gold] card, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Whenever an [gold]Elemental Reaction[/gold] happens, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -67,7 +67,7 @@ public sealed class ProtoMfNaviaCannonFireSupport : CustomCardModel, ICompanionC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

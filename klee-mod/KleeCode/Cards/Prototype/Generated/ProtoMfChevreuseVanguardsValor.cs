@@ -67,7 +67,7 @@ public sealed class ProtoMfChevreuseVanguardsValor : CustomCardModel, ICompanion
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("PowerAmount", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

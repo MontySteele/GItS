@@ -459,7 +459,6 @@ internal static class KleePowerIcons
         ReplayNextCompanionPower => KleePck.Path("klee/powers/study_buddy.png"),
         AttackUpThisTurnPower => KleePck.Path("klee/powers/fantastic_voyage.png"),
         NextAttackUpPower => KleePck.Path("klee/powers/passion_overload.png"),
-        ShatterBonusPower => KleePck.Path("klee/powers/shattering_pressure.png"),
         FrozenPower => KleePck.Path("klee/powers/frozen.png"),
 
         // FURINA. This block used to route all of her powers at KLEE textures

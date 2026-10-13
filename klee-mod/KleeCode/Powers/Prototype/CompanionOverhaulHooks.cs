@@ -309,7 +309,16 @@ public static class CompanionOverhaulReactions
         PlayerChoiceContext choiceContext, Reaction reaction,
         Creature target, Creature? dealer, Element consumedAura)
     {
-        if (reaction == Reaction.None || dealer == null) return;
+        if (reaction == Reaction.None) return;
+
+        // Navia, Cannon Fire Support (the Fontaine sanity check, 2026-10-12):
+        // "Whenever an Elemental Reaction happens, gain 4 Block." Ahead of the
+        // dealer guard below, because it pays every holder on the board for
+        // every reaction, a dealer-less one included. The co-op reading is
+        // argued on `CannonFireSupportPower`.
+        await CannonFireSupportPower.OnReaction(choiceContext, target);
+
+        if (dealer == null) return;
 
         // Dahlia, Favonian Favor: "Whenever a reaction happens this turn, gain
         // 3 Block." The stack IS the 3, so a second copy pays twice. ANY

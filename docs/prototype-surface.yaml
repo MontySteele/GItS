@@ -2382,21 +2382,23 @@
 # bodies, upgrades and art; the three guest stars are Furina's. Provenance
 # note, "Fontaine companions ported, 2026-10-01". ---
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_chevreuse_interdiction_fire, name: "Chevreuse — Interdiction Fire", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: chevreuse_interdiction_fire,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: pyro, cost: 1, type: attack,
-   description: "Deal 7 [gold]Pyro[/gold] damage.",
-   effects: [{op: damage, amount: 7, target: enemy, applies_element: true}]}
+   description: "Deal 8 [gold]Pyro[/gold] damage.",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]}
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_chevreuse_vanguards_valor, name: "Chevreuse — Vanguard's Valor", character: klee,
    upgrade: {buff: 2},
    authored_by: [claude],
    art_of: chevreuse_vanguards_valor,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: pyro, cost: 0, type: skill,
-   description: "Your next Attack deals 3 additional damage, plus 3 if an [gold]Elemental Reaction[/gold] triggered this turn.",
-   effects: [{op: buff_next_attack, amount: 3}, {op: conditional, if: reaction_triggered_this_turn, then: [{op: buff_next_attack, amount: 3}]}]}
+   description: "Your next Attack deals 6 additional damage, plus 3 if an [gold]Elemental Reaction[/gold] triggered this turn.",
+   effects: [{op: buff_next_attack, amount: 6}, {op: conditional, if: reaction_triggered_this_turn, then: [{op: buff_next_attack, amount: 3}]}]}
 
 - {id: proto_mf_chevreuse_bursting_grenades, name: "Chevreuse — Ring of Bursting Grenades", character: klee,
    upgrade: {damage: 2},
@@ -2414,13 +2416,14 @@
    description: "[gold]Swirl[/gold] the enemy. Gain 5 [gold]Block[/gold].",
    effects: [{op: swirl, target: enemy}, {op: block, amount: 5}]}
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_lynette_box_trick, name: "Lynette — Bogglecat Box", character: klee,
    upgrade: {draw: 1},
    authored_by: [claude],
    art_of: lynette_box_trick,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
-   description: "Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: draw, amount: 2}]}
+   description: "Gain 4 [gold]Block[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: block, amount: 4}, {op: draw, amount: 2}]}
 
 # 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift", character: klee,
@@ -2431,21 +2434,23 @@
    description: "[gold]Swirl[/gold] the enemy. Deal 8 damage to ALL enemies.",
    effects: [{op: swirl, target: enemy}, {op: damage, amount: 8, target: all_enemies, applies_element: false}]}
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: charlotte_freezing_point,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
-   description: "Deal 6 [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: damage, amount: 6, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
+   description: "Deal 7 [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_charlotte_enduring_frosthelm, name: "Charlotte — First-Person Shutter", character: klee,
    upgrade: {block: 2},
    authored_by: [claude],
    art_of: charlotte_enduring_frosthelm,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: cryo, cost: 1, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
-   effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
+   description: "Gain 4 [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
+   effects: [{op: block, amount: 4}, {op: apply_aura, element: cryo, target: enemy}, {op: block_next_turn, amount: 4}]}
 
 # 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", character: klee,
@@ -2464,29 +2469,32 @@
    description: "Deal 8 [gold]Cryo[/gold] damage.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]}
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_freminet_pressurized_floe, name: "Freminet — Pressurized Floe: Backstroke", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: freminet_pressurized_floe,
-   nation: fontaine, star: 4, rarity: common, role_c: trigger, element: cryo, cost: 2, type: attack,
-   description: "Deal 10 damage. Gain 6 [gold]Block[/gold].",
-   effects: [{op: damage, amount: 10, target: enemy, applies_element: false}, {op: block, amount: 6}]}
+   nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 2, type: attack,
+   description: "Deal 10 [gold]Cryo[/gold] damage. Gain 6 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 10, target: enemy, applies_element: true}, {op: block, amount: 6}]}
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_freminet_shattering_pressure, name: "Freminet — Shattering Pressure", character: klee,
-   upgrade: {power_amount: 2},
+   upgrade: {damage: 2},
    authored_by: [claude],
    art_of: freminet_shattering_pressure,
-   nation: fontaine, star: 4, rarity: uncommon, role_c: trigger, element: cryo, cost: 1, type: power,
-   description: "Your [gold]Shatters[/gold] deal 4 additional damage.",
-   effects: [{op: apply_power, power: shatter_bonus, amount: 4, target: self, note: "your Shatters deal +4 damage"}]}
+   nation: fontaine, star: 4, rarity: uncommon, role_c: applier, element: cryo, cost: 1, type: attack,
+   description: "Deal 5 [gold]Cryo[/gold] damage twice.",
+   effects: [{op: damage, amount: 5, target: enemy, times: 2, applies_element: true}]}
 
+# Fontaine sanity check, 2026-10-12 (review/active/fontaine-companions-2026-10-12.md, ruled).
 - {id: proto_mf_navia_cannon_fire_support, name: "Navia — Cannon Fire Support", character: klee,
    upgrade: {power_amount: 2},
    authored_by: [claude],
    art_of: navia_cannon_fire_support,
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: geo, cost: 1, type: power,
-   description: "Whenever you play a [gold]Companion[/gold] card, gain 3 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: cannon_fire_support, amount: 3, target: self, note: "whenever you play a Companion card, gain 3 Block"}]}
+   description: "Whenever an [gold]Elemental Reaction[/gold] happens, gain 4 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: cannon_fire_support, amount: 4, target: self, note: "whenever an Elemental Reaction happens, gain 4 Block"}]}
 
 - {id: proto_mf_clorinde_impale_the_night, name: "Clorinde — Impale the Night", character: klee,
    upgrade: {damage: 3},

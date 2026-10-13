@@ -415,16 +415,6 @@ def _finish_play(state: CombatState, card: Card,
                for cid in state.companions_played):
             state.companions_played.append(card.id)
         state.companion_plays_this_turn += 1
-        # Navia, Cannon Fire Support: the pool pays the pool. Fires once per
-        # CARD PLAY, here beside companions_played, not once per replay inside
-        # the loop below -- Study Buddy's replay is one card being resolved
-        # twice, and paying it twice would make the two cards a combo rather
-        # than each doing its own job. Sitting before resolve_card also means
-        # Navia's own play does not pay itself: the power is not up yet.
-        navia = p.powers.get("cannon_fire_support", 0)
-        if navia:
-            p.block += navia
-            state.emit("cannon_fire_support", amount=navia, card=card.id)
         if state.replay_next_companion > 0:   # Study Buddy
             replays += state.replay_next_companion
             state.replay_next_companion = 0

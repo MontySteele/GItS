@@ -73,7 +73,7 @@ public sealed class ProtoMfCharlotteFreezingPoint : CustomCardModel, IElementalC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
+            new CalculationBaseVar(7m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new CardsVar(1)
