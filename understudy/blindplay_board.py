@@ -1468,6 +1468,13 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                     # added it ("" on an older mod), and the card's Anemo
                     # applications that found no aura, and that found one.
                     "fang_relic": _text(row.get("fang_relic")),
+                    # Design-session call (2026-10-13): the copies Wolfpack
+                    # shuffled in off this play, printed on its line.
+                    "wolfpack": sum(
+                        _int(ev.get("amount"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "wolfpack"),
                     "swirl_no_aura": _int(row.get("swirl_no_aura")),
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
@@ -1522,6 +1529,10 @@ def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                 continue
             kind = _text(ev.get("kind"))
             if kind not in PAGE_EVENT_KINDS:
+                continue
+            # Design-session call (2026-10-13): Wolfpack on a card's row
+            # prints on that card's play line (`resolutions`), not twice.
+            if kind == "wolfpack" and _text(row.get("card")):
                 continue
             out.append({"kind": kind,
                         "card": _text(ev.get("card")),

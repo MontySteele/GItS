@@ -197,6 +197,45 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
+    public void Ascensions_element_hit_gains_no_oath_and_the_avatars_does()
+    {
+        // Design-session call (2026-10-13): Four Winds' Ascension's element
+        // hit gaining no Oath IS the rule (a payoff does not feed its own
+        // scaling), and its hover says so. The pin is the `credit` argument
+        // each card hands the shared hit: false for the Ascension, true for
+        // Northwind Avatar, read off the IL as the constant pushed just
+        // before the call (ldc.i4.0 / ldc.i4.1).
+        Assert.False(CreditArgument("AscensionHit"));
+        Assert.True(CreditArgument("AvatarHit"));
+        var none = Enumerable.Empty<MegaCrit.Sts2.Core.HoverTips.IHoverTip>();
+        Assert.NotSame(none, ArmKeywordTips.ForAscensionNoOath(
+            none, new ProtoVkFourWindsAscension()));
+    }
+
+    private static bool CreditArgument(string method)
+    {
+        var body = (System.Reflection.MethodInfo)Il.Method("VarkaCards", method);
+        var il = body.GetMethodBody()!.GetILAsByteArray()!;
+        for (var i = 1; i + 4 < il.Length; i++)
+        {
+            if (il[i] != 0x28) continue;    // call
+            System.Reflection.MethodBase? callee;
+            try { callee = body.Module.ResolveMethod(BitConverter.ToInt32(il, i + 1)); }
+            catch (ArgumentException) { continue; }
+            if (callee?.Name != "CurrentElementHit") continue;
+            return il[i - 1] switch
+            {
+                0x16 => false,
+                0x17 => true,
+                var op => throw new InvalidOperationException(
+                    $"{method} passes credit as opcode 0x{op:x2}"),
+            };
+        }
+        throw new InvalidOperationException(
+            $"{method} does not call CurrentElementHit");
+    }
+
+    [Fact]
     public void Rally_moves_every_point_and_accord_splits_them()
     {
         var ledger = FreshLedger();

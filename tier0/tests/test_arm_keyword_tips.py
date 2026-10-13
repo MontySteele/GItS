@@ -363,7 +363,12 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_PLAN_NO_LINE",
                     # The card text pass (2026-10-12): Boreas's Fang's hover
                     # for the Ascension's reshuffle clause, a relic's tip.
-                    "KLEEMOD-ARM_VARKA_ASCENSION_RETURN"}
+                    "KLEEMOD-ARM_VARKA_ASCENSION_RETURN",
+                    # Design-session calls (2026-10-13): Four Winds'
+                    # Ascension's rider, its element hit gains no Oath.
+                    "KLEEMOD-ARM_VARKA_ASCENSION_NO_OATH",
+                    # And Bis!'s rider: a "Spend up to" does not count.
+                    "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():

@@ -319,7 +319,8 @@ public class VarkaExpansionTests : IDisposable
         var wolves = Calls("WolfpackPower", "OnAscensionPlayed");
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", wolves);
         Assert.Contains("CardModel.AddKeyword", wolves);
-        Assert.Contains("ResolutionLedger.NoteEvent", wolves);
+        // On the Ascension's own play line (2026-10-13).
+        Assert.Contains("ResolutionLedger.NoteEventOnPlay", wolves);
     }
 
     [Fact]

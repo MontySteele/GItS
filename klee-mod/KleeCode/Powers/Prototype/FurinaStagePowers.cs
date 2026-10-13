@@ -239,17 +239,20 @@ public sealed class CriticsDarlingPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Bis!</i>: "Whenever you Spend all your Fanfare, keep half of
-/// it." [Innate] Half rounds down; a second copy adds nothing
-/// (<see cref="FurinaStageLedger.SpendAll"/>).</summary>
+/// <summary><i>Bis!</i>: "Whenever a card Spends all your Fanfare, keep half
+/// of it." [Innate] Half rounds down; a second copy adds nothing
+/// (<see cref="FurinaStageLedger.SpendAll"/>). A "Spend up to" card is not a
+/// spend-all even when it empties the bank; the card's hover says so
+/// (<see cref="KleeMod.Cards.ArmKeywordTips.ForBisSpendUpTo"/>, design-session
+/// call, 2026-10-13).</summary>
 public sealed class BisPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Bis!"),
         ("description",
-            "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], "
-          + "keep half of it."),
+            "Whenever a card [gold]Spends[/gold] all your "
+          + "[gold]Fanfare[/gold], keep half of it."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -3004,7 +3004,7 @@
    upgrade: {innate: true},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: rare,
-   description: "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep half of it.",
+   description: "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], keep half of it.",
    effects: [{op: apply_power, power: fs_bis, amount: 1,
               target: self}]}
 

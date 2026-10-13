@@ -68,6 +68,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_SUMMONED,
                                         RESOLUTION_OATH, RESOLUTION_FANG,
                                         RESOLUTION_FANG_DEFAULT,
+                                        RESOLUTION_WOLFPACK,
                                         RESOLUTION_NO_AURA,
                                         RESOLUTION_HIT_KILLED,
                                         RESOLUTION_KILLED,
@@ -1773,6 +1774,11 @@ def _resolution_lines(rows: list[dict[str, Any]],
         if oath_lines and row.get("fang_ascension"):
             oath_lines.append(RESOLUTION_FANG.format(
                 relic=row.get("fang_relic") or RESOLUTION_FANG_DEFAULT))
+        # Design-session call (2026-10-13): Wolfpack's copy, on this line.
+        copies = int(row.get("wolfpack") or 0)
+        if copies > 0:
+            oath_lines.append(RESOLUTION_WOLFPACK.format(
+                n="a copy" if copies == 1 else f"{copies} copies"))
         killed = row.get("killed") or []
         applied = row.get("applied") or []
         if not row["hits"] and not killed and not applied and oath_lines:

@@ -402,7 +402,13 @@ public class ArmKeywordTipTests
         // play it (two seats played Rising Applause at 0 to 4 damage).
         // 44 since the card text pass (2026-10-12): Boreas's Fang's
         // Ascension-return hover.
-        Assert.Equal(44, attaches.Count);
+        // 46 with the design-session calls (2026-10-13):
+        // `ForAscensionNoOath`, the rider on Four Winds' Ascension's element
+        // hit (it gains no Oath), and `ForBisSpendUpTo`, Bis!'s (a "Spend up
+        // to" does not count).
+        Assert.Equal(46, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForAscensionNoOath");
+        Assert.Contains(attaches, m => m.Name == "ForBisSpendUpTo");
         Assert.Contains(attaches, m => m.Name == "ForAscensionReturn");
         Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
         Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");

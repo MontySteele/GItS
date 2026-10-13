@@ -98,8 +98,8 @@ public abstract class StagePerformerBadge : PowerModel
               + "[gold]Cryo[/gold] damage to a random enemy. Act: deal " + act
               + " [gold]Cryo[/gold] damage to a random enemy.",
             StagePerformer.Lynette =>
-                "The first time each turn an enemy makes you lose HP, gain that "
-              + "much [gold]Fanfare[/gold] again. Act: deal " + act
+                "The first time each turn you lose HP to an enemy, gain double "
+              + "[gold]Fanfare[/gold]. Act: deal " + act
               + " [gold]Anemo[/gold] damage to an enemy, one with an aura if "
               + "able.",
             StagePerformer.Clorinde =>

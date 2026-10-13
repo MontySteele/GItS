@@ -928,12 +928,16 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
             made++;
         }
         // The seat page's line (the payoff round's record): what fired, and
-        // how many copies went in.
+        // how many copies went in. On the Ascension's own play line
+        // (design-session call, 2026-10-13), even when its row has closed.
         if (made > 0)
         {
-            ResolutionLedger.NoteEvent(ResolutionLedger.Wolfpack,
-                                       "Four Winds' Ascension", string.Empty,
-                                       "Wolfpack", amount: made);
+            string title;
+            try { title = played.Title?.ToString() ?? string.Empty; }
+            catch (System.Exception) { title = string.Empty; }
+            ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack, title,
+                                             "Four Winds' Ascension",
+                                             "Wolfpack", amount: made);
         }
     }
 }

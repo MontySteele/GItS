@@ -1258,6 +1258,23 @@ def starter_spends_the_bank(card: dict) -> bool:
                     for eff in ops))
 
 
+def keeps_half_a_spend_all(card: dict) -> bool:
+    """Design-session call (2026-10-13): does this row apply Bis!, which
+    keeps half of a spend-all and never of a "Spend up to"? Asked of the
+    effect, so the tip follows the power, not an id."""
+    return any(e.get("op") == "apply_power" and e.get("power") == "fs_bis"
+               for e in card.get("effects") or [])
+
+
+def ascension_hit_gains_no_oath(card: dict) -> bool:
+    """Design-session call (2026-10-13): does this row deal Four Winds'
+    Ascension's element hit, which gains no Oath (a payoff does not feed its
+    own scaling)? Asked of the effect, so the tip follows the hit, not an
+    id."""
+    return any(e.get("op") == "varka" and e.get("kind") == "ascension_hit"
+               for e in card.get("effects") or [])
+
+
 def doubles_the_first_plan(card: dict) -> bool:
     """Kokomi round 2 (2026-10-12): does this row apply Nereid's Ascension,
     whose first Plan each turn is carried out twice? Asked of the effect, so
@@ -3212,8 +3229,8 @@ APPLY_POWERS = {
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
         "much damage to a random enemy."),
     "fs_bis": ("BisPower", None,
-        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep "
-        "half of it."),
+        "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], "
+        "keep half of it."),
     # THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5).
     # Every class lives in klee-mod/KleeCode/Powers/Prototype/
     # FurinaPool75Powers.cs.
@@ -16847,6 +16864,17 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         if doubles_the_first_plan(card):
             tips_expr = (
                 "ArmKeywordTips.ForNereidsTwice("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # Design-session calls (2026-10-13): Bis! says a "Spend up to" does
+        # not count, and Four Winds' Ascension's element hit gains no Oath.
+        # The same rider shape.
+        if keeps_half_a_spend_all(card):
+            tips_expr = (
+                "ArmKeywordTips.ForBisSpendUpTo("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        if ascension_hit_gains_no_oath(card):
+            tips_expr = (
+                "ArmKeywordTips.ForAscensionNoOath("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-575`, and it sits beside the two riders below it for their
         # reason: it is a fact about THIS card on THIS board, read before the

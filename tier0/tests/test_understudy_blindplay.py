@@ -6572,8 +6572,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                       ", draw ", " card. Act: "],
         "Wriothesley": ["Whenever you ", ", deal that much ",
                         "damage to a random enemy. Act: deal "],
-        "Lynette": ["The first time each turn an enemy makes you lose HP, "
-                    "gain that ", " again. Act: deal ",
+        "Lynette": ["The first time each turn you lose HP to an enemy, "
+                    "gain double ", ". Act: deal ",
                     " damage to an enemy, one with an aura if "],
         "Clorinde": ["Whenever you ", ", deal twice that much ",
                      " damage to a random enemy."],

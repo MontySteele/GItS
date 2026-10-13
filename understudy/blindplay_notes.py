@@ -1711,8 +1711,8 @@ ARM_KEYWORDS: dict[str, str] = {
                   "Repay."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
                     "enemy. Act: deal 4 Cryo damage to a random enemy."),
-    "Lynette": ("The first time each turn an enemy makes you lose HP, gain "
-                "that much Fanfare again. Act: deal 3 Anemo damage to an enemy, "
+    "Lynette": ("The first time each turn you lose HP to an enemy, gain "
+                "double Fanfare. Act: deal 3 Anemo damage to an enemy, "
                 "one with an aura if able."),
     "Clorinde": ("Whenever you Repay, deal twice that much Electro damage to a "
                  "random enemy. Act: deal 6 Electro damage to a random enemy."),
@@ -3586,6 +3586,11 @@ RESOLUTION_OATH = "  +{n} {element} Oath{source}"
 RESOLUTION_FANG = ("  That gain made **{relic}** add **Four Winds' "
                    "Ascension** to your hand.")
 RESOLUTION_FANG_DEFAULT = "Boreas's Fang"
+#: Design-session call (2026-10-13): Wolfpack's copy, on the Ascension's own
+#: play line. It went into the draw pile unseen, and two seats never knew it
+#: worked. `{n}` is "a copy" or "2 copies".
+RESOLUTION_WOLFPACK = ("  Wolfpack: shuffled {n} of Four Winds' Ascension "
+                       "into your Draw Pile.")
 #: The Varka payoff round (2026-10-10): a card whose every Anemo application
 #: found no aura (Sucrose on a bare board) said "Nothing this page can count
 #: landed off it", and the seat could not tell it had needed an aura.

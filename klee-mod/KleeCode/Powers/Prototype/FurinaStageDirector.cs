@@ -322,8 +322,9 @@ public sealed class StageDirector
         return _stage.Gain(amount, "HP lost");
     }
 
-    /// <summary>Lynette's line: "The first time each turn an enemy makes you
-    /// lose HP, gain that much Fanfare again."</summary>
+    /// <summary>Lynette's line: "The first time each turn you lose HP to an
+    /// enemy, gain double Fanfare." Double is rule 3's 1 a point plus this
+    /// grant of that much again on top.</summary>
     public int OnEnemyHit(int hpLost)
     {
         if (hpLost <= 0 || !_stage.OnStage(StagePerformer.Lynette)

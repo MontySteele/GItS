@@ -88,6 +88,12 @@ public static class ArmKeywordTips
     // The card text pass (2026-10-12): Boreas's Fang's reshuffle clause,
     // moved off the relic's face into this hover.
     public const string AscensionReturnKey = "KLEEMOD-ARM_VARKA_ASCENSION_RETURN";
+    // Design-session call (2026-10-13), A RIDER AND NOT A KEYWORD: Four
+    // Winds' Ascension's element hit gains no Oath, and that is the rule.
+    public const string AscensionNoOathKey = "KLEEMOD-ARM_VARKA_ASCENSION_NO_OATH";
+    // Design-session call (2026-10-13), A RIDER AND NOT A KEYWORD: Bis!
+    // keeps half of a spend-all only, never of a "Spend up to".
+    public const string BisSpendUpToKey = "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO";
     // ELEMENT IDENTITIES sec.7 (2026-10-01): a rider that titles no keyword,
     // a fact about THIS card on THIS board -- playing it would switch his
     // current element. Four times in one round a seat lost the Oath it was
@@ -679,6 +685,30 @@ public static class ArmKeywordTips
         With(inherited, AscensionReturnKey,
             "Played, it goes to your [gold]Discard Pile[/gold] and returns "
           + "after a reshuffle.");
+
+    /// <summary>
+    /// Design-session call (2026-10-13): Four Winds' Ascension's element hit
+    /// gains no Oath (<see cref="VarkaCards.AscensionHit"/> passes
+    /// <c>credit: false</c>), where Barbara's hit does; a payoff does not feed
+    /// its own scaling. `gen_klee_cards.emit` raises it off the row's
+    /// <c>ascension_hit</c> effect.
+    /// </summary>
+    /// <summary>
+    /// Design-session call (2026-10-13): Bis! keeps half of a spend-all only
+    /// (<see cref="KleeMod.Powers.FurinaStageLedger.SpendAll"/>); a "Spend up
+    /// to" card is not one even when it empties the bank, and a seat read it
+    /// the other way. `gen_klee_cards.emit` raises it off the row's
+    /// <c>fs_bis</c> power.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForBisSpendUpTo(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, BisSpendUpToKey,
+            "A card that [gold]Spends[/gold] up to an amount does not count, "
+          + "even if it empties your [gold]Fanfare[/gold].");
+
+    public static IEnumerable<IHoverTip> ForAscensionNoOath(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, AscensionNoOathKey, "This hit does not gain Oath.");
 
     /// <summary>
     /// WHAT HIS CARDS CHARGE (the Oath rework, sec.3): one count per element.
