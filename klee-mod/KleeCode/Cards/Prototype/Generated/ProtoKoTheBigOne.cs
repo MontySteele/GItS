@@ -48,7 +48,7 @@ public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard, ISetOffC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Big One"),
-        ("description", "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage."),
+        ("description", "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.{InCombat:\n([gold]Bombs[/gold]: {SetOffBombs} damage)|}"),
     };
 
     // EB-261, the Set-off gate: a card whose whole body is a
@@ -65,7 +65,7 @@ public sealed class ProtoKoTheBigOne : CustomCardModel, IElementalCard, ISetOffC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new SetOffBombsVar(4)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

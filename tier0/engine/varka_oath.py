@@ -258,6 +258,8 @@ KINDS = frozenset({
     "pyro_oath",
     # PYRO PAPER 2 (2026-10-12).
     "temp_strength", "next_pyro_attack",
+    # VARKA TEXT PASS (2026-10-13).
+    "tidal_bulwark",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -286,6 +288,8 @@ KIND_FIELDS = {
     # Pyro paper 2 (2026-10-12).
     "temp_strength": ("amount",),
     "next_pyro_attack": ("base",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("per",),
 }
 #: A field a kind MAY print (codegen's `VARKA_OPTIONAL_FIELDS`): Vow of the
 #: Blade's `amount: 2` (Varka co-op fixes, 2026-10-11); absent means 1.
@@ -305,6 +309,8 @@ KIND_TARGETS = {
     "frost_ward": "all_enemies", "gleeful_songs": "all_enemies",
     # The combo pass (2026-10-04).
     "pyro_strike": "enemy", "shatter": "enemy", "deep_freeze": "enemy",
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": "enemy",
 }
 #: `upgraded` is the `varka_upgraded` delta's mark (Pathfinder's Mark+).
 OP_FIELDS = frozenset({"op", "kind", "target", "per", "base", "amount",
@@ -1172,6 +1178,12 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     elif kind == "blazing_charge":
         _card_hit(state, card, aim, fx["base"] + fx["per"] * led.oath["pyro"],
                   "pyro")
+    elif kind == "tidal_bulwark":
+        # Varka text pass (2026-10-13, ruled (a)): "Deal Hydro damage equal
+        # to your Block, plus 2 [3] for each Hydro Oath." One Hydro hit (it
+        # reacts, it credits); the Block and the Oath read before it.
+        _card_hit(state, card, aim,
+                  max(0, p.block) + fx["per"] * led.oath["hydro"], "hydro")
     elif kind == "glacial_edict":
         # "1 Weak and 1 Vulnerable, plus 1 of each for every 3 Cryo Oath",
         # read after the row's own Cryo landed.

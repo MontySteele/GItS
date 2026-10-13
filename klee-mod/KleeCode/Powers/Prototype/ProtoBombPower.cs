@@ -671,14 +671,19 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// Skulking Colony's Hardened Shell is not a damage term: it caps the HP
     /// the enemy loses after Block each turn, and its own badge says so.
     /// </summary>
-    public int PredictedSetOffDamage()
+    /// <param name="multiplier">The damage previews pass (2026-10-13): a Set
+    /// off multiplier, the factor <see cref="SetOff"/> takes off the ledger
+    /// and multiplies into each charge with the badge. 1 for the badge; The
+    /// Big One's face passes its row's own 4, so its line and the badge are
+    /// one arithmetic.</param>
+    public int PredictedSetOffDamage(int multiplier = 1)
     {
         if (_charges.Count == 0) return 0;
         // A canonical (compendium) copy has no owner and its getter asserts;
         // the stored BaseValue is what such a copy prints.
-        if (!IsMutable) return TotalSize;
+        if (!IsMutable) return TotalSize * multiplier;
         var target = Owner;
-        if (target == null) return TotalSize;
+        if (target == null) return TotalSize * multiplier;
 
         var total = 0;
         // `EB-559`: the first charge through the funnel is the one that meets
@@ -714,7 +719,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 if (!pact) amplifier = 1m;
             }
             total += SimDamagePipeline.ResolveOnTarget(
-                target, _charges[i].Size * badge + dark, paid);
+                target, _charges[i].Size * badge * multiplier + dark, paid);
         }
         return total;
     }

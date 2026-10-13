@@ -274,37 +274,46 @@ def test_blazing_charge_reads_pyro_oath_by_name(varka):
 
 
 def test_tidal_bulwark_is_hydros_body_slam(varka):
-    # The Hydro paper (2026-10-10): "Deal damage equal to your Block, plus
-    # 2 [3] for each Hydro Oath. Apply Hydro to an enemy." The hit reads the
-    # Oath before its own application credits. Varka last pass
-    # (2026-10-12): "Gain 6 [8] Block" first, which the hit counts.
+    # The Hydro paper (2026-10-10): Hydro's Body Slam. Varka text pass
+    # (2026-10-13), ruled (a): "Deal Hydro damage equal to your Block, plus
+    # 2 [3] for each Hydro Oath." No Block of its own; the hit is Hydro. The
+    # hit reads the Oath before its own application credits.
     st = _state()
     led = _led(st)
     led.oath["hydro"] = 2
     st.player.block = 10
     _play(st, _vk("tidal_bulwark"))
     e = st.enemies[0]
-    assert e.hp == 100 - (10 + 6 + 2 * 2)
+    assert e.hp == 100 - (10 + 2 * 2)
     assert e.aura == "hydro" and led.oath["hydro"] == 3
-    assert st.player.block == 16                        # Body Slam keeps it
+    assert led.current == "hydro"
+    assert st.player.block == 10                        # Body Slam keeps it
     st = _state()
     _led(st).oath["hydro"] = 2
     st.player.block = 10
     _play(st, _vk("tidal_bulwark") + "+")
-    assert st.enemies[0].hp == 100 - (10 + 8 + 3 * 2)
-    st = _state()                                       # no Block, no Oath
+    assert st.enemies[0].hp == 100 - (10 + 3 * 2)
+
+
+def test_tidal_bulwarks_hit_reacts_like_any_hydro_hit(varka):
+    # The text pass's rule change: the Hydro rides the hit, so a Pyro aura
+    # already on the enemy reacts with it (Vaporize), where the old
+    # element-less hit then a separate Apply left the reaction off the damage.
+    st = _state(enemies=[_enemy(aura="pyro")])
+    st.player.block = 10
     _play(st, _vk("tidal_bulwark"))
-    assert st.enemies[0].hp == 100 - 6
+    e = st.enemies[0]
+    assert e.aura is None                               # consumed
+    assert e.hp < 100 - 10                              # amplified
 
 
 def test_tidal_bulwark_is_an_attack_on_the_sheet(varka):
     from tier0.content import loader
     c = loader.get_card(_vk("tidal_bulwark"))
     assert c.type == "attack" and c.cost == 1
-    assert c.effects[0] == {"op": "block", "amount": 6}
-    fx = c.effects[1]
-    assert fx["amount_formula"] == {"base": 0, "per": 2, "count": "hydro_oath",
-                                    "plus": "player_block"}
+    assert c.effects == [{"op": "varka", "kind": "tidal_bulwark",
+                          "target": "enemy", "per": 2}]
+    assert not any(fx["op"] in ("block", "apply_aura") for fx in c.effects)
 
 
 def test_glacial_edict_stacks_every_three_cryo(varka):

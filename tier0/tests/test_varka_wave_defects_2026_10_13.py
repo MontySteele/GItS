@@ -7,9 +7,8 @@ change"), the generated-text and tooltip halves:
     current with no line saying so);
   * every Anemo card's "Applies Anemo" tip names the Swirl and its 2 damage to
     ALL enemies (Windbound Execution's face never said so);
-  * Tidal Bulwark's own Block is counted by its damage only while that Block
-    is still to come (the hit read the var after the gain and counted it
-    twice).
+  * (Tidal Bulwark's own-Block pin left with its Block: the Varka text pass,
+    2026-10-13, ruled (a), took the Block off the card.)
 """
 from __future__ import annotations
 
@@ -56,10 +55,3 @@ def test_the_applies_anemo_tip_names_the_swirl_and_its_damage_to_all():
     tip = words["KLEEMOD-APPLIES_ANEMO.description"]
     assert "[gold]Swirls[/gold]" in tip
     assert "[blue]2[/blue] unblockable damage to ALL enemies" in tip
-
-
-def test_tidal_bulwarks_own_block_is_pending_only():
-    cs = _cs("ProtoVkTidalBulwark")
-    assert ("(int)card.Owner.Creature.Block + PendingOwnBlock.For(card, "
-            "(int)card.DynamicVars.Block.BaseValue)") in cs
-    assert "(int)card.Owner.Creature.Block + (int)card.DynamicVars.Block" not in cs
