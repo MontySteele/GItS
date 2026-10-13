@@ -42,21 +42,34 @@
 
 ## The art source
 
-- **Option 2, the official 3D model.** It can't be confirmed from here.
-  - HoYoverse's 2020 model release lists 14 characters, and Klee isn't one.
-  - A 2020 blog says a Klee model went to their account on the Chinese site Model House (aplaybox.com), but that site needs an account and I couldn't reach it.
-  - Those models' terms allow modifying the model and forbid redistributing it or using it commercially. So we could ship pictures rendered from it, never the model file.
-- **Option 1, AI inpainting of her official art.** The fallback you named. From the official splash and character portrait, generate a right-facing three-quarter stance:
-  - chest toward the viewer, head right;
-  - feet on the ground;
-  - painted in her official style.
-  
-  Then cut it into the same layers the rig already skins. The current splash stays as the Set Off pose.
-  - Which image model to use is open. If it costs money, that comes to you as its own pick.
+**Option 2 works: the official Klee model exists, and we have it.**
+- Your HoYoLAB link lists Klee on two official pages. One of them, Bilibili's Mondstadt model page (`activity-c_fu2inm-`), hosts 17 model packs on Bilibili's own servers.
+- One pack is `可莉2.0.pmx` ("Klee 2.0"), 1.2 MB, with face, hair, outfit and expression textures. It's downloaded to the scratchpad (`klee-model/dl/`) and not committed.
+- Its terms file (`使用规则.txt`), translated:
+  - "Modification permitted: optimizing bones and rigid bodies, and redoing UVs."
+  - "Do not redistribute."
+  - "Do not use in R18 works, extreme religious propaganda, gore, horror or grotesque works, or personal attacks."
+  - "Do not use for commercial purposes."
+  - "All consequences of others' use of this model are not borne by the model editor or miHoYo; the user bears full responsibility."
+  - "Model editor: 神帝宇. Model copyright belongs to miHoYo."
+- **What that allows us:**
+  - We render pictures from the model and ship the pictures, never the model file. That is what the pack is for, since the page is a creator video campaign.
+  - Our build is free, so it isn't commercial. A battle pose is none of the excluded content.
+  - The pack must never go into the repo or the release.
+
+**What rendering buys:** the 3D model can be posed into exactly the base pose (chest toward the viewer, head right, feet planted) and rendered toon-shaded in her official look. The same model gives every pose we need: idle, attack, cast, hurt, death, Set Off, a seated rest-site pose and a merchant pose. None of it is painted by hand or invented by an image model.
+
+**The tools are free:**
+- Blender and its MMD importer (mmd_tools) pose and render;
+- the renders are cut into the layers our existing Godot rig skins, or rendered as frame sequences for the one-shots.
+
+Blender isn't installed on this machine yet. Installing it is a one-time step I'd do, and it costs nothing.
+
+**Option 1, AI inpainting,** stays the fallback if the renders don't read well next to the painted base characters.
 
 ## The plan
 
-1. **New stance art,** from whichever route pick 1 chooses. The existing rig is re-skinned on it: same bones, new layers.
+1. **New stance art,** rendered from the official model in the base pose. The existing rig is re-skinned on it: same bones, new layers. Slow one-shots such as death can be rendered as frame sequences.
 2. **Scale to 0.62 of an adult.**
    - Her body shrinks from about 182 to about 150 px. The box stays, with headroom for the Set Off pose.
    - The merchant gets her own higher-resolution sprite at the base 1.7 times, with feet on the anchor.
@@ -74,8 +87,9 @@
 ## For [USER]
 
 1. **The art route.**
-   - **(a) Default:** go to option 1 (AI inpainting) now.
-   - (b) You check Model House first. If an official Klee model is there, we render her from it. It needs an account, and I can't make one for you.
+   - **(a) Default:** render from the official Klee model (Blender + mmd_tools, free); ship renders only.
+   - (b) AI inpainting of her official art.
+
 2. **Her size.**
    - **(a) Default:** 0.62 of an adult (about 150 px of body in combat).
    - (b) 0.70: smaller than now, but still close to Silent.
