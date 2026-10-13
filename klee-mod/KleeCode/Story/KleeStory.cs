@@ -28,7 +28,7 @@ public static class KleeStory
 
         IntroTitle = "The Spark Knight of Mondstadt.",
         IntroLine =
-            "She packed extra bombs, just in case the Spire says no.",
+            "Mom says the best treasure is at the top of the tallest place. Klee brought bombs for anything in the way.",
 
         Ancients = new[]
         {
