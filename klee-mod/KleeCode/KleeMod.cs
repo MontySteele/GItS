@@ -731,6 +731,20 @@ public static class KleeMod
                       + "next [blue]{}[/blue] turns|}, a Skill's damage too.",
                 });
 
+            // `EB-677`. GLAM'S REPLAY ON A TIMED CARD. Kokomi r26 lane 1:
+            // Kyouka, replayed by Glam, ran 4 turns at +4 and not 2 at +8,
+            // and no face said which. The behaviour stays (the base game's
+            // stacking: a replayed power adds its turns); Glam's own row says
+            // so. The shipped sentence, read off `SlayTheSpire2.pck`'s
+            // `localization/eng/enchantments.json`, with one sentence added.
+            LocManager.Instance.GetTable("enchantments").MergeWith(
+                new Dictionary<string, string>
+                {
+                    ["GLAM.description"] =
+                        "This card has [gold]Replay[/gold] once per combat. "
+                      + "Replaying a card with turns adds its turns.",
+                });
+
             // Klee's character strings moved onto the model itself
             // (Klee.Localization) when she became a CustomCharacterModel:
             // BaseLib prefixed her id to KLEEMOD-KLEE, so the hardcoded
