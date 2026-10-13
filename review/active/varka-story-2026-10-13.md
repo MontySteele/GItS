@@ -63,15 +63,16 @@ plot beats).
 
 ## 5. Act 3: The Long Way Home
 
-> Campfires on the stairs below, and banners in Favonius blue. After five years away, most of the expedition has come the long way round to walk him home. Three faces step out of the ranks first.
+> Campfires on the stairs below, and banners in Favonius blue. After five years away, most of the expedition has come the long way round to walk him home. Jean is at the head of the column. "You owe me five years of reports, Grand Master." Three faces step out of the ranks behind her.
 
 | Option | Effect | Their line |
 |---|---|---|
-| **Jean** | Add an upgraded **Jean — Wind Companion** to your deck. | "You owe me five years of reports, Grand Master." |
-| **Kaeya** | Add an upgraded **Kaeya: Heart of the Abyss** to your deck. | "The tavern's been quiet. Diluc almost misses you." |
-| **Mika** | Add an upgraded **Mika: Suppressive Barrage** to your deck. | "Surveyor Mika, sir! I've mapped the whole way home." |
+| **Eula** | Add an upgraded **Eula: Icetide Vortex** to your deck. | "You still owe me a rematch. Don't you dare go easy." |
+| **Noelle** | Add an upgraded **Noelle: Steadfast Maid** to your deck. | "Grand Master! I kept your armor polished. All five years of it." |
+| **Diluc** | Add an upgraded **Diluc: Searing Onslaught** to your deck. | "I'm not here for you. ...Mostly." |
+| **Wave them back to the column.** | Nothing. | "Save it for the tavern. We've still got a Spire to finish." |
 
-All three are Commons now (`proto_vk_jean_dandelion_breeze`, `proto_vk_kaeya_frostgnaw`, `proto_vk_mika_starfrost_swirl`). The first draft mixed rarities: Jean is a Common, Eula: Icetide Vortex an Uncommon, and Kaeya: Hidden Strength one of his starter Knights. Mika is the surveyor who served on the expedition. Varka answers whichever knight steps out: "Good. Then we climb together, and we all go home."
+All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, which is why he came anyway. When one steps out, Varka answers: "Good. Then we climb together, and we all go home."
 
 ## 6. Lines in combat (speech bubbles)
 
@@ -89,7 +90,7 @@ All three are Commons now (`proto_vk_jean_dandelion_breeze`, `proto_vk_kaeya_fro
 | Pair | Lines |
 |---|---|
 | Varka and Klee | (written with Klee's batch) Varka: "Spark Knight. Same orders as always." Klee: "No bombs indoors. ...Is this indoors?" |
-| Varka and Kokomi | Varka: "Priestess, I've studied your campaigns. A pincer?" Kokomi: "I was about to suggest the same. You take the left." |
+| Varka and Kokomi | Varka: "You've got your planning face on. Mind if I borrow it?" Kokomi: "Only if you take the left flank." |
 | Varka and Furina | Furina: "The Grand Master himself! Do try not to upstage me." Varka: "Wouldn't dream of it." |
 
 ## The arc in one line
@@ -109,6 +110,12 @@ the same rarity?" (No: act 3 now offers three Commons.) "The kokomi line
 needs a rework. Varka's own role in Nod-Krai is that of a strategist; he's
 not a dumb brute." Rewritten by Claude: the intro's third line, act 2, act
 3's Kaeya and Mika, the Kokomi pair.
+
+Second round, 2026-10-13. [USER]: "For an act 3 event, 3 commons is kinda
+meh. Can we upgrade it to give one of three uncommons and have an option to
+skip as well? For Varka's Kokomi co-op - reads too formal. Varka's pretty
+laid back. Otherwise the changes sounds good!" Act 3 now offers Eula, Noelle
+or Diluc (Uncommons) or a skip; Jean's line moved to the scene.
 
 ## For [USER]
 
