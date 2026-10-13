@@ -68,11 +68,11 @@ plot beats).
 | Option | Effect | Their line |
 |---|---|---|
 | **Eula** | Add an upgraded **Eula: Icetide Vortex** to your deck. | "You still owe me a rematch. Don't you dare go easy." |
-| **Noelle** | Add an upgraded **Noelle: Steadfast Maid** to your deck. | "Grand Master! I kept your armor polished. All five years of it." |
-| **Diluc** | Add an upgraded **Diluc: Searing Onslaught** to your deck. | "I'm not here for you. ...Mostly." |
+| **Noelle** | Add an upgraded **Noelle: Steadfast Maid** to your deck. | "Welcome back, Grand Master! Please, let me take the front line." |
+| **Diluc** | Add an upgraded **Diluc: Searing Onslaught** to your deck. | "Angel's Share is holding your usual table. Don't keep it waiting." |
 | **Wave them back to the column.** | Nothing. | "Save it for the tavern. We've still got a Spire to finish." |
 
-All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, which is why he came anyway. When one steps out, Varka answers: "Good. Then we climb together, and we all go home."
+All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, but he still keeps a table for him at his tavern. When one steps out, Varka answers: "Good. Then we climb together, and we all go home."
 
 ## 6. Lines in combat (speech bubbles)
 
@@ -116,6 +116,9 @@ meh. Can we upgrade it to give one of three uncommons and have an option to
 skip as well? For Varka's Kokomi co-op - reads too formal. Varka's pretty
 laid back. Otherwise the changes sounds good!" Act 3 now offers Eula, Noelle
 or Diluc (Uncommons) or a skip; Jean's line moved to the scene.
+
+Third round, 2026-10-13. [USER]: "I like the Eula line, but the Noelle line
+sounds off, and Diluc reads a little too edgy." Both rewritten.
 
 ## For [USER]
 
