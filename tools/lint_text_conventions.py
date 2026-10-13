@@ -770,6 +770,8 @@ ANCIENT_CARD_FILES = (
     MOD / "Cards" / "Furina" / "CenterOfAttention.cs",
     MOD / "Cards" / "Kokomi" / "DivineStrategy.cs",
     MOD / "Cards" / "Kokomi" / "PrincessOfWatatsumi.cs",
+    MOD / "Cards" / "Varka" / "AllFourWinds.cs",
+    MOD / "Cards" / "Varka" / "DandelionGale.cs",
 )
 
 

@@ -4101,9 +4101,8 @@ What the rows needed that the grammar did not have, each one call into
   `CardSelectCmd.FromSimpleGrid`) over four option faces
   (`VarkaModalOptions`). Favonius Drill's sec.10.3 row is therefore not a
   `choose_one`.
-- `tags: [dusty_tome]` emits BaseLib's `ITomeCard` (Ascension). He has no
-  Ancient card, and Darv's Dusty Tome softlocks on an empty Ancient draw; the
-  Tome hands him an upgraded Ascension until an Ancient is designed.
+- (`tags: [dusty_tome]`, BaseLib's `ITomeCard` on Ascension, left with his
+  Ancients: "Varka review, 2026-10-12" below.)
 - `tags: [strike]` emits `CardTag.Strike` (Oathsworn Strike, 2026-09-29: a
   seat saw Strike Dummy pay on Strike and not on it). A non-basic Strike is
   tagged the way the base game tags Twin Strike; a basic still answers with
@@ -7880,6 +7879,45 @@ now pins the two tokens as the only 0-cost Plan rows.
   (a Sting Exhausted by Ethereal at her turn's end). Mod feed only.
 - **Art:** the two new rows are `KNOWN_MISSING`; the legacy
   `all_streams_flow.png` is a candidate, unseen.
+
+## Varka review, 2026-10-12
+
+`review/active/varka-review-2026-10-12.md`, ruled 2026-10-12 ([USER]: "On
+Varka - wow, ok, sounds like we've outright solved the open issues."; "Both
+sound workable to me - Dandelion Gale could be the Replace version.").
+
+- `proto_vk_ember_cleave`: 7 [9] to 9 [11] Pyro damage (pick 1 (a)); the
+  Strength this turn is unchanged at 2 [3].
+- `proto_vk_stoke_the_flames`: the face prints "Pyro becomes your current
+  element." first, which the code already did (the switch before the gain).
+  It carries no in-combat switch line, since its face says it.
+- THE SWITCH PREVIEW. Every Varka row whose play makes an element current
+  (codegen `varka_switch_element`: Knights, and any card that applies an Oath
+  element) ends its face in `{InCombat:{VarkaSwitch}|}`, Kokomi's Plan-preview
+  seam, filled by `VarkaOath.SwitchLine`: "(Makes Pyro current)" on its own
+  line while the play would CHANGE his current element (`WouldSwitchTo`, the
+  hover tip's question), else nothing. Knights carry it too, so the rule reads
+  the same on every card; the bridge's "Knight, Pyro." tag stays, and the
+  bridge's hand row prints the game's own line.
+- `proto_vk_four_winds_ascension`: the `dusty_tome` tag is gone. Darv's Dusty
+  Tome draws from `RosterAncientCards.Varka`, through
+  `VarkaRoster.OfferablePool`, like every kit's.
+- `proto_vk_windbound_execution`: Orobas's Archaic Tooth turns it into
+  Dandelion Gale. Codegen's `TRANSCENDENCE` table emits BaseLib's
+  `ITranscendenceCard`; BaseLib's `ArchaicToothTranscendenceUpgradesPatch`
+  (3.4.7.0, read by decompile) adds the pair to the private
+  `ArchaicTooth.TranscendenceUpgrades`, which the vanilla Dusty Tome also
+  skips, so the Tome hands him All Four Winds. No other kit wires the Tooth:
+  their starters are the base Strike and Defend plus cards with no
+  replacement, so the Tooth is never offered to them.
+- His Ancients are hand-written and game-side only (no sim twin), like each
+  kit's second: `Cards/Varka/AllFourWinds.cs` (Power, 3 [2]: "Your cards read
+  your Oath of every element together.", the Elixir of the Four Winds' turn
+  for the whole combat, `VarkaOathLedger.AllFourThisCombat`) and
+  `Cards/Varka/DandelionGale.cs` (Attack, 1: "Deal 7 [10] Anemo damage to ALL
+  enemies. Swirl every aura. These Swirls pay twice.", Crosscurrent's
+  `PaysTwice` window around the hit). Witnessed by
+  `tools/lint_handwritten_parity.ANCIENT_WITNESS`.
 
 ## Furina: Encore! is a free act, 2026-10-12
 

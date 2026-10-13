@@ -579,13 +579,24 @@ def _allies(p: dict[str, Any], plan_pet: str | None) -> list[dict[str, Any]]:
     return out
 
 
+#: The Varka review (2026-10-12): cards a pile line names besides Status
+#: cards, because they arrive there unseen. Four Winds' Ascension goes to the
+#: discard pile when played and Wolfpack shuffles a copy into the draw pile.
+PILE_NOTED_CARDS = ("four winds' ascension",)
+
+
 def _status_counts(rows: Any) -> list[tuple[str, int]]:
-    """The Status cards in one pile, `[(name, count)]` in first-seen order.
-    `[]` for a pile with none, or a wire that sent no list."""
+    """The Status cards in one pile, and the `PILE_NOTED_CARDS`, as
+    `[(name, count)]` in first-seen order. `[]` for a pile with none, or a
+    wire that sent no list."""
     counts: dict[str, int] = {}
     for row in rows if isinstance(rows, list) else []:
-        if isinstance(row, dict) and _fold(_text(row.get("type"))) == "status":
-            name = _text(row.get("name")) or "Status"
+        if not isinstance(row, dict):
+            continue
+        name = _text(row.get("name"))
+        noted = _fold(name.rstrip("+")) in {_fold(n) for n in PILE_NOTED_CARDS}
+        if noted or _fold(_text(row.get("type"))) == "status":
+            name = name or "Status"
             counts[name] = counts.get(name, 0) + 1
     return list(counts.items())
 
@@ -828,6 +839,11 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     oath = varka_oath(p, combat)
     if oath is not None:
         combat["oath"] = oath
+        # The Varka review (2026-10-12): the "Pyro Oath (left)" badge's line
+        # goes, since a seat called it "noise"; the Oath counts above stay.
+        combat["you"]["powers"] = [
+            pw for pw in combat["you"]["powers"]
+            if not _OATH_LEFT.match(_text(pw.get("name")))]
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -850,6 +866,9 @@ _OATH_NAME = re.compile(r"^(?:(Pyro|Hydro|Electro|Cryo) )?Oath$")
 _OATH_COUNTS = re.compile(
     r"Oath: Pyro (\d+), Hydro (\d+), Electro (\d+), Cryo (\d+)\.")
 _AURA_BADGE = re.compile(r"^(Pyro|Hydro|Electro|Cryo) Aura$")
+#: The element he left this turn, beside the badge in game
+#: (`OathLeftPower`): kept in game, dropped from the page.
+_OATH_LEFT = re.compile(r"^(?:Pyro|Hydro|Electro|Cryo) Oath \(left\)$")
 
 
 def varka_oath(player: dict[str, Any],

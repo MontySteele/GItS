@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard, ICharacterCard, ITomeCard
+public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard, ICharacterCard
 {
     /// <summary>Sheet: all Varka attacks apply Anemo (catalyst-grade cadence).</summary>
     public Element Element => Element.Anemo;

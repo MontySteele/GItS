@@ -48,8 +48,17 @@ public sealed class ProtoVkDeepFreeze : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Freeze"),
-        ("description", "Apply [gold]Cryo[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold]."),
+        ("description", "Apply [gold]Cryo[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].{InCombat:{VarkaSwitch}|}"),
     };
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

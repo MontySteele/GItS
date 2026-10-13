@@ -119,7 +119,9 @@ def test_a_wolfpack_copy_exhausts_and_fires_again(varka):
 
 def test_the_sheet_strings(varka):
     # Pyro paper 2 (2026-10-12): the Exhaust rider retired from both.
+    # The Varka review (2026-10-12): Stoke's face prints its switch.
     assert _row(_vk("stoke_the_flames"))["description"] == (
+        "[gold]Pyro[/gold] becomes your [gold]current element[/gold]. "
         "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your "
         "next [gold]Pyro[/gold] Attack this turn deals {VkBase:diff()} "
         "additional damage.")
@@ -142,7 +144,7 @@ def test_the_sheet_strings(varka):
                                    "base": 5}
     ember = _row(_vk("ember_cleave"))
     assert ember["upgrade"] == {"varka_base": 2, "varka_amount": 1}
-    assert ember["effects"][0]["base"] == 7
+    assert ember["effects"][0]["base"] == 9
     assert ember["effects"][1] == {"op": "varka", "kind": "temp_strength",
                                    "amount": 2}
     assert len(ember["effects"]) == 2

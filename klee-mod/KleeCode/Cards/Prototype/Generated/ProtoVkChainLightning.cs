@@ -53,7 +53,7 @@ public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain Lightning"),
-        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Costs 1 less for each card you discarded this turn."),
+        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Costs 1 less for each card you discarded this turn.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>Sheet `cost_reduction_per_discard_this_turn: 1`: this card
@@ -66,6 +66,15 @@ public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICh
         modifiedCost = System.Math.Max(0m, originalCost - 1m
             * KokomiResources.DiscardsThisTurn(this));
         return true;
+    }
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

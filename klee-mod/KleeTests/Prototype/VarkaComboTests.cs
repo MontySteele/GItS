@@ -143,10 +143,12 @@ public class VarkaComboTests : IDisposable
         var makes = Calls("VarkaOath", "CardMakesCurrent");
         Assert.Contains("VarkaOath.BannerHolds", makes);
         Assert.Contains("VarkaOath.SetCurrent", makes);
-        // The switch prints as the switch tip (the 120-character ceiling).
+        // The switch prints as the switch tip, and since the Varka review
+        // (2026-10-12) on the face too.
         Assert.Contains("ArmKeywordTips.ForElementSwitch",
                         Il.Calls(Il.Method("ProtoVkStokeTheFlames", "get_ExtraHoverTips")));
-        Assert.Equal("Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. "
+        Assert.Equal("[gold]Pyro[/gold] becomes your [gold]current element[/gold]. "
+                     + "Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. "
                      + "Your next [gold]Pyro[/gold] Attack this turn deals "
                      + "{VkBase:diff()} additional damage.",
                      Face(new ProtoVkStokeTheFlames()));
@@ -175,9 +177,10 @@ public class VarkaComboTests : IDisposable
     public void Ember_cleave_is_setup_strike_in_pyro()
     {
         // Pyro paper 2 (2026-10-12): "Deal 7 [9] Pyro damage. Gain 2 [3]
-        // Strength this turn." No Oath gain, no Exhaust rider.
-        Assert.Equal(7m, Var(new ProtoVkEmberCleave(), "VkBase"));
-        Assert.Equal(9m, Var(Upgraded<ProtoVkEmberCleave>(), "VkBase"));
+        // Strength this turn." No Oath gain, no Exhaust rider. The Varka
+        // review (2026-10-12, pick 1 (a)): 9 [11].
+        Assert.Equal(9m, Var(new ProtoVkEmberCleave(), "VkBase"));
+        Assert.Equal(11m, Var(Upgraded<ProtoVkEmberCleave>(), "VkBase"));
         Assert.Equal(2m, Var(new ProtoVkEmberCleave(), "VkAmount"));
         Assert.Equal(3m, Var(Upgraded<ProtoVkEmberCleave>(), "VkAmount"));
         var play = Calls("ProtoVkEmberCleave", "OnPlay");
@@ -192,7 +195,7 @@ public class VarkaComboTests : IDisposable
         Assert.True(typeof(MegaCrit.Sts2.Core.Models.Powers.TemporaryStrengthPower)
             .IsAssignableFrom(typeof(EmberCleavePower)));
         Assert.Equal("Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain "
-                     + "{VkAmount:diff()} [gold]Strength[/gold] this turn.",
+                     + "{VkAmount:diff()} [gold]Strength[/gold] this turn.{InCombat:{VarkaSwitch}|}",
                      Face(new ProtoVkEmberCleave()));
     }
 
