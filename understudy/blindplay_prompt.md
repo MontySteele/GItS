@@ -37,7 +37,9 @@ them in the order it prints them — `Water's Edge (1)` and `Water's Edge (2)`,
 name that appears only once is not numbered, except an enemy that was
 numbered earlier in the fight, which keeps its number: say it exactly as
 printed. A card the screen marks `(upgraded)` can also be named that way, and
-`(not upgraded)` names the other copy.
+`(not upgraded)` names the other copy. A numbered card in your hand names the copy
+on the last screen you were shown, and the number does not shift as you play
+until you are shown the hand again.
 
 Every screen lists the commands it accepts under **What you can say**. A
 command the screen cannot take is refused and told back to you in one line,

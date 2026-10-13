@@ -49,6 +49,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning, where a Swirl or Crystallize on a burning enemy consumes the held Pyro and Burning keeps ticking; and Dendro ported as ruled (the non-reacting pairs, the Core rules and their previews), tested on Kirara and Emilie. Neither engine has Burning or Dendro today.
 - Show the amplifier: a Melt or Vaporize prints no factor on the face or in the seat log (Rosaria's Melt printed "Deal 15" from a written 9; "Vaporize on X" with no x1.5; Klee's log printed "nothing to amplify" beside a hit multiplied by 1.75); a hit carrying an element chosen at play (Four Winds' Ascension, Northwind Avatar) previews no amplifier either (multiplier pinned by `A_current_element_hit_amplifies_like_any_hit`).
 - Kokomi's Plan list prints a waiting Plan's damage without the target's Vulnerable: a queued card is in no pile, so its numbers never refresh; `KokomiPlan.QueueRow` could send the front-target-folded number (`PlannedDamage(FrontEnemy, ...)`) for front-aimed Plans; `WrittenFrontDamage` has the same gap.
+- Kokomi round 2 (0.2.5212, lane 3): Grand Design+ printed "no card in your hand can be planned" on most turns of a deck about two-thirds Plan cards and Companions, but headless the gate matches the Bake-Kurage's drop target for every card class, printed and upgraded (`KokomiRoundTwoFixesTests`), and the sim matches every row; the cause is not found. The gate now fails open and writes its first throw to godot.log ("Grand Design gate:"): after the next Kokomi round read that line, and have the seat record the hand on any Grand Design refusal. Grand Design+ Retains, so a refusal after the turn's Plans were played is correct and may be what the seat saw.
 - Kokomi: Smoggy ("you can only play 1 Skill per turn") refuses writing a Plan once a Skill is played; neither Smoggy's line nor the Bake-Kurage tip says writing a Plan counts as playing the card.
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
 - Furina: rename the four mismatched guest ids in one regen, moving their art keys with them, after [USER]'s run and never mid-save.
@@ -147,6 +148,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-193` `game_ref/role_tempo_canon.json` predates the int-var reader fix; regenerate it (46 cards gain `has_body`).
 - `EB-667` the Smith shows no upgrade for Ultimate Strike; its numbers are published nowhere the repo reads.
 - `EB-71` no committed sheet prints `sly_autoplay`, so the `CardKeyword.Sly` rail has never run in game; whoever prints the first one checks it live.
+- The shown-hand numbering (Kokomi round 2, `resolve_shown_card`) and the card-skip count reach only `blindplay act`; the in-process `Session` driver re-reads the hand each call and still re-counts numbers. Wire them in if a Session seat chains numbered plays.
 
 ## Sim
 

@@ -462,7 +462,18 @@ public static class KokomiRefounding
     /// hand hold a card, other than <paramref name="card"/> itself, that can
     /// be planned? A canonical copy has no owner and answers false. Must
     /// never throw: <c>IsPlayable</c> is read on every state poll. Sim twin:
-    /// <c>kokomi_plan.refuses_for_no_plan</c>.</summary>
+    /// <c>kokomi_plan.refuses_for_no_plan</c>.
+    ///
+    /// FAILS OPEN (Kokomi round 2, 2026-10-13). Lane 3's Grand Design+ said
+    /// "no card in your hand can be planned" on most turns of a deck about
+    /// two-thirds Plan cards and Companions, while this predicate matches the
+    /// Bake-Kurage's drop target for every card in the assembly, upgraded or
+    /// not (<c>KokomiRoundTwoFixesTests</c>). The one path that could refuse a
+    /// good hand was the catch: any throw while reading the hand answered
+    /// "nothing to plan". A throw now answers "playable" (a Grand Design that
+    /// finds nothing picks nothing, which is the lesser defect), a throwing
+    /// card counts alone as unplannable, and the first throw of each kind is
+    /// written to godot.log so the next round names it.</summary>
     public static bool AnyToPlan(CardModel card)
     {
         try
@@ -472,19 +483,53 @@ public static class KokomiRefounding
             if (owner == null) return false;
             return AnyOtherToPlan(PileType.Hand.GetPile(owner).Cards, card);
         }
-        catch (System.Exception)
+        catch (System.Exception e)
         {
-            return false;
+            WarnOnce(ref _warnedHand, $"reading the hand threw: {e}");
+            return true;
         }
     }
 
     /// <summary>The hand read behind <see cref="AnyToPlan"/>, PURE: any card
     /// in <paramref name="hand"/> but <paramref name="self"/> that
-    /// <see cref="CanBeWritten"/>.</summary>
+    /// <see cref="CanBeWritten"/>. A card whose read throws counts as
+    /// unplannable on its own rather than ending the read.</summary>
     public static bool AnyOtherToPlan(IEnumerable<CardModel> hand,
                                       CardModel? self) =>
-        hand.Any(other => !ReferenceEquals(other, self)
-                          && CanBeWritten(other));
+        hand.ToList().Any(other => !ReferenceEquals(other, self)
+                                   && CanBeWrittenSafely(other));
+
+    private static bool _warnedHand;
+    private static bool _warnedCard;
+
+    private static bool CanBeWrittenSafely(CardModel card)
+    {
+        try
+        {
+            return CanBeWritten(card);
+        }
+        catch (System.Exception e)
+        {
+            WarnOnce(ref _warnedCard,
+                     $"reading {card.GetType().Name} threw: {e}");
+            return false;
+        }
+    }
+
+    private static void WarnOnce(ref bool warned, string message)
+    {
+        if (warned) return;
+        warned = true;
+        try
+        {
+            MegaCrit.Sts2.Core.Logging.Log.Warn(
+                $"[{KleeMod.ModId}] Grand Design gate: {message}");
+        }
+        catch (System.Exception)
+        {
+            // Headless (no logger): the answer above stands.
+        }
+    }
 
     /// <summary>Is this card Ethereal right now (its own keyword, or one it
     /// was given)?</summary>

@@ -5581,7 +5581,9 @@ def test_the_duplicate_name_note_does_not_say_two():
     assert "**Coral Guard (1)**" in page and "**Coral Guard (3)**" in page
     assert "Two cards here print the same name" not in page
     assert "More than one card in this hand prints the same name" in page
-    assert "names a different copy once one of them leaves your hand" in page
+    # Kokomi round 2 (2026-10-13): the number now holds until the next
+    # `observe` (`resolve_shown_card`), and the note says that instead.
+    assert "does not shift as you play" in page
     # `EB-181` narrowed the enchantment clause rather than dropping it: the
     # bridge now carries an enchantment, so the note claims only what is
     # still true -- that copies showing NONE cannot be told apart here.
