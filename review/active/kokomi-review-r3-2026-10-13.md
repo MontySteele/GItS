@@ -87,3 +87,9 @@ Not changed, with the reason: Tidal Surge, Coral Crash, Kelp Wall (section 3); S
 No starter change and no new direction is raised by this round. One stage-gate question is the user's:
 
 1. **Kokomi's Prototype finish line.** Three rounds in: the act-1 chip is fixed, the jellyfish half is drafted and compounds in four of five runs, every seat's MOST WANTED turn was kit-specific (section 1), and the deaths are five different fights with seat errors in four. **(a) Default:** build the A-list, redeploy, and the next Kokomi play is the user's own finish-line run (CLAUDE.md: the user plays at a kit's finish line; no rule changes here, so no earlier run is owed); a further Sonnet round only if that run finds something. (b) One more five-seat round on the A-list build first, read for Wards made and played the way this one was read for Stings. (c) Hold at Prototype and open a Block paper; not recommended, the audit does not support it.
+
+## Ruled
+
+[USER], 2026-10-13: "On Kokomi - have we already done a review pass today for her least-played cards to bring them up to snuff? ... If we did, then I think we build the A-list and run another seat round to be sure (I'm out for a few more hours)." The least-played pass was the level pass (`review/ruled/kokomi-level-pass-2026-10-12.md`, ruled all defaults). So pick 1 is (b): the A-list is built (#1218) and five more seats play it, read for Wards made and played.
+
+On Albedo, Solar Isotoma: "we can only have one aura, right? So that just reads 'deal 8 damage and gant 4 block to one enemy with an aura,' which sounds underwhelming at Rare." Then: "Not that the numbers are bad (free block is very good), but that a Rare should be more dramatic and the Mondstadt pool already has powers for free block." One aura per enemy is right (`AuraCmd`), so "most auras" was wrong on two faces. Albedo is redesigned in its own PR, and Jean's Dandelion Breeze says "an enemy with an aura".

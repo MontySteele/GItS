@@ -22,9 +22,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Kokomi round 3 review** (`kokomi-review-r3-2026-10-13.md`, one pick, default
-  (a)): call the next Kokomi play your finish-line run on the A-list build, or
-  run five more seats first, read for Wards.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
