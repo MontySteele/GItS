@@ -49,7 +49,9 @@ watch at Balance. Weathervane and Oathbound Aegis were never seen.
 64 Block cleared a room, seat 4's Juggernaut turned every Block card into
 damage. The two losses that were Block failures (seat 3 under Tainted, seat 2
 under Chains of Binding and Frail) were decks that drafted no scaling Block.
-No change.
+No change. **Caveat (found after the wave, fixed in #1200):** Tidal Bulwark counted its own Block twice, so every Tidal Bulwark hit in this wave dealt about its Block more than printed. Noelle: Sweeping Time and Juggernaut were not affected. Seat 5's engine was partly this bug; re-read it next wave.
+
+Also from #1200: of the defects below, Static Field, Rising Gale, Change of Guard, the stale current element, Terror Eel and the Cultist turn were seat misreads (checked against lane telemetry); Ravenous "x2" was a double subscription, fixed; Kaiser Crab's missing 99 Block is unexplained (BACKLOG).
 
 ## What played well
 
