@@ -1588,16 +1588,20 @@ ARM_KEYWORDS: dict[str, str] = {
     "Bomb": ("Deals its size in Pyro damage when Set off. Grows {growth} at "
              "the start of your turn. If its enemy dies, it jumps to "
              "another."),
-    "Set off": ("Every Bomb on the enemy goes off, oldest first. A random Set "
-                "off picks an enemy with Bombs."),
+    # 2026-10-13 (text-only fix): the other enemies' Bombs stay.
+    "Set off": ("Every Bomb on the enemy goes off, oldest first. Bombs on "
+                "other enemies stay. A random Set off picks an enemy with "
+                "Bombs."),
     "Spark": ("Some cards cost Sparks instead of Energy, with no cap. Gone "
               "after combat."),
     # Text pass 2026-09-25, in step with `ArmKeywordTips.ForMine`.
     # The Klee round (2026-10-11): three of five seats read "goes off just
     # before its enemy attacks" as "on the enemy's turn"; the tip now says
     # it waits on a turn its enemy does not attack.
-    "Mine": ("A Bomb that also goes off when its enemy attacks you. If it "
-             "does not attack, the Mine waits. Any Set off spends it too."),
+    # 2026-10-13 (text-only fix): an attack leaves the plain Bombs.
+    "Mine": ("A Bomb that also goes off when its enemy attacks you, without "
+             "the enemy's plain Bombs. Otherwise, it waits. Any Set off "
+             "spends it too."),
     # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
     # step with `ArmKeywordTips.ForPlan` word for word: the old row carried
     # six seats' edge cases (the aim and its Minion exception, Strength
@@ -1664,21 +1668,6 @@ ARM_KEYWORDS: dict[str, str] = {
     "Swirl": (f"Anemo meets an aura: remove it, deal {SWIRL_DAMAGE} "
               "unblockable damage to ALL enemies, and apply that element to "
               "the others."),
-    # `EB-372`. THE WORD REACHED A SEAT THAT HAD NEVER DRAFTED IT. `Grounded`
-    # is a Power card of Klee's, and Kaeya's Cold-Blooded Strike is written
-    # against it by name ("Next turn, Grounded pays even if you played a
-    # Set off card", `EB-749`), as is the Cold-Blooded buff it leaves behind. The r9 seat
-    # met the word in both acts, held neither the Power nor a screen that
-    # defined it, and read it as noise. Held in step with
-    # `ArmKeywordTips.ForGrounded`.
-    # `EB-516` moved the condition to the board and the tip moved with it;
-    # `EB-749` (R271 sec.5.1) moved it again, onto the CARDS the player played.
-    # Kaeya's clause above is stale as a result and is left standing by that
-    # ruling's scope -- it rules Klee's face and not the companion row.
-    # 2026-10-02: the row names what it pays (Block, no number: the upgrade
-    # moves it).
-    "Grounded": ("A Power that gives Block and 1 Spark at the start of your "
-                 "turn, but only if you played no Set off card last turn."),
     # `EB-446`. THE NAME ONE CARD IS WRITTEN AGAINST AND ANOTHER GRANTS.
     # `Fischl -- Nightrider` prints "If Oz is out, he deals 5 Electro damage"
     # and cannot put him out: the Power that does is a DIFFERENT companion
@@ -1986,8 +1975,8 @@ _ARM_KEYWORD_CHARACTER: dict[str, str] = {"Oz": "klee"}
 #
 # THE UNIVERSAL WORDS KEEP NO OWNER and are untouched: `Companion` (every arm
 # drafts them and `EB-460` already splits its one arm-conditional clause),
-# `Swirl` (ten Universals print the verb), `Grounded` (Kaeya's Power, on a
-# companion card), and the two above.
+# `Swirl` (ten Universals print the verb), and the two above. (`Grounded`
+# left with its cut Power, 2026-10-13.)
 #
 # A FEED THAT DOES NOT SAY WHO IS PLAYING GETS EVERY ROW, which is
 # `_ARM_KEYWORD_CHARACTER`'s direction one table up and `absent is not zero`'s:
@@ -2086,11 +2075,6 @@ _ARM_KEYWORD_RE = {
     "Oath": re.compile(r"\bOath\b"),
     "current element": re.compile(r"\bcurrent element\b"),
     "Knight": re.compile(r"\bKnights?\b"),
-    # `EB-372`. NO PLURAL: the word names one Power. It fires on Kaeya's face,
-    # on the Cold-Blooded buff it leaves behind, and on the Power card itself
-    # wherever one is printed -- which is every screen a reader can meet the
-    # word on, whether or not the deck holds it.
-    "Grounded": re.compile(r"\bGrounded\b"),
     # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
     # which names him and cannot grant him, and on the Power card that does --
     # every screen a reader can meet the word on, whether or not the run holds

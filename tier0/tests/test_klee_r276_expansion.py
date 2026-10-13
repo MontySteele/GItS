@@ -414,19 +414,8 @@ def test_boom_badge_doubles_the_bombs_of_the_next_set_off_card(overhaul):
     assert before - enemy.hp == 5 * 2 + 4
 
 
-# Sit Tight's card pins left with the row (the Klee tempo paper, 2026-10-07).
-# Its power stays registered until its engine pieces go (BACKLOG); the
-# ordering pin below reads the engine, not the card.
-
-
-def test_sit_tight_pays_before_the_shipped_turn_end_triggers():
-    """The mod pays it as a POWER tenant of `BeforeSideTurnEnd`, ahead of the
-    model-driven `TurnEndSequencer`; the sim's call sits ahead of
-    `player_turn_end_triggers` for the same reason."""
-    import inspect
-    body = inspect.getsource(combat._player_turn)
-    assert (body.index("klee_overhaul.sit_tight_turn_end(state)")
-            < body.index("effects.player_turn_end_triggers(state)"))
+# Sit Tight's and Patience, Klee!'s pins left with their dead powers (Klee
+# text-only fixes, 2026-10-13).
 
 
 def test_wait_for_it_pays_once_on_a_reacting_bomb(overhaul):
@@ -464,18 +453,6 @@ def test_party_poppers_pays_a_bomb_per_spark_priced_play(overhaul):
     klee_overhaul.note_card_played(state, load("proto_ko_pop"))
     klee_overhaul.note_card_played(state, load("proto_ko_pocket_match"))
     assert sizes(enemy) == [3, 3]
-
-
-def test_patience_grows_on_a_turn_with_no_set_off_card(overhaul):
-    enemy = make_enemy(hp=200)
-    state = klee_state([enemy])
-    state.player.powers[klee_overhaul.PATIENCE] = 4
-    klee_overhaul.place(state, enemy, 5)
-    klee_overhaul.turn_end(state)
-    assert sizes(enemy) == [9]
-    state.ko_set_off_cards_this_turn = 1
-    klee_overhaul.turn_end(state)
-    assert sizes(enemy) == [9]
 
 
 def test_the_echo_left_the_end_of_the_turn(overhaul):

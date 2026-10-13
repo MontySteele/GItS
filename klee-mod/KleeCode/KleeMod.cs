@@ -430,10 +430,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SparkKey + ".title"] = "Spark",
                     [Cards.ArmKeywordTips.MineKey + ".title"] = "Mine",
                     // Klee's fifth, Hexerei, was retired by R276 pick 2.
-                    // `EB-372`, Klee's sixth: a Power of hers that Kaeya's
-                    // Cold-Blooded Strike is written against, so the word
-                    // reaches a player who may never have drafted it.
-                    [Cards.ArmKeywordTips.GroundedKey + ".title"] = "Grounded",
+                    // Klee's sixth, Grounded (`EB-372`), left with its cut
+                    // Power (Klee text-only fixes, 2026-10-13).
                     // `EB-446`, Klee's seventh: the raven ANOTHER companion
                     // card puts out, named on a face that cannot grant him.
                     [Cards.ArmKeywordTips.OzKey + ".title"] = "Oz",
@@ -490,6 +488,15 @@ public static class KleeMod
                     // whose acts happen one after another.
                     [Cards.ArmKeywordTips.FinalBowInTurnKey + ".title"] =
                         "Final Bow",
+                    // Klee text-only fixes (2026-10-13): four riders.
+                    [Cards.ArmKeywordTips.BigBaddaBoomTotalKey + ".title"] =
+                        "Big Badda Boom",
+                    [Cards.ArmKeywordTips.BoomBadgeTurnKey + ".title"] =
+                        "Boom Badge",
+                    [Cards.ArmKeywordTips.LionsFangLastTurnKey + ".title"] =
+                        "Last turn",
+                    [Cards.ArmKeywordTips.PassTheMatchActingKey + ".title"] =
+                        "Pass the Match",
                     // Co-op notes pick 2 (2026-10-02): the key is also
                     // `KleeKeywords.Knight`'s, the printed "Knight." line,
                     // and the keyword's own hover reads this row.

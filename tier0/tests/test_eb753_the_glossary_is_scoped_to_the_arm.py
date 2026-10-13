@@ -109,10 +109,11 @@ def test_a_run_reads_no_other_kits_words(character):
 
 
 def test_the_universal_words_are_scoped_to_nobody():
-    """`Companion`, `Swirl`, `Grounded` and `Oz` ride faces the whole roster
-    drafts, so none of them is owned and each keeps the treatment it already
-    had. (`Hexerei` was the fifth until R276 pick 2 retired it.)"""
-    for word in ("Companion", "Swirl", "Grounded", "Oz"):
+    """`Companion`, `Swirl` and `Oz` ride faces the whole roster drafts, so
+    none of them is owned and each keeps the treatment it already had.
+    (`Hexerei` was the fourth until R276 pick 2 retired it; `Grounded` left
+    with its cut Power, 2026-10-13.)"""
+    for word in ("Companion", "Swirl", "Oz"):
         assert word not in blindplay_notes._ARM_KEYWORD_ARM, word
 
 

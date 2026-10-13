@@ -42,22 +42,6 @@ public static class KleeOverhaulLaw
     public const int OpeningSpark = 3;
 
     /// <summary>
-    /// GROUNDED'S SPARK (`EB-344`, ruled R248): the held turn pays this many
-    /// Sparks alongside the Block. Mirrors
-    /// <c>C.KLEE_OVERHAUL_GROUNDED_SPARK</c>.
-    ///
-    /// A CONSTANT AND NOT THE POWER'S AMOUNT, and the upgrade is why: Grounded
-    /// upgrades <c>{power_amount: +2}</c>, so <c>GroundedPower.Amount</c> is
-    /// the BLOCK and moves from 4 to 6 (`EB-622`). The Spark stays 1 at both
-    /// levels, which
-    /// makes it the kit's rate rather than the card's number -- the same
-    /// footing as <see cref="SparkPerExplosion"/> and
-    /// <see cref="OpeningSpark"/>, and the reason all three are compared by
-    /// value against tier0 rather than written as literals at the grant site.
-    /// </summary>
-    public const int GroundedSpark = 1;
-
-    /// <summary>
     /// Damage Report's Spark per status drawn (Klee pre-Balance sweep,
     /// 2026-10-03). Flat at both levels: the upgrade moves the Block (4 to 6),
     /// as Grounded's does. Mirrors <c>C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK</c>.

@@ -52,7 +52,6 @@ internal static class KleePowerIcons
         // illustration stays owed until the slice is accepted.
         VermillionPactPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
-        GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         // R276's Explosive Frags borrows the shipped Explosive Frags badge,
         // whose job it takes over for the arm's Mine (Vulnerable per charge
         // gone off). Its own illustration stays owed until Balance.
@@ -61,9 +60,8 @@ internal static class KleePowerIcons
         // POOL PASS TWO's two (`EB-732`), on the block above's terms verbatim.
         // Return to Sender borrows the BOMB-PER-TRIGGER badge, because that is
         // what it is -- a Bomb placed off an event, one trigger along from
-        // Chained Reactions' explosion. Blazing Delight borrows Grounded's,
-        // because Grounded is the arm's other start-of-turn payer and this one
-        // pays the same beat in a different currency. Both illustrations stay
+        // Chained Reactions' explosion. Blazing Delight borrows the
+        // spark-per-turn badge. Both illustrations stay
         // owed until the slice is accepted.
         ReturnToSenderPower =>
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
@@ -83,10 +81,6 @@ internal static class KleePowerIcons
         SecretBasePower =>
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         LookOutPower => KleePck.Path("klee/powers/spark_per_turn.png"),
-        PatienceKleePower => KleePck.Path("klee/powers/bomb_damage_up.png"),
-        // Sit Tight's quiet-turn Block borrows Grounded's badge: both pay
-        // Block off the arm's explosion ledger for a turn nothing went off.
-        SitTightPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         DodocoPower => KleePck.Path("klee/powers/bomb.png"),
         // THE SPIRAL ABYSS (2026-10-12): each Abyss Mage Shield wears the
         // official shield of its element, and each Shadow badge its own icon.
