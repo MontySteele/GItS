@@ -39,7 +39,7 @@ public class KokomiRefoundingTests
         Assert.False(TamakushiCasket.Pays(0));
         Assert.True(TamakushiCasket.Pays(1));
         Assert.Equal(
-            "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
+            "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
             + "[blue]3[/blue] [gold]Block[/gold]." + KokomiPreRunFixesTests.CasketTail,
             new TamakushiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
@@ -48,9 +48,13 @@ public class KokomiRefoundingTests
     }
 
     [Fact]
-    public void The_casket_reads_the_queue_and_gains_raw_block_at_turn_end()
+    public void The_casket_reads_the_queue_and_gains_raw_block_after_the_block_clear()
     {
-        var seq = Seq(nameof(TamakushiCasket), "BeforeSideTurnEnd");
+        // [USER], 2026-10-12: "let's have her starter relic apply block at the
+        // beginning of the turn rather than the end." AfterBlockCleared runs
+        // after the turn's Block clear and before AfterPlayerTurnStart, where
+        // the waiting Plans are carried out.
+        var seq = Seq(nameof(TamakushiCasket), "AfterBlockCleared");
         var held = seq.IndexOf("KokomiPlan.PlansHeld");
         var block = seq.IndexOf("CreatureCmd.GainBlock");
         Assert.True(held >= 0 && block > held, string.Join(" ", seq));

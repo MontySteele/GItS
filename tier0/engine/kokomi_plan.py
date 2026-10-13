@@ -2540,11 +2540,14 @@ def turn_start_generators(state: CombatState) -> None:
 
 
 def casket_block(state: CombatState) -> None:
-    """THE TAMAKUSHI CASKET (the re-founding, 2026-10-12): "At the end of your
-    turn, if a Plan is waiting, gain 3 Block." Its hook, at this engine's
-    `BeforeSideTurnEnd` on her side; raw relic Block (Orichalcum's
-    `ValueProp.Unpowered`). `TamakushiCasket.BeforeSideTurnEnd` is the
-    twin."""
+    """THE TAMAKUSHI CASKET (the re-founding, 2026-10-12): "At the start of
+    your turn, if a Plan is waiting, gain 3 Block." Start, not end, since
+    [USER]'s ruling the same day ("let's have her starter relic apply block at
+    the beginning of the turn rather than the end"). Its hook, at this
+    engine's `AfterBlockCleared` site: right after the turn's Block clear and
+    before `resolve_all` carries the waiting Plans out, so the queue it reads
+    is still last turn's. Raw relic Block (`ValueProp.Unpowered`).
+    `TamakushiCasket.AfterBlockCleared` is the twin."""
     from tier0.content import loader                # late import: cycle
     if not live(state):
         return

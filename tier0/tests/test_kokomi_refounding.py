@@ -201,6 +201,20 @@ def test_the_casket_gains_3_block_while_a_plan_is_waiting():
     assert st.player.block == C.KOKOMI_OVERHAUL_CASKET_BLOCK == 3
 
 
+def test_the_casket_pays_at_the_start_of_the_turn_before_the_plans_resolve():
+    """[USER], 2026-10-12: "For Kokomi - let's have her starter relic apply
+    block at the beginning of the turn rather than the end." The sim site is
+    StS2's `AfterBlockCleared`: after the turn's Block clear (or the Block is
+    wiped at once) and before `resolve_all` empties the queue it reads; and
+    it is gone from the end of the turn."""
+    import inspect
+    src = inspect.getsource(combat._player_turn)
+    at = src.index("kokomi_plan.casket_block(state)")
+    assert src.index("p.block = 0 if kept is None else kept") < at
+    assert at < src.index("kokomi_plan.resolve_all(state)")
+    assert src.count("kokomi_plan.casket_block(state)") == 1   # not at the end
+
+
 # --- the new cards ----------------------------------------------------------
 
 def test_grand_design_writes_up_to_3_writable_cards_for_free():

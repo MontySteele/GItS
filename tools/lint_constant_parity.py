@@ -243,7 +243,7 @@ MIRRORED: dict[str, object] = {
     # with the pulse, the Garment and the Tide.
     # THE CASKET PASS (2026-09-28) retired the strike; THE RE-FOUNDING
     # (2026-10-12) retired the count: the relic's one number is its Block at
-    # the end of her turn while a Plan is waiting.
+    # the start of her turn while a Plan is waiting.
     "KokomiOverhaulLaw.CasketBlock": C.KOKOMI_OVERHAUL_CASKET_BLOCK,
     # THE RE-FOUNDING: Gorou's Juuga, its Plan line's Block per turn, and
     # Call the Generals' "1 of 3".

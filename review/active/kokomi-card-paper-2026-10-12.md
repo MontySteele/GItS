@@ -6,7 +6,7 @@
 
 ## 1. The rules this builds
 
-1. **The Casket goes.** The starter relic keeps its name and art: "At the end of your turn, if a Plan is waiting, gain 3 Block." Open the Casket goes.
+1. **The Casket goes.** The starter relic keeps its name and art: "At the start of your turn, if a Plan is waiting, gain 3 Block." Open the Casket goes. (It read "At the end of your turn" until [USER] ruled, 2026-10-12: "For Kokomi - let's have her starter relic apply block at the beginning of the turn rather than the end." The Block lands after the turn's Block clear and before the waiting Plans are carried out.)
 2. **Dusk is retired.** No Plan happens within your own turn. (Amended 2026-10-12; [USER]: "I'm actually totally fine with 0-cost plans; it's Dusk Plans that were 'kinda silly' since they take place within your turn (at the end) like a normal card with extra steps." This read "No card with a Plan line costs 0" until then.)
 3. **Ethereal** is the base game's keyword. Writing an Ethereal card as a Plan keeps it.
 4. **Jellyfish cards.** Two generated cards, both Ethereal, 1 Energy, Exhausting when played or carried out:

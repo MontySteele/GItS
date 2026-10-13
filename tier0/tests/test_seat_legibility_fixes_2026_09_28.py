@@ -25,7 +25,7 @@ def _fresh_run_ledger():
 # The relic's face since the Kokomi re-founding (2026-10-12), which retired
 # the count and the count line it printed.
 CASKET = {"id": "TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
-          "description": "At the end of your turn, if a Plan is waiting, "
+          "description": "At the start of your turn, if a Plan is waiting, "
                          "gain 3 Block."}
 
 

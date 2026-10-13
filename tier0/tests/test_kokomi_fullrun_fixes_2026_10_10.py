@@ -15,10 +15,10 @@ from understudy import blindplay
 # `TamakushiCasket.cs`, `WatatsumiCasket.Localization`, as the wire prints
 # them since the Kokomi re-founding (2026-10-12): no count.
 TAMAKUSHI = {"id": "KLEEMOD-TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
-             "description": "At the end of your turn, if a Plan is waiting, "
+             "description": "At the start of your turn, if a Plan is waiting, "
                             "gain 3 Block."}
 WATATSUMI = {"id": "KLEEMOD-WATATSUMI_CASKET", "name": "Watatsumi Casket",
-             "description": "At the end of your turn, if a Plan is waiting, "
+             "description": "At the start of your turn, if a Plan is waiting, "
                             "gain 5 Block."}
 
 
