@@ -43,7 +43,7 @@ public sealed class ProtoVkStormBattery : CustomCardModel, IElementalCard, IChar
     public string CharacterId => "varka";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesElectro };
+        new[] { CardKeyword.Retain, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro);

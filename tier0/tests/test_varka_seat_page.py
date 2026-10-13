@@ -219,7 +219,8 @@ def _card(name: str, text: str, kind: str = "Attack") -> dict:
             "can_play": True, "unplayable_reason": None}
 
 
-ROLL_CALL = ("Knights' Roll Call", "Add a random Knight to your hand.")
+ROLL_CALL = ("Knights' Roll Call",
+             "Choose 1 of 3 random Knights to add into your Hand.")
 
 
 def test_knights_roll_call_is_an_element_source():

@@ -140,10 +140,11 @@ def test_the_ruled_rows_and_their_upgrades(varka):
     assert nw.cost == 2
     assert _fx(nw.id, "damage")["amount"] == 10
     hit = _fx(nw.id, "varka")
-    assert (hit["kind"], hit["base"], hit["per"]) == ("avatar_hit", 10, 2)
+    # Varka last pass (2026-10-12), pick 1: the second hit 8 [12].
+    assert (hit["kind"], hit["base"], hit["per"]) == ("avatar_hit", 8, 2)
     up = loader.get_card(_vk("northwind_avatar") + "+")
     assert _fx(up.id, "damage")["amount"] == 14
-    assert _fx(up.id, "varka")["base"] == 14
+    assert _fx(up.id, "varka")["base"] == 12
     # Combo pass pick 3 (2026-10-04): the upgrade is cost 2 to 1 and
     # nothing else.
     asc = loader.get_card(_vk("four_winds_ascension") + "+")
@@ -151,7 +152,7 @@ def test_the_ruled_rows_and_their_upgrades(varka):
     assert _fx(asc.id, "damage")["amount"] == 10
     assert _fx(asc.id, "varka")["per"] == 3
     assert loader.get_card(_vk("grand_masters_order") + "+").retain is True
-    assert _fx(_vk("knights_roll_call") + "+", "add_knight")["choose"] is True
+    assert _fx(_vk("knights_roll_call") + "+", "add_knight")["upgraded"] is True
     assert V.SWIRL_ELECTRO_DAMAGE_ALL == 3
 
 
@@ -236,13 +237,13 @@ def test_a_spread_credits_nothing(varka):
 
 def test_northwind_credits_both_keys_and_ascension_only_the_swirl(varka):
     # Northwind: 10 Anemo Swirls the Pyro (+1 swirl-Pyro, flat 2, Pyro
-    # payout 3), then 10 + 2 x 2 Pyro, which credits apply-Pyro.
+    # payout 3), then 8 + 2 x 2 Pyro, which credits apply-Pyro.
     st = _state(enemies=[_enemy(aura="pyro")], fang=False)
     led = _led(st)
     led.current, led.oath["pyro"] = "pyro", 1
     _play(st, _vk("northwind_avatar"))
     assert led.oath["pyro"] == 3
-    assert st.enemies[0].hp == 100 - (10 + 2 + 3 + 14)
+    assert st.enemies[0].hp == 100 - (10 + 2 + 3 + 12)
     # Ascension: 10 Anemo Swirls (+1), then 3 x 2 Pyro that credits nothing.
     st = _state(enemies=[_enemy(aura="pyro")], fang=False)
     led = _led(st)
@@ -678,14 +679,23 @@ def test_rally(varka):
 
 
 def test_add_knight(varka):
+    # Varka last pass (2026-10-12): choose 1 of 3 random Knights, free this
+    # turn; upgraded, the pick arrives upgraded.
     st = _state(fang=False)
     _play(st, _vk("knights_roll_call"))
     knight = st.player.hand[-1]
     assert knight.id in V.pool_knight_ids() and knight.free_this_turn
     assert len(V.pool_knight_ids()) == 13     # 9 + the expansion's 4
+    offer = [e for e in st.log if e["event"] == "varka_roll_call"][-1]
+    assert len(offer["offered"]) == 3 == len(set(offer["offered"]))
+    assert knight.id in offer["offered"]
     _led(st).current = "cryo"
     _play(st, _vk("knights_roll_call") + "+")
-    assert st.player.hand[-1].id == _vk("kaeya_frostgnaw")
+    up = st.player.hand[-1]
+    assert up.id.endswith("+") and up.id[:-1] in V.pool_knight_ids()
+    assert up.free_this_turn
+    offer = [e for e in st.log if e["event"] == "varka_roll_call"][-1]
+    assert up.id[:-1] == V.order_answers_pick(offer["offered"], "cryo")
 
 
 # ---------------------------------------------------------------------------

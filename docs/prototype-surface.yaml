@@ -3815,9 +3815,11 @@
 - {id: proto_vk_knights_roll_call, name: "Knights' Roll Call", character: varka,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Add {IfUpgraded:show:a [gold]Knight[/gold] you choose|a random [gold]Knight[/gold]} to your [gold]Hand[/gold]. It costs 0 this turn.",
+   # Varka last pass (2026-10-12): choose 1 of 3, upgraded when this is.
+   # Was "Add a random Knight [one you choose] to your hand".
+   description: "Choose 1 of 3 random [gold]Knights[/gold] to add into your [gold]Hand[/gold]. It {IfUpgraded:show:is upgraded and |}costs 0 this turn.",
    effects: [{op: add_knight}],
-   upgrade: {choose_knight: true}}
+   upgrade: {upgraded_knight: true}}
 
 - {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
    authored_by: [claude],
@@ -3938,7 +3940,8 @@
 
 - {id: proto_vk_boreas_unbound, name: "Boreas Unbound", character: varka,
    authored_by: [claude],
-   cost: 3, type: power, rarity: rare,
+   # Varka last pass (2026-10-12): costs 2, was 3.
+   cost: 2, type: power, rarity: rare,
    description: "Whenever your [gold]current element[/gold] changes, gain {energyPrefix:energyIcons(1)}.",
    effects: [{op: apply_power, power: vk_boreas_unbound, amount: 1, target: self}],
    upgrade: {innate: true}}
@@ -3956,9 +3959,11 @@
 - {id: proto_vk_violet_storm, name: "Violet Storm", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: rare,
-   description: "Discard your [gold]Hand[/gold]. Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each card discarded.",
-   effects: [{op: varka, kind: violet_storm, target: random_enemy, base: 8}],
-   upgrade: {varka_base: 3}}
+   # Varka last pass (2026-10-12): no discard, 6 [8] per other card in the
+   # Hand. Was "Discard your hand. Deal 8 [11] ... for each card discarded."
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each other card in your [gold]Hand[/gold].",
+   effects: [{op: varka, kind: violet_storm, target: random_enemy, base: 6}],
+   upgrade: {varka_base: 2}}
 
 - {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
    authored_by: [claude],
@@ -3972,10 +3977,11 @@
 - {id: proto_vk_northwind_avatar, name: "Northwind Avatar", character: varka,
    authored_by: [claude],
    # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
+   # Varka last pass (2026-10-12), pick 1: the second hit 8 [12].
    cost: 2, type: attack, rarity: rare,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.",
    effects: [{op: damage, amount: 10, target: enemy},
-             {op: varka, kind: avatar_hit, base: 10, per: 2}],
+             {op: varka, kind: avatar_hit, base: 8, per: 2}],
    upgrade: {damage: 4, varka_base: 4}}
 
 - {id: proto_vk_dawn_winds_march, name: "Dawn Wind's March", character: varka,
@@ -3989,7 +3995,8 @@
 
 - {id: proto_vk_azure_devour, name: "Azure Devour", character: varka,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: rare, exhaust: true,
+   # Varka last pass (2026-10-12): costs 1, was 2.
+   cost: 1, type: attack, rarity: rare, exhaust: true,
    description: "Deal {ExtraDamage:diff()} damage for each [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy, applies_element: false,
               amount_formula: {base: 0, per: 4, count: current_oath}}],
@@ -4050,16 +4057,17 @@
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
-   # The Hydro paper (2026-10-10, review/active/varka-hydro-payoffs-2026-10-10.md):
-   # Hydro's Body Slam. Was a Skill, "Gain 4 [6] Block, plus 2 for each
-   # Hydro Oath".
+   # The Hydro paper (2026-10-10): Hydro's Body Slam, was a Skill. Varka
+   # last pass (2026-10-12): gains 6 [8] Block first. Provenance, "Varka
+   # last pass, 2026-10-12".
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy, applies_element: false,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: block, amount: 6},
+             {op: damage, target: enemy, applies_element: false,
               amount_formula: {base: 0, per: 2, count: hydro_oath,
                                plus: player_block}},
              {op: apply_aura, element: hydro, target: enemy}],
-   upgrade: {formula_per: 1}}
+   upgrade: {block: 2, formula_per: 1}}
 
 - {id: proto_vk_glacial_edict, name: "Glacial Edict", character: varka,
    authored_by: [claude],
@@ -4148,7 +4156,8 @@
    # The rebalance (sec.4, pick 5 at cost 1): Electro's payoff; replaces
    # Gust Ward.
    authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
+   # Varka last pass (2026-10-12): Retain, so it can wait for a full Hand.
+   cost: 1, type: attack, rarity: uncommon, retain: true,
    description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].",
    effects: [{op: varka, kind: storm_battery, target: all_enemies, per: 2}],
    upgrade: {varka_per: 1}}
@@ -4176,7 +4185,8 @@
 
 - {id: proto_vk_crosscurrent, name: "Crosscurrent", character: varka,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
+   # Varka last pass (2026-10-12): costs 0, was 1.
+   cost: 0, type: skill, rarity: uncommon,
    description: "[gold]Swirl[/gold] the enemy. This [gold]Swirl[/gold] pays your [gold]current element[/gold] twice.",
    effects: [{op: varka, kind: crosscurrent, target: enemy}],
    upgrade: {add: {op: draw, amount: 1}}}
@@ -4213,7 +4223,8 @@
 - {id: proto_vk_retaliating_tide, name: "Retaliating Tide", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the end of your turn, deal damage equal to your [gold]Block[/gold], up to your [gold]Hydro[/gold] [gold]Oath[/gold], to a random enemy.",
+   # Varka last pass (2026-10-12): the Hydro Oath cap is gone.
+   description: "At the end of your turn, deal damage equal to your [gold]Block[/gold] to a random enemy.",
    effects: [{op: apply_power, power: vk_retaliating_tide, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -4248,7 +4259,8 @@
 
 - {id: proto_vk_grand_masters_verdict, name: "Grand Master's Verdict", character: varka,
    authored_by: [claude],
-   cost: 3, type: attack, rarity: rare, exhaust: true,
+   # Varka last pass (2026-10-12): costs 2, was 3.
+   cost: 2, type: attack, rarity: rare, exhaust: true,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Double your [gold]Oath[/gold] of your [gold]current element[/gold].",
    effects: [{op: damage, amount: 15, target: enemy},
              {op: varka, kind: double_current_oath}],
@@ -4274,7 +4286,8 @@
 
 - {id: proto_vk_weathervane, name: "Weathervane", character: varka,
    authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
+   # Varka last pass (2026-10-12): costs 1, was 2.
+   cost: 1, type: power, rarity: rare,
    description: "At the start of your turn, you may make an element you have [gold]Oath[/gold] in your [gold]current element[/gold].",
    effects: [{op: apply_power, power: vk_weathervane, amount: 1, target: self}],
    upgrade: {innate: true}}
@@ -4312,10 +4325,11 @@
 - {id: proto_vk_charge_of_the_knights, name: "Charge of the Knights", character: varka,
    authored_by: [claude],
    # Combo pass sec.1 (2026-10-04): cost 2 to 1, 5 [6] to 5 [7].
+   # Varka last pass (2026-10-12): a floor of 8.
    cost: 1, type: attack, rarity: rare,
-   description: "Deal {ExtraDamage:diff()} damage for each [gold]Knight[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Knight[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy, applies_element: false,
-              amount_formula: {base: 0, per: 5, count: knights_played_this_combat}}],
+              amount_formula: {base: 8, per: 5, count: knights_played_this_combat}}],
    upgrade: {formula_per: 2}}
 
 - {id: proto_vk_the_order_answers, name: "The Order Answers", character: varka,
@@ -4379,12 +4393,13 @@
 
 - {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
    authored_by: [claude],
-   # Upgrade cost 1 to 0: confirmed by the main session, 2026-10-04.
-   # Varka payoff fix, 2026-10-08: adds 1 Vulnerable, landing before the
-   # doubling, so a clean enemy ends on 2.
+   # Upgrade cost 1 to 0 (2026-10-04). Payoff fix (2026-10-08): 1 Vulnerable;
+   # last pass (2026-10-12): 1 Weak too, both landing before the doubling, so
+   # a clean enemy ends on 2 of each. Provenance, "Varka last pass".
    cost: 1, type: skill, rarity: uncommon, retain: true,
-   description: "Apply [gold]Cryo[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
+   description: "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
+             {op: apply_power, power: weak, amount: 1, target: enemy},
              {op: apply_power, power: vulnerable, amount: 1, target: enemy},
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}

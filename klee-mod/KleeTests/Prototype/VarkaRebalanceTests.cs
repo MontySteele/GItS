@@ -136,7 +136,10 @@ public class VarkaRebalanceTests : IDisposable
         // The Hydro paper (2026-10-10): an Attack, 1, "Deal damage equal to
         // your Block, plus 2 [3] for each Hydro Oath. Apply Hydro to an
         // enemy." One CalculatedDamage folds the Block and the Oath slope.
+        // Varka last pass (2026-10-12): "Gain 6 [8] Block" first.
         var card = new ProtoVkTidalBulwark();
+        Assert.Equal(6m, Var(card, "Block"));
+        Assert.Equal(8m, Var(Upgraded<ProtoVkTidalBulwark>(), "Block"));
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(0m, Var(card, "CalculationBase"));
@@ -147,7 +150,9 @@ public class VarkaRebalanceTests : IDisposable
         var play = Calls("ProtoVkTidalBulwark", "OnPlay");
         Assert.Contains("DamageCmd.Attack", play);
         Assert.Contains("ElementalHit.ApplyOnly", play);
-        Assert.DoesNotContain(play, c => c.Contains("GainBlock"));
+        var gain = play.FindIndex(c => c.Contains("GainBlock"));
+        Assert.True(gain >= 0 && gain < play.IndexOf("DamageCmd.Attack"),
+                    string.Join(", ", play));
         Assert.Contains("(Deals {CalculatedDamage:diff()} damage)",
                         card.Localization!.Single(p => p.Item1 == "description").Item2);
     }
@@ -172,6 +177,8 @@ public class VarkaRebalanceTests : IDisposable
     {
         var battery = new ProtoVkStormBattery();
         Assert.Equal(1, battery.EnergyCost.Canonical);
+        // Varka last pass (2026-10-12): Retain.
+        Assert.Contains(CardKeyword.Retain, battery.CanonicalKeywords);
         Assert.Equal(CardRarity.Uncommon, battery.Rarity);
         Assert.Equal(TargetType.AllEnemies, battery.TargetType);
         Assert.Equal(2m, Var(battery, "VkPer"));

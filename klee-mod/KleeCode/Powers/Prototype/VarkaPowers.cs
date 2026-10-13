@@ -783,8 +783,8 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Retaliating Tide (element identities sec.4, in Unbroken Tide's place): "At
-/// the end of your turn, deal damage equal to your Block, up to your Hydro
-/// Oath, to a random enemy." After Oathbound Aegis (which pays at
+/// the end of your turn, deal damage equal to your Block to a random enemy."
+/// The Hydro Oath cap went in the Varka last pass (2026-10-12). After Oathbound Aegis (which pays at
 /// <c>BeforeSideTurnEndEarly</c>), so its Block counts; element-less and
 /// unpowered, a Power's damage, like Cycle of Seasons'; once per stack. The
 /// sim's twin is <c>varka_oath.turn_end</c>.
@@ -796,8 +796,7 @@ public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
         ("title", "Retaliating Tide"),
         ("description",
             "At the end of your turn, deal damage equal to your "
-          + "[gold]Block[/gold], up to your [gold]Hydro[/gold] [gold]Oath[/gold], to a "
-          + "random enemy."),
+          + "[gold]Block[/gold] to a random enemy."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -805,8 +804,7 @@ public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>One stack's damage. PURE.</summary>
-    public static int DamageFor(int block, int hydroOath) =>
-        System.Math.Max(0, System.Math.Min(block, hydroOath));
+    public static int DamageFor(int block) => System.Math.Max(0, block);
 
     public override async Task BeforeSideTurnEnd(
         PlayerChoiceContext choiceContext, CombatSide side,
@@ -818,8 +816,7 @@ public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
         if (player == null || combat == null) return;
         for (var i = 0; i < Amount; i++)
         {
-            var damage = DamageFor(Owner.Block,
-                                   VarkaOath.Count(Owner, Element.Hydro));
+            var damage = DamageFor(Owner.Block);
             var living = combat.HittableEnemies.Where(e => e.IsAlive).ToList();
             if (damage <= 0 || living.Count == 0) return;
             Flash();

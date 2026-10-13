@@ -7919,6 +7919,51 @@ sound workable to me - Dandelion Gale could be the Replace version.").
   `PaysTwice` window around the hit). Witnessed by
   `tools/lint_handwritten_parity.ANCIENT_WITNESS`.
 
+## Varka last pass, 2026-10-12
+
+`review/active/varka-last-pass-2026-10-12.md`, ruled 2026-10-12 ([USER]: "On
+Varka - agreed with all defaults on both picks!"). One trim of an always-taken
+Rare (pick 1) and twelve floors for always-skipped cards (pick 2). Each card
+keeps its old upgrade unless the paper gave one.
+
+- `proto_vk_northwind_avatar`: the second hit 10 [14] to 8 [12], plus 2 per
+  current Oath. The Anemo hit stays 10 [14].
+- `proto_vk_deep_freeze`: applies Cryo, 1 Weak and 1 Vulnerable, then
+  doubles both, so a clean enemy ends on 2 of each (was Cryo and 1
+  Vulnerable only). Cost 1 [0], Retain, unchanged.
+- `proto_vk_crosscurrent`: cost 0 (was 1). Upgrade still draws 1.
+- `proto_vk_tidal_bulwark`: "Gain 6 [8] Block" first; the hit then counts it.
+  The per-Hydro-Oath slope keeps its 2 [3]. The in-combat damage preview adds
+  the card's printed Block (`plus_block_calc_rider`; Dexterity is not
+  previewed).
+- `proto_vk_knights_roll_call`: "Choose 1 of 3 random Knights to add into
+  your Hand. It [is upgraded and] costs 0 this turn." The upgrade key is
+  `upgraded_knight` (was `choose_knight`, a pick from the full grid). C#
+  `VarkaRules.RollCall` shares `VarkaRules.ChooseKnight` with The Order
+  Answers (three distinct pool Knights on the choose-a-card screen); sim
+  `varka_oath.op_add_knight` picks by `order_answers_pick`. Favonius Duty
+  Roster keeps the random add (`VarkaRules.AddKnight`); the grid prompt
+  `KLEEMOD-CHOOSE_KNIGHT` is gone.
+- `proto_vk_violet_storm`: "Deal 6 [8] Electro damage to a random enemy for
+  each other card in your Hand." No discard (was: discard the hand, 8 [11]
+  per card discarded). The sim's discard sequencer
+  (`tools/varka_expansion_sim._electro_pick`) now orders only Short Circuit,
+  and plays Storm Battery or Violet Storm before its discards.
+- `proto_vk_storm_battery`: gains Retain.
+- `proto_vk_charge_of_the_knights`: "Deal 8 damage, plus 5 [7] for each
+  Knight you played this combat." (`amount_formula.base` 0 to 8).
+- `proto_vk_azure_devour`: cost 1 (was 2).
+- `proto_vk_grand_masters_verdict`: cost 2 (was 3).
+- `proto_vk_boreas_unbound`: cost 2 (was 3).
+- `proto_vk_weathervane`: cost 1 (was 2).
+- `proto_vk_retaliating_tide`: "At the end of your turn, deal damage equal to
+  your Block to a random enemy." The Hydro Oath cap is gone in both engines
+  (`RetaliatingTidePower.DamageFor(block)`; sim `varka_oath.turn_end`).
+
+Text follows the card text pass's house rules (`[gold]Hand[/gold]`,
+"additional"); `Hand` joins the golded base-game zones in
+`tier0/tests/test_arm_keyword_tips.py`. Untested in game until a deploy.
+
 ## Furina: Encore! is a free act, 2026-10-12
 
 [USER]: "Agreed on Encore! Let's otherwise leave her alone for now"

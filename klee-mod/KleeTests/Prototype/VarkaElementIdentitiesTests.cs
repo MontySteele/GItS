@@ -167,18 +167,18 @@ public class VarkaElementIdentitiesTests : IDisposable
     }
 
     [Fact]
-    public void Violet_storm_discards_the_hand_then_hits_a_random_enemy_per_card()
+    public void Violet_storm_hits_a_random_enemy_per_other_card_and_keeps_the_hand()
     {
+        // Varka last pass (2026-10-12): 6 [8], no discard.
         var storm = new ProtoVkVioletStorm();
         Assert.Equal(CardType.Attack, storm.Type);
         Assert.Equal(CardRarity.Rare, storm.Rarity);
         Assert.Equal(1, storm.EnergyCost.Canonical);
-        Assert.Equal(8m, Var(storm, "VkBase"));
-        Assert.Equal(11m, Var(Upgraded<ProtoVkVioletStorm>(), "VkBase"));
+        Assert.Equal(6m, Var(storm, "VkBase"));
+        Assert.Equal(8m, Var(Upgraded<ProtoVkVioletStorm>(), "VkBase"));
         var body = Il.CallSequence(Il.Method("VarkaCards", "VioletStorm")).ToList();
-        var discard = body.IndexOf("CardCmd.Discard");
-        var hit = body.IndexOf("VarkaCards.ElementHit");
-        Assert.True(discard >= 0 && hit > discard, string.Join(", ", body));
+        Assert.DoesNotContain("CardCmd.Discard", body);
+        Assert.Contains("VarkaCards.ElementHit", body);
         Assert.Contains("Rng.NextItem", Calls("VarkaCards", "VioletStorm"));
     }
 
@@ -193,15 +193,15 @@ public class VarkaElementIdentitiesTests : IDisposable
     // ---- sec.4: Retaliating Tide ------------------------------------------------
 
     [Fact]
-    public void Retaliating_tide_deals_its_block_capped_at_hydro_oath()
+    public void Retaliating_tide_deals_its_block_uncapped()
     {
-        Assert.Equal(4, RetaliatingTidePower.DamageFor(10, 4));
-        Assert.Equal(3, RetaliatingTidePower.DamageFor(3, 7));
-        Assert.Equal(0, RetaliatingTidePower.DamageFor(0, 5));
-        Assert.Equal(0, RetaliatingTidePower.DamageFor(9, 0));
+        // Varka last pass (2026-10-12): the Hydro Oath cap is gone.
+        Assert.Equal(10, RetaliatingTidePower.DamageFor(10));
+        Assert.Equal(0, RetaliatingTidePower.DamageFor(0));
+        Assert.Equal(0, RetaliatingTidePower.DamageFor(-3));
         var end = Calls("RetaliatingTidePower", "BeforeSideTurnEnd");
         Assert.Contains("ElementalHit.DealUnelemented", end);
-        Assert.Contains("VarkaOath.Count", end);
+        Assert.DoesNotContain("VarkaOath.Count", end);
         // The Aegis pays EARLY, so the Tide reads its Block.
         Assert.Contains("CreatureCmd.GainBlock",
                         Calls("OathboundAegisPower", "BeforeSideTurnEndEarly"));

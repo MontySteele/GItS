@@ -58,7 +58,7 @@ public sealed class ProtoVkNorthwindAvatar : CustomCardModel, IElementalCard, IC
         new List<DynamicVar>
         {
             new DamageVar(10m, ValueProp.Move),
-            new DynamicVar("VkBase", 10m),
+            new DynamicVar("VkBase", 8m),
             new DynamicVar("VkPer", 2m)
         };
 

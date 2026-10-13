@@ -51,13 +51,13 @@ public sealed class ProtoVkChargeOfTheKnights : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charge of the Knights"),
-        ("description", "Deal {ExtraDamage:diff()} damage for each [gold]Knight[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each [gold]Knight[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(0m),
+            new CalculationBaseVar(8m),
             new ExtraDamageVar(5m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => VarkaOath.KnightsInCombat(card.Owner.Creature))
         };

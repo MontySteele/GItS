@@ -1426,17 +1426,18 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = hit is not None
             if hit:
                 hit["upgraded"] = True
-        elif key == "choose_knight":
-            # VARKA's Knights' Roll Call: upgraded, the player picks the
-            # Knight. Boolean, only True is a ruling.
+        elif key == "upgraded_knight":
+            # VARKA's Knights' Roll Call (Varka last pass, 2026-10-12):
+            # upgraded, the chosen Knight arrives upgraded. Boolean, only
+            # True is a ruling.
             if val is not True:
                 raise ValueError(
-                    f"choose_knight delta on {base_id!r} must be true")
+                    f"upgraded_knight delta on {base_id!r} must be true")
             hit = next((fx for fx in top if fx.get("op") == "add_knight"),
                        None)
             ok = hit is not None
             if hit:
-                hit["choose"] = True
+                hit["upgraded"] = True
         elif key == "upgraded_power":
             # Power cost sweep, 2026-09-30 (The Long Game, Sworn Brotherhood):
             # upgraded, the card installs a DIFFERENT power, named by the

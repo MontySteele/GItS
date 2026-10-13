@@ -246,10 +246,8 @@ public static class KleeMod
                     Powers.FurinaCards.TutorPromptText,
                 [Powers.FurinaCards.BowPromptKey] =
                     Powers.FurinaCards.BowPromptText,
-                // VARKA (the Oath rework): Knights' Roll Call+'s grid and
-                // Change of Guard's, on the same terms.
-                [Powers.VarkaRules.KnightPromptKey] =
-                    Powers.VarkaRules.KnightPromptText,
+                // VARKA (the Oath rework): Change of Guard's grid, on the
+                // same terms.
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
             });
