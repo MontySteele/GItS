@@ -34,6 +34,32 @@ def test_the_runtime_set_is_not_vacuous():
         assert key in keys, key
 
 
+def _planned_card_keys(plan: Path = ROOT / "art" / "plan.tsv") -> set[str]:
+    """Stems of every EFFECTIVE card out-path in art/plan.tsv (auto rows and
+    shortlist rank 1) -- the tracked ledger of card art, readable in CI."""
+    out = set()
+    for line in plan.read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        c = line.rstrip("\r\n").split("\t")
+        if len(c) > 7 and "/cards/" in c[1] and (c[6] == "auto" or c[7] == "1"):
+            out.add(Path(c[1]).stem)
+    return out
+
+
+def test_every_shipped_key_has_planned_art_or_is_known_missing():
+    """THE CI HALF of the art bill (2026-10-12). The pixel check below skips
+    on any checkout without ImageGen -- every CI runner -- so a card could
+    merge with no art and no excuse and nothing would say so until it drew
+    blank in a game. Sting and Ward did exactly that (on KNOWN_MISSING, which
+    nobody reads). art/plan.tsv is tracked: every key the mod asks for must
+    have an effective plan row, or be named on KNOWN_MISSING (which
+    deploy_round now prints on every deploy)."""
+    unplanned = sca.shipped_keys() - _planned_card_keys() \
+        - set(art_coverage.KNOWN_MISSING)
+    assert not unplanned, sorted(unplanned)
+
+
 def test_known_missing_names_only_live_keys():
     """An entry for a card that was cut is a stale excuse; delete it."""
     stale = set(art_coverage.KNOWN_MISSING) - sca.shipped_keys()

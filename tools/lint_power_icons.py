@@ -69,63 +69,11 @@ ART_PLAN = REPO / "art" / "plan.tsv"
 # TO CLOSE ONE: make the art, add the case, DELETE the row here. Leaving the
 # row behind fails this lint.
 ICON_DEBT: dict[str, str] = {
-    # Furina's block gap (review/records/furina-drain-line-round-2026-10-09.md
-    # pick 2, ruled 2026-10-09): one new Power; its icon waits on the art pass.
-    "TheMasqueradePower":
-        "Furina block-gap Power; icon waits on the art pass, renders the placeholder",
-    # Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md,
-    # ruled 2026-10-11): two new Powers; their icons wait on the art pass.
-    "LeadingLadyPower":
-        "Furina diversity-pass Power; icon waits on the art pass, renders the placeholder",
-    "FullHousePower":
-        "Furina diversity-pass Power; icon waits on the art pass, renders the placeholder",
-    # Furina's pool to 75 (review/active/furina-pool-growth-2026-10-09.md):
-    # eleven new Powers and Freminet's badges; their icons wait on the art
-    # pass.
-    "CrescendoPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "EnsembleCastPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "GrandEntrancePower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "HighStakesPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "HymnOfRenewalPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "PneumaTidesPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "PrimaDonnaPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "ReginaOfAllWatersPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "ShowstopperPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "StandingRoomOnlyPower":
-        "Furina pool-75 Power; icon waits on the art pass, renders the placeholder",
-    "FreminetBadgePower":
-        "Furina pool-75 guest badge; the guest's face waits on the art pass",
-    "FreminetUpgradedBadgePower":
-        "Furina pool-75 guest badge; the guest's face waits on the art pass",
-    # Furina's pool to 39 (review/active/furina-pool-40-2026-10-05.md):
-    # five new Powers; their icons come with the art pass.
-    "OusiaSurgePower":
-        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
-    "FiveCenturyActPower":
-        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
-    "FountainOfLucinePower":
-        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
-    "CriticsDarlingPower":
-        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
-    "BisPower":
-        "Furina pool-40 Power; icon waits on the art pass, renders the placeholder",
-    "AncientSeaAuthorityPower":
-        "Fontaine ancient payoff; no icon planned, renders the placeholder",
-    "CannonFireSupportPower":
-        "Fontaine companion payoff; no icon planned, renders the placeholder",
-    "MasqueRedDeathPower":
-        "Bond of Life carrier; the end-of-turn docket titles it, the badge does not",
-    "NightVigilPower":
-        "Fontaine ancient payoff; no icon planned, renders the placeholder",
+    # Empty since 2026-10-12: the twenty-four rows (Furina's block gap,
+    # diversity pass, pool to 40 and pool to 75, Freminet's badges and the
+    # Fontaine payoffs) were closed by the missing-art census -- three new
+    # icons, Freminet's face, and a shipped-sigil borrow for the rest
+    # (KleePowerIcons.cs, "THE ICON DEBT CLOSED").
 }
 
 # THE AURA CONCATENATION'S COVERAGE LIST (shape 2). `Element` -> the
