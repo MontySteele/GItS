@@ -2163,9 +2163,9 @@
    authored_by: [claude],
    # The jellyfish build (2026-10-12): cost 0, with its Plan line.
    cost: 0, type: skill, rarity: token, ethereal: true, exhaust: true,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold].",
    effects: [{op: block, amount: 4}],
-   plan: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   plan: [{op: apply_power, power: weak, amount: 1, target: front_enemy}],
    # 6 Block / Plan 2 Weak.
    upgrade: {block: 2, plan_power_amount: 1}}
 
