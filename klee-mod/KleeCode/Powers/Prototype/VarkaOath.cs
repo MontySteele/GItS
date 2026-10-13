@@ -1029,6 +1029,48 @@ public static class VarkaOath
     public static string SwitchWords(Element element) =>
         $"\n(Makes {element} current)";
 
+    /// <summary>
+    /// WILDFIRE OATH'S PREVIEW (BACKLOG: "Wildfire Oath's damage has no
+    /// preview on the card that applies Pyro; a seat mis-added a lethal by
+    /// 1"). A card of his that applies Pyro ends its face in
+    /// <c>{InCombat:{VarkaWildfire}|}</c>, the switch line's seam, and the
+    /// line prints what each Pyro application of the play deals while
+    /// <see cref="WildfireOathPower"/> is up: his Pyro Oath after this play's
+    /// own credit of 1 (<see cref="NoteApplication"/> pays Wildfire after the
+    /// credit), plus Oath Unto Death's extra when Pyro is or becomes his
+    /// current element, times the stacks. Empty otherwise.
+    /// </summary>
+    public static string WildfireLine(CardModel? card)
+    {
+        if (card is not { IsMutable: true }) return "";
+        Creature? owner;
+        try
+        {
+            owner = card.Owner?.Creature;
+        }
+        catch (System.Exception)
+        {
+            return "";
+        }
+        if (owner?.CombatState == null || !Live(owner)) return "";
+        var stacks = owner.Powers.OfType<WildfireOathPower>()
+            .Sum(p => (int)p.Amount);
+        if (stacks <= 0) return "";
+        var gain = 1;
+        if (Current(owner) == Element.Pyro || WouldSwitchTo(card, Element.Pyro))
+        {
+            gain += owner.Powers.OfType<OathUntoDeathPower>()
+                .Sum(p => (int)p.Amount);
+        }
+        return WildfireWords(WildfireOathPower.DamageFor(
+            Count(owner, Element.Pyro) + gain, stacks));
+    }
+
+    /// <summary>The line itself, "(Wildfire Oath deals 5)", or empty for 0.
+    /// PURE.</summary>
+    public static string WildfireWords(int damage) =>
+        damage > 0 ? $"\n(Wildfire Oath deals {damage})" : "";
+
     /// <summary>The payout sentence for <paramref name="element"/>, the one
     /// the badge and the current-element tip print. PURE.</summary>
     public static string PayoutSentence(Element element) => element switch

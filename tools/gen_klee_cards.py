@@ -15867,6 +15867,38 @@ def stage_spend_hits_call(card: dict) -> str | None:
             f"{int(spends[0]['amount'])})")
 
 
+#: BACKLOG (Furina: a Spend card silently plays its plain side): the token
+#: of a Spend mode's in-combat "(Not enough Fanfare)" line.
+STAGE_SPEND_SHORT_TOKEN = "StageSpendShort"
+
+
+def stage_spend_short_call(card: dict) -> str | None:
+    """The C# that fills a Spend mode's in-combat line, or None.
+
+    A `choose_one` whose mode is headed by a `stage_spend` is not offered
+    that mode when her Fanfare is short (`ModalChoice.SelectAffordableMode`),
+    so the plain mode played with no word said. The card now says it in
+    hand, "(Not enough Fanfare)", as a Drain mode says "(Not enough HP)".
+    Behaviour unchanged. The price is the gate's (`stage_spend_amount_cs`).
+    """
+    heads = []
+    for fx in card.get("effects") or []:
+        if fx.get("op") != "choose_one":
+            continue
+        for mode in fx.get("modes") or []:
+            body = mode.get("effects") or []
+            if body and body[0].get("op") == "stage_spend":
+                heads.append(body[0])
+    if not heads:
+        return None
+    if len({int(h.get("amount", 1)) for h in heads}) != 1:
+        raise ValueError(f"{card['id']}: a Spend mode preview reads one "
+                         "Spend price")
+    amount = (stage_spend_amount_cs(card, heads[0])
+              or str(int(heads[0].get("amount", 1))))
+    return f"FurinaStageFacePreview.SpendShort(this, {amount})"
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
     args = []
@@ -15874,7 +15906,9 @@ def stage_face_args(card: dict) -> list[tuple[str, str]]:
                         (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
                         (STAGE_REPAY_TOKEN, stage_repay_call(card)),
                         (STAGE_SPEND_HITS_TOKEN,
-                         stage_spend_hits_call(card))):
+                         stage_spend_hits_call(card)),
+                        (STAGE_SPEND_SHORT_TOKEN,
+                         stage_spend_short_call(card))):
         if call:
             args.append((token, call))
     return args
@@ -15910,6 +15944,46 @@ def varka_switch_face_arg(card: dict, profile: "CharacterProfile"
         return None
     return (VARKA_SWITCH_TOKEN,
             f"VarkaOath.SwitchLine(this, {ELEMENT_CS[element]})")
+
+
+#: The token of a Pyro-applying card's in-combat Wildfire Oath line
+#: (`VarkaOath.WildfireLine`).
+VARKA_WILDFIRE_TOKEN = "VarkaWildfire"
+
+
+def applies_pyro(card: dict) -> bool:
+    """Does this row's play apply Pyro? An `apply_aura` of Pyro, a `varka`
+    kind whose hit carries it (`VARKA_KIND_ELEMENTS`), or damage that applies
+    the row's own element when that element is Pyro."""
+    for effect in _effects_everywhere(card):
+        if effect.get("op") == "apply_aura" and effect.get("element") == "pyro":
+            return True
+        if (effect.get("op") == "varka"
+                and "pyro" in VARKA_KIND_ELEMENTS.get(effect.get("kind"), ())):
+            return True
+        if (effect.get("op") == "damage" and effect.get("applies_element")
+                and card.get("element") == "pyro"):
+            return True
+    return False
+
+
+def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
+                            ) -> tuple[str, str] | None:
+    """`(token, C#)` for a Pyro-applying card's "(Wildfire Oath deals N)"
+    line, or None.
+
+    BACKLOG: "Wildfire Oath's damage has no preview on the card that applies
+    Pyro; a seat mis-added a lethal by 1." Every Varka row that applies Pyro,
+    and every shared Companion row that does (it is his card in his deck),
+    ends its face in `{InCombat:{VarkaWildfire}|}`, the switch line's seam;
+    the line prints only while a live Varka holds Wildfire Oath.
+    """
+    if profile.character_id != "varka" and not (
+            is_companion(card) and card.get("character") != "varka"):
+        return None
+    if not applies_pyro(card):
+        return None
+    return (VARKA_WILDFIRE_TOKEN, "VarkaOath.WildfireLine(this)")
 
 
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
@@ -16228,6 +16302,9 @@ def emit(
     switch_arg = varka_switch_face_arg(card, profile)
     if switch_arg is not None:
         face_args.append(switch_arg)
+    wildfire_arg = varka_wildfire_face_arg(card, profile)
+    if wildfire_arg is not None:
+        face_args.append(wildfire_arg)
     desc = stage_lines_face(desc, face_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
@@ -17237,6 +17314,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "The element this card makes current, on its in-combat line\n"
             "    /// (`VarkaOath.SwitchLine`)."
             if tokens == [VARKA_SWITCH_TOKEN] else
+            "This card's in-combat Oath lines\n"
+            "    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`)."
+            if set(tokens) <= {VARKA_SWITCH_TOKEN, VARKA_WILDFIRE_TOKEN} else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'

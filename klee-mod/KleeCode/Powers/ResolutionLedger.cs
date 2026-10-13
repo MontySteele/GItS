@@ -132,7 +132,8 @@ public static class ResolutionLedger
                                       bool OnPlayer = false,
                                       string Source = "",
                                       bool Self = false,
-                                      long Seq = 0);
+                                      long Seq = 0,
+                                      string By = "");
 
     /// <summary>A power the card put on an enemy, and by how much
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
@@ -290,6 +291,33 @@ public static class ResolutionLedger
     /// next one starts, so one open row is the whole of the bookkeeping --
     /// the posture `KokomiPlan`'s Plan receipt takes.</summary>
     private static Resolved? _open;
+
+    /// <summary>BACKLOG (the Varka screen): the Power whose damage the hits
+    /// filed now belong to (<see cref="HitsBy"/>), or empty.</summary>
+    private static string _hitsBy = string.Empty;
+
+    /// <summary>
+    /// "Cycle of Seasons' damage has no line of its own on the played page."
+    /// A Power that deals damage inside a play (its hit lands while the card
+    /// is resolving) opens this scope round the hit, and the hit is filed
+    /// under the card with the Power's name (<see cref="Hit.By"/>), so the
+    /// page labels it rather than numbering it as the card's own.
+    /// </summary>
+    public static System.IDisposable HitsBy(string power) =>
+        new HitsByScope(power);
+
+    private sealed class HitsByScope : System.IDisposable
+    {
+        private readonly string _was;
+
+        public HitsByScope(string power)
+        {
+            _was = _hitsBy;
+            _hitsBy = power ?? string.Empty;
+        }
+
+        public void Dispose() => _hitsBy = _was;
+    }
 
     /// <summary>Where the player stopped watching, or negative for "no mark
     /// was taken this turn". <see cref="ReactionLog.MarkPlayerTurnEnd"/>'s
@@ -515,7 +543,7 @@ public static class ResolutionLedger
                                OnPlayer: onPlayer,
                                Source: onPlayer && !self
                                    ? Named(dealer) : string.Empty,
-                               Self: self, Seq: ++_seq));
+                               Self: self, Seq: ++_seq, By: _hitsBy));
     }
 
     /// <summary>
@@ -753,6 +781,7 @@ public static class ResolutionLedger
                     ["source"] = hit.Source,
                     ["self"] = hit.Self,
                     ["seq"] = hit.Seq,
+                    ["by"] = hit.By,
                 }),
             ["applied"] = row.Applied.ConvertAll(a =>
                 new Dictionary<string, object?>

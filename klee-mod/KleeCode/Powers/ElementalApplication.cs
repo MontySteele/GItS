@@ -279,6 +279,16 @@ public sealed class KleeElementalHooks : AbstractModel
         // here and the reaction AuraPower reads later cannot be different
         // elements. Identical to the old inline read with no rider standing.
         var element = AuraCmd.ElementOfPlay(cardSource, dealer);
+        // BACKLOG (the Varka screen): an Anemo HIT is a Swirl attempt too, as
+        // `ElementalHit.ApplyOnly`'s is. Read here, before the hit's reaction
+        // resolves (`AuraPower.AfterDamageReceived`), so the aura it found is
+        // still standing. Sayu's random Swirl on a bare enemy now says the
+        // Swirl did nothing.
+        if (element == Element.Anemo)
+        {
+            ResolutionLedger.NoteAnemoApplication(
+                onAura: AuraCmd.Find(target) != null);
+        }
         if (!element.LeavesAura()) return;   // None, and trigger-only Anemo/Geo
 
         // VARKA (the Oath rework, sec.3): a card's hit that applies an

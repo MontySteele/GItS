@@ -401,8 +401,18 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card)
     {
         if (!KokomiCompanionPlan.OnKokomi(card)) return inherited;
-        return With(inherited, CompanionPlanKey, CompanionPlanText);
+        return With(inherited, CompanionPlanKey,
+            card is Prototype.Generated.ProtoMcAlbedoDustOfPurification
+                ? CompanionPlanText + " " + DustPlanText
+                : CompanionPlanText);
     }
+
+    /// <summary>BACKLOG (Albedo -- Dust of Purification): planned, its exhaust
+    /// reads the Draw Pile, as Sea Glass Harvest's Plan does
+    /// (<c>KleeStatusPackage.ExhaustStatusesGrowLargest</c>).</summary>
+    internal const string DustPlanText =
+        "Planned, it reads your [gold]Draw Pile[/gold] instead of your "
+      + "[gold]Hand[/gold].";
 
     /// <summary><see cref="ForCompanionPlan"/>'s sentence. INTERNAL, as
     /// <see cref="KnightTipText"/> is: every public string constant here is a

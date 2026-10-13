@@ -2034,15 +2034,17 @@ def transform_statuses_into(state: CombatState, card_id: str) -> int:
     return n
 
 
-def exhaust_statuses(state: CombatState) -> int:
+def exhaust_statuses(state: CombatState, pile: Optional[list] = None) -> int:
     """"Exhaust every status in your hand." Returns how many went; curses
     stay. Kitchen Alchemy's (reworked 2026-10-02) and Dust of Purification's
-    exhaust. `KleeStatusPackage.ExhaustStatuses`."""
+    exhaust. `pile` is the pile read, the hand by default.
+    `KleeStatusPackage.ExhaustStatuses`."""
     from tier0.engine import effects, refpowers     # late import: cycle
 
-    victims = [c for c in state.player.hand if is_status(c)]
+    held_in = state.player.hand if pile is None else pile
+    victims = [c for c in held_in if is_status(c)]
     for held in victims:
-        if effects.remove_instance(state.player.hand, held):
+        if effects.remove_instance(held_in, held):
             refpowers.exhaust_card(state, held)
     return len(victims)
 
@@ -2053,8 +2055,14 @@ def exhaust_statuses_grow_largest(state: CombatState, per: int,
     Your largest Bomb grows by 6 [8] for each. Draw 1 card for each." One
     growth of `per` times the count, after the exhausts; no Bomb and the
     exhausts still happen. Then the draw, `draw_each` per status exhausted
-    (the 2026-10-11 Companion pass), after the growth as printed."""
-    n = exhaust_statuses(state)
+    (the 2026-10-11 Companion pass), after the growth as printed.
+
+    WRITTEN BY KOKOMI AS A PLAN it reads the DRAW PILE (BACKLOG, Albedo --
+    Dust of Purification): the carry-out comes before the turn's draw, so the
+    hand it was written for is gone. Sea Glass Harvest's fix (Kokomi round-1
+    fixes, 2026-10-12), `state.kk_carrying_out` the window."""
+    n = exhaust_statuses(
+        state, state.player.draw_pile if state.kk_carrying_out else None)
     if n and per > 0:
         grow_largest(state, int(per) * n)
     state.emit("ko_dust_of_purification", exhausted=n, per=int(per))

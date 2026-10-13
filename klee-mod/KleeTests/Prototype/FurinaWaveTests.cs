@@ -121,4 +121,20 @@ public class FurinaWaveTests
         Assert.Equal("", FurinaStageFacePreview.SpendUpToHits(
             new ProtoFsCrashingWaves(), 16));
     }
+
+    // ---- A Spend mode she cannot pay (BACKLOG) -------------------------------------
+
+    [Fact]
+    public void A_spend_mode_says_when_fanfare_is_short()
+    {
+        // The chooser drops a Spend mode she cannot pay and the plain side
+        // plays; the face says so in hand. Off a combat it adds nothing.
+        Assert.Equal("\n(Not enough Fanfare)",
+                     FurinaStageFacePreview.NotEnoughFanfare);
+        Assert.Equal("", FurinaStageFacePreview.SpendShort(
+            new ProtoFsBubbleAria(), 3));
+        Assert.Contains(Il.Calls(Il.Method("FurinaStageFacePreview",
+                                           "SpendShort")),
+                        c => c.Contains("FurinaStage.CanSpend"));
+    }
 }

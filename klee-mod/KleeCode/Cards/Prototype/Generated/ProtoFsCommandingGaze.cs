@@ -45,8 +45,17 @@ public sealed class ProtoFsCommandingGaze : CustomCardModel, ICharacterCard, ISt
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Commanding Gaze"),
-        ("description", "Apply 2 [gold]Vulnerable[/gold]. [gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} [gold]Vulnerable[/gold] and 2 [gold]Weak[/gold] instead."),
+        ("description", "Apply 2 [gold]Vulnerable[/gold]. [gold]Spend[/gold] 4: apply {IfUpgraded:show:3|2} [gold]Vulnerable[/gold] and 2 [gold]Weak[/gold] instead.{InCombat:{StageSpendShort}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageSpendShort", FurinaStageFacePreview.SpendShort(this, 4));
+    }
 
     // EB-184: what each mode does about AIMING, in sheet order.
     // The card's own TargetType is fixed before a mode is chosen (the

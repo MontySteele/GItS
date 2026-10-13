@@ -40,11 +40,14 @@ public static class KleeStatusPackage
     /// <summary>Is <paramref name="card"/> her Confiscated? PURE.</summary>
     public static bool IsConfiscated(CardModel? card) => card is Confiscated;
 
-    private static List<CardModel> HandStatuses(Player? player)
+    private static List<CardModel> HandStatuses(Player? player) =>
+        PileStatuses(player, PileType.Hand);
+
+    private static List<CardModel> PileStatuses(Player? player, PileType type)
     {
         if (player == null) return new List<CardModel>();
-        var hand = PileType.Hand.GetPile(player);
-        return hand?.Cards.Where(IsStatus).ToList() ?? new List<CardModel>();
+        var pile = type.GetPile(player);
+        return pile?.Cards.Where(IsStatus).ToList() ?? new List<CardModel>();
     }
 
     /// <summary>How many statuses are in the hand of
@@ -59,9 +62,10 @@ public static class KleeStatusPackage
     /// the card still plays. Dust of Purification's exhaust, shared. Sim
     /// twin: <c>klee_overhaul.exhaust_statuses</c>.</summary>
     public static async Task<int> ExhaustStatuses(
-        PlayerChoiceContext choiceContext, Player player)
+        PlayerChoiceContext choiceContext, Player player,
+        PileType pile = PileType.Hand)
     {
-        var victims = HandStatuses(player);
+        var victims = PileStatuses(player, pile);
         foreach (var card in victims)
         {
             await CardCmd.Exhaust(choiceContext, card);
@@ -102,12 +106,18 @@ public static class KleeStatusPackage
     /// times the count; with no Bomb out the exhausts still happen. Then the
     /// draw, <paramref name="drawEach"/> per status exhausted (the 2026-10-11
     /// Companion pass). Sim twin:
-    /// <c>klee_overhaul.exhaust_statuses_grow_largest</c>.</summary>
+    /// <c>klee_overhaul.exhaust_statuses_grow_largest</c>.
+    /// <para>WRITTEN BY KOKOMI AS A PLAN it reads the DRAW PILE (BACKLOG,
+    /// Albedo -- Dust of Purification): the carry-out comes before the turn's
+    /// draw, so the hand it was written for is gone. Sea Glass Harvest's fix
+    /// (Kokomi round-1 fixes, 2026-10-12);
+    /// <see cref="KokomiPlan.IsCarryingOut"/> is the window.</para></summary>
     public static async Task<int> ExhaustStatusesGrowLargest(
         PlayerChoiceContext choiceContext, Player player, int per,
         int drawEach = 0)
     {
-        var n = await ExhaustStatuses(choiceContext, player);
+        var n = await ExhaustStatuses(choiceContext, player,
+            KokomiPlan.IsCarryingOut(player) ? PileType.Draw : PileType.Hand);
         if (n > 0 && per > 0 && player.Creature != null)
         {
             ProtoBombPower.GrowLargest(player.Creature, per * n);

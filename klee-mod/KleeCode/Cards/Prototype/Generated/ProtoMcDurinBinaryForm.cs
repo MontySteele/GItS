@@ -59,7 +59,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Durin — Binary Form"),
-        ("description", "Choose one, then draw 1 card. [gold]White[/gold]: Deal {IfUpgraded:show:8|6} [gold]Pyro[/gold] damage to ALL enemies. [gold]Dark[/gold]: Deal {IfUpgraded:show:5|4} [gold]Pyro[/gold] damage to an enemy 3 times.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Choose one, then draw 1 card. [gold]White[/gold]: Deal {IfUpgraded:show:8|6} [gold]Pyro[/gold] damage to ALL enemies. [gold]Dark[/gold]: Deal {IfUpgraded:show:5|4} [gold]Pyro[/gold] damage to an enemy 3 times.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -70,13 +70,14 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
 
-    /// <summary>The element this card makes current, on its in-combat line
-    /// (`VarkaOath.SwitchLine`).</summary>
+    /// <summary>This card's in-combat Oath lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`).</summary>
     protected override void AddExtraArgsToDescription(
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
+        description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
 
     // EB-184: what each mode does about AIMING, in sheet order.

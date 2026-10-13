@@ -1452,7 +1452,10 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                  "self": bool(h.get("self")),
                  # 2026-10-11: the ledger's play-order stamp, shared with
                  # `applied`; None on an older mod (`_seq` below).
-                 "seq": _seq(h)}
+                 "seq": _seq(h),
+                 # BACKLOG (the Varka screen): the Power whose damage this
+                 # was (Cycle of Seasons), "" for the card's own hit.
+                 "by": _text(h.get("by"))}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
         # 2026-09-25 evening: who a random summon inside the card rolled, in

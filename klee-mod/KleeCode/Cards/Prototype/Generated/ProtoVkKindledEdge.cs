@@ -53,16 +53,17 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kindled Edge"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
 
-    /// <summary>The element this card makes current, on its in-combat line
-    /// (`VarkaOath.SwitchLine`).</summary>
+    /// <summary>This card's in-combat Oath lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`).</summary>
     protected override void AddExtraArgsToDescription(
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
+        description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

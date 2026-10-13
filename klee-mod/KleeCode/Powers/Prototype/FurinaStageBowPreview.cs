@@ -135,6 +135,20 @@ public static class FurinaStageFacePreview
     /// </summary>
     public const string NotEnoughHp = "\n(Not enough HP)";
 
+    /// <summary>BACKLOG (Furina: a Spend card silently plays its plain
+    /// side): "(Not enough Fanfare)" while a Spend mode's price of
+    /// <paramref name="amount"/> cannot be paid, so the card says in hand
+    /// that the plain side will play. The gate is
+    /// <see cref="FurinaStage.CanSpend"/>, the one the chooser asks. Empty
+    /// otherwise, and off a combat or a Furina board.</summary>
+    public static string SpendShort(CardModel card, int amount) =>
+        Owner(card) is { } owner && !FurinaStage.CanSpend(owner, amount)
+            ? NotEnoughFanfare
+            : "";
+
+    /// <summary><see cref="SpendShort"/>'s words.</summary>
+    public const string NotEnoughFanfare = "\n(Not enough Fanfare)";
+
     /// <summary>THE FURINA WAVE (2026-10-13, "To change now" 3): what a
     /// "Spend up to <paramref name="cap"/>: hit once more for every 4" buys
     /// now -- "(Spends 2: no extra hit)", "(Spends 6: 1 more hit)". Crashing
