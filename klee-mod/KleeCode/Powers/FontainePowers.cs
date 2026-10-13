@@ -23,55 +23,25 @@ namespace KleeMod.Powers;
 /// </summary>
 
 /// <summary>
-/// Navia, Cannon Fire Support: whenever you play a Companion card, gain Block.
+/// Navia, Cannon Fire Support: "Whenever an Elemental Reaction happens, gain
+/// Amount Block." (The Fontaine sanity check, 2026-10-12, pick 3: it keyed on
+/// playing a Companion card before.)
 ///
-/// The only trigger in the game keyed on a CARD TYPE rather than an element,
-/// which is deliberate -- it is what keeps her clear of the Crystallize
-/// archetype Zhongli's slot-4 deep dive owns.
+/// No hook of its own. <see cref="OnReaction"/> is called from
+/// <c>CompanionOverhaulReactions.Note</c>, which <c>ReactionEffects.Resolve</c>
+/// calls once per named reaction -- the single site a reaction resolves in the
+/// mod, the same one Dahlia's Favonian Favor reads. Sim twin: the
+/// `cannon_fire_support` read in `effects.companion_overhaul_reaction`.
 ///
-/// ORDERING DIVERGENCE, recorded rather than hidden. tier0 grants the Block in
-/// combat.play_card BEFORE resolve_card runs; this fires AfterCardPlayed,
-/// because BeforeCardPlayed on PowerModel is not an async/choiceContext hook
-/// and cannot award Block. The two orders differ only for a companion card
-/// that READS the player's Block during its own resolution, and no companion
-/// card in any sheet does (the pool's Block cards all write). If one is ever
-/// written, this is the note that says where to look.
+/// CO-OP: THE BOARD'S REACTIONS, NOT ONLY YOURS. "Happens" is the board-wide
+/// reading red-pen R1 sealed for <c>ReactionEffects.ReactionTriggeredThisTurn</c>
+/// (a Reaction is a fact about the board both players stand on), so every
+/// player holding this power is paid for every reaction, whoever dealt it,
+/// and for a reaction with no dealer. Solo that is every reaction, which is
+/// the sim's reading. Favonian Favor pays its holder only for reactions that
+/// holder dealt; this card does not copy that.
 ///
-/// SELF-PAYMENT, closed EB-19/M5. That divergence had a second consequence the
-/// note above missed: NAVIA'S OWN PLAY paid itself. The sim says explicitly
-/// that it must not -- combat.py play_card reads
-/// `p.powers.get("cannon_fire_support")` beside the companions_played record
-/// site, ahead of resolve_card, with the comment "Sitting before resolve_card
-/// also means Navia's own play does not pay itself: the power is not up yet."
-/// The C# read is a LISTENER ENUMERATION, not a power read, and the decompile
-/// says that enumeration happens too late to agree:
-///
-///   CardModel.PlayInternal  ->  Hook.BeforeCardPlayed(combatState, cardPlay)
-///                           ->  OnPlay(...)          // the power is ADDED here
-///                           ->  Hook.AfterCardPlayed(combatState, ...)
-///
-/// and both Hook methods `foreach` over `CombatState.IterateHookListeners()`,
-/// an ITERATOR that materializes its `List&lt;AbstractModel&gt;` (creature
-/// Powers, relics, potions, piles, modifiers) inside its first MoveNext --
-/// i.e. at the moment the foreach starts, not when the play started. So a
-/// power added during OnPlay is absent from the BeforeCardPlayed list and
-/// PRESENT in the AfterCardPlayed one. (Hook.BeforeCardPlayed goes through
-/// IterateCombatHookListeners, which is the same enumeration behind a
-/// combat-is-over guard.)
-///
-/// The fix uses exactly that asymmetry as the signal. BeforeCardPlayed records
-/// the CardPlay it saw; AfterCardPlayed pays only for a CardPlay in that set.
-/// Navia's own play never entered it, so it never pays -- while every LATER
-/// companion play does. A set rather than a field because card plays nest (a
-/// card that plays a card), and CardPlay is a class with reference identity,
-/// one fresh instance per play index (CardPlay.cs, `new CardPlay { ... }` per
-/// `i` in the playCount loop), so entries can never collide or go stale.
-///
-/// IsFirstInSeries: one grant per card PLAY, not per replay. Study Buddy's
-/// replay is one card resolved twice; paying it twice would make those two
-/// cards a combo instead of each doing its own job -- the same line tier0
-/// draws by granting once beside its companions_played record site, outside
-/// the replay loop.
+/// Raw Block (NC-11: power-sourced Block stays raw), Amount per copy.
 /// </summary>
 public sealed class CannonFireSupportPower : PowerModel, ILocalizationProvider
 {
@@ -79,50 +49,34 @@ public sealed class CannonFireSupportPower : PowerModel, ILocalizationProvider
     {
         ("title", "Cannon Fire Support"),
         ("description",
-            "Whenever you play a [gold]Companion[/gold] card, gain {Amount} "
-          + "[gold]Block[/gold]."),
+            "Whenever an [gold]Elemental Reaction[/gold] happens, gain "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>
-    /// The plays this power was already installed for, snapshotted at the one
-    /// broadcast that runs before the card resolves. Reference identity on
-    /// CardPlay; every entry is removed by the AfterCardPlayed of the same
-    /// play, so this holds only the plays currently open (normally one).
-    /// </summary>
-    private readonly HashSet<CardPlay> _presentAtPlayStart = new();
-
-    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    /// <summary>A reaction resolved on <paramref name="target"/>'s board: pay
+    /// every living player creature that holds the power.</summary>
+    internal static async Task OnReaction(
+        PlayerChoiceContext choiceContext, Creature target)
     {
-        if (Eligible(cardPlay)) _presentAtPlayStart.Add(cardPlay);
-        return Task.CompletedTask;
+        var players = target.CombatState?.PlayerCreatures;
+        if (players == null) return;
+        foreach (var creature in players.ToList())
+        {
+            if (!creature.IsAlive) continue;
+            foreach (var power in creature.Powers
+                         .OfType<CannonFireSupportPower>().ToList())
+            {
+                power.Flash();
+                await CreatureCmd.GainBlock(
+                    creature, power.Amount, ValueProp.Unpowered, null,
+                    fast: true);
+            }
+        }
     }
-
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        // Remove unconditionally: a play that resolved is closed whether or
-        // not it pays, and an entry left behind would outlive its CardPlay.
-        var wasPresent = _presentAtPlayStart.Remove(cardPlay);
-        if (!wasPresent) return;
-        if (!Eligible(cardPlay)) return;
-
-        await CreatureCmd.GainBlock(
-            Owner, Amount, ValueProp.Unpowered, null, fast: true);
-    }
-
-    /// <summary>
-    /// Asked at both ends so the snapshot and the settle agree. Re-asked at
-    /// AfterCardPlayed because ownership can change mid-play (a card handed
-    /// to another player), and the sim's read is of the player who played it.
-    /// </summary>
-    private bool Eligible(CardPlay cardPlay) =>
-        cardPlay.Card is ICompanionCard
-        && cardPlay.Card.Owner?.Creature == Owner
-        && cardPlay.IsFirstInSeries;
 }
 
 /// <summary>
