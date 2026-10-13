@@ -108,12 +108,14 @@ public class KleeTempoTests
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus your largest "
           + "[gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] "
-          + "into your [gold]Discard Pile[/gold].",
+          + "into your [gold]Discard Pile[/gold]."
+          + "{InCombat:\n(Deals {BombHit:diff()} damage)|}",
             Face(new ProtoKoSimmer()));
         Assert.Equal(
             "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on "
           + "the enemy. They do not go off. Add {Stash:diff()} "
-          + "[gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+          + "[gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."
+          + "{InCombat:\n(Deals {BombHit:diff()} damage)|}",
             Face(new ProtoKoTasteTest()));
         Assert.Equal(
             "Gain {Sparks:diff()} [gold]Sparks[/gold]. Add a [gold]Confiscated[/gold] "
