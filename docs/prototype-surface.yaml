@@ -4407,7 +4407,9 @@
    # Upgrade cost 1 to 0 (2026-10-04). Payoff fix (2026-10-08): 1 Vulnerable;
    # last pass (2026-10-12): 1 Weak too, both landing before the doubling, so
    # a clean enemy ends on 2 of each. Provenance, "Varka last pass".
-   cost: 1, type: skill, rarity: uncommon, retain: true,
+   # Retain dropped 2026-10-13 ([USER]: "Deep Freeze looks really, really
+   # good now ... I think we should drop Retain").
+   cost: 1, type: skill, rarity: uncommon,
    description: "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy},

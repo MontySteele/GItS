@@ -38,7 +38,7 @@ public sealed class ProtoVkDeepFreeze : CustomCardModel, ICharacterCard
     public string CharacterId => "varka";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Retain, KleeKeywords.AppliesCryo };
+        new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this);
