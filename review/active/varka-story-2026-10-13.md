@@ -120,7 +120,11 @@ or Diluc (Uncommons) or a skip; Jean's line moved to the scene.
 Third round, 2026-10-13. [USER]: "I like the Eula line, but the Noelle line
 sounds off, and Diluc reads a little too edgy." Both rewritten.
 
-## For [USER]
+## Ruled
+
+[USER], 2026-10-13: "Sounds good! Let's go with it." Built as written.
+
+## For [USER] (ruled above)
 
 1. **The batch.**
    - **(a) Default:** build it as written.
