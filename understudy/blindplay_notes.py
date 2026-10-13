@@ -722,12 +722,21 @@ LAST_MORNING_NOTE = (
 # the other half unprompted -- "the numbered suffixes renumber inside a turn",
 # so `(1)` names a different card the moment the first one is played -- and
 # that is a fact about the handle, which belongs beside it.
+#
+# KOKOMI ROUND 2 (2026-10-13, lane 4): and the number now holds until the
+# next `observe`. A chained `play "Sting (3)"` then `play "Sting (4)"` was
+# refused because the hand had been re-counted between them; a numbered name
+# is now resolved against the hand this page printed
+# (`blindplay_grammar.resolve_shown_card`), so the note says so.
 HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
-                    "The copies are numbered in the order they are listed, "
-                    "and that number is a place in this list rather than "
-                    "anything the card carries: it is re-counted on every "
-                    "screen, so `(1)` names a different copy once one of them "
-                    "leaves your hand. An enchantment prints beside the "
+                    "The copies are numbered in the order they are listed. "
+                    "A number names the copy on the page you last read with "
+                    "`observe`, and it does not shift as you play: "
+                    "`play \"Sting (3)\"` then `play \"Sting (4)\"` plays "
+                    "the two copies this page shows, and a copy already "
+                    "played is refused rather than swapped for another. "
+                    "`observe` again to see the new numbers. An enchantment "
+                    "prints beside the "
                     "title where a card carries one, so where two copies show "
                     "none and differ only by one, this page cannot say which "
                     "is which.*")

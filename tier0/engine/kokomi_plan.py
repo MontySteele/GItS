@@ -515,6 +515,11 @@ def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     through `IUnplayableReasonCard` ("no Plan is waiting" / "no card in your
     hand can be planned"); this is that refusal at this engine's twin seam,
     exactly as `klee_overhaul.refuses_for_no_bomb` is.
+
+    Kokomi round 2 (2026-10-13): pinned row by row, printed and upgraded, to
+    count exactly the Plan-line rows and Companions
+    (`test_kokomi_round_2_fixes_2026_10_13`). The C# read now fails open on a
+    throw (`KokomiRefounding.AnyToPlan`); a sim read cannot throw here.
     """
     if not live(state):
         return False
