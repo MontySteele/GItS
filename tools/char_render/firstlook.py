@@ -106,7 +106,7 @@ def figure(work: Path, name: str, zoom: float, shadow: bool):
 def base(base_dir: Path, c: str, zoom: int):
     tag = "b1" if zoom == 1 else "b2"
     im = Image.open(base_dir / f"{tag}_{c}.png").convert("RGBA")
-    o = json.loads((base_dir / f"{tag}_{c}.json").read_text())["origin"]
+    o = json.loads((base_dir / f"{tag}_{c}.json").read_text(encoding="utf-8"))["origin"]
     return im, tuple(o)
 
 
