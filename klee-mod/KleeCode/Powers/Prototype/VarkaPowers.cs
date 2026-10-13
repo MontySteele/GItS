@@ -1014,8 +1014,8 @@ public sealed class WeathervanePower : PowerModel, ILocalizationProvider
     {
         ("title", "Weathervane"),
         ("description",
-            "At the start of your turn, you may make an element you have "
-          + "[gold]Oath[/gold] in your [gold]current element[/gold]."),
+            "At the start of your turn, you may choose an element you have "
+          + "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

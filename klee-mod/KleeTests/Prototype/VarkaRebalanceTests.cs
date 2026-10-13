@@ -133,40 +133,29 @@ public class VarkaRebalanceTests : IDisposable
     [Fact]
     public void Tidal_bulwark_is_hydros_body_slam()
     {
-        // The Hydro paper (2026-10-10): an Attack, 1, "Deal damage equal to
-        // your Block, plus 2 [3] for each Hydro Oath. Apply Hydro to an
-        // enemy." One CalculatedDamage folds the Block and the Oath slope.
-        // Varka last pass (2026-10-12): "Gain 6 [8] Block" first.
+        // The Hydro paper (2026-10-10): an Attack, 1, Hydro's Body Slam.
+        // Varka text pass (2026-10-13), ruled (a): "Deal Hydro damage equal to
+        // your Block, plus 2 [3] for each Hydro Oath." No Block of its own;
+        // one Hydro hit through VarkaCards.TidalBulwark, so it reacts.
         var card = new ProtoVkTidalBulwark();
-        Assert.Equal(6m, Var(card, "Block"));
-        Assert.Equal(8m, Var(Upgraded<ProtoVkTidalBulwark>(), "Block"));
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(1, card.EnergyCost.Canonical);
-        Assert.Equal(0m, Var(card, "CalculationBase"));
-        Assert.Equal(1m, Var(card, "ExtraDamage"));
-        Assert.Equal(2m, Var(card, "CalculationExtra"));
-        Assert.Equal(3m, Var(Upgraded<ProtoVkTidalBulwark>(), "CalculationExtra"));
-        Assert.IsType<FrontFoldedDamageVar>(card.DynamicVars["CalculatedDamage"]);
+        Assert.False(card.DynamicVars.TryGetValue("Block", out _));
+        Assert.Equal(2m, Var(card, "VkPer"));
+        Assert.Equal(3m, Var(Upgraded<ProtoVkTidalBulwark>(), "VkPer"));
+        Assert.IsType<VarkaTidalBulwarkDamageVar>(card.DynamicVars["VkHit"]);
         var play = Calls("ProtoVkTidalBulwark", "OnPlay");
-        Assert.Contains("DamageCmd.Attack", play);
-        Assert.Contains("ElementalHit.ApplyOnly", play);
-        var gain = play.FindIndex(c => c.Contains("GainBlock"));
-        Assert.True(gain >= 0 && gain < play.IndexOf("DamageCmd.Attack"),
-                    string.Join(", ", play));
-        Assert.Contains("(Deals {CalculatedDamage:diff()} damage)",
-                        card.Localization!.Single(p => p.Item1 == "description").Item2);
-    }
-
-    [Fact]
-    public void Tidal_bulwarks_own_block_counts_only_while_it_is_still_to_come()
-    {
-        // The Varka wave (2026-10-13): the hit reads CalculatedDamage AFTER
-        // the play gained the Block, so the own-Block term is 0 while the
-        // card is in the Play pile; anywhere else (the hand's preview) it is
-        // the printed Block.
-        var card = new ProtoVkTidalBulwark();
-        Assert.Equal(6, PendingOwnBlock.For(card, 6));
-        Assert.Equal(8, PendingOwnBlock.For(Upgraded<ProtoVkTidalBulwark>(), 8));
+        Assert.Contains("VarkaCards.TidalBulwark", play);
+        Assert.DoesNotContain("CreatureCmd.GainBlock", play);
+        var body = Calls("VarkaCards", "TidalBulwark");
+        Assert.Contains("VarkaCards.ElementHit", body);
+        Assert.DoesNotContain("ElementalHit.ApplyOnly", body);
+        var face = card.Localization!.Single(p => p.Item1 == "description").Item2;
+        Assert.StartsWith("Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold]", face);
+        Assert.DoesNotContain("Apply", face);
+        Assert.Contains("(Deals {VkHit:diff()} damage)", face);
+        Assert.Equal(14, VarkaCards.TidalBulwarkDamage(10, 2m, 2));
+        Assert.Equal(0, VarkaCards.TidalBulwarkDamage(0, 3m, 0));
     }
 
     // ---- sec.4: payoffs that borrow -----------------------------------------

@@ -3708,7 +3708,7 @@
    cost: 1, type: skill, personal_pool: varka,
    # The rebalance (sec.3): Block that scales with reactions. Varka co-op
    # fixes (2026-10-11): 6 [8] + 2 [3], was 4 [6] + 3 [4] (provenance).
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on.",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy the [gold]Hydro[/gold] reacts on.",
    effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 6, per: 2}],
    upgrade: {varka_base: 2, varka_per: 1}}
 
@@ -4032,7 +4032,7 @@
    # "more" is a second, element-less hit on the same enemy.
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkAgain:diff()} additional damage.",
    effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
    upgrade: {varka_base: 3}}
 
@@ -4062,23 +4062,19 @@
    cost: 1, type: attack, rarity: uncommon,
    # The Pyro pass (2026-10-11, review/ruled/varka-pyro-pass-2026-10-11.md):
    # base 5 [7] to 8 [11], the floor every new card is held to.
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 2}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
-   # The Hydro paper (2026-10-10): Hydro's Body Slam, was a Skill. Varka
-   # last pass (2026-10-12): gains 6 [8] Block first. Provenance, "Varka
-   # last pass, 2026-10-12".
+   # The Hydro paper (2026-10-10): Hydro's Body Slam. Varka text pass
+   # (2026-10-13), ruled (a): no Block, the hit itself is Hydro. Provenance,
+   # "Varka text pass, 2026-10-13".
    cost: 1, type: attack, rarity: uncommon,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: block, amount: 6},
-             {op: damage, target: enemy, applies_element: false,
-              amount_formula: {base: 0, per: 2, count: hydro_oath,
-                               plus: player_block}},
-             {op: apply_aura, element: hydro, target: enemy}],
-   upgrade: {block: 2, formula_per: 1}}
+   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold], plus {VkPer:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   effects: [{op: varka, kind: tidal_bulwark, target: enemy, per: 2}],
+   upgrade: {varka_per: 1}}
 
 - {id: proto_vk_glacial_edict, name: "Glacial Edict", character: varka,
    authored_by: [claude],
@@ -4169,7 +4165,7 @@
    authored_by: [claude],
    # Varka last pass (2026-10-12): Retain, so it can wait for a full Hand.
    cost: 1, type: attack, rarity: uncommon, retain: true,
-   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].",
+   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: varka, kind: storm_battery, target: all_enemies, per: 2}],
    upgrade: {varka_per: 1}}
 
@@ -4299,7 +4295,7 @@
    authored_by: [claude],
    # Varka last pass (2026-10-12): costs 1, was 2.
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, you may make an element you have [gold]Oath[/gold] in your [gold]current element[/gold].",
+   description: "At the start of your turn, you may choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold].",
    effects: [{op: apply_power, power: vk_weathervane, amount: 1, target: self}],
    upgrade: {innate: true}}
 

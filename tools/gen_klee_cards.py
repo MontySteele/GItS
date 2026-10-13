@@ -2610,6 +2610,9 @@ VARKA_KINDS = {
     # "Your next Pyro Attack this turn deals 5 additional damage".
     "temp_strength": "TemporaryStrength",
     "next_pyro_attack": "NextPyroAttack",
+    # VARKA TEXT PASS (2026-10-13): Tidal Bulwark, "Deal Hydro damage equal
+    # to your Block, plus 2 [3] for each Hydro Oath." One Hydro hit.
+    "tidal_bulwark": "TidalBulwark",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2639,6 +2642,8 @@ VARKA_KIND_FIELDS = {
     # Pyro paper 2 (2026-10-12).
     "temp_strength": ("amount",),
     "next_pyro_attack": ("base",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("per",),
 }
 #: A field a kind MAY print; absent, the rule's own default holds (Vow of the
 #: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).
@@ -2662,7 +2667,9 @@ VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      # The AoE trim (sec.4): Razor: Awakening at one enemy.
                      "awakening", "kindled_edge",
                      # The combo pass (2026-10-04).
-                     "pyro_strike", "shatter", "deep_freeze"}
+                     "pyro_strike", "shatter", "deep_freeze",
+                     # Varka text pass (2026-10-13).
+                     "tidal_bulwark"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
 VARKA_ALL_KINDS = {"thundering_verdict", "electro_all",
@@ -2694,6 +2701,8 @@ VARKA_KIND_ELEMENTS = {
     # `apply_aura`.
     "pyro_strike": ("pyro",),
     "shatter": ("cryo",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("hydro",),
 }
 #: A kind that makes an element current without a hit of its own
 #: (`VarkaCards.GainPyroOath`'s `CardMakesCurrent`), for the switch tip.
@@ -2709,12 +2718,39 @@ VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
 #: element identities round, 2026-10-01: Thundering Verdict printed no per-hit
 #: number). The value is the element whose Oath the hit adds; the var is
 #: `VarkaHitDamageVar` (Powers/Prototype/VarkaOath.cs), display only.
-VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
+VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro",
+                           # Varka text pass (2026-10-13): Blazing Charge's
+                           # live total, "(Deals N damage)".
+                           "blazing_charge": "Pyro"}
 #: A kind whose face prints its total against the enemy it previews on, the
 #: same `{VkHit}` token (the combo pass, 2026-10-04: Shatter's "plus 2 for
 #: each Weak and Vulnerable on the enemy"). The value is the C# var class
 #: (Powers/Prototype/VarkaOath.cs), display only.
-VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
+VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar",
+                              # Varka text pass (2026-10-13): Tidal
+                              # Bulwark's Block plus its Hydro Oath slope.
+                              "tidal_bulwark": "VarkaTidalBulwarkDamageVar",
+                              # and Storm Battery's VkPer per other card.
+                              "storm_battery": "VarkaStormBatteryDamageVar"}
+#: A kind whose printed `VkBase` IS one hit's number, so it folds like a
+#: damage var: Strength, Weak and the body's Vulnerable, the kind's element
+#: carried (Varka text pass, 2026-10-13, the damage-preview census: a plain
+#: `DynamicVar` printed the sheet number whatever the modifiers). The value is
+#: the C# `Element` member the hit carries ("None" for Tempest's four).
+#: Display only: the play reads the var's `BaseValue`, which a fold never moves.
+VARKA_FOLDED_BASE_KINDS = {
+    "electro_strike": "Electro", "electro_all": "Electro",
+    "violet_storm": "Electro", "pyro_strike": "Pyro", "tempest": "None",
+    "kindled_edge": "Pyro", "awakening": "Electro",
+}
+#: A kind whose `amount` is a bonus inside the same hit as its `VkBase`
+#: (Razor: Awakening's Electro bonus): `VarkaBonusDamageVar` prints the folded
+#: hit with it less the folded hit without it, so Strength counts once.
+VARKA_BONUS_FOLD_KINDS = {"awakening": "Electro"}
+#: A kind whose face prints a follow-up hit repeating `VkBase` under a token of
+#: its own, folded as a follow-up leg (`VarkaFollowUpDamageVar`, the Sizzle
+#: idiom): Kindled Edge's "deal {VkAgain} additional damage".
+VARKA_FOLLOW_UP_KINDS = {"kindled_edge": "VkAgain"}
 #: A kind whose face prints its second hit's live total, the same `{VkHit}`
 #: token: `VkBase` (if printed) plus `VkPer` per Oath of his current element,
 #: folded against the previewed body with that element carried (text pass
@@ -3750,8 +3786,8 @@ APPLY_POWERS = {
         "Whenever your [gold]current element[/gold] changes, gain {X} "
         "[gold]Block[/gold]."),
     "vk_weathervane": ("WeathervanePower", None,
-        "At the start of your turn, you may make an element you have "
-        "[gold]Oath[/gold] in your [gold]current element[/gold]."),
+        "At the start of your turn, you may choose an element you have "
+        "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
         "and the element they [gold]Swirl[/gold]."),
@@ -7806,6 +7842,18 @@ def build_vars(card: dict) -> list[str]:
                         f'new CardBlockNumberVar("{VARKA_VAR_FIELDS[field]}", '
                         f'{int(eff[field])}m)')
                     continue
+                if field == "base" and eff["kind"] in VARKA_FOLDED_BASE_KINDS:
+                    out.append(
+                        f'new FoldedDamageVar("{VARKA_VAR_FIELDS[field]}", '
+                        f'{int(eff[field])}m, ValueProp.Move, carries: '
+                        f'Element.{VARKA_FOLDED_BASE_KINDS[eff["kind"]]})')
+                    continue
+                if field == "amount" and eff["kind"] in VARKA_BONUS_FOLD_KINDS:
+                    out.append(
+                        f'new VarkaBonusDamageVar("{VARKA_VAR_FIELDS[field]}", '
+                        f'{int(eff[field])}m, "VkBase", '
+                        f'Element.{VARKA_BONUS_FOLD_KINDS[eff["kind"]]})')
+                    continue
                 out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
                            f'{int(eff[field])}m)')
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
@@ -7816,6 +7864,9 @@ def build_vars(card: dict) -> list[str]:
                     f'new {VARKA_TARGET_PREVIEW_KINDS[eff["kind"]]}()')
             elif eff["kind"] in VARKA_CURRENT_HIT_PREVIEW_KINDS:
                 out.append('new VarkaCurrentElementHitVar()')
+            if eff["kind"] in VARKA_FOLLOW_UP_KINDS:
+                out.append('new VarkaFollowUpDamageVar('
+                           f'"{VARKA_FOLLOW_UP_KINDS[eff["kind"]]}", "VkBase")')
         elif op == "crash_fanfare":
             # Always a var: the Hyperbeam's upgrade IS this number (the
             # floor_drop delta), so the upgraded face has to render it.

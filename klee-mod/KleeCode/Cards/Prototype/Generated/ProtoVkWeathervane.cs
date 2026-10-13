@@ -45,7 +45,7 @@ public sealed class ProtoVkWeathervane : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Weathervane"),
-        ("description", "At the start of your turn, you may make an element you have [gold]Oath[/gold] in your [gold]current element[/gold]."),
+        ("description", "At the start of your turn, you may choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

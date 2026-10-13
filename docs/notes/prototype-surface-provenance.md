@@ -8186,3 +8186,30 @@ with one text held:
 Pins: `tier0/tests/test_kokomi_round3_alist_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiRound3AListTests.cs`. Untested in game
 until a deploy.
+
+## Varka text pass, 2026-10-13
+
+- `proto_vk_tidal_bulwark`: the user, "'Tidal Bulwark' does a lot. It gives
+  block and it's a better body slam. It's also not using standardized
+  language. Instead of saying "Apply hydro", it should say "Deal hydro
+  damage"", then "Tidal Bulwark - let's do (a)". Now "Deal Hydro damage equal
+  to your Block, plus 2 [3] for each Hydro Oath." The 6 [8] Block is gone and
+  the separate Apply sentence with it: the hit itself carries Hydro (the
+  `tidal_bulwark` kind, `VarkaCards.TidalBulwark`), so it reacts with an aura
+  already there and credits the Hydro Oath like any Hydro hit. The Block and
+  the Oath are read before the hit. The upgrade is the one the row had before
+  the last pass added the Block: 2 [3] per Hydro Oath (cost stays 1). The
+  in-combat line prints the live total (`VarkaTidalBulwarkDamageVar`).
+- **Wording, text only:** Weathervane (card and power) "you may choose an
+  element you have Oath in. It becomes your current element." (was "make ...
+  your current element"); Barbara: Gleeful Songs "for each enemy the Hydro
+  reacts on" (was "it"). Amber: Baron Bunny keeps "Next turn": Varka's
+  `VarkaBaronBunnyPower` fires at the start of his next turn.
+- **Live damage previews, display only** (the damage-preview census): Blazing
+  Charge and Storm Battery print "(Deals N damage)" in combat; Charged Lunge,
+  Ember Cleave, Chain Lightning, Tempest of the Four Winds, Violet Storm (per
+  hit), Kindled Edge and Razor: Awakening print `VkBase` as a folding damage
+  var (`VARKA_FOLDED_BASE_KINDS`); Kindled Edge's follow-up is its own token
+  `{VkAgain}`, a follow-up leg; Razor's Electro bonus is the folded hit with
+  it less the folded hit without it (`VarkaBonusDamageVar`). Stoke the
+  Flames' 5 [7] is a rider on a later Attack, not a hit, and is not folded.

@@ -69,7 +69,7 @@ public sealed class ProtoVkEmberCleave : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 9m),
+            new FoldedDamageVar("VkBase", 9m, ValueProp.Move, carries: Element.Pyro),
             new DynamicVar("VkAmount", 2m)
         };
 
