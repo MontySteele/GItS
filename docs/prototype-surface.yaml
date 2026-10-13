@@ -3740,10 +3740,11 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack, personal_pool: varka,
-   # The AoE trim: one enemy. 5 [7], +4: provenance, "Varka Electro
+   # The AoE trim: one enemy. 6 [8], +3 (was 5 [7], +4; user 2026-10-13:
+   # "9 damage with its rider effect is fine for a common"). Provenance, "Varka Electro
    # Knights, 2026-10-03". An Attack since the combo pass (2026-10-04).
    description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
-   effects: [{op: varka, kind: awakening, target: enemy, base: 5, amount: 4}],
+   effects: [{op: varka, kind: awakening, target: enemy, base: 6, amount: 3}],
    upgrade: {varka_base: 2}}
 
 - {id: proto_vk_mika_starfrost_swirl, name: "Mika: Suppressive Barrage", character: varka,
