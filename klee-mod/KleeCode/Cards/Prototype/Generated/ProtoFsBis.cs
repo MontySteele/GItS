@@ -38,14 +38,14 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(ArmKeywordTips.ForBisSpendUpTo(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bis");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bis!"),
-        ("description", "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep half of it."),
+        ("description", "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], keep half of it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

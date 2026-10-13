@@ -44,7 +44,7 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
         new[] { CardKeyword.Retain, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
+        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(ArmKeywordTips.ForAscensionNoOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_four_winds_ascension");
 

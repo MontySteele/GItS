@@ -496,6 +496,48 @@ public class ResolutionLedgerTests
         Assert.Equal(0, events[0]["amount"]);
     }
 
+    /// <summary>Design-session call (2026-10-13): Wolfpack's copy lands on
+    /// the Ascension's play line, open or just closed, and nowhere else's.
+    /// </summary>
+    [Fact]
+    public void A_play_line_event_files_on_its_card_even_after_the_row_closed()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("vk_fwa", "Four Winds' Ascension", false);
+        ResolutionLedger.ClosePlay();
+        ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack,
+            "Four Winds' Ascension", "Four Winds' Ascension", "Wolfpack",
+            amount: 1);
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Single(rows);
+        var events = (List<Dictionary<string, object?>>)rows[0]["events"]!;
+        Assert.Single(events);
+        Assert.Equal("wolfpack", events[0]["kind"]);
+        Assert.Equal(1, events[0]["amount"]);
+
+        // Open: the open row, as NoteEvent files it.
+        Fresh();
+        ResolutionLedger.OpenPlay("vk_fwa", "Four Winds' Ascension", false);
+        ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack,
+            "Four Winds' Ascension", "Four Winds' Ascension", "Wolfpack",
+            amount: 2);
+        rows = ResolutionLedger.Snapshot();
+        Assert.Single(rows);
+        Assert.Single((List<Dictionary<string, object?>>)rows[0]["events"]!);
+
+        // Another card last: never that card's line, a between row instead.
+        Fresh();
+        ResolutionLedger.OpenPlay("strike", "Strike", false);
+        ResolutionLedger.ClosePlay();
+        ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack,
+            "Four Winds' Ascension", "Four Winds' Ascension", "Wolfpack",
+            amount: 1);
+        rows = ResolutionLedger.Snapshot();
+        Assert.Empty((List<Dictionary<string, object?>>)rows[0]["events"]!);
+        Assert.Equal(2, rows.Count);
+        Assert.Equal(true, rows[1]["between"]);
+    }
+
     /// <summary>Seat page 3 (2026-10-05): the curtain call's figure rides
     /// the event, and a Shatter and the curtain call reach the ledger.
     /// </summary>

@@ -128,14 +128,6 @@ EXCEPTIONS = {
     "WolfsGravestone.description": (
         "Boreas's Fang's face, worded by the same paper, plus 'It is upgraded "
         "and costs 0 this turn.'"),
-    "LynetteKey": (
-        "the card text pass (2026-10-12) found the guest tips had never been "
-        "read: `_act_texts` measured the act-amount switch and `_tip_body` "
-        "missed the `card.IsUpgraded` argument, so every guest tip rendered "
-        "empty. Lynette's is the one over the tip ceiling, at 146: her line "
-        "and her act, the act in the card face's own words. The pass changed "
-        "wording to its rules only and this tip breaks none of them, so it is "
-        "carried here for a later trim rather than rewritten unasked"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.

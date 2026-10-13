@@ -170,7 +170,10 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          "fang_relic", "swirl_no_aura", "swirl_on_aura",
          # The Spiral Abyss seat round (2026-10-12): whose card, and how
          # many times it played.
-         "owner", "is_local", "play_count"])
+         "owner", "is_local", "play_count",
+         # Design-session calls (2026-10-13): Wolfpack's copies, on the
+         # Ascension's play line.
+         "wolfpack"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
          "source", "self",

@@ -155,10 +155,49 @@ def test_wolfpack_and_twin_gales_are_said_since_last_page():
     page = blindplay.observe(state)
     line = next(ln for ln in page.splitlines()
                 if ln.startswith("- Since last page: "))
-    assert ("Wolfpack shuffled a copy of Four Winds' Ascension into your "
-            "draw pile (it Exhausts when played)") in line
+    # Design-session call (2026-10-13): Wolfpack on the Ascension's row moved
+    # to its play line (below), so the since-last-page line no longer
+    # repeats it.
+    assert "Wolfpack" not in line
     assert ("Twin Gales: the Swirl of Cryo on Hilichurl 1 paid Pyro (3 "
             "damage) and Cryo (1 Vulnerable)") in line
+
+
+def test_wolfpack_prints_on_the_ascensions_play_line():
+    """Design-session call (2026-10-13): Wolfpack's copy went into the draw
+    pile unseen, and two seats never knew it worked. It prints under the
+    Ascension's own row."""
+    state = varka_state()
+    state["player"]["resolutions"] = [
+        _row("Four Winds' Ascension", hits=True, events=[
+            _ev("wolfpack", 9001, card="Four Winds' Ascension",
+                power="Wolfpack", amount=1)]),
+        _row("Strike", hits=True)]
+    page = blindplay.observe(state)
+    section = page.split("- **Four Winds' Ascension**", 1)[1]
+    row = section.split("- **Strike**", 1)[0]
+    assert ("  Wolfpack: shuffled a copy of Four Winds' Ascension into your "
+            "Draw Pile.") in row
+    assert page.count("Wolfpack") == 1
+    two = varka_state()
+    two["player"]["resolutions"] = [
+        _row("Four Winds' Ascension", hits=True, events=[
+            _ev("wolfpack", 9002, card="Four Winds' Ascension",
+                power="Wolfpack", amount=2)])]
+    assert ("Wolfpack: shuffled 2 copies of Four Winds' Ascension into your "
+            "Draw Pile.") in blindplay.observe(two)
+
+
+def test_wolfpack_outside_any_play_still_says_since_last_page():
+    state = varka_state()
+    between = _row("", events=[
+        _ev("wolfpack", 9003, card="Four Winds' Ascension",
+            power="Wolfpack", amount=1)])
+    between["between"] = True
+    state["player"]["resolutions"] = [between]
+    page = blindplay.observe(state)
+    assert ("Wolfpack shuffled a copy of Four Winds' Ascension into your "
+            "draw pile") in page
 
 
 def test_the_board_reads_the_new_row_keys():

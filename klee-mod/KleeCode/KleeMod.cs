@@ -472,6 +472,14 @@ public static class KleeMod
                     // The card text pass (2026-10-12): Boreas's Fang's hover.
                     [Cards.ArmKeywordTips.AscensionReturnKey + ".title"] =
                         "Four Winds' Ascension",
+                    // Design-session call (2026-10-13): the rider on the
+                    // Ascension's element hit, which gains no Oath.
+                    [Cards.ArmKeywordTips.AscensionNoOathKey + ".title"] =
+                        "The second hit",
+                    // Design-session call (2026-10-13): the rider on Bis!,
+                    // which Spends count.
+                    [Cards.ArmKeywordTips.BisSpendUpToKey + ".title"] =
+                        "Bis!",
                     // Co-op notes pick 2 (2026-10-02): the key is also
                     // `KleeKeywords.Knight`'s, the printed "Knight." line,
                     // and the keyword's own hover reads this row.

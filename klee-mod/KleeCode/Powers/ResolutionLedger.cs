@@ -344,6 +344,37 @@ public static class ResolutionLedger
                                      ++_seq, amount, lost, past));
     }
 
+    /// <summary>
+    /// Design-session call (2026-10-13): an event that belongs on the PLAY
+    /// LINE of the card that caused it, even when the after-play hooks run
+    /// after the row closed. With a play open it is <see cref="NoteEvent(string, string, string, string, string, bool, int, int, int)"/>;
+    /// with none, it files on the last row when that row is a card titled
+    /// <paramref name="playedTitle"/>; else it is an ordinary event. Wolfpack's
+    /// copy of Four Winds' Ascension went into the draw pile unseen, and two
+    /// seats never knew it worked.
+    /// </summary>
+    public static void NoteEventOnPlay(string kind, string playedTitle,
+                                       string card, string power,
+                                       int amount = 0)
+    {
+        if (string.IsNullOrEmpty(kind)) return;
+        if (_open == null && Rows.Count > 0 && Rows[^1] is { Between: false } last
+            && !string.IsNullOrEmpty(playedTitle) && last.Card == playedTitle)
+        {
+            if (last.Events.Count >= MaxHits)
+            {
+                last.Overflowed = true;
+                return;
+            }
+            last.Events.Add(new PageEvent(kind, card ?? string.Empty,
+                                          string.Empty, power ?? string.Empty,
+                                          string.Empty, false, ++_seq, amount,
+                                          0, 0));
+            return;
+        }
+        NoteEvent(kind, card, string.Empty, power, amount: amount);
+    }
+
     /// <summary>The same note for a body: its printed name, its combat id
     /// and whether it is a player, read without a throw.</summary>
     public static void NoteEvent(string kind, string card, Creature? body,
