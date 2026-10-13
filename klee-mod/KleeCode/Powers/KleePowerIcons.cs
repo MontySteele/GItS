@@ -439,6 +439,10 @@ internal static class KleePowerIcons
         OathUntoDeathPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         WolfpackPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+        // His Ancient (the Varka review, 2026-10-12): the Oath badge's
+        // nearest shape, Stormward Stance's.
+        AllFourWindsPower =>
+            KleePck.Path("varka/powers/stormward_stance.png"),
         OathboundAegisPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         WeathervanePower => KleePck.Path("varka/powers/boreas_unbound.png"),

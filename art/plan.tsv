@@ -2779,6 +2779,10 @@ kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	c
 kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool
 # Furina card-art picks, 38 rows ([USER] 2026-10-09: "all of the art picks are good enough for now")
 center_of_attention	ImageGen/images/cards/furina/center_of_attention.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 1.jpg		splash	
+# The Varka review (2026-10-12): his two Ancients. all_four_winds <- Venti, the god of the winds
+all_four_winds	ImageGen/images/cards/varka/all_four_winds.png	500	380	cover	center	shortlist	1	png	Character Venti Full Wish.png		splash	
+# dandelion_gale <- Jean, whose Dandelion Breeze is the gale
+dandelion_gale	ImageGen/images/cards/varka/dandelion_gale.png	500	380	cover	center	shortlist	1	png	Jean Birthday 2022.png		splash	
 proto_fs_a_five_century_act	ImageGen/images/cards/furina/proto_fs_a_five_century_act.png	500	380	cover	y0.25	shortlist	1	png	NPC Focalors.png		splash	
 proto_fs_against_the_tide	ImageGen/images/cards/furina/proto_fs_against_the_tide.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 2.png		splash	
 proto_fs_all_in	ImageGen/images/cards/furina/proto_fs_all_in.png	500	380	cover	x0.50,y0.50@1.3	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	
