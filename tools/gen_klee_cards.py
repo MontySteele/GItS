@@ -1164,6 +1164,30 @@ def varka_switch_element(card: dict,
     current, no Unwavering Banner for a non-Knight) is
     `ArmKeywordTips.ForElementSwitch`'s live question.
     """
+    # THE SHARED COMPANIONS (Varka wave, 2026-10-13: Lisa's Violet Arc made
+    # Electro current with no line saying so). A shared Companion row is
+    # emitted once, under Klee's profile, yet in Varka's deck it is a card of
+    # his and its element switches him like any other. So the question is the
+    # ROW's, not the profile's: a shared Companion that applies its element
+    # (an `apply_aura`, or damage that carries it) carries the line, and
+    # `VarkaOath.WouldSwitchTo` prints it only for a live Varka owner.
+    if is_companion(card) and card.get("character") != "varka":
+        element = card.get("element")
+        if element not in VARKA_OATH_ELEMENTS:
+            return None
+        applies = any(e.get("op") == "apply_aura"
+                      and e.get("element") in VARKA_OATH_ELEMENTS
+                      for e in _effects_everywhere(card))
+        applies = applies or any(e.get("applies_element")
+                                 for e in companion_damage_effects(card))
+        if not applies:
+            return None
+        last = element
+        for effect in _effects_everywhere(card):
+            if (effect.get("op") == "apply_aura"
+                    and effect.get("element") in VARKA_OATH_ELEMENTS):
+                last = effect["element"]
+        return last
     if profile.character_id != "varka":
         return None
     if is_companion(card):
@@ -6259,14 +6283,17 @@ def plus_block_calc_rider(
     count = reader[len(prefix):]
     # Varka last pass (2026-10-12): Tidal Bulwark gains its own Block first,
     # so the preview counts that Block too (its printed number; Dexterity
-    # is not previewed).
+    # is not previewed). The Varka wave (2026-10-13): only while it is still
+    # to come -- the hit reads this var AFTER the play gained it, and counted
+    # it twice (`PendingOwnBlock`).
     effects = card.get("effects") or []
     own_block = ""
     for e in effects:
         if e is eff:
             break
         if e.get("op") == "block" and e.get("target", "self") == "self":
-            own_block = " + (int)card.DynamicVars.Block.BaseValue"
+            own_block = (" + PendingOwnBlock.For(card, "
+                         "(int)card.DynamicVars.Block.BaseValue)")
             break
     return (int(formula.get("base", 0)), 1, (
         f"{prefix}(int)card.Owner.Creature.Block{own_block}"

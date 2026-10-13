@@ -2645,6 +2645,13 @@ public sealed class PlayTelemetryHooks : AbstractModel
             var ns = power.GetType().Namespace ?? "";
             if (!ns.StartsWith("MegaCrit.", StringComparison.Ordinal)) return;
             WatchedPowers.Add(power);
+            // The Varka wave (2026-10-13): "Ravenous fired x2" on one death.
+            // The set is cleared at BeforeCombatStart, AFTER a power applied
+            // as the room was built (Ravenous, Slippery) was already watched
+            // and subscribed, so the next sweep subscribed it a second time
+            // and every Flash filed two events. Unsubscribing first keeps one
+            // subscription per power whatever the set remembers.
+            power.Flashed -= OnEnemyPowerFlashed;
             power.Flashed += OnEnemyPowerFlashed;
         }
         catch (Exception e)

@@ -62,6 +62,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
 - Furina screen (wave 2026-10-12): Crashing Waves silently spends Fanfare under 4 for no hit; Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
+- Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher (telemetry: 18 enemy Block all fight, Crusher's own Guarded Strike; Crusher then died to Tidal Bulwark and Blazing Charge). The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Varka screen (wave 2026-10-12): Sayu's random Swirl gives no warning on an enemy with no aura; Amber: Sharpshooter's "if the enemy already has Pyro" loses its second hit when a Melt eats the Pyro first; Cycle of Seasons' damage has no line of its own on the played page.
 - Vambrace's preview shows doubled Block on every Block card in hand, but only the first Block card each combat doubles; a Kokomi seat spent it early on that reading (round 2 2026-10-12, lane 4b).
 - Kokomi text (jellyfish round 2026-10-12): the Plan tip does not say whether Strength adds to Plan damage.

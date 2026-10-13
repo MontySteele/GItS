@@ -1196,6 +1196,17 @@ public sealed class StokeTheFlamesPower : PowerModel, ILocalizationProvider
         _spending = 0;
         _paid = false;
         if (!paid || spent <= 0) return;
+        // The Varka wave (2026-10-13): a seat "never saw the number change in
+        // the log, and could not tell if Four Winds' Pyro half qualified". It
+        // does (the half carries Pyro, `HitElement.Carry`), so the power
+        // flashes and the play's own line says what it added.
+        Flash();
+        string title;
+        try { title = cardPlay.Card?.Title?.ToString() ?? string.Empty; }
+        catch (System.Exception) { title = string.Empty; }
+        ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Stoked, title,
+                                         title, "Stoke the Flames",
+                                         amount: spent);
         if (Amount <= spent)
         {
             await PowerCmd.Remove(this);

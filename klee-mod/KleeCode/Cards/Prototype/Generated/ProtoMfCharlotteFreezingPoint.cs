@@ -52,14 +52,14 @@ public sealed class ProtoMfCharlotteFreezingPoint : CustomCardModel, IElementalC
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this);
+        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("charlotte_freezing_point");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — Framing: Freezing Point Composition"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -69,6 +69,15 @@ public sealed class ProtoMfCharlotteFreezingPoint : CustomCardModel, IElementalC
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The element this card makes current, on its in-combat line
+    /// (`VarkaOath.SwitchLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -8,7 +8,7 @@
   "KLEEMOD-APPLIES_CRYO.title": "Applies Cryo",
   "KLEEMOD-APPLIES_CRYO.description": "No aura: applies [gold]Cryo[/gold] for [blue]2[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
   "KLEEMOD-APPLIES_ANEMO.title": "Applies Anemo",
-  "KLEEMOD-APPLIES_ANEMO.description": "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Anemo[/gold] never stays on an enemy.",
+  "KLEEMOD-APPLIES_ANEMO.description": "No aura: nothing happens. Another aura: it [gold]Swirls[/gold], dealing [blue]2[/blue] unblockable damage to ALL enemies and spreading that element.",
   "KLEEMOD-APPLIES_GEO.title": "Applies Geo",
   "KLEEMOD-APPLIES_GEO.description": "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",
   "KLEEMOD-CONFISCATED.title": "Confiscated",

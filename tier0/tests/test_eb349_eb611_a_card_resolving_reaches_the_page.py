@@ -173,7 +173,9 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          "owner", "is_local", "play_count",
          # Design-session calls (2026-10-13): Wolfpack's copies, on the
          # Ascension's play line.
-         "wolfpack"])
+         "wolfpack",
+         # The Varka wave (2026-10-13): Stoke the Flames' bonus.
+         "stoked"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
          "source", "self",

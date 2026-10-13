@@ -69,6 +69,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_OATH, RESOLUTION_FANG,
                                         RESOLUTION_FANG_DEFAULT,
                                         RESOLUTION_WOLFPACK,
+                                        RESOLUTION_STOKED,
                                         RESOLUTION_NO_AURA,
                                         RESOLUTION_HIT_KILLED,
                                         RESOLUTION_KILLED,
@@ -1779,6 +1780,10 @@ def _resolution_lines(rows: list[dict[str, Any]],
         if copies > 0:
             oath_lines.append(RESOLUTION_WOLFPACK.format(
                 n="a copy" if copies == 1 else f"{copies} copies"))
+        # The Varka wave (2026-10-13): Stoke the Flames' bonus, on this line.
+        stoked = int(row.get("stoked") or 0)
+        if stoked > 0:
+            oath_lines.append(RESOLUTION_STOKED.format(n=stoked))
         killed = row.get("killed") or []
         applied = row.get("applied") or []
         if not row["hits"] and not killed and not applied and oath_lines:

@@ -3591,6 +3591,10 @@ RESOLUTION_FANG_DEFAULT = "Boreas's Fang"
 #: worked. `{n}` is "a copy" or "2 copies".
 RESOLUTION_WOLFPACK = ("  Wolfpack: shuffled {n} of Four Winds' Ascension "
                        "into your Draw Pile.")
+#: The Varka wave (2026-10-13): Stoke the Flames' bonus, on the Attack that
+#: took it. A seat "never saw the number change in the log, and could not tell
+#: if Four Winds' Pyro half qualified" (it does).
+RESOLUTION_STOKED = ("  Stoke the Flames: its Pyro damage was {n} higher.")
 #: The Varka payoff round (2026-10-10): a card whose every Anemo application
 #: found no aura (Sucrose on a bare board) said "Nothing this page can count
 #: landed off it", and the seat could not tell it had needed an aura.

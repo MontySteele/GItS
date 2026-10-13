@@ -841,9 +841,15 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         combat["oath"] = oath
         # The Varka review (2026-10-12): the "Pyro Oath (left)" badge's line
         # goes, since a seat called it "noise"; the Oath counts above stay.
+        # The Varka wave (2026-10-13): a badge at 0 ("Hydro Oath 0" on turn
+        # 1, a Knight that made Hydro current before any Hydro Oath) left a
+        # seat asking what it was FOR. The block above says it in words, so
+        # a 0 badge's line goes too.
         combat["you"]["powers"] = [
             pw for pw in combat["you"]["powers"]
-            if not _OATH_LEFT.match(_text(pw.get("name")))]
+            if not _OATH_LEFT.match(_text(pw.get("name")))
+            and not (_OATH_NAME.match(_text(pw.get("name")))
+                     and _int(pw.get("stacks")) == 0)]
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -1475,6 +1481,13 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         for ev in (row.get("events") or [])
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "wolfpack"),
+                    # The Varka wave (2026-10-13): what Stoke the Flames
+                    # added to this Attack's Pyro hits, on its line.
+                    "stoked": sum(
+                        _int(ev.get("amount"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "stoked"),
                     "swirl_no_aura": _int(row.get("swirl_no_aura")),
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
