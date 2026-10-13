@@ -45,8 +45,10 @@ namespace KleeMod.Story;
 /// COMPOSES WITH THE SPIRAL ABYSS PAGE. The Abyss page replaces the
 /// Ancient's DESCRIPTION and OPTIONS (<c>AbyssChoicePage</c>, after
 /// <c>SetInitialEventState</c>); the dialogue is the room's separate layer,
-/// set by <c>NEventRoom.SetupLayout</c> from this set. The two touch nothing
-/// in common, so the greeting plays over whichever page is up.
+/// set by <c>NEventRoom.SetupLayout</c> from this set. Since the Blessing
+/// screen (2026-10-12, <c>AbyssOverlay</c>) the greeting is held while the
+/// Abyss page is up and plays after the screen closes, over the Ancient's own
+/// page, as in a normal run.
 /// </summary>
 public static class StoryAncients
 {

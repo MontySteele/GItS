@@ -407,6 +407,13 @@ public static partial class McpMod
 
         int index = indexElem.GetInt32();
 
+        // GItS LOCAL EDIT (the Spiral Abyss Blessing screen, 2026-10-12):
+        // while the Blessing screen is up, a choice is a click on its card
+        // (gits/GitsAbyssOverlay.cs).
+        var gitsAbyssChoice = GitsChooseAbyssCard(uiRoom, index);
+        if (gitsAbyssChoice != null)
+            return gitsAbyssChoice;
+
         // GItS LOCAL EDIT (Klee's Ancient greeting, 2026-10-12): an option
         // button is clickable by ForceClick while an Ancient's exchange still
         // has a line to go, which a player cannot do (the buttons sit below
