@@ -790,21 +790,11 @@ CO_TENANCY_LEDGER = {
             "After her draw: the badge and Grand Theater Program's Fanfare "
             "(`FurinaStage.TurnStart`). THE ORDERING QUESTION, answered: what "
             "it WRITES to a shared resource is Furina's one Fanfare number, "
-            "and every other writer of it in this broadcast "
-            "(`StageRaisePerTurnPower`) ADDS to it "
-            "and reads nothing, so any order leaves the same number. It deals "
+            "and no other writer of it shares this broadcast (her Ancient's "
+            "per-turn Fanfare left with the Ancient audit, 2026-10-12), so "
+            "no order can move the number. It deals "
             "no damage and touches no element, so it shares no resource with "
             "`KleeElementalHooks` or the Companion powers beside it",
-        ("Powers/Prototype/StageRaisePerTurnPower.cs",
-         "StageRaisePerTurnPower"):
-            "(the Furina stage; R276 hygiene, re-founded "
-            "2026-10-04). Her Ancient under the arm: gain N Fanfare at the "
-            "start of her turn. THE ORDERING QUESTION, answered: its "
-            "co-tenants on the same resource (`FurinaStageHooks`' turn-start "
-            "powers) all ADD to her one Fanfare number and read "
-            "nothing, so either order leaves the same number. It deals no "
-            "damage, grants no Block and touches no element. NO SIM TWIN "
-            "ORDERS IT: the sim models the shipped Ancient only",
         ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
             "(the Kokomi overhaul, C.KOKOMI_OVERHAUL). RULE 8's "
             "resolution point: the Plans she wrote last turn happen here, in "

@@ -18,8 +18,8 @@ TAMAKUSHI = {"id": "KLEEMOD-TAMAKUSHI_CASKET", "name": "Tamakushi Casket",
              "description": "At the start of your turn, if a Plan is waiting, "
                             "gain 3 Block."}
 WATATSUMI = {"id": "KLEEMOD-WATATSUMI_CASKET", "name": "Watatsumi Casket",
-             "description": "At the start of your turn, if a Plan is waiting, "
-                            "gain 5 Block."}
+             "description": "At the start of your turn, gain 3 Block for each "
+                            "Plan waiting."}
 
 
 @pytest.fixture(autouse=True)

@@ -215,14 +215,13 @@ brief, with no amendment ceremony.
   **The rule binds the player's own bar (R269, 2026-09-08): a pet's bar may be
   restored at any rarity, priced as damage prevention wherever the pet stands
   between the player and the enemy.** (principles Guardrail 6; R8; R79/B4; R269)
-- **Ancient carve-out (R127, 2026-08-07):** an Ancient-rarity card — Dusty
-  Tome's single acquisition door, one visible Ancient per roster character —
-  may grant per-turn accrual that its owner's resource laws otherwise ban
-  (Kokomi's no-passive-accrual Charge; Furina's no-per-turn-Encore trickle).
-  A bounded, opt-in, once-per-run power spike is the rarity's design: the one
-  door out of the character's central bargain. Scoped to Ancient rarity
-  exactly — no other rarity, no relic, and no event may inherit the
-  exception. (EB-30q)
+- **Ancient carve-out (R127, 2026-08-07):** an Ancient-rarity card — reached
+  only through an act-2 Ancient (Darv's Dusty Tome or Orobas's Archaic Tooth),
+  never rolled — may grant per-turn accrual that its owner's resource laws
+  otherwise ban. A bounded, opt-in, once-per-run power spike is the rarity's
+  design: the one door out of the character's central bargain. Scoped to
+  Ancient rarity exactly — no other rarity, no relic, and no event may
+  inherit the exception. (EB-30q)
 - **Strict-domination is scoped to adjacent rarities:** a card must not be a
   strictly-better superset of another at similar weight; two-step gaps are
   informational. Self-damage/discard/spend_encore count as costs; prefer base-StS

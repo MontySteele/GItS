@@ -1,5 +1,9 @@
 """The three Ancient cards, sim-side (EB-30m, executing R127's carve-out).
 
+Since the Ancient audit (ruled 2026-10-12) these three are the game's Archaic
+Tooth cards; the sim, which has no Orobas, still grants them through its
+Dusty Tome.
+
 `tier0/content/cards/ancients.yaml` is a SIDE-SHEET: no codegen reads it, no
 `*-cards.yaml` lint sweeps it, and the C# classes it mirrors are hand-written.
 That is the right arrangement for cards whose C# twin is hand-written, and it
@@ -8,11 +12,9 @@ rebuilt here, mechanically, against
 `tools/lint_handwritten_parity.ANCIENT_WITNESS`, which reads the C# directly.
 A number can then only be changed in both places or in neither.
 
-The other half of the file pins the ORDER of the two income powers'
-turn-start tick against the Salon upkeep (their shipped-world payouts left
-with the shipped kits, legacy cleanup stage 6). That order is EB-2's
-stated parity target, so it is the one thing here that a well-meaning tidy-up
-could silently undo.
+(The other half of the file once pinned the two income powers' turn-start
+tick, Kokomi's Charge and Furina's Encore. Both are retired, and the Ancient
+audit, 2026-10-12, took the last rows that applied them.)
 """
 
 from __future__ import annotations
@@ -49,19 +51,33 @@ WITNESSED = {
 def _printed_vars(card) -> list[int]:
     """The card's DynamicVar values, in declaration order.
 
-    Mirrors what `extract_cs` reads off the C# `CanonicalVars` list: the
-    damage number, then the bomb's ExtraDamage, or the lone PowerAmount.
-    Declaration order is load-bearing -- the witness pins a LIST.
+    Mirrors what `extract_cs` reads off the C# `CanonicalVars` list: Block,
+    the draw's CardsVar, a damage number (or a spend-all hit's
+    CalculationBase and ExtraDamage), the bomb's size. A Plan line's
+    `KokomiPlan.PlanDamageVar` is namespaced, so the extractor's var regex
+    does not see it; its upgrade delta is the pin's `arm_only_upgrade_vars`,
+    since a Plan line is prototype surface only. Declaration order is
+    load-bearing -- the witness pins a LIST.
     """
     out = []
     for fx in card.effects:
-        if fx["op"] == "damage":
+        if fx["op"] in ("block", "draw"):
+            out.append(fx["amount"])
+        elif fx["op"] == "damage" and "amount_formula" in fx:
+            out.extend([fx["amount_formula"]["base"],
+                        fx["amount_formula"]["per"]])
+        elif fx["op"] == "damage":
             out.append(fx["amount"])
         elif fx["op"] == "place_bomb":
             out.append(fx["bomb_damage"])
-        elif fx["op"] == "apply_power":
-            out.append(fx["amount"])
     return out
+
+
+def _upgrade_deltas(base, up) -> list[int]:
+    """Every number the upgrade moves, in declaration order: the C# side's
+    `UpgradeValueBy` calls, less a Plan line's (arm-only, see the pin)."""
+    return [u - b for b, u in zip(_printed_vars(base), _printed_vars(up))
+            if u != b]
 
 
 def _hits(card) -> list[int]:
@@ -120,8 +136,7 @@ def test_every_number_matches_the_c_sharp_witness(cid):
     assert [base.cost] == pin["cost"]
     assert _printed_vars(base) == shipped("vars")
     assert _hits(base) == pin["hits"]
-    assert [u - b for b, u in zip(_printed_vars(base), _printed_vars(up))] \
-        == shipped("upgrade_vars")
+    assert _upgrade_deltas(base, up) == shipped("upgrade_vars")
     delta_cost = up.cost - base.cost
     assert ([delta_cost] if delta_cost else []) == pin["upgrade_cost"]
 
@@ -147,7 +162,7 @@ def test_the_ancients_stay_out_of_the_ratified_sheets():
     assert "ancient" not in gen.RARITY_CS
 
 
-# --- the income powers -----------------------------------------------------
+# --- playing an Ancient ---------------------------------------------------
 
 def _state(character, seed=0, enemies=None):
     return CombatState(player=loader.build_player(character),

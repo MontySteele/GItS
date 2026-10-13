@@ -1378,7 +1378,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // attack set it off (`byAttack`, rule 6) rather than a Set off.
         RecordExplosion(applier, charge.IsMine, reacted, byAttack);
         // POOL COMPLETION (2026-10-01), ALICE'S MASTERPIECE (her second
-        // Ancient): "When one of your Bombs goes off, it stays on the enemy at
+        // Ancient): "When one of your Bombs or Mines goes off, it stays on the enemy at
         // half its size, rounded down." The charge already left the pile
         // (take-then-resolve), so the half that stays is never set off by the
         // take that set off the whole.

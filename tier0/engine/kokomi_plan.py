@@ -271,13 +271,6 @@ QUARTER = 4
 #: written on the Bake-Kurage): `note_face_up_plan_card`. `TreatisePower` is
 #: the twin.
 TREATISE = "kk_treatise"
-#: R276: her Ancient under the arm, "Whenever the Bake-Kurage carries out a
-#: Plan, gain N Block and draw 1 card." EVERY Plan, uncapped -- the card prints
-#: "Whenever" and is the Dusty Tome's single grant. Applied by the second effect
-#: on `princess_of_watatsumi` (`content/cards/ancients.yaml`);
-#: `PrincessOfWatatsumiPlanPower` is the twin.
-PRINCESS_OF_WATATSUMI = "kk_princess_of_watatsumi"
-PRINCESS_OF_WATATSUMI_DRAW = 1
 #: THE EXPANSION, BATCH ONE (2026-09-29). Twins in `KokomiExpansion.cs`. (The
 #: Casket's Powers -- Grand Design's old marker, Flood Tide, The Long Game,
 #: Kurage Swarm -- left with the re-founding, 2026-10-12.)
@@ -1337,7 +1330,8 @@ def _note_plan_resolved(state: CombatState,
     Treatise and Song of Pearls LEFT this bus in the Kokomi core pass
     (2026-09-27): Treatise now pays for a face-up play of a Plan card
     (`note_face_up_plan_card`) and Song of Pearls for an empty queue
-    (`song_of_pearls`). Her Ancient under the arm still rides it.
+    (`song_of_pearls`). Her Ancient left it with the Ancient audit
+    (2026-10-12): Princess of Watatsumi is a Plan card now.
 
     ONE PAYMENT PER PLAN, NOT PER CLAUSE: War Council prints two clauses and is
     one Plan. That is true because of WHERE this is called (the tail of
@@ -1352,22 +1346,13 @@ def _note_plan_resolved(state: CombatState,
     state.kk_plans_carried_out_this_combat += 1
     # THE PAYOFF PASS, KURAGE CANOPY: "Whenever the Bake-Kurage carries out
     # a Plan, gain 2 Block." Per carry-out, so a doubled one pays twice.
-    # POWERED, as her Ancient's Block below. `KurageCanopyPower` is the twin.
+    # POWERED (rule 3). `KurageCanopyPower` is the twin.
     canopy = int(p.powers.get(KURAGE_CANOPY, 0))
     if canopy:
         amount = powers.modify_block_gained(p, canopy)
         p.block += amount
         state.emit("block", amount=amount)
         state.emit("plan_kurage_canopy", amount=amount)
-    n = p.powers.get(PRINCESS_OF_WATATSUMI, 0)
-    if n:
-        # Block first, then the card: `PrincessOfWatatsumiPlanPower`'s order.
-        # POWERED (rule 3: her Dexterity counts on what a Plan pays).
-        amount = powers.modify_block_gained(p, n)
-        p.block += amount
-        state.emit("block", amount=amount)
-        state.draw(PRINCESS_OF_WATATSUMI_DRAW)
-        state.emit("plan_princess_of_watatsumi", amount=amount)
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,

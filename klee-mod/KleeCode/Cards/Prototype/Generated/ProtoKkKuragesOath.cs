@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlannedCard, INowLineCard
+public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, ITranscendenceCard, IPlannedCard, INowLineCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -47,6 +47,11 @@ public sealed class ProtoKkKuragesOath : CustomCardModel, ICharacterCard, IPlann
         ("title", "Kurage's Oath"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies."),
     };
+
+    /// <summary>Orobas's Archaic Tooth turns this card into its Ancient
+    /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`).</summary>
+    public CardModel GetTranscendenceTransformedCard() =>
+        ModelDb.Card<global::KleeMod.Cards.Kokomi.PrincessOfWatatsumi>();
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
     /// was written. Carried out by the Bake-Kurage at the start of her next

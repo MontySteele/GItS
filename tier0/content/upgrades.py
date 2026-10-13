@@ -1461,7 +1461,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             word = "vuln" if key == "vulnerable" else "weak"
             ok = _bump_first((fx for fx in top if fx.get("op") == "apply_power"
                               and word in fx.get("power", "")), "amount", val)
-        elif key in ("kurage_ward", "kk_princess_of_watatsumi"):
+        elif key == "kurage_ward":
             # R130 (2026-08-07): at ward 5 the Oath's upgrade sells the +2 the
             # ruling prints, so the delta needs a key. NAME-MATCHED like weak /
             # vulnerable rather than routed through the generic `power_amount`:
@@ -1469,8 +1469,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # = ward x pulses per play), and a delta that says which power it
             # moves cannot land on the wrong apply_power if the row ever grows
             # a second one.
-            # R276: Princess of Watatsumi's arm power is the second apply_power
-            # on its row, so it is name-matched for the same reason.
             ok = _bump_first((fx for fx in top if fx.get("op") == "apply_power"
                               and fx.get("power") == key),
                              "amount", val)
