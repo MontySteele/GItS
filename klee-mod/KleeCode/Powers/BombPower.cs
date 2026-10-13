@@ -23,7 +23,7 @@ namespace KleeMod.Powers;
 /// <summary>
 /// Klee's signature Bomb: a delayed charge on an enemy.
 ///
-/// Canonical rules (klee-character-design.md line 22, tier0-simulator-spec.md
+/// Canonical rules (klee-character-design.md line 22, archived; tier0-simulator-spec.md
 /// line 115, reference implementation tier0/engine/effects.py):
 ///   - Detonates at the start of Klee's next turn for its damage, applying Pyro.
 ///   - Detonates EARLY if that enemy is hit by an Attack card.

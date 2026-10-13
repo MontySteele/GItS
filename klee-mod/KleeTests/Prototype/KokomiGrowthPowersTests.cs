@@ -14,7 +14,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// KOKOMI GROWTH POWERS (2026-10-10). Brief
-/// <c>review/active/kokomi-growth-powers-2026-10-10.md</c>, ruled ("Agreed on
+/// <c>review/active/kokomi-growth-powers-2026-10-10.md</c> (archived), ruled ("Agreed on
 /// both"): Flood Tide replaces The General's Banner, Grand Design keeps the
 /// Casket's count, and Brine Sting's Plan deals 3 before its Weak. Readers
 /// that run synchronously run for real on a headless seat; anything that

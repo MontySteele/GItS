@@ -78,7 +78,7 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Exhaust, and have a Plan line.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
-- **Latest:** the level pass (`review/active/kokomi-level-pass-2026-10-12.md`)
+- **Latest:** the level pass (`review/ruled/kokomi-level-pass-2026-10-12.md`)
   took the big numbers down and gave the situational cards a floor; it is
   unplayed. Records: `review/records/kokomi-round-{1,2,3}-2026-10-12.md`.
 - **Next:** a two-seat round on the level-pass build, then the review.
@@ -100,7 +100,7 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Theater Program; one potion, Bottled Applause. Ancients: Center of
   Attention (Tome) and All the World's a Stage (Tooth on Rising Applause).
   Sim twin `tier0/engine/furina_tide.py`.
-- **Latest:** the Furina review (`review/active/furina-review-2026-10-12.md`)
+- **Latest:** the Furina review (`review/ruled/furina-review-2026-10-12.md`)
   made Encore! "Your oldest guest acts." at 0.
 - **Next:** one more overnight wave, then a card-pool review on [USER]'s
   playtest. Otherwise she is left alone for now.
@@ -120,7 +120,7 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 - **Pool:** 78 (20 / 35 / 23), thirteen pool Knights, his own relics and
   three potions. Ancients: All Four Winds (Tome) and Dandelion Gale (Tooth on
   Windbound Execution).
-- **Latest:** the last pass (`review/active/varka-last-pass-2026-10-12.md`)
+- **Latest:** the last pass (`review/ruled/varka-last-pass-2026-10-12.md`)
   gave twelve always-skipped cards a floor and cut five costs; it is unplayed.
 - **Next:** [USER]'s playtest, then Balance (`operations/stage-gate.md`),
   then his visuals, story and events, as Klee had.
@@ -144,7 +144,7 @@ A fourth main-menu mode (`klee-mod/KleeCode/Abyss/`).
   co-op party agrees on one Blessing.
 - **Durations:** each entry lasts the Whole run or This act. The pools are 14
   Blessings and 12 Shadows (papers `review/active/spiral-abyss-pools-2026-10-12.md`
-  and `review/active/abyss-pools-2-2026-10-12.md`).
+  and `review/ruled/abyss-pools-2-2026-10-12.md`).
 - **Display:** each Blessing is a relic; Shadows show as an "Abyss Shadows"
   relic and as badges on enemies.
 - **Tests:** `KleeTests/SpiralAbyss*Tests.cs`, `AbyssOverlayTests.cs`,

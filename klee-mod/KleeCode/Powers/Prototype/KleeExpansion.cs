@@ -165,7 +165,7 @@ public static class KleeExpansion
     /// turn."): <paramref name="options"/> DISTINCT Companion cards off
     /// <see cref="RandomCompanionPool"/>, the player keeps
     /// <paramref name="amount"/> of them. The Klee upper pass (2026-10-11,
-    /// <c>review/active/klee-upper-pass-2026-10-11.md</c> pick 3 (a)); they
+    /// <c>review/ruled/klee-upper-pass-2026-10-11.md</c> pick 3 (a)); they
     /// were random adds.
     ///
     /// THE BASE GAME'S DISCOVERY, line for line where it can be: the options

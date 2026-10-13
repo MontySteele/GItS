@@ -189,7 +189,7 @@ public sealed class ChevreuseMonster : StagePerformerMonster
 }
 
 // ---- THE POOL TO 75's four guests (2026-10-09,
-// review/active/furina-pool-growth-2026-10-09.md sec.5). Navia, Neuvillette
+// review/ruled/furina-pool-growth-2026-10-09.md sec.5). Navia, Neuvillette
 // and Escoffier wear the scenes the supporting pool's art pass cut; Freminet
 // has none yet (`ModVisualsPathFor` answers null) and stands as the Osty
 // fallback until one is cut.

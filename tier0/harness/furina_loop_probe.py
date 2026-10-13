@@ -6,7 +6,7 @@
     .venv/Scripts/python.exe -m tier0.harness.furina_loop_probe --named
 
 `--named` is the pool-to-75 paper's sec.6 check
-(`review/active/furina-pool-growth-2026-10-09.md`): the four combinations it
+(`review/ruled/furina-pool-growth-2026-10-09.md`): the four combinations it
 names, each played out in one long turn (the criterion below, with up to
 three members and the named Powers, so a four-card combination fits) and
 over several whole turns (`play_turns`: draw 5, play, the end of the turn's

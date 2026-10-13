@@ -1,7 +1,7 @@
 """Atomic effect resolvers — the card DSL.
 
 v1 ops per tier0-simulator-spec.md §4.2, extended per
-klee-character-design.md §6 for the real card sheet: detonate, move_bombs,
+klee-character-design.md §6 (archived) for the real card sheet: detonate, move_bombs,
 modify_bombs, burst_energy, swirl, refresh_all_auras, buff_next_attack,
 cost_mod, conditional, repeat_this, formula amounts, companion ops.
 """

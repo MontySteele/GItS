@@ -50,7 +50,7 @@ def test_the_carrier_set_is_exactly_what_was_ruled():
     `ethereal:` on some row would quietly discount a card nobody meant to
     discount. Phase 2B ruled ONE draftable carrier, the shipped
     `big_badda_boom`, which left with the shipped sheets (legacy cleanup stage
-    6). The Kokomi re-founding (review/active/kokomi-card-paper-2026-10-12.md,
+    6). The Kokomi re-founding (review/ruled/kokomi-card-paper-2026-10-12.md,
     ruled 2026-10-12) prints Ethereal on five of her rows, and this fails the
     moment another appears without a ruling to point at."""
     offerable = [c for c in loader.prototype_cards()

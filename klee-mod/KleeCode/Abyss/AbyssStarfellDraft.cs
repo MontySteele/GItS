@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Runs;
 namespace KleeMod.Abyss;
 
 /// <summary>
-/// STARFELL DRAFT (<c>review/active/abyss-pools-2-2026-10-12.md</c>, whole
+/// STARFELL DRAFT (<c>review/ruled/abyss-pools-2-2026-10-12.md</c>, whole
 /// run): "Card rewards show 1 additional card."
 ///
 /// THE SEAM. Every card reward the game rolls -- a combat's, an event's, a

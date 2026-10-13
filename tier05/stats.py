@@ -30,7 +30,9 @@ is Kokomi PULSE TELEMETRY, which is reported and has never been ratified: the
 two nearest-rank readers (`elite_blitz.aggregate`'s `p95_pulse` and
 `kurage_telemetry.aggregate`'s `p50`/`p95`) now interpolate. The two unit
 tests that pinned the old arithmetic were re-homed with the change named in
-them, not deleted. See docs/sprint-sim-hygiene-log-2026-07-29.md.
+them, not deleted. See
+docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md (archived,
+docs/ARCHIVE.md).
 """
 
 from __future__ import annotations

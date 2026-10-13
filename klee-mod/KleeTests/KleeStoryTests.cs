@@ -18,7 +18,7 @@ namespace KleeMod.Tests;
 
 /// <summary>
 /// KLEE'S STORY IN THE RUN, batches 1 and 2
-/// (<c>review/active/klee-story-batch-1-2026-10-12.md</c>,
+/// (<c>review/ruled/klee-story-batch-1-2026-10-12.md</c>,
 /// <c>review/active/klee-story-batch-2-2026-10-12.md</c>).
 ///
 /// THE HEADLESS BOUNDARY (README.md): no ModelDb, no event room, no live
@@ -37,7 +37,8 @@ public class KleeStoryTests
     // ---- The words are the papers' -------------------------------------------
 
     private static string Paper(int batch) => File.ReadAllText(Path.Combine(
-        RepoRoot(), "review", "active", $"klee-story-batch-{batch}-2026-10-12.md"));
+        RepoRoot(), "review", batch == 1 ? "ruled" : "active",
+        $"klee-story-batch-{batch}-2026-10-12.md"));
 
     /// <summary>The game's markup back to the paper's Markdown.</summary>
     private static string ToPaper(string s) => s

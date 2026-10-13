@@ -36,7 +36,7 @@ namespace KleeMod.Powers;
 ///   4. SALON SOLITAIRE, her starting relic: "At the end of your turn, Repay
 ///      1." (Upgraded: 2. <see cref="FurinaStageLaw.SingerRepay"/>.)
 ///   5. GUEST STARS (the pool to 75's rule,
-///      <c>review/active/furina-pool-growth-2026-10-09.md</c> sec.3): three
+///      <c>review/ruled/furina-pool-growth-2026-10-09.md</c> sec.3): three
 ///      seats, guests only. A Guest Star exhausts when played and has no
 ///      effect on summon; a guest has a line while on stage and acts at the
 ///      end of her turn, oldest first. A fourth makes the oldest leave, and

@@ -85,7 +85,7 @@ public static class AbyssDisplay
 
     /// <summary>The Blessing relics this player holds whose Blessing is no
     /// longer in force: a This act Blessing once its act has ended
-    /// (<c>review/active/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)).</summary>
+    /// (<c>review/ruled/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)).</summary>
     public static IReadOnlyList<AbyssBlessingRelic> BlessingRelicsToRemove(
         IEnumerable<AbyssBlessing> inForce, IEnumerable<RelicModel> held)
     {

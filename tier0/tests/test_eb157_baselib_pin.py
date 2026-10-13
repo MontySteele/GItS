@@ -92,7 +92,7 @@ def _state_pin() -> str:
     """The number in STATE.md's `Mod build environment (pinned)` block.
 
     Read from the CURRENT block only, which is bounded by the next `##`
-    heading. Pin history moved to `docs/current/workstreams.md` on 2026-09-01
+    heading. Pin history moved to `docs/current/workstreams.md` (archived) on 2026-09-01
     (the prose diet) and names the number this one replaced; a reader that took
     the last match anywhere would gate on the retired pin.
     """

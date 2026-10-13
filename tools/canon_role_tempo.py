@@ -1,6 +1,6 @@
 """The canon role x tempo baseline, read STRUCTURALLY out of the local dll.
 
-Track A / T1 + T3 (docs/track-a-kickoff-brief.md). Produces three things:
+Track A / T1 + T3 (docs/track-a-kickoff-brief.md, archived in docs/ARCHIVE.md). Produces three things:
 
   game_ref/role_tempo_canon.json   LOCAL artifact. Per-card classification for
                                    all five canon pools, card names included.

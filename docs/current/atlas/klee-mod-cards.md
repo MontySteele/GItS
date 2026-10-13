@@ -188,7 +188,7 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 - **R92-3b** — the sheet schema has TWO readers (`tier0/content/loader.py` via
   `Card.from_dict`, and `gen_klee_cards.CARD_FIELDS`), so a field addition is a
   shared-surface change that files a cross-session note BEFORE landing
-  (`tier0/DECISIONS.md:3149-3161`; mirror `docs/roster-codegen.md:118-134`).
+  (`tier0/DECISIONS.md:3149-3161`; mirror `docs/roster-codegen.md:118-134`, archived in `docs/ARCHIVE.md`).
 
 ## 5. Traps
 
@@ -221,10 +221,9 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
   checked in BOTH directions**: a deferred row that now parses fails as a STALE
   DEFERRAL (`lint_handwritten_parity.py:297-331`, `:388-402`), and `Unparseable`
   is always loud, never a skip (`:22-27`, `:53-55`).
-- **`docs/roster-codegen.md` is partly stale by its own admission** — a
-  2026-07-26 correction block up top, and it still quotes "75 of 76" Furina
-  cards against the live 81/82 (`:5-16`, `:71-76`). The manifests are the
-  coverage ledger; the doc is the contract prose.
+- **`docs/roster-codegen.md` is archived** (`docs/ARCHIVE.md`); the manifests
+  are the coverage ledger and `docs/current/operations/codegen.md` is the
+  procedure.
 - **`Confiscated.cs:16` names `KleeExtraCardPool`, which no longer exists** —
   the off-pool ledger is `KleeOffPoolCards.cs`, whose docstring also records
   that its "a second pool could never work" paragraph is now FALSE and was
@@ -242,8 +241,8 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
    is generator-independent.
 5. `tools/lint_handwritten_parity.py:1-56` and `:241-262` — the only drift-prone
    path, and the kit invariant that already burned us.
-6. `docs/roster-codegen.md` — the prose contract (read its correction block
-   first), before touching a profile or the sheet schema.
+6. `docs/current/operations/codegen.md` — the procedure, before touching a
+   profile or the sheet schema.
 
 ## 7. The prototype surface — a fourth emitter that is not a fourth character
 

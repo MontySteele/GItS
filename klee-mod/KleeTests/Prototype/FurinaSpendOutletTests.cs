@@ -9,7 +9,7 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// THE SPEND OUTLET PAPER (<c>review/active/furina-spend-outlet-2026-10-12.md</c>
+/// THE SPEND OUTLET PAPER (<c>review/ruled/furina-spend-outlet-2026-10-12.md</c>
 /// sec.2, ruled 2026-10-12, all defaults): Rising Applause+ gains Retain and
 /// the base card is unchanged; her starter spend-all carries a one-line rider
 /// saying when to play it. The caps are pinned in

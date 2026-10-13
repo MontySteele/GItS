@@ -154,7 +154,38 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
 
 - **The map marker.** It is still the wiki side-icon. It needs either an `art_process` refit in the main checkout, or a base-style pin drawn for her; it is listed in `BACKLOG.md`.
 - **The rest site is a still,** not an idle loop. BaseLib rebuilds the rest sprite from its texture alone, so a loop there needs code.
-- **The toon-shading verdict,** after an in-game look.
+- ~~The toon-shading verdict~~: ruled 2026-10-13, below.
+
+## Style G ruled, 2026-10-13
+
+[USER], on the style-match variant sheet: "Agreed - I like G as well! Let's go with your pick (a)." Pick (a) was G, plus a ground shadow under her.
+
+**What G is, as built** (`tools/klee_render/`):
+
+- **The shader** (`render.py`, `STYLE`):
+  - a three-step constant toon ramp: deep (0.66, 0.52, 0.62) at 0, half (0.90, 0.80, 0.82) at 0.22, light at 0.40;
+  - the light/shadow boundaries wobbled by plus or minus 0.26 by stretched noise in her UV space (scale 22, stretch 4, turned 28 degrees);
+  - plus or minus 10% value grain in UV space;
+  - each body material's outline is its own texture times (0.42, 0.33, 0.35), not one flat brown.
+- **The 2D pass** (`post.py`, new; numpy and Pillow only), run on every frame and still between render and pack, in this order:
+  - the interior thin-line fade, at 0.6;
+  - the grade: Lab chroma soft-knee at 38, max 54; L* top compressed from 97 to 88; whites +4 b*; a soft posterise, step 9, strength 0.3;
+  - anisotropic Kuwahara at radius 2.0;
+  - brush grain at 1.0 L*.
+- **The protect mask.** The line fade and the Kuwahara skip her face and the bomb, grown 2 px and feathered. Without it her eyes vanish at game scale. The mask comes out of the same render as a `style` pass (an EEVEE AOV), so there is no second render.
+- **The grain moves with her.** The grain is noise in her own surface space. The shader writes it into the `style` pass, and `post.py` smears it into short strokes. Measured on idle and attack, the grain changes from frame to frame exactly as much as her own texture does (frame-to-frame correlation at a fixed pixel: idle 0.96 against 0.98 for the texture; attack 0.56 against 0.59). The prototype's screen grain stayed at 1.00 while she moved, which is the crawl.
+- **Scale.** Every pixel length in the 2D pass is tuned at the combat scale and grows with the render, so the shop, rest site and select close-up carry the same strokes on screen.
+- **The thrown bomb** (`klee_bomb.png`) is cut from the painted attack sheet, so it carries the same look.
+
+**The ground shadow.** Every base character's combat and shop skeleton carries a `shadow` region in its own Spine atlas. The game does not add shadows itself, so Klee's sprite scene had none. Hers is the same thing done for sprites:
+
+- **The look.** A soft black ellipse with a flat alpha of about 0.39 and a ragged, brushy rim, like the base atlases' own shadows (Ironclad 101/255, Silent 100/255).
+- **The size.** 102 by 24 px at 1080p, 1.9 times her boot span in stance A. At the shop it is 1.7 times that.
+- **Where.** `pack.py` draws it (`klee_shadow.png`). The `combat.tscn` that `tools/klee_rig` generates places it first under `%Facing`, at the feet anchor, so it draws behind her and mirrors with her. The merchant scene places it the same way.
+- **Nothing animates it,** so it holds through the attack, the death sit and the facing flip, as the base shadows do on their root bone.
+- **The rest site has none yet.** The base rest-site skeletons carry shadows too, but the brief named combat and the shop. Her rest still is one BaseLib sprite, so a shadow there would be painted into `klee_rest.png`. It is listed in `BACKLOG.md`.
+
+**Left:** [USER]'s look at her in motion on the next build.
 
 ## For [USER] (ruled above)
 

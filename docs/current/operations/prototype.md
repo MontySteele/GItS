@@ -6,7 +6,7 @@ starts `proto_` (ids kept, legacy cleanup pick 1: renaming breaks saves, art
 paths and the seat bridge). The old shipped kits' sheets
 (`docs/*-cards.yaml`, `*-upgrades.yaml` and the three companion sheets), their
 C# and the arm switches are deleted (legacy cleanup stages 5 and 6, 2026-10-01,
-`review/active/legacy-cleanup-2026-10-01.md`). There is one build and one sim
+`review/ruled/legacy-cleanup-2026-10-01.md`). There is one build and one sim
 world: the current kits.
 
 ```sh

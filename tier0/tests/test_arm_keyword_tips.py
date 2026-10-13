@@ -1216,11 +1216,11 @@ STAGE_SUMMONERS = {
     "proto_fs_guest_star_wriothesley": "Wriothesley",
     "proto_fs_guest_star_lynette": "Lynette",
     "proto_fs_guest_star_clorinde": "Clorinde",
-    # The pool to 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+    # The pool to 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3).
     "proto_fs_guest_star_lyney": "Lyney",
     "proto_fs_guest_star_sigewinne": "Sigewinne",
     "proto_fs_guest_star_chevreuse": "Chevreuse",
-    # The pool to 75 (review/active/furina-pool-growth-2026-10-09.md sec.5).
+    # The pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5).
     "proto_fs_guest_star_freminet": "Freminet",
     "proto_fs_guest_star_navia": "Navia",
     "proto_fs_guest_star_neuvillette": "Neuvillette",

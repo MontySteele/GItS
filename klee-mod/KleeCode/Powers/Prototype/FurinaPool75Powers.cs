@@ -12,7 +12,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 // ======================================================================
-// FURINA, THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md,
+// FURINA, THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md,
 // ruled 2026-10-09) -- THE NEW POWERS.
 //
 // As with the Salon's Tab's powers (`FurinaStagePowers.cs`), each is a switch
@@ -327,7 +327,7 @@ public sealed class TheMasqueradePower : PowerModel, ILocalizationProvider
 }
 
 // ======================================================================
-// THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md,
+// THE DIVERSITY PASS (review/ruled/furina-diversity-pass-2026-10-11.md,
 // ruled 2026-10-11): the two guest styles' Powers.
 // ======================================================================
 

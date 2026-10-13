@@ -10,7 +10,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE SPEND PAPER, BUILT AT ITS DEFAULTS (2026-10-10,
-/// <c>review/active/furina-spend-paper-2026-10-10.md</c> picks 1 and 2; the
+/// <c>review/ruled/furina-spend-paper-2026-10-10.md</c> picks 1 and 2; the
 /// picks are open on #1014). "Spend up to X" spends X, or all she holds if
 /// that is less, never fails, and is a Spend only when at least 1 counts; it
 /// is not a spend-all. Navia's act Spends half the bank and Freminet's a

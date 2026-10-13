@@ -16,7 +16,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE KOKOMI JELLYFISH BUILD (2026-10-12,
-/// <c>review/active/kokomi-jellyfish-growth-2026-10-12.md</c>, ruled at all
+/// <c>review/ruled/kokomi-jellyfish-growth-2026-10-12.md</c>, ruled at all
 /// defaults: "Good with all defaults." and "I'm actually totally fine with
 /// 0-cost plans"). Stings and Wards cost 0 and keep their Plan lines, the
 /// generators are at the Silent's rates (Shoal Call is Blade Dance), Endless

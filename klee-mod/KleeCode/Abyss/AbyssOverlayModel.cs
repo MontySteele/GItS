@@ -8,7 +8,7 @@ namespace KleeMod.Abyss;
 /// half) and the Shadow that joins the enemies' roll if it is passed (lower
 /// half). Every string is the paper's, through <see cref="AbyssText"/>. The
 /// tags are each entry's duration, "Whole run" or "This act"
-/// (<c>review/active/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)).</summary>
+/// (<c>review/ruled/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)).</summary>
 public sealed record AbyssOverlayCard(
     int Index, AbyssBlessing Blessing, AbyssShadow Shadow,
     string BlessingName, string BlessingText, string ShadowName, string ShadowText,

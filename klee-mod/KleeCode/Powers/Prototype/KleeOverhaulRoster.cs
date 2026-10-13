@@ -394,7 +394,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoBehindJeansDesk>(),
         ModelDb.Card<ProtoKoKitchenAlchemy>(),
         // THE KLEE TEMPO PAPER (2026-10-07, ruled,
-        // review/active/klee-tempo-paper-2026-10-07.md sec.3): five in for
+        // review/ruled/klee-tempo-paper-2026-10-07.md sec.3): five in for
         // the five cut above, in `C.KLEE_TEMPO_IDS`' order, which is the
         // sheet's -- Cook's damage that leaves the Bombs cooking, and Spray's
         // damage with and without the bank. Still 78, 25 / 32 / 21.
@@ -404,7 +404,7 @@ internal static class KleeOverhaulRoster
         ModelDb.Card<ProtoKoDodocoTag>(),
         ModelDb.Card<ProtoKoExplosiveSpark>(),
         // THE KLEE DESIGN REVIEW (2026-10-08, ruled,
-        // review/active/klee-design-review-2026-10-08.md sec.4.4 and 4.5):
+        // review/ruled/klee-design-review-2026-10-08.md sec.4.4 and 4.5):
         // two Commons in for Playdate and Pop!, in
         // `C.KLEE_DESIGN_REVIEW_IDS`' order, which is the sheet's -- her
         // normal attack (place and set off in one card) and Spray's fuel for

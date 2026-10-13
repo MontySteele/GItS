@@ -319,7 +319,7 @@ public static class AbyssRules
         return Math.Max(0, hits - AbyssNumbers.MageShieldPerHit);
     }
 
-    // ---- Round two (review/active/abyss-pools-2-2026-10-12.md) -------------
+    // ---- Round two (review/ruled/abyss-pools-2-2026-10-12.md) -------------
 
     /// <summary>Vigor of the Abyss: "while you are above half HP, your
     /// Attacks deal 3 additional damage". A player's powered attack (the hits

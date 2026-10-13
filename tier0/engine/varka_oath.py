@@ -126,7 +126,7 @@ THE COMBO PASS (review/active/varka-combo-pass-2026-10-04.md, ruled
     `shatter` (stacks of Weak plus Vulnerable on the aim, read before the
     hit) and `deep_freeze` (double the aim's Weak and Vulnerable).
 
-VARKA PYRO PAPER 2 (2026-10-12, review/active/varka-pyro-reactions-2026-10-12.md):
+VARKA PYRO PAPER 2 (2026-10-12, review/ruled/varka-pyro-reactions-2026-10-12.md):
   * KIND `temp_strength` (Ember Cleave, "Gain 2 Strength this turn"): the
     shared `temp_strength` power, Setup Strike's.
   * KIND `next_pyro_attack` (Stoke the Flames, "Your next Pyro Attack this

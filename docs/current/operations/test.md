@@ -6,7 +6,8 @@ lints, understudy contracts). The frozen-battery calibration bands are
 retired until a kit reaches Balance (2026-10-01, legacy cleanup pick 5): they
 skip, marked `RETIRED_CALIBRATION` (`tier0/tests/retired_calibration.py`). The sim
 runs the current kits only; the shipped kits, their sheets and the
-`shipped_world` fixture are deleted (legacy cleanup stage 6).
+`shipped_world` fixture are deleted (legacy cleanup stage 6). What the sim
+checks now is rules parity with the mod, not balance.
 
 ```sh
 python3 -m pytest tier0/tests tier05/tests -q          # what CI runs
@@ -78,13 +79,13 @@ date-attributed shape the C11 ruling took):
 - **inner loop** — the targeted tests for what you are editing, plus the fast
   lane. Seconds, not minutes.
 - **before any push** — the FULL suite (`-n auto --dist loadscope`) and the
-  full lint battery. The fast lane is never the gate: the deselected 82 items
-  are the calibration bands, and a band that was not run is not a band. Since
+  full lint battery. The fast lane is never the gate: it deselects the slow
+  items, and a test that was not run is not a gate. Since
   Correction D a push that ran NOTHING is refused outright — since 2026-09-02
   by the git `pre-push` hook (`tools/hooks/pre_push_gate.py`, installed once
   per clone with `python tools/hooks/install.py`), which runs the fast lane and
   the `ci` lint lane in ~60 s — **a floor under this rule, not a substitute for
-  it.** The hook cannot afford the bands; you can. It left `PreToolUse` because
+  it.** The hook cannot afford the full suite; you can. It left `PreToolUse` because
   such a hook necessarily judged the tree as it stood BEFORE the command: an
   `edit && commit && push` one-liner was gated on the pre-edit tree, and often
   refused over the state of a file that same command was fixing.

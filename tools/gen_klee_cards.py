@@ -2512,10 +2512,10 @@ VARKA_KINDS = {
     "pyro_strike": "PyroStrike",
     "shatter": "Shatter",
     "deep_freeze": "DeepFreeze",
-    # THE PYRO PASS (2026-10-11, review/active/varka-pyro-pass-2026-10-11.md):
+    # THE PYRO PASS (2026-10-11, review/ruled/varka-pyro-pass-2026-10-11.md):
     # Ashen Oath's gain, which switches nothing.
     "pyro_oath": "PyroOath",
-    # PYRO PAPER 2 (2026-10-12, review/active/varka-pyro-reactions-2026-10-12.md):
+    # PYRO PAPER 2 (2026-10-12, review/ruled/varka-pyro-reactions-2026-10-12.md):
     # Ember Cleave's "Gain 2 Strength this turn" (Setup Strike's) and Stoke's
     # "Your next Pyro Attack this turn deals 5 additional damage".
     "temp_strength": "TemporaryStrength",
@@ -2694,7 +2694,7 @@ FURINA_FIELDS = {"op", "kind", "amount"}
 #: whether it arrives upgraded is the card's own upgrade (`upgraded_grant`).
 GRANT_ALICES_MINE_EACH_TURN_FIELDS = {"op"}
 #: THE KLEE SCALING PASS (klee-next, 2026-10-05,
-#: review/active/klee-scaling-pass-2026-10-05.md sec.4 B): Witch's Homework.
+#: review/ruled/klee-scaling-pass-2026-10-05.md sec.4 B): Witch's Homework.
 #: "Place a Bomb SIZE. When it goes off, this card's Bomb is GROWTH
 #: [UPGRADED_GROWTH] larger for the rest of the run." The upgrade is the
 #: play-time `IsUpgraded` read (`upgraded_grant`), the face its own swap.
@@ -3200,7 +3200,7 @@ APPLY_POWERS = {
     "fs_universal_revelry": ("UniversalRevelryPower", None,
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that "
         "much additional [gold]Fanfare[/gold]."),
-    # THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md sec.3).
+    # THE POOL TO 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3).
     "fs_ousia_surge": ("OusiaSurgePower", None,
         "The first time you [gold]Drain[/gold] each turn, draw {X} card."),
     "fs_a_five_century_act": ("FiveCenturyActPower", None,
@@ -3214,7 +3214,7 @@ APPLY_POWERS = {
     "fs_bis": ("BisPower", None,
         "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold], keep "
         "half of it."),
-    # THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md sec.5).
+    # THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5).
     # Every class lives in klee-mod/KleeCode/Powers/Prototype/
     # FurinaPool75Powers.cs.
     "fs_grand_entrance": ("GrandEntrancePower", None,
@@ -3248,7 +3248,7 @@ APPLY_POWERS = {
     "fs_the_masquerade": ("TheMasqueradePower", None,
         "Whenever you [gold]Drain[/gold], gain that much "
         "[gold]Block[/gold]."),
-    # THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md,
+    # THE DIVERSITY PASS (review/ruled/furina-diversity-pass-2026-10-11.md,
     # ruled 2026-10-11). The classes live in
     # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
     "fs_leading_lady": ("LeadingLadyPower", None,
@@ -3336,7 +3336,7 @@ APPLY_POWERS = {
     "kk_watatsumi_resistance": ("WatatsumiResistancePower", None,
         "Whenever you write a [gold]Companion[/gold] card as a "
         "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
-    # THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md
+    # THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md
     # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
     "kk_sangonomiyas_orders": ("SangonomiyasOrdersPower", None,
         "At the start of your turn, add a random Common Inazuma "
@@ -15776,7 +15776,7 @@ def varka_switch_face_arg(card: dict, profile: "CharacterProfile"
 #: So the starter row carries the mark and names its Ancient. The vanilla
 #: Dusty Tome skips every card in that map, which is what keeps the Tome on
 #: All Four Winds. Row id -> the hand-written Ancient's class.
-#: The Ancient audit (review/active/ancient-audit-2026-10-12.md, ruled
+#: The Ancient audit (review/ruled/ancient-audit-2026-10-12.md, ruled
 #: 2026-10-12: "Otherwise agreed.- let's fix them all") wires every kit's
 #: Tooth card the same way, and each kit's Tome then draws its other Ancient.
 TRANSCENDENCE = {

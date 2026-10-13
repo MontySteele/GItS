@@ -61,7 +61,7 @@ than blocking a push. See `docs/current/operations/ci.md`.
 That is deliberate and it is a **[USER] call**, not a hygiene decision:
 promoting it to mandatory puts the game install and the Workshop BaseLib on
 every deploy's critical path, which is the same objection that keeps
-`validate.ps1` out of CI (`docs/pending/serenitea-g3-ci-proposal.md`). Whoever
+`validate.ps1` out of CI (`docs/current/rationale/serenitea-g3-ci-proposal.md`, archived in `docs/ARCHIVE.md`). Whoever
 raises that with [USER] should raise the CI question with it.
 
 ## Why it works at all

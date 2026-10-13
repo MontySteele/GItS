@@ -355,7 +355,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// Dumpty's charge, when it goes off, puts a Mine of this size on every
     /// enemy. 0 is "no payload", which is every other charge in the slice.
     /// <c>Homework</c> is the Klee scaling pass's mark (klee-next, 2026-10-05,
-    /// `review/active/klee-scaling-pass-2026-10-05.md` sec.4 B): the Witch's
+    /// `review/ruled/klee-scaling-pass-2026-10-05.md` sec.4 B): the Witch's
     /// Homework card(s) whose Bomb this is. It TRAVELS with a jump and a merge
     /// and is never made by a copy, so "when it goes off" reads the charge and
     /// not the card (<see cref="KleeScalingPass.AfterHomeworkWentOff"/>).
@@ -2022,7 +2022,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// carries them. The ones already on <paramref name="dest"/> grow too.
     ///
     /// THE KLEE UPPER PASS (2026-10-11,
-    /// <c>review/active/klee-upper-pass-2026-10-11.md</c> pick 2 (a)) dropped
+    /// <c>review/ruled/klee-upper-pass-2026-10-11.md</c> pick 2 (a)) dropped
     /// the merge: every Bomb that goes off pays a Spark, so folding three into
     /// one threw two away. Sim twin: <c>klee_overhaul.gather_all_to</c>.
     /// </summary>

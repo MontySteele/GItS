@@ -19,7 +19,7 @@ namespace KleeMod.Powers;
 // number. The same sentence is its keyword tip on its Guest Star card
 // (`ArmKeywordTips`), both off <see cref="ActText"/>.
 //
-// THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md sec.3): an
+// THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.3): an
 // upgraded Guest Star raises its guest's line or act, so each guest has a
 // second badge class carrying the upgraded sentence. A power's text is its
 // class's, which is why the upgrade is a class and not a field.

@@ -24,8 +24,8 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// THE KOKOMI RE-FOUNDING (2026-10-12): Plans and Ethereal, the Casket gone.
-/// Direction <c>review/active/kokomi-design-pass-2026-10-11.md</c> (all five
-/// picks (a)); cards <c>review/active/kokomi-card-paper-2026-10-12.md</c>
+/// Direction <c>review/ruled/kokomi-design-pass-2026-10-11.md</c> (all five
+/// picks (a)); cards <c>review/ruled/kokomi-card-paper-2026-10-12.md</c>
 /// (ruled 2026-10-12). The now-line verbs of the new and changed rows, one
 /// awaited call per `kind:` of the `kokomi` op
 /// (<c>tools/gen_klee_cards.KOKOMI_KINDS</c>). Sim twin:

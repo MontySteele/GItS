@@ -5,7 +5,7 @@ budget are enforced here so a later card edit answers to the kickoff's
 convergence levers, not to a review. Plus the three DSL additions the
 sheet flagged inline (reaction_triggered_this_turn, block_next_turn) and the
 Guest Star reward exclusions. The Fontaine sanity check (2026-10-12,
-review/active/fontaine-companions-2026-10-12.md, ruled) retired shatter_bonus
+review/ruled/fontaine-companions-2026-10-12.md, ruled) retired shatter_bonus
 and moved Navia onto reactions.
 """
 

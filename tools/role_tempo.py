@@ -1,7 +1,7 @@
 """The role x tempo taxonomy: vocabulary, classifiers, and the tag-through.
 
 Track A of the Axis-Validity session (docs/axis-validity-session-charter.md
-§3, docs/track-a-kickoff-brief.md). This module is the shared spine; the three
+§3, docs/track-a-kickoff-brief.md, archived). This module is the shared spine; the three
 tools around it are thin:
 
   tools/canon_role_tempo.py         the five canon pools, out of the local DLL

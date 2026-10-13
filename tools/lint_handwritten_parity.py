@@ -630,7 +630,7 @@ def roster_handwritten_parity() -> list[str]:
 # same C# through the same regexes.
 ANCIENT_WITNESS: dict[str, dict] = {
     # THE ARCHAIC TOOTH CARDS (the Ancient audit,
-    # review/active/ancient-audit-2026-10-12.md, ruled 2026-10-12: "Otherwise
+    # review/ruled/ancient-audit-2026-10-12.md, ruled 2026-10-12: "Otherwise
     # agreed.- let's fix them all"). Each kit's first Ancient became the
     # Transcendence of its starter (`gen_klee_cards.TRANSCENDENCE`), Dandelion
     # Gale's pattern; the sim twins in tier0/content/cards/ancients.yaml.

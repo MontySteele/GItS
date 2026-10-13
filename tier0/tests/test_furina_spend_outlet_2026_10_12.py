@@ -1,6 +1,6 @@
 """FURINA, THE SPEND OUTLET PAPER, in the one-seat sim (ruled 2026-10-12).
 
-`review/active/furina-spend-outlet-2026-10-12.md` sec.2, all defaults:
+`review/ruled/furina-spend-outlet-2026-10-12.md` sec.2, all defaults:
 Spirited Aria spends up to 12, Crashing Waves and Hold the Stage up to 16
 (`test_furina_spend_up_to.py` pins those); Packed House becomes "Gain 5 [8]
 Block, plus 1 for every 4 Fanfare you have." and never spends; Rising

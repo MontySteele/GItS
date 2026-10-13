@@ -22,8 +22,7 @@ of you, so a fresh session does not bulk-load the repo.
   - stamp history → `docs/current/STAMPS.md`
   - the **one** YAML sheet the task touches. Never bulk-load all YAML.
 - **Reference, open only when the task reaches it:** `docs/current/atlas/`,
-  `dossiers/`, `research/`, `calibration/`, `characters/`, `art/`,
-  `rationale/`, `roster/`.
+  `dossiers/`, `research/`, `art/`. Retired files: `docs/ARCHIVE.md`.
 - **Never preload** git history or `review/`.
 
 ## History retrieval (works on a shallow clone)

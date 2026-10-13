@@ -39,12 +39,12 @@ public class SpiralAbyssTests
     public void Every_entry_text_is_the_papers_word_for_word()
     {
         // The first paper's eight of each, and round two's
-        // (review/active/abyss-pools-2-2026-10-12.md): six Blessings, four
+        // (review/ruled/abyss-pools-2-2026-10-12.md): six Blessings, four
         // Shadows, and Riptide's This act text.
         var papers = File.ReadAllText(Path.Combine(
                          RepoRoot(), "review", "active", "spiral-abyss-pools-2026-10-12.md"))
                    + File.ReadAllText(Path.Combine(
-                         RepoRoot(), "review", "active", "abyss-pools-2-2026-10-12.md"));
+                         RepoRoot(), "review", "ruled", "abyss-pools-2-2026-10-12.md"));
         foreach (var b in AbyssDraft.AllBlessings)
         {
             Assert.Contains($"**{AbyssText.Name(b)}** | {AbyssText.Text(b)} |", papers);

@@ -17,7 +17,7 @@ namespace KleeMod.Cards;
 
 /// <summary>
 /// Klee's Archaic Tooth Ancient, the top of the Jumpy Dumpty family (the
-/// Ancient audit, review/active/ancient-audit-2026-10-12.md, ruled
+/// Ancient audit, review/ruled/ancient-audit-2026-10-12.md, ruled
 /// 2026-10-12: "Otherwise agreed.- let's fix them all"). Orobas's Archaic
 /// Tooth turns her starter Jumpy Dumpty into it, as it turns Bash into Break,
 /// and it is Innate because the card it replaces is. Its text is otherwise

@@ -44,6 +44,7 @@ resource=res://furina/vfx/spotlight_shine.tscn
 resource=res://klee/model/combat.tscn
 resource=res://klee/model/frames/klee_attack.png
 resource=res://klee/model/frames/klee_bomb.png
+resource=res://klee/model/frames/klee_shadow.png
 resource=res://klee/model/frames/klee_cast.png
 resource=res://klee/model/frames/klee_death.png
 resource=res://klee/model/frames/klee_hurt.png

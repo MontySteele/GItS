@@ -15,7 +15,7 @@ namespace KleeMod.Cards.Kokomi;
 
 /// <summary>
 /// Kokomi's Archaic Tooth Ancient (the Ancient audit,
-/// review/active/ancient-audit-2026-10-12.md, ruled 2026-10-12: "Princess of
+/// review/ruled/ancient-audit-2026-10-12.md, ruled 2026-10-12: "Princess of
 /// Watatsumi needs to do more as an Ancient. Perhaps "Gain 9 [12] Block. Draw
 /// 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies five times.""):
 /// Orobas's Archaic Tooth turns her starter Kurage's Oath into it, as it

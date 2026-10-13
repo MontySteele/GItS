@@ -201,7 +201,7 @@ SEA_GLASS = "kk_sea_glass"
 EACH_PLAYER_ENERGY = "each_player_energy"
 EACH_PLAYER_DRAW = "each_player_draw"
 
-#: THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md).
+#: THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md).
 #: Kurage's Wake's "Plan: Add 2 Stings to your hand"; Gorou's War Banner
 #: "Plan: Gain 1 Strength" (permanent since the Kokomi level pass) and Juuga "Plan:
 #: For 3 turns, at the end of your turn gain 6 Block" (`amount` is the turns,
@@ -2188,8 +2188,8 @@ def validate_op(card_id: str, fx: dict) -> None:
 
 # ---------------------------------------------------------------------------
 # THE RE-FOUNDING (2026-10-12) -- `Powers/Prototype/KokomiRefounding.cs`'s twin.
-# Direction review/active/kokomi-design-pass-2026-10-11.md (all five picks
-# (a)); cards review/active/kokomi-card-paper-2026-10-12.md (ruled 2026-10-12).
+# Direction review/ruled/kokomi-design-pass-2026-10-11.md (all five picks
+# (a)); cards review/ruled/kokomi-card-paper-2026-10-12.md (ruled 2026-10-12).
 # ---------------------------------------------------------------------------
 
 def add_jellyfish(state: CombatState, card_id: str, amount: int,

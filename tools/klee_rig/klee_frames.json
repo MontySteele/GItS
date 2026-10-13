@@ -354,6 +354,33 @@
   "hat_to_boot_px": 164.8,
   "width_px": 76.5
  },
+ "shadow": {
+  "file": "klee_shadow.png",
+  "texture": [
+   203,
+   49
+  ],
+  "combat": {
+   "center": [
+    2.5,
+    0.0
+   ],
+   "size": [
+    101.6,
+    24.4
+   ]
+  },
+  "merchant": {
+   "center": [
+    4.0,
+    0.0
+   ],
+   "size": [
+    173.5,
+    41.6
+   ]
+  }
+ },
  "rest": {
   "file": "klee_rest.png",
   "size": [

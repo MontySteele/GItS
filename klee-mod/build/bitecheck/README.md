@@ -26,7 +26,7 @@ The three most recent are EB-14's selection-telemetry patches
 
 It needs the Slay the Spire 2 install and the Workshop BaseLib, neither of
 which exists on a GitHub runner — the same reason `validate.ps1` is not in CI
-(see `docs/pending/serenitea-g3-ci-proposal.md`). The automated half of F2 is
+(see `docs/current/rationale/serenitea-g3-ci-proposal.md`, archived in `docs/ARCHIVE.md`). The automated half of F2 is
 `tier0/tests/test_harmony_bootstrap_contract.py`, which pins the *shape* of the
 bootstrap and runs everywhere. This harness checks the *behaviour*, by hand,
 when the bootstrap changes.

@@ -11,7 +11,7 @@ namespace KleeMod.Cards;
 
 /// <summary>
 /// CONFINEMENT, Klee's own Curse (Klee story batch 1 sec.3,
-/// <c>review/active/klee-story-batch-1-2026-10-12.md</c>): "Unplayable. After
+/// <c>review/ruled/klee-story-batch-1-2026-10-12.md</c>): "Unplayable. After
 /// 3 combats, remove this from your deck." Jean always lets her out
 /// eventually.
 ///

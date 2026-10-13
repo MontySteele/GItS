@@ -73,8 +73,8 @@ the Bake-Kurage carries it out at the start of her next turn.
    Her jellyfish cards, Sting and Ward, are generated, cost 1, are Ethereal
    and Exhaust when played or carried out. Dusk ("carried out at the end of
    this turn") is retired with its keyword. (Re-founding, 2026-10-12:
-   `review/active/kokomi-design-pass-2026-10-11.md` and
-   `review/active/kokomi-card-paper-2026-10-12.md`, both ruled.)
+   `review/ruled/kokomi-design-pass-2026-10-11.md` and
+   `review/ruled/kokomi-card-paper-2026-10-12.md`, both ruled.)
 6. **The queue is a resource (R265).** Pool rows may read the queue (how
    many Plans wait, which is first), reorder it, hurry it (Change of Plans
    carries out the first Plan now) or cancel it (Second Thoughts returns
@@ -149,7 +149,7 @@ point (R267 pick 1). Its Weak numbers are the R243 audit's (Weak 1 now, Weak 1
 to ALL written; upgrade 2 Weak written); its damage is 6 [9].
 
 **Plan pricing (2026-10-11,
-`review/active/kokomi-plan-pricing-2026-10-11.md`).** [USER]: "Let's go
+`review/ruled/kokomi-plan-pricing-2026-10-11.md`).** [USER]: "Let's go
 with a ratio of 1.3 and I agree on the other defaults." and "I'm also fine
 with modifying the starters if the rates are low." Kurage's Oath's Plan
 7 to ALL became 9 [12]; Slack Water's damage 4 [7] became 6 [9].
@@ -359,7 +359,7 @@ plan:" (rule 2). Readings: provenance note, "Kokomi status batch,
 ### Plan pricing (2026-10-11)
 
 A Plan that lands next turn prints 1.3 times the base game's on-turn median
-for its cost and target (`review/active/kokomi-plan-pricing-2026-10-11.md`,
+for its cost and target (`review/ruled/kokomi-plan-pricing-2026-10-11.md`,
 ruled: "Let's go with a ratio of 1.3 and I agree on the other defaults").
 Base [upgraded]:
 
