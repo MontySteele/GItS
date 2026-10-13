@@ -109,6 +109,13 @@ HANG_POLE = (-1.0, 0.5, 0.0)
 FAR_READY = (0.24, -0.02, 0.02)
 FAR_CURL = (55, 30)
 SMIRK = {"にやり": 0.6}
+#: The morphs that swap her eyes for the drawn overlay (the 表情 material):
+#: はぅ is the squeezed-shut "> <", なごみ and はちゅ目 its siblings. The
+#: overlay slides out from behind the face skin, so at any value short of 1
+#: it is half buried and her eyes read blank (the hurt sheet, 2026-10-13).
+#: render.py steps these between keys instead of blending them, and a pose
+#: sets them to 0 or 1 only.
+STEP_MORPHS = {"はぅ", "なごみ", "はちゅ目"}
 
 
 def idle_pose(breath=0.0, sway=0.0, blink=0.0, swing=0.0):
@@ -226,7 +233,7 @@ def recoil(k=1.0):
         + arms((0.06 - 0.01 * k, -0.11, -0.16 + 0.20 * k), (0.24 - 0.10 * k, -0.04, 0.02 + 0.06 * k),
                near_pole=(-0.6, 0.2, -0.6), far_pole=(0.6, 0.3, -1), near_curl=(55, 25), far_curl=(55, 25))
         + pigtails(swing=-12 * k, lift=6 * k),
-        {"はぅ": 1.0 * k, "あ": 0.4 * k, "にやり": 0.6 * (1 - k)})
+        {"はぅ": 1.0, "あ": 0.4 * k, "にやり": 0.6 * (1 - k)})
 
 
 HURT = {
