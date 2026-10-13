@@ -151,7 +151,27 @@ package walks seven loops (sec.4 there); none makes a resource from itself.
 - **Encore!, Bis!**: changed or new since the last round; read again after
   the next.
 
-## For [USER]
+## Ruled 2026-10-13
+
+[USER]: "On the four Furina picks: 1) a 2) b but I may revisit Wriotheslet
+later 3) a 4) I think a is fine for now." And: "one thing I noticed is that
+Wriothesley (a 5 star) is at Common. We must have bumped him down at some
+point." (He went to Common in the diversity pass, as the company's Common
+damage star; a rarity question for later.)
+
+Built from this:
+- **Fountain of Lucine:** "Gain 8 [11] Block. At the start of your next turn,
+  Repay 3."
+- **Leading Lady:** "Gain 2 [3] Strength. Your Attacks deal 1 additional
+  damage for each guest on stage."
+- **Escoffier's line:** "Your guests' acts deal 2 [3] more damage." Her act
+  stays 4 [6] to ALL.
+- **Lyney's act:** 5 [7] to ALL (from 8 [11]); Drain 2 and the buffer line
+  stay.
+- Every other guest is unchanged (pick 2 (b): the rest of the package is not
+  built).
+
+## For [USER] (ruled above)
 
 1. **Uncommon Block.**
    - **(a) Default:** Fountain of Lucine "Gain 8 [11] Block. At the start of
