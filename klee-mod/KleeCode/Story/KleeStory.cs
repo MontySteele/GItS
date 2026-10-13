@@ -61,7 +61,7 @@ public static class KleeStory
         Lines = new CombatLines(
             BossEntry: "Klee's never blown up anything that big!",
             LowHp: "Owie... Klee's okay. Klee's [i]fine[/i].",
-            BigBomb: "KABOOM!",
+            Signature: "KABOOM!",
             BossKill: "Klee's gonna need a bigger backpack.",
             RunLoss: "Klee... wants to go home now.",
             RunWin: "Wait till Jean hears! ...Actually, maybe don't tell Jean."),

@@ -11,6 +11,7 @@ using HarmonyLib;
 using KleeMod.Cards;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -38,9 +39,12 @@ namespace KleeMod.Story;
 ///   * below a third of her HP: the first time in a combat a loss takes her
 ///     from at least a third of her max HP to under it (<see
 ///     cref="StoryRules.CrossedBelowThird"/>), once a combat.
-///   * her biggest Bomb: one Bomb (not a Mine) explosion landing 30 or more,
-///     once a combat (<see cref="AfterBombWentOff"/>, called from
-///     <c>ProtoBombPower.Explode</c>).
+///   * the signature moment, once a combat: Klee's biggest Bomb, one Bomb
+///     (not a Mine) explosion landing 30 or more (<see
+///     cref="AfterBombWentOff"/>, called from <c>ProtoBombPower.Explode</c>);
+///     Varka's Four Winds' Ascension, the moment his table's
+///     <see cref="CharacterStory.SignatureCard"/> is played
+///     (<see cref="StoryCombatHooks.AfterCardPlayed"/>).
 ///   * killing a boss: a boss room's combat won, while she stands.
 ///   * losing / winning the run: the game-over screen's quote line
 ///     (<see cref="NGameOverScreen_Quote_Story_Patch"/>), since a dead
@@ -55,7 +59,7 @@ public static class StoryLines
 
     public const string BossEntry = "bossEntry";
     public const string LowHp = "lowHp";
-    public const string BigBomb = "bigBomb";
+    public const string Signature = "signature";
     public const string BossKill = "bossKill";
     public const string RunLoss = "runLoss";
     public const string RunWin = "runWin";
@@ -114,27 +118,36 @@ public static class StoryLines
     }
 
     /// <summary>The entry block at a boss: every story character at the
-    /// table, her pair exchange if a partner is here, else her own line.</summary>
+    /// table speaks once, in a pair exchange where one is written for two
+    /// characters here (in either one's table), else her own line
+    /// (<see cref="StoryRules.BossEntryPlan"/>).</summary>
     internal static void BossEntered(IReadOnlyList<Player> players)
     {
-        foreach (var player in players)
+        var plan = StoryRules.BossEntryPlan(players.Select(p => p.Character.GetType()).ToList());
+        foreach (var speech in plan)
         {
-            var story = StoryRegistry.For(player.Character);
-            if (story == null) continue;
-            var own = StoryRegistry.EntryOf(story.Character);
-            var others = players.Where(p => !ReferenceEquals(p, player)).ToList();
-            var pair = StoryRules.PairFor(story, others.Select(p => p.Character.GetType()));
-            if (pair == null)
+            var owner = players[speech.OwnerSeat];
+            var own = StoryRegistry.EntryOf(speech.Story.Character);
+            if (speech.Pair == null)
             {
-                Say(player.Creature, Key(own, BossEntry));
+                Say(owner.Creature, Key(own, BossEntry));
                 continue;
             }
-            var partner = others.First(p => p.Character.GetType() == pair.Partner);
-            var partnerEntry = StoryRegistry.EntryOf(pair.Partner);
-            Sequence(
-                (partner.Creature, PairKey(own, partnerEntry, partnerSpeaks: true)),
-                (player.Creature, PairKey(own, partnerEntry, partnerSpeaks: false)));
+            var partner = players[speech.PartnerSeat];
+            var partnerEntry = StoryRegistry.EntryOf(speech.Pair.Partner);
+            var partnerLine = (partner.Creature, PairKey(own, partnerEntry, partnerSpeaks: true));
+            var ownLine = (owner.Creature, PairKey(own, partnerEntry, partnerSpeaks: false));
+            if (speech.Pair.OwnFirst) Sequence(ownLine, partnerLine);
+            else Sequence(partnerLine, ownLine);
         }
+    }
+
+    /// <summary>The signature line over this speaker, once a combat.</summary>
+    internal static void SaySignature(Creature speaker, CharacterStory story)
+    {
+        if (speaker.CombatState == null) return;
+        if (!LatchFor(speaker.CombatState).TryTake(speaker, Signature)) return;
+        Say(speaker, Key(StoryRegistry.EntryOf(story.Character), Signature));
     }
 
     /// <summary>
@@ -147,9 +160,8 @@ public static class StoryLines
         {
             if (!StoryRules.IsBigBomb(isMine, dealt)) return;
             var story = StoryRegistry.For(applier.Player?.Character);
-            if (story == null || applier.CombatState == null) return;
-            if (!LatchFor(applier.CombatState).TryTake(applier, BigBomb)) return;
-            Say(applier, Key(StoryRegistry.EntryOf(story.Character), BigBomb));
+            if (story == null) return;
+            SaySignature(applier, story);
         }
         catch (Exception e)
         {
@@ -157,17 +169,18 @@ public static class StoryLines
         }
     }
 
-    /// <summary>Confinement's clock at a combat's end: one more combat
-    /// served for every copy in every deck, and the third removes it.</summary>
-    internal static async Task ServeConfinement(IEnumerable<Player> players)
+    /// <summary>The story Curses' clock at a combat's end (Confinement,
+    /// Overdue Reports): one more combat served for every copy in every deck,
+    /// and the third removes it.</summary>
+    internal static async Task ServeStoryCurses(IEnumerable<Player> players)
     {
         foreach (var player in players)
         {
             var served = new List<CardModel>();
-            foreach (var card in player.Deck.Cards.OfType<Confinement>().ToList())
+            foreach (var card in player.Deck.Cards.OfType<StoryCurse>().ToList())
             {
                 card.CombatsServed += 1;
-                if (StoryRules.ConfinementServedOut(card.CombatsServed)) served.Add(card);
+                if (StoryRules.StoryCurseServedOut(card.CombatsServed)) served.Add(card);
             }
             if (served.Count > 0) await CardPileCmd.RemoveFromDeck(served);
         }
@@ -239,6 +252,26 @@ public sealed class StoryCombatHooks : AbstractModel
         return Task.CompletedTask;
     }
 
+    /// <summary>The signature card's play (Varka: Four Winds' Ascension):
+    /// his line, once a combat. A speech bubble only.</summary>
+    public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        try
+        {
+            var owner = cardPlay.Card?.Owner;
+            var speaker = owner?.Creature;
+            if (owner == null || speaker == null) return Task.CompletedTask;
+            var story = StoryRegistry.For(owner.Character);
+            if (story == null || !StoryRules.IsSignaturePlay(story, cardPlay.Card!.GetType())) return Task.CompletedTask;
+            StoryLines.SaySignature(speaker, story);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] story: signature line skipped: {e.Message}");
+        }
+        return Task.CompletedTask;
+    }
+
     public override Task AfterCombatVictory(CombatRoom room)
     {
         try
@@ -259,18 +292,18 @@ public sealed class StoryCombatHooks : AbstractModel
         return Task.CompletedTask;
     }
 
-    /// <summary>Confinement's clock. <c>AfterCombatEnd</c> runs inside
+    /// <summary>The story Curses' clock. <c>AfterCombatEnd</c> runs inside
     /// <c>EndCombatInternal</c>, which a lost fight never reaches -- and a
     /// lost fight is a lost run.</summary>
     public override async Task AfterCombatEnd(CombatRoom room)
     {
         try
         {
-            await StoryLines.ServeConfinement(room.CombatState.RunState.Players);
+            await StoryLines.ServeStoryCurses(room.CombatState.RunState.Players);
         }
         catch (Exception e)
         {
-            Log.Error($"[{KleeMod.ModId}] story: Confinement's clock failed this combat: {e}");
+            Log.Error($"[{KleeMod.ModId}] story: the story Curses' clock failed this combat: {e}");
         }
     }
 }

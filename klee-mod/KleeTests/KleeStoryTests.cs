@@ -77,7 +77,7 @@ public class KleeStoryTests
         var l = Klee.Lines;
         Assert.Contains($"| Entering a boss fight | \"{ToPaper(l.BossEntry)}\" |", paper);
         Assert.Contains($"| Below a third of her HP | \"{ToPaper(l.LowHp)}\" |", paper);
-        Assert.Contains($"| Her biggest Bomb (30 or more damage at once) | \"{ToPaper(l.BigBomb)}\" |", paper);
+        Assert.Contains($"| Her biggest Bomb (30 or more damage at once) | \"{ToPaper(l.Signature)}\" |", paper);
         Assert.Contains($"| Killing a boss | \"{ToPaper(l.BossKill)}\" |", paper);
         Assert.Contains($"| Losing the run | \"{ToPaper(l.RunLoss)}\" |", paper);
         Assert.Contains($"| Winning the run | \"{ToPaper(l.RunWin)}\" |", paper);
@@ -197,9 +197,13 @@ public class KleeStoryTests
         var calls = Il.Calls(Il.Method(nameof(StoryEventModel), "Apply"));
         Assert.Contains("PlayerCmd.GainGold", calls);
         Assert.Contains("CreatureCmd.Heal", calls);
-        Assert.Contains("CardCmd.Upgrade", calls);
-        Assert.Contains("StoryRules.PickRandom", calls);
-        Assert.Contains("StoryRules.PlacesBomb", calls);
+        // The random upgrades (Paper bomb's, and Varka's) share one helper;
+        // Paper bomb's filter is the table's PlacesBomb (a closure, so it is
+        // pinned by behaviour below, not by IL).
+        Assert.Contains("StoryEventModel.UpgradeRandom", calls);
+        var upgrade = Il.Calls(Il.Method(nameof(StoryEventModel), "UpgradeRandom"));
+        Assert.Contains("CardCmd.Upgrade", upgrade);
+        Assert.Contains("StoryRules.PickRandom", upgrade);
         var add = Il.Calls(Il.Method(nameof(StoryEventModel), "AddToDeck"));
         Assert.Contains("CardPileCmd.Add", add);
         Assert.Contains("CardCmd.Upgrade", add);
@@ -251,7 +255,7 @@ public class KleeStoryTests
         Assert.Null(StoryRules.EventFor(new[] { typeof(global::KleeMod.Klee) }, 3, NothingSeen));
         for (var act = 0; act < 4; act++)
         {
-            Assert.Null(StoryRules.EventFor(new[] { typeof(Kokomi), typeof(Furina), typeof(Varka) }, act, NothingSeen));
+            Assert.Null(StoryRules.EventFor(new[] { typeof(Kokomi), typeof(Furina) }, act, NothingSeen));
             Assert.Null(StoryRules.EventFor(new[] { typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad) }, act, NothingSeen));
             Assert.Null(StoryRules.EventFor(Array.Empty<Type>(), act, NothingSeen));
         }
@@ -449,7 +453,7 @@ public class KleeStoryTests
     {
         var entry = StoryRegistry.EntryOf(typeof(global::KleeMod.Klee));
         var rows = StoryAncients.Rows(_ => "NEXT");
-        Assert.Equal(Klee.Ancients.Count * 3, rows.Count);
+        Assert.Equal(StoryRegistry.All.Sum(s => s.Ancients.Count) * 3, rows.Count);
         foreach (var a in Klee.Ancients)
         {
             Assert.Equal(a.AncientLine, rows[$"{a.AncientEntry}.talk.{entry}.0-0.ancient"]);
@@ -463,24 +467,24 @@ public class KleeStoryTests
     [Fact]
     public void Confinement_is_removed_after_exactly_three_combats()
     {
-        Assert.Equal(3, StoryRules.ConfinementCombats);
+        Assert.Equal(3, StoryRules.StoryCurseCombats);
         var served = 0;
         var removedAfter = -1;
         for (var combat = 1; combat <= 5 && removedAfter < 0; combat++)
         {
             served++;
-            if (StoryRules.ConfinementServedOut(served)) removedAfter = combat;
+            if (StoryRules.StoryCurseServedOut(served)) removedAfter = combat;
         }
         Assert.Equal(3, removedAfter);
-        Assert.False(StoryRules.ConfinementServedOut(2));
+        Assert.False(StoryRules.StoryCurseServedOut(2));
 
         // Structural: the combat-end hook ticks every Confinement in every
         // deck and removes the served ones through the game's own command.
-        var calls = Il.Calls(Il.Method(nameof(StoryLines), "ServeConfinement"));
-        Assert.Contains("Confinement.set_CombatsServed", calls);
-        Assert.Contains("StoryRules.ConfinementServedOut", calls);
+        var calls = Il.Calls(Il.Method(nameof(StoryLines), "ServeStoryCurses"));
+        Assert.Contains("StoryCurse.set_CombatsServed", calls);
+        Assert.Contains("StoryRules.StoryCurseServedOut", calls);
         Assert.Contains("CardPileCmd.RemoveFromDeck", calls);
-        Assert.Contains("StoryLines.ServeConfinement",
+        Assert.Contains("StoryLines.ServeStoryCurses",
             Il.Calls(Il.Method(nameof(StoryCombatHooks), "AfterCombatEnd")));
     }
 
@@ -509,7 +513,7 @@ public class KleeStoryTests
 
             // One more combat after the reload is the third.
             loaded.CombatsServed += 1;
-            Assert.True(StoryRules.ConfinementServedOut(loaded.CombatsServed));
+            Assert.True(StoryRules.StoryCurseServedOut(loaded.CombatsServed));
         }
         finally
         {
@@ -525,14 +529,14 @@ public class KleeStoryTests
         var combat = new object();
         var klee = new object();
         var latch = StoryLines.LatchFor(combat);
-        Assert.True(latch.TryTake(klee, StoryLines.BigBomb));
-        Assert.False(latch.TryTake(klee, StoryLines.BigBomb));
-        Assert.False(StoryLines.LatchFor(combat).TryTake(klee, StoryLines.BigBomb));
+        Assert.True(latch.TryTake(klee, StoryLines.Signature));
+        Assert.False(latch.TryTake(klee, StoryLines.Signature));
+        Assert.False(StoryLines.LatchFor(combat).TryTake(klee, StoryLines.Signature));
         // Another line, or another Klee, is its own latch.
         Assert.True(latch.TryTake(klee, StoryLines.LowHp));
-        Assert.True(latch.TryTake(new object(), StoryLines.BigBomb));
+        Assert.True(latch.TryTake(new object(), StoryLines.Signature));
         // The next combat starts fresh.
-        Assert.True(StoryLines.LatchFor(new object()).TryTake(klee, StoryLines.BigBomb));
+        Assert.True(StoryLines.LatchFor(new object()).TryTake(klee, StoryLines.Signature));
     }
 
     [Fact]
@@ -575,8 +579,8 @@ public class KleeStoryTests
     {
         var rows = StoryLoc.LineRows();
         var own = StoryRegistry.EntryOf(typeof(global::KleeMod.Klee));
-        Assert.Equal(6 + 2 * Klee.Pairs.Count, rows.Count);
-        Assert.Equal(Klee.Lines.BigBomb, rows[StoryLines.Key(own, StoryLines.BigBomb)]);
+        Assert.Equal(StoryRegistry.All.Sum(s => 6 + 2 * s.Pairs.Count), rows.Count);
+        Assert.Equal(Klee.Lines.Signature, rows[StoryLines.Key(own, StoryLines.Signature)]);
         foreach (var p in Klee.Pairs)
         {
             var partner = StoryRegistry.EntryOf(p.Partner);

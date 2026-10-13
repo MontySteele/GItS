@@ -25,7 +25,7 @@ public static class StoryLoc
             var l = story.Lines;
             rows[StoryLines.Key(own, StoryLines.BossEntry)] = l.BossEntry;
             rows[StoryLines.Key(own, StoryLines.LowHp)] = l.LowHp;
-            rows[StoryLines.Key(own, StoryLines.BigBomb)] = l.BigBomb;
+            rows[StoryLines.Key(own, StoryLines.Signature)] = l.Signature;
             rows[StoryLines.Key(own, StoryLines.BossKill)] = l.BossKill;
             rows[StoryLines.Key(own, StoryLines.RunLoss)] = l.RunLoss;
             rows[StoryLines.Key(own, StoryLines.RunWin)] = l.RunWin;

@@ -140,7 +140,7 @@ public static class KleeMod
                     // is that a measurement must never desync a co-op table.
                     .Concat(Diagnostics.PlayTelemetryHooks.Subscribe(combatState))
                     // Klee's story in the run (story batches 1 and 2): the
-                    // combat speech bubbles and Confinement's clock. Visual
+                    // combat speech bubbles and the story Curses' clock. Visual
                     // and deck-only; inert with no story character at the
                     // table.
                     .Concat(Story.StoryCombatHooks.Subscribe(combatState)));

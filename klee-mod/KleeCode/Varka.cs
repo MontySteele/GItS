@@ -27,9 +27,9 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Varka"),
-        ("description",
-            "Grand Master of the Knights of Favonius, who fights with every "
-          + "wind in Mondstadt."),
+        // The intro (review/active/varka-story-2026-10-13.md sec.1), from
+        // his story table.
+        ("description", Story.VarkaStory.Table.Intro),
         ("titleObject", "Varka"),
         ("pronounSubject", "he"),
         ("pronounObject", "him"),

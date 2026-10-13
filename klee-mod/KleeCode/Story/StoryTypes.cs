@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Story;
 
@@ -13,7 +14,7 @@ namespace KleeMod.Story;
 /// and every option's effect is a value in a <see cref="CharacterStory"/>;
 /// the machinery (<see cref="StoryAncients"/>, <see cref="StoryEventModel"/>,
 /// <see cref="StoryLines"/>, <see cref="StoryLoc"/>) reads the table and names
-/// no character. Kokomi, Furina and Varka get their lines by adding a table
+/// no character. Kokomi and Furina get their lines (Varka has his, VarkaStory.cs) by adding a table
 /// to <see cref="StoryRegistry.All"/> and, for an event, a one-line
 /// <see cref="StoryEventModel"/> subclass (the game's ModelDb needs one type
 /// per event).
@@ -57,6 +58,15 @@ public sealed class CharacterStory
     /// cards that place a Bomb -- what "Upgrade 2 random cards that place a
     /// Bomb" draws from. Mine-only cards are not in it.</summary>
     public IReadOnlyCollection<string> BombPlacers { get; init; } = Array.Empty<string>();
+
+    /// <summary>The card whose play speaks the signature line (Varka: Four
+    /// Winds' Ascension), once a combat. Null: the line has its own trigger
+    /// (Klee: her biggest Bomb, called from the Bomb's explosion).</summary>
+    public Type? SignatureCard { get; init; }
+
+    /// <summary>What "Choose 1 of 3 random ..." draws from (Varka: his pool
+    /// Knights, the pool Knights' Roll Call offers). Null: none.</summary>
+    public Func<IReadOnlyList<CardModel>>? ChoicePool { get; init; }
 }
 
 /// <summary>An Ancient's line and her answer. <see cref="Ancient"/> is the
@@ -65,14 +75,19 @@ public sealed class CharacterStory
 public sealed record AncientExchange(
     string Ancient, string AncientEntry, string AncientLine, string CharacterLine);
 
-/// <summary>The six moments the paper gives a combat line to.</summary>
+/// <summary>The six moments the paper gives a combat line to. The third is
+/// the character's signature moment: Klee's biggest Bomb (30 or more at
+/// once), Varka's Four Winds' Ascension.</summary>
 public sealed record CombatLines(
-    string BossEntry, string LowHp, string BigBomb, string BossKill,
+    string BossEntry, string LowHp, string Signature, string BossKill,
     string RunLoss, string RunWin);
 
-/// <summary>Who the partner is, what they say, and her answer.</summary>
+/// <summary>Who the partner is, what they say, and her answer. The partner
+/// speaks first unless <see cref="OwnFirst"/> (the paper's order: Varka
+/// opens his exchange with Kokomi).</summary>
 public sealed record PairExchange(
-    Type Partner, string PartnerName, string PartnerLine, string OwnLine);
+    Type Partner, string PartnerName, string PartnerLine, string OwnLine,
+    bool OwnFirst = false);
 
 /// <summary>What an option does. Every effect a story event can have is one
 /// of these, so a new event is data and not code.</summary>
@@ -100,10 +115,27 @@ public enum StoryEffectKind
     /// <summary>Upgrade <c>Amount</c> random cards that place a Bomb (all of
     /// them if there are fewer).</summary>
     UpgradeRandomBombCards,
+
+    /// <summary>Upgrade <c>Amount</c> random upgradable cards (all of them
+    /// if there are fewer).</summary>
+    UpgradeRandomCards,
+
+    /// <summary>Lose <c>HpLoss</c> HP, then upgrade <c>Amount</c> random
+    /// upgradable cards.</summary>
+    LoseHpUpgradeRandomCards,
+
+    /// <summary>Choose 1 of <c>Amount</c> distinct random cards from the
+    /// table's <see cref="CharacterStory.ChoicePool"/> and add it to the
+    /// deck.</summary>
+    ChooseFromPoolToDeck,
+
+    /// <summary>Nothing (the skip).</summary>
+    Nothing,
 }
 
 /// <summary>One option's effect.</summary>
-public sealed record StoryEffect(StoryEffectKind Kind, int Amount = 0, Type? Card = null);
+public sealed record StoryEffect(
+    StoryEffectKind Kind, int Amount = 0, Type? Card = null, int HpLoss = 0);
 
 /// <summary>One option: its button, its effect line, what it does, and the
 /// page it leaves on screen (<c>null</c>: the event's own page stays).</summary>
