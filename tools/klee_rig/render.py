@@ -19,8 +19,8 @@ BG = (43, 47, 58, 255)
 W, H, OX, OY = 340, 330, 160, 312
 GIF_FPS = 30
 #: The frame of each motion with the largest joint angles (RESET first).
-DETAIL_KEYS = [("RESET", 0), ("attack", 0.17), ("hurt", 0.07), ("death", 0.6),
-               ("cast", 0.13), ("power", 0.2), ("idle_low", 0.0), ("idle", 0.9)]
+DETAIL_KEYS = [("RESET", 0), ("attack", 0.42), ("hurt", 0.1), ("death", 1.0),
+               ("cast", 0.38), ("power", 0.38), ("idle_low", 0.0), ("idle", 0.9), ("setoff", 0.27)]
 LAYER_COLOURS = {"Smoke": (140, 200, 255), "Floaters": (255, 220, 90), "Dumpty": (255, 120, 90),
                  "Body": (120, 255, 140), "Dodoco": (255, 140, 255)}
 

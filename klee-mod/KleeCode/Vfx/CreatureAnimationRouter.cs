@@ -71,12 +71,27 @@ internal static class CreatureAnimationRouter
         ["PowerUp"] = new[] { "power", "cast", "attack" },
         ["Hit"] = new[] { "hurt" },
         ["Dead"] = new[] { "death" },
+        // Klee's Set Off cards (milestone 2, 2026-10-12): her scene swaps to
+        // the floating-bombs splash for the play. Sent by CardPlayMotion for
+        // an ISetOffCard; a scene without the state lunges as for an attack.
+        ["SetOff"] = new[] { "setoff", "attack" },
     };
 
     internal const string IdleState = "idle";
     internal const string LowHealthIdleState = "idle_low";
     internal const string CastState = "cast";
     internal const string PowerState = "power";
+    internal const string SetOffState = "setoff";
+
+    /// <summary>
+    /// A Set Off play is ONE clip: the attack lunge and cast that the same
+    /// card's own commands send while it runs would cut the splash short, so
+    /// while the tree is in <see cref="SetOffState"/> those three triggers
+    /// are absorbed. Hits and death still interrupt it. Pure.
+    /// </summary>
+    internal static bool AbsorbedBy(string? currentState, string trigger)
+        => currentState == SetOffState
+           && trigger is "Attack" or "Cast" or "PowerUp";
 
     /// <summary>
     /// The two AnimationTree conditions the low-HP idle hangs off. A scene
@@ -164,6 +179,10 @@ internal static class CreatureAnimationRouter
 
         if (tree.Get("parameters/playback").Obj is AnimationNodeStateMachinePlayback playback)
         {
+            if (AbsorbedBy(playback.GetCurrentNode(), trigger))
+            {
+                return;
+            }
             // Travel to the current state is a no-op, so a double "Dead"
             // (StartDeathAnim re-entry) cannot restart the death animation.
             playback.Travel(target);

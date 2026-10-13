@@ -45,11 +45,35 @@ rules, motion keys) and regenerate; never hand-edit the scene.
 .venv/Scripts/python -m tools.klee_rig render --art-root <main checkout> --out <scratch dir>
 ```
 
-`klee_cells.json` is the only art-derived input (an occupancy grid, no
-pixels), so `gen` and `tier0/tests/test_klee_rig.py` run anywhere. `verify`
+Since milestone 2 of the visual paper (2026-10-12) the mesh rig is the
+**Set Off alt-art only**: it rests invisible and the `setoff` state cross-fades
+to it. Klee herself is `Visuals/Facing/Model`, one Sprite2D per frame sheet
+rendered from the official Klee model by `tools/klee_render/` (Blender +
+mmd_tools; `clips.py` poses, `render.py` renders, `pack.py` packs, `build.py`
+runs the lot). **The model never enters the repo or ImageGen** (its terms
+forbid redistribution); only the renders do.
+
+```sh
+.venv/Scripts/python tools/klee_render/build.py --pmx <scratch>/可莉2.0.pmx --work <scratch dir> --art-root <main checkout>
+.venv/Scripts/python tools/klee_render/pack.py --renders <scratch dir> --art-root <main checkout> [--check]
+```
+
+`pack.py` is the one producer of `ImageGen/images/model/frames/*.png`,
+`model/klee_rest.png` and `ui/select_closeup.png`, and writes the committed
+manifest `tools/klee_rig/klee_frames.json` (cells, counts, times, feet
+anchors, no pixels) that `gen` reads for `combat.tscn` and the merchant scene
+`pck-src/klee/model/merchant_character.tscn`. The scale lives in `build.py`:
+300 texture px per model unit drawn at 0.5, so about 165 px hat-to-boot at
+1080p.
+
+`klee_cells.json` and `klee_frames.json` are the only art-derived inputs, so
+`gen` and `tier0/tests/test_klee_rig.py` run anywhere. `verify`
 adds mesh coverage of every drawn texel when it can see the art; `--godot`
-loads the scene in MegaDot (every polygon's `get_bone_count() > 0`), renders
-RESET beside the old layered composite at 1x and 2x both facings (passes at a
+loads the scene in MegaDot (every polygon's `get_bone_count() > 0`; headless,
+it also steps the AnimationTree at 60 Hz through idle, attack, hurt, setoff and
+death and checks the visible sheet, its frame and which figure shows, and
+that the merchant loop autoplays), renders the splash at rest (`setoff` at
+0.6 s) beside the old layered composite at 1x and 2x both facings (passes at a
 max channel difference of 2/255, the GPU's UV interpolation), and checks a
 flipped pose is the mirror of the unflipped one. `render` opens a MegaDot
 window briefly and writes a contact sheet and GIF per state at 1x and 2x, a

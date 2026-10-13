@@ -98,6 +98,57 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
 - **Pick 3 (a):** all five screens.
 - **First milestone:** stance renders for your eyes before the rig is re-skinned.
 
+## Milestone 1 ruled, 2026-10-12
+
+[USER], on the stance renders: "On Klee - the toon shading works well at a glance but probably needs an in-game look to be sure. I feel like it's not 'quite' the same as the art style of the existing characters, but it's hard to say without seeing it in motion how much of that is 2D vs 3D. Stance B is definitely 'cuter' but A probably makes more sense as a battle pose."
+
+- **Stance A (bomb held low) is the battle idle.** Stance B (bomb cradled) went where she isn't fighting: the shop and character select.
+- **Toon shading stays for now.** The verdict waits for an in-game look in motion.
+
+## Milestone 2, built 2026-10-12
+
+**What is built.** Everything below is rendered from the official model, and only the renders ship. The pose library is `tools/klee_render/clips.py`. One command renders and packs it all (`tools/klee_render/build.py`). The model file stays in the scratchpad.
+
+- **Combat.** Six frame sheets: idle, low-HP idle, attack, hurt, death and cast (power reuses cast with a glow). The `combat.tscn` that `tools/klee_rig` generates plays them.
+  - Idle loop: 2.0 s at 20 fps, with breathing, a pigtail sway and one blink.
+  - Attack: 1.0 s. Wind-up, an overarm throw of a bomb that flies off toward the enemy, then a fresh bomb pops back into her hand.
+  - Hurt: 0.8 s. A flinch with her eyes squeezed shut.
+  - Death: 2.0 s. A stagger, her knees buckle, she sits down hard with a small bounce and slumps; the bomb rolls away; then she fades out.
+  - Cast: 1.0 s. A little hop with her free hand raised.
+  - Low-HP idle: 2.4 s at 15 fps, slumped and tired.
+- **The clock** follows the plan's section 3:
+  - cross-fades of 0.05 s, 0.1 s from idle into the attack, 0.03 s into a hurt;
+  - one-shots as listed above;
+  - a random 0.9 to 1.1 loop speed and start. Her scene opts in to the existing per-creature desync (`IdleDesync`, metadata `idle_desync`).
+  - The old scene's transitions were disabled, so every clip used to snap. Its travel transitions are now enabled, so they cross-fade.
+- **Set Off.** Her Set Off cards (`ISetOffCard`) send a new `SetOff` trigger. The new `setoff` clip cross-fades to the old floating-bombs splash, plays its lunge, and fades back. While it plays, the router absorbs the card's own attack and cast triggers; a hit or a death still interrupts it.
+- **Milestone 1's rough edges, fixed:**
+  - **The flat palm.** The finger curl never ran, because the model spells its finger bones with full-width digits (`人指１`). Her hands now close.
+  - **The backpack.** She now faces 14 degrees off the camera instead of 30, and the pack's root bone is tucked. Her chest reads toward the viewer and her head faces right.
+  - **The bomb.** A new Jumpy-Dumpty-like bomb modelled from primitives: a red round body, ears, a cap, a lit fuse, eyes, a mouth and blush. Nothing is copied from another asset.
+- **Merchant.** Stance B at 1.7 times her combat size with her feet on the anchor, breathing on a 2.4 s loop (`pck-src/klee/model/merchant_character.tscn`).
+- **Rest site.** She crouches by the fire at the base rest scale, with the bomb beside her. The texture is padded so her seat lands on BaseLib's anchor.
+- **Character select.** A waist-up close-up of stance B over her backdrop, bleeding off the bottom like the base five.
+
+**Scale, measured** (`tools/klee_rig/klee_frames.json`, `measure`):
+
+- **Height at 1080p:** 164.8 px from hat to boot, and 176.8 px to the tip of the hat's feather.
+- **Against the base adults:** about 235 px, so she is 0.70 hat-to-boot and 0.75 to the feather tip. That brackets the ruled 0.72.
+- **No stretch.** The renders are orthographic with square pixels, and the game draws them at one uniform scale, 0.5. Her bomb in flight measures 38 by 41 px. That is round, allowing for its ears, its cap and a sphere flattened to 0.94.
+
+**Checked:**
+
+- The repo gates (lints, the full pytest run, the C# build and tests) are green. A headless MegaDot probe steps the tree at 60 Hz and finds the right sheet, frame and figure in every state. It also finds the shop loop playing.
+- **Not yet seen in a game.**
+
+**Cost.** The seven sheets take about 55 MB of video memory, uncompressed at 2x. That keeps them sharp at 4K.
+
+**Left:**
+
+- **The map marker.** It is still the wiki side-icon. It needs either an `art_process` refit in the main checkout, or a base-style pin drawn for her; it is listed in `BACKLOG.md`.
+- **The rest site is a still,** not an idle loop. BaseLib rebuilds the rest sprite from its texture alone, so a loop there needs code.
+- **The toon-shading verdict,** after an in-game look.
+
 ## For [USER] (ruled above)
 
 1. **The art route.**

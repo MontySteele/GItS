@@ -15,12 +15,10 @@
 # SIDES are the viewer's: "Left" is screen-left. Klee's own right arm is the
 # raised one on screen-left (UpperArmLeft).
 #
-# THE CONTRACT this file must keep is the router's (CreatureAnimationRouter.cs)
-# and the old scene's: Visuals/Facing/Rig, Bounds, CenterPos, IntentPos,
-# AnimationPlayer, AnimationTree, the seven states and their lengths. The
-# lengths of the one-shots (attack 0.5, hurt 0.4, death 1.0 -- pinned by
-# lint_constant_parity -- cast 0.4, power 0.5) are the old scene's. The two
-# loops take the motion design's periods (idle 2.4 s, idle_low 3.2 s).
+# THE CONTRACT this file must keep is the router's (CreatureAnimationRouter.cs):
+# Visuals/Facing/Rig, Bounds, CenterPos, IntentPos, AnimationPlayer,
+# AnimationTree, the seven states plus `setoff`. Since milestone 2 the states
+# play frame sheets of the official model on the base game's clock (below).
 
 source_canvas: [1069, 1245]
 combat_box: [240, 280]
@@ -152,185 +150,99 @@ skin:
 floater_min_mass: 20
 
 # ---------------------------------------------------------------------------
-# Animations. Each track drives one property of one node or bone:
+# THE MODEL (milestone 2, 2026-10-12). Every state but `setoff` draws Klee
+# from frame sheets rendered off the official model (tools/klee_render; the
+# model itself never enters the repo). `sheets` are the Sprite2D children of
+# Visuals/Facing/Model, back to front; their cells, counts, times and feet
+# anchors come from the committed manifest klee_frames.json. A state names
+# the sheet it plays (`sheet`), at the times the renderer drew; a one-shot
+# longer than its frames holds the last one. The mesh rig above is the old
+# floating splash, kept as alt-art: it is invisible (Rig modulate alpha 0)
+# except in `setoff`, which cross-fades to it and back.
+# ---------------------------------------------------------------------------
+model:
+  sheets: [idle, idle_low, attack, hurt, death, cast]
+
+# ---------------------------------------------------------------------------
+# Animations. A track drives one property of one node or bone:
 #   node:  a path under Visuals/Facing/Rig ("" is Rig itself), absolute values
+#   model: a path under Visuals/Facing/Model ("" is Model itself)
 #   bone:  a bone name; rot (deg) / pos (rig px) / scale are DELTAS from rest
 # and is either
 #   keys:  [[time, value, transition?], ...]   (transition: Godot easing)
 #   wave:  {amp, phase (s), cycles (per loop), base} sampled 8x per cycle,
 #          cubic -- loops only.
 # `bones: [A, B]` on a track applies the same keys to several bones.
+#
+# THE CLOCK is the base game's (review/active/klee-visual-paper-2026-10-12.md,
+# from the census of the five base skeletons): attack ~1.0 s, cast ~1.0 s,
+# hurt ~0.8 s, death ~2.0 s, loops at their rendered length. Cross-fades are
+# on the state machine (rig.py XFADE).
 # ---------------------------------------------------------------------------
 animations:
   idle:
-    length: 2.4
+    length: 2.0
     loop: true
-    tracks:
-      # Airborne float: the whole rig bobs 6 px peak to peak.
-      - {node: "", prop: position, wave: {base: [0, -140], amp: [0, 3], phase: 0}}
-      # Legs kick alternately; the knee follows by half, a beat later.
-      - {bone: ThighLeft,  prop: rot, wave: {amp: 4, phase: 0}}
-      - {bone: ShinLeft,   prop: rot, wave: {amp: 2, phase: 0.15}}
-      - {bone: ThighRight, prop: rot, wave: {amp: 4, phase: 1.2}}
-      - {bone: ShinRight,  prop: rot, wave: {amp: 2, phase: 1.35}}
-      # Arms sway out of phase.
-      - {bone: UpperArmLeft,  prop: rot, wave: {amp: 3, phase: 0.3}}
-      - {bone: ForearmLeft,   prop: rot, wave: {amp: 1.5, phase: 0.45}}
-      - {bone: UpperArmRight, prop: rot, wave: {amp: 3, phase: 1.5}}
-      - {bone: ForearmRight,  prop: rot, wave: {amp: 1.5, phase: 1.65}}
-      # Secondary motion: hair and hem trail the bob by 0.2 s.
-      - {bone: PigtailLeft,  prop: rot, wave: {amp: -5, phase: 0.2}}
-      - {bone: PigtailRight, prop: rot, wave: {amp: 5, phase: 0.2}}
-      - {bone: HemLeft,      prop: rot, wave: {amp: -2.5, phase: 0.2}}
-      - {bone: HemFront,     prop: rot, wave: {amp: 2, phase: 0.2}}
-      - {bone: HemBack,      prop: rot, wave: {amp: 2.5, phase: 0.2}}
-      # Hat feather: one flick per loop.
-      - bone: Feather
-        prop: rot
-        keys: [[0, 0], [1.0, 0], [1.12, -9], [1.26, 4], [1.4, -1.5], [1.55, 0], [2.4, 0]]
-      # Dumpty: slow bob, rocking, a soft squash at the bottom of the bob.
-      - {bone: DumptyCenter, prop: pos, wave: {amp: [0, 2.2], phase: 0.6}}
-      - {bone: DumptyCenter, prop: rot, wave: {amp: 3, phase: 0.0}}
-      - {bone: DumptyTop,    prop: pos, wave: {amp: [0, 1.2], phase: 0.6}}
-      - {bone: DumptyTop,    prop: scale, wave: {base: [1, 1], amp: [0.02, 0], phase: 0.6}}
-      - {bone: DumptyBottom, prop: scale, wave: {base: [1, 1], amp: [0.02, 0], phase: 0.6}}
-      # Smoke billows: each lobe breathes on its own beat.
-      - {bone: SmokeTop,   prop: scale, wave: {base: [1, 1], amp: [0.04, 0.04], phase: 0.0}}
-      - {bone: SmokeRight, prop: scale, wave: {base: [1, 1], amp: [0.05, 0.03], phase: 0.8}}
-      - {bone: SmokeCore,  prop: pos,   wave: {amp: [1.2, -1.0], phase: 0.4}}
-      - {bone: SmokeLow,   prop: pos,   wave: {amp: [1.5, 1.0], phase: 1.6}}
-      - {bone: SmokeLow,   prop: scale, wave: {base: [1, 1], amp: [0.04, 0.05], phase: 1.2}}
-      # Dodoco bounces twice per loop.
-      - {bone: Dodoco, prop: pos, wave: {amp: [0, -1.6], phase: 0, cycles: 2}}
-      - {bone: Dodoco, prop: rot, wave: {amp: 3, phase: 0.3}}
-      # Each floater: {floaters: wave} expands to one track per island with
-      # its own phase and amplitude (see rig.py FLOATER_WAVES).
-      - {floaters: bob}
+    sheet: idle
 
   idle_low:
-    length: 3.2
+    length: 2.4
     loop: true
+    sheet: idle_low
     tracks:
-      # The old scene's slumped low-HP keys, retimed 4.0 -> 3.2 s.
-      - {node: "", prop: position, wave: {base: [0, -132.25], amp: [0, 0.75], phase: 0}}
-      - {node: "", prop: rotation, wave: {base: 0.04, amp: 0.005, phase: 0}}
-      - {node: "", prop: modulate, keys: [[0, [0.88, 0.84, 0.84, 1]], [3.2, [0.88, 0.84, 0.84, 1]]]}
-      - {bone: SmokeRoot,    prop: pos, wave: {base: [0, 3.25], amp: [0.5, 0.25], phase: 0}}
-      - {bone: FloatersRoot, prop: pos, wave: {base: [0, 4.5], amp: [0, 0.5], phase: 0}}
-      - {bone: DumptyCenter, prop: pos, wave: {base: [0, 5.75], amp: [0, 0.75], phase: 0}}
-      - {bone: Body,         prop: pos, wave: {base: [0, 2], amp: [0, 1], phase: 0}}
-      - {bone: Dodoco,       prop: pos, wave: {base: [0, 3.25], amp: [0, 0.75], phase: 0}}
-      - {bone: Dodoco,       prop: rot, wave: {base: 5.2, amp: 0.6, phase: 0}}
-      # Arms lowered 10 degrees; legs dangle with only a lazy sway.
-      - {bone: UpperArmLeft,  prop: rot, wave: {base: -10, amp: 1.5, phase: 0.4}}
-      - {bone: UpperArmRight, prop: rot, wave: {base: 10, amp: 1.5, phase: 2.0}}
-      - {bone: ForearmLeft,   prop: rot, wave: {base: -3, amp: 0.8, phase: 0.6}}
-      - {bone: ForearmRight,  prop: rot, wave: {base: 3, amp: 0.8, phase: 2.2}}
-      - {bone: ThighLeft,  prop: rot, wave: {base: 2, amp: 1.2, phase: 0.3}}
-      - {bone: ShinLeft,   prop: rot, wave: {base: 3, amp: 1.0, phase: 0.6}}
-      - {bone: ThighRight, prop: rot, wave: {base: 1, amp: 1.2, phase: 1.9}}
-      - {bone: ShinRight,  prop: rot, wave: {base: 3, amp: 1.0, phase: 2.2}}
-      - {bone: Head, prop: rot, wave: {base: 3, amp: 0.8, phase: 0.3}}
-      - {bone: PigtailLeft,  prop: rot, wave: {amp: -2.5, phase: 0.3}}
-      - {bone: PigtailRight, prop: rot, wave: {amp: 2.5, phase: 0.3}}
-      - {floaters: drift}
+      - {model: "", prop: modulate, keys: [[0, [0.92, 0.88, 0.88, 1]], [2.4, [0.92, 0.88, 0.88, 1]]]}
 
   attack:
-    length: 0.5
-    tracks:
-      # The old lunge toward the target (+x), unchanged.
-      - {node: "", prop: position, keys: [[0, [0, -140], 0.5], [0.15, [42, -140], 1.6], [0.35, [-5, -140]], [0.5, [0, -140]]]}
-      # Wind-up (0 - 0.07): arms lift 8 degrees. Throw (0.07 - 0.17): both
-      # swing 15 degrees toward the enemy. Settle by 0.45.
-      - {bone: UpperArmLeft,  prop: rot, keys: [[0, 0], [0.07, 8, 0.5], [0.17, 15, 2], [0.45, 0]]}
-      - {bone: ForearmLeft,   prop: rot, keys: [[0, 0], [0.07, 3], [0.19, 6, 2], [0.45, 0]]}
-      - {bone: UpperArmRight, prop: rot, keys: [[0, 0], [0.07, -8, 0.5], [0.17, 15, 2], [0.45, 0]]}
-      - {bone: ForearmRight,  prop: rot, keys: [[0, 0], [0.07, -3], [0.19, 6, 2], [0.45, 0]]}
-      # Legs tuck 8 degrees through the throw.
-      - {bone: ThighLeft,  prop: rot, keys: [[0, 0], [0.15, -8, 2], [0.42, 0]]}
-      - {bone: ShinLeft,   prop: rot, keys: [[0, 0], [0.15, 8, 2], [0.42, 0]]}
-      - {bone: ThighRight, prop: rot, keys: [[0, 0], [0.15, -8, 2], [0.42, 0]]}
-      - {bone: ShinRight,  prop: rot, keys: [[0, 0], [0.15, 8, 2], [0.42, 0]]}
-      - {bone: [PigtailLeft, PigtailRight], prop: rot, keys: [[0, 0], [0.12, -6], [0.24, 4], [0.4, 0]]}
-      # Dumpty squashes on the wind-up, then stretches and lunges toward the
-      # target; the old +7 px drop is kept inside the lunge.
-      - {bone: DumptyCenter, prop: pos, keys: [[0, [0, 0]], [0.07, [-2, 0], 0.5], [0.2, [10, 7], 2], [0.45, [0, 0]]]}
-      - {bone: DumptyCenter, prop: rot, keys: [[0, 0], [0.07, -4], [0.2, 8, 2], [0.45, 0]]}
-      - {bone: DumptyTop,    prop: pos, keys: [[0, [0, 0]], [0.07, [0, 3]], [0.17, [0, -4], 2], [0.45, [0, 0]]]}
-      - {bone: DumptyBottom, prop: pos, keys: [[0, [0, 0]], [0.07, [0, -2]], [0.17, [0, 3], 2], [0.45, [0, 0]]]}
-      - {bone: [DumptyTop, DumptyBottom], prop: scale, keys: [[0, [1, 1]], [0.07, [1.07, 1]], [0.17, [0.92, 1], 2], [0.45, [1, 1]]]}
+    length: 1.0
+    sheet: attack
 
   hurt:
-    length: 0.4
+    length: 0.8
+    sheet: hurt
     tracks:
-      - {node: "", prop: position, keys: [[0, [0, -140]], [0.06, [-10, -140]], [0.14, [7, -140]], [0.22, [-4, -140]], [0.32, [2, -140]], [0.4, [0, -140]]]}
-      - {node: Body, prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.05, [1, 0.45, 0.4, 1]], [0.35, [1, 1, 1, 1]]]}
-      # Flinch: head snaps back, arms pull in, legs kick, pigtails whip.
-      - {bone: Head, prop: rot, keys: [[0, 0], [0.06, -6, 0.5], [0.3, 0, 2]]}
-      - {bone: UpperArmLeft,  prop: rot, keys: [[0, 0], [0.07, -8, 0.5], [0.34, 0, 2]]}
-      - {bone: UpperArmRight, prop: rot, keys: [[0, 0], [0.07, 8, 0.5], [0.34, 0, 2]]}
-      - {bone: ForearmLeft,   prop: rot, keys: [[0, 0], [0.08, -4], [0.34, 0]]}
-      - {bone: ForearmRight,  prop: rot, keys: [[0, 0], [0.08, 4], [0.34, 0]]}
-      - {bone: ThighLeft,  prop: rot, keys: [[0, 0], [0.07, -7, 0.5], [0.18, 3], [0.36, 0]]}
-      - {bone: ShinLeft,   prop: rot, keys: [[0, 0], [0.09, 9], [0.22, -2], [0.38, 0]]}
-      - {bone: ThighRight, prop: rot, keys: [[0, 0], [0.07, 5, 0.5], [0.18, -4], [0.36, 0]]}
-      - {bone: ShinRight,  prop: rot, keys: [[0, 0], [0.09, 7], [0.22, -2], [0.38, 0]]}
-      - {bone: PigtailLeft,  prop: rot, keys: [[0, 0], [0.08, 12], [0.18, -8], [0.28, 3], [0.4, 0]]}
-      - {bone: PigtailRight, prop: rot, keys: [[0, 0], [0.08, 12], [0.18, -8], [0.28, 3], [0.4, 0]]}
-      - {bone: Feather, prop: rot, keys: [[0, 0], [0.08, 10], [0.2, -5], [0.4, 0]]}
-      - {bone: DumptyCenter, prop: rot, keys: [[0, 0], [0.08, -5], [0.22, 3], [0.4, 0]]}
+      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.05, [1, 0.45, 0.4, 1]], [0.35, [1, 1, 1, 1]]]}
 
   death:
-    length: 1.0
+    length: 2.0
+    sheet: death
     tracks:
-      - {node: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.15, [1, 0.62, 0.6, 1]], [1, [1, 1, 1, 0]]]}
-      - {node: "", prop: rotation, keys: [[0, 0.0], [1, 0.1]]}
-      - {node: "", prop: position, keys: [[0, [0, -140]], [1, [0, -128]]]}
-      # Arms drop, legs go limp, the head slumps forward; Dumpty deflates.
-      - {bone: UpperArmLeft,  prop: rot, keys: [[0, 0], [0.12, 4], [0.6, -16, 0.6], [1, -18]]}
-      - {bone: ForearmLeft,   prop: rot, keys: [[0, 0], [0.6, -6, 0.6], [1, -7]]}
-      - {bone: UpperArmRight, prop: rot, keys: [[0, 0], [0.12, -4], [0.6, 16, 0.6], [1, 18]]}
-      - {bone: ForearmRight,  prop: rot, keys: [[0, 0], [0.6, 6, 0.6], [1, 7]]}
-      - {bone: ThighLeft,  prop: rot, keys: [[0, 0], [0.5, 5, 0.6], [1, 6]]}
-      - {bone: ShinLeft,   prop: rot, keys: [[0, 0], [0.5, 10, 0.6], [1, 12]]}
-      - {bone: ThighRight, prop: rot, keys: [[0, 0], [0.5, 3, 0.6], [1, 4]]}
-      - {bone: ShinRight,  prop: rot, keys: [[0, 0], [0.5, 9, 0.6], [1, 11]]}
-      - {bone: Head, prop: rot, keys: [[0, 0], [0.1, -4], [0.6, 9, 0.6], [1, 10]]}
-      - {bone: [PigtailLeft, PigtailRight], prop: rot, keys: [[0, 0], [0.1, -8], [0.35, 5], [0.6, 0]]}
-      - {bone: Feather, prop: rot, keys: [[0, 0], [0.6, 12, 0.6], [1, 14]]}
-      - {bone: DumptyCenter, prop: pos, keys: [[0, [0, 0]], [0.8, [0, 10], 0.6], [1, [0, 12]]]}
-      - {bone: DumptyTop, prop: pos, keys: [[0, [0, 0]], [0.8, [0, 16], 0.6], [1, [0, 18]]]}
-      - {bone: [DumptyTop, DumptyBottom], prop: scale, keys: [[0, [1, 1]], [0.8, [1.12, 1], 0.6], [1, [1.14, 1]]]}
+      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.12, [1, 0.62, 0.6, 1]], [0.6, [1, 1, 1, 1]], [1.5, [1, 1, 1, 1]], [2.0, [1, 1, 1, 0]]]}
 
   cast:
-    length: 0.4
-    tracks:
-      - {node: "", prop: position, keys: [[0, [0, -140], 0.5], [0.12, [0, -152], 1.6], [0.4, [0, -140]]]}
-      - {node: "", prop: rotation, keys: [[0, 0.0, 0.5], [0.12, -0.04, 1.6], [0.4, 0.0]]}
-      - {node: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.12, [1.3, 1.18, 0.95, 1]], [0.4, [1, 1, 1, 1]]]}
-      - {bone: Dodoco, prop: pos, keys: [[0, [0, 0], 0.5], [0.15, [0, -9.5], 1.6], [0.4, [0, 0]]]}
-      # Arms raise 10 degrees higher; feather and pigtails lift.
-      - {bone: UpperArmLeft,  prop: rot, keys: [[0, 0, 0.5], [0.12, 10, 1.6], [0.4, 0]]}
-      - {bone: UpperArmRight, prop: rot, keys: [[0, 0, 0.5], [0.12, -10, 1.6], [0.4, 0]]}
-      - {bone: ForearmLeft,   prop: rot, keys: [[0, 0], [0.14, 3], [0.4, 0]]}
-      - {bone: ForearmRight,  prop: rot, keys: [[0, 0], [0.14, -3], [0.4, 0]]}
-      - {bone: Feather,      prop: rot, keys: [[0, 0, 0.5], [0.14, -12, 1.6], [0.4, 0]]}
-      - {bone: PigtailLeft,  prop: rot, keys: [[0, 0, 0.5], [0.14, 10, 1.6], [0.4, 0]]}
-      - {bone: PigtailRight, prop: rot, keys: [[0, 0, 0.5], [0.14, -10, 1.6], [0.4, 0]]}
+    length: 1.0
+    sheet: cast
 
   power:
-    length: 0.5
+    length: 1.0
+    sheet: cast
     tracks:
-      - {node: "", prop: position, keys: [[0, [0, -140], 0.5], [0.18, [0, -158], 1.6], [0.32, [0, -156]], [0.5, [0, -140]]]}
-      - {node: "", prop: rotation, keys: [[0, 0.0, 0.5], [0.18, -0.06, 1.6], [0.5, 0.0]]}
-      - {node: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.18, [1.45, 1.2, 0.85, 1]], [0.5, [1, 1, 1, 1]]]}
-      # The old scene lifted the smoke (4, -10); halved, because the lift
-      # pulls the cloud out from behind the pale smoke painted into the body
-      # layer and opens a hole beside the hat.
-      - {bone: SmokeRoot,    prop: pos, keys: [[0, [0, 0]], [0.2, [2, -5]], [0.5, [0, 0]]]}
-      - {bone: FloatersRoot, prop: pos, keys: [[0, [0, 0]], [0.2, [0, -8]], [0.5, [0, 0]]]}
-      # Arms fling outward and hold; the whole figure squash-bounces.
-      - {bone: UpperArmLeft,  prop: rot, keys: [[0, 0, 0.5], [0.1, -10, 1], [0.38, -10, 2], [0.5, 0]]}
-      - {bone: UpperArmRight, prop: rot, keys: [[0, 0, 0.5], [0.1, 10, 1], [0.38, 10, 2], [0.5, 0]]}
-      - {bone: Figure, prop: scale, keys: [[0, [1, 1]], [0.07, [1.06, 0.93], 0.5], [0.18, [0.96, 1.05]], [0.3, [1.02, 0.98]], [0.4, [1, 1]]]}
-      - {bone: [PigtailLeft, PigtailRight], prop: rot, keys: [[0, 0], [0.07, 6], [0.2, -6], [0.36, 2], [0.5, 0]]}
+      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1], 0.5], [0.38, [1.45, 1.2, 0.85, 1], 1.6], [1.0, [1, 1, 1, 1]]]}
+
+  # Set Off: her bombs go up. Cross-fade (0.08 s) to the old floating splash
+  # -- Jumpy Dumpty, the smoke, the bell bombs -- play its lunge toward the
+  # target (the old attack keys, 0.1 s later), lift the smoke and floaters,
+  # hold, and cross-fade back to the standing figure.
+  setoff:
+    length: 1.2
+    sheet: idle
+    hold_frame: 0
+    tracks:
+      - {model: "", prop: modulate, keys: [[0, [1, 1, 1, 1]], [0.08, [1, 1, 1, 0]], [1.0, [1, 1, 1, 0]], [1.15, [1, 1, 1, 1]]]}
+      - {node: "", prop: modulate, keys: [[0, [1, 1, 1, 0]], [0.08, [1, 1, 1, 1]], [1.0, [1, 1, 1, 1]], [1.15, [1, 1, 1, 0]]]}
+      - {node: "", prop: position, keys: [[0, [0, -140]], [0.1, [0, -140], 0.5], [0.25, [42, -140], 1.6], [0.45, [-5, -140]], [0.6, [0, -140]], [0.8, [0, -143]], [1.0, [0, -140]]]}
+      - {bone: UpperArmLeft,  prop: rot, keys: [[0, 0], [0.1, 0], [0.17, 8, 0.5], [0.27, 15, 2], [0.55, 0]]}
+      - {bone: ForearmLeft,   prop: rot, keys: [[0, 0], [0.1, 0], [0.17, 3], [0.29, 6, 2], [0.55, 0]]}
+      - {bone: UpperArmRight, prop: rot, keys: [[0, 0], [0.1, 0], [0.17, -8, 0.5], [0.27, 15, 2], [0.55, 0]]}
+      - {bone: ForearmRight,  prop: rot, keys: [[0, 0], [0.1, 0], [0.17, -3], [0.29, 6, 2], [0.55, 0]]}
+      - {bone: ThighLeft,  prop: rot, keys: [[0, 0], [0.1, 0], [0.25, -8, 2], [0.52, 0]]}
+      - {bone: ShinLeft,   prop: rot, keys: [[0, 0], [0.1, 0], [0.25, 8, 2], [0.52, 0]]}
+      - {bone: ThighRight, prop: rot, keys: [[0, 0], [0.1, 0], [0.25, -8, 2], [0.52, 0]]}
+      - {bone: ShinRight,  prop: rot, keys: [[0, 0], [0.1, 0], [0.25, 8, 2], [0.52, 0]]}
+      - {bone: [PigtailLeft, PigtailRight], prop: rot, keys: [[0, 0], [0.1, 0], [0.22, -6], [0.34, 4], [0.5, 0]]}
+      - {bone: DumptyCenter, prop: pos, keys: [[0, [0, 0]], [0.1, [0, 0]], [0.17, [-2, 0], 0.5], [0.3, [10, 7], 2], [0.55, [0, 0]]]}
+      - {bone: DumptyCenter, prop: rot, keys: [[0, 0], [0.1, 0], [0.17, -4], [0.3, 8, 2], [0.55, 0]]}
+      - {bone: DumptyTop,    prop: pos, keys: [[0, [0, 0]], [0.1, [0, 0]], [0.17, [0, 3]], [0.27, [0, -4], 2], [0.55, [0, 0]]]}
+      - {bone: DumptyBottom, prop: pos, keys: [[0, [0, 0]], [0.1, [0, 0]], [0.17, [0, -2]], [0.27, [0, 3], 2], [0.55, [0, 0]]]}
+      - {bone: [DumptyTop, DumptyBottom], prop: scale, keys: [[0, [1, 1]], [0.1, [1, 1]], [0.17, [1.07, 1]], [0.27, [0.92, 1], 2], [0.55, [1, 1]]]}
+      - {bone: SmokeRoot,    prop: pos, keys: [[0, [0, 0]], [0.15, [0, 0]], [0.3, [2, -5]], [0.58, [0, 0]]]}
+      - {bone: FloatersRoot, prop: pos, keys: [[0, [0, 0]], [0.15, [0, 0]], [0.3, [0, -8]], [0.58, [0, 0]]]}

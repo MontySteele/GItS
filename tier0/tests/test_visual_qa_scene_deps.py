@@ -123,8 +123,8 @@ def test_live_scenes_carry_no_errors():
 def test_live_scenes_resolve_against_the_fixture_contract_universe():
     """Every ext_resource in pck-src is a path the contract fixture knows.
 
-    The fixture contract is a hand-kept list of the eleven textures the
-    committed scenes reference; if a scene gains a twelfth and nobody updates
+    The fixture contract is a hand-kept list of the seventeen textures the
+    committed scenes reference; if a scene gains another and nobody updates
     the fixture, this fails -- which is the point. The live contract is
     gitignored (*.pck.contract.txt), so this is the portable half.
     """

@@ -36,8 +36,15 @@ namespace KleeMod.Vfx;
 /// <c>res://teyvat/creature_visuals/</c>, read off the same registry
 /// <see cref="ModdedPlayerDeathSeam.CoversDressedBody"/> reads. With the arm
 /// off -- every calibration deploy, every release package -- the gate is shut
-/// before any node is touched, so base enemies, the three player bodies and
-/// Furina's performers are byte-identical to what they are today.
+/// before any node is touched, so base enemies and Furina's performers are
+/// byte-identical to what they are today.
+///
+/// THE ONE OPT-IN (2026-10-12): a scene whose %AnimationTree carries the
+/// metadata <c>idle_desync = true</c> is covered whatever the arm says. Klee's
+/// generated combat scene does (tools/klee_rig), because the base game runs
+/// every character loop at a random 0.9-1.1 speed from a random start
+/// (<c>CreatureAnimator.OffsetLoopingAnimation</c>) and the visual paper takes
+/// that clock. Base bodies carry no such metadata and are untouched.
 ///
 /// TIMING, SAID PLAINLY. <see cref="AnimationPlayer.SpeedScale"/> is the
 /// player's own global multiplier: it is not an idle-only lever, so on a body
@@ -164,6 +171,13 @@ internal static class IdleDesync
                 ModdedPlayerDeathSeam.TeyvatVisualsRoot,
                 System.StringComparison.Ordinal);
 
+    /// <summary>The scene's own opt-in: <c>metadata/idle_desync = true</c> on
+    /// its %AnimationTree.</summary>
+    internal const string OptInMeta = "idle_desync";
+
+    private static bool OptsIn(AnimationTree tree)
+        => tree.HasMeta(OptInMeta) && tree.GetMeta(OptInMeta).AsBool();
+
     /// <summary>
     /// The phase in SECONDS for a clip of this length. Pure. A clip that could
     /// not be measured gets no advance at all rather than a guessed one.
@@ -193,7 +207,8 @@ internal static class IdleDesync
         }
 
         var entity = creature.Entity;
-        if (entity == null || !Covers(TeyvatFrame.Enabled, DressedVisualsScene(entity)))
+        if (entity == null
+            || !(OptsIn(tree) || Covers(TeyvatFrame.Enabled, DressedVisualsScene(entity))))
         {
             return;
         }

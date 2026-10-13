@@ -78,10 +78,40 @@ def test_all_seven_animations_and_reset(scene_text):
     assert driven <= set(anims["RESET"])
 
 
-def test_one_shot_lengths_are_the_old_scenes(scene_text):
-    # death = 1.0 is also pinned by lint_constant_parity (FallbackDeathAnimLength).
-    for name, length in {"attack": 0.5, "hurt": 0.4, "death": 1.0, "cast": 0.4, "power": 0.5}.items():
+def test_one_shot_lengths_are_the_base_clock(scene_text):
+    # The base skeletons' one-shots (klee-visual-paper-2026-10-12): attack
+    # 0.93-1.5 s, cast 0.97-1.8, hurt 0.73-1.0, die 1.87-4.17.
+    for name, length in {"attack": 1.0, "hurt": 0.8, "death": 2.0, "cast": 1.0, "power": 1.0,
+                         "setoff": 1.2}.items():
         assert f'resource_name = "{name}"\nlength = {rig.fnum(length)}\n' in scene_text
+
+
+def test_the_splash_rig_rests_invisible_and_only_setoff_shows_it(scene_text):
+    nodes = verify.parse_nodes(scene_text)
+    assert nodes["Visuals/Facing/Rig"].props["modulate"] == "Color(1, 1, 1, 0)"
+    anims = verify.track_paths(scene_text)
+    showing = [a for a, paths in anims.items() if "Visuals/Facing/Rig:modulate" in paths and a != "RESET"]
+    assert showing == ["setoff"]
+
+
+def test_every_state_draws_one_sheet_from_the_manifest(scene_text):
+    frames = rig.load_frames()
+    spec = rig.load_spec()
+    for state, anim in spec["animations"].items():
+        assert anim["sheet"] in frames["sheets"], state
+    nodes = verify.parse_nodes(scene_text)
+    for name in spec["model"]["sheets"]:
+        n = nodes[f"Visuals/Facing/Model/{rig.SHEET_NODE[name]}"]
+        ox, oy = frames["sheets"][name]["origin"]
+        assert n.props["offset"] == rig.vec2((-ox, -oy)), name
+        assert n.props["texture"] == f'ExtResource("{rig.SHEET_IDS[name]}")', name
+
+
+def test_travel_transitions_are_enabled_so_they_cross_fade():
+    # advance_mode 0 (disabled) made every Travel teleport: no cross-fade.
+    sm = rig.state_machine()
+    assert 'id="Transition_idle_attack"]\nxfade_time = 0.1\nadvance_mode = 1' in sm
+    assert 'id="Transition_attack_idle"]\nxfade_time = 0.05\nswitch_mode = 2\nadvance_mode = 2' in sm
 
 
 def test_cells_grid_is_rectangular():

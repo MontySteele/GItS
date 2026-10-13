@@ -71,6 +71,15 @@ def make_project(work: Path, art_root: Path, scene_text: str | None = None) -> P
         dst = model / "layers" / layer["texture"]
         if not dst.exists() or dst.read_bytes() != src.read_bytes():
             shutil.copyfile(src, dst)
+    # the model's frame sheets and the merchant scene that also draws one
+    frames_src = art_root / "ImageGen" / "images" / "model" / "frames"
+    (model / "frames").mkdir(parents=True, exist_ok=True)
+    for rec in rig.load_frames()["sheets"].values():
+        src, dst = frames_src / rec["file"], model / "frames" / rec["file"]
+        if not dst.exists() or dst.read_bytes() != src.read_bytes():
+            shutil.copyfile(src, dst)
+    (model / "merchant_character.tscn").write_text(rig.MERCHANT_SCENE.read_text(encoding="utf-8"),
+                                                   encoding="utf-8", newline="\n")
     text = scene_text if scene_text is not None else rig.SCENE.read_text(encoding="utf-8")
     (model / "combat.tscn").write_text(text, encoding="utf-8", newline="\n")
     (model / "reference.tscn").write_text(reference_scene(rig.load_cells()), encoding="utf-8", newline="\n")

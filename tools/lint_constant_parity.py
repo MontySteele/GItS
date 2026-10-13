@@ -500,8 +500,8 @@ UNMIRRORED: dict[str, str] = {
         "`EB-159`. A PRESENTATION DURATION, not balance: how long a spine-less "
         "player body with no death clip to measure is reported to be dying for, "
         "so the death sound has room and `Hook.AfterDeath` waits something "
-        "instead of nothing. The number is one of the mod's own authored clips "
-        "(`pck-src/klee/model/combat.tscn`, `Animation_death` `length = 1.0`), "
+        "instead of nothing. The number was Klee's authored death clip until "
+        "2026-10-12 and is still shorter than every death clip the mod ships, "
         "and a body that HAS a clip is measured rather than given this. tier0 "
         "has no animations, no clock the player sees and no counterpart.",
     "ModdedPlayerDeathSeam.MaxDeathAnimLength":
