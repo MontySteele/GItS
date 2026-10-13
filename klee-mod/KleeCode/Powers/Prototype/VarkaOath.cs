@@ -2086,3 +2086,157 @@ public sealed class VarkaCurrentElementHitVar : DamageVar
         }
     }
 }
+
+/// <summary>
+/// KINDLED EDGE'S "ADDITIONAL" HIT, FOLDED (Varka text pass, 2026-10-13, the
+/// damage-preview census). Display only: the face's second number is the
+/// card's <c>VkBase</c> (read live, so the upgrade moves it with the first),
+/// folded the way <see cref="FoldedDamageVar"/> folds a follow-up leg: the
+/// body's Vulnerable and his Strength, no reaction (the first hit consumed
+/// the aura) and no element (<see cref="VarkaCards.KindledEdge"/>'s second
+/// hit carries none). Emitted by codegen for <c>VARKA_FOLLOW_UP_KINDS</c>.
+/// </summary>
+public sealed class VarkaFollowUpDamageVar : DamageVar
+{
+    /// <summary>The var whose number the follow-up repeats.</summary>
+    public string Source { get; }
+
+    public VarkaFollowUpDamageVar(string name, string source)
+        : base(name, 0m, ValueProp.Move)
+    {
+        Source = source;
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        BaseValue = card.DynamicVars[Source].BaseValue;
+        using var reaction = AuraPower.PreviewWithoutReaction();
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+    }
+}
+
+/// <summary>
+/// A BONUS INSIDE ONE HIT, FOLDED (Varka text pass, 2026-10-13: Razor:
+/// Awakening's "If it already has Electro, deal 3 additional damage").
+/// Display only. The bonus rides the same hit as <c>VkBase</c>
+/// (<see cref="VarkaCards.AwakeningDamage"/>), so his Strength counts once and
+/// the body's Weak and Vulnerable multiply the sum: the printed bonus is the
+/// folded hit with it less the folded hit without it, so the two printed
+/// numbers add up to what the hit deals. Out of combat, the sheet number.
+/// Emitted by codegen for <c>VARKA_BONUS_FOLD_KINDS</c>; the play reads the
+/// var's <c>BaseValue</c>, which this never leaves changed.
+/// </summary>
+public sealed class VarkaBonusDamageVar : DamageVar
+{
+    /// <summary>The hit's own number, which the bonus is added to.</summary>
+    public string Source { get; }
+
+    /// <summary>The element the hit carries.</summary>
+    public Element Carries { get; }
+
+    public VarkaBonusDamageVar(string name, decimal amount, string source,
+                               Element carries)
+        : base(name, amount, ValueProp.Move)
+    {
+        Source = source;
+        Carries = carries;
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        var bonus = BaseValue;
+        var hit = card.DynamicVars[Source].BaseValue;
+        try
+        {
+            using (HitElement.Carry(card, Carries))
+            {
+                BaseValue = hit + bonus;
+                base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+                var with = PreviewValue;
+                BaseValue = hit;
+                base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+                var without = PreviewValue;
+                PreviewValue = Math.Max(0m, with - without);
+            }
+        }
+        finally
+        {
+            BaseValue = bonus;
+        }
+    }
+}
+
+/// <summary>
+/// STORM BATTERY'S LIVE TOTAL (Varka text pass, 2026-10-13). Display only:
+/// the face's <c>{VkHit}</c> is <c>VkPer</c> for each other card in his Hand,
+/// folded through the game's damage hooks with Electro carried, as
+/// <see cref="VarkaCards.StormBattery"/> deals it to each enemy. An
+/// all-enemies face, so the body is the game's own
+/// (<see cref="FoldedPreview.Body"/>). Emitted by codegen for
+/// <c>VARKA_TARGET_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaStormBatteryDamageVar : DamageVar
+{
+    /// <summary>The face's token, Shatter's.</summary>
+    public const string Token = "VkHit";
+
+    public VarkaStormBatteryDamageVar()
+        : base(Token, 0m, ValueProp.Move)
+    {
+    }
+
+    /// <summary>The other cards in the owner's Hand (the card leaves the Hand
+    /// when it resolves, so the play's count is the same).</summary>
+    public static int OthersInHand(CardModel card) =>
+        card.IsMutable && card.Owner is { } player
+            ? PileType.Hand.GetPile(player).Cards.Count(c => c != card)
+            : 0;
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            BaseValue = 0m;
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        BaseValue = card.DynamicVars["VkPer"].BaseValue * OthersInHand(card);
+        if (BaseValue <= 0)
+        {
+            PreviewValue = 0m;
+            return;
+        }
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        using (HitElement.Carry(card, Element.Electro))
+        {
+            base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+        }
+    }
+}

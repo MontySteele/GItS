@@ -53,7 +53,7 @@ public sealed class ProtoVkStormBattery : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Storm Battery"),
-        ("description", "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line
@@ -68,7 +68,8 @@ public sealed class ProtoVkStormBattery : CustomCardModel, IElementalCard, IChar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkPer", 2m)
+            new DynamicVar("VkPer", 2m),
+            new VarkaStormBatteryDamageVar()
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

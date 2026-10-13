@@ -80,7 +80,7 @@ public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICh
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 8m)
+            new FoldedDamageVar("VkBase", 8m, ValueProp.Move, carries: Element.Electro)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

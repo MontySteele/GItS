@@ -4032,7 +4032,7 @@
    # "more" is a second, element-less hit on the same enemy.
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkAgain:diff()} additional damage.",
    effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
    upgrade: {varka_base: 3}}
 
@@ -4062,20 +4062,15 @@
    cost: 1, type: attack, rarity: uncommon,
    # The Pyro pass (2026-10-11, review/ruled/varka-pyro-pass-2026-10-11.md):
    # base 5 [7] to 8 [11], the floor every new card is held to.
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].",
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 2}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
-   # The Hydro paper (2026-10-10): Hydro's Body Slam, was a Skill. Varka
-   # last pass (2026-10-12) gave it 6 [8] Block first. Varka text pass
-   # (2026-10-13), the user: "'Tidal Bulwark' does a lot. It gives block and
-   # it's a better body slam. ... Instead of saying "Apply hydro", it should
-   # say "Deal hydro damage"", then "Tidal Bulwark - let's do (a)": no Block,
-   # and the hit itself is Hydro (it reacts and credits the Hydro Oath, a
-   # `varka` kind like Blazing Charge). The upgrade is the one it had before
-   # the Block came: 2 [3] per Hydro Oath.
+   # The Hydro paper (2026-10-10): Hydro's Body Slam. Varka text pass
+   # (2026-10-13), ruled (a): no Block, the hit itself is Hydro. Provenance,
+   # "Varka text pass, 2026-10-13".
    cost: 1, type: attack, rarity: uncommon,
    description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold], plus {VkPer:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: varka, kind: tidal_bulwark, target: enemy, per: 2}],
@@ -4170,7 +4165,7 @@
    authored_by: [claude],
    # Varka last pass (2026-10-12): Retain, so it can wait for a full Hand.
    cost: 1, type: attack, rarity: uncommon, retain: true,
-   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].",
+   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: varka, kind: storm_battery, target: all_enemies, per: 2}],
    upgrade: {varka_per: 1}}
 

@@ -8200,3 +8200,16 @@ until a deploy.
   the Oath are read before the hit. The upgrade is the one the row had before
   the last pass added the Block: 2 [3] per Hydro Oath (cost stays 1). The
   in-combat line prints the live total (`VarkaTidalBulwarkDamageVar`).
+- **Wording, text only:** Weathervane (card and power) "you may choose an
+  element you have Oath in. It becomes your current element." (was "make ...
+  your current element"); Barbara: Gleeful Songs "for each enemy the Hydro
+  reacts on" (was "it"). Amber: Baron Bunny keeps "Next turn": Varka's
+  `VarkaBaronBunnyPower` fires at the start of his next turn.
+- **Live damage previews, display only** (the damage-preview census): Blazing
+  Charge and Storm Battery print "(Deals N damage)" in combat; Charged Lunge,
+  Ember Cleave, Chain Lightning, Tempest of the Four Winds, Violet Storm (per
+  hit), Kindled Edge and Razor: Awakening print `VkBase` as a folding damage
+  var (`VARKA_FOLDED_BASE_KINDS`); Kindled Edge's follow-up is its own token
+  `{VkAgain}`, a follow-up leg; Razor's Electro bonus is the folded hit with
+  it less the folded hit without it (`VarkaBonusDamageVar`). Stoke the
+  Flames' 5 [7] is a rider on a later Attack, not a hit, and is not folded.
