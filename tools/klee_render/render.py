@@ -17,7 +17,7 @@ in <out>/raw/<clip>/aux/f_000_X.png (R protect, G/B grain: see add_aovs), and
 feet's anchor) projects to, the fps and the frame times. Stills write
 <out>/raw/<name>.png (+ aux/<name>_X.png) and <out>/<name>.json the same way.
 `tools/klee_render/post.py` paints the raw frames into <out>/<clip>/ and
-<out>/<name>.png (style G's 2D half); `pack.py` trims and packs those.
+<out>/<name>.png (the style's 2D half); `pack.py` trims and packs those.
 
 Units: `--ppu` is TEXTURE pixels per model unit. The pose library is
 tools/klee_render/clips.py (no bpy; importable anywhere).
@@ -54,12 +54,14 @@ MMD = "bl_ext.user_default.mmd_tools"
 SHADOW_TINT = (0.80, 0.64, 0.68)       # the bomb's flat two-tone
 LINE_COLOR = (0.13, 0.07, 0.07)        # the bomb's lines, and a body material with no texture
 LINE_TINT = (0.42, 0.33, 0.35)         # body lines: the fill's own texture times this
-#: Style G, the shader half (ruled 2026-10-13, review/active/klee-visual-paper-2026-10-12.md).
-#: post.py holds the 2D half.
+#: Style H1 + H3 lite, the shader half (H1; ruled 2026-10-13, review/active/klee-visual-paper-2026-10-12.md):
+#: style G's ramp with a deeper shadow band, its steps moved up, and the lit
+#: tone capped below white. post.py holds the 2D half (G's chain plus H3 lite).
 STYLE = {
-    "shadow": (0.66, 0.52, 0.62),      # deep tone: cooler, a touch violet
-    "mid": (0.90, 0.80, 0.82),         # half tone
-    "mid_at": 0.22, "light_at": 0.40,  # the ramp's steps
+    "shadow": (0.52, 0.37, 0.40),      # deep tone: warm purple-brown (G: 0.66, 0.52, 0.62)
+    "mid": (0.84, 0.71, 0.70),         # half tone (G: 0.90, 0.80, 0.82)
+    "light": (0.94, 0.92, 0.91),       # lit tone: highlights capped below white (G: 1, 1, 1)
+    "mid_at": 0.30, "light_at": 0.52,  # the ramp's steps (G: 0.22 / 0.40)
     "terminator_noise": 0.26,          # +- wobble of the light/shadow boundaries
     "noise_scale": 22.0, "noise_stretch": 4.0, "noise_detail": 6.0, "noise_angle": 28.0,
     "grain": 0.10,                     # +- value grain multiplied into the fill
@@ -189,7 +191,7 @@ def toon_material(mat, img):
         e[0].position = 0.0
         e[0].color = (*STYLE["shadow"], 1)
         e[1].position = STYLE["light_at"]
-        e[1].color = (1, 1, 1, 1)
+        e[1].color = (*STYLE["light"], 1)
         e.new(STYLE["mid_at"]).color = (*STYLE["mid"], 1)
         mul = nt.nodes.new("ShaderNodeMix")
         mul.data_type = "RGBA"
@@ -734,17 +736,18 @@ def main():
     body_outline.thickness = t_world
 
     # the held bomb rides the near wrist; its offset is set once, in the
-    # stance-A pose, so it sits under the curled fingers in every clip
-    held, held_parts, held_lines = make_jumpy_dumpty(0.052, mats, line)
+    # stance-A pose (clips.HELD_AT: on her palm, held out toward the enemy),
+    # so it sits in her hand in every clip
+    held, held_parts, held_lines = make_jumpy_dumpty(C.BOMB_R, mats, line)
     apply_pose(root, arm, mesh, C.STILLS["stance_a"])
     tip = arm.matrix_world @ arm.pose.bones["手先.R"].head
-    want = Matrix.Translation(tip + Vector((0.012, -0.022, -0.058))) @ Matrix.Rotation(math.radians(20), 4, "Z")
+    want = (Matrix.Translation(tip + Vector(C.HELD_AT)) @ Matrix.Rotation(math.radians(C.HELD_YAW), 4, "Z"))
     held.parent = arm
     held.parent_type = "BONE"
     held.parent_bone = "手首.R"
     upd()
     held.matrix_world = want
-    thrown, thrown_parts, thrown_lines = make_jumpy_dumpty(0.052, mats, line)
+    thrown, thrown_parts, thrown_lines = make_jumpy_dumpty(C.BOMB_R, mats, line)
     cradled, cradled_parts, cradled_lines = make_jumpy_dumpty(0.064, mats, line)
     for m_ in held_lines + thrown_lines + cradled_lines:
         m_.thickness = t_world

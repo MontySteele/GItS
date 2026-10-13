@@ -189,6 +189,24 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
 
 **Left:** [USER]'s look at her in motion on the next build.
 
+## Style H1 + H3 lite and the new stance, ruled 2026-10-13
+
+[USER], on the style sheet: "On Klee - yeah, that looks geally good! Let's do H1 + H3 lite." And on the silhouette: "Agreed on the Silhouette change". Style G is replaced by H1 + H3 lite; stance A is replaced by the stance below.
+
+**H1, the shader half** (`render.py`, `STYLE`). G's ramp with a deeper shadow band: deep (0.52, 0.37, 0.40), a warm purple-brown, at 0; half (0.84, 0.71, 0.70) at 0.30; light capped at (0.94, 0.92, 0.91) from 0.52, so no highlight reaches white. G's noise, grain and outlines are unchanged.
+
+**H3 lite, the 2D half** (`post.py`, step 5, after G's four steps, on the whole finished frame). In CIELAB, chroma above C* 20 is squeezed by a fixed 0.808 (hue and L* untouched). Full H3's 0.616 pulled her 90th-percentile chroma onto the Ironclad + Silent pair's; lite takes half that pull, and keeps H3's red hue shift and cream change out.
+
+**Measured** (idle frame 0 and attack frame 9 at 1080p, opaque pixels): L* p90 81.3, C* p90 44.7 (shipped G: 85.1 and 49.8; the H1 + H3 lite prototype on the old stance: 81.2 and 43.6; the bigger red bomb adds a little chroma).
+
+**The stance** (`clips.py`, stance A):
+
+- **Wider and lower.** Feet 0.17 forward and 0.15 back (were 0.11 and 0.10), hips dropped 0.12 (were 0.055).
+- **Leaning toward the enemy.** The upper body leans 13 degrees toward screen right (was 4); the head takes 4 of it back. Her chest stays turned a little off-centre toward the viewer (yaw 14, twist -14), as the base cast's are.
+- **A bigger bomb, held out in front.** Jumpy Dumpty is now radius 0.115 (was 0.052), about the size of her head. Her near hand holds it out toward the enemy and the far hand steadies it from beyond.
+- **Every combat clip plants her feet where stance A does,** so attack, hurt, cast, Set Off and the low-HP idle blend out of and back into idle without sliding. Cast and the low-HP idle keep the bomb in her hand in front of her; Set Off raises it overhead; the dropped bomb in death and beside her at the rest site sits on the ground at its new size. The shop and select cradle (stance B) are unchanged.
+- **Her scale is unchanged.** The scale check now measures an upright still (`clips.STAND`, the old stance A without the bomb): 165.9 px hat to boot and 177.4 px to the feather at 1080p (were 164.8 and 176.8). Stance A itself is 153.9 px hat to boot and 92.0 px wide (standing: 77.5).
+
 ## For [USER] (ruled above)
 
 1. **The art route.**

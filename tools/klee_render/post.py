@@ -1,4 +1,4 @@
-"""Style G's 2D half: paint Klee's raw renders into the frames pack.py packs.
+"""Style H1 + H3 lite's 2D half: paint Klee's raw renders into the frames pack.py packs.
 
     python tools/klee_render/post.py --renders <render.py --out dir> [--only idle,select,...]
 
@@ -9,10 +9,11 @@ surface space. This script writes the painted frame to <renders>/<clip>/f_NNN.pn
 (stills to <renders>/<name>.png), which is what pack.py reads. It never touches
 the raw renders, so running it twice gives the same pixels.
 
-The chain, in order (ruled 2026-10-13 as variant G of
-review/active/klee-visual-paper-2026-10-12.md; the shader half is render.py's
-STYLE), under a protect mask grown 2 px and feathered so the face and the bomb
-keep their render (without it her eyes vanish at game scale):
+The chain, in order (style G's 2D half, ruled 2026-10-13, then H3 lite on
+top: [USER], "Let's do H1 + H3 lite"; review/active/klee-visual-paper-2026-10-12.md;
+the shader half, H1, is render.py's STYLE), steps 1-3 under a protect mask grown
+2 px and feathered so the face and the bomb keep their render (without it her
+eyes vanish at game scale):
 
   1. the interior thin-line fade, strength 0.6 (the silhouette line is the
      shader's texture-tinted hull, so only interior lines are touched);
@@ -20,7 +21,12 @@ keep their render (without it her eyes vanish at game scale):
      whites +4 b*, soft posterise of L* with step 9 at strength 0.3;
   3. anisotropic Kuwahara at radius 2.0 (Kyprianidis, Kang and Doellner 2009);
   4. brush grain at sigma 1.0 L*, read from the `style` pass, so the grain is
-     fixed to her surface and moves with her instead of crawling over her.
+     fixed to her surface and moves with her instead of crawling over her;
+  5. H3 lite, over the whole finished frame: in CIELAB, chroma above C* 20 is
+     squeezed by H3_SQUEEZE (hue and L* untouched), pulling her toward the
+     base cast's saturation. Full H3 measured 0.616 (the Ironclad + Silent C*
+     p90 against style G's); lite takes half that pull, 0.808. A fixed
+     constant, never measured per run.
 
 Every length above is in texture px at COMBAT_PPU (the combat frames) and
 scales with a job's ppu, so the merchant, rest and select renders get the same
@@ -55,6 +61,9 @@ GRAIN_SD = {"fine": 4.0, "mottle": 11.0, "fine_smeared": 0.32}
 #: carried back up (the select close-up, rendered at ~5.7x): the same strokes
 #: on screen at a tractable cost.
 AKF_MAX_SCALE = 2.0
+#: H3 lite: C* above H3_KNEE is scaled by H3_SQUEEZE = 1 - (1 - 0.616) * 0.5.
+H3_KNEE = 20.0
+H3_SQUEEZE = 1 - (1 - 0.616) * 0.5
 
 
 # ------------------------------------------------------------ small image ops
@@ -344,6 +353,16 @@ def grain(rgb, aux, s):
     return from_lab(lab)
 
 
+def h3_lite(rgb):
+    """H3 lite: squeeze chroma above the knee; L* and hue are untouched."""
+    lab = to_lab(rgb)
+    A, B = lab[..., 1], lab[..., 2]
+    C = np.hypot(A, B)
+    k = np.where(C > H3_KNEE, (H3_KNEE + (C - H3_KNEE) * H3_SQUEEZE) / np.maximum(C, 1e-6), 1.0)
+    lab[..., 1], lab[..., 2] = A * k, B * k
+    return from_lab(lab)
+
+
 def paint(im: Image.Image, aux: Image.Image, s: float) -> Image.Image:
     """One frame through the whole chain; `s` = this render's ppu / REF_PPU.
     Alpha is never changed. Each step reads her colours bled past the edge
@@ -357,6 +376,7 @@ def paint(im: Image.Image, aux: Image.Image, s: float) -> Image.Image:
     r = grade(push_pull(r, body))
     r = kuwahara(push_pull(r, body), s) * (1 - prot[..., None]) + r * prot[..., None]
     r = grain(r, x, s)
+    r = h3_lite(r)
     r = np.where(a[..., None] > 0, r, 0)
     out = np.dstack([np.clip(r * 255 + 0.5, 0, 255), np.clip(a * 255 + 0.5, 0, 255)]).astype(np.uint8)
     return Image.fromarray(out, "RGBA")

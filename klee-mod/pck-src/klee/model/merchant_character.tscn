@@ -45,7 +45,7 @@ _data = {
 
 [node name="Shadow" type="Sprite2D" parent="."]
 position = Vector2(4, 0)
-scale = Vector2(0.8547, 0.849)
+scale = Vector2(0.6426, 0.64)
 texture = ExtResource("2_shadow")
 
 [node name="Sheet" type="Sprite2D" parent="."]

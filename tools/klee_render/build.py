@@ -5,7 +5,7 @@
 
 The PMX stays wherever the operator keeps it (never in the repo: its terms
 forbid redistribution). `--work` receives the raw renders (render.py, under
-<work>/raw), `post.py` paints style G's 2D half over every frame and still
+<work>/raw), `post.py` paints the 2D half (G's chain plus H3 lite) over every frame and still
 (the shader half is render.py's), and `pack.py` then
 writes the sheets/stills into <art-root>/ImageGen and the manifest
 tools/klee_rig/klee_frames.json. Run from a worktree with --art-root pointing
@@ -13,7 +13,8 @@ at the main checkout (operations/art.md: ImageGen lives only there).
 
 THE SCALE, in one place. COMBAT_PPU is texture px per model unit for combat,
 drawn at 0.5, so 150 screen px per unit at 1080p: her hat-to-boot height is
-~165 px and ~177 px to the feather tip, about 0.72 of the base adults' ~235
+~165 px and ~177 px to the feather tip standing (measured on clips.STAND;
+the battle stance is lower), about 0.72 of the base adults' ~235
 (paper pick 2 as corrected: 4'2" against 5'6"-5'10"). The merchant draws her
 at 1.7x (base merchant scale over combat scale) from a 1.5x texture; the rest
 site at 1.33x (base 0.38 over 0.28-0.29) through BaseLib's 0.5 container; the
@@ -38,7 +39,7 @@ REST_PPU = COMBAT_PPU * (0.38 / 0.285)  # 1.33x on screen; 2x texture under the 
 SELECT_PPU = 1700.0
 
 JOBS = [
-    {"clips": "idle,idle_low,attack,hurt,death,cast,setoff", "stills": "stance_a", "ppu": COMBAT_PPU,
+    {"clips": "idle,idle_low,attack,hurt,death,cast,setoff", "stills": "stance_a,stand", "ppu": COMBAT_PPU,
      "outline": OUTLINE_PX},
     {"clips": "merchant", "stills": "", "ppu": MERCHANT_PPU, "outline": OUTLINE_PX * MERCHANT_PPU / COMBAT_PPU},
     {"clips": "", "stills": "rest", "ppu": REST_PPU, "outline": OUTLINE_PX * REST_PPU / COMBAT_PPU},

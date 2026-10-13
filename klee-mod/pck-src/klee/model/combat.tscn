@@ -1299,8 +1299,8 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [node name="Shadow" type="Sprite2D" parent="Visuals/Facing"]
-position = Vector2(2.5, 0)
-scale = Vector2(0.5005, 0.498)
+position = Vector2(2.8, 0)
+scale = Vector2(0.4996, 0.4985)
 texture = ExtResource("9_shadow")
 
 [node name="Model" type="Node2D" parent="Visuals/Facing"]
@@ -1308,34 +1308,34 @@ texture = ExtResource("9_shadow")
 [node name="Idle" type="Sprite2D" parent="Visuals/Facing/Model"]
 texture = ExtResource("1_idle")
 centered = false
-offset = Vector2(-61, -357)
+offset = Vector2(-69, -330)
 scale = Vector2(0.5, 0.5)
-hframes = 10
-vframes = 4
+hframes = 9
+vframes = 5
 
 [node name="IdleLow" type="Sprite2D" parent="Visuals/Facing/Model"]
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("2_idle_low")
 centered = false
-offset = Vector2(-64, -353)
+offset = Vector2(-69, -325)
 scale = Vector2(0.5, 0.5)
-hframes = 10
+hframes = 9
 vframes = 4
 
 [node name="Attack" type="Sprite2D" parent="Visuals/Facing/Model"]
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("3_attack")
 centered = false
-offset = Vector2(-126, -357)
+offset = Vector2(-128, -343)
 scale = Vector2(0.5, 0.5)
-hframes = 5
-vframes = 4
+hframes = 4
+vframes = 5
 
 [node name="Hurt" type="Sprite2D" parent="Visuals/Facing/Model"]
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("4_hurt")
 centered = false
-offset = Vector2(-93, -359)
+offset = Vector2(-84, -338)
 scale = Vector2(0.5, 0.5)
 hframes = 6
 vframes = 3
@@ -1344,16 +1344,16 @@ vframes = 3
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("5_death")
 centered = false
-offset = Vector2(-93, -357)
+offset = Vector2(-85, -338)
 scale = Vector2(0.5, 0.5)
-hframes = 8
-vframes = 4
+hframes = 7
+vframes = 5
 
 [node name="Cast" type="Sprite2D" parent="Visuals/Facing/Model"]
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("6_cast")
 centered = false
-offset = Vector2(-73, -371)
+offset = Vector2(-69, -350)
 scale = Vector2(0.5, 0.5)
 hframes = 7
 vframes = 3
@@ -1362,7 +1362,7 @@ vframes = 3
 self_modulate = Color(1, 1, 1, 0)
 texture = ExtResource("7_setoff")
 centered = false
-offset = Vector2(-84, -374)
+offset = Vector2(-109, -354)
 scale = Vector2(0.5, 0.5)
 hframes = 6
 vframes = 3
@@ -1370,10 +1370,10 @@ vframes = 3
 [node name="ThrownProjectile" type="Sprite2D" parent="Visuals/Facing"]
 unique_name_in_owner = true
 visible = false
-position = Vector2(67.5, -138.25)
+position = Vector2(123.5, -147)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("8_bomb")
-metadata/release = 0.45
+metadata/release = 0.5
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true
