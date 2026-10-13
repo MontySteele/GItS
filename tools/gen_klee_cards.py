@@ -3269,7 +3269,7 @@ APPLY_POWERS = {
         "HP you [gold]Drain[/gold] past your line also returns when combat "
         "ends."),
     "fs_fountain_of_lucine": ("FountainOfLucinePower", None,
-        "At the start of your next 3 turns, [gold]Repay[/gold] {X}."),
+        "Next turn, [gold]Repay[/gold] {X}."),
     "fs_critics_darling": ("CriticsDarlingPower", None,
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
         "much damage to a random enemy."),
@@ -15742,7 +15742,7 @@ STAGE_REPAY_PAYOUT_CS = {
     "damage": "FurinaStageFacePreview.PayDamage",
 }
 STAGE_REPAY_POWER_PAYOUTS = {
-    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "block",
+    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "",
     "fs_grand_entrance": "block"}
 
 
@@ -15783,10 +15783,15 @@ def stage_later_repay_call(card: dict) -> str | None:
     for fx in top:
         if (fx.get("op") == "apply_power"
                 and fx.get("power") in STAGE_REPAY_POWERS):
-            pay = STAGE_REPAY_PAYOUT_CS[
-                STAGE_REPAY_POWER_PAYOUTS[fx["power"]]]
+            kind = STAGE_REPAY_POWER_PAYOUTS[fx["power"]]
+            pay = (", " + STAGE_REPAY_PAYOUT_CS[kind]) if kind else ""
+            # A fixed Repay (Fountain of Lucine, 2026-10-13) has no
+            # PowerAmount variable: its number is the printed one.
+            uses_var = bool(kind)    # only the floored powers keep the var
+            amount = ('DynamicVars["PowerAmount"].IntValue' if uses_var
+                      else str(int(fx["amount"])))
             return ('FurinaStageFacePreview.Repay(this, '
-                    f'DynamicVars["PowerAmount"].IntValue, {pay})')
+                    f'{amount}{pay})')
     nested = [inner for fx in top if fx.get("op") == "conditional"
               for inner in (fx.get("then") or [])
               if inner.get("op") == "stage_repay"]

@@ -65,14 +65,14 @@ public static class FurinaStageLaw
     public const int LyneyLineDrop = 10;
 
     /// <summary>Lyney's act: "Drain 2, never past your line (none at or below
-    /// it). Deal 8 Pyro
+    /// it). Deal 5 Pyro
     /// damage to ALL enemies." A guest's Drain stops at the line (the
     /// drain-line round, 2026-10-09): it drains only the room above it, and
     /// the damage lands either way.</summary>
     public const int LyneyActDrain = 2;
 
     /// <summary>Lyney's act's damage.</summary>
-    public const int LyneyActDamage = 8;
+    public const int LyneyActDamage = 5;
 
     /// <summary>Sigewinne's act: "Repay 2." (Her line gives the Block of
     /// every Repay.)</summary>
@@ -91,10 +91,6 @@ public static class FurinaStageLaw
     /// push the line below.</summary>
     public const int DrainFloor = 1;
 
-    /// <summary>Fountain of Lucine: "At the start of your next 3 turns,
-    /// Repay 3."</summary>
-    public const int FountainTurns = 3;
-
     // ---- the pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md) --
     // Sec.3's guest rule: a guest's upgrade raises its line or its act,
     // never its cost (the table of seven built guests, and sec.5's four).
@@ -108,8 +104,8 @@ public static class FurinaStageLaw
     /// <summary>Wriothesley upgraded: "Act: 7."</summary>
     public const int WriothesleyActDamageUpgraded = 7;
 
-    /// <summary>Lyney upgraded: "Act: 11."</summary>
-    public const int LyneyActDamageUpgraded = 11;
+    /// <summary>Lyney upgraded: "Act: 7."</summary>
+    public const int LyneyActDamageUpgraded = 7;
 
     /// <summary>Lynette upgraded: "Act: 6."</summary>
     public const int LynetteActDamageUpgraded = 6;
@@ -167,8 +163,11 @@ public static class FurinaStageLaw
 
     public const int EscoffierActDamageUpgraded = 6;
 
-    /// <summary>Escoffier's line: "Whenever a guest acts, Repay 1."</summary>
-    public const int EscoffierLineRepay = 1;
+    /// <summary>Escoffier's line (ruled 2026-10-13): "Your guests' acts deal
+    /// 2 [3] more damage."</summary>
+    public const int EscoffierLineBonus = 2;
+
+    public const int EscoffierLineBonusUpgraded = 3;
 
     /// <summary>Ensemble Cast: "You have 4 guest seats."</summary>
     public const int EnsembleSeats = 4;

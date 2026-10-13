@@ -523,15 +523,15 @@ public sealed class StageDirector
     }
 
     /// <summary>Fountain of Lucine: at the start of her turn, each play still
-    /// owed Repays its amount, one Repay per play, each with its Block floor
-    /// (2026-10-09).</summary>
+    /// owed Repays its amount, one Repay per play (no floor, 2026-10-13).
+    /// </summary>
     public async Task<int> TurnStartRepays()
     {
         var total = 0;
         foreach (var amount in _stage.TakeDueRepays())
         {
             if (_board.Over) break;
-            total += await RepayFloor(amount, StageFloor.Block);
+            total += await Repay(amount);
         }
         return total;
     }
@@ -636,7 +636,7 @@ public sealed class StageDirector
 
     /// <summary>One guest's act, at the end of her turn or bought by a card
     /// (Encore!, Tutti!, Final Bow, Bring the House Down, Showstopper).
-    /// Escoffier's line answers every act, his own included. A Repay inside
+    /// A Repay inside
     /// it is the act's, not a card's (<see cref="FurinaStageLedger.Acting"/>,
     /// Charlotte's line).</summary>
     public async Task<bool> Act(StageSeat seat)
@@ -674,22 +674,22 @@ public sealed class StageDirector
                 if (!_board.Over) floor = System.Math.Max(0, number - moved);
                 break;
             case StagePerformer.Wriothesley:
-                moved = number + await FullHouse();
+                moved = number + await FullHouse() + EscoffierBonus();
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Cryo);
                 break;
             case StagePerformer.Lynette:
-                moved = number + await FullHouse();
+                moved = number + await FullHouse() + EscoffierBonus();
                 await _board.Damage(who, StageTarget.Aura, moved,
                                     Element.Anemo);
                 break;
             case StagePerformer.Clorinde:
-                moved = number + await FullHouse();
+                moved = number + await FullHouse() + EscoffierBonus();
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.Electro);
                 break;
             case StagePerformer.Lyney:
-                // "Drain 2, never past your line (none at or below it). Deal 8
+                // "Drain 2, never past your line (none at or below it). Deal 5
                 // Pyro damage to ALL enemies." A guest acts with no choice from the
                 // player, so its Drain stops at the line (the drain-line
                 // round, 2026-10-09): it drains only the room above the
@@ -699,13 +699,13 @@ public sealed class StageDirector
                                     StagePerformer.Lyney);
                 if (!_board.Over)
                 {
-                    moved = number + await FullHouse();
+                    moved = number + await FullHouse() + EscoffierBonus();
                     await _board.Damage(who, StageTarget.All, moved,
                                         Element.Pyro);
                 }
                 break;
             case StagePerformer.Chevreuse:
-                moved = number + await FullHouse();
+                moved = number + await FullHouse() + EscoffierBonus();
                 await _board.Damage(who, StageTarget.Random, moved,
                                     Element.None);
                 break;
@@ -736,7 +736,7 @@ public sealed class StageDirector
                                          NaviaSpendSource);
                 if (moved > 0 && !_board.Over)
                 {
-                    moved += await FullHouse();
+                    moved += await FullHouse() + EscoffierBonus();
                     await _board.Damage(who, StageTarget.Random, moved,
                                         Element.Geo);
                 }
@@ -747,13 +747,13 @@ public sealed class StageDirector
                 moved = _stage.HpLostSinceLastTurn;
                 if (moved > 0)
                 {
-                    moved += await FullHouse();
+                    moved += await FullHouse() + EscoffierBonus();
                     await _board.Damage(who, StageTarget.All, moved,
                                         Element.Hydro);
                 }
                 break;
             case StagePerformer.Escoffier:
-                moved = number + await FullHouse();
+                moved = number + await FullHouse() + EscoffierBonus();
                 await _board.Damage(who, StageTarget.All, moved,
                                     Element.Cryo);
                 break;
@@ -761,15 +761,25 @@ public sealed class StageDirector
         _stage.Note(new StageBeat(FurinaStageLedger.ActEvent, who,
                                   _stage.IndexOf(seat), _stage.Fanfare, moved,
                                   "", SeatKey: seat.Key, Floor: floor));
-        if (_stage.SeatOf(StagePerformer.Escoffier) is { } escoffier
-            && !_board.Over)
-        {
-            _stage.NoteLine(StagePerformer.Escoffier,
-                            FurinaStageLaw.EscoffierLineRepay);
-            await _board.LineCue(escoffier);
-            await Repay(FurinaStageLaw.EscoffierLineRepay);
-        }
         return true;
+    }
+
+    /// <summary>Escoffier's line (ruled 2026-10-13): "Your guests' acts deal
+    /// 2 [3] more damage." Added to every damaging act as it lands, his own
+    /// included; Block and Repay acts do not call it. A guest holds one seat,
+    /// so there is one Escoffier; with two the highest bonus would stand, not
+    /// the sum. Sim twin: <c>furina_tide.escoffier_bonus</c>.</summary>
+    public int EscoffierBonus()
+    {
+        var bonus = 0;
+        foreach (var seat in _stage.Seats)
+        {
+            if (seat.Who != StagePerformer.Escoffier) continue;
+            bonus = System.Math.Max(bonus, seat.Upgraded
+                ? FurinaStageLaw.EscoffierLineBonusUpgraded
+                : FurinaStageLaw.EscoffierLineBonus);
+        }
+        return bonus;
     }
 
     /// <summary>Full House (the diversity pass, 2026-10-11): "Whenever a

@@ -605,7 +605,7 @@ public static class FurinaStage
         if (applied > ledger.FountainSeen)
         {
             ledger.ScheduleRepay(applied - ledger.FountainSeen,
-                                 FurinaStageLaw.FountainTurns);
+                                 turns: 1);   // ruled 2026-10-13: the next turn only
             ledger.FountainSeen = applied;
         }
         using (ledger.CausedBy(FountainOfLucinePower.Title))

@@ -133,9 +133,9 @@ THUNDEROUS_DAMAGE = 3        # Power: whenever you Spend, 3 to ALL
 LYNEY_LINE_DROP = 10         # line: "Your Drain buffer is 10 HP larger."
                              # (2026-10-11: +10 to her Drain buffer; the line
                              # sits 10 HP lower)
-LYNEY_ACT_DRAIN = 2          # act: "Drain 2, never past your line. Deal 8
+LYNEY_ACT_DRAIN = 2          # act: "Drain 2, never past your line. Deal 5
                              # Pyro damage to ALL enemies."
-LYNEY_ACT = 8
+LYNEY_ACT = 5
 CHEVREUSE_ACT = 4            # act: "Deal 4 damage to a random enemy."
 CHEVREUSE_LINE_VULNERABLE = 1  # line: each Spend, 1 Vulnerable (random)
 DRAIN_FLOOR = 1              # a Drain cannot take her to 0 HP (2026-10-09)
@@ -145,13 +145,13 @@ LINE_MAX_HP_DIVISOR = 4      # the Drain buffer: entry Max HP // 4
 #: Max HP counted in HP drained (2026-10-11). Every other variant's line is a
 #: float share, by HP position.
 SHIPPED_LINE = "entry_minus_quarter_max"
-FOUNTAIN_TURNS = 3           # Fountain of Lucine: the next 3 turns
+FOUNTAIN_TURNS = 1           # Fountain of Lucine: the next turn
 # The pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09). Sec.3: a guest's upgrade raises its line or its act.
 CHARLOTTE_ACT_REPAY_UPGRADED = 4
 SIGEWINNE_ACT_REPAY_UPGRADED = 4
 WRIOTHESLEY_ACT_UPGRADED = 7
-LYNEY_ACT_UPGRADED = 11
+LYNEY_ACT_UPGRADED = 7
 LYNETTE_ACT_UPGRADED = 6
 CHEVREUSE_LINE_WEAK_UPGRADED = 1   # upgraded line: also 1 Weak
 CLORINDE_ACT_UPGRADED = 9
@@ -169,7 +169,8 @@ NAVIA_LINE_DISCOUNT_UPGRADED = 3
 NEUVILLETTE_HYDRO_BONUS_UPGRADED = 3
 ESCOFFIER_ACT = 4                  # act: 4 Cryo to ALL [6]
 ESCOFFIER_ACT_UPGRADED = 6
-ESCOFFIER_LINE_REPAY = 1           # line: whenever a guest acts, Repay 1
+ESCOFFIER_LINE_BONUS = 2           # line: your guests' acts deal 2 [3] more damage
+ESCOFFIER_LINE_BONUS_UPGRADED = 3
 ENSEMBLE_SEATS = 4                 # Ensemble Cast: 4 guest seats
 SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
 # High Stakes (the Spend round 2, 2026-10-10): "Your Attacks deal 1
@@ -433,7 +434,7 @@ CARDS: dict[str, Spec] = {
     "ftd_ousia_surge": Spec("Ousia Surge", 1, "power", "uncommon", "power",
                             (1,), "ousia_surge"),
     # Guest Star: Lyney (1). Line: your Drain buffer is 10 HP larger. Act:
-    # Drain 2, never past your line. Deal 8 Pyro damage to ALL enemies.
+    # Drain 2, never past your line. Deal 5 Pyro damage to ALL enemies.
     "ftd_lyney": Spec("Guest Star: Lyney", 1, "skill", "uncommon", "guest",
                       (), "lyney", exhaust=True),
     # A Five-Century Act (Power, 2): HP you Drain past your line also
@@ -441,9 +442,10 @@ CARDS: dict[str, Spec] = {
     # HP".)
     "ftd_five_century": Spec("A Five-Century Act", 2, "power", "rare",
                              "power", (1,), "five_century"),
-    # Fountain of Lucine (1): At the start of your next 3 turns, Repay 3.
+    # Fountain of Lucine (1): Gain 8 [11] Block. At the start of your next
+    # turn, Repay 3. (Ruled 2026-10-13.)
     "ftd_fountain": Spec("Fountain of Lucine", 1, "skill", "uncommon",
-                         "fountain", (3,)),
+                         "block_fountain", (8, 3)),
     # Hold the Stage (1): Gain 6 Block. Spend up to 16: gain 1 more for
     # each. (The Spend paper; 16 since the Spend outlet paper, 2026-10-12.)
     "ftd_hold_the_stage": Spec("Hold the Stage", 1, "skill", "uncommon",
@@ -1301,6 +1303,7 @@ def _act(state, member: str) -> None:
     elif member == "wriothesley":
         if living:
             n += full_house(state)
+            n += escoffier_bonus(f)
             _hit(state, state.rng.choice(living), n, "cryo")
     elif member == "lynette":
         # "Deal 3 Anemo damage to an enemy, one with an aura if able." (the
@@ -1309,20 +1312,23 @@ def _act(state, member: str) -> None:
         pool = aura or living
         if pool:
             n += full_house(state)
+            n += escoffier_bonus(f)
             _hit(state, state.rng.choice(pool), n, "anemo")
     elif member == "clorinde":
         if living:
             n += full_house(state)
+            n += escoffier_bonus(f)
             _hit(state, state.rng.choice(living), n, "electro")
     elif member == "neuvillette":
         # The HP she lost since her last turn, Drained or taken (2026-10-09).
         dmg = f.hp_lost_window
         if dmg > 0 and living:
             dmg += full_house(state)
+            dmg += escoffier_bonus(f)
             for enemy in living:
                 _hit(state, enemy, dmg, "hydro")
     elif member == "lyney":
-        # "Drain 2, never past your line. Deal 8 Pyro damage to ALL
+        # "Drain 2, never past your line. Deal 5 Pyro damage to ALL
         # enemies." A guest's Drain stops at the line (the drain-line round,
         # 2026-10-09): it drains only the room above it, 0 with none, and
         # the damage lands either way.
@@ -1331,11 +1337,13 @@ def _act(state, member: str) -> None:
             drain(state, room)
         if not state.over and p.alive and state.living_enemies:
             n += full_house(state)
+            n += escoffier_bonus(f)
             for enemy in list(state.living_enemies):
                 _hit(state, enemy, n, "pyro")
     elif member == "chevreuse":
         if living:
             n += full_house(state)
+            n += escoffier_bonus(f)
             _hit(state, state.rng.choice(living), n, None)
     elif member == "freminet":
         # "Gain 3 Block. Spend a quarter of your Fanfare (rounded down): gain
@@ -1354,16 +1362,26 @@ def _act(state, member: str) -> None:
         living = state.living_enemies
         if dmg > 0 and living and not state.over:
             dmg += full_house(state)
+            dmg += escoffier_bonus(f)
             _hit(state, state.rng.choice(living), dmg, "geo")
     elif member == "escoffier":
         if living:
             n += full_house(state)
+            n += escoffier_bonus(f)
         for enemy in living:
             _hit(state, enemy, n, "cryo")
     state.emit("ftd_act", member=member)
-    if "escoffier" in f.stage and not state.over and p.alive:
-        _line(state, "escoffier", ESCOFFIER_LINE_REPAY)
-        repay(state, ESCOFFIER_LINE_REPAY)
+
+
+def escoffier_bonus(f: Ftd) -> int:
+    """Escoffier's line (ruled 2026-10-13): "Your guests' acts deal 2 [3]
+    more damage." Read off the seat when a damaging act lands. One seat a
+    guest, so one Escoffier; the highest bonus would stand if there were two.
+    The C# twin is `StageDirector.EscoffierBonus`."""
+    if "escoffier" not in f.stage:
+        return 0
+    return (ESCOFFIER_LINE_BONUS_UPGRADED if "escoffier" in f.stage_up
+            else ESCOFFIER_LINE_BONUS)
 
 
 def full_house(state) -> int:
@@ -1549,12 +1567,12 @@ def turn_start(state) -> None:
     for item in f.fountains:
         item[1] -= 1
     f.fountains = [item for item in f.fountains if item[1] > 0]
-    # The Repay floor (2026-10-09): Fountain of Lucine's pays Block, Pneuma
-    # Tides' Vigor.
+    # Fountain of Lucine's Repay has no floor (2026-10-13); Pneuma Tides'
+    # pays Vigor (the Repay floor, 2026-10-09).
     for amount in due:
         if state.over or not state.player.alive:
             break
-        f.ledger["fountain_repaid"] += repay_floor(state, amount, "block")
+        f.ledger["fountain_repaid"] += repay(state, amount)
     tides = _player_power(p, "pneuma_tides")
     if tides and not state.over and p.alive:
         repay_floor(state, tides, "vigor")
@@ -1720,8 +1738,9 @@ def resolve_card(state, card) -> None:
         held = spend_all(state)
         if held > 0:
             _card_damage(state, card, n[0] * held, all_enemies=True)
-    elif k == "fountain":
-        f.fountains.append([n[0], FOUNTAIN_TURNS])
+    elif k == "block_fountain":
+        _card_block(state, card, n[0])
+        f.fountains.append([n[1], FOUNTAIN_TURNS])
     elif k == "power":
         f.powers[spec.member] += n[0]
         if spec.member == "high_stakes":

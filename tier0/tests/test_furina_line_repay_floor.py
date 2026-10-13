@@ -146,15 +146,14 @@ def test_soothing_waters_keeps_no_leftover_payout():
     assert st.player.block == 0
 
 
-def test_fountain_pays_block_each_turn_and_pneuma_tides_vigor():
+def test_fountain_has_no_floor_and_pneuma_tides_pays_vigor():
     st = _furina()
     effects.resolve_card(st, _card("proto_fs_fountain_of_lucine"))
+    assert st.player.block == 8                             # the card's own
+    st.player.block = 0
     FS.drain(st, 1)
     T.turn_start(st)
-    assert st.player.block == 2                             # 3 - 1
-    st.player.block = 0
-    T.turn_start(st)
-    assert st.player.block == 3
+    assert st.player.block == 0                             # no floor (2026-10-13)
     st = _furina()
     effects.resolve_card(st, _card("proto_fs_pneuma_tides"))
     T.turn_start(st)

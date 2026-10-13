@@ -147,7 +147,7 @@ public class FurinaGuestRuleTests
         Run(kit.Director.SummonGuest(StagePerformer.Clorinde));
         Assert.Equal(before + FurinaStageLaw.LyneyActDrain, kit.Stage.Drained);
         Assert.Equal(76, kit.Board.Hp);
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
         Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Lyney));
         Assert.DoesNotContain(StagePerformer.Lyney, kit.Company);
     }
@@ -249,7 +249,7 @@ public class FurinaGuestRuleTests
         Run(kit.Director.SummonGuest(StagePerformer.Lyney));
         Assert.Equal(before + FurinaStageLaw.LyneyActDrain, kit.Stage.Drained);
         Assert.Equal(76, kit.Board.Hp);
-        Assert.Contains("damage Lyney All 8 Pyro", kit.Board.Log);
+        Assert.Contains("damage Lyney All 5 Pyro", kit.Board.Log);
         Assert.Single(kit.Board.Hits);
         Assert.Equal(1, kit.Beats(FurinaStageLedger.ActEvent, StagePerformer.Lyney));
     }
@@ -411,17 +411,21 @@ public class FurinaGuestRuleTests
     }
 
     [Fact]
-    public void Escoffiers_line_repays_one_whenever_a_guest_acts_his_own_included()
+    public void Escoffiers_line_adds_two_to_every_damaging_act_his_own_included()
     {
-        var kit = StageKit.Of(StagePerformer.Charlotte, StagePerformer.Escoffier);
+        var kit = StageKit.Of(StagePerformer.Charlotte, StagePerformer.Escoffier,
+                              StagePerformer.Lyney);
         Run(kit.Director.Drain(10));
         kit.Board.Log.Clear();
         Run(kit.Director.ActAll());
-        Assert.Equal(2, kit.Beats(FurinaStageLedger.LineEvent, StagePerformer.Escoffier));
-        Assert.Contains("damage Escoffier All 4 Cryo", kit.Board.Log);
-        // Charlotte Repays 2, Escoffier 1 after each act.
-        Assert.Equal(new[] { "heal 2", "heal 1", "heal 1" },
-                     kit.Board.Log.Where(l => l.StartsWith("heal ")).ToArray());
+        // His own 4 lands as 6; Lyney's 5 as 7; Charlotte's Repay 2 is not
+        // damage and is not touched.
+        Assert.Contains("damage Escoffier All 6 Cryo", kit.Board.Log);
+        Assert.Contains("damage Lyney All 7 Pyro", kit.Board.Log);
+        Assert.Contains("heal 2", kit.Board.Log);
+        Assert.Equal(0, kit.Beats(FurinaStageLedger.LineEvent, StagePerformer.Escoffier));
+        Assert.Equal(2, FurinaStageLaw.EscoffierLineBonus);
+        Assert.Equal(3, FurinaStageLaw.EscoffierLineBonusUpgraded);
     }
 
     [Fact]

@@ -147,8 +147,10 @@ public abstract class StagePerformerBadge : PowerModel
               + " additional damage. Act: deal [gold]Hydro[/gold] damage to ALL enemies "
               + "equal to the HP you lost since your last turn.",
             StagePerformer.Escoffier =>
-                "Whenever a guest acts, [gold]Repay[/gold] "
-              + FurinaStageLaw.EscoffierLineRepay + ". Act: deal " + act
+                "Your guests' acts deal "
+              + (upgraded ? FurinaStageLaw.EscoffierLineBonusUpgraded
+                          : FurinaStageLaw.EscoffierLineBonus)
+              + " more damage. Act: deal " + act
               + " [gold]Cryo[/gold] damage to ALL enemies.",
             _ => "",
         };

@@ -248,13 +248,28 @@ def test_neuvillette_adds_to_hydro_and_acts_for_the_hp_drained():
     assert hp - st.enemies[0].hp == 4 + 2
 
 
-def test_escoffier_repays_one_whenever_a_guest_acts():
-    st = _furina()
-    st.player.ftd.stage = ["charlotte", "escoffier"]
-    FS.drain(st, 10)
-    T.act_all(st)
-    assert st.player.ftd.ledger["lines"]["escoffier"] == 2
-    assert st.player.ftd.drained == 10 - 2 - 1 - 1
+def test_escoffiers_line_adds_to_every_damaging_act_his_own_included():
+    hits = []
+    real = T._hit
+    T._hit = lambda state, enemy, n, el: (hits.append(n),
+                                           real(state, enemy, n, el))[1]
+    try:
+        st = _furina()
+        st.player.ftd.stage = ["charlotte", "escoffier", "lyney"]
+        FS.drain(st, 10)
+        T.act_all(st)
+        # Charlotte's Repay 2 is untouched (drained 10 - 2, plus Lyney's
+        # Drain 2); his own 4 lands as 6 and Lyney's 5 as 7.
+        assert st.player.ftd.drained == 10 - 2 + 2
+        assert hits == [6, 7]
+        st = _furina()
+        st.player.ftd.stage = ["escoffier"]
+        st.player.ftd.stage_up = ["escoffier"]
+        hits.clear()
+        T.act_all(st)
+        assert hits == [6 + 3]                  # upgraded: act 6, line 3
+    finally:
+        T._hit = real
 
 
 def test_ensemble_cast_seats_four():

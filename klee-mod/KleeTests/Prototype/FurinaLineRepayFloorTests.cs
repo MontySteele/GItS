@@ -109,13 +109,13 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void Fountain_pneuma_tides_and_grand_entrance_pay_their_floor()
+    public void Pneuma_tides_and_grand_entrance_pay_their_floor_and_fountain_none()
     {
-        // Fountain: each turn's Repay pays its own Block floor.
+        // Fountain: no floor (ruled 2026-10-13); nothing drained, nothing paid.
         var kit = StageKit.Of();
-        kit.Stage.ScheduleRepay(3, FurinaStageLaw.FountainTurns);
+        kit.Stage.ScheduleRepay(3, 1);
         Run(kit.Director.TurnStartRepays());
-        Assert.Equal(new[] { "block 3" }, kit.Board.Log.ToArray());
+        Assert.Empty(kit.Board.Log);
         // Pneuma Tides: Vigor.
         kit.Board.Log.Clear();
         Run(kit.Director.PneumaTides(2));
@@ -126,12 +126,12 @@ public class FurinaLineRepayFloorTests
             Il.Calls(Il.Method("FurinaStage", "GuestStar")));
         foreach (var card in new CardModel[]
                  {
-                     new ProtoFsFountainOfLucine(),
                      new ProtoFsGrandEntrance(), new ProtoFsHymnOfManyWaters(),
                  })
         {
             Assert.Contains(BlockFloor, Face(card));
         }
+        Assert.DoesNotContain("could not", Face(new ProtoFsFountainOfLucine()));
         // Soothing Waters keeps no floor (ruled 2026-10-09): a 0-cost
         // draw-1 card paying out on an empty Repay looped forever.
         Assert.DoesNotContain("could not", Face(new ProtoFsSoothingWaters()));

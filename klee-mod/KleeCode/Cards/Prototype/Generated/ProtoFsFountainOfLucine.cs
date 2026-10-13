@@ -45,7 +45,7 @@ public sealed class ProtoFsFountainOfLucine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fountain of Lucine"),
-        ("description", "For 3 turns, at the start of your turn [gold]Repay[/gold] {PowerAmount:diff()}. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].{InCombat:{StageRepay}|}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Next turn, [gold]Repay[/gold] 3.{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>This card's in-combat Stage line
@@ -54,13 +54,13 @@ public sealed class ProtoFsFountainOfLucine : CustomCardModel, ICharacterCard
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["PowerAmount"].IntValue, FurinaStageFacePreview.PayBlock));
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, 3));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new SpotlightSystem.SpotlitBlockVar(8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,11 +72,12 @@ public sealed class ProtoFsFountainOfLucine : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<FountainOfLucinePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await PowerCmd.Apply<FountainOfLucinePower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

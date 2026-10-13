@@ -487,7 +487,7 @@ def _guest_value(state, member: str) -> float:
     elif member == "neuvillette":
         per = 3.0 * n + 2.0
     elif member == "lyney":
-        # 8 to ALL every act; it Drains only the room above the line, up to
+        # 5 to ALL every act; it Drains only the room above the line, up to
         # 2 (the drain-line round, 2026-10-09; his line adds 10).
         room = T.guest_drain_room(state, T.LYNEY_ACT_DRAIN)
         per = T.LYNEY_ACT * n - room * temp_hp_value(state) + 1.0
@@ -500,7 +500,9 @@ def _guest_value(state, member: str) -> float:
     elif member == "navia":
         per = 0.5 * 4.0 + T.NAVIA_LINE_DISCOUNT * FANFARE
     elif member == "escoffier":
-        per = T.ESCOFFIER_ACT * n + 0.5 * per_repay * len(f.stage)
+        # His line adds to his own act and, say, two other damaging acts.
+        per = ((T.ESCOFFIER_ACT + T.ESCOFFIER_LINE_BONUS) * n
+               + T.ESCOFFIER_LINE_BONUS * 2.0)
     else:
         per = 0.0
     entrance = T._player_power(state.player, "grand_entrance")
@@ -653,10 +655,11 @@ def value(state, card, playable: list, decider) -> float:
         return repay_value(state, n[0]) + (DRAW * n[1] if draws else 0.0)
     if k == "repay_all":
         return repay_value(state, f.drained)
-    if k == "fountain":
+    if k == "block_fountain":
         hp_per = temp_hp_value(state) if f.curtain_call else hp_value(state)
         per_repay = hp_per + (FANFARE if f.repay_fanfare else 0.0)
-        return T.FOUNTAIN_TURNS * 0.6 * per_repay * n[0]
+        return (_block_value(n[0], need_now)
+                + T.FOUNTAIN_TURNS * 0.6 * per_repay * n[1])
     if k == "bravura":
         pts = f.fanfare
         return _single(state, n[0] + n[1] * pts) - spend_cost(state, pts)

@@ -117,9 +117,9 @@ public class FurinaDiversityPassTests : IDisposable
                         Generated("ProtoFsTheLeadingLady"));
         Assert.Contains("PowerCmd.Apply<LeadingLadyPower>",
                         Generated("ProtoFsTheLeadingLady"));
-        Assert.Equal(1, new ProtoFsTheLeadingLady()
+        Assert.Equal(2, new ProtoFsTheLeadingLady()
             .DynamicVars["PowerAmount"].IntValue);
-        Assert.Equal(2, Upgraded(new ProtoFsTheLeadingLady())
+        Assert.Equal(3, Upgraded(new ProtoFsTheLeadingLady())
             .DynamicVars["PowerAmount"].IntValue);
 
         var furina = Seat.Furina(80).WithPower<LeadingLadyPower>(1);
@@ -149,11 +149,11 @@ public class FurinaDiversityPassTests : IDisposable
                                 StagePerformer.Escoffier);
         Run(kit.Director.ActAll());
         Assert.Contains($"damage Wriothesley Random "
-                        + $"{FurinaStageLaw.WriothesleyActDamage + 4} Cryo",
+                        + $"{FurinaStageLaw.WriothesleyActDamage + 4 + FurinaStageLaw.EscoffierLineBonus} Cryo",
                         kit.Board.Log);
         // The second act gets what is left: 10 - 4 = 6, so 4 more.
         Assert.Contains($"damage Escoffier All "
-                        + $"{FurinaStageLaw.EscoffierActDamage + 4} Cryo",
+                        + $"{FurinaStageLaw.EscoffierActDamage + 4 + FurinaStageLaw.EscoffierLineBonus} Cryo",
                         kit.Board.Log);
         Assert.Equal(2, kit.Stage.Fanfare);
     }

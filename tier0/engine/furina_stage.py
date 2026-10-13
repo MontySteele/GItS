@@ -89,7 +89,8 @@ NEUVILLETTE_HYDRO_BONUS = T.NEUVILLETTE_HYDRO_BONUS
 NEUVILLETTE_HYDRO_BONUS_UPGRADED = T.NEUVILLETTE_HYDRO_BONUS_UPGRADED
 ESCOFFIER_ACT_DAMAGE = T.ESCOFFIER_ACT
 ESCOFFIER_ACT_DAMAGE_UPGRADED = T.ESCOFFIER_ACT_UPGRADED
-ESCOFFIER_LINE_REPAY = T.ESCOFFIER_LINE_REPAY
+ESCOFFIER_LINE_BONUS = T.ESCOFFIER_LINE_BONUS
+ESCOFFIER_LINE_BONUS_UPGRADED = T.ESCOFFIER_LINE_BONUS_UPGRADED
 ENSEMBLE_SEATS = T.ENSEMBLE_SEATS
 SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
 HIGH_STAKES_EVERY = T.HIGH_STAKES_EVERY
@@ -781,7 +782,8 @@ READINGS: tuple[str, ...] = (
     "at least 1 is spent, and Navia's discount applies when it is the turn's "
     "first Spend; each guest takes its share of what is left, oldest first, "
     "and again after Showstopper.",
-    "Escoffier's line answers every act, his own included.",
+    "Escoffier's line adds to every damaging act, his own included; it does "
+    "not touch Block or Repay acts.",
     "Regina drains first at turn start, then Fountain of Lucine and Pneuma "
     "Tides Repay, then Prima Donna reads the Fanfare.",
     "Salon Solitaire's Repay comes after the guests act, at the end of her "
