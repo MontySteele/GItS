@@ -53,7 +53,19 @@ Give each kit one Tome card and one Tooth card, like the base characters and Var
 
 Your rulings to leave Klee's deck and Furina alone apply here. These are rewards from two act-2 Ancients, not pool cards, and Mk.Omega's text doesn't change. Pick 1 lets you hold either kit back.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "Watastumi Casket is a bit weak for an Ancient relic - perhaps bump it to "3 Block per Plan" instead of just "3 block if there was a Plan". Princess of Watatsumi needs to do more as an Ancient. Perhaps "Gain 9 [12] Block. Draw 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies five times." All the World's a Stage likewise needs a bump - "Gain 8 [11] Block. Spend all your Fanfare and deal that much Hydro damage to ALL enemies twice." Otherwise agreed.- let's fix them all"
+
+- **Pick 1 (a):** all three kits get one Tome card and one Tooth card.
+  - **Klee:** Mk.Omega becomes the Tooth card for Jumpy Dumpty and gains Innate. Alice's Masterpiece says "Bombs and Mines".
+  - **Kokomi:** Princess of Watatsumi becomes the Tooth card for Kurage's Oath: "Gain 9 [12] Block. Draw 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies five times."
+  - **Furina:** All the World's a Stage becomes the Tooth card for Rising Applause: "Gain 8 [11] Block. Spend all your Fanfare and deal that much Hydro damage to ALL enemies twice." Center of Attention's text says it skips "Spend all".
+- **Pick 2 (a):** Rising Applause is Furina's Tooth card, at your numbers.
+- **Watatsumi Casket** (the Orobas upgrade): "At the start of your turn, gain 3 Block for each Plan waiting." The Tamakushi Casket stays at 3 if any Plan is waiting.
+- **Hygiene** as listed, and the `LAW.md` Ancient carve-out loses the retired Charge and Encore.
+
+## For [USER] (ruled above)
 
 1. **One Tome card and one Tooth card per kit.**
    - **(a) Default:** all three as proposed.
