@@ -130,6 +130,13 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
 - **Rest site.** She crouches by the fire at the base rest scale, with the bomb beside her. The texture is padded so her seat lands on BaseLib's anchor.
 - **Character select.** A waist-up close-up of stance B over her backdrop, bleeding off the bottom like the base five.
 
+**The near arm, fixed 2026-10-13.** [USER], on the contact sheet: "why do the idle loop ones have no right arm (Left side)?"
+
+- **The cause.** Stance A placed her right hand from her chest. It swung across her belly and hid the upper arm behind the coat.
+- **The fix.** The hand is now placed from her right hip (`clips.py`, `NEAR_HANG`). The sleeve, cuff and glove hang at her screen-left side, and the bomb is held by her hip.
+- **Same fix elsewhere:** low-HP idle, cast, the start and end of the attack, and the death sit, where the hand now props her up on the ground.
+- **Left alone:** the hurt flinch (the arm raised to guard her face) and the merchant/select cradle. Both read as intended.
+
 **Scale, measured** (`tools/klee_rig/klee_frames.json`, `measure`):
 
 - **Height at 1080p:** 164.8 px from hat to boot, and 176.8 px to the tip of the hat's feather.
