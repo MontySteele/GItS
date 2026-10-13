@@ -78,7 +78,13 @@
 
 Plan-only cards (Masterstroke, Tactical Relay, Crystal Collapse) keep "Play on the Bake-Kurage. Plan: ...". It is the one place the pet must be named. Crystal Collapse's lowercase "play" after "Plan:" is capitalized.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "On Kokomi: Let's stick with "Plan" for consistency."
+
+- **Pick 1 (a):** "plan" is her one verb: "plan a card", "when planned". The twelve house rules and the table above are built as written.
+
+## For [USER] (ruled above)
 
 1. **Kokomi's planning verb.**
    - **(a) Default:** "plan" everywhere, as above.
