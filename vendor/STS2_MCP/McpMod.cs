@@ -163,25 +163,51 @@ public static partial class McpMod
         }
     }
 
+    // GItS LOCAL EDIT (EB-489, 2026-10-13) - the main-thread hop is BOUNDED.
+    // Upstream's task had no timeout, so once the game thread stopped reaching
+    // a process frame every caller's `GetAwaiter().GetResult()` parked its
+    // ThreadPool worker forever and `/api/v1/singleplayer` was dead for the
+    // life of the process while `/` still answered (Furina r10, lane 1). Now
+    // the task faults with a TimeoutException after `MainThreadTimeout`, which
+    // every caller's existing catch turns into an error reply, and a queued
+    // call whose caller has already been answered is SKIPPED rather than run
+    // late -- an action nobody is waiting on must not land on the board after
+    // the client was told it failed. The timeout is below the understudy
+    // client's 20 s socket timeout so the client reads the reason.
+    internal static readonly TimeSpan MainThreadTimeout = TimeSpan.FromSeconds(15);
+
+    private static void BoundMainThreadTask<T>(TaskCompletionSource<T> tcs)
+    {
+        var cts = new CancellationTokenSource(MainThreadTimeout);
+        cts.Token.Register(() => tcs.TrySetException(new TimeoutException(
+            $"the game thread did not run this call within {MainThreadTimeout.TotalSeconds:0} s " +
+            "(no process frame reached; EB-489)")));
+        tcs.Task.ContinueWith(_ => cts.Dispose(), TaskScheduler.Default);
+    }
+
     internal static Task<T> RunOnMainThread<T>(Func<T> func)
     {
-        var tcs = new TaskCompletionSource<T>();
+        var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
         _mainThreadQueue.Enqueue(() =>
         {
-            try { tcs.SetResult(func()); }
-            catch (Exception ex) { tcs.SetException(ex); }
+            if (tcs.Task.IsCompleted) return;
+            try { tcs.TrySetResult(func()); }
+            catch (Exception ex) { tcs.TrySetException(ex); }
         });
+        BoundMainThreadTask(tcs);
         return tcs.Task;
     }
 
     internal static Task RunOnMainThread(Action action)
     {
-        var tcs = new TaskCompletionSource<bool>();
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         _mainThreadQueue.Enqueue(() =>
         {
-            try { action(); tcs.SetResult(true); }
-            catch (Exception ex) { tcs.SetException(ex); }
+            if (tcs.Task.IsCompleted) return;
+            try { action(); tcs.TrySetResult(true); }
+            catch (Exception ex) { tcs.TrySetException(ex); }
         });
+        BoundMainThreadTask(tcs);
         return tcs.Task;
     }
 
