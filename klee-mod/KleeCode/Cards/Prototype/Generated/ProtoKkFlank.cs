@@ -51,7 +51,7 @@ public sealed class ProtoKkFlank : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flank"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to each enemy that intended to attack when you wrote this."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to each enemy that intends to attack."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -67,7 +67,7 @@ public sealed class ProtoKkFlank : CustomCardModel, IElementalCard, ICharacterCa
         new List<DynamicVar>
         {
             new DamageVar(8m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(9m)
+            new KokomiPlan.PlanDamageVar(11m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

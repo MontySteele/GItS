@@ -70,8 +70,8 @@ def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
         assert cid not in rows
     assert "proto_kk_coral_sanctuary" not in rows
     rarity = collections.Counter(_row(cid).rarity for cid in ids)
-    # The jellyfish build (2026-10-12): 21 / 37 / 20.
-    assert rarity == {"common": 21, "uncommon": 37, "rare": 20}
+    # The Kokomi level pass (2026-10-12): Change of Plans C -> U, 20 / 38 / 20.
+    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
     # The re-founding (2026-10-12) cut Turning Tide and Abyssal Salvage.
     for cid in ("proto_kk_turning_tide", "proto_kk_abyssal_salvage"):
         assert cid not in ids
@@ -92,38 +92,22 @@ def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
 
 # --- Kelp Wall: the count is the hand it was written from ---------------------
 
-def test_kelp_wall_counts_the_hand_when_written_not_the_morning_hand(overhaul):
-    """Kokomi round-1 fixes (2026-10-12). Written over a hand of two Dazed;
-    the hand is then emptied and tomorrow's draw brings three more. The Plan,
-    carried out by the real turn loop, pays for the TWO it was written with."""
-    st = _quiet_state()
-    st.player.hand = [statuses.make_status("dazed"),
-                      statuses.make_status("dazed")]
-    kokomi_plan.schedule(st, _row("proto_kk_kelp_wall"))
-    assert st.kk_plan_queue[-1].clauses[1]["written_count"] == 2
-    st.player.hand = []
-    st.player.draw_pile = ([statuses.make_status("dazed")] * 3
-                           + _filler(8))
-    combat._player_turn(st, lambda s: None)
-    kelp = [e for e in st.log if e["event"] == "plan_kelp_wall"]
-    assert kelp and kelp[0]["statuses"] == 2
-    # The Kokomi card pass (2026-10-11): Plan 9 [12] (was 7 [10]).
-    assert st.player.block == 9 + 3 * 2
-
-
-def test_kelp_wall_written_count_does_not_touch_the_printed_row(overhaul):
-    row = _row("proto_kk_kelp_wall")
-    st = _quiet_state()
-    st.player.hand = [statuses.make_status("wound")]
-    kokomi_plan.schedule(st, row)
-    assert all("written_count" not in c for c in row.plan)
-
-
 def test_kelp_wall_pays_the_flat_block_on_a_clean_hand(overhaul):
+    """The Kokomi level pass (2026-10-12): the status count went; the Plan is
+    a flat 12 [15]."""
+    assert _row("proto_kk_kelp_wall").plan == [{"op": "block", "amount": 12}]
     st = _quiet_state()
     st.player.hand = _filler(3)
     _carry_out(st, _row("proto_kk_kelp_wall"))
-    assert st.player.block == 9
+    assert st.player.block == 12
+
+
+def test_kelp_wall_ignores_statuses_in_hand(overhaul):
+    st = _quiet_state()
+    st.player.hand = [statuses.make_status("dazed"),
+                      statuses.make_status("dazed")]
+    _carry_out(st, _row("proto_kk_kelp_wall"))
+    assert st.player.block == 12
 
 
 def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
@@ -131,18 +115,6 @@ def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
     st.player.hand = [statuses.make_status("wound")]
     _carry_out(st, _up("proto_kk_kelp_wall"))
     assert st.player.block == 12 + 3
-
-
-def test_kelp_wall_pays_its_written_count_after_the_hand_is_played_out(
-        overhaul):
-    """The seat's case: the statuses were played (or exhausted) after the
-    Plan was written; the preview's number is still the number paid."""
-    st = _quiet_state()
-    st.player.hand = [statuses.make_status("wound")] * 2
-    kokomi_plan.schedule(st, _row("proto_kk_kelp_wall"))
-    st.player.hand = []
-    kokomi_plan.resolve_all(st)
-    assert st.player.block == 9 + 3 * 2
 
 
 # --- Tidecleanse -------------------------------------------------------------------
@@ -233,17 +205,19 @@ def test_flotsam_surge_hits_all_and_discards_two_dazed(overhaul):
     st.player.energy = 3
     st.player.hand.append(card)
     combat.play_card(st, card)
-    assert all(e.hp == 100 - 13 for e in st.enemies)
+    # The Kokomi level pass (2026-10-12): 10 [13] (was 13 [17]).
+    assert all(e.hp == 100 - 10 for e in st.enemies)
     dazed = [c for c in st.player.discard_pile if c.id == "status_dazed"]
     assert len(dazed) == 2
-    assert _up("proto_kk_flotsam_surge").effects[0]["amount"] == 17
+    assert _up("proto_kk_flotsam_surge").effects[0]["amount"] == 13
 
 
 # --- Riptide Ruin ------------------------------------------------------------------------
 
-def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
-    """The Rare in Coral Sanctuary's place (ruled 2026-10-01): "Deal 9 [12]
-    damage to ALL enemies twice. Add 3 Dazed into your Discard Pile." """
+def test_riptide_ruin_hits_all_twice_and_adds_no_dazed(overhaul):
+    """The Rare in Coral Sanctuary's place (ruled 2026-10-01). Since the card
+    text pass and the Kokomi level pass (2026-10-12): "Deal 11 [14] Hydro
+    damage to ALL enemies twice." The Dazed went."""
     st = kokomi_state(enemies=[make_enemy(hp=100), make_enemy(hp=100)])
     st.player.draw_pile = _filler(4)
     card = _row("proto_kk_riptide_ruin")
@@ -251,11 +225,11 @@ def test_riptide_ruin_hits_all_twice_and_discards_three_dazed(overhaul):
     st.player.energy = 3
     st.player.hand.append(card)
     combat.play_card(st, card)
-    assert all(e.hp == 100 - 9 * 2 for e in st.enemies)
+    assert all(e.hp == 100 - 11 * 2 for e in st.enemies)
     dazed = [c for c in st.player.discard_pile if c.id == "status_dazed"]
-    assert len(dazed) == 3
+    assert dazed == []
     up = _up("proto_kk_riptide_ruin").effects[0]
-    assert (up["amount"], up["times"]) == (12, 2)
+    assert (up["amount"], up["times"]) == (14, 2)
 
 
 # --- the shape check -------------------------------------------------------------------------

@@ -46,14 +46,14 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPl
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForDexterity(BaseKeywordTips.ForStrength(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mi_gorou_war_banner");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — General's War Banner"),
-        ("description", "Gain {PowerAmount:diff()} [gold]Dexterity[/gold] for 2 turns.\nOr [gold]plan[/gold]: Gain 3 [gold]Strength[/gold] this turn."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Gain {PlanStrength:diff()} [gold]Strength[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -62,13 +62,16 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPl
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.StrengthThisTurn, 3, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.GainStrength, DynamicVars["PlanStrength"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+            new CalculationBaseVar(7m),
+            new CalculationExtraVar(1m),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new DynamicVar("PlanStrength", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -98,12 +101,12 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPl
     /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
     public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<DexterityPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        await PowerCmd.Apply<WarBannerPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PlanStrength"].UpgradeValueBy(1m);
     }
 }

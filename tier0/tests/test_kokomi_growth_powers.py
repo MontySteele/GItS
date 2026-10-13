@@ -32,8 +32,8 @@ def test_the_generals_banner_stays_out_and_the_pool_is_78(overhaul):
         assert gone not in ids
         assert gone not in {c.id for c in loader.prototype_cards()}
     rarity = collections.Counter(_row(cid).rarity for cid in ids)
-    # The jellyfish build (2026-10-12): 21 / 37 / 20.
-    assert rarity == {"common": 21, "uncommon": 37, "rare": 20}
+    # The Kokomi level pass (2026-10-12): Change of Plans C -> U, 20 / 38 / 20.
+    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
 
 
 def test_kurage_canopy_prints_3_and_4(overhaul):

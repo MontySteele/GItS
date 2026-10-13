@@ -172,7 +172,6 @@ internal static class KleePowerIcons
             "klee/powers/amp_reaction_up.png"),
         EndlessShoalPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
         DawnTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
-        WarBannerPlanPower => KleePck.Path("klee/powers/celestial_gift.png"),
         JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
@@ -236,7 +235,6 @@ internal static class KleePowerIcons
         // THE INAZUMA ARM, on the same terms again: each borrows the shipped
         // icon of the power whose job it takes over, and the workshop's own
         // illustrations are deferred to the Balance stage.
-        WarBannerPower => KleePck.Path("klee/powers/celestial_gift.png"),
         JuugaPower => KleePck.Path("klee/powers/oz_summon.png"),
         MujiMujiDarumaPower => KleePck.Path("klee/powers/oz_summon.png"),
         NaptimePower => KleePck.Path("klee/powers/celestial_gift.png"),

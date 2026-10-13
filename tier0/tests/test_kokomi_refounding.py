@@ -305,12 +305,15 @@ def test_endless_shoal_adds_a_sting_for_any_carried_out_plan():
     assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID]
 
 
-def test_war_banners_plan_line_is_strength_for_one_turn():
+def test_war_banners_plan_line_is_permanent_strength():
+    """The Kokomi level pass (2026-10-12): "Plan: Gain 1 [2] Strength", for
+    good -- no temporary Strength left to take back."""
     st = kokomi_state()
     write(st, card("proto_mi_gorou_war_banner"))
     before = st.player.powers.get("strength", 0)
     carry_out(st)
-    assert st.player.powers.get("strength", 0) == before + 3
+    assert st.player.powers.get("strength", 0) == before + 1
+    assert not st.player.powers.get("temp_strength")
 
 
 def test_juugas_plan_line_is_6_block_at_the_end_of_3_turns():

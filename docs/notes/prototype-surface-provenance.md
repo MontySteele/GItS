@@ -7977,3 +7977,73 @@ looks good!" All three picks (a); Vanguard's Valor stays Common with no draw.
 Pins: `tier0/tests/test_fontaine.py`,
 `tier0/tests/test_reaction_phase_parity.py::test_navia_pays_at_the_one_reaction_site_in_both_engines`.
 Untested in game until a deploy.
+
+## Kokomi level pass, 2026-10-12
+
+`review/active/kokomi-level-pass-2026-10-12.md`, ruled 2026-10-12 ([USER]:
+"On the Kokomi level paper - agreed on all defaults"): pick 1 (a), all of
+section 1's trims; pick 2 (a), all of section 2's floors. Faces are written to
+the card-text pass's house rules (#1172): "plan" as the verb, [gold]Hand[/gold]
+golded.
+
+**Section 1, the big numbers down.**
+- **Coral Crash:** cost 0 -> **1 [0]**, damage equal to your Block; the "+4"
+  upgrade goes (upgrade `cost: -1`). Body Slam's price.
+- **Tidal Rebuke:** cost 1 [0] -> **2 [1]**, Retain kept. Noelle's Sweeping
+  Time is 2 [1] at Uncommon.
+- **Flotsam Surge:** 13 [17] -> **10 [13]** to ALL, still 2 Dazed.
+- **Steady Tide:** 13 [16] -> **11 [14]** Block; Ethereal and its Plan (draw
+  3) unchanged.
+- **Change of Plans:** Common -> **Uncommon**, text unchanged.
+- **Riptide Ruin:** "Deal 11 [14] Hydro damage to ALL enemies twice." (was 9
+  [12] and 3 Dazed), as the card-text pass agreed.
+
+**Section 2, a floor under the odd cards.**
+- **Tideturn:** "Deal 8 [10] Hydro damage, plus 8 [10] for each Plan
+  waiting." Feint's shape: `amount_formula {base: 8, per: 8, count:
+  plans_held}`, upgrade `formula_base: 2, formula_per: 2`.
+- **Shoal of Spears:** "Deal 5 [6] Hydro damage to ALL enemies, plus once more
+  for each Plan waiting." A new runtime hit count, `plans_held_plus_one`
+  (`RUNTIME_TIMES` in the codegen, `effects._runtime_count` in the sim).
+- **Drowning Pressure:** "Apply 1 Weak and 1 Vulnerable. Deal 3 [4] Hydro
+  damage for each Weak and Vulnerable on the enemy." The two debuffs land
+  first, so the floor is 6 [8] before Vulnerable's multiplier. The in-combat
+  damage line is dropped: it would read the enemy before the debuffs land.
+- **Sea's Reproach:** 3 -> **5 [7]** per Weak or Vulnerable applied. The
+  upgrade now moves the number (`power_amount: 2`) and the cost stays 1 on
+  both faces (was 1 [0]); "5 [7]" is the paper's number, one upgrade axis.
+- **Flank:** "Deal 8 [11] Hydro damage. Or plan: Deal 11 [14] Hydro damage to
+  each enemy that intends to attack." The `enemies_intending_attack` aim now
+  reads the board AT CARRY-OUT, as Tide Wall does (`KokomiPlan.Aimed`,
+  `kokomi_plan._aimed`). The write-time capture and Flank's strip label
+  (`AimedLabel` / `plan_aimed_label`) are retired.
+- **Kelp Wall:** "Gain 5 [7] Block. Draw 1 card. Or plan: Gain 12 [15]
+  Block." The status count goes. Its clause, `block_per_status_in_hand`,
+  stays registered in both engines with no row spelling it.
+- **Gorou -- General's War Banner:** "Gain 7 [10] Block. Or plan: Gain 1 [2]
+  Strength." Permanent Strength: the plan clause `strength_this_turn` became
+  `gain_strength` (`KokomiPlan.Kind.GainStrength`, `StrengthPower`), with the
+  new upgrade key `plan_strength` (`PlanStrength`). Its Dexterity clock
+  (`WarBannerPower`, sim `mi_war_banner`, `WarBannerDexterity` /
+  `C.MI_WAR_BANNER_DEXTERITY`) and the one-turn `WarBannerPlanPower` had no
+  other card and are removed, with their pins.
+- **Gorou -- Crystal Collapse:** "Plan: Play a copy of the last Companion card
+  you played." The memory is combat-wide (`KokomiOverhaulLedger.
+  LastCompanionPlayed`, sim `kk_companions_played`), still captured when the
+  Plan is written so the strip names the card. Crystal Collapse never records
+  itself as the last Companion: a copy of it would only plan again.
+- **Orders from the Shrine:** cost 0 -> **1 [0]**, "Choose 1 of 3 random
+  Common Inazuma Companions to add into your Hand. It is Ethereal." A new
+  kind, `choose_common_companion` (`KokomiCards.ChooseCommonCompanion`, Call
+  the Generals' screen at Common, no cost-0 rider), replaces `add_companion`.
+  **The upgraded grant is dropped:** the upgrade is the cost, one axis, and an
+  upgraded pick on a 0-cost card would stack two upgrades on a Common.
+  "Companions" is now a token of the Companion keyword tip.
+
+**Pool:** 78, **20 / 38 / 20** (was 21 / 37 / 20): Change of Plans moved.
+**Base keyword sets:** Dexterity is no longer printed by any prototype face;
+"Hand" joins the zones a face may gold.
+
+Pins: `tier0/tests/test_kokomi_level_pass_2026_10_12.py`,
+`klee-mod/KleeTests/Prototype/KokomiLevelPassTests.cs`, and the updated card
+pins they replace. Untested in game until a deploy.

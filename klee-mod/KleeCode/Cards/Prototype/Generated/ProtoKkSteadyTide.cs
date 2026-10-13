@@ -63,7 +63,7 @@ public sealed class ProtoKkSteadyTide : CustomCardModel, ICharacterCard, IPlanne
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(13m, ValueProp.Move)
+            new BlockVar(11m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

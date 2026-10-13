@@ -1385,10 +1385,9 @@
 
 - {id: proto_kk_change_of_plans, name: "Change of Plans", character: kokomi,
    authored_by: [claude],
-   # 2026-10-10 rounds: cost 0, draws; 2026-10-11 card pass: draws 2.
-   # [USER]'s run (2026-10-11): "an auto pick" with Exhaust off on upgrade;
-   # the upgrade now keeps Exhaust and draws 3 (provenance, same section).
-   cost: 0, type: skill, rarity: common, exhaust: true,
+   # 2026-10-11: draws 2 [3], the upgrade keeps Exhaust. Kokomi level pass
+   # (2026-10-12): Common -> Uncommon, text unchanged. Provenance note.
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
    description: "The [gold]Bake-Kurage[/gold] carries out your first [gold]Plan[/gold] now. Draw {Cards:diff()} cards.",
    effects: [{op: carry_out_front_plan}, {op: draw, amount: 2}],
    upgrade: {draw: 1}}
@@ -1450,11 +1449,12 @@
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage to each enemy that intended to attack when you wrote this.",
+   # Kokomi level pass (2026-10-12, sec.2): the Plan reads intents WHEN IT IS
+   # CARRIED OUT, as Tide Wall does ("when you wrote this" goes); 11 [14].
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 [gold]Hydro[/gold] damage to each enemy that intends to attack.",
    effects: [{op: damage, amount: 8, target: enemy}],
-   # `EB-492`, the intent-keyed aim. THE SET IS FIXED WHEN THE PLAN IS
-   # WRITTEN -- R250's rule for an aimed Plan, applied to a set.
-   plan: [{op: damage, amount: 9, target: enemies_intending_attack}],
+   # `EB-492`, the intent-keyed aim, read at carry-out.
+   plan: [{op: damage, amount: 11, target: enemies_intending_attack}],
    upgrade: {damage: 3, plan_damage: 3}}
 
 # FEIGNED RETREAT IS CUT (the status batch, 2026-10-01,
@@ -1564,11 +1564,13 @@
 - {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
    authored_by: [claude], art_of: tideturn,
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # Kokomi level pass (2026-10-12, sec.2): a floor of 8 [10] with none
+   # waiting (was 0), Feint's shape.
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 8, count: plans_held}}],
-   # 10 each. 2026-10-11 Kokomi card pass: 4 [5] -> 6 [8]. Kokomi round 2 (2026-10-12): 8 [10].
-   upgrade: {formula_per: 2}}
+              amount_formula: {base: 8, per: 8, count: plans_held}}],
+   # 10, plus 10 each. 2026-10-11 Kokomi card pass: 4 [5] -> 6 [8]. Kokomi round 2 (2026-10-12): 8 [10].
+   upgrade: {formula_base: 2, formula_per: 2}}
 
 # MOON SIGNAL IS CUT (the status batch, 2026-10-01,
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
@@ -1669,10 +1671,13 @@
 - {id: proto_kk_drowning_pressure, name: "Drowning Pressure", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # 2026-10-11 Kokomi card pass (review/active/kokomi-card-pass-2026-10-11.md):
-   # STACKS of Weak plus stacks of Vulnerable on the enemy, 5 [7] -> 3 [4].
-   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy,
+   # STACKS of Weak plus Vulnerable on the enemy. Kokomi level pass
+   # (2026-10-12): brings its own 1 and 1 first, a floor of 6 [8]; no
+   # in-combat preview (it would read before the debuffs). Provenance note.
+   description: "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
+             {op: apply_power, power: vulnerable, amount: 1, target: enemy},
+             {op: damage, target: enemy,
               amount_formula: {base: 0, per: 3, count: weak_vuln_stacks_on_target}}],
    # 4 each.
    upgrade: {formula_per: 1}}
@@ -1724,13 +1729,13 @@
 
 - {id: proto_kk_coral_crash, name: "Coral Crash", character: kokomi,
    authored_by: [claude],
-   # POOL COMPLETION (2026-10-01, paper sec.6): Uncommon -> Common. 2026-10-11
-   # Kokomi card pass: costs 0; the upgrade adds 4 damage (was cost 0).
-   cost: 0, type: attack, rarity: common,
-   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold]{IfUpgraded:show:, plus 4|}.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # Kokomi level pass (2026-10-12): Body Slam's price, 1 [0]; the "+4"
+   # upgrade goes. Provenance note.
+   cost: 1, type: attack, rarity: common,
+   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 0, per: 1, count: player_block}}],
-   upgrade: {formula_base: 4}}
+   upgrade: {cost: -1}}
 
 - {id: proto_kk_evening_watch, name: "Evening Watch", character: kokomi,
    authored_by: [claude],
@@ -1822,9 +1827,10 @@
    cost: 1, type: attack, rarity: rare,
    # The re-founding (2026-10-12): one hit per Plan waiting (was per Plan
    # written this turn).
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies once for each [gold]Plan[/gold] waiting.",
+   # Kokomi level pass (2026-10-12, sec.2): always hits at least once.
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.",
    effects: [{op: damage, amount: 5, target: all_enemies,
-              times: plans_held}],
+              times: plans_held_plus_one}],
    # 6 a hit. Kokomi round 2 (2026-10-12): 4 [5] -> 5 [6].
    upgrade: {damage: 1}}
 
@@ -1832,18 +1838,17 @@
    authored_by: [claude],
    # 2026-10-11 Kokomi card pass: cost 2 [1] -> 1 [0].
    cost: 1, type: power, rarity: rare,
-   # Per application of Weak or Vulnerable that she makes, once per enemy it
-   # lands on; Hydro and unpowered, as Tidal Riposte's.
-   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal 3 damage to it.",
-   effects: [{op: apply_power, power: kk_seas_reproach, amount: 3, target: self}],
-   upgrade: {cost: -1}}
+   # Per Weak or Vulnerable she applies, once per enemy; unpowered. Kokomi
+   # level pass (2026-10-12): 3 -> 5 [7], the cost stays 1. Provenance note.
+   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal 5 damage to it.",
+   effects: [{op: apply_power, power: kk_seas_reproach, amount: 5, target: self}],
+   upgrade: {power_amount: 2}}
 
 - {id: proto_kk_tidal_rebuke, name: "Tidal Rebuke", character: kokomi,
    authored_by: [claude],
-   # Paper sec.6: no Exhaust (Body Slam to ALL, a rarity above).
-   # THE RARE PASS (2026-10-04): cost 2 -> 1 and Retain. At 2 it was her own
-   # Common, Coral Crash, at double the price in every one-enemy fight.
-   cost: 1, type: attack, rarity: rare, retain: true,
+   # Body Slam to ALL, no Exhaust, Retain. Kokomi level pass (2026-10-12):
+   # 2 [1], Noelle's price. Provenance note.
+   cost: 2, type: attack, rarity: rare, retain: true,
    description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies,
               amount_formula: {base: 0, per: 1, count: player_block}}],
@@ -1865,15 +1870,12 @@
 - {id: proto_kk_kelp_wall, name: "Kelp Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # The count is the hand WHEN THE PLAN IS WRITTEN (round-1 fixes); the
-   # now-line gains 5 [7] Block before its draw (Kokomi round-3 changes,
-   # 2026-10-12). Provenance note.
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus 3 for each status or curse in your hand when written.{InCombat:\n(Gains {PlanStatusBlock:diff()} [gold]Block[/gold])|}",
+   # Kokomi level pass (2026-10-12): the status count goes; the Plan is a
+   # flat 12 [15]. Provenance note.
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
    effects: [{op: block, amount: 5}, {op: draw, amount: 1}],
-   plan: [{op: block, amount: 9},
-          {op: block_per_status_in_hand, amount: 3}],
-   # now 7 Block; Plan 12; the rate does not upgrade. 2026-10-11 Kokomi card
-   # pass: 7 [10] -> 9 [12].
+   plan: [{op: block, amount: 12}],
+   # now 7 Block; Plan 15. 2026-10-11 Kokomi card pass: 7 [10] -> 9 [12].
    upgrade: {block: 2, plan_block: 3}}
 
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
@@ -1903,25 +1905,22 @@
 - {id: proto_kk_flotsam_surge, name: "Flotsam Surge", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # The self-status engine: well above a Common's AoE rate, paid in Dazed
-   # added to the discard pile, as the base game adds every status ([USER],
-   # 2026-10-03: "I agree that we should adopt the same convention").
-   description: "Deal 13 [gold]Hydro[/gold] damage to ALL enemies. Add 2 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
-   effects: [{op: damage, amount: 13, target: all_enemies},
+   # The self-status engine, paid in Dazed to the discard pile. Kokomi level
+   # pass (2026-10-12): 13 [17] -> 10 [13]. Provenance note.
+   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Add 2 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   effects: [{op: damage, amount: 10, target: all_enemies},
              {op: add_card, card: status_dazed, zone: discard, amount: 2}],
-   # 17 to ALL.
-   upgrade: {damage: 4}}
+   # 13 to ALL.
+   upgrade: {damage: 3}}
 
 - {id: proto_kk_riptide_ruin, name: "Riptide Ruin", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   # The status batch's Rare, in Coral Sanctuary's place (ruled 2026-10-01):
-   # a second status source, Flotsam Surge's shape at Rare size. Hydro
-   # through the arm's cadence like every damaging card of hers.
-   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies twice. Add 3 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
-   effects: [{op: damage, amount: 9, target: all_enemies, times: 2},
-             {op: add_card, card: status_dazed, zone: discard, amount: 3}],
-   # 12 to ALL, twice.
+   # Card text pass / Kokomi level pass (2026-10-12): the Dazed goes, with 2
+   # more damage a hit. Provenance note.
+   description: "Deal 11 [gold]Hydro[/gold] damage to ALL enemies twice.",
+   effects: [{op: damage, amount: 11, target: all_enemies, times: 2}],
+   # 14 to ALL, twice.
    upgrade: {damage: 3}}
 
 # THE RE-FOUNDING CUT 24 ROWS (2026-10-12, review/active/kokomi-card-paper-
@@ -1970,11 +1969,12 @@
 
 - {id: proto_kk_orders_from_the_shrine, name: "Orders from the Shrine", character: kokomi,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
-   description: "Add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] card to your hand. It is [gold]Ethereal[/gold].",
-   effects: [{op: kokomi, kind: add_companion}],
-   # The Companion arrives upgraded: a play-time read, the face's own swap.
-   upgrade: {upgraded_grant: true}}
+   # Kokomi level pass (2026-10-12, sec.2): choose 1 of 3, cost 1 [0]. The
+   # upgraded grant goes: the cost is the upgrade, one axis.
+   cost: 1, type: skill, rarity: common,
+   description: "Choose 1 of 3 random Common Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
+   effects: [{op: kokomi, kind: choose_common_companion}],
+   upgrade: {cost: -1}}
 
 - {id: proto_kk_kurages_wake, name: "Kurage's Wake", character: kokomi,
    authored_by: [claude],
@@ -2055,10 +2055,11 @@
 - {id: proto_kk_steady_tide, name: "Steady Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, ethereal: true,
-   description: "Gain 13 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 3 cards.",
-   effects: [{op: block, amount: 13}],
+   # Kokomi level pass (2026-10-12, sec.1): 13 [16] -> 11 [14].
+   description: "Gain 11 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 3 cards.",
+   effects: [{op: block, amount: 11}],
    plan: [{op: draw, amount: 3}],
-   # 16 Block; the Plan line does not upgrade.
+   # 14 Block; the Plan line does not upgrade.
    upgrade: {block: 3}}
 
 - {id: proto_kk_resolve_of_watatsumi, name: "Resolve of Watatsumi", character: kokomi,
@@ -2184,10 +2185,13 @@
    # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3).
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: geo,
    cost: 1, type: skill,
-   description: "Gain 2 [gold]Dexterity[/gold] for 2 turns. [gold]Plan[/gold]: Gain 3 [gold]Strength[/gold] this turn.",
-   effects: [{op: apply_power, power: dexterity, amount: 2, target: self},
-             {op: apply_power, power: mi_war_banner, amount: 2, target: self}],
-   plan: [{op: strength_this_turn, amount: 3}]}
+   # Kokomi level pass (2026-10-12, sec.2): her own slow Strength line;
+   # the Strength is permanent.
+   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 1 [gold]Strength[/gold].",
+   effects: [{op: block, amount: 7}],
+   plan: [{op: gain_strength, amount: 1}],
+   # 10 Block; Plan 2 Strength.
+   upgrade: {block: 3, plan_strength: 1}}
 
 # 2026-10-11 Companion pass (review/active/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: kokomi,
@@ -2587,7 +2591,10 @@
    # in her pool rather than her Personal companion slot.
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Plan[/gold]: play a copy of the last other [gold]Companion[/gold] card you played this turn.",
+   # Kokomi level pass (2026-10-12, sec.2): the last Companion played this
+   # COMBAT ("other" and "this turn" go). Crystal Collapse never counts as
+   # its own last Companion.
+   description: "[gold]Plan[/gold]: Play a copy of the last [gold]Companion[/gold] card you played.",
    effects: [],
    plan: [{op: play_copy_of_companion}],
    # 2026-10-12: Retain, not cost 0 ("no card with a Plan line costs 0",

@@ -52,16 +52,30 @@ public class CrystalCollapseTests
     [Fact]
     public void Writing_a_plan_reads_the_ledgers_last_companion()
     {
-        // THE CAPTURE IS AT WRITING TIME. "The last other Companion card you
-        // played THIS turn" is a fact about the turn the Plan was written on,
-        // and the Plan resolves on the next one -- so a read at carry-out
-        // would find nothing on the usual morning.
+        // THE CAPTURE IS AT WRITING TIME, off a combat-wide memory since the
+        // Kokomi level pass (2026-10-12): "the last Companion card you
+        // played", whichever turn that was. The strip names the card caught.
         var schedule = typeof(KokomiPlan).GetMethod("Schedule", HeadlessGame.All)
             ?? throw new System.InvalidOperationException(
                 "KokomiPlan.Schedule is gone -- the capture moved with it.");
         var calls = Il.Calls(schedule);
         Assert.Contains(calls, c =>
-            c.Contains("LastCompanionPlayedThisTurn"));
+            c.Contains("get_LastCompanionPlayed"));
+    }
+
+    [Fact]
+    public void The_memory_is_combat_wide_and_skips_crystal_collapse()
+    {
+        // A turn boundary leaves the last Companion where it was, and Crystal
+        // Collapse never records itself (a copy of it would only re-plan).
+        var ledger = new KokomiOverhaulLedger();
+        var juuga = new ProtoMiGorouJuuga();
+        ledger.RollTo(1);
+        ledger.NoteCompanionCard(juuga);
+        ledger.RollTo(2);
+        Assert.Same(juuga, ledger.LastCompanionPlayed);
+        ledger.NoteCompanionCard(new ProtoMiGorouCrystalCollapse());
+        Assert.Same(juuga, ledger.LastCompanionPlayed);
     }
 
     [Fact]

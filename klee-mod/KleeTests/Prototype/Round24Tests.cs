@@ -144,7 +144,7 @@ public class Round24Tests
     [Fact]
     public void Every_end_of_turn_actor_goes_through_the_one_door()
     {
-        // Sixteen actors, one wrapper: instrumenting sixteen volley bodies is
+        // Fifteen actors, one wrapper: instrumenting fifteen volley bodies is
         // sixteen chances to forget one, and an actor added later joins the
         // log by being called through this door. So no bare `await x.FireVolley`
         // or `await x.Tick(choiceContext)` may remain in the walk.
@@ -155,8 +155,9 @@ public class Round24Tests
         // And every one of them is wrapped: twelve volleys plus the three
         // ticks that take a context (Yaoyao's Yuegui volley left with the
         // Klee-only companions, 2026-10-03), and since the Kokomi re-founding
-        // (2026-10-12) Juuga's Plan-line Block beside its volley.
-        Assert.Equal(16, System.Text.RegularExpressions.Regex.Matches(
+        // (2026-10-12) Juuga's Plan-line Block beside its volley. Fifteen since
+        // the Kokomi level pass (2026-10-12) retired the War Banner's tick.
+        Assert.Equal(15, System.Text.RegularExpressions.Regex.Matches(
             walk, @"await Act\(creature, ").Count);
     }
 
