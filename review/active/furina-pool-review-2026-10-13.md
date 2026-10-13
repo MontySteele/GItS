@@ -38,14 +38,15 @@ Powers and Freminet are engines and can stay engines. Fountain of Lucine is
 the one the seats called dead ("never again: repay with nothing drained"),
 and Private Box is a worse Defend with no guest out.
 
-**Proposal:** two Uncommons get a real number at play.
-- **Fountain of Lucine:** "Gain 8 [11] Block. At the start of your next turn,
-  Repay 3." It keeps the Repay, and is never blank.
-- **Private Box:** "Gain 8 [10] Block, plus 3 [4] for each guest on stage."
-  Up from 5 [7]. With no guest it is a Common-sized Block card; with two, 14.
+**Proposal:** Fountain of Lucine gets a real number at play: "Gain 8 [11]
+Block. At the start of your next turn, Repay 3." It keeps the Repay, and is
+never blank. That takes her Uncommon printed Block from 11 to 19, still the
+lowest, which fits a character meant to take hits for Fanfare. It does not
+scale with Fanfare.
 
-That takes her Uncommon printed Block from 11 to 25, still the lowest, which
-fits a character meant to take hits for Fanfare. Neither scales with Fanfare.
+Private Box stays. It is a guest payoff: [USER] (2026-10-13) "Private Box
+would read 'gain 17 Block' with 3 guest stars deployed", and a higher base
+would make that 17.
 
 ## 2. The guest-star style, again
 
@@ -98,9 +99,8 @@ for a 1-Energy Power, the price of the Ironclad's Inflame.
 
 1. **Uncommon Block.**
    - **(a) Default:** Fountain of Lucine "Gain 8 [11] Block. At the start of
-     your next turn, Repay 3."; Private Box 8 [10] plus 3 [4] per guest.
-   - (b) Private Box only.
-   - (c) No change.
+     your next turn, Repay 3." Private Box unchanged.
+   - (b) No change.
 2. **The guest style.**
    - **(a) Default:** damaging acts +2, Freminet +2, Leading Lady 2 [3]
      Strength.

@@ -23,8 +23,7 @@ line leaves this file. Closed picks are in git
 ## Open packets in `review/active/`
 
 - **Furina pool review** (`furina-pool-review-2026-10-13.md`, two picks,
-  defaults (a)): (1) Uncommon Block: Fountain of Lucine and Private Box print
-  8 Block; (2) the guest style: damaging acts +2, Freminet +2, Leading Lady
+  defaults (a)): (1) Uncommon Block: Fountain of Lucine prints 8 Block; (2) the guest style: damaging acts +2, Freminet +2, Leading Lady
   2 Strength.
 
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
