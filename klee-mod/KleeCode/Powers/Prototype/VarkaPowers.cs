@@ -442,7 +442,7 @@ public sealed class BoreasUnboundPower : PowerModel, ILocalizationProvider
         ("title", "Boreas Unbound"),
         ("description",
             "Whenever your [gold]current element[/gold] changes, gain "
-          + "[blue]{Amount}[/blue] [gold]Energy[/gold]."),
+          + "{Amount:energyIcons()}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -901,7 +901,7 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
     {
         ("title", "Wolfpack"),
         ("description",
-            "Whenever you play Four Winds' Ascension, shuffle a copy of it "
+            "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it "
           + "into your [gold]Draw Pile[/gold]. The copy "
           + "[gold]Exhausts[/gold]."),
     };
@@ -1076,7 +1076,7 @@ public sealed class TheOrderAnswersPower : PowerModel, ILocalizationProvider
         ("description",
             $"At the start of your turn, choose 1 of {VarkaRules.OrderAnswersOptions} random "
           + "[gold]Knights[/gold] [blue]{Amount}[/blue] "
-          + "{Amount:plural:time|times}. Add each to your hand, upgraded."),
+          + "{Amount:plural:time|times}. Add each to your [gold]Hand[/gold], upgraded."),
     };
 
     public override PowerType Type => PowerType.Buff;

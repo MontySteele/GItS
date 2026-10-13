@@ -45,7 +45,7 @@ public sealed class ProtoKkSangonomiyasOrders : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sangonomiya's Orders"),
-        ("description", "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] card to your hand. It is [gold]Ethereal[/gold]."),
+        ("description", "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It is [gold]Ethereal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

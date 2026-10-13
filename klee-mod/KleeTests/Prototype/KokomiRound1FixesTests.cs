@@ -64,7 +64,7 @@ public class KokomiRound1FixesTests
         Assert.Contains(body, c => c.Contains("KokomiStatusBatch.PileStatuses"));
         Assert.DoesNotContain(body,
             c => c.Contains("KokomiStatusBatch.HandStatuses"));
-        Assert.Contains("Transform every status and curse in your [gold]Draw Pile[/gold]",
+        Assert.Contains("Transform every Status and Curse in your [gold]Draw Pile[/gold]",
                         Face(new ProtoKkSeaGlassHarvest()));
     }
 

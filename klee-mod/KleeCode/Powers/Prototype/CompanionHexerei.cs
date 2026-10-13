@@ -384,7 +384,7 @@ public sealed class IntroductionMagicPower : PowerModel, ILocalizationProvider
     {
         ("title", "Introduction Magic"),
         ("description",
-            "The cards that were in your hand count as [gold]Companion[/gold] "
+            "The cards that were in your [gold]Hand[/gold] count as [gold]Companion[/gold] "
           + "cards this turn."),
     };
 

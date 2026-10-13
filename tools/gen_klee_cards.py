@@ -7637,7 +7637,11 @@ def build_vars(card: dict) -> list[str]:
             out.append(
                 f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
         elif op == "energy" and energy_upgrade(card):
-            out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
+            # The card text pass (2026-10-12, rule 3): energy is the base
+            # game's icon, `{Energy:energyIcons()}`, and the game's
+            # `EnergyIconsFormatter` reads an `EnergyVar` (a plain
+            # `DynamicVar` throws), so the var is the base game's type.
+            out.append(f'new EnergyVar({int(eff["amount"])})')
         elif op == "lose_strength":
             # Defence in the status pile. Always a var (raise_fanfare_cap's
             # rule): the face prints it and its one carrier upgrades it.
@@ -10571,7 +10575,9 @@ def _sentence_mode_faces(card: dict, desc: str,
     # its label, which says the whole of what it does.
     for i, part in enumerate(parts):
         _, sep, rest = part.partition(":")
-        if sep and rest.strip().startswith("also "):
+        # "also," too: the card text pass (2026-10-12, rule 6) prints the
+        # delayed half as "also, next turn, gain ...".
+        if sep and rest.strip().startswith(("also ", "also,")):
             label = str(modes[i].get("label") or "").strip()
             if label:
                 parts[i] = label
@@ -10596,6 +10602,21 @@ def resolve_upgrade_swap(text: str, upgraded: bool) -> str:
     """
     return _UPGRADE_SWAP.sub(
         lambda m: m.group(1) if upgraded else m.group(2), text)
+
+
+#: The base game's energy icon template, `{energyPrefix:energyIcons(N)}`.
+_ENERGY_ICON = re.compile(r"\{energyPrefix:energyIcons\((\d+)\)\}")
+
+
+def label_energy_words(text: str) -> str:
+    """`text` with each energy icon template written as "N [gold]Energy[/gold]".
+
+    The card text pass (2026-10-12, rule 3) prints energy as the base game's
+    icon. A card DESCRIPTION renders the template; `ModeLabels` is a wire
+    contract the bridge shows verbatim, and a template is not a label (the
+    2026-10-04 rule for the upgrade swap, applied to the icon).
+    """
+    return _ENERGY_ICON.sub(lambda m: m.group(1) + " [gold]Energy[/gold]", text)
 
 
 def stage_mode_title(card: dict, index: int,
@@ -14368,9 +14389,11 @@ def build_description(card: dict, *,
             # Same defect as the play emitter: an upgradeable amount printed
             # its BASE forever. The var renders the diff so the face, the
             # upgrade preview and the energy actually gained all agree.
-            parts.append("Gain {Energy:diff()} [gold]Energy[/gold]."
+            # The card text pass (2026-10-12, rule 3): the icon, never the
+            # word, as the base game prints it.
+            parts.append("Gain {Energy:energyIcons()}."
                          if energy_upgrade(card)
-                         else f"Gain {n} [gold]Energy[/gold].")
+                         else f"Gain {{energyPrefix:energyIcons({n})}}.")
 
         elif op == "scry_discard":
             n = int(eff["amount"])
@@ -17378,7 +17401,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     if aims is not None:
         def _labels_cs(upgraded: bool) -> str:
             return ", ".join(
-                '"' + resolve_upgrade_swap(label, upgraded)
+                '"' + label_energy_words(resolve_upgrade_swap(label, upgraded))
                 .replace("\\", "\\\\").replace('"', '\\"') + '"'
                 for label, _ in aims)
         labels_cs = "new[] { " + _labels_cs(False) + " }"

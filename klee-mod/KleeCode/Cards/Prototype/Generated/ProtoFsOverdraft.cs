@@ -45,7 +45,7 @@ public sealed class ProtoFsOverdraft : CustomCardModel, ICharacterCard, IUnplaya
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Overdraft"),
-        ("description", "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Gain 1 [gold]Energy[/gold] next turn.{InCombat:{StageDrainLine}|}"),
+        ("description", "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Next turn, gain {energyPrefix:energyIcons(1)}.{InCombat:{StageDrainLine}|}"),
     };
 
     /// <summary>This card's in-combat Stage line

@@ -3165,9 +3165,9 @@ public sealed class PendingPlansPower : PowerModel, ILocalizationProvider
             // not change what you wrote" is the panel's
             // (`blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE`). Spec:
             // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.
-            "Carries out [blue]{Amount}[/blue] "
-          + "[gold]Plan{Amount:plural:|s}[/gold] at the start of your next "
-          + "turn, in order."
+            "Next turn, the [gold]Bake-Kurage[/gold] carries out "
+          + "[blue]{Amount}[/blue] [gold]Plan{Amount:plural:|s}[/gold] in "
+          + "order."
           // `EB-653` (round 24). AND THE CAP, WHERE IT BINDS. Empty on an
           // unconfigured build, which is every build but a cap lane's; the
           // sentence is `KokomiPlan.CapSentence`'s, spelled once for both

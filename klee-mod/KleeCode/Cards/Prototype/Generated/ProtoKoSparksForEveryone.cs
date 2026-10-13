@@ -47,7 +47,7 @@ public sealed class ProtoKoSparksForEveryone : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparks for Everyone"),
-        ("description", "The first time each turn one of your [gold]Bombs[/gold] goes off, each other player gains 1 [gold]Energy[/gold]."),
+        ("description", "The first time each turn one of your [gold]Bombs[/gold] goes off, each other player gains {energyPrefix:energyIcons(1)}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

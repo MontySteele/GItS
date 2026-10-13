@@ -45,7 +45,7 @@ public sealed class ProtoKkEndlessShoal : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Shoal"),
-        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
+        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -45,7 +45,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Field"),
-        ("description", "Look at the top {Scry:diff()} card{Scry:plural:|s} of your [gold]Draw Pile[/gold]. Put 1 into your hand and the rest on the bottom.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Look at the top {Scry:diff()} card{Scry:plural:|s} of your [gold]Draw Pile[/gold]. Put 1 into your [gold]Hand[/gold] and the rest on the bottom.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

@@ -57,7 +57,7 @@ public class KleeFinishBatchTests
     public void Finders_keepers_places_a_bomb_on_a_status_drawn()
     {
         Assert.Equal(
-            "Whenever you draw a status, place a [gold]Bomb[/gold] "
+            "Whenever you draw a Status, place a [gold]Bomb[/gold] "
           + "{PowerAmount:diff()} on a random enemy.",
             Face(new ProtoKoFindersKeepers()));
         Assert.Equal((6m, 8m),
@@ -80,7 +80,7 @@ public class KleeFinishBatchTests
         var face = new ExplosiveFrags().Localization!
             .First(r => r.Item1 == "description").Item2;
         Assert.EndsWith(
-            "Start each combat with [blue]4[/blue] more [gold]Sparks[/gold].",
+            "Start each combat with [blue]4[/blue] additional [gold]Sparks[/gold].",
             face);
         var opening = Seq("KleeOverhaulOpening", "GrantSpark");
         var kit = opening.FindIndex(c => c.Contains("SparkPower.Gain"));

@@ -59,7 +59,7 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diluc: Searing Onslaught"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit causes an [gold]Elemental Reaction[/gold], gain 1 [gold]Energy[/gold].{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit triggers an [gold]Elemental Reaction[/gold], gain {energyPrefix:energyIcons(1)}.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

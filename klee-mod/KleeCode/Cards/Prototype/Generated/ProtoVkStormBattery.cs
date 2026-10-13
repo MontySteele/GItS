@@ -53,7 +53,7 @@ public sealed class ProtoVkStormBattery : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Storm Battery"),
-        ("description", "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your hand.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

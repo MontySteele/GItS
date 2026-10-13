@@ -45,7 +45,7 @@ public sealed class ProtoKoWaitForIt : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wait For It..."),
-        ("description", "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw {PowerAmount:diff()} cards and gain 1 [gold]Energy[/gold]."),
+        ("description", "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw {PowerAmount:diff()} cards and gain {energyPrefix:energyIcons(1)}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

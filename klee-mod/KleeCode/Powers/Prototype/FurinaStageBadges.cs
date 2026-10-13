@@ -88,8 +88,8 @@ public abstract class StagePerformerBadge : PowerModel
         return who switch
         {
             StagePerformer.Charlotte =>
-                "The first time one of your cards [gold]Repays[/gold]"
-              + " each turn, draw "
+                "The first time each turn one of your cards "
+              + "[gold]Repays[/gold], draw "
               + FurinaStageLaw.CharlotteLineDraw + " card. Act: "
               + "[gold]Repay[/gold] " + act + ". Gain 1 [gold]Block[/gold] "
               + "for any HP it could not [gold]Repay[/gold].",
@@ -112,8 +112,8 @@ public abstract class StagePerformerBadge : PowerModel
                 "Your [gold]Drain[/gold] buffer is "
               + FurinaStageLaw.LyneyLineDrop + " HP larger. Act: "
               + "[gold]Drain[/gold] " + FurinaStageLaw.LyneyActDrain
-              + ", never past your line (none at or below it). Deal " + act
-              + " [gold]Pyro[/gold] damage to ALL enemies.",
+              + ", deal " + act + " [gold]Pyro[/gold] damage to ALL enemies. "
+              + "It never [gold]Drains[/gold] past your line.",
             StagePerformer.Sigewinne =>
                 "Whenever you [gold]Repay[/gold], gain that much "
               + "[gold]Block[/gold]. Act: [gold]Repay[/gold] " + act + ". "
@@ -132,20 +132,19 @@ public abstract class StagePerformerBadge : PowerModel
             StagePerformer.Freminet =>
                 "Whenever you [gold]Drain[/gold], gain that much "
               + "[gold]Block[/gold]. Act: gain " + act
-              + " [gold]Block[/gold]. [gold]Spend[/gold] a quarter of your "
-              + "[gold]Fanfare[/gold] (rounded down): gain that much more "
-              + "[gold]Block[/gold].",
+              + " [gold]Block[/gold], and more for [gold]Fanfare[/gold]: "
+              + "[gold]Spend[/gold] a quarter of it, rounded down, for that "
+              + "much.",
             StagePerformer.Navia =>
                 "Your first [gold]Spend[/gold] each turn costs "
-              + NaviaDiscount(upgraded) + " less (a spend-all keeps "
-              + NaviaDiscount(upgraded) + "). Act: [gold]Spend[/gold] half "
-              + "your [gold]Fanfare[/gold] (rounded down). Deal that much "
-              + "[gold]Geo[/gold] damage to a random enemy.",
+              + NaviaDiscount(upgraded) + " less. Act: [gold]Spend[/gold] "
+              + "half your [gold]Fanfare[/gold], rounded down, to deal that "
+              + "much [gold]Geo[/gold] damage to a random enemy.",
             StagePerformer.Neuvillette =>
                 "Your [gold]Hydro[/gold] damage deals "
               + (upgraded ? FurinaStageLaw.NeuvilletteHydroBonusUpgraded
                           : FurinaStageLaw.NeuvilletteHydroBonus)
-              + " more. Act: deal [gold]Hydro[/gold] damage to ALL enemies "
+              + " additional damage. Act: deal [gold]Hydro[/gold] damage to ALL enemies "
               + "equal to the HP you lost since your last turn.",
             StagePerformer.Escoffier =>
                 "Whenever a guest acts, [gold]Repay[/gold] "

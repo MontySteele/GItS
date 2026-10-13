@@ -479,9 +479,9 @@ public sealed class VermillionPactPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sparkborne Magic"),
         ("description",
-            "When a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] "
-          + "react, every other [gold]Bomb[/gold] it sets off reacts with the "
-          + "same aura."),
+            "Whenever a [gold]Set off[/gold] makes one of your [gold]Bombs[/gold] "
+          + "react, every other [gold]Bomb[/gold] in that [gold]Set off[/gold] "
+          + "reacts with the same aura."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -668,8 +668,8 @@ public sealed class BlazingDelightPower : PowerModel, ILocalizationProvider
     {
         ("title", "Blazing Delight"),
         ("description",
-            "At the start of your turn, gain [blue]{Amount}[/blue] "
-          + "[gold]Energy[/gold] and draw that many cards."),
+            "At the start of your turn, gain {Amount:energyIcons()} and draw "
+          + "that many cards."),
     };
 
     public override PowerType Type => PowerType.Buff;

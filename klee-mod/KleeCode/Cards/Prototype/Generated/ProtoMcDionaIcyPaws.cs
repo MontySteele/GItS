@@ -53,7 +53,7 @@ public sealed class ProtoMcDionaIcyPaws : CustomCardModel, ICompanionCard, IWrit
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Diona — Icy Paws"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. When this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Whenever this [gold]Block[/gold] absorbs damage, apply [gold]Cryo[/gold] to the attacker."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

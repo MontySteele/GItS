@@ -174,8 +174,9 @@ def test_the_stage_badge_interpolates_the_law():
     assert "FurinaStageLaw.ClorindeActDamage" in src
     assert "FurinaStageLaw.CharlotteActRepay" in src
     # Freminet's act Spends "a quarter of your Fanfare" (the Spend paper,
-    # pick 2, ruled 2026-10-10); no other quarter (the old fade) may print.
-    src = src.replace("[gold]Spend[/gold] a quarter of your ", "")
+    # pick 2, ruled 2026-10-10; "a quarter of it" since the card text pass,
+    # 2026-10-12); no other quarter (the old fade) may print.
+    src = src.replace("[gold]Spend[/gold] a quarter of it", "")
     assert "FadeDivisor" not in src and "quarter" not in src
 
 

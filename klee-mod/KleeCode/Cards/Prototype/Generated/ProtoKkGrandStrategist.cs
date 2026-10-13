@@ -45,7 +45,7 @@ public sealed class ProtoKkGrandStrategist : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Strategist"),
-        ("description", "Whenever a [gold]Plan[/gold] causes an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies."),
+        ("description", "Whenever a [gold]Plan[/gold] triggers an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

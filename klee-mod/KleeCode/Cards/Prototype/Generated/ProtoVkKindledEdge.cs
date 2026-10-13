@@ -53,7 +53,7 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kindled Edge"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it causes an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

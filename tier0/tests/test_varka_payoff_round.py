@@ -129,7 +129,7 @@ def test_the_sheet_strings(varka):
         "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain "
         "{VkAmount:diff()} [gold]Strength[/gold] this turn.")
     assert _row(_vk("wolfpack"))["description"] == (
-        "Whenever you play Four Winds' Ascension, shuffle a copy of it into "
+        "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it into "
         "your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].")
     assert _row(_vk("wolfpack"))["upgrade"] == {"innate": True}
     assert _row(_vk("unwavering_banner"))["description"] == (

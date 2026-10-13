@@ -117,7 +117,7 @@ public class AncientAuditTests
     public void Alices_masterpiece_says_bombs_and_mines()
     {
         const string face =
-            "When one of your [gold]Bombs[/gold] or [gold]Mines[/gold] goes off, "
+            "Whenever one of your [gold]Bombs[/gold] or [gold]Mines[/gold] goes off, "
           + "it stays on the enemy at half its size, rounded down.";
         Assert.Equal(face, Face(new AlicesMasterpiece()));
         Assert.Equal(face, new AlicesMasterpiecePower().Localization!

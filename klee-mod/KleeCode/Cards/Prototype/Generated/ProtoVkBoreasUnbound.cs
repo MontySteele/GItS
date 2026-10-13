@@ -45,7 +45,7 @@ public sealed class ProtoVkBoreasUnbound : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Boreas Unbound"),
-        ("description", "Whenever your [gold]current element[/gold] changes, gain 1 [gold]Energy[/gold]."),
+        ("description", "Whenever your [gold]current element[/gold] changes, gain {energyPrefix:energyIcons(1)}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

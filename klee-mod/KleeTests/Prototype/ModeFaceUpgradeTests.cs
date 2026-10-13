@@ -37,6 +37,9 @@ public class ModeFaceUpgradeTests
 
     private static readonly Regex VarToken = new(@"\{(\w+)(?::diff\(\))?\}");
 
+    private static readonly Regex EnergyIcons =
+        new(@"\{energyPrefix:energyIcons\((\d+)\)\}");
+
     private static T Upgraded<T>(T card) where T : CardModel
     {
         Seat.Set(card, "IsMutable", true);
@@ -53,6 +56,8 @@ public class ModeFaceUpgradeTests
     {
         var text = UpgradeSwap.Replace(Raw(card, "description"),
             m => card.IsUpgraded ? m.Groups[1].Value : m.Groups[2].Value);
+        // The card text pass (2026-10-12): the energy icon prints its count.
+        text = EnergyIcons.Replace(text, m => m.Groups[1].Value);
         return VarToken.Replace(text, m =>
             card.DynamicVars.TryGetValue(m.Groups[1].Value, out var v)
                 ? ((int)v.BaseValue).ToString(CultureInfo.InvariantCulture)
@@ -91,7 +96,7 @@ public class ModeFaceUpgradeTests
             var face = Render(option);
             Assert.DoesNotContain("{", face);
             var parentFace = Render(parent);
-            if (!parentFace.Contains(face) && parentFace.Contains(": also "))
+            if (!parentFace.Contains(face) && parentFace.Contains(": also"))
             {
                 // The Salon's Tab seat round (2026-10-05): an "also" mode
                 // prints its whole label, so it says it draws too. Its

@@ -49,14 +49,14 @@ public static class KleeExpansion
         "KLEEMOD-FETCH_SET_OFF.selectionScreenPrompt";
 
     public const string SetOffPromptText =
-        "Choose a Set off card to put into your hand.";
+        "Choose a Set off card to put into your [gold]Hand[/gold].";
 
     /// <summary>The Companion pick's prompt, on the same terms.</summary>
     public const string CompanionPromptKey =
         "KLEEMOD-FETCH_COMPANION.selectionScreenPrompt";
 
     public const string CompanionPromptText =
-        "Choose a Companion card to put into your hand.";
+        "Choose a Companion card to put into your [gold]Hand[/gold].";
 
     /// <summary>Adventure Club's grid prompt (<see cref="ChooseCompanions"/>),
     /// on the same terms.</summary>
@@ -64,7 +64,7 @@ public static class KleeExpansion
         "KLEEMOD-CHOOSE_COMPANIONS.selectionScreenPrompt";
 
     public const string ChooseCompanionsPromptText =
-        "Choose 2 Companion cards to add to your hand.";
+        "Choose 2 Companion cards to add to your [gold]Hand[/gold].";
 
     /// <summary>Is <paramref name="card"/> a Companion card?
     /// <c>CompanionHexerei.CountsAsCompanion</c>, the one reader. PURE.

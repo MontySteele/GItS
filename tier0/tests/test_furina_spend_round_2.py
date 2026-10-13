@@ -172,7 +172,7 @@ def test_grand_entrance_in_a_guest_star_play_is_not_a_cards_repay():
 def test_the_seat_glossary_says_one_of_your_cards():
     from understudy import blindplay_notes
     assert blindplay_notes.ARM_KEYWORDS["Charlotte"].startswith(
-        "The first time one of your cards Repays each turn, draw 1 card.")
+        "The first time each turn one of your cards Repays, draw 1 card.")
 
 
 # ---- 4. A Drain line of 0 explains itself -------------------------------------------

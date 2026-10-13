@@ -45,7 +45,7 @@ public sealed class ProtoKkReserves : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Reserves"),
-        ("description", "Put a card from your [gold]Exhaust Pile[/gold] into your hand. It is [gold]Ethereal[/gold]."),
+        ("description", "Put a card from your [gold]Exhaust Pile[/gold] into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -202,7 +202,7 @@ public static class BaseKeywordTips
     public static IEnumerable<IHoverTip> ForEthereal(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, EtherealKey,
-            "If this card is in your hand at the end of your turn, it is "
+            "If this card is in your [gold]Hand[/gold] at the end of your turn, it is "
           + "Exhausted.");
 
     /// <summary>

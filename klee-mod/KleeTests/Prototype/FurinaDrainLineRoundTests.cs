@@ -106,9 +106,9 @@ public class FurinaDrainLineRoundTests
     [Fact]
     public void Lyneys_badge_says_his_drain_stops_at_the_line()
     {
-        Assert.Contains(", never past your line (none at or below it). Deal 8 "
-                        + "[gold]Pyro[/gold] "
-                        + "damage to ALL enemies.",
+        // The card text pass (2026-10-12): the face's words, no parentheses.
+        Assert.Contains(", deal 8 [gold]Pyro[/gold] damage to ALL enemies. "
+                        + "It never [gold]Drains[/gold] past your line.",
                         StagePerformerBadge.ActText(StagePerformer.Lyney));
     }
 

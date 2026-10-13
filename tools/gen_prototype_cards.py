@@ -211,7 +211,9 @@ _ON_UPGRADE = re.compile(
     r"protected override void OnUpgrade\(\)\s*\{(.*?)\n    \}", re.S)
 _DESCRIPTION = re.compile(r'\("description", (".*?")\),\n', re.S)
 _VAR_MOVED = re.compile(r'DynamicVars(?:\.(\w+)|\["(\w+)"\])\s*\.\s*Upgrade')
-_VAR_PRINTED = re.compile(r"\{(\w+):diff\(\)\}")
+#: The card text pass (2026-10-12): `{Energy:energyIcons()}` is the base
+#: game's printed energy, a var the upgrade moves as visibly as a `diff()`.
+_VAR_PRINTED = re.compile(r"\{(\w+):(?:diff|energyIcons)\(\)\}")
 #: `EB-491`. The SPARK cost badge as an upgrade channel: a declared price that
 #: reads `IsUpgraded` is a number the player watches move in the cost slot,
 #: even though the face prints no figure for it.

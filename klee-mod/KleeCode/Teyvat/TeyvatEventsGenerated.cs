@@ -2223,7 +2223,7 @@ internal static partial class TeyvatLoc
                 "Sounding the Beryl Shelf",
             ["SOUNDING_THE_BERYL_SHELF.pages.INITIAL.description"] =
                 "The Melusines of Merusea Village have gridded a sunken freight lot "
-                + "on the Beryl Region shelf: eleven squares by eleven of grey silt, "
+                + "on the Beryl Region shelf: eleven squares by eleven of gray silt, "
                 + "cargo somewhere beneath it. A harbormistress in an oilskin cap "
                 + "explains the sounding charges — one clears a single square, or a "
                 + "three-by-three sweep — and warns that only crates bared completely "
