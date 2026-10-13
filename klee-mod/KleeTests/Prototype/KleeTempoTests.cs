@@ -14,7 +14,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE KLEE TEMPO PAPER (2026-10-07, ruled,
-/// review/active/klee-tempo-paper-2026-10-07.md sec.3). [USER]: "I
+/// review/ruled/klee-tempo-paper-2026-10-07.md sec.3). [USER]: "I
 /// personally found Blast Shield and Kitchen Alchemy quite useful in my runs,
 /// so I'm not sure I buy that they should go. Otherwise agreed." Five out,
 /// five in, 78 and 25 / 32 / 21 held (<see cref="PoolCountTests"/>). Sim

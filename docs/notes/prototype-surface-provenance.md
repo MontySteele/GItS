@@ -2994,7 +2994,7 @@ beats by name through `KokomiPlan.NoteRider`.
 
 ## Furina, the Stage — batch one (`EB-723`, R269 2026-09-08)
 
-The design is `review/active/furina-stage-brief-2026-09-08.md`, whose sec.12
+The design is `review/active/furina-stage-brief-2026-09-08.md` (archived), whose sec.12
 prints the seventeen faces and whose sec.3 states the rules they play by. The
 faces below are the brief's, word for word; nothing here is a design act, and
 the names are provisional and cosmetic (sec.10 default 7, R179).
@@ -3102,7 +3102,7 @@ live in `FurinaStage` beside the rule each bends.
 ## Furina, the Stage — the Guest Cast (2026-09-25)
 
 Eight Guest Star Skills, `proto_fs_guest_star_<name>`, as ruled in
-`review/active/furina-guest-batch-2026-09-25.md` that evening and amended by
+`review/ruled/furina-guest-batch-2026-09-25.md` that evening and amended by
 two rulings after it: no guest cap ("why not just let the Stage be filled
 with guest stars if the player wants?"), and one of each guest ("only one
 Neuvillette allowed - repeats trigger a Bow and then resummon them, carrying
@@ -3720,7 +3720,7 @@ end of `effects._resolve_card_bound`. Both powers left the plan bus.
 and the review found Fanfare GENERATION too high. The spend side is untouched:
 "I actually think the spend is totally fine; it's the generation that's the
 issue. Let's leave these alone for now." Bravura and every spender keep their
-numbers. Design: `review/active/furina-stage-brief-2026-09-08.md`.
+numbers. Design: `review/active/furina-stage-brief-2026-09-08.md` (archived).
 
 - **Dual Nature** (`proto_fs_dual_nature`): the upgrade is +1 draw (draw 2)
   instead of cost -1; it stays 1 cost. "I think a is good".
@@ -3753,7 +3753,7 @@ numbers. Design: `review/active/furina-stage-brief-2026-09-08.md`.
 After balance pass one (#740) two Sonnet seats both cleared both A0 bosses
 comfortably. [USER]: "If Furina is still generating too much Fanfare and not
 enough damage, we could solve her problem by upping both the spend and output
-of her cards." Design: `review/active/furina-stage-brief-2026-09-08.md` §16.
+of her cards." Design: `review/active/furina-stage-brief-2026-09-08.md` (archived) §16.
 Each row keeps its upgrade key; base / upgraded:
 
 - **Quick Cue** (`proto_fs_quick_cue`): 3, or Spend 3: deal 11 and apply
@@ -3801,7 +3801,7 @@ Sonnet seats of 2026-09-28 (run FSR3RUN2Q7XB, acts 1 to 3) named it their
 performer that is almost always 1". A main-session tuning fix under [USER]'s
 direction "upping both the spend and output of her cards" (the Spend pass,
 above, which had left Bravura unchanged). The tier0 sim reads this row, so it
-moved with it. Design: `review/active/furina-stage-brief-2026-09-08.md` §16.
+moved with it. Design: `review/active/furina-stage-brief-2026-09-08.md` (archived) §16.
 
 ## Furina, the Stage — the audit pass (2026-09-29)
 
@@ -3809,7 +3809,7 @@ moved with it. Design: `review/active/furina-stage-brief-2026-09-08.md` §16.
 existing core systems". Designed by the main session off a factual packet
 (the sheet and twelve seat records: which cards the seats named, and damage
 and Block per Energy); the reasons, card by card, are in
-`review/active/furina-stage-brief-2026-09-08.md` §17.
+`review/active/furina-stage-brief-2026-09-08.md` (archived) §17.
 
 **Cut, 78 -> 75:** `proto_fs_gala_dinner` (no seat record named it),
 `proto_fs_rapt_audience` (the same) and `proto_fs_scene_change` (the third
@@ -3851,7 +3851,7 @@ more impactful. Keep her Block cards generally weak but her Spend cards
 strong", "What about a percentage fade, say 25%? Anything below 4 rounds to
 losing 0." and "Yes, please proceed!" Designed by the main session; the
 reasons and the sim evidence are in
-`review/active/furina-stage-brief-2026-09-08.md` §18.
+`review/active/furina-stage-brief-2026-09-08.md` (archived) §18.
 
 **Rule 12.** Every performer, the front one included, loses a quarter of its
 Fanfare, rounded down, at the end of Furina's turn after the acts
@@ -5629,7 +5629,7 @@ build's screen; this note supersedes them.
 
 ## Fontaine companions ported, 2026-10-01
 
-Legacy cleanup pick 4 (`review/active/legacy-cleanup-2026-10-01.md`, ruled):
+Legacy cleanup pick 4 (`review/ruled/legacy-cleanup-2026-10-01.md`, ruled):
 "The 19 Fontaine companion rows move to the prototype sheet as they are. A
 Fontaine rework is its own paper." Built in legacy cleanup stage 4.
 
@@ -6170,7 +6170,7 @@ to the start of her next turn (`FurinaStage.TurnStartFade`, sim
 `furina_stage.turn_start_fade`), same amount. Two rows changed:
 `proto_fs_tutti` costs 1 (was 2) and its upgrade is Retain (was cost -1);
 `proto_fs_gala_premiere` costs 1 (was 2), 0 upgraded, and keeps Exhaust.
-Brief: `review/active/furina-stage-brief-2026-09-08.md` sec.20.
+Brief: `review/active/furina-stage-brief-2026-09-08.md` (archived) sec.20.
 
 ## Klee pre-Balance sweep, 2026-10-03
 
@@ -6641,7 +6641,7 @@ Two changes after the seat round (`review/records/kokomi-review-round-2026-10-05
 
 ## Klee scaling pass, 2026-10-05
 
-Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-measurement-2026-10-05.md` sec.6). Paper: `review/active/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its defaults.
+Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-measurement-2026-10-05.md` sec.6). Paper: `review/ruled/klee-scaling-pass-2026-10-05.md` sec.4, ruled at its defaults.
 
 - `proto_ko_secret_base`, v3 (replaces sec.4 A's "Your Bombs are placed 3 [4] bigger", whose placement bonus and card-face fold are removed, so faces print their own numbers again): "At the start of your turn, place a Bomb 4 [6] on a random enemy." 1-cost Uncommon Power; the upgrade raises 4 to 6. Copies add like Noxious Fumes (two copies place one Bomb 8, 12 upgraded). Placed after the start-of-turn growth, so it shows 4 when she acts, through the expansion's start-of-turn sequencer (after the echo, before Dodoco's Mine) and the ordinary placement path Pop! uses; a random living enemy, none means nothing.
 - `proto_ko_boom_badge`: Retain, and "Does not stack." -- x2 whatever the stack (sec.4 C).
@@ -6649,7 +6649,7 @@ Staging branch `klee-next` only, under the freeze (`review/active/klee-balance-m
 
 ## Klee tempo paper, 2026-10-07
 
-Staging branch `klee-next`. Paper `review/active/klee-tempo-paper-2026-10-07.md` sec.3, ruled 2026-10-07. [USER]: "I personally found Blast Shield and Kitchen Alchemy quite useful in my runs, so I'm not sure I buy that they should go. Otherwise agreed." Klee is slow (act-3 turn-one damage 9 to the base five's 62) and her Block pays for it; each engine gets its missing damage. Five out, five in; the pool stays **78 (25 / 32 / 21)**. Built in both engines.
+Staging branch `klee-next`. Paper `review/ruled/klee-tempo-paper-2026-10-07.md` sec.3, ruled 2026-10-07. [USER]: "I personally found Blast Shield and Kitchen Alchemy quite useful in my runs, so I'm not sure I buy that they should go. Otherwise agreed." Klee is slow (act-3 turn-one damage 9 to the base five's 62) and her Block pays for it; each engine gets its missing damage. Five out, five in; the pool stays **78 (25 / 32 / 21)**. Built in both engines.
 
 - **Out:** `proto_ko_it_wasnt_me` (C), `proto_ko_sorry_jean` (C), `proto_ko_grounded` (U Power), `proto_ko_sit_tight` (U), `proto_ko_patience_klee` (U, "Experiment in Progress"). Painted art `KNOWN_STALE`; card pins removed or moved onto Favonius Escort (the same `remove_bomb_for_block` verb). Their powers stay registered (BACKLOG).
 - **In, after the status package in `C.KLEE_TEMPO_IDS` and `Slice()`:**
@@ -6669,7 +6669,7 @@ Staging branch `klee-next`. Paper `review/active/klee-tempo-paper-2026-10-07.md`
 
 ## Klee design review, 2026-10-08
 
-Staging branch `klee-next`. Paper `review/active/klee-design-review-2026-10-08.md`, ruled 2026-10-08, all five picks at the defaults. [USER]: "Nope, this all looks good. I'm now in agreement with all picks." The starter is not the root; rule 1 made waiting free and rule 4 left the Spark cards dead on turn one. No starter change. Built in both engines.
+Staging branch `klee-next`. Paper `review/ruled/klee-design-review-2026-10-08.md`, ruled 2026-10-08, all five picks at the defaults. [USER]: "Nope, this all looks good. I'm now in agreement with all picks." The starter is not the root; rule 1 made waiting free and rule 4 left the Spark cards dead on turn one. No starter change. Built in both engines.
 
 - **Rule 1 (sec.4.6):** Bomb growth 4 to **2** a turn. `C.KLEE_OVERHAUL_BOMB_GROWTH`, `KleeOverhaulLaw.BombGrowth`, `understudy/blindplay_shape.BOMB_GROWTH`; the Bomb tip interpolates the constant. Alice's Recipe still doubles it (4).
 - **Rule 4 (sec.4.6):** opening Sparks 1 to **3**. `C.KLEE_OVERHAUL_OPENING_SPARK`, `KleeOverhaulLaw.OpeningSpark`, `blindplay_shape.OPENING_SPARK`; the Spark tip interpolates it. Pounding Surprise's text does not move; Explosive Frags' own 4 stacks on top (7).
@@ -6682,7 +6682,7 @@ Staging branch `klee-next`. Paper `review/active/klee-design-review-2026-10-08.m
 
 ## Varka payoff fix, 2026-10-08
 
-Paper: `review/active/varka-payoff-fix-2026-10-08.md` (project review
+Paper: `review/ruled/varka-payoff-fix-2026-10-08.md` (project review
 2026-10-08, pick 10). Seven rows; the record is
 `review/records/varka-offers-round-2026-10-08.md`.
 
@@ -6722,7 +6722,7 @@ readjust after the card pool expands."
 
 ## Furina: the pool to 75, 2026-10-09
 
-Paper: `review/active/furina-pool-growth-2026-10-09.md` (on branch
+Paper: `review/ruled/furina-pool-growth-2026-10-09.md` (on branch
 `furina-pool-78-paper-2026-10-09`), ruled 2026-10-09 at all defaults after a
 Fable design review ended with "no further critiques" ([USER]: "If they have
 no further critiques, then I'm good to approve it."). Built on the 2026-10-09
@@ -6933,7 +6933,7 @@ twins: the sheet ops through `furina_stage` (`gain_fanfare`, the two counts,
 
 ## Furina: Spend up to X, and two guests Spend half the bank, 2026-10-10
 
-`review/active/furina-spend-paper-2026-10-10.md`, picks 1 and 2, built at the
+`review/ruled/furina-spend-paper-2026-10-10.md`, picks 1 and 2, built at the
 paper's defaults; [USER]'s ruling is pending (picks open on #1014). His
 direction, quoted in the paper: "we could have Spend act as 'spend up to X'
 with partial effects, and then make the X larger".
@@ -7141,7 +7141,7 @@ Two rulings by [USER], built as written.
 
 ## Kokomi growth Powers, 2026-10-10
 
-Brief `review/active/kokomi-growth-powers-2026-10-10.md`. [USER]: "Agreed on
+Brief `review/active/kokomi-growth-powers-2026-10-10.md` (archived). [USER]: "Agreed on
 both." Sim read: `tools/kokomi_growth_power_sim.py` (#1059).
 
 - **Flood Tide** (`proto_kk_flood_tide`, new, Uncommon Power, cost 1):
@@ -7213,7 +7213,7 @@ obvious use in a short hallway fight".
 
 ## Kokomi Plan pricing, 2026-10-11
 
-Paper `review/active/kokomi-plan-pricing-2026-10-11.md`. [USER]: "Let's go
+Paper `review/ruled/kokomi-plan-pricing-2026-10-11.md`. [USER]: "Let's go
 with a ratio of 1.3 and I agree on the other defaults." and "I'm also fine
 with modifying the starters if the rates are low." A Plan that lands next
 turn prints 1.3 times the base on-turn median for its cost and target.
@@ -7262,7 +7262,7 @@ Fish Blasting, Lisa's Treats, Confiscated, Tinder Toss, Alice's Detonator. [USER
 
 ## Klee Commons pass, 2026-10-11
 
-`review/active/klee-commons-pass-2026-10-11.md` (PR #1080). [USER]: "Agreed on 6 of the commons - I like leaving the Dazed on Simmer, so let's try b)". Landed on `klee-next`.
+`review/ruled/klee-commons-pass-2026-10-11.md` (PR #1080). [USER]: "Agreed on 6 of the commons - I like leaving the Dazed on Simmer, so let's try b)". Landed on `klee-next`.
 
 - `proto_ko_pocket_match` (C Attack, 0, Retain): Deal 6 [9]. Was 3 [5].
 - `proto_ko_simmer` (C Attack, 1): "Deal 6 [9] Pyro damage, plus your largest Bomb's size. It does not go off. Add a Dazed." Was 4 [6] plus half. Pick 2 (b), the Wild Strike shape: the Dazed stays and buys the full read. The read is renamed `largest` (was `largest_half`; C# `BombRead.Largest`, sim `effects._op_damage_from_bombs`, pilot `policy` estimate).
@@ -7274,7 +7274,7 @@ Fish Blasting, Lisa's Treats, Confiscated, Tinder Toss, Alice's Detonator. [USER
 
 ## Klee Uncommons and Rares pass, 2026-10-11
 
-`review/active/klee-upper-pass-2026-10-11.md` (PR #1081). [USER]: "Agreed on all defaults - looks good!" Landed on `klee-next`.
+`review/ruled/klee-upper-pass-2026-10-11.md` (PR #1081). [USER]: "Agreed on all defaults - looks good!" Landed on `klee-next`.
 
 - `proto_ko_cover_your_ears` (U Skill, 0, Exhaust): 1 Spark, was 2. ALL enemies lose 6 [8] Strength this turn, unchanged.
 - `proto_ko_sparkling_burst` (U Skill, 0): 1 Spark. "Gain 1 [2] Energy. If a Bomb went off this turn, gain 1 more." Was 2 [1] Sparks for a flat 1. The `energy` delta bumps the first `energy` op only (tier0 `_bump_first`), so the generator's branch emitter now reads the `Energy` var only when no top-level gain owns it: the bonus stays 1.
@@ -7316,7 +7316,7 @@ your Fanfare and see how that goes." (Furina round 3 record, pick 1.)
 [USER]: "On Kokomi - Abyssal Salvage sounds possibly too good. The rest look
 good to me ... Coral Tithe might be too strong now, but since it was never
 played before, maybe we buff it and put it on watch." Paper
-`review/active/kokomi-card-pass-2026-10-11.md`, picks 1 (a), 2 (the middle
+`review/ruled/kokomi-card-pass-2026-10-11.md`, picks 1 (a), 2 (the middle
 option) and 3 (a).
 
 - **Debuff stacks.** The new count token `weak_vuln_stacks_on_target` is
@@ -7381,7 +7381,7 @@ Blade is weak."
 
 ## Varka Pyro pass, 2026-10-11
 
-Paper `review/active/varka-pyro-pass-2026-10-11.md`, pick 1 ruled (b):
+Paper `review/ruled/varka-pyro-pass-2026-10-11.md`, pick 1 ruled (b):
 "I lean towards b) which allows for some tactical use of Exhaust vs status
 enemies, bit I agree that we need something better as the main engine."
 
@@ -7410,7 +7410,7 @@ enemies, bit I agree that we need something better as the main engine."
 
 ## Varka Pyro paper 2, 2026-10-12
 
-Paper `review/active/varka-pyro-reactions-2026-10-12.md`, sec.3, ruled at
+Paper `review/ruled/varka-pyro-reactions-2026-10-12.md`, sec.3, ruled at
 both defaults (a). [USER]: "On Varka - agreed on both options".
 
 - **Ember Cleave**: "Deal 7 [9] Pyro damage. Gain 2 [3] Strength this
@@ -7431,7 +7431,7 @@ both defaults (a). [USER]: "On Varka - agreed on both options".
 
 ## Furina: the diversity pass, 2026-10-11
 
-`review/active/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled
+`review/ruled/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled
 2026-10-11 at all five defaults ([USER]: "I think that we can leave it as
 double-scaling for now and see if it goes overboard"). Texts and numbers are
 the paper's.
@@ -7513,7 +7513,7 @@ strong but feels possibly justified as a high cost Rare." Then, on Mines:
 
 ## Varka Block paper, 2026-10-12
 
-Paper `review/active/varka-block-paper-2026-10-12.md`, both picks ruled (a)
+Paper `review/ruled/varka-block-paper-2026-10-12.md`, both picks ruled (a)
 ([USER]: "On Varka - agreed on both defaults"). Pick 1 (a) moves no number.
 
 - **Rippling Guard** (`proto_vk_rippling_guard`, pick 2 (a)): "Gain 7 [10]
@@ -7551,9 +7551,9 @@ Furina is at Prototype.
 
 ## Kokomi re-founding, 2026-10-12
 
-Direction `review/active/kokomi-design-pass-2026-10-11.md` (all five picks
+Direction `review/ruled/kokomi-design-pass-2026-10-11.md` (all five picks
 (a), with pick 4's two tiers) and cards
-`review/active/kokomi-card-paper-2026-10-12.md` (PR #1125, ruled: Gorou's
+`review/ruled/kokomi-card-paper-2026-10-12.md` (PR #1125, ruled: Gorou's
 four join her pool, Deep Current, Massed Volley, Commander's Eye and Signal
 Arrow dropped). The build before it is tagged
 `kokomi-casket-frozen-2026-10-12`.
@@ -7794,7 +7794,7 @@ only, no number and no rule moves. C# pins in
 
 ## Furina Spend outlet paper, 2026-10-12
 
-`review/active/furina-spend-outlet-2026-10-12.md` sec.2, ruled 2026-10-12 at
+`review/ruled/furina-spend-outlet-2026-10-12.md` sec.2, ruled 2026-10-12 at
 all four defaults ([USER]: "For Furina - generally agree across the board.").
 Texts and numbers are the paper's; every Spend rate is unchanged.
 
@@ -7815,7 +7815,7 @@ Texts and numbers are the paper's; every Spend rate is unchanged.
 
 ## Kokomi jellyfish build, 2026-10-12
 
-`review/active/kokomi-jellyfish-growth-2026-10-12.md` sec.3 and its Ruled
+`review/ruled/kokomi-jellyfish-growth-2026-10-12.md` sec.3 and its Ruled
 section, ruled 2026-10-12 at all defaults ([USER]: "Good with all defaults."
 and "I'm actually totally fine with 0-cost plans"). The Ruled section
 overrides the draft: the Sting and Ward keep their Plan lines. The card
@@ -7882,7 +7882,7 @@ now pins the two tokens as the only 0-cost Plan rows.
 
 ## Varka review, 2026-10-12
 
-`review/active/varka-review-2026-10-12.md`, ruled 2026-10-12 ([USER]: "On
+`review/ruled/varka-review-2026-10-12.md`, ruled 2026-10-12 ([USER]: "On
 Varka - wow, ok, sounds like we've outright solved the open issues."; "Both
 sound workable to me - Dandelion Gale could be the Replace version.").
 
@@ -7921,7 +7921,7 @@ sound workable to me - Dandelion Gale could be the Replace version.").
 
 ## Varka last pass, 2026-10-12
 
-`review/active/varka-last-pass-2026-10-12.md`, ruled 2026-10-12 ([USER]: "On
+`review/ruled/varka-last-pass-2026-10-12.md`, ruled 2026-10-12 ([USER]: "On
 Varka - agreed with all defaults on both picks!"). One trim of an always-taken
 Rare (pick 1) and twelve floors for always-skipped cards (pick 2). Each card
 keeps its old upgrade unless the paper gave one.
@@ -7967,7 +7967,7 @@ Text follows the card text pass's house rules (`[gold]Hand[/gold]`,
 ## Furina: Encore! is a free act, 2026-10-12
 
 [USER]: "Agreed on Encore! Let's otherwise leave her alone for now"
-(`review/active/furina-review-2026-10-12.md`, "Ruled 2026-10-12", pick 3).
+(`review/ruled/furina-review-2026-10-12.md`, "Ruled 2026-10-12", pick 3).
 
 - **Encore! (`proto_fs_encore`):** cost 0, Common Skill, "Your oldest guest
   acts." It no longer Spends 4 [3] and no longer draws 1. Its upgrade adds
@@ -7983,7 +7983,7 @@ Text follows the card text pass's house rules (`[gold]Hand[/gold]`,
 
 ## Fontaine sanity check, 2026-10-12
 
-`review/active/fontaine-companions-2026-10-12.md`, ruled: [USER] "On the
+`review/ruled/fontaine-companions-2026-10-12.md`, ruled: [USER] "On the
 Fontaine cards - I don't like to have cycling at Common, so Vanguard's Valor
 either needs a rarity bump or a power-up minus the draw effect. Otherwise
 looks good!" All three picks (a); Vanguard's Valor stays Common with no draw.
@@ -8025,7 +8025,7 @@ Untested in game until a deploy.
 
 ## Kokomi level pass, 2026-10-12
 
-`review/active/kokomi-level-pass-2026-10-12.md`, ruled 2026-10-12 ([USER]:
+`review/ruled/kokomi-level-pass-2026-10-12.md`, ruled 2026-10-12 ([USER]:
 "On the Kokomi level paper - agreed on all defaults"): pick 1 (a), all of
 section 1's trims; pick 2 (a), all of section 2's floors. Faces are written to
 the card-text pass's house rules (#1172): "plan" as the verb, [gold]Hand[/gold]

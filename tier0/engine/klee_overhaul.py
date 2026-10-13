@@ -1230,7 +1230,7 @@ def gather_all_to(state: CombatState, dest: Optional[Enemy],
     """Exquisite Compound: "Move all your Bombs onto the enemy. Each grows by
     4 [6]." `GatherAllTo`'s twin.
 
-    THE KLEE UPPER PASS (2026-10-11, `review/active/klee-upper-pass-2026-10-11.md`
+    THE KLEE UPPER PASS (2026-10-11, `review/ruled/klee-upper-pass-2026-10-11.md`
     pick 2 (a)) dropped the old merge: every Bomb that goes off pays a Spark,
     so folding three into one threw two away. Each charge now lands on `dest`
     as ITSELF -- a Mine stays a Mine, its payload rides with it -- and grows by
@@ -1673,7 +1673,7 @@ def boom_badge_factor(copies: int) -> int:
     any, 1 with none. `BoomBadgePower.FactorFor`'s twin.
 
     BADGES DO NOT STACK (the Klee scaling pass, klee-next 2026-10-05,
-    `review/active/klee-scaling-pass-2026-10-05.md` sec.4 C): two badges on
+    `review/ruled/klee-scaling-pass-2026-10-05.md` sec.4 C): two badges on
     one Set off are x2, not x4."""
     return 2 if copies > 0 else 1
 

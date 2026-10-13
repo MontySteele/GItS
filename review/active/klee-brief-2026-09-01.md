@@ -57,7 +57,7 @@ I expect Klee to average less block per turn that base characters but in
 exchange end fights sooner rather than later." Her HP is fixed by ending
 fights sooner, not by more Block; Cook, Spray and the status cards between
 them each need damage of their own
-(`review/active/klee-tempo-paper-2026-10-07.md`).
+(`review/ruled/klee-tempo-paper-2026-10-07.md`).
 
 ## 2. The lore audit
 

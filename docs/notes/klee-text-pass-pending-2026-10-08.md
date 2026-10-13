@@ -1,7 +1,7 @@
 # Klee text pass, held for klee-next (2026-10-08)
 
 **Landed in part, 2026-10-12.** The card text pass
-(`review/active/card-text-pass-2026-10-12.md`) built the rule-8 rows (Team
+(`review/ruled/card-text-pass-2026-10-12.md`) built the rule-8 rows (Team
 Effort, Sparkling Burst), the pile rows (Treasure Map, Come Back and Play!) and
 the Set off rows (Sparkborne Magic, Pass the Match, Knights of Favonius), each
 in that paper's wording, and emptied the lint's `DEFERRED` table. The other

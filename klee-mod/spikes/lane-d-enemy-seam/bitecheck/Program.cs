@@ -31,7 +31,7 @@ namespace LaneD.EnemySeam.BiteCheck;
 /// WHAT IT CANNOT DO. Nothing here renders. The proof scene is never parsed,
 /// no PackedScene is instantiated, and no NCreatureVisuals is built -- all
 /// three need the Godot runtime. Those belong to the morning live procedure in
-/// review/dispatch3/tooling-laned-handoff.md.
+/// review/dispatch3/tooling-laned-handoff.md (archived, docs/ARCHIVE.md).
 /// </summary>
 internal static class Program
 {

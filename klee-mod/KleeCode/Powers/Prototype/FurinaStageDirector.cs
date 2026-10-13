@@ -138,7 +138,7 @@ public readonly record struct StageRoom(StageSummonResult Kind, int Index);
 
 /// <summary>
 /// THE KIT'S RULES, IN ORDER (the Salon's Tab, 2026-10-05; the guest rule of
-/// the pool to 75, <c>review/active/furina-pool-growth-2026-10-09.md</c>
+/// the pool to 75, <c>review/ruled/furina-pool-growth-2026-10-09.md</c>
 /// sec.3). Every method is the sim's twin of the same name in
 /// <c>tier0/engine/furina_tide.py</c>.
 ///

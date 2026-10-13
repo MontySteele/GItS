@@ -6,7 +6,7 @@ namespace KleeMod.Story;
 
 /// <summary>
 /// KLEE'S STORY TABLE. Every string here is the ruled paper's, word for word:
-/// batch 1 (<c>review/active/klee-story-batch-1-2026-10-12.md</c>: the intro,
+/// batch 1 (<c>review/ruled/klee-story-batch-1-2026-10-12.md</c>: the intro,
 /// the eight Ancients, Starsnatch Cliff, the combat and pair lines) and batch
 /// 2 (<c>review/active/klee-story-batch-2-2026-10-12.md</c>: A Letter from
 /// Jean, The Knights Come Looking). <c>KleeStoryTests</c> holds each one

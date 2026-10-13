@@ -119,73 +119,73 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
     "proto_kk_measured_breath": (
-        "The Kokomi jellyfish build (2026-10-12, review/active/kokomi-jellyfish-growth-2026-10-12.md) cut this row: Endless Shoal takes its Uncommon slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi jellyfish build (2026-10-12, review/ruled/kokomi-jellyfish-growth-2026-10-12.md) cut this row: Endless Shoal takes its Uncommon slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_spring_tide": (
-        "The Kokomi jellyfish build (2026-10-12, review/active/kokomi-jellyfish-growth-2026-10-12.md) cut this row: The Shape of Water takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi jellyfish build (2026-10-12, review/ruled/kokomi-jellyfish-growth-2026-10-12.md) cut this row: The Shape of Water takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_shell_guard": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_depths_judgment": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_coral_tithe": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_what_the_tokoyo_took": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_abyssal_salvage": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_kurage_swarm": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_nip": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_current_read": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_vanguard": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_weight_of_the_plan": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_turning_tide": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_stolen_chapter": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_tidal_resonance": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_salt_in_the_wound": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_lull": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_kurage_school": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_the_long_game": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_patient_tide": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_deep_current": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_massed_volley": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kk_signal_arrow": (
-        "The Kokomi re-founding (2026-10-12, review/active/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "The Kokomi re-founding (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md) cut this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_vk_knights_muster": (
         "Legacy cleanup stage 6 (2026-10-02, #832) deleted this retired Varka row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
@@ -224,46 +224,46 @@ KNOWN_STALE = {
         "Legacy cleanup stage 6 (2026-10-02, #832) deleted this retired Varka row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_spark_burst_conversion": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_spark_mode_bombs": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_spark_priced_draw": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_spark_priced_strike": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "spotlight_center_stage": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "spotlight_guest_cast": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_kurages_oath_memory": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_muster_subsidy_funnel": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_itto_superlative_superstrength_either": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_itto_superlative_superstrength_priced": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_shinobu_sanctifying_ring_either": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_shinobu_sanctifying_ring_priced": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_thoma_crimson_ooyoroi_either": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_thoma_crimson_ooyoroi_priced": (
-        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/active/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Legacy cleanup stages 5 and 6 (2026-10-01, #822/#824 and stage 6) retired this card: a retired-arm or shipped-only row whose C# class and sheet row are both deleted (review/ruled/legacy-cleanup-2026-10-01.md). Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     # RETIRED 2026-09-24 (blank-portrait pass): the seven spare Klee paintings
     # kept here for the cut cards now wear new card ids with the same source
@@ -330,22 +330,22 @@ KNOWN_STALE = {
         "Klee defence in the status pile (2026-10-01) CUT this row from her pool (three rows cut, three added; review/active/klee-status-package-2026-10-01.md sec.5). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_ko_playdate": (
-        "The Klee design review (2026-10-08) CUT this row from her pool (two rows cut, two added; review/active/klee-design-review-2026-10-08.md sec.4.4). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+        "The Klee design review (2026-10-08) CUT this row from her pool (two rows cut, two added; review/ruled/klee-design-review-2026-10-08.md sec.4.4). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_ko_it_wasnt_me": (
-        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_ko_sorry_jean": (
-        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_ko_grounded": (
-        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_ko_sit_tight": (
-        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_ko_patience_klee": (
-        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/active/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
+        "The Klee tempo paper (2026-10-07) CUT this row from her pool (five rows cut, five added; review/ruled/klee-tempo-paper-2026-10-07.md sec.3). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_ko_where_did_i_put_it": (
         "The Klee final pass (2026-10-02) CUT this row from her pool (Cover Your Ears! took its slot; review/active/klee-final-pass-2026-10-02.md, \"Ruled\"). Kept rather than deleted, as the entries below are: a painted asset on a klee/ out-path. It is NOT coverage for anything and must never be counted as such."
@@ -486,16 +486,16 @@ KNOWN_STALE = {
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_gentle_current": (
-        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Furina's diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_pay_the_tab": (
-        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Furina's diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_sold_out": (
-        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Furina's diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_surging_waters": (
-        "Furina's diversity pass (review/active/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+        "Furina's diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_cheered_on": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."

@@ -2,7 +2,7 @@
 
 WHY THIS EXISTS
 ---------------
-`docs/current/research/companion-value-vs-colorless-study.md` had to build its
+`docs/current/research/companion-value-vs-colorless-study.md` (archived) had to build its
 base-colorless reference band out of **Slay the Spire 1** wiki material,
 because no StS2 colorless data existed anywhere in this repo. Its own §2 says
 so in a warning box. Every companion pricing argument since has rested on that

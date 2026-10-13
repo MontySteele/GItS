@@ -9,7 +9,7 @@ or repriced.
 **Date:** 2026-08-30. **Static analysis only:** the game was never launched,
 nothing was deployed, and no file under the install was written.
 
-**What this replaces.** `docs/current/research/companion-value-vs-colorless-study.md`
+**What this replaces.** `docs/current/research/companion-value-vs-colorless-study.md` (archived, `docs/ARCHIVE.md`)
 had to build its base-colorless reference band out of **Slay the Spire 1** wiki
 material. Its own §2 says so in a warning box — *"No base-game colorless card
 data exists in this repo… I cannot verify from here."* Every companion pricing

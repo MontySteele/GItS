@@ -272,7 +272,7 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.LynetteActDamage": _stage("LYNETTE_ACT_DAMAGE"),
     "FurinaStageLaw.ClorindeActDamage": _stage("CLORINDE_ACT_DAMAGE"),
     "FurinaStageLaw.ClorindePerRepay": _stage("CLORINDE_PER_REPAY"),
-    # THE POOL TO 39 (review/active/furina-pool-40-2026-10-05.md sec.3): the
+    # THE POOL TO 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3): the
     # three new guests' lines and acts, A Five-Century Act's line and
     # Fountain of Lucine's three turns.
     "FurinaStageLaw.LyneyLineDrop": _stage("LYNEY_LINE_DROP"),
@@ -283,7 +283,7 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.ChevreuseLineVulnerable": _stage("CHEVREUSE_LINE_VULNERABLE"),
     "FurinaStageLaw.DrainFloor": _stage("DRAIN_FLOOR"),
     "FurinaStageLaw.FountainTurns": _stage("FOUNTAIN_TURNS"),
-    # THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md, ruled
+    # THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md, ruled
     # 2026-10-09): the guests' upgraded lines and acts (sec.3), the four new
     # guests and the new Powers' numbers (sec.5).
     "FurinaStageLaw.CharlotteActRepayUpgraded": _stage("CHARLOTTE_ACT_REPAY_UPGRADED"),
@@ -372,11 +372,11 @@ _ABYSS_REASON = (
     "run modifier's Blessing or Shadow number, tuned by play; tier 0.5 models "
     "no run modifier, so no sim twin exists.")
 
-#: KLEE'S STORY IN THE RUN (review/active/klee-story-batch-1-2026-10-12.md):
+#: KLEE'S STORY IN THE RUN (review/ruled/klee-story-batch-1-2026-10-12.md):
 #: when a speech bubble fires, and how long her story Curse lasts. Narrative
 #: content the sim does not model (tier 0.5 has no events or speech).
 _STORY_REASON = (
-    "KLEE'S STORY IN THE RUN (review/active/klee-story-batch-1-2026-10-12.md). "
+    "KLEE'S STORY IN THE RUN (review/ruled/klee-story-batch-1-2026-10-12.md). "
     "A story line's trigger or the story Curse's length; tier 0.5 models no "
     "events, speech or curses, so no sim twin exists.")
 

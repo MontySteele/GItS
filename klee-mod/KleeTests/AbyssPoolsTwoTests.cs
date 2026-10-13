@@ -17,7 +17,7 @@ using Xunit;
 namespace KleeMod.Tests;
 
 /// <summary>
-/// THE SPIRAL ABYSS, ROUND TWO (<c>review/active/abyss-pools-2-2026-10-12.md</c>,
+/// THE SPIRAL ABYSS, ROUND TWO (<c>review/ruled/abyss-pools-2-2026-10-12.md</c>,
 /// ruled 2026-10-12: pick 1 (a), pick 2 (a) with Moonlit Spring at 8, Frenzy
 /// as 2 Strength, and no retunes).
 ///

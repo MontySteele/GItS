@@ -9,4 +9,4 @@ import pytest
 
 RETIRED_CALIBRATION = pytest.mark.skip(
     reason="calibration retired until a kit reaches Balance, 2026-10-01 "
-           "(review/active/legacy-cleanup-2026-10-01.md, pick 5)")
+           "(review/ruled/legacy-cleanup-2026-10-01.md, pick 5)")

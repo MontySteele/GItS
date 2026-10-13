@@ -5,7 +5,7 @@
 **Date:** 2026-07-23
 
 **Status:** implementation handoff; art work is intentionally separate from the Furina codegen pass
-**Canonical content:** `docs/furina-cards.yaml`, `docs/fontaine-companions.yaml`, `docs/mondstadt-companions.yaml`, and `tier0/content/cards/tokens.yaml`
+**Canonical content:** Furina's `proto_` rows and the Fontaine and Mondstadt Companion rows on `docs/prototype-surface.yaml`, and `tier0/content/cards/tokens.yaml`. The per-kit sheets this line used to name (`docs/furina-cards.yaml`, `docs/fontaine-companions.yaml`, `docs/mondstadt-companions.yaml`) were deleted in the 2026-10-01 legacy cleanup; where this file says `fontaine-companions.yaml`, read the surface rows.
 
 ## 1. Outcome
 

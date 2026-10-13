@@ -108,7 +108,7 @@ its TARGET is what a rewrite aims below.
     British English." "Gray", "color", "defense", "theater"; the lint's
     `british` spelling holds the common ones.
 17. **One phrasing per idea** (the card text pass, 2026-10-12,
-    `review/active/card-text-pass-2026-10-12.md`; the lint name in brackets
+    `review/ruled/card-text-pass-2026-10-12.md`; the lint name in brackets
     where a regex holds it):
     - "Whenever" for a trigger that repeats, "When" only for a one-time one
       ("When it goes off" on the one Bomb a card placed).

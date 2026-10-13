@@ -19,7 +19,7 @@ namespace KleeMod.Cards.Furina;
 
 /// <summary>
 /// Furina's Archaic Tooth Ancient (the Ancient audit,
-/// review/active/ancient-audit-2026-10-12.md, ruled 2026-10-12: "All the
+/// review/ruled/ancient-audit-2026-10-12.md, ruled 2026-10-12: "All the
 /// World's a Stage likewise needs a bump - "Gain 8 [11] Block. Spend all your
 /// Fanfare and deal that much Hydro damage to ALL enemies twice.""): Orobas's
 /// Archaic Tooth turns her starter Rising Applause into it, as it turns Bash

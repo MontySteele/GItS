@@ -10,7 +10,7 @@ under ui/.
 
 SIZE, MEASURED NOT ASSUMED. Nothing in this repo's reach (no game_ref
 decompile, no local mod install) states the pixel size `NModInfoContainer`
-expects. `lamali292/Downfall` (pinned in review/dispatch3/s12-public-patterns
+expects. `lamali292/Downfall` (pinned in the archived review/dispatch3/s12-public-patterns
 as the reference public StS2 mod, and its `mod_image.png` cited by name in the
 S20 P5 finding) is a real, released mod on that same screen; its five submod
 badges plus its own top-level badge are byte-measured 420x420 (Champ,

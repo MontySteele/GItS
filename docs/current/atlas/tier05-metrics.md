@@ -191,7 +191,7 @@ history keeps them.
   anchors are re-run in ONE invocation rather than quoted from older tables,
   and why every rate column carries a Wilson interval so a point estimate
   cannot be quoted bare
-  (`docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md:159`).
+  (`docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md:159`, archived in `docs/ARCHIVE.md`).
 
 ## 6. Reading order
 

@@ -1,7 +1,7 @@
 """THE KOKOMI RE-FOUNDING (2026-10-12), the sim side.
 
-The direction is `review/active/kokomi-design-pass-2026-10-11.md` (all five
-picks (a)); the cards are `review/active/kokomi-card-paper-2026-10-12.md`.
+The direction is `review/ruled/kokomi-design-pass-2026-10-11.md` (all five
+picks (a)); the cards are `review/ruled/kokomi-card-paper-2026-10-12.md`.
 The Casket's count, Open the Casket and Dusk are retired; Ethereal is the base
 game's keyword; Stings and Wards are her generated jellyfish; any Companion
 card can be written as a Plan and is carried out next turn at its printed

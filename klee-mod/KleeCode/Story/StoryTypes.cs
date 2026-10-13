@@ -6,7 +6,7 @@ namespace KleeMod.Story;
 
 /// <summary>
 /// THE SHAPE OF ONE CHARACTER'S STORY IN THE RUN (Klee story batches 1 and 2,
-/// <c>review/active/klee-story-batch-1-2026-10-12.md</c> and
+/// <c>review/ruled/klee-story-batch-1-2026-10-12.md</c> and
 /// <c>klee-story-batch-2-2026-10-12.md</c>).
 ///
 /// ONE DATA TABLE PER CHARACTER. Every line a player reads, every event page

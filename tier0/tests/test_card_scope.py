@@ -55,7 +55,7 @@ RUN_SCOPE_CREATE = re.compile(r"RunState\s*\)?\s*\.\s*CreateCard\b|RunState\.Cre
 # 2026-07-26 soft lock again.
 RUN_SCOPE_ALLOWED = {
     "StoryEvents.cs":
-        "Klee's story events (review/active/klee-story-batch-1-2026-10-12.md, "
+        "Klee's story events (review/ruled/klee-story-batch-1-2026-10-12.md, "
         "klee-story-batch-2-2026-10-12.md) add a card straight into the DECK "
         "from an event page (Confinement, Fish Blasting, an upgraded knight), "
         "run scope's real lifetime and the base events' own call "

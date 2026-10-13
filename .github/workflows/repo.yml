@@ -3,7 +3,7 @@
 # simplification), and the R-number / register lints that succeeded it
 # retired in the 2026-09-23 process trim. The argument, and the recorded NOT-doing list -- no Windows runner, no pck
 # build, no deploy automation, no coverage number, no scheduled runs -- live
-# in docs/current/rationale/serenitea-g3-ci-proposal.md. Read that before
+# in docs/current/rationale/serenitea-g3-ci-proposal.md (archived, docs/ARCHIVE.md). Read that before
 # adding a job here; each refusal is a decision, not an oversight.
 #
 # The consumer is the NEXT SESSION, not a hypothetical contributor: this is a

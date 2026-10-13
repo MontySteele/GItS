@@ -12,7 +12,7 @@ WARNING), else 0 -- the same contract every lint in `tools/` already has, so
 this can be wired into `tools/run_lints.py` and `klee-mod/build/validate.ps1`
 without either of them learning anything new. Neither wiring is done by this
 lane: both files are shared and single-owner, and the proposed rows are in
-`review/dispatch3/tooling-lanec-handoff.md`.
+`review/dispatch3/tooling-lanec-handoff.md` (archived, docs/ARCHIVE.md).
 """
 
 from __future__ import annotations

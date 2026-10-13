@@ -1,6 +1,6 @@
 """Cut the Guest Stars' stage bodies.
 
-The Guest Cast (2026-09-25, review/active/furina-guest-batch-2026-09-25.md)
+The Guest Cast (2026-09-25, review/ruled/furina-guest-batch-2026-09-25.md)
 put eight Fontaine characters on Furina's stage as performers, and the
 supporting pool (2026-09-26, review/active/furina-supporting-pool-2026-09-26.md)
 added Lyney and Escoffier for ten. Until this tool each one wore the base

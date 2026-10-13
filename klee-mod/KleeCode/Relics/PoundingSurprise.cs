@@ -14,7 +14,7 @@ using MegaCrit.Sts2.Core.Runs;
 namespace KleeMod.Relics;
 
 /// <summary>
-/// Klee's real starting relic (spec C1.4/C2.3, klee-character-design.md §23):
+/// Klee's real starting relic (spec C1.4/C2.3, klee-character-design.md §23, archived):
 /// +1 Spark per Bomb detonation. This is the talent-relic — her weapon slot is
 /// folded into it per design principles §118 — and it is what makes the
 /// demolition deck feed the Spark economy: bombs pop, sparks bank, the third

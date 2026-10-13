@@ -16,7 +16,7 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// THE VARKA REVIEW (review/active/varka-review-2026-10-12.md, ruled
+/// THE VARKA REVIEW (review/ruled/varka-review-2026-10-12.md, ruled
 /// 2026-10-12: "Both sound workable to me - Dandelion Gale could be the
 /// Replace version"). His two Ancients and their doors, the switch preview,
 /// and the card numbers the review moved. What awaits a live combat (the hit,

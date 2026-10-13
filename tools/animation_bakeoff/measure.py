@@ -2,7 +2,7 @@
 one comparison table.
 
     python -m tools.animation_bakeoff.measure \\
-        --projects <dir> --exports <dir> --out review/dispatch3/lane-a
+        --projects <dir> --exports <dir> --out <dir>
 
 Reads only; it produces `bakeoff-results.json` and `bakeoff-matrix.md`. Every
 number in the output is either read out of a file this run produced or counted

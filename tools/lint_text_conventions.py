@@ -81,7 +81,7 @@ IN_SCOPE = re.compile(r"^proto_(ko|kk|mc|mi|mf|fs|vk)_")
 #: THE DEFERRED ROWS (text pass 2026-10-08): spellings held for named rows by
 #: (row id, spelling name). ROT SEMANTICS, like `EXCEPTIONS`: an entry whose
 #: spelling no longer fires fails, so the list can only shrink. EMPTY since the
-#: card text pass of 2026-10-12 (`review/active/card-text-pass-2026-10-12.md`,
+#: card text pass of 2026-10-12 (`review/ruled/card-text-pass-2026-10-12.md`,
 #: rules 1 and 8): Team Effort, Sparkling Burst, Treasure Map and Come Back and
 #: Play! took the spellings they were held from.
 DEFERRED: dict[tuple[str, str], str] = {}
@@ -243,7 +243,7 @@ SPELLINGS: list[tuple[str, re.Pattern[str], str]] = [
      "'[gold]Elemental Reaction[/gold]', the shipped spelling"),
     ("otherwise-comma", re.compile(r"\bOtherwise [a-z]"), "'Otherwise, ...'"),
     ("parenthesis", re.compile(r"[()]"), "no parentheses"),
-    # THE CARD TEXT PASS (2026-10-12, `review/active/card-text-pass-2026-10-12.md`),
+    # THE CARD TEXT PASS (2026-10-12, `review/ruled/card-text-pass-2026-10-12.md`),
     # its house rules wherever a regex can hold them. Rule 1: the base golds
     # "Hand" 103 times and never writes "your hand".
     ("hand-plain", re.compile(r"\b(?:your|the|in|from|to|into) hand\b"),

@@ -83,12 +83,12 @@ public class PoolCountTests
     {
         // THE SALON'S TAB (2026-10-05, proposal sec.16): the slice's 24 rows
         // (12 Common, 8 Uncommon, 4 Rare), and the pool to 39
-        // (review/active/furina-pool-40-2026-10-05.md sec.3, ruled): seven
+        // (review/ruled/furina-pool-40-2026-10-05.md sec.3, ruled): seven
         // Uncommons and three Rares more. The paper's 29 -> 39 counts the
         // two Basics and the three Neuvillette companion rows besides. The
         // 2026-10-09 playtest trim moved Interval Bell and Tidal Flourish to
         // Uncommon: 12 / 15 / 7 -> 10 / 17 / 7. THE POOL TO 75
-        // (review/active/furina-pool-growth-2026-10-09.md sec.5, ruled
+        // (review/ruled/furina-pool-growth-2026-10-09.md sec.5, ruled
         // 2026-10-09): 41 rows, 10 / 18 / 13 -> 20 / 35 / 20; three slots,
         // one per rarity, held for the first seat round. The pool-75 round's
         // rulings (2026-10-09): Endless Waltz cut (Uncommon) and Standing
@@ -97,7 +97,7 @@ public class PoolCountTests
         // 2026-10-09): 1 Common, 2 Uncommon, 1 Rare, 20 / 37 / 21. Guest
         // Star: Navia Rare -> Uncommon (2026-10-10): 20 / 38 / 20. Standing
         // Ovation Common again (2026-10-11): 21 / 37 / 20. THE DIVERSITY PASS
-        // (review/active/furina-diversity-pass-2026-10-11.md, ruled
+        // (review/ruled/furina-diversity-pass-2026-10-11.md, ruled
         // 2026-10-11): Headliner, Packed House, Tutti! and Wriothesley to
         // Common, Leading Lady and Full House Uncommon; Gentle Current,
         // Surging Waters, Pay the Tab and Sold Out cut: 23 / 35 / 20.

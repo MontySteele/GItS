@@ -16,7 +16,7 @@ namespace KleeMod.Relics;
 
 /// <summary>
 /// THE TEMPO RELIC, A STAGING TEST AND NOT A STARTER CHANGE (the Klee scaling
-/// pass, klee-next 2026-10-05, `review/active/klee-scaling-pass-2026-10-05.md`
+/// pass, klee-next 2026-10-05, `review/ruled/klee-scaling-pass-2026-10-05.md`
 /// sec.4 D; pick 5 stays [USER]'s). A copy of <see cref="PoundingSurprise"/>
 /// -- the Spark per explosion, the companion reward slot, the Touch of Orobas
 /// upgrade -- that ALSO does: "At the start of each combat, place a Bomb 6 on

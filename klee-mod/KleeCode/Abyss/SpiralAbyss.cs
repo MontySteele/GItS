@@ -112,7 +112,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
 
     /// <summary>Is Blessing <paramref name="b"/> in force now? A Whole run
     /// Blessing is once taken; a This act one only in the act it was taken in
-    /// (<c>review/active/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)). Nothing
+    /// (<c>review/ruled/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)). Nothing
     /// new is saved: the record already keeps each pick's act, so a run
     /// continued mid-act keeps the act's entries and one continued after the
     /// act has ended has lost them.</summary>

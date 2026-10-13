@@ -63,8 +63,8 @@ public static class FurinaStageRoster
 
     /// <summary>
     /// THE SLICE'S 24 (proposal sec.16), THE POOL TO 39's ten
-    /// (<c>review/active/furina-pool-40-2026-10-05.md</c> sec.3) and THE POOL
-    /// TO 75's 41 (<c>review/active/furina-pool-growth-2026-10-09.md</c>
+    /// (<c>review/ruled/furina-pool-40-2026-10-05.md</c> sec.3) and THE POOL
+    /// TO 75's 41 (<c>review/ruled/furina-pool-growth-2026-10-09.md</c>
     /// sec.5), every one a `proto_fs_` row, less Endless Waltz (cut
     /// 2026-10-09, with Standing Ovation moved to Uncommon), and THE BLOCK
     /// GAP's four (ruled 2026-10-09), and THE DIVERSITY PASS (ruled
@@ -116,7 +116,7 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsHoldTheStage>(),
         ModelDb.Card<ProtoFsGuestStarChevreuse>(),
         ModelDb.Card<ProtoFsBis>(),
-        // THE POOL TO 75 (review/active/furina-pool-growth-2026-10-09.md
+        // THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md
         // sec.5, ruled 2026-10-09): 41 rows. Guests and stage (11).
         ModelDb.Card<ProtoFsCastingCall>(),
         ModelDb.Card<ProtoFsEncore>(),
@@ -166,7 +166,7 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsPrivateBox>(),
         ModelDb.Card<ProtoFsTheMasquerade>(),
         ModelDb.Card<ProtoFsTheShowMustGoOn>(),
-        // THE DIVERSITY PASS (review/active/furina-diversity-pass-2026-10-11.md,
+        // THE DIVERSITY PASS (review/ruled/furina-diversity-pass-2026-10-11.md,
         // ruled 2026-10-11): 2 Common, 2 Uncommon.
         ModelDb.Card<ProtoFsHeadliner>(),
         ModelDb.Card<ProtoFsTheLeadingLady>(),

@@ -9,8 +9,8 @@ THE RE-FOUNDING (2026-10-12) RETIRED THE COUNT. The relic keeps its id, name
 and art and now says one plain thing: "At the end of your turn, if a Plan is
 waiting, gain 3 Block." No card names it, so there is no tip to attach, and
 Shell Guard, Open the Casket and the count's readers are cut
-(`review/active/kokomi-design-pass-2026-10-11.md`,
-`review/active/kokomi-card-paper-2026-10-12.md`). What stays pinned here is
+(`review/ruled/kokomi-design-pass-2026-10-11.md`,
+`review/ruled/kokomi-card-paper-2026-10-12.md`). What stays pinned here is
 that the retired surfaces stay gone, and the panel clause that answers a
 debuff-striking relic stays silent on the relic's face.
 """

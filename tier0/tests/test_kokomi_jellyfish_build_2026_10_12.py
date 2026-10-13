@@ -1,6 +1,6 @@
 """THE KOKOMI JELLYFISH BUILD (2026-10-12), the sim side.
 
-Paper `review/active/kokomi-jellyfish-growth-2026-10-12.md`, ruled at all
+Paper `review/ruled/kokomi-jellyfish-growth-2026-10-12.md`, ruled at all
 defaults ([USER]: "Good with all defaults." and "I'm actually totally fine
 with 0-cost plans"). Stings and Wards are the Silent's Shivs with a Plan line,
 the generators are at the Silent's rates, Endless Shoal is the Uncommon "a

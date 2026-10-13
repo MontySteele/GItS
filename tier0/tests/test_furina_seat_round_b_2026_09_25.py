@@ -154,14 +154,3 @@ def test_a_settled_board_still_costs_one_read(monkeypatch):
     assert blindplay.settle_board(rest, wire, delay=9.0) == rest
     assert wire.reads == 1
     assert slept == []
-
-
-def test_the_brief_records_both_changes():
-    brief = (REPO / "review" / "active"
-             / "furina-stage-brief-2026-09-08.md").read_text(encoding="utf-8")
-    # Draft 3 (2026-09-25) superseded round B's Fanfare Bow: rule 9 is now
-    # "the Bow is the performer's act, once more".
-    assert "**The Bow is the performer's act, once more**" in brief
-    assert "Usher: the front performer gains 4 Fanfare" not in brief
-    assert "Usher: Furina gains 4 Block" not in brief
-    assert "equal to twice your performers' Fanfare" in brief

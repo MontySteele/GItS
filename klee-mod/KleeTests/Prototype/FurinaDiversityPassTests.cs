@@ -13,7 +13,7 @@ using static KleeMod.Tests.Prototype.StageKit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// FURINA, THE DIVERSITY PASS (<c>review/active/furina-diversity-pass-2026-10-11.md</c>
+/// FURINA, THE DIVERSITY PASS (<c>review/ruled/furina-diversity-pass-2026-10-11.md</c>
 /// sec.2 and sec.3, ruled 2026-10-11, all defaults): the two guest styles'
 /// cards and the floors. Headless over the director and the recording board
 /// (<see cref="StageKit"/>) where the rule is the director's; the generated

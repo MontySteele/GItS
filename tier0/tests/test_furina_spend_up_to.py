@@ -1,6 +1,6 @@
 """THE SPEND PAPER, BUILT AT ITS DEFAULTS, in the sim (2026-10-10).
 
-`review/active/furina-spend-paper-2026-10-10.md` picks 1 and 2 (the picks
+`review/ruled/furina-spend-paper-2026-10-10.md` picks 1 and 2 (the picks
 are open on #1014). "Spend up to X" spends X, or all she holds if that is
 less, never fails, and is a Spend only when at least 1 counts; it is not a
 spend-all, so Bis! and Standing Room Only ignore it. Navia's line makes the

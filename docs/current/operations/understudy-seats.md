@@ -68,11 +68,6 @@ Raw transcripts: `review/qa/blindplay/<session>/` (local, gitignored).
 ```sh
 # an Opus subagent playing by hand: paste this brief, never rewrite it
 python tools/seat.py --opus-brief --lane 1 --character KLEEMOD-KLEE --scratch <dir>
-
-# a backend seat (codex, or the local model), embark to teardown
-python tools/seat.py --lane 1 --character KLEEMOD-KLEE --backend codex
-python tools/seat.py --lane 2 --character KLEEMOD-KOKOMI --backend local \
-    --max-actions 70 --max-wall-s 5400 --dry-run      # print the 3 commands
 ```
 
 `--opus-brief` prints the embark to run first on stderr, with an explicit
@@ -121,11 +116,7 @@ Environment:
 | variable | what it does |
 |---|---|
 | `GITS_LANE` | the ONLY way the design-blind `blindplay` commands find a lane (they take no flag). Unset it before a deploy. |
-| `GITS_LOCAL_MODEL_URL` | the local model endpoint, e.g. `http://localhost:8010/v1`; required, no default |
-| `GITS_LOCAL_MODEL_CTX` | the context size; a prompt that does not fit is refused, never truncated |
-| `GITS_LOCAL_PLAY_TOKENS` | the local whole-run answer ceiling; use **12000** (the 4096 default truncates and the round dies with the game up) |
-| `GITS_LOCAL_MODEL_FORM_TOKENS`, `GITS_LOCAL_MODEL_REVIEW_TOKENS` | the local grader's two answer ceilings (default 8192) |
-| `GITS_CODEX_PRIMARY_STOP`, `GITS_CODEX_WEEKLY_STOP` | override the Codex usage stops (85% of the five-hour window, 50% of the week) for one run |
+| `GITS_LOCAL_*`, `GITS_CODEX_*` | settings for the dormant backends; their module docstrings name them |
 | `STS2_MCP_PORT` | the bridge port a lane's game listens on; set by the lane machinery, not by hand |
 
 **embark** owns deploy, launch, readiness, embark and speed; it reads the run
@@ -349,7 +340,7 @@ python -m understudy.embark --teardown --coop --lanes 2,3     # client first
 ```sh
 python -m understudy.blindplay observe [--raw-file <state.json>]
 python -m understudy.blindplay act "<command>" [--raw-file <f>] [--dry-run]
-python -m understudy.blindplay session [--backend codex|local] [--max-actions N] [--max-wall-s S]
+python -m understudy.blindplay session [--max-actions N] [--max-wall-s S]
 ```
 
 `observe` renders whichever screen is up as printed faces only; an unknown or
@@ -388,10 +379,7 @@ ends, budgets on actions, wall time and consecutive refusals. The seat's
 record is `review/qa/blindplay/<session>/record.md` (local, gitignored) with
 the identity block read off disk (`mods\klee\manifest.json`,
 `release_info.json`), and beside it `wire.json`, the per-turn wire snapshot
-the tester never sees. `--backend local` runs the same session over the local
-model (same prompt, same page, same records), keeps one thread per act and
-hands over at each act boundary; it is an option, not a seat any round rests
-on.
+the tester never sees.
 
 **Asked of `STS2_MCP`: a resolving-part marker on a multi-part intent
 (`EB-461`).** `BuildEnemyState` sends one entry per intent part (`type`,
@@ -403,20 +391,11 @@ warning). One key per intent on `BuildEnemyState` would close it. `STS2_MCP`
 is vendored (`vendor/STS2_MCP/`, `PROVENANCE.md`): this is a request upstream,
 not a local edit.
 
-### Dormant seats: Codex, the local model, staged turns
+### Dormant seats
 
-No seat since 2026-09-28 has used these three, and their code stays because the
-live path still imports it (`blindplay_session` reaches `seat`, which reaches
-`staged_turn` and `codex_usage`; the `face-defects` lint reaches `scenario`).
-The Codex seat (`python -m understudy.seat check|grade|review`, one-time
-`npm install -g @openai/codex` and `codex login`) grades a staged turn or reads a
-proposal as the doctrine or pair seat, refusing at 85% of the five-hour window
-or 50% of the week. The local model (`understudy.local_model`, `local_seat`,
-`local_tester`, served by `serve.ps1` on port 8010) gives subjective readings
-only. Staged turns (`python -m understudy.staged_turn check|stage|grade|execute|ledger`)
-set one board and write a blind `packet.md` for a grader. Each module's
-docstring is the manual; the full text of this section is in git at
-`bf073df4:docs/current/operations/understudy-seats.md`, lines 315-377.
+The Codex and local-model backends (`--backend codex|local` on `tools/seat.py`
+and `blindplay session`) and staged turns are dormant: no seat has used them
+since 2026-09-28, and the code stays because the live path imports it.
 
 ### Attended drivers (scenarios, forced events, act skips, grants)
 

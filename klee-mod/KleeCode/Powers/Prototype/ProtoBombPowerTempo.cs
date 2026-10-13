@@ -8,7 +8,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// THE KLEE TEMPO PAPER's Bomb verb (2026-10-07, ruled,
-/// review/active/klee-tempo-paper-2026-10-07.md sec.3): damage READ off her
+/// review/ruled/klee-tempo-paper-2026-10-07.md sec.3): damage READ off her
 /// Bombs that leaves them cooking. Cook "has no Common way to deal damage
 /// while it waits"; Simmer and Taste Test are that damage, paid for in
 /// statuses. Sheet op <c>damage_from_bombs</c>, one awaited call per card.

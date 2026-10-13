@@ -14,7 +14,7 @@
 # docstring carries the citation and the softlock that produced it).
 #
 # IN THE GAME THESE THREE ARE THE ARCHAIC TOOTH CARDS (the Ancient audit,
-# review/active/ancient-audit-2026-10-12.md, ruled 2026-10-12): Orobas turns
+# review/ruled/ancient-audit-2026-10-12.md, ruled 2026-10-12): Orobas turns
 # each kit's starter into its row here, and Darv's Dusty Tome draws the kit's
 # other Ancient, which is game-side only (`ARM_ONLY_ANCIENTS`). THE SIM HAS NO
 # OROBAS, so its one door is still the act-2 Darv event's Dusty Tome, modelled

@@ -1,6 +1,6 @@
 """FURINA, THE DIVERSITY PASS in the one-seat sim.
 
-`review/active/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled
+`review/ruled/furina-diversity-pass-2026-10-11.md` sec.2 and sec.3, ruled
 2026-10-11 (all defaults): Headliner, Leading Lady, Full House and Packed
 House in; Bravura at 7 Hydro for every 3 spent; Tutti! and Wriothesley to
 Common; Lynette's act; the Final Bow, Casting Call and Ensemble Cast floors;

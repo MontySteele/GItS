@@ -102,7 +102,7 @@ public sealed record StageMods
     /// <summary>Thunderous Applause: damage to ALL enemies per Spend.</summary>
     public int Thunderous { get; init; }
 
-    // ---- the pool to 75 (review/active/furina-pool-growth-2026-10-09.md) --
+    // ---- the pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md) --
 
     /// <summary>Grand Entrance: Repay per Guest Star played (copies add).
     /// </summary>

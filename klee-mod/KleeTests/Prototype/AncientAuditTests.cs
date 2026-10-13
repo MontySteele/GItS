@@ -18,7 +18,7 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// THE ANCIENT AUDIT (review/active/ancient-audit-2026-10-12.md, ruled
+/// THE ANCIENT AUDIT (review/ruled/ancient-audit-2026-10-12.md, ruled
 /// 2026-10-12: "Otherwise agreed.- let's fix them all"). Every kit has one
 /// Dusty Tome card and one Archaic Tooth card, Varka's pattern
 /// (<c>VarkaAncientsTests</c>): Jumpy Dumpty becomes Mk.Omega, Kurage's Oath

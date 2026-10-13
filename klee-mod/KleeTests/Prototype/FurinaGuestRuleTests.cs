@@ -14,7 +14,7 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// FURINA, THE POOL TO 75 (<c>review/active/furina-pool-growth-2026-10-09.md</c>,
+/// FURINA, THE POOL TO 75 (<c>review/ruled/furina-pool-growth-2026-10-09.md</c>,
 /// ruled 2026-10-09): sec.3's guest rule and sec.5's new verbs, pinned
 /// headlessly over the director and the recording board
 /// (<see cref="StageKit"/>). The sim twin is <c>tier0/tests/test_furina_pool75.py</c>.
