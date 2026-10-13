@@ -162,7 +162,25 @@ from tools import effect_walk                       # noqa: E402
 # reading is comparable only with readings taken under its own
 # `VOCAB_VERSION`, and the published Phase-1 post-read stands as published
 # (R101b) and is not re-run against a later vocabulary.
-VOCAB_VERSION = "eb118-connectivity-v3"
+#
+# ===== v4 (2026-10-13): THE PROTOTYPE SURFACE, TAUGHT =====
+# Legacy cleanup stage 6 made the mod corpus the prototype surface, and v3
+# knew none of its kit vocabulary: 175 rows reported UNCLASSIFIED. v4 is
+# ADDITIVE and touches no shared entry:
+#   * ONE private entry, `stage` (Furina's Stage). The `stage_*` ops already
+#     filed onto it; the entry itself was never minted, so every one of them
+#     read "unknown private state". Kokomi's Plan queue stays on `kurage`,
+#     where the overhaul ops already file it (see the `--- Kokomi overhaul`
+#     block): the Bake-Kurage is where a Plan is sent.
+#   * The three overhaul arms' powers (`ko_*`, `kk_*`, `fs_*`), their count
+#     tokens and predicates, Klee's Mines (filed on `bombs`: a Mine is a Bomb
+#     that goes off on its own trigger), and the `plan:` card field, whose
+#     effects are this card's printed rule and are walked like `effects:`.
+#   * Synthesized statuses (`status_<x>`, `tier0.engine.statuses`) resolve to
+#     junk for `add_card`, the way the engine's own `token_card` resolves them.
+# Shipped-sheet rows reach none of the added keys, so a v3 reading of them
+# re-runs identical under v4; the version moves because the tables did.
+VOCAB_VERSION = "eb118-connectivity-v4"
 
 # `recall_to_draw`'s exhaust-pile source (tier0.engine.effects).
 RECALL_EXHAUST_SOURCE = "exhaust"
@@ -247,6 +265,8 @@ PRIVATE_STATES: dict[str, tuple[str, str]] = {
               CANON_ABSENT),
     "conscript_sly": ("Conscript / Sly", CANON_ABSENT),
     "kurage": ("the Bake-Kurage summon", CANON_ABSENT),
+    "stage": ("Furina's Stage: guest seats, Fanfare bar and drained line",
+              CANON_ABSENT),
     "orbs": ("canon: channelled Orbs", GROUNDED),
     "stars": ("canon: Forge / Stars", GROUNDED),
     "osty": ("canon: summoned bodies", GROUNDED),
@@ -825,6 +845,135 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                      _hook("shared", "draw_pile", "use"),
                      _hook("shared", "universal_verb_power", "write")],
     "metallicize": [_hook("shared", "block_held", "write")],
+    # --- v4: the overhaul arms' powers (the prototype surface) ---
+    # Each row is read off the card's printed text: what the trigger watches
+    # is a READ, what the payout changes is a WRITE, and a payout that takes
+    # from a meter another card also wants is a USE. Mines are Bombs here.
+    # Klee
+    "ko_alices_recipe": [_hook("private", "bombs", "read"),
+                         _hook("private", "bombs", "write")],
+    "ko_chained_reactions": [_hook("private", "bombs", "read"),
+                             _hook("private", "bombs", "write")],
+    "ko_bomb_echo": [_hook("private", "bombs", "read")],
+    # Rides the play verb on ANY Companion card -- a card from outside her
+    # pool -- so it is a universal-verb rider, `first_attack_draw`'s shape.
+    "ko_witches_circle": [_hook("shared", "plays_this_turn", "read"),
+                          _hook("shared", "card_identity", "read"),
+                          _hook("private", "bombs", "write"),
+                          _hook("shared", "universal_verb_power", "write")],
+    "ko_vermillion_pact": [_hook("private", "bombs", "read"),
+                           _hook("shared", "aura_reaction", "read")],
+    "ko_return_to_sender": [_hook("shared", "block_held", "read"),
+                            _hook("private", "bombs", "write")],
+    "ko_blazing_delight": [_hook("shared", "draw_pile", "use"),
+                           _hook("shared", "hand_contents", "write")],
+    "ko_mine_frags": [_hook("private", "bombs", "read")],
+    "ko_boom_badge": [_hook("private", "bombs", "read")],
+    "ko_wait_for_it": [_hook("private", "bombs", "read"),
+                       _hook("shared", "aura_reaction", "read"),
+                       _hook("shared", "draw_pile", "use"),
+                       _hook("shared", "hand_contents", "write")],
+    "ko_party_poppers": [_hook("private", "sparks", "read"),
+                         _hook("shared", "plays_this_turn", "read"),
+                         _hook("private", "bombs", "write")],
+    "ko_look_out": [_hook("private", "bombs", "read"),
+                    _hook("shared", "block_held", "write")],
+    "ko_secret_base": [_hook("private", "bombs", "write")],
+    "ko_dodoco": [_hook("private", "bombs", "write")],
+    "ko_aftershock": [_hook("private", "bombs", "read"),
+                      _hook("shared", "aura_reaction", "read"),
+                      _hook("private", "bombs", "write")],
+    "ko_spark_knight": [_hook("private", "sparks", "read"),
+                        _hook("shared", "enemy_count", "read")],
+    # Ride the DRAW verb on any Status, whoever made it: `dark_embrace`'s
+    # verb class, filtered by type.
+    "ko_finders_keepers": [_hook("shared", "draw_pile", "read"),
+                           _hook("shared", "card_identity", "read"),
+                           _hook("private", "bombs", "write"),
+                           _hook("shared", "universal_verb_power", "write")],
+    "ko_damage_report": [_hook("shared", "draw_pile", "read"),
+                         _hook("shared", "card_identity", "read"),
+                         _hook("shared", "block_held", "write"),
+                         _hook("private", "sparks", "write"),
+                         _hook("shared", "universal_verb_power", "write")],
+    # The co-op set: the other player has no state here (`ally_draw`'s
+    # argument); what remains is the Set off they cause.
+    "ko_pass_the_match": [_hook("private", "bombs", "use")],
+    "ko_knights_of_favonius": [_hook("private", "bombs", "use")],
+    "ko_shrapnel": [_hook("private", "bombs", "read")],
+    "ko_sparks_for_everyone": [_hook("private", "bombs", "read")],
+    # Kokomi. The Plan queue is filed on `kurage`, as the overhaul ops file it.
+    "kk_treatise": [_hook("shared", "plays_this_turn", "read"),
+                    _hook("shared", "card_identity", "read"),
+                    _hook("shared", "draw_pile", "use"),
+                    _hook("shared", "hand_contents", "write")],
+    "kk_nereids_ascension": [_hook("private", "kurage", "write")],
+    "kk_at_waters_edge": [_hook("shared", "aura_reaction", "read")],
+    "kk_ceremonial_garment": [_hook("shared", "card_identity", "write")],
+    "kk_watatsumis_grace": [_hook("shared", "block_held", "read"),
+                            _hook("shared", "block_held", "write")],
+    "kk_tidal_riposte": [_hook("shared", "block_held", "read"),
+                         _hook("shared", "enemy_intent", "read")],
+    "kk_kurage_canopy": [_hook("private", "kurage", "read"),
+                         _hook("shared", "hand_contents", "write")],
+    # Weak and Vulnerable carry no vocabulary hook (the `weak` row), so the
+    # trigger reads nothing here: EMPTY and disclosed.
+    "kk_seas_reproach": [],
+    "kk_watatsumi_resistance": [_hook("private", "kurage", "read"),
+                                _hook("shared", "card_identity", "read"),
+                                _hook("shared", "hand_contents", "write")],
+    "kk_sangonomiyas_orders": [_hook("shared", "hand_contents", "write"),
+                               _hook("shared", "ethereal", "write")],
+    "kk_kurage_bloom": [_hook("shared", "hand_contents", "write")],
+    "kk_watchful_shoal": [_hook("shared", "card_identity", "write")],
+    "kk_coordinated_tide": [_hook("private", "kurage", "read"),
+                            _hook("shared", "ethereal", "read")],
+    "kk_grand_strategist": [_hook("private", "kurage", "read"),
+                            _hook("shared", "aura_reaction", "read"),
+                            _hook("shared", "enemy_count", "read")],
+    "kk_endless_shoal": [_hook("private", "kurage", "read"),
+                         _hook("shared", "hand_contents", "write")],
+    "kk_dawn_tide": [_hook("private", "kurage", "read"),
+                     _hook("shared", "aura_reaction", "write"),
+                     _hook("shared", "enemy_count", "read")],
+    "kk_sangonomiyas_counsel": [_hook("private", "kurage", "read")],
+    # Furina. A Drain or a Repay WRITES the Stage; a Spend USES it.
+    "fs_salons_encore": [_hook("private", "stage", "read"),
+                         _hook("shared", "enemy_count", "read")],
+    "fs_thunderous_applause": [_hook("private", "stage", "read"),
+                               _hook("shared", "enemy_count", "read")],
+    "fs_universal_revelry": [_hook("private", "stage", "read"),
+                             _hook("private", "stage", "write")],
+    "fs_ousia_surge": [_hook("private", "stage", "read"),
+                       _hook("shared", "draw_pile", "use"),
+                       _hook("shared", "hand_contents", "write")],
+    "fs_a_five_century_act": [_hook("private", "stage", "read"),
+                              _hook("shared", "hp_ledger", "write")],
+    "fs_fountain_of_lucine": [_hook("private", "stage", "write")],
+    "fs_critics_darling": [_hook("private", "stage", "read")],
+    "fs_bis": [_hook("private", "stage", "read"),
+               _hook("private", "stage", "write")],
+    "fs_grand_entrance": [_hook("shared", "plays_this_turn", "read"),
+                          _hook("shared", "card_identity", "read"),
+                          _hook("private", "stage", "write"),
+                          _hook("shared", "block_held", "write")],
+    "fs_showstopper": [_hook("private", "stage", "use")],
+    "fs_ensemble_cast": [_hook("private", "stage", "write")],
+    "fs_crescendo": [_hook("private", "stage", "read"),
+                     _hook("shared", "draw_pile", "use"),
+                     _hook("shared", "hand_contents", "write")],
+    "fs_prima_donna": [_hook("private", "stage", "read")],
+    "fs_standing_room_only": [_hook("private", "stage", "read")],
+    "fs_high_stakes": [_hook("private", "stage", "read"),
+                       _hook("shared", "card_identity", "write")],
+    "fs_regina_of_all_waters": [_hook("private", "stage", "write")],
+    "fs_pneuma_tides": [_hook("private", "stage", "write")],
+    "fs_hymn_of_renewal": [_hook("private", "stage", "read")],
+    "fs_the_masquerade": [_hook("private", "stage", "read"),
+                          _hook("shared", "block_held", "write")],
+    "fs_leading_lady": [_hook("private", "stage", "read"),
+                        _hook("shared", "card_identity", "write")],
+    "fs_full_house": [_hook("private", "stage", "use")],
 }
 
 # Powers whose rider fires on a UNIVERSAL VERB -- playing, drawing,
@@ -893,7 +1042,35 @@ COUNT_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "discards_this_turn": [_hook("shared", "discard_pile", "read")],
     "discards_this_card": [_hook("shared", "discard_pile", "read")],
     "salon_members": [_hook("private", "salon", "read")],
+    # --- v4: the prototype surface's tokens ---
+    "enemies_with_bomb": [_hook("private", "bombs", "read"),
+                          _hook("shared", "enemy_count", "read")],
+    "sparks_spent": [_hook("private", "sparks", "read")],
+    "plans_held": [_hook("private", "kurage", "read")],
+    "plans_held_plus_one": [_hook("private", "kurage", "read")],
+    "plans_carried_out_this_combat": [_hook("private", "kurage", "read")],
+    "stings_played_this_turn": [_hook("shared", "plays_this_turn", "read"),
+                                _hook("shared", "card_identity", "read")],
+    "stings_played_this_combat": [_hook("shared", "plays_this_turn", "read"),
+                                  _hook("shared", "card_identity", "read")],
+    # Weak and Vulnerable carry no hook (the `weak` power row): EMPTY.
+    "weak_vuln_stacks_on_target": [],
+    "stage_fanfare": [_hook("private", "stage", "read")],
+    "stage_fanfare_fours": [_hook("private", "stage", "read")],
+    "stage_guests": [_hook("private", "stage", "read")],
+    "stage_spent": [_hook("private", "stage", "read")],
+    "stage_spent_threes": [_hook("private", "stage", "read")],
+    "stage_spent_fours": [_hook("private", "stage", "read")],
+    "stage_drained": [_hook("private", "stage", "read")],
+    "stage_drains": [_hook("private", "stage", "read")],
+    "stage_repaid": [_hook("private", "stage", "read")],
+    "stage_repay_left": [_hook("private", "stage", "read")],
+    "stage_repays_turn": [_hook("private", "stage", "read")],
 }
+
+# Amount WORDS that are not counts: `all` on a spend op means "everything the
+# op's own state holds", and the op's own row already carries that hook.
+AMOUNT_WORDS = frozenset({"all"})
 
 # `if:` predicates. The `_at_least_N` families are matched by prefix, so a
 # new threshold on a known meter is classified and a new METER is not.
@@ -929,6 +1106,13 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "spotlighted_card_played_this_turn": [
         _hook("private", "spotlight", "read"),
         _hook("shared", "plays_this_turn", "read")],
+    # --- v4: the prototype surface ---
+    "bomb_went_off_this_turn": [_hook("private", "bombs", "read")],
+    "bomb_reacted_this_turn": [_hook("private", "bombs", "read"),
+                               _hook("shared", "aura_reaction", "read")],
+    "plan_held": [_hook("private", "kurage", "read")],
+    "stage_drained_this_turn": [_hook("private", "stage", "read")],
+    "stage_none_drained": [_hook("private", "stage", "read")],
 }
 PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
     "encore_at_least_": [_hook("private", "encore", "read")],
@@ -970,6 +1154,12 @@ CARD_FIELD_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "innate": [_hook("shared", "card_timing", "write")],
     "encore_cost": [_hook("private", "encore", "read")],
     "sly": [_hook("private", "conscript_sly", "write")],
+    # v4. Star Turn's printed discount reads the Stage's Fanfare.
+    "cost_reduction_per_fanfare": [_hook("private", "stage", "read"),
+                                   _hook("shared", "card_identity", "write")],
+    # v4. A `plan:` line WRITES the Plan queue (filed on `kurage`); its
+    # effects are walked by `classify_row` like `effects:`.
+    "plan": [_hook("private", "kurage", "write")],
 }
 CARD_FIELDS_NO_HOOK = frozenset({
     "id", "name", "cost", "type", "rarity", "solve", "tempo_band",
@@ -978,8 +1168,7 @@ CARD_FIELDS_NO_HOOK = frozenset({
     # The prototype surface's bookkeeping fields (legacy cleanup stage 6 made
     # it the mod corpus): who owns and wrote the row, its printed text, the
     # retired row it re-authors, whose art it wears, and its co-op flag. None
-    # is a rule the card performs. `plan:` / `plan_dusk:` ARE rules and stay
-    # unclassified until the vocabulary learns them.
+    # is a rule the card performs. `plan:` IS a rule (CARD_FIELD_HOOKS).
     "character", "authored_by", "description", "replaces", "art_of",
     "multiplayer",
 })
@@ -1087,6 +1276,8 @@ def _classify_amount(record: dict, value, where: str) -> None:
                         and value[len("X_plus_"):].isdigit()):
         _apply(record, [_hook("shared", "card_timing", "read")])
         _note_choice(record, "x_alloc")
+        return
+    if value in AMOUNT_WORDS:
         return
     hooks = COUNT_HOOKS.get(value)
     if hooks is None:
@@ -1310,6 +1501,10 @@ def classify_row(row: dict, pool: str, junk_rarity=None) -> dict:
 
     for fx in effect_walk.iter_effects(row.get("effects")):
         _classify_effect(record, fx, junk_rarity)
+    # v4. A Plan line is carried out later, but it is still this card's
+    # printed rule and still its connectivity.
+    for fx in effect_walk.iter_effects(row.get("plan")):
+        _classify_effect(record, fx, junk_rarity)
     # A Sly rider resolves on a DISCARD, not on the play -- still this
     # card's printed rule, and still its connectivity.
     for fx in effect_walk.iter_effects(effect_walk.sly_riders(row)):
@@ -1344,8 +1539,16 @@ def mod_corpus() -> dict[str, list[dict]]:
             if "id" in row:
                 rarity_by_id.setdefault(row["id"], str(row.get("rarity", "")))
 
+    # v4. A `status_<x>` id is synthesized by `tier0.engine.statuses` and
+    # sits on no sheet; it is a Status by TYPE, so it is junk.
+    from tier0.engine import statuses
+
     def junk_rarity(card_id: str):
-        return rarity_by_id.get(card_id)
+        if card_id in rarity_by_id:
+            return rarity_by_id[card_id]
+        if statuses.status_from_card_id(card_id) is not None:
+            return "status"
+        return None
 
     return {name: [classify_row(row, name, junk_rarity) for row in rows]
             for name, rows in sheets.items()}

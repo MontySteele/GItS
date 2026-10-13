@@ -139,6 +139,7 @@ SHEET_FIXTURES: dict[str, dict] = {
     "burst": _row(requires="burst_energy_full"),
     "conscript_sly": _row(effects=[{"op": "conscript", "amount": 1}]),
     "kurage": _row(effects=[{"op": "summon_kurage", "amount": 3}]),
+    "stage": _row(effects=[{"op": "stage_drain", "amount": 3}]),
 }
 # The three canon-side private states cannot be reached from a sheet row --
 # no GItS card channels an Orb. Their fixtures are decompiled sources.
@@ -217,13 +218,9 @@ def test_op_table_covers_the_engine_exactly():
     assert not RETIRED_OPS & set(effects.OPS)
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "the eb118-connectivity-v3 vocabulary was written for the shipped sheets; "
-    "since legacy cleanup stage 6 the mod corpus is the prototype surface, "
-    "whose Plan, Stage and overhaul powers, predicates and count tokens it "
-    "does not know yet. Teaching it is a new VOCAB_VERSION (BACKLOG); strict, "
-    "so this turns red the day the vocabulary covers every row."))
 def test_every_live_sheet_row_classifies():
+    """v4 taught the prototype surface's Plan, Stage and overhaul vocabulary;
+    every mod row classifies, so a new power or token is a red test."""
     for pool, records in ccr.mod_corpus().items():
         bad = [(r["id"], r["unclassified"]) for r in records
                if r["unclassified"]]
@@ -299,7 +296,7 @@ V2_POWER_ROWS = {
     "prevent_exhaust_ward", "feel_no_pain", "dark_embrace", "metallicize"}
 
 
-def test_v3_added_exactly_one_power_row_and_no_vocabulary_entry():
+def test_v3_and_v4_added_no_shared_entry_and_one_private_entry():
     """The machine-checkable form of the relabel-only acceptance check.
 
     A baseline re-run can only move if a table a baseline card reaches
@@ -310,16 +307,23 @@ def test_v3_added_exactly_one_power_row_and_no_vocabulary_entry():
     silently, so the entry sets are pinned here rather than argued in
     prose.
     """
-    assert ccr.VOCAB_VERSION == "eb118-connectivity-v3"
+    assert ccr.VOCAB_VERSION == "eb118-connectivity-v4"
     assert set(ccr.SHARED_STATES) == V2_SHARED_ENTRIES
-    assert set(ccr.PRIVATE_STATES) == V2_PRIVATE_ENTRIES
+    # v4 minted `stage`, the private entry the `stage_*` ops already filed
+    # onto. No shared entry moved, so the shared writer:reader table of a
+    # shipped-sheet reading cannot renumber.
+    assert set(ccr.PRIVATE_STATES) == V2_PRIVATE_ENTRIES | {"stage"}
     # `fanfare_attack_per5` joins the delta on the same argument
     # (2026-09-07): it is the reframe arm's copy of `fanfare_attack_per10` at
     # a halved threshold, exists in NO pre-door sheet -- only in
     # `docs/prototype-surface.yaml`, which no baseline corpus reads -- and its
     # hook row is the per-10 row's, verbatim.
-    assert set(ccr.POWER_HOOKS) - V2_POWER_ROWS == {
-        "bomb_damage_per_rotation", "fanfare_attack_per5"}
+    # v4's power rows are the overhaul arms' own (`ko_`, `kk_`, `fs_`), which
+    # exist only on the prototype surface.
+    added = set(ccr.POWER_HOOKS) - V2_POWER_ROWS
+    assert {"bomb_damage_per_rotation", "fanfare_attack_per5"} <= added
+    assert all(p.startswith(("ko_", "kk_", "fs_")) for p in
+               added - {"bomb_damage_per_rotation", "fanfare_attack_per5"})
     assert ccr.POWER_HOOKS["fanfare_attack_per5"] == \
         ccr.POWER_HOOKS["fanfare_attack_per10"]
     assert not V2_POWER_ROWS - set(ccr.POWER_HOOKS)
@@ -809,3 +813,32 @@ def test_report_completeness_matches_the_corpus_and_carries_no_threshold():
 
 def test_report_is_deterministic():
     assert ccr.render(ccr.build_report()) == ccr.render(ccr.build_report())
+
+
+# --- v4: the prototype surface --------------------------------------------
+
+def test_a_plan_line_is_this_cards_connectivity():
+    """A `plan:` line writes the Plan queue (filed on `kurage`) and its
+    effects are walked like `effects:`."""
+    record = classify(_row(plan=[{"op": "draw", "amount": 1}]))
+    assert record["unclassified"] == []
+    assert ("private", "kurage") in hooks_of(record)
+    assert ("shared", "draw_pile") in hooks_of(record)
+
+
+def test_the_stage_is_a_private_entry_its_ops_reach():
+    record = classify(_row(effects=[{"op": "stage_spend", "amount": 3}]))
+    assert record["unclassified"] == []
+    assert ("private", "stage") in record["uses"]
+
+
+def test_a_synthesized_status_is_junk_by_type():
+    """`status_dazed` sits on no sheet; the corpus resolves it through
+    `tier0.engine.statuses`, as the engine's `token_card` does."""
+    records = {r["id"]: r for recs in ccr.mod_corpus().values()
+               for r in recs}
+    dazed_makers = [r for r in records.values()
+                    if "junk_create" in r["shared_writes"]]
+    assert dazed_makers
+    assert not any("status_dazed" in n for r in records.values()
+                   for n in r["unclassified"])
