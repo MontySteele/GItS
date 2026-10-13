@@ -222,18 +222,12 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "the story event's upgrade count, not the Bomb's growth",
     # THE SPIRAL ABYSS MODE (2026-10-12): Resonance's "draw 1 card" is a run
     # modifier's number; these cards print their own draw, not Resonance's.
-    ("klee-mod/KleeCode/Cards/Kokomi/PrincessOfWatatsumi.cs",
-     "AbyssNumbers.ResonanceDraw", "1"):
-        "the card's own draw, not the Abyss Blessing's",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
      "AbyssNumbers.ResonanceDraw", "1"):
         "the card's own draw, not the Abyss Blessing's",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
      "AbyssNumbers.ResonanceDraw", "1"):
         "the card's own draw, not the Abyss Blessing's",
-    ("klee-mod/KleeCode/Powers/Prototype/KokomiOverhaulPowers.cs",
-     "AbyssNumbers.ResonanceDraw", "1"):
-        "the power's own draw, not the Abyss Blessing's",
     ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs",
      "AbyssNumbers.ResonanceDraw", "1"):
         "the power's own draw, not the Abyss Blessing's",
@@ -275,11 +269,7 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     # now reads "[gold]Energy[/gold]", the coincidence does not arise, and the
     # lint reported the excuse as no longer matching -- which is the whole
     # point of it reporting stale entries.
-    ("klee-mod/KleeCode/Cards/Kokomi/PrincessOfWatatsumi.cs", "FurinaStageLaw.CharlotteLineDraw", "1"):
-        "Furina's Charlotte line draws 1 (the Salon's Tab, 2026-10-05); this face's 'draw 1 card' is its own rule, not Charlotte's",
     ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs", "FurinaStageLaw.CharlotteLineDraw", "1"):
-        "Furina's Charlotte line draws 1 (the Salon's Tab, 2026-10-05); this face's 'draw 1 card' is its own rule, not Charlotte's",
-    ("klee-mod/KleeCode/Powers/Prototype/KokomiOverhaulPowers.cs", "FurinaStageLaw.CharlotteLineDraw", "1"):
         "Furina's Charlotte line draws 1 (the Salon's Tab, 2026-10-05); this face's 'draw 1 card' is its own rule, not Charlotte's",
 }
 

@@ -609,14 +609,14 @@ def roster_handwritten_parity() -> list[str]:
 # models neither events nor relics"; tier05 has modelled both since the
 # relic-content pass -- the sheetless status now rests on tier0's
 # no-passive-accrual law, which bars the Ancients' per-turn shapes.) That is a real answer to "where does
-# this number come from", and it left them with no gate at all -- `+5 Encore
-# per turn` on AllTheWorldsAStage existed in exactly one place in the repo, so
+# this number come from", and it left them with no gate at all -- the per-turn
+# number on Furina's first Ancient existed in exactly one place in the repo, so
 # any edit to it was self-consistent by definition.
 #
 # So they get the other half of the gate, borrowed from lint_constant_parity's
 # UNMIRRORED table: a WITNESS. The pin is not a claim that the number is
-# right -- nothing can make that claim about an Ancient, and PrincessOfWatatsumi
-# says so in its own docstring ("no instrument can tell us it is wrong"). It is
+# right -- nothing can make that claim about an Ancient ("no instrument can
+# tell us it is wrong", as PrincessOfWatatsumi's first docstring put it). It is
 # a claim that the number is what it was when someone last looked. Changing an
 # Ancient now means changing it twice, in the card and here, which is precisely
 # the friction the sheets provide for everything else.
@@ -629,53 +629,50 @@ def roster_handwritten_parity() -> list[str]:
 # Categories are extract_cs's, so the pins and the sheet comparisons read the
 # same C# through the same regexes.
 ANCIENT_WITNESS: dict[str, dict] = {
+    # THE ARCHAIC TOOTH CARDS (the Ancient audit,
+    # review/active/ancient-audit-2026-10-12.md, ruled 2026-10-12: "Otherwise
+    # agreed.- let's fix them all"). Each kit's first Ancient became the
+    # Transcendence of its starter (`gen_klee_cards.TRANSCENDENCE`), Dandelion
+    # Gale's pattern; the sim twins in tier0/content/cards/ancients.yaml.
     "AllTheWorldsAStage": {
-        "why": "Furina's Ancient, the Encore engine (user ruling 2026-07-23, "
-               "act-2 Darv softlock fix). +5 Encore at the start of each turn, "
-               "+2 on the Tome's upgrade. Read at its upgraded numbers, since "
-               "DustyTome.AfterObtained upgrades what it grants. Under the "
-               "Stage arm (R276 hygiene) it Raises 2 Fanfare on the back "
-               "performer instead, +1 upgraded: the second var and delta.",
+        "why": "Furina's Archaic Tooth Ancient, Rising Applause's "
+               "replacement: a Skill, 1 Energy, 8 Block, +3 upgraded; Spend "
+               "all her Fanfare and deal that much Hydro to ALL enemies "
+               "twice (CalculationBase 0, ExtraDamage 1 per Fanfare spent, "
+               "two hits).",
         "cost": [1],
-        "vars": [5, 2],
-        "hits": [],
-        "upgrade_vars": [2, 1],
-        # The Stage arm's var and delta, declared inside `#if
-        # PROTOTYPE_CARDS`. The sim twin (tier0/content/cards/ancients.yaml)
-        # models the SHIPPED card, so `test_eb30m_ancients` compares it
-        # against the pin less these two.
-        "arm_only_vars": [2],
-        "arm_only_upgrade_vars": [1],
+        "vars": [8, 0, 1],
+        "hits": [2],
+        "upgrade_vars": [3],
         "upgrade_cost": [],
-        # The Encore drip is applied by EncorePerTurnPower, not by a
-        # GainEncore call on the card, so this stays empty: the 5 above IS the
-        # drip, carried as the power's PowerAmount.
         "encore": [],
         "fanfare_div": [],
         "fanfare_tip": [],
     },
     "PrincessOfWatatsumi": {
-        "why": "Kokomi's Ancient, the deliberate parallel to Furina's: +3 "
-               "Charge per turn, +1 on upgrade. 3 rather than 5 because Charge "
-               "is banked and never spent, so it compounds against the Kurage "
-               "pulse multiplier instead of adding to a total (its docstring "
-               "carries the argument). Under Kokomi's arm (R276) it pays "
-               "PlanBlock instead: 2 Block and a card per Plan carried out, "
-               "+1 Block on upgrade -- the second var.",
+        "why": "Kokomi's Archaic Tooth Ancient, Kurage's Oath's "
+               "replacement: a two-line Plan Skill, 1 Energy. Gain 9 Block "
+               "(+3) and draw 2 (the CardsVar); or Plan 3 Hydro (+2) to ALL "
+               "enemies five times. The Plan damage is a namespaced "
+               "`KokomiPlan.PlanDamageVar`, which the var regex does not "
+               "read; its upgrade delta it does.",
         "cost": [1],
-        "vars": [3, 2],
+        "vars": [9, 2],
         "hits": [],
-        "upgrade_vars": [1, 1],
+        "upgrade_vars": [3, 2],
+        # The Plan line's +2: `plan:` is prototype surface only, so the sim
+        # row models the now-line and `test_eb30m_ancients` sets this aside.
+        "arm_only_upgrade_vars": [2],
         "upgrade_cost": [],
         "encore": [],
         "fanfare_div": [],
         "fanfare_tip": [],
     },
     "JumpyDumptyMkOmega": {
-        "why": "Klee's Ancient, top of the Jumpy Dumpty family. 12 damage to "
-               "random enemies 3 times, plus a 12-damage Bomb on EVERY enemy; "
-               "+4/+4 on upgrade. Same ruling and the same reason for having "
-               "no sheet row as the other two.",
+        "why": "Klee's Archaic Tooth Ancient, Jumpy Dumpty's replacement "
+               "(Innate, as the starter is). 12 damage to random enemies 3 "
+               "times, plus a 12-damage Bomb on EVERY enemy; +4/+4 on "
+               "upgrade.",
         "cost": [2],
         "vars": [12, 12],
         "hits": [3],
@@ -689,6 +686,8 @@ ANCIENT_WITNESS: dict[str, dict] = {
 
 # POOL COMPLETION (2026-10-01, review/active/pool-completion-2026-10-01.md
 # sec.3): each kit's SECOND Ancient, which bends one of the kit's own rules.
+# Since the Ancient audit (2026-10-12) these are the Dusty Tome's cards: the
+# Tome skips the Tooth cards above.
 # ARM-ONLY: each file is compiled under `PROTOTYPE_CARDS` alone and has NO sim
 # twin in tier0/content/cards/ancients.yaml (the paper: "game-side only, as the
 # first three were"; the rules they bend live in C# alone), so
@@ -699,9 +698,10 @@ ARM_ONLY_ANCIENTS = frozenset((
     "AllFourWinds", "DandelionGale"))
 ANCIENT_WITNESS.update({
     "AlicesMasterpiece": {
-        "why": "Klee's second Ancient (pool completion, 2026-10-01): a Power, "
-               "3 Energy, 2 upgraded; when one of her Bombs goes off it stays "
-               "at half its size. No number on the face but the cost.",
+        "why": "Klee's Dusty Tome Ancient (pool completion, 2026-10-01): a "
+               "Power, 3 Energy, 2 upgraded; when one of her Bombs or Mines "
+               "goes off it stays at half its size. No number on the face "
+               "but the cost.",
         "cost": [3],
         "vars": [],
         "hits": [],
@@ -712,7 +712,7 @@ ANCIENT_WITNESS.update({
         "fanfare_tip": [],
     },
     "DivineStrategy": {
-        "why": "Kokomi's second Ancient (pool completion, 2026-10-01): a "
+        "why": "Kokomi's Dusty Tome Ancient (pool completion, 2026-10-01): a "
                "Power, 2 Energy, 1 upgraded; the turn's first card played on "
                "the Bake-Kurage also does the line above its Plan now.",
         "cost": [2],
@@ -754,9 +754,9 @@ ANCIENT_WITNESS.update({
         "fanfare_tip": [],
     },
     "CenterOfAttention": {
-        "why": "Furina's second Ancient (pool completion, 2026-10-01): a "
-               "Power, 2 Energy, 1 upgraded; the turn's first Spend is free "
-               "and may be chosen on a short bar.",
+        "why": "Furina's Dusty Tome Ancient (pool completion, 2026-10-01): a "
+               "Power, 2 Energy, 1 upgraded; the turn's first Spend N or Spend "
+               "up to N is free (a spend-all never is).",
         "cost": [2],
         "vars": [],
         "hits": [],

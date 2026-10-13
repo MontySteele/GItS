@@ -13,19 +13,14 @@ namespace KleeMod.Tests.Prototype;
 /// KOKOMI PRE-RUN FIXES (2026-10-12), from the Fable round-3 review sec.4:
 /// Treatise names its draw and flashes, the Companion Plan tip says a written
 /// Companion is played (so Strength and Weak count), Tide Wall's face says
-/// when the intent is read, the Casket says when a Plan's Block arrives, and
+/// when the intent is read, the Casket said when a Plan's Block arrives (the
+/// Ancient audit, 2026-10-12, dropped that sentence again), and
 /// Nereid's tip says an early carry-out is single. No number moves. Page
 /// twin: <c>tier0/tests/test_kokomi_prerun_fixes_2026_10_12.py</c>.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiPreRunFixesTests
 {
-    /// <summary>The sentence the Casket face gained, shared with the older
-    /// face tests that pin the whole string.</summary>
-    internal const string CasketTail =
-        " A [gold]Plan[/gold]'s own [gold]Block[/gold] comes at the start of "
-      + "your next turn.";
-
     private static string Face(CardModel card) =>
         ((CustomCardModel)card).Localization!
             .First(r => r.Item1 == "description").Item2;
@@ -94,9 +89,11 @@ public class KokomiPreRunFixesTests
     }
 
     [Fact]
-    public void The_casket_says_when_a_plans_block_arrives()
+    public void The_casket_face_is_one_sentence_again()
     {
-        Assert.EndsWith(CasketTail, new TamakushiCasket().Localization!
-            .First(r => r.Item1 == "description").Item2);
+        // The Ancient audit (ruled 2026-10-12) dropped "A Plan's own Block
+        // comes at the start of your next turn."
+        Assert.DoesNotContain("own [gold]Block[/gold]", new TamakushiCasket()
+            .Localization!.First(r => r.Item1 == "description").Item2);
     }
 }

@@ -332,8 +332,10 @@ public sealed class FountainOfLucinePower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// CENTER OF ATTENTION, Furina's second Ancient: "The first Spend you choose
-/// each turn takes no Fanfare." A free Spend moves nothing, so it is no Spend
+/// CENTER OF ATTENTION, Furina's Dusty Tome Ancient: "The first Spend N or
+/// Spend up to N each turn takes no Fanfare." (the Ancient audit, 2026-10-12:
+/// a spend-all is never free; <c>FurinaStage.SpendAll</c> never claims it).
+/// A free Spend moves nothing, so it is no Spend
 /// (Thunderous Applause and the spent-this-turn count do not see it). The
 /// latch is this power's own round number. Game-side only, like every
 /// Ancient.
@@ -346,8 +348,8 @@ public sealed class CenterOfAttentionPower : PowerModel, ILocalizationProvider
     {
         ("title", "Center of Attention"),
         ("description",
-            "The first [gold]Spend[/gold] you choose each turn takes no "
-          + "[gold]Fanfare[/gold]."),
+            "The first [gold]Spend[/gold] N or [gold]Spend[/gold] up to N "
+          + "each turn takes no [gold]Fanfare[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

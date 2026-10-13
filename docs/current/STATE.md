@@ -88,7 +88,11 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   2026-10-11 on 0.2.4969 ("Overall much improved!"; a fair act-3 death,
   `review/records/klee-user-run-2026-10-11.md`) reworked Alice's Recipe: cost
   3, "Whenever you place a Bomb or Mine, your other Bombs and Mines grow by
-  2 [3]." **Next:** [USER]'s higher-ascension (A3 to A5) runs, which read her
+  2 [3]." Her two Ancients (the Ancient audit,
+  `review/active/ancient-audit-2026-10-12.md`, ruled 2026-10-12: "Otherwise
+  agreed.- let's fix them all"): Alice's Masterpiece ("Bombs or Mines") from
+  Darv's Tome, and Jumpy Dumpty Mk.Omega, now Innate, from Orobas's Archaic
+  Tooth on Jumpy Dumpty. **Next:** [USER]'s higher-ascension (A3 to A5) runs, which read her
   deep scaling.
 - **Kokomi: Prototype, re-founded 2026-10-12.** Brief
   `review/active/kokomi-brief-2026-09-01.md` (sec.2, the rules). A card with
@@ -100,7 +104,7 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   `review/active/kokomi-card-paper-2026-10-12.md`, both ruled) retired the
   Casket's count, Open the Casket and Dusk: the Tamakushi Casket now gains 3
   Block at the start of her turn while a Plan is waiting (the Watatsumi Casket
-  5), after the turn's Block clear and before the waiting Plans are carried
+  3 for each Plan waiting, the Ancient audit), after the turn's Block clear and before the waiting Plans are carried
   out ([USER], 2026-10-12: "For Kokomi - let's have her starter relic apply
   block at the beginning of the turn rather than the end."). Ethereal is the base keyword and a written card is not lost to it.
   Stings and Wards are her generated jellyfish (Ethereal, Exhaust; cost 0
@@ -108,7 +112,10 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   A written Companion is carried out at its printed rate after the
   Bake-Kurage applies Hydro to its target; Gorou's four are her own cards
   with their own Plan lines. Pool 78 (21 / 37 / 20) plus five co-op cards
-  and two Ancients. The build before it is tagged
+  and two Ancients (the Ancient audit, ruled 2026-10-12): Divine Strategy
+  from Darv's Tome, and Princess of Watatsumi from Orobas's Archaic Tooth on
+  Kurage's Oath ("Gain 9 [12] Block. Draw 2 cards. Or plan: Deal 3 [5] Hydro
+  damage to ALL enemies 5 times."). The build before it is tagged
   `kokomi-casket-frozen-2026-10-12`. Three seat rounds and a forced test
   ran on 2026-10-12 (`review/records/kokomi-round-{1,2,3}-2026-10-12.md`,
   `kokomi-growth-test-2026-10-12.md`): 0 wins in 32; act 1 her safest yet;
@@ -171,7 +178,12 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   2026-10-09 playtest trim), its Orobas upgrade The Curtain Never Falls
   (Repay 2; Ancient, never rolled), and two reward
   relics, Opera Glasses and Grand Theater Program; one potion, Bottled
-  Applause (`FurinaRelicPool.cs`, `ArmPotions.cs`). Sim twin
+  Applause (`FurinaRelicPool.cs`, `ArmPotions.cs`). Two Ancients (the
+  Ancient audit, ruled 2026-10-12): Center of Attention from Darv's Tome
+  ("The first Spend N or Spend up to N each turn takes no Fanfare."), and
+  All the World's a Stage from Orobas's Archaic Tooth on Rising Applause
+  ("Gain 8 [11] Block. Spend all your Fanfare and deal that much Hydro
+  damage to ALL enemies twice."). Sim twin
   `tier0/engine/furina_tide.py`. Latest round
   `review/records/furina-pool75-round-2026-10-09.md` (pool 75: 1 win in 7,
   four deaths in act 2 with the Drain half locked; Fable review; picks
