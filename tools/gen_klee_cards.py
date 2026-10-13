@@ -2610,6 +2610,9 @@ VARKA_KINDS = {
     # "Your next Pyro Attack this turn deals 5 additional damage".
     "temp_strength": "TemporaryStrength",
     "next_pyro_attack": "NextPyroAttack",
+    # VARKA TEXT PASS (2026-10-13): Tidal Bulwark, "Deal Hydro damage equal
+    # to your Block, plus 2 [3] for each Hydro Oath." One Hydro hit.
+    "tidal_bulwark": "TidalBulwark",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2639,6 +2642,8 @@ VARKA_KIND_FIELDS = {
     # Pyro paper 2 (2026-10-12).
     "temp_strength": ("amount",),
     "next_pyro_attack": ("base",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("per",),
 }
 #: A field a kind MAY print; absent, the rule's own default holds (Vow of the
 #: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).
@@ -2662,7 +2667,9 @@ VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      # The AoE trim (sec.4): Razor: Awakening at one enemy.
                      "awakening", "kindled_edge",
                      # The combo pass (2026-10-04).
-                     "pyro_strike", "shatter", "deep_freeze"}
+                     "pyro_strike", "shatter", "deep_freeze",
+                     # Varka text pass (2026-10-13).
+                     "tidal_bulwark"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
 VARKA_ALL_KINDS = {"thundering_verdict", "electro_all",
@@ -2694,6 +2701,8 @@ VARKA_KIND_ELEMENTS = {
     # `apply_aura`.
     "pyro_strike": ("pyro",),
     "shatter": ("cryo",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("hydro",),
 }
 #: A kind that makes an element current without a hit of its own
 #: (`VarkaCards.GainPyroOath`'s `CardMakesCurrent`), for the switch tip.
@@ -2714,7 +2723,10 @@ VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
 #: same `{VkHit}` token (the combo pass, 2026-10-04: Shatter's "plus 2 for
 #: each Weak and Vulnerable on the enemy"). The value is the C# var class
 #: (Powers/Prototype/VarkaOath.cs), display only.
-VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
+VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar",
+                              # Varka text pass (2026-10-13): Tidal
+                              # Bulwark's Block plus its Hydro Oath slope.
+                              "tidal_bulwark": "VarkaTidalBulwarkDamageVar"}
 #: A kind whose face prints its second hit's live total, the same `{VkHit}`
 #: token: `VkBase` (if printed) plus `VkPer` per Oath of his current element,
 #: folded against the previewed body with that element carried (text pass

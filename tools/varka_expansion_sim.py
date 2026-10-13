@@ -313,6 +313,12 @@ def _translate(state, fx):
     elif kind == "blazing_charge":
         yield {"op": "damage", "amount": base + per * oath["pyro"],
                "target": "enemy"}
+    elif kind == "tidal_bulwark":
+        # Varka text pass (2026-10-13): one Hydro hit, Block + per x Oath.
+        yield {"op": "damage",
+               "amount": state.player.block + per * oath["hydro"],
+               "target": "enemy"}
+        yield oath_proxy
     elif kind == "thundering_verdict":
         # Element identities: X times (`_est` prices "X" as the bank).
         yield {"op": "damage", "amount": base + per * oath["electro"],
@@ -643,6 +649,9 @@ def _draft_ops(fx):
     if kind == "awakening":
         return [{"op": "damage", "amount": base + amt // 2,
                  "target": "enemy"}]
+    if kind == "tidal_bulwark":
+        # Body Slam's pricing: a deck's typical Block (6), plus one Oath.
+        return [{"op": "damage", "amount": 6 + per, "target": "enemy"}]
     return None
 
 

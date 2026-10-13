@@ -2198,8 +2198,7 @@
       "varka_base": 2
     },
     "proto_vk_tidal_bulwark": {
-      "block": 2,
-      "formula_per": 1
+      "varka_per": 1
     },
     "proto_vk_twin_gales": {
       "innate": true

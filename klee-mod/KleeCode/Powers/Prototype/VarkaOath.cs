@@ -1434,6 +1434,29 @@ public static class VarkaCards
                        VarkaOath.Count(card.Owner?.Creature, Element.Pyro)),
                    Element.Pyro);
 
+    /// <summary>Tidal Bulwark's hit before the damage hooks: his Block, plus
+    /// <paramref name="per"/> for each Hydro Oath. PURE.</summary>
+    public static int TidalBulwarkDamage(int block, decimal per,
+                                         int hydroOath) =>
+        System.Math.Max(0, block) + (int)(per * System.Math.Max(0, hydroOath));
+
+    /// <summary>Tidal Bulwark (Varka text pass, 2026-10-13, [USER]: "Instead
+    /// of saying "Apply hydro", it should say "Deal hydro damage"", ruled
+    /// (a)): "Deal Hydro damage equal to your Block, plus 2 [3] for each Hydro
+    /// Oath." No Block of its own; one Hydro hit, so it reacts with an aura
+    /// already there and credits the Hydro Oath like any Hydro hit. The Block
+    /// and the Oath are read before the hit (its own credit comes after).
+    /// Sim twin: <c>varka_oath</c>'s <c>tidal_bulwark</c> kind.</summary>
+    public static Task TidalBulwark(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        return ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
+                   TidalBulwarkDamage(owner == null ? 0 : (int)owner.Block,
+                       Var(card, "VkPer"), VarkaOath.Count(owner, Element.Hydro)),
+                   Element.Hydro);
+    }
+
     /// <summary>Glacial Edict's stacks: 1, plus 1 for every
     /// <paramref name="per"/> Cryo Oath. PURE.</summary>
     public static int GlacialEdictStacks(int cryoOath, int per) =>
@@ -1887,6 +1910,55 @@ public sealed class VarkaShatterDamageVar : DamageVar
             card.DynamicVars["VkPer"].BaseValue,
             VarkaCards.WeakAndVulnerable(body));
         using (HitElement.Carry(card, Element.Cryo))
+        {
+            base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+        }
+    }
+}
+
+/// <summary>
+/// TIDAL BULWARK'S LIVE TOTAL (Varka text pass, 2026-10-13). Display only,
+/// Shatter's shape: the face's <c>{VkHit}</c> is his Block plus <c>VkPer</c>
+/// for each Hydro Oath, folded through the game's damage hooks against the
+/// body <see cref="FrontFoldedDamageVar"/> picks with Hydro carried, as
+/// <see cref="VarkaCards.TidalBulwark"/> deals it. Emitted by codegen for the
+/// kinds in <c>VARKA_TARGET_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaTidalBulwarkDamageVar : DamageVar
+{
+    /// <summary>The face's token, Shatter's.</summary>
+    public const string Token = "VkHit";
+
+    public VarkaTidalBulwarkDamageVar()
+        : base(Token, 0m, ValueProp.Move)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            BaseValue = 0m;
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        BaseValue = VarkaCards.TidalBulwarkDamage(
+            owner == null ? 0 : (int)owner.Block,
+            card.DynamicVars["VkPer"].BaseValue,
+            VarkaOath.Count(owner, Element.Hydro));
+        if (BaseValue <= 0)
+        {
+            // The play deals nothing here, so no Strength is folded onto it.
+            PreviewValue = 0m;
+            return;
+        }
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        using (HitElement.Carry(card, Element.Hydro))
         {
             base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
         }

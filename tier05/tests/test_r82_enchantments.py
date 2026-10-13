@@ -166,9 +166,7 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
                     # Kokomi's own card since the re-founding (2026-10-12):
                     # its Plan line is "Gain 11 Block".
                     "proto_mi_gorou_inuzaka",
-                    "proto_vk_crosswind",
-                    # Varka last pass (2026-10-12): Gain 6 Block first.
-                    "proto_vk_tidal_bulwark"}
+                    "proto_vk_crosswind"}
     reference = {c.id for c in loader._card_index().values()
                  if c.type == "attack"
                  and c.character in roster.REFERENCE_IDS

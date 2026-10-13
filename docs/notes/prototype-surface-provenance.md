@@ -8186,3 +8186,17 @@ with one text held:
 Pins: `tier0/tests/test_kokomi_round3_alist_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiRound3AListTests.cs`. Untested in game
 until a deploy.
+
+## Varka text pass, 2026-10-13
+
+- `proto_vk_tidal_bulwark`: the user, "'Tidal Bulwark' does a lot. It gives
+  block and it's a better body slam. It's also not using standardized
+  language. Instead of saying "Apply hydro", it should say "Deal hydro
+  damage"", then "Tidal Bulwark - let's do (a)". Now "Deal Hydro damage equal
+  to your Block, plus 2 [3] for each Hydro Oath." The 6 [8] Block is gone and
+  the separate Apply sentence with it: the hit itself carries Hydro (the
+  `tidal_bulwark` kind, `VarkaCards.TidalBulwark`), so it reacts with an aura
+  already there and credits the Hydro Oath like any Hydro hit. The Block and
+  the Oath are read before the hit. The upgrade is the one the row had before
+  the last pass added the Block: 2 [3] per Hydro Oath (cost stays 1). The
+  in-combat line prints the live total (`VarkaTidalBulwarkDamageVar`).

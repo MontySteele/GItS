@@ -4069,16 +4069,17 @@
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
    # The Hydro paper (2026-10-10): Hydro's Body Slam, was a Skill. Varka
-   # last pass (2026-10-12): gains 6 [8] Block first. Provenance, "Varka
-   # last pass, 2026-10-12".
+   # last pass (2026-10-12) gave it 6 [8] Block first. Varka text pass
+   # (2026-10-13), the user: "'Tidal Bulwark' does a lot. It gives block and
+   # it's a better body slam. ... Instead of saying "Apply hydro", it should
+   # say "Deal hydro damage"", then "Tidal Bulwark - let's do (a)": no Block,
+   # and the hit itself is Hydro (it reacts and credits the Hydro Oath, a
+   # `varka` kind like Blazing Charge). The upgrade is the one it had before
+   # the Block came: 2 [3] per Hydro Oath.
    cost: 1, type: attack, rarity: uncommon,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: block, amount: 6},
-             {op: damage, target: enemy, applies_element: false,
-              amount_formula: {base: 0, per: 2, count: hydro_oath,
-                               plus: player_block}},
-             {op: apply_aura, element: hydro, target: enemy}],
-   upgrade: {block: 2, formula_per: 1}}
+   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold], plus {VkPer:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   effects: [{op: varka, kind: tidal_bulwark, target: enemy, per: 2}],
+   upgrade: {varka_per: 1}}
 
 - {id: proto_vk_glacial_edict, name: "Glacial Edict", character: varka,
    authored_by: [claude],
