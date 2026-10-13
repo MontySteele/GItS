@@ -114,7 +114,16 @@ Her existing Companion card (Sesshou Sakura, Inazuma Uncommon) would become hers
 - **No intent control.** A trick that redirects an attack into a Sakura would make Sakura need HP, like Furina's guests and Osty. It's left out.
 - **No cards past 78.** The pool target holds.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "The Yae design sounds very interesting to me, and I really like the idea of adding card enchantments on the publishing side! I do wonder how we keep the Sakura interesting / scaling beyond just "get some free Electro damage each turn", but the direction here makes a lot of sense, as do all three archetypes. That question probably calls for attention during the card design stage. Agreed on the defaults for 1, 2, and 4."
+
+- **Picks 1, 2 and 4, (a).** The Shrine and the Publishing House. Annotations last the combat unless Published. Sakura last 3 turns, and Tenko refreshes them.
+- **Open for the card stage:** how the Sakura scale beyond free Electro damage each turn.
+- **Pick 3, parked.** [USER]: "Ideally I'd like to toss in a nod to Stellar-Conduct somewhere as a callout - perhaps a Rare power that upgrades the Superconduct reaction to also double the damage of the triggering hit ... But that actual idea seems tricky because you'd need to have the power AND a good Cryo partner to make it work, which is limited to just Ayaka in the Inazuma companions list... Maybe an item to come back to if nothing sticks out right now." It returns at the card stage.
+- **Building waits on Varka reaching Balance.**
+
+## For [USER] (ruled above)
 
 1. **Direction.**
    - **(a) Default:** the Shrine and the Publishing House, as above. A Defect-like turret, plus deck editing nobody has done.
