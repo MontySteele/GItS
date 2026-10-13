@@ -27,9 +27,11 @@ link an asset tree into a worktree). Kokomi's and Varka's configs (#9/#10)
 prepare the source before fencing with `source_crop`, `source_scale` and
 `source_pad` (Kokomi's 4900x5700 master is scaled to a quarter; Varka's is
 padded to the 240x280 aspect so the box resize does not stretch him); fence
-coordinates are in the prepared canvas. Their rigs are
-`pck-src/{kokomi,varka}/model/combat.tscn`, which carry the optional
+coordinates are in the prepared canvas. Kokomi's rig is
+`pck-src/kokomi/model/combat.tscn`, which carries the optional
 `cast`, `power` and `idle_low` states beside the four the router requires.
+Varka's layers no longer ship: his scene is drawn from his model since
+2026-10-13 (below).
 
 **Klee's combat scene (`tools/klee_rig/`).** Klee's
 `pck-src/klee/model/combat.tscn` is GENERATED, with the router contract (node
@@ -97,6 +99,33 @@ are cut, so planted blades read as driven in. Varka's pose library is
 ```sh
 .venv/Scripts/python tools/char_render/build.py --char varka --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
 .venv/Scripts/python tools/char_render/pack.py --char varka --renders <scratch dir> --art-root <dir> [--check]
+```
+
+**Varka's scenes (`tools/varka_rig/`, phase B, 2026-10-13).** His
+`pck-src/varka/model/combat.tscn` and `merchant_character.tscn` are GENERATED
+from `tools/varka_rig/varka.yaml` and `tools/char_render/varka_frames.json`,
+Klee's shape: the router contract plus an `ascension` state, the shadow, one
+Sprite2D per clip under `Visuals/Facing/Model`. Each frame is an AtlasTexture
+(region = its rect on its page, margin = its offset and the trimmed
+remainder of the cell) and a state steps the sprite's `texture`. Over the body,
+`%AttackFx` and `%AscensionFx` draw the neutral element layer from the frame
+the manifest names, and `%GroundBurst` (at the blade's point) and
+`%TargetBurst` (mirrored by a negative x scale) play the ground burst from
+the ascension's impact frame. One ShaderMaterial, local to each instance,
+tints all four: `KleeMod.Vfx.ElementTrail` sets its `element` from the
+played card's element (`ElementHitFx.ElementOf`; Anemo when there is none)
+and moves `%TargetBurst` under the target. `CardPlayMotion` sends an
+`Ascension` trigger for Four Winds' Ascension; the router plays `ascension`
+and absorbs the card's own lunge. `build_pck.ps1` copies
+`ImageGen/images/varka/model/frames/*.png` with an `.import` asking for VRAM
+compression (`Write-TextureImport`, the manifest's `texture_import`), and
+switches his rest scene to `varka_rest.png` and his select art to
+`ui/select_closeup.png` when they exist. `char_render/pack.py` is the one
+producer of all of them and of his roster tile (`art_lint.GENERATOR_OWNED`).
+Never hand-edit the scenes:
+
+```sh
+.venv/Scripts/python -m tools.varka_rig gen [--check]           # write / check both scenes (no art)
 ```
 
 **The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for

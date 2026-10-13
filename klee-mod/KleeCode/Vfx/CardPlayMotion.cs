@@ -48,6 +48,27 @@ internal static class CardPlayMotion
     internal const string PowerUpTrigger = "PowerUp";
     internal const string SetOffTrigger = "SetOff";
     internal const string JumpyTrigger = "Jumpy";
+    internal const string AscensionTrigger = "Ascension";
+
+    /// <summary>
+    /// Four Winds' Ascension plays Varka's Ascension clip: he jumps and drives
+    /// one blade into the ground, and the ground burst plays at its point and,
+    /// mirrored, under the target ([USER], 2026-10-13: "let's drop the twirl
+    /// and instead show him jumping up and then driving one blade into the
+    /// ground, with a mirrored ground particle effect on him and the target
+    /// enemy"). Only that card: the visual paper names no other. A scene
+    /// without an `ascension` state lunges as for an attack.
+    /// </summary>
+    internal static bool IsAscensionPlay(CardModel card)
+        => card is ProtoVkFourWindsAscension;
+
+    /// <summary>
+    /// The wait after the Ascension trigger before the card's own play goes
+    /// on. None: its attack command then waits Varka's AttackAnimDelay, which
+    /// is his attack's main impact (0.6 s), so the hit lands just after the
+    /// blade goes in at 0.5 s rather than a cast delay later.
+    /// </summary>
+    internal const float AscensionDelay = 0f;
 
     /// <summary>
     /// A Jumpy Dumpty card plays Klee's Jumpy Dumpty clip, whatever its type:
@@ -100,8 +121,13 @@ internal static class CardPlayMotion
 
         RefreshLowHealth(card);
 
+        // Varka's element layer colours itself from the card being played,
+        // so every play is noted, an Attack's too (its own command lunges).
+        ElementTrail.NotePlay(creature, card, cardPlay!.Target);
+
         var ours = DefinedByThisMod(card);
         var trigger = IsJumpyPlay(card) ? JumpyTrigger
+            : IsAscensionPlay(card) ? AscensionTrigger
             : IsSetOffPlay(card, ours) ? SetOffTrigger
             : TriggerFor(card.Type, ours);
         if (trigger == null) return;
@@ -112,8 +138,8 @@ internal static class CardPlayMotion
             ThrownProjectile.NoteAim(creature, cardPlay!.Target);
         }
         var character = card.Owner!.Character;
-        var delay = trigger == PowerUpTrigger
-            ? character.PowerUpAnimDelay
+        var delay = trigger == PowerUpTrigger ? character.PowerUpAnimDelay
+            : trigger == AscensionTrigger ? AscensionDelay
             : character.CastAnimDelay;
         await CreatureCmd.TriggerAnim(creature, trigger, delay);
     }

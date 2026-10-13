@@ -567,10 +567,9 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/char_icon.png":              "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
-    # Varka (prototype, 2026-09-29): same six surfaces from his own render.
+    # Varka (prototype, 2026-09-29): same six surfaces from his own render,
+    # less the roster tile, which his model art took over (below).
     "ImageGen/images/varka/model/combat_model.png":         "gen_varka_stills.py",
-    "ImageGen/images/varka/ui/select_portrait.png":         "gen_varka_stills.py",
-    "ImageGen/images/varka/ui/select_portrait_locked.png":  "gen_varka_stills.py",
     "ImageGen/images/varka/ui/selection_splash.png":        "gen_varka_stills.py",
     "ImageGen/images/varka/ui/char_icon.png":               "gen_varka_stills.py",
     "ImageGen/images/varka/ui/map_marker.png":              "gen_varka_stills.py",
@@ -619,6 +618,27 @@ GENERATOR_OWNED = {
     # plan.tsv crop of the wish splash and art_process derived the locked one.
     "ImageGen/images/ui/select_portrait.png":               "klee_render/pack.py",
     "ImageGen/images/ui/select_portrait_locked.png":        "klee_render/pack.py",
+    # Varka's model art (phase B, 2026-10-13): his frame sheets, element
+    # layers, ground burst, shadow, rest still, select close-up and roster
+    # tile, rendered from the official model (which never enters the repo)
+    # and packed by one script; tools/char_render/varka_frames.json is the
+    # committed manifest of their cells, pages and anchors.
+    "ImageGen/images/varka/model/frames/varka_idle.png":    "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_idle_low.png": "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_attack.png":  "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_cast.png":    "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_hurt.png":    "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_death.png":   "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_ascension.png": "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_merchant.png": "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_ascension_fx.png": "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_ground_burst.png": "char_render/pack.py",
+    "ImageGen/images/varka/model/frames/varka_shadow.png":  "char_render/pack.py",
+    "ImageGen/images/varka/model/varka_rest.png":           "char_render/pack.py",
+    "ImageGen/images/varka/ui/select_closeup.png":          "char_render/pack.py",
+    "ImageGen/images/varka/ui/select_portrait.png":         "char_render/pack.py",
+    "ImageGen/images/varka/ui/select_portrait_locked.png":  "char_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",

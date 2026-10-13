@@ -92,7 +92,8 @@ internal static class ModdedPlayerDeathSeam
     /// to measure -- a flat portrait with no %AnimationTree at all. One second:
     /// Klee's death clip until 2026-10-12 and still shorter than every death
     /// clip this mod ships (Klee 2.0 since her model frames, Furina 1.2,
-    /// Varka 1.2, Kokomi 1.3), so the fallback can never out-wait a real clip.
+    /// Varka 2.2 since his model frames, Kokomi 1.3), so the fallback can
+    /// never out-wait a real clip.
     /// </summary>
     internal const float FallbackDeathAnimLength = 1.0f;
 
