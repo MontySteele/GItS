@@ -386,7 +386,7 @@ def test_records_without_the_credit_keys_are_not_read_as_zero_credit():
 
 def test_the_writer_emits_the_credit_keys():
     src = CS_TELEMETRY.read_text(encoding="utf-8")
-    for key in ("damage_by_kind", "damage_blocked", "killing_blows",
-                "block_gained_by_turn", "block_gained", "block_given",
-                "mine_detonations"):
+    for key in ("damage_by_kind", "damage_blocked", "damage_absorbed",
+                "killing_blows", "block_gained_by_turn", "block_gained",
+                "block_given", "mine_detonations"):
         assert f'\\"{key}\\":' in src, key

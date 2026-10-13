@@ -159,6 +159,25 @@ public class Round12Tests
         Assert.Contains(
             "$\"[blue]{CompanionOverhaulLaw.ShowerDamage}[/blue]", src);
     }
+
+    [Fact]
+    public void The_shower_card_face_prints_the_same_live_number()
+    {
+        // Dahlia, Sacramental Shower: the face printed a literal 12 while the
+        // badge it places folds Strength and Weak through `ShowerVar`. The
+        // card now prints that var, and its card preview asks the same call.
+        var card = Printed(
+            "Cards/Prototype/Generated/ProtoMcDahliaSacramentalShower.cs");
+        Assert.Contains("deal {Shower:diff()} [gold]Hydro[/gold] damage", card);
+        Assert.DoesNotContain("deal 12 ", card);
+        Assert.Contains("new ShowerVar()", card);
+
+        var hooks = Printed("Powers/Prototype/CompanionOverhaulHooks.cs");
+        Assert.Contains("public override void UpdateCardPreview(", hooks);
+        Assert.Contains(
+            "PreviewValue = (int)SimDamagePipeline.DealerMods(holder, BaseValue);",
+            hooks);
+    }
     // ==================================================================
     // `EB-526` -- "Spotlight every Companion card" and the card made after
     // ==================================================================
