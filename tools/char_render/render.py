@@ -173,6 +173,170 @@ def grip_hand(arm, side, grip_w, rot, pole):
     T.upd()
 
 
+#: HANDS ON THE POMMELS (a blade spec's `rest`: stance B, [USER]
+#: 2026-10-13: "the way he's holding the claymores looks kinda weird, like
+#: they're going through his hands"). The plain grip puts the palm's centre
+#: ON the handle's axis, so on a planted blade the hilt runs through the hand.
+#: A resting hand lies palm-down on top of the pommel instead: the hand
+#: level and pointing out from his shoulder, its palm turned down the blade,
+#: lifted (fit_rest) until no hand vertex is inside the pommel, with
+#: REST_CLEAR to spare, and the fingers draped over its far side.
+REST_LIFTS = tuple(round(0.005 * i, 3) for i in range(25))   # units the palm's centre sits over the pommel top
+REST_CURLS = (50, 42, 34, 26, 18, 10)
+REST_CLEAR = 0.003
+POMMEL_CAP = 0.06        # the tapering cap at a pommel's top (the gem), units
+POMMEL_TIP_R = 0.012     # the cap's point: the footprint a resting palm must clear
+_PALM = {}
+_HAND_IDX = {}
+
+
+def _hand_frame(arm, side):
+    """(hand length h, hinge axis z, palm normal n), armature space. The
+    curl turns a finger about its local Z, so its tip moves across h toward
+    the palm; which way z x h points is the model's convention, measured once
+    per hand (palm_side) and kept in _PALM."""
+    pbs = arm.pose.bones
+    z = pbs[f"中指１.{side}"].matrix.col[2].to_3d().normalized()
+    h = (pbs[f"中指１.{side}"].head - pbs[f"手首.{side}"].head).normalized()
+    return h, z, (z.cross(h) * _PALM.get(side, 1.0)).normalized()
+
+
+def palm_side(arm, side):
+    """Straight, then curled: the middle fingertip's move across the hand
+    fixes the sign of the palm normal."""
+    pbs = arm.pose.bones
+    tip = f"中指先.{side}" if f"中指先.{side}" in pbs else f"中指３.{side}"
+    T.curl(arm, side, 0, 0)
+    t0 = pbs[tip].head.copy()
+    T.curl(arm, side, 80, 0)
+    t1 = pbs[tip].head.copy()
+    _PALM[side] = 1.0
+    _h, _z, n = _hand_frame(arm, side)
+    _PALM[side] = 1.0 if (t1 - t0).dot(n) > 0 else -1.0
+    T.curl(arm, side, 0, 0)
+
+
+def rest_hand(arm, side, top_w, rot, pole, lift):
+    """IK the arm so the palm's centre sits `lift` over the pommel's top
+    (top_w, world), the hand level and pointing out from the shoulder, its
+    palm turned down the blade."""
+    inv = arm.matrix_world.inverted()
+    down = (inv.to_3x3() @ (rot.to_matrix() @ Vector((0, -1, 0)))).normalized()
+    G = inv @ top_w - down * lift
+    target = G.copy()
+    for _ in range(6):
+        T.wrist_to(arm, side, target, pole)
+        pbs = arm.pose.bones
+        # level, and out from his shoulder over the pommel: the whole hand
+        # shows from the front, laid across the pommel's top
+        out = G - pbs[f"腕.{side}"].head
+        level = out - out.dot(down) * down
+        if level.length > 1e-4:
+            T.aim(arm, f"手首.{side}", level.normalized())
+        h, _z, n = _hand_frame(arm, side)
+        a, t = n - n.dot(h) * h, down - down.dot(h) * h
+        if a.length > 1e-6 and t.length > 1e-6:
+            a, t = a.normalized(), t.normalized()
+            T.rotate_world(arm, f"手首.{side}", h, math.degrees(math.atan2(a.cross(t).dot(h), a.dot(t))))
+        pal = (pbs[f"手首.{side}"].head + pbs[f"中指１.{side}"].head) / 2
+        err = G - pal
+        if err.length < 1e-4:
+            break
+        target = target + err
+    T.upd()
+
+
+def hand_clearance(mesh, side, base, top, r):
+    """The deformed hand (outline hull off) against a pommel from `base` to
+    `top` (world) of radius r: the nearest hand vertex's distance from its
+    axis along that span (none may be under r), and how high the hand's
+    lowest vertex over the pommel's footprint sits above its top (the rest)."""
+    import numpy as np
+    if side not in _HAND_IDX:
+        names = {f"手首.{side}"} | {f"{f}{d}.{side}" for f in T.FINGERS + ["親指"] for d in "０１２３"}
+        gi = {g.index for g in mesh.vertex_groups if g.name in names}
+        _HAND_IDX[side] = np.array([v.index for v in mesh.data.vertices
+                                    if any(g.group in gi and g.weight > 0.3 for g in v.groups)], dtype=np.int64)
+    hull = mesh.modifiers.get("outline")
+    if hull:
+        hull.show_viewport = False
+    T.upd()
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = mesh.evaluated_get(dg).to_mesh()
+    assert len(me.vertices) == len(mesh.data.vertices), "the hull is off: one deformed vertex per body vertex"
+    co = np.empty(len(me.vertices) * 3, np.float64)
+    me.vertices.foreach_get("co", co)
+    mesh.evaluated_get(dg).to_mesh_clear()
+    if hull:
+        hull.show_viewport = True
+    T.upd()
+    P = co.reshape(-1, 3)[_HAND_IDX[side]]
+    mw = np.array(mesh.matrix_world)
+    P = P @ mw[:3, :3].T + mw[:3, 3]
+    b, t = np.array(base), np.array(top)
+    ax = t - b
+    span = np.linalg.norm(ax)
+    ax /= span
+    s = (P - b) @ ax
+    d = np.linalg.norm((P - b) - np.outer(s, ax), axis=1)
+    # the pommel's body is a cylinder up to its cap; the cap tapers to a
+    # point (the gem), so over it only the point's own footprint counts
+    on = (s >= 0) & (s <= span - POMMEL_CAP)
+    over = d <= POMMEL_TIP_R
+    return {"min_axis_dist": round(float(d[on].min()), 4) if on.any() else None, "pommel_r": r,
+            "rest_gap": round(float((s[over] - span).min()), 4) if over.any() else None,
+            "hand_verts_on_pommel": int(on.sum())}
+
+
+def pommel_span(spec, at_w, rot, grip):
+    """The pommel's ends in the world for a blade whose local Y `grip` is at
+    at_w: local Y runs from the tip (-) to the pommel (+)."""
+    up = rot.to_matrix() @ Vector((0, 1, 0))
+    return at_w + up * (spec["pommel"][0] - grip), at_w + up * (spec["pommel"][1] - grip)
+
+
+def fit_rest(arm, mesh, side, top_w, rot, pole, grip, curl):
+    """Rest the hand on its pommel: the lowest lift (REST_LIFTS) at which
+    some finger curl (REST_CURLS, most draped first) leaves every hand vertex
+    at least REST_CLEAR outside the pommel. Returns (lift, finger curl)."""
+    spec = CFG["blades"][side]
+    base, top = pommel_span(spec, top_w, rot, grip)
+    if side not in _PALM:
+        palm_side(arm, side)
+    best = None
+    for lift in REST_LIFTS:
+        rest_hand(arm, side, top_w, rot, pole, lift)
+        for c in REST_CURLS:
+            T.curl(arm, side, min(c, curl[0]), curl[1])
+            m = hand_clearance(mesh, side, base, top, spec["pommel_r"])
+            if m["min_axis_dist"] is None or m["min_axis_dist"] >= spec["pommel_r"] + REST_CLEAR:
+                if m["rest_gap"] is None or m["rest_gap"] >= REST_CLEAR:
+                    best = (lift, min(c, curl[0]))
+                    break
+        if best:
+            break
+    if best is None:
+        print("WARN rest: no clear rest for", side)
+        best = (REST_LIFTS[-1], REST_CURLS[-1])
+    rest_hand(arm, side, top_w, rot, pole, best[0])
+    T.curl(arm, side, best[1], curl[1])
+    print(f"REST {side} lift {best[0]} curl {best[1]} palm {_PALM[side]:+.0f}")
+    return best
+
+
+def grip_metrics(arm, mesh, side, ob, spec):
+    """hand_clearance on a placed blade object's pommel."""
+    bw = ob.matrix_world
+    return hand_clearance(mesh, side, bw @ Vector((0, spec["pommel"][0], 0)), bw @ Vector((0, spec["pommel"][1], 0)),
+                          spec["pommel_r"])
+
+
+def rest_metrics(arm, mesh, blade_obs, p):
+    """grip_metrics for every resting hand of pose p ({} when none rests)."""
+    return {side: grip_metrics(arm, mesh, side, blade_obs[side], CFG["blades"][side])
+            for side, b in (p.get("blades") or {}).items() if b.get("rest") and b.get("hand", True)}
+
+
 def capture(root, arm, mesh, p):
     """Resolve a pose to the numbers the renderer interpolates."""
     apply_pose(root, arm, mesh, p)
@@ -181,9 +345,12 @@ def capture(root, arm, mesh, p):
         bl = {"anchor": spec.get("anchor", "上半身2"), "at": Vector(spec["at"]), "rot": blade_frame(spec),
               "hand": bool(spec.get("hand", True)), "pole": Vector(spec.get("pole", (0.0, 0.5, -1.0))),
               # where on the handle the hand closes: the grip, or the pommel to rest on
-              "grip": float(spec.get("grip", CFG["blades"][side]["grip"]))}
+              "grip": float(spec.get("grip", CFG["blades"][side]["grip"])), "rest": bool(spec.get("rest"))}
         blades[side] = bl
-        if bl["hand"]:
+        if bl["hand"] and bl["rest"]:
+            bl["lift"], _c = fit_rest(arm, mesh, side, anchor_point(arm, bl["anchor"]) + bl["at"], bl["rot"],
+                                      bl["pole"], bl["grip"], spec.get("curl", (80, 40)))
+        elif bl["hand"]:
             grip_hand(arm, side, anchor_point(arm, bl["anchor"]) + bl["at"], bl["rot"], bl["pole"])
             T.curl(arm, side, *spec.get("curl", (80, 40)))
     bones = {}
@@ -245,7 +412,11 @@ def set_frame(root, arm, mesh, blade_obs, caps, keys, t):
         r = qRu @ qa.slerp(qb, u)
         place_blade(ob, g, r, ba["grip"] * (1 - u) + bb["grip"] * u)
         if ba["hand"] and bb["hand"]:
-            grip_hand(arm, side, g, r, Ru @ (Ia @ ba["pole"]).lerp(Ib @ bb["pole"], u))
+            pole = Ru @ (Ia @ ba["pole"]).lerp(Ib @ bb["pole"], u)
+            if ba["rest"] and bb["rest"]:
+                rest_hand(arm, side, g, r, pole, ba["lift"] * (1 - u) + bb["lift"] * u)
+            else:
+                grip_hand(arm, side, g, r, pole)
     T.upd()
 
 
@@ -322,8 +493,11 @@ def main():
         w, h, origin, _c = T.frame_camera(cam_ob, T.project(cam_ob, pts), ppu)
         d = os.path.join(args.out, "raw", name)
         os.makedirs(d, exist_ok=True)
+        grip = {}
         for i, t in enumerate(times):
             set_frame(root, arm, mesh, blade_obs, caps, keys, t)
+            if i == 0:
+                grip = rest_metrics(arm, mesh, blade_obs, keys[0][1])
             T.render_to(os.path.join(d, f"f_{i:03d}.png"))
         track = []
         if blade_obs and not args.keys_only:
@@ -338,6 +512,8 @@ def main():
                 "trails": spec.get("trails", []), "bursts": spec.get("bursts", []),
                 "effects": spec.get("effects", []),
                 "substeps": SUBSTEPS, "blades": track}
+        if grip:
+            meta["grip"] = grip
         with open(os.path.join(args.out, f"{name}.json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=1)
         print("CLIP", name, len(times), "frames", (w, h), "origin", origin)
@@ -358,6 +534,7 @@ def main():
                 fobjs.append(prop[2])
         T.reset_camera(cam_ob, args.pitch, cam_h)
         w, h, origin, _c = T.frame_camera(cam_ob, T.project(cam_ob, T.world_box(fobjs)), ppu)
+        grip = rest_metrics(arm, mesh, blade_obs, p)
         T.render_to(os.path.join(args.out, "raw", f"{name}.png"))
         hips = arm.matrix_world @ arm.pose.bones["下半身"].head
         head = arm.matrix_world @ arm.pose.bones["頭"].head      # the neck joint, under the chin
@@ -365,6 +542,8 @@ def main():
                 "origin_px": [round(origin[0], 3), round(origin[1], 3)], "ppu": round(ppu, 4),
                 "hips_px": T.to_px(cam_ob, ppu, hips), "head_px": T.to_px(cam_ob, ppu, head),
                 "rest_height_units": round(rest_h, 5), "pitch": args.pitch, "combat_scale": CH.COMBAT_SCALE}
+        if grip:
+            meta["grip"] = grip
         with open(os.path.join(args.out, f"{name}.json"), "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=1)
         print("STILL", name, (w, h), origin)

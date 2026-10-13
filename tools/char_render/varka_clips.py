@@ -15,6 +15,9 @@ so his right side, .R, is nearest the camera), plus BLADES:
             roll    degrees about the blade (0: the flat faces the viewer)
             hand    False = the blade lies free (planted, laid down)
             pole    the elbow's bend direction (world)
+            rest    True: the hand lies palm-down ON the pommel (stance B's
+                    planted blades; `grip` is then the pommel's top and `at`
+                    where it stands); else the palm centres on the handle
             grip    where on the handle the hand closes (default: the
                     blade's own grip from chars.py; the pommel to rest on)
             curl    (finger, thumb) degrees
@@ -29,7 +32,7 @@ slide them; a spin turns him on the spot (`turned`), and his two blades always
 move as one pair (`pair`).
 
 THE SCALE: the model stands 2.05 units (import 0.08); every offset below is in
-those units, about 1.86x Klee's. His ruled height is 78 in (chars.py).
+those units, about 1.86x Klee's. His ruled height is 82 in (chars.py).
 
 The model is the official Varka pack (观海子, miHoYo); it is read in place from
 the operator's scratch directory and NEVER enters the repo.
@@ -122,9 +125,11 @@ def cloth(swing=0.0, flare=0.0):
     return ops
 
 
-def blade(at, d, pole, anchor=CH, roll=0.0, hand=True, grip=None, curl=(80, 40)):
+def blade(at, d, pole, anchor=CH, roll=0.0, hand=True, grip=None, curl=(80, 40), rest=False):
     b = {"at": tuple(at), "dir": tuple(d), "pole": tuple(pole), "anchor": anchor, "roll": roll,
          "hand": hand, "curl": tuple(curl)}
+    if rest:
+        b["rest"] = True
     if grip is not None:
         b["grip"] = grip
     return b
@@ -582,8 +587,16 @@ ASCENSION = {
 # both claymores planted point-down, one either side, his hands resting on the
 # hilts. Each claymore is nearly his height, so a hand at chest height puts
 # the tip a little into the ground (pack.py cuts it at the ground line).
-B_L = (0.42, -0.10, 1.56)        # grips at his chest; the tips ~0.3 and ~0.1 into the ground
-B_R = (-0.32, -0.18, 1.45)
+#: [USER], 2026-10-13: "the way he's holding the claymores looks kinda weird,
+#: like they're going through his hands". His hands now REST on the pommels,
+#: palm-down (render.py fit_rest: no hand vertex inside a pommel), so each
+#: blade stands with its pommel's top at his hand: about chest height, the
+#: points driven about a quarter of their length into the ground (pack.py
+#: cuts them at the ground line).
+B_L = (0.44, -0.10, 1.46)        # the pommels' tops, from the ground under him
+B_R = (-0.34, -0.18, 1.40)
+POMMEL_TOP = {"L": 0.338, "R": 0.354}        # chars.CHARS["varka"]["blades"][side]["pommel"][1]
+REST_CURL = (50, 20)
 
 
 def regal(breath=0.0, swing=0.0, head_turn=30.0):
@@ -601,9 +614,9 @@ def regal(breath=0.0, swing=0.0, head_turn=30.0):
         + cloth(swing),
         {"真面目": 0.4, "にこり": 0.25},
         blades={"L": blade(add(B_L, (0, 0, -0.004 * (1 - b))), (0.06, 0.02, -1.0), (0.8, 0.4, -0.4),
-                           anchor="ground", curl=(70, 30)),
+                           anchor="ground", curl=REST_CURL, rest=True, grip=POMMEL_TOP["L"]),
                 "R": blade(add(B_R, (0, 0, -0.004 * (1 - b))), (-0.06, -0.02, -1.0), (-0.8, 0.2, -0.4),
-                           anchor="ground", curl=(70, 30))})
+                           anchor="ground", curl=REST_CURL, rest=True, grip=POMMEL_TOP["R"])})
 
 
 MERCHANT = {

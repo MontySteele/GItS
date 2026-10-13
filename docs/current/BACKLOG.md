@@ -15,7 +15,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
-- Re-render Varka at his new 82 in (ruled 2026-10-13, chart proportions; `tools/char_render/chars.py`) and repack; needs a Blender session, do it with Furina's.
 - Moon's Reflection with an empty Exhaust pile does nothing and nothing says so; a seat played it twice for nothing (Kokomi round 4, lane 1).
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; read `cards_drawn_by_turn` in her next round, or check the relic in game.

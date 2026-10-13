@@ -353,6 +353,16 @@ def main(argv=None) -> int:
     manifest["rest"] = {"file": REST_FILES[char], **rrec}
     print("rest      ", rrec)
 
+    # stance B's hands on the pommels (render.py fit_rest), as measured on
+    # the deformed mesh: the merchant loop's first frame and the select still
+    rest_on = {}
+    for name in ("merchant", "select"):
+        g = json.loads((R / f"{name}.json").read_text(encoding="utf-8")).get("grip")
+        if g:
+            rest_on[name] = g
+    if rest_on:
+        manifest["hands_on_pommels"] = rest_on
+
     sel, srec = select_closeup(R)
     writes.append((art / "ui" / "select_closeup.png", sel))
     manifest["select"] = {"file": "select_closeup.png", **srec}

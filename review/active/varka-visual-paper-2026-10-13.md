@@ -61,7 +61,7 @@ R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A 
 
 ## Measured
 
-- **Height.** Standing (`stand`), he is 265.5 px from hair to boot and 270.5 px in full at 1080p. The target is 269.6 (78 in over a 68 in adult, times 235 px). That is 1.13 to 1.15 of the base adults. In stance A his neck sits at 218.8 px against 238.7 standing (the crouch), and the figure with both blades is 255.5 px wide (294.5 in the reviewed take, 473 in the first). Nothing rises over his head: the guard's full height is 249.9 px.
+- **Height** (re-rendered at 82 in, see the last section). Standing (`stand`), he is 279.3 px from hair to boot and 284.3 px in full at 1080p. The target is 283.4 (82 in over a 68 in adult, times 235 px). That is 1.19 to 1.21 of the base adults. In stance A his neck sits at 230.0 px against 251.0 standing (the crouch), and the figure with both blades is 268.5 px wide. At 78 in these were 265.5, 270.5, 218.8, 238.7 and 255.5 px.
 - **Style** (L* p90 / C* p90, opaque pixels at 1080p):
 
 | Figure | L* p90 | C* p90 |
@@ -203,3 +203,17 @@ His old layer-cut rig's four layers no longer ship. The contract fixture went fr
 2. **The motion,** redone after your second look (Round 3), on these sheets: `scratchpad/varka-art/sheets/` (`c_attack_anemo.gif` and `c_ascension_pyro.gif` show it moving).
    - **(a) Default:** go to phase B as is.
    - (b) Change the poses first: the guard, the spin-to-slam, the jump and drive, or the ground burst.
+
+## Re-rendered at 82 in, hands on the pommels (2026-10-13)
+
+[USER], on the heights chart: "Hmm. Ok, let's give Varka the height boost and use these proportion. (a)." His `height_in` in `tools/char_render/chars.py` is now 82, and the interim `ruled_height_in` is gone. Every clip and still was rendered again at the new scale (combat ppu 276.9, was 263.4). Motion, shading, trails, the ground burst and the texture pipeline are unchanged; only the size moved. Standing he is 284.3 px in full at 1080p against a target of 283.4. The frames come to 12 sheets, 92.1 Mpx (47.5 MB of PNG).
+
+[USER], the same evening, on the select screen: "the way he's holding the claymores looks kinda weird, like they're going through his hands." The cause: the plain grip puts the palm's centre on the handle's axis, so on the planted blades of stance B the hilt ran through his palm and fingers. Stance B (the shop loop and the select close-up) now rests his hands ON the pommels:
+- each blade stands with its pommel's top at his hand, about chest height (pommel tops 1.46 and 1.40 units up). The points go in about a quarter of their length, where `pack.py` cuts them at the ground line, so the planted blades look shorter than before;
+- `render.py` (`fit_rest`) lays each hand palm-down on its pommel, level and pointing out from his shoulder, and lifts it until no vertex of the deformed hand is inside the pommel. It then drapes the fingers over the far side;
+- the manifest records the measured result (`hands_on_pommels`). In both the shop's first frame and the select still, no hand vertex is inside either pommel, and the palm sits 0.007 to 0.008 units over the pommel's point;
+- the test `test_his_hands_rest_on_the_pommels_and_never_go_through_them` holds those numbers, and `test_stance_b_plants_both_blades_with_his_hands_on_them` holds the pose.
+
+A closed fist round the handle was tried first and dropped. His gauntlets are thick and the handle is narrow (0.016 to 0.018 units), so no fist that cleared the handle also closed round it. Each one either floated beside the hilt or had its fingers through it.
+
+No combat clip changes grip. The roster tile is unchanged: it shows no hands. Sheets: `scratchpad/varka-art/sheets/` (`e_shop_rest_select_roster.png` shows the new stance B; every other sheet is at 82 in).

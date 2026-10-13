@@ -40,8 +40,8 @@ model sizes, not canon heights; only their ratios are used, anchored on
 Furina = 63 in (scale 63 / 150.5 in per chart cm). That puts Neuvillette at
 76.4 in against his canon 192 cm (75.6 in). Klee, Furina and Kokomi keep their
 ruled heights (the chart is within 3% of each). Varka moves to 82 in (chart
-196.4 cm, a size above the other tall males) at his next re-render; until then
-`ruled_height_in` holds it. GUEST_HEIGHTS_IN holds Furina's guest stars from
+196.4 cm, a size above the other tall males); his clips were re-rendered at
+it the same day. GUEST_HEIGHTS_IN holds Furina's guest stars from
 the same chart.
 """
 from __future__ import annotations
@@ -181,10 +181,7 @@ CHARS = {
     },
     "varka": {
         "pmx": "varka/unpacked/法尔伽.pmx",
-        "height_in": 78.0,          # ruled 2026-10-13: his custom in-game model is tall
-        # 82 in ruled later the same day (PROPORTIONS above); 78 stays live
-        # until his re-render, because the packed manifest was built at 78.
-        "ruled_height_in": 82.0,
+        "height_in": 82.0,          # ruled 2026-10-13 (PROPORTIONS above): a size above the tall males
         "hand_tip": "中指１",
         "face_mats": FACE_MATS,
         "no_line_mats": NO_LINE_MATS,
@@ -196,12 +193,15 @@ CHARS = {
         # claymores, one per hand ([USER], 2026-10-13: a dual wielder). Each
         # blade's local frame as imported: tip along -Y, the flat in the XY
         # plane; `grip` is where the palm closes on the handle, `base` the
-        # blade just past the guard and `tip` its point (measured on the
+        # blade just past the guard and `tip` its point, `pommel` the pommel
+        # from its foot to its top and `pommel_r` its radius (measured on the
         # meshes, 2026-10-13). The longer Varka_Sword leads in the far hand.
         "clips": "varka_clips",
         "blades": {
-            "R": {"pmx": "varka/unpacked/武器.pmx", "grip": 0.08, "base": -0.36, "tip": -1.49},
-            "L": {"pmx": "varka/unpacked/剑.pmx", "grip": 0.06, "base": -0.38, "tip": -1.80},
+            "R": {"pmx": "varka/unpacked/武器.pmx", "grip": 0.08, "base": -0.36, "tip": -1.49,
+                  "pommel": (0.17, 0.354), "pommel_r": 0.038},
+            "L": {"pmx": "varka/unpacked/剑.pmx", "grip": 0.06, "base": -0.38, "tip": -1.80,
+                  "pommel": (0.18, 0.338), "pommel_r": 0.034},
         },
         "hide_mats": set(),
         "camera_height": 1.0,

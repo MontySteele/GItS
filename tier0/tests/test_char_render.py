@@ -6,8 +6,9 @@ can be held: every kit has a stance in the shared pose language, the scale
 follows the law (canon height over an adult, docs/current/LAW.md), the
 overlay shells that broke Klee's protect mask are recognised, Varka's pose
 library is well formed (two claymores, feet planted, impacts marked), the
-trail layer is deterministic and tintable, and the committed manifest was
-packed at his ruled height (review/active/varka-visual-paper-2026-10-13.md).
+trail layer is deterministic and tintable, the committed manifest was
+packed at his ruled height (82 in), and his hands rest on the pommels in
+stance B (review/active/varka-visual-paper-2026-10-13.md).
 """
 from __future__ import annotations
 
@@ -57,12 +58,15 @@ def test_scale_is_canon_height_over_an_adult():
     assert 168 <= chars.body_px(50.0) <= 176
     for name, cfg in chars.CHARS.items():
         px = chars.body_px(cfg["height_in"])
-        assert 200 <= px <= 270, name
+        assert 200 <= px <= 290, name
     # the ppu is solved per model, never shared: packs differ in scale
     assert chars.target_ppu("kokomi", 1.626) != chars.target_ppu("furina", 1.722)
-    # Varka's ruled 78 in: ~270 px, from his model's measured 2.05 unit rest height
-    assert abs(chars.body_px(78.0) - 269.6) < 0.5
-    assert abs(build.combat_ppu("varka") * build.REST_HEIGHT["varka"] * chars.COMBAT_SCALE - 269.6) < 0.5
+    # Varka's ruled 82 in ([USER], 2026-10-13: "let's give Varka the height
+    # boost and use these proportion"): ~283.4 px, from his model's measured
+    # 2.05 unit rest height; the interim ruled_height_in is gone
+    assert chars.CHARS["varka"]["height_in"] == 82.0 and "ruled_height_in" not in chars.CHARS["varka"]
+    assert abs(chars.body_px(82.0) - 283.4) < 0.1
+    assert abs(build.combat_ppu("varka") * build.REST_HEIGHT["varka"] * chars.COMBAT_SCALE - 283.4) < 0.5
 
 
 def test_overlay_shells_are_hidden_and_face_parts_unlined():
@@ -294,6 +298,16 @@ def test_stance_b_plants_both_blades_with_his_hands_on_them():
     b = vc.MERCHANT["keys"][0][1]["blades"]
     for side in ("L", "R"):
         assert b[side]["anchor"] == "ground" and b[side]["hand"] and b[side]["dir"][2] < -0.95
+        # [USER], 2026-10-13: "like they're going through his hands" -- the
+        # hands REST on the pommels: the blade stands with its pommel's top
+        # (chars.py) at his hand, about chest height
+        assert b[side]["rest"] and b[side]["grip"] == chars.CHARS["varka"]["blades"][side]["pommel"][1]
+        assert 1.3 <= b[side]["at"][2] <= 1.5, b[side]["at"]
+    assert vc.SELECT["blades"] == vc.regal(1.0)["blades"], "the select close-up is stance B too"
+    # no other clip rests a hand on a pommel
+    for name, clip in vc.CLIPS.items():
+        if name != "merchant":
+            assert not any(bl.get("rest") for k in clip["keys"] for bl in k[1]["blades"].values()), name
     assert b["L"]["at"][0] > 0 > b["R"]["at"][0], "one either side"
     # the rest site: both blades planted upright behind him, and he sits upright
     for bl in vc.REST["blades"].values():
@@ -429,6 +443,25 @@ def test_the_manifest_was_packed_at_his_ruled_height():
     assert m["texture_import"] == "vram_compressed", "visual paper, pick 1 (a)"
     # the low guard keeps stance A tight: no wider than the reviewed 295 px at 1080p
     assert m["stance_a"]["width_px"] <= 300, m["stance_a"]
+
+
+def test_his_hands_rest_on_the_pommels_and_never_go_through_them():
+    # [USER], 2026-10-13, on the select close-up: "the way he's holding the
+    # claymores looks kinda weird, like they're going through his hands".
+    # render.py measures the deformed hand mesh against each pommel in stance
+    # B (the shop loop's first frame and the select still): no hand vertex
+    # inside the pommel's body (its axis distance at least its radius), and
+    # the palm down on its top, not floating over it.
+    m = json.loads(pack.manifest_path("varka").read_text(encoding="utf-8"))
+    rest = m["hands_on_pommels"]
+    assert set(rest) == {"merchant", "select"}
+    for still, sides in rest.items():
+        assert set(sides) == {"L", "R"}, still
+        for side, g in sides.items():
+            r = chars.CHARS["varka"]["blades"][side]["pommel_r"]
+            assert g["pommel_r"] == r
+            assert g["min_axis_dist"] is None or g["min_axis_dist"] >= r, (still, side, g)
+            assert g["rest_gap"] is not None and 0.0 <= g["rest_gap"] <= 0.05, (still, side, g)
 
 
 def test_tight_box_ignores_the_faint_haze():
