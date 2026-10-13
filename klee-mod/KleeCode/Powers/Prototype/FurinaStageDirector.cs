@@ -234,7 +234,7 @@ public sealed class StageDirector
     }
 
     /// <summary>A guest's act's share-Spend (the Spend paper's pick 2):
-    /// Navia "Spend half your Fanfare (rounded down)" (divisor 2), Freminet
+    /// Navia "Spend a third of your Fanfare (rounded down)" (divisor 3), Freminet
     /// "Spend a quarter" (divisor 4). A share of what is left when it acts,
     /// so two such guests split the bank oldest first. Returns what counts
     /// as spent.</summary>
@@ -729,13 +729,14 @@ public sealed class StageDirector
                 }
                 break;
             case StagePerformer.Navia:
-                // "Spend half your Fanfare (rounded down). Deal that much Geo
+                // "Spend a third of your Fanfare (rounded down). Deal twice that much Geo
                 // damage to a random enemy." (the Spend paper, pick 2).
                 // Nothing spent, nothing dealt.
                 moved = await SpendShare(FurinaStageLaw.NaviaSpendDivisor,
                                          NaviaSpendSource);
                 if (moved > 0 && !_board.Over)
                 {
+                    moved = moved * FurinaStageLaw.NaviaActMultiplier;
                     moved += await FullHouse() + EscoffierBonus();
                     await _board.Damage(who, StageTarget.Random, moved,
                                         Element.Geo);

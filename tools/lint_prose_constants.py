@@ -207,6 +207,10 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # The guest package (2026-10-13): Navia's act now Spends a third.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsBubbleAria.cs",
+     "FurinaStageLaw.NaviaSpendDivisor", "3"):
+        "Bubble Aria's own Spend price, not Navia's divisor",
     # THE CARD TEXT PASS (2026-10-12): Blazing Delight's energy icon
     # `{energyPrefix:energyIcons(1)}` prints the card's own number; the
     # reworded context joined it to these constants. (Treatise's pair left

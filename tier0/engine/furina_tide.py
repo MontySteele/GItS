@@ -120,10 +120,10 @@ GUEST_ELEMENTS = {"wriothesley": "cryo", "clorinde": "electro",
                   "escoffier": "cryo"}
 
 # Guest numbers (paper sec.16; Sigewinne and Neuvillette from sec.7/15).
-CHARLOTTE_ACT_REPAY = 2
-SIGEWINNE_ACT_REPAY = 2      # the pool-40 paper: "Repay 2." (was 3)
-WRIOTHESLEY_ACT = 4
-LYNETTE_ACT = 3              # Anemo to an enemy with an aura
+CHARLOTTE_ACT_REPAY = 3
+SIGEWINNE_ACT_REPAY = 3      # the guest package, 2026-10-13: "Repay 3." [5]
+WRIOTHESLEY_ACT = 5
+LYNETTE_ACT = 5              # Anemo to an enemy with an aura
 CLORINDE_ACT = 6
 CLORINDE_PER_REPAY = 2       # "deal twice that much Electro"
 NEUVILLETTE_HYDRO_BONUS = 2  # line: "Your Hydro damage deals 2 more." [3]
@@ -136,7 +136,7 @@ LYNEY_LINE_DROP = 10         # line: "Your Drain buffer is 10 HP larger."
 LYNEY_ACT_DRAIN = 2          # act: "Drain 2, never past your line. Deal 5
                              # Pyro damage to ALL enemies."
 LYNEY_ACT = 5
-CHEVREUSE_ACT = 4            # act: "Deal 4 damage to a random enemy."
+CHEVREUSE_ACT = 5            # act: "Deal 5 damage to a random enemy."
 CHEVREUSE_LINE_VULNERABLE = 1  # line: each Spend, 1 Vulnerable (random)
 DRAIN_FLOOR = 1              # a Drain cannot take her to 0 HP (2026-10-09)
 LINE_MAX_HP_DIVISOR = 4      # the Drain buffer: entry Max HP // 4
@@ -148,20 +148,21 @@ SHIPPED_LINE = "entry_minus_quarter_max"
 FOUNTAIN_TURNS = 1           # Fountain of Lucine: the next turn
 # The pool to 75 (review/ruled/furina-pool-growth-2026-10-09.md, ruled
 # 2026-10-09). Sec.3: a guest's upgrade raises its line or its act.
-CHARLOTTE_ACT_REPAY_UPGRADED = 4
-SIGEWINNE_ACT_REPAY_UPGRADED = 4
-WRIOTHESLEY_ACT_UPGRADED = 7
+CHARLOTTE_ACT_REPAY_UPGRADED = 5
+SIGEWINNE_ACT_REPAY_UPGRADED = 5
+WRIOTHESLEY_ACT_UPGRADED = 8
 LYNEY_ACT_UPGRADED = 7
-LYNETTE_ACT_UPGRADED = 6
+LYNETTE_ACT_UPGRADED = 8
 CHEVREUSE_LINE_WEAK_UPGRADED = 1   # upgraded line: also 1 Weak
 CLORINDE_ACT_UPGRADED = 9
 # The Spend paper (review/ruled/furina-spend-paper-2026-10-10.md pick 2,
 # ruled 2026-10-10): Freminet's act is "Gain 3 Block. Spend a quarter of your
 # Fanfare (rounded down): gain that much more Block." [6]; his 5 [8] Cryo hit
 # left with it. Navia's act Spends half and deals that much as Geo.
-FREMINET_ACT_BLOCK = 3             # act: gain 3 Block [6], then the quarter
-FREMINET_ACT_BLOCK_UPGRADED = 6
-NAVIA_SPEND_DIVISOR = 2            # Navia's act: half the bank
+FREMINET_ACT_BLOCK = 4             # act: gain 4 Block [7], then the quarter
+FREMINET_ACT_BLOCK_UPGRADED = 7
+NAVIA_SPEND_DIVISOR = 3            # Navia's act: a third of the bank
+NAVIA_ACT_MULTIPLIER = 2           # ... for twice that much Geo damage
 FREMINET_SPEND_DIVISOR = 4         # Freminet's act: a quarter of the bank
 SPEND_UP_TO_EVERY = 4              # "Draw 1 / hit once more for every 4"
 NAVIA_LINE_DISCOUNT = 2            # line: first Spend each turn 2 less [3]
@@ -1361,6 +1362,7 @@ def _act(state, member: str) -> None:
         dmg = spend_share(state, NAVIA_SPEND_DIVISOR)
         living = state.living_enemies
         if dmg > 0 and living and not state.over:
+            dmg *= NAVIA_ACT_MULTIPLIER
             dmg += full_house(state)
             dmg += escoffier_bonus(f)
             _hit(state, state.rng.choice(living), dmg, "geo")
@@ -1866,7 +1868,7 @@ def default_bow(state) -> int:
     for i, member in enumerate(f.stage):
         n = act_amount(member, member in f.stage_up)
         if member == "navia":
-            n = f.fanfare // NAVIA_SPEND_DIVISOR
+            n = f.fanfare // NAVIA_SPEND_DIVISOR * NAVIA_ACT_MULTIPLIER
         elif member == "freminet":
             n += f.fanfare // FREMINET_SPEND_DIVISOR
         elif member == "neuvillette":

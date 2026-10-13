@@ -160,16 +160,15 @@ point." (He went to Common in the diversity pass, as the company's Common
 damage star; a rarity question for later.)
 
 Built from this:
-- **Fountain of Lucine:** "Gain 8 [11] Block. At the start of your next turn,
-  Repay 3."
+- **Fountain of Lucine:** "Gain 8 [11] Block. Next turn, Repay 3."
 - **Leading Lady:** "Gain 2 [3] Strength. Your Attacks deal 1 additional
   damage for each guest on stage."
 - **Escoffier's line:** "Your guests' acts deal 2 [3] more damage." Her act
   stays 4 [6] to ALL.
 - **Lyney's act:** 5 [7] to ALL (from 8 [11]); Drain 2 and the buffer line
   stay.
-- Every other guest is unchanged (pick 2 (b): the rest of the package is not
-  built).
+- The rest of the guest package, as in section 2's table (corrected: [USER]:
+  "Oh, sorry, On Furina 2, I meant a)").
 
 ## For [USER] (ruled above)
 

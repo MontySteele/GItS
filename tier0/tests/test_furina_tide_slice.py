@@ -297,7 +297,7 @@ def test_a_five_century_act_returns_the_past_line_part_at_the_curtain():
     assert plain.player.ftd.ledger["lost_past_line"] == 11
 
 
-def test_sigewinne_blocks_each_repay_and_her_act_repays_two():
+def test_sigewinne_blocks_each_repay_and_her_act_repays_three():
     st = _state()
     f = st.player.ftd
     f.stage = ["sigewinne"]
@@ -305,7 +305,7 @@ def test_sigewinne_blocks_each_repay_and_her_act_repays_two():
     T.repay(st, 3)
     assert st.player.block == 3
     T.act(st, "sigewinne")
-    assert st.player.block == 5 and f.drained == 1
+    assert st.player.block == 6 and f.drained == 0
 
 
 def test_fountain_of_lucine_blocks_now_and_repays_at_the_next_turn_start():
@@ -338,7 +338,7 @@ def test_hold_the_stage_spends_up_to_16_for_1_block_each():
     assert st.player.block == 6 + 13 + 22 and st.player.ftd.fanfare == 4
 
 
-def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_four():
+def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_five():
     st = _state()
     f = st.player.ftd
     f.stage = ["chevreuse"]
@@ -347,7 +347,7 @@ def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_four():
     T.spend_all(st)
     assert st.enemies[0].powers.get("vulnerable") == 2
     T.act(st, "chevreuse")
-    assert st.enemies[0].hp == 200 - 6        # 4, Vulnerable: 6
+    assert st.enemies[0].hp == 200 - 7        # 5, Vulnerable: 7
 
 
 def test_bis_keeps_half_a_spend_all_rounded_down():

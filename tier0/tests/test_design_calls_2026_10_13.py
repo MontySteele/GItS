@@ -26,16 +26,16 @@ def _rows() -> dict[str, dict]:
     return {r["id"]: r for r in proto._rows()}
 
 
-def test_lynettes_line_reads_double_and_needs_no_exception():
+def test_lynettes_line_reads_that_much_again_and_needs_no_exception():
     badges = (POWERS / "FurinaStageBadges.cs").read_text(encoding="utf-8")
-    assert ('"The first time each turn you lose HP to an enemy, gain double "'
+    assert ('"The first time each turn you lose HP to an enemy, gain that much "'
             in badges)
     assert "an enemy makes you lose HP" not in badges
     assert '"LynetteKey"' not in LINT.read_text(encoding="utf-8")
-    # Rendered (Act 3, the base number), golds stripped: under the ceiling.
-    tip = ("The first time each turn you lose HP to an enemy, gain double "
-           "Fanfare. Act: deal 3 Anemo damage to an enemy, one with an aura "
-           "if able.")
+    # Rendered (Act 5, the base number), golds stripped: under the ceiling
+    # (the guest package, 2026-10-13, reworded the line and the act).
+    tip = ("The first time each turn you lose HP to an enemy, gain that much "
+           "Fanfare again. Act: deal 5 Anemo damage to an enemy, aura first.")
     assert len(tip) <= 135
 
 

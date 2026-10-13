@@ -98,10 +98,9 @@ public abstract class StagePerformerBadge : PowerModel
               + "[gold]Cryo[/gold] damage to a random enemy. Act: deal " + act
               + " [gold]Cryo[/gold] damage to a random enemy.",
             StagePerformer.Lynette =>
-                "The first time each turn you lose HP to an enemy, gain double "
-              + "[gold]Fanfare[/gold]. Act: deal " + act
-              + " [gold]Anemo[/gold] damage to an enemy, one with an aura if "
-              + "able.",
+                "The first time each turn you lose HP to an enemy, gain that much "
+              + "[gold]Fanfare[/gold] again. Act: deal " + act
+              + " [gold]Anemo[/gold] damage to an enemy, aura first.",
             StagePerformer.Clorinde =>
                 "Whenever you [gold]Repay[/gold], deal twice that much "
               + "[gold]Electro[/gold] damage to a random enemy. Act: deal "
@@ -138,8 +137,8 @@ public abstract class StagePerformerBadge : PowerModel
             StagePerformer.Navia =>
                 "Your first [gold]Spend[/gold] each turn costs "
               + NaviaDiscount(upgraded) + " less. Act: [gold]Spend[/gold] "
-              + "half your [gold]Fanfare[/gold], rounded down, to deal that "
-              + "much [gold]Geo[/gold] damage to a random enemy.",
+              + "a third of your [gold]Fanfare[/gold] to deal "
+              + "twice that much [gold]Geo[/gold] damage to a random enemy.",
             StagePerformer.Neuvillette =>
                 "Your [gold]Hydro[/gold] damage deals "
               + (upgraded ? FurinaStageLaw.NeuvilletteHydroBonusUpgraded

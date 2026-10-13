@@ -202,7 +202,7 @@ public class FurinaDiversityPassTests : IDisposable
                         kit.Board.Log);
         Assert.Contains("one with an aura if able",
                         Face(new ProtoFsGuestStarLynette()));
-        Assert.Contains("one with an aura if able",
+        Assert.Contains("aura first",
                         StagePerformerBadge.ActText(StagePerformer.Lynette));
     }
 

@@ -299,6 +299,7 @@ MIRRORED: dict[str, object] = {
     # The Spend paper (2026-10-10): Navia's half, Freminet's quarter, and
     # "for every 4".
     "FurinaStageLaw.NaviaSpendDivisor": _stage("NAVIA_SPEND_DIVISOR"),
+    "FurinaStageLaw.NaviaActMultiplier": _stage("NAVIA_ACT_MULTIPLIER"),
     "FurinaStageLaw.FreminetSpendDivisor": _stage("FREMINET_SPEND_DIVISOR"),
     "FurinaStageLaw.SpendUpToEvery": _stage("SPEND_UP_TO_EVERY"),
     "FurinaStageLaw.LineMaxHpDivisor": _stage("LINE_MAX_HP_DIVISOR"),

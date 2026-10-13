@@ -31,22 +31,22 @@ public static class FurinaStageLaw
 
     // ---- the first four guests (sec.16) ------------------------------------------
 
-    /// <summary>Charlotte's act: "Repay 2."</summary>
-    public const int CharlotteActRepay = 2;
+    /// <summary>Charlotte's act: "Repay 3."</summary>
+    public const int CharlotteActRepay = 3;
 
     /// <summary>Charlotte's line: "The first time one of your cards Repays
     /// each turn, draw 1 card." (The Spend round 2, 2026-10-10: her own act
     /// and Salon Solitaire no longer count.)</summary>
     public const int CharlotteLineDraw = 1;
 
-    /// <summary>Wriothesley's act: "Deal 4 Cryo damage to a random enemy."
+    /// <summary>Wriothesley's act: "Deal 5 Cryo damage to a random enemy."
     /// (His line deals the HP drained.)</summary>
-    public const int WriothesleyActDamage = 4;
+    public const int WriothesleyActDamage = 5;
 
-    /// <summary>Lynette's act: "Deal 3 Anemo damage to an enemy with an
+    /// <summary>Lynette's act: "Deal 5 Anemo damage to an enemy with an
     /// aura." (Her line pays the first HP an enemy takes each turn again.)
     /// </summary>
-    public const int LynetteActDamage = 3;
+    public const int LynetteActDamage = 5;
 
     /// <summary>Clorinde's act: "Deal 6 Electro damage to a random enemy."
     /// </summary>
@@ -74,12 +74,12 @@ public static class FurinaStageLaw
     /// <summary>Lyney's act's damage.</summary>
     public const int LyneyActDamage = 5;
 
-    /// <summary>Sigewinne's act: "Repay 2." (Her line gives the Block of
+    /// <summary>Sigewinne's act: "Repay 3." (Her line gives the Block of
     /// every Repay.)</summary>
-    public const int SigewinneActRepay = 2;
+    public const int SigewinneActRepay = 3;
 
-    /// <summary>Chevreuse's act: "Deal 4 damage to a random enemy."</summary>
-    public const int ChevreuseActDamage = 4;
+    /// <summary>Chevreuse's act: "Deal 5 damage to a random enemy."</summary>
+    public const int ChevreuseActDamage = 5;
 
     /// <summary>Chevreuse's line: "Whenever you Spend, apply 1 Vulnerable to
     /// a random enemy."</summary>
@@ -95,20 +95,20 @@ public static class FurinaStageLaw
     // Sec.3's guest rule: a guest's upgrade raises its line or its act,
     // never its cost (the table of seven built guests, and sec.5's four).
 
-    /// <summary>Charlotte upgraded: "Act: Repay 4."</summary>
-    public const int CharlotteActRepayUpgraded = 4;
+    /// <summary>Charlotte upgraded: "Act: Repay 5."</summary>
+    public const int CharlotteActRepayUpgraded = 5;
 
-    /// <summary>Sigewinne upgraded: "Act: Repay 4."</summary>
-    public const int SigewinneActRepayUpgraded = 4;
+    /// <summary>Sigewinne upgraded: "Act: Repay 5."</summary>
+    public const int SigewinneActRepayUpgraded = 5;
 
-    /// <summary>Wriothesley upgraded: "Act: 7."</summary>
-    public const int WriothesleyActDamageUpgraded = 7;
+    /// <summary>Wriothesley upgraded: "Act: 8."</summary>
+    public const int WriothesleyActDamageUpgraded = 8;
 
     /// <summary>Lyney upgraded: "Act: 7."</summary>
     public const int LyneyActDamageUpgraded = 7;
 
-    /// <summary>Lynette upgraded: "Act: 6."</summary>
-    public const int LynetteActDamageUpgraded = 6;
+    /// <summary>Lynette upgraded: "Act: 8."</summary>
+    public const int LynetteActDamageUpgraded = 8;
 
     /// <summary>Chevreuse upgraded: "Line: also 1 Weak."</summary>
     public const int ChevreuseLineWeakUpgraded = 1;
@@ -121,14 +121,18 @@ public static class FurinaStageLaw
     /// 2026-10-10): "Gain 3 Block. Spend a quarter of your Fanfare (rounded
     /// down): gain that much more Block." [6] (His line gives the Block of
     /// every Drain.) The 5 [8] Cryo hit left with this act.</summary>
-    public const int FreminetActBlock = 3;
+    public const int FreminetActBlock = 4;
 
-    public const int FreminetActBlockUpgraded = 6;
+    public const int FreminetActBlockUpgraded = 7;
 
-    /// <summary>Navia's act Spends half your Fanfare, rounded down (the
-    /// Spend paper, pick 2). Mirrors
+    /// <summary>Navia's act Spends a third of your Fanfare, rounded down (the
+    /// guest package, ruled 2026-10-13; a half before). Mirrors
     /// <c>furina_stage.NAVIA_SPEND_DIVISOR</c>.</summary>
-    public const int NaviaSpendDivisor = 2;
+    public const int NaviaSpendDivisor = 3;
+
+    /// <summary>... and deals twice that much Geo damage. Mirrors
+    /// <c>furina_stage.NAVIA_ACT_MULTIPLIER</c>.</summary>
+    public const int NaviaActMultiplier = 2;
 
     /// <summary>Freminet's act Spends a quarter of your Fanfare, rounded down
     /// (the Spend paper, pick 2, ruled 2026-10-10: "I don't like artificial

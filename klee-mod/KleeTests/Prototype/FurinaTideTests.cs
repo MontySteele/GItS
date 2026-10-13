@@ -393,7 +393,7 @@ public class FurinaTideTests
     }
 
     [Fact]
-    public void Sigewinne_blocks_each_repay_and_her_act_repays_two()
+    public void Sigewinne_blocks_each_repay_and_her_act_repays_three()
     {
         var kit = StageKit.Of(StagePerformer.Sigewinne);
         Run(kit.Director.Drain(6));
@@ -402,19 +402,19 @@ public class FurinaTideTests
         kit.Board.Log.Clear();
         StageKit.Run(kit.Director.Act(kit.Stage.Seats[0]));
         // The pool to 75: her line gets a cue of its own before its Block.
-        Assert.Equal(new[] { "heal 2", "cue Sigewinne", "block 2" },
+        Assert.Equal(new[] { "heal 3", "cue Sigewinne", "block 3" },
                      kit.Board.Log);
     }
 
     [Fact]
-    public void Chevreuse_applies_vulnerable_on_every_spend_and_her_act_deals_four()
+    public void Chevreuse_applies_vulnerable_on_every_spend_and_her_act_deals_five()
     {
         var kit = StageKit.With(9, StagePerformer.Chevreuse);
         Run(kit.Director.Spend(3));
         Run(kit.Director.SpendAll());
         Assert.Equal(2, kit.Board.Log.Count(l => l == "vulnerable Random 1"));
         StageKit.Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Contains("damage Chevreuse Random 4 None", kit.Board.Log);
+        Assert.Contains("damage Chevreuse Random 5 None", kit.Board.Log);
     }
 
     [Fact]
@@ -506,7 +506,7 @@ public class FurinaTideTests
             StageKit.Run(kit.Director.SummonGuest(StagePerformer.Charlotte)));
         Assert.Equal(new[] { StagePerformer.Lynette, StagePerformer.Clorinde,
                              StagePerformer.Charlotte }, kit.Company);
-        Assert.Equal(new[] { "damage Wriothesley Random 4 Cryo" },
+        Assert.Equal(new[] { "damage Wriothesley Random 5 Cryo" },
                      kit.Board.Hits.ToArray());
         Assert.Contains("return Wriothesley 0", kit.Board.Log);
     }
@@ -557,13 +557,13 @@ public class FurinaTideTests
         kit.Board.Log.Clear();
         StageKit.Run(kit.Director.EndOfTurn(FurinaStageLaw.SingerRepay));
         // Lynette finds no aura-wearer here (the board decides), then
-        // Charlotte Repays 2, then the Singer Repays 1 (the 2026-10-09
+        // Charlotte Repays 3, then the Singer Repays 1 (the 2026-10-09
         // playtest trim; was 2). The Spend round 2 (2026-10-10): neither is
         // a card's Repay, so Charlotte's line draws nothing.
-        Assert.Equal(new[] { "damage Lynette Aura 3 Anemo", "heal 2",
+        Assert.Equal(new[] { "damage Lynette Aura 5 Anemo", "heal 3",
                              "heal 1" },
                      kit.Board.Log);
-        Assert.Equal(3, kit.Stage.Drained);
+        Assert.Equal(2, kit.Stage.Drained);
     }
 
     [Fact]

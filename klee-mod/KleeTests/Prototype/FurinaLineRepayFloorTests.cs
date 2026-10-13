@@ -92,14 +92,14 @@ public class FurinaLineRepayFloorTests
     {
         var kit = StageKit.Of(StagePerformer.Charlotte);
         Run(kit.Director.Act(kit.Stage.Seats[0]));
-        Assert.Contains("block 2", kit.Board.Log);
+        Assert.Contains("block 3", kit.Board.Log);
         var up = StageKit.Of();
         Run(up.Director.SummonGuest(StagePerformer.Sigewinne, true));
         Run(up.Director.Drain(1));
         up.Board.Log.Clear();
         Run(up.Director.Act(up.Stage.Seats[0]));
-        // Repay 4 returns 1 (her line's Block 1), then the floor's 3.
-        Assert.Equal(new[] { "heal 1", "cue Sigewinne", "block 1", "block 3" },
+        // Repay 5 returns 1 (her line's Block 1), then the floor's 4.
+        Assert.Equal(new[] { "heal 1", "cue Sigewinne", "block 1", "block 4" },
                      up.Board.Log.ToArray());
         Assert.Contains(BlockFloor.Replace("[gold]", "").Replace("[/gold]", ""),
             StagePerformerBadge.ActText(StagePerformer.Charlotte)
@@ -285,21 +285,21 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void Freminets_act_gives_three_block_six_upgraded()
+    public void Freminets_act_gives_four_block_seven_upgraded()
     {
         // The Spend paper (2026-10-10) took the 5 [8] Cryo hit and set the
         // Block to 3 [6], plus a quarter of the bank (none held here).
         var kit = StageKit.Of(StagePerformer.Freminet);
         Run(kit.Director.Act(kit.Stage.Seats[0]));
         Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("damage Freminet"));
-        Assert.Contains("block 3", kit.Board.Log);
+        Assert.Contains("block 4", kit.Board.Log);
         var up = StageKit.Of();
         Run(up.Director.SummonGuest(StagePerformer.Freminet, true));
         Run(up.Director.Act(up.Stage.Seats[0]));
-        Assert.Contains("block 6", up.Board.Log);
-        Assert.Contains("gain 3 [gold]Block[/gold]",
+        Assert.Contains("block 7", up.Board.Log);
+        Assert.Contains("gain 4 [gold]Block[/gold]",
             StagePerformerBadge.ActText(StagePerformer.Freminet));
-        Assert.Contains("gain 6 [gold]Block[/gold]",
+        Assert.Contains("gain 7 [gold]Block[/gold]",
             StagePerformerBadge.ActText(StagePerformer.Freminet, true));
     }
 
