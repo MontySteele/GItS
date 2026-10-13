@@ -368,7 +368,8 @@ def cmd_observe(args) -> int:
         if word:
             print(blindplay_brief.define(
                 observe(state), word,
-                blindplay_shape.bomb_growth(observation(state))).rstrip("\n"))
+                blindplay_shape.bomb_growth(observation(state)),
+                blindplay_brief.screen_powers(state)).rstrip("\n"))
         else:
             print(_page(screen_page(state, full=not _brief_on(args)),
                         args))

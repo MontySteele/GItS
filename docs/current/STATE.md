@@ -79,15 +79,17 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Exhaust, and have a Plan line.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
-- **Latest:** round 3 on 2026-10-13 was 0/5, but Stings were made and
-  played in every run and her mean HP leaving the act-1 boss rose from 22 (round
-  1) to 49 of 80 (`review/active/kokomi-review-r3-2026-10-13.md`). Its A-list is
-  built (#1218): Opening Gambit's and Second Wave's window text, Bubble Ward
-  6 [9], Kurage Canopy makes a Ward per carried-out Plan, and page receipts
-  for hand-full discards and Ethereal Exhausts. Albedo, Solar Isotoma is now
-  2 [3] Geo damage to ALL enemies per Attack played this turn (#1219).
-- **Next:** round 4 (five seats, 0.2.5263) read for Wards made and played;
-  [USER] ruled (b) on review r3.
+- **Latest:** round 4 on 2026-10-13 (five seats, 0.2.5263) was 1/5 won,
+  with three runs at an act-3 boss, and Wards were made in every lane
+  (`review/active/kokomi-review-r4-2026-10-13.md`). Its A-list is built:
+  Moon's Reflection is unplayable while the Exhaust Pile is empty, Opening
+  Gambit's and Second Wave's now-line no longer spends Vigor, the brief's
+  Casket line reads start of turn, and three page fixes (a copy a play adds
+  takes the next number, the difference line names only what moved, and
+  `--define` reads a power on the board). The rider-power sentence did not
+  fit the 125-character power ceiling (BACKLOG).
+- **Next:** [USER]'s picks on review r4; the default is his own finish-line
+  run.
 - **Possible change, parked:** Nereid's Ascension carries her burst's name
   only (no HP scaling, healing or jellyfish refresh, unlike the other three
   kits' bursts). [USER]: "Let's flag this as a possible change on Kokomi and

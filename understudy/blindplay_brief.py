@@ -293,10 +293,37 @@ NOT_DEFINED = ("No definition of \"{word}\" on this screen. Words defined "
                "here: {words}.")
 
 
-def define(text: str, word: str, growth: int | None = None) -> str:
+def screen_powers(state: dict | None) -> list[tuple[str, str]]:
+    """`(printed name, the game's own text)` for every power on you and on
+    each enemy on this screen, for `define` (Kokomi round 4, 2026-10-13: a
+    seat at The Insatiable asked for "Sandpit" while it sat on the board and
+    was told it was not on this screen). The text is the wire's own
+    description, the game's localization, never a sentence of ours."""
+    if not isinstance(state, dict):
+        return []
+    blobs: list = [state.get("player")]
+    battle = state.get("battle") if isinstance(state.get("battle"), dict) else {}
+    blobs += list(battle.get("enemies") or [])
+    out: list[tuple[str, str]] = []
+    for blob in blobs:
+        if not isinstance(blob, dict):
+            continue
+        for s in blob.get("status") or []:
+            if not isinstance(s, dict):
+                continue
+            name = str(s.get("title") or s.get("name") or "").strip()
+            text = str(s.get("description") or "").strip()
+            if name and text and (name, text) not in out:
+                out.append((name, text))
+    return out
+
+
+def define(text: str, word: str, growth: int | None = None,
+           powers: list[tuple[str, str]] | None = None) -> str:
     """Every definition of `word` a full page prints -- its glossary row and
-    its italic glosses, once each -- else the glossary's own row, marked as
-    not on this screen, else the one line saying there is none."""
+    its italic glosses, once each -- else a power on this screen by its own
+    text (`screen_powers`), else the glossary's own row, marked as not on
+    this screen, else the one line saying there is none."""
     want = word.strip().strip('"*').strip().casefold()
     rows: list[str] = []
     words: list[str] = []
@@ -313,6 +340,11 @@ def define(text: str, word: str, growth: int | None = None) -> str:
                 rows.append(row)
     if rows:
         return "\n".join(rows) + "\n"
+    # Kokomi round 4 (2026-10-13): a power standing on this screen.
+    hits = [f"- **{name}** — {body}" for name, body in (powers or [])
+            if name.casefold() == want]
+    if hits:
+        return "\n".join(dict.fromkeys(hits)) + "\n"
     # 2026-10-02: a word this screen does not define is looked up in the
     # glossary's own tables, and marked as off-screen.
     found = glossary_definition(want, growth)
