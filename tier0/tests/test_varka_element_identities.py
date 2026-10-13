@@ -114,8 +114,9 @@ def test_the_paper_numbers(varka):
     assert _fx(verdict.id + "+", "varka")["base"] == 8
     storm = loader.get_card(_vk("violet_storm"))
     assert (storm.type, storm.cost, storm.rarity) == ("attack", 1, "rare")
-    assert _fx(storm.id, "varka")["base"] == 8
-    assert _fx(storm.id + "+", "varka")["base"] == 11
+    # Varka last pass (2026-10-12): 6 [8], was 8 [11].
+    assert _fx(storm.id, "varka")["base"] == 6
+    assert _fx(storm.id + "+", "varka")["base"] == 8
     tide = loader.get_card(_vk("retaliating_tide"))
     assert (tide.type, tide.cost) == ("power", 2)
     assert loader.get_card(tide.id + "+").cost == 1
@@ -188,13 +189,14 @@ def test_chain_lightning_after_short_circuit_is_free(varka):
     assert st.player.energy == 1
 
 
-def test_violet_storm_discards_the_hand_and_hits_per_card(varka):
+def test_violet_storm_hits_per_other_card_and_keeps_the_hand(varka):
+    # Varka last pass (2026-10-12): no discard, 6 per other card.
     st = _state(n=2)
     st.player.hand = [loader.get_card("strike") for _ in range(3)]
     _play(st, _vk("violet_storm"))
-    assert st.player.hand == []
-    assert st.discards_this_turn == 3
-    assert sum(100 - e.hp for e in st.enemies) == 3 * 8
+    assert len(st.player.hand) == 3
+    assert st.discards_this_turn == 0
+    assert sum(100 - e.hp for e in st.enemies) == 3 * 6
     assert V.ledger(st.player).oath["electro"] == 1     # one credit per card
 
 
@@ -225,18 +227,19 @@ def test_thundering_verdict_spends_x(varka):
 # 3. Hydro: Retaliating Tide.
 # ---------------------------------------------------------------------------
 
-def test_retaliating_tide_deals_block_up_to_hydro_oath(varka):
+def test_retaliating_tide_deals_its_block_uncapped(varka):
+    # Varka last pass (2026-10-12): the Hydro Oath cap is gone.
     st = _state(n=1)
     led = V.ledger(st.player)
     st.player.powers[V.RETALIATING_TIDE] = 1
     led.oath["hydro"] = 5
     st.player.block = 12
     V.turn_end(st)
-    assert st.enemies[0].hp == 100 - 5
+    assert st.enemies[0].hp == 100 - 12
     st = _state(n=1)
     led = V.ledger(st.player)
     st.player.powers[V.RETALIATING_TIDE] = 1
-    led.oath["hydro"] = 9
+    led.oath["hydro"] = 0
     st.player.block = 4
     V.turn_end(st)
     assert st.enemies[0].hp == 100 - 4
@@ -505,7 +508,9 @@ def test_the_sequencer_holds_short_circuit_over_a_hand_worth_playing(sim):
     assert pick is hand[0]                      # the stock pick, a Strike
 
 
-def test_the_sequencer_plays_storm_battery_before_violet_storm(sim):
+def test_the_sequencer_leaves_violet_storm_to_the_stock_pilot(sim):
+    # Varka last pass (2026-10-12): Violet Storm no longer discards, so with
+    # no Short Circuit in hand the stock pilot sees the whole hand.
     S = sim
     st = _state(n=2)
     hand = _hand(st, ["status_dazed"] * 3
@@ -517,8 +522,5 @@ def test_the_sequencer_plays_storm_battery_before_violet_storm(sim):
         return next((c for c in s.player.hand
                      if combat.card_playable(s, c)), None)
 
-    # Storm Battery's hits on the full hand, then Violet Storm's on what is
-    # left, beat Violet Storm now: it is hidden and the stock pilot plays
-    # Storm Battery.
     assert S._electro_pick(st, stock) is hand[3]
-    assert _vk("violet_storm") not in seen
+    assert _vk("violet_storm") in seen

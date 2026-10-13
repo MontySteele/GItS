@@ -2100,7 +2100,7 @@
       "damage": 3
     },
     "proto_vk_knights_roll_call": {
-      "choose_knight": true
+      "upgraded_knight": true
     },
     "proto_vk_lisa_lightning_rose": {
       "block": 2,
@@ -2199,6 +2199,7 @@
       "varka_base": 2
     },
     "proto_vk_tidal_bulwark": {
+      "block": 2,
       "formula_per": 1
     },
     "proto_vk_twin_gales": {
@@ -2208,7 +2209,7 @@
       "innate": true
     },
     "proto_vk_violet_storm": {
-      "varka_base": 3
+      "varka_base": 2
     },
     "proto_vk_vow_of_the_blade": {
       "draw": 1

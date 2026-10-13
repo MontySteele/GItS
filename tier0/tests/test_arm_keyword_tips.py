@@ -854,6 +854,8 @@ NO_GLOSSARY_ROW_OWED = {
     # Status cards go to the discard pile, as in the base game (2026-10-03).
     "Discard Pile": "a zone the page prints by name, with its contents",
     "Draw Pile": "a zone the page prints by name, with its count",
+    # The card text pass (2026-10-12): the base golds "Hand", and so do we.
+    "Hand": "a zone the page prints by name, with its contents",
     # The text pass of 2026-10-08 golded the cards a face makes, as the base
     # golds `OVERCLOCK`'s Burn: like Dazed, the page prints each with its own
     # face once it is added.
@@ -1343,7 +1345,7 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
 #: The base game's own keywords and zones: the game tips the keyword, and the
 #: page prints the zone by name.
 GOLD_BASE_GAME = {"Block", "Energy", "Exhaust", "Exhausted", "Exhausts",
-                  "Discard Pile", "Draw Pile", "Exhaust Pile"}
+                  "Discard Pile", "Draw Pile", "Exhaust Pile", "Hand"}
 #: The six elements: the card wears the element's gem, whose keyword carries
 #: the Applies tip and the reaction previews (`KleeCardTooltips.ForCard`).
 GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}

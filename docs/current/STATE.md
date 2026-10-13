@@ -232,7 +232,16 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Varka - wow, ok, sounds like we've outright solved the open issues."): the
   Pyro core is settled, Ember Cleave 9 [11], switch against mono unchanged, a
   card that would change his current element says "(Makes Pyro current)" in
-  combat. Next: [USER]'s playtest, then Balance.
+  combat. The last pass before Balance
+  (`review/active/varka-last-pass-2026-10-12.md`, ruled 2026-10-12: "On
+  Varka - agreed with all defaults on both picks!"): Northwind Avatar's
+  second hit is 8 [12]; twelve always-skipped cards get a floor (Deep Freeze
+  applies Weak too, Tidal Bulwark gains 6 [8] Block first, Knights' Roll Call
+  chooses 1 of 3, Violet Storm no longer discards, Storm Battery Retains,
+  Charge of the Knights deals 8 plus 5 [7] per Knight, Retaliating Tide loses
+  its Hydro Oath cap, and five cost cuts: Crosscurrent 0, Azure Devour 1,
+  Grand Master's Verdict 2, Boreas Unbound 2, Weathervane 1). Next:
+  [USER]'s playtest, then Balance.
 
 ## Elements
 

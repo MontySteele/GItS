@@ -45,7 +45,7 @@ public sealed class ProtoVkKnightsRollCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Knights' Roll Call"),
-        ("description", "Add {IfUpgraded:show:a [gold]Knight[/gold] you choose|a random [gold]Knight[/gold]} to your hand. It costs 0 this turn."),
+        ("description", "Choose 1 of 3 random [gold]Knights[/gold] to add into your [gold]Hand[/gold]. It {IfUpgraded:show:is upgraded and |}costs 0 this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,11 @@ public sealed class ProtoVkKnightsRollCall : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await VarkaRules.AddKnight(choiceContext, Owner, IsUpgraded);
+        await VarkaRules.RollCall(choiceContext, Owner, IsUpgraded);
     }
 
     protected override void OnUpgrade()
     {
-        // choose_knight: the player picks the Knight, read off IsUpgraded when the card is played.
+        // upgraded_knight: the chosen Knight arrives upgraded, read off IsUpgraded when the card is played.
     }
 }

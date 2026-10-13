@@ -600,9 +600,8 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # `casket_double` left with the Casket, the Kokomi
                   # re-founding, 2026-10-12.)
                   # VARKA (the Oath rework, 2026-09-29). Two verbs: Knights'
-                  # Roll Call's "add a Knight to your hand, free this turn"
-                  # (`VarkaRules.AddKnight`; the upgraded pick is a GRID,
-                  # because nine Knights do not fit the choose-a-card screen)
+                  # Roll Call's "choose 1 of 3 Knights, free this turn"
+                  # (`VarkaRules.RollCall`, the choose-a-card screen)
                   # and `varka`, the one verb every Oath rule speaks, one
                   # awaited `VarkaCards.<Kind>` call per `kind:`
                   # (`VARKA_KINDS`).
@@ -2457,10 +2456,10 @@ FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
 FETCH_FROM_DISCARD_FILTERS = {"set_off", "companion"}
 #: Tag Along and Adventure Club: `amount` random Companion cards, free this turn.
 CHOOSE_COMPANION_FIELDS = {"op", "amount", "options"}
-#: VARKA's two verbs (the Oath rework). `add_knight` aims at nobody, and
-#: whether the player CHOOSES the Knight is the card's upgrade
-#: (`choose_knight`), read at play time off `IsUpgraded` the way Alice's
-#: Detonator reads its own.
+#: VARKA's two verbs (the Oath rework). `add_knight` aims at nobody: choose
+#: 1 of 3 random Knights (Varka last pass, 2026-10-12), and whether the pick
+#: arrives upgraded is the card's upgrade (`upgraded_knight`), read at play
+#: time off `IsUpgraded` the way Alice's Detonator reads its own.
 ADD_KNIGHT_FIELDS = {"op"}
 #: `varka`: one kind per Oath rule, each ONE awaited `VarkaCards.<method>`
 #: call (Powers/Prototype/VarkaOath.cs). The kind names the method; its
@@ -3631,8 +3630,7 @@ APPLY_POWERS = {
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
     "vk_retaliating_tide": ("RetaliatingTidePower", None,
         "At the end of your turn, deal damage equal to your "
-        "[gold]Block[/gold], up to your [gold]Hydro[/gold] [gold]Oath[/gold], "
-        "to a random enemy."),
+        "[gold]Block[/gold] to a random enemy."),
     "vk_absolute_zero": ("AbsoluteZeroPower", None,
         "While your [gold]current element[/gold] is [gold]Cryo[/gold], your "
         "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
@@ -4067,7 +4065,7 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        "bonus_vs_bombed", "upgraded_grant",
                        # VARKA (Knights' Roll Call+): the same play-time
                        # IsUpgraded read, one verb over.
-                       "choose_knight",
+                       "upgraded_knight",
                        # Power cost sweep, 2026-09-30: upgraded, the card
                        # installs a different power (the value names it), a
                        # play-time IsUpgraded swap the face states in its own
@@ -6238,8 +6236,19 @@ def plus_block_calc_rider(
     if reader is None or not reader.startswith(prefix):
         return None
     count = reader[len(prefix):]
+    # Varka last pass (2026-10-12): Tidal Bulwark gains its own Block first,
+    # so the preview counts that Block too (its printed number; Dexterity
+    # is not previewed).
+    effects = card.get("effects") or []
+    own_block = ""
+    for e in effects:
+        if e is eff:
+            break
+        if e.get("op") == "block" and e.get("target", "self") == "self":
+            own_block = " + (int)card.DynamicVars.Block.BaseValue"
+            break
     return (int(formula.get("base", 0)), 1, (
-        f"{prefix}(int)card.Owner.Creature.Block"
+        f"{prefix}(int)card.Owner.Creature.Block{own_block}"
         f" + card.DynamicVars.CalculationExtra.BaseValue * {count}"))
 
 
@@ -8148,10 +8157,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # writing card's IsUpgraded when the Plan is carried out.
         or any(e.get("op") == "transform_statuses_in_draw_pile"
                for e in plan_line),
-        # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
-        # play time off `IsUpgraded`; the face carries its own
+        # VARKA (Knights' Roll Call+): the chosen Knight arrives upgraded,
+        # read at play time off `IsUpgraded`; the face carries its own
         # `{IfUpgraded:show:...}` swap.
-        "choose_knight": any(e["op"] == "add_knight" for e in effects),
+        "upgraded_knight": any(e["op"] == "add_knight" for e in effects),
         # AoE trim, 2026-10-03: the per-mode keys (`mode_upgrade_bump`).
         **{key: _mode_upgrade_reason(card, key, deltas[key]) is None
            for key in MODE_UPGRADE_KEYS if key in deltas},
@@ -11864,11 +11873,11 @@ def build_body(
                 f"await VarkaCards.{method}(choiceContext, this, cardPlay);")
 
         elif op == "add_knight":
-            # VARKA's Knights' Roll Call: a random Knight, or with the upgrade
-            # (`choose_knight`) one the player picks, into the hand at 0 this
-            # turn.
+            # VARKA's Knights' Roll Call (Varka last pass, 2026-10-12): choose
+            # 1 of 3 random Knights, into the hand at 0 this turn; with the
+            # upgrade (`upgraded_knight`) the pick arrives upgraded.
             lines.append(
-                "await VarkaRules.AddKnight(choiceContext, Owner, "
+                "await VarkaRules.RollCall(choiceContext, Owner, "
                 "IsUpgraded);")
 
         elif op == "choose_companion":
@@ -15148,12 +15157,12 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("upgraded_grant")
         lines.append("// upgraded_grant: the granted card arrives upgraded, "
                      "read off IsUpgraded when the Power is installed.")
-    if "choose_knight" in deltas:
+    if "upgraded_knight" in deltas:
         # VARKA (Knights' Roll Call+). The same play-time read: nothing to
-        # bump, and the face's own swap says which Knight arrives.
-        done.add("choose_knight")
-        lines.append("// choose_knight: the player picks the Knight, read off "
-                     "IsUpgraded when the card is played.")
+        # bump, and the face's own swap says the Knight arrives upgraded.
+        done.add("upgraded_knight")
+        lines.append("// upgraded_knight: the chosen Knight arrives upgraded, "
+                     "read off IsUpgraded when the card is played.")
     if "varka_upgraded" in deltas:
         # VARKA (the expansion, Pathfinder's Mark+). The same play-time read.
         done.add("varka_upgraded")

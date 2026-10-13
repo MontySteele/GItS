@@ -256,13 +256,13 @@ def test_deep_freeze_applies_cryo_and_doubles_weak_and_vulnerable(varka):
     e.powers["vulnerable"] = 1
     _play(st, _vk("deep_freeze"))
     assert e.aura == "cryo"
-    # Varka payoff fix (2026-10-08): its 1 Vulnerable lands before the
-    # doubling, so 1 + 1 doubles to 4.
-    assert (e.powers["weak"], e.powers["vulnerable"]) == (4, 4)
+    # Varka last pass (2026-10-12): its 1 Weak and 1 Vulnerable land
+    # before the doubling, so 2 + 1 doubles to 6 and 1 + 1 to 4.
+    assert (e.powers["weak"], e.powers["vulnerable"]) == (6, 4)
     assert _led(st).current == "cryo"               # the open Oath
     st = _state()
     _play(st, _vk("deep_freeze"))                   # a clean enemy ends on 2
-    assert "weak" not in st.enemies[0].powers
+    assert st.enemies[0].powers["weak"] == 2
     assert st.enemies[0].powers["vulnerable"] == 2
 
 

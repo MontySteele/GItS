@@ -54,7 +54,7 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Bulwark"),
-        ("description", "Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line
@@ -69,10 +69,11 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, IChar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new BlockVar(6m, ValueProp.Move),
             new CalculationBaseVar(0m),
             new ExtraDamageVar(1m),
             new CalculationExtraVar(2m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => (int)card.Owner.Creature.Block + card.DynamicVars.CalculationExtra.BaseValue * VarkaOath.Count(card.Owner.Creature, Element.Hydro))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => (int)card.Owner.Creature.Block + (int)card.DynamicVars.Block.BaseValue + card.DynamicVars.CalculationExtra.BaseValue * VarkaOath.Count(card.Owner.Creature, Element.Hydro))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -84,6 +85,7 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, IChar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
@@ -95,6 +97,7 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, IChar
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Block.UpgradeValueBy(2m);
         DynamicVars.CalculationExtra.UpgradeValueBy(1m);
     }
 }

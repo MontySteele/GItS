@@ -48,9 +48,9 @@ READINGS TAKEN WHERE THE SPEC LEAVES ROOM (each also in the builder's report):
     card's flat Attack riders (`state.current_attack_bonus`) less Stormward
     Stance's part, because that hit is not Anemo; Strength counts.
   * Change of Guard's choice is the pilot's (`VarkaLedger.guard_choice`),
-    default the element with the most Oath, ties in P/H/E/C order. The
-    upgraded Knights' Roll Call's choice is `VarkaLedger.knight_choice`,
-    default the first pool Knight of the current element, else the first.
+    default the element with the most Oath, ties in P/H/E/C order. Knights'
+    Roll Call's pick of its 3 offered Knights is `order_answers_pick` (Varka
+    last pass, 2026-10-12): the first of the current element, else the first.
   * Gale Sweep and Wall of Gales shield their snapshot: an enemy a sweep's
     earlier Swirl spread over gets its own aura back before its hit.
 
@@ -58,7 +58,8 @@ ELEMENT IDENTITIES (review/active/varka-element-identities-2026-10-01.md,
 ruled 2026-10-01): Electro's discard-and-spend cards and Retaliating Tide.
 What it adds here:
   * KINDS `electro_strike` (Charged Lunge), `electro_all` (Chain Lightning),
-    `violet_storm` (discard the hand, one random Electro hit per card), and
+    `violet_storm` (one random Electro hit per other card in hand; no
+    discard since the Varka last pass, 2026-10-12), and
     Thundering Verdict at X (`state.current_x` hits of the whole row).
   * RETALIATING TIDE (`turn_end`, after Oathbound Aegis): min(Block, Hydro
     Oath) to a random enemy per stack, element-less and unpowered.
@@ -356,7 +357,6 @@ class VarkaLedger:
     banner_paid: bool = False
     # --- the pilot's choices (None: the default reading) ---
     guard_choice: Optional[str] = None
-    knight_choice: Optional[str] = None
     #: Weathervane: an element, or "keep" to leave the current one.
     weathervane_choice: Optional[str] = None
 
@@ -932,11 +932,12 @@ def turn_end(state) -> None:
         _block(state, (sum(led.oath.values()) // 2) * copies,
                "oathbound_aegis")
     # RETALIATING TIDE (element identities), after the Aegis so its Block
-    # counts: "deal damage equal to your Block, up to your Hydro Oath, to a
-    # random enemy". Element-less and unpowered (a Power's), once per stack.
+    # counts: "deal damage equal to your Block to a random enemy" (the Hydro
+    # Oath cap went in the Varka last pass, 2026-10-12). Element-less and
+    # unpowered (a Power's), once per stack.
     from tier0.engine import effects                # late: cycle
     for _ in range(_power(state.player, RETALIATING_TIDE)):
-        amount = min(state.player.block, led.oath["hydro"])
+        amount = state.player.block
         if amount <= 0 or not state.living_enemies:
             break
         e = state.rng.choice(list(state.living_enemies))
@@ -1177,14 +1178,10 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
         for e in list(state.living_enemies):
             _card_hit(state, card, e, fx["base"], "electro")
     elif kind == "violet_storm":
-        # "Discard your hand. Deal 8 Electro damage to a random enemy for
-        # each card discarded." Storm of Steel's discard (the sheet's own
-        # `discard` op, `amount: hand_size`, so Sly and the turn's count see
-        # it), then one hit per card actually discarded.
-        before = state.discards_this_turn
-        effects._op_discard(state, {"op": "discard", "amount": "hand_size"},
-                            card)
-        for _ in range(state.discards_this_turn - before):
+        # "Deal 6 Electro damage to a random enemy for each other card in
+        # your Hand." (Varka last pass, 2026-10-12: no discard.) The card
+        # has left the hand, so the hand is the others.
+        for _ in range(len(p.hand)):
             if not state.living_enemies:
                 break
             _card_hit(state, card,
@@ -1253,7 +1250,7 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
             _card_hit(state, card, aim, fx["base"], None)
     elif kind == "storm_battery":
         # "Deal 2 Electro damage to ALL enemies for each other card in your
-        # hand." The card has left the hand, so the hand is the others.
+        # Hand." The card has left the hand, so the hand is the others.
         n = len(p.hand)
         for e in list(state.living_enemies):
             _card_hit(state, card, e, fx["per"] * n, "electro")
@@ -1434,8 +1431,11 @@ def pool_knight_ids() -> list[str]:
 
 
 def op_add_knight(state, fx: dict, card) -> None:
-    """`effects.OPS['add_knight']`: Knights' Roll Call. A random pool Knight
-    (upgraded, `choose: true`, the pilot's pick) into the hand, 0 this turn.
+    """`effects.OPS['add_knight']`: Knights' Roll Call (Varka last pass,
+    2026-10-12). 3 distinct random pool Knights offered, the pick
+    (`order_answers_pick`) into the hand, 0 this turn; upgraded when the row
+    is (`upgraded: true`, the `upgraded_knight` delta). C#'s
+    `VarkaRules.RollCall`.
     """
     from tier0.content import loader                # late: cycle
     from tier0.engine import effects                # late: cycle
@@ -1445,17 +1445,11 @@ def op_add_knight(state, fx: dict, card) -> None:
     pool = pool_knight_ids()
     if not pool:
         return
-    if fx.get("choose"):
-        pick = led.knight_choice if led.knight_choice in pool else None
-        led.knight_choice = None
-        if pick is None:
-            pick = next((cid for cid in pool
-                         if loader.peek_card(cid).element == led.current),
-                        pool[0])
-    else:
-        pick = state.rng.choice(pool)
-    knight = loader.get_card(pick)
+    offered = state.rng.sample(pool, min(ORDER_ANSWERS_OPTIONS, len(pool)))
+    pick = order_answers_pick(offered, led.current)
+    knight = loader.get_card(pick + ("+" if fx.get("upgraded") else ""))
     knight.free_this_turn = True
+    state.emit("varka_roll_call", card=knight.id, offered=offered)
     effects._add_token(state, knight, "hand")
 
 

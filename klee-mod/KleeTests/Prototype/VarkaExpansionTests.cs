@@ -140,12 +140,16 @@ public class VarkaExpansionTests : IDisposable
         }
         // Varka co-op fixes (2026-10-11): The Order Answers offers 3 of
         // them on the choose-a-card screen, upgraded.
-        var order = Calls("VarkaRules", "ChooseUpgradedKnight");
+        // Varka last pass (2026-10-12): the offer is shared with Knights'
+        // Roll Call (VarkaRules.ChooseKnight); The Order Answers' copy is
+        // upgraded and not free this turn.
+        Assert.Contains("VarkaRules.ChooseKnight",
+                        Calls("VarkaRules", "ChooseUpgradedKnight"));
+        var order = Calls("VarkaRules", "ChooseKnight");
         Assert.Contains("VarkaRules.PoolKnights", order);
         Assert.Contains("CardModel.UpgradeInternal", order);
         Assert.Contains("CardSelectCmd.FromChooseACardScreen", order);
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", order);
-        Assert.DoesNotContain("SetThisTurn", string.Join(",", order));
         Assert.Equal(3, VarkaRules.OrderAnswersOptions);
     }
 

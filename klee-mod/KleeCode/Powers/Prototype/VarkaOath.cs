@@ -1459,11 +1459,11 @@ public static class VarkaCards
     }
 
     /// <summary>
-    /// Violet Storm (element identities sec.3, raised at the ruling): "Discard
-    /// your hand. Deal 8 [11] Electro damage to a random enemy for each card
-    /// discarded." Storm of Steel's discard, the whole hand in one
-    /// <c>CardCmd.Discard</c>; then one hit per card, each at a random
-    /// living enemy (<c>Rng.CombatTargets</c>).
+    /// Violet Storm (Varka last pass, 2026-10-12): "Deal 6 [8] Electro
+    /// damage to a random enemy for each other card in your Hand." No
+    /// discard (it threw away a held Ascension); Storm Battery's count, one
+    /// hit per other card, each at a random living enemy
+    /// (<c>Rng.CombatTargets</c>).
     /// </summary>
     public static async Task VioletStorm(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -1471,10 +1471,8 @@ public static class VarkaCards
         var player = card.Owner;
         var combat = player?.Creature?.CombatState;
         if (player == null || combat == null) return;
-        var hand = PileType.Hand.GetPile(player).Cards.ToList();
-        var discarded = hand.Count;
-        if (discarded > 0) await CardCmd.Discard(choiceContext, hand);
-        for (var i = 0; i < discarded; i++)
+        var others = PileType.Hand.GetPile(player).Cards.Count(c => c != card);
+        for (var i = 0; i < others; i++)
         {
             var living = combat.HittableEnemies.Where(e => e.IsAlive).ToList();
             if (living.Count == 0) break;

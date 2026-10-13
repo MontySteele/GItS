@@ -396,7 +396,7 @@ public sealed class AndriussHowl : VarkaArmRelic
 }
 
 /// <summary>Shop. "At the start of each combat, add a random Knight to your
-/// hand. It costs 0 this turn." Knights' Roll Call's own add
+/// hand. It costs 0 this turn." Knights' Roll Call's old add
 /// (<see cref="VarkaRules.AddKnight"/>, unchosen): a pool Knight, never one
 /// of the four starter-only ones, on his first turn after the draw so the
 /// cost holds.</summary>
@@ -422,6 +422,6 @@ public sealed class FavoniusDutyRoster : VarkaArmRelic
     {
         if (!VarkaArmRelics.FirstTurnOf(this, player)) return;
         Flash();
-        await VarkaRules.AddKnight(choiceContext, player, choose: false);
+        await VarkaRules.AddKnight(choiceContext, player);
     }
 }
