@@ -21,6 +21,11 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi review 2026-10-13** (`kokomi-review-2026-10-13.md`, three picks,
+  defaults (a)): (1) the jellyfish half: the rarity swap and Wake's 3 Stings
+  only, then count Stings next round; (2) the turn-one Oath Plan: leave it;
+  (3) the Ward token: its Plan becomes single-target Weak.
+
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
