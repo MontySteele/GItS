@@ -3708,7 +3708,7 @@
    cost: 1, type: skill, personal_pool: varka,
    # The rebalance (sec.3): Block that scales with reactions. Varka co-op
    # fixes (2026-10-11): 6 [8] + 2 [3], was 4 [6] + 3 [4] (provenance).
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on.",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy the [gold]Hydro[/gold] reacts on.",
    effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 6, per: 2}],
    upgrade: {varka_base: 2, varka_per: 1}}
 
@@ -4300,7 +4300,7 @@
    authored_by: [claude],
    # Varka last pass (2026-10-12): costs 1, was 2.
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, you may make an element you have [gold]Oath[/gold] in your [gold]current element[/gold].",
+   description: "At the start of your turn, you may choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold].",
    effects: [{op: apply_power, power: vk_weathervane, amount: 1, target: self}],
    upgrade: {innate: true}}
 

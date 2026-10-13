@@ -56,7 +56,7 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Barbara: Gleeful Songs"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy the [gold]Hydro[/gold] reacts on.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

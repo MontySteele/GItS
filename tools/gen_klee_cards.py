@@ -3762,8 +3762,8 @@ APPLY_POWERS = {
         "Whenever your [gold]current element[/gold] changes, gain {X} "
         "[gold]Block[/gold]."),
     "vk_weathervane": ("WeathervanePower", None,
-        "At the start of your turn, you may make an element you have "
-        "[gold]Oath[/gold] in your [gold]current element[/gold]."),
+        "At the start of your turn, you may choose an element you have "
+        "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
         "and the element they [gold]Swirl[/gold]."),
