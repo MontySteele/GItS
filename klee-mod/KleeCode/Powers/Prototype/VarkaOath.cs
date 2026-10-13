@@ -1206,7 +1206,7 @@ public static class VarkaCards
             ? (int)amount.BaseValue : 1;
 
     /// <summary>
-    /// Four Winds' Ascension's second hit: "Then deal 3 damage for each Oath
+    /// Four Winds' Ascension's second hit: "Then deal 3 damage per Oath
     /// of your current element, as that element." (The upgrade cuts the cost,
     /// not this number.) The Oath is read after
     /// the Anemo hit, and this hit credits no Oath (sec.4).
@@ -1216,8 +1216,8 @@ public static class VarkaCards
         CurrentElementHit(choiceContext, card, cardPlay, 0m,
                           Var(card, "VkPer"), credit: false);
 
-    /// <summary>Northwind Avatar's second hit: "Then deal 10 [14], plus 2 for
-    /// each Oath, as your current element." It credits like any card.</summary>
+    /// <summary>Northwind Avatar's second hit: "Then deal 8 [12], plus 2 per
+    /// Oath, as your current element." It credits like any card.</summary>
     public static Task AvatarHit(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         CurrentElementHit(choiceContext, card, cardPlay, Var(card, "VkBase"),
@@ -1945,6 +1945,72 @@ public sealed class VarkaHitDamageVar : DamageVar
         using (HitElement.Carry(card, OathElement))
         {
             base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+        }
+    }
+}
+
+/// <summary>
+/// THE SECOND HIT'S LIVE TOTAL ON FOUR WINDS' ASCENSION AND NORTHWIND AVATAR
+/// (text pass 2026-10-13, [USER]: "Currently the second line doesn't actually
+/// say how much it's going to hit for"). Display only, Shatter's shape: the
+/// face's <c>{VkHit}</c> is <c>VkBase</c> (0 on a card that prints none) plus
+/// <c>VkPer</c> for each Oath of his current element, folded through the
+/// game's damage hooks against the body <see cref="FrontFoldedDamageVar"/>
+/// picks (the aimed enemy, else the front one) with the current element
+/// carried, as <see cref="VarkaCards.AscensionHit"/> and
+/// <see cref="VarkaCards.AvatarHit"/> deal it. With no current element, or a
+/// total of 0, the play deals nothing and the face prints 0. Emitted by
+/// codegen for the kinds in <c>VARKA_CURRENT_HIT_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaCurrentElementHitVar : DamageVar
+{
+    /// <summary>The face's token, Thundering Verdict's and Shatter's.</summary>
+    public const string Token = "VkHit";
+
+    public VarkaCurrentElementHitVar()
+        : base(Token, 0m, ValueProp.Move)
+    {
+    }
+
+    /// <summary>The second hit before the hooks, as
+    /// <c>VarkaCards.CurrentElementHit</c> computes it: 0 with no current
+    /// element (the play skips the hit). PURE.</summary>
+    public static int Raw(decimal baseDamage, decimal per, Element current,
+                          int oath) =>
+        current == Element.None
+            ? 0
+            : Math.Max(0, VarkaCards.CurrentElementDamage(baseDamage, per, oath));
+
+    private static decimal BaseOf(CardModel card) =>
+        card.DynamicVars.TryGetValue("VkBase", out var v) ? v.BaseValue : 0m;
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            BaseValue = VarkaCards.CurrentElementDamage(
+                BaseOf(card), card.DynamicVars["VkPer"].BaseValue, 0);
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        var element = VarkaOath.Current(owner);
+        BaseValue = Raw(BaseOf(card), card.DynamicVars["VkPer"].BaseValue,
+                        element, VarkaOath.CurrentOath(owner));
+        if (BaseValue <= 0)
+        {
+            // The play deals nothing here, so no Strength is folded onto it.
+            PreviewValue = 0m;
+            return;
+        }
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        using (HitElement.Carry(card, element))
+        {
+            base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
         }
     }
 }

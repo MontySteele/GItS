@@ -3586,7 +3586,7 @@
    # pile. Starter ruling 2026-10-03; upgrade cost 2 to 1 since the combo
    # pass. Provenance note, "Varka review, 2026-10-12" (no `dusty_tome`).
    cost: 2, type: attack, rarity: basic, retain: true,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {cost: -1}}
@@ -3987,7 +3987,7 @@
    # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
    # Varka last pass (2026-10-12), pick 1: the second hit 8 [12].
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: avatar_hit, base: 8, per: 2}],
    upgrade: {damage: 4, varka_base: 4}}
