@@ -15767,8 +15767,16 @@ def varka_switch_face_arg(card: dict, profile: "CharacterProfile"
 #: So the starter row carries the mark and names its Ancient. The vanilla
 #: Dusty Tome skips every card in that map, which is what keeps the Tome on
 #: All Four Winds. Row id -> the hand-written Ancient's class.
+#: The Ancient audit (review/active/ancient-audit-2026-10-12.md, ruled
+#: 2026-10-12: "Otherwise agreed.- let's fix them all") wires every kit's
+#: Tooth card the same way, and each kit's Tome then draws its other Ancient.
 TRANSCENDENCE = {
     "proto_vk_windbound_execution": "global::KleeMod.Cards.Varka.DandelionGale",
+    "proto_ko_jumpy_dumpty": "global::KleeMod.Cards.JumpyDumptyMkOmega",
+    "proto_kk_kurages_oath":
+        "global::KleeMod.Cards.Kokomi.PrincessOfWatatsumi",
+    "proto_fs_standing_ovation":
+        "global::KleeMod.Cards.Furina.AllTheWorldsAStage",
 }
 
 

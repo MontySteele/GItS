@@ -28,9 +28,12 @@ public class Wave3Fixes20260926Tests
     public void Jumpy_dumpty_mk_omega_drops_the_burst_keyword_under_the_arm()
     {
         // BaseLib assigns the custom keywords' values at registration, so
-        // headless they are all one value: the pin is the count.
+        // headless they are all one value: the pin is the count. Innate
+        // since the Ancient audit (2026-10-12): it replaces the Innate
+        // Jumpy Dumpty.
         var arm = new JumpyDumptyMkOmega().CanonicalKeywords.ToList();
-        Assert.Equal(new[] { KleeKeywords.AppliesPyro }, arm);
+        Assert.Equal(new[] { MegaCrit.Sts2.Core.Entities.Cards.CardKeyword.Innate,
+                             KleeKeywords.AppliesPyro }, arm);
     }
 
     [Fact]

@@ -16,23 +16,32 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Klee's Ancient-rarity card, the top of the Jumpy Dumpty family
-/// (basic -> Mk.III -> this; Mk.II under the old shipped kits). Dusty Tome is
-/// its only door: reward, transform and shop generation all filter
-/// CardRarity.Ancient upstream (decompiled
-/// CardFactory), so membership in RosterAncientCards.Klee does not make it
-/// rollable. DustyTome.AfterObtained upgrades the grant, so the card is
-/// designed to be READ at its upgraded numbers -- the base line exists for
-/// smith-less acquisition paths (e.g. a future transform-to-ancient effect).
+/// Klee's Archaic Tooth Ancient, the top of the Jumpy Dumpty family (the
+/// Ancient audit, review/active/ancient-audit-2026-10-12.md, ruled
+/// 2026-10-12: "Otherwise agreed.- let's fix them all"). Orobas's Archaic
+/// Tooth turns her starter Jumpy Dumpty into it, as it turns Bash into Break,
+/// and it is Innate because the card it replaces is. Its text is otherwise
+/// the one it had as her Dusty Tome card.
 ///
-/// User ruling 2026-07-23 (act-2 Darv softlock fix): "an upscaled Jumpty
-/// Dumpty ... scaled to the rest of the Ancient rewards". Hand-written and
-/// outside the ratified sheets: the sim models neither events nor relics,
-/// so Ancient cards are game-side-only content (DECISIONS entry 2026-07-23).
+/// THE DOOR: <c>ProtoKoJumpyDumpty</c> implements BaseLib's
+/// <c>ITranscendenceCard</c> and names this card
+/// (<c>gen_klee_cards.TRANSCENDENCE</c>, Dandelion Gale's pattern). BaseLib
+/// adds the pair to <c>ArchaicTooth.TranscendenceUpgrades</c>, and the
+/// vanilla Dusty Tome skips every card in that map, so Klee's Tome now yields
+/// <see cref="AlicesMasterpiece"/>. Reward, transform and shop generation
+/// filter CardRarity.Ancient upstream, so membership in
+/// <c>RosterAncientCards.Klee</c> does not make it rollable; the membership
+/// is what resolves its <c>CardModel.Pool</c> to hers.
+///
+/// First made 2026-07-23 (act-2 Darv softlock fix): "an upscaled Jumpty
+/// Dumpty ... scaled to the rest of the Ancient rewards". Hand-written;
+/// numbers witnessed by <c>tools/lint_handwritten_parity.ANCIENT_WITNESS</c>,
+/// sim twin <c>jumpy_dumpty_mk_omega</c> in
+/// <c>tier0/content/cards/ancients.yaml</c>.
 ///
 /// It places the Klee overhaul's Bomb (a plain <see cref="ProtoBombPower"/>
 /// charge of the same size on every enemy), which never goes off by itself
-/// (rule 7). R276 hygiene; its shipped Bomb went with the shipped kits.
+/// (rule 7).
 /// </summary>
 public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard
 {
@@ -42,8 +51,10 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard
     /// <summary>Applies Pyro alone: Klee has no Burst meter, so the
     /// <c>Elemental Skill</c> keyword went (2026-09-26, wave-3 Klee lane 2b).
     /// </summary>
+    /// <summary>Innate like the starter it replaces (the Ancient audit).
+    /// </summary>
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
+        new[] { CardKeyword.Innate, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForBomb(

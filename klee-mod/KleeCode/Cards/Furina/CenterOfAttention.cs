@@ -14,14 +14,19 @@ namespace KleeMod.Cards.Furina;
 /// <summary>
 /// Furina's second Ancient-rarity card (pool completion, 2026-10-01;
 /// review/active/pool-completion-2026-10-01.md sec.3, ruled at the default):
-/// "The first Spend you choose each turn takes no Fanfare." The Furina rules
+/// "The first Spend you choose each turn takes no Fanfare." The Ancient audit
+/// (ruled 2026-10-12) made the face say what the code always did: "The first
+/// Spend N or Spend up to N each turn takes no Fanfare." A spend-all (Rising
+/// Applause, Bravura, All the World's a Stage) is never free, since a free
+/// spend-all would be a second Bis!; Spend half is a Spend up to. The Furina rules
 /// pass (2026-10-01) dropped its short-bar clause: rule 8 now pays back
 /// first, then forward, so the mode is offered on the same board as any. The rule and its readings are
 /// <see cref="CenterOfAttentionPower"/>'s, read at the Spend gate and the
 /// Spend payment (<c>FurinaStage.CanSpend</c> / <c>Spend</c>).
 ///
-/// Game-side only, like every Ancient: the Dusty Tome draws one of her
-/// Ancients at random and grants it UPGRADED (read it at 1 Energy).
+/// Game-side only. Her Dusty Tome card: the Tome skips her Archaic Tooth card
+/// (the Ancient audit, 2026-10-12), so it draws this one and grants it
+/// UPGRADED (read it at 1 Energy).
 /// Membership is <c>RosterAncientCards.Furina</c>. Compiled with the
 /// prototype surface only. Numbers witnessed by
 /// <c>tools/lint_handwritten_parity.ANCIENT_WITNESS</c>. Art: the placeholder
@@ -38,8 +43,8 @@ public sealed class CenterOfAttention : CustomCardModel, ICharacterCard
     {
         ("title", "Center of Attention"),
         ("description",
-            "The first [gold]Spend[/gold] you choose each turn takes no "
-          + "[gold]Fanfare[/gold]."),
+            "The first [gold]Spend[/gold] N or [gold]Spend[/gold] up to N "
+          + "each turn takes no [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

@@ -14,13 +14,13 @@ namespace KleeMod.Cards;
 /// <summary>
 /// Klee's second Ancient-rarity card (pool completion, 2026-10-01;
 /// review/active/pool-completion-2026-10-01.md sec.3, ruled at the default):
-/// "When one of your Bombs goes off, it stays on the enemy at half its size,
+/// "When one of your Bombs or Mines goes off, it stays on the enemy at half its size,
 /// rounded down." Bends the Klee arm's rule 2, under which a set-off Bomb is
 /// gone; the rule and its readings are <see cref="AlicesMasterpiecePower"/>'s.
 ///
-/// Game-side only, like every Ancient: the Darv event's Dusty Tome is the one
-/// door (it draws one of her Ancients at random and grants it UPGRADED, so
-/// read it at 2 Energy). Membership is <c>RosterAncientCards.Klee</c>;
+/// Game-side only. Her Dusty Tome card: the Tome skips her Archaic Tooth card,
+/// Mk.Omega (the Ancient audit, 2026-10-12), so it draws this one and grants
+/// it UPGRADED (read it at 2 Energy). Membership is <c>RosterAncientCards.Klee</c>;
 /// reward, transform and shop generation filter Ancient upstream. Compiled
 /// with the prototype surface only, because the rule it bends is the arm's.
 /// Numbers witnessed by <c>tools/lint_handwritten_parity.ANCIENT_WITNESS</c>.
@@ -37,12 +37,12 @@ public sealed class AlicesMasterpiece : CustomCardModel, ICharacterCard
     {
         ("title", "Alice's Masterpiece"),
         ("description",
-            "Whenever one of your [gold]Bombs[/gold] goes off, it stays on the "
-          + "enemy at half its size, rounded down."),
+            "Whenever one of your [gold]Bombs[/gold] or [gold]Mines[/gold] goes off, it "
+          + "stays on the enemy at half its size, rounded down."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
     // autoAdd: false -- RosterAncientCards.Klee owns membership.
     public AlicesMasterpiece()

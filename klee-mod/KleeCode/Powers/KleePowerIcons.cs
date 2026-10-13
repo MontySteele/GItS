@@ -179,13 +179,9 @@ internal static class KleePowerIcons
         // The four with no shipped Kokomi power to borrow from -- the Plan
         // badge, its draw rider and the two Commander powers -- take
         // the nearest shipped SHAPE instead: a Klee companion power for the
-        // two that read Companions, and her own Ancient's drip for the badge
+        // two that read Companions, and her Ancient's sigil for the badge
         // that counts something waiting to arrive.
         PendingPlansPower => KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
-        // R276: her Ancient under the arm keeps its own shipped sigil -- it
-        // is the same card, paying on the Plan instead of in Charge.
-        PrincessOfWatatsumiPlanPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
         // R276: Pincer's carry-out borrows the nearest shipped SHAPE, the
         // block above's rule: a replay.
@@ -288,9 +284,6 @@ internal static class KleePowerIcons
         // every borrow above: the arm copy is the shipped clause at a halved
         // threshold, so it wears the shipped power's own sigil rather than
         // asking for art a prototype may not keep.
-        // R276: the Ancient's Stage-arm power wears the Ancient's own icon.
-        StageRaisePerTurnPower =>
-            KleePck.Path("furina/powers/all_the_worlds_a_stage.png"),
         // R276 batch two: the Stage's five powers borrow the shipped Furina
         // sigil nearest their job, on the terms every borrow above takes.
         ThunderousApplausePower =>

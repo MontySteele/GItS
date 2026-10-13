@@ -624,7 +624,7 @@ public static class FurinaStage
     }
 
     /// <summary>Rule 4: the Singer's Repay at the end of her turn -- Salon
-    /// Solitaire's 2, The Curtain Never Falls' 3.</summary>
+    /// Solitaire's 1, The Curtain Never Falls' 2.</summary>
     public static int SingerOf(Creature? owner)
     {
         if (!LiveFor(owner) || owner!.Player is not { } player) return 0;

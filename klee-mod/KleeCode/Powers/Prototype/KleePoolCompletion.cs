@@ -13,7 +13,8 @@ namespace KleeMod.Powers;
 /// ALICE'S MASTERPIECE, Klee's second Ancient (pool completion, 2026-10-01;
 /// <c>Cards/AlicesMasterpiece.cs</c>, paper
 /// <c>review/active/pool-completion-2026-10-01.md</c> sec.3): "When one of
-/// your Bombs goes off, it stays on the enemy at half its size, rounded down."
+/// your Bombs or Mines goes off, it stays on the enemy at half its size,
+/// rounded down." (Mines named on the face by the Ancient audit, 2026-10-12.)
 /// Bends rule 2, under which a set-off Bomb is gone.
 ///
 /// READINGS, recorded in the provenance note:
@@ -37,8 +38,8 @@ public sealed class AlicesMasterpiecePower : PowerModel, ILocalizationProvider
     {
         ("title", "Alice's Masterpiece"),
         ("description",
-            "Whenever one of your [gold]Bombs[/gold] goes off, it stays on the "
-          + "enemy at half its size, rounded down."),
+            "Whenever one of your [gold]Bombs[/gold] or [gold]Mines[/gold] goes off, it "
+          + "stays on the enemy at half its size, rounded down."),
     };
 
     public override PowerType Type => PowerType.Buff;

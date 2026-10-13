@@ -9,42 +9,42 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Kokomi;
 
 /// <summary>
-/// Kokomi's Ancient-rarity card.
+/// Kokomi's Archaic Tooth Ancient (the Ancient audit,
+/// review/active/ancient-audit-2026-10-12.md, ruled 2026-10-12: "Princess of
+/// Watatsumi needs to do more as an Ancient. Perhaps "Gain 9 [12] Block. Draw
+/// 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies five times.""):
+/// Orobas's Archaic Tooth turns her starter Kurage's Oath into it, as it
+/// turns Bash into Break. A bigger Oath, built the way Kurage's Oath is: a
+/// two-line Plan card whose now-line is the Block and the draw, and whose Plan
+/// line the Bake-Kurage carries out at the start of her next turn.
 ///
-/// WHY IT EXISTS AT ALL is a crash, not a design want. The act-2 Darv event
-/// rolls Dusty Tome ~50% of the time, and DustyTome.SetupForPlayer draws a
-/// random CardRarity.Ancient card from the character's pool. A character with
-/// no Ancient card gets an empty draw, NextItem(...).Id NREs inside
-/// Darv.GenerateInitialOptions, and the run softlocks on room entry. That was
-/// a live playtest defect on 2026-07-23; the invariant (>= 1 visible Ancient
-/// per roster character) and its lint came out of it.
+/// Its Power face ("Whenever the Bake-Kurage carries out a Plan, gain 2 Block
+/// and draw 1 card.") and that face's plan-bus listener went with the ruling;
+/// it overlapped the pool's Kurage Canopy.
 ///
-/// Membership in RosterAncientCards.Kokomi does NOT make it rollable --
-/// reward, transform and shop generation all filter Ancient upstream, so
-/// Dusty Tome is the single door. The Tome upgrades what it grants, so read
-/// the card at its upgraded numbers.
+/// THE DOOR: <c>ProtoKkKuragesOath</c> implements BaseLib's
+/// <c>ITranscendenceCard</c> and names this card
+/// (<c>gen_klee_cards.TRANSCENDENCE</c>, Dandelion Gale's pattern). The
+/// vanilla Dusty Tome skips every Tooth card, so her Tome draws
+/// <see cref="DivineStrategy"/>. It is in <c>RosterAncientCards.Kokomi</c> so
+/// its <c>CardModel.Pool</c> resolves to hers; reward, transform and shop
+/// generation filter Ancient upstream. Numbers witnessed by
+/// <c>tools/lint_handwritten_parity.ANCIENT_WITNESS</c>; sim twin the
+/// <c>princess_of_watatsumi</c> row in <c>tier0/content/cards/ancients.yaml</c>.
 ///
-/// The card reads "Whenever the Bake-Kurage carries out a Plan, gain 2 Block
-/// and draw 1 card." (upgrade: 3 Block) and applies
-/// <c>PrincessOfWatatsumiPlanPower</c> (R276 hygiene). Its shipped face, a
-/// per-turn Charge drip, went with the shipped kits (legacy cleanup stage 5);
-/// <c>PowerAmount</c> stays declared because both engines' witness
-/// (<c>tools/lint_handwritten_parity.ANCIENT_WITNESS</c>) reads one var list.
-/// Sim twin: the <c>princess_of_watatsumi</c> row in
-/// <c>tier0/content/cards/ancients.yaml</c>.
-///
-/// NAME: "Princess of Watatsumi" is her canon innate passive.
+/// NAME: "Princess of Watatsumi" is her canon innate passive. Art: the
+/// placeholder it had (the ruling: the new card may keep its current art).
 /// </summary>
-public sealed class PrincessOfWatatsumi : CustomCardModel, ICharacterCard
+public sealed class PrincessOfWatatsumi
+    : CustomCardModel, ICharacterCard, IPlannedCard, INowLineCard
 {
     public string CharacterId => "kokomi";
 
-    // Art: reuses her rare Charge accelerant's portrait until the art pass
-    // gives the Ancient its own crop. A look-pass item, not a blocker.
     public override Texture2D? CustomPortrait =>
         RosterArt.CardPortrait("prayer_to_the_moon");
 
@@ -52,26 +52,39 @@ public sealed class PrincessOfWatatsumi : CustomCardModel, ICharacterCard
     {
         ("title", "Princess of Watatsumi"),
         ("description",
-            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold], gain {PlanBlock:diff()} [gold]Block[/gold] "
-          + "and draw 1 card."),
+            "Gain {Block:diff()} [gold]Block[/gold]. Draw 2 cards.\n"
+          + "Or [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] "
+          + "damage to ALL enemies 5 times."),
     };
 
-    // The face prints Plan, and carries that word's definition.
+    // Kurage's Oath's tips: the Plan word and the Plan line's element.
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForPlan(
+            ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this);
+
+    /// <summary>The card's printed Plan line: 3 [5] Hydro to ALL enemies,
+    /// five times. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(
+                KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue,
+                KokomiPlan.Aim.AllEnemies, Times: 5),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m),
-            new DynamicVar("PlanBlock", 2m)
+            new BlockVar(9m, ValueProp.Move),
+            new CardsVar(2),
+            new KokomiPlan.PlanDamageVar(3m),
         };
 
     // autoAdd: false -- RosterAncientCards.Kokomi owns membership, concatted
     // into KokomiCardPool.GenerateAllCards.
     public PrincessOfWatatsumi()
-        : base(1, CardType.Power, CardRarity.Ancient, TargetType.Self,
+        : base(1, CardType.Skill, CardRarity.Ancient, KokomiTargets.PetOrSelf,
                autoAdd: false)
     {
     }
@@ -79,16 +92,33 @@ public sealed class PrincessOfWatatsumi : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!KokomiOverhaul.LiveFor(Owner.Creature)) return;
-        await PowerCmd.Apply<PrincessOfWatatsumiPlanPower>(
-            choiceContext, Owner.Creature,
-            DynamicVars["PlanBlock"].IntValue,
-            applier: Owner.Creature, cardSource: this);
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(
+                choiceContext, Owner.Creature, this, PlanClauses);
+            if (DivineStrategyPower.NowLine(
+                    cardPlay, Owner.Creature, DivineStrategyPower.Aim.None)
+                is not { } nowLine) return;
+            cardPlay = nowLine;
+        }
+        await PlayNowLine(choiceContext, cardPlay);
+    }
+
+    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
+    /// for a Plan: nowhere, it is her own Block and draw.</summary>
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.None;
+
+    /// <summary>The now-line: "Gain 9 [12] Block. Draw 2 cards."</summary>
+    public async Task PlayNowLine(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
-        DynamicVars["PlanBlock"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars["PlanDamage"].UpgradeValueBy(2m);
     }
 }

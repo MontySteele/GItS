@@ -24,25 +24,14 @@ namespace KleeMod.Tests.Prototype;
 /// Second Wave) now declare it on the sheet, and a card that declares nothing
 /// applies nothing in her hand. Sim twin: <c>tier0/tests/test_kokomi_plan.py</c>.
 ///
-/// HYGIENE: her Ancient, Princess of Watatsumi, pays on the Plan under the arm
-/// ("Whenever the Bake-Kurage carries out a Plan, gain 2 Block and draw 1
-/// card.") instead of the Charge the arm turns off.
+/// (Her Ancient, Princess of Watatsumi, is the Archaic Tooth's Plan card since
+/// the Ancient audit, 2026-10-12: <c>AncientAuditTests</c>.)
 ///
 /// THE COLLECTION IS LOAD-BEARING: both arm switches are one static apiece.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiR276Tests
 {
-    private static void Upgrade(CardModel card)
-    {
-        Seat.Set(card, "IsMutable", true);
-        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
-            .Invoke(card, Array.Empty<object?>());
-    }
-
-    private static string Description(CustomCardModel card) =>
-        card.Localization!.Single(row => row.Item1 == "description").Item2;
-
     // ---- pick 2, now on the card ---------------------------------------------
 
     [Fact]
@@ -95,50 +84,6 @@ public class KokomiR276Tests
         }
     }
 
-    // ---- her Ancient -----------------------------------------------------------
-
-    [Fact]
-    public void The_ancient_prints_the_plan_payout_under_the_arm_and_charge_off_it()
-    {
-        try
-        {
-            var arm = Description(new PrincessOfWatatsumi());
-            Assert.Contains("carries out a [gold]Plan[/gold]", arm);
-            Assert.Contains("{PlanBlock:diff()} [gold]Block[/gold]", arm);
-            Assert.Contains("draw 1 card", arm);
-            Assert.DoesNotContain("Charge", arm);
-
-        }
-        finally
-        {
-        }
-    }
-
-    [Fact]
-    public void The_ancient_pays_two_block_and_three_upgraded()
-    {
-        var card = new PrincessOfWatatsumi();
-        Assert.Equal(2m, card.DynamicVars["PlanBlock"].BaseValue);
-        Assert.Equal(3m, card.DynamicVars["PowerAmount"].BaseValue);
-        var upgraded = new PrincessOfWatatsumi();
-        Upgrade(upgraded);
-        Assert.Equal(3m, upgraded.DynamicVars["PlanBlock"].BaseValue);
-        Assert.Equal(4m, upgraded.DynamicVars["PowerAmount"].BaseValue);
-    }
-
-    [Fact]
-    public void The_ancient_applies_the_plan_power_only_where_the_arm_is_live()
-    {
-        // STRUCTURAL: applying a power needs a live PlayerChoiceContext.
-        var applies = Il.CallSequence(Il.Method("PrincessOfWatatsumi", "OnPlay"))
-            .ToList();
-        var live = applies.FindIndex(c => c.Contains("KokomiOverhaul.LiveFor"));
-        var plan = applies.FindIndex(
-            c => c.Contains("PrincessOfWatatsumiPlanPower"));
-        Assert.True(live >= 0 && plan > live);
-        Assert.DoesNotContain(applies, c => c.Contains("ChargePerTurnPower"));
-    }
-
     // ---- pick 1: the halves rewrite's five new Plan clauses -----------------
 
     [Fact]
@@ -175,21 +120,5 @@ public class KokomiR276Tests
         Assert.Contains(
             Il.Calls(Il.Method("KokomiOverhaulKit", "IntendedDamage")),
             c => c.Contains("AttackIntent.GetTotalDamage"));
-    }
-
-    [Fact]
-    public void The_plan_power_pays_block_and_a_card_on_every_plan()
-    {
-        // "Whenever", not "once per turn": no ledger claim on this hook.
-        Assert.True(typeof(IKokomiPlanListener)
-            .IsAssignableFrom(typeof(PrincessOfWatatsumiPlanPower)));
-        var hook = typeof(PrincessOfWatatsumiPlanPower)
-            .GetMethod("OnPlanResolved", HeadlessGame.All)!;
-        var calls = Il.CallSequence(hook).ToList();
-        Assert.DoesNotContain(calls,
-            c => c.Contains("KokomiOverhaulLedger.ClaimOncePerTurn"));
-        var block = calls.IndexOf("CreatureCmd.GainBlock");
-        var draw = calls.IndexOf("CardPileCmd.Draw");
-        Assert.True(block >= 0 && draw > block);
     }
 }

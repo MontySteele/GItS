@@ -65,10 +65,17 @@ public class TamakushiCasket : CustomRelicModel
     public override RelicModel? GetUpgradeReplacement() =>
         ModelDb.Relic<WatatsumiCasket>().ToMutable();
 
-    /// <summary>The Block at the start of her turn while a Plan is waiting.
-    /// The Tamakushi Casket <see cref="KokomiOverhaulLaw.CasketBlock"/>;
-    /// <see cref="WatatsumiCasket"/> more.</summary>
-    public virtual int Block => KokomiOverhaulLaw.CasketBlock;
+    /// <summary>The Block at the start of her turn while a Plan is waiting:
+    /// <see cref="KokomiOverhaulLaw.CasketBlock"/>. The
+    /// <see cref="WatatsumiCasket"/> pays it once per Plan instead
+    /// (<see cref="BlockFor"/>).</summary>
+    public int Block => KokomiOverhaulLaw.CasketBlock;
+
+    /// <summary>The Block a queue this deep pays at the start of her turn.
+    /// The Tamakushi Casket: <see cref="Block"/> if any Plan is waiting.
+    /// PURE.</summary>
+    public virtual int BlockFor(int plansWaiting) =>
+        Pays(plansWaiting) ? Block : 0;
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
@@ -78,8 +85,9 @@ public class TamakushiCasket : CustomRelicModel
         ("description", Face(KokomiOverhaulLaw.CasketBlock)),
     };
 
-    /// <summary>The face, one sentence, the number the only difference
-    /// between the Casket and its upgrade.</summary>
+    /// <summary>The face, one sentence. (The Ancient audit, 2026-10-12,
+    /// dropped its second sentence, "A Plan's own Block comes at the start of
+    /// your next turn.")</summary>
     internal static string Face(int block) =>
         "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
       + "[blue]" + block + "[/blue] [gold]Block[/gold].";
@@ -104,9 +112,10 @@ public class TamakushiCasket : CustomRelicModel
         var kokomi = Owner?.Creature;
         if (kokomi == null || creature != kokomi) return;
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (!Pays(KokomiPlan.PlansHeld(kokomi))) return;
+        var block = BlockFor(KokomiPlan.PlansHeld(kokomi));
+        if (block <= 0) return;
         Flash();
-        await CreatureCmd.GainBlock(kokomi, Block, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(kokomi, block, ValueProp.Unpowered, null);
     }
 
     /// <summary>Does a queue this deep pay? Any Plan waiting. PURE.</summary>
@@ -160,12 +169,13 @@ public class TamakushiCasket : CustomRelicModel
 /// <summary>
 /// WATATSUMI CASKET -- the Tamakushi Casket upgraded, Touch of Orobas's
 /// hand-over (main-session design, 2026-09-30, from [USER]'s co-op playtest:
-/// "Varka and Kokomi need Ancient relics for Orobas"). Since the re-founding
-/// (2026-10-12) it is the same sentence at 5 Block (the smallest change that
-/// keeps it an upgrade of a 3-Block relic; it started combat with 3 in the
-/// Casket before). It IS a Tamakushi Casket (see its header), so the hook and
-/// the companion reward slot are the base's, and the only difference is
-/// <see cref="Block"/>.
+/// "Varka and Kokomi need Ancient relics for Orobas"). The Ancient audit
+/// (ruled 2026-10-12: "Watastumi Casket is a bit weak for an Ancient relic -
+/// perhaps bump it to "3 Block per Plan" instead of just "3 block if there
+/// was a Plan"."): "At the start of your turn, gain 3 Block for each Plan
+/// waiting." (5 Block if any Plan waited, before.) It IS a Tamakushi Casket
+/// (see its header), so the hook and the companion reward slot are the
+/// base's, and the only difference is <see cref="BlockFor"/>.
 ///
 /// ANCIENT, NEVER STARTER (see <c>ExplosiveFrags</c>). ICON: the Tamakushi
 /// Casket's own fallback chain, as Pearl of Insight reuses the Pearl's.
@@ -178,14 +188,18 @@ public sealed class WatatsumiCasket : TamakushiCasket
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi Casket"),
-        ("description", Face(WatatsumiBlock)),
+        ("description",
+            "At the start of your turn, gain [blue]" + WatatsumiBlock
+          + "[/blue] [gold]Block[/gold] for each [gold]Plan[/gold] waiting."),
     };
 
-    /// <summary>The Block at the start of her turn while a Plan is waiting.
+    /// <summary>The Block per waiting Plan at the start of her turn.
     /// </summary>
-    public const int WatatsumiBlock = 5;
+    public const int WatatsumiBlock = 3;
 
-    public override int Block => WatatsumiBlock;
+    /// <summary>3 Block for each Plan waiting. PURE.</summary>
+    public override int BlockFor(int plansWaiting) =>
+        plansWaiting > 0 ? WatatsumiBlock * plansWaiting : 0;
 
     /// <summary>Already the upgrade: nothing further for Orobas.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;

@@ -404,6 +404,10 @@ UNMIRRORED: dict[str, str] = {
     "AbyssOverlayView.DiamondSize": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.BadgeSize": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.StripIconSize": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossHalfWidth": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossGlowReach": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossInsetX": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayView.CrossInsetY": _ABYSS_SCREEN_REASON,
     "StoryRules.BigBombDamage": _STORY_REASON,
     "StoryRules.ConfinementCombats": _STORY_REASON,
     "AbyssNumbers.LeyLineDamageReduction": _ABYSS_REASON,
@@ -447,8 +451,9 @@ UNMIRRORED: dict[str, str] = {
     "GrandTheaterProgram.Fanfare": _ARM_ITEMS_REASON,
     "WatatsumiCasket.WatatsumiBlock":
         "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"
-        "session design from the co-op playtest; 5 Block since the "
-        "re-founding, 2026-10-12). A Prototype-stage relic number built C# "
+        "session design from the co-op playtest; 3 Block for each Plan "
+        "waiting since the Ancient audit, 2026-10-12). A Prototype-stage "
+        "relic number built C# "
         "first; tier05 has no Orobas row for the arm, and the sim twin lands "
         "at Balance.",
     "ShrapnelPower.Shred":

@@ -194,14 +194,14 @@ def _choice_page():
                       "body": PAGE_BODY,
                       "options": [
                           _option(0, "The Ley Line",
-                                  "Enemies' auras fade.\nIf passed: Abyss "
+                                  "Enemies' auras fade.\nShadow: Abyss "
                                   "Herald. Enemies have 15% more HP."),
                           _option(1, "Resonance",
-                                  "Turn 1: draw 1 and gain 1 Energy.\nIf "
-                                  "passed: Sheer Cold. End your turn with no "
+                                  "Turn 1: draw 1 and gain 1 Energy.\n"
+                                  "Shadow: Sheer Cold. End your turn with no "
                                   "Block: lose 3 HP."),
                           _option(2, "Fateful Fortune",
-                                  "Gain 12 Max HP.\nIf passed: Rally. When an "
+                                  "Gain 12 Max HP.\nShadow: Rally. When an "
                                   "enemy dies, the others gain 1 Strength.")]}}
 
 
@@ -218,7 +218,7 @@ def test_the_choice_page_prints_as_an_ordinary_event():
     for title in ("The Ley Line", "Resonance", "Fateful Fortune"):
         assert f"**{title}**" in page
     assert "Gain 12 Max HP." in page
-    assert "If passed: Sheer Cold." in page
+    assert "Shadow: Sheer Cold." in page
     assert 'choose "<option>"' in page
 
 

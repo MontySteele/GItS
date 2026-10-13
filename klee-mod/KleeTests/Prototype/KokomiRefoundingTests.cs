@@ -31,20 +31,22 @@ public class KokomiRefoundingTests
     // ---- the relic ---------------------------------------------------------
 
     [Fact]
-    public void The_casket_is_3_block_while_a_plan_waits_and_the_upgrade_5()
+    public void The_casket_is_3_block_while_a_plan_waits_and_the_upgrade_3_per_plan()
     {
         Assert.Equal(3, KokomiOverhaulLaw.CasketBlock);
         Assert.Equal(3, new TamakushiCasket().Block);
-        Assert.Equal(5, new WatatsumiCasket().Block);
+        Assert.Equal(3, new TamakushiCasket().BlockFor(2));
+        Assert.Equal(6, new WatatsumiCasket().BlockFor(2));
         Assert.False(TamakushiCasket.Pays(0));
         Assert.True(TamakushiCasket.Pays(1));
         Assert.Equal(
             "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
-            + "[blue]3[/blue] [gold]Block[/gold]." + KokomiPreRunFixesTests.CasketTail,
+            + "[blue]3[/blue] [gold]Block[/gold].",
             new TamakushiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
-        Assert.Contains("[blue]5[/blue]", new WatatsumiCasket().Localization!
-            .First(r => r.Item1 == "description").Item2);
+        Assert.Contains("[blue]3[/blue] [gold]Block[/gold] for each",
+            new WatatsumiCasket().Localization!
+                .First(r => r.Item1 == "description").Item2);
     }
 
     [Fact]

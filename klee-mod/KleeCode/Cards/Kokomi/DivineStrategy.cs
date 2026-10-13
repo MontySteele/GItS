@@ -21,8 +21,9 @@ namespace KleeMod.Cards.Kokomi;
 /// now-line (Nip) do not use up the once. The rule and its readings are
 /// <see cref="DivineStrategyPower"/>'s; the generated Plan branch asks it.
 ///
-/// Game-side only, like every Ancient: the Dusty Tome draws one of her
-/// Ancients at random and grants it UPGRADED (read it at 1 Energy).
+/// Game-side only. Her Dusty Tome card: the Tome skips her Archaic Tooth card
+/// (the Ancient audit, 2026-10-12), so it draws this one and grants it
+/// UPGRADED (read it at 1 Energy).
 /// Membership is <c>RosterAncientCards.Kokomi</c>. Compiled with the prototype
 /// surface only. Numbers witnessed by
 /// <c>tools/lint_handwritten_parity.ANCIENT_WITNESS</c>. Art: the placeholder
