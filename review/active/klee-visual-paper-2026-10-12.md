@@ -84,7 +84,16 @@ Blender isn't installed on this machine yet. Installing it is a one-time step I'
    - an idle loop at the merchant and the rest site, not a still.
 4. **Furina's stretch fix.**
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "On the Klee art pass - agreed with your first picks. Sounds like a plan!"
+
+- **Pick 1 (a):** render from the official Klee model. Ship the renders only.
+- **Pick 2 (a):** 0.62 of an adult.
+- **Pick 3 (a):** all five screens.
+- **First milestone:** stance renders for your eyes before the rig is re-skinned.
+
+## For [USER] (ruled above)
 
 1. **The art route.**
    - **(a) Default:** render from the official Klee model (Blender + mmd_tools, free); ship renders only.
