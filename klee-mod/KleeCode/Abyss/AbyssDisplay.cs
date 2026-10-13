@@ -38,6 +38,9 @@ public static class AbyssDisplay
         typeof(AbyssMoonlitRestRelic), typeof(AbyssFirstStrikeRelic),
         typeof(AbyssElementalBurstRelic), typeof(AbyssResonanceRelic),
         typeof(AbyssCrystallizeRelic), typeof(AbyssFatefulFortuneRelic),
+        typeof(AbyssOverflowRelic), typeof(AbyssVigorOfTheAbyssRelic),
+        typeof(AbyssMoonlitSpringRelic), typeof(AbyssBattleRhythmRelic),
+        typeof(AbyssWaveringMoonRelic), typeof(AbyssStarfellDraftRelic),
         typeof(AbyssShadowsRelic),
     };
 
@@ -47,6 +50,8 @@ public static class AbyssDisplay
         typeof(AbyssSheerColdShadowPower), typeof(AbyssElementalMarkShadowPower),
         typeof(AbyssHeraldShadowPower), typeof(AbyssRallyShadowPower),
         typeof(AbyssRiptideShadowPower), typeof(AbyssFatuiSkirmishersShadowPower),
+        typeof(AbyssThornyGroundShadowPower), typeof(AbyssBulwarkShadowPower),
+        typeof(AbyssFrenzyShadowPower), typeof(AbyssWitheringShadowPower),
     };
 
     /// <summary>Called once from <c>KleeMod.Initialize</c>, before the game
@@ -76,6 +81,16 @@ public static class AbyssDisplay
     {
         var shown = held.OfType<AbyssBlessingRelic>().Select(r => r.Blessing).ToHashSet();
         return taken.Where(b => b != AbyssBlessing.None && shown.Add(b)).ToList();
+    }
+
+    /// <summary>The Blessing relics this player holds whose Blessing is no
+    /// longer in force: a This act Blessing once its act has ended
+    /// (<c>review/active/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)).</summary>
+    public static IReadOnlyList<AbyssBlessingRelic> BlessingRelicsToRemove(
+        IEnumerable<AbyssBlessing> inForce, IEnumerable<RelicModel> held)
+    {
+        var live = inForce.ToHashSet();
+        return held.OfType<AbyssBlessingRelic>().Where(r => !live.Contains(r.Blessing)).ToList();
     }
 
     /// <summary>Whether this player still needs the Abyss Shadows relic: the
@@ -114,6 +129,12 @@ public static class AbyssDisplay
         AbyssBlessing.Resonance => typeof(AbyssResonanceRelic),
         AbyssBlessing.Crystallize => typeof(AbyssCrystallizeRelic),
         AbyssBlessing.FatefulFortune => typeof(AbyssFatefulFortuneRelic),
+        AbyssBlessing.Overflow => typeof(AbyssOverflowRelic),
+        AbyssBlessing.VigorOfTheAbyss => typeof(AbyssVigorOfTheAbyssRelic),
+        AbyssBlessing.MoonlitSpring => typeof(AbyssMoonlitSpringRelic),
+        AbyssBlessing.BattleRhythm => typeof(AbyssBattleRhythmRelic),
+        AbyssBlessing.WaveringMoon => typeof(AbyssWaveringMoonRelic),
+        AbyssBlessing.StarfellDraft => typeof(AbyssStarfellDraftRelic),
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };
 
@@ -127,6 +148,10 @@ public static class AbyssDisplay
         AbyssShadow.Rally => typeof(AbyssRallyShadowPower),
         AbyssShadow.Riptide => typeof(AbyssRiptideShadowPower),
         AbyssShadow.FatuiSkirmishers => typeof(AbyssFatuiSkirmishersShadowPower),
+        AbyssShadow.ThornyGround => typeof(AbyssThornyGroundShadowPower),
+        AbyssShadow.Bulwark => typeof(AbyssBulwarkShadowPower),
+        AbyssShadow.Frenzy => typeof(AbyssFrenzyShadowPower),
+        AbyssShadow.Withering => typeof(AbyssWitheringShadowPower),
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
@@ -140,6 +165,12 @@ public static class AbyssDisplay
         AbyssBlessing.Resonance => ModelDb.Relic<AbyssResonanceRelic>(),
         AbyssBlessing.Crystallize => ModelDb.Relic<AbyssCrystallizeRelic>(),
         AbyssBlessing.FatefulFortune => ModelDb.Relic<AbyssFatefulFortuneRelic>(),
+        AbyssBlessing.Overflow => ModelDb.Relic<AbyssOverflowRelic>(),
+        AbyssBlessing.VigorOfTheAbyss => ModelDb.Relic<AbyssVigorOfTheAbyssRelic>(),
+        AbyssBlessing.MoonlitSpring => ModelDb.Relic<AbyssMoonlitSpringRelic>(),
+        AbyssBlessing.BattleRhythm => ModelDb.Relic<AbyssBattleRhythmRelic>(),
+        AbyssBlessing.WaveringMoon => ModelDb.Relic<AbyssWaveringMoonRelic>(),
+        AbyssBlessing.StarfellDraft => ModelDb.Relic<AbyssStarfellDraftRelic>(),
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };
 
@@ -153,35 +184,53 @@ public static class AbyssDisplay
         AbyssShadow.Rally => ModelDb.Power<AbyssRallyShadowPower>(),
         AbyssShadow.Riptide => ModelDb.Power<AbyssRiptideShadowPower>(),
         AbyssShadow.FatuiSkirmishers => ModelDb.Power<AbyssFatuiSkirmishersShadowPower>(),
+        AbyssShadow.ThornyGround => ModelDb.Power<AbyssThornyGroundShadowPower>(),
+        AbyssShadow.Bulwark => ModelDb.Power<AbyssBulwarkShadowPower>(),
+        AbyssShadow.Frenzy => ModelDb.Power<AbyssFrenzyShadowPower>(),
+        AbyssShadow.Withering => ModelDb.Power<AbyssWitheringShadowPower>(),
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
     // ---- The doers ------------------------------------------------------------
 
     /// <summary>
-    /// Bring one player's relics up to the record: a relic for each Blessing
-    /// taken that the player lacks, the Abyss Shadows relic once the run has a
-    /// Shadow, and that relic's list refreshed. Called from the choice page for
-    /// each player's copy of the shared event, so in co-op every player gets
-    /// their own, and idempotent, so a second call adds nothing.
+    /// Bring one player's relics up to what is in force in act
+    /// <paramref name="act"/>: a relic for each Blessing in force that the
+    /// player lacks, none for a This act Blessing whose act has ended (its
+    /// relic goes), the Abyss Shadows relic once the run has a Shadow, and
+    /// that relic's list redrawn to the Shadows in force. Called from the
+    /// choice page for each player's copy of the shared event, so in co-op
+    /// every player gets their own, and from the act-change hook; idempotent,
+    /// so a second call changes nothing.
     /// </summary>
-    public static async Task GrantTo(Player player, AbyssRecord record)
+    public static async Task GrantTo(Player player, AbyssRecord record, int act)
     {
-        foreach (var blessing in BlessingsToGrant(record.Blessings, player.Relics))
+        var blessings = record.BlessingsInForce(act);
+        var shadows = record.ShadowsInForce(act);
+
+        foreach (var expired in BlessingRelicsToRemove(blessings, player.Relics))
+        {
+            await RelicCmd.Remove(expired);
+        }
+
+        foreach (var blessing in BlessingsToGrant(blessings, player.Relics))
         {
             await RelicCmd.Obtain(BlessingRelic(blessing).ToMutable(), player);
         }
 
+        // The Shadows relic comes with the run's first Shadow and stays (an
+        // empty list reads "None yet."), so a run whose only Shadow expired
+        // keeps the relic it was shown.
         if (NeedsShadowsRelic(record.Shadows, player.Relics))
         {
             var relic = (AbyssShadowsRelic)ModelDb.Relic<AbyssShadowsRelic>().ToMutable();
-            relic.SetShadows(record.Shadows);
+            relic.SetShadows(shadows);
             await RelicCmd.Obtain(relic, player);
         }
 
         foreach (var shown in player.Relics.OfType<AbyssShadowsRelic>())
         {
-            shown.SetShadows(record.Shadows);
+            shown.SetShadows(shadows);
         }
     }
 
@@ -191,10 +240,10 @@ public static class AbyssDisplay
     /// <c>PowerModel.ApplyInternal</c> (see <see cref="AbyssShadowPower"/>),
     /// so no hook hears it.
     /// </summary>
-    public static void ShowShadows(Creature creature, AbyssRecord record)
+    public static void ShowShadows(Creature creature, IEnumerable<AbyssShadow> inForce)
     {
         if (!creature.IsAlive || !creature.CanReceivePowers) return;
-        var missing = ShadowsToShow(creature.Side == CombatSide.Enemy, record.Shadows, creature.Powers);
+        var missing = ShadowsToShow(creature.Side == CombatSide.Enemy, inForce, creature.Powers);
         foreach (var shadow in missing)
         {
             ShadowPower(shadow).ToMutable().ApplyInternal(creature, 1m, silent: true);

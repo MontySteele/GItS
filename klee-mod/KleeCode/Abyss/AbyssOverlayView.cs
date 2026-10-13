@@ -27,6 +27,13 @@ public sealed class AbyssOverlayViewData
         public string ShadowText = "";
         public Texture2D? BlessingIcon;
         public Texture2D? ShadowIcon;
+
+        /// <summary>The Blessing's duration tag, "Whole run" or "This act".
+        /// Empty falls back to <see cref="AbyssOverlayViewData.WholeRunTag"/>.</summary>
+        public string Tag = "";
+
+        /// <summary>A This act Blessing: its tag takes the deep-blue chip.</summary>
+        public bool ThisAct;
     }
 
     public sealed class StripIcon
@@ -34,6 +41,10 @@ public sealed class AbyssOverlayViewData
         public string Name = "";
         public string Text = "";
         public Texture2D? Icon;
+
+        /// <summary>A small caption under the icon ("This act"); empty for a
+        /// Whole run entry, which the strip leaves bare.</summary>
+        public string Caption = "";
     }
 }
 
@@ -124,6 +135,10 @@ public sealed class AbyssOverlayView
     internal const float CrossInsetX = 30f;
     internal const float CrossInsetY = 26f;
     public static readonly Color Backdrop = new(0f, 0f, 0f, 0.78f);
+    /// <summary>The duration chips: the brown the "Whole run" tag always
+    /// wore, and a deep blue for "This act" so the two read apart.</summary>
+    public static readonly Color WholeRunChip = new("5A4326");
+    public static readonly Color ThisActChip = new("2B4A78");
 
     public Control Root { get; }
 
@@ -304,8 +319,9 @@ public sealed class AbyssOverlayView
         up.AddChild(new Control { SizeFlagsVertical = Control.SizeFlags.ExpandFill, MouseFilter = Control.MouseFilterEnum.Ignore });
         var tagRow = new CenterContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
         var tag = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
-        tag.AddThemeStyleboxOverride("panel", Box(new Color("5A4326"), new Color("5A4326"), 0, 0, 0, 0, 10, 10, 10, 10, 12, 3));
-        tag.AddChild(MakeLabel(data.WholeRunTag, fonts.Bold, SmallSize - 2, PanelCream));
+        var chip = card.ThisAct ? ThisActChip : WholeRunChip;
+        tag.AddThemeStyleboxOverride("panel", Box(chip, chip, 0, 0, 0, 0, 10, 10, 10, 10, 12, 3));
+        tag.AddChild(MakeLabel(card.Tag.Length > 0 ? card.Tag : data.WholeRunTag, fonts.Bold, SmallSize - 2, PanelCream));
         tagRow.AddChild(tag);
         up.AddChild(tagRow);
 
@@ -434,7 +450,18 @@ public sealed class AbyssOverlayView
                 MouseFilter = Control.MouseFilterEnum.Stop,
                 FocusMode = Control.FocusModeEnum.None,
             };
-            row.AddChild(node);
+            // A This act entry carries its duration under the icon; the
+            // hover text names every entry's.
+            var cell = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+            cell.AddThemeConstantOverride("separation", 0);
+            cell.AddChild(node);
+            if (entry.Caption.Length > 0)
+            {
+                var caption = MakeLabel(entry.Caption, fonts.Bold, SmallSize - 6, colour);
+                caption.HorizontalAlignment = HorizontalAlignment.Center;
+                cell.AddChild(caption);
+            }
+            row.AddChild(cell);
             _strip.Add((node, entry));
         }
     }

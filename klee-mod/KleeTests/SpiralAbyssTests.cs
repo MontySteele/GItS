@@ -38,18 +38,23 @@ public class SpiralAbyssTests
     [Fact]
     public void Every_entry_text_is_the_papers_word_for_word()
     {
-        var paper = File.ReadAllText(Path.Combine(
-            RepoRoot(), "review", "active", "spiral-abyss-pools-2026-10-12.md"));
+        // The first paper's eight of each, and round two's
+        // (review/active/abyss-pools-2-2026-10-12.md): six Blessings, four
+        // Shadows, and Riptide's This act text.
+        var papers = File.ReadAllText(Path.Combine(
+                         RepoRoot(), "review", "active", "spiral-abyss-pools-2026-10-12.md"))
+                   + File.ReadAllText(Path.Combine(
+                         RepoRoot(), "review", "active", "abyss-pools-2-2026-10-12.md"));
         foreach (var b in AbyssDraft.AllBlessings)
         {
-            Assert.Contains($"**{AbyssText.Name(b)}** | {AbyssText.Text(b)} |", paper);
+            Assert.Contains($"**{AbyssText.Name(b)}** | {AbyssText.Text(b)} |", papers);
         }
         foreach (var s in AbyssDraft.AllShadows)
         {
-            Assert.Contains($"**{AbyssText.Name(s)}** | {AbyssText.Text(s)} |", paper);
+            Assert.Contains($"**{AbyssText.Name(s)}** | {AbyssText.Text(s)} |", papers);
         }
-        Assert.Equal(8, AbyssDraft.AllBlessings.Count);
-        Assert.Equal(8, AbyssDraft.AllShadows.Count);
+        Assert.Equal(14, AbyssDraft.AllBlessings.Count);
+        Assert.Equal(12, AbyssDraft.AllShadows.Count);
     }
 
     // ---- Each Blessing once ---------------------------------------------------

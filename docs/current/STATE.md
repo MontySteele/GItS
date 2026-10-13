@@ -284,9 +284,17 @@ three blessings before the Ancient screen loads?"): `Abyss/AbyssOverlay.cs`
 draws three tall cards (Blessing over Shadow-if-passed) over the room, holds
 the Ancient's greeting until the pick lands, drives the co-op vote and shows
 its result; the seat bridge reads it as a "The Spiral Abyss" page
-(`KleeTests/AbyssOverlayTests.cs`, renders by `tools/abyss_overlay_rig`). Next:
-the live checks listed in the build, display and screen PRs, then one solo and
-one co-op seat on the mode.
+(`KleeTests/AbyssOverlayTests.cs`, renders by `tools/abyss_overlay_rig`).
+Round two (`review/active/abyss-pools-2-2026-10-12.md`, ruled and built
+2026-10-12) adds a second duration, "This act", beside "Whole run": a This act
+entry ends with its act, and each page shows at least one of each. The pools
+are now 14 Blessings and 12 Shadows (four of each This act; Riptide moved to
+This act). Moonlit Spring heals 8 and Frenzy gives enemies 2 Strength; the
+first eight keep their numbers ([USER]: "don't retune the existing ones;
+nobody's done full runs on the spiral abyss yet"). Pins:
+`KleeTests/AbyssPoolsTwoTests.cs`. Next: the live checks listed in the build,
+display, screen and round-two PRs, then one solo and one co-op seat on the
+mode.
 
 ## Live cell
 

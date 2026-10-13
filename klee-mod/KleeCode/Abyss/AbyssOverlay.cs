@@ -323,6 +323,8 @@ public static class AbyssOverlay
                 ShadowText = c.ShadowText,
                 BlessingIcon = Icon(c.BlessingIconFile),
                 ShadowIcon = Icon(c.ShadowIconFile),
+                Tag = c.BlessingTag,
+                ThisAct = c.BlessingTag == AbyssOverlayContent.ThisActTag,
             });
         }
         data.Blessings.AddRange(content.BlessingsTaken.Select(Strip));
@@ -331,7 +333,7 @@ public static class AbyssOverlay
     }
 
     private static AbyssOverlayViewData.StripIcon Strip(AbyssOverlayStripEntry e) =>
-        new() { Name = e.Name, Text = e.Text, Icon = Icon(e.IconFile) };
+        new() { Name = e.Name, Text = e.HoverText, Icon = Icon(e.IconFile), Caption = e.ThisAct ? e.Duration : "" };
 
     private static Texture2D? Icon(string file)
     {
@@ -453,8 +455,10 @@ public static class AbyssOverlay
                     ["description"] = AbyssOverlayContent.BridgeDescription(c),
                     ["blessing"] = c.BlessingName,
                     ["blessing_text"] = c.BlessingText,
+                    ["blessing_duration"] = c.BlessingTag,
                     ["shadow"] = c.ShadowName,
                     ["shadow_text"] = c.ShadowText,
+                    ["shadow_duration"] = c.ShadowTag,
                 }).ToList(),
         };
         return JsonSerializer.Serialize(page);

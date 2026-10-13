@@ -432,6 +432,10 @@ internal static class ReactionEffects
             // which is every body outside an Abyss run.
             await Abyss.AbyssShieldPower.NoteReaction(choiceContext, target);
 
+            // THE SPIRAL ABYSS (Wavering Moon): a reaction a player triggers
+            // deals 3 to every enemy. A no-op outside an Abyss run.
+            await Abyss.SpiralAbyss.NoteReaction(choiceContext, target, dealer);
+
             // Courtroom Drama (R85): the FIRST reaction of the turn puts its
             // target on the stand. Counted PER DEALER -- the sim's
             // `reactions_this_turn == 1` in the only configuration it models

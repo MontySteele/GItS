@@ -50,7 +50,8 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         ("title", "Spiral Abyss"),
         ("description",
             "Before each act's Ancient, take one of three Blessings. The enemies "
-          + "take one of the two Shadows you pass. Both last the whole run."),
+          + "take one of the two Shadows you pass. Some last the whole run; "
+          + "others end with the act."),
     };
 
     private AbyssRecord? _record;
@@ -109,11 +110,76 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
     public static SpiralAbyss? In(IRunState? runState) =>
         runState?.Modifiers.OfType<SpiralAbyss>().FirstOrDefault();
 
-    internal bool Has(AbyssBlessing b) => Record.Has(b);
+    /// <summary>Is Blessing <paramref name="b"/> in force now? A Whole run
+    /// Blessing is once taken; a This act one only in the act it was taken in
+    /// (<c>review/active/abyss-pools-2-2026-10-12.md</c>, pick 1 (a)). Nothing
+    /// new is saved: the record already keeps each pick's act, so a run
+    /// continued mid-act keeps the act's entries and one continued after the
+    /// act has ended has lost them.</summary>
+    public bool Has(AbyssBlessing b) =>
+        AbyssDurations.Of(b) == AbyssDuration.WholeRun ? Record.Has(b) : Record.HasInForce(b, CurrentAct);
 
-    internal bool Has(AbyssShadow s) => Record.Has(s);
+    public bool Has(AbyssShadow s) =>
+        AbyssDurations.Of(s) == AbyssDuration.WholeRun ? Record.Has(s) : Record.HasInForce(s, CurrentAct);
 
-    private int CurrentAct => RunState.CurrentActIndex;
+    /// <summary>The headless suite's act: a modifier the harness builds has
+    /// no run. Null in every game.</summary>
+    public int? ActForTests;
+
+    private int CurrentAct => ActForTests ?? RunState.CurrentActIndex;
+
+    /// <summary>The Shadows on the enemies now, in the order applied.</summary>
+    public IReadOnlyList<AbyssShadow> ShadowsNow => Record.ShadowsInForce(CurrentAct);
+
+    /// <summary>
+    /// THE ACT ENDS (the game's act-change hook, which runs once the next act
+    /// is entered, never on a reload): every This act entry of the act just
+    /// left drops off. The effects stop by themselves (<see cref="Has(AbyssBlessing)"/>
+    /// reads the act); this brings each player's display relics into line:
+    /// an expired Blessing's relic goes, the Abyss Shadows list is redrawn.
+    /// The enemy badges need nothing: they are put on per combat from the
+    /// Shadows in force.
+    /// </summary>
+    public override async Task AfterActEntered()
+    {
+        foreach (var player in RunState.Players)
+        {
+            await AbyssDisplay.GrantTo(player, Record, CurrentAct);
+        }
+    }
+
+    /// <summary>The run's Abyss, found from a creature in it (the reaction
+    /// seams have a creature, not a run).</summary>
+    internal static SpiralAbyss? Of(Creature? creature) =>
+        In(creature?.Player?.RunState ?? creature?.CombatState?.RunState);
+
+    /// <summary>Overflow's factor on a reaction's own damage: 2 for a
+    /// reaction a player dealt while Overflow is in force, else 1. Called
+    /// from <c>CompanionOverhaulReactions.DamageMultiplier</c>, the one seam
+    /// every reaction's damage passes.</summary>
+    public static decimal OverflowFactor(Creature? dealer)
+    {
+        if (dealer == null || dealer.Player == null) return 1m;
+        var abyss = Of(dealer);
+        if (abyss == null || !abyss.Has(AbyssBlessing.Overflow)) return 1m;
+        return AbyssRules.OverflowFactor(dealerIsPlayer: true);
+    }
+
+    /// <summary>Wavering Moon: "Whenever you trigger an Elemental Reaction,
+    /// deal 3 damage to ALL enemies." Called from
+    /// <c>ReactionEffects.Resolve</c>, the single site a reaction resolves.
+    /// The damage is element-less, so it reacts with nothing and cannot loop.</summary>
+    public static async Task NoteReaction(PlayerChoiceContext choiceContext, Creature target, Creature? dealer)
+    {
+        if (!AbyssRules.WaveringMoonFires(dealer?.Player != null)) return;
+        var abyss = Of(dealer);
+        if (abyss == null || !abyss.Has(AbyssBlessing.WaveringMoon)) return;
+        if (dealer!.IsDead || dealer.CombatState == null) return;
+        var enemies = dealer.CombatState.HittableEnemies.ToList();
+        if (enemies.Count == 0) return;
+        await CreatureCmd.Damage(
+            choiceContext, enemies, AbyssNumbers.WaveringMoonDamage, ValueProp.Unpowered, dealer);
+    }
 
     // ---- Per-combat scratch, never saved: a combat restarts on reload. ----
 
@@ -137,6 +203,18 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
                     creature, AbyssNumbers.CrystallizeBlock, ValueProp.Unpowered, null);
             }
         }
+
+        // Bulwark: "enemies start each combat with 6 Block". Here, where the
+        // base game's Anchor gives its combat-start Block, so it is up for
+        // the player's first turn and clears at the enemies' first.
+        var combat = RunState.Players.Select(p => p.Creature?.CombatState).FirstOrDefault(c => c != null);
+        if (Has(AbyssShadow.Bulwark) && combat != null)
+        {
+            foreach (var enemy in combat.Enemies.Where(e => e.IsAlive).ToList())
+            {
+                await CreatureCmd.GainBlock(enemy, AbyssNumbers.BulwarkBlock, ValueProp.Unpowered, null);
+            }
+        }
     }
 
     // ---- Shadows that arrive with the room ------------------------------
@@ -149,8 +227,43 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         var isBoss = combatRoom.RoomType == RoomType.Boss;
 
         // The badges first (display only, AbyssDisplay): one per Shadow in
-        // force on every enemy that starts the fight.
-        foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, Record);
+        // force on every enemy that starts the fight. A This act Shadow of an
+        // earlier act is not in force, so it wears no badge.
+        var inForce = ShadowsNow;
+        foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, inForce);
+
+        // The combat-start powers, where the base game's Oddly Smooth Stone
+        // and Philosopher's Stone put theirs.
+        if (Has(AbyssShadow.Frenzy) && enemies.Count > 0)
+        {
+            await PowerCmd.Apply<StrengthPower>(
+                NoChoice(), enemies, AbyssNumbers.FrenzyStrength, null, null);
+        }
+
+        if (Has(AbyssShadow.ThornyGround) && enemies.Count > 0)
+        {
+            await PowerCmd.Apply<ThornsPower>(
+                NoChoice(), enemies, AbyssNumbers.ThornyGroundThorns, null, null);
+        }
+
+        var players = RunState.Players
+            .Select(p => p.Creature).Where(c => c is { IsDead: false }).Select(c => c!).ToList();
+        if (players.Count > 0)
+        {
+            if (Has(AbyssBlessing.BattleRhythm))
+            {
+                await PowerCmd.Apply<StrengthPower>(
+                    NoChoice(), players, AbyssNumbers.BattleRhythmStrength, null, null);
+                await PowerCmd.Apply<DexterityPower>(
+                    NoChoice(), players, AbyssNumbers.BattleRhythmDexterity, null, null);
+            }
+
+            if (Has(AbyssShadow.Withering))
+            {
+                await PowerCmd.Apply<WeakPower>(
+                    NoChoice(), players, AbyssNumbers.WitheringWeak, null, null);
+            }
+        }
 
         if (Has(AbyssShadow.Herald))
         {
@@ -179,8 +292,10 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // an enemy too. The two elite-entry Shadows are about entering combat,
         // so a summon does not take them.
         if (creature.Side != CombatSide.Enemy) return;
-        // A summoned enemy wears the badges too (display only).
-        AbyssDisplay.ShowShadows(creature, Record);
+        // A summoned enemy wears the badges too (display only). The
+        // combat-start Shadows (Frenzy, Thorny Ground, Bulwark) are about
+        // starting the combat, so a summon does not take them.
+        AbyssDisplay.ShowShadows(creature, ShadowsNow);
         if (Has(AbyssShadow.Herald)) await HeraldBuff(creature);
     }
 
@@ -361,10 +476,20 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
         CardModel? cardSource, CardPlay? cardPlay)
     {
-        if (!Has(AbyssBlessing.LeyLine) || dealer == null) return 0m;
-        return AbyssRules.LeyLineDamageDelta(
-            dealer.Side == CombatSide.Enemy, AuraCmd.Find(dealer) != null,
-            props.IsPoweredAttack(), amount);
+        if (dealer == null) return 0m;
+        var delta = 0m;
+        if (Has(AbyssBlessing.LeyLine))
+        {
+            delta += AbyssRules.LeyLineDamageDelta(
+                dealer.Side == CombatSide.Enemy, AuraCmd.Find(dealer) != null,
+                props.IsPoweredAttack(), amount);
+        }
+        if (Has(AbyssBlessing.VigorOfTheAbyss))
+        {
+            delta += AbyssRules.VigorDamageDelta(
+                dealer.Player != null, props.IsPoweredAttack(), dealer.CurrentHp, dealer.MaxHp);
+        }
+        return delta;
     }
 
     public override async Task AfterDamageReceived(
@@ -406,12 +531,14 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
 
     public override async Task AfterCombatVictory(CombatRoom room)
     {
-        if (!Has(AbyssBlessing.MoonlitRest)) return;
+        // Moonlit Rest (4, whole run) and Moonlit Spring (8, this act) stack.
+        var heal = AbyssRules.CombatEndHeal(Has(AbyssBlessing.MoonlitRest), Has(AbyssBlessing.MoonlitSpring));
+        if (heal <= 0) return;
         foreach (var player in RunState.Players)
         {
             var creature = player.Creature;
             if (creature == null || creature.IsDead) continue;
-            await CreatureCmd.Heal(creature, AbyssNumbers.MoonlitRestHeal);
+            await CreatureCmd.Heal(creature, heal);
         }
     }
 }

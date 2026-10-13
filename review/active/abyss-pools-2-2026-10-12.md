@@ -1,5 +1,14 @@
 # Spiral Abyss pools, round 2: "This act" next to "Whole run", 2026-10-12
 
+**Ruled 2026-10-12: pick 1 (a) and pick 2 (a), with two changes. Built.**
+
+[USER]: "Moonlit Spring sounds insanely strong even as a 1 act Blessing. I'd say bring it down to 8 to be safe (double the per-run amount) and don't retune the existing ones; nobody's done full runs on the spiral abyss yet, so there's nothing to tune against.
+Frenzy sounds like +1 strength for an act which might be too low."
+
+[USER], on Frenzy's wording: "Why the extra words? Just give enemies 2 Strength."
+
+So Moonlit Spring heals 8, not 10. Frenzy gives enemies 2 Strength at the start of each combat. There are no retunes. The tables below are what was built.
+
 [USER]: "I'm seeing some room here for 'Whole run' vs 'This floor' effects, and we should see if we can broaden the pool a little."
 
 **Evidence.** The packet is `scratchpad/abyss-pools/packet.md` (gitignored). It covers:
@@ -39,39 +48,42 @@ In none of the 24 examples does an effect last several floors without lasting th
 
 | Name | Text |
 |---|---|
-| Overflow | This act, Elemental Reactions deal double damage. |
-| Vigor of the Abyss | This act, while you are above half HP, your Attacks deal 3 additional damage. |
-| Moonlit Spring | This act, heal 10 HP at the end of each combat. |
-| Battle Rhythm | This act, start each combat with 1 Strength and 1 Dexterity. |
+| **Overflow** | This act, Elemental Reactions deal double damage. |
+| **Vigor of the Abyss** | This act, while you are above half HP, your Attacks deal 3 additional damage. |
+| **Moonlit Spring** | This act, heal 8 HP at the end of each combat. |
+| **Battle Rhythm** | This act, start each combat with 1 Strength and 1 Dexterity. |
 
 **New Blessings, Whole run** (Genshin's Abyssal Moon shockwaves):
 
 | Name | Text |
 |---|---|
-| Wavering Moon | Whenever you trigger an Elemental Reaction, deal 3 damage to ALL enemies. |
-| Starfell Draft | Card rewards show 1 additional card. |
+| **Wavering Moon** | Whenever you trigger an Elemental Reaction, deal 3 damage to ALL enemies. |
+| **Starfell Draft** | Card rewards show 1 additional card. |
 
-**Retunes:**
-- Abyssal Moon goes from 4 to 6. You called it "possibly the weakest", and it has never been taken.
-- Jade Shield goes from 8 to 10 Block.
-- Moonlit Rest stays at 4 HP; Moonlit Spring is its This-act sibling.
+**No retunes.** [USER]: "don't retune the existing ones; nobody's done full runs on the spiral abyss yet, so there's nothing to tune against." Abyssal Moon stays at 4, Jade Shield at 8 Block, Moonlit Rest at 4 HP. Moonlit Spring is Moonlit Rest's This-act sibling at 8, "double the per-run amount", and the two stack.
 
 **New Shadows, This act:**
 
 | Name | Text |
 |---|---|
-| Thorny Ground | This act, enemies start each combat with 2 Thorns. |
-| Bulwark | This act, enemies start each combat with 6 Block. |
-| Frenzy | This act, enemy Attacks deal 1 additional damage. |
+| **Thorny Ground** | This act, enemies start each combat with 2 Thorns. |
+| **Bulwark** | This act, enemies start each combat with 6 Block. |
+| **Frenzy** | This act, enemies start each combat with 2 Strength. |
+
+Frenzy was "enemy Attacks deal 1 additional damage". [USER]: "Frenzy sounds like +1 strength for an act which might be too low", then "Why the extra words? Just give enemies 2 Strength."
 
 **Shadows moving to This act:**
-- **Riptide** becomes "This act". It keeps its bite where it's most dangerous, early, and doesn't snowball for the rest of the run.
+- **Riptide** becomes "This act". It keeps its bite where it's most dangerous, early, and doesn't snowball for the rest of the run. Its text now says so:
+
+| Name | Text |
+|---|---|
+| **Riptide** | This act, whenever an enemy attack deals you unblocked damage, that enemy gains 1 Strength. |
 
 **New Shadow, Whole run:**
 
 | Name | Text |
 |---|---|
-| Withering | You start each combat with 1 Weak. |
+| **Withering** | You start each combat with 1 Weak. |
 
 **Totals:**
 - Blessings go from 8 to 14, 4 of them This act.
@@ -85,11 +97,18 @@ In none of the 24 examples does an effect last several floors without lasting th
 
 **Not proposed:** Shadows that scale by act. You ruled flat Shadows earlier ("Let's go with a) and see how that plays"), and the This-act split gives the same early-or-late texture without scaling.
 
+## How it was built
+
+- **Durations.** Each entry's duration is fixed by its name (`AbyssDurations` in `klee-mod/KleeCode/Abyss/AbyssEntries.cs`). The run already saved the act of each pick, so nothing new is saved. A This act entry is in force only in the act it was taken in. A run continued mid-act keeps it; one continued after the act has ended has lost it.
+- **The page.** Each page shows at least one Whole run and one This act Blessing while the pool still holds both (`AbyssDraft.MixedPage`). A passed entry may come back in a later act. A taken one never does.
+- **The screen.** Each card's tag reads "Whole run" or "This act" (a blue chip for This act). The top-right strip lists only what is in force. A This act icon carries a "This act" caption, and every icon's hover names its duration.
+- **At act end.** An expired Blessing's relic is removed, the Abyss Shadows relic's list is redrawn, and enemies stop wearing the expired Shadow's badge.
+- **Co-op.** Unchanged: the party agrees on one Blessing, and the enemies take one of the two passed Shadows at random.
+- **Icons.** The ten new entries wear stand-in icons borrowed from the first eight until their own are fetched (`BACKLOG.md`).
+
 ## For [USER]
 
-1. **Durations.**
-   - **(a) Default:** add This act, with each page mixing both durations and Riptide moving to This act.
-   - (b) Everything stays Whole run; only broaden the pools.
-2. **The new entries.**
-   - **(a) Default:** all ten new entries, and the two retunes.
-   - (b) Blessings only. The Shadows wait for another seat round.
+Ruled 2026-10-12; see the top of this page.
+
+1. **Durations.** **(a), ruled:** add This act, with each page mixing both durations and Riptide moving to This act.
+2. **The new entries.** **(a), ruled, changed:** all ten new entries. Moonlit Spring heals 8. Frenzy gives enemies 2 Strength. There are no retunes.
