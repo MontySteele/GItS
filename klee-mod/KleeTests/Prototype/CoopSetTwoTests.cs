@@ -84,7 +84,7 @@ public class CoopSetTwoTests
             Face(new ProtoKoShrapnel()));
         Assert.Equal(
             "The first time each turn one of your [gold]Bombs[/gold] goes "
-            + "off, each other player gains 1 [gold]Energy[/gold].",
+            + "off, each other player gains {energyPrefix:energyIcons(1)}.",
             Face(new ProtoKoSparksForEveryone()));
     }
 

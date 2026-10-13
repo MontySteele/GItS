@@ -42,7 +42,7 @@ public sealed class ProtoKoBlastShield : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Blast Shield"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Return this card to your hand."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Return this card to your [gold]Hand[/gold]."),
     };
 
     // `EB-732`, Blast Shield: the played card goes back to the HAND

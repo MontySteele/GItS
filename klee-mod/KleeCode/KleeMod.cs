@@ -246,10 +246,8 @@ public static class KleeMod
                     Powers.FurinaCards.TutorPromptText,
                 [Powers.FurinaCards.BowPromptKey] =
                     Powers.FurinaCards.BowPromptText,
-                // VARKA (the Oath rework): Knights' Roll Call+'s grid and
-                // Change of Guard's, on the same terms.
-                [Powers.VarkaRules.KnightPromptKey] =
-                    Powers.VarkaRules.KnightPromptText,
+                // VARKA (the Oath rework): Change of Guard's grid, on the
+                // same terms.
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
             });
@@ -471,6 +469,9 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.CurrentElementKey + ".title"] =
                         "Current element",
                     [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",
+                    // The card text pass (2026-10-12): Boreas's Fang's hover.
+                    [Cards.ArmKeywordTips.AscensionReturnKey + ".title"] =
+                        "Four Winds' Ascension",
                     // Co-op notes pick 2 (2026-10-02): the key is also
                     // `KleeKeywords.Knight`'s, the printed "Knight." line,
                     // and the keyword's own hover reads this row.

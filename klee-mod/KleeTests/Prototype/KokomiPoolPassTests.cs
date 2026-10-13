@@ -171,7 +171,8 @@ public class KokomiPoolPassTests
     }
 
     // ======================================================================
-    // 4. FLANK -- the intent-keyed set, fixed when the Plan is written
+    // 4. FLANK -- the intent-keyed set, read when the Plan is carried out
+    //    (the Kokomi level pass, 2026-10-12)
     // ======================================================================
 
     [Fact]
@@ -184,29 +185,23 @@ public class KokomiPoolPassTests
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.Damage, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.EnemiesIntendingAttack, clause.Aim);
-        // EMPTY UNTIL THE PLAN IS WRITTEN, which is the whole shape of the
-        // card: the printed clause is a rule and the set is this board's.
+        // Nothing is captured: the set is the board's at carry-out.
         Assert.Null(clause.Targets);
     }
 
     [Fact]
-    public void The_set_is_captured_when_the_plan_is_written()
+    public void The_set_is_read_when_the_plan_is_carried_out()
     {
-        // R250's rule for an aimed Plan, applied to a SET: what the player is
-        // reading when they decide to write it is the intents on screen NOW,
-        // so the capture is in `Schedule` and not in the carry-out. A read at
-        // resolution would answer about the next turn's intents instead.
-        // Twin: `test_the_intent_set_is_fixed_when_the_plan_is_written`.
+        // The Kokomi level pass (2026-10-12): "each enemy that intends to
+        // attack" is read at carry-out, as Tide Wall reads its intent. The
+        // writing captures nothing. Twin:
+        // `test_the_intent_set_is_read_when_the_plan_is_carried_out`.
         var schedule = typeof(KokomiPlan).GetMethod("Schedule", All)!;
-        Assert.Contains(Il.Calls(schedule),
-                        c => c.Contains("KokomiPlan.IntendingAttack"));
-
-        // And nothing in the carry-out asks the board what it intends.
+        Assert.DoesNotContain(Il.Calls(schedule),
+                              c => c.Contains("KokomiPlan.IntendingAttack"));
         var aimed = typeof(KokomiPlan).GetMethod("Aimed", All)!;
-        Assert.DoesNotContain(Il.Calls(aimed),
-                              c => c.Contains("IntendsAttack"));
         Assert.Contains(Il.Calls(aimed),
-                        c => c.Contains("Planned.get_Targets"));
+                        c => c.Contains("KokomiPlan.IntendingAttack"));
     }
 
     [Fact]
@@ -224,19 +219,6 @@ public class KokomiPoolPassTests
             c => c.Contains("IntendsAttack"));
     }
 
-    [Fact]
-    public void An_empty_set_still_writes_a_plan_and_says_so()
-    {
-        // "The Plan is written and carries out nothing." A Plan that silently
-        // declined to queue would make the badge and the strip lie about the
-        // queue's depth, so the entry is real and the LABEL is what tells the
-        // player -- the same channel Crystal Collapse's "nothing" uses.
-        // Twin: `test_an_empty_intent_set_is_a_plan_that_carries_out_nothing`.
-        var label = typeof(KokomiPlan).GetMethod("AimedLabel", All)!;
-        Assert.Contains(Il.Strings(label), s => s.Contains("nothing"));
-        Assert.Contains(Il.Calls(typeof(KokomiPlan).GetMethod("Schedule", All)!),
-                        c => c.Contains("KokomiPlan.AimedLabel"));
-    }
 
     // ======================================================================
     // 5. WELL LAID -- cut by the Casket pass (2026-09-28); its pins left

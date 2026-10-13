@@ -42,7 +42,7 @@ public sealed class ProtoKoDamageReport : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Damage Report"),
-        ("description", "Whenever you draw a status, gain {PowerAmount:diff()} [gold]Block[/gold] and 1 [gold]Spark[/gold]."),
+        ("description", "Whenever you draw a Status, gain {PowerAmount:diff()} [gold]Block[/gold] and 1 [gold]Spark[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

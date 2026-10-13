@@ -51,7 +51,7 @@ public sealed class ProtoKkWatatsumiDrill : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi Drill"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your hand."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

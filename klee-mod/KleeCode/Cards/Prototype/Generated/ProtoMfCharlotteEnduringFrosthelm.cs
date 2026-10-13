@@ -56,7 +56,7 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — First-Person Shutter"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. At the start of your next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

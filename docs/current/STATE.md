@@ -111,7 +111,7 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   with a Plan line since the jellyfish build, below).
   A written Companion is carried out at its printed rate after the
   Bake-Kurage applies Hydro to its target; Gorou's four are her own cards
-  with their own Plan lines. Pool 78 (21 / 37 / 20) plus five co-op cards
+  with their own Plan lines. Pool 78 (20 / 38 / 20) plus five co-op cards
   and two Ancients (the Ancient audit, ruled 2026-10-12): Divine Strategy
   from Darv's Tome, and Princess of Watatsumi from Orobas's Archaic Tooth on
   Kurage's Oath ("Gain 9 [12] Block. Draw 2 cards. Or plan: Deal 3 [5] Hydro
@@ -130,8 +130,17 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Endless Shoal the Uncommon "a Sting per Plan carried out", and adds All
   Streams Flow to the Sea (Rare) and The Shape of Water (Uncommon); Measured
   Breath and Spring Tide are cut. Telemetry counts Stings made, played,
-  written and lost per fight. Next: a Kokomi seat round on that build, then
-  [USER]'s run on it.
+  written and lost per fight. The level pass
+  (`review/active/kokomi-level-pass-2026-10-12.md`, ruled at all defaults)
+  takes the big numbers down (Coral Crash 1 [0], Tidal Rebuke 2 [1], Flotsam
+  Surge 10 [13], Steady Tide 11 [14], Change of Plans to Uncommon) and gives
+  the odd cards a floor (Tideturn 8 plus 8 per Plan, Shoal of Spears hits
+  once more than the Plans waiting, Drowning Pressure brings its own Weak and
+  Vulnerable, Sea's Reproach 5 [7], Flank reads intents at carry-out, Kelp
+  Wall's Plan a flat 12 [15], War Banner Block now and permanent Strength
+  planned, Crystal Collapse copies the last Companion this combat, Orders from
+  the Shrine chooses 1 of 3 at 1 [0]). Next: a two-seat Kokomi round on that
+  build, then the review [USER] asked for "once things are levelled out".
 - **Furina: Prototype, the Salon's Tab (2026-10-05).** Her rules are the
   research proposal (`review/active/furina-research-proposal-2026-10-05.md`,
   sec.2 rules, sec.16 slice and curtain call, sec.17's two edits); [USER]:
@@ -232,7 +241,16 @@ Per-card readings for every kit: `docs/notes/prototype-surface-provenance.md`.
   Varka - wow, ok, sounds like we've outright solved the open issues."): the
   Pyro core is settled, Ember Cleave 9 [11], switch against mono unchanged, a
   card that would change his current element says "(Makes Pyro current)" in
-  combat. Next: [USER]'s playtest, then Balance.
+  combat. The last pass before Balance
+  (`review/active/varka-last-pass-2026-10-12.md`, ruled 2026-10-12: "On
+  Varka - agreed with all defaults on both picks!"): Northwind Avatar's
+  second hit is 8 [12]; twelve always-skipped cards get a floor (Deep Freeze
+  applies Weak too, Tidal Bulwark gains 6 [8] Block first, Knights' Roll Call
+  chooses 1 of 3, Violet Storm no longer discards, Storm Battery Retains,
+  Charge of the Knights deals 8 plus 5 [7] per Knight, Retaliating Tide loses
+  its Hydro Oath cap, and five cost cuts: Crosscurrent 0, Azure Devour 1,
+  Grand Master's Verdict 2, Boreas Unbound 2, Weathervane 1). Next:
+  [USER]'s playtest, then Balance.
 
 ## Elements
 

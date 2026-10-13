@@ -133,8 +133,9 @@ def test_undertide_lance_plans_a_flat_eighteen(overhaul):
 def test_drowning_pressure_counts_weak_and_vulnerable_stacks(overhaul):
     """The Kokomi card pass (2026-10-11, pick 1): "Deal 3 [4] Hydro damage for
     each Weak and Vulnerable on the enemy" -- STACKS. 2 Weak + 2 Vulnerable
-    is 4, so 12; the Vulnerable then multiplies the hit (x1.5) to 18. Poison
-    is a debuff and not counted; an aura is not counted."""
+    is 4; the card's own 1 Weak and 1 Vulnerable (the Kokomi level pass,
+    2026-10-12) make 6, so 18; the Vulnerable then multiplies the hit (x1.5)
+    to 27. Poison is a debuff and not counted; an aura is not counted."""
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
     powers.apply_power(st, enemy, "weak", 2, applier=st.player)
@@ -142,14 +143,27 @@ def test_drowning_pressure_counts_weak_and_vulnerable_stacks(overhaul):
     powers.apply_power(st, enemy, "poison", 3, applier=st.player)
     assert kokomi_plan.weak_vuln_stacks(enemy) == 4
     card = _row("proto_kk_drowning_pressure")
-    assert card.effects[0]["amount_formula"] == {
+    assert card.effects[:2] == [
+        {"op": "apply_power", "power": "weak", "amount": 1, "target": "enemy"},
+        {"op": "apply_power", "power": "vulnerable", "amount": 1,
+         "target": "enemy"}]
+    assert card.effects[2]["amount_formula"] == {
         "base": 0, "per": 3, "count": "weak_vuln_stacks_on_target"}
     assert effects._runtime_count(st, "weak_vuln_stacks_on_target") == 4
     before = enemy.hp
     _write(st, card, energy=1)
-    assert before - enemy.hp == 18                 # 12, x1.5 Vulnerable
-    assert _up("proto_kk_drowning_pressure").effects[0][
+    assert before - enemy.hp == 27                 # 18, x1.5 Vulnerable
+    assert _up("proto_kk_drowning_pressure").effects[2][
         "amount_formula"]["per"] == 4
+
+
+def test_drowning_pressures_floor_is_its_own_debuffs(overhaul):
+    """The Kokomi level pass (2026-10-12): on a clean enemy it applies 1 Weak
+    and 1 Vulnerable first, so it deals 6, x1.5 Vulnerable = 9."""
+    enemy = make_enemy(hp=200)
+    st = kokomi_state(enemies=[enemy])
+    _write(st, _row("proto_kk_drowning_pressure"), energy=1)
+    assert 200 - enemy.hp == 9
 
 
 def test_undercurrent_snare_plans_vulnerable_on_all(overhaul):

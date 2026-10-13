@@ -360,7 +360,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_PLAN_COMPANION",
                     # The Kokomi round-1 fixes (2026-10-12): the Plan tip a
                     # card that names Plans with no Plan line carries.
-                    "KLEEMOD-ARM_PLAN_NO_LINE"}
+                    "KLEEMOD-ARM_PLAN_NO_LINE",
+                    # The card text pass (2026-10-12): Boreas's Fang's hover
+                    # for the Ascension's reshuffle clause, a relic's tip.
+                    "KLEEMOD-ARM_VARKA_ASCENSION_RETURN"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -760,14 +763,16 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
     (2026-10-01): Barbara: Wellspring Hymn prints Frail, the word the join
     above carried for tomorrow. Six since the Repay floor (2026-10-09):
     Soothing Waters and Pneuma Tides print Vigor. Seven since the Kokomi
-    re-founding (2026-10-12): five faces name Ethereal."""
+    re-founding (2026-10-12): five faces name Ethereal. Six again since the
+    Kokomi level pass (2026-10-12): General's War Banner, the one face that
+    printed Dexterity, gains Block now."""
     printed = {keyword.word
                for path in _prototype_files()
                for description in _descriptions(
                    path.read_text(encoding="utf-8"))
                for keyword in gen.BASE_KEYWORDS
                if keyword.attach in gen.base_keyword_tip_calls(description)}
-    assert printed == {"Vulnerable", "Weak", "Strength", "Dexterity",
+    assert printed == {"Vulnerable", "Weak", "Strength",
                        "Frail", "Vigor", "Ethereal"}
 
 
@@ -854,6 +859,9 @@ NO_GLOSSARY_ROW_OWED = {
     # Status cards go to the discard pile, as in the base game (2026-10-03).
     "Discard Pile": "a zone the page prints by name, with its contents",
     "Draw Pile": "a zone the page prints by name, with its count",
+    # The card-text pass (2026-10-12) golds the Hand as the base game does;
+    # Orders from the Shrine is the first face (the Kokomi level pass).
+    "Hand": "a zone the page prints by name, with its contents",
     # The text pass of 2026-10-08 golded the cards a face makes, as the base
     # golds `OVERCLOCK`'s Burn: like Dazed, the page prints each with its own
     # face once it is added.
@@ -864,6 +872,13 @@ NO_GLOSSARY_ROW_OWED = {
     # Watchful Shoal (Kokomi round-3 changes, 2026-10-12).
     "Wards": "a token card the page prints with its own face once it is added",
     "Sea Glass": "a token card the page prints with its own face once added",
+    # The card text pass (2026-10-12): the hand is a zone, golded as the base
+    # golds it; the two cards a face makes, golded as Burn is.
+    "Hand": "a zone the page prints by name, with its contents",
+    "Alice's Mine": "a card the page prints with its own face once it is added",
+    "Pop!": "a card the page prints with its own face once it is added",
+    "Four Winds' Ascension": "Varka's card, which the page prints with its own "
+                              "face once it is added",
     # The elements. None is a glossary row and none should be: the element is
     # the card's own indicator (`blindplay_faces._element` puts it on the card
     # LINE), and every pairing it can make is a `REACTION_KEYWORDS` row on any
@@ -1297,7 +1312,7 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
         "Exhausts. Acts at the end of your turn. When it leaves, this card "
         "goes to your Discard Pile.")
     assert rows["Charlotte"] == (
-        "The first time one of your cards Repays each turn, draw 1 card. "
+        "The first time each turn one of your cards Repays, draw 1 card. "
         "Act: Repay 2. Gain 1 Block for any HP it could not Repay.")
     for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",
                  "Mademoiselle Crabaletta", "Ousia", "Pneuma"):
@@ -1343,7 +1358,7 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
 #: The base game's own keywords and zones: the game tips the keyword, and the
 #: page prints the zone by name.
 GOLD_BASE_GAME = {"Block", "Energy", "Exhaust", "Exhausted", "Exhausts",
-                  "Discard Pile", "Draw Pile", "Exhaust Pile"}
+                  "Discard Pile", "Draw Pile", "Exhaust Pile", "Hand"}
 #: The six elements: the card wears the element's gem, whose keyword carries
 #: the Applies tip and the reaction previews (`KleeCardTooltips.ForCard`).
 GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}
@@ -1352,7 +1367,9 @@ GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}
 #: also preview the card they name (`KokomiCards.WithStingPreview`); Wards
 #: since Watchful Shoal's rewrite (Kokomi round-3 changes, 2026-10-12).
 GOLD_CREATED_CARDS = {"Dazed", "Confiscated", "Sting", "Stings", "Ward",
-                      "Wards", "Sea Glass"}
+                      "Wards", "Sea Glass",
+                      # The card text pass (2026-10-12, rule 9).
+                      "Alice's Mine", "Pop!", "Four Winds' Ascension"}
 #: Words whose tip attaches off an op rather than off the table.
 GOLD_OP_TIPS = {"Summon": "the `stage_guest` op attaches ForSummon"}
 #: Names, each defined somewhere a reader meets it.

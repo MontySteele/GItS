@@ -9,9 +9,9 @@ by their loc id. Lengths are RENDERED characters: BBCode tags stripped, every
 `{hole}` counted as one numeral, newlines as spaces. `tools/lint_text_conventions.py`
 enforces the ceilings and spellings on every kit's faces (`proto_ko_`, `kk_`,
 `vk_`, `fs_`, `mc_`, `mi_`, `mf_`), the keyword tips (arm, base and the
-`KLEEMOD-*` reaction rows), the prototype power badges, the potions and the
-Ancient cards; `--report` reads the top-level power badges and relics the gate
-does not yet hold, and `--census` flags every string over its target.
+`KLEEMOD-*` reaction rows, the Guest Star tips), the prototype power badges,
+the potions, the four kits' relics and the Ancient cards; `--report` reads the
+top-level power badges and the Abyss relics the gate does not hold, and `--census` flags every string over its target.
 
 ## Ceilings, measured
 
@@ -104,6 +104,32 @@ its TARGET is what a rewrite aims below.
 15. **A card says what it does and nothing about why.** No "so that", no
     "which means", no restated rule on every carrier: the word carries the
     rule in its tip, the card prints the word.
+16. **American English.** [USER], 2026-10-12: "Use American English, not
+    British English." "Gray", "color", "defense", "theater"; the lint's
+    `british` spelling holds the common ones.
+17. **One phrasing per idea** (the card text pass, 2026-10-12,
+    `review/active/card-text-pass-2026-10-12.md`; the lint name in brackets
+    where a regex holds it):
+    - "Whenever" for a trigger that repeats, "When" only for a one-time one
+      ("When it goes off" on the one Bomb a card placed).
+    - "The first time each turn you X, Y." Never "Once a turn, when you X",
+      never "The first time you X each turn" (`first-time-order`).
+    - A delayed one-time effect opens with "Next turn,"; a repeating one with
+      "At the start of your turn,". Never "At the start of your next turn",
+      never a trailing "... next turn." (`next-turn`, faces only).
+    - Status and Curse are capitalized, plain, as the base's card types are
+      (`status-lowercase`).
+    - A reaction is triggered: "If it triggers an [gold]Elemental
+      Reaction[/gold]" (`reaction-verb`). "Whenever an [gold]Elemental
+      Reaction[/gold] happens" is any reaction on the board; "Whenever you
+      trigger" is only your own.
+    - Energy is the base game's icon, `{energyPrefix:energyIcons(N)}` or an
+      `EnergyVar`'s `{Energy:energyIcons()}`, never the word (`energy-word`,
+      faces only: a keyword tip is a plain string the game does not format).
+    - "[gold]Set off[/gold]" is golded wherever it is printed, as the verb
+      (`set-off-prose`, faces only).
+    - A Guest Star's hover says what its card face says, in the face's own
+      words, and never in parentheses.
 
 ## This mod's own words, spelled once
 
@@ -113,11 +139,11 @@ its TARGET is what a rewrite aims below.
 | `[gold]Set off[/gold]` | the verb, sentence-initial: "[gold]Set off[/gold]. Deal 4 damage."; "[gold]Set off[/gold] a random enemy's [gold]Bombs[/gold]." | never as prose; the event is "goes off" |
 | `[gold]Mine[/gold]` | "Place a [gold]Mine[/gold] 4 on ALL enemies." | a Mine is a Bomb; "goes off when its enemy attacks you" |
 | `[gold]Spark[/gold]` / `[gold]Sparks[/gold]` | the price sits in the cost slot; the body does not restate it; "gain 1 [gold]Spark[/gold]" | "Some cards cost Sparks instead of Energy." |
-| `[gold]Plan[/gold]` | the line: "[gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage." A plan-only row leads with "Play on the [gold]Bake-Kurage[/gold]." (codegen) | the Bake-Kurage "carries out" a Plan; a Plan "hits the front enemy" unless it says ALL |
+| `[gold]Plan[/gold]` | the line: "[gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage." A plan-only row leads with "Play on the [gold]Bake-Kurage[/gold]." (codegen). Putting a card on the Bake-Kurage is to "plan" it, the one verb ([USER], 2026-10-12: "Let's stick with "Plan" for consistency"): "plan a card", "when planned", "a card you could have planned". Never "write", "written" or "play on the Bake-Kurage" in prose | the Bake-Kurage "carries out" a Plan; a Plan is "waiting"; a Plan "hits the front enemy" unless it says ALL |
 | `[gold]Mend[/gold] N` | "[gold]Mend[/gold] 10." | "heal N HP, but never above the HP you had at the start of this combat" |
 | `[gold]Bake-Kurage[/gold]` | the pet's name, always; "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], draw 1 card." | never "the jellyfish" |
 | `[gold]Swirl[/gold]` | a verb with the base's targets: "[gold]Swirl[/gold] the enemy." "[gold]Swirl[/gold] ALL enemies." "Deal 8 [gold]Anemo[/gold] damage to a random enemy and [gold]Swirl[/gold] it." A sweep of the auras present at play is "[gold]Swirl[/gold] every aura." (Wall of Gales, Bottled Gale): the code takes the aura-wearing enemies once and does not Swirl one that gains an aura during the sweep, so "ALL enemies" would promise more. Never "Swirl an enemy's aura", never a bare "Swirl.", never "the element Swirled": "that element" | "Whenever a [gold]Swirl[/gold] happens" |
-| `[gold]Elemental Reaction[/gold]` | the shipped spelling of the noun, kept, with its own tip (`ArmKeywordTips.ForElementalReaction`): "If it causes an [gold]Elemental Reaction[/gold], ...". The VERB "react" is admitted and needs no gold: "a [gold]Bomb[/gold] reacted this turn", "makes one of your [gold]Bombs[/gold] react". A hit "causes" a reaction; "sets off" is the Bomb's verb and never the reaction's | "reaction" lowercase as a noun is never printed |
+| `[gold]Elemental Reaction[/gold]` | the shipped spelling of the noun, kept, with its own tip (`ArmKeywordTips.ForElementalReaction`): "If it triggers an [gold]Elemental Reaction[/gold], ...". The VERB "react" is admitted and needs no gold: "a [gold]Bomb[/gold] reacted this turn", "makes one of your [gold]Bombs[/gold] react". A hit "triggers" a reaction (the card text pass, 2026-10-12; "causes" retired); "Set off" is the Bomb's verb and never the reaction's | "reaction" lowercase as a noun is never printed |
 | Element application (all six) | The text names the element AND the card wears its gem. [USER], 2026-10-02, after a co-op run: "Unify the language across all cards - say if it does an element and also apply the symbol to the card". This reverses the 2026-09-01 rule, under which the gem replaced the sentence. A hit that applies its element: "Deal 6 [gold]Pyro[/gold] damage." (also "to ALL enemies", "to a random enemy", "N times", "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold]."); only the element word is added before "damage", and a Kokomi Plan hit is Hydro: "[gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage." An aura with no hit: "Apply [gold]Hydro[/gold] to an enemy." / "Apply [gold]Hydro[/gold] to ALL enemies." A Swirl keeps its verb and adds no word (it is Anemo by definition); its card wears the Anemo gem. The gem is `KleeKeywords.Applies*` at `AutoKeywordPosition.None`, drawn by `Vfx/ElementBadge.cs`: one gem per card, the first aura element its face declares, else Anemo, else Geo. `tools/lint_element_text.py` holds every prototype face to the words. | |
 | `[gold]Spend[/gold]` N | Furina. As a mode: "Deal 6 damage. [gold]Spend[/gold] 5: deal 12 and draw 2 cards instead."; as a fixed price, its own sentence first: "[gold]Spend[/gold] 4. Deal 11 [gold]Hydro[/gold] damage."; spend-all: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage."; up to X (the Spend paper, 2026-10-10), the base game's "for each": "Deal 5 [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] up to 10: deal 1 more for each." The tip: "Pay that much Fanfare. Offered only if you have enough. Spend up to X pays X, or all you have if that is less." | she "spends" Fanfare; a Spend mode she cannot afford is not offered |
 | `[gold]Fanfare[/gold]` | Furina's one number, never a bar or a meter: "gain 3 additional [gold]Fanfare[/gold]", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]". The tip (shortened after the 2026-10-11 playtest): "Gain 1 for each HP you lose or Repay. Spend uses it. Resets after each combat." | the gauge beside her portrait |
@@ -125,13 +151,14 @@ its TARGET is what a rewrite aims below.
 | `Guest Star` | the card's keyword (its tip: "Acts at the end of your turn. Summoning one already on stage makes it act and stay."); a face that names the class prints the words: "Whenever a Guest Star joins the stage" | |
 | `[gold]Drain[/gold]` N | Furina (the Salon's Tab, 2026-10-05). A price in HP, never a meter. As a mode: "Deal 7 damage. [gold]Drain[/gold] 3: deal 12 instead."; as a fixed price, its own sentence first: "[gold]Drain[/gold] 5. Deal 20 damage." A Drain may go past the line (her HP minus the Drain buffer she has left, the buffer being 1/4 of her Max HP each combat, 2026-10-11); a card that would take her to 0 HP is unplayable, and a Drain mode that would is not offered. The tip (one sentence since the 2026-10-11 playtest, "rather verbose"): "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns after combat; more than that only Repay returns." (The Drain buffer, 2026-10-11: counted in HP drained, so a hit never uses it up.) The line's number and definition are on the Drained counter's hover: "Drain line N HP (your HP minus your Drain buffer: 1/4 of your Max HP, less what you have drained)". | she "drains" HP; the counter beside the Fanfare gauge reads "Drained N"; the floor is "the line" |
 | `[gold]Repay[/gold]` N | "[gold]Repay[/gold] 3." / "[gold]Repay[/gold] all your drained HP." The Repay floor (2026-10-09): "[gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold]." (Vigor the same; damage: "Deal 6 damage, plus 1 for any HP it could not [gold]Repay[/gold]."). The tip: "Regain that much drained HP. It never returns more than you drained." Never "heal", which is the base's word for HP from anywhere | she "repays" drained HP; HP returned by the end of combat is "the curtain call", not a Repay |
-| `[gold]Companion[/gold]`, `[gold]Energy[/gold]` | golded (the mod has no energy icon var) | |
+| `[gold]Companion[/gold]` | golded; a card that makes one says "a random Common Inazuma [gold]Companion[/gold]", never "Companion card" for the card made | |
+| energy | the base game's icon, never the word (the card text pass, 2026-10-12): a fixed amount is `{energyPrefix:energyIcons(N)}` ("Gain {energyPrefix:energyIcons(2)}."), an upgradable one an `EnergyVar` printed `{Energy:energyIcons()}`. A mode LABEL the bridge reads keeps the words (codegen `label_energy_words`) | |
 | `[gold]Knight[/gold]` / `[gold]Knights[/gold]` | Co-op notes pick 2 ([USER], 2026-10-02): every Knight (a Varka Companion card, `VarkaRules.IsKnight`: the 17 colon-titled rows, the four starter-only ones included) prints "**Knight.**" as its first line, the way a card prints Exhaust. The line is the keyword rail (`KleeKeywords.Knight` at `AutoKeywordPosition.Before`, declared by codegen from `personal_pool: varka`) and is never typed into a row. A card written against Knights golds the bare word, singular or plural: "If you played a [gold]Knight[/gold] this turn", "Add a random [gold]Knight[/gold] to your hand.", "for each [gold]Knight[/gold] you played this combat". Never "Knight card", and on a Varka card "Companion" never means a Knight. The printed line and the golded word hover one tip, key `KLEEMOD-ARM_VARKA_KNIGHT`: "One of Varka's Companions. Playing one makes its element your current element. Geo does not." A relic that names a Knight golds it the same way and attaches the same tip. | a Knight is "played"; Noelle is a Geo Knight and sets no element |
 | `[gold]Oath[/gold]` | Varka's count, one per element. The element is golded and leads: "gain 1 [gold]Pyro[/gold] [gold]Oath[/gold]", "for each [gold]Cryo[/gold] [gold]Oath[/gold]". His current element's is "[gold]Oath[/gold] of your [gold]current element[/gold]" (one spelling; never "your current element's Oath", never "for each Oath, as your current element"). The tip: "1 Oath per element a card applies, plus 1 per element it Swirls. Kept all fight. Element cards read their own, others the current." | he "gains" Oath |
 | `[gold]current element[/gold]` | two words, lowercase, one span: "Apply your [gold]current element[/gold] to an enemy.", "deal 3 for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element" | it "becomes" or "changes"; a card "switches" it (the switch hover) |
 | `[gold]Tamakushi Casket[/gold]` | Kokomi's relic, by its full name. Since the re-founding (2026-10-12) it keeps no count: "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain 3 [gold]Block[/gold]." (Open the Casket and Dusk retired the same day; start rather than end of turn by [USER]'s ruling that day.) | |
 | a card a face makes (`Sting`, `Ward`, `Sea Glass`, `Pop!` and the rest) | golded on the face that makes it, as the base golds `OVERCLOCK`'s Burn: "Add 2 [gold]Stings[/gold] to your hand." The card itself is the definition; the page prints its face once it is added | |
-| a pile | the base's capitals and gold: "[gold]Draw Pile[/gold]", "[gold]Discard Pile[/gold]", "[gold]Exhaust Pile[/gold]". Never lowercase "discard pile" on a face | |
+| a pile | the base's capitals and gold: "[gold]Hand[/gold]", "[gold]Draw Pile[/gold]", "[gold]Discard Pile[/gold]", "[gold]Exhaust Pile[/gold]". Never lowercase "your hand" or "discard pile" on a face (`hand-plain`, `bare-hand`, `pile-plain`) | |
 | co-op targets | three meanings, one spelling each. A chosen ally: "Another player gains 6 [gold]Block[/gold]." / "Another player's next Attack this turn ..."; every ally: "each other player"; everyone, you included: "each player" | |
 | a repeating effect | "For N turns, at the start of your turn X." / "For N turns, at the end of your turn X." No comma after the timing clause (the ten companion rows' spelling). A card's own duration on a stat is rule 9's "Gain 2 [gold]Dexterity[/gold] for 2 turns." Never "At the start of your next N turns" or "At the end of each of your next N turns" | |
 | a delayed one-shot | "In 2 turns, deal 12 [gold]Hydro[/gold] damage to a random enemy." Never "After 2 turns" | |
@@ -154,8 +181,10 @@ static `description` and its `smartDescription`, which no card raises any more
 class stays until its tests and the telemetry that reads its counters are
 retired, and the report does not read "detonates" on it.
 
-**Rows held for `klee-next`:** the lint's `DEFERRED` table names the Klee rows
-the 2026-10-08 pass widened a spelling over (Team Effort, Sparkling Burst,
-Treasure Map, Come Back and Play!), because Klee is frozen at Balance on `main`.
-The edits are written out in `docs/notes/klee-text-pass-pending-2026-10-08.md`;
-the table has rot semantics and empties when they land.
+**Rows held back:** the lint's `DEFERRED` table is empty. Its four Klee rows
+(Team Effort, Sparkling Burst, Treasure Map, Come Back and Play!) took their
+spellings in the card text pass of 2026-10-12.
+
+**Carried by the card text pass (2026-10-12):** Boreas's Fang and Wolf's
+Gravestone, whose faces the pass's paper gives word for word over the relic
+ceiling, and Lynette's guest tip (146), which the lint first read that day.

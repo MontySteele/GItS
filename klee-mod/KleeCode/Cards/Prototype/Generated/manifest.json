@@ -1182,7 +1182,7 @@
       "block": 3
     },
     "proto_kk_coral_crash": {
-      "formula_base": 4
+      "cost": -1
     },
     "proto_kk_dawn_tide": {
       "cost": -1
@@ -1205,7 +1205,7 @@
       "plan_damage": 3
     },
     "proto_kk_flotsam_surge": {
-      "damage": 4
+      "damage": 3
     },
     "proto_kk_grand_design": {
       "retain": true
@@ -1255,7 +1255,7 @@
       "damage": 2
     },
     "proto_kk_orders_from_the_shrine": {
-      "upgraded_grant": true
+      "cost": -1
     },
     "proto_kk_pearl_current": {
       "damage": 1,
@@ -1304,7 +1304,7 @@
       "upgraded_grant": true
     },
     "proto_kk_seas_reproach": {
-      "cost": -1
+      "power_amount": 2
     },
     "proto_kk_second_wave": {
       "damage": 2
@@ -1374,6 +1374,7 @@
       "kokomi_amount": 1
     },
     "proto_kk_tideturn": {
+      "formula_base": 2,
       "formula_per": 2
     },
     "proto_kk_treatise": {
@@ -1896,7 +1897,8 @@
       "power_amount": 1
     },
     "proto_mi_gorou_war_banner": {
-      "power_amount": 1
+      "block": 3,
+      "plan_strength": 1
     },
     "proto_mi_heizou_heartstopper": {
       "add": {
@@ -2100,7 +2102,7 @@
       "damage": 3
     },
     "proto_vk_knights_roll_call": {
-      "choose_knight": true
+      "upgraded_knight": true
     },
     "proto_vk_lisa_lightning_rose": {
       "block": 2,
@@ -2199,6 +2201,7 @@
       "varka_base": 2
     },
     "proto_vk_tidal_bulwark": {
+      "block": 2,
       "formula_per": 1
     },
     "proto_vk_twin_gales": {
@@ -2208,7 +2211,7 @@
       "innate": true
     },
     "proto_vk_violet_storm": {
-      "varka_base": 3
+      "varka_base": 2
     },
     "proto_vk_vow_of_the_blade": {
       "draw": 1

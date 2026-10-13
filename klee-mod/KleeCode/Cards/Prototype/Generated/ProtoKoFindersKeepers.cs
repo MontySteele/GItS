@@ -42,7 +42,7 @@ public sealed class ProtoKoFindersKeepers : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Finders Keepers"),
-        ("description", "Whenever you draw a status, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
+        ("description", "Whenever you draw a Status, place a [gold]Bomb[/gold] {PowerAmount:diff()} on a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

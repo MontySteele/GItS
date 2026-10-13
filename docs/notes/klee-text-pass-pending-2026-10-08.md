@@ -1,5 +1,12 @@
 # Klee text pass, held for klee-next (2026-10-08)
 
+**Landed in part, 2026-10-12.** The card text pass
+(`review/active/card-text-pass-2026-10-12.md`) built the rule-8 rows (Team
+Effort, Sparkling Burst), the pile rows (Treasure Map, Come Back and Play!) and
+the Set off rows (Sparkborne Magic, Pass the Match, Knights of Favonius), each
+in that paper's wording, and emptied the lint's `DEFERRED` table. The other
+tables below are still open.
+
 The card-text and tooltip conventions pass of 2026-10-08 (conventions review,
 "Hygiene Claude can just do") landed on `main` for every kit but Klee. Klee is
 frozen at Balance on `main` and her rows move on `klee-next`, so her edits are

@@ -53,7 +53,7 @@ public sealed class ProtoVkVioletStorm : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Violet Storm"),
-        ("description", "Discard your hand. Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each card discarded.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to a random enemy for each other card in your [gold]Hand[/gold].{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line
@@ -68,7 +68,7 @@ public sealed class ProtoVkVioletStorm : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 8m)
+            new DynamicVar("VkBase", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -85,6 +85,6 @@ public sealed class ProtoVkVioletStorm : CustomCardModel, IElementalCard, IChara
 
     protected override void OnUpgrade()
     {
-        DynamicVars["VkBase"].UpgradeValueBy(3m);
+        DynamicVars["VkBase"].UpgradeValueBy(2m);
     }
 }

@@ -600,9 +600,8 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # `casket_double` left with the Casket, the Kokomi
                   # re-founding, 2026-10-12.)
                   # VARKA (the Oath rework, 2026-09-29). Two verbs: Knights'
-                  # Roll Call's "add a Knight to your hand, free this turn"
-                  # (`VarkaRules.AddKnight`; the upgraded pick is a GRID,
-                  # because nine Knights do not fit the choose-a-card screen)
+                  # Roll Call's "choose 1 of 3 Knights, free this turn"
+                  # (`VarkaRules.RollCall`, the choose-a-card screen)
                   # and `varka`, the one verb every Oath rule speaks, one
                   # awaited `VarkaCards.<Kind>` call per `kind:`
                   # (`VARKA_KINDS`).
@@ -833,9 +832,11 @@ ARM_KEYWORDS = (
     # 2026-09-25 (the afternoon Klee seats): `Companion`, golded on Klee's
     # readers (Witches' Circle, Coven Errand, Playdate ...) and on the Kokomi
     # and Furina arms' faces, and defined nowhere on screen. The retired
-    # Hexerei row above left the word untipped. NO PLURAL: every face prints
-    # "[gold]Companion[/gold] card" or "each [gold]Companion[/gold]".
-    ArmKeyword("Companion", ("Companion",), "ArmKeywordTips.ForCompanion"),
+    # Hexerei row above left the word untipped. The plural since the Kokomi
+    # level pass (2026-10-12): Orders from the Shrine's "Choose 1 of 3 random
+    # Common Inazuma [gold]Companions[/gold]", the card-text pass's wording.
+    ArmKeyword("Companion", ("Companion", "Companions"),
+               "ArmKeywordTips.ForCompanion"),
     # THE FURINA REFRAME'S FOUR ARE GONE (`EB-723`, R269). `Deploy`, `Evoke`,
     # `Drain` and `Encore` left this table with the eleven `proto_fr_` rows
     # that printed them: draft 6's precedent one character over ("a table row
@@ -2457,10 +2458,10 @@ FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
 FETCH_FROM_DISCARD_FILTERS = {"set_off", "companion"}
 #: Tag Along and Adventure Club: `amount` random Companion cards, free this turn.
 CHOOSE_COMPANION_FIELDS = {"op", "amount", "options"}
-#: VARKA's two verbs (the Oath rework). `add_knight` aims at nobody, and
-#: whether the player CHOOSES the Knight is the card's upgrade
-#: (`choose_knight`), read at play time off `IsUpgraded` the way Alice's
-#: Detonator reads its own.
+#: VARKA's two verbs (the Oath rework). `add_knight` aims at nobody: choose
+#: 1 of 3 random Knights (Varka last pass, 2026-10-12), and whether the pick
+#: arrives upgraded is the card's upgrade (`upgraded_knight`), read at play
+#: time off `IsUpgraded` the way Alice's Detonator reads its own.
 ADD_KNIGHT_FIELDS = {"op"}
 #: `varka`: one kind per Oath rule, each ONE awaited `VarkaCards.<method>`
 #: call (Powers/Prototype/VarkaOath.cs). The kind names the method; its
@@ -2642,7 +2643,9 @@ KOKOMI_KINDS = {
     # THE RE-FOUNDING: the Commander's generators (random Common Inazuma
     # Companions, Ethereal; upgraded on the upgraded card) and Call the
     # Generals (choose 1 of 3 random Rare Inazuma Companions).
-    "add_companion": "AddCompanion",
+    # The Kokomi level pass (2026-10-12): Orders from the Shrine chooses 1 of
+    # 3 Common Inazuma Companions (was `add_companion`, one at random).
+    "choose_common_companion": "ChooseCommonCompanion",
     "add_companions": "AddCompanions",
     "call_the_generals": "CallTheGenerals",
     # THE RE-FOUNDING: Reserves, Grand Design (write up to N hand cards as
@@ -2790,7 +2793,7 @@ PLAN_CLAUSE_KINDS = {
     # gain 6 Block" (`amount` is the turns; the Block is the rule's,
     # `CompanionOverhaulLaw.JuugaGuardBlock`).
     "add_stings": "AddStings",
-    "strength_this_turn": "StrengthThisTurn",
+    "gain_strength": "GainStrength",
     "juuga_guard": "JuugaGuard",
     "apply_power": None,
 }
@@ -2860,7 +2863,7 @@ PLAN_ONLY_OPS = {
                  "transform_statuses_in_draw_pile",
                  # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
                  # Gorou's two Plan lines name the carry-out turn.
-                 "add_stings", "strength_this_turn", "juuga_guard"}
+                 "add_stings", "gain_strength", "juuga_guard"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -2951,6 +2954,8 @@ PLAN_UPGRADE_VARS = {
     "plan_block": "PlanBlock",
     "plan_mend": "PlanMend",
     "plan_power_amount": "PlanPowerAmount",
+    # The Kokomi level pass (2026-10-12), War Banner's planned Strength.
+    "plan_strength": "PlanStrength",
     "plan_draw": "PlanCards",
     # R276, Battle Plan's per-Attack bonus.
     "plan_attack_bonus": "PlanAttackBonus",
@@ -3405,12 +3410,8 @@ APPLY_POWERS = {
     "strength": ("StrengthPower", None,
         "Gain {X} [gold]Strength[/gold]."),
     # The base game's other flat stat, given a sheet spelling by the Inazuma
-    # companion overhaul: Gorou's General's War Banner is the first row in the
-    # repo to print Dexterity. REAL Dexterity, not a private modifier, so it
-    # means what every other Dexterity in the engine means; the card's "for 2
-    # turns" is a SECOND power beside it (`mi_war_banner`), which takes these
-    # two stacks back when its clock runs out. tier0 has read a `dexterity`
-    # power stack since the block funnel was written.
+    # companion overhaul (Gorou's General's War Banner printed it until the
+    # Kokomi level pass, 2026-10-12). REAL Dexterity, not a private modifier.
     "dexterity": ("DexterityPower", None,
         "Gain {X} [gold]Dexterity[/gold]."),
     # The base game's Blur (Silent), first printed by Varka's Barbara:
@@ -3509,8 +3510,6 @@ APPLY_POWERS = {
     # Mondstadt second wave built. The {X} templates are here for form; every
     # row carries its own `description:` (EB-215). Sim twins:
     # tier0.engine.effects' `inazuma_overhaul_*` block.
-    "mi_war_banner": ("WarBannerPower", None,
-        "You have 2 more [gold]Dexterity[/gold]. Lasts {X} more turn(s)."),
     "mi_juuga": ("JuugaPower", None,
         "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
         "a random enemy. Lasts {X} more turn(s)."),
@@ -3631,8 +3630,7 @@ APPLY_POWERS = {
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
     "vk_retaliating_tide": ("RetaliatingTidePower", None,
         "At the end of your turn, deal damage equal to your "
-        "[gold]Block[/gold], up to your [gold]Hydro[/gold] [gold]Oath[/gold], "
-        "to a random enemy."),
+        "[gold]Block[/gold] to a random enemy."),
     "vk_absolute_zero": ("AbsoluteZeroPower", None,
         "While your [gold]current element[/gold] is [gold]Cryo[/gold], your "
         "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
@@ -4067,7 +4065,7 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        "bonus_vs_bombed", "upgraded_grant",
                        # VARKA (Knights' Roll Call+): the same play-time
                        # IsUpgraded read, one verb over.
-                       "choose_knight",
+                       "upgraded_knight",
                        # Power cost sweep, 2026-09-30: upgraded, the card
                        # installs a different power (the value names it), a
                        # play-time IsUpgraded swap the face states in its own
@@ -4641,6 +4639,9 @@ RUNTIME_TIMES = {
     # The Kokomi re-founding (2026-10-12), Shoal of Spears: one hit per Plan
     # waiting (`effects._amount`'s token of the same name).
     "plans_held": "KokomiPlan.PlansHeld(Owner.Creature)",
+    # The Kokomi level pass (2026-10-12), Shoal of Spears: "plus once more for
+    # each Plan waiting" -- always at least one hit.
+    "plans_held_plus_one": "KokomiPlan.PlansHeld(Owner.Creature) + 1",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -4650,6 +4651,7 @@ RUNTIME_TIMES_TEXT = {
     "salon_members": " once per [gold]Salon Member[/gold]",
     "sparks_spent": " for each [gold]Spark[/gold] spent",
     "plans_held": " once for each [gold]Plan[/gold] waiting",
+    "plans_held_plus_one": ", plus once more for each [gold]Plan[/gold] waiting",
 }
 
 
@@ -6238,8 +6240,19 @@ def plus_block_calc_rider(
     if reader is None or not reader.startswith(prefix):
         return None
     count = reader[len(prefix):]
+    # Varka last pass (2026-10-12): Tidal Bulwark gains its own Block first,
+    # so the preview counts that Block too (its printed number; Dexterity
+    # is not previewed).
+    effects = card.get("effects") or []
+    own_block = ""
+    for e in effects:
+        if e is eff:
+            break
+        if e.get("op") == "block" and e.get("target", "self") == "self":
+            own_block = " + (int)card.DynamicVars.Block.BaseValue"
+            break
     return (int(formula.get("base", 0)), 1, (
-        f"{prefix}(int)card.Owner.Creature.Block"
+        f"{prefix}(int)card.Owner.Creature.Block{own_block}"
         f" + card.DynamicVars.CalculationExtra.BaseValue * {count}"))
 
 
@@ -7633,7 +7646,11 @@ def build_vars(card: dict) -> list[str]:
             out.append(
                 f'new DynamicVar("KurageTurns", {int(eff.get("amount", 1))}m)')
         elif op == "energy" and energy_upgrade(card):
-            out.append(f'new DynamicVar("Energy", {int(eff["amount"])}m)')
+            # The card text pass (2026-10-12, rule 3): energy is the base
+            # game's icon, `{Energy:energyIcons()}`, and the game's
+            # `EnergyIconsFormatter` reads an `EnergyVar` (a plain
+            # `DynamicVar` throws), so the var is the base game's type.
+            out.append(f'new EnergyVar({int(eff["amount"])})')
         elif op == "lose_strength":
             # Defence in the status pile. Always a var (raise_fanfare_cap's
             # rule): the face prints it and its one carrier upgrades it.
@@ -8141,17 +8158,16 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "upgraded_grant": any(e["op"] in ("grant_alices_mine_each_turn",
                                           "plant_homework_bomb")
                               or (e["op"] == "kokomi"
-                                  and e.get("kind") in ("add_companion",
-                                                        "add_companions"))
+                                  and e.get("kind") == "add_companions")
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
         # writing card's IsUpgraded when the Plan is carried out.
         or any(e.get("op") == "transform_statuses_in_draw_pile"
                for e in plan_line),
-        # VARKA (Knights' Roll Call+): the player chooses the Knight, read at
-        # play time off `IsUpgraded`; the face carries its own
+        # VARKA (Knights' Roll Call+): the chosen Knight arrives upgraded,
+        # read at play time off `IsUpgraded`; the face carries its own
         # `{IfUpgraded:show:...}` swap.
-        "choose_knight": any(e["op"] == "add_knight" for e in effects),
+        "upgraded_knight": any(e["op"] == "add_knight" for e in effects),
         # AoE trim, 2026-10-03: the per-mode keys (`mode_upgrade_bump`).
         **{key: _mode_upgrade_reason(card, key, deltas[key]) is None
            for key in MODE_UPGRADE_KEYS if key in deltas},
@@ -10568,7 +10584,9 @@ def _sentence_mode_faces(card: dict, desc: str,
     # its label, which says the whole of what it does.
     for i, part in enumerate(parts):
         _, sep, rest = part.partition(":")
-        if sep and rest.strip().startswith("also "):
+        # "also," too: the card text pass (2026-10-12, rule 6) prints the
+        # delayed half as "also, next turn, gain ...".
+        if sep and rest.strip().startswith(("also ", "also,")):
             label = str(modes[i].get("label") or "").strip()
             if label:
                 parts[i] = label
@@ -10593,6 +10611,21 @@ def resolve_upgrade_swap(text: str, upgraded: bool) -> str:
     """
     return _UPGRADE_SWAP.sub(
         lambda m: m.group(1) if upgraded else m.group(2), text)
+
+
+#: The base game's energy icon template, `{energyPrefix:energyIcons(N)}`.
+_ENERGY_ICON = re.compile(r"\{energyPrefix:energyIcons\((\d+)\)\}")
+
+
+def label_energy_words(text: str) -> str:
+    """`text` with each energy icon template written as "N [gold]Energy[/gold]".
+
+    The card text pass (2026-10-12, rule 3) prints energy as the base game's
+    icon. A card DESCRIPTION renders the template; `ModeLabels` is a wire
+    contract the bridge shows verbatim, and a template is not a label (the
+    2026-10-04 rule for the upgrade swap, applied to the icon).
+    """
+    return _ENERGY_ICON.sub(lambda m: m.group(1) + " [gold]Energy[/gold]", text)
 
 
 def stage_mode_title(card: dict, index: int,
@@ -11864,11 +11897,11 @@ def build_body(
                 f"await VarkaCards.{method}(choiceContext, this, cardPlay);")
 
         elif op == "add_knight":
-            # VARKA's Knights' Roll Call: a random Knight, or with the upgrade
-            # (`choose_knight`) one the player picks, into the hand at 0 this
-            # turn.
+            # VARKA's Knights' Roll Call (Varka last pass, 2026-10-12): choose
+            # 1 of 3 random Knights, into the hand at 0 this turn; with the
+            # upgrade (`upgraded_knight`) the pick arrives upgraded.
             lines.append(
-                "await VarkaRules.AddKnight(choiceContext, Owner, "
+                "await VarkaRules.RollCall(choiceContext, Owner, "
                 "IsUpgraded);")
 
         elif op == "choose_companion":
@@ -14365,9 +14398,11 @@ def build_description(card: dict, *,
             # Same defect as the play emitter: an upgradeable amount printed
             # its BASE forever. The var renders the diff so the face, the
             # upgrade preview and the energy actually gained all agree.
-            parts.append("Gain {Energy:diff()} [gold]Energy[/gold]."
+            # The card text pass (2026-10-12, rule 3): the icon, never the
+            # word, as the base game prints it.
+            parts.append("Gain {Energy:energyIcons()}."
                          if energy_upgrade(card)
-                         else f"Gain {n} [gold]Energy[/gold].")
+                         else f"Gain {{energyPrefix:energyIcons({n})}}.")
 
         elif op == "scry_discard":
             n = int(eff["amount"])
@@ -15148,12 +15183,12 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("upgraded_grant")
         lines.append("// upgraded_grant: the granted card arrives upgraded, "
                      "read off IsUpgraded when the Power is installed.")
-    if "choose_knight" in deltas:
+    if "upgraded_knight" in deltas:
         # VARKA (Knights' Roll Call+). The same play-time read: nothing to
-        # bump, and the face's own swap says which Knight arrives.
-        done.add("choose_knight")
-        lines.append("// choose_knight: the player picks the Knight, read off "
-                     "IsUpgraded when the card is played.")
+        # bump, and the face's own swap says the Knight arrives upgraded.
+        done.add("upgraded_knight")
+        lines.append("// upgraded_knight: the chosen Knight arrives upgraded, "
+                     "read off IsUpgraded when the card is played.")
     if "varka_upgraded" in deltas:
         # VARKA (the expansion, Pathfinder's Mark+). The same play-time read.
         done.add("varka_upgraded")
@@ -17375,7 +17410,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     if aims is not None:
         def _labels_cs(upgraded: bool) -> str:
             return ", ".join(
-                '"' + resolve_upgrade_swap(label, upgraded)
+                '"' + label_energy_words(resolve_upgrade_swap(label, upgraded))
                 .replace("\\", "\\\\").replace('"', '\\"') + '"'
                 for label, _ in aims)
         labels_cs = "new[] { " + _labels_cs(False) + " }"

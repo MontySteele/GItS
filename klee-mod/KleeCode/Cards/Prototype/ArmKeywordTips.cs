@@ -85,6 +85,9 @@ public static class ArmKeywordTips
     public const string OathKey = "KLEEMOD-ARM_VARKA_OATH";
     public const string CurrentElementKey = "KLEEMOD-ARM_VARKA_CURRENT_ELEMENT";
     public const string KnightKey = "KLEEMOD-ARM_VARKA_KNIGHT";
+    // The card text pass (2026-10-12): Boreas's Fang's reshuffle clause,
+    // moved off the relic's face into this hover.
+    public const string AscensionReturnKey = "KLEEMOD-ARM_VARKA_ASCENSION_RETURN";
     // ELEMENT IDENTITIES sec.7 (2026-10-01): a rider that titles no keyword,
     // a fact about THIS card on THIS board -- playing it would switch his
     // current element. Four times in one round a seat lost the Oath it was
@@ -432,8 +435,7 @@ public static class ArmKeywordTips
     /// <see cref="KnightTipText"/> is: every public string constant here is a
     /// tip key.</summary>
     internal const string CompanionPlanText =
-        "Play it on the [gold]Bake-Kurage[/gold] to write it as a "
-      + "[gold]Plan[/gold]. Next turn the Kurage applies [gold]Hydro[/gold], "
+        "Play it on the [gold]Bake-Kurage[/gold] to plan it. Next turn the Kurage applies [gold]Hydro[/gold], "
       + "then it is played: [gold]Strength[/gold] and [gold]Weak[/gold] "
       + "count.";
 
@@ -666,6 +668,17 @@ public static class ArmKeywordTips
           + "own.");
 
     // ---------------------------------------------------- Varka -----------
+
+    /// <summary>
+    /// Boreas's Fang's Four Winds' Ascension goes to the discard pile when
+    /// played and comes back when he draws it. The card text pass
+    /// (2026-10-12) moved the clause off the relic's face into this hover.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForAscensionReturn(
+        IEnumerable<IHoverTip> inherited) =>
+        With(inherited, AscensionReturnKey,
+            "Played, it goes to your [gold]Discard Pile[/gold] and returns "
+          + "after a reshuffle.");
 
     /// <summary>
     /// WHAT HIS CARDS CHARGE (the Oath rework, sec.3): one count per element.

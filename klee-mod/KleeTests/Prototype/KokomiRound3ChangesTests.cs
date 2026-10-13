@@ -121,8 +121,9 @@ public class KokomiRound3ChangesTests
             Face(new ProtoKkKelpWall()));
         Assert.Equal((5, 7), (Var<ProtoKkKelpWall>("Block"),
                               Var<ProtoKkKelpWall>("Block", true)));
-        Assert.Equal((9, 12), (Var<ProtoKkKelpWall>("PlanBlock"),
-                               Var<ProtoKkKelpWall>("PlanBlock", true)));
+        // The Kokomi level pass (2026-10-12): a flat 12 [15].
+        Assert.Equal((12, 15), (Var<ProtoKkKelpWall>("PlanBlock"),
+                                Var<ProtoKkKelpWall>("PlanBlock", true)));
     }
 
     // ---- 6. Watchful Shoal, the jellyfish's Accuracy -------------------------

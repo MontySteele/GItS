@@ -64,9 +64,9 @@ resolution moves.
 
 THE DISCARD SEQUENCER (2026-10-03, [USER]: "Agreed - let's make the sim
 useful."): the second INSTRUMENT SURFACE. The stock scorer has no plan for
-a turn, so it played Short Circuit last at 0 Energy, never played Chain
-Lightning after a discard and did not price the cards Violet Storm throws
-away. `_electro_pick` orders his four discard cards before the stock pilot
+a turn, so it played Short Circuit last at 0 Energy and never played Chain
+Lightning after a discard. `_electro_pick` orders his Electro cards before
+the stock pilot
 picks; it prices each card in hand by the stock scorer's own value with its
 Energy charge added back (`_gross`) and a turn by a greedy best-per-Energy
 fill (`_plan`):
@@ -80,11 +80,9 @@ fill (`_plan`):
     the amounts are read off the card, as they always were.
   * CHAIN LIGHTNING after the discards: Short Circuit goes first when it is
     worth it, and its discount is in the plan that says so.
-  * VIOLET STORM now when its hits on the hand as it stands are worth at
-    least the best turn on the rest of the hand plus its hits on what that
-    leaves; otherwise held (played at the end of the turn if nothing else
-    is).
-  * STORM BATTERY before either discard card, with the hand still full.
+  * STORM BATTERY and VIOLET STORM before Short Circuit's discards, with
+    the hand still full (Violet Storm no longer discards since the Varka
+    last pass, 2026-10-12; it counts the hand, as Storm Battery does).
 Nothing the engine resolves moves; the choices are the player's.
 """
 
@@ -327,8 +325,7 @@ def _translate(state, fx):
         yield oath_proxy
     elif kind == "violet_storm":
         # One hit per OTHER card in hand (the card itself is in hand while
-        # it is priced); the discard itself is not priced (the stock scorer
-        # has no value for losing the hand).
+        # it is priced).
         n = max(0, len(state.player.hand) - 1)
         if n:
             yield {"op": "damage", "amount": base, "target": "random_enemy",
@@ -512,18 +509,6 @@ def _short_circuit_now(state, sc):
     return with_sc >= without
 
 
-def _violet_storm_now(state, vs):
-    from tier0.engine import combat
-    p = state.player
-    others = [c for c in p.hand if c is not vs]
-    if not others:
-        return False
-    now = _gross(state, vs)
-    per_hit = now / len(others)
-    rest, left = _plan(state, others, p.energy - combat.card_cost(state, vs))
-    return now >= rest + per_hit * len(left)
-
-
 def _electro_pick(state, base):
     """His discard cards' order; None hands the turn to the stock pilot
     with any held card hidden from it."""
@@ -536,34 +521,27 @@ def _electro_pick(state, base):
                 and combat.card_playable(state, c)
                 and combat.card_cost(state, c) <= p.energy):
             ready.setdefault(b, c)
-    if not ready.keys() & {SHORT_CIRCUIT, VIOLET_STORM}:
+    sc = ready.get(SHORT_CIRCUIT)
+    if sc is None:
         return base(state)
-    sc, vs = ready.get(SHORT_CIRCUIT), ready.get(VIOLET_STORM)
-    discard_now = None
-    if sc is not None and _short_circuit_now(state, sc):
-        discard_now = sc
-    elif vs is not None and _violet_storm_now(state, vs):
-        discard_now = vs
-    if discard_now is not None:
-        sb = ready.get(STORM_BATTERY)
-        if sb is not None and _gross(state, sb) > 0:
-            return sb
-        return discard_now
-    hidden = [c for c in p.hand
-              if _base_id(c) in (SHORT_CIRCUIT, VIOLET_STORM)]
+    if _short_circuit_now(state, sc):
+        # The hand counters first, while the hand is still full.
+        for b in (STORM_BATTERY, VIOLET_STORM):
+            full = ready.get(b)
+            if full is not None and _gross(state, full) > 0:
+                return full
+        return sc
     saved = p.hand
-    p.hand = [c for c in saved if all(c is not h for h in hidden)]
+    p.hand = [c for c in saved if c is not sc]
     try:
         pick = base(state)
     finally:
         p.hand = saved
     if pick is not None:
         return pick
-    # Nothing else worth playing: a held discard card goes last (Short
-    # Circuit's Electro, Violet Storm's hits on what is left).
-    for c in (vs, sc):
-        if c is not None and _gross(state, c) > 0:
-            return c
+    # Nothing else worth playing: Short Circuit goes last, for its Electro.
+    if _gross(state, sc) > 0:
+        return sc
     return None
 
 

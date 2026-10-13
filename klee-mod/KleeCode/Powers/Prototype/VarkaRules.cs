@@ -18,7 +18,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// VARKA'S KNIGHTS AND HIS TWO GRIDS (the Oath rework, sec.6): what a Knight
-/// is, Knights' Roll Call's add (<c>gen_klee_cards</c>'s <c>add_knight</c>),
+/// is, Knights' Roll Call's offer (<c>gen_klee_cards</c>'s <c>add_knight</c>),
 /// Change of Guard's element pick, and the fresh-aura sweeps (Gale Sweep's
 /// <c>only_if: fresh_aura</c> rider and Wall of Gales).
 ///
@@ -37,14 +37,8 @@ public static class VarkaRules
 {
     private const string Table = "cards";
 
-    /// <summary>Knights' Roll Call+'s prompt. Merged into the `cards` table by
+    /// <summary>Change of Guard's prompt. Merged into the `cards` table by
     /// <c>KleeMod.InjectLocStrings</c>, its only source.</summary>
-    public const string KnightPromptKey =
-        "KLEEMOD-CHOOSE_KNIGHT.selectionScreenPrompt";
-
-    public const string KnightPromptText = "Choose a Knight.";
-
-    /// <summary>Change of Guard's prompt, on the same terms.</summary>
     public const string ElementPromptKey =
         "KLEEMOD-CHOOSE_ELEMENT.selectionScreenPrompt";
 
@@ -94,39 +88,32 @@ public static class VarkaRules
             or ProtoVkLisaLightningRose or ProtoVkKaeyaGlacialWaltz;
 
     /// <summary>
-    /// Knights' Roll Call: "Add a random Knight to your hand. It costs 0 this
-    /// turn." Upgraded, the player picks it (<paramref name="choose"/>, the
-    /// card's own <c>IsUpgraded</c>) on a grid of the Knight cards themselves.
+    /// A random pool Knight into the hand, 0 this turn: Favonius Duty
+    /// Roster's add (Knights' Roll Call's add before the Varka last pass,
+    /// 2026-10-12).
     /// </summary>
     public static async Task AddKnight(
-        PlayerChoiceContext choiceContext, Player? owner, bool choose)
+        PlayerChoiceContext choiceContext, Player? owner)
     {
         var combat = owner?.Creature?.CombatState;
         if (owner == null || combat == null) return;
-
-        CardModel? card;
-        if (choose)
-        {
-            var options = PoolKnights()
-                .Select(c => combat.CreateCard(c, owner))
-                .Where(c => c != null)
-                .Cast<CardModel>()
-                .ToList();
-            card = (await CardSelectCmd.FromSimpleGrid(
-                choiceContext, options, owner,
-                new CardSelectorPrefs(new LocString(Table, KnightPromptKey), 1)))
-                .FirstOrDefault();
-        }
-        else
-        {
-            var canonical = owner.RunState.Rng.CombatTargets.NextItem(
-                PoolKnights().ToList());
-            card = canonical == null ? null : combat.CreateCard(canonical, owner);
-        }
+        var canonical = owner.RunState.Rng.CombatTargets.NextItem(
+            PoolKnights().ToList());
+        var card = canonical == null ? null : combat.CreateCard(canonical, owner);
         if (card == null) return;
         card.EnergyCost.SetThisTurn(0);
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, owner);
     }
+
+    /// <summary>
+    /// Knights' Roll Call (Varka last pass, 2026-10-12): "Choose 1 of 3
+    /// random Knights to add into your Hand. It [is upgraded and] costs 0
+    /// this turn." <paramref name="upgraded"/> is the card's own
+    /// <c>IsUpgraded</c>. The Order Answers' screen, free this turn.
+    /// </summary>
+    public static Task RollCall(
+        PlayerChoiceContext choiceContext, Player? owner, bool upgraded) =>
+        ChooseKnight(choiceContext, owner, upgraded, freeThisTurn: true);
 
     /// <summary>How many Knights The Order Answers offers at once.</summary>
     public const int OrderAnswersOptions = 3;
@@ -162,8 +149,21 @@ public static class VarkaRules
     /// synced through <paramref name="choiceContext"/>, as Weathervane's
     /// turn-start grid is.
     /// </summary>
-    public static async Task ChooseUpgradedKnight(
-        PlayerChoiceContext choiceContext, Player? owner)
+    public static Task ChooseUpgradedKnight(
+        PlayerChoiceContext choiceContext, Player? owner) =>
+        ChooseKnight(choiceContext, owner, upgraded: true,
+                     freeThisTurn: false);
+
+    /// <summary>
+    /// The one Knight offer (The Order Answers and Knights' Roll Call): three
+    /// distinct pool Knights (<see cref="DrawDistinct{T}"/>), each upgraded
+    /// when <paramref name="upgraded"/>, on the choose-a-card screen; the
+    /// pick goes to the hand, at 0 this turn when
+    /// <paramref name="freeThisTurn"/>.
+    /// </summary>
+    public static async Task ChooseKnight(
+        PlayerChoiceContext choiceContext, Player? owner, bool upgraded,
+        bool freeThisTurn)
     {
         var combat = owner?.Creature?.CombatState;
         if (owner == null || combat == null) return;
@@ -174,11 +174,14 @@ public static class VarkaRules
             .Where(c => c != null)
             .Cast<CardModel>()
             .ToList();
-        foreach (var option in options)
+        if (upgraded)
         {
-            if (option.IsUpgradable && !option.IsUpgraded)
+            foreach (var option in options)
             {
-                option.UpgradeInternal();
+                if (option.IsUpgradable && !option.IsUpgraded)
+                {
+                    option.UpgradeInternal();
+                }
             }
         }
         if (options.Count == 0) return;
@@ -187,6 +190,7 @@ public static class VarkaRules
             : await CardSelectCmd.FromChooseACardScreen(
                 choiceContext, options, owner, canSkip: false);
         if (card == null) return;
+        if (freeThisTurn) card.EnergyCost.SetThisTurn(0);
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, owner);
     }
 

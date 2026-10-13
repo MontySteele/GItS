@@ -236,7 +236,7 @@ def test_the_shape_of_water_with_no_stings_deals_nothing():
 
 # --- the pool ------------------------------------------------------------------------
 
-def test_the_pool_stays_78_at_21_37_20():
+def test_the_pool_stays_78_at_20_38_20():
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     assert len(ids) == len(set(ids)) == 78
     rows = {c.id for c in loader.prototype_cards()}
@@ -247,5 +247,5 @@ def test_the_pool_stays_78_at_21_37_20():
     assert set(C.KOKOMI_JELLYFISH_IDS) <= set(ids)
     assert "proto_kk_endless_shoal" in ids
     rarity = collections.Counter(loader.get_card(cid).rarity for cid in ids)
-    assert rarity == {"common": 21, "uncommon": 37, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
     assert "draw_if_no_plan" not in kokomi_plan.KINDS

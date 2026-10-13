@@ -248,6 +248,9 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
                    "block_max_intent"),
     "plan_mend": ("mend",),
     "plan_power_amount": ("apply_power",),
+    # The Kokomi level pass (2026-10-12), Gorou's War Banner: "Plan: Gain 1
+    # [2] Strength."
+    "plan_strength": ("gain_strength",),
     "plan_draw": ("draw",
                   # POOL COMPLETION: Tactical Relay's "and draws 1 card".
                   "each_player_draw"),
@@ -819,14 +822,14 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # A flag on the install op, read when the Power is installed --
             # the codegen's play-time `IsUpgraded` read, one engine over.
             # The re-founding's generated Companions ride the same key
-            # (Orders from the Shrine, Watatsumi Muster). (Shoal Call left
+            # (Watatsumi Muster; Orders from the Shrine's upgrade is its cost since the
+            # Kokomi level pass, 2026-10-12). (Shoal Call left
             # it in the jellyfish build, 2026-10-12: its upgrade adds a Sting.)
             hit = next((fx for fx in top
                         if fx.get("op") in ("grant_alices_mine_each_turn",
                                             "plant_homework_bomb")
                         or (fx.get("op") == "kokomi"
-                            and fx.get("kind") in ("add_companion",
-                                                   "add_companions"))),
+                            and fx.get("kind") == "add_companions")),
                        None)
             # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into
             # Sea Glass+, a flag on the plan clause.
@@ -1423,17 +1426,18 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = hit is not None
             if hit:
                 hit["upgraded"] = True
-        elif key == "choose_knight":
-            # VARKA's Knights' Roll Call: upgraded, the player picks the
-            # Knight. Boolean, only True is a ruling.
+        elif key == "upgraded_knight":
+            # VARKA's Knights' Roll Call (Varka last pass, 2026-10-12):
+            # upgraded, the chosen Knight arrives upgraded. Boolean, only
+            # True is a ruling.
             if val is not True:
                 raise ValueError(
-                    f"choose_knight delta on {base_id!r} must be true")
+                    f"upgraded_knight delta on {base_id!r} must be true")
             hit = next((fx for fx in top if fx.get("op") == "add_knight"),
                        None)
             ok = hit is not None
             if hit:
-                hit["choose"] = True
+                hit["upgraded"] = True
         elif key == "upgraded_power":
             # Power cost sweep, 2026-09-30 (The Long Game, Sworn Brotherhood):
             # upgraded, the card installs a DIFFERENT power, named by the

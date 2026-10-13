@@ -400,7 +400,10 @@ public class ArmKeywordTipTests
         // FORTY-THREE with the Spend outlet paper (2026-10-12):
         // `ForBankDamage`, a rider on her starter spend-all saying when to
         // play it (two seats played Rising Applause at 0 to 4 damage).
-        Assert.Equal(43, attaches.Count);
+        // 44 since the card text pass (2026-10-12): Boreas's Fang's
+        // Ascension-return hover.
+        Assert.Equal(44, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForAscensionReturn");
         Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
         Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");
         Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");

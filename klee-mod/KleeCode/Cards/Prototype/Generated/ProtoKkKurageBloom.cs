@@ -45,7 +45,7 @@ public sealed class ProtoKkKurageBloom : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Bloom"),
-        ("description", "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
+        ("description", "At the start of your turn, add a [gold]Sting[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

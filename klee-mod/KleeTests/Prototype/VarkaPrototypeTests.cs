@@ -450,11 +450,12 @@ public class VarkaPrototypeTests : IDisposable
         var avatar = new ProtoVkNorthwindAvatar();
         Assert.Equal(2, avatar.EnergyCost.Canonical);
         Assert.Equal(10m, Var(avatar, "Damage"));
-        Assert.Equal(10m, Var(avatar, "VkBase"));
+        // Varka last pass (2026-10-12), pick 1: the second hit 8 [12].
+        Assert.Equal(8m, Var(avatar, "VkBase"));
         Assert.Equal(2m, Var(avatar, "VkPer"));
         var up = Upgraded<ProtoVkNorthwindAvatar>();
         Assert.Equal(14m, Var(up, "Damage"));
-        Assert.Equal(14m, Var(up, "VkBase"));
+        Assert.Equal(12m, Var(up, "VkBase"));
         Assert.Equal(2m, Var(up, "VkPer"));
         Assert.Contains(CardKeyword.Exhaust, new ProtoVkEyeOfTheStorm().Keywords);
     }
@@ -655,14 +656,21 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Roll_call_adds_a_pool_knight_and_chooses_it_upgraded()
+    public void Roll_call_chooses_1_of_3_pool_knights_free_this_turn()
     {
-        Assert.Contains("VarkaRules.AddKnight",
+        // Varka last pass (2026-10-12): choose 1 of 3 random Knights, free
+        // this turn; upgraded, the pick arrives upgraded.
+        Assert.Contains("VarkaRules.RollCall",
                         Il.Calls(Il.Method("ProtoVkKnightsRollCall", "OnPlay")));
-        var add = Il.Calls(Il.Method("VarkaRules", "AddKnight"));
-        Assert.Contains("VarkaRules.PoolKnights", add);
-        Assert.Contains("CardSelectCmd.FromSimpleGrid", add);
-        Assert.Contains("CardEnergyCost.SetThisTurn", add);
+        Assert.Contains("VarkaRules.ChooseKnight",
+                        Il.Calls(Il.Method("VarkaRules", "RollCall")));
+        var offer = Il.Calls(Il.Method("VarkaRules", "ChooseKnight"));
+        Assert.Contains("VarkaRules.PoolKnights", offer);
+        Assert.Contains("VarkaRules.DrawDistinct", offer);
+        Assert.Contains("CardModel.UpgradeInternal", offer);
+        Assert.Contains("CardSelectCmd.FromChooseACardScreen", offer);
+        Assert.Contains("CardEnergyCost.SetThisTurn", offer);
+        Assert.DoesNotContain("CardSelectCmd.FromSimpleGrid", offer);
     }
 
     // ---- the starter and the pool ------------------------------------------

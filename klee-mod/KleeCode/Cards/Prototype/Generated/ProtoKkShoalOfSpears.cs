@@ -51,7 +51,7 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shoal of Spears"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies once for each [gold]Plan[/gold] waiting."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -69,10 +69,10 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlansHeld(Owner.Creature) > 0)
+        if (KokomiPlan.PlansHeld(Owner.Creature) + 1 > 0)
         {
             await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-                .WithHitCount(KokomiPlan.PlansHeld(Owner.Creature))
+                .WithHitCount(KokomiPlan.PlansHeld(Owner.Creature) + 1)
                 .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
                 .WithElementHitFx(this)

@@ -82,7 +82,7 @@ public sealed class CrescendoPower : PowerModel, ILocalizationProvider
     {
         ("title", "Crescendo"),
         ("description",
-            "The first time you [gold]Spend[/gold] each turn, draw "
+            "The first time each turn you [gold]Spend[/gold], draw "
           + "[blue]{Amount}[/blue] card."),
     };
 
@@ -100,7 +100,7 @@ public sealed class PrimaDonnaPower : PowerModel, ILocalizationProvider
         ("title", "Prima Donna"),
         ("description",
             "At the start of your turn, if you have 10 or more "
-          + "[gold]Fanfare[/gold], gain [blue]{Amount}[/blue] Energy."),
+          + "[gold]Fanfare[/gold], gain {Amount:energyIcons()}."),
     };
 
     public override PowerType Type => PowerType.Buff;

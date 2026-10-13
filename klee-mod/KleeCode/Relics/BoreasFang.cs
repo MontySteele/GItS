@@ -93,21 +93,23 @@ public class BoreasFang : CustomRelicModel
         ("title", "Boreas's Fang"),
         ("description",
             "At the start of each combat, your starting [gold]Knight[/gold]'s "
-          + "element "
-          + "becomes your [gold]current element[/gold]. The first time each "
-          + "combat you gain [gold]Oath[/gold], add Four Winds' Ascension to "
-          + "your hand. It returns after a reshuffle."),
+          + "element becomes current. The first time each combat you gain "
+          + "[gold]Oath[/gold], add [gold]Four Winds' Ascension[/gold] to "
+          + "your [gold]Hand[/gold]."),
     };
 
     /// <summary>The words the face leans on. Knight joined with the co-op
-    /// notes language pass (2026-10-02); Wolf's Gravestone inherits it.
+    /// notes language pass (2026-10-02); Wolf's Gravestone inherits it. The
+    /// card text pass (2026-10-12) moved "It returns after a reshuffle." off
+    /// the face and into the Ascension's own hover here.
     /// </summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForKnight(
-            ArmKeywordTips.ForCurrentElement(
-                ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null),
-                null),
-            null);
+        ArmKeywordTips.ForAscensionReturn(
+            ArmKeywordTips.ForKnight(
+                ArmKeywordTips.ForCurrentElement(
+                    ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null),
+                    null),
+                null));
 
     /// <summary>The element the Fang makes current at combat start: the run's
     /// recorded starter Knight element, else the starter Knight in the deck
@@ -245,11 +247,9 @@ public sealed class WolfsGravestone : BoreasFang
         ("title", "Wolf's Gravestone"),
         ("description",
             "At the start of each combat, your starting [gold]Knight[/gold]'s "
-          + "element "
-          + "becomes your [gold]current element[/gold]. The first time each "
-          + "combat you gain [gold]Oath[/gold], add an upgraded [gold]Four "
-          + "Winds' Ascension[/gold] to your hand. It costs 0 this turn and "
-          + "returns after a reshuffle."),
+          + "element becomes current. The first time each combat you gain "
+          + "[gold]Oath[/gold], add [gold]Four Winds' Ascension[/gold] to "
+          + "your [gold]Hand[/gold]. It is upgraded and costs 0 this turn."),
     };
 
     public override bool AscensionUpgraded => true;

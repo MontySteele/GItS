@@ -246,15 +246,17 @@ public class FurinaSpendUpToTests
     public void The_two_guests_badges_print_their_share_spend()
     {
         Assert.EndsWith(
-            "Act: gain 3 [gold]Block[/gold]. [gold]Spend[/gold] a quarter of your "
-            + "[gold]Fanfare[/gold] (rounded down): gain that much more "
-            + "[gold]Block[/gold].",
+            // The card text pass (2026-10-12): the face's words, no
+            // parentheses.
+            "Act: gain 3 [gold]Block[/gold], and more for [gold]Fanfare[/gold]: "
+            + "[gold]Spend[/gold] a quarter of it, rounded down, for that "
+            + "much.",
             StagePerformerBadge.ActText(StagePerformer.Freminet));
-        Assert.Contains("Act: gain 6 [gold]Block[/gold].",
+        Assert.Contains("Act: gain 6 [gold]Block[/gold], and more",
             StagePerformerBadge.ActText(StagePerformer.Freminet, true));
         Assert.EndsWith(
-            "Act: [gold]Spend[/gold] half your [gold]Fanfare[/gold] (rounded "
-            + "down). Deal that much [gold]Geo[/gold] damage to a random "
+            "Act: [gold]Spend[/gold] half your [gold]Fanfare[/gold], rounded "
+            + "down, to deal that much [gold]Geo[/gold] damage to a random "
             + "enemy.",
             StagePerformerBadge.ActText(StagePerformer.Navia));
     }

@@ -268,28 +268,33 @@ def test_blazing_charge_reads_pyro_oath_by_name(varka):
 def test_tidal_bulwark_is_hydros_body_slam(varka):
     # The Hydro paper (2026-10-10): "Deal damage equal to your Block, plus
     # 2 [3] for each Hydro Oath. Apply Hydro to an enemy." The hit reads the
-    # Oath before its own application credits.
+    # Oath before its own application credits. Varka last pass
+    # (2026-10-12): "Gain 6 [8] Block" first, which the hit counts.
     st = _state()
     led = _led(st)
     led.oath["hydro"] = 2
     st.player.block = 10
     _play(st, _vk("tidal_bulwark"))
     e = st.enemies[0]
-    assert e.hp == 100 - (10 + 2 * 2)
+    assert e.hp == 100 - (10 + 6 + 2 * 2)
     assert e.aura == "hydro" and led.oath["hydro"] == 3
-    assert st.player.block == 10                        # Body Slam keeps it
+    assert st.player.block == 16                        # Body Slam keeps it
     st = _state()
     _led(st).oath["hydro"] = 2
     st.player.block = 10
     _play(st, _vk("tidal_bulwark") + "+")
-    assert st.enemies[0].hp == 100 - (10 + 3 * 2)
+    assert st.enemies[0].hp == 100 - (10 + 8 + 3 * 2)
+    st = _state()                                       # no Block, no Oath
+    _play(st, _vk("tidal_bulwark"))
+    assert st.enemies[0].hp == 100 - 6
 
 
 def test_tidal_bulwark_is_an_attack_on_the_sheet(varka):
     from tier0.content import loader
     c = loader.get_card(_vk("tidal_bulwark"))
     assert c.type == "attack" and c.cost == 1
-    fx = c.effects[0]
+    assert c.effects[0] == {"op": "block", "amount": 6}
+    fx = c.effects[1]
     assert fx["amount_formula"] == {"base": 0, "per": 2, "count": "hydro_oath",
                                     "plus": "player_block"}
 
@@ -371,7 +376,11 @@ def test_charge_of_the_knights(varka):
     _play(st, _vk("noelle_steadfast_maid"))
     _play(st, _vk("noelle_steadfast_maid"))
     _play(st, _vk("charge_of_the_knights"))
-    assert st.enemies[0].hp == 100 - 10
+    # Varka last pass (2026-10-12): 8, plus 5 for each Knight.
+    assert st.enemies[0].hp == 100 - (8 + 10)
+    st = _state()
+    _play(st, _vk("charge_of_the_knights"))             # the floor
+    assert st.enemies[0].hp == 100 - 8
 
 
 def test_eye_wall_crosscurrent_and_eye_of_stormterror(varka):

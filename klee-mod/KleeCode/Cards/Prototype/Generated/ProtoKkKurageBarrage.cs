@@ -51,7 +51,7 @@ public sealed class ProtoKkKurageBarrage : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Barrage"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage 3 times. Add a [gold]Sting[/gold] to your hand."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage 3 times. Add a [gold]Sting[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

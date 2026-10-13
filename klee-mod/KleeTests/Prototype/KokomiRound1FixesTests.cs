@@ -45,10 +45,11 @@ public class KokomiRound1FixesTests
             KokomiPlan.Kind.BlockPerStatusInHand, 3, KokomiPlan.Aim.Self)
             with { WrittenCount = 2 };
         Assert.Equal(2, stamped.WrittenCount);
-        // The printed clause carries no count: it is stamped at writing.
-        Assert.Null(new ProtoKkKelpWall().PlanClauses[1].WrittenCount);
-        Assert.Contains("plus 3 for each status or curse in your hand when "
-                      + "written.", Face(new ProtoKkKelpWall()));
+        // The Kokomi level pass (2026-10-12): Kelp Wall's Plan is a flat
+        // Block, so no row spells the clause today; the machinery stays.
+        Assert.Equal(KokomiPlan.Kind.Block,
+                     Assert.Single(new ProtoKkKelpWall().PlanClauses).Kind);
+        Assert.DoesNotContain("status or curse", Face(new ProtoKkKelpWall()));
     }
 
     // ---- Sea Glass Harvest ----------------------------------------------------
@@ -63,7 +64,7 @@ public class KokomiRound1FixesTests
         Assert.Contains(body, c => c.Contains("KokomiStatusBatch.PileStatuses"));
         Assert.DoesNotContain(body,
             c => c.Contains("KokomiStatusBatch.HandStatuses"));
-        Assert.Contains("Transform every status and curse in your [gold]Draw Pile[/gold]",
+        Assert.Contains("Transform every Status and Curse in your [gold]Draw Pile[/gold]",
                         Face(new ProtoKkSeaGlassHarvest()));
     }
 

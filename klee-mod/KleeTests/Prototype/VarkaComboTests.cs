@@ -255,10 +255,11 @@ public class VarkaComboTests : IDisposable
         Assert.True(play.IndexOf("ElementalHit.ApplyOnly")
                     < play.IndexOf("VarkaCards.DeepFreeze"));
         // Varka payoff fix (2026-10-08): 1 Vulnerable lands before the
-        // doubling.
-        Assert.True(play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal))
+        // doubling; Varka last pass (2026-10-12): 1 Weak too.
+        Assert.True(play.FindLastIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal))
                     < play.IndexOf("VarkaCards.DeepFreeze"));
-        Assert.True(play.FindIndex(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal)) >= 0);
+        Assert.Equal(2, Il.CallSequence(Il.Method("ProtoVkDeepFreeze", "OnPlay"))
+                        .Count(c => c.StartsWith("PowerCmd.Apply", StringComparison.Ordinal)));
         Assert.Contains("PowerCmd.Apply", Calls("VarkaCards", "DeepFreeze"));
     }
 
@@ -303,10 +304,12 @@ public class VarkaComboTests : IDisposable
     }
 
     [Fact]
-    public void Charge_of_the_knights_costs_1_and_pays_5_then_7()
+    public void Charge_of_the_knights_costs_1_and_pays_8_plus_5_then_7()
     {
         var card = new ProtoVkChargeOfTheKnights();
         Assert.Equal(1, card.EnergyCost.Canonical);
+        // Varka last pass (2026-10-12): a floor of 8.
+        Assert.Equal(8m, Var(card, "CalculationBase"));
         Assert.Equal(5m, Var(card, "ExtraDamage"));
         Assert.Equal(7m, Var(Upgraded<ProtoVkChargeOfTheKnights>(), "ExtraDamage"));
     }

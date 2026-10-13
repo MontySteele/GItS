@@ -169,8 +169,8 @@ public sealed class WaitForItPower
         ("description",
             "The next time a [gold]Bomb[/gold] triggers an "
           + "[gold]Elemental Reaction[/gold] this turn, draw "
-          + "[blue]{Amount}[/blue] cards and gain [blue]" + ReactionEnergy
-          + "[/blue] [gold]Energy[/gold]."),
+          + "[blue]{Amount}[/blue] cards and gain "
+          + "{energyPrefix:energyIcons(" + ReactionEnergy + ")}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -648,7 +648,7 @@ public sealed class AlicesDetonatorPower : AlicesDetonatorBasePower
         ("title", "Alice's Detonator"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] "
-          + "[gold]Alice's Mine[/gold] to your hand."),
+          + "[gold]Alice's Mine[/gold] to your [gold]Hand[/gold]."),
     };
 }
 
@@ -663,6 +663,6 @@ public sealed class AlicesDetonatorPlusPower : AlicesDetonatorBasePower
         ("title", "Alice's Detonator+"),
         ("description",
             "At the start of your turn, add [blue]{Amount}[/blue] upgraded "
-          + "[gold]Alice's Mine[/gold] to your hand."),
+          + "[gold]Alice's Mine[/gold] to your [gold]Hand[/gold]."),
     };
 }

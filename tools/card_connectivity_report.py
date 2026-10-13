@@ -566,7 +566,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # write on the jellyfish until `EB-492` retired it with Nereid's
     # Ascension's redesign into a Power.)
     # Crystal Collapse (R236) READS the same shared play stream the count above
-    # reads -- "the last other Companion card you played this turn" -- and then
+    # reads -- "the last Companion card you played" -- and then
     # resolves a card, which is `plays_this_turn` WRITE the way every free play
     # in this table is. It does not touch the queue: the Plan it rides was
     # written by the ordinary Plan machinery.
@@ -602,11 +602,12 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # the channel every one of them touches or is priced against.
     "kokomi": [_hook("private", "kurage", "use")],
     # THE RE-FOUNDING (2026-10-12). Kurage's Wake's Plan line hands Stings to
-    # the hand; Gorou's two Plan lines are a one-turn Strength and a Block
+    # the hand; Gorou's two Plan lines are a Strength (permanent since the
+    # Kokomi level pass) and a Block
     # clock; a written Companion's clause plays the card -- each on the
     # queue that carries it out.
     "add_stings": [_hook("shared", "hand_contents", "write")],
-    "strength_this_turn": [_hook("private", "kurage", "use")],
+    "gain_strength": [_hook("private", "kurage", "use")],
     "juuga_guard": [_hook("shared", "block_held", "write")],
     "play_companion": [_hook("private", "kurage", "use")],
     # FURINA, THE POOL TO 75 (2026-10-09): the `furina` op's guest verbs

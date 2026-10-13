@@ -300,7 +300,7 @@ public class KleeR276ExpansionTests
         Assert.True(setOff >= 0 && hit > setOff);
         Assert.IsAssignableFrom<ISetOffCard>(new ProtoKoTeamEffort());
         Assert.Equal(9m, Upgraded<ProtoKoTeamEffort>().DynamicVars.Damage.BaseValue);
-        Assert.Contains("6 more", Face(new ProtoKoTeamEffort()));
+        Assert.Contains("6 additional damage", Face(new ProtoKoTeamEffort()));
     }
 
     [Fact]
@@ -447,12 +447,12 @@ public class KleeR276ExpansionTests
                         Printed("Cards/Prototype/Generated/ProtoKoTagAlong.cs"));
         Assert.Contains("await KleeExpansion.ChooseCompanions(choiceContext, Owner, 2, 4);",
                         Printed("Cards/Prototype/Generated/ProtoKoAdventureClub.cs"));
-        Assert.Equal("Choose 1 of 3 [gold]Companion[/gold] cards to add to your hand. "
+        Assert.Equal("Choose 1 of 3 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. "
                      + "It costs 0 this turn.", Face(new ProtoKoTagAlong()));
-        Assert.Equal("Choose 2 of 4 [gold]Companion[/gold] cards to add to your hand. "
+        Assert.Equal("Choose 2 of 4 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. "
                      + "They cost 0 this turn.", Face(new ProtoKoAdventureClub()));
         // The grid's prompt is injected with the other selection prompts.
-        Assert.Equal("Choose 2 Companion cards to add to your hand.",
+        Assert.Equal("Choose 2 Companion cards to add to your [gold]Hand[/gold].",
                      KleeExpansion.ChooseCompanionsPromptText);
 
         Assert.Contains(CardKeyword.Exhaust, new ProtoKoTagAlong().CanonicalKeywords);
@@ -615,7 +615,7 @@ public class KleeR276ExpansionTests
         var source = Printed("Powers/Prototype/KleeExpansionPowers.cs");
         Assert.Contains("ModelDb.Card<ProtoKoAlicesMine>()", source);
         Assert.DoesNotContain("ModelDb.Card<ProtoKoKapow>()", source);
-        Assert.Contains("{IfUpgraded:show:an upgraded |}Alice's Mine",
+        Assert.Contains("{IfUpgraded:show:an upgraded |}[gold]Alice's Mine[/gold]",
                         Face(new ProtoKoAlicesDetonator()));
         // No prompt of any kind.
         Assert.DoesNotContain(turn, c => c.StartsWith("CardSelectCmd"));
@@ -643,8 +643,9 @@ public class KleeR276ExpansionTests
         Assert.Contains("HoverTipFactory.FromCard", calls);
         Assert.Contains("AlicesDetonatorBasePower.get_Upgraded", calls);
 
-        // The face stays plain: the preview carries the card, not a gold word.
-        Assert.DoesNotContain("[gold]Alice's Mine[/gold]", Face(new ProtoKoAlicesDetonator()));
+        // The card text pass (2026-10-12, rule 9): a card name is golded
+        // wherever a face prints it; the preview still carries the card.
+        Assert.Contains("[gold]Alice's Mine[/gold]", Face(new ProtoKoAlicesDetonator()));
     }
 
     [Fact]

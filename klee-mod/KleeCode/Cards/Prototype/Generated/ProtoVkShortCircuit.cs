@@ -48,7 +48,7 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Short Circuit"),
-        ("description", "Discard 2 cards. Draw {Cards:diff()} card{Cards:plural:|s}. Gain 1 [gold]Energy[/gold]. Apply [gold]Electro[/gold] to an enemy.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Discard 2 cards. Draw {Cards:diff()} card{Cards:plural:|s}. Gain {energyPrefix:energyIcons(1)}. Apply [gold]Electro[/gold] to an enemy.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

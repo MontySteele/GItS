@@ -275,7 +275,7 @@ public sealed class BannerOfTheWestWind : VarkaArmRelic
     {
         ("title", "Banner of the West Wind"),
         ("description",
-            "When your [gold]current element[/gold] changes, the old "
+            "Whenever your [gold]current element[/gold] changes, the old "
           + "element's [gold]Oath[/gold] moves to the new one."),
     };
 
@@ -346,7 +346,7 @@ public sealed class AndriussHowl : VarkaArmRelic
     {
         ("title", "Andrius's Howl"),
         ("description",
-            "[gold]Four Winds' Ascension[/gold] returns to your hand at the "
+            "[gold]Four Winds' Ascension[/gold] returns to your [gold]Hand[/gold] at the "
           + "start of your turn after you play it."),
     };
 
@@ -396,7 +396,7 @@ public sealed class AndriussHowl : VarkaArmRelic
 }
 
 /// <summary>Shop. "At the start of each combat, add a random Knight to your
-/// hand. It costs 0 this turn." Knights' Roll Call's own add
+/// hand. It costs 0 this turn." Knights' Roll Call's old add
 /// (<see cref="VarkaRules.AddKnight"/>, unchosen): a pool Knight, never one
 /// of the four starter-only ones, on his first turn after the draw so the
 /// cost holds.</summary>
@@ -411,7 +411,7 @@ public sealed class FavoniusDutyRoster : VarkaArmRelic
         ("title", "Favonius Duty Roster"),
         ("description",
             "At the start of each combat, add a random [gold]Knight[/gold] to "
-          + "your hand. It costs 0 this turn."),
+          + "your [gold]Hand[/gold]. It costs 0 this turn."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
@@ -422,6 +422,6 @@ public sealed class FavoniusDutyRoster : VarkaArmRelic
     {
         if (!VarkaArmRelics.FirstTurnOf(this, player)) return;
         Flash();
-        await VarkaRules.AddKnight(choiceContext, player, choose: false);
+        await VarkaRules.AddKnight(choiceContext, player);
     }
 }
