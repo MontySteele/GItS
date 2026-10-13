@@ -1471,7 +1471,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. Your next [gold]Plan[/gold] deals double damage.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] written this turn deals double damage.",
    # THE CASKET PASS (2026-09-28): 5 -> 7 now. `applies_element: true`
    # (2026-10-05): the face prints Hydro, so the row declares it -- the element
    # lives on the card, not on who plays it ([USER]'s ruling).
