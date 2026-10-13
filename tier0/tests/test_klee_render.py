@@ -146,7 +146,8 @@ def test_every_combat_clip_that_leaves_idle_keeps_her_feet_planted():
 
 def test_style_is_h1_plus_h3_lite():
     # [USER], 2026-10-13: "Let's do H1 + H3 lite."
-    render = (ROOT / "tools" / "klee_render" / "render.py").read_text(encoding="utf-8")
+    # the shader half is the shared toon.py's STYLE (one STYLE for every kit)
+    render = (ROOT / "tools" / "char_render" / "toon.py").read_text(encoding="utf-8")
     assert '"shadow": (0.52, 0.37, 0.40)' in render and '"mid_at": 0.30, "light_at": 0.52' in render
     assert '"light": (0.94, 0.92, 0.91)' in render
     post = _load("post")

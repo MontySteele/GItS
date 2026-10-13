@@ -169,6 +169,19 @@ CHARS = {
                         "wince": ("まばたき", "怒り"), "stern": "真面目", "shock": "びっくり", "star_eyes": "星目"},
         "stance": VARKA_STANCE,
         "prop": "varka/unpacked/武器.pmx",     # "Claymore"; 剑.pmx ("Varka_Sword") is the other blade
+        # the full clip set (render.py --clips): his pose library, and his two
+        # claymores, one per hand ([USER], 2026-10-13: a dual wielder). Each
+        # blade's local frame as imported: tip along -Y, the flat in the XY
+        # plane; `grip` is where the palm closes on the handle, `base` the
+        # blade just past the guard and `tip` its point (measured on the
+        # meshes, 2026-10-13). The longer Varka_Sword leads in the far hand.
+        "clips": "varka_clips",
+        "blades": {
+            "R": {"pmx": "varka/unpacked/武器.pmx", "grip": 0.08, "base": -0.36, "tip": -1.49},
+            "L": {"pmx": "varka/unpacked/剑.pmx", "grip": 0.06, "base": -0.38, "tip": -1.80},
+        },
+        "hide_mats": set(),
+        "camera_height": 1.0,
     },
 }
 

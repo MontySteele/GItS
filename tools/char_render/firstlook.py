@@ -5,7 +5,7 @@
         --out <scratch>/models/firstlook [--art-root <main checkout>] [--skip-render]
 
 Renders the neutral rest pose and the draft battle stance (render.py, in
-Blender), paints them with style G's 2D half (tools/klee_render/post.py,
+Blender), paints them with the 2D half (tools/klee_render/post.py,
 imported, not copied: it is pure numpy/Pillow), and lays them out at 1080p
 game scale on one ground line beside base Ironclad and Silent and the kit's
 current combat sprite (<art-root>/ImageGen/images/<char>/model/combat_model.png,
@@ -60,7 +60,8 @@ def down(im: Image.Image, f: float) -> Image.Image:
 def render(char: str, models: Path, work: Path, blender: str) -> None:
     cfg = CH.CHARS[char]
     cmd = [blender, "-b", "--factory-startup", "-P", str(HERE / "render.py"), "--",
-           "--char", char, "--pmx", str(models / cfg["pmx"]), "--out", str(work)]
+           "--char", char, "--models", str(models), "--pmx", str(models / cfg["pmx"]), "--out", str(work),
+           "--stills", "rest,stance"]
     if cfg["prop"]:
         cmd += ["--prop", str(models / cfg["prop"])]
     res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
