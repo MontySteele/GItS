@@ -15,6 +15,8 @@ from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ENEMY_FOLD_NOTE,
+                                        ENEMY_FOLD_NOTE_EXCEPT,
+                                        ENEMY_FOLD_NOTE_ONLY,
                                         AURA_NOTE, BOMB_FORECAST_NOTE,
                                         BOMB_REACTION_CLAUSE,
                                         REACTION_ELEMENTS,
@@ -1235,6 +1237,12 @@ def _per_hit_note(you: dict[str, Any],
         return []
     for enemy in enemies:
         for intent in enemy.get("intents") or []:
+            # Seat page backlog (2026-10-13), as `_weak_note` does since
+            # #650: a part the bridge sent a breakdown for already folds the
+            # per-hit power (`Hook.ModifyDamage`), and its line prints the
+            # game's one number; two readings beside it are a double count.
+            if (intent.get("breakdown") or {}).get("repeats"):
+                continue
             found = _MULTI_HIT_LABEL.match(str(intent.get("label") or ""))
             if not found:
                 continue
@@ -1449,22 +1457,50 @@ def _attack_buff_note(you: dict[str, Any],
 ENEMY_FOLD_POWERS = ("vulnerable", "slow")
 
 
+#: Seat page backlog (2026-10-13): a combat board with no living enemy (a
+#: reviving boss between forms), in the refusal's own words.
+NO_LIVING_ENEMY_LINE = ("- No enemy is standing: every enemy is dead or "
+                        "waiting to revive{who}. A card or potion aimed at an "
+                        "enemy has nothing to hit until one is back.")
+
+#: A calculated damage face's in-combat line (`{InCombat:(Deals N damage)}`).
+_DEALS_LINE = re.compile(r"\(Deals \d+ damage", re.I)
+
+
 def _enemy_fold_note(enemies: list[dict[str, Any]],
-                     hand: list[dict[str, Any]]) -> list[str]:
+                     hand: list[dict[str, Any]],
+                     stage: bool = False) -> list[str]:
     """Furina round 3 (2026-10-11): one line under the hand where a living
     enemy wears Vulnerable or Slow and an Attack in hand prints a number,
     `_attack_buff_note`'s rule: one rule about the hand, not a line per
-    card."""
+    card. Seat page backlog (2026-10-13): off Furina's stage a "(Deals N
+    damage)" face already folds the front enemy's (`FrontFoldedDamageVar`),
+    so those cards are named; on her stage every face previews the base
+    game's way (`FoldedPreview`) and the note stands whole."""
     if not any(_stacks_of(e, word) > 0 for e in enemies
                if not e.get("phase_flip")
                and not (isinstance(e.get("hp"), int) and e["hp"] <= 0)
                for word in ENEMY_FOLD_POWERS):
         return []
-    if not any(str(card.get("kind") or "").strip().casefold() == "attack"
-               and _NUMBER.search(str(card.get("text") or ""))
-               for card in hand):
+    attacks = [card for card in hand
+               if str(card.get("kind") or "").strip().casefold() == "attack"
+               and _NUMBER.search(str(card.get("text") or ""))]
+    if not attacks:
         return []
-    return ["", ENEMY_FOLD_NOTE]
+    folded: list[str] = []
+    if not stage:
+        for card in attacks:
+            name = _plain_name(card.get("title"))
+            if (_DEALS_LINE.search(str(card.get("text") or ""))
+                    and name and name not in folded):
+                folded.append(name)
+    if not folded:
+        return ["", ENEMY_FOLD_NOTE]
+    cards = _and_list([f"**{name}**" for name in folded])
+    if all(_DEALS_LINE.search(str(card.get("text") or ""))
+           for card in attacks):
+        return ["", ENEMY_FOLD_NOTE_ONLY.format(cards=cards)]
+    return ["", ENEMY_FOLD_NOTE_EXCEPT.format(cards=cards)]
 
 
 def _numbers_disagree(intent: dict[str, Any]) -> bool:
@@ -3037,6 +3073,10 @@ _NO_BLOCK_RELIC = re.compile(
 #: And Block per card in hand (Cloak Clasp).
 _PER_CARD_RELIC = re.compile(
     r"end of your turn, gain (\d+) Block for each card in your hand", re.I)
+#: Ripple Basin: "if you did not play any Attacks this turn, gain 4 Block".
+#: Counted off the turn's resolutions when every row says its card type.
+_NO_ATTACK_RELIC = re.compile(
+    r"(?:did not|didn't) play any Attacks?\b[^.]*?gain (\d+) Block", re.I)
 #: Beating Remnant: "You cannot lose more than 20 HP in a single turn."
 _HP_LOSS_CAP = re.compile(r"lose more than (\d+) HP", re.I)
 #: (The Tamakushi Casket's Block was counted here while it landed at the end
@@ -3059,11 +3099,27 @@ def _named_sum(parts: list[tuple[str, int]]) -> tuple[str, int, bool]:
     return who, sum(n for _name, n in parts), len(parts) > 1
 
 
+def _attack_played(resolutions: list[dict[str, Any]] | None) -> bool | None:
+    """Whether an Attack was played this turn, off the ledger's rows: None
+    when the wire cannot say (no ledger, or a row with no card type)."""
+    if resolutions is None:
+        return None
+    rows = [r for r in resolutions if not r.get("carried")]
+    if any(_fold(r.get("card_type")) == "attack" for r in rows):
+        return True
+    if any(not r.get("card_type") for r in rows):
+        return None
+    return False
+
+
 def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
-                    pets: list[dict[str, Any]]) -> dict[str, Any]:
+                    pets: list[dict[str, Any]],
+                    resolutions: list[dict[str, Any]] | None = None
+                    ) -> dict[str, Any]:
     """What lands between the end of your turn and the enemies' hits, off the
     wire's own numbers, as if the turn ended now; what the page cannot count
-    goes in `unknown`, by name."""
+    goes in `unknown`, by name. `resolutions` is the turn's ledger rows, for
+    a relic that pays only when no Attack was played (Ripple Basin)."""
     block_parts: list[tuple[str, int]] = []
     hit_parts: list[tuple[str, int]] = []
     hp_parts: list[tuple[str, int]] = []
@@ -3087,8 +3143,17 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
             if hand:
                 block_parts.append((name, int(found.group(1)) * len(hand)))
             continue
-        # Any other relic that gives Block at the end of the turn (Ripple
-        # Basin: only if no Attack was played, which the wire does not say).
+        # Ripple Basin: only if no Attack was played this turn, which the
+        # ledger's rows say where each carries its card type.
+        found = _NO_ATTACK_RELIC.search(text)
+        if found:
+            played = _attack_played(resolutions)
+            if played is None:
+                unknown.append(name)
+            elif not played:
+                block_parts.append((name, int(found.group(1))))
+            continue
+        # Any other relic that gives Block at the end of the turn.
         if _END_OF_TURN.search(text) and re.search(r"\bgain \d+ Block", text,
                                                     re.I):
             unknown.append(name)
@@ -3167,7 +3232,8 @@ def _with_folds(line: str, clauses: list[str]) -> str:
 
 def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                    hand: list[dict[str, Any]] | None = None,
-                   pets: list[dict[str, Any]] | None = None) -> str:
+                   pets: list[dict[str, Any]] | None = None,
+                   resolutions: list[dict[str, Any]] | None = None) -> str:
     """`- Incoming this turn: N (your Block B): you would take T.`
 
     The sum of every attack part shown; a part it cannot count is named as
@@ -3192,7 +3258,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                     unknown.append(name)
             else:
                 total += part
-    facts = _turn_end_facts(you, hand or [], pets or [])
+    facts = _turn_end_facts(you, hand or [], pets or [], resolutions)
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     if not any_attack and not (facts["hit"] or facts["hp"]):
@@ -3245,6 +3311,8 @@ INCOMING_STAGE_BLOCK = (" Your guests' end-of-turn acts come first and may "
                         "add Block (Sigewinne).")
 INCOMING_STAGE_BLOCK_FIXED = (" Your guests' end-of-turn acts come first and "
                               "add {n} Block.")
+INCOMING_STAGE_BLOCK_NAMED = (" Your guests' end-of-turn acts come first and "
+                              "add {n} Block ({who}).")
 
 
 def _stage_block_clause(stage: dict[str, Any] | None) -> str:
@@ -3255,6 +3323,15 @@ def _stage_block_clause(stage: dict[str, Any] | None) -> str:
     if not stage:
         return ""
     forecast = stage.get("forecast") or {}
+    # Seat page backlog (2026-10-13): the acts that give Block (Freminet),
+    # summed and named; a mod that sent `block` as a hard-coded 0 still
+    # sent each act's amount.
+    givers = [(str(act.get("name") or ""), int(act.get("amount") or 0))
+              for act in forecast.get("acts") or []
+              if _fold(act.get("kind")) == "block" and act.get("amount")]
+    if givers:
+        who, n, _plural = _named_sum(givers)
+        return INCOMING_STAGE_BLOCK_NAMED.format(n=n, who=who)
     after = forecast.get("block") or stage.get("act_block") or 0
     if after:
         return INCOMING_STAGE_BLOCK_FIXED.format(n=after)
@@ -3796,8 +3873,15 @@ def render(obs: dict[str, Any]) -> str:
         # printed unchanged, which may or may not already count the buff.
         out += _attack_buff_note(you, c["hand"])
         # Furina round 3: the enemy's Vulnerable and Slow are not on a face.
-        out += _enemy_fold_note(c["enemies"], c["hand"])
+        out += _enemy_fold_note(c["enemies"], c["hand"],
+                                stage=c.get("stage") is not None)
         out += ["", _OTHER_SIDE, ""]
+        # Seat page backlog (2026-10-13): the empty board says what the
+        # refusal says (`NO_LIVING_ENEMY`).
+        if c.get("no_living_enemy") is not None:
+            who = c["no_living_enemy"]
+            out.append(NO_LIVING_ENEMY_LINE.format(
+                who=f" ({_and_list(who)})" if who else ""))
         for e in c["enemies"]:
             # `EB-496`: the letter in brackets after the name, where the card
             # face already carries its element -- the handle at a glance,
@@ -3848,7 +3932,7 @@ def render(obs: dict[str, Any]) -> str:
         # player may take it.
         if c["enemies"] and not obs.get("coop"):
             out += ["", _incoming_line(c["enemies"], you, c["hand"],
-                                       c.get("pets"))
+                                       c.get("pets"), c.get("resolutions"))
                     + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the

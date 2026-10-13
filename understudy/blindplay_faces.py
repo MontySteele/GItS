@@ -1643,6 +1643,18 @@ def remembered_enemy_name(combat_id: Any, title: str) -> str:
     return name
 
 
+def remembered_enemy_names() -> list[str]:
+    """Every body this fight has lettered, by its printed name, once each
+    and in first-seen order (seat page backlog, 2026-10-13: the board that
+    shows no enemy while a boss waits to revive names who it was)."""
+    _load_fight()
+    out: list[str] = []
+    for name in _FIGHT_MEMORY["names"].values():
+        if name and name not in out:
+            out.append(name)
+    return out
+
+
 def remember_kills(rows: int, standing: list[str],
                    round_: int | None) -> dict[int, list[str]]:
     """Which bodies each of this turn's resolution rows killed, by combat id.

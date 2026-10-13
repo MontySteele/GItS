@@ -20,7 +20,8 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         relic_faces,
                                         remember_deck, remember_kills,
                                         remembered_deck,
-                                        remembered_enemy_name)
+                                        remembered_enemy_name,
+                                        remembered_enemy_names)
 from understudy.blindplay_read import (_aims_at_an_enemy, _blob, _enemies,
                                        _fold, _hand, _int,
                                        _is_mod_source_tip,
@@ -712,6 +713,17 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # `EB-671`: and which of them is the FRONT. Read after the list is built,
     # off the rows the page is about to print.
     mark_front(combat["enemies"])
+    # Seat page backlog (2026-10-13): a reviving boss (Test Subject) killed
+    # mid-turn leaves the board with no living body, and the page showed
+    # nothing while an aimed card was refused. Who was on it: the dead rows
+    # the wire still sends, else the bodies this fight has lettered.
+    if not any(_is_alive(e) for e in combat["enemies"]):
+        waiting: list[str] = []
+        for name in ([e["name"] for e in combat["enemies"]]
+                     or remembered_enemy_names()):
+            if name and name not in waiting:
+                waiting.append(name)
+        combat["no_living_enemy"] = waiting
     # Seat page 3 (2026-10-05): what a debuff move does, where the wire names
     # the move and the base-game table knows it ("applies Frail 2", "steals a
     # card"). On the first part whose own hover names no power.
@@ -1503,6 +1515,11 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                                  if isinstance(row.get("is_local"), bool)
                                  else None),
                     "play_count": max(1, _int(row.get("play_count")) or 1),
+                    # Seat page backlog (2026-10-13): the card's type
+                    # ("Attack", "Skill"...), so Incoming can say whether an
+                    # Attack was played this turn (Ripple Basin); "" on an
+                    # older mod, which keeps the relic under "Not counted".
+                    "card_type": _text(row.get("card_type")),
                     "carried": bool(row.get("carried")),
                     "overflowed": bool(row.get("overflowed")),
                     "hits": hits,

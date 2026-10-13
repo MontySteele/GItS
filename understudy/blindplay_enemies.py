@@ -144,8 +144,11 @@ ENEMY_BRIEFS: dict[str, tuple[str, str]] = {
         "Knowledge Demon",
         "Curse of Knowledge, Slap, Knowledge Overwhelming (three hits), "
         "Ponder (hit, heals, Strength); the Curse comes again on turns 5 and "
-        "9 only. Each Curse makes you pick one of two harmful cards, which "
-        "take effect at once."),
+        "9 only. Each Curse shows two cards; the one picked is a debuff for "
+        "the rest of the fight: Disintegration (damage at your turn's end, "
+        "Block takes it; 6, then 7, then 8, stacking) or Mind Rot (draw 1 "
+        "fewer), then Sloth (3 cards a turn), then Waste Away (1 less "
+        "Energy)."),
     "LAGAVULIN_MATRIARCH": (
         "Lagavulin Matriarch",
         "Asleep behind Plating, which refills its Block each turn; it wakes "
