@@ -126,7 +126,8 @@ public class WolfsGravestoneTests : IDisposable
 
 
 /// <summary>The Kokomi re-founding (2026-10-12): the Tamakushi Casket is
-/// "At the end of your turn, if a Plan is waiting, gain 3 Block."; the
+/// "At the start of your turn, if a Plan is waiting, gain 3 Block." (start,
+/// not end, since 2026-10-12); the
 /// Watatsumi Casket is the same sentence at 5 Block.</summary>
 public class WatatsumiCasketTests
 {
@@ -143,11 +144,11 @@ public class WatatsumiCasketTests
         Assert.Equal(5, Bare<WatatsumiCasket>().Block);
         Assert.Equal(5, WatatsumiCasket.WatatsumiBlock);
         Assert.Equal(
-            "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
+            "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
           + "[blue]3[/blue] [gold]Block[/gold]." + KokomiPreRunFixesTests.CasketTail,
             Face(Bare<TamakushiCasket>()));
         Assert.Equal(
-            "At the end of your turn, if a [gold]Plan[/gold] is waiting, gain "
+            "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
           + "[blue]5[/blue] [gold]Block[/gold]." + KokomiPreRunFixesTests.CasketTail,
             Face(Bare<WatatsumiCasket>()));
     }
@@ -158,8 +159,8 @@ public class WatatsumiCasketTests
         Assert.False(TamakushiCasket.Pays(0));
         Assert.True(TamakushiCasket.Pays(1));
         Assert.True(TamakushiCasket.Pays(3));
-        var turnEnd = Il.Calls(Il.Method("TamakushiCasket", "BeforeSideTurnEnd"));
-        Assert.Contains(turnEnd, c => c.Contains("KokomiPlan.PlansHeld"));
-        Assert.Contains(turnEnd, c => c.Contains("CreatureCmd.GainBlock"));
+        var turnStart = Il.Calls(Il.Method("TamakushiCasket", "AfterBlockCleared"));
+        Assert.Contains(turnStart, c => c.Contains("KokomiPlan.PlansHeld"));
+        Assert.Contains(turnStart, c => c.Contains("CreatureCmd.GainBlock"));
     }
 }

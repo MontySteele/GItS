@@ -6554,7 +6554,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Block interpolated on both sides (`KokomiOverhaulLaw.CasketBlock`,
         # `blindplay_shape.CASKET_BLOCK`), so the anchors are the prose
         # either side of it and of the golded spans.
-        "Tamakushi Casket": ["At the end of your turn, if a ",
+        "Tamakushi Casket": ["At the start of your turn, if a ",
                              " is waiting, gain "],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
