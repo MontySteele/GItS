@@ -76,14 +76,15 @@ public class AbyssLaneTests
 
         IReadOnlyList<ModifierModel> modifiers = Array.Empty<ModifierModel>();
         var mode = GameMode.Standard;
-        AbyssLane.Release(ref modifiers, ref mode);
+        AbyssLane.Release(ref modifiers, mode);
         Assert.Same(abyss, Assert.Single(modifiers));
-        Assert.Equal(GameMode.Custom, mode);
+        // The run stays a Standard run: it counts for ascension (2026-10-12).
+        Assert.Equal(GameMode.Standard, mode);
 
         // Spent: the next Standard run is a Standard run.
         IReadOnlyList<ModifierModel> next = Array.Empty<ModifierModel>();
         var nextMode = GameMode.Standard;
-        AbyssLane.Release(ref next, ref nextMode);
+        AbyssLane.Release(ref next, nextMode);
         Assert.Empty(next);
         Assert.Equal(GameMode.Standard, nextMode);
     }
@@ -97,7 +98,7 @@ public class AbyssLaneTests
 
         IReadOnlyList<ModifierModel> modifiers = Array.Empty<ModifierModel>();
         var mode = GameMode.Standard;
-        AbyssLane.Release(ref modifiers, ref mode);
+        AbyssLane.Release(ref modifiers, mode);
         Assert.Empty(modifiers);
         Assert.Equal(GameMode.Standard, mode);
     }
@@ -109,7 +110,7 @@ public class AbyssLaneTests
         AbyssLane.Hold(new List<ModifierModel> { abyss });
         IReadOnlyList<ModifierModel> modifiers = Array.Empty<ModifierModel>();
         var mode = GameMode.Daily;
-        AbyssLane.Release(ref modifiers, ref mode);
+        AbyssLane.Release(ref modifiers, mode);
         Assert.Empty(modifiers);
         Assert.Equal(GameMode.Daily, mode);
         // Clear the hold for any test after this one.

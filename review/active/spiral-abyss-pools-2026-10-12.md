@@ -46,7 +46,7 @@ Ruled 2026-10-12, [USER]: "Riptide sounds insanely dangerous for enemies that op
 
 ## 4. The build
 
-- **The menu button.** A patch on `NSingleplayerSubmenu._Ready` and `NMultiplayerHostSubmenu` copies the Custom button as "Spiral Abyss". The button opens the Custom screen with the Abyss modifier already ticked and locked. Co-op comes free, because the lobby already sends modifiers to each player.
+- **The menu button.** A patch on `NSingleplayerSubmenu._Ready` and `NMultiplayerHostSubmenu` copies the Custom button as "Spiral Abyss". The button opens the ordinary character select (character and ascension) with a "Spiral Abyss" banner, and the run carries the Abyss modifier as a Standard run ([USER], 2026-10-12: "I'd prefer it have the normal screen where you select the character and ascension rather than the custom mode screen"). Co-op comes free, because the lobby already sends its modifier list to each player on joining and at the run's start.
 - **The modifier.** `SpiralAbyss`, a run modifier saved with the run. It holds the Blessings and Shadows taken so far and applies them through combat hooks. It is registered by BaseLib's `CustomModifierModel`, or by one patch if BaseLib's version lacks it.
 - **The choice screen.**
   - Before each act's Ancient (Neow in act 1), an event with three options. Each option shows its Blessing and the Shadow it brings if passed.

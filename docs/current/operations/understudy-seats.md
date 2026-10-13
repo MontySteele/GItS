@@ -192,8 +192,8 @@ python -m understudy.embark --coop --lanes 2,3 --characters klee,furina --abyss
 The embark sets `GITS_ABYSS=1` on the launched game (empty without the flag).
 The mod (`klee-mod/KleeCode/Abyss/AbyssLane.cs`) adds the modifier where the
 host's Standard lobby begins the run, so in co-op the client gets it inside the
-game's own begin-run message and the pair cannot disagree. The run is built as
-a Custom-mode run, exactly as the Abyss button's is. The embark reads the
+game's own begin-run message and the pair cannot disagree. The run stays a
+Standard-mode run carrying the modifier, exactly as the Abyss button's is. The embark reads the
 run's modifiers back off `run.modifiers` and fails `abyss_not_honoured`
 without it; the status row and the solo `mode:` line print `abyss`. `--hold`
 refuses it.
