@@ -3017,15 +3017,15 @@
    description: "Put a Guest Star from your [gold]Draw Pile[/gold] into your hand. If you can't, draw {FsAmount:diff()} cards.",
    effects: [{op: furina, kind: tutor_guest, amount: 2}]}
 
-# Encore!: one bought act. "Oldest guest" carries its tip (sec.5).
+# Encore!: one free act. "Oldest guest" carries its tip (sec.5). Ruled
+# 2026-10-12 (furina-review-2026-10-12.md, pick 3): no Spend, no draw; the
+# upgrade adds Retain.
 - {id: proto_fs_encore, name: "Encore!", character: furina,
-   upgrade: {stage_spend: -1},
+   upgrade: {retain: true},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: common,
-   description: "[gold]Spend[/gold] {IfUpgraded:show:3|4}. Your [gold]oldest guest[/gold] acts. Draw 1 card.",
-   effects: [{op: stage_spend, amount: 4},
-             {op: furina, kind: act_oldest},
-             {op: draw, amount: 1}]}
+   description: "Your [gold]oldest guest[/gold] acts.",
+   effects: [{op: furina, kind: act_oldest}]}
 
 # Tutti!: Common, and it draws 1 (the diversity pass, sec.2: the floor).
 - {id: proto_fs_tutti, name: "Tutti!", character: furina,

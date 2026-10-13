@@ -945,7 +945,7 @@
       "stage_repay": 1
     },
     "proto_fs_encore": {
-      "stage_spend": -1
+      "retain": true
     },
     "proto_fs_ensemble_cast": {
       "cost": -1

@@ -9780,8 +9780,8 @@ def stage_raise_amount(card: dict, eff: dict) -> str | None:
     if (op in STAGE_AMOUNT_VARS and stage_amount_upgrade(card, op)
             and eff is stage_amount_var_effect(card, op)):
         return f'DynamicVars["{STAGE_AMOUNT_VARS[op]}"].IntValue'
-    # THE POOL TO 75 (2026-10-09): a FIXED price an upgrade moves (Encore!
-    # "Spend 4 [3]", Sold Out, Overdraft "Drain 4 [3]", All In, Ebb and Flow)
+    # THE POOL TO 75 (2026-10-09): a FIXED price an upgrade moves (Sold Out,
+    # Overdraft "Drain 4 [3]", All In, Ebb and Flow)
     # is paid at the swapped number, the one its gate reads.
     if op == "stage_spend":
         return stage_spend_amount_cs(card, eff)

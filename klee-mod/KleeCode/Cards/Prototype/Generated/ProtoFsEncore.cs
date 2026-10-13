@@ -32,36 +32,26 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsEncore : CustomCardModel, ICharacterCard, IStageSpendCard, IUnplayableReasonCard
+public sealed class ProtoFsEncore : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOldestGuest(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForOldestGuest(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_encore");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Encore!"),
-        ("description", "[gold]Spend[/gold] {IfUpgraded:show:3|4}. Your [gold]oldest guest[/gold] acts. Draw 1 card."),
+        ("description", "Your [gold]oldest guest[/gold] acts."),
     };
-
-    // The Salon's Tab (2026-10-05): a fixed price is the cost line,
-    // unplayable when it cannot be paid.
-    protected override bool IsPlayable =>
-        FurinaStage.CanSpend(SparkCost.OwnerCreatureOf(this), (IsUpgraded ? 3 : 4));
-
-    public string? UnplayableReason =>
-        FurinaStage.CanSpend(SparkCost.OwnerCreatureOf(this), (IsUpgraded ? 3 : 4))
-            ? null
-            : "you do not have that much Fanfare";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -73,13 +63,11 @@ public sealed class ProtoFsEncore : CustomCardModel, ICharacterCard, IStageSpend
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Spend(choiceContext, Owner.Creature, (IsUpgraded ? 3 : 4));
         await FurinaCards.ActOldest(choiceContext, this, cardPlay);
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        // stage_spend: the Spend mode's price is read off IsUpgraded in its gate and its payment.
+        AddKeyword(CardKeyword.Retain);
     }
 }
