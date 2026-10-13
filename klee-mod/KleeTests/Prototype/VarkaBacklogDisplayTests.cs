@@ -29,4 +29,39 @@ public class VarkaBacklogDisplayTests
         Assert.Contains(Il.Calls(Il.Method("VarkaOath", "WildfireLine")),
                         c => c.Contains("WildfireOathPower.DamageFor"));
     }
+
+    [Fact]
+    public void An_anemo_hit_is_a_swirl_attempt_the_page_can_count()
+    {
+        // (a) Sayu's random Swirl: the hit's Anemo is noted before the hit's
+        // reaction resolves, so a bare enemy reads "the Swirl did nothing".
+        Assert.Contains(Il.Calls(Il.Method("KleeElementalHooks",
+                                           "BeforeDamageReceived")),
+                        c => c.Contains("ResolutionLedger.NoteAnemoApplication"));
+    }
+
+    [Fact]
+    public void Sharpshooter_reads_pyro_before_its_first_hit()
+    {
+        // (b) The snapshot is taken before the first hit is dealt, so a
+        // reaction that eats the Pyro mid-card cannot cancel the second.
+        var calls = Il.CallSequence(Il.Method("ProtoVkAmberSharpshooter",
+                                              "OnPlay")).ToList();
+        var snapshot = calls.FindIndex(c => c.Contains("AuraCmd.Find"));
+        var firstHit = calls.FindIndex(c => c.Contains("Execute"));
+        Assert.True(snapshot >= 0 && firstHit > snapshot,
+                    string.Join(", ", calls));
+    }
+
+    [Fact]
+    public void Cycle_of_seasons_files_its_hit_under_its_own_name()
+    {
+        // (c) The hit is filed with `by`, and the page labels it.
+        Assert.Contains("ResolutionLedger.HitsBy",
+            Il.CallSequence(Il.Method("CycleOfSeasonsPower",
+                                      "OnElementChanged")));
+        Assert.Equal("Cycle of Seasons",
+            new ResolutionLedger.Hit("Slime", 7, 0, "1",
+                                     By: "Cycle of Seasons").By);
+    }
 }

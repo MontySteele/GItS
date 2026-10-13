@@ -71,6 +71,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_WOLFPACK,
                                         RESOLUTION_STOKED,
                                         RESOLUTION_NO_AURA,
+                                        RESOLUTION_NO_AURA_HIT,
+                                        RESOLUTION_HIT_BY,
                                         RESOLUTION_HIT_KILLED,
                                         RESOLUTION_KILLED,
                                         RESOLUTION_AUTO_CLAUSE,
@@ -1815,8 +1817,18 @@ def _resolution_lines(rows: list[dict[str, Any]],
                     target=entry["target"] or "an enemy"))
                 continue
             hit = entry
-            n += 1
             target = hit["target"] or "an enemy"
+            # BACKLOG (the Varka screen): a Power's hit inside the play
+            # (Cycle of Seasons) on a line of its own, not numbered.
+            if hit.get("by") and not hit.get("on_player"):
+                line = RESOLUTION_HIT_BY.format(by=hit["by"], target=target,
+                                                amount=hit["amount"])
+                if hit["blocked"] > 0:
+                    line += RESOLUTION_HIT_BLOCKED.format(
+                        blocked=hit["blocked"])
+                out.append(line)
+                continue
+            n += 1
             # A body that died inside the play: the game hands the killing hit
             # to no damage hook, so the ledger files the death with no number.
             if hit.get("killed"):
@@ -1839,6 +1851,10 @@ def _resolution_lines(rows: list[dict[str, Any]],
             if hit["blocked"] > 0:
                 line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
             out.append(line)
+        # BACKLOG (the Varka screen): an Anemo hit that found no aura on
+        # anything it hit (Sayu's random Swirl) says the Swirl did nothing.
+        if row.get("swirl_no_aura") and not row.get("swirl_on_aura"):
+            out.append(RESOLUTION_NO_AURA_HIT)
         out += oath_lines
         # And a kill the ledger did not file, read off the board: after the
         # numbered hits, because no place in their order is known.

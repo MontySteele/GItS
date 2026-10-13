@@ -3619,6 +3619,13 @@ RESOLUTION_STOKED = ("  Stoke the Flames: its Pyro damage was {n} higher.")
 #: landed off it", and the seat could not tell it had needed an aura.
 RESOLUTION_NO_AURA = ("  No aura to Swirl: no enemy had an element on it, so "
                       "the Swirl did nothing.")
+#: BACKLOG (the Varka screen): a card that HIT with Anemo and found no aura
+#: on what it hit (Sayu's random Swirl on a bare enemy) said only the hit.
+RESOLUTION_NO_AURA_HIT = ("  No aura to Swirl: nothing it hit had an element "
+                          "on it, so the Swirl did nothing.")
+#: BACKLOG (the Varka screen): a hit a Power dealt while the card resolved
+#: (Cycle of Seasons), labelled rather than numbered as the card's own.
+RESOLUTION_HIT_BY = "  {by}: **{target}** -- {amount}"
 #: A body that DIED inside the play. The game never hands a killing hit to the
 #: damage hook the ledger reads, so a kill arrives with no number, and the
 #: first wording printed it as "Nothing this page can count landed off it"
