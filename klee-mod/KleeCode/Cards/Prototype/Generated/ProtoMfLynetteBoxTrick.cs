@@ -53,7 +53,7 @@ public sealed class ProtoMfLynetteBoxTrick : CustomCardModel, ICompanionCard, IW
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lynette — Bogglecat Box"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -67,6 +67,9 @@ public sealed class ProtoMfLynetteBoxTrick : CustomCardModel, ICompanionCard, IW
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new CalculationBaseVar(4m),
+            new CalculationExtraVar(1m),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new CardsVar(2)
         };
 
@@ -84,6 +87,7 @@ public sealed class ProtoMfLynetteBoxTrick : CustomCardModel, ICompanionCard, IW
             await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
             return;
         }
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 

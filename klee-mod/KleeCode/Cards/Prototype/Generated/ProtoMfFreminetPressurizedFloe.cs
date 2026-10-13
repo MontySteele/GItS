@@ -32,8 +32,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfFreminetPressurizedFloe : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMfFreminetPressurizedFloe : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
 {
+    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
+    public Element Element => Element.Cryo;
+
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -45,15 +48,18 @@ public sealed class ProtoMfFreminetPressurizedFloe : CustomCardModel, ICompanion
 
     public string? Nation => "fontaine";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesCryo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("freminet_pressurized_floe");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Pressurized Floe: Backstroke"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

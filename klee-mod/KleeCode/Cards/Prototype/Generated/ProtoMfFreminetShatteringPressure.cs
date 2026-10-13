@@ -32,8 +32,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
 {
+    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
+    public Element Element => Element.Cryo;
+
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -45,15 +48,18 @@ public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, ICompan
 
     public string? Nation => "fontaine";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { KleeKeywords.AppliesCryo };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("freminet_shattering_pressure");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Shattering Pressure"),
-        ("description", "Your [gold]Shatters[/gold] deal {PowerAmount:diff()} additional damage."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage twice."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -67,13 +73,15 @@ public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, ICompan
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new CalculationBaseVar(5m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoMfFreminetShatteringPressure()
-        : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
@@ -84,11 +92,17 @@ public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, ICompan
             await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
             return;
         }
-        await PowerCmd.Apply<ShatterBonusPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .WithHitCount(2)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }
