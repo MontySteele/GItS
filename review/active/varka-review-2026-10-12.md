@@ -80,7 +80,20 @@ Klee, Kokomi and Furina each have two Ancient cards: big rewards from an Ancient
 - **Dandelion Gale** (Attack, 2): "Deal 9 [12] Anemo damage to ALL enemies. Swirl every aura. These Swirls pay twice."
   - It is the big Swirl turn the Anemo half builds toward.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "On Varka - wow, ok, sounds like we've outright solved the open issues. Pending my playtest, I guess, but we might be about to hit Balance." On the Ancients: "Both sound workable to me - Dandelion Gale could be the Replace version."
+
+- **Picks 1 and 2, (a).** Pyro is settled, with Ember Cleave at 9 [11]. Switch against mono is unchanged.
+- **Pick 3, (a), with Dandelion Gale as the replace card.** The base game has two Ancient rewards:
+  - Darv's Dusty Tome adds a random Ancient card.
+  - Orobas's Archaic Tooth turns the character's own starter card into its stronger version (Bash to Break, Dualcast to Quadcast).
+  - So **All Four Winds** is his Dusty Tome card, and **Dandelion Gale** is Windbound Execution's replacement.
+  - Dandelion Gale costs 1, like a starter-slot card should: "Deal 7 [10] Anemo damage to ALL enemies. Swirl every aura. These Swirls pay twice."
+  - Darv's Tome stops handing him Four Winds' Ascension.
+- **Next:** your playtest, then Balance.
+
+## For [USER] (ruled above)
 
 1. **Pyro core.**
    - **(a) Default:** settled as built (Strength core), with Ember Cleave at 9 [11].
