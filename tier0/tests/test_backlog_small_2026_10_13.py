@@ -71,3 +71,17 @@ def test_a_plan_whose_target_was_already_dead_says_so():
                     "moved": [], "no_target": True}))))
     assert "its target was already dead" in page
     assert "no enemy lost HP" not in page
+
+
+# The Decimillipede brief said 25 HP; co-op scales the Reattach heal.
+def test_the_decimillipede_brief_names_the_co_op_reattach_heal():
+    from understudy import blindplay_enemies
+    assert "60 with two players" in blindplay_enemies._DECIMILLIPEDE
+
+
+# Owl Magistrate's "Soar" had no definition on the page.
+def test_the_owl_magistrate_brief_defines_soar():
+    from understudy import blindplay_enemies, qa_packet
+    name, brief = blindplay_enemies.ENEMY_BRIEFS["OWL_MAGISTRATE"]
+    assert name == "Owl Magistrate" and "Soar halves" in brief
+    assert not qa_packet.leaks(brief)

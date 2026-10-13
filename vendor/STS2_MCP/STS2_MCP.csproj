@@ -1,5 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- GItS LOCAL EDIT (EB-799): the machine paths klee-mod reads (klee-mod/Directory.Build.props),
+       so a bare `dotnet build` of the bridge works in any worktree: the
+       worktree's klee-mod/local.props wins, else %LOCALAPPDATA%\gits\local.props.
+       Its GameDir becomes STS2GameDir unless one is passed. -->
   <PropertyGroup>
+    <GitsKleeLocalProps>$(MSBuildThisFileDirectory)..\..\klee-mod\local.props</GitsKleeLocalProps>
+    <GitsLocalProps Condition="'$(GitsLocalProps)' == ''">$(LOCALAPPDATA)\gits\local.props</GitsLocalProps>
+  </PropertyGroup>
+  <Import Project="$(GitsKleeLocalProps)" Condition="Exists('$(GitsKleeLocalProps)')" />
+  <Import Project="$(GitsLocalProps)"
+          Condition="!Exists('$(GitsKleeLocalProps)') and '$(GitsLocalProps)' != '' and Exists('$(GitsLocalProps)')" />
+  <PropertyGroup>
+    <STS2GameDir Condition="'$(STS2GameDir)' == '' and '$(GameDir)' != ''">$(GameDir)</STS2GameDir>
     <TargetFramework>net9.0</TargetFramework>
     <OutputType>Library</OutputType>
     <Nullable>enable</Nullable>

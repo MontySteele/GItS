@@ -97,9 +97,13 @@ def test_our_additions_live_apart_from_upstreams_source():
     # in the middle of a private builder, with nothing to route around.
     # Kokomi pick 5 (a) (2026-10-01): `kokomi_flip_plan` on both action
     # switches, so `McpMod.MultiplayerActions.cs` joined the list.
+    # EB-799 (2026-10-13): `STS2_MCP.csproj` reads the machine paths
+    # klee-mod reads, so a bare build of the bridge works in a worktree; a
+    # project file has no gits/ seam to route through.
     assert modified == ["McpMod.Actions.cs", "McpMod.Compendium.cs",
                         "McpMod.cs", "McpMod.MultiplayerActions.cs",
                         "McpMod.MultiplayerState.cs",
-                        "McpMod.StateBuilder.cs", "McpMod.Wiki.cs"], (
+                        "McpMod.StateBuilder.cs", "McpMod.Wiki.cs",
+                        "STS2_MCP.csproj"], (
         f"upstream files we have edited changed: {modified}. Update PROVENANCE.md's "
         f"'What we changed' table and this assertion together, deliberately.")

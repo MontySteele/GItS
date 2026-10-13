@@ -111,9 +111,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Co-op: players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted.
 - Enemy rules not on the page: Surrounded (which arm turns you; the debuff text only says "use targeting cards to change your orientation").
 - Enemy rules not on the page: Flutter's "50% less damage from Attacks" halved Bomb damage in one run and not in two others; say whether it applies to a Bomb.
-- Enemy rules not on the page: the final boss's Enrage (Strength per Skill), which the page does not warn about.
 - Enemy rules not on the page: a boss curse's duration and growth.
-- Owl Magistrate's "Soar" intent has no definition on the page, so a lethal turn reads as safe.
 - Knowledge Demon's Curse of Knowledge choice shows Disintegration as "cost 0, status"; a seat took it for a card, not a permanent 6-a-turn debuff.
 - Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line.
 - Co-op: a downed player is revived after the fight (at 1 or 13 HP) with no warning on the page.
@@ -121,7 +119,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Seat bridge: when a fight ends partway through a batch of commands, the refused commands after it ran past three without the stall stop firing.
 - Klee's glossary is read from the checkout, not the installed build, so a `+next` deploy shows main's numbers ("Bomb grows 4" against the build's 2).
 - Pass the Match's tip should say the partner must still be acting; once they have ended their turn it does nothing (3 seats, `review/records/coop-paired-round-2026-10-09.md`). Text only, on `klee-next`.
-- A dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies); send the body and its revive countdown. The page note also says it returns at 25 HP, while the game returns it at about 60.
+- A dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies); send the body and its revive countdown.
 - Killing a reviving boss mid-turn (Test Subject) makes it vanish from the page with no notice; between the act-3 boss's forms the board shows no enemy and targeted cards are refused.
 - The bridge does not show the order enemies act in; print it when the game exposes it.
 - Live repro, no change before it: Wax Lizard Tail did not fire after Toy Box (base relics; `review/records/furina-fullrun-round-2-2026-10-10.md`). Check whether a melted relic stays in `player.Relics` unflagged, so the page still lists it (bridge `McpMod.StateBuilder.cs:1471-1488`).
@@ -145,7 +143,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - An embark was never reverted (all its ledger rows APPLIED, the game still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
 - `test_local_tester` is flaky: it failed once and passed on re-run with no change.
 - The seat harness sometimes sends end-turn twice in a row (seat rounds); find which path repeats it.
-- `EB-799` `vendor/STS2_MCP/STS2_MCP.csproj` ignores `klee-mod/local.props`, so a bare `dotnet build` of the bridge fails in a worktree; read `local.props` (until then pass `-p:STS2GameDir=...`).
 - `EB-489` bound the bridge's main-thread hop so one stalled frame cannot hang `/api/v1/singleplayer` for the life of the process.
 - `EB-391` the `rest` verb sometimes fails its first call on an open rest site ("Rest site room is not open"); game-side race.
 - `EB-208` the seed ledger ships empty: run the Klee three-body seed hunt and record the first entries.
