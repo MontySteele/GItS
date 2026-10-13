@@ -80,3 +80,36 @@ Not changed, with the reason: Tidal Screen (E "weaker than Defend+") is 7 Block 
    - **(a) Default:** "Gain 4 Block. Plan: Apply 1 Weak." (front enemy; upgraded 6 / 2). Weak to ALL stays Slack Water's starter Plan.
    - (b) "Gain 6 Block. Plan: Apply 1 Weak to ALL enemies." (upgraded 8 / 2): the now-line catches up instead.
    - (c) Leave it.
+
+## Round 2 on the build-now list (2026-10-13, build 0.2.5212)
+
+Five more Sonnet seats at A0 after #1205 (records in the session scratchpad).
+
+| Seat | Result |
+|---|---|
+| 1 | **won**: Soul Fysh, The Insatiable, Aeonglass |
+| 2 | lost, act 2 boss (The Insatiable), floor 33 |
+| 3 | lost, act 3 boss (Aeonglass, at 60 of 512), floor 48 |
+| 4 | lost, act 2 boss (Kaiser Crab), floor 33 |
+| 5 | lost, act 2 boss (Knowledge Demon), floor 33 |
+
+One win and every run reached its act 2 boss, against round 1's 0 of 5 with
+two runs dead before it. Five runs is too few to credit the build-now list
+with that; read it as no worse.
+
+- **Compounding, the question this round was for:** the win was the Block
+  engine (Tidal Rebuke+, Coral Crash+, Noelle with Steady Tide, Horn Cleat,
+  Diamond Diadem: 50 to 100+ a turn); seat 3's was reaction poison (Shinobu's
+  Ring plus Hydro, 512 to 60 in six turns) with Chevreuse and Opening Gambit+.
+  Both runs that went deep found something that grew; the three act 2 boss
+  losses did 15 to 30 a turn into a boss that scaled.
+- **Stings:** one seat drafted Kurage Canopy and played Stings (Matriarch
+  fight); seat 3 called The Shape of Water "0 damage with no Stings". The half
+  is seen now, still rarely. Pick 1 stays as written.
+- **Opening Gambit then Wrath** landed 54 to ALL twice (seat 5), the combo
+  added to the probe's known set.
+- **Defects found, fixing:** Grand Design+ refused "almost always" (seat 3),
+  which points at the new no-plannable-card gate; a reward `skip` still needs
+  two proceeds; duplicate-card numbers shift mid-chain (two Stings wasted).
+  Plans landing into Intangible or a fresh 33 Block (seat 1) stay a
+  legibility item for the next pass.
