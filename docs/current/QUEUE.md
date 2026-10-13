@@ -21,9 +21,6 @@ line leaves this file. Closed picks are in git
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
   merged.)
-- **Fontaine Companions** (`fontaine-companions-2026-10-12.md`, three picks,
-  defaults (a)): six Commons raised, Shattering Pressure becomes a two-hit
-  Cryo Attack, Navia triggers on reactions.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's

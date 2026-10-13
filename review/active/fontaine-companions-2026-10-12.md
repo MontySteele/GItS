@@ -71,7 +71,14 @@ Two more trail their neighbors:
 
 **Fontaine is small:** 4 Uncommons against Mondstadt's 18. Growing it belongs to the rest of the nation sweep, which this paper does not try. One more fact for that sweep: the Featured Banner shows 3 of Fontaine's 4 Rares each run, so one is always missing.
 
-## For [USER]
+## Ruled 2026-10-12
+
+[USER]: "On the Fontaine cards - I don't like to have cycling at Common, so Vanguard's Valor either needs a rarity bump or a power-up minus the draw effect. Otherwise looks good!"
+
+- **Pick 1 (a), with one change:** Vanguard's Valor stays a Common and does not draw. It becomes "Your next Attack deals 6 [8] additional damage, plus 3 if an Elemental Reaction triggered this turn." The other five Commons are as listed.
+- **Picks 2 and 3, (a).**
+
+## For [USER] (ruled above)
 
 1. **The six Commons**, each about one upgrade's worth:
    - Interdiction Fire: 7 → 8 [10] Pyro damage, in line with Pers, Deploy!.
