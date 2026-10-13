@@ -7880,3 +7880,20 @@ now pins the two tokens as the only 0-cost Plan rows.
   (a Sting Exhausted by Ethereal at her turn's end). Mod feed only.
 - **Art:** the two new rows are `KNOWN_MISSING`; the legacy
   `all_streams_flow.png` is a candidate, unseen.
+
+## Furina: Encore! is a free act, 2026-10-12
+
+[USER]: "Agreed on Encore! Let's otherwise leave her alone for now"
+(`review/active/furina-review-2026-10-12.md`, "Ruled 2026-10-12", pick 3).
+
+- **Encore! (`proto_fs_encore`):** cost 0, Common Skill, "Your oldest guest
+  acts." It no longer Spends 4 [3] and no longer draws 1. Its upgrade adds
+  Retain (was: Spend 3). The act itself is unchanged
+  (`FurinaCards.ActOldest`; sim `act_oldest`). The card lost its Spend gate,
+  its unplayable reason and its Spend tip; it keeps the "oldest guest" tip.
+- **Sim twin:** `ftd_encore` carries no numbers and left `FIXED_SPEND_KINDS`;
+  the pilot values it at one guest act with a guest on stage and no longer
+  counts it as a Fanfare outlet. The sheet arm reads the new row as written.
+- **Loop probe:** Tutti!+ with Encore! is no longer an accepted thin-deck
+  loop, since Encore! no longer draws.
+- Guest acts and Tutti! are unchanged.

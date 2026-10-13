@@ -468,7 +468,9 @@ CARDS: dict[str, Spec] = {
     # Guests and stage (11).
     "ftd_casting_call": Spec("Casting Call", 1, "skill", "uncommon",
                              "tutor_guest", ()),
-    "ftd_encore": Spec("Encore!", 0, "skill", "common", "encore", (4, 1)),
+    # Encore! (ruled 2026-10-12): no Spend, no draw; the upgrade's Retain
+    # is not modelled (the probe drafts no upgrades).
+    "ftd_encore": Spec("Encore!", 0, "skill", "common", "encore", ()),
     "ftd_tutti": Spec("Tutti!", 1, "skill", "uncommon", "tutti", ()),
     "ftd_final_bow": Spec("Final Bow", 1, "skill", "uncommon", "final_bow",
                           (2,)),
@@ -614,7 +616,7 @@ def upto_cap(spec) -> int:
     """An up-to card's X (the volley prints it at `[2]`, the rest at `[1]`)."""
     return int(spec.n[2] if spec.kind == "upto_volley" else spec.n[1])
 #: Fixed-price Spend cards; every one's `n[0]` is its Spend price.
-FIXED_SPEND_KINDS = ("spend_fixed_hit", "encore", "sold_out")
+FIXED_SPEND_KINDS = ("spend_fixed_hit", "sold_out")
 
 
 def spend_price(spec) -> int:
@@ -1682,9 +1684,7 @@ def resolve_card(state, card) -> None:
         if spend(state, price):
             _card_damage(state, card, dmg, hydro=True)
     elif k == "encore":
-        if spend(state, n[0]):
-            act_oldest(state)
-            state.draw(n[1])
+        act_oldest(state)
     elif k == "sold_out":
         if spend(state, n[0]):
             state.draw(n[2])

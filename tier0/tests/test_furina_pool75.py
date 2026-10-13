@@ -268,12 +268,13 @@ def test_ensemble_cast_seats_four():
 
 # ---- sec.5's new cards --------------------------------------------------------
 
-def test_encore_spends_and_its_oldest_guest_acts():
+def test_encore_acts_its_oldest_guest_and_spends_nothing():
+    # Ruled 2026-10-12: "Your oldest guest acts." No Spend, no draw.
     st = _furina()
     st.player.ftd.stage = ["wriothesley", "clorinde"]
     st.player.ftd.fanfare = 4
     _play(st, _card("proto_fs_encore"))
-    assert st.player.ftd.fanfare == 0
+    assert st.player.ftd.fanfare == 4
     assert st.player.ftd.ledger["guest_acts"]["wriothesley"] == 1
     assert st.player.ftd.ledger["guest_acts"]["clorinde"] == 0
 
