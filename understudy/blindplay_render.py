@@ -425,6 +425,11 @@ def _guest_lines(text: str) -> list[str]:
     return [f"    Guest: {text.strip()}"]
 
 
+#: A Plan whose hit found no living body: an earlier Plan that morning killed
+#: its target. Without it the row read "no enemy lost HP", like a miss.
+PLAN_NO_TARGET = "its target was already dead, so it hit nothing"
+
+
 def _render_moved(said: dict[str, Any]) -> list[str]:
     """What the board did under one carried-out Plan (`EB-329`).
 
@@ -440,6 +445,8 @@ def _render_moved(said: dict[str, Any]) -> list[str]:
     """
     if not said["board_read"]:
         return []
+    if not said["moved"] and said.get("no_target"):
+        return [f"    - {PLAN_NO_TARGET}"]
     if not said["moved"]:
         return ["    - no enemy lost HP"]
     return [f"    - {_moved_line(m)}" for m in said["moved"]]

@@ -2297,7 +2297,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
    cost: 3, type: attack,
-   description: "Deal 27 [gold]Electro[/gold] damage. Deals 5 additional damage for each [gold]Companion[/gold] card you played this combat.",
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage. Deals {ExtraDamage:diff()} additional damage for each [gold]Companion[/gold] card you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy, applies_element: true,
               amount_formula: {base: 27, per: 5, count: companions_played_this_combat}}]}
 

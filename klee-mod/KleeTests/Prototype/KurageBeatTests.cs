@@ -286,6 +286,8 @@ public class KurageBeatTests
         var keys = Il.Strings(Il.Method("KokomiPlan", "CarriedOutRow"));
         Assert.Contains("moved", keys);
         Assert.Contains("on_play", keys);
+        // BACKLOG 2026-10-13: a carry-out whose hit found no living body.
+        Assert.Contains("no_target", keys);
         var moved = Il.Strings(Il.Method("KokomiPlan", "MovedRow"));
         Assert.Contains("target", moved);
         Assert.Contains("combat_id", moved);

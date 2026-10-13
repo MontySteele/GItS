@@ -17,7 +17,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; read `cards_drawn_by_turn` in her next round, or check the relic in game.
-- Dahlia — Sacramental Shower and Raiden — Musou no Hitotachi print their damage as fixed text, so the face ignores Strength and Weak; move them to the computed damage token like the other Companions.
+- Dahlia — Sacramental Shower prints its damage as fixed text, so the card face ignores Strength and Weak (its power badge already folds them through `ShowerVar`); move the face to a computed token.
 - `build_pck` skips two copy blocks whose sources are missing locally: `klee\mod_image.png` (made by `tools/gen_mod_image.py`) and `kokomi\potions` (deploy 2026-10-11, 0.2.4849+next).
 - Furina wave 2 (2026-10-12): Bis! ("Whenever you Spend all your Fanfare, keep half") does not fire when a "Spend up to" card empties the bank; a seat read it the other way. Make the face say which Spends count.
 - Furina/Varka wave 2: the next-Attack bonus previews (Sturm und Drang, Vigor, Stoke the Flames) show on every Attack in hand though they pay one card; show them once, or say "next".
@@ -27,7 +27,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Klee's rest-site still has no ground shadow (the base rest-site skeletons carry one): paint a soft ellipse under her seat into `klee_rest.png` in `tools/klee_render/pack.py` (visual paper, "Style G ruled").
 - Art owed, Klee: Forbidden Fun, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Albedo — Dust of Purification (its plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched), Up in Smoke!, Behind Jean's Desk, Kitchen Alchemy, Cover Your Ears!; the two status-package Powers borrow Party Poppers' and Spark Knight's badges.
 - Klee tempo paper (2026-10-07, `klee-next`): delete the engine pieces only its five cuts used, in both engines -- `GroundedPower` (and its `Grounded` keyword tip and `KleeOverhaulLaw.GroundedSpark`), `SitTightPower`, `PatienceKleePower` and their sim twins (`ko_grounded`, `ko_sit_tight`, `ko_patience`), with their pins. Left registered so the cut could land without an engine sweep.
-- Lynette's Guest Star tip is 146 characters against the 135 ceiling; it has a lint exception (text pass 2026-10-12). Trim it and drop the exception.
+- Lynette's Guest Star tip is 146 characters against the 135 ceiling; it has a lint exception (text pass 2026-10-12). Trim it and drop the exception. A wording pick: the house order ("The first time each turn you ...") and the face's own act words leave no plain cut of 11 characters.
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
 - Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Flotsam Surge and the Sea Glass token.
 - Art owed, Spiral Abyss mode (2026-10-12): the menu emblem and The Ley Line are 64px wiki sources upscaled 4x, and seven are nearest-official stand-ins (Abyssal Moon = Iridescent Moon, Moonlit Rest = Sweet Madame, First Strike = Sword Unaligned, Elemental Burst = Battle-Line Detonation, Crystallize = Crystallize Shield Hydro, Sheer Cold = Element Cryo, Elemental Mark = Element Pyro).
@@ -52,7 +52,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Card reward card off screen but still selectable by controller (user, co-op). Cause not found; `Diagnostics/RewardRowProbe.cs` writes a "reward row OFF SCREEN" WARN to godot.log naming the card and where its holder and body are; read that line after the next sighting and fix from it.
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning, where a Swirl or Crystallize on a burning enemy consumes the held Pyro and Burning keeps ticking; and Dendro ported as ruled (the non-reacting pairs, the Core rules and their previews), tested on Kirara and Emilie. Neither engine has Burning or Dendro today.
 - Show the amplifier: a Melt or Vaporize prints no factor on the face or in the seat log (Rosaria's Melt printed "Deal 15" from a written 9; "Vaporize on X" with no x1.5; Klee's log printed "nothing to amplify" beside a hit multiplied by 1.75); a hit carrying an element chosen at play (Four Winds' Ascension, Northwind Avatar) previews no amplifier either (multiplier pinned by `A_current_element_hit_amplifies_like_any_hit`).
-- Kokomi text: the Neow bundle's Plan gloss omits "instead of playing it now".
 - Kokomi's Plan list prints a waiting Plan's damage without the target's Vulnerable: a queued card is in no pile, so its numbers never refresh; `KokomiPlan.QueueRow` could send the front-target-folded number (`PlannedDamage(FrontEnemy, ...)`) for front-aimed Plans; `WrittenFrontDamage` has the same gap.
 - Kokomi: Smoggy ("you can only play 1 Skill per turn") refuses writing a Plan once a Skill is played; neither Smoggy's line nor the Bake-Kurage tip says writing a Plan counts as playing the card.
 - Furina: a Spend card silently plays its plain side when her Fanfare cannot pay the Spend.
@@ -60,7 +59,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-798` `ProtoKkBreakwater` is offered Nimble but Nimble pays it nothing (its only Block is the Plan's); planned-only Block is not `GainsBlock`, in both engines and `lint_enchant_parity`.
 - `EB-677` Glam's Replay on a timed card (Kyouka) runs it 4 turns at +4, not 2 at +8, and no face says which; needs an emitter change that gives the rule a tip surface, plus a taste call on which rows carry it.
 - `EB-65` the four Furina power badges draw shrunk card portraits; they want badge-kind icons like Klee's.
-- `EB-803` `proto_mc_kaeya_frostgnaw` wears Cold-Blooded Strike's named art (only Frostgnaw's own pick is owed); confirm `klee/relics/dodoco_tales.png` is packed on the next pck build.
+- `EB-803` `proto_mc_kaeya_frostgnaw` wears Cold-Blooded Strike's named art (only Frostgnaw's own pick is owed).
 - `EB-53` end-of-turn docket: capture the co-op half (`C6`) on the two-seat runtime (`embark --coop`) and isolate the electro (Oz) leg.
 - `EB-296` / `EB-300` controller: a live walk that the Kokomi pet is targetable by D-pad and mouse, and that the hand is reachable after a custom-target card.
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
@@ -100,7 +99,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Oathsworn Strike's line printed "Deals 29" and hit 31 on a Vulnerable target; the hand preview folds no target's Vulnerable, and the page does not say so.
 - An autoplaying relic (the Earring) plays the first turn with no line saying what it will play or played.
 - Copy numbers renumber after a play, so "Frantic Escape (2)" picked the other copy; name copies by something stable (cost or upgrade) or warn on renumber. The bridge renumbers mid-turn too ("Sting (3)" vanished after a play and the next command was refused; Kokomi jellyfish round 2026-10-12, lane 1).
-- A Furina seat never saw her own Frail or Dexterity loss printed, so Defend at 1-2 was unexplained; check the brief page lists the player's debuffs.
 - The Tainted per-hit note still gives two readings for a multi-hit, the same double count the Weak note had before #650.
 - Pocket Match's play log listed 3 and left out its own 5 damage.
 - Tender prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only.
@@ -128,7 +126,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - The bridge does not show the order enemies act in; print it when the game exposes it.
 - Live repro, no change before it: Wax Lizard Tail did not fire after Toy Box (base relics; `review/records/furina-fullrun-round-2-2026-10-10.md`). Check whether a melted relic stays in `player.Relics` unflagged, so the page still lists it (bridge `McpMod.StateBuilder.cs:1471-1488`).
 - Live repro, no change before it: Fairy in a Bottle may not have saved the Ironclad control at death (base potion; `review/records/kokomi-fullrun-round-2026-10-10.md`). No klee-mod hook touches death or HP loss, so check the base game's own path in a live run.
-- A Plan carried out with no living enemy to aim at (an earlier Plan that morning killed it) prints "no enemy lost HP", like a Plan that missed (Kokomi round 5, lane 3). The wire cannot tell the two apart: `KokomiPlan.Hit` returns null when `Aimed` finds no living body, so the row is `number` null, `moved` []; add a field to `CarriedOutRow` (e.g. `no_target`) and print "its target was already dead" in `blindplay_render._render_moved`.
 
 - Furina's Incoming forecast leaves out the guests' end-of-turn Block (Freminet), so it reads too pessimistic; and Frozen on a boss, and whether a guest's act ends a freeze, are not printed (round 2026-10-12, lane 2).
 - Seat page: the note "Face numbers leave out the enemy's Vulnerable and Slow until a card is aimed" (`understudy/blindplay_notes.py` ENEMY_FOLD_NOTE) read as wrong to a Kokomi seat beside faces that already folded Vulnerable (round 1 2026-10-12, lane 5b); check which faces fold it and say so per card.

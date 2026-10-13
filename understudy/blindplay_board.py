@@ -1929,6 +1929,9 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
             "riders": [_rider_row(r) for r in (row.get("riders") or [])
                        if isinstance(r, dict) and _int(r.get("amount")) > 0],
             "unfinished": bool(row.get("unfinished")),
+            # Its hit found no living body to aim at: an earlier Plan that
+            # morning killed the target (BACKLOG 2026-10-13).
+            "no_target": bool(row.get("no_target")),
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
             # Block is something. The filter existed to drop the mod's
             # zero-delta rows, and a beat that spent itself entirely on a

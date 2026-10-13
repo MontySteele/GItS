@@ -58,3 +58,16 @@ def test_two_lane_frames_refuse_an_incomplete_frame():
     assert twolane_frames.verdict([whole, whole]) == 0
     assert twolane_frames.verdict([whole, clipped]) == 1
     assert twolane_frames.verdict([{"lane": "lane1"}]) == 1
+
+
+# A Plan with no living enemy to aim at printed "no enemy lost HP", like a miss.
+def test_a_plan_whose_target_was_already_dead_says_so():
+    from tier0.tests.test_understudy_blindplay import (morning_of,
+                                                       plans_combat_state)
+    blindplay.forget_fight()
+    page = blindplay.render(blindplay.observation(plans_combat_state(
+        morning_of({"card": "Ambush", "number": None,
+                    "line": "Bake-Kurage: Ambush", "on_play": False,
+                    "moved": [], "no_target": True}))))
+    assert "its target was already dead" in page
+    assert "no enemy lost HP" not in page

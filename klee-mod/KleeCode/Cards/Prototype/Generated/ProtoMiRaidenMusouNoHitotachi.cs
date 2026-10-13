@@ -59,7 +59,7 @@ public sealed class ProtoMiRaidenMusouNoHitotachi : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Raiden Shogun — Musou no Hitotachi"),
-        ("description", "Deal 27 [gold]Electro[/gold] damage. Deals 5 additional damage for each [gold]Companion[/gold] card you played this combat."),
+        ("description", "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage. Deals {ExtraDamage:diff()} additional damage for each [gold]Companion[/gold] card you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
