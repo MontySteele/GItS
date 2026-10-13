@@ -81,12 +81,16 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 - **Latest:** round 3 on 2026-10-13 was 0/5, but Stings were made and
   played in every run and her mean HP leaving the act-1 boss rose from 22 (round
   1) to 49 of 80 (`review/active/kokomi-review-r3-2026-10-13.md`). Its A-list is
-  built: Second Wave's window text, Bubble Ward 6 [9], Kurage Canopy makes a
-  Ward per carried-out Plan, Albedo's target text, and page receipts for
-  hand-full discards and Ethereal Exhausts. Opening Gambit's new text is
-  held (one character over the card ceiling).
-- **Next:** [USER]'s pick in review r3 (default: his finish-line run on the
-  A-list build).
+  built (#1218): Opening Gambit's and Second Wave's window text, Bubble Ward
+  6 [9], Kurage Canopy makes a Ward per carried-out Plan, and page receipts
+  for hand-full discards and Ethereal Exhausts. Albedo, Solar Isotoma is now
+  2 [3] Geo damage to ALL enemies per Attack played this turn (#1219).
+- **Next:** round 4 (five seats, 0.2.5263) read for Wards made and played;
+  [USER] ruled (b) on review r3.
+- **Possible change, parked:** Nereid's Ascension carries her burst's name
+  only (no HP scaling, healing or jellyfish refresh, unlike the other three
+  kits' bursts). [USER]: "Let's flag this as a possible change on Kokomi and
+  otherwise leave it alone."
 
 **Furina: Prototype.**
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md`, sec.2):
