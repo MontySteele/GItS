@@ -8186,3 +8186,30 @@ with one text held:
 Pins: `tier0/tests/test_kokomi_round3_alist_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiRound3AListTests.cs`. Untested in game
 until a deploy.
+
+## Varka starter, Fang and Tooth, 2026-10-13
+
+[USER]'s picks: "On Varka's starter - I don't want to give him two starting
+effects, so if we do (a), then I'd want to knock Windbound Execution out of
+his starting deck and make Four Winds' Ascension his second starter
+instead"; "Starter - (a)". The Tooth: "Archaic Tooth - let's have the
+upgrade make it AoE and also reduce the cost to 1 when upgraded", then "Not
+exactly. I meant that the ancient starts at 2, and upgrading it at a
+campfire (or replacing an already-upgraded Ascension) takes it to 1." Deep
+Freeze: "I think we should drop Retain."
+
+- `proto_vk_four_winds_ascension`: in his starter deck, in Windbound
+  Execution's slot (Strike x4, Defend x4, Ascension, the rolled starter
+  Knight). Numbers unchanged: 2 [1], Retain, 10 Anemo then 3 per current
+  Oath. It carries the Tooth's `TRANSCENDENCE` mark now.
+- `proto_vk_windbound_execution`: retired. Nothing else made or named it
+  (the Tooth moved to the Ascension); row, generated class and its tests are
+  gone.
+- Dandelion Gale (`Cards/Varka/DandelionGale.cs`, hand-written, Ancient):
+  the Ascension made bigger. Attack, 2 [1], Retain: "Deal 10 Anemo damage to
+  ALL enemies. Then deal 3 damage per Oath of your current element to each,
+  as that element." with the Ascension's live "(Deals X damage)" line. The
+  second hit is `VarkaCards.GaleHit`, gaining no Oath, as the Ascension's.
+  The vanilla Tooth upgrades the card it makes when the starter card was
+  upgraded, so an upgraded Ascension becomes a 1-cost Gale.
+- `proto_vk_deep_freeze`: Retain dropped, base and upgraded.

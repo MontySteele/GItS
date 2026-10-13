@@ -17,8 +17,11 @@ internal static class VarkaRoster
 {
     /// <summary>
     /// The starter (sec.5): "Strike x4, Defend x4 (base game), and: One
-    /// starting Knight, at random each run ... Windbound Execution". The deck
-    /// lists Amber: Precise Shot; Boreas's Fang rolls the run's Knight when the
+    /// starting Knight, at random each run", and Four Winds' Ascension
+    /// (Starter (a), 2026-10-13, [USER]: "knock Windbound Execution out of his
+    /// starting deck and make Four Winds' Ascension his second starter
+    /// instead"; it takes Windbound Execution's slot). The deck lists Amber:
+    /// Precise Shot; Boreas's Fang rolls the run's Knight when the
     /// run begins (<c>BoreasFang.AfterObtained</c>). The base pair is the
     /// Silent's, because his pool borrows her green frame.
     /// </summary>
@@ -32,7 +35,7 @@ internal static class VarkaRoster
         ModelDb.Card<DefendSilent>(),
         ModelDb.Card<DefendSilent>(),
         ModelDb.Card<DefendSilent>(),
-        ModelDb.Card<ProtoVkWindboundExecution>(),
+        ModelDb.Card<ProtoVkFourWindsAscension>(),
         ModelDb.Card<ProtoVkAmberFieryRain>(),
     };
 

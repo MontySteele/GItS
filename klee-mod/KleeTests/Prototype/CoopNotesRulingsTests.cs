@@ -114,7 +114,7 @@ public class CoopNotesRulingsTests
     public void Every_knight_and_only_a_knight_declares_the_keyword()
     {
         var cards = typeof(VarkaRules).Assembly.GetTypes()
-            .Where(t => t.Namespace == typeof(ProtoVkWindboundExecution).Namespace
+            .Where(t => t.Namespace == typeof(ProtoVkFourWindsAscension).Namespace
                         && typeof(CardModel).IsAssignableFrom(t) && !t.IsAbstract
                         && t.GetConstructor(Type.EmptyTypes) != null)
             .ToList();

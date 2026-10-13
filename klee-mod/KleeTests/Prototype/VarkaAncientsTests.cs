@@ -217,7 +217,7 @@ public class VarkaAncientsTests : IDisposable
                           stoke);
         Assert.DoesNotContain("VarkaSwitch", stoke);
         // An Anemo card switches nothing.
-        Assert.DoesNotContain("VarkaSwitch", Face(new ProtoVkWindboundExecution()));
+        Assert.DoesNotContain("VarkaSwitch", Face(new ProtoVkFourWindsAscension()));
     }
 
     // ==== the numbers the review moved =======================================

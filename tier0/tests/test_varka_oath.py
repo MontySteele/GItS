@@ -159,7 +159,9 @@ def test_the_ruled_rows_and_their_upgrades(varka):
 def test_every_row_resolves_and_every_upgrade_applies(varka):
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(V.ID_PREFIX)]
-    assert len(rows) == 84          # 47, and 84 since the expansion
+    # 47, 84 since the expansion, 83 since Windbound Execution retired
+    # (Starter (a), 2026-10-13).
+    assert len(rows) == 83
     for c in rows:
         loader.get_card(c.id)
         if c.no_upgrade:
@@ -182,7 +184,7 @@ def test_the_starter_and_the_helper(varka):
     p = V.build_player("hydro")
     ids = sorted(c.id for c in p.draw_pile)
     assert ids == sorted(["strike"] * 4 + ["defend"] * 4
-                         + [_vk("windbound_execution"),
+                         + [_vk("four_winds_ascension"),
                             _vk("barbara_melody_loop")])
     assert (p.hp, p.max_hp, p.character_id) == (80, 80, "varka")
     assert V.FANG in p.relic_hooks
@@ -224,11 +226,11 @@ def test_apply_and_swirl_are_separate_keys_in_one_scope(varka):
 
 
 def test_a_spread_credits_nothing(varka):
-    """Windbound Execution Swirls A's Pyro, consuming it; the spread's copies
+    """Four Winds' Ascension Swirls A's Pyro, consuming it; the spread's copies
     on B and C credit nothing (2026-10-03: no spent auras)."""
     st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b"),
                          _enemy(name="c")], fang=False)
-    _play(st, _vk("windbound_execution"))
+    _play(st, _vk("four_winds_ascension"))
     assert _led(st).oath == {"pyro": 1, "hydro": 0, "electro": 0, "cryo": 0}
     a, b, c = st.enemies
     assert a.aura is None and b.aura == "pyro" and c.aura == "pyro"
@@ -333,12 +335,13 @@ def test_an_anemo_or_geo_card_neither_credits_nor_switches(
 
 
 def test_a_swirl_spread_does_not_switch(varka):
-    """Windbound Execution Swirls A's Pyro while Hydro is current: the
+    """Four Winds' Ascension Swirls A's Pyro while Hydro is current (0 Hydro
+    Oath, so its second hit deals nothing): the
     Swirl credits Pyro, its spread lands on B and C, and Hydro stays."""
     st = _state(enemies=[_enemy(name="a", aura="pyro"), _enemy(name="b"),
                          _enemy(name="c")], fang=False)
     _led(st).current = "hydro"
-    _play(st, _vk("windbound_execution"))
+    _play(st, _vk("four_winds_ascension"))
     assert _led(st).current == "hydro"
     assert _led(st).oath["pyro"] == 1
 

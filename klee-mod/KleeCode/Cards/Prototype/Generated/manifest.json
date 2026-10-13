@@ -422,7 +422,6 @@
     "proto_vk_weathervane",
     "proto_vk_wildfire_oath",
     "proto_vk_windborne_resolve",
-    "proto_vk_windbound_execution",
     "proto_vk_wolfpack"
   ],
   "owners": {
@@ -842,7 +841,6 @@
     "proto_vk_weathervane": "varka",
     "proto_vk_wildfire_oath": "varka",
     "proto_vk_windborne_resolve": "varka",
-    "proto_vk_windbound_execution": "varka",
     "proto_vk_wolfpack": "varka"
   },
   "mode_faces": {
@@ -2224,9 +2222,6 @@
     },
     "proto_vk_windborne_resolve": {
       "power_amount": 2
-    },
-    "proto_vk_windbound_execution": {
-      "damage": 2
     },
     "proto_vk_wolfpack": {
       "innate": true

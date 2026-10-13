@@ -486,7 +486,6 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoVkWeathervane>(),
             ModelDb.Card<ProtoVkWildfireOath>(),
             ModelDb.Card<ProtoVkWindborneResolve>(),
-            ModelDb.Card<ProtoVkWindboundExecution>(),
             ModelDb.Card<ProtoVkWolfpack>(),
         };
 

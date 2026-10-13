@@ -294,16 +294,4 @@ public class VarkaRebalanceTests : IDisposable
         Assert.Contains(Calls("BoreasFang", "AddAscension"),
                         c => c.EndsWith(".CreateCard"));
     }
-
-    [Fact]
-    public void Windbound_execution_is_0_cost_single_target()
-    {
-        var card = new ProtoVkWindboundExecution();
-        Assert.Equal(0, card.EnergyCost.Canonical);
-        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.Equal(4m, Var(card, "Damage"));
-        Assert.Equal(6m, Var(Upgraded<ProtoVkWindboundExecution>(), "Damage"));
-        Assert.DoesNotContain(Calls("ProtoVkWindboundExecution", "OnPlay"),
-                              c => c.Contains("TargetingAllOpponents"));
-    }
 }

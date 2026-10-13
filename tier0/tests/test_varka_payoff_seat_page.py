@@ -148,7 +148,7 @@ def test_wolfpack_and_twin_gales_are_said_since_last_page():
         _row("Four Winds' Ascension", hits=True, events=[
             _ev("wolfpack", 9001, card="Four Winds' Ascension",
                 power="Wolfpack", amount=1)]),
-        _row("Windbound Execution", hits=True, events=[
+        _row("Storm Surge", hits=True, events=[
             _ev("paid", 9002, card="Cryo", target="Hilichurl 1",
                 power="Pyro (3 damage) and Cryo (1 Vulnerable)")]),
     ]

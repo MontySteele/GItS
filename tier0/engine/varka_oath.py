@@ -229,7 +229,7 @@ STARTER_KNIGHT_IDS = {
 STARTER_BASE_IDS: tuple[str, ...] = (
     "strike", "strike", "strike", "strike",
     "defend", "defend", "defend", "defend",
-    "proto_vk_windbound_execution",
+    "proto_vk_four_winds_ascension",
 )
 
 #: The `varka` op's kinds (C# `VarkaCards.<Method>`, the codegen's
@@ -1458,7 +1458,8 @@ def op_add_knight(state, fx: dict, card) -> None:
 # --------------------------------------------------------------------------
 
 def starter_ids(element: str) -> list[str]:
-    """The starter: base Strike x4, Defend x4, Windbound Execution, and the
+    """The starter: base Strike x4, Defend x4, Four Winds' Ascension
+    (Starter (a), 2026-10-13: Windbound Execution's slot), and the
     starter Knight of `element`."""
     return list(STARTER_BASE_IDS) + [STARTER_KNIGHT_IDS[element]]
 

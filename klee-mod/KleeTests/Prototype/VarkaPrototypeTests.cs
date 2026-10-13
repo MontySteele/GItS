@@ -677,7 +677,7 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Equal(Element.Cryo, VarkaOath.KnightElement(new ProtoVkEulaIcetideVortex()));
         // Jean is a Skill that sets no element; his own Attacks are not Knights.
         Assert.False(VarkaRules.IsKnight(new ProtoVkJeanDandelionBreeze()));
-        Assert.False(VarkaRules.IsKnight(new ProtoVkWindboundExecution()));
+        Assert.False(VarkaRules.IsKnight(new ProtoVkFourWindsAscension()));
         Assert.Equal(Element.None, VarkaOath.KnightElement(new ProtoVkFrostWard()));
     }
 
@@ -715,13 +715,17 @@ public class VarkaPrototypeTests : IDisposable
     // ---- the starter and the pool ------------------------------------------
 
     [Fact]
-    public void The_starter_is_the_base_pair_windbound_and_a_starter_knight()
+    public void The_starter_is_the_base_pair_ascension_and_a_starter_knight()
     {
         var deck = Cards("VarkaRoster", "StartingDeck");
         Assert.Equal(10, deck.Count);
         Assert.Equal(4, deck.Count(c => c == "ModelDb.Card<StrikeSilent>"));
         Assert.Equal(4, deck.Count(c => c == "ModelDb.Card<DefendSilent>"));
-        Assert.Single(deck, c => c == "ModelDb.Card<ProtoVkWindboundExecution>");
+        // Starter (a), 2026-10-13: Four Winds' Ascension takes Windbound
+        // Execution's slot ("make Four Winds' Ascension his second starter
+        // instead"); Windbound Execution is retired.
+        Assert.Single(deck, c => c == "ModelDb.Card<ProtoVkFourWindsAscension>");
+        Assert.DoesNotContain(deck, c => c.Contains("Windbound"));
         Assert.Single(deck, c => c == "ModelDb.Card<ProtoVkAmberFieryRain>");
         Assert.Equal(new[] { "ModelDb.Card<StrikeSilent>" },
                      Cards("VarkaRoster", "StarterStrike"));
@@ -749,9 +753,8 @@ public class VarkaPrototypeTests : IDisposable
         Assert.Equal(35, types.Count(c => c.Rarity == CardRarity.Uncommon));
         Assert.Equal(23, types.Count(c => c.Rarity == CardRarity.Rare));
         Assert.Equal(13, types.Count(VarkaRules.IsKnight));
-        // The starter's and the Fang's cards are not offered.
+        // The starter cards are not offered.
         foreach (var starter in new[] { "ProtoVkFourWindsAscension",
-                                        "ProtoVkWindboundExecution",
                                         "ProtoVkAmberFieryRain",
                                         "ProtoVkBarbaraMelodyLoop",
                                         "ProtoVkLisaLightningRose",

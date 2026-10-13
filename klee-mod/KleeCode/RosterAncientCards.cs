@@ -69,8 +69,8 @@ public static class RosterAncientCards
 
     /// <summary>
     /// VARKA'S TWO (the Varka review, ruled 2026-10-12). All Four Winds is
-    /// the Dusty Tome's; Dandelion Gale is the Archaic Tooth's, Windbound
-    /// Execution's replacement, listed so its <c>CardModel.Pool</c> resolves
+    /// the Dusty Tome's; Dandelion Gale is the Archaic Tooth's, Four Winds'
+    /// Ascension's replacement (since 2026-10-13), listed so its <c>CardModel.Pool</c> resolves
     /// to his. The vanilla Tome skips every Archaic Tooth card
     /// (<c>ArchaicTooth.TranscendenceCards</c>), so it draws All Four Winds.
     /// </summary>

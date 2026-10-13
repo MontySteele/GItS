@@ -127,12 +127,19 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
     card that would change it says "(Makes X current)" in combat.
   - **Swirl:** a Swirl he makes pays his current element (Pyro 3 damage,
     Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).
-- **Starter:** Windbound Execution and one of four starter Knights, rolled
-  per run. Boreas's Fang adds Four Winds' Ascension the first time each
-  combat he gains Oath.
+- **Starter:** Four Winds' Ascension and one of four starter Knights, rolled
+  per run (2026-10-13, [USER]: "I don't want to give him two starting
+  effects, so if we do (a), then I'd want to knock Windbound Execution out
+  of his starting deck and make Four Winds' Ascension his second starter
+  instead"; "Starter - (a)"). Windbound Execution is retired. Boreas's Fang
+  adds Four Winds' Ascension the first time each combat he gains Oath.
 - **Pool:** 78 (20 / 35 / 23), thirteen pool Knights, his own relics and
   three potions. Ancients: All Four Winds (Tome) and Dandelion Gale (Tooth on
-  Windbound Execution).
+  Four Winds' Ascension: the Ascension on ALL enemies, 2 [1], Retain;
+  [USER]: "let's have the upgrade make it AoE and also reduce the cost to 1
+  when upgraded", then "the ancient starts at 2, and upgrading it at a
+  campfire (or replacing an already-upgraded Ascension) takes it to 1").
+  Deep Freeze lost Retain ([USER]: "I think we should drop Retain").
 - **Latest:** the last pass (`review/ruled/varka-last-pass-2026-10-12.md`)
   gave twelve always-skipped cards a floor and cut five costs. The overnight
   wave on it (`review/records/varka-wave-2026-10-13.md`, 1 win in 5) found no
