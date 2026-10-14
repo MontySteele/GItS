@@ -31,11 +31,13 @@ def test_a_power_draw_names_the_power_not_the_card_row():
 
 # --- 2. a written Companion is played ----------------------------------------
 
-def test_the_written_number_note_carves_out_written_companions():
+def test_the_written_number_note_names_strength_and_intent_reads():
+    # Kokomi review r5 (2026-10-14, A2) reworded the note; the Companion
+    # clause left with the old wording.
     said = blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE
-    assert "Every planned HIT is the jellyfish's" in said
-    assert ("A written Companion is the exception: it is played as a card "
-            "next turn, so your Strength and Weak then count.") in said
+    assert "a loss (Tender) as much as a gain" in said
+    assert "Weak or Shrink on you never does" in said
+    assert "reads it when it lands" in said
 
 
 def test_the_sheet_face_is_labelled_unmodified_not_written():

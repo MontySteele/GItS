@@ -1864,7 +1864,18 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # The Kokomi pool overhaul (2026-10-13): a Counter or Chain
               # Plan's number as it stands, in the strip's words. Absent or
               # null on every other entry and on an older bridge.
-              "live": _text(row.get("live")) or None}
+              "live": _text(row.get("live")) or None,
+              # Kokomi review r5 (2026-10-14, A2): what the Plan will land
+              # per body, whatever its aim, and her Strength when it was
+              # written. Absent on an older bridge: 0 and None, and then
+              # nothing is said.
+              "written": _int(row.get("written")),
+              "written_strength": (row.get("written_strength")
+                                   if isinstance(row.get("written_strength"),
+                                                 int)
+                                   and not isinstance(
+                                       row.get("written_strength"), bool)
+                                   else None)}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

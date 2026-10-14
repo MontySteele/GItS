@@ -1281,15 +1281,28 @@ PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans at "
 # not a clause the jellyfish deals: `KokomiCompanionPlan.CarryOut` auto-plays
 # a clone of the card, a real play of hers, so her Weak and Strength at that
 # moment move it (round 3 lane 5: Shinobu written as "Deal 8" landed 6).
-PLAN_WRITTEN_NUMBER_NOTE = ("- A Plan carries the numbers you wrote. Every "
-                            "planned HIT is the jellyfish's, so Shrink or Weak "
-                            "on you never cuts it, before or after you write "
-                            "it; a planned BLOCK is yours, so Frail does cut "
-                            "it. A written Companion is the exception: it is "
-                            "played as a card next turn, so your Strength "
-                            "and Weak then count.")
-#: Kokomi whole-run round 2026-10-10. The same fact, said for Strength alone.
-PLAN_STRENGTH_NOTE = "- Strength is read when the Plan is written."
+# KOKOMI REVIEW R5 (2026-10-14, A2): reworded. "Shrink or Weak on you never
+# cuts it" read as "nothing on me cuts it", and Tender cut a planned Oath+
+# (run 1); the Strength-at-writing rule (the 2026-10-10 line it replaces) was
+# invisible until a Potion showed as "63 vs 42" (run 3).
+PLAN_WRITTEN_NUMBER_NOTE = ("- Your Strength when you write it counts, a loss "
+                            "(Tender) as much as a gain; Weak or Shrink on "
+                            "you never does. A Plan that reads an intent "
+                            "(Tide Wall, Flank, Undercurrent Snare) reads it "
+                            "when it lands.")
+#: Kokomi review r5 (2026-10-14, A2): so Spearhead before Masterstroke is
+#: visible.
+PLAN_ORDER_NOTE = "- Plans carry out in the order written."
+#: Kokomi review r5 (2026-10-14, A2): under a waiting Plan with a hit, what
+#: it will land and her Strength when it was written.
+PLAN_LANDS_ROW = "     - Lands {n} {where} next turn{strength}."
+PLAN_LANDS_WHERE = {"front": "at the front enemy", "all": "to ALL",
+                    "other": "at its target"}
+PLAN_LANDS_STRENGTH = "; your Strength was {strength} when written"
+#: Kokomi review r5 (2026-10-14, A1): a damage Plan waiting on a body that
+#: intends to Block. Three runs of five wasted Plans into it.
+PLAN_DEFEND_WARNING = ("     - {enemy} intends to Block; {plan} ({n}) lands "
+                       "into that Block.")
 
 # `EB-752`. THE RELIC TERM NO DAMAGE FACE CAN FOLD.
 #

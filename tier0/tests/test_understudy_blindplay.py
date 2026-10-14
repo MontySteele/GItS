@@ -5080,7 +5080,9 @@ def test_the_plan_word_left_the_modifier_rule_to_the_panel():
 
     assert "folds as you write it" not in plan
     assert "Weak" not in plan
-    assert "carries the numbers you wrote" in blindplay.PLAN_WRITTEN_NUMBER_NOTE
+    # Kokomi review r5 (2026-10-14, A2): reworded.
+    assert ("Your Strength when you write it counts"
+            in blindplay.PLAN_WRITTEN_NUMBER_NOTE)
 
 
 def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
@@ -10799,19 +10801,16 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
                     "line": "Bake-Kurage: Kurage's Oath, 7",
                     "kind": "Damage", "asked": 7})))
     lines = page.splitlines()
-    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE.startswith(
-        "- A Plan carries the numbers you wrote.")
     assert blindplay.PLAN_WRITTEN_NUMBER_NOTE in lines
-    # `EB-688`. AND BOTH CASES ARE PREDICTABLE FROM IT. "afterwards" was the
-    # word that was not the rule: both r27 and r28 wrote a Plan while ALREADY
-    # debuffed and were paid in full. "Either 'a hit you land' excludes the
-    # jellyfish's hit ... or Plans are simply immune. The rules text does not
-    # say which, and the difference matters" (r28 lane 1, (c) 2). It is the
-    # first, and the Block half is `EB-659`'s mirror of it.
+    # Kokomi review r5 (2026-10-14, A2): the paper's wording. "Shrink or Weak
+    # on you never cuts it" read as "nothing on me cuts it" (Tender cut a
+    # planned Oath+), so the Strength half is said first, a loss as much as
+    # a gain.
     said = blindplay.PLAN_WRITTEN_NUMBER_NOTE
-    assert "Every planned HIT is the jellyfish's" in said
-    assert "before or after you write it" in said
-    assert "a planned BLOCK is yours, so Frail does cut it" in said
+    assert said == ("- Your Strength when you write it counts, a loss "
+                    "(Tender) as much as a gain; Weak or Shrink on you never "
+                    "does. A Plan that reads an intent (Tide Wall, Flank, "
+                    "Undercurrent Snare) reads it when it lands.")
     assert "afterwards" not in said
     # Beside the count rule, which is the one it qualifies.
     assert lines.index(blindplay.PLAN_COUNT_NOTE) + 1 == \

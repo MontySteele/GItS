@@ -1925,12 +1925,12 @@
 - {id: proto_kk_sea_glass_harvest, name: "Sea Glass Harvest", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Defect's Compact on the draw pile, curses included (Kokomi round-1
-   # fixes, 2026-10-12; provenance note). Sea Glass is a token in no pool:
+   # Compact on the hand and draw pile, curses included (provenance notes,
+   # 2026-10-12 and r5 A-list 2026-10-14). Sea Glass is a token in no pool:
    # 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse in your [gold]Hand[/gold] and [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
    effects: [{op: block, amount: 10}],
-   plan: [{op: transform_statuses_in_draw_pile}],
+   plan: [{op: transform_statuses_in_hand_and_draw_pile}],
    # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13].
    # 13 Block; the Sea Glass arrives upgraded.
    upgrade: {block: 3, upgraded_grant: true}}

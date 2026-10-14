@@ -291,7 +291,7 @@ def test_room_closed_names_the_shop_too():
 # ---- 8. the brief page's relic and price trims -----------------------------
 
 PAGE = "\n".join([
-    "# Battle — round 2", "", "- HP 40/68", "- Block 0", "- Energy 3/3", "",
+    "# Battle — round 2", "", "- HP 40/68", "- Block 0", "- Energy 3 left of 3", "",
     "## Your relics", "",
     "- **Pendulum** (1 of 3) — Every 3 turns, draw 1 card.",
     "- **Akabeko** — At the start of each combat, gain 8 Vigor.", "",

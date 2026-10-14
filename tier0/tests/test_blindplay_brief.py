@@ -32,7 +32,7 @@ NEVER_DROPPED = [
     "# Battle — round 4",
     "- HP 68/78",
     "- Block 0",
-    "- Energy 3/3",
+    "- Energy 3 left of 3",
     "- Constrict 6 (debuff) — While the Slithering Strangler is alive, at the "
     "end of your turn, take 6 damage.",
     "## Your stage",
@@ -107,7 +107,7 @@ def test_a_removal_that_would_hide_an_intent_returns_the_full_page():
 
 
 @pytest.mark.parametrize("line", [
-    INTENT, "- HP 3/70", "- Block 12", "- Energy 0/3",
+    INTENT, "- HP 3/70", "- Block 12", "- Energy 0 left of 3",
     "REFUSED: nothing here is called 'Nope'.", "TOOL-BLOCKED: crystal_sphere",
     "- `end turn`", "WAITING: the other player has not ended their turn",
     "blind play error: something", "# Battle — round 2"])
@@ -127,7 +127,7 @@ def test_the_recorded_combat_page_keeps_its_board():
     for line in (head + tail).splitlines():
         if line.strip() and not blindplay_brief._drop_line(line):
             assert line in kept, line
-    assert "Intent:" in out and "- Energy 2/3" in out
+    assert "Intent:" in out and "- Energy 2 left of 3" in out
     assert len(out) < len(full)
     # 2026-10-01: the italic glosses under the hand are gone too.
     assert "*Applies Hydro* — " in full
