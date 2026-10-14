@@ -2,33 +2,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
+using Godot;
 using KleeMod.Cards;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.Entities.RestSite;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rewards;
+using MegaCrit.Sts2.Core.Rooms;
+using MegaCrit.Sts2.Core.TestSupport;
 
 namespace KleeMod.Relics;
 
 /// <summary>
-/// MEDITATIONS OF A YAKO -- Yae's starting relic (paper sec.3): "At a rest
-/// site you may Publish: a card you Edited this run keeps its last
-/// Annotation for the rest of the run." In place of Rest or Smith, the way
-/// the base game's Shovel adds Dig (<c>Shovel.TryModifyRestSiteOptions</c>,
-/// 0.111.0 decompile): the relic adds <see cref="PublishRestSiteOption"/> to
-/// its owner's rest-site options, and choosing it spends the site's choice
-/// as any option does (<c>RestSiteSynchronizer.ChooseOption</c> clears the
-/// rest unless a listener says otherwise).
+/// MEDITATIONS OF A YAKO -- Yae's starting relic: "After an elite or boss
+/// fight, you may Publish an Annotation." (Publish after elites and bosses,
+/// ruled 2026-10-14, <c>review/active/yae-design-axes-2026-10-14.md</c>; it
+/// was a rest-site option, which competed with Smith.)
+///
+/// HOW. At the end of every fight (<see cref="AfterCombatEnd"/>, while the
+/// combat piles still exist) each deck card's draft is rewritten to the
+/// Annotation its combat copy carries at that moment
+/// (<see cref="YaeEditing.SnapshotDrafts"/>), so the drafts are that fight's
+/// evidence and the run save keeps them across a reload on the reward
+/// screen. After an elite or boss win the relic adds one
+/// <see cref="YaePublishReward"/> to the combat reward screen
+/// (<see cref="TryModifyRewards"/>, the hook Prayer Wheel uses), only when
+/// some card is Annotated and not yet Published.
 ///
 /// No free setup ([USER]'s rule): fight one opens with an empty shrine and
-/// an unedited deck. The draft each Edit writes lives on the deck card
-/// (<see cref="YaeEditing.Draft"/>), so the relic holds no state and its
-/// Orobas upgrade inherits every draft.
+/// an unedited deck, and the relic holds no state of its own, so its Orobas
+/// upgrade inherits every draft.
 ///
 /// NOT SEALED: <see cref="EnlightenedBlessing"/> IS one, so
 /// <c>GetRelic&lt;MeditationsOfAYako&gt;</c> finds either.
@@ -45,49 +54,43 @@ public class MeditationsOfAYako : CustomRelicModel
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
-    /// <summary>Does Publishing leave the site's other options open
-    /// (Enlightened Blessing: "You may Publish and then Rest or Smith")?
-    /// </summary>
-    public virtual bool PublishKeepsTheSite => false;
+    /// <summary>How many Annotations one reward may Publish.</summary>
+    public virtual int PublishCount => 1;
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Meditations of a Yako"),
         ("description",
-            "At a [gold]Rest Site[/gold], you may [gold]Publish[/gold]: a card "
-          + "you [gold]Edited[/gold] this run keeps its last Annotation for "
-          + "the rest of the run."),
+            "After an elite or boss fight, you may [gold]Publish[/gold] an "
+          + "Annotation."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForEdit(System.Array.Empty<IHoverTip>(), null);
 
-    /// <summary>Set by <see cref="PublishRestSiteOption.OnSelect"/> for the
-    /// one ask that follows it.</summary>
-    private bool _justPublished;
-
-    internal void NotePublished() => _justPublished = true;
-
-    public override bool TryModifyRestSiteOptions(Player player,
-                                                  ICollection<RestSiteOption> options)
+    /// <summary>The fight's evidence: every deck card's draft becomes the
+    /// Annotation its combat copy carries now.</summary>
+    public override Task AfterCombatEnd(CombatRoom room)
     {
-        if (player != Owner) return false;
-        options.Add(new PublishRestSiteOption(player, this));
-        return true;
+        YaeEditing.SnapshotDrafts(Owner);
+        return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Enlightened Blessing's rule: right after a Publish, the remaining
-    /// options stay (MiniatureTent's hook, 0.111.0 decompile). Every other
-    /// choice, and every choice under the plain relic, closes the site.
-    /// </summary>
-    public override bool ShouldDisableRemainingRestSiteOptions(Player player)
+    public override bool TryModifyRewards(Player player, List<Reward> rewards,
+                                          AbstractRoom? room)
     {
-        if (player != Owner) return true;
-        var keep = _justPublished && PublishKeepsTheSite;
-        _justPublished = false;
-        if (keep) Flash();
-        return !keep;
+        if (player != Owner || room is not CombatRoom combat) return false;
+        var runState = player.RunState;
+        var finalBoss = room.RoomType == RoomType.Boss
+            && runState.CurrentActIndex >= runState.Acts.Count - 1;
+        if (!YaeEditing.OffersPublish(room.RoomType,
+                combat.Encounter?.ShouldGiveRewards ?? false, finalBoss))
+        {
+            return false;
+        }
+        if (!YaeEditing.PublishChoices(player).Any()) return false;
+        rewards.Add(new YaePublishReward(player, this));
+        return true;
     }
 
     /// <summary>Placeholder art: Kokomi's Pearl of Wisdom icon, borrowed
@@ -100,23 +103,24 @@ public class MeditationsOfAYako : CustomRelicModel
 }
 
 /// <summary>
-/// ENLIGHTENED BLESSING -- the Touch of Orobas upgrade (her A4): "You may
-/// Publish and then Rest or Smith." ANCIENT, never Starter (a second Orobas
-/// finds its target by Starter rarity).
+/// ENLIGHTENED BLESSING -- the Touch of Orobas upgrade (her A4). It was
+/// "Publish and then Rest or Smith"; with the rest-site option gone it
+/// Publishes up to two (Claude's reading of the upgrade, 2026-10-14, open to
+/// change). ANCIENT, never Starter (a second Orobas finds its target by
+/// Starter rarity).
 /// </summary>
 public sealed class EnlightenedBlessing : MeditationsOfAYako
 {
     public override RelicRarity Rarity => RelicRarity.Ancient;
 
-    public override bool PublishKeepsTheSite => true;
+    public override int PublishCount => 2;
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Enlightened Blessing"),
         ("description",
-            "At a [gold]Rest Site[/gold], you may [gold]Publish[/gold] and then "
-          + "Rest or Smith: a card you [gold]Edited[/gold] this run keeps its "
-          + "last Annotation for the rest of the run."),
+            "After an elite or boss fight, you may [gold]Publish[/gold] up to "
+          + "2 Annotations."),
     };
 
     /// <summary>Already the upgrade.</summary>
@@ -124,65 +128,102 @@ public sealed class EnlightenedBlessing : MeditationsOfAYako
 }
 
 /// <summary>
-/// PUBLISH, THE REST-SITE OPTION (pick 2 (a), ruled): choose a deck card that
-/// holds a draft; its draft becomes its Published Annotation, the deck card's
-/// Enchantment, which the run save keeps. A Published card can be Published
-/// again later (the new one replaces it). Disabled, with the reason, when no
-/// card holds a draft. Shovel's <c>DigRestSiteOption</c> is the shape.
+/// PUBLISH, THE REWARD-SCREEN ROW. Claiming it opens a grid of the cards the
+/// fight left Annotated, each shown as a copy wearing that Annotation; the
+/// one picked is that exact deck card, and its Annotation becomes the deck
+/// card's Enchantment, which the run save keeps. The grid can be closed
+/// without a pick (the row stays, as a full-belt potion's does), and leaving
+/// the reward screen skips it. Not serialised: the reward screen is rebuilt
+/// from the room and the hooks on a reload, and the drafts it reads are
+/// saved on the deck cards.
 /// </summary>
-public sealed class PublishRestSiteOption : CustomRestSiteOption
+public sealed class YaePublishReward : Reward
 {
-    /// <summary>The rest_site_ui rows, merged by
-    /// <c>KleeMod.InjectLocStrings</c> (the option's Title and Description
-    /// are the base game's table lookups).</summary>
-    public const string Id = "KLEEMOD_PUBLISH";
+    /// <summary>The reward row's text, merged into `gameplay_ui` by
+    /// <c>KleeMod.InjectLocStrings</c>.</summary>
+    public const string DescriptionKey = "KLEEMOD_YAE_PUBLISH_REWARD";
 
-    public const string Name = "Publish";
-
-    public const string DescriptionText =
-        "A card you [gold]Edited[/gold] this run keeps its last Annotation "
-      + "for the rest of the run.";
-
-    public const string DisabledText =
-        "No card has been [gold]Edited[/gold] this run.";
-
-    public const string PromptKey = "KLEEMOD-YAE_REST_PUBLISH.selectionScreenPrompt";
-
-    public const string PromptText = "Choose a card to Publish.";
+    public const string DescriptionText = "Publish an Annotation";
 
     private readonly MeditationsOfAYako? _relic;
 
-    public PublishRestSiteOption(Player owner, MeditationsOfAYako? relic = null)
-        : base(owner)
+    public YaePublishReward(Player player, MeditationsOfAYako? relic = null)
+        : base(player)
     {
         _relic = relic;
     }
 
-    public override string OptionId => Id;
+    /// <summary>No base type fits; nothing serialises it (above).</summary>
+    protected override RewardType RewardType => RewardType.None;
 
-    /// <summary>The Dig icon, borrowed (placeholder art).</summary>
-    public override string? CustomIconPath => "res://images/ui/rest_site/option_dig.png";
+    /// <summary>After the card reward (5), before a card removal (7).</summary>
+    public override int RewardsSetIndex => 6;
 
-    public override bool IsEnabled => YaeEditing.Publishable(Owner).Any();
+    public override LocString Description => new("gameplay_ui", DescriptionKey);
 
-    public override LocString Description => new(
-        "rest_site_ui",
-        "OPTION_" + OptionId + (IsEnabled ? ".description" : ".descriptionDisabled"));
+    public override bool IsPopulated => true;
 
-    public override async Task<bool> OnSelect()
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForEdit(System.Array.Empty<IHoverTip>(), null);
+
+    public override void Populate()
     {
-        var cards = YaeEditing.Publishable(Owner).ToList();
-        if (cards.Count == 0) return false;
-        var prefs = new CardSelectorPrefs(new LocString("cards", PromptKey), 1)
+    }
+
+    /// <summary>The relic's own icon.</summary>
+    public override Control? CreateIcon()
+    {
+        if (TestMode.IsOn || _relic == null) return null;
+        var rect = new TextureRect
+        {
+            Texture = _relic.BigIcon,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+        };
+        rect.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        return rect;
+    }
+
+    /// <summary>The grid's terms: one pick (two under Enlightened
+    /// Blessing), and it may be closed without one. PURE.</summary>
+    public static CardSelectorPrefs Prefs(int max) => max <= 1
+        ? new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 1)
+        {
+            Cancelable = true,
+        }
+        : new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 0, max)
         {
             Cancelable = true,
             RequireManualConfirmation = true,
         };
-        var picked = (await CardSelectCmd.FromDeckGeneric(
-            Owner, prefs, c => YaeEditing.Draft(c) != YaeAnnotation.None)).FirstOrDefault();
-        if (picked == null) return false;
-        if (!YaeEditing.PublishToDeck(picked, YaeEditing.Draft(picked))) return false;
-        _relic?.NotePublished();
+
+    protected override async Task<bool> OnSelect()
+    {
+        var decks = YaeEditing.PublishChoices(Player).ToList();
+        if (decks.Count == 0) return false;
+        var previews = decks.Select(YaeEditing.PublishPreview).ToList();
+        var max = System.Math.Min(_relic?.PublishCount ?? 1, decks.Count);
+        List<CardModel> picked;
+        try
+        {
+            picked = (await CardSelectCmd.FromSimpleGrid(
+                new BlockingPlayerChoiceContext(), previews, Player, Prefs(max))).ToList();
+        }
+        finally
+        {
+            foreach (var preview in previews) Player.RunState.RemoveCard(preview);
+        }
+        var n = 0;
+        foreach (var deck in YaeEditing.ResolvePicks(previews, decks, picked))
+        {
+            if (YaeEditing.PublishToDeck(deck, YaeEditing.Draft(deck))) n++;
+        }
+        if (n == 0) return false;
+        YaeEditing.ClearDrafts(Player);
+        _relic?.Flash();
         return true;
+    }
+
+    public override void MarkContentAsSeen()
+    {
     }
 }

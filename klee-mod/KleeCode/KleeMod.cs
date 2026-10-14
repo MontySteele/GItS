@@ -262,31 +262,25 @@ public static class KleeMod
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
                 // YAE MIKO (2026-10-13): the Edit, The Seven Glamours',
-                // Reborn as Guuji Yae's and the rest-site Publish's prompts,
-                // on the same terms.
+                // Reborn as Guuji Yae's prompts, on the same terms. The
+                // Publish prompt also titles the after-elite Publish grid.
                 [Powers.YaeEditing.EditPromptKey] =
                     Powers.YaeEditing.EditPromptText,
                 [Powers.YaeEditing.PublishPromptKey] =
                     Powers.YaeEditing.PublishPromptText,
                 [Powers.YaeEditing.AnnotationPromptKey] =
                     Powers.YaeEditing.AnnotationPromptText,
-                [Relics.PublishRestSiteOption.PromptKey] =
-                    Relics.PublishRestSiteOption.PromptText,
             });
 
-            // YAE MIKO (2026-10-13): Meditations of a Yako's rest-site
-            // option. A RestSiteOption's Title and Description are the base
-            // game's `rest_site_ui` lookups (OPTION_<id>.name /
-            // .description), so its rows are merged here, their only source.
-            LocManager.Instance.GetTable("rest_site_ui").MergeWith(
+            // YAE MIKO (2026-10-14, Publish after elites and bosses):
+            // Meditations of a Yako's reward-screen row. A Reward's
+            // Description is a table lookup, so its row is merged into
+            // `gameplay_ui` here, its only source.
+            LocManager.Instance.GetTable("gameplay_ui").MergeWith(
                 new Dictionary<string, string>
                 {
-                    ["OPTION_" + Relics.PublishRestSiteOption.Id + ".name"] =
-                        Relics.PublishRestSiteOption.Name,
-                    ["OPTION_" + Relics.PublishRestSiteOption.Id + ".description"] =
-                        Relics.PublishRestSiteOption.DescriptionText,
-                    ["OPTION_" + Relics.PublishRestSiteOption.Id + ".descriptionDisabled"] =
-                        Relics.PublishRestSiteOption.DisabledText,
+                    [Relics.YaePublishReward.DescriptionKey] =
+                        Relics.YaePublishReward.DescriptionText,
                 });
 
             // Runtime copy of the custom-keyword loc. The pck carries the

@@ -26,8 +26,8 @@ public interface IYaeCharacter
 ///   * EDIT (<see cref="YaeEditing"/>): a card in hand gains one of five
 ///     Annotations (her Enchantments, <see cref="YaeAnnotationModel"/>) for
 ///     the combat. PUBLISH keeps one for the run: The Seven Glamours in
-///     combat, and Meditations of a Yako's rest-site option
-///     (<c>Relics.MeditationsOfAYako</c>).
+///     combat, and Meditations of a Yako's reward-screen Publish after an
+///     elite or boss fight (<c>Relics.MeditationsOfAYako</c>).
 ///
 /// NO SWITCH, as Varka: she ships nowhere else. BUILT IN BOTH ENGINES: the
 /// sim twin is <c>tier0/engine/yae_shrine.py</c>, whose numbers

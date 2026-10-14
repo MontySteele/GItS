@@ -3189,6 +3189,11 @@ public static partial class McpMod
         CardReward => "card",
         SpecialCardReward => "special_card",
         CardRemovalReward => "card_removal",
+        // GItS LOCAL EDIT (2026-10-14, Yae's Publish after elites and
+        // bosses): her relic's reward row would print its class name,
+        // `yaepublishreward`. Matched by name; this assembly does not
+        // reference the mod's.
+        _ when reward.GetType().Name == "YaePublishReward" => "publish",
         _ => reward.GetType().Name.ToLower()
     };
 

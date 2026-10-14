@@ -8456,6 +8456,29 @@ Fox's Mooncall raises Grafted Branch's Level too (3 [4] under one copy).
 The old "Mikage Thunder: the paper prints no upgrade" note above is
 superseded.
 
+## Yae Miko, Publish after elites and bosses, 2026-10-14
+
+Ruled by [USER] (`review/active/yae-design-axes-2026-10-14.md`, "Publish
+after elites and bosses, ruled 2026-10-14"). No row moves; the relic's rule
+does. Meditations of a Yako: "After an elite or boss fight, you may Publish
+an Annotation." The rest-site option (`PublishRestSiteOption`) is gone. Built
+as a combat-reward row (`Relics.YaePublishReward`, added by
+`TryModifyRewards`), not an overlay. Readings, both engines:
+- The offer is every deck card the fight left Annotated that does not
+  already carry a Published Annotation (one Enchantment per card), shown as a
+  copy wearing that Annotation; the exact copy picked is the one Published.
+  The fight's evidence is the draft, rewritten for every deck card at the
+  end of every fight (`YaeEditing.SnapshotDrafts`) and cleared after a
+  Publish. No offer after a normal fight, the final boss or a no-reward
+  encounter, or when nothing is Annotated. Sim twin
+  `yae_shrine.offers_publish` / `publish_choices` / `publish_after_fight`.
+- Enlightened Blessing (Orobas): "After an elite or boss fight, you may
+  Publish up to 2 Annotations." Claude's reading of the upgrade, since its
+  old text ("Publish and then Rest or Smith") had no rest site left to
+  read; open to change.
+- The harness (`tools/yae_expansion_sim`) rests at every R and Publishes
+  after E and B.
+
 ## Kokomi pool overhaul, 2026-10-13
 
 `review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).

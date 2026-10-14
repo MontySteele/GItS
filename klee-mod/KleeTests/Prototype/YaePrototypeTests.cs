@@ -538,23 +538,123 @@ public class YaePrototypeTests : IDisposable
 
     // ---- the relic (sec.3) ---------------------------------------------------
 
-    [Fact]
-    public void Meditations_adds_publish_to_the_rest_site_and_upgrades_to_enlightened_blessing()
+    // Publish after elites and bosses (ruled 2026-10-14,
+    // review/active/yae-design-axes-2026-10-14.md). Sim twin:
+    // tier0/tests/test_yae_shrine.py's after-elite pins.
+
+    /// <summary>A stand-in deck card for the pure offer reads: reference
+    /// identity only, so two "Strikes" are two cards.</summary>
+    private sealed class DeckSlot
     {
-        Assert.Equal(typeof(MeditationsOfAYako),
-                     typeof(MeditationsOfAYako).GetMethod("TryModifyRestSiteOptions")!.DeclaringType);
-        Assert.False(Uninit<MeditationsOfAYako>().PublishKeepsTheSite);
-        Assert.True(Uninit<EnlightenedBlessing>().PublishKeepsTheSite);
-        Assert.True(typeof(MeditationsOfAYako).IsAssignableFrom(typeof(EnlightenedBlessing)));
+        public DeckSlot(string name) => Name = name;
+
+        public string Name { get; }
     }
 
     [Fact]
-    public void The_rest_site_publish_reads_the_draft()
+    public void The_rest_site_no_longer_offers_publish()
     {
-        var calls = Il.CallSequence(typeof(PublishRestSiteOption).GetMethod("OnSelect")!).ToList();
-        Assert.Contains(calls, c => c.Contains("FromDeckGeneric"));
-        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.Draft))
-                                    || c.Contains(nameof(YaeEditing.Publishable)));
+        Assert.NotEqual(typeof(MeditationsOfAYako),
+                        typeof(MeditationsOfAYako).GetMethod("TryModifyRestSiteOptions")!.DeclaringType);
+        Assert.NotEqual(typeof(MeditationsOfAYako),
+                        typeof(MeditationsOfAYako).GetMethod("ShouldDisableRemainingRestSiteOptions")!.DeclaringType);
+        Assert.DoesNotContain(typeof(MeditationsOfAYako).Assembly.GetTypes(),
+                              t => typeof(MegaCrit.Sts2.Core.Entities.RestSite.RestSiteOption).IsAssignableFrom(t)
+                                   && t.Name.Contains("Publish"));
+        Assert.True(typeof(MeditationsOfAYako).IsAssignableFrom(typeof(EnlightenedBlessing)));
+        Assert.Equal(1, Uninit<MeditationsOfAYako>().PublishCount);
+        Assert.Equal(2, Uninit<EnlightenedBlessing>().PublishCount);
+    }
+
+    [Fact]
+    public void Publish_is_offered_after_an_elite_or_boss_and_never_after_a_normal_fight()
+    {
+        Assert.True(YaeEditing.OffersPublish(MegaCrit.Sts2.Core.Rooms.RoomType.Elite, true, false));
+        Assert.True(YaeEditing.OffersPublish(MegaCrit.Sts2.Core.Rooms.RoomType.Boss, true, false));
+        Assert.False(YaeEditing.OffersPublish(MegaCrit.Sts2.Core.Rooms.RoomType.Monster, true, false));
+        Assert.False(YaeEditing.OffersPublish(MegaCrit.Sts2.Core.Rooms.RoomType.Event, true, false));
+        // No reward screen follows the final boss or a no-reward encounter.
+        Assert.False(YaeEditing.OffersPublish(MegaCrit.Sts2.Core.Rooms.RoomType.Boss, true, true));
+        Assert.False(YaeEditing.OffersPublish(MegaCrit.Sts2.Core.Rooms.RoomType.Elite, false, false));
+    }
+
+    [Fact]
+    public void The_relic_adds_the_reward_only_through_the_gate_and_the_offer()
+    {
+        var calls = Il.CallSequence(typeof(MeditationsOfAYako).GetMethod("TryModifyRewards")!).ToList();
+        var gate = calls.FindIndex(c => c.Contains(nameof(YaeEditing.OffersPublish)));
+        var offer = calls.FindIndex(c => c.Contains(nameof(YaeEditing.PublishChoices)));
+        var add = calls.FindIndex(c => c.Contains(nameof(YaePublishReward)));
+        Assert.True(gate >= 0 && offer > gate && add > offer, string.Join(", ", calls));
+        // The fight's evidence is taken at the end of every fight.
+        Assert.Contains(Il.CallSequence(typeof(MeditationsOfAYako).GetMethod("AfterCombatEnd")!),
+                        c => c.Contains(nameof(YaeEditing.SnapshotDrafts)));
+        var snap = Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.SnapshotDrafts))!).ToList();
+        Assert.Contains(snap, c => c.Contains("get_AllCards"));
+        Assert.Contains(snap, c => c.Contains("get_DeckVersion"));
+        Assert.Contains(snap, c => c.Contains(nameof(YaeEditing.RecordDraft)));
+    }
+
+    [Fact]
+    public void Nothing_is_offered_when_no_card_is_annotated()
+    {
+        var a = new DeckSlot("Strike");
+        var b = new DeckSlot("Defend");
+        Assert.Empty(YaeEditing.PublishChoices(new[]
+        {
+            (a, YaeAnnotation.None, false),
+            (b, YaeAnnotation.None, false),
+        }));
+        Assert.Empty(YaeEditing.PublishChoices(Array.Empty<(DeckSlot, YaeAnnotation, bool)>()));
+    }
+
+    [Fact]
+    public void The_offer_is_the_annotated_cards_not_yet_published_in_deck_order()
+    {
+        var strike1 = new DeckSlot("Strike");
+        var strike2 = new DeckSlot("Strike");
+        var published = new DeckSlot("Bestseller");
+        var plain = new DeckSlot("Defend");
+        var offer = YaeEditing.PublishChoices(new[]
+        {
+            (strike1, YaeAnnotation.RedInk, false),
+            (plain, YaeAnnotation.None, false),
+            (published, YaeAnnotation.SakuraSeal, true),
+            (strike2, YaeAnnotation.FoxFire, false),
+        });
+        Assert.Equal(new[] { strike1, strike2 }, offer);
+    }
+
+    [Fact]
+    public void The_chosen_copy_is_the_one_published_and_a_skip_publishes_nothing()
+    {
+        var decks = new[] { new DeckSlot("Strike"), new DeckSlot("Strike") };
+        var previews = new[] { new DeckSlot("Strike"), new DeckSlot("Strike") };
+        Assert.Same(decks[1], Assert.Single(YaeEditing.ResolvePicks(previews, decks, new[] { previews[1] })));
+        Assert.Same(decks[0], Assert.Single(YaeEditing.ResolvePicks(previews, decks, new[] { previews[0] })));
+        // The grid closed with no pick: nothing.
+        Assert.Empty(YaeEditing.ResolvePicks(previews, decks, Array.Empty<DeckSlot>()));
+        // A stranger (not a preview) is nothing.
+        Assert.Empty(YaeEditing.ResolvePicks(previews, decks, new[] { new DeckSlot("Strike") }));
+    }
+
+    [Fact]
+    public void The_reward_opens_a_closable_grid_and_publishes_the_draft_on_the_deck_card()
+    {
+        var prefs = Il.CallSequence(typeof(YaePublishReward).GetMethod(nameof(YaePublishReward.Prefs))!).ToList();
+        Assert.Contains(prefs, c => c.Contains("set_Cancelable"));
+        var calls = Il.CallSequence(typeof(YaePublishReward).GetMethod("OnSelect",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!).ToList();
+        var grid = calls.FindIndex(c => c.Contains("FromSimpleGrid"));
+        var resolve = calls.FindIndex(c => c.Contains(nameof(YaeEditing.ResolvePicks)));
+        var publish = calls.FindIndex(c => c.Contains(nameof(YaeEditing.PublishToDeck)));
+        Assert.True(grid >= 0 && resolve > grid && publish > resolve, string.Join(", ", calls));
+        // A method group (ldftn), which only the set scan reads.
+        Assert.Contains(Il.Calls(typeof(YaePublishReward).GetMethod("OnSelect",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!),
+            c => c.Contains(nameof(YaeEditing.PublishPreview)));
+        Assert.Contains(calls, c => c.Contains("RemoveCard"));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.ClearDrafts)));
     }
 
     // ---- the companion and the keywords (picks 5, 6) -------------------------
