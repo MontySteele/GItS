@@ -70,10 +70,11 @@ def test_treatise_face_says_writing_does_not_count():
 
 def test_kelp_wall_now_line_blocks_and_draws():
     row = loader.get_card("proto_kk_kelp_wall")
-    assert row.effects[0] == {"op": "block", "amount": 5}
+    # Numbers pass (kokomi-review-r5-2026-10-14): 5 -> 7 [9].
+    assert row.effects[0] == {"op": "block", "amount": 7}
     assert row.effects[1] == {"op": "draw", "amount": 1}
     up = upgrades.apply_upgrade(loader.get_card("proto_kk_kelp_wall"))
-    assert up.effects[0]["amount"] == 7
+    assert up.effects[0]["amount"] == 9
     # The pool overhaul (2026-10-13): the Plan is a Counter line with no
     # printed number (was the level pass's flat 12 [15] Block).
     assert up.plan == [{"op": "damage_blocked_since",
@@ -83,7 +84,7 @@ def test_kelp_wall_now_line_blocks_and_draws():
     st.player.draw_pile = [card("proto_kk_evening_watch")]
     st.player.block = 0
     _play(st, card("proto_kk_kelp_wall"))
-    assert st.player.block == 5
+    assert st.player.block == 7
     assert [c.id for c in st.player.hand] == ["proto_kk_evening_watch"]
 
 

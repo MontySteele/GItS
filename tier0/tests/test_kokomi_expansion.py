@@ -170,14 +170,15 @@ def test_drowning_pressures_floor_is_its_own_debuffs(overhaul):
 
 def test_undercurrent_snare_plans_vulnerable_on_all(overhaul):
     """The pool overhaul (2026-10-13): the Plan line is an Intent read --
-    each enemy that intends to attack when it lands loses 3 Strength this
-    turn (Piercing Wail's `temp_strength_down`); no Vulnerable any more."""
+    each enemy that intends to attack when it lands loses 4 Strength this
+    turn (Piercing Wail's `temp_strength_down`; 3 -> 4 in the numbers pass,
+    kokomi-review-r5-2026-10-14); no Vulnerable any more."""
     a, b = make_enemy(hp=100, name="a"), make_enemy(hp=100, name="b",
                                                      intents=QUIET)
     st = kokomi_state(enemies=[a, b])
     kokomi_plan.schedule(st, _row("proto_kk_undercurrent_snare"))
     kokomi_plan.resolve_all(st)
-    assert a.powers.get("temp_strength_down") == 3
+    assert a.powers.get("temp_strength_down") == 4
     assert b.powers.get("temp_strength_down") is None
     assert a.powers.get("vulnerable") is None
 

@@ -1243,13 +1243,13 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    # The re-founding (2026-10-12): per Plan waiting. The pool overhaul
-   # (2026-10-13): a Chain Plan, 5 [7] per Plan carried out this turn
-   # (was Apply 1 [2] Vulnerable). Provenance note.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # (2026-10-13): a Chain Plan (was Apply 1 [2] Vulnerable). Provenance note.
+   # kokomi-review-r5-2026-10-14 numbers pass: base 6 -> 8, Plan 5 -> 6 per Plan.
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 6, per: 3, count: plans_held}}],
-   plan: [{op: damage_per_plan_this_turn, amount: 5, target: front_enemy}],
-   # 9, plus 3 each / Plan 7 per Plan.
+              amount_formula: {base: 8, per: 3, count: plans_held}}],
+   plan: [{op: damage_per_plan_this_turn, amount: 6, target: front_enemy}],
+   # 11, plus 3 each / Plan 8 per Plan.
    upgrade: {formula_base: 3, plan_damage: 2}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
@@ -1424,10 +1424,11 @@
 - {id: proto_kk_prepared_retreat, name: "Prepared Retreat", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: If an enemy attacked you since you planned this, gain {PlanEnergy:energyIcons()}.",
-   effects: [{op: block, amount: 7}],
+   # kokomi-review-r5-2026-10-14 numbers pass: Block 7 -> 8.
+   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: If an enemy attacked you since you planned this, gain {PlanEnergy:energyIcons()}.",
+   effects: [{op: block, amount: 8}],
    plan: [{op: energy_if_attacked_since, amount: 1}],
-   # 10 Block / Plan 2 Energy.
+   # 11 Block / Plan 2 Energy.
    upgrade: {block: 3, plan_energy: 1}}
 
 # --- the tempo shelf (Kokomi round 9 pick 1, default applied 2026-09-04):
@@ -1633,10 +1634,11 @@
    # Counter Plan, each enemy that attacked her since it was written (was
    # Apply 1 Vulnerable to ALL enemies). Provenance note.
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 [gold]Hydro[/gold] damage to each enemy that attacked you since you planned this.",
-   effects: [{op: damage, amount: 8, target: enemy}],
-   plan: [{op: damage, amount: 8, target: enemies_attacked_since}],
-   # 11 damage / Plan 11.
+   # kokomi-review-r5-2026-10-14 numbers pass: 8 -> 10, Plan 8 -> 10.
+   description: "Deal 10 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 10 [gold]Hydro[/gold] damage to each enemy that attacked you since you planned this.",
+   effects: [{op: damage, amount: 10, target: enemy}],
+   plan: [{op: damage, amount: 10, target: enemies_attacked_since}],
+   # 13 damage / Plan 13.
    upgrade: {damage: 3, plan_damage: 3}}
 
 # --- THE EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
@@ -1705,10 +1707,12 @@
    # Piercing Wail's this-turn loss (was Apply 1 [2] Vulnerable to ALL
    # enemies). Provenance note.
    cost: 1, type: skill, rarity: uncommon,
-   description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 3 [gold]Strength[/gold] this turn.",
-   effects: [{op: apply_power, power: weak, amount: 2, target: enemy}],
-   plan: [{op: lose_strength_this_turn, amount: 3, target: enemies_intending_attack}],
-   # Plan 4 Strength; the now-line does not upgrade.
+   # kokomi-review-r5-2026-10-14 numbers pass: Gain 5 Block added; Plan 3 -> 4 Strength.
+   description: "Gain 5 [gold]Block[/gold]. Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 4 [gold]Strength[/gold] this turn.",
+   effects: [{op: block, amount: 5},
+             {op: apply_power, power: weak, amount: 2, target: enemy}],
+   plan: [{op: lose_strength_this_turn, amount: 4, target: enemies_intending_attack}],
+   # Plan 5 Strength; the now-line does not upgrade.
    upgrade: {plan_power_amount: 1}}
 
 - {id: proto_kk_at_waters_edge, name: "At Water's Edge", character: kokomi,
@@ -1729,7 +1733,8 @@
 - {id: proto_kk_battle_formation, name: "Battle Formation", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever 3 or more [gold]Plans[/gold] are carried out in one turn, gain {energyPrefix:energyIcons(1)} and draw 2 cards.",
+   # kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2 Plans, draw 2 -> 1.
+   description: "Whenever 2 or more [gold]Plans[/gold] are carried out in one turn, gain {energyPrefix:energyIcons(1)} and draw 1 card.",
    effects: [{op: apply_power, power: kk_battle_formation, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1906,9 +1911,10 @@
    # since it was written, at the front enemy (was Gain 12 [15] Block).
    # Provenance note.
    description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the damage you blocked since you planned this.",
-   effects: [{op: block, amount: 5}, {op: draw, amount: 1}],
+   # kokomi-review-r5-2026-10-14 numbers pass: Block 5 -> 7.
+   effects: [{op: block, amount: 7}, {op: draw, amount: 1}],
    plan: [{op: damage_blocked_since, target: front_enemy}],
-   # now 7 Block; the Plan line prints no number.
+   # now 9 Block; the Plan line prints no number.
    upgrade: {block: 2}}
 
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
@@ -1991,10 +1997,11 @@
 - {id: proto_kk_turning_tide_chain, name: "Turning Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] carried out this turn.",
-   effects: [{op: damage, amount: 7, target: enemy}],
-   plan: [{op: damage_per_plan_this_turn, amount: 4, target: all_enemies}],
-   # 10 / Plan 5 per Plan.
+   # kokomi-review-r5-2026-10-14 numbers pass: 7 -> 9, Plan 4 -> 5 per Plan.
+   description: "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] carried out this turn.",
+   effects: [{op: damage, amount: 9, target: enemy}],
+   plan: [{op: damage_per_plan_this_turn, amount: 5, target: all_enemies}],
+   # 12 / Plan 6 per Plan.
    upgrade: {damage: 3, plan_damage: 1}}
 
 - {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
@@ -2089,11 +2096,12 @@
 - {id: proto_kk_brine_spray, name: "Brine Spray", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 5 [gold]Hydro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], add {KkAmount} [gold]Stings[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
+   # kokomi-review-r5-2026-10-14 numbers pass: 5 -> 8.
+   description: "Deal 8 [gold]Hydro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], add {KkAmount} [gold]Stings[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: conditional, if: reaction_triggered_by_this,
               then: [{op: kokomi, kind: shoal_call, amount: 2}]}],
-   # 7 damage; the Stings do not upgrade.
+   # 10 damage; the Stings do not upgrade.
    upgrade: {damage: 2}}
 
 - {id: proto_kk_spearhead, name: "Spearhead", character: kokomi,
@@ -2182,9 +2190,10 @@
    cost: 1, type: attack, rarity: rare,
    description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Elemental Reaction[/gold] you triggered this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 5, per: 5,
+              amount_formula: {base: 10, per: 5,
                                count: reactions_triggered_this_combat}}],
-   # 7, plus 5 per reaction.
+   # kokomi-review-r5-2026-10-14 numbers pass: base 5 -> 10.
+   # 12, plus 5 per reaction.
    upgrade: {formula_base: 2}}
 
 - {id: proto_kk_the_shape_of_water, name: "The Shape of Water", character: kokomi,

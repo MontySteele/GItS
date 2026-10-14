@@ -198,12 +198,13 @@ public class KokomiJellyfishBuildTests
     {
         // The pool overhaul (2026-10-13): 5 [7], plus 5 for each Elemental
         // Reaction she triggered this combat (was 4 [8] plus 2 per Sting).
+        // The numbers pass (kokomi-review-r5-2026-10-14): base 10 [12].
         var card = new ProtoKkAllStreamsFlow();
         Assert.Equal((CardType.Attack, CardRarity.Rare, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
-        Assert.Equal(5m, card.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(10m, card.DynamicVars.CalculationBase.BaseValue);
         Assert.Equal(5m, card.DynamicVars.ExtraDamage.BaseValue);
-        Assert.Equal(7m, Upgraded<ProtoKkAllStreamsFlow>()
+        Assert.Equal(12m, Upgraded<ProtoKkAllStreamsFlow>()
                              .DynamicVars.CalculationBase.BaseValue);
         var vars = VarCalls(typeof(ProtoKkAllStreamsFlow));
         Assert.Contains(vars, c => c.Contains("get_ReactionsThisCombat"));
