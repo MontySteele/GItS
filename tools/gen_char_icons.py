@@ -2,10 +2,9 @@
 """Generate the top-bar character icons (`ui/char_icon.png`) from select art.
 
 The ONE producer of `char_icon.png` for every character listed in `CHARS`
-(Klee, Varka and Kokomi since 2026-10-13; Furina joins when her model's
-select art lands, by adding a row). Until then her icon stays
-`gen_furina_stills.py`'s. The outline halo beside each icon is still derived
-from it by `gen_char_icon_outlines.py`; run that after this.
+(Klee, Varka, Kokomi and Furina since 2026-10-13). The outline halo beside
+each icon is still derived from it by `gen_char_icon_outlines.py`; run that
+after this.
 
 THE SLOT -- measured, not assumed (SlayTheSpire2.pck, read 2026-10-13)
 ---------------------------------------------------------------------
@@ -24,6 +23,9 @@ The five base textures (`images/ui/top_panel/character_icon_<char>.png`):
                 3..82, Necrobinder 5..79 x 4..80): a free silhouette about
                 75px wide, centred, never touching the canvas sides, so the
                 outline halo (r ~4.5px, see gen_char_icon_outlines.py) fits.
+    subject     each character's own face or head, cut out: Ironclad's
+                helmet, Silent's skull mask, Defect's head, and so on. Ours
+                are our characters' faces to match.
 
 Our icons were 88x88 square crops whose alpha ran to every edge (Klee x 8..85
 y 0..87, Varka 0..87 both ways, Kokomi 0..82 x 0..87), so they drew bigger
@@ -38,14 +40,15 @@ disc of radius `DISC_R` centred on the canvas, so the content occupies x/y
 where it stays inside the disc. Each character's source is scaled so its
 crown-to-chin span is `HEAD_PX` and placed with the crown at `CROWN_Y` and the
 face centre on the canvas centre line. The crown is the top of the head mass
-the icon keeps (Klee's hat crown, not its feather; Kokomi's hair, not her bow).
+the icon keeps (Klee's hat crown, not its feather; Kokomi's hair, not her bow;
+Furina's hair, not the tilted top hat on the side of her head).
 
 The landmarks are hand-measured in SOURCE pixels, so each row also pins the
 source's size and alpha bbox: a re-rendered source fails loudly ("re-measure")
 instead of silently reframing.
 
 Usage:
-    .venv/Scripts/python tools/gen_char_icons.py [--chars klee,varka,kokomi]
+    .venv/Scripts/python tools/gen_char_icons.py [--chars klee,varka,kokomi,furina]
         [--art-root <checkout>] [--out-root <dir>] [--check]
 
 `--art-root` reads the sources under another checkout's ImageGen/ (a worktree
@@ -112,6 +115,16 @@ CHARS = {
         out="ImageGen/images/kokomi/ui/char_icon.png",
         source_size=(1920, 1200), source_bbox=(227, 70, 1092, 1118),
         face_cx=626, crown_y=110, chin_y=272),
+    # Furina: her model-rendered select close-up (tools/char_render/pack.py,
+    # PR #1241). Her top hat sits tilted on the side of her head, so the crown
+    # is the top of her HAIR under the brim, not the hat; the hat shows where
+    # it stays inside the disc. Face centre is the middle of her 3/4 face
+    # (eyes at x 1245 and 1342, chin at 1323).
+    "furina": Icon(
+        source="ImageGen/images/furina/ui/select_closeup.png",
+        out="ImageGen/images/furina/ui/char_icon.png",
+        source_size=(1920, 1080), source_bbox=(945, 37, 1834, 1080),
+        face_cx=1300, crown_y=260, chin_y=537),
 }
 
 

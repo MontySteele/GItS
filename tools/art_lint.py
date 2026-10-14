@@ -559,7 +559,6 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/ui/select_portrait.png":        "gen_furina_stills.py",
     "ImageGen/images/furina/ui/select_portrait_locked.png": "gen_furina_stills.py",
     "ImageGen/images/furina/ui/selection_splash.png":       "gen_furina_stills.py",
-    "ImageGen/images/furina/ui/char_icon.png":              "gen_furina_stills.py",
     "ImageGen/images/furina/ui/map_marker.png":             "gen_furina_stills.py",
     "ImageGen/images/kokomi/model/combat_model.png":        "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/select_portrait.png":        "gen_kokomi_stills.py",
@@ -642,10 +641,11 @@ GENERATOR_OWNED = {
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",
     # The top-bar icons (2026-10-13): head and shoulders cut from each
     # character's select art and framed to the base game's 85x85 icons by one
-    # script. Furina's stays gen_furina_stills.py's until her model lands.
+    # script (Furina's from her model's close-up, PR #1241).
     "ImageGen/images/ui/char_icon.png":                     "gen_char_icons.py",
     "ImageGen/images/varka/ui/char_icon.png":               "gen_char_icons.py",
     "ImageGen/images/kokomi/ui/char_icon.png":              "gen_char_icons.py",
+    "ImageGen/images/furina/ui/char_icon.png":              "gen_char_icons.py",
     # EB-37: derived from each character's own char_icon.png, so a plan row
     # claiming one of these would be sourcing a halo from the wiki instead of
     # from the fill it has to agree with.

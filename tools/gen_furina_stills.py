@@ -10,7 +10,7 @@ Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
     ImageGen/images/furina/ui/select_portrait.png       132x195
     ImageGen/images/furina/ui/select_portrait_locked.png 132x195
     ImageGen/images/furina/ui/selection_splash.png     1920x1200
-    ImageGen/images/furina/ui/char_icon.png              88x88
+    (ui/char_icon.png left 2026-10-13: tools/gen_char_icons.py draws it)
     ImageGen/images/furina/ui/map_marker.png             49x64
 
 CENTRING RULE. Every framing here is computed from the render's ALPHA
@@ -65,9 +65,9 @@ def main():
     print("  select_portrait.png    132x195 (+ locked, identical framing)")
 
     # Character icon + map marker: tight head crops on transparency.
-    head_crop(cutout, 88, 88, head_frac=0.30).save(UI / "char_icon.png")
+    # (the icon is tools/gen_char_icons.py's, from her model close-up)
     head_crop(cutout, 49, 64, head_frac=0.34).save(UI / "map_marker.png")
-    print("  char_icon.png 88x88, map_marker.png 49x64")
+    print("  map_marker.png 49x64")
 
     # Selection splash: the full-res twin, framed so she sits centred in the
     # left-of-centre third the info panel leaves free.
