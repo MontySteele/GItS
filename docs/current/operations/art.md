@@ -184,24 +184,25 @@ and switches her rest and select art when they exist. To re-render:
 ```
 
 **Yae Miko's model art (`yae_clips.py`, `tools/yae_rig/`, phase A, a
-temporary model, 2026-10-14).** Kokomi's phase A, for Yae, built without a
-render (the game was in use). The body PMX is `八重神子.pmx` from the official
-pack (scratch `models/SOURCES.md`); the 观海 bone set at about 1.13x Kokomi's
-frame, rest height 1.8057 units read off the PMX's vertices, 70 in (Navia's
-height: the two packs share a head-bone height to 0.2%; not yet ruled), so
-about 241.9 px at 1080p. The pack has no gohei, so her attack is a flick of
+temporary model, 2026-10-14).** Kokomi's phase A, for Yae. Rendered
+2026-10-14 (242.7 px at 1080p against a 241.9 target; `yae_frames.json`
+committed, both scenes generated, her static merchant sprite gone,
+`AttackAnimDelay` 0.4 s on the flick, frame 8). The body PMX is `八重神子.pmx`
+from the official pack (scratch `models/SOURCES.md`); the 观海 bone set at
+about 1.13x Kokomi's frame, rest height 1.8057 units read off the PMX's
+vertices, 70 in (Navia's height: the two packs share a head-bone height to
+0.2%; not yet ruled). The pack has no gohei, so her attack is a flick of
 the open far hand whose fox spirit is a phantom line (`PHANTOM`), tinted
 Electro; her cast plants a Sesshou Sakura (a seal, then a sweep to the
 ground); her rest pose is seiza. Her long robe is twelve skirt chains, laid
 over her lap whenever she kneels or sits (`FRONT`, `cloth(seated_yaw=)`).
 Pose bone names are the imported ones (mmd_tools turns the PMX's 左X into
 X.L), which also fixed Kokomi's sleeve and tail names before her first
-render. `tools/yae_rig` generates her two scenes the moment
-`yae_frames.json` exists (tested now against a synthetic manifest; her box
-is Kokomi's x 1.11); `build_pck.ps1` copies her frames and switches her rest
-and select art when they exist, and `Yae.cs` loads `yae/model/combat.tscn`
-first, so Klee's borrowed still stays only where her own file is missing. To
-finish, on a free machine:
+render. `tools/yae_rig` generates her two scenes from `yae_frames.json`
+(her box is Kokomi's x 1.11; every rendered cell sits inside it);
+`build_pck.ps1` copies her frames and switches her rest and select art when
+they exist, and `Yae.cs` loads `yae/model/combat.tscn` first, so Klee's
+borrowed still stays only where her own file is missing. To re-render:
 
 ```sh
 .venv/Scripts/python tools/char_render/build.py --char yae --models <scratch>/models --work <scratch dir> --art-root <scratch art root>

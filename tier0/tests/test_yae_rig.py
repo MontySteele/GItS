@@ -1,13 +1,12 @@
 """Yae Miko's model-scene generator (tools/yae_rig), phase A of her model
 art, a temporary model.
 
-Her frames are not rendered yet (2026-10-14: the game was in use, so no
-Blender), so tools/char_render/yae_frames.json does not exist and her
-placeholder (Klee's still at her path) still ships. These tests hold the
-generator against a SYNTHETIC manifest shaped exactly as
-tools/char_render/pack.py writes one, with her clips' real frame times
-(tools/char_render/yae_clips.py), so the wire step after the render is
-`python -m tools.yae_rig gen` and nothing more:
+Her frames were rendered 2026-10-14 (tools/char_render/yae_frames.json is
+committed). Most of these tests hold the generator against a SYNTHETIC
+manifest shaped exactly as tools/char_render/pack.py writes one, with her
+clips' real frame times (tools/char_render/yae_clips.py), so the generator's
+contract does not move with a re-render; the shipped scenes are checked
+against the real manifest:
 
   * the generator is deterministic and keeps the router contract;
   * every frame is an AtlasTexture that restores its cell, stepped at the
@@ -15,20 +14,21 @@ tools/char_render/pack.py writes one, with her clips' real frame times
   * the fox spirit's layer draws over the attack from the manifest's frame
     and rests at Electro;
   * the merchant loops stance B; the shadow sits under both;
-  * once the real manifest exists, the shipped scenes are what the
-    generator writes (until then the CLI says so and the check passes);
+  * the shipped scenes are what the generator writes from the committed
+    manifest;
   * build_pck copies her frames VRAM-compressed and switches rest and select
-    art only when they exist, and Yae.cs loads the scene first.
+    art only when they exist, ships no static merchant sprite, and Yae.cs
+    loads the scene first and releases the attack on the flick.
 """
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 from pathlib import Path
 
 import pytest
 
-from tools.yae_rig import __main__ as cli
 from tools.yae_rig import rig
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -175,14 +175,8 @@ def test_one_shot_lengths_are_the_clips(frames):
     assert set(rig.load_spec()["model"]["sheets"]) == set(rig.SHEET_NODE) == set(KC.CLIPS) - {"merchant"}
 
 
-def test_the_shipped_scenes_are_the_generators_once_she_is_rendered(capsys):
-    if not rig.FRAMES.exists():
-        assert cli.main(["gen", "--check"]) == 0
-        assert "does not exist yet" in capsys.readouterr().out
-        assert cli.main(["gen"]) == 2
-        # her placeholder still ships until the render lands: no scene yet
-        assert not rig.SCENE.exists() and not rig.MERCHANT_SCENE.exists()
-        return
+def test_the_shipped_scenes_are_the_generators():
+    assert rig.FRAMES.exists()
     assert rig.SCENE.read_text(encoding="utf-8") == rig.render_scene()
     assert rig.MERCHANT_SCENE.read_text(encoding="utf-8") == rig.render_merchant_scene()
 
@@ -197,13 +191,18 @@ def test_the_pack_copies_her_frames_compressed_and_switches_rest_and_select_only
     assert "\"res://yae/ui/$yaeSelectArt\"" in ps
     # Klee's placeholders stay the fallback at every path her art does not fill
     assert "Copy-YaeFallback $relative" in ps
+    # her generated merchant scene replaced the static sprite heredoc
+    assert "YaeMerchantSprite" not in ps
 
 
-def test_yae_keeps_the_still_until_her_scene_is_generated():
-    # The scene-first branch waits for the render commit (BACKLOG): deploy's
-    # S6c and S12 refuse a reference to a scene the pck lacks. That commit
-    # flips this test back to scene-first.
+def test_yae_loads_her_scene_first_and_keeps_the_still_as_the_fallback():
     cs = (ROOT / "klee-mod" / "KleeCode" / "Yae.cs").read_text(encoding="utf-8")
     body = cs.split("CreateCustomVisuals()", 1)[1]
-    assert 'KleePck.Path("yae/model/combat.tscn")' not in cs
-    assert 'KleePck.Path("yae/model/combat_model.png")' in body
+    assert body.index('KleePck.Path("yae/model/combat.tscn")') < body.index('KleePck.Path("yae/model/combat_model.png")')
+
+
+def test_her_attack_releases_on_the_flick():
+    cs = (ROOT / "klee-mod" / "KleeCode" / "Yae.cs").read_text(encoding="utf-8")
+    real = json.loads(rig.FRAMES.read_text(encoding="utf-8"))
+    main = real["sheets"]["attack"]["events"]["main"]
+    assert f"public override float AttackAnimDelay => {main}f;" in cs
