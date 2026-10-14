@@ -97,7 +97,6 @@
     "proto_kk_call_the_generals",
     "proto_kk_change_of_plans",
     "proto_kk_coordinated_strike",
-    "proto_kk_coordinated_tide",
     "proto_kk_coral_bulwark",
     "proto_kk_coral_crash",
     "proto_kk_dawn_tide",
@@ -107,15 +106,16 @@
     "proto_kk_feint",
     "proto_kk_flank",
     "proto_kk_flotsam_surge",
+    "proto_kk_following_current",
     "proto_kk_grand_design",
     "proto_kk_grand_strategist",
-    "proto_kk_jellyfish_current",
     "proto_kk_jellyfish_drift",
     "proto_kk_joint_orders",
     "proto_kk_kelp_wall",
     "proto_kk_kurage_barrage",
     "proto_kk_kurage_bloom",
     "proto_kk_kurage_canopy",
+    "proto_kk_kurage_vanguard",
     "proto_kk_kurages_mercy",
     "proto_kk_kurages_oath",
     "proto_kk_kurages_wake",
@@ -563,7 +563,6 @@
     "proto_kk_call_the_generals": "kokomi",
     "proto_kk_change_of_plans": "kokomi",
     "proto_kk_coordinated_strike": "kokomi",
-    "proto_kk_coordinated_tide": "kokomi",
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_coral_crash": "kokomi",
     "proto_kk_dawn_tide": "kokomi",
@@ -573,15 +572,16 @@
     "proto_kk_feint": "kokomi",
     "proto_kk_flank": "kokomi",
     "proto_kk_flotsam_surge": "kokomi",
+    "proto_kk_following_current": "kokomi",
     "proto_kk_grand_design": "kokomi",
     "proto_kk_grand_strategist": "kokomi",
-    "proto_kk_jellyfish_current": "kokomi",
     "proto_kk_jellyfish_drift": "kokomi",
     "proto_kk_joint_orders": "kokomi",
     "proto_kk_kelp_wall": "kokomi",
     "proto_kk_kurage_barrage": "kokomi",
     "proto_kk_kurage_bloom": "kokomi",
     "proto_kk_kurage_canopy": "kokomi",
+    "proto_kk_kurage_vanguard": "kokomi",
     "proto_kk_kurages_mercy": "kokomi",
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_kurages_wake": "kokomi",
@@ -1266,9 +1266,6 @@
     "proto_kk_coordinated_strike": {
       "damage": 3
     },
-    "proto_kk_coordinated_tide": {
-      "innate": true
-    },
     "proto_kk_coral_bulwark": {
       "block": 3
     },
@@ -1298,14 +1295,14 @@
     "proto_kk_flotsam_surge": {
       "damage": 3
     },
+    "proto_kk_following_current": {
+      "power_amount": 1
+    },
     "proto_kk_grand_design": {
       "retain": true
     },
     "proto_kk_grand_strategist": {
       "power_amount": 2
-    },
-    "proto_kk_jellyfish_current": {
-      "innate": true
     },
     "proto_kk_jellyfish_drift": {
       "damage": 2
@@ -1324,6 +1321,9 @@
     },
     "proto_kk_kurage_canopy": {
       "upgraded_power": "kk_kurage_canopy_plus"
+    },
+    "proto_kk_kurage_vanguard": {
+      "power_amount": 2
     },
     "proto_kk_kurages_mercy": {
       "kokomi_amount": 4
@@ -1445,7 +1445,7 @@
       "cost": -1
     },
     "proto_kk_tidal_riposte": {
-      "power_amount": 2
+      "power_amount": 3
     },
     "proto_kk_tidal_screen": {
       "block": 3

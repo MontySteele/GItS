@@ -45,7 +45,7 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kelp Wall"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.\nOr [gold]plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the damage you blocked since you planned this."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.\nOr [gold]plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the Attack damage you blocked since you planned this."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

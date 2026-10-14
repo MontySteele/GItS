@@ -200,7 +200,7 @@ def test_sea_glass_harvest_transforms_the_hand_and_draw_piles_statuses(
 
 def test_sea_glass_harvest_upgraded_makes_sea_glass_plus(overhaul):
     up = _up("proto_kk_sea_glass_harvest")
-    assert up.plan == [{"op": "transform_statuses_in_hand_and_draw_pile",
+    assert up.plan == [{"op": "transform_statuses_you_have",
                         "upgraded": True}]
     st = _quiet_state()
     st.player.draw_pile = [statuses.make_status("wound")]
@@ -247,7 +247,7 @@ def test_riptide_ruin_hits_all_twice_and_adds_no_dazed(overhaul):
 # --- the shape check -------------------------------------------------------------------------
 
 @pytest.mark.parametrize("op", ["block_per_status_in_hand",
-                                "transform_statuses_in_hand_and_draw_pile"])
+                                "transform_statuses_you_have"])
 def test_the_two_surviving_clauses_are_plan_only(op):
     assert op in kokomi_plan.PLAN_KINDS
     assert op in kokomi_plan.PLAN_ONLY_OPS

@@ -51,9 +51,9 @@ public class KokomiRound2ChangesTests
         // upgrade is Innate) and Grand Strategist is 4 [6]
         // (`KokomiPoolOverhaulTests`). Kurage Canopy makes Wards since the
         // Kokomi round 3 A-list (2026-10-13; `KokomiPayoffPassTests`).
-        Assert.False(new ProtoKkCoordinatedTide().DynamicVars
-                         .ContainsKey("PowerAmount"));
-        Assert.Equal((4, 6), (Var<ProtoKkGrandStrategist>("PowerAmount"),
+        // Coordinated Tide left and Grand Strategist moved to 6 [8] with
+        // the Kokomi review r6 (2026-10-14, pick 2 (b)).
+        Assert.Equal((6, 8), (Var<ProtoKkGrandStrategist>("PowerAmount"),
                               Var<ProtoKkGrandStrategist>("PowerAmount", true)));
         Assert.Equal((5, 6), (Var<ProtoKkShoalOfSpears>("Damage"),
                               Var<ProtoKkShoalOfSpears>("Damage", true)));

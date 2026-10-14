@@ -996,6 +996,12 @@ def taken_line(res: dict[str, Any], state: dict[str, Any] | None = None) -> str:
     # Kokomi r28 seat a whole batched turn -- and the play now goes through
     # with the clause ignored. The answer has to say so, or a seat learns
     # nothing and keeps typing it.
+    # Kokomi review r6 (2026-10-14, item 13): an ALL-enemies card played
+    # bare that the game still aims at one body went to the front.
+    auto = _text(printed.get("auto_target"))
+    if auto:
+        line += (f" It prints ALL enemies, so no `on` was needed; the game "
+                 f"aims it at one body, and it went to {auto}.")
     ignored = _text(printed.get("ignored_target"))
     if ignored:
         line += (f' Its `on "{ignored}"` was ignored: this card '

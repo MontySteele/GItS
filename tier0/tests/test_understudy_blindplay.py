@@ -10170,21 +10170,15 @@ def _two_all_faces_state() -> dict:
 
 
 def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
-    """`EB-527`. THE REFUSAL THAT COST AN ELITE TURN.
+    """`EB-527`, and since the Kokomi review r6 (2026-10-14, item 13) the
+    bare play GOES THROUGH.
 
     Furina r12 lane 2: `play "Lynette — Magic Trick: Astonishing Shift"` bare
-    was refused "there is more than one enemy, so say which" -- a sentence
-    about the board that says nothing about the card. "The very next turn the
-    opposite happened: Chevreuse ... refused with 'does its own aiming, so it
-    takes no `on`'. Two cards, both printing ALL enemies, with opposite
-    targeting rules and nothing on either face to tell them apart."
-
-    THE WIRE IS RIGHT AND THE FACE IS INCOMPLETE: Magic Trick's Swirl half
-    needs a body, so the game aims the card at one, and the ALL in its damage
-    clause is about what the hit does rather than how it is played. `EB-499`
-    gave the other direction its own sentence; this is that sentence's twin.
-
-    Seen to FAIL: the refusal was the board's generic one.
+    was refused "there is more than one enemy, so say which". `EB-527` made
+    the refusal name the face ("prints ALL enemies and is still aimed at one
+    body"); item 13 ruled that a card whose own line prints ALL enemies takes
+    no target at all. The game still aims Magic Trick at one body (its Swirl),
+    so the bare play goes to the front enemy and the answer says so.
     """
     state = _two_all_faces_state()
     _new_process()
@@ -10192,13 +10186,9 @@ def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
 
     res = blindplay.act(state, 'play "Lynette — Magic Trick"')
 
-    assert not res["ok"] and res["post"] is None
-    assert ("'Lynette — Magic Trick' prints \"ALL enemies\" and is still aimed "
-            "at one body, so say which: ") in res["refusal"]
-    assert "Phantasmal Gardener (1)" in res["refusal"]
-    # And the form that works is offered, `EB-402`'s rule unchanged: every
-    # refusal ends in the commands that resolve (`_with_forms`).
-    assert 'play "Lynette — Magic Trick" on "Phantasmal Gardener (1)"'         in res["refusal"]
+    assert res["ok"], res["refusal"]
+    assert res["post"]["target"]
+    assert "Phantasmal Gardener (1)" in res["printed"]["auto_target"]
 
 
 def test_the_face_that_aims_itself_drops_the_clause_and_says_so():

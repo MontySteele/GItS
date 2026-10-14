@@ -162,7 +162,7 @@ public static class KokomiPlan
         // <see cref="KokomiStatusBatch"/>; sim twins `kokomi_plan`, the same
         // names.
         BlockPerStatusInHand,
-        TransformStatusesInHandAndDrawPile,
+        TransformStatusesYouHave,
         // THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-
         // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
         // Gorou's War Banner "Gain 1 Strength" (permanent since the Kokomi
@@ -570,6 +570,12 @@ public static class KokomiPlan
     /// on-play carry-out is not followed by a turn-start tick in the same beat,
     /// so only a morning hit spares its aura.</summary>
     private static readonly HashSet<Player> _morning = new();
+
+    /// <summary>Is <paramref name="kokomi"/>'s morning drain running now?
+    /// Read by Following Current (Kokomi review r6, 2026-10-14), whose hit
+    /// spares its Hydro the turn-start tick as a Plan's own hit does.</summary>
+    public static bool InMorning(Creature? kokomi) =>
+        kokomi?.Player is { } player && _morning.Contains(player);
 
     /// <summary>THE RE-FOUNDING (2026-10-12): the seats whose Plan is being
     /// carried out right now, one entry's clauses at a time
@@ -2257,7 +2263,7 @@ public static class KokomiPlan
             case Kind.BlockPerStatusInHand:
                 return await KokomiStatusBatch.BlockPerStatus(
                     kokomi, plan.Amount, plan.WrittenCount);
-            case Kind.TransformStatusesInHandAndDrawPile:
+            case Kind.TransformStatusesYouHave:
                 return await KokomiStatusBatch.TransformStatuses(
                     player, entry?.Source?.IsUpgraded ?? false);
 
@@ -2317,6 +2323,8 @@ public static class KokomiPlan
                                   1))).FirstOrDefault();
         if (pick == null) return 0;
         await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
+        // Kokomi review r6 pick 3 (a) (2026-10-14): "It costs 0 this turn."
+        pick.EnergyCost.SetThisTurn(0);
         return 1;
     }
 
@@ -2356,7 +2364,7 @@ public static class KokomiPlan
         // The two riders produce no number at all and fall to the default.
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",
-        Kind.TransformStatusesInHandAndDrawPile => "cards transformed",
+        Kind.TransformStatusesYouHave => "cards transformed",
         // THE RE-FOUNDING (2026-10-12).
         Kind.AddStings => "cards added",
         Kind.GainStrength => "Strength",
@@ -2990,8 +2998,42 @@ public static class KokomiPlan
                     ? 0 : WrittenDamage(entry),
                 ["written_strength"] = entry.Now && entry.TwoLine
                     ? null : entry.WrittenStrength,
+                // KOKOMI REVIEW R6 (2026-10-14, item 7): a Counter Plan that
+                // pays only for an enemy Attack in its window -- "attackers"
+                // (Brine Sting), "blocked" (Kelp Wall), "energy" (Prepared
+                // Retreat) -- so the page can warn when no enemy intends to
+                // attack. Null for every other entry and a flipped one.
+                ["needs_attack"] = entry.Now && entry.TwoLine
+                    ? null : NeedsAttack(entry),
+                // Item 11: the card written is an Attack, which the base
+                // game counts as an Attack played this turn (Ripple Basin).
+                ["attack"] = entry.Source?.Type == CardType.Attack,
             };
     }
+
+    /// <summary>KOKOMI REVIEW R6 (2026-10-14, item 7): which Counter reading
+    /// this entry pays off an enemy Attack in its window, in the page's word,
+    /// or null. Display only.</summary>
+    public static string? NeedsAttack(Entry entry)
+    {
+        foreach (var clause in entry.Clauses)
+        {
+            switch (clause.Kind)
+            {
+                case Kind.DamageBlockedSince: return "blocked";
+                case Kind.EnergyIfAttackedSince: return "energy";
+                case Kind.Damage when clause.Aim == Aim.EnemiesAttackedSince:
+                    return "attackers";
+            }
+        }
+        return null;
+    }
+
+    /// <summary>KOKOMI REVIEW R6 (2026-10-14, item 7): does any living enemy
+    /// intend to attack right now? The arm's one definition
+    /// (<see cref="KokomiRefounding.EnemiesIntendingAttack"/>).</summary>
+    public static bool AnyEnemyIntendsAttack(Creature kokomi) =>
+        KokomiRefounding.EnemiesIntendingAttack(kokomi) > 0;
 
     /// <summary>KOKOMI REVIEW R5 (2026-10-14, A2): the flat hits this entry
     /// has written, per body, whatever their aim -- the number a page prints
@@ -3038,16 +3080,24 @@ public static class KokomiPlan
                     // count in its own words ("7 blocked so far"); the hit
                     // is that count.
                     case Kind.DamageBlockedSince:
-                        return LiveBlocked(ledger.BlockedSince(entry.Window));
+                        var blocked = ledger.BlockedSince(entry.Window);
+                        // KOKOMI REVIEW R6 (2026-10-14, item 7).
+                        if (blocked == 0 && !AnyEnemyIntendsAttack(kokomi))
+                            return NoAttackIntended;
+                        return LiveBlocked(blocked);
                     case Kind.DamageTakenSince:
                         return LiveTaken(ledger.TakenSince(entry.Window));
                     case Kind.EnergyIfAttackedSince:
-                        return ledger.AttackedSince(entry.Window)
-                            ? $"Energy {clause.Amount}" : NoAttackYet;
+                        if (ledger.AttackedSince(entry.Window))
+                            return $"Energy {clause.Amount}";
+                        return AnyEnemyIntendsAttack(kokomi)
+                            ? NoAttackYet : NoAttackIntended;
                     case Kind.Damage when clause.Aim == Aim.EnemiesAttackedSince:
                         var n = ledger.AttackersSince(entry.Window).Count;
-                        return n == 0 ? NoAttackYet
-                            : n == 1 ? "1 attacker" : $"{n} attackers";
+                        if (n == 0)
+                            return AnyEnemyIntendsAttack(kokomi)
+                                ? NoAttackYet : NoAttackIntended;
+                        return n == 1 ? "1 attacker" : $"{n} attackers";
                 }
             }
             return null;
@@ -3070,6 +3120,11 @@ public static class KokomiPlan
 
     /// <summary>A Counter Plan no enemy has attacked into yet.</summary>
     public const string NoAttackYet = "No attack yet";
+
+    /// <summary>KOKOMI REVIEW R6 (2026-10-14, item 7): a Counter Plan that
+    /// pays only for an enemy Attack, on a board where no enemy intends one,
+    /// so as things stand it lands nothing.</summary>
+    public const string NoAttackIntended = "No enemy intends to attack";
 
     /// <summary>
     /// THE KOKOMI REVIEW (2026-10-13), Tide Wall's live total. "Tide Wall

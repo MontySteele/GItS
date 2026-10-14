@@ -276,7 +276,8 @@ public class InazumaCompanionOverhaulTests
             .Single(r => r.Item1 == "description").Item2;
         Assert.Equal("[gold]Swirl[/gold] ALL enemies. Deal "
                    + "{CalculatedDamage:diff()} damage to ALL enemies and "
-                   + "[gold]Mend[/gold] 6.", face);
+                   + "[gold]Mend[/gold] 6{InCombat: ({MendLands} will "
+                   + "land)|}.", face);
         Assert.Equal(2, card.EnergyCost.Canonical);
     }
 
@@ -304,7 +305,8 @@ public class InazumaCompanionOverhaulTests
         // THE ONE LINE THAT MOVED for the companion arm. The rule below it is
         // unchanged and unduplicated; what widened is the gate, because
         // Mizuki's row is a UNIVERSAL and Klee or Furina can draft it.
-        var mend = Il.Method("KokomiRules", "Mend");
+        // Through `MendWouldLand` since the Kokomi review r6 (2026-10-14).
+        var mend = Il.Method("KokomiRules", "MendWouldLand");
         Assert.Contains(Il.Calls(mend), c => c.Contains("MendIsLive"));
 
         var live = Il.Method("KokomiRules", "MendIsLive");

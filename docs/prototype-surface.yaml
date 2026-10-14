@@ -1273,10 +1273,9 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: skill, rarity: uncommon,
-   # The pool overhaul (2026-10-13): the Plan fetches a card from the Draw
-   # Pile (was Gain 10 [12] Block); the now-line is reworded to fit the
-   # card ceiling, same effect. Provenance note.
-   description: "Look at your top {Scry:diff()} card{Scry:plural:|s}. Take 1; put the rest on the bottom. [gold]Plan[/gold]: Put a card from your [gold]Draw Pile[/gold] into your [gold]Hand[/gold].",
+   # Pool overhaul (2026-10-13) and Kokomi review r6 pick 3 (a): the Plan
+   # fetches a card that costs 0 this turn. Provenance note.
+   description: "Take 1 of your top {Scry:diff()}. Put the rest on the bottom. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.",
    effects: [{op: scry_take, amount: 3}],
    plan: [{op: draw_pile_to_hand}],
    # 4 seen; the Plan line prints no number.
@@ -1356,7 +1355,8 @@
    cost: 1, type: skill, rarity: rare, exhaust: true,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Gain 12 [gold]Block[/gold]. [gold]Plan[/gold]: [gold]Mend[/gold] 6.",
+   # Kokomi review r6 pick 1 (a) (2026-10-14): the cap prints in combat.
+   description: "Gain 12 [gold]Block[/gold]. [gold]Plan[/gold]: [gold]Mend[/gold] 6{InCombat: ({MendLands} will land)|}.",
    effects: [{op: block, amount: 12}],
    plan: [{op: mend, amount: 6}],
    # 16 Block; Mend 8.
@@ -1719,8 +1719,9 @@
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
    # 2026-10-11 Kokomi card pass: once per turn, off her first Hydro damage
-   # to an enemy (was any Elemental Reaction, which solo never fires).
-   description: "The first time each turn you deal [gold]Hydro[/gold] damage to an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it.",
+   # to an enemy (was any Elemental Reaction); Kokomi review r6 item 8
+   # (2026-10-14): "Plans count." Provenance notes.
+   description: "The first time each turn you deal [gold]Hydro[/gold] damage to an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it. [gold]Plans[/gold] count.",
    effects: [{op: apply_power, power: kk_at_waters_edge, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -1778,14 +1779,16 @@
 # Current takes its Uncommon slot. Its `double_block` kind stays registered
 # with no row spelling it. Provenance note, "Kokomi pool overhaul, 2026-10-13".
 
-# THE POOL OVERHAUL (2026-10-13, sec.4): a Sting's own hit reacting makes
-# another. Bounded: each reaction consumes the aura it reacted with.
-- {id: proto_kk_jellyfish_current, name: "Jellyfish Current", character: kokomi,
+# JELLYFISH CURRENT IS CUT (Kokomi review r6, 2026-10-14, pick 2 (b)):
+# Kurage Vanguard takes its slot; its power stays registered. Provenance
+# note, "Kokomi review r6, 2026-10-14".
+- {id: proto_kk_kurage_vanguard, name: "Kurage Vanguard", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever a [gold]Sting[/gold] triggers an [gold]Elemental Reaction[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: apply_power, power: kk_jellyfish_current, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   description: "At the start of your turn, the [gold]Bake-Kurage[/gold] deals 4 [gold]Hydro[/gold] damage.",
+   effects: [{op: apply_power, power: kk_kurage_vanguard, amount: 4, target: self}],
+   # 6 damage.
+   upgrade: {power_amount: 2}}
 
 - {id: proto_kk_watatsumis_grace, name: "Watatsumi's Grace", character: kokomi,
    authored_by: [claude],
@@ -1804,9 +1807,11 @@
    # "Fully Blocked": a hit Block absorbed whole, once per hit. It hits the
    # attacker alone ("that enemy", Kokomi review 2026-10-13).
    description: "Whenever an enemy's attack is fully blocked, deal {PowerAmount:diff()} damage to that enemy.",
-   effects: [{op: apply_power, power: kk_tidal_riposte, amount: 5, target: self}],
-   # 7.
-   upgrade: {power_amount: 2}}
+   # Kokomi review r6 (2026-10-14, item 5): 8 [11] (was 5 [7]); it pays once
+   # per hit of a multi-hit attack (`TidalRipostePower.AfterDamageReceived`).
+   effects: [{op: apply_power, power: kk_tidal_riposte, amount: 8, target: self}],
+   # 11.
+   upgrade: {power_amount: 3}}
 
 # Plan volume: more feed.
 
@@ -1907,10 +1912,10 @@
 - {id: proto_kk_kelp_wall, name: "Kelp Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # The pool overhaul (2026-10-13): a Counter Plan, the damage she blocked
-   # since it was written, at the front enemy (was Gain 12 [15] Block).
-   # Provenance note.
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the damage you blocked since you planned this.",
+   # The pool overhaul (2026-10-13): a Counter Plan; Kokomi review r6 item
+   # 12: only an enemy Attack's damage counts, and the face says so.
+   # Provenance notes.
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the Attack damage you blocked since you planned this.",
    # kokomi-review-r5-2026-10-14 numbers pass: Block 5 -> 7.
    effects: [{op: block, amount: 7}, {op: draw, amount: 1}],
    plan: [{op: damage_blocked_since, target: front_enemy}],
@@ -1931,12 +1936,12 @@
 - {id: proto_kk_sea_glass_harvest, name: "Sea Glass Harvest", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Compact on the hand and draw pile, curses included (provenance notes,
-   # 2026-10-12 and r5 A-list 2026-10-14). Sea Glass is a token in no pool:
-   # 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse in your [gold]Hand[/gold] and [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   # Compact on every pile she holds, curses included (provenance notes,
+   # 2026-10-12, r5 A-list and r6 item 6, 2026-10-14: the Discard Pile
+   # joins). Sea Glass is a token in no pool: 0, "Gain 1 [2] Energy. Exhaust."
+   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse you have into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
    effects: [{op: block, amount: 10}],
-   plan: [{op: transform_statuses_in_hand_and_draw_pile}],
+   plan: [{op: transform_statuses_you_have}],
    # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13].
    # 13 Block; the Sea Glass arrives upgraded.
    upgrade: {block: 3, upgraded_grant: true}}
@@ -2007,11 +2012,12 @@
 - {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: damage, amount: 6, target: enemy},
+   description: "Deal 7 [gold]Hydro[/gold] damage. Add a [gold]Ward[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: damage, amount: 7, target: enemy},
              {op: kokomi, kind: add_ward}],
-   # 9 damage. Kokomi round 2 (2026-10-12): 6 [9] -> 8 [11]; the jellyfish
-   # build (2026-10-12): back to 6 [9].
+   # 10 damage. Kokomi round 2 (2026-10-12): 6 [9] -> 8 [11]; the jellyfish
+   # build (2026-10-12): back to 6 [9]; Kokomi review r6 (2026-10-14,
+   # item 1): 7 [10].
    upgrade: {damage: 3}}
 
 - {id: proto_kk_orders_from_the_shrine, name: "Orders from the Shrine", character: kokomi,
@@ -2028,10 +2034,11 @@
    cost: 1, type: attack, rarity: common,
    # Kokomi review 2026-10-13: the Plan adds 3 Stings (was 2), the 1.3
    # rate on a 1-Energy Plan.
-   description: "Deal 4 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 3 [gold]Stings[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: damage, amount: 4, target: enemy, times: 2}],
+   # Kokomi review r6 (2026-10-14, item 2): 5 twice (was 4), Twin Strike's.
+   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 3 [gold]Stings[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: damage, amount: 5, target: enemy, times: 2}],
    plan: [{op: add_stings, amount: 3}],
-   # 5 twice; the Plan line does not upgrade.
+   # 6 twice; the Plan line does not upgrade.
    upgrade: {damage: 1}}
 
 - {id: proto_kk_watatsumi_muster, name: "Watatsumi Muster", character: kokomi,
@@ -2073,19 +2080,21 @@
    # Provenance note.
    cost: 1, type: power, rarity: uncommon,
    description: "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} additional [gold]Block[/gold].",
-   effects: [{op: apply_power, power: kk_watchful_shoal, amount: 3, target: self}],
-   # 5 and 5.
+   # Kokomi review r6 (2026-10-14, item 3): 4 [6] (was 3 [5]), Accuracy's.
+   effects: [{op: apply_power, power: kk_watchful_shoal, amount: 4, target: self}],
+   # 6 and 6.
    upgrade: {power_amount: 2}}
 
-- {id: proto_kk_coordinated_tide, name: "Coordinated Tide", character: kokomi,
+# COORDINATED TIDE IS CUT (Kokomi review r6, 2026-10-14, pick 2 (b)):
+# Following Current takes its slot; its power stays registered. Provenance
+# note, "Kokomi review r6, 2026-10-14".
+- {id: proto_kk_following_current, name: "Following Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # The pool overhaul (2026-10-13): a Companion's own hit reacting adds a
-   # Sting (was a hit per Ethereal carry-out). The upgrade is Innate, the
-   # jellyfish generators'. Provenance note.
-   description: "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental Reaction[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: apply_power, power: kk_coordinated_tide, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   description: "Whenever a [gold]Plan[/gold] is carried out, the [gold]Bake-Kurage[/gold] deals 3 [gold]Hydro[/gold] damage.",
+   effects: [{op: apply_power, power: kk_following_current, amount: 3, target: self}],
+   # 4 damage.
+   upgrade: {power_amount: 1}}
 
 # RESERVES IS CUT (the pool overhaul, 2026-10-13, sec.4): Brine Spray takes
 # its Uncommon slot. Its `reserves` kind stays registered with no row
@@ -2139,8 +2148,9 @@
    # cards, her Companions and the Bake-Kurage's Plans alike, 4 [6] (was a
    # Plan's reaction alone, 7 [10]). Provenance note.
    description: "Whenever you trigger an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies.",
-   effects: [{op: apply_power, power: kk_grand_strategist, amount: 4, target: self}],
-   # 6 damage.
+   # Kokomi review r6 (2026-10-14, item 4 and pick 2 (b)): 6 [8] (was 4 [6]).
+   effects: [{op: apply_power, power: kk_grand_strategist, amount: 6, target: self}],
+   # 8 damage.
    upgrade: {power_amount: 2}}
 
 - {id: proto_kk_call_the_generals, name: "Call the Generals", character: kokomi,
@@ -2436,7 +2446,8 @@
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
    cost: 2, type: skill, exhaust: true,
    upgrade: {cost: -1},
-   description: "[gold]Swirl[/gold] ALL enemies. Deal 14 damage to ALL enemies and [gold]Mend[/gold] 6.",
+   # Kokomi review r6 pick 1 (a) (2026-10-14): the cap prints in combat.
+   description: "[gold]Swirl[/gold] ALL enemies. Deal 14 damage to ALL enemies and [gold]Mend[/gold] 6{InCombat: ({MendLands} will land)|}.",
    effects: [{op: swirl, target: all_enemies},
              {op: damage, amount: 14, target: all_enemies, applies_element: false},
              {op: mend, amount: 6}]}
@@ -3637,7 +3648,8 @@
 - {id: proto_kk_kurages_mercy, name: "Kurage's Mercy", character: kokomi,
    authored_by: [claude], multiplayer: true,
    cost: 2, type: skill, rarity: rare, exhaust: true,
-   description: "Each player [gold]Mend[/gold]s {KkAmount:diff()}.",
+   # Kokomi review r6 pick 1 (a) (2026-10-14): the cap prints in combat.
+   description: "Each player [gold]Mend[/gold]s {KkAmount:diff()}{InCombat: ({MendLands} will land on you)|}.",
    effects: [{op: kokomi, kind: kurages_mercy, amount: 8}],
    # Mend 12.
    upgrade: {kokomi_amount: 4}}

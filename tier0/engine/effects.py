@@ -5176,7 +5176,7 @@ OPS = {
     # THE STATUS BATCH (2026-10-01): plan-only clauses that read the hand
     # just drawn.
     "block_per_status_in_hand": _op_kokomi_plan_only,
-    "transform_statuses_in_hand_and_draw_pile": _op_kokomi_plan_only,
+    "transform_statuses_you_have": _op_kokomi_plan_only,
     # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's
     # two Plan lines and a written Companion's clause.
     "add_stings": _op_kokomi_plan_only,

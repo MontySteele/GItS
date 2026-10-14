@@ -99,7 +99,8 @@ public class KokomiJellyfishBuildTests
     {
         Assert.Equal((6, 8), (Var<ProtoKkJellyfishDrift>("Damage"),
                               Var<ProtoKkJellyfishDrift>("Damage", true)));
-        Assert.Equal((6, 9), (Var<ProtoKkWatatsumiDrill>("Damage"),
+        // Kokomi review r6 (2026-10-14, item 1): Drill 7 [10].
+        Assert.Equal((7, 10), (Var<ProtoKkWatatsumiDrill>("Damage"),
                               Var<ProtoKkWatatsumiDrill>("Damage", true)));
         // Kokomi round 3 A-list (2026-10-13): Bubble Ward 6 [9].
         Assert.Equal((6, 9), (Var<ProtoKkBubbleWard>("Block"),

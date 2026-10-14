@@ -873,6 +873,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Plans (`DawnTidePower.Signal`, after `ResolveAll`), then the turn-start
     # generators (Kurage Bloom, Sangonomiya's Orders; their own
     # `AfterPlayerTurnStart` hooks, which follow the marker's).
+    # Kokomi review r6 (2026-10-14): Kurage Vanguard's hit, after the Plans
+    # and before Dawn Tide (`KurageVanguardPower.Signal`).
+    kokomi_plan.kurage_vanguard(state)
     kokomi_plan.dawn_tide(state)
     kokomi_plan.turn_start_generators(state)
     _settle_phases(state)

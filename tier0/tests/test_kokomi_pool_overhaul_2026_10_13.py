@@ -33,8 +33,10 @@ ATTACK = [{"kind": "attack", "amount": 6}]
 CUT = ("proto_kk_riptide_guard", "proto_kk_reserves",
        "proto_kk_brace_for_the_tide", "proto_kk_moons_reflection",
        "proto_kk_ceremonial_garment", "proto_kk_watatsumi_resistance")
+# Jellyfish Current left with the Kokomi review r6 (2026-10-14, pick 2 (b));
+# Kurage Vanguard holds its slot (`test_kokomi_review_r6_2026_10_14`).
 NEW = ("proto_kk_turning_tide_chain", "proto_kk_brine_spray",
-       "proto_kk_jellyfish_current", "proto_kk_prepared_retreat",
+       "proto_kk_prepared_retreat",
        "proto_kk_battle_formation", "proto_kk_turnabout")
 
 
@@ -77,7 +79,6 @@ def test_each_new_card_takes_the_slot_of_the_cut_card_of_its_rarity():
 @pytest.mark.parametrize("cid,rarity,ctype,cost", [
     ("proto_kk_turning_tide_chain", "common", "attack", 1),
     ("proto_kk_brine_spray", "uncommon", "attack", 1),
-    ("proto_kk_jellyfish_current", "uncommon", "power", 1),
     ("proto_kk_prepared_retreat", "uncommon", "skill", 1),
     ("proto_kk_battle_formation", "rare", "power", 1),
     ("proto_kk_turnabout", "rare", "skill", 2),
@@ -110,9 +111,7 @@ def test_the_new_cards_numbers_and_upgrades():
     spray = loader.get_card("proto_kk_brine_spray")
     assert spray.effects[0]["amount"] == 8
     assert _up("proto_kk_brine_spray").effects[0]["amount"] == 10
-    for cid in ("proto_kk_jellyfish_current", "proto_kk_battle_formation",
-                "proto_kk_coordinated_tide"):
-        assert _up(cid).innate, cid
+    assert _up("proto_kk_battle_formation").innate
 
 
 def test_the_rewrites_numbers():
@@ -127,13 +126,11 @@ def test_the_rewrites_numbers():
     assert sting.plan == [{"op": "damage", "amount": 10,
                            "target": "enemies_attacked_since"}]
     assert _up("proto_kk_brine_sting").plan[0]["amount"] == 13
-    tide = loader.get_card("proto_kk_coordinated_tide")
-    assert tide.effects[0] == {"op": "apply_power",
-                               "power": "kk_coordinated_tide", "amount": 1,
-                               "target": "self"}
+    # Coordinated Tide left with the Kokomi review r6 (pick 2 (b)), which
+    # moved Grand Strategist to 6 [8].
     strat = loader.get_card("proto_kk_grand_strategist")
     assert (strat.effects[0]["amount"],
-            _up("proto_kk_grand_strategist").effects[0]["amount"]) == (4, 6)
+            _up("proto_kk_grand_strategist").effects[0]["amount"]) == (6, 8)
 
 
 def test_the_new_clauses_are_plan_only():

@@ -8629,3 +8629,60 @@ blind Sonnet seats, build 0.2.5414).
 
 Pins: `tier0/tests/test_kokomi_review_r5_2026_10_14.py`,
 `klee-mod/KleeTests/Prototype/KokomiReviewR5Tests.cs`.
+
+## Kokomi review r6, 2026-10-14
+
+Built from `review/active/kokomi-review-r6-2026-10-14.md`: section 3 (items
+1 to 13) and picks 1 (a), 2 (b), 3 (a). [USER]: "2,3,4) Good with the
+defaults, other than the first question." Then, on pick 1: "Let's go with
+(a)."
+
+- **Numbers** (items 1 to 5): Watatsumi Drill 7 [10] (was 6 [9]); Kurage's
+  Wake 5 twice (was 4), upgrade unchanged at +1, so 6 twice; Watchful Shoal 4
+  [6] (was 3 [5]); Grand Strategist 6 [8] (was 4 [6]); Tidal Riposte 8 [11]
+  (was 5 [7]). Tidal Riposte pays per hit of a multi-hit attack:
+  `TidalRipostePower.AfterDamageReceived` fires once per hit.
+- **Sea Glass Harvest** (item 6): "Plan: Transform every Status and Curse you
+  have into Sea Glass." The Discard Pile joins the Hand and Draw Pile, both
+  engines; the verb is renamed `transform_statuses_you_have`
+  (`Kind.TransformStatusesYouHave`).
+- **Mend** (pick 1 (a)): the cap stays. The Moon, Kurage's Mercy and
+  Mizuki's Anraku print "(N will land)" in combat (`MendLandsVar`, through
+  `KokomiRules.MendWouldLand`, the one cap shared with `Mend`); Kurage's Mercy
+  says "(N will land on you)". The page's carry-out receipt reads "Mend 6, 1
+  landed: Mend never heals above the HP you started this combat with."
+- **Cuts and new cards** (pick 2 (b)): Jellyfish Current and Coordinated Tide
+  are cut; their powers stay registered with no row applying them. Kurage
+  Vanguard takes Jellyfish Current's slot: Uncommon Power, 1, "At the start
+  of your turn, the Bake-Kurage deals 4 [6] Hydro damage." Following Current
+  takes Coordinated Tide's: Uncommon Power, 1, "Whenever a Plan is carried
+  out, the Bake-Kurage deals 3 [4] Hydro damage." Both hit the front enemy,
+  on a Plan hit's terms (unpowered, Hydro, `KurageHydroSources.Hit`; sim
+  `kokomi_plan.kurage_hit`). The ruled faces said "to the front enemy"; that
+  phrase is off card lines by text convention 3 (a Plan hits the front enemy
+  unless it says ALL, which the Plan tip carries), so the faces end at
+  "Hydro damage." Vanguard fires after the morning's Plans and before Dawn
+  Tide; Following Current once per carry-out, after the Plan's clauses.
+  Pool 78 (20 / 38 / 20). Art: Enemy Hat Jellyfish 2 (Vanguard) and the
+  Moonglow Jellyfish archive image (Following Current), art/plan.tsv.
+- **Read the Field** (pick 3 (a)): the Plan's card costs 0 this turn, both
+  engines (`SetThisTurn(0)`, `free_this_turn`). The ruled "Put a card from
+  your Draw Pile into your Hand. It costs 0 this turn." beside "Take 1 of
+  your top 3 cards. Put the rest on the bottom." is 133 characters against
+  the 120 card ceiling, so the face reads "Take 1 of your top 3 [4]. Put the
+  rest on the bottom. Plan: Put a Draw Pile card into your Hand. It costs 0
+  this turn." (117). Same effect. Treatise unchanged.
+- **At Water's Edge** (item 8): the face and badge end "Plans count." A
+  Plan's hit is hers (`AtWatersEdgePower.AfterDamageGiven`, dealer her). The
+  review's "(a Plan counts)" is said without parentheses, which the text
+  conventions lint refuses.
+- **Kelp Wall** (item 12): only Block that absorbed an enemy Attack counts
+  (`KokomiOverhaulLedger.NoteEnemyHit`), so Disintegration's damage does not.
+  The face says "the Attack damage you blocked since you planned this."
+- **Checks** (item 12): Sea's Reproach fires on Weak or Vulnerable a Plan
+  applies (a Plan's debuff is applied by her, `applier: kokomi`). Heizou does
+  not count his own Swirl: his count is read when the hit is computed, before
+  his Anemo lands.
+
+Pins: `tier0/tests/test_kokomi_review_r6_2026_10_14.py`,
+`klee-mod/KleeTests/Prototype/KokomiReviewR6Tests.cs`.

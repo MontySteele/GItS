@@ -702,7 +702,7 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "each_player_energy", "each_player_draw",
     # THE STATUS BATCH (2026-10-01): four plan clauses that read the hand
     # just drawn, priced ZERO in `_op_price` (a hand fact).
-    "block_per_status_in_hand", "transform_statuses_in_hand_and_draw_pile",
+    "block_per_status_in_hand", "transform_statuses_you_have",
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's two Plan
     # lines and a written Companion's clause, each with its own branch in
     # `_op_price` on this set's terms.
@@ -992,7 +992,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # screen cannot read, so that part is a deliberate ZERO.
         return _neutral_amount(fx, 0)
     if op in ("block_per_status_in_hand",
-              "transform_statuses_in_hand_and_draw_pile"):
+              "transform_statuses_you_have"):
         # THE STATUS BATCH (2026-10-01). ZERO: each pays off statuses and
         # curses (Kelp Wall's in the hand it was written from, Sea Glass
         # Harvest's in the hand and draw pile), a fight fact an offer
@@ -2256,7 +2256,7 @@ STATIC_OP_PRICING: dict[str, str] = {
     "block_per_status_in_hand": "ZERO: a rate per status or curse in the "
                                 "hand a Plan sees, a fight fact an offer "
                                 "screen cannot read",
-    "transform_statuses_in_hand_and_draw_pile": (
+    "transform_statuses_you_have": (
         "ZERO: worth the statuses in the hand and draw pile it turns to "
         "Energy, a fight fact an offer screen cannot read"),
     # --- the co-op set (review/records/coop-set-2026-09-25.md) ---

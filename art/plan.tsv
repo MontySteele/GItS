@@ -3085,3 +3085,7 @@ proto_kk_sea_glass_harvest	ImageGen/images/cards/kokomi/proto_kk_sea_glass_harve
 proto_kk_flotsam_surge	ImageGen/images/cards/kokomi/proto_kk_flotsam_surge.png	500	380	cover	y0.42	shortlist	1	png	Hydro Hypostasis Character Card.png		tcg	
 # kk_sea_glass <- the glowing blue Sea Ganoderma: a thing the tide leaves behind
 kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sea Ganoderma.png		item	
+# proto_kk_kurage_vanguard <- a lone jellyfish adrift in the dark water, Kokomi review r6 (2026-10-14)
+proto_kk_kurage_vanguard	ImageGen/images/cards/kokomi/proto_kk_kurage_vanguard.png	500	380	cover	center	shortlist	1	png	Enemy Hat Jellyfish 2.png		splash	
+# proto_kk_following_current <- the Moonglow Jellyfish's bell, lit from within, Kokomi review r6 (2026-10-14)
+proto_kk_following_current	ImageGen/images/cards/kokomi/proto_kk_following_current.png	500	380	cover	y0.30	shortlist	1	png	Wildlife Moonglow Jellyfish Archive.png		splash	

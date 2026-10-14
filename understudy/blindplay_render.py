@@ -109,6 +109,13 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_LANDS_ROW, PLAN_LANDS_WHERE,
                                         PLAN_LANDS_STRENGTH,
                                         PLAN_DEFEND_WARNING,
+                                        PLAN_AFTER_DRAW_NOTE,
+                                        PLAN_NO_ATTACK_WARNING,
+                                        PLAN_NO_ATTACK_WHAT,
+                                        PLAN_LANDS_VULNERABLE,
+                                        RECEIPT_BONUS, RECEIPT_MEND,
+                                        ENERGY_LINE, ENERGY_LINE_BONUS,
+                                        INCOMING_CONDITIONAL_LOST,
                                         CARD_OFFER_AFTER_SKIP_NOTE,
                                         PLAN_AIM_NOTE,
                                         PLAN_BLOCK_NOTE,
@@ -570,7 +577,8 @@ def _moved_line(m: dict[str, Any]) -> str:
 
 
 def _render_carry_out(pl: dict[str, Any],
-                      enemies: list[dict[str, Any]] | None = None
+                      enemies: list[dict[str, Any]] | None = None,
+                      you: dict[str, Any] | None = None
                       ) -> list[str]:
     """The morning, and then the Plans that fired as they were written.
 
@@ -594,18 +602,18 @@ def _render_carry_out(pl: dict[str, Any],
     if pl.get("summon_hits"):
         out.append("- These fired at the end of your last turn, before the "
                    "enemies acted:")
-        out += _carry_out_rows(pl["summon_hits"], enemies)
+        out += _carry_out_rows(pl["summon_hits"], enemies, you)
     # (`EB-680`'s Dusk heading left with Dusk, the Kokomi re-founding,
     # 2026-10-12: every carry-out is a morning one again.)
     if pl["carried_out"]:
         out.append(f"- The {pl['pet_name']} carried these out at the "
                    "start of this turn, front first:")
-        out += _carry_out_rows(pl["carried_out"], enemies)
+        out += _carry_out_rows(pl["carried_out"], enemies, you)
     if pl["fired_now"]:
         out.append(f"- The {pl['pet_name']} carried these out THIS TURN, the "
                    "moment each was written, and not at the start of the "
                    "turn:")
-        out += _carry_out_rows(pl["fired_now"], enemies)
+        out += _carry_out_rows(pl["fired_now"], enemies, you)
     return out
 
 
@@ -728,10 +736,6 @@ def _plan_lands_lines(entry: dict[str, Any],
     if n <= 0 or aim not in PLAN_LANDS_WHERE:
         return []
     strength = entry.get("written_strength")
-    out = [PLAN_LANDS_ROW.format(
-        n=n, where=PLAN_LANDS_WHERE[aim],
-        strength=(PLAN_LANDS_STRENGTH.format(strength=strength)
-                  if isinstance(strength, int) and strength else ""))]
     if aim == "front":
         front = _front_body(enemies)
         bodies = [front] if front is not None else []
@@ -740,6 +744,21 @@ def _plan_lands_lines(entry: dict[str, Any],
                   and not (isinstance(e.get("hp"), int) and e["hp"] <= 0)]
     else:
         bodies = []
+    out = [PLAN_LANDS_ROW.format(
+        n=n, where=PLAN_LANDS_WHERE[aim],
+        strength=(PLAN_LANDS_STRENGTH.format(strength=strength)
+                  if isinstance(strength, int) and strength else ""))]
+    # Kokomi review r6 (2026-10-14, item 9): an ALL-enemies hit names what
+    # each body's Vulnerable makes of it (the front's is already folded into
+    # `damage`). Only a Vulnerable that will still be up at the morning (2 or
+    # more, `KokomiPlan.VulnerableAtMorning`), at the game's 1.5x.
+    if aim == "all":
+        parts = [f"{int(n * 1.5)} on {b.get('name') or 'an enemy'}"
+                 for b in bodies if _stacks_of(b, "vulnerable") >= 2]
+        if parts:
+            out[0] = (out[0][:-1]
+                      + PLAN_LANDS_VULNERABLE.format(parts=", ".join(parts))
+                      + ".")
     for body in bodies:
         if any(_fold(i.get("type")) == "defend"
                for i in body.get("intents") or []):
@@ -749,8 +768,34 @@ def _plan_lands_lines(entry: dict[str, Any],
     return out
 
 
+def _plan_no_attack_lines(entry: dict[str, Any],
+                          enemies: list[dict[str, Any]]) -> list[str]:
+    """Kokomi review r6 (2026-10-14, item 7): under a waiting Counter Plan
+    that pays only off an enemy Attack in its window (`needs_attack`), on a
+    board where no living enemy intends to attack: "Sculptor does not intend
+    to attack: Brine Sting's Plan hits no one." Nothing where its count has
+    already moved (the wire's `live` caption says so), where any body intends
+    an attack, or on an older bridge."""
+    what = PLAN_NO_ATTACK_WHAT.get(str(entry.get("needs_attack") or ""))
+    if not what:
+        return []
+    live = str(entry.get("live") or "")
+    if live and not (live.startswith("No ") or live.startswith("0 ")):
+        return []
+    bodies = [e for e in enemies if not e.get("phase_flip")
+              and not (isinstance(e.get("hp"), int) and e["hp"] <= 0)]
+    if not bodies or any(_fold(i.get("type")) in ATTACK_KINDS
+                         for b in bodies for i in b.get("intents") or []):
+        return []
+    names = [str(b.get("name") or "The enemy") for b in bodies]
+    return [PLAN_NO_ATTACK_WARNING.format(
+        enemies=_and_list(names), verb="does" if len(names) == 1 else "do",
+        plan=entry["name"], what=what)]
+
+
 def _carry_out_rows(rows: list[dict[str, Any]],
-                    enemies: list[dict[str, Any]] | None = None) -> list[str]:
+                    enemies: list[dict[str, Any]] | None = None,
+                    you: dict[str, Any] | None = None) -> list[str]:
     """One heading's worth of Plans, in the order the jellyfish took them.
 
     `EB-453` PUT THE UNRUN PLANS IN THE SAME LIST. A kill inside the first
@@ -766,7 +811,7 @@ def _carry_out_rows(rows: list[dict[str, Any]],
                        "ended, so it never happened.")
             continue
         out.append(
-            f"  - {said['line']}{_kind_clause(said, enemies)}"
+            f"  - {said['line']}{_kind_clause(said, enemies, you)}"
             f"{_rider_clause(said)}")
         out += _render_moved(said)
     return out
@@ -848,8 +893,39 @@ def _capped_clause(said: dict[str, Any],
     return f" — asked for {asked}, {shown} landed ({_and_list(names)})."
 
 
+#: Kokomi review r6 (2026-10-14, item 9): what can raise a carry-out's number
+#: above what its clause asked for, by kind, as the page prints the power.
+RECEIPT_BONUS_POWERS = {
+    "damage": ("vulnerable",),
+    "Block": ("dexterity", "watchful shoal"),
+}
+
+
+def _receipt_bonus_names(said: dict[str, Any],
+                         enemies: list[dict[str, Any]] | None,
+                         you: dict[str, Any] | None) -> list[str]:
+    """The powers on the board that can account for a number ABOVE what the
+    clause asked for: the bodies it moved for a hit (Vulnerable), her own for
+    Block (Dexterity, Watchful Shoal on a Ward). Named as printed."""
+    wanted = RECEIPT_BONUS_POWERS.get(str(said.get("kind") or ""), ())
+    names: list[str] = []
+    if said.get("kind") == "damage":
+        moved = {_fold(m.get("target")) for m in said.get("moved") or []}
+        holders = [e for e in enemies or [] if _fold(e.get("name")) in moved]
+    else:
+        holders = [you] if you else []
+    for holder in holders:
+        for pw in holder.get("powers") or []:
+            if _fold(pw.get("name")) in wanted:
+                name = str(pw.get("name"))
+                if name not in names:
+                    names.append(name)
+    return names
+
+
 def _kind_clause(said: dict[str, Any],
-                 enemies: list[dict[str, Any]] | None = None) -> str:
+                 enemies: list[dict[str, Any]] | None = None,
+                 you: dict[str, Any] | None = None) -> str:
     """What the figure on a carry-out line IS (`EB-426`).
 
     `Bake-Kurage: Cleansing Wave, 7` put a bare 7 in the slot every other line
@@ -880,6 +956,18 @@ def _kind_clause(said: dict[str, Any],
     capped = _capped_clause(said, enemies)
     if capped:
         return capped
+    asked = said["asked"]
+    # Kokomi review r6 pick 1 (a) (2026-10-14): Mend's cap, said on the
+    # receipt -- "Mend 6, 1 landed" and why.
+    if (said["kind"] == "HP healed" and asked is not None
+            and said["number"] < asked):
+        return RECEIPT_MEND.format(asked=asked, n=said["number"])
+    # Item 9: a number ABOVE the ask names what raised it.
+    if asked is not None and said["number"] > asked:
+        names = _receipt_bonus_names(said, enemies, you)
+        if names:
+            return RECEIPT_BONUS.format(asked=asked, n=said["number"],
+                                        names=_and_list(names))
     clause = f" — the {said['number']} is {said['kind']}"
     if said["asked"] is not None and said["asked"] != said["number"]:
         clause += f"; the clause asked for {said['asked']}"
@@ -2608,13 +2696,45 @@ def _status_clause(counts: Any) -> str:
     return " (" + ", ".join(f"{n} {name}" for name, n in counts) + ")"
 
 
+#: Kokomi review r6 (2026-10-14, item 10): a relic face that gives Energy,
+#: "gain 1 Energy" or the icon form the wire may print.
+_RELIC_ENERGY = re.compile(r"\bgain (\d+) (?:\[?energy\]?|\[E\])", re.I)
+
+
+def _energy_line(you: dict[str, Any]) -> str:
+    """`Energy 2 left of 3`, or, where she holds more than a turn's, what
+    gave the rest: `Energy 4 (3 a turn, +1 Lantern)` (Kokomi review r6,
+    2026-10-14, item 10; "4 left of 3" read as a bug). The relics are named
+    by their faces; a surplus no relic face accounts for is said as such."""
+    energy, top = you.get("energy"), you.get("max_energy")
+    if not (isinstance(energy, int) and isinstance(top, int)) or energy <= top:
+        return ENERGY_LINE.format(energy=energy, max_energy=top)
+    surplus = energy - top
+    parts: list[str] = []
+    for relic in you.get("relics") or []:
+        found = _RELIC_ENERGY.search(str(relic.get("text") or ""))
+        if found and surplus > 0:
+            n = min(int(found.group(1)), surplus)
+            parts.append(f"+{n} {relic.get('name') or 'a relic'}")
+            surplus -= n
+    if surplus > 0:
+        parts.append(f"+{surplus} from this turn's plays")
+    return ENERGY_LINE_BONUS.format(energy=energy, max_energy=top,
+                                    parts=", ".join(parts))
+
+
+def _planned_attack(plans: dict[str, Any] | None) -> bool:
+    """Is an Attack card waiting as a Plan (Kokomi review r6, item 11)?"""
+    return any(e.get("attack") for e in (plans or {}).get("queue") or [])
+
+
 def _render_board_behind(c: dict[str, Any]) -> list[str]:
     """The fight under a mid-fight chooser: you, your hand, the stage and each
     enemy's HP and intent."""
     you = c["you"]
     out = ["", BOARD_BEHIND_HEADING, "",
            f"- HP {you['hp']}/{you['max_hp']} · Block {you['block']} · "
-           f"Energy {you['energy']} left of {you['max_energy']}"
+           + _energy_line(you)
            + (f" · Stars {you['stars']}" if you.get("stars") is not None
               else "")]
     hand = [card["title"] for card in c.get("hand") or []]
@@ -3380,7 +3500,8 @@ def _attack_played(resolutions: list[dict[str, Any]] | None) -> bool | None:
 
 def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
                     pets: list[dict[str, Any]],
-                    resolutions: list[dict[str, Any]] | None = None
+                    resolutions: list[dict[str, Any]] | None = None,
+                    planned_attack: bool = False
                     ) -> dict[str, Any]:
     """What lands between the end of your turn and the enemies' hits, off the
     wire's own numbers, as if the turn ended now; what the page cannot count
@@ -3391,6 +3512,7 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
     hp_parts: list[tuple[str, int]] = []
     unknown: list[str] = []
     conditional: list[tuple[str, int]] = []
+    lost: list[str] = []
     block_now = int(you.get("block") or 0)
     cap = None
     less = None
@@ -3421,7 +3543,11 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
         # it as "+4 if you play no Attack" until an Attack has been played.
         found = _NO_ATTACK_RELIC.search(text)
         if found:
-            if _attack_played(resolutions) is not True:
+            # Kokomi review r6 (2026-10-14, item 11): an Attack written as a
+            # Plan is an Attack played, so the bonus greys out then too.
+            if planned_attack or _attack_played(resolutions) is True:
+                lost.append(name)
+            else:
                 conditional.append((name, int(found.group(1))))
             continue
         # Any other relic that gives Block at the end of the turn.
@@ -3478,7 +3604,7 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
                  and int(pet.get("hp") or 0) > 0), None)
     return {"block": block_parts, "hit": hit_parts, "hp": hp_parts,
             "osty": osty, "cap": cap, "less": less, "unknown": unknown,
-            "conditional": conditional}
+            "conditional": conditional, "lost": lost}
 
 
 def _is_down(e: dict[str, Any]) -> bool:
@@ -3567,7 +3693,8 @@ def _with_folds(line: str, clauses: list[str]) -> str:
 def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                    hand: list[dict[str, Any]] | None = None,
                    pets: list[dict[str, Any]] | None = None,
-                   resolutions: list[dict[str, Any]] | None = None) -> str:
+                   resolutions: list[dict[str, Any]] | None = None,
+                   planned_attack: bool = False) -> str:
     """`- Incoming this turn: N (your Block B): you would take T.`
 
     The sum of every attack part shown; a part it cannot count is named as
@@ -3597,11 +3724,14 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
             else:
                 total += part
                 hits += _split_hits(intent, part)
-    facts = _turn_end_facts(you, hand or [], pets or [], resolutions)
+    facts = _turn_end_facts(you, hand or [], pets or [], resolutions,
+                            planned_attack)
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     not_counted += "".join(INCOMING_CONDITIONAL_BLOCK.format(name=name, n=n)
                            for name, n in facts["conditional"])
+    not_counted += "".join(INCOMING_CONDITIONAL_LOST.format(name=name)
+                           for name in facts.get("lost") or [])
     not_counted += _death_blow_clauses(enemies)
     if not any_attack and not (facts["hit"] or facts["hp"]):
         return INCOMING_NONE + not_counted
@@ -3835,7 +3965,7 @@ def render(obs: dict[str, Any]) -> str:
         out += [f"# Battle — round {c['round']}", "",
                 f"- HP {you['hp']}/{you['max_hp']}",
                 f"- Block {you['block']}",
-                f"- Energy {you['energy']} left of {you['max_energy']}"]
+                "- " + _energy_line(you)]
         out += _stars_line(you)
         defined = {row["name"] for row in (obs.get("keywords") or [])}
         spark_named = False
@@ -4000,6 +4130,9 @@ def render(obs: dict[str, Any]) -> str:
                 # Kokomi review r5 (2026-10-14, A2): the order is the
                 # writing order, so Spearhead before Masterstroke shows.
                 out.append(PLAN_ORDER_NOTE)
+                # Kokomi review r6 (2026-10-14, item 11): when the morning
+                # falls in the turn.
+                out.append(PLAN_AFTER_DRAW_NOTE)
                 # `EB-578`. AND WHEN THE HAND HOLDS NONE, one line saying so.
                 # The form under *What you can say* is gone on such a turn
                 # (`blindplay_observe`), and a form that disappears with no
@@ -4026,7 +4159,7 @@ def render(obs: dict[str, Any]) -> str:
             # the line's own figure is its first clause's and a reader who
             # took it for the damage got `Exposed Flank, 2` for a beat that
             # moved 3.
-            out += _render_carry_out(pl, c.get("enemies") or [])
+            out += _render_carry_out(pl, c.get("enemies") or [], you)
             if not pl["queue"]:
                 out.append("- Nothing is planned. Nothing will be carried "
                            "out at the start of your next turn.")
@@ -4076,6 +4209,9 @@ def render(obs: dict[str, Any]) -> str:
                     # land, her Strength named, and a body intending to
                     # Block in its way.
                     out += _plan_lands_lines(e, c.get("enemies") or [])
+                    # Kokomi review r6 (2026-10-14, item 7): a Counter Plan
+                    # no enemy intends to attack into.
+                    out += _plan_no_attack_lines(e, c.get("enemies") or [])
                 if pl["twice"]:
                     # The Rare doubles the first entry of the morning's drain
                     # (`KokomiPlan.Drain`). (Its Dusk half left with Dusk,
@@ -4291,7 +4427,8 @@ def render(obs: dict[str, Any]) -> str:
         # player may take it.
         if c["enemies"] and not obs.get("coop"):
             out += ["", _incoming_line(c["enemies"], you, c["hand"],
-                                       c.get("pets"), c.get("resolutions"))
+                                       c.get("pets"), c.get("resolutions"),
+                                       _planned_attack(c.get("plans")))
                     + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the

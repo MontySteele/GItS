@@ -76,7 +76,7 @@ PLAN_KINDS = frozenset((
     "each_player_energy", "each_player_draw",
     # THE STATUS BATCH (2026-10-01): clauses that read the hand just drawn.
     # See `BLOCK_PER_STATUS_IN_HAND`.
-    "block_per_status_in_hand", "transform_statuses_in_hand_and_draw_pile",
+    "block_per_status_in_hand", "transform_statuses_you_have",
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and Gorou's two
     # Plan lines. See `ADD_STINGS` and the two beside it.
     "add_stings", "gain_strength", "juuga_guard",
@@ -104,7 +104,7 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     # R276. A switch: "your first Attack" has no size to print.
     "first_attack_twice",
     # THE STATUS BATCH: "every status and curse".
-    "transform_statuses_in_hand_and_draw_pile",
+    "transform_statuses_you_have",
     # THE POOL OVERHAUL (2026-10-13): Kelp Wall's and Turnabout's size is read
     # off the ledger at carry-out; Read the Field's is one card.
     "damage_blocked_since", "damage_taken_since", "draw_pile_to_hand",
@@ -188,7 +188,7 @@ PLAN_ONLY_OPS = frozenset((
                            # THE STATUS BATCH: each reads the hand just
                            # drawn, which only a Plan can see.
                            "block_per_status_in_hand",
-                           "transform_statuses_in_hand_and_draw_pile",
+                           "transform_statuses_you_have",
                            # THE RE-FOUNDING: each names the carry-out turn.
                            "add_stings", "gain_strength",
                            "juuga_guard",
@@ -253,8 +253,8 @@ ENEMIES_ATTACKED_SINCE = "enemies_attacked_since"
 #: `KokomiPlan.Kind.BlockPerStatusInHand` and the one beside it are the twins;
 #: the bodies are `KokomiStatusBatch`.
 BLOCK_PER_STATUS_IN_HAND = "block_per_status_in_hand"
-TRANSFORM_STATUSES_IN_HAND_AND_DRAW_PILE = (
-    "transform_statuses_in_hand_and_draw_pile")
+TRANSFORM_STATUSES_YOU_HAVE = (
+    "transform_statuses_you_have")
 #: Sea Glass Harvest's token, in no pool. `SeaGlass.cs` is the twin.
 SEA_GLASS = "kk_sea_glass"
 
@@ -371,6 +371,11 @@ DAWN_TIDE = "kk_dawn_tide"                       # turn start: Hydro to ALL
 #: Energy and draw 1 card." `JellyfishCurrentPower`, `BattleFormationPower`.
 JELLYFISH_CURRENT = "kk_jellyfish_current"       # a Sting's reaction: N Stings
 BATTLE_FORMATION = "kk_battle_formation"         # second Plan a turn: N Energy, 1 card
+#: KOKOMI REVIEW R6 (2026-10-14, pick 2 (b)): two Hydro sources, each one hit
+#: by the Bake-Kurage at the front enemy. `KurageVanguardPower`,
+#: `FollowingCurrentPower`.
+KURAGE_VANGUARD = "kk_kurage_vanguard"           # turn start: N Hydro at the front
+FOLLOWING_CURRENT = "kk_following_current"       # a Plan carried out: N Hydro at the front
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
 #: `carry_out_times` reads only whether it is worn. It replaced a `plan_twice`
@@ -448,7 +453,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
         # times", on the flat hit only.
         if op == "damage":
             allowed.add("strength_times")
-        if op == TRANSFORM_STATUSES_IN_HAND_AND_DRAW_PILE:
+        if op == TRANSFORM_STATUSES_YOU_HAVE:
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
@@ -1626,7 +1631,7 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         _play_copy(state, entry.card)
     elif op == BLOCK_PER_STATUS_IN_HAND:
         block_per_status(state, amount, clause.get("written_count"))
-    elif op == TRANSFORM_STATUSES_IN_HAND_AND_DRAW_PILE:
+    elif op == TRANSFORM_STATUSES_YOU_HAVE:
         transform_statuses(state, bool(clause.get("upgraded")))
     else:                                   # unreachable: shape-checked at load
         raise ValueError(f"unknown plan clause {op!r}")
@@ -1691,14 +1696,15 @@ def sea_glass_card(upgraded: bool = False) -> Card:
 
 
 def transform_statuses(state: CombatState, upgraded: bool) -> int:
-    """SEA GLASS HARVEST: "Transform every Status and Curse in your Hand and
-    Draw Pile into Sea Glass [Sea Glass+]." The DRAW PILE since the Kokomi
-    round-1 fixes (2026-10-12), and the HAND as well since the round-5 review
-    (2026-10-14, A8): a Status drawn that morning becomes Sea Glass the same
-    turn. In place, as `CardCmd.Transform` swaps a card where it stands; the
-    hand first, then the draw pile (`KokomiStatusBatch.TransformStatuses`)."""
+    """SEA GLASS HARVEST: "Transform every Status and Curse you have into Sea
+    Glass [Sea Glass+]." The DRAW PILE since the Kokomi round-1 fixes
+    (2026-10-12), the HAND as well since the round-5 review (2026-10-14, A8)
+    and the DISCARD PILE since the round-6 review (2026-10-14, item 6). In
+    place, as `CardCmd.Transform` swaps a card where it stands; hand, draw
+    pile, then discard pile (`KokomiStatusBatch.TransformStatuses`)."""
     n = 0
-    for pile in (state.player.hand, state.player.draw_pile):
+    for pile in (state.player.hand, state.player.draw_pile,
+                 state.player.discard_pile):
         for i, card in enumerate(list(pile)):
             if is_status_or_curse(card):
                 pile[i] = sea_glass_card(upgraded)
@@ -2602,6 +2608,44 @@ def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
     if n > 0:
         added = add_jellyfish(state, STING_ID, n, upgraded=False)
         state.emit("plan_endless_shoal", card=entry.card_id, amount=added)
+    following_current(state)
+
+
+def kurage_hit(state: CombatState, amount: int, cause: str) -> None:
+    """KOKOMI REVIEW R6 (2026-10-14, pick 2 (b)): one Hydro hit by the
+    Bake-Kurage at the front enemy, on a Plan hit's terms (`_hit`: unpowered,
+    `source="plan"`). `KurageHydroSources.Hit` is the twin."""
+    if amount <= 0:
+        return
+    enemy = front_enemy(state)
+    if enemy is None or not enemy.alive:
+        return
+    from tier0.engine import effects                # late import: cycle
+    effects.deal_damage_to_enemy(state, enemy, amount, element="hydro",
+                                 source="plan", powered=False)
+    state.emit("plan_kurage_hit", cause=cause, amount=amount)
+
+
+def kurage_vanguard(state: CombatState) -> None:
+    """KURAGE VANGUARD: "At the start of your turn, the Bake-Kurage deals 4
+    Hydro damage to the front enemy." After the morning's Plans and before
+    Dawn Tide; copies stack into one hit. `KurageVanguardPower.Signal` is the
+    twin."""
+    if not live(state):
+        return
+    kurage_hit(state, int(state.player.powers.get(KURAGE_VANGUARD, 0)),
+               "kurage_vanguard")
+
+
+def following_current(state: CombatState) -> None:
+    """FOLLOWING CURRENT: "Whenever a Plan is carried out, the Bake-Kurage
+    deals 3 Hydro damage to the front enemy." Once per carry-out, after the
+    Plan's own clauses (`note_carried_out`); copies stack into one hit.
+    `FollowingCurrentPower.OnCarriedOut` is the twin."""
+    if not live(state):
+        return
+    kurage_hit(state, int(state.player.powers.get(FOLLOWING_CURRENT, 0)),
+               "following_current")
 
 
 def note_sting_played(state: CombatState, card: Card) -> None:
@@ -2750,7 +2794,8 @@ def battle_formation(state: CombatState) -> None:
 
 def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
     """READ THE FIELD's Plan line (the pool overhaul, 2026-10-13): "Put a card
-    from your Draw Pile into your Hand." The player chooses in the mod; the
+    from your Draw Pile into your Hand. It costs 0 this turn." (the cost since
+    the Kokomi review r6, pick 3 (a), 2026-10-14). The player chooses in the mod; the
     pilot takes `effects._best_card`, an INSTRUMENT SURFACE. An empty pile or
     a full hand is a no-op. `KokomiPlan.DrawPileToHand` is the twin."""
     from tier0.engine import effects                # late import: cycle
@@ -2761,6 +2806,7 @@ def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
         return None
     pick = effects._best_card(pile)
     remove_instance(state.player.draw_pile, pick)
+    pick.free_this_turn = True
     state.player.hand.append(pick)
     state.emit("plan_draw_pile_to_hand", card=pick.id)
     return pick

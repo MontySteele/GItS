@@ -118,6 +118,12 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_kk_jellyfish_current": (
+        "The Kokomi review r6 (2026-10-14, review/active/kokomi-review-r6-2026-10-14.md pick 2 (b)) cut this row: Kurage Vanguard takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_coordinated_tide": (
+        "The Kokomi review r6 (2026-10-14, review/active/kokomi-review-r6-2026-10-14.md pick 2 (b)) cut this row: Following Current takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_vk_windbound_execution": (
         "Varka starter (a) (2026-10-13, 0c88d4e2c): Four Winds' Ascension replaced this card, and the row left the pool. Its art/plan.tsv row stays, so a full fetch repaints it. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -627,6 +633,8 @@ KNOWN_MISSING = {
     # one in its summary, so adding one is a visible choice. Emptied again
     # 2026-10-14: the Kokomi pool overhaul's six keys, painted under "Kokomi
     # art pass (2026-10-14)" in art/plan.tsv.
+    # The Kokomi review r6's two Powers (2026-10-14) were painted in the
+    # same PR, under "Kokomi review r6" in art/plan.tsv.
 }
 
 

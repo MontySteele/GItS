@@ -375,6 +375,19 @@ def _match(entries: list[dict[str, Any]], name: str, *,
         # explicit -- they are a handle, not an obligation.
         if face is not None and len({face(entries[i]) for i in hits}) == 1:
             return hits[0], ""
+        # Kokomi review r6 (2026-10-14, item 13): `play "Sting"` with
+        # `Sting (1)` and `Sting (2)` in hand takes ANY copy, even where a
+        # live number on one face differs. The bare name is the copies' own
+        # title once the copy suffix is off, so the tester named the card and
+        # not a copy. Copies that differ in upgrade or cost are different
+        # plays and are still refused with the names that pick one.
+        copies = [i for i in hits
+                  if _fold(_STALE_NUMBER.sub("", printed[i]).strip()) == want]
+        if (number and copies
+                and len({(_is_upgraded(entries[i]),
+                          _text(entries[i].get("cost")))
+                         for i in copies}) == 1):
+            return copies[0], ""
         # `EB-177`: otherwise the refusal ADVERTISES the names that would have
         # worked. With `number` on, two copies of one title print as `... (1)`
         # and `... (2)`, so a bare ambiguous title lands here and the way out
@@ -636,6 +649,17 @@ def _prints_all_enemies(entry: dict[str, Any]) -> bool:
     misses simply gets the sentence it always got.
     """
     return "ALL enemies" in _text(_card_face(entry).get("text"))
+
+
+_PLAN_LINE_HEAD = re.compile(r"\b(?:or\s+)?plan\s*:", re.I)
+
+
+def _now_line_prints_all(entry: dict[str, Any]) -> bool:
+    """Does the card's own (now) line print `ALL enemies`? (Kokomi review r6,
+    2026-10-14, item 13.) The text before a `Plan:` line, so a Sting -- one
+    body now, ALL only when planned -- still asks which body."""
+    text = _text(_card_face(entry).get("text"))
+    return "ALL enemies" in _PLAN_LINE_HEAD.split(text, maxsplit=1)[0]
 
 
 def _potion_aims_at_an_enemy(entry: dict[str, Any]) -> bool:
@@ -988,6 +1012,19 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     # ABSENT field is a bridge that predates it and keeps the behaviour that
     # build has.
     needs_target = _aims_at_an_enemy(entry)
+    # Kokomi review r6 (2026-10-14, item 13): a card whose own line prints
+    # "ALL enemies" takes no `on`. Where the game still aims it at one body
+    # (Magic Trick's Swirl), a bare play goes to the front enemy and the
+    # answer says so, rather than refusing a play the face says needs no aim.
+    if not cmd.target and needs_target and _now_line_prints_all(entry):
+        living = _living_enemy_names(state)
+        if living:
+            eid, why = _resolve_enemy(state, living[0])
+            if eid:
+                post["target"] = eid
+                printed["target"] = living[0]
+                printed["auto_target"] = living[0]
+                return Resolution(True, "play", post, printed)
     if cmd.target or needs_target:
         eid, why = _resolve_enemy(state, cmd.target)
         if not eid:
